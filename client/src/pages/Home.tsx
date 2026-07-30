@@ -23,7 +23,7 @@ interface Module {
   title: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
-  group: "Planung" | "Sicherheit" | "Wissen" | "Energie & Wasser";
+  group: "Planung" | "Sicherheit" | "1. Hilfe" | "Energie & Wasser";
   offline?: boolean;
 }
 
@@ -35,15 +35,15 @@ const modules: Module[] = [
   { path: "/familie", title: "Familien-Modus", description: "Kinder-Checklisten, Schnitzeljagden und Quiz", icon: Users, group: "Planung" },
   { path: "/sos", title: "SOS & Notfall", description: "GPS-Koordinaten und Notfallnummern", icon: Siren, group: "Sicherheit" },
   { path: "/erste-hilfe", title: "Erste Hilfe", description: "Offline-Ratgeber für Outdoor-Verletzungen", icon: Cross, group: "Sicherheit", offline: true },
-  { path: "/knoten", title: "Knoten-Bibliothek", description: "Die wichtigsten Outdoor-Knoten, Schritt für Schritt", icon: Cable, group: "Wissen", offline: true },
-  { path: "/natur", title: "Natur-Entdecker", description: "Tierspuren, Sternbilder und Bäume erkennen", icon: TreePine, group: "Wissen", offline: true },
-  { path: "/rezepte", title: "Campfire-Rezepte", description: "Kochen auf Gaskocher und offenem Feuer", icon: CookingPot, group: "Wissen", offline: true },
-  { path: "/kuehlbox", title: "Kühlbox-Inventar", description: "Vorräte erfassen, passende Rezepte finden", icon: Refrigerator, group: "Wissen" },
+  { path: "/knoten", title: "Knoten-Bibliothek", description: "Die wichtigsten Outdoor-Knoten, Schritt für Schritt", icon: Cable, group: "1. Hilfe", offline: true },
+  { path: "/natur", title: "Natur-Entdecker", description: "Tierspuren, Sternbilder und Bäume erkennen", icon: TreePine, group: "1. Hilfe", offline: true },
+  { path: "/rezepte", title: "Campfire-Rezepte", description: "Kochen auf Gaskocher und offenem Feuer", icon: CookingPot, group: "1. Hilfe", offline: true },
+  { path: "/kuehlbox", title: "Kühlbox-Inventar", description: "Vorräte erfassen, passende Rezepte finden", icon: Refrigerator, group: "1. Hilfe" },
   { path: "/energie", title: "Energie-Budget", description: "Autarkie-Dauer mit Solar und Powerstation", icon: BatteryCharging, group: "Energie & Wasser" },
   { path: "/wasser", title: "Trinkwasser-Rechner", description: "Wasserbedarf für Personen, Tage und Hitze", icon: Droplets, group: "Energie & Wasser" },
 ];
 
-const groups = ["Planung", "Sicherheit", "Wissen", "Energie & Wasser"] as const;
+const groups = ["Planung", "Sicherheit", "1. Hilfe", "Energie & Wasser"] as const;
 
 export default function Home() {
   const [sunInfo, setSunInfo] = useState<string | null>(null);
@@ -68,26 +68,31 @@ export default function Home() {
     <div>
       {/* Hero */}
       <section className="relative overflow-hidden bg-primary text-primary-foreground">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.12]"
-          aria-hidden="true"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15 45 L30 15 L45 45 Z' fill='none' stroke='white' stroke-width='1'/%3E%3C/svg%3E\")",
-          }}
+        <img
+          src="/manus-storage/hero-camping_c11b2337.png"
+          alt="Zelt mit Solarpanels und Lagerfeuer vor Schweizer Alpen bei Sonnenuntergang"
+          className="absolute inset-0 h-full w-full object-cover object-center"
         />
-        <div className="container relative py-12 md:py-16">
-          <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-primary-foreground/70">
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/10"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent"
+          aria-hidden="true"
+        />
+        <div className="container relative py-16 md:py-24">
+          <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-primary-foreground/90 drop-shadow">
             Dein Schweizer Taschenmesser fürs Zelt-Camping
           </p>
-          <h1 className="max-w-xl text-3xl font-bold leading-tight md:text-5xl">
+          <h1 className="max-w-xl text-3xl font-bold leading-tight drop-shadow-md md:text-5xl">
             Alles fürs Camp.<br />In einer App.
           </h1>
-          <p className="mt-3 max-w-lg text-primary-foreground/85 md:text-lg">
+          <p className="mt-3 max-w-lg text-primary-foreground/90 drop-shadow md:text-lg">
             Planung, Sicherheit, Energie und Naturerlebnis – 13 smarte Werkzeuge für dein nächstes Abenteuer.
           </p>
           {sunInfo && (
-            <p className="mt-5 inline-flex items-center gap-2 rounded-full bg-primary-foreground/10 px-4 py-1.5 text-sm backdrop-blur-sm">
+            <p className="mt-5 inline-flex items-center gap-2 rounded-full bg-black/30 px-4 py-1.5 text-sm backdrop-blur-md">
               <Compass className="h-4 w-4" aria-hidden="true" />
               {sunInfo}
             </p>

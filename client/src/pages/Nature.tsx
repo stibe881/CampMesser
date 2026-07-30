@@ -74,6 +74,14 @@ export default function NaturePage() {
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
+              {entry.image && (
+                <img
+                  src={entry.image}
+                  alt={`Illustration: ${entry.name}`}
+                  loading="lazy"
+                  className="mb-4 aspect-[4/3] w-full rounded-lg border border-border object-cover"
+                />
+              )}
               <p className="mb-4 text-sm leading-relaxed">{entry.description}</p>
 
               <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">

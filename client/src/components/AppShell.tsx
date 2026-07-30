@@ -17,7 +17,7 @@ const navItems = [
   { path: "/", label: "Start", icon: Home },
   { path: "/packlisten", label: "Packen", icon: ListChecks },
   { path: "/sonne", label: "Sonne", icon: Compass },
-  { path: "/erste-hilfe", label: "Wissen", icon: BookOpen, activePaths: ["/erste-hilfe", "/knoten", "/natur", "/rezepte"] },
+  { path: "/erste-hilfe", label: "1. Hilfe", icon: BookOpen, activePaths: ["/erste-hilfe", "/knoten", "/natur", "/rezepte"] },
   { path: "/sos", label: "SOS", icon: Siren },
 ];
 
@@ -94,4 +94,3 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-

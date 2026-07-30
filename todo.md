@@ -29,8 +29,12 @@
 - [x] Barrierefreiheit: ARIA-Labels, Tastaturnavigation, Kontraste (WCAG 2.1)
 - [x] Vitest-Tests für Server-Prozeduren und Berechnungslogik (18 Tests grün)
 - [x] Responsive Prüfung (Mobile 375px + Desktop)
-- [ ] Checkpoint erstellen und liefern
+- [x] Checkpoint erstellen und liefern (Version 0891b6aa)
 
+## Erweiterungen (Nutzerwunsch 30.07.2026)
+- [x] Natur-Entdecker: Bild für jeden Eintrag (Tierspuren, Sternbilder, Bäume) generieren und einbinden (16 Illustrationen)
+- [x] Startseite: modernes, echtes Hero-Bild statt Muster-Hintergrund (Alpen-Camping-Szene mit Zelt, Solarpanels, Powerstation)
+- [x] Gruppe/Menüpunkt «Wissen» in «1. Hilfe» umbenennen (Startseite + Bottom-Navigation)
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)
 - Packlisten: toggle-/addItem-Mutationen mit DB-Persistenz vorhanden (PackListDetail.tsx, server/routers.ts packing-Router)

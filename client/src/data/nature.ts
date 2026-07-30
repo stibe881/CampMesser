@@ -26,6 +26,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Reh",
     latinOrExtra: "Capreolus capreolus",
     category: "tierspuren",
+    image: "/manus-storage/natur-reh_2304e34b.png",
     description:
       "Die Trittsiegel des Rehs sind klein, spitz und herzförmig – etwa 4–5 cm lang. Die beiden Schalenhälften laufen vorne spitz zu. Rehe sind in der Dämmerung am Waldrand unterwegs.",
     funFact: "Rehe bellen! Wenn sie erschrecken, stossen sie einen rauen Beller aus, der wie ein Hund klingt.",
@@ -37,6 +38,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Fuchs",
     latinOrExtra: "Vulpes vulpes",
     category: "tierspuren",
+    image: "/manus-storage/natur-fuchs_d9e9a959.png",
     description:
       "Fuchsspuren ähneln kleinen Hundespuren (ca. 5 cm), sind aber schmaler und laufen wie auf einer Perlenschnur in einer geraden Linie – das nennt man «schnüren».",
     funFact: "Füchse nutzen das Erdmagnetfeld, um beim Mäusesprung die Entfernung zu ihrer Beute abzuschätzen.",
@@ -48,6 +50,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Wildschwein",
     latinOrExtra: "Sus scrofa",
     category: "tierspuren",
+    image: "/manus-storage/natur-wildschwein_79298aa5.png",
     description:
       "Wildschweinspuren sind breit und stumpf (6–8 cm). Typisch: Hinter den zwei Hauptschalen drücken sich fast immer die zwei seitlichen Afterklauen ab. Umgewühlte Erde in der Nähe ist ein sicheres Zeichen.",
     funFact: "Wildschweine sind ausgezeichnete Schwimmer und können ganze Seen durchqueren.",
@@ -59,6 +62,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Eichhörnchen",
     latinOrExtra: "Sciurus vulgaris",
     category: "tierspuren",
+    image: "/manus-storage/natur-eichhoernchen_9a32d146.png",
     description:
       "Beim Hüpfen landen die grossen Hinterpfoten vor den kleinen Vorderpfoten – das ergibt ein typisches Sprungmuster. Angenagte Tannenzapfen, die wie abgenagte Maiskolben aussehen, sind sein Markenzeichen.",
     funFact: "Eichhörnchen vergessen viele ihrer Nussverstecke – und pflanzen so nebenbei neue Bäume.",
@@ -70,6 +74,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Dachs",
     latinOrExtra: "Meles meles",
     category: "tierspuren",
+    image: "/manus-storage/natur-dachs_45f6a2f3.png",
     description:
       "Dachsspuren wirken wie kleine Bärentatzen: fünf Zehen mit langen, deutlich sichtbaren Krallen vor einem breiten Ballen. Dachse laufen auf festen Pfaden, die sie über Generationen benutzen.",
     funFact: "Dachse legen richtige Burgen mit mehreren Etagen an – manche sind über 100 Jahre alt und werden vererbt.",
@@ -82,6 +87,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Grosser Wagen",
     latinOrExtra: "Teil des Sternbilds Grosser Bär",
     category: "sternbilder",
+    image: "/manus-storage/natur-grosser-wagen_a766651d.png",
     description:
       "Sieben helle Sterne bilden einen Kastenwagen mit Deichsel. Er ist das ganze Jahr über am Nordhimmel sichtbar und der beste Startpunkt für alle Sternentdecker*innen.",
     funFact: "Verlängert man die hintere Kastenkante fünfmal, landet man genau beim Polarstern – dem Wegweiser nach Norden.",
@@ -93,6 +99,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Polarstern & Kleiner Wagen",
     latinOrExtra: "Polaris",
     category: "sternbilder",
+    image: "/manus-storage/natur-polarstern_0d3cac24.png",
     description:
       "Der Polarstern steht fast genau über dem Nordpol und bewegt sich scheinbar nie. Er ist der letzte Stern in der Deichsel des Kleinen Wagens – und ein natürlicher Kompass.",
     funFact: "Alle anderen Sterne scheinen sich in der Nacht um den Polarstern zu drehen – er ist der ruhende Punkt des Himmels.",
@@ -104,6 +111,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Kassiopeia",
     latinOrExtra: "Das «Himmels-W»",
     category: "sternbilder",
+    image: "/manus-storage/natur-kassiopeia_948c79c1.png",
     description:
       "Fünf helle Sterne formen ein deutliches W (oder M, je nach Jahreszeit). Kassiopeia steht dem Grossen Wagen am Himmel genau gegenüber – der Polarstern liegt in der Mitte.",
     funFact: "In der griechischen Sage war Kassiopeia eine eitle Königin, die zur Strafe an den Himmel gesetzt wurde.",
@@ -115,6 +123,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Orion",
     latinOrExtra: "Der Himmelsjäger",
     category: "sternbilder",
+    image: "/manus-storage/natur-orion_b35423fb.png",
     description:
       "Das prächtigste Wintersternbild: Drei Sterne in einer Reihe bilden den Gürtel des Jägers, umrahmt von vier hellen Ecksternen. Unter dem Gürtel schimmert der Orionnebel.",
     funFact: "Der rote Schulterstern Beteigeuze ist so riesig, dass er bis fast zum Jupiter reichen würde, stünde er an der Stelle unserer Sonne.",
@@ -126,6 +135,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Sommerdreieck",
     latinOrExtra: "Wega, Deneb, Atair",
     category: "sternbilder",
+    image: "/manus-storage/natur-sommerdreieck_539d5445.png",
     description:
       "Drei sehr helle Sterne aus drei Sternbildern (Leier, Schwan, Adler) bilden ein riesiges Dreieck – das auffälligste Muster des Sommerhimmels, perfekt für laue Zeltnächte.",
     funFact: "Mitten durch das Sommerdreieck zieht sich das Band der Milchstrasse – bei dunklem Himmel als schimmernder Nebel sichtbar.",
@@ -138,6 +148,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Fichte",
     latinOrExtra: "Picea abies",
     category: "baeume",
+    image: "/manus-storage/natur-fichte_738ee4b4.png",
     description:
       "Der häufigste Nadelbaum der Schweiz. Ihre Nadeln sind spitz und stechen, die Zapfen hängen nach unten und fallen als Ganzes ab. Merkspruch: «Die Fichte sticht, die Tanne nicht.»",
     funFact: "Fichtenharz war früher der Kaugummi der Alpen – Hirtenkinder kauten das goldgelbe Harz.",
@@ -149,6 +160,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Weisstanne",
     latinOrExtra: "Abies alba",
     category: "baeume",
+    image: "/manus-storage/natur-tanne_d0db954a.png",
     description:
       "Ihre Nadeln sind weich, vorne eingekerbt und haben zwei weisse Wachsstreifen auf der Unterseite. Die Zapfen stehen aufrecht wie Kerzen auf den Ästen und zerfallen am Baum.",
     funFact: "Tannenzapfen findet man nie am Boden – sie zerfallen hoch oben am Ast in einzelne Schuppen.",
@@ -160,6 +172,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Rotbuche",
     latinOrExtra: "Fagus sylvatica",
     category: "baeume",
+    image: "/manus-storage/natur-buche_8af46d78.png",
     description:
       "Die «Mutter des Waldes» hat eine glatte, silbergraue Rinde und eiförmige Blätter mit welligem Rand. Im Herbst fallen die dreikantigen Bucheckern aus ihren stacheligen Hüllen.",
     funFact: "Buchenwälder werden auch «Kathedralen des Waldes» genannt, weil ihre glatten Stämme wie Säulen wirken.",
@@ -171,6 +184,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Stieleiche",
     latinOrExtra: "Quercus robur",
     category: "baeume",
+    image: "/manus-storage/natur-eiche_5c86e6fe.png",
     description:
       "Erkennbar an den gebuchteten Blättern und den Eicheln, die an langen Stielen hängen. Die Rinde ist tief gefurcht. Eichen können über 800 Jahre alt werden.",
     funFact: "Eine alte Eiche beherbergt bis zu 500 verschiedene Tierarten – mehr als jeder andere Baum bei uns.",
@@ -182,6 +196,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Hängebirke",
     latinOrExtra: "Betula pendula",
     category: "baeume",
+    image: "/manus-storage/natur-birke_d48b4371.png",
     description:
       "Unverwechselbar durch die weisse, papierartige Rinde mit schwarzen Rissen. Die kleinen, gezackten Blätter zittern schon bei leichtem Wind an ihren dünnen Zweigen.",
     funFact: "Birkenrinde brennt dank ihrer ätherischen Öle sogar nass – der beste natürliche Feuerstarter des Waldes.",
@@ -193,6 +208,7 @@ export const natureEntries: NatureEntry[] = [
     name: "Lärche",
     latinOrExtra: "Larix decidua",
     category: "baeume",
+    image: "/manus-storage/natur-laerche_0fdd8159.png",
     description:
       "Der einzige heimische Nadelbaum, der im Herbst seine Nadeln verliert – vorher färben sie sich leuchtend goldgelb. Die weichen Nadeln wachsen in Büscheln an kurzen Trieben.",
     funFact: "Im Herbst verwandeln Lärchen ganze Berghänge in ein goldenes Meer, bevor die Nadeln fallen.",
