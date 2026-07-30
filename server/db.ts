@@ -1,6 +1,19 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import {
+  foodItems,
+  InsertFoodItem,
+  InsertInventoryItem,
+  InsertPackItem,
+  InsertPackList,
+  InsertPowerConsumer,
+  InsertUser,
+  inventoryItems,
+  packItems,
+  packLists,
+  powerConsumers,
+  users,
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +102,135 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+function requireDb<T>(db: T | null): T {
+  if (!db) throw new Error("Datenbank nicht verfügbar");
+  return db;
+}
+
+// ── Packlisten ──
+export async function getPackLists(userId: number) {
+  const db = requireDb(await getDb());
+  return db.select().from(packLists).where(eq(packLists.userId, userId));
+}
+
+export async function createPackList(data: InsertPackList) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(packLists).values(data);
+  return result.insertId;
+}
+
+export async function getPackList(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(packLists)
+    .where(and(eq(packLists.id, id), eq(packLists.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+export async function deletePackList(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(packItems).where(eq(packItems.listId, id));
+  await db.delete(packLists).where(and(eq(packLists.id, id), eq(packLists.userId, userId)));
+}
+
+export async function getPackItems(listId: number) {
+  const db = requireDb(await getDb());
+  return db.select().from(packItems).where(eq(packItems.listId, listId));
+}
+
+export async function addPackItems(items: InsertPackItem[]) {
+  if (items.length === 0) return;
+  const db = requireDb(await getDb());
+  await db.insert(packItems).values(items);
+}
+
+export async function setPackItemChecked(id: number, checked: boolean) {
+  const db = requireDb(await getDb());
+  await db.update(packItems).set({ checked }).where(eq(packItems.id, id));
+}
+
+export async function deletePackItem(id: number) {
+  const db = requireDb(await getDb());
+  await db.delete(packItems).where(eq(packItems.id, id));
+}
+
+// ── Inventar ──
+export async function getInventory(userId: number) {
+  const db = requireDb(await getDb());
+  return db.select().from(inventoryItems).where(eq(inventoryItems.userId, userId));
+}
+
+export async function addInventoryItem(data: InsertInventoryItem) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(inventoryItems).values(data);
+  return result.insertId;
+}
+
+export async function updateInventoryItem(
+  id: number,
+  userId: number,
+  data: Partial<InsertInventoryItem>,
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(inventoryItems)
+    .set(data)
+    .where(and(eq(inventoryItems.id, id), eq(inventoryItems.userId, userId)));
+}
+
+export async function deleteInventoryItem(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(inventoryItems)
+    .where(and(eq(inventoryItems.id, id), eq(inventoryItems.userId, userId)));
+}
+
+// ── Energie-Verbraucher ──
+export async function getPowerConsumers(userId: number) {
+  const db = requireDb(await getDb());
+  return db.select().from(powerConsumers).where(eq(powerConsumers.userId, userId));
+}
+
+export async function addPowerConsumer(data: InsertPowerConsumer) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(powerConsumers).values(data);
+  return result.insertId;
+}
+
+export async function updatePowerConsumer(
+  id: number,
+  userId: number,
+  data: Partial<InsertPowerConsumer>,
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(powerConsumers)
+    .set(data)
+    .where(and(eq(powerConsumers.id, id), eq(powerConsumers.userId, userId)));
+}
+
+export async function deletePowerConsumer(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(powerConsumers)
+    .where(and(eq(powerConsumers.id, id), eq(powerConsumers.userId, userId)));
+}
+
+// ── Lebensmittel-Inventar ──
+export async function getFoodItems(userId: number) {
+  const db = requireDb(await getDb());
+  return db.select().from(foodItems).where(eq(foodItems.userId, userId));
+}
+
+export async function addFoodItem(data: InsertFoodItem) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(foodItems).values(data);
+  return result.insertId;
+}
+
+export async function deleteFoodItem(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(foodItems).where(and(eq(foodItems.id, id), eq(foodItems.userId, userId)));
+}

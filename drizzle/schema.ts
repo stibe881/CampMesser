@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, float, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -25,4 +25,73 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/** Packlisten: eine Liste pro Nutzer*in, basierend auf einem Szenario oder leer gestartet. */
+export const packLists = mysqlTable("packLists", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 120 }).notNull(),
+  scenario: varchar("scenario", { length: 60 }).notNull().default("custom"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PackList = typeof packLists.$inferSelect;
+export type InsertPackList = typeof packLists.$inferInsert;
+
+/** Einzelne Einträge einer Packliste, abhakbar. */
+export const packItems = mysqlTable("packItems", {
+  id: int("id").autoincrement().primaryKey(),
+  listId: int("listId").notNull(),
+  name: varchar("name", { length: 160 }).notNull(),
+  category: varchar("category", { length: 80 }).notNull().default("Allgemein"),
+  quantity: int("quantity").notNull().default(1),
+  checked: boolean("checked").notNull().default(false),
+  sortOrder: int("sortOrder").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PackItem = typeof packItems.$inferSelect;
+export type InsertPackItem = typeof packItems.$inferInsert;
+
+/** Inventar: vorhandenes Campingmaterial mit Gewicht (g) und Volumen (l). */
+export const inventoryItems = mysqlTable("inventoryItems", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 160 }).notNull(),
+  category: varchar("category", { length: 80 }).notNull().default("Allgemein"),
+  weightGrams: int("weightGrams").notNull().default(0),
+  volumeLiters: float("volumeLiters").notNull().default(0),
+  quantity: int("quantity").notNull().default(1),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type InventoryItem = typeof inventoryItems.$inferSelect;
+export type InsertInventoryItem = typeof inventoryItems.$inferInsert;
+
+/** Energie-Verbraucher für den Energie-Budget-Rechner. */
+export const powerConsumers = mysqlTable("powerConsumers", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 160 }).notNull(),
+  watts: float("watts").notNull().default(0),
+  hoursPerDay: float("hoursPerDay").notNull().default(0),
+  enabled: boolean("enabled").notNull().default(true),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PowerConsumer = typeof powerConsumers.$inferSelect;
+export type InsertPowerConsumer = typeof powerConsumers.$inferInsert;
+
+/** Lebensmittel-Inventar (Kühlbox) für Rezeptvorschläge. */
+export const foodItems = mysqlTable("foodItems", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 160 }).notNull(),
+  quantity: varchar("quantity", { length: 80 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type FoodItem = typeof foodItems.$inferSelect;
+export type InsertFoodItem = typeof foodItems.$inferInsert;
