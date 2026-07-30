@@ -21,6 +21,7 @@ export const knots: Knot[] = [
     altName: "Webeleinenstek",
     category: "Befestigen",
     difficulty: 1,
+    image: "/manus-storage/knoten-mastwurf_d14af3f4.png",
     useCase: "Ein Seil schnell an einem Baum, Pfahl oder Hering befestigen.",
     campingUse: "Tarp-Leine am Baumstamm oder an der Zeltstange festmachen – schnell gelegt und ebenso schnell wieder gelöst.",
     steps: [
@@ -37,6 +38,7 @@ export const knots: Knot[] = [
     altName: "Bulin",
     category: "Schlaufen",
     difficulty: 2,
+    image: "/manus-storage/knoten-palstek_140013d7.png",
     useCase: "Eine feste Schlaufe, die sich unter Last nicht zuzieht – der «König der Knoten».",
     campingUse: "Feste Schlaufe zum Einhängen in Heringe, zum Abschleppen oder um etwas Schweres zu sichern.",
     steps: [
@@ -53,6 +55,7 @@ export const knots: Knot[] = [
     altName: "Tautline Hitch",
     category: "Spannen",
     difficulty: 2,
+    image: "/manus-storage/knoten-spannknoten_21fd007d.png",
     useCase: "Verstellbarer Knoten, der eine Leine auf Spannung hält – nachspannbar ohne Neubinden.",
     campingUse: "Der wichtigste Zeltknoten: Abspannleinen von Zelt und Tarp lassen sich damit stufenlos nachspannen, wenn sie sich über Nacht lockern.",
     steps: [
@@ -69,6 +72,7 @@ export const knots: Knot[] = [
     altName: "Weberknoten",
     category: "Verbinden",
     difficulty: 1,
+    image: "/manus-storage/knoten-kreuzknoten_3915edec.png",
     useCase: "Zwei gleich dicke Seilenden miteinander verbinden.",
     campingUse: "Gerissene Zeltleine flicken oder zwei kurze Schnüre zu einer langen verbinden (bei gleicher Dicke).",
     steps: [
@@ -84,6 +88,7 @@ export const knots: Knot[] = [
     name: "Schotstek",
     category: "Verbinden",
     difficulty: 2,
+    image: "/manus-storage/knoten-schotstek_4535bfcf.png",
     useCase: "Zwei unterschiedlich dicke Seile sicher verbinden.",
     campingUse: "Dünne Reepschnur an ein dickeres Seil knüpfen, z. B. um eine Tarp-Leine zu verlängern.",
     steps: [
@@ -99,6 +104,7 @@ export const knots: Knot[] = [
     name: "Prusikknoten",
     category: "Schlaufen",
     difficulty: 2,
+    image: "/manus-storage/knoten-prusik_f01a0397.png",
     useCase: "Klemmknoten, der sich auf einem gespannten Seil verschieben lässt und unter Last blockiert.",
     campingUse: "Perfekt für die Tarp-Firstleine: Damit lassen sich Aufhängepunkte verschieben, die unter Zug sofort festklemmen.",
     steps: [
@@ -114,6 +120,7 @@ export const knots: Knot[] = [
     name: "Achterknoten",
     category: "Befestigen",
     difficulty: 1,
+    image: "/manus-storage/knoten-achterknoten_4a1f1e8e.png",
     useCase: "Stopperknoten, der verhindert, dass ein Seilende durch eine Öse rutscht.",
     campingUse: "Am Ende von Zeltleinen, damit sie nicht aus den Ösen oder Leinenspannern rutschen.",
     steps: [
@@ -130,6 +137,7 @@ export const knots: Knot[] = [
     altName: "Fischerknoten",
     category: "Verbinden",
     difficulty: 3,
+    image: "/manus-storage/knoten-fischerknoten_c8ff1b90.png",
     useCase: "Bombenfeste Verbindung zweier Seile – auch bei glatten, dünnen Schnüren.",
     campingUse: "Gerissene Abspannleinen dauerhaft flicken oder eine geschlossene Prusikschlinge aus Reepschnur knüpfen.",
     steps: [

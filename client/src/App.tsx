@@ -20,6 +20,7 @@ import WaterPage from "./pages/Water";
 import PackOptimizerPage from "./pages/PackOptimizer";
 import FamilyPage from "./pages/Family";
 import FoodPage from "./pages/Food";
+import WeatherPage from "./pages/Weather";
 
 function Router() {
   return (
@@ -40,6 +41,7 @@ function Router() {
         <Route path={"/packen"} component={PackOptimizerPage} />
         <Route path={"/familie"} component={FamilyPage} />
         <Route path={"/kuehlbox"} component={FoodPage} />
+        <Route path={"/wetter"} component={WeatherPage} />
         <Route path={"/404"} component={NotFound} />
         <Route component={NotFound} />
       </Switch>

@@ -74,6 +74,14 @@ export default function KnotsPage() {
             className="flex flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
             aria-label={`Anleitung für ${knot.name} öffnen`}
           >
+            {knot.image && (
+              <img
+                src={knot.image}
+                alt={`Schritt-für-Schritt-Anleitung: ${knot.name}`}
+                loading="lazy"
+                className="aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
+              />
+            )}
             <div className="flex w-full items-center justify-between">
               <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                 <Cable className="h-5 w-5" aria-hidden="true" />
@@ -107,6 +115,14 @@ export default function KnotsPage() {
               </DialogHeader>
 
               <div className="space-y-4">
+                {selected.image && (
+                  <img
+                    src={selected.image}
+                    alt={`Schritt-für-Schritt-Bild: ${selected.name} binden`}
+                    loading="lazy"
+                    className="w-full rounded-lg border border-border/60"
+                  />
+                )}
                 <div className="rounded-lg bg-accent/60 p-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Beim Camping
@@ -144,4 +160,3 @@ export default function KnotsPage() {
     </div>
   );
 }
-

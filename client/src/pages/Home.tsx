@@ -14,6 +14,7 @@ import {
   Users,
   Refrigerator,
   ArrowRight,
+  CloudSunRain,
 } from "lucide-react";
 import { getSunTimes } from "@/lib/sun";
 import { useEffect, useState } from "react";
@@ -34,6 +35,7 @@ const modules: Module[] = [
   { path: "/packen", title: "Pack-Optimierung", description: "Gewicht und Packmass im Griff behalten", icon: Scale, group: "Planung" },
   { path: "/familie", title: "Familien-Modus", description: "Kinder-Checklisten, Schnitzeljagden und Quiz", icon: Users, group: "Planung" },
   { path: "/sos", title: "SOS & Notfall", description: "GPS-Koordinaten und Notfallnummern", icon: Siren, group: "Sicherheit" },
+  { path: "/wetter", title: "Camp-Wetter", description: "Hyperlokale Vorhersage und Unwetterwarnungen", icon: CloudSunRain, group: "Sicherheit" },
   { path: "/erste-hilfe", title: "Erste Hilfe", description: "Offline-Ratgeber für Outdoor-Verletzungen", icon: Cross, group: "Sicherheit", offline: true },
   { path: "/knoten", title: "Knoten-Bibliothek", description: "Die wichtigsten Outdoor-Knoten, Schritt für Schritt", icon: Cable, group: "1. Hilfe", offline: true },
   { path: "/natur", title: "Natur-Entdecker", description: "Tierspuren, Sternbilder und Bäume erkennen", icon: TreePine, group: "1. Hilfe", offline: true },
@@ -89,7 +91,7 @@ export default function Home() {
             Alles fürs Camp.<br />In einer App.
           </h1>
           <p className="mt-3 max-w-lg text-primary-foreground/90 drop-shadow md:text-lg">
-            Planung, Sicherheit, Energie und Naturerlebnis – 13 smarte Werkzeuge für dein nächstes Abenteuer.
+            Planung, Sicherheit, Energie und Naturerlebnis – 14 smarte Werkzeuge für dein nächstes Abenteuer.
           </p>
           {sunInfo && (
             <p className="mt-5 inline-flex items-center gap-2 rounded-full bg-black/30 px-4 py-1.5 text-sm backdrop-blur-md">

@@ -6,6 +6,7 @@ import {
   Compass,
   BookOpen,
   Siren,
+  CloudSunRain,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,7 @@ const navItems = [
   { path: "/", label: "Start", icon: Home },
   { path: "/packlisten", label: "Packen", icon: ListChecks },
   { path: "/sonne", label: "Sonne", icon: Compass },
+  { path: "/wetter", label: "Wetter", icon: CloudSunRain },
   { path: "/erste-hilfe", label: "1. Hilfe", icon: BookOpen, activePaths: ["/erste-hilfe", "/knoten", "/natur", "/rezepte"] },
   { path: "/sos", label: "SOS", icon: Siren },
 ];
