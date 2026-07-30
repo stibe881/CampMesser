@@ -1,7 +1,9 @@
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
+  campSpots,
   foodItems,
+  InsertCampSpot,
   InsertFoodItem,
   InsertInventoryItem,
   InsertPackItem,
@@ -233,4 +235,33 @@ export async function addFoodItem(data: InsertFoodItem) {
 export async function deleteFoodItem(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db.delete(foodItems).where(and(eq(foodItems.id, id), eq(foodItems.userId, userId)));
+}
+
+// ── Zeltplatz-Favoriten ──
+export async function getCampSpots(userId: number) {
+  const db = requireDb(await getDb());
+  return db.select().from(campSpots).where(eq(campSpots.userId, userId));
+}
+
+export async function addCampSpot(data: InsertCampSpot) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(campSpots).values(data);
+  return result.insertId;
+}
+
+export async function updateCampSpot(
+  id: number,
+  userId: number,
+  data: Partial<Pick<InsertCampSpot, "name" | "note">>,
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(campSpots)
+    .set(data)
+    .where(and(eq(campSpots.id, id), eq(campSpots.userId, userId)));
+}
+
+export async function deleteCampSpot(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(campSpots).where(and(eq(campSpots.id, id), eq(campSpots.userId, userId)));
 }

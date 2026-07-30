@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   BatteryCharging,
   Loader2,
@@ -39,6 +39,50 @@ export default function EnergyPage() {
   const [solarWatts, setSolarWatts] = useState("400");
   const [sunHours, setSunHours] = useState(4);
   const [form, setForm] = useState({ name: "", watts: "", hoursPerDay: "" });
+  const [forecastState, setForecastState] = useState<
+    { status: "idle" | "loading" | "error" } | { status: "ok"; avgSunHours: number; days: number }
+  >({ status: "idle" });
+
+  const applyWeatherForecast = () => {
+    if (!navigator.geolocation) {
+      setForecastState({ status: "error" });
+      return;
+    }
+    setForecastState({ status: "loading" });
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        try {
+          const params = new URLSearchParams({
+            latitude: pos.coords.latitude.toFixed(4),
+            longitude: pos.coords.longitude.toFixed(4),
+            timezone: "auto",
+            forecast_days: "3",
+            daily: "sunshine_duration",
+          });
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+          if (!res.ok) throw new Error("Wetterdienst nicht erreichbar");
+          const json = await res.json();
+          const durations: number[] = json.daily?.sunshine_duration ?? [];
+          if (durations.length === 0) throw new Error("Keine Daten");
+          const avgHours = durations.reduce((s, d) => s + (d ?? 0), 0) / durations.length / 3600;
+          const rounded = Math.min(10, Math.round(avgHours * 2) / 2);
+          setSunHours(rounded);
+          setForecastState({ status: "ok", avgSunHours: rounded, days: durations.length });
+        } catch {
+          setForecastState({ status: "error" });
+        }
+      },
+      () => setForecastState({ status: "error" }),
+      { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 },
+    );
+  };
+
+  // Prognose beim Seitenaufruf automatisch übernehmen (stille Fehlerbehandlung:
+  // ohne Standortfreigabe bleibt der manuelle Richtwert bestehen)
+  useEffect(() => {
+    applyWeatherForecast();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const addMutation = trpc.energy.add.useMutation({
     onSuccess: () => {
@@ -199,6 +243,32 @@ export default function EnergyPage() {
             onValueChange={v => setSunHours(v[0])}
             aria-label="Effektive Sonnenstunden pro Tag"
           />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-3 w-full"
+            onClick={applyWeatherForecast}
+            disabled={forecastState.status === "loading"}
+          >
+            {forecastState.status === "loading"
+              ? "Prognose wird geladen …"
+              : forecastState.status === "ok"
+                ? "Prognose aktualisieren"
+                : "Sonnenstunden aus Wetterprognose übernehmen"}
+          </Button>
+          {forecastState.status === "ok" && (
+            <p className="mt-2 text-xs text-primary">
+              Übernommen: Ø {forecastState.avgSunHours} h Sonnenschein pro Tag (Prognose für die
+              nächsten {forecastState.days} Tage an deinem Standort).
+            </p>
+          )}
+          {forecastState.status === "error" && (
+            <p className="mt-2 text-xs text-destructive">
+              Automatische Prognose nicht verfügbar (Standortfreigabe oder Internet fehlt) – setze
+              den Wert manuell oder versuche es erneut.
+            </p>
+          )}
           <p className="mt-2 text-xs text-muted-foreground">
             Richtwerte Schweiz: Sommer sonnig 5–6 h, wechselhaft 3–4 h, bedeckt 1–2 h. Verschattung
             durch Bäume oder Berge reduziert den Wert deutlich – prüfe den Sonnenverlauf im{" "}

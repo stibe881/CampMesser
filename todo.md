@@ -41,6 +41,11 @@
 - [x] Knoten-Bibliothek: Schritt-für-Schritt-Bild für jeden der 8 Knoten (4-Panel-Anleitungen)
 - [x] Wetter-Modul: hyperlokale Vorhersage (Open-Meteo, ICON-CH) + Unwetterwarnungen (Sturm, Starkregen, Gewitter, Hitze, Frost), Route /wetter
 - [x] Rezeptbuch: 6 weitere Rezepte ergänzt (jetzt 18 Rezepte)
+
+## Erweiterungen (Nutzerwunsch 30.07.2026, Runde 3)
+- [x] Zeltplatz-Favoriten: Orte speichern (DB campSpots, Route /zeltplaetze), Wetter-Vorschau (Open-Meteo + Warnungen) und Sonnenzeiten pro Ort, Link zum Sonnenstand-Kompass mit URL-Parametern
+- [x] Energie-Budget: Button «Sonnenstunden aus Wetterprognose übernehmen» (Ø sunshine_duration der nächsten 3 Tage am Standort)
+- [x] Rezeptbuch: Bild für jedes der 18 Rezepte generiert und in Karten + Detail-Dialog eingebunden
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)
 - Packlisten: toggle-/addItem-Mutationen mit DB-Persistenz vorhanden (PackListDetail.tsx, server/routers.ts packing-Router)

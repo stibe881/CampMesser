@@ -118,6 +118,14 @@ export default function RecipesPage() {
             className="flex flex-col items-start gap-2.5 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
             aria-label={`Rezept ${recipe.name} öffnen`}
           >
+            {recipe.image && (
+              <img
+                src={recipe.image}
+                alt={`Foto: ${recipe.name}`}
+                loading="lazy"
+                className="aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
+              />
+            )}
             <div className="flex w-full items-center justify-between">
               <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                 {recipe.method === "Offenes Feuer" ? (
@@ -176,6 +184,14 @@ export default function RecipesPage() {
               </DialogHeader>
 
               <div className="space-y-4">
+                {selected.image && (
+                  <img
+                    src={selected.image}
+                    alt={`Foto: ${selected.name}`}
+                    loading="lazy"
+                    className="aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
+                  />
+                )}
                 <div>
                   <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                     Zutaten
@@ -222,4 +238,3 @@ export default function RecipesPage() {
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-import { boolean, float, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, double, float, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -24,6 +24,20 @@ export const users = mysqlTable("users", {
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+
+/** Gespeicherte Zeltplatz-Favoriten für Wetter- und Sonnenstand-Abruf im Voraus */
+export const campSpots = mysqlTable("campSpots", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 120 }).notNull(),
+  latitude: double("latitude").notNull(),
+  longitude: double("longitude").notNull(),
+  note: text("note"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type CampSpot = typeof campSpots.$inferSelect;
+export type InsertCampSpot = typeof campSpots.$inferInsert;
 
 /** Packlisten: eine Liste pro Nutzer*in, basierend auf einem Szenario oder leer gestartet. */
 export const packLists = mysqlTable("packLists", {

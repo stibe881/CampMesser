@@ -158,6 +158,34 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteFoodItem(input.id, ctx.user.id)),
   }),
+  spots: router({
+    list: protectedProcedure.query(({ ctx }) => db.getCampSpots(ctx.user.id)),
+    add: protectedProcedure
+      .input(
+        z.object({
+          name: z.string().min(1).max(120),
+          latitude: z.number().min(-90).max(90),
+          longitude: z.number().min(-180).max(180),
+          note: z.string().max(500).optional(),
+        }),
+      )
+      .mutation(({ ctx, input }) => db.addCampSpot({ userId: ctx.user.id, ...input })),
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().min(1).max(120).optional(),
+          note: z.string().max(500).optional(),
+        }),
+      )
+      .mutation(({ ctx, input }) => {
+        const { id, ...data } = input;
+        return db.updateCampSpot(id, ctx.user.id, data);
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ ctx, input }) => db.deleteCampSpot(input.id, ctx.user.id)),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

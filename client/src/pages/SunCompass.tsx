@@ -161,7 +161,20 @@ function SunDiagram({
 }
 
 export default function SunCompassPage() {
-  const [geo, setGeo] = useState<GeoState>({ status: "loading" });
+  // Optional: Koordinaten aus URL-Parametern (z. B. von Zeltplatz-Favoriten)
+  const [urlSpot] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const lat = parseFloat(params.get("lat") ?? "");
+    const lon = parseFloat(params.get("lon") ?? "");
+    const name = params.get("name");
+    if (!Number.isNaN(lat) && !Number.isNaN(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+      return { lat, lon, name: name ?? undefined };
+    }
+    return null;
+  });
+  const [geo, setGeo] = useState<GeoState>(() =>
+    urlSpot ? { status: "ok", lat: urlSpot.lat, lng: urlSpot.lon } : { status: "loading" },
+  );
   const [baseDate] = useState(() => new Date());
   const [minutes, setMinutes] = useState(() => {
     const now = new Date();
@@ -189,7 +202,8 @@ export default function SunCompassPage() {
   };
 
   useEffect(() => {
-    locate();
+    if (!urlSpot) locate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const selectedDate = useMemo(() => {
@@ -197,6 +211,24 @@ export default function SunCompassPage() {
     d.setHours(Math.floor(minutes / 60), minutes % 60, 0, 0);
     return d;
   }, [baseDate, minutes]);
+
+  const spotBanner = urlSpot ? (
+    <div className="mb-4 flex items-center justify-between gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
+      <span>
+        Sonnenstand für gespeicherten Zeltplatz{urlSpot.name ? `: ${urlSpot.name}` : ""}
+      </span>
+      <button
+        type="button"
+        onClick={() => {
+          window.history.replaceState(null, "", "/sonne");
+          locate();
+        }}
+        className="shrink-0 font-medium text-primary underline"
+      >
+        Eigenen Standort nutzen
+      </button>
+    </div>
+  ) : null;
 
   const sunTimes = useMemo(
     () => (geo.status === "ok" ? getSunTimes(selectedDate, geo.lat!, geo.lng!) : null),
@@ -215,6 +247,8 @@ export default function SunCompassPage() {
         title="Sonnenstand-Kompass"
         subtitle="Wo steht die Sonne wann? Perfekt für die Wahl des Stellplatzes und die Ausrichtung der Solarpanels."
       />
+
+      {spotBanner}
 
       {geo.status === "loading" && (
         <Card>
