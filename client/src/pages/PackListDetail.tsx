@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useParams } from "wouter";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Link2, Loader2, Plus, Share2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -22,6 +22,21 @@ export default function PackListDetailPage() {
 
   const [newItem, setNewItem] = useState("");
   const [newCategory, setNewCategory] = useState("");
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+
+  const shareMutation = trpc.packing.share.useMutation({
+    onSuccess: async ({ token }) => {
+      const url = `${window.location.origin}/liste/${token}`;
+      setShareUrl(url);
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Teil-Link kopiert – schick ihn deinen Mitreisenden!");
+      } catch {
+        toast.success("Teil-Link erstellt – kopiere ihn unten.");
+      }
+    },
+    onError: () => toast.error("Teilen fehlgeschlagen"),
+  });
 
   const toggleMutation = trpc.packing.toggleItem.useMutation({
     onMutate: async input => {
@@ -129,6 +144,42 @@ export default function PackListDetailPage() {
 
       <div className="mb-6">
         <Progress value={progress} aria-label={`Fortschritt: ${Math.round(progress)} Prozent gepackt`} />
+      </div>
+
+      {/* Liste teilen */}
+      <div className="mb-6">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => shareMutation.mutate({ listId })}
+          disabled={shareMutation.isPending}
+        >
+          <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          {shareMutation.isPending ? "Link wird erstellt …" : "Liste per Link teilen"}
+        </Button>
+        {shareUrl && (
+          <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+            <Link2 className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+            <code className="min-w-0 flex-1 truncate text-xs">{shareUrl}</code>
+            <button
+              type="button"
+              className="shrink-0 text-xs font-medium text-primary hover:underline"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(shareUrl);
+                  toast.success("Link kopiert");
+                } catch {
+                  toast.error("Kopieren nicht möglich – bitte manuell markieren");
+                }
+              }}
+            >
+              Kopieren
+            </button>
+          </div>
+        )}
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          Wer den Link hat, kann die Liste sehen und mit dir gemeinsam abhaken – ganz ohne Anmeldung.
+        </p>
       </div>
 
       {/* Neuen Eintrag hinzufügen */}

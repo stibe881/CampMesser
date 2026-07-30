@@ -158,6 +158,26 @@ export async function deletePackItem(id: number) {
   await db.delete(packItems).where(eq(packItems.id, id));
 }
 
+/** Teil-Token setzen oder entfernen (nur für die eigene Liste). */
+export async function setPackListShareToken(id: number, userId: number, token: string | null) {
+  const db = requireDb(await getDb());
+  await db
+    .update(packLists)
+    .set({ shareToken: token })
+    .where(and(eq(packLists.id, id), eq(packLists.userId, userId)));
+}
+
+/** Geteilte Liste anhand des Tokens laden (öffentlich, ohne Login). */
+export async function getPackListByToken(token: string) {
+  const db = requireDb(await getDb());
+  const result = await db
+    .select()
+    .from(packLists)
+    .where(eq(packLists.shareToken, token))
+    .limit(1);
+  return result[0];
+}
+
 // ── Inventar ──
 export async function getInventory(userId: number) {
   const db = requireDb(await getDb());

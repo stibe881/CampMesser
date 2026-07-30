@@ -22,6 +22,7 @@ import FamilyPage from "./pages/Family";
 import FoodPage from "./pages/Food";
 import WeatherPage from "./pages/Weather";
 import SpotsPage from "./pages/Spots";
+import SharedPackListPage from "./pages/SharedPackList";
 
 function Router() {
   return (
@@ -44,6 +45,7 @@ function Router() {
         <Route path={"/kuehlbox"} component={FoodPage} />
         <Route path={"/wetter"} component={WeatherPage} />
         <Route path={"/zeltplaetze"} component={SpotsPage} />
+        <Route path={"/liste/:token"} component={SharedPackListPage} />
         <Route path={"/404"} component={NotFound} />
         <Route component={NotFound} />
       </Switch>

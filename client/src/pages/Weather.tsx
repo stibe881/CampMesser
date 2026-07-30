@@ -16,12 +16,15 @@ import {
   Sun,
   Sunrise,
   Sunset,
+  Tent,
   Wind,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import {
   describeWeatherCode,
@@ -146,10 +149,29 @@ export default function WeatherPage() {
   const [error, setError] = useState<string | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [data, setData] = useState<WeatherData | null>(null);
+  // Ausgewählter Ort: null = eigener Standort, sonst ID des Zeltplatz-Favoriten
+  const [selectedSpotId, setSelectedSpotId] = useState<number | null>(null);
+  const [locationLabel, setLocationLabel] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
+  const { data: spots } = trpc.spots.list.useQuery(undefined, { enabled: isAuthenticated });
+
+  const loadForCoords = async (lat: number, lon: number) => {
+    setState("loading");
+    setCoords({ lat, lon });
+    try {
+      setData(await fetchWeather(lat, lon));
+      setState("ready");
+    } catch (e) {
+      setState("error");
+      setError(e instanceof Error ? e.message : "Wetterdaten konnten nicht geladen werden.");
+    }
+  };
 
   const load = () => {
     setState("locating");
     setError(null);
+    setSelectedSpotId(null);
+    setLocationLabel(null);
     if (!navigator.geolocation) {
       setState("error");
       setError("Dein Gerät unterstützt keine Standortbestimmung.");
@@ -158,15 +180,7 @@ export default function WeatherPage() {
     navigator.geolocation.getCurrentPosition(
       async pos => {
         const { latitude, longitude } = pos.coords;
-        setCoords({ lat: latitude, lon: longitude });
-        setState("loading");
-        try {
-          setData(await fetchWeather(latitude, longitude));
-          setState("ready");
-        } catch (e) {
-          setState("error");
-          setError(e instanceof Error ? e.message : "Wetterdaten konnten nicht geladen werden.");
-        }
+        await loadForCoords(latitude, longitude);
       },
       () => {
         setState("error");
@@ -174,6 +188,13 @@ export default function WeatherPage() {
       },
       { enableHighAccuracy: true, timeout: 12000 },
     );
+  };
+
+  const selectSpot = (spot: { id: number; name: string; latitude: number; longitude: number }) => {
+    setSelectedSpotId(spot.id);
+    setLocationLabel(spot.name);
+    setError(null);
+    void loadForCoords(spot.latitude, spot.longitude);
   };
 
   useEffect(() => {
@@ -190,6 +211,41 @@ export default function WeatherPage() {
         title="Camp-Wetter"
         subtitle="Hyperlokale Vorhersage und Unwetterwarnungen für deinen Zeltplatz."
       />
+
+      {/* Ortsauswahl: eigener Standort oder gespeicherte Zeltplatz-Favoriten */}
+      {(spots?.length ?? 0) > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-2" role="group" aria-label="Ort für die Wettervorhersage wählen">
+          <button
+            type="button"
+            onClick={load}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+              selectedSpotId === null
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card text-muted-foreground hover:border-primary/50",
+            )}
+          >
+            <LocateFixed className="h-3.5 w-3.5" aria-hidden="true" />
+            Mein Standort
+          </button>
+          {spots!.map(spot => (
+            <button
+              key={spot.id}
+              type="button"
+              onClick={() => selectSpot(spot)}
+              className={cn(
+                "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                selectedSpotId === spot.id
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground hover:border-primary/50",
+              )}
+            >
+              <Tent className="h-3.5 w-3.5" aria-hidden="true" />
+              {spot.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {(state === "locating" || state === "loading") && (
         <div className="space-y-3" aria-busy="true" aria-label="Wetterdaten werden geladen">
@@ -225,8 +281,9 @@ export default function WeatherPage() {
                 <div>
                   <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-                    {coords ? `${coords.lat.toFixed(3)}°, ${coords.lon.toFixed(3)}°` : ""} ·{" "}
-                    {Math.round(data.elevation)} m ü. M.
+                    {locationLabel ??
+                      (coords ? `${coords.lat.toFixed(3)}°, ${coords.lon.toFixed(3)}°` : "")}{" "}
+                    · {Math.round(data.elevation)} m ü. M.
                   </p>
                   <p className="mt-1 font-serif text-4xl font-semibold">
                     {Math.round(data.current.temperatureC)}°

@@ -46,6 +46,14 @@
 - [x] Zeltplatz-Favoriten: Orte speichern (DB campSpots, Route /zeltplaetze), Wetter-Vorschau (Open-Meteo + Warnungen) und Sonnenzeiten pro Ort, Link zum Sonnenstand-Kompass mit URL-Parametern
 - [x] Energie-Budget: Button «Sonnenstunden aus Wetterprognose übernehmen» (Ø sunshine_duration der nächsten 3 Tage am Standort)
 - [x] Rezeptbuch: Bild für jedes der 18 Rezepte generiert und in Karten + Detail-Dialog eingebunden
+
+## Erweiterungen (Nutzerwunsch 31.07.2026, Runde 4)
+- [x] Sonnenstand-Kompass: moderneres, selbsterklärendes Design (Himmels-Gradient, Aufgang/Untergang-Marker, vergangene/zukünftige Bahn, Sonne mit Strahlen, Legende, Live-Zusammenfassung in Alltagssprache)
+- [x] Familien-Modus: 2 neue Schnitzeljagden (Expedition Wassertropfen, Nachtwächter-Prüfung) und 2 neue Quizze (Wetterfrosch, Lagerfeuer-Profi)
+- [x] Familien-Modus: alle 6 Schnitzeljagden als Erlebnis-Jagden (Story, Stationen mit Rätseln/Hinweisen, Buchstaben sammeln, Lösungswort + Schatz-Finale, Stationen werden erst nach und nach enthüllt)
+- [x] Zeltplatz-Favoriten: Karten-Auswahl im Dialog (Tipp auf Karte setzt Marker und Koordinaten)
+- [x] Camp-Wetter: Favoriten-Chips zur Ortsauswahl (Mein Standort + gespeicherte Zeltplätze)
+- [x] Packlisten: Teil-Link (shareToken), öffentliche Route /liste/:token mit gemeinsamem Abhaken (Auto-Refresh 15 s), Link kopieren – per DB-Token-Test verifiziert
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)
 - Packlisten: toggle-/addItem-Mutationen mit DB-Persistenz vorhanden (PackListDetail.tsx, server/routers.ts packing-Router)

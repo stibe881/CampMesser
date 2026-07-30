@@ -1,4 +1,5 @@
 import { COOKIE_NAME } from "@shared/const";
+import { nanoid } from "nanoid";
 import { z } from "zod";
 import { packScenarios } from "@shared/packTemplates";
 import { getSessionCookieOptions } from "./_core/cookies";
@@ -83,6 +84,46 @@ export const appRouter = router({
     deleteItem: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => db.deletePackItem(input.id)),
+    /** Teil-Link erzeugen: gibt den Token zurück. */
+    share: protectedProcedure
+      .input(z.object({ listId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const list = await db.getPackList(input.listId, ctx.user.id);
+        if (!list) throw new Error("Liste nicht gefunden");
+        if (list.shareToken) return { token: list.shareToken };
+        const token = nanoid(16);
+        await db.setPackListShareToken(input.listId, ctx.user.id, token);
+        return { token };
+      }),
+    /** Teilen beenden: Token entfernen, Link wird ungültig. */
+    unshare: protectedProcedure
+      .input(z.object({ listId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.setPackListShareToken(input.listId, ctx.user.id, null);
+        return { success: true } as const;
+      }),
+    /** Geteilte Liste öffentlich abrufen (kein Login nötig). */
+    sharedGet: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(32) }))
+      .query(async ({ input }) => {
+        const list = await db.getPackListByToken(input.token);
+        if (!list) {
+          return { list: null, items: [] as Awaited<ReturnType<typeof db.getPackItems>> };
+        }
+        const items = await db.getPackItems(list.id);
+        return { list: { id: list.id, name: list.name, scenario: list.scenario }, items };
+      }),
+    /** Abhaken über den Teil-Link (kein Login nötig, Token dient als Berechtigung). */
+    sharedToggle: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(32), itemId: z.number(), checked: z.boolean() }))
+      .mutation(async ({ input }) => {
+        const list = await db.getPackListByToken(input.token);
+        if (!list) throw new Error("Geteilte Liste nicht gefunden");
+        const items = await db.getPackItems(list.id);
+        if (!items.some(i => i.id === input.itemId)) throw new Error("Eintrag gehört nicht zu dieser Liste");
+        await db.setPackItemChecked(input.itemId, input.checked);
+        return { success: true } as const;
+      }),
   }),
 
   inventory: router({

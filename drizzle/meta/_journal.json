@@ -29,6 +29,13 @@
       "when": 1785448894782,
       "tag": "0003_tough_riptide",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1785450571060,
+      "tag": "0004_abandoned_solo",
+      "breakpoints": true
     }
   ]
 }

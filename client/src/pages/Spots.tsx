@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   Droplets,
   LocateFixed,
+  MapIcon,
   MapPin,
   Plus,
   Sunrise,
@@ -27,6 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MapView } from "@/components/Map";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { getSunTimes } from "@/lib/sun";
@@ -189,6 +191,50 @@ function SpotCard({ spot, onDelete }: { spot: { id: number; name: string; latitu
   );
 }
 
+/**
+ * Karten-Auswahl: Ein Tipp/Klick auf die Karte setzt einen Marker und
+ * übernimmt die Koordinaten ins Formular.
+ */
+function SpotMapPicker({
+  initial,
+  onPick,
+}: {
+  initial: { lat: number; lng: number } | null;
+  onPick: (lat: number, lng: number) => void;
+}) {
+  const markerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
+
+  return (
+    <MapView
+      className="h-56 overflow-hidden rounded-lg border border-border"
+      initialCenter={initial ?? { lat: 46.8182, lng: 8.2275 }}
+      initialZoom={initial ? 13 : 8}
+      onMapReady={map => {
+        if (initial) {
+          markerRef.current = new google.maps.marker.AdvancedMarkerElement({
+            map,
+            position: initial,
+          });
+        }
+        map.addListener("click", (e: google.maps.MapMouseEvent) => {
+          if (!e.latLng) return;
+          const lat = e.latLng.lat();
+          const lng = e.latLng.lng();
+          if (markerRef.current) {
+            markerRef.current.position = { lat, lng };
+          } else {
+            markerRef.current = new google.maps.marker.AdvancedMarkerElement({
+              map,
+              position: { lat, lng },
+            });
+          }
+          onPick(lat, lng);
+        });
+      }}
+    />
+  );
+}
+
 export default function SpotsPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const utils = trpc.useUtils();
@@ -202,6 +248,7 @@ export default function SpotsPage() {
   const [lon, setLon] = useState("");
   const [note, setNote] = useState("");
   const [locating, setLocating] = useState(false);
+  const [showMap, setShowMap] = useState(true);
 
   const addMutation = trpc.spots.add.useMutation({
     onSuccess: () => {
@@ -311,7 +358,8 @@ export default function SpotsPage() {
           <DialogHeader>
             <DialogTitle className="font-serif">Zeltplatz speichern</DialogTitle>
             <DialogDescription>
-              Gib die Koordinaten des geplanten Zeltplatzes ein oder übernimm deinen aktuellen Standort.
+              Tippe auf die Karte, übernimm deinen aktuellen Standort oder gib die Koordinaten von
+              Hand ein.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -324,6 +372,34 @@ export default function SpotsPage() {
                 placeholder="z. B. Camping Grindelwald"
                 maxLength={120}
               />
+            </div>
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <Label className="flex items-center gap-1.5">
+                  <MapIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                  Ort auf der Karte wählen
+                </Label>
+                <button
+                  type="button"
+                  onClick={() => setShowMap(v => !v)}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  {showMap ? "Karte ausblenden" : "Karte anzeigen"}
+                </button>
+              </div>
+              {showMap && dialogOpen && (
+                <SpotMapPicker
+                  initial={
+                    lat && lon && !Number.isNaN(parseFloat(lat)) && !Number.isNaN(parseFloat(lon))
+                      ? { lat: parseFloat(lat.replace(",", ".")), lng: parseFloat(lon.replace(",", ".")) }
+                      : null
+                  }
+                  onPick={(pickedLat, pickedLng) => {
+                    setLat(pickedLat.toFixed(5));
+                    setLon(pickedLng.toFixed(5));
+                  }}
+                />
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

@@ -35,9 +35,9 @@ function SunDiagram({
   lng: number;
   selectedDate: Date;
 }) {
-  const size = 320;
+  const size = 340;
   const c = size / 2;
-  const rHorizon = size / 2 - 24;
+  const rHorizon = size / 2 - 30;
 
   const toXY = (azimuth: number, altitude: number) => {
     const r = rHorizon * (1 - Math.max(0, altitude) / 90);
@@ -45,18 +45,33 @@ function SunDiagram({
     return { x: c + r * Math.cos(rad), y: c + r * Math.sin(rad) };
   };
 
-  // Sonnenbahn des Tages (nur über Horizont)
-  const path = useMemo(() => {
-    const points: { x: number; y: number }[] = [];
+  // Sonnenbahn des Tages, aufgeteilt in «schon vergangen» und «kommt noch»
+  const { pastPath, futurePath, riseXY, setXY } = useMemo(() => {
+    const past: { x: number; y: number }[] = [];
+    const future: { x: number; y: number }[] = [];
     const dayStart = new Date(selectedDate);
     dayStart.setHours(0, 0, 0, 0);
-    for (let m = 0; m < 1440; m += 10) {
+    const selectedMs = selectedDate.getTime();
+    let rise: { x: number; y: number } | null = null;
+    let set: { x: number; y: number } | null = null;
+    for (let m = 0; m < 1440; m += 5) {
       const t = new Date(dayStart.getTime() + m * 60000);
       const pos = getSunPosition(t, lat, lng);
-      if (pos.altitude > 0) points.push(toXY(pos.azimuth, pos.altitude));
+      if (pos.altitude > 0) {
+        const xy = toXY(pos.azimuth, pos.altitude);
+        if (!rise) rise = toXY(pos.azimuth, 0);
+        set = toXY(pos.azimuth, 0);
+        if (t.getTime() <= selectedMs) past.push(xy);
+        else future.push(xy);
+      }
     }
-    if (points.length < 2) return "";
-    return points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
+    // Übergangspunkt verbinden, damit keine Lücke entsteht
+    if (past.length > 0 && future.length > 0) future.unshift(past[past.length - 1]);
+    const toPath = (pts: { x: number; y: number }[]) =>
+      pts.length < 2
+        ? ""
+        : pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
+    return { pastPath: toPath(past), futurePath: toPath(future), riseXY: rise, setXY: set };
   }, [lat, lng, selectedDate]);
 
   const sunPos = getSunPosition(selectedDate, lat, lng);
@@ -73,7 +88,7 @@ function SunDiagram({
       const pos = getSunPosition(t, lat, lng);
       if (pos.altitude > 2) {
         const xy = toXY(pos.azimuth, pos.altitude);
-        marks.push({ ...xy, label: `${h}` });
+        marks.push({ ...xy, label: `${h} Uhr` });
       }
     }
     return marks;
@@ -86,33 +101,38 @@ function SunDiagram({
       role="img"
       aria-label={`Sonnenstand-Diagramm: Sonne aktuell im ${directionLabel(sunPos.azimuth)} bei ${Math.round(sunPos.altitude)} Grad Höhe`}
     >
-      {/* Horizont-Ringe */}
-      {[1, 2 / 3, 1 / 3].map(f => (
-        <circle
-          key={f}
-          cx={c}
-          cy={c}
-          r={rHorizon * f}
-          fill={f === 1 ? "var(--color-card)" : "none"}
-          stroke="var(--color-border)"
-          strokeWidth={f === 1 ? 2 : 1}
-          strokeDasharray={f === 1 ? undefined : "3 4"}
-        />
+      <defs>
+        <radialGradient id="skyGradient" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.55" />
+          <stop offset="70%" stopColor="var(--color-accent)" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="var(--color-card)" stopOpacity="1" />
+        </radialGradient>
+        <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#F5B841" stopOpacity="0.65" />
+          <stop offset="100%" stopColor="#F5B841" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      {/* Himmel (Blick von oben auf die Himmelskuppel) */}
+      <circle cx={c} cy={c} r={rHorizon} fill="url(#skyGradient)" stroke="var(--color-border)" strokeWidth="2" />
+      {/* Höhen-Ringe: 30° und 60° über dem Horizont */}
+      {[2 / 3, 1 / 3].map(f => (
+        <circle key={f} cx={c} cy={c} r={rHorizon * f} fill="none" stroke="var(--color-border)" strokeWidth="1" strokeDasharray="3 5" opacity="0.8" />
       ))}
-      {/* Höhen-Beschriftung */}
-      <text x={c + 4} y={c - rHorizon * (2 / 3) - 3} fontSize="8" fill="var(--color-muted-foreground)">30°</text>
-      <text x={c + 4} y={c - rHorizon / 3 - 3} fontSize="8" fill="var(--color-muted-foreground)">60°</text>
+      <text x={c + 5} y={c - rHorizon + 12} fontSize="8" fill="var(--color-muted-foreground)">Horizont (0°)</text>
+      <text x={c + 5} y={c - rHorizon * (2 / 3) + 10} fontSize="8" fill="var(--color-muted-foreground)">30° hoch</text>
+      <text x={c + 5} y={c - rHorizon / 3 + 10} fontSize="8" fill="var(--color-muted-foreground)">60° hoch</text>
 
       {/* Himmelsrichtungen */}
       {[
-        { label: "N", az: 0 },
-        { label: "O", az: 90 },
-        { label: "S", az: 180 },
-        { label: "W", az: 270 },
+        { label: "N", az: 0, full: "Norden" },
+        { label: "O", az: 90, full: "Osten" },
+        { label: "S", az: 180, full: "Süden" },
+        { label: "W", az: 270, full: "Westen" },
       ].map(({ label, az }) => {
         const rad = ((az - 90) * Math.PI) / 180;
-        const x = c + (rHorizon + 14) * Math.cos(rad);
-        const y = c + (rHorizon + 14) * Math.sin(rad);
+        const x = c + (rHorizon + 18) * Math.cos(rad);
+        const y = c + (rHorizon + 18) * Math.sin(rad);
         return (
           <text
             key={label}
@@ -128,32 +148,92 @@ function SunDiagram({
         );
       })}
 
-      {/* Sonnenbahn */}
-      {path && (
-        <path d={path} fill="none" stroke="var(--color-chart-1)" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
+      {/* Sonnenbahn: vergangen (blass) und noch kommend (kräftig) */}
+      {pastPath && (
+        <path d={pastPath} fill="none" stroke="var(--color-chart-1)" strokeWidth="3" strokeLinecap="round" opacity="0.3" />
+      )}
+      {futurePath && (
+        <path d={futurePath} fill="none" stroke="var(--color-chart-1)" strokeWidth="3" strokeLinecap="round" opacity="0.9" />
+      )}
+
+      {/* Auf- und Untergangspunkte am Horizont */}
+      {riseXY && (
+        <g>
+          <circle cx={riseXY.x} cy={riseXY.y} r="5" fill="var(--color-card)" stroke="var(--color-chart-1)" strokeWidth="2" />
+          <text x={riseXY.x} y={riseXY.y + 16} textAnchor="middle" fontSize="8.5" fontWeight="600" fill="var(--color-muted-foreground)">Aufgang</text>
+        </g>
+      )}
+      {setXY && (
+        <g>
+          <circle cx={setXY.x} cy={setXY.y} r="5" fill="var(--color-card)" stroke="var(--color-chart-1)" strokeWidth="2" />
+          <text x={setXY.x} y={setXY.y + 16} textAnchor="middle" fontSize="8.5" fontWeight="600" fill="var(--color-muted-foreground)">Untergang</text>
+        </g>
       )}
 
       {/* Stundenmarken */}
       {hourMarks.map(m => (
         <g key={m.label}>
-          <circle cx={m.x} cy={m.y} r="2.5" fill="var(--color-muted-foreground)" />
-          <text x={m.x} y={m.y - 6} textAnchor="middle" fontSize="8" fill="var(--color-muted-foreground)">
+          <circle cx={m.x} cy={m.y} r="2.5" fill="var(--color-foreground)" opacity="0.55" />
+          <text x={m.x} y={m.y - 6} textAnchor="middle" fontSize="7.5" fontWeight="600" fill="var(--color-muted-foreground)">
             {m.label}
           </text>
         </g>
       ))}
 
+      {/* Richtungslinie vom Standort zur Sonne */}
+      {isUp && (
+        <line
+          x1={c}
+          y1={c}
+          x2={sunXY.x}
+          y2={sunXY.y}
+          stroke="#F5B841"
+          strokeWidth="1.5"
+          strokeDasharray="4 4"
+          opacity="0.7"
+        />
+      )}
+
       {/* Zentrum = Standort */}
-      <circle cx={c} cy={c} r="4" fill="var(--color-primary)" />
-      <text x={c} y={c + 16} textAnchor="middle" fontSize="9" fill="var(--color-muted-foreground)">
-        Dein Standort
+      <circle cx={c} cy={c} r="10" fill="var(--color-primary)" opacity="0.15" />
+      <circle cx={c} cy={c} r="4.5" fill="var(--color-primary)" stroke="var(--color-card)" strokeWidth="1.5" />
+      <text x={c} y={c + 20} textAnchor="middle" fontSize="9" fontWeight="600" fill="var(--color-foreground)">
+        Du bist hier
       </text>
 
-      {/* Sonne */}
+      {/* Sonne mit Strahlen */}
       {isUp && (
         <g>
-          <circle cx={sunXY.x} cy={sunXY.y} r="14" fill="var(--color-chart-1)" opacity="0.25" />
-          <circle cx={sunXY.x} cy={sunXY.y} r="8" fill="var(--color-chart-1)" stroke="white" strokeWidth="1.5" />
+          <circle cx={sunXY.x} cy={sunXY.y} r="20" fill="url(#sunGlow)" />
+          {Array.from({ length: 8 }, (_, i) => {
+            const a = (i * 45 * Math.PI) / 180;
+            return (
+              <line
+                key={i}
+                x1={sunXY.x + 10.5 * Math.cos(a)}
+                y1={sunXY.y + 10.5 * Math.sin(a)}
+                x2={sunXY.x + 14 * Math.cos(a)}
+                y2={sunXY.y + 14 * Math.sin(a)}
+                stroke="#E09B2D"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            );
+          })}
+          <circle cx={sunXY.x} cy={sunXY.y} r="8.5" fill="#F5B841" stroke="#E09B2D" strokeWidth="1.5" />
+        </g>
+      )}
+      {/* Mond-Symbol, wenn die Sonne unter dem Horizont ist */}
+      {!isUp && (
+        <g opacity="0.75">
+          <circle cx={c} cy={c - rHorizon / 2} r="9" fill="var(--color-muted-foreground)" opacity="0.25" />
+          <path
+            d={`M ${c + 3} ${c - rHorizon / 2 - 6} a 6.5 6.5 0 1 0 0 12 a 5 5 0 1 1 0 -12`}
+            fill="var(--color-muted-foreground)"
+          />
+          <text x={c} y={c - rHorizon / 2 + 22} textAnchor="middle" fontSize="8.5" fill="var(--color-muted-foreground)">
+            Sonne unter dem Horizont
+          </text>
         </g>
       )}
     </svg>
@@ -273,16 +353,62 @@ export default function SunCompassPage() {
 
       {geo.status === "ok" && sunTimes && sunPos && (
         <>
+          {/* Verständliche Live-Zusammenfassung */}
+          <div className="mb-4 rounded-xl bg-primary px-4 py-3.5 text-primary-foreground">
+            <p className="text-sm leading-relaxed">
+              {sunPos.altitude > 0 ? (
+                <>
+                  Um <strong>{timeLabel} Uhr</strong> steht die Sonne im{" "}
+                  <strong>{directionLabel(sunPos.azimuth)}</strong> ({Math.round(sunPos.azimuth)}°),{" "}
+                  <strong>{Math.round(sunPos.altitude)}°</strong> über dem Horizont
+                  {sunPos.altitude > 45
+                    ? " – fast senkrecht, kaum Schatten."
+                    : sunPos.altitude > 20
+                      ? " – Bäume und Zelte werfen mittellange Schatten."
+                      : " – tiefer Stand, lange Schatten: Hindernisse verschatten jetzt viel."}
+                </>
+              ) : (
+                <>
+                  Um <strong>{timeLabel} Uhr</strong> ist die Sonne unter dem Horizont. Nächster
+                  Aufgang: <strong>{fmtTime(sunTimes.sunrise)} Uhr</strong> im Osten.
+                </>
+              )}
+            </p>
+          </div>
+
           {/* Diagramm */}
           <Card className="mb-4">
             <CardContent className="pt-6">
+              <p className="mb-3 text-center text-xs text-muted-foreground">
+                Blick von oben auf deinen Platz: Aussenring = Horizont, Mitte = senkrecht über dir.
+              </p>
               <SunDiagram lat={geo.lat!} lng={geo.lng!} selectedDate={selectedDate} />
+
+              {/* Legende */}
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground" aria-hidden="true">
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-3 w-3 rounded-full border-2 border-[#E09B2D] bg-[#F5B841]" />
+                  Sonne jetzt
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-1 w-5 rounded-full bg-chart-1 opacity-90" />
+                  Bahn (kommt noch)
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-1 w-5 rounded-full bg-chart-1 opacity-30" />
+                  Bahn (vorbei)
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-3 w-3 rounded-full border-2 border-card bg-primary" />
+                  Dein Standort
+                </span>
+              </div>
 
               {/* Zeit-Slider */}
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between">
                   <label htmlFor="time-slider" className="text-sm font-medium text-muted-foreground">
-                    Uhrzeit wählen
+                    Zieh den Regler, um in die Zukunft zu schauen
                   </label>
                   <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-sm font-semibold">
                     {timeLabel} Uhr

@@ -4,10 +4,13 @@ import {
   Baby,
   BadgeCheck,
   Compass as CompassIcon,
+  Gift,
+  Lightbulb,
   ListChecks,
   Map,
   PartyPopper,
   RotateCcw,
+  Sparkles,
   Trophy,
   WifiOff,
 } from "lucide-react";
@@ -61,9 +64,16 @@ function useHuntProgress(huntId: string, taskCount: number) {
 }
 
 function HuntDialog({ hunt, onClose }: { hunt: ScavengerHunt; onClose: () => void }) {
-  const [checked, setChecked] = useHuntProgress(hunt.id, hunt.tasks.length);
+  const [checked, setChecked] = useHuntProgress(hunt.id, hunt.stations.length);
+  const [revealedHints, setRevealedHints] = useState<Record<number, boolean>>({});
   const doneCount = checked.filter(Boolean).length;
-  const allDone = doneCount === hunt.tasks.length;
+  const allDone = doneCount === hunt.stations.length;
+  // Die nächste offene Station – nur bis dahin wird die Geschichte enthüllt
+  const nextOpenIndex = checked.findIndex(c => !c);
+  const visibleCount = nextOpenIndex === -1 ? hunt.stations.length : nextOpenIndex + 1;
+  const collectedLetters = hunt.stations
+    .map((s, i) => (checked[i] ? s.letter : undefined))
+    .filter((l): l is string => Boolean(l));
 
   return (
     <DialogContent className="max-h-[85vh] overflow-y-auto">
@@ -73,42 +83,126 @@ function HuntDialog({ hunt, onClose }: { hunt: ScavengerHunt; onClose: () => voi
           {hunt.ageHint} · ca. {hunt.durationMinutes} Minuten
         </DialogDescription>
       </DialogHeader>
-      <p className="text-sm text-muted-foreground">{hunt.intro}</p>
+      <p className="rounded-lg bg-accent/60 p-3 text-sm italic text-accent-foreground">{hunt.intro}</p>
+      {hunt.preparation && (
+        <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
+          {hunt.preparation}
+        </p>
+      )}
       <Progress
-        value={(doneCount / hunt.tasks.length) * 100}
-        aria-label={`${doneCount} von ${hunt.tasks.length} Aufgaben erledigt`}
+        value={(doneCount / hunt.stations.length) * 100}
+        aria-label={`${doneCount} von ${hunt.stations.length} Stationen geschafft`}
       />
-      <ul className="space-y-2">
-        {hunt.tasks.map((task, i) => (
+
+      {/* Gesammelte Buchstaben (falls die Jagd ein Lösungswort hat) */}
+      {hunt.solutionWord && (
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2.5">
+          <Sparkles className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+          <span className="text-sm font-medium">Gesammelte Buchstaben:</span>
+          <span className="flex gap-1.5">
+            {hunt.stations
+              .filter(s => s.letter)
+              .map((s, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    "flex h-7 w-7 items-center justify-center rounded-md border font-mono text-sm font-bold",
+                    collectedLetters.length > i
+                      ? "border-primary bg-accent text-primary"
+                      : "border-dashed border-border text-transparent",
+                  )}
+                >
+                  {collectedLetters.length > i ? collectedLetters[i] : "?"}
+                </span>
+              ))}
+          </span>
+        </div>
+      )}
+
+      <ol className="space-y-3">
+        {hunt.stations.slice(0, visibleCount).map((station, i) => (
           <li
             key={i}
             className={cn(
-              "flex items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5",
-              checked[i] && "bg-muted/60",
+              "rounded-xl border border-border bg-card p-4",
+              checked[i] && "border-primary/30 bg-muted/50",
             )}
           >
-            <Checkbox
-              id={`${hunt.id}-task-${i}`}
-              checked={checked[i]}
-              onCheckedChange={value =>
-                setChecked(prev => prev.map((c, idx) => (idx === i ? value === true : c)))
-              }
-              aria-label={`Aufgabe: ${task}`}
-            />
-            <label
-              htmlFor={`${hunt.id}-task-${i}`}
-              className={cn("flex-1 cursor-pointer text-sm", checked[i] && "text-muted-foreground line-through")}
-            >
-              {task}
-            </label>
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id={`${hunt.id}-station-${i}`}
+                checked={checked[i]}
+                onCheckedChange={value =>
+                  setChecked(prev => prev.map((c, idx) => (idx === i ? value === true : c)))
+                }
+                className="mt-0.5"
+                aria-label={`Station geschafft: ${station.title}`}
+              />
+              <div className="min-w-0 flex-1">
+                <label
+                  htmlFor={`${hunt.id}-station-${i}`}
+                  className={cn(
+                    "cursor-pointer text-sm font-semibold",
+                    checked[i] && "text-muted-foreground",
+                  )}
+                >
+                  {station.title}
+                  {station.letter && checked[i] && (
+                    <span className="ml-2 rounded bg-accent px-1.5 py-0.5 font-mono text-xs font-bold text-primary">
+                      Buchstabe: {station.letter}
+                    </span>
+                  )}
+                </label>
+                <p className="mt-1 text-xs italic text-muted-foreground">{station.story}</p>
+                <p className={cn("mt-1.5 text-sm", checked[i] && "text-muted-foreground line-through")}>
+                  {station.task}
+                </p>
+                {station.hint && !checked[i] && (
+                  <div className="mt-2">
+                    {revealedHints[i] ? (
+                      <p className="flex items-start gap-1.5 rounded-md bg-muted p-2 text-xs text-muted-foreground">
+                        <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-chart-4" aria-hidden="true" />
+                        {station.hint}
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setRevealedHints(prev => ({ ...prev, [i]: true }))}
+                        className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                      >
+                        <Lightbulb className="h-3.5 w-3.5" aria-hidden="true" />
+                        Hinweis anzeigen
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </li>
         ))}
-      </ul>
+      </ol>
+
+      {visibleCount < hunt.stations.length && (
+        <p className="text-center text-xs text-muted-foreground">
+          Noch {hunt.stations.length - visibleCount} geheime{" "}
+          {hunt.stations.length - visibleCount === 1 ? "Station" : "Stationen"} – hake die aktuelle
+          Station ab, um weiterzukommen!
+        </p>
+      )}
+
       {allDone && (
-        <div className="flex items-center gap-3 rounded-lg bg-accent p-4">
-          <PartyPopper className="h-6 w-6 text-primary" aria-hidden="true" />
-          <p className="text-sm font-semibold">
-            Alle Aufgaben geschafft – du bist ein echtes Natur-Talent!
+        <div className="space-y-3 rounded-xl bg-accent p-4">
+          <div className="flex items-center gap-3">
+            <PartyPopper className="h-6 w-6 shrink-0 text-primary" aria-hidden="true" />
+            <p className="font-serif text-base font-bold">
+              {hunt.solutionWord
+                ? `Lösungswort: ${hunt.solutionWord}`
+                : "Alle Stationen geschafft!"}
+            </p>
+          </div>
+          <p className="flex items-start gap-2 text-sm">
+            <Gift className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+            {hunt.finale}
           </p>
         </div>
       )}
@@ -116,7 +210,10 @@ function HuntDialog({ hunt, onClose }: { hunt: ScavengerHunt; onClose: () => voi
         <Button
           variant="outline"
           className="flex-1"
-          onClick={() => setChecked(new Array(hunt.tasks.length).fill(false))}
+          onClick={() => {
+            setChecked(new Array(hunt.stations.length).fill(false));
+            setRevealedHints({});
+          }}
           aria-label="Fortschritt zurücksetzen"
         >
           <RotateCcw className="mr-1.5 h-4 w-4" aria-hidden="true" />
@@ -316,7 +413,10 @@ export default function FamilyPage() {
             <span>
               <span className="block font-semibold">{hunt.title}</span>
               <span className="mt-0.5 block text-sm text-muted-foreground">
-                {hunt.ageHint} · ca. {hunt.durationMinutes} Min. · {hunt.tasks.length} Aufgaben
+                {hunt.ageHint} · ca. {hunt.durationMinutes} Min. · {hunt.stations.length} Stationen
+              </span>
+              <span className="mt-1.5 line-clamp-2 block text-xs italic text-muted-foreground">
+                {hunt.intro}
               </span>
             </span>
           </button>
