@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import heroImage from "@/assets/hero-camping.webp";
 import {
   Compass,
   ListChecks,
@@ -174,7 +175,7 @@ export default function Home() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-primary text-white">
         <img
-          src="/manus-storage/hero-camping_c11b2337.png"
+          src={heroImage}
           alt="Zelt mit Solarpanels und Lagerfeuer vor Schweizer Alpen bei Sonnenuntergang"
           className="absolute inset-0 h-full w-full object-cover object-center"
         />
