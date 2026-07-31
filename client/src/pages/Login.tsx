@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { LogIn, UserPlus, Tent } from "lucide-react";
+import { LogIn, UserPlus, Tent, KeyRound, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,13 @@ export default function LoginPage() {
   const [regEmail, setRegEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regPassword2, setRegPassword2] = useState("");
+  // Passwort-vergessen-Flow
+  const [resetMode, setResetMode] = useState(false);
+  const [resetStep, setResetStep] = useState<1 | 2>(1);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [resetPw, setResetPw] = useState("");
+  const [resetPw2, setResetPw2] = useState("");
 
   const afterAuth = async (name: string | null) => {
     await utils.auth.me.invalidate();
@@ -36,6 +43,21 @@ export default function LoginPage() {
   });
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: data => void afterAuth(data.name),
+    onError: err => toast.error(err.message),
+  });
+  const requestResetMutation = trpc.auth.requestReset.useMutation({
+    onSuccess: () => {
+      setResetStep(2);
+      toast.success("Falls ein Konto existiert, wurde ein Bestätigungscode verschickt.");
+    },
+    onError: err => toast.error(err.message),
+  });
+  const resetMutation = trpc.auth.resetPassword.useMutation({
+    onSuccess: () => {
+      toast.success("Passwort zurückgesetzt – du bist jetzt angemeldet.");
+      void utils.auth.me.invalidate();
+      navigate("/");
+    },
     onError: err => toast.error(err.message),
   });
 
@@ -56,11 +78,126 @@ export default function LoginPage() {
   return (
     <div className="container max-w-md py-6">
       <PageHeader
-        title="Anmelden"
-        subtitle="Mit deinem CampMesser-Konto speicherst du Packlisten, Inventar und Zeltplätze und nutzt sie auf allen Geräten."
+        title={resetMode ? "Passwort zurücksetzen" : "Anmelden"}
+        subtitle={
+          resetMode
+            ? "Wir schicken dir einen 6-stelligen Bestätigungscode, mit dem du ein neues Passwort setzen kannst."
+            : "Mit deinem CampMesser-Konto speicherst du Packlisten, Inventar und Zeltplätze und nutzt sie auf allen Geräten."
+        }
       />
       <Card>
         <CardContent className="pt-6">
+          {resetMode ? (
+            <div>
+              {resetStep === 1 ? (
+                <form
+                  className="space-y-4"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    requestResetMutation.mutate({ email: resetEmail });
+                  }}
+                >
+                  <div>
+                    <Label htmlFor="reset-email" className="mb-1.5 block">
+                      E-Mail deines Kontos
+                    </Label>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={resetEmail}
+                      onChange={e => setResetEmail(e.target.value)}
+                      placeholder="du@beispiel.ch"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={requestResetMutation.isPending}>
+                    <KeyRound className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    {requestResetMutation.isPending ? "Code wird verschickt …" : "Code anfordern"}
+                  </Button>
+                </form>
+              ) : (
+                <form
+                  className="space-y-4"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    if (resetPw !== resetPw2) {
+                      toast.error("Die Passwörter stimmen nicht überein.");
+                      return;
+                    }
+                    resetMutation.mutate({ email: resetEmail, code: resetCode, newPassword: resetPw });
+                  }}
+                >
+                  <div>
+                    <Label htmlFor="reset-code" className="mb-1.5 block">
+                      Bestätigungscode <span className="text-xs text-muted-foreground">(6 Ziffern, 15 Min. gültig)</span>
+                    </Label>
+                    <Input
+                      id="reset-code"
+                      inputMode="numeric"
+                      pattern="[0-9]{6}"
+                      maxLength={6}
+                      required
+                      value={resetCode}
+                      onChange={e => setResetCode(e.target.value.replace(/\D/g, ""))}
+                      placeholder="123456"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="reset-pw" className="mb-1.5 block">
+                      Neues Passwort <span className="text-xs text-muted-foreground">(mind. 8 Zeichen)</span>
+                    </Label>
+                    <Input
+                      id="reset-pw"
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      minLength={8}
+                      value={resetPw}
+                      onChange={e => setResetPw(e.target.value)}
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="reset-pw2" className="mb-1.5 block">
+                      Neues Passwort bestätigen
+                    </Label>
+                    <Input
+                      id="reset-pw2"
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      value={resetPw2}
+                      onChange={e => setResetPw2(e.target.value)}
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={resetMutation.isPending}>
+                    <KeyRound className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    {resetMutation.isPending ? "Wird gespeichert …" : "Passwort setzen"}
+                  </Button>
+                  <button
+                    type="button"
+                    className="w-full text-center text-xs text-muted-foreground underline-offset-2 hover:underline"
+                    onClick={() => requestResetMutation.mutate({ email: resetEmail })}
+                    disabled={requestResetMutation.isPending}
+                  >
+                    Keinen Code erhalten? Erneut anfordern
+                  </button>
+                </form>
+              )}
+              <button
+                type="button"
+                className="mt-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  setResetMode(false);
+                  setResetStep(1);
+                }}
+              >
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /> Zurück zur Anmeldung
+              </button>
+            </div>
+          ) : (
           <Tabs defaultValue="login">
             <TabsList className="mb-4 grid w-full grid-cols-2">
               <TabsTrigger value="login">Anmelden</TabsTrigger>
@@ -101,6 +238,16 @@ export default function LoginPage() {
                   <LogIn className="mr-1.5 h-4 w-4" aria-hidden="true" />
                   {loginMutation.isPending ? "Wird angemeldet …" : "Anmelden"}
                 </Button>
+                <button
+                  type="button"
+                  className="w-full text-center text-xs text-muted-foreground underline-offset-2 hover:underline"
+                  onClick={() => {
+                    setResetMode(true);
+                    setResetEmail(loginEmail);
+                  }}
+                >
+                  Passwort vergessen?
+                </button>
               </form>
             </TabsContent>
 
@@ -169,6 +316,7 @@ export default function LoginPage() {
               </form>
             </TabsContent>
           </Tabs>
+          )}
           <p className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
             <Tent className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             Die Wissens-Module (1. Hilfe, Knoten, Natur, Rezepte) funktionieren auch ohne Konto –

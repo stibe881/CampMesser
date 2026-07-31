@@ -72,6 +72,100 @@ export const appRouter = router({
         ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
         return { success: true, name: user.name } as const;
       }),
+    updateName: protectedProcedure
+      .input(z.object({ name: z.string().min(1, "Bitte gib einen Namen ein.").max(100) }))
+      .mutation(async ({ ctx, input }) => {
+        const { updateUserName } = await import("./localAuth");
+        await updateUserName(ctx.user.id, input.name);
+        return { success: true } as const;
+      }),
+    updatePassword: protectedProcedure
+      .input(
+        z.object({
+          currentPassword: z.string().min(1).max(200),
+          newPassword: z.string().min(1).max(200),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { validatePassword, verifyPassword, updateUserPassword } = await import("./localAuth");
+        if (!ctx.user.passwordHash) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Für dieses Konto ist kein Passwort hinterlegt.",
+          });
+        }
+        const ok = await verifyPassword(input.currentPassword, ctx.user.passwordHash);
+        if (!ok) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Das aktuelle Passwort ist falsch." });
+        }
+        const pwError = validatePassword(input.newPassword);
+        if (pwError) throw new TRPCError({ code: "BAD_REQUEST", message: pwError });
+        await updateUserPassword(ctx.user.id, input.newPassword);
+        return { success: true } as const;
+      }),
+    deleteAccount: protectedProcedure
+      .input(z.object({ password: z.string().min(1).max(200) }))
+      .mutation(async ({ ctx, input }) => {
+        const { verifyPassword, deleteUserAccount } = await import("./localAuth");
+        if (ctx.user.passwordHash) {
+          const ok = await verifyPassword(input.password, ctx.user.passwordHash);
+          if (!ok) {
+            throw new TRPCError({ code: "UNAUTHORIZED", message: "Das Passwort ist falsch." });
+          }
+        }
+        await deleteUserAccount(ctx.user.id);
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+        return { success: true } as const;
+      }),
+    requestReset: publicProcedure
+      .input(z.object({ email: z.string().min(3).max(320) }))
+      .mutation(async ({ input }) => {
+        const { findUserByEmail, createResetCode } = await import("./localAuth");
+        const user = await findUserByEmail(input.email);
+        // Aus Datenschutzgründen immer Erfolg melden, auch wenn das Konto nicht existiert
+        if (user && user.email && user.passwordHash) {
+          const code = await createResetCode(user.email);
+          const { notifyOwner } = await import("./_core/notification");
+          // Code als Benachrichtigung verschicken (E-Mail an Konto-Inhaber:in)
+          await notifyOwner({
+            title: `CampMesser: Passwort-Code für ${user.email}`,
+            content: `Bestätigungscode: ${code} (15 Minuten gültig). Falls du das nicht warst, ignoriere diese Nachricht.`,
+          }).catch(() => {});
+        }
+        return { success: true } as const;
+      }),
+    resetPassword: publicProcedure
+      .input(
+        z.object({
+          email: z.string().min(3).max(320),
+          code: z.string().length(6),
+          newPassword: z.string().min(1).max(200),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        const {
+          findUserByEmail,
+          verifyResetCode,
+          consumeResetCode,
+          validatePassword,
+          updateUserPassword,
+          createLocalSessionToken,
+        } = await import("./localAuth");
+        const codeError = await verifyResetCode(input.email, input.code);
+        if (codeError) throw new TRPCError({ code: "BAD_REQUEST", message: codeError });
+        const pwError = validatePassword(input.newPassword);
+        if (pwError) throw new TRPCError({ code: "BAD_REQUEST", message: pwError });
+        const user = await findUserByEmail(input.email);
+        if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Konto nicht gefunden." });
+        await updateUserPassword(user.id, input.newPassword);
+        consumeResetCode(input.email);
+        // Direkt anmelden
+        const token = await createLocalSessionToken(user);
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        return { success: true } as const;
+      }),
   }),
 
   packing: router({

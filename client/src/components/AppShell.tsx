@@ -140,6 +140,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     {user?.name || user?.email || "Angemeldet"}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      window.location.href = "/profil";
+                    }}
+                  >
+                    <UserRound className="mr-2 h-4 w-4" aria-hidden="true" /> Profil
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => void logout()}>
                     <LogOut className="mr-2 h-4 w-4" aria-hidden="true" /> Abmelden
                   </DropdownMenuItem>

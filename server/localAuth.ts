@@ -85,3 +85,92 @@ export async function createLocalSessionToken(user: User): Promise<string> {
   });
 }
 
+/** Namen eines Kontos ändern. */
+export async function updateUserName(userId: number, name: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Datenbank nicht verfügbar");
+  await db.update(users).set({ name: name.trim() }).where(eq(users.id, userId));
+}
+
+/** Passwort eines Kontos setzen (Hash wird neu berechnet). */
+export async function updateUserPassword(userId: number, newPassword: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Datenbank nicht verfügbar");
+  const passwordHash = await hashPassword(newPassword);
+  await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
+}
+
+/** Konto und alle zugehörigen Daten unwiderruflich löschen. */
+export async function deleteUserAccount(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Datenbank nicht verfügbar");
+  const { packLists, packItems, inventoryItems, powerConsumers, foodItems, campSpots } =
+    await import("../drizzle/schema");
+  const { inArray } = await import("drizzle-orm");
+  // Packlisten-Positionen zuerst (referenzieren Listen)
+  const lists = await db
+    .select({ id: packLists.id })
+    .from(packLists)
+    .where(eq(packLists.userId, userId));
+  const listIds = lists.map(l => l.id);
+  if (listIds.length > 0) {
+    await db.delete(packItems).where(inArray(packItems.listId, listIds));
+  }
+  await db.delete(packLists).where(eq(packLists.userId, userId));
+  await db.delete(inventoryItems).where(eq(inventoryItems.userId, userId));
+  await db.delete(powerConsumers).where(eq(powerConsumers.userId, userId));
+  await db.delete(foodItems).where(eq(foodItems.userId, userId));
+  await db.delete(campSpots).where(eq(campSpots.userId, userId));
+  await db.delete(users).where(eq(users.id, userId));
+}
+
+// ---------------------------------------------------------------------------
+// Passwort vergessen: 6-stelliger Code, 15 Minuten gültig, max. 5 Versuche.
+// In-Memory-Speicher genügt: Codes sind kurzlebig; bei Server-Neustart kann
+// einfach ein neuer Code angefordert werden.
+// ---------------------------------------------------------------------------
+
+interface ResetEntry {
+  codeHash: string;
+  expiresAt: number;
+  attempts: number;
+}
+
+const resetCodes = new Map<string, ResetEntry>();
+const RESET_TTL_MS = 15 * 60 * 1000;
+const RESET_MAX_ATTEMPTS = 5;
+
+/** Reset-Code für eine E-Mail erzeugen und speichern; gibt den Klartext-Code zurück. */
+export async function createResetCode(email: string): Promise<string> {
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  resetCodes.set(normalizeEmail(email), {
+    codeHash: await hashPassword(code),
+    expiresAt: Date.now() + RESET_TTL_MS,
+    attempts: 0,
+  });
+  return code;
+}
+
+/** Reset-Code prüfen. Gibt eine Fehlermeldung zurück oder null bei Erfolg. */
+export async function verifyResetCode(email: string, code: string): Promise<string | null> {
+  const key = normalizeEmail(email);
+  const entry = resetCodes.get(key);
+  if (!entry) return "Kein Code angefordert oder Code abgelaufen. Fordere einen neuen Code an.";
+  if (Date.now() > entry.expiresAt) {
+    resetCodes.delete(key);
+    return "Der Code ist abgelaufen. Fordere einen neuen Code an.";
+  }
+  if (entry.attempts >= RESET_MAX_ATTEMPTS) {
+    resetCodes.delete(key);
+    return "Zu viele Fehlversuche. Fordere einen neuen Code an.";
+  }
+  entry.attempts += 1;
+  const ok = await verifyPassword(code, entry.codeHash);
+  if (!ok) return "Der Code ist falsch. Bitte prüfe deine Eingabe.";
+  return null;
+}
+
+/** Reset-Code nach erfolgreicher Nutzung entwerten. */
+export function consumeResetCode(email: string): void {
+  resetCodes.delete(normalizeEmail(email));
+}

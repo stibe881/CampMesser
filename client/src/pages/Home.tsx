@@ -172,7 +172,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-primary text-primary-foreground">
+      <section className="relative overflow-hidden bg-primary text-white">
         <img
           src="/manus-storage/hero-camping_c11b2337.png"
           alt="Zelt mit Solarpanels und Lagerfeuer vor Schweizer Alpen bei Sonnenuntergang"
@@ -187,17 +187,17 @@ export default function Home() {
           aria-hidden="true"
         />
         <div className="container relative py-16 md:py-24">
-          <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-primary-foreground/90 drop-shadow">
+          <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-white/90 drop-shadow">
             Dein Schweizer Taschenmesser fürs Zelt-Camping
           </p>
           <h1 className="max-w-xl text-3xl font-bold leading-tight drop-shadow-md md:text-5xl">
             Alles fürs Camp.<br />In einer App.
           </h1>
-          <p className="mt-3 max-w-lg text-primary-foreground/90 drop-shadow md:text-lg">
+          <p className="mt-3 max-w-lg text-white/90 drop-shadow md:text-lg">
             Planung, Sicherheit, Energie und Naturerlebnis – 16 smarte Werkzeuge für dein nächstes Abenteuer.
           </p>
           {sunInfo && (
-            <p className="mt-5 inline-flex items-center gap-2 rounded-full bg-black/30 px-4 py-1.5 text-sm backdrop-blur-md">
+            <p className="mt-5 inline-flex items-center gap-2 rounded-full bg-black/40 px-4 py-1.5 text-sm text-white backdrop-blur-md">
               <Compass className="h-4 w-4" aria-hidden="true" />
               {sunInfo}
             </p>

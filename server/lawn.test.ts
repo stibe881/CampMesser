@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { estimateLawnTolerance, formatHours, lawnVerdict } from "../shared/lawn";
+import { deriveMoisture, estimateLawnTolerance, formatHours, lawnVerdict } from "../shared/lawn";
 
 const base = {
   floor: "standard" as const,
@@ -73,3 +73,20 @@ describe("formatHours", () => {
   });
 });
 
+describe("deriveMoisture", () => {
+  it("nutzt primär die Bodenfeuchte-Prognose (m³/m³)", () => {
+    expect(deriveMoisture(0.35, 0)).toBe("wet");
+    expect(deriveMoisture(0.2, 0)).toBe("normal");
+    expect(deriveMoisture(0.1, 20)).toBe("dry"); // Bodenfeuchte schlägt Niederschlag
+  });
+
+  it("fällt ohne Bodenfeuchte-Daten auf den Niederschlag zurück", () => {
+    expect(deriveMoisture(null, 8)).toBe("wet");
+    expect(deriveMoisture(undefined, 1)).toBe("normal");
+    expect(deriveMoisture(null, 0)).toBe("dry");
+  });
+
+  it("ignoriert ungültige Bodenfeuchte-Werte (NaN)", () => {
+    expect(deriveMoisture(Number.NaN, 8)).toBe("wet");
+  });
+});

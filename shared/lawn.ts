@@ -114,3 +114,24 @@ export function formatHours(hours: number): string {
   const rest = Math.round(hours % 24);
   return rest > 0 ? `${days} Tag${days > 1 ? "e" : ""} ${rest} Std.` : `${days} Tag${days > 1 ? "e" : ""}`;
 }
+
+/**
+ * Bodenfeuchte-Kategorie aus Wetterdaten ableiten.
+ * Primär: volumetrische Bodenfeuchte (0–7 cm) aus der Prognose (m³/m³).
+ *   Richtwerte für Wiesenböden: < 0.15 trocken, 0.15–0.30 normal, > 0.30 nass.
+ * Fallback: Niederschlagssumme der letzten 48 h (mm), wenn keine
+ *   Bodenfeuchte-Daten verfügbar sind: >= 5 mm nass, >= 0.5 mm normal, sonst trocken.
+ */
+export function deriveMoisture(
+  soilMoisture: number | null | undefined,
+  rain48hMm: number,
+): Moisture {
+  if (typeof soilMoisture === "number" && Number.isFinite(soilMoisture)) {
+    if (soilMoisture > 0.3) return "wet";
+    if (soilMoisture >= 0.15) return "normal";
+    return "dry";
+  }
+  if (rain48hMm >= 5) return "wet";
+  if (rain48hMm >= 0.5) return "normal";
+  return "dry";
+}

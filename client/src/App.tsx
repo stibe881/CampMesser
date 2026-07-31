@@ -29,6 +29,8 @@ import SharedPackListPage from "./pages/SharedPackList";
 import HuntPrintPage from "./pages/HuntPrint";
 import LoginPage from "./pages/Login";
 import LawnPage from "./pages/Lawn";
+import ProfilePage from "./pages/Profile";
+import { getThemePreference } from "./pages/Profile";
 
 function Router() {
   return (
@@ -55,6 +57,7 @@ function Router() {
         <Route path={"/zeltplaetze"} component={SpotsPage} />
         <Route path={"/anmelden"} component={LoginPage} />
         <Route path={"/rasen"} component={LawnPage} />
+        <Route path={"/profil"} component={ProfilePage} />
         <Route path={"/liste/:token"} component={SharedPackListPage} />
         <Route path={"/familie/drucken/:id"} component={HuntPrintPage} />
         <Route path={"/404"} component={NotFound} />
@@ -70,10 +73,12 @@ function Router() {
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
+  // Gespeicherte Design-Präferenz aus dem Profil anwenden
+  const savedTheme = getThemePreference();
   return (
     <ErrorBoundary>
       <ThemeProvider
-        defaultTheme="light"
+        defaultTheme={savedTheme ?? "light"}
         switchable
       >
         <TooltipProvider>

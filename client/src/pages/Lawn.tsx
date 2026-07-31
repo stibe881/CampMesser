@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
-import { Sprout, Tent, Thermometer, Sun, Droplets, Clock, RefreshCcw } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Sprout, Tent, Thermometer, Sun, Droplets, Clock, RefreshCcw, CloudSun, RefreshCw } from "lucide-react";
+import { cn as cnUtil } from "@/lib/utils";
 import PageHeader from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -7,6 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
+  deriveMoisture,
   estimateLawnTolerance,
   formatHours,
   lawnVerdict,
@@ -45,6 +47,79 @@ export default function LawnPage() {
   const [sun, setSun] = useState<SunExposure>("partial");
   const [moisture, setMoisture] = useState<Moisture>("normal");
   const [plannedDays, setPlannedDays] = useState(3);
+  const [weatherStatus, setWeatherStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
+  const [weatherNote, setWeatherNote] = useState<string | null>(null);
+  const autoTried = useRef(false);
+
+  /** Temperatur + Bodenfeuchte aus der Wetter-Prognose übernehmen. */
+  const loadWeather = () => {
+    if (!navigator.geolocation) {
+      setWeatherStatus("error");
+      return;
+    }
+    setWeatherStatus("loading");
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        try {
+          const params = new URLSearchParams({
+            latitude: String(pos.coords.latitude),
+            longitude: String(pos.coords.longitude),
+            daily: "temperature_2m_max,precipitation_sum",
+            hourly: "soil_moisture_0_to_7cm",
+            past_days: "1",
+            forecast_days: "1",
+            timezone: "auto",
+          });
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+          if (!res.ok) throw new Error("Wetter-API-Fehler");
+          const json = await res.json();
+          const tMax: number[] = json.daily?.temperature_2m_max ?? [];
+          const rain: number[] = json.daily?.precipitation_sum ?? [];
+          // Index 0 = gestern (past_days: 1), Index 1 = heute
+          const todayMax = tMax[1] ?? tMax[0];
+          const rain24h = (rain[0] ?? 0) + (rain[1] ?? 0);
+          if (typeof todayMax !== "number") throw new Error("Keine Temperaturdaten");
+          setTemperature(Math.round(todayMax));
+          // Bodenfeuchte: echte soil_moisture-Prognose (aktuelle Stunde),
+          // Fallback: Niederschlag der letzten 48 h
+          const soilSeries: (number | null)[] = json.hourly?.soil_moisture_0_to_7cm ?? [];
+          const times: string[] = json.hourly?.time ?? [];
+          const nowIso = new Date().toISOString().slice(0, 13);
+          let soilNow: number | null = null;
+          const idx = times.findIndex(t => t.startsWith(nowIso));
+          if (idx >= 0 && typeof soilSeries[idx] === "number") soilNow = soilSeries[idx];
+          else {
+            const lastValid = soilSeries.filter((v): v is number => typeof v === "number");
+            if (lastValid.length > 0) soilNow = lastValid[lastValid.length - 1];
+          }
+          const derived = deriveMoisture(soilNow, rain24h);
+          setMoisture(derived);
+          setWeatherNote(
+            soilNow !== null
+              ? `Tagesmaximum ${Math.round(todayMax)} °C, Bodenfeuchte ${(soilNow * 100).toFixed(0)} % → Boden ${
+                  derived === "wet" ? "nass" : derived === "normal" ? "normal" : "trocken"
+                }`
+              : `Tagesmaximum ${Math.round(todayMax)} °C, Niederschlag letzte 2 Tage ${rain24h.toFixed(1)} mm → Boden ${
+                  derived === "wet" ? "nass" : derived === "normal" ? "normal" : "trocken"
+                } (abgeleitet)`,
+          );
+          setWeatherStatus("ok");
+        } catch {
+          setWeatherStatus("error");
+        }
+      },
+      () => setWeatherStatus("error"),
+      { timeout: 10000 },
+    );
+  };
+
+  // Beim Öffnen automatisch versuchen
+  useEffect(() => {
+    if (autoTried.current) return;
+    autoTried.current = true;
+    loadWeather();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const result = useMemo(
     () => estimateLawnTolerance({ floor, grass, temperature, sun, moisture }),
@@ -111,6 +186,35 @@ export default function LawnPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={loadWeather}
+              disabled={weatherStatus === "loading"}
+            >
+              <RefreshCw
+                className={cnUtil("mr-1.5 h-3.5 w-3.5", weatherStatus === "loading" && "animate-spin")}
+                aria-hidden="true"
+              />
+              {weatherStatus === "loading"
+                ? "Wetter wird geladen …"
+                : "Temperatur & Feuchte vom Wetter übernehmen"}
+            </Button>
+            {weatherStatus === "ok" && weatherNote && (
+              <p className="mt-1.5 flex items-start gap-1.5 text-xs text-primary">
+                <CloudSun className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                Aus Prognose übernommen: {weatherNote}. Manuell anpassbar.
+              </p>
+            )}
+            {weatherStatus === "error" && (
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Wetter nicht verfügbar – stelle Temperatur und Feuchte von Hand ein.
+              </p>
+            )}
+          </div>
           <OptionRow label="Zeltboden" options={floorOptions} value={floor} onChange={setFloor} />
           <OptionRow label="Rasen-Zustand" options={grassOptions} value={grass} onChange={setGrass} />
           <OptionRow label="Sonneneinstrahlung am Stellplatz" options={sunOptions} value={sun} onChange={setSun} />

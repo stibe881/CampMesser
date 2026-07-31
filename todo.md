@@ -96,6 +96,14 @@
 - [x] Eigenständige Auth: passwordHash-Spalte, auth.register/login/logout (scrypt, JWT-Cookie), auth.me ohne passwordHash (7 Tests)
 - [x] Eigenständige Auth: Login-/Registrierungsseite /anmelden, LoginPrompt und 401-Redirect umgestellt, Konto-Menü mit Abmelden im Header
 - [x] Rasenschoner-Rechner: shared/lawn.ts (Zeltboden, Rasen, Temperatur, Sonne, Feuchte → Vergilbung/Schäden/Umstell-Empfehlung), Seite /rasen, 7 Tests
+
+## Runde 12: Wetter-Rasenschoner, Profil, Passwort-Reset
+
+- [x] Rasenschoner: Temperatur und Bodenfeuchte automatisch aus der Wetter-Prognose übernehmen (GPS, manuell überschreibbar, Hinweis mit Quelle; Bodenfeuchte primär aus soil_moisture_0_to_7cm, Fallback Niederschlag 48 h – deriveMoisture mit 3 Tests)
+- [x] Profil-Seite /profil: Name ändern, Passwort aktualisieren (mit aktuellem Passwort bestätigen), Konto löschen (inkl. aller Daten, AlertDialog mit Passwort), Profil-Link im Konto-Menü
+- [x] Passwort vergessen: 6-stelliger Code (15 Min., max. 5 Versuche, scrypt-gehasht), Versand als Owner-Benachrichtigung, zweistufiger Flow in /anmelden, 6 Tests
+- [x] Profil: Standard-Design wählbar (Hell/Dunkel) – localStorage, wird beim App-Start angewendet
+- [x] Bug: Hero-Text auf der Startseite im Dark Mode fast unlesbar – explizit weisse Textfarben verwenden
 - [x] Bug: «Live-Kompass aus»-Button funktioniert nicht → behoben (stabiler Event-Handler mit enabledRef, stop() entfernt beide Event-Typen zuverlässig)
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)
