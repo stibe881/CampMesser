@@ -8,7 +8,7 @@
  * - API-Aufrufe (/api/) und externe Dienste (Open-Meteo, Karten): immer Netz,
  *   kein Caching – Live-Daten sollen nicht veralten.
  */
-const CACHE_VERSION = "campmesser-v1";
+const CACHE_VERSION = "campmesser-v2";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 
@@ -59,13 +59,31 @@ self.addEventListener("fetch", event => {
     event.respondWith(
       caches.open(IMAGE_CACHE).then(async cache => {
         const cached = await cache.match(request);
-        if (cached) return cached;
+        // Nur saubere 200er-Antworten ausliefern; Redirect-/Opaque-Einträge
+        // sind für <img> nicht nutzbar und werden verworfen.
+        if (cached && cached.status === 200 && !cached.redirected) return cached;
+        if (cached) await cache.delete(request);
         try {
+          // /manus-storage antwortet mit 307 auf eine signierte CloudFront-URL.
+          // fetch() folgt dem Redirect, markiert die Antwort aber als
+          // "redirected" – solche Responses dürfen nicht direkt gecached oder
+          // ausgeliefert werden. Deshalb den Body in eine frische, saubere
+          // 200er-Response umpacken.
           const response = await fetch(request);
-          if (response.ok) cache.put(request, response.clone());
+          if (response.ok) {
+            const body = await response.arrayBuffer();
+            const clean = new Response(body, {
+              status: 200,
+              headers: {
+                "Content-Type": response.headers.get("Content-Type") || "image/png",
+              },
+            });
+            await cache.put(request, clean.clone());
+            return clean;
+          }
           return response;
         } catch {
-          return cached ?? Response.error();
+          return Response.error();
         }
       }),
     );
@@ -77,7 +95,7 @@ self.addEventListener("fetch", event => {
     caches.open(SHELL_CACHE).then(async cache => {
       try {
         const response = await fetch(request);
-        if (response.ok) cache.put(request, response.clone());
+        if (response.ok && !response.redirected) cache.put(request, response.clone());
         return response;
       } catch {
         const cached = await cache.match(request);

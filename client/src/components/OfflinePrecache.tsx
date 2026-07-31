@@ -31,7 +31,9 @@ export default function OfflinePrecache() {
         for (const url of urls) {
           if (cancelled) return;
           try {
-            await fetch(url, { mode: "no-cors" });
+            // Same-Origin-Fetch: läuft durch den Service Worker, der die
+            // Bilder redirect-sicher in den Offline-Cache legt.
+            await fetch(url);
           } catch {
             /* offline oder Fehler – beim nächsten Start erneut versuchen */
           }
