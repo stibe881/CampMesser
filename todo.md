@@ -104,7 +104,8 @@
 - [x] Passwort vergessen: 6-stelliger Code (15 Min., max. 5 Versuche, scrypt-gehasht), Versand als Owner-Benachrichtigung, zweistufiger Flow in /anmelden, 6 Tests
 - [x] Profil: Standard-Design wählbar (Hell/Dunkel) – localStorage, wird beim App-Start angewendet
 - [x] Bug: Hero-Text auf der Startseite im Dark Mode fast unlesbar – explizit weisse Textfarben verwenden
-- [x] Bug: Hero-Bild wird in der veröffentlichten Version nicht angezeigt – Ursache: Service Worker cachte Redirect-/Opaque-Responses von /manus-storage (307→CloudFront); Fix: sw.js v2 packt Bilder in saubere 200er-Responses um, verwirft defekte Cache-Einträge, OfflinePrecache ohne no-cors
+- [x] Bug: Hero-Bild wird in der veröffentlichten Version nicht angezeigt – Fix-Versuch 1: sw.js v2 (Redirect-sichere Bild-Auslieferung) – hat laut User nicht geholfen
+- [x] Bug (Runde 2): Hero-Bild fehlt beim User trotz SW v2 – Live-Test im echten Browser: Bild lädt korrekt, SW v2 cached sauber (200/nicht-redirected). Ursache beim User: alter SW v1 bleibt aktiv, bis alle Tabs/PWA-Instanzen geschlossen werden. Fix: Auto-Update-Mechanismus (registration.update + SKIP_WAITING + einmaliger Reload bei controllerchange), Cache v3
 - [x] Bug: «Live-Kompass aus»-Button funktioniert nicht → behoben (stabiler Event-Handler mit enabledRef, stop() entfernt beide Event-Typen zuverlässig)
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)
