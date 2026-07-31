@@ -141,5 +141,15 @@
 - [x] Erkenntnis: Projekt darf NICHT in public_html liegen – Apache lieferte app.js/package.json/server/mailer.ts mit Status 200 aus. Nach Verschieben nach ~/campmesser: 404, Quellcode nicht mehr öffentlich.
 - [x] Anleitung auf eigene Domain campmesser.ch und Zielverzeichnis ~/campmesser umgestellt
 - [x] Startseiten-Gruppe und Navigation von «1. Hilfe» auf «Erste Hilfe» umbenannt (Home, AppShell, Weather, Login)
-- [ ] DNS von campmesser.ch prüfen (aktuell keine öffentliche Auflösung – Domain evtl. noch nicht delegiert)
-- [ ] Node.js in konsoleH für campmesser.ch konfigurieren und Start verifizieren
+- [x] DNS von campmesser.ch geprüft: Domain heute registriert, Status «active», Nameserver ns1.your-server.de / ns3.second-ns.de / ns.second-ns.com (Hetzner) – A-Eintrag noch nicht weltweit auflösbar, Verzögerung normal
+- [ ] Node.js in konsoleH für campmesser.ch konfigurieren und Start verifizieren (wartet auf DNS-Verbreitung und Rückmeldung des Users)
+
+## Logo (Nutzerwunsch 31.07.2026)
+
+- [x] Eigenständiges CampMesser-Logo entworfen: Taschenmesser mit aufgeklappter Klinge als SVG-Bauteil `client/src/components/BrandLogo.tsx` (skalierbar, echte Transparenz, Farbe via currentColor)
+- [x] Symbol-Dateien erzeugt: favicon.ico (16/32/48), favicon-16/32.png, icon-192.png, icon-512.png (maskable), apple-touch-icon.png (180), logo-mark.png transparent – Generator `/home/ubuntu/make_icons.py`
+- [x] Logo im Kopfbereich (AppShell) ersetzt – altes Dreieck-SVG entfernt
+- [x] Logo in index.html eingesetzt (favicon.ico, PNG-Favicons 16/32, Apple-Touch-Icon 180) und manifest.json ergänzt
+- [x] Service Worker Cache-Version v3 → v4 erhöht, damit alte Symbole ersetzt werden
+- [x] Geprüft: Startseite, Anmeldeseite, SOS, mobile Ansicht – TypeScript sauber, 88 Tests grün
+- [ ] Checkpoint speichern und ins GitHub-Repo pushen

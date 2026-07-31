@@ -8,7 +8,7 @@
  * - API-Aufrufe (/api/) und externe Dienste (Open-Meteo, Karten): immer Netz,
  *   kein Caching – Live-Daten sollen nicht veralten.
  */
-const CACHE_VERSION = "campmesser-v3";
+const CACHE_VERSION = "campmesser-v4";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 
