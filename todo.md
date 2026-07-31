@@ -106,7 +106,16 @@
 - [x] Bug: Hero-Text auf der Startseite im Dark Mode fast unlesbar – explizit weisse Textfarben verwenden
 - [x] Bug: Hero-Bild wird in der veröffentlichten Version nicht angezeigt – Fix-Versuch 1: sw.js v2 (Redirect-sichere Bild-Auslieferung) – hat laut User nicht geholfen
 - [x] Bug (Runde 2): Hero-Bild fehlt beim User trotz SW v2 – Live-Test im echten Browser: Bild lädt korrekt, SW v2 cached sauber (200/nicht-redirected). Ursache beim User: alter SW v1 bleibt aktiv, bis alle Tabs/PWA-Instanzen geschlossen werden. Fix: Auto-Update-Mechanismus (registration.update + SKIP_WAITING + einmaliger Reload bei controllerchange), Cache v3. Upgrade-Szenario in Produktion verifiziert: Browser mit aktivem v2-SW erhielt beim Seitenbesuch automatisch v3 (alte v2-Caches gelöscht, nur campmesser-v3-* vorhanden, kein waiting worker), Hero-Bild lädt (naturalWidth 1920)
-- [x] Bug (Runde 3): Hero-Bild fehlt beim User weiterhin – robusteste Lösung umgesetzt: Bild als gebündeltes Vite-Asset (client/src/assets/hero-camping.webp, 112 KB WebP statt 4 MB PNG über Redirect); kein /manus-storage-Redirect, kein Service Worker im Pfad; Vorschau geprüft
+- [x] Bug (Runde 3): Hero-Bild fehlt beim User weiterhin – robusteste Lösung umgesetzt: Bild als gebündeltes Vite-Asset (client/src/assets/hero-camping.webp, 112 KB WebP statt 4 MB PNG über Redirect); kein /manus-storage-Redirect, kein Service Worker im Pfad; in Produktion verifiziert (Status 200, keine Redirects)
+
+## Selbst-Hosting (Hetzner)
+
+- [x] Alle Modul-Bilder (Natur 16, Knoten 8, Rezepte 18) als lokale WebP-Bundle-Assets einbinden, damit die App ohne Manus-Storage läuft
+- [x] Passwort-Reset ohne Manus-Notification-Dienst nutzbar machen (server/mailer.ts: SMTP über nodemailer, Fallback Manus-Notification, sonst Logfile)
+- [x] Hetzner-Deployment-Anleitung erstellt (DEPLOYMENT-HETZNER.md) – zugeschnitten auf Webhosting L/XL mit Node.js-Aktivierung in konsoleH (statt VPS/Nginx/systemd)
+- [x] Deploy-Skript scripts/deploy-hetzner.sh und Umgebungs-Vorlage env.hetzner.template ergänzt
+- [x] Selbst-Hosting verifiziert: Produktions-Build ohne Manus-Variablen gestartet (nur NODE_ENV/PORT/DATABASE_URL/JWT_SECRET) – Startseite HTTP 200, Hero-Bild 114 KB, Registrierung erfolgreich
+- [x] Vollständige Prüfung (Build sauber, 88 Vitest-Tests grün) und Checkpoint
 - [x] Bug: «Live-Kompass aus»-Button funktioniert nicht → behoben (stabiler Event-Handler mit enabledRef, stop() entfernt beide Event-Typen zuverlässig)
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)

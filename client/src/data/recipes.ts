@@ -2,6 +2,25 @@
  * Campfire-Rezeptbuch – Rezepte für Gaskocher und offenes Feuer,
  * filterbar nach Zutaten und Zubereitungszeit. Offline verfügbar.
  */
+import img_rezept_one_pot_pasta from "@/assets/rezept-one-pot-pasta.webp";
+import img_rezept_chili from "@/assets/rezept-chili.webp";
+import img_rezept_schlangenbrot from "@/assets/rezept-schlangenbrot.webp";
+import img_rezept_folienkartoffeln from "@/assets/rezept-folienkartoffeln.webp";
+import img_rezept_porridge from "@/assets/rezept-porridge.webp";
+import img_rezept_couscous from "@/assets/rezept-couscous.webp";
+import img_rezept_aelplermagronen from "@/assets/rezept-aelplermagronen.webp";
+import img_rezept_feuerspiess from "@/assets/rezept-feuerspiess.webp";
+import img_rezept_linsen_dal from "@/assets/rezept-linsen-dal.webp";
+import img_rezept_quesadilla from "@/assets/rezept-quesadilla.webp";
+import img_rezept_bananen_schoggi from "@/assets/rezept-bananen-schoggi.webp";
+import img_rezept_eier_broetli from "@/assets/rezept-eier-broetli.webp";
+import img_rezept_risotto_pilze from "@/assets/rezept-risotto-pilze.webp";
+import img_rezept_curry_kokos from "@/assets/rezept-curry-kokos.webp";
+import img_rezept_steckerlfisch from "@/assets/rezept-steckerlfisch.webp";
+import img_rezept_pfannen_pizza from "@/assets/rezept-pfannen-pizza.webp";
+import img_rezept_minestrone from "@/assets/rezept-minestrone.webp";
+import img_rezept_apfel_zimt from "@/assets/rezept-apfel-zimt.webp";
+
 export interface Recipe {
   id: string;
   name: string;
@@ -20,7 +39,7 @@ export interface Recipe {
 export const recipes: Recipe[] = [
   {
     id: "one-pot-pasta",
-    image: "/manus-storage/rezept-one-pot-pasta_5460f00b.png",
+    image: img_rezept_one_pot_pasta,
     name: "One-Pot-Tomatenpasta",
     method: "Gaskocher",
     timeMinutes: 20,
@@ -39,7 +58,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "chili-sin-carne",
-    image: "/manus-storage/rezept-chili_05ae5fac.png",
+    image: img_rezept_chili,
     name: "Camping-Chili",
     method: "Beides",
     timeMinutes: 30,
@@ -58,7 +77,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "schlangenbrot",
-    image: "/manus-storage/rezept-schlangenbrot_261663db.png",
+    image: img_rezept_schlangenbrot,
     name: "Schlangenbrot",
     method: "Offenes Feuer",
     timeMinutes: 40,
@@ -77,7 +96,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "folienkartoffeln",
-    image: "/manus-storage/rezept-folienkartoffeln_a3613550.png",
+    image: img_rezept_folienkartoffeln,
     name: "Glut-Kartoffeln in Folie",
     method: "Offenes Feuer",
     timeMinutes: 45,
@@ -96,7 +115,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "porridge",
-    image: "/manus-storage/rezept-porridge_a7010fb4.png",
+    image: img_rezept_porridge,
     name: "Beeren-Porridge",
     method: "Gaskocher",
     timeMinutes: 10,
@@ -115,7 +134,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "gemuese-couscous",
-    image: "/manus-storage/rezept-couscous_ba817fc1.png",
+    image: img_rezept_couscous,
     name: "Blitz-Couscous mit Gemüse",
     method: "Gaskocher",
     timeMinutes: 15,
@@ -134,7 +153,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "aelplermagronen",
-    image: "/manus-storage/rezept-aelplermagronen_ea69b252.png",
+    image: img_rezept_aelplermagronen,
     name: "Älplermagronen",
     method: "Gaskocher",
     timeMinutes: 25,
@@ -153,7 +172,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "feuerspiess",
-    image: "/manus-storage/rezept-feuerspiess_1058b3de.png",
+    image: img_rezept_feuerspiess,
     name: "Gemüse-Wurst-Spiesse",
     method: "Offenes Feuer",
     timeMinutes: 20,
@@ -172,7 +191,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "linsen-dal",
-    image: "/manus-storage/rezept-linsen-dal_f6cefb02.png",
+    image: img_rezept_linsen_dal,
     name: "Schnelles Linsen-Dal",
     method: "Gaskocher",
     timeMinutes: 25,
@@ -191,7 +210,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "pfannen-quesadilla",
-    image: "/manus-storage/rezept-quesadilla_42edb0c0.png",
+    image: img_rezept_quesadilla,
     name: "Pfannen-Quesadillas",
     method: "Gaskocher",
     timeMinutes: 15,
@@ -210,7 +229,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "bananen-schoggi",
-    image: "/manus-storage/rezept-bananen-schoggi_1198bd34.png",
+    image: img_rezept_bananen_schoggi,
     name: "Schoggi-Bananen aus der Glut",
     method: "Offenes Feuer",
     timeMinutes: 15,
@@ -229,7 +248,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "eier-broetli",
-    image: "/manus-storage/rezept-eier-broetli_353ad687.png",
+    image: img_rezept_eier_broetli,
     name: "Znüni-Eierbrötli aus der Pfanne",
     method: "Gaskocher",
     timeMinutes: 10,
@@ -248,7 +267,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "risotto-pilze",
-    image: "/manus-storage/rezept-risotto-pilze_224d8c30.png",
+    image: img_rezept_risotto_pilze,
     name: "Pilz-Risotto aus einem Topf",
     method: "Gaskocher",
     timeMinutes: 30,
@@ -267,7 +286,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "curry-kokos",
-    image: "/manus-storage/rezept-curry-kokos_08ce0191.png",
+    image: img_rezept_curry_kokos,
     name: "Gemüse-Kokos-Curry",
     method: "Gaskocher",
     timeMinutes: 25,
@@ -286,7 +305,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "steckerlfisch",
-    image: "/manus-storage/rezept-steckerlfisch_1af170f0.png",
+    image: img_rezept_steckerlfisch,
     name: "Fisch am Stecken",
     method: "Offenes Feuer",
     timeMinutes: 30,
@@ -305,7 +324,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "pfannen-pizza",
-    image: "/manus-storage/rezept-pfannen-pizza_0386d24b.png",
+    image: img_rezept_pfannen_pizza,
     name: "Pfannen-Pizza",
     method: "Gaskocher",
     timeMinutes: 20,
@@ -324,7 +343,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "camp-minestrone",
-    image: "/manus-storage/rezept-minestrone_68be525d.png",
+    image: img_rezept_minestrone,
     name: "Camp-Minestrone",
     method: "Beides",
     timeMinutes: 30,
@@ -343,7 +362,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "apfel-zimt-glut",
-    image: "/manus-storage/rezept-apfel-zimt_3d37b331.png",
+    image: img_rezept_apfel_zimt,
     name: "Apfel-Zimt-Päckli aus der Glut",
     method: "Offenes Feuer",
     timeMinutes: 15,

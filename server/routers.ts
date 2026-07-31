@@ -126,12 +126,9 @@ export const appRouter = router({
         // Aus Datenschutzgründen immer Erfolg melden, auch wenn das Konto nicht existiert
         if (user && user.email && user.passwordHash) {
           const code = await createResetCode(user.email);
-          const { notifyOwner } = await import("./_core/notification");
-          // Code als Benachrichtigung verschicken (E-Mail an Konto-Inhaber:in)
-          await notifyOwner({
-            title: `CampMesser: Passwort-Code für ${user.email}`,
-            content: `Bestätigungscode: ${code} (15 Minuten gültig). Falls du das nicht warst, ignoriere diese Nachricht.`,
-          }).catch(() => {});
+          const { sendResetCode } = await import("./mailer");
+          // Zustellung per SMTP (Selbst-Hosting) oder Manus-Benachrichtigung
+          await sendResetCode(user.email, code).catch(() => {});
         }
         return { success: true } as const;
       }),
