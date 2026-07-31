@@ -27,6 +27,8 @@ import QuietPage from "./pages/Quiet";
 import SpotsPage from "./pages/Spots";
 import SharedPackListPage from "./pages/SharedPackList";
 import HuntPrintPage from "./pages/HuntPrint";
+import LoginPage from "./pages/Login";
+import LawnPage from "./pages/Lawn";
 
 function Router() {
   return (
@@ -51,6 +53,8 @@ function Router() {
         <Route path={"/trockenzeiten"} component={DryingPage} />
         <Route path={"/nachtruhe"} component={QuietPage} />
         <Route path={"/zeltplaetze"} component={SpotsPage} />
+        <Route path={"/anmelden"} component={LoginPage} />
+        <Route path={"/rasen"} component={LawnPage} />
         <Route path={"/liste/:token"} component={SharedPackListPage} />
         <Route path={"/familie/drucken/:id"} component={HuntPrintPage} />
         <Route path={"/404"} component={NotFound} />
@@ -70,7 +74,7 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider
         defaultTheme="light"
-        // switchable
+        switchable
       >
         <TooltipProvider>
           <Toaster />

@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import {
+  BellRing,
   CloudRain,
   CloudSun,
   Droplets,
@@ -61,6 +63,10 @@ export default function DryingPage() {
   });
   const [weather, setWeather] = useState<WeatherState>({ status: "idle" });
   const [sunset, setSunset] = useState<Date | null>(null);
+  const [reminderOn, setReminderOn] = useState(false);
+  const [leadMinutes, setLeadMinutes] = useState(30);
+  const reminderTimers = useRef<number[]>([]);
+  const [reminderInfo, setReminderInfo] = useState<string | null>(null);
   const [now] = useState(() => new Date());
   const [hourly, setHourly] = useState<HourlyConditions[] | null>(null);
   const [customItems, setCustomItems] = useState<DryingItem[]>(() => loadCustomItems());
@@ -191,6 +197,96 @@ export default function DryingPage() {
     [conditions, sunset, now, hourly, customItems],
   );
 
+  /** Frühester Regen-Zeitpunkt über alle Teile, die noch nicht trocken sind. */
+  const earliestRain = useMemo(() => {
+    let earliest: Date | null = null;
+    for (const r of results) {
+      if (r.rain?.rainAt) {
+        if (!earliest || r.rain.rainAt < earliest) earliest = r.rain.rainAt;
+      }
+    }
+    return earliest;
+  }, [results]);
+
+  const clearReminderTimers = () => {
+    for (const t of reminderTimers.current) window.clearTimeout(t);
+    reminderTimers.current = [];
+  };
+
+  /** Erinnerung aktivieren: Timer für Regen- und Sonnenuntergangs-Warnung stellen. */
+  const toggleReminder = async () => {
+    if (reminderOn) {
+      clearReminderTimers();
+      setReminderOn(false);
+      setReminderInfo(null);
+      return;
+    }
+    let canNotify = false;
+    if ("Notification" in window) {
+      if (Notification.permission === "granted") canNotify = true;
+      else if (Notification.permission !== "denied") {
+        canNotify = (await Notification.requestPermission()) === "granted";
+      }
+    }
+    const notify = (title: string, body: string) => {
+      toast.warning(title, { description: body, duration: 30000 });
+      if (canNotify) {
+        try {
+          new Notification(title, { body, icon: "/icons/icon-192.png" });
+        } catch {
+          // Einige Browser (iOS) erlauben den Konstruktor nicht – Toast reicht
+        }
+      }
+      if ("vibrate" in navigator) navigator.vibrate?.([200, 100, 200]);
+    };
+    const nowMs = Date.now();
+    const leadMs = leadMinutes * 60_000;
+    const scheduled: string[] = [];
+    if (earliestRain) {
+      const fireAt = earliestRain.getTime() - leadMs;
+      if (fireAt > nowMs) {
+        reminderTimers.current.push(
+          window.setTimeout(() => {
+            notify(
+              "Regen im Anzug!",
+              `In ca. ${leadMinutes} Minuten beginnt es zu regnen – hol die Wäsche rein.`,
+            );
+          }, fireAt - nowMs),
+        );
+        scheduled.push(
+          `Regen-Warnung um ${new Date(fireAt).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} Uhr`,
+        );
+      }
+    }
+    if (sunset) {
+      const fireAt = sunset.getTime() - leadMs;
+      if (fireAt > nowMs) {
+        reminderTimers.current.push(
+          window.setTimeout(() => {
+            notify(
+              "Sonne geht bald unter",
+              `Noch ca. ${leadMinutes} Minuten bis Sonnenuntergang – Wäsche vor dem Abendtau reinholen.`,
+            );
+          }, fireAt - nowMs),
+        );
+        scheduled.push(
+          `Sonnenuntergangs-Erinnerung um ${new Date(fireAt).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} Uhr`,
+        );
+      }
+    }
+    if (scheduled.length === 0) {
+      toast.info("Keine Erinnerung nötig", {
+        description: "Weder Regen noch Sonnenuntergang stehen in nächster Zeit bevor.",
+      });
+      return;
+    }
+    setReminderOn(true);
+    setReminderInfo(scheduled.join(" · "));
+  };
+
+  // Timer aufräumen, wenn die Seite verlassen wird
+  useEffect(() => clearReminderTimers, []);
+
   return (
     <div className="container max-w-3xl py-6">
       <PageHeader
@@ -306,6 +402,56 @@ export default function DryingPage() {
         <Shirt className="h-4 w-4 text-primary" aria-hidden="true" />
         Was hängt an der Leine?
       </h2>
+      <Card className="mb-5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <BellRing className="h-4 w-4 text-primary" aria-hidden="true" />
+            Wäsche-Erinnerung
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-3 text-sm text-muted-foreground">
+            Erhalte eine Warnung, bevor Regen einsetzt oder die Sonne untergeht – damit du die
+            Wäsche rechtzeitig reinholen kannst. Die Erinnerung funktioniert, solange die App
+            geöffnet ist (auch im Hintergrund-Tab).
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Label htmlFor="lead" className="text-xs">
+              Vorlaufzeit:
+            </Label>
+            <div className="flex gap-1.5" role="group" aria-label="Vorlaufzeit wählen">
+              {[15, 30, 60].map(min => (
+                <Button
+                  key={min}
+                  type="button"
+                  size="sm"
+                  variant={leadMinutes === min ? "default" : "outline"}
+                  className="rounded-full"
+                  disabled={reminderOn}
+                  onClick={() => setLeadMinutes(min)}
+                >
+                  {min} Min.
+                </Button>
+              ))}
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant={reminderOn ? "destructive" : "default"}
+              className="ml-auto"
+              onClick={() => void toggleReminder()}
+            >
+              <BellRing className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+              {reminderOn ? "Erinnerung stoppen" : "Erinnerung aktivieren"}
+            </Button>
+          </div>
+          {reminderOn && reminderInfo && (
+            <p className="mt-2.5 rounded-lg bg-accent px-3 py-2 text-xs text-accent-foreground">
+              Aktiv: {reminderInfo}
+            </p>
+          )}
+        </CardContent>
+      </Card>
       <div className="space-y-3">
         {results.map(({ item, hours, dryAt, verdict, rain }) => (
           <div key={item.id} className="rounded-xl border border-border bg-card p-4">

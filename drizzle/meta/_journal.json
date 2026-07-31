@@ -36,6 +36,20 @@
       "when": 1785450571060,
       "tag": "0004_abandoned_solo",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1785483090643,
+      "tag": "0005_huge_maverick",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1785484119693,
+      "tag": "0006_productive_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

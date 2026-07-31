@@ -1,4 +1,3 @@
-import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { TRPCClientError } from "@trpc/client";
 import { useCallback, useEffect, useMemo } from "react";
@@ -76,11 +75,10 @@ export function useAuth(options?: UseAuthOptions) {
     if (typeof window === "undefined") return;
     if (redirectPath && window.location.pathname === redirectPath) return;
 
-    // Navigate at this moment only. startLogin() mints the nonce + cookie itself.
-    if (redirectPath) {
-      window.location.href = redirectPath;
-    } else {
-      startLogin();
+    // Eigenständige Anmeldung: immer zur App-eigenen Login-Seite
+    const target = redirectPath ?? "/anmelden";
+    if (window.location.pathname !== target) {
+      window.location.href = target;
     }
   }, [
     redirectOnUnauthenticated,

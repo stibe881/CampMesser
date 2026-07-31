@@ -88,6 +88,14 @@
 - [x] Trockenzeiten: Regen-Warnung (rainBeforeDry, ≥0.2 mm/h oder ≥60 % Wahrscheinlichkeit vor dem Trockenzeitpunkt, 4 neue Tests)
 - [x] Startseite: Schnellzugriff «Zuletzt genutzt» mit bis zu 4 zuletzt geöffneten Modulen (localStorage-Tracking im AppShell)
 - [x] Header: Blendet beim Runterscrollen aus (ab 80 px), schwebender SOS-Button bleibt oben rechts sichtbar; Hochscrollen zeigt Header wieder
+
+## Erweiterungen (Runde 11)
+- [x] Dark Mode: dunkle Alpine-Palette, ThemeProvider switchable, Mond/Sonne-Umschalter im Header
+- [x] Startseite: Kachel-Sortierung per Drag-and-Drop + Pfeil-Buttons (Sortier-Modus, localStorage, pro Gruppe)
+- [x] Trockenzeiten: Wäsche-Erinnerung vor Regen/Sonnenuntergang (Notification API, Toast, Vibration; Vorlauf 15/30/60 Min.)
+- [x] Eigenständige Auth: passwordHash-Spalte, auth.register/login/logout (scrypt, JWT-Cookie), auth.me ohne passwordHash (7 Tests)
+- [x] Eigenständige Auth: Login-/Registrierungsseite /anmelden, LoginPrompt und 401-Redirect umgestellt, Konto-Menü mit Abmelden im Header
+- [x] Rasenschoner-Rechner: shared/lawn.ts (Zeltboden, Rasen, Temperatur, Sonne, Feuchte → Vergilbung/Schäden/Umstell-Empfehlung), Seite /rasen, 7 Tests
 - [x] Bug: «Live-Kompass aus»-Button funktioniert nicht → behoben (stabiler Event-Handler mit enabledRef, stop() entfernt beide Event-Typen zuverlässig)
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)

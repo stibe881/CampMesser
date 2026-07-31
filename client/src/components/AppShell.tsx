@@ -7,8 +7,23 @@ import {
   BookOpen,
   Siren,
   CloudSunRain,
+  LogIn,
+  LogOut,
+  UserRound,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { useTheme } from "@/contexts/ThemeContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 /**
  * Gemeinsames App-Layout: Top-Bar mit Logo, Inhalt, Bottom-Navigation (mobil).
@@ -57,6 +72,8 @@ export function getRecentModules(): string[] {
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [headerHidden, setHeaderHidden] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   // Beim Seitenwechsel nach oben scrollen
   useEffect(() => {
@@ -97,17 +114,59 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </span>
             <span className="font-serif text-lg font-semibold tracking-tight">CampMesser</span>
           </Link>
-          <Link
-            href="/sos"
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-transform active:scale-[0.97]",
-              "bg-destructive text-destructive-foreground shadow-sm",
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => toggleTheme?.()}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
+              aria-label={theme === "dark" ? "Helles Design aktivieren" : "Dunkles Design aktivieren"}
+            >
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Moon className="h-4 w-4" aria-hidden="true" />
+              )}
+            </button>
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label="Konto-Menü öffnen"
+                >
+                  <UserRound className="h-4 w-4" aria-hidden="true" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel className="max-w-[200px] truncate">
+                    {user?.name || user?.email || "Angemeldet"}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => void logout()}>
+                    <LogOut className="mr-2 h-4 w-4" aria-hidden="true" /> Abmelden
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link
+                href="/anmelden"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                aria-label="Anmelden"
+              >
+                <LogIn className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Anmelden</span>
+              </Link>
             )}
-            aria-label="SOS – Notfall-Dashboard öffnen"
-          >
-            <Siren className="h-4 w-4" aria-hidden="true" />
-            SOS
-          </Link>
+            <Link
+              href="/sos"
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-transform active:scale-[0.97]",
+                "bg-destructive text-destructive-foreground shadow-sm",
+              )}
+              aria-label="SOS – Notfall-Dashboard öffnen"
+            >
+              <Siren className="h-4 w-4" aria-hidden="true" />
+              SOS
+            </Link>
+          </div>
         </div>
       </header>
 

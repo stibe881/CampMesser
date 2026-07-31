@@ -1,6 +1,6 @@
 import { LogIn } from "lucide-react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { startLogin } from "@/const";
 
 /** Freundlicher Hinweis mit Anmelde-Button für geschützte Funktionen. */
 export default function LoginPrompt({ feature }: { feature: string }) {
@@ -11,8 +11,10 @@ export default function LoginPrompt({ feature }: { feature: string }) {
       <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
         Melde dich an, um {feature} zu speichern und auf allen Geräten zu synchronisieren.
       </p>
-      <Button className="mt-4" onClick={() => startLogin()} aria-label="Jetzt anmelden">
-        Jetzt anmelden
+      <Button asChild className="mt-4">
+        <Link href="/anmelden" aria-label="Jetzt anmelden">
+          Jetzt anmelden
+        </Link>
       </Button>
     </div>
   );

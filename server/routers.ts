@@ -1,7 +1,9 @@
 import { COOKIE_NAME } from "@shared/const";
 import { nanoid } from "nanoid";
 import { z } from "zod";
+import { ONE_YEAR_MS } from "@shared/const";
 import { packScenarios } from "@shared/packTemplates";
+import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
@@ -11,7 +13,12 @@ export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
+    me: publicProcedure.query(opts => {
+      if (!opts.ctx.user) return null;
+      // passwordHash niemals an den Client schicken
+      const { passwordHash: _ph, ...safeUser } = opts.ctx.user;
+      return safeUser;
+    }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
@@ -19,6 +26,52 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    register: publicProcedure
+      .input(
+        z.object({
+          name: z.string().min(1, "Bitte gib einen Namen ein.").max(100),
+          email: z.string().min(3).max(320),
+          password: z.string().min(1).max(200),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { validateEmail, validatePassword, normalizeEmail, findUserByEmail, registerUser, createLocalSessionToken } =
+          await import("./localAuth");
+        if (!validateEmail(normalizeEmail(input.email))) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Bitte gib eine gültige E-Mail-Adresse ein." });
+        }
+        const pwError = validatePassword(input.password);
+        if (pwError) throw new TRPCError({ code: "BAD_REQUEST", message: pwError });
+        const existing = await findUserByEmail(input.email);
+        if (existing) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Für diese E-Mail-Adresse existiert bereits ein Konto. Melde dich stattdessen an.",
+          });
+        }
+        const user = await registerUser(input.name, input.email, input.password);
+        const token = await createLocalSessionToken(user);
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        return { success: true, name: user.name } as const;
+      }),
+    login: publicProcedure
+      .input(z.object({ email: z.string().min(3).max(320), password: z.string().min(1).max(200) }))
+      .mutation(async ({ ctx, input }) => {
+        const { findUserByEmail, verifyPassword, createLocalSessionToken } = await import("./localAuth");
+        const user = await findUserByEmail(input.email);
+        const invalid = new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "E-Mail oder Passwort ist falsch.",
+        });
+        if (!user || !user.passwordHash) throw invalid;
+        const ok = await verifyPassword(input.password, user.passwordHash);
+        if (!ok) throw invalid;
+        const token = await createLocalSessionToken(user);
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        return { success: true, name: user.name } as const;
+      }),
   }),
 
   packing: router({
