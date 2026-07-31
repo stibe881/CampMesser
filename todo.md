@@ -152,4 +152,4 @@
 - [x] Logo in index.html eingesetzt (favicon.ico, PNG-Favicons 16/32, Apple-Touch-Icon 180) und manifest.json ergänzt
 - [x] Service Worker Cache-Version v3 → v4 erhöht, damit alte Symbole ersetzt werden
 - [x] Geprüft: Startseite, Anmeldeseite, SOS, mobile Ansicht – TypeScript sauber, 88 Tests grün
-- [ ] Checkpoint speichern und ins GitHub-Repo pushen
+- [x] Checkpoint f49ca398 gespeichert, veröffentlicht und ins GitHub-Repo gepusht
