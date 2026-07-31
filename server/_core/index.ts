@@ -31,6 +31,10 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 
 async function startServer() {
   const app = express();
+  // Hetzner leitet HTTPS über Apache/Passenger weiter – Express muss dem
+  // X-Forwarded-Proto Header vertrauen, damit req.protocol === "https"
+  // und Secure-Cookies korrekt gesetzt werden.
+  app.set("trust proxy", 1);
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
