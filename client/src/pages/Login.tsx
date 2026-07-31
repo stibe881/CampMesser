@@ -319,7 +319,7 @@ export default function LoginPage() {
           )}
           <p className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
             <Tent className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            Die Wissens-Module (1. Hilfe, Knoten, Natur, Rezepte) funktionieren auch ohne Konto –
+            Die Wissens-Module (Erste Hilfe, Knoten, Natur, Rezepte) funktionieren auch ohne Konto –
             ein Konto brauchst du nur zum Speichern eigener Daten.
           </p>
         </CardContent>

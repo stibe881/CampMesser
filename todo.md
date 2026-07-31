@@ -134,3 +134,12 @@
 - Packlisten: toggle-/addItem-Mutationen mit DB-Persistenz vorhanden (PackListDetail.tsx, server/routers.ts packing-Router)
 - Inventar: add/update/remove-Mutationen mit Feldern name/weightGrams/volumeLiters/category (Inventory.tsx, inventory-Router)
 - Tests: 18 Vitest-Tests grün (Berechnungen, Sonnenstand, LV95, Packlisten-Vorlagen, Auth)
+
+## Hetzner Runde 2: eigene Domain campmesser.ch
+
+- [x] Erkenntnis: Node.js wirkt bei Hetzner auf die GESAMTE Domain – Aktivierung für camping.gross-ict.ch legte gross-ict.ch lahm (503). Nach Deaktivierung wieder 200 OK.
+- [x] Erkenntnis: Projekt darf NICHT in public_html liegen – Apache lieferte app.js/package.json/server/mailer.ts mit Status 200 aus. Nach Verschieben nach ~/campmesser: 404, Quellcode nicht mehr öffentlich.
+- [x] Anleitung auf eigene Domain campmesser.ch und Zielverzeichnis ~/campmesser umgestellt
+- [x] Startseiten-Gruppe und Navigation von «1. Hilfe» auf «Erste Hilfe» umbenannt (Home, AppShell, Weather, Login)
+- [ ] DNS von campmesser.ch prüfen (aktuell keine öffentliche Auflösung – Domain evtl. noch nicht delegiert)
+- [ ] Node.js in konsoleH für campmesser.ch konfigurieren und Start verifizieren

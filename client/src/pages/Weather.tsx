@@ -266,7 +266,7 @@ export default function WeatherPage() {
             </Button>
             <p className="max-w-sm text-xs text-muted-foreground">
               Hinweis: Das Wetter-Modul braucht eine Internetverbindung und deinen Standort. Die
-              Offline-Module (1. Hilfe, Knoten, Natur) funktionieren weiterhin ohne Netz.
+              Offline-Module (Erste Hilfe, Knoten, Natur) funktionieren weiterhin ohne Netz.
             </p>
           </CardContent>
         </Card>

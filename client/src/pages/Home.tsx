@@ -57,7 +57,7 @@ interface Module {
   title: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
-  group: "Planung" | "Sicherheit" | "1. Hilfe" | "Energie & Wasser";
+  group: "Planung" | "Sicherheit" | "Erste Hilfe" | "Energie & Wasser";
   offline?: boolean;
 }
 
@@ -74,15 +74,15 @@ const modules: Module[] = [
   { path: "/trockenzeiten", title: "Trockenzeiten", description: "Wird die Wäsche bis Sonnenuntergang trocken?", icon: Shirt, group: "Planung" },
   { path: "/nachtruhe", title: "Camp-Quiet-Timer", description: "Lautstärke im Blick während der Nachtruhe", icon: Moon, group: "Sicherheit" },
   { path: "/erste-hilfe", title: "Erste Hilfe", description: "Offline-Ratgeber für Outdoor-Verletzungen", icon: Cross, group: "Sicherheit", offline: true },
-  { path: "/knoten", title: "Knoten-Bibliothek", description: "Die wichtigsten Outdoor-Knoten, Schritt für Schritt", icon: Cable, group: "1. Hilfe", offline: true },
-  { path: "/natur", title: "Natur-Entdecker", description: "Tierspuren, Sternbilder und Bäume erkennen", icon: TreePine, group: "1. Hilfe", offline: true },
-  { path: "/rezepte", title: "Campfire-Rezepte", description: "Kochen auf Gaskocher und offenem Feuer", icon: CookingPot, group: "1. Hilfe", offline: true },
-  { path: "/kuehlbox", title: "Kühlbox-Inventar", description: "Vorräte erfassen, passende Rezepte finden", icon: Refrigerator, group: "1. Hilfe" },
+  { path: "/knoten", title: "Knoten-Bibliothek", description: "Die wichtigsten Outdoor-Knoten, Schritt für Schritt", icon: Cable, group: "Erste Hilfe", offline: true },
+  { path: "/natur", title: "Natur-Entdecker", description: "Tierspuren, Sternbilder und Bäume erkennen", icon: TreePine, group: "Erste Hilfe", offline: true },
+  { path: "/rezepte", title: "Campfire-Rezepte", description: "Kochen auf Gaskocher und offenem Feuer", icon: CookingPot, group: "Erste Hilfe", offline: true },
+  { path: "/kuehlbox", title: "Kühlbox-Inventar", description: "Vorräte erfassen, passende Rezepte finden", icon: Refrigerator, group: "Erste Hilfe" },
   { path: "/energie", title: "Energie-Budget", description: "Autarkie-Dauer mit Solar und Powerstation", icon: BatteryCharging, group: "Energie & Wasser" },
   { path: "/wasser", title: "Trinkwasser-Rechner", description: "Wasserbedarf für Personen, Tage und Hitze", icon: Droplets, group: "Energie & Wasser" },
 ];
 
-const groups = ["Planung", "Sicherheit", "1. Hilfe", "Energie & Wasser"] as const;
+const groups = ["Planung", "Sicherheit", "Erste Hilfe", "Energie & Wasser"] as const;
 
 /** Schnellzugriff: die zuletzt genutzten Module (max. 4) aus dem lokalen Verlauf. */
 function RecentModules() {
