@@ -105,15 +105,36 @@ function SunDiagram({
   lng,
   selectedDate,
   obstacles,
+  placeMode,
+  onPlace,
 }: {
   lat: number;
   lng: number;
   selectedDate: Date;
   obstacles: Obstacle[];
+  /** Wenn aktiv, setzt ein Tipp aufs Diagramm ein Hindernis. */
+  placeMode: boolean;
+  onPlace?: (azimuth: number, height: number) => void;
 }) {
   const size = 340;
   const c = size / 2;
   const rHorizon = size / 2 - 30;
+
+  /** Klick-/Tipp-Position im SVG in Azimut (0–360°) und Höhe (0–89°) umrechnen. */
+  const handlePointer = (e: React.MouseEvent<SVGSVGElement>) => {
+    if (!placeMode || !onPlace) return;
+    const svg = e.currentTarget;
+    const rect = svg.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * size;
+    const y = ((e.clientY - rect.top) / rect.height) * size;
+    const dx = x - c;
+    const dy = y - c;
+    const r = Math.sqrt(dx * dx + dy * dy);
+    if (r > rHorizon + 12) return; // ausserhalb der Himmelskuppel
+    const azimuth = (((Math.atan2(dy, dx) * 180) / Math.PI + 90) + 360) % 360;
+    const height = Math.min(89, Math.max(1, Math.round((1 - Math.min(r, rHorizon) / rHorizon) * 90)));
+    onPlace(Math.round(azimuth), height);
+  };
 
   const toXY = (azimuth: number, altitude: number) => {
     const r = rHorizon * (1 - Math.max(0, altitude) / 90);
@@ -193,7 +214,8 @@ function SunDiagram({
   return (
     <svg
       viewBox={`0 0 ${size} ${size}`}
-      className="mx-auto w-full max-w-sm"
+      className={`mx-auto w-full max-w-sm ${placeMode ? "cursor-crosshair" : ""}`}
+      onClick={handlePointer}
       role="img"
       aria-label={`Sonnenstand-Diagramm: Sonne aktuell im ${directionLabel(sunPos.azimuth)} bei ${Math.round(sunPos.altitude)} Grad Höhe`}
     >
@@ -404,6 +426,7 @@ export default function SunCompassPage() {
   const [newAzimuth, setNewAzimuth] = useState("180");
   const [newHeight, setNewHeight] = useState("25");
   const [newWidth, setNewWidth] = useState("30");
+  const [placeMode, setPlaceMode] = useState(false);
 
   const saveObstacles = (next: Obstacle[]) => {
     setObstacles(next);
@@ -427,6 +450,19 @@ export default function SunCompassPage() {
       width: Number.isNaN(w) ? OBSTACLE_KINDS[newKind].defaultWidth : Math.min(Math.max(w, 5), 180),
     };
     saveObstacles([...obstacles, next]);
+  };
+
+  /** Hindernis per Tipp aufs Diagramm setzen: Richtung und Höhe aus der Position, Breite je nach Art. */
+  const placeObstacleAt = (azimuth: number, height: number) => {
+    const next: Obstacle = {
+      id: `${Date.now()}`,
+      kind: newKind,
+      azimuth,
+      height,
+      width: OBSTACLE_KINDS[newKind].defaultWidth,
+    };
+    saveObstacles([...obstacles, next]);
+    setPlaceMode(false);
   };
 
   const locate = () => {
@@ -562,7 +598,28 @@ export default function SunCompassPage() {
               <p className="mb-3 text-center text-xs text-muted-foreground">
                 Blick von oben auf deinen Platz: Aussenring = Horizont, Mitte = senkrecht über dir.
               </p>
-              <SunDiagram lat={geo.lat!} lng={geo.lng!} selectedDate={selectedDate} obstacles={obstacles} />
+              {placeMode && (
+                <div className="mb-3 rounded-lg border border-primary/40 bg-accent/60 px-3 py-2 text-center text-sm text-accent-foreground">
+                  Tippe jetzt auf die Stelle im Diagramm, wo das Hindernis (
+                  {OBSTACLE_KINDS[newKind].label}) steht – Richtung und Höhe werden automatisch
+                  übernommen.{" "}
+                  <button
+                    type="button"
+                    onClick={() => setPlaceMode(false)}
+                    className="font-medium text-primary underline"
+                  >
+                    Abbrechen
+                  </button>
+                </div>
+              )}
+              <SunDiagram
+                lat={geo.lat!}
+                lng={geo.lng!}
+                selectedDate={selectedDate}
+                obstacles={obstacles}
+                placeMode={placeMode}
+                onPlace={placeObstacleAt}
+              />
 
               {/* Legende */}
               <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground" aria-hidden="true">
@@ -758,10 +815,20 @@ export default function SunCompassPage() {
                   />
                 </div>
               </div>
-              <Button variant="outline" size="sm" className="mt-3 w-full" onClick={addObstacle}>
-                <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                Hindernis eintragen
-              </Button>
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <Button
+                  variant={placeMode ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setPlaceMode(v => !v)}
+                >
+                  <Compass className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {placeMode ? "Tipp-Modus aktiv …" : "Per Tipp im Diagramm setzen"}
+                </Button>
+                <Button variant="outline" size="sm" onClick={addObstacle}>
+                  <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  Mit Zahlen eintragen
+                </Button>
+              </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 Tipp zur Höhe: Strecke den Arm aus – eine Faust entspricht etwa 10°. Ein Baum, der
                 zweieinhalb Fäuste über dem Horizont endet, hat also rund 25°.

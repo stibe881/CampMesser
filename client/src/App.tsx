@@ -24,6 +24,7 @@ import FoodPage from "./pages/Food";
 import WeatherPage from "./pages/Weather";
 import SpotsPage from "./pages/Spots";
 import SharedPackListPage from "./pages/SharedPackList";
+import HuntPrintPage from "./pages/HuntPrint";
 
 function Router() {
   return (
@@ -47,6 +48,7 @@ function Router() {
         <Route path={"/wetter"} component={WeatherPage} />
         <Route path={"/zeltplaetze"} component={SpotsPage} />
         <Route path={"/liste/:token"} component={SharedPackListPage} />
+        <Route path={"/familie/drucken/:id"} component={HuntPrintPage} />
         <Route path={"/404"} component={NotFound} />
         <Route component={NotFound} />
       </Switch>

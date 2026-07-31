@@ -194,3 +194,20 @@
     }
   }
 }
+
+/* Druckansicht: Navigation und Bedienelemente ausblenden, sauberes Papier-Layout */
+@media print {
+  header,
+  nav {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+  }
+  .print-sheet {
+    color: black;
+  }
+  .print-station {
+    break-inside: avoid;
+  }
+}

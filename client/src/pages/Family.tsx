@@ -400,26 +400,45 @@ export default function FamilyPage() {
       </p>
       <div className="mb-8 grid gap-3 sm:grid-cols-2">
         {scavengerHunts.map(hunt => (
-          <button
+          <div
             key={hunt.id}
-            type="button"
-            onClick={() => setActiveHunt(hunt)}
-            className="flex items-start gap-3.5 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
-            aria-label={`Schnitzeljagd ${hunt.title} starten`}
+            className="flex flex-col rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/40 hover:shadow-md"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-              <Map className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <span>
-              <span className="block font-semibold">{hunt.title}</span>
-              <span className="mt-0.5 block text-sm text-muted-foreground">
-                {hunt.ageHint} · ca. {hunt.durationMinutes} Min. · {hunt.stations.length} Stationen
+            <button
+              type="button"
+              onClick={() => setActiveHunt(hunt)}
+              className="flex items-start gap-3.5 text-left active:scale-[0.99]"
+              aria-label={`Schnitzeljagd ${hunt.title} starten`}
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                <Map className="h-5 w-5" aria-hidden="true" />
               </span>
-              <span className="mt-1.5 line-clamp-2 block text-xs italic text-muted-foreground">
-                {hunt.intro}
+              <span>
+                <span className="block font-semibold">{hunt.title}</span>
+                <span className="mt-0.5 block text-sm text-muted-foreground">
+                  {hunt.ageHint} · ca. {hunt.durationMinutes} Min. · {hunt.stations.length} Stationen
+                </span>
+                <span className="mt-1.5 line-clamp-2 block text-xs italic text-muted-foreground">
+                  {hunt.intro}
+                </span>
               </span>
-            </span>
-          </button>
+            </button>
+            <div className="mt-3 flex items-center gap-4 border-t border-border/60 pt-2.5 text-xs">
+              <button
+                type="button"
+                onClick={() => setActiveHunt(hunt)}
+                className="font-medium text-primary hover:underline"
+              >
+                Auf dem Handy spielen
+              </button>
+              <Link
+                href={`/familie/drucken/${hunt.id}`}
+                className="font-medium text-primary hover:underline"
+              >
+                Zum Ausdrucken (PDF)
+              </Link>
+            </div>
+          </div>
         ))}
       </div>
 

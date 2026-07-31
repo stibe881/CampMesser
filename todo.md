@@ -59,6 +59,11 @@
 - [x] Sonnen-Kompass: Hindernis-Profil – Hindernisse (Baum/Wald, Berg/Hügel, Gebäude) mit Richtung, Höhe und Breite erfassen (localStorage), Sektoren im Diagramm, «im Schatten»-Anzeige an der Sonne, Schattenzeiten-Fenster des Tages, Faust-Regel-Tipp (Logik in shared/obstacles.ts, 8 Tests)
 - [x] PWA: manifest.json + Icons (192/512, maskable) + Service Worker (network-first Shell, cache-first Bilder, kein API-Caching), Registrierung nur in Produktion, Apple-Meta-Tags, lang=de-CH
 - [x] PWA: Wissens-Module inkl. /manus-storage-Bilder offline nutzbar (SPA-Fallback auf gecachte Shell; Inhalte statisch im JS-Bundle; OfflinePrecache-Komponente lädt alle Natur-/Knoten-/Rezept-Bilder nach App-Start gezielt vor)
+
+## Erweiterungen (Runde 6)
+- [x] Sonnen-Kompass: Hindernisse per Tipp/Klick direkt aufs Diagramm setzen (Tipp-Modus-Button, Pixel→Azimut/Höhe-Umrechnung, Crosshair-Cursor, Hinweisbanner mit Abbrechen; Zahleneingabe bleibt als Alternative)
+- [x] Familien-Modus: Schnitzeljagd-Druckansicht unter /familie/drucken/:id (Stationen, Rätsel, Abhak- und Buchstabenfelder, Lösungswort-Felder leer; Print-CSS blendet Navigation aus; Links auf jeder Jagd-Karte)
+- [x] Natur-Modul: Mondphasen-Kalender (aktuelle Phase mit Symbol und Beleuchtung, Sternbeobachtungs-Bewertung, nächste 3 Vollmonde/Neumonde, offline berechnet; shared/moon.ts mit 7 Tests)
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)
 - Packlisten: toggle-/addItem-Mutationen mit DB-Persistenz vorhanden (PackListDetail.tsx, server/routers.ts packing-Router)
