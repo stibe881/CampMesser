@@ -52,6 +52,7 @@ export default function QuietPage() {
   const [tooLoudSince, setTooLoudSince] = useState<number | null>(null);
   const [reminder, setReminder] = useState(false);
   const [now, setNow] = useState(() => new Date());
+  const lastVibrateRef = useRef(0);
 
   const streamRef = useRef<MediaStream | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
@@ -128,7 +129,9 @@ export default function QuietPage() {
 
   const quietNow = isQuietTime(now, settings.quietFrom, settings.quietTo);
 
-  // Erinnerung: Pegel länger als 3 Sekunden über der Schwelle während der Nachtruhe
+  // Erinnerung: Pegel länger als 3 Sekunden über der Schwelle während der Nachtruhe.
+  // Zusätzlich zur visuellen Erinnerung vibriert das Handy dezent (wo unterstützt),
+  // höchstens alle 15 Sekunden.
   useEffect(() => {
     if (!listening || !quietNow) {
       setTooLoudSince(null);
@@ -140,6 +143,18 @@ export default function QuietPage() {
         setTooLoudSince(Date.now());
       } else if (Date.now() - tooLoudSince > 3000) {
         setReminder(true);
+        if (
+          typeof navigator !== "undefined" &&
+          "vibrate" in navigator &&
+          Date.now() - lastVibrateRef.current > 15000
+        ) {
+          lastVibrateRef.current = Date.now();
+          try {
+            navigator.vibrate([200, 100, 200]);
+          } catch {
+            /* nicht unterstützt */
+          }
+        }
       }
     } else {
       setTooLoudSince(null);
@@ -179,6 +194,10 @@ export default function QuietPage() {
             <p className="text-sm">
               Die Gespräche sind gerade lauter als dein eingestellter Richtwert. Die Zelt-Nachbarn
               danken für etwas leisere Töne.
+            </p>
+            <p className="mt-1 text-xs opacity-80">
+              Auf Android-Geräten vibriert das Handy zusätzlich (iPhones unterstützen Web-Vibration
+              leider nicht).
             </p>
           </div>
         </div>

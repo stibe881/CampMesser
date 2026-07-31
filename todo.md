@@ -77,6 +77,11 @@
 - [x] Energie-Budget: Auto/Manuell-Schalter für Sonnenstunden – manuelles Ziehen des Sliders deaktiviert Auto, Schalter zurück auf Auto übernimmt die Prognose sofort
 - [x] Sonnen-Kompass: Sonnenauf- (orange) und -untergangs-Symbol (rot) an der korrekten Position des Zeit-Sliders
 - [x] Live-Kompass: Sichtkegel (50° Öffnung) mit Richtungspfeil zeigt die Blickrichtung des Smartphones im Diagramm
+
+## Erweiterungen (Runde 9)
+- [x] Trockenzeiten: Eigene Materialien mit individueller Basis-Trockenzeit hinzufügen/löschen (localStorage, Formular + Papierkorb-Button)
+- [x] Trockenzeiten: Stündlicher Prognose-Verlauf (48 h, Open-Meteo) mit Integrations-Berechnung (estimateDryingWithForecast, 4 neue Tests); zeigt «Voraussichtlich trocken um HH:MM»; manuelle Eingabe schaltet auf Punktschätzung
+- [x] Quiet-Timer: Vibration bei der Erinnerung (navigator.vibrate, max. alle 15 s, Hinweis dass iPhones das nicht unterstützen)
 - [x] Bug: «Live-Kompass aus»-Button funktioniert nicht → behoben (stabiler Event-Handler mit enabledRef, stop() entfernt beide Event-Typen zuverlässig)
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)

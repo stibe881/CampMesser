@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { DRYING_ITEMS, estimateDryingTime, formatHours, sunsetVerdict } from "../shared/drying";
+import {
+  DRYING_ITEMS,
+  estimateDryingTime,
+  estimateDryingWithForecast,
+  formatHours,
+  sunsetVerdict,
+  type HourlyConditions,
+} from "../shared/drying";
 
 const REF = { temperature: 20, humidity: 60, windSpeed: 5 };
 
@@ -62,3 +69,52 @@ describe("formatHours", () => {
   });
 });
 
+describe("estimateDryingWithForecast", () => {
+  const mkHours = (startHour: number, conds: Array<Partial<HourlyConditions>>): HourlyConditions[] =>
+    conds.map((c, i) => ({
+      time: new Date(2026, 6, 31, startHour + i, 0, 0),
+      temperature: c.temperature ?? 20,
+      humidity: c.humidity ?? 60,
+      windSpeed: c.windSpeed ?? 5,
+    }));
+
+  it("liefert bei konstanten Referenzbedingungen etwa die Punktschätzung", () => {
+    const start = new Date(2026, 6, 31, 12, 0, 0);
+    const hourly = mkHours(12, Array.from({ length: 12 }, () => ({})));
+    const point = estimateDryingTime(3, { temperature: 20, humidity: 60, windSpeed: 5 });
+    const fc = estimateDryingWithForecast(3, hourly, start);
+    expect(fc.dryAt).not.toBeNull();
+    expect(Math.abs(fc.hours - point.hours)).toBeLessThan(0.3);
+  });
+
+  it("trocknet schneller, wenn der Nachmittag wärmer und windiger wird", () => {
+    const start = new Date(2026, 6, 31, 12, 0, 0);
+    const constant = mkHours(12, Array.from({ length: 12 }, () => ({})));
+    const improving = mkHours(
+      12,
+      Array.from({ length: 12 }, (_, i) => ({
+        temperature: 20 + i * 2,
+        humidity: Math.max(30, 60 - i * 4),
+        windSpeed: 5 + i * 2,
+      })),
+    );
+    const a = estimateDryingWithForecast(4, constant, start);
+    const b = estimateDryingWithForecast(4, improving, start);
+    expect(b.hours).toBeLessThan(a.hours);
+  });
+
+  it("meldet dryAt=null, wenn der Verlauf nicht reicht", () => {
+    const start = new Date(2026, 6, 31, 20, 0, 0);
+    const hourly = mkHours(20, [{ humidity: 95 }, { humidity: 97 }]);
+    const fc = estimateDryingWithForecast(6, hourly, start);
+    expect(fc.dryAt).toBeNull();
+  });
+
+  it("berücksichtigt nur Stunden ab dem Start", () => {
+    const start = new Date(2026, 6, 31, 14, 30, 0);
+    const hourly = mkHours(10, Array.from({ length: 14 }, () => ({})));
+    const fc = estimateDryingWithForecast(1, hourly, start);
+    expect(fc.dryAt).not.toBeNull();
+    expect(fc.dryAt!.getTime()).toBeGreaterThan(start.getTime());
+  });
+});

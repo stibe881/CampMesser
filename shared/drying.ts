@@ -103,3 +103,55 @@ export function formatHours(h: number): string {
   const mins = Math.round((h - whole) * 60);
   return mins === 0 ? `${whole} Std.` : `${whole} Std. ${mins} Min.`;
 }
+
+export interface HourlyConditions extends DryingConditions {
+  /** Startzeit der Stunde */
+  time: Date;
+}
+
+export interface ForecastDryingResult {
+  /** Geschätzte Trockenzeit in Stunden (mit Prognose-Verlauf) */
+  hours: number;
+  /** Zeitpunkt, an dem das Teil trocken ist – null, wenn es innerhalb des Verlaufs nicht trocknet */
+  dryAt: Date | null;
+}
+
+/**
+ * Trocknungsberechnung mit stündlichem Prognose-Verlauf: Pro Stunde wird der
+ * Trocknungsfortschritt unter den jeweiligen Bedingungen aufsummiert
+ * (1 Stunde unter Bedingungen X erledigt 1/Trockenzeit(X) des Trocknens).
+ * Deutlich genauer als eine Momentaufnahme, weil Nachmittags-Wärme oder
+ * aufkommender Wind korrekt berücksichtigt werden.
+ */
+export function estimateDryingWithForecast(
+  baseHours: number,
+  hourly: HourlyConditions[],
+  start: Date,
+): ForecastDryingResult {
+  const relevant = hourly
+    .filter(h => h.time.getTime() + 3600000 > start.getTime())
+    .sort((a, b) => a.time.getTime() - b.time.getTime());
+  let progress = 0; // 1 = trocken
+  let elapsed = 0; // Stunden seit Start
+  for (const hour of relevant) {
+    // Anteil der Stunde, der nach dem Start liegt
+    const hourStart = Math.max(hour.time.getTime(), start.getTime());
+    const hourEnd = hour.time.getTime() + 3600000;
+    const fraction = Math.max(0, Math.min(1, (hourEnd - hourStart) / 3600000));
+    if (fraction <= 0) continue;
+    const { hours } = estimateDryingTime(baseHours, hour);
+    const rate = hours > 0 ? 1 / hours : 1;
+    const gained = rate * fraction;
+    if (progress + gained >= 1) {
+      const needed = (1 - progress) / rate; // Stunden innerhalb dieser Stunde
+      elapsed += needed;
+      return {
+        hours: Math.round(elapsed * 10) / 10,
+        dryAt: new Date(hourStart + needed * 3600000),
+      };
+    }
+    progress += gained;
+    elapsed += fraction;
+  }
+  return { hours: Math.round(elapsed * 10) / 10, dryAt: null };
+}
