@@ -82,6 +82,12 @@
 - [x] Trockenzeiten: Eigene Materialien mit individueller Basis-Trockenzeit hinzufügen/löschen (localStorage, Formular + Papierkorb-Button)
 - [x] Trockenzeiten: Stündlicher Prognose-Verlauf (48 h, Open-Meteo) mit Integrations-Berechnung (estimateDryingWithForecast, 4 neue Tests); zeigt «Voraussichtlich trocken um HH:MM»; manuelle Eingabe schaltet auf Punktschätzung
 - [x] Quiet-Timer: Vibration bei der Erinnerung (navigator.vibrate, max. alle 15 s, Hinweis dass iPhones das nicht unterstützen)
+
+## Erweiterungen (Runde 10)
+- [x] Trockenzeiten: Zeltplatz-Favoriten als Standort-Auswahl (Chips «Mein Standort» + gespeicherte Orte, nur für angemeldete Nutzer sichtbar)
+- [x] Trockenzeiten: Regen-Warnung (rainBeforeDry, ≥0.2 mm/h oder ≥60 % Wahrscheinlichkeit vor dem Trockenzeitpunkt, 4 neue Tests)
+- [x] Startseite: Schnellzugriff «Zuletzt genutzt» mit bis zu 4 zuletzt geöffneten Modulen (localStorage-Tracking im AppShell)
+- [x] Header: Blendet beim Runterscrollen aus (ab 80 px), schwebender SOS-Button bleibt oben rechts sichtbar; Hochscrollen zeigt Header wieder
 - [x] Bug: «Live-Kompass aus»-Button funktioniert nicht → behoben (stabiler Event-Handler mit enabledRef, stop() entfernt beide Event-Typen zuverlässig)
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)

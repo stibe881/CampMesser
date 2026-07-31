@@ -1,5 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { CloudSun, Droplets, Plus, RefreshCw, Shirt, Thermometer, Trash2, Wind } from "lucide-react";
+import {
+  CloudRain,
+  CloudSun,
+  Droplets,
+  LocateFixed,
+  Plus,
+  RefreshCw,
+  Shirt,
+  Tent,
+  Thermometer,
+  Trash2,
+  Wind,
+} from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +23,7 @@ import {
   estimateDryingTime,
   estimateDryingWithForecast,
   formatHours,
+  rainBeforeDry,
   sunsetVerdict,
   type DryingConditions,
   type DryingItem,
@@ -18,6 +31,8 @@ import {
 } from "@shared/drying";
 import { getSunTimes } from "@/lib/sun";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 
 type WeatherState =
   | { status: "idle" | "loading" | "error" }
@@ -51,6 +66,10 @@ export default function DryingPage() {
   const [customItems, setCustomItems] = useState<DryingItem[]>(() => loadCustomItems());
   const [newLabel, setNewLabel] = useState("");
   const [newHours, setNewHours] = useState("");
+  // Standort-Auswahl: eigener Standort oder gespeicherter Zeltplatz-Favorit
+  const [selectedSpotId, setSelectedSpotId] = useState<number | null>(null);
+  const { isAuthenticated } = useAuth();
+  const { data: spots } = trpc.spots.list.useQuery(undefined, { enabled: isAuthenticated });
 
   const saveCustomItems = (items: DryingItem[]) => {
     setCustomItems(items);
@@ -76,50 +95,64 @@ export default function DryingPage() {
     setNewHours("");
   };
 
+  const fetchForLocation = async (lat: number, lng: number) => {
+    try {
+      const params = new URLSearchParams({
+        latitude: lat.toFixed(4),
+        longitude: lng.toFixed(4),
+        timezone: "auto",
+        current: "temperature_2m,relative_humidity_2m,wind_speed_10m",
+        hourly:
+          "temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,precipitation_probability",
+        forecast_days: "2",
+      });
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+      if (!res.ok) throw new Error("Wetterdienst nicht erreichbar");
+      const json = await res.json();
+      const cur = json.current;
+      if (!cur) throw new Error("Keine Daten");
+      setConditions({
+        temperature: Math.round(cur.temperature_2m),
+        humidity: Math.round(cur.relative_humidity_2m),
+        windSpeed: Math.round(cur.wind_speed_10m),
+      });
+      // Stündlicher Verlauf für Trocknungs-Schätzung + Regen-Warnung
+      if (json.hourly?.time && Array.isArray(json.hourly.time)) {
+        const hours: HourlyConditions[] = json.hourly.time.map((t: string, i: number) => ({
+          time: new Date(t),
+          temperature: json.hourly.temperature_2m?.[i] ?? cur.temperature_2m,
+          humidity: json.hourly.relative_humidity_2m?.[i] ?? cur.relative_humidity_2m,
+          windSpeed: json.hourly.wind_speed_10m?.[i] ?? cur.wind_speed_10m,
+          precipitation: json.hourly.precipitation?.[i] ?? 0,
+          precipitationProbability: json.hourly.precipitation_probability?.[i] ?? 0,
+        }));
+        setHourly(hours);
+      }
+      const times = getSunTimes(new Date(), lat, lng);
+      setSunset(times.sunset);
+      setWeather({ status: "ok", lat, lng });
+    } catch {
+      setWeather({ status: "error" });
+    }
+  };
+
   const loadWeather = () => {
+    // Gespeicherter Zeltplatz ausgewählt → dessen Koordinaten verwenden
+    if (selectedSpotId !== null) {
+      const spot = spots?.find(s => s.id === selectedSpotId);
+      if (spot) {
+        setWeather({ status: "loading" });
+        void fetchForLocation(spot.latitude, spot.longitude);
+        return;
+      }
+    }
     if (!navigator.geolocation) {
       setWeather({ status: "error" });
       return;
     }
     setWeather({ status: "loading" });
     navigator.geolocation.getCurrentPosition(
-      async pos => {
-        try {
-          const params = new URLSearchParams({
-            latitude: pos.coords.latitude.toFixed(4),
-            longitude: pos.coords.longitude.toFixed(4),
-            timezone: "auto",
-            current: "temperature_2m,relative_humidity_2m,wind_speed_10m",
-            hourly: "temperature_2m,relative_humidity_2m,wind_speed_10m",
-            forecast_days: "2",
-          });
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
-          if (!res.ok) throw new Error("Wetterdienst nicht erreichbar");
-          const json = await res.json();
-          const cur = json.current;
-          if (!cur) throw new Error("Keine Daten");
-          setConditions({
-            temperature: Math.round(cur.temperature_2m),
-            humidity: Math.round(cur.relative_humidity_2m),
-            windSpeed: Math.round(cur.wind_speed_10m),
-          });
-          // Stündlicher Verlauf für die genauere Trocknungs-Schätzung
-          if (json.hourly?.time && Array.isArray(json.hourly.time)) {
-            const hours: HourlyConditions[] = json.hourly.time.map((t: string, i: number) => ({
-              time: new Date(t),
-              temperature: json.hourly.temperature_2m?.[i] ?? cur.temperature_2m,
-              humidity: json.hourly.relative_humidity_2m?.[i] ?? cur.relative_humidity_2m,
-              windSpeed: json.hourly.wind_speed_10m?.[i] ?? cur.wind_speed_10m,
-            }));
-            setHourly(hours);
-          }
-          const times = getSunTimes(new Date(), pos.coords.latitude, pos.coords.longitude);
-          setSunset(times.sunset);
-          setWeather({ status: "ok", lat: pos.coords.latitude, lng: pos.coords.longitude });
-        } catch {
-          setWeather({ status: "error" });
-        }
-      },
+      pos => void fetchForLocation(pos.coords.latitude, pos.coords.longitude),
       () => setWeather({ status: "error" }),
       { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 },
     );
@@ -129,7 +162,7 @@ export default function DryingPage() {
   useEffect(() => {
     loadWeather();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedSpotId]);
 
   const setField = (field: keyof DryingConditions, raw: string) => {
     const v = parseFloat(raw.replace(",", "."));
@@ -152,7 +185,8 @@ export default function DryingPage() {
           hours = estimateDryingTime(item.baseHours, conditions).hours;
         }
         const verdict = sunset ? sunsetVerdict(hours, now, sunset) : null;
-        return { item, hours, dryAt, verdict };
+        const rain = hourly && hourly.length > 0 ? rainBeforeDry(hourly, now, dryAt) : null;
+        return { item, hours, dryAt, verdict, rain };
       }),
     [conditions, sunset, now, hourly, customItems],
   );
@@ -163,6 +197,33 @@ export default function DryingPage() {
         title="Trockenzeiten"
         subtitle="Wird die Wäsche an der Leine bis Sonnenuntergang trocken? Berechnet aus Temperatur, Luftfeuchtigkeit und Wind."
       />
+
+      {/* Standort-Auswahl: eigener Standort oder gespeicherte Zeltplätze */}
+      {isAuthenticated && spots && spots.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant={selectedSpotId === null ? "default" : "outline"}
+            size="sm"
+            className="rounded-full"
+            onClick={() => setSelectedSpotId(null)}
+          >
+            <LocateFixed className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" /> Mein Standort
+          </Button>
+          {spots.map(spot => (
+            <Button
+              key={spot.id}
+              type="button"
+              variant={selectedSpotId === spot.id ? "default" : "outline"}
+              size="sm"
+              className="rounded-full"
+              onClick={() => setSelectedSpotId(spot.id)}
+            >
+              <Tent className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" /> {spot.name}
+            </Button>
+          ))}
+        </div>
+      )}
 
       <Card className="mb-5">
         <CardHeader className="pb-3">
@@ -246,7 +307,7 @@ export default function DryingPage() {
         Was hängt an der Leine?
       </h2>
       <div className="space-y-3">
-        {results.map(({ item, hours, dryAt, verdict }) => (
+        {results.map(({ item, hours, dryAt, verdict, rain }) => (
           <div key={item.id} className="rounded-xl border border-border bg-card p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -279,6 +340,20 @@ export default function DryingPage() {
                 </span>{" "}
                 Uhr
                 {dryAt.getDate() !== now.getDate() && " (morgen)"}.
+              </p>
+            )}
+            {rain && (
+              <p className="mt-2 flex items-start gap-2 rounded-lg bg-chart-4/15 px-3 py-2 text-sm font-medium text-foreground">
+                <CloudRain className="mt-0.5 h-4 w-4 shrink-0 text-chart-4" aria-hidden="true" />
+                <span>
+                  Achtung: Ab{" "}
+                  <span className="font-mono font-semibold">
+                    {rain.rainAt.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })}
+                  </span>{" "}
+                  Uhr{rain.rainAt.getDate() !== now.getDate() && " (morgen)"} ist Regen angesagt
+                  {rain.probability !== null && ` (${rain.probability} %)`} – vorher abnehmen oder
+                  unters Vordach hängen!
+                </span>
               </p>
             )}
             {verdict && (

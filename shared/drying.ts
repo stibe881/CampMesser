@@ -107,6 +107,10 @@ export function formatHours(h: number): string {
 export interface HourlyConditions extends DryingConditions {
   /** Startzeit der Stunde */
   time: Date;
+  /** Niederschlag in mm (optional, für die Regen-Warnung) */
+  precipitation?: number;
+  /** Regenwahrscheinlichkeit in % (optional) */
+  precipitationProbability?: number;
 }
 
 export interface ForecastDryingResult {
@@ -154,4 +158,36 @@ export function estimateDryingWithForecast(
     elapsed += fraction;
   }
   return { hours: Math.round(elapsed * 10) / 10, dryAt: null };
+}
+
+export interface RainWarning {
+  /** Zeitpunkt, an dem der Regen voraussichtlich einsetzt */
+  rainAt: Date;
+  /** Regenwahrscheinlichkeit in % zu diesem Zeitpunkt (falls bekannt) */
+  probability: number | null;
+}
+
+/**
+ * Prüft, ob im Prognose-Verlauf Regen einsetzt, bevor das Teil trocken ist.
+ * Regen = >= 0.2 mm/h oder >= 60 % Regenwahrscheinlichkeit.
+ * Gibt die erste Regenstunde zwischen `start` und `dryAt` zurück (oder null).
+ */
+export function rainBeforeDry(
+  hourly: HourlyConditions[],
+  start: Date,
+  dryAt: Date | null,
+): RainWarning | null {
+  const end = dryAt ? dryAt.getTime() : start.getTime() + 24 * 3600000;
+  for (const h of [...hourly].sort((a, b) => a.time.getTime() - b.time.getTime())) {
+    const t = h.time.getTime();
+    if (t + 3600000 <= start.getTime() || t >= end) continue;
+    const wet = (h.precipitation ?? 0) >= 0.2 || (h.precipitationProbability ?? 0) >= 60;
+    if (wet) {
+      return {
+        rainAt: h.time,
+        probability: h.precipitationProbability ?? null,
+      };
+    }
+  }
+  return null;
 }

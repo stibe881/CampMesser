@@ -4,6 +4,7 @@ import {
   estimateDryingTime,
   estimateDryingWithForecast,
   formatHours,
+  rainBeforeDry,
   sunsetVerdict,
   type HourlyConditions,
 } from "../shared/drying";
@@ -116,5 +117,45 @@ describe("estimateDryingWithForecast", () => {
     const fc = estimateDryingWithForecast(1, hourly, start);
     expect(fc.dryAt).not.toBeNull();
     expect(fc.dryAt!.getTime()).toBeGreaterThan(start.getTime());
+  });
+});
+
+describe("rainBeforeDry", () => {
+  const mk = (hour: number, precipitation = 0, prob = 0): HourlyConditions => ({
+    time: new Date(2026, 6, 31, hour, 0, 0),
+    temperature: 20,
+    humidity: 60,
+    windSpeed: 5,
+    precipitation,
+    precipitationProbability: prob,
+  });
+
+  it("warnt, wenn Regen vor dem Trocknen einsetzt", () => {
+    const start = new Date(2026, 6, 31, 12, 0, 0);
+    const dryAt = new Date(2026, 6, 31, 17, 0, 0);
+    const hourly = [mk(12), mk(13), mk(14, 1.5, 80), mk(15), mk(16)];
+    const warning = rainBeforeDry(hourly, start, dryAt);
+    expect(warning).not.toBeNull();
+    expect(warning!.rainAt.getHours()).toBe(14);
+    expect(warning!.probability).toBe(80);
+  });
+
+  it("warnt nicht, wenn der Regen erst nach dem Trocknen kommt", () => {
+    const start = new Date(2026, 6, 31, 12, 0, 0);
+    const dryAt = new Date(2026, 6, 31, 14, 0, 0);
+    const hourly = [mk(12), mk(13), mk(15, 2, 90)];
+    expect(rainBeforeDry(hourly, start, dryAt)).toBeNull();
+  });
+
+  it("warnt bei hoher Regenwahrscheinlichkeit auch ohne Niederschlagsmenge", () => {
+    const start = new Date(2026, 6, 31, 12, 0, 0);
+    const hourly = [mk(13, 0, 70)];
+    expect(rainBeforeDry(hourly, start, null)).not.toBeNull();
+  });
+
+  it("ignoriert Stunden vor dem Start", () => {
+    const start = new Date(2026, 6, 31, 12, 0, 0);
+    const hourly = [mk(9, 3, 90), mk(13)];
+    expect(rainBeforeDry(hourly, start, null)).toBeNull();
   });
 });

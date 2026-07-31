@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Home,
   ListChecks,
@@ -23,18 +23,70 @@ const navItems = [
   { path: "/sos", label: "SOS", icon: Siren },
 ];
 
+/** Merkt sich die zuletzt genutzten Module für den Startseiten-Schnellzugriff. */
+const RECENT_KEY = "campmesser.recentModules";
+
+function trackModuleVisit(path: string) {
+  // Nur echte Modul-Seiten tracken (nicht Start, 404, geteilte Listen, Druckansichten)
+  if (path === "/" || path.startsWith("/liste/") || path.startsWith("/familie/drucken") || path === "/404") return;
+  // Nur den Modul-Stamm speichern (z. B. /packlisten/5 → /packlisten)
+  const root = "/" + path.split("/")[1];
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    const list: string[] = raw ? JSON.parse(raw) : [];
+    const next = [root, ...list.filter(p => p !== root)].slice(0, 6);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  } catch {
+    /* egal */
+  }
+}
+
+export function getRecentModules(): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    if (raw) {
+      const list = JSON.parse(raw);
+      if (Array.isArray(list)) return list.filter(p => typeof p === "string");
+    }
+  } catch {
+    /* egal */
+  }
+  return [];
+}
+
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
+  const [headerHidden, setHeaderHidden] = useState(false);
 
   // Beim Seitenwechsel nach oben scrollen
   useEffect(() => {
     window.scrollTo(0, 0);
+    trackModuleVisit(location);
   }, [location]);
+
+  // Header beim Runterscrollen ausblenden, beim Hochscrollen wieder zeigen
+  useEffect(() => {
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y > lastY + 4 && y > 80) setHeaderHidden(true);
+      else if (y < lastY - 4 || y <= 80) setHeaderHidden(false);
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Top-Bar */}
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
+      <header
+        className={cn(
+          "sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md",
+          "transition-transform duration-300 ease-out",
+          headerHidden && "-translate-y-full",
+        )}
+      >
         <div className="container flex h-14 items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5" aria-label="Zur Startseite">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -58,6 +110,22 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
       </header>
+
+      {/* Schwebender SOS-Button, wenn der Header ausgeblendet ist */}
+      <Link
+        href="/sos"
+        className={cn(
+          "fixed right-4 top-3 z-50 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold",
+          "bg-destructive text-destructive-foreground shadow-lg transition-all duration-300 ease-out active:scale-[0.97]",
+          headerHidden ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-16 opacity-0",
+        )}
+        aria-label="SOS – Notfall-Dashboard öffnen"
+        aria-hidden={!headerHidden}
+        tabIndex={headerHidden ? 0 : -1}
+      >
+        <Siren className="h-4 w-4" aria-hidden="true" />
+        SOS
+      </Link>
 
       {/* Inhalt */}
       <main className="flex-1 pb-24 md:pb-10">{children}</main>

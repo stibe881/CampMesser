@@ -18,9 +18,11 @@ import {
   Tent,
   Shirt,
   Moon,
+  History as HistoryIcon,
 } from "lucide-react";
 import { getSunTimes } from "@/lib/sun";
 import { useEffect, useState } from "react";
+import { getRecentModules } from "@/components/AppShell";
 
 interface Module {
   path: string;
@@ -52,6 +54,39 @@ const modules: Module[] = [
 ];
 
 const groups = ["Planung", "Sicherheit", "1. Hilfe", "Energie & Wasser"] as const;
+
+/** Schnellzugriff: die zuletzt genutzten Module (max. 4) aus dem lokalen Verlauf. */
+function RecentModules() {
+  const [recent] = useState<string[]>(() => getRecentModules());
+  const items = recent
+    .map(path => modules.find(m => m.path === path))
+    .filter((m): m is (typeof modules)[number] => Boolean(m))
+    .slice(0, 4);
+  if (items.length === 0) return null;
+  return (
+    <div className="mb-8">
+      <h2 className="mb-3 flex items-center gap-2 font-serif text-xl font-semibold md:text-2xl">
+        <HistoryIcon className="h-5 w-5 text-primary" aria-hidden="true" />
+        Zuletzt genutzt
+      </h2>
+      <div className="flex flex-wrap gap-2">
+        {items.map(m => {
+          const Icon = m.icon;
+          return (
+            <Link
+              key={m.path}
+              href={m.path}
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium shadow-sm transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.98]"
+            >
+              <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+              {m.title}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const [sunInfo, setSunInfo] = useState<string | null>(null);
@@ -110,6 +145,7 @@ export default function Home() {
 
       {/* Modul-Grid */}
       <section className="container py-8 md:py-12">
+        <RecentModules />
         {groups.map(group => (
           <div key={group} className="mb-8 last:mb-0">
             <h2 className="mb-4 font-serif text-xl font-semibold md:text-2xl">{group}</h2>
