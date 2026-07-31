@@ -28,6 +28,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { getSunPosition, getSunTimes } from "@/lib/sun";
 import { isBlocked, type ObstacleShape } from "@shared/obstacles";
+import { useDeviceHeading } from "@/hooks/useDeviceHeading";
 
 interface GeoState {
   status: "loading" | "ok" | "error";
@@ -107,6 +108,7 @@ function SunDiagram({
   obstacles,
   placeMode,
   onPlace,
+  rotation = 0,
 }: {
   lat: number;
   lng: number;
@@ -115,6 +117,8 @@ function SunDiagram({
   /** Wenn aktiv, setzt ein Tipp aufs Diagramm ein Hindernis. */
   placeMode: boolean;
   onPlace?: (azimuth: number, height: number) => void;
+  /** Rotation des gesamten Diagramms in Grad (Live-Kompass: -Geräte-Heading). */
+  rotation?: number;
 }) {
   const size = 340;
   const c = size / 2;
@@ -131,7 +135,8 @@ function SunDiagram({
     const dy = y - c;
     const r = Math.sqrt(dx * dx + dy * dy);
     if (r > rHorizon + 12) return; // ausserhalb der Himmelskuppel
-    const azimuth = (((Math.atan2(dy, dx) * 180) / Math.PI + 90) + 360) % 360;
+    // Bei gedrehtem Diagramm (Live-Kompass) die Rotation herausrechnen
+    const azimuth = (((Math.atan2(dy, dx) * 180) / Math.PI + 90 - rotation) + 720) % 360;
     const height = Math.min(89, Math.max(1, Math.round((1 - Math.min(r, rHorizon) / rHorizon) * 90)));
     onPlace(Math.round(azimuth), height);
   };
@@ -216,6 +221,11 @@ function SunDiagram({
       viewBox={`0 0 ${size} ${size}`}
       className={`mx-auto w-full max-w-sm ${placeMode ? "cursor-crosshair" : ""}`}
       onClick={handlePointer}
+      style={{
+        transform: `rotate(${rotation}deg)`,
+        transition: "transform 0.25s ease-out",
+        transformOrigin: "center",
+      }}
       role="img"
       aria-label={`Sonnenstand-Diagramm: Sonne aktuell im ${directionLabel(sunPos.azimuth)} bei ${Math.round(sunPos.altitude)} Grad Höhe`}
     >
@@ -427,6 +437,7 @@ export default function SunCompassPage() {
   const [newHeight, setNewHeight] = useState("25");
   const [newWidth, setNewWidth] = useState("30");
   const [placeMode, setPlaceMode] = useState(false);
+  const compass = useDeviceHeading();
 
   const saveObstacles = (next: Obstacle[]) => {
     setObstacles(next);
@@ -488,6 +499,19 @@ export default function SunCompassPage() {
   useEffect(() => {
     if (!urlSpot) locate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Slider auf die aktuelle Uhrzeit stellen, wenn die App aus dem Hintergrund
+  // zurückkehrt (bei installierter PWA bleibt die Seite sonst auf der alten Zeit stehen)
+  useEffect(() => {
+    const syncToNow = () => {
+      if (document.visibilityState === "visible") {
+        const now = new Date();
+        setMinutes(now.getHours() * 60 + now.getMinutes());
+      }
+    };
+    document.addEventListener("visibilitychange", syncToNow);
+    return () => document.removeEventListener("visibilitychange", syncToNow);
   }, []);
 
   const selectedDate = useMemo(() => {
@@ -612,6 +636,41 @@ export default function SunCompassPage() {
                   </button>
                 </div>
               )}
+              {/* Live-Kompass: Diagramm dreht sich mit der Geräte-Ausrichtung */}
+              <div className="mb-3 flex items-center justify-center gap-2">
+                <Button
+                  type="button"
+                  variant={compass.active ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => (compass.active ? compass.stop() : void compass.start())}
+                >
+                  <Compass className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {compass.active ? "Live-Kompass aus" : "Live-Kompass ein"}
+                </Button>
+                {compass.active && compass.heading !== null && (
+                  <span className="rounded-md bg-muted px-2 py-1 font-mono text-xs font-semibold">
+                    {Math.round(compass.heading)}° {directionLabel(compass.heading)}
+                  </span>
+                )}
+              </div>
+              {compass.permission === "denied" && (
+                <p className="mb-3 text-center text-xs text-destructive">
+                  Zugriff auf den Bewegungssensor wurde abgelehnt – erlaube ihn in den
+                  Browser-Einstellungen, um den Live-Kompass zu nutzen.
+                </p>
+              )}
+              {compass.permission === "unsupported" && (
+                <p className="mb-3 text-center text-xs text-muted-foreground">
+                  Dieses Gerät hat keinen Richtungssensor – der Live-Kompass funktioniert nur auf
+                  Smartphones und Tablets.
+                </p>
+              )}
+              {compass.active && compass.heading === null && (
+                <p className="mb-3 text-center text-xs text-muted-foreground">
+                  Warte auf Sensordaten … bewege das Gerät leicht in einer Acht, um den Kompass zu
+                  kalibrieren.
+                </p>
+              )}
               <SunDiagram
                 lat={geo.lat!}
                 lng={geo.lng!}
@@ -619,6 +678,7 @@ export default function SunCompassPage() {
                 obstacles={obstacles}
                 placeMode={placeMode}
                 onPlace={placeObstacleAt}
+                rotation={compass.active && compass.heading !== null ? -compass.heading : 0}
               />
 
               {/* Legende */}
@@ -653,8 +713,21 @@ export default function SunCompassPage() {
                   <label htmlFor="time-slider" className="text-sm font-medium text-muted-foreground">
                     Zieh den Regler, um in die Zukunft zu schauen
                   </label>
-                  <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-sm font-semibold">
-                    {timeLabel} Uhr
+                  <span className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const now = new Date();
+                        setMinutes(now.getHours() * 60 + now.getMinutes());
+                      }}
+                      className="rounded-md border border-border px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-accent"
+                      aria-label="Regler auf die aktuelle Uhrzeit stellen"
+                    >
+                      Jetzt
+                    </button>
+                    <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-sm font-semibold">
+                      {timeLabel} Uhr
+                    </span>
                   </span>
                 </div>
                 <Slider

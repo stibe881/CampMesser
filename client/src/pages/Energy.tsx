@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BatteryCharging,
   Loader2,
@@ -40,39 +40,60 @@ export default function EnergyPage() {
   const [sunHours, setSunHours] = useState(4);
   const [form, setForm] = useState({ name: "", watts: "", hoursPerDay: "" });
   const [forecastState, setForecastState] = useState<
-    { status: "idle" | "loading" | "error" } | { status: "ok"; avgSunHours: number; days: number }
+    | { status: "idle" | "loading" | "error" }
+    | { status: "ok"; avgSunHours: number; days: number; source: string }
   >({ status: "idle" });
+  const spotsQuery = trpc.spots.list.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  // Aktuelle Favoritenliste für Callbacks (GPS-Fehler kann vor dem Laden der Favoriten eintreten)
+  const spotsRef = useRef<typeof spotsQuery.data>(undefined);
+  spotsRef.current = spotsQuery.data;
+
+  /** Sonnenschein-Prognose für Koordinaten laden und als effektive Sonnenstunden übernehmen. */
+  const fetchSunshine = async (lat: number, lng: number, source: string) => {
+    const params = new URLSearchParams({
+      latitude: lat.toFixed(4),
+      longitude: lng.toFixed(4),
+      timezone: "auto",
+      forecast_days: "3",
+      daily: "sunshine_duration",
+    });
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+    if (!res.ok) throw new Error("Wetterdienst nicht erreichbar");
+    const json = await res.json();
+    const durations: number[] = json.daily?.sunshine_duration ?? [];
+    if (durations.length === 0) throw new Error("Keine Daten");
+    const avgHours = durations.reduce((s, d) => s + (d ?? 0), 0) / durations.length / 3600;
+    const rounded = Math.min(10, Math.round(avgHours * 2) / 2);
+    setSunHours(rounded);
+    setForecastState({ status: "ok", avgSunHours: rounded, days: durations.length, source });
+  };
 
   const applyWeatherForecast = () => {
+    setForecastState({ status: "loading" });
+    const fallbackToSpot = () => {
+      // Ohne GPS: Prognose für den ersten gespeicherten Zeltplatz übernehmen
+      const spot = spotsRef.current?.[0];
+      if (spot) {
+        fetchSunshine(spot.latitude, spot.longitude, `Zeltplatz «${spot.name}»`).catch(() =>
+          setForecastState({ status: "error" }),
+        );
+      } else {
+        setForecastState({ status: "error" });
+      }
+    };
     if (!navigator.geolocation) {
-      setForecastState({ status: "error" });
+      fallbackToSpot();
       return;
     }
-    setForecastState({ status: "loading" });
     navigator.geolocation.getCurrentPosition(
-      async pos => {
-        try {
-          const params = new URLSearchParams({
-            latitude: pos.coords.latitude.toFixed(4),
-            longitude: pos.coords.longitude.toFixed(4),
-            timezone: "auto",
-            forecast_days: "3",
-            daily: "sunshine_duration",
-          });
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
-          if (!res.ok) throw new Error("Wetterdienst nicht erreichbar");
-          const json = await res.json();
-          const durations: number[] = json.daily?.sunshine_duration ?? [];
-          if (durations.length === 0) throw new Error("Keine Daten");
-          const avgHours = durations.reduce((s, d) => s + (d ?? 0), 0) / durations.length / 3600;
-          const rounded = Math.min(10, Math.round(avgHours * 2) / 2);
-          setSunHours(rounded);
-          setForecastState({ status: "ok", avgSunHours: rounded, days: durations.length });
-        } catch {
-          setForecastState({ status: "error" });
-        }
-      },
-      () => setForecastState({ status: "error" }),
+      pos =>
+        fetchSunshine(pos.coords.latitude, pos.coords.longitude, "deinem Standort").catch(() =>
+          setForecastState({ status: "error" }),
+        ),
+      fallbackToSpot,
       { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 },
     );
   };
@@ -83,6 +104,26 @@ export default function EnergyPage() {
     applyWeatherForecast();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Falls der erste Versuch scheiterte (z. B. GPS abgelehnt, Favoriten noch nicht
+  // geladen): erneut versuchen, sobald die Favoriten verfügbar sind
+  const retriedWithSpots = useRef(false);
+  useEffect(() => {
+    if (
+      forecastState.status === "error" &&
+      !retriedWithSpots.current &&
+      spotsQuery.data &&
+      spotsQuery.data.length > 0
+    ) {
+      retriedWithSpots.current = true;
+      const spot = spotsQuery.data[0];
+      setForecastState({ status: "loading" });
+      fetchSunshine(spot.latitude, spot.longitude, `Zeltplatz «${spot.name}»`).catch(() =>
+        setForecastState({ status: "error" }),
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [forecastState.status, spotsQuery.data]);
 
   const addMutation = trpc.energy.add.useMutation({
     onSuccess: () => {
@@ -260,13 +301,13 @@ export default function EnergyPage() {
           {forecastState.status === "ok" && (
             <p className="mt-2 text-xs text-primary">
               Übernommen: Ø {forecastState.avgSunHours} h Sonnenschein pro Tag (Prognose für die
-              nächsten {forecastState.days} Tage an deinem Standort).
+              nächsten {forecastState.days} Tage – Quelle: {forecastState.source}).
             </p>
           )}
           {forecastState.status === "error" && (
             <p className="mt-2 text-xs text-destructive">
-              Automatische Prognose nicht verfügbar (Standortfreigabe oder Internet fehlt) – setze
-              den Wert manuell oder versuche es erneut.
+              Automatische Prognose nicht verfügbar – erlaube den Standortzugriff, speichere einen
+              Zeltplatz-Favoriten oder setze den Wert manuell.
             </p>
           )}
           <p className="mt-2 text-xs text-muted-foreground">

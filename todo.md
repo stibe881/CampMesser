@@ -64,6 +64,12 @@
 - [x] Sonnen-Kompass: Hindernisse per Tipp/Klick direkt aufs Diagramm setzen (Tipp-Modus-Button, Pixel→Azimut/Höhe-Umrechnung, Crosshair-Cursor, Hinweisbanner mit Abbrechen; Zahleneingabe bleibt als Alternative)
 - [x] Familien-Modus: Schnitzeljagd-Druckansicht unter /familie/drucken/:id (Stationen, Rätsel, Abhak- und Buchstabenfelder, Lösungswort-Felder leer; Print-CSS blendet Navigation aus; Links auf jeder Jagd-Karte)
 - [x] Natur-Modul: Mondphasen-Kalender (aktuelle Phase mit Symbol und Beleuchtung, Sternbeobachtungs-Bewertung, nächste 3 Vollmonde/Neumonde, offline berechnet; shared/moon.ts mit 7 Tests)
+
+## Erweiterungen (Runde 7)
+- [x] Energie-Budget: Effektive Sonnenstunden zuverlässig aus der Wetter-Prognose übernehmen (Auto-Load beim Öffnen, Fallback auf ersten Zeltplatz-Favoriten wenn GPS fehlt/abgelehnt, Quellen-Anzeige im Bestätigungstext)
+- [x] Sonnen-Kompass: Zeit-Slider steht beim Öffnen auf der aktuellen Uhrzeit, synchronisiert sich beim Zurückkehren aus dem Hintergrund (PWA) und hat einen «Jetzt»-Button
+- [x] Sonnen-Kompass: Live-Kompass-Modus – Diagramm dreht sich automatisch mit der Smartphone-Ausrichtung (DeviceOrientation, iOS-Berechtigungsabfrage, Ein/Aus-Button mit Grad-Anzeige, Fallback-Hinweis auf Desktop, Tipp-Modus rechnet Rotation heraus)
+- [ ] Projekt-Code committen und ins GitHub-Repo stibe881/CampMesser pushen
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)
 - Packlisten: toggle-/addItem-Mutationen mit DB-Persistenz vorhanden (PackListDetail.tsx, server/routers.ts packing-Router)
