@@ -22,6 +22,8 @@ import PackOptimizerPage from "./pages/PackOptimizer";
 import FamilyPage from "./pages/Family";
 import FoodPage from "./pages/Food";
 import WeatherPage from "./pages/Weather";
+import DryingPage from "./pages/Drying";
+import QuietPage from "./pages/Quiet";
 import SpotsPage from "./pages/Spots";
 import SharedPackListPage from "./pages/SharedPackList";
 import HuntPrintPage from "./pages/HuntPrint";
@@ -46,6 +48,8 @@ function Router() {
         <Route path={"/familie"} component={FamilyPage} />
         <Route path={"/kuehlbox"} component={FoodPage} />
         <Route path={"/wetter"} component={WeatherPage} />
+        <Route path={"/trockenzeiten"} component={DryingPage} />
+        <Route path={"/nachtruhe"} component={QuietPage} />
         <Route path={"/zeltplaetze"} component={SpotsPage} />
         <Route path={"/liste/:token"} component={SharedPackListPage} />
         <Route path={"/familie/drucken/:id"} component={HuntPrintPage} />

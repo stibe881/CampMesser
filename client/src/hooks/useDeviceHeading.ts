@@ -17,16 +17,35 @@ export function useDeviceHeading() {
   const [heading, setHeading] = useState<number | null>(null);
   const [active, setActive] = useState(false);
   const [permission, setPermission] = useState<PermissionState>("idle");
-  const listenerRef = useRef<((e: DeviceOrientationEvent) => void) | null>(null);
-  const eventNameRef = useRef<string>("deviceorientation");
+  // Ein einziger, stabiler Handler für die gesamte Hook-Lebensdauer: Events werden
+  // nur verarbeitet, wenn `enabledRef` gesetzt ist. So kann «Aus» nie an einer
+  // falschen Listener-Referenz scheitern.
+  const enabledRef = useRef(false);
+  const attachedRef = useRef(false);
+  const handlerRef = useRef((e: DeviceOrientationEvent) => {
+    if (!enabledRef.current) return;
+    const ios = e as DeviceOrientationEventiOS;
+    let h: number | null = null;
+    if (typeof ios.webkitCompassHeading === "number") {
+      // iOS: bereits Kompass-Richtung (0 = Nord, im Uhrzeigersinn)
+      h = ios.webkitCompassHeading;
+    } else if (e.alpha !== null) {
+      // Android: alpha ist gegen den Uhrzeigersinn ab Nord
+      h = (360 - e.alpha) % 360;
+    }
+    if (h !== null) setHeading(h);
+  });
 
   const stop = useCallback(() => {
-    if (listenerRef.current) {
+    enabledRef.current = false;
+    if (attachedRef.current) {
+      // Beide Varianten entfernen – schadet nicht, falls nur eine registriert war
       window.removeEventListener(
-        eventNameRef.current as "deviceorientation",
-        listenerRef.current as EventListener,
+        "deviceorientationabsolute" as "deviceorientation",
+        handlerRef.current as EventListener,
       );
-      listenerRef.current = null;
+      window.removeEventListener("deviceorientation", handlerRef.current as EventListener);
+      attachedRef.current = false;
     }
     setActive(false);
     setHeading(null);
@@ -56,27 +75,14 @@ export function useDeviceHeading() {
     }
     setPermission("granted");
 
-    const handler = (e: DeviceOrientationEvent) => {
-      const ios = e as DeviceOrientationEventiOS;
-      let h: number | null = null;
-      if (typeof ios.webkitCompassHeading === "number") {
-        // iOS: bereits Kompass-Richtung (0 = Nord, im Uhrzeigersinn)
-        h = ios.webkitCompassHeading;
-      } else if (e.absolute && e.alpha !== null) {
-        // Android: alpha ist gegen den Uhrzeigersinn ab Nord
-        h = (360 - e.alpha) % 360;
-      } else if (e.alpha !== null) {
-        h = (360 - e.alpha) % 360;
-      }
-      if (h !== null) setHeading(h);
-    };
-
-    // `deviceorientationabsolute` liefert auf Android verlässlichere Nordwerte
-    const eventName =
-      "ondeviceorientationabsolute" in window ? "deviceorientationabsolute" : "deviceorientation";
-    eventNameRef.current = eventName;
-    listenerRef.current = handler;
-    window.addEventListener(eventName as "deviceorientation", handler as EventListener);
+    enabledRef.current = true;
+    if (!attachedRef.current) {
+      // `deviceorientationabsolute` liefert auf Android verlässlichere Nordwerte
+      const eventName =
+        "ondeviceorientationabsolute" in window ? "deviceorientationabsolute" : "deviceorientation";
+      window.addEventListener(eventName as "deviceorientation", handlerRef.current as EventListener);
+      attachedRef.current = true;
+    }
     setActive(true);
   }, []);
 

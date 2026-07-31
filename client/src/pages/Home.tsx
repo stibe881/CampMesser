@@ -16,6 +16,8 @@ import {
   ArrowRight,
   CloudSunRain,
   Tent,
+  Shirt,
+  Moon,
 } from "lucide-react";
 import { getSunTimes } from "@/lib/sun";
 import { useEffect, useState } from "react";
@@ -38,6 +40,8 @@ const modules: Module[] = [
   { path: "/zeltplaetze", title: "Zeltplatz-Favoriten", description: "Orte speichern, Wetter und Sonne im Voraus prüfen", icon: Tent, group: "Planung" },
   { path: "/sos", title: "SOS & Notfall", description: "GPS-Koordinaten und Notfallnummern", icon: Siren, group: "Sicherheit" },
   { path: "/wetter", title: "Camp-Wetter", description: "Hyperlokale Vorhersage und Unwetterwarnungen", icon: CloudSunRain, group: "Sicherheit" },
+  { path: "/trockenzeiten", title: "Trockenzeiten", description: "Wird die Wäsche bis Sonnenuntergang trocken?", icon: Shirt, group: "Planung" },
+  { path: "/nachtruhe", title: "Camp-Quiet-Timer", description: "Lautstärke im Blick während der Nachtruhe", icon: Moon, group: "Sicherheit" },
   { path: "/erste-hilfe", title: "Erste Hilfe", description: "Offline-Ratgeber für Outdoor-Verletzungen", icon: Cross, group: "Sicherheit", offline: true },
   { path: "/knoten", title: "Knoten-Bibliothek", description: "Die wichtigsten Outdoor-Knoten, Schritt für Schritt", icon: Cable, group: "1. Hilfe", offline: true },
   { path: "/natur", title: "Natur-Entdecker", description: "Tierspuren, Sternbilder und Bäume erkennen", icon: TreePine, group: "1. Hilfe", offline: true },

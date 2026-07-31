@@ -69,7 +69,15 @@
 - [x] Energie-Budget: Effektive Sonnenstunden zuverlässig aus der Wetter-Prognose übernehmen (Auto-Load beim Öffnen, Fallback auf ersten Zeltplatz-Favoriten wenn GPS fehlt/abgelehnt, Quellen-Anzeige im Bestätigungstext)
 - [x] Sonnen-Kompass: Zeit-Slider steht beim Öffnen auf der aktuellen Uhrzeit, synchronisiert sich beim Zurückkehren aus dem Hintergrund (PWA) und hat einen «Jetzt»-Button
 - [x] Sonnen-Kompass: Live-Kompass-Modus – Diagramm dreht sich automatisch mit der Smartphone-Ausrichtung (DeviceOrientation, iOS-Berechtigungsabfrage, Ein/Aus-Button mit Grad-Anzeige, Fallback-Hinweis auf Desktop, Tipp-Modus rechnet Rotation heraus)
-- [ ] Projekt-Code committen und ins GitHub-Repo stibe881/CampMesser pushen
+- [x] Projekt-Code committen und ins GitHub-Repo stibe881/CampMesser pushen (Branch main, Commit 6769856)
+
+## Erweiterungen (Runde 8)
+- [x] Trockenzeiten-Rechner: 11 Materialien, Berechnung aus Temperatur/Feuchte/Wind (Auto-Load vom Standort-Wetter + manuelle Eingabe), Sonnenuntergangs-Empfehlung mit 30-Min-Tau-Reserve (shared/drying.ts, 8 Tests, Route /trockenzeiten)
+- [x] Camp-Quiet-Timer: Web-Audio-Pegelmessung (rein lokal), einstellbares Nachtruhe-Fenster (auch über Mitternacht) und Schwelle, Erinnerung nach 3 s über Schwelle (Route /nachtruhe)
+- [x] Energie-Budget: Auto/Manuell-Schalter für Sonnenstunden – manuelles Ziehen des Sliders deaktiviert Auto, Schalter zurück auf Auto übernimmt die Prognose sofort
+- [x] Sonnen-Kompass: Sonnenauf- (orange) und -untergangs-Symbol (rot) an der korrekten Position des Zeit-Sliders
+- [x] Live-Kompass: Sichtkegel (50° Öffnung) mit Richtungspfeil zeigt die Blickrichtung des Smartphones im Diagramm
+- [x] Bug: «Live-Kompass aus»-Button funktioniert nicht → behoben (stabiler Event-Handler mit enabledRef, stop() entfernt beide Event-Typen zuverlässig)
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)
 - Packlisten: toggle-/addItem-Mutationen mit DB-Persistenz vorhanden (PackListDetail.tsx, server/routers.ts packing-Router)

@@ -109,6 +109,7 @@ function SunDiagram({
   placeMode,
   onPlace,
   rotation = 0,
+  deviceHeading = null,
 }: {
   lat: number;
   lng: number;
@@ -119,6 +120,8 @@ function SunDiagram({
   onPlace?: (azimuth: number, height: number) => void;
   /** Rotation des gesamten Diagramms in Grad (Live-Kompass: -Geräte-Heading). */
   rotation?: number;
+  /** Geräte-Blickrichtung in Grad (0 = Nord). Zeichnet einen Sichtkegel, wenn gesetzt. */
+  deviceHeading?: number | null;
 }) {
   const size = 340;
   const c = size / 2;
@@ -349,6 +352,50 @@ function SunDiagram({
           strokeDasharray="4 4"
           opacity="0.7"
         />
+      )}
+
+      {/* Sichtkegel: zeigt die Blickrichtung des Smartphones (Live-Kompass) */}
+      {deviceHeading !== null && deviceHeading !== undefined && (
+        <g>
+          {(() => {
+            const cone = 25; // halber Öffnungswinkel in Grad
+            const rad = (a: number) => ((a - 90) * Math.PI) / 180;
+            const r = rHorizon;
+            const a1 = rad(deviceHeading - cone);
+            const a2 = rad(deviceHeading + cone);
+            const x1 = c + r * Math.cos(a1);
+            const y1 = c + r * Math.sin(a1);
+            const x2 = c + r * Math.cos(a2);
+            const y2 = c + r * Math.sin(a2);
+            const tipA = rad(deviceHeading);
+            const tipX = c + r * 0.92 * Math.cos(tipA);
+            const tipY = c + r * 0.92 * Math.sin(tipA);
+            return (
+              <>
+                <path
+                  d={`M ${c} ${c} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`}
+                  fill="var(--color-primary)"
+                  opacity="0.14"
+                />
+                <line
+                  x1={c}
+                  y1={c}
+                  x2={tipX}
+                  y2={tipY}
+                  stroke="var(--color-primary)"
+                  strokeWidth="2"
+                  opacity="0.6"
+                />
+                <path
+                  d={`M ${tipX} ${tipY} l -5 10 l 5 -3.5 l 5 3.5 Z`}
+                  fill="var(--color-primary)"
+                  transform={`rotate(${deviceHeading} ${tipX} ${tipY})`}
+                  opacity="0.85"
+                />
+              </>
+            );
+          })()}
+        </g>
       )}
 
       {/* Zentrum = Standort */}
@@ -679,6 +726,7 @@ export default function SunCompassPage() {
                 placeMode={placeMode}
                 onPlace={placeObstacleAt}
                 rotation={compass.active && compass.heading !== null ? -compass.heading : 0}
+                deviceHeading={compass.active ? compass.heading : null}
               />
 
               {/* Legende */}
@@ -739,6 +787,29 @@ export default function SunCompassPage() {
                   onValueChange={v => setMinutes(v[0])}
                   aria-label="Uhrzeit für die Sonnenstand-Anzeige wählen"
                 />
+                {/* Sonnenauf-/-untergangs-Marker auf der Slider-Achse */}
+                {sunTimes && sunTimes.sunrise && sunTimes.sunset && (
+                  <div className="relative mt-1 h-5" aria-hidden="true">
+                    <span
+                      className="absolute flex -translate-x-1/2 flex-col items-center"
+                      style={{
+                        left: `${((sunTimes.sunrise.getHours() * 60 + sunTimes.sunrise.getMinutes()) / 1439) * 100}%`,
+                      }}
+                      title="Sonnenaufgang"
+                    >
+                      <Sunrise className="h-4 w-4 text-chart-1" />
+                    </span>
+                    <span
+                      className="absolute flex -translate-x-1/2 flex-col items-center"
+                      style={{
+                        left: `${((sunTimes.sunset.getHours() * 60 + sunTimes.sunset.getMinutes()) / 1439) * 100}%`,
+                      }}
+                      title="Sonnenuntergang"
+                    >
+                      <Sunset className="h-4 w-4 text-destructive" />
+                    </span>
+                  </div>
+                )}
                 <div className="mt-1.5 flex justify-between text-xs text-muted-foreground" aria-hidden="true">
                   <span>00:00</span>
                   <span>06:00</span>

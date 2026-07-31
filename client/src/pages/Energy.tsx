@@ -38,6 +38,10 @@ export default function EnergyPage() {
   const [batteryWh, setBatteryWh] = useState("1024");
   const [solarWatts, setSolarWatts] = useState("400");
   const [sunHours, setSunHours] = useState(4);
+  // Auto: Prognose-Wert wird übernommen; Manuell: eigener Wert bleibt bestehen
+  const [sunHoursAuto, setSunHoursAuto] = useState(true);
+  const sunHoursAutoRef = useRef(true);
+  sunHoursAutoRef.current = sunHoursAuto;
   const [form, setForm] = useState({ name: "", watts: "", hoursPerDay: "" });
   const [forecastState, setForecastState] = useState<
     | { status: "idle" | "loading" | "error" }
@@ -67,7 +71,7 @@ export default function EnergyPage() {
     if (durations.length === 0) throw new Error("Keine Daten");
     const avgHours = durations.reduce((s, d) => s + (d ?? 0), 0) / durations.length / 3600;
     const rounded = Math.min(10, Math.round(avgHours * 2) / 2);
-    setSunHours(rounded);
+    if (sunHoursAutoRef.current) setSunHours(rounded);
     setForecastState({ status: "ok", avgSunHours: rounded, days: durations.length, source });
   };
 
@@ -275,15 +279,43 @@ export default function EnergyPage() {
               {sunHours} h
             </span>
           </div>
+          <div className="mb-3 flex items-center justify-between rounded-lg bg-accent/50 px-3 py-2">
+            <Label htmlFor="sun-auto" className="cursor-pointer text-sm">
+              Automatisch aus Wetter-Prognose übernehmen
+            </Label>
+            <Switch
+              id="sun-auto"
+              checked={sunHoursAuto}
+              onCheckedChange={checked => {
+                setSunHoursAuto(checked);
+                if (checked) {
+                  // Zurück auf Auto: zuletzt geladene Prognose sofort übernehmen
+                  if (forecastState.status === "ok") setSunHours(forecastState.avgSunHours);
+                  else applyWeatherForecast();
+                }
+              }}
+              aria-label="Sonnenstunden automatisch aus der Wetter-Prognose übernehmen"
+            />
+          </div>
           <Slider
             id="sun-hours"
             min={0}
             max={10}
             step={0.5}
             value={[sunHours]}
-            onValueChange={v => setSunHours(v[0])}
+            onValueChange={v => {
+              setSunHours(v[0]);
+              // Manuelles Ziehen schaltet auf manuellen Modus um
+              if (sunHoursAuto) setSunHoursAuto(false);
+            }}
             aria-label="Effektive Sonnenstunden pro Tag"
           />
+          {!sunHoursAuto && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Manueller Modus: Dein Wert bleibt bestehen und wird nicht von der Prognose
+              überschrieben.
+            </p>
+          )}
           <Button
             type="button"
             variant="outline"
