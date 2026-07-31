@@ -54,6 +54,11 @@
 - [x] Zeltplatz-Favoriten: Karten-Auswahl im Dialog (Tipp auf Karte setzt Marker und Koordinaten)
 - [x] Camp-Wetter: Favoriten-Chips zur Ortsauswahl (Mein Standort + gespeicherte Zeltplätze)
 - [x] Packlisten: Teil-Link (shareToken), öffentliche Route /liste/:token mit gemeinsamem Abhaken (Auto-Refresh 15 s), Link kopieren – per DB-Token-Test verifiziert
+
+## Erweiterungen (Runde 5)
+- [x] Sonnen-Kompass: Hindernis-Profil – Hindernisse (Baum/Wald, Berg/Hügel, Gebäude) mit Richtung, Höhe und Breite erfassen (localStorage), Sektoren im Diagramm, «im Schatten»-Anzeige an der Sonne, Schattenzeiten-Fenster des Tages, Faust-Regel-Tipp (Logik in shared/obstacles.ts, 8 Tests)
+- [x] PWA: manifest.json + Icons (192/512, maskable) + Service Worker (network-first Shell, cache-first Bilder, kein API-Caching), Registrierung nur in Produktion, Apple-Meta-Tags, lang=de-CH
+- [x] PWA: Wissens-Module inkl. /manus-storage-Bilder offline nutzbar (SPA-Fallback auf gecachte Shell; Inhalte statisch im JS-Bundle; OfflinePrecache-Komponente lädt alle Natur-/Knoten-/Rezept-Bilder nach App-Start gezielt vor)
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)
 - Packlisten: toggle-/addItem-Mutationen mit DB-Persistenz vorhanden (PackListDetail.tsx, server/routers.ts packing-Router)

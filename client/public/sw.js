@@ -1,0 +1,94 @@
+/*
+ * CampMesser Service Worker
+ * Strategie:
+ * - App-Shell (HTML/JS/CSS): network-first mit Cache-Fallback, damit die App
+ *   auch komplett offline startet.
+ * - Bilder (manus-storage): cache-first, damit Natur-, Knoten- und Rezept-Bilder
+ *   nach dem ersten Besuch offline verfügbar sind.
+ * - API-Aufrufe (/api/) und externe Dienste (Open-Meteo, Karten): immer Netz,
+ *   kein Caching – Live-Daten sollen nicht veralten.
+ */
+const CACHE_VERSION = "campmesser-v1";
+const SHELL_CACHE = `${CACHE_VERSION}-shell`;
+const IMAGE_CACHE = `${CACHE_VERSION}-images`;
+
+// Routen der Wissens-Module, die offline funktionieren sollen (SPA: alle laden dieselbe Shell)
+const PRECACHE_URLS = ["/", "/manifest.json"];
+
+self.addEventListener("install", event => {
+  event.waitUntil(
+    caches
+      .open(SHELL_CACHE)
+      .then(cache => cache.addAll(PRECACHE_URLS))
+      .then(() => self.skipWaiting()),
+  );
+});
+
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then(keys =>
+        Promise.all(
+          keys
+            .filter(key => !key.startsWith(CACHE_VERSION))
+            .map(key => caches.delete(key)),
+        ),
+      )
+      .then(() => self.clients.claim()),
+  );
+});
+
+self.addEventListener("fetch", event => {
+  const { request } = event;
+  if (request.method !== "GET") return;
+
+  const url = new URL(request.url);
+
+  // API und externe Dienste: nie cachen
+  if (
+    url.pathname.startsWith("/api/") ||
+    url.pathname.startsWith("/__manus__/") ||
+    (url.origin !== self.location.origin && !url.pathname.startsWith("/manus-storage/"))
+  ) {
+    return;
+  }
+
+  // Bilder aus dem Projekt-Speicher: cache-first
+  if (url.pathname.startsWith("/manus-storage/")) {
+    event.respondWith(
+      caches.open(IMAGE_CACHE).then(async cache => {
+        const cached = await cache.match(request);
+        if (cached) return cached;
+        try {
+          const response = await fetch(request);
+          if (response.ok) cache.put(request, response.clone());
+          return response;
+        } catch {
+          return cached ?? Response.error();
+        }
+      }),
+    );
+    return;
+  }
+
+  // Navigation (HTML) und Assets: network-first mit Cache-Fallback
+  event.respondWith(
+    caches.open(SHELL_CACHE).then(async cache => {
+      try {
+        const response = await fetch(request);
+        if (response.ok) cache.put(request, response.clone());
+        return response;
+      } catch {
+        const cached = await cache.match(request);
+        if (cached) return cached;
+        // SPA-Fallback: bei Navigation die gecachte Startseite liefern
+        if (request.mode === "navigate") {
+          const shell = await cache.match("/");
+          if (shell) return shell;
+        }
+        return Response.error();
+      }
+    }),
+  );
+});

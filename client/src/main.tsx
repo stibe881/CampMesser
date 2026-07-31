@@ -79,3 +79,13 @@ createRoot(document.getElementById("root")!).render(
     </QueryClientProvider>
   </trpc.Provider>
 );
+
+// PWA: Service Worker registrieren (nur in Produktion, damit die Entwicklung
+// nicht durch gecachte Dateien gestört wird). Macht die Wissens-Module offline nutzbar.
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(err => {
+      console.warn("[PWA] Service Worker konnte nicht registriert werden:", err);
+    });
+  });
+}

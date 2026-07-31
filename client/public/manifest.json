@@ -1,0 +1,26 @@
+{
+  "name": "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+  "short_name": "CampMesser",
+  "description": "Planung, Sicherheit, Energie und Naturerlebnis – smarte Werkzeuge fürs Zelt-Camping.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf6ef",
+  "theme_color": "#1d4230",
+  "lang": "de-CH",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

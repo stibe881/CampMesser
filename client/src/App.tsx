@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
+import OfflinePrecache from "./components/OfflinePrecache";
 import AppShell from "./components/AppShell";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -67,6 +68,7 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
+          <OfflinePrecache />
           <Router />
         </TooltipProvider>
       </ThemeProvider>

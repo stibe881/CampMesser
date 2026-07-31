@@ -1,16 +1,90 @@
 import { useEffect, useMemo, useState } from "react";
-import { Compass, MapPin, Moon, RefreshCw, Sunrise, Sunset, Sun as SunIcon } from "lucide-react";
+import {
+  Compass,
+  MapPin,
+  Moon,
+  Mountain,
+  Plus,
+  RefreshCw,
+  Sunrise,
+  Sunset,
+  Sun as SunIcon,
+  Trash2,
+  TreePine,
+  Building2,
+} from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { getSunPosition, getSunTimes } from "@/lib/sun";
+import { isBlocked, type ObstacleShape } from "@shared/obstacles";
 
 interface GeoState {
   status: "loading" | "ok" | "error";
   lat?: number;
   lng?: number;
   errorMessage?: string;
+}
+
+/** Ein Hindernis am Horizont: verdeckt einen Richtungs-Sektor bis zu einer bestimmten Höhe. */
+interface Obstacle extends ObstacleShape {
+  id: string;
+  kind: "baum" | "berg" | "gebaeude";
+}
+
+const OBSTACLE_KINDS = {
+  baum: { label: "Baum / Wald", icon: TreePine, defaultHeight: 25, defaultWidth: 30 },
+  berg: { label: "Berg / Hügel", icon: Mountain, defaultHeight: 15, defaultWidth: 60 },
+  gebaeude: { label: "Gebäude", icon: Building2, defaultHeight: 30, defaultWidth: 20 },
+} as const;
+
+const OBSTACLES_STORAGE_KEY = "campmesser.sunObstacles.v1";
+
+function loadObstacles(): Obstacle[] {
+  try {
+    const raw = localStorage.getItem(OBSTACLES_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as Obstacle[];
+    return Array.isArray(parsed) ? parsed.filter(o => o && typeof o.azimuth === "number") : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Zusammenhängende Schatten-Zeitfenster eines Tages berechnen (nur während die Sonne über dem Horizont ist). */
+function computeShadowWindows(
+  date: Date,
+  lat: number,
+  lng: number,
+  obstacles: Obstacle[],
+): { from: Date; to: Date }[] {
+  if (obstacles.length === 0) return [];
+  const dayStart = new Date(date);
+  dayStart.setHours(0, 0, 0, 0);
+  const windows: { from: Date; to: Date }[] = [];
+  let openStart: Date | null = null;
+  for (let m = 0; m <= 1440; m += 5) {
+    const t = new Date(dayStart.getTime() + m * 60000);
+    const pos = getSunPosition(t, lat, lng);
+    const shadowed = pos.altitude > 0 && isBlocked(pos.azimuth, pos.altitude, obstacles);
+    if (shadowed && !openStart) openStart = t;
+    if (!shadowed && openStart) {
+      windows.push({ from: openStart, to: t });
+      openStart = null;
+    }
+  }
+  if (openStart) windows.push({ from: openStart, to: new Date(dayStart.getTime() + 1440 * 60000) });
+  return windows;
 }
 
 function fmtTime(d: Date | null) {
@@ -30,10 +104,12 @@ function SunDiagram({
   lat,
   lng,
   selectedDate,
+  obstacles,
 }: {
   lat: number;
   lng: number;
   selectedDate: Date;
+  obstacles: Obstacle[];
 }) {
   const size = 340;
   const c = size / 2;
@@ -77,6 +153,26 @@ function SunDiagram({
   const sunPos = getSunPosition(selectedDate, lat, lng);
   const sunXY = toXY(sunPos.azimuth, sunPos.altitude);
   const isUp = sunPos.altitude > 0;
+  const sunBlocked = isUp && isBlocked(sunPos.azimuth, sunPos.altitude, obstacles);
+
+  /** Ring-Sektor-Pfad für ein Hindernis: vom Horizont (aussen) bis zur Oberkante (innen). */
+  const obstaclePath = (o: Obstacle) => {
+    const rInner = rHorizon * (1 - Math.min(o.height, 89) / 90);
+    const a0 = o.azimuth - o.width / 2;
+    const a1 = o.azimuth + o.width / 2;
+    const pt = (az: number, r: number) => {
+      const rad = ((az - 90) * Math.PI) / 180;
+      return `${(c + r * Math.cos(rad)).toFixed(1)} ${(c + r * Math.sin(rad)).toFixed(1)}`;
+    };
+    const large = o.width > 180 ? 1 : 0;
+    return [
+      `M ${pt(a0, rHorizon)}`,
+      `A ${rHorizon} ${rHorizon} 0 ${large} 1 ${pt(a1, rHorizon)}`,
+      `L ${pt(a1, rInner)}`,
+      `A ${rInner} ${rInner} 0 ${large} 0 ${pt(a0, rInner)}`,
+      "Z",
+    ].join(" ");
+  };
 
   // Stundenmarkierungen auf der Bahn
   const hourMarks = useMemo(() => {
@@ -122,6 +218,35 @@ function SunDiagram({
       <text x={c + 5} y={c - rHorizon + 12} fontSize="8" fill="var(--color-muted-foreground)">Horizont (0°)</text>
       <text x={c + 5} y={c - rHorizon * (2 / 3) + 10} fontSize="8" fill="var(--color-muted-foreground)">30° hoch</text>
       <text x={c + 5} y={c - rHorizon / 3 + 10} fontSize="8" fill="var(--color-muted-foreground)">60° hoch</text>
+
+      {/* Hindernis-Sektoren am Horizont */}
+      {obstacles.map(o => {
+        const Icon = OBSTACLE_KINDS[o.kind];
+        void Icon;
+        const midRad = ((o.azimuth - 90) * Math.PI) / 180;
+        const rMid = rHorizon * (1 - Math.min(o.height, 89) / 90 / 2);
+        return (
+          <g key={o.id}>
+            <path
+              d={obstaclePath(o)}
+              fill="var(--color-primary)"
+              opacity="0.22"
+              stroke="var(--color-primary)"
+              strokeWidth="1"
+              strokeOpacity="0.45"
+            />
+            <text
+              x={c + rMid * Math.cos(midRad)}
+              y={c + rMid * Math.sin(midRad) + 3}
+              textAnchor="middle"
+              fontSize="9"
+              aria-hidden="true"
+            >
+              {o.kind === "baum" ? "🌲" : o.kind === "berg" ? "⛰️" : "🏠"}
+            </text>
+          </g>
+        );
+      })}
 
       {/* Himmelsrichtungen */}
       {[
@@ -204,7 +329,7 @@ function SunDiagram({
       {/* Sonne mit Strahlen */}
       {isUp && (
         <g>
-          <circle cx={sunXY.x} cy={sunXY.y} r="20" fill="url(#sunGlow)" />
+          <circle cx={sunXY.x} cy={sunXY.y} r="20" fill="url(#sunGlow)" opacity={sunBlocked ? 0.35 : 1} />
           {Array.from({ length: 8 }, (_, i) => {
             const a = (i * 45 * Math.PI) / 180;
             return (
@@ -217,10 +342,24 @@ function SunDiagram({
                 stroke="#E09B2D"
                 strokeWidth="2"
                 strokeLinecap="round"
+                opacity={sunBlocked ? 0.35 : 1}
               />
             );
           })}
-          <circle cx={sunXY.x} cy={sunXY.y} r="8.5" fill="#F5B841" stroke="#E09B2D" strokeWidth="1.5" />
+          <circle
+            cx={sunXY.x}
+            cy={sunXY.y}
+            r="8.5"
+            fill="#F5B841"
+            stroke="#E09B2D"
+            strokeWidth="1.5"
+            opacity={sunBlocked ? 0.4 : 1}
+          />
+          {sunBlocked && (
+            <text x={sunXY.x} y={sunXY.y - 16} textAnchor="middle" fontSize="8.5" fontWeight="700" fill="var(--color-destructive)">
+              im Schatten
+            </text>
+          )}
         </g>
       )}
       {/* Mond-Symbol, wenn die Sonne unter dem Horizont ist */}
@@ -260,6 +399,35 @@ export default function SunCompassPage() {
     const now = new Date();
     return now.getHours() * 60 + now.getMinutes();
   });
+  const [obstacles, setObstacles] = useState<Obstacle[]>(() => loadObstacles());
+  const [newKind, setNewKind] = useState<Obstacle["kind"]>("baum");
+  const [newAzimuth, setNewAzimuth] = useState("180");
+  const [newHeight, setNewHeight] = useState("25");
+  const [newWidth, setNewWidth] = useState("30");
+
+  const saveObstacles = (next: Obstacle[]) => {
+    setObstacles(next);
+    try {
+      localStorage.setItem(OBSTACLES_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      /* Speicher voll oder blockiert – Anzeige funktioniert trotzdem */
+    }
+  };
+
+  const addObstacle = () => {
+    const az = parseFloat(newAzimuth.replace(",", "."));
+    const h = parseFloat(newHeight.replace(",", "."));
+    const w = parseFloat(newWidth.replace(",", "."));
+    if (Number.isNaN(az) || az < 0 || az > 360) return;
+    const next: Obstacle = {
+      id: `${Date.now()}`,
+      kind: newKind,
+      azimuth: ((az % 360) + 360) % 360,
+      height: Number.isNaN(h) ? OBSTACLE_KINDS[newKind].defaultHeight : Math.min(Math.max(h, 1), 89),
+      width: Number.isNaN(w) ? OBSTACLE_KINDS[newKind].defaultWidth : Math.min(Math.max(w, 5), 180),
+    };
+    saveObstacles([...obstacles, next]);
+  };
 
   const locate = () => {
     if (!navigator.geolocation) {
@@ -319,6 +487,16 @@ export default function SunCompassPage() {
     [geo, selectedDate],
   );
 
+  const shadowWindows = useMemo(
+    () =>
+      geo.status === "ok"
+        ? computeShadowWindows(selectedDate, geo.lat!, geo.lng!, obstacles)
+        : [],
+    [geo, selectedDate, obstacles],
+  );
+  const sunBlockedNow =
+    sunPos !== null && sunPos.altitude > 0 && isBlocked(sunPos.azimuth, sunPos.altitude, obstacles);
+
   const timeLabel = `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 
   return (
@@ -361,11 +539,13 @@ export default function SunCompassPage() {
                   Um <strong>{timeLabel} Uhr</strong> steht die Sonne im{" "}
                   <strong>{directionLabel(sunPos.azimuth)}</strong> ({Math.round(sunPos.azimuth)}°),{" "}
                   <strong>{Math.round(sunPos.altitude)}°</strong> über dem Horizont
-                  {sunPos.altitude > 45
-                    ? " – fast senkrecht, kaum Schatten."
-                    : sunPos.altitude > 20
-                      ? " – Bäume und Zelte werfen mittellange Schatten."
-                      : " – tiefer Stand, lange Schatten: Hindernisse verschatten jetzt viel."}
+                  {sunBlockedNow
+                    ? " – aber ein eingetragenes Hindernis verdeckt sie: dein Platz liegt im Schatten."
+                    : sunPos.altitude > 45
+                      ? " – fast senkrecht, kaum Schatten."
+                      : sunPos.altitude > 20
+                        ? " – Bäume und Zelte werfen mittellange Schatten."
+                        : " – tiefer Stand, lange Schatten: Hindernisse verschatten jetzt viel."}
                 </>
               ) : (
                 <>
@@ -382,7 +562,7 @@ export default function SunCompassPage() {
               <p className="mb-3 text-center text-xs text-muted-foreground">
                 Blick von oben auf deinen Platz: Aussenring = Horizont, Mitte = senkrecht über dir.
               </p>
-              <SunDiagram lat={geo.lat!} lng={geo.lng!} selectedDate={selectedDate} />
+              <SunDiagram lat={geo.lat!} lng={geo.lng!} selectedDate={selectedDate} obstacles={obstacles} />
 
               {/* Legende */}
               <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground" aria-hidden="true">
@@ -402,6 +582,12 @@ export default function SunCompassPage() {
                   <span className="inline-block h-3 w-3 rounded-full border-2 border-card bg-primary" />
                   Dein Standort
                 </span>
+                {obstacles.length > 0 && (
+                  <span className="flex items-center gap-1.5">
+                    <span className="inline-block h-3 w-3 rounded-sm bg-primary opacity-25 ring-1 ring-primary/50" />
+                    Hindernis
+                  </span>
+                )}
               </div>
 
               {/* Zeit-Slider */}
@@ -467,6 +653,147 @@ export default function SunCompassPage() {
           </div>
 
           {/* Standort & Tipps */}
+          {/* Hindernis-Profil: Bäume, Berge, Gebäude erfassen und Schattenzeiten sehen */}
+          <Card className="mb-4">
+            <CardContent className="pt-6">
+              <p className="mb-1 flex items-center gap-2 font-semibold">
+                <TreePine className="h-4 w-4 text-primary" aria-hidden="true" />
+                Hindernisse am Horizont
+              </p>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Trage Bäume, Berge oder Gebäude rund um deinen Platz ein. Der Kompass zeigt sie im
+                Diagramm und berechnet, wann sie die Sonne verdecken – wichtig für Zelt und
+                Solarpanels.
+              </p>
+
+              {obstacles.length > 0 && (
+                <ul className="mb-4 space-y-2">
+                  {obstacles.map(o => {
+                    const Icon = OBSTACLE_KINDS[o.kind].icon;
+                    return (
+                      <li
+                        key={o.id}
+                        className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                      >
+                        <Icon className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                        <span className="min-w-0 flex-1">
+                          {OBSTACLE_KINDS[o.kind].label} im {directionLabel(o.azimuth)} (
+                          {Math.round(o.azimuth)}°) · {Math.round(o.height)}° hoch ·{" "}
+                          {Math.round(o.width)}° breit
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => saveObstacles(obstacles.filter(x => x.id !== o.id))}
+                          aria-label={`${OBSTACLE_KINDS[o.kind].label} entfernen`}
+                          className="shrink-0 text-muted-foreground transition-colors hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div>
+                  <Label htmlFor="obstacle-kind" className="text-xs">
+                    Art
+                  </Label>
+                  <Select
+                    value={newKind}
+                    onValueChange={v => {
+                      const kind = v as Obstacle["kind"];
+                      setNewKind(kind);
+                      setNewHeight(String(OBSTACLE_KINDS[kind].defaultHeight));
+                      setNewWidth(String(OBSTACLE_KINDS[kind].defaultWidth));
+                    }}
+                  >
+                    <SelectTrigger id="obstacle-kind">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(OBSTACLE_KINDS).map(([value, def]) => (
+                        <SelectItem key={value} value={value}>
+                          {def.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="obstacle-azimuth" className="text-xs">
+                    Richtung (°)
+                  </Label>
+                  <Input
+                    id="obstacle-azimuth"
+                    value={newAzimuth}
+                    onChange={e => setNewAzimuth(e.target.value)}
+                    inputMode="numeric"
+                    placeholder="180 = Süden"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="obstacle-height" className="text-xs">
+                    Höhe (°)
+                  </Label>
+                  <Input
+                    id="obstacle-height"
+                    value={newHeight}
+                    onChange={e => setNewHeight(e.target.value)}
+                    inputMode="numeric"
+                    placeholder="25"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="obstacle-width" className="text-xs">
+                    Breite (°)
+                  </Label>
+                  <Input
+                    id="obstacle-width"
+                    value={newWidth}
+                    onChange={e => setNewWidth(e.target.value)}
+                    inputMode="numeric"
+                    placeholder="30"
+                  />
+                </div>
+              </div>
+              <Button variant="outline" size="sm" className="mt-3 w-full" onClick={addObstacle}>
+                <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                Hindernis eintragen
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Tipp zur Höhe: Strecke den Arm aus – eine Faust entspricht etwa 10°. Ein Baum, der
+                zweieinhalb Fäuste über dem Horizont endet, hat also rund 25°.
+              </p>
+
+              {obstacles.length > 0 && (
+                <div className="mt-4 rounded-lg bg-accent/50 p-3">
+                  <p className="mb-1.5 text-sm font-semibold">Schattenzeiten heute</p>
+                  {shadowWindows.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      Deine Hindernisse verdecken die Sonne heute nie – freie Sicht den ganzen Tag.
+                    </p>
+                  ) : (
+                    <ul className="space-y-1 text-sm text-muted-foreground">
+                      {shadowWindows.map((w, i) => (
+                        <li key={i} className="flex items-center gap-2">
+                          <Moon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                          <span>
+                            <strong className="text-foreground">
+                              {fmtTime(w.from)}–{fmtTime(w.to)} Uhr
+                            </strong>{" "}
+                            – Sonne hinter Hindernis, Platz im Schatten
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <Card className="mb-4">
             <CardContent className="pt-6">
               <p className="flex items-center gap-2 text-sm text-muted-foreground">
