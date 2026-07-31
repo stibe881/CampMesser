@@ -1,149 +1,168 @@
-# CampMesser auf Hetzner Webhosting betreiben
+# CampMesser auf Hetzner Webhosting einrichten
 
-Diese Anleitung beschreibt, wie die Anwendung **CampMesser** auf einem Hetzner-Webhosting-Paket mit aktivierter Node.js-Unterstützung installiert und betrieben wird. Sie richtet sich an ein Paket vom Typ **Webhosting L oder XL**, da Node.js erst ab dieser Stufe verfügbar ist [1].
+Diese Anleitung führt Schritt für Schritt durch die Installation von **CampMesser** auf einem Hetzner-Webhosting-Paket mit Node.js. Sie ist konkret auf die Subdomain **camping.gross-ict.ch** und die Datenbank **camping** zugeschnitten, sodass sich alle Werte direkt übernehmen lassen.
 
-## Voraussetzungen prüfen
+Die Anwendung besteht aus einem Node-Server, der sowohl die Weboberfläche als auch die Programmschnittstelle ausliefert, sowie einer MySQL-Datenbank. Sämtliche Bilder sind fest in die Anwendung eingebaut, sodass keine externen Dienste benötigt werden.
 
-Bevor du beginnst, sollten die folgenden Punkte erfüllt sein. Die Anwendung besteht aus einem Node-Server (Express), einer React-Oberfläche und einer MySQL-Datenbank; alle Bilder sind inzwischen fest in die Anwendung eingebaut, sodass keine externen Dienste mehr benötigt werden.
+> **Hinweis zur Domain:** Sobald Node.js für eine Domain aktiviert wird, deaktiviert Hetzner alle anderen Webanwendungen dieser Domain [1]. Da du dafür eine eigene Subdomain angelegt hast, ist das unproblematisch.
 
-| Voraussetzung | Details |
+## Übersicht der benötigten Angaben
+
+| Angabe | Wert |
 | --- | --- |
-| Hosting-Paket | Webhosting L oder XL mit Node.js-Unterstützung |
-| SSH-Zugang | In konsoleH aktiviert, Zugangsdaten bekannt |
-| MySQL-Datenbank | In konsoleH angelegt (Name, Benutzer, Passwort, Host) |
-| Node.js-Version | 20 oder neuer |
-| Domain | Eine Domain oder Subdomain, die ausschliesslich für CampMesser genutzt wird |
+| Subdomain | `camping.gross-ict.ch` |
+| Datenbank | `camping` auf `ly8y.your-database.de` |
+| Datenbank-Benutzer | `jqviwy_0` |
+| Node.js-Version | 24 |
+| Zielverzeichnis auf dem Server | `~/public_html/camping` |
 
-> **Wichtig:** Sobald du Node.js für eine Domain aktivierst, werden alle anderen Webanwendungen dieser Domain – etwa PHP oder statisches HTML – deaktiviert [1]. Verwende deshalb am besten eine eigene Subdomain wie `camp.deinedomain.ch`, wenn unter der Hauptdomain bereits eine Website läuft.
+## Schritt 1: Code per SSH auf den Server laden
 
-## Schritt 1: Datenbank anlegen
-
-Melde dich in konsoleH an, öffne den Bereich für Datenbanken und lege eine neue MySQL-Datenbank an. Notiere dir Datenbankname, Benutzername, Passwort und Hostname. Aus diesen Angaben setzt sich später die Verbindungszeichenfolge zusammen:
-
-```
-mysql://BENUTZER:PASSWORT@HOST:3306/DATENBANKNAME
-```
-
-Enthält das Passwort Sonderzeichen wie `@`, `:` oder `/`, müssen diese URL-kodiert werden (`@` wird zu `%40`, `:` zu `%3A`, `/` zu `%2F`).
-
-## Schritt 2: Code auf den Server bringen
-
-Verbinde dich per SSH mit deinem Hosting-Account und lege die Anwendung im Heimatverzeichnis ab. Der Quellcode liegt öffentlich auf GitHub bereit:
+Verbinde dich per SSH mit deinem Hosting-Account und lade das Projekt aus dem GitHub-Repository in das bestehende Verzeichnis der Subdomain. Da der Ordner `camping` bereits existiert, wird direkt in ihn hinein geklont.
 
 ```bash
-ssh dein-benutzer@dein-host.your-server.de
-cd ~
-git clone https://github.com/stibe881/CampMesser.git campmesser
-cd campmesser
+cd ~/public_html/camping
+git clone https://github.com/stibe881/CampMesser.git .
 ```
 
-Falls `git` nicht verfügbar ist, kannst du das Projekt alternativ als ZIP-Archiv herunterladen und per SFTP hochladen.
+Ist der Ordner nicht leer, verschiebe die vorhandenen Dateien zuvor beiseite (`mkdir ~/alt-camping && mv ~/public_html/camping/* ~/alt-camping/`). Steht `git` nicht zur Verfügung, lade das Repository als ZIP-Archiv herunter und entpacke es per SFTP in den Ordner `camping`.
 
-## Schritt 3: Node-Version festlegen und Abhängigkeiten installieren
+## Schritt 2: Node-Version festlegen und Anwendung bauen
 
-Hetzner erlaubt es, die gewünschte Node-Version für den Account per Datei zu hinterlegen [1]. Anschliessend installierst du die Pakete und erzeugst den Produktions-Build:
+Hetzner liest die gewünschte Node-Version aus einer Datei im Heimatverzeichnis [1]. Danach installierst du die Pakete und erzeugst den Produktions-Build, der die Serverdatei `dist/index.js` und die fertige Oberfläche unter `dist/public` enthält.
 
 ```bash
-echo 22 > ~/.nodeversion
-cd ~/campmesser
-npm install -g pnpm          # falls pnpm noch nicht vorhanden ist
+echo 24 > ~/.nodeversion
+cd ~/public_html/camping
+npm install -g pnpm
 pnpm install
 pnpm build
 ```
 
-Der Build erzeugt zwei Bestandteile: die Serverdatei `dist/index.js` sowie die fertige Weboberfläche inklusive aller Bilder unter `dist/public`. Der Build benötigt einige Minuten und etwa 1 GB Arbeitsspeicher.
+Der Build dauert einige Minuten. Bricht er wegen Arbeitsspeichers ab, hilft in der Regel der Aufruf `NODE_OPTIONS=--max-old-space-size=1024 pnpm build`.
 
-## Schritt 4: Umgebungsvariablen definieren
+## Schritt 3: Konfigurationsdatei anlegen
 
-Die Anwendung wird über Umgebungsvariablen konfiguriert. Zwingend erforderlich sind die Datenbankverbindung und ein zufälliges Sitzungsgeheimnis; die SMTP-Angaben sind optional und aktivieren den E-Mail-Versand der Passwort-Codes über deinen eigenen Mailserver.
+Die Zugangsdaten legst du in einer Datei `.env` im Projektverzeichnis ab. Das Datenbank-Passwort enthält Sonderzeichen und muss deshalb kodiert in der Verbindungszeichenfolge stehen; die untenstehende Zeile enthält bereits die korrekt kodierte Fassung.
 
-| Variable | Pflicht | Bedeutung |
-| --- | --- | --- |
-| `DATABASE_URL` | ja | Verbindung zur MySQL-Datenbank, Format siehe Schritt 1 |
-| `JWT_SECRET` | ja | Zufällige Zeichenkette zum Signieren der Anmelde-Sitzungen |
-| `NODE_ENV` | ja | Muss auf `production` gesetzt werden |
-| `PORT` | empfohlen | Port, auf dem der Server lauscht (Wert aus der konsoleH-Konfiguration) |
-| `SMTP_HOST` | optional | Mailserver, z. B. `mail.deinedomain.ch` |
-| `SMTP_PORT` | optional | Üblicherweise `587`, bei SSL `465` |
-| `SMTP_USER` | optional | Postfachname |
-| `SMTP_PASS` | optional | Postfach-Passwort |
-| `SMTP_FROM` | optional | Absenderadresse, z. B. `noreply@deinedomain.ch` |
-
-Ein sicheres Sitzungsgeheimnis erzeugst du direkt auf dem Server:
+Erzeuge zunächst ein zufälliges Sitzungsgeheimnis und notiere dir die Ausgabe:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
-Für die Migration im nächsten Schritt legst du zusätzlich eine Datei `.env` im Projektverzeichnis an. Diese wird nur von den Kommandozeilen-Werkzeugen gelesen; im laufenden Betrieb kommen die Werte aus konsoleH.
+Lege anschliessend die Datei an und setze die Ausgabe bei `JWT_SECRET` ein:
 
 ```bash
-cat > ~/campmesser/.env << 'EOF'
-DATABASE_URL=mysql://benutzer:passwort@host:3306/datenbank
-JWT_SECRET=hier-das-erzeugte-geheimnis-einsetzen
-NODE_ENV=production
-EOF
-chmod 600 ~/campmesser/.env
+cd ~/public_html/camping
+nano .env
 ```
 
-## Schritt 5: Datenbankschema einspielen
+Inhalt der Datei:
 
-Die Tabellenstruktur liegt als Migrationsdateien im Ordner `drizzle`. Sie wird mit einem einzigen Befehl angelegt:
+```
+NODE_ENV=production
+DATABASE_URL=mysql://jqviwy_0:k8%2CCt%3D%26*%2F28%24@ly8y.your-database.de:3306/camping
+JWT_SECRET=HIER_DAS_ERZEUGTE_GEHEIMNIS_EINSETZEN
+```
+
+Schütze die Datei anschliessend vor fremdem Zugriff:
 
 ```bash
-cd ~/campmesser
+chmod 600 ~/public_html/camping/.env
+```
+
+Zur Erläuterung der Kodierung: Aus dem Passwort `k8,Ct=&*/28$` wird `k8%2CCt%3D%26*%2F28%24`, weil Komma, Gleichheitszeichen, kaufmännisches Und, Schrägstrich und Dollarzeichen in einer Verbindungsadresse eine Sonderbedeutung haben. Änderst du das Passwort später, müssen die neuen Sonderzeichen ebenfalls kodiert werden.
+
+## Schritt 4: Datenbankstruktur anlegen
+
+Die Tabellen werden aus den mitgelieferten Migrationsdateien erzeugt:
+
+```bash
+cd ~/public_html/camping
 pnpm drizzle-kit migrate
 ```
 
-Sollte der Befehl in der Hosting-Umgebung nicht durchlaufen, kannst du die Dateien `drizzle/0000_*.sql` bis `drizzle/0006_*.sql` in aufsteigender Reihenfolge über phpMyAdmin in konsoleH einspielen. Achte dabei darauf, die in den Dateien enthaltenen Trennmarkierungen `--> statement-breakpoint` zu entfernen beziehungsweise die Anweisungen einzeln auszuführen.
+Sollte der Befehl in der Hosting-Umgebung nicht durchlaufen, spiele ersatzweise die Dateien `drizzle/0000_*.sql` bis `drizzle/0006_*.sql` in aufsteigender Reihenfolge über phpMyAdmin in konsoleH ein. Die Markierungen `--> statement-breakpoint` trennen dabei die einzelnen Anweisungen und gehören nicht mit in die Eingabe.
 
-## Schritt 6: Node.js in konsoleH aktivieren
+## Schritt 5: Node.js in konsoleH konfigurieren
 
-Wähle in konsoleH die gewünschte Domain aus und öffne links **Services → Node.js configuration** [1]. Trage dort die folgenden Werte ein und speichere anschliessend:
+Öffne in konsoleH die Subdomain `camping.gross-ict.ch` und dort links **Services → Node.js Konfiguration**. Trage die folgenden Werte in das Formular ein:
 
-| Feld | Wert |
+| Feld im Formular | Einzutragender Wert |
 | --- | --- |
-| Working directory | `campmesser` |
-| Script path | `dist/index.js` |
-| Version | 22 (oder die installierte Version) |
-| Log file | `campmesser/app.log` |
-| Memory limit | mindestens 512 MB |
-| Environment variables | `NODE_ENV`, `DATABASE_URL`, `JWT_SECRET` sowie optional die SMTP-Werte |
+| Skript-Pfad | `app.js` |
+| Arbeitsverzeichnis | `public_html/camping` |
+| Name der Log-Datei | `camping.log` |
+| Arbeitsspeicher-Beschränkung | `512` |
+| Version | `24` |
+| Skript Parameter | leer lassen |
 
-Nach dem Speichern aktivierst du die Anwendung über die Schaltfläche **Aktivieren**. Rufst du danach deine Domain im Browser auf, sollte die Startseite von CampMesser erscheinen.
+Die Datei `app.js` liegt bereits im Projekt. Sie liest deine `.env`-Datei ein und startet anschliessend den gebauten Server – genau in dem Format, das Hetzner erwartet. Das Arbeitsverzeichnis wird relativ zum Heimatverzeichnis angegeben, der Skript-Pfad wiederum relativ zum Arbeitsverzeichnis. Die Log-Datei landet direkt im Heimatverzeichnis.
 
-### Hinweis zum Port
+### Umgebungsvariablen im Formular
 
-Die Anwendung liest den Port aus der Umgebungsvariablen `PORT` und verwendet ersatzweise 3000. Falls Hetzner einen bestimmten Port vorgibt, trage diesen in der konsoleH-Konfiguration als Umgebungsvariable `PORT` ein. Erscheint die Seite nicht, findest du im Logfile `campmesser/app.log` die tatsächlich verwendete Portnummer und mögliche Fehlermeldungen.
+Im Abschnitt **Umgebungsvariablen** trägst du zusätzlich die folgenden Schlüssel-Wert-Paare ein und bestätigst jedes einzeln mit **Hinzufügen**. Sie haben Vorrang vor der `.env`-Datei und stellen sicher, dass die Anwendung auch dann korrekt startet, wenn die Datei einmal fehlt.
 
-## Schritt 7: Funktion prüfen
+| Schlüssel | Wert |
+| --- | --- |
+| `NODE_ENV` | `production` |
+| `DATABASE_URL` | `mysql://jqviwy_0:k8%2CCt%3D%26*%2F28%24@ly8y.your-database.de:3306/camping` |
+| `JWT_SECRET` | dasselbe Geheimnis wie in der `.env`-Datei |
 
-Prüfe nach dem Start die folgenden Punkte: Die Startseite lädt inklusive Hintergrundbild, die Registrierung eines Testkontos funktioniert, eine Packliste lässt sich anlegen und wieder aufrufen (dies bestätigt die Datenbankverbindung), und die Wissens-Module zeigen ihre Bilder an. Bei Problemen hilft ein Blick ins Logfile:
+Klicke danach auf **Aktivieren**. Rufst du nun `https://camping.gross-ict.ch` im Browser auf, sollte die Startseite von CampMesser erscheinen.
+
+### Wenn die Seite nicht erscheint
+
+Die Anwendung schreibt ihre Meldungen in die Datei `camping.log` in deinem Heimatverzeichnis. Ein Blick hinein zeigt in fast allen Fällen die Ursache:
 
 ```bash
-tail -50 ~/campmesser/app.log
+tail -50 ~/camping.log
 ```
+
+Meldet das Protokoll einen Portkonflikt, ergänze im Formular eine weitere Umgebungsvariable `PORT` mit der Portnummer, die Hetzner deinem Account zugewiesen hat. Ohne Vorgabe verwendet die Anwendung Port 3000 und weicht bei Belegung selbstständig auf den nächsten freien Port aus.
+
+## Schritt 6: E-Mail-Versand für vergessene Passwörter
+
+Damit Rücksetz-Codes per E-Mail zugestellt werden, hinterlege die Zugangsdaten eines Postfachs deiner Domain. Ohne diese Angaben funktioniert die Anmeldung normal weiter; der Code wird dann lediglich ins Protokoll geschrieben.
+
+| Schlüssel | Beispielwert |
+| --- | --- |
+| `SMTP_HOST` | `mail.gross-ict.ch` |
+| `SMTP_PORT` | `587` |
+| `SMTP_USER` | Postfachname |
+| `SMTP_PASS` | Postfach-Passwort |
+| `SMTP_FROM` | `noreply@gross-ict.ch` |
+
+Diese Werte kannst du wahlweise in die `.env`-Datei schreiben oder als Umgebungsvariablen im konsoleH-Formular ergänzen.
+
+## Schritt 7: Funktionsprüfung
+
+Prüfe nach dem Start, ob die Startseite mitsamt Hintergrundbild lädt, ob sich ein Testkonto registrieren lässt und ob eine angelegte Packliste nach dem Neuladen erhalten bleibt. Der letzte Punkt bestätigt, dass die Datenbankverbindung steht. Öffne zusätzlich ein Wissens-Modul wie das Rezeptbuch, um die Bildauslieferung zu kontrollieren.
 
 ## Aktualisierungen einspielen
 
-Neue Versionen holst du dir mit wenigen Befehlen. Anschliessend startest du die Anwendung in konsoleH einmal neu.
+Neue Versionen holst du dir mit dem beiliegenden Skript. Anschliessend schaltest du die Anwendung in konsoleH einmal aus und wieder ein, damit der neue Stand geladen wird.
 
 ```bash
-cd ~/campmesser
-git pull
-pnpm install
-pnpm build
+bash ~/public_html/camping/scripts/deploy-hetzner.sh
 ```
 
-Zur Vereinfachung liegt dem Projekt das Skript `scripts/deploy-hetzner.sh` bei, das diese Schritte zusammenfasst.
+## Sicherheitshinweis
+
+Das Datenbank-Passwort wurde während der Einrichtung im Klartext übermittelt. Wechsle es nach der Inbetriebnahme in konsoleH und trage den neuen Wert an zwei Stellen ein: in der Datei `~/public_html/camping/.env` und in der Umgebungsvariablen `DATABASE_URL` im Node.js-Formular. Die passende kodierte Zeichenfolge erhältst du auf dem Server mit:
+
+```bash
+node -e "console.log(encodeURIComponent('DEIN_NEUES_PASSWORT'))"
+```
 
 ## Häufige Stolpersteine
 
-Bleibt die Seite weiss oder erscheint ein Serverfehler, liegt es meist an einer der folgenden Ursachen. Die Datenbank-Verbindungszeichenfolge enthält nicht kodierte Sonderzeichen, `NODE_ENV` wurde nicht auf `production` gesetzt (dann sucht der Server nach dem Entwicklungsmodus statt nach den gebauten Dateien), oder der Build wurde nach einer Änderung nicht erneut ausgeführt. Fehlen die Anmeldefunktionen, prüfe, ob `JWT_SECRET` gesetzt ist. Kommen keine Passwort-E-Mails an, fehlen die SMTP-Angaben; in diesem Fall wird der Code lediglich ins Logfile geschrieben.
+Bleibt die Seite weiss, wurde meist der Build nicht ausgeführt oder `NODE_ENV` steht nicht auf `production`; in diesem Fall sucht der Server nach dem Entwicklungsmodus statt nach den gebauten Dateien. Erscheint eine Datenbankmeldung, prüfe die Kodierung des Passworts in der Verbindungszeichenfolge. Funktioniert die Anmeldung nicht, fehlt in der Regel `JWT_SECRET`. Nach jeder Änderung an der Konfiguration muss die Anwendung in konsoleH neu aktiviert werden.
 
-## Alternative: Hetzner Cloud oder Manus-Hosting
+## Alternative bei Engpässen
 
-Falls das Webhosting-Paket an Grenzen stösst – etwa beim Arbeitsspeicher während des Builds –, bieten sich zwei Alternativen an. Ein kleiner Cloud-Server bei Hetzner (etwa CX22 für rund 4 Euro monatlich) bietet volle Kontrolle mit Node.js, MySQL, Nginx und automatischem HTTPS-Zertifikat. Ebenso kannst du die Anwendung auf der Manus-Plattform belassen und dort lediglich deine eigene Domain verbinden; Datenbank, Zertifikate und Updates werden dann automatisch verwaltet.
+Stösst das Webhosting-Paket an Grenzen, etwa beim Arbeitsspeicher während des Builds, kannst du den Build auf einem anderen Rechner erzeugen und nur den fertigen Ordner `dist` per SFTP hochladen. Alternativ bietet ein kleiner Cloud-Server bei Hetzner volle Kontrolle, oder du belässt die Anwendung auf der Manus-Plattform und verbindest dort lediglich deine Subdomain.
 
 ## Referenzen
 

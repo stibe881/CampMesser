@@ -117,6 +117,18 @@
 - [x] Selbst-Hosting verifiziert: Produktions-Build ohne Manus-Variablen gestartet (nur NODE_ENV/PORT/DATABASE_URL/JWT_SECRET) – Startseite HTTP 200, Hero-Bild 114 KB, Registrierung erfolgreich
 - [x] Vollständige Prüfung (Build sauber, 88 Vitest-Tests grün) und Checkpoint
 - [x] Bug: «Live-Kompass aus»-Button funktioniert nicht → behoben (stabiler Event-Handler mit enabledRef, stop() entfernt beide Event-Typen zuverlässig)
+## Hetzner-Konfiguration (Subdomain camping.gross-ict.ch, Node.js 24)
+
+- [x] Start-Skript app.js im Projektwurzelverzeichnis angelegt: liest .env (eigener Parser, konsoleH-Variablen haben Vorrang), prüft dist/index.js, startet den Server
+- [x] Start aus fremdem Arbeitsverzeichnis getestet: Startseite HTTP 200, Bundle 1.3 MB ausgeliefert, tRPC-Antwort korrekt, ohne Manus-Umgebungsvariablen
+- [x] Server läuft ohne PORT-Vorgabe (Standard 3000 mit automatischem Ausweichen); PORT als optionale konsoleH-Variable dokumentiert
+- [x] Anleitung mit exakten Feldwerten für das konsoleH-Formular ergänzt (Skript-Pfad app.js, Arbeitsverzeichnis public_html/camping, Log-Datei camping.log, 512 MB, Version 24, Umgebungsvariablen)
+- [x] DATABASE_URL für die Hetzner-Datenbank korrekt URL-kodiert (Sonderzeichen im Passwort) und in die Anleitung übernommen
+- [x] Zielverzeichnis auf ~/public_html/camping umgestellt (Anleitung, Deploy-Skript)
+- [x] Start ohne PORT-Variable verifiziert: Standard 3000, automatisches Ausweichen auf 3001 bei Belegung, Startseite HTTP 200
+- [x] OAuth-Warnung im Log geprüft: rein informativ (Manus-OAuth wird nicht mehr genutzt), Anmeldung läuft über die eigene E-Mail/Passwort-Auth
+- [x] Checkpoint speichern und ins GitHub-Repo pushen (TypeScript sauber, 88 Tests grün)
+
 ## Verifikation (per Code-Prüfung bestätigt)
 - SOS: Notfallnummern exakt benannt (Rega 1414, Notruf 112, Polizei 117 in data/emergency.ts), Direktwahl via tel:-Links, Geolocation-Fehlerbehandlung vorhanden, Koordinaten in Dezimalgrad/GMS/LV95 (formatDMS, wgs84ToLV95 – durch Tests abgedeckt)
 - Packlisten: toggle-/addItem-Mutationen mit DB-Persistenz vorhanden (PackListDetail.tsx, server/routers.ts packing-Router)

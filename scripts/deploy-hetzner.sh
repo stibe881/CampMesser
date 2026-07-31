@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Aktualisiert CampMesser auf einem Hetzner-Webhosting-Account.
-# Aufruf per SSH:  bash ~/campmesser/scripts/deploy-hetzner.sh
+# Aufruf per SSH:  bash ~/public_html/camping/scripts/deploy-hetzner.sh
 set -euo pipefail
 
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -42,4 +42,3 @@ $PKG run build
 echo ""
 echo "Fertig. Starte die Anwendung jetzt in konsoleH unter"
 echo "Services -> Node.js configuration neu (Deaktivieren, dann Aktivieren)."
-
