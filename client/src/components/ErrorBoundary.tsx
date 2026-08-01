@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { AlertTriangle, RotateCcw } from "lucide-react";
-import { Component, ReactNode } from "react";
+import { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -19,6 +19,26 @@ class ErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    // Absturz an den Server melden (fire-and-forget), damit Probleme auf dem
+    // Selbst-Hosting diagnostizierbar sind. Es werden keine Nutzerdaten gesendet.
+    try {
+      void fetch("/api/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: String(error?.message ?? error).slice(0, 500),
+          stack: String(error?.stack ?? "").slice(0, 4000),
+          componentStack: String(info?.componentStack ?? "").slice(0, 2000),
+          url: window.location.pathname,
+          userAgent: navigator.userAgent.slice(0, 300),
+        }),
+      }).catch(() => undefined);
+    } catch {
+      // Melden darf nie selbst zum Problem werden
+    }
   }
 
   render() {

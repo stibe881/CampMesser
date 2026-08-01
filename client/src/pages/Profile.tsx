@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { UserRound, KeyRound, Trash2, Palette, Sun, Moon, LogOut } from "lucide-react";
+import { UserRound, KeyRound, Mail, Trash2, Palette, Sun, Moon, LogOut } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +34,8 @@ export default function ProfilePage() {
   const [newPw, setNewPw] = useState("");
   const [newPw2, setNewPw2] = useState("");
   const [deletePw, setDeletePw] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [emailPw, setEmailPw] = useState("");
   const [themePref, setThemePref] = useState<"light" | "dark" | null>(() => getThemePreference());
 
   useEffect(() => {
@@ -43,6 +45,16 @@ export default function ProfilePage() {
   const nameMutation = trpc.auth.updateName.useMutation({
     onSuccess: () => {
       toast.success("Name aktualisiert");
+      void utils.auth.me.invalidate();
+      void refresh?.();
+    },
+    onError: e => toast.error(e.message),
+  });
+  const emailMutation = trpc.auth.updateEmail.useMutation({
+    onSuccess: () => {
+      toast.success("E-Mail-Adresse aktualisiert – melde dich künftig damit an");
+      setNewEmail("");
+      setEmailPw("");
       void utils.auth.me.invalidate();
       void refresh?.();
     },
@@ -143,6 +155,62 @@ export default function ProfilePage() {
             />
             <Button type="submit" disabled={nameMutation.isPending || !name.trim()}>
               Speichern
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
+            E-Mail-Adresse ändern
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-3 text-sm text-muted-foreground">
+            Aktuell: <span className="font-medium text-foreground">{user?.email ?? "–"}</span>. Mit
+            der neuen Adresse meldest du dich künftig an.
+          </p>
+          <form
+            className="space-y-3"
+            onSubmit={e => {
+              e.preventDefault();
+              emailMutation.mutate({ newEmail: newEmail.trim(), currentPassword: emailPw });
+            }}
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="email-new" className="mb-1.5 block text-xs">
+                  Neue E-Mail-Adresse
+                </Label>
+                <Input
+                  id="email-new"
+                  type="email"
+                  autoComplete="email"
+                  value={newEmail}
+                  onChange={e => setNewEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="email-pw" className="mb-1.5 block text-xs">
+                  Passwort zur Bestätigung
+                </Label>
+                <Input
+                  id="email-pw"
+                  type="password"
+                  autoComplete="current-password"
+                  value={emailPw}
+                  onChange={e => setEmailPw(e.target.value)}
+                />
+              </div>
+            </div>
+            <Button
+              type="submit"
+              disabled={emailMutation.isPending || !newEmail.trim() || !emailPw}
+              className="w-full sm:w-auto"
+            >
+              E-Mail ändern
             </Button>
           </form>
         </CardContent>

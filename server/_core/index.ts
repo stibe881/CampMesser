@@ -79,6 +79,39 @@ async function startServer() {
       latencyMs: Date.now() - startedAt,
     });
   });
+  // Client-Fehlerprotokoll: der ErrorBoundary meldet Abstürze hierher.
+  // Anhängen an logs/client-errors.log mit einfacher Grössen-Rotation.
+  app.post("/api/log", async (req, res) => {
+    try {
+      const body = req.body as Record<string, unknown> | undefined;
+      const clean = (v: unknown, max: number) =>
+        typeof v === "string" ? v.replace(/\s+/g, " ").slice(0, max) : "";
+      const line = JSON.stringify({
+        at: new Date().toISOString(),
+        message: clean(body?.message, 500),
+        url: clean(body?.url, 300),
+        stack: clean(body?.stack, 4000),
+        componentStack: clean(body?.componentStack, 2000),
+        userAgent: clean(body?.userAgent, 300),
+      });
+      const fs = await import("node:fs/promises");
+      const path = await import("node:path");
+      const logDir = path.join(process.cwd(), "logs");
+      const logFile = path.join(logDir, "client-errors.log");
+      await fs.mkdir(logDir, { recursive: true });
+      await fs.appendFile(logFile, `${line}\n`, "utf8");
+      // Rotation: bei über 1 MB die ältesten Zeilen verwerfen
+      const stat = await fs.stat(logFile);
+      if (stat.size > 1024 * 1024) {
+        const content = await fs.readFile(logFile, "utf8");
+        const lines = content.split("\n");
+        await fs.writeFile(logFile, lines.slice(Math.floor(lines.length / 2)).join("\n"), "utf8");
+      }
+    } catch {
+      // Logging darf den Betrieb nie stören
+    }
+    res.json({ success: true });
+  });
   // tRPC API
   app.use(
     "/api/trpc",

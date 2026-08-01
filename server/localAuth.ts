@@ -92,6 +92,13 @@ export async function updateUserName(userId: number, name: string): Promise<void
   await db.update(users).set({ name: name.trim() }).where(eq(users.id, userId));
 }
 
+/** E-Mail-Adresse eines Kontos ändern (normalisiert). */
+export async function updateUserEmail(userId: number, email: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Datenbank nicht verfügbar");
+  await db.update(users).set({ email: normalizeEmail(email) }).where(eq(users.id, userId));
+}
+
 /** Passwort eines Kontos setzen (Hash wird neu berechnet). */
 export async function updateUserPassword(userId: number, newPassword: string): Promise<void> {
   const db = await getDb();
