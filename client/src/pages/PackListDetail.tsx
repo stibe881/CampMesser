@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "wouter";
-import { Link2, Loader2, Plus, Share2, Trash2 } from "lucide-react";
+import { Link2, Loader2, Plus, QrCode, Share2, Trash2 } from "lucide-react";
+import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -23,6 +24,18 @@ export default function PackListDetailPage() {
   const [newItem, setNewItem] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+
+  // QR-Code zum Teil-Link erzeugen: am Platz einfach abscannen lassen statt Link verschicken
+  useEffect(() => {
+    if (!shareUrl) {
+      setQrDataUrl(null);
+      return;
+    }
+    QRCode.toDataURL(shareUrl, { width: 480, margin: 1, errorCorrectionLevel: "M" })
+      .then(setQrDataUrl)
+      .catch(() => setQrDataUrl(null));
+  }, [shareUrl]);
 
   const shareMutation = trpc.packing.share.useMutation({
     onSuccess: async ({ token }) => {
@@ -175,6 +188,28 @@ export default function PackListDetailPage() {
             >
               Kopieren
             </button>
+          </div>
+        )}
+        {qrDataUrl && (
+          <div className="mt-3 flex items-center gap-4 rounded-lg border border-border bg-card p-4">
+            {/* Weisser Rahmen, damit der Code auch im Dark Mode zuverlässig scannbar bleibt */}
+            <div className="shrink-0 rounded-md bg-white p-2 shadow-sm">
+              <img
+                src={qrDataUrl}
+                alt={`QR-Code zum Teil-Link der Liste ${query.data.list.name}`}
+                className="h-36 w-36"
+              />
+            </div>
+            <div className="min-w-0">
+              <p className="flex items-center gap-1.5 text-sm font-semibold">
+                <QrCode className="h-4 w-4 text-primary" aria-hidden="true" />
+                Direkt am Platz übergeben
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Lass deine Mitreisenden den Code mit der Handy-Kamera scannen – die Liste öffnet
+                sich sofort, ganz ohne Tippen oder Anmeldung.
+              </p>
+            </div>
           </div>
         )}
         <p className="mt-1.5 text-xs text-muted-foreground">
