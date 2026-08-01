@@ -162,6 +162,9 @@
 ## Offene Aufgaben (User)
 
 - [ ] Backup auf dem Hetzner-Server einrichten: einmal `bash ~/campmesser/scripts/backup-db.sh` von Hand ausführen, dann Cronjob in konsoleH anlegen (z. B. täglich 03:30) – siehe Abschnitt «Datenbank-Backup» in DEPLOYMENT-HETZNER.md
+- [ ] Auto-Deploy scharf schalten: SSH-Key erzeugen, Public Key in `~/.ssh/authorized_keys` auf dem Server, GitHub-Secrets `HETZNER_HOST`/`HETZNER_USER`/`HETZNER_SSH_KEY` anlegen – siehe Abschnitt «Automatisches Deployment» in DEPLOYMENT-HETZNER.md
+- [ ] Uptime-Dienst (z. B. UptimeRobot) auf `https://campmesser.ch/api/health` einrichten
+- [ ] Feature-Branch `claude/projekt-laden-eb1rox` nach `main` mergen (Claude sagen oder selbst mergen – löst nach Secret-Einrichtung das Auto-Deploy aus)
 
 ## Erweiterungen (Nutzerwunsch 01.08.2026, Runde 3)
 
