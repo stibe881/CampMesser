@@ -193,6 +193,17 @@
 - [x] DB-Indizes auf alle userId-Spalten sowie packItems.listId und packLists.shareToken (Migration 0010)
 - [x] Dependabot: wöchentliche, gruppierte Update-PRs für npm und GitHub Actions (CI prüft sie automatisch)
 
+## Erweiterungen (Nutzerwunsch 01.08.2026, Runde 6)
+
+- [x] Packlisten ↔ Inventar: Gegenstände per Chip aus dem Inventar übernehmen; Gewichts-Bilanz (gesamt/gepackt/Volumen) über Namens-Abgleich (shared/packWeight.ts, 4 Tests)
+- [x] Packliste duplizieren: Kopie mit unabgehakten Einträgen per Button (packing.duplicateList)
+- [x] Startseite: Wetter-Widget mit aktueller Temperatur, Zustand, Wind und höchster Unwetterwarnung am Standort, verlinkt aufs Wetter-Modul
+- [x] Natur-Modul: Sternschnuppen-Kalender – die 10 grossen Jahresströme mit nächstem Maximum, Raten, Blickrichtung, Tipps und Mondstörung (shared/astro.ts, 5 Tests)
+- [x] Quiet-Timer: Nacht-Protokoll – höchster Pegel pro Minute als Verlaufsgrafik (recharts) mit Schwellen-Linie, bleibt für den Morgen-Rückblick erhalten
+- [x] Profil: E-Mail-Adresse ändern (Passwort-Bestätigung, Validierung, Konflikt-Prüfung, auth.updateEmail)
+- [x] Client-Fehler-Reporting: ErrorBoundary meldet Abstürze an POST /api/log (Datei-Log logs/client-errors.log mit 1-MB-Rotation)
+- [x] Smoke-Tests: 4 Playwright-Tests gegen den Produktions-Build (Startseite, Anmelden, Code-Splitting-Chunk, Health-Version) als eigener CI-Job
+
 ## Logo (Nutzerwunsch 31.07.2026)
 
 - [x] Eigenständiges CampMesser-Logo entworfen: Taschenmesser mit aufgeklappter Klinge als SVG-Bauteil `client/src/components/BrandLogo.tsx` (skalierbar, echte Transparenz, Farbe via currentColor)
