@@ -28,11 +28,13 @@ import {
   Eye,
   EyeOff,
   Gauge,
+  Search,
 } from "lucide-react";
 import { getSunTimes } from "@/lib/sun";
 import { useEffect, useRef, useState } from "react";
 import { getRecentModules } from "@/components/AppShell";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
+import { searchKnowledge } from "@/lib/globalSearch";
 
 const ORDER_KEY = "campmesser.moduleOrder";
 const HIDDEN_KEY = "campmesser.hiddenModules";
@@ -112,6 +114,60 @@ const modules: Module[] = [
 ];
 
 const groups = ["Planung", "Sicherheit", "Erste Hilfe", "Energie & Wasser"] as const;
+
+/** Globale Suche über die Offline-Wissensmodule (Erste Hilfe, Knoten, Rezepte, Natur). */
+function KnowledgeSearch() {
+  const [query, setQuery] = useState("");
+  const results = query.trim().length >= 2 ? searchKnowledge(query, 8) : [];
+  return (
+    <div className="mb-8">
+      <div className="relative">
+        <Search
+          className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+          aria-hidden="true"
+        />
+        <input
+          type="search"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="Wissen durchsuchen: Zeckenbiss, Mastwurf, Rezepte …"
+          aria-label="Wissensmodule durchsuchen"
+          className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
+        />
+      </div>
+      {query.trim().length >= 2 && (
+        <div className="mt-2 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+          {results.length === 0 ? (
+            <p className="px-4 py-3 text-sm text-muted-foreground">
+              Nichts gefunden – probiere einen anderen Begriff (z. B. «Verbrennung» oder «Knoten»).
+            </p>
+          ) : (
+            <ul className="divide-y divide-border/60">
+              {results.map(r => (
+                <li key={r.id}>
+                  <Link
+                    href={r.path}
+                    className="flex items-start gap-3 px-4 py-2.5 transition-colors hover:bg-accent/50"
+                  >
+                    <span className="mt-0.5 shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-secondary-foreground">
+                      {r.module}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold">{r.title}</span>
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {r.snippet}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** Schnellzugriff: die zuletzt genutzten Module (max. 4) aus dem lokalen Verlauf. */
 function RecentModules({ hidden }: { hidden: string[] }) {
@@ -280,6 +336,7 @@ export default function Home() {
 
       {/* Modul-Grid */}
       <section className="container py-8 md:py-12">
+        <KnowledgeSearch />
         <RecentModules hidden={hidden} />
         <div className="mb-4 flex items-center justify-end">
           <button
