@@ -1,25 +1,34 @@
 /**
- * Gemeinsamer Speicher für das Hindernis-Profil des Sonnen-Kompasses
+ * Lokaler Speicher für die Hindernis-Profile des Sonnen-Kompasses
  * (localStorage). Wird auch von der Solarpanel-Ausrichtungshilfe im
- * Energie-Budget genutzt.
+ * Energie-Budget genutzt. Die Profil-Logik selbst liegt in
+ * shared/obstacleProfiles.ts.
  */
-import type { ObstacleShape } from "@shared/obstacles";
+import {
+  emptyProfiles,
+  normalizeProfiles,
+  type ObstacleProfiles,
+} from "@shared/obstacleProfiles";
 
-/** Ein Hindernis am Horizont: verdeckt einen Richtungs-Sektor bis zu einer bestimmten Höhe. */
-export interface Obstacle extends ObstacleShape {
-  id: string;
-  kind: "baum" | "berg" | "gebaeude";
-}
+export type { Obstacle, ObstacleProfiles } from "@shared/obstacleProfiles";
 
+// Schlüssel bleibt v1: loadObstacleProfiles migriert die alte Array-Form automatisch
 export const OBSTACLES_STORAGE_KEY = "campmesser.sunObstacles.v1";
 
-export function loadObstacles(): Obstacle[] {
+export function loadObstacleProfiles(): ObstacleProfiles {
   try {
     const raw = localStorage.getItem(OBSTACLES_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as Obstacle[];
-    return Array.isArray(parsed) ? parsed.filter(o => o && typeof o.azimuth === "number") : [];
+    if (!raw) return emptyProfiles();
+    return normalizeProfiles(JSON.parse(raw)) ?? emptyProfiles();
   } catch {
-    return [];
+    return emptyProfiles();
+  }
+}
+
+export function saveObstacleProfiles(profiles: ObstacleProfiles) {
+  try {
+    localStorage.setItem(OBSTACLES_STORAGE_KEY, JSON.stringify(profiles));
+  } catch {
+    /* Speicher voll oder blockiert – Anzeige funktioniert trotzdem */
   }
 }

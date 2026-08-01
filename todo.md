@@ -159,6 +159,16 @@
 - [x] Geräte-Sync über das Konto: Tabelle userSettings (userId+key unique, JSON-Wert, Migration 0008), settings-Router (all/set, Schlüssel-Allowlist in shared/settings.ts), Client-Hook useSyncedSetting (Server-Stand gewinnt beim Laden, lokale Änderungen werden gepusht, ohne Anmeldung rein lokal); angebunden: Kachel-Reihenfolge + ausgeblendete Kacheln, Hindernis-Profil des Sonnen-Kompasses, eigene Materialien im Trockenzeiten-Rechner (3 Tests)
 - [x] Code-Splitting: alle Routen ausser Home per React.lazy in eigene Chunks (Haupt-Bundle 914 kB → 532 kB, gzip 262 kB → 165 kB); Route-Chunks werden 2,5 s nach App-Start im Leerlauf vorgeladen, damit der Service Worker sie cached und die Offline-Module offline nutzbar bleiben; getThemePreference nach client/src/lib/themePreference.ts ausgelagert
 
+## Erweiterungen (Nutzerwunsch 01.08.2026, Runde 3)
+
+- [x] index.html von 369 kB auf 1,7 kB verkleinert: Manus-Runtime-Plugin (367 kB Inline-Skript) und jsx-loc nur noch im Dev-Server, totes Analytics-Tag entfernt
+- [x] Chunk-Lade-Fehler nach Deployments abgefangen: lazyWithRetry lädt einmalig neu (60-s-Schleifenschutz), danach ErrorBoundary
+- [x] CI: GitHub-Actions-Workflow (pnpm install/check/test/build bei Push auf main und PRs)
+- [x] Login-Rate-Limiting: max. 10 Fehlversuche pro E-Mail+IP in 15 Min (server/rateLimit.ts, 6 Tests)
+- [x] DB-Backup: scripts/backup-db.sh (mysqldump, gzip, Rotation 14 Stände) + Abschnitt in DEPLOYMENT-HETZNER.md (Cronjob, Restore)
+- [x] Wasserwaage (/wasserwaage): Libelle mit Lagesensor, Grad-Anzeige beider Achsen, Unterleg-Tipps, «Hier nullen»-Kalibrierung, Bildschirmdrehungs-Kompensation, iOS-Berechtigung; Logik in shared/level.ts mit 8 Tests, offline
+- [x] Hindernis-Profil pro Zeltplatz: Profile {global, spots} in shared/obstacleProfiles.ts (alte Array-Form wird migriert, 7 Tests), Profil-Chips im Sonnen-Kompass (Allgemein + Favoriten mit Zähler), Spots-Link übergibt spot-ID und wählt das Profil automatisch, Energie-Budget nutzt das Profil des Prognose-Zeltplatzes, Sync über bestehenden Schlüssel sunObstacles
+
 ## Logo (Nutzerwunsch 31.07.2026)
 
 - [x] Eigenständiges CampMesser-Logo entworfen: Taschenmesser mit aufgeklappter Klinge als SVG-Bauteil `client/src/components/BrandLogo.tsx` (skalierbar, echte Transparenz, Farbe via currentColor)

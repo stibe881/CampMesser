@@ -21,7 +21,8 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { calcEnergyBudget } from "@shared/calculators";
 import { compassDirection, computeSolarAlignment } from "@shared/solar";
-import { loadObstacles } from "@/lib/obstacleStore";
+import { loadObstacleProfiles } from "@/lib/obstacleStore";
+import { getProfileObstacles } from "@shared/obstacleProfiles";
 import { cn } from "@/lib/utils";
 
 const presetConsumers = [
@@ -50,10 +51,15 @@ export default function EnergyPage() {
     | { status: "idle" | "loading" | "error" }
     | { status: "ok"; avgSunHours: number; days: number; source: string }
   >({ status: "idle" });
-  // Koordinaten des zuletzt geladenen Orts – Basis für die Panel-Ausrichtungshilfe
-  const [panelCoords, setPanelCoords] = useState<{ lat: number; lng: number } | null>(null);
-  // Hindernis-Profil aus dem Sonnen-Kompass (einmal beim Öffnen laden)
-  const [obstacles] = useState(() => loadObstacles());
+  // Koordinaten des zuletzt geladenen Orts – Basis für die Panel-Ausrichtungshilfe.
+  // spotId gesetzt = Prognose kam von einem Zeltplatz-Favoriten → dessen Hindernis-Profil nutzen
+  const [panelCoords, setPanelCoords] = useState<{
+    lat: number;
+    lng: number;
+    spotId?: number;
+  } | null>(null);
+  // Hindernis-Profile aus dem Sonnen-Kompass (einmal beim Öffnen laden)
+  const [profiles] = useState(() => loadObstacleProfiles());
   const spotsQuery = trpc.spots.list.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
@@ -63,8 +69,8 @@ export default function EnergyPage() {
   spotsRef.current = spotsQuery.data;
 
   /** Sonnenschein-Prognose für Koordinaten laden und als effektive Sonnenstunden übernehmen. */
-  const fetchSunshine = async (lat: number, lng: number, source: string) => {
-    setPanelCoords({ lat, lng });
+  const fetchSunshine = async (lat: number, lng: number, source: string, spotId?: number) => {
+    setPanelCoords({ lat, lng, spotId });
     const params = new URLSearchParams({
       latitude: lat.toFixed(4),
       longitude: lng.toFixed(4),
@@ -89,8 +95,8 @@ export default function EnergyPage() {
       // Ohne GPS: Prognose für den ersten gespeicherten Zeltplatz übernehmen
       const spot = spotsRef.current?.[0];
       if (spot) {
-        fetchSunshine(spot.latitude, spot.longitude, `Zeltplatz «${spot.name}»`).catch(() =>
-          setForecastState({ status: "error" }),
+        fetchSunshine(spot.latitude, spot.longitude, `Zeltplatz «${spot.name}»`, spot.id).catch(
+          () => setForecastState({ status: "error" }),
         );
       } else {
         setForecastState({ status: "error" });
@@ -130,7 +136,7 @@ export default function EnergyPage() {
       retriedWithSpots.current = true;
       const spot = spotsQuery.data[0];
       setForecastState({ status: "loading" });
-      fetchSunshine(spot.latitude, spot.longitude, `Zeltplatz «${spot.name}»`).catch(() =>
+      fetchSunshine(spot.latitude, spot.longitude, `Zeltplatz «${spot.name}»`, spot.id).catch(() =>
         setForecastState({ status: "error" }),
       );
     }
@@ -179,7 +185,13 @@ export default function EnergyPage() {
     [batteryWh, solarWatts, sunHours, consumers],
   );
 
-  // Optimale Panel-Ausrichtung für heute am zuletzt geladenen Ort
+  // Optimale Panel-Ausrichtung für heute am zuletzt geladenen Ort. Kam die
+  // Prognose von einem Zeltplatz-Favoriten, gilt dessen Hindernis-Profil,
+  // sonst das allgemeine Profil aus dem Sonnen-Kompass.
+  const obstacles = useMemo(
+    () => getProfileObstacles(profiles, panelCoords?.spotId ?? null),
+    [profiles, panelCoords?.spotId],
+  );
   const alignment = useMemo(
     () =>
       panelCoords

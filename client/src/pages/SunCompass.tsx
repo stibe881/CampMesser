@@ -9,6 +9,7 @@ import {
   Sunrise,
   Sunset,
   Sun as SunIcon,
+  Tent,
   Trash2,
   TreePine,
   Building2,
@@ -29,12 +30,21 @@ import { Slider } from "@/components/ui/slider";
 import { getSunPosition, getSunTimes } from "@/lib/sun";
 import { isBlocked } from "@shared/obstacles";
 import {
-  loadObstacles,
-  OBSTACLES_STORAGE_KEY,
+  loadObstacleProfiles,
+  saveObstacleProfiles,
   type Obstacle,
+  type ObstacleProfiles,
 } from "@/lib/obstacleStore";
+import {
+  getProfileObstacles,
+  normalizeProfiles,
+  withProfileObstacles,
+} from "@shared/obstacleProfiles";
 import { useDeviceHeading } from "@/hooks/useDeviceHeading";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import { cn } from "@/lib/utils";
 
 interface GeoState {
   status: "loading" | "ok" | "error";
@@ -452,8 +462,9 @@ export default function SunCompassPage() {
     const lat = parseFloat(params.get("lat") ?? "");
     const lon = parseFloat(params.get("lon") ?? "");
     const name = params.get("name");
+    const spotId = parseInt(params.get("spot") ?? "", 10);
     if (!Number.isNaN(lat) && !Number.isNaN(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
-      return { lat, lon, name: name ?? undefined };
+      return { lat, lon, name: name ?? undefined, spotId: Number.isNaN(spotId) ? null : spotId };
     }
     return null;
   });
@@ -465,7 +476,12 @@ export default function SunCompassPage() {
     const now = new Date();
     return now.getHours() * 60 + now.getMinutes();
   });
-  const [obstacles, setObstacles] = useState<Obstacle[]>(() => loadObstacles());
+  // Hindernis-Profile: allgemein plus optional eines pro Zeltplatz-Favorit
+  const [profiles, setProfiles] = useState<ObstacleProfiles>(() => loadObstacleProfiles());
+  const [activeSpotId, setActiveSpotId] = useState<number | null>(() => urlSpot?.spotId ?? null);
+  const { isAuthenticated } = useAuth();
+  const { data: spots } = trpc.spots.list.useQuery(undefined, { enabled: isAuthenticated });
+  const obstacles = getProfileObstacles(profiles, activeSpotId);
   const [newKind, setNewKind] = useState<Obstacle["kind"]>("baum");
   const [newAzimuth, setNewAzimuth] = useState("180");
   const [newHeight, setNewHeight] = useState("25");
@@ -473,26 +489,21 @@ export default function SunCompassPage() {
   const [placeMode, setPlaceMode] = useState(false);
   const compass = useDeviceHeading();
 
-  // Geräte-Sync: Hindernis-Profil vom Konto übernehmen bzw. Änderungen hochladen
-  const obstaclesSync = useSyncedSetting<Obstacle[]>("sunObstacles", value => {
-    if (!Array.isArray(value)) return;
-    const clean = value.filter(o => o && typeof o.azimuth === "number");
-    setObstacles(clean);
-    try {
-      localStorage.setItem(OBSTACLES_STORAGE_KEY, JSON.stringify(clean));
-    } catch {
-      /* Speicher voll oder blockiert – Anzeige funktioniert trotzdem */
-    }
+  // Geräte-Sync: Hindernis-Profile vom Konto übernehmen bzw. Änderungen hochladen.
+  // normalizeProfiles versteht auch die alte Array-Form (nur globales Profil).
+  const obstaclesSync = useSyncedSetting<unknown>("sunObstacles", value => {
+    const normalized = normalizeProfiles(value);
+    if (!normalized) return;
+    setProfiles(normalized);
+    saveObstacleProfiles(normalized);
   });
 
+  /** Hindernis-Liste des aktiven Profils ersetzen, lokal speichern und syncen. */
   const saveObstacles = (next: Obstacle[]) => {
-    setObstacles(next);
-    try {
-      localStorage.setItem(OBSTACLES_STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      /* Speicher voll oder blockiert – Anzeige funktioniert trotzdem */
-    }
-    obstaclesSync.push(next);
+    const nextProfiles = withProfileObstacles(profiles, activeSpotId, next);
+    setProfiles(nextProfiles);
+    saveObstacleProfiles(nextProfiles);
+    obstaclesSync.push(nextProfiles);
   };
 
   const addObstacle = () => {
@@ -866,6 +877,53 @@ export default function SunCompassPage() {
                 Diagramm und berechnet, wann sie die Sonne verdecken – wichtig für Zelt und
                 Solarpanels.
               </p>
+
+              {/* Profil-Auswahl: allgemeines Panorama oder eines pro Zeltplatz-Favorit */}
+              {(spots?.length ?? 0) > 0 && (
+                <div
+                  className="mb-4 flex flex-wrap items-center gap-2"
+                  role="group"
+                  aria-label="Hindernis-Profil wählen"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActiveSpotId(null)}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                      activeSpotId === null
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-card text-muted-foreground hover:border-primary/50",
+                    )}
+                  >
+                    <Compass className="h-3.5 w-3.5" aria-hidden="true" />
+                    Allgemein
+                  </button>
+                  {spots!.map(spot => {
+                    const count = profiles.spots[String(spot.id)]?.length ?? 0;
+                    return (
+                      <button
+                        key={spot.id}
+                        type="button"
+                        onClick={() => setActiveSpotId(spot.id)}
+                        className={cn(
+                          "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                          activeSpotId === spot.id
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-card text-muted-foreground hover:border-primary/50",
+                        )}
+                      >
+                        <Tent className="h-3.5 w-3.5" aria-hidden="true" />
+                        {spot.name}
+                        {count > 0 && (
+                          <span className="rounded-full bg-background/60 px-1.5 text-[10px] font-semibold">
+                            {count}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               {obstacles.length > 0 && (
                 <ul className="mb-4 space-y-2">
