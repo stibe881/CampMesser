@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "wouter";
-import { Link2, Loader2, Plus, QrCode, Share2, Trash2 } from "lucide-react";
+import { Link2, Loader2, Package, Plus, QrCode, Scale, Share2, Trash2 } from "lucide-react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { familyAddOns } from "@shared/packTemplates";
+import { computePackWeight, formatGrams } from "@shared/packWeight";
 import { cn } from "@/lib/utils";
 
 export default function PackListDetailPage() {
@@ -20,6 +21,7 @@ export default function PackListDetailPage() {
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
   const query = trpc.packing.items.useQuery({ listId }, { enabled: isAuthenticated && !isNaN(listId) });
+  const inventoryQuery = trpc.inventory.list.useQuery(undefined, { enabled: isAuthenticated });
 
   const [newItem, setNewItem] = useState("");
   const [newCategory, setNewCategory] = useState("");
@@ -117,6 +119,22 @@ export default function PackListDetailPage() {
     return Array.from(map.entries());
   }, [query.data?.items]);
 
+  // Gewichts-Bilanz über den Namens-Abgleich mit dem Inventar
+  const weight = useMemo(
+    () => computePackWeight(query.data?.items ?? [], inventoryQuery.data ?? []),
+    [query.data?.items, inventoryQuery.data],
+  );
+
+  // Inventar-Gegenstände, die noch nicht auf der Liste stehen (per Name)
+  const inventorySuggestions = useMemo(() => {
+    const listNames = new Set(
+      (query.data?.items ?? []).map(i => i.name.trim().toLowerCase().replace(/\s+/g, " ")),
+    );
+    return (inventoryQuery.data ?? []).filter(
+      inv => !listNames.has(inv.name.trim().toLowerCase().replace(/\s+/g, " ")),
+    );
+  }, [query.data?.items, inventoryQuery.data]);
+
   if (loading || (isAuthenticated && query.isLoading)) {
     return (
       <div className="container flex justify-center py-16">
@@ -155,9 +173,30 @@ export default function PackListDetailPage() {
         backLabel="Packlisten"
       />
 
-      <div className="mb-6">
+      <div className="mb-2">
         <Progress value={progress} aria-label={`Fortschritt: ${Math.round(progress)} Prozent gepackt`} />
       </div>
+
+      {/* Gewichts-Bilanz aus dem Inventar-Abgleich */}
+      {weight.matchedCount > 0 && (
+        <p className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Scale className="h-4 w-4 text-primary" aria-hidden="true" />
+            <span className="font-medium text-foreground">{formatGrams(weight.totalGrams)}</span>
+            gesamt
+          </span>
+          <span>
+            <span className="font-medium text-foreground">{formatGrams(weight.packedGrams)}</span>{" "}
+            gepackt
+          </span>
+          <span>{weight.totalVolumeLiters.toLocaleString("de-CH")} l Volumen</span>
+          <span className="text-xs">
+            ({weight.matchedCount} von {weight.matchedCount + weight.unmatchedCount} Einträgen im
+            Inventar gefunden)
+          </span>
+        </p>
+      )}
+      {weight.matchedCount === 0 && <div className="mb-4" />}
 
       {/* Liste teilen */}
       <div className="mb-6">
@@ -246,6 +285,41 @@ export default function PackListDetailPage() {
           <Plus className="h-4 w-4" aria-hidden="true" />
         </Button>
       </form>
+
+      {/* Aus dem Inventar übernehmen */}
+      {inventorySuggestions.length > 0 && (
+        <div className="mb-6">
+          <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
+            <Package className="h-4 w-4 text-primary" aria-hidden="true" />
+            Aus deinem Inventar übernehmen
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {inventorySuggestions.slice(0, 20).map(inv => (
+              <button
+                key={inv.id}
+                type="button"
+                disabled={addMutation.isPending}
+                onClick={() =>
+                  addMutation.mutate({
+                    listId,
+                    items: [{ name: inv.name, category: inv.category, quantity: 1 }],
+                  })
+                }
+                className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                aria-label={`${inv.name} aus dem Inventar zur Liste hinzufügen`}
+              >
+                + {inv.name}
+                {inv.weightGrams > 0 && (
+                  <span className="ml-1 opacity-70">({formatGrams(inv.weightGrams)})</span>
+                )}
+              </button>
+            ))}
+          </div>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Einträge mit Inventar-Treffer zählen automatisch zur Gewichts-Bilanz oben.
+          </p>
+        </div>
+      )}
 
       {/* Familien-Add-ons */}
       <div className="mb-6 flex flex-wrap gap-2">

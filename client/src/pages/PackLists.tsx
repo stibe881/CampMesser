@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Backpack, Bike, ListPlus, Loader2, Plus, Trash2, Users } from "lucide-react";
+import { Backpack, Bike, Copy, ListPlus, Loader2, Plus, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -47,6 +47,14 @@ export default function PackListsPage() {
 
   const deleteMutation = trpc.packing.deleteList.useMutation({
     onSuccess: () => utils.packing.lists.invalidate(),
+  });
+
+  const duplicateMutation = trpc.packing.duplicateList.useMutation({
+    onSuccess: () => {
+      utils.packing.lists.invalidate();
+      toast.success("Liste kopiert – alle Einträge sind unabgehakt");
+    },
+    onError: () => toast.error("Kopieren fehlgeschlagen"),
   });
 
   if (loading) {
@@ -173,6 +181,16 @@ export default function PackListsPage() {
                   <p className="font-semibold">{list.name}</p>
                   <p className="text-sm text-muted-foreground">{scenarioLabel}</p>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative z-10 text-muted-foreground hover:text-primary"
+                  disabled={duplicateMutation.isPending}
+                  onClick={() => duplicateMutation.mutate({ id: list.id })}
+                  aria-label={`Packliste ${list.name} duplizieren`}
+                >
+                  <Copy className="h-4 w-4" aria-hidden="true" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"

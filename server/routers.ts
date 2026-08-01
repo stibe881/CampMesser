@@ -96,6 +96,45 @@ export const appRouter = router({
         await updateUserName(ctx.user.id, input.name);
         return { success: true } as const;
       }),
+    updateEmail: protectedProcedure
+      .input(
+        z.object({
+          newEmail: z.string().min(3).max(320),
+          currentPassword: z.string().min(1).max(200),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { validateEmail, normalizeEmail, verifyPassword, findUserByEmail } = await import(
+          "./localAuth"
+        );
+        if (!ctx.user.passwordHash) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Für dieses Konto ist kein Passwort hinterlegt.",
+          });
+        }
+        const ok = await verifyPassword(input.currentPassword, ctx.user.passwordHash);
+        if (!ok) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Das Passwort ist falsch." });
+        }
+        const email = normalizeEmail(input.newEmail);
+        if (!validateEmail(email)) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Bitte gib eine gültige E-Mail-Adresse ein.",
+          });
+        }
+        const existing = await findUserByEmail(email);
+        if (existing && existing.id !== ctx.user.id) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Diese E-Mail-Adresse wird bereits von einem anderen Konto verwendet.",
+          });
+        }
+        const { updateUserEmail } = await import("./localAuth");
+        await updateUserEmail(ctx.user.id, email);
+        return { success: true, email } as const;
+      }),
     updatePassword: protectedProcedure
       .input(
         z.object({
@@ -209,6 +248,29 @@ export const appRouter = router({
     deleteList: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deletePackList(input.id, ctx.user.id)),
+    /** Liste samt Einträgen kopieren – alles unabgehakt, ohne Teil-Link. */
+    duplicateList: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const list = await db.getPackList(input.id, ctx.user.id);
+        if (!list) throw new TRPCError({ code: "NOT_FOUND", message: "Liste nicht gefunden" });
+        const items = await db.getPackItems(input.id);
+        const newListId = await db.createPackList({
+          userId: ctx.user.id,
+          name: `${list.name} (Kopie)`.slice(0, 120),
+          scenario: list.scenario,
+        });
+        await db.addPackItems(
+          items.map(item => ({
+            listId: newListId,
+            name: item.name,
+            category: item.category,
+            quantity: item.quantity,
+            sortOrder: item.sortOrder,
+          })),
+        );
+        return { listId: newListId };
+      }),
     items: protectedProcedure
       .input(z.object({ listId: z.number() }))
       .query(async ({ ctx, input }) => {
