@@ -81,7 +81,21 @@ async function startServer() {
   });
   // Client-Fehlerprotokoll: der ErrorBoundary meldet Abstürze hierher.
   // Anhängen an logs/client-errors.log mit einfacher Grössen-Rotation.
+  // Rate-Limit pro IP, damit der Endpoint nicht als Spam-Ziel taugt.
+  const logBuckets = new Map<string, { count: number; resetAt: number }>();
   app.post("/api/log", async (req, res) => {
+    const ip = req.ip ?? "?";
+    const now = Date.now();
+    const bucket = logBuckets.get(ip);
+    if (!bucket || now > bucket.resetAt) {
+      if (logBuckets.size > 5000) logBuckets.clear();
+      logBuckets.set(ip, { count: 1, resetAt: now + 10 * 60 * 1000 });
+    } else if (bucket.count >= 20) {
+      res.status(429).json({ success: false });
+      return;
+    } else {
+      bucket.count += 1;
+    }
     try {
       const body = req.body as Record<string, unknown> | undefined;
       const clean = (v: unknown, max: number) =>
