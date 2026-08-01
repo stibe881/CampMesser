@@ -22,6 +22,13 @@ describe("searchKnowledge", () => {
     expect(results.some(r => r.module === "Natur")).toBe(true);
   });
 
+  it("findet die Werkzeug-Module selbst", () => {
+    const level = searchKnowledge("wasserwaage");
+    expect(level[0]).toMatchObject({ module: "Modul", path: "/wasserwaage" });
+    const diary = searchKnowledge("tagebuch");
+    expect(diary.some(r => r.path === "/tagebuch")).toBe(true);
+  });
+
   it("faltet Umlaute: «kase» findet dieselben Treffer wie «käse»", () => {
     const a = searchKnowledge("käse").map(r => r.id);
     const b = searchKnowledge("kase").map(r => r.id);

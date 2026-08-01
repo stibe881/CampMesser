@@ -5,6 +5,7 @@
  */
 import { firstAidTopics } from "@/data/firstAid";
 import { knots } from "@/data/knots";
+import { modules } from "@/data/modules";
 import { natureEntries } from "@/data/nature";
 import { recipes } from "@/data/recipes";
 
@@ -72,6 +73,10 @@ function buildIndex(): IndexEntry[] {
     });
   };
 
+  // Werkzeuge selbst sind auch findbar: «wasserwaage» führt direkt zur Kachel
+  for (const m of modules) {
+    add(`module-${m.path}`, m.title, "Modul", m.path, m.description, [m.description, m.group]);
+  }
   for (const t of firstAidTopics) {
     add(`firstaid-${t.id}`, t.title, "Erste Hilfe", "/erste-hilfe", t.summary, [
       t.summary,
