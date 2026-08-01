@@ -159,6 +159,10 @@
 - [x] Geräte-Sync über das Konto: Tabelle userSettings (userId+key unique, JSON-Wert, Migration 0008), settings-Router (all/set, Schlüssel-Allowlist in shared/settings.ts), Client-Hook useSyncedSetting (Server-Stand gewinnt beim Laden, lokale Änderungen werden gepusht, ohne Anmeldung rein lokal); angebunden: Kachel-Reihenfolge + ausgeblendete Kacheln, Hindernis-Profil des Sonnen-Kompasses, eigene Materialien im Trockenzeiten-Rechner (3 Tests)
 - [x] Code-Splitting: alle Routen ausser Home per React.lazy in eigene Chunks (Haupt-Bundle 914 kB → 532 kB, gzip 262 kB → 165 kB); Route-Chunks werden 2,5 s nach App-Start im Leerlauf vorgeladen, damit der Service Worker sie cached und die Offline-Module offline nutzbar bleiben; getThemePreference nach client/src/lib/themePreference.ts ausgelagert
 
+## Offene Aufgaben (User)
+
+- [ ] Backup auf dem Hetzner-Server einrichten: einmal `bash ~/campmesser/scripts/backup-db.sh` von Hand ausführen, dann Cronjob in konsoleH anlegen (z. B. täglich 03:30) – siehe Abschnitt «Datenbank-Backup» in DEPLOYMENT-HETZNER.md
+
 ## Erweiterungen (Nutzerwunsch 01.08.2026, Runde 3)
 
 - [x] index.html von 369 kB auf 1,7 kB verkleinert: Manus-Runtime-Plugin (367 kB Inline-Skript) und jsx-loc nur noch im Dev-Server, totes Analytics-Tag entfernt
