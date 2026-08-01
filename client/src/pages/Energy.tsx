@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BatteryCharging,
+  Compass,
   Loader2,
   Plus,
   Sun,
@@ -19,6 +20,8 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { calcEnergyBudget } from "@shared/calculators";
+import { compassDirection, computeSolarAlignment } from "@shared/solar";
+import { loadObstacles } from "@/lib/obstacleStore";
 import { cn } from "@/lib/utils";
 
 const presetConsumers = [
@@ -47,6 +50,10 @@ export default function EnergyPage() {
     | { status: "idle" | "loading" | "error" }
     | { status: "ok"; avgSunHours: number; days: number; source: string }
   >({ status: "idle" });
+  // Koordinaten des zuletzt geladenen Orts – Basis für die Panel-Ausrichtungshilfe
+  const [panelCoords, setPanelCoords] = useState<{ lat: number; lng: number } | null>(null);
+  // Hindernis-Profil aus dem Sonnen-Kompass (einmal beim Öffnen laden)
+  const [obstacles] = useState(() => loadObstacles());
   const spotsQuery = trpc.spots.list.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
@@ -57,6 +64,7 @@ export default function EnergyPage() {
 
   /** Sonnenschein-Prognose für Koordinaten laden und als effektive Sonnenstunden übernehmen. */
   const fetchSunshine = async (lat: number, lng: number, source: string) => {
+    setPanelCoords({ lat, lng });
     const params = new URLSearchParams({
       latitude: lat.toFixed(4),
       longitude: lng.toFixed(4),
@@ -169,6 +177,15 @@ export default function EnergyPage() {
         })),
       }),
     [batteryWh, solarWatts, sunHours, consumers],
+  );
+
+  // Optimale Panel-Ausrichtung für heute am zuletzt geladenen Ort
+  const alignment = useMemo(
+    () =>
+      panelCoords
+        ? computeSolarAlignment(new Date(), panelCoords.lat, panelCoords.lng, obstacles)
+        : null,
+    [panelCoords, obstacles],
   );
 
   if (loading) {
@@ -352,6 +369,65 @@ export default function EnergyPage() {
           </p>
         </CardContent>
       </Card>
+
+      {/* Panel-Ausrichtung heute */}
+      {alignment && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="mb-3 flex items-center gap-2">
+              <Compass className="h-4 w-4 text-primary" aria-hidden="true" />
+              <h2 className="font-serif text-base font-semibold">
+                Optimale Panel-Ausrichtung heute
+              </h2>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="rounded-lg bg-accent/50 py-2.5">
+                <p className="font-serif text-xl font-bold text-primary">
+                  {alignment.azimuth}° {compassDirection(alignment.azimuth)}
+                </p>
+                <p className="text-xs text-muted-foreground">Ausrichtung</p>
+              </div>
+              <div className="rounded-lg bg-accent/50 py-2.5">
+                <p className="font-serif text-xl font-bold text-primary">{alignment.tilt}°</p>
+                <p className="text-xs text-muted-foreground">Neigung</p>
+              </div>
+              <div className="rounded-lg bg-accent/50 py-2.5">
+                <p className="font-serif text-xl font-bold text-primary">
+                  +{alignment.gainVsFlatPercent} %
+                </p>
+                <p className="text-xs text-muted-foreground">vs. flach gelegt</p>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Direkte Sonne heute{" "}
+              {alignment.firstSun &&
+                alignment.lastSun &&
+                `von ${alignment.firstSun.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} bis ${alignment.lastSun.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })}`}{" "}
+              ({alignment.usableSunHours} h).
+              {alignment.shadedHours > 0 && (
+                <>
+                  {" "}
+                  {alignment.shadedHours} h sind durch dein Hindernis-Profil aus dem{" "}
+                  <a href="/sonne" className="font-medium text-primary hover:underline">
+                    Sonnen-Kompass
+                  </a>{" "}
+                  verschattet – die Empfehlung rechnet das bereits ein.
+                </>
+              )}
+              {alignment.shadedHours === 0 && obstacles.length === 0 && (
+                <>
+                  {" "}
+                  Tipp: Erfasse Bäume oder Berge im{" "}
+                  <a href="/sonne" className="font-medium text-primary hover:underline">
+                    Sonnen-Kompass
+                  </a>
+                  , dann berücksichtigt die Empfehlung auch die Verschattung.
+                </>
+              )}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Verbraucher */}
       <h2 className="mb-3 font-serif text-lg font-semibold">Deine Verbraucher</h2>

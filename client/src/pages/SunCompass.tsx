@@ -27,7 +27,12 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { getSunPosition, getSunTimes } from "@/lib/sun";
-import { isBlocked, type ObstacleShape } from "@shared/obstacles";
+import { isBlocked } from "@shared/obstacles";
+import {
+  loadObstacles,
+  OBSTACLES_STORAGE_KEY,
+  type Obstacle,
+} from "@/lib/obstacleStore";
 import { useDeviceHeading } from "@/hooks/useDeviceHeading";
 
 interface GeoState {
@@ -37,30 +42,11 @@ interface GeoState {
   errorMessage?: string;
 }
 
-/** Ein Hindernis am Horizont: verdeckt einen Richtungs-Sektor bis zu einer bestimmten Höhe. */
-interface Obstacle extends ObstacleShape {
-  id: string;
-  kind: "baum" | "berg" | "gebaeude";
-}
-
 const OBSTACLE_KINDS = {
   baum: { label: "Baum / Wald", icon: TreePine, defaultHeight: 25, defaultWidth: 30 },
   berg: { label: "Berg / Hügel", icon: Mountain, defaultHeight: 15, defaultWidth: 60 },
   gebaeude: { label: "Gebäude", icon: Building2, defaultHeight: 30, defaultWidth: 20 },
 } as const;
-
-const OBSTACLES_STORAGE_KEY = "campmesser.sunObstacles.v1";
-
-function loadObstacles(): Obstacle[] {
-  try {
-    const raw = localStorage.getItem(OBSTACLES_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as Obstacle[];
-    return Array.isArray(parsed) ? parsed.filter(o => o && typeof o.azimuth === "number") : [];
-  } catch {
-    return [];
-  }
-}
 
 /** Zusammenhängende Schatten-Zeitfenster eines Tages berechnen (nur während die Sonne über dem Horizont ist). */
 function computeShadowWindows(
