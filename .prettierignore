@@ -33,3 +33,10 @@ pnpm-lock.yaml
 # OS files
 .DS_Store
 Thumbs.db
+
+# Playwright-Artefakte
+test-results/
+playwright-report/
+
+# Drizzle-generierte Dateien (eigenes Format)
+drizzle/meta/

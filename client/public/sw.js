@@ -20,7 +20,7 @@ self.addEventListener("install", event => {
     caches
       .open(SHELL_CACHE)
       .then(cache => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting()),
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -32,10 +32,10 @@ self.addEventListener("activate", event => {
         Promise.all(
           keys
             .filter(key => !key.startsWith(CACHE_VERSION))
-            .map(key => caches.delete(key)),
-        ),
+            .map(key => caches.delete(key))
+        )
       )
-      .then(() => self.clients.claim()),
+      .then(() => self.clients.claim())
   );
 });
 
@@ -56,7 +56,8 @@ self.addEventListener("fetch", event => {
   if (
     url.pathname.startsWith("/api/") ||
     url.pathname.startsWith("/__manus__/") ||
-    (url.origin !== self.location.origin && !url.pathname.startsWith("/manus-storage/"))
+    (url.origin !== self.location.origin &&
+      !url.pathname.startsWith("/manus-storage/"))
   ) {
     return;
   }
@@ -68,7 +69,8 @@ self.addEventListener("fetch", event => {
         const cached = await cache.match(request);
         // Nur saubere 200er-Antworten ausliefern; Redirect-/Opaque-Einträge
         // sind für <img> nicht nutzbar und werden verworfen.
-        if (cached && cached.status === 200 && !cached.redirected) return cached;
+        if (cached && cached.status === 200 && !cached.redirected)
+          return cached;
         if (cached) await cache.delete(request);
         try {
           // /manus-storage antwortet mit 307 auf eine signierte CloudFront-URL.
@@ -82,7 +84,8 @@ self.addEventListener("fetch", event => {
             const clean = new Response(body, {
               status: 200,
               headers: {
-                "Content-Type": response.headers.get("Content-Type") || "image/png",
+                "Content-Type":
+                  response.headers.get("Content-Type") || "image/png",
               },
             });
             await cache.put(request, clean.clone());
@@ -92,7 +95,7 @@ self.addEventListener("fetch", event => {
         } catch {
           return Response.error();
         }
-      }),
+      })
     );
     return;
   }
@@ -102,7 +105,8 @@ self.addEventListener("fetch", event => {
     caches.open(SHELL_CACHE).then(async cache => {
       try {
         const response = await fetch(request);
-        if (response.ok && !response.redirected) cache.put(request, response.clone());
+        if (response.ok && !response.redirected)
+          cache.put(request, response.clone());
         return response;
       } catch {
         const cached = await cache.match(request);
@@ -114,6 +118,6 @@ self.addEventListener("fetch", event => {
         }
         return Response.error();
       }
-    }),
+    })
   );
 });

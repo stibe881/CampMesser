@@ -26,7 +26,9 @@ describe("parseHuntStations", () => {
   it("verwirft kaputtes JSON und fremde Formate", () => {
     expect(parseHuntStations("kaputt")).toEqual([]);
     expect(parseHuntStations('{"a":1}')).toEqual([]);
-    expect(parseHuntStations(JSON.stringify([{ title: "ohne Rest" }]))).toEqual([]);
+    expect(parseHuntStations(JSON.stringify([{ title: "ohne Rest" }]))).toEqual(
+      []
+    );
   });
 
   it("begrenzt die Stations-Anzahl", () => {
@@ -37,8 +39,16 @@ describe("parseHuntStations", () => {
 
 describe("solutionWordFromStations", () => {
   it("bildet das Lösungswort aus den Buchstaben in Reihenfolge", () => {
-    const stations = [station("Z"), station(), station("e"), station("l"), station("t")];
-    expect(solutionWordFromStations(parseHuntStations(JSON.stringify(stations)))).toBe("ZELT");
+    const stations = [
+      station("Z"),
+      station(),
+      station("e"),
+      station("l"),
+      station("t"),
+    ];
+    expect(
+      solutionWordFromStations(parseHuntStations(JSON.stringify(stations)))
+    ).toBe("ZELT");
   });
 
   it("gibt null ohne Buchstaben zurück", () => {
@@ -53,6 +63,8 @@ describe("hunts router", () => {
       req: { protocol: "https", headers: {} } as TrpcContext["req"],
       res: {} as TrpcContext["res"],
     });
-    await expect(caller.hunts.list()).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    await expect(caller.hunts.list()).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
   });
 });

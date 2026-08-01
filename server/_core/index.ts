@@ -48,7 +48,10 @@ async function startServer() {
     const startedAt = Date.now();
     let dbOk = false;
     try {
-      const [{ getDb }, { sql }] = await Promise.all([import("../db"), import("drizzle-orm")]);
+      const [{ getDb }, { sql }] = await Promise.all([
+        import("../db"),
+        import("drizzle-orm"),
+      ]);
       const db = await getDb();
       if (db) {
         await db.execute(sql`select 1`);
@@ -63,9 +66,18 @@ async function startServer() {
       try {
         const fs = await import("node:fs/promises");
         const path = await import("node:path");
-        const raw = await fs.readFile(path.join(import.meta.dirname, "version.json"), "utf8");
-        const parsed = JSON.parse(raw) as { version?: string; builtAt?: string };
-        versionInfo = { version: parsed.version ?? "unbekannt", builtAt: parsed.builtAt ?? null };
+        const raw = await fs.readFile(
+          path.join(import.meta.dirname, "version.json"),
+          "utf8"
+        );
+        const parsed = JSON.parse(raw) as {
+          version?: string;
+          builtAt?: string;
+        };
+        versionInfo = {
+          version: parsed.version ?? "unbekannt",
+          builtAt: parsed.builtAt ?? null,
+        };
       } catch {
         versionInfo = { version: "dev", builtAt: null };
       }
@@ -119,7 +131,11 @@ async function startServer() {
       if (stat.size > 1024 * 1024) {
         const content = await fs.readFile(logFile, "utf8");
         const lines = content.split("\n");
-        await fs.writeFile(logFile, lines.slice(Math.floor(lines.length / 2)).join("\n"), "utf8");
+        await fs.writeFile(
+          logFile,
+          lines.slice(Math.floor(lines.length / 2)).join("\n"),
+          "utf8"
+        );
       }
     } catch {
       // Logging darf den Betrieb nie stören
@@ -142,9 +158,10 @@ async function startServer() {
   }
 
   const preferredPort = parseInt(process.env.PORT || "3000");
-  const port = process.env.NODE_ENV === "production" 
-    ? preferredPort 
-    : await findAvailablePort(preferredPort);
+  const port =
+    process.env.NODE_ENV === "production"
+      ? preferredPort
+      : await findAvailablePort(preferredPort);
 
   if (port !== preferredPort) {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);

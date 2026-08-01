@@ -39,7 +39,9 @@ export function normalizeProfiles(value: unknown): ObstacleProfiles | null {
     const v = value as { global?: unknown; spots?: unknown };
     const spots: Record<string, Obstacle[]> = {};
     if (v.spots && typeof v.spots === "object") {
-      for (const [key, list] of Object.entries(v.spots as Record<string, unknown>)) {
+      for (const [key, list] of Object.entries(
+        v.spots as Record<string, unknown>
+      )) {
         const clean = cleanList(list);
         if (clean.length > 0) spots[key] = clean;
       }
@@ -52,7 +54,7 @@ export function normalizeProfiles(value: unknown): ObstacleProfiles | null {
 /** Hindernisse des aktiven Profils (null = allgemeines Profil). */
 export function getProfileObstacles(
   profiles: ObstacleProfiles,
-  spotId: number | null,
+  spotId: number | null
 ): Obstacle[] {
   if (spotId != null) return profiles.spots[String(spotId)] ?? [];
   return profiles.global;
@@ -62,7 +64,7 @@ export function getProfileObstacles(
 export function withProfileObstacles(
   profiles: ObstacleProfiles,
   spotId: number | null,
-  obstacles: Obstacle[],
+  obstacles: Obstacle[]
 ): ObstacleProfiles {
   if (spotId != null) {
     const spots = { ...profiles.spots };

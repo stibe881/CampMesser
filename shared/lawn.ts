@@ -38,7 +38,10 @@ export interface LawnResult {
 }
 
 /** Bewertung einer geplanten Standzeit gegen das Ergebnis. */
-export function lawnVerdict(plannedHours: number, result: LawnResult): LawnVerdict {
+export function lawnVerdict(
+  plannedHours: number,
+  result: LawnResult
+): LawnVerdict {
   if (plannedHours <= result.yellowingHours) return "safe";
   if (plannedHours <= result.damageHours) return "caution";
   return "damage";
@@ -112,7 +115,9 @@ export function formatHours(hours: number): string {
   if (hours < 24) return `${Math.round(hours)} Std.`;
   const days = Math.floor(hours / 24);
   const rest = Math.round(hours % 24);
-  return rest > 0 ? `${days} Tag${days > 1 ? "e" : ""} ${rest} Std.` : `${days} Tag${days > 1 ? "e" : ""}`;
+  return rest > 0
+    ? `${days} Tag${days > 1 ? "e" : ""} ${rest} Std.`
+    : `${days} Tag${days > 1 ? "e" : ""}`;
 }
 
 /**
@@ -124,7 +129,7 @@ export function formatHours(hours: number): string {
  */
 export function deriveMoisture(
   soilMoisture: number | null | undefined,
-  rain48hMm: number,
+  rain48hMm: number
 ): Moisture {
   if (typeof soilMoisture === "number" && Number.isFinite(soilMoisture)) {
     if (soilMoisture > 0.3) return "wet";

@@ -8,7 +8,10 @@
  *    Standard auf der Manus-Plattform, wenn kein SMTP konfiguriert ist.
  * 3. Server-Log als letzte Rückfallebene, damit Codes im Betrieb nachvollziehbar sind.
  */
-export async function sendResetCode(email: string, code: string): Promise<void> {
+export async function sendResetCode(
+  email: string,
+  code: string
+): Promise<void> {
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
@@ -48,5 +51,7 @@ export async function sendResetCode(email: string, code: string): Promise<void> 
     console.error("[Mailer] Benachrichtigung fehlgeschlagen:", err);
   }
 
-  console.warn(`[Mailer] Kein Zustellweg verfügbar. Reset-Code für ${email}: ${code}`);
+  console.warn(
+    `[Mailer] Kein Zustellweg verfügbar. Reset-Code für ${email}: ${code}`
+  );
 }

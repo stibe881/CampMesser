@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Backpack, Bike, Copy, ListPlus, Loader2, Plus, Trash2, Users } from "lucide-react";
+import {
+  Backpack,
+  Bike,
+  Copy,
+  ListPlus,
+  Loader2,
+  Plus,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -20,7 +29,10 @@ import { trpc } from "@/lib/trpc";
 import { packScenarios } from "@shared/packTemplates";
 import { cn } from "@/lib/utils";
 
-const scenarioIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+const scenarioIcons: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
   solo: Backpack,
   familie: Users,
   motorrad: Bike,
@@ -30,7 +42,9 @@ const scenarioIcons: Record<string, React.ComponentType<{ className?: string }>>
 export default function PackListsPage() {
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
-  const listsQuery = trpc.packing.lists.useQuery(undefined, { enabled: isAuthenticated });
+  const listsQuery = trpc.packing.lists.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [scenario, setScenario] = useState("solo");
   const [name, setName] = useState("");
@@ -60,7 +74,10 @@ export default function PackListsPage() {
   if (loading) {
     return (
       <div className="container flex justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Lädt" />
+        <Loader2
+          className="h-6 w-6 animate-spin text-muted-foreground"
+          aria-label="Lädt"
+        />
       </div>
     );
   }
@@ -97,7 +114,8 @@ export default function PackListsPage() {
           <DialogHeader>
             <DialogTitle>Neue Packliste</DialogTitle>
             <DialogDescription>
-              Wähle ein Szenario – die passende Basis-Ausrüstung wird automatisch eingetragen.
+              Wähle ein Szenario – die passende Basis-Ausrüstung wird
+              automatisch eingetragen.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -113,14 +131,16 @@ export default function PackListsPage() {
                       "flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-all",
                       scenario === s.id
                         ? "border-primary bg-accent"
-                        : "border-border hover:border-primary/40",
+                        : "border-border hover:border-primary/40"
                     )}
                     aria-pressed={scenario === s.id}
                     aria-label={`Szenario ${s.label} wählen`}
                   >
                     <Icon className="h-5 w-5 text-primary" aria-hidden="true" />
                     <span className="text-sm font-semibold">{s.label}</span>
-                    <span className="text-xs text-muted-foreground">{s.description}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {s.description}
+                    </span>
                   </button>
                 );
               })}
@@ -135,7 +155,11 @@ export default function PackListsPage() {
               <Input
                 id="list-name"
                 className="mt-1.5"
-                placeholder={selectedScenario ? `z. B. ${selectedScenario.label} Sommer` : "Name"}
+                placeholder={
+                  selectedScenario
+                    ? `z. B. ${selectedScenario.label} Sommer`
+                    : "Name"
+                }
                 value={name}
                 onChange={e => setName(e.target.value)}
               />
@@ -144,11 +168,17 @@ export default function PackListsPage() {
               className="w-full"
               disabled={createMutation.isPending}
               onClick={() => {
-                const finalName = name.trim() || selectedScenario?.label || "Meine Packliste";
+                const finalName =
+                  name.trim() || selectedScenario?.label || "Meine Packliste";
                 createMutation.mutate({ name: finalName, scenario });
               }}
             >
-              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+              {createMutation.isPending && (
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              )}
               Liste erstellen
             </Button>
           </div>
@@ -157,13 +187,18 @@ export default function PackListsPage() {
 
       {listsQuery.isLoading ? (
         <div className="flex justify-center py-10">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Lädt" />
+          <Loader2
+            className="h-6 w-6 animate-spin text-muted-foreground"
+            aria-label="Lädt"
+          />
         </div>
       ) : listsQuery.data && listsQuery.data.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2">
           {listsQuery.data.map(list => {
             const Icon = scenarioIcons[list.scenario] ?? ListPlus;
-            const scenarioLabel = packScenarios.find(s => s.id === list.scenario)?.label ?? "Eigene Liste";
+            const scenarioLabel =
+              packScenarios.find(s => s.id === list.scenario)?.label ??
+              "Eigene Liste";
             return (
               <div
                 key={list.id}
@@ -179,7 +214,9 @@ export default function PackListsPage() {
                 </span>
                 <div className="flex-1">
                   <p className="font-semibold">{list.name}</p>
-                  <p className="text-sm text-muted-foreground">{scenarioLabel}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {scenarioLabel}
+                  </p>
                 </div>
                 <Button
                   variant="ghost"
@@ -210,7 +247,10 @@ export default function PackListsPage() {
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-border p-10 text-center">
-          <Backpack className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" aria-hidden="true" />
+          <Backpack
+            className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
+            aria-hidden="true"
+          />
           <p className="font-medium">Noch keine Packlisten</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Erstelle deine erste Liste – wähle einfach ein Szenario aus.

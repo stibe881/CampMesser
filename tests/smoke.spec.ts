@@ -10,8 +10,12 @@ test("Startseite rendert das Modul-Grid", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle(/CampMesser/);
   // Hero und mindestens eine bekannte Modul-Kachel sichtbar
-  await expect(page.getByRole("link", { name: /SOS & Notfall öffnen/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Packlisten öffnen/ })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /SOS & Notfall öffnen/ })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /Packlisten öffnen/ })
+  ).toBeVisible();
 });
 
 test("Anmelde-Seite ist erreichbar", async ({ page }) => {
@@ -19,7 +23,9 @@ test("Anmelde-Seite ist erreichbar", async ({ page }) => {
   await expect(page.getByText(/E-Mail/i).first()).toBeVisible();
 });
 
-test("Offline-Wissensmodul lädt (Code-Splitting funktioniert)", async ({ page }) => {
+test("Offline-Wissensmodul lädt (Code-Splitting funktioniert)", async ({
+  page,
+}) => {
   await page.goto("/erste-hilfe");
   await expect(page.getByText("Zeckenbiss").first()).toBeVisible();
 });

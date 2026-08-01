@@ -1,5 +1,13 @@
 import { useMemo, useState } from "react";
-import { Moon, PawPrint, Sparkles, TreePine, WifiOff, Lightbulb, HelpCircle } from "lucide-react";
+import {
+  Moon,
+  PawPrint,
+  Sparkles,
+  TreePine,
+  WifiOff,
+  Lightbulb,
+  HelpCircle,
+} from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import {
   Accordion,
@@ -9,7 +17,12 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { natureCategories, natureEntries } from "@/data/nature";
-import { getMoonInfo, nextFullMoons, nextNewMoons, stargazingQuality } from "@shared/moon";
+import {
+  getMoonInfo,
+  nextFullMoons,
+  nextNewMoons,
+  stargazingQuality,
+} from "@shared/moon";
 import { upcomingShowers } from "@shared/astro";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +57,10 @@ function MoonCalendar() {
   const newMoons = useMemo(() => nextNewMoons(now, 3), [now]);
 
   return (
-    <section className="mb-6 rounded-xl border border-border bg-card p-4" aria-label="Mondphasen-Kalender">
+    <section
+      className="mb-6 rounded-xl border border-border bg-card p-4"
+      aria-label="Mondphasen-Kalender"
+    >
       <div className="mb-3 flex items-center gap-2">
         <Moon className="h-4 w-4 text-primary" aria-hidden="true" />
         <h2 className="font-serif text-lg font-semibold">Mond heute Nacht</h2>
@@ -59,7 +75,9 @@ function MoonCalendar() {
           <p className="text-sm text-muted-foreground">
             Zu {Math.round(moon.illumination * 100)} % beleuchtet
           </p>
-          <Badge className={cn("mt-1.5 border-0", QUALITY_STYLES[quality.score])}>
+          <Badge
+            className={cn("mt-1.5 border-0", QUALITY_STYLES[quality.score])}
+          >
             Sterne schauen: {quality.score}
           </Badge>
         </div>
@@ -91,7 +109,8 @@ function MoonCalendar() {
         </div>
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        Berechnung erfolgt direkt auf dem Gerät (±1 Tag genau) – funktioniert auch offline.
+        Berechnung erfolgt direkt auf dem Gerät (±1 Tag genau) – funktioniert
+        auch offline.
       </p>
     </section>
   );
@@ -109,7 +128,9 @@ function MeteorCalendar() {
     >
       <div className="mb-3 flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
-        <h2 className="font-serif text-lg font-semibold">Nächste Sternschnuppen-Nächte</h2>
+        <h2 className="font-serif text-lg font-semibold">
+          Nächste Sternschnuppen-Nächte
+        </h2>
       </div>
       <ul className="space-y-3">
         {showers.map(entry => (
@@ -117,7 +138,9 @@ function MeteorCalendar() {
             <div className="flex flex-wrap items-center gap-2">
               <p className="font-semibold">{entry.shower.name}</p>
               {entry.activeNow && (
-                <Badge className="border-0 bg-primary/15 text-primary">Jetzt aktiv</Badge>
+                <Badge className="border-0 bg-primary/15 text-primary">
+                  Jetzt aktiv
+                </Badge>
               )}
               <span className="ml-auto text-sm text-muted-foreground">
                 {entry.daysUntilPeak === 0
@@ -128,14 +151,16 @@ function MeteorCalendar() {
               </span>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              {fmtDate(entry.peakDate)} · bis {entry.shower.zhr} Meteore/h · Blickrichtung{" "}
-              {entry.shower.radiant}
+              {fmtDate(entry.peakDate)} · bis {entry.shower.zhr} Meteore/h ·
+              Blickrichtung {entry.shower.radiant}
             </p>
             <p className="mt-1.5 text-sm">{entry.shower.tip}</p>
             <p
               className={cn(
                 "mt-1.5 text-xs",
-                entry.moonInterferes ? "text-destructive" : "text-muted-foreground",
+                entry.moonInterferes
+                  ? "text-destructive"
+                  : "text-muted-foreground"
               )}
             >
               {entry.moonInterferes
@@ -146,8 +171,8 @@ function MeteorCalendar() {
         ))}
       </ul>
       <p className="mt-3 text-xs text-muted-foreground">
-        Raten gelten für dunklen Himmel ohne Lichtverschmutzung. Termine jährlich ungefähr gleich,
-        Berechnung offline auf dem Gerät.
+        Raten gelten für dunklen Himmel ohne Lichtverschmutzung. Termine
+        jährlich ungefähr gleich, Berechnung offline auf dem Gerät.
       </p>
     </section>
   );
@@ -167,13 +192,18 @@ export default function NaturePage() {
 
       <div className="mb-4 flex items-center gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
         <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
-        Das ganze Lexikon ist in der App gespeichert und ohne Internetverbindung nutzbar.
+        Das ganze Lexikon ist in der App gespeichert und ohne Internetverbindung
+        nutzbar.
       </div>
 
       <MoonCalendar />
       <MeteorCalendar />
 
-      <div className="mb-4 grid grid-cols-3 gap-2" role="group" aria-label="Kategorie wählen">
+      <div
+        className="mb-4 grid grid-cols-3 gap-2"
+        role="group"
+        aria-label="Kategorie wählen"
+      >
         {natureCategories.map(c => {
           const Icon = iconMap[c.icon] ?? TreePine;
           return (
@@ -185,7 +215,7 @@ export default function NaturePage() {
                 "flex flex-col items-center gap-1.5 rounded-xl border p-3.5 transition-all",
                 category === c.id
                   ? "border-primary bg-accent text-accent-foreground"
-                  : "border-border bg-card text-muted-foreground hover:border-primary/40",
+                  : "border-border bg-card text-muted-foreground hover:border-primary/40"
               )}
               aria-pressed={category === c.id}
             >
@@ -196,7 +226,9 @@ export default function NaturePage() {
         })}
       </div>
 
-      <p className="mb-5 text-sm text-muted-foreground">{activeCategory.intro}</p>
+      <p className="mb-5 text-sm text-muted-foreground">
+        {activeCategory.intro}
+      </p>
 
       <Accordion type="single" collapsible className="space-y-3">
         {entries.map(entry => (
@@ -209,7 +241,9 @@ export default function NaturePage() {
               <div className="text-left">
                 <p className="font-semibold">{entry.name}</p>
                 {entry.latinOrExtra && (
-                  <p className="text-xs italic text-muted-foreground">{entry.latinOrExtra}</p>
+                  <p className="text-xs italic text-muted-foreground">
+                    {entry.latinOrExtra}
+                  </p>
                 )}
               </div>
             </AccordionTrigger>
@@ -222,7 +256,9 @@ export default function NaturePage() {
                   className="mb-4 aspect-[4/3] w-full rounded-lg border border-border object-cover"
                 />
               )}
-              <p className="mb-4 text-sm leading-relaxed">{entry.description}</p>
+              <p className="mb-4 text-sm leading-relaxed">
+                {entry.description}
+              </p>
 
               <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 Erkennungsmerkmale
@@ -230,23 +266,34 @@ export default function NaturePage() {
               <ul className="mb-4 space-y-1 text-sm">
                 {entry.features.map(f => (
                   <li key={f} className="flex gap-2">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                      aria-hidden="true"
+                    />
                     {f}
                   </li>
                 ))}
               </ul>
 
               <div className="mb-3 flex gap-2.5 rounded-lg bg-accent/60 p-3">
-                <Lightbulb className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                <Lightbulb
+                  className="h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
                 <p className="text-sm">
-                  <span className="font-semibold">Wusstest du?</span> {entry.funFact}
+                  <span className="font-semibold">Wusstest du?</span>{" "}
+                  {entry.funFact}
                 </p>
               </div>
 
               <div className="flex gap-2.5 rounded-lg border border-chart-1/40 bg-chart-1/10 p-3">
-                <HelpCircle className="h-4 w-4 shrink-0 text-amber-glow" aria-hidden="true" />
+                <HelpCircle
+                  className="h-4 w-4 shrink-0 text-amber-glow"
+                  aria-hidden="true"
+                />
                 <p className="text-sm">
-                  <span className="font-semibold">Für Kinder:</span> {entry.kidQuestion}
+                  <span className="font-semibold">Für Kinder:</span>{" "}
+                  {entry.kidQuestion}
                 </p>
               </div>
             </AccordionContent>

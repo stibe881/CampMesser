@@ -25,7 +25,8 @@ export function validateEmail(email: string): boolean {
 }
 
 export function validatePassword(password: string): string | null {
-  if (password.length < 8) return "Das Passwort muss mindestens 8 Zeichen lang sein.";
+  if (password.length < 8)
+    return "Das Passwort muss mindestens 8 Zeichen lang sein.";
   if (password.length > 200) return "Das Passwort ist zu lang.";
   return null;
 }
@@ -36,15 +37,22 @@ export async function hashPassword(password: string): Promise<string> {
   return `${salt}:${derived.toString("hex")}`;
 }
 
-export async function verifyPassword(password: string, stored: string): Promise<boolean> {
+export async function verifyPassword(
+  password: string,
+  stored: string
+): Promise<boolean> {
   const [salt, hash] = stored.split(":");
   if (!salt || !hash) return false;
   const derived = (await scryptAsync(password, salt, 64)) as Buffer;
   const expected = Buffer.from(hash, "hex");
-  return derived.length === expected.length && timingSafeEqual(derived, expected);
+  return (
+    derived.length === expected.length && timingSafeEqual(derived, expected)
+  );
 }
 
-export async function findUserByEmail(email: string): Promise<User | undefined> {
+export async function findUserByEmail(
+  email: string
+): Promise<User | undefined> {
   const db = await getDb();
   if (!db) return undefined;
   const rows = await db
@@ -58,7 +66,7 @@ export async function findUserByEmail(email: string): Promise<User | undefined> 
 export async function registerUser(
   name: string,
   email: string,
-  password: string,
+  password: string
 ): Promise<User> {
   const db = await getDb();
   if (!db) throw new Error("Datenbank nicht verfügbar");
@@ -72,7 +80,11 @@ export async function registerUser(
     loginMethod: "email",
     lastSignedIn: new Date(),
   });
-  const rows = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  const rows = await db
+    .select()
+    .from(users)
+    .where(eq(users.openId, openId))
+    .limit(1);
   if (!rows[0]) throw new Error("Registrierung fehlgeschlagen");
   return rows[0];
 }
@@ -86,21 +98,33 @@ export async function createLocalSessionToken(user: User): Promise<string> {
 }
 
 /** Namen eines Kontos ändern. */
-export async function updateUserName(userId: number, name: string): Promise<void> {
+export async function updateUserName(
+  userId: number,
+  name: string
+): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Datenbank nicht verfügbar");
   await db.update(users).set({ name: name.trim() }).where(eq(users.id, userId));
 }
 
 /** E-Mail-Adresse eines Kontos ändern (normalisiert). */
-export async function updateUserEmail(userId: number, email: string): Promise<void> {
+export async function updateUserEmail(
+  userId: number,
+  email: string
+): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Datenbank nicht verfügbar");
-  await db.update(users).set({ email: normalizeEmail(email) }).where(eq(users.id, userId));
+  await db
+    .update(users)
+    .set({ email: normalizeEmail(email) })
+    .where(eq(users.id, userId));
 }
 
 /** Passwort eines Kontos setzen (Hash wird neu berechnet). */
-export async function updateUserPassword(userId: number, newPassword: string): Promise<void> {
+export async function updateUserPassword(
+  userId: number,
+  newPassword: string
+): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Datenbank nicht verfügbar");
   const passwordHash = await hashPassword(newPassword);
@@ -111,8 +135,14 @@ export async function updateUserPassword(userId: number, newPassword: string): P
 export async function deleteUserAccount(userId: number): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Datenbank nicht verfügbar");
-  const { packLists, packItems, inventoryItems, powerConsumers, foodItems, campSpots } =
-    await import("../drizzle/schema");
+  const {
+    packLists,
+    packItems,
+    inventoryItems,
+    powerConsumers,
+    foodItems,
+    campSpots,
+  } = await import("../drizzle/schema");
   const { inArray } = await import("drizzle-orm");
   // Packlisten-Positionen zuerst (referenzieren Listen)
   const lists = await db
@@ -159,10 +189,14 @@ export async function createResetCode(email: string): Promise<string> {
 }
 
 /** Reset-Code prüfen. Gibt eine Fehlermeldung zurück oder null bei Erfolg. */
-export async function verifyResetCode(email: string, code: string): Promise<string | null> {
+export async function verifyResetCode(
+  email: string,
+  code: string
+): Promise<string | null> {
   const key = normalizeEmail(email);
   const entry = resetCodes.get(key);
-  if (!entry) return "Kein Code angefordert oder Code abgelaufen. Fordere einen neuen Code an.";
+  if (!entry)
+    return "Kein Code angefordert oder Code abgelaufen. Fordere einen neuen Code an.";
   if (Date.now() > entry.expiresAt) {
     resetCodes.delete(key);
     return "Der Code ist abgelaufen. Fordere einen neuen Code an.";

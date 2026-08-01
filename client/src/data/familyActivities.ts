@@ -76,27 +76,31 @@ export const scavengerHunts: ScavengerHunt[] = [
       },
       {
         title: "Station 3: Das Riesenblatt",
-        story: "«Ein Blatt, grösser als eine Kinderhand, hat den Schatz zugedeckt!»",
+        story:
+          "«Ein Blatt, grösser als eine Kinderhand, hat den Schatz zugedeckt!»",
         task: "Finde ein Blatt, das grösser ist als deine Hand, und vergleiche.",
         hint: "Ahorn- und Platanenblätter sind besonders gross.",
         letter: "U",
       },
       {
         title: "Station 4: Der Duft-Detektor",
-        story: "Waldgeister lieben gute Gerüche. Nur wer ihnen etwas Duftendes bringt, darf weiter.",
+        story:
+          "Waldgeister lieben gute Gerüche. Nur wer ihnen etwas Duftendes bringt, darf weiter.",
         task: "Finde etwas, das gut riecht (Tannennadeln, Harz, eine Blume) und lass alle daran schnuppern.",
         hint: "Zerreibe vorsichtig ein paar Nadeln zwischen den Fingern.",
         letter: "M",
       },
       {
         title: "Station 5: Der Zauberstab",
-        story: "«Mit einem Buchstaben-Zauberstab habe ich den Schatz verzaubert», sagt Nussli.",
+        story:
+          "«Mit einem Buchstaben-Zauberstab habe ich den Schatz verzaubert», sagt Nussli.",
         task: "Finde einen Stock, der wie ein Buchstabe aussieht. Welcher Buchstabe ist es?",
         hint: "Y, L, T und V sind am einfachsten zu finden.",
       },
       {
         title: "Station 6: Die Schatzwächter-Feder",
-        story: "Ein Vogel bewacht den Schatz von oben. Sein Geschenk öffnet das letzte Tor.",
+        story:
+          "Ein Vogel bewacht den Schatz von oben. Sein Geschenk öffnet das letzte Tor.",
         task: "Finde eine Feder oder etwas anderes, das fliegen kann (z. B. einen Ahorn-Flügelsamen).",
         hint: "Flügelsamen drehen sich wie kleine Helikopter, wenn du sie wirfst.",
       },
@@ -124,13 +128,15 @@ export const scavengerHunts: ScavengerHunt[] = [
       },
       {
         title: "Mission 2: Die Flüster-Bäume",
-        story: "Die Bäume tauschen geheime Nachrichten aus, wenn der Wind sie anstösst.",
+        story:
+          "Die Bäume tauschen geheime Nachrichten aus, wenn der Wind sie anstösst.",
         task: "Schliess die Augen und höre den Wind in den Blättern. Klingt er eher wie Rauschen, Flüstern oder Knistern?",
         letter: "H",
       },
       {
         title: "Mission 3: Der Brumm-Funk",
-        story: "Achtung, feindlicher Funkverkehr! Kleine Flieger senden Brummsignale.",
+        story:
+          "Achtung, feindlicher Funkverkehr! Kleine Flieger senden Brummsignale.",
         task: "Höre ein Insekt summen oder brummen. Kannst du es auch sehen?",
         hint: "Bei Blumen und blühenden Sträuchern funkt es am meisten.",
         letter: "R",
@@ -182,7 +188,8 @@ export const scavengerHunts: ScavengerHunt[] = [
       },
       {
         title: "Spur 4: Der Verhör-Zeuge",
-        story: "Ein kleines Tier hat alles beobachtet. Du musst es finden und geduldig verhören.",
+        story:
+          "Ein kleines Tier hat alles beobachtet. Du musst es finden und geduldig verhören.",
         task: "Entdecke ein Tier (eine Ameise zählt auch!) und beobachte es eine Minute lang. Was hat es «gesehen»? Denk dir aus, was es dir erzählen würde.",
         letter: "T",
       },
@@ -193,7 +200,8 @@ export const scavengerHunts: ScavengerHunt[] = [
       },
       {
         title: "Spur 6: Der Glücksstein-Test",
-        story: "Der Dieb hat einen magischen Stein verloren. Wer ihn findet, kann den Kompass zurückzaubern.",
+        story:
+          "Der Dieb hat einen magischen Stein verloren. Wer ihn findet, kann den Kompass zurückzaubern.",
         task: "Finde einen Stein, der genau in deine Hosentasche passt – dein Detektiv-Glücksstein!",
       },
     ],
@@ -239,7 +247,8 @@ export const scavengerHunts: ScavengerHunt[] = [
       },
       {
         title: "Farbe 6: Blau wie der Himmel",
-        story: "Das Blau ist am schwersten zu retten – es versteckt sich fast immer oben.",
+        story:
+          "Das Blau ist am schwersten zu retten – es versteckt sich fast immer oben.",
         task: "Finde etwas Blaues. Wenn du nichts findest: Zeig in den Himmel – der zählt auch!",
       },
       {
@@ -263,7 +272,8 @@ export const scavengerHunts: ScavengerHunt[] = [
     stations: [
       {
         title: "Etappe 1: Die Tau-Suche",
-        story: "Plitsch sucht seine Geschwister – winzige Tropfen, die überall glitzern.",
+        story:
+          "Plitsch sucht seine Geschwister – winzige Tropfen, die überall glitzern.",
         task: "Finde Wasser in der Natur: einen Tautropfen, eine Pfütze, feuchtes Moos oder einen Bach.",
         hint: "Früh am Morgen glitzert Tau auf Gräsern und Spinnennetzen.",
         letter: "S",
@@ -352,31 +362,41 @@ export const natureQuizzes: NatureQuiz[] = [
         question: "Welcher Baum sticht, wenn du seine Nadeln anfasst?",
         options: ["Die Tanne", "Die Fichte", "Die Lärche"],
         correctIndex: 1,
-        explanation: "Merkspruch: «Die Fichte sticht, die Tanne nicht!» Tannennadeln sind weich und vorne eingekerbt.",
+        explanation:
+          "Merkspruch: «Die Fichte sticht, die Tanne nicht!» Tannennadeln sind weich und vorne eingekerbt.",
       },
       {
         question: "Was verliert die Lärche im Winter?",
         options: ["Ihre Rinde", "Ihre Zapfen", "Ihre Nadeln"],
         correctIndex: 2,
-        explanation: "Die Lärche ist der einzige heimische Nadelbaum, der im Herbst alle Nadeln abwirft – vorher werden sie goldgelb.",
+        explanation:
+          "Die Lärche ist der einzige heimische Nadelbaum, der im Herbst alle Nadeln abwirft – vorher werden sie goldgelb.",
       },
       {
-        question: "Welches Tier vergisst seine Nussverstecke und pflanzt so neue Bäume?",
+        question:
+          "Welches Tier vergisst seine Nussverstecke und pflanzt so neue Bäume?",
         options: ["Das Eichhörnchen", "Der Fuchs", "Der Dachs"],
         correctIndex: 0,
-        explanation: "Eichhörnchen verstecken hunderte Nüsse und finden viele nie wieder – daraus wachsen neue Bäume.",
+        explanation:
+          "Eichhörnchen verstecken hunderte Nüsse und finden viele nie wieder – daraus wachsen neue Bäume.",
       },
       {
         question: "Woran erkennst du eine Fuchsspur?",
-        options: ["Sie ist riesig wie ein Teller", "Die Abdrücke liegen auf einer geraden Linie", "Sie hat sechs Zehen"],
+        options: [
+          "Sie ist riesig wie ein Teller",
+          "Die Abdrücke liegen auf einer geraden Linie",
+          "Sie hat sechs Zehen",
+        ],
         correctIndex: 1,
-        explanation: "Füchse «schnüren»: Ihre Pfotenabdrücke liegen wie Perlen auf einer Schnur hintereinander.",
+        explanation:
+          "Füchse «schnüren»: Ihre Pfotenabdrücke liegen wie Perlen auf einer Schnur hintereinander.",
       },
       {
         question: "Welche Baumrinde brennt sogar, wenn sie nass ist?",
         options: ["Buchenrinde", "Eichenrinde", "Birkenrinde"],
         correctIndex: 2,
-        explanation: "Birkenrinde enthält ätherische Öle und ist der beste natürliche Feuerstarter des Waldes.",
+        explanation:
+          "Birkenrinde enthält ätherische Öle und ist der beste natürliche Feuerstarter des Waldes.",
       },
     ],
   },
@@ -389,31 +409,44 @@ export const natureQuizzes: NatureQuiz[] = [
         question: "Welcher Stern zeigt dir immer, wo Norden ist?",
         options: ["Der Polarstern", "Die Wega", "Der Mond"],
         correctIndex: 0,
-        explanation: "Der Polarstern steht fast genau über dem Nordpol und bewegt sich scheinbar nie.",
+        explanation:
+          "Der Polarstern steht fast genau über dem Nordpol und bewegt sich scheinbar nie.",
       },
       {
         question: "Wie sieht das Sternbild Kassiopeia aus?",
         options: ["Wie ein Kreis", "Wie ein grosses W", "Wie ein Dreieck"],
         correctIndex: 1,
-        explanation: "Fünf helle Sterne bilden ein W – manchmal steht es auf dem Kopf und sieht aus wie ein M.",
+        explanation:
+          "Fünf helle Sterne bilden ein W – manchmal steht es auf dem Kopf und sieht aus wie ein M.",
       },
       {
         question: "Wie findest du mit dem Grossen Wagen den Polarstern?",
-        options: ["Er steht direkt daneben", "Hintere Kastenkante 5× verlängern", "Der Deichsel folgen"],
+        options: [
+          "Er steht direkt daneben",
+          "Hintere Kastenkante 5× verlängern",
+          "Der Deichsel folgen",
+        ],
         correctIndex: 1,
-        explanation: "Verlängere die hintere Kante des Wagenkastens fünfmal nach oben – dort funkelt der Polarstern.",
+        explanation:
+          "Verlängere die hintere Kante des Wagenkastens fünfmal nach oben – dort funkelt der Polarstern.",
       },
       {
         question: "Was siehst du bei dunklem Himmel mitten im Sommerdreieck?",
         options: ["Die Milchstrasse", "Einen Planeten", "Ein Flugzeug"],
         correctIndex: 0,
-        explanation: "Das schimmernde Band der Milchstrasse zieht mitten durch das Sommerdreieck – Milliarden ferner Sterne!",
+        explanation:
+          "Das schimmernde Band der Milchstrasse zieht mitten durch das Sommerdreieck – Milliarden ferner Sterne!",
       },
       {
         question: "Woraus besteht der Gürtel des Orion?",
-        options: ["Aus drei Sternen in einer Reihe", "Aus einem hellen Nebel", "Aus sieben Sternen im Kreis"],
+        options: [
+          "Aus drei Sternen in einer Reihe",
+          "Aus einem hellen Nebel",
+          "Aus sieben Sternen im Kreis",
+        ],
         correctIndex: 0,
-        explanation: "Drei helle Sterne in einer geraden Reihe bilden den berühmten Oriongürtel – im Winter gut sichtbar.",
+        explanation:
+          "Drei helle Sterne in einer geraden Reihe bilden den berühmten Oriongürtel – im Winter gut sichtbar.",
       },
     ],
   },
@@ -426,31 +459,37 @@ export const natureQuizzes: NatureQuiz[] = [
         question: "Welches Tier hinterlässt kleine, herzförmige Spuren?",
         options: ["Das Wildschwein", "Das Reh", "Der Dachs"],
         correctIndex: 1,
-        explanation: "Rehspuren sind nur 4–5 cm klein und sehen aus wie zwei Kommas, die ein Herz bilden.",
+        explanation:
+          "Rehspuren sind nur 4–5 cm klein und sehen aus wie zwei Kommas, die ein Herz bilden.",
       },
       {
         question: "Was verrät dir, dass ein Wildschwein in der Nähe war?",
         options: ["Umgewühlte Erde", "Abgenagte Zapfen", "Federn am Boden"],
         correctIndex: 0,
-        explanation: "Wildschweine wühlen mit ihrer Schnauze den Boden um, wenn sie nach Würmern und Wurzeln suchen.",
+        explanation:
+          "Wildschweine wühlen mit ihrer Schnauze den Boden um, wenn sie nach Würmern und Wurzeln suchen.",
       },
       {
         question: "Welches Tier baut unterirdische Burgen mit vielen Etagen?",
         options: ["Der Fuchs", "Das Eichhörnchen", "Der Dachs"],
         correctIndex: 2,
-        explanation: "Dachsburgen haben viele Gänge und Kammern – manche sind über 100 Jahre alt.",
+        explanation:
+          "Dachsburgen haben viele Gänge und Kammern – manche sind über 100 Jahre alt.",
       },
       {
-        question: "Ein Zapfen sieht aus wie ein abgenagter Maiskolben. Wer war das?",
+        question:
+          "Ein Zapfen sieht aus wie ein abgenagter Maiskolben. Wer war das?",
         options: ["Ein Eichhörnchen", "Ein Reh", "Ein Vogel"],
         correctIndex: 0,
-        explanation: "Eichhörnchen nagen die Schuppen der Zapfen ab, um an die Samen zu kommen – übrig bleibt der «Maiskolben».",
+        explanation:
+          "Eichhörnchen nagen die Schuppen der Zapfen ab, um an die Samen zu kommen – übrig bleibt der «Maiskolben».",
       },
       {
         question: "Welches Geräusch macht ein erschrockenes Reh?",
         options: ["Es miaut", "Es bellt", "Es pfeift"],
         correctIndex: 1,
-        explanation: "Rehe stossen einen rauen Beller aus – viele verwechseln ihn mit einem Hund!",
+        explanation:
+          "Rehe stossen einen rauen Beller aus – viele verwechseln ihn mit einem Hund!",
       },
     ],
   },
@@ -460,34 +499,57 @@ export const natureQuizzes: NatureQuiz[] = [
     ageHint: "ab ca. 6 Jahren",
     questions: [
       {
-        question: "Was solltest du beim Zelten tun, wenn ein Gewitter aufzieht?",
-        options: ["Unter den höchsten Baum stehen", "Ins Auto oder ein Gebäude gehen", "Im Zelt die Stangen festhalten"],
+        question:
+          "Was solltest du beim Zelten tun, wenn ein Gewitter aufzieht?",
+        options: [
+          "Unter den höchsten Baum stehen",
+          "Ins Auto oder ein Gebäude gehen",
+          "Im Zelt die Stangen festhalten",
+        ],
         correctIndex: 1,
-        explanation: "Ein Auto oder Gebäude schützt am besten. Zelte und einzelne Bäume sind bei Blitzen gefährlich!",
+        explanation:
+          "Ein Auto oder Gebäude schützt am besten. Zelte und einzelne Bäume sind bei Blitzen gefährlich!",
       },
       {
         question: "Wie erkennst du, dass bald ein Gewitter kommen könnte?",
-        options: ["Hohe Türme aus Blumenkohl-Wolken", "Ganz dünne Schleierwolken", "Ein knallblauer Himmel"],
+        options: [
+          "Hohe Türme aus Blumenkohl-Wolken",
+          "Ganz dünne Schleierwolken",
+          "Ein knallblauer Himmel",
+        ],
         correctIndex: 0,
-        explanation: "Riesige, blumenkohlförmige Wolkentürme (Cumulonimbus) sind Gewitterwolken – Zeit, das Camp zu sichern!",
+        explanation:
+          "Riesige, blumenkohlförmige Wolkentürme (Cumulonimbus) sind Gewitterwolken – Zeit, das Camp zu sichern!",
       },
       {
-        question: "Wie weit ist ein Gewitter weg, wenn zwischen Blitz und Donner 9 Sekunden liegen?",
+        question:
+          "Wie weit ist ein Gewitter weg, wenn zwischen Blitz und Donner 9 Sekunden liegen?",
         options: ["9 Kilometer", "etwa 3 Kilometer", "90 Meter"],
         correctIndex: 1,
-        explanation: "Sekunden zählen und durch 3 teilen ergibt ungefähr die Entfernung in Kilometern: 9 ÷ 3 = 3 km.",
+        explanation:
+          "Sekunden zählen und durch 3 teilen ergibt ungefähr die Entfernung in Kilometern: 9 ÷ 3 = 3 km.",
       },
       {
         question: "Was bedeutet Morgentau auf der Zeltplane meistens?",
-        options: ["Es wird regnen", "Ein schöner Tag kommt", "Es gibt Nebel den ganzen Tag"],
+        options: [
+          "Es wird regnen",
+          "Ein schöner Tag kommt",
+          "Es gibt Nebel den ganzen Tag",
+        ],
         correctIndex: 1,
-        explanation: "Tau entsteht in klaren, windstillen Nächten – die kündigen oft einen sonnigen Tag an.",
+        explanation:
+          "Tau entsteht in klaren, windstillen Nächten – die kündigen oft einen sonnigen Tag an.",
       },
       {
         question: "Warum schwirren Schwalben bei schönem Wetter hoch oben?",
-        options: ["Sie üben fürs Wegfliegen", "Ihre Beute, die Insekten, fliegt hoch", "Sie haben Angst vor Katzen"],
+        options: [
+          "Sie üben fürs Wegfliegen",
+          "Ihre Beute, die Insekten, fliegt hoch",
+          "Sie haben Angst vor Katzen",
+        ],
         correctIndex: 1,
-        explanation: "Bei stabilem Hochdruckwetter steigen Insekten hoch hinauf – und die Schwalben folgen ihrem Futter.",
+        explanation:
+          "Bei stabilem Hochdruckwetter steigen Insekten hoch hinauf – und die Schwalben folgen ihrem Futter.",
       },
     ],
   },
@@ -498,33 +560,58 @@ export const natureQuizzes: NatureQuiz[] = [
     questions: [
       {
         question: "Was brauchst du zum Feuermachen zuerst?",
-        options: ["Dicke Holzscheite", "Dünnes, trockenes Anzündmaterial", "Viel Papier und Benzin"],
+        options: [
+          "Dicke Holzscheite",
+          "Dünnes, trockenes Anzündmaterial",
+          "Viel Papier und Benzin",
+        ],
         correctIndex: 1,
-        explanation: "Erst kleines, trockenes Material (Birkenrinde, dünne Zweige), dann immer dickeres Holz – nie Benzin!",
+        explanation:
+          "Erst kleines, trockenes Material (Birkenrinde, dünne Zweige), dann immer dickeres Holz – nie Benzin!",
       },
       {
         question: "Wo darfst du ein Lagerfeuer machen?",
-        options: ["Überall im Wald", "Nur an offiziellen Feuerstellen", "Direkt neben dem Zelt"],
+        options: [
+          "Überall im Wald",
+          "Nur an offiziellen Feuerstellen",
+          "Direkt neben dem Zelt",
+        ],
         correctIndex: 1,
-        explanation: "Nur an erlaubten, eingerichteten Feuerstellen – und bei Waldbrandgefahr gar nicht.",
+        explanation:
+          "Nur an erlaubten, eingerichteten Feuerstellen – und bei Waldbrandgefahr gar nicht.",
       },
       {
         question: "Wie löschst du das Feuer richtig, bevor du schlafen gehst?",
-        options: ["Einfach brennen lassen", "Mit viel Wasser übergiessen und umrühren", "Mit Blättern zudecken"],
+        options: [
+          "Einfach brennen lassen",
+          "Mit viel Wasser übergiessen und umrühren",
+          "Mit Blättern zudecken",
+        ],
         correctIndex: 1,
-        explanation: "Wasser drüber, umrühren, nochmals Wasser – erst wenn nichts mehr zischt und alles kalt ist, ist es sicher.",
+        explanation:
+          "Wasser drüber, umrühren, nochmals Wasser – erst wenn nichts mehr zischt und alles kalt ist, ist es sicher.",
       },
       {
         question: "Welcher Abstand zwischen Feuer und Zelt ist sicher?",
-        options: ["1 grosser Schritt", "mindestens 3–5 Meter", "Das Feuer darf das Zelt berühren"],
+        options: [
+          "1 grosser Schritt",
+          "mindestens 3–5 Meter",
+          "Das Feuer darf das Zelt berühren",
+        ],
         correctIndex: 1,
-        explanation: "Funken fliegen weit! Mindestens 3–5 Meter Abstand, und auf die Windrichtung achten.",
+        explanation:
+          "Funken fliegen weit! Mindestens 3–5 Meter Abstand, und auf die Windrichtung achten.",
       },
       {
         question: "Was machst du, wenn deine Marshmallow-Rute brennt?",
-        options: ["Wild herumfuchteln", "Ruhig ausblasen oder in den Sand tauchen", "Wegwerfen, egal wohin"],
+        options: [
+          "Wild herumfuchteln",
+          "Ruhig ausblasen oder in den Sand tauchen",
+          "Wegwerfen, egal wohin",
+        ],
         correctIndex: 1,
-        explanation: "Ruhig bleiben und ausblasen oder die Spitze auf den Boden drücken – nie mit brennenden Sachen rennen.",
+        explanation:
+          "Ruhig bleiben und ausblasen oder die Spitze auf den Boden drücken – nie mit brennenden Sachen rennen.",
       },
     ],
   },

@@ -14,14 +14,16 @@ export const emergencyNumbers: EmergencyNumber[] = [
     id: "rega",
     label: "Rega 1414",
     number: "1414",
-    description: "Schweizerische Rettungsflugwacht – Bergrettung und medizinische Notfälle aus der Luft.",
+    description:
+      "Schweizerische Rettungsflugwacht – Bergrettung und medizinische Notfälle aus der Luft.",
     primary: true,
   },
   {
     id: "notruf",
     label: "Notruf 112",
     number: "112",
-    description: "Europäischer Notruf – funktioniert in der ganzen EU und der Schweiz, auch ohne SIM-Empfang des eigenen Anbieters.",
+    description:
+      "Europäischer Notruf – funktioniert in der ganzen EU und der Schweiz, auch ohne SIM-Empfang des eigenen Anbieters.",
     primary: true,
   },
   {
@@ -35,19 +37,22 @@ export const emergencyNumbers: EmergencyNumber[] = [
     id: "feuerwehr",
     label: "Feuerwehr 118",
     number: "118",
-    description: "Feuerwehrnotruf Schweiz – bei Bränden, auch Wald- und Flächenbränden.",
+    description:
+      "Feuerwehrnotruf Schweiz – bei Bränden, auch Wald- und Flächenbränden.",
   },
   {
     id: "sanitaet",
     label: "Sanität 144",
     number: "144",
-    description: "Sanitätsnotruf Schweiz – Ambulanz bei medizinischen Notfällen.",
+    description:
+      "Sanitätsnotruf Schweiz – Ambulanz bei medizinischen Notfällen.",
   },
   {
     id: "toxinfo",
     label: "Tox Info 145",
     number: "145",
-    description: "Vergiftungsnotfälle – rund um die Uhr, z. B. bei giftigen Pflanzen oder Pilzen.",
+    description:
+      "Vergiftungsnotfälle – rund um die Uhr, z. B. bei giftigen Pflanzen oder Pilzen.",
   },
 ];
 

@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { UserRound, KeyRound, Mail, Trash2, Palette, Sun, Moon, LogOut } from "lucide-react";
+import {
+  UserRound,
+  KeyRound,
+  Mail,
+  Trash2,
+  Palette,
+  Sun,
+  Moon,
+  LogOut,
+} from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,7 +45,9 @@ export default function ProfilePage() {
   const [deletePw, setDeletePw] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [emailPw, setEmailPw] = useState("");
-  const [themePref, setThemePref] = useState<"light" | "dark" | null>(() => getThemePreference());
+  const [themePref, setThemePref] = useState<"light" | "dark" | null>(() =>
+    getThemePreference()
+  );
 
   useEffect(() => {
     if (user?.name) setName(user.name);
@@ -52,7 +63,9 @@ export default function ProfilePage() {
   });
   const emailMutation = trpc.auth.updateEmail.useMutation({
     onSuccess: () => {
-      toast.success("E-Mail-Adresse aktualisiert – melde dich künftig damit an");
+      toast.success(
+        "E-Mail-Adresse aktualisiert – melde dich künftig damit an"
+      );
       setNewEmail("");
       setEmailPw("");
       void utils.auth.me.invalidate();
@@ -82,14 +95,21 @@ export default function ProfilePage() {
     saveThemePreference(pref);
     setThemePref(pref);
     if (theme !== pref) toggleTheme?.();
-    toast.success(pref === "dark" ? "Dunkles Design als Standard gespeichert" : "Helles Design als Standard gespeichert");
+    toast.success(
+      pref === "dark"
+        ? "Dunkles Design als Standard gespeichert"
+        : "Helles Design als Standard gespeichert"
+    );
   };
 
   if (loading) return null;
   if (!isAuthenticated) {
     return (
       <div className="container max-w-2xl py-6">
-        <PageHeader title="Profil" subtitle="Verwalte dein Konto und deine Einstellungen." />
+        <PageHeader
+          title="Profil"
+          subtitle="Verwalte dein Konto und deine Einstellungen."
+        />
         <LoginPrompt feature="dein Profil" />
       </div>
     );
@@ -97,7 +117,10 @@ export default function ProfilePage() {
 
   return (
     <div className="container max-w-2xl py-6">
-      <PageHeader title="Profil" subtitle={`Angemeldet als ${user?.email ?? user?.name ?? ""}`} />
+      <PageHeader
+        title="Profil"
+        subtitle={`Angemeldet als ${user?.email ?? user?.name ?? ""}`}
+      />
 
       <Card className="mb-5">
         <CardHeader className="pb-3">
@@ -110,7 +133,11 @@ export default function ProfilePage() {
           <p className="mb-3 text-sm text-muted-foreground">
             Wähle, mit welchem Design die App standardmässig startet.
           </p>
-          <div className="flex gap-2" role="group" aria-label="Standard-Design wählen">
+          <div
+            className="flex gap-2"
+            role="group"
+            aria-label="Standard-Design wählen"
+          >
             <Button
               type="button"
               variant={themePref === "light" ? "default" : "outline"}
@@ -153,7 +180,10 @@ export default function ProfilePage() {
               aria-label="Name"
               placeholder="Dein Name"
             />
-            <Button type="submit" disabled={nameMutation.isPending || !name.trim()}>
+            <Button
+              type="submit"
+              disabled={nameMutation.isPending || !name.trim()}
+            >
               Speichern
             </Button>
           </form>
@@ -169,14 +199,20 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent>
           <p className="mb-3 text-sm text-muted-foreground">
-            Aktuell: <span className="font-medium text-foreground">{user?.email ?? "–"}</span>. Mit
-            der neuen Adresse meldest du dich künftig an.
+            Aktuell:{" "}
+            <span className="font-medium text-foreground">
+              {user?.email ?? "–"}
+            </span>
+            . Mit der neuen Adresse meldest du dich künftig an.
           </p>
           <form
             className="space-y-3"
             onSubmit={e => {
               e.preventDefault();
-              emailMutation.mutate({ newEmail: newEmail.trim(), currentPassword: emailPw });
+              emailMutation.mutate({
+                newEmail: newEmail.trim(),
+                currentPassword: emailPw,
+              });
             }}
           >
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -232,7 +268,10 @@ export default function ProfilePage() {
                 toast.error("Die neuen Passwörter stimmen nicht überein.");
                 return;
               }
-              pwMutation.mutate({ currentPassword: currentPw, newPassword: newPw });
+              pwMutation.mutate({
+                currentPassword: currentPw,
+                newPassword: newPw,
+              });
             }}
           >
             <div>
@@ -293,20 +332,22 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent>
           <p className="mb-3 text-sm text-muted-foreground">
-            Löscht dein Konto und alle gespeicherten Daten (Packlisten, Inventar, Zeltplätze,
-            Verbraucher, Kühlbox) unwiderruflich.
+            Löscht dein Konto und alle gespeicherten Daten (Packlisten,
+            Inventar, Zeltplätze, Verbraucher, Kühlbox) unwiderruflich.
           </p>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button type="button" variant="destructive">
-                <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" /> Konto löschen …
+                <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" /> Konto
+                löschen …
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Konto wirklich löschen?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Alle deine Daten werden unwiderruflich gelöscht. Bestätige mit deinem Passwort.
+                  Alle deine Daten werden unwiderruflich gelöscht. Bestätige mit
+                  deinem Passwort.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <div className="py-1">
@@ -337,7 +378,12 @@ export default function ProfilePage() {
       </Card>
 
       <div className="mt-5">
-        <Button type="button" variant="outline" className="w-full" onClick={() => logout()}>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => logout()}
+        >
           <LogOut className="mr-1.5 h-4 w-4" aria-hidden="true" /> Abmelden
         </Button>
       </div>
@@ -346,11 +392,14 @@ export default function ProfilePage() {
       <p className="mt-6 text-center text-xs text-muted-foreground/70">
         CampMesser Version {__APP_VERSION__}
         {__APP_VERSION__ !== "dev" &&
-          ` · Build vom ${new Date(__APP_BUILT_AT__).toLocaleDateString("de-CH", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })}`}
+          ` · Build vom ${new Date(__APP_BUILT_AT__).toLocaleDateString(
+            "de-CH",
+            {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }
+          )}`}
       </p>
     </div>
   );

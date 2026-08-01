@@ -26,22 +26,34 @@ function solarMeanAnomaly(d: number) {
   return rad * (357.5291 + 0.98560028 * d);
 }
 function eclipticLongitude(M: number) {
-  const C = rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+  const C =
+    rad *
+    (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
   const P = rad * 102.9372;
   return M + C + P + Math.PI;
 }
 function declination(l: number, b: number) {
-  return Math.asin(Math.sin(b) * Math.cos(obliquity) + Math.cos(b) * Math.sin(obliquity) * Math.sin(l));
+  return Math.asin(
+    Math.sin(b) * Math.cos(obliquity) +
+      Math.cos(b) * Math.sin(obliquity) * Math.sin(l)
+  );
 }
 function rightAscension(l: number, b: number) {
-  return Math.atan2(Math.sin(l) * Math.cos(obliquity) - Math.tan(b) * Math.sin(obliquity), Math.cos(l));
+  return Math.atan2(
+    Math.sin(l) * Math.cos(obliquity) - Math.tan(b) * Math.sin(obliquity),
+    Math.cos(l)
+  );
 }
 function siderealTime(d: number, lw: number) {
   return rad * (280.16 + 360.9856235 * d) - lw;
 }
 
 /** Sonnenposition (Azimut/Höhe) für Zeitpunkt und Ort. */
-export function getSunPosition(date: Date, lat: number, lng: number): SunPosition {
+export function getSunPosition(
+  date: Date,
+  lat: number,
+  lng: number
+): SunPosition {
   const lw = rad * -lng;
   const phi = rad * lat;
   const d = toDays(date);
@@ -52,9 +64,16 @@ export function getSunPosition(date: Date, lat: number, lng: number): SunPositio
   const H = siderealTime(d, lw) - ra;
 
   const altitude =
-    Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H)) / rad;
+    Math.asin(
+      Math.sin(phi) * Math.sin(dec) +
+        Math.cos(phi) * Math.cos(dec) * Math.cos(H)
+    ) / rad;
   // Azimut: 0 = Süd im Rohwert → auf 0 = Nord normalisieren
-  const azRaw = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(dec) * Math.cos(phi)) / rad;
+  const azRaw =
+    Math.atan2(
+      Math.sin(H),
+      Math.cos(H) * Math.sin(phi) - Math.tan(dec) * Math.cos(phi)
+    ) / rad;
   const azimuth = (azRaw + 180 + 360) % 360;
   return { azimuth, altitude };
 }
@@ -75,7 +94,9 @@ function solarTransitJ(ds: number, M: number, L: number) {
   return J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
 }
 function hourAngle(h: number, phi: number, d: number) {
-  return Math.acos((Math.sin(h) - Math.sin(phi) * Math.sin(d)) / (Math.cos(phi) * Math.cos(d)));
+  return Math.acos(
+    (Math.sin(h) - Math.sin(phi) * Math.sin(d)) / (Math.cos(phi) * Math.cos(d))
+  );
 }
 function fromJulian(j: number) {
   return new Date((j + 0.5 - J1970) * dayMs);
@@ -94,7 +115,9 @@ export function getSunTimes(date: Date, lat: number, lng: number): SunTimes {
   const Jnoon = solarTransitJ(ds, M, L);
 
   const h0 = rad * -0.833; // Standard-Horizont inkl. Refraktion
-  const cosH = (Math.sin(h0) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec));
+  const cosH =
+    (Math.sin(h0) - Math.sin(phi) * Math.sin(dec)) /
+    (Math.cos(phi) * Math.cos(dec));
   if (cosH < -1 || cosH > 1) {
     // Polartag/-nacht
     return { sunrise: null, sunset: null, solarNoon: fromJulian(Jnoon) };
@@ -103,7 +126,11 @@ export function getSunTimes(date: Date, lat: number, lng: number): SunTimes {
   const a = approxTransit(w, lw, n);
   const Jset = solarTransitJ(a, M, L);
   const Jrise = Jnoon - (Jset - Jnoon);
-  return { sunrise: fromJulian(Jrise), sunset: fromJulian(Jset), solarNoon: fromJulian(Jnoon) };
+  return {
+    sunrise: fromJulian(Jrise),
+    sunset: fromJulian(Jset),
+    solarNoon: fromJulian(Jnoon),
+  };
 }
 
 /** Koordinaten-Formatierung fürs SOS-Dashboard. */
@@ -124,7 +151,10 @@ export function formatDMS(lat: number, lng: number): string {
  * Offizielle swisstopo-Näherungsformeln, Genauigkeit ca. 1 m – für Notfall-Angaben geeignet.
  * Gültig nur innerhalb der Schweiz.
  */
-export function wgs84ToLV95(lat: number, lng: number): { east: number; north: number } | null {
+export function wgs84ToLV95(
+  lat: number,
+  lng: number
+): { east: number; north: number } | null {
   if (lat < 45.5 || lat > 48 || lng < 5.5 || lng > 11) return null;
   const phi = (lat * 3600 - 169028.66) / 10000;
   const lam = (lng * 3600 - 26782.5) / 10000;

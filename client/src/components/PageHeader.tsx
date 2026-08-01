@@ -24,7 +24,9 @@ export default function PageHeader({
         {backLabel}
       </Link>
       <h1 className="text-2xl font-bold md:text-3xl">{title}</h1>
-      {subtitle && <p className="mt-1.5 max-w-2xl text-muted-foreground">{subtitle}</p>}
+      {subtitle && (
+        <p className="mt-1.5 max-w-2xl text-muted-foreground">{subtitle}</p>
+      )}
     </div>
   );
 }

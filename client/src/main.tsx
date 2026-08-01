@@ -1,5 +1,5 @@
 import { trpc } from "@/lib/trpc";
-import { COOKIE_NAME, UNAUTHED_ERR_MSG } from '@shared/const';
+import { COOKIE_NAME, UNAUTHED_ERR_MSG } from "@shared/const";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
@@ -110,7 +110,10 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
       registration.addEventListener("updatefound", () => {
         const installing = registration.installing;
         installing?.addEventListener("statechange", () => {
-          if (installing.state === "installed" && navigator.serviceWorker.controller) {
+          if (
+            installing.state === "installed" &&
+            navigator.serviceWorker.controller
+          ) {
             promoteWaiting(registration.waiting ?? installing);
           }
         });
@@ -127,7 +130,10 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
       // Aktiv nach Updates suchen (Browser prüfen sw.js sonst nur sporadisch)
       registration.update().catch(() => {});
     } catch (err) {
-      console.warn("[PWA] Service Worker konnte nicht registriert werden:", err);
+      console.warn(
+        "[PWA] Service Worker konnte nicht registriert werden:",
+        err
+      );
     }
   });
 }

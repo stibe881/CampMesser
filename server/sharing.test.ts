@@ -33,7 +33,7 @@ describe("packing sharing", () => {
   it("lehnt zu kurze Tokens bei sharedToggle ab (Input-Validierung)", async () => {
     const caller = appRouter.createCaller(createAnonContext());
     await expect(
-      caller.packing.sharedToggle({ token: "x", itemId: 1, checked: true }),
+      caller.packing.sharedToggle({ token: "x", itemId: 1, checked: true })
     ).rejects.toThrow();
   });
 });

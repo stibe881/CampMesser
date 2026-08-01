@@ -15,7 +15,8 @@ afterEach(() => resetRateLimits());
 
 describe("rateLimit", () => {
   it("sperrt erst nach dem Erreichen der Maximalzahl an Fehlversuchen", () => {
-    for (let i = 0; i < MAX_LOGIN_ATTEMPTS - 1; i++) registerFailure(KEY, T0 + i);
+    for (let i = 0; i < MAX_LOGIN_ATTEMPTS - 1; i++)
+      registerFailure(KEY, T0 + i);
     expect(isRateLimited(KEY, T0 + 1000)).toBe(false);
     registerFailure(KEY, T0 + 1000);
     expect(isRateLimited(KEY, T0 + 1001)).toBe(true);

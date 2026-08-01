@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 // Sonnenberechnung liegt im Client-Code, ist aber reine Logik ohne DOM.
-import { formatDMS, getSunPosition, getSunTimes, wgs84ToLV95 } from "../client/src/lib/sun";
+import {
+  formatDMS,
+  getSunPosition,
+  getSunTimes,
+  wgs84ToLV95,
+} from "../client/src/lib/sun";
 
 // Referenzort: Bern, Schweiz
 const BERN_LAT = 46.948;
@@ -30,11 +35,13 @@ describe("getSunTimes", () => {
     expect(times.sunrise).not.toBeNull();
     expect(times.sunset).not.toBeNull();
     // Sonnenaufgang Bern am 21.6. ≈ 05:37 Lokalzeit (03:37 UTC)
-    const sunriseUTC = times.sunrise!.getUTCHours() + times.sunrise!.getUTCMinutes() / 60;
+    const sunriseUTC =
+      times.sunrise!.getUTCHours() + times.sunrise!.getUTCMinutes() / 60;
     expect(sunriseUTC).toBeGreaterThan(3);
     expect(sunriseUTC).toBeLessThan(4.5);
     // Sonnenuntergang ≈ 21:26 Lokalzeit (19:26 UTC)
-    const sunsetUTC = times.sunset!.getUTCHours() + times.sunset!.getUTCMinutes() / 60;
+    const sunsetUTC =
+      times.sunset!.getUTCHours() + times.sunset!.getUTCMinutes() / 60;
     expect(sunsetUTC).toBeGreaterThan(19);
     expect(sunsetUTC).toBeLessThan(20.5);
   });

@@ -21,6 +21,6 @@ const dist = path.join(root, "dist");
 mkdirSync(dist, { recursive: true });
 writeFileSync(
   path.join(dist, "version.json"),
-  `${JSON.stringify({ version, builtAt: new Date().toISOString() }, null, 2)}\n`,
+  `${JSON.stringify({ version, builtAt: new Date().toISOString() }, null, 2)}\n`
 );
 console.log(`Version ${version} nach dist/version.json geschrieben`);

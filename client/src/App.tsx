@@ -53,7 +53,9 @@ const CHUNK_RELOAD_KEY = "campmesser.chunkReloadAt";
  * index.html mit gültigen Chunk-URLs zu holen. Ein Zeitstempel verhindert eine
  * Reload-Schleife, falls der Chunk dauerhaft fehlt (dann greift der ErrorBoundary).
  */
-function lazyWithRetry<T extends ComponentType<unknown>>(load: () => Promise<{ default: T }>) {
+function lazyWithRetry<T extends ComponentType<unknown>>(
+  load: () => Promise<{ default: T }>
+) {
   return lazy(() =>
     load().catch((error: unknown) => {
       let lastReload = 0;
@@ -69,7 +71,7 @@ function lazyWithRetry<T extends ComponentType<unknown>>(load: () => Promise<{ d
         return new Promise<never>(() => {});
       }
       throw error;
-    }),
+    })
   );
 }
 
@@ -103,7 +105,10 @@ const HuntPrintPage = lazyWithRetry(pageLoaders.HuntPrint);
 function RouteFallback() {
   return (
     <div className="container flex justify-center py-16">
-      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Lädt" />
+      <Loader2
+        className="h-6 w-6 animate-spin text-muted-foreground"
+        aria-label="Lädt"
+      />
     </div>
   );
 }
@@ -173,10 +178,7 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme={savedTheme ?? "light"}
-        switchable
-      >
+      <ThemeProvider defaultTheme={savedTheme ?? "light"} switchable>
         <TooltipProvider>
           <Toaster />
           <OfflinePrecache />

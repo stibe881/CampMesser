@@ -42,9 +42,12 @@ export function useDeviceHeading() {
       // Beide Varianten entfernen – schadet nicht, falls nur eine registriert war
       window.removeEventListener(
         "deviceorientationabsolute" as "deviceorientation",
-        handlerRef.current as EventListener,
+        handlerRef.current as EventListener
       );
-      window.removeEventListener("deviceorientation", handlerRef.current as EventListener);
+      window.removeEventListener(
+        "deviceorientation",
+        handlerRef.current as EventListener
+      );
       attachedRef.current = false;
     }
     setActive(false);
@@ -52,7 +55,10 @@ export function useDeviceHeading() {
   }, []);
 
   const start = useCallback(async () => {
-    if (typeof window === "undefined" || !("DeviceOrientationEvent" in window)) {
+    if (
+      typeof window === "undefined" ||
+      !("DeviceOrientationEvent" in window)
+    ) {
       setPermission("unsupported");
       return;
     }
@@ -79,8 +85,13 @@ export function useDeviceHeading() {
     if (!attachedRef.current) {
       // `deviceorientationabsolute` liefert auf Android verlässlichere Nordwerte
       const eventName =
-        "ondeviceorientationabsolute" in window ? "deviceorientationabsolute" : "deviceorientation";
-      window.addEventListener(eventName as "deviceorientation", handlerRef.current as EventListener);
+        "ondeviceorientationabsolute" in window
+          ? "deviceorientationabsolute"
+          : "deviceorientation";
+      window.addEventListener(
+        eventName as "deviceorientation",
+        handlerRef.current as EventListener
+      );
       attachedRef.current = true;
     }
     setActive(true);

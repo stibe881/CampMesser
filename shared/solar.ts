@@ -42,7 +42,7 @@ function incidenceFactor(
   sunAzimuth: number,
   sunAltitude: number,
   panelAzimuth: number,
-  panelTilt: number,
+  panelTilt: number
 ): number {
   const cosIncidence =
     Math.sin(sunAltitude * rad) * Math.cos(panelTilt * rad) +
@@ -62,13 +62,14 @@ export function computeSolarAlignment(
   date: Date,
   lat: number,
   lng: number,
-  obstacles: ObstacleShape[] = [],
+  obstacles: ObstacleShape[] = []
 ): SolarAlignment | null {
   const dayStart = new Date(date);
   dayStart.setHours(0, 0, 0, 0);
 
   // Sonnenbahn abtasten: nur unverschattete Stunden zählen für die Ausrichtung
-  const samples: { azimuth: number; altitude: number; irradiance: number }[] = [];
+  const samples: { azimuth: number; altitude: number; irradiance: number }[] =
+    [];
   let shadedMinutes = 0;
   let firstSun: Date | null = null;
   let lastSun: Date | null = null;
@@ -114,13 +115,16 @@ export function computeSolarAlignment(
     flatYield += s.irradiance * incidenceFactor(s.azimuth, s.altitude, 0, 0);
   }
   const gainVsFlatPercent =
-    flatYield > 0 ? Math.max(0, Math.round((bestYield / flatYield - 1) * 100)) : 0;
+    flatYield > 0
+      ? Math.max(0, Math.round((bestYield / flatYield - 1) * 100))
+      : 0;
 
   return {
     azimuth: bestAzimuth,
     tilt: bestTilt,
     gainVsFlatPercent,
-    usableSunHours: Math.round(((samples.length * SAMPLE_MINUTES) / 60) * 10) / 10,
+    usableSunHours:
+      Math.round(((samples.length * SAMPLE_MINUTES) / 60) * 10) / 10,
     shadedHours: Math.round((shadedMinutes / 60) * 10) / 10,
     firstSun,
     lastSun,

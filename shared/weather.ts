@@ -42,20 +42,27 @@ export interface WeatherAlert {
 }
 
 /** WMO-Wettercode in deutschen Text und Icon-Schlüssel übersetzen */
-export function describeWeatherCode(code: number): { label: string; icon: string } {
+export function describeWeatherCode(code: number): {
+  label: string;
+  icon: string;
+} {
   if (code === 0) return { label: "Klarer Himmel", icon: "sun" };
   if (code === 1) return { label: "Überwiegend klar", icon: "sun" };
   if (code === 2) return { label: "Teilweise bewölkt", icon: "cloud-sun" };
   if (code === 3) return { label: "Bedeckt", icon: "cloud" };
   if (code === 45 || code === 48) return { label: "Nebel", icon: "fog" };
-  if (code >= 51 && code <= 57) return { label: "Nieselregen", icon: "drizzle" };
+  if (code >= 51 && code <= 57)
+    return { label: "Nieselregen", icon: "drizzle" };
   if (code >= 61 && code <= 65) return { label: "Regen", icon: "rain" };
-  if (code === 66 || code === 67) return { label: "Gefrierender Regen", icon: "rain" };
+  if (code === 66 || code === 67)
+    return { label: "Gefrierender Regen", icon: "rain" };
   if (code >= 71 && code <= 77) return { label: "Schneefall", icon: "snow" };
   if (code >= 80 && code <= 82) return { label: "Regenschauer", icon: "rain" };
-  if (code === 85 || code === 86) return { label: "Schneeschauer", icon: "snow" };
+  if (code === 85 || code === 86)
+    return { label: "Schneeschauer", icon: "snow" };
   if (code === 95) return { label: "Gewitter", icon: "storm" };
-  if (code === 96 || code === 99) return { label: "Gewitter mit Hagel", icon: "storm" };
+  if (code === 96 || code === 99)
+    return { label: "Gewitter mit Hagel", icon: "storm" };
   return { label: "Unbekannt", icon: "cloud" };
 }
 
@@ -81,7 +88,8 @@ export function detectAlerts(hours: HourlyWeather[]): WeatherAlert[] {
       title: "Sturmböen erwartet",
       description: `Böen bis ${Math.round(Math.max(...next48.map(h => h.windGustsKmh)))} km/h ab ${formatHour(gustHour.time)}.`,
       startTime: gustHour.time,
-      advice: "Zelt sturmfest machen: alle Abspannleinen setzen, Heringe tief einschlagen, Tarp abbauen. Bei Sturm nicht unter Bäumen aufhalten.",
+      advice:
+        "Zelt sturmfest machen: alle Abspannleinen setzen, Heringe tief einschlagen, Tarp abbauen. Bei Sturm nicht unter Bäumen aufhalten.",
     });
   } else if (windHour) {
     alerts.push({
@@ -90,7 +98,8 @@ export function detectAlerts(hours: HourlyWeather[]): WeatherAlert[] {
       title: "Starker Wind",
       description: `Böen bis ${Math.round(Math.max(...next48.map(h => h.windGustsKmh)))} km/h ab ${formatHour(windHour.time)}.`,
       startTime: windHour.time,
-      advice: "Abspannleinen nachspannen, lose Gegenstände (Stühle, Tisch) sichern, Markise oder Tarp prüfen.",
+      advice:
+        "Abspannleinen nachspannen, lose Gegenstände (Stühle, Tisch) sichern, Markise oder Tarp prüfen.",
     });
   }
 
@@ -103,7 +112,8 @@ export function detectAlerts(hours: HourlyWeather[]): WeatherAlert[] {
       title: "Starkregen erwartet",
       description: `Bis ${Math.max(...next48.map(h => h.precipitationMm)).toFixed(0)} mm Regen pro Stunde ab ${formatHour(heavyRain.time)}.`,
       startTime: heavyRain.time,
-      advice: "Zeltgraben prüfen, nicht in Mulden oder an Bachläufen campieren – Gefahr von Überflutung. Ausrüstung wasserdicht verpacken.",
+      advice:
+        "Zeltgraben prüfen, nicht in Mulden oder an Bachläufen campieren – Gefahr von Überflutung. Ausrüstung wasserdicht verpacken.",
     });
   } else if (rain) {
     alerts.push({
@@ -112,11 +122,14 @@ export function detectAlerts(hours: HourlyWeather[]): WeatherAlert[] {
       title: "Kräftiger Regen",
       description: `Bis ${Math.max(...next48.map(h => h.precipitationMm)).toFixed(1)} mm pro Stunde ab ${formatHour(rain.time)}.`,
       startTime: rain.time,
-      advice: "Regensachen bereitlegen, Zeltboden-Wanne kontrollieren und empfindliche Ausrüstung ins Zeltinnere räumen.",
+      advice:
+        "Regensachen bereitlegen, Zeltboden-Wanne kontrollieren und empfindliche Ausrüstung ins Zeltinnere räumen.",
     });
   }
 
-  const thunderHour = next48.find(h => h.weatherCode === 95 || h.weatherCode === 96 || h.weatherCode === 99);
+  const thunderHour = next48.find(
+    h => h.weatherCode === 95 || h.weatherCode === 96 || h.weatherCode === 99
+  );
   const capeHour = next48.find(h => h.cape > 1500);
   if (thunderHour) {
     const hail = next48.some(h => h.weatherCode === 96 || h.weatherCode === 99);
@@ -126,7 +139,8 @@ export function detectAlerts(hours: HourlyWeather[]): WeatherAlert[] {
       title: hail ? "Gewitter mit Hagel" : "Gewitter erwartet",
       description: `Gewitter ab ${formatHour(thunderHour.time)}${hail ? ", örtlich mit Hagel" : ""}.`,
       startTime: thunderHour.time,
-      advice: "Rechtzeitig Schutz suchen (Auto oder festes Gebäude, nicht das Zelt). Abstand zu einzelnen Bäumen und Gewässern halten.",
+      advice:
+        "Rechtzeitig Schutz suchen (Auto oder festes Gebäude, nicht das Zelt). Abstand zu einzelnen Bäumen und Gewässern halten.",
     });
   } else if (capeHour) {
     alerts.push({
@@ -135,7 +149,8 @@ export function detectAlerts(hours: HourlyWeather[]): WeatherAlert[] {
       title: "Erhöhte Gewitterneigung",
       description: `Labile Luftschichtung ab ${formatHour(capeHour.time)} – lokale Gewitter möglich.`,
       startTime: capeHour.time,
-      advice: "Himmel im Auge behalten (Quellwolken), Wetter-Update vor dem Abend prüfen und Camp gewittersicher einrichten.",
+      advice:
+        "Himmel im Auge behalten (Quellwolken), Wetter-Update vor dem Abend prüfen und Camp gewittersicher einrichten.",
     });
   }
 
@@ -147,7 +162,8 @@ export function detectAlerts(hours: HourlyWeather[]): WeatherAlert[] {
       title: "Grosse Hitze",
       description: `Gefühlte Temperaturen bis ${Math.round(Math.max(...next48.map(h => h.apparentC)))} °C.`,
       startTime: heatHour.time,
-      advice: "Mehr Wasser einplanen (Trinkwasser-Rechner nutzen), Zelt in den Schatten stellen, Mittagshitze meiden.",
+      advice:
+        "Mehr Wasser einplanen (Trinkwasser-Rechner nutzen), Zelt in den Schatten stellen, Mittagshitze meiden.",
     });
   }
 
@@ -159,12 +175,19 @@ export function detectAlerts(hours: HourlyWeather[]): WeatherAlert[] {
       title: "Frost in der Nacht",
       description: `Temperaturen bis ${Math.round(Math.min(...next48.map(h => h.temperatureC)))} °C ab ${formatHour(frostHour.time)}.`,
       startTime: frostHour.time,
-      advice: "Warmen Schlafsack (Komfortbereich prüfen), Isomatte mit gutem R-Wert und Mütze für die Nacht bereitlegen.",
+      advice:
+        "Warmen Schlafsack (Komfortbereich prüfen), Isomatte mit gutem R-Wert und Mütze für die Nacht bereitlegen.",
     });
   }
 
-  const severityOrder: Record<AlertSeverity, number> = { gefahr: 0, warnung: 1, info: 2 };
-  return alerts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
+  const severityOrder: Record<AlertSeverity, number> = {
+    gefahr: 0,
+    warnung: 1,
+    info: 2,
+  };
+  return alerts.sort(
+    (a, b) => severityOrder[a.severity] - severityOrder[b.severity]
+  );
 }
 
 function formatHour(isoTime: string): string {

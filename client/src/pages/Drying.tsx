@@ -48,7 +48,8 @@ function loadCustomItems(): DryingItem[] {
     const raw = localStorage.getItem(CUSTOM_ITEMS_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as DryingItem[];
-      if (Array.isArray(parsed)) return parsed.filter(i => i.id && i.label && i.baseHours > 0);
+      if (Array.isArray(parsed))
+        return parsed.filter(i => i.id && i.label && i.baseHours > 0);
     }
   } catch {
     /* defaults */
@@ -70,25 +71,32 @@ export default function DryingPage() {
   const [reminderInfo, setReminderInfo] = useState<string | null>(null);
   const [now] = useState(() => new Date());
   const [hourly, setHourly] = useState<HourlyConditions[] | null>(null);
-  const [customItems, setCustomItems] = useState<DryingItem[]>(() => loadCustomItems());
+  const [customItems, setCustomItems] = useState<DryingItem[]>(() =>
+    loadCustomItems()
+  );
   const [newLabel, setNewLabel] = useState("");
   const [newHours, setNewHours] = useState("");
   // Standort-Auswahl: eigener Standort oder gespeicherter Zeltplatz-Favorit
   const [selectedSpotId, setSelectedSpotId] = useState<number | null>(null);
   const { isAuthenticated } = useAuth();
-  const { data: spots } = trpc.spots.list.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: spots } = trpc.spots.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
   // Geräte-Sync: eigene Materialien vom Konto übernehmen bzw. Änderungen hochladen
-  const customItemsSync = useSyncedSetting<DryingItem[]>("dryingCustomItems", value => {
-    if (!Array.isArray(value)) return;
-    const clean = value.filter(i => i && i.id && i.label && i.baseHours > 0);
-    setCustomItems(clean);
-    try {
-      localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(clean));
-    } catch {
-      /* egal */
+  const customItemsSync = useSyncedSetting<DryingItem[]>(
+    "dryingCustomItems",
+    value => {
+      if (!Array.isArray(value)) return;
+      const clean = value.filter(i => i && i.id && i.label && i.baseHours > 0);
+      setCustomItems(clean);
+      try {
+        localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(clean));
+      } catch {
+        /* egal */
+      }
     }
-  });
+  );
 
   const saveCustomItems = (items: DryingItem[]) => {
     setCustomItems(items);
@@ -126,7 +134,9 @@ export default function DryingPage() {
           "temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,precipitation_probability",
         forecast_days: "2",
       });
-      const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+      const res = await fetch(
+        `https://api.open-meteo.com/v1/forecast?${params.toString()}`
+      );
       if (!res.ok) throw new Error("Wetterdienst nicht erreichbar");
       const json = await res.json();
       const cur = json.current;
@@ -138,14 +148,18 @@ export default function DryingPage() {
       });
       // Stündlicher Verlauf für Trocknungs-Schätzung + Regen-Warnung
       if (json.hourly?.time && Array.isArray(json.hourly.time)) {
-        const hours: HourlyConditions[] = json.hourly.time.map((t: string, i: number) => ({
-          time: new Date(t),
-          temperature: json.hourly.temperature_2m?.[i] ?? cur.temperature_2m,
-          humidity: json.hourly.relative_humidity_2m?.[i] ?? cur.relative_humidity_2m,
-          windSpeed: json.hourly.wind_speed_10m?.[i] ?? cur.wind_speed_10m,
-          precipitation: json.hourly.precipitation?.[i] ?? 0,
-          precipitationProbability: json.hourly.precipitation_probability?.[i] ?? 0,
-        }));
+        const hours: HourlyConditions[] = json.hourly.time.map(
+          (t: string, i: number) => ({
+            time: new Date(t),
+            temperature: json.hourly.temperature_2m?.[i] ?? cur.temperature_2m,
+            humidity:
+              json.hourly.relative_humidity_2m?.[i] ?? cur.relative_humidity_2m,
+            windSpeed: json.hourly.wind_speed_10m?.[i] ?? cur.wind_speed_10m,
+            precipitation: json.hourly.precipitation?.[i] ?? 0,
+            precipitationProbability:
+              json.hourly.precipitation_probability?.[i] ?? 0,
+          })
+        );
         setHourly(hours);
       }
       const times = getSunTimes(new Date(), lat, lng);
@@ -174,7 +188,7 @@ export default function DryingPage() {
     navigator.geolocation.getCurrentPosition(
       pos => void fetchForLocation(pos.coords.latitude, pos.coords.longitude),
       () => setWeather({ status: "error" }),
-      { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 },
+      { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }
     );
   };
 
@@ -205,10 +219,13 @@ export default function DryingPage() {
           hours = estimateDryingTime(item.baseHours, conditions).hours;
         }
         const verdict = sunset ? sunsetVerdict(hours, now, sunset) : null;
-        const rain = hourly && hourly.length > 0 ? rainBeforeDry(hourly, now, dryAt) : null;
+        const rain =
+          hourly && hourly.length > 0
+            ? rainBeforeDry(hourly, now, dryAt)
+            : null;
         return { item, hours, dryAt, verdict, rain };
       }),
-    [conditions, sunset, now, hourly, customItems],
+    [conditions, sunset, now, hourly, customItems]
   );
 
   /** Frühester Regen-Zeitpunkt über alle Teile, die noch nicht trocken sind. */
@@ -263,12 +280,12 @@ export default function DryingPage() {
           window.setTimeout(() => {
             notify(
               "Regen im Anzug!",
-              `In ca. ${leadMinutes} Minuten beginnt es zu regnen – hol die Wäsche rein.`,
+              `In ca. ${leadMinutes} Minuten beginnt es zu regnen – hol die Wäsche rein.`
             );
-          }, fireAt - nowMs),
+          }, fireAt - nowMs)
         );
         scheduled.push(
-          `Regen-Warnung um ${new Date(fireAt).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} Uhr`,
+          `Regen-Warnung um ${new Date(fireAt).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} Uhr`
         );
       }
     }
@@ -279,18 +296,19 @@ export default function DryingPage() {
           window.setTimeout(() => {
             notify(
               "Sonne geht bald unter",
-              `Noch ca. ${leadMinutes} Minuten bis Sonnenuntergang – Wäsche vor dem Abendtau reinholen.`,
+              `Noch ca. ${leadMinutes} Minuten bis Sonnenuntergang – Wäsche vor dem Abendtau reinholen.`
             );
-          }, fireAt - nowMs),
+          }, fireAt - nowMs)
         );
         scheduled.push(
-          `Sonnenuntergangs-Erinnerung um ${new Date(fireAt).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} Uhr`,
+          `Sonnenuntergangs-Erinnerung um ${new Date(fireAt).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} Uhr`
         );
       }
     }
     if (scheduled.length === 0) {
       toast.info("Keine Erinnerung nötig", {
-        description: "Weder Regen noch Sonnenuntergang stehen in nächster Zeit bevor.",
+        description:
+          "Weder Regen noch Sonnenuntergang stehen in nächster Zeit bevor.",
       });
       return;
     }
@@ -318,7 +336,8 @@ export default function DryingPage() {
             className="rounded-full"
             onClick={() => setSelectedSpotId(null)}
           >
-            <LocateFixed className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" /> Mein Standort
+            <LocateFixed className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />{" "}
+            Mein Standort
           </Button>
           {spots.map(spot => (
             <Button
@@ -329,7 +348,8 @@ export default function DryingPage() {
               className="rounded-full"
               onClick={() => setSelectedSpotId(spot.id)}
             >
-              <Tent className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" /> {spot.name}
+              <Tent className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />{" "}
+              {spot.name}
             </Button>
           ))}
         </div>
@@ -345,8 +365,12 @@ export default function DryingPage() {
         <CardContent>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <Label htmlFor="temp" className="mb-1.5 flex items-center gap-1 text-xs">
-                <Thermometer className="h-3.5 w-3.5" aria-hidden="true" /> Temp. (°C)
+              <Label
+                htmlFor="temp"
+                className="mb-1.5 flex items-center gap-1 text-xs"
+              >
+                <Thermometer className="h-3.5 w-3.5" aria-hidden="true" /> Temp.
+                (°C)
               </Label>
               <Input
                 id="temp"
@@ -356,8 +380,12 @@ export default function DryingPage() {
               />
             </div>
             <div>
-              <Label htmlFor="hum" className="mb-1.5 flex items-center gap-1 text-xs">
-                <Droplets className="h-3.5 w-3.5" aria-hidden="true" /> Feuchte (%)
+              <Label
+                htmlFor="hum"
+                className="mb-1.5 flex items-center gap-1 text-xs"
+              >
+                <Droplets className="h-3.5 w-3.5" aria-hidden="true" /> Feuchte
+                (%)
               </Label>
               <Input
                 id="hum"
@@ -367,7 +395,10 @@ export default function DryingPage() {
               />
             </div>
             <div>
-              <Label htmlFor="wind" className="mb-1.5 flex items-center gap-1 text-xs">
+              <Label
+                htmlFor="wind"
+                className="mb-1.5 flex items-center gap-1 text-xs"
+              >
                 <Wind className="h-3.5 w-3.5" aria-hidden="true" /> Wind (km/h)
               </Label>
               <Input
@@ -387,7 +418,10 @@ export default function DryingPage() {
             disabled={weather.status === "loading"}
           >
             <RefreshCw
-              className={cn("mr-1.5 h-3.5 w-3.5", weather.status === "loading" && "animate-spin")}
+              className={cn(
+                "mr-1.5 h-3.5 w-3.5",
+                weather.status === "loading" && "animate-spin"
+              )}
               aria-hidden="true"
             />
             {weather.status === "loading"
@@ -397,16 +431,24 @@ export default function DryingPage() {
           {weather.status === "ok" && sunset && (
             <p className="mt-2 text-xs text-primary">
               Wetter übernommen – Sonnenuntergang heute um{" "}
-              {sunset.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} Uhr.
+              {sunset.toLocaleTimeString("de-CH", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}{" "}
+              Uhr.
               {hourly && hourly.length > 0 && (
-                <> Die Schätzung rechnet mit dem stündlichen Prognose-Verlauf (genauer als eine Momentaufnahme).</>
+                <>
+                  {" "}
+                  Die Schätzung rechnet mit dem stündlichen Prognose-Verlauf
+                  (genauer als eine Momentaufnahme).
+                </>
               )}
             </p>
           )}
           {weather.status === "error" && (
             <p className="mt-2 text-xs text-destructive">
-              Wetter konnte nicht geladen werden – trage die Werte von Hand ein (Sonnenuntergangs-
-              Empfehlung braucht die Standortfreigabe).
+              Wetter konnte nicht geladen werden – trage die Werte von Hand ein
+              (Sonnenuntergangs- Empfehlung braucht die Standortfreigabe).
             </p>
           )}
         </CardContent>
@@ -425,15 +467,20 @@ export default function DryingPage() {
         </CardHeader>
         <CardContent>
           <p className="mb-3 text-sm text-muted-foreground">
-            Erhalte eine Warnung, bevor Regen einsetzt oder die Sonne untergeht – damit du die
-            Wäsche rechtzeitig reinholen kannst. Die Erinnerung funktioniert, solange die App
-            geöffnet ist (auch im Hintergrund-Tab).
+            Erhalte eine Warnung, bevor Regen einsetzt oder die Sonne untergeht
+            – damit du die Wäsche rechtzeitig reinholen kannst. Die Erinnerung
+            funktioniert, solange die App geöffnet ist (auch im
+            Hintergrund-Tab).
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <Label htmlFor="lead" className="text-xs">
               Vorlaufzeit:
             </Label>
-            <div className="flex gap-1.5" role="group" aria-label="Vorlaufzeit wählen">
+            <div
+              className="flex gap-1.5"
+              role="group"
+              aria-label="Vorlaufzeit wählen"
+            >
               {[15, 30, 60].map(min => (
                 <Button
                   key={min}
@@ -468,7 +515,10 @@ export default function DryingPage() {
       </Card>
       <div className="space-y-3">
         {results.map(({ item, hours, dryAt, verdict, rain }) => (
-          <div key={item.id} className="rounded-xl border border-border bg-card p-4">
+          <div
+            key={item.id}
+            className="rounded-xl border border-border bg-card p-4"
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-semibold">{item.label}</p>
@@ -484,7 +534,9 @@ export default function DryingPage() {
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                    onClick={() => saveCustomItems(customItems.filter(c => c.id !== item.id))}
+                    onClick={() =>
+                      saveCustomItems(customItems.filter(c => c.id !== item.id))
+                    }
                     aria-label={`${item.label} entfernen`}
                   >
                     <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -496,7 +548,10 @@ export default function DryingPage() {
               <p className="mt-1.5 text-xs text-muted-foreground">
                 Voraussichtlich trocken um{" "}
                 <span className="font-mono font-semibold">
-                  {dryAt.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })}
+                  {dryAt.toLocaleTimeString("de-CH", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </span>{" "}
                 Uhr
                 {dryAt.getDate() !== now.getDate() && " (morgen)"}.
@@ -504,15 +559,22 @@ export default function DryingPage() {
             )}
             {rain && (
               <p className="mt-2 flex items-start gap-2 rounded-lg bg-chart-4/15 px-3 py-2 text-sm font-medium text-foreground">
-                <CloudRain className="mt-0.5 h-4 w-4 shrink-0 text-chart-4" aria-hidden="true" />
+                <CloudRain
+                  className="mt-0.5 h-4 w-4 shrink-0 text-chart-4"
+                  aria-hidden="true"
+                />
                 <span>
                   Achtung: Ab{" "}
                   <span className="font-mono font-semibold">
-                    {rain.rainAt.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })}
+                    {rain.rainAt.toLocaleTimeString("de-CH", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </span>{" "}
-                  Uhr{rain.rainAt.getDate() !== now.getDate() && " (morgen)"} ist Regen angesagt
-                  {rain.probability !== null && ` (${rain.probability} %)`} – vorher abnehmen oder
-                  unters Vordach hängen!
+                  Uhr{rain.rainAt.getDate() !== now.getDate() && " (morgen)"}{" "}
+                  ist Regen angesagt
+                  {rain.probability !== null && ` (${rain.probability} %)`} –
+                  vorher abnehmen oder unters Vordach hängen!
                 </span>
               </p>
             )}
@@ -522,7 +584,7 @@ export default function DryingPage() {
                   "mt-2.5 rounded-lg px-3 py-2 text-sm",
                   verdict.driesBeforeSunset
                     ? "bg-primary/10 text-primary"
-                    : "bg-destructive/10 text-destructive",
+                    : "bg-destructive/10 text-destructive"
                 )}
               >
                 {verdict.recommendation}
@@ -574,20 +636,21 @@ export default function DryingPage() {
             onClick={addCustomItem}
             disabled={!newLabel.trim() || !newHours.trim()}
           >
-            <Plus className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" /> Hinzufügen
+            <Plus className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />{" "}
+            Hinzufügen
           </Button>
           <p className="mt-2 text-xs text-muted-foreground">
-            Basis-Trockenzeit = wie lange das Teil bei mildem Sommerwetter (20 °C, 60 % Feuchte,
-            leichter Wind) zum Trocknen braucht. Deine Materialien bleiben auf diesem Gerät
-            gespeichert.
+            Basis-Trockenzeit = wie lange das Teil bei mildem Sommerwetter (20
+            °C, 60 % Feuchte, leichter Wind) zum Trocknen braucht. Deine
+            Materialien bleiben auf diesem Gerät gespeichert.
           </p>
         </CardContent>
       </Card>
 
       <p className="mt-4 text-xs text-muted-foreground">
-        Schätzwerte für gut ausgewrungene, frei hängende Sachen. Direkte Sonne beschleunigt das
-        Trocknen zusätzlich, Schatten und Windstille verlangsamen es. Bei Regen gilt: alles unters
-        Vordach.
+        Schätzwerte für gut ausgewrungene, frei hängende Sachen. Direkte Sonne
+        beschleunigt das Trocknen zusätzlich, Schatten und Windstille
+        verlangsamen es. Bei Regen gilt: alles unters Vordach.
       </p>
     </div>
   );

@@ -32,7 +32,11 @@ import { MapView } from "@/components/Map";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { getSunTimes } from "@/lib/sun";
-import { describeWeatherCode, detectAlerts, type WeatherAlert } from "@shared/weather";
+import {
+  describeWeatherCode,
+  detectAlerts,
+  type WeatherAlert,
+} from "@shared/weather";
 
 interface SpotForecast {
   tempMaxC: number;
@@ -43,31 +47,39 @@ interface SpotForecast {
   alerts: WeatherAlert[];
 }
 
-async function fetchSpotForecast(lat: number, lon: number): Promise<SpotForecast> {
+async function fetchSpotForecast(
+  lat: number,
+  lon: number
+): Promise<SpotForecast> {
   const params = new URLSearchParams({
     latitude: lat.toFixed(4),
     longitude: lon.toFixed(4),
     timezone: "auto",
     forecast_days: "3",
-    daily: "temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_gusts_10m_max,weather_code",
+    daily:
+      "temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_gusts_10m_max,weather_code",
     hourly:
       "temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,weather_code,cape,cloud_cover",
   });
-  const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+  const res = await fetch(
+    `https://api.open-meteo.com/v1/forecast?${params.toString()}`
+  );
   if (!res.ok) throw new Error("Wetterdienst nicht erreichbar");
   const json = await res.json();
-  const hourly = (json.hourly.time as string[]).map((time: string, i: number) => ({
-    time,
-    temperatureC: json.hourly.temperature_2m[i],
-    apparentC: json.hourly.apparent_temperature[i],
-    precipitationMm: json.hourly.precipitation[i],
-    precipitationProbability: json.hourly.precipitation_probability?.[i] ?? 0,
-    windSpeedKmh: json.hourly.wind_speed_10m[i],
-    windGustsKmh: json.hourly.wind_gusts_10m[i],
-    weatherCode: json.hourly.weather_code[i],
-    cape: json.hourly.cape?.[i] ?? 0,
-    cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
-  }));
+  const hourly = (json.hourly.time as string[]).map(
+    (time: string, i: number) => ({
+      time,
+      temperatureC: json.hourly.temperature_2m[i],
+      apparentC: json.hourly.apparent_temperature[i],
+      precipitationMm: json.hourly.precipitation[i],
+      precipitationProbability: json.hourly.precipitation_probability?.[i] ?? 0,
+      windSpeedKmh: json.hourly.wind_speed_10m[i],
+      windGustsKmh: json.hourly.wind_gusts_10m[i],
+      weatherCode: json.hourly.weather_code[i],
+      cape: json.hourly.cape?.[i] ?? 0,
+      cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
+    })
+  );
   return {
     tempMaxC: json.daily.temperature_2m_max[0],
     tempMinC: json.daily.temperature_2m_min[0],
@@ -78,7 +90,19 @@ async function fetchSpotForecast(lat: number, lon: number): Promise<SpotForecast
   };
 }
 
-function SpotCard({ spot, onDelete }: { spot: { id: number; name: string; latitude: number; longitude: number; note: string | null }; onDelete: () => void }) {
+function SpotCard({
+  spot,
+  onDelete,
+}: {
+  spot: {
+    id: number;
+    name: string;
+    latitude: number;
+    longitude: number;
+    note: string | null;
+  };
+  onDelete: () => void;
+}) {
   const [forecast, setForecast] = useState<SpotForecast | null>(null);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -86,7 +110,9 @@ function SpotCard({ spot, onDelete }: { spot: { id: number; name: string; latitu
   const sun = useMemo(() => {
     const times = getSunTimes(new Date(), spot.latitude, spot.longitude);
     const fmt = (d: Date | null) =>
-      d ? d.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" }) : "–";
+      d
+        ? d.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })
+        : "–";
     return { sunrise: fmt(times.sunrise), sunset: fmt(times.sunset) };
   }, [spot.latitude, spot.longitude]);
 
@@ -108,13 +134,18 @@ function SpotCard({ spot, onDelete }: { spot: { id: number; name: string; latitu
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="flex items-center gap-2 font-semibold">
-              <Tent className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              <Tent
+                className="h-4 w-4 shrink-0 text-primary"
+                aria-hidden="true"
+              />
               {spot.name}
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {spot.latitude.toFixed(4)}°, {spot.longitude.toFixed(4)}°
             </p>
-            {spot.note && <p className="mt-1 text-sm text-muted-foreground">{spot.note}</p>}
+            {spot.note && (
+              <p className="mt-1 text-sm text-muted-foreground">{spot.note}</p>
+            )}
           </div>
           <Button
             variant="ghost"
@@ -151,7 +182,12 @@ function SpotCard({ spot, onDelete }: { spot: { id: number; name: string; latitu
         </div>
 
         {forecast === null && !loading && !failed && (
-          <Button variant="outline" size="sm" className="mt-3 w-full" onClick={loadForecast}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-3 w-full"
+            onClick={loadForecast}
+          >
             Wetter-Vorschau laden
           </Button>
         )}
@@ -168,10 +204,17 @@ function SpotCard({ spot, onDelete }: { spot: { id: number; name: string; latitu
         {forecast && (
           <div className="mt-3 rounded-lg bg-accent/50 p-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">{describeWeatherCode(forecast.weatherCode).label}</span>
+              <span className="font-medium">
+                {describeWeatherCode(forecast.weatherCode).label}
+              </span>
               <span>
-                <span className="font-semibold">{Math.round(forecast.tempMaxC)}°</span>
-                <span className="text-muted-foreground"> / {Math.round(forecast.tempMinC)}°</span>
+                <span className="font-semibold">
+                  {Math.round(forecast.tempMaxC)}°
+                </span>
+                <span className="text-muted-foreground">
+                  {" "}
+                  / {Math.round(forecast.tempMinC)}°
+                </span>
               </span>
             </div>
             <div className="mt-1.5 flex items-center gap-4 text-xs text-muted-foreground">
@@ -186,7 +229,10 @@ function SpotCard({ spot, onDelete }: { spot: { id: number; name: string; latitu
             </div>
             {forecast.alerts.length > 0 && (
               <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-destructive">
-                <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <AlertTriangle
+                  className="h-3.5 w-3.5 shrink-0"
+                  aria-hidden="true"
+                />
                 {forecast.alerts.map(a => a.title).join(" · ")}
               </p>
             )}
@@ -208,7 +254,9 @@ function SpotMapPicker({
   initial: { lat: number; lng: number } | null;
   onPick: (lat: number, lng: number) => void;
 }) {
-  const markerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
+  const markerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(
+    null
+  );
 
   return (
     <MapView
@@ -272,7 +320,9 @@ export default function SpotsPage() {
     onMutate: async input => {
       await utils.spots.list.cancel();
       const prev = utils.spots.list.getData();
-      utils.spots.list.setData(undefined, old => old?.filter(s => s.id !== input.id));
+      utils.spots.list.setData(undefined, old =>
+        old?.filter(s => s.id !== input.id)
+      );
       return { prev };
     },
     onError: (_e, _i, ctx) => {
@@ -298,7 +348,7 @@ export default function SpotsPage() {
         toast.error("Standort nicht verfügbar.");
         setLocating(false);
       },
-      { enableHighAccuracy: true, timeout: 12000 },
+      { enableHighAccuracy: true, timeout: 12000 }
     );
   };
 
@@ -309,11 +359,25 @@ export default function SpotsPage() {
       toast.error("Bitte einen Namen eingeben.");
       return;
     }
-    if (Number.isNaN(latNum) || latNum < -90 || latNum > 90 || Number.isNaN(lonNum) || lonNum < -180 || lonNum > 180) {
-      toast.error("Bitte gültige Koordinaten eingeben (z. B. 46.8182 und 8.2275).");
+    if (
+      Number.isNaN(latNum) ||
+      latNum < -90 ||
+      latNum > 90 ||
+      Number.isNaN(lonNum) ||
+      lonNum < -180 ||
+      lonNum > 180
+    ) {
+      toast.error(
+        "Bitte gültige Koordinaten eingeben (z. B. 46.8182 und 8.2275)."
+      );
       return;
     }
-    addMutation.mutate({ name: name.trim(), latitude: latNum, longitude: lonNum, note: note.trim() || undefined });
+    addMutation.mutate({
+      name: name.trim(),
+      latitude: latNum,
+      longitude: lonNum,
+      note: note.trim() || undefined,
+    });
   };
 
   return (
@@ -342,10 +406,14 @@ export default function SpotsPage() {
           {!isLoading && (spots?.length ?? 0) === 0 && (
             <Card>
               <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
-                <MapPin className="h-8 w-8 text-muted-foreground/50" aria-hidden="true" />
+                <MapPin
+                  className="h-8 w-8 text-muted-foreground/50"
+                  aria-hidden="true"
+                />
                 <p className="text-sm text-muted-foreground">
-                  Noch keine Favoriten. Speichere deinen ersten geplanten Zeltplatz – per Koordinaten
-                  oder direkt mit deinem aktuellen Standort.
+                  Noch keine Favoriten. Speichere deinen ersten geplanten
+                  Zeltplatz – per Koordinaten oder direkt mit deinem aktuellen
+                  Standort.
                 </p>
               </CardContent>
             </Card>
@@ -353,7 +421,11 @@ export default function SpotsPage() {
 
           <div className="space-y-3">
             {spots?.map(spot => (
-              <SpotCard key={spot.id} spot={spot} onDelete={() => removeMutation.mutate({ id: spot.id })} />
+              <SpotCard
+                key={spot.id}
+                spot={spot}
+                onDelete={() => removeMutation.mutate({ id: spot.id })}
+              />
             ))}
           </div>
         </>
@@ -362,10 +434,12 @@ export default function SpotsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-serif">Zeltplatz speichern</DialogTitle>
+            <DialogTitle className="font-serif">
+              Zeltplatz speichern
+            </DialogTitle>
             <DialogDescription>
-              Tippe auf die Karte, übernimm deinen aktuellen Standort oder gib die Koordinaten von
-              Hand ein.
+              Tippe auf die Karte, übernimm deinen aktuellen Standort oder gib
+              die Koordinaten von Hand ein.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -396,8 +470,14 @@ export default function SpotsPage() {
               {showMap && dialogOpen && (
                 <SpotMapPicker
                   initial={
-                    lat && lon && !Number.isNaN(parseFloat(lat)) && !Number.isNaN(parseFloat(lon))
-                      ? { lat: parseFloat(lat.replace(",", ".")), lng: parseFloat(lon.replace(",", ".")) }
+                    lat &&
+                    lon &&
+                    !Number.isNaN(parseFloat(lat)) &&
+                    !Number.isNaN(parseFloat(lon))
+                      ? {
+                          lat: parseFloat(lat.replace(",", ".")),
+                          lng: parseFloat(lon.replace(",", ".")),
+                        }
                       : null
                   }
                   onPick={(pickedLat, pickedLng) => {
@@ -438,7 +518,9 @@ export default function SpotsPage() {
               className="w-full"
             >
               <LocateFixed className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              {locating ? "Standort wird ermittelt …" : "Aktuellen Standort übernehmen"}
+              {locating
+                ? "Standort wird ermittelt …"
+                : "Aktuellen Standort übernehmen"}
             </Button>
             <div>
               <Label htmlFor="spot-note">Notiz (optional)</Label>

@@ -59,7 +59,7 @@ function buildIndex(): IndexEntry[] {
     module: string,
     path: string,
     snippet: string,
-    bodyParts: (string | undefined)[],
+    bodyParts: (string | undefined)[]
   ) => {
     const body = [title, ...bodyParts.filter(Boolean)].join(" ");
     entries.push({
@@ -75,7 +75,10 @@ function buildIndex(): IndexEntry[] {
 
   // Werkzeuge selbst sind auch findbar: «wasserwaage» führt direkt zur Kachel
   for (const m of modules) {
-    add(`module-${m.path}`, m.title, "Modul", m.path, m.description, [m.description, m.group]);
+    add(`module-${m.path}`, m.title, "Modul", m.path, m.description, [
+      m.description,
+      m.group,
+    ]);
   }
   for (const t of firstAidTopics) {
     add(`firstaid-${t.id}`, t.title, "Erste Hilfe", "/erste-hilfe", t.summary, [
@@ -96,12 +99,14 @@ function buildIndex(): IndexEntry[] {
     ]);
   }
   for (const r of recipes) {
-    add(`recipe-${r.id}`, r.name, "Rezepte", "/rezepte", `${r.method} · ${r.timeMinutes} Min. · Zutaten: ${r.ingredients.slice(0, 5).join(", ")}`, [
-      r.method,
-      ...r.ingredients,
-      ...r.steps,
-      r.tip,
-    ]);
+    add(
+      `recipe-${r.id}`,
+      r.name,
+      "Rezepte",
+      "/rezepte",
+      `${r.method} · ${r.timeMinutes} Min. · Zutaten: ${r.ingredients.slice(0, 5).join(", ")}`,
+      [r.method, ...r.ingredients, ...r.steps, r.tip]
+    );
   }
   for (const n of natureEntries) {
     add(`nature-${n.id}`, n.name, "Natur", "/natur", n.description, [
@@ -119,7 +124,9 @@ function buildIndex(): IndexEntry[] {
  * Titel-Treffer werden höher gewichtet als Text-Treffer.
  */
 export function searchKnowledge(query: string, limit = 12): SearchResult[] {
-  const words = normalize(query.trim()).split(/\s+/).filter(w => w.length >= 2);
+  const words = normalize(query.trim())
+    .split(/\s+/)
+    .filter(w => w.length >= 2);
   if (words.length === 0) return [];
   if (!index) index = buildIndex();
 
@@ -147,5 +154,9 @@ export function searchKnowledge(query: string, limit = 12): SearchResult[] {
       score,
     });
   }
-  return results.sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, "de-CH")).slice(0, limit);
+  return results
+    .sort(
+      (a, b) => b.score - a.score || a.title.localeCompare(b.title, "de-CH")
+    )
+    .slice(0, limit);
 }

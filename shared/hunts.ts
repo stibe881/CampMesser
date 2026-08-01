@@ -29,7 +29,7 @@ export function parseHuntStations(json: string): CustomHuntStation[] {
           Boolean(s) &&
           typeof s.title === "string" &&
           typeof s.story === "string" &&
-          typeof s.task === "string",
+          typeof s.task === "string"
       )
       .slice(0, MAX_STATIONS)
       .map(s => ({
@@ -48,7 +48,9 @@ export function parseHuntStations(json: string): CustomHuntStation[] {
 }
 
 /** Lösungswort aus den Stations-Buchstaben in Reihenfolge (null ohne Buchstaben). */
-export function solutionWordFromStations(stations: CustomHuntStation[]): string | null {
+export function solutionWordFromStations(
+  stations: CustomHuntStation[]
+): string | null {
   const word = stations
     .map(s => s.letter?.trim().slice(0, 1).toUpperCase() ?? "")
     .join("");

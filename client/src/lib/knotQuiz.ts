@@ -30,7 +30,7 @@ function shuffle<T>(list: T[], rng: () => number): T[] {
 export function buildKnotQuiz(
   all: Knot[],
   count = 8,
-  rng: () => number = Math.random,
+  rng: () => number = Math.random
 ): KnotQuizQuestion[] {
   if (all.length < 4) return [];
   return shuffle(all, rng)
@@ -40,7 +40,7 @@ export function buildKnotQuiz(
       const prompt = rng() < 0.5 ? knot.campingUse : knot.useCase;
       const wrong = shuffle(
         all.filter(k => k.id !== knot.id),
-        rng,
+        rng
       )
         .slice(0, 3)
         .map(k => k.name);

@@ -13,13 +13,15 @@ function createAnonContext(): TrpcContext {
 describe("spots router", () => {
   it("verweigert anonymen Zugriff auf die Favoritenliste", async () => {
     const caller = appRouter.createCaller(createAnonContext());
-    await expect(caller.spots.list()).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    await expect(caller.spots.list()).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
   });
 
   it("verweigert anonymes Anlegen eines Favoriten", async () => {
     const caller = appRouter.createCaller(createAnonContext());
     await expect(
-      caller.spots.add({ name: "Test", latitude: 46.8, longitude: 8.2 }),
+      caller.spots.add({ name: "Test", latitude: 46.8, longitude: 8.2 })
     ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });
 });

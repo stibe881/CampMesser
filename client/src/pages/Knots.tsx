@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { BadgeCheck, Cable, GraduationCap, RotateCcw, Trophy, WifiOff } from "lucide-react";
+import {
+  BadgeCheck,
+  Cable,
+  GraduationCap,
+  RotateCcw,
+  Trophy,
+  WifiOff,
+} from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +24,9 @@ import { cn } from "@/lib/utils";
 
 /** Übungsmodus: «Welcher Knoten passt zur Situation?» als Karteikarten-Quiz. */
 function KnotQuizDialog({ onClose }: { onClose: () => void }) {
-  const [questions, setQuestions] = useState<KnotQuizQuestion[]>(() => buildKnotQuiz(knots, 8));
+  const [questions, setQuestions] = useState<KnotQuizQuestion[]>(() =>
+    buildKnotQuiz(knots, 8)
+  );
   const [current, setCurrent] = useState(0);
   const [answered, setAnswered] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -44,7 +53,10 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
 
       {finished ? (
         <div className="space-y-4 text-center">
-          <Trophy className="mx-auto h-12 w-12 text-chart-1" aria-hidden="true" />
+          <Trophy
+            className="mx-auto h-12 w-12 text-chart-1"
+            aria-hidden="true"
+          />
           <p className="font-serif text-2xl font-bold">
             {score} von {questions.length} richtig!
           </p>
@@ -73,7 +85,10 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
             </span>
             <span>{score} Punkte</span>
           </div>
-          <Progress value={(current / questions.length) * 100} aria-label="Quiz-Fortschritt" />
+          <Progress
+            value={(current / questions.length) * 100}
+            aria-label="Quiz-Fortschritt"
+          />
           <p className="font-semibold">{question.prompt}</p>
           <div className="space-y-2">
             {question.options.map((option, idx) => {
@@ -91,16 +106,28 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
                   disabled={answered !== null}
                   className={cn(
                     "w-full rounded-lg border p-3 text-left text-sm font-medium transition-all",
-                    answered === null && "border-border bg-card hover:border-primary/50",
-                    answered !== null && isCorrect && "border-primary bg-accent",
-                    answered !== null && isSelected && !isCorrect && "border-destructive bg-destructive/10",
-                    answered !== null && !isSelected && !isCorrect && "border-border opacity-60",
+                    answered === null &&
+                      "border-border bg-card hover:border-primary/50",
+                    answered !== null &&
+                      isCorrect &&
+                      "border-primary bg-accent",
+                    answered !== null &&
+                      isSelected &&
+                      !isCorrect &&
+                      "border-destructive bg-destructive/10",
+                    answered !== null &&
+                      !isSelected &&
+                      !isCorrect &&
+                      "border-border opacity-60"
                   )}
                   aria-label={`Antwort: ${option}`}
                 >
                   {option}
                   {answered !== null && isCorrect && (
-                    <BadgeCheck className="ml-2 inline h-4 w-4 text-primary" aria-hidden="true" />
+                    <BadgeCheck
+                      className="ml-2 inline h-4 w-4 text-primary"
+                      aria-hidden="true"
+                    />
                   )}
                 </button>
               );
@@ -109,7 +136,9 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
           {answered !== null && (
             <>
               <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">{question.knotName}:</span>{" "}
+                <span className="font-semibold text-foreground">
+                  {question.knotName}:
+                </span>{" "}
                 {question.proTip}
               </p>
               <Button
@@ -122,7 +151,9 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
                   }
                 }}
               >
-                {current + 1 >= questions.length ? "Ergebnis anzeigen" : "Nächste Frage"}
+                {current + 1 >= questions.length
+                  ? "Ergebnis anzeigen"
+                  : "Nächste Frage"}
               </Button>
             </>
           )}
@@ -132,15 +163,27 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
   );
 }
 
-const categories = ["Alle", "Befestigen", "Spannen", "Verbinden", "Schlaufen"] as const;
+const categories = [
+  "Alle",
+  "Befestigen",
+  "Spannen",
+  "Verbinden",
+  "Schlaufen",
+] as const;
 
 function DifficultyDots({ level }: { level: 1 | 2 | 3 }) {
   return (
-    <span className="flex items-center gap-1" aria-label={`Schwierigkeit ${level} von 3`}>
+    <span
+      className="flex items-center gap-1"
+      aria-label={`Schwierigkeit ${level} von 3`}
+    >
       {[1, 2, 3].map(i => (
         <span
           key={i}
-          className={cn("h-1.5 w-1.5 rounded-full", i <= level ? "bg-primary" : "bg-border")}
+          className={cn(
+            "h-1.5 w-1.5 rounded-full",
+            i <= level ? "bg-primary" : "bg-border"
+          )}
           aria-hidden="true"
         />
       ))}
@@ -153,7 +196,8 @@ export default function KnotsPage() {
   const [selected, setSelected] = useState<Knot | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
 
-  const filtered = category === "Alle" ? knots : knots.filter(k => k.category === category);
+  const filtered =
+    category === "Alle" ? knots : knots.filter(k => k.category === category);
 
   return (
     <div className="container py-6">
@@ -164,7 +208,8 @@ export default function KnotsPage() {
 
       <div className="mb-4 flex items-center gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
         <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
-        Alle Anleitungen sind in der App gespeichert und ohne Internetverbindung nutzbar.
+        Alle Anleitungen sind in der App gespeichert und ohne Internetverbindung
+        nutzbar.
       </div>
 
       {/* Übungsmodus */}
@@ -185,7 +230,11 @@ export default function KnotsPage() {
         </span>
       </button>
 
-      <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Nach Kategorie filtern">
+      <div
+        className="mb-6 flex flex-wrap gap-2"
+        role="group"
+        aria-label="Nach Kategorie filtern"
+      >
         {categories.map(c => (
           <button
             key={c}
@@ -195,7 +244,7 @@ export default function KnotsPage() {
               "rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
               category === c
                 ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:text-foreground",
+                : "bg-muted text-muted-foreground hover:text-foreground"
             )}
             aria-pressed={category === c}
           >
@@ -229,7 +278,11 @@ export default function KnotsPage() {
             </div>
             <div>
               <p className="font-semibold">{knot.name}</p>
-              {knot.altName && <p className="text-xs text-muted-foreground">auch: {knot.altName}</p>}
+              {knot.altName && (
+                <p className="text-xs text-muted-foreground">
+                  auch: {knot.altName}
+                </p>
+              )}
             </div>
             <Badge variant="secondary">{knot.category}</Badge>
             <p className="text-sm text-muted-foreground">{knot.useCase}</p>
@@ -237,7 +290,10 @@ export default function KnotsPage() {
         ))}
       </div>
 
-      <Dialog open={selected !== null} onOpenChange={open => !open && setSelected(null)}>
+      <Dialog
+        open={selected !== null}
+        onOpenChange={open => !open && setSelected(null)}
+      >
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           {selected && (
             <>
@@ -297,7 +353,10 @@ export default function KnotsPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={quizOpen} onOpenChange={open => !open && setQuizOpen(false)}>
+      <Dialog
+        open={quizOpen}
+        onOpenChange={open => !open && setQuizOpen(false)}
+      >
         {quizOpen && <KnotQuizDialog onClose={() => setQuizOpen(false)} />}
       </Dialog>
     </div>

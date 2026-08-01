@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { deriveMoisture, estimateLawnTolerance, formatHours, lawnVerdict } from "../shared/lawn";
+import {
+  deriveMoisture,
+  estimateLawnTolerance,
+  formatHours,
+  lawnVerdict,
+} from "../shared/lawn";
 
 const base = {
   floor: "standard" as const,
@@ -25,8 +30,16 @@ describe("estimateLawnTolerance", () => {
   });
 
   it("Hitze und pralle Sonne verkürzen die tolerierte Standzeit deutlich", () => {
-    const hot = estimateLawnTolerance({ ...base, temperature: 32, sun: "full" });
-    const mild = estimateLawnTolerance({ ...base, temperature: 15, sun: "shade" });
+    const hot = estimateLawnTolerance({
+      ...base,
+      temperature: 32,
+      sun: "full",
+    });
+    const mild = estimateLawnTolerance({
+      ...base,
+      temperature: 15,
+      sun: "shade",
+    });
     expect(hot.yellowingHours).toBeLessThan(mild.yellowingHours / 2);
   });
 

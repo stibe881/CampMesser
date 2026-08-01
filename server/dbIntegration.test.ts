@@ -28,7 +28,11 @@ function anonContext(): { ctx: TrpcContext; cookies: { name: string }[] } {
   return {
     ctx: {
       user: null,
-      req: { protocol: "https", headers: {}, ip: "203.0.113.99" } as TrpcContext["req"],
+      req: {
+        protocol: "https",
+        headers: {},
+        ip: "203.0.113.99",
+      } as TrpcContext["req"],
       res,
     },
     cookies,
@@ -43,7 +47,11 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     // Registrieren setzt ein Session-Cookie
     const anon = anonContext();
     const anonCaller = appRouter.createCaller(anon.ctx);
-    const registered = await anonCaller.auth.register({ name: "CI Test", email, password });
+    const registered = await anonCaller.auth.register({
+      name: "CI Test",
+      email,
+      password,
+    });
     expect(registered.success).toBe(true);
     expect(anon.cookies.length).toBeGreaterThan(0);
 
@@ -59,18 +67,28 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     expect(user).toBeDefined();
     const authed = appRouter.createCaller({
       user: user as NonNullable<TrpcContext["user"]>,
-      req: { protocol: "https", headers: {}, ip: "203.0.113.99" } as TrpcContext["req"],
+      req: {
+        protocol: "https",
+        headers: {},
+        ip: "203.0.113.99",
+      } as TrpcContext["req"],
       res: createRes().res,
     });
 
     // Packliste anlegen und wiederfinden (Migrationen + Schreibpfad ok)
-    const { listId } = await authed.packing.createList({ name: "CI-Liste", scenario: "solo" });
+    const { listId } = await authed.packing.createList({
+      name: "CI-Liste",
+      scenario: "solo",
+    });
     expect(listId).toBeTruthy();
     const lists = await authed.packing.lists();
     expect(lists.some(l => l.name === "CI-Liste")).toBe(true);
 
     // Einstellungs-Sync: Schreiben und Lesen über die userSettings-Tabelle
-    await authed.settings.set({ key: "moduleOrder", value: JSON.stringify(["/sos"]) });
+    await authed.settings.set({
+      key: "moduleOrder",
+      value: JSON.stringify(["/sos"]),
+    });
     const settings = await authed.settings.all();
     expect(settings.moduleOrder).toBe(JSON.stringify(["/sos"]));
 

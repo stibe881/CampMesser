@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { getMoonInfo, moonAge, nextFullMoons, nextNewMoons, stargazingQuality } from "../shared/moon";
+import {
+  getMoonInfo,
+  moonAge,
+  nextFullMoons,
+  nextNewMoons,
+  stargazingQuality,
+} from "../shared/moon";
 
 describe("moonAge", () => {
   it("liefert ~0 am Referenz-Neumond (6.1.2000)", () => {
@@ -61,4 +67,3 @@ describe("stargazingQuality", () => {
     expect(stargazingQuality(0.95).score).toBe("schlecht");
   });
 });
-

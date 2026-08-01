@@ -1,4 +1,17 @@
-import { boolean, date, double, float, index, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
+import {
+  boolean,
+  date,
+  double,
+  float,
+  index,
+  int,
+  mysqlEnum,
+  mysqlTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  varchar,
+} from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -39,7 +52,7 @@ export const campSpots = mysqlTable(
     note: text("note"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
-  table => [index("campSpots_userId").on(table.userId)],
+  table => [index("campSpots_userId").on(table.userId)]
 );
 
 export type CampSpot = typeof campSpots.$inferSelect;
@@ -61,7 +74,7 @@ export const packLists = mysqlTable(
   table => [
     index("packLists_userId").on(table.userId),
     index("packLists_shareToken").on(table.shareToken),
-  ],
+  ]
 );
 
 export type PackList = typeof packLists.$inferSelect;
@@ -74,13 +87,15 @@ export const packItems = mysqlTable(
     id: int("id").autoincrement().primaryKey(),
     listId: int("listId").notNull(),
     name: varchar("name", { length: 160 }).notNull(),
-    category: varchar("category", { length: 80 }).notNull().default("Allgemein"),
+    category: varchar("category", { length: 80 })
+      .notNull()
+      .default("Allgemein"),
     quantity: int("quantity").notNull().default(1),
     checked: boolean("checked").notNull().default(false),
     sortOrder: int("sortOrder").notNull().default(0),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
-  table => [index("packItems_listId").on(table.listId)],
+  table => [index("packItems_listId").on(table.listId)]
 );
 
 export type PackItem = typeof packItems.$inferSelect;
@@ -93,7 +108,9 @@ export const inventoryItems = mysqlTable(
     id: int("id").autoincrement().primaryKey(),
     userId: int("userId").notNull(),
     name: varchar("name", { length: 160 }).notNull(),
-    category: varchar("category", { length: 80 }).notNull().default("Allgemein"),
+    category: varchar("category", { length: 80 })
+      .notNull()
+      .default("Allgemein"),
     weightGrams: int("weightGrams").notNull().default(0),
     volumeLiters: float("volumeLiters").notNull().default(0),
     quantity: int("quantity").notNull().default(1),
@@ -101,7 +118,7 @@ export const inventoryItems = mysqlTable(
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
-  table => [index("inventoryItems_userId").on(table.userId)],
+  table => [index("inventoryItems_userId").on(table.userId)]
 );
 
 export type InventoryItem = typeof inventoryItems.$inferSelect;
@@ -119,7 +136,7 @@ export const powerConsumers = mysqlTable(
     enabled: boolean("enabled").notNull().default(true),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
-  table => [index("powerConsumers_userId").on(table.userId)],
+  table => [index("powerConsumers_userId").on(table.userId)]
 );
 
 export type PowerConsumer = typeof powerConsumers.$inferSelect;
@@ -137,7 +154,7 @@ export const foodItems = mysqlTable(
     expiryDate: date("expiryDate", { mode: "string" }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
-  table => [index("foodItems_userId").on(table.userId)],
+  table => [index("foodItems_userId").on(table.userId)]
 );
 
 export type FoodItem = typeof foodItems.$inferSelect;
@@ -162,7 +179,7 @@ export const tripLogs = mysqlTable(
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
-  table => [index("tripLogs_userId").on(table.userId)],
+  table => [index("tripLogs_userId").on(table.userId)]
 );
 
 export type TripLog = typeof tripLogs.$inferSelect;
@@ -190,7 +207,7 @@ export const customHunts = mysqlTable(
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
-  table => [index("customHunts_userId").on(table.userId)],
+  table => [index("customHunts_userId").on(table.userId)]
 );
 
 export type CustomHunt = typeof customHunts.$inferSelect;
@@ -210,7 +227,7 @@ export const userSettings = mysqlTable(
     value: text("value").notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
-  table => [uniqueIndex("userSettings_user_key").on(table.userId, table.key)],
+  table => [uniqueIndex("userSettings_user_key").on(table.userId, table.key)]
 );
 
 export type UserSetting = typeof userSettings.$inferSelect;

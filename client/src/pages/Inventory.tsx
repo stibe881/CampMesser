@@ -45,12 +45,20 @@ interface FormState {
   quantity: string;
 }
 
-const emptyForm: FormState = { name: "", category: "Allgemein", weightGrams: "", volumeLiters: "", quantity: "1" };
+const emptyForm: FormState = {
+  name: "",
+  category: "Allgemein",
+  weightGrams: "",
+  volumeLiters: "",
+  quantity: "1",
+};
 
 export default function InventoryPage() {
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
-  const query = trpc.inventory.list.useQuery(undefined, { enabled: isAuthenticated });
+  const query = trpc.inventory.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
 
@@ -78,7 +86,10 @@ export default function InventoryPage() {
     const items = query.data ?? [];
     return {
       count: items.reduce((s, i) => s + i.quantity, 0),
-      weightKg: items.reduce((s, i) => s + (i.weightGrams * i.quantity) / 1000, 0),
+      weightKg: items.reduce(
+        (s, i) => s + (i.weightGrams * i.quantity) / 1000,
+        0
+      ),
       volume: items.reduce((s, i) => s + i.volumeLiters * i.quantity, 0),
     };
   }, [query.data]);
@@ -122,7 +133,10 @@ export default function InventoryPage() {
   if (loading) {
     return (
       <div className="container flex justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Lädt" />
+        <Loader2
+          className="h-6 w-6 animate-spin text-muted-foreground"
+          aria-label="Lädt"
+        />
       </div>
     );
   }
@@ -164,7 +178,11 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      <Button className="mb-6" onClick={openNew} aria-label="Neue Ausrüstung erfassen">
+      <Button
+        className="mb-6"
+        onClick={openNew}
+        aria-label="Neue Ausrüstung erfassen"
+      >
         <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
         Ausrüstung erfassen
       </Button>
@@ -172,7 +190,9 @@ export default function InventoryPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{form.id ? "Ausrüstung bearbeiten" : "Neue Ausrüstung"}</DialogTitle>
+            <DialogTitle>
+              {form.id ? "Ausrüstung bearbeiten" : "Neue Ausrüstung"}
+            </DialogTitle>
             <DialogDescription>
               Gewicht und Volumen helfen später bei der Pack-Optimierung.
             </DialogDescription>
@@ -190,8 +210,15 @@ export default function InventoryPage() {
             </div>
             <div>
               <Label htmlFor="inv-category">Kategorie</Label>
-              <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
-                <SelectTrigger id="inv-category" className="mt-1.5" aria-label="Kategorie wählen">
+              <Select
+                value={form.category}
+                onValueChange={v => setForm(f => ({ ...f, category: v }))}
+              >
+                <SelectTrigger
+                  id="inv-category"
+                  className="mt-1.5"
+                  aria-label="Kategorie wählen"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -213,7 +240,9 @@ export default function InventoryPage() {
                   min="0"
                   placeholder="1200"
                   value={form.weightGrams}
-                  onChange={e => setForm(f => ({ ...f, weightGrams: e.target.value }))}
+                  onChange={e =>
+                    setForm(f => ({ ...f, weightGrams: e.target.value }))
+                  }
                 />
               </div>
               <div>
@@ -226,7 +255,9 @@ export default function InventoryPage() {
                   step="0.1"
                   placeholder="8"
                   value={form.volumeLiters}
-                  onChange={e => setForm(f => ({ ...f, volumeLiters: e.target.value }))}
+                  onChange={e =>
+                    setForm(f => ({ ...f, volumeLiters: e.target.value }))
+                  }
                 />
               </div>
               <div>
@@ -237,7 +268,9 @@ export default function InventoryPage() {
                   type="number"
                   min="1"
                   value={form.quantity}
-                  onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
+                  onChange={e =>
+                    setForm(f => ({ ...f, quantity: e.target.value }))
+                  }
                 />
               </div>
             </div>
@@ -247,7 +280,10 @@ export default function InventoryPage() {
               disabled={addMutation.isPending || updateMutation.isPending}
             >
               {(addMutation.isPending || updateMutation.isPending) && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
               )}
               {form.id ? "Speichern" : "Erfassen"}
             </Button>
@@ -257,7 +293,10 @@ export default function InventoryPage() {
 
       {query.isLoading ? (
         <div className="flex justify-center py-10">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Lädt" />
+          <Loader2
+            className="h-6 w-6 animate-spin text-muted-foreground"
+            aria-label="Lädt"
+          />
         </div>
       ) : items.length > 0 ? (
         <div className="overflow-hidden rounded-xl border border-border">
@@ -265,23 +304,38 @@ export default function InventoryPage() {
             <thead>
               <tr className="border-b border-border bg-muted/50 text-left">
                 <th className="px-4 py-2.5 font-semibold">Name</th>
-                <th className="hidden px-4 py-2.5 font-semibold sm:table-cell">Kategorie</th>
-                <th className="px-4 py-2.5 text-right font-semibold">Gewicht</th>
-                <th className="hidden px-4 py-2.5 text-right font-semibold sm:table-cell">Volumen</th>
+                <th className="hidden px-4 py-2.5 font-semibold sm:table-cell">
+                  Kategorie
+                </th>
+                <th className="px-4 py-2.5 text-right font-semibold">
+                  Gewicht
+                </th>
+                <th className="hidden px-4 py-2.5 text-right font-semibold sm:table-cell">
+                  Volumen
+                </th>
                 <th className="px-2 py-2.5" aria-label="Aktionen"></th>
               </tr>
             </thead>
             <tbody>
               {items.map(item => (
-                <tr key={item.id} className="border-b border-border/60 last:border-0 hover:bg-muted/30">
+                <tr
+                  key={item.id}
+                  className="border-b border-border/60 last:border-0 hover:bg-muted/30"
+                >
                   <td className="px-4 py-2.5">
                     <span className="font-medium">{item.name}</span>
                     {item.quantity > 1 && (
-                      <span className="ml-1.5 text-xs text-muted-foreground">× {item.quantity}</span>
+                      <span className="ml-1.5 text-xs text-muted-foreground">
+                        × {item.quantity}
+                      </span>
                     )}
-                    <span className="block text-xs text-muted-foreground sm:hidden">{item.category}</span>
+                    <span className="block text-xs text-muted-foreground sm:hidden">
+                      {item.category}
+                    </span>
                   </td>
-                  <td className="hidden px-4 py-2.5 text-muted-foreground sm:table-cell">{item.category}</td>
+                  <td className="hidden px-4 py-2.5 text-muted-foreground sm:table-cell">
+                    {item.category}
+                  </td>
                   <td className="px-4 py-2.5 text-right font-mono text-xs">
                     {item.weightGrams >= 1000
                       ? `${(item.weightGrams / 1000).toFixed(1)} kg`
@@ -323,7 +377,10 @@ export default function InventoryPage() {
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-border p-10 text-center">
-          <Package className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" aria-hidden="true" />
+          <Package
+            className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
+            aria-hidden="true"
+          />
           <p className="font-medium">Noch keine Ausrüstung erfasst</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Beginne mit den grossen Teilen: Zelt, Schlafsack, Isomatte.

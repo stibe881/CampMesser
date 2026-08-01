@@ -67,10 +67,20 @@ describe("calcWaterNeeds", () => {
 
   it("erhöht den Bedarf bei Hitze und Aktivität", () => {
     const cool = calcWaterNeeds({
-      adults: 1, children: 0, days: 1, maxTempC: 20, activity: "ruhig", includeCookingHygiene: false,
+      adults: 1,
+      children: 0,
+      days: 1,
+      maxTempC: 20,
+      activity: "ruhig",
+      includeCookingHygiene: false,
     });
     const hot = calcWaterNeeds({
-      adults: 1, children: 0, days: 1, maxTempC: 35, activity: "aktiv", includeCookingHygiene: false,
+      adults: 1,
+      children: 0,
+      days: 1,
+      maxTempC: 35,
+      activity: "aktiv",
+      includeCookingHygiene: false,
     });
     expect(hot.totalLiters).toBeGreaterThan(cool.totalLiters);
     // 35 °C → 3 Stufen à 0.5 = 1.5 Zuschlag, aktiv +1 → 4.5 l
@@ -79,7 +89,12 @@ describe("calcWaterNeeds", () => {
 
   it("rechnet Kochen und Abwasch für alle Personen ein", () => {
     const result = calcWaterNeeds({
-      adults: 2, children: 2, days: 3, maxTempC: 20, activity: "normal", includeCookingHygiene: true,
+      adults: 2,
+      children: 2,
+      days: 3,
+      maxTempC: 20,
+      activity: "normal",
+      includeCookingHygiene: true,
     });
     expect(result.cookingHygieneLiters).toBe(4 * 1.5 * 3); // 18
   });
@@ -91,10 +106,22 @@ describe("analyzePack", () => {
   it("summiert Gewicht und Volumen inkl. Menge", () => {
     const analysis = analyzePack(
       [
-        { name: "Zelt", weightGrams: 3000, volumeLiters: 10, quantity: 1, category: "Schlafen" },
-        { name: "Schlafsack", weightGrams: 1000, volumeLiters: 8, quantity: 2, category: "Schlafen" },
+        {
+          name: "Zelt",
+          weightGrams: 3000,
+          volumeLiters: 10,
+          quantity: 1,
+          category: "Schlafen",
+        },
+        {
+          name: "Schlafsack",
+          weightGrams: 1000,
+          volumeLiters: 8,
+          quantity: 2,
+          category: "Schlafen",
+        },
       ],
-      motorrad,
+      motorrad
     );
     expect(analysis.totalWeightKg).toBeCloseTo(5);
     expect(analysis.totalVolumeLiters).toBeCloseTo(26);
@@ -102,8 +129,16 @@ describe("analyzePack", () => {
 
   it("warnt bei Überschreitung des Limits", () => {
     const analysis = analyzePack(
-      [{ name: "Kiste", weightGrams: 40000, volumeLiters: 120, quantity: 1, category: "Sonstiges" }],
-      motorrad,
+      [
+        {
+          name: "Kiste",
+          weightGrams: 40000,
+          volumeLiters: 120,
+          quantity: 1,
+          category: "Sonstiges",
+        },
+      ],
+      motorrad
     );
     expect(analysis.weightPercent).toBeGreaterThan(100);
     expect(analysis.hints.some(h => h.includes("überschritten"))).toBe(true);

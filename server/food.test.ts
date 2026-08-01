@@ -16,17 +16,31 @@ describe("expiryInfo", () => {
       daysLeft: -1,
       label: "seit gestern abgelaufen",
     });
-    expect(expiryInfo("2026-07-27", TODAY)?.label).toBe("seit 5 Tagen abgelaufen");
+    expect(expiryInfo("2026-07-27", TODAY)?.label).toBe(
+      "seit 5 Tagen abgelaufen"
+    );
   });
 
   it("erkennt heute und bald ablaufende Lebensmittel", () => {
-    expect(expiryInfo("2026-08-01", TODAY)).toMatchObject({ state: "today", label: "läuft heute ab" });
-    expect(expiryInfo("2026-08-02", TODAY)).toMatchObject({ state: "soon", label: "läuft morgen ab" });
-    expect(expiryInfo("2026-08-04", TODAY)).toMatchObject({ state: "soon", label: "noch 3 Tage" });
+    expect(expiryInfo("2026-08-01", TODAY)).toMatchObject({
+      state: "today",
+      label: "läuft heute ab",
+    });
+    expect(expiryInfo("2026-08-02", TODAY)).toMatchObject({
+      state: "soon",
+      label: "läuft morgen ab",
+    });
+    expect(expiryInfo("2026-08-04", TODAY)).toMatchObject({
+      state: "soon",
+      label: "noch 3 Tage",
+    });
   });
 
   it("markiert länger haltbare Lebensmittel als ok", () => {
-    expect(expiryInfo("2026-08-05", TODAY)).toMatchObject({ state: "ok", daysLeft: 4 });
+    expect(expiryInfo("2026-08-05", TODAY)).toMatchObject({
+      state: "ok",
+      daysLeft: 4,
+    });
     expect(expiryInfo("2026-09-01", TODAY)?.state).toBe("ok");
   });
 
@@ -42,7 +56,9 @@ describe("expirySortKey", () => {
       { name: "Später", expiryDate: "2026-08-10" },
       { name: "Zuerst", expiryDate: "2026-08-02" },
     ];
-    const sorted = [...items].sort((a, b) => expirySortKey(a.expiryDate) - expirySortKey(b.expiryDate));
+    const sorted = [...items].sort(
+      (a, b) => expirySortKey(a.expiryDate) - expirySortKey(b.expiryDate)
+    );
     expect(sorted.map(i => i.name)).toEqual(["Zuerst", "Später", "Ohne"]);
   });
 });

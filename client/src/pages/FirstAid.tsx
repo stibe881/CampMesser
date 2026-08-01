@@ -46,8 +46,13 @@ const severityStyle: Record<FirstAidTopic["severity"], string> = {
 };
 
 export default function FirstAidPage() {
-  const [filter, setFilter] = useState<"alle" | FirstAidTopic["severity"]>("alle");
-  const topics = filter === "alle" ? firstAidTopics : firstAidTopics.filter(t => t.severity === filter);
+  const [filter, setFilter] = useState<"alle" | FirstAidTopic["severity"]>(
+    "alle"
+  );
+  const topics =
+    filter === "alle"
+      ? firstAidTopics
+      : firstAidTopics.filter(t => t.severity === filter);
 
   return (
     <div className="container max-w-3xl py-6">
@@ -58,10 +63,15 @@ export default function FirstAidPage() {
 
       <div className="mb-4 flex items-center gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
         <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
-        Alle Inhalte sind in der App gespeichert und ohne Internetverbindung nutzbar.
+        Alle Inhalte sind in der App gespeichert und ohne Internetverbindung
+        nutzbar.
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Nach Schweregrad filtern">
+      <div
+        className="mb-6 flex flex-wrap gap-2"
+        role="group"
+        aria-label="Nach Schweregrad filtern"
+      >
         {(["alle", "leicht", "mittel", "ernst"] as const).map(s => (
           <button
             key={s}
@@ -71,7 +81,7 @@ export default function FirstAidPage() {
               "rounded-full px-3.5 py-1.5 text-sm font-medium capitalize transition-colors",
               filter === s
                 ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:text-foreground",
+                : "bg-muted text-muted-foreground hover:text-foreground"
             )}
             aria-pressed={filter === s}
           >
@@ -96,14 +106,21 @@ export default function FirstAidPage() {
                   </span>
                   <div>
                     <p className="font-semibold">{topic.title}</p>
-                    <Badge className={cn("mt-0.5 capitalize", severityStyle[topic.severity])}>
+                    <Badge
+                      className={cn(
+                        "mt-0.5 capitalize",
+                        severityStyle[topic.severity]
+                      )}
+                    >
                       {topic.severity}
                     </Badge>
                   </div>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
-                <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{topic.summary}</p>
+                <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+                  {topic.summary}
+                </p>
 
                 <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                   Erkennen
@@ -111,7 +128,10 @@ export default function FirstAidPage() {
                 <ul className="mb-4 space-y-1 text-sm">
                   {topic.symptoms.map(s => (
                     <li key={s} className="flex gap-2">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                      <span
+                        className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                        aria-hidden="true"
+                      />
                       {s}
                     </li>
                   ))}
@@ -128,20 +148,28 @@ export default function FirstAidPage() {
                       </span>
                       <div>
                         <p className="text-sm font-semibold">{step.title}</p>
-                        <p className="text-sm text-muted-foreground">{step.text}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {step.text}
+                        </p>
                       </div>
                     </li>
                   ))}
                 </ol>
 
                 <div className="mb-3 flex gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-                  <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
+                  <AlertTriangle
+                    className="h-4 w-4 shrink-0 text-destructive"
+                    aria-hidden="true"
+                  />
                   <p className="text-sm text-foreground">{topic.warning}</p>
                 </div>
 
                 {topic.kidNote && (
                   <div className="flex gap-2.5 rounded-lg bg-accent/60 p-3">
-                    <Baby className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                    <Baby
+                      className="h-4 w-4 shrink-0 text-primary"
+                      aria-hidden="true"
+                    />
                     <p className="text-sm">{topic.kidNote}</p>
                   </div>
                 )}
@@ -152,8 +180,9 @@ export default function FirstAidPage() {
       </Accordion>
 
       <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
-        Hinweis: Dieser Guide ersetzt keine ärztliche Beratung und keinen Erste-Hilfe-Kurs. Im
-        Zweifel immer den Notruf 112 oder die Rega 1414 kontaktieren.
+        Hinweis: Dieser Guide ersetzt keine ärztliche Beratung und keinen
+        Erste-Hilfe-Kurs. Im Zweifel immer den Notruf 112 oder die Rega 1414
+        kontaktieren.
       </p>
     </div>
   );

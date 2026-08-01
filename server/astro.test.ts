@@ -25,7 +25,9 @@ describe("upcomingShowers", () => {
     expect(list[0].activeNow).toBe(true);
     // aufsteigend sortiert
     for (let i = 1; i < list.length; i++) {
-      expect(list[i].daysUntilPeak).toBeGreaterThanOrEqual(list[i - 1].daysUntilPeak);
+      expect(list[i].daysUntilPeak).toBeGreaterThanOrEqual(
+        list[i - 1].daysUntilPeak
+      );
     }
   });
 

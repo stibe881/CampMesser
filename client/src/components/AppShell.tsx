@@ -35,7 +35,12 @@ const navItems = [
   { path: "/packlisten", label: "Packen", icon: ListChecks },
   { path: "/sonne", label: "Sonne", icon: Compass },
   { path: "/wetter", label: "Wetter", icon: CloudSunRain },
-  { path: "/erste-hilfe", label: "Erste Hilfe", icon: BookOpen, activePaths: ["/erste-hilfe", "/knoten", "/natur", "/rezepte"] },
+  {
+    path: "/erste-hilfe",
+    label: "Erste Hilfe",
+    icon: BookOpen,
+    activePaths: ["/erste-hilfe", "/knoten", "/natur", "/rezepte"],
+  },
   { path: "/sos", label: "SOS", icon: Siren },
 ];
 
@@ -44,7 +49,13 @@ const RECENT_KEY = "campmesser.recentModules";
 
 function trackModuleVisit(path: string) {
   // Nur echte Modul-Seiten tracken (nicht Start, 404, geteilte Listen, Druckansichten)
-  if (path === "/" || path.startsWith("/liste/") || path.startsWith("/familie/drucken") || path === "/404") return;
+  if (
+    path === "/" ||
+    path.startsWith("/liste/") ||
+    path.startsWith("/familie/drucken") ||
+    path === "/404"
+  )
+    return;
   // Nur den Modul-Stamm speichern (z. B. /packlisten/5 → /packlisten)
   const root = "/" + path.split("/")[1];
   try {
@@ -102,22 +113,32 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         className={cn(
           "sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md",
           "transition-transform duration-300 ease-out",
-          headerHidden && "-translate-y-full",
+          headerHidden && "-translate-y-full"
         )}
       >
         <div className="container flex h-14 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5" aria-label="Zur Startseite">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5"
+            aria-label="Zur Startseite"
+          >
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <BrandLogo className="h-6 w-6" />
             </span>
-            <span className="font-serif text-lg font-semibold tracking-tight">CampMesser</span>
+            <span className="font-serif text-lg font-semibold tracking-tight">
+              CampMesser
+            </span>
           </Link>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => toggleTheme?.()}
               className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
-              aria-label={theme === "dark" ? "Helles Design aktivieren" : "Dunkles Design aktivieren"}
+              aria-label={
+                theme === "dark"
+                  ? "Helles Design aktivieren"
+                  : "Dunkles Design aktivieren"
+              }
             >
               {theme === "dark" ? (
                 <Sun className="h-4 w-4" aria-hidden="true" />
@@ -143,10 +164,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       window.location.href = "/profil";
                     }}
                   >
-                    <UserRound className="mr-2 h-4 w-4" aria-hidden="true" /> Profil
+                    <UserRound className="mr-2 h-4 w-4" aria-hidden="true" />{" "}
+                    Profil
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => void logout()}>
-                    <LogOut className="mr-2 h-4 w-4" aria-hidden="true" /> Abmelden
+                    <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />{" "}
+                    Abmelden
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -164,7 +187,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               href="/sos"
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-transform active:scale-[0.97]",
-                "bg-destructive text-destructive-foreground shadow-sm",
+                "bg-destructive text-destructive-foreground shadow-sm"
               )}
               aria-label="SOS – Notfall-Dashboard öffnen"
             >
@@ -181,7 +204,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         className={cn(
           "fixed right-4 top-3 z-50 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold",
           "bg-destructive text-destructive-foreground shadow-lg transition-all duration-300 ease-out active:scale-[0.97]",
-          headerHidden ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-16 opacity-0",
+          headerHidden
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none -translate-y-16 opacity-0"
         )}
         aria-label="SOS – Notfall-Dashboard öffnen"
         aria-hidden={!headerHidden}
@@ -213,12 +238,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 href={item.path}
                 className={cn(
                   "flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  isActive
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
                 aria-label={item.label}
                 aria-current={isActive ? "page" : undefined}
               >
-                <Icon className={cn("h-5 w-5", item.label === "SOS" && "text-destructive")} aria-hidden="true" />
+                <Icon
+                  className={cn(
+                    "h-5 w-5",
+                    item.label === "SOS" && "text-destructive"
+                  )}
+                  aria-hidden="true"
+                />
                 {item.label}
               </Link>
             );

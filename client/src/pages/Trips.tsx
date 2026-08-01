@@ -46,8 +46,12 @@ function formatRange(startDate: string, endDate: string): string {
 export default function TripsPage() {
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
-  const tripsQuery = trpc.trips.list.useQuery(undefined, { enabled: isAuthenticated });
-  const spotsQuery = trpc.spots.list.useQuery(undefined, { enabled: isAuthenticated });
+  const tripsQuery = trpc.trips.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const spotsQuery = trpc.spots.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
   const today = new Date().toISOString().slice(0, 10);
   const [spotChoice, setSpotChoice] = useState<string>(FREE_LOCATION);
@@ -65,7 +69,8 @@ export default function TripsPage() {
       setForm(f => ({ ...f, location: "", title: "", notes: "" }));
       toast.success("Eintrag gespeichert");
     },
-    onError: e => toast.error(e.message || "Eintrag konnte nicht gespeichert werden"),
+    onError: e =>
+      toast.error(e.message || "Eintrag konnte nicht gespeichert werden"),
   });
 
   const removeMutation = trpc.trips.remove.useMutation({
@@ -88,17 +93,24 @@ export default function TripsPage() {
   const stats = useMemo(
     () =>
       computeTripStats(
-        trips.map(t => ({ startDate: t.startDate, endDate: t.endDate, placeName: placeName(t) })),
+        trips.map(t => ({
+          startDate: t.startDate,
+          endDate: t.endDate,
+          placeName: placeName(t),
+        }))
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [trips, spots],
+    [trips, spots]
   );
   const currentYear = new Date().getFullYear();
 
   if (loading || (isAuthenticated && tripsQuery.isLoading)) {
     return (
       <div className="container flex justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Lädt" />
+        <Loader2
+          className="h-6 w-6 animate-spin text-muted-foreground"
+          aria-label="Lädt"
+        />
       </div>
     );
   }
@@ -130,7 +142,9 @@ export default function TripsPage() {
               <p className="font-serif text-2xl font-bold text-primary">
                 {stats.nightsByYear[currentYear] ?? 0}
               </p>
-              <p className="text-xs text-muted-foreground">Nächte {currentYear}</p>
+              <p className="text-xs text-muted-foreground">
+                Nächte {currentYear}
+              </p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold">{stats.totalNights}</p>
@@ -142,8 +156,13 @@ export default function TripsPage() {
             </div>
             <div className="text-center">
               <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
-                <Trophy className="h-4 w-4 shrink-0 text-chart-1" aria-hidden="true" />
-                <span className="truncate">{stats.topPlaces[0]?.name ?? "–"}</span>
+                <Trophy
+                  className="h-4 w-4 shrink-0 text-chart-1"
+                  aria-hidden="true"
+                />
+                <span className="truncate">
+                  {stats.topPlaces[0]?.name ?? "–"}
+                </span>
               </p>
               <p className="text-xs text-muted-foreground">Lieblingsplatz</p>
             </div>
@@ -162,9 +181,12 @@ export default function TripsPage() {
             className="grid gap-3"
             onSubmit={e => {
               e.preventDefault();
-              const spotId = spotChoice === FREE_LOCATION ? null : Number(spotChoice);
+              const spotId =
+                spotChoice === FREE_LOCATION ? null : Number(spotChoice);
               if (spotId === null && !form.location.trim()) {
-                toast.error("Bitte einen Zeltplatz wählen oder einen Ort eintragen");
+                toast.error(
+                  "Bitte einen Zeltplatz wählen oder einen Ort eintragen"
+                );
                 return;
               }
               addMutation.mutate({
@@ -185,7 +207,9 @@ export default function TripsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={FREE_LOCATION}>Ort frei eintragen …</SelectItem>
+                    <SelectItem value={FREE_LOCATION}>
+                      Ort frei eintragen …
+                    </SelectItem>
                     {spots.map(s => (
                       <SelectItem key={s.id} value={String(s.id)}>
                         {s.name}
@@ -202,7 +226,9 @@ export default function TripsPage() {
                     className="mt-1.5"
                     placeholder="z. B. Camping Aareschlucht"
                     value={form.location}
-                    onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
+                    onChange={e =>
+                      setForm(f => ({ ...f, location: e.target.value }))
+                    }
                   />
                 </div>
               )}
@@ -221,7 +247,8 @@ export default function TripsPage() {
                       ...f,
                       startDate: e.target.value,
                       // Abreise automatisch nachziehen, wenn sie vor der Anreise läge
-                      endDate: f.endDate < e.target.value ? e.target.value : f.endDate,
+                      endDate:
+                        f.endDate < e.target.value ? e.target.value : f.endDate,
                     }))
                   }
                   required
@@ -235,7 +262,9 @@ export default function TripsPage() {
                   type="date"
                   value={form.endDate}
                   min={form.startDate}
-                  onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))}
+                  onChange={e =>
+                    setForm(f => ({ ...f, endDate: e.target.value }))
+                  }
                   required
                 />
               </div>
@@ -261,26 +290,38 @@ export default function TripsPage() {
                 onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
               />
             </div>
-            <Button type="submit" disabled={addMutation.isPending} className="justify-self-start">
+            <Button
+              type="submit"
+              disabled={addMutation.isPending}
+              className="justify-self-start"
+            >
               <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              {addMutation.isPending ? "Wird gespeichert …" : "Eintrag speichern"}
+              {addMutation.isPending
+                ? "Wird gespeichert …"
+                : "Eintrag speichern"}
             </Button>
           </form>
         </CardContent>
       </Card>
 
       {/* Einträge */}
-      <h2 className="mb-3 font-serif text-lg font-semibold">Deine Aufenthalte</h2>
+      <h2 className="mb-3 font-serif text-lg font-semibold">
+        Deine Aufenthalte
+      </h2>
       {trips.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          Noch keine Einträge – halte oben deinen ersten Camping-Aufenthalt fest.
+          Noch keine Einträge – halte oben deinen ersten Camping-Aufenthalt
+          fest.
         </p>
       ) : (
         <ul className="space-y-3">
           {trips.map(trip => {
             const nights = tripNights(trip.startDate, trip.endDate);
             return (
-              <li key={trip.id} className="rounded-xl border border-border bg-card p-4">
+              <li
+                key={trip.id}
+                className="rounded-xl border border-border bg-card p-4"
+              >
                 <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                     {trip.spotId != null ? (
@@ -290,7 +331,9 @@ export default function TripsPage() {
                     )}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold">{trip.title || placeName(trip)}</p>
+                    <p className="font-semibold">
+                      {trip.title || placeName(trip)}
+                    </p>
                     <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                       {trip.title && (
                         <span className="flex items-center gap-1">

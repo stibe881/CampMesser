@@ -37,7 +37,10 @@ export function tripNights(startDate: string, endDate: string): number {
 }
 
 /** Nächte eines Aufenthalts pro Jahr aufteilen (die Nacht zählt zum Datum ihres Abends). */
-export function nightsByYear(startDate: string, endDate: string): Record<number, number> {
+export function nightsByYear(
+  startDate: string,
+  endDate: string
+): Record<number, number> {
   const result: Record<number, number> = {};
   const start = parseIsoDay(startDate);
   const nights = tripNights(startDate, endDate);
@@ -51,14 +54,20 @@ export function nightsByYear(startDate: string, endDate: string): Record<number,
 
 /** Gesamt-Statistik über alle Tagebuch-Einträge. */
 export function computeTripStats(trips: TripLike[]): TripStats {
-  const stats: TripStats = { totalTrips: trips.length, totalNights: 0, nightsByYear: {}, topPlaces: [] };
+  const stats: TripStats = {
+    totalTrips: trips.length,
+    totalNights: 0,
+    nightsByYear: {},
+    topPlaces: [],
+  };
   const placeNights = new Map<string, number>();
   for (const trip of trips) {
     const nights = tripNights(trip.startDate, trip.endDate);
     stats.totalNights += nights;
     const perYear = nightsByYear(trip.startDate, trip.endDate);
     for (const [year, n] of Object.entries(perYear)) {
-      stats.nightsByYear[Number(year)] = (stats.nightsByYear[Number(year)] ?? 0) + n;
+      stats.nightsByYear[Number(year)] =
+        (stats.nightsByYear[Number(year)] ?? 0) + n;
     }
     const place = trip.placeName?.trim();
     if (place && nights > 0) {
@@ -67,6 +76,8 @@ export function computeTripStats(trips: TripLike[]): TripStats {
   }
   stats.topPlaces = Array.from(placeNights.entries())
     .map(([name, nights]) => ({ name, nights }))
-    .sort((a, b) => b.nights - a.nights || a.name.localeCompare(b.name, "de-CH"));
+    .sort(
+      (a, b) => b.nights - a.nights || a.name.localeCompare(b.name, "de-CH")
+    );
   return stats;
 }

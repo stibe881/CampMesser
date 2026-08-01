@@ -3,7 +3,12 @@ import { Crosshair, Gauge, RotateCcw, Smartphone } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { bubblePosition, levelingAdvice, screenTilt, type Tilt } from "@shared/level";
+import {
+  bubblePosition,
+  levelingAdvice,
+  screenTilt,
+  type Tilt,
+} from "@shared/level";
 import { useDeviceTilt } from "@/hooks/useDeviceTilt";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +21,8 @@ function loadCalibration(): Tilt {
     const raw = localStorage.getItem(CALIBRATION_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Tilt;
-      if (typeof parsed?.pitch === "number" && typeof parsed?.roll === "number") return parsed;
+      if (typeof parsed?.pitch === "number" && typeof parsed?.roll === "number")
+        return parsed;
     }
   } catch {
     /* Standard */
@@ -33,7 +39,8 @@ function saveCalibration(cal: Tilt) {
 }
 
 function currentScreenAngle(): number {
-  if (typeof screen !== "undefined" && screen.orientation) return screen.orientation.angle;
+  if (typeof screen !== "undefined" && screen.orientation)
+    return screen.orientation.angle;
   // Ältere iOS-Versionen: window.orientation (deprecated, aber vorhanden)
   const legacy = (window as { orientation?: number }).orientation;
   return typeof legacy === "number" ? legacy : 0;
@@ -48,7 +55,7 @@ export default function LevelPage() {
   const { reading, active, permission, start } = useDeviceTilt();
   const [calibration, setCalibration] = useState<Tilt>(() => loadCalibration());
   const [screenAngle, setScreenAngle] = useState<number>(() =>
-    typeof window === "undefined" ? 0 : currentScreenAngle(),
+    typeof window === "undefined" ? 0 : currentScreenAngle()
   );
 
   // Sensor direkt starten (Android/Desktop); iOS verlangt den Button unten
@@ -67,15 +74,19 @@ export default function LevelPage() {
   }, []);
 
   const rawTilt = useMemo<Tilt | null>(
-    () => (reading ? screenTilt(reading.beta, reading.gamma, screenAngle) : null),
-    [reading, screenAngle],
+    () =>
+      reading ? screenTilt(reading.beta, reading.gamma, screenAngle) : null,
+    [reading, screenAngle]
   );
   const tilt = useMemo<Tilt | null>(
     () =>
       rawTilt
-        ? { pitch: rawTilt.pitch - calibration.pitch, roll: rawTilt.roll - calibration.roll }
+        ? {
+            pitch: rawTilt.pitch - calibration.pitch,
+            roll: rawTilt.roll - calibration.roll,
+          }
         : null,
-    [rawTilt, calibration],
+    [rawTilt, calibration]
   );
   const advice = tilt ? levelingAdvice(tilt) : null;
   const bubble = tilt ? bubblePosition(tilt, MAX_DEG) : { x: 0, y: 0 };
@@ -91,10 +102,13 @@ export default function LevelPage() {
       {permission === "unsupported" && (
         <Card>
           <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
-            <Smartphone className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+            <Smartphone
+              className="h-8 w-8 text-muted-foreground"
+              aria-hidden="true"
+            />
             <p className="text-sm text-muted-foreground">
-              Dieses Gerät hat keinen Lagesensor. Öffne die Wasserwaage auf deinem Smartphone –
-              sie funktioniert komplett offline.
+              Dieses Gerät hat keinen Lagesensor. Öffne die Wasserwaage auf
+              deinem Smartphone – sie funktioniert komplett offline.
             </p>
           </CardContent>
         </Card>
@@ -103,7 +117,10 @@ export default function LevelPage() {
       {permission === "denied" && (
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
-            <Gauge className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+            <Gauge
+              className="h-8 w-8 text-muted-foreground"
+              aria-hidden="true"
+            />
             <p className="text-sm text-muted-foreground">
               Für die Wasserwaage braucht die App Zugriff auf den Lagesensor.
             </p>
@@ -115,7 +132,12 @@ export default function LevelPage() {
       {active && (
         <>
           {/* Libelle */}
-          <Card className={cn("mb-4", advice?.level && "border-primary/60 bg-accent/30")}>
+          <Card
+            className={cn(
+              "mb-4",
+              advice?.level && "border-primary/60 bg-accent/30"
+            )}
+          >
             <CardContent className="flex flex-col items-center pt-6">
               <div
                 className="relative h-64 w-64 rounded-full border-2 border-border bg-card shadow-inner"
@@ -138,7 +160,7 @@ export default function LevelPage() {
                     "absolute h-12 w-12 rounded-full border shadow-md transition-transform duration-100 ease-out",
                     advice?.level
                       ? "border-primary bg-primary/70"
-                      : "border-chart-1 bg-chart-1/60",
+                      : "border-chart-1 bg-chart-1/60"
                   )}
                   style={{
                     left: "50%",
@@ -151,12 +173,18 @@ export default function LevelPage() {
               {/* Zahlen */}
               <div className="mt-5 grid w-full grid-cols-2 gap-3 text-center">
                 <div className="rounded-lg bg-accent/50 py-2.5">
-                  <p className="font-mono text-2xl font-bold">{tilt ? fmtDeg(tilt.pitch) : "–"}</p>
+                  <p className="font-mono text-2xl font-bold">
+                    {tilt ? fmtDeg(tilt.pitch) : "–"}
+                  </p>
                   <p className="text-xs text-muted-foreground">Vor / zurück</p>
                 </div>
                 <div className="rounded-lg bg-accent/50 py-2.5">
-                  <p className="font-mono text-2xl font-bold">{tilt ? fmtDeg(tilt.roll) : "–"}</p>
-                  <p className="text-xs text-muted-foreground">Links / rechts</p>
+                  <p className="font-mono text-2xl font-bold">
+                    {tilt ? fmtDeg(tilt.roll) : "–"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Links / rechts
+                  </p>
                 </div>
               </div>
 
@@ -215,10 +243,11 @@ export default function LevelPage() {
             )}
           </div>
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-            «Hier nullen» gleicht eine schiefe Handy-Hülle oder Tischplatte aus: Lege das Handy auf
-            eine Fläche, von der du weisst, dass sie eben ist, und nulle dort. Für den Wohnwagen:
-            Handy auf den Boden oder eine Arbeitsfläche im Innern legen und die tiefe Seite mit
-            Keilen unterlegen, bis die Blase in der Mitte ist.
+            «Hier nullen» gleicht eine schiefe Handy-Hülle oder Tischplatte aus:
+            Lege das Handy auf eine Fläche, von der du weisst, dass sie eben
+            ist, und nulle dort. Für den Wohnwagen: Handy auf den Boden oder
+            eine Arbeitsfläche im Innern legen und die tiefe Seite mit Keilen
+            unterlegen, bis die Blase in der Mitte ist.
           </p>
         </>
       )}

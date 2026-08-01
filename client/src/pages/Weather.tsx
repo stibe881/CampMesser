@@ -54,7 +54,13 @@ const icons: Record<string, React.ComponentType<{ className?: string }>> = {
   storm: CloudLightning,
 };
 
-function WeatherIcon({ code, className }: { code: number; className?: string }) {
+function WeatherIcon({
+  code,
+  className,
+}: {
+  code: number;
+  className?: string;
+}) {
   const { icon } = describeWeatherCode(code);
   const Icon = icons[icon] ?? Cloud;
   return <Icon className={className} aria-hidden="true" />;
@@ -63,7 +69,12 @@ function WeatherIcon({ code, className }: { code: number; className?: string }) 
 interface WeatherData {
   hourly: HourlyWeather[];
   daily: DailyWeather[];
-  current: { temperatureC: number; apparentC: number; weatherCode: number; windKmh: number };
+  current: {
+    temperatureC: number;
+    apparentC: number;
+    weatherCode: number;
+    windKmh: number;
+  };
   elevation: number;
 }
 
@@ -81,7 +92,9 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
     daily:
       "temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_gusts_10m_max,weather_code,sunrise,sunset,uv_index_max",
   });
-  const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+  const res = await fetch(
+    `https://api.open-meteo.com/v1/forecast?${params.toString()}`
+  );
   if (!res.ok) throw new Error(`Wetterdienst antwortet nicht (${res.status})`);
   const json = await res.json();
 
@@ -99,40 +112,53 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
       cape: json.hourly.cape?.[i] ?? 0,
       cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
     }))
-    .filter(h => h.time.slice(0, 13) >= nowIso.slice(0, 13) || h.time >= new Date().toISOString().slice(0, 16));
+    .filter(
+      h =>
+        h.time.slice(0, 13) >= nowIso.slice(0, 13) ||
+        h.time >= new Date().toISOString().slice(0, 16)
+    );
 
   // Ab der aktuellen Stunde (lokale API-Zeit ist bereits Ortszeit durch timezone=auto)
-  const nowLocalHour = json.hourly.time.findIndex((t: string) => new Date(t).getTime() >= Date.now() - 3600000);
-  const hourlyFromNow = nowLocalHour >= 0
-    ? (json.hourly.time as string[]).slice(nowLocalHour).map((time: string, k: number) => {
-        const i = nowLocalHour + k;
-        return {
-          time,
-          temperatureC: json.hourly.temperature_2m[i],
-          apparentC: json.hourly.apparent_temperature[i],
-          precipitationMm: json.hourly.precipitation[i],
-          precipitationProbability: json.hourly.precipitation_probability?.[i] ?? 0,
-          windSpeedKmh: json.hourly.wind_speed_10m[i],
-          windGustsKmh: json.hourly.wind_gusts_10m[i],
-          weatherCode: json.hourly.weather_code[i],
-          cape: json.hourly.cape?.[i] ?? 0,
-          cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
-        };
-      })
-    : hourly;
+  const nowLocalHour = json.hourly.time.findIndex(
+    (t: string) => new Date(t).getTime() >= Date.now() - 3600000
+  );
+  const hourlyFromNow =
+    nowLocalHour >= 0
+      ? (json.hourly.time as string[])
+          .slice(nowLocalHour)
+          .map((time: string, k: number) => {
+            const i = nowLocalHour + k;
+            return {
+              time,
+              temperatureC: json.hourly.temperature_2m[i],
+              apparentC: json.hourly.apparent_temperature[i],
+              precipitationMm: json.hourly.precipitation[i],
+              precipitationProbability:
+                json.hourly.precipitation_probability?.[i] ?? 0,
+              windSpeedKmh: json.hourly.wind_speed_10m[i],
+              windGustsKmh: json.hourly.wind_gusts_10m[i],
+              weatherCode: json.hourly.weather_code[i],
+              cape: json.hourly.cape?.[i] ?? 0,
+              cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
+            };
+          })
+      : hourly;
 
-  const daily: DailyWeather[] = (json.daily.time as string[]).map((date: string, i: number) => ({
-    date,
-    tempMaxC: json.daily.temperature_2m_max[i],
-    tempMinC: json.daily.temperature_2m_min[i],
-    precipitationSumMm: json.daily.precipitation_sum[i],
-    precipitationProbabilityMax: json.daily.precipitation_probability_max?.[i] ?? 0,
-    windGustsMaxKmh: json.daily.wind_gusts_10m_max[i],
-    weatherCode: json.daily.weather_code[i],
-    sunrise: json.daily.sunrise[i],
-    sunset: json.daily.sunset[i],
-    uvIndexMax: json.daily.uv_index_max?.[i] ?? 0,
-  }));
+  const daily: DailyWeather[] = (json.daily.time as string[]).map(
+    (date: string, i: number) => ({
+      date,
+      tempMaxC: json.daily.temperature_2m_max[i],
+      tempMinC: json.daily.temperature_2m_min[i],
+      precipitationSumMm: json.daily.precipitation_sum[i],
+      precipitationProbabilityMax:
+        json.daily.precipitation_probability_max?.[i] ?? 0,
+      windGustsMaxKmh: json.daily.wind_gusts_10m_max[i],
+      weatherCode: json.daily.weather_code[i],
+      sunrise: json.daily.sunrise[i],
+      sunset: json.daily.sunset[i],
+      uvIndexMax: json.daily.uv_index_max?.[i] ?? 0,
+    })
+  );
 
   return {
     hourly: hourlyFromNow,
@@ -164,14 +190,18 @@ const fireLevelStyles: Record<FireDangerLevel, string> = {
 export default function WeatherPage() {
   const [state, setState] = useState<LoadState>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(
+    null
+  );
   const [data, setData] = useState<WeatherData | null>(null);
   // Ausgewählter Ort: null = eigener Standort, sonst ID des Zeltplatz-Favoriten
   const [selectedSpotId, setSelectedSpotId] = useState<number | null>(null);
   const [locationLabel, setLocationLabel] = useState<string | null>(null);
   const [fireDanger, setFireDanger] = useState<FireDangerInfo | null>(null);
   const { isAuthenticated } = useAuth();
-  const { data: spots } = trpc.spots.list.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: spots } = trpc.spots.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
   // Waldbrandgefahr (offizielle BAFU-Warnkarte) für den gewählten Ort laden.
   // Nur innerhalb der Schweiz verfügbar – ausserhalb bleibt der Abschnitt ausgeblendet.
@@ -202,7 +232,11 @@ export default function WeatherPage() {
       setState("ready");
     } catch (e) {
       setState("error");
-      setError(e instanceof Error ? e.message : "Wetterdaten konnten nicht geladen werden.");
+      setError(
+        e instanceof Error
+          ? e.message
+          : "Wetterdaten konnten nicht geladen werden."
+      );
     }
   };
 
@@ -223,13 +257,20 @@ export default function WeatherPage() {
       },
       () => {
         setState("error");
-        setError("Standort nicht verfügbar. Bitte Standortfreigabe im Browser erlauben.");
+        setError(
+          "Standort nicht verfügbar. Bitte Standortfreigabe im Browser erlauben."
+        );
       },
-      { enableHighAccuracy: true, timeout: 12000 },
+      { enableHighAccuracy: true, timeout: 12000 }
     );
   };
 
-  const selectSpot = (spot: { id: number; name: string; latitude: number; longitude: number }) => {
+  const selectSpot = (spot: {
+    id: number;
+    name: string;
+    latitude: number;
+    longitude: number;
+  }) => {
     setSelectedSpotId(spot.id);
     setLocationLabel(spot.name);
     setError(null);
@@ -241,7 +282,10 @@ export default function WeatherPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const alerts: WeatherAlert[] = useMemo(() => (data ? detectAlerts(data.hourly) : []), [data]);
+  const alerts: WeatherAlert[] = useMemo(
+    () => (data ? detectAlerts(data.hourly) : []),
+    [data]
+  );
   const next24 = data?.hourly.slice(0, 24) ?? [];
 
   return (
@@ -253,7 +297,11 @@ export default function WeatherPage() {
 
       {/* Ortsauswahl: eigener Standort oder gespeicherte Zeltplatz-Favoriten */}
       {(spots?.length ?? 0) > 0 && (
-        <div className="mb-4 flex flex-wrap items-center gap-2" role="group" aria-label="Ort für die Wettervorhersage wählen">
+        <div
+          className="mb-4 flex flex-wrap items-center gap-2"
+          role="group"
+          aria-label="Ort für die Wettervorhersage wählen"
+        >
           <button
             type="button"
             onClick={load}
@@ -261,7 +309,7 @@ export default function WeatherPage() {
               "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
               selectedSpotId === null
                 ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-card text-muted-foreground hover:border-primary/50",
+                : "border-border bg-card text-muted-foreground hover:border-primary/50"
             )}
           >
             <LocateFixed className="h-3.5 w-3.5" aria-hidden="true" />
@@ -276,7 +324,7 @@ export default function WeatherPage() {
                 "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                 selectedSpotId === spot.id
                   ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-card text-muted-foreground hover:border-primary/50",
+                  : "border-border bg-card text-muted-foreground hover:border-primary/50"
               )}
             >
               <Tent className="h-3.5 w-3.5" aria-hidden="true" />
@@ -287,7 +335,11 @@ export default function WeatherPage() {
       )}
 
       {(state === "locating" || state === "loading") && (
-        <div className="space-y-3" aria-busy="true" aria-label="Wetterdaten werden geladen">
+        <div
+          className="space-y-3"
+          aria-busy="true"
+          aria-label="Wetterdaten werden geladen"
+        >
           <Skeleton className="h-28 w-full rounded-xl" />
           <Skeleton className="h-40 w-full rounded-xl" />
           <Skeleton className="h-64 w-full rounded-xl" />
@@ -297,15 +349,19 @@ export default function WeatherPage() {
       {state === "error" && (
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
-            <AlertTriangle className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+            <AlertTriangle
+              className="h-8 w-8 text-muted-foreground"
+              aria-hidden="true"
+            />
             <p className="text-sm text-muted-foreground">{error}</p>
             <Button onClick={load} className="mt-1">
               <LocateFixed className="mr-2 h-4 w-4" aria-hidden="true" />
               Erneut versuchen
             </Button>
             <p className="max-w-sm text-xs text-muted-foreground">
-              Hinweis: Das Wetter-Modul braucht eine Internetverbindung und deinen Standort. Die
-              Offline-Module (Erste Hilfe, Knoten, Natur) funktionieren weiterhin ohne Netz.
+              Hinweis: Das Wetter-Modul braucht eine Internetverbindung und
+              deinen Standort. Die Offline-Module (Erste Hilfe, Knoten, Natur)
+              funktionieren weiterhin ohne Netz.
             </p>
           </CardContent>
         </Card>
@@ -321,7 +377,9 @@ export default function WeatherPage() {
                   <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
                     {locationLabel ??
-                      (coords ? `${coords.lat.toFixed(3)}°, ${coords.lon.toFixed(3)}°` : "")}{" "}
+                      (coords
+                        ? `${coords.lat.toFixed(3)}°, ${coords.lon.toFixed(3)}°`
+                        : "")}{" "}
                     · {Math.round(data.elevation)} m ü. M.
                   </p>
                   <p className="mt-1 font-serif text-4xl font-semibold">
@@ -333,7 +391,10 @@ export default function WeatherPage() {
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <WeatherIcon code={data.current.weatherCode} className="h-14 w-14 text-primary" />
+                  <WeatherIcon
+                    code={data.current.weatherCode}
+                    className="h-14 w-14 text-primary"
+                  />
                   <p className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Wind className="h-3.5 w-3.5" aria-hidden="true" />
                     {Math.round(data.current.windKmh)} km/h
@@ -342,12 +403,29 @@ export default function WeatherPage() {
               </div>
               <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-3">
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Sunrise className="h-4 w-4 text-chart-4" aria-hidden="true" />
-                  {new Date(data.daily[0].sunrise).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })}
-                  <Sunset className="ml-3 h-4 w-4 text-chart-1" aria-hidden="true" />
-                  {new Date(data.daily[0].sunset).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })}
+                  <Sunrise
+                    className="h-4 w-4 text-chart-4"
+                    aria-hidden="true"
+                  />
+                  {new Date(data.daily[0].sunrise).toLocaleTimeString("de-CH", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                  <Sunset
+                    className="ml-3 h-4 w-4 text-chart-1"
+                    aria-hidden="true"
+                  />
+                  {new Date(data.daily[0].sunset).toLocaleTimeString("de-CH", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </p>
-                <Button variant="ghost" size="sm" onClick={load} aria-label="Wetter aktualisieren">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={load}
+                  aria-label="Wetter aktualisieren"
+                >
                   <RefreshCw className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </div>
@@ -358,18 +436,28 @@ export default function WeatherPage() {
           <section aria-label="Unwetterwarnungen" className="mb-6 space-y-2.5">
             {alerts.length === 0 ? (
               <div className="flex items-center gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
-                <Info className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-                Keine Unwetterwarnungen für die nächsten 48 Stunden – gute Bedingungen fürs Camp.
+                <Info
+                  className="h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                Keine Unwetterwarnungen für die nächsten 48 Stunden – gute
+                Bedingungen fürs Camp.
               </div>
             ) : (
               alerts.map(alert => (
                 <div
                   key={alert.id}
-                  className={cn("rounded-xl border px-4 py-3", severityStyles[alert.severity])}
+                  className={cn(
+                    "rounded-xl border px-4 py-3",
+                    severityStyles[alert.severity]
+                  )}
                   role={alert.severity === "gefahr" ? "alert" : undefined}
                 >
                   <p className="flex items-center gap-2 text-sm font-semibold">
-                    <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <AlertTriangle
+                      className="h-4 w-4 shrink-0"
+                      aria-hidden="true"
+                    />
                     {alert.title}
                     <span className="ml-auto rounded-full bg-background/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
                       {alert.severity}
@@ -386,7 +474,10 @@ export default function WeatherPage() {
           {fireDanger && (
             <section aria-label="Waldbrandgefahr" className="mb-6">
               <div
-                className={cn("rounded-xl border px-4 py-3", fireLevelStyles[fireDanger.level])}
+                className={cn(
+                  "rounded-xl border px-4 py-3",
+                  fireLevelStyles[fireDanger.level]
+                )}
                 role={fireDanger.level >= 4 ? "alert" : undefined}
               >
                 <p className="flex items-center gap-2 text-sm font-semibold">
@@ -398,14 +489,15 @@ export default function WeatherPage() {
                 </p>
                 <p className="mt-1 text-sm">
                   {fireDanger.regionName}
-                  {fireDanger.validFrom && ` · gültig seit ${fireDanger.validFrom}`}
+                  {fireDanger.validFrom &&
+                    ` · gültig seit ${fireDanger.validFrom}`}
                 </p>
                 <p className="mt-1.5 text-xs opacity-90">
                   {FIRE_DANGER_LEVELS[fireDanger.level].advice}
                 </p>
                 <p className="mt-1.5 text-xs opacity-75">
-                  Quelle: BAFU-Warnkarte. Rechtlich verbindlich sind die kantonalen Verfügungen –
-                  Details auf{" "}
+                  Quelle: BAFU-Warnkarte. Rechtlich verbindlich sind die
+                  kantonalen Verfügungen – Details auf{" "}
                   <a
                     href="https://www.waldbrandgefahr.ch"
                     target="_blank"
@@ -421,16 +513,26 @@ export default function WeatherPage() {
           )}
 
           {/* Stundenverlauf */}
-          <h2 className="mb-2.5 font-serif text-lg font-semibold">Nächste 24 Stunden</h2>
+          <h2 className="mb-2.5 font-serif text-lg font-semibold">
+            Nächste 24 Stunden
+          </h2>
           <div className="mb-6 overflow-x-auto rounded-xl border border-border/70 bg-card">
             <div className="flex min-w-max gap-0 px-2 py-3">
               {next24.map(h => (
-                <div key={h.time} className="flex w-16 shrink-0 flex-col items-center gap-1 text-center">
+                <div
+                  key={h.time}
+                  className="flex w-16 shrink-0 flex-col items-center gap-1 text-center"
+                >
                   <p className="text-[11px] text-muted-foreground">
                     {new Date(h.time).getHours()}:00
                   </p>
-                  <WeatherIcon code={h.weatherCode} className="h-5 w-5 text-primary" />
-                  <p className="text-sm font-semibold">{Math.round(h.temperatureC)}°</p>
+                  <WeatherIcon
+                    code={h.weatherCode}
+                    className="h-5 w-5 text-primary"
+                  />
+                  <p className="text-sm font-semibold">
+                    {Math.round(h.temperatureC)}°
+                  </p>
                   <p className="flex items-center gap-0.5 text-[10px] text-chart-2">
                     <Droplets className="h-3 w-3" aria-hidden="true" />
                     {Math.round(h.precipitationProbability)}%
@@ -445,7 +547,9 @@ export default function WeatherPage() {
           </div>
 
           {/* 7-Tage */}
-          <h2 className="mb-2.5 font-serif text-lg font-semibold">7-Tage-Vorhersage</h2>
+          <h2 className="mb-2.5 font-serif text-lg font-semibold">
+            7-Tage-Vorhersage
+          </h2>
           <Card>
             <CardContent className="divide-y divide-border/60 pt-2">
               {data.daily.map((d, i) => (
@@ -453,9 +557,15 @@ export default function WeatherPage() {
                   <p className="w-16 text-sm font-medium">
                     {i === 0
                       ? "Heute"
-                      : new Date(d.date).toLocaleDateString("de-CH", { weekday: "short", day: "numeric" })}
+                      : new Date(d.date).toLocaleDateString("de-CH", {
+                          weekday: "short",
+                          day: "numeric",
+                        })}
                   </p>
-                  <WeatherIcon code={d.weatherCode} className="h-5 w-5 shrink-0 text-primary" />
+                  <WeatherIcon
+                    code={d.weatherCode}
+                    className="h-5 w-5 shrink-0 text-primary"
+                  />
                   <p className="flex w-14 items-center gap-1 text-xs text-chart-2">
                     <Droplets className="h-3 w-3 shrink-0" aria-hidden="true" />
                     {Math.round(d.precipitationProbabilityMax)}%
@@ -465,8 +575,13 @@ export default function WeatherPage() {
                     {Math.round(d.windGustsMaxKmh)} km/h
                   </p>
                   <p className="ml-auto text-sm">
-                    <span className="font-semibold">{Math.round(d.tempMaxC)}°</span>
-                    <span className="text-muted-foreground"> / {Math.round(d.tempMinC)}°</span>
+                    <span className="font-semibold">
+                      {Math.round(d.tempMaxC)}°
+                    </span>
+                    <span className="text-muted-foreground">
+                      {" "}
+                      / {Math.round(d.tempMinC)}°
+                    </span>
                   </p>
                 </div>
               ))}
@@ -474,9 +589,10 @@ export default function WeatherPage() {
           </Card>
 
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-            Datenquelle: Open-Meteo (beste verfügbare Auflösung für deinen Standort, in der Schweiz
-            MeteoSchweiz ICON-CH). Warnungen werden aus der Vorhersage berechnet und ersetzen keine
-            offiziellen Warnungen von MeteoSchweiz.
+            Datenquelle: Open-Meteo (beste verfügbare Auflösung für deinen
+            Standort, in der Schweiz MeteoSchweiz ICON-CH). Warnungen werden aus
+            der Vorhersage berechnet und ersetzen keine offiziellen Warnungen
+            von MeteoSchweiz.
           </p>
         </>
       )}

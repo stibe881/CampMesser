@@ -7,8 +7,20 @@ import {
   type Obstacle,
 } from "@shared/obstacleProfiles";
 
-const tree: Obstacle = { id: "1", kind: "baum", azimuth: 120, width: 30, height: 25 };
-const hill: Obstacle = { id: "2", kind: "berg", azimuth: 250, width: 60, height: 15 };
+const tree: Obstacle = {
+  id: "1",
+  kind: "baum",
+  azimuth: 120,
+  width: 30,
+  height: 25,
+};
+const hill: Obstacle = {
+  id: "2",
+  kind: "berg",
+  azimuth: 250,
+  width: 60,
+  height: 15,
+};
 
 describe("normalizeProfiles", () => {
   it("migriert die alte Array-Form ins globale Profil", () => {

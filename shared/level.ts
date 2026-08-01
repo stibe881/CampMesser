@@ -19,7 +19,11 @@ export interface Tilt {
  * (screen.orientation.angle 90/180/270), müssen die Achsen mitdrehen, damit
  * «links/rechts/vorne/hinten» zur Anzeige passt.
  */
-export function screenTilt(beta: number, gamma: number, screenAngle: number): Tilt {
+export function screenTilt(
+  beta: number,
+  gamma: number,
+  screenAngle: number
+): Tilt {
   const a = ((Math.round(screenAngle) % 360) + 360) % 360;
   // Achsen-Remap für gedrehte Bildschirme (übliche Transformation β'/γ'),
   // danach Vorzeichen-Konvention: pitch = β', roll = −γ'
@@ -39,7 +43,10 @@ export function screenTilt(beta: number, gamma: number, screenAngle: number): Ti
  * Position der Luftblase in der Libelle (−1…1 je Achse). Die Blase wandert
  * zur höheren Seite: x > 0 = rechts, y > 0 = zur oberen Kante.
  */
-export function bubblePosition(tilt: Tilt, maxDeg = 10): { x: number; y: number } {
+export function bubblePosition(
+  tilt: Tilt,
+  maxDeg = 10
+): { x: number; y: number } {
   const clamp = (v: number) => Math.max(-1, Math.min(1, v / maxDeg));
   return { x: clamp(tilt.roll), y: clamp(tilt.pitch) };
 }

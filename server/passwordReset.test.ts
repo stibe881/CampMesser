@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createResetCode, verifyResetCode, consumeResetCode } from "./localAuth";
+import {
+  createResetCode,
+  verifyResetCode,
+  consumeResetCode,
+} from "./localAuth";
 
 describe("Passwort-Reset-Codes", () => {
   it("erzeugt einen 6-stelligen Code und akzeptiert ihn", async () => {

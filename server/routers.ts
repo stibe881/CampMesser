@@ -3,7 +3,10 @@ import { nanoid } from "nanoid";
 import { z } from "zod";
 import { ONE_YEAR_MS } from "@shared/const";
 import { packScenarios } from "@shared/packTemplates";
-import { SETTING_VALUE_MAX_LENGTH, SYNCED_SETTING_KEYS } from "@shared/settings";
+import {
+  SETTING_VALUE_MAX_LENGTH,
+  SYNCED_SETTING_KEYS,
+} from "@shared/settings";
 import { MAX_STATIONS, solutionWordFromStations } from "@shared/hunts";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
@@ -12,7 +15,7 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
+  // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => {
@@ -34,37 +37,67 @@ export const appRouter = router({
           name: z.string().min(1, "Bitte gib einen Namen ein.").max(100),
           email: z.string().min(3).max(320),
           password: z.string().min(1).max(200),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
-        const { validateEmail, validatePassword, normalizeEmail, findUserByEmail, registerUser, createLocalSessionToken } =
-          await import("./localAuth");
+        const {
+          validateEmail,
+          validatePassword,
+          normalizeEmail,
+          findUserByEmail,
+          registerUser,
+          createLocalSessionToken,
+        } = await import("./localAuth");
         if (!validateEmail(normalizeEmail(input.email))) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "Bitte gib eine gültige E-Mail-Adresse ein." });
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Bitte gib eine gültige E-Mail-Adresse ein.",
+          });
         }
         const pwError = validatePassword(input.password);
-        if (pwError) throw new TRPCError({ code: "BAD_REQUEST", message: pwError });
+        if (pwError)
+          throw new TRPCError({ code: "BAD_REQUEST", message: pwError });
         const existing = await findUserByEmail(input.email);
         if (existing) {
           throw new TRPCError({
             code: "CONFLICT",
-            message: "Für diese E-Mail-Adresse existiert bereits ein Konto. Melde dich stattdessen an.",
+            message:
+              "Für diese E-Mail-Adresse existiert bereits ein Konto. Melde dich stattdessen an.",
           });
         }
-        const user = await registerUser(input.name, input.email, input.password);
+        const user = await registerUser(
+          input.name,
+          input.email,
+          input.password
+        );
         const token = await createLocalSessionToken(user);
         const cookieOptions = getSessionCookieOptions(ctx.req);
-        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        ctx.res.cookie(COOKIE_NAME, token, {
+          ...cookieOptions,
+          maxAge: ONE_YEAR_MS,
+        });
         return { success: true, name: user.name } as const;
       }),
     login: publicProcedure
-      .input(z.object({ email: z.string().min(3).max(320), password: z.string().min(1).max(200) }))
+      .input(
+        z.object({
+          email: z.string().min(3).max(320),
+          password: z.string().min(1).max(200),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
-        const { findUserByEmail, verifyPassword, createLocalSessionToken, normalizeEmail } =
-          await import("./localAuth");
-        const { isRateLimited, registerFailure, clearFailures, lockoutMinutes } = await import(
-          "./rateLimit"
-        );
+        const {
+          findUserByEmail,
+          verifyPassword,
+          createLocalSessionToken,
+          normalizeEmail,
+        } = await import("./localAuth");
+        const {
+          isRateLimited,
+          registerFailure,
+          clearFailures,
+          lockoutMinutes,
+        } = await import("./rateLimit");
         // Brute-Force-Schutz: pro E-Mail+IP begrenzte Fehlversuche
         const limitKey = `${normalizeEmail(input.email)}|${ctx.req.ip ?? "?"}`;
         if (isRateLimited(limitKey)) {
@@ -87,11 +120,18 @@ export const appRouter = router({
         clearFailures(limitKey);
         const token = await createLocalSessionToken(user);
         const cookieOptions = getSessionCookieOptions(ctx.req);
-        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        ctx.res.cookie(COOKIE_NAME, token, {
+          ...cookieOptions,
+          maxAge: ONE_YEAR_MS,
+        });
         return { success: true, name: user.name } as const;
       }),
     updateName: protectedProcedure
-      .input(z.object({ name: z.string().min(1, "Bitte gib einen Namen ein.").max(100) }))
+      .input(
+        z.object({
+          name: z.string().min(1, "Bitte gib einen Namen ein.").max(100),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const { updateUserName } = await import("./localAuth");
         await updateUserName(ctx.user.id, input.name);
@@ -102,21 +142,30 @@ export const appRouter = router({
         z.object({
           newEmail: z.string().min(3).max(320),
           currentPassword: z.string().min(1).max(200),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
-        const { validateEmail, normalizeEmail, verifyPassword, findUserByEmail } = await import(
-          "./localAuth"
-        );
+        const {
+          validateEmail,
+          normalizeEmail,
+          verifyPassword,
+          findUserByEmail,
+        } = await import("./localAuth");
         if (!ctx.user.passwordHash) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Für dieses Konto ist kein Passwort hinterlegt.",
           });
         }
-        const ok = await verifyPassword(input.currentPassword, ctx.user.passwordHash);
+        const ok = await verifyPassword(
+          input.currentPassword,
+          ctx.user.passwordHash
+        );
         if (!ok) {
-          throw new TRPCError({ code: "UNAUTHORIZED", message: "Das Passwort ist falsch." });
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Das Passwort ist falsch.",
+          });
         }
         const email = normalizeEmail(input.newEmail);
         if (!validateEmail(email)) {
@@ -129,7 +178,8 @@ export const appRouter = router({
         if (existing && existing.id !== ctx.user.id) {
           throw new TRPCError({
             code: "CONFLICT",
-            message: "Diese E-Mail-Adresse wird bereits von einem anderen Konto verwendet.",
+            message:
+              "Diese E-Mail-Adresse wird bereits von einem anderen Konto verwendet.",
           });
         }
         const { updateUserEmail } = await import("./localAuth");
@@ -141,33 +191,49 @@ export const appRouter = router({
         z.object({
           currentPassword: z.string().min(1).max(200),
           newPassword: z.string().min(1).max(200),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
-        const { validatePassword, verifyPassword, updateUserPassword } = await import("./localAuth");
+        const { validatePassword, verifyPassword, updateUserPassword } =
+          await import("./localAuth");
         if (!ctx.user.passwordHash) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Für dieses Konto ist kein Passwort hinterlegt.",
           });
         }
-        const ok = await verifyPassword(input.currentPassword, ctx.user.passwordHash);
+        const ok = await verifyPassword(
+          input.currentPassword,
+          ctx.user.passwordHash
+        );
         if (!ok) {
-          throw new TRPCError({ code: "UNAUTHORIZED", message: "Das aktuelle Passwort ist falsch." });
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Das aktuelle Passwort ist falsch.",
+          });
         }
         const pwError = validatePassword(input.newPassword);
-        if (pwError) throw new TRPCError({ code: "BAD_REQUEST", message: pwError });
+        if (pwError)
+          throw new TRPCError({ code: "BAD_REQUEST", message: pwError });
         await updateUserPassword(ctx.user.id, input.newPassword);
         return { success: true } as const;
       }),
     deleteAccount: protectedProcedure
       .input(z.object({ password: z.string().min(1).max(200) }))
       .mutation(async ({ ctx, input }) => {
-        const { verifyPassword, deleteUserAccount } = await import("./localAuth");
+        const { verifyPassword, deleteUserAccount } = await import(
+          "./localAuth"
+        );
         if (ctx.user.passwordHash) {
-          const ok = await verifyPassword(input.password, ctx.user.passwordHash);
+          const ok = await verifyPassword(
+            input.password,
+            ctx.user.passwordHash
+          );
           if (!ok) {
-            throw new TRPCError({ code: "UNAUTHORIZED", message: "Das Passwort ist falsch." });
+            throw new TRPCError({
+              code: "UNAUTHORIZED",
+              message: "Das Passwort ist falsch.",
+            });
           }
         }
         await deleteUserAccount(ctx.user.id);
@@ -178,7 +244,9 @@ export const appRouter = router({
     requestReset: publicProcedure
       .input(z.object({ email: z.string().min(3).max(320) }))
       .mutation(async ({ input }) => {
-        const { findUserByEmail, createResetCode } = await import("./localAuth");
+        const { findUserByEmail, createResetCode } = await import(
+          "./localAuth"
+        );
         const user = await findUserByEmail(input.email);
         // Aus Datenschutzgründen immer Erfolg melden, auch wenn das Konto nicht existiert
         if (user && user.email && user.passwordHash) {
@@ -195,7 +263,7 @@ export const appRouter = router({
           email: z.string().min(3).max(320),
           code: z.string().length(6),
           newPassword: z.string().min(1).max(200),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
         const {
@@ -207,17 +275,26 @@ export const appRouter = router({
           createLocalSessionToken,
         } = await import("./localAuth");
         const codeError = await verifyResetCode(input.email, input.code);
-        if (codeError) throw new TRPCError({ code: "BAD_REQUEST", message: codeError });
+        if (codeError)
+          throw new TRPCError({ code: "BAD_REQUEST", message: codeError });
         const pwError = validatePassword(input.newPassword);
-        if (pwError) throw new TRPCError({ code: "BAD_REQUEST", message: pwError });
+        if (pwError)
+          throw new TRPCError({ code: "BAD_REQUEST", message: pwError });
         const user = await findUserByEmail(input.email);
-        if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Konto nicht gefunden." });
+        if (!user)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Konto nicht gefunden.",
+          });
         await updateUserPassword(user.id, input.newPassword);
         consumeResetCode(input.email);
         // Direkt anmelden
         const token = await createLocalSessionToken(user);
         const cookieOptions = getSessionCookieOptions(ctx.req);
-        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        ctx.res.cookie(COOKIE_NAME, token, {
+          ...cookieOptions,
+          maxAge: ONE_YEAR_MS,
+        });
         return { success: true } as const;
       }),
   }),
@@ -225,7 +302,12 @@ export const appRouter = router({
   packing: router({
     lists: protectedProcedure.query(({ ctx }) => db.getPackLists(ctx.user.id)),
     createList: protectedProcedure
-      .input(z.object({ name: z.string().min(1).max(120), scenario: z.string().max(60) }))
+      .input(
+        z.object({
+          name: z.string().min(1).max(120),
+          scenario: z.string().max(60),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const listId = await db.createPackList({
           userId: ctx.user.id,
@@ -241,7 +323,7 @@ export const appRouter = router({
               category: item.category,
               quantity: item.quantity ?? 1,
               sortOrder: idx,
-            })),
+            }))
           );
         }
         return { listId };
@@ -254,7 +336,11 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
         const list = await db.getPackList(input.id, ctx.user.id);
-        if (!list) throw new TRPCError({ code: "NOT_FOUND", message: "Liste nicht gefunden" });
+        if (!list)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Liste nicht gefunden",
+          });
         const items = await db.getPackItems(input.id);
         const newListId = await db.createPackList({
           userId: ctx.user.id,
@@ -268,7 +354,7 @@ export const appRouter = router({
             category: item.category,
             quantity: item.quantity,
             sortOrder: item.sortOrder,
-          })),
+          }))
         );
         return { listId: newListId };
       }),
@@ -277,7 +363,10 @@ export const appRouter = router({
       .query(async ({ ctx, input }) => {
         const list = await db.getPackList(input.listId, ctx.user.id);
         if (!list) {
-          return { list: null, items: [] as Awaited<ReturnType<typeof db.getPackItems>> };
+          return {
+            list: null,
+            items: [] as Awaited<ReturnType<typeof db.getPackItems>>,
+          };
         }
         const items = await db.getPackItems(input.listId);
         return { list, items };
@@ -291,15 +380,19 @@ export const appRouter = router({
               name: z.string().min(1).max(160),
               category: z.string().max(80).default("Allgemein"),
               quantity: z.number().int().min(1).max(99).default(1),
-            }),
+            })
           ),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
         const list = await db.getPackList(input.listId, ctx.user.id);
         if (!list) throw new Error("Liste nicht gefunden");
         await db.addPackItems(
-          input.items.map((item, idx) => ({ listId: input.listId, sortOrder: 1000 + idx, ...item })),
+          input.items.map((item, idx) => ({
+            listId: input.listId,
+            sortOrder: 1000 + idx,
+            ...item,
+          }))
         );
       }),
     toggleItem: protectedProcedure
@@ -332,19 +425,32 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const list = await db.getPackListByToken(input.token);
         if (!list) {
-          return { list: null, items: [] as Awaited<ReturnType<typeof db.getPackItems>> };
+          return {
+            list: null,
+            items: [] as Awaited<ReturnType<typeof db.getPackItems>>,
+          };
         }
         const items = await db.getPackItems(list.id);
-        return { list: { id: list.id, name: list.name, scenario: list.scenario }, items };
+        return {
+          list: { id: list.id, name: list.name, scenario: list.scenario },
+          items,
+        };
       }),
     /** Abhaken über den Teil-Link (kein Login nötig, Token dient als Berechtigung). */
     sharedToggle: publicProcedure
-      .input(z.object({ token: z.string().min(8).max(32), itemId: z.number(), checked: z.boolean() }))
+      .input(
+        z.object({
+          token: z.string().min(8).max(32),
+          itemId: z.number(),
+          checked: z.boolean(),
+        })
+      )
       .mutation(async ({ input }) => {
         const list = await db.getPackListByToken(input.token);
         if (!list) throw new Error("Geteilte Liste nicht gefunden");
         const items = await db.getPackItems(list.id);
-        if (!items.some(i => i.id === input.itemId)) throw new Error("Eintrag gehört nicht zu dieser Liste");
+        if (!items.some(i => i.id === input.itemId))
+          throw new Error("Eintrag gehört nicht zu dieser Liste");
         await db.setPackItemChecked(input.itemId, input.checked);
         return { success: true } as const;
       }),
@@ -361,9 +467,11 @@ export const appRouter = router({
           volumeLiters: z.number().min(0).max(5000).default(0),
           quantity: z.number().int().min(1).max(99).default(1),
           notes: z.string().max(1000).optional(),
-        }),
+        })
       )
-      .mutation(({ ctx, input }) => db.addInventoryItem({ userId: ctx.user.id, ...input })),
+      .mutation(({ ctx, input }) =>
+        db.addInventoryItem({ userId: ctx.user.id, ...input })
+      ),
     update: protectedProcedure
       .input(
         z.object({
@@ -374,7 +482,7 @@ export const appRouter = router({
           volumeLiters: z.number().min(0).max(5000).optional(),
           quantity: z.number().int().min(1).max(99).optional(),
           notes: z.string().max(1000).optional(),
-        }),
+        })
       )
       .mutation(({ ctx, input }) => {
         const { id, ...data } = input;
@@ -382,20 +490,26 @@ export const appRouter = router({
       }),
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(({ ctx, input }) => db.deleteInventoryItem(input.id, ctx.user.id)),
+      .mutation(({ ctx, input }) =>
+        db.deleteInventoryItem(input.id, ctx.user.id)
+      ),
   }),
 
   energy: router({
-    consumers: protectedProcedure.query(({ ctx }) => db.getPowerConsumers(ctx.user.id)),
+    consumers: protectedProcedure.query(({ ctx }) =>
+      db.getPowerConsumers(ctx.user.id)
+    ),
     add: protectedProcedure
       .input(
         z.object({
           name: z.string().min(1).max(160),
           watts: z.number().min(0).max(10000),
           hoursPerDay: z.number().min(0).max(24),
-        }),
+        })
       )
-      .mutation(({ ctx, input }) => db.addPowerConsumer({ userId: ctx.user.id, ...input })),
+      .mutation(({ ctx, input }) =>
+        db.addPowerConsumer({ userId: ctx.user.id, ...input })
+      ),
     update: protectedProcedure
       .input(
         z.object({
@@ -403,7 +517,7 @@ export const appRouter = router({
           watts: z.number().min(0).max(10000).optional(),
           hoursPerDay: z.number().min(0).max(24).optional(),
           enabled: z.boolean().optional(),
-        }),
+        })
       )
       .mutation(({ ctx, input }) => {
         const { id, ...data } = input;
@@ -411,7 +525,9 @@ export const appRouter = router({
       }),
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(({ ctx, input }) => db.deletePowerConsumer(input.id, ctx.user.id)),
+      .mutation(({ ctx, input }) =>
+        db.deletePowerConsumer(input.id, ctx.user.id)
+      ),
   }),
 
   food: router({
@@ -425,7 +541,7 @@ export const appRouter = router({
             .string()
             .regex(/^\d{4}-\d{2}-\d{2}$/)
             .nullish(),
-        }),
+        })
       )
       .mutation(({ ctx, input }) =>
         db.addFoodItem({
@@ -433,7 +549,7 @@ export const appRouter = router({
           name: input.name,
           quantity: input.quantity,
           expiryDate: input.expiryDate ?? null,
-        }),
+        })
       ),
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
@@ -460,11 +576,11 @@ export const appRouter = router({
                 task: z.string().min(1).max(1000),
                 hint: z.string().max(500).optional(),
                 letter: z.string().max(2).optional(),
-              }),
+              })
             )
             .min(1)
             .max(MAX_STATIONS),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
         const stations = input.stations.map(s => ({
@@ -487,7 +603,10 @@ export const appRouter = router({
         if (input.id) {
           const own = await db.getCustomHunts(ctx.user.id);
           if (!own.some(h => h.id === input.id)) {
-            throw new TRPCError({ code: "NOT_FOUND", message: "Schnitzeljagd nicht gefunden." });
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Schnitzeljagd nicht gefunden.",
+            });
           }
           await db.updateCustomHunt(input.id, ctx.user.id, data);
           return { id: input.id };
@@ -504,14 +623,17 @@ export const appRouter = router({
     /** Alle synchronisierten Einstellungen als key → JSON-String. */
     all: protectedProcedure.query(async ({ ctx }) => {
       const rows = await db.getUserSettings(ctx.user.id);
-      return Object.fromEntries(rows.map(r => [r.key, r.value])) as Record<string, string>;
+      return Object.fromEntries(rows.map(r => [r.key, r.value])) as Record<
+        string,
+        string
+      >;
     }),
     set: protectedProcedure
       .input(
         z.object({
           key: z.enum(SYNCED_SETTING_KEYS),
           value: z.string().max(SETTING_VALUE_MAX_LENGTH),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
         await db.upsertUserSetting(ctx.user.id, input.key, input.value);
@@ -535,16 +657,22 @@ export const appRouter = router({
           .refine(v => v.endDate >= v.startDate, {
             message: "Die Abreise darf nicht vor der Anreise liegen.",
           })
-          .refine(v => v.spotId != null || (v.location ?? "").trim().length > 0, {
-            message: "Bitte einen Zeltplatz wählen oder einen Ort eintragen.",
-          }),
+          .refine(
+            v => v.spotId != null || (v.location ?? "").trim().length > 0,
+            {
+              message: "Bitte einen Zeltplatz wählen oder einen Ort eintragen.",
+            }
+          )
       )
       .mutation(async ({ ctx, input }) => {
         // Nur eigene Zeltplatz-Favoriten dürfen verknüpft werden
         if (input.spotId != null) {
           const spots = await db.getCampSpots(ctx.user.id);
           if (!spots.some(s => s.id === input.spotId)) {
-            throw new TRPCError({ code: "NOT_FOUND", message: "Zeltplatz nicht gefunden." });
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Zeltplatz nicht gefunden.",
+            });
           }
         }
         const id = await db.addTripLog({
@@ -571,16 +699,18 @@ export const appRouter = router({
           latitude: z.number().min(-90).max(90),
           longitude: z.number().min(-180).max(180),
           note: z.string().max(500).optional(),
-        }),
+        })
       )
-      .mutation(({ ctx, input }) => db.addCampSpot({ userId: ctx.user.id, ...input })),
+      .mutation(({ ctx, input }) =>
+        db.addCampSpot({ userId: ctx.user.id, ...input })
+      ),
     update: protectedProcedure
       .input(
         z.object({
           id: z.number(),
           name: z.string().min(1).max(120).optional(),
           note: z.string().max(500).optional(),
-        }),
+        })
       )
       .mutation(({ ctx, input }) => {
         const { id, ...data } = input;

@@ -8,12 +8,12 @@ Die Anwendung besteht aus einem Node-Server, der sowohl die Weboberfläche als a
 
 ## Übersicht der benötigten Angaben
 
-| Angabe | Wert |
-| --- | --- |
-| Domain | `campmesser.ch` |
-| Datenbank | `camping` auf `ly8y.your-database.de` |
-| Datenbank-Benutzer | `jqviwy_0` |
-| Node.js-Version | 24 |
+| Angabe                         | Wert                                     |
+| ------------------------------ | ---------------------------------------- |
+| Domain                         | `campmesser.ch`                          |
+| Datenbank                      | `camping` auf `ly8y.your-database.de`    |
+| Datenbank-Benutzer             | `jqviwy_0`                               |
+| Node.js-Version                | 24                                       |
 | Zielverzeichnis auf dem Server | `~/campmesser` (ausserhalb des Webspace) |
 
 ## Schritt 1: Code auf den Server laden
@@ -94,14 +94,14 @@ Sollte der Befehl in der Hosting-Umgebung nicht durchlaufen, spiele ersatzweise 
 
 Öffne in konsoleH die Domain `campmesser.ch` – **nicht** `gross-ict.ch` – und dort links **Einstellungen → Node.js Konfiguration**. Trage die folgenden Werte in das Formular ein:
 
-| Feld im Formular | Einzutragender Wert |
-| --- | --- |
-| Skript-Pfad | `app.js` |
-| Arbeitsverzeichnis | `campmesser` |
-| Name der Log-Datei | `campmesser.log` |
-| Arbeitsspeicher-Beschränkung | `512` |
-| Version | `24` |
-| Skript Parameter | leer lassen |
+| Feld im Formular             | Einzutragender Wert |
+| ---------------------------- | ------------------- |
+| Skript-Pfad                  | `app.js`            |
+| Arbeitsverzeichnis           | `campmesser`        |
+| Name der Log-Datei           | `campmesser.log`    |
+| Arbeitsspeicher-Beschränkung | `512`               |
+| Version                      | `24`                |
+| Skript Parameter             | leer lassen         |
 
 Die Datei `app.js` liegt bereits im Projekt. Sie liest deine `.env`-Datei ein und startet anschliessend den gebauten Server – genau in dem Format, das Hetzner erwartet. Das Arbeitsverzeichnis wird relativ zum Heimatverzeichnis angegeben, der Skript-Pfad wiederum relativ zum Arbeitsverzeichnis. Die Log-Datei landet direkt im Heimatverzeichnis.
 
@@ -111,11 +111,11 @@ Lehnt konsoleH das Speichern mit «Skript konnte nicht gefunden werden» ab, pr�
 
 Im Abschnitt **Umgebungsvariablen** trägst du zusätzlich die folgenden Schlüssel-Wert-Paare ein und bestätigst jedes einzeln mit **Hinzufügen**. Sie haben Vorrang vor der `.env`-Datei und stellen sicher, dass die Anwendung auch dann korrekt startet, wenn die Datei einmal fehlt.
 
-| Schlüssel | Wert |
-| --- | --- |
-| `NODE_ENV` | `production` |
+| Schlüssel      | Wert                                                                         |
+| -------------- | ---------------------------------------------------------------------------- |
+| `NODE_ENV`     | `production`                                                                 |
 | `DATABASE_URL` | `mysql://jqviwy_0:k8%2CCt%3D%26*%2F28%24@ly8y.your-database.de:3306/camping` |
-| `JWT_SECRET` | dasselbe Geheimnis wie in der `.env`-Datei |
+| `JWT_SECRET`   | dasselbe Geheimnis wie in der `.env`-Datei                                   |
 
 Klicke danach auf **Aktivieren**. Rufst du nun `https://camping.gross-ict.ch` im Browser auf, sollte die Startseite von CampMesser erscheinen.
 
@@ -133,12 +133,12 @@ Meldet das Protokoll einen Portkonflikt, ergänze im Formular eine weitere Umgeb
 
 Damit Rücksetz-Codes per E-Mail zugestellt werden, hinterlege die Zugangsdaten eines Postfachs deiner Domain. Ohne diese Angaben funktioniert die Anmeldung normal weiter; der Code wird dann lediglich ins Protokoll geschrieben.
 
-| Schlüssel | Beispielwert |
-| --- | --- |
-| `SMTP_HOST` | `mail.campmesser.ch` |
-| `SMTP_PORT` | `587` |
-| `SMTP_USER` | Postfachname |
-| `SMTP_PASS` | Postfach-Passwort |
+| Schlüssel   | Beispielwert            |
+| ----------- | ----------------------- |
+| `SMTP_HOST` | `mail.campmesser.ch`    |
+| `SMTP_PORT` | `587`                   |
+| `SMTP_USER` | Postfachname            |
+| `SMTP_PASS` | Postfach-Passwort       |
 | `SMTP_FROM` | `noreply@campmesser.ch` |
 
 Diese Werte kannst du wahlweise in die `.env`-Datei schreiben oder als Umgebungsvariablen im konsoleH-Formular ergänzen.

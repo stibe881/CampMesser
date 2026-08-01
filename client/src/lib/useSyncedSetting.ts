@@ -11,7 +11,7 @@ import type { SyncedSettingKey } from "@shared/settings";
 
 export function useSyncedSetting<T>(
   key: SyncedSettingKey,
-  onServerValue: (value: T) => void,
+  onServerValue: (value: T) => void
 ): { push: (value: T) => void } {
   const { isAuthenticated } = useAuth();
   const query = trpc.settings.all.useQuery(undefined, {

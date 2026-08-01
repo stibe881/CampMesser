@@ -45,17 +45,21 @@ const PHASES: { id: MoonPhaseId; label: string; symbol: string }[] = [
 /** Mond-Alter in Tagen seit dem letzten Neumond. */
 export function moonAge(date: Date): number {
   const days = (date.getTime() - NEW_MOON_REF_MS) / DAY_MS;
-  return ((days % SYNODIC_MONTH_DAYS) + SYNODIC_MONTH_DAYS) % SYNODIC_MONTH_DAYS;
+  return (
+    ((days % SYNODIC_MONTH_DAYS) + SYNODIC_MONTH_DAYS) % SYNODIC_MONTH_DAYS
+  );
 }
 
 /** Mondphase und Beleuchtung für ein Datum. */
 export function getMoonInfo(date: Date): MoonInfo {
   const age = moonAge(date);
   // Beleuchtung: 0 bei Neumond, 1 bei Vollmond (Kosinus-Näherung)
-  const illumination = (1 - Math.cos((2 * Math.PI * age) / SYNODIC_MONTH_DAYS)) / 2;
+  const illumination =
+    (1 - Math.cos((2 * Math.PI * age) / SYNODIC_MONTH_DAYS)) / 2;
   // Phase in 8 Segmente teilen; Segmentgrenzen um ein halbes Segment verschoben,
   // damit «Neumond» das Fenster um Alter 0 abdeckt
-  const segment = Math.floor(((age + SYNODIC_MONTH_DAYS / 16) / SYNODIC_MONTH_DAYS) * 8) % 8;
+  const segment =
+    Math.floor(((age + SYNODIC_MONTH_DAYS / 16) / SYNODIC_MONTH_DAYS) * 8) % 8;
   const def = PHASES[segment];
   return {
     ageDays: age,
@@ -75,7 +79,9 @@ export function nextFullMoons(from: Date, count: number): Date[] {
   if (toFull < 0) toFull += SYNODIC_MONTH_DAYS;
   const result: Date[] = [];
   for (let i = 0; i < count; i++) {
-    result.push(new Date(from.getTime() + (toFull + i * SYNODIC_MONTH_DAYS) * DAY_MS));
+    result.push(
+      new Date(from.getTime() + (toFull + i * SYNODIC_MONTH_DAYS) * DAY_MS)
+    );
   }
   return result;
 }
@@ -87,7 +93,9 @@ export function nextNewMoons(from: Date, count: number): Date[] {
   if (toNew >= SYNODIC_MONTH_DAYS) toNew -= SYNODIC_MONTH_DAYS;
   const result: Date[] = [];
   for (let i = 0; i < count; i++) {
-    result.push(new Date(from.getTime() + (toNew + i * SYNODIC_MONTH_DAYS) * DAY_MS));
+    result.push(
+      new Date(from.getTime() + (toNew + i * SYNODIC_MONTH_DAYS) * DAY_MS)
+    );
   }
   return result;
 }

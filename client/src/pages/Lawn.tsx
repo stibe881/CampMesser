@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Sprout, Tent, Thermometer, Sun, Droplets, Clock, RefreshCcw, CloudSun, RefreshCw } from "lucide-react";
+import {
+  Sprout,
+  Tent,
+  Thermometer,
+  Sun,
+  Droplets,
+  Clock,
+  RefreshCcw,
+  CloudSun,
+  RefreshCw,
+} from "lucide-react";
 import { cn as cnUtil } from "@/lib/utils";
 import PageHeader from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,9 +29,21 @@ import {
 } from "@shared/lawn";
 
 const floorOptions: { value: FloorType; label: string; hint: string }[] = [
-  { value: "mesh", label: "Mesh / ohne Boden", hint: "Licht und Luft kommen durch" },
-  { value: "standard", label: "Standard-Zeltboden", hint: "übliche Bodenwanne" },
-  { value: "footprint", label: "Boden + Footprint", hint: "dichtet vollständig ab" },
+  {
+    value: "mesh",
+    label: "Mesh / ohne Boden",
+    hint: "Licht und Luft kommen durch",
+  },
+  {
+    value: "standard",
+    label: "Standard-Zeltboden",
+    hint: "übliche Bodenwanne",
+  },
+  {
+    value: "footprint",
+    label: "Boden + Footprint",
+    hint: "dichtet vollständig ab",
+  },
 ];
 const grassOptions: { value: GrassCondition; label: string; hint: string }[] = [
   { value: "robust", label: "Robust", hint: "Sport-/Campingwiese" },
@@ -47,7 +69,9 @@ export default function LawnPage() {
   const [sun, setSun] = useState<SunExposure>("partial");
   const [moisture, setMoisture] = useState<Moisture>("normal");
   const [plannedDays, setPlannedDays] = useState(3);
-  const [weatherStatus, setWeatherStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
+  const [weatherStatus, setWeatherStatus] = useState<
+    "idle" | "loading" | "ok" | "error"
+  >("idle");
   const [weatherNote, setWeatherNote] = useState<string | null>(null);
   const autoTried = useRef(false);
 
@@ -70,7 +94,9 @@ export default function LawnPage() {
             forecast_days: "1",
             timezone: "auto",
           });
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+          const res = await fetch(
+            `https://api.open-meteo.com/v1/forecast?${params.toString()}`
+          );
           if (!res.ok) throw new Error("Wetter-API-Fehler");
           const json = await res.json();
           const tMax: number[] = json.daily?.temperature_2m_max ?? [];
@@ -78,18 +104,23 @@ export default function LawnPage() {
           // Index 0 = gestern (past_days: 1), Index 1 = heute
           const todayMax = tMax[1] ?? tMax[0];
           const rain24h = (rain[0] ?? 0) + (rain[1] ?? 0);
-          if (typeof todayMax !== "number") throw new Error("Keine Temperaturdaten");
+          if (typeof todayMax !== "number")
+            throw new Error("Keine Temperaturdaten");
           setTemperature(Math.round(todayMax));
           // Bodenfeuchte: echte soil_moisture-Prognose (aktuelle Stunde),
           // Fallback: Niederschlag der letzten 48 h
-          const soilSeries: (number | null)[] = json.hourly?.soil_moisture_0_to_7cm ?? [];
+          const soilSeries: (number | null)[] =
+            json.hourly?.soil_moisture_0_to_7cm ?? [];
           const times: string[] = json.hourly?.time ?? [];
           const nowIso = new Date().toISOString().slice(0, 13);
           let soilNow: number | null = null;
           const idx = times.findIndex(t => t.startsWith(nowIso));
-          if (idx >= 0 && typeof soilSeries[idx] === "number") soilNow = soilSeries[idx];
+          if (idx >= 0 && typeof soilSeries[idx] === "number")
+            soilNow = soilSeries[idx];
           else {
-            const lastValid = soilSeries.filter((v): v is number => typeof v === "number");
+            const lastValid = soilSeries.filter(
+              (v): v is number => typeof v === "number"
+            );
             if (lastValid.length > 0) soilNow = lastValid[lastValid.length - 1];
           }
           const derived = deriveMoisture(soilNow, rain24h);
@@ -97,11 +128,19 @@ export default function LawnPage() {
           setWeatherNote(
             soilNow !== null
               ? `Tagesmaximum ${Math.round(todayMax)} °C, Bodenfeuchte ${(soilNow * 100).toFixed(0)} % → Boden ${
-                  derived === "wet" ? "nass" : derived === "normal" ? "normal" : "trocken"
+                  derived === "wet"
+                    ? "nass"
+                    : derived === "normal"
+                      ? "normal"
+                      : "trocken"
                 }`
               : `Tagesmaximum ${Math.round(todayMax)} °C, Niederschlag letzte 2 Tage ${rain24h.toFixed(1)} mm → Boden ${
-                  derived === "wet" ? "nass" : derived === "normal" ? "normal" : "trocken"
-                } (abgeleitet)`,
+                  derived === "wet"
+                    ? "nass"
+                    : derived === "normal"
+                      ? "normal"
+                      : "trocken"
+                } (abgeleitet)`
           );
           setWeatherStatus("ok");
         } catch {
@@ -109,7 +148,7 @@ export default function LawnPage() {
         }
       },
       () => setWeatherStatus("error"),
-      { timeout: 10000 },
+      { timeout: 10000 }
     );
   };
 
@@ -123,7 +162,7 @@ export default function LawnPage() {
 
   const result = useMemo(
     () => estimateLawnTolerance({ floor, grass, temperature, sun, moisture }),
-    [floor, grass, temperature, sun, moisture],
+    [floor, grass, temperature, sun, moisture]
   );
   const verdict = lawnVerdict(plannedDays * 24, result);
 
@@ -196,7 +235,10 @@ export default function LawnPage() {
               disabled={weatherStatus === "loading"}
             >
               <RefreshCw
-                className={cnUtil("mr-1.5 h-3.5 w-3.5", weatherStatus === "loading" && "animate-spin")}
+                className={cnUtil(
+                  "mr-1.5 h-3.5 w-3.5",
+                  weatherStatus === "loading" && "animate-spin"
+                )}
                 aria-hidden="true"
               />
               {weatherStatus === "loading"
@@ -205,24 +247,49 @@ export default function LawnPage() {
             </Button>
             {weatherStatus === "ok" && weatherNote && (
               <p className="mt-1.5 flex items-start gap-1.5 text-xs text-primary">
-                <CloudSun className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <CloudSun
+                  className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                  aria-hidden="true"
+                />
                 Aus Prognose übernommen: {weatherNote}. Manuell anpassbar.
               </p>
             )}
             {weatherStatus === "error" && (
               <p className="mt-1.5 text-xs text-muted-foreground">
-                Wetter nicht verfügbar – stelle Temperatur und Feuchte von Hand ein.
+                Wetter nicht verfügbar – stelle Temperatur und Feuchte von Hand
+                ein.
               </p>
             )}
           </div>
-          <OptionRow label="Zeltboden" options={floorOptions} value={floor} onChange={setFloor} />
-          <OptionRow label="Rasen-Zustand" options={grassOptions} value={grass} onChange={setGrass} />
-          <OptionRow label="Sonneneinstrahlung am Stellplatz" options={sunOptions} value={sun} onChange={setSun} />
-          <OptionRow label="Bodenfeuchte" options={moistureOptions} value={moisture} onChange={setMoisture} />
+          <OptionRow
+            label="Zeltboden"
+            options={floorOptions}
+            value={floor}
+            onChange={setFloor}
+          />
+          <OptionRow
+            label="Rasen-Zustand"
+            options={grassOptions}
+            value={grass}
+            onChange={setGrass}
+          />
+          <OptionRow
+            label="Sonneneinstrahlung am Stellplatz"
+            options={sunOptions}
+            value={sun}
+            onChange={setSun}
+          />
+          <OptionRow
+            label="Bodenfeuchte"
+            options={moistureOptions}
+            value={moisture}
+            onChange={setMoisture}
+          />
           <div>
             <Label className="mb-1.5 flex items-center justify-between text-xs">
               <span className="flex items-center gap-1">
-                <Thermometer className="h-3.5 w-3.5" aria-hidden="true" /> Tagestemperatur
+                <Thermometer className="h-3.5 w-3.5" aria-hidden="true" />{" "}
+                Tagestemperatur
               </span>
               <span className="font-semibold">{temperature} °C</span>
             </Label>
@@ -238,7 +305,8 @@ export default function LawnPage() {
           <div>
             <Label className="mb-1.5 flex items-center justify-between text-xs">
               <span className="flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" aria-hidden="true" /> Geplante Standzeit
+                <Clock className="h-3.5 w-3.5" aria-hidden="true" /> Geplante
+                Standzeit
               </span>
               <span className="font-semibold">
                 {plannedDays} Tag{plannedDays > 1 ? "e" : ""}
@@ -266,23 +334,44 @@ export default function LawnPage() {
       <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Card>
           <CardContent className="pt-5 text-center">
-            <Sun className="mx-auto mb-1.5 h-5 w-5 text-amber-glow" aria-hidden="true" />
-            <p className="text-lg font-bold">{formatHours(result.yellowingHours)}</p>
-            <p className="text-xs text-muted-foreground">bis erste Vergilbung</p>
+            <Sun
+              className="mx-auto mb-1.5 h-5 w-5 text-amber-glow"
+              aria-hidden="true"
+            />
+            <p className="text-lg font-bold">
+              {formatHours(result.yellowingHours)}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              bis erste Vergilbung
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-5 text-center">
-            <Droplets className="mx-auto mb-1.5 h-5 w-5 text-destructive" aria-hidden="true" />
-            <p className="text-lg font-bold">{formatHours(result.damageHours)}</p>
-            <p className="text-xs text-muted-foreground">bis bleibende Schäden</p>
+            <Droplets
+              className="mx-auto mb-1.5 h-5 w-5 text-destructive"
+              aria-hidden="true"
+            />
+            <p className="text-lg font-bold">
+              {formatHours(result.damageHours)}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              bis bleibende Schäden
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-5 text-center">
-            <RefreshCcw className="mx-auto mb-1.5 h-5 w-5 text-primary" aria-hidden="true" />
-            <p className="text-lg font-bold">{formatHours(result.moveAfterHours)}</p>
-            <p className="text-xs text-muted-foreground">spätestens dann umstellen</p>
+            <RefreshCcw
+              className="mx-auto mb-1.5 h-5 w-5 text-primary"
+              aria-hidden="true"
+            />
+            <p className="text-lg font-bold">
+              {formatHours(result.moveAfterHours)}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              spätestens dann umstellen
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -297,20 +386,26 @@ export default function LawnPage() {
         <CardContent>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              <strong className="text-foreground">Zelt regelmässig umstellen:</strong> Schon ein
-              Versetzen um eine Zeltbreite gibt dem Gras Licht und Luft zurück.
+              <strong className="text-foreground">
+                Zelt regelmässig umstellen:
+              </strong>{" "}
+              Schon ein Versetzen um eine Zeltbreite gibt dem Gras Licht und
+              Luft zurück.
             </li>
             <li>
-              <strong className="text-foreground">Zelt tagsüber lüften:</strong> Boden anheben oder
-              Apsiden öffnen, damit Hitze und Feuchtigkeit entweichen.
+              <strong className="text-foreground">Zelt tagsüber lüften:</strong>{" "}
+              Boden anheben oder Apsiden öffnen, damit Hitze und Feuchtigkeit
+              entweichen.
             </li>
             <li>
-              <strong className="text-foreground">Vergilbtes Gras:</strong> erholt sich meist in 1–2
-              Wochen von selbst – braunes, matschiges Gras braucht oft eine Nachsaat.
+              <strong className="text-foreground">Vergilbtes Gras:</strong>{" "}
+              erholt sich meist in 1–2 Wochen von selbst – braunes, matschiges
+              Gras braucht oft eine Nachsaat.
             </li>
             <li>
-              <strong className="text-foreground">Heisse Tage:</strong> Bei über 30 °C in praller
-              Sonne leidet der Rasen unter dem Zeltboden schon nach einem Tag.
+              <strong className="text-foreground">Heisse Tage:</strong> Bei über
+              30 °C in praller Sonne leidet der Rasen unter dem Zeltboden schon
+              nach einem Tag.
             </li>
           </ul>
         </CardContent>

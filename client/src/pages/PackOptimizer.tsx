@@ -1,5 +1,13 @@
 import { useMemo, useState } from "react";
-import { Backpack, Bike, Car, CarFront, Loader2, Scale, TrendingDown } from "lucide-react";
+import {
+  Backpack,
+  Bike,
+  Car,
+  CarFront,
+  Loader2,
+  Scale,
+  TrendingDown,
+} from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +18,10 @@ import { analyzePack, transportProfiles } from "@shared/calculators";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 
-const profileIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+const profileIcons: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
   motorrad: Bike,
   kleinwagen: CarFront,
   kombi: Car,
@@ -19,7 +30,9 @@ const profileIcons: Record<string, React.ComponentType<{ className?: string }>> 
 
 export default function PackOptimizerPage() {
   const { isAuthenticated, loading } = useAuth();
-  const query = trpc.inventory.list.useQuery(undefined, { enabled: isAuthenticated });
+  const query = trpc.inventory.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
   const [profileId, setProfileId] = useState("kombi");
 
   const profile = transportProfiles.find(p => p.id === profileId)!;
@@ -38,7 +51,10 @@ export default function PackOptimizerPage() {
   if (loading) {
     return (
       <div className="container flex justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Lädt" />
+        <Loader2
+          className="h-6 w-6 animate-spin text-muted-foreground"
+          aria-label="Lädt"
+        />
       </div>
     );
   }
@@ -56,7 +72,11 @@ export default function PackOptimizerPage() {
   }
 
   const barColor = (percent: number) =>
-    percent > 100 ? "bg-destructive" : percent > 85 ? "bg-chart-1" : "bg-primary";
+    percent > 100
+      ? "bg-destructive"
+      : percent > 85
+        ? "bg-chart-1"
+        : "bg-primary";
 
   return (
     <div className="container max-w-3xl py-6">
@@ -67,7 +87,11 @@ export default function PackOptimizerPage() {
 
       {/* Transportprofil */}
       <h2 className="mb-3 font-serif text-lg font-semibold">Transportmittel</h2>
-      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4" role="group" aria-label="Transportmittel wählen">
+      <div
+        className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4"
+        role="group"
+        aria-label="Transportmittel wählen"
+      >
         {transportProfiles.map(p => {
           const Icon = profileIcons[p.id] ?? Car;
           return (
@@ -79,7 +103,7 @@ export default function PackOptimizerPage() {
                 "flex flex-col items-center gap-1.5 rounded-xl border p-3.5 transition-all",
                 profileId === p.id
                   ? "border-primary bg-accent"
-                  : "border-border bg-card hover:border-primary/40",
+                  : "border-border bg-card hover:border-primary/40"
               )}
               aria-pressed={profileId === p.id}
             >
@@ -103,11 +127,19 @@ export default function PackOptimizerPage() {
                 {analysis.totalWeightKg.toFixed(1)} / {profile.maxWeightKg} kg
               </span>
             </div>
-            <div className="h-3 overflow-hidden rounded-full bg-muted" role="progressbar"
-              aria-valuenow={Math.round(analysis.weightPercent)} aria-valuemin={0} aria-valuemax={100}
-              aria-label={`Gewichtsauslastung ${Math.round(analysis.weightPercent)} Prozent`}>
+            <div
+              className="h-3 overflow-hidden rounded-full bg-muted"
+              role="progressbar"
+              aria-valuenow={Math.round(analysis.weightPercent)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Gewichtsauslastung ${Math.round(analysis.weightPercent)} Prozent`}
+            >
               <div
-                className={cn("h-full rounded-full transition-all", barColor(analysis.weightPercent))}
+                className={cn(
+                  "h-full rounded-full transition-all",
+                  barColor(analysis.weightPercent)
+                )}
                 style={{ width: `${Math.min(100, analysis.weightPercent)}%` }}
               />
             </div>
@@ -116,14 +148,23 @@ export default function PackOptimizerPage() {
             <div className="mb-1.5 flex items-center justify-between text-sm">
               <span className="font-medium">Volumen</span>
               <span className="font-mono">
-                {analysis.totalVolumeLiters.toFixed(0)} / {profile.maxVolumeLiters} l
+                {analysis.totalVolumeLiters.toFixed(0)} /{" "}
+                {profile.maxVolumeLiters} l
               </span>
             </div>
-            <div className="h-3 overflow-hidden rounded-full bg-muted" role="progressbar"
-              aria-valuenow={Math.round(analysis.volumePercent)} aria-valuemin={0} aria-valuemax={100}
-              aria-label={`Volumenauslastung ${Math.round(analysis.volumePercent)} Prozent`}>
+            <div
+              className="h-3 overflow-hidden rounded-full bg-muted"
+              role="progressbar"
+              aria-valuenow={Math.round(analysis.volumePercent)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Volumenauslastung ${Math.round(analysis.volumePercent)} Prozent`}
+            >
               <div
-                className={cn("h-full rounded-full transition-all", barColor(analysis.volumePercent))}
+                className={cn(
+                  "h-full rounded-full transition-all",
+                  barColor(analysis.volumePercent)
+                )}
                 style={{ width: `${Math.min(100, analysis.volumePercent)}%` }}
               />
             </div>
@@ -133,11 +174,19 @@ export default function PackOptimizerPage() {
       </Card>
 
       {/* Hinweise */}
-      <h2 className="mb-3 font-serif text-lg font-semibold">Optimierungshinweise</h2>
+      <h2 className="mb-3 font-serif text-lg font-semibold">
+        Optimierungshinweise
+      </h2>
       <ul className="mb-6 space-y-2">
         {analysis.hints.map(hint => (
-          <li key={hint} className="flex gap-2.5 rounded-xl border border-border bg-card p-3.5 text-sm">
-            <TrendingDown className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+          <li
+            key={hint}
+            className="flex gap-2.5 rounded-xl border border-border bg-card p-3.5 text-sm"
+          >
+            <TrendingDown
+              className="h-4 w-4 shrink-0 text-primary"
+              aria-hidden="true"
+            />
             {hint}
           </li>
         ))}
@@ -155,9 +204,13 @@ export default function PackOptimizerPage() {
               <ol className="space-y-2 text-sm">
                 {analysis.heaviestItems.map(item => (
                   <li key={item.name} className="flex justify-between gap-2">
-                    <span>{item.name}{item.quantity > 1 ? ` × ${item.quantity}` : ""}</span>
+                    <span>
+                      {item.name}
+                      {item.quantity > 1 ? ` × ${item.quantity}` : ""}
+                    </span>
                     <span className="font-mono text-muted-foreground">
-                      {((item.weightGrams * item.quantity) / 1000).toFixed(1)} kg
+                      {((item.weightGrams * item.quantity) / 1000).toFixed(1)}{" "}
+                      kg
                     </span>
                   </li>
                 ))}
@@ -173,7 +226,10 @@ export default function PackOptimizerPage() {
               <ol className="space-y-2 text-sm">
                 {analysis.bulkiestItems.map(item => (
                   <li key={item.name} className="flex justify-between gap-2">
-                    <span>{item.name}{item.quantity > 1 ? ` × ${item.quantity}` : ""}</span>
+                    <span>
+                      {item.name}
+                      {item.quantity > 1 ? ` × ${item.quantity}` : ""}
+                    </span>
                     <span className="font-mono text-muted-foreground">
                       {(item.volumeLiters * item.quantity).toFixed(1)} l
                     </span>
@@ -188,7 +244,10 @@ export default function PackOptimizerPage() {
       {(query.data ?? []).length === 0 && (
         <p className="mt-4 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
           Dein Inventar ist noch leer.{" "}
-          <Link href="/inventar" className="font-medium text-primary hover:underline">
+          <Link
+            href="/inventar"
+            className="font-medium text-primary hover:underline"
+          >
             Erfasse zuerst deine Ausrüstung
           </Link>{" "}
           mit Gewicht und Volumen.

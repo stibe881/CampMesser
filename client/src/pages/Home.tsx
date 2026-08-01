@@ -15,7 +15,11 @@ import {
   Wind,
 } from "lucide-react";
 import { groups, modules } from "@/data/modules";
-import { describeWeatherCode, detectAlerts, type HourlyWeather } from "@shared/weather";
+import {
+  describeWeatherCode,
+  detectAlerts,
+  type HourlyWeather,
+} from "@shared/weather";
 import { getSunTimes } from "@/lib/sun";
 import { useEffect, useRef, useState } from "react";
 import { getRecentModules } from "@/components/AppShell";
@@ -31,7 +35,9 @@ function loadModuleOrder(): string[] {
     const raw = localStorage.getItem(ORDER_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((p): p is string => typeof p === "string") : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((p): p is string => typeof p === "string")
+      : [];
   } catch {
     return [];
   }
@@ -52,7 +58,9 @@ function loadHiddenModules(): string[] {
     const raw = localStorage.getItem(HIDDEN_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((p): p is string => typeof p === "string") : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((p): p is string => typeof p === "string")
+      : [];
   } catch {
     return [];
   }
@@ -92,36 +100,42 @@ function WeatherWidget() {
             hourly:
               "temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,weather_code,cape,cloud_cover",
           });
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+          const res = await fetch(
+            `https://api.open-meteo.com/v1/forecast?${params.toString()}`
+          );
           if (!res.ok) return;
           const json = await res.json();
-          const hourly: HourlyWeather[] = (json.hourly?.time as string[] | undefined)?.map(
-            (time: string, i: number) => ({
-              time,
-              temperatureC: json.hourly.temperature_2m[i],
-              apparentC: json.hourly.apparent_temperature[i],
-              precipitationMm: json.hourly.precipitation[i],
-              precipitationProbability: json.hourly.precipitation_probability?.[i] ?? 0,
-              windSpeedKmh: json.hourly.wind_speed_10m[i],
-              windGustsKmh: json.hourly.wind_gusts_10m[i],
-              weatherCode: json.hourly.weather_code[i],
-              cape: json.hourly.cape?.[i] ?? 0,
-              cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
-            }),
-          ) ?? [];
+          const hourly: HourlyWeather[] =
+            (json.hourly?.time as string[] | undefined)?.map(
+              (time: string, i: number) => ({
+                time,
+                temperatureC: json.hourly.temperature_2m[i],
+                apparentC: json.hourly.apparent_temperature[i],
+                precipitationMm: json.hourly.precipitation[i],
+                precipitationProbability:
+                  json.hourly.precipitation_probability?.[i] ?? 0,
+                windSpeedKmh: json.hourly.wind_speed_10m[i],
+                windGustsKmh: json.hourly.wind_gusts_10m[i],
+                weatherCode: json.hourly.weather_code[i],
+                cape: json.hourly.cape?.[i] ?? 0,
+                cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
+              })
+            ) ?? [];
           const alerts = detectAlerts(hourly);
           setWeather({
             temperatureC: json.current.temperature_2m,
             windKmh: json.current.wind_speed_10m,
             label: describeWeatherCode(json.current.weather_code).label,
-            alert: alerts[0] ? { title: alerts[0].title, severity: alerts[0].severity } : null,
+            alert: alerts[0]
+              ? { title: alerts[0].title, severity: alerts[0].severity }
+              : null,
           });
         } catch {
           // Ohne Netz bleibt das Widget einfach ausgeblendet
         }
       },
       () => {},
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }
     );
   }, []);
 
@@ -137,8 +151,12 @@ function WeatherWidget() {
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-baseline gap-2">
-          <span className="font-serif text-2xl font-bold">{Math.round(weather.temperatureC)}°</span>
-          <span className="truncate text-sm text-muted-foreground">{weather.label}</span>
+          <span className="font-serif text-2xl font-bold">
+            {Math.round(weather.temperatureC)}°
+          </span>
+          <span className="truncate text-sm text-muted-foreground">
+            {weather.label}
+          </span>
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Wind className="h-3 w-3" aria-hidden="true" />
             {Math.round(weather.windKmh)} km/h
@@ -161,7 +179,10 @@ function WeatherWidget() {
           </span>
         )}
       </span>
-      <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/50" aria-hidden="true" />
+      <ArrowRight
+        className="h-4 w-4 shrink-0 text-muted-foreground/50"
+        aria-hidden="true"
+      />
     </Link>
   );
 }
@@ -190,7 +211,8 @@ function KnowledgeSearch() {
         <div className="mt-2 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           {results.length === 0 ? (
             <p className="px-4 py-3 text-sm text-muted-foreground">
-              Nichts gefunden – probiere einen anderen Begriff (z. B. «Verbrennung» oder «Knoten»).
+              Nichts gefunden – probiere einen anderen Begriff (z. B.
+              «Verbrennung» oder «Knoten»).
             </p>
           ) : (
             <ul className="divide-y divide-border/60">
@@ -204,7 +226,9 @@ function KnowledgeSearch() {
                       {r.module}
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-sm font-semibold">{r.title}</span>
+                      <span className="block text-sm font-semibold">
+                        {r.title}
+                      </span>
                       <span className="block truncate text-xs text-muted-foreground">
                         {r.snippet}
                       </span>
@@ -225,7 +249,10 @@ function RecentModules({ hidden }: { hidden: string[] }) {
   const [recent] = useState<string[]>(() => getRecentModules());
   const items = recent
     .map(path => modules.find(m => m.path === path))
-    .filter((m): m is (typeof modules)[number] => Boolean(m) && !hidden.includes(m!.path))
+    .filter(
+      (m): m is (typeof modules)[number] =>
+        Boolean(m) && !hidden.includes(m!.path)
+    )
     .slice(0, 4);
   if (items.length === 0) return null;
   return (
@@ -276,17 +303,26 @@ export default function Home() {
 
   /** Kachel aus- oder wieder einblenden (nur im Sortier-Modus erreichbar). */
   const toggleHidden = (path: string) => {
-    const next = hidden.includes(path) ? hidden.filter(p => p !== path) : [...hidden, path];
+    const next = hidden.includes(path)
+      ? hidden.filter(p => p !== path)
+      : [...hidden, path];
     setHidden(next);
     saveHiddenModules(next);
     hiddenSync.push(next);
   };
   const [dragOverPath, setDragOverPath] = useState<string | null>(null);
-  const dragInfo = useRef<{ from: string; group: (typeof groups)[number] } | null>(null);
+  const dragInfo = useRef<{
+    from: string;
+    group: (typeof groups)[number];
+  } | null>(null);
   const dragOverRef = useRef<string | null>(null);
 
   /** Kachel unter dem Zeiger ermitteln (funktioniert für Maus und Touch). */
-  const tileUnderPointer = (x: number, y: number, group: string): string | null => {
+  const tileUnderPointer = (
+    x: number,
+    y: number,
+    group: string
+  ): string | null => {
     const el = document.elementFromPoint(x, y) as HTMLElement | null;
     const tile = el?.closest<HTMLElement>("[data-drag-path]");
     if (!tile || tile.dataset.dragGroup !== group) return null;
@@ -307,12 +343,19 @@ export default function Home() {
     return [...inGroup].sort((a, b) => {
       const ia = order.indexOf(a.path);
       const ib = order.indexOf(b.path);
-      return (ia === -1 ? inGroup.indexOf(a) : ia) - (ib === -1 ? inGroup.indexOf(b) : ib);
+      return (
+        (ia === -1 ? inGroup.indexOf(a) : ia) -
+        (ib === -1 ? inGroup.indexOf(b) : ib)
+      );
     });
   };
 
   /** Kachel innerhalb ihrer Gruppe an neue Position schieben und speichern. */
-  const moveModule = (group: (typeof groups)[number], fromPath: string, toPath: string) => {
+  const moveModule = (
+    group: (typeof groups)[number],
+    fromPath: string,
+    toPath: string
+  ) => {
     if (fromPath === toPath) return;
     const inGroup = orderedModules(group).map(m => m.path);
     const fromIdx = inGroup.indexOf(fromPath);
@@ -320,13 +363,19 @@ export default function Home() {
     if (fromIdx === -1 || toIdx === -1) return;
     inGroup.splice(toIdx, 0, ...inGroup.splice(fromIdx, 1));
     // Gesamtreihenfolge: alle Gruppen zusammenführen
-    const next = groups.flatMap(g => (g === group ? inGroup : orderedModules(g).map(m => m.path)));
+    const next = groups.flatMap(g =>
+      g === group ? inGroup : orderedModules(g).map(m => m.path)
+    );
     setOrder(next);
     saveModuleOrder(next);
     orderSync.push(next);
   };
 
-  const moveByOffset = (group: (typeof groups)[number], path: string, offset: -1 | 1) => {
+  const moveByOffset = (
+    group: (typeof groups)[number],
+    path: string,
+    offset: -1 | 1
+  ) => {
     const inGroup = orderedModules(group).map(m => m.path);
     const idx = inGroup.indexOf(path);
     const target = inGroup[idx + offset];
@@ -337,15 +386,24 @@ export default function Home() {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       pos => {
-        const times = getSunTimes(new Date(), pos.coords.latitude, pos.coords.longitude);
+        const times = getSunTimes(
+          new Date(),
+          pos.coords.latitude,
+          pos.coords.longitude
+        );
         if (times.sunrise && times.sunset) {
           const fmt = (d: Date) =>
-            d.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" });
-          setSunInfo(`Heute: Sonnenaufgang ${fmt(times.sunrise)} · Sonnenuntergang ${fmt(times.sunset)}`);
+            d.toLocaleTimeString("de-CH", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+          setSunInfo(
+            `Heute: Sonnenaufgang ${fmt(times.sunrise)} · Sonnenuntergang ${fmt(times.sunset)}`
+          );
         }
       },
       () => setSunInfo(null),
-      { timeout: 8000 },
+      { timeout: 8000 }
     );
   }, []);
 
@@ -371,10 +429,13 @@ export default function Home() {
             Dein Schweizer Taschenmesser fürs Zelt-Camping
           </p>
           <h1 className="max-w-xl text-3xl font-bold leading-tight drop-shadow-md md:text-5xl">
-            Alles fürs Camp.<br />In einer App.
+            Alles fürs Camp.
+            <br />
+            In einer App.
           </h1>
           <p className="mt-3 max-w-lg text-white/90 drop-shadow md:text-lg">
-            Planung, Sicherheit, Energie und Naturerlebnis – 16 smarte Werkzeuge für dein nächstes Abenteuer.
+            Planung, Sicherheit, Energie und Naturerlebnis – 16 smarte Werkzeuge
+            für dein nächstes Abenteuer.
           </p>
           {sunInfo && (
             <p className="mt-5 inline-flex items-center gap-2 rounded-full bg-black/40 px-4 py-1.5 text-sm text-white backdrop-blur-md">
@@ -408,23 +469,26 @@ export default function Home() {
         </div>
         {sortMode && (
           <p className="mb-4 rounded-lg bg-accent px-4 py-2.5 text-sm text-accent-foreground">
-            Ziehe die Kacheln an ihre neue Position (innerhalb der Gruppe) oder nutze die
-            Pfeil-Buttons. Mit dem Augen-Button blendest du Kacheln aus oder wieder ein.
-            Angemeldet wird die Auswahl auf allen deinen Geräten übernommen.
+            Ziehe die Kacheln an ihre neue Position (innerhalb der Gruppe) oder
+            nutze die Pfeil-Buttons. Mit dem Augen-Button blendest du Kacheln
+            aus oder wieder ein. Angemeldet wird die Auswahl auf allen deinen
+            Geräten übernommen.
           </p>
         )}
         {groups.map(group => {
           // Im Normal-Modus verschwinden ausgeblendete Kacheln (und leere Gruppen),
           // im Sortier-Modus bleiben sie gedimmt sichtbar, damit man sie zurückholen kann.
           const groupModules = orderedModules(group).filter(
-            m => sortMode || !hidden.includes(m.path),
+            m => sortMode || !hidden.includes(m.path)
           );
           if (groupModules.length === 0) return null;
           return (
-          <div key={group} className="mb-8 last:mb-0">
-            <h2 className="mb-4 font-serif text-xl font-semibold md:text-2xl">{group}</h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {groupModules.map((m, idx, arr) => {
+            <div key={group} className="mb-8 last:mb-0">
+              <h2 className="mb-4 font-serif text-xl font-semibold md:text-2xl">
+                {group}
+              </h2>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {groupModules.map((m, idx, arr) => {
                   const Icon = m.icon;
                   if (sortMode) {
                     const isHidden = hidden.includes(m.path);
@@ -435,7 +499,8 @@ export default function Home() {
                         data-drag-group={group}
                         onPointerDown={e => {
                           // Klicks auf die Pfeil-Buttons nicht als Ziehen werten
-                          if ((e.target as HTMLElement).closest("button")) return;
+                          if ((e.target as HTMLElement).closest("button"))
+                            return;
                           dragInfo.current = { from: m.path, group };
                           dragOverRef.current = null;
                           setDragPath(m.path);
@@ -443,7 +508,11 @@ export default function Home() {
                         }}
                         onPointerMove={e => {
                           if (!dragInfo.current) return;
-                          const over = tileUnderPointer(e.clientX, e.clientY, group);
+                          const over = tileUnderPointer(
+                            e.clientX,
+                            e.clientY,
+                            group
+                          );
                           if (over !== dragOverRef.current) {
                             dragOverRef.current = over;
                             setDragOverPath(over);
@@ -469,7 +538,10 @@ export default function Home() {
                         }
                         aria-label={`${m.title} verschieben`}
                       >
-                        <GripVertical className="mt-2 h-5 w-5 shrink-0 text-muted-foreground/60" aria-hidden="true" />
+                        <GripVertical
+                          className="mt-2 h-5 w-5 shrink-0 text-muted-foreground/60"
+                          aria-hidden="true"
+                        />
                         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                           <Icon className="h-5.5 w-5.5" aria-hidden="true" />
                         </span>
@@ -482,7 +554,9 @@ export default function Home() {
                               </span>
                             )}
                           </span>
-                          <span className="mt-0.5 block text-sm text-muted-foreground">{m.description}</span>
+                          <span className="mt-0.5 block text-sm text-muted-foreground">
+                            {m.description}
+                          </span>
                         </span>
                         <span className="flex shrink-0 flex-col gap-1">
                           <button
@@ -501,7 +575,10 @@ export default function Home() {
                             className="rounded-md border border-border p-1 text-muted-foreground disabled:opacity-30"
                             aria-label={`${m.title} nach hinten verschieben`}
                           >
-                            <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                            <ChevronDown
+                              className="h-4 w-4"
+                              aria-hidden="true"
+                            />
                           </button>
                           <button
                             type="button"
@@ -513,7 +590,9 @@ export default function Home() {
                             }
                             aria-pressed={isHidden}
                             aria-label={
-                              isHidden ? `${m.title} wieder einblenden` : `${m.title} ausblenden`
+                              isHidden
+                                ? `${m.title} wieder einblenden`
+                                : `${m.title} ausblenden`
                             }
                           >
                             {isHidden ? (
@@ -551,7 +630,9 @@ export default function Home() {
                             </span>
                           )}
                         </span>
-                        <span className="mt-0.5 block text-sm text-muted-foreground">{m.description}</span>
+                        <span className="mt-0.5 block text-sm text-muted-foreground">
+                          {m.description}
+                        </span>
                       </span>
                       <ArrowRight
                         className="mt-1 h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
@@ -560,8 +641,8 @@ export default function Home() {
                     </Link>
                   );
                 })}
+              </div>
             </div>
-          </div>
           );
         })}
       </section>

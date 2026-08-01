@@ -15,7 +15,7 @@ describe("computePackWeight", () => {
         { name: "Schlafsack", quantity: 2, checked: false },
         { name: "Sonnencreme", quantity: 1, checked: false },
       ],
-      inventory,
+      inventory
     );
     expect(summary.totalGrams).toBe(3200 + 2200);
     expect(summary.packedGrams).toBe(3200);
@@ -27,14 +27,17 @@ describe("computePackWeight", () => {
   it("gleicht Namen unabhängig von Gross-/Kleinschreibung und Leerraum ab", () => {
     const summary = computePackWeight(
       [{ name: "  schlafsack ", quantity: 1, checked: false }],
-      inventory,
+      inventory
     );
     expect(summary.matchedCount).toBe(1);
     expect(summary.totalGrams).toBe(1100);
   });
 
   it("liefert eine leere Bilanz ohne Treffer", () => {
-    const summary = computePackWeight([{ name: "Buch", quantity: 1, checked: false }], inventory);
+    const summary = computePackWeight(
+      [{ name: "Buch", quantity: 1, checked: false }],
+      inventory
+    );
     expect(summary.totalGrams).toBe(0);
     expect(summary.matchedCount).toBe(0);
     expect(summary.unmatchedCount).toBe(1);

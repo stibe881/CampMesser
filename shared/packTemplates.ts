@@ -100,35 +100,73 @@ export const packScenarios: PackScenario[] = [
 ];
 
 /** Familien-Modus: Zusatzpakete, die jeder Liste hinzugefügt werden können. */
-export const familyAddOns: { id: string; label: string; description: string; items: PackTemplateItem[] }[] = [
+export const familyAddOns: {
+  id: string;
+  label: string;
+  description: string;
+  items: PackTemplateItem[];
+}[] = [
   {
     id: "kindersicherheit",
     label: "Kindersichere Ausrüstung",
-    description: "Sicherheits-Ergänzungen für Kleinkinder und Kinder bis ca. 8 Jahre.",
+    description:
+      "Sicherheits-Ergänzungen für Kleinkinder und Kinder bis ca. 8 Jahre.",
     items: [
-      { name: "Reflektierende Armbänder / Leuchtbänder", category: "Kinder-Sicherheit", quantity: 2 },
-      { name: "Notfall-Armband mit Handynummer der Eltern", category: "Kinder-Sicherheit", quantity: 2 },
-      { name: "Trillerpfeife pro Kind", category: "Kinder-Sicherheit", quantity: 2 },
-      { name: "Kindgerechte Stirnlampe", category: "Kinder-Sicherheit", quantity: 2 },
-      { name: "Steckdosen-/Kocher-Abschirmung (Kleinkind)", category: "Kinder-Sicherheit" },
-      { name: "Sonnenzelt / UV-Schutz fürs Kleinkind", category: "Kinder-Sicherheit" },
-      { name: "Schwimmhilfe (falls Gewässer in der Nähe)", category: "Kinder-Sicherheit" },
+      {
+        name: "Reflektierende Armbänder / Leuchtbänder",
+        category: "Kinder-Sicherheit",
+        quantity: 2,
+      },
+      {
+        name: "Notfall-Armband mit Handynummer der Eltern",
+        category: "Kinder-Sicherheit",
+        quantity: 2,
+      },
+      {
+        name: "Trillerpfeife pro Kind",
+        category: "Kinder-Sicherheit",
+        quantity: 2,
+      },
+      {
+        name: "Kindgerechte Stirnlampe",
+        category: "Kinder-Sicherheit",
+        quantity: 2,
+      },
+      {
+        name: "Steckdosen-/Kocher-Abschirmung (Kleinkind)",
+        category: "Kinder-Sicherheit",
+      },
+      {
+        name: "Sonnenzelt / UV-Schutz fürs Kleinkind",
+        category: "Kinder-Sicherheit",
+      },
+      {
+        name: "Schwimmhilfe (falls Gewässer in der Nähe)",
+        category: "Kinder-Sicherheit",
+      },
     ],
   },
   {
     id: "reiseapotheke-kinder",
     label: "Reiseapotheke für Kinder",
-    description: "Erweiterung der Standard-Apotheke für Kleinkind und Schulkind.",
+    description:
+      "Erweiterung der Standard-Apotheke für Kleinkind und Schulkind.",
     items: [
       { name: "Fieberthermometer", category: "Kinder-Apotheke" },
-      { name: "Fieber-/Schmerzzäpfchen oder -sirup (altersgerecht)", category: "Kinder-Apotheke" },
+      {
+        name: "Fieber-/Schmerzzäpfchen oder -sirup (altersgerecht)",
+        category: "Kinder-Apotheke",
+      },
       { name: "Elektrolytlösung für Kinder", category: "Kinder-Apotheke" },
       { name: "Kinder-Sonnencrème LSF 50+", category: "Kinder-Apotheke" },
       { name: "Insektenschutz für Kinder", category: "Kinder-Apotheke" },
       { name: "Wund- und Heilsalbe", category: "Kinder-Apotheke" },
       { name: "Kinderpflaster (bunt hilft!)", category: "Kinder-Apotheke" },
       { name: "Kühlendes Gel für Insektenstiche", category: "Kinder-Apotheke" },
-      { name: "Windeln & Wundschutzcrème (Kleinkind)", category: "Kinder-Apotheke" },
+      {
+        name: "Windeln & Wundschutzcrème (Kleinkind)",
+        category: "Kinder-Apotheke",
+      },
     ],
   },
 ];

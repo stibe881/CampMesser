@@ -51,7 +51,9 @@ function matchScore(foodNames: string[], ingredients: string[]): number {
 export default function FoodPage() {
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
-  const query = trpc.food.list.useQuery(undefined, { enabled: isAuthenticated });
+  const query = trpc.food.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
   const [name, setName] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const today = new Date().toISOString().slice(0, 10);
@@ -68,21 +70,30 @@ export default function FoodPage() {
     onSuccess: () => utils.food.list.invalidate(),
   });
 
-  const foodNames = useMemo(() => (query.data ?? []).map(f => f.name), [query.data]);
+  const foodNames = useMemo(
+    () => (query.data ?? []).map(f => f.name),
+    [query.data]
+  );
 
   const suggestions = useMemo(() => {
     if (foodNames.length === 0) return [];
     return recipes
       .map(r => ({ recipe: r, score: matchScore(foodNames, r.ingredients) }))
       .filter(s => s.score > 0)
-      .sort((a, b) => b.score - a.score || a.recipe.timeMinutes - b.recipe.timeMinutes)
+      .sort(
+        (a, b) =>
+          b.score - a.score || a.recipe.timeMinutes - b.recipe.timeMinutes
+      )
       .slice(0, 5);
   }, [foodNames]);
 
   if (loading) {
     return (
       <div className="container flex justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Lädt" />
+        <Loader2
+          className="h-6 w-6 animate-spin text-muted-foreground"
+          aria-label="Lädt"
+        />
       </div>
     );
   }
@@ -101,7 +112,7 @@ export default function FoodPage() {
 
   // «Verbrauche zuerst»: ablaufende Vorräte nach vorne, ohne Datum ans Ende
   const items = [...(query.data ?? [])].sort(
-    (a, b) => expirySortKey(a.expiryDate) - expirySortKey(b.expiryDate),
+    (a, b) => expirySortKey(a.expiryDate) - expirySortKey(b.expiryDate)
   );
   const urgentCount = items.filter(i => {
     const info = expiryInfo(i.expiryDate, today);
@@ -140,18 +151,25 @@ export default function FoodPage() {
           onChange={e => setExpiryDate(e.target.value)}
           aria-label="Mindesthaltbarkeitsdatum (optional)"
         />
-        <Button type="submit" disabled={addMutation.isPending || !name.trim()} aria-label="Lebensmittel speichern">
+        <Button
+          type="submit"
+          disabled={addMutation.isPending || !name.trim()}
+          aria-label="Lebensmittel speichern"
+        >
           <Plus className="h-4 w-4" aria-hidden="true" />
         </Button>
       </form>
       <p className="mb-5 text-xs text-muted-foreground">
-        Datum = Mindesthaltbarkeit (optional). Bald ablaufende Vorräte rutschen nach vorne und
-        werden markiert.
+        Datum = Mindesthaltbarkeit (optional). Bald ablaufende Vorräte rutschen
+        nach vorne und werden markiert.
       </p>
 
       {query.isLoading ? (
         <div className="flex justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Lädt" />
+          <Loader2
+            className="h-6 w-6 animate-spin text-muted-foreground"
+            aria-label="Lädt"
+          />
         </div>
       ) : items.length > 0 ? (
         <>
@@ -171,7 +189,7 @@ export default function FoodPage() {
                   key={item.id}
                   className={cn(
                     "inline-flex items-center gap-1.5 rounded-full border py-1 pl-3.5 pr-1.5 text-sm font-medium",
-                    expiryStyles[info?.state ?? "ok"],
+                    expiryStyles[info?.state ?? "ok"]
                   )}
                 >
                   {item.name}
@@ -179,7 +197,9 @@ export default function FoodPage() {
                     <span
                       className={cn(
                         "text-xs font-normal",
-                        info.state === "soon" ? "text-muted-foreground" : "text-destructive",
+                        info.state === "soon"
+                          ? "text-muted-foreground"
+                          : "text-destructive"
                       )}
                     >
                       {info.label}
@@ -200,10 +220,14 @@ export default function FoodPage() {
         </>
       ) : (
         <div className="mb-8 rounded-xl border border-dashed border-border p-8 text-center">
-          <Refrigerator className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" aria-hidden="true" />
+          <Refrigerator
+            className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
+            aria-hidden="true"
+          />
           <p className="font-medium">Kühlbox noch leer</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Trage ein, was du dabei hast – wir schlagen dir passende Rezepte vor.
+            Trage ein, was du dabei hast – wir schlagen dir passende Rezepte
+            vor.
           </p>
         </div>
       )}
@@ -229,7 +253,8 @@ export default function FoodPage() {
                     </Badge>
                   </div>
                   <p className="mb-2 text-sm text-muted-foreground">
-                    {recipe.method} · {recipe.timeMinutes} Min. · {recipe.servings} Portionen
+                    {recipe.method} · {recipe.timeMinutes} Min. ·{" "}
+                    {recipe.servings} Portionen
                     {recipe.onePot && " · One-Pot"}
                   </p>
                   <p className="text-sm text-muted-foreground">
@@ -241,7 +266,10 @@ export default function FoodPage() {
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             Alle Anleitungen findest du im{" "}
-            <Link href="/rezepte" className="font-medium text-primary hover:underline">
+            <Link
+              href="/rezepte"
+              className="font-medium text-primary hover:underline"
+            >
               Campfire-Rezeptbuch
             </Link>
             .
@@ -251,4 +279,3 @@ export default function FoodPage() {
     </div>
   );
 }
-

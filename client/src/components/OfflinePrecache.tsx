@@ -18,7 +18,8 @@ export default function OfflinePrecache() {
       try {
         await navigator.serviceWorker.ready;
         // Nur bei guter Verbindung und nicht im Datensparmodus vorladen
-        const conn = (navigator as { connection?: { saveData?: boolean } }).connection;
+        const conn = (navigator as { connection?: { saveData?: boolean } })
+          .connection;
         if (conn?.saveData) return;
 
         const urls = [

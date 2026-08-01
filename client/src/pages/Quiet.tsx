@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { BellOff, LineChart, Mic, MicOff, Moon, Trash2, Volume2 } from "lucide-react";
+import {
+  BellOff,
+  LineChart,
+  Mic,
+  MicOff,
+  Moon,
+  Trash2,
+  Volume2,
+} from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -35,7 +43,13 @@ interface QuietSettings {
 function loadSettings(): QuietSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return { quietFrom: "22:00", quietTo: "07:00", threshold: 55, ...JSON.parse(raw) };
+    if (raw)
+      return {
+        quietFrom: "22:00",
+        quietTo: "07:00",
+        threshold: 55,
+        ...JSON.parse(raw),
+      };
   } catch {
     /* defaults */
   }
@@ -124,7 +138,10 @@ export default function QuietPage() {
         }
         const rms = Math.sqrt(sum / data.length);
         // Logarithmische Skalierung für gefühlte Lautstärke
-        const pct = Math.min(100, Math.round((Math.log10(1 + rms * 30) / Math.log10(31)) * 100));
+        const pct = Math.min(
+          100,
+          Math.round((Math.log10(1 + rms * 30) / Math.log10(31)) * 100)
+        );
         setLevel(pct);
         setPeak(p => Math.max(p * 0.995, pct));
         // Protokoll: Maximum je Minute festhalten
@@ -133,7 +150,10 @@ export default function QuietPage() {
         if (!minuteRef.current || minuteRef.current.key !== key) {
           if (minuteRef.current) {
             const finished = minuteRef.current;
-            setHistory(h => [...h.slice(-479), { time: finished.key, max: finished.max }]);
+            setHistory(h => [
+              ...h.slice(-479),
+              { time: finished.key, max: finished.max },
+            ]);
           }
           minuteRef.current = { key, max: pct };
         } else if (pct > minuteRef.current.max) {
@@ -145,7 +165,7 @@ export default function QuietPage() {
       setListening(true);
     } catch {
       setError(
-        "Mikrofon-Zugriff nicht möglich. Erlaube den Zugriff in den Browser-Einstellungen – die Messung bleibt komplett auf deinem Gerät.",
+        "Mikrofon-Zugriff nicht möglich. Erlaube den Zugriff in den Browser-Einstellungen – die Messung bleibt komplett auf deinem Gerät."
       );
     }
   };
@@ -199,7 +219,9 @@ export default function QuietPage() {
       <div
         className={cn(
           "mb-4 flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-sm",
-          quietNow ? "bg-primary/10 text-primary" : "bg-accent/60 text-accent-foreground",
+          quietNow
+            ? "bg-primary/10 text-primary"
+            : "bg-accent/60 text-accent-foreground"
         )}
       >
         <Moon className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -218,12 +240,12 @@ export default function QuietPage() {
           <div>
             <p className="font-semibold">Psst – Nachtruhe!</p>
             <p className="text-sm">
-              Die Gespräche sind gerade lauter als dein eingestellter Richtwert. Die Zelt-Nachbarn
-              danken für etwas leisere Töne.
+              Die Gespräche sind gerade lauter als dein eingestellter Richtwert.
+              Die Zelt-Nachbarn danken für etwas leisere Töne.
             </p>
             <p className="mt-1 text-xs opacity-80">
-              Auf Android-Geräten vibriert das Handy zusätzlich (iPhones unterstützen Web-Vibration
-              leider nicht).
+              Auf Android-Geräten vibriert das Handy zusätzlich (iPhones
+              unterstützen Web-Vibration leider nicht).
             </p>
           </div>
         </div>
@@ -238,7 +260,10 @@ export default function QuietPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-3 h-6 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+          <div
+            className="mb-3 h-6 overflow-hidden rounded-full bg-muted"
+            aria-hidden="true"
+          >
             <div
               className={cn(
                 "h-full rounded-full transition-[width] duration-150",
@@ -246,7 +271,7 @@ export default function QuietPage() {
                   ? "bg-destructive"
                   : level > settings.threshold * 0.75
                     ? "bg-chart-4"
-                    : "bg-primary",
+                    : "bg-primary"
               )}
               style={{ width: `${level}%` }}
             />
@@ -256,27 +281,39 @@ export default function QuietPage() {
               Aktuell: <span className="font-mono font-semibold">{level}</span>
             </span>
             <span>
-              Schwelle: <span className="font-mono font-semibold">{settings.threshold}</span>
+              Schwelle:{" "}
+              <span className="font-mono font-semibold">
+                {settings.threshold}
+              </span>
             </span>
             <span>
-              Spitze: <span className="font-mono font-semibold">{Math.round(peak)}</span>
+              Spitze:{" "}
+              <span className="font-mono font-semibold">
+                {Math.round(peak)}
+              </span>
             </span>
           </div>
-          <Button type="button" className="w-full" onClick={() => (listening ? stop() : void start())}>
+          <Button
+            type="button"
+            className="w-full"
+            onClick={() => (listening ? stop() : void start())}
+          >
             {listening ? (
               <>
-                <MicOff className="mr-1.5 h-4 w-4" aria-hidden="true" /> Messung stoppen
+                <MicOff className="mr-1.5 h-4 w-4" aria-hidden="true" /> Messung
+                stoppen
               </>
             ) : (
               <>
-                <Mic className="mr-1.5 h-4 w-4" aria-hidden="true" /> Messung starten
+                <Mic className="mr-1.5 h-4 w-4" aria-hidden="true" /> Messung
+                starten
               </>
             )}
           </Button>
           {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
           <p className="mt-2 text-xs text-muted-foreground">
-            Der Ton wird nur live analysiert – nichts wird aufgenommen, gespeichert oder gesendet.
-            Der Bildschirm muss dafür an bleiben.
+            Der Ton wird nur live analysiert – nichts wird aufgenommen,
+            gespeichert oder gesendet. Der Bildschirm muss dafür an bleiben.
           </p>
         </CardContent>
       </Card>
@@ -287,7 +324,10 @@ export default function QuietPage() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center justify-between text-base">
               <span className="flex items-center gap-2">
-                <LineChart className="h-4 w-4 text-primary" aria-hidden="true" />
+                <LineChart
+                  className="h-4 w-4 text-primary"
+                  aria-hidden="true"
+                />
                 Nacht-Protokoll
               </span>
               <Button
@@ -308,8 +348,14 @@ export default function QuietPage() {
           <CardContent>
             <div className="h-44 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={history} margin={{ top: 4, right: 4, bottom: 0, left: -22 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/60" />
+                <AreaChart
+                  data={history}
+                  margin={{ top: 4, right: 4, bottom: 0, left: -22 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border/60"
+                  />
                   <XAxis
                     dataKey="time"
                     tick={{ fontSize: 10 }}
@@ -338,9 +384,10 @@ export default function QuietPage() {
               </ResponsiveContainer>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              Höchster Pegel pro Minute ({history.length} Min. aufgezeichnet, max. 8 h). Die
-              gestrichelte Linie ist deine Erinnerungs-Schwelle. Das Protokoll bleibt bis zum
-              Verlassen der Seite erhalten – ideal für den Rückblick am Morgen.
+              Höchster Pegel pro Minute ({history.length} Min. aufgezeichnet,
+              max. 8 h). Die gestrichelte Linie ist deine Erinnerungs-Schwelle.
+              Das Protokoll bleibt bis zum Verlassen der Seite erhalten – ideal
+              für den Rückblick am Morgen.
             </p>
           </CardContent>
         </Card>
@@ -364,7 +411,9 @@ export default function QuietPage() {
                 id="from"
                 type="time"
                 value={settings.quietFrom}
-                onChange={e => saveSettings({ ...settings, quietFrom: e.target.value })}
+                onChange={e =>
+                  saveSettings({ ...settings, quietFrom: e.target.value })
+                }
               />
             </div>
             <div>
@@ -375,7 +424,9 @@ export default function QuietPage() {
                 id="to"
                 type="time"
                 value={settings.quietTo}
-                onChange={e => saveSettings({ ...settings, quietTo: e.target.value })}
+                onChange={e =>
+                  saveSettings({ ...settings, quietTo: e.target.value })
+                }
               />
             </div>
           </div>
@@ -384,7 +435,9 @@ export default function QuietPage() {
               <Label htmlFor="threshold" className="text-xs">
                 Erinnerungs-Schwelle
               </Label>
-              <span className="font-mono text-xs font-semibold">{settings.threshold}</span>
+              <span className="font-mono text-xs font-semibold">
+                {settings.threshold}
+              </span>
             </div>
             <Slider
               id="threshold"
@@ -392,12 +445,15 @@ export default function QuietPage() {
               max={90}
               step={5}
               value={[settings.threshold]}
-              onValueChange={v => saveSettings({ ...settings, threshold: v[0] })}
+              onValueChange={v =>
+                saveSettings({ ...settings, threshold: v[0] })
+              }
               aria-label="Erinnerungs-Schwelle für die Lautstärke"
             />
             <p className="mt-2 text-xs text-muted-foreground">
-              Tipp: Starte die Messung bei normaler Gesprächslautstärke und stelle die Schwelle
-              knapp darüber ein. Übliche Nachtruhe auf Schweizer Campingplätzen: 22:00–07:00 Uhr.
+              Tipp: Starte die Messung bei normaler Gesprächslautstärke und
+              stelle die Schwelle knapp darüber ein. Übliche Nachtruhe auf
+              Schweizer Campingplätzen: 22:00–07:00 Uhr.
             </p>
           </div>
         </CardContent>

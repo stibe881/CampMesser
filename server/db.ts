@@ -21,7 +21,7 @@ import {
   users,
   userSettings,
 } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -76,8 +76,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
+      values.role = "admin";
+      updateSet.role = "admin";
     }
 
     if (!values.lastSignedIn) {
@@ -104,7 +104,11 @@ export async function getUserByOpenId(openId: string) {
     return undefined;
   }
 
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.openId, openId))
+    .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
 }
@@ -139,7 +143,9 @@ export async function getPackList(id: number, userId: number) {
 export async function deletePackList(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db.delete(packItems).where(eq(packItems.listId, id));
-  await db.delete(packLists).where(and(eq(packLists.id, id), eq(packLists.userId, userId)));
+  await db
+    .delete(packLists)
+    .where(and(eq(packLists.id, id), eq(packLists.userId, userId)));
 }
 
 export async function getPackItems(listId: number) {
@@ -164,7 +170,11 @@ export async function deletePackItem(id: number) {
 }
 
 /** Teil-Token setzen oder entfernen (nur für die eigene Liste). */
-export async function setPackListShareToken(id: number, userId: number, token: string | null) {
+export async function setPackListShareToken(
+  id: number,
+  userId: number,
+  token: string | null
+) {
   const db = requireDb(await getDb());
   await db
     .update(packLists)
@@ -186,7 +196,10 @@ export async function getPackListByToken(token: string) {
 // ── Inventar ──
 export async function getInventory(userId: number) {
   const db = requireDb(await getDb());
-  return db.select().from(inventoryItems).where(eq(inventoryItems.userId, userId));
+  return db
+    .select()
+    .from(inventoryItems)
+    .where(eq(inventoryItems.userId, userId));
 }
 
 export async function addInventoryItem(data: InsertInventoryItem) {
@@ -198,7 +211,7 @@ export async function addInventoryItem(data: InsertInventoryItem) {
 export async function updateInventoryItem(
   id: number,
   userId: number,
-  data: Partial<InsertInventoryItem>,
+  data: Partial<InsertInventoryItem>
 ) {
   const db = requireDb(await getDb());
   await db
@@ -217,7 +230,10 @@ export async function deleteInventoryItem(id: number, userId: number) {
 // ── Energie-Verbraucher ──
 export async function getPowerConsumers(userId: number) {
   const db = requireDb(await getDb());
-  return db.select().from(powerConsumers).where(eq(powerConsumers.userId, userId));
+  return db
+    .select()
+    .from(powerConsumers)
+    .where(eq(powerConsumers.userId, userId));
 }
 
 export async function addPowerConsumer(data: InsertPowerConsumer) {
@@ -229,7 +245,7 @@ export async function addPowerConsumer(data: InsertPowerConsumer) {
 export async function updatePowerConsumer(
   id: number,
   userId: number,
-  data: Partial<InsertPowerConsumer>,
+  data: Partial<InsertPowerConsumer>
 ) {
   const db = requireDb(await getDb());
   await db
@@ -259,7 +275,9 @@ export async function addFoodItem(data: InsertFoodItem) {
 
 export async function deleteFoodItem(id: number, userId: number) {
   const db = requireDb(await getDb());
-  await db.delete(foodItems).where(and(eq(foodItems.id, id), eq(foodItems.userId, userId)));
+  await db
+    .delete(foodItems)
+    .where(and(eq(foodItems.id, id), eq(foodItems.userId, userId)));
 }
 
 // ── Zeltplatz-Favoriten ──
@@ -277,7 +295,7 @@ export async function addCampSpot(data: InsertCampSpot) {
 export async function updateCampSpot(
   id: number,
   userId: number,
-  data: Partial<Pick<InsertCampSpot, "name" | "note">>,
+  data: Partial<Pick<InsertCampSpot, "name" | "note">>
 ) {
   const db = requireDb(await getDb());
   await db
@@ -288,7 +306,9 @@ export async function updateCampSpot(
 
 export async function deleteCampSpot(id: number, userId: number) {
   const db = requireDb(await getDb());
-  await db.delete(campSpots).where(and(eq(campSpots.id, id), eq(campSpots.userId, userId)));
+  await db
+    .delete(campSpots)
+    .where(and(eq(campSpots.id, id), eq(campSpots.userId, userId)));
 }
 
 // ── Reise-Tagebuch ──
@@ -309,7 +329,9 @@ export async function addTripLog(data: InsertTripLog) {
 
 export async function deleteTripLog(id: number, userId: number) {
   const db = requireDb(await getDb());
-  await db.delete(tripLogs).where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
+  await db
+    .delete(tripLogs)
+    .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
 }
 
 // ── Eigene Schnitzeljagden ──
@@ -331,7 +353,7 @@ export async function addCustomHunt(data: InsertCustomHunt) {
 export async function updateCustomHunt(
   id: number,
   userId: number,
-  data: Partial<Omit<InsertCustomHunt, "id" | "userId">>,
+  data: Partial<Omit<InsertCustomHunt, "id" | "userId">>
 ) {
   const db = requireDb(await getDb());
   await db
@@ -342,7 +364,9 @@ export async function updateCustomHunt(
 
 export async function deleteCustomHunt(id: number, userId: number) {
   const db = requireDb(await getDb());
-  await db.delete(customHunts).where(and(eq(customHunts.id, id), eq(customHunts.userId, userId)));
+  await db
+    .delete(customHunts)
+    .where(and(eq(customHunts.id, id), eq(customHunts.userId, userId)));
 }
 
 // ── Synchronisierte Einstellungen ──
@@ -351,7 +375,11 @@ export async function getUserSettings(userId: number) {
   return db.select().from(userSettings).where(eq(userSettings.userId, userId));
 }
 
-export async function upsertUserSetting(userId: number, key: string, value: string) {
+export async function upsertUserSetting(
+  userId: number,
+  key: string,
+  value: string
+) {
   const db = requireDb(await getDb());
   await db
     .insert(userSettings)

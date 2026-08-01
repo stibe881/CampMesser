@@ -19,7 +19,7 @@ export default function SharedPackListPage() {
 
   const query = trpc.packing.sharedGet.useQuery(
     { token },
-    { enabled: token.length >= 8, refetchInterval: 15000 },
+    { enabled: token.length >= 8, refetchInterval: 15000 }
   );
 
   const toggleMutation = trpc.packing.sharedToggle.useMutation({
@@ -31,10 +31,10 @@ export default function SharedPackListPage() {
           ? {
               ...old,
               items: old.items.map(i =>
-                i.id === input.itemId ? { ...i, checked: input.checked } : i,
+                i.id === input.itemId ? { ...i, checked: input.checked } : i
               ),
             }
-          : old,
+          : old
       );
       return { prev };
     },
@@ -59,11 +59,15 @@ export default function SharedPackListPage() {
   if (!query.data?.list) {
     return (
       <div className="container max-w-3xl py-6">
-        <PageHeader title="Liste nicht gefunden" backHref="/" backLabel="Startseite" />
+        <PageHeader
+          title="Liste nicht gefunden"
+          backHref="/"
+          backLabel="Startseite"
+        />
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            Dieser Teil-Link ist ungültig oder wurde von der Besitzerin bzw. dem Besitzer
-            zurückgezogen.
+            Dieser Teil-Link ist ungültig oder wurde von der Besitzerin bzw. dem
+            Besitzer zurückgezogen.
           </CardContent>
         </Card>
       </div>
@@ -90,19 +94,27 @@ export default function SharedPackListPage() {
 
       <div className="mb-4 flex items-center gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
         <Users className="h-4 w-4 shrink-0" aria-hidden="true" />
-        Gemeinsames Abhaken: Alle mit diesem Link sehen den gleichen Stand – die Anzeige
-        aktualisiert sich automatisch.
+        Gemeinsames Abhaken: Alle mit diesem Link sehen den gleichen Stand – die
+        Anzeige aktualisiert sich automatisch.
       </div>
 
       <div className="mb-6">
-        <Progress value={progress} aria-label={`Fortschritt: ${Math.round(progress)} Prozent gepackt`} />
+        <Progress
+          value={progress}
+          aria-label={`Fortschritt: ${Math.round(progress)} Prozent gepackt`}
+        />
       </div>
 
       {items.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
-            <ListChecks className="h-8 w-8 text-muted-foreground/50" aria-hidden="true" />
-            <p className="text-sm text-muted-foreground">Diese Liste ist noch leer.</p>
+            <ListChecks
+              className="h-8 w-8 text-muted-foreground/50"
+              aria-hidden="true"
+            />
+            <p className="text-sm text-muted-foreground">
+              Diese Liste ist noch leer.
+            </p>
           </CardContent>
         </Card>
       )}
@@ -119,14 +131,18 @@ export default function SharedPackListPage() {
                   key={item.id}
                   className={cn(
                     "flex items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5",
-                    item.checked && "bg-muted/60",
+                    item.checked && "bg-muted/60"
                   )}
                 >
                   <Checkbox
                     id={`shared-item-${item.id}`}
                     checked={item.checked}
                     onCheckedChange={value =>
-                      toggleMutation.mutate({ token, itemId: item.id, checked: value === true })
+                      toggleMutation.mutate({
+                        token,
+                        itemId: item.id,
+                        checked: value === true,
+                      })
                     }
                     aria-label={`${item.name} abhaken`}
                   />
@@ -134,12 +150,14 @@ export default function SharedPackListPage() {
                     htmlFor={`shared-item-${item.id}`}
                     className={cn(
                       "flex-1 cursor-pointer text-sm",
-                      item.checked && "text-muted-foreground line-through",
+                      item.checked && "text-muted-foreground line-through"
                     )}
                   >
                     {item.name}
                     {item.quantity > 1 && (
-                      <span className="ml-1.5 text-xs text-muted-foreground">× {item.quantity}</span>
+                      <span className="ml-1.5 text-xs text-muted-foreground">
+                        × {item.quantity}
+                      </span>
                     )}
                   </label>
                 </li>
@@ -151,4 +169,3 @@ export default function SharedPackListPage() {
     </div>
   );
 }
-

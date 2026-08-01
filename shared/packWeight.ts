@@ -36,7 +36,7 @@ function normalizeName(s: string): string {
 /** Bilanz einer Packliste berechnen: Einträge werden per Name dem Inventar zugeordnet. */
 export function computePackWeight(
   items: PackItemLike[],
-  inventory: InventoryItemLike[],
+  inventory: InventoryItemLike[]
 ): PackWeightSummary {
   const byName = new Map<string, InventoryItemLike>();
   for (const inv of inventory) {

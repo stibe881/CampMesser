@@ -32,9 +32,11 @@ function createAuthContext(): TrpcContext {
 describe("settings router", () => {
   it("verweigert anonymen Zugriff auf die Einstellungen", async () => {
     const caller = appRouter.createCaller(createAnonContext());
-    await expect(caller.settings.all()).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    await expect(caller.settings.all()).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
     await expect(
-      caller.settings.set({ key: "moduleOrder", value: "[]" }),
+      caller.settings.set({ key: "moduleOrder", value: "[]" })
     ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });
 
@@ -42,7 +44,7 @@ describe("settings router", () => {
     const caller = appRouter.createCaller(createAuthContext());
     await expect(
       // @ts-expect-error – absichtlich ungültiger Schlüssel
-      caller.settings.set({ key: "boesesFeld", value: "[]" }),
+      caller.settings.set({ key: "boesesFeld", value: "[]" })
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 
@@ -52,7 +54,7 @@ describe("settings router", () => {
       caller.settings.set({
         key: "moduleOrder",
         value: "x".repeat(SETTING_VALUE_MAX_LENGTH + 1),
-      }),
+      })
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 });

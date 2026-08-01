@@ -25,6 +25,9 @@ jobs:
       - name: TypeScript prüfen
         run: pnpm check
 
+      - name: Formatierung prüfen (Prettier)
+        run: pnpm exec prettier --check .
+
       - name: Tests ausführen
         run: pnpm test
 

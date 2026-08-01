@@ -21,7 +21,10 @@ describe("tripNights", () => {
 describe("nightsByYear", () => {
   it("teilt einen Jahreswechsel-Aufenthalt auf beide Jahre auf", () => {
     // Nächte: 30.12., 31.12. (→ 2025) und 1.1. (→ 2026)
-    expect(nightsByYear("2025-12-30", "2026-01-02")).toEqual({ 2025: 2, 2026: 1 });
+    expect(nightsByYear("2025-12-30", "2026-01-02")).toEqual({
+      2025: 2,
+      2026: 1,
+    });
   });
 
   it("ordnet einen normalen Aufenthalt einem Jahr zu", () => {
@@ -31,10 +34,26 @@ describe("nightsByYear", () => {
 
 describe("computeTripStats", () => {
   const trips = [
-    { startDate: "2026-07-10", endDate: "2026-07-13", placeName: "Camping Aareschlucht" },
-    { startDate: "2026-08-01", endDate: "2026-08-03", placeName: "Camping Aareschlucht" },
-    { startDate: "2025-12-30", endDate: "2026-01-02", placeName: "Wintercamp Gantrisch" },
-    { startDate: "2026-05-01", endDate: "2026-05-01", placeName: "Tagesausflug" },
+    {
+      startDate: "2026-07-10",
+      endDate: "2026-07-13",
+      placeName: "Camping Aareschlucht",
+    },
+    {
+      startDate: "2026-08-01",
+      endDate: "2026-08-03",
+      placeName: "Camping Aareschlucht",
+    },
+    {
+      startDate: "2025-12-30",
+      endDate: "2026-01-02",
+      placeName: "Wintercamp Gantrisch",
+    },
+    {
+      startDate: "2026-05-01",
+      endDate: "2026-05-01",
+      placeName: "Tagesausflug",
+    },
   ];
 
   it("summiert Trips, Nächte und Jahres-Aufteilung", () => {
@@ -46,8 +65,14 @@ describe("computeTripStats", () => {
 
   it("sortiert die Lieblingsplätze nach Nächten", () => {
     const stats = computeTripStats(trips);
-    expect(stats.topPlaces[0]).toEqual({ name: "Camping Aareschlucht", nights: 5 });
-    expect(stats.topPlaces[1]).toEqual({ name: "Wintercamp Gantrisch", nights: 3 });
+    expect(stats.topPlaces[0]).toEqual({
+      name: "Camping Aareschlucht",
+      nights: 5,
+    });
+    expect(stats.topPlaces[1]).toEqual({
+      name: "Wintercamp Gantrisch",
+      nights: 3,
+    });
     // Ort ohne Übernachtung taucht nicht auf
     expect(stats.topPlaces.some(p => p.name === "Tagesausflug")).toBe(false);
   });

@@ -34,8 +34,14 @@ export function calcEnergyBudget(input: EnergyBudgetInput): EnergyBudgetResult {
   const efficiency = input.solarEfficiency ?? 0.7;
   const dailyConsumptionWh = input.consumers
     .filter(c => c.enabled !== false)
-    .reduce((sum, c) => sum + Math.max(0, c.watts) * Math.max(0, c.hoursPerDay), 0);
-  const dailySolarYieldWh = Math.max(0, input.solarPanelWatts) * Math.max(0, input.sunHoursPerDay) * efficiency;
+    .reduce(
+      (sum, c) => sum + Math.max(0, c.watts) * Math.max(0, c.hoursPerDay),
+      0
+    );
+  const dailySolarYieldWh =
+    Math.max(0, input.solarPanelWatts) *
+    Math.max(0, input.sunHoursPerDay) *
+    efficiency;
   const netDailyWh = dailyConsumptionWh - dailySolarYieldWh;
   const selfSufficient = netDailyWh <= 0 && dailyConsumptionWh > 0;
   let autonomyDays: number;
@@ -46,7 +52,13 @@ export function calcEnergyBudget(input: EnergyBudgetInput): EnergyBudgetResult {
   } else {
     autonomyDays = input.batteryWh / netDailyWh;
   }
-  return { dailyConsumptionWh, dailySolarYieldWh, netDailyWh, autonomyDays, selfSufficient };
+  return {
+    dailyConsumptionWh,
+    dailySolarYieldWh,
+    netDailyWh,
+    autonomyDays,
+    selfSufficient,
+  };
 }
 
 export interface WaterInput {
@@ -89,18 +101,31 @@ export interface WaterResult {
  */
 export function calcWaterNeeds(input: WaterInput): WaterResult {
   const tempSurcharge = Math.max(0, Math.ceil((input.maxTempC - 20) / 5)) * 0.5;
-  const activitySurcharge = input.activity === "aktiv" ? 1 : input.activity === "normal" ? 0.5 : 0;
+  const activitySurcharge =
+    input.activity === "aktiv" ? 1 : input.activity === "normal" ? 0.5 : 0;
   const drinkingLitersPerAdult = 2 + tempSurcharge + activitySurcharge;
-  const drinkingLitersPerChild = 1.2 + tempSurcharge * 0.7 + activitySurcharge * 0.6;
-  const drinkingLitersPerDog = 1.5 + tempSurcharge * 0.7 + activitySurcharge * 0.6;
+  const drinkingLitersPerChild =
+    1.2 + tempSurcharge * 0.7 + activitySurcharge * 0.6;
+  const drinkingLitersPerDog =
+    1.5 + tempSurcharge * 0.7 + activitySurcharge * 0.6;
   const dogs = input.dogs ?? 0;
   const persons = input.adults + input.children;
   const totalDrinkingLiters =
-    (input.adults * drinkingLitersPerAdult + input.children * drinkingLitersPerChild) * input.days;
+    (input.adults * drinkingLitersPerAdult +
+      input.children * drinkingLitersPerChild) *
+    input.days;
   const dogLiters = dogs * drinkingLitersPerDog * input.days;
-  const cookingHygieneLiters = input.includeCookingHygiene ? persons * 1.5 * input.days : 0;
-  const comfortHygieneLiters = input.includeComfortHygiene ? persons * 4 * input.days : 0;
-  const totalLiters = totalDrinkingLiters + dogLiters + cookingHygieneLiters + comfortHygieneLiters;
+  const cookingHygieneLiters = input.includeCookingHygiene
+    ? persons * 1.5 * input.days
+    : 0;
+  const comfortHygieneLiters = input.includeComfortHygiene
+    ? persons * 4 * input.days
+    : 0;
+  const totalLiters =
+    totalDrinkingLiters +
+    dogLiters +
+    cookingHygieneLiters +
+    comfortHygieneLiters;
   const recommendedLiters = Math.ceil(totalLiters * 1.2);
   return {
     drinkingLitersPerAdult,
@@ -172,34 +197,57 @@ export interface PackAnalysis {
   hints: string[];
 }
 
-export function analyzePack(items: PackItemInput[], profile: TransportProfile): PackAnalysis {
-  const totalWeightKg = items.reduce((s, i) => s + (i.weightGrams * i.quantity) / 1000, 0);
-  const totalVolumeLiters = items.reduce((s, i) => s + i.volumeLiters * i.quantity, 0);
-  const weightPercent = profile.maxWeightKg > 0 ? (totalWeightKg / profile.maxWeightKg) * 100 : 0;
-  const volumePercent = profile.maxVolumeLiters > 0 ? (totalVolumeLiters / profile.maxVolumeLiters) * 100 : 0;
-  const sortedByWeight = [...items].sort((a, b) => b.weightGrams * b.quantity - a.weightGrams * a.quantity);
-  const sortedByVolume = [...items].sort((a, b) => b.volumeLiters * b.quantity - a.volumeLiters * a.quantity);
+export function analyzePack(
+  items: PackItemInput[],
+  profile: TransportProfile
+): PackAnalysis {
+  const totalWeightKg = items.reduce(
+    (s, i) => s + (i.weightGrams * i.quantity) / 1000,
+    0
+  );
+  const totalVolumeLiters = items.reduce(
+    (s, i) => s + i.volumeLiters * i.quantity,
+    0
+  );
+  const weightPercent =
+    profile.maxWeightKg > 0 ? (totalWeightKg / profile.maxWeightKg) * 100 : 0;
+  const volumePercent =
+    profile.maxVolumeLiters > 0
+      ? (totalVolumeLiters / profile.maxVolumeLiters) * 100
+      : 0;
+  const sortedByWeight = [...items].sort(
+    (a, b) => b.weightGrams * b.quantity - a.weightGrams * a.quantity
+  );
+  const sortedByVolume = [...items].sort(
+    (a, b) => b.volumeLiters * b.quantity - a.volumeLiters * a.quantity
+  );
 
   const hints: string[] = [];
   if (weightPercent > 100) {
     hints.push(
-      `Zuladung um ${(totalWeightKg - profile.maxWeightKg).toFixed(1)} kg überschritten – prüfe die schwersten Positionen.`,
+      `Zuladung um ${(totalWeightKg - profile.maxWeightKg).toFixed(1)} kg überschritten – prüfe die schwersten Positionen.`
     );
   } else if (weightPercent > 85) {
-    hints.push("Gewicht nahe am Limit – plane Reserven für Wasser und Lebensmittel ein.");
+    hints.push(
+      "Gewicht nahe am Limit – plane Reserven für Wasser und Lebensmittel ein."
+    );
   }
   if (volumePercent > 100) {
     hints.push(
-      `Packvolumen um ${(totalVolumeLiters - profile.maxVolumeLiters).toFixed(0)} l überschritten – Kompressionssäcke helfen bei Schlafsack und Kleidung.`,
+      `Packvolumen um ${(totalVolumeLiters - profile.maxVolumeLiters).toFixed(0)} l überschritten – Kompressionssäcke helfen bei Schlafsack und Kleidung.`
     );
   } else if (volumePercent > 85) {
-    hints.push("Volumen fast ausgeschöpft – weiche Teile (Kleidung) in Lücken stopfen statt separat packen.");
+    hints.push(
+      "Volumen fast ausgeschöpft – weiche Teile (Kleidung) in Lücken stopfen statt separat packen."
+    );
   }
   if (weightPercent <= 85 && volumePercent <= 85 && items.length > 0) {
     hints.push("Gute Reserve – Gewicht und Volumen liegen im grünen Bereich.");
   }
   if (items.length === 0) {
-    hints.push("Füge Ausrüstung aus deinem Inventar hinzu, um die Analyse zu starten.");
+    hints.push(
+      "Füge Ausrüstung aus deinem Inventar hinzu, um die Analyse zu starten."
+    );
   }
   return {
     totalWeightKg,

@@ -1,5 +1,13 @@
 import { useMemo, useState } from "react";
-import { Baby, Clock, CookingPot, Flame, Search, Users, WifiOff } from "lucide-react";
+import {
+  Baby,
+  Clock,
+  CookingPot,
+  Flame,
+  Search,
+  Users,
+  WifiOff,
+} from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import {
   Dialog,
@@ -28,12 +36,15 @@ export default function RecipesPage() {
 
   const filtered = useMemo(() => {
     return recipes.filter(r => {
-      if (method !== "Alle" && r.method !== method && r.method !== "Beides") return false;
+      if (method !== "Alle" && r.method !== method && r.method !== "Beides")
+        return false;
       if (maxTime !== "alle" && r.timeMinutes > Number(maxTime)) return false;
       if (search.trim()) {
         const q = search.trim().toLowerCase();
         const inName = r.name.toLowerCase().includes(q);
-        const inIngredients = r.ingredients.some(i => i.toLowerCase().includes(q));
+        const inIngredients = r.ingredients.some(i =>
+          i.toLowerCase().includes(q)
+        );
         if (!inName && !inIngredients) return false;
       }
       return true;
@@ -49,7 +60,8 @@ export default function RecipesPage() {
 
       <div className="mb-4 flex items-center gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
         <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
-        Alle Rezepte sind in der App gespeichert und ohne Internetverbindung nutzbar.
+        Alle Rezepte sind in der App gespeichert und ohne Internetverbindung
+        nutzbar.
       </div>
 
       {/* Filter */}
@@ -68,7 +80,11 @@ export default function RecipesPage() {
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex gap-1.5" role="group" aria-label="Nach Kochmethode filtern">
+          <div
+            className="flex gap-1.5"
+            role="group"
+            aria-label="Nach Kochmethode filtern"
+          >
             {methodFilters.map(m => (
               <button
                 key={m}
@@ -78,7 +94,7 @@ export default function RecipesPage() {
                   "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
                   method === m
                     ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:text-foreground",
+                    : "bg-muted text-muted-foreground hover:text-foreground"
                 )}
                 aria-pressed={method === m}
               >
@@ -86,8 +102,14 @@ export default function RecipesPage() {
               </button>
             ))}
           </div>
-          <span className="text-border" aria-hidden="true">·</span>
-          <div className="flex gap-1.5" role="group" aria-label="Nach Zubereitungszeit filtern">
+          <span className="text-border" aria-hidden="true">
+            ·
+          </span>
+          <div
+            className="flex gap-1.5"
+            role="group"
+            aria-label="Nach Zubereitungszeit filtern"
+          >
             {timeFilters.map(t => (
               <button
                 key={t.id}
@@ -97,7 +119,7 @@ export default function RecipesPage() {
                   "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
                   maxTime === t.id
                     ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:text-foreground",
+                    : "bg-muted text-muted-foreground hover:text-foreground"
                 )}
                 aria-pressed={maxTime === t.id}
               >
@@ -164,12 +186,17 @@ export default function RecipesPage() {
       )}
 
       {/* Rezept-Detail */}
-      <Dialog open={selected !== null} onOpenChange={open => !open && setSelected(null)}>
+      <Dialog
+        open={selected !== null}
+        onOpenChange={open => !open && setSelected(null)}
+      >
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           {selected && (
             <>
               <DialogHeader>
-                <DialogTitle className="font-serif text-xl">{selected.name}</DialogTitle>
+                <DialogTitle className="font-serif text-xl">
+                  {selected.name}
+                </DialogTitle>
                 <DialogDescription className="flex flex-wrap items-center gap-3">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" aria-hidden="true" />
@@ -199,7 +226,10 @@ export default function RecipesPage() {
                   <ul className="grid grid-cols-2 gap-1 text-sm">
                     {selected.ingredients.map(i => (
                       <li key={i} className="flex gap-2">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                        <span
+                          className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                          aria-hidden="true"
+                        />
                         {i}
                       </li>
                     ))}

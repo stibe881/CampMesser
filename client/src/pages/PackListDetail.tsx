@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "wouter";
-import { Link2, Loader2, Package, Plus, QrCode, Scale, Share2, Trash2 } from "lucide-react";
+import {
+  Link2,
+  Loader2,
+  Package,
+  Plus,
+  QrCode,
+  Scale,
+  Share2,
+  Trash2,
+} from "lucide-react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
@@ -20,8 +29,13 @@ export default function PackListDetailPage() {
   const listId = Number(params.id);
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
-  const query = trpc.packing.items.useQuery({ listId }, { enabled: isAuthenticated && !isNaN(listId) });
-  const inventoryQuery = trpc.inventory.list.useQuery(undefined, { enabled: isAuthenticated });
+  const query = trpc.packing.items.useQuery(
+    { listId },
+    { enabled: isAuthenticated && !isNaN(listId) }
+  );
+  const inventoryQuery = trpc.inventory.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
   const [newItem, setNewItem] = useState("");
   const [newCategory, setNewCategory] = useState("");
@@ -34,7 +48,11 @@ export default function PackListDetailPage() {
       setQrDataUrl(null);
       return;
     }
-    QRCode.toDataURL(shareUrl, { width: 480, margin: 1, errorCorrectionLevel: "M" })
+    QRCode.toDataURL(shareUrl, {
+      width: 480,
+      margin: 1,
+      errorCorrectionLevel: "M",
+    })
       .then(setQrDataUrl)
       .catch(() => setQrDataUrl(null));
   }, [shareUrl]);
@@ -61,9 +79,11 @@ export default function PackListDetailPage() {
         old
           ? {
               ...old,
-              items: old.items.map(i => (i.id === input.id ? { ...i, checked: input.checked } : i)),
+              items: old.items.map(i =>
+                i.id === input.id ? { ...i, checked: input.checked } : i
+              ),
             }
-          : old,
+          : old
       );
       return { prev };
     },
@@ -86,7 +106,7 @@ export default function PackListDetailPage() {
       await utils.packing.items.cancel({ listId });
       const prev = utils.packing.items.getData({ listId });
       utils.packing.items.setData({ listId }, old =>
-        old ? { ...old, items: old.items.filter(i => i.id !== input.id) } : old,
+        old ? { ...old, items: old.items.filter(i => i.id !== input.id) } : old
       );
       return { prev };
     },
@@ -102,9 +122,13 @@ export default function PackListDetailPage() {
     addMutation.mutate(
       {
         listId,
-        items: addOn.items.map(i => ({ name: i.name, category: i.category, quantity: i.quantity ?? 1 })),
+        items: addOn.items.map(i => ({
+          name: i.name,
+          category: i.category,
+          quantity: i.quantity ?? 1,
+        })),
       },
-      { onSuccess: () => toast.success(`«${addOn.label}» hinzugefügt`) },
+      { onSuccess: () => toast.success(`«${addOn.label}» hinzugefügt`) }
     );
   };
 
@@ -122,23 +146,28 @@ export default function PackListDetailPage() {
   // Gewichts-Bilanz über den Namens-Abgleich mit dem Inventar
   const weight = useMemo(
     () => computePackWeight(query.data?.items ?? [], inventoryQuery.data ?? []),
-    [query.data?.items, inventoryQuery.data],
+    [query.data?.items, inventoryQuery.data]
   );
 
   // Inventar-Gegenstände, die noch nicht auf der Liste stehen (per Name)
   const inventorySuggestions = useMemo(() => {
     const listNames = new Set(
-      (query.data?.items ?? []).map(i => i.name.trim().toLowerCase().replace(/\s+/g, " ")),
+      (query.data?.items ?? []).map(i =>
+        i.name.trim().toLowerCase().replace(/\s+/g, " ")
+      )
     );
     return (inventoryQuery.data ?? []).filter(
-      inv => !listNames.has(inv.name.trim().toLowerCase().replace(/\s+/g, " ")),
+      inv => !listNames.has(inv.name.trim().toLowerCase().replace(/\s+/g, " "))
     );
   }, [query.data?.items, inventoryQuery.data]);
 
   if (loading || (isAuthenticated && query.isLoading)) {
     return (
       <div className="container flex justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Lädt" />
+        <Loader2
+          className="h-6 w-6 animate-spin text-muted-foreground"
+          aria-label="Lädt"
+        />
       </div>
     );
   }
@@ -146,7 +175,11 @@ export default function PackListDetailPage() {
   if (!isAuthenticated) {
     return (
       <div className="container py-6">
-        <PageHeader title="Packliste" backHref="/packlisten" backLabel="Packlisten" />
+        <PageHeader
+          title="Packliste"
+          backHref="/packlisten"
+          backLabel="Packlisten"
+        />
         <LoginPrompt feature="deine Packlisten" />
       </div>
     );
@@ -155,7 +188,11 @@ export default function PackListDetailPage() {
   if (!query.data?.list) {
     return (
       <div className="container py-6">
-        <PageHeader title="Packliste nicht gefunden" backHref="/packlisten" backLabel="Packlisten" />
+        <PageHeader
+          title="Packliste nicht gefunden"
+          backHref="/packlisten"
+          backLabel="Packlisten"
+        />
       </div>
     );
   }
@@ -174,7 +211,10 @@ export default function PackListDetailPage() {
       />
 
       <div className="mb-2">
-        <Progress value={progress} aria-label={`Fortschritt: ${Math.round(progress)} Prozent gepackt`} />
+        <Progress
+          value={progress}
+          aria-label={`Fortschritt: ${Math.round(progress)} Prozent gepackt`}
+        />
       </div>
 
       {/* Gewichts-Bilanz aus dem Inventar-Abgleich */}
@@ -182,17 +222,24 @@ export default function PackListDetailPage() {
         <p className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <Scale className="h-4 w-4 text-primary" aria-hidden="true" />
-            <span className="font-medium text-foreground">{formatGrams(weight.totalGrams)}</span>
+            <span className="font-medium text-foreground">
+              {formatGrams(weight.totalGrams)}
+            </span>
             gesamt
           </span>
           <span>
-            <span className="font-medium text-foreground">{formatGrams(weight.packedGrams)}</span>{" "}
+            <span className="font-medium text-foreground">
+              {formatGrams(weight.packedGrams)}
+            </span>{" "}
             gepackt
           </span>
-          <span>{weight.totalVolumeLiters.toLocaleString("de-CH")} l Volumen</span>
+          <span>
+            {weight.totalVolumeLiters.toLocaleString("de-CH")} l Volumen
+          </span>
           <span className="text-xs">
-            ({weight.matchedCount} von {weight.matchedCount + weight.unmatchedCount} Einträgen im
-            Inventar gefunden)
+            ({weight.matchedCount} von{" "}
+            {weight.matchedCount + weight.unmatchedCount} Einträgen im Inventar
+            gefunden)
           </span>
         </p>
       )}
@@ -207,11 +254,16 @@ export default function PackListDetailPage() {
           disabled={shareMutation.isPending}
         >
           <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          {shareMutation.isPending ? "Link wird erstellt …" : "Liste per Link teilen"}
+          {shareMutation.isPending
+            ? "Link wird erstellt …"
+            : "Liste per Link teilen"}
         </Button>
         {shareUrl && (
           <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
-            <Link2 className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+            <Link2
+              className="h-4 w-4 shrink-0 text-primary"
+              aria-hidden="true"
+            />
             <code className="min-w-0 flex-1 truncate text-xs">{shareUrl}</code>
             <button
               type="button"
@@ -221,7 +273,9 @@ export default function PackListDetailPage() {
                   await navigator.clipboard.writeText(shareUrl);
                   toast.success("Link kopiert");
                 } catch {
-                  toast.error("Kopieren nicht möglich – bitte manuell markieren");
+                  toast.error(
+                    "Kopieren nicht möglich – bitte manuell markieren"
+                  );
                 }
               }}
             >
@@ -245,14 +299,15 @@ export default function PackListDetailPage() {
                 Direkt am Platz übergeben
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Lass deine Mitreisenden den Code mit der Handy-Kamera scannen – die Liste öffnet
-                sich sofort, ganz ohne Tippen oder Anmeldung.
+                Lass deine Mitreisenden den Code mit der Handy-Kamera scannen –
+                die Liste öffnet sich sofort, ganz ohne Tippen oder Anmeldung.
               </p>
             </div>
           </div>
         )}
         <p className="mt-1.5 text-xs text-muted-foreground">
-          Wer den Link hat, kann die Liste sehen und mit dir gemeinsam abhaken – ganz ohne Anmeldung.
+          Wer den Link hat, kann die Liste sehen und mit dir gemeinsam abhaken –
+          ganz ohne Anmeldung.
         </p>
       </div>
 
@@ -264,7 +319,13 @@ export default function PackListDetailPage() {
           if (!newItem.trim()) return;
           addMutation.mutate({
             listId,
-            items: [{ name: newItem.trim(), category: newCategory.trim() || "Eigene", quantity: 1 }],
+            items: [
+              {
+                name: newItem.trim(),
+                category: newCategory.trim() || "Eigene",
+                quantity: 1,
+              },
+            ],
           });
         }}
       >
@@ -281,7 +342,11 @@ export default function PackListDetailPage() {
           onChange={e => setNewCategory(e.target.value)}
           aria-label="Kategorie des neuen Eintrags"
         />
-        <Button type="submit" disabled={addMutation.isPending || !newItem.trim()} aria-label="Eintrag hinzufügen">
+        <Button
+          type="submit"
+          disabled={addMutation.isPending || !newItem.trim()}
+          aria-label="Eintrag hinzufügen"
+        >
           <Plus className="h-4 w-4" aria-hidden="true" />
         </Button>
       </form>
@@ -302,7 +367,9 @@ export default function PackListDetailPage() {
                 onClick={() =>
                   addMutation.mutate({
                     listId,
-                    items: [{ name: inv.name, category: inv.category, quantity: 1 }],
+                    items: [
+                      { name: inv.name, category: inv.category, quantity: 1 },
+                    ],
                   })
                 }
                 className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
@@ -310,13 +377,16 @@ export default function PackListDetailPage() {
               >
                 + {inv.name}
                 {inv.weightGrams > 0 && (
-                  <span className="ml-1 opacity-70">({formatGrams(inv.weightGrams)})</span>
+                  <span className="ml-1 opacity-70">
+                    ({formatGrams(inv.weightGrams)})
+                  </span>
                 )}
               </button>
             ))}
           </div>
           <p className="mt-1.5 text-xs text-muted-foreground">
-            Einträge mit Inventar-Treffer zählen automatisch zur Gewichts-Bilanz oben.
+            Einträge mit Inventar-Treffer zählen automatisch zur Gewichts-Bilanz
+            oben.
           </p>
         </div>
       )}
@@ -350,14 +420,17 @@ export default function PackListDetailPage() {
                 key={item.id}
                 className={cn(
                   "group flex items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5 transition-colors",
-                  item.checked && "bg-muted/60",
+                  item.checked && "bg-muted/60"
                 )}
               >
                 <Checkbox
                   id={`item-${item.id}`}
                   checked={item.checked}
                   onCheckedChange={checked =>
-                    toggleMutation.mutate({ id: item.id, checked: checked === true })
+                    toggleMutation.mutate({
+                      id: item.id,
+                      checked: checked === true,
+                    })
                   }
                   aria-label={`${item.name} ${item.checked ? "als ungepackt" : "als gepackt"} markieren`}
                 />
@@ -365,12 +438,14 @@ export default function PackListDetailPage() {
                   htmlFor={`item-${item.id}`}
                   className={cn(
                     "flex-1 cursor-pointer text-sm",
-                    item.checked && "text-muted-foreground line-through",
+                    item.checked && "text-muted-foreground line-through"
                   )}
                 >
                   {item.name}
                   {item.quantity > 1 && (
-                    <span className="ml-1.5 text-xs text-muted-foreground">× {item.quantity}</span>
+                    <span className="ml-1.5 text-xs text-muted-foreground">
+                      × {item.quantity}
+                    </span>
                   )}
                 </label>
                 <Button

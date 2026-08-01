@@ -22,9 +22,9 @@ export function angleDiff(a: number, b: number): number {
 export function isBlocked(
   azimuth: number,
   altitude: number,
-  obstacles: ObstacleShape[],
+  obstacles: ObstacleShape[]
 ): boolean {
   return obstacles.some(
-    o => angleDiff(azimuth, o.azimuth) <= o.width / 2 && altitude <= o.height,
+    o => angleDiff(azimuth, o.azimuth) <= o.width / 2 && altitude <= o.height
   );
 }

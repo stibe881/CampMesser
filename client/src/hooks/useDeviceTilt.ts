@@ -9,7 +9,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type PermissionState = "idle" | "granted" | "denied" | "unsupported";
 
 export function useDeviceTilt() {
-  const [reading, setReading] = useState<{ beta: number; gamma: number } | null>(null);
+  const [reading, setReading] = useState<{
+    beta: number;
+    gamma: number;
+  } | null>(null);
   const [active, setActive] = useState(false);
   const [permission, setPermission] = useState<PermissionState>("idle");
   const enabledRef = useRef(false);
@@ -23,7 +26,10 @@ export function useDeviceTilt() {
   const stop = useCallback(() => {
     enabledRef.current = false;
     if (attachedRef.current) {
-      window.removeEventListener("deviceorientation", handlerRef.current as EventListener);
+      window.removeEventListener(
+        "deviceorientation",
+        handlerRef.current as EventListener
+      );
       attachedRef.current = false;
     }
     setActive(false);
@@ -31,7 +37,10 @@ export function useDeviceTilt() {
   }, []);
 
   const start = useCallback(async () => {
-    if (typeof window === "undefined" || !("DeviceOrientationEvent" in window)) {
+    if (
+      typeof window === "undefined" ||
+      !("DeviceOrientationEvent" in window)
+    ) {
       setPermission("unsupported");
       return;
     }
@@ -54,7 +63,10 @@ export function useDeviceTilt() {
     setPermission("granted");
     enabledRef.current = true;
     if (!attachedRef.current) {
-      window.addEventListener("deviceorientation", handlerRef.current as EventListener);
+      window.addEventListener(
+        "deviceorientation",
+        handlerRef.current as EventListener
+      );
       attachedRef.current = true;
     }
     setActive(true);

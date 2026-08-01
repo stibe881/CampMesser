@@ -60,9 +60,17 @@ describe("parseFireDangerResponse", () => {
   it("gibt null bei kaputtem oder fremdem Format zurück", () => {
     expect(parseFireDangerResponse(null)).toBeNull();
     expect(parseFireDangerResponse("fehler")).toBeNull();
-    expect(parseFireDangerResponse({ detail: "No GeoTable", status: "error" })).toBeNull();
-    expect(parseFireDangerResponse({ results: [{ attributes: { title_de: 42 } }] })).toBeNull();
-    expect(parseFireDangerResponse({ results: [{ attributes: { title_de: "Unbekannt" } }] })).toBeNull();
+    expect(
+      parseFireDangerResponse({ detail: "No GeoTable", status: "error" })
+    ).toBeNull();
+    expect(
+      parseFireDangerResponse({ results: [{ attributes: { title_de: 42 } }] })
+    ).toBeNull();
+    expect(
+      parseFireDangerResponse({
+        results: [{ attributes: { title_de: "Unbekannt" } }],
+      })
+    ).toBeNull();
   });
 });
 

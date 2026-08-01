@@ -83,14 +83,22 @@ describe("auth.register Validierung", () => {
   it("lehnt ungültige E-Mail-Adressen ab", async () => {
     const caller = appRouter.createCaller(ctx);
     await expect(
-      caller.auth.register({ name: "Test", email: "keine-email", password: "geheim123" }),
+      caller.auth.register({
+        name: "Test",
+        email: "keine-email",
+        password: "geheim123",
+      })
     ).rejects.toThrowError(TRPCError);
   });
 
   it("lehnt zu kurze Passwörter ab", async () => {
     const caller = appRouter.createCaller(ctx);
     await expect(
-      caller.auth.register({ name: "Test", email: "du@beispiel.ch", password: "kurz" }),
+      caller.auth.register({
+        name: "Test",
+        email: "du@beispiel.ch",
+        password: "kurz",
+      })
     ).rejects.toThrow(/mindestens 8 Zeichen/);
   });
 });

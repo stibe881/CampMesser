@@ -25,7 +25,7 @@ function parseIsoDay(iso: string): number | null {
 /** Haltbarkeits-Info zu einem MHD (null = kein Datum erfasst oder unlesbar). */
 export function expiryInfo(
   expiryDate: string | null | undefined,
-  today: string,
+  today: string
 ): ExpiryInfo | null {
   if (!expiryDate) return null;
   const expiry = parseIsoDay(expiryDate);
@@ -37,10 +37,14 @@ export function expiryInfo(
     return {
       state: "expired",
       daysLeft,
-      label: days === 1 ? "seit gestern abgelaufen" : `seit ${days} Tagen abgelaufen`,
+      label:
+        days === 1
+          ? "seit gestern abgelaufen"
+          : `seit ${days} Tagen abgelaufen`,
     };
   }
-  if (daysLeft === 0) return { state: "today", daysLeft, label: "läuft heute ab" };
+  if (daysLeft === 0)
+    return { state: "today", daysLeft, label: "läuft heute ab" };
   if (daysLeft <= SOON_THRESHOLD_DAYS) {
     return {
       state: "soon",

@@ -17,7 +17,9 @@ describe("computeSolarAlignment", () => {
     expect(result!.usableSunHours).toBeGreaterThan(10);
     expect(result!.shadedHours).toBe(0);
     expect(result!.firstSun).not.toBeNull();
-    expect(result!.lastSun!.getTime()).toBeGreaterThan(result!.firstSun!.getTime());
+    expect(result!.lastSun!.getTime()).toBeGreaterThan(
+      result!.firstSun!.getTime()
+    );
   });
 
   it("empfiehlt im Winter eine steilere Neigung als im Sommer (tiefe Sonne)", () => {
@@ -41,7 +43,9 @@ describe("computeSolarAlignment", () => {
     expect(blockedEast.usableSunHours).toBeLessThan(free.usableSunHours);
     expect(blockedEast.shadedHours).toBeGreaterThan(0);
     // Erste direkte Sonne kommt später als ohne Hindernis
-    expect(blockedEast.firstSun!.getTime()).toBeGreaterThan(free.firstSun!.getTime());
+    expect(blockedEast.firstSun!.getTime()).toBeGreaterThan(
+      free.firstSun!.getTime()
+    );
   });
 
   it("gibt null zurück, wenn der Standort komplett verschattet ist", () => {

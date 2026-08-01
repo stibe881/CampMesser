@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Phone, MapPin, Copy, RefreshCw, ExternalLink, Info } from "lucide-react";
+import {
+  Phone,
+  MapPin,
+  Copy,
+  RefreshCw,
+  ExternalLink,
+  Info,
+} from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -22,7 +29,10 @@ export default function SosPage() {
 
   const locate = () => {
     if (!navigator.geolocation) {
-      setGeo({ status: "error", errorMessage: "Dieses Gerät unterstützt keine Standortermittlung." });
+      setGeo({
+        status: "error",
+        errorMessage: "Dieses Gerät unterstützt keine Standortermittlung.",
+      });
       return;
     }
     setGeo({ status: "loading" });
@@ -44,7 +54,7 @@ export default function SosPage() {
               ? "Standortzugriff verweigert. Bitte in den Browser-Einstellungen erlauben."
               : "Standort konnte nicht ermittelt werden. Bitte erneut versuchen.",
         }),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 
@@ -61,7 +71,10 @@ export default function SosPage() {
     }
   };
 
-  const lv95 = geo.status === "ok" && geo.lat && geo.lng ? wgs84ToLV95(geo.lat, geo.lng) : null;
+  const lv95 =
+    geo.status === "ok" && geo.lat && geo.lng
+      ? wgs84ToLV95(geo.lat, geo.lng)
+      : null;
   const decimal =
     geo.status === "ok" && geo.lat !== undefined && geo.lng !== undefined
       ? `${geo.lat.toFixed(5)}, ${geo.lng.toFixed(5)}`
@@ -82,7 +95,12 @@ export default function SosPage() {
               <MapPin className="h-5 w-5 text-destructive" aria-hidden="true" />
               Dein Standort
             </h2>
-            <Button variant="outline" size="sm" onClick={locate} aria-label="Standort aktualisieren">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={locate}
+              aria-label="Standort aktualisieren"
+            >
               <RefreshCw className="mr-1.5 h-4 w-4" aria-hidden="true" />
               Aktualisieren
             </Button>
@@ -94,47 +112,55 @@ export default function SosPage() {
           {geo.status === "error" && (
             <p className="text-destructive">{geo.errorMessage}</p>
           )}
-          {geo.status === "ok" && geo.lat !== undefined && geo.lng !== undefined && (
-            <div className="space-y-3">
-              <div className="rounded-lg bg-muted p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Dezimalgrad (WGS84) – für Rettungsdienste
+          {geo.status === "ok" &&
+            geo.lat !== undefined &&
+            geo.lng !== undefined && (
+              <div className="space-y-3">
+                <div className="rounded-lg bg-muted p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Dezimalgrad (WGS84) – für Rettungsdienste
+                  </p>
+                  <div className="mt-1 flex items-center justify-between gap-2">
+                    <p className="font-mono text-xl font-semibold">{decimal}</p>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => decimal && copyCoords(decimal)}
+                      aria-label="Koordinaten in Dezimalgrad kopieren"
+                    >
+                      <Copy className="h-4 w-4" aria-hidden="true" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-lg bg-muted p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Grad / Minuten / Sekunden
+                    </p>
+                    <p className="mt-1 font-mono text-sm">
+                      {formatDMS(geo.lat, geo.lng)}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-muted p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Schweizer Koordinaten (LV95)
+                    </p>
+                    <p className="mt-1 font-mono text-sm">
+                      {lv95
+                        ? `E ${lv95.east.toLocaleString("de-CH")} / N ${lv95.north.toLocaleString("de-CH")}`
+                        : "Ausserhalb der Schweiz"}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Genauigkeit: ±{Math.round(geo.accuracy ?? 0)} m
+                  {geo.altitude != null &&
+                    ` · Höhe: ${Math.round(geo.altitude)} m ü. M.`}
+                  {geo.timestamp &&
+                    ` · Stand: ${new Date(geo.timestamp).toLocaleTimeString("de-CH")}`}
                 </p>
-                <div className="mt-1 flex items-center justify-between gap-2">
-                  <p className="font-mono text-xl font-semibold">{decimal}</p>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => decimal && copyCoords(decimal)}
-                    aria-label="Koordinaten in Dezimalgrad kopieren"
-                  >
-                    <Copy className="h-4 w-4" aria-hidden="true" />
-                  </Button>
-                </div>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg bg-muted p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Grad / Minuten / Sekunden
-                  </p>
-                  <p className="mt-1 font-mono text-sm">{formatDMS(geo.lat, geo.lng)}</p>
-                </div>
-                <div className="rounded-lg bg-muted p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Schweizer Koordinaten (LV95)
-                  </p>
-                  <p className="mt-1 font-mono text-sm">
-                    {lv95 ? `E ${lv95.east.toLocaleString("de-CH")} / N ${lv95.north.toLocaleString("de-CH")}` : "Ausserhalb der Schweiz"}
-                  </p>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Genauigkeit: ±{Math.round(geo.accuracy ?? 0)} m
-                {geo.altitude != null && ` · Höhe: ${Math.round(geo.altitude)} m ü. M.`}
-                {geo.timestamp && ` · Stand: ${new Date(geo.timestamp).toLocaleTimeString("de-CH")}`}
-              </p>
-            </div>
-          )}
+            )}
         </CardContent>
       </Card>
 
@@ -157,7 +183,9 @@ export default function SosPage() {
             </span>
             <span className="flex-1">
               <span className="block text-lg font-bold">{n.label}</span>
-              <span className="block text-sm text-muted-foreground">{n.description}</span>
+              <span className="block text-sm text-muted-foreground">
+                {n.description}
+              </span>
             </span>
           </a>
         ))}
@@ -171,9 +199,10 @@ export default function SosPage() {
             Rega-Alarmierung mit Standortübermittlung
           </h2>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Die offizielle Rega-App übermittelt beim Alarmieren automatisch deine Position an die
-            Einsatzzentrale – das beschleunigt die Rettung in den Bergen erheblich. Wir empfehlen,
-            sie zusätzlich zu installieren. Alternativ kannst du beim Anruf auf 1414 die oben
+            Die offizielle Rega-App übermittelt beim Alarmieren automatisch
+            deine Position an die Einsatzzentrale – das beschleunigt die Rettung
+            in den Bergen erheblich. Wir empfehlen, sie zusätzlich zu
+            installieren. Alternativ kannst du beim Anruf auf 1414 die oben
             angezeigten Koordinaten durchgeben.
           </p>
           <a
@@ -190,10 +219,15 @@ export default function SosPage() {
       </Card>
 
       {/* Notruf-Anleitung */}
-      <h2 className="mb-3 font-serif text-lg font-semibold">So setzt du den Notruf richtig ab</h2>
+      <h2 className="mb-3 font-serif text-lg font-semibold">
+        So setzt du den Notruf richtig ab
+      </h2>
       <ol className="space-y-3">
         {emergencyCallGuide.map((step, i) => (
-          <li key={step.title} className="flex gap-3 rounded-xl border border-border bg-card p-4">
+          <li
+            key={step.title}
+            className="flex gap-3 rounded-xl border border-border bg-card p-4"
+          >
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
               {i + 1}
             </span>
@@ -207,4 +241,3 @@ export default function SosPage() {
     </div>
   );
 }
-
