@@ -1,0 +1,67 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Nie zwei Deployments gleichzeitig; laufende nicht abbrechen
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm test
+      - run: pnpm run build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: verify
+    steps:
+      - name: Prüfen, ob Deploy-Secrets konfiguriert sind
+        id: cfg
+        env:
+          HOST: ${{ secrets.HETZNER_HOST }}
+          USER: ${{ secrets.HETZNER_USER }}
+          KEY: ${{ secrets.HETZNER_SSH_KEY }}
+        run: |
+          if [ -n "$HOST" ] && [ -n "$USER" ] && [ -n "$KEY" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Deploy übersprungen – Secrets HETZNER_HOST/HETZNER_USER/HETZNER_SSH_KEY fehlen (siehe DEPLOYMENT-HETZNER.md)."
+          fi
+
+      - name: SSH-Schlüssel einrichten
+        if: steps.cfg.outputs.configured == 'true'
+        env:
+          KEY: ${{ secrets.HETZNER_SSH_KEY }}
+          HOST: ${{ secrets.HETZNER_HOST }}
+          PORT: ${{ secrets.HETZNER_PORT || '22' }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$PORT" "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy-Skript auf dem Server ausführen
+        if: steps.cfg.outputs.configured == 'true'
+        env:
+          HOST: ${{ secrets.HETZNER_HOST }}
+          USER: ${{ secrets.HETZNER_USER }}
+          PORT: ${{ secrets.HETZNER_PORT || '22' }}
+          APP_DIR: ${{ secrets.HETZNER_APP_DIR || 'campmesser' }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "$PORT" "$USER@$HOST" \
+            "bash '$APP_DIR/scripts/deploy-hetzner.sh'"

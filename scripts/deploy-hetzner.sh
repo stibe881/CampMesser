@@ -39,6 +39,13 @@ fi
 echo "==> Produktions-Build erstellen"
 $PKG run build
 
+echo "==> Anwendung neu starten (Passenger)"
+# Phusion Passenger lädt die App neu, sobald tmp/restart.txt berührt wird –
+# der manuelle Neustart über konsoleH entfällt damit in der Regel.
+mkdir -p tmp
+touch tmp/restart.txt
+
 echo ""
-echo "Fertig. Starte die Anwendung jetzt in konsoleH unter"
-echo "Services -> Node.js configuration neu (Deaktivieren, dann Aktivieren)."
+echo "Fertig. Die Anwendung wird beim nächsten Aufruf automatisch neu geladen."
+echo "Falls nicht: in konsoleH unter Services -> Node.js configuration"
+echo "einmal deaktivieren und wieder aktivieren."

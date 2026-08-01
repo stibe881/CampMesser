@@ -155,6 +155,26 @@ Neue Versionen holst du dir mit dem beiliegenden Skript. Anschliessend schaltest
 bash ~/campmesser/scripts/deploy-hetzner.sh
 ```
 
+## Automatisches Deployment (GitHub Actions)
+
+Jeder Push auf `main` kann die Live-Seite automatisch aktualisieren: Der Workflow `.github/workflows/deploy.yml` prüft erst TypeScript, Tests und Build und führt dann per SSH das Deploy-Skript auf dem Server aus. Das Skript berührt am Ende `tmp/restart.txt`, worauf Passenger die Anwendung neu lädt – der manuelle konsoleH-Neustart entfällt.
+
+Einmalige Einrichtung:
+
+1. Deploy-Schlüssel erzeugen (lokal, ohne Passphrase): `ssh-keygen -t ed25519 -f campmesser-deploy -C "github-deploy"`
+2. Den öffentlichen Schlüssel (`campmesser-deploy.pub`) auf dem Server an `~/.ssh/authorized_keys` anhängen (SSH-Zugang vorher in konsoleH aktivieren).
+3. Im GitHub-Repo unter **Settings → Secrets and variables → Actions** anlegen:
+   - `HETZNER_HOST` – Server-Hostname (z. B. `wpXXX.webpack.hosteurope.de` bzw. dein Hetzner-Host)
+   - `HETZNER_USER` – SSH-Benutzername
+   - `HETZNER_SSH_KEY` – Inhalt der privaten Schlüsseldatei `campmesser-deploy`
+   - optional `HETZNER_PORT` (Standard 22) und `HETZNER_APP_DIR` (Standard `campmesser`, relativ zum Home-Verzeichnis)
+
+Solange die Secrets fehlen, überspringt der Workflow das Deployment mit einem Hinweis – CI (Check/Tests/Build) läuft trotzdem. Manuell auslösen geht über **Actions → Deploy → Run workflow**.
+
+## Überwachung (Health-Check)
+
+Die Anwendung bietet unter `/api/health` einen Health-Endpoint: HTTP 200 mit `{"status":"ok"}`, wenn Prozess und Datenbank erreichbar sind, sonst 503. Richte einen kostenlosen Uptime-Dienst (z. B. UptimeRobot oder Better Stack) auf `https://campmesser.ch/api/health` ein, damit du bei einem Ausfall per E-Mail gewarnt wirst, statt ihn zufällig zu bemerken.
+
 ## Datenbank-Backup
 
 Die App speichert echte Nutzerdaten (Konten, Packlisten, Tagebuch, Einstellungen) – richte deshalb ein regelmässiges Backup ein. Das beiliegende Skript erzeugt einen komprimierten `mysqldump` und behält automatisch die letzten 14 Sicherungen:

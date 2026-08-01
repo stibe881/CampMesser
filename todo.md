@@ -173,6 +173,15 @@
 - [x] Wasserwaage (/wasserwaage): Libelle mit Lagesensor, Grad-Anzeige beider Achsen, Unterleg-Tipps, «Hier nullen»-Kalibrierung, Bildschirmdrehungs-Kompensation, iOS-Berechtigung; Logik in shared/level.ts mit 8 Tests, offline
 - [x] Hindernis-Profil pro Zeltplatz: Profile {global, spots} in shared/obstacleProfiles.ts (alte Array-Form wird migriert, 7 Tests), Profil-Chips im Sonnen-Kompass (Allgemein + Favoriten mit Zähler), Spots-Link übergibt spot-ID und wählt das Profil automatisch, Energie-Budget nutzt das Profil des Prognose-Zeltplatzes, Sync über bestehenden Schlüssel sunObstacles
 
+## Erweiterungen (Nutzerwunsch 01.08.2026, Runde 4)
+
+- [x] Auto-Deploy: GitHub-Actions-Workflow deploy.yml (verify: check/test/build → deploy: SSH aufs Hetzner, Deploy-Skript, Passenger-Neustart via tmp/restart.txt); überspringt sauber, solange Secrets fehlen; Einrichtungs-Anleitung in DEPLOYMENT-HETZNER.md
+- [x] Schriften selbst gehostet: Fraunces/Inter/JetBrains Mono via Fontsource im Bundle, Google-Fonts-Links entfernt – offline-fähig, datenschutzfreundlich, ein Roundtrip weniger
+- [x] Health-Endpoint /api/health (200 ok / 503 bei DB-Ausfall, uptime+latency) + Doku-Abschnitt Uptime-Überwachung
+- [x] Globale Suche auf der Startseite über alle Wissensmodule (Erste Hilfe, Knoten, Rezepte, Natur) mit Umlaut-Faltung und Titel-Gewichtung (client/src/lib/globalSearch.ts, 7 Tests)
+- [x] PWA-Shortcuts im Manifest: SOS, Wetter, Wasserwaage per Langdruck aufs App-Icon
+- [x] Kühlbox: MHD-Tracking – optionales Haltbarkeitsdatum (Spalte expiryDate, Migration 0009), Warn-Badges (abgelaufen/heute/bald), «Verbrauche zuerst»-Sortierung und Hinweis-Banner (shared/food.ts, 6 Tests)
+
 ## Logo (Nutzerwunsch 31.07.2026)
 
 - [x] Eigenständiges CampMesser-Logo entworfen: Taschenmesser mit aufgeklappter Klinge als SVG-Bauteil `client/src/components/BrandLogo.tsx` (skalierbar, echte Transparenz, Farbe via currentColor)
