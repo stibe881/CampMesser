@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import { z } from "zod";
 import { ONE_YEAR_MS } from "@shared/const";
 import { packScenarios } from "@shared/packTemplates";
+import { SETTING_VALUE_MAX_LENGTH, SYNCED_SETTING_KEYS } from "@shared/settings";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -343,6 +344,25 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteFoodItem(input.id, ctx.user.id)),
   }),
+  settings: router({
+    /** Alle synchronisierten Einstellungen als key → JSON-String. */
+    all: protectedProcedure.query(async ({ ctx }) => {
+      const rows = await db.getUserSettings(ctx.user.id);
+      return Object.fromEntries(rows.map(r => [r.key, r.value])) as Record<string, string>;
+    }),
+    set: protectedProcedure
+      .input(
+        z.object({
+          key: z.enum(SYNCED_SETTING_KEYS),
+          value: z.string().max(SETTING_VALUE_MAX_LENGTH),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.upsertUserSetting(ctx.user.id, input.key, input.value);
+        return { success: true } as const;
+      }),
+  }),
+
   trips: router({
     list: protectedProcedure.query(({ ctx }) => db.getTripLogs(ctx.user.id)),
     add: protectedProcedure

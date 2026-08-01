@@ -34,6 +34,7 @@ import {
   type Obstacle,
 } from "@/lib/obstacleStore";
 import { useDeviceHeading } from "@/hooks/useDeviceHeading";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 
 interface GeoState {
   status: "loading" | "ok" | "error";
@@ -472,6 +473,18 @@ export default function SunCompassPage() {
   const [placeMode, setPlaceMode] = useState(false);
   const compass = useDeviceHeading();
 
+  // Geräte-Sync: Hindernis-Profil vom Konto übernehmen bzw. Änderungen hochladen
+  const obstaclesSync = useSyncedSetting<Obstacle[]>("sunObstacles", value => {
+    if (!Array.isArray(value)) return;
+    const clean = value.filter(o => o && typeof o.azimuth === "number");
+    setObstacles(clean);
+    try {
+      localStorage.setItem(OBSTACLES_STORAGE_KEY, JSON.stringify(clean));
+    } catch {
+      /* Speicher voll oder blockiert – Anzeige funktioniert trotzdem */
+    }
+  });
+
   const saveObstacles = (next: Obstacle[]) => {
     setObstacles(next);
     try {
@@ -479,6 +492,7 @@ export default function SunCompassPage() {
     } catch {
       /* Speicher voll oder blockiert – Anzeige funktioniert trotzdem */
     }
+    obstaclesSync.push(next);
   };
 
   const addObstacle = () => {

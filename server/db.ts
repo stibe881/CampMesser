@@ -17,6 +17,7 @@ import {
   powerConsumers,
   tripLogs,
   users,
+  userSettings,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -307,4 +308,18 @@ export async function addTripLog(data: InsertTripLog) {
 export async function deleteTripLog(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db.delete(tripLogs).where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
+}
+
+// ── Synchronisierte Einstellungen ──
+export async function getUserSettings(userId: number) {
+  const db = requireDb(await getDb());
+  return db.select().from(userSettings).where(eq(userSettings.userId, userId));
+}
+
+export async function upsertUserSetting(userId: number, key: string, value: string) {
+  const db = requireDb(await getDb());
+  await db
+    .insert(userSettings)
+    .values({ userId, key, value })
+    .onDuplicateKeyUpdate({ set: { value } });
 }

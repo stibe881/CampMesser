@@ -35,6 +35,7 @@ import { getSunTimes } from "@/lib/sun";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 
 type WeatherState =
   | { status: "idle" | "loading" | "error" }
@@ -77,6 +78,18 @@ export default function DryingPage() {
   const { isAuthenticated } = useAuth();
   const { data: spots } = trpc.spots.list.useQuery(undefined, { enabled: isAuthenticated });
 
+  // Geräte-Sync: eigene Materialien vom Konto übernehmen bzw. Änderungen hochladen
+  const customItemsSync = useSyncedSetting<DryingItem[]>("dryingCustomItems", value => {
+    if (!Array.isArray(value)) return;
+    const clean = value.filter(i => i && i.id && i.label && i.baseHours > 0);
+    setCustomItems(clean);
+    try {
+      localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(clean));
+    } catch {
+      /* egal */
+    }
+  });
+
   const saveCustomItems = (items: DryingItem[]) => {
     setCustomItems(items);
     try {
@@ -84,6 +97,7 @@ export default function DryingPage() {
     } catch {
       /* egal */
     }
+    customItemsSync.push(items);
   };
 
   const addCustomItem = () => {

@@ -1,4 +1,4 @@
-import { boolean, date, double, float, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, date, double, float, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -134,3 +134,23 @@ export const tripLogs = mysqlTable("tripLogs", {
 
 export type TripLog = typeof tripLogs.$inferSelect;
 export type InsertTripLog = typeof tripLogs.$inferInsert;
+
+/**
+ * Geräteübergreifend synchronisierte Client-Einstellungen: pro Nutzer*in und
+ * Schlüssel ein JSON-serialisierter Wert (z. B. Kachel-Reihenfolge, Hindernis-Profil).
+ */
+export const userSettings = mysqlTable(
+  "userSettings",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    key: varchar("key", { length: 64 }).notNull(),
+    /** JSON-serialisierter Wert */
+    value: text("value").notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [uniqueIndex("userSettings_user_key").on(table.userId, table.key)],
+);
+
+export type UserSetting = typeof userSettings.$inferSelect;
+export type InsertUserSetting = typeof userSettings.$inferInsert;

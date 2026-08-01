@@ -25,12 +25,16 @@ import {
   ChevronDown,
   Sprout,
   BookOpen,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { getSunTimes } from "@/lib/sun";
 import { useEffect, useRef, useState } from "react";
 import { getRecentModules } from "@/components/AppShell";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 
 const ORDER_KEY = "campmesser.moduleOrder";
+const HIDDEN_KEY = "campmesser.hiddenModules";
 
 /** Gespeicherte Kachel-Reihenfolge laden (Pfad-Liste). */
 function loadModuleOrder(): string[] {
@@ -50,6 +54,27 @@ function saveModuleOrder(order: string[]) {
     localStorage.setItem(ORDER_KEY, JSON.stringify(order));
   } catch {
     // Speicher nicht verfügbar – Sortierung gilt nur für die Sitzung
+  }
+}
+
+/** Ausgeblendete Kacheln laden (Pfad-Liste). */
+function loadHiddenModules(): string[] {
+  try {
+    const raw = localStorage.getItem(HIDDEN_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((p): p is string => typeof p === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Ausgeblendete Kacheln auf dem Gerät speichern. */
+function saveHiddenModules(hidden: string[]) {
+  try {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify(hidden));
+  } catch {
+    // Speicher nicht verfügbar – Auswahl gilt nur für die Sitzung
   }
 }
 
@@ -87,11 +112,11 @@ const modules: Module[] = [
 const groups = ["Planung", "Sicherheit", "Erste Hilfe", "Energie & Wasser"] as const;
 
 /** Schnellzugriff: die zuletzt genutzten Module (max. 4) aus dem lokalen Verlauf. */
-function RecentModules() {
+function RecentModules({ hidden }: { hidden: string[] }) {
   const [recent] = useState<string[]>(() => getRecentModules());
   const items = recent
     .map(path => modules.find(m => m.path === path))
-    .filter((m): m is (typeof modules)[number] => Boolean(m))
+    .filter((m): m is (typeof modules)[number] => Boolean(m) && !hidden.includes(m!.path))
     .slice(0, 4);
   if (items.length === 0) return null;
   return (
@@ -123,7 +148,30 @@ export default function Home() {
   const [sunInfo, setSunInfo] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState(false);
   const [order, setOrder] = useState<string[]>(() => loadModuleOrder());
+  const [hidden, setHidden] = useState<string[]>(() => loadHiddenModules());
   const [dragPath, setDragPath] = useState<string | null>(null);
+
+  // Geräte-Sync: Server-Stand gewinnt beim Laden, lokale Änderungen werden gepusht
+  const orderSync = useSyncedSetting<string[]>("moduleOrder", value => {
+    if (!Array.isArray(value)) return;
+    const clean = value.filter((p): p is string => typeof p === "string");
+    setOrder(clean);
+    saveModuleOrder(clean);
+  });
+  const hiddenSync = useSyncedSetting<string[]>("hiddenModules", value => {
+    if (!Array.isArray(value)) return;
+    const clean = value.filter((p): p is string => typeof p === "string");
+    setHidden(clean);
+    saveHiddenModules(clean);
+  });
+
+  /** Kachel aus- oder wieder einblenden (nur im Sortier-Modus erreichbar). */
+  const toggleHidden = (path: string) => {
+    const next = hidden.includes(path) ? hidden.filter(p => p !== path) : [...hidden, path];
+    setHidden(next);
+    saveHiddenModules(next);
+    hiddenSync.push(next);
+  };
   const [dragOverPath, setDragOverPath] = useState<string | null>(null);
   const dragInfo = useRef<{ from: string; group: (typeof groups)[number] } | null>(null);
   const dragOverRef = useRef<string | null>(null);
@@ -166,6 +214,7 @@ export default function Home() {
     const next = groups.flatMap(g => (g === group ? inGroup : orderedModules(g).map(m => m.path)));
     setOrder(next);
     saveModuleOrder(next);
+    orderSync.push(next);
   };
 
   const moveByOffset = (group: (typeof groups)[number], path: string, offset: -1 | 1) => {
@@ -229,7 +278,7 @@ export default function Home() {
 
       {/* Modul-Grid */}
       <section className="container py-8 md:py-12">
-        <RecentModules />
+        <RecentModules hidden={hidden} />
         <div className="mb-4 flex items-center justify-end">
           <button
             type="button"
@@ -248,17 +297,26 @@ export default function Home() {
         </div>
         {sortMode && (
           <p className="mb-4 rounded-lg bg-accent px-4 py-2.5 text-sm text-accent-foreground">
-            Ziehe die Kacheln an ihre neue Position (innerhalb der Gruppe) oder nutze die Pfeil-Buttons.
-            Die Reihenfolge wird auf diesem Gerät gespeichert.
+            Ziehe die Kacheln an ihre neue Position (innerhalb der Gruppe) oder nutze die
+            Pfeil-Buttons. Mit dem Augen-Button blendest du Kacheln aus oder wieder ein.
+            Angemeldet wird die Auswahl auf allen deinen Geräten übernommen.
           </p>
         )}
-        {groups.map(group => (
+        {groups.map(group => {
+          // Im Normal-Modus verschwinden ausgeblendete Kacheln (und leere Gruppen),
+          // im Sortier-Modus bleiben sie gedimmt sichtbar, damit man sie zurückholen kann.
+          const groupModules = orderedModules(group).filter(
+            m => sortMode || !hidden.includes(m.path),
+          );
+          if (groupModules.length === 0) return null;
+          return (
           <div key={group} className="mb-8 last:mb-0">
             <h2 className="mb-4 font-serif text-xl font-semibold md:text-2xl">{group}</h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {orderedModules(group).map((m, idx, arr) => {
+              {groupModules.map((m, idx, arr) => {
                   const Icon = m.icon;
                   if (sortMode) {
+                    const isHidden = hidden.includes(m.path);
                     return (
                       <div
                         key={m.path}
@@ -291,6 +349,7 @@ export default function Home() {
                         onPointerCancel={endDrag}
                         className={
                           "flex touch-none select-none items-start gap-4 rounded-xl border bg-card p-4 shadow-sm transition-all " +
+                          (isHidden ? "opacity-45 " : "") +
                           (dragPath === m.path
                             ? "border-primary opacity-60"
                             : dragOverPath === m.path
@@ -304,7 +363,14 @@ export default function Home() {
                           <Icon className="h-5.5 w-5.5" aria-hidden="true" />
                         </span>
                         <span className="flex-1">
-                          <span className="font-semibold text-card-foreground">{m.title}</span>
+                          <span className="flex items-center gap-2 font-semibold text-card-foreground">
+                            {m.title}
+                            {isHidden && (
+                              <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-secondary-foreground">
+                                Ausgeblendet
+                              </span>
+                            )}
+                          </span>
                           <span className="mt-0.5 block text-sm text-muted-foreground">{m.description}</span>
                         </span>
                         <span className="flex shrink-0 flex-col gap-1">
@@ -325,6 +391,25 @@ export default function Home() {
                             aria-label={`${m.title} nach hinten verschieben`}
                           >
                             <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => toggleHidden(m.path)}
+                            className={
+                              isHidden
+                                ? "rounded-md border border-primary bg-primary/10 p-1 text-primary"
+                                : "rounded-md border border-border p-1 text-muted-foreground"
+                            }
+                            aria-pressed={isHidden}
+                            aria-label={
+                              isHidden ? `${m.title} wieder einblenden` : `${m.title} ausblenden`
+                            }
+                          >
+                            {isHidden ? (
+                              <Eye className="h-4 w-4" aria-hidden="true" />
+                            ) : (
+                              <EyeOff className="h-4 w-4" aria-hidden="true" />
+                            )}
                           </button>
                         </span>
                       </div>
@@ -366,7 +451,8 @@ export default function Home() {
                 })}
             </div>
           </div>
-        ))}
+          );
+        })}
       </section>
     </div>
   );
