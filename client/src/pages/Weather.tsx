@@ -8,6 +8,7 @@ import {
   CloudRain,
   CloudSun,
   Droplets,
+  Flame,
   Info,
   LocateFixed,
   MapPin,
@@ -33,6 +34,14 @@ import {
   type HourlyWeather,
   type WeatherAlert,
 } from "@shared/weather";
+import {
+  FIRE_DANGER_LEVELS,
+  fireDangerRequestUrl,
+  parseFireDangerResponse,
+  type FireDangerInfo,
+  type FireDangerLevel,
+} from "@shared/fireDanger";
+import { wgs84ToLV95 } from "@/lib/sun";
 
 const icons: Record<string, React.ComponentType<{ className?: string }>> = {
   sun: Sun,
@@ -144,6 +153,14 @@ const severityStyles = {
   info: "border-border bg-secondary/60 text-foreground",
 } as const;
 
+const fireLevelStyles: Record<FireDangerLevel, string> = {
+  1: "border-primary/30 bg-primary/5 text-foreground",
+  2: "border-chart-4/50 bg-chart-4/10 text-foreground",
+  3: "border-chart-1/60 bg-chart-1/10 text-foreground",
+  4: "border-destructive/50 bg-destructive/10 text-destructive",
+  5: "border-destructive bg-destructive/20 text-destructive",
+};
+
 export default function WeatherPage() {
   const [state, setState] = useState<LoadState>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -152,8 +169,30 @@ export default function WeatherPage() {
   // Ausgewählter Ort: null = eigener Standort, sonst ID des Zeltplatz-Favoriten
   const [selectedSpotId, setSelectedSpotId] = useState<number | null>(null);
   const [locationLabel, setLocationLabel] = useState<string | null>(null);
+  const [fireDanger, setFireDanger] = useState<FireDangerInfo | null>(null);
   const { isAuthenticated } = useAuth();
   const { data: spots } = trpc.spots.list.useQuery(undefined, { enabled: isAuthenticated });
+
+  // Waldbrandgefahr (offizielle BAFU-Warnkarte) für den gewählten Ort laden.
+  // Nur innerhalb der Schweiz verfügbar – ausserhalb bleibt der Abschnitt ausgeblendet.
+  useEffect(() => {
+    setFireDanger(null);
+    if (!coords) return;
+    const lv95 = wgs84ToLV95(coords.lat, coords.lon);
+    if (!lv95) return;
+    let cancelled = false;
+    fetch(fireDangerRequestUrl(lv95.east, lv95.north))
+      .then(res => (res.ok ? res.json() : null))
+      .then(json => {
+        if (!cancelled) setFireDanger(parseFireDangerResponse(json));
+      })
+      .catch(() => {
+        // Stilles Scheitern: Waldbrand-Info ist eine Zusatzinfo, kein Kern-Feature
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [coords]);
 
   const loadForCoords = async (lat: number, lon: number) => {
     setState("loading");
@@ -342,6 +381,44 @@ export default function WeatherPage() {
               ))
             )}
           </section>
+
+          {/* Waldbrandgefahr (nur Schweiz) */}
+          {fireDanger && (
+            <section aria-label="Waldbrandgefahr" className="mb-6">
+              <div
+                className={cn("rounded-xl border px-4 py-3", fireLevelStyles[fireDanger.level])}
+                role={fireDanger.level >= 4 ? "alert" : undefined}
+              >
+                <p className="flex items-center gap-2 text-sm font-semibold">
+                  <Flame className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  Waldbrandgefahr: {fireDanger.title}
+                  <span className="ml-auto rounded-full bg-background/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                    Stufe {fireDanger.level}/5
+                  </span>
+                </p>
+                <p className="mt-1 text-sm">
+                  {fireDanger.regionName}
+                  {fireDanger.validFrom && ` · gültig seit ${fireDanger.validFrom}`}
+                </p>
+                <p className="mt-1.5 text-xs opacity-90">
+                  {FIRE_DANGER_LEVELS[fireDanger.level].advice}
+                </p>
+                <p className="mt-1.5 text-xs opacity-75">
+                  Quelle: BAFU-Warnkarte. Rechtlich verbindlich sind die kantonalen Verfügungen –
+                  Details auf{" "}
+                  <a
+                    href="https://www.waldbrandgefahr.ch"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium underline"
+                  >
+                    waldbrandgefahr.ch
+                  </a>
+                  .
+                </p>
+              </div>
+            </section>
+          )}
 
           {/* Stundenverlauf */}
           <h2 className="mb-2.5 font-serif text-lg font-semibold">Nächste 24 Stunden</h2>
