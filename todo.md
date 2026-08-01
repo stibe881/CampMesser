@@ -152,6 +152,13 @@
 - [x] Energie-Budget: Solarpanel-Ausrichtungshilfe – optimale Ausrichtung und Neigung für heute aus Sonnenbahn und Hindernis-Profil des Sonnen-Kompasses (Rastersuche mit Luftmassen-Gewichtung), inkl. Mehrertrag vs. flach, Sonnenfenster und Verschattungs-Stunden (shared/solar.ts, 6 Tests; Hindernis-Speicher nach client/src/lib/obstacleStore.ts ausgelagert)
 - [x] Reise-Tagebuch (/tagebuch): Aufenthalte mit Zeltplatz-Favorit oder Freitext-Ort, An-/Abreise und Notizen erfassen; Statistik mit Nächten im laufenden Jahr, Nächten gesamt, Aufenthalten und Lieblingsplatz (DB-Tabelle tripLogs, Migration 0007, trips-Router, shared/trips.ts mit 8 Tests, Kachel in Gruppe «Planung»)
 
+## Erweiterungen (Nutzerwunsch 01.08.2026, Runde 2)
+
+- [x] auth.logout-Test an die Lax-Cookie-Policy angeglichen (sameSite lax statt none) – Suite wieder komplett grün
+- [x] Startseite: Kacheln im Sortier-Modus per Augen-Button aus-/einblenden; ausgeblendete Kacheln verschwinden im Normal-Modus (auch aus «Zuletzt genutzt» und leeren Gruppen), bleiben im Sortier-Modus gedimmt mit Badge sichtbar
+- [x] Geräte-Sync über das Konto: Tabelle userSettings (userId+key unique, JSON-Wert, Migration 0008), settings-Router (all/set, Schlüssel-Allowlist in shared/settings.ts), Client-Hook useSyncedSetting (Server-Stand gewinnt beim Laden, lokale Änderungen werden gepusht, ohne Anmeldung rein lokal); angebunden: Kachel-Reihenfolge + ausgeblendete Kacheln, Hindernis-Profil des Sonnen-Kompasses, eigene Materialien im Trockenzeiten-Rechner (3 Tests)
+- [x] Code-Splitting: alle Routen ausser Home per React.lazy in eigene Chunks (Haupt-Bundle 914 kB → 532 kB, gzip 262 kB → 165 kB); Route-Chunks werden 2,5 s nach App-Start im Leerlauf vorgeladen, damit der Service Worker sie cached und die Offline-Module offline nutzbar bleiben; getThemePreference nach client/src/lib/themePreference.ts ausgelagert
+
 ## Logo (Nutzerwunsch 31.07.2026)
 
 - [x] Eigenständiges CampMesser-Logo entworfen: Taschenmesser mit aufgeklappter Klinge als SVG-Bauteil `client/src/components/BrandLogo.tsx` (skalierbar, echte Transparenz, Farbe via currentColor)

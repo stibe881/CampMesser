@@ -21,18 +21,7 @@ import {
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
-
-const THEME_PREF_KEY = "campmesser.themePreference";
-
-/** Gespeicherte Design-Präferenz lesen ("light" | "dark" | null). */
-export function getThemePreference(): "light" | "dark" | null {
-  try {
-    const v = localStorage.getItem(THEME_PREF_KEY);
-    return v === "light" || v === "dark" ? v : null;
-  } catch {
-    return null;
-  }
-}
+import { getThemePreference, saveThemePreference } from "@/lib/themePreference";
 
 /** Profil-Seite: Konto verwalten und App-Einstellungen. */
 export default function ProfilePage() {
@@ -78,11 +67,7 @@ export default function ProfilePage() {
 
   /** Design-Präferenz speichern und sofort anwenden. */
   const chooseTheme = (pref: "light" | "dark") => {
-    try {
-      localStorage.setItem(THEME_PREF_KEY, pref);
-    } catch {
-      // localStorage nicht verfügbar
-    }
+    saveThemePreference(pref);
     setThemePref(pref);
     if (theme !== pref) toggleTheme?.();
     toast.success(pref === "dark" ? "Dunkles Design als Standard gespeichert" : "Helles Design als Standard gespeichert");
