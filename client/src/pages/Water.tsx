@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Dog, Droplets, Minus, Plus, ShowerHead, Thermometer } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -60,7 +60,43 @@ export default function WaterPage() {
   const [dogs, setDogs] = useState(0);
   const [days, setDays] = useState(3);
   const [maxTempC, setMaxTempC] = useState(25);
+  // Auto: Prognose-Höchstwert wird übernommen; manuelles Ziehen des Sliders schaltet ab
+  const [tempAuto, setTempAuto] = useState(true);
+  const tempAutoRef = useRef(true);
+  tempAutoRef.current = tempAuto;
+  const [forecast, setForecast] = useState<{ maxTemp: number; days: number } | null>(null);
   const [activity, setActivity] = useState<WaterInput["activity"]>("normal");
+
+  // Höchsttemperatur der nächsten 3 Tage vom Standort übernehmen (stille
+  // Fehlerbehandlung: ohne Standortfreigabe bleibt der manuelle Wert bestehen)
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        try {
+          const params = new URLSearchParams({
+            latitude: pos.coords.latitude.toFixed(4),
+            longitude: pos.coords.longitude.toFixed(4),
+            timezone: "auto",
+            forecast_days: "3",
+            daily: "temperature_2m_max",
+          });
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          const temps: number[] = json.daily?.temperature_2m_max ?? [];
+          if (temps.length === 0) return;
+          const max = Math.min(40, Math.max(5, Math.round(Math.max(...temps))));
+          setForecast({ maxTemp: max, days: temps.length });
+          if (tempAutoRef.current) setMaxTempC(max);
+        } catch {
+          // Wetterdienst nicht erreichbar: manueller Wert bleibt
+        }
+      },
+      () => {},
+      { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 },
+    );
+  }, []);
   const [includeCookingHygiene, setIncludeCookingHygiene] = useState(true);
   const [includeComfortHygiene, setIncludeComfortHygiene] = useState(false);
 
@@ -127,9 +163,31 @@ export default function WaterPage() {
             max={40}
             step={1}
             value={[maxTempC]}
-            onValueChange={v => setMaxTempC(v[0])}
+            onValueChange={v => {
+              setMaxTempC(v[0]);
+              // Manuelles Ziehen schaltet die automatische Übernahme ab
+              if (tempAuto) setTempAuto(false);
+            }}
             aria-label="Erwartete Tageshöchsttemperatur in Grad Celsius"
           />
+          {forecast && tempAuto && (
+            <p className="mt-2 text-xs text-primary">
+              Automatisch übernommen: Höchstwert der nächsten {forecast.days} Tage an deinem
+              Standort ({forecast.maxTemp} °C).
+            </p>
+          )}
+          {forecast && !tempAuto && (
+            <button
+              type="button"
+              className="mt-2 text-xs font-medium text-primary hover:underline"
+              onClick={() => {
+                setTempAuto(true);
+                setMaxTempC(forecast.maxTemp);
+              }}
+            >
+              Prognose wieder übernehmen ({forecast.maxTemp} °C)
+            </button>
+          )}
           <p className="mt-2 text-xs text-muted-foreground">
             Ab 20 °C rechnen wir pro 5 °C einen Zuschlag von 0.5 l pro Person und Tag.
           </p>
