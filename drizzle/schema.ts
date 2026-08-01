@@ -168,6 +168,34 @@ export const tripLogs = mysqlTable(
 export type TripLog = typeof tripLogs.$inferSelect;
 export type InsertTripLog = typeof tripLogs.$inferInsert;
 
+/** Eigene Schnitzeljagden aus dem Editor im Familien-Modus. */
+export const customHunts = mysqlTable(
+  "customHunts",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    title: varchar("title", { length: 140 }).notNull(),
+    ageHint: varchar("ageHint", { length: 80 }),
+    durationMinutes: int("durationMinutes").notNull().default(30),
+    /** Rahmengeschichte / Mission */
+    intro: text("intro").notNull(),
+    /** Vorbereitung für die Erwachsenen (optional) */
+    preparation: text("preparation"),
+    /** Stationen als JSON-Array (Titel, Geschichte, Aufgabe, Hinweis, Buchstabe) */
+    stationsJson: text("stationsJson").notNull(),
+    /** Lösungswort – automatisch aus den Stations-Buchstaben gebildet */
+    solutionWord: varchar("solutionWord", { length: 40 }),
+    /** Abschluss-Erlebnis (Schatz/Belohnung) */
+    finale: text("finale").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("customHunts_userId").on(table.userId)],
+);
+
+export type CustomHunt = typeof customHunts.$inferSelect;
+export type InsertCustomHunt = typeof customHunts.$inferInsert;
+
 /**
  * Geräteübergreifend synchronisierte Client-Einstellungen: pro Nutzer*in und
  * Schlüssel ein JSON-serialisierter Wert (z. B. Kachel-Reihenfolge, Hindernis-Profil).

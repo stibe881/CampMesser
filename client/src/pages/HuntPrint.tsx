@@ -1,17 +1,32 @@
 import { useEffect } from "react";
 import { useParams } from "wouter";
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { scavengerHunts } from "@/data/familyActivities";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import { customHuntDbId, customHuntToScavengerHunt } from "@/lib/customHunts";
 
 /**
  * Druckfreundliche Ansicht einer Schnitzeljagd: Stationen, Rätsel und
  * Buchstabenfelder zum Ausfüllen – ohne Lösungen, damit Kinder ohne Handy
  * auf die Suche gehen können. PDF entsteht über den Browser-Druckdialog.
+ * Unterstützt eingebaute und eigene Jagden (IDs mit «eigene-»-Präfix).
  */
 export default function HuntPrintPage() {
   const params = useParams<{ id: string }>();
-  const hunt = scavengerHunts.find(h => h.id === params.id);
+  const customId = customHuntDbId(params.id ?? "");
+  const { isAuthenticated } = useAuth();
+  const customQuery = trpc.hunts.list.useQuery(undefined, {
+    enabled: customId !== null && isAuthenticated,
+  });
+  const customRow = customQuery.data?.find(h => h.id === customId);
+  const hunt =
+    customId !== null
+      ? customRow
+        ? customHuntToScavengerHunt(customRow)
+        : undefined
+      : scavengerHunts.find(h => h.id === params.id);
 
   useEffect(() => {
     document.title = hunt ? `${hunt.title} – Schnitzeljagd zum Ausdrucken` : "Schnitzeljagd";
@@ -19,6 +34,14 @@ export default function HuntPrintPage() {
       document.title = "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping";
     };
   }, [hunt]);
+
+  if (customId !== null && customQuery.isLoading) {
+    return (
+      <div className="container flex justify-center py-16">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Lädt" />
+      </div>
+    );
+  }
 
   if (!hunt) {
     return (

@@ -2,6 +2,8 @@ import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   campSpots,
+  customHunts,
+  InsertCustomHunt,
   foodItems,
   InsertCampSpot,
   InsertFoodItem,
@@ -308,6 +310,39 @@ export async function addTripLog(data: InsertTripLog) {
 export async function deleteTripLog(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db.delete(tripLogs).where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
+}
+
+// ── Eigene Schnitzeljagden ──
+export async function getCustomHunts(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(customHunts)
+    .where(eq(customHunts.userId, userId))
+    .orderBy(desc(customHunts.id));
+}
+
+export async function addCustomHunt(data: InsertCustomHunt) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(customHunts).values(data);
+  return result.insertId;
+}
+
+export async function updateCustomHunt(
+  id: number,
+  userId: number,
+  data: Partial<Omit<InsertCustomHunt, "id" | "userId">>,
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(customHunts)
+    .set(data)
+    .where(and(eq(customHunts.id, id), eq(customHunts.userId, userId)));
+}
+
+export async function deleteCustomHunt(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(customHunts).where(and(eq(customHunts.id, id), eq(customHunts.userId, userId)));
 }
 
 // ── Synchronisierte Einstellungen ──

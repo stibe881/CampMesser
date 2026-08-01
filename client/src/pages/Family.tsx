@@ -9,11 +9,15 @@ import {
   ListChecks,
   Map,
   PartyPopper,
+  Pencil,
+  Plus,
   RotateCcw,
   Sparkles,
+  Trash2,
   Trophy,
   WifiOff,
 } from "lucide-react";
+import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,6 +31,9 @@ import {
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   natureQuizzes,
   scavengerHunts,
@@ -34,7 +41,278 @@ import {
   type ScavengerHunt,
 } from "@/data/familyActivities";
 import { familyAddOns } from "@shared/packTemplates";
+import { MAX_STATIONS, parseHuntStations } from "@shared/hunts";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import { customHuntToScavengerHunt, type CustomHuntRow } from "@/lib/customHunts";
 import { cn } from "@/lib/utils";
+
+/** Formular-Zustand einer Station im Editor. */
+interface EditorStation {
+  title: string;
+  story: string;
+  task: string;
+  hint: string;
+  letter: string;
+}
+
+const emptyStation = (index: number): EditorStation => ({
+  title: `Station ${index + 1}`,
+  story: "",
+  task: "",
+  hint: "",
+  letter: "",
+});
+
+/** Editor für eigene Schnitzeljagden: erstellen und bearbeiten. */
+function HuntEditorDialog({
+  initial,
+  onClose,
+}: {
+  initial: CustomHuntRow | null;
+  onClose: () => void;
+}) {
+  const utils = trpc.useUtils();
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [ageHint, setAgeHint] = useState(initial?.ageHint ?? "");
+  const [duration, setDuration] = useState(String(initial?.durationMinutes ?? 30));
+  const [intro, setIntro] = useState(initial?.intro ?? "");
+  const [preparation, setPreparation] = useState(initial?.preparation ?? "");
+  const [finale, setFinale] = useState(initial?.finale ?? "");
+  const [stations, setStations] = useState<EditorStation[]>(() => {
+    if (initial) {
+      const parsed = parseHuntStations(initial.stationsJson);
+      if (parsed.length > 0) {
+        return parsed.map(s => ({
+          title: s.title,
+          story: s.story,
+          task: s.task,
+          hint: s.hint ?? "",
+          letter: s.letter ?? "",
+        }));
+      }
+    }
+    return [emptyStation(0)];
+  });
+
+  const saveMutation = trpc.hunts.save.useMutation({
+    onSuccess: () => {
+      utils.hunts.list.invalidate();
+      toast.success(initial ? "Schnitzeljagd aktualisiert" : "Schnitzeljagd erstellt");
+      onClose();
+    },
+    onError: e => toast.error(e.message || "Speichern fehlgeschlagen"),
+  });
+
+  const updateStation = (index: number, patch: Partial<EditorStation>) =>
+    setStations(prev => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
+
+  const solutionPreview = stations
+    .map(s => s.letter.trim().slice(0, 1).toUpperCase())
+    .filter(Boolean)
+    .join("");
+
+  const canSave =
+    title.trim() &&
+    intro.trim() &&
+    finale.trim() &&
+    stations.length > 0 &&
+    stations.every(s => s.title.trim() && s.task.trim());
+
+  return (
+    <DialogContent className="max-h-[85vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle className="font-serif text-xl">
+          {initial ? "Schnitzeljagd bearbeiten" : "Eigene Schnitzeljagd erstellen"}
+        </DialogTitle>
+        <DialogDescription>
+          Geschichte, Stationen und Schatz-Finale – gespeichert in deinem Konto, spielbar und
+          druckbar wie die eingebauten Jagden.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="space-y-3">
+        <div>
+          <Label htmlFor="hunt-title">Titel</Label>
+          <Input
+            id="hunt-title"
+            className="mt-1.5"
+            placeholder="z. B. Das Geheimnis des Seeufers"
+            value={title}
+            maxLength={140}
+            onChange={e => setTitle(e.target.value)}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="hunt-age">Alter (optional)</Label>
+            <Input
+              id="hunt-age"
+              className="mt-1.5"
+              placeholder="z. B. ab 6 Jahren"
+              value={ageHint}
+              maxLength={80}
+              onChange={e => setAgeHint(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="hunt-duration">Dauer (Minuten)</Label>
+            <Input
+              id="hunt-duration"
+              className="mt-1.5"
+              type="number"
+              min={5}
+              max={240}
+              value={duration}
+              onChange={e => setDuration(e.target.value)}
+            />
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="hunt-intro">Die Mission (Rahmengeschichte)</Label>
+          <Textarea
+            id="hunt-intro"
+            className="mt-1.5"
+            rows={3}
+            placeholder="Wer braucht Hilfe? Was ist passiert? Was ist das Ziel?"
+            value={intro}
+            onChange={e => setIntro(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="hunt-prep">Für die Erwachsenen (optional)</Label>
+          <Textarea
+            id="hunt-prep"
+            className="mt-1.5"
+            rows={2}
+            placeholder="Was muss vorher versteckt oder vorbereitet werden?"
+            value={preparation}
+            onChange={e => setPreparation(e.target.value)}
+          />
+        </div>
+
+        {/* Stationen */}
+        <div>
+          <p className="mb-2 text-sm font-semibold">Stationen ({stations.length})</p>
+          <div className="space-y-3">
+            {stations.map((s, i) => (
+              <div key={i} className="rounded-lg border border-border p-3">
+                <div className="mb-2 flex items-center gap-2">
+                  <Input
+                    value={s.title}
+                    maxLength={140}
+                    onChange={e => updateStation(i, { title: e.target.value })}
+                    aria-label={`Titel der Station ${i + 1}`}
+                  />
+                  <button
+                    type="button"
+                    disabled={stations.length <= 1}
+                    onClick={() => setStations(prev => prev.filter((_, idx) => idx !== i))}
+                    className="shrink-0 text-muted-foreground transition-colors hover:text-destructive disabled:opacity-30"
+                    aria-label={`Station ${i + 1} entfernen`}
+                  >
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+                <Textarea
+                  className="mb-2"
+                  rows={2}
+                  placeholder="Erzähltext (optional): Wie geht die Geschichte hier weiter?"
+                  value={s.story}
+                  onChange={e => updateStation(i, { story: e.target.value })}
+                  aria-label={`Geschichte der Station ${i + 1}`}
+                />
+                <Textarea
+                  className="mb-2"
+                  rows={2}
+                  placeholder="Aufgabe oder Rätsel, z. B. «Findet drei verschiedene Blätter»"
+                  value={s.task}
+                  onChange={e => updateStation(i, { task: e.target.value })}
+                  aria-label={`Aufgabe der Station ${i + 1}`}
+                />
+                <div className="grid grid-cols-[1fr_5rem] gap-2">
+                  <Input
+                    placeholder="Hinweis, falls die Kinder feststecken (optional)"
+                    value={s.hint}
+                    maxLength={500}
+                    onChange={e => updateStation(i, { hint: e.target.value })}
+                    aria-label={`Hinweis der Station ${i + 1}`}
+                  />
+                  <Input
+                    placeholder="Bst."
+                    value={s.letter}
+                    maxLength={1}
+                    onChange={e => updateStation(i, { letter: e.target.value })}
+                    aria-label={`Buchstabe der Station ${i + 1} fürs Lösungswort`}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          {stations.length < MAX_STATIONS && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => setStations(prev => [...prev, emptyStation(prev.length)])}
+            >
+              <Plus className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+              Station hinzufügen
+            </Button>
+          )}
+          {solutionPreview && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Lösungswort aus den Buchstaben: <span className="font-mono font-bold">{solutionPreview}</span>
+            </p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="hunt-finale">Das Finale (Schatz/Belohnung)</Label>
+          <Textarea
+            id="hunt-finale"
+            className="mt-1.5"
+            rows={2}
+            placeholder="Was passiert, wenn alle Stationen geschafft sind?"
+            value={finale}
+            onChange={e => setFinale(e.target.value)}
+          />
+        </div>
+
+        <div className="flex gap-2">
+          <Button variant="outline" className="flex-1" onClick={onClose}>
+            Abbrechen
+          </Button>
+          <Button
+            className="flex-1"
+            disabled={!canSave || saveMutation.isPending}
+            onClick={() =>
+              saveMutation.mutate({
+                id: initial?.id,
+                title: title.trim(),
+                ageHint: ageHint.trim() || null,
+                durationMinutes: Math.min(240, Math.max(5, Number(duration) || 30)),
+                intro: intro.trim(),
+                preparation: preparation.trim() || null,
+                finale: finale.trim(),
+                stations: stations.map(s => ({
+                  title: s.title.trim(),
+                  story: s.story.trim(),
+                  task: s.task.trim(),
+                  hint: s.hint.trim() || undefined,
+                  letter: s.letter.trim() || undefined,
+                })),
+              })
+            }
+          >
+            {saveMutation.isPending ? "Wird gespeichert …" : "Speichern"}
+          </Button>
+        </div>
+      </div>
+    </DialogContent>
+  );
+}
 
 /** Fortschritt der Schnitzeljagden wird lokal gespeichert – funktioniert offline. */
 function useHuntProgress(huntId: string, taskCount: number) {
@@ -343,6 +621,15 @@ function QuizDialog({ quiz, onClose }: { quiz: NatureQuiz; onClose: () => void }
 export default function FamilyPage() {
   const [activeHunt, setActiveHunt] = useState<ScavengerHunt | null>(null);
   const [activeQuiz, setActiveQuiz] = useState<NatureQuiz | null>(null);
+  const { isAuthenticated } = useAuth();
+  const utils = trpc.useUtils();
+  const customHuntsQuery = trpc.hunts.list.useQuery(undefined, { enabled: isAuthenticated });
+  // null = Editor zu, "neu" = neue Jagd, sonst die zu bearbeitende Jagd
+  const [editorState, setEditorState] = useState<CustomHuntRow | "neu" | null>(null);
+  const removeHuntMutation = trpc.hunts.remove.useMutation({
+    onSuccess: () => utils.hunts.list.invalidate(),
+    onError: () => toast.error("Löschen fehlgeschlagen"),
+  });
 
   return (
     <div className="container py-6">
@@ -442,6 +729,93 @@ export default function FamilyPage() {
         ))}
       </div>
 
+      {/* Eigene Schnitzeljagden */}
+      {isAuthenticated && (
+        <>
+          <h2 className="mb-1 font-serif text-xl font-semibold">Eigene Schnitzeljagden</h2>
+          <p className="mb-3 text-sm text-muted-foreground">
+            Erfinde eigene Abenteuer – perfekt zugeschnitten auf euren Zeltplatz und das Alter
+            deiner Kinder.
+          </p>
+          <div className="mb-8 grid gap-3 sm:grid-cols-2">
+            {(customHuntsQuery.data ?? []).map(row => {
+              const hunt = customHuntToScavengerHunt(row);
+              return (
+                <div
+                  key={row.id}
+                  className="flex flex-col rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/40 hover:shadow-md"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActiveHunt(hunt)}
+                    className="flex items-start gap-3.5 text-left active:scale-[0.99]"
+                    aria-label={`Schnitzeljagd ${row.title} starten`}
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                      <Map className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                    <span>
+                      <span className="block font-semibold">{row.title}</span>
+                      <span className="mt-0.5 block text-sm text-muted-foreground">
+                        {hunt.ageHint} · ca. {row.durationMinutes} Min. · {hunt.stations.length}{" "}
+                        Stationen
+                      </span>
+                      <span className="mt-1.5 line-clamp-2 block text-xs italic text-muted-foreground">
+                        {row.intro}
+                      </span>
+                    </span>
+                  </button>
+                  <div className="mt-3 flex items-center gap-4 border-t border-border/60 pt-2.5 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setActiveHunt(hunt)}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      Spielen
+                    </button>
+                    <Link
+                      href={`/familie/drucken/${hunt.id}`}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      Drucken
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setEditorState(row)}
+                      className="flex items-center gap-1 font-medium text-primary hover:underline"
+                    >
+                      <Pencil className="h-3 w-3" aria-hidden="true" />
+                      Bearbeiten
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm(`Schnitzeljagd «${row.title}» wirklich löschen?`)) {
+                          removeHuntMutation.mutate({ id: row.id });
+                        }
+                      }}
+                      className="ml-auto flex items-center gap-1 font-medium text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3" aria-hidden="true" />
+                      Löschen
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => setEditorState("neu")}
+              className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-primary/50 p-4 text-primary transition-all hover:border-primary hover:bg-accent/40 active:scale-[0.99]"
+              aria-label="Neue Schnitzeljagd erstellen"
+            >
+              <Plus className="h-6 w-6" aria-hidden="true" />
+              <span className="text-sm font-semibold">Neue Jagd erstellen</span>
+            </button>
+          </div>
+        </>
+      )}
+
       {/* Natur-Quizze */}
       <h2 className="mb-1 font-serif text-xl font-semibold">Natur-Quizze</h2>
       <p className="mb-3 text-sm text-muted-foreground">
@@ -471,6 +845,14 @@ export default function FamilyPage() {
       </Dialog>
       <Dialog open={activeQuiz !== null} onOpenChange={open => !open && setActiveQuiz(null)}>
         {activeQuiz && <QuizDialog quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
+      </Dialog>
+      <Dialog open={editorState !== null} onOpenChange={open => !open && setEditorState(null)}>
+        {editorState !== null && (
+          <HuntEditorDialog
+            initial={editorState === "neu" ? null : editorState}
+            onClose={() => setEditorState(null)}
+          />
+        )}
       </Dialog>
     </div>
   );

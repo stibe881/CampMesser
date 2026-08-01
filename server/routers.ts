@@ -4,6 +4,7 @@ import { z } from "zod";
 import { ONE_YEAR_MS } from "@shared/const";
 import { packScenarios } from "@shared/packTemplates";
 import { SETTING_VALUE_MAX_LENGTH, SYNCED_SETTING_KEYS } from "@shared/settings";
+import { MAX_STATIONS, solutionWordFromStations } from "@shared/hunts";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -438,6 +439,67 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteFoodItem(input.id, ctx.user.id)),
   }),
+  hunts: router({
+    list: protectedProcedure.query(({ ctx }) => db.getCustomHunts(ctx.user.id)),
+    save: protectedProcedure
+      .input(
+        z.object({
+          /** Ohne id wird neu angelegt, mit id die eigene Jagd aktualisiert */
+          id: z.number().int().positive().optional(),
+          title: z.string().min(1).max(140),
+          ageHint: z.string().max(80).nullish(),
+          durationMinutes: z.number().int().min(5).max(240).default(30),
+          intro: z.string().min(1).max(2000),
+          preparation: z.string().max(2000).nullish(),
+          finale: z.string().min(1).max(2000),
+          stations: z
+            .array(
+              z.object({
+                title: z.string().min(1).max(140),
+                story: z.string().max(1000).default(""),
+                task: z.string().min(1).max(1000),
+                hint: z.string().max(500).optional(),
+                letter: z.string().max(2).optional(),
+              }),
+            )
+            .min(1)
+            .max(MAX_STATIONS),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        const stations = input.stations.map(s => ({
+          title: s.title.trim(),
+          story: s.story.trim(),
+          task: s.task.trim(),
+          hint: s.hint?.trim() || undefined,
+          letter: s.letter?.trim().slice(0, 1).toUpperCase() || undefined,
+        }));
+        const data = {
+          title: input.title.trim(),
+          ageHint: input.ageHint?.trim() || null,
+          durationMinutes: input.durationMinutes,
+          intro: input.intro.trim(),
+          preparation: input.preparation?.trim() || null,
+          finale: input.finale.trim(),
+          stationsJson: JSON.stringify(stations),
+          solutionWord: solutionWordFromStations(stations),
+        };
+        if (input.id) {
+          const own = await db.getCustomHunts(ctx.user.id);
+          if (!own.some(h => h.id === input.id)) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Schnitzeljagd nicht gefunden." });
+          }
+          await db.updateCustomHunt(input.id, ctx.user.id, data);
+          return { id: input.id };
+        }
+        const id = await db.addCustomHunt({ userId: ctx.user.id, ...data });
+        return { id };
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ ctx, input }) => db.deleteCustomHunt(input.id, ctx.user.id)),
+  }),
+
   settings: router({
     /** Alle synchronisierten Einstellungen als key → JSON-String. */
     all: protectedProcedure.query(async ({ ctx }) => {
