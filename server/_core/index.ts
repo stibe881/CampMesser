@@ -43,6 +43,7 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Health-Check für die Uptime-Überwachung: prüft Prozess und DB-Verbindung.
   // 200 = alles ok, 503 = Datenbank nicht erreichbar.
+  let versionInfo: { version: string; builtAt: string | null } | null = null;
   app.get("/api/health", async (_req, res) => {
     const startedAt = Date.now();
     let dbOk = false;
@@ -56,9 +57,24 @@ async function startServer() {
     } catch {
       // dbOk bleibt false
     }
+    if (!versionInfo) {
+      // dist/version.json entsteht beim Build (scripts/write-version.mjs);
+      // im Dev-Modus existiert sie nicht → "dev"
+      try {
+        const fs = await import("node:fs/promises");
+        const path = await import("node:path");
+        const raw = await fs.readFile(path.join(import.meta.dirname, "version.json"), "utf8");
+        const parsed = JSON.parse(raw) as { version?: string; builtAt?: string };
+        versionInfo = { version: parsed.version ?? "unbekannt", builtAt: parsed.builtAt ?? null };
+      } catch {
+        versionInfo = { version: "dev", builtAt: null };
+      }
+    }
     res.status(dbOk ? 200 : 503).json({
       status: dbOk ? "ok" : "degraded",
       db: dbOk ? "ok" : "down",
+      version: versionInfo.version,
+      builtAt: versionInfo.builtAt,
       uptimeSeconds: Math.round(process.uptime()),
       latencyMs: Date.now() - startedAt,
     });

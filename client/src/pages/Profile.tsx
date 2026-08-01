@@ -273,6 +273,17 @@ export default function ProfilePage() {
           <LogOut className="mr-1.5 h-4 w-4" aria-hidden="true" /> Abmelden
         </Button>
       </div>
+
+      {/* Versions-Anzeige: welcher Build läuft gerade? */}
+      <p className="mt-6 text-center text-xs text-muted-foreground/70">
+        CampMesser Version {__APP_VERSION__}
+        {__APP_VERSION__ !== "dev" &&
+          ` · Build vom ${new Date(__APP_BUILT_AT__).toLocaleDateString("de-CH", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}`}
+      </p>
     </div>
   );
 }
