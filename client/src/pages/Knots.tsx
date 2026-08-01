@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Cable, WifiOff } from "lucide-react";
+import { BadgeCheck, Cable, GraduationCap, RotateCcw, Trophy, WifiOff } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,8 +10,127 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { knots, type Knot } from "@/data/knots";
+import { buildKnotQuiz, type KnotQuizQuestion } from "@/lib/knotQuiz";
 import { cn } from "@/lib/utils";
+
+/** Übungsmodus: «Welcher Knoten passt zur Situation?» als Karteikarten-Quiz. */
+function KnotQuizDialog({ onClose }: { onClose: () => void }) {
+  const [questions, setQuestions] = useState<KnotQuizQuestion[]>(() => buildKnotQuiz(knots, 8));
+  const [current, setCurrent] = useState(0);
+  const [answered, setAnswered] = useState<number | null>(null);
+  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
+
+  const question = questions[current];
+
+  const restart = () => {
+    setQuestions(buildKnotQuiz(knots, 8));
+    setCurrent(0);
+    setAnswered(null);
+    setScore(0);
+    setFinished(false);
+  };
+
+  return (
+    <DialogContent className="max-h-[85vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle className="font-serif text-xl">Knoten-Quiz</DialogTitle>
+        <DialogDescription>
+          Welcher Knoten passt zur Situation? Übe, bis die Griffe sitzen.
+        </DialogDescription>
+      </DialogHeader>
+
+      {finished ? (
+        <div className="space-y-4 text-center">
+          <Trophy className="mx-auto h-12 w-12 text-chart-1" aria-hidden="true" />
+          <p className="font-serif text-2xl font-bold">
+            {score} von {questions.length} richtig!
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {score === questions.length
+              ? "Knoten-Profi! Jetzt fehlt nur noch die Übung mit echtem Seil."
+              : score >= questions.length / 2
+                ? "Solide! Schau dir die verpassten Knoten in der Bibliothek nochmal an."
+                : "Kein Problem – die Bibliothek unten erklärt jeden Knoten Schritt für Schritt."}
+          </p>
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={restart}>
+              <RotateCcw className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              Neue Runde
+            </Button>
+            <Button className="flex-1" onClick={onClose}>
+              Fertig
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>
+              Frage {current + 1} von {questions.length}
+            </span>
+            <span>{score} Punkte</span>
+          </div>
+          <Progress value={(current / questions.length) * 100} aria-label="Quiz-Fortschritt" />
+          <p className="font-semibold">{question.prompt}</p>
+          <div className="space-y-2">
+            {question.options.map((option, idx) => {
+              const isCorrect = idx === question.correctIndex;
+              const isSelected = answered === idx;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    if (answered !== null) return;
+                    setAnswered(idx);
+                    if (idx === question.correctIndex) setScore(s => s + 1);
+                  }}
+                  disabled={answered !== null}
+                  className={cn(
+                    "w-full rounded-lg border p-3 text-left text-sm font-medium transition-all",
+                    answered === null && "border-border bg-card hover:border-primary/50",
+                    answered !== null && isCorrect && "border-primary bg-accent",
+                    answered !== null && isSelected && !isCorrect && "border-destructive bg-destructive/10",
+                    answered !== null && !isSelected && !isCorrect && "border-border opacity-60",
+                  )}
+                  aria-label={`Antwort: ${option}`}
+                >
+                  {option}
+                  {answered !== null && isCorrect && (
+                    <BadgeCheck className="ml-2 inline h-4 w-4 text-primary" aria-hidden="true" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {answered !== null && (
+            <>
+              <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">{question.knotName}:</span>{" "}
+                {question.proTip}
+              </p>
+              <Button
+                className="w-full"
+                onClick={() => {
+                  if (current + 1 >= questions.length) setFinished(true);
+                  else {
+                    setCurrent(c => c + 1);
+                    setAnswered(null);
+                  }
+                }}
+              >
+                {current + 1 >= questions.length ? "Ergebnis anzeigen" : "Nächste Frage"}
+              </Button>
+            </>
+          )}
+        </div>
+      )}
+    </DialogContent>
+  );
+}
 
 const categories = ["Alle", "Befestigen", "Spannen", "Verbinden", "Schlaufen"] as const;
 
@@ -31,6 +151,7 @@ function DifficultyDots({ level }: { level: 1 | 2 | 3 }) {
 export default function KnotsPage() {
   const [category, setCategory] = useState<(typeof categories)[number]>("Alle");
   const [selected, setSelected] = useState<Knot | null>(null);
+  const [quizOpen, setQuizOpen] = useState(false);
 
   const filtered = category === "Alle" ? knots : knots.filter(k => k.category === category);
 
@@ -45,6 +166,24 @@ export default function KnotsPage() {
         <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
         Alle Anleitungen sind in der App gespeichert und ohne Internetverbindung nutzbar.
       </div>
+
+      {/* Übungsmodus */}
+      <button
+        type="button"
+        onClick={() => setQuizOpen(true)}
+        className="mb-6 flex w-full items-center gap-4 rounded-xl border border-primary/40 bg-accent/40 p-4 text-left transition-all hover:border-primary hover:shadow-md active:scale-[0.99]"
+        aria-label="Knoten-Quiz starten"
+      >
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <GraduationCap className="h-5.5 w-5.5" aria-hidden="true" />
+        </span>
+        <span>
+          <span className="block font-semibold">Knoten-Quiz</span>
+          <span className="mt-0.5 block text-sm text-muted-foreground">
+            8 Situationen, 4 Antworten – welcher Knoten ist der richtige?
+          </span>
+        </span>
+      </button>
 
       <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Nach Kategorie filtern">
         {categories.map(c => (
@@ -156,6 +295,10 @@ export default function KnotsPage() {
             </>
           )}
         </DialogContent>
+      </Dialog>
+
+      <Dialog open={quizOpen} onOpenChange={open => !open && setQuizOpen(false)}>
+        {quizOpen && <KnotQuizDialog onClose={() => setQuizOpen(false)} />}
       </Dialog>
     </div>
   );
