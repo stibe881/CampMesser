@@ -26,7 +26,7 @@ import {
   Sprout,
 } from "lucide-react";
 import { getSunTimes } from "@/lib/sun";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getRecentModules } from "@/components/AppShell";
 
 const ORDER_KEY = "campmesser.moduleOrder";
@@ -122,6 +122,25 @@ export default function Home() {
   const [sortMode, setSortMode] = useState(false);
   const [order, setOrder] = useState<string[]>(() => loadModuleOrder());
   const [dragPath, setDragPath] = useState<string | null>(null);
+  const [dragOverPath, setDragOverPath] = useState<string | null>(null);
+  const dragInfo = useRef<{ from: string; group: (typeof groups)[number] } | null>(null);
+  const dragOverRef = useRef<string | null>(null);
+
+  /** Kachel unter dem Zeiger ermitteln (funktioniert für Maus und Touch). */
+  const tileUnderPointer = (x: number, y: number, group: string): string | null => {
+    const el = document.elementFromPoint(x, y) as HTMLElement | null;
+    const tile = el?.closest<HTMLElement>("[data-drag-path]");
+    if (!tile || tile.dataset.dragGroup !== group) return null;
+    return tile.dataset.dragPath ?? null;
+  };
+
+  /** Zieh-Zustand zurücksetzen. */
+  const endDrag = () => {
+    dragInfo.current = null;
+    dragOverRef.current = null;
+    setDragPath(null);
+    setDragOverPath(null);
+  };
 
   /** Module einer Gruppe in gespeicherter Reihenfolge liefern. */
   const orderedModules = (group: (typeof groups)[number]) => {
@@ -241,23 +260,40 @@ export default function Home() {
                     return (
                       <div
                         key={m.path}
-                        draggable
-                        onDragStart={e => {
+                        data-drag-path={m.path}
+                        data-drag-group={group}
+                        onPointerDown={e => {
+                          // Klicks auf die Pfeil-Buttons nicht als Ziehen werten
+                          if ((e.target as HTMLElement).closest("button")) return;
+                          dragInfo.current = { from: m.path, group };
+                          dragOverRef.current = null;
                           setDragPath(m.path);
-                          e.dataTransfer.effectAllowed = "move";
+                          e.currentTarget.setPointerCapture(e.pointerId);
                         }}
-                        onDragOver={e => e.preventDefault()}
-                        onDrop={e => {
-                          e.preventDefault();
-                          if (dragPath) moveModule(group, dragPath, m.path);
-                          setDragPath(null);
+                        onPointerMove={e => {
+                          if (!dragInfo.current) return;
+                          const over = tileUnderPointer(e.clientX, e.clientY, group);
+                          if (over !== dragOverRef.current) {
+                            dragOverRef.current = over;
+                            setDragOverPath(over);
+                          }
                         }}
-                        onDragEnd={() => setDragPath(null)}
+                        onPointerUp={() => {
+                          const info = dragInfo.current;
+                          const over = dragOverRef.current;
+                          if (info && over && over !== info.from) {
+                            moveModule(info.group, info.from, over);
+                          }
+                          endDrag();
+                        }}
+                        onPointerCancel={endDrag}
                         className={
-                          "flex items-start gap-4 rounded-xl border bg-card p-4 shadow-sm transition-all " +
+                          "flex touch-none select-none items-start gap-4 rounded-xl border bg-card p-4 shadow-sm transition-all " +
                           (dragPath === m.path
                             ? "border-primary opacity-60"
-                            : "cursor-grab border-dashed border-primary/40 active:cursor-grabbing")
+                            : dragOverPath === m.path
+                              ? "border-solid border-primary bg-accent/40"
+                              : "cursor-grab border-dashed border-primary/40 active:cursor-grabbing")
                         }
                         aria-label={`${m.title} verschieben`}
                       >
