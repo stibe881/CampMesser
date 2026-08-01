@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { BellOff, Mic, MicOff, Moon, Volume2 } from "lucide-react";
+import { BellOff, LineChart, Mic, MicOff, Moon, Trash2, Volume2 } from "lucide-react";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +63,10 @@ export default function QuietPage() {
   const [reminder, setReminder] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const lastVibrateRef = useRef(0);
+  // Nacht-Protokoll: höchster Pegel pro Minute (max. 8 Stunden), bleibt nach
+  // dem Stoppen für den Morgen-Rückblick erhalten
+  const [history, setHistory] = useState<{ time: string; max: number }[]>([]);
+  const minuteRef = useRef<{ key: string; max: number } | null>(null);
 
   const streamRef = useRef<MediaStream | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
@@ -113,6 +127,18 @@ export default function QuietPage() {
         const pct = Math.min(100, Math.round((Math.log10(1 + rms * 30) / Math.log10(31)) * 100));
         setLevel(pct);
         setPeak(p => Math.max(p * 0.995, pct));
+        // Protokoll: Maximum je Minute festhalten
+        const d = new Date();
+        const key = `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+        if (!minuteRef.current || minuteRef.current.key !== key) {
+          if (minuteRef.current) {
+            const finished = minuteRef.current;
+            setHistory(h => [...h.slice(-479), { time: finished.key, max: finished.max }]);
+          }
+          minuteRef.current = { key, max: pct };
+        } else if (pct > minuteRef.current.max) {
+          minuteRef.current.max = pct;
+        }
         rafRef.current = requestAnimationFrame(tick);
       };
       tick();
@@ -254,6 +280,71 @@ export default function QuietPage() {
           </p>
         </CardContent>
       </Card>
+
+      {/* Nacht-Protokoll */}
+      {history.length > 1 && (
+        <Card className="mb-5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center justify-between text-base">
+              <span className="flex items-center gap-2">
+                <LineChart className="h-4 w-4 text-primary" aria-hidden="true" />
+                Nacht-Protokoll
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-muted-foreground hover:text-destructive"
+                onClick={() => {
+                  setHistory([]);
+                  minuteRef.current = null;
+                }}
+                aria-label="Protokoll löschen"
+              >
+                <Trash2 className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                Löschen
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-44 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={history} margin={{ top: 4, right: 4, bottom: 0, left: -22 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/60" />
+                  <XAxis
+                    dataKey="time"
+                    tick={{ fontSize: 10 }}
+                    interval="preserveStartEnd"
+                    minTickGap={40}
+                  />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+                  <Tooltip
+                    formatter={(value: number) => [`Pegel ${value}`, "Maximum"]}
+                    labelFormatter={(label: string) => `${label} Uhr`}
+                  />
+                  <ReferenceLine
+                    y={settings.threshold}
+                    stroke="var(--destructive)"
+                    strokeDasharray="4 4"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="max"
+                    stroke="var(--primary)"
+                    fill="var(--primary)"
+                    fillOpacity={0.25}
+                    isAnimationActive={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Höchster Pegel pro Minute ({history.length} Min. aufgezeichnet, max. 8 h). Die
+              gestrichelte Linie ist deine Erinnerungs-Schwelle. Das Protokoll bleibt bis zum
+              Verlassen der Seite erhalten – ideal für den Rückblick am Morgen.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Einstellungen */}
       <Card>

@@ -1,17 +1,21 @@
 import { Link } from "wouter";
 import heroImage from "@/assets/hero-camping.webp";
 import {
+  AlertTriangle,
   ArrowRight,
   ChevronDown,
   ChevronUp,
+  CloudSunRain,
   Compass,
   Eye,
   EyeOff,
   GripVertical,
   History as HistoryIcon,
   Search,
+  Wind,
 } from "lucide-react";
 import { groups, modules } from "@/data/modules";
+import { describeWeatherCode, detectAlerts, type HourlyWeather } from "@shared/weather";
 import { getSunTimes } from "@/lib/sun";
 import { useEffect, useRef, useState } from "react";
 import { getRecentModules } from "@/components/AppShell";
@@ -61,6 +65,105 @@ function saveHiddenModules(hidden: string[]) {
   } catch {
     // Speicher nicht verfügbar – Auswahl gilt nur für die Sitzung
   }
+}
+
+interface HomeWeather {
+  temperatureC: number;
+  windKmh: number;
+  label: string;
+  alert: { title: string; severity: "info" | "warnung" | "gefahr" } | null;
+}
+
+/** Kompaktes Wetter-Widget: aktuelle Lage + höchste Warnung am Standort. */
+function WeatherWidget() {
+  const [weather, setWeather] = useState<HomeWeather | null>(null);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        try {
+          const params = new URLSearchParams({
+            latitude: pos.coords.latitude.toFixed(4),
+            longitude: pos.coords.longitude.toFixed(4),
+            timezone: "auto",
+            forecast_days: "2",
+            current: "temperature_2m,weather_code,wind_speed_10m",
+            hourly:
+              "temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,weather_code,cape,cloud_cover",
+          });
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          const hourly: HourlyWeather[] = (json.hourly?.time as string[] | undefined)?.map(
+            (time: string, i: number) => ({
+              time,
+              temperatureC: json.hourly.temperature_2m[i],
+              apparentC: json.hourly.apparent_temperature[i],
+              precipitationMm: json.hourly.precipitation[i],
+              precipitationProbability: json.hourly.precipitation_probability?.[i] ?? 0,
+              windSpeedKmh: json.hourly.wind_speed_10m[i],
+              windGustsKmh: json.hourly.wind_gusts_10m[i],
+              weatherCode: json.hourly.weather_code[i],
+              cape: json.hourly.cape?.[i] ?? 0,
+              cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
+            }),
+          ) ?? [];
+          const alerts = detectAlerts(hourly);
+          setWeather({
+            temperatureC: json.current.temperature_2m,
+            windKmh: json.current.wind_speed_10m,
+            label: describeWeatherCode(json.current.weather_code).label,
+            alert: alerts[0] ? { title: alerts[0].title, severity: alerts[0].severity } : null,
+          });
+        } catch {
+          // Ohne Netz bleibt das Widget einfach ausgeblendet
+        }
+      },
+      () => {},
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
+    );
+  }, []);
+
+  if (!weather) return null;
+  return (
+    <Link
+      href="/wetter"
+      className="mb-6 flex items-center gap-4 rounded-xl border border-border/70 bg-card p-4 shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
+      aria-label={`Aktuelles Wetter: ${Math.round(weather.temperatureC)} Grad, ${weather.label} – zum Wetter-Modul`}
+    >
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+        <CloudSunRain className="h-5.5 w-5.5" aria-hidden="true" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex items-baseline gap-2">
+          <span className="font-serif text-2xl font-bold">{Math.round(weather.temperatureC)}°</span>
+          <span className="truncate text-sm text-muted-foreground">{weather.label}</span>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Wind className="h-3 w-3" aria-hidden="true" />
+            {Math.round(weather.windKmh)} km/h
+          </span>
+        </span>
+        {weather.alert ? (
+          <span
+            className={
+              weather.alert.severity === "gefahr"
+                ? "mt-0.5 flex items-center gap-1 text-xs font-medium text-destructive"
+                : "mt-0.5 flex items-center gap-1 text-xs font-medium text-foreground"
+            }
+          >
+            <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden="true" />
+            {weather.alert.title}
+          </span>
+        ) : (
+          <span className="mt-0.5 block text-xs text-muted-foreground">
+            Keine Unwetterwarnungen an deinem Standort
+          </span>
+        )}
+      </span>
+      <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/50" aria-hidden="true" />
+    </Link>
+  );
 }
 
 /** Globale Suche über die Offline-Wissensmodule (Erste Hilfe, Knoten, Rezepte, Natur). */
@@ -284,6 +387,7 @@ export default function Home() {
 
       {/* Modul-Grid */}
       <section className="container py-8 md:py-12">
+        <WeatherWidget />
         <KnowledgeSearch />
         <RecentModules hidden={hidden} />
         <div className="mb-4 flex items-center justify-end">

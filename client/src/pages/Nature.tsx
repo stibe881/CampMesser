@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { natureCategories, natureEntries } from "@/data/nature";
 import { getMoonInfo, nextFullMoons, nextNewMoons, stargazingQuality } from "@shared/moon";
+import { upcomingShowers } from "@shared/astro";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -96,6 +97,62 @@ function MoonCalendar() {
   );
 }
 
+/** Sternschnuppen-Kalender: die nächsten Strom-Maxima inkl. Mondstörung – offline berechnet. */
+function MeteorCalendar() {
+  const [now] = useState(() => new Date());
+  const showers = useMemo(() => upcomingShowers(now, 4), [now]);
+
+  return (
+    <section
+      className="mb-6 rounded-xl border border-border bg-card p-4"
+      aria-label="Sternschnuppen-Kalender"
+    >
+      <div className="mb-3 flex items-center gap-2">
+        <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+        <h2 className="font-serif text-lg font-semibold">Nächste Sternschnuppen-Nächte</h2>
+      </div>
+      <ul className="space-y-3">
+        {showers.map(entry => (
+          <li key={entry.shower.id} className="rounded-lg bg-accent/50 p-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="font-semibold">{entry.shower.name}</p>
+              {entry.activeNow && (
+                <Badge className="border-0 bg-primary/15 text-primary">Jetzt aktiv</Badge>
+              )}
+              <span className="ml-auto text-sm text-muted-foreground">
+                {entry.daysUntilPeak === 0
+                  ? "Maximum heute Nacht!"
+                  : entry.daysUntilPeak === 1
+                    ? "Maximum morgen"
+                    : `Maximum in ${entry.daysUntilPeak} Tagen`}
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {fmtDate(entry.peakDate)} · bis {entry.shower.zhr} Meteore/h · Blickrichtung{" "}
+              {entry.shower.radiant}
+            </p>
+            <p className="mt-1.5 text-sm">{entry.shower.tip}</p>
+            <p
+              className={cn(
+                "mt-1.5 text-xs",
+                entry.moonInterferes ? "text-destructive" : "text-muted-foreground",
+              )}
+            >
+              {entry.moonInterferes
+                ? `Mond stört: am Maximum zu ${Math.round(entry.moonIllumination * 100)} % beleuchtet – helle Meteore sind trotzdem sichtbar.`
+                : `Guter Mondstand: nur ${Math.round(entry.moonIllumination * 100)} % beleuchtet.`}
+            </p>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-xs text-muted-foreground">
+        Raten gelten für dunklen Himmel ohne Lichtverschmutzung. Termine jährlich ungefähr gleich,
+        Berechnung offline auf dem Gerät.
+      </p>
+    </section>
+  );
+}
+
 export default function NaturePage() {
   const [category, setCategory] = useState<string>("tierspuren");
   const activeCategory = natureCategories.find(c => c.id === category)!;
@@ -114,6 +171,7 @@ export default function NaturePage() {
       </div>
 
       <MoonCalendar />
+      <MeteorCalendar />
 
       <div className="mb-4 grid grid-cols-3 gap-2" role="group" aria-label="Kategorie wählen">
         {natureCategories.map(c => {
