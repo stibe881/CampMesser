@@ -41,6 +41,28 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  // Health-Check für die Uptime-Überwachung: prüft Prozess und DB-Verbindung.
+  // 200 = alles ok, 503 = Datenbank nicht erreichbar.
+  app.get("/api/health", async (_req, res) => {
+    const startedAt = Date.now();
+    let dbOk = false;
+    try {
+      const [{ getDb }, { sql }] = await Promise.all([import("../db"), import("drizzle-orm")]);
+      const db = await getDb();
+      if (db) {
+        await db.execute(sql`select 1`);
+        dbOk = true;
+      }
+    } catch {
+      // dbOk bleibt false
+    }
+    res.status(dbOk ? 200 : 503).json({
+      status: dbOk ? "ok" : "degraded",
+      db: dbOk ? "ok" : "down",
+      uptimeSeconds: Math.round(process.uptime()),
+      latencyMs: Date.now() - startedAt,
+    });
+  });
   // tRPC API
   app.use(
     "/api/trpc",
