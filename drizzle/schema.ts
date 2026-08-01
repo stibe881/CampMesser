@@ -1,4 +1,4 @@
-import { boolean, double, float, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, date, double, float, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -113,3 +113,24 @@ export const foodItems = mysqlTable("foodItems", {
 
 export type FoodItem = typeof foodItems.$inferSelect;
 export type InsertFoodItem = typeof foodItems.$inferInsert;
+
+/** Reise-Tagebuch: ein Eintrag pro Camping-Aufenthalt, optional mit Zeltplatz-Favorit verknüpft. */
+export const tripLogs = mysqlTable("tripLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  /** Verknüpfter Zeltplatz-Favorit; null bei frei eingetragenem Ort */
+  spotId: int("spotId"),
+  /** Freitext-Ort, falls kein Favorit verknüpft ist */
+  location: varchar("location", { length: 140 }),
+  title: varchar("title", { length: 140 }),
+  notes: text("notes"),
+  /** Anreise (erster Abend) */
+  startDate: date("startDate", { mode: "string" }).notNull(),
+  /** Abreise – Nächte ergeben sich aus der Differenz der beiden Daten */
+  endDate: date("endDate", { mode: "string" }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TripLog = typeof tripLogs.$inferSelect;
+export type InsertTripLog = typeof tripLogs.$inferInsert;

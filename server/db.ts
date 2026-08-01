@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   campSpots,
@@ -9,11 +9,13 @@ import {
   InsertPackItem,
   InsertPackList,
   InsertPowerConsumer,
+  InsertTripLog,
   InsertUser,
   inventoryItems,
   packItems,
   packLists,
   powerConsumers,
+  tripLogs,
   users,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -284,4 +286,25 @@ export async function updateCampSpot(
 export async function deleteCampSpot(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db.delete(campSpots).where(and(eq(campSpots.id, id), eq(campSpots.userId, userId)));
+}
+
+// ── Reise-Tagebuch ──
+export async function getTripLogs(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripLogs)
+    .where(eq(tripLogs.userId, userId))
+    .orderBy(desc(tripLogs.startDate), desc(tripLogs.id));
+}
+
+export async function addTripLog(data: InsertTripLog) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(tripLogs).values(data);
+  return result.insertId;
+}
+
+export async function deleteTripLog(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripLogs).where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
 }

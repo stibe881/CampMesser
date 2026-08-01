@@ -343,6 +343,49 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteFoodItem(input.id, ctx.user.id)),
   }),
+  trips: router({
+    list: protectedProcedure.query(({ ctx }) => db.getTripLogs(ctx.user.id)),
+    add: protectedProcedure
+      .input(
+        z
+          .object({
+            spotId: z.number().int().positive().nullish(),
+            location: z.string().max(140).nullish(),
+            title: z.string().max(140).nullish(),
+            notes: z.string().max(2000).nullish(),
+            startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          })
+          .refine(v => v.endDate >= v.startDate, {
+            message: "Die Abreise darf nicht vor der Anreise liegen.",
+          })
+          .refine(v => v.spotId != null || (v.location ?? "").trim().length > 0, {
+            message: "Bitte einen Zeltplatz wählen oder einen Ort eintragen.",
+          }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        // Nur eigene Zeltplatz-Favoriten dürfen verknüpft werden
+        if (input.spotId != null) {
+          const spots = await db.getCampSpots(ctx.user.id);
+          if (!spots.some(s => s.id === input.spotId)) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Zeltplatz nicht gefunden." });
+          }
+        }
+        const id = await db.addTripLog({
+          userId: ctx.user.id,
+          spotId: input.spotId ?? null,
+          location: input.location?.trim() || null,
+          title: input.title?.trim() || null,
+          notes: input.notes?.trim() || null,
+          startDate: input.startDate,
+          endDate: input.endDate,
+        });
+        return { id };
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ ctx, input }) => db.deleteTripLog(input.id, ctx.user.id)),
+  }),
   spots: router({
     list: protectedProcedure.query(({ ctx }) => db.getCampSpots(ctx.user.id)),
     add: protectedProcedure

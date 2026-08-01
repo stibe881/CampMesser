@@ -24,6 +24,7 @@ import {
   ChevronUp,
   ChevronDown,
   Sprout,
+  BookOpen,
 } from "lucide-react";
 import { getSunTimes } from "@/lib/sun";
 import { useEffect, useRef, useState } from "react";
@@ -68,6 +69,7 @@ const modules: Module[] = [
   { path: "/packen", title: "Pack-Optimierung", description: "Gewicht und Packmass im Griff behalten", icon: Scale, group: "Planung" },
   { path: "/familie", title: "Familien-Modus", description: "Kinder-Checklisten, Schnitzeljagden und Quiz", icon: Users, group: "Planung" },
   { path: "/zeltplaetze", title: "Zeltplatz-Favoriten", description: "Orte speichern, Wetter und Sonne im Voraus prüfen", icon: Tent, group: "Planung" },
+  { path: "/tagebuch", title: "Reise-Tagebuch", description: "Aufenthalte festhalten, Nächte und Lieblingsplätze zählen", icon: BookOpen, group: "Planung" },
   { path: "/rasen", title: "Rasenschoner", description: "Wie lange darf das Zelt auf dem Rasen stehen?", icon: Sprout, group: "Planung", offline: true },
   { path: "/sos", title: "SOS & Notfall", description: "GPS-Koordinaten und Notfallnummern", icon: Siren, group: "Sicherheit" },
   { path: "/wetter", title: "Camp-Wetter", description: "Hyperlokale Vorhersage und Unwetterwarnungen", icon: CloudSunRain, group: "Sicherheit" },

@@ -25,6 +25,7 @@ import WeatherPage from "./pages/Weather";
 import DryingPage from "./pages/Drying";
 import QuietPage from "./pages/Quiet";
 import SpotsPage from "./pages/Spots";
+import TripsPage from "./pages/Trips";
 import SharedPackListPage from "./pages/SharedPackList";
 import HuntPrintPage from "./pages/HuntPrint";
 import LoginPage from "./pages/Login";
@@ -55,6 +56,7 @@ function Router() {
         <Route path={"/trockenzeiten"} component={DryingPage} />
         <Route path={"/nachtruhe"} component={QuietPage} />
         <Route path={"/zeltplaetze"} component={SpotsPage} />
+        <Route path={"/tagebuch"} component={TripsPage} />
         <Route path={"/anmelden"} component={LoginPage} />
         <Route path={"/rasen"} component={LawnPage} />
         <Route path={"/profil"} component={ProfilePage} />

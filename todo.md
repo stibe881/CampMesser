@@ -144,6 +144,14 @@
 - [x] DNS von campmesser.ch geprüft: Domain heute registriert, Status «active», Nameserver ns1.your-server.de / ns3.second-ns.de / ns.second-ns.com (Hetzner) – A-Eintrag noch nicht weltweit auflösbar, Verzögerung normal
 - [ ] Node.js in konsoleH für campmesser.ch konfigurieren und Start verifizieren (wartet auf DNS-Verbreitung und Rückmeldung des Users)
 
+## Erweiterungen (Nutzerwunsch 01.08.2026)
+
+- [x] Startseite: Kachel-Sortierung auf Pointer Events umgestellt – Drag-and-drop funktioniert jetzt auch auf Touch-Geräten (touch-none gegen Mitscrollen, Pfeil-Buttons bleiben als Fallback)
+- [x] Packlisten: QR-Code im Teilen-Dialog – Mitreisende scannen den Teil-Link direkt mit der Handy-Kamera (qrcode-Paket, weisser Rahmen für Dark Mode)
+- [x] Camp-Wetter: Waldbrandgefahr-Anzeige für die Schweiz – Gefahrenstufe 1–5 der offiziellen BAFU-Warnkarte via GeoAdmin-API (LV95), mit Region, Feuerregeln je Stufe und Verweis auf waldbrandgefahr.ch (shared/fireDanger.ts, 8 Tests)
+- [x] Energie-Budget: Solarpanel-Ausrichtungshilfe – optimale Ausrichtung und Neigung für heute aus Sonnenbahn und Hindernis-Profil des Sonnen-Kompasses (Rastersuche mit Luftmassen-Gewichtung), inkl. Mehrertrag vs. flach, Sonnenfenster und Verschattungs-Stunden (shared/solar.ts, 6 Tests; Hindernis-Speicher nach client/src/lib/obstacleStore.ts ausgelagert)
+- [x] Reise-Tagebuch (/tagebuch): Aufenthalte mit Zeltplatz-Favorit oder Freitext-Ort, An-/Abreise und Notizen erfassen; Statistik mit Nächten im laufenden Jahr, Nächten gesamt, Aufenthalten und Lieblingsplatz (DB-Tabelle tripLogs, Migration 0007, trips-Router, shared/trips.ts mit 8 Tests, Kachel in Gruppe «Planung»)
+
 ## Logo (Nutzerwunsch 31.07.2026)
 
 - [x] Eigenständiges CampMesser-Logo entworfen: Taschenmesser mit aufgeklappter Klinge als SVG-Bauteil `client/src/components/BrandLogo.tsx` (skalierbar, echte Transparenz, Farbe via currentColor)
