@@ -185,6 +185,14 @@
 - [x] PWA-Shortcuts im Manifest: SOS, Wetter, Wasserwaage per Langdruck aufs App-Icon
 - [x] Kühlbox: MHD-Tracking – optionales Haltbarkeitsdatum (Spalte expiryDate, Migration 0009), Warn-Badges (abgelaufen/heute/bald), «Verbrauche zuerst»-Sortierung und Hinweis-Banner (shared/food.ts, 6 Tests)
 
+## Erweiterungen (Nutzerwunsch 01.08.2026, Runde 5)
+
+- [x] Globale Suche findet jetzt auch die Werkzeug-Module selbst («wasserwaage» → Kachel); Modul-Katalog nach client/src/data/modules.ts extrahiert (Home + Suche teilen ihn)
+- [x] Trinkwasser-Rechner: Tageshöchsttemperatur automatisch aus der 3-Tages-Prognose am Standort (manuelles Ziehen schaltet auf manuell, Prognose per Klick wieder übernehmbar)
+- [x] Versions-Anzeige: Git-Commit + Build-Datum beim Build eingebettet (vite define + dist/version.json via scripts/write-version.mjs), sichtbar im Profil-Footer und in /api/health – zeigt auf einen Blick, welcher Stand live läuft
+- [x] DB-Indizes auf alle userId-Spalten sowie packItems.listId und packLists.shareToken (Migration 0010)
+- [x] Dependabot: wöchentliche, gruppierte Update-PRs für npm und GitHub Actions (CI prüft sie automatisch)
+
 ## Logo (Nutzerwunsch 31.07.2026)
 
 - [x] Eigenständiges CampMesser-Logo entworfen: Taschenmesser mit aufgeklappter Klinge als SVG-Bauteil `client/src/components/BrandLogo.tsx` (skalierbar, echte Transparenz, Farbe via currentColor)

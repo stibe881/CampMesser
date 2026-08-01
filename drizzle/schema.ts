@@ -1,4 +1,4 @@
-import { boolean, date, double, float, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
+import { boolean, date, double, float, index, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -28,111 +28,142 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 /** Gespeicherte Zeltplatz-Favoriten für Wetter- und Sonnenstand-Abruf im Voraus */
-export const campSpots = mysqlTable("campSpots", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  name: varchar("name", { length: 120 }).notNull(),
-  latitude: double("latitude").notNull(),
-  longitude: double("longitude").notNull(),
-  note: text("note"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+export const campSpots = mysqlTable(
+  "campSpots",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 120 }).notNull(),
+    latitude: double("latitude").notNull(),
+    longitude: double("longitude").notNull(),
+    note: text("note"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("campSpots_userId").on(table.userId)],
+);
 
 export type CampSpot = typeof campSpots.$inferSelect;
 export type InsertCampSpot = typeof campSpots.$inferInsert;
 
 /** Packlisten: eine Liste pro Nutzer*in, basierend auf einem Szenario oder leer gestartet. */
-export const packLists = mysqlTable("packLists", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  name: varchar("name", { length: 120 }).notNull(),
-  scenario: varchar("scenario", { length: 60 }).notNull().default("custom"),
-  /** Öffentlicher Teil-Token: Wer den Link kennt, kann die Liste sehen und abhaken. */
-  shareToken: varchar("shareToken", { length: 32 }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+export const packLists = mysqlTable(
+  "packLists",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 120 }).notNull(),
+    scenario: varchar("scenario", { length: 60 }).notNull().default("custom"),
+    /** Öffentlicher Teil-Token: Wer den Link kennt, kann die Liste sehen und abhaken. */
+    shareToken: varchar("shareToken", { length: 32 }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    index("packLists_userId").on(table.userId),
+    index("packLists_shareToken").on(table.shareToken),
+  ],
+);
 
 export type PackList = typeof packLists.$inferSelect;
 export type InsertPackList = typeof packLists.$inferInsert;
 
 /** Einzelne Einträge einer Packliste, abhakbar. */
-export const packItems = mysqlTable("packItems", {
-  id: int("id").autoincrement().primaryKey(),
-  listId: int("listId").notNull(),
-  name: varchar("name", { length: 160 }).notNull(),
-  category: varchar("category", { length: 80 }).notNull().default("Allgemein"),
-  quantity: int("quantity").notNull().default(1),
-  checked: boolean("checked").notNull().default(false),
-  sortOrder: int("sortOrder").notNull().default(0),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+export const packItems = mysqlTable(
+  "packItems",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    listId: int("listId").notNull(),
+    name: varchar("name", { length: 160 }).notNull(),
+    category: varchar("category", { length: 80 }).notNull().default("Allgemein"),
+    quantity: int("quantity").notNull().default(1),
+    checked: boolean("checked").notNull().default(false),
+    sortOrder: int("sortOrder").notNull().default(0),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("packItems_listId").on(table.listId)],
+);
 
 export type PackItem = typeof packItems.$inferSelect;
 export type InsertPackItem = typeof packItems.$inferInsert;
 
 /** Inventar: vorhandenes Campingmaterial mit Gewicht (g) und Volumen (l). */
-export const inventoryItems = mysqlTable("inventoryItems", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  name: varchar("name", { length: 160 }).notNull(),
-  category: varchar("category", { length: 80 }).notNull().default("Allgemein"),
-  weightGrams: int("weightGrams").notNull().default(0),
-  volumeLiters: float("volumeLiters").notNull().default(0),
-  quantity: int("quantity").notNull().default(1),
-  notes: text("notes"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+export const inventoryItems = mysqlTable(
+  "inventoryItems",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 160 }).notNull(),
+    category: varchar("category", { length: 80 }).notNull().default("Allgemein"),
+    weightGrams: int("weightGrams").notNull().default(0),
+    volumeLiters: float("volumeLiters").notNull().default(0),
+    quantity: int("quantity").notNull().default(1),
+    notes: text("notes"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("inventoryItems_userId").on(table.userId)],
+);
 
 export type InventoryItem = typeof inventoryItems.$inferSelect;
 export type InsertInventoryItem = typeof inventoryItems.$inferInsert;
 
 /** Energie-Verbraucher für den Energie-Budget-Rechner. */
-export const powerConsumers = mysqlTable("powerConsumers", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  name: varchar("name", { length: 160 }).notNull(),
-  watts: float("watts").notNull().default(0),
-  hoursPerDay: float("hoursPerDay").notNull().default(0),
-  enabled: boolean("enabled").notNull().default(true),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+export const powerConsumers = mysqlTable(
+  "powerConsumers",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 160 }).notNull(),
+    watts: float("watts").notNull().default(0),
+    hoursPerDay: float("hoursPerDay").notNull().default(0),
+    enabled: boolean("enabled").notNull().default(true),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("powerConsumers_userId").on(table.userId)],
+);
 
 export type PowerConsumer = typeof powerConsumers.$inferSelect;
 export type InsertPowerConsumer = typeof powerConsumers.$inferInsert;
 
 /** Lebensmittel-Inventar (Kühlbox) für Rezeptvorschläge. */
-export const foodItems = mysqlTable("foodItems", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  name: varchar("name", { length: 160 }).notNull(),
-  quantity: varchar("quantity", { length: 80 }),
-  /** Mindesthaltbarkeitsdatum (optional) für «Verbrauche zuerst»-Hinweise */
-  expiryDate: date("expiryDate", { mode: "string" }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+export const foodItems = mysqlTable(
+  "foodItems",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 160 }).notNull(),
+    quantity: varchar("quantity", { length: 80 }),
+    /** Mindesthaltbarkeitsdatum (optional) für «Verbrauche zuerst»-Hinweise */
+    expiryDate: date("expiryDate", { mode: "string" }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("foodItems_userId").on(table.userId)],
+);
 
 export type FoodItem = typeof foodItems.$inferSelect;
 export type InsertFoodItem = typeof foodItems.$inferInsert;
 
 /** Reise-Tagebuch: ein Eintrag pro Camping-Aufenthalt, optional mit Zeltplatz-Favorit verknüpft. */
-export const tripLogs = mysqlTable("tripLogs", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  /** Verknüpfter Zeltplatz-Favorit; null bei frei eingetragenem Ort */
-  spotId: int("spotId"),
-  /** Freitext-Ort, falls kein Favorit verknüpft ist */
-  location: varchar("location", { length: 140 }),
-  title: varchar("title", { length: 140 }),
-  notes: text("notes"),
-  /** Anreise (erster Abend) */
-  startDate: date("startDate", { mode: "string" }).notNull(),
-  /** Abreise – Nächte ergeben sich aus der Differenz der beiden Daten */
-  endDate: date("endDate", { mode: "string" }).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+export const tripLogs = mysqlTable(
+  "tripLogs",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Verknüpfter Zeltplatz-Favorit; null bei frei eingetragenem Ort */
+    spotId: int("spotId"),
+    /** Freitext-Ort, falls kein Favorit verknüpft ist */
+    location: varchar("location", { length: 140 }),
+    title: varchar("title", { length: 140 }),
+    notes: text("notes"),
+    /** Anreise (erster Abend) */
+    startDate: date("startDate", { mode: "string" }).notNull(),
+    /** Abreise – Nächte ergeben sich aus der Differenz der beiden Daten */
+    endDate: date("endDate", { mode: "string" }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("tripLogs_userId").on(table.userId)],
+);
 
 export type TripLog = typeof tripLogs.$inferSelect;
 export type InsertTripLog = typeof tripLogs.$inferInsert;

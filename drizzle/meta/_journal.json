@@ -71,6 +71,13 @@
       "when": 1785623761669,
       "tag": "0009_deep_spirit",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1785624326410,
+      "tag": "0010_chief_the_call",
+      "breakpoints": true
     }
   ]
 }

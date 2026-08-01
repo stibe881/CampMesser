@@ -1,0 +1,24 @@
+version: 2
+updates:
+  # npm-Abhängigkeiten: wöchentlich, in einem gruppierten PR (CI prüft ihn automatisch)
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Zurich
+    groups:
+      abhaengigkeiten:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    open-pull-requests-limit: 5
+
+  # GitHub-Actions-Versionen aktuell halten
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Zurich
