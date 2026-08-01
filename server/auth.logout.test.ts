@@ -51,10 +51,12 @@ describe("auth.logout", () => {
     expect(result).toEqual({ success: true });
     expect(clearedCookies).toHaveLength(1);
     expect(clearedCookies[0]?.name).toBe(COOKIE_NAME);
+    // sameSite "lax": seit dem Wechsel der Cookie-Policy (Browser verwarfen
+    // "none"-Cookies ohne Partitionierung) ist Lax der erwartete Wert.
     expect(clearedCookies[0]?.options).toMatchObject({
       maxAge: -1,
       secure: true,
-      sameSite: "none",
+      sameSite: "lax",
       httpOnly: true,
       path: "/",
     });
