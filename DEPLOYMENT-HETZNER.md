@@ -155,6 +155,29 @@ Neue Versionen holst du dir mit dem beiliegenden Skript. Anschliessend schaltest
 bash ~/campmesser/scripts/deploy-hetzner.sh
 ```
 
+## Datenbank-Backup
+
+Die App speichert echte Nutzerdaten (Konten, Packlisten, Tagebuch, Einstellungen) – richte deshalb ein regelmässiges Backup ein. Das beiliegende Skript erzeugt einen komprimierten `mysqldump` und behält automatisch die letzten 14 Sicherungen:
+
+```bash
+bash ~/campmesser/scripts/backup-db.sh
+```
+
+Die Sicherungen landen unter `~/backups/campmesser/` (anpassbar über die Variable `BACKUP_DIR`, die Anzahl über `KEEP`). Für den automatischen Lauf legst du in konsoleH unter **Services → Cronjobs** einen täglichen Job an, z. B. um 03:30 Uhr:
+
+```
+bash /usr/home/DEIN_LOGIN/campmesser/scripts/backup-db.sh
+```
+
+Wiederherstellen lässt sich eine Sicherung so (Achtung: überschreibt den aktuellen Stand):
+
+```bash
+gunzip < ~/backups/campmesser/campmesser-JJJJMMTT-HHMMSS.sql.gz | \
+  mysql --host=DB_HOST --user=DB_USER -p DB_NAME
+```
+
+Lade die Sicherungen gelegentlich zusätzlich auf einen anderen Rechner herunter – ein Backup auf demselben Server schützt nicht vor dem Verlust des Accounts selbst.
+
 ## Sicherheitshinweis
 
 Das Datenbank-Passwort und das Sitzungsgeheimnis wurden während der Einrichtung im Klartext übermittelt. Wechsle beide nach der Inbetriebnahme: das Datenbank-Passwort in konsoleH, das Sitzungsgeheimnis durch einen neu erzeugten Wert. Trage sie anschliessend in `~/campmesser/.env` ein. Die passende kodierte Zeichenfolge für ein neues Datenbank-Passwort erhältst du auf dem Server mit:

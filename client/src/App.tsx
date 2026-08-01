@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, type ComponentType } from "react";
 import { Loader2 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -43,30 +43,58 @@ const pageLoaders = {
   HuntPrint: () => import("./pages/HuntPrint"),
 } as const;
 
-const SosPage = lazy(pageLoaders.Sos);
-const SunCompassPage = lazy(pageLoaders.SunCompass);
-const PackListsPage = lazy(pageLoaders.PackLists);
-const PackListDetailPage = lazy(pageLoaders.PackListDetail);
-const InventoryPage = lazy(pageLoaders.Inventory);
-const FirstAidPage = lazy(pageLoaders.FirstAid);
-const KnotsPage = lazy(pageLoaders.Knots);
-const NaturePage = lazy(pageLoaders.Nature);
-const RecipesPage = lazy(pageLoaders.Recipes);
-const EnergyPage = lazy(pageLoaders.Energy);
-const WaterPage = lazy(pageLoaders.Water);
-const PackOptimizerPage = lazy(pageLoaders.PackOptimizer);
-const FamilyPage = lazy(pageLoaders.Family);
-const FoodPage = lazy(pageLoaders.Food);
-const WeatherPage = lazy(pageLoaders.Weather);
-const DryingPage = lazy(pageLoaders.Drying);
-const QuietPage = lazy(pageLoaders.Quiet);
-const SpotsPage = lazy(pageLoaders.Spots);
-const TripsPage = lazy(pageLoaders.Trips);
-const LoginPage = lazy(pageLoaders.Login);
-const LawnPage = lazy(pageLoaders.Lawn);
-const ProfilePage = lazy(pageLoaders.Profile);
-const SharedPackListPage = lazy(pageLoaders.SharedPackList);
-const HuntPrintPage = lazy(pageLoaders.HuntPrint);
+const CHUNK_RELOAD_KEY = "campmesser.chunkReloadAt";
+
+/**
+ * Wie React.lazy, aber robust gegen Deployments während einer laufenden Sitzung:
+ * Liefert ein alter Chunk 404, wird die Seite einmal neu geladen, um die frische
+ * index.html mit gültigen Chunk-URLs zu holen. Ein Zeitstempel verhindert eine
+ * Reload-Schleife, falls der Chunk dauerhaft fehlt (dann greift der ErrorBoundary).
+ */
+function lazyWithRetry<T extends ComponentType<unknown>>(load: () => Promise<{ default: T }>) {
+  return lazy(() =>
+    load().catch((error: unknown) => {
+      let lastReload = 0;
+      try {
+        lastReload = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) ?? 0);
+      } catch {
+        // sessionStorage blockiert: lieber kein Auto-Reload als eine Endlosschleife
+        throw error;
+      }
+      if (Date.now() - lastReload > 60_000) {
+        sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()));
+        window.location.reload();
+        return new Promise<never>(() => {});
+      }
+      throw error;
+    }),
+  );
+}
+
+const SosPage = lazyWithRetry(pageLoaders.Sos);
+const SunCompassPage = lazyWithRetry(pageLoaders.SunCompass);
+const PackListsPage = lazyWithRetry(pageLoaders.PackLists);
+const PackListDetailPage = lazyWithRetry(pageLoaders.PackListDetail);
+const InventoryPage = lazyWithRetry(pageLoaders.Inventory);
+const FirstAidPage = lazyWithRetry(pageLoaders.FirstAid);
+const KnotsPage = lazyWithRetry(pageLoaders.Knots);
+const NaturePage = lazyWithRetry(pageLoaders.Nature);
+const RecipesPage = lazyWithRetry(pageLoaders.Recipes);
+const EnergyPage = lazyWithRetry(pageLoaders.Energy);
+const WaterPage = lazyWithRetry(pageLoaders.Water);
+const PackOptimizerPage = lazyWithRetry(pageLoaders.PackOptimizer);
+const FamilyPage = lazyWithRetry(pageLoaders.Family);
+const FoodPage = lazyWithRetry(pageLoaders.Food);
+const WeatherPage = lazyWithRetry(pageLoaders.Weather);
+const DryingPage = lazyWithRetry(pageLoaders.Drying);
+const QuietPage = lazyWithRetry(pageLoaders.Quiet);
+const SpotsPage = lazyWithRetry(pageLoaders.Spots);
+const TripsPage = lazyWithRetry(pageLoaders.Trips);
+const LoginPage = lazyWithRetry(pageLoaders.Login);
+const LawnPage = lazyWithRetry(pageLoaders.Lawn);
+const ProfilePage = lazyWithRetry(pageLoaders.Profile);
+const SharedPackListPage = lazyWithRetry(pageLoaders.SharedPackList);
+const HuntPrintPage = lazyWithRetry(pageLoaders.HuntPrint);
 
 function RouteFallback() {
   return (

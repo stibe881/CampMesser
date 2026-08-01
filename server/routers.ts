@@ -59,15 +59,31 @@ export const appRouter = router({
     login: publicProcedure
       .input(z.object({ email: z.string().min(3).max(320), password: z.string().min(1).max(200) }))
       .mutation(async ({ ctx, input }) => {
-        const { findUserByEmail, verifyPassword, createLocalSessionToken } = await import("./localAuth");
+        const { findUserByEmail, verifyPassword, createLocalSessionToken, normalizeEmail } =
+          await import("./localAuth");
+        const { isRateLimited, registerFailure, clearFailures, lockoutMinutes } = await import(
+          "./rateLimit"
+        );
+        // Brute-Force-Schutz: pro E-Mail+IP begrenzte Fehlversuche
+        const limitKey = `${normalizeEmail(input.email)}|${ctx.req.ip ?? "?"}`;
+        if (isRateLimited(limitKey)) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: `Zu viele fehlgeschlagene Anmeldeversuche. Bitte warte ${lockoutMinutes(limitKey)} Minuten und versuche es erneut.`,
+          });
+        }
         const user = await findUserByEmail(input.email);
-        const invalid = new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "E-Mail oder Passwort ist falsch.",
-        });
-        if (!user || !user.passwordHash) throw invalid;
+        const invalid = () => {
+          registerFailure(limitKey);
+          return new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "E-Mail oder Passwort ist falsch.",
+          });
+        };
+        if (!user || !user.passwordHash) throw invalid();
         const ok = await verifyPassword(input.password, user.passwordHash);
-        if (!ok) throw invalid;
+        if (!ok) throw invalid();
+        clearFailures(limitKey);
         const token = await createLocalSessionToken(user);
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });

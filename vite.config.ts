@@ -150,10 +150,17 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
-
-export default defineConfig({
-  plugins,
+export default defineConfig(({ command }) => ({
+  plugins: [
+    react(),
+    tailwindcss(),
+    // Manus-Werkzeuge nur im Dev-Server: die Manus-Laufzeit blähte die
+    // Produktions-index.html um 367 kB (inline) auf, ohne beim Selbst-Hosting
+    // etwas zu tun; jsx-loc dient nur der Quellcode-Verortung im Editor.
+    ...(command === "serve"
+      ? [jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()]
+      : []),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -184,4 +191,4 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
-});
+}));
