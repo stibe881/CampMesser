@@ -27,6 +27,7 @@ import {
   BookOpen,
   Eye,
   EyeOff,
+  Gauge,
 } from "lucide-react";
 import { getSunTimes } from "@/lib/sun";
 import { useEffect, useRef, useState } from "react";
@@ -96,6 +97,7 @@ const modules: Module[] = [
   { path: "/zeltplaetze", title: "Zeltplatz-Favoriten", description: "Orte speichern, Wetter und Sonne im Voraus prüfen", icon: Tent, group: "Planung" },
   { path: "/tagebuch", title: "Reise-Tagebuch", description: "Aufenthalte festhalten, Nächte und Lieblingsplätze zählen", icon: BookOpen, group: "Planung" },
   { path: "/rasen", title: "Rasenschoner", description: "Wie lange darf das Zelt auf dem Rasen stehen?", icon: Sprout, group: "Planung", offline: true },
+  { path: "/wasserwaage", title: "Wasserwaage", description: "Wohnwagen und Tisch mit dem Lagesensor ausrichten", icon: Gauge, group: "Planung", offline: true },
   { path: "/sos", title: "SOS & Notfall", description: "GPS-Koordinaten und Notfallnummern", icon: Siren, group: "Sicherheit" },
   { path: "/wetter", title: "Camp-Wetter", description: "Hyperlokale Vorhersage und Unwetterwarnungen", icon: CloudSunRain, group: "Sicherheit" },
   { path: "/trockenzeiten", title: "Trockenzeiten", description: "Wird die Wäsche bis Sonnenuntergang trocken?", icon: Shirt, group: "Planung" },
