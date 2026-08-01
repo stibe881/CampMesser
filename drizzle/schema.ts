@@ -108,6 +108,8 @@ export const foodItems = mysqlTable("foodItems", {
   userId: int("userId").notNull(),
   name: varchar("name", { length: 160 }).notNull(),
   quantity: varchar("quantity", { length: 80 }),
+  /** Mindesthaltbarkeitsdatum (optional) für «Verbrauche zuerst»-Hinweise */
+  expiryDate: date("expiryDate", { mode: "string" }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

@@ -11,6 +11,16 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { recipes } from "@/data/recipes";
+import { expiryInfo, expirySortKey, type ExpiryState } from "@shared/food";
+import { cn } from "@/lib/utils";
+
+/** Chip-Stile je Haltbarkeits-Zustand. */
+const expiryStyles: Record<ExpiryState, string> = {
+  expired: "border-destructive bg-destructive/10",
+  today: "border-destructive/60 bg-destructive/5",
+  soon: "border-chart-4/70 bg-chart-4/10",
+  ok: "border-border bg-card",
+};
 
 /** Einfache Normalisierung für den Zutaten-Abgleich. */
 function normalize(s: string): string {
@@ -43,11 +53,14 @@ export default function FoodPage() {
   const utils = trpc.useUtils();
   const query = trpc.food.list.useQuery(undefined, { enabled: isAuthenticated });
   const [name, setName] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+  const today = new Date().toISOString().slice(0, 10);
 
   const addMutation = trpc.food.add.useMutation({
     onSuccess: () => {
       utils.food.list.invalidate();
       setName("");
+      setExpiryDate("");
     },
     onError: () => toast.error("Eintrag konnte nicht gespeichert werden"),
   });
@@ -86,7 +99,14 @@ export default function FoodPage() {
     );
   }
 
-  const items = query.data ?? [];
+  // «Verbrauche zuerst»: ablaufende Vorräte nach vorne, ohne Datum ans Ende
+  const items = [...(query.data ?? [])].sort(
+    (a, b) => expirySortKey(a.expiryDate) - expirySortKey(b.expiryDate),
+  );
+  const urgentCount = items.filter(i => {
+    const info = expiryInfo(i.expiryDate, today);
+    return info && info.state !== "ok";
+  }).length;
 
   return (
     <div className="container max-w-2xl py-6">
@@ -96,11 +116,14 @@ export default function FoodPage() {
       />
 
       <form
-        className="mb-5 flex gap-2"
+        className="mb-2 flex gap-2"
         onSubmit={e => {
           e.preventDefault();
           if (!name.trim()) return;
-          addMutation.mutate({ name: name.trim() });
+          addMutation.mutate({
+            name: name.trim(),
+            expiryDate: expiryDate || null,
+          });
         }}
       >
         <Input
@@ -109,34 +132,72 @@ export default function FoodPage() {
           onChange={e => setName(e.target.value)}
           aria-label="Lebensmittel hinzufügen"
         />
+        <Input
+          type="date"
+          className="w-40 shrink-0"
+          value={expiryDate}
+          min={today}
+          onChange={e => setExpiryDate(e.target.value)}
+          aria-label="Mindesthaltbarkeitsdatum (optional)"
+        />
         <Button type="submit" disabled={addMutation.isPending || !name.trim()} aria-label="Lebensmittel speichern">
           <Plus className="h-4 w-4" aria-hidden="true" />
         </Button>
       </form>
+      <p className="mb-5 text-xs text-muted-foreground">
+        Datum = Mindesthaltbarkeit (optional). Bald ablaufende Vorräte rutschen nach vorne und
+        werden markiert.
+      </p>
 
       {query.isLoading ? (
         <div className="flex justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Lädt" />
         </div>
       ) : items.length > 0 ? (
-        <div className="mb-8 flex flex-wrap gap-2">
-          {items.map(item => (
-            <span
-              key={item.id}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card py-1 pl-3.5 pr-1.5 text-sm font-medium"
-            >
-              {item.name}
-              <button
-                type="button"
-                onClick={() => removeMutation.mutate({ id: item.id })}
-                className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive"
-                aria-label={`${item.name} entfernen`}
-              >
-                <Trash2 className="h-3 w-3" aria-hidden="true" />
-              </button>
-            </span>
-          ))}
-        </div>
+        <>
+          {urgentCount > 0 && (
+            <p className="mb-3 rounded-lg bg-accent px-4 py-2.5 text-sm text-accent-foreground">
+              {urgentCount === 1
+                ? "Ein Vorrat sollte bald verbraucht werden"
+                : `${urgentCount} Vorräte sollten bald verbraucht werden`}{" "}
+              – die Rezeptvorschläge unten helfen dabei.
+            </p>
+          )}
+          <div className="mb-8 flex flex-wrap gap-2">
+            {items.map(item => {
+              const info = expiryInfo(item.expiryDate, today);
+              return (
+                <span
+                  key={item.id}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full border py-1 pl-3.5 pr-1.5 text-sm font-medium",
+                    expiryStyles[info?.state ?? "ok"],
+                  )}
+                >
+                  {item.name}
+                  {info && info.state !== "ok" && (
+                    <span
+                      className={cn(
+                        "text-xs font-normal",
+                        info.state === "soon" ? "text-muted-foreground" : "text-destructive",
+                      )}
+                    >
+                      {info.label}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeMutation.mutate({ id: item.id })}
+                    className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive"
+                    aria-label={`${item.name} entfernen`}
+                  >
+                    <Trash2 className="h-3 w-3" aria-hidden="true" />
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+        </>
       ) : (
         <div className="mb-8 rounded-xl border border-dashed border-border p-8 text-center">
           <Refrigerator className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" aria-hidden="true" />

@@ -354,8 +354,24 @@ export const appRouter = router({
   food: router({
     list: protectedProcedure.query(({ ctx }) => db.getFoodItems(ctx.user.id)),
     add: protectedProcedure
-      .input(z.object({ name: z.string().min(1).max(160), quantity: z.string().max(80).optional() }))
-      .mutation(({ ctx, input }) => db.addFoodItem({ userId: ctx.user.id, ...input })),
+      .input(
+        z.object({
+          name: z.string().min(1).max(160),
+          quantity: z.string().max(80).optional(),
+          expiryDate: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/)
+            .nullish(),
+        }),
+      )
+      .mutation(({ ctx, input }) =>
+        db.addFoodItem({
+          userId: ctx.user.id,
+          name: input.name,
+          quantity: input.quantity,
+          expiryDate: input.expiryDate ?? null,
+        }),
+      ),
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteFoodItem(input.id, ctx.user.id)),

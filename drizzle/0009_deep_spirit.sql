@@ -1,0 +1,1 @@
+ALTER TABLE `foodItems` ADD `expiryDate` date;
