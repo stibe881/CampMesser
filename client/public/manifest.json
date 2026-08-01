@@ -9,6 +9,29 @@
   "background_color": "#faf6ef",
   "theme_color": "#1d4230",
   "lang": "de-CH",
+  "shortcuts": [
+    {
+      "name": "SOS & Notfall",
+      "short_name": "SOS",
+      "description": "GPS-Koordinaten und Notfallnummern",
+      "url": "/sos",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Camp-Wetter",
+      "short_name": "Wetter",
+      "description": "Vorhersage und Unwetterwarnungen",
+      "url": "/wetter",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Wasserwaage",
+      "short_name": "Waage",
+      "description": "Wohnwagen und Tisch ausrichten",
+      "url": "/wasserwaage",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
   "icons": [
     {
       "src": "/icons/favicon-32.png",
