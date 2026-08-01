@@ -137,8 +137,14 @@ function SpotCard({ spot, onDelete }: { spot: { id: number; name: string; latitu
             {sun.sunset}
           </span>
           <a
-            href={`/sonne?lat=${spot.latitude}&lon=${spot.longitude}&name=${encodeURIComponent(spot.name)}&spot=${spot.id}`}
+            href={`/zeltplaetze/${spot.id}`}
             className="ml-auto font-medium text-primary hover:underline"
+          >
+            Dossier →
+          </a>
+          <a
+            href={`/sonne?lat=${spot.latitude}&lon=${spot.longitude}&name=${encodeURIComponent(spot.name)}&spot=${spot.id}`}
+            className="font-medium text-primary hover:underline"
           >
             Sonnenstand →
           </a>

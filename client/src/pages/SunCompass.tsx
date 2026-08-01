@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Compass,
   MapPin,
@@ -471,7 +471,7 @@ export default function SunCompassPage() {
   const [geo, setGeo] = useState<GeoState>(() =>
     urlSpot ? { status: "ok", lat: urlSpot.lat, lng: urlSpot.lon } : { status: "loading" },
   );
-  const [baseDate] = useState(() => new Date());
+  const [baseDate, setBaseDate] = useState(() => new Date());
   const [minutes, setMinutes] = useState(() => {
     const now = new Date();
     return now.getHours() * 60 + now.getMinutes();
@@ -560,11 +560,15 @@ export default function SunCompassPage() {
   }, []);
 
   // Slider auf die aktuelle Uhrzeit stellen, wenn die App aus dem Hintergrund
-  // zurückkehrt (bei installierter PWA bleibt die Seite sonst auf der alten Zeit stehen)
+  // zurückkehrt (bei installierter PWA bleibt die Seite sonst auf der alten Zeit
+  // stehen) – aber nur, wenn kein Planungs-Datum in der Zukunft gewählt ist
+  const baseDateRef = useRef(baseDate);
+  baseDateRef.current = baseDate;
   useEffect(() => {
     const syncToNow = () => {
       if (document.visibilityState === "visible") {
         const now = new Date();
+        if (baseDateRef.current.toDateString() !== now.toDateString()) return;
         setMinutes(now.getHours() * 60 + now.getMinutes());
       }
     };
@@ -766,6 +770,29 @@ export default function SunCompassPage() {
                 )}
               </div>
 
+              {/* Datum für die Planung: die Sonnenbahn steht je nach Jahreszeit anders */}
+              <div className="mt-4 flex items-center gap-2">
+                <label htmlFor="sun-date" className="text-sm font-medium text-muted-foreground">
+                  Datum
+                </label>
+                <Input
+                  id="sun-date"
+                  type="date"
+                  className="h-8 w-40"
+                  value={`${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, "0")}-${String(baseDate.getDate()).padStart(2, "0")}`}
+                  onChange={e => {
+                    const parsed = new Date(`${e.target.value}T12:00:00`);
+                    if (!Number.isNaN(parsed.getTime())) setBaseDate(parsed);
+                  }}
+                  aria-label="Datum für die Sonnenstand-Anzeige wählen"
+                />
+                {baseDate.toDateString() !== new Date().toDateString() && (
+                  <span className="rounded-full bg-chart-4/20 px-2.5 py-1 text-xs font-medium">
+                    Planungs-Ansicht
+                  </span>
+                )}
+              </div>
+
               {/* Zeit-Slider */}
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between">
@@ -777,10 +804,11 @@ export default function SunCompassPage() {
                       type="button"
                       onClick={() => {
                         const now = new Date();
+                        setBaseDate(now);
                         setMinutes(now.getHours() * 60 + now.getMinutes());
                       }}
                       className="rounded-md border border-border px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-accent"
-                      aria-label="Regler auf die aktuelle Uhrzeit stellen"
+                      aria-label="Datum und Regler auf jetzt stellen"
                     >
                       Jetzt
                     </button>

@@ -35,6 +35,7 @@ const pageLoaders = {
   Drying: () => import("./pages/Drying"),
   Quiet: () => import("./pages/Quiet"),
   Spots: () => import("./pages/Spots"),
+  SpotDetail: () => import("./pages/SpotDetail"),
   Trips: () => import("./pages/Trips"),
   Level: () => import("./pages/Level"),
   Login: () => import("./pages/Login"),
@@ -90,6 +91,7 @@ const WeatherPage = lazyWithRetry(pageLoaders.Weather);
 const DryingPage = lazyWithRetry(pageLoaders.Drying);
 const QuietPage = lazyWithRetry(pageLoaders.Quiet);
 const SpotsPage = lazyWithRetry(pageLoaders.Spots);
+const SpotDetailPage = lazyWithRetry(pageLoaders.SpotDetail);
 const TripsPage = lazyWithRetry(pageLoaders.Trips);
 const LevelPage = lazyWithRetry(pageLoaders.Level);
 const LoginPage = lazyWithRetry(pageLoaders.Login);
@@ -130,6 +132,7 @@ function Router() {
           <Route path={"/trockenzeiten"} component={DryingPage} />
           <Route path={"/nachtruhe"} component={QuietPage} />
           <Route path={"/zeltplaetze"} component={SpotsPage} />
+          <Route path={"/zeltplaetze/:id"} component={SpotDetailPage} />
           <Route path={"/tagebuch"} component={TripsPage} />
           <Route path={"/wasserwaage"} component={LevelPage} />
           <Route path={"/anmelden"} component={LoginPage} />
