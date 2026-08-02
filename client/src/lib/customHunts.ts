@@ -4,6 +4,7 @@
  * eingebauten Jagden verwenden können.
  */
 import type { ScavengerHunt } from "@/data/familyActivities";
+import { l4 } from "@shared/i18n";
 import { parseHuntStations } from "@shared/hunts";
 
 export interface CustomHuntRow {
@@ -25,7 +26,9 @@ export function customHuntToScavengerHunt(row: CustomHuntRow): ScavengerHunt {
   return {
     id: `${CUSTOM_HUNT_ID_PREFIX}${row.id}`,
     title: row.title,
-    ageHint: row.ageHint ?? "selbst erstellt",
+    ageHint:
+      row.ageHint ??
+      l4("selbst erstellt", "création maison", "creata da te", "self-made"),
     durationMinutes: row.durationMinutes,
     intro: row.intro,
     preparation: row.preparation ?? undefined,

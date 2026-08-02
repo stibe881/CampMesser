@@ -39,7 +39,10 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
       Schwierigkeit als Schlüssel + `RECIPE_METHOD_LABELS`/
       `RECIPE_DIFFICULTY_LABELS`-L4 in shared/customRecipes.ts; eigene
       Rezepte bleiben Strings, Anzeige via pick)
-- [ ] Family (+Editoren), HuntPrint
+- [x] Family (+Editoren), HuntPrint (Namespaces `family`/`huntPrint`;
+      shared/hunts.ts enthält keine Anzeigetexte – unverändert; eigene Jagden
+      bleiben Strings, Anzeige via pick; Lösungswörter je Sprache nachgedichtet,
+      Stations-Buchstaben als L4 mit "" = kein Buchstabe in dieser Sprache)
 - [x] NotFound, ErrorBoundary, LoginPrompt, PageHeader-Verwendungen
 
 ### Inhalts-Daten (L4)
@@ -50,7 +53,8 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 - [x] data/nature.ts (16 Einträge + Kategorien; Trivialnamen je Sprache,
       wissenschaftliche Namen als sprachneutrale Strings)
 - [x] data/recipes.ts (18 Rezepte inkl. Zutaten/Schritte)
-- [ ] data/familyActivities.ts (6 Jagden, Quizze)
+- [x] data/familyActivities.ts (6 Jagden, 5 Quizze inkl. aller Stationen,
+      Fragen, Optionen und Erklärungen)
 - [x] data/emergency.ts
 - [x] shared/packTemplates.ts (Szenarien + Einträge)
 

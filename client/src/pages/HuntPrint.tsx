@@ -3,6 +3,8 @@ import { useParams } from "wouter";
 import { ArrowLeft, Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { scavengerHunts } from "@/data/familyActivities";
+import { pick } from "@shared/i18n";
+import { useI18n } from "@/i18n";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { customHuntDbId, customHuntToScavengerHunt } from "@/lib/customHunts";
@@ -14,6 +16,7 @@ import { customHuntDbId, customHuntToScavengerHunt } from "@/lib/customHunts";
  * Unterstützt eingebaute und eigene Jagden (IDs mit «eigene-»-Präfix).
  */
 export default function HuntPrintPage() {
+  const { lang, t } = useI18n();
   const params = useParams<{ id: string }>();
   const customId = customHuntDbId(params.id ?? "");
   const { isAuthenticated } = useAuth();
@@ -30,20 +33,19 @@ export default function HuntPrintPage() {
 
   useEffect(() => {
     document.title = hunt
-      ? `${hunt.title} – Schnitzeljagd zum Ausdrucken`
-      : "Schnitzeljagd";
+      ? t.huntPrint.docTitle(pick(hunt.title, lang))
+      : t.huntPrint.docTitleFallback;
     return () => {
-      document.title =
-        "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping";
+      document.title = t.huntPrint.appTitle;
     };
-  }, [hunt]);
+  }, [hunt, lang, t]);
 
   if (customId !== null && customQuery.isLoading) {
     return (
       <div className="container flex justify-center py-16">
         <Loader2
           className="h-6 w-6 animate-spin text-muted-foreground"
-          aria-label="Lädt"
+          aria-label={t.common.loading}
         />
       </div>
     );
@@ -52,22 +54,25 @@ export default function HuntPrintPage() {
   if (!hunt) {
     return (
       <div className="container max-w-2xl py-8">
-        <p className="text-muted-foreground">
-          Diese Schnitzeljagd wurde nicht gefunden.
-        </p>
+        <p className="text-muted-foreground">{t.huntPrint.notFound}</p>
         <Button
           variant="outline"
           className="mt-3"
           onClick={() => window.history.back()}
         >
           <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          Zurück
+          {t.common.back}
         </Button>
       </div>
     );
   }
 
-  const letterCount = hunt.stations.filter(s => s.letter).length;
+  // Buchstaben-Stationen in der aktiven Sprache (Lösungswörter sind je Sprache nachgedichtet)
+  const stationHasLetter = hunt.stations.map(s =>
+    s.letter ? pick(s.letter, lang) !== "" : false
+  );
+  const letterCount = stationHasLetter.filter(Boolean).length;
+  const solutionWord = hunt.solutionWord ? pick(hunt.solutionWord, lang) : "";
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-8 print:max-w-none print:px-0 print:py-0">
@@ -79,39 +84,46 @@ export default function HuntPrintPage() {
           onClick={() => window.history.back()}
         >
           <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          Zurück
+          {t.common.back}
         </Button>
         <Button size="sm" onClick={() => window.print()}>
           <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          Drucken / Als PDF sichern
+          {t.huntPrint.printButton}
         </Button>
       </div>
 
       <div className="print-sheet">
         <header className="mb-6 border-b-2 border-foreground pb-4">
           <p className="text-xs font-semibold uppercase tracking-widest">
-            CampMesser · Schnitzeljagd
+            {t.huntPrint.headerKicker}
           </p>
-          <h1 className="mt-1 font-serif text-3xl font-bold">{hunt.title}</h1>
+          <h1 className="mt-1 font-serif text-3xl font-bold">
+            {pick(hunt.title, lang)}
+          </h1>
           <p className="mt-1 text-sm">
-            {hunt.ageHint} · ca. {hunt.durationMinutes} Minuten ·{" "}
-            {hunt.stations.length} Stationen
+            {t.huntPrint.meta(
+              pick(hunt.ageHint, lang),
+              hunt.durationMinutes,
+              hunt.stations.length
+            )}
           </p>
         </header>
 
         <section className="mb-5">
           <h2 className="mb-1 text-sm font-bold uppercase tracking-wide">
-            Die Mission
+            {t.huntPrint.missionTitle}
           </h2>
-          <p className="text-sm leading-relaxed">{hunt.intro}</p>
+          <p className="text-sm leading-relaxed">{pick(hunt.intro, lang)}</p>
         </section>
 
         {hunt.preparation && (
           <section className="mb-5 rounded-lg border border-dashed border-foreground/40 p-3">
             <h2 className="mb-1 text-sm font-bold uppercase tracking-wide">
-              Für die Erwachsenen (vorher lesen)
+              {t.huntPrint.adultsTitle}
             </h2>
-            <p className="text-sm leading-relaxed">{hunt.preparation}</p>
+            <p className="text-sm leading-relaxed">
+              {pick(hunt.preparation, lang)}
+            </p>
           </section>
         )}
 
@@ -121,28 +133,31 @@ export default function HuntPrintPage() {
               key={i}
               className="print-station rounded-lg border border-foreground/30 p-4"
             >
-              <h3 className="font-serif text-lg font-bold">{station.title}</h3>
+              <h3 className="font-serif text-lg font-bold">
+                {pick(station.title, lang)}
+              </h3>
               <p className="mt-1 text-sm italic leading-relaxed">
-                {station.story}
+                {pick(station.story, lang)}
               </p>
               <p className="mt-2 text-sm leading-relaxed">
-                <strong>Aufgabe:</strong> {station.task}
+                <strong>{t.huntPrint.taskLabel}</strong>{" "}
+                {pick(station.task, lang)}
               </p>
               {station.hint && (
                 <p className="mt-1.5 text-xs leading-relaxed">
-                  <strong>Hinweis (nur wenn ihr feststeckt):</strong>{" "}
-                  {station.hint}
+                  <strong>{t.huntPrint.hintLabel}</strong>{" "}
+                  {pick(station.hint, lang)}
                 </p>
               )}
               <div className="mt-3 flex items-center gap-3 text-sm">
-                <span>Geschafft? Abhaken:</span>
+                <span>{t.huntPrint.doneLabel}</span>
                 <span
                   className="inline-block h-5 w-5 rounded border-2 border-foreground"
                   aria-hidden="true"
                 />
-                {station.letter && (
+                {stationHasLetter[i] && (
                   <span className="ml-auto flex items-center gap-2">
-                    Euer Buchstabe:
+                    {t.huntPrint.letterLabel}
                     <span
                       className="inline-block h-8 w-8 rounded border-2 border-foreground"
                       aria-hidden="true"
@@ -154,17 +169,16 @@ export default function HuntPrintPage() {
           ))}
         </section>
 
-        {hunt.solutionWord && (
+        {solutionWord && (
           <section className="mt-6 rounded-lg border-2 border-foreground p-4">
             <h2 className="mb-2 text-sm font-bold uppercase tracking-wide">
-              Das Lösungswort
+              {t.huntPrint.solutionTitle}
             </h2>
             <p className="mb-3 text-sm">
-              Tragt die gesammelten Buchstaben der Reihe nach ein ({letterCount}{" "}
-              Buchstaben):
+              {t.huntPrint.solutionText(letterCount)}
             </p>
             <div className="flex flex-wrap gap-2">
-              {Array.from({ length: hunt.solutionWord.length }, (_, i) => (
+              {Array.from({ length: solutionWord.length }, (_, i) => (
                 <span
                   key={i}
                   className="inline-block h-10 w-10 rounded border-2 border-foreground"
@@ -177,14 +191,13 @@ export default function HuntPrintPage() {
 
         <section className="mt-5">
           <h2 className="mb-1 text-sm font-bold uppercase tracking-wide">
-            Das Finale
+            {t.huntPrint.finaleTitle}
           </h2>
-          <p className="text-sm leading-relaxed">{hunt.finale}</p>
+          <p className="text-sm leading-relaxed">{pick(hunt.finale, lang)}</p>
         </section>
 
         <footer className="mt-8 border-t border-foreground/30 pt-3 text-center text-xs">
-          Viel Spass beim Entdecken! · CampMesser – Das Schweizer Taschenmesser
-          fürs Zelt-Camping
+          {t.huntPrint.footer}
         </footer>
       </div>
     </div>
