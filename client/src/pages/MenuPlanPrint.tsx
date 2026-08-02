@@ -75,6 +75,10 @@ export default function MenuPlanPrintPage() {
   const entryFor = (day: string, meal: Meal) =>
     entries.find(e => e.day === day && e.meal === meal);
 
+  /** Tages-Notiz eines Tages – erscheint kursiv unter dem Tages-Datum. */
+  const dayNotes = menuQuery.data?.dayNotes ?? [];
+  const noteFor = (day: string) => dayNotes.find(n => n.day === day)?.note;
+
   /** Anzeigetitel eines Slots in der aktiven Sprache (Freitext wie erfasst). */
   const entryTitle = (entry: NonNullable<ReturnType<typeof entryFor>>) => {
     if (entry.recipeId) {
@@ -204,6 +208,11 @@ export default function MenuPlanPrintPage() {
                 <tr key={day} className="print-station">
                   <th className="border border-foreground/40 px-2 py-1.5 text-left align-top text-xs font-semibold capitalize">
                     {formatDay(day)}
+                    {noteFor(day) && (
+                      <span className="block break-words font-normal normal-case italic">
+                        {noteFor(day)}
+                      </span>
+                    )}
                   </th>
                   {MEALS.map(meal => {
                     const entry = entryFor(day, meal);

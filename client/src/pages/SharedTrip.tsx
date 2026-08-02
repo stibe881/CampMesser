@@ -115,7 +115,7 @@ export default function SharedTripPage() {
     );
   }
 
-  const { trip, spot, menu, packList } = data;
+  const { trip, spot, menu, menuDayNotes, packList } = data;
   const placeName = spot?.name ?? trip.location ?? t.trips.unknownPlace;
   const title = trip.title || placeName;
   const nights = tripNights(trip.startDate, trip.endDate);
@@ -145,11 +145,14 @@ export default function SharedTripPage() {
     if (entry.customRecipeName) return entry.customRecipeName;
     return entry.freeText ?? "–";
   };
-  const menuDays = tripDays(trip.startDate, trip.endDate).filter(day =>
-    menu.some(e => e.day === day)
+  // Tage mit Mahlzeiten ODER Tages-Notiz erscheinen in der Tabelle
+  const menuDays = tripDays(trip.startDate, trip.endDate).filter(
+    day =>
+      menu.some(e => e.day === day) || menuDayNotes.some(n => n.day === day)
   );
   const entryFor = (day: string, meal: (typeof MEALS)[number]) =>
     menu.find(e => e.day === day && e.meal === meal);
+  const noteFor = (day: string) => menuDayNotes.find(n => n.day === day)?.note;
 
   // Packliste nach Person gruppieren: «Allgemein» zuerst (Muster SharedPackList)
   const items = packList?.items ?? [];
@@ -339,6 +342,11 @@ export default function SharedTripPage() {
                     <tr key={day}>
                       <th className="border border-border px-2 py-1.5 text-left align-top text-xs font-semibold capitalize">
                         {fmtDay(day)}
+                        {noteFor(day) && (
+                          <span className="block break-words font-normal normal-case italic text-muted-foreground">
+                            {noteFor(day)}
+                          </span>
+                        )}
                       </th>
                       {MEALS.map(meal => {
                         const entry = entryFor(day, meal);

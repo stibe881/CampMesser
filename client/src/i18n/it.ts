@@ -2293,6 +2293,15 @@ export const it: Translation = {
     autofillFailed: "Riempimento automatico non riuscito",
     editedBy: name => `di ${name}`,
     editedByTitle: (name, date) => `Ultima modifica di ${name} il ${date}`,
+    dayNoteAria: (day: string) => `Modificare la nota del giorno per ${day}`,
+    dayNoteTitle: "Nota del giorno",
+    dayNoteDescription:
+      "Una breve nota per la giornata – tutti i compagni di viaggio la vedono nel piano dei menu.",
+    dayNoteLabel: "Nota",
+    dayNotePlaceholder: "ad es. Serata in pizzeria",
+    dayNoteRemove: "Rimuovi la nota",
+    dayNoteSaved: "Nota salvata",
+    dayNoteRemoved: "Nota rimossa",
   },
   tripShopping: {
     title: "Lista della spesa del viaggio",

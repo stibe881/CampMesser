@@ -2983,6 +2983,7 @@ export const appRouter = router({
             ? await db.getCampSpot(trip.spotId, trip.userId)
             : undefined;
         const entries = await db.getMenuEntriesForTrip(trip.id);
+        const dayNotes = await db.getMenuDayNotesForTrip(trip.id);
         const customNameById = new Map<number, string>();
         if (entries.some(e => e.customRecipeId != null)) {
           const own = await db.getCustomRecipes(trip.userId);
@@ -3038,6 +3039,7 @@ export const appRouter = router({
                 : null,
             freeText: e.freeText,
           })),
+          menuDayNotes: dayNotes.map(n => ({ day: n.day, note: n.note })),
           packList,
         };
       }),
@@ -3055,11 +3057,19 @@ export const appRouter = router({
         type EntryWithEditor = Awaited<
           ReturnType<typeof db.getMenuEntriesForTrip>
         >[number] & { updatedByName: string | null };
+        type DayNote = Awaited<
+          ReturnType<typeof db.getMenuDayNotesForTrip>
+        >[number];
         const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
         if (!trip) {
-          return { trip: null, entries: [] as EntryWithEditor[] };
+          return {
+            trip: null,
+            entries: [] as EntryWithEditor[],
+            dayNotes: [] as DayNote[],
+          };
         }
         const entries = await db.getMenuEntriesForTrip(input.tripId);
+        const dayNotes = await db.getMenuDayNotesForTrip(input.tripId);
         const names = await db.getUserDisplayNames(
           entries
             .map(e => e.updatedByUserId)
@@ -3074,6 +3084,7 @@ export const appRouter = router({
                 ? (names.get(entry.updatedByUserId) ?? null)
                 : null,
           })),
+          dayNotes,
         };
       }),
     /** Slot setzen: genau eine Quelle (Rezept, eigenes Rezept oder Freitext). */
@@ -3152,6 +3163,41 @@ export const appRouter = router({
           });
         }
         await db.deleteMenuEntrySlot(input.tripId, input.day, input.meal);
+        return { success: true } as const;
+      }),
+    /**
+     * Tages-Notiz setzen oder löschen (#153): eine kurze Notiz pro Tag
+     * («Pizzeria-Abend»); leerer/fehlender Text löscht die Notiz.
+     * Mitreisende dürfen wie beim Menüplan mitschreiben (canAccessTrip).
+     */
+    setDayNote: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number().int().positive(),
+          day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          note: z.string().max(200).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        if (input.day < trip.startDate || input.day > trip.endDate) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Der Tag liegt ausserhalb des Aufenthalts.",
+          });
+        }
+        const note = input.note?.trim() || null;
+        if (note) {
+          await db.upsertMenuDayNote(input.tripId, input.day, note);
+        } else {
+          await db.deleteMenuDayNote(input.tripId, input.day);
+        }
         return { success: true } as const;
       }),
   }),

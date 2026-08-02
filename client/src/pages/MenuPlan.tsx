@@ -6,6 +6,7 @@ import {
   Clock,
   CookingPot,
   Loader2,
+  Pencil,
   Plus,
   Printer,
   Search,
@@ -110,6 +111,11 @@ export default function MenuPlanPage() {
   const [picker, setPicker] = useState<PickerSlot | null>(null);
   const [search, setSearch] = useState("");
   const [freeText, setFreeText] = useState("");
+  /** Tages-Notiz-Editor: Tag + aktueller Eingabewert (null = zu). */
+  const [noteEditor, setNoteEditor] = useState<{
+    day: string;
+    value: string;
+  } | null>(null);
   /** Auswahl «Persönliche Liste / Reise-Liste» offen (nur geteilte Reisen). */
   const [listChoiceOpen, setListChoiceOpen] = useState(false);
 
@@ -130,6 +136,19 @@ export default function MenuPlanPage() {
   const removeMutation = trpc.menu.remove.useMutation({
     onSuccess: () => utils.menu.listByTrip.invalidate({ tripId }),
     onError: () => toast.error(t.common.deleteFailed),
+  });
+  // Tages-Notiz speichern/löschen – leerer Text löscht serverseitig
+  const setDayNoteMutation = trpc.menu.setDayNote.useMutation({
+    onSuccess: (_data, variables) => {
+      utils.menu.listByTrip.invalidate({ tripId });
+      toast.success(
+        variables.note?.trim()
+          ? t.menuPlan.dayNoteSaved
+          : t.menuPlan.dayNoteRemoved
+      );
+      setNoteEditor(null);
+    },
+    onError: e => toast.error(e.message || t.common.saveFailed),
   });
   // Autofill nutzt eigene Mutations-Instanzen ohne Dialog-Nebenwirkungen
   const autofillSetMutation = trpc.menu.set.useMutation();
@@ -185,6 +204,10 @@ export default function MenuPlanPage() {
 
   const entryFor = (day: string, meal: Meal) =>
     entries.find(e => e.day === day && e.meal === meal);
+
+  /** Tages-Notiz eines Tages (undefined = keine). */
+  const dayNotes = menuQuery.data?.dayNotes ?? [];
+  const noteFor = (day: string) => dayNotes.find(n => n.day === day)?.note;
 
   /** Anzeigetitel eines Slots in der aktiven Sprache. */
   const entryTitle = (entry: NonNullable<ReturnType<typeof entryFor>>) => {
@@ -495,9 +518,29 @@ export default function MenuPlanPage() {
             key={day}
             className="overflow-hidden rounded-xl border border-border"
           >
-            <h2 className="border-b border-border bg-muted/50 px-4 py-2 font-serif text-sm font-semibold capitalize">
-              {formatDay(day)}
-            </h2>
+            <div className="border-b border-border bg-muted/50 px-4 py-2">
+              <div className="flex items-center gap-2">
+                <h2 className="font-serif text-sm font-semibold capitalize">
+                  {formatDay(day)}
+                </h2>
+                {/* Dezenter Stift: Tages-Notiz («Pizzeria-Abend») bearbeiten */}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setNoteEditor({ day, value: noteFor(day) ?? "" })
+                  }
+                  aria-label={t.menuPlan.dayNoteAria(formatDay(day))}
+                  className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              </div>
+              {noteFor(day) && (
+                <p className="mt-0.5 break-words text-xs italic text-muted-foreground">
+                  {noteFor(day)}
+                </p>
+              )}
+            </div>
             <ul className="divide-y divide-border/60">
               {MEALS.map(meal => {
                 const entry = entryFor(day, meal);
@@ -672,6 +715,94 @@ export default function MenuPlanPage() {
                       {t.menuPlan.freeTextSave}
                     </Button>
                   </div>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Tages-Notiz bearbeiten: kurzer Freitext pro Tag, leer = löschen */}
+      <Dialog
+        open={noteEditor !== null}
+        onOpenChange={open => !open && setNoteEditor(null)}
+      >
+        <DialogContent className="max-w-sm">
+          {noteEditor && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-serif text-xl">
+                  {t.menuPlan.dayNoteTitle}
+                  {" · "}
+                  <span className="capitalize">
+                    {formatDay(noteEditor.day)}
+                  </span>
+                </DialogTitle>
+                <DialogDescription>
+                  {t.menuPlan.dayNoteDescription}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="menu-day-note">
+                    {t.menuPlan.dayNoteLabel}
+                  </Label>
+                  <Input
+                    id="menu-day-note"
+                    className="mt-1.5"
+                    autoFocus
+                    maxLength={200}
+                    placeholder={t.menuPlan.dayNotePlaceholder}
+                    value={noteEditor.value}
+                    onChange={e =>
+                      setNoteEditor({
+                        day: noteEditor.day,
+                        value: e.target.value,
+                      })
+                    }
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && !setDayNoteMutation.isPending) {
+                        setDayNoteMutation.mutate({
+                          tripId,
+                          day: noteEditor.day,
+                          note: noteEditor.value.trim() || null,
+                        });
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  {noteFor(noteEditor.day) && (
+                    <Button
+                      variant="outline"
+                      className="text-destructive hover:text-destructive"
+                      disabled={setDayNoteMutation.isPending}
+                      onClick={() =>
+                        setDayNoteMutation.mutate({
+                          tripId,
+                          day: noteEditor.day,
+                          note: null,
+                        })
+                      }
+                    >
+                      {t.menuPlan.dayNoteRemove}
+                    </Button>
+                  )}
+                  <Button
+                    className="flex-1"
+                    disabled={setDayNoteMutation.isPending}
+                    onClick={() =>
+                      setDayNoteMutation.mutate({
+                        tripId,
+                        day: noteEditor.day,
+                        note: noteEditor.value.trim() || null,
+                      })
+                    }
+                  >
+                    {setDayNoteMutation.isPending
+                      ? t.common.saving
+                      : t.common.save}
+                  </Button>
                 </div>
               </div>
             </>

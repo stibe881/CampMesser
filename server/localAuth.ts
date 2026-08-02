@@ -151,6 +151,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     tripMembers,
     tripPhotos,
     tripShoppingItems,
+    menuDayNotes,
     menuEntries,
     customRecipes,
     customHunts,
@@ -233,6 +234,11 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     await db
       .delete(menuEntries)
       .where(inArray(menuEntries.tripId, ownedTripIds));
+    // Tages-Notizen des Menüplans hängen ohne userId an der Reise –
+    // Notizen in FREMDEN Reisen bleiben bewusst stehen (gehören zur Reise)
+    await db
+      .delete(menuDayNotes)
+      .where(inArray(menuDayNotes.tripId, ownedTripIds));
     await db
       .delete(tripMembers)
       .where(inArray(tripMembers.tripId, ownedTripIds));

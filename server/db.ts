@@ -34,6 +34,7 @@ import {
   InsertTripShoppingItem,
   InsertUser,
   inventoryItems,
+  menuDayNotes,
   menuEntries,
   natureSightings,
   packItems,
@@ -1159,6 +1160,8 @@ export async function deleteTripLog(id: number, userId: number) {
   // Der Router stellt vor dem Aufruf sicher, dass NUR die Besitzerin/der
   // Besitzer hier ankommt.
   await db.delete(menuEntries).where(eq(menuEntries.tripId, id));
+  // Tages-Notizen des Menüplans hängen ebenfalls an der Reise
+  await db.delete(menuDayNotes).where(eq(menuDayNotes.tripId, id));
   // Mitglieder und offene Einladungs-Links der Reise mit aufräumen
   await db.delete(tripMembers).where(eq(tripMembers.tripId, id));
   await db.delete(tripInvites).where(eq(tripInvites.tripId, id));
@@ -1565,6 +1568,43 @@ export async function deleteMenuEntry(
         eq(menuEntries.meal, meal)
       )
     );
+}
+
+/**
+ * Tages-Notizen einer Reise (aufsteigend nach Tag) – nur NACH einer
+ * canAccessTrip-Prüfung im Router verwenden.
+ */
+export async function getMenuDayNotesForTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(menuDayNotes)
+    .where(eq(menuDayNotes.tripId, tripId))
+    .orderBy(menuDayNotes.day);
+}
+
+/**
+ * Tages-Notiz setzen oder ersetzen (Upsert über unique tripId+day) –
+ * nur NACH einer canAccessTrip-Prüfung im Router verwenden.
+ */
+export async function upsertMenuDayNote(
+  tripId: number,
+  day: string,
+  note: string
+) {
+  const db = requireDb(await getDb());
+  await db
+    .insert(menuDayNotes)
+    .values({ tripId, day, note })
+    .onDuplicateKeyUpdate({ set: { note } });
+}
+
+/** Tages-Notiz löschen – nur NACH einer canAccessTrip-Prüfung im Router. */
+export async function deleteMenuDayNote(tripId: number, day: string) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(menuDayNotes)
+    .where(and(eq(menuDayNotes.tripId, tripId), eq(menuDayNotes.day, day)));
 }
 
 // ── Fotos zu Zeltplatz-Favoriten ──

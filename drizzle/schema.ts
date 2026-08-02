@@ -567,6 +567,33 @@ export const menuEntries = mysqlTable(
 export type MenuEntry = typeof menuEntries.$inferSelect;
 export type InsertMenuEntry = typeof menuEntries.$inferInsert;
 
+/**
+ * Tages-Notiz im Menüplan: eine kurze Freitext-Notiz pro Reise und Tag
+ * (z. B. «Pizzeria-Abend»). Genau eine Notiz pro Tag (unique tripId+day);
+ * gelöscht wird durch Entfernen der Zeile. Kein userId – die Notiz gehört
+ * zur Reise (Muster tripShoppingItems), die Berechtigung prüft der Router
+ * via canAccessTrip.
+ */
+export const menuDayNotes = mysqlTable(
+  "menuDayNotes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    /** Verknüpfter Tagebuch-/Trip-Eintrag (tripLogs.id) */
+    tripId: int("tripId").notNull(),
+    day: date("day", { mode: "string" }).notNull(),
+    note: varchar("note", { length: 200 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    index("menuDayNotes_tripId").on(table.tripId),
+    uniqueIndex("menuDayNotes_trip_day").on(table.tripId, table.day),
+  ]
+);
+
+export type MenuDayNote = typeof menuDayNotes.$inferSelect;
+export type InsertMenuDayNote = typeof menuDayNotes.$inferInsert;
+
 /** Einkaufsliste: abhakbare Einträge pro Nutzer*in (manuell oder aus Rezepten). */
 export const shoppingItems = mysqlTable(
   "shoppingItems",

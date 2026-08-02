@@ -2321,6 +2321,15 @@ export const de = {
     editedBy: (name: string) => `von ${name}`,
     editedByTitle: (name: string, date: string) =>
       `Zuletzt geändert von ${name} am ${date}`,
+    dayNoteAria: (day: string) => `Tages-Notiz für ${day} bearbeiten`,
+    dayNoteTitle: "Tages-Notiz",
+    dayNoteDescription:
+      "Eine kurze Notiz zum Tag – alle Mitreisenden sehen sie im Menüplan.",
+    dayNoteLabel: "Notiz",
+    dayNotePlaceholder: "z. B. Pizzeria-Abend",
+    dayNoteRemove: "Notiz entfernen",
+    dayNoteSaved: "Notiz gespeichert",
+    dayNoteRemoved: "Notiz entfernt",
   },
   tripShopping: {
     title: "Reise-Einkaufsliste",

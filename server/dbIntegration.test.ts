@@ -146,6 +146,15 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       meal: "dinner",
       customRecipeId: recipeId,
     });
+    // Tages-Notiz im Menüplan (#153): setzen, ausserhalb des Zeitraums abweisen
+    await authed.menu.setDayNote({
+      tripId,
+      day: "2026-08-01",
+      note: "Pizzeria-Abend",
+    });
+    await expect(
+      authed.menu.setDayNote({ tripId, day: "2026-08-05", note: "X" })
+    ).rejects.toThrow();
     await authed.hunts.save({
       title: "CI-Jagd",
       intro: "Los",
@@ -407,6 +416,35 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     expect(menuShared.trip?.title).toBe("Gemeinsame Reise");
     expect(menuShared.entries.some(e => e.freeText === "Fondue")).toBe(true);
 
+    // Tages-Notizen: das Mitglied sieht die Owner-Notiz, darf überschreiben
+    // und per leerem Text löschen (eine Notiz pro Tag, unique tripId+day)
+    expect(menuShared.dayNotes).toHaveLength(1);
+    expect(menuShared.dayNotes[0]).toMatchObject({
+      day: "2026-08-01",
+      note: "Pizzeria-Abend",
+    });
+    await memberCaller.menu.setDayNote({
+      tripId,
+      day: "2026-08-01",
+      note: "Fondue-Abend",
+    });
+    await memberCaller.menu.setDayNote({
+      tripId,
+      day: "2026-08-02",
+      note: "Ruhetag",
+    });
+    await memberCaller.menu.setDayNote({
+      tripId,
+      day: "2026-08-02",
+      note: "   ",
+    });
+    const dayNotesAfter = (await authed.menu.listByTrip({ tripId })).dayNotes;
+    expect(dayNotesAfter).toHaveLength(1);
+    expect(dayNotesAfter[0]).toMatchObject({
+      day: "2026-08-01",
+      note: "Fondue-Abend",
+    });
+
     // Reise-Einkaufsliste: Owner und Mitglied teilen sich dieselbe Liste
     await authed.tripShopping.add({
       tripId,
@@ -488,6 +526,13 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       outsiderCaller.packing.toggleItem({ id: sharedItem2.id, checked: false })
     ).rejects.toThrow();
     expect((await outsiderCaller.menu.listByTrip({ tripId })).trip).toBeNull();
+    await expect(
+      outsiderCaller.menu.setDayNote({
+        tripId,
+        day: "2026-08-01",
+        note: "Fremd-Notiz",
+      })
+    ).rejects.toThrow();
 
     // Owner-only: löschen, einladen/widerrufen, fremde Mitglieder entfernen
     await expect(memberCaller.trips.remove({ id: tripId })).rejects.toThrow();
@@ -681,6 +726,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.tripShoppingItems)
         .where(eq(schema.tripShoppingItems.tripId, tripId)),
+      dbc
+        .select()
+        .from(schema.menuDayNotes)
+        .where(eq(schema.menuDayNotes.tripId, tripId)),
     ]);
     expect(remaining.map(rows => rows.length)).toEqual(remaining.map(() => 0));
 

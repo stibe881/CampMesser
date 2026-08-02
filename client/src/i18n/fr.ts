@@ -2315,6 +2315,15 @@ export const fr: Translation = {
     editedBy: name => `par ${name}`,
     editedByTitle: (name, date) =>
       `Dernière modification par ${name} le ${date}`,
+    dayNoteAria: (day: string) => `Modifier la note du jour pour ${day}`,
+    dayNoteTitle: "Note du jour",
+    dayNoteDescription:
+      "Une courte note pour la journée – tous les compagnons de voyage la voient dans le plan des menus.",
+    dayNoteLabel: "Note",
+    dayNotePlaceholder: "p. ex. Soirée pizzeria",
+    dayNoteRemove: "Supprimer la note",
+    dayNoteSaved: "Note enregistrée",
+    dayNoteRemoved: "Note supprimée",
   },
   tripShopping: {
     title: "Liste de courses du séjour",
