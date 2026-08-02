@@ -713,6 +713,14 @@ export const en: Translation = {
     rainSoonAria: "Short-term rain notice",
     rainStartsAt: time => `Rain starts around ${time}`,
     rainEndsAt: time => `Rain stops around ${time}`,
+    placeAddButton: "Add place",
+    placeSearchLabel: "Search a place and save it as a weather favourite",
+    placeSearchPlaceholder: "e.g. Locarno or Scuol",
+    placeSearchCloseAria: "Close place search",
+    placeResultsHint: "One click saves the place and shows its weather.",
+    placeRemoveAria: name => `Remove ${name} from your weather places`,
+    placeLimitHint: max =>
+      `A maximum of ${max} saved places – remove one first.`,
   },
   water: {
     title: "Drinking water calculator",

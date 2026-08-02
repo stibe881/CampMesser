@@ -733,6 +733,14 @@ export const it: Translation = {
     rainSoonAria: "Avviso pioggia a breve termine",
     rainStartsAt: time => `La pioggia inizia verso le ${time}`,
     rainEndsAt: time => `La pioggia smette verso le ${time}`,
+    placeAddButton: "Aggiungi luogo",
+    placeSearchLabel: "Cerca un luogo e salvalo come preferito meteo",
+    placeSearchPlaceholder: "es. Locarno o Scuol",
+    placeSearchCloseAria: "Chiudi la ricerca del luogo",
+    placeResultsHint: "Un clic salva il luogo e ne mostra il meteo.",
+    placeRemoveAria: name => `Rimuovi ${name} dai luoghi meteo`,
+    placeLimitHint: max =>
+      `Al massimo ${max} luoghi salvati – rimuovi prima un luogo.`,
   },
   water: {
     title: "Calcolatore dell'acqua potabile",

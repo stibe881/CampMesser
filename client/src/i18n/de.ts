@@ -745,6 +745,14 @@ export const de = {
     rainSoonAria: "Regen-Kurzfrist-Hinweis",
     rainStartsAt: (time: string) => `Regen beginnt ca. ${time}`,
     rainEndsAt: (time: string) => `Regen hört ca. ${time} auf`,
+    placeAddButton: "Ort hinzufügen",
+    placeSearchLabel: "Ort suchen und als Wetter-Favorit speichern",
+    placeSearchPlaceholder: "z. B. Locarno oder Scuol",
+    placeSearchCloseAria: "Ortssuche schliessen",
+    placeResultsHint: "Ein Klick speichert den Ort und zeigt sein Wetter.",
+    placeRemoveAria: (name: string) => `${name} aus den Wetter-Orten entfernen`,
+    placeLimitHint: (max: number) =>
+      `Maximal ${max} gespeicherte Orte – entferne zuerst einen.`,
   },
   water: {
     title: "Trinkwasser-Rechner",

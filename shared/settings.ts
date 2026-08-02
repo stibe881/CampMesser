@@ -22,6 +22,8 @@ export const SYNCED_SETTING_KEYS = [
   "recipeFavorites",
   /** Einkaufs-Verlauf für Autocomplete-Vorschläge */
   "shoppingHistory",
+  /** Gespeicherte Wetter-Orte (Favoriten der Wettervorhersage) */
+  "weatherPlaces",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];

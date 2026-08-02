@@ -15,9 +15,11 @@ import {
   Info,
   LocateFixed,
   MapPin,
+  Plus,
   RefreshCw,
   Search,
   Snowflake,
+  Star,
   Sun,
   Sunrise,
   Sunset,
@@ -46,6 +48,18 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
 import { trpc } from "@/lib/trpc";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
+import {
+  LAST_WEATHER_PLACE_KEY,
+  MAX_WEATHER_PLACES,
+  WEATHER_PLACES_KEY,
+  addWeatherPlace,
+  isSameWeatherPlace,
+  removeWeatherPlace,
+  sanitizeWeatherPlace,
+  sanitizeWeatherPlaces,
+  type WeatherPlace,
+} from "@/lib/weatherPlaces";
 import { cn } from "@/lib/utils";
 import { LOCALE_TAGS } from "@shared/i18n";
 import {
@@ -255,6 +269,183 @@ function storeComparePlace(place: ComparePlace) {
   } catch {
     // Speicher voll/blockiert – der Vergleich funktioniert trotzdem
   }
+}
+
+/** Gespeicherte Wetter-Orte laden (defensiv – kaputte Daten werden bereinigt). */
+function loadStoredWeatherPlaces(): WeatherPlace[] {
+  try {
+    const raw = localStorage.getItem(WEATHER_PLACES_KEY);
+    return raw ? sanitizeWeatherPlaces(JSON.parse(raw)) : [];
+  } catch {
+    return [];
+  }
+}
+
+function storeWeatherPlaces(places: WeatherPlace[]) {
+  try {
+    localStorage.setItem(WEATHER_PLACES_KEY, JSON.stringify(places));
+  } catch {
+    // Speicher voll/blockiert – die Chips leben dann nur diese Sitzung
+  }
+}
+
+/** Zuletzt gewählten Wetter-Ort laden – null = eigener Standort. */
+function loadLastWeatherPlace(): WeatherPlace | null {
+  try {
+    const raw = localStorage.getItem(LAST_WEATHER_PLACE_KEY);
+    return raw ? sanitizeWeatherPlace(JSON.parse(raw)) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Zuletzt gewählten Wetter-Ort merken bzw. (null) wieder vergessen. */
+function storeLastWeatherPlace(place: WeatherPlace | null) {
+  try {
+    if (place) {
+      localStorage.setItem(LAST_WEATHER_PLACE_KEY, JSON.stringify(place));
+    } else {
+      localStorage.removeItem(LAST_WEATHER_PLACE_KEY);
+    }
+  } catch {
+    // Speicher blockiert – dann startet die Seite eben mit dem Standort
+  }
+}
+
+/**
+ * Ortssuche für die Wetter-Favoriten: gleiche Geocoding-Suche wie der
+ * Vergleich – ein Klick auf ein Resultat speichert den Ort (Stern) und
+ * zeigt sofort sein Wetter.
+ */
+function PlaceSearch({
+  onPick,
+  onClose,
+}: {
+  onPick: (place: WeatherPlace) => void;
+  onClose: () => void;
+}) {
+  const { lang, t } = useI18n();
+  const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [searchFailed, setSearchFailed] = useState(false);
+  const [results, setResults] = useState<PlaceResult[] | null>(null);
+
+  const runSearch = async () => {
+    const q = query.trim();
+    if (q.length < 2 || searching) return;
+    setSearching(true);
+    setSearchFailed(false);
+    setResults(null);
+    try {
+      setResults(await searchPlaces(q, lang));
+    } catch {
+      setSearchFailed(true);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  return (
+    <Card className="mb-4">
+      <CardContent className="pt-5">
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            void runSearch();
+          }}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <Label htmlFor="weather-place-search">
+              {t.weather.placeSearchLabel}
+            </Label>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              aria-label={t.weather.placeSearchCloseAria}
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          </div>
+          <div className="mt-1.5 flex gap-2">
+            <Input
+              id="weather-place-search"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder={t.weather.placeSearchPlaceholder}
+              autoComplete="off"
+            />
+            <Button
+              type="submit"
+              variant="outline"
+              disabled={searching || query.trim().length < 2}
+            >
+              <Search className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.weather.compareSearchButton}
+            </Button>
+          </div>
+        </form>
+        {searching && (
+          <div
+            className="mt-3"
+            aria-busy="true"
+            aria-label={t.weather.compareSearchingAria}
+          >
+            <Skeleton className="h-9 w-full rounded-lg" />
+          </div>
+        )}
+        {searchFailed && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t.weather.compareSearchFailed}
+          </p>
+        )}
+        {!searching && results !== null && results.length === 0 && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t.weather.compareNoResults}
+          </p>
+        )}
+        {!searching && results !== null && results.length > 0 && (
+          <>
+            <ul
+              aria-label={t.weather.compareResultsAria}
+              className="mt-3 space-y-1.5"
+            >
+              {results.map(r => (
+                <li key={r.id}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onPick({
+                        name: r.name,
+                        lat: r.latitude,
+                        lon: r.longitude,
+                      })
+                    }
+                    className="flex w-full items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-left text-sm transition-colors hover:border-primary/50"
+                  >
+                    <Star
+                      className="h-3.5 w-3.5 shrink-0 text-primary"
+                      aria-hidden="true"
+                    />
+                    <span className="font-medium">{r.name}</span>
+                    {r.region && (
+                      <span className="truncate text-xs text-muted-foreground">
+                        {r.region}
+                      </span>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t.weather.placeResultsHint}
+            </p>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 /** Kompakte Tageszelle im Vergleich: Icon, Max/Min, Regen, Böen. */
@@ -659,7 +850,12 @@ export default function WeatherPage() {
   const [data, setData] = useState<WeatherData | null>(null);
   // Ausgewählter Ort: null = eigener Standort, sonst ID des Zeltplatz-Favoriten
   const [selectedSpotId, setSelectedSpotId] = useState<number | null>(null);
+  // Ausgewählter Wetter-Favorit (per Ortssuche gespeicherter Ort)
+  const [selectedPlace, setSelectedPlace] = useState<WeatherPlace | null>(null);
   const [locationLabel, setLocationLabel] = useState<string | null>(null);
+  // Gespeicherte Wetter-Orte (localStorage + Geräte-Sync)
+  const [places, setPlaces] = useState<WeatherPlace[]>(loadStoredWeatherPlaces);
+  const [placeSearchOpen, setPlaceSearchOpen] = useState(false);
   const [fireDanger, setFireDanger] = useState<FireDangerInfo | null>(null);
   const [pollen, setPollen] = useState<PollenState>({ status: "idle" });
   const [compareOpen, setCompareOpen] = useState(false);
@@ -669,6 +865,22 @@ export default function WeatherPage() {
   const { data: spots } = trpc.spots.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+
+  // Geräte-Sync: Wetter-Orte vom Konto übernehmen bzw. Änderungen hochladen
+  const placesSync = useSyncedSetting<WeatherPlace[]>(
+    "weatherPlaces",
+    value => {
+      const clean = sanitizeWeatherPlaces(value);
+      setPlaces(clean);
+      storeWeatherPlaces(clean);
+    }
+  );
+
+  const savePlaces = (next: WeatherPlace[]) => {
+    setPlaces(next);
+    storeWeatherPlaces(next);
+    placesSync.push(next);
+  };
 
   // Waldbrandgefahr (offizielle BAFU-Warnkarte) für den gewählten Ort laden.
   // Nur innerhalb der Schweiz verfügbar – ausserhalb bleibt der Abschnitt ausgeblendet.
@@ -738,7 +950,9 @@ export default function WeatherPage() {
     setState("locating");
     setError(null);
     setSelectedSpotId(null);
+    setSelectedPlace(null);
     setLocationLabel(null);
+    storeLastWeatherPlace(null);
     if (!navigator.geolocation) {
       setState("error");
       setError(t.weather.geoUnsupported);
@@ -764,13 +978,51 @@ export default function WeatherPage() {
     longitude: number;
   }) => {
     setSelectedSpotId(spot.id);
+    setSelectedPlace(null);
     setLocationLabel(spot.name);
     setError(null);
+    storeLastWeatherPlace(null);
     void loadForCoords(spot.latitude, spot.longitude);
   };
 
+  /** Gespeicherten Wetter-Ort anzeigen und als «zuletzt gewählt» merken. */
+  const selectPlace = (place: WeatherPlace) => {
+    setSelectedSpotId(null);
+    setSelectedPlace(place);
+    setLocationLabel(place.name);
+    setError(null);
+    storeLastWeatherPlace(place);
+    void loadForCoords(place.lat, place.lon);
+  };
+
+  /** Suchresultat übernehmen: Ort speichern (Stern) und sofort anzeigen. */
+  const pickSearchResult = (place: WeatherPlace) => {
+    const next = addWeatherPlace(places, place);
+    if (next) savePlaces(next);
+    setPlaceSearchOpen(false);
+    const saved = sanitizeWeatherPlace(place);
+    if (saved) selectPlace(saved);
+  };
+
+  /** Stern entfernen – ein gerade angezeigter Ort bleibt sichtbar. */
+  const removePlace = (place: WeatherPlace) => {
+    savePlaces(removeWeatherPlace(places, place));
+    if (selectedPlace && isSameWeatherPlace(selectedPlace, place)) {
+      setSelectedPlace(null);
+      storeLastWeatherPlace(null);
+    }
+  };
+
   useEffect(() => {
-    load();
+    // Zuletzt gewählter Wetter-Favorit gewinnt beim Start – sonst Standort
+    const last = loadLastWeatherPlace();
+    if (last) {
+      setSelectedPlace(last);
+      setLocationLabel(last.name);
+      void loadForCoords(last.lat, last.lon);
+    } else {
+      load();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -838,44 +1090,98 @@ export default function WeatherPage() {
     <div className="container max-w-3xl py-6 md:py-8">
       <PageHeader title={t.weather.title} subtitle={t.weather.subtitle} />
 
-      {/* Ortsauswahl: eigener Standort oder gespeicherte Zeltplatz-Favoriten */}
-      {(spots?.length ?? 0) > 0 && (
-        <div
-          className="mb-4 flex flex-wrap items-center gap-2"
-          role="group"
-          aria-label={t.weather.locationGroupAria}
+      {/* Ortsauswahl: eigener Standort, Zeltplatz-Favoriten und Wetter-Orte */}
+      <div
+        className="mb-4 flex flex-wrap items-center gap-2"
+        role="group"
+        aria-label={t.weather.locationGroupAria}
+      >
+        <button
+          type="button"
+          onClick={load}
+          className={cn(
+            "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+            selectedSpotId === null &&
+              selectedPlace === null &&
+              locationLabel === null
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-border bg-card text-muted-foreground hover:border-primary/50"
+          )}
         >
+          <LocateFixed className="h-3.5 w-3.5" aria-hidden="true" />
+          {t.weather.myLocation}
+        </button>
+        {(spots ?? []).map(spot => (
           <button
+            key={spot.id}
             type="button"
-            onClick={load}
+            onClick={() => selectSpot(spot)}
             className={cn(
               "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-              selectedSpotId === null
+              selectedSpotId === spot.id
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border bg-card text-muted-foreground hover:border-primary/50"
             )}
           >
-            <LocateFixed className="h-3.5 w-3.5" aria-hidden="true" />
-            {t.weather.myLocation}
+            <Tent className="h-3.5 w-3.5" aria-hidden="true" />
+            {spot.name}
           </button>
-          {spots!.map(spot => (
-            <button
-              key={spot.id}
-              type="button"
-              onClick={() => selectSpot(spot)}
+        ))}
+        {places.map(place => {
+          const active =
+            selectedPlace !== null && isSameWeatherPlace(selectedPlace, place);
+          return (
+            <span
+              key={`${place.name}-${place.lat}-${place.lon}`}
               className={cn(
-                "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-                selectedSpotId === spot.id
+                "flex items-center overflow-hidden rounded-full border text-xs font-medium transition-colors",
+                active
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-card text-muted-foreground hover:border-primary/50"
               )}
             >
-              <Tent className="h-3.5 w-3.5" aria-hidden="true" />
-              {spot.name}
-            </button>
-          ))}
-        </div>
-      )}
+              <button
+                type="button"
+                onClick={() => selectPlace(place)}
+                className="flex items-center gap-1.5 py-1.5 pl-3 pr-1.5"
+              >
+                <Star className="h-3.5 w-3.5" aria-hidden="true" />
+                {place.name}
+              </button>
+              <button
+                type="button"
+                onClick={() => removePlace(place)}
+                aria-label={t.weather.placeRemoveAria(place.name)}
+                className="py-1.5 pl-1 pr-2.5 opacity-70 transition-opacity hover:opacity-100"
+              >
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </span>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => setPlaceSearchOpen(open => !open)}
+          aria-expanded={placeSearchOpen}
+          className="flex items-center gap-1.5 rounded-full border border-dashed border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/50"
+        >
+          <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+          {t.weather.placeAddButton}
+        </button>
+      </div>
+
+      {/* Ortssuche für neue Wetter-Orte (nur auf Wunsch eingeblendet) */}
+      {placeSearchOpen &&
+        (places.length >= MAX_WEATHER_PLACES ? (
+          <p className="mb-4 text-sm text-muted-foreground">
+            {t.weather.placeLimitHint(MAX_WEATHER_PLACES)}
+          </p>
+        ) : (
+          <PlaceSearch
+            onPick={pickSearchResult}
+            onClose={() => setPlaceSearchOpen(false)}
+          />
+        ))}
 
       {(state === "locating" || state === "loading") && (
         <div
