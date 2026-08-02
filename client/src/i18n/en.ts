@@ -1125,6 +1125,15 @@ export const en: Translation = {
     osmSource: "© OpenStreetMap",
     adoptFavorite: "Save as favourite",
     adopted: (name: string) => `“${name}” saved as favourite`,
+    createTitle: "Create a favourite here?",
+    createDesc: (lat: string, lon: string) =>
+      `Position ${lat}, ${lon} – give the new pitch a name.`,
+    createNameLabel: "Name",
+    createNamePlaceholder: "e.g. Camping Seeblick",
+    createNameRequired: "Please enter a name first.",
+    createConfirm: "Create favourite",
+    createdToast: (name: string) => `“${name}” created as favourite`,
+    createdToastAction: "Open dossier",
   },
   spotDetail: {
     fallbackTitle: "Pitch",

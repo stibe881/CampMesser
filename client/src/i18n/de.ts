@@ -1159,6 +1159,15 @@ export const de = {
     osmSource: "© OpenStreetMap",
     adoptFavorite: "Als Favorit übernehmen",
     adopted: (name: string) => `«${name}» als Favorit gespeichert`,
+    createTitle: "Favorit hier anlegen?",
+    createDesc: (lat: string, lon: string) =>
+      `Position ${lat}, ${lon} – gib dem neuen Platz einen Namen.`,
+    createNameLabel: "Name",
+    createNamePlaceholder: "z. B. Camping Seeblick",
+    createNameRequired: "Bitte gib zuerst einen Namen ein.",
+    createConfirm: "Favorit anlegen",
+    createdToast: (name: string) => `«${name}» als Favorit angelegt`,
+    createdToastAction: "Zum Dossier",
   },
   spotDetail: {
     fallbackTitle: "Zeltplatz",

@@ -3,6 +3,7 @@
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 17)
 
 - [x] Campingplätze aus OpenStreetMap entdecken: zuschaltbarer Layer auf der Karte (Toggle-Chip «Campingplätze entdecken», Standard AUS) fragt die Overpass-API für den aktuellen Ausschnitt ab (tourism=camp_site als node/way, max. 100 Ergebnisse); bei Kartenbewegung kein automatisches Nachladen, sondern Button «In diesem Ausschnitt suchen» (Overpass ist rate-limitiert), bei Zoom < 9 Hinweis «bitte näher zoomen»; defensiver Parser `parseCampsites` in client/src/lib/overpass.ts (node → lat/lon, way → center, Tags name/website/phone, Duplikat- und Limit-Schutz) mit 6 Tests in server/overpass.test.ts; eigene blaue Marker samt Legenden-Eintrag, Popup mit Name (Fallback «Campingplatz»), Website-Link, Telefon, Quelle «© OpenStreetMap» und «Als Favorit übernehmen» (spots.add → Toast, Pin wird nach dem Refetch zum grünen Favoriten); mapView-Namespace in allen 4 Sprachen erweitert
+- [x] Neuen Platz per Karten-Klick anlegen: Klick auf eine freie Kartenstelle (Marker/Popups schlucken ihre Klicks, Panning feuert kein click-Event, Popup-Schliess-Klicks werden über popupclose ausgefiltert; auf Touch-Geräten genügt der normale Tap) öffnet einen kleinen Dialog «Favorit hier anlegen?» mit Pflicht-Namensfeld und gerundet angezeigten Koordinaten; Bestätigen legt den Platz über spots.add an und zeigt einen Toast mit Aktion «Zum Dossier»; a11y über shadcn-Dialog (Fokus-Falle, Label, DialogDescription); mapView-Namespace in allen 4 Sprachen erweitert
 
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 16)
 

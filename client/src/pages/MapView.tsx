@@ -14,6 +14,11 @@
  * per Klick auf «In diesem Ausschnitt suchen». Gefundene Plätze lassen sich
  * direkt als Favorit übernehmen.
  *
+ * Klick auf eine freie Kartenstelle (nicht auf Marker/Popup) öffnet einen
+ * kleinen Dialog «Favorit hier anlegen?» mit Pflicht-Namensfeld – Bestätigen
+ * legt den Platz über den spots-Router an. Karten-Panning löst dank Leaflet
+ * kein click-Event aus, auf Touch-Geräten genügt der normale Tap.
+ *
  * Tagebuch-Einträge mit reinem Freitext-Ort haben keine Koordinaten und
  * erscheinen deshalb nicht als eigene Pins.
  */
@@ -25,7 +30,18 @@ import "leaflet/dist/leaflet.css";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -114,6 +130,13 @@ function SpotsMap({
   const campLayerRef = useRef<L.LayerGroup | null>(null);
   const didFitRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
+  const popupJustClosedRef = useRef(0);
+
+  // Karten-Klick auf freie Stelle: Vorschlag für einen neuen Favoriten
+  const [proposed, setProposed] = useState<{ lat: number; lon: number } | null>(
+    null
+  );
+  const [newName, setNewName] = useState("");
 
   // Entdecker-Layer: Zustand der Overpass-Suche (Standard AUS)
   const [discoverOn, setDiscoverOn] = useState(false);
@@ -139,6 +162,17 @@ function SpotsMap({
     }).addTo(map);
     markersRef.current = L.layerGroup().addTo(map);
     campLayerRef.current = L.layerGroup().addTo(map);
+    // Klick auf freie Kartenstelle → Dialog «Favorit hier anlegen?».
+    // Marker/Popups schlucken ihre Klicks selbst, Panning feuert kein click.
+    // Ein Klick, der gerade erst ein Popup geschlossen hat, soll aber nur
+    // schliessen – deshalb der kurze Zeit-Abstand zu popupclose.
+    map.on("popupclose", () => {
+      popupJustClosedRef.current = Date.now();
+    });
+    map.on("click", (event: L.LeafletMouseEvent) => {
+      if (Date.now() - popupJustClosedRef.current < 200) return;
+      setProposed({ lat: event.latlng.lat, lon: event.latlng.lng });
+    });
     mapRef.current = map;
     return () => {
       abortRef.current?.abort();
@@ -387,6 +421,42 @@ function SpotsMap({
     [campsites, spots]
   );
 
+  // Neuen Favoriten aus dem Karten-Klick anlegen (Toast mit Dossier-Link)
+  const createMutation = trpc.spots.add.useMutation({
+    onSuccess: (id, vars) => {
+      void utils.spots.list.invalidate();
+      setProposed(null);
+      setNewName("");
+      toast.success(t.mapView.createdToast(vars.name), {
+        action: {
+          label: t.mapView.createdToastAction,
+          onClick: () => navigate(`/zeltplaetze/${id}`),
+        },
+      });
+    },
+    onError: () => toast.error(t.common.saveFailed),
+  });
+
+  const closeCreateDialog = () => {
+    setProposed(null);
+    setNewName("");
+  };
+
+  const submitCreate = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!proposed || createMutation.isPending) return;
+    const trimmed = newName.trim();
+    if (!trimmed) {
+      toast.error(t.mapView.createNameRequired);
+      return;
+    }
+    createMutation.mutate({
+      name: trimmed,
+      latitude: Number(proposed.lat.toFixed(5)),
+      longitude: Number(proposed.lon.toFixed(5)),
+    });
+  };
+
   return (
     <>
       <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -460,6 +530,58 @@ function SpotsMap({
           </span>
         )}
       </div>
+
+      <Dialog
+        open={proposed !== null}
+        onOpenChange={open => {
+          if (!open) closeCreateDialog();
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <form onSubmit={submitCreate} className="space-y-4">
+            <DialogHeader>
+              <DialogTitle className="font-serif">
+                {t.mapView.createTitle}
+              </DialogTitle>
+              <DialogDescription>
+                {proposed
+                  ? t.mapView.createDesc(
+                      proposed.lat.toFixed(5),
+                      proposed.lon.toFixed(5)
+                    )
+                  : ""}
+              </DialogDescription>
+            </DialogHeader>
+            <div>
+              <Label htmlFor="map-new-spot-name">
+                {t.mapView.createNameLabel}
+              </Label>
+              <Input
+                id="map-new-spot-name"
+                value={newName}
+                onChange={event => setNewName(event.target.value)}
+                placeholder={t.mapView.createNamePlaceholder}
+                maxLength={120}
+                required
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeCreateDialog}
+              >
+                {t.common.cancel}
+              </Button>
+              <Button type="submit" disabled={createMutation.isPending}>
+                {createMutation.isPending
+                  ? t.common.saving
+                  : t.mapView.createConfirm}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

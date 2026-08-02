@@ -1147,6 +1147,15 @@ export const it: Translation = {
     osmSource: "© OpenStreetMap",
     adoptFavorite: "Salva come preferito",
     adopted: (name: string) => `«${name}» salvato tra i preferiti`,
+    createTitle: "Creare qui un preferito?",
+    createDesc: (lat: string, lon: string) =>
+      `Posizione ${lat}, ${lon} – dai un nome alla nuova piazzola.`,
+    createNameLabel: "Nome",
+    createNamePlaceholder: "es. Camping Seeblick",
+    createNameRequired: "Inserisci prima un nome.",
+    createConfirm: "Crea preferito",
+    createdToast: (name: string) => `«${name}» creato come preferito`,
+    createdToastAction: "Al dossier",
   },
   spotDetail: {
     fallbackTitle: "Piazzola",

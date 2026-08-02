@@ -1161,6 +1161,15 @@ export const fr: Translation = {
     osmSource: "© OpenStreetMap",
     adoptFavorite: "Enregistrer comme favori",
     adopted: (name: string) => `«${name}» enregistré comme favori`,
+    createTitle: "Créer un favori ici ?",
+    createDesc: (lat: string, lon: string) =>
+      `Position ${lat}, ${lon} – donne un nom au nouvel emplacement.`,
+    createNameLabel: "Nom",
+    createNamePlaceholder: "p. ex. Camping Seeblick",
+    createNameRequired: "Saisis d'abord un nom.",
+    createConfirm: "Créer le favori",
+    createdToast: (name: string) => `«${name}» créé comme favori`,
+    createdToastAction: "Vers le dossier",
   },
   spotDetail: {
     fallbackTitle: "Emplacement",
