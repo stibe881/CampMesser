@@ -357,6 +357,32 @@ export type ShoppingItem = typeof shoppingItems.$inferSelect;
 export type InsertShoppingItem = typeof shoppingItems.$inferInsert;
 
 /**
+ * Passwort-Reset per E-Mail: pro Anfrage ein Token (32 Zufallsbytes, hex),
+ * von dem nur der sha256-Hash gespeichert wird – der Klartext steht
+ * ausschliesslich im E-Mail-Link. 60 Minuten gültig, einmalig verwendbar.
+ */
+export const passwordResetTokens = mysqlTable(
+  "passwordResetTokens",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** sha256-Hex des Tokens (64 Zeichen) */
+    tokenHash: varchar("tokenHash", { length: 64 }).notNull(),
+    expiresAt: timestamp("expiresAt").notNull(),
+    /** Zeitpunkt der Nutzung bzw. Entwertung; null = noch offen */
+    usedAt: timestamp("usedAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    index("passwordResetTokens_userId").on(table.userId),
+    uniqueIndex("passwordResetTokens_tokenHash").on(table.tokenHash),
+  ]
+);
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
+
+/**
  * Geräteübergreifend synchronisierte Client-Einstellungen: pro Nutzer*in und
  * Schlüssel ein JSON-serialisierter Wert (z. B. Kachel-Reihenfolge, Hindernis-Profil).
  */

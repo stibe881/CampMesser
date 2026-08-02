@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { LogIn, UserPlus, Tent, KeyRound, ArrowLeft } from "lucide-react";
+import {
+  LogIn,
+  UserPlus,
+  Tent,
+  KeyRound,
+  ArrowLeft,
+  MailCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -9,14 +16,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
-import { useT } from "@/i18n";
+import { useI18n } from "@/i18n";
 
 /**
  * Eigenständige Anmeldung: E-Mail/Passwort-Login und Registrierung,
- * unabhängig vom Manus-Login.
+ * unabhängig vom Manus-Login. Passwort vergessen: Link per E-Mail anfordern;
+ * mit ?reset=<token> in der URL wird das Formular «Neues Passwort setzen» gezeigt.
  */
 export default function LoginPage() {
-  const t = useT();
+  const { lang, t } = useI18n();
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
   const [loginEmail, setLoginEmail] = useState("");
@@ -25,11 +33,14 @@ export default function LoginPage() {
   const [regEmail, setRegEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regPassword2, setRegPassword2] = useState("");
-  // Passwort-vergessen-Flow
+  // Passwort-vergessen-Flow: Link anfordern …
   const [resetMode, setResetMode] = useState(false);
-  const [resetStep, setResetStep] = useState<1 | 2>(1);
   const [resetEmail, setResetEmail] = useState("");
-  const [resetCode, setResetCode] = useState("");
+  const [linkSent, setLinkSent] = useState(false);
+  // … oder mit Token aus dem E-Mail-Link ein neues Passwort setzen
+  const [resetToken, setResetToken] = useState<string | null>(
+    () => new URLSearchParams(window.location.search).get("reset") ?? null
+  );
   const [resetPw, setResetPw] = useState("");
   const [resetPw2, setResetPw2] = useState("");
 
@@ -48,19 +59,25 @@ export default function LoginPage() {
     onError: err => toast.error(err.message),
   });
   const requestResetMutation = trpc.auth.requestReset.useMutation({
-    onSuccess: () => {
-      setResetStep(2);
-      toast.success(t.login.codeSent);
+    onSuccess: () => setLinkSent(true),
+    onError: err => {
+      if (err.data?.code === "PRECONDITION_FAILED")
+        toast.error(t.login.resetUnavailable);
+      else if (err.data?.code === "TOO_MANY_REQUESTS")
+        toast.error(t.login.tooManyResets);
+      else toast.error(err.message);
     },
-    onError: err => toast.error(err.message),
   });
-  const resetMutation = trpc.auth.resetPassword.useMutation({
+  const performResetMutation = trpc.auth.performReset.useMutation({
     onSuccess: () => {
       toast.success(t.login.resetDone);
       void utils.auth.me.invalidate();
       navigate("/");
     },
-    onError: err => toast.error(err.message),
+    onError: err => {
+      if (err.data?.code === "NOT_FOUND") toast.error(t.login.resetLinkInvalid);
+      else toast.error(err.message);
+    },
   });
 
   const submitLogin = (e: React.FormEvent) => {
@@ -81,22 +98,112 @@ export default function LoginPage() {
     });
   };
 
+  const leaveTokenMode = () => {
+    setResetToken(null);
+    // Token-Parameter aus der Adresszeile entfernen
+    navigate("/anmelden", { replace: true });
+  };
+
+  const pageTitle = resetToken
+    ? t.login.newPasswordTitle
+    : resetMode
+      ? t.login.resetTitle
+      : t.login.title;
+  const pageSubtitle = resetToken
+    ? t.login.newPasswordSubtitle
+    : resetMode
+      ? t.login.resetSubtitle
+      : t.login.subtitle;
+
   return (
     <div className="container max-w-md py-6">
-      <PageHeader
-        title={resetMode ? t.login.resetTitle : t.login.title}
-        subtitle={resetMode ? t.login.resetSubtitle : t.login.subtitle}
-      />
+      <PageHeader title={pageTitle} subtitle={pageSubtitle} />
       <Card>
         <CardContent className="pt-6">
-          {resetMode ? (
+          {resetToken ? (
             <div>
-              {resetStep === 1 ? (
+              <form
+                className="space-y-4"
+                onSubmit={e => {
+                  e.preventDefault();
+                  if (resetPw !== resetPw2) {
+                    toast.error(t.login.passwordsMismatch);
+                    return;
+                  }
+                  performResetMutation.mutate({
+                    token: resetToken,
+                    newPassword: resetPw,
+                  });
+                }}
+              >
+                <div>
+                  <Label htmlFor="reset-pw" className="mb-1.5 block">
+                    {t.login.newPasswordLabel}{" "}
+                    <span className="text-xs text-muted-foreground">
+                      {t.login.passwordHint}
+                    </span>
+                  </Label>
+                  <Input
+                    id="reset-pw"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    minLength={8}
+                    value={resetPw}
+                    onChange={e => setResetPw(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="reset-pw2" className="mb-1.5 block">
+                    {t.login.confirmNewPasswordLabel}
+                  </Label>
+                  <Input
+                    id="reset-pw2"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    value={resetPw2}
+                    onChange={e => setResetPw2(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={performResetMutation.isPending}
+                >
+                  <KeyRound className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {performResetMutation.isPending
+                    ? t.common.saving
+                    : t.login.setPassword}
+                </Button>
+              </form>
+              <button
+                type="button"
+                className="mt-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                onClick={leaveTokenMode}
+              >
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />{" "}
+                {t.login.backToLogin}
+              </button>
+            </div>
+          ) : resetMode ? (
+            <div>
+              {linkSent ? (
+                <p className="flex items-start gap-2 text-sm">
+                  <MailCheck
+                    className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                    aria-hidden="true"
+                  />
+                  {t.login.linkSent}
+                </p>
+              ) : (
                 <form
                   className="space-y-4"
                   onSubmit={e => {
                     e.preventDefault();
-                    requestResetMutation.mutate({ email: resetEmail });
+                    requestResetMutation.mutate({ email: resetEmail, lang });
                   }}
                 >
                   <div>
@@ -120,98 +227,9 @@ export default function LoginPage() {
                   >
                     <KeyRound className="mr-1.5 h-4 w-4" aria-hidden="true" />
                     {requestResetMutation.isPending
-                      ? t.login.requestingCode
-                      : t.login.requestCode}
+                      ? t.login.sendingLink
+                      : t.login.sendLink}
                   </Button>
-                </form>
-              ) : (
-                <form
-                  className="space-y-4"
-                  onSubmit={e => {
-                    e.preventDefault();
-                    if (resetPw !== resetPw2) {
-                      toast.error(t.login.passwordsMismatch);
-                      return;
-                    }
-                    resetMutation.mutate({
-                      email: resetEmail,
-                      code: resetCode,
-                      newPassword: resetPw,
-                    });
-                  }}
-                >
-                  <div>
-                    <Label htmlFor="reset-code" className="mb-1.5 block">
-                      {t.login.codeLabel}{" "}
-                      <span className="text-xs text-muted-foreground">
-                        {t.login.codeHint}
-                      </span>
-                    </Label>
-                    <Input
-                      id="reset-code"
-                      inputMode="numeric"
-                      pattern="[0-9]{6}"
-                      maxLength={6}
-                      required
-                      value={resetCode}
-                      onChange={e =>
-                        setResetCode(e.target.value.replace(/\D/g, ""))
-                      }
-                      placeholder="123456"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="reset-pw" className="mb-1.5 block">
-                      {t.login.newPasswordLabel}{" "}
-                      <span className="text-xs text-muted-foreground">
-                        {t.login.passwordHint}
-                      </span>
-                    </Label>
-                    <Input
-                      id="reset-pw"
-                      type="password"
-                      autoComplete="new-password"
-                      required
-                      minLength={8}
-                      value={resetPw}
-                      onChange={e => setResetPw(e.target.value)}
-                      placeholder="••••••••"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="reset-pw2" className="mb-1.5 block">
-                      {t.login.confirmNewPasswordLabel}
-                    </Label>
-                    <Input
-                      id="reset-pw2"
-                      type="password"
-                      autoComplete="new-password"
-                      required
-                      value={resetPw2}
-                      onChange={e => setResetPw2(e.target.value)}
-                      placeholder="••••••••"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={resetMutation.isPending}
-                  >
-                    <KeyRound className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                    {resetMutation.isPending
-                      ? t.common.saving
-                      : t.login.setPassword}
-                  </Button>
-                  <button
-                    type="button"
-                    className="w-full text-center text-xs text-muted-foreground underline-offset-2 hover:underline"
-                    onClick={() =>
-                      requestResetMutation.mutate({ email: resetEmail })
-                    }
-                    disabled={requestResetMutation.isPending}
-                  >
-                    {t.login.resendCode}
-                  </button>
                 </form>
               )}
               <button
@@ -219,7 +237,7 @@ export default function LoginPage() {
                 className="mt-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
                 onClick={() => {
                   setResetMode(false);
-                  setResetStep(1);
+                  setLinkSent(false);
                 }}
               >
                 <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />{" "}
@@ -280,6 +298,7 @@ export default function LoginPage() {
                     className="w-full text-center text-xs text-muted-foreground underline-offset-2 hover:underline"
                     onClick={() => {
                       setResetMode(true);
+                      setLinkSent(false);
                       setResetEmail(loginEmail);
                     }}
                   >

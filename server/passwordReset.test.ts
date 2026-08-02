@@ -1,49 +1,130 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import {
-  createResetCode,
-  verifyResetCode,
-  consumeResetCode,
-} from "./localAuth";
+  generateResetToken,
+  hashResetToken,
+  resetTokenState,
+  RESET_TOKEN_TTL_MS,
+} from "./passwordReset";
+import { buildPasswordResetMail, mailConfigured } from "./mailer";
+import { LANGUAGES } from "@shared/i18n";
 
-describe("Passwort-Reset-Codes", () => {
-  it("erzeugt einen 6-stelligen Code und akzeptiert ihn", async () => {
-    const code = await createResetCode("test-reset@example.com");
-    expect(code).toMatch(/^\d{6}$/);
-    const err = await verifyResetCode("test-reset@example.com", code);
-    expect(err).toBeNull();
+describe("Passwort-Reset-Tokens", () => {
+  it("erzeugt Tokens aus 32 Zufallsbytes als Hex (64 Zeichen)", () => {
+    const token = generateResetToken();
+    expect(token).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it("normalisiert die E-Mail (Gross-/Kleinschreibung)", async () => {
-    const code = await createResetCode("Mixed@Example.COM");
-    const err = await verifyResetCode("mixed@example.com", code);
-    expect(err).toBeNull();
+  it("erzeugt bei jedem Aufruf ein anderes Token", () => {
+    const seen = new Set(
+      Array.from({ length: 20 }, () => generateResetToken())
+    );
+    expect(seen.size).toBe(20);
   });
 
-  it("lehnt falsche Codes ab", async () => {
-    await createResetCode("wrong@example.com");
-    const err = await verifyResetCode("wrong@example.com", "000000");
-    expect(err).toContain("falsch");
+  it("hasht Tokens mit sha256 (nur der Hash wird gespeichert)", () => {
+    // Bekannter sha256-Testvektor
+    expect(hashResetToken("abc")).toBe(
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    );
+    expect(hashResetToken("abc")).toHaveLength(64);
+    expect(hashResetToken("abc")).not.toBe(hashResetToken("abd"));
   });
 
-  it("lehnt Anfragen ohne angeforderten Code ab", async () => {
-    const err = await verifyResetCode("nie-angefordert@example.com", "123456");
-    expect(err).toContain("Kein Code");
+  it("gilt 60 Minuten", () => {
+    expect(RESET_TOKEN_TTL_MS).toBe(60 * 60 * 1000);
   });
 
-  it("entwertet Codes nach Nutzung", async () => {
-    const code = await createResetCode("consume@example.com");
-    expect(await verifyResetCode("consume@example.com", code)).toBeNull();
-    consumeResetCode("consume@example.com");
-    const err = await verifyResetCode("consume@example.com", code);
-    expect(err).toContain("Kein Code");
+  it("meldet gültige, abgelaufene und verwendete Tokens korrekt", () => {
+    const now = new Date("2026-08-02T12:00:00Z");
+    const in30Min = new Date(now.getTime() + 30 * 60 * 1000);
+    const before1Min = new Date(now.getTime() - 60 * 1000);
+    expect(resetTokenState({ expiresAt: in30Min, usedAt: null }, now)).toBe(
+      "valid"
+    );
+    expect(resetTokenState({ expiresAt: before1Min, usedAt: null }, now)).toBe(
+      "expired"
+    );
+    // usedAt schlägt auch ein noch nicht abgelaufenes Token
+    expect(
+      resetTokenState({ expiresAt: in30Min, usedAt: before1Min }, now)
+    ).toBe("used");
+    // exakt zum Ablaufzeitpunkt noch gültig, 1 ms später nicht mehr
+    expect(resetTokenState({ expiresAt: now, usedAt: null }, now)).toBe(
+      "valid"
+    );
+    expect(
+      resetTokenState(
+        { expiresAt: now, usedAt: null },
+        new Date(now.getTime() + 1)
+      )
+    ).toBe("expired");
   });
+});
 
-  it("sperrt nach zu vielen Fehlversuchen", async () => {
-    const code = await createResetCode("bruteforce@example.com");
-    for (let i = 0; i < 5; i++) {
-      await verifyResetCode("bruteforce@example.com", "999999");
+describe("Reset-Mail", () => {
+  const url = "https://campmesser.ch/anmelden?reset=deadbeef";
+
+  it("enthält in allen vier Sprachen den Link und einen Betreff mit CampMesser", () => {
+    for (const lang of LANGUAGES) {
+      const mail = buildPasswordResetMail(url, lang);
+      expect(mail.subject).toContain("CampMesser");
+      expect(mail.text).toContain(url);
+      expect(mail.text.length).toBeGreaterThan(50);
     }
-    const err = await verifyResetCode("bruteforce@example.com", code);
-    expect(err).toContain("Zu viele Fehlversuche");
+  });
+
+  it("übersetzt Betreff und Text pro Sprache unterschiedlich", () => {
+    const subjects = LANGUAGES.map(
+      lang => buildPasswordResetMail(url, lang).subject
+    );
+    expect(new Set(subjects).size).toBe(LANGUAGES.length);
+    expect(buildPasswordResetMail(url, "de").text).toContain("60 Minuten");
+    expect(buildPasswordResetMail(url, "fr").text).toContain("60 minutes");
+    expect(buildPasswordResetMail(url, "it").text).toContain("60 minuti");
+    expect(buildPasswordResetMail(url, "en").text).toContain("60 minutes");
+  });
+});
+
+describe("mailConfigured", () => {
+  const KEYS = ["SMTP_HOST", "SMTP_USER", "SMTP_PASS", "SMTP_FROM"] as const;
+  const saved = new Map<string, string | undefined>();
+
+  afterEach(() => {
+    KEYS.forEach(key => {
+      const value = saved.get(key);
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    });
+  });
+
+  const setEnv = (values: Partial<Record<(typeof KEYS)[number], string>>) => {
+    KEYS.forEach(key => {
+      if (!saved.has(key)) saved.set(key, process.env[key]);
+      if (values[key] === undefined) delete process.env[key];
+      else process.env[key] = values[key];
+    });
+  };
+
+  it("ist falsch ohne SMTP-Zugangsdaten", () => {
+    setEnv({});
+    expect(mailConfigured()).toBe(false);
+  });
+
+  it("ist wahr mit Host, Benutzer und Passwort (Absender fällt auf SMTP_USER zurück)", () => {
+    setEnv({
+      SMTP_HOST: "mail.example.ch",
+      SMTP_USER: "noreply@example.ch",
+      SMTP_PASS: "geheim",
+    });
+    expect(mailConfigured()).toBe(true);
+  });
+
+  it("ist falsch, wenn das Passwort fehlt", () => {
+    setEnv({
+      SMTP_HOST: "mail.example.ch",
+      SMTP_USER: "noreply@example.ch",
+      SMTP_FROM: "noreply@example.ch",
+    });
+    expect(mailConfigured()).toBe(false);
   });
 });

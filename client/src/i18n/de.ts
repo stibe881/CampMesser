@@ -98,24 +98,29 @@ export const de = {
       "Mit deinem CampMesser-Konto speicherst du Packlisten, Inventar und Zeltplätze und nutzt sie auf allen Geräten.",
     resetTitle: "Passwort zurücksetzen",
     resetSubtitle:
-      "Wir schicken dir einen 6-stelligen Bestätigungscode, mit dem du ein neues Passwort setzen kannst.",
+      "Gib die E-Mail-Adresse deines Kontos an – wir schicken dir einen Link, mit dem du ein neues Passwort setzen kannst.",
+    newPasswordTitle: "Neues Passwort setzen",
+    newPasswordSubtitle: "Wähle ein neues Passwort für dein Konto.",
     welcome: "Willkommen!",
     welcomeName: (name: string) => `Willkommen, ${name}!`,
-    codeSent:
-      "Falls ein Konto existiert, wurde ein Bestätigungscode verschickt.",
+    linkSent:
+      "Falls ein Konto mit dieser E-Mail-Adresse existiert, haben wir dir soeben einen Link geschickt (60 Minuten gültig). Prüfe auch den Spam-Ordner.",
     resetDone: "Passwort zurückgesetzt – du bist jetzt angemeldet.",
+    resetUnavailable:
+      "Der Passwort-Reset per E-Mail ist derzeit nicht verfügbar. Bitte wende dich an den Betreiber.",
+    tooManyResets:
+      "Zu viele Anfragen. Bitte versuche es in einer Stunde erneut.",
+    resetLinkInvalid:
+      "Der Link ist ungültig oder abgelaufen. Fordere einen neuen an.",
     passwordsMismatch: "Die Passwörter stimmen nicht überein.",
     accountEmailLabel: "E-Mail deines Kontos",
     emailPlaceholder: "du@beispiel.ch",
-    requestingCode: "Code wird verschickt …",
-    requestCode: "Code anfordern",
-    codeLabel: "Bestätigungscode",
-    codeHint: "(6 Ziffern, 15 Min. gültig)",
+    sendingLink: "Link wird verschickt …",
+    sendLink: "Link anfordern",
     newPasswordLabel: "Neues Passwort",
     passwordHint: "(mind. 8 Zeichen)",
     confirmNewPasswordLabel: "Neues Passwort bestätigen",
     setPassword: "Passwort setzen",
-    resendCode: "Keinen Code erhalten? Erneut anfordern",
     backToLogin: "Zurück zur Anmeldung",
     tabLogin: "Anmelden",
     tabRegister: "Registrieren",

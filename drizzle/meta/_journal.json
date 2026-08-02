@@ -141,6 +141,13 @@
       "when": 1785641505684,
       "tag": "0019_mushy_invaders",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1785642040120,
+      "tag": "0020_shocking_franklin_richards",
+      "breakpoints": true
     }
   ]
 }

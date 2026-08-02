@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  allowAction,
   clearFailures,
   isRateLimited,
   lockoutMinutes,
@@ -51,5 +52,29 @@ describe("rateLimit", () => {
     registerFailure(KEY, T0);
     expect(lockoutMinutes(KEY, T0 + 5 * 60_000)).toBe(10);
     expect(lockoutMinutes("unbekannt", T0)).toBe(0);
+  });
+});
+
+describe("allowAction (generische Aktions-Begrenzung)", () => {
+  const HOUR = 60 * 60_000;
+  const RKEY = "pwreset|user@example.com|203.0.113.7";
+
+  it("erlaubt bis zum Maximum und blockiert danach", () => {
+    expect(allowAction(RKEY, 3, HOUR, T0)).toBe(true);
+    expect(allowAction(RKEY, 3, HOUR, T0 + 1)).toBe(true);
+    expect(allowAction(RKEY, 3, HOUR, T0 + 2)).toBe(true);
+    expect(allowAction(RKEY, 3, HOUR, T0 + 3)).toBe(false);
+  });
+
+  it("zählt nach Ablauf des Fensters neu", () => {
+    for (let i = 0; i < 4; i++) allowAction(RKEY, 3, HOUR, T0 + i);
+    expect(allowAction(RKEY, 3, HOUR, T0 + HOUR + 1)).toBe(true);
+  });
+
+  it("zählt verschiedene Schlüssel getrennt", () => {
+    for (let i = 0; i < 4; i++) allowAction(RKEY, 3, HOUR, T0 + i);
+    expect(
+      allowAction("pwreset|andere@example.com|203.0.113.7", 3, HOUR, T0)
+    ).toBe(true);
   });
 });

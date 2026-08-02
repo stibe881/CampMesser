@@ -142,6 +142,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     powerConsumers,
     foodItems,
     campSpots,
+    passwordResetTokens,
   } = await import("../drizzle/schema");
   const { inArray } = await import("drizzle-orm");
   // Packlisten-Positionen zuerst (referenzieren Listen)
@@ -158,60 +159,20 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(powerConsumers).where(eq(powerConsumers.userId, userId));
   await db.delete(foodItems).where(eq(foodItems.userId, userId));
   await db.delete(campSpots).where(eq(campSpots.userId, userId));
+  await db
+    .delete(passwordResetTokens)
+    .where(eq(passwordResetTokens.userId, userId));
   await db.delete(users).where(eq(users.id, userId));
 }
 
-// ---------------------------------------------------------------------------
-// Passwort vergessen: 6-stelliger Code, 15 Minuten gültig, max. 5 Versuche.
-// In-Memory-Speicher genügt: Codes sind kurzlebig; bei Server-Neustart kann
-// einfach ein neuer Code angefordert werden.
-// ---------------------------------------------------------------------------
-
-interface ResetEntry {
-  codeHash: string;
-  expiresAt: number;
-  attempts: number;
-}
-
-const resetCodes = new Map<string, ResetEntry>();
-const RESET_TTL_MS = 15 * 60 * 1000;
-const RESET_MAX_ATTEMPTS = 5;
-
-/** Reset-Code für eine E-Mail erzeugen und speichern; gibt den Klartext-Code zurück. */
-export async function createResetCode(email: string): Promise<string> {
-  const code = String(Math.floor(100000 + Math.random() * 900000));
-  resetCodes.set(normalizeEmail(email), {
-    codeHash: await hashPassword(code),
-    expiresAt: Date.now() + RESET_TTL_MS,
-    attempts: 0,
-  });
-  return code;
-}
-
-/** Reset-Code prüfen. Gibt eine Fehlermeldung zurück oder null bei Erfolg. */
-export async function verifyResetCode(
-  email: string,
-  code: string
-): Promise<string | null> {
-  const key = normalizeEmail(email);
-  const entry = resetCodes.get(key);
-  if (!entry)
-    return "Kein Code angefordert oder Code abgelaufen. Fordere einen neuen Code an.";
-  if (Date.now() > entry.expiresAt) {
-    resetCodes.delete(key);
-    return "Der Code ist abgelaufen. Fordere einen neuen Code an.";
-  }
-  if (entry.attempts >= RESET_MAX_ATTEMPTS) {
-    resetCodes.delete(key);
-    return "Zu viele Fehlversuche. Fordere einen neuen Code an.";
-  }
-  entry.attempts += 1;
-  const ok = await verifyPassword(code, entry.codeHash);
-  if (!ok) return "Der Code ist falsch. Bitte prüfe deine Eingabe.";
-  return null;
-}
-
-/** Reset-Code nach erfolgreicher Nutzung entwerten. */
-export function consumeResetCode(email: string): void {
-  resetCodes.delete(normalizeEmail(email));
+/** Konto anhand der numerischen Id nachschlagen (z. B. für den Passwort-Reset). */
+export async function findUserById(userId: number): Promise<User | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  return rows[0];
 }

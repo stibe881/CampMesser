@@ -131,17 +131,24 @@ Meldet das Protokoll einen Portkonflikt, ergänze im Formular eine weitere Umgeb
 
 ## Schritt 6: E-Mail-Versand für vergessene Passwörter
 
-Damit Rücksetz-Codes per E-Mail zugestellt werden, hinterlege die Zugangsdaten eines Postfachs deiner Domain. Ohne diese Angaben funktioniert die Anmeldung normal weiter; der Code wird dann lediglich ins Protokoll geschrieben.
+Über «Passwort vergessen?» auf der Anmeldeseite verschickt CampMesser einen Link per E-Mail, mit dem sich ein neues Passwort setzen lässt (60 Minuten gültig, einmalig verwendbar). Dafür braucht die Anwendung die Zugangsdaten eines Postfachs deiner Domain. Ohne diese Angaben funktioniert die Anmeldung normal weiter; die Reset-Funktion meldet dann lediglich, dass sie derzeit nicht verfügbar ist.
+
+So richtest du das Postfach bei Hetzner ein:
+
+1. Lege in konsoleH unter **E-Mail → Postfächer** ein neues Postfach an, z. B. `noreply@campmesser.ch`, und vergib ein starkes Passwort.
+2. Als Mailserver dient der Hetzner-Mailserver deines Pakets (in konsoleH bei den Postfach-Details ersichtlich, üblicherweise `mail.deine-domain` oder der dort genannte `mailXX.hetzner`-Host). Verwende **Port 587 mit STARTTLS** – die Anwendung handelt die Verschlüsselung automatisch aus (Port 465 = direktes TLS wird ebenfalls erkannt).
+3. Hinterlege die Werte in der `.env`-Datei oder als Umgebungsvariablen im konsoleH-Formular:
 
 | Schlüssel   | Beispielwert            |
 | ----------- | ----------------------- |
 | `SMTP_HOST` | `mail.campmesser.ch`    |
 | `SMTP_PORT` | `587`                   |
-| `SMTP_USER` | Postfachname            |
+| `SMTP_USER` | `noreply@campmesser.ch` |
 | `SMTP_PASS` | Postfach-Passwort       |
 | `SMTP_FROM` | `noreply@campmesser.ch` |
+| `APP_URL`   | `https://campmesser.ch` |
 
-Diese Werte kannst du wahlweise in die `.env`-Datei schreiben oder als Umgebungsvariablen im konsoleH-Formular ergänzen.
+`APP_URL` ist die öffentliche Adresse der Anwendung und bestimmt, auf welche Domain die Links in den Reset-Mails zeigen. Fehlt die Angabe, verwendet der Server den Host der jeweiligen Anfrage. Nach dem Eintragen die Anwendung in konsoleH einmal neu aktivieren und den Versand über «Passwort vergessen?» auf der Anmeldeseite testen (auch den Spam-Ordner prüfen).
 
 ## Schritt 7: Funktionsprüfung
 

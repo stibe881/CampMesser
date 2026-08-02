@@ -245,52 +245,89 @@ export const appRouter = router({
         return { success: true } as const;
       }),
     requestReset: publicProcedure
-      .input(z.object({ email: z.string().min(3).max(320) }))
-      .mutation(async ({ input }) => {
-        const { findUserByEmail, createResetCode } = await import(
-          "./localAuth"
-        );
-        const user = await findUserByEmail(input.email);
-        // Aus Datenschutzgründen immer Erfolg melden, auch wenn das Konto nicht existiert
-        if (user && user.email && user.passwordHash) {
-          const code = await createResetCode(user.email);
-          const { sendResetCode } = await import("./mailer");
-          // Zustellung per SMTP (Selbst-Hosting) oder Manus-Benachrichtigung
-          await sendResetCode(user.email, code).catch(() => {});
-        }
-        return { success: true } as const;
-      }),
-    resetPassword: publicProcedure
       .input(
         z.object({
           email: z.string().min(3).max(320),
-          code: z.string().length(6),
+          lang: z.enum(["de", "fr", "it", "en"]).default("de"),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { mailConfigured, sendPasswordResetMail } = await import(
+          "./mailer"
+        );
+        if (!mailConfigured()) {
+          // Der Client übersetzt diesen Fall anhand des Fehler-Codes.
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message:
+              "Der Passwort-Reset per E-Mail ist derzeit nicht verfügbar.",
+          });
+        }
+        const { normalizeEmail, findUserByEmail } = await import("./localAuth");
+        const { allowAction } = await import("./rateLimit");
+        // Missbrauchsschutz: max. 3 Anfragen pro Stunde pro E-Mail+IP
+        const limitKey = `pwreset|${normalizeEmail(input.email)}|${ctx.req.ip ?? "?"}`;
+        if (!allowAction(limitKey, 3, 60 * 60 * 1000)) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message:
+              "Zu viele Anfragen. Bitte versuche es in einer Stunde erneut.",
+          });
+        }
+        const user = await findUserByEmail(input.email);
+        // Aus Datenschutzgründen immer Erfolg melden, auch wenn das Konto nicht existiert
+        if (user && user.email && user.passwordHash) {
+          const { createResetToken } = await import("./passwordReset");
+          const token = await createResetToken(user.id);
+          // Absolute Basis-URL: bevorzugt APP_URL, sonst Request-Host, sonst Produktions-Domain
+          const host = ctx.req.get("host");
+          const base =
+            process.env.APP_URL?.replace(/\/+$/, "") ??
+            (host ? `${ctx.req.protocol}://${host}` : "https://campmesser.ch");
+          const resetUrl = `${base}/anmelden?reset=${token}`;
+          await sendPasswordResetMail(user.email, resetUrl, input.lang).catch(
+            err => console.error("[Mailer] Reset-Mail fehlgeschlagen:", err)
+          );
+        }
+        return { success: true } as const;
+      }),
+    performReset: publicProcedure
+      .input(
+        z.object({
+          token: z.string().length(64),
           newPassword: z.string().min(1).max(200),
         })
       )
       .mutation(async ({ ctx, input }) => {
+        const { findResetToken, resetTokenState, consumeResetTokens } =
+          await import("./passwordReset");
+        const entry = await findResetToken(input.token);
+        if (!entry || resetTokenState(entry) !== "valid") {
+          // Der Client übersetzt diesen Fall anhand des Fehler-Codes.
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message:
+              "Der Link ist ungültig oder abgelaufen. Fordere einen neuen an.",
+          });
+        }
         const {
-          findUserByEmail,
-          verifyResetCode,
-          consumeResetCode,
+          findUserById,
           validatePassword,
           updateUserPassword,
           createLocalSessionToken,
         } = await import("./localAuth");
-        const codeError = await verifyResetCode(input.email, input.code);
-        if (codeError)
-          throw new TRPCError({ code: "BAD_REQUEST", message: codeError });
         const pwError = validatePassword(input.newPassword);
         if (pwError)
           throw new TRPCError({ code: "BAD_REQUEST", message: pwError });
-        const user = await findUserByEmail(input.email);
+        const user = await findUserById(entry.userId);
         if (!user)
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Konto nicht gefunden.",
           });
         await updateUserPassword(user.id, input.newPassword);
-        consumeResetCode(input.email);
+        // Verwendetes und alle weiteren offenen Tokens des Kontos entwerten
+        await consumeResetTokens(user.id);
         // Direkt anmelden
         const token = await createLocalSessionToken(user);
         const cookieOptions = getSessionCookieOptions(ctx.req);

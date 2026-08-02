@@ -56,7 +56,39 @@ export function lockoutMinutes(key: string, now: number = Date.now()): number {
   return Math.max(1, Math.ceil(remainingMs / 60000));
 }
 
+// ---------------------------------------------------------------------------
+// Generische Aktions-Begrenzung mit frei wählbarem Fenster – z. B. für
+// Passwort-Reset-Anfragen (3 pro Stunde pro E-Mail+IP). Jeder Aufruf zählt.
+// ---------------------------------------------------------------------------
+
+const actionBuckets = new Map<string, Bucket & { windowMs: number }>();
+
+/**
+ * Versucht eine Aktion: zählt den Aufruf und gibt zurück, ob er noch im
+ * Limit liegt (true = erlaubt). Nach Ablauf des Fensters wird neu gezählt.
+ */
+export function allowAction(
+  key: string,
+  max: number,
+  windowMs: number,
+  now: number = Date.now()
+): boolean {
+  if (actionBuckets.size > 10000) {
+    actionBuckets.forEach((bucket, k) => {
+      if (now - bucket.firstAt > bucket.windowMs) actionBuckets.delete(k);
+    });
+  }
+  const bucket = actionBuckets.get(key);
+  if (!bucket || now - bucket.firstAt > windowMs) {
+    actionBuckets.set(key, { count: 1, firstAt: now, windowMs });
+    return max >= 1;
+  }
+  bucket.count += 1;
+  return bucket.count <= max;
+}
+
 /** Nur für Tests: gesamten Zustand zurücksetzen. */
 export function resetRateLimits(): void {
   buckets.clear();
+  actionBuckets.clear();
 }
