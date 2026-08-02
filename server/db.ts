@@ -172,6 +172,12 @@ export async function setPackItemChecked(id: number, checked: boolean) {
   await db.update(packItems).set({ checked }).where(eq(packItems.id, id));
 }
 
+/** Personen-Zuordnung («Wer packt das?») setzen oder mit null entfernen. */
+export async function setPackItemAssignee(id: number, assignee: string | null) {
+  const db = requireDb(await getDb());
+  await db.update(packItems).set({ assignee }).where(eq(packItems.id, id));
+}
+
 export async function deletePackItem(id: number) {
   const db = requireDb(await getDb());
   await db.delete(packItems).where(eq(packItems.id, id));

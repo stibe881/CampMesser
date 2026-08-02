@@ -266,6 +266,23 @@ export const it: Translation = {
     deleteItemAria: name => `Eliminare ${name}`,
     emptyList:
       "Questa lista è ancora vuota – aggiungi sopra la tua prima voce.",
+    assignFailed: "Assegnazione non riuscita",
+    assignButtonAria: name => `Assegnare ${name} a una persona`,
+    assignInputAria: name => `Persona che prepara ${name}`,
+    assignPlaceholder: "Nome (ad es. Mamma)",
+    assignSave: "Assegna",
+    assignRemove: "Rimuovi l'assegnazione",
+    assignSuggestionAria: (person, item) => `Assegnare ${item} a ${person}`,
+    filterTitle: "Chi prepara cosa?",
+    filterGroupAria: "Filtrare le voci per persona",
+    filterAll: "Tutti",
+    filterUnassigned: "Senza assegnazione",
+    filterEmpty: "Nessuna voce per questo filtro.",
+    filteredCount: (checked, total) =>
+      `Nel filtro: ${checked} su ${total} preparate`,
+    totalCount: (checked, total) => `In totale: ${checked} su ${total}`,
+    filterProgressAria: pct =>
+      `Avanzamento nel filtro: ${pct} per cento preparato`,
   },
   sharedPackList: {
     loadingShared: "Caricamento della lista condivisa …",

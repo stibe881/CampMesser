@@ -270,6 +270,23 @@ export const fr: Translation = {
     deleteItemAria: name => `Supprimer ${name}`,
     emptyList:
       "Cette liste est encore vide – ajoute ta première entrée ci-dessus.",
+    assignFailed: "Échec de l'attribution",
+    assignButtonAria: name => `Attribuer ${name} à une personne`,
+    assignInputAria: name => `Personne qui emballe ${name}`,
+    assignPlaceholder: "Nom (p. ex. Maman)",
+    assignSave: "Attribuer",
+    assignRemove: "Retirer l'attribution",
+    assignSuggestionAria: (person, item) => `Attribuer ${item} à ${person}`,
+    filterTitle: "Qui emballe quoi ?",
+    filterGroupAria: "Filtrer les entrées par personne",
+    filterAll: "Tous",
+    filterUnassigned: "Sans attribution",
+    filterEmpty: "Aucune entrée pour ce filtre.",
+    filteredCount: (checked, total) =>
+      `Dans le filtre : ${checked} sur ${total} emballés`,
+    totalCount: (checked, total) => `Au total : ${checked} sur ${total}`,
+    filterProgressAria: pct =>
+      `Progression dans le filtre : ${pct} pour cent emballé`,
   },
   sharedPackList: {
     loadingShared: "Chargement de la liste partagée …",

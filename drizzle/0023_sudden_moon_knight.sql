@@ -1,0 +1,1 @@
+ALTER TABLE `packItems` ADD `assignee` varchar(80);

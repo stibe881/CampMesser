@@ -262,6 +262,23 @@ export const en: Translation = {
     markUnpacked: name => `Mark ${name} as unpacked`,
     deleteItemAria: name => `Delete ${name}`,
     emptyList: "This list is still empty – add your first item above.",
+    assignFailed: "Assignment failed",
+    assignButtonAria: name => `Assign ${name} to a person`,
+    assignInputAria: name => `Person packing ${name}`,
+    assignPlaceholder: "Name (e.g. Mum)",
+    assignSave: "Assign",
+    assignRemove: "Remove assignment",
+    assignSuggestionAria: (person, item) => `Assign ${item} to ${person}`,
+    filterTitle: "Who packs what?",
+    filterGroupAria: "Filter items by person",
+    filterAll: "All",
+    filterUnassigned: "Unassigned",
+    filterEmpty: "No items for this filter.",
+    filteredCount: (checked, total) =>
+      `In this filter: ${checked} of ${total} packed`,
+    totalCount: (checked, total) => `Total: ${checked} of ${total}`,
+    filterProgressAria: pct =>
+      `Progress in this filter: ${pct} per cent packed`,
   },
   sharedPackList: {
     loadingShared: "Loading shared list …",

@@ -463,6 +463,17 @@ export const appRouter = router({
     toggleItem: protectedProcedure
       .input(z.object({ id: z.number(), checked: z.boolean() }))
       .mutation(({ input }) => db.setPackItemChecked(input.id, input.checked)),
+    /** Personen-Zuordnung («Wer packt das?») setzen; null entfernt sie wieder. */
+    updateItem: protectedProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          assignee: z.string().trim().min(1).max(80).nullable(),
+        })
+      )
+      .mutation(({ input }) =>
+        db.setPackItemAssignee(input.id, input.assignee)
+      ),
     deleteItem: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => db.deletePackItem(input.id)),

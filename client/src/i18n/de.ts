@@ -271,6 +271,25 @@ export const de = {
     deleteItemAria: (name: string) => `${name} löschen`,
     emptyList:
       "Diese Liste ist noch leer – füge oben deinen ersten Eintrag hinzu.",
+    assignFailed: "Zuordnung fehlgeschlagen",
+    assignButtonAria: (name: string) => `${name} einer Person zuweisen`,
+    assignInputAria: (name: string) => `Person, die ${name} packt`,
+    assignPlaceholder: "Name (z. B. Mama)",
+    assignSave: "Zuweisen",
+    assignRemove: "Zuordnung entfernen",
+    assignSuggestionAria: (person: string, item: string) =>
+      `${item} an ${person} zuweisen`,
+    filterTitle: "Wer packt was?",
+    filterGroupAria: "Einträge nach Person filtern",
+    filterAll: "Alle",
+    filterUnassigned: "Ohne Zuordnung",
+    filterEmpty: "Für diesen Filter gibt es keine Einträge.",
+    filteredCount: (checked: number, total: number) =>
+      `Im Filter: ${checked} von ${total} gepackt`,
+    totalCount: (checked: number, total: number) =>
+      `Gesamt: ${checked} von ${total}`,
+    filterProgressAria: (pct: number) =>
+      `Fortschritt im Filter: ${pct} Prozent gepackt`,
   },
   sharedPackList: {
     loadingShared: "Geteilte Liste wird geladen …",

@@ -1,5 +1,5 @@
 import { useParams } from "wouter";
-import { ListChecks, Loader2, Users } from "lucide-react";
+import { ListChecks, Loader2, UserRound, Users } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -160,6 +160,15 @@ export default function SharedPackListPage() {
                       </span>
                     )}
                   </label>
+                  {item.assignee && (
+                    <span className="inline-flex max-w-32 items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
+                      <UserRound
+                        className="h-3 w-3 shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span className="truncate">{item.assignee}</span>
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
