@@ -28,7 +28,10 @@ test("Startseite ohne A11y-Verstösse", async ({ page }) => {
 
 test("Anmelde-Seite ohne A11y-Verstösse", async ({ page }) => {
   await page.goto("/anmelden");
-  await page.getByText(/E-Mail/i).first().waitFor();
+  await page
+    .getByText(/E-Mail/i)
+    .first()
+    .waitFor();
   await expectNoViolations(page);
 });
 
