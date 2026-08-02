@@ -353,6 +353,18 @@ export const de = {
     fireValidFrom: (date: string) => `gültig seit ${date}`,
     fireSourcePrefix:
       "Quelle: BAFU-Warnkarte. Rechtlich verbindlich sind die kantonalen Verfügungen – Details auf ",
+    uvAria: "UV-Index",
+    uvTitle: "UV-Index",
+    uvTodayMax: (uv: number) => `Heutiges Maximum: UV ${uv}`,
+    pollenTitle: "Pollenflug",
+    pollenAria: "Pollenflug",
+    pollenListAria: "Pollenbelastung nach Art",
+    pollenLoadingAria: "Pollendaten werden geladen",
+    pollenUnavailable:
+      "Pollendaten sind zurzeit nicht verfügbar – die Wettervorhersage ist davon nicht betroffen.",
+    pollenNoData: "Für diesen Ort liegen keine Pollendaten vor.",
+    pollenSource:
+      "Quelle: Open-Meteo Air Quality (CAMS Europa) – aktuelle Belastung der laufenden Stunde.",
     next24: "Nächste 24 Stunden",
     rain48: "Regen: nächste 48 Stunden",
     chartRain: "Regen",

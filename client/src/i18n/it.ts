@@ -351,6 +351,18 @@ export const it: Translation = {
     fireValidFrom: date => `valido dal ${date}`,
     fireSourcePrefix:
       "Fonte: carta dei pericoli dell'UFAM. Fanno stato le decisioni cantonali – dettagli su ",
+    uvAria: "Indice UV",
+    uvTitle: "Indice UV",
+    uvTodayMax: uv => `Massimo di oggi: UV ${uv}`,
+    pollenTitle: "Pollini",
+    pollenAria: "Pollini",
+    pollenListAria: "Carico pollinico per specie",
+    pollenLoadingAria: "Caricamento dei dati sui pollini",
+    pollenUnavailable:
+      "I dati sui pollini non sono al momento disponibili – le previsioni meteo non ne risentono.",
+    pollenNoData: "Nessun dato sui pollini per questo luogo.",
+    pollenSource:
+      "Fonte: Open-Meteo Air Quality (CAMS Europa) – carico attuale dell'ora in corso.",
     next24: "Prossime 24 ore",
     rain48: "Pioggia: prossime 48 ore",
     chartRain: "Pioggia",

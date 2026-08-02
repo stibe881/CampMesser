@@ -9,6 +9,7 @@ import {
   CloudSun,
   Droplets,
   Flame,
+  Flower2,
   Info,
   LocateFixed,
   MapPin,
@@ -40,12 +41,22 @@ import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { LOCALE_TAGS } from "@shared/i18n";
 import {
+  describeUvIndex,
   describeWeatherCode,
   detectAlerts,
   type DailyWeather,
   type HourlyWeather,
+  type UvLevel,
   type WeatherAlert,
 } from "@shared/weather";
+import {
+  describePollenLevel,
+  parsePollenResponse,
+  pollenRequestUrl,
+  pollenTypeName,
+  type PollenLevel,
+  type PollenReading,
+} from "@shared/pollen";
 import {
   describeFireDanger,
   fireDangerRequestUrl,
@@ -206,6 +217,32 @@ const fireLevelStyles: Record<FireDangerLevel, string> = {
   5: "border-destructive bg-destructive/20 text-destructive",
 };
 
+// UV-Stufen (WHO-Skala) in dieselbe Farblogik wie die Waldbrand-Stufen übersetzen
+const uvLevelStyles: Record<UvLevel, string> = {
+  niedrig: "border-primary/30 bg-primary/5 text-foreground",
+  maessig: "border-chart-4/50 bg-chart-4/10 text-foreground",
+  hoch: "border-chart-1/60 bg-chart-1/10 text-foreground",
+  sehrHoch: "border-destructive/50 bg-destructive/10 text-destructive",
+  extrem: "border-destructive bg-destructive/20 text-destructive",
+};
+
+const pollenLevelStyles: Record<PollenLevel, string> = {
+  keine: "border-border bg-secondary/60 text-foreground",
+  gering: "border-primary/30 bg-primary/5 text-foreground",
+  maessig: "border-chart-4/50 bg-chart-4/10 text-foreground",
+  hoch: "border-chart-1/60 bg-chart-1/10 text-foreground",
+  sehrHoch: "border-destructive/50 bg-destructive/10 text-destructive",
+};
+
+/** Eigener Ladezustand für den Pollenflug – ein Ausfall der
+ *  Air-Quality-API darf die Wettervorhersage nicht brechen. */
+type PollenState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "error" }
+  | { status: "empty" }
+  | { status: "ready"; readings: PollenReading[] };
+
 export default function WeatherPage() {
   const { lang, t } = useI18n();
   const [state, setState] = useState<LoadState>("idle");
@@ -218,6 +255,7 @@ export default function WeatherPage() {
   const [selectedSpotId, setSelectedSpotId] = useState<number | null>(null);
   const [locationLabel, setLocationLabel] = useState<string | null>(null);
   const [fireDanger, setFireDanger] = useState<FireDangerInfo | null>(null);
+  const [pollen, setPollen] = useState<PollenState>({ status: "idle" });
   const { isAuthenticated } = useAuth();
   const { data: spots } = trpc.spots.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -238,6 +276,32 @@ export default function WeatherPage() {
       })
       .catch(() => {
         // Stilles Scheitern: Waldbrand-Info ist eine Zusatzinfo, kein Kern-Feature
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [coords]);
+
+  // Pollenflug (Open-Meteo Air-Quality-API) für den gewählten Ort laden.
+  // Separater Zustand: schlägt der Abruf fehl, bleibt das Wetter unberührt.
+  useEffect(() => {
+    if (!coords) {
+      setPollen({ status: "idle" });
+      return;
+    }
+    let cancelled = false;
+    setPollen({ status: "loading" });
+    fetch(pollenRequestUrl(coords.lat, coords.lon))
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error())))
+      .then(json => {
+        if (cancelled) return;
+        const readings = parsePollenResponse(json);
+        setPollen(
+          readings ? { status: "ready", readings } : { status: "empty" }
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setPollen({ status: "error" });
       });
     return () => {
       cancelled = true;
@@ -305,6 +369,9 @@ export default function WeatherPage() {
     [data, lang]
   );
   const next24 = data?.hourly.slice(0, 24) ?? [];
+  // Heutiger Max-UV (WHO-Skala) – Wert kommt aus demselben Forecast-Abruf
+  const uvToday = data?.daily[0]?.uvIndexMax ?? null;
+  const uvInfo = uvToday !== null ? describeUvIndex(uvToday, lang) : null;
   // Regen-Grafik: 48 h mit Menge und Wahrscheinlichkeit
   const rainData = useMemo(
     () =>
@@ -541,6 +608,94 @@ export default function WeatherPage() {
                   .
                 </p>
               </div>
+            </section>
+          )}
+
+          {/* UV-Index: heutiges Maximum mit WHO-Stufe und Schutzhinweis ab «hoch» */}
+          {uvInfo && uvToday !== null && (
+            <section aria-label={t.weather.uvAria} className="mb-6">
+              <div
+                className={cn(
+                  "rounded-xl border px-4 py-3",
+                  uvLevelStyles[uvInfo.level]
+                )}
+              >
+                <p className="flex items-center gap-2 text-sm font-semibold">
+                  <Sun className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  {t.weather.uvTitle}
+                  <span className="ml-auto rounded-full bg-background/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                    {uvInfo.label}
+                  </span>
+                </p>
+                <p className="mt-1 text-sm">
+                  {t.weather.uvTodayMax(Math.round(uvToday))}
+                </p>
+                {uvInfo.advice && (
+                  <p className="mt-1.5 text-xs opacity-90">{uvInfo.advice}</p>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* Pollenflug: aktuelle Belastung pro Art (eigener Ladezustand) */}
+          {pollen.status !== "idle" && (
+            <section aria-label={t.weather.pollenAria} className="mb-6">
+              <h2 className="mb-2.5 font-serif text-lg font-semibold">
+                {t.weather.pollenTitle}
+              </h2>
+              <Card>
+                <CardContent className="pt-5">
+                  {pollen.status === "loading" && (
+                    <div
+                      aria-busy="true"
+                      aria-label={t.weather.pollenLoadingAria}
+                    >
+                      <Skeleton className="h-9 w-full rounded-lg" />
+                    </div>
+                  )}
+                  {pollen.status === "error" && (
+                    <p className="text-sm text-muted-foreground">
+                      {t.weather.pollenUnavailable}
+                    </p>
+                  )}
+                  {pollen.status === "empty" && (
+                    <p className="text-sm text-muted-foreground">
+                      {t.weather.pollenNoData}
+                    </p>
+                  )}
+                  {pollen.status === "ready" && (
+                    <>
+                      <ul
+                        className="flex flex-wrap gap-2"
+                        aria-label={t.weather.pollenListAria}
+                      >
+                        {pollen.readings.map(r => (
+                          <li key={r.type}>
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium",
+                                pollenLevelStyles[r.level]
+                              )}
+                            >
+                              <Flower2
+                                className="h-3.5 w-3.5"
+                                aria-hidden="true"
+                              />
+                              {pollenTypeName(r.type, lang)}
+                              <span className="rounded-full bg-background/60 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+                                {describePollenLevel(r.level, lang)}
+                              </span>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-3 text-xs text-muted-foreground">
+                        {t.weather.pollenSource}
+                      </p>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
             </section>
           )}
 

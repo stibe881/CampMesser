@@ -345,6 +345,18 @@ export const en: Translation = {
     fireValidFrom: date => `valid since ${date}`,
     fireSourcePrefix:
       "Source: FOEN danger map. The cantonal decrees are legally binding – details at ",
+    uvAria: "UV index",
+    uvTitle: "UV index",
+    uvTodayMax: uv => `Today's maximum: UV ${uv}`,
+    pollenTitle: "Pollen",
+    pollenAria: "Pollen",
+    pollenListAria: "Pollen load by species",
+    pollenLoadingAria: "Loading pollen data",
+    pollenUnavailable:
+      "Pollen data is currently unavailable – the weather forecast is not affected.",
+    pollenNoData: "No pollen data available for this location.",
+    pollenSource:
+      "Source: Open-Meteo Air Quality (CAMS Europe) – current load for the ongoing hour.",
     next24: "Next 24 hours",
     rain48: "Rain: next 48 hours",
     chartRain: "Rain",

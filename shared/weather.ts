@@ -154,6 +154,74 @@ export function describeWeatherCode(
   return { label: pick(label, lang), icon };
 }
 
+/** UV-Stufen nach WHO-Skala (gerundeter Index): 0–2, 3–5, 6–7, 8–10, 11+ */
+export type UvLevel = "niedrig" | "maessig" | "hoch" | "sehrHoch" | "extrem";
+
+const UV_LEVELS: Record<UvLevel, { label: L4; advice: L4 | null }> = {
+  niedrig: {
+    label: l4("Niedrig", "Faible", "Basso", "Low"),
+    advice: null,
+  },
+  maessig: {
+    label: l4("Mässig", "Modéré", "Moderato", "Moderate"),
+    advice: null,
+  },
+  hoch: {
+    label: l4("Hoch", "Élevé", "Alto", "High"),
+    advice: l4(
+      "Sonnencreme (LSF 30+) auftragen, Sonnenhut und Sonnenbrille tragen und über Mittag den Schatten aufsuchen.",
+      "Applique de la crème solaire (IP 30+), porte un chapeau et des lunettes de soleil et reste à l'ombre à la mi-journée.",
+      "Applica la crema solare (SPF 30+), indossa cappello e occhiali da sole e cerca l'ombra nelle ore centrali.",
+      "Apply sunscreen (SPF 30+), wear a sun hat and sunglasses and seek shade around midday."
+    ),
+  },
+  sehrHoch: {
+    label: l4("Sehr hoch", "Très élevé", "Molto alto", "Very high"),
+    advice: l4(
+      "Zwischen 11 und 15 Uhr möglichst im Schatten bleiben, Haut bedecken und Sonnencreme (LSF 50+) regelmässig nachcremen.",
+      "Reste autant que possible à l'ombre entre 11 h et 15 h, couvre ta peau et remets régulièrement de la crème solaire (IP 50+).",
+      "Tra le 11 e le 15 resta il più possibile all'ombra, copri la pelle e riapplica regolarmente la crema solare (SPF 50+).",
+      "Stay in the shade between 11 am and 3 pm if possible, cover your skin and reapply sunscreen (SPF 50+) regularly."
+    ),
+  },
+  extrem: {
+    label: l4("Extrem", "Extrême", "Estremo", "Extreme"),
+    advice: l4(
+      "Mittagssonne unbedingt meiden, lange Kleidung und Sonnenhut tragen, Sonnencreme (LSF 50+) mehrfach auftragen – besonders am Wasser und in den Bergen.",
+      "Évite absolument le soleil de midi, porte des vêtements longs et un chapeau, applique plusieurs fois de la crème solaire (IP 50+) – surtout au bord de l'eau et en montagne.",
+      "Evita assolutamente il sole di mezzogiorno, indossa abiti lunghi e un cappello, applica più volte la crema solare (SPF 50+) – soprattutto vicino all'acqua e in montagna.",
+      "Avoid the midday sun entirely, wear long clothing and a sun hat, apply sunscreen (SPF 50+) several times – especially near water and in the mountains."
+    ),
+  },
+};
+
+/** UV-Index (WHO-Skala) in die Stufe übersetzen – gerundet wie in der Anzeige. */
+export function uvLevelForIndex(uv: number): UvLevel {
+  const v = Math.round(uv);
+  if (v <= 2) return "niedrig";
+  if (v <= 5) return "maessig";
+  if (v <= 7) return "hoch";
+  if (v <= 10) return "sehrHoch";
+  return "extrem";
+}
+
+/**
+ * UV-Index in Stufe, Stufen-Label und Schutzhinweis übersetzen.
+ * Der Hinweis ist erst ab Stufe «hoch» gesetzt (WHO-Empfehlung), sonst null.
+ */
+export function describeUvIndex(
+  uv: number,
+  lang: Language = "de"
+): { level: UvLevel; label: string; advice: string | null } {
+  const level = uvLevelForIndex(uv);
+  const entry = UV_LEVELS[level];
+  return {
+    level,
+    label: pick(entry.label, lang),
+    advice: entry.advice ? pick(entry.advice, lang) : null,
+  };
+}
+
 /**
  * Unwetter-Erkennung für die nächsten 48 h – speziell auf Zelt-Camping ausgelegt.
  * Schwellenwerte orientieren sich an MeteoSchweiz-Warnstufen:

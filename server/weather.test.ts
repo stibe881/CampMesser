@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  describeUvIndex,
   describeWeatherCode,
   detectAlerts,
+  uvLevelForIndex,
   type HourlyWeather,
 } from "../shared/weather";
 import { calcWaterNeeds } from "../shared/calculators";
@@ -28,6 +30,44 @@ describe("describeWeatherCode", () => {
     expect(describeWeatherCode(63).label).toBe("Regen");
     expect(describeWeatherCode(95).label).toBe("Gewitter");
     expect(describeWeatherCode(96).label).toBe("Gewitter mit Hagel");
+  });
+});
+
+describe("uvLevelForIndex / describeUvIndex", () => {
+  it("ordnet die WHO-Stufen korrekt zu (gerundet)", () => {
+    expect(uvLevelForIndex(0)).toBe("niedrig");
+    expect(uvLevelForIndex(2.4)).toBe("niedrig"); // rundet auf 2
+    expect(uvLevelForIndex(2.6)).toBe("maessig"); // rundet auf 3
+    expect(uvLevelForIndex(5)).toBe("maessig");
+    expect(uvLevelForIndex(6)).toBe("hoch");
+    expect(uvLevelForIndex(7.4)).toBe("hoch");
+    expect(uvLevelForIndex(8)).toBe("sehrHoch");
+    expect(uvLevelForIndex(10)).toBe("sehrHoch");
+    expect(uvLevelForIndex(11)).toBe("extrem");
+    expect(uvLevelForIndex(13.5)).toBe("extrem");
+  });
+
+  it("liefert deutsche Labels als Default", () => {
+    expect(describeUvIndex(1).label).toBe("Niedrig");
+    expect(describeUvIndex(4).label).toBe("Mässig");
+    expect(describeUvIndex(7).label).toBe("Hoch");
+    expect(describeUvIndex(9).label).toBe("Sehr hoch");
+    expect(describeUvIndex(12).label).toBe("Extrem");
+  });
+
+  it("gibt Schutzhinweise erst ab Stufe «hoch»", () => {
+    expect(describeUvIndex(2).advice).toBeNull();
+    expect(describeUvIndex(5).advice).toBeNull();
+    expect(describeUvIndex(6).advice).toContain("Sonnencreme");
+    expect(describeUvIndex(9).advice).toContain("Schatten");
+    expect(describeUvIndex(11).advice).toContain("Mittagssonne");
+  });
+
+  it("übersetzt Labels und Hinweise in die gewählte Sprache", () => {
+    expect(describeUvIndex(7, "fr").label).toBe("Élevé");
+    expect(describeUvIndex(7, "it").label).toBe("Alto");
+    expect(describeUvIndex(7, "en").label).toBe("High");
+    expect(describeUvIndex(7, "en").advice).toContain("sunscreen");
   });
 });
 

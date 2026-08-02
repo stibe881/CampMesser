@@ -354,6 +354,18 @@ export const fr: Translation = {
     fireValidFrom: date => `valable depuis le ${date}`,
     fireSourcePrefix:
       "Source : carte des dangers de l'OFEV. Seules les décisions cantonales font foi – détails sur ",
+    uvAria: "Indice UV",
+    uvTitle: "Indice UV",
+    uvTodayMax: uv => `Maximum du jour : UV ${uv}`,
+    pollenTitle: "Pollens",
+    pollenAria: "Pollens",
+    pollenListAria: "Charge pollinique par espèce",
+    pollenLoadingAria: "Chargement des données polliniques",
+    pollenUnavailable:
+      "Les données polliniques sont momentanément indisponibles – les prévisions météo n'en sont pas affectées.",
+    pollenNoData: "Aucune donnée pollinique pour ce lieu.",
+    pollenSource:
+      "Source : Open-Meteo Air Quality (CAMS Europe) – charge actuelle de l'heure en cours.",
     next24: "Prochaines 24 heures",
     rain48: "Pluie : prochaines 48 heures",
     chartRain: "Pluie",
