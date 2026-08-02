@@ -14,13 +14,9 @@ import {
   Wind,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import {
-  getExistingSubscription,
-  pushSupported,
-  subscribeBrowser,
-  unsubscribeBrowser,
-} from "@/lib/pushClient";
+import { usePushSubscription } from "@/lib/usePushSubscription";
 import { toast } from "sonner";
+import { Link } from "wouter";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
@@ -306,52 +302,12 @@ function SpotMapPicker({
 
 /** Opt-in für Unwetter-Push: warnt bei Sturm/Gewitter an gespeicherten Plätzen. */
 function PushOptIn({ hasSpots }: { hasSpots: boolean }) {
-  const { lang, t } = useI18n();
-  const vapidQuery = trpc.push.vapidKey.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-  const subscribeMutation = trpc.push.subscribe.useMutation();
-  const unsubscribeMutation = trpc.push.unsubscribe.useMutation();
-  const [enabled, setEnabled] = useState<boolean | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    if (!pushSupported()) {
-      setEnabled(false);
-      return;
-    }
-    getExistingSubscription()
-      .then(sub => setEnabled(Boolean(sub)))
-      .catch(() => setEnabled(false));
-  }, []);
+  const t = useT();
+  const push = usePushSubscription();
 
   // Ausblenden, wenn der Browser kein Push kann oder der Server keine
   // VAPID-Schlüssel konfiguriert hat (siehe DEPLOYMENT-HETZNER.md)
-  if (!pushSupported() || !vapidQuery.data?.publicKey) return null;
-
-  const toggle = async (next: boolean) => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      if (next) {
-        const sub = await subscribeBrowser(vapidQuery.data!.publicKey!, lang);
-        await subscribeMutation.mutateAsync(sub);
-        setEnabled(true);
-        toast.success(t.spots.pushEnabled);
-      } else {
-        const endpoint = await unsubscribeBrowser();
-        if (endpoint) await unsubscribeMutation.mutateAsync({ endpoint });
-        setEnabled(false);
-        toast.success(t.spots.pushDisabled);
-      }
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : t.common.actionFailed
-      );
-    } finally {
-      setBusy(false);
-    }
-  };
+  if (!push.supported || !push.configured) return null;
 
   return (
     <Card className="mb-5">
@@ -365,11 +321,24 @@ function PushOptIn({ hasSpots }: { hasSpots: boolean }) {
             {t.spots.pushDesc}
             {!hasSpots && ` ${t.spots.pushSaveFirst}`}
           </p>
+          {push.enabled && (
+            <Link
+              href="/profil"
+              className="mt-1 inline-block text-xs font-medium text-primary hover:underline"
+            >
+              {t.spots.pushProfileHint}
+            </Link>
+          )}
         </div>
         <Switch
-          checked={enabled ?? false}
-          disabled={busy || enabled === null}
-          onCheckedChange={toggle}
+          checked={push.enabled ?? false}
+          disabled={push.busy || push.enabled === null}
+          onCheckedChange={next =>
+            push.toggle(next, {
+              enabled: t.spots.pushEnabled,
+              disabled: t.spots.pushDisabled,
+            })
+          }
           aria-label={t.spots.pushAria}
         />
       </CardContent>

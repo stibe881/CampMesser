@@ -179,6 +179,24 @@ export const en: Translation = {
     deleteFinal: "Delete permanently",
     versionLine: version => `CampMesser version ${version}`,
     buildDate: date => ` · build from ${date}`,
+    notificationsTitle: "Notifications",
+    pushDeviceTitle: "Push on this device",
+    pushDeviceDesc:
+      "Notifications for storms, cool box best-before dates and the trip countdown.",
+    pushDeviceAria: "Enable push notifications on this device",
+    pushUnsupported: "Your browser does not support push notifications.",
+    pushNotConfigured: "Push is not configured on the server.",
+    pushOn: "Push notifications enabled",
+    pushOff: "Push notifications disabled",
+    prefsIntro: "Choose which notifications this device receives:",
+    prefWeather: "Storm alerts",
+    prefWeatherDesc: "Storm, thunderstorm or heavy rain at your saved pitches.",
+    prefFood: "Best-before reminders",
+    prefFoodDesc: "When food in the cool box expires today or tomorrow.",
+    prefTrips: "Trip countdown",
+    prefTripsDesc:
+      "3 days before arrival, including your packing list progress.",
+    prefToggleAria: (label: string) => `Turn ${label} on or off`,
   },
   packLists: {
     title: "Packing lists",
@@ -946,6 +964,7 @@ export const en: Translation = {
     pushDesc:
       "Push notification for storms, thunderstorms or heavy rain at one of your saved pitches. CampMesser also reminds you when food in the cool box is about to expire – and 3 days before a planned stay, including your packing list progress.",
     pushSaveFirst: "Save a pitch first.",
+    pushProfileHint: "Fine-tune in your profile →",
     pushAria: "Enable storm alerts for saved pitches",
     geoUnsupported: "Your device does not support geolocation.",
     geoUnavailable: "Location unavailable.",

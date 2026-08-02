@@ -59,6 +59,75 @@ export async function deleteSubscription(userId: number, endpoint: string) {
     );
 }
 
+/** Mitteilungs-Arten, die pro Abo (Gerät) einzeln abschaltbar sind. */
+export type PushKind = "weather" | "food" | "trip";
+
+/** Die drei Mitteilungs-Flags eines Abos (Default: alles an). */
+export interface PushPrefs {
+  wantsWeather: boolean;
+  wantsFood: boolean;
+  wantsTrips: boolean;
+}
+
+/**
+ * Will dieses Abo die Mitteilungs-Art erhalten? Reine Funktion (für Tests
+ * exportiert, Muster buildTripAlert) – checkAndNotify filtert damit pro Abo.
+ */
+export function subscriptionWants(prefs: PushPrefs, kind: PushKind): boolean {
+  switch (kind) {
+    case "weather":
+      return prefs.wantsWeather;
+    case "food":
+      return prefs.wantsFood;
+    case "trip":
+      return prefs.wantsTrips;
+  }
+}
+
+/** Mitteilungs-Einstellungen des Abos mit diesem Endpoint (null = kein Abo). */
+export async function getSubscriptionPrefs(
+  userId: number,
+  endpoint: string
+): Promise<PushPrefs | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select({
+      wantsWeather: pushSubscriptions.wantsWeather,
+      wantsFood: pushSubscriptions.wantsFood,
+      wantsTrips: pushSubscriptions.wantsTrips,
+    })
+    .from(pushSubscriptions)
+    .where(
+      and(
+        eq(pushSubscriptions.userId, userId),
+        eq(pushSubscriptions.endpoint, endpoint)
+      )
+    )
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/** Mitteilungs-Einstellungen des Abos mit diesem Endpoint setzen (teilweise erlaubt). */
+export async function setSubscriptionPrefs(
+  userId: number,
+  endpoint: string,
+  prefs: Partial<PushPrefs>
+): Promise<void> {
+  if (Object.keys(prefs).length === 0) return;
+  const db = await getDb();
+  if (!db) throw new Error("Datenbank nicht verfügbar");
+  await db
+    .update(pushSubscriptions)
+    .set(prefs)
+    .where(
+      and(
+        eq(pushSubscriptions.userId, userId),
+        eq(pushSubscriptions.endpoint, endpoint)
+      )
+    );
+}
+
 export async function hasSubscription(
   userId: number,
   endpoint: string
@@ -250,6 +319,8 @@ function localIsoDate(now = new Date()): string {
  * Alle Abos prüfen: für jeden Zeltplatz der abonnierten Nutzer*innen die
  * Warnlage berechnen und bei Sturm/Gewitter & Co. (Stufe «gefahr») einen
  * Push senden. Dieselbe Warnlage wird pro Abo nur einmal gemeldet.
+ * Die Mitteilungs-Flags pro Abo (wantsWeather/wantsFood/wantsTrips) werden
+ * über subscriptionWants respektiert.
  */
 export async function checkAndNotify(): Promise<PushCheckResult> {
   const result: PushCheckResult = {
@@ -422,7 +493,10 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
           .set({ lastAlertKey: null })
           .where(eq(pushSubscriptions.id, sub.id));
       }
-    } else if (alertKey !== sub.lastAlertKey) {
+    } else if (
+      subscriptionWants(sub, "weather") &&
+      alertKey !== sub.lastAlertKey
+    ) {
       const first = dangers[0];
       const payload = JSON.stringify({
         title: `⚠️ ${first.title} – ${first.spotName}`,
@@ -446,7 +520,9 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     if (subGone) continue;
 
     // ── Kühlbox: MHD-Erinnerung (max. eine pro Tag und Abo) ──
-    const foodAlert = foodAlertByUser.get(sub.userId);
+    const foodAlert = subscriptionWants(sub, "food")
+      ? foodAlertByUser.get(sub.userId)
+      : undefined;
     if (foodAlert && foodAlert.key !== sub.lastFoodKey) {
       const foodPayload = JSON.stringify({
         title: foodAlert.title,
@@ -469,7 +545,12 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
 
     // ── Reise-Tagebuch: Trip-Countdown (max. eine Nachricht pro Trip) ──
     const tripAlert = tripAlertByUser.get(sub.userId);
-    if (!tripAlert || tripAlert.key === sub.lastTripKey) continue;
+    if (
+      !subscriptionWants(sub, "trip") ||
+      !tripAlert ||
+      tripAlert.key === sub.lastTripKey
+    )
+      continue;
     const tripPayload = JSON.stringify({
       title: tripAlert.title,
       body: tripAlert.body,

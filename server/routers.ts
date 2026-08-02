@@ -825,6 +825,31 @@ export const appRouter = router({
           subscribed: await hasSubscription(ctx.user.id, input.endpoint),
         };
       }),
+    /** Mitteilungs-Flags des Abos dieses Geräts (null = kein Abo gespeichert). */
+    getPrefs: protectedProcedure
+      .input(z.object({ endpoint: z.string().min(10).max(500) }))
+      .query(async ({ ctx, input }) => {
+        const { getSubscriptionPrefs } = await import("./push");
+        return {
+          prefs: await getSubscriptionPrefs(ctx.user.id, input.endpoint),
+        };
+      }),
+    /** Mitteilungs-Flags des Abos dieses Geräts setzen (teilweise erlaubt). */
+    setPrefs: protectedProcedure
+      .input(
+        z.object({
+          endpoint: z.string().min(10).max(500),
+          wantsWeather: z.boolean().optional(),
+          wantsFood: z.boolean().optional(),
+          wantsTrips: z.boolean().optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { setSubscriptionPrefs } = await import("./push");
+        const { endpoint, ...prefs } = input;
+        await setSubscriptionPrefs(ctx.user.id, endpoint, prefs);
+        return { success: true } as const;
+      }),
   }),
 
   recipes: router({

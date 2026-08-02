@@ -253,6 +253,12 @@ export const pushSubscriptions = mysqlTable(
     endpoint: varchar("endpoint", { length: 500 }).notNull(),
     p256dh: varchar("p256dh", { length: 255 }).notNull(),
     auth: varchar("auth", { length: 255 }).notNull(),
+    /** Mitteilungs-Einstellung dieses Geräts: Unwetter-Warnungen an gespeicherten Plätzen */
+    wantsWeather: boolean("wantsWeather").notNull().default(true),
+    /** Mitteilungs-Einstellung dieses Geräts: MHD-Erinnerungen der Kühlbox */
+    wantsFood: boolean("wantsFood").notNull().default(true),
+    /** Mitteilungs-Einstellung dieses Geräts: Trip-Countdown vor der Anreise */
+    wantsTrips: boolean("wantsTrips").notNull().default(true),
     /** Schlüssel der zuletzt gemeldeten Warnlage (verhindert Doppel-Pushes) */
     lastAlertKey: varchar("lastAlertKey", { length: 255 }),
     /** Schlüssel der letzten MHD-Erinnerung («food:YYYY-MM-DD»): max. 1 Kühlbox-Push pro Tag */

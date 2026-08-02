@@ -181,6 +181,25 @@ export const it: Translation = {
     deleteFinal: "Elimina definitivamente",
     versionLine: version => `CampMesser versione ${version}`,
     buildDate: date => ` · build del ${date}`,
+    notificationsTitle: "Notifiche",
+    pushDeviceTitle: "Push su questo dispositivo",
+    pushDeviceDesc:
+      "Notifiche per maltempo, TMC del frigo box e conto alla rovescia del soggiorno.",
+    pushDeviceAria: "Attiva le notifiche push su questo dispositivo",
+    pushUnsupported: "Il tuo browser non supporta le notifiche push.",
+    pushNotConfigured: "Il push non è configurato lato server.",
+    pushOn: "Notifiche push attivate",
+    pushOff: "Notifiche push disattivate",
+    prefsIntro: "Scegli quali notifiche riceve questo dispositivo:",
+    prefWeather: "Allerte maltempo",
+    prefWeatherDesc:
+      "Tempesta, temporale o piogge intense sulle tue piazzole salvate.",
+    prefFood: "Promemoria TMC",
+    prefFoodDesc: "Quando gli alimenti nel frigo box scadono oggi o domani.",
+    prefTrips: "Conto alla rovescia del soggiorno",
+    prefTripsDesc:
+      "3 giorni prima dell'arrivo, incluso lo stato della lista bagagli.",
+    prefToggleAria: (label: string) => `Attiva o disattiva ${label}`,
   },
   packLists: {
     title: "Liste bagagli",
@@ -960,6 +979,7 @@ export const it: Translation = {
     pushDesc:
       "Notifica push in caso di tempesta, temporale o pioggia intensa su una delle tue piazzole salvate. CampMesser ti ricorda inoltre quando gli alimenti nel frigo box stanno per scadere – e 3 giorni prima di un soggiorno pianificato, con lo stato della lista bagagli.",
     pushSaveFirst: "Salva prima una piazzola.",
+    pushProfileHint: "Impostazioni dettagliate nel profilo →",
     pushAria: "Attiva le allerte maltempo per le piazzole salvate",
     geoUnsupported: "Il tuo dispositivo non supporta la geolocalizzazione.",
     geoUnavailable: "Posizione non disponibile.",

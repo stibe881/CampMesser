@@ -183,6 +183,25 @@ export const de = {
     deleteFinal: "Endgültig löschen",
     versionLine: (version: string) => `CampMesser Version ${version}`,
     buildDate: (date: string) => ` · Build vom ${date}`,
+    notificationsTitle: "Mitteilungen",
+    pushDeviceTitle: "Push auf diesem Gerät",
+    pushDeviceDesc:
+      "Benachrichtigungen zu Unwetter, Kühlbox-MHD und Trip-Countdown.",
+    pushDeviceAria: "Push-Mitteilungen auf diesem Gerät aktivieren",
+    pushUnsupported: "Dein Browser unterstützt keine Push-Mitteilungen.",
+    pushNotConfigured: "Push ist serverseitig nicht eingerichtet.",
+    pushOn: "Push-Mitteilungen aktiviert",
+    pushOff: "Push-Mitteilungen deaktiviert",
+    prefsIntro: "Wähle, welche Mitteilungen dieses Gerät erhält:",
+    prefWeather: "Unwetter-Warnungen",
+    prefWeatherDesc:
+      "Sturm, Gewitter oder Starkregen an deinen gespeicherten Plätzen.",
+    prefFood: "MHD-Erinnerungen",
+    prefFoodDesc:
+      "Wenn Lebensmittel in der Kühlbox heute oder morgen ablaufen.",
+    prefTrips: "Trip-Countdown",
+    prefTripsDesc: "3 Tage vor der Anreise, inklusive Packlisten-Stand.",
+    prefToggleAria: (label: string) => `${label} an- oder abschalten`,
   },
   packLists: {
     title: "Packlisten",
@@ -969,6 +988,7 @@ export const de = {
     pushDesc:
       "Push-Benachrichtigung bei Sturm, Gewitter oder Starkregen an einem deiner gespeicherten Zeltplätze. Zusätzlich erinnert dich CampMesser, wenn Lebensmittel in der Kühlbox bald ablaufen – und 3 Tage vor einem geplanten Aufenthalt inklusive Packlisten-Stand.",
     pushSaveFirst: "Speichere zuerst einen Zeltplatz.",
+    pushProfileHint: "Feineinstellungen im Profil →",
     pushAria: "Unwetter-Warnungen für gespeicherte Zeltplätze aktivieren",
     geoUnsupported: "Dein Gerät unterstützt keine Standortbestimmung.",
     geoUnavailable: "Standort nicht verfügbar.",

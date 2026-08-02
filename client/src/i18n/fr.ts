@@ -183,6 +183,27 @@ export const fr: Translation = {
     deleteFinal: "Supprimer définitivement",
     versionLine: version => `CampMesser version ${version}`,
     buildDate: date => ` · build du ${date}`,
+    notificationsTitle: "Notifications",
+    pushDeviceTitle: "Push sur cet appareil",
+    pushDeviceDesc:
+      "Notifications pour les intempéries, la DLC de la glacière et le compte à rebours du séjour.",
+    pushDeviceAria: "Activer les notifications push sur cet appareil",
+    pushUnsupported:
+      "Ton navigateur ne prend pas en charge les notifications push.",
+    pushNotConfigured: "Le push n'est pas configuré côté serveur.",
+    pushOn: "Notifications push activées",
+    pushOff: "Notifications push désactivées",
+    prefsIntro: "Choisis quelles notifications cet appareil reçoit :",
+    prefWeather: "Alertes intempéries",
+    prefWeatherDesc:
+      "Tempête, orage ou fortes pluies sur tes emplacements enregistrés.",
+    prefFood: "Rappels DLC",
+    prefFoodDesc:
+      "Quand des aliments de la glacière expirent aujourd'hui ou demain.",
+    prefTrips: "Compte à rebours du séjour",
+    prefTripsDesc:
+      "3 jours avant l'arrivée, avec l'état de la liste de bagages.",
+    prefToggleAria: (label: string) => `Activer ou désactiver ${label}`,
   },
   packLists: {
     title: "Listes de bagages",
@@ -969,6 +990,7 @@ export const fr: Translation = {
     pushDesc:
       "Notification push en cas de tempête, d'orage ou de fortes pluies sur l'un de tes emplacements enregistrés. CampMesser te rappelle aussi quand des aliments de la glacière arrivent bientôt à expiration – et 3 jours avant un séjour prévu, avec l'avancement de ta liste de bagages.",
     pushSaveFirst: "Enregistre d'abord un emplacement.",
+    pushProfileHint: "Réglages fins dans le profil →",
     pushAria:
       "Activer les alertes intempéries pour les emplacements enregistrés",
     geoUnsupported: "Ton appareil ne prend pas en charge la géolocalisation.",

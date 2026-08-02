@@ -10,6 +10,7 @@ import {
   Moon,
   MonitorSmartphone,
   LogOut,
+  BellRing,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -17,6 +18,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { usePushSubscription } from "@/lib/usePushSubscription";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +41,133 @@ import {
 } from "@/lib/themePreference";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
+
+type PushFlag = "wantsWeather" | "wantsFood" | "wantsTrips";
+
+/**
+ * Abschnitt «Mitteilungen»: Push-Abo dieses Geräts (an/aus) plus
+ * Feineinstellungen, welche Mitteilungs-Arten das Gerät erhalten soll.
+ */
+function NotificationsCard() {
+  const { t } = useI18n();
+  const utils = trpc.useUtils();
+  const push = usePushSubscription();
+  const prefsQuery = trpc.push.getPrefs.useQuery(
+    { endpoint: push.endpoint ?? "" },
+    { enabled: Boolean(push.enabled && push.endpoint) }
+  );
+  const setPrefsMutation = trpc.push.setPrefs.useMutation({
+    onSuccess: () => utils.push.getPrefs.invalidate(),
+    onError: () => {
+      toast.error(t.common.saveFailed);
+      void utils.push.getPrefs.invalidate();
+    },
+  });
+  const prefs = prefsQuery.data?.prefs ?? null;
+
+  const setFlag = (flag: PushFlag, value: boolean) => {
+    if (!push.endpoint) return;
+    const patch =
+      flag === "wantsWeather"
+        ? { wantsWeather: value }
+        : flag === "wantsFood"
+          ? { wantsFood: value }
+          : { wantsTrips: value };
+    setPrefsMutation.mutate({ endpoint: push.endpoint, ...patch });
+  };
+
+  const rows: { flag: PushFlag; label: string; desc: string }[] = [
+    {
+      flag: "wantsWeather",
+      label: t.profile.prefWeather,
+      desc: t.profile.prefWeatherDesc,
+    },
+    {
+      flag: "wantsFood",
+      label: t.profile.prefFood,
+      desc: t.profile.prefFoodDesc,
+    },
+    {
+      flag: "wantsTrips",
+      label: t.profile.prefTrips,
+      desc: t.profile.prefTripsDesc,
+    },
+  ];
+
+  return (
+    <Card className="mb-5">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <BellRing className="h-4 w-4 text-primary" aria-hidden="true" />
+          {t.profile.notificationsTitle}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {!push.supported ? (
+          <p className="text-sm text-muted-foreground">
+            {t.profile.pushUnsupported}
+          </p>
+        ) : push.configLoaded && !push.configured ? (
+          <p className="text-sm text-muted-foreground">
+            {t.profile.pushNotConfigured}
+          </p>
+        ) : (
+          <>
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">
+                  {t.profile.pushDeviceTitle}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {t.profile.pushDeviceDesc}
+                </p>
+              </div>
+              <Switch
+                checked={push.enabled ?? false}
+                disabled={
+                  push.busy || push.enabled === null || !push.configured
+                }
+                onCheckedChange={next =>
+                  push.toggle(next, {
+                    enabled: t.profile.pushOn,
+                    disabled: t.profile.pushOff,
+                  })
+                }
+                aria-label={t.profile.pushDeviceAria}
+              />
+            </div>
+            {push.enabled && prefs && (
+              <div className="mt-4 space-y-3 border-t border-border pt-4">
+                <p className="text-xs text-muted-foreground">
+                  {t.profile.prefsIntro}
+                </p>
+                {rows.map(row => (
+                  <div
+                    key={row.flag}
+                    className="flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium">{row.label}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {row.desc}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={prefs[row.flag]}
+                      disabled={setPrefsMutation.isPending}
+                      onCheckedChange={value => setFlag(row.flag, value)}
+                      aria-label={t.profile.prefToggleAria(row.label)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 /** Profil-Seite: Konto verwalten und App-Einstellungen. */
 export default function ProfilePage() {
@@ -179,6 +309,8 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      <NotificationsCard />
 
       <Card className="mb-5">
         <CardHeader className="pb-3">
