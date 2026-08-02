@@ -17,6 +17,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import {
+  clearAppBadge,
+  computeBadgeCount,
+  isAppBadgeSupported,
+  updateAppBadge,
+} from "@/lib/appBadge";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useI18n } from "@/i18n";
 import { LANGUAGES, LANGUAGE_LABELS } from "@shared/i18n";
@@ -95,6 +102,45 @@ export function getRecentModules(): string[] {
     /* egal */
   }
   return [];
+}
+
+/**
+ * Hält den App-Icon-Zähler (Badging API) aktuell: heute/morgen ablaufende
+ * Kühlbox-Einträge plus fällige Pflege-Aufgaben. Ohne Badging-Unterstützung
+ * werden die Queries gar nicht erst geladen; beim Logout wird das Badge
+ * geräumt. Keine sichtbare UI.
+ */
+function AppBadgeUpdater() {
+  const { isAuthenticated } = useAuth();
+  const supported = isAppBadgeSupported();
+  // Support VOR dem Laden prüfen: ohne Badging keine unnötigen Abrufe
+  const enabled = supported && isAuthenticated;
+  const foodQuery = trpc.food.list.useQuery(undefined, {
+    enabled,
+    staleTime: 10 * 60_000,
+  });
+  const gearQuery = trpc.gear.list.useQuery(undefined, {
+    enabled,
+    staleTime: 10 * 60_000,
+  });
+
+  useEffect(() => {
+    if (!supported) return;
+    if (!isAuthenticated) {
+      clearAppBadge();
+      return;
+    }
+    if (!foodQuery.data && !gearQuery.data) return; // noch nichts geladen
+    updateAppBadge(
+      computeBadgeCount({
+        foodItems: foodQuery.data ?? [],
+        gearTasks: gearQuery.data ?? [],
+        today: new Date().toISOString().slice(0, 10),
+      })
+    );
+  }, [supported, isAuthenticated, foodQuery.data, gearQuery.data]);
+
+  return null;
 }
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -269,6 +315,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Schnellaktionen: FAB (mobil) + Befehls-Palette (Cmd/Ctrl+K) */}
       <QuickActions />
+
+      {/* App-Icon-Zähler (Badging API) – unsichtbar */}
+      <AppBadgeUpdater />
 
       {/* Bottom-Navigation (mobil) */}
       <nav
