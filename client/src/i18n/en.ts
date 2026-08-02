@@ -1119,6 +1119,36 @@ export const en: Translation = {
     bookLink: "Campfire recipe book",
     bookSuffix: ".",
   },
+  shopping: {
+    title: "Shopping list",
+    subtitle:
+      "Buy everything for camp: tick off items, take ingredients straight from the recipe book.",
+    subtitleLoggedOut:
+      "Your shopping list for camp – filled by hand or straight from the recipe book.",
+    loginFeature: "your shopping list",
+    addPlaceholder: "e.g. 500 g spaghetti …",
+    addNameAria: "Add an item to the shopping list",
+    addButton: "Add",
+    addFailed: "The item could not be saved",
+    openTitle: "Still to buy",
+    doneTitle: "Done",
+    itemCheckAria: (name: string) => `Tick off ${name}`,
+    itemUncheckAria: (name: string) => `Reopen ${name}`,
+    removeAria: (name: string) => `Remove ${name} from the list`,
+    removeChecked: "Remove ticked items",
+    clearAll: "Clear list",
+    clearConfirm: "Really delete the whole shopping list?",
+    emptyTitle: "Shopping list is empty",
+    emptyText:
+      "Add items above – or take ingredients straight from a recipe in the recipe book.",
+    openCount: (n: number) => (n === 1 ? "1 open item" : `${n} open items`),
+    addedFromRecipe: (n: number) =>
+      n === 1
+        ? "1 ingredient added to the shopping list"
+        : `${n} ingredients added to the shopping list`,
+    openList: "Go to shopping list",
+    addIngredients: "Add ingredients to shopping list",
+  },
   family: {
     title: "Family mode",
     subtitle:

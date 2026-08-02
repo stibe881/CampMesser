@@ -20,6 +20,7 @@ import {
   Refrigerator,
   Scale,
   Shirt,
+  ShoppingCart,
   Siren,
   Sprout,
   Tent,
@@ -327,6 +328,23 @@ export const modules: Module[] = [
       "Track supplies and find matching recipes"
     ),
     icon: Refrigerator,
+    group: "Erste Hilfe",
+  },
+  {
+    path: "/einkauf",
+    title: l4(
+      "Einkaufsliste",
+      "Liste de courses",
+      "Lista della spesa",
+      "Shopping list"
+    ),
+    description: l4(
+      "Abhaken beim Einkauf, Zutaten aus dem Rezeptbuch übernehmen",
+      "Coche en faisant les courses, reprends les ingrédients des recettes",
+      "Spunta durante la spesa, riprendi gli ingredienti dal ricettario",
+      "Tick off while shopping, take ingredients from the recipe book"
+    ),
+    icon: ShoppingCart,
     group: "Erste Hilfe",
   },
   {

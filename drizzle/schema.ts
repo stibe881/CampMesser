@@ -274,6 +274,23 @@ export const customHunts = mysqlTable(
 export type CustomHunt = typeof customHunts.$inferSelect;
 export type InsertCustomHunt = typeof customHunts.$inferInsert;
 
+/** Einkaufsliste: abhakbare Einträge pro Nutzer*in (manuell oder aus Rezepten). */
+export const shoppingItems = mysqlTable(
+  "shoppingItems",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 160 }).notNull(),
+    checked: boolean("checked").notNull().default(false),
+    position: int("position").notNull().default(0),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("shoppingItems_userId").on(table.userId)]
+);
+
+export type ShoppingItem = typeof shoppingItems.$inferSelect;
+export type InsertShoppingItem = typeof shoppingItems.$inferInsert;
+
 /**
  * Geräteübergreifend synchronisierte Client-Einstellungen: pro Nutzer*in und
  * Schlüssel ein JSON-serialisierter Wert (z. B. Kachel-Reihenfolge, Hindernis-Profil).

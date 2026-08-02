@@ -1151,6 +1151,37 @@ export const fr: Translation = {
     bookLink: "livre de recettes Campfire",
     bookSuffix: ".",
   },
+  shopping: {
+    title: "Liste de courses",
+    subtitle:
+      "Tout acheter pour le camp : coche les articles, reprends les ingrédients directement du livre de recettes.",
+    subtitleLoggedOut:
+      "Ta liste de courses pour le camp – remplie à la main ou directement depuis le livre de recettes.",
+    loginFeature: "ta liste de courses",
+    addPlaceholder: "p. ex. 500 g de spaghettis …",
+    addNameAria: "Ajouter un article à la liste de courses",
+    addButton: "Ajouter",
+    addFailed: "L'article n'a pas pu être enregistré",
+    openTitle: "Encore à acheter",
+    doneTitle: "Fait",
+    itemCheckAria: (name: string) => `Cocher ${name}`,
+    itemUncheckAria: (name: string) => `Rouvrir ${name}`,
+    removeAria: (name: string) => `Retirer ${name} de la liste`,
+    removeChecked: "Supprimer les articles cochés",
+    clearAll: "Vider la liste",
+    clearConfirm: "Vraiment supprimer toute la liste de courses ?",
+    emptyTitle: "La liste de courses est vide",
+    emptyText:
+      "Ajoute des articles ci-dessus – ou reprends les ingrédients directement d'une recette du livre de recettes.",
+    openCount: (n: number) =>
+      n === 1 ? "1 article ouvert" : `${n} articles ouverts`,
+    addedFromRecipe: (n: number) =>
+      n === 1
+        ? "1 ingrédient ajouté à la liste de courses"
+        : `${n} ingrédients ajoutés à la liste de courses`,
+    openList: "Vers la liste de courses",
+    addIngredients: "Ingrédients sur la liste de courses",
+  },
   family: {
     title: "Mode famille",
     subtitle:

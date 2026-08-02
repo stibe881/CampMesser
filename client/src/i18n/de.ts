@@ -1146,6 +1146,37 @@ export const de = {
     bookLink: "Campfire-Rezeptbuch",
     bookSuffix: ".",
   },
+  shopping: {
+    title: "Einkaufsliste",
+    subtitle:
+      "Alles fürs Camp einkaufen: Einträge abhaken, Zutaten direkt aus dem Rezeptbuch übernehmen.",
+    subtitleLoggedOut:
+      "Deine Einkaufsliste fürs Camp – manuell oder direkt aus dem Rezeptbuch gefüllt.",
+    loginFeature: "deine Einkaufsliste",
+    addPlaceholder: "z. B. 500 g Spaghetti …",
+    addNameAria: "Eintrag zur Einkaufsliste hinzufügen",
+    addButton: "Hinzufügen",
+    addFailed: "Eintrag konnte nicht gespeichert werden",
+    openTitle: "Noch zu kaufen",
+    doneTitle: "Erledigt",
+    itemCheckAria: (name: string) => `${name} abhaken`,
+    itemUncheckAria: (name: string) => `${name} wieder öffnen`,
+    removeAria: (name: string) => `${name} von der Liste entfernen`,
+    removeChecked: "Erledigte entfernen",
+    clearAll: "Liste leeren",
+    clearConfirm: "Wirklich die ganze Einkaufsliste löschen?",
+    emptyTitle: "Einkaufsliste ist leer",
+    emptyText:
+      "Füge oben Einträge hinzu – oder übernimm Zutaten direkt aus einem Rezept im Rezeptbuch.",
+    openCount: (n: number) =>
+      n === 1 ? "1 offener Eintrag" : `${n} offene Einträge`,
+    addedFromRecipe: (n: number) =>
+      n === 1
+        ? "1 Zutat auf die Einkaufsliste gesetzt"
+        : `${n} Zutaten auf die Einkaufsliste gesetzt`,
+    openList: "Zur Einkaufsliste",
+    addIngredients: "Zutaten auf die Einkaufsliste",
+  },
   family: {
     title: "Familien-Modus",
     subtitle:

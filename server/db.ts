@@ -13,12 +13,14 @@ import {
   InsertPackItem,
   InsertPackList,
   InsertPowerConsumer,
+  InsertShoppingItem,
   InsertTripLog,
   InsertUser,
   inventoryItems,
   packItems,
   packLists,
   powerConsumers,
+  shoppingItems,
   tripLogs,
   users,
   userSettings,
@@ -280,6 +282,57 @@ export async function deleteFoodItem(id: number, userId: number) {
   await db
     .delete(foodItems)
     .where(and(eq(foodItems.id, id), eq(foodItems.userId, userId)));
+}
+
+// ── Einkaufsliste ──
+export async function getShoppingItems(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(shoppingItems)
+    .where(eq(shoppingItems.userId, userId))
+    .orderBy(shoppingItems.position, shoppingItems.id);
+}
+
+export async function addShoppingItems(items: InsertShoppingItem[]) {
+  if (items.length === 0) return;
+  const db = requireDb(await getDb());
+  await db.insert(shoppingItems).values(items);
+}
+
+export async function setShoppingItemChecked(
+  id: number,
+  userId: number,
+  checked: boolean
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(shoppingItems)
+    .set({ checked })
+    .where(and(eq(shoppingItems.id, id), eq(shoppingItems.userId, userId)));
+}
+
+export async function deleteShoppingItem(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(shoppingItems)
+    .where(and(eq(shoppingItems.id, id), eq(shoppingItems.userId, userId)));
+}
+
+/** Alle abgehakten Einträge der Einkaufsliste entfernen. */
+export async function deleteCheckedShoppingItems(userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(shoppingItems)
+    .where(
+      and(eq(shoppingItems.userId, userId), eq(shoppingItems.checked, true))
+    );
+}
+
+/** Die ganze Einkaufsliste leeren. */
+export async function clearShoppingItems(userId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(shoppingItems).where(eq(shoppingItems.userId, userId));
 }
 
 // ── Zeltplatz-Favoriten ──

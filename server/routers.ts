@@ -522,6 +522,63 @@ export const appRouter = router({
       ),
   }),
 
+  shopping: router({
+    list: protectedProcedure.query(({ ctx }) =>
+      db.getShoppingItems(ctx.user.id)
+    ),
+    add: protectedProcedure
+      .input(z.object({ name: z.string().min(1).max(160) }))
+      .mutation(async ({ ctx, input }) => {
+        const items = await db.getShoppingItems(ctx.user.id);
+        const nextPosition =
+          items.reduce((max, i) => Math.max(max, i.position), 0) + 1;
+        await db.addShoppingItems([
+          {
+            userId: ctx.user.id,
+            name: input.name.trim(),
+            position: nextPosition,
+          },
+        ]);
+        return { success: true } as const;
+      }),
+    /** Mehrere Einträge auf einmal (z. B. Zutaten eines Rezepts). */
+    addMany: protectedProcedure
+      .input(
+        z.object({
+          names: z.array(z.string().min(1).max(160)).min(1).max(100),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const items = await db.getShoppingItems(ctx.user.id);
+        const nextPosition =
+          items.reduce((max, i) => Math.max(max, i.position), 0) + 1;
+        await db.addShoppingItems(
+          input.names.map((name, idx) => ({
+            userId: ctx.user.id,
+            name: name.trim(),
+            position: nextPosition + idx,
+          }))
+        );
+        return { added: input.names.length };
+      }),
+    toggle: protectedProcedure
+      .input(z.object({ id: z.number(), checked: z.boolean() }))
+      .mutation(({ ctx, input }) =>
+        db.setShoppingItemChecked(input.id, ctx.user.id, input.checked)
+      ),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ ctx, input }) =>
+        db.deleteShoppingItem(input.id, ctx.user.id)
+      ),
+    removeChecked: protectedProcedure.mutation(({ ctx }) =>
+      db.deleteCheckedShoppingItems(ctx.user.id)
+    ),
+    clear: protectedProcedure.mutation(({ ctx }) =>
+      db.clearShoppingItems(ctx.user.id)
+    ),
+  }),
+
   energy: router({
     consumers: protectedProcedure.query(({ ctx }) =>
       db.getPowerConsumers(ctx.user.id)

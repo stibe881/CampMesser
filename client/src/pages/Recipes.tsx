@@ -8,10 +8,12 @@ import {
   Pencil,
   Plus,
   Search,
+  ShoppingCart,
   Trash2,
   Users,
   WifiOff,
 } from "lucide-react";
+import { useLocation } from "wouter";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -289,6 +291,20 @@ export default function RecipesPage() {
     onSuccess: () => utils.recipes.list.invalidate(),
     onError: () => toast.error(t.common.deleteFailed),
   });
+  const [, navigate] = useLocation();
+  // Zutaten in der aktiven Sprache auf die Einkaufsliste übernehmen
+  const addToShoppingMutation = trpc.shopping.addMany.useMutation({
+    onSuccess: result => {
+      utils.shopping.list.invalidate();
+      toast.success(t.shopping.addedFromRecipe(result.added), {
+        action: {
+          label: t.shopping.openList,
+          onClick: () => navigate("/einkauf"),
+        },
+      });
+    },
+    onError: () => toast.error(t.shopping.addFailed),
+  });
 
   // Eigene Rezepte zuoberst, dann die eingebauten
   const allRecipes = useMemo(
@@ -528,6 +544,28 @@ export default function RecipesPage() {
                       </li>
                     ))}
                   </ul>
+                  {isAuthenticated && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      disabled={addToShoppingMutation.isPending}
+                      onClick={() =>
+                        addToShoppingMutation.mutate({
+                          names: selected.ingredients
+                            .map(i => pick(i, lang).trim())
+                            .filter(Boolean)
+                            .map(i => i.slice(0, 160)),
+                        })
+                      }
+                    >
+                      <ShoppingCart
+                        className="mr-1.5 h-4 w-4"
+                        aria-hidden="true"
+                      />
+                      {t.shopping.addIngredients}
+                    </Button>
+                  )}
                 </div>
 
                 <div>

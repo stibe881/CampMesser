@@ -1,5 +1,9 @@
 # CampMesser – Projekt TODO
 
+## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 9)
+
+- [x] Einkaufsliste (/einkauf): eigenes Modul mit abhakbarer Liste (offen oben, erledigt durchgestrichen unten), Schnell-Eingabe, «Erledigte entfernen» und «Liste leeren»; Tabelle shoppingItems (Migration 0016), tRPC-Router shopping (list/add/addMany/toggle/remove/removeChecked/clear); Rezept-Detail übernimmt Zutaten in der aktiven Sprache per Button auf die Liste (Toast mit Direktlink); Modul-Kachel + Namespace shopping in DE/FR/IT/EN
+
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 8)
 
 - [x] Trip-Planer: Tagebuch-Einträge mit Zukunfts-Datum als «Geplante Aufenthalte» mit Countdown, optionaler Packlisten-Verknüpfung (packListId, Migration 0012) und Pack-Fortschritt; Startseiten-Widget «Nächster Trip»

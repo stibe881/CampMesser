@@ -1139,6 +1139,36 @@ export const it: Translation = {
     bookLink: "ricettario Campfire",
     bookSuffix: ".",
   },
+  shopping: {
+    title: "Lista della spesa",
+    subtitle:
+      "Compra tutto per il campo: spunta le voci, riprendi gli ingredienti direttamente dal ricettario.",
+    subtitleLoggedOut:
+      "La tua lista della spesa per il campo – compilata a mano o direttamente dal ricettario.",
+    loginFeature: "la tua lista della spesa",
+    addPlaceholder: "es. 500 g di spaghetti …",
+    addNameAria: "Aggiungi una voce alla lista della spesa",
+    addButton: "Aggiungi",
+    addFailed: "La voce non è stata salvata",
+    openTitle: "Ancora da comprare",
+    doneTitle: "Fatto",
+    itemCheckAria: (name: string) => `Spunta ${name}`,
+    itemUncheckAria: (name: string) => `Riapri ${name}`,
+    removeAria: (name: string) => `Rimuovi ${name} dalla lista`,
+    removeChecked: "Rimuovi le voci spuntate",
+    clearAll: "Svuota la lista",
+    clearConfirm: "Vuoi davvero cancellare tutta la lista della spesa?",
+    emptyTitle: "La lista della spesa è vuota",
+    emptyText:
+      "Aggiungi voci qui sopra – oppure riprendi gli ingredienti direttamente da una ricetta del ricettario.",
+    openCount: (n: number) => (n === 1 ? "1 voce aperta" : `${n} voci aperte`),
+    addedFromRecipe: (n: number) =>
+      n === 1
+        ? "1 ingrediente aggiunto alla lista della spesa"
+        : `${n} ingredienti aggiunti alla lista della spesa`,
+    openList: "Alla lista della spesa",
+    addIngredients: "Ingredienti sulla lista della spesa",
+  },
   family: {
     title: "Modalità famiglia",
     subtitle:

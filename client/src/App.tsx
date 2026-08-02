@@ -32,6 +32,7 @@ const pageLoaders = {
   PackOptimizer: () => import("./pages/PackOptimizer"),
   Family: () => import("./pages/Family"),
   Food: () => import("./pages/Food"),
+  Shopping: () => import("./pages/Shopping"),
   Weather: () => import("./pages/Weather"),
   Drying: () => import("./pages/Drying"),
   Quiet: () => import("./pages/Quiet"),
@@ -91,6 +92,7 @@ const WaterPage = lazyWithRetry(pageLoaders.Water);
 const PackOptimizerPage = lazyWithRetry(pageLoaders.PackOptimizer);
 const FamilyPage = lazyWithRetry(pageLoaders.Family);
 const FoodPage = lazyWithRetry(pageLoaders.Food);
+const ShoppingPage = lazyWithRetry(pageLoaders.Shopping);
 const WeatherPage = lazyWithRetry(pageLoaders.Weather);
 const DryingPage = lazyWithRetry(pageLoaders.Drying);
 const QuietPage = lazyWithRetry(pageLoaders.Quiet);
@@ -137,6 +139,7 @@ function Router() {
           <Route path={"/packen"} component={PackOptimizerPage} />
           <Route path={"/familie"} component={FamilyPage} />
           <Route path={"/kuehlbox"} component={FoodPage} />
+          <Route path={"/einkauf"} component={ShoppingPage} />
           <Route path={"/wetter"} component={WeatherPage} />
           <Route path={"/trockenzeiten"} component={DryingPage} />
           <Route path={"/nachtruhe"} component={QuietPage} />
