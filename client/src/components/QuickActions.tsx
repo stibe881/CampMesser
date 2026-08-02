@@ -53,7 +53,8 @@ function isQuietRoute(path: string): boolean {
     path.startsWith("/liste/") ||
     path.startsWith("/einkaufsliste/") ||
     path.startsWith("/platz/") ||
-    path.startsWith("/vorlage/")
+    path.startsWith("/vorlage/") ||
+    path.startsWith("/reise-einladung/")
   );
 }
 

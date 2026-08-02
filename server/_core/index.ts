@@ -199,7 +199,8 @@ async function startServer() {
           return;
         }
         const db = await import("../db");
-        const trip = await db.getTripLog(tripId, user.id);
+        // Besitzerin/Besitzer ODER eingeladene Mitreisende dürfen hochladen
+        const trip = await db.canAccessTrip(tripId, user.id);
         if (!trip) {
           res.status(404).json({ error: "notFound" });
           return;
@@ -226,9 +227,7 @@ async function startServer() {
           res.status(413).json({ error: "tooLarge" });
           return;
         }
-        if (
-          (await db.countTripPhotos(tripId, user.id)) >= MAX_PHOTOS_PER_TRIP
-        ) {
+        if ((await db.countTripPhotosForTrip(tripId)) >= MAX_PHOTOS_PER_TRIP) {
           res.status(409).json({ error: "limitReached" });
           return;
         }
@@ -244,8 +243,8 @@ async function startServer() {
       }
     }
   );
-  // Auslieferung: Fotos sind privat – nur die Besitzerin/der Besitzer
-  // (DB-Lookup über fileName + userId) bekommt die Datei zu sehen.
+  // Auslieferung: Fotos sind privat – nur wer Zugriff auf die Reise hat
+  // (Besitzerin/Besitzer oder eingeladenes Mitglied) sieht die Datei.
   app.get("/api/trips/photos/:fileName", async (req, res) => {
     try {
       const user = await authenticatePhotoRequest(req, res);
@@ -258,8 +257,8 @@ async function startServer() {
         return;
       }
       const db = await import("../db");
-      const photo = await db.getTripPhotoByFileName(fileName, user.id);
-      if (!photo) {
+      const photo = await db.getTripPhotoByFileNameAny(fileName);
+      if (!photo || !(await db.canAccessTrip(photo.tripId, user.id))) {
         res.status(404).json({ error: "notFound" });
         return;
       }

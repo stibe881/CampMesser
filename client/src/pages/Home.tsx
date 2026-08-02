@@ -203,12 +203,16 @@ function NextTripWidget() {
     staleTime: 60_000,
   });
   const today = new Date().toISOString().slice(0, 10);
+  // Bewusst nur EIGENE Reisen im Widget (Mitglieds-Trips bleiben im Tagebuch)
+  const ownTrips = (tripsQuery.data ?? []).filter(
+    trip => trip.role === "owner"
+  );
   // Laufender Aufenthalt: heute innerhalb des Zeitraums – bei Überlappung
   // gewinnt der zuletzt angetretene.
-  const current = (tripsQuery.data ?? [])
+  const current = ownTrips
     .filter(trip => currentTripDay(trip, today) !== null)
     .sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
-  const next = (tripsQuery.data ?? [])
+  const next = ownTrips
     .filter(trip => isUpcomingTrip(trip.startDate, today))
     .sort((a, b) => a.startDate.localeCompare(b.startDate))[0];
   const progress = trpc.packing.progress.useQuery(

@@ -41,7 +41,9 @@ import {
   shoppingShares,
   spotPhotos,
   InsertSpotPhoto,
+  tripInvites,
   tripLogs,
+  tripMembers,
   tripPhotos,
   users,
   userSettings,
@@ -161,6 +163,48 @@ export async function getPackList(id: number, userId: number) {
     .select()
     .from(packLists)
     .where(and(eq(packLists.id, id), eq(packLists.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/**
+ * Zugriff auf eine Packliste: die eigene Liste ODER die Liste ist mit einer
+ * Reise verknüpft, bei der das Konto eingeladenes Mitglied ist (der Trip
+ * gehört dabei der Listen-Besitzerin/dem Listen-Besitzer – nur eigene Listen
+ * lassen sich verknüpfen). Für eigene Listen verhält sich das exakt wie
+ * getPackList(id, userId).
+ */
+export async function canAccessList(listId: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(packLists)
+    .where(eq(packLists.id, listId))
+    .limit(1);
+  const list = rows[0];
+  if (!list) return undefined;
+  if (list.userId === userId) return list;
+  const linked = await db
+    .select({ id: tripLogs.id })
+    .from(tripLogs)
+    .innerJoin(
+      tripMembers,
+      and(eq(tripMembers.tripId, tripLogs.id), eq(tripMembers.userId, userId))
+    )
+    .where(
+      and(eq(tripLogs.packListId, listId), eq(tripLogs.userId, list.userId))
+    )
+    .limit(1);
+  return linked.length > 0 ? list : undefined;
+}
+
+/** Einzelnen Eintrag laden – für die Zugriffs-Prüfung über seine Liste. */
+export async function getPackItem(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(packItems)
+    .where(eq(packItems.id, id))
     .limit(1);
   return rows[0];
 }
@@ -894,10 +938,152 @@ export async function deleteTripLog(id: number, userId: number) {
   await db
     .delete(tripLogs)
     .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
-  // Zugehörige Menüplan-Einträge mitlöschen (kein DB-FK, daher manuell)
+  // Zugehörige Menüplan-Einträge mitlöschen (kein DB-FK, daher manuell) –
+  // trip-weit, damit auch Einträge von Mitreisenden nicht verwaisen.
+  // Der Router stellt vor dem Aufruf sicher, dass NUR die Besitzerin/der
+  // Besitzer hier ankommt.
+  await db.delete(menuEntries).where(eq(menuEntries.tripId, id));
+  // Mitglieder und offene Einladungs-Links der Reise mit aufräumen
+  await db.delete(tripMembers).where(eq(tripMembers.tripId, id));
+  await db.delete(tripInvites).where(eq(tripInvites.tripId, id));
+}
+
+// ── Reise-Mitglieder & Einladungen ──
+
+/** Trip ohne Besitz-Filter laden – nur intern für die Mitglieds-Prüfung. */
+async function getTripLogById(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripLogs)
+    .where(eq(tripLogs.id, id))
+    .limit(1);
+  return rows[0];
+}
+
+/** Mitglieds-Zeile eines Kontos für eine Reise (undefined = kein Mitglied). */
+export async function getTripMembership(tripId: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripMembers)
+    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/**
+ * Kern des Berechtigungs-Modells: liefert den Trip, wenn das Konto die
+ * Besitzerin/der Besitzer ODER eingeladenes Mitglied ist – sonst undefined.
+ * Für nicht geteilte Trips verhält sich das exakt wie getTripLog(id, userId).
+ */
+export async function canAccessTrip(tripId: number, userId: number) {
+  const trip = await getTripLogById(tripId);
+  if (!trip) return undefined;
+  if (trip.userId === userId) return trip;
+  const membership = await getTripMembership(tripId, userId);
+  return membership ? trip : undefined;
+}
+
+/** Mitglied hinzufügen – idempotent (unique tripId+userId). */
+export async function addTripMember(tripId: number, userId: number) {
+  const db = requireDb(await getDb());
   await db
-    .delete(menuEntries)
-    .where(and(eq(menuEntries.tripId, id), eq(menuEntries.userId, userId)));
+    .insert(tripMembers)
+    .values({ tripId, userId, role: "member" })
+    .onDuplicateKeyUpdate({ set: { role: "member" } });
+}
+
+export async function removeTripMember(tripId: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(tripMembers)
+    .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, userId)));
+}
+
+/** Mitglieder einer Reise samt Anzeige-Daten (Name/E-Mail) der Konten. */
+export async function getTripMembersWithUsers(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select({
+      userId: tripMembers.userId,
+      role: tripMembers.role,
+      name: users.name,
+      email: users.email,
+    })
+    .from(tripMembers)
+    .leftJoin(users, eq(users.id, tripMembers.userId))
+    .where(eq(tripMembers.tripId, tripId))
+    .orderBy(asc(tripMembers.id));
+}
+
+/** Konto-Zeile für Anzeige-Zwecke (Owner-Name in Mitglieder-Liste/Einladung). */
+export async function getUserById(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  return rows[0];
+}
+
+/**
+ * Reisen, bei denen das Konto eingeladenes Mitglied ist – mit Owner-Name
+ * und dem Namen des verknüpften Zeltplatzes (der gehört der Besitzerin/dem
+ * Besitzer und wäre für Mitglieder sonst nicht auflösbar).
+ */
+export async function getMemberTripLogs(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select({
+      trip: tripLogs,
+      ownerName: users.name,
+      ownerEmail: users.email,
+      spotName: campSpots.name,
+    })
+    .from(tripMembers)
+    .innerJoin(tripLogs, eq(tripMembers.tripId, tripLogs.id))
+    .leftJoin(users, eq(users.id, tripLogs.userId))
+    .leftJoin(campSpots, eq(campSpots.id, tripLogs.spotId))
+    .where(eq(tripMembers.userId, userId))
+    .orderBy(desc(tripLogs.startDate), desc(tripLogs.id));
+}
+
+/** Aktiver Einladungs-Link einer Reise (undefined = keiner). */
+export async function getTripInvite(tripId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripInvites)
+    .where(eq(tripInvites.tripId, tripId))
+    .limit(1);
+  return rows[0];
+}
+
+/** Einladungs-Token setzen – ersetzt einen bestehenden Link (unique tripId). */
+export async function upsertTripInvite(tripId: number, inviteToken: string) {
+  const db = requireDb(await getDb());
+  await db
+    .insert(tripInvites)
+    .values({ tripId, inviteToken })
+    .onDuplicateKeyUpdate({ set: { inviteToken } });
+}
+
+export async function deleteTripInvite(tripId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripInvites).where(eq(tripInvites.tripId, tripId));
+}
+
+/** Einladung anhand des Tokens laden (öffentlich, ohne Login). */
+export async function getTripInviteByToken(token: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripInvites)
+    .where(eq(tripInvites.inviteToken, token))
+    .limit(1);
+  const invite = rows[0];
+  if (!invite) return undefined;
+  const trip = await getTripLogById(invite.tripId);
+  if (!trip) return undefined;
+  return { invite, trip };
 }
 
 // ── Fotos im Reise-Tagebuch ──
@@ -912,6 +1098,57 @@ export async function getTripPhotos(tripId: number, userId: number) {
 
 export async function countTripPhotos(tripId: number, userId: number) {
   return (await getTripPhotos(tripId, userId)).length;
+}
+
+/**
+ * Alle Fotos einer Reise – unabhängig davon, wer sie hochgeladen hat.
+ * Nur NACH einer canAccessTrip-Prüfung im Router verwenden.
+ */
+export async function getTripPhotosForTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripPhotos)
+    .where(eq(tripPhotos.tripId, tripId))
+    .orderBy(tripPhotos.id);
+}
+
+export async function countTripPhotosForTrip(tripId: number) {
+  return (await getTripPhotosForTrip(tripId)).length;
+}
+
+/** Foto ohne Besitz-Filter – der Router prüft danach den Trip-Zugriff. */
+export async function getTripPhotoById(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripPhotos)
+    .where(eq(tripPhotos.id, id))
+    .limit(1);
+  return rows[0];
+}
+
+/** Foto per Dateiname ohne Besitz-Filter – Router prüft den Trip-Zugriff. */
+export async function getTripPhotoByFileNameAny(fileName: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripPhotos)
+    .where(eq(tripPhotos.fileName, fileName))
+    .limit(1);
+  return rows[0];
+}
+
+/** Foto-Zeile löschen – nur NACH einer canAccessTrip-Prüfung im Router. */
+export async function deleteTripPhotoById(id: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripPhotos).where(eq(tripPhotos.id, id));
+}
+
+/** Alle Foto-Zeilen einer Reise löschen (auch die von Mitreisenden). */
+export async function deleteAllTripPhotosForTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripPhotos).where(eq(tripPhotos.tripId, tripId));
 }
 
 export async function addTripPhoto(data: InsertTripPhoto) {
@@ -960,6 +1197,38 @@ export async function deleteTripPhotosForTrip(tripId: number, userId: number) {
 }
 
 // ── Menüplan pro Trip ──
+
+/**
+ * Alle Menüplan-Einträge einer Reise – unabhängig davon, wer sie angelegt
+ * hat. Nur NACH einer canAccessTrip-Prüfung im Router verwenden.
+ */
+export async function getMenuEntriesForTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(menuEntries)
+    .where(eq(menuEntries.tripId, tripId))
+    .orderBy(menuEntries.day, menuEntries.id);
+}
+
+/** Slot einer Reise leeren – nur NACH einer canAccessTrip-Prüfung im Router. */
+export async function deleteMenuEntrySlot(
+  tripId: number,
+  day: string,
+  meal: "breakfast" | "lunch" | "dinner" | "snack"
+) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(menuEntries)
+    .where(
+      and(
+        eq(menuEntries.tripId, tripId),
+        eq(menuEntries.day, day),
+        eq(menuEntries.meal, meal)
+      )
+    );
+}
+
 export async function getMenuEntries(tripId: number, userId: number) {
   const db = requireDb(await getDb());
   return db

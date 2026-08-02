@@ -5,9 +5,11 @@ import {
   CalendarDays,
   ChevronDown,
   CloudSun,
+  Copy,
   GraduationCap,
   ListChecks,
   Loader2,
+  LogOut,
   MapPin,
   Moon,
   Pencil,
@@ -18,10 +20,12 @@ import {
   Tent,
   Trash2,
   Trophy,
+  Users,
   UtensilsCrossed,
 } from "lucide-react";
 import { Link, useSearch } from "wouter";
 import { toast } from "sonner";
+import QRCode from "qrcode";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import PhotoGallery from "@/components/PhotoGallery";
@@ -37,6 +41,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { MAX_PHOTOS_PER_TRIP } from "@shared/tripPhotos";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -651,6 +662,226 @@ function TripPhotos({
   );
 }
 
+/**
+ * Dialog «Mitreisende» (nur für eigene Reisen): zeigt die Mitglieder-Liste
+ * (Entfernen für die Besitzerin/den Besitzer), erzeugt/kopiert den
+ * Einladungs-Link samt QR-Code (Muster der Teilen-Dialoge) und widerruft ihn.
+ */
+function TripMembersDialog({
+  trip,
+  onClose,
+}: {
+  trip: { id: number; name: string } | null;
+  onClose: () => void;
+}) {
+  const t = useT();
+  const utils = trpc.useUtils();
+  const open = trip !== null;
+  const membersQuery = trpc.trips.members.list.useQuery(
+    { tripId: trip?.id ?? 0 },
+    { enabled: open }
+  );
+  const inviteToken = membersQuery.data?.inviteToken ?? null;
+  const inviteUrl = inviteToken
+    ? `${window.location.origin}/reise-einladung/${inviteToken}`
+    : null;
+
+  // QR-Code zum Einladungs-Link: am Lagerfeuer einfach abscannen lassen
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!inviteUrl) {
+      setQrDataUrl(null);
+      return;
+    }
+    QRCode.toDataURL(inviteUrl, {
+      width: 480,
+      margin: 1,
+      errorCorrectionLevel: "M",
+    })
+      .then(setQrDataUrl)
+      .catch(() => setQrDataUrl(null));
+  }, [inviteUrl]);
+
+  const copyInviteUrl = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(t.common.linkCopied);
+    } catch {
+      toast.error(t.common.copyFailed);
+    }
+  };
+
+  const createMutation = trpc.trips.invite.create.useMutation({
+    onSuccess: async ({ token }) => {
+      utils.trips.members.list.invalidate();
+      // Link direkt in die Zwischenablage – der Dialog zeigt ihn zusätzlich an
+      try {
+        await navigator.clipboard.writeText(
+          `${window.location.origin}/reise-einladung/${token}`
+        );
+        toast.success(t.common.linkCopied);
+      } catch {
+        // Kein Zwischenablage-Zugriff – der Link steht ja im Dialog
+      }
+    },
+    onError: () => toast.error(t.trips.inviteCreateFailed),
+  });
+  const revokeMutation = trpc.trips.invite.revoke.useMutation({
+    onSuccess: () => {
+      utils.trips.members.list.invalidate();
+      toast.success(t.trips.inviteRevoked);
+    },
+    onError: () => toast.error(t.trips.inviteRevokeFailed),
+  });
+  const removeMemberMutation = trpc.trips.members.remove.useMutation({
+    onSuccess: () => {
+      utils.trips.members.list.invalidate();
+      utils.trips.list.invalidate();
+      toast.success(t.trips.memberRemoved);
+    },
+    onError: () => toast.error(t.trips.memberRemoveFailed),
+  });
+
+  const memberDisplayName = (m: {
+    name: string | null;
+    email: string | null;
+    userId: number;
+  }): string => m.name || m.email || `#${m.userId}`;
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={o => {
+        if (!o) onClose();
+      }}
+    >
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-serif">
+            {t.trips.membersButton}
+            {trip ? ` – ${trip.name}` : ""}
+          </DialogTitle>
+          <DialogDescription>{t.trips.membersDialogDesc}</DialogDescription>
+        </DialogHeader>
+        {trip && (
+          <>
+            {/* Mitglieder-Liste */}
+            <div>
+              <h3 className="mb-2 text-sm font-semibold">
+                {t.trips.membersListTitle}
+              </h3>
+              <ul className="space-y-1.5">
+                {(membersQuery.data?.members ?? []).map(m => (
+                  <li
+                    key={m.userId}
+                    className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">
+                        {memberDisplayName(m)}
+                      </p>
+                      {m.name && m.email && (
+                        <p className="truncate text-xs text-muted-foreground">
+                          {m.email}
+                        </p>
+                      )}
+                    </div>
+                    {m.role === "owner" ? (
+                      <span className="shrink-0 rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary">
+                        {t.trips.membersOwnerBadge}
+                      </span>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0 text-muted-foreground/60 hover:text-destructive"
+                        aria-label={t.trips.memberRemoveAria(
+                          memberDisplayName(m)
+                        )}
+                        disabled={removeMemberMutation.isPending}
+                        onClick={() => {
+                          if (
+                            confirm(
+                              t.trips.memberRemoveConfirm(memberDisplayName(m))
+                            )
+                          ) {
+                            removeMemberMutation.mutate({
+                              tripId: trip.id,
+                              userId: m.userId,
+                            });
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Einladungs-Link */}
+            <div>
+              <h3 className="mb-1 text-sm font-semibold">
+                {t.trips.inviteSectionTitle}
+              </h3>
+              <p className="mb-2 text-xs text-muted-foreground">
+                {t.trips.inviteHint}
+              </p>
+              {inviteUrl ? (
+                <>
+                  <p className="break-all rounded-lg bg-muted px-3 py-2 font-mono text-xs">
+                    {inviteUrl}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void copyInviteUrl(inviteUrl)}
+                    >
+                      <Copy className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                      {t.common.copy}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={revokeMutation.isPending}
+                      onClick={() => revokeMutation.mutate({ tripId: trip.id })}
+                    >
+                      {t.trips.inviteRevoke}
+                    </Button>
+                  </div>
+                  {qrDataUrl && (
+                    <div className="mt-3 text-center">
+                      {/* Weisser Rahmen, damit der QR-Code auch im Dark Mode lesbar bleibt */}
+                      <img
+                        src={qrDataUrl}
+                        alt={t.trips.inviteQrAlt(trip.name)}
+                        className="mx-auto w-40 rounded-lg bg-white p-2"
+                      />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {t.trips.inviteQrHint}
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Button
+                  size="sm"
+                  disabled={createMutation.isPending}
+                  onClick={() => createMutation.mutate({ tripId: trip.id })}
+                >
+                  <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {t.trips.inviteCreate}
+                </Button>
+              )}
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function TripsPage() {
   const { lang, t } = useI18n();
   const { isAuthenticated, loading } = useAuth();
@@ -749,6 +980,21 @@ export default function TripsPage() {
     onError: () => toast.error(t.common.deleteFailed),
   });
 
+  /** Reise verlassen (nur Mitglieds-Trips): entfernt die eigene Mitgliedschaft. */
+  const leaveMutation = trpc.trips.members.remove.useMutation({
+    onSuccess: () => {
+      utils.trips.list.invalidate();
+      toast.success(t.trips.leftTrip);
+    },
+    onError: () => toast.error(t.trips.leaveFailed),
+  });
+
+  /** Reise, deren «Mitreisende»-Dialog gerade offen ist (null = zu). */
+  const [membersTrip, setMembersTrip] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+
   const setRatingMutation = trpc.trips.setRating.useMutation({
     onSuccess: () => utils.trips.list.invalidate(),
     onError: () => toast.error(t.trips.ratingSaveFailed),
@@ -769,11 +1015,24 @@ export default function TripsPage() {
     [allTrips, today]
   );
 
-  /** Anzeigename eines Eintrags: verknüpfter Favorit, sonst Freitext-Ort. */
+  /** Gerade bearbeiteter Eintrag – für Mitglieds-Trips gelten Einschränkungen. */
+  const editingTrip =
+    editingId !== null
+      ? (allTrips.find(tr => tr.id === editingId) ?? null)
+      : null;
+  /** Mitglieds-Trip im Formular: Zeltplatz/Packliste bleiben unveränderbar. */
+  const editingShared = editingTrip?.role === "member";
+
+  /**
+   * Anzeigename eines Eintrags: verknüpfter Favorit, sonst Freitext-Ort.
+   * Bei Mitglieds-Trips gehört der Zeltplatz der Besitzerin/dem Besitzer –
+   * dafür liefert der Server den Namen als spotName mit.
+   */
   const placeName = (trip: (typeof trips)[number]): string => {
     if (trip.spotId != null) {
       const spot = spots.find(s => s.id === trip.spotId);
       if (spot) return spot.name;
+      if (trip.spotName) return trip.spotName;
     }
     return trip.location ?? t.trips.unknownPlace;
   };
@@ -1192,6 +1451,29 @@ export default function TripsPage() {
             className="grid gap-3"
             onSubmit={e => {
               e.preventDefault();
+              if (editingShared && editingTrip) {
+                // Mitglieds-Trip: Zeltplatz-/Packlisten-Verknüpfung bleibt
+                // unverändert (gehört der Besitzerin/dem Besitzer)
+                if (editingTrip.spotId === null && !form.location.trim()) {
+                  toast.error(t.trips.choosePlaceError);
+                  return;
+                }
+                updateMutation.mutate({
+                  id: editingTrip.id,
+                  spotId: editingTrip.spotId,
+                  packListId: editingTrip.packListId,
+                  location:
+                    editingTrip.spotId === null
+                      ? form.location.trim()
+                      : editingTrip.location,
+                  title: form.title.trim() || null,
+                  notes: form.notes.trim() || null,
+                  startDate: form.startDate,
+                  endDate: form.endDate,
+                  rating: formRating,
+                });
+                return;
+              }
               const spotId =
                 spotChoice === FREE_LOCATION ? null : Number(spotChoice);
               if (spotId === null && !form.location.trim()) {
@@ -1217,25 +1499,31 @@ export default function TripsPage() {
             }}
           >
             <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="trip-spot">{t.trips.placeLabel}</Label>
-                <Select value={spotChoice} onValueChange={setSpotChoice}>
-                  <SelectTrigger id="trip-spot" className="mt-1.5 w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={FREE_LOCATION}>
-                      {t.trips.freeLocationOption}
-                    </SelectItem>
-                    {spots.map(s => (
-                      <SelectItem key={s.id} value={String(s.id)}>
-                        {s.name}
+              {/* Zeltplatz/Packliste gehören der Besitzerin/dem Besitzer –
+                  beim Bearbeiten eines Mitglieds-Trips ausgeblendet */}
+              {!editingShared && (
+                <div>
+                  <Label htmlFor="trip-spot">{t.trips.placeLabel}</Label>
+                  <Select value={spotChoice} onValueChange={setSpotChoice}>
+                    <SelectTrigger id="trip-spot" className="mt-1.5 w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={FREE_LOCATION}>
+                        {t.trips.freeLocationOption}
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {spotChoice === FREE_LOCATION && (
+                      {spots.map(s => (
+                        <SelectItem key={s.id} value={String(s.id)}>
+                          {s.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {(editingShared
+                ? editingTrip?.spotId === null
+                : spotChoice === FREE_LOCATION) && (
                 <div>
                   <Label htmlFor="trip-location">
                     {t.trips.locationNameLabel}
@@ -1251,25 +1539,29 @@ export default function TripsPage() {
                   />
                 </div>
               )}
-              <div>
-                <Label htmlFor="trip-packlist">{t.trips.packListLabel}</Label>
-                <Select
-                  value={packListChoice}
-                  onValueChange={setPackListChoice}
-                >
-                  <SelectTrigger id="trip-packlist" className="mt-1.5 w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="keine">{t.trips.noPackList}</SelectItem>
-                    {(listsQuery.data ?? []).map(l => (
-                      <SelectItem key={l.id} value={String(l.id)}>
-                        {l.name}
+              {!editingShared && (
+                <div>
+                  <Label htmlFor="trip-packlist">{t.trips.packListLabel}</Label>
+                  <Select
+                    value={packListChoice}
+                    onValueChange={setPackListChoice}
+                  >
+                    <SelectTrigger id="trip-packlist" className="mt-1.5 w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="keine">
+                        {t.trips.noPackList}
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                      {(listsQuery.data ?? []).map(l => (
+                        <SelectItem key={l.id} value={String(l.id)}>
+                          {l.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -1444,8 +1736,20 @@ export default function TripsPage() {
                         <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">
                           {t.trips.countdown(days)}
                         </span>
+                        {trip.role === "member" && (
+                          <span className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                            <Users className="h-3 w-3" aria-hidden="true" />
+                            {t.trips.sharedBadge}
+                          </span>
+                        )}
                       </p>
                       <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        {trip.role === "member" && trip.ownerName && (
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3 w-3" aria-hidden="true" />
+                            {t.trips.sharedWith(trip.ownerName)}
+                          </span>
+                        )}
                         {trip.title && (
                           <span className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" aria-hidden="true" />
@@ -1525,17 +1829,66 @@ export default function TripsPage() {
                       >
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
-                        onClick={() => removeMutation.mutate({ id: trip.id })}
-                        aria-label={t.trips.deletePlannedAria(
-                          trip.title || placeName(trip)
-                        )}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                      </Button>
+                      {trip.role === "owner" ? (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+                            onClick={() =>
+                              setMembersTrip({
+                                id: trip.id,
+                                name: trip.title || placeName(trip),
+                              })
+                            }
+                            aria-label={t.trips.membersAria(
+                              trip.title || placeName(trip)
+                            )}
+                          >
+                            <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
+                            onClick={() =>
+                              removeMutation.mutate({ id: trip.id })
+                            }
+                            aria-label={t.trips.deletePlannedAria(
+                              trip.title || placeName(trip)
+                            )}
+                          >
+                            <Trash2
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
+                          disabled={leaveMutation.isPending}
+                          onClick={() => {
+                            if (
+                              confirm(
+                                t.trips.leaveConfirm(
+                                  trip.title || placeName(trip)
+                                )
+                              )
+                            ) {
+                              leaveMutation.mutate({ tripId: trip.id });
+                            }
+                          }}
+                          aria-label={t.trips.leaveTripAria(
+                            trip.title || placeName(trip)
+                          )}
+                          title={t.trips.leaveTrip}
+                        >
+                          <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </li>
@@ -1581,10 +1934,22 @@ export default function TripsPage() {
                     )}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold">
+                    <p className="flex flex-wrap items-center gap-2 font-semibold">
                       {trip.title || placeName(trip)}
+                      {trip.role === "member" && (
+                        <span className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                          <Users className="h-3 w-3" aria-hidden="true" />
+                          {t.trips.sharedBadge}
+                        </span>
+                      )}
                     </p>
                     <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      {trip.role === "member" && trip.ownerName && (
+                        <span className="flex items-center gap-1">
+                          <Users className="h-3 w-3" aria-hidden="true" />
+                          {t.trips.sharedWith(trip.ownerName)}
+                        </span>
+                      )}
                       {trip.title && (
                         <span className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" aria-hidden="true" />
@@ -1646,17 +2011,61 @@ export default function TripsPage() {
                     >
                       <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
-                      onClick={() => removeMutation.mutate({ id: trip.id })}
-                      aria-label={t.trips.deleteEntryAria(
-                        trip.title || placeName(trip)
-                      )}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    </Button>
+                    {trip.role === "owner" ? (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+                          onClick={() =>
+                            setMembersTrip({
+                              id: trip.id,
+                              name: trip.title || placeName(trip),
+                            })
+                          }
+                          aria-label={t.trips.membersAria(
+                            trip.title || placeName(trip)
+                          )}
+                        >
+                          <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
+                          onClick={() => removeMutation.mutate({ id: trip.id })}
+                          aria-label={t.trips.deleteEntryAria(
+                            trip.title || placeName(trip)
+                          )}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
+                        disabled={leaveMutation.isPending}
+                        onClick={() => {
+                          if (
+                            confirm(
+                              t.trips.leaveConfirm(
+                                trip.title || placeName(trip)
+                              )
+                            )
+                          ) {
+                            leaveMutation.mutate({ tripId: trip.id });
+                          }
+                        }}
+                        aria-label={t.trips.leaveTripAria(
+                          trip.title || placeName(trip)
+                        )}
+                        title={t.trips.leaveTrip}
+                      >
+                        <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </li>
@@ -1664,6 +2073,12 @@ export default function TripsPage() {
           })}
         </ul>
       )}
+
+      {/* Dialog «Mitreisende» der gewählten eigenen Reise */}
+      <TripMembersDialog
+        trip={membersTrip}
+        onClose={() => setMembersTrip(null)}
+      />
     </div>
   );
 }

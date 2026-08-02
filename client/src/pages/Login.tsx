@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
+import { consumeLoginReturn } from "@/lib/loginReturn";
 import { useI18n } from "@/i18n";
 
 /**
@@ -52,7 +53,8 @@ export default function LoginPage() {
   const afterAuth = async (name: string | null) => {
     await utils.auth.me.invalidate();
     toast.success(name ? t.login.welcomeName(name) : t.login.welcome);
-    navigate("/");
+    // Zurück zur Ausgangsseite (z. B. Reise-Einladung), sonst zur Startseite
+    navigate(consumeLoginReturn());
   };
 
   const loginMutation = trpc.auth.login.useMutation({

@@ -147,6 +147,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     homeLocations,
     spotPhotos,
     tripLogs,
+    tripInvites,
+    tripMembers,
     tripPhotos,
     menuEntries,
     customRecipes,
@@ -163,13 +165,28 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     passkeys,
     gearTasks,
   } = await import("../drizzle/schema");
-  const { inArray } = await import("drizzle-orm");
+  const { inArray, or } = await import("drizzle-orm");
+  // Eigene Reisen zuerst ermitteln: deren Mitglieder, Einladungs-Links und
+  // von Mitreisenden beigesteuerte Fotos/Menüplan-Einträge fallen mit.
+  const ownedTrips = await db
+    .select({ id: tripLogs.id })
+    .from(tripLogs)
+    .where(eq(tripLogs.userId, userId));
+  const ownedTripIds = ownedTrips.map(t => t.id);
   // Dateinamen der Foto-Uploads sichern, bevor die DB-Zeilen fallen –
   // der DB-Eintrag ist die Wahrheit (Muster wie trips.remove/recipes.remove).
+  // Eigene Uploads (auch auf fremden Reisen) plus alle Fotos eigener Reisen.
   const photoRows = await db
     .select({ fileName: tripPhotos.fileName })
     .from(tripPhotos)
-    .where(eq(tripPhotos.userId, userId));
+    .where(
+      ownedTripIds.length > 0
+        ? or(
+            eq(tripPhotos.userId, userId),
+            inArray(tripPhotos.tripId, ownedTripIds)
+          )
+        : eq(tripPhotos.userId, userId)
+    );
   const recipeRows = await db
     .select({ imageFileName: customRecipes.imageFileName })
     .from(customRecipes)
@@ -202,9 +219,25 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(homeLocations).where(eq(homeLocations.userId, userId));
   await db.delete(spotPhotos).where(eq(spotPhotos.userId, userId));
   await db.delete(campSpots).where(eq(campSpots.userId, userId));
-  // Reise-Tagebuch samt Fotos und Menüplänen (referenzieren Trips)
+  // Reise-Tagebuch samt Fotos und Menüplänen (referenzieren Trips) –
+  // eigene Beiträge überall PLUS alles, was an eigenen Reisen hängt
+  // (auch Beiträge von Mitreisenden), damit nichts verwaist.
+  if (ownedTripIds.length > 0) {
+    await db.delete(tripPhotos).where(inArray(tripPhotos.tripId, ownedTripIds));
+    await db
+      .delete(menuEntries)
+      .where(inArray(menuEntries.tripId, ownedTripIds));
+    await db
+      .delete(tripMembers)
+      .where(inArray(tripMembers.tripId, ownedTripIds));
+    await db
+      .delete(tripInvites)
+      .where(inArray(tripInvites.tripId, ownedTripIds));
+  }
   await db.delete(tripPhotos).where(eq(tripPhotos.userId, userId));
   await db.delete(menuEntries).where(eq(menuEntries.userId, userId));
+  // Eigene Mitgliedschaften bei fremden Reisen ebenfalls aufräumen
+  await db.delete(tripMembers).where(eq(tripMembers.userId, userId));
   await db.delete(tripLogs).where(eq(tripLogs.userId, userId));
   await db.delete(customRecipes).where(eq(customRecipes.userId, userId));
   await db.delete(customHunts).where(eq(customHunts.userId, userId));

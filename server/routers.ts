@@ -592,11 +592,14 @@ export const appRouter = router({
     deleteList: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deletePackList(input.id, ctx.user.id)),
-    /** Leichter Pack-Fortschritt einer Liste (für den Trip-Planer). */
+    /**
+     * Leichter Pack-Fortschritt einer Liste (für den Trip-Planer) – auch für
+     * Mitreisende einer Reise mit verknüpfter Liste.
+     */
     progress: protectedProcedure
       .input(z.object({ listId: z.number() }))
       .query(async ({ ctx, input }) => {
-        const list = await db.getPackList(input.listId, ctx.user.id);
+        const list = await db.canAccessList(input.listId, ctx.user.id);
         if (!list) return null;
         const items = await db.getPackItems(input.listId);
         return {
@@ -822,10 +825,11 @@ export const appRouter = router({
         );
         return { listId };
       }),
+    /** Liste samt Einträgen – auch für Mitreisende einer verknüpften Reise. */
     items: protectedProcedure
       .input(z.object({ listId: z.number() }))
       .query(async ({ ctx, input }) => {
-        const list = await db.getPackList(input.listId, ctx.user.id);
+        const list = await db.canAccessList(input.listId, ctx.user.id);
         if (!list) {
           return {
             list: null,
@@ -857,7 +861,7 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const list = await db.getPackList(input.listId, ctx.user.id);
+        const list = await db.canAccessList(input.listId, ctx.user.id);
         if (!list) throw new Error("Liste nicht gefunden");
         await db.addPackItems(
           input.items.map((item, idx) => ({
@@ -869,7 +873,16 @@ export const appRouter = router({
       }),
     toggleItem: protectedProcedure
       .input(z.object({ id: z.number(), checked: z.boolean() }))
-      .mutation(({ input }) => db.setPackItemChecked(input.id, input.checked)),
+      .mutation(async ({ ctx, input }) => {
+        const item = await db.getPackItem(input.id);
+        if (!item || !(await db.canAccessList(item.listId, ctx.user.id))) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Eintrag nicht gefunden",
+          });
+        }
+        await db.setPackItemChecked(input.id, input.checked);
+      }),
     /**
      * Personen-Bereiche der Liste setzen. Einträge entfernter Personen
      * wandern zurück in den Bereich «Allgemein» (assignee null).
@@ -884,7 +897,7 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const list = await db.getPackList(input.listId, ctx.user.id);
+        const list = await db.canAccessList(input.listId, ctx.user.id);
         if (!list)
           throw new TRPCError({
             code: "NOT_FOUND",
@@ -898,16 +911,16 @@ export const appRouter = router({
           await db.clearPackItemAssignees(input.listId, removed);
         await db.setPackListPersons(
           input.listId,
-          ctx.user.id,
+          list.userId,
           serializePersons(next)
         );
         return { persons: next };
       }),
-    /** Alle Haken einer eigenen Liste lösen – z. B. vor dem nächsten Trip. */
+    /** Alle Haken einer Liste lösen – z. B. vor dem nächsten Trip. */
     uncheckAll: protectedProcedure
       .input(z.object({ listId: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        const list = await db.getPackList(input.listId, ctx.user.id);
+        const list = await db.canAccessList(input.listId, ctx.user.id);
         if (!list)
           throw new TRPCError({
             code: "NOT_FOUND",
@@ -925,7 +938,7 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const list = await db.getPackList(input.listId, ctx.user.id);
+        const list = await db.canAccessList(input.listId, ctx.user.id);
         if (!list)
           throw new TRPCError({
             code: "NOT_FOUND",
@@ -950,15 +963,31 @@ export const appRouter = router({
           category: z.string().trim().min(1).max(80).optional(),
         })
       )
-      .mutation(({ input }) =>
-        db.updatePackItem(input.id, {
+      .mutation(async ({ ctx, input }) => {
+        const item = await db.getPackItem(input.id);
+        if (!item || !(await db.canAccessList(item.listId, ctx.user.id))) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Eintrag nicht gefunden",
+          });
+        }
+        await db.updatePackItem(input.id, {
           ...(input.assignee !== undefined ? { assignee: input.assignee } : {}),
           ...(input.category !== undefined ? { category: input.category } : {}),
-        })
-      ),
+        });
+      }),
     deleteItem: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(({ input }) => db.deletePackItem(input.id)),
+      .mutation(async ({ ctx, input }) => {
+        const item = await db.getPackItem(input.id);
+        if (!item || !(await db.canAccessList(item.listId, ctx.user.id))) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Eintrag nicht gefunden",
+          });
+        }
+        await db.deletePackItem(input.id);
+      }),
     /** Gewichts-Budget in Gramm setzen; null entfernt es wieder. */
     setWeightBudget: protectedProcedure
       .input(
@@ -1943,7 +1972,35 @@ export const appRouter = router({
   }),
 
   trips: router({
-    list: protectedProcedure.query(({ ctx }) => db.getTripLogs(ctx.user.id)),
+    /**
+     * Eigene Reisen plus Reisen, bei denen man eingeladenes Mitglied ist –
+     * Mitglieds-Trips tragen role "member" und den Namen der Besitzerin/des
+     * Besitzers als Zusatzinfo.
+     */
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const [own, member] = await Promise.all([
+        db.getTripLogs(ctx.user.id),
+        db.getMemberTripLogs(ctx.user.id),
+      ]);
+      const merged = [
+        ...own.map(trip => ({
+          ...trip,
+          role: "owner" as const,
+          ownerName: null as string | null,
+          spotName: null as string | null,
+        })),
+        ...member.map(({ trip, ownerName, ownerEmail, spotName }) => ({
+          ...trip,
+          role: "member" as const,
+          ownerName: ownerName ?? ownerEmail ?? null,
+          spotName,
+        })),
+      ];
+      merged.sort(
+        (a, b) => b.startDate.localeCompare(a.startDate) || b.id - a.id
+      );
+      return merged;
+    }),
     add: protectedProcedure
       .input(
         z
@@ -2032,32 +2089,47 @@ export const appRouter = router({
           )
       )
       .mutation(async ({ ctx, input }) => {
-        const trip = await db.getTripLog(input.id, ctx.user.id);
+        // Besitzerin/Besitzer oder eingeladenes Mitglied dürfen bearbeiten
+        const trip = await db.canAccessTrip(input.id, ctx.user.id);
         if (!trip) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Aufenthalt nicht gefunden.",
           });
         }
-        // Nur eigene Zeltplatz-Favoriten dürfen verknüpft werden
-        if (input.spotId != null) {
-          const spots = await db.getCampSpots(ctx.user.id);
-          if (!spots.some(s => s.id === input.spotId)) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Zeltplatz nicht gefunden.",
-            });
+        const isOwner = trip.userId === ctx.user.id;
+        if (isOwner) {
+          // Nur eigene Zeltplatz-Favoriten dürfen verknüpft werden
+          if (input.spotId != null) {
+            const spots = await db.getCampSpots(ctx.user.id);
+            if (!spots.some(s => s.id === input.spotId)) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Zeltplatz nicht gefunden.",
+              });
+            }
           }
-        }
-        // Nur eigene Packlisten dürfen verknüpft werden
-        if (input.packListId != null) {
-          const list = await db.getPackList(input.packListId, ctx.user.id);
-          if (!list) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Packliste nicht gefunden.",
-            });
+          // Nur eigene Packlisten dürfen verknüpft werden
+          if (input.packListId != null) {
+            const list = await db.getPackList(input.packListId, ctx.user.id);
+            if (!list) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Packliste nicht gefunden.",
+              });
+            }
           }
+        } else if (
+          (input.spotId ?? null) !== trip.spotId ||
+          (input.packListId ?? null) !== trip.packListId
+        ) {
+          // Zeltplatz-/Packlisten-Verknüpfungen gehören der Besitzerin/dem
+          // Besitzer – Mitreisende dürfen sie nicht umhängen.
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "Zeltplatz und Packliste kann nur die Besitzerin/der Besitzer der Reise ändern.",
+          });
         }
         const spotId = input.spotId ?? null;
         const location = input.location?.trim() || null;
@@ -2067,7 +2139,7 @@ export const appRouter = router({
           trip.endDate !== input.endDate ||
           trip.spotId !== spotId ||
           trip.location !== location;
-        await db.updateTripLog(input.id, ctx.user.id, {
+        await db.updateTripLog(input.id, trip.userId, {
           spotId,
           packListId: input.packListId ?? null,
           location,
@@ -2089,14 +2161,14 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const trip = await db.getTripLog(input.id, ctx.user.id);
+        const trip = await db.canAccessTrip(input.id, ctx.user.id);
         if (!trip) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Aufenthalt nicht gefunden.",
           });
         }
-        await db.setTripLogRating(input.id, ctx.user.id, input.rating);
+        await db.setTripLogRating(input.id, trip.userId, input.rating);
         return { success: true } as const;
       }),
     /**
@@ -2127,7 +2199,7 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const trip = await db.getTripLog(input.id, ctx.user.id);
+        const trip = await db.canAccessTrip(input.id, ctx.user.id);
         if (!trip) {
           throw new TRPCError({
             code: "NOT_FOUND",
@@ -2136,7 +2208,7 @@ export const appRouter = router({
         }
         await db.setTripLogWeather(
           input.id,
-          ctx.user.id,
+          trip.userId,
           JSON.stringify(input.summary)
         );
         return { success: true } as const;
@@ -2153,7 +2225,7 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const trip = await db.getTripLog(input.tripId, ctx.user.id);
+        const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
         if (!trip) {
           throw new TRPCError({
             code: "NOT_FOUND",
@@ -2161,7 +2233,7 @@ export const appRouter = router({
           });
         }
         if (input.photoId != null) {
-          const photo = await db.getTripPhoto(input.photoId, ctx.user.id);
+          const photo = await db.getTripPhotoById(input.photoId);
           if (!photo || photo.tripId !== input.tripId) {
             throw new TRPCError({
               code: "NOT_FOUND",
@@ -2169,66 +2241,241 @@ export const appRouter = router({
             });
           }
         }
-        await db.setTripLogCoverPhoto(input.tripId, ctx.user.id, input.photoId);
+        await db.setTripLogCoverPhoto(input.tripId, trip.userId, input.photoId);
         return { success: true } as const;
       }),
+    /** Reise löschen – bewusst NUR für die Besitzerin/den Besitzer. */
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        // Zugehörige Fotos mitlöschen: erst Dateinamen sichern, dann
-        // DB-Zeilen und zuletzt die Dateien auf dem Webspace entfernen.
-        const photos = await db.getTripPhotos(input.id, ctx.user.id);
+        const trip = await db.getTripLog(input.id, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        // Zugehörige Fotos mitlöschen (auch die von Mitreisenden): erst
+        // Dateinamen sichern, dann DB-Zeilen und zuletzt die Dateien auf
+        // dem Webspace entfernen.
+        const photos = await db.getTripPhotosForTrip(input.id);
         await db.deleteTripLog(input.id, ctx.user.id);
-        await db.deleteTripPhotosForTrip(input.id, ctx.user.id);
+        await db.deleteAllTripPhotosForTrip(input.id);
         if (photos.length > 0) {
           const { tripPhotoStorage } = await import("./photoStorage");
           await tripPhotoStorage.deleteFiles(photos.map(p => p.fileName));
         }
       }),
     photos: router({
-      /** Fotos eines eigenen Trips (leere Liste, wenn der Trip nicht dir gehört). */
+      /** Fotos eines zugänglichen Trips (leer, wenn kein Zugriff besteht). */
       list: protectedProcedure
         .input(z.object({ tripId: z.number().int().positive() }))
         .query(async ({ ctx, input }) => {
-          const trip = await db.getTripLog(input.tripId, ctx.user.id);
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
           if (!trip) {
-            return [] as Awaited<ReturnType<typeof db.getTripPhotos>>;
+            return [] as Awaited<ReturnType<typeof db.getTripPhotosForTrip>>;
           }
-          return db.getTripPhotos(input.tripId, ctx.user.id);
+          return db.getTripPhotosForTrip(input.tripId);
         }),
       /** Einzelnes Foto löschen (DB-Zeile + Datei auf dem Webspace). */
       remove: protectedProcedure
         .input(z.object({ photoId: z.number().int().positive() }))
         .mutation(async ({ ctx, input }) => {
-          const photo = await db.getTripPhoto(input.photoId, ctx.user.id);
-          if (!photo) {
+          const photo = await db.getTripPhotoById(input.photoId);
+          const trip = photo
+            ? await db.canAccessTrip(photo.tripId, ctx.user.id)
+            : undefined;
+          if (!photo || !trip) {
             throw new TRPCError({
               code: "NOT_FOUND",
               message: "Foto nicht gefunden.",
             });
           }
-          await db.deleteTripPhoto(input.photoId, ctx.user.id);
+          await db.deleteTripPhotoById(input.photoId);
           // War das Foto das Titelbild seines Trips, den Verweis mitlöschen
-          await db.clearTripLogCoverPhoto(photo.tripId, ctx.user.id, photo.id);
+          await db.clearTripLogCoverPhoto(photo.tripId, trip.userId, photo.id);
           const { tripPhotoStorage } = await import("./photoStorage");
           await tripPhotoStorage.deleteFiles([photo.fileName]);
           return { success: true } as const;
         }),
     }),
+    invite: router({
+      /**
+       * Einladungs-Link erzeugen (nur Besitzerin/Besitzer): ein bestehender
+       * Link wird wiederverwendet – widerrufen + neu erzeugen erneuert ihn.
+       */
+      create: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.getTripLog(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          const existing = await db.getTripInvite(input.tripId);
+          if (existing) return { token: existing.inviteToken };
+          const token = nanoid(24);
+          await db.upsertTripInvite(input.tripId, token);
+          return { token };
+        }),
+      /** Einladungs-Link widerrufen (nur Besitzerin/Besitzer). */
+      revoke: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.getTripLog(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          await db.deleteTripInvite(input.tripId);
+          return { success: true } as const;
+        }),
+      /**
+       * Öffentliche Vorschau einer Einladung: bewusst nur Ort, Zeitraum und
+       * Owner-Name – keine Notizen, Fotos oder weiteren Details.
+       */
+      get: publicProcedure
+        .input(z.object({ token: z.string().min(8).max(64) }))
+        .query(async ({ input }) => {
+          const found = await db.getTripInviteByToken(input.token);
+          if (!found) return { trip: null };
+          const { trip } = found;
+          let place = trip.location;
+          if (!place && trip.spotId != null) {
+            const spot = await db.getCampSpot(trip.spotId, trip.userId);
+            place = spot?.name ?? null;
+          }
+          const owner = await db.getUserById(trip.userId);
+          return {
+            trip: {
+              place,
+              startDate: trip.startDate,
+              endDate: trip.endDate,
+              ownerName: owner?.name ?? owner?.email ?? null,
+            },
+          };
+        }),
+      /**
+       * Einladung annehmen (eingeloggt): fügt als Mitglied hinzu – idempotent,
+       * die eigene Reise ist ein No-op.
+       */
+      accept: protectedProcedure
+        .input(z.object({ token: z.string().min(8).max(64) }))
+        .mutation(async ({ ctx, input }) => {
+          const found = await db.getTripInviteByToken(input.token);
+          if (!found) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Die Einladung ist ungültig oder wurde widerrufen.",
+            });
+          }
+          const { trip } = found;
+          if (trip.userId === ctx.user.id) {
+            return { tripId: trip.id, alreadyOwner: true } as const;
+          }
+          await db.addTripMember(trip.id, ctx.user.id);
+          return { tripId: trip.id, alreadyOwner: false } as const;
+        }),
+    }),
+    members: router({
+      /**
+       * Mitglieder einer Reise (Besitzerin/Besitzer zuerst) – sichtbar für
+       * alle Mitreisenden; der Einladungs-Token nur für die Besitzerin/den
+       * Besitzer (für den «Mitreisende»-Dialog).
+       */
+      list: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          const [owner, members, invite] = await Promise.all([
+            db.getUserById(trip.userId),
+            db.getTripMembersWithUsers(input.tripId),
+            trip.userId === ctx.user.id
+              ? db.getTripInvite(input.tripId)
+              : Promise.resolve(undefined),
+          ]);
+          return {
+            members: [
+              {
+                userId: trip.userId,
+                role: "owner" as const,
+                name: owner?.name ?? null,
+                email: owner?.email ?? null,
+              },
+              ...members.map(m => ({
+                userId: m.userId,
+                role: "member" as const,
+                name: m.name,
+                email: m.email,
+              })),
+            ],
+            inviteToken: invite?.inviteToken ?? null,
+          };
+        }),
+      /**
+       * Mitglied entfernen: die Besitzerin/der Besitzer darf jedes Mitglied
+       * entfernen; ein Mitglied nur sich selbst (= Reise verlassen).
+       * Ohne userId entfernt man sich selbst.
+       */
+      remove: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            userId: z.number().int().positive().optional(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          const targetUserId = input.userId ?? ctx.user.id;
+          const isOwner = trip.userId === ctx.user.id;
+          if (targetUserId === trip.userId) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message:
+                "Die Besitzerin/der Besitzer kann die eigene Reise nicht verlassen.",
+            });
+          }
+          if (!isOwner && targetUserId !== ctx.user.id) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message:
+                "Nur die Besitzerin/der Besitzer darf andere Mitreisende entfernen.",
+            });
+          }
+          await db.removeTripMember(input.tripId, targetUserId);
+          return { success: true } as const;
+        }),
+    }),
   }),
   menu: router({
-    /** Trip samt Menüplan-Einträgen (null, wenn der Trip nicht dir gehört). */
+    /** Trip samt Menüplan-Einträgen (null, wenn kein Zugriff besteht). */
     listByTrip: protectedProcedure
       .input(z.object({ tripId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
-        const trip = await db.getTripLog(input.tripId, ctx.user.id);
+        const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
         if (!trip) {
           return {
             trip: null,
-            entries: [] as Awaited<ReturnType<typeof db.getMenuEntries>>,
+            entries: [] as Awaited<ReturnType<typeof db.getMenuEntriesForTrip>>,
           };
         }
-        const entries = await db.getMenuEntries(input.tripId, ctx.user.id);
+        const entries = await db.getMenuEntriesForTrip(input.tripId);
         return { trip, entries };
       }),
     /** Slot setzen: genau eine Quelle (Rezept, eigenes Rezept oder Freitext). */
@@ -2254,7 +2501,7 @@ export const appRouter = router({
           )
       )
       .mutation(async ({ ctx, input }) => {
-        const trip = await db.getTripLog(input.tripId, ctx.user.id);
+        const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
         if (!trip) {
           throw new TRPCError({
             code: "NOT_FOUND",
@@ -2298,12 +2545,14 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        await db.deleteMenuEntry(
-          input.tripId,
-          ctx.user.id,
-          input.day,
-          input.meal
-        );
+        const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        await db.deleteMenuEntrySlot(input.tripId, input.day, input.meal);
         return { success: true } as const;
       }),
   }),

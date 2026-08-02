@@ -286,6 +286,169 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     const passkeyList = await authed.auth.passkeyList();
     expect(passkeyList.some(p => p.name === "CI-Passkey")).toBe(true);
 
+    // ── Reise-Mitglieder: einladen, gemeinsam bearbeiten, Berechtigungen ──
+    const memberEmail = `ci-member-${Date.now()}@example.com`;
+    const outsiderEmail = `ci-outsider-${Date.now()}@example.com`;
+    await appRouter
+      .createCaller(anonContext().ctx)
+      .auth.register({ name: "CI Mitglied", email: memberEmail, password });
+    await appRouter
+      .createCaller(anonContext().ctx)
+      .auth.register({ name: "CI Fremd", email: outsiderEmail, password });
+    const memberUser = await findUserByEmail(memberEmail);
+    const outsiderUser = await findUserByEmail(outsiderEmail);
+    const makeCaller = (u: typeof user) =>
+      appRouter.createCaller({
+        user: u as NonNullable<TrpcContext["user"]>,
+        req: {
+          protocol: "https",
+          headers: {},
+          ip: "203.0.113.99",
+        } as TrpcContext["req"],
+        res: createRes().res,
+      });
+    const memberCaller = makeCaller(memberUser);
+    const outsiderCaller = makeCaller(outsiderUser);
+
+    // Owner verknüpft die Packliste mit dem Trip (für den Mitglieds-Zugriff)
+    await authed.trips.update({
+      id: tripId,
+      packListId: listId,
+      location: "CI-Ort",
+      startDate: "2026-08-01",
+      endDate: "2026-08-02",
+    });
+
+    // Einladung erzeugen ist idempotent; die öffentliche Vorschau zeigt nur
+    // Ort, Zeitraum und Owner-Name
+    const { token: inviteToken } = await authed.trips.invite.create({ tripId });
+    expect((await authed.trips.invite.create({ tripId })).token).toBe(
+      inviteToken
+    );
+    const preview = await publicCaller.trips.invite.get({ token: inviteToken });
+    expect(preview.trip?.place).toBe("CI-Ort");
+    expect(preview.trip?.ownerName).toBe("CI Test");
+
+    // Annehmen ist idempotent; der Trip erscheint als Mitglieds-Trip
+    expect(
+      (await memberCaller.trips.invite.accept({ token: inviteToken })).tripId
+    ).toBe(tripId);
+    await memberCaller.trips.invite.accept({ token: inviteToken });
+    const sharedTrip = (await memberCaller.trips.list()).find(
+      tr => tr.id === tripId
+    );
+    expect(sharedTrip?.role).toBe("member");
+    expect(sharedTrip?.ownerName).toBe("CI Test");
+
+    // Mitglieder-Liste: Owner zuerst; den Einladungs-Token sieht nur der Owner
+    const membersForOwner = await authed.trips.members.list({ tripId });
+    expect(membersForOwner.members.map(m => m.role)).toEqual([
+      "owner",
+      "member",
+    ]);
+    expect(membersForOwner.inviteToken).toBe(inviteToken);
+    expect(
+      (await memberCaller.trips.members.list({ tripId })).inviteToken
+    ).toBeNull();
+
+    // Mitglied darf bearbeiten – die Verknüpfungen (Zeltplatz/Packliste)
+    // muss es unverändert lassen
+    await memberCaller.trips.update({
+      id: tripId,
+      spotId: null,
+      packListId: listId,
+      location: "CI-Ort",
+      title: "Gemeinsame Reise",
+      startDate: "2026-08-01",
+      endDate: "2026-08-02",
+    });
+    await expect(
+      memberCaller.trips.update({
+        id: tripId,
+        spotId: null,
+        packListId: null,
+        location: "CI-Ort",
+        startDate: "2026-08-01",
+        endDate: "2026-08-02",
+      })
+    ).rejects.toThrow();
+
+    // Menüplan gemeinsam pflegen
+    await memberCaller.menu.set({
+      tripId,
+      day: "2026-08-02",
+      meal: "dinner",
+      freeText: "Fondue",
+    });
+    const menuShared = await memberCaller.menu.listByTrip({ tripId });
+    expect(menuShared.trip?.title).toBe("Gemeinsame Reise");
+    expect(menuShared.entries.some(e => e.freeText === "Fondue")).toBe(true);
+
+    // Verknüpfte Packliste: einsehen und abhaken
+    const sharedListView = await memberCaller.packing.items({ listId });
+    expect(sharedListView.list?.id).toBe(listId);
+    const sharedItem2 = sharedListView.items[0];
+    await memberCaller.packing.toggleItem({
+      id: sharedItem2.id,
+      checked: true,
+    });
+    expect(
+      (await authed.packing.items({ listId })).items.find(
+        i => i.id === sharedItem2.id
+      )?.checked
+    ).toBe(true);
+
+    // Nicht-Mitglieder bleiben aussen vor
+    await expect(
+      outsiderCaller.trips.update({
+        id: tripId,
+        spotId: null,
+        packListId: null,
+        location: "X",
+        startDate: "2026-08-01",
+        endDate: "2026-08-02",
+      })
+    ).rejects.toThrow();
+    expect((await outsiderCaller.packing.items({ listId })).list).toBeNull();
+    await expect(
+      outsiderCaller.packing.toggleItem({ id: sharedItem2.id, checked: false })
+    ).rejects.toThrow();
+    expect((await outsiderCaller.menu.listByTrip({ tripId })).trip).toBeNull();
+
+    // Owner-only: löschen, einladen/widerrufen, fremde Mitglieder entfernen
+    await expect(memberCaller.trips.remove({ id: tripId })).rejects.toThrow();
+    await expect(
+      memberCaller.trips.invite.create({ tripId })
+    ).rejects.toThrow();
+    await expect(
+      memberCaller.trips.invite.revoke({ tripId })
+    ).rejects.toThrow();
+    await expect(
+      memberCaller.trips.members.remove({
+        tripId,
+        userId: (user as NonNullable<typeof user>).id,
+      })
+    ).rejects.toThrow();
+
+    // Widerrufen macht den Link ungültig; ein neuer ersetzt ihn
+    await authed.trips.invite.revoke({ tripId });
+    expect(
+      (await publicCaller.trips.invite.get({ token: inviteToken })).trip
+    ).toBeNull();
+    const { token: secondToken } = await authed.trips.invite.create({ tripId });
+    expect(secondToken).not.toBe(inviteToken);
+
+    // Reise verlassen (ohne userId = sich selbst) und wieder beitreten
+    await memberCaller.trips.members.remove({ tripId });
+    expect((await memberCaller.trips.list()).some(tr => tr.id === tripId)).toBe(
+      false
+    );
+    expect((await memberCaller.menu.listByTrip({ tripId })).trip).toBeNull();
+    await memberCaller.trips.invite.accept({ token: secondToken });
+    expect((await memberCaller.trips.list()).some(tr => tr.id === tripId)).toBe(
+      true
+    );
+
     // Foto-Uploads simulieren: DB-Einträge plus echte Dateien auf dem Webspace
     const { getDb } = await import("./db");
     const schema = await import("../drizzle/schema");
@@ -419,8 +582,28 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.gearTasks)
         .where(eq(schema.gearTasks.userId, uid)),
+      // Reise-Mitglieder und Einladungs-Links der eigenen Reisen sind weg
+      dbc
+        .select()
+        .from(schema.tripMembers)
+        .where(eq(schema.tripMembers.tripId, tripId)),
+      dbc
+        .select()
+        .from(schema.tripInvites)
+        .where(eq(schema.tripInvites.tripId, tripId)),
     ]);
     expect(remaining.map(rows => rows.length)).toEqual(remaining.map(() => 0));
+
+    // Für das Mitglied ist der geteilte Trip nach der Konto-Löschung weg
+    expect((await memberCaller.trips.list()).some(tr => tr.id === tripId)).toBe(
+      false
+    );
+
+    // Hilfs-Konten wieder aufräumen
+    await memberCaller.auth.deleteAccount({ password });
+    await outsiderCaller.auth.deleteAccount({ password });
+    expect(await findUserByEmail(memberEmail)).toBeUndefined();
+    expect(await findUserByEmail(outsiderEmail)).toBeUndefined();
 
     // Auch die Upload-Dateien sind vom Webspace verschwunden
     await expect(

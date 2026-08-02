@@ -263,6 +263,55 @@ export type TripLog = typeof tripLogs.$inferSelect;
 export type InsertTripLog = typeof tripLogs.$inferInsert;
 
 /**
+ * Mitreisende einer Reise: eingeladene Konten dürfen den Eintrag samt
+ * Fotos, Menüplan und verknüpfter Packliste sehen und bearbeiten.
+ * Die Besitzerin/der Besitzer bleibt implizit tripLogs.userId (ohne Zeile
+ * hier); Zeilen tragen die Rolle "member". Löschen/Einladen bleibt Owner-only.
+ */
+export const tripMembers = mysqlTable(
+  "tripMembers",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    /** Zugehöriger Tagebuch-/Trip-Eintrag (tripLogs.id) */
+    tripId: int("tripId").notNull(),
+    /** Eingeladenes Konto (users.id) */
+    userId: int("userId").notNull(),
+    role: varchar("role", { length: 20 }).notNull().default("member"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    uniqueIndex("tripMembers_trip_user").on(table.tripId, table.userId),
+    index("tripMembers_tripId").on(table.tripId),
+    index("tripMembers_userId").on(table.userId),
+  ]
+);
+
+export type TripMember = typeof tripMembers.$inferSelect;
+export type InsertTripMember = typeof tripMembers.$inferInsert;
+
+/**
+ * Einladungs-Links für Reisen: EIN aktiver Link pro Trip (unique tripId) –
+ * erneuern ersetzt den Token, widerrufen löscht die Zeile.
+ */
+export const tripInvites = mysqlTable(
+  "tripInvites",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    /** Zugehöriger Tagebuch-/Trip-Eintrag (tripLogs.id), genau ein Link pro Trip */
+    tripId: int("tripId").notNull(),
+    inviteToken: varchar("inviteToken", { length: 64 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    uniqueIndex("tripInvites_tripId").on(table.tripId),
+    uniqueIndex("tripInvites_token").on(table.inviteToken),
+  ]
+);
+
+export type TripInvite = typeof tripInvites.$inferSelect;
+export type InsertTripInvite = typeof tripInvites.$inferInsert;
+
+/**
  * Fotos zum Reise-Tagebuch: die Datei liegt unter uploads/trips/<fileName>
  * auf dem Webspace (server/photoStorage.ts), hier nur die Metadaten.
  */
