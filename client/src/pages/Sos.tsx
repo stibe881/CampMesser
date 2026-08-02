@@ -12,7 +12,9 @@ import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { emergencyCallGuide, emergencyNumbers } from "@/data/emergency";
+import { useI18n } from "@/i18n";
 import { formatDMS, wgs84ToLV95 } from "@/lib/sun";
+import { LOCALE_TAGS, pick } from "@shared/i18n";
 
 interface GeoState {
   status: "loading" | "ok" | "error";
@@ -21,18 +23,16 @@ interface GeoState {
   accuracy?: number;
   altitude?: number | null;
   timestamp?: number;
-  errorMessage?: string;
+  errorKey?: "unsupported" | "denied" | "failed";
 }
 
 export default function SosPage() {
+  const { lang, t } = useI18n();
   const [geo, setGeo] = useState<GeoState>({ status: "loading" });
 
   const locate = () => {
     if (!navigator.geolocation) {
-      setGeo({
-        status: "error",
-        errorMessage: "Dieses Gerät unterstützt keine Standortermittlung.",
-      });
+      setGeo({ status: "error", errorKey: "unsupported" });
       return;
     }
     setGeo({ status: "loading" });
@@ -49,10 +49,7 @@ export default function SosPage() {
       err =>
         setGeo({
           status: "error",
-          errorMessage:
-            err.code === err.PERMISSION_DENIED
-              ? "Standortzugriff verweigert. Bitte in den Browser-Einstellungen erlauben."
-              : "Standort konnte nicht ermittelt werden. Bitte erneut versuchen.",
+          errorKey: err.code === err.PERMISSION_DENIED ? "denied" : "failed",
         }),
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
@@ -65,11 +62,18 @@ export default function SosPage() {
   const copyCoords = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Koordinaten kopiert");
+      toast.success(t.sos.coordsCopied);
     } catch {
-      toast.error("Kopieren nicht möglich");
+      toast.error(t.sos.copyFailed);
     }
   };
+
+  const geoErrorMessage =
+    geo.errorKey === "unsupported"
+      ? t.sos.geoUnsupported
+      : geo.errorKey === "denied"
+        ? t.sos.geoDenied
+        : t.sos.geoFailed;
 
   const lv95 =
     geo.status === "ok" && geo.lat && geo.lng
@@ -82,10 +86,7 @@ export default function SosPage() {
 
   return (
     <div className="container py-6">
-      <PageHeader
-        title="SOS & Notfall-Dashboard"
-        subtitle="Dein Standort und alle wichtigen Notfallnummern – für den Fall der Fälle."
-      />
+      <PageHeader title={t.sos.title} subtitle={t.sos.subtitle} />
 
       {/* GPS-Koordinaten */}
       <Card className="mb-6 border-destructive/30">
@@ -93,24 +94,24 @@ export default function SosPage() {
           <div className="mb-4 flex items-center justify-between">
             <h2 className="flex items-center gap-2 font-serif text-lg font-semibold">
               <MapPin className="h-5 w-5 text-destructive" aria-hidden="true" />
-              Dein Standort
+              {t.sos.locationTitle}
             </h2>
             <Button
               variant="outline"
               size="sm"
               onClick={locate}
-              aria-label="Standort aktualisieren"
+              aria-label={t.sos.refreshAria}
             >
               <RefreshCw className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              Aktualisieren
+              {t.sos.refresh}
             </Button>
           </div>
 
           {geo.status === "loading" && (
-            <p className="text-muted-foreground">Standort wird ermittelt …</p>
+            <p className="text-muted-foreground">{t.sos.locating}</p>
           )}
           {geo.status === "error" && (
-            <p className="text-destructive">{geo.errorMessage}</p>
+            <p className="text-destructive">{geoErrorMessage}</p>
           )}
           {geo.status === "ok" &&
             geo.lat !== undefined &&
@@ -118,7 +119,7 @@ export default function SosPage() {
               <div className="space-y-3">
                 <div className="rounded-lg bg-muted p-4">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Dezimalgrad (WGS84) – für Rettungsdienste
+                    {t.sos.decimalLabel}
                   </p>
                   <div className="mt-1 flex items-center justify-between gap-2">
                     <p className="font-mono text-xl font-semibold">{decimal}</p>
@@ -126,7 +127,7 @@ export default function SosPage() {
                       variant="ghost"
                       size="icon"
                       onClick={() => decimal && copyCoords(decimal)}
-                      aria-label="Koordinaten in Dezimalgrad kopieren"
+                      aria-label={t.sos.copyDecimalAria}
                     >
                       <Copy className="h-4 w-4" aria-hidden="true" />
                     </Button>
@@ -135,7 +136,7 @@ export default function SosPage() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-lg bg-muted p-4">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Grad / Minuten / Sekunden
+                      {t.sos.dmsLabel}
                     </p>
                     <p className="mt-1 font-mono text-sm">
                       {formatDMS(geo.lat, geo.lng)}
@@ -143,21 +144,25 @@ export default function SosPage() {
                   </div>
                   <div className="rounded-lg bg-muted p-4">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Schweizer Koordinaten (LV95)
+                      {t.sos.lv95Label}
                     </p>
                     <p className="mt-1 font-mono text-sm">
                       {lv95
-                        ? `E ${lv95.east.toLocaleString("de-CH")} / N ${lv95.north.toLocaleString("de-CH")}`
-                        : "Ausserhalb der Schweiz"}
+                        ? `E ${lv95.east.toLocaleString(LOCALE_TAGS[lang])} / N ${lv95.north.toLocaleString(LOCALE_TAGS[lang])}`
+                        : t.sos.outsideSwitzerland}
                     </p>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Genauigkeit: ±{Math.round(geo.accuracy ?? 0)} m
+                  {t.sos.accuracy(Math.round(geo.accuracy ?? 0))}
                   {geo.altitude != null &&
-                    ` · Höhe: ${Math.round(geo.altitude)} m ü. M.`}
+                    t.sos.altitude(Math.round(geo.altitude))}
                   {geo.timestamp &&
-                    ` · Stand: ${new Date(geo.timestamp).toLocaleTimeString("de-CH")}`}
+                    t.sos.asOf(
+                      new Date(geo.timestamp).toLocaleTimeString(
+                        LOCALE_TAGS[lang]
+                      )
+                    )}
                 </p>
               </div>
             )}
@@ -165,7 +170,9 @@ export default function SosPage() {
       </Card>
 
       {/* Notfallnummern */}
-      <h2 className="mb-3 font-serif text-lg font-semibold">Notfallnummern</h2>
+      <h2 className="mb-3 font-serif text-lg font-semibold">
+        {t.sos.numbersTitle}
+      </h2>
       <div className="mb-6 grid gap-3 sm:grid-cols-2">
         {emergencyNumbers.map(n => (
           <a
@@ -176,15 +183,17 @@ export default function SosPage() {
                 ? "flex items-center gap-4 rounded-xl border-2 border-destructive/50 bg-destructive/5 p-4 transition-all hover:bg-destructive/10 active:scale-[0.99]"
                 : "flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:border-destructive/30 active:scale-[0.99]"
             }
-            aria-label={`${n.label} anrufen`}
+            aria-label={t.sos.callAria(pick(n.label, lang))}
           >
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-destructive text-destructive-foreground">
               <Phone className="h-5 w-5" aria-hidden="true" />
             </span>
             <span className="flex-1">
-              <span className="block text-lg font-bold">{n.label}</span>
+              <span className="block text-lg font-bold">
+                {pick(n.label, lang)}
+              </span>
               <span className="block text-sm text-muted-foreground">
-                {n.description}
+                {pick(n.description, lang)}
               </span>
             </span>
           </a>
@@ -196,23 +205,19 @@ export default function SosPage() {
         <CardContent className="pt-6">
           <h2 className="mb-2 flex items-center gap-2 font-serif text-lg font-semibold">
             <Info className="h-5 w-5 text-primary" aria-hidden="true" />
-            Rega-Alarmierung mit Standortübermittlung
+            {t.sos.regaTitle}
           </h2>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Die offizielle Rega-App übermittelt beim Alarmieren automatisch
-            deine Position an die Einsatzzentrale – das beschleunigt die Rettung
-            in den Bergen erheblich. Wir empfehlen, sie zusätzlich zu
-            installieren. Alternativ kannst du beim Anruf auf 1414 die oben
-            angezeigten Koordinaten durchgeben.
+            {t.sos.regaText}
           </p>
           <a
             href="https://www.rega.ch/rega-app"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
-            aria-label="Offizielle Rega-App-Seite öffnen (externer Link)"
+            aria-label={t.sos.regaLinkAria}
           >
-            Zur offiziellen Rega-App
+            {t.sos.regaLink}
             <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
           </a>
         </CardContent>
@@ -220,20 +225,22 @@ export default function SosPage() {
 
       {/* Notruf-Anleitung */}
       <h2 className="mb-3 font-serif text-lg font-semibold">
-        So setzt du den Notruf richtig ab
+        {t.sos.guideTitle}
       </h2>
       <ol className="space-y-3">
         {emergencyCallGuide.map((step, i) => (
           <li
-            key={step.title}
+            key={step.title.de}
             className="flex gap-3 rounded-xl border border-border bg-card p-4"
           >
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
               {i + 1}
             </span>
             <div>
-              <p className="font-semibold">{step.title}</p>
-              <p className="text-sm text-muted-foreground">{step.text}</p>
+              <p className="font-semibold">{pick(step.title, lang)}</p>
+              <p className="text-sm text-muted-foreground">
+                {pick(step.text, lang)}
+              </p>
             </div>
           </li>
         ))}

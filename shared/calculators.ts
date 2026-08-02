@@ -2,6 +2,7 @@
  * Berechnungslogik für Energie-Budget, Trinkwasser und Pack-Optimierung.
  * Reine Funktionen – von Client und Tests gemeinsam genutzt.
  */
+import { l4, pick, type L4, type Language } from "./i18n";
 
 export interface ConsumerInput {
   name: string;
@@ -150,40 +151,65 @@ export interface PackItemInput {
 
 export interface TransportProfile {
   id: string;
-  label: string;
+  label: L4;
   maxWeightKg: number;
   maxVolumeLiters: number;
-  hint: string;
+  hint: L4;
 }
 
 export const transportProfiles: TransportProfile[] = [
   {
     id: "motorrad",
-    label: "Motorrad",
+    label: l4("Motorrad", "Moto", "Moto", "Motorbike"),
     maxWeightKg: 30,
     maxVolumeLiters: 90,
-    hint: "Typisch: 2 Seitenkoffer à ca. 30 l plus Gepäckrolle 30 l. Schwere Sachen nach unten und nah zur Fahrzeugmitte packen.",
+    hint: l4(
+      "Typisch: 2 Seitenkoffer à ca. 30 l plus Gepäckrolle 30 l. Schwere Sachen nach unten und nah zur Fahrzeugmitte packen.",
+      "Typique : 2 valises latérales d'env. 30 l plus un sac de selle de 30 l. Range le lourd en bas et près du centre du véhicule.",
+      "Tipico: 2 valigie laterali da ca. 30 l più un borsone da 30 l. Metti le cose pesanti in basso e vicino al centro del veicolo.",
+      "Typical: 2 panniers of about 30 l each plus a 30 l roll bag. Pack heavy items low and close to the centre of the bike."
+    ),
   },
   {
     id: "kleinwagen",
-    label: "Kleinwagen",
+    label: l4("Kleinwagen", "Petite voiture", "Utilitaria", "Small car"),
     maxWeightKg: 150,
     maxVolumeLiters: 300,
-    hint: "Kofferraum ca. 300 l. Schwere Kisten unten, Zelt zuletzt einladen – es kommt am Zeltplatz zuerst raus.",
+    hint: l4(
+      "Kofferraum ca. 300 l. Schwere Kisten unten, Zelt zuletzt einladen – es kommt am Zeltplatz zuerst raus.",
+      "Coffre d'env. 300 l. Caisses lourdes en bas, la tente en dernier – c'est elle qui sort en premier à l'emplacement.",
+      "Bagagliaio di ca. 300 l. Casse pesanti in basso, tenda per ultima – in piazzola sarà la prima a uscire.",
+      "Boot of about 300 l. Heavy boxes at the bottom, tent loaded last – it comes out first at the pitch."
+    ),
   },
   {
     id: "kombi",
-    label: "Kombi / SUV",
+    label: l4(
+      "Kombi / SUV",
+      "Break / SUV",
+      "Station wagon / SUV",
+      "Estate / SUV"
+    ),
     maxWeightKg: 300,
     maxVolumeLiters: 550,
-    hint: "Viel Platz – aber Sichtfeld freihalten und schwere Ausrüstung gegen Verrutschen sichern.",
+    hint: l4(
+      "Viel Platz – aber Sichtfeld freihalten und schwere Ausrüstung gegen Verrutschen sichern.",
+      "Beaucoup de place – mais garde le champ de vision dégagé et arrime l'équipement lourd pour qu'il ne glisse pas.",
+      "Tanto spazio – ma lascia libera la visuale e fissa l'attrezzatura pesante perché non scivoli.",
+      "Plenty of space – but keep the view clear and secure heavy gear so it cannot slide."
+    ),
   },
   {
     id: "rucksack",
-    label: "Nur Rucksack",
+    label: l4("Nur Rucksack", "Sac à dos seul", "Solo zaino", "Backpack only"),
     maxWeightKg: 16,
     maxVolumeLiters: 65,
-    hint: "Faustregel: Rucksackgewicht max. 20–25 % des Körpergewichts. Schweres nah am Rücken auf Schulterhöhe.",
+    hint: l4(
+      "Faustregel: Rucksackgewicht max. 20–25 % des Körpergewichts. Schweres nah am Rücken auf Schulterhöhe.",
+      "Règle de base : poids du sac max. 20–25 % du poids du corps. Le lourd près du dos, à hauteur des épaules.",
+      "Regola pratica: peso dello zaino max. 20–25 % del peso corporeo. Le cose pesanti vicino alla schiena, all'altezza delle spalle.",
+      "Rule of thumb: pack weight max. 20–25% of body weight. Heavy items close to your back at shoulder height."
+    ),
   },
 ];
 
@@ -199,7 +225,8 @@ export interface PackAnalysis {
 
 export function analyzePack(
   items: PackItemInput[],
-  profile: TransportProfile
+  profile: TransportProfile,
+  lang: Language = "de"
 ): PackAnalysis {
   const totalWeightKg = items.reduce(
     (s, i) => s + (i.weightGrams * i.quantity) / 1000,
@@ -224,29 +251,81 @@ export function analyzePack(
 
   const hints: string[] = [];
   if (weightPercent > 100) {
+    const over = (totalWeightKg - profile.maxWeightKg).toFixed(1);
     hints.push(
-      `Zuladung um ${(totalWeightKg - profile.maxWeightKg).toFixed(1)} kg überschritten – prüfe die schwersten Positionen.`
+      pick(
+        l4(
+          `Zuladung um ${over} kg überschritten – prüfe die schwersten Positionen.`,
+          `Charge utile dépassée de ${over} kg – vérifie les positions les plus lourdes.`,
+          `Carico superato di ${over} kg – controlla le posizioni più pesanti.`,
+          `Payload exceeded by ${over} kg – check the heaviest items.`
+        ),
+        lang
+      )
     );
   } else if (weightPercent > 85) {
     hints.push(
-      "Gewicht nahe am Limit – plane Reserven für Wasser und Lebensmittel ein."
+      pick(
+        l4(
+          "Gewicht nahe am Limit – plane Reserven für Wasser und Lebensmittel ein.",
+          "Poids proche de la limite – prévois des réserves pour l'eau et les provisions.",
+          "Peso vicino al limite – prevedi riserve per acqua e provviste.",
+          "Weight close to the limit – leave reserves for water and food."
+        ),
+        lang
+      )
     );
   }
   if (volumePercent > 100) {
+    const over = (totalVolumeLiters - profile.maxVolumeLiters).toFixed(0);
     hints.push(
-      `Packvolumen um ${(totalVolumeLiters - profile.maxVolumeLiters).toFixed(0)} l überschritten – Kompressionssäcke helfen bei Schlafsack und Kleidung.`
+      pick(
+        l4(
+          `Packvolumen um ${over} l überschritten – Kompressionssäcke helfen bei Schlafsack und Kleidung.`,
+          `Volume dépassé de ${over} l – des sacs de compression aident pour le sac de couchage et les vêtements.`,
+          `Volume superato di ${over} l – i sacchi a compressione aiutano con sacco a pelo e vestiti.`,
+          `Packing volume exceeded by ${over} l – compression sacks help with sleeping bag and clothing.`
+        ),
+        lang
+      )
     );
   } else if (volumePercent > 85) {
     hints.push(
-      "Volumen fast ausgeschöpft – weiche Teile (Kleidung) in Lücken stopfen statt separat packen."
+      pick(
+        l4(
+          "Volumen fast ausgeschöpft – weiche Teile (Kleidung) in Lücken stopfen statt separat packen.",
+          "Volume presque épuisé – glisse les pièces souples (vêtements) dans les interstices au lieu de les emballer séparément.",
+          "Volume quasi esaurito – infila i pezzi morbidi (vestiti) negli spazi vuoti invece di imballarli a parte.",
+          "Volume almost used up – stuff soft items (clothing) into gaps instead of packing them separately."
+        ),
+        lang
+      )
     );
   }
   if (weightPercent <= 85 && volumePercent <= 85 && items.length > 0) {
-    hints.push("Gute Reserve – Gewicht und Volumen liegen im grünen Bereich.");
+    hints.push(
+      pick(
+        l4(
+          "Gute Reserve – Gewicht und Volumen liegen im grünen Bereich.",
+          "Bonne réserve – le poids et le volume sont dans le vert.",
+          "Buona riserva – peso e volume sono nella zona verde.",
+          "Good reserve – weight and volume are well within limits."
+        ),
+        lang
+      )
+    );
   }
   if (items.length === 0) {
     hints.push(
-      "Füge Ausrüstung aus deinem Inventar hinzu, um die Analyse zu starten."
+      pick(
+        l4(
+          "Füge Ausrüstung aus deinem Inventar hinzu, um die Analyse zu starten.",
+          "Ajoute de l'équipement depuis ton inventaire pour lancer l'analyse.",
+          "Aggiungi attrezzatura dal tuo inventario per avviare l'analisi.",
+          "Add gear from your inventory to start the analysis."
+        ),
+        lang
+      )
     );
   }
   return {

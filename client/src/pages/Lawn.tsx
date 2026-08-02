@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 import {
   deriveMoisture,
@@ -28,41 +29,18 @@ import {
   type SunExposure,
 } from "@shared/lawn";
 
-const floorOptions: { value: FloorType; label: string; hint: string }[] = [
-  {
-    value: "mesh",
-    label: "Mesh / ohne Boden",
-    hint: "Licht und Luft kommen durch",
-  },
-  {
-    value: "standard",
-    label: "Standard-Zeltboden",
-    hint: "übliche Bodenwanne",
-  },
-  {
-    value: "footprint",
-    label: "Boden + Footprint",
-    hint: "dichtet vollständig ab",
-  },
-];
-const grassOptions: { value: GrassCondition; label: string; hint: string }[] = [
-  { value: "robust", label: "Robust", hint: "Sport-/Campingwiese" },
-  { value: "normal", label: "Normal", hint: "gewöhnliche Wiese" },
-  { value: "delicate", label: "Empfindlich", hint: "Zierrasen, frisch gesät" },
-];
-const sunOptions: { value: SunExposure; label: string }[] = [
-  { value: "shade", label: "Schattig" },
-  { value: "partial", label: "Halbschatten" },
-  { value: "full", label: "Pralle Sonne" },
-];
-const moistureOptions: { value: Moisture; label: string }[] = [
-  { value: "dry", label: "Trocken" },
-  { value: "normal", label: "Normal" },
-  { value: "wet", label: "Nass" },
-];
+/** Aus der Prognose übernommene Werte – der Hinweistext wird sprachabhängig gerendert. */
+interface WeatherNote {
+  tempMax: number;
+  /** Bodenfeuchte in %, null = keine Daten (Fallback über Niederschlag) */
+  soilPercent: string | null;
+  rain48: string;
+  derived: Moisture;
+}
 
 /** Rasenschoner-Rechner: Wie lange darf das Zelt auf dem Rasen stehen? */
 export default function LawnPage() {
+  const { lang, t } = useI18n();
   const [floor, setFloor] = useState<FloorType>("standard");
   const [grass, setGrass] = useState<GrassCondition>("normal");
   const [temperature, setTemperature] = useState(20);
@@ -72,8 +50,50 @@ export default function LawnPage() {
   const [weatherStatus, setWeatherStatus] = useState<
     "idle" | "loading" | "ok" | "error"
   >("idle");
-  const [weatherNote, setWeatherNote] = useState<string | null>(null);
+  const [weatherNote, setWeatherNote] = useState<WeatherNote | null>(null);
   const autoTried = useRef(false);
+
+  const floorOptions: { value: FloorType; label: string; hint: string }[] = [
+    { value: "mesh", label: t.lawn.floorMesh, hint: t.lawn.floorMeshHint },
+    {
+      value: "standard",
+      label: t.lawn.floorStandard,
+      hint: t.lawn.floorStandardHint,
+    },
+    {
+      value: "footprint",
+      label: t.lawn.floorFootprint,
+      hint: t.lawn.floorFootprintHint,
+    },
+  ];
+  const grassOptions: { value: GrassCondition; label: string; hint: string }[] =
+    [
+      {
+        value: "robust",
+        label: t.lawn.grassRobust,
+        hint: t.lawn.grassRobustHint,
+      },
+      {
+        value: "normal",
+        label: t.lawn.grassNormal,
+        hint: t.lawn.grassNormalHint,
+      },
+      {
+        value: "delicate",
+        label: t.lawn.grassDelicate,
+        hint: t.lawn.grassDelicateHint,
+      },
+    ];
+  const sunOptions: { value: SunExposure; label: string }[] = [
+    { value: "shade", label: t.lawn.sunShade },
+    { value: "partial", label: t.lawn.sunPartial },
+    { value: "full", label: t.lawn.sunFull },
+  ];
+  const moistureOptions: { value: Moisture; label: string }[] = [
+    { value: "dry", label: t.lawn.moistureOptDry },
+    { value: "normal", label: t.lawn.moistureOptNormal },
+    { value: "wet", label: t.lawn.moistureOptWet },
+  ];
 
   /** Temperatur + Bodenfeuchte aus der Wetter-Prognose übernehmen. */
   const loadWeather = () => {
@@ -114,7 +134,7 @@ export default function LawnPage() {
           const times: string[] = json.hourly?.time ?? [];
           const nowIso = new Date().toISOString().slice(0, 13);
           let soilNow: number | null = null;
-          const idx = times.findIndex(t => t.startsWith(nowIso));
+          const idx = times.findIndex(time => time.startsWith(nowIso));
           if (idx >= 0 && typeof soilSeries[idx] === "number")
             soilNow = soilSeries[idx];
           else {
@@ -125,23 +145,12 @@ export default function LawnPage() {
           }
           const derived = deriveMoisture(soilNow, rain24h);
           setMoisture(derived);
-          setWeatherNote(
-            soilNow !== null
-              ? `Tagesmaximum ${Math.round(todayMax)} °C, Bodenfeuchte ${(soilNow * 100).toFixed(0)} % → Boden ${
-                  derived === "wet"
-                    ? "nass"
-                    : derived === "normal"
-                      ? "normal"
-                      : "trocken"
-                }`
-              : `Tagesmaximum ${Math.round(todayMax)} °C, Niederschlag letzte 2 Tage ${rain24h.toFixed(1)} mm → Boden ${
-                  derived === "wet"
-                    ? "nass"
-                    : derived === "normal"
-                      ? "normal"
-                      : "trocken"
-                } (abgeleitet)`
-          );
+          setWeatherNote({
+            tempMax: Math.round(todayMax),
+            soilPercent: soilNow !== null ? (soilNow * 100).toFixed(0) : null,
+            rain48: rain24h.toFixed(1),
+            derived,
+          });
           setWeatherStatus("ok");
         } catch {
           setWeatherStatus("error");
@@ -172,12 +181,30 @@ export default function LawnPage() {
     damage: "border-destructive/40 bg-destructive/10 text-destructive",
   }[verdict];
   const verdictText = {
-    safe: "Unbedenklich – der Rasen erholt sich innert weniger Tage von selbst.",
-    caution:
-      "Vorsicht – das Gras wird vergilben. Es erholt sich meist in 1–2 Wochen, plane das Umstellen ein.",
-    damage:
-      "Bleibende Schäden wahrscheinlich – bei dieser Standzeit stirbt das Gras darunter ab. Stelle das Zelt zwingend um.",
+    safe: t.lawn.verdictSafe,
+    caution: t.lawn.verdictCaution,
+    damage: t.lawn.verdictDamage,
   }[verdict];
+
+  const moistureWord = (m: Moisture) =>
+    m === "wet"
+      ? t.lawn.moistureWet
+      : m === "normal"
+        ? t.lawn.moistureNormal
+        : t.lawn.moistureDry;
+  const weatherNoteText = weatherNote
+    ? weatherNote.soilPercent !== null
+      ? t.lawn.weatherNoteSoil(
+          weatherNote.tempMax,
+          weatherNote.soilPercent,
+          moistureWord(weatherNote.derived)
+        )
+      : t.lawn.weatherNoteRain(
+          weatherNote.tempMax,
+          weatherNote.rain48,
+          moistureWord(weatherNote.derived)
+        )
+    : null;
 
   const OptionRow = <T extends string>({
     options,
@@ -212,16 +239,13 @@ export default function LawnPage() {
 
   return (
     <div className="container max-w-3xl py-6">
-      <PageHeader
-        title="Rasenschoner"
-        subtitle="Wie lange darf das Zelt auf dem Rasen stehen, bevor das Gras Schaden nimmt?"
-      />
+      <PageHeader title={t.lawn.title} subtitle={t.lawn.subtitle} />
 
       <Card className="mb-5">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Tent className="h-4 w-4 text-primary" aria-hidden="true" />
-            Dein Setup
+            {t.lawn.setupTitle}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -242,45 +266,44 @@ export default function LawnPage() {
                 aria-hidden="true"
               />
               {weatherStatus === "loading"
-                ? "Wetter wird geladen …"
-                : "Temperatur & Feuchte vom Wetter übernehmen"}
+                ? t.lawn.loadingWeather
+                : t.lawn.loadWeather}
             </Button>
-            {weatherStatus === "ok" && weatherNote && (
+            {weatherStatus === "ok" && weatherNoteText && (
               <p className="mt-1.5 flex items-start gap-1.5 text-xs text-primary">
                 <CloudSun
                   className="mt-0.5 h-3.5 w-3.5 shrink-0"
                   aria-hidden="true"
                 />
-                Aus Prognose übernommen: {weatherNote}. Manuell anpassbar.
+                {t.lawn.fromForecast(weatherNoteText)}
               </p>
             )}
             {weatherStatus === "error" && (
               <p className="mt-1.5 text-xs text-muted-foreground">
-                Wetter nicht verfügbar – stelle Temperatur und Feuchte von Hand
-                ein.
+                {t.lawn.weatherError}
               </p>
             )}
           </div>
           <OptionRow
-            label="Zeltboden"
+            label={t.lawn.floorLabel}
             options={floorOptions}
             value={floor}
             onChange={setFloor}
           />
           <OptionRow
-            label="Rasen-Zustand"
+            label={t.lawn.grassLabel}
             options={grassOptions}
             value={grass}
             onChange={setGrass}
           />
           <OptionRow
-            label="Sonneneinstrahlung am Stellplatz"
+            label={t.lawn.sunLabel}
             options={sunOptions}
             value={sun}
             onChange={setSun}
           />
           <OptionRow
-            label="Bodenfeuchte"
+            label={t.lawn.moistureLabel}
             options={moistureOptions}
             value={moisture}
             onChange={setMoisture}
@@ -289,7 +312,7 @@ export default function LawnPage() {
             <Label className="mb-1.5 flex items-center justify-between text-xs">
               <span className="flex items-center gap-1">
                 <Thermometer className="h-3.5 w-3.5" aria-hidden="true" />{" "}
-                Tagestemperatur
+                {t.lawn.tempLabel}
               </span>
               <span className="font-semibold">{temperature} °C</span>
             </Label>
@@ -299,18 +322,16 @@ export default function LawnPage() {
               max={38}
               step={1}
               onValueChange={v => setTemperature(v[0] ?? 20)}
-              aria-label="Tagestemperatur in Grad Celsius"
+              aria-label={t.lawn.tempAria}
             />
           </div>
           <div>
             <Label className="mb-1.5 flex items-center justify-between text-xs">
               <span className="flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" aria-hidden="true" /> Geplante
-                Standzeit
+                <Clock className="h-3.5 w-3.5" aria-hidden="true" />{" "}
+                {t.lawn.plannedLabel}
               </span>
-              <span className="font-semibold">
-                {plannedDays} Tag{plannedDays > 1 ? "e" : ""}
-              </span>
+              <span className="font-semibold">{t.lawn.days(plannedDays)}</span>
             </Label>
             <Slider
               value={[plannedDays]}
@@ -318,7 +339,7 @@ export default function LawnPage() {
               max={14}
               step={1}
               onValueChange={v => setPlannedDays(v[0] ?? 3)}
-              aria-label="Geplante Standzeit in Tagen"
+              aria-label={t.lawn.plannedAria}
             />
           </div>
         </CardContent>
@@ -339,10 +360,10 @@ export default function LawnPage() {
               aria-hidden="true"
             />
             <p className="text-lg font-bold">
-              {formatHours(result.yellowingHours)}
+              {formatHours(result.yellowingHours, lang)}
             </p>
             <p className="text-xs text-muted-foreground">
-              bis erste Vergilbung
+              {t.lawn.statYellowing}
             </p>
           </CardContent>
         </Card>
@@ -353,11 +374,9 @@ export default function LawnPage() {
               aria-hidden="true"
             />
             <p className="text-lg font-bold">
-              {formatHours(result.damageHours)}
+              {formatHours(result.damageHours, lang)}
             </p>
-            <p className="text-xs text-muted-foreground">
-              bis bleibende Schäden
-            </p>
+            <p className="text-xs text-muted-foreground">{t.lawn.statDamage}</p>
           </CardContent>
         </Card>
         <Card>
@@ -367,11 +386,9 @@ export default function LawnPage() {
               aria-hidden="true"
             />
             <p className="text-lg font-bold">
-              {formatHours(result.moveAfterHours)}
+              {formatHours(result.moveAfterHours, lang)}
             </p>
-            <p className="text-xs text-muted-foreground">
-              spätestens dann umstellen
-            </p>
+            <p className="text-xs text-muted-foreground">{t.lawn.statMove}</p>
           </CardContent>
         </Card>
       </div>
@@ -380,32 +397,26 @@ export default function LawnPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Sprout className="h-4 w-4 text-primary" aria-hidden="true" />
-            Tipps zum Rasenschonen
+            {t.lawn.tipsTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              <strong className="text-foreground">
-                Zelt regelmässig umstellen:
-              </strong>{" "}
-              Schon ein Versetzen um eine Zeltbreite gibt dem Gras Licht und
-              Luft zurück.
+              <strong className="text-foreground">{t.lawn.tip1Title}</strong>{" "}
+              {t.lawn.tip1Text}
             </li>
             <li>
-              <strong className="text-foreground">Zelt tagsüber lüften:</strong>{" "}
-              Boden anheben oder Apsiden öffnen, damit Hitze und Feuchtigkeit
-              entweichen.
+              <strong className="text-foreground">{t.lawn.tip2Title}</strong>{" "}
+              {t.lawn.tip2Text}
             </li>
             <li>
-              <strong className="text-foreground">Vergilbtes Gras:</strong>{" "}
-              erholt sich meist in 1–2 Wochen von selbst – braunes, matschiges
-              Gras braucht oft eine Nachsaat.
+              <strong className="text-foreground">{t.lawn.tip3Title}</strong>{" "}
+              {t.lawn.tip3Text}
             </li>
             <li>
-              <strong className="text-foreground">Heisse Tage:</strong> Bei über
-              30 °C in praller Sonne leidet der Rasen unter dem Zeltboden schon
-              nach einem Tag.
+              <strong className="text-foreground">{t.lawn.tip4Title}</strong>{" "}
+              {t.lawn.tip4Text}
             </li>
           </ul>
         </CardContent>

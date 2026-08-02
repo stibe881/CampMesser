@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 /**
@@ -68,11 +69,12 @@ export function isQuietTime(now: Date, from: string, to: string): boolean {
 }
 
 export default function QuietPage() {
+  const t = useT();
   const [settings, setSettings] = useState<QuietSettings>(() => loadSettings());
   const [listening, setListening] = useState(false);
   const [level, setLevel] = useState(0);
   const [peak, setPeak] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
   const [tooLoudSince, setTooLoudSince] = useState<number | null>(null);
   const [reminder, setReminder] = useState(false);
   const [now, setNow] = useState(() => new Date());
@@ -115,7 +117,7 @@ export default function QuietPage() {
   };
 
   const start = async () => {
-    setError(null);
+    setError(false);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
@@ -164,9 +166,7 @@ export default function QuietPage() {
       tick();
       setListening(true);
     } catch {
-      setError(
-        "Mikrofon-Zugriff nicht möglich. Erlaube den Zugriff in den Browser-Einstellungen – die Messung bleibt komplett auf deinem Gerät."
-      );
+      setError(true);
     }
   };
 
@@ -210,10 +210,7 @@ export default function QuietPage() {
 
   return (
     <div className="container max-w-3xl py-6">
-      <PageHeader
-        title="Camp-Quiet-Timer"
-        subtitle="Behalte die Lautstärke im Blick, wenn auf dem Campingplatz Nachtruhe gilt – dezent und komplett offline."
-      />
+      <PageHeader title={t.quiet.title} subtitle={t.quiet.subtitle} />
 
       {/* Status Nachtruhe */}
       <div
@@ -226,8 +223,8 @@ export default function QuietPage() {
       >
         <Moon className="h-4 w-4 shrink-0" aria-hidden="true" />
         {quietNow
-          ? `Nachtruhe aktiv (${settings.quietFrom}–${settings.quietTo} Uhr) – der Timer erinnert dich, wenn es zu laut wird.`
-          : `Aktuell keine Nachtruhe. Sie beginnt um ${settings.quietFrom} Uhr.`}
+          ? t.quiet.quietActive(settings.quietFrom, settings.quietTo)
+          : t.quiet.quietInactive(settings.quietFrom)}
       </div>
 
       {/* Erinnerung */}
@@ -238,15 +235,9 @@ export default function QuietPage() {
         >
           <BellOff className="h-5 w-5 shrink-0" aria-hidden="true" />
           <div>
-            <p className="font-semibold">Psst – Nachtruhe!</p>
-            <p className="text-sm">
-              Die Gespräche sind gerade lauter als dein eingestellter Richtwert.
-              Die Zelt-Nachbarn danken für etwas leisere Töne.
-            </p>
-            <p className="mt-1 text-xs opacity-80">
-              Auf Android-Geräten vibriert das Handy zusätzlich (iPhones
-              unterstützen Web-Vibration leider nicht).
-            </p>
+            <p className="font-semibold">{t.quiet.shhTitle}</p>
+            <p className="text-sm">{t.quiet.shhBody}</p>
+            <p className="mt-1 text-xs opacity-80">{t.quiet.vibrateNote}</p>
           </div>
         </div>
       )}
@@ -256,7 +247,7 @@ export default function QuietPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Volume2 className="h-4 w-4 text-primary" aria-hidden="true" />
-            Lautstärke-Pegel
+            {t.quiet.levelTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -278,16 +269,17 @@ export default function QuietPage() {
           </div>
           <div className="mb-4 flex justify-between text-xs text-muted-foreground">
             <span>
-              Aktuell: <span className="font-mono font-semibold">{level}</span>
+              {t.quiet.currentLabel}{" "}
+              <span className="font-mono font-semibold">{level}</span>
             </span>
             <span>
-              Schwelle:{" "}
+              {t.quiet.thresholdLabel}{" "}
               <span className="font-mono font-semibold">
                 {settings.threshold}
               </span>
             </span>
             <span>
-              Spitze:{" "}
+              {t.quiet.peakLabel}{" "}
               <span className="font-mono font-semibold">
                 {Math.round(peak)}
               </span>
@@ -300,20 +292,21 @@ export default function QuietPage() {
           >
             {listening ? (
               <>
-                <MicOff className="mr-1.5 h-4 w-4" aria-hidden="true" /> Messung
-                stoppen
+                <MicOff className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
+                {t.quiet.stopMeasuring}
               </>
             ) : (
               <>
-                <Mic className="mr-1.5 h-4 w-4" aria-hidden="true" /> Messung
-                starten
+                <Mic className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
+                {t.quiet.startMeasuring}
               </>
             )}
           </Button>
-          {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
+          {error && (
+            <p className="mt-2 text-xs text-destructive">{t.quiet.micError}</p>
+          )}
           <p className="mt-2 text-xs text-muted-foreground">
-            Der Ton wird nur live analysiert – nichts wird aufgenommen,
-            gespeichert oder gesendet. Der Bildschirm muss dafür an bleiben.
+            {t.quiet.privacyNote}
           </p>
         </CardContent>
       </Card>
@@ -328,7 +321,7 @@ export default function QuietPage() {
                   className="h-4 w-4 text-primary"
                   aria-hidden="true"
                 />
-                Nacht-Protokoll
+                {t.quiet.protocolTitle}
               </span>
               <Button
                 variant="ghost"
@@ -338,10 +331,10 @@ export default function QuietPage() {
                   setHistory([]);
                   minuteRef.current = null;
                 }}
-                aria-label="Protokoll löschen"
+                aria-label={t.quiet.clearAria}
               >
                 <Trash2 className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
-                Löschen
+                {t.quiet.clear}
               </Button>
             </CardTitle>
           </CardHeader>
@@ -364,8 +357,13 @@ export default function QuietPage() {
                   />
                   <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
                   <Tooltip
-                    formatter={(value: number) => [`Pegel ${value}`, "Maximum"]}
-                    labelFormatter={(label: string) => `${label} Uhr`}
+                    formatter={(value: number) => [
+                      t.quiet.tooltipValue(value),
+                      t.quiet.tooltipName,
+                    ]}
+                    labelFormatter={(label: string) =>
+                      t.quiet.tooltipLabel(label)
+                    }
                   />
                   <ReferenceLine
                     y={settings.threshold}
@@ -384,10 +382,7 @@ export default function QuietPage() {
               </ResponsiveContainer>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              Höchster Pegel pro Minute ({history.length} Min. aufgezeichnet,
-              max. 8 h). Die gestrichelte Linie ist deine Erinnerungs-Schwelle.
-              Das Protokoll bleibt bis zum Verlassen der Seite erhalten – ideal
-              für den Rückblick am Morgen.
+              {t.quiet.protocolNote(history.length)}
             </p>
           </CardContent>
         </Card>
@@ -398,14 +393,14 @@ export default function QuietPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Moon className="h-4 w-4 text-primary" aria-hidden="true" />
-            Nachtruhe-Einstellungen
+            {t.quiet.settingsTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="from" className="mb-1.5 block text-xs">
-                Nachtruhe ab
+                {t.quiet.fromLabel}
               </Label>
               <Input
                 id="from"
@@ -418,7 +413,7 @@ export default function QuietPage() {
             </div>
             <div>
               <Label htmlFor="to" className="mb-1.5 block text-xs">
-                Nachtruhe bis
+                {t.quiet.toLabel}
               </Label>
               <Input
                 id="to"
@@ -433,7 +428,7 @@ export default function QuietPage() {
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between">
               <Label htmlFor="threshold" className="text-xs">
-                Erinnerungs-Schwelle
+                {t.quiet.thresholdSetting}
               </Label>
               <span className="font-mono text-xs font-semibold">
                 {settings.threshold}
@@ -448,13 +443,9 @@ export default function QuietPage() {
               onValueChange={v =>
                 saveSettings({ ...settings, threshold: v[0] })
               }
-              aria-label="Erinnerungs-Schwelle für die Lautstärke"
+              aria-label={t.quiet.thresholdAria}
             />
-            <p className="mt-2 text-xs text-muted-foreground">
-              Tipp: Starte die Messung bei normaler Gesprächslautstärke und
-              stelle die Schwelle knapp darüber ein. Übliche Nachtruhe auf
-              Schweizer Campingplätzen: 22:00–07:00 Uhr.
-            </p>
+            <p className="mt-2 text-xs text-muted-foreground">{t.quiet.tip}</p>
           </div>
         </CardContent>
       </Card>

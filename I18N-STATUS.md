@@ -27,7 +27,7 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 - [x] PackLists, PackListDetail, SharedPackList, PackOptimizer, Inventory
 - [x] Weather, Water
 - [x] SunCompass, Level
-- [ ] Sos, Energy, Drying, Quiet, Lawn
+- [x] Sos, Energy, Drying, Quiet, Lawn
 - [ ] Spots, SpotDetail, SharedSpot, Trips
 - [ ] FirstAid, Knots (+Quiz), Nature, Recipes (+Editor), Food
 - [ ] Family (+Editoren), HuntPrint
@@ -41,7 +41,7 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 - [ ] data/nature.ts (16 Einträge + Kategorien)
 - [ ] data/recipes.ts (18 Rezepte inkl. Zutaten/Schritte)
 - [ ] data/familyActivities.ts (6 Jagden, Quizze)
-- [ ] data/emergency.ts
+- [x] data/emergency.ts
 - [x] shared/packTemplates.ts (Szenarien + Einträge)
 
 ### Shared-Logik mit Nutzertexten (lang-Parameter)
@@ -51,12 +51,14 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 - [x] shared/astro.ts (Namen, Tipps, Radiant als L4; Nature.tsx picked bereits)
 - [x] shared/moon.ts (Phasen-Labels, stargazingQuality; lang-Parameter)
 - [x] shared/level.ts (Unterleg-Tipps; lang-Parameter)
-- [x] shared/solar.ts (compassDirection mit lang; Energy.tsx reicht lang noch
-      nicht durch – gehört zum Energy-Batch)
-- [ ] shared/drying.ts (Material-Labels/Hinweise)
-- [ ] shared/lawn.ts (Empfehlungen)
+- [x] shared/solar.ts (compassDirection mit lang; Energy.tsx reicht lang durch)
+- [x] shared/drying.ts (Material-Labels als L4, sunsetVerdict/formatHours mit
+      lang-Parameter)
+- [x] shared/lawn.ts (formatHours mit lang-Parameter; Verdict-/Options-Texte
+      liegen im lawn-Namespace des Wörterbuchs)
 - [ ] shared/food.ts (MHD-Labels)
-- [ ] shared/calculators.ts (prüfen)
+- [x] shared/calculators.ts (Transport-Profile als L4, analyzePack-Hinweise mit
+      lang-Parameter; PackOptimizer reicht lang durch)
 
 ### Abschluss
 

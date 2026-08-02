@@ -12,9 +12,10 @@ import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { useT } from "@/i18n";
+import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { analyzePack, transportProfiles } from "@shared/calculators";
+import { pick } from "@shared/i18n";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 
@@ -30,7 +31,7 @@ const profileIcons: Record<
 
 export default function PackOptimizerPage() {
   const { isAuthenticated, loading } = useAuth();
-  const t = useT();
+  const { lang, t } = useI18n();
   const query = trpc.inventory.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -46,8 +47,8 @@ export default function PackOptimizerPage() {
       quantity: i.quantity,
       category: i.category,
     }));
-    return analyzePack(items, profile);
-  }, [query.data, profile]);
+    return analyzePack(items, profile, lang);
+  }, [query.data, profile, lang]);
 
   if (loading) {
     return (
@@ -111,7 +112,9 @@ export default function PackOptimizerPage() {
               aria-pressed={profileId === p.id}
             >
               <Icon className="h-6 w-6 text-primary" aria-hidden="true" />
-              <span className="text-sm font-semibold">{p.label}</span>
+              <span className="text-sm font-semibold">
+                {pick(p.label, lang)}
+              </span>
               <span className="text-[11px] text-muted-foreground">
                 {p.maxWeightKg} kg · {p.maxVolumeLiters} l
               </span>
@@ -176,7 +179,9 @@ export default function PackOptimizerPage() {
               />
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">{profile.hint}</p>
+          <p className="text-xs text-muted-foreground">
+            {pick(profile.hint, lang)}
+          </p>
         </CardContent>
       </Card>
 

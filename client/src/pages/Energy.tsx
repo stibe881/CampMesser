@@ -18,24 +18,27 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { calcEnergyBudget } from "@shared/calculators";
+import { LOCALE_TAGS } from "@shared/i18n";
 import { compassDirection, computeSolarAlignment } from "@shared/solar";
 import { loadObstacleProfiles } from "@/lib/obstacleStore";
 import { getProfileObstacles } from "@shared/obstacleProfiles";
 import { cn } from "@/lib/utils";
 
 const presetConsumers = [
-  { name: "Kompressor-Kühlbox", watts: 45, hoursPerDay: 8 },
-  { name: "Laptop", watts: 60, hoursPerDay: 2 },
-  { name: "Drohnen-Akku laden", watts: 90, hoursPerDay: 1 },
-  { name: "Smartphone laden", watts: 15, hoursPerDay: 2 },
-  { name: "LED-Beleuchtung", watts: 8, hoursPerDay: 4 },
-  { name: "Kamera-Akkus", watts: 20, hoursPerDay: 1.5 },
-];
+  { key: "coolbox", watts: 45, hoursPerDay: 8 },
+  { key: "laptop", watts: 60, hoursPerDay: 2 },
+  { key: "drone", watts: 90, hoursPerDay: 1 },
+  { key: "phone", watts: 15, hoursPerDay: 2 },
+  { key: "led", watts: 8, hoursPerDay: 4 },
+  { key: "camera", watts: 20, hoursPerDay: 1.5 },
+] as const;
 
 export default function EnergyPage() {
   const { isAuthenticated, loading } = useAuth();
+  const { lang, t } = useI18n();
   const utils = trpc.useUtils();
   const query = trpc.energy.consumers.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -51,7 +54,13 @@ export default function EnergyPage() {
   const [form, setForm] = useState({ name: "", watts: "", hoursPerDay: "" });
   const [forecastState, setForecastState] = useState<
     | { status: "idle" | "loading" | "error" }
-    | { status: "ok"; avgSunHours: number; days: number; source: string }
+    | {
+        status: "ok";
+        avgSunHours: number;
+        days: number;
+        // null = eigener Standort, sonst Name des Zeltplatz-Favoriten
+        sourceSpotName: string | null;
+      }
   >({ status: "idle" });
   // Koordinaten des zuletzt geladenen Orts – Basis für die Panel-Ausrichtungshilfe.
   // spotId gesetzt = Prognose kam von einem Zeltplatz-Favoriten → dessen Hindernis-Profil nutzen
@@ -74,7 +83,7 @@ export default function EnergyPage() {
   const fetchSunshine = async (
     lat: number,
     lng: number,
-    source: string,
+    sourceSpotName: string | null,
     spotId?: number
   ) => {
     setPanelCoords({ lat, lng, spotId });
@@ -100,7 +109,7 @@ export default function EnergyPage() {
       status: "ok",
       avgSunHours: rounded,
       days: durations.length,
-      source,
+      sourceSpotName,
     });
   };
 
@@ -110,12 +119,9 @@ export default function EnergyPage() {
       // Ohne GPS: Prognose für den ersten gespeicherten Zeltplatz übernehmen
       const spot = spotsRef.current?.[0];
       if (spot) {
-        fetchSunshine(
-          spot.latitude,
-          spot.longitude,
-          `Zeltplatz «${spot.name}»`,
-          spot.id
-        ).catch(() => setForecastState({ status: "error" }));
+        fetchSunshine(spot.latitude, spot.longitude, spot.name, spot.id).catch(
+          () => setForecastState({ status: "error" })
+        );
       } else {
         setForecastState({ status: "error" });
       }
@@ -126,11 +132,9 @@ export default function EnergyPage() {
     }
     navigator.geolocation.getCurrentPosition(
       pos =>
-        fetchSunshine(
-          pos.coords.latitude,
-          pos.coords.longitude,
-          "deinem Standort"
-        ).catch(() => setForecastState({ status: "error" })),
+        fetchSunshine(pos.coords.latitude, pos.coords.longitude, null).catch(
+          () => setForecastState({ status: "error" })
+        ),
       fallbackToSpot,
       { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }
     );
@@ -156,12 +160,9 @@ export default function EnergyPage() {
       retriedWithSpots.current = true;
       const spot = spotsQuery.data[0];
       setForecastState({ status: "loading" });
-      fetchSunshine(
-        spot.latitude,
-        spot.longitude,
-        `Zeltplatz «${spot.name}»`,
-        spot.id
-      ).catch(() => setForecastState({ status: "error" }));
+      fetchSunshine(spot.latitude, spot.longitude, spot.name, spot.id).catch(
+        () => setForecastState({ status: "error" })
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forecastState.status, spotsQuery.data]);
@@ -171,7 +172,7 @@ export default function EnergyPage() {
       utils.energy.consumers.invalidate();
       setForm({ name: "", watts: "", hoursPerDay: "" });
     },
-    onError: () => toast.error("Verbraucher konnte nicht gespeichert werden"),
+    onError: () => toast.error(t.energy.saveFailed),
   });
   const updateMutation = trpc.energy.update.useMutation({
     onMutate: async input => {
@@ -233,7 +234,7 @@ export default function EnergyPage() {
       <div className="container flex justify-center py-16">
         <Loader2
           className="h-6 w-6 animate-spin text-muted-foreground"
-          aria-label="Lädt"
+          aria-label={t.common.loading}
         />
       </div>
     );
@@ -243,28 +244,30 @@ export default function EnergyPage() {
     return (
       <div className="container py-6">
         <PageHeader
-          title="Energie-Budget-Rechner"
-          subtitle="Wie lange reicht deine Powerstation? Verbraucher erfassen und Autarkie berechnen."
+          title={t.energy.title}
+          subtitle={t.energy.subtitleLoggedOut}
         />
-        <LoginPrompt feature="deine Energie-Verbraucher" />
+        <LoginPrompt feature={t.energy.loginFeature} />
       </div>
     );
   }
 
   const autonomyLabel = result.selfSufficient
-    ? "Unbegrenzt – Solar deckt den Verbrauch"
+    ? t.energy.autonomyUnlimited
     : result.autonomyDays === Infinity
       ? "–"
       : result.autonomyDays >= 14
-        ? "> 14 Tage"
-        : `${result.autonomyDays.toFixed(1)} Tage`;
+        ? t.energy.autonomyMoreThan14
+        : t.energy.autonomyDays(result.autonomyDays.toFixed(1));
+
+  const timeFormat: Intl.DateTimeFormatOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+  };
 
   return (
     <div className="container max-w-3xl py-6">
-      <PageHeader
-        title="Energie-Budget-Rechner"
-        subtitle="Verbraucher, Solarertrag und Akkukapazität kombiniert: So lange kannst du autark stehen."
-      />
+      <PageHeader title={t.energy.title} subtitle={t.energy.subtitle} />
 
       {/* Ergebnis */}
       <Card
@@ -279,19 +282,25 @@ export default function EnergyPage() {
               <p className="font-serif text-2xl font-bold text-primary">
                 {autonomyLabel}
               </p>
-              <p className="text-xs text-muted-foreground">Autarkie-Dauer</p>
+              <p className="text-xs text-muted-foreground">
+                {t.energy.autonomyLabel}
+              </p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold">
                 {Math.round(result.dailyConsumptionWh)} Wh
               </p>
-              <p className="text-xs text-muted-foreground">Verbrauch / Tag</p>
+              <p className="text-xs text-muted-foreground">
+                {t.energy.consumptionPerDay}
+              </p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold">
                 {Math.round(result.dailySolarYieldWh)} Wh
               </p>
-              <p className="text-xs text-muted-foreground">Solarertrag / Tag</p>
+              <p className="text-xs text-muted-foreground">
+                {t.energy.solarPerDay}
+              </p>
             </div>
             <div className="text-center">
               <p
@@ -303,7 +312,9 @@ export default function EnergyPage() {
                 {result.netDailyWh > 0 ? "−" : "+"}
                 {Math.abs(Math.round(result.netDailyWh))} Wh
               </p>
-              <p className="text-xs text-muted-foreground">Bilanz / Tag</p>
+              <p className="text-xs text-muted-foreground">
+                {t.energy.balancePerDay}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -318,7 +329,7 @@ export default function EnergyPage() {
                 className="h-4 w-4 text-primary"
                 aria-hidden="true"
               />
-              <Label htmlFor="battery">Akkukapazität (Wh)</Label>
+              <Label htmlFor="battery">{t.energy.batteryLabel}</Label>
             </div>
             <Input
               id="battery"
@@ -328,7 +339,7 @@ export default function EnergyPage() {
               onChange={e => setBatteryWh(e.target.value)}
             />
             <p className="mt-1.5 text-xs text-muted-foreground">
-              Standard: DJI Power 1000 mit 1024 Wh
+              {t.energy.batteryHint}
             </p>
           </CardContent>
         </Card>
@@ -336,7 +347,7 @@ export default function EnergyPage() {
           <CardContent className="pt-6">
             <div className="mb-1.5 flex items-center gap-2">
               <Sun className="h-4 w-4 text-chart-1" aria-hidden="true" />
-              <Label htmlFor="solar">Solarpanels (W gesamt)</Label>
+              <Label htmlFor="solar">{t.energy.solarLabel}</Label>
             </div>
             <Input
               id="solar"
@@ -346,7 +357,7 @@ export default function EnergyPage() {
               onChange={e => setSolarWatts(e.target.value)}
             />
             <p className="mt-1.5 text-xs text-muted-foreground">
-              z. B. 2 × 200-W-Panels = 400
+              {t.energy.solarHint}
             </p>
           </CardContent>
         </Card>
@@ -355,14 +366,14 @@ export default function EnergyPage() {
       <Card className="mb-6">
         <CardContent className="pt-6">
           <div className="mb-2 flex items-center justify-between">
-            <Label htmlFor="sun-hours">Effektive Sonnenstunden pro Tag</Label>
+            <Label htmlFor="sun-hours">{t.energy.sunHoursLabel}</Label>
             <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-sm font-semibold">
               {sunHours} h
             </span>
           </div>
           <div className="mb-3 flex items-center justify-between rounded-lg bg-accent/50 px-3 py-2">
             <Label htmlFor="sun-auto" className="cursor-pointer text-sm">
-              Automatisch aus Wetter-Prognose übernehmen
+              {t.energy.sunAutoLabel}
             </Label>
             <Switch
               id="sun-auto"
@@ -376,7 +387,7 @@ export default function EnergyPage() {
                   else applyWeatherForecast();
                 }
               }}
-              aria-label="Sonnenstunden automatisch aus der Wetter-Prognose übernehmen"
+              aria-label={t.energy.sunAutoAria}
             />
           </div>
           <Slider
@@ -390,12 +401,11 @@ export default function EnergyPage() {
               // Manuelles Ziehen schaltet auf manuellen Modus um
               if (sunHoursAuto) setSunHoursAuto(false);
             }}
-            aria-label="Effektive Sonnenstunden pro Tag"
+            aria-label={t.energy.sunSliderAria}
           />
           {!sunHoursAuto && (
             <p className="mt-2 text-xs text-muted-foreground">
-              Manueller Modus: Dein Wert bleibt bestehen und wird nicht von der
-              Prognose überschrieben.
+              {t.energy.manualModeHint}
             </p>
           )}
           <Button
@@ -407,36 +417,36 @@ export default function EnergyPage() {
             disabled={forecastState.status === "loading"}
           >
             {forecastState.status === "loading"
-              ? "Prognose wird geladen …"
+              ? t.energy.forecastLoading
               : forecastState.status === "ok"
-                ? "Prognose aktualisieren"
-                : "Sonnenstunden aus Wetterprognose übernehmen"}
+                ? t.energy.forecastRefresh
+                : t.energy.forecastApply}
           </Button>
           {forecastState.status === "ok" && (
             <p className="mt-2 text-xs text-primary">
-              Übernommen: Ø {forecastState.avgSunHours} h Sonnenschein pro Tag
-              (Prognose für die nächsten {forecastState.days} Tage – Quelle:{" "}
-              {forecastState.source}).
+              {t.energy.forecastOk(
+                forecastState.avgSunHours,
+                forecastState.days,
+                forecastState.sourceSpotName === null
+                  ? t.energy.sourceLocation
+                  : t.energy.sourceSpot(forecastState.sourceSpotName)
+              )}
             </p>
           )}
           {forecastState.status === "error" && (
             <p className="mt-2 text-xs text-destructive">
-              Automatische Prognose nicht verfügbar – erlaube den
-              Standortzugriff, speichere einen Zeltplatz-Favoriten oder setze
-              den Wert manuell.
+              {t.energy.forecastError}
             </p>
           )}
           <p className="mt-2 text-xs text-muted-foreground">
-            Richtwerte Schweiz: Sommer sonnig 5–6 h, wechselhaft 3–4 h, bedeckt
-            1–2 h. Verschattung durch Bäume oder Berge reduziert den Wert
-            deutlich – prüfe den Sonnenverlauf im{" "}
+            {t.energy.guidelinePrefix}
             <a
               href="/sonne"
               className="font-medium text-primary hover:underline"
             >
-              Sonnenstand-Kompass
+              {t.energy.sunCompassLink}
             </a>
-            . Die Rechnung berücksichtigt bereits einen Systemverlust von 30 %.
+            {t.energy.guidelineSuffix}
           </p>
         </CardContent>
       </Card>
@@ -448,62 +458,74 @@ export default function EnergyPage() {
             <div className="mb-3 flex items-center gap-2">
               <Compass className="h-4 w-4 text-primary" aria-hidden="true" />
               <h2 className="font-serif text-base font-semibold">
-                Optimale Panel-Ausrichtung heute
+                {t.energy.alignmentTitle}
               </h2>
             </div>
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="rounded-lg bg-accent/50 py-2.5">
                 <p className="font-serif text-xl font-bold text-primary">
-                  {alignment.azimuth}° {compassDirection(alignment.azimuth)}
+                  {alignment.azimuth}°{" "}
+                  {compassDirection(alignment.azimuth, lang)}
                 </p>
-                <p className="text-xs text-muted-foreground">Ausrichtung</p>
+                <p className="text-xs text-muted-foreground">
+                  {t.energy.alignmentDirection}
+                </p>
               </div>
               <div className="rounded-lg bg-accent/50 py-2.5">
                 <p className="font-serif text-xl font-bold text-primary">
                   {alignment.tilt}°
                 </p>
-                <p className="text-xs text-muted-foreground">Neigung</p>
+                <p className="text-xs text-muted-foreground">
+                  {t.energy.alignmentTilt}
+                </p>
               </div>
               <div className="rounded-lg bg-accent/50 py-2.5">
                 <p className="font-serif text-xl font-bold text-primary">
                   +{alignment.gainVsFlatPercent} %
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  vs. flach gelegt
+                  {t.energy.alignmentVsFlat}
                 </p>
               </div>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              Direkte Sonne heute{" "}
-              {alignment.firstSun &&
-                alignment.lastSun &&
-                `von ${alignment.firstSun.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} bis ${alignment.lastSun.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })}`}{" "}
-              ({alignment.usableSunHours} h).
+              {alignment.firstSun && alignment.lastSun
+                ? t.energy.directSun(
+                    alignment.firstSun.toLocaleTimeString(
+                      LOCALE_TAGS[lang],
+                      timeFormat
+                    ),
+                    alignment.lastSun.toLocaleTimeString(
+                      LOCALE_TAGS[lang],
+                      timeFormat
+                    ),
+                    alignment.usableSunHours
+                  )
+                : t.energy.directSunNoTimes(alignment.usableSunHours)}
               {alignment.shadedHours > 0 && (
                 <>
                   {" "}
-                  {alignment.shadedHours} h sind durch dein Hindernis-Profil aus
-                  dem{" "}
+                  {t.energy.shadedPrefix(alignment.shadedHours)}
                   <a
                     href="/sonne"
                     className="font-medium text-primary hover:underline"
                   >
-                    Sonnen-Kompass
-                  </a>{" "}
-                  verschattet – die Empfehlung rechnet das bereits ein.
+                    {t.energy.shadedLink}
+                  </a>
+                  {t.energy.shadedSuffix}
                 </>
               )}
               {alignment.shadedHours === 0 && obstacles.length === 0 && (
                 <>
                   {" "}
-                  Tipp: Erfasse Bäume oder Berge im{" "}
+                  {t.energy.obstacleTipPrefix}
                   <a
                     href="/sonne"
                     className="font-medium text-primary hover:underline"
                   >
-                    Sonnen-Kompass
+                    {t.energy.shadedLink}
                   </a>
-                  , dann berücksichtigt die Empfehlung auch die Verschattung.
+                  {t.energy.obstacleTipSuffix}
                 </>
               )}
             </p>
@@ -513,7 +535,7 @@ export default function EnergyPage() {
 
       {/* Verbraucher */}
       <h2 className="mb-3 font-serif text-lg font-semibold">
-        Deine Verbraucher
+        {t.energy.consumersTitle}
       </h2>
 
       <form
@@ -524,40 +546,40 @@ export default function EnergyPage() {
           const watts = Number(form.watts);
           const hours = Number(form.hoursPerDay);
           if (!name || !(watts > 0) || !(hours > 0)) {
-            toast.error("Bitte Name, Watt und Stunden angeben");
+            toast.error(t.energy.formError);
             return;
           }
           addMutation.mutate({ name, watts, hoursPerDay: Math.min(24, hours) });
         }}
       >
         <Input
-          placeholder="Verbraucher"
+          placeholder={t.energy.consumerPlaceholder}
           value={form.name}
           onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-          aria-label="Name des Verbrauchers"
+          aria-label={t.energy.consumerNameAria}
         />
         <Input
-          placeholder="Watt"
+          placeholder={t.energy.wattsPlaceholder}
           type="number"
           min="0"
           value={form.watts}
           onChange={e => setForm(f => ({ ...f, watts: e.target.value }))}
-          aria-label="Leistung in Watt"
+          aria-label={t.energy.wattsAria}
         />
         <Input
-          placeholder="h/Tag"
+          placeholder={t.energy.hoursPlaceholder}
           type="number"
           min="0"
           max="24"
           step="0.5"
           value={form.hoursPerDay}
           onChange={e => setForm(f => ({ ...f, hoursPerDay: e.target.value }))}
-          aria-label="Betriebsstunden pro Tag"
+          aria-label={t.energy.hoursAria}
         />
         <Button
           type="submit"
           disabled={addMutation.isPending}
-          aria-label="Verbraucher hinzufügen"
+          aria-label={t.energy.addAria}
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
         </Button>
@@ -566,16 +588,22 @@ export default function EnergyPage() {
       {/* Vorschläge */}
       <div className="mb-4 flex flex-wrap gap-1.5">
         {presetConsumers
-          .filter(p => !consumers.some(c => c.name === p.name))
+          .filter(p => !consumers.some(c => c.name === t.energy.presets[p.key]))
           .map(p => (
             <button
-              key={p.name}
+              key={p.key}
               type="button"
-              onClick={() => addMutation.mutate(p)}
+              onClick={() =>
+                addMutation.mutate({
+                  name: t.energy.presets[p.key],
+                  watts: p.watts,
+                  hoursPerDay: p.hoursPerDay,
+                })
+              }
               className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-              aria-label={`Vorschlag ${p.name} hinzufügen`}
+              aria-label={t.energy.presetAddAria(t.energy.presets[p.key])}
             >
-              + {p.name} ({p.watts} W)
+              + {t.energy.presets[p.key]} ({p.watts} W)
             </button>
           ))}
       </div>
@@ -584,7 +612,7 @@ export default function EnergyPage() {
         <div className="flex justify-center py-8">
           <Loader2
             className="h-6 w-6 animate-spin text-muted-foreground"
-            aria-label="Lädt"
+            aria-label={t.common.loading}
           />
         </div>
       ) : consumers.length > 0 ? (
@@ -606,8 +634,11 @@ export default function EnergyPage() {
                 <div className="flex-1">
                   <p className="text-sm font-semibold">{c.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {c.watts} W · {c.hoursPerDay} h/Tag = {Math.round(dailyWh)}{" "}
-                    Wh
+                    {t.energy.consumerLine(
+                      c.watts,
+                      c.hoursPerDay,
+                      Math.round(dailyWh)
+                    )}
                   </p>
                 </div>
                 <Switch
@@ -615,14 +646,18 @@ export default function EnergyPage() {
                   onCheckedChange={enabled =>
                     updateMutation.mutate({ id: c.id, enabled })
                   }
-                  aria-label={`${c.name} ${c.enabled ? "deaktivieren" : "aktivieren"}`}
+                  aria-label={
+                    c.enabled
+                      ? t.energy.disableAria(c.name)
+                      : t.energy.enableAria(c.name)
+                  }
                 />
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
                   onClick={() => removeMutation.mutate({ id: c.id })}
-                  aria-label={`${c.name} löschen`}
+                  aria-label={t.energy.deleteAria(c.name)}
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 </Button>
@@ -632,8 +667,7 @@ export default function EnergyPage() {
         </ul>
       ) : (
         <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          Noch keine Verbraucher erfasst – nutze die Vorschläge oben oder trage
-          eigene Geräte ein.
+          {t.energy.empty}
         </p>
       )}
     </div>

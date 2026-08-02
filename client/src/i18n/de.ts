@@ -545,6 +545,283 @@ export const de = {
     calibrationHint:
       "«Hier nullen» gleicht eine schiefe Handy-Hülle oder Tischplatte aus: Lege das Handy auf eine Fläche, von der du weisst, dass sie eben ist, und nulle dort. Für den Wohnwagen: Handy auf den Boden oder eine Arbeitsfläche im Innern legen und die tiefe Seite mit Keilen unterlegen, bis die Blase in der Mitte ist.",
   },
+  sos: {
+    title: "SOS & Notfall-Dashboard",
+    subtitle:
+      "Dein Standort und alle wichtigen Notfallnummern – für den Fall der Fälle.",
+    geoUnsupported: "Dieses Gerät unterstützt keine Standortermittlung.",
+    geoDenied:
+      "Standortzugriff verweigert. Bitte in den Browser-Einstellungen erlauben.",
+    geoFailed:
+      "Standort konnte nicht ermittelt werden. Bitte erneut versuchen.",
+    coordsCopied: "Koordinaten kopiert",
+    copyFailed: "Kopieren nicht möglich",
+    locationTitle: "Dein Standort",
+    refresh: "Aktualisieren",
+    refreshAria: "Standort aktualisieren",
+    locating: "Standort wird ermittelt …",
+    decimalLabel: "Dezimalgrad (WGS84) – für Rettungsdienste",
+    copyDecimalAria: "Koordinaten in Dezimalgrad kopieren",
+    dmsLabel: "Grad / Minuten / Sekunden",
+    lv95Label: "Schweizer Koordinaten (LV95)",
+    outsideSwitzerland: "Ausserhalb der Schweiz",
+    accuracy: (m: number) => `Genauigkeit: ±${m} m`,
+    altitude: (m: number) => ` · Höhe: ${m} m ü. M.`,
+    asOf: (time: string) => ` · Stand: ${time}`,
+    numbersTitle: "Notfallnummern",
+    callAria: (label: string) => `${label} anrufen`,
+    regaTitle: "Rega-Alarmierung mit Standortübermittlung",
+    regaText:
+      "Die offizielle Rega-App übermittelt beim Alarmieren automatisch deine Position an die Einsatzzentrale – das beschleunigt die Rettung in den Bergen erheblich. Wir empfehlen, sie zusätzlich zu installieren. Alternativ kannst du beim Anruf auf 1414 die oben angezeigten Koordinaten durchgeben.",
+    regaLinkAria: "Offizielle Rega-App-Seite öffnen (externer Link)",
+    regaLink: "Zur offiziellen Rega-App",
+    guideTitle: "So setzt du den Notruf richtig ab",
+  },
+  energy: {
+    title: "Energie-Budget-Rechner",
+    subtitleLoggedOut:
+      "Wie lange reicht deine Powerstation? Verbraucher erfassen und Autarkie berechnen.",
+    loginFeature: "deine Energie-Verbraucher",
+    subtitle:
+      "Verbraucher, Solarertrag und Akkukapazität kombiniert: So lange kannst du autark stehen.",
+    saveFailed: "Verbraucher konnte nicht gespeichert werden",
+    sourceSpot: (name: string) => `Zeltplatz «${name}»`,
+    sourceLocation: "deinem Standort",
+    autonomyUnlimited: "Unbegrenzt – Solar deckt den Verbrauch",
+    autonomyMoreThan14: "> 14 Tage",
+    autonomyDays: (d: string) => `${d} Tage`,
+    autonomyLabel: "Autarkie-Dauer",
+    consumptionPerDay: "Verbrauch / Tag",
+    solarPerDay: "Solarertrag / Tag",
+    balancePerDay: "Bilanz / Tag",
+    batteryLabel: "Akkukapazität (Wh)",
+    batteryHint: "Standard: DJI Power 1000 mit 1024 Wh",
+    solarLabel: "Solarpanels (W gesamt)",
+    solarHint: "z. B. 2 × 200-W-Panels = 400",
+    sunHoursLabel: "Effektive Sonnenstunden pro Tag",
+    sunAutoLabel: "Automatisch aus Wetter-Prognose übernehmen",
+    sunAutoAria: "Sonnenstunden automatisch aus der Wetter-Prognose übernehmen",
+    sunSliderAria: "Effektive Sonnenstunden pro Tag",
+    manualModeHint:
+      "Manueller Modus: Dein Wert bleibt bestehen und wird nicht von der Prognose überschrieben.",
+    forecastLoading: "Prognose wird geladen …",
+    forecastRefresh: "Prognose aktualisieren",
+    forecastApply: "Sonnenstunden aus Wetterprognose übernehmen",
+    forecastOk: (avg: number, days: number, source: string) =>
+      `Übernommen: Ø ${avg} h Sonnenschein pro Tag (Prognose für die nächsten ${days} Tage – Quelle: ${source}).`,
+    forecastError:
+      "Automatische Prognose nicht verfügbar – erlaube den Standortzugriff, speichere einen Zeltplatz-Favoriten oder setze den Wert manuell.",
+    guidelinePrefix:
+      "Richtwerte Schweiz: Sommer sonnig 5–6 h, wechselhaft 3–4 h, bedeckt 1–2 h. Verschattung durch Bäume oder Berge reduziert den Wert deutlich – prüfe den Sonnenverlauf im ",
+    sunCompassLink: "Sonnenstand-Kompass",
+    guidelineSuffix:
+      ". Die Rechnung berücksichtigt bereits einen Systemverlust von 30 %.",
+    alignmentTitle: "Optimale Panel-Ausrichtung heute",
+    alignmentDirection: "Ausrichtung",
+    alignmentTilt: "Neigung",
+    alignmentVsFlat: "vs. flach gelegt",
+    directSun: (from: string, to: string, h: number) =>
+      `Direkte Sonne heute von ${from} bis ${to} (${h} h).`,
+    directSunNoTimes: (h: number) => `Direkte Sonne heute (${h} h).`,
+    shadedPrefix: (h: number) =>
+      `${h} h sind durch dein Hindernis-Profil aus dem `,
+    shadedLink: "Sonnen-Kompass",
+    shadedSuffix: " verschattet – die Empfehlung rechnet das bereits ein.",
+    obstacleTipPrefix: "Tipp: Erfasse Bäume oder Berge im ",
+    obstacleTipSuffix:
+      ", dann berücksichtigt die Empfehlung auch die Verschattung.",
+    consumersTitle: "Deine Verbraucher",
+    formError: "Bitte Name, Watt und Stunden angeben",
+    consumerPlaceholder: "Verbraucher",
+    consumerNameAria: "Name des Verbrauchers",
+    wattsPlaceholder: "Watt",
+    wattsAria: "Leistung in Watt",
+    hoursPlaceholder: "h/Tag",
+    hoursAria: "Betriebsstunden pro Tag",
+    addAria: "Verbraucher hinzufügen",
+    presetAddAria: (name: string) => `Vorschlag ${name} hinzufügen`,
+    consumerLine: (w: number, h: number, wh: number) =>
+      `${w} W · ${h} h/Tag = ${wh} Wh`,
+    enableAria: (name: string) => `${name} aktivieren`,
+    disableAria: (name: string) => `${name} deaktivieren`,
+    deleteAria: (name: string) => `${name} löschen`,
+    empty:
+      "Noch keine Verbraucher erfasst – nutze die Vorschläge oben oder trage eigene Geräte ein.",
+    presets: {
+      coolbox: "Kompressor-Kühlbox",
+      laptop: "Laptop",
+      drone: "Drohnen-Akku laden",
+      phone: "Smartphone laden",
+      led: "LED-Beleuchtung",
+      camera: "Kamera-Akkus",
+    },
+  },
+  drying: {
+    title: "Trockenzeiten",
+    subtitle:
+      "Wird die Wäsche an der Leine bis Sonnenuntergang trocken? Berechnet aus Temperatur, Luftfeuchtigkeit und Wind.",
+    myLocation: "Mein Standort",
+    conditionsTitle: "Aktuelle Bedingungen",
+    tempLabel: "Temp. (°C)",
+    humidityLabel: "Feuchte (%)",
+    windLabel: "Wind (km/h)",
+    loadingWeather: "Wetter wird geladen …",
+    loadWeather: "Aktuelles Wetter vom Standort übernehmen",
+    weatherOk: (time: string) =>
+      `Wetter übernommen – Sonnenuntergang heute um ${time} Uhr.`,
+    forecastNote:
+      "Die Schätzung rechnet mit dem stündlichen Prognose-Verlauf (genauer als eine Momentaufnahme).",
+    weatherError:
+      "Wetter konnte nicht geladen werden – trage die Werte von Hand ein (Sonnenuntergangs-Empfehlung braucht die Standortfreigabe).",
+    lineTitle: "Was hängt an der Leine?",
+    reminderTitle: "Wäsche-Erinnerung",
+    reminderText:
+      "Erhalte eine Warnung, bevor Regen einsetzt oder die Sonne untergeht – damit du die Wäsche rechtzeitig reinholen kannst. Die Erinnerung funktioniert, solange die App geöffnet ist (auch im Hintergrund-Tab).",
+    leadLabel: "Vorlaufzeit:",
+    leadGroupAria: "Vorlaufzeit wählen",
+    minutesShort: (n: number) => `${n} Min.`,
+    reminderStop: "Erinnerung stoppen",
+    reminderStart: "Erinnerung aktivieren",
+    reminderActive: (info: string) => `Aktiv: ${info}`,
+    rainWarnTitle: "Regen im Anzug!",
+    rainWarnBody: (min: number) =>
+      `In ca. ${min} Minuten beginnt es zu regnen – hol die Wäsche rein.`,
+    sunsetWarnTitle: "Sonne geht bald unter",
+    sunsetWarnBody: (min: number) =>
+      `Noch ca. ${min} Minuten bis Sonnenuntergang – Wäsche vor dem Abendtau reinholen.`,
+    scheduledRain: (time: string) => `Regen-Warnung um ${time} Uhr`,
+    scheduledSunset: (time: string) =>
+      `Sonnenuntergangs-Erinnerung um ${time} Uhr`,
+    noReminderTitle: "Keine Erinnerung nötig",
+    noReminderBody:
+      "Weder Regen noch Sonnenuntergang stehen in nächster Zeit bevor.",
+    over24: "> 24 Std.",
+    removeAria: (label: string) => `${label} entfernen`,
+    dryAtPrefix: "Voraussichtlich trocken um ",
+    dryAtSuffix: " Uhr",
+    tomorrowSuffix: " (morgen)",
+    rainFromPrefix: "Achtung: Ab ",
+    rainFromSuffix: " Uhr",
+    rainAnnounced: " ist Regen angesagt",
+    rainProbability: (p: number) => ` (${p} %)`,
+    rainAction: " – vorher abnehmen oder unters Vordach hängen!",
+    ownMaterialTitle: "Eigenes Material hinzufügen",
+    labelLabel: "Bezeichnung",
+    labelPlaceholder: "z. B. Wollpullover",
+    baseHoursLabel: "Basis (Std.)",
+    addButton: "Hinzufügen",
+    ownMaterialNote: "Eigenes Material",
+    ownMaterialHint:
+      "Basis-Trockenzeit = wie lange das Teil bei mildem Sommerwetter (20 °C, 60 % Feuchte, leichter Wind) zum Trocknen braucht. Deine Materialien bleiben auf diesem Gerät gespeichert.",
+    footnote:
+      "Schätzwerte für gut ausgewrungene, frei hängende Sachen. Direkte Sonne beschleunigt das Trocknen zusätzlich, Schatten und Windstille verlangsamen es. Bei Regen gilt: alles unters Vordach.",
+  },
+  quiet: {
+    title: "Camp-Quiet-Timer",
+    subtitle:
+      "Behalte die Lautstärke im Blick, wenn auf dem Campingplatz Nachtruhe gilt – dezent und komplett offline.",
+    micError:
+      "Mikrofon-Zugriff nicht möglich. Erlaube den Zugriff in den Browser-Einstellungen – die Messung bleibt komplett auf deinem Gerät.",
+    quietActive: (from: string, to: string) =>
+      `Nachtruhe aktiv (${from}–${to} Uhr) – der Timer erinnert dich, wenn es zu laut wird.`,
+    quietInactive: (from: string) =>
+      `Aktuell keine Nachtruhe. Sie beginnt um ${from} Uhr.`,
+    shhTitle: "Psst – Nachtruhe!",
+    shhBody:
+      "Die Gespräche sind gerade lauter als dein eingestellter Richtwert. Die Zelt-Nachbarn danken für etwas leisere Töne.",
+    vibrateNote:
+      "Auf Android-Geräten vibriert das Handy zusätzlich (iPhones unterstützen Web-Vibration leider nicht).",
+    levelTitle: "Lautstärke-Pegel",
+    currentLabel: "Aktuell:",
+    thresholdLabel: "Schwelle:",
+    peakLabel: "Spitze:",
+    stopMeasuring: "Messung stoppen",
+    startMeasuring: "Messung starten",
+    privacyNote:
+      "Der Ton wird nur live analysiert – nichts wird aufgenommen, gespeichert oder gesendet. Der Bildschirm muss dafür an bleiben.",
+    protocolTitle: "Nacht-Protokoll",
+    clearAria: "Protokoll löschen",
+    clear: "Löschen",
+    tooltipValue: (v: number) => `Pegel ${v}`,
+    tooltipName: "Maximum",
+    tooltipLabel: (label: string) => `${label} Uhr`,
+    protocolNote: (n: number) =>
+      `Höchster Pegel pro Minute (${n} Min. aufgezeichnet, max. 8 h). Die gestrichelte Linie ist deine Erinnerungs-Schwelle. Das Protokoll bleibt bis zum Verlassen der Seite erhalten – ideal für den Rückblick am Morgen.`,
+    settingsTitle: "Nachtruhe-Einstellungen",
+    fromLabel: "Nachtruhe ab",
+    toLabel: "Nachtruhe bis",
+    thresholdSetting: "Erinnerungs-Schwelle",
+    thresholdAria: "Erinnerungs-Schwelle für die Lautstärke",
+    tip: "Tipp: Starte die Messung bei normaler Gesprächslautstärke und stelle die Schwelle knapp darüber ein. Übliche Nachtruhe auf Schweizer Campingplätzen: 22:00–07:00 Uhr.",
+  },
+  lawn: {
+    title: "Rasenschoner",
+    subtitle:
+      "Wie lange darf das Zelt auf dem Rasen stehen, bevor das Gras Schaden nimmt?",
+    setupTitle: "Dein Setup",
+    loadingWeather: "Wetter wird geladen …",
+    loadWeather: "Temperatur & Feuchte vom Wetter übernehmen",
+    weatherNoteSoil: (temp: number, soil: string, moisture: string) =>
+      `Tagesmaximum ${temp} °C, Bodenfeuchte ${soil} % → Boden ${moisture}`,
+    weatherNoteRain: (temp: number, rain: string, moisture: string) =>
+      `Tagesmaximum ${temp} °C, Niederschlag letzte 2 Tage ${rain} mm → Boden ${moisture} (abgeleitet)`,
+    moistureWet: "nass",
+    moistureNormal: "normal",
+    moistureDry: "trocken",
+    fromForecast: (note: string) =>
+      `Aus Prognose übernommen: ${note}. Manuell anpassbar.`,
+    weatherError:
+      "Wetter nicht verfügbar – stelle Temperatur und Feuchte von Hand ein.",
+    floorLabel: "Zeltboden",
+    floorMesh: "Mesh / ohne Boden",
+    floorMeshHint: "Licht und Luft kommen durch",
+    floorStandard: "Standard-Zeltboden",
+    floorStandardHint: "übliche Bodenwanne",
+    floorFootprint: "Boden + Footprint",
+    floorFootprintHint: "dichtet vollständig ab",
+    grassLabel: "Rasen-Zustand",
+    grassRobust: "Robust",
+    grassRobustHint: "Sport-/Campingwiese",
+    grassNormal: "Normal",
+    grassNormalHint: "gewöhnliche Wiese",
+    grassDelicate: "Empfindlich",
+    grassDelicateHint: "Zierrasen, frisch gesät",
+    sunLabel: "Sonneneinstrahlung am Stellplatz",
+    sunShade: "Schattig",
+    sunPartial: "Halbschatten",
+    sunFull: "Pralle Sonne",
+    moistureLabel: "Bodenfeuchte",
+    moistureOptDry: "Trocken",
+    moistureOptNormal: "Normal",
+    moistureOptWet: "Nass",
+    tempLabel: "Tagestemperatur",
+    tempAria: "Tagestemperatur in Grad Celsius",
+    plannedLabel: "Geplante Standzeit",
+    plannedAria: "Geplante Standzeit in Tagen",
+    days: (n: number) => `${n} Tag${n > 1 ? "e" : ""}`,
+    verdictSafe:
+      "Unbedenklich – der Rasen erholt sich innert weniger Tage von selbst.",
+    verdictCaution:
+      "Vorsicht – das Gras wird vergilben. Es erholt sich meist in 1–2 Wochen, plane das Umstellen ein.",
+    verdictDamage:
+      "Bleibende Schäden wahrscheinlich – bei dieser Standzeit stirbt das Gras darunter ab. Stelle das Zelt zwingend um.",
+    statYellowing: "bis erste Vergilbung",
+    statDamage: "bis bleibende Schäden",
+    statMove: "spätestens dann umstellen",
+    tipsTitle: "Tipps zum Rasenschonen",
+    tip1Title: "Zelt regelmässig umstellen:",
+    tip1Text:
+      "Schon ein Versetzen um eine Zeltbreite gibt dem Gras Licht und Luft zurück.",
+    tip2Title: "Zelt tagsüber lüften:",
+    tip2Text:
+      "Boden anheben oder Apsiden öffnen, damit Hitze und Feuchtigkeit entweichen.",
+    tip3Title: "Vergilbtes Gras:",
+    tip3Text:
+      "erholt sich meist in 1–2 Wochen von selbst – braunes, matschiges Gras braucht oft eine Nachsaat.",
+    tip4Title: "Heisse Tage:",
+    tip4Text:
+      "Bei über 30 °C in praller Sonne leidet der Rasen unter dem Zeltboden schon nach einem Tag.",
+  },
   notFound: {
     heading: "Seite nicht gefunden",
     text1: "Diese Seite gibt es leider nicht.",

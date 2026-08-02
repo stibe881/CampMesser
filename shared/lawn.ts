@@ -8,6 +8,8 @@
  * Zeltboden wirkt zusätzlich wie ein Treibhaus.
  */
 
+import { l4, pick, type Language } from "./i18n";
+
 export type FloorType = "mesh" | "standard" | "footprint";
 export type GrassCondition = "robust" | "normal" | "delicate";
 export type SunExposure = "shade" | "partial" | "full";
@@ -111,13 +113,20 @@ export function estimateLawnTolerance(input: LawnInput): LawnResult {
 }
 
 /** Stunden in lesbaren Text umwandeln, z. B. 60 → "2 Tage 12 Std." */
-export function formatHours(hours: number): string {
-  if (hours < 24) return `${Math.round(hours)} Std.`;
+export function formatHours(hours: number, lang: Language = "de"): string {
+  const hourUnit = pick(l4("Std.", "h", "h", "h"), lang);
+  if (hours < 24) return `${Math.round(hours)} ${hourUnit}`;
   const days = Math.floor(hours / 24);
   const rest = Math.round(hours % 24);
+  const dayWord = pick(
+    days > 1
+      ? l4("Tage", "jours", "giorni", "days")
+      : l4("Tag", "jour", "giorno", "day"),
+    lang
+  );
   return rest > 0
-    ? `${days} Tag${days > 1 ? "e" : ""} ${rest} Std.`
-    : `${days} Tag${days > 1 ? "e" : ""}`;
+    ? `${days} ${dayWord} ${rest} ${hourUnit}`
+    : `${days} ${dayWord}`;
 }
 
 /**

@@ -31,9 +31,11 @@ import {
   type DryingItem,
   type HourlyConditions,
 } from "@shared/drying";
+import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { getSunTimes } from "@/lib/sun";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 
@@ -58,6 +60,7 @@ function loadCustomItems(): DryingItem[] {
 }
 
 export default function DryingPage() {
+  const { lang, t } = useI18n();
   const [conditions, setConditions] = useState<DryingConditions>({
     temperature: 20,
     humidity: 60,
@@ -82,6 +85,13 @@ export default function DryingPage() {
   const { data: spots } = trpc.spots.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+
+  const timeFormat: Intl.DateTimeFormatOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  const formatTime = (d: Date) =>
+    d.toLocaleTimeString(LOCALE_TAGS[lang], timeFormat);
 
   // Geräte-Sync: eigene Materialien vom Konto übernehmen bzw. Änderungen hochladen
   const customItemsSync = useSyncedSetting<DryingItem[]>(
@@ -116,7 +126,7 @@ export default function DryingPage() {
       id: `custom-${Date.now()}`,
       label,
       baseHours: hours,
-      note: "Eigenes Material",
+      note: "",
     };
     saveCustomItems([...customItems, item]);
     setNewLabel("");
@@ -149,8 +159,8 @@ export default function DryingPage() {
       // Stündlicher Verlauf für Trocknungs-Schätzung + Regen-Warnung
       if (json.hourly?.time && Array.isArray(json.hourly.time)) {
         const hours: HourlyConditions[] = json.hourly.time.map(
-          (t: string, i: number) => ({
-            time: new Date(t),
+          (iso: string, i: number) => ({
+            time: new Date(iso),
             temperature: json.hourly.temperature_2m?.[i] ?? cur.temperature_2m,
             humidity:
               json.hourly.relative_humidity_2m?.[i] ?? cur.relative_humidity_2m,
@@ -218,14 +228,14 @@ export default function DryingPage() {
         } else {
           hours = estimateDryingTime(item.baseHours, conditions).hours;
         }
-        const verdict = sunset ? sunsetVerdict(hours, now, sunset) : null;
+        const verdict = sunset ? sunsetVerdict(hours, now, sunset, lang) : null;
         const rain =
           hourly && hourly.length > 0
             ? rainBeforeDry(hourly, now, dryAt)
             : null;
         return { item, hours, dryAt, verdict, rain };
       }),
-    [conditions, sunset, now, hourly, customItems]
+    [conditions, sunset, now, hourly, customItems, lang]
   );
 
   /** Frühester Regen-Zeitpunkt über alle Teile, die noch nicht trocken sind. */
@@ -240,7 +250,7 @@ export default function DryingPage() {
   }, [results]);
 
   const clearReminderTimers = () => {
-    for (const t of reminderTimers.current) window.clearTimeout(t);
+    for (const timer of reminderTimers.current) window.clearTimeout(timer);
     reminderTimers.current = [];
   };
 
@@ -278,15 +288,10 @@ export default function DryingPage() {
       if (fireAt > nowMs) {
         reminderTimers.current.push(
           window.setTimeout(() => {
-            notify(
-              "Regen im Anzug!",
-              `In ca. ${leadMinutes} Minuten beginnt es zu regnen – hol die Wäsche rein.`
-            );
+            notify(t.drying.rainWarnTitle, t.drying.rainWarnBody(leadMinutes));
           }, fireAt - nowMs)
         );
-        scheduled.push(
-          `Regen-Warnung um ${new Date(fireAt).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} Uhr`
-        );
+        scheduled.push(t.drying.scheduledRain(formatTime(new Date(fireAt))));
       }
     }
     if (sunset) {
@@ -295,20 +300,17 @@ export default function DryingPage() {
         reminderTimers.current.push(
           window.setTimeout(() => {
             notify(
-              "Sonne geht bald unter",
-              `Noch ca. ${leadMinutes} Minuten bis Sonnenuntergang – Wäsche vor dem Abendtau reinholen.`
+              t.drying.sunsetWarnTitle,
+              t.drying.sunsetWarnBody(leadMinutes)
             );
           }, fireAt - nowMs)
         );
-        scheduled.push(
-          `Sonnenuntergangs-Erinnerung um ${new Date(fireAt).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} Uhr`
-        );
+        scheduled.push(t.drying.scheduledSunset(formatTime(new Date(fireAt))));
       }
     }
     if (scheduled.length === 0) {
-      toast.info("Keine Erinnerung nötig", {
-        description:
-          "Weder Regen noch Sonnenuntergang stehen in nächster Zeit bevor.",
+      toast.info(t.drying.noReminderTitle, {
+        description: t.drying.noReminderBody,
       });
       return;
     }
@@ -321,10 +323,7 @@ export default function DryingPage() {
 
   return (
     <div className="container max-w-3xl py-6">
-      <PageHeader
-        title="Trockenzeiten"
-        subtitle="Wird die Wäsche an der Leine bis Sonnenuntergang trocken? Berechnet aus Temperatur, Luftfeuchtigkeit und Wind."
-      />
+      <PageHeader title={t.drying.title} subtitle={t.drying.subtitle} />
 
       {/* Standort-Auswahl: eigener Standort oder gespeicherte Zeltplätze */}
       {isAuthenticated && spots && spots.length > 0 && (
@@ -337,7 +336,7 @@ export default function DryingPage() {
             onClick={() => setSelectedSpotId(null)}
           >
             <LocateFixed className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />{" "}
-            Mein Standort
+            {t.drying.myLocation}
           </Button>
           {spots.map(spot => (
             <Button
@@ -359,7 +358,7 @@ export default function DryingPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <CloudSun className="h-4 w-4 text-primary" aria-hidden="true" />
-            Aktuelle Bedingungen
+            {t.drying.conditionsTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -369,8 +368,8 @@ export default function DryingPage() {
                 htmlFor="temp"
                 className="mb-1.5 flex items-center gap-1 text-xs"
               >
-                <Thermometer className="h-3.5 w-3.5" aria-hidden="true" /> Temp.
-                (°C)
+                <Thermometer className="h-3.5 w-3.5" aria-hidden="true" />{" "}
+                {t.drying.tempLabel}
               </Label>
               <Input
                 id="temp"
@@ -384,8 +383,8 @@ export default function DryingPage() {
                 htmlFor="hum"
                 className="mb-1.5 flex items-center gap-1 text-xs"
               >
-                <Droplets className="h-3.5 w-3.5" aria-hidden="true" /> Feuchte
-                (%)
+                <Droplets className="h-3.5 w-3.5" aria-hidden="true" />{" "}
+                {t.drying.humidityLabel}
               </Label>
               <Input
                 id="hum"
@@ -399,7 +398,8 @@ export default function DryingPage() {
                 htmlFor="wind"
                 className="mb-1.5 flex items-center gap-1 text-xs"
               >
-                <Wind className="h-3.5 w-3.5" aria-hidden="true" /> Wind (km/h)
+                <Wind className="h-3.5 w-3.5" aria-hidden="true" />{" "}
+                {t.drying.windLabel}
               </Label>
               <Input
                 id="wind"
@@ -425,30 +425,18 @@ export default function DryingPage() {
               aria-hidden="true"
             />
             {weather.status === "loading"
-              ? "Wetter wird geladen …"
-              : "Aktuelles Wetter vom Standort übernehmen"}
+              ? t.drying.loadingWeather
+              : t.drying.loadWeather}
           </Button>
           {weather.status === "ok" && sunset && (
             <p className="mt-2 text-xs text-primary">
-              Wetter übernommen – Sonnenuntergang heute um{" "}
-              {sunset.toLocaleTimeString("de-CH", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}{" "}
-              Uhr.
-              {hourly && hourly.length > 0 && (
-                <>
-                  {" "}
-                  Die Schätzung rechnet mit dem stündlichen Prognose-Verlauf
-                  (genauer als eine Momentaufnahme).
-                </>
-              )}
+              {t.drying.weatherOk(formatTime(sunset))}
+              {hourly && hourly.length > 0 && <> {t.drying.forecastNote}</>}
             </p>
           )}
           {weather.status === "error" && (
             <p className="mt-2 text-xs text-destructive">
-              Wetter konnte nicht geladen werden – trage die Werte von Hand ein
-              (Sonnenuntergangs- Empfehlung braucht die Standortfreigabe).
+              {t.drying.weatherError}
             </p>
           )}
         </CardContent>
@@ -456,30 +444,27 @@ export default function DryingPage() {
 
       <h2 className="mb-3 flex items-center gap-2 font-serif text-lg font-semibold">
         <Shirt className="h-4 w-4 text-primary" aria-hidden="true" />
-        Was hängt an der Leine?
+        {t.drying.lineTitle}
       </h2>
       <Card className="mb-5">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <BellRing className="h-4 w-4 text-primary" aria-hidden="true" />
-            Wäsche-Erinnerung
+            {t.drying.reminderTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="mb-3 text-sm text-muted-foreground">
-            Erhalte eine Warnung, bevor Regen einsetzt oder die Sonne untergeht
-            – damit du die Wäsche rechtzeitig reinholen kannst. Die Erinnerung
-            funktioniert, solange die App geöffnet ist (auch im
-            Hintergrund-Tab).
+            {t.drying.reminderText}
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <Label htmlFor="lead" className="text-xs">
-              Vorlaufzeit:
+              {t.drying.leadLabel}
             </Label>
             <div
               className="flex gap-1.5"
               role="group"
-              aria-label="Vorlaufzeit wählen"
+              aria-label={t.drying.leadGroupAria}
             >
               {[15, 30, 60].map(min => (
                 <Button
@@ -491,7 +476,7 @@ export default function DryingPage() {
                   disabled={reminderOn}
                   onClick={() => setLeadMinutes(min)}
                 >
-                  {min} Min.
+                  {t.drying.minutesShort(min)}
                 </Button>
               ))}
             </div>
@@ -503,12 +488,12 @@ export default function DryingPage() {
               onClick={() => void toggleReminder()}
             >
               <BellRing className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-              {reminderOn ? "Erinnerung stoppen" : "Erinnerung aktivieren"}
+              {reminderOn ? t.drying.reminderStop : t.drying.reminderStart}
             </Button>
           </div>
           {reminderOn && reminderInfo && (
             <p className="mt-2.5 rounded-lg bg-accent px-3 py-2 text-xs text-accent-foreground">
-              Aktiv: {reminderInfo}
+              {t.drying.reminderActive(reminderInfo)}
             </p>
           )}
         </CardContent>
@@ -521,12 +506,16 @@ export default function DryingPage() {
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-semibold">{item.label}</p>
-                <p className="text-xs text-muted-foreground">{item.note}</p>
+                <p className="font-semibold">{pick(item.label, lang)}</p>
+                <p className="text-xs text-muted-foreground">
+                  {item.id.startsWith("custom-")
+                    ? t.drying.ownMaterialNote
+                    : pick(item.note, lang)}
+                </p>
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
                 <Badge variant="outline" className="font-mono">
-                  {hours >= 48 ? "> 24 Std." : formatHours(hours)}
+                  {hours >= 48 ? t.drying.over24 : formatHours(hours, lang)}
                 </Badge>
                 {item.id.startsWith("custom-") && (
                   <Button
@@ -537,7 +526,7 @@ export default function DryingPage() {
                     onClick={() =>
                       saveCustomItems(customItems.filter(c => c.id !== item.id))
                     }
-                    aria-label={`${item.label} entfernen`}
+                    aria-label={t.drying.removeAria(pick(item.label, lang))}
                   >
                     <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                   </Button>
@@ -546,15 +535,12 @@ export default function DryingPage() {
             </div>
             {dryAt && (
               <p className="mt-1.5 text-xs text-muted-foreground">
-                Voraussichtlich trocken um{" "}
+                {t.drying.dryAtPrefix}
                 <span className="font-mono font-semibold">
-                  {dryAt.toLocaleTimeString("de-CH", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>{" "}
-                Uhr
-                {dryAt.getDate() !== now.getDate() && " (morgen)"}.
+                  {formatTime(dryAt)}
+                </span>
+                {t.drying.dryAtSuffix}
+                {dryAt.getDate() !== now.getDate() && t.drying.tomorrowSuffix}.
               </p>
             )}
             {rain && (
@@ -564,17 +550,17 @@ export default function DryingPage() {
                   aria-hidden="true"
                 />
                 <span>
-                  Achtung: Ab{" "}
+                  {t.drying.rainFromPrefix}
                   <span className="font-mono font-semibold">
-                    {rain.rainAt.toLocaleTimeString("de-CH", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>{" "}
-                  Uhr{rain.rainAt.getDate() !== now.getDate() && " (morgen)"}{" "}
-                  ist Regen angesagt
-                  {rain.probability !== null && ` (${rain.probability} %)`} –
-                  vorher abnehmen oder unters Vordach hängen!
+                    {formatTime(rain.rainAt)}
+                  </span>
+                  {t.drying.rainFromSuffix}
+                  {rain.rainAt.getDate() !== now.getDate() &&
+                    t.drying.tomorrowSuffix}
+                  {t.drying.rainAnnounced}
+                  {rain.probability !== null &&
+                    t.drying.rainProbability(rain.probability)}
+                  {t.drying.rainAction}
                 </span>
               </p>
             )}
@@ -599,25 +585,25 @@ export default function DryingPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Plus className="h-4 w-4 text-primary" aria-hidden="true" />
-            Eigenes Material hinzufügen
+            {t.drying.ownMaterialTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-2">
             <div className="flex-1">
               <Label htmlFor="new-label" className="mb-1.5 block text-xs">
-                Bezeichnung
+                {t.drying.labelLabel}
               </Label>
               <Input
                 id="new-label"
-                placeholder="z. B. Wollpullover"
+                placeholder={t.drying.labelPlaceholder}
                 value={newLabel}
                 onChange={e => setNewLabel(e.target.value)}
               />
             </div>
             <div className="w-28">
               <Label htmlFor="new-hours" className="mb-1.5 block text-xs">
-                Basis (Std.)
+                {t.drying.baseHoursLabel}
               </Label>
               <Input
                 id="new-hours"
@@ -637,21 +623,15 @@ export default function DryingPage() {
             disabled={!newLabel.trim() || !newHours.trim()}
           >
             <Plus className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />{" "}
-            Hinzufügen
+            {t.drying.addButton}
           </Button>
           <p className="mt-2 text-xs text-muted-foreground">
-            Basis-Trockenzeit = wie lange das Teil bei mildem Sommerwetter (20
-            °C, 60 % Feuchte, leichter Wind) zum Trocknen braucht. Deine
-            Materialien bleiben auf diesem Gerät gespeichert.
+            {t.drying.ownMaterialHint}
           </p>
         </CardContent>
       </Card>
 
-      <p className="mt-4 text-xs text-muted-foreground">
-        Schätzwerte für gut ausgewrungene, frei hängende Sachen. Direkte Sonne
-        beschleunigt das Trocknen zusätzlich, Schatten und Windstille
-        verlangsamen es. Bei Regen gilt: alles unters Vordach.
-      </p>
+      <p className="mt-4 text-xs text-muted-foreground">{t.drying.footnote}</p>
     </div>
   );
 }
