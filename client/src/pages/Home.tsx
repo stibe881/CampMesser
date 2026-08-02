@@ -69,6 +69,7 @@ import {
   type TentFinderTarget,
 } from "@/lib/tentFinderTargets";
 import { currentTripDay, daysUntilTrip, isUpcomingTrip } from "@shared/trips";
+import { firstNameOf, greetingKey } from "@shared/greeting";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import {
@@ -533,6 +534,11 @@ function NextTripWidget() {
                 ? t.home.tripStartsTomorrow
                 : t.home.tripDaysLeft(days)}
           </span>
+          {next.arrivalTime && (
+            <span className="text-xs text-muted-foreground">
+              {t.home.tripArrivalAt(next.arrivalTime)}
+            </span>
+          )}
         </span>
         {pct !== null && packed ? (
           <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -951,6 +957,12 @@ function RecentModules({ hidden }: { hidden: string[] }) {
 
 export default function Home() {
   const { lang, t } = useI18n();
+  const { user } = useAuth();
+  // Persönliche Begrüssung nach Tageszeit; ohne Namen bleibt der Hero-Kicker
+  const greetFirstName = firstNameOf(user?.name);
+  const greeting = greetFirstName
+    ? t.home.greeting[greetingKey(new Date().getHours())](greetFirstName)
+    : null;
   const homeWeather = useHomeWeather(lang);
   const [sunTimes, setSunTimes] = useState<{
     sunrise: Date;
@@ -1076,7 +1088,7 @@ export default function Home() {
         />
         <div className="container relative py-16 md:py-24">
           <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-white/90 drop-shadow">
-            {t.home.heroKicker}
+            {greeting ?? t.home.heroKicker}
           </p>
           <h1 className="max-w-xl text-3xl font-bold leading-tight drop-shadow-md md:text-5xl">
             {t.home.heroTitle1}

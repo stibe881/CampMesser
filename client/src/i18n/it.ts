@@ -50,6 +50,12 @@ export const it: Translation = {
     heroImageAlt:
       "Tenda con pannelli solari e falò davanti alle Alpi svizzere al tramonto",
     heroKicker: "Il tuo coltellino svizzero per il campeggio in tenda",
+    greeting: {
+      morning: (name: string) => `Buongiorno, ${name}`,
+      day: (name: string) => `Buongiorno, ${name}`,
+      evening: (name: string) => `Buonasera, ${name}`,
+    },
+    tripArrivalAt: (time: string) => `Arrivo ${time}`,
     heroTitle1: "Tutto per il campo.",
     heroTitle2: "In una sola app.",
     heroSubtitle:
@@ -1574,6 +1580,13 @@ export const it: Translation = {
     locationPlaceholder: "ad es. Camping Aareschlucht",
     packListLabel: "Lista bagagli (facoltativa)",
     noPackList: "Senza lista bagagli",
+    arrivalTimeLabel: "Ora di arrivo (facoltativo)",
+    departureTimeLabel: "Ora di partenza (facoltativo)",
+    timesLine: (a: string | null, d: string | null) =>
+      [a ? `Arrivo ${a}` : null, d ? `Partenza ${d}` : null]
+        .filter(Boolean)
+        .join(" · "),
+    yearCompareTitle: "Notti per anno",
     arrivalLabel: "Arrivo",
     departureLabel: "Partenza",
     titleLabel: "Titolo (facoltativo)",

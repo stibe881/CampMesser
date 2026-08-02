@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  nightsPerYear,
   computeTripStats,
   computeYearReview,
   currentTripDay,
@@ -271,5 +272,32 @@ describe("currentTripDay", () => {
       )
     ).toBeNull();
     expect(currentTripDay(trip, "kaputt")).toBeNull();
+  });
+});
+
+describe("nightsPerYear", () => {
+  it("summiert Nächte pro Startjahr, aufsteigend sortiert", () => {
+    const trips = [
+      { startDate: "2025-07-01", endDate: "2025-07-05" },
+      { startDate: "2026-08-10", endDate: "2026-08-12" },
+      { startDate: "2025-09-01", endDate: "2025-09-02" },
+    ];
+    expect(nightsPerYear(trips)).toEqual([
+      { year: 2025, nights: 5 },
+      { year: 2026, nights: 2 },
+    ]);
+  });
+
+  it("zählt Silvester-Trips komplett zum Startjahr", () => {
+    expect(
+      nightsPerYear([{ startDate: "2025-12-30", endDate: "2026-01-02" }])
+    ).toEqual([{ year: 2025, nights: 3 }]);
+  });
+
+  it("ignoriert ungültige Zeiträume und liefert sonst leer", () => {
+    expect(
+      nightsPerYear([{ startDate: "2026-08-10", endDate: "2026-08-10" }])
+    ).toEqual([]);
+    expect(nightsPerYear([])).toEqual([]);
   });
 });

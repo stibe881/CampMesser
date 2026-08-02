@@ -67,6 +67,27 @@ export function nightsByYear(
   return result;
 }
 
+/**
+ * Übernachtungen pro Jahr für den Jahres-Vergleich in der Statistik.
+ * Konvention wie im Jahresrückblick: ein Trip zählt komplett zum Jahr seines
+ * Startdatums. Nur Jahre mit mindestens einer Nacht, aufsteigend sortiert.
+ */
+export function nightsPerYear(
+  trips: TripLike[]
+): Array<{ year: number; nights: number }> {
+  const byYear = new Map<number, number>();
+  for (const trip of trips) {
+    const start = parseIsoDay(trip.startDate);
+    const nights = tripNights(trip.startDate, trip.endDate);
+    if (start === null || nights === 0) continue;
+    const year = new Date(start).getUTCFullYear();
+    byYear.set(year, (byYear.get(year) ?? 0) + nights);
+  }
+  return Array.from(byYear.entries())
+    .map(([year, nights]) => ({ year, nights }))
+    .sort((a, b) => a.year - b.year);
+}
+
 /** Ist der Aufenthalt aus heutiger Sicht geplant (Anreise heute oder später)? */
 export function isUpcomingTrip(startDate: string, today: string): boolean {
   return startDate >= today;

@@ -51,6 +51,12 @@ export const de = {
     heroImageAlt:
       "Zelt mit Solarpanels und Lagerfeuer vor Schweizer Alpen bei Sonnenuntergang",
     heroKicker: "Dein Schweizer Taschenmesser fürs Zelt-Camping",
+    greeting: {
+      morning: (name: string) => `Guten Morgen, ${name}`,
+      day: (name: string) => `Guten Tag, ${name}`,
+      evening: (name: string) => `Guten Abend, ${name}`,
+    },
+    tripArrivalAt: (time: string) => `Anreise ${time}`,
     heroTitle1: "Alles fürs Camp.",
     heroTitle2: "In einer App.",
     heroSubtitle:
@@ -1593,6 +1599,13 @@ export const de = {
     locationPlaceholder: "z. B. Camping Aareschlucht",
     packListLabel: "Packliste (optional)",
     noPackList: "Ohne Packliste",
+    arrivalTimeLabel: "Ankunftszeit (optional)",
+    departureTimeLabel: "Abreisezeit (optional)",
+    timesLine: (a: string | null, d: string | null) =>
+      [a ? `Anreise ${a}` : null, d ? `Abreise ${d}` : null]
+        .filter(Boolean)
+        .join(" · "),
+    yearCompareTitle: "Übernachtungen pro Jahr",
     arrivalLabel: "Anreise",
     departureLabel: "Abreise",
     titleLabel: "Titel (optional)",

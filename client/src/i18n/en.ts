@@ -50,6 +50,12 @@ export const en: Translation = {
     heroImageAlt:
       "Tent with solar panels and campfire in front of the Swiss Alps at sunset",
     heroKicker: "Your Swiss army knife for tent camping",
+    greeting: {
+      morning: (name: string) => `Good morning, ${name}`,
+      day: (name: string) => `Good afternoon, ${name}`,
+      evening: (name: string) => `Good evening, ${name}`,
+    },
+    tripArrivalAt: (time: string) => `Arrival ${time}`,
     heroTitle1: "Everything for camp.",
     heroTitle2: "In one app.",
     heroSubtitle:
@@ -1535,6 +1541,13 @@ export const en: Translation = {
     locationPlaceholder: "e.g. Camping Aareschlucht",
     packListLabel: "Packing list (optional)",
     noPackList: "Without packing list",
+    arrivalTimeLabel: "Arrival time (optional)",
+    departureTimeLabel: "Departure time (optional)",
+    timesLine: (a: string | null, d: string | null) =>
+      [a ? `Arrival ${a}` : null, d ? `Departure ${d}` : null]
+        .filter(Boolean)
+        .join(" · "),
+    yearCompareTitle: "Nights per year",
     arrivalLabel: "Arrival",
     departureLabel: "Departure",
     titleLabel: "Title (optional)",

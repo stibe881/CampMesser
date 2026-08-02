@@ -1060,6 +1060,8 @@ export async function updateTripLog(
       | "startDate"
       | "endDate"
       | "rating"
+      | "arrivalTime"
+      | "departureTime"
       | "weatherJson"
     >
   >

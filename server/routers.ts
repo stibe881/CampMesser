@@ -2381,6 +2381,14 @@ export const appRouter = router({
             startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
             endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
             rating: z.number().int().min(1).max(5).nullable().optional(),
+            arrivalTime: z
+              .string()
+              .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+              .nullish(),
+            departureTime: z
+              .string()
+              .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+              .nullish(),
           })
           .refine(v => v.endDate >= v.startDate, {
             message: "Die Abreise darf nicht vor der Anreise liegen.",
@@ -2423,6 +2431,8 @@ export const appRouter = router({
           startDate: input.startDate,
           endDate: input.endDate,
           rating: input.rating ?? null,
+          arrivalTime: input.arrivalTime ?? null,
+          departureTime: input.departureTime ?? null,
         });
         return { id };
       }),
@@ -2445,6 +2455,14 @@ export const appRouter = router({
             startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
             endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
             rating: z.number().int().min(1).max(5).nullable().optional(),
+            arrivalTime: z
+              .string()
+              .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+              .nullish(),
+            departureTime: z
+              .string()
+              .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+              .nullish(),
           })
           .refine(v => v.endDate >= v.startDate, {
             message: "Die Abreise darf nicht vor der Anreise liegen.",
@@ -2516,6 +2534,8 @@ export const appRouter = router({
           startDate: input.startDate,
           endDate: input.endDate,
           rating: input.rating ?? null,
+          arrivalTime: input.arrivalTime ?? null,
+          departureTime: input.departureTime ?? null,
           ...(weatherStale ? { weatherJson: null } : {}),
         });
         return { success: true } as const;
@@ -2588,6 +2608,8 @@ export const appRouter = router({
           startDate: input.startDate,
           endDate: input.endDate,
           rating: null,
+          arrivalTime: trip.arrivalTime,
+          departureTime: trip.departureTime,
         });
         // Menüplan-Einträge auf die neuen Daten mappen (Tag 1 → Tag 1)
         const entries = await db.getMenuEntriesForTrip(input.tripId);

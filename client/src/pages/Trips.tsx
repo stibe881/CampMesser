@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Award,
   CalendarClock,
+  Clock,
   CalendarDays,
   ChevronDown,
   CloudSun,
@@ -65,6 +66,7 @@ import {
   computeYearReview,
   daysUntilTrip,
   isUpcomingTrip,
+  nightsPerYear,
   tripNights,
 } from "@shared/trips";
 import { milestones } from "@shared/milestones";
@@ -1201,6 +1203,8 @@ export default function TripsPage() {
     notes: "",
     startDate: today,
     endDate: today,
+    arrivalTime: "",
+    departureTime: "",
   });
   /** Sterne-Bewertung des neuen Eintrags (null = ohne Bewertung). */
   const [formRating, setFormRating] = useState<number | null>(null);
@@ -1220,6 +1224,8 @@ export default function TripsPage() {
       notes: "",
       startDate: today,
       endDate: today,
+      arrivalTime: "",
+      departureTime: "",
     });
     setFormRating(null);
   };
@@ -1350,6 +1356,8 @@ export default function TripsPage() {
       notes: trip.notes ?? "",
       startDate: trip.startDate,
       endDate: trip.endDate,
+      arrivalTime: trip.arrivalTime ?? "",
+      departureTime: trip.departureTime ?? "",
     });
     setFormRating(trip.rating ?? null);
     setFormOpen(true);
@@ -1375,6 +1383,12 @@ export default function TripsPage() {
 
   // Wetter-Glück über alle Aufenthalte mit gespeichertem Wetterarchiv
   const luck = useMemo(() => weatherLuck(pastTripLikes), [pastTripLikes]);
+
+  // Übernachtungen pro Jahr für den Jahres-Vergleich (Startjahr zählt)
+  const yearNights = useMemo(
+    () => nightsPerYear(pastTripLikes),
+    [pastTripLikes]
+  );
 
   // Meilensteine über die abgeschlossenen Aufenthalte: erreichte als farbige
   // Chips, dazu die nächsten offenen (höchster Fortschritt zuerst, max. 3)
@@ -1757,6 +1771,58 @@ export default function TripsPage() {
         </Card>
       )}
 
+      {/* Jahres-Vergleich: Übernachtungen pro Jahr als schlichte CSS-Balken
+          (bewusst ohne Chart-Bibliothek – hält den Reisen-Chunk klein) */}
+      {yearNights.length >= 2 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <h2 className="mb-3 flex items-center gap-2 font-serif text-base font-semibold">
+              <CalendarDays
+                className="h-4 w-4 text-primary"
+                aria-hidden="true"
+              />
+              {t.trips.yearCompareTitle}
+            </h2>
+            <ul className="space-y-1.5">
+              {yearNights.map(({ year, nights }) => {
+                const max = yearNights.reduce(
+                  (m, y) => Math.max(m, y.nights),
+                  1
+                );
+                const current = year === new Date().getFullYear();
+                return (
+                  <li key={year} className="flex items-center gap-2 text-sm">
+                    <span
+                      className={cn(
+                        "w-12 tabular-nums",
+                        current && "font-semibold text-primary"
+                      )}
+                    >
+                      {year}
+                    </span>
+                    <span className="h-3 flex-1 overflow-hidden rounded-full bg-muted">
+                      <span
+                        className={cn(
+                          "block h-full rounded-full",
+                          current ? "bg-primary" : "bg-primary/50"
+                        )}
+                        style={{
+                          width: `${Math.max(4, (nights / max) * 100)}%`,
+                        }}
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <span className="w-24 text-right text-xs text-muted-foreground">
+                      {t.trips.nightsCount(nights)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Meilensteine: erreichte farbig, die nächsten offenen mit Fortschritt */}
       {trips.length > 0 && (
         <Card className="mb-6">
@@ -1983,6 +2049,8 @@ export default function TripsPage() {
                   startDate: form.startDate,
                   endDate: form.endDate,
                   rating: formRating,
+                  arrivalTime: form.arrivalTime || null,
+                  departureTime: form.departureTime || null,
                 });
                 return;
               }
@@ -2002,6 +2070,8 @@ export default function TripsPage() {
                 startDate: form.startDate,
                 endDate: form.endDate,
                 rating: formRating,
+                arrivalTime: form.arrivalTime || null,
+                departureTime: form.departureTime || null,
               };
               if (editingId !== null) {
                 updateMutation.mutate({ id: editingId, ...payload });
@@ -2108,6 +2178,37 @@ export default function TripsPage() {
                     setForm(f => ({ ...f, endDate: e.target.value }))
                   }
                   required
+                />
+              </div>
+            </div>
+            {/* Optionale Uhrzeiten – passend zu den Check-in-Zeiten des Platzes */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="trip-start-time">
+                  {t.trips.arrivalTimeLabel}
+                </Label>
+                <Input
+                  id="trip-start-time"
+                  className="mt-1.5"
+                  type="time"
+                  value={form.arrivalTime}
+                  onChange={e =>
+                    setForm(f => ({ ...f, arrivalTime: e.target.value }))
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="trip-end-time">
+                  {t.trips.departureTimeLabel}
+                </Label>
+                <Input
+                  id="trip-end-time"
+                  className="mt-1.5"
+                  type="time"
+                  value={form.departureTime}
+                  onChange={e =>
+                    setForm(f => ({ ...f, departureTime: e.target.value }))
+                  }
                 />
               </div>
             </div>
@@ -2292,6 +2393,15 @@ export default function TripsPage() {
                           />
                           {formatRange(trip.startDate, trip.endDate)}
                         </span>
+                        {(trip.arrivalTime || trip.departureTime) && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" aria-hidden="true" />
+                            {t.trips.timesLine(
+                              trip.arrivalTime,
+                              trip.departureTime
+                            )}
+                          </span>
+                        )}
                         <span className="flex items-center gap-1">
                           <Moon className="h-3 w-3" aria-hidden="true" />
                           {t.trips.nightsCount(nights)}
@@ -2552,6 +2662,15 @@ export default function TripsPage() {
                             />
                             {formatRange(trip.startDate, trip.endDate)}
                           </span>
+                          {(trip.arrivalTime || trip.departureTime) && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" aria-hidden="true" />
+                              {t.trips.timesLine(
+                                trip.arrivalTime,
+                                trip.departureTime
+                              )}
+                            </span>
+                          )}
                           <span className="flex items-center gap-1">
                             <Moon className="h-3 w-3" aria-hidden="true" />
                             {t.trips.nightsCount(nights)}
