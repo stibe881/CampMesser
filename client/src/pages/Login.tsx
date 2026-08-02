@@ -9,12 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
+import { useT } from "@/i18n";
 
 /**
  * Eigenständige Anmeldung: E-Mail/Passwort-Login und Registrierung,
  * unabhängig vom Manus-Login.
  */
 export default function LoginPage() {
+  const t = useT();
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
   const [loginEmail, setLoginEmail] = useState("");
@@ -33,7 +35,7 @@ export default function LoginPage() {
 
   const afterAuth = async (name: string | null) => {
     await utils.auth.me.invalidate();
-    toast.success(name ? `Willkommen, ${name}!` : "Willkommen!");
+    toast.success(name ? t.login.welcomeName(name) : t.login.welcome);
     navigate("/");
   };
 
@@ -48,15 +50,13 @@ export default function LoginPage() {
   const requestResetMutation = trpc.auth.requestReset.useMutation({
     onSuccess: () => {
       setResetStep(2);
-      toast.success(
-        "Falls ein Konto existiert, wurde ein Bestätigungscode verschickt."
-      );
+      toast.success(t.login.codeSent);
     },
     onError: err => toast.error(err.message),
   });
   const resetMutation = trpc.auth.resetPassword.useMutation({
     onSuccess: () => {
-      toast.success("Passwort zurückgesetzt – du bist jetzt angemeldet.");
+      toast.success(t.login.resetDone);
       void utils.auth.me.invalidate();
       navigate("/");
     },
@@ -71,7 +71,7 @@ export default function LoginPage() {
   const submitRegister = (e: React.FormEvent) => {
     e.preventDefault();
     if (regPassword !== regPassword2) {
-      toast.error("Die Passwörter stimmen nicht überein.");
+      toast.error(t.login.passwordsMismatch);
       return;
     }
     registerMutation.mutate({
@@ -84,12 +84,8 @@ export default function LoginPage() {
   return (
     <div className="container max-w-md py-6">
       <PageHeader
-        title={resetMode ? "Passwort zurücksetzen" : "Anmelden"}
-        subtitle={
-          resetMode
-            ? "Wir schicken dir einen 6-stelligen Bestätigungscode, mit dem du ein neues Passwort setzen kannst."
-            : "Mit deinem CampMesser-Konto speicherst du Packlisten, Inventar und Zeltplätze und nutzt sie auf allen Geräten."
-        }
+        title={resetMode ? t.login.resetTitle : t.login.title}
+        subtitle={resetMode ? t.login.resetSubtitle : t.login.subtitle}
       />
       <Card>
         <CardContent className="pt-6">
@@ -105,7 +101,7 @@ export default function LoginPage() {
                 >
                   <div>
                     <Label htmlFor="reset-email" className="mb-1.5 block">
-                      E-Mail deines Kontos
+                      {t.login.accountEmailLabel}
                     </Label>
                     <Input
                       id="reset-email"
@@ -114,7 +110,7 @@ export default function LoginPage() {
                       required
                       value={resetEmail}
                       onChange={e => setResetEmail(e.target.value)}
-                      placeholder="du@beispiel.ch"
+                      placeholder={t.login.emailPlaceholder}
                     />
                   </div>
                   <Button
@@ -124,8 +120,8 @@ export default function LoginPage() {
                   >
                     <KeyRound className="mr-1.5 h-4 w-4" aria-hidden="true" />
                     {requestResetMutation.isPending
-                      ? "Code wird verschickt …"
-                      : "Code anfordern"}
+                      ? t.login.requestingCode
+                      : t.login.requestCode}
                   </Button>
                 </form>
               ) : (
@@ -134,7 +130,7 @@ export default function LoginPage() {
                   onSubmit={e => {
                     e.preventDefault();
                     if (resetPw !== resetPw2) {
-                      toast.error("Die Passwörter stimmen nicht überein.");
+                      toast.error(t.login.passwordsMismatch);
                       return;
                     }
                     resetMutation.mutate({
@@ -146,9 +142,9 @@ export default function LoginPage() {
                 >
                   <div>
                     <Label htmlFor="reset-code" className="mb-1.5 block">
-                      Bestätigungscode{" "}
+                      {t.login.codeLabel}{" "}
                       <span className="text-xs text-muted-foreground">
-                        (6 Ziffern, 15 Min. gültig)
+                        {t.login.codeHint}
                       </span>
                     </Label>
                     <Input
@@ -166,9 +162,9 @@ export default function LoginPage() {
                   </div>
                   <div>
                     <Label htmlFor="reset-pw" className="mb-1.5 block">
-                      Neues Passwort{" "}
+                      {t.login.newPasswordLabel}{" "}
                       <span className="text-xs text-muted-foreground">
-                        (mind. 8 Zeichen)
+                        {t.login.passwordHint}
                       </span>
                     </Label>
                     <Input
@@ -184,7 +180,7 @@ export default function LoginPage() {
                   </div>
                   <div>
                     <Label htmlFor="reset-pw2" className="mb-1.5 block">
-                      Neues Passwort bestätigen
+                      {t.login.confirmNewPasswordLabel}
                     </Label>
                     <Input
                       id="reset-pw2"
@@ -203,8 +199,8 @@ export default function LoginPage() {
                   >
                     <KeyRound className="mr-1.5 h-4 w-4" aria-hidden="true" />
                     {resetMutation.isPending
-                      ? "Wird gespeichert …"
-                      : "Passwort setzen"}
+                      ? t.common.saving
+                      : t.login.setPassword}
                   </Button>
                   <button
                     type="button"
@@ -214,7 +210,7 @@ export default function LoginPage() {
                     }
                     disabled={requestResetMutation.isPending}
                   >
-                    Keinen Code erhalten? Erneut anfordern
+                    {t.login.resendCode}
                   </button>
                 </form>
               )}
@@ -226,22 +222,24 @@ export default function LoginPage() {
                   setResetStep(1);
                 }}
               >
-                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /> Zurück
-                zur Anmeldung
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />{" "}
+                {t.login.backToLogin}
               </button>
             </div>
           ) : (
             <Tabs defaultValue="login">
               <TabsList className="mb-4 grid w-full grid-cols-2">
-                <TabsTrigger value="login">Anmelden</TabsTrigger>
-                <TabsTrigger value="register">Registrieren</TabsTrigger>
+                <TabsTrigger value="login">{t.login.tabLogin}</TabsTrigger>
+                <TabsTrigger value="register">
+                  {t.login.tabRegister}
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
                 <form onSubmit={submitLogin} className="space-y-4">
                   <div>
                     <Label htmlFor="login-email" className="mb-1.5 block">
-                      E-Mail
+                      {t.login.emailLabel}
                     </Label>
                     <Input
                       id="login-email"
@@ -250,12 +248,12 @@ export default function LoginPage() {
                       required
                       value={loginEmail}
                       onChange={e => setLoginEmail(e.target.value)}
-                      placeholder="du@beispiel.ch"
+                      placeholder={t.login.emailPlaceholder}
                     />
                   </div>
                   <div>
                     <Label htmlFor="login-password" className="mb-1.5 block">
-                      Passwort
+                      {t.login.passwordLabel}
                     </Label>
                     <Input
                       id="login-password"
@@ -273,7 +271,9 @@ export default function LoginPage() {
                     disabled={loginMutation.isPending}
                   >
                     <LogIn className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                    {loginMutation.isPending ? "Wird angemeldet …" : "Anmelden"}
+                    {loginMutation.isPending
+                      ? t.login.loggingIn
+                      : t.login.loginButton}
                   </Button>
                   <button
                     type="button"
@@ -283,7 +283,7 @@ export default function LoginPage() {
                       setResetEmail(loginEmail);
                     }}
                   >
-                    Passwort vergessen?
+                    {t.login.forgotPassword}
                   </button>
                 </form>
               </TabsContent>
@@ -292,7 +292,7 @@ export default function LoginPage() {
                 <form onSubmit={submitRegister} className="space-y-4">
                   <div>
                     <Label htmlFor="reg-name" className="mb-1.5 block">
-                      Name
+                      {t.login.nameLabel}
                     </Label>
                     <Input
                       id="reg-name"
@@ -300,12 +300,12 @@ export default function LoginPage() {
                       required
                       value={regName}
                       onChange={e => setRegName(e.target.value)}
-                      placeholder="z. B. Alex"
+                      placeholder={t.login.namePlaceholder}
                     />
                   </div>
                   <div>
                     <Label htmlFor="reg-email" className="mb-1.5 block">
-                      E-Mail
+                      {t.login.emailLabel}
                     </Label>
                     <Input
                       id="reg-email"
@@ -314,14 +314,14 @@ export default function LoginPage() {
                       required
                       value={regEmail}
                       onChange={e => setRegEmail(e.target.value)}
-                      placeholder="du@beispiel.ch"
+                      placeholder={t.login.emailPlaceholder}
                     />
                   </div>
                   <div>
                     <Label htmlFor="reg-password" className="mb-1.5 block">
-                      Passwort{" "}
+                      {t.login.passwordLabel}{" "}
                       <span className="text-xs text-muted-foreground">
-                        (mind. 8 Zeichen)
+                        {t.login.passwordHint}
                       </span>
                     </Label>
                     <Input
@@ -337,7 +337,7 @@ export default function LoginPage() {
                   </div>
                   <div>
                     <Label htmlFor="reg-password2" className="mb-1.5 block">
-                      Passwort bestätigen
+                      {t.login.confirmPasswordLabel}
                     </Label>
                     <Input
                       id="reg-password2"
@@ -356,8 +356,8 @@ export default function LoginPage() {
                   >
                     <UserPlus className="mr-1.5 h-4 w-4" aria-hidden="true" />
                     {registerMutation.isPending
-                      ? "Konto wird erstellt …"
-                      : "Konto erstellen"}
+                      ? t.login.creatingAccount
+                      : t.login.createAccount}
                   </Button>
                 </form>
               </TabsContent>
@@ -365,9 +365,7 @@ export default function LoginPage() {
           )}
           <p className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
             <Tent className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            Die Wissens-Module (Erste Hilfe, Knoten, Natur, Rezepte)
-            funktionieren auch ohne Konto – ein Konto brauchst du nur zum
-            Speichern eigener Daten.
+            {t.login.knowledgeNote}
           </p>
         </CardContent>
       </Card>

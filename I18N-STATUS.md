@@ -23,13 +23,13 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 
 - [x] AppShell (Navigation, Gruppen, Konto-Menü)
 - [x] Home (Hero, Widgets, Suche, Sortier-Modus)
-- [ ] Login, Profile
+- [x] Login, Profile
 - [ ] PackLists, PackListDetail, SharedPackList, PackOptimizer, Inventory
 - [ ] Sos, Weather, SunCompass, Energy, Water, Drying, Quiet, Lawn, Level
 - [ ] Spots, SpotDetail, SharedSpot, Trips
 - [ ] FirstAid, Knots (+Quiz), Nature, Recipes (+Editor), Food
 - [ ] Family (+Editoren), HuntPrint
-- [ ] NotFound, ErrorBoundary, LoginPrompt, PageHeader-Verwendungen
+- [x] NotFound, ErrorBoundary, LoginPrompt, PageHeader-Verwendungen
 
 ### Inhalts-Daten (L4)
 

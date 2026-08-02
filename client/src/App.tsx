@@ -8,7 +8,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import OfflinePrecache from "./components/OfflinePrecache";
 import AppShell from "./components/AppShell";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { LanguageProvider } from "./i18n";
+import { LanguageProvider, useT } from "./i18n";
 import Home from "./pages/Home";
 import { getThemePreference } from "./lib/themePreference";
 
@@ -106,11 +106,12 @@ const SharedSpotPage = lazyWithRetry(pageLoaders.SharedSpot);
 const HuntPrintPage = lazyWithRetry(pageLoaders.HuntPrint);
 
 function RouteFallback() {
+  const t = useT();
   return (
     <div className="container flex justify-center py-16">
       <Loader2
         className="h-6 w-6 animate-spin text-muted-foreground"
-        aria-label="Lädt"
+        aria-label={t.common.loading}
       />
     </div>
   );

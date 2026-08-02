@@ -31,9 +31,12 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
 import { getThemePreference, saveThemePreference } from "@/lib/themePreference";
+import { useI18n } from "@/i18n";
+import { LOCALE_TAGS } from "@shared/i18n";
 
 /** Profil-Seite: Konto verwalten und App-Einstellungen. */
 export default function ProfilePage() {
+  const { lang, t } = useI18n();
   const { user, isAuthenticated, loading, logout, refresh } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const utils = trpc.useUtils();
@@ -55,7 +58,7 @@ export default function ProfilePage() {
 
   const nameMutation = trpc.auth.updateName.useMutation({
     onSuccess: () => {
-      toast.success("Name aktualisiert");
+      toast.success(t.profile.nameUpdated);
       void utils.auth.me.invalidate();
       void refresh?.();
     },
@@ -63,9 +66,7 @@ export default function ProfilePage() {
   });
   const emailMutation = trpc.auth.updateEmail.useMutation({
     onSuccess: () => {
-      toast.success(
-        "E-Mail-Adresse aktualisiert – melde dich künftig damit an"
-      );
+      toast.success(t.profile.emailUpdated);
       setNewEmail("");
       setEmailPw("");
       void utils.auth.me.invalidate();
@@ -75,7 +76,7 @@ export default function ProfilePage() {
   });
   const pwMutation = trpc.auth.updatePassword.useMutation({
     onSuccess: () => {
-      toast.success("Passwort aktualisiert");
+      toast.success(t.profile.passwordUpdated);
       setCurrentPw("");
       setNewPw("");
       setNewPw2("");
@@ -84,7 +85,7 @@ export default function ProfilePage() {
   });
   const deleteMutation = trpc.auth.deleteAccount.useMutation({
     onSuccess: () => {
-      toast.success("Konto gelöscht. Gute Reise!");
+      toast.success(t.profile.accountDeleted);
       window.location.href = "/";
     },
     onError: e => toast.error(e.message),
@@ -96,9 +97,7 @@ export default function ProfilePage() {
     setThemePref(pref);
     if (theme !== pref) toggleTheme?.();
     toast.success(
-      pref === "dark"
-        ? "Dunkles Design als Standard gespeichert"
-        : "Helles Design als Standard gespeichert"
+      pref === "dark" ? t.profile.themeSavedDark : t.profile.themeSavedLight
     );
   };
 
@@ -107,10 +106,10 @@ export default function ProfilePage() {
     return (
       <div className="container max-w-2xl py-6">
         <PageHeader
-          title="Profil"
-          subtitle="Verwalte dein Konto und deine Einstellungen."
+          title={t.profile.title}
+          subtitle={t.profile.manageSubtitle}
         />
-        <LoginPrompt feature="dein Profil" />
+        <LoginPrompt feature={t.profile.loginFeature} />
       </div>
     );
   }
@@ -118,25 +117,25 @@ export default function ProfilePage() {
   return (
     <div className="container max-w-2xl py-6">
       <PageHeader
-        title="Profil"
-        subtitle={`Angemeldet als ${user?.email ?? user?.name ?? ""}`}
+        title={t.profile.title}
+        subtitle={t.profile.loggedInAs(user?.email ?? user?.name ?? "")}
       />
 
       <Card className="mb-5">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Palette className="h-4 w-4 text-primary" aria-hidden="true" />
-            Design
+            {t.profile.themeTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="mb-3 text-sm text-muted-foreground">
-            Wähle, mit welchem Design die App standardmässig startet.
+            {t.profile.themeIntro}
           </p>
           <div
             className="flex gap-2"
             role="group"
-            aria-label="Standard-Design wählen"
+            aria-label={t.profile.themeGroupAria}
           >
             <Button
               type="button"
@@ -144,7 +143,8 @@ export default function ProfilePage() {
               className="flex-1"
               onClick={() => chooseTheme("light")}
             >
-              <Sun className="mr-1.5 h-4 w-4" aria-hidden="true" /> Hell
+              <Sun className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
+              {t.profile.themeLight}
             </Button>
             <Button
               type="button"
@@ -152,7 +152,8 @@ export default function ProfilePage() {
               className="flex-1"
               onClick={() => chooseTheme("dark")}
             >
-              <Moon className="mr-1.5 h-4 w-4" aria-hidden="true" /> Dunkel
+              <Moon className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
+              {t.profile.themeDark}
             </Button>
           </div>
         </CardContent>
@@ -162,7 +163,7 @@ export default function ProfilePage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <UserRound className="h-4 w-4 text-primary" aria-hidden="true" />
-            Name ändern
+            {t.profile.nameTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -177,14 +178,14 @@ export default function ProfilePage() {
               value={name}
               onChange={e => setName(e.target.value)}
               maxLength={100}
-              aria-label="Name"
-              placeholder="Dein Name"
+              aria-label={t.profile.nameAria}
+              placeholder={t.profile.namePlaceholder}
             />
             <Button
               type="submit"
               disabled={nameMutation.isPending || !name.trim()}
             >
-              Speichern
+              {t.common.save}
             </Button>
           </form>
         </CardContent>
@@ -194,16 +195,16 @@ export default function ProfilePage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
-            E-Mail-Adresse ändern
+            {t.profile.emailTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="mb-3 text-sm text-muted-foreground">
-            Aktuell:{" "}
+            {t.profile.emailCurrentPrefix}{" "}
             <span className="font-medium text-foreground">
               {user?.email ?? "–"}
             </span>
-            . Mit der neuen Adresse meldest du dich künftig an.
+            {t.profile.emailCurrentSuffix}
           </p>
           <form
             className="space-y-3"
@@ -218,7 +219,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <Label htmlFor="email-new" className="mb-1.5 block text-xs">
-                  Neue E-Mail-Adresse
+                  {t.profile.newEmailLabel}
                 </Label>
                 <Input
                   id="email-new"
@@ -230,7 +231,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <Label htmlFor="email-pw" className="mb-1.5 block text-xs">
-                  Passwort zur Bestätigung
+                  {t.profile.confirmWithPasswordLabel}
                 </Label>
                 <Input
                   id="email-pw"
@@ -246,7 +247,7 @@ export default function ProfilePage() {
               disabled={emailMutation.isPending || !newEmail.trim() || !emailPw}
               className="w-full sm:w-auto"
             >
-              E-Mail ändern
+              {t.profile.changeEmail}
             </Button>
           </form>
         </CardContent>
@@ -256,7 +257,7 @@ export default function ProfilePage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <KeyRound className="h-4 w-4 text-primary" aria-hidden="true" />
-            Passwort aktualisieren
+            {t.profile.passwordTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -265,7 +266,7 @@ export default function ProfilePage() {
             onSubmit={e => {
               e.preventDefault();
               if (newPw !== newPw2) {
-                toast.error("Die neuen Passwörter stimmen nicht überein.");
+                toast.error(t.profile.newPasswordsMismatch);
                 return;
               }
               pwMutation.mutate({
@@ -276,7 +277,7 @@ export default function ProfilePage() {
           >
             <div>
               <Label htmlFor="pw-current" className="mb-1.5 block text-xs">
-                Aktuelles Passwort
+                {t.profile.currentPasswordLabel}
               </Label>
               <Input
                 id="pw-current"
@@ -289,7 +290,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <Label htmlFor="pw-new" className="mb-1.5 block text-xs">
-                  Neues Passwort (min. 8 Zeichen)
+                  {t.profile.newPasswordLabel}
                 </Label>
                 <Input
                   id="pw-new"
@@ -301,7 +302,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <Label htmlFor="pw-new2" className="mb-1.5 block text-xs">
-                  Neues Passwort wiederholen
+                  {t.profile.repeatPasswordLabel}
                 </Label>
                 <Input
                   id="pw-new2"
@@ -317,7 +318,7 @@ export default function ProfilePage() {
               disabled={pwMutation.isPending || !currentPw || !newPw || !newPw2}
               className="w-full sm:w-auto"
             >
-              Passwort ändern
+              {t.profile.changePassword}
             </Button>
           </form>
         </CardContent>
@@ -327,32 +328,32 @@ export default function ProfilePage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base text-destructive">
             <Trash2 className="h-4 w-4" aria-hidden="true" />
-            Konto löschen
+            {t.profile.deleteTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="mb-3 text-sm text-muted-foreground">
-            Löscht dein Konto und alle gespeicherten Daten (Packlisten,
-            Inventar, Zeltplätze, Verbraucher, Kühlbox) unwiderruflich.
+            {t.profile.deleteIntro}
           </p>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button type="button" variant="destructive">
-                <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" /> Konto
-                löschen …
+                <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
+                {t.profile.deleteButton}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Konto wirklich löschen?</AlertDialogTitle>
+                <AlertDialogTitle>
+                  {t.profile.deleteConfirmTitle}
+                </AlertDialogTitle>
                 <AlertDialogDescription>
-                  Alle deine Daten werden unwiderruflich gelöscht. Bestätige mit
-                  deinem Passwort.
+                  {t.profile.deleteConfirmDescription}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <div className="py-1">
                 <Label htmlFor="pw-delete" className="mb-1.5 block text-xs">
-                  Passwort
+                  {t.profile.passwordLabel}
                 </Label>
                 <Input
                   id="pw-delete"
@@ -363,13 +364,13 @@ export default function ProfilePage() {
                 />
               </div>
               <AlertDialogFooter>
-                <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
                 <AlertDialogAction
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   disabled={!deletePw || deleteMutation.isPending}
                   onClick={() => deleteMutation.mutate({ password: deletePw })}
                 >
-                  Endgültig löschen
+                  {t.profile.deleteFinal}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -384,22 +385,22 @@ export default function ProfilePage() {
           className="w-full"
           onClick={() => logout()}
         >
-          <LogOut className="mr-1.5 h-4 w-4" aria-hidden="true" /> Abmelden
+          <LogOut className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
+          {t.shell.logout}
         </Button>
       </div>
 
       {/* Versions-Anzeige: welcher Build läuft gerade? */}
       <p className="mt-6 text-center text-xs text-muted-foreground/70">
-        CampMesser Version {__APP_VERSION__}
+        {t.profile.versionLine(__APP_VERSION__)}
         {__APP_VERSION__ !== "dev" &&
-          ` · Build vom ${new Date(__APP_BUILT_AT__).toLocaleDateString(
-            "de-CH",
-            {
+          t.profile.buildDate(
+            new Date(__APP_BUILT_AT__).toLocaleDateString(LOCALE_TAGS[lang], {
               day: "numeric",
               month: "short",
               year: "numeric",
-            }
-          )}`}
+            })
+          )}
       </p>
     </div>
   );

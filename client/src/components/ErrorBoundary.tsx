@@ -1,6 +1,25 @@
 import { cn } from "@/lib/utils";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { Component, ErrorInfo, ReactNode } from "react";
+import { getStoredLanguage } from "@/i18n";
+import { l4, pick } from "@shared/i18n";
+
+// Der ErrorBoundary liegt AUSSERHALB des LanguageProvider (er fängt auch dessen
+// Fehler ab) – deshalb kleines lokales Wörterbuch statt useT().
+const TEXTS = {
+  title: l4(
+    "Ein unerwarteter Fehler ist aufgetreten.",
+    "Une erreur inattendue s'est produite.",
+    "Si è verificato un errore imprevisto.",
+    "An unexpected error occurred."
+  ),
+  reload: l4(
+    "Seite neu laden",
+    "Recharger la page",
+    "Ricarica la pagina",
+    "Reload page"
+  ),
+};
 
 interface Props {
   children: ReactNode;
@@ -43,6 +62,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      const lang = getStoredLanguage();
       return (
         <div className="flex items-center justify-center min-h-screen p-8 bg-background">
           <div className="flex flex-col items-center w-full max-w-2xl p-8">
@@ -51,7 +71,7 @@ class ErrorBoundary extends Component<Props, State> {
               className="text-destructive mb-6 flex-shrink-0"
             />
 
-            <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
+            <h2 className="text-xl mb-4">{pick(TEXTS.title, lang)}</h2>
 
             <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
               <pre className="text-sm text-muted-foreground whitespace-break-spaces">
@@ -68,7 +88,7 @@ class ErrorBoundary extends Component<Props, State> {
               )}
             >
               <RotateCcw size={16} />
-              Reload Page
+              {pick(TEXTS.reload, lang)}
             </button>
           </div>
         </div>
