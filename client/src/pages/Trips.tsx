@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Award,
-  BookOpen,
   CalendarClock,
   CalendarDays,
   ChevronDown,
@@ -1207,6 +1206,8 @@ export default function TripsPage() {
   const [formRating, setFormRating] = useState<number | null>(null);
   /** Eintrag, der gerade im Formular bearbeitet wird (null = neuer Eintrag). */
   const [editingId, setEditingId] = useState<number | null>(null);
+  /** Erfassungs-Dialog «Neue Reise» / «Reise bearbeiten» offen? */
+  const [formOpen, setFormOpen] = useState(false);
 
   /** Formular leeren und in den Neu-Modus zurückkehren. */
   const resetForm = () => {
@@ -1223,25 +1224,30 @@ export default function TripsPage() {
     setFormRating(null);
   };
 
-  // Schnellaktion «Neuer Tagebuch-Eintrag» (?neu=1): zum Formular springen
+  /** Dialog im Neu-Modus öffnen (Formular frisch). */
+  const openNewTripDialog = () => {
+    resetForm();
+    setFormOpen(true);
+  };
+
+  /** Dialog schliessen und das Formular zurücksetzen. */
+  const closeForm = () => {
+    setFormOpen(false);
+    resetForm();
+  };
+
+  // Schnellaktion «Neuer Tagebuch-Eintrag» (?neu=1): den Reise-Dialog öffnen
   const search = useSearch();
-  const newEntryCardRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!isAuthenticated) return;
-    if (new URLSearchParams(search).get("neu") !== "1") return;
-    const card = newEntryCardRef.current;
-    if (!card) return;
-    card.scrollIntoView({ behavior: "smooth", block: "start" });
-    card
-      .querySelector<HTMLElement>("input, button, [role='combobox']")
-      ?.focus({ preventScroll: true });
+    if (new URLSearchParams(search).get("neu") === "1") openNewTripDialog();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, isAuthenticated]);
 
   const addMutation = trpc.trips.add.useMutation({
     onSuccess: () => {
       utils.trips.list.invalidate();
-      setForm(f => ({ ...f, location: "", title: "", notes: "" }));
-      setFormRating(null);
+      closeForm();
       toast.success(t.trips.entrySaved);
     },
     onError: e => toast.error(e.message || t.trips.entrySaveFailed),
@@ -1250,7 +1256,7 @@ export default function TripsPage() {
   const updateMutation = trpc.trips.update.useMutation({
     onSuccess: () => {
       utils.trips.list.invalidate();
-      resetForm();
+      closeForm();
       toast.success(t.trips.entryUpdated);
     },
     onError: e => toast.error(e.message || t.trips.entryUpdateFailed),
@@ -1331,7 +1337,7 @@ export default function TripsPage() {
     return trip.location ?? t.trips.unknownPlace;
   };
 
-  /** Eintrag ins Formular laden (Bearbeiten-Modus) und dorthin scrollen. */
+  /** Eintrag ins Formular laden und den Dialog im Bearbeiten-Modus öffnen. */
   const startEdit = (trip: (typeof allTrips)[number]) => {
     setEditingId(trip.id);
     setSpotChoice(trip.spotId != null ? String(trip.spotId) : FREE_LOCATION);
@@ -1346,10 +1352,7 @@ export default function TripsPage() {
       endDate: trip.endDate,
     });
     setFormRating(trip.rating ?? null);
-    newEntryCardRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+    setFormOpen(true);
   };
 
   const pastTripLikes = useMemo(
@@ -1566,7 +1569,7 @@ export default function TripsPage() {
     [allTrips, spots]
   );
 
-  /** Klick auf einen Kalender-Balken: Eintrag ins Formular laden + hinscrollen. */
+  /** Klick auf einen Kalender-Balken: Eintrag im Bearbeiten-Dialog öffnen. */
   const openTripFromCalendar = (tripId: number) => {
     const trip = allTrips.find(tr => tr.id === tripId);
     if (trip) startEdit(trip);
@@ -1662,6 +1665,14 @@ export default function TripsPage() {
   return (
     <div className="container max-w-3xl py-6">
       <PageHeader title={t.trips.title} subtitle={t.trips.subtitle} />
+
+      {/* «Neue Reise»: öffnet den Erfassungs-Dialog */}
+      <div className="mb-6">
+        <Button size="lg" onClick={openNewTripDialog}>
+          <Plus className="mr-1.5 h-5 w-5" aria-hidden="true" />
+          {t.trips.newTripButton}
+        </Button>
+      </div>
 
       {/* Statistik */}
       <Card className="mb-6">
@@ -1932,19 +1943,22 @@ export default function TripsPage() {
         </Card>
       )}
 
-      {/* Neuer Eintrag */}
-      <Card className="mb-8 scroll-mt-20" ref={newEntryCardRef}>
-        <CardContent className="pt-6">
-          <h2 className="mb-4 flex items-center gap-2 font-serif text-base font-semibold">
-            {editingId !== null ? (
-              <Pencil className="h-4 w-4 text-primary" aria-hidden="true" />
-            ) : (
-              <BookOpen className="h-4 w-4 text-primary" aria-hidden="true" />
-            )}
-            {editingId !== null
-              ? t.trips.editEntryTitle
-              : t.trips.newEntryTitle}
-          </h2>
+      {/* Dialog «Neue Reise» / «Reise bearbeiten»: gemeinsames Erfassungs-Formular */}
+      <Dialog
+        open={formOpen}
+        onOpenChange={o => {
+          if (!o) closeForm();
+        }}
+      >
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-serif">
+              {editingId !== null
+                ? t.trips.editEntryTitle
+                : t.trips.newTripButton}
+            </DialogTitle>
+            <DialogDescription>{t.trips.tripFormDialogDesc}</DialogDescription>
+          </DialogHeader>
           <form
             className="grid gap-3"
             onSubmit={e => {
@@ -2128,7 +2142,15 @@ export default function TripsPage() {
                 />
               </div>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <DialogFooter className="pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeForm}
+                disabled={addMutation.isPending || updateMutation.isPending}
+              >
+                {t.common.cancel}
+              </Button>
               <Button
                 type="submit"
                 disabled={addMutation.isPending || updateMutation.isPending}
@@ -2144,20 +2166,10 @@ export default function TripsPage() {
                     ? t.trips.saveChanges
                     : t.trips.submit}
               </Button>
-              {editingId !== null && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={resetForm}
-                  disabled={updateMutation.isPending}
-                >
-                  {t.common.cancel}
-                </Button>
-              )}
-            </div>
+            </DialogFooter>
           </form>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
 
       {/* Umschalter Liste/Kalender – die Wahl bleibt gespeichert */}
       <div
@@ -2475,9 +2487,14 @@ export default function TripsPage() {
             {t.trips.entriesTitle}
           </h2>
           {trips.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              {t.trips.empty}
-            </p>
+            <div className="rounded-xl border border-dashed border-border p-6 text-center">
+              <p className="text-sm text-muted-foreground">{t.trips.empty}</p>
+              {/* Zentraler Einstieg, solange noch nichts erfasst ist */}
+              <Button className="mt-4" onClick={openNewTripDialog}>
+                <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {t.trips.newTripButton}
+              </Button>
+            </div>
           ) : (
             <ul className="space-y-3">
               {trips.map(trip => {

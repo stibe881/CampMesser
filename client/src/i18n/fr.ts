@@ -1561,7 +1561,7 @@ export const fr: Translation = {
       `${name} : ${checked} sur ${total} emballés`,
     entrySaved: "Entrée enregistrée",
     entrySaveFailed: "Impossible d'enregistrer l'entrée",
-    editEntryTitle: "Modifier l'entrée",
+    editEntryTitle: "Modifier le voyage",
     editEntryAria: (name: string) => `Modifier l'entrée ${name}`,
     saveChanges: "Enregistrer les modifications",
     entryUpdated: "Entrée mise à jour",
@@ -1581,7 +1581,9 @@ export const fr: Translation = {
       `Partager la rétrospective ${year} en image`,
     yearReviewImageSaved: "Image téléchargée",
     yearReviewShareFailed: "L'image n'a pas pu être créée",
-    newEntryTitle: "Ajouter un séjour",
+    newTripButton: "Nouveau voyage",
+    tripFormDialogDesc:
+      "Note le lieu, les dates et les souvenirs de ton séjour.",
     choosePlaceError: "Choisis un emplacement ou saisis un lieu",
     placeLabel: "Lieu",
     freeLocationOption: "Saisir un lieu librement …",
@@ -1619,7 +1621,7 @@ export const fr: Translation = {
     deleteEntryAria: name => `Supprimer l'entrée ${name}`,
     entriesTitle: "Tes séjours",
     empty:
-      "Pas encore d'entrées – note ci-dessus ton premier séjour en camping.",
+      "Pas encore d'entrées – note ton premier séjour en camping avec «Nouveau voyage».",
     addPhotos: "Ajouter des photos",
     addPhotosAria: name => `Ajouter des photos au séjour ${name}`,
     photoCountHint: (n, max) => `${n} sur ${max} photos`,

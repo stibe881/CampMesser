@@ -1563,7 +1563,7 @@ export const de = {
       `${name}: ${checked} von ${total} gepackt`,
     entrySaved: "Eintrag gespeichert",
     entrySaveFailed: "Eintrag konnte nicht gespeichert werden",
-    editEntryTitle: "Eintrag bearbeiten",
+    editEntryTitle: "Reise bearbeiten",
     editEntryAria: (name: string) => `Eintrag ${name} bearbeiten`,
     saveChanges: "Änderungen speichern",
     entryUpdated: "Eintrag aktualisiert",
@@ -1583,7 +1583,9 @@ export const de = {
       `Jahresrückblick ${year} als Bild teilen`,
     yearReviewImageSaved: "Bild heruntergeladen",
     yearReviewShareFailed: "Bild konnte nicht erstellt werden",
-    newEntryTitle: "Aufenthalt eintragen",
+    newTripButton: "Neue Reise",
+    tripFormDialogDesc:
+      "Ort, Daten und Erinnerungen deines Aufenthalts festhalten.",
     choosePlaceError: "Bitte einen Zeltplatz wählen oder einen Ort eintragen",
     placeLabel: "Ort",
     freeLocationOption: "Ort frei eintragen …",
@@ -1620,7 +1622,7 @@ export const de = {
     deleteEntryAria: (name: string) => `Eintrag ${name} löschen`,
     entriesTitle: "Deine Aufenthalte",
     empty:
-      "Noch keine Einträge – halte oben deinen ersten Camping-Aufenthalt fest.",
+      "Noch keine Einträge – halte mit «Neue Reise» deinen ersten Camping-Aufenthalt fest.",
     addPhotos: "Fotos hinzufügen",
     addPhotosAria: (name: string) => `Fotos zum Aufenthalt ${name} hinzufügen`,
     photoCountHint: (n: number, max: number) => `${n} von ${max} Fotos`,
