@@ -1294,6 +1294,13 @@ export const fr: Translation = {
     moonOk: pct => `Bonne position de la lune : éclairée à ${pct} % seulement.`,
     meteorFootnote:
       "Les taux valent pour un ciel sombre sans pollution lumineuse. Les dates sont à peu près les mêmes chaque année, calcul hors ligne sur l'appareil.",
+    redLightSectionAria: "Mode lumière rouge pour l'observation des étoiles",
+    redLightTitle: "Mode lumière rouge",
+    redLightHint:
+      "Une lumière rouge tamisée préserve l'adaptation de tes yeux à l'obscurité : après un coup d'œil au téléphone, tu revois beaucoup plus vite les étoiles faibles. Le filtre couvre toute l'app, que tu peux continuer à utiliser – il se désactive automatiquement au rechargement.",
+    redLightOn: "Activer la lumière rouge",
+    redLightOff: "Éteindre la lumière rouge",
+    redLightOffAria: "Quitter le mode lumière rouge",
     categoryAria: "Choisir une catégorie",
     imageAlt: name => `Illustration : ${name}`,
     featuresTitle: "Signes distinctifs",

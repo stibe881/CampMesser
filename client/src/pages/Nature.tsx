@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import {
+  Flashlight,
   Moon,
   PawPrint,
   Sparkles,
@@ -9,6 +10,8 @@ import {
   HelpCircle,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import RedLightMode from "@/components/RedLightMode";
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
@@ -192,9 +195,49 @@ function MeteorCalendar() {
   );
 }
 
+/**
+ * Rotlicht-Umschalter im Astro-Bereich: erklärt die Dunkeladaption und
+ * schaltet den App-weiten Rotfilter ein. Zustand bewusst nur im Speicher.
+ */
+function RedLightSection({
+  active,
+  onToggle,
+}: {
+  active: boolean;
+  onToggle: () => void;
+}) {
+  const { t } = useI18n();
+  return (
+    <section
+      className="mb-6 rounded-xl border border-border bg-card p-4"
+      aria-label={t.nature.redLightSectionAria}
+    >
+      <div className="mb-2 flex items-center gap-2">
+        <Flashlight className="h-4 w-4 text-primary" aria-hidden="true" />
+        <h2 className="font-serif text-lg font-semibold">
+          {t.nature.redLightTitle}
+        </h2>
+      </div>
+      <p className="mb-3 text-sm text-muted-foreground">
+        {t.nature.redLightHint}
+      </p>
+      <Button
+        variant="outline"
+        size="sm"
+        aria-pressed={active}
+        onClick={onToggle}
+      >
+        <Flashlight className="mr-1.5 h-4 w-4" aria-hidden="true" />
+        {active ? t.nature.redLightOff : t.nature.redLightOn}
+      </Button>
+    </section>
+  );
+}
+
 export default function NaturePage() {
   const { lang, t } = useI18n();
   const [category, setCategory] = useState<string>("tierspuren");
+  const [redLight, setRedLight] = useState(false);
   const activeCategory = natureCategories.find(c => c.id === category)!;
   const entries = natureEntries.filter(e => e.category === category);
 
@@ -209,6 +252,11 @@ export default function NaturePage() {
 
       <MoonCalendar />
       <MeteorCalendar />
+      <RedLightSection
+        active={redLight}
+        onToggle={() => setRedLight(v => !v)}
+      />
+      {redLight && <RedLightMode onExit={() => setRedLight(false)} />}
 
       <div
         className="mb-4 grid grid-cols-3 gap-2"

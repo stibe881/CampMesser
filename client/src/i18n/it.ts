@@ -1285,6 +1285,13 @@ export const it: Translation = {
     moonOk: pct => `Buona posizione della luna: illuminata solo al ${pct} %.`,
     meteorFootnote:
       "I tassi valgono per un cielo scuro senza inquinamento luminoso. Le date sono circa le stesse ogni anno, calcolo offline sul dispositivo.",
+    redLightSectionAria: "Modalità luce rossa per osservare le stelle",
+    redLightTitle: "Modalità luce rossa",
+    redLightHint:
+      "Una luce rossa attenuata preserva l'adattamento al buio dei tuoi occhi: dopo uno sguardo al telefono torni a vedere molto più in fretta le stelle deboli. Il filtro copre tutta l'app, che resta utilizzabile – al ricaricamento si disattiva da solo.",
+    redLightOn: "Attiva la luce rossa",
+    redLightOff: "Spegni la luce rossa",
+    redLightOffAria: "Esci dalla modalità luce rossa",
     categoryAria: "Scegli una categoria",
     imageAlt: name => `Illustrazione: ${name}`,
     featuresTitle: "Segni di riconoscimento",

@@ -1302,6 +1302,13 @@ export const de = {
     moonOk: (pct: number) => `Guter Mondstand: nur ${pct} % beleuchtet.`,
     meteorFootnote:
       "Raten gelten für dunklen Himmel ohne Lichtverschmutzung. Termine jährlich ungefähr gleich, Berechnung offline auf dem Gerät.",
+    redLightSectionAria: "Rotlicht-Modus für die Sternbeobachtung",
+    redLightTitle: "Rotlicht-Modus",
+    redLightHint:
+      "Rotes, gedimmtes Licht erhält die Dunkeladaption deiner Augen: Nach dem Blick aufs Handy siehst du schwache Sterne viel schneller wieder. Der Filter legt sich über die ganze App, bedienen kannst du sie weiterhin – beim Neuladen ist er automatisch aus.",
+    redLightOn: "Rotlicht einschalten",
+    redLightOff: "Rotlicht aus",
+    redLightOffAria: "Rotlicht-Modus beenden",
     categoryAria: "Kategorie wählen",
     imageAlt: (name: string) => `Illustration: ${name}`,
     featuresTitle: "Erkennungsmerkmale",

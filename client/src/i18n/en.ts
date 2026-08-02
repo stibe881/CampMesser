@@ -1260,6 +1260,13 @@ export const en: Translation = {
     moonOk: pct => `Good moon conditions: only ${pct} % illuminated.`,
     meteorFootnote:
       "Rates apply to a dark sky without light pollution. Dates are roughly the same every year, calculated offline on the device.",
+    redLightSectionAria: "Red light mode for stargazing",
+    redLightTitle: "Red light mode",
+    redLightHint:
+      "Dim red light preserves your eyes' dark adaptation: after glancing at your phone you can spot faint stars again much sooner. The filter covers the whole app while everything stays usable – it switches off automatically on reload.",
+    redLightOn: "Turn on red light",
+    redLightOff: "Red light off",
+    redLightOffAria: "Exit red light mode",
     categoryAria: "Choose a category",
     imageAlt: name => `Illustration: ${name}`,
     featuresTitle: "Identifying features",
