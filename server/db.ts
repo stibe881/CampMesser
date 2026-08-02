@@ -722,6 +722,45 @@ export async function setTripLogWeather(
     .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
 }
 
+/**
+ * Titelbild eines Tagebuch-Eintrags setzen oder mit null entfernen (nur
+ * eigener Eintrag). Ob das Foto zum Trip gehört, prüft der Router.
+ */
+export async function setTripLogCoverPhoto(
+  id: number,
+  userId: number,
+  coverPhotoId: number | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripLogs)
+    .set({ coverPhotoId })
+    .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
+}
+
+/**
+ * Titelbild-Verweis eines Trips löschen, falls er auf das gegebene Foto
+ * zeigt – wird beim Löschen des Fotos aufgerufen, damit kein toter
+ * coverPhotoId zurückbleibt.
+ */
+export async function clearTripLogCoverPhoto(
+  tripId: number,
+  userId: number,
+  photoId: number
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripLogs)
+    .set({ coverPhotoId: null })
+    .where(
+      and(
+        eq(tripLogs.id, tripId),
+        eq(tripLogs.userId, userId),
+        eq(tripLogs.coverPhotoId, photoId)
+      )
+    );
+}
+
 export async function deleteTripLog(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db

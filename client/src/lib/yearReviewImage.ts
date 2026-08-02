@@ -27,6 +27,13 @@ export interface YearReviewImageLabels {
 export interface YearReviewImageData {
   review: YearReview;
   labels: YearReviewImageLabels;
+  /**
+   * Optionales Titelbild (best bewerteter bzw. längster Trip des Jahres):
+   * fertig geladenes Bild von der eigenen Origin (/api/trips/photos/…) –
+   * das Canvas bleibt dadurch untainted und toBlob funktioniert. Ohne Bild
+   * bleibt das Layout unverändert.
+   */
+  coverImage?: HTMLImageElement;
 }
 
 // App-Farben (Hex-Näherungen der oklch-Werte aus index.css, helles Design)
@@ -54,6 +61,30 @@ function ellipsize(
     cut = cut.slice(0, -1);
   }
   return `${cut.trimEnd()}…`;
+}
+
+/** Bild «cover»-beschnitten (mittig, füllend) in ein abgerundetes Rechteck zeichnen. */
+function drawCoverImage(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  radius: number
+) {
+  const iw = img.naturalWidth || img.width;
+  const ih = img.naturalHeight || img.height;
+  if (!iw || !ih) return;
+  const scale = Math.max(w / iw, h / ih);
+  const sw = w / scale;
+  const sh = h / scale;
+  ctx.save();
+  const clip = new Path2D();
+  clip.roundRect(x, y, w, h, radius);
+  ctx.clip(clip);
+  ctx.drawImage(img, (iw - sw) / 2, (ih - sh) / 2, sw, sh, x, y, w, h);
+  ctx.restore();
 }
 
 /** Die CampMesser-Bildmarke (Pfad aus BrandLogo.tsx, viewBox 64) zeichnen. */
@@ -95,7 +126,7 @@ export function drawYearReview(
   data: YearReviewImageData,
   lang: Language
 ): void {
-  const { review, labels } = data;
+  const { review, labels, coverImage } = data;
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
   const ctx = canvas.getContext("2d");
@@ -136,13 +167,19 @@ export function drawYearReview(
     ctx.fillText(ellipsize(ctx, stat.label, col - 40), cx, 600);
   });
 
-  // Trennlinie
-  ctx.strokeStyle = AMBER;
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.moveTo(140, 668);
-  ctx.lineTo(WIDTH - 140, 668);
-  ctx.stroke();
+  // Mit Titelbild: abgerundetes Banner statt Trennlinie, Highlights kompakter
+  const hasCover = Boolean(coverImage);
+  if (coverImage) {
+    drawCoverImage(ctx, coverImage, 80, 636, WIDTH - 160, 270, 24);
+  } else {
+    // Trennlinie
+    ctx.strokeStyle = AMBER;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(140, 668);
+    ctx.lineTo(WIDTH - 140, 668);
+    ctx.stroke();
+  }
 
   // Highlights: Top-Platz, längster Aufenthalt, best bewerteter Platz
   const dash = "–";
@@ -168,27 +205,33 @@ export function drawYearReview(
     },
   ];
   highlights.forEach((item, i) => {
-    const top = 750 + i * 170;
-    // Rauten-Punkt als Akzent
-    ctx.save();
-    ctx.translate(WIDTH / 2, top - 12);
-    ctx.rotate(Math.PI / 4);
-    ctx.fillStyle = AMBER;
-    ctx.fillRect(-9, -9, 18, 18);
-    ctx.restore();
+    const top = hasCover ? 985 + i * 105 : 750 + i * 170;
+    if (!hasCover) {
+      // Rauten-Punkt als Akzent (nur im luftigen Layout ohne Titelbild)
+      ctx.save();
+      ctx.translate(WIDTH / 2, top - 12);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = AMBER;
+      ctx.fillRect(-9, -9, 18, 18);
+      ctx.restore();
+    }
     ctx.fillStyle = MUTED;
-    ctx.font = `600 30px ${SANS}`;
+    ctx.font = hasCover ? `600 26px ${SANS}` : `600 30px ${SANS}`;
     ctx.fillText(
       ellipsize(ctx, item.label.toUpperCase(), WIDTH - 160),
       WIDTH / 2,
-      top + 44
+      top + (hasCover ? 0 : 44)
     );
     ctx.fillStyle = INK;
-    ctx.font = `600 48px ${SERIF}`;
+    ctx.font = hasCover ? `600 42px ${SERIF}` : `600 48px ${SERIF}`;
     const value = item.extra
       ? `${ellipsize(ctx, item.value, WIDTH - 420)} · ${item.extra}`
       : item.value;
-    ctx.fillText(ellipsize(ctx, value, WIDTH - 120), WIDTH / 2, top + 104);
+    ctx.fillText(
+      ellipsize(ctx, value, WIDTH - 120),
+      WIDTH / 2,
+      top + (hasCover ? 48 : 104)
+    );
   });
 
   // Fusszeile

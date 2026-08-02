@@ -10,6 +10,7 @@ import {
   ChevronRight,
   ImagePlus,
   Loader2,
+  Star,
   Trash2,
   X,
 } from "lucide-react";
@@ -55,6 +56,23 @@ export interface GalleryPhoto {
   fileName: string;
 }
 
+/**
+ * Optionale Titelbild-Funktion (genutzt vom Reise-Tagebuch): markiert das
+ * aktuelle Titelbild in den Thumbnails und bietet im Vollbild-Dialog einen
+ * Setzen/Entfernen-Knopf. Ohne diese Prop (Platz-Dossier) bleibt die
+ * Galerie unverändert.
+ */
+export interface GalleryCover {
+  coverPhotoId: number | null;
+  pending?: boolean;
+  onSetCover: (photoId: number | null) => void;
+  texts: {
+    setButton: string;
+    removeButton: string;
+    badge: string;
+  };
+}
+
 export default function PhotoGallery({
   photos,
   loadFailed,
@@ -65,6 +83,7 @@ export default function PhotoGallery({
   onChanged,
   deletePhoto,
   texts,
+  cover,
 }: {
   photos: GalleryPhoto[];
   /** true, wenn die Foto-Liste nicht geladen werden konnte */
@@ -81,6 +100,8 @@ export default function PhotoGallery({
   /** Foto löschen; muss bei Fehlern werfen */
   deletePhoto: (photoId: number) => Promise<unknown>;
   texts: PhotoGalleryTexts;
+  /** Optional: Titelbild markieren/setzen (siehe GalleryCover) */
+  cover?: GalleryCover;
 }) {
   const [uploadingCount, setUploadingCount] = useState(0);
   const [deletePending, setDeletePending] = useState(false);
@@ -216,6 +237,12 @@ export default function PhotoGallery({
               >
                 <X className="h-3 w-3" aria-hidden="true" />
               </button>
+              {cover && cover.coverPhotoId === photo.id && (
+                <span className="pointer-events-none absolute bottom-0.5 left-0.5 flex items-center gap-0.5 rounded-full bg-primary/90 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-primary-foreground">
+                  <Star className="h-2.5 w-2.5" aria-hidden="true" />
+                  {cover.texts.badge}
+                </span>
+              )}
             </li>
           ))}
         </ul>
@@ -291,18 +318,48 @@ export default function PhotoGallery({
             >
               <ChevronLeft className="h-4 w-4" aria-hidden="true" />
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={deletePending || !lightboxPhoto}
-              onClick={() => {
-                if (lightboxPhoto) void removePhoto(lightboxPhoto.id);
-              }}
-            >
-              <Trash2 className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-              {texts.photoDeleteAria((lightboxIndex ?? 0) + 1)}
-            </Button>
+            <span className="flex flex-wrap items-center justify-center gap-2">
+              {cover && lightboxPhoto && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={cover.pending}
+                  aria-pressed={cover.coverPhotoId === lightboxPhoto.id}
+                  onClick={() =>
+                    cover.onSetCover(
+                      cover.coverPhotoId === lightboxPhoto.id
+                        ? null
+                        : lightboxPhoto.id
+                    )
+                  }
+                >
+                  <Star
+                    className={
+                      cover.coverPhotoId === lightboxPhoto.id
+                        ? "mr-1.5 h-3.5 w-3.5 fill-chart-1 text-chart-1"
+                        : "mr-1.5 h-3.5 w-3.5"
+                    }
+                    aria-hidden="true"
+                  />
+                  {cover.coverPhotoId === lightboxPhoto.id
+                    ? cover.texts.removeButton
+                    : cover.texts.setButton}
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={deletePending || !lightboxPhoto}
+                onClick={() => {
+                  if (lightboxPhoto) void removePhoto(lightboxPhoto.id);
+                }}
+              >
+                <Trash2 className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                {texts.photoDeleteAria((lightboxIndex ?? 0) + 1)}
+              </Button>
+            </span>
             <Button
               type="button"
               variant="outline"

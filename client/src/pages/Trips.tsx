@@ -537,21 +537,71 @@ function TripWeatherArchive({
   );
 }
 
+/** URL eines Trip-Fotos (gleiche Origin – Canvas bleibt dadurch untainted). */
+const tripPhotoSrc = (fileName: string) => `/api/trips/photos/${fileName}`;
+
+/**
+ * Titelbild-Banner eines Tagebuch-Eintrags: zeigt das als Titelbild
+ * markierte Foto oben am Eintrag. Nutzt dieselbe Foto-Query wie die Galerie
+ * darunter (react-query dedupliziert – kein zweiter Fetch).
+ */
+function TripCoverBanner({
+  tripId,
+  coverPhotoId,
+  tripName,
+}: {
+  tripId: number;
+  coverPhotoId: number | null;
+  tripName: string;
+}) {
+  const t = useT();
+  const photosQuery = trpc.trips.photos.list.useQuery(
+    { tripId },
+    { enabled: coverPhotoId !== null }
+  );
+  if (coverPhotoId === null) return null;
+  const cover = photosQuery.data?.find(p => p.id === coverPhotoId);
+  if (!cover) return null;
+  return (
+    <img
+      src={tripPhotoSrc(cover.fileName)}
+      alt={t.trips.coverAlt(tripName)}
+      loading="lazy"
+      className="mb-3 max-h-44 w-full rounded-lg object-cover"
+    />
+  );
+}
+
 /**
  * Foto-Galerie eines Tagebuch-Eintrags: nutzt die gemeinsame PhotoGallery
- * (Upload, Thumbnails, Vollbild-Dialog) mit den Trip-Endpoints und -Texten.
+ * (Upload, Thumbnails, Vollbild-Dialog) mit den Trip-Endpoints und -Texten;
+ * zusätzlich lässt sich hier ein Foto als Titelbild markieren.
  */
 function TripPhotos({
   tripId,
   tripName,
+  coverPhotoId,
 }: {
   tripId: number;
   tripName: string;
+  coverPhotoId: number | null;
 }) {
   const t = useT();
   const utils = trpc.useUtils();
   const photosQuery = trpc.trips.photos.list.useQuery({ tripId });
-  const removeMutation = trpc.trips.photos.remove.useMutation();
+  const removeMutation = trpc.trips.photos.remove.useMutation({
+    // Wird das Titelbild gelöscht, setzt der Server coverPhotoId zurück
+    onSuccess: () => utils.trips.list.invalidate(),
+  });
+  const setCoverMutation = trpc.trips.setCoverPhoto.useMutation({
+    onSuccess: (_data, vars) => {
+      utils.trips.list.invalidate();
+      toast.success(
+        vars.photoId === null ? t.trips.coverRemoved : t.trips.coverSet
+      );
+    },
+    onError: () => toast.error(t.trips.coverSaveFailed),
+  });
 
   return (
     <PhotoGallery
@@ -560,9 +610,19 @@ function TripPhotos({
       name={tripName}
       maxPhotos={MAX_PHOTOS_PER_TRIP}
       uploadUrl={`/api/trips/${tripId}/photos`}
-      photoSrc={fileName => `/api/trips/photos/${fileName}`}
+      photoSrc={tripPhotoSrc}
       onChanged={() => utils.trips.photos.list.invalidate({ tripId })}
       deletePhoto={photoId => removeMutation.mutateAsync({ photoId })}
+      cover={{
+        coverPhotoId,
+        pending: setCoverMutation.isPending,
+        onSetCover: photoId => setCoverMutation.mutate({ tripId, photoId }),
+        texts: {
+          setButton: t.trips.coverSetButton,
+          removeButton: t.trips.coverRemoveButton,
+          badge: t.trips.coverBadge,
+        },
+      }}
       texts={{
         addPhotos: t.trips.addPhotos,
         addPhotosAria: t.trips.addPhotosAria,
@@ -775,6 +835,58 @@ export default function TripsPage() {
   );
 
   /**
+   * Titelbild fürs Jahresrückblick-Bild laden: einfache Priorität – zuerst
+   * der best bewertete Trip des Jahres, sonst der längste; hat keiner der
+   * beiden ein Titelbild (oder schlägt das Laden fehl), bleibt das Bild weg.
+   * Geladen wird über die bestehende GET-Route (gleiche Origin) – das
+   * Canvas bleibt dadurch untainted.
+   */
+  const loadReviewCoverImage = async (
+    year: number
+  ): Promise<HTMLImageElement | undefined> => {
+    const inYear = trips.filter(
+      trip => Number(trip.startDate.slice(0, 4)) === year
+    );
+    const rated = inYear.filter(trip => typeof trip.rating === "number");
+    const bestRated =
+      rated.length > 0
+        ? [...rated].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))[0]
+        : undefined;
+    const longest =
+      inYear.length > 0
+        ? [...inYear].sort(
+            (a, b) =>
+              tripNights(b.startDate, b.endDate) -
+              tripNights(a.startDate, a.endDate)
+          )[0]
+        : undefined;
+    const coverTrip =
+      bestRated?.coverPhotoId != null
+        ? bestRated
+        : longest?.coverPhotoId != null
+          ? longest
+          : undefined;
+    if (!coverTrip || coverTrip.coverPhotoId == null) return undefined;
+    try {
+      const photos = await utils.trips.photos.list.fetch({
+        tripId: coverTrip.id,
+      });
+      const photo = photos.find(p => p.id === coverTrip.coverPhotoId);
+      if (!photo) return undefined;
+      const img = new Image();
+      img.src = tripPhotoSrc(photo.fileName);
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error("Titelbild nicht ladbar"));
+      });
+      return img;
+    } catch {
+      // Ohne Titelbild weiterzeichnen – das Rückblick-Bild bleibt nutzbar
+      return undefined;
+    }
+  };
+
+  /**
    * Jahresrückblick als PNG teilen: Kennzahlen mit der Canvas-API zeichnen
    * (client/src/lib/yearReviewImage.ts), dann Web Share API Level 2 mit
    * Datei – wo nicht verfügbar, Download über einen a[download]-Link.
@@ -782,11 +894,13 @@ export default function TripsPage() {
   const shareYearReview = async () => {
     if (!yearReview) return;
     try {
+      const coverImage = await loadReviewCoverImage(yearReview.year);
       const canvas = document.createElement("canvas");
       drawYearReview(
         canvas,
         {
           review: yearReview,
+          coverImage,
           labels: {
             subtitle: `${t.trips.yearReviewTitle} ${yearReview.year}`,
             stays: t.trips.staysLabel,
@@ -1315,6 +1429,11 @@ export default function TripsPage() {
                   key={trip.id}
                   className="rounded-xl border border-primary/40 bg-accent/30 p-4"
                 >
+                  <TripCoverBanner
+                    tripId={trip.id}
+                    coverPhotoId={trip.coverPhotoId}
+                    tripName={trip.title || placeName(trip)}
+                  />
                   <div className="flex items-start gap-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                       <Tent className="h-5 w-5" aria-hidden="true" />
@@ -1391,6 +1510,7 @@ export default function TripsPage() {
                       <TripPhotos
                         tripId={trip.id}
                         tripName={trip.title || placeName(trip)}
+                        coverPhotoId={trip.coverPhotoId}
                       />
                     </div>
                     <div className="flex shrink-0 flex-col gap-1">
@@ -1447,6 +1567,11 @@ export default function TripsPage() {
                 key={trip.id}
                 className="rounded-xl border border-border bg-card p-4"
               >
+                <TripCoverBanner
+                  tripId={trip.id}
+                  coverPhotoId={trip.coverPhotoId}
+                  tripName={trip.title || placeName(trip)}
+                />
                 <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                     {trip.spotId != null ? (
@@ -1506,6 +1631,7 @@ export default function TripsPage() {
                     <TripPhotos
                       tripId={trip.id}
                       tripName={trip.title || placeName(trip)}
+                      coverPhotoId={trip.coverPhotoId}
                     />
                   </div>
                   <div className="flex shrink-0 flex-col gap-1">

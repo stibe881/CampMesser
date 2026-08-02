@@ -244,6 +244,8 @@ export const tripLogs = mysqlTable(
      * Open-Meteo-Archiv befüllt; null = (noch) kein Archiv.
      */
     weatherJson: text("weatherJson"),
+    /** Titelbild des Eintrags (tripPhotos.id); null = kein Titelbild */
+    coverPhotoId: int("coverPhotoId"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },

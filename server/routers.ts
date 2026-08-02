@@ -1784,6 +1784,37 @@ export const appRouter = router({
         );
         return { success: true } as const;
       }),
+    /**
+     * Titelbild eines Eintrags setzen (photoId) oder mit null entfernen.
+     * Das Foto muss zu GENAU DIESEM Trip gehören – sonst NOT_FOUND.
+     */
+    setCoverPhoto: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number().int().positive(),
+          photoId: z.number().int().positive().nullable(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.getTripLog(input.tripId, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        if (input.photoId != null) {
+          const photo = await db.getTripPhoto(input.photoId, ctx.user.id);
+          if (!photo || photo.tripId !== input.tripId) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Foto nicht gefunden.",
+            });
+          }
+        }
+        await db.setTripLogCoverPhoto(input.tripId, ctx.user.id, input.photoId);
+        return { success: true } as const;
+      }),
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
@@ -1820,6 +1851,8 @@ export const appRouter = router({
             });
           }
           await db.deleteTripPhoto(input.photoId, ctx.user.id);
+          // War das Foto das Titelbild seines Trips, den Verweis mitlöschen
+          await db.clearTripLogCoverPhoto(photo.tripId, ctx.user.id, photo.id);
           const { tripPhotoStorage } = await import("./photoStorage");
           await tripPhotoStorage.deleteFiles([photo.fileName]);
           return { success: true } as const;
