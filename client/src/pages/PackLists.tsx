@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import {
   Baby,
   Backpack,
@@ -75,6 +75,14 @@ export default function PackListsPage() {
     url: string;
   } | null>(null);
   const [templateQr, setTemplateQr] = useState<string | null>(null);
+
+  // Schnellaktion «Neue Packliste» (?neu=1): den Neue-Liste-Dialog öffnen
+  const searchParams = useSearch();
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (new URLSearchParams(searchParams).get("neu") === "1")
+      setDialogOpen(true);
+  }, [searchParams, isAuthenticated]);
 
   // QR-Code zum Teil-Link erzeugen (Muster PackListDetail): einfach abscannen lassen
   useEffect(() => {

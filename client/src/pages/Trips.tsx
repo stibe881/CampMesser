@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BookOpen,
   CalendarClock,
@@ -19,7 +19,7 @@ import {
   Trophy,
   UtensilsCrossed,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -510,6 +510,20 @@ export default function TripsPage() {
   /** Sterne-Bewertung des neuen Eintrags (null = ohne Bewertung). */
   const [formRating, setFormRating] = useState<number | null>(null);
 
+  // Schnellaktion «Neuer Tagebuch-Eintrag» (?neu=1): zum Formular springen
+  const search = useSearch();
+  const newEntryCardRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (new URLSearchParams(search).get("neu") !== "1") return;
+    const card = newEntryCardRef.current;
+    if (!card) return;
+    card.scrollIntoView({ behavior: "smooth", block: "start" });
+    card
+      .querySelector<HTMLElement>("input, button, [role='combobox']")
+      ?.focus({ preventScroll: true });
+  }, [search, isAuthenticated]);
+
   const addMutation = trpc.trips.add.useMutation({
     onSuccess: () => {
       utils.trips.list.invalidate();
@@ -877,7 +891,7 @@ export default function TripsPage() {
       )}
 
       {/* Neuer Eintrag */}
-      <Card className="mb-8">
+      <Card className="mb-8 scroll-mt-20" ref={newEntryCardRef}>
         <CardContent className="pt-6">
           <h2 className="mb-4 flex items-center gap-2 font-serif text-base font-semibold">
             <BookOpen className="h-4 w-4 text-primary" aria-hidden="true" />

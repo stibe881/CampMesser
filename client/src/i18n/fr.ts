@@ -1920,6 +1920,25 @@ export const fr: Translation = {
     overview: "Vue d'ensemble",
     backAria: label => `Retour : ${label}`,
   },
+  quickActions: {
+    fabAria: "Ouvrir les actions rapides",
+    title: "Actions rapides",
+    subtitle: "Va droit au but – sans passer par la page d'accueil.",
+    searchPlaceholder: "Chercher une action …",
+    noResults: "Aucune action trouvée.",
+    newTrip: "Nouvelle entrée de journal",
+    newPackList: "Nouvelle liste de bagages",
+    recipeSearch: "Chercher une recette",
+    sos: "SOS & urgence",
+    shoppingAdd: "Ajouter à la liste de courses",
+    shoppingPlaceholder: "p. ex. lait …",
+    shoppingSubmit: "Ajouter",
+    shoppingAdded: (name: string) => `${name} ajouté à la liste de courses`,
+    shoppingExists: (name: string) =>
+      `${name} est déjà sur la liste de courses`,
+    shoppingFailed: "L'entrée n'a pas pu être enregistrée",
+    backToActions: "Retour aux actions",
+  },
   install: {
     title: "Installer CampMesser",
     description:

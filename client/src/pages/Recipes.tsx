@@ -14,7 +14,7 @@ import {
   Users,
   WifiOff,
 } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -415,6 +415,14 @@ export default function RecipesPage() {
   const [maxTime, setMaxTime] = useState<string>("alle");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Recipe | null>(null);
+
+  // Schnellaktion «Rezept suchen» (?suche=1): Fokus direkt ins Suchfeld
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchParams = useSearch();
+  useEffect(() => {
+    if (new URLSearchParams(searchParams).get("suche") !== "1") return;
+    searchInputRef.current?.focus();
+  }, [searchParams]);
   const { isAuthenticated } = useAuth();
   const utils = trpc.useUtils();
   const customQuery = trpc.recipes.list.useQuery(undefined, {
@@ -486,6 +494,7 @@ export default function RecipesPage() {
             aria-hidden="true"
           />
           <Input
+            ref={searchInputRef}
             className="pl-9"
             placeholder={t.recipes.searchPlaceholder}
             value={search}

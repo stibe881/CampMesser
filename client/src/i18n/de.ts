@@ -1917,6 +1917,25 @@ export const de = {
     overview: "Übersicht",
     backAria: (label: string) => `Zurück zur ${label}`,
   },
+  quickActions: {
+    fabAria: "Schnellaktionen öffnen",
+    title: "Schnellaktionen",
+    subtitle: "Direkt loslegen – ohne Umweg über die Startseite.",
+    searchPlaceholder: "Aktion suchen …",
+    noResults: "Keine Aktion gefunden.",
+    newTrip: "Neuer Tagebuch-Eintrag",
+    newPackList: "Neue Packliste",
+    recipeSearch: "Rezept suchen",
+    sos: "SOS & Notfall",
+    shoppingAdd: "Eintrag auf die Einkaufsliste",
+    shoppingPlaceholder: "z. B. Milch …",
+    shoppingSubmit: "Hinzufügen",
+    shoppingAdded: (name: string) => `${name} auf die Einkaufsliste gesetzt`,
+    shoppingExists: (name: string) =>
+      `${name} steht schon auf der Einkaufsliste`,
+    shoppingFailed: "Eintrag konnte nicht gespeichert werden",
+    backToActions: "Zurück zu den Aktionen",
+  },
   install: {
     title: "CampMesser installieren",
     description:

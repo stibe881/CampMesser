@@ -22,6 +22,7 @@ import { useI18n } from "@/i18n";
 import { LANGUAGES, LANGUAGE_LABELS } from "@shared/i18n";
 import BrandLogo from "@/components/BrandLogo";
 import InstallPrompt from "@/components/InstallPrompt";
+import QuickActions from "@/components/QuickActions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -265,6 +266,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* PWA-Install-Hinweis (dezent, abweisbar, über der Bottom-Nav) */}
       <InstallPrompt />
+
+      {/* Schnellaktionen: FAB (mobil) + Befehls-Palette (Cmd/Ctrl+K) */}
+      <QuickActions />
 
       {/* Bottom-Navigation (mobil) */}
       <nav
