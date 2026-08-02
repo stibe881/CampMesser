@@ -721,6 +721,16 @@ export const en: Translation = {
     placeRemoveAria: name => `Remove ${name} from your weather places`,
     placeLimitHint: max =>
       `A maximum of ${max} saved places – remove one first.`,
+    placesTitle: "Your places",
+    placesAria: "Alert overview for your places",
+    placesIntro:
+      "Checks the severe-weather alerts for the next 48 hours for your saved pitches and your home location.",
+    placesLoadingAria: "Checking alerts for your places",
+    placesNoAlert: "No alerts",
+    placesCheckFailed: "Check failed",
+    placesEmpty:
+      "No places saved yet – add pitch favourites or set your home location in your profile.",
+    placesSelectAria: name => `Show the weather for ${name} in the main view`,
   },
   water: {
     title: "Drinking water calculator",

@@ -753,6 +753,17 @@ export const de = {
     placeRemoveAria: (name: string) => `${name} aus den Wetter-Orten entfernen`,
     placeLimitHint: (max: number) =>
       `Maximal ${max} gespeicherte Orte – entferne zuerst einen.`,
+    placesTitle: "Deine Plätze",
+    placesAria: "Warnungs-Übersicht deiner Plätze",
+    placesIntro:
+      "Prüft die Unwetterwarnungen der nächsten 48 Stunden für deine gespeicherten Zeltplätze und deinen Heim-Standort.",
+    placesLoadingAria: "Warnungen deiner Plätze werden geprüft",
+    placesNoAlert: "Keine Warnung",
+    placesCheckFailed: "Prüfung fehlgeschlagen",
+    placesEmpty:
+      "Noch keine Plätze gespeichert – lege Zeltplatz-Favoriten an oder setze deinen Heim-Standort im Profil.",
+    placesSelectAria: (name: string) =>
+      `Wetter für ${name} in der Hauptansicht anzeigen`,
   },
   water: {
     title: "Trinkwasser-Rechner",

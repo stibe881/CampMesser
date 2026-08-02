@@ -751,6 +751,17 @@ export const fr: Translation = {
     placeRemoveAria: name => `Retirer ${name} des lieux météo`,
     placeLimitHint: max =>
       `${max} lieux enregistrés au maximum – retire d'abord un lieu.`,
+    placesTitle: "Tes lieux",
+    placesAria: "Aperçu des alertes pour tes lieux",
+    placesIntro:
+      "Vérifie les alertes d'intempéries des prochaines 48 heures pour tes emplacements enregistrés et ton lieu de domicile.",
+    placesLoadingAria: "Vérification des alertes pour tes lieux",
+    placesNoAlert: "Aucune alerte",
+    placesCheckFailed: "Vérification échouée",
+    placesEmpty:
+      "Aucun lieu enregistré pour l'instant – ajoute des emplacements favoris ou définis ton lieu de domicile dans le profil.",
+    placesSelectAria: name =>
+      `Afficher la météo de ${name} dans la vue principale`,
   },
   water: {
     title: "Calculateur d'eau potable",
