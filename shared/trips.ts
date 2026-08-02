@@ -66,6 +66,80 @@ export function daysUntilTrip(startDate: string, today: string): number {
   return Math.round((start - now) / DAY_MS);
 }
 
+/** Ein Ort mit Nächte-Zahl für die Highlights des Jahresrückblicks. */
+export interface YearHighlight {
+  name: string;
+  nights: number;
+}
+
+export interface YearReview {
+  year: number;
+  /** Anzahl Aufenthalte mit Anreise in diesem Jahr */
+  trips: number;
+  /** Übernachtungen gesamt */
+  nights: number;
+  /** Anzahl verschiedener Orte */
+  places: number;
+  /** Ort mit den meisten Nächten */
+  topPlace: YearHighlight | null;
+  /** Längster Aufenthalt am Stück (Ort + Nächte) */
+  longestStay: YearHighlight | null;
+}
+
+/**
+ * Jahresrückblick: Kennzahlen aller Aufenthalte mit Anreise im gegebenen Jahr.
+ * Bewusst einfach gehalten: ein Trip zählt komplett zum Jahr seines Startdatums –
+ * ein Silvester-Aufenthalt wird also NICHT auf zwei Jahre aufgeteilt.
+ * Vergangen/geplant filtert die Aufrufstelle (lang steuert nur die Orts-Sortierung).
+ */
+export function computeYearReview(
+  trips: TripLike[],
+  year: number,
+  lang: Language = "de"
+): YearReview {
+  const inYear = trips.filter(trip => {
+    const start = parseIsoDay(trip.startDate);
+    return start !== null && new Date(start).getUTCFullYear() === year;
+  });
+  const review: YearReview = {
+    year,
+    trips: inYear.length,
+    nights: 0,
+    places: 0,
+    topPlace: null,
+    longestStay: null,
+  };
+  const placeNights = new Map<string, number>();
+  const places = new Set<string>();
+  for (const trip of inYear) {
+    const nights = tripNights(trip.startDate, trip.endDate);
+    review.nights += nights;
+    const place = trip.placeName?.trim();
+    if (place) {
+      places.add(place);
+      if (nights > 0) {
+        placeNights.set(place, (placeNights.get(place) ?? 0) + nights);
+      }
+    }
+    // Längster Aufenthalt: bei Gleichstand gewinnt der zuerst eingetragene
+    if (
+      nights > 0 &&
+      (review.longestStay === null || nights > review.longestStay.nights)
+    ) {
+      review.longestStay = { name: place ?? "", nights };
+    }
+  }
+  review.places = places.size;
+  const ranked = Array.from(placeNights.entries())
+    .map(([name, nights]) => ({ name, nights }))
+    .sort(
+      (a, b) =>
+        b.nights - a.nights || a.name.localeCompare(b.name, LOCALE_TAGS[lang])
+    );
+  review.topPlace = ranked[0] ?? null;
+  return review;
+}
+
 /** Gesamt-Statistik über alle Tagebuch-Einträge (lang steuert nur die Orts-Sortierung). */
 export function computeTripStats(
   trips: TripLike[],

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   computeTripStats,
+  computeYearReview,
   daysUntilTrip,
   isUpcomingTrip,
   nightsByYear,
@@ -89,6 +90,82 @@ describe("computeTripStats", () => {
       totalNights: 0,
       nightsByYear: {},
       topPlaces: [],
+    });
+  });
+});
+
+describe("computeYearReview", () => {
+  const trips = [
+    {
+      startDate: "2026-07-10",
+      endDate: "2026-07-13",
+      placeName: "Camping Aareschlucht",
+    },
+    {
+      startDate: "2026-08-01",
+      endDate: "2026-08-03",
+      placeName: "Camping Aareschlucht",
+    },
+    {
+      startDate: "2026-06-01",
+      endDate: "2026-06-05",
+      placeName: "Camping Seefeld",
+    },
+    {
+      startDate: "2026-05-01",
+      endDate: "2026-05-01",
+      placeName: "Tagesausflug",
+    },
+    {
+      startDate: "2025-12-30",
+      endDate: "2026-01-02",
+      placeName: "Wintercamp Gantrisch",
+    },
+  ];
+
+  it("zählt Trips, Nächte und verschiedene Orte des Jahres", () => {
+    const review = computeYearReview(trips, 2026);
+    expect(review.year).toBe(2026);
+    expect(review.trips).toBe(4);
+    expect(review.nights).toBe(3 + 2 + 4);
+    // Tagesausflug ohne Nacht zählt als Ort mit
+    expect(review.places).toBe(3);
+  });
+
+  it("kürt Top-Platz (meiste Nächte) und längsten Aufenthalt", () => {
+    const review = computeYearReview(trips, 2026);
+    // Aareschlucht gesamthaft 5 Nächte, Seefeld nur 4 – aber am Stück
+    expect(review.topPlace).toEqual({
+      name: "Camping Aareschlucht",
+      nights: 5,
+    });
+    expect(review.longestStay).toEqual({ name: "Camping Seefeld", nights: 4 });
+  });
+
+  it("zählt einen Silvester-Trip komplett zum Jahr der Anreise (keine Aufteilung)", () => {
+    // Bewusst einfach gehalten: alle 3 Nächte des Wintercamps (30.12.–2.1.)
+    // gehören zu 2025, obwohl eine Nacht schon im neuen Jahr liegt.
+    const review = computeYearReview(trips, 2025);
+    expect(review.trips).toBe(1);
+    expect(review.nights).toBe(3);
+    expect(review.topPlace).toEqual({
+      name: "Wintercamp Gantrisch",
+      nights: 3,
+    });
+    expect(review.longestStay).toEqual({
+      name: "Wintercamp Gantrisch",
+      nights: 3,
+    });
+  });
+
+  it("liefert leere Kennzahlen für ein Jahr ohne Trips", () => {
+    expect(computeYearReview(trips, 2024)).toEqual({
+      year: 2024,
+      trips: 0,
+      nights: 0,
+      places: 0,
+      topPlace: null,
+      longestStay: null,
     });
   });
 });

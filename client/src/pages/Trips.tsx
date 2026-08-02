@@ -11,6 +11,7 @@ import {
   MapPin,
   Moon,
   Plus,
+  Sparkles,
   Tent,
   Trash2,
   Trophy,
@@ -48,6 +49,7 @@ import { useI18n, useT } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
 import {
   computeTripStats,
+  computeYearReview,
   daysUntilTrip,
   isUpcomingTrip,
   tripNights,
@@ -414,20 +416,39 @@ export default function TripsPage() {
     return trip.location ?? t.trips.unknownPlace;
   };
 
-  const stats = useMemo(
+  const pastTripLikes = useMemo(
     () =>
-      computeTripStats(
-        trips.map(t => ({
-          startDate: t.startDate,
-          endDate: t.endDate,
-          placeName: placeName(t),
-        })),
-        lang
-      ),
+      trips.map(t => ({
+        startDate: t.startDate,
+        endDate: t.endDate,
+        placeName: placeName(t),
+      })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [trips, spots, lang]
+    [trips, spots]
+  );
+  const stats = useMemo(
+    () => computeTripStats(pastTripLikes, lang),
+    [pastTripLikes, lang]
   );
   const currentYear = new Date().getFullYear();
+
+  // Jahresrückblick: Jahre mit vergangenen Trips, Default = aktuellstes Jahr
+  const reviewYears = useMemo(() => {
+    const years = new Set<number>();
+    for (const t of trips) years.add(Number(t.startDate.slice(0, 4)));
+    return Array.from(years).sort((a, b) => b - a);
+  }, [trips]);
+  const [reviewYearChoice, setReviewYearChoice] = useState<string>("");
+  const reviewYear = reviewYears.includes(Number(reviewYearChoice))
+    ? Number(reviewYearChoice)
+    : reviewYears[0];
+  const yearReview = useMemo(
+    () =>
+      reviewYear === undefined
+        ? null
+        : computeYearReview(pastTripLikes, reviewYear, lang),
+    [pastTripLikes, reviewYear, lang]
+  );
 
   if (loading || (isAuthenticated && tripsQuery.isLoading)) {
     return (
@@ -494,6 +515,94 @@ export default function TripsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Jahresrückblick: nur wenn mindestens ein vergangener Trip existiert */}
+      {yearReview && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <h2 className="flex items-center gap-2 font-serif text-base font-semibold">
+                <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+                {t.trips.yearReviewTitle}
+              </h2>
+              <Select
+                value={String(yearReview.year)}
+                onValueChange={setReviewYearChoice}
+              >
+                <SelectTrigger
+                  className="w-28"
+                  aria-label={t.trips.yearReviewYearAria}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {reviewYears.map(year => (
+                    <SelectItem key={year} value={String(year)}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              <div className="text-center">
+                <p className="font-serif text-2xl font-bold text-primary">
+                  {yearReview.trips}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t.trips.staysLabel}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold">{yearReview.nights}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t.trips.nightsTotal}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold">{yearReview.places}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t.trips.yearReviewPlaces}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
+                  <Trophy
+                    className="h-4 w-4 shrink-0 text-chart-1"
+                    aria-hidden="true"
+                  />
+                  <span className="truncate">
+                    {yearReview.topPlace?.name ?? "–"}
+                  </span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t.trips.yearReviewTopPlace}
+                  {yearReview.topPlace
+                    ? ` · ${t.trips.nightsCount(yearReview.topPlace.nights)}`
+                    : ""}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
+                  <Moon
+                    className="h-4 w-4 shrink-0 text-primary"
+                    aria-hidden="true"
+                  />
+                  <span className="truncate">
+                    {yearReview.longestStay?.name ?? "–"}
+                  </span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t.trips.yearReviewLongest}
+                  {yearReview.longestStay
+                    ? ` · ${t.trips.nightsCount(yearReview.longestStay.nights)}`
+                    : ""}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Neuer Eintrag */}
       <Card className="mb-8">
