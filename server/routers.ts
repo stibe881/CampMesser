@@ -668,16 +668,23 @@ export const appRouter = router({
       .input(z.object({ name: z.string().min(1).max(160) }))
       .mutation(async ({ ctx, input }) => {
         const items = await db.getShoppingItems(ctx.user.id);
+        const name = input.name.trim();
+        // Duplikat-Schutz: steht der Name bereits unabgehakt auf der Liste
+        // (case-insensitiv), wird kein zweiter Eintrag angelegt.
+        const alreadyOpen = items.some(
+          i => !i.checked && i.name.trim().toLowerCase() === name.toLowerCase()
+        );
+        if (alreadyOpen) return { success: true, added: false } as const;
         const nextPosition =
           items.reduce((max, i) => Math.max(max, i.position), 0) + 1;
         await db.addShoppingItems([
           {
             userId: ctx.user.id,
-            name: input.name.trim(),
+            name,
             position: nextPosition,
           },
         ]);
-        return { success: true } as const;
+        return { success: true, added: true } as const;
       }),
     /** Mehrere Einträge auf einmal (z. B. Zutaten eines Rezepts). */
     addMany: protectedProcedure

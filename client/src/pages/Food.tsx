@@ -1,13 +1,26 @@
 import { useMemo, useState } from "react";
-import { ChefHat, Loader2, Plus, Refrigerator, Trash2 } from "lucide-react";
+import {
+  ChefHat,
+  Loader2,
+  Plus,
+  Refrigerator,
+  ShoppingCart,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { recipes } from "@/data/recipes";
@@ -75,6 +88,25 @@ export default function FoodPage() {
   });
   const removeMutation = trpc.food.remove.useMutation({
     onSuccess: () => utils.food.list.invalidate(),
+  });
+  // «Nachkaufen»: Lebensmittel auf die Einkaufsliste setzen (Server verhindert
+  // Duplikate, wenn der Name bereits unabgehakt auf der Liste steht)
+  const [, navigate] = useLocation();
+  const addToShoppingMutation = trpc.shopping.add.useMutation({
+    onSuccess: (result, variables) => {
+      utils.shopping.list.invalidate();
+      if (result.added) {
+        toast.success(t.food.addedToShopping(variables.name), {
+          action: {
+            label: t.shopping.openList,
+            onClick: () => navigate("/einkauf"),
+          },
+        });
+      } else {
+        toast.info(t.food.alreadyOnShopping(variables.name));
+      }
+    },
+    onError: () => toast.error(t.food.addToShoppingFailed),
   });
 
   const foodNames = useMemo(
@@ -219,12 +251,51 @@ export default function FoodPage() {
                   )}
                   <button
                     type="button"
-                    onClick={() => removeMutation.mutate({ id: item.id })}
-                    className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive"
-                    aria-label={t.food.removeAria(item.name)}
+                    onClick={() =>
+                      addToShoppingMutation.mutate({ name: item.name })
+                    }
+                    className={cn(
+                      "flex h-6 w-6 items-center justify-center rounded-full transition-colors",
+                      // Abgelaufene Vorräte: Nachkaufen-Aktion prominent zeigen
+                      info?.state === "expired"
+                        ? "bg-primary/15 text-primary hover:bg-primary/25"
+                        : "text-muted-foreground/60 hover:bg-primary/10 hover:text-primary"
+                    )}
+                    aria-label={t.food.addToShoppingAria(item.name)}
                   >
-                    <Trash2 className="h-3 w-3" aria-hidden="true" />
+                    <ShoppingCart className="h-3 w-3" aria-hidden="true" />
                   </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive"
+                        aria-label={t.food.removeAria(item.name)}
+                      >
+                        <Trash2 className="h-3 w-3" aria-hidden="true" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => removeMutation.mutate({ id: item.id })}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                        {t.food.deleteOnly}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          addToShoppingMutation.mutate({ name: item.name });
+                          removeMutation.mutate({ id: item.id });
+                        }}
+                      >
+                        <ShoppingCart
+                          className="mr-2 h-4 w-4"
+                          aria-hidden="true"
+                        />
+                        {t.food.deleteAndShop}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </span>
               );
             })}

@@ -1410,6 +1410,14 @@ export const it: Translation = {
     urgentMany: (n: number) => `${n} scorte dovrebbero essere consumate presto`,
     urgentSuffix: " – i suggerimenti di ricette qui sotto ti aiutano.",
     removeAria: (name: string) => `Rimuovi ${name}`,
+    addToShoppingAria: (name: string) =>
+      `Metti ${name} sulla lista della spesa`,
+    addedToShopping: (name: string) => `${name} messo sulla lista della spesa`,
+    alreadyOnShopping: (name: string) =>
+      `${name} è già sulla lista della spesa`,
+    addToShoppingFailed: "Impossibile aggiungerlo alla lista della spesa",
+    deleteOnly: "Solo eliminare",
+    deleteAndShop: "Elimina e metti sulla lista della spesa",
     emptyTitle: "Frigo box ancora vuoto",
     emptyText:
       "Registra quello che hai con te – ti suggeriamo le ricette adatte.",

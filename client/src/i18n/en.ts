@@ -1381,6 +1381,13 @@ export const en: Translation = {
     urgentMany: (n: number) => `${n} supplies should be used up soon`,
     urgentSuffix: " – the recipe suggestions below help with that.",
     removeAria: (name: string) => `Remove ${name}`,
+    addToShoppingAria: (name: string) => `Put ${name} on the shopping list`,
+    addedToShopping: (name: string) => `${name} added to the shopping list`,
+    alreadyOnShopping: (name: string) =>
+      `${name} is already on the shopping list`,
+    addToShoppingFailed: "Could not add it to the shopping list",
+    deleteOnly: "Delete only",
+    deleteAndShop: "Delete and add to shopping list",
     emptyTitle: "Cool box still empty",
     emptyText: "Enter what you have with you – we'll suggest matching recipes.",
     suggestionsTitle: "Here's what you can cook with it",

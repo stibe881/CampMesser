@@ -1426,6 +1426,13 @@ export const de = {
     urgentMany: (n: number) => `${n} Vorräte sollten bald verbraucht werden`,
     urgentSuffix: " – die Rezeptvorschläge unten helfen dabei.",
     removeAria: (name: string) => `${name} entfernen`,
+    addToShoppingAria: (name: string) => `${name} auf die Einkaufsliste setzen`,
+    addedToShopping: (name: string) => `${name} auf die Einkaufsliste gesetzt`,
+    alreadyOnShopping: (name: string) =>
+      `${name} steht schon auf der Einkaufsliste`,
+    addToShoppingFailed: "Konnte nicht auf die Einkaufsliste gesetzt werden",
+    deleteOnly: "Nur löschen",
+    deleteAndShop: "Löschen und auf die Einkaufsliste",
     emptyTitle: "Kühlbox noch leer",
     emptyText:
       "Trage ein, was du dabei hast – wir schlagen dir passende Rezepte vor.",

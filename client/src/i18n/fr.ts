@@ -1424,6 +1424,14 @@ export const fr: Translation = {
       `${n} provisions devraient être consommées bientôt`,
     urgentSuffix: " – les suggestions de recettes ci-dessous t'y aident.",
     removeAria: (name: string) => `Retirer ${name}`,
+    addToShoppingAria: (name: string) =>
+      `Mettre ${name} sur la liste de courses`,
+    addedToShopping: (name: string) => `${name} mis sur la liste de courses`,
+    alreadyOnShopping: (name: string) =>
+      `${name} est déjà sur la liste de courses`,
+    addToShoppingFailed: "Impossible de l'ajouter à la liste de courses",
+    deleteOnly: "Supprimer seulement",
+    deleteAndShop: "Supprimer et mettre sur la liste de courses",
     emptyTitle: "Glacière encore vide",
     emptyText:
       "Saisis ce que tu as avec toi – nous te proposons des recettes adaptées.",
