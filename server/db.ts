@@ -12,6 +12,7 @@ import {
   InsertInventoryItem,
   InsertPackItem,
   InsertPackList,
+  InsertPackTemplateCustom,
   InsertMenuEntry,
   InsertPowerConsumer,
   InsertShoppingItem,
@@ -22,6 +23,7 @@ import {
   menuEntries,
   packItems,
   packLists,
+  packTemplatesCustom,
   powerConsumers,
   shoppingItems,
   tripLogs,
@@ -181,6 +183,49 @@ export async function setPackItemAssignee(id: number, assignee: string | null) {
 export async function deletePackItem(id: number) {
   const db = requireDb(await getDb());
   await db.delete(packItems).where(eq(packItems.id, id));
+}
+
+// ── Eigene Packlisten-Vorlagen ──
+export async function getPackTemplates(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(packTemplatesCustom)
+    .where(eq(packTemplatesCustom.userId, userId))
+    .orderBy(desc(packTemplatesCustom.id));
+}
+
+export async function getPackTemplate(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(packTemplatesCustom)
+    .where(
+      and(
+        eq(packTemplatesCustom.id, id),
+        eq(packTemplatesCustom.userId, userId)
+      )
+    )
+    .limit(1);
+  return rows[0];
+}
+
+export async function createPackTemplate(data: InsertPackTemplateCustom) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(packTemplatesCustom).values(data);
+  return result.insertId;
+}
+
+export async function deletePackTemplate(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(packTemplatesCustom)
+    .where(
+      and(
+        eq(packTemplatesCustom.id, id),
+        eq(packTemplatesCustom.userId, userId)
+      )
+    );
 }
 
 /** Teil-Token setzen oder entfernen (nur für die eigene Liste). */

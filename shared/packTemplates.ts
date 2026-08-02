@@ -686,3 +686,38 @@ export const familyAddOns: {
     ],
   },
 ];
+
+/**
+ * Eintrag einer eigenen Packlisten-Vorlage (packTemplatesCustom.itemsJson).
+ * Bewusst einsprachig: die Vorlage friert die Texte der Ursprungs-Liste ein.
+ */
+export interface CustomTemplateItem {
+  name: string;
+  category: string;
+  quantity: number;
+}
+
+/** itemsJson defensiv parsen – kaputte Daten ergeben eine leere Vorlage. */
+export function parseCustomTemplateItems(json: string): CustomTemplateItem[] {
+  try {
+    const parsed: unknown = JSON.parse(json);
+    if (!Array.isArray(parsed)) return [];
+    const items: CustomTemplateItem[] = [];
+    for (const entry of parsed) {
+      if (typeof entry !== "object" || entry === null) continue;
+      const { name, category, quantity } = entry as Record<string, unknown>;
+      if (typeof name !== "string" || name.length === 0) continue;
+      items.push({
+        name,
+        category: typeof category === "string" ? category : "Allgemein",
+        quantity:
+          typeof quantity === "number" && Number.isFinite(quantity)
+            ? Math.max(1, Math.min(99, Math.round(quantity)))
+            : 1,
+      });
+    }
+    return items;
+  } catch {
+    return [];
+  }
+}

@@ -225,6 +225,14 @@ export const de = {
     addOnAddFailed: "Einträge konnten nicht hinzugefügt werden",
     noListsForAddOn:
       "Erstelle zuerst eine Packliste – danach kannst du das Paket übernehmen.",
+    myTemplatesTitle: "Meine Vorlagen",
+    templateAria: (name: string) => `Vorlage ${name} wählen`,
+    templateItemCount: (n: number) => (n === 1 ? "1 Eintrag" : `${n} Einträge`),
+    templateDeleteAria: (name: string) => `Vorlage ${name} löschen`,
+    templateDeleteConfirm: (name: string) =>
+      `Vorlage «${name}» wirklich löschen?`,
+    templateDeleted: "Vorlage gelöscht",
+    templateDeleteFailed: "Vorlage konnte nicht gelöscht werden",
   },
   packListDetail: {
     backLabel: "Packlisten",
@@ -291,6 +299,15 @@ export const de = {
     filterProgressAria: (pct: number) =>
       `Fortschritt im Filter: ${pct} Prozent gepackt`,
     printButton: "Drucken",
+    saveTemplateButton: "Als Vorlage speichern",
+    saveTemplateAria: (name: string) => `Liste ${name} als Vorlage speichern`,
+    saveTemplateTitle: "Als Vorlage speichern",
+    saveTemplateDescription:
+      "Speichert die aktuellen Einträge (Namen, Kategorien, Mengen) als wiederverwendbare Vorlage. Häkchen und Personen-Zuordnungen werden nicht übernommen.",
+    templateNameLabel: "Name der Vorlage",
+    saveTemplateConfirm: "Vorlage speichern",
+    templateSaved: "Vorlage gespeichert – beim Anlegen neuer Listen wählbar",
+    templateSaveFailed: "Vorlage konnte nicht gespeichert werden",
   },
   packListPrint: {
     docTitle: (name: string) => `${name} – Packliste zum Ausdrucken`,

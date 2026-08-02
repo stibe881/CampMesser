@@ -224,6 +224,14 @@ export const fr: Translation = {
     addOnAddFailed: "Impossible d'ajouter les entrées",
     noListsForAddOn:
       "Crée d'abord une liste de bagages – tu pourras ensuite reprendre le paquet.",
+    myTemplatesTitle: "Mes modèles",
+    templateAria: (name: string) => `Choisir le modèle ${name}`,
+    templateItemCount: (n: number) => (n === 1 ? "1 entrée" : `${n} entrées`),
+    templateDeleteAria: (name: string) => `Supprimer le modèle ${name}`,
+    templateDeleteConfirm: (name: string) =>
+      `Vraiment supprimer le modèle «${name}» ?`,
+    templateDeleted: "Modèle supprimé",
+    templateDeleteFailed: "Le modèle n'a pas pu être supprimé",
   },
   packListDetail: {
     backLabel: "Listes de bagages",
@@ -288,6 +296,17 @@ export const fr: Translation = {
     filterProgressAria: pct =>
       `Progression dans le filtre : ${pct} pour cent emballé`,
     printButton: "Imprimer",
+    saveTemplateButton: "Enregistrer comme modèle",
+    saveTemplateAria: (name: string) =>
+      `Enregistrer la liste ${name} comme modèle`,
+    saveTemplateTitle: "Enregistrer comme modèle",
+    saveTemplateDescription:
+      "Enregistre les entrées actuelles (noms, catégories, quantités) comme modèle réutilisable. Les coches et les attributions de personnes ne sont pas reprises.",
+    templateNameLabel: "Nom du modèle",
+    saveTemplateConfirm: "Enregistrer le modèle",
+    templateSaved:
+      "Modèle enregistré – disponible à la création de nouvelles listes",
+    templateSaveFailed: "Le modèle n'a pas pu être enregistré",
   },
   packListPrint: {
     docTitle: name => `${name} – liste de bagages à imprimer`,

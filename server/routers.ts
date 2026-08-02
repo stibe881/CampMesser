@@ -2,7 +2,11 @@ import { COOKIE_NAME } from "@shared/const";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { ONE_YEAR_MS } from "@shared/const";
-import { packScenarios } from "@shared/packTemplates";
+import {
+  packScenarios,
+  parseCustomTemplateItems,
+  type CustomTemplateItem,
+} from "@shared/packTemplates";
 import { l4, pick } from "@shared/i18n";
 import {
   SETTING_VALUE_MAX_LENGTH,
@@ -422,6 +426,91 @@ export const appRouter = router({
           }))
         );
         return { listId: newListId };
+      }),
+    /** Eigene Liste als wiederverwendbare Vorlage einfrieren (Namen/Kategorien/Mengen). */
+    saveAsTemplate: protectedProcedure
+      .input(
+        z.object({
+          listId: z.number(),
+          name: z.string().trim().min(1).max(120),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const list = await db.getPackList(input.listId, ctx.user.id);
+        if (!list)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Liste nicht gefunden",
+          });
+        const items = await db.getPackItems(input.listId);
+        if (items.length === 0)
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Die Liste hat keine Einträge",
+          });
+        const templateItems: CustomTemplateItem[] = [...items]
+          .sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id)
+          .map(item => ({
+            name: item.name,
+            category: item.category,
+            quantity: item.quantity,
+          }));
+        const templateId = await db.createPackTemplate({
+          userId: ctx.user.id,
+          name: input.name,
+          itemsJson: JSON.stringify(templateItems),
+        });
+        return { templateId };
+      }),
+    /** Eigene Vorlagen samt geparsten Einträgen (neuste zuerst). */
+    listTemplates: protectedProcedure.query(async ({ ctx }) => {
+      const rows = await db.getPackTemplates(ctx.user.id);
+      return rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        items: parseCustomTemplateItems(row.itemsJson),
+        createdAt: row.createdAt,
+      }));
+    }),
+    deleteTemplate: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ ctx, input }) =>
+        db.deletePackTemplate(input.id, ctx.user.id)
+      ),
+    /** Neue Liste aus einer eigenen Vorlage anlegen (alles unabgehakt). */
+    createListFromTemplate: protectedProcedure
+      .input(
+        z.object({
+          templateId: z.number(),
+          listName: z.string().trim().min(1).max(120),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const template = await db.getPackTemplate(
+          input.templateId,
+          ctx.user.id
+        );
+        if (!template)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Vorlage nicht gefunden",
+          });
+        const items = parseCustomTemplateItems(template.itemsJson);
+        const listId = await db.createPackList({
+          userId: ctx.user.id,
+          name: input.listName,
+          scenario: "custom",
+        });
+        await db.addPackItems(
+          items.map((item, idx) => ({
+            listId,
+            name: item.name,
+            category: item.category,
+            quantity: item.quantity,
+            sortOrder: idx,
+          }))
+        );
+        return { listId };
       }),
     items: protectedProcedure
       .input(z.object({ listId: z.number() }))

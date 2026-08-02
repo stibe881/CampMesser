@@ -4,6 +4,7 @@ import {
   Baby,
   Backpack,
   Bike,
+  Bookmark,
   Copy,
   ListChecks,
   ListPlus,
@@ -51,8 +52,13 @@ export default function PackListsPage() {
   const listsQuery = trpc.packing.lists.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  const templatesQuery = trpc.packing.listTemplates.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [scenario, setScenario] = useState("solo");
+  /** Gewählte eigene Vorlage – hat Vorrang vor dem Szenario. */
+  const [templateChoice, setTemplateChoice] = useState<number | null>(null);
   const [name, setName] = useState("");
   // Familien-Checkliste, für die gerade eine Ziel-Liste gewählt wird
   const [addOnId, setAddOnId] = useState<string | null>(null);
@@ -67,8 +73,27 @@ export default function PackListsPage() {
     onError: () => toast.error(t.packLists.createFailed),
   });
 
+  const createFromTemplateMutation =
+    trpc.packing.createListFromTemplate.useMutation({
+      onSuccess: () => {
+        utils.packing.lists.invalidate();
+        setDialogOpen(false);
+        setName("");
+        toast.success(t.packLists.created);
+      },
+      onError: () => toast.error(t.packLists.createFailed),
+    });
+
   const deleteMutation = trpc.packing.deleteList.useMutation({
     onSuccess: () => utils.packing.lists.invalidate(),
+  });
+
+  const deleteTemplateMutation = trpc.packing.deleteTemplate.useMutation({
+    onSuccess: () => {
+      utils.packing.listTemplates.invalidate();
+      toast.success(t.packLists.templateDeleted);
+    },
+    onError: () => toast.error(t.packLists.templateDeleteFailed),
   });
 
   const duplicateMutation = trpc.packing.duplicateList.useMutation({
@@ -132,6 +157,9 @@ export default function PackListsPage() {
   }
 
   const selectedScenario = packScenarios.find(s => s.id === scenario);
+  const templates = templatesQuery.data ?? [];
+  const selectedTemplate =
+    templates.find(tpl => tpl.id === templateChoice) ?? null;
 
   return (
     <div className="container py-6">
@@ -159,14 +187,17 @@ export default function PackListsPage() {
                   <button
                     key={s.id}
                     type="button"
-                    onClick={() => setScenario(s.id)}
+                    onClick={() => {
+                      setScenario(s.id);
+                      setTemplateChoice(null);
+                    }}
                     className={cn(
                       "flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-all",
-                      scenario === s.id
+                      templateChoice === null && scenario === s.id
                         ? "border-primary bg-accent"
                         : "border-border hover:border-primary/40"
                     )}
-                    aria-pressed={scenario === s.id}
+                    aria-pressed={templateChoice === null && scenario === s.id}
                     aria-label={t.packLists.scenarioAria(pick(s.label, lang))}
                   >
                     <Icon className="h-5 w-5 text-primary" aria-hidden="true" />
@@ -180,10 +211,80 @@ export default function PackListsPage() {
                 );
               })}
             </div>
-            {selectedScenario && selectedScenario.items.length > 0 && (
+            {/* Eigene Vorlagen: gespeicherte Listen als Ausgangspunkt */}
+            {templates.length > 0 && (
+              <div>
+                <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
+                  <Bookmark
+                    className="h-4 w-4 text-primary"
+                    aria-hidden="true"
+                  />
+                  {t.packLists.myTemplatesTitle}
+                </p>
+                <div className="space-y-2">
+                  {templates.map(template => (
+                    <div
+                      key={template.id}
+                      className={cn(
+                        "flex items-center gap-2 rounded-lg border pr-1 transition-all",
+                        templateChoice === template.id
+                          ? "border-primary bg-accent"
+                          : "border-border hover:border-primary/40"
+                      )}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setTemplateChoice(template.id)}
+                        className="flex min-w-0 flex-1 flex-col items-start gap-0.5 p-3 text-left"
+                        aria-pressed={templateChoice === template.id}
+                        aria-label={t.packLists.templateAria(template.name)}
+                      >
+                        <span className="w-full truncate text-sm font-semibold">
+                          {template.name}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {t.packLists.templateItemCount(template.items.length)}
+                        </span>
+                      </button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                        disabled={deleteTemplateMutation.isPending}
+                        onClick={() => {
+                          if (
+                            confirm(
+                              t.packLists.templateDeleteConfirm(template.name)
+                            )
+                          ) {
+                            if (templateChoice === template.id) {
+                              setTemplateChoice(null);
+                            }
+                            deleteTemplateMutation.mutate({ id: template.id });
+                          }
+                        }}
+                        aria-label={t.packLists.templateDeleteAria(
+                          template.name
+                        )}
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selectedTemplate ? (
               <p className="text-xs text-muted-foreground">
-                {t.packLists.preparedItems(selectedScenario.items.length)}
+                {t.packLists.preparedItems(selectedTemplate.items.length)}
               </p>
+            ) : (
+              selectedScenario &&
+              selectedScenario.items.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {t.packLists.preparedItems(selectedScenario.items.length)}
+                </p>
+              )
             )}
             <div>
               <Label htmlFor="list-name">{t.packLists.nameLabel}</Label>
@@ -191,11 +292,13 @@ export default function PackListsPage() {
                 id="list-name"
                 className="mt-1.5"
                 placeholder={
-                  selectedScenario
-                    ? t.packLists.namePlaceholder(
-                        pick(selectedScenario.label, lang)
-                      )
-                    : t.packLists.namePlaceholderFallback
+                  selectedTemplate
+                    ? t.packLists.namePlaceholder(selectedTemplate.name)
+                    : selectedScenario
+                      ? t.packLists.namePlaceholder(
+                          pick(selectedScenario.label, lang)
+                        )
+                      : t.packLists.namePlaceholderFallback
                 }
                 value={name}
                 onChange={e => setName(e.target.value)}
@@ -203,8 +306,18 @@ export default function PackListsPage() {
             </div>
             <Button
               className="w-full"
-              disabled={createMutation.isPending}
+              disabled={
+                createMutation.isPending || createFromTemplateMutation.isPending
+              }
               onClick={() => {
+                if (selectedTemplate) {
+                  const finalName = name.trim() || selectedTemplate.name;
+                  createFromTemplateMutation.mutate({
+                    templateId: selectedTemplate.id,
+                    listName: finalName,
+                  });
+                  return;
+                }
                 const finalName =
                   name.trim() ||
                   (selectedScenario
@@ -213,7 +326,8 @@ export default function PackListsPage() {
                 createMutation.mutate({ name: finalName, scenario, lang });
               }}
             >
-              {createMutation.isPending && (
+              {(createMutation.isPending ||
+                createFromTemplateMutation.isPending) && (
                 <Loader2
                   className="mr-2 h-4 w-4 animate-spin"
                   aria-hidden="true"

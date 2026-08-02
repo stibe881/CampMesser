@@ -221,6 +221,14 @@ export const it: Translation = {
     addOnAddFailed: "Impossibile aggiungere le voci",
     noListsForAddOn:
       "Crea prima una lista bagagli – poi potrai riprendere il pacchetto.",
+    myTemplatesTitle: "I miei modelli",
+    templateAria: (name: string) => `Scegliere il modello ${name}`,
+    templateItemCount: (n: number) => (n === 1 ? "1 voce" : `${n} voci`),
+    templateDeleteAria: (name: string) => `Eliminare il modello ${name}`,
+    templateDeleteConfirm: (name: string) =>
+      `Eliminare davvero il modello «${name}»?`,
+    templateDeleted: "Modello eliminato",
+    templateDeleteFailed: "Impossibile eliminare il modello",
   },
   packListDetail: {
     backLabel: "Liste bagagli",
@@ -284,6 +292,15 @@ export const it: Translation = {
     filterProgressAria: pct =>
       `Avanzamento nel filtro: ${pct} per cento preparato`,
     printButton: "Stampa",
+    saveTemplateButton: "Salva come modello",
+    saveTemplateAria: (name: string) => `Salvare la lista ${name} come modello`,
+    saveTemplateTitle: "Salva come modello",
+    saveTemplateDescription:
+      "Salva le voci attuali (nomi, categorie, quantità) come modello riutilizzabile. Le spunte e le assegnazioni alle persone non vengono riprese.",
+    templateNameLabel: "Nome del modello",
+    saveTemplateConfirm: "Salva il modello",
+    templateSaved: "Modello salvato – disponibile quando crei nuove liste",
+    templateSaveFailed: "Impossibile salvare il modello",
   },
   packListPrint: {
     docTitle: name => `${name} – lista bagagli da stampare`,

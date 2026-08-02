@@ -87,6 +87,25 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     const lists = await authed.packing.lists();
     expect(lists.some(l => l.name === "CI-Liste")).toBe(true);
 
+    // Eigene Vorlage aus der Liste einfrieren und daraus eine neue Liste bauen
+    const { templateId } = await authed.packing.saveAsTemplate({
+      listId,
+      name: "CI-Vorlage",
+    });
+    expect(templateId).toBeTruthy();
+    const templates = await authed.packing.listTemplates();
+    const template = templates.find(t => t.id === templateId);
+    expect(template?.name).toBe("CI-Vorlage");
+    expect(template?.items.length).toBeGreaterThan(0);
+    const fromTemplate = await authed.packing.createListFromTemplate({
+      templateId,
+      listName: "CI-Liste aus Vorlage",
+    });
+    const fromTemplateItems = await authed.packing.items({
+      listId: fromTemplate.listId,
+    });
+    expect(fromTemplateItems.items.length).toBe(template?.items.length);
+
     // Einstellungs-Sync: Schreiben und Lesen über die userSettings-Tabelle
     await authed.settings.set({
       key: "moduleOrder",
@@ -172,6 +191,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.packLists)
         .where(eq(schema.packLists.userId, uid)),
+      dbc
+        .select()
+        .from(schema.packTemplatesCustom)
+        .where(eq(schema.packTemplatesCustom.userId, uid)),
       dbc
         .select()
         .from(schema.campSpots)

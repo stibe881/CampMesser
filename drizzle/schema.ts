@@ -108,6 +108,27 @@ export const packItems = mysqlTable(
 export type PackItem = typeof packItems.$inferSelect;
 export type InsertPackItem = typeof packItems.$inferInsert;
 
+/**
+ * Eigene Packlisten-Vorlagen: eine gespeicherte Liste als wiederverwendbare
+ * Vorlage. Die Einträge liegen als JSON-Array von {name, category, quantity}
+ * im Textfeld (gleiches Muster wie customRecipes.ingredientsJson).
+ */
+export const packTemplatesCustom = mysqlTable(
+  "packTemplatesCustom",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 120 }).notNull(),
+    /** Einträge als JSON-Array von {name, category, quantity} */
+    itemsJson: text("itemsJson").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("packTemplatesCustom_userId").on(table.userId)]
+);
+
+export type PackTemplateCustom = typeof packTemplatesCustom.$inferSelect;
+export type InsertPackTemplateCustom = typeof packTemplatesCustom.$inferInsert;
+
 /** Inventar: vorhandenes Campingmaterial mit Gewicht (g) und Volumen (l). */
 export const inventoryItems = mysqlTable(
   "inventoryItems",

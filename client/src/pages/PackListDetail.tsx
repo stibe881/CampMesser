@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "wouter";
 import {
+  BookmarkPlus,
   Link2,
   Loader2,
   Package,
@@ -19,7 +20,15 @@ import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
@@ -55,6 +64,9 @@ export default function PackListDetailPage() {
   /** Eintrag, dessen Personen-Zuordnung gerade bearbeitet wird. */
   const [assignItemId, setAssignItemId] = useState<number | null>(null);
   const [assignDraft, setAssignDraft] = useState("");
+  /** Dialog «Als Vorlage speichern» mit Namensfeld. */
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [templateName, setTemplateName] = useState("");
 
   // QR-Code zum Teil-Link erzeugen: am Platz einfach abscannen lassen statt Link verschicken
   useEffect(() => {
@@ -83,6 +95,15 @@ export default function PackListDetailPage() {
       }
     },
     onError: () => toast.error(t.packListDetail.shareFailed),
+  });
+
+  const saveTemplateMutation = trpc.packing.saveAsTemplate.useMutation({
+    onSuccess: () => {
+      utils.packing.listTemplates.invalidate();
+      setTemplateDialogOpen(false);
+      toast.success(t.packListDetail.templateSaved);
+    },
+    onError: () => toast.error(t.packListDetail.templateSaveFailed),
   });
 
   const toggleMutation = trpc.packing.toggleItem.useMutation({
@@ -373,6 +394,19 @@ export default function PackListDetailPage() {
               <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
               {t.packListDetail.printButton}
             </Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={items.length === 0}
+            onClick={() => {
+              setTemplateName(query.data?.list?.name ?? "");
+              setTemplateDialogOpen(true);
+            }}
+            aria-label={t.packListDetail.saveTemplateAria(query.data.list.name)}
+          >
+            <BookmarkPlus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.packListDetail.saveTemplateButton}
           </Button>
         </div>
         {shareUrl && (
@@ -711,6 +745,51 @@ export default function PackListDetailPage() {
           {t.packListDetail.filterEmpty}
         </p>
       )}
+
+      {/* Dialog «Als Vorlage speichern» */}
+      <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.packListDetail.saveTemplateTitle}</DialogTitle>
+            <DialogDescription>
+              {t.packListDetail.saveTemplateDescription}
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              const name = templateName.trim().slice(0, 120);
+              if (!name) return;
+              saveTemplateMutation.mutate({ listId, name });
+            }}
+          >
+            <Label htmlFor="template-name">
+              {t.packListDetail.templateNameLabel}
+            </Label>
+            <Input
+              id="template-name"
+              className="mt-1.5"
+              value={templateName}
+              onChange={e => setTemplateName(e.target.value)}
+              maxLength={120}
+              autoFocus
+            />
+            <Button
+              type="submit"
+              className="mt-4 w-full"
+              disabled={saveTemplateMutation.isPending || !templateName.trim()}
+            >
+              {saveTemplateMutation.isPending && (
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              )}
+              {t.packListDetail.saveTemplateConfirm}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

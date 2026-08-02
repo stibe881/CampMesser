@@ -169,6 +169,13 @@
       "when": 1785666028239,
       "tag": "0023_sudden_moon_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1785669901930,
+      "tag": "0024_fair_sabra",
+      "breakpoints": true
     }
   ]
 }

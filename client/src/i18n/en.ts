@@ -219,6 +219,14 @@ export const en: Translation = {
     addOnAddFailed: "The entries could not be added",
     noListsForAddOn:
       "Create a packing list first – then you can add the bundle.",
+    myTemplatesTitle: "My templates",
+    templateAria: (name: string) => `Choose template ${name}`,
+    templateItemCount: (n: number) => (n === 1 ? "1 item" : `${n} items`),
+    templateDeleteAria: (name: string) => `Delete template ${name}`,
+    templateDeleteConfirm: (name: string) =>
+      `Really delete the template "${name}"?`,
+    templateDeleted: "Template deleted",
+    templateDeleteFailed: "The template could not be deleted",
   },
   packListDetail: {
     backLabel: "Packing lists",
@@ -280,6 +288,15 @@ export const en: Translation = {
     filterProgressAria: pct =>
       `Progress in this filter: ${pct} per cent packed`,
     printButton: "Print",
+    saveTemplateButton: "Save as template",
+    saveTemplateAria: (name: string) => `Save the list ${name} as a template`,
+    saveTemplateTitle: "Save as template",
+    saveTemplateDescription:
+      "Saves the current items (names, categories, quantities) as a reusable template. Ticks and person assignments are not carried over.",
+    templateNameLabel: "Name of the template",
+    saveTemplateConfirm: "Save template",
+    templateSaved: "Template saved – available when creating new lists",
+    templateSaveFailed: "The template could not be saved",
   },
   packListPrint: {
     docTitle: name => `${name} – printable packing list`,
