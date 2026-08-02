@@ -275,6 +275,27 @@ export const spotPhotos = mysqlTable(
 export type SpotPhoto = typeof spotPhotos.$inferSelect;
 export type InsertSpotPhoto = typeof spotPhotos.$inferInsert;
 
+/**
+ * Heim-Standort: genau ein Ort pro Nutzer*in (userId unique) für
+ * Unwetter-Warnungen und Sternschnuppen-Tipps auch ohne gespeicherten
+ * Zeltplatz. Bewusst ohne Teilen/Fotos – schlankes Muster nach campSpots.
+ */
+export const homeLocations = mysqlTable(
+  "homeLocations",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 80 }).notNull(),
+    latitude: double("latitude").notNull(),
+    longitude: double("longitude").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [uniqueIndex("homeLocations_userId").on(table.userId)]
+);
+
+export type HomeLocation = typeof homeLocations.$inferSelect;
+export type InsertHomeLocation = typeof homeLocations.$inferInsert;
+
 /** Web-Push-Abos für Unwetter-Warnungen an gespeicherten Zeltplätzen. */
 export const pushSubscriptions = mysqlTable(
   "pushSubscriptions",
@@ -291,6 +312,8 @@ export const pushSubscriptions = mysqlTable(
     wantsFood: boolean("wantsFood").notNull().default(true),
     /** Mitteilungs-Einstellung dieses Geräts: Trip-Countdown vor der Anreise */
     wantsTrips: boolean("wantsTrips").notNull().default(true),
+    /** Mitteilungs-Einstellung dieses Geräts: Sternschnuppen-Tipp bei klarer Nacht */
+    wantsAstro: boolean("wantsAstro").notNull().default(true),
     /** Schlüssel der zuletzt gemeldeten Warnlage (verhindert Doppel-Pushes) */
     lastAlertKey: varchar("lastAlertKey", { length: 255 }),
     /** Schlüssel der letzten MHD-Erinnerung («food:YYYY-MM-DD»): max. 1 Kühlbox-Push pro Tag */
@@ -299,6 +322,8 @@ export const pushSubscriptions = mysqlTable(
     lastTripKey: varchar("lastTripKey", { length: 64 }),
     /** Schlüssel der letzten Trocknungs-Erinnerung («dry:<tripId>»): max. 1 Erinnerung pro Heimkehr */
     lastDryKey: varchar("lastDryKey", { length: 64 }),
+    /** Schlüssel des letzten Sternschnuppen-Tipps («astro:YYYY-MM-DD»): max. 1 pro Nacht */
+    lastAstroKey: varchar("lastAstroKey", { length: 64 }),
     lastNotifiedAt: timestamp("lastNotifiedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },

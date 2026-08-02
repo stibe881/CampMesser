@@ -203,6 +203,24 @@ export const it: Translation = {
     prefTripsDesc:
       "3 giorni prima dell'arrivo, incluso lo stato della lista bagagli.",
     prefToggleAria: (label: string) => `Attiva o disattiva ${label}`,
+    homeTitle: "Località di casa",
+    homeIntro:
+      "Salva il luogo in cui abiti per ricevere allerte maltempo e consigli sulle stelle cadenti anche per casa – senza piazzola salvata.",
+    homeNotSet: "Nessuna località di casa impostata finora.",
+    homeNameLabel: "Nome",
+    homeDefaultName: "Casa",
+    homeUseLocation: "Usa la posizione attuale",
+    homeLocating: "Rilevamento della posizione …",
+    homeSearchLabel: "Cerca località",
+    homeSearchPlaceholder: "es. Berna",
+    homeSearchButton: "Cerca",
+    homeSearchFailed:
+      "La ricerca della località non è riuscita. Riprova più tardi.",
+    homeSearchEmpty: "Nessuna località trovata.",
+    homeSelectAria: (name: string) => `Imposta ${name} come località di casa`,
+    homeSaved: "Località di casa salvata",
+    homeRemoved: "Località di casa rimossa",
+    homeRemoveAria: "Rimuovi la località di casa",
   },
   packLists: {
     title: "Liste bagagli",

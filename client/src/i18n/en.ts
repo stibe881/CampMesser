@@ -200,6 +200,23 @@ export const en: Translation = {
     prefTripsDesc:
       "3 days before arrival, including your packing list progress.",
     prefToggleAria: (label: string) => `Turn ${label} on or off`,
+    homeTitle: "Home location",
+    homeIntro:
+      "Save where you live to get storm alerts and shooting-star tips for home too – no saved pitch needed.",
+    homeNotSet: "No home location set yet.",
+    homeNameLabel: "Name",
+    homeDefaultName: "Home",
+    homeUseLocation: "Use current position",
+    homeLocating: "Locating …",
+    homeSearchLabel: "Search for a place",
+    homeSearchPlaceholder: "e.g. Bern",
+    homeSearchButton: "Search",
+    homeSearchFailed: "The place search did not work. Try again later.",
+    homeSearchEmpty: "No places found.",
+    homeSelectAria: (name: string) => `Set ${name} as your home location`,
+    homeSaved: "Home location saved",
+    homeRemoved: "Home location removed",
+    homeRemoveAria: "Remove home location",
   },
   packLists: {
     title: "Packing lists",

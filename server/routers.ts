@@ -1006,6 +1006,31 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteFoodItem(input.id, ctx.user.id)),
   }),
+  home: router({
+    /** Heim-Standort der Nutzer*in (null = keiner gesetzt). */
+    get: protectedProcedure.query(async ({ ctx }) => {
+      const home = await db.getHomeLocation(ctx.user.id);
+      return home ?? null;
+    }),
+    /** Heim-Standort setzen bzw. ersetzen (Name + Koordinaten). */
+    set: protectedProcedure
+      .input(
+        z.object({
+          name: z.string().trim().min(1).max(80),
+          latitude: z.number().min(-90).max(90),
+          longitude: z.number().min(-180).max(180),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.upsertHomeLocation({ userId: ctx.user.id, ...input });
+        return { success: true } as const;
+      }),
+    /** Heim-Standort wieder entfernen. */
+    remove: protectedProcedure.mutation(async ({ ctx }) => {
+      await db.deleteHomeLocation(ctx.user.id);
+      return { success: true } as const;
+    }),
+  }),
   push: router({
     /** Öffentlicher VAPID-Schlüssel (null = Push serverseitig nicht konfiguriert). */
     vapidKey: publicProcedure.query(async () => {

@@ -207,6 +207,24 @@ export const fr: Translation = {
     prefTripsDesc:
       "3 jours avant l'arrivée, avec l'état de la liste de bagages.",
     prefToggleAria: (label: string) => `Activer ou désactiver ${label}`,
+    homeTitle: "Lieu de domicile",
+    homeIntro:
+      "Enregistre ton domicile pour recevoir les alertes intempéries et les conseils étoiles filantes aussi pour chez toi – sans emplacement enregistré.",
+    homeNotSet: "Aucun lieu de domicile défini pour l'instant.",
+    homeNameLabel: "Nom",
+    homeDefaultName: "Chez moi",
+    homeUseLocation: "Utiliser la position actuelle",
+    homeLocating: "Détermination de la position …",
+    homeSearchLabel: "Chercher un lieu",
+    homeSearchPlaceholder: "p. ex. Berne",
+    homeSearchButton: "Chercher",
+    homeSearchFailed:
+      "La recherche de lieu n'a pas abouti. Réessaie plus tard.",
+    homeSearchEmpty: "Aucun lieu trouvé.",
+    homeSelectAria: (name: string) => `Définir ${name} comme lieu de domicile`,
+    homeSaved: "Lieu de domicile enregistré",
+    homeRemoved: "Lieu de domicile supprimé",
+    homeRemoveAria: "Supprimer le lieu de domicile",
   },
   packLists: {
     title: "Listes de bagages",

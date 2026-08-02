@@ -9,8 +9,10 @@ import {
   InsertCustomQuiz,
   InsertCustomRecipe,
   foodItems,
+  homeLocations,
   InsertCampSpot,
   InsertFoodItem,
+  InsertHomeLocation,
   InsertInventoryItem,
   InsertPackItem,
   InsertPackList,
@@ -519,6 +521,38 @@ export async function deleteCampSpot(id: number, userId: number) {
   await db
     .delete(campSpots)
     .where(and(eq(campSpots.id, id), eq(campSpots.userId, userId)));
+}
+
+// ── Heim-Standort ──
+/** Heim-Standort der Nutzer*in (undefined = keiner gesetzt). */
+export async function getHomeLocation(userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(homeLocations)
+    .where(eq(homeLocations.userId, userId))
+    .limit(1);
+  return rows[0];
+}
+
+/** Heim-Standort setzen bzw. ersetzen (genau einer pro Nutzer*in, userId unique). */
+export async function upsertHomeLocation(data: InsertHomeLocation) {
+  const db = requireDb(await getDb());
+  await db
+    .insert(homeLocations)
+    .values(data)
+    .onDuplicateKeyUpdate({
+      set: {
+        name: data.name,
+        latitude: data.latitude,
+        longitude: data.longitude,
+      },
+    });
+}
+
+export async function deleteHomeLocation(userId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(homeLocations).where(eq(homeLocations.userId, userId));
 }
 
 // ── Reise-Tagebuch ──

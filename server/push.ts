@@ -1,8 +1,9 @@
 /**
- * Web-Push für Unwetter-Warnungen an gespeicherten Zeltplätzen,
- * MHD-Erinnerungen für die Kühlbox (Lebensmittel, die heute oder morgen ablaufen),
- * Trip-Countdowns (3 Tage vor der Anreise, inkl. Pack-Fortschritt) und
- * Zelt-Trocknungs-Erinnerungen am Tag nach der Heimkehr (bei Regen am Platz).
+ * Web-Push für Unwetter-Warnungen an gespeicherten Zeltplätzen und am
+ * Heim-Standort, MHD-Erinnerungen für die Kühlbox (Lebensmittel, die heute
+ * oder morgen ablaufen), Trip-Countdowns (3 Tage vor der Anreise, inkl.
+ * Pack-Fortschritt) und Zelt-Trocknungs-Erinnerungen am Tag nach der
+ * Heimkehr (bei Regen am Platz).
  * Der Check läuft über /api/push/check (konsoleH-Cronjob), weil Passenger
  * den Node-Prozess bei Inaktivität schlafen legt und ein interner Scheduler
  * deshalb unzuverlässig wäre.
@@ -12,6 +13,7 @@ import webpush from "web-push";
 import {
   campSpots,
   foodItems,
+  homeLocations,
   packItems,
   pushSubscriptions,
   tripLogs,
@@ -148,8 +150,11 @@ export async function hasSubscription(
   return rows.length > 0;
 }
 
-/** Wetter für einen Punkt laden und Camping-Warnungen berechnen. */
-async function alertsFor(lat: number, lon: number) {
+/**
+ * Stunden-Prognose (2 Tage) für einen Punkt laden – Warnungen berechnet
+ * detectAlerts daraus, die Nacht-Bewölkung der Sternschnuppen-Check.
+ */
+async function hourlyFor(lat: number, lon: number): Promise<HourlyWeather[]> {
   const params = new URLSearchParams({
     latitude: lat.toFixed(3),
     longitude: lon.toFixed(3),
@@ -179,7 +184,7 @@ async function alertsFor(lat: number, lon: number) {
     cape: Number(json.hourly.cape?.[i] ?? 0),
     cloudCover: Number(json.hourly.cloud_cover?.[i] ?? 0),
   }));
-  return detectAlerts(hourly);
+  return hourly;
 }
 
 export interface PushCheckResult {
@@ -448,6 +453,11 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     .select()
     .from(campSpots)
     .where(inArray(campSpots.userId, userIds));
+  // Heim-Standorte der abonnierten Nutzer*innen (max. einer pro Konto)
+  const homes = await db
+    .select()
+    .from(homeLocations)
+    .where(inArray(homeLocations.userId, userIds));
 
   // Kühlbox: MHD-Erinnerungen pro Nutzer*in vorbereiten
   const today = localIsoDate();
@@ -591,24 +601,34 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
   }
 
   // Wetter pro gerundeter Koordinate nur einmal abrufen
-  const alertCache = new Map<string, Awaited<ReturnType<typeof alertsFor>>>();
+  const hourlyCache = new Map<string, HourlyWeather[]>();
+  /** Stunden-Prognose aus dem Cache bzw. frisch laden (null bei Wetterdienst-Fehler). */
+  async function cachedHourly(
+    lat: number,
+    lon: number
+  ): Promise<HourlyWeather[] | null> {
+    const cacheKey = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+    const cached = hourlyCache.get(cacheKey);
+    if (cached) return cached;
+    try {
+      const hourly = await hourlyFor(lat, lon);
+      hourlyCache.set(cacheKey, hourly);
+      result.spotsChecked += 1;
+      return hourly;
+    } catch {
+      return null;
+    }
+  }
   const dangersByUser = new Map<
     number,
     { spotName: string; title: string; description: string; key: string }[]
   >();
   for (const spot of spots) {
-    const cacheKey = `${spot.latitude.toFixed(2)},${spot.longitude.toFixed(2)}`;
-    let alerts = alertCache.get(cacheKey);
-    if (!alerts) {
-      try {
-        alerts = await alertsFor(spot.latitude, spot.longitude);
-      } catch {
-        continue;
-      }
-      alertCache.set(cacheKey, alerts);
-      result.spotsChecked += 1;
-    }
-    for (const alert of alerts.filter(a => a.severity === "gefahr")) {
+    const hourly = await cachedHourly(spot.latitude, spot.longitude);
+    if (!hourly) continue;
+    for (const alert of detectAlerts(hourly).filter(
+      a => a.severity === "gefahr"
+    )) {
       const list = dangersByUser.get(spot.userId) ?? [];
       list.push({
         spotName: spot.name,
@@ -617,6 +637,24 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         key: `${spot.id}:${alert.id}:${alert.startTime.slice(0, 13)}`,
       });
       dangersByUser.set(spot.userId, list);
+    }
+  }
+  // Heim-Standort: gleiche Unwetter-Prüfung; Schlüssel-Präfix «home:» statt
+  // spotId, damit der Dedup-Schlüssel nicht mit Platz-Warnungen kollidiert.
+  for (const home of homes) {
+    const hourly = await cachedHourly(home.latitude, home.longitude);
+    if (!hourly) continue;
+    for (const alert of detectAlerts(hourly).filter(
+      a => a.severity === "gefahr"
+    )) {
+      const list = dangersByUser.get(home.userId) ?? [];
+      list.push({
+        spotName: home.name,
+        title: alert.title,
+        description: alert.description,
+        key: `home:${alert.id}:${alert.startTime.slice(0, 13)}`,
+      });
+      dangersByUser.set(home.userId, list);
     }
   }
 

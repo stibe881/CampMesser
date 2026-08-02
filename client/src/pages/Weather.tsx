@@ -43,9 +43,10 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
+import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { LOCALE_TAGS, type Language } from "@shared/i18n";
+import { LOCALE_TAGS } from "@shared/i18n";
 import {
   describeUvIndex,
   describeWeatherCode,
@@ -244,61 +245,6 @@ function storeComparePlace(place: ComparePlace) {
   } catch {
     // Speicher voll/blockiert – der Vergleich funktioniert trotzdem
   }
-}
-
-interface PlaceResult {
-  id: number;
-  name: string;
-  latitude: number;
-  longitude: number;
-  /** Region/Land als Zusatzinfo, z. B. «Ticino, Schweiz» */
-  region: string;
-}
-
-/** Ortssuche über die Open-Meteo-Geocoding-API (gleiche Datenquelle wie das Wetter). */
-async function searchPlaces(
-  query: string,
-  lang: Language
-): Promise<PlaceResult[]> {
-  const params = new URLSearchParams({
-    name: query,
-    count: "6",
-    language: lang,
-    format: "json",
-  });
-  const res = await fetch(
-    `https://geocoding-api.open-meteo.com/v1/search?${params.toString()}`
-  );
-  if (!res.ok) throw new Error(`geocoding error ${res.status}`);
-  const json = (await res.json()) as { results?: unknown };
-  if (!Array.isArray(json.results)) return [];
-  const places: PlaceResult[] = [];
-  json.results.forEach((r, i) => {
-    if (!r || typeof r !== "object") return;
-    const entry = r as Record<string, unknown>;
-    const name = typeof entry.name === "string" ? entry.name : "";
-    const latitude = entry.latitude;
-    const longitude = entry.longitude;
-    if (
-      !name ||
-      typeof latitude !== "number" ||
-      !Number.isFinite(latitude) ||
-      typeof longitude !== "number" ||
-      !Number.isFinite(longitude)
-    ) {
-      return;
-    }
-    places.push({
-      id: typeof entry.id === "number" ? entry.id : i,
-      name,
-      latitude,
-      longitude,
-      region: [entry.admin1, entry.country]
-        .filter((p): p is string => typeof p === "string" && p.length > 0)
-        .join(", "),
-    });
-  });
-  return places;
 }
 
 /** Kompakte Tageszelle im Vergleich: Icon, Max/Min, Regen, Böen. */

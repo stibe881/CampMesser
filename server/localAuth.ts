@@ -143,6 +143,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     powerConsumers,
     foodItems,
     campSpots,
+    homeLocations,
     spotPhotos,
     tripLogs,
     tripPhotos,
@@ -186,6 +187,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(inventoryItems).where(eq(inventoryItems.userId, userId));
   await db.delete(powerConsumers).where(eq(powerConsumers.userId, userId));
   await db.delete(foodItems).where(eq(foodItems.userId, userId));
+  await db.delete(homeLocations).where(eq(homeLocations.userId, userId));
   await db.delete(spotPhotos).where(eq(spotPhotos.userId, userId));
   await db.delete(campSpots).where(eq(campSpots.userId, userId));
   // Reise-Tagebuch samt Fotos und Menüplänen (referenzieren Trips)
