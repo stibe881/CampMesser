@@ -554,6 +554,13 @@ export const de = {
     chartLegend:
       "Balken = Regenmenge (mm/h, linke Achse) · Linie = Regenwahrscheinlichkeit (%, rechte Achse).",
     forecast7: "7-Tage-Vorhersage",
+    dayToggleAria: (day: string) =>
+      `Stundenverlauf für ${day} ein- oder ausblenden`,
+    chartTemp: "Temperatur",
+    hourlyLegend:
+      "Linie = Temperatur (°C, linke Achse) · Balken = Regenmenge (mm/h, rechte Achse).",
+    dayWindPeak: (n: number) => `Wind-Spitze: Böen bis ${n} km/h`,
+    dayHoursEmpty: "Keine Stundendaten für diesen Tag verfügbar.",
     dataSource:
       "Datenquelle: Open-Meteo (beste verfügbare Auflösung für deinen Standort, in der Schweiz MeteoSchweiz ICON-CH). Warnungen werden aus der Vorhersage berechnet und ersetzen keine offiziellen Warnungen von MeteoSchweiz.",
     compareButton: "Mit anderem Ort vergleichen",

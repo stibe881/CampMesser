@@ -535,6 +535,12 @@ export const en: Translation = {
     chartLegend:
       "Bars = rainfall (mm/h, left axis) · Line = rain probability (%, right axis).",
     forecast7: "7-day forecast",
+    dayToggleAria: (day: string) => `Show or hide the hourly detail for ${day}`,
+    chartTemp: "Temperature",
+    hourlyLegend:
+      "Line = temperature (°C, left axis) · Bars = rainfall (mm/h, right axis).",
+    dayWindPeak: (n: number) => `Peak wind: gusts up to ${n} km/h`,
+    dayHoursEmpty: "No hourly data available for this day.",
     dataSource:
       "Data source: Open-Meteo (best available resolution for your location, in Switzerland MeteoSwiss ICON-CH). Alerts are computed from the forecast and do not replace official MeteoSwiss warnings.",
     compareButton: "Compare with another place",

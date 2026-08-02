@@ -546,6 +546,13 @@ export const it: Translation = {
     chartLegend:
       "Barre = quantità di pioggia (mm/h, asse sinistro) · Linea = probabilità di pioggia (%, asse destro).",
     forecast7: "Previsioni a 7 giorni",
+    dayToggleAria: (day: string) =>
+      `Mostra o nascondi l'andamento orario per ${day}`,
+    chartTemp: "Temperatura",
+    hourlyLegend:
+      "Linea = temperatura (°C, asse sinistro) · Barre = quantità di pioggia (mm/h, asse destro).",
+    dayWindPeak: (n: number) => `Punta di vento: raffiche fino a ${n} km/h`,
+    dayHoursEmpty: "Nessun dato orario disponibile per questo giorno.",
     dataSource:
       "Fonte dati: Open-Meteo (migliore risoluzione disponibile per la tua posizione, in Svizzera MeteoSvizzera ICON-CH). Le allerte sono calcolate dalle previsioni e non sostituiscono le allerte ufficiali di MeteoSvizzera.",
     compareButton: "Confronta con un altro luogo",

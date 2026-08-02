@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowLeftRight,
+  ChevronDown,
   Cloud,
   CloudDrizzle,
   CloudFog,
@@ -97,7 +98,10 @@ function WeatherIcon({
 }
 
 interface WeatherData {
+  /** Stunden ab der aktuellen Stunde (für 24-h-Leiste, Regen-Grafik, Warnungen). */
   hourly: HourlyWeather[];
+  /** Alle Stunden der 7 Prognosetage (0–24 Uhr, für das Tages-Detail). */
+  hourlyAll: HourlyWeather[];
   daily: DailyWeather[];
   current: {
     temperatureC: number;
@@ -135,9 +139,9 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
   if (!res.ok) throw new WeatherServiceError(res.status);
   const json = await res.json();
 
-  const nowIso = new Date().toISOString().slice(0, 13);
-  const hourly: HourlyWeather[] = (json.hourly.time as string[])
-    .map((time: string, i: number) => ({
+  // Alle Stunden der 7 Prognosetage – das Tages-Detail braucht 0–24 Uhr
+  const hourlyAll: HourlyWeather[] = (json.hourly.time as string[]).map(
+    (time: string, i: number) => ({
       time,
       temperatureC: json.hourly.temperature_2m[i],
       apparentC: json.hourly.apparent_temperature[i],
@@ -148,38 +152,15 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
       weatherCode: json.hourly.weather_code[i],
       cape: json.hourly.cape?.[i] ?? 0,
       cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
-    }))
-    .filter(
-      h =>
-        h.time.slice(0, 13) >= nowIso.slice(0, 13) ||
-        h.time >= new Date().toISOString().slice(0, 16)
-    );
+    })
+  );
 
   // Ab der aktuellen Stunde (lokale API-Zeit ist bereits Ortszeit durch timezone=auto)
-  const nowLocalHour = json.hourly.time.findIndex(
-    (t: string) => new Date(t).getTime() >= Date.now() - 3600000
+  const nowLocalHour = hourlyAll.findIndex(
+    h => new Date(h.time).getTime() >= Date.now() - 3600000
   );
   const hourlyFromNow =
-    nowLocalHour >= 0
-      ? (json.hourly.time as string[])
-          .slice(nowLocalHour)
-          .map((time: string, k: number) => {
-            const i = nowLocalHour + k;
-            return {
-              time,
-              temperatureC: json.hourly.temperature_2m[i],
-              apparentC: json.hourly.apparent_temperature[i],
-              precipitationMm: json.hourly.precipitation[i],
-              precipitationProbability:
-                json.hourly.precipitation_probability?.[i] ?? 0,
-              windSpeedKmh: json.hourly.wind_speed_10m[i],
-              windGustsKmh: json.hourly.wind_gusts_10m[i],
-              weatherCode: json.hourly.weather_code[i],
-              cape: json.hourly.cape?.[i] ?? 0,
-              cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
-            };
-          })
-      : hourly;
+    nowLocalHour >= 0 ? hourlyAll.slice(nowLocalHour) : hourlyAll;
 
   const daily: DailyWeather[] = (json.daily.time as string[]).map(
     (date: string, i: number) => ({
@@ -199,6 +180,7 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
 
   return {
     hourly: hourlyFromNow,
+    hourlyAll,
     daily,
     current: {
       temperatureC: json.current.temperature_2m,
@@ -653,6 +635,8 @@ export default function WeatherPage() {
   const [fireDanger, setFireDanger] = useState<FireDangerInfo | null>(null);
   const [pollen, setPollen] = useState<PollenState>({ status: "idle" });
   const [compareOpen, setCompareOpen] = useState(false);
+  // Aufgeklappter Tag der 7-Tage-Vorschau (Datum) – nur einer gleichzeitig
+  const [openDay, setOpenDay] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
   const { data: spots } = trpc.spots.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -708,6 +692,7 @@ export default function WeatherPage() {
   const loadForCoords = async (lat: number, lon: number) => {
     setState("loading");
     setCoords({ lat, lon });
+    setOpenDay(null);
     try {
       setData(await fetchWeather(lat, lon));
       setState("ready");
@@ -778,6 +763,23 @@ export default function WeatherPage() {
         prob: h.precipitationProbability,
       })),
     [data]
+  );
+  // Stundenverlauf des aufgeklappten Tages (0–24 Uhr, Zeit via LOCALE_TAGS)
+  const openDayHours = useMemo(
+    () =>
+      data && openDay
+        ? data.hourlyAll
+            .filter(h => h.time.startsWith(openDay))
+            .map(h => ({
+              label: new Date(h.time).toLocaleTimeString(LOCALE_TAGS[lang], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+              temp: h.temperatureC,
+              mm: h.precipitationMm,
+            }))
+        : [],
+    [data, openDay, lang]
   );
 
   return (
@@ -1215,39 +1217,154 @@ export default function WeatherPage() {
           </h2>
           <Card>
             <CardContent className="divide-y divide-border/60 pt-2">
-              {data.daily.map((d, i) => (
-                <div key={d.date} className="flex items-center gap-3 py-2.5">
-                  <p className="w-16 text-sm font-medium">
-                    {i === 0
-                      ? t.common.today
-                      : new Date(d.date).toLocaleDateString(LOCALE_TAGS[lang], {
-                          weekday: "short",
-                          day: "numeric",
-                        })}
-                  </p>
-                  <WeatherIcon
-                    code={d.weatherCode}
-                    className="h-5 w-5 shrink-0 text-primary"
-                  />
-                  <p className="flex w-14 items-center gap-1 text-xs text-chart-2">
-                    <Droplets className="h-3 w-3 shrink-0" aria-hidden="true" />
-                    {Math.round(d.precipitationProbabilityMax)}%
-                  </p>
-                  <p className="hidden w-16 items-center gap-1 text-xs text-muted-foreground sm:flex">
-                    <Wind className="h-3 w-3 shrink-0" aria-hidden="true" />
-                    {Math.round(d.windGustsMaxKmh)} km/h
-                  </p>
-                  <p className="ml-auto text-sm">
-                    <span className="font-semibold">
-                      {Math.round(d.tempMaxC)}°
-                    </span>
-                    <span className="text-muted-foreground">
-                      {" "}
-                      / {Math.round(d.tempMinC)}°
-                    </span>
-                  </p>
-                </div>
-              ))}
+              {data.daily.map((d, i) => {
+                const dayLabel =
+                  i === 0
+                    ? t.common.today
+                    : new Date(d.date).toLocaleDateString(LOCALE_TAGS[lang], {
+                        weekday: "short",
+                        day: "numeric",
+                      });
+                const isOpen = openDay === d.date;
+                return (
+                  <div key={d.date}>
+                    <button
+                      type="button"
+                      onClick={() => setOpenDay(isOpen ? null : d.date)}
+                      aria-expanded={isOpen}
+                      aria-controls={`day-hours-${d.date}`}
+                      aria-label={t.weather.dayToggleAria(dayLabel)}
+                      className="flex w-full items-center gap-3 py-2.5 text-left"
+                    >
+                      <p className="w-16 text-sm font-medium">{dayLabel}</p>
+                      <WeatherIcon
+                        code={d.weatherCode}
+                        className="h-5 w-5 shrink-0 text-primary"
+                      />
+                      <p className="flex w-14 items-center gap-1 text-xs text-chart-2">
+                        <Droplets
+                          className="h-3 w-3 shrink-0"
+                          aria-hidden="true"
+                        />
+                        {Math.round(d.precipitationProbabilityMax)}%
+                      </p>
+                      <p className="hidden w-16 items-center gap-1 text-xs text-muted-foreground sm:flex">
+                        <Wind className="h-3 w-3 shrink-0" aria-hidden="true" />
+                        {Math.round(d.windGustsMaxKmh)} km/h
+                      </p>
+                      <p className="ml-auto text-sm">
+                        <span className="font-semibold">
+                          {Math.round(d.tempMaxC)}°
+                        </span>
+                        <span className="text-muted-foreground">
+                          {" "}
+                          / {Math.round(d.tempMinC)}°
+                        </span>
+                      </p>
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                          isOpen && "rotate-180"
+                        )}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    {isOpen && (
+                      <div id={`day-hours-${d.date}`} className="pb-3">
+                        {openDayHours.length > 0 ? (
+                          <>
+                            <div className="h-40 w-full">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <ComposedChart
+                                  data={openDayHours}
+                                  margin={{
+                                    top: 4,
+                                    right: -18,
+                                    bottom: 0,
+                                    left: -18,
+                                  }}
+                                >
+                                  <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    className="stroke-border/60"
+                                  />
+                                  <XAxis
+                                    dataKey="label"
+                                    tick={{ fontSize: 10 }}
+                                    interval="preserveStartEnd"
+                                    minTickGap={28}
+                                  />
+                                  <YAxis
+                                    yAxisId="temp"
+                                    tick={{ fontSize: 10 }}
+                                  />
+                                  <YAxis
+                                    yAxisId="mm"
+                                    orientation="right"
+                                    domain={[
+                                      0,
+                                      (max: number) =>
+                                        Math.max(2, Math.ceil(max)),
+                                    ]}
+                                    tick={{ fontSize: 10 }}
+                                  />
+                                  <Tooltip
+                                    formatter={(value: number, name: string) =>
+                                      name === t.weather.chartRain
+                                        ? [
+                                            `${value.toFixed(1)} mm/h`,
+                                            t.weather.chartRain,
+                                          ]
+                                        : [
+                                            `${Math.round(value)} °C`,
+                                            t.weather.chartTemp,
+                                          ]
+                                    }
+                                  />
+                                  <Bar
+                                    yAxisId="mm"
+                                    dataKey="mm"
+                                    name={t.weather.chartRain}
+                                    fill="var(--chart-2)"
+                                    fillOpacity={0.75}
+                                    isAnimationActive={false}
+                                  />
+                                  <Line
+                                    yAxisId="temp"
+                                    type="monotone"
+                                    dataKey="temp"
+                                    name={t.weather.chartTemp}
+                                    stroke="var(--chart-1)"
+                                    strokeWidth={2}
+                                    dot={false}
+                                    isAnimationActive={false}
+                                  />
+                                </ComposedChart>
+                              </ResponsiveContainer>
+                            </div>
+                            <p className="mt-1.5 text-xs text-muted-foreground">
+                              {t.weather.hourlyLegend}
+                            </p>
+                            <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                              <Wind
+                                className="h-3 w-3 shrink-0"
+                                aria-hidden="true"
+                              />
+                              {t.weather.dayWindPeak(
+                                Math.round(d.windGustsMaxKmh)
+                              )}
+                            </p>
+                          </>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            {t.weather.dayHoursEmpty}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
 

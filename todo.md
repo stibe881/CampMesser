@@ -2,6 +2,8 @@
 
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 15)
 
+- [x] Stunden-Detail im Wetter: die Tage der 7-Tage-Vorschau (Weather.tsx) sind jetzt aufklappbare Buttons (aria-expanded/aria-controls, Chevron, nur ein Tag gleichzeitig offen, Reset beim Ortswechsel) – darunter erscheint der Stundenverlauf 0–24 Uhr des Tages als kompaktes recharts-ComposedChart (Temperatur-Linie + Regen-Balken, Stunden-Labels via LOCALE_TAGS) plus Wind-Spitze (Tages-Böenmaximum) als Textzeile; der Forecast-Abruf holte hourly bereits für alle 7 Tage, fetchWeather liefert neu zusätzlich hourlyAll (ungefiltert 0–24 Uhr, die bisherige Doppel-Zuordnung ab «jetzt» wurde zu findIndex+slice vereinfacht); 5 neue weather-Schlüssel (dayToggleAria, chartTemp, hourlyLegend, dayWindPeak, dayHoursEmpty) in DE/FR/IT/EN
+
 - [x] Anreise-Navigation zum Platz: Helper directionsUrl(lat, lon, userAgent?) in client/src/lib/directions.ts – iPhone/iPad (User-Agent-Erkennung, injizierbar für Tests) öffnen Apple Karten (maps.apple.com/?daddr=lat,lon), alle anderen Google Maps (maps/dir/?api=1&destination=lat,lon), 5 Tests in server/directions.test.ts; «Route»-Knopf im Platz-Dossier (SpotDetail.tsx, neben «Zelt finden», target \_blank + noopener + aria-label), kompakter «Route →»-Link auf den Favoriten-Karten (Spots.tsx, neben Dossier/Sonnenstand) und Route-Link im Karten-Popup der Platz-Pins (MapView.tsx); neue Schlüssel spotDetail.routeButton/routeAria, spots.routeLink/routeAria, mapView.routeLink in DE/FR/IT/EN
 
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 14)
