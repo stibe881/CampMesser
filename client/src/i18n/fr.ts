@@ -1147,6 +1147,14 @@ export const fr: Translation = {
       "Le plus bel emplacement, la meilleure recette, quoi changer la prochaine fois …",
     submit: "Enregistrer l'entrée",
     plannedTitle: "Séjours prévus",
+    holidaySectionLabel: "Vacances scolaires & jours fériés",
+    holidayCantonAria:
+      "Choisir le canton pour les indications de vacances et jours fériés",
+    holidayCantonNone: "Aucun canton – pas d'indications",
+    holidaySchoolBadge: name => `Pendant les vacances scolaires (${name})`,
+    holidayPublicBadge: (date, name) => `Jour férié le ${date} : ${name}`,
+    holidaySource:
+      "Données de vacances et jours fériés : OpenHolidays API, sans garantie.",
     countdown: days =>
       days === 0
         ? "C'est parti aujourd'hui !"

@@ -1139,6 +1139,14 @@ export const it: Translation = {
       "La piazzola più bella, la ricetta migliore, cosa cambiare la prossima volta …",
     submit: "Salva voce",
     plannedTitle: "Soggiorni pianificati",
+    holidaySectionLabel: "Vacanze scolastiche & giorni festivi",
+    holidayCantonAria:
+      "Scegli il cantone per le indicazioni su vacanze e giorni festivi",
+    holidayCantonNone: "Nessun cantone – nessuna indicazione",
+    holidaySchoolBadge: name => `Cade nelle vacanze scolastiche (${name})`,
+    holidayPublicBadge: (date, name) => `Giorno festivo il ${date}: ${name}`,
+    holidaySource:
+      "Dati su vacanze e giorni festivi: OpenHolidays API, senza garanzia.",
     countdown: days =>
       days === 0
         ? "Si parte oggi!"

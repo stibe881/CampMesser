@@ -1151,6 +1151,13 @@ export const de = {
       "Schönster Stellplatz, bestes Rezept, was beim nächsten Mal anders …",
     submit: "Eintrag speichern",
     plannedTitle: "Geplante Aufenthalte",
+    holidaySectionLabel: "Schulferien & Feiertage",
+    holidayCantonAria: "Kanton für Ferien- und Feiertags-Hinweise wählen",
+    holidayCantonNone: "Kein Kanton – keine Hinweise",
+    holidaySchoolBadge: (name: string) => `Liegt in den Schulferien (${name})`,
+    holidayPublicBadge: (date: string, name: string) =>
+      `Feiertag am ${date}: ${name}`,
+    holidaySource: "Ferien- und Feiertagsdaten: OpenHolidays API, ohne Gewähr.",
     countdown: (days: number) =>
       days === 0
         ? "Heute geht's los!"

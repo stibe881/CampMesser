@@ -1118,6 +1118,13 @@ export const en: Translation = {
       "Nicest spot, best recipe, what to do differently next time …",
     submit: "Save entry",
     plannedTitle: "Planned stays",
+    holidaySectionLabel: "School & public holidays",
+    holidayCantonAria: "Choose the canton for holiday hints",
+    holidayCantonNone: "No canton – no hints",
+    holidaySchoolBadge: name => `Falls within the school holidays (${name})`,
+    holidayPublicBadge: (date, name) => `Public holiday on ${date}: ${name}`,
+    holidaySource:
+      "School and public holiday data: OpenHolidays API, without guarantee.",
     countdown: days =>
       days === 0
         ? "It starts today!"
