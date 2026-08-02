@@ -1448,6 +1448,16 @@ export const de = {
       "Richtung aus deiner Bewegung übernommen – der Pfeil stimmt nur, solange du dich vorwärts bewegst.",
     noCompassHint:
       "Kein Kompass verfügbar: Der Pfeil kann nicht mitdrehen. Richte dich nach der Himmelsrichtung – oder geh ein paar Schritte, dann übernimmt CampMesser die Richtung aus deiner Bewegung.",
+    mapTitle: "Mini-Karte",
+    mapAria: "Karte mit deiner Position und deinen gespeicherten Zielen",
+    mapHint:
+      "Blauer Punkt: deine Position. Tippe auf einen Pin, um das Ziel anzupeilen.",
+    mapNoTargets:
+      "Blauer Punkt: deine Position. Gespeicherte Ziele erscheinen als Pins.",
+    mapOffline:
+      "Offline – die Karte kann keine Kacheln laden. Der Kompass funktioniert weiter.",
+    mapLoadFailed: "Karte konnte nicht geladen werden.",
+    mapRetry: "Erneut versuchen",
   },
   sharedSpot: {
     invalid: "Dieser Teil-Link ist nicht mehr gültig.",

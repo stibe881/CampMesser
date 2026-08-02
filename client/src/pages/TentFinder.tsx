@@ -1,17 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ChevronDown,
   Compass,
   Loader2,
   LocateFixed,
+  Map as MapIcon,
   MapPin,
   Tent,
   Trash2,
 } from "lucide-react";
+import type * as Leaflet from "leaflet";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useDeviceHeading } from "@/hooks/useDeviceHeading";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import {
@@ -44,6 +48,31 @@ function storeTargets(targets: TentFinderTarget[]) {
     /* Sitzung reicht */
   }
 }
+
+/** Merkt sich, ob die Mini-Karte auf- oder eingeklappt ist (Standard: zu). */
+const MAP_OPEN_KEY = "campmesser.tentFinderMap";
+
+/** Schweiz als Ausgangs-Ausschnitt, solange weder Position noch Ziele da sind. */
+const MAP_FALLBACK_CENTER: Leaflet.LatLngTuple = [46.8, 8.2];
+const MAP_FALLBACK_ZOOM = 8;
+
+/**
+ * Ziel-Pin als divIcon (keine Bild-Assets nötig – Muster MapView): das aktive
+ * Ziel gross und grün, die übrigen als bernsteinfarbenes Fadenkreuz.
+ */
+function targetPinIcon(L: typeof Leaflet, active: boolean): Leaflet.DivIcon {
+  const size = active ? 32 : 26;
+  const fill = active ? "#2f6b4f" : "#b45309";
+  return L.divIcon({
+    className: "",
+    html: `<svg viewBox="0 0 28 28" width="${size}" height="${size}" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="${fill}" stroke="#ffffff" stroke-width="2.5"/><circle cx="14" cy="14" r="3" fill="#ffffff"/><path d="M14 5.5v4M14 18.5v4M5.5 14h4M18.5 14h4" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/></svg>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+}
+
+/** Ladezustand der lazy geladenen Leaflet-Bibliothek. */
+type MiniMapState = "idle" | "loading" | "error" | "ready";
 
 /** Distanz formatieren: unter 1 km in Metern, sonst km mit einer Nachkommastelle. */
 function formatDistance(meters: number, lang: Language): string {
@@ -236,6 +265,155 @@ export default function TentFinderPage() {
     bearing !== null ? compassDirection(bearing, lang) : null;
   const distanceLabel =
     distance !== null ? formatDistance(distance, lang) : null;
+
+  // ---- Mini-Karte (aufklappbar, Leaflet lazy – Muster RainRadar) ----
+  const [mapOpen, setMapOpen] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(MAP_OPEN_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const [mapState, setMapState] = useState<MiniMapState>("idle");
+  const [online, setOnline] = useState<boolean>(() => navigator.onLine);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<Leaflet.Map | null>(null);
+  const leafletRef = useRef<typeof Leaflet | null>(null);
+  const targetLayerRef = useRef<Leaflet.LayerGroup | null>(null);
+  const positionMarkerRef = useRef<Leaflet.CircleMarker | null>(null);
+  /** Einmalig einpassen; kommt die GPS-Position später an, EINMAL nachziehen. */
+  const fitDoneRef = useRef(false);
+  const fitWithFixDoneRef = useRef(false);
+
+  const toggleMap = () => {
+    setMapOpen(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem(MAP_OPEN_KEY, next ? "1" : "0");
+      } catch {
+        /* Sitzung reicht */
+      }
+      return next;
+    });
+  };
+
+  // Ohne Netz laden die OSM-Kacheln nicht – Hinweis zeigen (Kompass läuft weiter)
+  useEffect(() => {
+    const goOnline = () => setOnline(true);
+    const goOffline = () => setOnline(false);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return () => {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+  }, []);
+
+  // Leaflet erst beim ersten Aufklappen laden – der Zelt-Finder-Chunk bleibt klein
+  useEffect(() => {
+    if (!mapOpen || mapState !== "idle") return;
+    let cancelled = false;
+    setMapState("loading");
+    Promise.all([import("leaflet"), import("leaflet/dist/leaflet.css")])
+      .then(([leafletModule]) => {
+        if (cancelled) return;
+        leafletRef.current = leafletModule.default;
+        setMapState("ready");
+      })
+      .catch(() => {
+        if (!cancelled) setMapState("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mapOpen, mapState]);
+
+  // Karte aufbauen, sobald Leaflet bereit und der Abschnitt offen ist;
+  // beim Einklappen/Verlassen sauber abbauen (Bibliothek bleibt geladen)
+  useEffect(() => {
+    const L = leafletRef.current;
+    if (!mapOpen || mapState !== "ready" || !L) return;
+    const container = mapContainerRef.current;
+    if (!container || mapRef.current) return;
+
+    const map = L.map(container, {
+      center: MAP_FALLBACK_CENTER,
+      zoom: MAP_FALLBACK_ZOOM,
+      scrollWheelZoom: false,
+    });
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+    targetLayerRef.current = L.layerGroup().addTo(map);
+    mapRef.current = map;
+    fitDoneRef.current = false;
+    fitWithFixDoneRef.current = false;
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      targetLayerRef.current = null;
+      positionMarkerRef.current = null;
+    };
+  }, [mapOpen, mapState]);
+
+  // Ziel-Pins nachführen (aktives Ziel hervorgehoben; Klick wählt das Ziel)
+  useEffect(() => {
+    const L = leafletRef.current;
+    const layer = targetLayerRef.current;
+    if (!mapOpen || mapState !== "ready" || !L || !layer) return;
+    layer.clearLayers();
+    targets.forEach(tgt => {
+      const active = effectiveSelection === `target:${tgt.id}`;
+      const marker = L.marker([tgt.lat, tgt.lon], {
+        icon: targetPinIcon(L, active),
+        alt: tgt.name,
+        title: tgt.name,
+      });
+      marker.on("click", () => setSelection(`target:${tgt.id}`));
+      marker.addTo(layer);
+    });
+  }, [mapOpen, mapState, targets, effectiveSelection]);
+
+  // Eigene Position als blauer Punkt – folgt der laufenden watchPosition
+  useEffect(() => {
+    const L = leafletRef.current;
+    const map = mapRef.current;
+    if (!mapOpen || mapState !== "ready" || !L || !map || !fix) return;
+    if (positionMarkerRef.current) {
+      positionMarkerRef.current.setLatLng([fix.lat, fix.lon]);
+    } else {
+      positionMarkerRef.current = L.circleMarker([fix.lat, fix.lon], {
+        radius: 7,
+        color: "#ffffff",
+        weight: 2,
+        fillColor: "#2563eb",
+        fillOpacity: 1,
+      }).addTo(map);
+    }
+  }, [mapOpen, mapState, fix]);
+
+  // Initial über Position + Ziele einpassen (Position darf einmal nachziehen)
+  useEffect(() => {
+    const L = leafletRef.current;
+    const map = mapRef.current;
+    if (!mapOpen || mapState !== "ready" || !L || !map) return;
+    if (fitDoneRef.current && (!fix || fitWithFixDoneRef.current)) return;
+    const points: Leaflet.LatLngTuple[] = targets.map(tgt => [
+      tgt.lat,
+      tgt.lon,
+    ]);
+    if (fix) points.push([fix.lat, fix.lon]);
+    if (points.length === 0) return;
+    fitDoneRef.current = true;
+    if (fix) fitWithFixDoneRef.current = true;
+    if (points.length === 1) {
+      map.setView(points[0], 16);
+    } else {
+      map.fitBounds(L.latLngBounds(points), { padding: [24, 24], maxZoom: 17 });
+    }
+  }, [mapOpen, mapState, targets, fix]);
 
   const suggestions = [
     t.tentFinder.suggestionTent,
@@ -479,6 +657,68 @@ export default function TentFinderPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Mini-Karte: eigene Position + gespeicherte Ziele (aufklappbar) */}
+      <Card className="mt-4">
+        <CardContent className="pt-6">
+          <button
+            type="button"
+            onClick={toggleMap}
+            aria-expanded={mapOpen}
+            aria-controls="tent-finder-map"
+            className="flex w-full items-center gap-2 text-left text-sm font-semibold"
+          >
+            <MapIcon className="h-4 w-4 text-primary" aria-hidden="true" />
+            {t.tentFinder.mapTitle}
+            <ChevronDown
+              className={cn(
+                "ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                mapOpen && "rotate-180"
+              )}
+              aria-hidden="true"
+            />
+          </button>
+          {mapOpen && (
+            <div id="tent-finder-map" className="mt-3 space-y-2">
+              {mapState === "loading" && (
+                <Skeleton className="h-[200px] w-full rounded-xl" />
+              )}
+              {mapState === "error" && (
+                <p className="text-sm text-muted-foreground">
+                  {t.tentFinder.mapLoadFailed}{" "}
+                  <button
+                    type="button"
+                    onClick={() => setMapState("idle")}
+                    className="font-medium text-primary underline"
+                  >
+                    {t.tentFinder.mapRetry}
+                  </button>
+                </p>
+              )}
+              {mapState === "ready" && (
+                <>
+                  <div
+                    ref={mapContainerRef}
+                    role="region"
+                    aria-label={t.tentFinder.mapAria}
+                    className="h-[200px] w-full rounded-xl border border-border"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {targets.length > 0
+                      ? t.tentFinder.mapHint
+                      : t.tentFinder.mapNoTargets}
+                  </p>
+                  {!online && (
+                    <p className="text-xs text-muted-foreground" role="status">
+                      {t.tentFinder.mapOffline}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

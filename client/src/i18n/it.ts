@@ -1432,6 +1432,15 @@ export const it: Translation = {
       "Direzione ricavata dal tuo movimento – la freccia è corretta solo finché avanzi.",
     noCompassHint:
       "Nessuna bussola disponibile: la freccia non può ruotare. Orientati con il punto cardinale – oppure fai qualche passo e CampMesser ricaverà la direzione dal tuo movimento.",
+    mapTitle: "Mini-mappa",
+    mapAria: "Mappa con la tua posizione e le tue mete salvate",
+    mapHint: "Punto blu: la tua posizione. Tocca un pin per puntare la meta.",
+    mapNoTargets:
+      "Punto blu: la tua posizione. Le mete salvate appaiono come pin.",
+    mapOffline:
+      "Offline – la mappa non può caricare le tessere. La bussola continua a funzionare.",
+    mapLoadFailed: "Impossibile caricare la mappa.",
+    mapRetry: "Riprova",
   },
   sharedSpot: {
     invalid: "Questo link di condivisione non è più valido.",

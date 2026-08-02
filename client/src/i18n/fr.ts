@@ -1447,6 +1447,15 @@ export const fr: Translation = {
       "Direction reprise de ton déplacement – la flèche n'est correcte que tant que tu avances.",
     noCompassHint:
       "Pas de boussole disponible : la flèche ne peut pas tourner. Oriente-toi avec le point cardinal – ou fais quelques pas, CampMesser reprendra alors la direction de ton déplacement.",
+    mapTitle: "Mini-carte",
+    mapAria: "Carte avec ta position et tes cibles enregistrées",
+    mapHint: "Point bleu : ta position. Touche un repère pour viser la cible.",
+    mapNoTargets:
+      "Point bleu : ta position. Les cibles enregistrées apparaissent comme repères.",
+    mapOffline:
+      "Hors ligne – la carte ne peut pas charger les tuiles. La boussole continue de fonctionner.",
+    mapLoadFailed: "Impossible de charger la carte.",
+    mapRetry: "Réessayer",
   },
   sharedSpot: {
     invalid: "Ce lien de partage n'est plus valable.",

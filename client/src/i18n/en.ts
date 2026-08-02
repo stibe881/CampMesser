@@ -1400,6 +1400,14 @@ export const en: Translation = {
       "Direction taken from your movement – the arrow is only correct while you keep walking.",
     noCompassHint:
       "No compass available: the arrow cannot rotate. Use the cardinal direction instead – or walk a few steps and CampMesser will take the direction from your movement.",
+    mapTitle: "Mini map",
+    mapAria: "Map with your position and your saved targets",
+    mapHint: "Blue dot: your position. Tap a pin to aim for that target.",
+    mapNoTargets: "Blue dot: your position. Saved targets appear as pins.",
+    mapOffline:
+      "Offline – the map cannot load tiles. The compass keeps working.",
+    mapLoadFailed: "The map could not be loaded.",
+    mapRetry: "Try again",
   },
   sharedSpot: {
     invalid: "This share link is no longer valid.",
