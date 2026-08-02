@@ -22,6 +22,7 @@ export const en: Translation = {
     saveFailed: "Saving failed",
     actionFailed: "Action failed",
     offlineBadge: "Offline",
+    screenAwake: "Screen stays on",
   },
   shell: {
     toHome: "Go to home page",
@@ -1575,6 +1576,15 @@ export const en: Translation = {
     favoriteSaved: "Favourite",
     favoritesEmpty:
       "No favourites yet – tap the heart on a recipe to collect it here.",
+    cookingMode: "Cooking mode",
+    cookingModeAria: (name: string) => `Start cooking mode for ${name}`,
+    cookingStepProgress: (current: number, total: number) =>
+      `Step ${current} of ${total}`,
+    cookingPrev: "Back",
+    cookingNext: "Next",
+    cookingDone: "Done",
+    cookingIngredientsShow: "Show ingredients",
+    cookingIngredientsHide: "Hide ingredients",
     editor: {
       titleEdit: "Edit recipe",
       titleNew: "Create your own recipe",

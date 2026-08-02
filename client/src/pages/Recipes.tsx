@@ -2,11 +2,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Baby,
   ChefHat,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
   Clock,
   CookingPot,
   Flame,
   Heart,
   ImagePlus,
+  MonitorSmartphone,
   Pencil,
   Plus,
   Search,
@@ -56,6 +61,7 @@ import {
   toggleFavorite,
 } from "@/lib/recipeFavorites";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
+import { useWakeLock } from "@/lib/useWakeLock";
 import { cn } from "@/lib/utils";
 
 /** Editor für eigene Rezepte: erstellen und bearbeiten (Zutaten/Schritte zeilenweise). */
@@ -413,6 +419,133 @@ function RecipeEditorDialog({
   );
 }
 
+/**
+ * Kochmodus: Vollbild mit einem Zubereitungsschritt pro Ansicht, grossen
+ * Blätter-Flächen und aktivem Wake Lock (Display bleibt an, solange offen).
+ * Funktioniert für eingebaute und eigene Rezepte gleichermassen.
+ */
+function CookingModeDialog({
+  recipe,
+  onClose,
+}: {
+  recipe: Recipe;
+  onClose: () => void;
+}) {
+  const { lang, t } = useI18n();
+  const wakeLock = useWakeLock();
+  const [step, setStep] = useState(0);
+  const [showIngredients, setShowIngredients] = useState(false);
+  const stepRef = useRef<HTMLParagraphElement>(null);
+  const total = recipe.steps.length;
+  const isLast = step >= total - 1;
+
+  // Fokus auf den aktuellen Schritt setzen – Screenreader lesen ihn so
+  // direkt vor, und die Pfeiltasten-Navigation bleibt im Dialog.
+  useEffect(() => {
+    stepRef.current?.focus({ preventScroll: false });
+  }, [step]);
+
+  return (
+    <DialogContent
+      className="left-0 top-0 flex h-dvh max-h-none w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-0 p-0"
+      aria-label={pick(recipe.name, lang)}
+    >
+      <DialogHeader className="border-b border-border px-4 py-3 text-left sm:px-6">
+        <div className="flex items-center gap-3 pr-10">
+          <DialogTitle className="min-w-0 flex-1 truncate font-serif text-lg">
+            {pick(recipe.name, lang)}
+          </DialogTitle>
+          {wakeLock.active && (
+            <Badge variant="secondary" className="shrink-0 gap-1">
+              <MonitorSmartphone className="h-3 w-3" aria-hidden="true" />
+              {t.common.screenAwake}
+            </Badge>
+          )}
+        </div>
+        <DialogDescription>
+          {t.recipes.cookingStepProgress(step + 1, total)}
+        </DialogDescription>
+      </DialogHeader>
+
+      {/* Der grosse Schritt-Text */}
+      <div className="flex-1 overflow-y-auto px-6 py-8 sm:px-10">
+        <div className="mx-auto flex h-full max-w-2xl items-center">
+          <p
+            ref={stepRef}
+            tabIndex={-1}
+            aria-live="polite"
+            className="text-2xl leading-relaxed outline-none sm:text-3xl"
+          >
+            {pick(recipe.steps[step] ?? "", lang)}
+          </p>
+        </div>
+      </div>
+
+      {/* Zutaten zum Nachschauen, ohne den Kochmodus zu verlassen */}
+      <div className="border-t border-border px-4 sm:px-6">
+        <button
+          type="button"
+          onClick={() => setShowIngredients(v => !v)}
+          aria-expanded={showIngredients}
+          aria-controls="cooking-ingredients"
+          className="flex w-full items-center justify-between py-3 text-sm font-medium"
+        >
+          {showIngredients
+            ? t.recipes.cookingIngredientsHide
+            : t.recipes.cookingIngredientsShow}
+          {showIngredients ? (
+            <ChevronUp className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <ChevronDown className="h-4 w-4" aria-hidden="true" />
+          )}
+        </button>
+        {showIngredients && (
+          <ul
+            id="cooking-ingredients"
+            className="grid max-h-44 gap-x-4 gap-y-1 overflow-y-auto pb-3 text-sm sm:grid-cols-2"
+          >
+            {recipe.ingredients.map((i, idx) => (
+              <li key={idx} className="flex gap-2">
+                <span
+                  className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                  aria-hidden="true"
+                />
+                {pick(i, lang)}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Grosse Blätter-Flächen */}
+      <div className="grid grid-cols-2 gap-2 border-t border-border p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6">
+        <Button
+          variant="outline"
+          className="h-16 text-base"
+          disabled={step === 0}
+          onClick={() => setStep(s => Math.max(0, s - 1))}
+        >
+          <ChevronLeft className="mr-1.5 h-5 w-5" aria-hidden="true" />
+          {t.recipes.cookingPrev}
+        </Button>
+        {isLast ? (
+          <Button className="h-16 text-base" onClick={onClose}>
+            {t.recipes.cookingDone}
+          </Button>
+        ) : (
+          <Button
+            className="h-16 text-base"
+            onClick={() => setStep(s => Math.min(total - 1, s + 1))}
+          >
+            {t.recipes.cookingNext}
+            <ChevronRight className="ml-1.5 h-5 w-5" aria-hidden="true" />
+          </Button>
+        )}
+      </div>
+    </DialogContent>
+  );
+}
+
 /** Filter-Schlüssel: «alle» plus die gespeicherten Methoden-Schlüssel. */
 const methodFilters = ["alle", "Gaskocher", "Offenes Feuer"] as const;
 const timeFilters = ["alle", "15", "30"] as const;
@@ -424,6 +557,8 @@ export default function RecipesPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Recipe | null>(null);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
+  // Kochmodus-Vollbild fürs aktuell geöffnete Rezept
+  const [cookingMode, setCookingMode] = useState(false);
 
   // Favoriten: localStorage als schnelle Quelle, Geräte-Sync fürs Konto
   const [favorites, setFavorites] = useState<string[]>(() =>
@@ -726,7 +861,12 @@ export default function RecipesPage() {
       {/* Rezept-Detail */}
       <Dialog
         open={selected !== null}
-        onOpenChange={open => !open && setSelected(null)}
+        onOpenChange={open => {
+          if (!open) {
+            setSelected(null);
+            setCookingMode(false);
+          }
+        }}
       >
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           {selected && (
@@ -750,24 +890,38 @@ export default function RecipesPage() {
                 </DialogDescription>
               </DialogHeader>
 
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-fit"
-                aria-pressed={isFavorite(selected.id)}
-                onClick={() => handleToggleFavorite(selected.id)}
-              >
-                <Heart
-                  className={cn(
-                    "mr-1.5 h-4 w-4",
-                    isFavorite(selected.id) && "fill-red-500 text-red-500"
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-fit"
+                  aria-pressed={isFavorite(selected.id)}
+                  onClick={() => handleToggleFavorite(selected.id)}
+                >
+                  <Heart
+                    className={cn(
+                      "mr-1.5 h-4 w-4",
+                      isFavorite(selected.id) && "fill-red-500 text-red-500"
+                    )}
+                    aria-hidden="true"
+                  />
+                  {isFavorite(selected.id)
+                    ? t.recipes.favoriteSaved
+                    : t.recipes.favoriteSave}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-fit"
+                  onClick={() => setCookingMode(true)}
+                  aria-label={t.recipes.cookingModeAria(
+                    pick(selected.name, lang)
                   )}
-                  aria-hidden="true"
-                />
-                {isFavorite(selected.id)
-                  ? t.recipes.favoriteSaved
-                  : t.recipes.favoriteSave}
-              </Button>
+                >
+                  <CookingPot className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {t.recipes.cookingMode}
+                </Button>
+              </div>
 
               <div className="space-y-4">
                 {selected.image && (
@@ -890,6 +1044,19 @@ export default function RecipesPage() {
             </>
           )}
         </DialogContent>
+      </Dialog>
+
+      {/* Kochmodus-Vollbild – liegt über dem Detail-Dialog */}
+      <Dialog
+        open={cookingMode && selected !== null}
+        onOpenChange={open => !open && setCookingMode(false)}
+      >
+        {cookingMode && selected && (
+          <CookingModeDialog
+            recipe={selected}
+            onClose={() => setCookingMode(false)}
+          />
+        )}
       </Dialog>
 
       <Dialog

@@ -22,6 +22,7 @@ export const it: Translation = {
     saveFailed: "Salvataggio non riuscito",
     actionFailed: "Azione non riuscita",
     offlineBadge: "Offline",
+    screenAwake: "Lo schermo resta acceso",
   },
   shell: {
     toHome: "Alla pagina iniziale",
@@ -1612,6 +1613,15 @@ export const it: Translation = {
     favoriteSaved: "Preferito",
     favoritesEmpty:
       "Ancora nessun preferito – tocca il cuore di una ricetta per ritrovarla qui.",
+    cookingMode: "Modalità cucina",
+    cookingModeAria: (name: string) => `Avviare la modalità cucina per ${name}`,
+    cookingStepProgress: (current: number, total: number) =>
+      `Passo ${current} di ${total}`,
+    cookingPrev: "Indietro",
+    cookingNext: "Avanti",
+    cookingDone: "Fatto",
+    cookingIngredientsShow: "Mostra ingredienti",
+    cookingIngredientsHide: "Nascondi ingredienti",
     editor: {
       titleEdit: "Modifica ricetta",
       titleNew: "Crea una ricetta personale",

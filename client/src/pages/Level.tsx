@@ -12,6 +12,7 @@ import {
 import { type Language } from "@shared/i18n";
 import { useI18n } from "@/i18n";
 import { useDeviceTilt } from "@/hooks/useDeviceTilt";
+import { useWakeLock } from "@/lib/useWakeLock";
 import { cn } from "@/lib/utils";
 
 const CALIBRATION_KEY = "campmesser.levelCalibration";
@@ -58,6 +59,8 @@ function fmtDeg(v: number, lang: Language): string {
 export default function LevelPage() {
   const { lang, t } = useI18n();
   const { reading, active, permission, start } = useDeviceTilt();
+  // Display anlassen, solange die Wasserwaage offen und sichtbar ist
+  const wakeLock = useWakeLock();
   const [calibration, setCalibration] = useState<Tilt>(() => loadCalibration());
   const [screenAngle, setScreenAngle] = useState<number>(() =>
     typeof window === "undefined" ? 0 : currentScreenAngle()
@@ -253,6 +256,11 @@ export default function LevelPage() {
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
             {t.level.calibrationHint}
           </p>
+          {wakeLock.active && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t.common.screenAwake}
+            </p>
+          )}
         </>
       )}
     </div>

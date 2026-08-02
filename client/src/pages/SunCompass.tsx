@@ -45,6 +45,7 @@ import {
 } from "@shared/obstacleProfiles";
 import { useDeviceHeading } from "@/hooks/useDeviceHeading";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
+import { useWakeLock } from "@/lib/useWakeLock";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
@@ -648,6 +649,8 @@ function SunDiagram({
 
 export default function SunCompassPage() {
   const { lang, t } = useI18n();
+  // Display anlassen, solange der Kompass offen und sichtbar ist
+  const wakeLock = useWakeLock();
   // Optional: Koordinaten aus URL-Parametern (z. B. von Zeltplatz-Favoriten)
   const [urlSpot] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -1438,6 +1441,12 @@ export default function SunCompassPage() {
             </CardContent>
           </Card>
         </>
+      )}
+
+      {wakeLock.active && (
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          {t.common.screenAwake}
+        </p>
       )}
     </div>
   );

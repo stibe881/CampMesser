@@ -23,6 +23,7 @@ export const de = {
     saveFailed: "Speichern fehlgeschlagen",
     actionFailed: "Aktion fehlgeschlagen",
     offlineBadge: "Offline",
+    screenAwake: "Display bleibt an",
   },
   shell: {
     toHome: "Zur Startseite",
@@ -1629,6 +1630,15 @@ export const de = {
     favoriteSaved: "Favorit",
     favoritesEmpty:
       "Noch keine Favoriten – tippe auf das Herz eines Rezepts, um es hier zu sammeln.",
+    cookingMode: "Kochmodus",
+    cookingModeAria: (name: string) => `Kochmodus für ${name} starten`,
+    cookingStepProgress: (current: number, total: number) =>
+      `Schritt ${current} von ${total}`,
+    cookingPrev: "Zurück",
+    cookingNext: "Weiter",
+    cookingDone: "Fertig",
+    cookingIngredientsShow: "Zutaten anzeigen",
+    cookingIngredientsHide: "Zutaten ausblenden",
     editor: {
       titleEdit: "Rezept bearbeiten",
       titleNew: "Eigenes Rezept erstellen",
