@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { smoothHeading } from "@/lib/heading";
 
 /**
  * Liest die Kompass-Ausrichtung des Geräts (0° = Norden, im Uhrzeigersinn).
@@ -6,6 +7,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
  *   (muss aus einer Nutzer-Interaktion heraus gestartet werden).
  * - Android/übrige: nutzt `deviceorientationabsolute` bzw. `alpha` (absolut).
  * - Desktop ohne Sensor: `supported` bleibt false.
+ *
+ * Die rohen Sensor-Werte zappeln stark; der Hook glättet sie deshalb mit
+ * einem exponentiellen Mittel über Winkel (wrap-around-sicher, lib/heading).
+ * Davon profitieren ALLE Konsumenten (Zelt-Finder und Sonnen-Kompass) an
+ * einer Stelle, ohne dass die Seiten selbst etwas tun müssen.
  */
 interface DeviceOrientationEventiOS extends DeviceOrientationEvent {
   webkitCompassHeading?: number;
@@ -22,6 +28,8 @@ export function useDeviceHeading() {
   // falschen Listener-Referenz scheitern.
   const enabledRef = useRef(false);
   const attachedRef = useRef(false);
+  // Zuletzt geglätteter Wert für das exponentielle Mittel (null = noch keiner)
+  const smoothedRef = useRef<number | null>(null);
   const handlerRef = useRef((e: DeviceOrientationEvent) => {
     if (!enabledRef.current) return;
     const ios = e as DeviceOrientationEventiOS;
@@ -33,7 +41,12 @@ export function useDeviceHeading() {
       // Android: alpha ist gegen den Uhrzeigersinn ab Nord
       h = (360 - e.alpha) % 360;
     }
-    if (h !== null) setHeading(h);
+    if (h !== null) {
+      // Zappelige Sensor-Werte glätten (wrap-around-sicher über Vektoren)
+      const smoothed = smoothHeading(smoothedRef.current, h);
+      smoothedRef.current = smoothed;
+      setHeading(smoothed);
+    }
   });
 
   const stop = useCallback(() => {
@@ -50,6 +63,7 @@ export function useDeviceHeading() {
       );
       attachedRef.current = false;
     }
+    smoothedRef.current = null;
     setActive(false);
     setHeading(null);
   }, []);
