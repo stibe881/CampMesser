@@ -55,7 +55,8 @@ function isQuietRoute(path: string): boolean {
     path.startsWith("/platz/") ||
     path.startsWith("/vorlage/") ||
     path.startsWith("/reise/") ||
-    path.startsWith("/reise-einladung/")
+    path.startsWith("/reise-einladung/") ||
+    path.startsWith("/teilen")
   );
 }
 

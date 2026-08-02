@@ -8,9 +8,13 @@
  * - API-Aufrufe (/api/) und externe Dienste (Open-Meteo, Karten): immer Netz,
  *   kein Caching – Live-Daten sollen nicht veralten.
  */
-const CACHE_VERSION = "campmesser-v4";
+const CACHE_VERSION = "campmesser-v5";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
+// Zwischenablage für per Share Target geteilte Fotos – bewusst OHNE
+// Versions-Präfix, damit der Aufräum-Schritt in "activate" sie nie löscht.
+// Die Seite /teilen liest die Dateien aus und leert den Cache danach selbst.
+const SHARE_CACHE = "campmesser-share";
 
 // Routen der Wissens-Module, die offline funktionieren sollen (SPA: alle laden dieselbe Shell)
 const PRECACHE_URLS = ["/", "/manifest.json"];
@@ -31,7 +35,9 @@ self.addEventListener("activate", event => {
       .then(keys =>
         Promise.all(
           keys
-            .filter(key => !key.startsWith(CACHE_VERSION))
+            .filter(
+              key => !key.startsWith(CACHE_VERSION) && key !== SHARE_CACHE
+            )
             .map(key => caches.delete(key))
         )
       )
@@ -85,11 +91,57 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
+/**
+ * Share Target (PWA): das System POSTet geteilte Fotos als multipart/form-data
+ * an /teilen. Standard-Rezept: Dateien in einen eigenen Cache legen und mit
+ * 303 auf GET /teilen umleiten – die Seite liest die Dateien aus dem Cache
+ * und löscht sie danach. Fehler dürfen die Umleitung nie verhindern, die
+ * Seite zeigt ohne Dateien einfach einen Hinweis.
+ */
+async function handleShareTargetPost(request) {
+  try {
+    const formData = await request.formData();
+    const files = formData
+      .getAll("photos")
+      .filter(entry => entry instanceof File && entry.size > 0);
+    const cache = await caches.open(SHARE_CACHE);
+    // Reste einer früheren Teilen-Aktion wegräumen
+    const oldKeys = await cache.keys();
+    await Promise.all(oldKeys.map(key => cache.delete(key)));
+    await Promise.all(
+      files.map((file, index) =>
+        cache.put(
+          `/teilen/share-photo-${index}`,
+          new Response(file, {
+            headers: {
+              "Content-Type": file.type || "application/octet-stream",
+            },
+          })
+        )
+      )
+    );
+  } catch (error) {
+    // Formulardaten nicht lesbar – trotzdem zur Seite umleiten
+  }
+  return Response.redirect("/teilen", 303);
+}
+
 self.addEventListener("fetch", event => {
   const { request } = event;
-  if (request.method !== "GET") return;
 
   const url = new URL(request.url);
+
+  // Geteilte Fotos aus dem System-Teilen-Dialog entgegennehmen
+  if (
+    request.method === "POST" &&
+    url.origin === self.location.origin &&
+    url.pathname === "/teilen"
+  ) {
+    event.respondWith(handleShareTargetPost(request));
+    return;
+  }
+
+  if (request.method !== "GET") return;
 
   // API und externe Dienste: nie cachen
   if (

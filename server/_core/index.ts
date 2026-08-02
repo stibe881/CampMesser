@@ -700,6 +700,14 @@ async function startServer() {
       }
     }
   );
+  // Share-Target-Fallback: normalerweise fängt der Service Worker den POST
+  // des System-Teilen-Dialogs auf /teilen ab. Läuft (noch) kein aktueller
+  // Service Worker, landet der POST hier – dann leiten wir ohne Datei-
+  // Übernahme auf die GET-Seite um, die einen erklärenden Hinweis zeigt.
+  app.post("/teilen", (_req, res) => {
+    res.redirect(303, "/teilen");
+  });
+
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     const vite = await setupVite(app, server);

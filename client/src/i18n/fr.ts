@@ -2378,4 +2378,39 @@ export const fr: Translation = {
     shareIcon: "Icône de partage",
     dismiss: "Fermer l'invite d'installation",
   },
+  shareTarget: {
+    title: "Photos partagées",
+    subtitle:
+      "Ajoute directement à un voyage les photos partagées depuis ton appareil.",
+    loginFeature: "l'ajout de photos partagées",
+    emptyTitle: "Aucune photo partagée trouvée",
+    emptyText:
+      "Ouvre cette page via la fonction de partage de ton appareil : choisir une photo → Partager → CampMesser. L'entrée apparaît dans le menu de partage après (ré)installation ou mise à jour de l'app.",
+    photosCount: (n: number) =>
+      n === 1 ? "1 photo prête" : `${n} photos prêtes`,
+    photoAlt: (n: number) => `Photo partagée ${n}`,
+    removePhotoAria: (n: number) => `Supprimer la photo partagée ${n}`,
+    readFailed: "Une image partagée n'a pas pu être lue.",
+    tripLabel: "Vers quel voyage ?",
+    tripAria: "Choisir un voyage",
+    tripFallback: "Voyage",
+    noTrips:
+      "Pas encore de voyage – crée d'abord une entrée dans «Mes voyages».",
+    toTrips: "Vers «Mes voyages»",
+    upload: "Envoyer les photos au voyage",
+    uploading: (done: number, total: number) =>
+      `Envoi de la photo ${done} sur ${total} …`,
+    uploadFailed: (n: number) =>
+      n === 1
+        ? "1 photo n'a pas pu être envoyée."
+        : `${n} photos n'ont pas pu être envoyées.`,
+    limitReached:
+      "Limite de photos du voyage atteinte – toutes les photos n'ont pas été enregistrées.",
+    successTitle: "Photos enregistrées",
+    successText: (n: number) =>
+      n === 1
+        ? "1 photo a été ajoutée au voyage."
+        : `${n} photos ont été ajoutées au voyage.`,
+    toTrip: "Vers le voyage",
+  },
 };

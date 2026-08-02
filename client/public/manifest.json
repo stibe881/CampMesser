@@ -9,6 +9,21 @@
   "background_color": "#faf6ef",
   "theme_color": "#1d4230",
   "lang": "de-CH",
+  "share_target": {
+    "action": "/teilen",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "photos",
+          "accept": ["image/*"]
+        }
+      ],
+      "title": "title",
+      "text": "text"
+    }
+  },
   "shortcuts": [
     {
       "name": "SOS & Notfall",

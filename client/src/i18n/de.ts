@@ -2379,6 +2379,41 @@ export const de = {
     shareIcon: "Teilen-Symbol",
     dismiss: "Installations-Hinweis schliessen",
   },
+  shareTarget: {
+    title: "Geteilte Fotos",
+    subtitle:
+      "Fotos aus der Teilen-Funktion deines Geräts direkt in eine Reise übernehmen.",
+    loginFeature: "das Übernehmen geteilter Fotos",
+    emptyTitle: "Keine geteilten Fotos gefunden",
+    emptyText:
+      "Öffne diese Seite über die Teilen-Funktion deines Geräts: Foto wählen → Teilen → CampMesser. Der Eintrag im Teilen-Menü erscheint, nachdem die App (neu) installiert oder aktualisiert wurde.",
+    photosCount: (n: number) =>
+      n === 1 ? "1 Foto bereit" : `${n} Fotos bereit`,
+    photoAlt: (n: number) => `Geteiltes Foto ${n}`,
+    removePhotoAria: (n: number) => `Geteiltes Foto ${n} entfernen`,
+    readFailed: "Ein geteiltes Bild konnte nicht gelesen werden.",
+    tripLabel: "Zu welcher Reise?",
+    tripAria: "Reise wählen",
+    tripFallback: "Reise",
+    noTrips:
+      "Noch keine Reise vorhanden – lege zuerst in «Meine Reisen» einen Eintrag an.",
+    toTrips: "Zu «Meine Reisen»",
+    upload: "Fotos zur Reise hochladen",
+    uploading: (done: number, total: number) =>
+      `Foto ${done} von ${total} wird hochgeladen …`,
+    uploadFailed: (n: number) =>
+      n === 1
+        ? "1 Foto konnte nicht hochgeladen werden."
+        : `${n} Fotos konnten nicht hochgeladen werden.`,
+    limitReached:
+      "Foto-Limit der Reise erreicht – nicht alle Fotos wurden gespeichert.",
+    successTitle: "Fotos gespeichert",
+    successText: (n: number) =>
+      n === 1
+        ? "1 Foto wurde zur Reise hinzugefügt."
+        : `${n} Fotos wurden zur Reise hinzugefügt.`,
+    toTrip: "Zur Reise",
+  },
 };
 
 export type Translation = typeof de;

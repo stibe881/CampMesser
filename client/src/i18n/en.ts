@@ -2301,4 +2301,38 @@ export const en: Translation = {
     shareIcon: "Share icon",
     dismiss: "Dismiss install prompt",
   },
+  shareTarget: {
+    title: "Shared photos",
+    subtitle:
+      "Add photos shared from your device directly to one of your trips.",
+    loginFeature: "adding shared photos",
+    emptyTitle: "No shared photos found",
+    emptyText:
+      "Open this page via your device's share function: pick a photo → Share → CampMesser. The entry appears in the share menu after the app has been (re)installed or updated.",
+    photosCount: (n: number) =>
+      n === 1 ? "1 photo ready" : `${n} photos ready`,
+    photoAlt: (n: number) => `Shared photo ${n}`,
+    removePhotoAria: (n: number) => `Remove shared photo ${n}`,
+    readFailed: "A shared image could not be read.",
+    tripLabel: "Which trip?",
+    tripAria: "Choose a trip",
+    tripFallback: "Trip",
+    noTrips: "No trips yet – first create an entry in “My trips”.",
+    toTrips: "Go to “My trips”",
+    upload: "Upload photos to the trip",
+    uploading: (done: number, total: number) =>
+      `Uploading photo ${done} of ${total} …`,
+    uploadFailed: (n: number) =>
+      n === 1
+        ? "1 photo could not be uploaded."
+        : `${n} photos could not be uploaded.`,
+    limitReached:
+      "The trip's photo limit was reached – not all photos were saved.",
+    successTitle: "Photos saved",
+    successText: (n: number) =>
+      n === 1
+        ? "1 photo was added to the trip."
+        : `${n} photos were added to the trip.`,
+    toTrip: "Open trip",
+  },
 };

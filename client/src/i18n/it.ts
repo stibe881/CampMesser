@@ -2357,4 +2357,38 @@ export const it: Translation = {
     shareIcon: "Icona di condivisione",
     dismiss: "Chiudi l'avviso di installazione",
   },
+  shareTarget: {
+    title: "Foto condivise",
+    subtitle:
+      "Aggiungi direttamente a un viaggio le foto condivise dal tuo dispositivo.",
+    loginFeature: "l'aggiunta di foto condivise",
+    emptyTitle: "Nessuna foto condivisa trovata",
+    emptyText:
+      "Apri questa pagina tramite la funzione di condivisione del tuo dispositivo: scegli una foto → Condividi → CampMesser. La voce appare nel menu di condivisione dopo la (re)installazione o l'aggiornamento dell'app.",
+    photosCount: (n: number) =>
+      n === 1 ? "1 foto pronta" : `${n} foto pronte`,
+    photoAlt: (n: number) => `Foto condivisa ${n}`,
+    removePhotoAria: (n: number) => `Rimuovi la foto condivisa ${n}`,
+    readFailed: "Un'immagine condivisa non è stata letta.",
+    tripLabel: "A quale viaggio?",
+    tripAria: "Scegli un viaggio",
+    tripFallback: "Viaggio",
+    noTrips: "Ancora nessun viaggio – crea prima una voce in «I miei viaggi».",
+    toTrips: "A «I miei viaggi»",
+    upload: "Carica le foto nel viaggio",
+    uploading: (done: number, total: number) =>
+      `Caricamento della foto ${done} di ${total} …`,
+    uploadFailed: (n: number) =>
+      n === 1
+        ? "1 foto non è stata caricata."
+        : `${n} foto non sono state caricate.`,
+    limitReached:
+      "Limite di foto del viaggio raggiunto – non tutte le foto sono state salvate.",
+    successTitle: "Foto salvate",
+    successText: (n: number) =>
+      n === 1
+        ? "1 foto è stata aggiunta al viaggio."
+        : `${n} foto sono state aggiunte al viaggio.`,
+    toTrip: "Al viaggio",
+  },
 };

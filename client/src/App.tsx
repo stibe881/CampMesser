@@ -57,6 +57,7 @@ const pageLoaders = {
   SharedTrip: () => import("./pages/SharedTrip"),
   TripInvite: () => import("./pages/TripInvite"),
   HuntPrint: () => import("./pages/HuntPrint"),
+  ShareTarget: () => import("./pages/ShareTarget"),
 } as const;
 
 const CHUNK_RELOAD_KEY = "campmesser.chunkReloadAt";
@@ -128,6 +129,7 @@ const SharedTemplatePage = lazyWithRetry(pageLoaders.SharedTemplate);
 const SharedTripPage = lazyWithRetry(pageLoaders.SharedTrip);
 const TripInvitePage = lazyWithRetry(pageLoaders.TripInvite);
 const HuntPrintPage = lazyWithRetry(pageLoaders.HuntPrint);
+const ShareTargetPage = lazyWithRetry(pageLoaders.ShareTarget);
 
 function RouteFallback() {
   const t = useT();
@@ -198,6 +200,8 @@ function Router() {
           <Route path={"/reise/:token"} component={SharedTripPage} />
           <Route path={"/reise-einladung/:token"} component={TripInvitePage} />
           <Route path={"/familie/drucken/:id"} component={HuntPrintPage} />
+          {/* Share Target der PWA: nimmt per System-Teilen geteilte Fotos entgegen */}
+          <Route path={"/teilen"} component={ShareTargetPage} />
           <Route path={"/404"} component={NotFound} />
           <Route component={NotFound} />
         </Switch>
