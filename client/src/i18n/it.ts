@@ -1403,6 +1403,10 @@ export const it: Translation = {
     packSuggestionsAdded: name => `«${name}» aggiunto`,
     packSuggestionsAddedAll: n => `${n} voci aggiunte`,
     packSuggestionsAddFailed: "Impossibile aggiungere la voce",
+    weatherTitle: "Meteo durante il soggiorno",
+    weatherSummary: (max, min) => `${max}° / ${min}°`,
+    weatherRainDays: n =>
+      n === 1 ? "1 giorno di pioggia" : `${n} giorni di pioggia`,
   },
   firstAid: {
     title: "Guida di primo soccorso",

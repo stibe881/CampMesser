@@ -1370,6 +1370,9 @@ export const en: Translation = {
     packSuggestionsAdded: name => `"${name}" added`,
     packSuggestionsAddedAll: n => `${n} items added`,
     packSuggestionsAddFailed: "The item could not be added",
+    weatherTitle: "Weather during the stay",
+    weatherSummary: (max, min) => `${max}° / ${min}°`,
+    weatherRainDays: n => (n === 1 ? "1 rainy day" : `${n} rainy days`),
   },
   firstAid: {
     title: "First aid guide",

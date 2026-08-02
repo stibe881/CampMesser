@@ -1416,6 +1416,9 @@ export const fr: Translation = {
     packSuggestionsAdded: name => `«${name}» ajouté`,
     packSuggestionsAddedAll: n => `${n} entrées ajoutées`,
     packSuggestionsAddFailed: "Impossible d'ajouter l'entrée",
+    weatherTitle: "Météo pendant le séjour",
+    weatherSummary: (max, min) => `${max}° / ${min}°`,
+    weatherRainDays: n => (n === 1 ? "1 jour de pluie" : `${n} jours de pluie`),
   },
   firstAid: {
     title: "Guide de premiers secours",

@@ -1419,6 +1419,9 @@ export const de = {
     packSuggestionsAdded: (name: string) => `«${name}» hinzugefügt`,
     packSuggestionsAddedAll: (n: number) => `${n} Einträge hinzugefügt`,
     packSuggestionsAddFailed: "Eintrag konnte nicht hinzugefügt werden",
+    weatherTitle: "Wetter während des Aufenthalts",
+    weatherSummary: (max: number, min: number) => `${max}° / ${min}°`,
+    weatherRainDays: (n: number) => (n === 1 ? "1 Regentag" : `${n} Regentage`),
   },
   firstAid: {
     title: "Erste-Hilfe-Guide",

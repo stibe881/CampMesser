@@ -672,6 +672,22 @@ export async function setTripLogRating(
     .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
 }
 
+/**
+ * Wetterarchiv-JSON eines Tagebuch-Eintrags speichern (nur eigener Eintrag).
+ * Wird vom Client einmalig nach der Heimkehr befüllt.
+ */
+export async function setTripLogWeather(
+  id: number,
+  userId: number,
+  weatherJson: string
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripLogs)
+    .set({ weatherJson })
+    .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
+}
+
 export async function deleteTripLog(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db

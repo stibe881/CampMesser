@@ -54,6 +54,12 @@ import {
   type ForecastDay,
   type PackSuggestion,
 } from "@shared/packSuggestions";
+import { climateRequestUrl } from "@shared/climate";
+import {
+  parseTripWeather,
+  summarizeTripWeather,
+  TRIP_WEATHER_ARCHIVE_MIN_AGE_DAYS,
+} from "@shared/tripWeather";
 import {
   CANTONS,
   holidayDisplayName,
@@ -410,6 +416,123 @@ function TripPackSuggestions({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Wetterarchiv eines vergangenen Aufenthalts: zeigt die gespeicherte
+ * Zusammenfassung («31° / 12° · 2 Regentage»). Fehlt sie noch, werden die
+ * historischen Tageswerte einmalig geholt (Open-Meteo-Archiv; bei ganz
+ * frischen Trips die Forecast-API mit past_days, weil das Archiv die
+ * jüngsten Tage noch nicht führt) und via trips.setWeather gespeichert –
+ * einmal gespeichert wird nie wieder gefetcht. Fehler bleiben still.
+ */
+function TripWeatherArchive({
+  tripId,
+  weatherJson,
+  startDate,
+  endDate,
+  latitude,
+  longitude,
+}: {
+  tripId: number;
+  weatherJson: string | null;
+  startDate: string;
+  endDate: string;
+  latitude: number;
+  longitude: number;
+}) {
+  const t = useT();
+  const utils = trpc.useUtils();
+  const stored = useMemo(() => parseTripWeather(weatherJson), [weatherJson]);
+  const setWeatherMutation = trpc.trips.setWeather.useMutation({
+    onSuccess: () => utils.trips.list.invalidate(),
+  });
+  const mutateRef = useRef(setWeatherMutation.mutate);
+  mutateRef.current = setWeatherMutation.mutate;
+  // Pro Einhängen höchstens ein Abruf-Versuch – nach dem Speichern verhindert
+  // das gefüllte weatherJson jeden weiteren.
+  const attemptedRef = useRef(false);
+
+  useEffect(() => {
+    if (stored || attemptedRef.current) return;
+    const today = new Date().toISOString().slice(0, 10);
+    // Nur abgeschlossene Aufenthalte haben ein vollständiges Archiv
+    if (endDate >= today) return;
+    attemptedRef.current = true;
+    let cancelled = false;
+    // Das Archiv hinkt einige Tage hinterher – frische Trips über die
+    // Forecast-API mit past_days abdecken (Muster server/push.ts)
+    const daysSinceEnd = daysUntilTrip(today, endDate);
+    let url: string;
+    if (daysSinceEnd >= TRIP_WEATHER_ARCHIVE_MIN_AGE_DAYS) {
+      url = climateRequestUrl(latitude, longitude, startDate, endDate);
+    } else {
+      const pastDays = Math.min(
+        92,
+        Math.max(1, daysUntilTrip(today, startDate))
+      );
+      const params = new URLSearchParams({
+        latitude: latitude.toFixed(4),
+        longitude: longitude.toFixed(4),
+        timezone: "auto",
+        past_days: String(pastDays),
+        forecast_days: "1",
+        daily: "temperature_2m_max,temperature_2m_min,precipitation_sum",
+      });
+      url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+    }
+    fetch(url)
+      .then(res =>
+        res.ok ? res.json() : Promise.reject(new Error("weather unavailable"))
+      )
+      .then(json => {
+        if (cancelled) return;
+        const daily = json?.daily as
+          | {
+              time: string[];
+              temperature_2m_max: (number | null)[];
+              temperature_2m_min: (number | null)[];
+              precipitation_sum: (number | null)[];
+            }
+          | undefined;
+        if (!daily || !Array.isArray(daily.time)) return;
+        // Nur die Tage des Aufenthalts zusammenfassen (die Forecast-Antwort
+        // enthält auch Tage ausserhalb des Zeitraums)
+        const inRange = daily.time
+          .map((date, i) => ({ date, i }))
+          .filter(d => d.date >= startDate && d.date <= endDate)
+          .map(d => d.i);
+        const summary = summarizeTripWeather({
+          temperature_2m_max: inRange.map(i => daily.temperature_2m_max?.[i]),
+          temperature_2m_min: inRange.map(i => daily.temperature_2m_min?.[i]),
+          precipitation_sum: inRange.map(i => daily.precipitation_sum?.[i]),
+        });
+        // Noch lückenhaft (z. B. Archiv hinkt nach) → beim nächsten Besuch erneut
+        if (summary) mutateRef.current({ id: tripId, summary });
+      })
+      .catch(() => {
+        // Wetterdienst nicht erreichbar – still bleiben, später erneut versuchen
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [stored, tripId, startDate, endDate, latitude, longitude]);
+
+  if (!stored) return null;
+  return (
+    <p
+      className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"
+      title={t.trips.weatherTitle}
+    >
+      <CloudSun className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+      <span className="sr-only">{t.trips.weatherTitle}: </span>
+      {t.trips.weatherSummary(
+        Math.round(stored.tMax),
+        Math.round(stored.tMin)
+      )}{" "}
+      · {t.trips.weatherRainDays(stored.rainDays)}
+    </p>
   );
 }
 
@@ -1223,6 +1346,11 @@ export default function TripsPage() {
         <ul className="space-y-3">
           {trips.map(trip => {
             const nights = tripNights(trip.startDate, trip.endDate);
+            // Wetterarchiv nur mit Koordinaten eines verknüpften Favoriten
+            const weatherSpot =
+              trip.spotId != null
+                ? (spots.find(s => s.id === trip.spotId) ?? null)
+                : null;
             return (
               <li
                 key={trip.id}
@@ -1256,6 +1384,16 @@ export default function TripsPage() {
                         {t.trips.nightsCount(nights)}
                       </span>
                     </p>
+                    {weatherSpot && (
+                      <TripWeatherArchive
+                        tripId={trip.id}
+                        weatherJson={trip.weatherJson}
+                        startDate={trip.startDate}
+                        endDate={trip.endDate}
+                        latitude={weatherSpot.latitude}
+                        longitude={weatherSpot.longitude}
+                      />
+                    )}
                     <div className="mt-1.5">
                       <StarRating
                         size="sm"

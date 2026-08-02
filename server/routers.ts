@@ -26,6 +26,12 @@ import {
   parseFoodTemplateItems,
 } from "@shared/foodTemplates";
 import { MEALS } from "@shared/menuPlan";
+import {
+  TRIP_WEATHER_MAX_PRECIP_MM,
+  TRIP_WEATHER_MAX_RAIN_DAYS,
+  TRIP_WEATHER_TEMP_MAX,
+  TRIP_WEATHER_TEMP_MIN,
+} from "@shared/tripWeather";
 import { SHOPPING_CATEGORIES } from "@shared/shopping";
 import {
   parseSpotAttributes,
@@ -1540,6 +1546,48 @@ export const appRouter = router({
           });
         }
         await db.setTripLogRating(input.id, ctx.user.id, input.rating);
+        return { success: true } as const;
+      }),
+    /**
+     * Wetterarchiv eines vergangenen Aufenthalts speichern: der Client holt
+     * die historischen Tageswerte (Open-Meteo) einmalig und legt die kompakte
+     * Zusammenfassung ab – der Server validiert nur die Wertebereiche.
+     */
+    setWeather: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          summary: z
+            .object({
+              tMax: z
+                .number()
+                .min(TRIP_WEATHER_TEMP_MIN)
+                .max(TRIP_WEATHER_TEMP_MAX),
+              tMin: z
+                .number()
+                .min(TRIP_WEATHER_TEMP_MIN)
+                .max(TRIP_WEATHER_TEMP_MAX),
+              rainDays: z.number().int().min(0).max(TRIP_WEATHER_MAX_RAIN_DAYS),
+              totalPrecip: z.number().min(0).max(TRIP_WEATHER_MAX_PRECIP_MM),
+            })
+            .refine(v => v.tMin <= v.tMax, {
+              message: "Minimum darf nicht über dem Maximum liegen.",
+            }),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.getTripLog(input.id, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        await db.setTripLogWeather(
+          input.id,
+          ctx.user.id,
+          JSON.stringify(input.summary)
+        );
         return { success: true } as const;
       }),
     remove: protectedProcedure

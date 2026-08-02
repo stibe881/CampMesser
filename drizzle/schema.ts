@@ -238,6 +238,12 @@ export const tripLogs = mysqlTable(
     endDate: date("endDate", { mode: "string" }).notNull(),
     /** Sterne-Bewertung 1–5; null = (noch) nicht bewertet */
     rating: tinyint("rating"),
+    /**
+     * Wetterarchiv des Aufenthalts als JSON {tMax, tMin, rainDays, totalPrecip}
+     * (shared/tripWeather.ts) – wird nach der Heimkehr einmalig aus dem
+     * Open-Meteo-Archiv befüllt; null = (noch) kein Archiv.
+     */
+    weatherJson: text("weatherJson"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
