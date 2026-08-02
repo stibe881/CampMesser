@@ -6,6 +6,29 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
 
+type ViteDevServer = Awaited<ReturnType<typeof createViteServer>>;
+
+/** Dev-SPA-HTML laden: client/index.html frisch von der Platte + Vite-Transform. */
+export async function loadDevHtml(
+  vite: ViteDevServer,
+  url: string
+): Promise<string> {
+  const clientTemplate = path.resolve(
+    import.meta.dirname,
+    "../..",
+    "client",
+    "index.html"
+  );
+
+  // always reload the index.html file from disk incase it changes
+  let template = await fs.promises.readFile(clientTemplate, "utf-8");
+  template = template.replace(
+    `src="/src/main.tsx"`,
+    `src="/src/main.tsx?v=${nanoid()}"`
+  );
+  return vite.transformIndexHtml(url, template);
+}
+
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
@@ -22,36 +45,33 @@ export async function setupVite(app: Express, server: Server) {
 
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {
-    const url = req.originalUrl;
-
     try {
-      const clientTemplate = path.resolve(
-        import.meta.dirname,
-        "../..",
-        "client",
-        "index.html"
-      );
-
-      // always reload the index.html file from disk incase it changes
-      let template = await fs.promises.readFile(clientTemplate, "utf-8");
-      template = template.replace(
-        `src="/src/main.tsx"`,
-        `src="/src/main.tsx?v=${nanoid()}"`
-      );
-      const page = await vite.transformIndexHtml(url, template);
+      const page = await loadDevHtml(vite, req.originalUrl);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
       next(e);
     }
   });
+  return vite;
+}
+
+function resolveDistPath(): string {
+  return process.env.NODE_ENV === "development"
+    ? path.resolve(import.meta.dirname, "../..", "dist", "public")
+    : path.resolve(import.meta.dirname, "public");
+}
+
+/** Produktions-SPA-HTML (dist/index.html aus dem Build) laden. */
+export async function loadProdHtml(): Promise<string> {
+  return fs.promises.readFile(
+    path.resolve(resolveDistPath(), "index.html"),
+    "utf-8"
+  );
 }
 
 export function serveStatic(app: Express) {
-  const distPath =
-    process.env.NODE_ENV === "development"
-      ? path.resolve(import.meta.dirname, "../..", "dist", "public")
-      : path.resolve(import.meta.dirname, "public");
+  const distPath = resolveDistPath();
   if (!fs.existsSync(distPath)) {
     console.error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`

@@ -8,7 +8,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { serveStatic, setupVite } from "./vite";
+import { loadDevHtml, loadProdHtml, serveStatic, setupVite } from "./vite";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -167,11 +167,41 @@ async function startServer() {
       createContext,
     })
   );
+  // OpenGraph-Vorschau für geteilte Links: für bekannte Teil-Token wird das
+  // SPA-HTML mit OG-Meta-Tags ausgeliefert (Messenger laden kein JavaScript).
+  // Unbekannte Token oder Fehler fallen aufs normale SPA-HTML zurück.
+  // Der HTML-Loader wird je nach Modus (Vite/Build) unten gesetzt.
+  let loadSpaHtml: ((url: string) => Promise<string>) | null = null;
+  app.get(["/liste/:token", "/platz/:token"], async (req, res, next) => {
+    try {
+      if (!loadSpaHtml) {
+        next();
+        return;
+      }
+      const { injectOgTags, ogMetaForShareRequest } = await import("./og");
+      const origin = `${req.protocol}://${req.get("host")}`;
+      const meta = await ogMetaForShareRequest(req.path, origin);
+      if (!meta) {
+        next();
+        return;
+      }
+      const html = await loadSpaHtml(req.originalUrl);
+      res
+        .status(200)
+        .set({ "Content-Type": "text/html" })
+        .send(injectOgTags(html, meta));
+    } catch {
+      // DB nicht erreichbar o. Ä. → normales SPA-HTML ohne OG-Tags
+      next();
+    }
+  });
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
-    await setupVite(app, server);
+    const vite = await setupVite(app, server);
+    loadSpaHtml = url => loadDevHtml(vite, url);
   } else {
     serveStatic(app);
+    loadSpaHtml = () => loadProdHtml();
   }
 
   const preferredPort = parseInt(process.env.PORT || "3000");
