@@ -1235,6 +1235,11 @@ export const de = {
     yearReviewPlaces: "Verschiedene Orte",
     yearReviewTopPlace: "Top-Platz",
     yearReviewLongest: "Längster Aufenthalt",
+    yearReviewShare: "Als Bild teilen",
+    yearReviewShareAria: (year: number) =>
+      `Jahresrückblick ${year} als Bild teilen`,
+    yearReviewImageSaved: "Bild heruntergeladen",
+    yearReviewShareFailed: "Bild konnte nicht erstellt werden",
     newEntryTitle: "Aufenthalt eintragen",
     choosePlaceError: "Bitte einen Zeltplatz wählen oder einen Ort eintragen",
     placeLabel: "Ort",

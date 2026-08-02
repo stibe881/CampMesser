@@ -1236,6 +1236,11 @@ export const fr: Translation = {
     yearReviewPlaces: "Lieux différents",
     yearReviewTopPlace: "Top emplacement",
     yearReviewLongest: "Plus long séjour",
+    yearReviewShare: "Partager en image",
+    yearReviewShareAria: (year: number) =>
+      `Partager la rétrospective ${year} en image`,
+    yearReviewImageSaved: "Image téléchargée",
+    yearReviewShareFailed: "L'image n'a pas pu être créée",
     newEntryTitle: "Ajouter un séjour",
     choosePlaceError: "Choisis un emplacement ou saisis un lieu",
     placeLabel: "Lieu",

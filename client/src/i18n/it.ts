@@ -1222,6 +1222,11 @@ export const it: Translation = {
     yearReviewPlaces: "Luoghi diversi",
     yearReviewTopPlace: "Piazzola top",
     yearReviewLongest: "Soggiorno più lungo",
+    yearReviewShare: "Condividi come immagine",
+    yearReviewShareAria: (year: number) =>
+      `Condividi la retrospettiva ${year} come immagine`,
+    yearReviewImageSaved: "Immagine scaricata",
+    yearReviewShareFailed: "Impossibile creare l'immagine",
     newEntryTitle: "Aggiungi soggiorno",
     choosePlaceError: "Scegli una piazzola o inserisci un luogo",
     placeLabel: "Luogo",

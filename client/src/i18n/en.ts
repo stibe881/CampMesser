@@ -1199,6 +1199,11 @@ export const en: Translation = {
     yearReviewPlaces: "Different places",
     yearReviewTopPlace: "Top pitch",
     yearReviewLongest: "Longest stay",
+    yearReviewShare: "Share as image",
+    yearReviewShareAria: (year: number) =>
+      `Share the ${year} year in review as an image`,
+    yearReviewImageSaved: "Image downloaded",
+    yearReviewShareFailed: "The image could not be created",
     newEntryTitle: "Add a stay",
     choosePlaceError: "Please choose a pitch or enter a place",
     placeLabel: "Place",

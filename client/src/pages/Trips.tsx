@@ -9,6 +9,7 @@ import {
   MapPin,
   Moon,
   Plus,
+  Share2,
   Sparkles,
   Star,
   Tent,
@@ -52,6 +53,7 @@ import {
   overlappingHolidays,
 } from "@shared/holidays";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
+import { drawYearReview } from "@/lib/yearReviewImage";
 
 /** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
 const FREE_LOCATION = "frei";
@@ -388,6 +390,64 @@ export default function TripsPage() {
     [pastTripLikes, reviewYear, lang]
   );
 
+  /**
+   * Jahresrückblick als PNG teilen: Kennzahlen mit der Canvas-API zeichnen
+   * (client/src/lib/yearReviewImage.ts), dann Web Share API Level 2 mit
+   * Datei – wo nicht verfügbar, Download über einen a[download]-Link.
+   */
+  const shareYearReview = async () => {
+    if (!yearReview) return;
+    try {
+      const canvas = document.createElement("canvas");
+      drawYearReview(
+        canvas,
+        {
+          review: yearReview,
+          labels: {
+            subtitle: `${t.trips.yearReviewTitle} ${yearReview.year}`,
+            stays: t.trips.staysLabel,
+            nights: t.trips.nightsTotal,
+            places: t.trips.yearReviewPlaces,
+            topPlace: t.trips.yearReviewTopPlace,
+            longestStay: t.trips.yearReviewLongest,
+            bestRated: t.trips.bestRatedLabel,
+            nightsCount: t.trips.nightsCount,
+            starsAvg: t.trips.starsAvg,
+          },
+        },
+        lang
+      );
+      const blob = await new Promise<Blob | null>(resolve =>
+        canvas.toBlob(resolve, "image/png")
+      );
+      if (!blob) throw new Error("Canvas lieferte kein Bild");
+      const file = new File([blob], `campmesser-${yearReview.year}.png`, {
+        type: "image/png",
+      });
+      if (
+        typeof navigator.canShare === "function" &&
+        navigator.canShare({ files: [file] })
+      ) {
+        await navigator.share({
+          files: [file],
+          title: `CampMesser · ${t.trips.yearReviewTitle} ${yearReview.year}`,
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.name;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success(t.trips.yearReviewImageSaved);
+      }
+    } catch (error) {
+      // Abbruch des Teilen-Dialogs ist kein Fehler
+      if ((error as DOMException)?.name === "AbortError") return;
+      toast.error(t.trips.yearReviewShareFailed);
+    }
+  };
+
   // Schulferien & Feiertage des gewählten Kantons für die geplanten Aufenthalte.
   // Fehler bleiben still (holidays = null) – die Hinweise werden dann weggelassen.
   const [holidayCanton, setHolidayCanton] = useState<string>(
@@ -509,24 +569,36 @@ export default function TripsPage() {
                 <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
                 {t.trips.yearReviewTitle}
               </h2>
-              <Select
-                value={String(yearReview.year)}
-                onValueChange={setReviewYearChoice}
-              >
-                <SelectTrigger
-                  className="w-28"
-                  aria-label={t.trips.yearReviewYearAria}
+              <div className="flex items-center gap-2">
+                <Select
+                  value={String(yearReview.year)}
+                  onValueChange={setReviewYearChoice}
                 >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {reviewYears.map(year => (
-                    <SelectItem key={year} value={String(year)}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectTrigger
+                    className="w-28"
+                    aria-label={t.trips.yearReviewYearAria}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {reviewYears.map(year => (
+                      <SelectItem key={year} value={String(year)}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void shareYearReview()}
+                  aria-label={t.trips.yearReviewShareAria(yearReview.year)}
+                >
+                  <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {t.trips.yearReviewShare}
+                </Button>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               <div className="text-center">
