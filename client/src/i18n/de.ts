@@ -2379,6 +2379,13 @@ export const de = {
     shareIcon: "Teilen-Symbol",
     dismiss: "Installations-Hinweis schliessen",
   },
+  update: {
+    title: "Neue Version verfügbar",
+    description:
+      "Eine aktualisierte Version von CampMesser ist bereit. Beim Aktualisieren lädt die Seite einmal neu.",
+    reloadButton: "Aktualisieren",
+    dismiss: "Update-Hinweis schliessen",
+  },
   shareTarget: {
     title: "Geteilte Fotos",
     subtitle:

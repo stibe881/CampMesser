@@ -19,12 +19,12 @@ const SHARE_CACHE = "campmesser-share";
 // Routen der Wissens-Module, die offline funktionieren sollen (SPA: alle laden dieselbe Shell)
 const PRECACHE_URLS = ["/", "/manifest.json"];
 
+// Bewusst KEIN skipWaiting beim Installieren: die neue Version wartet, bis
+// die Person im Update-Hinweis «Aktualisieren» wählt (SKIP_WAITING-Message
+// unten) oder alle Tabs geschlossen wurden – kein überraschender Reload.
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches
-      .open(SHELL_CACHE)
-      .then(cache => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
+    caches.open(SHELL_CACHE).then(cache => cache.addAll(PRECACHE_URLS))
   );
 });
 

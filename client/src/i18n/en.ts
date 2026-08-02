@@ -2301,6 +2301,13 @@ export const en: Translation = {
     shareIcon: "Share icon",
     dismiss: "Dismiss install prompt",
   },
+  update: {
+    title: "New version available",
+    description:
+      "An updated version of CampMesser is ready. Refreshing reloads the page once.",
+    reloadButton: "Refresh",
+    dismiss: "Dismiss update notice",
+  },
   shareTarget: {
     title: "Shared photos",
     subtitle:

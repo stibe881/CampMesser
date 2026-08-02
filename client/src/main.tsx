@@ -94,41 +94,13 @@ createRoot(document.getElementById("root")!).render(
 
 // PWA: Service Worker registrieren (nur in Produktion, damit die Entwicklung
 // nicht durch gecachte Dateien gestört wird). Macht die Wissens-Module offline nutzbar.
-// Update-Strategie: Bei jedem Start nach einer neuen SW-Version suchen und diese
-// sofort aktivieren (SKIP_WAITING) – die Seite lädt danach einmalig neu, damit
-// Fixes (z. B. am Bild-Cache) alle Nutzer ohne manuelles Zutun erreichen.
+// Update-Strategie: Eine neue SW-Version wartet nach der Installation – die
+// Komponente UpdatePrompt (AppShell) zeigt dann «Neue Version verfügbar» und
+// aktiviert sie erst auf Wunsch per SKIP_WAITING (danach lädt die Seite EINMAL neu).
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("/sw.js");
-
-      // Neue Version sofort übernehmen, sobald sie installiert ist
-      const promoteWaiting = (worker: ServiceWorker | null) => {
-        worker?.postMessage({ type: "SKIP_WAITING" });
-      };
-      if (registration.waiting) promoteWaiting(registration.waiting);
-      registration.addEventListener("updatefound", () => {
-        const installing = registration.installing;
-        installing?.addEventListener("statechange", () => {
-          if (
-            installing.state === "installed" &&
-            navigator.serviceWorker.controller
-          ) {
-            promoteWaiting(registration.waiting ?? installing);
-          }
-        });
-      });
-
-      // Wenn der neue SW die Kontrolle übernimmt: einmalig neu laden
-      let reloaded = false;
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        if (reloaded) return;
-        reloaded = true;
-        window.location.reload();
-      });
-
-      // Aktiv nach Updates suchen (Browser prüfen sw.js sonst nur sporadisch)
-      registration.update().catch(() => {});
+      await navigator.serviceWorker.register("/sw.js");
     } catch (err) {
       console.warn(
         "[PWA] Service Worker konnte nicht registriert werden:",

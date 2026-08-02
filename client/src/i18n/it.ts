@@ -2357,6 +2357,13 @@ export const it: Translation = {
     shareIcon: "Icona di condivisione",
     dismiss: "Chiudi l'avviso di installazione",
   },
+  update: {
+    title: "Nuova versione disponibile",
+    description:
+      "È pronta una versione aggiornata di CampMesser. Con l'aggiornamento la pagina si ricarica una volta.",
+    reloadButton: "Aggiorna",
+    dismiss: "Chiudi l'avviso di aggiornamento",
+  },
   shareTarget: {
     title: "Foto condivise",
     subtitle:
