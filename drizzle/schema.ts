@@ -192,6 +192,36 @@ export const tripLogs = mysqlTable(
 export type TripLog = typeof tripLogs.$inferSelect;
 export type InsertTripLog = typeof tripLogs.$inferInsert;
 
+/** Eigene Campingrezepte aus dem Editor im Rezeptbuch. */
+export const customRecipes = mysqlTable(
+  "customRecipes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 120 }).notNull(),
+    /** Zubereitungsart: Gaskocher, Offenes Feuer oder Beides */
+    method: varchar("method", { length: 40 }).notNull().default("Gaskocher"),
+    timeMinutes: int("timeMinutes").notNull().default(30),
+    servings: int("servings").notNull().default(4),
+    difficulty: varchar("difficulty", { length: 20 })
+      .notNull()
+      .default("einfach"),
+    onePot: boolean("onePot").notNull().default(false),
+    kidFriendly: boolean("kidFriendly").notNull().default(false),
+    /** Zutaten als JSON-Array von Strings */
+    ingredientsJson: text("ingredientsJson").notNull(),
+    /** Zubereitungsschritte als JSON-Array von Strings */
+    stepsJson: text("stepsJson").notNull(),
+    tip: text("tip"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("customRecipes_userId").on(table.userId)]
+);
+
+export type CustomRecipe = typeof customRecipes.$inferSelect;
+export type InsertCustomRecipe = typeof customRecipes.$inferInsert;
+
 /** Eigene Schnitzeljagden aus dem Editor im Familien-Modus. */
 export const customHunts = mysqlTable(
   "customHunts",

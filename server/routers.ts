@@ -8,6 +8,7 @@ import {
   SYNCED_SETTING_KEYS,
 } from "@shared/settings";
 import { MAX_STATIONS, solutionWordFromStations } from "@shared/hunts";
+import { RECIPE_DIFFICULTIES, RECIPE_METHODS } from "@shared/customRecipes";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -568,6 +569,61 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteFoodItem(input.id, ctx.user.id)),
   }),
+  recipes: router({
+    list: protectedProcedure.query(({ ctx }) =>
+      db.getCustomRecipes(ctx.user.id)
+    ),
+    save: protectedProcedure
+      .input(
+        z.object({
+          /** Ohne id wird neu angelegt, mit id das eigene Rezept aktualisiert */
+          id: z.number().int().positive().optional(),
+          name: z.string().min(1).max(120),
+          method: z.enum(RECIPE_METHODS),
+          timeMinutes: z.number().int().min(5).max(600),
+          servings: z.number().int().min(1).max(20),
+          difficulty: z.enum(RECIPE_DIFFICULTIES),
+          onePot: z.boolean().default(false),
+          kidFriendly: z.boolean().default(false),
+          ingredients: z.array(z.string().min(1).max(120)).min(1).max(30),
+          steps: z.array(z.string().min(1).max(600)).min(1).max(20),
+          tip: z.string().max(600).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const data = {
+          name: input.name.trim(),
+          method: input.method,
+          timeMinutes: input.timeMinutes,
+          servings: input.servings,
+          difficulty: input.difficulty,
+          onePot: input.onePot,
+          kidFriendly: input.kidFriendly,
+          ingredientsJson: JSON.stringify(input.ingredients.map(s => s.trim())),
+          stepsJson: JSON.stringify(input.steps.map(s => s.trim())),
+          tip: input.tip?.trim() || null,
+        };
+        if (input.id) {
+          const own = await db.getCustomRecipes(ctx.user.id);
+          if (!own.some(r => r.id === input.id)) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Rezept nicht gefunden.",
+            });
+          }
+          await db.updateCustomRecipe(input.id, ctx.user.id, data);
+          return { id: input.id };
+        }
+        const id = await db.addCustomRecipe({ userId: ctx.user.id, ...data });
+        return { id };
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ ctx, input }) =>
+        db.deleteCustomRecipe(input.id, ctx.user.id)
+      ),
+  }),
+
   hunts: router({
     list: protectedProcedure.query(({ ctx }) => db.getCustomHunts(ctx.user.id)),
     save: protectedProcedure

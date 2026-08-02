@@ -68,3 +68,16 @@ describe("hunts router", () => {
     });
   });
 });
+
+describe("recipes router", () => {
+  it("verweigert anonymen Zugriff auf eigene Rezepte", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: { protocol: "https", headers: {} } as TrpcContext["req"],
+      res: {} as TrpcContext["res"],
+    });
+    await expect(caller.recipes.list()).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+  });
+});

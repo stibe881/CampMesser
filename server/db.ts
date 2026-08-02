@@ -3,7 +3,9 @@ import { drizzle } from "drizzle-orm/mysql2";
 import {
   campSpots,
   customHunts,
+  customRecipes,
   InsertCustomHunt,
+  InsertCustomRecipe,
   foodItems,
   InsertCampSpot,
   InsertFoodItem,
@@ -356,6 +358,41 @@ export async function getCampSpotByToken(token: string) {
     .where(eq(campSpots.shareToken, token))
     .limit(1);
   return rows[0];
+}
+
+// ── Eigene Rezepte ──
+export async function getCustomRecipes(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(customRecipes)
+    .where(eq(customRecipes.userId, userId))
+    .orderBy(desc(customRecipes.id));
+}
+
+export async function addCustomRecipe(data: InsertCustomRecipe) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(customRecipes).values(data);
+  return result.insertId;
+}
+
+export async function updateCustomRecipe(
+  id: number,
+  userId: number,
+  data: Partial<Omit<InsertCustomRecipe, "id" | "userId">>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(customRecipes)
+    .set(data)
+    .where(and(eq(customRecipes.id, id), eq(customRecipes.userId, userId)));
+}
+
+export async function deleteCustomRecipe(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(customRecipes)
+    .where(and(eq(customRecipes.id, id), eq(customRecipes.userId, userId)));
 }
 
 // ── Eigene Schnitzeljagden ──

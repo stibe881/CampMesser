@@ -1,14 +1,20 @@
 import { useMemo, useState } from "react";
 import {
   Baby,
+  ChefHat,
   Clock,
   CookingPot,
   Flame,
+  Pencil,
+  Plus,
   Search,
+  Trash2,
   Users,
   WifiOff,
 } from "lucide-react";
+import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -18,8 +24,239 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { recipes, type Recipe } from "@/data/recipes";
+import {
+  RECIPE_DIFFICULTIES,
+  RECIPE_METHODS,
+  parseStringList,
+} from "@shared/customRecipes";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import {
+  customRecipeToRecipe,
+  type CustomRecipeRow,
+} from "@/lib/customRecipesClient";
 import { cn } from "@/lib/utils";
+
+/** Editor für eigene Rezepte: erstellen und bearbeiten (Zutaten/Schritte zeilenweise). */
+function RecipeEditorDialog({
+  initial,
+  onClose,
+}: {
+  initial: CustomRecipeRow | null;
+  onClose: () => void;
+}) {
+  const utils = trpc.useUtils();
+  const [name, setName] = useState(initial?.name ?? "");
+  const [method, setMethod] = useState<(typeof RECIPE_METHODS)[number]>(
+    initial ? customRecipeToRecipe(initial).method : "Gaskocher"
+  );
+  const [difficulty, setDifficulty] = useState<
+    (typeof RECIPE_DIFFICULTIES)[number]
+  >(initial ? customRecipeToRecipe(initial).difficulty : "einfach");
+  const [time, setTime] = useState(String(initial?.timeMinutes ?? 30));
+  const [servings, setServings] = useState(String(initial?.servings ?? 4));
+  const [onePot, setOnePot] = useState(initial?.onePot ?? false);
+  const [kidFriendly, setKidFriendly] = useState(initial?.kidFriendly ?? false);
+  const [ingredients, setIngredients] = useState(
+    initial ? parseStringList(initial.ingredientsJson).join("\n") : ""
+  );
+  const [steps, setSteps] = useState(
+    initial ? parseStringList(initial.stepsJson, 20).join("\n") : ""
+  );
+  const [tip, setTip] = useState(initial?.tip ?? "");
+
+  const saveMutation = trpc.recipes.save.useMutation({
+    onSuccess: () => {
+      utils.recipes.list.invalidate();
+      toast.success(initial ? "Rezept aktualisiert" : "Rezept gespeichert");
+      onClose();
+    },
+    onError: e => toast.error(e.message || "Speichern fehlgeschlagen"),
+  });
+
+  const toLines = (value: string) =>
+    value
+      .split("\n")
+      .map(s => s.trim())
+      .filter(Boolean);
+
+  const canSave =
+    name.trim() && toLines(ingredients).length > 0 && toLines(steps).length > 0;
+
+  return (
+    <DialogContent className="max-h-[85vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle className="font-serif text-xl">
+          {initial ? "Rezept bearbeiten" : "Eigenes Rezept erstellen"}
+        </DialogTitle>
+        <DialogDescription>
+          Dein Rezept erscheint im Rezeptbuch und wird bei den
+          Kühlbox-Vorschlägen berücksichtigt.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="space-y-3">
+        <div>
+          <Label htmlFor="recipe-name">Name</Label>
+          <Input
+            id="recipe-name"
+            className="mt-1.5"
+            placeholder="z. B. Grosis Älplermagronen"
+            value={name}
+            maxLength={120}
+            onChange={e => setName(e.target.value)}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label className="mb-1.5 block">Zubereitung</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {RECIPE_METHODS.map(m => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMethod(m)}
+                  className={cn(
+                    "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                    method === m
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  )}
+                  aria-pressed={method === m}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Label className="mb-1.5 block">Schwierigkeit</Label>
+            <div className="flex gap-1.5">
+              {RECIPE_DIFFICULTIES.map(d => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDifficulty(d)}
+                  className={cn(
+                    "rounded-full px-3 py-1 text-xs font-medium capitalize transition-colors",
+                    difficulty === d
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  )}
+                  aria-pressed={difficulty === d}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="recipe-time">Zeit (Minuten)</Label>
+            <Input
+              id="recipe-time"
+              className="mt-1.5"
+              type="number"
+              min={5}
+              max={600}
+              value={time}
+              onChange={e => setTime(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="recipe-servings">Portionen</Label>
+            <Input
+              id="recipe-servings"
+              className="mt-1.5"
+              type="number"
+              min={1}
+              max={20}
+              value={servings}
+              onChange={e => setServings(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm">
+            One-Pot
+            <Switch checked={onePot} onCheckedChange={setOnePot} />
+          </label>
+          <label className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm">
+            Kinderfreundlich
+            <Switch checked={kidFriendly} onCheckedChange={setKidFriendly} />
+          </label>
+        </div>
+        <div>
+          <Label htmlFor="recipe-ingredients">Zutaten (eine pro Zeile)</Label>
+          <Textarea
+            id="recipe-ingredients"
+            className="mt-1.5 font-mono text-sm"
+            rows={5}
+            placeholder={"400 g Magronen\n200 g Bergkäse\n2 Zwiebeln"}
+            value={ingredients}
+            onChange={e => setIngredients(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="recipe-steps">
+            Zubereitung (ein Schritt pro Zeile)
+          </Label>
+          <Textarea
+            id="recipe-steps"
+            className="mt-1.5 text-sm"
+            rows={5}
+            placeholder={
+              "Wasser aufkochen und Magronen garen.\nZwiebeln rösten.\nAlles schichten und Käse schmelzen lassen."
+            }
+            value={steps}
+            onChange={e => setSteps(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="recipe-tip">Tipp (optional)</Label>
+          <Input
+            id="recipe-tip"
+            className="mt-1.5"
+            placeholder="z. B. Mit Apfelmus servieren"
+            value={tip}
+            maxLength={600}
+            onChange={e => setTip(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" className="flex-1" onClick={onClose}>
+            Abbrechen
+          </Button>
+          <Button
+            className="flex-1"
+            disabled={!canSave || saveMutation.isPending}
+            onClick={() =>
+              saveMutation.mutate({
+                id: initial?.id,
+                name: name.trim(),
+                method,
+                difficulty,
+                timeMinutes: Math.min(600, Math.max(5, Number(time) || 30)),
+                servings: Math.min(20, Math.max(1, Number(servings) || 4)),
+                onePot,
+                kidFriendly,
+                ingredients: toLines(ingredients).slice(0, 30),
+                steps: toLines(steps).slice(0, 20),
+                tip: tip.trim() || null,
+              })
+            }
+          >
+            {saveMutation.isPending ? "Wird gespeichert …" : "Speichern"}
+          </Button>
+        </div>
+      </div>
+    </DialogContent>
+  );
+}
 
 const methodFilters = ["Alle", "Gaskocher", "Offenes Feuer"] as const;
 const timeFilters = [
@@ -33,9 +270,28 @@ export default function RecipesPage() {
   const [maxTime, setMaxTime] = useState<string>("alle");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Recipe | null>(null);
+  const { isAuthenticated } = useAuth();
+  const utils = trpc.useUtils();
+  const customQuery = trpc.recipes.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  // null = Editor zu, "neu" = neues Rezept, sonst das zu bearbeitende
+  const [editorState, setEditorState] = useState<
+    CustomRecipeRow | "neu" | null
+  >(null);
+  const removeMutation = trpc.recipes.remove.useMutation({
+    onSuccess: () => utils.recipes.list.invalidate(),
+    onError: () => toast.error("Löschen fehlgeschlagen"),
+  });
+
+  // Eigene Rezepte zuoberst, dann die eingebauten
+  const allRecipes = useMemo(
+    () => [...(customQuery.data ?? []).map(customRecipeToRecipe), ...recipes],
+    [customQuery.data]
+  );
 
   const filtered = useMemo(() => {
-    return recipes.filter(r => {
+    return allRecipes.filter(r => {
       if (method !== "Alle" && r.method !== method && r.method !== "Beides")
         return false;
       if (maxTime !== "alle" && r.timeMinutes > Number(maxTime)) return false;
@@ -49,7 +305,10 @@ export default function RecipesPage() {
       }
       return true;
     });
-  }, [method, maxTime, search]);
+  }, [allRecipes, method, maxTime, search]);
+
+  const customRowFor = (recipe: Recipe): CustomRecipeRow | undefined =>
+    customQuery.data?.find(row => `eigenes-${row.id}` === recipe.id);
 
   return (
     <div className="container py-6">
@@ -130,6 +389,19 @@ export default function RecipesPage() {
         </div>
       </div>
 
+      {/* Eigenes Rezept erstellen */}
+      {isAuthenticated && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="mb-4"
+          onClick={() => setEditorState("neu")}
+        >
+          <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          Eigenes Rezept erstellen
+        </Button>
+      )}
+
       {/* Rezept-Karten */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map(recipe => (
@@ -163,6 +435,12 @@ export default function RecipesPage() {
             </div>
             <p className="font-semibold">{recipe.name}</p>
             <div className="flex flex-wrap gap-1.5">
+              {customRowFor(recipe) && (
+                <Badge className="gap-1 border-0 bg-primary/15 text-primary">
+                  <ChefHat className="h-3 w-3" aria-hidden="true" />
+                  Eigenes
+                </Badge>
+              )}
               <Badge variant="secondary">{recipe.method}</Badge>
               {recipe.onePot && <Badge variant="outline">One-Pot</Badge>}
               {recipe.kidFriendly && (
@@ -260,10 +538,61 @@ export default function RecipesPage() {
                     <p className="mt-1 text-sm">{selected.tip}</p>
                   </div>
                 )}
+
+                {/* Eigene Rezepte lassen sich bearbeiten und löschen */}
+                {customRowFor(selected) && (
+                  <div className="flex gap-2 border-t border-border/60 pt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        const row = customRowFor(selected);
+                        if (row) {
+                          setSelected(null);
+                          setEditorState(row);
+                        }
+                      }}
+                    >
+                      <Pencil className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                      Bearbeiten
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-destructive hover:text-destructive"
+                      onClick={() => {
+                        const row = customRowFor(selected);
+                        if (
+                          row &&
+                          confirm(`Rezept «${selected.name}» wirklich löschen?`)
+                        ) {
+                          removeMutation.mutate({ id: row.id });
+                          setSelected(null);
+                        }
+                      }}
+                    >
+                      <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                      Löschen
+                    </Button>
+                  </div>
+                )}
               </div>
             </>
           )}
         </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={editorState !== null}
+        onOpenChange={open => !open && setEditorState(null)}
+      >
+        {editorState !== null && (
+          <RecipeEditorDialog
+            initial={editorState === "neu" ? null : editorState}
+            onClose={() => setEditorState(null)}
+          />
+        )}
       </Dialog>
     </div>
   );

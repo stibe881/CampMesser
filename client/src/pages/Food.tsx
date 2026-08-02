@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { recipes } from "@/data/recipes";
+import { customRecipeToRecipe } from "@/lib/customRecipesClient";
 import { expiryInfo, expirySortKey, type ExpiryState } from "@shared/food";
 import { cn } from "@/lib/utils";
 
@@ -75,9 +76,17 @@ export default function FoodPage() {
     [query.data]
   );
 
+  // Eigene Rezepte zählen bei den Vorschlägen mit
+  const customRecipesQuery = trpc.recipes.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
   const suggestions = useMemo(() => {
     if (foodNames.length === 0) return [];
-    return recipes
+    const pool = [
+      ...(customRecipesQuery.data ?? []).map(customRecipeToRecipe),
+      ...recipes,
+    ];
+    return pool
       .map(r => ({ recipe: r, score: matchScore(foodNames, r.ingredients) }))
       .filter(s => s.score > 0)
       .sort(
@@ -85,7 +94,7 @@ export default function FoodPage() {
           b.score - a.score || a.recipe.timeMinutes - b.recipe.timeMinutes
       )
       .slice(0, 5);
-  }, [foodNames]);
+  }, [foodNames, customRecipesQuery.data]);
 
   if (loading) {
     return (
