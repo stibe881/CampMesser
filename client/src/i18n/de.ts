@@ -1392,6 +1392,16 @@ export const de = {
     overview: "Übersicht",
     backAria: (label: string) => `Zurück zur ${label}`,
   },
+  install: {
+    title: "CampMesser installieren",
+    description:
+      "Als App auf deinem Gerät – startet schneller und funktioniert offline.",
+    installButton: "Installieren",
+    iosStep1: "Tippe auf das Teilen-Symbol",
+    iosStep2: "und wähle «Zum Home-Bildschirm», um die App zu installieren.",
+    shareIcon: "Teilen-Symbol",
+    dismiss: "Installations-Hinweis schliessen",
+  },
 };
 
 export type Translation = typeof de;

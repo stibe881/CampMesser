@@ -20,6 +20,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useI18n } from "@/i18n";
 import { LANGUAGES, LANGUAGE_LABELS } from "@shared/i18n";
 import BrandLogo from "@/components/BrandLogo";
+import InstallPrompt from "@/components/InstallPrompt";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -253,6 +254,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Inhalt */}
       <main className="flex-1 pb-24 md:pb-10">{children}</main>
+
+      {/* PWA-Install-Hinweis (dezent, abweisbar, über der Bottom-Nav) */}
+      <InstallPrompt />
 
       {/* Bottom-Navigation (mobil) */}
       <nav

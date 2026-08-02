@@ -1396,4 +1396,14 @@ export const fr: Translation = {
     overview: "Vue d'ensemble",
     backAria: label => `Retour : ${label}`,
   },
+  install: {
+    title: "Installer CampMesser",
+    description:
+      "Comme app sur ton appareil – démarre plus vite et fonctionne hors ligne.",
+    installButton: "Installer",
+    iosStep1: "Touche l'icône de partage",
+    iosStep2: "puis choisis «Sur l'écran d'accueil» pour installer l'app.",
+    shareIcon: "Icône de partage",
+    dismiss: "Fermer l'invite d'installation",
+  },
 };
