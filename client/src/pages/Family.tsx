@@ -11,6 +11,7 @@ import {
   PartyPopper,
   Pencil,
   Plus,
+  Printer,
   RotateCcw,
   Sparkles,
   Trash2,
@@ -1092,9 +1093,20 @@ function ChildBadgeGallery({ childId }: { childId: number }) {
     });
   return (
     <div>
-      <p className="mb-2 text-xs text-muted-foreground">
-        {t.family.badgeCount(earnedCount, BADGES.length)}
-      </p>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">
+          {t.family.badgeCount(earnedCount, BADGES.length)}
+        </p>
+        {earnedCount > 0 && (
+          <Link
+            href={`/familie/urkunde/${childId}`}
+            className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+          >
+            <Printer className="h-3 w-3" aria-hidden="true" />
+            {t.badgeCertificate.galleryLink}
+          </Link>
+        )}
+      </div>
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {BADGES.map(def => {
           const earnedAt = earnedAtById[def.id];

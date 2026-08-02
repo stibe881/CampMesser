@@ -2384,6 +2384,27 @@ export const en: Translation = {
     footer:
       "Have fun exploring! · CampMesser – the Swiss army knife for tent camping",
   },
+  badgeCertificate: {
+    docTitle: (name: string) => `Certificate for ${name}`,
+    docTitleFallback: "Certificate",
+    appTitle: "CampMesser – the Swiss army knife for tent camping",
+    loginFeature: "the badge certificate",
+    notFound: "This child was not found.",
+    galleryLink: "Print certificate",
+    printButton: "Print certificate",
+    printBrowserHint:
+      "In the installed app this button opens the view in the browser – print or save as PDF from the menu there.",
+    kicker: "CampMesser · Family mode",
+    heading: "Certificate",
+    awardedTo: "awarded to",
+    badgesIntro: (n: number) =>
+      n === 1 ? "for this earned badge" : `for these ${n} earned badges`,
+    earnedOn: (date: string) => `earned on ${date}`,
+    noBadges:
+      "No badges earned yet – play a scavenger hunt or a quiz and the certificate will fill up.",
+    issuedOn: (date: string) => `Issued on ${date}`,
+    footer: "CampMesser – the Swiss army knife for tent camping",
+  },
   notFound: {
     heading: "Page not found",
     text1: "Sorry, this page doesn't exist.",

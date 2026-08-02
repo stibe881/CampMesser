@@ -2466,6 +2466,27 @@ export const fr: Translation = {
     footer:
       "Bonne découverte ! · CampMesser – le couteau suisse du camping sous tente",
   },
+  badgeCertificate: {
+    docTitle: (name: string) => `Diplôme pour ${name}`,
+    docTitleFallback: "Diplôme",
+    appTitle: "CampMesser – le couteau suisse du camping sous tente",
+    loginFeature: "le diplôme des badges",
+    notFound: "Cet enfant n'a pas été trouvé.",
+    galleryLink: "Imprimer le diplôme",
+    printButton: "Imprimer le diplôme",
+    printBrowserHint:
+      "Dans l'app installée, le bouton ouvre la vue dans le navigateur – imprime ou enregistre en PDF depuis le menu.",
+    kicker: "CampMesser · Mode famille",
+    heading: "Diplôme",
+    awardedTo: "décerné à",
+    badgesIntro: (n: number) =>
+      n === 1 ? "pour ce badge mérité" : `pour ces ${n} badges mérités`,
+    earnedOn: (date: string) => `obtenu le ${date}`,
+    noBadges:
+      "Aucun badge mérité pour l'instant – joue à une chasse au trésor ou à un quiz, et le diplôme se remplira.",
+    issuedOn: (date: string) => `Établi le ${date}`,
+    footer: "CampMesser – le couteau suisse du camping sous tente",
+  },
   notFound: {
     heading: "Page introuvable",
     text1: "Cette page n'existe malheureusement pas.",

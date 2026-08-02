@@ -2443,6 +2443,29 @@ export const it: Translation = {
     footer:
       "Buona scoperta! · CampMesser – il coltellino svizzero per il campeggio in tenda",
   },
+  badgeCertificate: {
+    docTitle: (name: string) => `Diploma per ${name}`,
+    docTitleFallback: "Diploma",
+    appTitle: "CampMesser – il coltellino svizzero per il campeggio in tenda",
+    loginFeature: "il diploma dei distintivi",
+    notFound: "Questo bambino non è stato trovato.",
+    galleryLink: "Stampa il diploma",
+    printButton: "Stampa il diploma",
+    printBrowserHint:
+      "Nell'app installata il pulsante apre la vista nel browser – da lì stampa o salva come PDF dal menu.",
+    kicker: "CampMesser · Modalità famiglia",
+    heading: "Diploma",
+    awardedTo: "conferito a",
+    badgesIntro: (n: number) =>
+      n === 1
+        ? "per questo distintivo guadagnato"
+        : `per questi ${n} distintivi guadagnati`,
+    earnedOn: (date: string) => `ottenuto il ${date}`,
+    noBadges:
+      "Nessun distintivo guadagnato finora – gioca a una caccia al tesoro o a un quiz e il diploma si riempirà.",
+    issuedOn: (date: string) => `Rilasciato il ${date}`,
+    footer: "CampMesser – il coltellino svizzero per il campeggio in tenda",
+  },
   notFound: {
     heading: "Pagina non trovata",
     text1: "Questa pagina purtroppo non esiste.",

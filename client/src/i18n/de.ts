@@ -2468,6 +2468,29 @@ export const de = {
     footer:
       "Viel Spass beim Entdecken! · CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
   },
+  badgeCertificate: {
+    docTitle: (name: string) => `Urkunde für ${name}`,
+    docTitleFallback: "Urkunde",
+    appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    loginFeature: "die Abzeichen-Urkunde",
+    notFound: "Dieses Kind wurde nicht gefunden.",
+    galleryLink: "Urkunde drucken",
+    printButton: "Urkunde drucken",
+    printBrowserHint:
+      "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
+    kicker: "CampMesser · Familien-Modus",
+    heading: "Urkunde",
+    awardedTo: "verliehen an",
+    badgesIntro: (n: number) =>
+      n === 1
+        ? "für dieses verdiente Abzeichen"
+        : `für diese ${n} verdienten Abzeichen`,
+    earnedOn: (date: string) => `verdient am ${date}`,
+    noBadges:
+      "Noch kein Abzeichen verdient – spiele eine Schnitzeljagd oder ein Quiz, dann füllt sich die Urkunde.",
+    issuedOn: (date: string) => `Ausgestellt am ${date}`,
+    footer: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+  },
   notFound: {
     heading: "Seite nicht gefunden",
     text1: "Diese Seite gibt es leider nicht.",

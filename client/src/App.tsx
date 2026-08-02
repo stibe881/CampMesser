@@ -58,6 +58,7 @@ const pageLoaders = {
   SharedTrip: () => import("./pages/SharedTrip"),
   TripInvite: () => import("./pages/TripInvite"),
   HuntPrint: () => import("./pages/HuntPrint"),
+  BadgeCertificate: () => import("./pages/BadgeCertificate"),
   ShareTarget: () => import("./pages/ShareTarget"),
 } as const;
 
@@ -131,6 +132,7 @@ const SharedTemplatePage = lazyWithRetry(pageLoaders.SharedTemplate);
 const SharedTripPage = lazyWithRetry(pageLoaders.SharedTrip);
 const TripInvitePage = lazyWithRetry(pageLoaders.TripInvite);
 const HuntPrintPage = lazyWithRetry(pageLoaders.HuntPrint);
+const BadgeCertificatePage = lazyWithRetry(pageLoaders.BadgeCertificate);
 const ShareTargetPage = lazyWithRetry(pageLoaders.ShareTarget);
 
 function RouteFallback() {
@@ -207,6 +209,11 @@ function Router() {
           <Route path={"/reise/:token"} component={SharedTripPage} />
           <Route path={"/reise-einladung/:token"} component={TripInvitePage} />
           <Route path={"/familie/drucken/:id"} component={HuntPrintPage} />
+          {/* Abzeichen-Urkunde eines Kindes zum Ausdrucken */}
+          <Route
+            path={"/familie/urkunde/:childId"}
+            component={BadgeCertificatePage}
+          />
           {/* Share Target der PWA: nimmt per System-Teilen geteilte Fotos entgegen */}
           <Route path={"/teilen"} component={ShareTargetPage} />
           <Route path={"/404"} component={NotFound} />
