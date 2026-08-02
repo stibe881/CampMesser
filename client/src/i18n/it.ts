@@ -911,6 +911,10 @@ export const it: Translation = {
     shareLinkCreated: "Link di condivisione creato – copialo qui sopra",
     shareFailed: "Condivisione non riuscita",
     shareButton: "Condividi piazzola tramite link",
+    qrAlt: name => `Codice QR del link di condivisione della piazzola ${name}`,
+    qrTitle: "Da passare direttamente sul posto",
+    qrText:
+      "Fai scansionare il codice con la fotocamera del telefono – il dossier della piazzola si apre subito, senza digitare né accedere.",
   },
   sharedSpot: {
     invalid: "Questo link di condivisione non è più valido.",

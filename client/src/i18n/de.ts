@@ -918,6 +918,10 @@ export const de = {
     shareLinkCreated: "Teil-Link erstellt – kopiere ihn oben",
     shareFailed: "Teilen fehlgeschlagen",
     shareButton: "Platz per Link teilen",
+    qrAlt: (name: string) => `QR-Code zum Teil-Link des Platzes ${name}`,
+    qrTitle: "Direkt am Platz weitergeben",
+    qrText:
+      "Lass andere den Code mit der Handy-Kamera scannen – das Platz-Dossier öffnet sich sofort, ganz ohne Tippen oder Anmeldung.",
   },
   sharedSpot: {
     invalid: "Dieser Teil-Link ist nicht mehr gültig.",

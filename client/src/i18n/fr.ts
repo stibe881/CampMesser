@@ -921,6 +921,10 @@ export const fr: Translation = {
     shareLinkCreated: "Lien de partage créé – copie-le ci-dessus",
     shareFailed: "Échec du partage",
     shareButton: "Partager l'emplacement par lien",
+    qrAlt: name => `Code QR vers le lien de partage de l'emplacement ${name}`,
+    qrTitle: "À transmettre directement sur place",
+    qrText:
+      "Fais scanner le code avec l'appareil photo du téléphone – le dossier de l'emplacement s'ouvre immédiatement, sans saisie ni connexion.",
   },
   sharedSpot: {
     invalid: "Ce lien de partage n'est plus valable.",

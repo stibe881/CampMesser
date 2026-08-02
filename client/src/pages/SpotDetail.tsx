@@ -10,9 +10,11 @@ import {
   MapPin,
   Moon,
   Mountain,
+  QrCode,
   Share2,
   Sunrise,
 } from "lucide-react";
+import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -47,8 +49,24 @@ export default function SpotDetailPage() {
   const [weather, setWeather] = useState<DossierWeather | null>(null);
   const [weatherFailed, setWeatherFailed] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const shareMutation = trpc.spots.share.useMutation();
   const unshareMutation = trpc.spots.unshare.useMutation();
+
+  // QR-Code zum Teil-Link erzeugen: am Platz einfach abscannen lassen statt Link verschicken
+  useEffect(() => {
+    if (!shareUrl) {
+      setQrDataUrl(null);
+      return;
+    }
+    QRCode.toDataURL(shareUrl, {
+      width: 480,
+      margin: 1,
+      errorCorrectionLevel: "M",
+    })
+      .then(setQrDataUrl)
+      .catch(() => setQrDataUrl(null));
+  }, [shareUrl]);
 
   const spot = spotsQuery.data?.find(s => s.id === spotId);
 
@@ -397,41 +415,67 @@ export default function SpotDetailPage() {
             {t.spotDetail.shareDesc}
           </p>
           {shareUrl ? (
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
-              <code className="min-w-0 flex-1 truncate text-xs">
-                {shareUrl}
-              </code>
-              <button
-                type="button"
-                className="shrink-0 text-xs font-medium text-primary hover:underline"
-                onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(shareUrl);
-                    toast.success(t.common.linkCopied);
-                  } catch {
-                    toast.error(t.common.copyFailed);
-                  }
-                }}
-              >
-                {t.common.copy}
-              </button>
-              <button
-                type="button"
-                className="shrink-0 text-xs font-medium text-muted-foreground hover:text-destructive"
-                onClick={() =>
-                  unshareMutation.mutate(
-                    { id: spot.id },
-                    {
-                      onSuccess: () => {
-                        setShareUrl(null);
-                        toast.success(t.spotDetail.stopShared);
-                      },
+            <div>
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+                <code className="min-w-0 flex-1 truncate text-xs">
+                  {shareUrl}
+                </code>
+                <button
+                  type="button"
+                  className="shrink-0 text-xs font-medium text-primary hover:underline"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(shareUrl);
+                      toast.success(t.common.linkCopied);
+                    } catch {
+                      toast.error(t.common.copyFailed);
                     }
-                  )
-                }
-              >
-                {t.spotDetail.stopShare}
-              </button>
+                  }}
+                >
+                  {t.common.copy}
+                </button>
+                <button
+                  type="button"
+                  className="shrink-0 text-xs font-medium text-muted-foreground hover:text-destructive"
+                  onClick={() =>
+                    unshareMutation.mutate(
+                      { id: spot.id },
+                      {
+                        onSuccess: () => {
+                          setShareUrl(null);
+                          toast.success(t.spotDetail.stopShared);
+                        },
+                      }
+                    )
+                  }
+                >
+                  {t.spotDetail.stopShare}
+                </button>
+              </div>
+              {qrDataUrl && (
+                <div className="mt-3 flex items-center gap-4 rounded-lg border border-border bg-card p-4">
+                  {/* Weisser Rahmen, damit der Code auch im Dark Mode zuverlässig scannbar bleibt */}
+                  <div className="shrink-0 rounded-md bg-white p-2 shadow-sm">
+                    <img
+                      src={qrDataUrl}
+                      alt={t.spotDetail.qrAlt(spot.name)}
+                      className="h-36 w-36"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1.5 text-sm font-semibold">
+                      <QrCode
+                        className="h-4 w-4 text-primary"
+                        aria-hidden="true"
+                      />
+                      {t.spotDetail.qrTitle}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t.spotDetail.qrText}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <Button

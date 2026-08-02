@@ -1,5 +1,9 @@
 # CampMesser – Projekt TODO
 
+## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 10)
+
+- [x] QR-Code fürs Platz-Dossier-Teilen: die Teilen-Karte im Platz-Dossier zeigt zum Teil-Link (/platz/:token) denselben QR-Code wie die Packlisten (qrcode-Dependency, weisser Rahmen für Dark-Mode-Scanbarkeit, alt-Text mit Platzname); neue Schlüssel qrAlt/qrTitle/qrText im Namespace spotDetail in DE/FR/IT/EN
+
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 9)
 
 - [x] Passwort-Reset per E-Mail (SMTP): «Passwort vergessen?» verschickt einen Link `…/anmelden?reset=<token>` statt des bisherigen 6-stelligen In-Memory-Codes; Token = 32 Zufallsbytes (hex), in der DB nur der sha256-Hash (Tabelle passwordResetTokens, Migration 0020, Index userId + Unique tokenHash), 60 Min gültig, einmalig – beim Einlösen werden alle offenen Tokens des Kontos entwertet und die Person direkt angemeldet; auth.requestReset({email, lang}) meldet immer Erfolg (kein User-Enumeration-Leak), Rate-Limit 3/Stunde pro E-Mail+IP (allowAction in server/rateLimit.ts), ohne SMTP-Konfiguration saubere, im Client übersetzte Fehlermeldung; auth.performReset({token, newPassword}) ersetzt auth.resetPassword; Mail-Betreff/-Text als L4 in DE/FR/IT/EN (server/mailer.ts, nodemailer, Port 587 STARTTLS, mailConfigured/buildPasswordResetMail testbar); Link-Basis aus APP_URL (Fallback Request-Host bzw. campmesser.ch); Login-Seite: E-Mail-Formular mit neutraler Erfolgsmeldung, bei ?reset=<token> Formular «Neues Passwort setzen» (2× Eingabe, min. 8 Zeichen); env.hetzner.template + DEPLOYMENT-HETZNER.md (Hetzner-Postfach, APP_URL) ergänzt; 9 neue Tests (Token-Hashing/Ablauf, Mail-Texte, mailConfigured, allowAction)

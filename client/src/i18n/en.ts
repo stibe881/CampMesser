@@ -899,6 +899,10 @@ export const en: Translation = {
     shareLinkCreated: "Share link created – copy it above",
     shareFailed: "Sharing failed",
     shareButton: "Share pitch via link",
+    qrAlt: name => `QR code for the share link of the pitch ${name}`,
+    qrTitle: "Hand over right at the pitch",
+    qrText:
+      "Let others scan the code with their phone camera – the pitch dossier opens immediately, no typing or sign-in needed.",
   },
   sharedSpot: {
     invalid: "This share link is no longer valid.",
