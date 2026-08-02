@@ -44,4 +44,51 @@ export const it: Translation = {
       sos: "SOS",
     },
   },
+  home: {
+    heroImageAlt:
+      "Tenda con pannelli solari e falò davanti alle Alpi svizzere al tramonto",
+    heroKicker: "Il tuo coltellino svizzero per il campeggio in tenda",
+    heroTitle1: "Tutto per il campo.",
+    heroTitle2: "In una sola app.",
+    heroSubtitle:
+      "Pianificazione, sicurezza, energia e natura – 16 strumenti smart per la tua prossima avventura.",
+    sunInfo: (sunrise, sunset) => `Oggi: alba ${sunrise} · tramonto ${sunset}`,
+    nextTripFallback: "Prossimo trip",
+    nextTripAria: place => `Prossimo soggiorno pianificato: ${place}`,
+    tripStartsToday: "Si parte oggi!",
+    tripStartsTomorrow: "Si parte domani!",
+    tripDaysLeft: n => `Ancora ${n} giorni`,
+    tripPacked: (name, checked, total, pct) =>
+      `${name}: ${checked} su ${total} pronti (${pct} %)`,
+    tripPlannedNote: "Soggiorno pianificato nel diario di viaggio",
+    weatherAria: (temp, label) =>
+      `Meteo attuale: ${temp} gradi, ${label} – al modulo meteo`,
+    weatherNoAlerts: "Nessuna allerta maltempo nella tua posizione",
+    searchPlaceholder:
+      "Cerca nel sapere: morso di zecca, nodo parlato, ricette …",
+    searchAria: "Cerca nei moduli di conoscenza",
+    searchNoResults:
+      "Nessun risultato – prova un altro termine (ad es. «ustione» o «nodo»).",
+    searchCategories: {
+      module: "Modulo",
+      firstAid: "Primo soccorso",
+      knots: "Nodi",
+      recipes: "Ricette",
+      nature: "Natura",
+    },
+    recentTitle: "Usati di recente",
+    sortStart: "Ordina",
+    sortDone: "Fatto",
+    sortStartAria: "Ordina le tessere",
+    sortDoneAria: "Termina l'ordinamento",
+    sortHint:
+      "Trascina le tessere nella nuova posizione (all'interno del gruppo) oppure usa i pulsanti freccia. Con il pulsante occhio nascondi o mostri di nuovo le tessere. Se hai eseguito l'accesso, la selezione vale su tutti i tuoi dispositivi.",
+    hiddenBadge: "Nascosto",
+    moveAria: title => `Sposta ${title}`,
+    moveUpAria: title => `Sposta ${title} in avanti`,
+    moveDownAria: title => `Sposta ${title} indietro`,
+    showAria: title => `Mostra di nuovo ${title}`,
+    hideAria: title => `Nascondi ${title}`,
+    openAria: title => `Apri ${title}`,
+  },
 };

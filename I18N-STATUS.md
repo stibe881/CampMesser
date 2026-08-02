@@ -17,12 +17,12 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 
 ### Infrastruktur
 
-- [ ] shared/i18n.ts, Provider, Sprachwahl im Profil + Header, Sync-Schlüssel
+- [x] shared/i18n.ts, Provider, Sprachwahl im Profil + Header, Sync-Schlüssel
 
 ### UI-Seiten (Wörterbuch + Umstellung)
 
-- [ ] AppShell (Navigation, Gruppen, Konto-Menü)
-- [ ] Home (Hero, Widgets, Suche, Sortier-Modus)
+- [x] AppShell (Navigation, Gruppen, Konto-Menü)
+- [x] Home (Hero, Widgets, Suche, Sortier-Modus)
 - [ ] Login, Profile
 - [ ] PackLists, PackListDetail, SharedPackList, PackOptimizer, Inventory
 - [ ] Sos, Weather, SunCompass, Energy, Water, Drying, Quiet, Lawn, Level
@@ -33,7 +33,7 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 
 ### Inhalts-Daten (L4)
 
-- [ ] data/modules.ts (Titel/Beschreibungen)
+- [x] data/modules.ts (Titel/Beschreibungen)
 - [ ] data/firstAid.ts (10 Themen)
 - [ ] data/knots.ts (8 Knoten)
 - [ ] data/nature.ts (16 Einträge + Kategorien)

@@ -44,4 +44,51 @@ export const en: Translation = {
       sos: "SOS",
     },
   },
+  home: {
+    heroImageAlt:
+      "Tent with solar panels and campfire in front of the Swiss Alps at sunset",
+    heroKicker: "Your Swiss army knife for tent camping",
+    heroTitle1: "Everything for camp.",
+    heroTitle2: "In one app.",
+    heroSubtitle:
+      "Planning, safety, energy and nature – 16 smart tools for your next adventure.",
+    sunInfo: (sunrise, sunset) =>
+      `Today: sunrise ${sunrise} · sunset ${sunset}`,
+    nextTripFallback: "Next trip",
+    nextTripAria: place => `Next planned stay: ${place}`,
+    tripStartsToday: "You're off today!",
+    tripStartsTomorrow: "You're off tomorrow!",
+    tripDaysLeft: n => `${n} days to go`,
+    tripPacked: (name, checked, total, pct) =>
+      `${name}: ${checked} of ${total} packed (${pct} %)`,
+    tripPlannedNote: "Planned stay in the travel journal",
+    weatherAria: (temp, label) =>
+      `Current weather: ${temp} degrees, ${label} – open the weather module`,
+    weatherNoAlerts: "No severe weather warnings at your location",
+    searchPlaceholder: "Search knowledge: tick bite, clove hitch, recipes …",
+    searchAria: "Search the knowledge modules",
+    searchNoResults:
+      "Nothing found – try a different term (e.g. “burn” or “knot”).",
+    searchCategories: {
+      module: "Module",
+      firstAid: "First aid",
+      knots: "Knots",
+      recipes: "Recipes",
+      nature: "Nature",
+    },
+    recentTitle: "Recently used",
+    sortStart: "Sort",
+    sortDone: "Done",
+    sortStartAria: "Sort tiles",
+    sortDoneAria: "Finish sorting",
+    sortHint:
+      "Drag the tiles to their new position (within the group) or use the arrow buttons. The eye button hides tiles or brings them back. When signed in, your selection is applied on all your devices.",
+    hiddenBadge: "Hidden",
+    moveAria: title => `Move ${title}`,
+    moveUpAria: title => `Move ${title} forward`,
+    moveDownAria: title => `Move ${title} back`,
+    showAria: title => `Show ${title} again`,
+    hideAria: title => `Hide ${title}`,
+    openAria: title => `Open ${title}`,
+  },
 };

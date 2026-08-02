@@ -7,24 +7,24 @@ describe("searchKnowledge", () => {
     const results = searchKnowledge("zecke");
     expect(results.length).toBeGreaterThan(0);
     expect(results[0].title).toBe("Zeckenbiss");
-    expect(results[0].module).toBe("Erste Hilfe");
+    expect(results[0].module).toBe("firstAid");
     expect(results[0].path).toBe("/erste-hilfe");
   });
 
   it("findet Knoten und Rezepte", () => {
-    expect(searchKnowledge("mastwurf")[0]?.module).toBe("Knoten");
+    expect(searchKnowledge("mastwurf")[0]?.module).toBe("knots");
     const recipe = searchKnowledge("quesadilla");
-    expect(recipe[0]?.module).toBe("Rezepte");
+    expect(recipe[0]?.module).toBe("recipes");
   });
 
   it("findet Natur-Einträge über den Inhalt", () => {
     const results = searchKnowledge("fuchs");
-    expect(results.some(r => r.module === "Natur")).toBe(true);
+    expect(results.some(r => r.module === "nature")).toBe(true);
   });
 
   it("findet die Werkzeug-Module selbst", () => {
     const level = searchKnowledge("wasserwaage");
-    expect(level[0]).toMatchObject({ module: "Modul", path: "/wasserwaage" });
+    expect(level[0]).toMatchObject({ module: "module", path: "/wasserwaage" });
     const diary = searchKnowledge("tagebuch");
     expect(diary.some(r => r.path === "/tagebuch")).toBe(true);
   });

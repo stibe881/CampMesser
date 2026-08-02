@@ -14,7 +14,9 @@ import {
   Search,
   Wind,
 } from "lucide-react";
-import { groups, modules } from "@/data/modules";
+import { groupLabels, groups, modules } from "@/data/modules";
+import { LOCALE_TAGS, pick } from "@shared/i18n";
+import { useI18n, useT } from "@/i18n";
 import {
   describeWeatherCode,
   detectAlerts,
@@ -89,6 +91,7 @@ interface HomeWeather {
 /** Kompaktes Wetter-Widget: aktuelle Lage + höchste Warnung am Standort. */
 /** Countdown zum nächsten geplanten Trip aus dem Reise-Tagebuch. */
 function NextTripWidget() {
+  const t = useT();
   const { isAuthenticated } = useAuth();
   const tripsQuery = trpc.trips.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -113,7 +116,7 @@ function NextTripWidget() {
     (next.spotId != null
       ? (spotsQuery.data?.find(s => s.id === next.spotId)?.name ?? "")
       : (next.location ?? "")) ||
-    "Nächster Trip";
+    t.home.nextTripFallback;
   const days = daysUntilTrip(next.startDate, today);
   const packed = progress.data;
   const pct =
@@ -125,7 +128,7 @@ function NextTripWidget() {
     <Link
       href="/tagebuch"
       className="mb-6 flex items-center gap-4 rounded-xl border border-primary/40 bg-accent/30 p-4 shadow-sm transition-all hover:border-primary hover:shadow-md"
-      aria-label={`Nächster geplanter Aufenthalt: ${place}`}
+      aria-label={t.home.nextTripAria(place)}
     >
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
         <CalendarClock className="h-5.5 w-5.5" aria-hidden="true" />
@@ -135,20 +138,20 @@ function NextTripWidget() {
           <span className="font-semibold">{place}</span>
           <span className="text-sm font-semibold text-primary">
             {days === 0
-              ? "Heute geht's los!"
+              ? t.home.tripStartsToday
               : days === 1
-                ? "Morgen geht's los!"
-                : `Noch ${days} Tage`}
+                ? t.home.tripStartsTomorrow
+                : t.home.tripDaysLeft(days)}
           </span>
         </span>
         {pct !== null && packed ? (
           <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
             <ListChecks className="h-3 w-3 shrink-0" aria-hidden="true" />
-            {packed.name}: {packed.checked} von {packed.total} gepackt ({pct} %)
+            {t.home.tripPacked(packed.name, packed.checked, packed.total, pct)}
           </span>
         ) : (
           <span className="mt-0.5 block text-xs text-muted-foreground">
-            Geplanter Aufenthalt im Reise-Tagebuch
+            {t.home.tripPlannedNote}
           </span>
         )}
       </span>
@@ -161,6 +164,7 @@ function NextTripWidget() {
 }
 
 function WeatherWidget() {
+  const t = useT();
   const [weather, setWeather] = useState<HomeWeather | null>(null);
 
   useEffect(() => {
@@ -221,7 +225,10 @@ function WeatherWidget() {
     <Link
       href="/wetter"
       className="mb-6 flex items-center gap-4 rounded-xl border border-border/70 bg-card p-4 shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
-      aria-label={`Aktuelles Wetter: ${Math.round(weather.temperatureC)} Grad, ${weather.label} – zum Wetter-Modul`}
+      aria-label={t.home.weatherAria(
+        Math.round(weather.temperatureC),
+        weather.label
+      )}
     >
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
         <CloudSunRain className="h-5.5 w-5.5" aria-hidden="true" />
@@ -252,7 +259,7 @@ function WeatherWidget() {
           </span>
         ) : (
           <span className="mt-0.5 block text-xs text-muted-foreground">
-            Keine Unwetterwarnungen an deinem Standort
+            {t.home.weatherNoAlerts}
           </span>
         )}
       </span>
@@ -266,8 +273,10 @@ function WeatherWidget() {
 
 /** Globale Suche über die Offline-Wissensmodule (Erste Hilfe, Knoten, Rezepte, Natur). */
 function KnowledgeSearch() {
+  const { lang, t } = useI18n();
   const [query, setQuery] = useState("");
-  const results = query.trim().length >= 2 ? searchKnowledge(query, 8) : [];
+  const results =
+    query.trim().length >= 2 ? searchKnowledge(query, 8, lang) : [];
   return (
     <div className="mb-8">
       <div className="relative">
@@ -279,8 +288,8 @@ function KnowledgeSearch() {
           type="search"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="Wissen durchsuchen: Zeckenbiss, Mastwurf, Rezepte …"
-          aria-label="Wissensmodule durchsuchen"
+          placeholder={t.home.searchPlaceholder}
+          aria-label={t.home.searchAria}
           className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
         />
       </div>
@@ -288,8 +297,7 @@ function KnowledgeSearch() {
         <div className="mt-2 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           {results.length === 0 ? (
             <p className="px-4 py-3 text-sm text-muted-foreground">
-              Nichts gefunden – probiere einen anderen Begriff (z. B.
-              «Verbrennung» oder «Knoten»).
+              {t.home.searchNoResults}
             </p>
           ) : (
             <ul className="divide-y divide-border/60">
@@ -300,7 +308,7 @@ function KnowledgeSearch() {
                     className="flex items-start gap-3 px-4 py-2.5 transition-colors hover:bg-accent/50"
                   >
                     <span className="mt-0.5 shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-secondary-foreground">
-                      {r.module}
+                      {t.home.searchCategories[r.module]}
                     </span>
                     <span className="min-w-0">
                       <span className="block text-sm font-semibold">
@@ -323,6 +331,7 @@ function KnowledgeSearch() {
 
 /** Schnellzugriff: die zuletzt genutzten Module (max. 4) aus dem lokalen Verlauf. */
 function RecentModules({ hidden }: { hidden: string[] }) {
+  const { lang, t } = useI18n();
   const [recent] = useState<string[]>(() => getRecentModules());
   const items = recent
     .map(path => modules.find(m => m.path === path))
@@ -336,7 +345,7 @@ function RecentModules({ hidden }: { hidden: string[] }) {
     <div className="mb-8">
       <h2 className="mb-3 flex items-center gap-2 font-serif text-xl font-semibold md:text-2xl">
         <HistoryIcon className="h-5 w-5 text-primary" aria-hidden="true" />
-        Zuletzt genutzt
+        {t.home.recentTitle}
       </h2>
       <div className="flex flex-wrap gap-2">
         {items.map(m => {
@@ -348,7 +357,7 @@ function RecentModules({ hidden }: { hidden: string[] }) {
               className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium shadow-sm transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.98]"
             >
               <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
-              {m.title}
+              {pick(m.title, lang)}
             </Link>
           );
         })}
@@ -358,7 +367,11 @@ function RecentModules({ hidden }: { hidden: string[] }) {
 }
 
 export default function Home() {
-  const [sunInfo, setSunInfo] = useState<string | null>(null);
+  const { lang, t } = useI18n();
+  const [sunTimes, setSunTimes] = useState<{
+    sunrise: Date;
+    sunset: Date;
+  } | null>(null);
   const [sortMode, setSortMode] = useState(false);
   const [order, setOrder] = useState<string[]>(() => loadModuleOrder());
   const [hidden, setHidden] = useState<string[]>(() => loadHiddenModules());
@@ -469,20 +482,19 @@ export default function Home() {
           pos.coords.longitude
         );
         if (times.sunrise && times.sunset) {
-          const fmt = (d: Date) =>
-            d.toLocaleTimeString("de-CH", {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-          setSunInfo(
-            `Heute: Sonnenaufgang ${fmt(times.sunrise)} · Sonnenuntergang ${fmt(times.sunset)}`
-          );
+          setSunTimes({ sunrise: times.sunrise, sunset: times.sunset });
         }
       },
-      () => setSunInfo(null),
+      () => setSunTimes(null),
       { timeout: 8000 }
     );
   }, []);
+
+  const fmtTime = (d: Date) =>
+    d.toLocaleTimeString(LOCALE_TAGS[lang], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
   return (
     <div>
@@ -490,7 +502,7 @@ export default function Home() {
       <section className="relative overflow-hidden bg-primary text-white">
         <img
           src={heroImage}
-          alt="Zelt mit Solarpanels und Lagerfeuer vor Schweizer Alpen bei Sonnenuntergang"
+          alt={t.home.heroImageAlt}
           className="absolute inset-0 h-full w-full object-cover object-center"
         />
         <div
@@ -503,21 +515,23 @@ export default function Home() {
         />
         <div className="container relative py-16 md:py-24">
           <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-white/90 drop-shadow">
-            Dein Schweizer Taschenmesser fürs Zelt-Camping
+            {t.home.heroKicker}
           </p>
           <h1 className="max-w-xl text-3xl font-bold leading-tight drop-shadow-md md:text-5xl">
-            Alles fürs Camp.
+            {t.home.heroTitle1}
             <br />
-            In einer App.
+            {t.home.heroTitle2}
           </h1>
           <p className="mt-3 max-w-lg text-white/90 drop-shadow md:text-lg">
-            Planung, Sicherheit, Energie und Naturerlebnis – 16 smarte Werkzeuge
-            für dein nächstes Abenteuer.
+            {t.home.heroSubtitle}
           </p>
-          {sunInfo && (
+          {sunTimes && (
             <p className="mt-5 inline-flex items-center gap-2 rounded-full bg-black/40 px-4 py-1.5 text-sm text-white backdrop-blur-md">
               <Compass className="h-4 w-4" aria-hidden="true" />
-              {sunInfo}
+              {t.home.sunInfo(
+                fmtTime(sunTimes.sunrise),
+                fmtTime(sunTimes.sunset)
+              )}
             </p>
           )}
         </div>
@@ -539,18 +553,15 @@ export default function Home() {
                 : "inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             }
             aria-pressed={sortMode}
-            aria-label={sortMode ? "Sortieren beenden" : "Kacheln sortieren"}
+            aria-label={sortMode ? t.home.sortDoneAria : t.home.sortStartAria}
           >
             <GripVertical className="h-4 w-4" aria-hidden="true" />
-            {sortMode ? "Fertig" : "Sortieren"}
+            {sortMode ? t.home.sortDone : t.home.sortStart}
           </button>
         </div>
         {sortMode && (
           <p className="mb-4 rounded-lg bg-accent px-4 py-2.5 text-sm text-accent-foreground">
-            Ziehe die Kacheln an ihre neue Position (innerhalb der Gruppe) oder
-            nutze die Pfeil-Buttons. Mit dem Augen-Button blendest du Kacheln
-            aus oder wieder ein. Angemeldet wird die Auswahl auf allen deinen
-            Geräten übernommen.
+            {t.home.sortHint}
           </p>
         )}
         {groups.map(group => {
@@ -563,7 +574,7 @@ export default function Home() {
           return (
             <div key={group} className="mb-8 last:mb-0">
               <h2 className="mb-4 font-serif text-xl font-semibold md:text-2xl">
-                {group}
+                {pick(groupLabels[group], lang)}
               </h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {groupModules.map((m, idx, arr) => {
@@ -614,7 +625,7 @@ export default function Home() {
                               ? "border-solid border-primary bg-accent/40"
                               : "cursor-grab border-dashed border-primary/40 active:cursor-grabbing")
                         }
-                        aria-label={`${m.title} verschieben`}
+                        aria-label={t.home.moveAria(pick(m.title, lang))}
                       >
                         <GripVertical
                           className="mt-2 h-5 w-5 shrink-0 text-muted-foreground/60"
@@ -625,15 +636,15 @@ export default function Home() {
                         </span>
                         <span className="flex-1">
                           <span className="flex items-center gap-2 font-semibold text-card-foreground">
-                            {m.title}
+                            {pick(m.title, lang)}
                             {isHidden && (
                               <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-secondary-foreground">
-                                Ausgeblendet
+                                {t.home.hiddenBadge}
                               </span>
                             )}
                           </span>
                           <span className="mt-0.5 block text-sm text-muted-foreground">
-                            {m.description}
+                            {pick(m.description, lang)}
                           </span>
                         </span>
                         <span className="flex shrink-0 flex-col gap-1">
@@ -642,7 +653,7 @@ export default function Home() {
                             onClick={() => moveByOffset(group, m.path, -1)}
                             disabled={idx === 0}
                             className="rounded-md border border-border p-1 text-muted-foreground disabled:opacity-30"
-                            aria-label={`${m.title} nach vorne verschieben`}
+                            aria-label={t.home.moveUpAria(pick(m.title, lang))}
                           >
                             <ChevronUp className="h-4 w-4" aria-hidden="true" />
                           </button>
@@ -651,7 +662,9 @@ export default function Home() {
                             onClick={() => moveByOffset(group, m.path, 1)}
                             disabled={idx === arr.length - 1}
                             className="rounded-md border border-border p-1 text-muted-foreground disabled:opacity-30"
-                            aria-label={`${m.title} nach hinten verschieben`}
+                            aria-label={t.home.moveDownAria(
+                              pick(m.title, lang)
+                            )}
                           >
                             <ChevronDown
                               className="h-4 w-4"
@@ -669,8 +682,8 @@ export default function Home() {
                             aria-pressed={isHidden}
                             aria-label={
                               isHidden
-                                ? `${m.title} wieder einblenden`
-                                : `${m.title} ausblenden`
+                                ? t.home.showAria(pick(m.title, lang))
+                                : t.home.hideAria(pick(m.title, lang))
                             }
                           >
                             {isHidden ? (
@@ -688,7 +701,7 @@ export default function Home() {
                       key={m.path}
                       href={m.path}
                       className="group flex items-start gap-4 rounded-xl border border-border/70 bg-card p-4 shadow-sm transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
-                      aria-label={`${m.title} öffnen`}
+                      aria-label={t.home.openAria(pick(m.title, lang))}
                     >
                       <span
                         className={
@@ -701,15 +714,15 @@ export default function Home() {
                       </span>
                       <span className="flex-1">
                         <span className="flex items-center gap-2 font-semibold text-card-foreground">
-                          {m.title}
+                          {pick(m.title, lang)}
                           {m.offline && (
                             <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-secondary-foreground">
-                              Offline
+                              {t.common.offlineBadge}
                             </span>
                           )}
                         </span>
                         <span className="mt-0.5 block text-sm text-muted-foreground">
-                          {m.description}
+                          {pick(m.description, lang)}
                         </span>
                       </span>
                       <ArrowRight

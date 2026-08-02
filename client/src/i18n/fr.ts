@@ -44,4 +44,52 @@ export const fr: Translation = {
       sos: "SOS",
     },
   },
+  home: {
+    heroImageAlt:
+      "Tente avec panneaux solaires et feu de camp devant les Alpes suisses au coucher du soleil",
+    heroKicker: "Ton couteau suisse pour le camping sous tente",
+    heroTitle1: "Tout pour le camp.",
+    heroTitle2: "Dans une seule app.",
+    heroSubtitle:
+      "Planification, sécurité, énergie et nature – 16 outils malins pour ta prochaine aventure.",
+    sunInfo: (sunrise, sunset) =>
+      `Aujourd'hui : lever du soleil ${sunrise} · coucher du soleil ${sunset}`,
+    nextTripFallback: "Prochain trip",
+    nextTripAria: place => `Prochain séjour planifié : ${place}`,
+    tripStartsToday: "C'est parti aujourd'hui !",
+    tripStartsTomorrow: "Départ demain !",
+    tripDaysLeft: n => `Encore ${n} jours`,
+    tripPacked: (name, checked, total, pct) =>
+      `${name} : ${checked} sur ${total} emballés (${pct} %)`,
+    tripPlannedNote: "Séjour planifié dans le journal de voyage",
+    weatherAria: (temp, label) =>
+      `Météo actuelle : ${temp} degrés, ${label} – vers le module météo`,
+    weatherNoAlerts: "Aucune alerte d'intempéries à ton emplacement",
+    searchPlaceholder:
+      "Rechercher : morsure de tique, nœud de cabestan, recettes …",
+    searchAria: "Rechercher dans les modules de savoir",
+    searchNoResults:
+      "Rien trouvé – essaie un autre terme (p. ex. «brûlure» ou «nœud»).",
+    searchCategories: {
+      module: "Module",
+      firstAid: "Premiers secours",
+      knots: "Nœuds",
+      recipes: "Recettes",
+      nature: "Nature",
+    },
+    recentTitle: "Utilisés récemment",
+    sortStart: "Trier",
+    sortDone: "Terminé",
+    sortStartAria: "Trier les tuiles",
+    sortDoneAria: "Terminer le tri",
+    sortHint:
+      "Glisse les tuiles à leur nouvelle position (au sein du groupe) ou utilise les boutons fléchés. Avec le bouton œil, tu masques ou réaffiches des tuiles. Connecté·e, ta sélection est reprise sur tous tes appareils.",
+    hiddenBadge: "Masqué",
+    moveAria: title => `Déplacer ${title}`,
+    moveUpAria: title => `Avancer ${title}`,
+    moveDownAria: title => `Reculer ${title}`,
+    showAria: title => `Réafficher ${title}`,
+    hideAria: title => `Masquer ${title}`,
+    openAria: title => `Ouvrir ${title}`,
+  },
 };

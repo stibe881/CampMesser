@@ -1,7 +1,9 @@
 /**
  * Modul-Katalog der Startseite: Kacheln mit Gruppe, Icon und Beschreibung.
  * Eigenes Datenmodul, damit auch die globale Suche die Werkzeuge findet.
+ * Alle sichtbaren Texte liegen als L4 in vier Sprachen vor.
  */
+import { l4, type L4 } from "@shared/i18n";
 import {
   BatteryCharging,
   BookOpen,
@@ -27,8 +29,8 @@ import {
 
 export interface Module {
   path: string;
-  title: string;
-  description: string;
+  title: L4;
+  description: L4;
   icon: React.ComponentType<{ className?: string }>;
   group: "Planung" | "Sicherheit" | "Erste Hilfe" | "Energie & Wasser";
   offline?: boolean;
@@ -37,147 +39,327 @@ export interface Module {
 export const modules: Module[] = [
   {
     path: "/sonne",
-    title: "Sonnenstand-Kompass",
-    description: "Sonnenposition, Auf- und Untergang am Standort",
+    title: l4(
+      "Sonnenstand-Kompass",
+      "Boussole solaire",
+      "Bussola solare",
+      "Sun compass"
+    ),
+    description: l4(
+      "Sonnenposition, Auf- und Untergang am Standort",
+      "Position du soleil, lever et coucher sur place",
+      "Posizione del sole, alba e tramonto sul posto",
+      "Sun position, sunrise and sunset at your location"
+    ),
     icon: Compass,
     group: "Planung",
   },
   {
     path: "/packlisten",
-    title: "Packlisten",
-    description: "Szenario-basierte Checklisten zum Abhaken",
+    title: l4(
+      "Packlisten",
+      "Listes de bagages",
+      "Liste bagagli",
+      "Packing lists"
+    ),
+    description: l4(
+      "Szenario-basierte Checklisten zum Abhaken",
+      "Checklists par scénario à cocher",
+      "Checklist per scenario da spuntare",
+      "Scenario-based checklists to tick off"
+    ),
     icon: ListChecks,
     group: "Planung",
   },
   {
     path: "/inventar",
-    title: "Inventar",
-    description: "Ausrüstung mit Gewicht und Volumen erfassen",
+    title: l4("Inventar", "Inventaire", "Inventario", "Inventory"),
+    description: l4(
+      "Ausrüstung mit Gewicht und Volumen erfassen",
+      "Saisis ton équipement avec poids et volume",
+      "Registra l'attrezzatura con peso e volume",
+      "Track your gear with weight and volume"
+    ),
     icon: Package,
     group: "Planung",
   },
   {
     path: "/packen",
-    title: "Pack-Optimierung",
-    description: "Gewicht und Packmass im Griff behalten",
+    title: l4(
+      "Pack-Optimierung",
+      "Optimisation des bagages",
+      "Ottimizzazione bagagli",
+      "Packing optimiser"
+    ),
+    description: l4(
+      "Gewicht und Packmass im Griff behalten",
+      "Garde le poids et le volume sous contrôle",
+      "Tieni sotto controllo peso e ingombro",
+      "Keep weight and packed size under control"
+    ),
     icon: Scale,
     group: "Planung",
   },
   {
     path: "/familie",
-    title: "Familien-Modus",
-    description: "Kinder-Checklisten, Schnitzeljagden und Quiz",
+    title: l4(
+      "Familien-Modus",
+      "Mode famille",
+      "Modalità famiglia",
+      "Family mode"
+    ),
+    description: l4(
+      "Kinder-Checklisten, Schnitzeljagden und Quiz",
+      "Checklists pour enfants, chasses au trésor et quiz",
+      "Checklist per bambini, cacce al tesoro e quiz",
+      "Kids' checklists, scavenger hunts and quizzes"
+    ),
     icon: Users,
     group: "Planung",
   },
   {
     path: "/zeltplaetze",
-    title: "Zeltplatz-Favoriten",
-    description: "Orte speichern, Wetter und Sonne im Voraus prüfen",
+    title: l4(
+      "Zeltplatz-Favoriten",
+      "Emplacements favoris",
+      "Piazzole preferite",
+      "Favourite pitches"
+    ),
+    description: l4(
+      "Orte speichern, Wetter und Sonne im Voraus prüfen",
+      "Enregistre des lieux, vérifie météo et soleil à l'avance",
+      "Salva i luoghi e controlla in anticipo meteo e sole",
+      "Save places, check weather and sun in advance"
+    ),
     icon: Tent,
     group: "Planung",
   },
   {
     path: "/tagebuch",
-    title: "Reise-Tagebuch",
-    description: "Aufenthalte festhalten, Nächte und Lieblingsplätze zählen",
+    title: l4(
+      "Reise-Tagebuch",
+      "Journal de voyage",
+      "Diario di viaggio",
+      "Travel journal"
+    ),
+    description: l4(
+      "Aufenthalte festhalten, Nächte und Lieblingsplätze zählen",
+      "Note tes séjours, compte les nuits et tes lieux préférés",
+      "Annota i soggiorni, conta notti e posti preferiti",
+      "Log your stays, count nights and favourite spots"
+    ),
     icon: BookOpen,
     group: "Planung",
   },
   {
     path: "/rasen",
-    title: "Rasenschoner",
-    description: "Wie lange darf das Zelt auf dem Rasen stehen?",
+    title: l4("Rasenschoner", "Protège-gazon", "Salva-prato", "Lawn saver"),
+    description: l4(
+      "Wie lange darf das Zelt auf dem Rasen stehen?",
+      "Combien de temps la tente peut-elle rester sur l'herbe ?",
+      "Per quanto tempo la tenda può restare sul prato?",
+      "How long can the tent stay on the grass?"
+    ),
     icon: Sprout,
     group: "Planung",
     offline: true,
   },
   {
     path: "/wasserwaage",
-    title: "Wasserwaage",
-    description: "Wohnwagen und Tisch mit dem Lagesensor ausrichten",
+    title: l4("Wasserwaage", "Niveau à bulle", "Livella", "Spirit level"),
+    description: l4(
+      "Wohnwagen und Tisch mit dem Lagesensor ausrichten",
+      "Mets la caravane et la table à niveau avec le capteur",
+      "Metti in piano caravan e tavolo con il sensore",
+      "Level your caravan and table with the motion sensor"
+    ),
     icon: Gauge,
     group: "Planung",
     offline: true,
   },
   {
     path: "/sos",
-    title: "SOS & Notfall",
-    description: "GPS-Koordinaten und Notfallnummern",
+    title: l4(
+      "SOS & Notfall",
+      "SOS & urgences",
+      "SOS ed emergenze",
+      "SOS & emergency"
+    ),
+    description: l4(
+      "GPS-Koordinaten und Notfallnummern",
+      "Coordonnées GPS et numéros d'urgence",
+      "Coordinate GPS e numeri d'emergenza",
+      "GPS coordinates and emergency numbers"
+    ),
     icon: Siren,
     group: "Sicherheit",
   },
   {
     path: "/wetter",
-    title: "Camp-Wetter",
-    description: "Hyperlokale Vorhersage und Unwetterwarnungen",
+    title: l4(
+      "Camp-Wetter",
+      "Météo du camp",
+      "Meteo del campo",
+      "Camp weather"
+    ),
+    description: l4(
+      "Hyperlokale Vorhersage und Unwetterwarnungen",
+      "Prévisions hyperlocales et alertes d'intempéries",
+      "Previsioni iperlocali e allerte maltempo",
+      "Hyperlocal forecast and severe weather warnings"
+    ),
     icon: CloudSunRain,
     group: "Sicherheit",
   },
   {
     path: "/trockenzeiten",
-    title: "Trockenzeiten",
-    description: "Wird die Wäsche bis Sonnenuntergang trocken?",
+    title: l4(
+      "Trockenzeiten",
+      "Temps de séchage",
+      "Tempi di asciugatura",
+      "Drying times"
+    ),
+    description: l4(
+      "Wird die Wäsche bis Sonnenuntergang trocken?",
+      "Le linge sera-t-il sec avant le coucher du soleil ?",
+      "Il bucato si asciugherà prima del tramonto?",
+      "Will the laundry dry before sunset?"
+    ),
     icon: Shirt,
     group: "Planung",
   },
   {
     path: "/nachtruhe",
-    title: "Camp-Quiet-Timer",
-    description: "Lautstärke im Blick während der Nachtruhe",
+    title: l4(
+      "Camp-Quiet-Timer",
+      "Camp Quiet Timer",
+      "Camp Quiet Timer",
+      "Camp quiet timer"
+    ),
+    description: l4(
+      "Lautstärke im Blick während der Nachtruhe",
+      "Garde un œil sur le volume pendant le repos nocturne",
+      "Tieni d'occhio il volume durante il riposo notturno",
+      "Keep an eye on noise during quiet hours"
+    ),
     icon: Moon,
     group: "Sicherheit",
   },
   {
     path: "/erste-hilfe",
-    title: "Erste Hilfe",
-    description: "Offline-Ratgeber für Outdoor-Verletzungen",
+    title: l4("Erste Hilfe", "Premiers secours", "Primo soccorso", "First aid"),
+    description: l4(
+      "Offline-Ratgeber für Outdoor-Verletzungen",
+      "Guide hors ligne pour les blessures en plein air",
+      "Guida offline per gli infortuni all'aperto",
+      "Offline guide for outdoor injuries"
+    ),
     icon: Cross,
     group: "Sicherheit",
     offline: true,
   },
   {
     path: "/knoten",
-    title: "Knoten-Bibliothek",
-    description: "Die wichtigsten Outdoor-Knoten, Schritt für Schritt",
+    title: l4(
+      "Knoten-Bibliothek",
+      "Bibliothèque de nœuds",
+      "Biblioteca dei nodi",
+      "Knot library"
+    ),
+    description: l4(
+      "Die wichtigsten Outdoor-Knoten, Schritt für Schritt",
+      "Les nœuds outdoor essentiels, pas à pas",
+      "I nodi outdoor più importanti, passo dopo passo",
+      "The key outdoor knots, step by step"
+    ),
     icon: Cable,
     group: "Erste Hilfe",
     offline: true,
   },
   {
     path: "/natur",
-    title: "Natur-Entdecker",
-    description: "Tierspuren, Sternbilder und Bäume erkennen",
+    title: l4(
+      "Natur-Entdecker",
+      "Explorateur nature",
+      "Esploratore della natura",
+      "Nature explorer"
+    ),
+    description: l4(
+      "Tierspuren, Sternbilder und Bäume erkennen",
+      "Reconnais traces d'animaux, constellations et arbres",
+      "Riconosci tracce di animali, costellazioni e alberi",
+      "Identify animal tracks, constellations and trees"
+    ),
     icon: TreePine,
     group: "Erste Hilfe",
     offline: true,
   },
   {
     path: "/rezepte",
-    title: "Campfire-Rezepte",
-    description: "Kochen auf Gaskocher und offenem Feuer",
+    title: l4(
+      "Campfire-Rezepte",
+      "Recettes de feu de camp",
+      "Ricette da falò",
+      "Campfire recipes"
+    ),
+    description: l4(
+      "Kochen auf Gaskocher und offenem Feuer",
+      "Cuisine au réchaud à gaz et au feu ouvert",
+      "Cucina su fornello a gas e fuoco vivo",
+      "Cooking on a gas stove and open fire"
+    ),
     icon: CookingPot,
     group: "Erste Hilfe",
     offline: true,
   },
   {
     path: "/kuehlbox",
-    title: "Kühlbox-Inventar",
-    description: "Vorräte erfassen, passende Rezepte finden",
+    title: l4(
+      "Kühlbox-Inventar",
+      "Inventaire de la glacière",
+      "Inventario frigo box",
+      "Cool box inventory"
+    ),
+    description: l4(
+      "Vorräte erfassen, passende Rezepte finden",
+      "Saisis tes provisions et trouve des recettes adaptées",
+      "Registra le scorte e trova ricette adatte",
+      "Track supplies and find matching recipes"
+    ),
     icon: Refrigerator,
     group: "Erste Hilfe",
   },
   {
     path: "/energie",
-    title: "Energie-Budget",
-    description: "Autarkie-Dauer mit Solar und Powerstation",
+    title: l4(
+      "Energie-Budget",
+      "Budget énergie",
+      "Budget energia",
+      "Energy budget"
+    ),
+    description: l4(
+      "Autarkie-Dauer mit Solar und Powerstation",
+      "Autonomie avec solaire et powerstation",
+      "Autonomia con solare e powerstation",
+      "Off-grid duration with solar and power station"
+    ),
     icon: BatteryCharging,
     group: "Energie & Wasser",
   },
   {
     path: "/wasser",
-    title: "Trinkwasser-Rechner",
-    description: "Wasserbedarf für Personen, Tage und Hitze",
+    title: l4(
+      "Trinkwasser-Rechner",
+      "Calculateur d'eau potable",
+      "Calcolatore acqua potabile",
+      "Drinking water calculator"
+    ),
+    description: l4(
+      "Wasserbedarf für Personen, Tage und Hitze",
+      "Besoins en eau selon personnes, jours et chaleur",
+      "Fabbisogno d'acqua per persone, giorni e caldo",
+      "Water needs for people, days and heat"
+    ),
     icon: Droplets,
     group: "Energie & Wasser",
   },
@@ -189,3 +371,21 @@ export const groups = [
   "Erste Hilfe",
   "Energie & Wasser",
 ] as const;
+
+/** Anzeige-Namen der Gruppen (die Gruppen-Schlüssel selbst bleiben stabil). */
+export const groupLabels: Record<(typeof groups)[number], L4> = {
+  Planung: l4("Planung", "Planification", "Pianificazione", "Planning"),
+  Sicherheit: l4("Sicherheit", "Sécurité", "Sicurezza", "Safety"),
+  "Erste Hilfe": l4(
+    "Erste Hilfe",
+    "Premiers secours",
+    "Primo soccorso",
+    "First aid"
+  ),
+  "Energie & Wasser": l4(
+    "Energie & Wasser",
+    "Énergie & eau",
+    "Energia e acqua",
+    "Energy & water"
+  ),
+};
