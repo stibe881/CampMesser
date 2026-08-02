@@ -19,6 +19,7 @@ import {
   MIN_QUIZ_OPTIONS,
 } from "@shared/quizzes";
 import { MEALS } from "@shared/menuPlan";
+import { SHOPPING_CATEGORIES } from "@shared/shopping";
 import {
   parseSpotAttributes,
   SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
@@ -769,7 +770,12 @@ export const appRouter = router({
       db.getShoppingItems(ctx.user.id)
     ),
     add: protectedProcedure
-      .input(z.object({ name: z.string().min(1).max(160) }))
+      .input(
+        z.object({
+          name: z.string().min(1).max(160),
+          category: z.enum(SHOPPING_CATEGORIES).nullish(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const items = await db.getShoppingItems(ctx.user.id);
         const name = input.name.trim();
@@ -786,6 +792,7 @@ export const appRouter = router({
             userId: ctx.user.id,
             name,
             position: nextPosition,
+            category: input.category ?? null,
           },
         ]);
         return { success: true, added: true } as const;
@@ -795,6 +802,7 @@ export const appRouter = router({
       .input(
         z.object({
           names: z.array(z.string().min(1).max(160)).min(1).max(100),
+          category: z.enum(SHOPPING_CATEGORIES).nullish(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -806,9 +814,32 @@ export const appRouter = router({
             userId: ctx.user.id,
             name: name.trim(),
             position: nextPosition + idx,
+            category: input.category ?? null,
           }))
         );
         return { added: input.names.length };
+      }),
+    /** Laden-Kategorie eines Eintrags setzen; null entfernt sie wieder. */
+    setCategory: protectedProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          category: z.enum(SHOPPING_CATEGORIES).nullable(),
+        })
+      )
+      .mutation(({ ctx, input }) =>
+        db.setShoppingItemCategory(input.id, ctx.user.id, input.category)
+      ),
+    /** Neue Reihenfolge (Drag-and-drop) speichern: Positionen 0..n. */
+    reorder: protectedProcedure
+      .input(z.object({ itemIds: z.array(z.number().int()).min(1).max(500) }))
+      .mutation(async ({ ctx, input }) => {
+        const items = await db.getShoppingItems(ctx.user.id);
+        const valid = new Set(items.map(i => i.id));
+        // Nur eigene Einträge umsortieren – fremde IDs werden ignoriert
+        const ids = input.itemIds.filter(id => valid.has(id));
+        if (ids.length > 0) await db.reorderShoppingItems(ctx.user.id, ids);
+        return { success: true } as const;
       }),
     toggle: protectedProcedure
       .input(z.object({ id: z.number(), checked: z.boolean() }))

@@ -1,0 +1,1 @@
+ALTER TABLE `shoppingItems` ADD `category` varchar(40);

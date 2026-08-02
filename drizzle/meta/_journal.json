@@ -225,6 +225,13 @@
       "when": 1785675851338,
       "tag": "0031_ambitious_shooting_star",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1785676857575,
+      "tag": "0032_round_cobalt_man",
+      "breakpoints": true
     }
   ]
 }

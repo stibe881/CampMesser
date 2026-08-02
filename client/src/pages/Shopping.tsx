@@ -1,28 +1,56 @@
 import { useMemo, useState } from "react";
-import { Loader2, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import {
+  GripVertical,
+  Loader2,
+  Plus,
+  ShoppingCart,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { useT } from "@/i18n";
+import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
+import { usePointerDrag } from "@/lib/usePointerDrag";
+import { cn } from "@/lib/utils";
+import { pick } from "@shared/i18n";
+import {
+  isShoppingCategory,
+  SHOPPING_CATEGORIES,
+  SHOPPING_CATEGORY_LABELS,
+  type ShoppingCategory,
+} from "@shared/shopping";
+
+/** Select-Wert für «Ohne Kategorie» (Radix erlaubt keinen leeren String). */
+const NO_CATEGORY = "none" as const;
 
 /**
  * Einkaufsliste: schnelles Erfassen, Abhaken und Aufräumen. Offene Einträge
- * stehen oben, erledigte durchgestrichen darunter – Zutaten kommen wahlweise
- * direkt aus dem Rezeptbuch (shopping.addMany).
+ * stehen nach Laden-Kategorien gruppiert oben (Reihenfolge des Katalogs,
+ * «Ohne Kategorie» zuletzt) und lassen sich per Griff innerhalb der Gruppe
+ * umsortieren; erledigte stehen durchgestrichen darunter. Zutaten kommen
+ * wahlweise direkt aus dem Rezeptbuch (shopping.addMany).
  */
 export default function ShoppingPage() {
   const { isAuthenticated, loading } = useAuth();
-  const t = useT();
+  const { lang, t } = useI18n();
   const utils = trpc.useUtils();
   const query = trpc.shopping.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
   const [name, setName] = useState("");
+  const [newCategory, setNewCategory] = useState<string>(NO_CATEGORY);
 
   const invalidate = () => utils.shopping.list.invalidate();
   const addMutation = trpc.shopping.add.useMutation({
@@ -48,15 +76,96 @@ export default function ShoppingPage() {
     onSuccess: invalidate,
     onError: () => toast.error(t.common.deleteFailed),
   });
+  const setCategoryMutation = trpc.shopping.setCategory.useMutation({
+    onSuccess: invalidate,
+    onError: () => toast.error(t.shopping.categoryChangeFailed),
+  });
+  const reorderMutation = trpc.shopping.reorder.useMutation({
+    onMutate: async input => {
+      await utils.shopping.list.cancel();
+      const prev = utils.shopping.list.getData();
+      // Optimistisch: Einträge sofort in der neuen Reihenfolge zeigen
+      utils.shopping.list.setData(undefined, old => {
+        if (!old) return old;
+        const byId = new Map(old.map(i => [i.id, i]));
+        const ordered = input.itemIds
+          .map(id => byId.get(id))
+          .filter((i): i is NonNullable<typeof i> => i !== undefined);
+        const rest = old.filter(i => !input.itemIds.includes(i.id));
+        return [...ordered, ...rest];
+      });
+      return { prev };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) utils.shopping.list.setData(undefined, ctx.prev);
+      toast.error(t.shopping.reorderFailed);
+    },
+    onSettled: invalidate,
+  });
 
   const items = useMemo(() => query.data ?? [], [query.data]);
   const openItems = useMemo(() => items.filter(i => !i.checked), [items]);
   const doneItems = useMemo(() => items.filter(i => i.checked), [items]);
 
+  /** Offene Einträge nach Kategorie gruppiert – Katalog-Reihenfolge, ohne Kategorie zuletzt. */
+  const grouped = useMemo(() => {
+    const groups: {
+      key: ShoppingCategory | null;
+      items: typeof openItems;
+    }[] = [];
+    SHOPPING_CATEGORIES.forEach(cat => {
+      const catItems = openItems.filter(i => i.category === cat);
+      if (catItems.length > 0) groups.push({ key: cat, items: catItems });
+    });
+    const uncategorized = openItems.filter(
+      i => !isShoppingCategory(i.category)
+    );
+    if (uncategorized.length > 0)
+      groups.push({ key: null, items: uncategorized });
+    return groups;
+  }, [openItems]);
+
+  /** Anzeige-Label einer Gruppe (null = «Ohne Kategorie»). */
+  const groupLabel = (key: ShoppingCategory | null) =>
+    key === null
+      ? t.shopping.noCategory
+      : pick(SHOPPING_CATEGORY_LABELS[key], lang);
+
+  /** Eintrag innerhalb seiner Gruppe verschieben und Gesamt-Reihenfolge speichern. */
+  const moveItem = (group: string, fromIdStr: string, toIdStr: string) => {
+    const fromId = Number(fromIdStr);
+    const toId = Number(toIdStr);
+    const flat: number[] = [];
+    for (const g of grouped) {
+      const ids = g.items.map(i => i.id);
+      if ((g.key ?? NO_CATEGORY) === group) {
+        const fromIdx = ids.indexOf(fromId);
+        const toIdx = ids.indexOf(toId);
+        if (fromIdx !== -1 && toIdx !== -1) {
+          ids.splice(toIdx, 0, ...ids.splice(fromIdx, 1));
+        }
+      }
+      flat.push(...ids);
+    }
+    // Erledigte behalten ihre Plätze am Ende der Gesamt-Reihenfolge
+    flat.push(...doneItems.map(i => i.id));
+    if (flat.length > 0) reorderMutation.mutate({ itemIds: flat });
+  };
+
+  // Geteilte Pointer-Drag-Logik (Maus + Touch) – gleiches Muster wie Packlisten
+  const drag = usePointerDrag({
+    onDrop: moveItem,
+    handleSelector: "[data-drag-handle]",
+  });
+
   const submit = () => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    addMutation.mutate({ name: trimmed.slice(0, 160) });
+    addMutation.mutate({
+      name: trimmed.slice(0, 160),
+      category:
+        newCategory === NO_CATEGORY ? null : (newCategory as ShoppingCategory),
+    });
   };
 
   if (loading) {
@@ -86,21 +195,38 @@ export default function ShoppingPage() {
     <div className="container max-w-2xl py-6">
       <PageHeader title={t.shopping.title} subtitle={t.shopping.subtitle} />
 
-      {/* Schnelles Hinzufügen */}
+      {/* Schnelles Hinzufügen mit optionaler Kategorie */}
       <form
-        className="mb-6 flex gap-2"
+        className="mb-6 flex flex-wrap gap-2"
         onSubmit={e => {
           e.preventDefault();
           submit();
         }}
       >
         <Input
+          className="min-w-40 flex-1"
           value={name}
           maxLength={160}
           placeholder={t.shopping.addPlaceholder}
           aria-label={t.shopping.addNameAria}
           onChange={e => setName(e.target.value)}
         />
+        <Select value={newCategory} onValueChange={setNewCategory}>
+          <SelectTrigger
+            className="w-40"
+            aria-label={t.shopping.addCategoryAria}
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={NO_CATEGORY}>{t.shopping.noCategory}</SelectItem>
+            {SHOPPING_CATEGORIES.map(cat => (
+              <SelectItem key={cat} value={cat}>
+                {pick(SHOPPING_CATEGORY_LABELS[cat], lang)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Button
           type="submit"
           disabled={!name.trim() || addMutation.isPending}
@@ -131,7 +257,7 @@ export default function ShoppingPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Offene Einträge */}
+          {/* Offene Einträge, nach Laden-Kategorien gruppiert */}
           <section>
             <h2 className="mb-2 flex items-baseline justify-between font-serif text-base font-semibold">
               {t.shopping.openTitle}
@@ -144,34 +270,113 @@ export default function ShoppingPage() {
                 {t.shopping.emptyText}
               </p>
             ) : (
-              <ul className="overflow-hidden rounded-xl border border-border">
-                {openItems.map(item => (
-                  <li
-                    key={item.id}
-                    className="flex items-center gap-3 border-b border-border/60 bg-card px-4 py-2.5 last:border-0"
-                  >
-                    <Checkbox
-                      checked={false}
-                      onCheckedChange={() =>
-                        toggleMutation.mutate({ id: item.id, checked: true })
-                      }
-                      aria-label={t.shopping.itemCheckAria(item.name)}
-                    />
-                    <span className="min-w-0 flex-1 break-words text-sm">
-                      {item.name}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 shrink-0 text-muted-foreground/60 hover:text-destructive"
-                      onClick={() => removeMutation.mutate({ id: item.id })}
-                      aria-label={t.shopping.removeAria(item.name)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+              <div className="space-y-4">
+                {grouped.map(group => {
+                  const groupId = group.key ?? NO_CATEGORY;
+                  return (
+                    <div key={groupId}>
+                      <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {groupLabel(group.key)}
+                      </h3>
+                      <ul
+                        className={cn(
+                          "overflow-hidden rounded-xl border border-border",
+                          drag.dragId !== null && "select-none"
+                        )}
+                      >
+                        {group.items.map(item => (
+                          <li
+                            key={item.id}
+                            {...drag.dragProps(groupId, String(item.id))}
+                            className={cn(
+                              "flex items-center gap-2 border-b border-border/60 bg-card px-3 py-2.5 transition-colors last:border-0",
+                              drag.dragId === String(item.id) &&
+                                "border-primary opacity-60",
+                              drag.dragOverId === String(item.id) &&
+                                drag.dragId !== String(item.id) &&
+                                "bg-accent"
+                            )}
+                          >
+                            <button
+                              type="button"
+                              data-drag-handle
+                              aria-label={t.shopping.reorderAria(item.name)}
+                              className="-ml-1 shrink-0 cursor-grab touch-none rounded p-0.5 text-muted-foreground/50 hover:text-foreground active:cursor-grabbing"
+                            >
+                              <GripVertical
+                                className="h-4 w-4"
+                                aria-hidden="true"
+                              />
+                            </button>
+                            <Checkbox
+                              checked={false}
+                              onCheckedChange={() =>
+                                toggleMutation.mutate({
+                                  id: item.id,
+                                  checked: true,
+                                })
+                              }
+                              aria-label={t.shopping.itemCheckAria(item.name)}
+                            />
+                            <span className="min-w-0 flex-1 break-words text-sm">
+                              {item.name}
+                            </span>
+                            <Select
+                              value={
+                                isShoppingCategory(item.category)
+                                  ? item.category
+                                  : NO_CATEGORY
+                              }
+                              onValueChange={value =>
+                                setCategoryMutation.mutate({
+                                  id: item.id,
+                                  category:
+                                    value === NO_CATEGORY
+                                      ? null
+                                      : (value as ShoppingCategory),
+                                })
+                              }
+                            >
+                              <SelectTrigger
+                                className="h-7 w-auto max-w-32 shrink-0 gap-1 border-0 bg-transparent px-1.5 text-xs text-muted-foreground shadow-none hover:text-foreground"
+                                aria-label={t.shopping.itemCategoryAria(
+                                  item.name
+                                )}
+                              >
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent align="end">
+                                <SelectItem value={NO_CATEGORY}>
+                                  {t.shopping.noCategory}
+                                </SelectItem>
+                                {SHOPPING_CATEGORIES.map(cat => (
+                                  <SelectItem key={cat} value={cat}>
+                                    {pick(SHOPPING_CATEGORY_LABELS[cat], lang)}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 shrink-0 text-muted-foreground/60 hover:text-destructive"
+                              onClick={() =>
+                                removeMutation.mutate({ id: item.id })
+                              }
+                              aria-label={t.shopping.removeAria(item.name)}
+                            >
+                              <Trash2
+                                className="h-3.5 w-3.5"
+                                aria-hidden="true"
+                              />
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </section>
 

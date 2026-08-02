@@ -1541,6 +1541,12 @@ export const en: Translation = {
         : `${n} ingredients added to the shopping list`,
     openList: "Go to shopping list",
     addIngredients: "Add ingredients to shopping list",
+    noCategory: "No category",
+    addCategoryAria: "Choose a category for the new item",
+    itemCategoryAria: (name: string) => `Change category of ${name}`,
+    categoryChangeFailed: "The category could not be saved",
+    reorderAria: (name: string) => `Move ${name}`,
+    reorderFailed: "The new order could not be saved",
   },
   menuPlan: {
     title: "Meal plan",

@@ -1575,6 +1575,12 @@ export const it: Translation = {
         : `${n} ingredienti aggiunti alla lista della spesa`,
     openList: "Alla lista della spesa",
     addIngredients: "Ingredienti sulla lista della spesa",
+    noCategory: "Senza categoria",
+    addCategoryAria: "Scegli la categoria della nuova voce",
+    itemCategoryAria: (name: string) => `Cambia la categoria di ${name}`,
+    categoryChangeFailed: "La categoria non è stata salvata",
+    reorderAria: (name: string) => `Sposta ${name}`,
+    reorderFailed: "Il nuovo ordine non è stato salvato",
   },
   menuPlan: {
     title: "Piano dei pasti",

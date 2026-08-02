@@ -1594,6 +1594,12 @@ export const fr: Translation = {
         : `${n} ingrédients ajoutés à la liste de courses`,
     openList: "Vers la liste de courses",
     addIngredients: "Ingrédients sur la liste de courses",
+    noCategory: "Sans catégorie",
+    addCategoryAria: "Choisir la catégorie du nouvel article",
+    itemCategoryAria: (name: string) => `Changer la catégorie de ${name}`,
+    categoryChangeFailed: "La catégorie n'a pas pu être enregistrée",
+    reorderAria: (name: string) => `Déplacer ${name}`,
+    reorderFailed: "Le nouvel ordre n'a pas pu être enregistré",
   },
   menuPlan: {
     title: "Plan des repas",

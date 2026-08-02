@@ -433,6 +433,8 @@ export const shoppingItems = mysqlTable(
     name: varchar("name", { length: 160 }).notNull(),
     checked: boolean("checked").notNull().default(false),
     position: int("position").notNull().default(0),
+    /** Laden-Kategorie (Schlüssel aus shared/shopping.ts); null = ohne Kategorie */
+    category: varchar("category", { length: 40 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("shoppingItems_userId").on(table.userId)]

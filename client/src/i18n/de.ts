@@ -1592,6 +1592,12 @@ export const de = {
         : `${n} Zutaten auf die Einkaufsliste gesetzt`,
     openList: "Zur Einkaufsliste",
     addIngredients: "Zutaten auf die Einkaufsliste",
+    noCategory: "Ohne Kategorie",
+    addCategoryAria: "Kategorie für den neuen Eintrag wählen",
+    itemCategoryAria: (name: string) => `Kategorie von ${name} ändern`,
+    categoryChangeFailed: "Kategorie konnte nicht gespeichert werden",
+    reorderAria: (name: string) => `${name} verschieben`,
+    reorderFailed: "Neue Reihenfolge konnte nicht gespeichert werden",
   },
   menuPlan: {
     title: "Menüplan",

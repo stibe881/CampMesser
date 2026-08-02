@@ -401,6 +401,32 @@ export async function setShoppingItemChecked(
     .where(and(eq(shoppingItems.id, id), eq(shoppingItems.userId, userId)));
 }
 
+/** Laden-Kategorie eines Eintrags setzen; null = «Ohne Kategorie». */
+export async function setShoppingItemCategory(
+  id: number,
+  userId: number,
+  category: string | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(shoppingItems)
+    .set({ category })
+    .where(and(eq(shoppingItems.id, id), eq(shoppingItems.userId, userId)));
+}
+
+/** Neue Reihenfolge der Einkaufsliste speichern: position = 0..n. */
+export async function reorderShoppingItems(userId: number, itemIds: number[]) {
+  const db = requireDb(await getDb());
+  await Promise.all(
+    itemIds.map((id, idx) =>
+      db
+        .update(shoppingItems)
+        .set({ position: idx })
+        .where(and(eq(shoppingItems.id, id), eq(shoppingItems.userId, userId)))
+    )
+  );
+}
+
 export async function deleteShoppingItem(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db
