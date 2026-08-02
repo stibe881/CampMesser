@@ -126,6 +126,8 @@ export const packTemplatesCustom = mysqlTable(
     name: varchar("name", { length: 120 }).notNull(),
     /** Einträge als JSON-Array von {name, category, quantity} */
     itemsJson: text("itemsJson").notNull(),
+    /** Öffentlicher Teil-Token: Wer den Link kennt, kann die Vorlage sehen und übernehmen. */
+    shareToken: varchar("shareToken", { length: 64 }).unique(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("packTemplatesCustom_userId").on(table.userId)]

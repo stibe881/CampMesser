@@ -249,6 +249,20 @@ export const en: Translation = {
     templateDeleted: "Template deleted",
     templateDeleteFailed: "The template could not be deleted",
     budgetBadge: weight => `Budget ${weight}`,
+    templateShareAria: name => `Share the template ${name} via link`,
+    templateShareTitle: "Share template",
+    templateShareDescription:
+      "Anyone with the link can view the template and, with an account, save it as their own template.",
+    templateShareCopied: "Share link copied – pass it on!",
+    templateShareFailed: "Sharing failed",
+    templateUnshare: "Stop sharing",
+    templateUnshared: "Sharing stopped – the link is no longer valid",
+    templateUnshareFailed: "Sharing could not be stopped",
+    templateQrAlt: name => `QR code for the share link of template ${name}`,
+    templateQrTitle: "Hand it over directly",
+    templateQrText:
+      "Let others scan the code with their phone camera – the template opens immediately.",
+    templateSharedBadge: "shared",
   },
   packListDetail: {
     backLabel: "Packing lists",
@@ -371,6 +385,27 @@ export const en: Translation = {
       "Shared ticking: everyone with this link sees the same state – the view updates automatically.",
     emptyList: "This list is still empty.",
     checkAria: name => `Tick off ${name}`,
+  },
+  sharedTemplate: {
+    loading: "Loading shared template …",
+    notFoundTitle: "Template not found",
+    backHome: "Home",
+    invalidLink:
+      "This share link is invalid or has been withdrawn by its owner.",
+    subtitle: n =>
+      n === 1
+        ? "Shared packing template · 1 item"
+        : `Shared packing template · ${n} items`,
+    sharedInfo:
+      "Shared packing template: have a look – with an account you can save it as your own template or start a packing list from it right away.",
+    importButton: "Save as my own template",
+    imported: "Template saved – available when creating new lists",
+    importFailed: "The template could not be saved",
+    createListButton: "Create a new list from it",
+    listCreated: "Packing list created",
+    createListFailed: "The list could not be created",
+    loginHint: "Sign in to save the template or create a packing list from it.",
+    emptyTemplate: "This template has no items.",
   },
   packOptimizer: {
     title: "Pack optimisation",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import {
   Baby,
@@ -6,14 +6,18 @@ import {
   Bike,
   Bookmark,
   Copy,
+  Link2,
   ListChecks,
   ListPlus,
   Loader2,
   Plus,
+  QrCode,
   Scale,
+  Share2,
   Trash2,
   Users,
 } from "lucide-react";
+import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -64,6 +68,28 @@ export default function PackListsPage() {
   const [name, setName] = useState("");
   // Familien-Checkliste, für die gerade eine Ziel-Liste gewählt wird
   const [addOnId, setAddOnId] = useState<string | null>(null);
+  /** Vorlage, deren Teil-Link gerade im Dialog gezeigt wird. */
+  const [templateShare, setTemplateShare] = useState<{
+    id: number;
+    name: string;
+    url: string;
+  } | null>(null);
+  const [templateQr, setTemplateQr] = useState<string | null>(null);
+
+  // QR-Code zum Teil-Link erzeugen (Muster PackListDetail): einfach abscannen lassen
+  useEffect(() => {
+    if (!templateShare) {
+      setTemplateQr(null);
+      return;
+    }
+    QRCode.toDataURL(templateShare.url, {
+      width: 480,
+      margin: 1,
+      errorCorrectionLevel: "M",
+    })
+      .then(setTemplateQr)
+      .catch(() => setTemplateQr(null));
+  }, [templateShare]);
 
   const createMutation = trpc.packing.createList.useMutation({
     onSuccess: () => {
@@ -108,6 +134,39 @@ export default function PackListsPage() {
 
   const addItemsMutation = trpc.packing.addItems.useMutation({
     onError: () => toast.error(t.packLists.addOnAddFailed),
+  });
+
+  const shareTemplateMutation = trpc.packing.shareTemplate.useMutation({
+    onError: () => toast.error(t.packLists.templateShareFailed),
+  });
+
+  /** Teil-Link der Vorlage erzeugen (idempotent), Dialog öffnen, Link kopieren. */
+  const openTemplateShare = (template: { id: number; name: string }) => {
+    shareTemplateMutation.mutate(
+      { id: template.id },
+      {
+        onSuccess: async ({ token }) => {
+          const url = `${window.location.origin}/vorlage/${token}`;
+          setTemplateShare({ id: template.id, name: template.name, url });
+          utils.packing.listTemplates.invalidate();
+          try {
+            await navigator.clipboard.writeText(url);
+            toast.success(t.packLists.templateShareCopied);
+          } catch {
+            // Zwischenablage blockiert – der Link steht im Dialog
+          }
+        },
+      }
+    );
+  };
+
+  const unshareTemplateMutation = trpc.packing.unshareTemplate.useMutation({
+    onSuccess: () => {
+      utils.packing.listTemplates.invalidate();
+      setTemplateShare(null);
+      toast.success(t.packLists.templateUnshared);
+    },
+    onError: () => toast.error(t.packLists.templateUnshareFailed),
   });
 
   const activeAddOn = familyAddOns.find(a => a.id === addOnId) ?? null;
@@ -246,8 +305,22 @@ export default function PackListsPage() {
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {t.packLists.templateItemCount(template.items.length)}
+                          {template.shareToken != null &&
+                            ` · ${t.packLists.templateSharedBadge}`}
                         </span>
                       </button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-primary"
+                        disabled={shareTemplateMutation.isPending}
+                        onClick={() => openTemplateShare(template)}
+                        aria-label={t.packLists.templateShareAria(
+                          template.name
+                        )}
+                      >
+                        <Share2 className="h-4 w-4" aria-hidden="true" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -531,6 +604,82 @@ export default function PackListsPage() {
             <p className="text-sm text-muted-foreground">
               {t.packLists.noListsForAddOn}
             </p>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Teil-Link einer Vorlage: Link + QR-Code, Teilen beenden */}
+      <Dialog
+        open={templateShare !== null}
+        onOpenChange={open => !open && setTemplateShare(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.packLists.templateShareTitle}</DialogTitle>
+            <DialogDescription>
+              {t.packLists.templateShareDescription}
+            </DialogDescription>
+          </DialogHeader>
+          {templateShare && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+                <Link2
+                  className="h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                <code className="min-w-0 flex-1 truncate text-xs">
+                  {templateShare.url}
+                </code>
+                <button
+                  type="button"
+                  className="shrink-0 text-xs font-medium text-primary hover:underline"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(templateShare.url);
+                      toast.success(t.common.linkCopied);
+                    } catch {
+                      toast.error(t.common.copyFailed);
+                    }
+                  }}
+                >
+                  {t.common.copy}
+                </button>
+              </div>
+              {templateQr && (
+                <div className="flex items-center gap-4 rounded-lg border border-border bg-card p-4">
+                  {/* Weisser Rahmen, damit der Code auch im Dark Mode scannbar bleibt */}
+                  <div className="shrink-0 rounded-md bg-white p-2 shadow-sm">
+                    <img
+                      src={templateQr}
+                      alt={t.packLists.templateQrAlt(templateShare.name)}
+                      className="h-36 w-36"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1.5 text-sm font-semibold">
+                      <QrCode
+                        className="h-4 w-4 text-primary"
+                        aria-hidden="true"
+                      />
+                      {t.packLists.templateQrTitle}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t.packLists.templateQrText}
+                    </p>
+                  </div>
+                </div>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={unshareTemplateMutation.isPending}
+                onClick={() =>
+                  unshareTemplateMutation.mutate({ id: templateShare.id })
+                }
+              >
+                {t.packLists.templateUnshare}
+              </Button>
+            </div>
           )}
         </DialogContent>
       </Dialog>

@@ -256,6 +256,21 @@ export const de = {
     templateDeleted: "Vorlage gelöscht",
     templateDeleteFailed: "Vorlage konnte nicht gelöscht werden",
     budgetBadge: (weight: string) => `Budget ${weight}`,
+    templateShareAria: (name: string) => `Vorlage ${name} per Link teilen`,
+    templateShareTitle: "Vorlage teilen",
+    templateShareDescription:
+      "Wer den Link hat, kann die Vorlage ansehen und mit einem Konto als eigene Vorlage übernehmen.",
+    templateShareCopied: "Teil-Link kopiert – schick ihn weiter!",
+    templateShareFailed: "Teilen fehlgeschlagen",
+    templateUnshare: "Teilen beenden",
+    templateUnshared: "Teilen beendet – der Link ist nicht mehr gültig",
+    templateUnshareFailed: "Teilen konnte nicht beendet werden",
+    templateQrAlt: (name: string) =>
+      `QR-Code zum Teil-Link der Vorlage ${name}`,
+    templateQrTitle: "Direkt weitergeben",
+    templateQrText:
+      "Lass andere den Code mit der Handy-Kamera scannen – die Vorlage öffnet sich sofort.",
+    templateSharedBadge: "geteilt",
   },
   packListDetail: {
     backLabel: "Packlisten",
@@ -385,6 +400,28 @@ export const de = {
       "Gemeinsames Abhaken: Alle mit diesem Link sehen den gleichen Stand – die Anzeige aktualisiert sich automatisch.",
     emptyList: "Diese Liste ist noch leer.",
     checkAria: (name: string) => `${name} abhaken`,
+  },
+  sharedTemplate: {
+    loading: "Geteilte Vorlage wird geladen …",
+    notFoundTitle: "Vorlage nicht gefunden",
+    backHome: "Startseite",
+    invalidLink:
+      "Dieser Teil-Link ist ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
+    subtitle: (n: number) =>
+      n === 1
+        ? "Geteilte Packvorlage · 1 Eintrag"
+        : `Geteilte Packvorlage · ${n} Einträge`,
+    sharedInfo:
+      "Geteilte Packvorlage: Schau sie dir an – mit einem Konto kannst du sie übernehmen oder direkt eine Packliste daraus erstellen.",
+    importButton: "Als eigene Vorlage übernehmen",
+    imported: "Vorlage übernommen – beim Anlegen neuer Listen wählbar",
+    importFailed: "Vorlage konnte nicht übernommen werden",
+    createListButton: "Neue Liste daraus erstellen",
+    listCreated: "Packliste erstellt",
+    createListFailed: "Liste konnte nicht erstellt werden",
+    loginHint:
+      "Melde dich an, um die Vorlage zu übernehmen oder eine Packliste daraus zu erstellen.",
+    emptyTemplate: "Diese Vorlage hat keine Einträge.",
   },
   packOptimizer: {
     title: "Pack-Optimierung",

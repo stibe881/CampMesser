@@ -51,6 +51,7 @@ const pageLoaders = {
   Profile: () => import("./pages/Profile"),
   SharedPackList: () => import("./pages/SharedPackList"),
   SharedSpot: () => import("./pages/SharedSpot"),
+  SharedTemplate: () => import("./pages/SharedTemplate"),
   HuntPrint: () => import("./pages/HuntPrint"),
 } as const;
 
@@ -117,6 +118,7 @@ const LawnPage = lazyWithRetry(pageLoaders.Lawn);
 const ProfilePage = lazyWithRetry(pageLoaders.Profile);
 const SharedPackListPage = lazyWithRetry(pageLoaders.SharedPackList);
 const SharedSpotPage = lazyWithRetry(pageLoaders.SharedSpot);
+const SharedTemplatePage = lazyWithRetry(pageLoaders.SharedTemplate);
 const HuntPrintPage = lazyWithRetry(pageLoaders.HuntPrint);
 
 function RouteFallback() {
@@ -178,6 +180,7 @@ function Router() {
           <Route path={"/profil"} component={ProfilePage} />
           <Route path={"/liste/:token"} component={SharedPackListPage} />
           <Route path={"/platz/:token"} component={SharedSpotPage} />
+          <Route path={"/vorlage/:token"} component={SharedTemplatePage} />
           <Route path={"/familie/drucken/:id"} component={HuntPrintPage} />
           <Route path={"/404"} component={NotFound} />
           <Route component={NotFound} />

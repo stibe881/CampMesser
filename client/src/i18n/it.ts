@@ -252,6 +252,21 @@ export const it: Translation = {
     templateDeleted: "Modello eliminato",
     templateDeleteFailed: "Impossibile eliminare il modello",
     budgetBadge: weight => `Budget ${weight}`,
+    templateShareAria: name => `Condividi il modello ${name} tramite link`,
+    templateShareTitle: "Condividi modello",
+    templateShareDescription:
+      "Chi ha il link può vedere il modello e, con un account, salvarlo come modello personale.",
+    templateShareCopied: "Link di condivisione copiato – inoltralo!",
+    templateShareFailed: "Condivisione non riuscita",
+    templateUnshare: "Termina condivisione",
+    templateUnshared: "Condivisione terminata – il link non è più valido",
+    templateUnshareFailed: "Impossibile terminare la condivisione",
+    templateQrAlt: name =>
+      `Codice QR del link di condivisione del modello ${name}`,
+    templateQrTitle: "Passalo direttamente",
+    templateQrText:
+      "Fai scansionare il codice con la fotocamera del telefono – il modello si apre subito.",
+    templateSharedBadge: "condiviso",
   },
   packListDetail: {
     backLabel: "Liste bagagli",
@@ -377,6 +392,28 @@ export const it: Translation = {
       "Spunta condivisa: tutte le persone con questo link vedono lo stesso stato – la visualizzazione si aggiorna automaticamente.",
     emptyList: "Questa lista è ancora vuota.",
     checkAria: name => `Spuntare ${name}`,
+  },
+  sharedTemplate: {
+    loading: "Caricamento del modello condiviso …",
+    notFoundTitle: "Modello non trovato",
+    backHome: "Pagina iniziale",
+    invalidLink:
+      "Questo link di condivisione non è valido o è stato ritirato dalla proprietaria o dal proprietario.",
+    subtitle: n =>
+      n === 1
+        ? "Modello bagagli condiviso · 1 voce"
+        : `Modello bagagli condiviso · ${n} voci`,
+    sharedInfo:
+      "Modello bagagli condiviso: dai un'occhiata – con un account puoi salvarlo come tuo modello o creare subito una lista bagagli da esso.",
+    importButton: "Salva come modello personale",
+    imported: "Modello salvato – disponibile quando crei nuove liste",
+    importFailed: "Impossibile salvare il modello",
+    createListButton: "Crea una nuova lista dal modello",
+    listCreated: "Lista bagagli creata",
+    createListFailed: "Impossibile creare la lista",
+    loginHint:
+      "Accedi per salvare il modello o creare una lista bagagli da esso.",
+    emptyTemplate: "Questo modello non ha voci.",
   },
   packOptimizer: {
     title: "Ottimizzazione bagagli",

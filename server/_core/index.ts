@@ -485,29 +485,32 @@ async function startServer() {
   // Unbekannte Token oder Fehler fallen aufs normale SPA-HTML zurück.
   // Der HTML-Loader wird je nach Modus (Vite/Build) unten gesetzt.
   let loadSpaHtml: ((url: string) => Promise<string>) | null = null;
-  app.get(["/liste/:token", "/platz/:token"], async (req, res, next) => {
-    try {
-      if (!loadSpaHtml) {
+  app.get(
+    ["/liste/:token", "/platz/:token", "/vorlage/:token"],
+    async (req, res, next) => {
+      try {
+        if (!loadSpaHtml) {
+          next();
+          return;
+        }
+        const { injectOgTags, ogMetaForShareRequest } = await import("./og");
+        const origin = `${req.protocol}://${req.get("host")}`;
+        const meta = await ogMetaForShareRequest(req.path, origin);
+        if (!meta) {
+          next();
+          return;
+        }
+        const html = await loadSpaHtml(req.originalUrl);
+        res
+          .status(200)
+          .set({ "Content-Type": "text/html" })
+          .send(injectOgTags(html, meta));
+      } catch {
+        // DB nicht erreichbar o. Ä. → normales SPA-HTML ohne OG-Tags
         next();
-        return;
       }
-      const { injectOgTags, ogMetaForShareRequest } = await import("./og");
-      const origin = `${req.protocol}://${req.get("host")}`;
-      const meta = await ogMetaForShareRequest(req.path, origin);
-      if (!meta) {
-        next();
-        return;
-      }
-      const html = await loadSpaHtml(req.originalUrl);
-      res
-        .status(200)
-        .set({ "Content-Type": "text/html" })
-        .send(injectOgTags(html, meta));
-    } catch {
-      // DB nicht erreichbar o. Ä. → normales SPA-HTML ohne OG-Tags
-      next();
     }
-  });
+  );
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     const vite = await setupVite(app, server);

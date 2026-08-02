@@ -257,6 +257,20 @@ export const fr: Translation = {
     templateDeleted: "Modèle supprimé",
     templateDeleteFailed: "Le modèle n'a pas pu être supprimé",
     budgetBadge: weight => `Budget ${weight}`,
+    templateShareAria: name => `Partager le modèle ${name} par lien`,
+    templateShareTitle: "Partager le modèle",
+    templateShareDescription:
+      "Toute personne avec le lien peut voir le modèle et, avec un compte, le reprendre comme modèle personnel.",
+    templateShareCopied: "Lien de partage copié – transmets-le !",
+    templateShareFailed: "Le partage a échoué",
+    templateUnshare: "Arrêter le partage",
+    templateUnshared: "Partage terminé – le lien n'est plus valable",
+    templateUnshareFailed: "Le partage n'a pas pu être arrêté",
+    templateQrAlt: name => `Code QR du lien de partage du modèle ${name}`,
+    templateQrTitle: "Transmettre directement",
+    templateQrText:
+      "Fais scanner le code avec l'appareil photo du téléphone – le modèle s'ouvre immédiatement.",
+    templateSharedBadge: "partagé",
   },
   packListDetail: {
     backLabel: "Listes de bagages",
@@ -386,6 +400,29 @@ export const fr: Translation = {
       "Cochage en commun : toutes les personnes avec ce lien voient le même état – l'affichage se met à jour automatiquement.",
     emptyList: "Cette liste est encore vide.",
     checkAria: name => `Cocher ${name}`,
+  },
+  sharedTemplate: {
+    loading: "Chargement du modèle partagé …",
+    notFoundTitle: "Modèle introuvable",
+    backHome: "Accueil",
+    invalidLink:
+      "Ce lien de partage est invalide ou a été retiré par sa propriétaire ou son propriétaire.",
+    subtitle: n =>
+      n === 1
+        ? "Modèle de bagages partagé · 1 entrée"
+        : `Modèle de bagages partagé · ${n} entrées`,
+    sharedInfo:
+      "Modèle de bagages partagé : regarde-le – avec un compte, tu peux le reprendre ou créer directement une liste de bagages à partir de lui.",
+    importButton: "Reprendre comme modèle personnel",
+    imported:
+      "Modèle repris – disponible lors de la création de nouvelles listes",
+    importFailed: "Le modèle n'a pas pu être repris",
+    createListButton: "Créer une nouvelle liste à partir du modèle",
+    listCreated: "Liste de bagages créée",
+    createListFailed: "La liste n'a pas pu être créée",
+    loginHint:
+      "Connecte-toi pour reprendre le modèle ou créer une liste de bagages à partir de lui.",
+    emptyTemplate: "Ce modèle n'a pas d'entrées.",
   },
   packOptimizer: {
     title: "Optimisation des bagages",

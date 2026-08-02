@@ -1,5 +1,6 @@
 /**
- * OpenGraph-Vorschau für geteilte Links (/liste/:token, /platz/:token).
+ * OpenGraph-Vorschau für geteilte Links (/liste/:token, /platz/:token,
+ * /vorlage/:token).
  * Messenger und soziale Netzwerke laden das SPA-HTML ohne JavaScript –
  * deshalb injiziert der Server für bekannte Teil-Token OG-Meta-Tags in den
  * <head>, bevor das HTML ausgeliefert wird. Unbekannte Token bekommen das
@@ -7,6 +8,7 @@
  * Beschreibungstexte deutsch, weil der Server die Sprache der Betrachter*innen
  * nicht kennt.
  */
+import { parseCustomTemplateItems } from "@shared/packTemplates";
 
 export interface OgMeta {
   title: string;
@@ -58,7 +60,7 @@ export function injectOgTags(html: string, meta: OgMeta): string {
   return `${html.slice(0, idx)}${renderOgTags(meta)}\n  ${html.slice(idx)}`;
 }
 
-const TOKEN_PATTERN = /^[A-Za-z0-9_-]{8,32}$/;
+const TOKEN_PATTERN = /^[A-Za-z0-9_-]{8,64}$/;
 
 /**
  * OG-Metadaten für einen Teil-Link ermitteln.
@@ -71,7 +73,7 @@ export async function ogMetaForShareRequest(
   path: string,
   origin: string
 ): Promise<OgMeta | null> {
-  const match = /^\/(liste|platz)\/([^/]+)$/.exec(path);
+  const match = /^\/(liste|platz|vorlage)\/([^/]+)$/.exec(path);
   if (!match) return null;
   const [, kind, token] = match;
   if (!TOKEN_PATTERN.test(token)) return null;
@@ -89,6 +91,19 @@ export async function ogMetaForShareRequest(
     return {
       title: `${list.name} – CampMesser`,
       description: `Geteilte Packliste mit ${count} – zum Mitpacken und Abhaken.`,
+      url,
+      image,
+    };
+  }
+
+  if (kind === "vorlage") {
+    const template = await db.getPackTemplateByToken(token);
+    if (!template) return null;
+    const items = parseCustomTemplateItems(template.itemsJson);
+    const count = items.length === 1 ? "1 Eintrag" : `${items.length} Einträge`;
+    return {
+      title: `${template.name} – CampMesser`,
+      description: `Geteilte Packvorlage mit ${count} – zum Übernehmen als eigene Vorlage.`,
       url,
       image,
     };

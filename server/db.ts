@@ -249,6 +249,35 @@ export async function deletePackTemplate(id: number, userId: number) {
     );
 }
 
+/** Teil-Token einer Vorlage setzen oder entfernen (nur für die eigene Vorlage). */
+export async function setPackTemplateShareToken(
+  id: number,
+  userId: number,
+  token: string | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(packTemplatesCustom)
+    .set({ shareToken: token })
+    .where(
+      and(
+        eq(packTemplatesCustom.id, id),
+        eq(packTemplatesCustom.userId, userId)
+      )
+    );
+}
+
+/** Geteilte Vorlage anhand des Tokens laden (öffentlich, ohne Login). */
+export async function getPackTemplateByToken(token: string) {
+  const db = requireDb(await getDb());
+  const result = await db
+    .select()
+    .from(packTemplatesCustom)
+    .where(eq(packTemplatesCustom.shareToken, token))
+    .limit(1);
+  return result[0];
+}
+
 /** Gewichts-Budget in Gramm setzen oder mit null entfernen (nur eigene Liste). */
 export async function setPackListWeightBudget(
   id: number,

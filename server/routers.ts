@@ -530,9 +530,96 @@ export const appRouter = router({
         id: row.id,
         name: row.name,
         items: parseCustomTemplateItems(row.itemsJson),
+        shareToken: row.shareToken,
         createdAt: row.createdAt,
       }));
     }),
+    /** Teil-Link für eine eigene Vorlage erzeugen: gibt den Token zurück. */
+    shareTemplate: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const template = await db.getPackTemplate(input.id, ctx.user.id);
+        if (!template)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Vorlage nicht gefunden",
+          });
+        if (template.shareToken) return { token: template.shareToken };
+        const token = nanoid(16);
+        await db.setPackTemplateShareToken(input.id, ctx.user.id, token);
+        return { token };
+      }),
+    /** Teilen der Vorlage beenden: Token entfernen, Link wird ungültig. */
+    unshareTemplate: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.setPackTemplateShareToken(input.id, ctx.user.id, null);
+        return { success: true } as const;
+      }),
+    /** Geteilte Vorlage öffentlich abrufen (kein Login nötig). */
+    sharedTemplateGet: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .query(async ({ input }) => {
+        const template = await db.getPackTemplateByToken(input.token);
+        if (!template) return { template: null };
+        return {
+          template: {
+            name: template.name,
+            items: parseCustomTemplateItems(template.itemsJson),
+          },
+        };
+      }),
+    /** Geteilte Vorlage als eigene Vorlage übernehmen (Kopie). */
+    importSharedTemplate: protectedProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .mutation(async ({ ctx, input }) => {
+        const template = await db.getPackTemplateByToken(input.token);
+        if (!template)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Geteilte Vorlage nicht gefunden",
+          });
+        // Über den defensiven Parser re-serialisieren – kaputte Daten bleiben draussen
+        const items = parseCustomTemplateItems(template.itemsJson);
+        const templateId = await db.createPackTemplate({
+          userId: ctx.user.id,
+          name: template.name,
+          itemsJson: JSON.stringify(items),
+        });
+        return { templateId };
+      }),
+    /** Neue eigene Liste direkt aus einer geteilten Vorlage anlegen. */
+    createListFromSharedTemplate: protectedProcedure
+      .input(
+        z.object({
+          token: z.string().min(8).max(64),
+          listName: z.string().trim().min(1).max(120),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const template = await db.getPackTemplateByToken(input.token);
+        if (!template)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Geteilte Vorlage nicht gefunden",
+          });
+        const items = parseCustomTemplateItems(template.itemsJson);
+        const listId = await db.createPackList({
+          userId: ctx.user.id,
+          name: input.listName,
+          scenario: "custom",
+        });
+        await db.addPackItems(
+          items.map((item, idx) => ({
+            listId,
+            name: item.name,
+            category: item.category,
+            quantity: item.quantity,
+            sortOrder: idx,
+          }))
+        );
+        return { listId };
+      }),
     deleteTemplate: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) =>
