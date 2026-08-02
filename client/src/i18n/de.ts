@@ -1336,6 +1336,18 @@ export const de = {
     avgRatingLabel: "Ø Bewertung",
     bestRatedLabel: "Best bewerteter Platz",
     starsAvg: (value: string) => `Ø ${value} Sterne`,
+    packSuggestionsTitle: "Packvorschläge fürs Wetter",
+    packSuggestionsBadge: (n: number) =>
+      n === 1 ? "1 Vorschlag" : `${n} Vorschläge`,
+    packSuggestionsHint:
+      "Basierend auf der Open-Meteo-Prognose für deinen Reisezeitraum – noch nicht auf deiner Liste:",
+    packSuggestionsAdd: "Hinzufügen",
+    packSuggestionsAddAria: (name: string) =>
+      `${name} zur Packliste hinzufügen`,
+    packSuggestionsAddAll: "Alle hinzufügen",
+    packSuggestionsAdded: (name: string) => `«${name}» hinzugefügt`,
+    packSuggestionsAddedAll: (n: number) => `${n} Einträge hinzugefügt`,
+    packSuggestionsAddFailed: "Eintrag konnte nicht hinzugefügt werden",
   },
   firstAid: {
     title: "Erste-Hilfe-Guide",

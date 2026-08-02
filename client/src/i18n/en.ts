@@ -1293,6 +1293,16 @@ export const en: Translation = {
     avgRatingLabel: "Avg. rating",
     bestRatedLabel: "Best-rated pitch",
     starsAvg: (value: string) => `Ø ${value} stars`,
+    packSuggestionsTitle: "Packing suggestions for the weather",
+    packSuggestionsBadge: n => (n === 1 ? "1 suggestion" : `${n} suggestions`),
+    packSuggestionsHint:
+      "Based on the Open-Meteo forecast for your travel dates – not yet on your list:",
+    packSuggestionsAdd: "Add",
+    packSuggestionsAddAria: name => `Add ${name} to the packing list`,
+    packSuggestionsAddAll: "Add all",
+    packSuggestionsAdded: name => `"${name}" added`,
+    packSuggestionsAddedAll: n => `${n} items added`,
+    packSuggestionsAddFailed: "The item could not be added",
   },
   firstAid: {
     title: "First aid guide",

@@ -1321,6 +1321,17 @@ export const it: Translation = {
     avgRatingLabel: "Valutazione media",
     bestRatedLabel: "Piazzola meglio valutata",
     starsAvg: (value: string) => `Ø ${value} stelle`,
+    packSuggestionsTitle: "Suggerimenti bagagli in base al meteo",
+    packSuggestionsBadge: n =>
+      n === 1 ? "1 suggerimento" : `${n} suggerimenti`,
+    packSuggestionsHint:
+      "In base alle previsioni Open-Meteo per il periodo del viaggio – non ancora nella tua lista:",
+    packSuggestionsAdd: "Aggiungi",
+    packSuggestionsAddAria: name => `Aggiungi ${name} alla lista bagagli`,
+    packSuggestionsAddAll: "Aggiungi tutti",
+    packSuggestionsAdded: name => `«${name}» aggiunto`,
+    packSuggestionsAddedAll: n => `${n} voci aggiunte`,
+    packSuggestionsAddFailed: "Impossibile aggiungere la voce",
   },
   firstAid: {
     title: "Guida di primo soccorso",

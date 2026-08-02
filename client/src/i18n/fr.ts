@@ -1335,6 +1335,16 @@ export const fr: Translation = {
     avgRatingLabel: "Note moyenne",
     bestRatedLabel: "Emplacement le mieux noté",
     starsAvg: (value: string) => `Ø ${value} étoiles`,
+    packSuggestionsTitle: "Suggestions de bagages selon la météo",
+    packSuggestionsBadge: n => (n === 1 ? "1 suggestion" : `${n} suggestions`),
+    packSuggestionsHint:
+      "Basé sur les prévisions Open-Meteo pour ta période de voyage – pas encore sur ta liste :",
+    packSuggestionsAdd: "Ajouter",
+    packSuggestionsAddAria: name => `Ajouter ${name} à la liste de bagages`,
+    packSuggestionsAddAll: "Tout ajouter",
+    packSuggestionsAdded: name => `«${name}» ajouté`,
+    packSuggestionsAddedAll: n => `${n} entrées ajoutées`,
+    packSuggestionsAddFailed: "Impossible d'ajouter l'entrée",
   },
   firstAid: {
     title: "Guide de premiers secours",

@@ -54,6 +54,9 @@ const cat = {
   ),
 };
 
+/** Kategorien auch für andere Module (z. B. Wetter-Packvorschläge) nutzbar. */
+export const packCategories = cat;
+
 const topfPfanne = l4(
   "Topf & Pfanne",
   "Casserole & poêle",
