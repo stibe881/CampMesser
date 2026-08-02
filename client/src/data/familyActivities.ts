@@ -1216,6 +1216,221 @@ export const natureQuizzes: NatureQuiz[] = [
           "Birch bark contains essential oils and is the forest's best natural fire starter."
         ),
       },
+      {
+        question: l4(
+          "Woran erkennst du, wie alt ein gefällter Baum war?",
+          "À quoi vois-tu l'âge d'un arbre abattu ?",
+          "Da che cosa capisci quanti anni aveva un albero tagliato?",
+          "How can you tell how old a felled tree was?"
+        ),
+        options: [
+          l4(
+            "An der Länge der Äste",
+            "À la longueur des branches",
+            "Dalla lunghezza dei rami",
+            "By the length of its branches"
+          ),
+          l4(
+            "An den Ringen im Stamm",
+            "Aux anneaux dans le tronc",
+            "Dagli anelli nel tronco",
+            "By the rings in the trunk"
+          ),
+          l4(
+            "An der Farbe der Blätter",
+            "À la couleur des feuilles",
+            "Dal colore delle foglie",
+            "By the colour of its leaves"
+          ),
+        ],
+        correctIndex: 1,
+        explanation: l4(
+          "Jedes Jahr wächst ein neuer Ring: Zähle die Jahresringe auf dem Baumstumpf – so viele Jahre wurde der Baum alt.",
+          "Chaque année, un nouvel anneau se forme : compte les cernes sur la souche – l'arbre a vécu autant d'années.",
+          "Ogni anno cresce un nuovo anello: conta gli anelli sul ceppo – tanti anelli, tanti anni dell'albero.",
+          "A new ring grows every year: count the growth rings on the stump – that's how many years the tree lived."
+        ),
+      },
+      {
+        question: l4(
+          "Welcher Vogel trommelt laut an Baumstämme?",
+          "Quel oiseau tambourine bruyamment sur les troncs ?",
+          "Quale uccello tamburella rumorosamente sui tronchi?",
+          "Which bird drums loudly on tree trunks?"
+        ),
+        options: [
+          l4("Der Kuckuck", "Le coucou", "Il cuculo", "The cuckoo"),
+          l4("Die Amsel", "Le merle", "Il merlo", "The blackbird"),
+          l4("Der Specht", "Le pic", "Il picchio", "The woodpecker"),
+        ],
+        correctIndex: 2,
+        explanation: l4(
+          "Der Specht hämmert nach Insekten unter der Rinde und zimmert Höhlen – sein Trommeln markiert zudem sein Revier.",
+          "Le pic martèle pour trouver des insectes sous l'écorce et creuser des cavités – son tambourinage marque aussi son territoire.",
+          "Il picchio martella per cercare insetti sotto la corteccia e scavare cavità – il suo tamburellare segna anche il territorio.",
+          "The woodpecker hammers for insects under the bark and carves out holes – its drumming also marks its territory."
+        ),
+      },
+      {
+        question: l4(
+          "Was verrät dir ein grosser Ameisenhaufen über die Himmelsrichtung?",
+          "Que t'apprend une grande fourmilière sur les points cardinaux ?",
+          "Che cosa ti dice un grande formicaio sui punti cardinali?",
+          "What does a big ant hill tell you about compass directions?"
+        ),
+        options: [
+          l4(
+            "Seine flache Seite zeigt meist nach Süden",
+            "Son côté en pente douce est souvent tourné vers le sud",
+            "Il suo lato più dolce guarda di solito a sud",
+            "Its gently sloping side usually faces south"
+          ),
+          l4(
+            "Seine Spitze zeigt nach Westen",
+            "Sa pointe indique l'ouest",
+            "La sua punta indica l'ovest",
+            "Its tip points west"
+          ),
+          l4("Gar nichts", "Rien du tout", "Proprio niente", "Nothing at all"),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Waldameisen bauen die Südseite flacher, damit die Sonne den Haufen wärmt – ein natürlicher Kompass.",
+          "Les fourmis des bois construisent le côté sud en pente douce pour que le soleil chauffe la fourmilière – une boussole naturelle.",
+          "Le formiche dei boschi costruiscono il lato sud più dolce perché il sole scaldi il formicaio – una bussola naturale.",
+          "Wood ants build the south side flatter so the sun warms the mound – a natural compass."
+        ),
+      },
+      {
+        question: l4(
+          "Welche Frucht wächst an der Eiche?",
+          "Quel fruit pousse sur le chêne ?",
+          "Quale frutto cresce sulla quercia?",
+          "Which fruit grows on the oak tree?"
+        ),
+        options: [
+          l4("Die Kastanie", "La châtaigne", "La castagna", "The chestnut"),
+          l4("Die Eichel", "Le gland", "La ghianda", "The acorn"),
+          l4(
+            "Der Tannenzapfen",
+            "La pomme de pin",
+            "La pigna",
+            "The pine cone"
+          ),
+        ],
+        correctIndex: 1,
+        explanation: l4(
+          "Eicheln sind die Früchte der Eiche – für Wildschweine, Eichelhäher und Mäuse ein Festessen.",
+          "Les glands sont les fruits du chêne – un festin pour les sangliers, les geais et les souris.",
+          "Le ghiande sono i frutti della quercia – un banchetto per cinghiali, ghiandaie e topi.",
+          "Acorns are the oak's fruit – a feast for wild boars, jays and mice."
+        ),
+      },
+      {
+        question: l4(
+          "Welche wichtige Aufgabe haben Pilze im Wald?",
+          "Quel rôle important jouent les champignons dans la forêt ?",
+          "Quale compito importante hanno i funghi nel bosco?",
+          "What important job do fungi do in the forest?"
+        ),
+        options: [
+          l4(
+            "Sie zersetzen altes Laub und Holz zu neuer Erde",
+            "Ils décomposent les feuilles mortes et le bois en nouvelle terre",
+            "Decompongono foglie morte e legno trasformandoli in nuova terra",
+            "They break down old leaves and wood into new soil"
+          ),
+          l4(
+            "Sie fressen Baumwurzeln auf",
+            "Ils dévorent les racines des arbres",
+            "Divorano le radici degli alberi",
+            "They eat up tree roots"
+          ),
+          l4(
+            "Sie halten den Boden trocken",
+            "Ils gardent le sol au sec",
+            "Tengono asciutto il terreno",
+            "They keep the ground dry"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Pilze sind die Müllabfuhr des Waldes: Sie verwandeln totes Material in Nährstoffe – und viele helfen den Bäumen sogar beim Wasserholen.",
+          "Les champignons sont les éboueurs de la forêt : ils transforment la matière morte en nutriments – et beaucoup aident même les arbres à puiser l'eau.",
+          "I funghi sono la squadra di pulizia del bosco: trasformano il materiale morto in nutrienti – e molti aiutano perfino gli alberi a procurarsi l'acqua.",
+          "Fungi are the forest's recycling crew: they turn dead material into nutrients – and many even help trees to gather water."
+        ),
+      },
+      {
+        question: l4(
+          "Warum bleibst du im Wald am besten auf den Wegen?",
+          "Pourquoi vaut-il mieux rester sur les chemins en forêt ?",
+          "Perché nel bosco è meglio restare sui sentieri?",
+          "Why is it best to stay on the paths in the forest?"
+        ),
+        options: [
+          l4(
+            "Damit du die Tiere und Jungpflanzen nicht störst",
+            "Pour ne pas déranger les animaux et les jeunes plantes",
+            "Per non disturbare gli animali e le giovani piante",
+            "So you don't disturb animals and young plants"
+          ),
+          l4(
+            "Weil der Waldboden giftig ist",
+            "Parce que le sol de la forêt est toxique",
+            "Perché il suolo del bosco è velenoso",
+            "Because the forest floor is poisonous"
+          ),
+          l4(
+            "Damit deine Schuhe sauber bleiben",
+            "Pour garder tes chaussures propres",
+            "Per tenere pulite le scarpe",
+            "To keep your shoes clean"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Viele Tiere haben ihre Verstecke und Nester direkt am Boden – wer auf den Wegen bleibt, lässt ihnen ihre Ruhe.",
+          "Beaucoup d'animaux ont leurs cachettes et leurs nids au ras du sol – rester sur les chemins leur laisse la tranquillité.",
+          "Molti animali hanno nascondigli e nidi proprio a terra – chi resta sui sentieri li lascia in pace.",
+          "Many animals have their hiding places and nests right on the ground – staying on the paths leaves them in peace."
+        ),
+      },
+      {
+        question: l4(
+          "Warum lässt man tote Bäume oft einfach im Wald liegen?",
+          "Pourquoi laisse-t-on souvent les arbres morts dans la forêt ?",
+          "Perché spesso gli alberi morti si lasciano nel bosco?",
+          "Why are dead trees often just left lying in the forest?"
+        ),
+        options: [
+          l4(
+            "Weil niemand sie wegtragen mag",
+            "Parce que personne ne veut les porter",
+            "Perché nessuno vuole portarli via",
+            "Because nobody wants to carry them away"
+          ),
+          l4(
+            "Weil darin unzählige Käfer, Pilze und Tiere wohnen",
+            "Parce qu'ils abritent d'innombrables insectes, champignons et animaux",
+            "Perché ci vivono tantissimi insetti, funghi e animali",
+            "Because countless beetles, fungi and animals live in them"
+          ),
+          l4(
+            "Damit der Wald unordentlich aussieht",
+            "Pour que la forêt ait l'air en désordre",
+            "Perché il bosco sembri disordinato",
+            "So the forest looks untidy"
+          ),
+        ],
+        correctIndex: 1,
+        explanation: l4(
+          "Totholz lebt: Käfer, Wildbienen, Spechte und Pilze brauchen alte Stämme als Wohnung und Speisekammer.",
+          "Le bois mort est plein de vie : coléoptères, abeilles sauvages, pics et champignons utilisent les vieux troncs comme logement et garde-manger.",
+          "Il legno morto è pieno di vita: coleotteri, api selvatiche, picchi e funghi usano i vecchi tronchi come casa e dispensa.",
+          "Dead wood is full of life: beetles, wild bees, woodpeckers and fungi use old trunks as home and larder."
+        ),
+      },
     ],
   },
   {
@@ -1383,6 +1598,231 @@ export const natureQuizzes: NatureQuiz[] = [
           "Three bright stars in a straight row form the famous Orion's Belt – easy to see in winter."
         ),
       },
+      {
+        question: l4(
+          "Was ist eine Sternschnuppe wirklich?",
+          "Qu'est-ce qu'une étoile filante en réalité ?",
+          "Che cos'è davvero una stella cadente?",
+          "What is a shooting star really?"
+        ),
+        options: [
+          l4(
+            "Ein Stern, der vom Himmel fällt",
+            "Une étoile qui tombe du ciel",
+            "Una stella che cade dal cielo",
+            "A star falling from the sky"
+          ),
+          l4(
+            "Ein glühendes Staubkorn aus dem Weltall",
+            "Un grain de poussière de l'espace qui se consume",
+            "Un granello di polvere spaziale che brucia",
+            "A glowing speck of space dust burning up"
+          ),
+          l4(
+            "Das Blinklicht eines Flugzeugs",
+            "Le feu clignotant d'un avion",
+            "La luce lampeggiante di un aereo",
+            "An aeroplane's flashing light"
+          ),
+        ],
+        correctIndex: 1,
+        explanation: l4(
+          "Winzige Staubkörner verglühen in der Lufthülle der Erde – dabei leuchtet die Luft als heller Strich auf.",
+          "De minuscules grains de poussière se consument dans l'atmosphère terrestre – l'air s'illumine alors en un trait brillant.",
+          "Minuscoli granelli di polvere bruciano nell'atmosfera terrestre – l'aria si illumina in una scia luminosa.",
+          "Tiny dust grains burn up in Earth's atmosphere – making the air glow in a bright streak."
+        ),
+      },
+      {
+        question: l4(
+          "Warum funkeln die Sterne?",
+          "Pourquoi les étoiles scintillent-elles ?",
+          "Perché le stelle brillano tremolando?",
+          "Why do stars twinkle?"
+        ),
+        options: [
+          l4(
+            "Weil sie an- und ausgehen",
+            "Parce qu'elles s'allument et s'éteignent",
+            "Perché si accendono e si spengono",
+            "Because they switch on and off"
+          ),
+          l4(
+            "Weil die Luft über uns immer in Bewegung ist",
+            "Parce que l'air au-dessus de nous bouge sans cesse",
+            "Perché l'aria sopra di noi è sempre in movimento",
+            "Because the air above us is always moving"
+          ),
+          l4(
+            "Weil sie sich drehen",
+            "Parce qu'elles tournent sur elles-mêmes",
+            "Perché girano su se stesse",
+            "Because they spin around"
+          ),
+        ],
+        correctIndex: 1,
+        explanation: l4(
+          "Das Sternenlicht wandert durch unruhige Luftschichten, die es flackern lassen. Im Weltall funkeln Sterne gar nicht.",
+          "La lumière des étoiles traverse des couches d'air agitées qui la font vaciller. Dans l'espace, les étoiles ne scintillent pas du tout.",
+          "La luce delle stelle attraversa strati d'aria agitati che la fanno tremolare. Nello spazio le stelle non scintillano affatto.",
+          "Starlight travels through restless layers of air that make it flicker. Out in space, stars don't twinkle at all."
+        ),
+      },
+      {
+        question: l4(
+          "Warum leuchtet der Mond in der Nacht?",
+          "Pourquoi la Lune brille-t-elle la nuit ?",
+          "Perché la Luna brilla di notte?",
+          "Why does the Moon shine at night?"
+        ),
+        options: [
+          l4(
+            "Er brennt wie die Sonne",
+            "Elle brûle comme le Soleil",
+            "Brucia come il Sole",
+            "It burns like the Sun"
+          ),
+          l4(
+            "Er hat innen eine grosse Lampe",
+            "Elle a une grande lampe à l'intérieur",
+            "Ha una grande lampada dentro",
+            "It has a big lamp inside"
+          ),
+          l4(
+            "Er wird von der Sonne angestrahlt",
+            "Elle est éclairée par le Soleil",
+            "È illuminata dal Sole",
+            "It is lit up by the Sun"
+          ),
+        ],
+        correctIndex: 2,
+        explanation: l4(
+          "Der Mond leuchtet nicht selbst – er wirft wie ein Spiegel das Sonnenlicht zu uns zurück.",
+          "La Lune ne brille pas par elle-même – comme un miroir, elle nous renvoie la lumière du Soleil.",
+          "La Luna non brilla di luce propria – come uno specchio ci rimanda la luce del Sole.",
+          "The Moon doesn't shine by itself – like a mirror, it reflects the sunlight back to us."
+        ),
+      },
+      {
+        question: l4(
+          "Aus wie vielen hellen Sternen besteht der Grosse Wagen?",
+          "De combien d'étoiles brillantes se compose la Grande Casserole ?",
+          "Da quante stelle luminose è formato il Grande Carro?",
+          "How many bright stars make up the Plough?"
+        ),
+        options: [
+          l4("Aus fünf", "De cinq", "Da cinque", "Five"),
+          l4("Aus sieben", "De sept", "Da sette", "Seven"),
+          l4("Aus zwölf", "De douze", "Da dodici", "Twelve"),
+        ],
+        correctIndex: 1,
+        explanation: l4(
+          "Vier Sterne bilden den Kasten, drei die Deichsel – zusammen sieben. Er ist Teil des Sternbilds Grosser Bär.",
+          "Quatre étoiles forment la casserole et trois le manche – sept en tout. Elle fait partie de la constellation de la Grande Ourse.",
+          "Quattro stelle formano il carro e tre il timone – sette in tutto. Fa parte della costellazione dell'Orsa Maggiore.",
+          "Four stars form the pan and three the handle – seven in all. It is part of the Great Bear constellation."
+        ),
+      },
+      {
+        question: l4(
+          "Was ist der helle «Abendstern», der oft als Erstes am Himmel steht?",
+          "Qu'est-ce que la brillante « étoile du soir », souvent la première dans le ciel ?",
+          "Che cos'è la luminosa «stella della sera», spesso la prima nel cielo?",
+          "What is the bright 'evening star' that often appears first in the sky?"
+        ),
+        options: [
+          l4(
+            "Der Planet Venus",
+            "La planète Vénus",
+            "Il pianeta Venere",
+            "The planet Venus"
+          ),
+          l4(
+            "Der Polarstern",
+            "L'étoile Polaire",
+            "La Stella Polare",
+            "The Pole Star"
+          ),
+          l4(
+            "Eine Weltraumstation",
+            "Une station spatiale",
+            "Una stazione spaziale",
+            "A space station"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Der «Abendstern» ist gar kein Stern, sondern unser Nachbarplanet Venus – ihre dichte Wolkenhülle spiegelt das Sonnenlicht besonders stark.",
+          "L'« étoile du soir » n'est pas une étoile mais notre planète voisine Vénus – son épaisse couche de nuages réfléchit très fort la lumière du Soleil.",
+          "La «stella della sera» non è una stella ma il nostro pianeta vicino, Venere – la sua fitta coltre di nubi riflette fortissimo la luce del Sole.",
+          "The 'evening star' is not a star at all but our neighbouring planet Venus – its thick blanket of clouds reflects sunlight very strongly."
+        ),
+      },
+      {
+        question: l4(
+          "Wann siehst du beim Zelten am meisten Sterne?",
+          "Quand vois-tu le plus d'étoiles au camping ?",
+          "Quando vedi più stelle in campeggio?",
+          "When do you see the most stars while camping?"
+        ),
+        options: [
+          l4(
+            "Bei Vollmond mitten im Dorf",
+            "À la pleine lune au milieu du village",
+            "Con la luna piena in mezzo al paese",
+            "At full moon in the middle of the village"
+          ),
+          l4(
+            "In dunkler Nacht ohne Mond, weit weg von Lampen",
+            "Par nuit noire sans lune, loin des lampadaires",
+            "In una notte buia senza luna, lontano dalle luci",
+            "On a dark, moonless night, far away from lights"
+          ),
+          l4(
+            "Direkt nach Sonnenuntergang",
+            "Juste après le coucher du soleil",
+            "Subito dopo il tramonto",
+            "Right after sunset"
+          ),
+        ],
+        correctIndex: 1,
+        explanation: l4(
+          "Mondlicht und Lampen überstrahlen schwache Sterne. Warte, bis es richtig dunkel ist – nach 20 Minuten ohne Licht sehen deine Augen am meisten.",
+          "La lune et les lampes éclipsent les étoiles faibles. Attends la vraie nuit noire – après 20 minutes sans lumière, tes yeux en voient le plus.",
+          "La luce della luna e delle lampade copre le stelle deboli. Aspetta il buio vero – dopo 20 minuti senza luce i tuoi occhi vedono il massimo.",
+          "Moonlight and lamps outshine faint stars. Wait until it is properly dark – after 20 minutes without light your eyes see the most."
+        ),
+      },
+      {
+        question: l4(
+          "Wie lange ist das Sonnenlicht zur Erde unterwegs?",
+          "Combien de temps la lumière du Soleil met-elle pour arriver sur Terre ?",
+          "Quanto impiega la luce del Sole ad arrivare sulla Terra?",
+          "How long does sunlight take to reach the Earth?"
+        ),
+        options: [
+          l4("Eine Sekunde", "Une seconde", "Un secondo", "One second"),
+          l4(
+            "Etwa 8 Minuten",
+            "Environ 8 minutes",
+            "Circa 8 minuti",
+            "About 8 minutes"
+          ),
+          l4(
+            "Ein ganzes Jahr",
+            "Une année entière",
+            "Un anno intero",
+            "A whole year"
+          ),
+        ],
+        correctIndex: 1,
+        explanation: l4(
+          "Licht rast mit 300 000 km pro Sekunde – und braucht trotzdem gut 8 Minuten. Du siehst die Sonne also immer so, wie sie vor 8 Minuten war.",
+          "La lumière file à 300 000 km par seconde – et met quand même plus de 8 minutes. Tu vois donc toujours le Soleil tel qu'il était il y a 8 minutes.",
+          "La luce sfreccia a 300 000 km al secondo – eppure impiega ben 8 minuti. Vedi quindi il Sole com'era 8 minuti fa.",
+          "Light races along at 300,000 km per second – and still needs a good 8 minutes. So you always see the Sun as it was 8 minutes ago."
+        ),
+      },
     ],
   },
   {
@@ -1513,6 +1953,176 @@ export const natureQuizzes: NatureQuiz[] = [
           "Le chevreuil pousse un aboiement rauque – beaucoup le confondent avec un chien !",
           "Il capriolo emette un abbaio rauco – molti lo scambiano per un cane!",
           "Roe deer give a rough bark – many people mistake it for a dog!"
+        ),
+      },
+      {
+        question: l4(
+          "Bei welcher Tierspur landen die grossen Hinterpfoten vor den kleinen Vorderpfoten?",
+          "Chez quel animal les grandes pattes arrière se posent devant les petites pattes avant ?",
+          "In quale traccia le grandi zampe posteriori arrivano davanti alle piccole zampe anteriori?",
+          "In which animal's tracks do the big hind paws land in front of the small front paws?"
+        ),
+        options: [
+          l4("Beim Feldhasen", "Chez le lièvre", "Nella lepre", "The hare's"),
+          l4("Beim Fuchs", "Chez le renard", "Nella volpe", "The fox's"),
+          l4("Beim Reh", "Chez le chevreuil", "Nel capriolo", "The roe deer's"),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Beim Hoppeln schwingen Hasen ihre langen Hinterbeine an den Vorderpfoten vorbei – die Spur sieht aus wie ein Y.",
+          "En bondissant, le lièvre balance ses longues pattes arrière devant ses pattes avant – la trace ressemble à un Y.",
+          "Saltellando, la lepre porta le lunghe zampe posteriori oltre quelle anteriori – la traccia sembra una Y.",
+          "When hopping, hares swing their long hind legs past their front paws – the track looks like a Y."
+        ),
+      },
+      {
+        question: l4(
+          "Welches Tier fällt Bäume mit seinen Zähnen und baut Burgen im Wasser?",
+          "Quel animal abat des arbres avec ses dents et construit des huttes dans l'eau ?",
+          "Quale animale abbatte gli alberi con i denti e costruisce tane nell'acqua?",
+          "Which animal fells trees with its teeth and builds lodges in the water?"
+        ),
+        options: [
+          l4("Die Ente", "Le canard", "L'anatra", "The duck"),
+          l4("Der Biber", "Le castor", "Il castoro", "The beaver"),
+          l4("Der Frosch", "La grenouille", "La rana", "The frog"),
+        ],
+        correctIndex: 1,
+        explanation: l4(
+          "Der Biber nagt Stämme sanduhrförmig an, bis sie fallen. Angespitzte Baumstümpfe am Ufer sind sein Erkennungszeichen.",
+          "Le castor ronge les troncs en forme de sablier jusqu'à ce qu'ils tombent. Les souches taillées en pointe au bord de l'eau sont sa signature.",
+          "Il castoro rosicchia i tronchi a forma di clessidra finché cadono. I ceppi appuntiti in riva all'acqua sono la sua firma.",
+          "The beaver gnaws trunks into an hourglass shape until they fall. Pointed tree stumps by the water are its calling card."
+        ),
+      },
+      {
+        question: l4(
+          "Welches Tier hinterlässt eine silbrig glänzende Spur?",
+          "Quel animal laisse une trace argentée et brillante ?",
+          "Quale animale lascia una scia argentata e lucida?",
+          "Which animal leaves a silvery, shiny trail?"
+        ),
+        options: [
+          l4("Die Schnecke", "L'escargot", "La lumaca", "The snail"),
+          l4("Die Maus", "La souris", "Il topo", "The mouse"),
+          l4("Der Käfer", "Le scarabée", "Lo scarabeo", "The beetle"),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Schnecken gleiten auf einem Schleimteppich. Wenn er trocknet, glitzert er silbrig – ihre «Strasse» von letzter Nacht.",
+          "Les escargots glissent sur un tapis de mucus. En séchant, il scintille comme de l'argent – leur « route » de la nuit passée.",
+          "Le lumache scivolano su un tappeto di muco. Quando si asciuga, luccica d'argento – la loro «strada» della notte scorsa.",
+          "Snails glide along on a carpet of slime. When it dries it glistens like silver – their 'road' from last night."
+        ),
+      },
+      {
+        question: l4(
+          "Wer macht die kleinen Erdhügel auf der Wiese?",
+          "Qui fait les petits monticules de terre dans le pré ?",
+          "Chi fa i mucchietti di terra nel prato?",
+          "Who makes the little mounds of earth in the meadow?"
+        ),
+        options: [
+          l4("Der Maulwurf", "La taupe", "La talpa", "The mole"),
+          l4("Der Vogel", "L'oiseau", "L'uccello", "The bird"),
+          l4("Der Hase", "Le lièvre", "La lepre", "The hare"),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Der Maulwurf gräbt unterirdische Gänge und schiebt die übrige Erde nach oben – fertig ist der Maulwurfshügel.",
+          "La taupe creuse des galeries souterraines et pousse la terre en trop vers le haut – voilà la taupinière.",
+          "La talpa scava gallerie sotterranee e spinge in su la terra che avanza – ecco fatta la collinetta.",
+          "The mole digs underground tunnels and pushes the spare soil upwards – and there's your molehill."
+        ),
+      },
+      {
+        question: l4(
+          "Was frisst ein Igel am liebsten?",
+          "Que mange le hérisson de préférence ?",
+          "Che cosa mangia più volentieri il riccio?",
+          "What does a hedgehog like to eat best?"
+        ),
+        options: [
+          l4(
+            "Milch und Brot",
+            "Du lait et du pain",
+            "Latte e pane",
+            "Milk and bread"
+          ),
+          l4(
+            "Käfer, Würmer und Schnecken",
+            "Des coléoptères, des vers et des escargots",
+            "Insetti, vermi e lumache",
+            "Beetles, worms and snails"
+          ),
+          l4(
+            "Äpfel vom Baum",
+            "Des pommes de l'arbre",
+            "Mele dall'albero",
+            "Apples from the tree"
+          ),
+        ],
+        correctIndex: 1,
+        explanation: l4(
+          "Igel sind Insektenjäger. Milch macht sie sogar krank – also nie Milch hinstellen, höchstens Wasser.",
+          "Le hérisson chasse les petites bêtes. Le lait le rend même malade – ne lui en donne jamais, tout au plus de l'eau.",
+          "Il riccio è un cacciatore di insetti. Il latte lo fa perfino ammalare – mai dargliene, al massimo acqua.",
+          "Hedgehogs hunt creepy-crawlies. Milk actually makes them ill – so never put milk out, only water."
+        ),
+      },
+      {
+        question: l4(
+          "Welches Tier ruft nachts «huu-huhuhu» durch den Wald?",
+          "Quel animal lance son « hou-houhou » la nuit dans la forêt ?",
+          "Quale animale la notte fa «uh-uhuh» nel bosco?",
+          "Which animal calls 'hoo-hoohoo' through the forest at night?"
+        ),
+        options: [
+          l4("Der Fuchs", "Le renard", "La volpe", "The fox"),
+          l4("Die Fledermaus", "La chauve-souris", "Il pipistrello", "The bat"),
+          l4(
+            "Der Waldkauz",
+            "La chouette hulotte",
+            "L'allocco",
+            "The tawny owl"
+          ),
+        ],
+        correctIndex: 2,
+        explanation: l4(
+          "Der Waldkauz ist unsere häufigste Eule. Sein Ruf klingt wie im Gruselfilm – dabei sagt er nur: «Hier wohne ich!»",
+          "La chouette hulotte est notre rapace nocturne le plus courant. Son cri semble sorti d'un film qui fait peur – en fait, elle dit juste : « J'habite ici ! »",
+          "L'allocco è il nostro gufo più comune. Il suo verso sembra da film di paura – ma in realtà dice solo: «Io abito qui!»",
+          "The tawny owl is our most common owl. Its call sounds like a spooky film – but it is only saying: 'I live here!'"
+        ),
+      },
+      {
+        question: l4(
+          "Wofür sammeln Vögel im Frühling Moos, Halme und Federn?",
+          "Pourquoi les oiseaux ramassent-ils au printemps de la mousse, des brins d'herbe et des plumes ?",
+          "Perché in primavera gli uccelli raccolgono muschio, fili d'erba e piume?",
+          "Why do birds collect moss, stalks and feathers in spring?"
+        ),
+        options: [
+          l4(
+            "Für ihr Nest",
+            "Pour leur nid",
+            "Per il loro nido",
+            "For their nest"
+          ),
+          l4(
+            "Als Wintervorrat",
+            "Comme provisions d'hiver",
+            "Come scorta per l'inverno",
+            "As a winter store"
+          ),
+          l4("Zum Spielen", "Pour jouer", "Per giocare", "To play with"),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Aus Moos, Halmen und Federn polstern Vögel ihre Nester weich und warm für die Eier und Küken.",
+          "Avec la mousse, les brins d'herbe et les plumes, les oiseaux rembourrent leur nid, doux et chaud pour les œufs et les oisillons.",
+          "Con muschio, fili d'erba e piume gli uccelli imbottiscono il nido, morbido e caldo per uova e pulcini.",
+          "Birds use moss, stalks and feathers to line their nests soft and warm for the eggs and chicks."
         ),
       },
     ],
@@ -1695,6 +2305,236 @@ export const natureQuizzes: NatureQuiz[] = [
           "Par temps stable de haute pression, les insectes montent très haut – et les hirondelles suivent leur nourriture.",
           "Con l'alta pressione stabile gli insetti salgono in alto – e le rondini seguono il loro cibo.",
           "In stable high-pressure weather, insects rise high into the air – and the swallows follow their food."
+        ),
+      },
+      {
+        question: l4(
+          "Was braucht es, damit du einen Regenbogen siehst?",
+          "Que faut-il pour que tu voies un arc-en-ciel ?",
+          "Che cosa serve perché tu veda un arcobaleno?",
+          "What is needed for you to see a rainbow?"
+        ),
+        options: [
+          l4(
+            "Sonne und Regen gleichzeitig",
+            "Du soleil et de la pluie en même temps",
+            "Sole e pioggia insieme",
+            "Sunshine and rain at the same time"
+          ),
+          l4(
+            "Einen ganz bedeckten Himmel",
+            "Un ciel complètement couvert",
+            "Un cielo tutto coperto",
+            "A completely overcast sky"
+          ),
+          l4(
+            "Eine Vollmondnacht",
+            "Une nuit de pleine lune",
+            "Una notte di luna piena",
+            "A full-moon night"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Sonnenlicht wird in den Regentropfen gebrochen und in Farben zerlegt. Die Sonne muss dabei in deinem Rücken stehen.",
+          "La lumière du soleil se brise dans les gouttes de pluie et se sépare en couleurs. Le soleil doit être dans ton dos.",
+          "La luce del sole si scompone nei suoi colori dentro le gocce di pioggia. Il sole deve stare alle tue spalle.",
+          "Sunlight is bent inside the raindrops and split into colours. The sun has to be behind your back."
+        ),
+      },
+      {
+        question: l4(
+          "Woraus besteht eine Wolke?",
+          "De quoi est fait un nuage ?",
+          "Di che cosa è fatta una nuvola?",
+          "What is a cloud made of?"
+        ),
+        options: [
+          l4("Aus Watte", "De ouate", "Di ovatta", "Cotton wool"),
+          l4("Aus Rauch", "De fumée", "Di fumo", "Smoke"),
+          l4(
+            "Aus winzigen Wassertröpfchen",
+            "De minuscules gouttelettes d'eau",
+            "Di minuscole goccioline d'acqua",
+            "Tiny water droplets"
+          ),
+        ],
+        correctIndex: 2,
+        explanation: l4(
+          "Millionen winziger Schwebe-Tröpfchen bilden eine Wolke. Werden sie zu schwer, fallen sie als Regen herunter.",
+          "Des millions de gouttelettes minuscules en suspension forment un nuage. Quand elles deviennent trop lourdes, elles tombent en pluie.",
+          "Milioni di goccioline minuscole sospese formano una nuvola. Quando diventano troppo pesanti, cadono come pioggia.",
+          "Millions of tiny floating droplets make up a cloud. When they get too heavy, they fall as rain."
+        ),
+      },
+      {
+        question: l4(
+          "Was verspricht ein rot leuchtender Abendhimmel meistens?",
+          "Que promet le plus souvent un ciel rouge le soir ?",
+          "Che cosa promette di solito un cielo rosso alla sera?",
+          "What does a glowing red evening sky usually promise?"
+        ),
+        options: [
+          l4(
+            "Schönes Wetter am nächsten Tag",
+            "Du beau temps pour le lendemain",
+            "Bel tempo per il giorno dopo",
+            "Fine weather the next day"
+          ),
+          l4(
+            "Ein Gewitter in der Nacht",
+            "Un orage dans la nuit",
+            "Un temporale nella notte",
+            "A thunderstorm in the night"
+          ),
+          l4("Schnee", "De la neige", "Neve", "Snow"),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Abendrot entsteht, wenn die Sonne im Westen durch trockene, klare Luft scheint – und unser Wetter kommt meist von Westen: «Abendrot – Schönwetterbot».",
+          "Le rouge du soir apparaît quand le soleil brille à l'ouest à travers un air sec et clair – et notre temps vient le plus souvent de l'ouest. D'où le dicton : « rouge le soir, bel espoir ».",
+          "Il rosso di sera nasce quando il sole a ovest splende attraverso aria secca e limpida – e il nostro tempo arriva per lo più da ovest: «rosso di sera, bel tempo si spera».",
+          "A red evening sky appears when the sun in the west shines through dry, clear air – and our weather mostly comes from the west: 'red sky at night, camper's delight'."
+        ),
+      },
+      {
+        question: l4(
+          "Was ist Nebel eigentlich?",
+          "Qu'est-ce que le brouillard, au juste ?",
+          "Che cos'è la nebbia, in realtà?",
+          "What actually is fog?"
+        ),
+        options: [
+          l4(
+            "Eine Wolke, die am Boden liegt",
+            "Un nuage posé sur le sol",
+            "Una nuvola appoggiata al suolo",
+            "A cloud lying on the ground"
+          ),
+          l4(
+            "Rauch von Lagerfeuern",
+            "De la fumée de feux de camp",
+            "Fumo di falò",
+            "Smoke from campfires"
+          ),
+          l4(
+            "Staub in der Luft",
+            "De la poussière dans l'air",
+            "Polvere nell'aria",
+            "Dust in the air"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Nebel ist nichts anderes als eine Wolke in Bodennähe – du spazierst mittendurch wie durch feinen Tröpfchen-Dunst.",
+          "Le brouillard n'est rien d'autre qu'un nuage au ras du sol – tu marches dedans, dans une brume de fines gouttelettes.",
+          "La nebbia non è che una nuvola vicino al suolo – ci cammini dentro, in un velo di goccioline finissime.",
+          "Fog is nothing but a cloud at ground level – you walk right through it, through a haze of fine droplets."
+        ),
+      },
+      {
+        question: l4(
+          "Was ist an einem heissen Sommertag beim Zelten am wichtigsten?",
+          "Qu'est-ce qui est le plus important au camping par une chaude journée d'été ?",
+          "Qual è la cosa più importante in campeggio in una giornata estiva molto calda?",
+          "What matters most while camping on a hot summer's day?"
+        ),
+        options: [
+          l4(
+            "Viel trinken und mittags in den Schatten",
+            "Boire beaucoup et rester à l'ombre à midi",
+            "Bere tanto e stare all'ombra a mezzogiorno",
+            "Drink plenty and stay in the shade at midday"
+          ),
+          l4(
+            "Möglichst viel rennen",
+            "Courir le plus possible",
+            "Correre il più possibile",
+            "Run around as much as possible"
+          ),
+          l4(
+            "Eine dicke Jacke anziehen",
+            "Mettre une grosse veste",
+            "Mettere una giacca pesante",
+            "Put on a thick jacket"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Bei Hitze verliert dein Körper viel Wasser. Trinken, Schatten und eine Kopfbedeckung schützen dich vor einem Hitzschlag.",
+          "Par forte chaleur, ton corps perd beaucoup d'eau. Boire, l'ombre et un chapeau te protègent du coup de chaleur.",
+          "Con il caldo il tuo corpo perde molta acqua. Bere, ombra e un cappellino ti proteggono dal colpo di calore.",
+          "In the heat your body loses a lot of water. Drinking, shade and a sun hat protect you from heatstroke."
+        ),
+      },
+      {
+        question: l4(
+          "Wie entstehen Hagelkörner?",
+          "Comment se forment les grêlons ?",
+          "Come si formano i chicchi di grandine?",
+          "How do hailstones form?"
+        ),
+        options: [
+          l4(
+            "Regentropfen frieren hoch oben in der Gewitterwolke zu Eis",
+            "Des gouttes de pluie gèlent tout en haut du nuage d'orage",
+            "Gocce di pioggia gelano in alto nella nube temporalesca",
+            "Raindrops freeze to ice high up in the storm cloud"
+          ),
+          l4(
+            "Es schneit im Sommer",
+            "Il neige en été",
+            "Nevica in estate",
+            "It snows in summer"
+          ),
+          l4(
+            "Eiszapfen fallen von den Bergen",
+            "Des glaçons tombent des montagnes",
+            "Ghiaccioli cadono dalle montagne",
+            "Icicles fall from the mountains"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "In der Gewitterwolke werden Tropfen immer wieder hochgeschleudert und gefrieren Schicht um Schicht – bis das Eiskorn zu schwer wird und fällt.",
+          "Dans le nuage d'orage, les gouttes sont projetées vers le haut encore et encore et gèlent couche après couche – jusqu'à ce que le grêlon devienne trop lourd et tombe.",
+          "Nella nube temporalesca le gocce vengono scagliate in alto più volte e gelano strato dopo strato – finché il chicco diventa troppo pesante e cade.",
+          "Inside the storm cloud, drops are flung upwards again and again, freezing layer by layer – until the hailstone gets too heavy and falls."
+        ),
+      },
+      {
+        question: l4(
+          "Was machen Fichtenzapfen, wenn feuchtes Wetter kommt?",
+          "Que font les cônes d'épicéa quand un temps humide arrive ?",
+          "Che cosa fanno le pigne d'abete rosso quando arriva il tempo umido?",
+          "What do spruce cones do when damp weather is on the way?"
+        ),
+        options: [
+          l4(
+            "Sie schliessen ihre Schuppen",
+            "Ils ferment leurs écailles",
+            "Chiudono le loro squame",
+            "They close their scales"
+          ),
+          l4(
+            "Sie fallen sofort ab",
+            "Ils tombent immédiatement",
+            "Cadono subito",
+            "They drop off at once"
+          ),
+          l4(
+            "Sie ändern die Farbe",
+            "Ils changent de couleur",
+            "Cambiano colore",
+            "They change colour"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Bei Feuchtigkeit schliessen sich die Schuppen, damit die Samen trocken bleiben – ein Zapfen ist ein kleines Natur-Hygrometer.",
+          "Avec l'humidité, les écailles se referment pour garder les graines au sec – un cône est un petit hygromètre naturel.",
+          "Con l'umidità le squame si chiudono per tenere asciutti i semi – una pigna è un piccolo igrometro naturale.",
+          "In damp air the scales close to keep the seeds dry – a cone is a little natural weather gauge."
         ),
       },
     ],
@@ -1887,6 +2727,246 @@ export const natureQuizzes: NatureQuiz[] = [
           "Garde ton calme, souffle dessus ou appuie la pointe au sol – ne cours jamais avec un objet en feu.",
           "Mantieni la calma, soffia o premi la punta a terra – mai correre con qualcosa che brucia.",
           "Stay calm, blow it out or press the tip onto the ground – never run with anything burning."
+        ),
+      },
+      {
+        question: l4(
+          "Welches Holz eignet sich am besten fürs Lagerfeuer?",
+          "Quel bois convient le mieux pour le feu de camp ?",
+          "Quale legna è la migliore per il falò?",
+          "Which wood is best for the campfire?"
+        ),
+        options: [
+          l4(
+            "Frisch geschnittene, grüne Äste",
+            "Des branches vertes fraîchement coupées",
+            "Rami verdi appena tagliati",
+            "Freshly cut green branches"
+          ),
+          l4(
+            "Trockenes, totes Holz vom Boden",
+            "Du bois mort et sec ramassé au sol",
+            "Legna morta e asciutta raccolta a terra",
+            "Dry, dead wood from the ground"
+          ),
+          l4(
+            "Bemaltes Holz von alten Möbeln",
+            "Du bois peint de vieux meubles",
+            "Legno verniciato di vecchi mobili",
+            "Painted wood from old furniture"
+          ),
+        ],
+        correctIndex: 1,
+        explanation: l4(
+          "Trockenes Totholz brennt sauber und heiss. Grünes Holz raucht stark, und behandeltes Holz gehört nie ins Feuer.",
+          "Le bois mort et sec brûle proprement et bien chaud. Le bois vert fume beaucoup, et le bois traité n'a jamais sa place dans le feu.",
+          "La legna morta e asciutta brucia pulita e calda. La legna verde fa molto fumo e il legno trattato non va mai nel fuoco.",
+          "Dry dead wood burns clean and hot. Green wood smokes a lot, and treated wood never belongs in a fire."
+        ),
+      },
+      {
+        question: l4(
+          "Warum knallt und zischt nasses Holz im Feuer?",
+          "Pourquoi le bois humide claque et siffle-t-il dans le feu ?",
+          "Perché la legna bagnata scoppietta e sfrigola nel fuoco?",
+          "Why does wet wood crackle and hiss in the fire?"
+        ),
+        options: [
+          l4(
+            "Das Wasser im Holz verdampft und sprengt kleine Stücke ab",
+            "L'eau du bois s'évapore et fait éclater de petits morceaux",
+            "L'acqua nel legno evapora e fa saltare piccoli pezzi",
+            "The water in the wood turns to steam and blasts off little pieces"
+          ),
+          l4(
+            "Kleine Tiere klopfen im Holz",
+            "De petits animaux tapent dans le bois",
+            "Piccoli animali bussano nel legno",
+            "Little animals are knocking inside the wood"
+          ),
+          l4(
+            "Das Feuer ist wütend",
+            "Le feu est en colère",
+            "Il fuoco è arrabbiato",
+            "The fire is angry"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Wasser dehnt sich als Dampf stark aus und sprengt Holzfasern – dabei können Funken weit fliegen, also Abstand halten!",
+          "En devenant vapeur, l'eau se dilate fortement et fait éclater les fibres du bois – des étincelles peuvent voler loin, garde tes distances !",
+          "Trasformandosi in vapore, l'acqua si espande e spacca le fibre del legno – le scintille possono volare lontano, stai a distanza!",
+          "Turning to steam, water expands strongly and bursts the wood fibres – sparks can fly far, so keep your distance!"
+        ),
+      },
+      {
+        question: l4(
+          "Wie schichtest du das Holz, damit das Feuer gut Luft bekommt?",
+          "Comment empiles-tu le bois pour que le feu ait assez d'air ?",
+          "Come impili la legna perché il fuoco abbia abbastanza aria?",
+          "How do you stack the wood so the fire gets enough air?"
+        ),
+        options: [
+          l4(
+            "Als kleines Tipi um das Anzündmaterial",
+            "En petit tipi autour de l'allume-feu",
+            "A piccolo tepee attorno all'esca",
+            "Like a little tepee around the kindling"
+          ),
+          l4(
+            "Als dichten, flachen Stapel",
+            "En tas plat et serré",
+            "In una pila piatta e fitta",
+            "In a dense, flat pile"
+          ),
+          l4(
+            "In ein tiefes Loch gestopft",
+            "Tassé dans un trou profond",
+            "Ficcata in una buca profonda",
+            "Stuffed into a deep hole"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Feuer braucht Sauerstoff: Die Tipi-Form lässt von unten Luft nachströmen, und die Flammen klettern die schrägen Hölzer hinauf.",
+          "Le feu a besoin d'oxygène : la forme en tipi laisse l'air entrer par en bas et les flammes grimpent le long des bûches inclinées.",
+          "Il fuoco ha bisogno di ossigeno: la forma a tepee fa entrare l'aria dal basso e le fiamme si arrampicano sui legni inclinati.",
+          "Fire needs oxygen: the tepee shape lets air flow in from below, and the flames climb up the leaning sticks."
+        ),
+      },
+      {
+        question: l4(
+          "Was darf nie im Lagerfeuer landen?",
+          "Qu'est-ce qui ne doit jamais finir dans le feu de camp ?",
+          "Che cosa non deve mai finire nel falò?",
+          "What must never end up in the campfire?"
+        ),
+        options: [
+          l4(
+            "Plastikabfall und Alufolie",
+            "Les déchets plastiques et l'alu",
+            "Rifiuti di plastica e alluminio",
+            "Plastic rubbish and foil"
+          ),
+          l4(
+            "Dürre Äste",
+            "Des branches sèches",
+            "Rami secchi",
+            "Dry branches"
+          ),
+          l4("Tannenzapfen", "Des pommes de pin", "Pigne", "Pine cones"),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Brennender Abfall setzt giftigen Rauch frei und hinterlässt Schadstoffe in der Asche. Abfall gehört in den Sack – und wandert mit nach Hause.",
+          "Les déchets qui brûlent dégagent des fumées toxiques et laissent des polluants dans la cendre. Les déchets vont dans le sac – et repartent avec toi.",
+          "I rifiuti che bruciano liberano fumi tossici e lasciano sostanze nocive nella cenere. I rifiuti vanno nel sacco – e tornano a casa con te.",
+          "Burning rubbish gives off toxic smoke and leaves pollutants in the ash. Rubbish goes in the bag – and travels home with you."
+        ),
+      },
+      {
+        question: l4(
+          "Was bedeutet es, wenn im Sommer ein Feuerverbot gilt?",
+          "Que signifie une interdiction de faire du feu en été ?",
+          "Che cosa significa quando in estate vige un divieto di accendere fuochi?",
+          "What does it mean when a fire ban is in force in summer?"
+        ),
+        options: [
+          l4(
+            "Kein Feuer – auch nicht an eingerichteten Feuerstellen",
+            "Aucun feu – même pas aux foyers aménagés",
+            "Nessun fuoco – nemmeno nelle aree attrezzate",
+            "No fires at all – not even at prepared fire pits"
+          ),
+          l4(
+            "Nur kleine Feuer sind erlaubt",
+            "Seuls les petits feux sont autorisés",
+            "Sono permessi solo fuochi piccoli",
+            "Only small fires are allowed"
+          ),
+          l4(
+            "Feuer nur am Nachmittag",
+            "Du feu seulement l'après-midi",
+            "Fuoco solo di pomeriggio",
+            "Fires only in the afternoon"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Bei grosser Trockenheit reicht ein Funke für einen Waldbrand. Feuerverbot heisst: gar kein offenes Feuer – frag im Zweifel bei der Platzleitung nach.",
+          "Par grande sécheresse, une seule étincelle suffit à déclencher un incendie de forêt. Interdiction de feu = aucun feu ouvert – en cas de doute, demande à la réception du camping.",
+          "Con la grande siccità basta una scintilla per un incendio boschivo. Divieto di fuoco = nessun fuoco all'aperto – nel dubbio chiedi alla direzione del campeggio.",
+          "In a drought, a single spark can start a forest fire. A fire ban means no open fire at all – if in doubt, ask at the campsite reception."
+        ),
+      },
+      {
+        question: l4(
+          "Womit kannst du ohne Feuerzeug und Zündhölzer Funken machen?",
+          "Avec quoi peux-tu faire des étincelles sans briquet ni allumettes ?",
+          "Con che cosa puoi fare scintille senza accendino né fiammiferi?",
+          "How can you make sparks without a lighter or matches?"
+        ),
+        options: [
+          l4(
+            "Mit einem Feuerstahl",
+            "Avec un allume-feu à étincelles (firesteel)",
+            "Con un acciarino",
+            "With a fire steel"
+          ),
+          l4(
+            "Mit zwei Blättern",
+            "Avec deux feuilles",
+            "Con due foglie",
+            "With two leaves"
+          ),
+          l4(
+            "Mit einem nassen Stein",
+            "Avec une pierre mouillée",
+            "Con un sasso bagnato",
+            "With a wet stone"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Beim Feuerstahl schabst du mit einem Metallstück über den Stab – die heissen Funken entzünden feines, trockenes Material wie Birkenrinde.",
+          "Avec le firesteel, tu racles la tige avec une pièce métallique – les étincelles brûlantes enflamment un matériau fin et sec comme l'écorce de bouleau.",
+          "Con l'acciarino sfreghi un pezzo di metallo sulla barretta – le scintille roventi accendono materiale fine e asciutto come la corteccia di betulla.",
+          "With a fire steel you scrape a piece of metal along the rod – the hot sparks ignite fine, dry material like birch bark."
+        ),
+      },
+      {
+        question: l4(
+          "Wie prüfst du am Morgen, ob die Feuerstelle wirklich kalt ist?",
+          "Comment vérifies-tu le matin que le foyer est vraiment froid ?",
+          "Come controlli al mattino che il punto fuoco sia davvero freddo?",
+          "How do you check in the morning that the fire pit is really cold?"
+        ),
+        options: [
+          l4(
+            "Den Handrücken vorsichtig über die Asche halten",
+            "Approcher prudemment le dos de la main au-dessus des cendres",
+            "Avvicinare con prudenza il dorso della mano sopra la cenere",
+            "Hold the back of your hand carefully over the ashes"
+          ),
+          l4(
+            "Mit blossen Fingern hineinfassen",
+            "Plonger les doigts dedans",
+            "Infilarci le dita",
+            "Stick your fingers right in"
+          ),
+          l4(
+            "Kräftig hineinpusten",
+            "Souffler fort dessus",
+            "Soffiarci dentro forte",
+            "Blow into it hard"
+          ),
+        ],
+        correctIndex: 0,
+        explanation: l4(
+          "Spürst du über der Asche noch Wärme, glimmt es darunter weiter – dann nochmals Wasser darüber und umrühren.",
+          "Si tu sens encore de la chaleur au-dessus des cendres, ça couve en dessous – remets de l'eau et remue encore.",
+          "Se sopra la cenere senti ancora calore, sotto cova ancora la brace – allora altra acqua e mescola di nuovo.",
+          "If you can still feel warmth above the ashes, embers are glowing below – add more water and stir again."
         ),
       },
     ],
