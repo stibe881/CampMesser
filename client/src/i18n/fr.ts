@@ -1,0 +1,47 @@
+import type { Translation } from "./de";
+
+/** Dictionnaire français. */
+export const fr: Translation = {
+  common: {
+    loading: "Chargement",
+    save: "Enregistrer",
+    saving: "Enregistrement …",
+    cancel: "Annuler",
+    delete: "Supprimer",
+    edit: "Modifier",
+    copy: "Copier",
+    linkCopied: "Lien copié",
+    copyFailed: "Copie impossible – sélectionne le texte manuellement",
+    back: "Retour",
+    today: "Aujourd'hui",
+    tomorrow: "demain",
+    optional: "facultatif",
+    night: "nuit",
+    nights: "nuits",
+    deleteFailed: "Échec de la suppression",
+    saveFailed: "Échec de l'enregistrement",
+    actionFailed: "Échec de l'action",
+    offlineBadge: "Hors ligne",
+  },
+  shell: {
+    toHome: "Vers la page d'accueil",
+    themeLight: "Activer le thème clair",
+    themeDark: "Activer le thème sombre",
+    languageMenu: "Choisir la langue",
+    accountMenu: "Ouvrir le menu du compte",
+    loggedIn: "Connecté·e",
+    profile: "Profil",
+    logout: "Se déconnecter",
+    login: "Se connecter",
+    sosAria: "SOS – ouvrir le tableau de bord d'urgence",
+    mainNav: "Navigation principale",
+    nav: {
+      start: "Accueil",
+      pack: "Bagages",
+      sun: "Soleil",
+      weather: "Météo",
+      firstAid: "Premiers secours",
+      sos: "SOS",
+    },
+  },
+};

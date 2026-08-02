@@ -7,6 +7,7 @@ import {
   BookOpen,
   Siren,
   CloudSunRain,
+  Globe,
   LogIn,
   LogOut,
   UserRound,
@@ -16,6 +17,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useI18n } from "@/i18n";
+import { LANGUAGES, LANGUAGE_LABELS } from "@shared/i18n";
 import BrandLogo from "@/components/BrandLogo";
 import {
   DropdownMenu,
@@ -30,18 +33,28 @@ import {
  * Gemeinsames App-Layout: Top-Bar mit Logo, Inhalt, Bottom-Navigation (mobil).
  * Die Bottom-Nav zeigt die fünf wichtigsten Bereiche; alle Module sind über die Startseite erreichbar.
  */
-const navItems = [
-  { path: "/", label: "Start", icon: Home },
-  { path: "/packlisten", label: "Packen", icon: ListChecks },
-  { path: "/sonne", label: "Sonne", icon: Compass },
-  { path: "/wetter", label: "Wetter", icon: CloudSunRain },
+interface NavItem {
+  path: string;
+  key: "start" | "pack" | "sun" | "weather" | "firstAid" | "sos";
+  icon: React.ComponentType<{
+    className?: string;
+    "aria-hidden"?: boolean | "true" | "false";
+  }>;
+  activePaths?: string[];
+}
+
+const navItems: NavItem[] = [
+  { path: "/", key: "start", icon: Home },
+  { path: "/packlisten", key: "pack", icon: ListChecks },
+  { path: "/sonne", key: "sun", icon: Compass },
+  { path: "/wetter", key: "weather", icon: CloudSunRain },
   {
     path: "/erste-hilfe",
-    label: "Erste Hilfe",
+    key: "firstAid",
     icon: BookOpen,
     activePaths: ["/erste-hilfe", "/knoten", "/natur", "/rezepte"],
   },
-  { path: "/sos", label: "SOS", icon: Siren },
+  { path: "/sos", key: "sos", icon: Siren },
 ];
 
 /** Merkt sich die zuletzt genutzten Module für den Startseiten-Schnellzugriff. */
@@ -86,6 +99,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [headerHidden, setHeaderHidden] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { lang, t, setLang } = useI18n();
 
   // Beim Seitenwechsel nach oben scrollen
   useEffect(() => {
@@ -120,7 +134,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <Link
             href="/"
             className="flex items-center gap-2.5"
-            aria-label="Zur Startseite"
+            aria-label={t.shell.toHome}
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <BrandLogo className="h-6 w-6" />
@@ -130,14 +144,35 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </span>
           </Link>
           <div className="flex items-center gap-2">
+            {/* Sprachwahl */}
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className="inline-flex h-8 items-center justify-center gap-1 rounded-full border border-border bg-card px-2.5 text-xs font-semibold uppercase text-muted-foreground transition-colors hover:text-foreground"
+                aria-label={t.shell.languageMenu}
+              >
+                <Globe className="h-3.5 w-3.5" aria-hidden="true" />
+                {lang}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {LANGUAGES.map(code => (
+                  <DropdownMenuItem
+                    key={code}
+                    onClick={() => setLang(code)}
+                    className={cn(
+                      code === lang && "font-semibold text-primary"
+                    )}
+                  >
+                    {LANGUAGE_LABELS[code]}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <button
               type="button"
               onClick={() => toggleTheme?.()}
               className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
               aria-label={
-                theme === "dark"
-                  ? "Helles Design aktivieren"
-                  : "Dunkles Design aktivieren"
+                theme === "dark" ? t.shell.themeLight : t.shell.themeDark
               }
             >
               {theme === "dark" ? (
@@ -150,13 +185,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <DropdownMenu>
                 <DropdownMenuTrigger
                   className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
-                  aria-label="Konto-Menü öffnen"
+                  aria-label={t.shell.accountMenu}
                 >
                   <UserRound className="h-4 w-4" aria-hidden="true" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel className="max-w-[200px] truncate">
-                    {user?.name || user?.email || "Angemeldet"}
+                    {user?.name || user?.email || t.shell.loggedIn}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -165,11 +200,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     }}
                   >
                     <UserRound className="mr-2 h-4 w-4" aria-hidden="true" />{" "}
-                    Profil
+                    {t.shell.profile}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => void logout()}>
                     <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />{" "}
-                    Abmelden
+                    {t.shell.logout}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -177,10 +212,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link
                 href="/anmelden"
                 className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                aria-label="Anmelden"
+                aria-label={t.shell.login}
               >
                 <LogIn className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:inline">Anmelden</span>
+                <span className="hidden sm:inline">{t.shell.login}</span>
               </Link>
             )}
             <Link
@@ -189,7 +224,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-transform active:scale-[0.97]",
                 "bg-destructive text-destructive-foreground shadow-sm"
               )}
-              aria-label="SOS – Notfall-Dashboard öffnen"
+              aria-label={t.shell.sosAria}
             >
               <Siren className="h-4 w-4" aria-hidden="true" />
               SOS
@@ -208,7 +243,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             ? "translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-16 opacity-0"
         )}
-        aria-label="SOS – Notfall-Dashboard öffnen"
+        aria-label={t.shell.sosAria}
         aria-hidden={!headerHidden}
         tabIndex={headerHidden ? 0 : -1}
       >
@@ -222,10 +257,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {/* Bottom-Navigation (mobil) */}
       <nav
         className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur-md md:hidden"
-        aria-label="Hauptnavigation"
+        aria-label={t.shell.mainNav}
       >
         <div className="mx-auto flex max-w-md items-stretch justify-around px-2 pb-[env(safe-area-inset-bottom)]">
           {navItems.map(item => {
+            const label = t.shell.nav[item.key];
             const isActive = item.activePaths
               ? item.activePaths.some(p => location.startsWith(p))
               : item.path === "/"
@@ -242,17 +278,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 )}
-                aria-label={item.label}
+                aria-label={label}
                 aria-current={isActive ? "page" : undefined}
               >
                 <Icon
                   className={cn(
                     "h-5 w-5",
-                    item.label === "SOS" && "text-destructive"
+                    item.key === "sos" && "text-destructive"
                   )}
                   aria-hidden="true"
                 />
-                {item.label}
+                {label}
               </Link>
             );
           })}

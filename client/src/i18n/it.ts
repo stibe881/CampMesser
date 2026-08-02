@@ -1,0 +1,47 @@
+import type { Translation } from "./de";
+
+/** Dizionario italiano. */
+export const it: Translation = {
+  common: {
+    loading: "Caricamento",
+    save: "Salva",
+    saving: "Salvataggio …",
+    cancel: "Annulla",
+    delete: "Elimina",
+    edit: "Modifica",
+    copy: "Copia",
+    linkCopied: "Link copiato",
+    copyFailed: "Copia non riuscita – seleziona il testo manualmente",
+    back: "Indietro",
+    today: "Oggi",
+    tomorrow: "domani",
+    optional: "facoltativo",
+    night: "notte",
+    nights: "notti",
+    deleteFailed: "Eliminazione non riuscita",
+    saveFailed: "Salvataggio non riuscito",
+    actionFailed: "Azione non riuscita",
+    offlineBadge: "Offline",
+  },
+  shell: {
+    toHome: "Alla pagina iniziale",
+    themeLight: "Attiva il tema chiaro",
+    themeDark: "Attiva il tema scuro",
+    languageMenu: "Scegli la lingua",
+    accountMenu: "Apri il menu dell'account",
+    loggedIn: "Connesso/a",
+    profile: "Profilo",
+    logout: "Esci",
+    login: "Accedi",
+    sosAria: "SOS – apri il pannello d'emergenza",
+    mainNav: "Navigazione principale",
+    nav: {
+      start: "Inizio",
+      pack: "Bagagli",
+      sun: "Sole",
+      weather: "Meteo",
+      firstAid: "Primo soccorso",
+      sos: "SOS",
+    },
+  },
+};

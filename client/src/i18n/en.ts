@@ -1,0 +1,47 @@
+import type { Translation } from "./de";
+
+/** English dictionary. */
+export const en: Translation = {
+  common: {
+    loading: "Loading",
+    save: "Save",
+    saving: "Saving …",
+    cancel: "Cancel",
+    delete: "Delete",
+    edit: "Edit",
+    copy: "Copy",
+    linkCopied: "Link copied",
+    copyFailed: "Copying failed – please select the text manually",
+    back: "Back",
+    today: "Today",
+    tomorrow: "tomorrow",
+    optional: "optional",
+    night: "night",
+    nights: "nights",
+    deleteFailed: "Deleting failed",
+    saveFailed: "Saving failed",
+    actionFailed: "Action failed",
+    offlineBadge: "Offline",
+  },
+  shell: {
+    toHome: "Go to home page",
+    themeLight: "Switch to light theme",
+    themeDark: "Switch to dark theme",
+    languageMenu: "Choose language",
+    accountMenu: "Open account menu",
+    loggedIn: "Signed in",
+    profile: "Profile",
+    logout: "Sign out",
+    login: "Sign in",
+    sosAria: "SOS – open the emergency dashboard",
+    mainNav: "Main navigation",
+    nav: {
+      start: "Home",
+      pack: "Packing",
+      sun: "Sun",
+      weather: "Weather",
+      firstAid: "First aid",
+      sos: "SOS",
+    },
+  },
+};

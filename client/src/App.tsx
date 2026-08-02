@@ -8,6 +8,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import OfflinePrecache from "./components/OfflinePrecache";
 import AppShell from "./components/AppShell";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { LanguageProvider } from "./i18n";
 import Home from "./pages/Home";
 import { getThemePreference } from "./lib/themePreference";
 
@@ -185,7 +186,9 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <OfflinePrecache />
-          <Router />
+          <LanguageProvider>
+            <Router />
+          </LanguageProvider>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

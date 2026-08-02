@@ -12,6 +12,8 @@ export const SYNCED_SETTING_KEYS = [
   "sunObstacles",
   /** Eigene Materialien im Trockenzeiten-Rechner */
   "dryingCustomItems",
+  /** Gewählte App-Sprache (de/fr/it/en) */
+  "language",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];
