@@ -2385,6 +2385,21 @@ export const de = {
     whoPlaysDescription:
       "Wähle, wer spielt – das Kind sammelt Abzeichen für abgeschlossene Jagden und Quizze.",
     whoPlaysNobody: "Ohne Abzeichen spielen",
+    duelMode: "Duell: zwei Kinder gegeneinander",
+    duelSetupTitle: "Quiz-Duell",
+    duelSetupDescription:
+      "Zwei Kinder beantworten abwechselnd dieselben Fragen – reicht das Gerät nach jedem Zug weiter.",
+    duelPickFirst: "Wer beginnt?",
+    duelPickSecond: "Wer spielt dagegen?",
+    duelFirstChosen: (name: string) => `${name} beginnt.`,
+    duelVs: (a: string, b: string) => `${a} gegen ${b}`,
+    duelNowPlaying: (name: string) => `Jetzt spielt: ${name}`,
+    duelHandoverHint: (name: string) => `Gib das Gerät an ${name} weiter.`,
+    duelGo: "Los geht's!",
+    duelPassTo: (name: string) => `Weiter – ${name} ist dran`,
+    duelScore: (name: string, points: number) => `${name}: ${points}`,
+    duelTie: "Unentschieden!",
+    duelWinner: (name: string) => `${name} gewinnt!`,
     quizEditor: {
       titleEdit: "Quiz bearbeiten",
       titleNew: "Eigenes Quiz erstellen",

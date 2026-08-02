@@ -2382,6 +2382,21 @@ export const fr: Translation = {
     whoPlaysDescription:
       "Choisis qui joue – l'enfant collectionne des badges pour les chasses et quiz terminés.",
     whoPlaysNobody: "Jouer sans badges",
+    duelMode: "Duel : deux enfants s'affrontent",
+    duelSetupTitle: "Duel de quiz",
+    duelSetupDescription:
+      "Deux enfants répondent à tour de rôle aux mêmes questions – passez l'appareil après chaque tour.",
+    duelPickFirst: "Qui commence ?",
+    duelPickSecond: "Qui joue contre ?",
+    duelFirstChosen: (name: string) => `${name} commence.`,
+    duelVs: (a: string, b: string) => `${a} contre ${b}`,
+    duelNowPlaying: (name: string) => `À ${name} de jouer !`,
+    duelHandoverHint: (name: string) => `Passe l'appareil à ${name}.`,
+    duelGo: "C'est parti !",
+    duelPassTo: (name: string) => `Continuer – au tour de ${name}`,
+    duelScore: (name: string, points: number) => `${name} : ${points}`,
+    duelTie: "Égalité !",
+    duelWinner: (name: string) => `${name} gagne !`,
     quizEditor: {
       titleEdit: "Modifier le quiz",
       titleNew: "Créer son propre quiz",

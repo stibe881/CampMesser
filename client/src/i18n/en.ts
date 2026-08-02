@@ -2303,6 +2303,21 @@ export const en: Translation = {
     whoPlaysDescription:
       "Choose who plays – the child collects badges for completed hunts and quizzes.",
     whoPlaysNobody: "Play without badges",
+    duelMode: "Duel: two kids head-to-head",
+    duelSetupTitle: "Quiz duel",
+    duelSetupDescription:
+      "Two children answer the same questions in turns – hand the device over after each turn.",
+    duelPickFirst: "Who starts?",
+    duelPickSecond: "Who plays against them?",
+    duelFirstChosen: (name: string) => `${name} starts.`,
+    duelVs: (a: string, b: string) => `${a} vs ${b}`,
+    duelNowPlaying: (name: string) => `Now playing: ${name}`,
+    duelHandoverHint: (name: string) => `Hand the device to ${name}.`,
+    duelGo: "Let's go!",
+    duelPassTo: (name: string) => `Next – ${name}'s turn`,
+    duelScore: (name: string, points: number) => `${name}: ${points}`,
+    duelTie: "It's a tie!",
+    duelWinner: (name: string) => `${name} wins!`,
     quizEditor: {
       titleEdit: "Edit quiz",
       titleNew: "Create your own quiz",

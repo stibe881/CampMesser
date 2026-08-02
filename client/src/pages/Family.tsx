@@ -14,6 +14,7 @@ import {
   Printer,
   RotateCcw,
   Sparkles,
+  Swords,
   Trash2,
   Trophy,
   Volume2,
@@ -58,6 +59,12 @@ import {
   customQuizToNatureQuiz,
   type CustomQuizRow,
 } from "@/lib/customQuizzes";
+import {
+  duelFinished,
+  duelPlayer,
+  duelQuestionIndex,
+  duelWinner,
+} from "@/lib/quizDuel";
 import { useSpeech } from "@/lib/speech";
 import { cn } from "@/lib/utils";
 
@@ -1072,6 +1079,266 @@ function QuizDialog({
   );
 }
 
+/** Kind-Profil im Duell – die Reihenfolge im Tupel ist die Zugreihenfolge. */
+interface DuelChild {
+  id: number;
+  name: string;
+}
+
+/**
+ * Quiz-Duell für zwei Kinder: beide beantworten abwechselnd dieselben
+ * Fragen (A Frage 1, B Frage 1, A Frage 2 …). Vor jedem Zug zeigt ein
+ * Übergabe-Banner, wer dran ist, damit das Gerät weitergereicht wird.
+ * Am Ende vergleicht die Auswertung beide Punktestände (Unentschieden
+ * möglich); Zugreihenfolge/Punkte-Logik liegt in client/src/lib/quizDuel.ts.
+ */
+function DuelQuizDialog({
+  quiz,
+  players,
+  onClose,
+  onCompleted,
+}: {
+  quiz: NatureQuiz;
+  players: [DuelChild, DuelChild];
+  onClose: () => void;
+  /** Wird nach dem letzten Zug mit den Ergebnissen BEIDER Kinder gemeldet. */
+  onCompleted?: (results: [QuizResult, QuizResult]) => void;
+}) {
+  const { lang, t } = useI18n();
+  const [turn, setTurn] = useState(0);
+  // «handover» = Übergabe-Banner zwischen den Zügen, «question» = Frage offen
+  const [phase, setPhase] = useState<"handover" | "question">("handover");
+  const [answered, setAnswered] = useState<number | null>(null);
+  const [scores, setScores] = useState<[number, number]>([0, 0]);
+  const [streaks, setStreaks] = useState<[number, number]>([0, 0]);
+  const [bestStreaks, setBestStreaks] = useState<[number, number]>([0, 0]);
+  const [finished, setFinished] = useState(false);
+
+  const player = duelPlayer(turn);
+  const questionIndex = duelQuestionIndex(turn);
+  const question = quiz.questions[questionIndex];
+  const explanationText =
+    answered !== null && question ? pick(question.explanation, lang) : "";
+
+  const setForPlayer = (
+    values: [number, number],
+    value: number
+  ): [number, number] =>
+    player === 0 ? [value, values[1]] : [values[0], value];
+
+  const answer = (idx: number) => {
+    if (answered !== null) return;
+    setAnswered(idx);
+    if (idx === question.correctIndex) {
+      setScores(prev => setForPlayer(prev, prev[player] + 1));
+      const nextStreak = streaks[player] + 1;
+      setStreaks(prev => setForPlayer(prev, nextStreak));
+      if (nextStreak > bestStreaks[player]) {
+        setBestStreaks(prev => setForPlayer(prev, nextStreak));
+      }
+    } else {
+      setStreaks(prev => setForPlayer(prev, 0));
+    }
+  };
+
+  const next = () => {
+    const nextTurn = turn + 1;
+    setAnswered(null);
+    if (duelFinished(nextTurn, quiz.questions.length)) {
+      setFinished(true);
+      onCompleted?.([
+        {
+          quizId: quiz.id,
+          perfect: scores[0] === quiz.questions.length,
+          correctStreak: bestStreaks[0],
+        },
+        {
+          quizId: quiz.id,
+          perfect: scores[1] === quiz.questions.length,
+          correctStreak: bestStreaks[1],
+        },
+      ]);
+    } else {
+      setTurn(nextTurn);
+      setPhase("handover");
+    }
+  };
+
+  const restart = () => {
+    setTurn(0);
+    setPhase("handover");
+    setAnswered(null);
+    setScores([0, 0]);
+    setStreaks([0, 0]);
+    setBestStreaks([0, 0]);
+    setFinished(false);
+  };
+
+  const winner = duelWinner(scores[0], scores[1]);
+
+  return (
+    <DialogContent className="max-h-[85vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle className="font-serif text-xl">
+          {pick(quiz.title, lang)}
+        </DialogTitle>
+        <DialogDescription>
+          {t.family.duelVs(players[0].name, players[1].name)}
+        </DialogDescription>
+      </DialogHeader>
+
+      {finished ? (
+        <div className="space-y-4 text-center">
+          <Trophy
+            className="mx-auto h-12 w-12 text-amber-glow"
+            aria-hidden="true"
+          />
+          <p className="font-serif text-2xl font-bold">
+            {winner === null
+              ? t.family.duelTie
+              : t.family.duelWinner(players[winner].name)}
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {players.map((p, i) => (
+              <div
+                key={p.id}
+                className={cn(
+                  "rounded-lg border p-3",
+                  winner === i
+                    ? "border-primary bg-accent"
+                    : "border-border bg-card"
+                )}
+              >
+                <p className="truncate text-sm font-semibold">{p.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t.family.points(scores[i])}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={restart}>
+              <RotateCcw className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.family.again}
+            </Button>
+            <Button className="flex-1" onClick={onClose}>
+              {t.family.done}
+            </Button>
+          </div>
+        </div>
+      ) : phase === "handover" ? (
+        <div className="space-y-4 py-2 text-center">
+          <p className="text-sm text-muted-foreground">
+            {t.family.questionProgress(
+              questionIndex + 1,
+              quiz.questions.length
+            )}
+          </p>
+          <p
+            role="status"
+            className="rounded-xl bg-accent p-4 font-serif text-xl font-bold"
+          >
+            {t.family.duelNowPlaying(players[player].name)}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {t.family.duelHandoverHint(players[player].name)}
+          </p>
+          <Button className="w-full" onClick={() => setPhase("question")}>
+            {t.family.duelGo}
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-2 text-sm">
+            {players.map((p, i) => (
+              <span
+                key={p.id}
+                className={cn(
+                  "min-w-0 truncate",
+                  player === i
+                    ? "font-bold text-primary"
+                    : "text-muted-foreground"
+                )}
+              >
+                {t.family.duelScore(p.name, scores[i])}
+              </span>
+            ))}
+          </div>
+          <div
+            role="status"
+            className="rounded-lg bg-accent px-3.5 py-2 text-sm font-semibold"
+          >
+            {t.family.duelNowPlaying(players[player].name)} ·{" "}
+            {t.family.questionProgress(
+              questionIndex + 1,
+              quiz.questions.length
+            )}
+          </div>
+          <Progress
+            value={(turn / (quiz.questions.length * 2)) * 100}
+            aria-label={t.family.quizProgressAria}
+          />
+          <p className="font-semibold">{pick(question.question, lang)}</p>
+          <div className="space-y-2">
+            {question.options.map((option, idx) => {
+              const isCorrect = idx === question.correctIndex;
+              const isSelected = answered === idx;
+              const optionText = pick(option, lang);
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => answer(idx)}
+                  disabled={answered !== null}
+                  className={cn(
+                    "w-full rounded-lg border p-3 text-left text-sm font-medium transition-all",
+                    answered === null &&
+                      "border-border bg-card hover:border-primary/50",
+                    answered !== null &&
+                      isCorrect &&
+                      "border-primary bg-accent",
+                    answered !== null &&
+                      isSelected &&
+                      !isCorrect &&
+                      "border-destructive bg-destructive/10",
+                    answered !== null &&
+                      !isSelected &&
+                      !isCorrect &&
+                      "border-border opacity-60"
+                  )}
+                  aria-label={t.family.answerAria(optionText)}
+                >
+                  {optionText}
+                  {answered !== null && isCorrect && (
+                    <BadgeCheck
+                      className="ml-2 inline h-4 w-4 text-primary"
+                      aria-hidden="true"
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {answered !== null && (
+            <>
+              {explanationText && (
+                <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
+                  {explanationText}
+                </p>
+              )}
+              <Button className="w-full" onClick={next}>
+                {duelFinished(turn + 1, quiz.questions.length)
+                  ? t.family.showResult
+                  : t.family.duelPassTo(players[duelPlayer(turn + 1)].name)}
+              </Button>
+            </>
+          )}
+        </div>
+      )}
+    </DialogContent>
+  );
+}
+
 /**
  * Abzeichen-Galerie eines Kindes: verdiente farbig mit Datum, offene
  * ausgegraut mit der Bedingung als Hinweis.
@@ -1333,6 +1600,16 @@ export default function FamilyPage() {
   const [pendingActivity, setPendingActivity] = useState<
     { hunt: ScavengerHunt } | { quiz: NatureQuiz } | null
   >(null);
+  // Duell-Aufbau: Quiz gewählt, dann zwei Kinder nacheinander bestimmen
+  const [duelSetup, setDuelSetup] = useState<{
+    quiz: NatureQuiz;
+    firstId: number | null;
+  } | null>(null);
+  // Laufendes Duell mit fixer Zugreihenfolge (players[0] beginnt)
+  const [activeDuel, setActiveDuel] = useState<{
+    quiz: NatureQuiz;
+    players: [DuelChild, DuelChild];
+  } | null>(null);
 
   const recordMutation = trpc.family.stats.record.useMutation();
   const awardMutation = trpc.family.badges.award.useMutation();
@@ -1369,8 +1646,8 @@ export default function FamilyPage() {
    * Bedingungen prüfen und neue Abzeichen idempotent vergeben – schlicht
    * gefeiert mit einem Toast pro Abzeichen. Fehler bleiben still.
    */
-  const handleCompleted = async (event: BadgeEvent) => {
-    const child = children.find(c => c.id === activeChildId);
+  const handleCompletedFor = async (childId: number, event: BadgeEvent) => {
+    const child = children.find(c => c.id === childId);
     if (!child) return;
     try {
       const stats = await recordMutation.mutateAsync({
@@ -1404,6 +1681,27 @@ export default function FamilyPage() {
       // Offline/Fehler: kein Abzeichen-Update – die Vergabe ist idempotent,
       // beim nächsten Abschluss klappt es wieder
     }
+  };
+
+  /** Solo-Abschluss: Zähler/Abzeichen fürs zuvor gewählte Kind. */
+  const handleCompleted = async (event: BadgeEvent) => {
+    if (activeChildId === null) return;
+    await handleCompletedFor(activeChildId, event);
+  };
+
+  /** Duell-Abschluss: Zähler/Abzeichen für BEIDE Kinder nacheinander. */
+  const handleDuelCompleted = async (
+    players: [DuelChild, DuelChild],
+    results: [QuizResult, QuizResult]
+  ) => {
+    await handleCompletedFor(players[0].id, {
+      type: "quizCompleted",
+      ...results[0],
+    });
+    await handleCompletedFor(players[1].id, {
+      type: "quizCompleted",
+      ...results[1],
+    });
   };
 
   return (
@@ -1696,9 +1994,74 @@ export default function FamilyPage() {
                   {child.name}
                 </Button>
               ))}
+              {"quiz" in pendingActivity && children.length >= 2 && (
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setDuelSetup({ quiz: pendingActivity.quiz, firstId: null });
+                    setPendingActivity(null);
+                  }}
+                >
+                  <Swords className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {t.family.duelMode}
+                </Button>
+              )}
               <Button variant="ghost" onClick={() => chooseChild(null)}>
                 {t.family.whoPlaysNobody}
               </Button>
+            </div>
+          </DialogContent>
+        )}
+      </Dialog>
+
+      {/* Duell-Aufbau: erst das startende, dann das zweite Kind wählen */}
+      <Dialog
+        open={duelSetup !== null}
+        onOpenChange={open => !open && setDuelSetup(null)}
+      >
+        {duelSetup !== null && (
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="font-serif text-xl">
+                {t.family.duelSetupTitle}
+              </DialogTitle>
+              <DialogDescription>
+                {t.family.duelSetupDescription}
+              </DialogDescription>
+            </DialogHeader>
+            <p className="text-sm font-medium" role="status">
+              {duelSetup.firstId === null
+                ? t.family.duelPickFirst
+                : `${t.family.duelFirstChosen(
+                    children.find(c => c.id === duelSetup.firstId)?.name ?? ""
+                  )} ${t.family.duelPickSecond}`}
+            </p>
+            <div className="grid gap-2">
+              {children
+                .filter(c => c.id !== duelSetup.firstId)
+                .map(child => (
+                  <Button
+                    key={child.id}
+                    variant="outline"
+                    onClick={() => {
+                      if (duelSetup.firstId === null) {
+                        setDuelSetup({ ...duelSetup, firstId: child.id });
+                        return;
+                      }
+                      const first = children.find(
+                        c => c.id === duelSetup.firstId
+                      );
+                      if (!first) return;
+                      setActiveDuel({
+                        quiz: duelSetup.quiz,
+                        players: [first, child],
+                      });
+                      setDuelSetup(null);
+                    }}
+                  >
+                    {child.name}
+                  </Button>
+                ))}
             </div>
           </DialogContent>
         )}
@@ -1726,6 +2089,21 @@ export default function FamilyPage() {
             onClose={() => setActiveQuiz(null)}
             onCompleted={result =>
               void handleCompleted({ type: "quizCompleted", ...result })
+            }
+          />
+        )}
+      </Dialog>
+      <Dialog
+        open={activeDuel !== null}
+        onOpenChange={open => !open && setActiveDuel(null)}
+      >
+        {activeDuel && (
+          <DuelQuizDialog
+            quiz={activeDuel.quiz}
+            players={activeDuel.players}
+            onClose={() => setActiveDuel(null)}
+            onCompleted={results =>
+              void handleDuelCompleted(activeDuel.players, results)
             }
           />
         )}

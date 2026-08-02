@@ -2358,6 +2358,21 @@ export const it: Translation = {
     whoPlaysDescription:
       "Scegli chi gioca – il bambino raccoglie distintivi per cacce e quiz completati.",
     whoPlaysNobody: "Gioca senza distintivi",
+    duelMode: "Duello: due bambini uno contro l'altro",
+    duelSetupTitle: "Duello di quiz",
+    duelSetupDescription:
+      "Due bambini rispondono a turno alle stesse domande – passate il dispositivo dopo ogni turno.",
+    duelPickFirst: "Chi comincia?",
+    duelPickSecond: "Chi gioca contro?",
+    duelFirstChosen: (name: string) => `Comincia ${name}.`,
+    duelVs: (a: string, b: string) => `${a} contro ${b}`,
+    duelNowPlaying: (name: string) => `Tocca a ${name}!`,
+    duelHandoverHint: (name: string) => `Passa il dispositivo a ${name}.`,
+    duelGo: "Si parte!",
+    duelPassTo: (name: string) => `Avanti – tocca a ${name}`,
+    duelScore: (name: string, points: number) => `${name}: ${points}`,
+    duelTie: "Pareggio!",
+    duelWinner: (name: string) => `Vince ${name}!`,
     quizEditor: {
       titleEdit: "Modifica quiz",
       titleNew: "Crea il tuo quiz",
