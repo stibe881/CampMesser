@@ -26,7 +26,8 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 - [x] Login, Profile
 - [x] PackLists, PackListDetail, SharedPackList, PackOptimizer, Inventory
 - [x] Weather, Water
-- [ ] Sos, SunCompass, Energy, Drying, Quiet, Lawn, Level
+- [x] SunCompass, Level
+- [ ] Sos, Energy, Drying, Quiet, Lawn
 - [ ] Spots, SpotDetail, SharedSpot, Trips
 - [ ] FirstAid, Knots (+Quiz), Nature, Recipes (+Editor), Food
 - [ ] Family (+Editoren), HuntPrint
@@ -47,9 +48,11 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 
 - [x] shared/weather.ts (describeWeatherCode, detectAlerts)
 - [x] shared/fireDanger.ts (Stufen + Regeln)
-- [ ] shared/astro.ts (Namen ok, Tipps/Radiant)
-- [ ] shared/moon.ts (Phasen-Labels, stargazingQuality)
-- [ ] shared/level.ts (Unterleg-Tipps)
+- [x] shared/astro.ts (Namen, Tipps, Radiant als L4; Nature.tsx picked bereits)
+- [x] shared/moon.ts (Phasen-Labels, stargazingQuality; lang-Parameter)
+- [x] shared/level.ts (Unterleg-Tipps; lang-Parameter)
+- [x] shared/solar.ts (compassDirection mit lang; Energy.tsx reicht lang noch
+      nicht durch – gehört zum Energy-Batch)
 - [ ] shared/drying.ts (Material-Labels/Hinweise)
 - [ ] shared/lawn.ts (Empfehlungen)
 - [ ] shared/food.ts (MHD-Labels)

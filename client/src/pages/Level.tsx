@@ -9,6 +9,8 @@ import {
   screenTilt,
   type Tilt,
 } from "@shared/level";
+import { type Language } from "@shared/i18n";
+import { useI18n } from "@/i18n";
 import { useDeviceTilt } from "@/hooks/useDeviceTilt";
 import { cn } from "@/lib/utils";
 
@@ -46,12 +48,15 @@ function currentScreenAngle(): number {
   return typeof legacy === "number" ? legacy : 0;
 }
 
-function fmtDeg(v: number): string {
+/** Grad-Wert mit Vorzeichen formatieren (Dezimal-Komma ausser im Englischen). */
+function fmtDeg(v: number, lang: Language): string {
   const sign = v > 0 ? "+" : v < 0 ? "−" : "";
-  return `${sign}${Math.abs(v).toFixed(1).replace(".", ",")}°`;
+  const fixed = Math.abs(v).toFixed(1);
+  return `${sign}${lang === "en" ? fixed : fixed.replace(".", ",")}°`;
 }
 
 export default function LevelPage() {
+  const { lang, t } = useI18n();
   const { reading, active, permission, start } = useDeviceTilt();
   const [calibration, setCalibration] = useState<Tilt>(() => loadCalibration());
   const [screenAngle, setScreenAngle] = useState<number>(() =>
@@ -88,16 +93,13 @@ export default function LevelPage() {
         : null,
     [rawTilt, calibration]
   );
-  const advice = tilt ? levelingAdvice(tilt) : null;
+  const advice = tilt ? levelingAdvice(tilt, undefined, lang) : null;
   const bubble = tilt ? bubblePosition(tilt, MAX_DEG) : { x: 0, y: 0 };
   const isCalibrated = calibration.pitch !== 0 || calibration.roll !== 0;
 
   return (
     <div className="container max-w-xl py-6">
-      <PageHeader
-        title="Wasserwaage"
-        subtitle="Wohnwagen, Kocher oder Tisch ausrichten – Handy flach auflegen, Display nach oben."
-      />
+      <PageHeader title={t.level.title} subtitle={t.level.subtitle} />
 
       {permission === "unsupported" && (
         <Card>
@@ -107,8 +109,7 @@ export default function LevelPage() {
               aria-hidden="true"
             />
             <p className="text-sm text-muted-foreground">
-              Dieses Gerät hat keinen Lagesensor. Öffne die Wasserwaage auf
-              deinem Smartphone – sie funktioniert komplett offline.
+              {t.level.unsupported}
             </p>
           </CardContent>
         </Card>
@@ -122,9 +123,11 @@ export default function LevelPage() {
               aria-hidden="true"
             />
             <p className="text-sm text-muted-foreground">
-              Für die Wasserwaage braucht die App Zugriff auf den Lagesensor.
+              {t.level.needsSensor}
             </p>
-            <Button onClick={() => void start()}>Sensor aktivieren</Button>
+            <Button onClick={() => void start()}>
+              {t.level.activateSensor}
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -144,8 +147,11 @@ export default function LevelPage() {
                 role="img"
                 aria-label={
                   tilt
-                    ? `Neigung: vor/zurück ${fmtDeg(tilt.pitch)}, links/rechts ${fmtDeg(tilt.roll)}`
-                    : "Warte auf Sensordaten"
+                    ? t.level.bubbleAria(
+                        fmtDeg(tilt.pitch, lang),
+                        fmtDeg(tilt.roll, lang)
+                      )
+                    : t.level.waitingSensor
                 }
               >
                 {/* Zielringe */}
@@ -174,16 +180,18 @@ export default function LevelPage() {
               <div className="mt-5 grid w-full grid-cols-2 gap-3 text-center">
                 <div className="rounded-lg bg-accent/50 py-2.5">
                   <p className="font-mono text-2xl font-bold">
-                    {tilt ? fmtDeg(tilt.pitch) : "–"}
+                    {tilt ? fmtDeg(tilt.pitch, lang) : "–"}
                   </p>
-                  <p className="text-xs text-muted-foreground">Vor / zurück</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t.level.pitchLabel}
+                  </p>
                 </div>
                 <div className="rounded-lg bg-accent/50 py-2.5">
                   <p className="font-mono text-2xl font-bold">
-                    {tilt ? fmtDeg(tilt.roll) : "–"}
+                    {tilt ? fmtDeg(tilt.roll, lang) : "–"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Links / rechts
+                    {t.level.rollLabel}
                   </p>
                 </div>
               </div>
@@ -193,7 +201,7 @@ export default function LevelPage() {
                 <div className="mt-4 w-full">
                   {advice.level ? (
                     <p className="rounded-lg bg-primary/10 px-4 py-2.5 text-center text-sm font-semibold text-primary">
-                      In Waage – perfekter Stand!
+                      {t.level.levelNow}
                     </p>
                   ) : (
                     <ul className="space-y-1.5">
@@ -225,7 +233,7 @@ export default function LevelPage() {
               }}
             >
               <Crosshair className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              Hier nullen
+              {t.level.zeroHere}
             </Button>
             {isCalibrated && (
               <Button
@@ -238,16 +246,12 @@ export default function LevelPage() {
                 }}
               >
                 <RotateCcw className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                Kalibrierung zurücksetzen
+                {t.level.resetCalibration}
               </Button>
             )}
           </div>
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-            «Hier nullen» gleicht eine schiefe Handy-Hülle oder Tischplatte aus:
-            Lege das Handy auf eine Fläche, von der du weisst, dass sie eben
-            ist, und nulle dort. Für den Wohnwagen: Handy auf den Boden oder
-            eine Arbeitsfläche im Innern legen und die tiefe Seite mit Keilen
-            unterlegen, bis die Blase in der Mitte ist.
+            {t.level.calibrationHint}
           </p>
         </>
       )}

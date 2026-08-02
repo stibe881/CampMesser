@@ -411,6 +411,139 @@ export const it: Translation = {
     footnote:
       "Nota: valori indicativi per un clima temperato. In caso di ondate di caldo, altitudine o lavoro fisico pianifica con più margine. Il valore per i cani vale per cani di taglia media (ca. 20 kg). Usa l'acqua dei ruscelli solo filtrata o bollita.",
   },
+  sunCompass: {
+    title: "Bussola solare",
+    subtitle:
+      "Dove si trova il sole e quando? Perfetto per scegliere la piazzola e orientare i pannelli solari.",
+    kinds: {
+      baum: "Albero / bosco",
+      berg: "Montagna / collina",
+      gebaeude: "Edificio",
+    },
+    diagramAria: (dir: string, alt: number) =>
+      `Diagramma della posizione del sole: sole attualmente a ${dir} a ${alt} gradi di altezza`,
+    horizonLabel: "Orizzonte (0°)",
+    ring30: "30° di altezza",
+    ring60: "60° di altezza",
+    cardinalN: "N",
+    cardinalE: "E",
+    cardinalS: "S",
+    cardinalW: "O",
+    risePoint: "Alba",
+    setPoint: "Tramonto",
+    hourMark: (h: number) => `ore ${h}`,
+    youAreHere: "Tu sei qui",
+    inShadow: "in ombra",
+    sunBelowHorizon: "Sole sotto l'orizzonte",
+    spotBanner: "Posizione del sole per la piazzola salvata",
+    useOwnLocation: "Usa la mia posizione",
+    locating: "Localizzazione in corso …",
+    retry: "Riprova",
+    geoUnsupported: "Questo dispositivo non supporta la localizzazione.",
+    geoDenied:
+      "Accesso alla posizione negato. Consentilo nelle impostazioni del browser.",
+    geoFailed: "Impossibile determinare la posizione.",
+    atTime: (time: string) => `Alle ${time}`,
+    sunIsIn: "il sole è a",
+    aboveHorizon: "sopra l'orizzonte",
+    summaryBlocked:
+      " – ma un ostacolo registrato lo copre: la tua piazzola è in ombra.",
+    summaryHigh: " – quasi verticale, pochissima ombra.",
+    summaryMid: " – alberi e tende proiettano ombre di media lunghezza.",
+    summaryLow:
+      " – posizione bassa, ombre lunghe: gli ostacoli ora fanno molta ombra.",
+    belowHorizonNext: "il sole è sotto l'orizzonte. Prossima alba:",
+    clock: (time: string) => time,
+    inTheEast: "a est.",
+    viewFromAbove:
+      "Vista dall'alto della tua piazzola: anello esterno = orizzonte, centro = in verticale sopra di te.",
+    placeModeHint: (kind: string) =>
+      `Tocca ora il punto del diagramma dove si trova l'ostacolo (${kind}) – direzione e altezza vengono rilevate automaticamente.`,
+    liveCompassOn: "Attiva bussola live",
+    liveCompassOff: "Disattiva bussola live",
+    compassDenied:
+      "L'accesso al sensore di movimento è stato negato – consentilo nelle impostazioni del browser per usare la bussola live.",
+    compassUnsupported:
+      "Questo dispositivo non ha un sensore di direzione – la bussola live funziona solo su smartphone e tablet.",
+    compassWaiting:
+      "In attesa dei dati del sensore … muovi leggermente il dispositivo formando un otto per calibrare la bussola.",
+    legendSunNow: "Sole adesso",
+    legendPathFuture: "Traiettoria (in arrivo)",
+    legendPathPast: "Traiettoria (passata)",
+    legendYourLocation: "La tua posizione",
+    legendObstacle: "Ostacolo",
+    dateLabel: "Data",
+    dateAria: "Scegli la data per la visualizzazione della posizione del sole",
+    planningView: "Vista di pianificazione",
+    sliderLabel: "Trascina il cursore per guardare nel futuro",
+    nowButton: "Adesso",
+    nowAria: "Imposta data e cursore su adesso",
+    timeAria: "Scegli l'ora per la visualizzazione della posizione del sole",
+    sunriseTitle: "Alba",
+    sunsetTitle: "Tramonto",
+    belowHorizonShort: "sotto l'orizzonte",
+    sunHeightAt: (time: string) => `Altezza del sole alle ${time}`,
+    directionAt: (time: string) => `Direzione alle ${time}`,
+    obstaclesTitle: "Ostacoli all'orizzonte",
+    obstaclesIntro:
+      "Registra alberi, montagne o edifici attorno alla tua piazzola. La bussola li mostra nel diagramma e calcola quando coprono il sole – importante per tenda e pannelli solari.",
+    profileGroupAria: "Scegli il profilo degli ostacoli",
+    profileGeneral: "Generale",
+    obstacleLine: (
+      label: string,
+      dir: string,
+      az: number,
+      h: number,
+      w: number
+    ) => `${label} a ${dir} (${az}°) · alto ${h}° · largo ${w}°`,
+    removeObstacleAria: (label: string) => `Rimuovi ${label}`,
+    kindLabel: "Tipo",
+    azimuthLabel: "Direzione (°)",
+    azimuthPlaceholder: "180 = sud",
+    heightLabel: "Altezza (°)",
+    widthLabel: "Larghezza (°)",
+    placeByTapActive: "Modalità tocco attiva …",
+    placeByTap: "Posiziona toccando il diagramma",
+    addNumeric: "Inserisci con i numeri",
+    fistTip:
+      "Suggerimento per l'altezza: allunga il braccio – un pugno corrisponde a circa 10°. Un albero che finisce a due pugni e mezzo sopra l'orizzonte è quindi a circa 25°.",
+    shadowTitle: "Orari d'ombra oggi",
+    shadowNone:
+      "I tuoi ostacoli oggi non coprono mai il sole – vista libera tutto il giorno.",
+    shadowRange: (from: string, to: string) => `${from}–${to}`,
+    shadowSuffix: "– sole dietro un ostacolo, piazzola in ombra",
+    locationLine: "Posizione:",
+    refreshLocationAria: "Aggiorna la posizione",
+    tipsTitle: "Consigli per la piazzola",
+    morningShadeTitle: "Ombra al mattino:",
+    morningShadeText: (sunrise: string) =>
+      `Posiziona la tenda in modo che a est (alba alle ${sunrise}) ci siano alberi o un pendio – così la tenda resta fresca più a lungo.`,
+    solarTitle: "Pannelli solari:",
+    solarText1: (alt: number) =>
+      `Orienta i pannelli verso sud. Verso mezzogiorno il sole raggiunge il punto più alto a ${alt}° – il`,
+    solarLink: "calcolatore del budget energetico",
+    solarText2: "aiuta a pianificare la resa.",
+  },
+  level: {
+    title: "Livella a bolla",
+    subtitle:
+      "Livellare caravan, fornello o tavolo – appoggia il telefono in piano, display verso l'alto.",
+    unsupported:
+      "Questo dispositivo non ha un sensore di inclinazione. Apri la livella sul tuo smartphone – funziona completamente offline.",
+    needsSensor:
+      "Per la livella l'app ha bisogno dell'accesso al sensore di inclinazione.",
+    activateSensor: "Attiva il sensore",
+    bubbleAria: (pitch: string, roll: string) =>
+      `Inclinazione: avanti/indietro ${pitch}, sinistra/destra ${roll}`,
+    waitingSensor: "In attesa dei dati del sensore",
+    pitchLabel: "Avanti / indietro",
+    rollLabel: "Sinistra / destra",
+    levelNow: "In bolla – posizione perfetta!",
+    zeroHere: "Azzera qui",
+    resetCalibration: "Reimposta la calibrazione",
+    calibrationHint:
+      "«Azzera qui» compensa una custodia del telefono o un piano storti: appoggia il telefono su una superficie che sai essere piana e azzera lì. Per il caravan: appoggia il telefono sul pavimento o su un piano di lavoro all'interno e metti dei cunei sotto il lato basso finché la bolla è al centro.",
+  },
   notFound: {
     heading: "Pagina non trovata",
     text1: "Questa pagina purtroppo non esiste.",

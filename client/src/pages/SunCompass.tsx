@@ -29,6 +29,9 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { getSunPosition, getSunTimes } from "@/lib/sun";
 import { isBlocked } from "@shared/obstacles";
+import { compassDirection } from "@shared/solar";
+import { LOCALE_TAGS, type Language } from "@shared/i18n";
+import { useI18n } from "@/i18n";
 import {
   loadObstacleProfiles,
   saveObstacleProfiles,
@@ -50,24 +53,22 @@ interface GeoState {
   status: "loading" | "ok" | "error";
   lat?: number;
   lng?: number;
-  errorMessage?: string;
+  errorKey?: "geoUnsupported" | "geoDenied" | "geoFailed";
 }
 
+/** Hindernis-Arten: Icon und Standardmasse (Labels kommen aus dem Wörterbuch). */
 const OBSTACLE_KINDS = {
   baum: {
-    label: "Baum / Wald",
     icon: TreePine,
     defaultHeight: 25,
     defaultWidth: 30,
   },
   berg: {
-    label: "Berg / Hügel",
     icon: Mountain,
     defaultHeight: 15,
     defaultWidth: 60,
   },
   gebaeude: {
-    label: "Gebäude",
     icon: Building2,
     defaultHeight: 30,
     defaultWidth: 20,
@@ -105,15 +106,13 @@ function computeShadowWindows(
   return windows;
 }
 
-function fmtTime(d: Date | null) {
+function fmtTime(d: Date | null, lang: Language) {
   return d
-    ? d.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })
+    ? d.toLocaleTimeString(LOCALE_TAGS[lang], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : "–";
-}
-
-function directionLabel(azimuth: number): string {
-  const dirs = ["N", "NO", "O", "SO", "S", "SW", "W", "NW"];
-  return dirs[Math.round(azimuth / 45) % 8];
 }
 
 /**
@@ -142,6 +141,7 @@ function SunDiagram({
   /** Geräte-Blickrichtung in Grad (0 = Nord). Zeichnet einen Sichtkegel, wenn gesetzt. */
   deviceHeading?: number | null;
 }) {
+  const { lang, t } = useI18n();
   const size = 340;
   const c = size / 2;
   const rHorizon = size / 2 - 30;
@@ -211,6 +211,7 @@ function SunDiagram({
       riseXY: rise,
       setXY: set,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lat, lng, selectedDate]);
 
   const sunPos = getSunPosition(selectedDate, lat, lng);
@@ -244,15 +245,16 @@ function SunDiagram({
     const dayStart = new Date(selectedDate);
     dayStart.setHours(0, 0, 0, 0);
     for (let h = 0; h < 24; h += 3) {
-      const t = new Date(dayStart.getTime() + h * 3600000);
-      const pos = getSunPosition(t, lat, lng);
+      const time = new Date(dayStart.getTime() + h * 3600000);
+      const pos = getSunPosition(time, lat, lng);
       if (pos.altitude > 2) {
         const xy = toXY(pos.azimuth, pos.altitude);
-        marks.push({ ...xy, label: `${h} Uhr` });
+        marks.push({ ...xy, label: t.sunCompass.hourMark(h) });
       }
     }
     return marks;
-  }, [lat, lng, selectedDate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lat, lng, selectedDate, t]);
 
   return (
     <svg
@@ -265,7 +267,10 @@ function SunDiagram({
         transformOrigin: "center",
       }}
       role="img"
-      aria-label={`Sonnenstand-Diagramm: Sonne aktuell im ${directionLabel(sunPos.azimuth)} bei ${Math.round(sunPos.altitude)} Grad Höhe`}
+      aria-label={t.sunCompass.diagramAria(
+        compassDirection(sunPos.azimuth, lang),
+        Math.round(sunPos.altitude)
+      )}
     >
       <defs>
         <radialGradient id="skyGradient" cx="50%" cy="50%" r="50%">
@@ -316,7 +321,7 @@ function SunDiagram({
         fontSize="8"
         fill="var(--color-muted-foreground)"
       >
-        Horizont (0°)
+        {t.sunCompass.horizonLabel}
       </text>
       <text
         x={c + 5}
@@ -324,7 +329,7 @@ function SunDiagram({
         fontSize="8"
         fill="var(--color-muted-foreground)"
       >
-        30° hoch
+        {t.sunCompass.ring30}
       </text>
       <text
         x={c + 5}
@@ -332,12 +337,12 @@ function SunDiagram({
         fontSize="8"
         fill="var(--color-muted-foreground)"
       >
-        60° hoch
+        {t.sunCompass.ring60}
       </text>
 
       {/* Hindernis-Sektoren am Horizont */}
       {obstacles.map(o => {
-        const Icon = OBSTACLE_KINDS[o.kind];
+        const Icon = OBSTACLE_KINDS[o.kind].icon;
         void Icon;
         const midRad = ((o.azimuth - 90) * Math.PI) / 180;
         const rMid = rHorizon * (1 - Math.min(o.height, 89) / 90 / 2);
@@ -366,24 +371,24 @@ function SunDiagram({
 
       {/* Himmelsrichtungen */}
       {[
-        { label: "N", az: 0, full: "Norden" },
-        { label: "O", az: 90, full: "Osten" },
-        { label: "S", az: 180, full: "Süden" },
-        { label: "W", az: 270, full: "Westen" },
-      ].map(({ label, az }) => {
+        { key: "N", label: t.sunCompass.cardinalN, az: 0 },
+        { key: "E", label: t.sunCompass.cardinalE, az: 90 },
+        { key: "S", label: t.sunCompass.cardinalS, az: 180 },
+        { key: "W", label: t.sunCompass.cardinalW, az: 270 },
+      ].map(({ key, label, az }) => {
         const rad = ((az - 90) * Math.PI) / 180;
         const x = c + (rHorizon + 18) * Math.cos(rad);
         const y = c + (rHorizon + 18) * Math.sin(rad);
         return (
           <text
-            key={label}
+            key={key}
             x={x}
             y={y + 4}
             textAnchor="middle"
             fontSize="13"
             fontWeight="700"
             fill={
-              label === "N"
+              key === "N"
                 ? "var(--color-destructive)"
                 : "var(--color-muted-foreground)"
             }
@@ -434,7 +439,7 @@ function SunDiagram({
             fontWeight="600"
             fill="var(--color-muted-foreground)"
           >
-            Aufgang
+            {t.sunCompass.risePoint}
           </text>
         </g>
       )}
@@ -456,7 +461,7 @@ function SunDiagram({
             fontWeight="600"
             fill="var(--color-muted-foreground)"
           >
-            Untergang
+            {t.sunCompass.setPoint}
           </text>
         </g>
       )}
@@ -560,7 +565,7 @@ function SunDiagram({
         fontWeight="600"
         fill="var(--color-foreground)"
       >
-        Du bist hier
+        {t.sunCompass.youAreHere}
       </text>
 
       {/* Sonne mit Strahlen */}
@@ -607,7 +612,7 @@ function SunDiagram({
               fontWeight="700"
               fill="var(--color-destructive)"
             >
-              im Schatten
+              {t.sunCompass.inShadow}
             </text>
           )}
         </g>
@@ -633,7 +638,7 @@ function SunDiagram({
             fontSize="8.5"
             fill="var(--color-muted-foreground)"
           >
-            Sonne unter dem Horizont
+            {t.sunCompass.sunBelowHorizon}
           </text>
         </g>
       )}
@@ -642,6 +647,7 @@ function SunDiagram({
 }
 
 export default function SunCompassPage() {
+  const { lang, t } = useI18n();
   // Optional: Koordinaten aus URL-Parametern (z. B. von Zeltplatz-Favoriten)
   const [urlSpot] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -744,10 +750,7 @@ export default function SunCompassPage() {
 
   const locate = () => {
     if (!navigator.geolocation) {
-      setGeo({
-        status: "error",
-        errorMessage: "Dieses Gerät unterstützt keine Standortermittlung.",
-      });
+      setGeo({ status: "error", errorKey: "geoUnsupported" });
       return;
     }
     setGeo({ status: "loading" });
@@ -761,10 +764,8 @@ export default function SunCompassPage() {
       err =>
         setGeo({
           status: "error",
-          errorMessage:
-            err.code === err.PERMISSION_DENIED
-              ? "Standortzugriff verweigert. Bitte in den Browser-Einstellungen erlauben."
-              : "Standort konnte nicht ermittelt werden.",
+          errorKey:
+            err.code === err.PERMISSION_DENIED ? "geoDenied" : "geoFailed",
         }),
       { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }
     );
@@ -801,7 +802,7 @@ export default function SunCompassPage() {
   const spotBanner = urlSpot ? (
     <div className="mb-4 flex items-center justify-between gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
       <span>
-        Sonnenstand für gespeicherten Zeltplatz
+        {t.sunCompass.spotBanner}
         {urlSpot.name ? `: ${urlSpot.name}` : ""}
       </span>
       <button
@@ -812,7 +813,7 @@ export default function SunCompassPage() {
         }}
         className="shrink-0 font-medium text-primary underline"
       >
-        Eigenen Standort nutzen
+        {t.sunCompass.useOwnLocation}
       </button>
     </div>
   ) : null;
@@ -848,10 +849,7 @@ export default function SunCompassPage() {
 
   return (
     <div className="container max-w-2xl py-6">
-      <PageHeader
-        title="Sonnenstand-Kompass"
-        subtitle="Wo steht die Sonne wann? Perfekt für die Wahl des Stellplatzes und die Ausrichtung der Solarpanels."
-      />
+      <PageHeader title={t.sunCompass.title} subtitle={t.sunCompass.subtitle} />
 
       {spotBanner}
 
@@ -859,7 +857,7 @@ export default function SunCompassPage() {
         <Card>
           <CardContent className="flex items-center gap-3 pt-6 text-muted-foreground">
             <Compass className="h-5 w-5 animate-pulse" aria-hidden="true" />
-            Standort wird ermittelt …
+            {t.sunCompass.locating}
           </CardContent>
         </Card>
       )}
@@ -867,10 +865,12 @@ export default function SunCompassPage() {
       {geo.status === "error" && (
         <Card>
           <CardContent className="pt-6">
-            <p className="mb-3 text-destructive">{geo.errorMessage}</p>
+            <p className="mb-3 text-destructive">
+              {t.sunCompass[geo.errorKey ?? "geoFailed"]}
+            </p>
             <Button variant="outline" onClick={locate}>
               <RefreshCw className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              Erneut versuchen
+              {t.sunCompass.retry}
             </Button>
           </CardContent>
         </Card>
@@ -883,24 +883,28 @@ export default function SunCompassPage() {
             <p className="text-sm leading-relaxed">
               {sunPos.altitude > 0 ? (
                 <>
-                  Um <strong>{timeLabel} Uhr</strong> steht die Sonne im{" "}
-                  <strong>{directionLabel(sunPos.azimuth)}</strong> (
+                  <strong>{t.sunCompass.atTime(timeLabel)}</strong>{" "}
+                  {t.sunCompass.sunIsIn}{" "}
+                  <strong>{compassDirection(sunPos.azimuth, lang)}</strong> (
                   {Math.round(sunPos.azimuth)}°),{" "}
-                  <strong>{Math.round(sunPos.altitude)}°</strong> über dem
-                  Horizont
+                  <strong>{Math.round(sunPos.altitude)}°</strong>{" "}
+                  {t.sunCompass.aboveHorizon}
                   {sunBlockedNow
-                    ? " – aber ein eingetragenes Hindernis verdeckt sie: dein Platz liegt im Schatten."
+                    ? t.sunCompass.summaryBlocked
                     : sunPos.altitude > 45
-                      ? " – fast senkrecht, kaum Schatten."
+                      ? t.sunCompass.summaryHigh
                       : sunPos.altitude > 20
-                        ? " – Bäume und Zelte werfen mittellange Schatten."
-                        : " – tiefer Stand, lange Schatten: Hindernisse verschatten jetzt viel."}
+                        ? t.sunCompass.summaryMid
+                        : t.sunCompass.summaryLow}
                 </>
               ) : (
                 <>
-                  Um <strong>{timeLabel} Uhr</strong> ist die Sonne unter dem
-                  Horizont. Nächster Aufgang:{" "}
-                  <strong>{fmtTime(sunTimes.sunrise)} Uhr</strong> im Osten.
+                  <strong>{t.sunCompass.atTime(timeLabel)}</strong>{" "}
+                  {t.sunCompass.belowHorizonNext}{" "}
+                  <strong>
+                    {t.sunCompass.clock(fmtTime(sunTimes.sunrise, lang))}
+                  </strong>{" "}
+                  {t.sunCompass.inTheEast}
                 </>
               )}
             </p>
@@ -910,20 +914,17 @@ export default function SunCompassPage() {
           <Card className="mb-4">
             <CardContent className="pt-6">
               <p className="mb-3 text-center text-xs text-muted-foreground">
-                Blick von oben auf deinen Platz: Aussenring = Horizont, Mitte =
-                senkrecht über dir.
+                {t.sunCompass.viewFromAbove}
               </p>
               {placeMode && (
                 <div className="mb-3 rounded-lg border border-primary/40 bg-accent/60 px-3 py-2 text-center text-sm text-accent-foreground">
-                  Tippe jetzt auf die Stelle im Diagramm, wo das Hindernis (
-                  {OBSTACLE_KINDS[newKind].label}) steht – Richtung und Höhe
-                  werden automatisch übernommen.{" "}
+                  {t.sunCompass.placeModeHint(t.sunCompass.kinds[newKind])}{" "}
                   <button
                     type="button"
                     onClick={() => setPlaceMode(false)}
                     className="font-medium text-primary underline"
                   >
-                    Abbrechen
+                    {t.common.cancel}
                   </button>
                 </div>
               )}
@@ -938,31 +939,30 @@ export default function SunCompassPage() {
                   }
                 >
                   <Compass className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                  {compass.active ? "Live-Kompass aus" : "Live-Kompass ein"}
+                  {compass.active
+                    ? t.sunCompass.liveCompassOff
+                    : t.sunCompass.liveCompassOn}
                 </Button>
                 {compass.active && compass.heading !== null && (
                   <span className="rounded-md bg-muted px-2 py-1 font-mono text-xs font-semibold">
                     {Math.round(compass.heading)}°{" "}
-                    {directionLabel(compass.heading)}
+                    {compassDirection(compass.heading, lang)}
                   </span>
                 )}
               </div>
               {compass.permission === "denied" && (
                 <p className="mb-3 text-center text-xs text-destructive">
-                  Zugriff auf den Bewegungssensor wurde abgelehnt – erlaube ihn
-                  in den Browser-Einstellungen, um den Live-Kompass zu nutzen.
+                  {t.sunCompass.compassDenied}
                 </p>
               )}
               {compass.permission === "unsupported" && (
                 <p className="mb-3 text-center text-xs text-muted-foreground">
-                  Dieses Gerät hat keinen Richtungssensor – der Live-Kompass
-                  funktioniert nur auf Smartphones und Tablets.
+                  {t.sunCompass.compassUnsupported}
                 </p>
               )}
               {compass.active && compass.heading === null && (
                 <p className="mb-3 text-center text-xs text-muted-foreground">
-                  Warte auf Sensordaten … bewege das Gerät leicht in einer Acht,
-                  um den Kompass zu kalibrieren.
+                  {t.sunCompass.compassWaiting}
                 </p>
               )}
               <SunDiagram
@@ -987,24 +987,24 @@ export default function SunCompassPage() {
               >
                 <span className="flex items-center gap-1.5">
                   <span className="inline-block h-3 w-3 rounded-full border-2 border-[#E09B2D] bg-[#F5B841]" />
-                  Sonne jetzt
+                  {t.sunCompass.legendSunNow}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="inline-block h-1 w-5 rounded-full bg-chart-1 opacity-90" />
-                  Bahn (kommt noch)
+                  {t.sunCompass.legendPathFuture}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="inline-block h-1 w-5 rounded-full bg-chart-1 opacity-30" />
-                  Bahn (vorbei)
+                  {t.sunCompass.legendPathPast}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="inline-block h-3 w-3 rounded-full border-2 border-card bg-primary" />
-                  Dein Standort
+                  {t.sunCompass.legendYourLocation}
                 </span>
                 {obstacles.length > 0 && (
                   <span className="flex items-center gap-1.5">
                     <span className="inline-block h-3 w-3 rounded-sm bg-primary opacity-25 ring-1 ring-primary/50" />
-                    Hindernis
+                    {t.sunCompass.legendObstacle}
                   </span>
                 )}
               </div>
@@ -1015,7 +1015,7 @@ export default function SunCompassPage() {
                   htmlFor="sun-date"
                   className="text-sm font-medium text-muted-foreground"
                 >
-                  Datum
+                  {t.sunCompass.dateLabel}
                 </label>
                 <Input
                   id="sun-date"
@@ -1026,11 +1026,11 @@ export default function SunCompassPage() {
                     const parsed = new Date(`${e.target.value}T12:00:00`);
                     if (!Number.isNaN(parsed.getTime())) setBaseDate(parsed);
                   }}
-                  aria-label="Datum für die Sonnenstand-Anzeige wählen"
+                  aria-label={t.sunCompass.dateAria}
                 />
                 {baseDate.toDateString() !== new Date().toDateString() && (
                   <span className="rounded-full bg-chart-4/20 px-2.5 py-1 text-xs font-medium">
-                    Planungs-Ansicht
+                    {t.sunCompass.planningView}
                   </span>
                 )}
               </div>
@@ -1042,7 +1042,7 @@ export default function SunCompassPage() {
                     htmlFor="time-slider"
                     className="text-sm font-medium text-muted-foreground"
                   >
-                    Zieh den Regler, um in die Zukunft zu schauen
+                    {t.sunCompass.sliderLabel}
                   </label>
                   <span className="flex items-center gap-1.5">
                     <button
@@ -1053,12 +1053,12 @@ export default function SunCompassPage() {
                         setMinutes(now.getHours() * 60 + now.getMinutes());
                       }}
                       className="rounded-md border border-border px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-accent"
-                      aria-label="Datum und Regler auf jetzt stellen"
+                      aria-label={t.sunCompass.nowAria}
                     >
-                      Jetzt
+                      {t.sunCompass.nowButton}
                     </button>
                     <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-sm font-semibold">
-                      {timeLabel} Uhr
+                      {t.sunCompass.clock(timeLabel)}
                     </span>
                   </span>
                 </div>
@@ -1069,7 +1069,7 @@ export default function SunCompassPage() {
                   step={5}
                   value={[minutes]}
                   onValueChange={v => setMinutes(v[0])}
-                  aria-label="Uhrzeit für die Sonnenstand-Anzeige wählen"
+                  aria-label={t.sunCompass.timeAria}
                 />
                 {/* Sonnenauf-/-untergangs-Marker auf der Slider-Achse */}
                 {sunTimes && sunTimes.sunrise && sunTimes.sunset && (
@@ -1079,7 +1079,7 @@ export default function SunCompassPage() {
                       style={{
                         left: `${((sunTimes.sunrise.getHours() * 60 + sunTimes.sunrise.getMinutes()) / 1439) * 100}%`,
                       }}
-                      title="Sonnenaufgang"
+                      title={t.sunCompass.sunriseTitle}
                     >
                       <Sunrise className="h-4 w-4 text-chart-1" />
                     </span>
@@ -1088,7 +1088,7 @@ export default function SunCompassPage() {
                       style={{
                         left: `${((sunTimes.sunset.getHours() * 60 + sunTimes.sunset.getMinutes()) / 1439) * 100}%`,
                       }}
-                      title="Sonnenuntergang"
+                      title={t.sunCompass.sunsetTitle}
                     >
                       <Sunset className="h-4 w-4 text-destructive" />
                     </span>
@@ -1116,9 +1116,11 @@ export default function SunCompassPage() {
                 aria-hidden="true"
               />
               <p className="font-mono text-sm font-semibold">
-                {fmtTime(sunTimes.sunrise)}
+                {fmtTime(sunTimes.sunrise, lang)}
               </p>
-              <p className="text-xs text-muted-foreground">Sonnenaufgang</p>
+              <p className="text-xs text-muted-foreground">
+                {t.sunCompass.sunriseTitle}
+              </p>
             </div>
             <div className="rounded-xl border border-border bg-card p-3.5 text-center">
               <Sunset
@@ -1126,9 +1128,11 @@ export default function SunCompassPage() {
                 aria-hidden="true"
               />
               <p className="font-mono text-sm font-semibold">
-                {fmtTime(sunTimes.sunset)}
+                {fmtTime(sunTimes.sunset, lang)}
               </p>
-              <p className="text-xs text-muted-foreground">Sonnenuntergang</p>
+              <p className="text-xs text-muted-foreground">
+                {t.sunCompass.sunsetTitle}
+              </p>
             </div>
             <div className="rounded-xl border border-border bg-card p-3.5 text-center">
               {sunPos.altitude > 0 ? (
@@ -1145,10 +1149,10 @@ export default function SunCompassPage() {
               <p className="font-mono text-sm font-semibold">
                 {sunPos.altitude > 0
                   ? `${sunPos.altitude.toFixed(0)}°`
-                  : "unter Horizont"}
+                  : t.sunCompass.belowHorizonShort}
               </p>
               <p className="text-xs text-muted-foreground">
-                Sonnenhöhe um {timeLabel}
+                {t.sunCompass.sunHeightAt(timeLabel)}
               </p>
             </div>
             <div className="rounded-xl border border-border bg-card p-3.5 text-center">
@@ -1157,10 +1161,11 @@ export default function SunCompassPage() {
                 aria-hidden="true"
               />
               <p className="font-mono text-sm font-semibold">
-                {sunPos.azimuth.toFixed(0)}° ({directionLabel(sunPos.azimuth)})
+                {sunPos.azimuth.toFixed(0)}° (
+                {compassDirection(sunPos.azimuth, lang)})
               </p>
               <p className="text-xs text-muted-foreground">
-                Richtung um {timeLabel}
+                {t.sunCompass.directionAt(timeLabel)}
               </p>
             </div>
           </div>
@@ -1171,12 +1176,10 @@ export default function SunCompassPage() {
             <CardContent className="pt-6">
               <p className="mb-1 flex items-center gap-2 font-semibold">
                 <TreePine className="h-4 w-4 text-primary" aria-hidden="true" />
-                Hindernisse am Horizont
+                {t.sunCompass.obstaclesTitle}
               </p>
               <p className="mb-4 text-sm text-muted-foreground">
-                Trage Bäume, Berge oder Gebäude rund um deinen Platz ein. Der
-                Kompass zeigt sie im Diagramm und berechnet, wann sie die Sonne
-                verdecken – wichtig für Zelt und Solarpanels.
+                {t.sunCompass.obstaclesIntro}
               </p>
 
               {/* Profil-Auswahl: allgemeines Panorama oder eines pro Zeltplatz-Favorit */}
@@ -1184,7 +1187,7 @@ export default function SunCompassPage() {
                 <div
                   className="mb-4 flex flex-wrap items-center gap-2"
                   role="group"
-                  aria-label="Hindernis-Profil wählen"
+                  aria-label={t.sunCompass.profileGroupAria}
                 >
                   <button
                     type="button"
@@ -1197,7 +1200,7 @@ export default function SunCompassPage() {
                     )}
                   >
                     <Compass className="h-3.5 w-3.5" aria-hidden="true" />
-                    Allgemein
+                    {t.sunCompass.profileGeneral}
                   </button>
                   {spots!.map(spot => {
                     const count = profiles.spots[String(spot.id)]?.length ?? 0;
@@ -1240,17 +1243,22 @@ export default function SunCompassPage() {
                           aria-hidden="true"
                         />
                         <span className="min-w-0 flex-1">
-                          {OBSTACLE_KINDS[o.kind].label} im{" "}
-                          {directionLabel(o.azimuth)} ({Math.round(o.azimuth)}°)
-                          · {Math.round(o.height)}° hoch · {Math.round(o.width)}
-                          ° breit
+                          {t.sunCompass.obstacleLine(
+                            t.sunCompass.kinds[o.kind],
+                            compassDirection(o.azimuth, lang),
+                            Math.round(o.azimuth),
+                            Math.round(o.height),
+                            Math.round(o.width)
+                          )}
                         </span>
                         <button
                           type="button"
                           onClick={() =>
                             saveObstacles(obstacles.filter(x => x.id !== o.id))
                           }
-                          aria-label={`${OBSTACLE_KINDS[o.kind].label} entfernen`}
+                          aria-label={t.sunCompass.removeObstacleAria(
+                            t.sunCompass.kinds[o.kind]
+                          )}
                           className="shrink-0 text-muted-foreground transition-colors hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -1264,7 +1272,7 @@ export default function SunCompassPage() {
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div>
                   <Label htmlFor="obstacle-kind" className="text-xs">
-                    Art
+                    {t.sunCompass.kindLabel}
                   </Label>
                   <Select
                     value={newKind}
@@ -1279,29 +1287,31 @@ export default function SunCompassPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(OBSTACLE_KINDS).map(([value, def]) => (
-                        <SelectItem key={value} value={value}>
-                          {def.label}
-                        </SelectItem>
-                      ))}
+                      {(Object.keys(OBSTACLE_KINDS) as Obstacle["kind"][]).map(
+                        value => (
+                          <SelectItem key={value} value={value}>
+                            {t.sunCompass.kinds[value]}
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <Label htmlFor="obstacle-azimuth" className="text-xs">
-                    Richtung (°)
+                    {t.sunCompass.azimuthLabel}
                   </Label>
                   <Input
                     id="obstacle-azimuth"
                     value={newAzimuth}
                     onChange={e => setNewAzimuth(e.target.value)}
                     inputMode="numeric"
-                    placeholder="180 = Süden"
+                    placeholder={t.sunCompass.azimuthPlaceholder}
                   />
                 </div>
                 <div>
                   <Label htmlFor="obstacle-height" className="text-xs">
-                    Höhe (°)
+                    {t.sunCompass.heightLabel}
                   </Label>
                   <Input
                     id="obstacle-height"
@@ -1313,7 +1323,7 @@ export default function SunCompassPage() {
                 </div>
                 <div>
                   <Label htmlFor="obstacle-width" className="text-xs">
-                    Breite (°)
+                    {t.sunCompass.widthLabel}
                   </Label>
                   <Input
                     id="obstacle-width"
@@ -1332,29 +1342,26 @@ export default function SunCompassPage() {
                 >
                   <Compass className="mr-1.5 h-4 w-4" aria-hidden="true" />
                   {placeMode
-                    ? "Tipp-Modus aktiv …"
-                    : "Per Tipp im Diagramm setzen"}
+                    ? t.sunCompass.placeByTapActive
+                    : t.sunCompass.placeByTap}
                 </Button>
                 <Button variant="outline" size="sm" onClick={addObstacle}>
                   <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                  Mit Zahlen eintragen
+                  {t.sunCompass.addNumeric}
                 </Button>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                Tipp zur Höhe: Strecke den Arm aus – eine Faust entspricht etwa
-                10°. Ein Baum, der zweieinhalb Fäuste über dem Horizont endet,
-                hat also rund 25°.
+                {t.sunCompass.fistTip}
               </p>
 
               {obstacles.length > 0 && (
                 <div className="mt-4 rounded-lg bg-accent/50 p-3">
                   <p className="mb-1.5 text-sm font-semibold">
-                    Schattenzeiten heute
+                    {t.sunCompass.shadowTitle}
                   </p>
                   {shadowWindows.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
-                      Deine Hindernisse verdecken die Sonne heute nie – freie
-                      Sicht den ganzen Tag.
+                      {t.sunCompass.shadowNone}
                     </p>
                   ) : (
                     <ul className="space-y-1 text-sm text-muted-foreground">
@@ -1366,9 +1373,12 @@ export default function SunCompassPage() {
                           />
                           <span>
                             <strong className="text-foreground">
-                              {fmtTime(w.from)}–{fmtTime(w.to)} Uhr
+                              {t.sunCompass.shadowRange(
+                                fmtTime(w.from, lang),
+                                fmtTime(w.to, lang)
+                              )}
                             </strong>{" "}
-                            – Sonne hinter Hindernis, Platz im Schatten
+                            {t.sunCompass.shadowSuffix}
                           </span>
                         </li>
                       ))}
@@ -1383,13 +1393,14 @@ export default function SunCompassPage() {
             <CardContent className="pt-6">
               <p className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" aria-hidden="true" />
-                Standort: {geo.lat!.toFixed(4)}, {geo.lng!.toFixed(4)}
+                {t.sunCompass.locationLine} {geo.lat!.toFixed(4)},{" "}
+                {geo.lng!.toFixed(4)}
                 <Button
                   variant="ghost"
                   size="sm"
                   className="ml-auto"
                   onClick={locate}
-                  aria-label="Standort aktualisieren"
+                  aria-label={t.sunCompass.refreshLocationAria}
                 >
                   <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
                 </Button>
@@ -1399,29 +1410,30 @@ export default function SunCompassPage() {
 
           <Card className="bg-accent/50">
             <CardContent className="pt-6 text-sm leading-relaxed">
-              <p className="mb-2 font-semibold">Tipps für den Stellplatz</p>
+              <p className="mb-2 font-semibold">{t.sunCompass.tipsTitle}</p>
               <p className="mb-2 text-muted-foreground">
-                <strong className="text-foreground">Morgens Schatten:</strong>{" "}
-                Stelle das Zelt so, dass im Osten (Sonnenaufgang um{" "}
-                {fmtTime(sunTimes.sunrise)}) Bäume oder ein Hang stehen – so
-                bleibt es im Zelt länger kühl.
+                <strong className="text-foreground">
+                  {t.sunCompass.morningShadeTitle}
+                </strong>{" "}
+                {t.sunCompass.morningShadeText(fmtTime(sunTimes.sunrise, lang))}
               </p>
               <p className="text-muted-foreground">
-                <strong className="text-foreground">Solarpanels:</strong> Richte
-                die Panels nach Süden aus. Um die Mittagszeit steht die Sonne
-                mit{" "}
-                {Math.round(
-                  getSunPosition(sunTimes.solarNoon, geo.lat!, geo.lng!)
-                    .altitude
-                )}
-                ° am höchsten – der{" "}
+                <strong className="text-foreground">
+                  {t.sunCompass.solarTitle}
+                </strong>{" "}
+                {t.sunCompass.solarText1(
+                  Math.round(
+                    getSunPosition(sunTimes.solarNoon, geo.lat!, geo.lng!)
+                      .altitude
+                  )
+                )}{" "}
                 <a
                   href="/energie"
                   className="font-medium text-primary hover:underline"
                 >
-                  Energie-Budget-Rechner
+                  {t.sunCompass.solarLink}
                 </a>{" "}
-                hilft bei der Ertragsplanung.
+                {t.sunCompass.solarText2}
               </p>
             </CardContent>
           </Card>

@@ -412,6 +412,139 @@ export const de = {
     footnote:
       "Hinweis: Werte sind Richtwerte für gemässigtes Klima. Bei Hitzewellen, Höhenlagen oder körperlicher Arbeit grosszügiger planen. Hunde-Richtwert gilt für mittelgrosse Hunde (ca. 20 kg). Wasser aus Bächen nur gefiltert oder abgekocht verwenden.",
   },
+  sunCompass: {
+    title: "Sonnenstand-Kompass",
+    subtitle:
+      "Wo steht die Sonne wann? Perfekt für die Wahl des Stellplatzes und die Ausrichtung der Solarpanels.",
+    kinds: {
+      baum: "Baum / Wald",
+      berg: "Berg / Hügel",
+      gebaeude: "Gebäude",
+    },
+    diagramAria: (dir: string, alt: number) =>
+      `Sonnenstand-Diagramm: Sonne aktuell im ${dir} bei ${alt} Grad Höhe`,
+    horizonLabel: "Horizont (0°)",
+    ring30: "30° hoch",
+    ring60: "60° hoch",
+    cardinalN: "N",
+    cardinalE: "O",
+    cardinalS: "S",
+    cardinalW: "W",
+    risePoint: "Aufgang",
+    setPoint: "Untergang",
+    hourMark: (h: number) => `${h} Uhr`,
+    youAreHere: "Du bist hier",
+    inShadow: "im Schatten",
+    sunBelowHorizon: "Sonne unter dem Horizont",
+    spotBanner: "Sonnenstand für gespeicherten Zeltplatz",
+    useOwnLocation: "Eigenen Standort nutzen",
+    locating: "Standort wird ermittelt …",
+    retry: "Erneut versuchen",
+    geoUnsupported: "Dieses Gerät unterstützt keine Standortermittlung.",
+    geoDenied:
+      "Standortzugriff verweigert. Bitte in den Browser-Einstellungen erlauben.",
+    geoFailed: "Standort konnte nicht ermittelt werden.",
+    atTime: (time: string) => `Um ${time} Uhr`,
+    sunIsIn: "steht die Sonne im",
+    aboveHorizon: "über dem Horizont",
+    summaryBlocked:
+      " – aber ein eingetragenes Hindernis verdeckt sie: dein Platz liegt im Schatten.",
+    summaryHigh: " – fast senkrecht, kaum Schatten.",
+    summaryMid: " – Bäume und Zelte werfen mittellange Schatten.",
+    summaryLow:
+      " – tiefer Stand, lange Schatten: Hindernisse verschatten jetzt viel.",
+    belowHorizonNext: "ist die Sonne unter dem Horizont. Nächster Aufgang:",
+    clock: (time: string) => `${time} Uhr`,
+    inTheEast: "im Osten.",
+    viewFromAbove:
+      "Blick von oben auf deinen Platz: Aussenring = Horizont, Mitte = senkrecht über dir.",
+    placeModeHint: (kind: string) =>
+      `Tippe jetzt auf die Stelle im Diagramm, wo das Hindernis (${kind}) steht – Richtung und Höhe werden automatisch übernommen.`,
+    liveCompassOn: "Live-Kompass ein",
+    liveCompassOff: "Live-Kompass aus",
+    compassDenied:
+      "Zugriff auf den Bewegungssensor wurde abgelehnt – erlaube ihn in den Browser-Einstellungen, um den Live-Kompass zu nutzen.",
+    compassUnsupported:
+      "Dieses Gerät hat keinen Richtungssensor – der Live-Kompass funktioniert nur auf Smartphones und Tablets.",
+    compassWaiting:
+      "Warte auf Sensordaten … bewege das Gerät leicht in einer Acht, um den Kompass zu kalibrieren.",
+    legendSunNow: "Sonne jetzt",
+    legendPathFuture: "Bahn (kommt noch)",
+    legendPathPast: "Bahn (vorbei)",
+    legendYourLocation: "Dein Standort",
+    legendObstacle: "Hindernis",
+    dateLabel: "Datum",
+    dateAria: "Datum für die Sonnenstand-Anzeige wählen",
+    planningView: "Planungs-Ansicht",
+    sliderLabel: "Zieh den Regler, um in die Zukunft zu schauen",
+    nowButton: "Jetzt",
+    nowAria: "Datum und Regler auf jetzt stellen",
+    timeAria: "Uhrzeit für die Sonnenstand-Anzeige wählen",
+    sunriseTitle: "Sonnenaufgang",
+    sunsetTitle: "Sonnenuntergang",
+    belowHorizonShort: "unter Horizont",
+    sunHeightAt: (time: string) => `Sonnenhöhe um ${time}`,
+    directionAt: (time: string) => `Richtung um ${time}`,
+    obstaclesTitle: "Hindernisse am Horizont",
+    obstaclesIntro:
+      "Trage Bäume, Berge oder Gebäude rund um deinen Platz ein. Der Kompass zeigt sie im Diagramm und berechnet, wann sie die Sonne verdecken – wichtig für Zelt und Solarpanels.",
+    profileGroupAria: "Hindernis-Profil wählen",
+    profileGeneral: "Allgemein",
+    obstacleLine: (
+      label: string,
+      dir: string,
+      az: number,
+      h: number,
+      w: number
+    ) => `${label} im ${dir} (${az}°) · ${h}° hoch · ${w}° breit`,
+    removeObstacleAria: (label: string) => `${label} entfernen`,
+    kindLabel: "Art",
+    azimuthLabel: "Richtung (°)",
+    azimuthPlaceholder: "180 = Süden",
+    heightLabel: "Höhe (°)",
+    widthLabel: "Breite (°)",
+    placeByTapActive: "Tipp-Modus aktiv …",
+    placeByTap: "Per Tipp im Diagramm setzen",
+    addNumeric: "Mit Zahlen eintragen",
+    fistTip:
+      "Tipp zur Höhe: Strecke den Arm aus – eine Faust entspricht etwa 10°. Ein Baum, der zweieinhalb Fäuste über dem Horizont endet, hat also rund 25°.",
+    shadowTitle: "Schattenzeiten heute",
+    shadowNone:
+      "Deine Hindernisse verdecken die Sonne heute nie – freie Sicht den ganzen Tag.",
+    shadowRange: (from: string, to: string) => `${from}–${to} Uhr`,
+    shadowSuffix: "– Sonne hinter Hindernis, Platz im Schatten",
+    locationLine: "Standort:",
+    refreshLocationAria: "Standort aktualisieren",
+    tipsTitle: "Tipps für den Stellplatz",
+    morningShadeTitle: "Morgens Schatten:",
+    morningShadeText: (sunrise: string) =>
+      `Stelle das Zelt so, dass im Osten (Sonnenaufgang um ${sunrise}) Bäume oder ein Hang stehen – so bleibt es im Zelt länger kühl.`,
+    solarTitle: "Solarpanels:",
+    solarText1: (alt: number) =>
+      `Richte die Panels nach Süden aus. Um die Mittagszeit steht die Sonne mit ${alt}° am höchsten – der`,
+    solarLink: "Energie-Budget-Rechner",
+    solarText2: "hilft bei der Ertragsplanung.",
+  },
+  level: {
+    title: "Wasserwaage",
+    subtitle:
+      "Wohnwagen, Kocher oder Tisch ausrichten – Handy flach auflegen, Display nach oben.",
+    unsupported:
+      "Dieses Gerät hat keinen Lagesensor. Öffne die Wasserwaage auf deinem Smartphone – sie funktioniert komplett offline.",
+    needsSensor:
+      "Für die Wasserwaage braucht die App Zugriff auf den Lagesensor.",
+    activateSensor: "Sensor aktivieren",
+    bubbleAria: (pitch: string, roll: string) =>
+      `Neigung: vor/zurück ${pitch}, links/rechts ${roll}`,
+    waitingSensor: "Warte auf Sensordaten",
+    pitchLabel: "Vor / zurück",
+    rollLabel: "Links / rechts",
+    levelNow: "In Waage – perfekter Stand!",
+    zeroHere: "Hier nullen",
+    resetCalibration: "Kalibrierung zurücksetzen",
+    calibrationHint:
+      "«Hier nullen» gleicht eine schiefe Handy-Hülle oder Tischplatte aus: Lege das Handy auf eine Fläche, von der du weisst, dass sie eben ist, und nulle dort. Für den Wohnwagen: Handy auf den Boden oder eine Arbeitsfläche im Innern legen und die tiefe Seite mit Keilen unterlegen, bis die Blase in der Mitte ist.",
+  },
   notFound: {
     heading: "Seite nicht gefunden",
     text1: "Diese Seite gibt es leider nicht.",

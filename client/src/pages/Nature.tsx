@@ -24,6 +24,8 @@ import {
   stargazingQuality,
 } from "@shared/moon";
 import { upcomingShowers } from "@shared/astro";
+import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -39,8 +41,8 @@ const QUALITY_STYLES: Record<string, string> = {
   schlecht: "bg-destructive/10 text-destructive",
 };
 
-function fmtDate(d: Date) {
-  return d.toLocaleDateString("de-CH", {
+function fmtDate(d: Date, lang: Language) {
+  return d.toLocaleDateString(LOCALE_TAGS[lang], {
     weekday: "short",
     day: "numeric",
     month: "long",
@@ -50,9 +52,13 @@ function fmtDate(d: Date) {
 
 /** Mondphasen-Kalender: aktuelle Phase, Sternbeobachtungs-Tipp und nächste Termine – rein offline berechnet. */
 function MoonCalendar() {
+  const { lang } = useI18n();
   const [now] = useState(() => new Date());
-  const moon = useMemo(() => getMoonInfo(now), [now]);
-  const quality = useMemo(() => stargazingQuality(moon.illumination), [moon]);
+  const moon = useMemo(() => getMoonInfo(now, lang), [now, lang]);
+  const quality = useMemo(
+    () => stargazingQuality(moon.illumination, lang),
+    [moon, lang]
+  );
   const fullMoons = useMemo(() => nextFullMoons(now, 3), [now]);
   const newMoons = useMemo(() => nextNewMoons(now, 3), [now]);
 
@@ -89,7 +95,7 @@ function MoonCalendar() {
           <p className="mb-1.5 text-sm font-semibold">🌕 Nächste Vollmonde</p>
           <ul className="space-y-1 text-sm text-muted-foreground">
             {fullMoons.map((d, i) => (
-              <li key={i}>{fmtDate(d)}</li>
+              <li key={i}>{fmtDate(d, lang)}</li>
             ))}
           </ul>
           <p className="mt-1.5 text-xs text-muted-foreground">
@@ -100,7 +106,7 @@ function MoonCalendar() {
           <p className="mb-1.5 text-sm font-semibold">🌑 Nächste Neumonde</p>
           <ul className="space-y-1 text-sm text-muted-foreground">
             {newMoons.map((d, i) => (
-              <li key={i}>{fmtDate(d)}</li>
+              <li key={i}>{fmtDate(d, lang)}</li>
             ))}
           </ul>
           <p className="mt-1.5 text-xs text-muted-foreground">
@@ -118,6 +124,7 @@ function MoonCalendar() {
 
 /** Sternschnuppen-Kalender: die nächsten Strom-Maxima inkl. Mondstörung – offline berechnet. */
 function MeteorCalendar() {
+  const { lang } = useI18n();
   const [now] = useState(() => new Date());
   const showers = useMemo(() => upcomingShowers(now, 4), [now]);
 
@@ -136,7 +143,7 @@ function MeteorCalendar() {
         {showers.map(entry => (
           <li key={entry.shower.id} className="rounded-lg bg-accent/50 p-3">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="font-semibold">{entry.shower.name}</p>
+              <p className="font-semibold">{pick(entry.shower.name, lang)}</p>
               {entry.activeNow && (
                 <Badge className="border-0 bg-primary/15 text-primary">
                   Jetzt aktiv
@@ -151,10 +158,10 @@ function MeteorCalendar() {
               </span>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              {fmtDate(entry.peakDate)} · bis {entry.shower.zhr} Meteore/h ·
-              Blickrichtung {entry.shower.radiant}
+              {fmtDate(entry.peakDate, lang)} · bis {entry.shower.zhr} Meteore/h
+              · Blickrichtung {pick(entry.shower.radiant, lang)}
             </p>
-            <p className="mt-1.5 text-sm">{entry.shower.tip}</p>
+            <p className="mt-1.5 text-sm">{pick(entry.shower.tip, lang)}</p>
             <p
               className={cn(
                 "mt-1.5 text-xs",

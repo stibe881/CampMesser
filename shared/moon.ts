@@ -3,7 +3,10 @@
  * Basiert auf dem synodischen Monat (29.530588853 Tage) ab einer bekannten
  * Neumond-Referenz (6. Januar 2000, 18:14 UTC). Genauigkeit ±1 Tag –
  * völlig ausreichend für Nachtwanderungen und Sternbeobachtung.
+ * Anzeigetexte sind vollständig übersetzt (L4); Default-Sprache bleibt Deutsch.
  */
+
+import { l4, pick, type L4, type Language } from "./i18n";
 
 export const SYNODIC_MONTH_DAYS = 29.530588853;
 /** Referenz-Neumond: 6. Januar 2000, 18:14 UTC */
@@ -31,15 +34,77 @@ export interface MoonInfo {
   symbol: string;
 }
 
-const PHASES: { id: MoonPhaseId; label: string; symbol: string }[] = [
-  { id: "neumond", label: "Neumond", symbol: "🌑" },
-  { id: "zunehmende-sichel", label: "Zunehmende Sichel", symbol: "🌒" },
-  { id: "erstes-viertel", label: "Erstes Viertel (Halbmond)", symbol: "🌓" },
-  { id: "zunehmender-mond", label: "Zunehmender Mond", symbol: "🌔" },
-  { id: "vollmond", label: "Vollmond", symbol: "🌕" },
-  { id: "abnehmender-mond", label: "Abnehmender Mond", symbol: "🌖" },
-  { id: "letztes-viertel", label: "Letztes Viertel (Halbmond)", symbol: "🌗" },
-  { id: "abnehmende-sichel", label: "Abnehmende Sichel", symbol: "🌘" },
+const PHASES: { id: MoonPhaseId; label: L4; symbol: string }[] = [
+  {
+    id: "neumond",
+    label: l4("Neumond", "Nouvelle lune", "Luna nuova", "New moon"),
+    symbol: "🌑",
+  },
+  {
+    id: "zunehmende-sichel",
+    label: l4(
+      "Zunehmende Sichel",
+      "Premier croissant",
+      "Falce crescente",
+      "Waxing crescent"
+    ),
+    symbol: "🌒",
+  },
+  {
+    id: "erstes-viertel",
+    label: l4(
+      "Erstes Viertel (Halbmond)",
+      "Premier quartier (demi-lune)",
+      "Primo quarto (mezzaluna)",
+      "First quarter (half moon)"
+    ),
+    symbol: "🌓",
+  },
+  {
+    id: "zunehmender-mond",
+    label: l4(
+      "Zunehmender Mond",
+      "Lune gibbeuse croissante",
+      "Luna gibbosa crescente",
+      "Waxing gibbous"
+    ),
+    symbol: "🌔",
+  },
+  {
+    id: "vollmond",
+    label: l4("Vollmond", "Pleine lune", "Luna piena", "Full moon"),
+    symbol: "🌕",
+  },
+  {
+    id: "abnehmender-mond",
+    label: l4(
+      "Abnehmender Mond",
+      "Lune gibbeuse décroissante",
+      "Luna gibbosa calante",
+      "Waning gibbous"
+    ),
+    symbol: "🌖",
+  },
+  {
+    id: "letztes-viertel",
+    label: l4(
+      "Letztes Viertel (Halbmond)",
+      "Dernier quartier (demi-lune)",
+      "Ultimo quarto (mezzaluna)",
+      "Last quarter (half moon)"
+    ),
+    symbol: "🌗",
+  },
+  {
+    id: "abnehmende-sichel",
+    label: l4(
+      "Abnehmende Sichel",
+      "Dernier croissant",
+      "Falce calante",
+      "Waning crescent"
+    ),
+    symbol: "🌘",
+  },
 ];
 
 /** Mond-Alter in Tagen seit dem letzten Neumond. */
@@ -51,7 +116,7 @@ export function moonAge(date: Date): number {
 }
 
 /** Mondphase und Beleuchtung für ein Datum. */
-export function getMoonInfo(date: Date): MoonInfo {
+export function getMoonInfo(date: Date, lang: Language = "de"): MoonInfo {
   const age = moonAge(date);
   // Beleuchtung: 0 bei Neumond, 1 bei Vollmond (Kosinus-Näherung)
   const illumination =
@@ -65,7 +130,7 @@ export function getMoonInfo(date: Date): MoonInfo {
     ageDays: age,
     illumination,
     phase: def.id,
-    phaseLabel: def.label,
+    phaseLabel: pick(def.label, lang),
     symbol: def.symbol,
   };
 }
@@ -100,28 +165,51 @@ export function nextNewMoons(from: Date, count: number): Date[] {
   return result;
 }
 
+const STARGAZING_NOTES: Record<
+  "hervorragend" | "gut" | "mittel" | "schlecht",
+  L4
+> = {
+  hervorragend: l4(
+    "Fast kein Mondlicht – perfekte Nacht für Milchstrasse und schwache Sterne.",
+    "Presque pas de clair de lune – nuit parfaite pour la Voie lactée et les étoiles faibles.",
+    "Quasi nessuna luce lunare – notte perfetta per la Via Lattea e le stelle deboli.",
+    "Almost no moonlight – a perfect night for the Milky Way and faint stars."
+  ),
+  gut: l4(
+    "Wenig Mondlicht – die meisten Sternbilder sind gut sichtbar.",
+    "Peu de clair de lune – la plupart des constellations sont bien visibles.",
+    "Poca luce lunare – la maggior parte delle costellazioni è ben visibile.",
+    "Little moonlight – most constellations are clearly visible."
+  ),
+  mittel: l4(
+    "Deutliches Mondlicht – helle Sternbilder gehen, schwache Objekte verblassen.",
+    "Clair de lune marqué – les constellations brillantes restent visibles, les objets faibles s'estompent.",
+    "Luce lunare marcata – le costellazioni luminose si vedono, gli oggetti deboli sbiadiscono.",
+    "Noticeable moonlight – bright constellations still work, faint objects fade."
+  ),
+  schlecht: l4(
+    "Heller Mond überstrahlt viele Sterne – dafür ideal für eine Nachtwanderung ohne Lampe.",
+    "La lune brillante éclipse beaucoup d'étoiles – en revanche, c'est idéal pour une randonnée nocturne sans lampe.",
+    "La luna luminosa copre molte stelle – in compenso è ideale per un'escursione notturna senza lampada.",
+    "The bright moon outshines many stars – but it is ideal for a night walk without a lamp."
+  ),
+};
+
 /** Wie gut eignet sich die Nacht zur Sternbeobachtung? (je dunkler, desto besser) */
-export function stargazingQuality(illumination: number): {
+export function stargazingQuality(
+  illumination: number,
+  lang: Language = "de"
+): {
   score: "hervorragend" | "gut" | "mittel" | "schlecht";
   note: string;
 } {
-  if (illumination < 0.15)
-    return {
-      score: "hervorragend",
-      note: "Fast kein Mondlicht – perfekte Nacht für Milchstrasse und schwache Sterne.",
-    };
-  if (illumination < 0.45)
-    return {
-      score: "gut",
-      note: "Wenig Mondlicht – die meisten Sternbilder sind gut sichtbar.",
-    };
-  if (illumination < 0.8)
-    return {
-      score: "mittel",
-      note: "Deutliches Mondlicht – helle Sternbilder gehen, schwache Objekte verblassen.",
-    };
-  return {
-    score: "schlecht",
-    note: "Heller Mond überstrahlt viele Sterne – dafür ideal für eine Nachtwanderung ohne Lampe.",
-  };
+  const score =
+    illumination < 0.15
+      ? "hervorragend"
+      : illumination < 0.45
+        ? "gut"
+        : illumination < 0.8
+          ? "mittel"
+          : "schlecht";
+  return { score, note: pick(STARGAZING_NOTES[score], lang) };
 }

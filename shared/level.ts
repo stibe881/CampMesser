@@ -6,7 +6,12 @@
  * Semantik (Gerät flach, Display nach oben, natürliche Ausrichtung):
  * - pitch > 0: obere Kante («vorne») ist höher
  * - roll  > 0: rechte Kante ist höher
+ *
+ * Anzeigetexte (Unterleg-Tipps) sind vollständig übersetzt; Default-Sprache
+ * bleibt Deutsch, damit bestehende Aufrufer unverändert funktionieren.
  */
+
+import { pick, type L4, type Language } from "./i18n";
 
 export interface Tilt {
   pitch: number;
@@ -58,22 +63,67 @@ export interface LevelAdvice {
   tips: string[];
 }
 
-function fmtDeg(v: number): string {
-  return Math.abs(v).toFixed(1).replace(".", ",");
+/** Grad-Wert formatieren (Dezimal-Komma ausser im Englischen). */
+function fmtDeg(v: number, lang: Language): string {
+  const fixed = Math.abs(v).toFixed(1);
+  return lang === "en" ? fixed : fixed.replace(".", ",");
+}
+
+/** Unterleg-Tipp-Texte: {deg} wird durch den formatierten Winkel ersetzt. */
+const TIP_TEXTS: Record<
+  "frontHigher" | "backHigher" | "rightHigher" | "leftHigher",
+  L4
+> = {
+  frontHigher: {
+    de: "Vorne ist {deg}° höher – lege hinten unter.",
+    fr: "L'avant est plus haut de {deg}° – cale à l'arrière.",
+    it: "Il lato anteriore è più alto di {deg}° – metti spessori dietro.",
+    en: "The front is {deg}° higher – place shims at the back.",
+  },
+  backHigher: {
+    de: "Hinten ist {deg}° höher – lege vorne unter.",
+    fr: "L'arrière est plus haut de {deg}° – cale à l'avant.",
+    it: "Il lato posteriore è più alto di {deg}° – metti spessori davanti.",
+    en: "The back is {deg}° higher – place shims at the front.",
+  },
+  rightHigher: {
+    de: "Rechts ist {deg}° höher – lege links unter.",
+    fr: "La droite est plus haute de {deg}° – cale à gauche.",
+    it: "Il lato destro è più alto di {deg}° – metti spessori a sinistra.",
+    en: "The right side is {deg}° higher – place shims on the left.",
+  },
+  leftHigher: {
+    de: "Links ist {deg}° höher – lege rechts unter.",
+    fr: "La gauche est plus haute de {deg}° – cale à droite.",
+    it: "Il lato sinistro è più alto di {deg}° – metti spessori a destra.",
+    en: "The left side is {deg}° higher – place shims on the right.",
+  },
+};
+
+function tipText(
+  key: keyof typeof TIP_TEXTS,
+  deg: number,
+  lang: Language
+): string {
+  return pick(TIP_TEXTS[key], lang).replace("{deg}", fmtDeg(deg, lang));
 }
 
 /** Unterleg-Tipps aus der Neigung ableiten (Standard-Toleranz 0,4°). */
-export function levelingAdvice(tilt: Tilt, threshold = 0.4): LevelAdvice {
+export function levelingAdvice(
+  tilt: Tilt,
+  threshold = 0.4,
+  lang: Language = "de"
+): LevelAdvice {
   const tips: string[] = [];
   if (tilt.pitch > threshold) {
-    tips.push(`Vorne ist ${fmtDeg(tilt.pitch)}° höher – lege hinten unter.`);
+    tips.push(tipText("frontHigher", tilt.pitch, lang));
   } else if (tilt.pitch < -threshold) {
-    tips.push(`Hinten ist ${fmtDeg(tilt.pitch)}° höher – lege vorne unter.`);
+    tips.push(tipText("backHigher", tilt.pitch, lang));
   }
   if (tilt.roll > threshold) {
-    tips.push(`Rechts ist ${fmtDeg(tilt.roll)}° höher – lege links unter.`);
+    tips.push(tipText("rightHigher", tilt.roll, lang));
   } else if (tilt.roll < -threshold) {
-    tips.push(`Links ist ${fmtDeg(tilt.roll)}° höher – lege rechts unter.`);
+    tips.push(tipText("leftHigher", tilt.roll, lang));
   }
   return { level: tips.length === 0, tips };
 }

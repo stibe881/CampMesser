@@ -5,6 +5,7 @@
  */
 // Die Sonnenberechnung liegt im Client-Code, ist aber reine Logik ohne DOM.
 import { getSunPosition } from "../client/src/lib/sun";
+import { type Language } from "./i18n";
 import { isBlocked, type ObstacleShape } from "./obstacles";
 
 export interface SolarAlignment {
@@ -131,8 +132,18 @@ export function computeSolarAlignment(
   };
 }
 
+/** Himmelsrichtungs-Kürzel je Sprache (DE: O = Ost, FR/IT: E/O, EN: E/W). */
+const COMPASS_DIRS: Record<Language, string[]> = {
+  de: ["N", "NO", "O", "SO", "S", "SW", "W", "NW"],
+  fr: ["N", "NE", "E", "SE", "S", "SO", "O", "NO"],
+  it: ["N", "NE", "E", "SE", "S", "SO", "O", "NO"],
+  en: ["N", "NE", "E", "SE", "S", "SW", "W", "NW"],
+};
+
 /** Himmelsrichtung als Kurztext, z. B. 184° → «S». */
-export function compassDirection(azimuth: number): string {
-  const dirs = ["N", "NO", "O", "SO", "S", "SW", "W", "NW"];
-  return dirs[Math.round(azimuth / 45) % 8];
+export function compassDirection(
+  azimuth: number,
+  lang: Language = "de"
+): string {
+  return COMPASS_DIRS[lang][Math.round(azimuth / 45) % 8];
 }
