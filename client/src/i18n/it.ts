@@ -76,6 +76,7 @@ export const it: Translation = {
       knots: "Nodi",
       recipes: "Ricette",
       nature: "Natura",
+      own: "I miei contenuti",
     },
     recentTitle: "Usati di recente",
     sortStart: "Ordina",

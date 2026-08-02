@@ -77,6 +77,7 @@ export const de = {
       knots: "Knoten",
       recipes: "Rezepte",
       nature: "Natur",
+      own: "Meine Inhalte",
     },
     recentTitle: "Zuletzt genutzt",
     sortStart: "Sortieren",

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 // Suchindex liegt im Client-Code, ist aber reine Logik ohne DOM.
-import { searchKnowledge } from "../client/src/lib/globalSearch";
+import {
+  searchKnowledge,
+  searchOwnContent,
+  type OwnContent,
+} from "../client/src/lib/globalSearch";
 
 describe("searchKnowledge", () => {
   it("findet Erste-Hilfe-Themen über den Titel", () => {
@@ -51,5 +55,81 @@ describe("searchKnowledge", () => {
 
   it("respektiert das Limit", () => {
     expect(searchKnowledge("und", 5).length).toBeLessThanOrEqual(5);
+  });
+});
+
+describe("searchOwnContent", () => {
+  const own: OwnContent = {
+    packLists: [
+      { id: 3, name: "Sommerferien Tessin" },
+      { id: 7, name: "Wochenende Jura" },
+    ],
+    spots: [
+      { id: 12, name: "Camping Aareufer", note: "Schattiger Platz am Fluss" },
+      { id: 15, name: "TCS Sion", note: null },
+    ],
+    recipes: [{ id: 4, name: "Grosis Älplermagronen" }],
+    hunts: [{ id: 9, title: "Piraten-Schatzsuche" }],
+    quizzes: [{ id: 2, title: "Vogelstimmen-Quiz" }],
+    tentTargets: [{ id: "abc-123", name: "Duschen" }],
+  };
+
+  it("findet Packlisten über den Namen und verlinkt aufs Detail", () => {
+    const results = searchOwnContent("tessin", own);
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({
+      module: "own",
+      path: "/packlisten/3",
+      title: "Sommerferien Tessin",
+    });
+  });
+
+  it("findet Zeltplätze über Name und Notiz", () => {
+    expect(searchOwnContent("aareufer", own)[0]?.path).toBe("/zeltplaetze/12");
+    const viaNote = searchOwnContent("schattiger fluss", own);
+    expect(viaNote[0]?.path).toBe("/zeltplaetze/12");
+  });
+
+  it("findet Rezepte, Jagden und Quizze über den Titel", () => {
+    expect(searchOwnContent("älplermagronen", own)[0]?.path).toBe("/rezepte");
+    expect(searchOwnContent("piraten", own)[0]?.path).toBe("/familie");
+    expect(searchOwnContent("vogelstimmen", own)[0]?.path).toBe("/familie");
+  });
+
+  it("verlinkt Zelt-Finder-Ziele mit ?target=<id>", () => {
+    const results = searchOwnContent("duschen", own);
+    expect(results[0]?.path).toBe("/zeltfinder?target=abc-123");
+  });
+
+  it("faltet Umlaute auch bei Nutzertexten", () => {
+    expect(searchOwnContent("alplermagronen", own)[0]?.path).toBe("/rezepte");
+  });
+
+  it("gewichtet Titel-Anfangs-Treffer höher als Wort-im-Titel", () => {
+    const results = searchOwnContent("camping", {
+      packLists: [{ id: 1, name: "Herbst-Camping" }],
+      spots: [{ id: 2, name: "Camping Aareufer", note: null }],
+    });
+    expect(results[0]?.path).toBe("/zeltplaetze/2");
+  });
+
+  it("verlangt alle Suchwörter und liefert sonst nichts", () => {
+    expect(searchOwnContent("tessin duschen", own)).toEqual([]);
+    expect(searchOwnContent("", own)).toEqual([]);
+  });
+
+  it("kommt mit fehlenden/leeren Listen zurecht", () => {
+    expect(searchOwnContent("tessin", {})).toEqual([]);
+    expect(searchOwnContent("tessin", { packLists: [] })).toEqual([]);
+  });
+
+  it("respektiert das Limit", () => {
+    const many: OwnContent = {
+      packLists: Array.from({ length: 10 }, (_, i) => ({
+        id: i + 1,
+        name: `Liste ${i + 1}`,
+      })),
+    };
+    expect(searchOwnContent("liste", many, 4)).toHaveLength(4);
   });
 });

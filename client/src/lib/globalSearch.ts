@@ -19,7 +19,8 @@ export type SearchCategory =
   | "firstAid"
   | "knots"
   | "recipes"
-  | "nature";
+  | "nature"
+  | "own";
 
 export interface SearchResult {
   id: string;
@@ -156,23 +157,25 @@ function buildIndex(lang: Language): IndexEntry[] {
   return entries;
 }
 
-/**
- * Wissensmodule durchsuchen. Alle Suchwörter müssen vorkommen;
- * Titel-Treffer werden höher gewichtet als Text-Treffer.
- */
-export function searchKnowledge(
-  query: string,
-  limit = 12,
-  lang: Language = "de"
-): SearchResult[] {
-  const words = normalize(query.trim())
+/** Suchwörter einer Anfrage (normalisiert, min. 2 Zeichen). */
+function queryWords(query: string): string[] {
+  return normalize(query.trim())
     .split(/\s+/)
     .filter(w => w.length >= 2);
-  if (words.length === 0) return [];
-  const index = (indexCache[lang] ??= buildIndex(lang));
+}
 
+/**
+ * Einträge gegen die Suchwörter bewerten: alle Wörter müssen vorkommen;
+ * Titel-Treffer werden höher gewichtet als Text-Treffer.
+ */
+function rankEntries(
+  entries: IndexEntry[],
+  words: string[],
+  limit: number,
+  lang: Language
+): SearchResult[] {
   const results: SearchResult[] = [];
-  for (const entry of index) {
+  for (const entry of entries) {
     let score = 0;
     let allMatch = true;
     for (const word of words) {
@@ -201,4 +204,152 @@ export function searchKnowledge(
         b.score - a.score || a.title.localeCompare(b.title, LOCALE_TAGS[lang])
     )
     .slice(0, limit);
+}
+
+/**
+ * Wissensmodule durchsuchen. Alle Suchwörter müssen vorkommen;
+ * Titel-Treffer werden höher gewichtet als Text-Treffer.
+ */
+export function searchKnowledge(
+  query: string,
+  limit = 12,
+  lang: Language = "de"
+): SearchResult[] {
+  const words = queryWords(query);
+  if (words.length === 0) return [];
+  const index = (indexCache[lang] ??= buildIndex(lang));
+  return rankEntries(index, words, limit, lang);
+}
+
+/**
+ * Eigene Inhalte angemeldeter Nutzer*innen für die globale Suche.
+ * Alle Felder sind optional – noch nicht geladene Listen fehlen einfach.
+ * Nutzertexte sind einsprachige Strings, laufen aber defensiv durch pick().
+ */
+export interface OwnContent {
+  packLists?: { id: number; name: string }[];
+  spots?: { id: number; name: string; note?: string | null }[];
+  recipes?: { id: number; name: string }[];
+  hunts?: { id: number; title: string }[];
+  quizzes?: { id: number; title: string }[];
+  tentTargets?: { id: string; name: string }[];
+}
+
+/** Typ-Labels für die Snippet-Zeile eigener Treffer. */
+const OWN_KIND_LABELS = {
+  packList: l4(
+    "Packliste",
+    "Liste de bagages",
+    "Lista bagagli",
+    "Packing list"
+  ),
+  spot: l4("Zeltplatz", "Emplacement", "Piazzola", "Pitch"),
+  recipe: l4(
+    "Eigenes Rezept",
+    "Recette personnelle",
+    "Ricetta personale",
+    "Own recipe"
+  ),
+  hunt: l4(
+    "Eigene Schnitzeljagd",
+    "Chasse au trésor personnelle",
+    "Caccia al tesoro personale",
+    "Own treasure hunt"
+  ),
+  quiz: l4("Eigenes Quiz", "Quiz personnel", "Quiz personale", "Own quiz"),
+  tentTarget: l4(
+    "Zelt-Finder-Ziel",
+    "Cible du localisateur de tente",
+    "Obiettivo del trova-tenda",
+    "Tent finder target"
+  ),
+};
+
+/**
+ * Eigene Inhalte durchsuchen (Packlisten, Zeltplätze, eigene Rezepte,
+ * Jagden, Quizze, Zelt-Finder-Ziele). Gleiche Wort- und Gewichtungsregeln
+ * wie searchKnowledge; ohne Cache, weil sich Nutzerdaten laufend ändern.
+ */
+export function searchOwnContent(
+  query: string,
+  own: OwnContent,
+  limit = 6,
+  lang: Language = "de"
+): SearchResult[] {
+  const words = queryWords(query);
+  if (words.length === 0) return [];
+  const p = (x: L4 | string) => pick(x, lang);
+
+  const entries: IndexEntry[] = [];
+  const add = (
+    id: string,
+    title: string,
+    path: string,
+    snippet: string,
+    bodyParts: (string | undefined)[] = []
+  ) => {
+    const body = [title, ...bodyParts.filter(Boolean)].join(" ");
+    entries.push({
+      id,
+      title,
+      module: "own",
+      path,
+      snippet: shorten(snippet),
+      normTitle: normalize(title),
+      normBody: normalize(body),
+    });
+  };
+
+  for (const list of own.packLists ?? []) {
+    add(
+      `own-list-${list.id}`,
+      p(list.name),
+      `/packlisten/${list.id}`,
+      p(OWN_KIND_LABELS.packList)
+    );
+  }
+  for (const spot of own.spots ?? []) {
+    const kind = p(OWN_KIND_LABELS.spot);
+    add(
+      `own-spot-${spot.id}`,
+      p(spot.name),
+      `/zeltplaetze/${spot.id}`,
+      spot.note ? `${kind} · ${spot.note}` : kind,
+      [spot.note ?? undefined]
+    );
+  }
+  for (const recipe of own.recipes ?? []) {
+    add(
+      `own-recipe-${recipe.id}`,
+      p(recipe.name),
+      "/rezepte",
+      p(OWN_KIND_LABELS.recipe)
+    );
+  }
+  for (const hunt of own.hunts ?? []) {
+    add(
+      `own-hunt-${hunt.id}`,
+      p(hunt.title),
+      "/familie",
+      p(OWN_KIND_LABELS.hunt)
+    );
+  }
+  for (const quiz of own.quizzes ?? []) {
+    add(
+      `own-quiz-${quiz.id}`,
+      p(quiz.title),
+      "/familie",
+      p(OWN_KIND_LABELS.quiz)
+    );
+  }
+  for (const target of own.tentTargets ?? []) {
+    add(
+      `own-target-${target.id}`,
+      p(target.name),
+      `/zeltfinder?target=${encodeURIComponent(target.id)}`,
+      p(OWN_KIND_LABELS.tentTarget)
+    );
+  }
+
+  return rankEntries(entries, words, limit, lang);
 }

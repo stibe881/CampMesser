@@ -26,7 +26,12 @@ import { getSunTimes } from "@/lib/sun";
 import { useEffect, useRef, useState } from "react";
 import { getRecentModules } from "@/components/AppShell";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
-import { searchKnowledge } from "@/lib/globalSearch";
+import { searchKnowledge, searchOwnContent } from "@/lib/globalSearch";
+import {
+  TARGETS_KEY,
+  sanitizeTargets,
+  type TentFinderTarget,
+} from "@/lib/tentFinderTargets";
 import { daysUntilTrip, isUpcomingTrip } from "@shared/trips";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -271,12 +276,61 @@ function WeatherWidget() {
   );
 }
 
-/** Globale Suche über die Offline-Wissensmodule (Erste Hilfe, Knoten, Rezepte, Natur). */
+/**
+ * Globale Suche über die Offline-Wissensmodule (Erste Hilfe, Knoten, Rezepte,
+ * Natur) – angemeldet zusätzlich über eigene Inhalte (Packlisten, Zeltplätze,
+ * eigene Rezepte/Jagden/Quizze, Zelt-Finder-Ziele). Die Nutzerdaten werden
+ * erst geladen, wenn das Suchfeld benutzt wird (enabled-Flag), nicht beim
+ * Seitenaufbau.
+ */
 function KnowledgeSearch() {
   const { lang, t } = useI18n();
+  const { isAuthenticated } = useAuth();
   const [query, setQuery] = useState("");
-  const results =
-    query.trim().length >= 2 ? searchKnowledge(query, 8, lang) : [];
+  const [activated, setActivated] = useState(false);
+  const [tentTargets, setTentTargets] = useState<TentFinderTarget[]>([]);
+
+  const enabled = isAuthenticated && activated;
+  const queryOpts = { enabled, staleTime: 60_000 } as const;
+  const packListsQuery = trpc.packing.lists.useQuery(undefined, queryOpts);
+  const spotsQuery = trpc.spots.list.useQuery(undefined, queryOpts);
+  const recipesQuery = trpc.recipes.list.useQuery(undefined, queryOpts);
+  const huntsQuery = trpc.hunts.list.useQuery(undefined, queryOpts);
+  const quizzesQuery = trpc.quizzes.list.useQuery(undefined, queryOpts);
+
+  /** Beim ersten Fokus/Tippen: tRPC-Queries freischalten, lokale Ziele lesen. */
+  const activate = () => {
+    if (activated) return;
+    setActivated(true);
+    try {
+      setTentTargets(
+        sanitizeTargets(JSON.parse(localStorage.getItem(TARGETS_KEY) ?? "[]"))
+      );
+    } catch {
+      // Kaputter localStorage-Wert: dann eben ohne Zelt-Finder-Ziele suchen
+    }
+  };
+
+  const hasQuery = query.trim().length >= 2;
+  const ownResults =
+    hasQuery && isAuthenticated
+      ? searchOwnContent(
+          query,
+          {
+            packLists: packListsQuery.data,
+            spots: spotsQuery.data,
+            recipes: recipesQuery.data,
+            hunts: huntsQuery.data,
+            quizzes: quizzesQuery.data,
+            tentTargets,
+          },
+          6,
+          lang
+        )
+      : [];
+  const results = hasQuery ? searchKnowledge(query, 8, lang) : [];
+  // Eigene Treffer stehen vor den statischen Wissens-Inhalten
+  const combined = [...ownResults, ...results];
   return (
     <div className="mb-8">
       <div className="relative">
@@ -287,21 +341,25 @@ function KnowledgeSearch() {
         <input
           type="search"
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onFocus={activate}
+          onChange={e => {
+            activate();
+            setQuery(e.target.value);
+          }}
           placeholder={t.home.searchPlaceholder}
           aria-label={t.home.searchAria}
           className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
         />
       </div>
-      {query.trim().length >= 2 && (
+      {hasQuery && (
         <div className="mt-2 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-          {results.length === 0 ? (
+          {combined.length === 0 ? (
             <p className="px-4 py-3 text-sm text-muted-foreground">
               {t.home.searchNoResults}
             </p>
           ) : (
             <ul className="divide-y divide-border/60">
-              {results.map(r => (
+              {combined.map(r => (
                 <li key={r.id}>
                   <Link
                     href={r.path}
