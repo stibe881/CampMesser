@@ -8,6 +8,7 @@ import {
   CloudSun,
   Copy,
   GraduationCap,
+  List,
   ListChecks,
   Loader2,
   LogOut,
@@ -84,6 +85,7 @@ import {
 } from "@shared/holidays";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import { drawYearReview } from "@/lib/yearReviewImage";
+import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 
 /** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
 const FREE_LOCATION = "frei";
@@ -106,6 +108,20 @@ function loadStoredHolidayCanton(): string {
     // Speicher blockiert – einfach ohne Vorauswahl starten
   }
   return HOLIDAY_CANTON_NONE;
+}
+
+/** Gemerkte Ansicht der Aufenthalte: Liste (Standard) oder Monats-Kalender. */
+const TRIPS_VIEW_KEY = "campmesser.tripsView";
+type TripsView = "list" | "calendar";
+
+function loadStoredTripsView(): TripsView {
+  try {
+    const stored = localStorage.getItem(TRIPS_VIEW_KEY);
+    if (stored === "calendar" || stored === "list") return stored;
+  } catch {
+    // Speicher blockiert – mit der Listen-Ansicht starten
+  }
+  return "list";
 }
 
 /**
@@ -1373,6 +1389,38 @@ export default function TripsPage() {
     }
   };
 
+  // Ansicht der Aufenthalte: Liste (Standard) oder Monats-Kalender –
+  // die Wahl bleibt über localStorage erhalten.
+  const [tripsView, setTripsView] = useState<TripsView>(loadStoredTripsView);
+  const selectTripsView = (view: TripsView) => {
+    setTripsView(view);
+    try {
+      localStorage.setItem(TRIPS_VIEW_KEY, view);
+    } catch {
+      // Speicher blockiert – die Wahl gilt trotzdem für diese Sitzung
+    }
+  };
+
+  /** Aufenthalte fürs Kalender-Gitter (eigene vs. gemeinsame unterscheidbar). */
+  const calendarTrips = useMemo<CalendarTrip[]>(
+    () =>
+      allTrips.map(trip => ({
+        id: trip.id,
+        name: trip.title || placeName(trip),
+        startDate: trip.startDate,
+        endDate: trip.endDate,
+        shared: trip.role === "member" || trip.shared,
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allTrips, spots]
+  );
+
+  /** Klick auf einen Kalender-Balken: Eintrag ins Formular laden + hinscrollen. */
+  const openTripFromCalendar = (tripId: number) => {
+    const trip = allTrips.find(tr => tr.id === tripId);
+    if (trip) startEdit(trip);
+  };
+
   // Schulferien & Feiertage des gewählten Kantons für die geplanten Aufenthalte.
   // Fehler bleiben still (holidays = null) – die Hinweise werden dann weggelassen.
   const [holidayCanton, setHolidayCanton] = useState<string>(
@@ -1394,7 +1442,12 @@ export default function TripsPage() {
   };
 
   useEffect(() => {
-    if (holidayCanton === HOLIDAY_CANTON_NONE || plannedTrips.length === 0) {
+    // Kalender-Ansicht: Ferien immer laden (Markierung im Gitter);
+    // Listen-Ansicht: nur wenn es geplante Aufenthalte gibt (wie bisher)
+    if (
+      holidayCanton === HOLIDAY_CANTON_NONE ||
+      (tripsView !== "calendar" && plannedTrips.length === 0)
+    ) {
       setHolidays(null);
       return;
     }
@@ -1405,7 +1458,35 @@ export default function TripsPage() {
     return () => {
       cancelled = true;
     };
-  }, [holidayCanton, plannedTrips.length]);
+  }, [holidayCanton, plannedTrips.length, tripsView]);
+
+  /** Kantons-Auswahl für Ferien-/Feiertags-Hinweise (Liste UND Kalender). */
+  const holidayCantonPicker = (
+    <div className="mb-3 flex flex-wrap items-center gap-2">
+      <Label htmlFor="holiday-canton" className="text-xs text-muted-foreground">
+        {t.trips.holidaySectionLabel}
+      </Label>
+      <Select value={holidayCanton} onValueChange={selectHolidayCanton}>
+        <SelectTrigger
+          id="holiday-canton"
+          className="w-60"
+          aria-label={t.trips.holidayCantonAria}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={HOLIDAY_CANTON_NONE}>
+            {t.trips.holidayCantonNone}
+          </SelectItem>
+          {CANTONS.map(canton => (
+            <SelectItem key={canton.code} value={canton.code}>
+              {canton.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 
   if (loading || (isAuthenticated && tripsQuery.isLoading)) {
     return (
@@ -1885,8 +1966,53 @@ export default function TripsPage() {
         </CardContent>
       </Card>
 
+      {/* Umschalter Liste/Kalender – die Wahl bleibt gespeichert */}
+      <div
+        role="group"
+        aria-label={t.trips.viewToggleAria}
+        className="mb-4 flex gap-1.5"
+      >
+        <Button
+          type="button"
+          variant={tripsView === "list" ? "default" : "outline"}
+          size="sm"
+          aria-pressed={tripsView === "list"}
+          onClick={() => selectTripsView("list")}
+        >
+          <List className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          {t.trips.viewList}
+        </Button>
+        <Button
+          type="button"
+          variant={tripsView === "calendar" ? "default" : "outline"}
+          size="sm"
+          aria-pressed={tripsView === "calendar"}
+          onClick={() => selectTripsView("calendar")}
+        >
+          <CalendarDays className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          {t.trips.viewCalendar}
+        </Button>
+      </div>
+
+      {/* Kalender-Ansicht: Monats-Gitter mit Aufenthalten und Ferien */}
+      {tripsView === "calendar" && (
+        <div className="mb-8">
+          {holidayCantonPicker}
+          {holidays && (
+            <p className="mb-3 text-xs text-muted-foreground">
+              {t.trips.holidaySource}
+            </p>
+          )}
+          <TripCalendar
+            trips={calendarTrips}
+            holidays={holidays}
+            onTripClick={openTripFromCalendar}
+          />
+        </div>
+      )}
+
       {/* Geplante Aufenthalte: Trips mit Anreise heute oder später */}
-      {plannedTrips.length > 0 && (
+      {tripsView === "list" && plannedTrips.length > 0 && (
         <>
           <h2 className="mb-3 flex items-center gap-2 font-serif text-lg font-semibold">
             <CalendarClock
@@ -1896,33 +2022,7 @@ export default function TripsPage() {
             {t.trips.plannedTitle}
           </h2>
           {/* Kantons-Auswahl für Ferien-/Feiertags-Hinweise */}
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <Label
-              htmlFor="holiday-canton"
-              className="text-xs text-muted-foreground"
-            >
-              {t.trips.holidaySectionLabel}
-            </Label>
-            <Select value={holidayCanton} onValueChange={selectHolidayCanton}>
-              <SelectTrigger
-                id="holiday-canton"
-                className="w-60"
-                aria-label={t.trips.holidayCantonAria}
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={HOLIDAY_CANTON_NONE}>
-                  {t.trips.holidayCantonNone}
-                </SelectItem>
-                {CANTONS.map(canton => (
-                  <SelectItem key={canton.code} value={canton.code}>
-                    {canton.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {holidayCantonPicker}
           {holidays && (
             <p className="mb-3 text-xs text-muted-foreground">
               {t.trips.holidaySource}
@@ -2156,211 +2256,235 @@ export default function TripsPage() {
         </>
       )}
 
-      {/* Einträge */}
-      <h2 className="mb-3 font-serif text-lg font-semibold">
-        {t.trips.entriesTitle}
-      </h2>
-      {trips.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          {t.trips.empty}
-        </p>
-      ) : (
-        <ul className="space-y-3">
-          {trips.map(trip => {
-            const nights = tripNights(trip.startDate, trip.endDate);
-            // Wetterarchiv nur mit Koordinaten eines verknüpften Favoriten
-            const weatherSpot =
-              trip.spotId != null
-                ? (spots.find(s => s.id === trip.spotId) ?? null)
-                : null;
-            return (
-              <li
-                key={trip.id}
-                className="rounded-xl border border-border bg-card p-4"
-              >
-                <TripCoverBanner
-                  tripId={trip.id}
-                  coverPhotoId={trip.coverPhotoId}
-                  tripName={trip.title || placeName(trip)}
-                />
-                <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                    {trip.spotId != null ? (
-                      <Tent className="h-5 w-5" aria-hidden="true" />
-                    ) : (
-                      <MapPin className="h-5 w-5" aria-hidden="true" />
-                    )}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="flex flex-wrap items-center gap-2 font-semibold">
-                      {trip.title || placeName(trip)}
-                      {trip.role === "member" && (
-                        <span className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
-                          <Users className="h-3 w-3" aria-hidden="true" />
-                          {t.trips.sharedBadge}
-                        </span>
-                      )}
-                    </p>
-                    <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                      {trip.role === "member" && trip.ownerName && (
-                        <span className="flex items-center gap-1">
-                          <Users className="h-3 w-3" aria-hidden="true" />
-                          {t.trips.sharedWith(trip.ownerName)}
-                        </span>
-                      )}
-                      {trip.title && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" aria-hidden="true" />
-                          {placeName(trip)}
-                        </span>
-                      )}
-                      <span className="flex items-center gap-1">
-                        <CalendarDays className="h-3 w-3" aria-hidden="true" />
-                        {formatRange(trip.startDate, trip.endDate)}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Moon className="h-3 w-3" aria-hidden="true" />
-                        {t.trips.nightsCount(nights)}
-                      </span>
-                    </p>
-                    {weatherSpot && (
-                      <TripWeatherArchive
-                        tripId={trip.id}
-                        weatherJson={trip.weatherJson}
-                        startDate={trip.startDate}
-                        endDate={trip.endDate}
-                        latitude={weatherSpot.latitude}
-                        longitude={weatherSpot.longitude}
-                      />
-                    )}
-                    <div className="mt-1.5">
-                      <StarRating
-                        size="sm"
-                        value={trip.rating ?? null}
-                        disabled={setRatingMutation.isPending}
-                        onChange={rating =>
-                          setRatingMutation.mutate({ id: trip.id, rating })
-                        }
-                        groupLabel={t.trips.ratingGroupAria(
-                          trip.title || placeName(trip)
-                        )}
-                      />
-                    </div>
-                    {trip.notes && (
-                      <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
-                        {trip.notes}
-                      </p>
-                    )}
-                    <TripPhotos
+      {/* Einträge (nur Listen-Ansicht – der Kalender zeigt alle Aufenthalte) */}
+      {tripsView === "list" && (
+        <>
+          <h2 className="mb-3 font-serif text-lg font-semibold">
+            {t.trips.entriesTitle}
+          </h2>
+          {trips.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+              {t.trips.empty}
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {trips.map(trip => {
+                const nights = tripNights(trip.startDate, trip.endDate);
+                // Wetterarchiv nur mit Koordinaten eines verknüpften Favoriten
+                const weatherSpot =
+                  trip.spotId != null
+                    ? (spots.find(s => s.id === trip.spotId) ?? null)
+                    : null;
+                return (
+                  <li
+                    key={trip.id}
+                    className="rounded-xl border border-border bg-card p-4"
+                  >
+                    <TripCoverBanner
                       tripId={trip.id}
-                      tripName={trip.title || placeName(trip)}
                       coverPhotoId={trip.coverPhotoId}
+                      tripName={trip.title || placeName(trip)}
                     />
-                  </div>
-                  <div className="flex shrink-0 flex-col gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                      onClick={() => startEdit(trip)}
-                      aria-label={t.trips.editEntryAria(
-                        trip.title || placeName(trip)
-                      )}
-                    >
-                      <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                    </Button>
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                    >
-                      <Link
-                        href={`/tagebuch/${trip.id}/drucken`}
-                        aria-label={t.trips.printEntryAria(
-                          trip.title || placeName(trip)
+                    <div className="flex items-start gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                        {trip.spotId != null ? (
+                          <Tent className="h-5 w-5" aria-hidden="true" />
+                        ) : (
+                          <MapPin className="h-5 w-5" aria-hidden="true" />
                         )}
-                      >
-                        <Printer className="h-3.5 w-3.5" aria-hidden="true" />
-                      </Link>
-                    </Button>
-                    {trip.role === "owner" ? (
-                      <>
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="flex flex-wrap items-center gap-2 font-semibold">
+                          {trip.title || placeName(trip)}
+                          {trip.role === "member" && (
+                            <span className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                              <Users className="h-3 w-3" aria-hidden="true" />
+                              {t.trips.sharedBadge}
+                            </span>
+                          )}
+                        </p>
+                        <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                          {trip.role === "member" && trip.ownerName && (
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3 w-3" aria-hidden="true" />
+                              {t.trips.sharedWith(trip.ownerName)}
+                            </span>
+                          )}
+                          {trip.title && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" aria-hidden="true" />
+                              {placeName(trip)}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <CalendarDays
+                              className="h-3 w-3"
+                              aria-hidden="true"
+                            />
+                            {formatRange(trip.startDate, trip.endDate)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Moon className="h-3 w-3" aria-hidden="true" />
+                            {t.trips.nightsCount(nights)}
+                          </span>
+                        </p>
+                        {weatherSpot && (
+                          <TripWeatherArchive
+                            tripId={trip.id}
+                            weatherJson={trip.weatherJson}
+                            startDate={trip.startDate}
+                            endDate={trip.endDate}
+                            latitude={weatherSpot.latitude}
+                            longitude={weatherSpot.longitude}
+                          />
+                        )}
+                        <div className="mt-1.5">
+                          <StarRating
+                            size="sm"
+                            value={trip.rating ?? null}
+                            disabled={setRatingMutation.isPending}
+                            onChange={rating =>
+                              setRatingMutation.mutate({ id: trip.id, rating })
+                            }
+                            groupLabel={t.trips.ratingGroupAria(
+                              trip.title || placeName(trip)
+                            )}
+                          />
+                        </div>
+                        {trip.notes && (
+                          <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
+                            {trip.notes}
+                          </p>
+                        )}
+                        <TripPhotos
+                          tripId={trip.id}
+                          tripName={trip.title || placeName(trip)}
+                          coverPhotoId={trip.coverPhotoId}
+                        />
+                      </div>
+                      <div className="flex shrink-0 flex-col gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                          onClick={() =>
-                            setMembersTrip({
-                              id: trip.id,
-                              name: trip.title || placeName(trip),
-                            })
-                          }
-                          aria-label={t.trips.membersAria(
+                          onClick={() => startEdit(trip)}
+                          aria-label={t.trips.editEntryAria(
                             trip.title || placeName(trip)
                           )}
                         >
-                          <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                          <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                         </Button>
                         <Button
+                          asChild
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                          onClick={() =>
-                            setHubTrip({
-                              id: trip.id,
-                              name: trip.title || placeName(trip),
-                            })
-                          }
-                          aria-label={t.trips.hubShareAria(
-                            trip.title || placeName(trip)
-                          )}
                         >
-                          <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+                          <Link
+                            href={`/tagebuch/${trip.id}/drucken`}
+                            aria-label={t.trips.printEntryAria(
+                              trip.title || placeName(trip)
+                            )}
+                          >
+                            <Printer
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
+                          </Link>
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
-                          onClick={() => removeMutation.mutate({ id: trip.id })}
-                          aria-label={t.trips.deleteEntryAria(
-                            trip.title || placeName(trip)
-                          )}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
-                        disabled={leaveMutation.isPending}
-                        onClick={() => {
-                          if (
-                            confirm(
-                              t.trips.leaveConfirm(
+                        {trip.role === "owner" ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+                              onClick={() =>
+                                setMembersTrip({
+                                  id: trip.id,
+                                  name: trip.title || placeName(trip),
+                                })
+                              }
+                              aria-label={t.trips.membersAria(
                                 trip.title || placeName(trip)
-                              )
-                            )
-                          ) {
-                            leaveMutation.mutate({ tripId: trip.id });
-                          }
-                        }}
-                        aria-label={t.trips.leaveTripAria(
-                          trip.title || placeName(trip)
+                              )}
+                            >
+                              <Users
+                                className="h-3.5 w-3.5"
+                                aria-hidden="true"
+                              />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+                              onClick={() =>
+                                setHubTrip({
+                                  id: trip.id,
+                                  name: trip.title || placeName(trip),
+                                })
+                              }
+                              aria-label={t.trips.hubShareAria(
+                                trip.title || placeName(trip)
+                              )}
+                            >
+                              <Share2
+                                className="h-3.5 w-3.5"
+                                aria-hidden="true"
+                              />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
+                              onClick={() =>
+                                removeMutation.mutate({ id: trip.id })
+                              }
+                              aria-label={t.trips.deleteEntryAria(
+                                trip.title || placeName(trip)
+                              )}
+                            >
+                              <Trash2
+                                className="h-3.5 w-3.5"
+                                aria-hidden="true"
+                              />
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
+                            disabled={leaveMutation.isPending}
+                            onClick={() => {
+                              if (
+                                confirm(
+                                  t.trips.leaveConfirm(
+                                    trip.title || placeName(trip)
+                                  )
+                                )
+                              ) {
+                                leaveMutation.mutate({ tripId: trip.id });
+                              }
+                            }}
+                            aria-label={t.trips.leaveTripAria(
+                              trip.title || placeName(trip)
+                            )}
+                            title={t.trips.leaveTrip}
+                          >
+                            <LogOut
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
+                          </Button>
                         )}
-                        title={t.trips.leaveTrip}
-                      >
-                        <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </>
       )}
 
       {/* Dialog «Mitreisende» der gewählten eigenen Reise */}
