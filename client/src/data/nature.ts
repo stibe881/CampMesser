@@ -5,6 +5,7 @@
  * Namen bleiben unverändert (sprachneutrale Strings).
  */
 import { l4, type L4 } from "@shared/i18n";
+import type { Season } from "@shared/season";
 import img_natur_reh from "@/assets/natur-reh.webp";
 import img_natur_fuchs from "@/assets/natur-fuchs.webp";
 import img_natur_wildschwein from "@/assets/natur-wildschwein.webp";
@@ -35,6 +36,11 @@ export interface NatureEntry {
   kidQuestion: L4;
   features: L4[];
   image?: string;
+  /**
+   * Beste Beobachtungs-Monate (inklusive, wrap-around erlaubt) –
+   * fehlt das Feld, ist der Eintrag ganzjährig zu sehen.
+   */
+  season?: Season;
 }
 
 export interface NatureCategory {
@@ -283,6 +289,8 @@ export const natureEntries: NatureEntry[] = [
     latinOrExtra: "Meles meles",
     category: "tierspuren",
     image: img_natur_dachs,
+    // Winterruhe: von Spätherbst bis Ende Winter kaum frische Spuren
+    season: { from: 3, to: 11 },
     description: l4(
       "Dachsspuren wirken wie kleine Bärentatzen: fünf Zehen mit langen, deutlich sichtbaren Krallen vor einem breiten Ballen. Dachse laufen auf festen Pfaden, die sie über Generationen benutzen.",
       "Les traces de blaireau ressemblent à de petites pattes d'ours : cinq doigts avec de longues griffes bien visibles devant un large coussinet. Les blaireaux suivent des sentiers fixes qu'ils utilisent depuis des générations.",
@@ -489,6 +497,8 @@ export const natureEntries: NatureEntry[] = [
     ),
     category: "sternbilder",
     image: img_natur_orion,
+    // Wintersternbild – Sichtbarkeit laut Beschreibung Oktober bis März
+    season: { from: 10, to: 3 },
     description: l4(
       "Das prächtigste Wintersternbild: Drei Sterne in einer Reihe bilden den Gürtel des Jägers, umrahmt von vier hellen Ecksternen. Unter dem Gürtel schimmert der Orionnebel.",
       "La plus splendide constellation d'hiver : trois étoiles alignées forment la ceinture du chasseur, encadrée par quatre étoiles brillantes aux coins. Sous la ceinture scintille la nébuleuse d'Orion.",
@@ -544,6 +554,8 @@ export const natureEntries: NatureEntry[] = [
     ),
     category: "sternbilder",
     image: img_natur_sommerdreieck,
+    // Sommerhimmel – Sichtbarkeit laut Beschreibung Juni bis Oktober
+    season: { from: 6, to: 10 },
     description: l4(
       "Drei sehr helle Sterne aus drei Sternbildern (Leier, Schwan, Adler) bilden ein riesiges Dreieck – das auffälligste Muster des Sommerhimmels, perfekt für laue Zeltnächte.",
       "Trois étoiles très brillantes de trois constellations (Lyre, Cygne, Aigle) forment un triangle géant – le motif le plus marquant du ciel d'été, parfait pour les douces nuits sous tente.",
@@ -680,6 +692,8 @@ export const natureEntries: NatureEntry[] = [
     latinOrExtra: "Fagus sylvatica",
     category: "baeume",
     image: img_natur_buche,
+    // Laubzeit: Blattaustrieb bis Herbstfärbung/Bucheckern
+    season: { from: 4, to: 10 },
     description: l4(
       "Die «Mutter des Waldes» hat eine glatte, silbergraue Rinde und eiförmige Blätter mit welligem Rand. Im Herbst fallen die dreikantigen Bucheckern aus ihren stacheligen Hüllen.",
       "La «mère de la forêt» a une écorce lisse gris argenté et des feuilles ovales au bord ondulé. En automne, les faînes à trois côtés tombent de leurs enveloppes épineuses.",
@@ -725,6 +739,8 @@ export const natureEntries: NatureEntry[] = [
     latinOrExtra: "Quercus robur",
     category: "baeume",
     image: img_natur_eiche,
+    // Laubzeit: gebuchtete Blätter und Eicheln von Frühling bis Herbst
+    season: { from: 4, to: 10 },
     description: l4(
       "Erkennbar an den gebuchteten Blättern und den Eicheln, die an langen Stielen hängen. Die Rinde ist tief gefurcht. Eichen können über 800 Jahre alt werden.",
       "Reconnaissable à ses feuilles lobées et à ses glands suspendus à de longs pédoncules. L'écorce est profondément crevassée. Les chênes peuvent vivre plus de 800 ans.",
@@ -775,6 +791,8 @@ export const natureEntries: NatureEntry[] = [
     latinOrExtra: "Betula pendula",
     category: "baeume",
     image: img_natur_birke,
+    // Laubzeit: die gezackten Blätter tragen sie von Frühling bis Herbst
+    season: { from: 4, to: 10 },
     description: l4(
       "Unverwechselbar durch die weisse, papierartige Rinde mit schwarzen Rissen. Die kleinen, gezackten Blätter zittern schon bei leichtem Wind an ihren dünnen Zweigen.",
       "Impossible à confondre grâce à son écorce blanche comme du papier, marquée de fissures noires. Ses petites feuilles dentées tremblent au moindre vent sur leurs fins rameaux.",
@@ -820,6 +838,8 @@ export const natureEntries: NatureEntry[] = [
     latinOrExtra: "Larix decidua",
     category: "baeume",
     image: img_natur_laerche,
+    // Nadelzeit inkl. goldener Herbstfärbung – im Winter kahl
+    season: { from: 4, to: 11 },
     description: l4(
       "Der einzige heimische Nadelbaum, der im Herbst seine Nadeln verliert – vorher färben sie sich leuchtend goldgelb. Die weichen Nadeln wachsen in Büscheln an kurzen Trieben.",
       "Le seul conifère indigène qui perd ses aiguilles en automne – avant cela, elles se colorent d'un jaune doré éclatant. Les aiguilles souples poussent en touffes sur de courts rameaux.",

@@ -1837,6 +1837,11 @@ export const en: Translation = {
     featuresTitle: "Identifying features",
     funFactTitle: "Did you know?",
     kidsTitle: "For kids:",
+    seasonLine: (from: string, to: string) => `Season: ${from}–${to}`,
+    nowFilter: "Visible now",
+    nowFilterAria: "Only show entries currently in season",
+    nowFilterEmpty:
+      "Nothing in this category is in season right now – switch off the filter to see all entries.",
     sightings: {
       title: "My sightings",
       sectionAria: "My nature sightings",

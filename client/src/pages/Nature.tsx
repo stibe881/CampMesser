@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Binoculars,
+  CalendarCheck,
+  CalendarDays,
   Flashlight,
   HelpCircle,
   ImagePlus,
@@ -54,6 +56,7 @@ import {
 } from "@shared/moon";
 import { upcomingShowers } from "@shared/astro";
 import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
+import { inSeason } from "@shared/season";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { resizeImageForUpload } from "@/lib/imageResize";
@@ -84,6 +87,13 @@ function fmtDate(d: Date, lang: Language) {
     day: "numeric",
     month: "long",
     year: "numeric",
+  });
+}
+
+/** Monatsname (1–12) in der aktiven Sprache, z. B. «Mai». */
+function monthName(month: number, lang: Language): string {
+  return new Date(2000, month - 1, 1).toLocaleDateString(LOCALE_TAGS[lang], {
+    month: "long",
   });
 }
 
@@ -791,8 +801,14 @@ export default function NaturePage() {
   const { lang, t } = useI18n();
   const [category, setCategory] = useState<string>("tierspuren");
   const [redLight, setRedLight] = useState(false);
+  // «Jetzt zu sehen»: nur Einträge, deren Saison den aktuellen Monat umfasst
+  const [nowOnly, setNowOnly] = useState(false);
+  const currentMonth = new Date().getMonth() + 1;
   const activeCategory = natureCategories.find(c => c.id === category)!;
-  const entries = natureEntries.filter(e => e.category === category);
+  const entries = natureEntries.filter(
+    e =>
+      e.category === category && (!nowOnly || inSeason(e.season, currentMonth))
+  );
 
   return (
     <div className="container max-w-3xl py-6">
@@ -841,9 +857,31 @@ export default function NaturePage() {
         })}
       </div>
 
-      <p className="mb-5 text-sm text-muted-foreground">
+      <p className="mb-4 text-sm text-muted-foreground">
         {pick(activeCategory.intro, lang)}
       </p>
+
+      <button
+        type="button"
+        onClick={() => setNowOnly(v => !v)}
+        aria-pressed={nowOnly}
+        aria-label={t.nature.nowFilterAria}
+        className={cn(
+          "mb-5 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+          nowOnly
+            ? "border-primary bg-accent text-primary"
+            : "border-border bg-card text-muted-foreground hover:border-primary/40"
+        )}
+      >
+        <CalendarCheck className="h-4 w-4" aria-hidden="true" />
+        {t.nature.nowFilter}
+      </button>
+
+      {entries.length === 0 && (
+        <p className="rounded-lg bg-accent/50 p-3 text-sm text-muted-foreground">
+          {t.nature.nowFilterEmpty}
+        </p>
+      )}
 
       <Accordion type="single" collapsible className="space-y-3">
         {entries.map(entry => (
@@ -874,6 +912,19 @@ export default function NaturePage() {
               <p className="mb-4 text-sm leading-relaxed">
                 {pick(entry.description, lang)}
               </p>
+
+              {entry.season && (
+                <p className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+                  <CalendarDays
+                    className="h-4 w-4 shrink-0 text-primary"
+                    aria-hidden="true"
+                  />
+                  {t.nature.seasonLine(
+                    monthName(entry.season.from, lang),
+                    monthName(entry.season.to, lang)
+                  )}
+                </p>
+              )}
 
               <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 {t.nature.featuresTitle}

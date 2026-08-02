@@ -1910,6 +1910,11 @@ export const de = {
     featuresTitle: "Erkennungsmerkmale",
     funFactTitle: "Wusstest du?",
     kidsTitle: "Für Kinder:",
+    seasonLine: (from: string, to: string) => `Saison: ${from}–${to}`,
+    nowFilter: "Jetzt zu sehen",
+    nowFilterAria: "Nur Einträge zeigen, die jetzt Saison haben",
+    nowFilterEmpty:
+      "In dieser Kategorie hat gerade nichts Saison – schalte den Filter aus, um alle Einträge zu sehen.",
     sightings: {
       title: "Meine Beobachtungen",
       sectionAria: "Meine Natur-Beobachtungen",
