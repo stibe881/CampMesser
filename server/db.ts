@@ -652,6 +652,36 @@ export async function addTripLog(data: InsertTripLog) {
   return result.insertId;
 }
 
+/**
+ * Eintrag nachträglich bearbeiten (nur eigener). `weatherJson` wird vom
+ * Router auf null gesetzt, wenn sich Ort oder Zeitraum ändern – das
+ * Wetterarchiv holt sich die Seite dann automatisch neu.
+ */
+export async function updateTripLog(
+  id: number,
+  userId: number,
+  data: Partial<
+    Pick<
+      InsertTripLog,
+      | "spotId"
+      | "packListId"
+      | "location"
+      | "title"
+      | "notes"
+      | "startDate"
+      | "endDate"
+      | "rating"
+      | "weatherJson"
+    >
+  >
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripLogs)
+    .set(data)
+    .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
+}
+
 /** Einzelnen Tagebuch-/Trip-Eintrag laden (nur eigener). */
 export async function getTripLog(id: number, userId: number) {
   const db = requireDb(await getDb());

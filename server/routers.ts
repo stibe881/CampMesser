@@ -1644,6 +1644,85 @@ export const appRouter = router({
         });
         return { id };
       }),
+    /**
+     * Eintrag nachträglich bearbeiten (Validierung wie add). Ändern sich
+     * Zeitraum, Ort oder verknüpfter Zeltplatz, wird das gespeicherte
+     * Wetterarchiv (weatherJson) verworfen – der Client holt es dann beim
+     * nächsten Besuch automatisch neu (TripWeatherArchive in Trips.tsx).
+     */
+    update: protectedProcedure
+      .input(
+        z
+          .object({
+            id: z.number().int().positive(),
+            spotId: z.number().int().positive().nullish(),
+            packListId: z.number().int().positive().nullish(),
+            location: z.string().max(140).nullish(),
+            title: z.string().max(140).nullish(),
+            notes: z.string().max(2000).nullish(),
+            startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            rating: z.number().int().min(1).max(5).nullable().optional(),
+          })
+          .refine(v => v.endDate >= v.startDate, {
+            message: "Die Abreise darf nicht vor der Anreise liegen.",
+          })
+          .refine(
+            v => v.spotId != null || (v.location ?? "").trim().length > 0,
+            {
+              message: "Bitte einen Zeltplatz wählen oder einen Ort eintragen.",
+            }
+          )
+      )
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.getTripLog(input.id, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        // Nur eigene Zeltplatz-Favoriten dürfen verknüpft werden
+        if (input.spotId != null) {
+          const spots = await db.getCampSpots(ctx.user.id);
+          if (!spots.some(s => s.id === input.spotId)) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Zeltplatz nicht gefunden.",
+            });
+          }
+        }
+        // Nur eigene Packlisten dürfen verknüpft werden
+        if (input.packListId != null) {
+          const list = await db.getPackList(input.packListId, ctx.user.id);
+          if (!list) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Packliste nicht gefunden.",
+            });
+          }
+        }
+        const spotId = input.spotId ?? null;
+        const location = input.location?.trim() || null;
+        // Wetterarchiv verwerfen, wenn sich Zeitraum oder Ort geändert haben
+        const weatherStale =
+          trip.startDate !== input.startDate ||
+          trip.endDate !== input.endDate ||
+          trip.spotId !== spotId ||
+          trip.location !== location;
+        await db.updateTripLog(input.id, ctx.user.id, {
+          spotId,
+          packListId: input.packListId ?? null,
+          location,
+          title: input.title?.trim() || null,
+          notes: input.notes?.trim() || null,
+          startDate: input.startDate,
+          endDate: input.endDate,
+          rating: input.rating ?? null,
+          ...(weatherStale ? { weatherJson: null } : {}),
+        });
+        return { success: true } as const;
+      }),
     /** Sterne-Bewertung nachträglich setzen oder mit null wieder entfernen. */
     setRating: protectedProcedure
       .input(

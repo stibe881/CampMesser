@@ -10,6 +10,7 @@ import {
   Loader2,
   MapPin,
   Moon,
+  Pencil,
   Plus,
   Share2,
   Sparkles,
@@ -632,6 +633,23 @@ export default function TripsPage() {
   });
   /** Sterne-Bewertung des neuen Eintrags (null = ohne Bewertung). */
   const [formRating, setFormRating] = useState<number | null>(null);
+  /** Eintrag, der gerade im Formular bearbeitet wird (null = neuer Eintrag). */
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  /** Formular leeren und in den Neu-Modus zurückkehren. */
+  const resetForm = () => {
+    setEditingId(null);
+    setSpotChoice(FREE_LOCATION);
+    setPackListChoice("keine");
+    setForm({
+      location: "",
+      title: "",
+      notes: "",
+      startDate: today,
+      endDate: today,
+    });
+    setFormRating(null);
+  };
 
   // Schnellaktion «Neuer Tagebuch-Eintrag» (?neu=1): zum Formular springen
   const search = useSearch();
@@ -655,6 +673,15 @@ export default function TripsPage() {
       toast.success(t.trips.entrySaved);
     },
     onError: e => toast.error(e.message || t.trips.entrySaveFailed),
+  });
+
+  const updateMutation = trpc.trips.update.useMutation({
+    onSuccess: () => {
+      utils.trips.list.invalidate();
+      resetForm();
+      toast.success(t.trips.entryUpdated);
+    },
+    onError: e => toast.error(e.message || t.trips.entryUpdateFailed),
   });
 
   const removeMutation = trpc.trips.remove.useMutation({
@@ -689,6 +716,27 @@ export default function TripsPage() {
       if (spot) return spot.name;
     }
     return trip.location ?? t.trips.unknownPlace;
+  };
+
+  /** Eintrag ins Formular laden (Bearbeiten-Modus) und dorthin scrollen. */
+  const startEdit = (trip: (typeof allTrips)[number]) => {
+    setEditingId(trip.id);
+    setSpotChoice(trip.spotId != null ? String(trip.spotId) : FREE_LOCATION);
+    setPackListChoice(
+      trip.packListId != null ? String(trip.packListId) : "keine"
+    );
+    setForm({
+      location: trip.location ?? "",
+      title: trip.title ?? "",
+      notes: trip.notes ?? "",
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+    });
+    setFormRating(trip.rating ?? null);
+    newEntryCardRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   const pastTripLikes = useMemo(
@@ -1017,8 +1065,14 @@ export default function TripsPage() {
       <Card className="mb-8 scroll-mt-20" ref={newEntryCardRef}>
         <CardContent className="pt-6">
           <h2 className="mb-4 flex items-center gap-2 font-serif text-base font-semibold">
-            <BookOpen className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t.trips.newEntryTitle}
+            {editingId !== null ? (
+              <Pencil className="h-4 w-4 text-primary" aria-hidden="true" />
+            ) : (
+              <BookOpen className="h-4 w-4 text-primary" aria-hidden="true" />
+            )}
+            {editingId !== null
+              ? t.trips.editEntryTitle
+              : t.trips.newEntryTitle}
           </h2>
           <form
             className="grid gap-3"
@@ -1030,7 +1084,7 @@ export default function TripsPage() {
                 toast.error(t.trips.choosePlaceError);
                 return;
               }
-              addMutation.mutate({
+              const payload = {
                 spotId,
                 packListId:
                   packListChoice === "keine" ? null : Number(packListChoice),
@@ -1040,7 +1094,12 @@ export default function TripsPage() {
                 startDate: form.startDate,
                 endDate: form.endDate,
                 rating: formRating,
-              });
+              };
+              if (editingId !== null) {
+                updateMutation.mutate({ id: editingId, ...payload });
+              } else {
+                addMutation.mutate(payload);
+              }
             }}
           >
             <div className="grid gap-3 sm:grid-cols-2">
@@ -1165,14 +1224,33 @@ export default function TripsPage() {
                 />
               </div>
             </div>
-            <Button
-              type="submit"
-              disabled={addMutation.isPending}
-              className="justify-self-start"
-            >
-              <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              {addMutation.isPending ? t.common.saving : t.trips.submit}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="submit"
+                disabled={addMutation.isPending || updateMutation.isPending}
+              >
+                {editingId !== null ? (
+                  <Pencil className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                )}
+                {addMutation.isPending || updateMutation.isPending
+                  ? t.common.saving
+                  : editingId !== null
+                    ? t.trips.saveChanges
+                    : t.trips.submit}
+              </Button>
+              {editingId !== null && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={resetForm}
+                  disabled={updateMutation.isPending}
+                >
+                  {t.common.cancel}
+                </Button>
+              )}
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -1315,17 +1393,30 @@ export default function TripsPage() {
                         tripName={trip.title || placeName(trip)}
                       />
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 shrink-0 text-muted-foreground/60 hover:text-destructive"
-                      onClick={() => removeMutation.mutate({ id: trip.id })}
-                      aria-label={t.trips.deletePlannedAria(
-                        trip.title || placeName(trip)
-                      )}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    </Button>
+                    <div className="flex shrink-0 flex-col gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+                        onClick={() => startEdit(trip)}
+                        aria-label={t.trips.editEntryAria(
+                          trip.title || placeName(trip)
+                        )}
+                      >
+                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
+                        onClick={() => removeMutation.mutate({ id: trip.id })}
+                        aria-label={t.trips.deletePlannedAria(
+                          trip.title || placeName(trip)
+                        )}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
+                    </div>
                   </div>
                 </li>
               );
@@ -1417,17 +1508,30 @@ export default function TripsPage() {
                       tripName={trip.title || placeName(trip)}
                     />
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 shrink-0 text-muted-foreground/60 hover:text-destructive"
-                    onClick={() => removeMutation.mutate({ id: trip.id })}
-                    aria-label={t.trips.deleteEntryAria(
-                      trip.title || placeName(trip)
-                    )}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                  </Button>
+                  <div className="flex shrink-0 flex-col gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+                      onClick={() => startEdit(trip)}
+                      aria-label={t.trips.editEntryAria(
+                        trip.title || placeName(trip)
+                      )}
+                    >
+                      <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
+                      onClick={() => removeMutation.mutate({ id: trip.id })}
+                      aria-label={t.trips.deleteEntryAria(
+                        trip.title || placeName(trip)
+                      )}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    </Button>
+                  </div>
                 </div>
               </li>
             );
