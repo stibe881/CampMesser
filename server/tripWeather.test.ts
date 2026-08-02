@@ -3,6 +3,7 @@ import {
   parseTripWeather,
   summarizeTripWeather,
   TRIP_WEATHER_MAX_PRECIP_MM,
+  weatherLuck,
 } from "@shared/tripWeather";
 
 describe("summarizeTripWeather", () => {
@@ -133,5 +134,128 @@ describe("parseTripWeather", () => {
 
   it("verwirft fehlende Felder", () => {
     expect(parseTripWeather(JSON.stringify({ tMax: 20, tMin: 10 }))).toBeNull();
+  });
+});
+
+describe("weatherLuck", () => {
+  const archive = (
+    tMax: number,
+    rainDays: number,
+    tMin = 8,
+    totalPrecip = rainDays * 5
+  ) => JSON.stringify({ tMax, tMin, rainDays, totalPrecip });
+
+  it("aggregiert Trocken-Anteil, Ø-Tagesmaximum und wärmsten Trip", () => {
+    const luck = weatherLuck([
+      // 3 Nächte → 4 Campingtage, 1 Regentag
+      {
+        startDate: "2025-07-01",
+        endDate: "2025-07-04",
+        placeName: "Tessin",
+        weatherJson: archive(31, 1),
+      },
+      // 1 Nacht → 2 Campingtage, 0 Regentage
+      {
+        startDate: "2025-08-10",
+        endDate: "2025-08-11",
+        placeName: "Berner Oberland",
+        weatherJson: archive(24, 0),
+      },
+    ]);
+    expect(luck).toEqual({
+      trips: 2,
+      totalDays: 6,
+      dryDays: 5,
+      dryShare: 5 / 6,
+      avgTMax: 27.5,
+      warmest: { place: "Tessin", tMax: 31 },
+    });
+  });
+
+  it("liefert null ohne (gültiges) Wetterarchiv", () => {
+    expect(weatherLuck([])).toBeNull();
+    expect(
+      weatherLuck([
+        { startDate: "2025-07-01", endDate: "2025-07-04" },
+        {
+          startDate: "2025-07-10",
+          endDate: "2025-07-12",
+          weatherJson: "{kaputt",
+        },
+        {
+          startDate: "2025-07-20",
+          endDate: "2025-07-22",
+          weatherJson: JSON.stringify({
+            tMax: 999,
+            tMin: 5,
+            rainDays: 0,
+            totalPrecip: 0,
+          }),
+        },
+      ])
+    ).toBeNull();
+  });
+
+  it("überspringt Trips ohne Archiv, zählt die übrigen", () => {
+    const luck = weatherLuck([
+      { startDate: "2025-07-01", endDate: "2025-07-02" },
+      {
+        startDate: "2025-07-10",
+        endDate: "2025-07-11",
+        placeName: "Jura",
+        weatherJson: archive(19, 2),
+      },
+    ]);
+    expect(luck?.trips).toBe(1);
+    expect(luck?.warmest).toEqual({ place: "Jura", tMax: 19 });
+  });
+
+  it("klemmt Regentage auf die Campingtage (dryShare nie < 0)", () => {
+    // Tagesausflug (gleicher Tag = 1 Campingtag), Archiv meldet 3 Regentage
+    const luck = weatherLuck([
+      {
+        startDate: "2025-07-01",
+        endDate: "2025-07-01",
+        weatherJson: archive(15, 3),
+      },
+    ]);
+    expect(luck?.totalDays).toBe(1);
+    expect(luck?.dryDays).toBe(0);
+    expect(luck?.dryShare).toBe(0);
+  });
+
+  it("bei Gleichstand des Tagesmaximums gewinnt der erste Trip", () => {
+    const luck = weatherLuck([
+      {
+        startDate: "2025-06-01",
+        endDate: "2025-06-03",
+        placeName: "Wallis",
+        weatherJson: archive(28, 0),
+      },
+      {
+        startDate: "2025-09-01",
+        endDate: "2025-09-03",
+        placeName: "Graubünden",
+        weatherJson: archive(28, 1),
+      },
+    ]);
+    expect(luck?.warmest).toEqual({ place: "Wallis", tMax: 28 });
+  });
+
+  it("fehlender Ortsname → leerer place, Ø wird gerundet", () => {
+    const luck = weatherLuck([
+      {
+        startDate: "2025-07-01",
+        endDate: "2025-07-02",
+        weatherJson: archive(22.3, 0),
+      },
+      {
+        startDate: "2025-07-10",
+        endDate: "2025-07-11",
+        weatherJson: archive(22.2, 0),
+      },
+    ]);
+    expect(luck?.avgTMax).toBe(22.3);
+    expect(luck?.warmest).toEqual({ place: "", tMax: 22.3 });
   });
 });

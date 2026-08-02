@@ -1621,6 +1621,17 @@ export const it: Translation = {
     weatherSummary: (max, min) => `${max}° / ${min}°`,
     weatherRainDays: n =>
       n === 1 ? "1 giorno di pioggia" : `${n} giorni di pioggia`,
+    weatherLuckTitle: "Fortuna meteo",
+    weatherLuckDry: pct =>
+      `Il ${pct} % dei tuoi giorni di campeggio è stato asciutto`,
+    weatherLuckAvgMax: temp => `massima giornaliera media ${temp}°`,
+    weatherLuckWarmest: (place, temp) => `luogo più caldo: ${place} (${temp}°)`,
+    weatherLuckHint: n =>
+      n === 1
+        ? "Dall'archivio meteo di 1 soggiorno"
+        : `Dall'archivio meteo di ${n} soggiorni`,
+    weatherLuckYear: (pct, temp) =>
+      `Fortuna meteo: ${pct} % di giorni asciutti · massima giornaliera media ${temp}°`,
     sharedBadge: "Condiviso",
     sharedWith: name => `Viaggio di ${name}`,
     membersButton: "Compagni di viaggio",

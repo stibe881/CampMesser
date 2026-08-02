@@ -1579,6 +1579,16 @@ export const en: Translation = {
     weatherTitle: "Weather during the stay",
     weatherSummary: (max, min) => `${max}° / ${min}°`,
     weatherRainDays: n => (n === 1 ? "1 rainy day" : `${n} rainy days`),
+    weatherLuckTitle: "Weather luck",
+    weatherLuckDry: pct => `${pct}% of your camping days were dry`,
+    weatherLuckAvgMax: temp => `avg daily high ${temp}°`,
+    weatherLuckWarmest: (place, temp) => `warmest place: ${place} (${temp}°)`,
+    weatherLuckHint: n =>
+      n === 1
+        ? "Based on the weather archive of 1 stay"
+        : `Based on the weather archive of ${n} stays`,
+    weatherLuckYear: (pct, temp) =>
+      `Weather luck: ${pct}% dry days · avg daily high ${temp}°`,
     sharedBadge: "Shared",
     sharedWith: name => `Trip by ${name}`,
     membersButton: "Travel companions",

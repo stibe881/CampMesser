@@ -1641,6 +1641,18 @@ export const de = {
     weatherTitle: "Wetter während des Aufenthalts",
     weatherSummary: (max: number, min: number) => `${max}° / ${min}°`,
     weatherRainDays: (n: number) => (n === 1 ? "1 Regentag" : `${n} Regentage`),
+    weatherLuckTitle: "Wetter-Glück",
+    weatherLuckDry: (pct: number) =>
+      `${pct} % deiner Campingtage waren trocken`,
+    weatherLuckAvgMax: (temp: number) => `Ø Tagesmaximum ${temp}°`,
+    weatherLuckWarmest: (place: string, temp: number) =>
+      `wärmster Ort: ${place} (${temp}°)`,
+    weatherLuckHint: (n: number) =>
+      n === 1
+        ? "Aus dem Wetterarchiv von 1 Aufenthalt"
+        : `Aus dem Wetterarchiv von ${n} Aufenthalten`,
+    weatherLuckYear: (pct: number, temp: number) =>
+      `Wetter-Glück: ${pct} % trockene Tage · Ø Tagesmaximum ${temp}°`,
     sharedBadge: "Gemeinsam",
     sharedWith: (name: string) => `Reise von ${name}`,
     membersButton: "Mitreisende",

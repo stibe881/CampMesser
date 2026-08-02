@@ -5,6 +5,7 @@
  * (Validierung) und Tests genutzt (Muster shared/climate.ts).
  */
 import { RAIN_DAY_THRESHOLD_MM } from "./climate";
+import { tripNights } from "./trips";
 
 /** Kompakte Wetter-Zusammenfassung eines Aufenthalts. */
 export interface TripWeatherSummary {
@@ -97,6 +98,78 @@ export function summarizeTripWeather(
  * Gespeichertes Wetter-JSON defensiv in eine Zusammenfassung übersetzen –
  * kaputte oder unplausible Werte ergeben null (dann keine Anzeige).
  */
+/** Eingabe für die Wetter-Glück-Statistik: Trip-Zeitraum + Wetterarchiv. */
+export interface WeatherLuckTrip {
+  startDate: string;
+  endDate: string;
+  /** Anzeigename des Orts (für «wärmster Trip») */
+  placeName?: string | null;
+  /** Gespeichertes Wetterarchiv (TripWeatherSummary als JSON) */
+  weatherJson?: string | null;
+}
+
+/** Aggregierte Wetter-Glück-Kennzahlen über alle Trips mit Wetterarchiv. */
+export interface WeatherLuck {
+  /** Anzahl Aufenthalte mit gültigem Wetterarchiv */
+  trips: number;
+  /** Campingtage gesamt (Nächte + 1 pro Trip) */
+  totalDays: number;
+  /** Tage ohne Regen (Campingtage − Regentage) */
+  dryDays: number;
+  /** Anteil trockener Tage 0…1 (dryDays / totalDays) */
+  dryShare: number;
+  /** Ø des Tagesmaximums (tMax pro Trip, ungewichtet) in °C */
+  avgTMax: number;
+  /** Wärmster Aufenthalt: Ort + höchstes Tagesmaximum */
+  warmest: { place: string; tMax: number } | null;
+}
+
+/**
+ * Wetter-Glück über alle Aufenthalte mit Wetterarchiv aggregieren.
+ *
+ * Definitionen:
+ * - «Campingtage» eines Trips = Nächte + 1 (An- UND Abreisetag zählen als
+ *   Tage vor Ort; gleicher Tag = 1 Tag, kaputte Daten defensiv ebenfalls 1).
+ * - «Trockene Tage» = Campingtage − Regentage des Archivs; die Regentage
+ *   werden pro Trip auf die Campingtage geklemmt, damit unplausible Archive
+ *   den Anteil nie unter 0 drücken. dryShare = 1 − rainDays/totalDays.
+ * - avgTMax = ungewichteter Durchschnitt der Trip-Tagesmaxima (tMax),
+ *   auf eine Nachkommastelle gerundet.
+ * - warmest = Trip mit dem höchsten tMax (bei Gleichstand der erste).
+ *
+ * Trips ohne (oder mit kaputtem) weatherJson werden übersprungen; hat kein
+ * einziger Trip ein Archiv, gibt es null – dann keine Anzeige.
+ */
+export function weatherLuck(trips: WeatherLuckTrip[]): WeatherLuck | null {
+  let count = 0;
+  let totalDays = 0;
+  let rainDaysTotal = 0;
+  let tMaxSum = 0;
+  let warmest: { place: string; tMax: number } | null = null;
+  for (const trip of trips) {
+    const summary = parseTripWeather(trip.weatherJson);
+    if (!summary) continue;
+    const days = tripNights(trip.startDate, trip.endDate) + 1;
+    count += 1;
+    totalDays += days;
+    rainDaysTotal += Math.min(summary.rainDays, days);
+    tMaxSum += summary.tMax;
+    if (warmest === null || summary.tMax > warmest.tMax) {
+      warmest = { place: trip.placeName?.trim() ?? "", tMax: summary.tMax };
+    }
+  }
+  if (count === 0) return null;
+  const dryDays = totalDays - rainDaysTotal;
+  return {
+    trips: count,
+    totalDays,
+    dryDays,
+    dryShare: dryDays / totalDays,
+    avgTMax: round1(tMaxSum / count),
+    warmest,
+  };
+}
+
 export function parseTripWeather(
   json: string | null | undefined
 ): TripWeatherSummary | null {

@@ -1635,6 +1635,17 @@ export const fr: Translation = {
     weatherTitle: "Météo pendant le séjour",
     weatherSummary: (max, min) => `${max}° / ${min}°`,
     weatherRainDays: n => (n === 1 ? "1 jour de pluie" : `${n} jours de pluie`),
+    weatherLuckTitle: "Chance météo",
+    weatherLuckDry: pct => `${pct} % de tes jours de camping ont été secs`,
+    weatherLuckAvgMax: temp => `max. journalier moyen ${temp}°`,
+    weatherLuckWarmest: (place, temp) =>
+      `lieu le plus chaud : ${place} (${temp}°)`,
+    weatherLuckHint: n =>
+      n === 1
+        ? "D'après l'archive météo de 1 séjour"
+        : `D'après l'archive météo de ${n} séjours`,
+    weatherLuckYear: (pct, temp) =>
+      `Chance météo : ${pct} % de jours secs · max. journalier moyen ${temp}°`,
     sharedBadge: "Partagé",
     sharedWith: name => `Voyage de ${name}`,
     membersButton: "Compagnons de voyage",

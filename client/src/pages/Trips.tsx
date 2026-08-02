@@ -79,6 +79,7 @@ import {
   parseTripWeather,
   summarizeTripWeather,
   TRIP_WEATHER_ARCHIVE_MIN_AGE_DAYS,
+  weatherLuck,
 } from "@shared/tripWeather";
 import {
   CANTONS,
@@ -1358,6 +1359,7 @@ export default function TripsPage() {
         endDate: t.endDate,
         placeName: placeName(t),
         rating: t.rating,
+        weatherJson: t.weatherJson,
       })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [trips, spots]
@@ -1367,6 +1369,9 @@ export default function TripsPage() {
     [pastTripLikes, lang]
   );
   const currentYear = new Date().getFullYear();
+
+  // Wetter-Glück über alle Aufenthalte mit gespeichertem Wetterarchiv
+  const luck = useMemo(() => weatherLuck(pastTripLikes), [pastTripLikes]);
 
   // Meilensteine über die abgeschlossenen Aufenthalte: erreichte als farbige
   // Chips, dazu die nächsten offenen (höchster Fortschritt zuerst, max. 3)
@@ -1409,6 +1414,18 @@ export default function TripsPage() {
         ? null
         : computeYearReview(pastTripLikes, reviewYear, lang),
     [pastTripLikes, reviewYear, lang]
+  );
+  // Wetter-Glück des gewählten Rückblick-Jahres (Trip zählt zum Start-Jahr)
+  const yearLuck = useMemo(
+    () =>
+      reviewYear === undefined
+        ? null
+        : weatherLuck(
+            pastTripLikes.filter(
+              t => t.startDate.slice(0, 4) === String(reviewYear)
+            )
+          ),
+    [pastTripLikes, reviewYear]
   );
 
   /**
@@ -1700,6 +1717,35 @@ export default function TripsPage() {
         </CardContent>
       </Card>
 
+      {/* Wetter-Glück: nur wenn mindestens ein Trip ein Wetterarchiv hat */}
+      {luck && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <h2 className="mb-2 flex items-center gap-2 font-serif text-base font-semibold">
+              <CloudSun className="h-4 w-4 text-primary" aria-hidden="true" />
+              {t.trips.weatherLuckTitle}
+            </h2>
+            <p className="text-sm">
+              {t.trips.weatherLuckDry(Math.round(luck.dryShare * 100))}
+              {" · "}
+              {t.trips.weatherLuckAvgMax(Math.round(luck.avgTMax))}
+              {luck.warmest?.place && (
+                <>
+                  {" · "}
+                  {t.trips.weatherLuckWarmest(
+                    luck.warmest.place,
+                    Math.round(luck.warmest.tMax)
+                  )}
+                </>
+              )}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t.trips.weatherLuckHint(luck.trips)}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Meilensteine: erreichte farbig, die nächsten offenen mit Fortschritt */}
       {trips.length > 0 && (
         <Card className="mb-6">
@@ -1869,6 +1915,19 @@ export default function TripsPage() {
                 </p>
               </div>
             </div>
+            {/* Wetter-Glück des Jahres (nur mit Wetterarchiv-Daten) */}
+            {yearLuck && (
+              <p className="mt-4 flex items-center gap-1.5 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+                <CloudSun
+                  className="h-3.5 w-3.5 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                {t.trips.weatherLuckYear(
+                  Math.round(yearLuck.dryShare * 100),
+                  Math.round(yearLuck.avgTMax)
+                )}
+              </p>
+            )}
           </CardContent>
         </Card>
       )}
