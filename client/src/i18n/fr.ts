@@ -891,6 +891,14 @@ export const fr: Translation = {
       `Oriente les panneaux vers le sud. Vers midi, le soleil atteint son point le plus haut à ${alt}° – le`,
     solarLink: "calculateur de budget énergie",
     solarText2: "aide à planifier le rendement.",
+    photoLightTitle: "Lumière photo",
+    photoLightIntro:
+      "Heure dorée (lumière douce et chaude) et heure bleue (ciel bleu profond) à la date choisie à cet endroit.",
+    photoLightMorning: "Le matin",
+    photoLightEvening: "Le soir",
+    goldenHour: "Heure dorée",
+    blueHour: "Heure bleue",
+    photoLightRange: (from, to) => `${from}–${to}`,
   },
   level: {
     title: "Niveau à bulle",

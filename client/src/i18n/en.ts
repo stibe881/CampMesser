@@ -858,6 +858,14 @@ export const en: Translation = {
       `Point the panels south. Around midday the sun is at its highest at ${alt}° – the`,
     solarLink: "energy budget calculator",
     solarText2: "helps with yield planning.",
+    photoLightTitle: "Photo light",
+    photoLightIntro:
+      "Golden hour (soft, warm light) and blue hour (deep blue sky) on the selected date at this location.",
+    photoLightMorning: "Morning",
+    photoLightEvening: "Evening",
+    goldenHour: "Golden hour",
+    blueHour: "Blue hour",
+    photoLightRange: (from, to) => `${from}–${to}`,
   },
   level: {
     title: "Spirit level",

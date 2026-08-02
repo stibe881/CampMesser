@@ -132,6 +132,98 @@ export function computeSolarAlignment(
   };
 }
 
+/** Zeitfenster für Fotolicht: goldene und blaue Stunde einer Dämmerung. */
+export interface LightPhase {
+  goldenStart: Date;
+  goldenEnd: Date;
+  blueStart: Date;
+  blueEnd: Date;
+}
+
+export interface GoldenBlueHours {
+  /** Morgendämmerung (null in Polarfällen ohne passende Sonnenhöhen) */
+  morning: LightPhase | null;
+  /** Abenddämmerung (null in Polarfällen ohne passende Sonnenhöhen) */
+  evening: LightPhase | null;
+}
+
+/** Sonnenhöhen-Schwellen: goldene Stunde −4°…+6°, blaue Stunde −6°…−4°. */
+const GOLDEN_UPPER = 6;
+const GOLDEN_LOWER = -4;
+const BLUE_LOWER = -6;
+
+/**
+ * Goldene und blaue Stunde für Datum und Ort bestimmen. Die Sonnenhöhe wird
+ * minutenweise über den lokalen Tag abgetastet; gesucht sind die Auf- bzw.
+ * Abwärts-Durchgänge durch die Schwellen. Fehlt ein Durchgang (Polartag/
+ * Polarnacht oder sehr hohe Breiten), ist die jeweilige Seite null.
+ */
+export function goldenBlueHours(
+  date: Date,
+  lat: number,
+  lon: number
+): GoldenBlueHours {
+  const dayStart = new Date(date);
+  dayStart.setHours(0, 0, 0, 0);
+  const altitudes: number[] = [];
+  for (let m = 0; m <= 1440; m++) {
+    const t = new Date(dayStart.getTime() + m * 60000);
+    altitudes.push(getSunPosition(t, lat, lon).altitude);
+  }
+  const timeAt = (m: number) => new Date(dayStart.getTime() + m * 60000);
+
+  /** Erster Minuten-Index, an dem die Höhe die Schwelle aufwärts durchquert. */
+  const crossUp = (threshold: number): number | null => {
+    for (let m = 1; m < altitudes.length; m++) {
+      if (altitudes[m - 1] < threshold && altitudes[m] >= threshold) return m;
+    }
+    return null;
+  };
+  /** Erster Minuten-Index, an dem die Höhe die Schwelle abwärts durchquert. */
+  const crossDown = (threshold: number): number | null => {
+    for (let m = 1; m < altitudes.length; m++) {
+      if (altitudes[m - 1] >= threshold && altitudes[m] < threshold) return m;
+    }
+    return null;
+  };
+
+  const upBlue = crossUp(BLUE_LOWER);
+  const upGolden = crossUp(GOLDEN_LOWER);
+  const upEnd = crossUp(GOLDEN_UPPER);
+  const morning: LightPhase | null =
+    upBlue !== null &&
+    upGolden !== null &&
+    upEnd !== null &&
+    upBlue <= upGolden &&
+    upGolden <= upEnd
+      ? {
+          blueStart: timeAt(upBlue),
+          blueEnd: timeAt(upGolden),
+          goldenStart: timeAt(upGolden),
+          goldenEnd: timeAt(upEnd),
+        }
+      : null;
+
+  const downStart = crossDown(GOLDEN_UPPER);
+  const downGolden = crossDown(GOLDEN_LOWER);
+  const downBlue = crossDown(BLUE_LOWER);
+  const evening: LightPhase | null =
+    downStart !== null &&
+    downGolden !== null &&
+    downBlue !== null &&
+    downStart <= downGolden &&
+    downGolden <= downBlue
+      ? {
+          goldenStart: timeAt(downStart),
+          goldenEnd: timeAt(downGolden),
+          blueStart: timeAt(downGolden),
+          blueEnd: timeAt(downBlue),
+        }
+      : null;
+
+  return { morning, evening };
+}
+
 /** Himmelsrichtungs-Kürzel je Sprache (DE: O = Ost, FR/IT: E/O, EN: E/W). */
 const COMPASS_DIRS: Record<Language, string[]> = {
   de: ["N", "NO", "O", "SO", "S", "SW", "W", "NW"],

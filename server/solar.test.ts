@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { compassDirection, computeSolarAlignment } from "@shared/solar";
+import {
+  compassDirection,
+  computeSolarAlignment,
+  goldenBlueHours,
+} from "@shared/solar";
+import { getSunTimes } from "../client/src/lib/sun";
 
 // Referenzort: Bern, Schweiz
 const BERN = { lat: 46.948, lng: 7.4474 };
@@ -64,5 +69,62 @@ describe("compassDirection", () => {
     expect(compassDirection(184)).toBe("S");
     expect(compassDirection(270)).toBe("W");
     expect(compassDirection(359)).toBe("N");
+  });
+});
+
+describe("goldenBlueHours", () => {
+  it("liefert in Bern plausible Fenster rund um Auf- und Untergang", () => {
+    const result = goldenBlueHours(summerDay, BERN.lat, BERN.lng);
+    expect(result.morning).not.toBeNull();
+    expect(result.evening).not.toBeNull();
+    const m = result.morning!;
+    const e = result.evening!;
+
+    // Morgens: blaue Stunde vor der goldenen, nahtloser Übergang bei −4°
+    expect(m.blueStart.getTime()).toBeLessThan(m.blueEnd.getTime());
+    expect(m.blueEnd.getTime()).toBe(m.goldenStart.getTime());
+    expect(m.goldenStart.getTime()).toBeLessThan(m.goldenEnd.getTime());
+    // Abends umgekehrt: goldene Stunde vor der blauen
+    expect(e.goldenStart.getTime()).toBeLessThan(e.goldenEnd.getTime());
+    expect(e.goldenEnd.getTime()).toBe(e.blueStart.getTime());
+    expect(e.blueStart.getTime()).toBeLessThan(e.blueEnd.getTime());
+    // Abend liegt nach dem Morgen
+    expect(e.goldenStart.getTime()).toBeGreaterThan(m.goldenEnd.getTime());
+
+    // Sonnenauf-/-untergang (Höhe ≈ −0.8°) liegen in der goldenen Stunde
+    const times = getSunTimes(summerDay, BERN.lat, BERN.lng);
+    expect(times.sunrise!.getTime()).toBeGreaterThan(m.goldenStart.getTime());
+    expect(times.sunrise!.getTime()).toBeLessThan(m.goldenEnd.getTime());
+    expect(times.sunset!.getTime()).toBeGreaterThan(e.goldenStart.getTime());
+    expect(times.sunset!.getTime()).toBeLessThan(e.blueEnd.getTime());
+
+    // Dauern in Bern: blaue Stunde 10–60 min, goldene Stunde 20–120 min
+    const blueMin = (m.blueEnd.getTime() - m.blueStart.getTime()) / 60000;
+    const goldenMin = (m.goldenEnd.getTime() - m.goldenStart.getTime()) / 60000;
+    expect(blueMin).toBeGreaterThanOrEqual(10);
+    expect(blueMin).toBeLessThanOrEqual(60);
+    expect(goldenMin).toBeGreaterThanOrEqual(20);
+    expect(goldenMin).toBeLessThanOrEqual(120);
+  });
+
+  it("gibt im Winter spätere Morgen-Fenster als im Sommer zurück", () => {
+    const summer = goldenBlueHours(summerDay, BERN.lat, BERN.lng).morning!;
+    const winter = goldenBlueHours(winterDay, BERN.lat, BERN.lng).morning!;
+    // Minuten seit Mitternacht vergleichen (beide Tage lokal um 00:00 gestartet)
+    const minutesOfDay = (d: Date) => d.getHours() * 60 + d.getMinutes();
+    expect(minutesOfDay(winter.goldenStart)).toBeGreaterThan(
+      minutesOfDay(summer.goldenStart)
+    );
+  });
+
+  it("liefert in Polarfällen null (Mitternachtssonne und Polarnacht)", () => {
+    // Longyearbyen (Spitzbergen, 78°N): Sonne im Juni nie unter +6°,
+    // im Dezember nie über −6° – beide Seiten bleiben null
+    const midnightSun = goldenBlueHours(summerDay, 78.22, 15.65);
+    expect(midnightSun.morning).toBeNull();
+    expect(midnightSun.evening).toBeNull();
+    const polarNight = goldenBlueHours(winterDay, 78.22, 15.65);
+    expect(polarNight.morning).toBeNull();
+    expect(polarNight.evening).toBeNull();
   });
 });

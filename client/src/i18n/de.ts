@@ -891,6 +891,14 @@ export const de = {
       `Richte die Panels nach Süden aus. Um die Mittagszeit steht die Sonne mit ${alt}° am höchsten – der`,
     solarLink: "Energie-Budget-Rechner",
     solarText2: "hilft bei der Ertragsplanung.",
+    photoLightTitle: "Fotolicht",
+    photoLightIntro:
+      "Goldene Stunde (weiches, warmes Licht) und blaue Stunde (tiefblauer Himmel) am gewählten Datum an diesem Ort.",
+    photoLightMorning: "Morgens",
+    photoLightEvening: "Abends",
+    goldenHour: "Goldene Stunde",
+    blueHour: "Blaue Stunde",
+    photoLightRange: (from: string, to: string) => `${from}–${to} Uhr`,
   },
   level: {
     title: "Wasserwaage",

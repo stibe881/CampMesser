@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Camera,
   Compass,
   MapPin,
   Moon,
@@ -29,7 +30,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { getSunPosition, getSunTimes } from "@/lib/sun";
 import { isBlocked } from "@shared/obstacles";
-import { compassDirection } from "@shared/solar";
+import { compassDirection, goldenBlueHours } from "@shared/solar";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
 import { useI18n } from "@/i18n";
 import {
@@ -836,6 +837,16 @@ export default function SunCompassPage() {
     [geo, selectedDate]
   );
 
+  // Fotolicht: goldene und blaue Stunde für das gewählte Datum am Ort.
+  // Nur vom Tag abhängig – der Zeit-Slider ändert daran nichts.
+  const photoLight = useMemo(
+    () =>
+      geo.status === "ok"
+        ? goldenBlueHours(baseDate, geo.lat!, geo.lng!)
+        : null,
+    [geo, baseDate]
+  );
+
   const shadowWindows = useMemo(
     () =>
       geo.status === "ok"
@@ -1172,6 +1183,81 @@ export default function SunCompassPage() {
               </p>
             </div>
           </div>
+
+          {/* Fotolicht: goldene und blaue Stunde morgens/abends am gewählten Datum */}
+          {photoLight && (photoLight.morning || photoLight.evening) && (
+            <Card className="mb-4">
+              <CardContent className="pt-6">
+                <p className="mb-1 flex items-center gap-2 font-semibold">
+                  <Camera className="h-4 w-4 text-primary" aria-hidden="true" />
+                  {t.sunCompass.photoLightTitle}
+                </p>
+                <p className="mb-4 text-sm text-muted-foreground">
+                  {t.sunCompass.photoLightIntro}
+                </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {photoLight.morning && (
+                    <div className="rounded-xl border border-border bg-card p-3.5">
+                      <p className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
+                        <Sunrise
+                          className="h-4 w-4 text-chart-4"
+                          aria-hidden="true"
+                        />
+                        {t.sunCompass.photoLightMorning}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t.sunCompass.blueHour}:{" "}
+                        <strong className="font-mono text-foreground">
+                          {t.sunCompass.photoLightRange(
+                            fmtTime(photoLight.morning.blueStart, lang),
+                            fmtTime(photoLight.morning.blueEnd, lang)
+                          )}
+                        </strong>
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t.sunCompass.goldenHour}:{" "}
+                        <strong className="font-mono text-foreground">
+                          {t.sunCompass.photoLightRange(
+                            fmtTime(photoLight.morning.goldenStart, lang),
+                            fmtTime(photoLight.morning.goldenEnd, lang)
+                          )}
+                        </strong>
+                      </p>
+                    </div>
+                  )}
+                  {photoLight.evening && (
+                    <div className="rounded-xl border border-border bg-card p-3.5">
+                      <p className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
+                        <Sunset
+                          className="h-4 w-4 text-chart-1"
+                          aria-hidden="true"
+                        />
+                        {t.sunCompass.photoLightEvening}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t.sunCompass.goldenHour}:{" "}
+                        <strong className="font-mono text-foreground">
+                          {t.sunCompass.photoLightRange(
+                            fmtTime(photoLight.evening.goldenStart, lang),
+                            fmtTime(photoLight.evening.goldenEnd, lang)
+                          )}
+                        </strong>
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t.sunCompass.blueHour}:{" "}
+                        <strong className="font-mono text-foreground">
+                          {t.sunCompass.photoLightRange(
+                            fmtTime(photoLight.evening.blueStart, lang),
+                            fmtTime(photoLight.evening.blueEnd, lang)
+                          )}
+                        </strong>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Standort & Tipps */}
           {/* Hindernis-Profil: Bäume, Berge, Gebäude erfassen und Schattenzeiten sehen */}
