@@ -1600,6 +1600,22 @@ export const fr: Translation = {
     categoryChangeFailed: "La catégorie n'a pas pu être enregistrée",
     reorderAria: (name: string) => `Déplacer ${name}`,
     reorderFailed: "Le nouvel ordre n'a pas pu être enregistré",
+    printButton: "Imprimer",
+  },
+  shoppingPrint: {
+    docTitle: "Liste de courses à imprimer",
+    appTitle: "CampMesser – le couteau suisse du camping sous tente",
+    printButton: "Imprimer / Enregistrer en PDF",
+    printBrowserHint:
+      "Dans l'app installée, le bouton ouvre la vue dans le navigateur – imprime ou enregistre en PDF depuis son menu.",
+    headerKicker: "CampMesser · Liste de courses",
+    title: "Liste de courses",
+    meta: (items: number, categories: number) =>
+      `${items} ${items === 1 ? "article ouvert" : "articles ouverts"} · ${categories} ${categories === 1 ? "catégorie" : "catégories"}`,
+    printedOn: (date: string) => `État : ${date}`,
+    emptyList: "Aucun article ouvert – tout est acheté.",
+    footer:
+      "Bonnes courses ! · CampMesser – le couteau suisse du camping sous tente",
   },
   menuPlan: {
     title: "Plan des repas",
@@ -1630,6 +1646,21 @@ export const fr: Translation = {
     addIngredients: "Ingrédients des recettes prévues sur la liste de courses",
     noPlannedRecipes:
       "Aucune recette attribuée pour l'instant – choisis d'abord des recettes dans les créneaux de repas.",
+    printButton: "Imprimer",
+  },
+  menuPlanPrint: {
+    docTitle: (name: string) => `${name} – plan des repas à imprimer`,
+    docTitleFallback: "Plan des repas",
+    appTitle: "CampMesser – le couteau suisse du camping sous tente",
+    notFound: "Ce séjour est introuvable.",
+    printButton: "Imprimer / Enregistrer en PDF",
+    printBrowserHint:
+      "Dans l'app installée, le bouton ouvre la vue dans le navigateur – imprime ou enregistre en PDF depuis son menu.",
+    headerKicker: "CampMesser · Plan des repas",
+    printedOn: (date: string) => `État : ${date}`,
+    dayHeader: "Jour",
+    footer:
+      "Bon appétit ! · CampMesser – le couteau suisse du camping sous tente",
   },
   family: {
     title: "Mode famille",

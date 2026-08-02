@@ -1547,6 +1547,22 @@ export const en: Translation = {
     categoryChangeFailed: "The category could not be saved",
     reorderAria: (name: string) => `Move ${name}`,
     reorderFailed: "The new order could not be saved",
+    printButton: "Print",
+  },
+  shoppingPrint: {
+    docTitle: "Printable shopping list",
+    appTitle: "CampMesser – the Swiss army knife for tent camping",
+    printButton: "Print / Save as PDF",
+    printBrowserHint:
+      "In the installed app this button opens the view in your browser – print or save as PDF from its menu there.",
+    headerKicker: "CampMesser · Shopping list",
+    title: "Shopping list",
+    meta: (items: number, categories: number) =>
+      `${items} ${items === 1 ? "open item" : "open items"} · ${categories} ${categories === 1 ? "category" : "categories"}`,
+    printedOn: (date: string) => `As of ${date}`,
+    emptyList: "No open items – everything bought.",
+    footer:
+      "Happy shopping! · CampMesser – the Swiss army knife for tent camping",
   },
   menuPlan: {
     title: "Meal plan",
@@ -1578,6 +1594,21 @@ export const en: Translation = {
     addIngredients: "Add ingredients of planned recipes to the shopping list",
     noPlannedRecipes:
       "No recipes assigned yet – choose recipes in the meal slots first.",
+    printButton: "Print",
+  },
+  menuPlanPrint: {
+    docTitle: (name: string) => `${name} – printable meal plan`,
+    docTitleFallback: "Meal plan",
+    appTitle: "CampMesser – the Swiss army knife for tent camping",
+    notFound: "This stay could not be found.",
+    printButton: "Print / Save as PDF",
+    printBrowserHint:
+      "In the installed app this button opens the view in your browser – print or save as PDF from its menu there.",
+    headerKicker: "CampMesser · Meal plan",
+    printedOn: (date: string) => `As of ${date}`,
+    dayHeader: "Day",
+    footer:
+      "Enjoy your meals! · CampMesser – the Swiss army knife for tent camping",
   },
   family: {
     title: "Family mode",

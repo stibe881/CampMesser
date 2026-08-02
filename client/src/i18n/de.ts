@@ -1598,6 +1598,22 @@ export const de = {
     categoryChangeFailed: "Kategorie konnte nicht gespeichert werden",
     reorderAria: (name: string) => `${name} verschieben`,
     reorderFailed: "Neue Reihenfolge konnte nicht gespeichert werden",
+    printButton: "Drucken",
+  },
+  shoppingPrint: {
+    docTitle: "Einkaufsliste zum Ausdrucken",
+    appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    printButton: "Drucken / Als PDF sichern",
+    printBrowserHint:
+      "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
+    headerKicker: "CampMesser · Einkaufsliste",
+    title: "Einkaufsliste",
+    meta: (items: number, categories: number) =>
+      `${items} ${items === 1 ? "offener Eintrag" : "offene Einträge"} · ${categories} ${categories === 1 ? "Kategorie" : "Kategorien"}`,
+    printedOn: (date: string) => `Stand: ${date}`,
+    emptyList: "Keine offenen Einträge – alles eingekauft.",
+    footer:
+      "Guten Einkauf! · CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
   },
   menuPlan: {
     title: "Menüplan",
@@ -1628,6 +1644,21 @@ export const de = {
     addIngredients: "Zutaten der geplanten Rezepte auf die Einkaufsliste",
     noPlannedRecipes:
       "Noch keine Rezepte zugewiesen – wähle zuerst Rezepte in den Mahlzeiten-Slots.",
+    printButton: "Drucken",
+  },
+  menuPlanPrint: {
+    docTitle: (name: string) => `${name} – Menüplan zum Ausdrucken`,
+    docTitleFallback: "Menüplan",
+    appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    notFound: "Dieser Aufenthalt wurde nicht gefunden.",
+    printButton: "Drucken / Als PDF sichern",
+    printBrowserHint:
+      "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
+    headerKicker: "CampMesser · Menüplan",
+    printedOn: (date: string) => `Stand: ${date}`,
+    dayHeader: "Tag",
+    footer:
+      "En Guete! · CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
   },
   family: {
     title: "Familien-Modus",

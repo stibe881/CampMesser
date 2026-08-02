@@ -7,6 +7,7 @@ import {
   CookingPot,
   Loader2,
   Plus,
+  Printer,
   Search,
   ShoppingCart,
   UtensilsCrossed,
@@ -267,23 +268,30 @@ export default function MenuPlanPage() {
         </Button>
       </div>
 
-      {/* Brücke zur Einkaufsliste */}
-      <Button
-        variant="outline"
-        size="sm"
-        className="mb-6"
-        disabled={addToShoppingMutation.isPending}
-        onClick={() => {
-          if (plannedIngredients.length === 0) {
-            toast.error(t.menuPlan.noPlannedRecipes);
-            return;
-          }
-          addToShoppingMutation.mutate({ names: plannedIngredients });
-        }}
-      >
-        <ShoppingCart className="mr-1.5 h-4 w-4" aria-hidden="true" />
-        {t.menuPlan.addIngredients}
-      </Button>
+      {/* Brücke zur Einkaufsliste & Druckansicht */}
+      <div className="mb-6 flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={addToShoppingMutation.isPending}
+          onClick={() => {
+            if (plannedIngredients.length === 0) {
+              toast.error(t.menuPlan.noPlannedRecipes);
+              return;
+            }
+            addToShoppingMutation.mutate({ names: plannedIngredients });
+          }}
+        >
+          <ShoppingCart className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          {t.menuPlan.addIngredients}
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/menueplan/${tripId}/drucken`}>
+            <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.menuPlan.printButton}
+          </Link>
+        </Button>
+      </div>
 
       {/* Tage-Raster */}
       <div className="space-y-4">

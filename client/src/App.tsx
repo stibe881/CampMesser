@@ -34,6 +34,7 @@ const pageLoaders = {
   Family: () => import("./pages/Family"),
   Food: () => import("./pages/Food"),
   Shopping: () => import("./pages/Shopping"),
+  ShoppingPrint: () => import("./pages/ShoppingPrint"),
   Weather: () => import("./pages/Weather"),
   Drying: () => import("./pages/Drying"),
   Quiet: () => import("./pages/Quiet"),
@@ -43,6 +44,7 @@ const pageLoaders = {
   TentFinder: () => import("./pages/TentFinder"),
   Trips: () => import("./pages/Trips"),
   MenuPlan: () => import("./pages/MenuPlan"),
+  MenuPlanPrint: () => import("./pages/MenuPlanPrint"),
   Level: () => import("./pages/Level"),
   Login: () => import("./pages/Login"),
   Lawn: () => import("./pages/Lawn"),
@@ -98,6 +100,7 @@ const PackOptimizerPage = lazyWithRetry(pageLoaders.PackOptimizer);
 const FamilyPage = lazyWithRetry(pageLoaders.Family);
 const FoodPage = lazyWithRetry(pageLoaders.Food);
 const ShoppingPage = lazyWithRetry(pageLoaders.Shopping);
+const ShoppingPrintPage = lazyWithRetry(pageLoaders.ShoppingPrint);
 const WeatherPage = lazyWithRetry(pageLoaders.Weather);
 const DryingPage = lazyWithRetry(pageLoaders.Drying);
 const QuietPage = lazyWithRetry(pageLoaders.Quiet);
@@ -107,6 +110,7 @@ const SpotDetailPage = lazyWithRetry(pageLoaders.SpotDetail);
 const TentFinderPage = lazyWithRetry(pageLoaders.TentFinder);
 const TripsPage = lazyWithRetry(pageLoaders.Trips);
 const MenuPlanPage = lazyWithRetry(pageLoaders.MenuPlan);
+const MenuPlanPrintPage = lazyWithRetry(pageLoaders.MenuPlanPrint);
 const LevelPage = lazyWithRetry(pageLoaders.Level);
 const LoginPage = lazyWithRetry(pageLoaders.Login);
 const LawnPage = lazyWithRetry(pageLoaders.Lawn);
@@ -152,6 +156,7 @@ function Router() {
           <Route path={"/packen"} component={PackOptimizerPage} />
           <Route path={"/familie"} component={FamilyPage} />
           <Route path={"/kuehlbox"} component={FoodPage} />
+          <Route path={"/einkauf/drucken"} component={ShoppingPrintPage} />
           <Route path={"/einkauf"} component={ShoppingPage} />
           <Route path={"/wetter"} component={WeatherPage} />
           <Route path={"/trockenzeiten"} component={DryingPage} />
@@ -161,6 +166,11 @@ function Router() {
           <Route path={"/zeltplaetze/:id"} component={SpotDetailPage} />
           <Route path={"/zeltfinder"} component={TentFinderPage} />
           <Route path={"/tagebuch"} component={TripsPage} />
+          {/* Druckroute VOR der Basis-Route, sonst fängt :tripId auch «drucken» ab */}
+          <Route
+            path={"/menueplan/:tripId/drucken"}
+            component={MenuPlanPrintPage}
+          />
           <Route path={"/menueplan/:tripId"} component={MenuPlanPage} />
           <Route path={"/wasserwaage"} component={LevelPage} />
           <Route path={"/anmelden"} component={LoginPage} />

@@ -1581,6 +1581,22 @@ export const it: Translation = {
     categoryChangeFailed: "La categoria non è stata salvata",
     reorderAria: (name: string) => `Sposta ${name}`,
     reorderFailed: "Il nuovo ordine non è stato salvato",
+    printButton: "Stampa",
+  },
+  shoppingPrint: {
+    docTitle: "Lista della spesa da stampare",
+    appTitle: "CampMesser – il coltellino svizzero per il campeggio in tenda",
+    printButton: "Stampa / Salva come PDF",
+    printBrowserHint:
+      "Nell'app installata il pulsante apre la vista nel browser – da lì stampa o salva come PDF dal menu.",
+    headerKicker: "CampMesser · Lista della spesa",
+    title: "Lista della spesa",
+    meta: (items: number, categories: number) =>
+      `${items} ${items === 1 ? "voce aperta" : "voci aperte"} · ${categories} ${categories === 1 ? "categoria" : "categorie"}`,
+    printedOn: (date: string) => `Stato: ${date}`,
+    emptyList: "Nessuna voce aperta – tutto comprato.",
+    footer:
+      "Buona spesa! · CampMesser – il coltellino svizzero per il campeggio in tenda",
   },
   menuPlan: {
     title: "Piano dei pasti",
@@ -1612,6 +1628,21 @@ export const it: Translation = {
       "Ingredienti delle ricette pianificate sulla lista della spesa",
     noPlannedRecipes:
       "Ancora nessuna ricetta assegnata – scegli prima le ricette negli slot dei pasti.",
+    printButton: "Stampa",
+  },
+  menuPlanPrint: {
+    docTitle: (name: string) => `${name} – piano dei pasti da stampare`,
+    docTitleFallback: "Piano dei pasti",
+    appTitle: "CampMesser – il coltellino svizzero per il campeggio in tenda",
+    notFound: "Questo soggiorno non è stato trovato.",
+    printButton: "Stampa / Salva come PDF",
+    printBrowserHint:
+      "Nell'app installata il pulsante apre la vista nel browser – da lì stampa o salva come PDF dal menu.",
+    headerKicker: "CampMesser · Piano dei pasti",
+    printedOn: (date: string) => `Stato: ${date}`,
+    dayHeader: "Giorno",
+    footer:
+      "Buon appetito! · CampMesser – il coltellino svizzero per il campeggio in tenda",
   },
   family: {
     title: "Modalità famiglia",

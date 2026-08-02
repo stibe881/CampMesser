@@ -3,9 +3,11 @@ import {
   GripVertical,
   Loader2,
   Plus,
+  Printer,
   ShoppingCart,
   Trash2,
 } from "lucide-react";
+import { Link } from "wouter";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -259,10 +261,20 @@ export default function ShoppingPage() {
         <div className="space-y-6">
           {/* Offene Einträge, nach Laden-Kategorien gruppiert */}
           <section>
-            <h2 className="mb-2 flex items-baseline justify-between font-serif text-base font-semibold">
+            <h2 className="mb-2 flex items-center justify-between gap-2 font-serif text-base font-semibold">
               {t.shopping.openTitle}
-              <span className="text-xs font-normal text-muted-foreground">
-                {t.shopping.openCount(openItems.length)}
+              <span className="flex items-center gap-2">
+                <span className="font-sans text-xs font-normal text-muted-foreground">
+                  {t.shopping.openCount(openItems.length)}
+                </span>
+                {openItems.length > 0 && (
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/einkauf/drucken">
+                      <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                      {t.shopping.printButton}
+                    </Link>
+                  </Button>
+                )}
               </span>
             </h2>
             {openItems.length === 0 ? (
