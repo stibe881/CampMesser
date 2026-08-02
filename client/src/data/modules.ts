@@ -104,23 +104,6 @@ export const modules: Module[] = [
     group: "reise",
   },
   {
-    path: "/familie",
-    title: l4(
-      "Familien-Modus",
-      "Mode famille",
-      "Modalità famiglia",
-      "Family mode"
-    ),
-    description: l4(
-      "Kinder-Checklisten, Schnitzeljagden und Quiz",
-      "Checklists pour enfants, chasses au trésor et quiz",
-      "Checklist per bambini, cacce al tesoro e quiz",
-      "Kids' checklists, scavenger hunts and quizzes"
-    ),
-    icon: Users,
-    group: "reise",
-  },
-  {
     path: "/zeltplaetze",
     title: l4(
       "Zeltplatz-Favoriten",
@@ -375,6 +358,25 @@ export const modules: Module[] = [
     group: "Erste Hilfe",
   },
   {
+    path: "/familie",
+    title: l4(
+      "Familien-Modus",
+      "Mode famille",
+      "Modalità famiglia",
+      "Family mode"
+    ),
+    description: l4(
+      "Kinder-Checklisten, Schnitzeljagden und Quiz",
+      "Checklists pour enfants, chasses au trésor et quiz",
+      "Checklist per bambini, cacce al tesoro e quiz",
+      "Kids' checklists, scavenger hunts and quizzes"
+    ),
+    icon: Users,
+    // Inhaltlich Wissen & Freizeit – der Gruppen-Schlüssel «Erste Hilfe»
+    // bleibt aus historischen Gründen stabil (Anzeige-Label siehe groupLabels)
+    group: "Erste Hilfe",
+  },
+  {
     path: "/energie",
     title: l4(
       "Energie-Budget",
@@ -428,11 +430,15 @@ export const groupLabels: Record<(typeof groups)[number], L4> = {
   ),
   vorOrt: l4("Vor Ort", "Sur place", "Sul posto", "On site"),
   Sicherheit: l4("Sicherheit", "Sécurité", "Sicurezza", "Safety"),
+  // Historischer Schlüssel «Erste Hilfe»: die Gruppe enthält längst Knoten,
+  // Natur, Rezepte, Kühlbox, Einkauf und den Familien-Modus – der Schlüssel
+  // bleibt stabil (gespeicherte Sortierungen sind pfad-basiert), nur das
+  // Anzeige-Label ist verallgemeinert.
   "Erste Hilfe": l4(
-    "Erste Hilfe",
-    "Premiers secours",
-    "Primo soccorso",
-    "First aid"
+    "Wissen & Familie",
+    "Savoir & famille",
+    "Sapere & famiglia",
+    "Knowledge & family"
   ),
   "Energie & Wasser": l4(
     "Energie & Wasser",
