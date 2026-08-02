@@ -35,6 +35,11 @@
  * Nach jedem Zoom wird neu gruppiert (der Marker-Layer wird komplett neu
  * aufgebaut – bei < 500 Pins unkritisch); reines Verschieben ändert die
  * Pixel-Abstände nicht und braucht deshalb keinen Neuaufbau.
+ *
+ * Ebenen-Filter: Checkbox-Chips blenden die vier Pin-Ebenen (Favoriten,
+ * Ziele, Beobachtungen, OSM-Funde) einzeln aus. Die Wahl liegt in
+ * localStorage (campmesser.mapLayers), Standard alle an; der Filter greift
+ * vor dem Clustern, die Legende zeigt nur eingeblendete Ebenen.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -79,9 +84,12 @@ import {
 } from "@/lib/overpass";
 import {
   createBaseLayer,
+  loadLayerVisibility,
   loadMapLayer,
+  storeLayerVisibility,
   storeMapLayer,
   type MapLayerKind,
+  type MapLayerVisibility,
 } from "@/lib/mapLayers";
 import { CLUSTER_THRESHOLD_PX, clusterPoints } from "@/lib/mapCluster";
 import {
@@ -234,6 +242,20 @@ function SpotsMap({
 
   // Basis-Layer «Karte / Satellit» – Wahl bleibt in localStorage erhalten
   const [layerKind, setLayerKind] = useState<MapLayerKind>(loadMapLayer);
+
+  // Ein-/ausblendbare Pin-Ebenen (Favoriten/Ziele/Beobachtungen/OSM) –
+  // Wahl bleibt in localStorage erhalten, Standard: alle an. Der Filter
+  // greift VOR der Cluster-Rechnung: ausgeblendete Pins zählen nicht mit.
+  const [layerVisibility, setLayerVisibility] =
+    useState<MapLayerVisibility>(loadLayerVisibility);
+
+  const toggleLayer = useCallback((key: keyof MapLayerVisibility) => {
+    setLayerVisibility(prev => {
+      const next = { ...prev, [key]: !prev[key] };
+      storeLayerVisibility(next);
+      return next;
+    });
+  }, []);
 
   // Entdecker-Layer: Zustand der Overpass-Suche (Standard AUS)
   const [discoverOn, setDiscoverOn] = useState(false);
@@ -542,31 +564,40 @@ function SpotsMap({
       kind: PinKind;
       createMarker: () => L.Marker;
     }
+    // Ebenen-Filter greift vor dem Clustern: ausgeblendete Pins zählen nicht mit
     const pins: MapPin[] = [
-      ...spots.map<MapPin>(spot => ({
-        lat: spot.latitude,
-        lon: spot.longitude,
-        kind: "spot",
-        createMarker: () => createSpotMarker(spot),
-      })),
-      ...targets.map<MapPin>(tgt => ({
-        lat: tgt.lat,
-        lon: tgt.lon,
-        kind: "target",
-        createMarker: () => createTargetMarker(tgt),
-      })),
-      ...sightings.map<MapPin>(sighting => ({
-        lat: sighting.lat,
-        lon: sighting.lon,
-        kind: "sighting",
-        createMarker: () => createSightingMarker(sighting),
-      })),
-      ...visibleCampsites.map<MapPin>(site => ({
-        lat: site.lat,
-        lon: site.lon,
-        kind: "campsite",
-        createMarker: () => createCampsiteMarker(site),
-      })),
+      ...(layerVisibility.favorites
+        ? spots.map<MapPin>(spot => ({
+            lat: spot.latitude,
+            lon: spot.longitude,
+            kind: "spot" as const,
+            createMarker: () => createSpotMarker(spot),
+          }))
+        : []),
+      ...(layerVisibility.targets
+        ? targets.map<MapPin>(tgt => ({
+            lat: tgt.lat,
+            lon: tgt.lon,
+            kind: "target" as const,
+            createMarker: () => createTargetMarker(tgt),
+          }))
+        : []),
+      ...(layerVisibility.sightings
+        ? sightings.map<MapPin>(sighting => ({
+            lat: sighting.lat,
+            lon: sighting.lon,
+            kind: "sighting" as const,
+            createMarker: () => createSightingMarker(sighting),
+          }))
+        : []),
+      ...(layerVisibility.campsites
+        ? visibleCampsites.map<MapPin>(site => ({
+            lat: site.lat,
+            lon: site.lon,
+            kind: "campsite" as const,
+            createMarker: () => createCampsiteMarker(site),
+          }))
+        : []),
     ];
 
     const clusters = clusterPoints(
@@ -626,6 +657,7 @@ function SpotsMap({
     visibleCampsites,
     nightsBySpotId,
     clusterZoom,
+    layerVisibility,
     t,
     navigate,
     utils,
@@ -732,6 +764,71 @@ function SpotsMap({
           </span>
         )}
       </div>
+      {/* Pin-Ebenen einzeln ein-/ausblenden – Checkbox-Chips, Wahl bleibt erhalten */}
+      <div
+        role="group"
+        aria-label={t.mapView.layerFilterAria}
+        className="mb-3 flex flex-wrap items-center gap-1.5"
+      >
+        {(
+          [
+            {
+              key: "favorites",
+              label: t.mapView.layerFavorites,
+              icon: (
+                <Tent className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+              ),
+            },
+            {
+              key: "targets",
+              label: t.mapView.layerTargets,
+              icon: (
+                <LocateFixed
+                  className="h-3.5 w-3.5 text-amber-glow"
+                  aria-hidden="true"
+                />
+              ),
+            },
+            {
+              key: "sightings",
+              label: t.mapView.layerSightings,
+              icon: (
+                <PawPrint
+                  className="h-3.5 w-3.5 text-violet-700 dark:text-violet-400"
+                  aria-hidden="true"
+                />
+              ),
+            },
+            {
+              key: "campsites",
+              label: t.mapView.layerCampsites,
+              icon: (
+                <Compass
+                  className="h-3.5 w-3.5 text-sky-700 dark:text-sky-400"
+                  aria-hidden="true"
+                />
+              ),
+            },
+          ] as const
+        ).map(({ key, label, icon }) => (
+          <button
+            key={key}
+            type="button"
+            role="checkbox"
+            aria-checked={layerVisibility[key]}
+            onClick={() => toggleLayer(key)}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
+              layerVisibility[key]
+                ? "border-primary/40 bg-primary/10 text-foreground"
+                : "border-border bg-muted text-muted-foreground line-through hover:text-foreground"
+            )}
+          >
+            {icon}
+            {label}
+          </button>
+        ))}
+      </div>
       <div className="relative">
         <div
           ref={containerRef}
@@ -750,12 +847,15 @@ function SpotsMap({
           </button>
         )}
       </div>
+      {/* Legende: nur eingeblendete Ebenen erscheinen */}
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <Tent className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-          {t.mapView.legend(spots.length)}
-        </span>
-        {targets.length > 0 && (
+        {layerVisibility.favorites && (
+          <span className="flex items-center gap-1.5">
+            <Tent className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+            {t.mapView.legend(spots.length)}
+          </span>
+        )}
+        {layerVisibility.targets && targets.length > 0 && (
           <span className="flex items-center gap-1.5">
             <LocateFixed
               className="h-3.5 w-3.5 text-amber-glow"
@@ -764,7 +864,7 @@ function SpotsMap({
             {t.mapView.targetLegend(targets.length)}
           </span>
         )}
-        {sightings.length > 0 && (
+        {layerVisibility.sightings && sightings.length > 0 && (
           <span className="flex items-center gap-1.5">
             <PawPrint
               className="h-3.5 w-3.5 text-violet-700 dark:text-violet-400"
@@ -773,15 +873,17 @@ function SpotsMap({
             {t.mapView.sightingLegend(sightings.length)}
           </span>
         )}
-        {discoverOn && visibleCampsites.length > 0 && (
-          <span className="flex items-center gap-1.5">
-            <Compass
-              className="h-3.5 w-3.5 text-sky-700 dark:text-sky-400"
-              aria-hidden="true"
-            />
-            {t.mapView.discoverLegend(visibleCampsites.length)}
-          </span>
-        )}
+        {layerVisibility.campsites &&
+          discoverOn &&
+          visibleCampsites.length > 0 && (
+            <span className="flex items-center gap-1.5">
+              <Compass
+                className="h-3.5 w-3.5 text-sky-700 dark:text-sky-400"
+                aria-hidden="true"
+              />
+              {t.mapView.discoverLegend(visibleCampsites.length)}
+            </span>
+          )}
       </div>
 
       <Dialog

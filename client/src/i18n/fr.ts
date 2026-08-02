@@ -1333,6 +1333,11 @@ export const fr: Translation = {
     layerMap: "Carte",
     layerSatellite: "Satellite",
     clusterAria: (n: number) => `Groupe de ${n} épingles – touche pour zoomer`,
+    layerFilterAria: "Afficher ou masquer les couches d'épingles",
+    layerFavorites: "Favoris",
+    layerTargets: "Cibles",
+    layerSightings: "Observations",
+    layerCampsites: "Campings (OSM)",
   },
   spotDetail: {
     fallbackTitle: "Emplacement",

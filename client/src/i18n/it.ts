@@ -1318,6 +1318,11 @@ export const it: Translation = {
     layerSatellite: "Satellite",
     clusterAria: (n: number) =>
       `Gruppo di ${n} segnaposto – tocca per ingrandire`,
+    layerFilterAria: "Mostra o nascondi i livelli dei segnaposto",
+    layerFavorites: "Preferiti",
+    layerTargets: "Mete",
+    layerSightings: "Osservazioni",
+    layerCampsites: "Campeggi (OSM)",
   },
   spotDetail: {
     fallbackTitle: "Piazzola",

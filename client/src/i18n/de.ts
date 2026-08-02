@@ -1334,6 +1334,11 @@ export const de = {
     layerSatellite: "Satellit",
     clusterAria: (n: number) =>
       `Gruppe aus ${n} Pins – antippen zum Hineinzoomen`,
+    layerFilterAria: "Pin-Ebenen ein- oder ausblenden",
+    layerFavorites: "Favoriten",
+    layerTargets: "Ziele",
+    layerSightings: "Beobachtungen",
+    layerCampsites: "Campingplätze (OSM)",
   },
   spotDetail: {
     fallbackTitle: "Zeltplatz",

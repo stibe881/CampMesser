@@ -37,6 +37,56 @@ export function storeMapLayer(kind: MapLayerKind) {
   }
 }
 
+// ---- Ein-/ausblendbare Pin-Ebenen der grossen Karte -----------------------
+
+export const LAYER_VISIBILITY_KEY = "campmesser.mapLayers";
+
+/** Welche Pin-Ebenen die Karte zeigt – Standard: alle an. */
+export interface MapLayerVisibility {
+  favorites: boolean;
+  targets: boolean;
+  sightings: boolean;
+  campsites: boolean;
+}
+
+export const DEFAULT_LAYER_VISIBILITY: MapLayerVisibility = {
+  favorites: true,
+  targets: true,
+  sightings: true,
+  campsites: true,
+};
+
+/** Gemerkte Ebenen-Wahl lesen – fehlende/kaputte Werte fallen auf «an» zurück. */
+export function loadLayerVisibility(): MapLayerVisibility {
+  try {
+    const raw = localStorage.getItem(LAYER_VISIBILITY_KEY);
+    if (!raw) return { ...DEFAULT_LAYER_VISIBILITY };
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null) {
+      return { ...DEFAULT_LAYER_VISIBILITY };
+    }
+    const obj = parsed as Record<string, unknown>;
+    const read = (key: keyof MapLayerVisibility) =>
+      typeof obj[key] === "boolean" ? (obj[key] as boolean) : true;
+    return {
+      favorites: read("favorites"),
+      targets: read("targets"),
+      sightings: read("sightings"),
+      campsites: read("campsites"),
+    };
+  } catch {
+    return { ...DEFAULT_LAYER_VISIBILITY };
+  }
+}
+
+export function storeLayerVisibility(visibility: MapLayerVisibility) {
+  try {
+    localStorage.setItem(LAYER_VISIBILITY_KEY, JSON.stringify(visibility));
+  } catch {
+    /* Sitzung reicht */
+  }
+}
+
 /**
  * Basis-Layer für die gewünschte Darstellung erzeugen (noch nicht zur Karte
  * hinzugefügt). `L` kommt als Parameter, damit auch dynamisch geladene

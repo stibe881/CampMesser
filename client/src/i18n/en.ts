@@ -1288,6 +1288,11 @@ export const en: Translation = {
     layerMap: "Map",
     layerSatellite: "Satellite",
     clusterAria: (n: number) => `Cluster of ${n} pins – tap to zoom in`,
+    layerFilterAria: "Show or hide pin layers",
+    layerFavorites: "Favourites",
+    layerTargets: "Targets",
+    layerSightings: "Sightings",
+    layerCampsites: "Campsites (OSM)",
   },
   spotDetail: {
     fallbackTitle: "Pitch",
