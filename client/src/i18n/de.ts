@@ -1426,6 +1426,8 @@ export const de = {
     appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
     notFound: "Diese Schnitzeljagd wurde nicht gefunden.",
     printButton: "Drucken / Als PDF sichern",
+    printBrowserHint:
+      "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
     headerKicker: "CampMesser · Schnitzeljagd",
     meta: (age: string, minutes: number, stations: number) =>
       `${age} · ca. ${minutes} Minuten · ${stations} ${stations === 1 ? "Station" : "Stationen"}`,

@@ -15,8 +15,21 @@ import { customHuntDbId, customHuntToScavengerHunt } from "@/lib/customHunts";
  * auf die Suche gehen können. PDF entsteht über den Browser-Druckdialog.
  * Unterstützt eingebaute und eigene Jagden (IDs mit «eigene-»-Präfix).
  */
+/**
+ * In der installierten PWA (Standalone-Modus) ist window.print() auf Android
+ * und iOS wirkungslos – dort öffnen wir die Ansicht stattdessen in einem
+ * echten Browser-Tab, wo der Druckdialog («Als PDF sichern») funktioniert.
+ */
+function isStandaloneApp(): boolean {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
 export default function HuntPrintPage() {
   const { lang, t } = useI18n();
+  const standalone = isStandaloneApp();
   const params = useParams<{ id: string }>();
   const customId = customHuntDbId(params.id ?? "");
   const { isAuthenticated } = useAuth();
@@ -86,11 +99,25 @@ export default function HuntPrintPage() {
           <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
           {t.common.back}
         </Button>
-        <Button size="sm" onClick={() => window.print()}>
+        <Button
+          size="sm"
+          onClick={() => {
+            if (standalone) {
+              window.open(window.location.href, "_blank", "noopener");
+            } else {
+              window.print();
+            }
+          }}
+        >
           <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
           {t.huntPrint.printButton}
         </Button>
       </div>
+      {standalone && (
+        <p className="mb-6 text-xs text-muted-foreground print:hidden">
+          {t.huntPrint.printBrowserHint}
+        </p>
+      )}
 
       <div className="print-sheet">
         <header className="mb-6 border-b-2 border-foreground pb-4">

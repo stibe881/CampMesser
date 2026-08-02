@@ -1414,6 +1414,8 @@ export const it: Translation = {
     appTitle: "CampMesser – il coltellino svizzero per il campeggio in tenda",
     notFound: "Questa caccia al tesoro non è stata trovata.",
     printButton: "Stampa / Salva come PDF",
+    printBrowserHint:
+      "Nell'app installata il pulsante apre la vista nel browser – da lì stampa o salva come PDF dal menu.",
     headerKicker: "CampMesser · Caccia al tesoro",
     meta: (age: string, minutes: number, stations: number) =>
       `${age} · ca. ${minutes} minuti · ${stations} ${stations === 1 ? "tappa" : "tappe"}`,

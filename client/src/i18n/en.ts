@@ -1387,6 +1387,8 @@ export const en: Translation = {
     appTitle: "CampMesser – the Swiss army knife for tent camping",
     notFound: "This scavenger hunt could not be found.",
     printButton: "Print / Save as PDF",
+    printBrowserHint:
+      "In the installed app this button opens the view in your browser – print or save as PDF from its menu there.",
     headerKicker: "CampMesser · Scavenger hunt",
     meta: (age: string, minutes: number, stations: number) =>
       `${age} · approx. ${minutes} minutes · ${stations} ${stations === 1 ? "station" : "stations"}`,

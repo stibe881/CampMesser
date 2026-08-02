@@ -1429,6 +1429,8 @@ export const fr: Translation = {
     appTitle: "CampMesser – le couteau suisse du camping sous tente",
     notFound: "Cette chasse au trésor est introuvable.",
     printButton: "Imprimer / Enregistrer en PDF",
+    printBrowserHint:
+      "Dans l'app installée, le bouton ouvre la vue dans le navigateur – imprime ou enregistre en PDF depuis son menu.",
     headerKicker: "CampMesser · Chasse au trésor",
     meta: (age: string, minutes: number, stations: number) =>
       `${age} · env. ${minutes} minutes · ${stations} ${stations === 1 ? "étape" : "étapes"}`,
