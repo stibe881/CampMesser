@@ -55,13 +55,21 @@ interface PickerSlot {
  * Frühstückstaugliche eingebaute Rezepte: das Rezeptbuch kennt keine
  * Frühstücks-Kategorie, deshalb ordnet der Client per Id zu.
  */
-const BREAKFAST_RECIPE_IDS = new Set(["porridge", "eier-broetli"]);
+const BREAKFAST_RECIPE_IDS = new Set([
+  "porridge",
+  "eier-broetli",
+  "birchermuesli-overnight",
+  "camping-pancakes",
+  "fotzelschnitten",
+]);
 
 /** Beilagen und Desserts – als automatische Hauptmahlzeit ungeeignet. */
 const AUTOFILL_EXCLUDED_IDS = new Set([
   "schlangenbrot",
   "bananen-schoggi",
   "apfel-zimt-glut",
+  "maiskolben-glut",
+  "grill-ananas",
 ]);
 
 /** Präfix, unter dem eigene Rezepte in die Autofill-Rotation wandern. */

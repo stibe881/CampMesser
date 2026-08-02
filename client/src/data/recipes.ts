@@ -1177,4 +1177,889 @@ export const recipes: Recipe[] = [
       "Tastes like apple strudel without the pastry – the perfect autumn dessert by the fire."
     ),
   },
+  {
+    id: "birchermuesli-overnight",
+    name: l4(
+      "Overnight-Birchermüesli",
+      "Birchermüesli de la veille",
+      "Birchermüesli della notte",
+      "Overnight Bircher muesli"
+    ),
+    method: "Beides",
+    timeMinutes: 10,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: false,
+    kidFriendly: true,
+    ingredients: [
+      l4(
+        "200 g Haferflocken",
+        "200 g de flocons d'avoine",
+        "200 g di fiocchi d'avena",
+        "200 g rolled oats"
+      ),
+      l4("4 dl Milch", "4 dl de lait", "4 dl di latte", "400 ml milk"),
+      l4("2 Äpfel", "2 pommes", "2 mele", "2 apples"),
+      l4(
+        "2 EL Honig",
+        "2 c. à s. de miel",
+        "2 cucchiai di miele",
+        "2 tbsp honey"
+      ),
+      l4(
+        "1 Handvoll Nüsse",
+        "1 poignée de noix",
+        "1 manciata di noci",
+        "1 handful of nuts"
+      ),
+      l4(
+        "Beeren nach Saison",
+        "Baies de saison",
+        "Frutti di bosco di stagione",
+        "Seasonal berries"
+      ),
+      l4(
+        "1 Zitrone (Saft)",
+        "1 citron (jus)",
+        "1 limone (succo)",
+        "1 lemon (juice)"
+      ),
+    ],
+    steps: [
+      l4(
+        "Am Vorabend Haferflocken, Milch und Honig in einer Dose mit Deckel verrühren.",
+        "La veille au soir, mélanger les flocons d'avoine, le lait et le miel dans une boîte avec couvercle.",
+        "La sera prima mescola fiocchi d'avena, latte e miele in un contenitore con coperchio.",
+        "The evening before, stir the oats, milk and honey together in a container with a lid."
+      ),
+      l4(
+        "Zugedeckt über Nacht in die Kühlbox stellen.",
+        "Couvrir et laisser reposer toute la nuit dans la glacière.",
+        "Copri e lascia riposare tutta la notte nel frigo box.",
+        "Cover and leave overnight in the cool box."
+      ),
+      l4(
+        "Am Morgen die Äpfel grob reiben oder fein schneiden und mit dem Zitronensaft untermischen.",
+        "Le matin, râper grossièrement ou couper finement les pommes et les incorporer avec le jus de citron.",
+        "Al mattino grattugia grossolanamente o taglia finemente le mele e incorporale con il succo di limone.",
+        "In the morning, coarsely grate or finely chop the apples and stir them in with the lemon juice."
+      ),
+      l4(
+        "Mit Nüssen und Beeren anrichten.",
+        "Garnir de noix et de baies.",
+        "Completa con noci e frutti di bosco.",
+        "Top with nuts and berries."
+      ),
+    ],
+    tip: l4(
+      "Ganz ohne Kochen und Gas – das Frühstück wartet fertig in der Kühlbox, wenn der Rest des Camps noch schläft.",
+      "Sans cuisson ni gaz – le petit-déjeuner attend tout prêt dans la glacière pendant que le reste du camp dort encore.",
+      "Senza cottura né gas – la colazione aspetta già pronta nel frigo box mentre il resto del campo dorme ancora.",
+      "No cooking, no gas – breakfast is waiting ready in the cool box while the rest of the camp is still asleep."
+    ),
+  },
+  {
+    id: "camping-pancakes",
+    name: l4(
+      "Camping-Pancakes",
+      "Pancakes du camping",
+      "Pancake da campeggio",
+      "Camping pancakes"
+    ),
+    method: "Gaskocher",
+    timeMinutes: 25,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: true,
+    kidFriendly: true,
+    ingredients: [
+      l4("300 g Mehl", "300 g de farine", "300 g di farina", "300 g flour"),
+      l4("3 Eier", "3 œufs", "3 uova", "3 eggs"),
+      l4("4 dl Milch", "4 dl de lait", "4 dl di latte", "400 ml milk"),
+      l4(
+        "2 EL Zucker",
+        "2 c. à s. de sucre",
+        "2 cucchiai di zucchero",
+        "2 tbsp sugar"
+      ),
+      l4(
+        "1 TL Backpulver",
+        "1 c. à c. de poudre à lever",
+        "1 cucchiaino di lievito in polvere",
+        "1 tsp baking powder"
+      ),
+      l4(
+        "1 Prise Salz",
+        "1 pincée de sel",
+        "1 pizzico di sale",
+        "1 pinch of salt"
+      ),
+      l4(
+        "Butter zum Braten",
+        "Beurre pour la cuisson",
+        "Burro per la cottura",
+        "Butter for frying"
+      ),
+      l4(
+        "Ahornsirup oder Konfitüre",
+        "Sirop d'érable ou confiture",
+        "Sciroppo d'acero o confettura",
+        "Maple syrup or jam"
+      ),
+    ],
+    steps: [
+      l4(
+        "Mehl, Zucker, Backpulver und Salz mischen, Eier und Milch zugeben und zu einem glatten Teig rühren.",
+        "Mélanger la farine, le sucre, la poudre à lever et le sel, ajouter les œufs et le lait et travailler en une pâte lisse.",
+        "Mescola farina, zucchero, lievito e sale, aggiungi uova e latte e lavora fino a ottenere una pastella liscia.",
+        "Mix the flour, sugar, baking powder and salt, add the eggs and milk and stir into a smooth batter."
+      ),
+      l4(
+        "Teig 10 Minuten ruhen lassen.",
+        "Laisser reposer la pâte 10 minutes.",
+        "Lascia riposare la pastella per 10 minuti.",
+        "Let the batter rest for 10 minutes."
+      ),
+      l4(
+        "Kleine Portionen in der Butterpfanne bei mittlerer Hitze je Seite 2–3 Minuten backen, bis Bläschen aufsteigen und die Unterseite goldbraun ist.",
+        "Cuire de petites portions dans la poêle beurrée à feu moyen, 2–3 minutes par face, jusqu'à ce que des bulles se forment et que le dessous soit doré.",
+        "Cuoci piccole porzioni nella padella imburrata a fuoco medio, 2–3 minuti per lato, finché si formano bollicine e il lato sotto è dorato.",
+        "Fry small portions in the buttered pan over medium heat for 2–3 minutes per side, until bubbles rise and the underside is golden."
+      ),
+      l4(
+        "Fertige Pancakes unter einem Teller warm halten und mit Ahornsirup oder Konfitüre servieren.",
+        "Garder les pancakes au chaud sous une assiette et les servir avec du sirop d'érable ou de la confiture.",
+        "Tieni i pancake in caldo sotto un piatto e servili con sciroppo d'acero o confettura.",
+        "Keep the finished pancakes warm under a plate and serve with maple syrup or jam."
+      ),
+    ],
+    tip: l4(
+      "Den Teig zu Hause mischen und in einer sauberen Flasche mitnehmen – am Camp nur noch schütteln und braten.",
+      "Prépare la pâte à la maison et emporte-la dans une bouteille propre – au camp, il ne reste qu'à secouer et cuire.",
+      "Prepara la pastella a casa e portala in una bottiglia pulita – al campo basta agitare e cuocere.",
+      "Mix the batter at home and take it along in a clean bottle – at camp, just shake and fry."
+    ),
+  },
+  {
+    id: "roesti-spiegelei",
+    name: l4(
+      "Rösti mit Spiegelei",
+      "Rösti et œuf au plat",
+      "Rösti con uovo al tegamino",
+      "Rösti with fried egg"
+    ),
+    method: "Gaskocher",
+    timeMinutes: 35,
+    servings: 4,
+    difficulty: "mittel",
+    onePot: true,
+    kidFriendly: true,
+    ingredients: [
+      l4(
+        "1 kg festkochende Kartoffeln (am Vortag gekocht)",
+        "1 kg de pommes de terre à chair ferme (cuites la veille)",
+        "1 kg di patate a pasta soda (lessate il giorno prima)",
+        "1 kg waxy potatoes (boiled the day before)"
+      ),
+      l4("4 Eier", "4 œufs", "4 uova", "4 eggs"),
+      l4("1 Zwiebel", "1 oignon", "1 cipolla", "1 onion"),
+      l4(
+        "3 EL Bratbutter",
+        "3 c. à s. de beurre à rôtir",
+        "3 cucchiai di burro chiarificato",
+        "3 tbsp clarified butter"
+      ),
+      l4("Salz", "Sel", "Sale", "Salt"),
+    ],
+    steps: [
+      l4(
+        "Gekochte Kartoffeln schälen und grob reiben, Zwiebel fein hacken.",
+        "Peler les pommes de terre cuites et les râper grossièrement, hacher finement l'oignon.",
+        "Sbuccia le patate lessate e grattugiale grossolanamente, trita finemente la cipolla.",
+        "Peel the boiled potatoes and grate them coarsely; finely chop the onion."
+      ),
+      l4(
+        "Bratbutter in der Pfanne erhitzen, Kartoffeln und Zwiebel zugeben, salzen und zu einem Kuchen andrücken.",
+        "Chauffer le beurre à rôtir dans la poêle, ajouter les pommes de terre et l'oignon, saler et presser en une galette.",
+        "Scalda il burro chiarificato nella padella, aggiungi patate e cipolla, sala e pressa a forma di torta.",
+        "Heat the clarified butter in the pan, add the potatoes and onion, season with salt and press into a cake."
+      ),
+      l4(
+        "Bei mittlerer Hitze 10–12 Minuten braten, dann mit Hilfe eines Tellers wenden und die zweite Seite goldbraun braten.",
+        "Cuire 10–12 minutes à feu moyen, puis retourner à l'aide d'une assiette et dorer la deuxième face.",
+        "Cuoci a fuoco medio per 10–12 minuti, poi gira aiutandoti con un piatto e fai dorare il secondo lato.",
+        "Fry over medium heat for 10–12 minutes, then flip with the help of a plate and brown the second side."
+      ),
+      l4(
+        "Rösti in Stücke teilen, in derselben Pfanne die Spiegeleier braten und darauf anrichten.",
+        "Partager le rösti, cuire les œufs au plat dans la même poêle et les dresser dessus.",
+        "Dividi il rösti in porzioni, cuoci le uova al tegamino nella stessa padella e adagiale sopra.",
+        "Divide the rösti into portions, fry the eggs in the same pan and serve them on top."
+      ),
+    ],
+    tip: l4(
+      "Die Kartoffeln am Vorabend kochen und über Nacht ausdämpfen lassen – so lassen sie sich am Morgen perfekt reiben.",
+      "Cuire les pommes de terre la veille et les laisser sécher toute la nuit – elles se râpent parfaitement le matin.",
+      "Lessa le patate la sera prima e lasciale asciugare tutta la notte – al mattino si grattugiano perfettamente.",
+      "Boil the potatoes the evening before and let them dry out overnight – they grate perfectly in the morning."
+    ),
+  },
+  {
+    id: "ghackets-hoernli",
+    name: l4(
+      "Ghackets mit Hörnli",
+      "Viande hachée et cornettes",
+      "Carne macinata con cornetti",
+      "Swiss mince with macaroni"
+    ),
+    method: "Gaskocher",
+    timeMinutes: 30,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: false,
+    kidFriendly: true,
+    ingredients: [
+      l4(
+        "400 g Rindshackfleisch",
+        "400 g de viande de bœuf hachée",
+        "400 g di carne di manzo macinata",
+        "400 g minced beef"
+      ),
+      l4(
+        "400 g Hörnli",
+        "400 g de cornettes",
+        "400 g di cornetti (pasta)",
+        "400 g macaroni"
+      ),
+      l4("1 Zwiebel", "1 oignon", "1 cipolla", "1 onion"),
+      l4(
+        "2 EL Tomatenpüree",
+        "2 c. à s. de purée de tomates",
+        "2 cucchiai di concentrato di pomodoro",
+        "2 tbsp tomato purée"
+      ),
+      l4("2 dl Bouillon", "2 dl de bouillon", "2 dl di brodo", "200 ml stock"),
+      l4("Öl", "Huile", "Olio", "Oil"),
+      l4("Salz und Pfeffer", "Sel et poivre", "Sale e pepe", "Salt and pepper"),
+      l4("Apfelmus", "Compote de pommes", "Composta di mele", "Apple sauce"),
+    ],
+    steps: [
+      l4(
+        "Zwiebel hacken und im Topf mit Öl anbraten, Hackfleisch zugeben und krümelig braten.",
+        "Hacher l'oignon et le faire revenir dans la casserole avec de l'huile, ajouter la viande hachée et la faire revenir en l'émiettant.",
+        "Trita la cipolla e falla rosolare nella pentola con l'olio, aggiungi la carne macinata e falla rosolare sbriciolandola.",
+        "Chop the onion and fry it in the pot with oil, then add the mince and fry until crumbly."
+      ),
+      l4(
+        "Tomatenpüree kurz mitrösten, mit Bouillon ablöschen und 10 Minuten köcheln lassen, mit Salz und Pfeffer würzen.",
+        "Faire revenir brièvement la purée de tomates, déglacer au bouillon et laisser mijoter 10 minutes, assaisonner de sel et de poivre.",
+        "Tosta brevemente il concentrato di pomodoro, sfuma con il brodo e lascia sobbollire per 10 minuti, condisci con sale e pepe.",
+        "Briefly toast the tomato purée, pour in the stock and simmer for 10 minutes; season with salt and pepper."
+      ),
+      l4(
+        "Hörnli im zweiten Topf in Salzwasser al dente kochen und abgiessen.",
+        "Cuire les cornettes al dente à l'eau salée dans la deuxième casserole et les égoutter.",
+        "Cuoci i cornetti al dente in acqua salata nella seconda pentola e scolali.",
+        "Cook the macaroni al dente in salted water in the second pot and drain."
+      ),
+      l4(
+        "Hörnli mit dem Ghackten mischen und mit Apfelmus servieren.",
+        "Mélanger les cornettes avec la viande hachée et servir avec la compote de pommes.",
+        "Mescola i cornetti con la carne e servi con la composta di mele.",
+        "Mix the macaroni with the mince and serve with apple sauce."
+      ),
+    ],
+    tip: l4(
+      "Der Zmittag-Klassiker der Schweizer Küche – mit geriebenem Käse darüber wird er noch feiner.",
+      "Le grand classique suisse de midi – encore meilleur avec du fromage râpé par-dessus.",
+      "Il classico svizzero di mezzogiorno – ancora più buono con formaggio grattugiato sopra.",
+      "The Swiss lunchtime classic – even better with grated cheese on top."
+    ),
+  },
+  {
+    id: "forellen-paeckli",
+    name: l4(
+      "Forellen-Päckli aus der Glut",
+      "Papillotes de truite à la braise",
+      "Pacchetti di trota dalla brace",
+      "Trout parcels from the embers"
+    ),
+    method: "Offenes Feuer",
+    timeMinutes: 30,
+    servings: 4,
+    difficulty: "mittel",
+    onePot: false,
+    kidFriendly: false,
+    ingredients: [
+      l4(
+        "4 Forellen (ausgenommen)",
+        "4 truites (vidées)",
+        "4 trote (eviscerate)",
+        "4 trout (gutted)"
+      ),
+      l4("1 Zitrone", "1 citron", "1 limone", "1 lemon"),
+      l4(
+        "Frische Kräuter (Petersilie, Thymian)",
+        "Herbes fraîches (persil, thym)",
+        "Erbe fresche (prezzemolo, timo)",
+        "Fresh herbs (parsley, thyme)"
+      ),
+      l4(
+        "4 EL Butter",
+        "4 c. à s. de beurre",
+        "4 cucchiai di burro",
+        "4 tbsp butter"
+      ),
+      l4("Salz und Pfeffer", "Sel et poivre", "Sale e pepe", "Salt and pepper"),
+      l4("Alufolie", "Papier alu", "Foglio di alluminio", "Aluminium foil"),
+    ],
+    steps: [
+      l4(
+        "Forellen waschen, trocken tupfen und innen wie aussen salzen und pfeffern.",
+        "Laver les truites, les sécher en tamponnant et les saler et poivrer à l'intérieur comme à l'extérieur.",
+        "Lava le trote, asciugale tamponando e condiscile con sale e pepe dentro e fuori.",
+        "Wash the trout, pat dry and season with salt and pepper inside and out."
+      ),
+      l4(
+        "Mit Zitronenscheiben, Kräutern und Butterflöckli füllen und einzeln in zwei Lagen Alufolie fest einwickeln.",
+        "Les farcir de rondelles de citron, d'herbes et de noisettes de beurre et les emballer une à une, bien serrées, dans deux couches de papier alu.",
+        "Farciscile con fette di limone, erbe e fiocchetti di burro e avvolgile una a una, ben strette, in due strati di stagnola.",
+        "Fill with lemon slices, herbs and small knobs of butter and wrap each one tightly in two layers of foil."
+      ),
+      l4(
+        "Päckli 12–15 Minuten in die Randglut legen und einmal wenden.",
+        "Poser les papillotes 12–15 minutes en bordure des braises et les retourner une fois.",
+        "Metti i pacchetti sul bordo della brace per 12–15 minuti e girali una volta.",
+        "Place the parcels in the embers at the edge of the fire for 12–15 minutes, turning once."
+      ),
+      l4(
+        "Vorsichtig öffnen (heisser Dampf!) – der Fisch ist gar, wenn sich das Fleisch leicht von der Gräte löst.",
+        "Ouvrir avec précaution (vapeur brûlante!) – le poisson est cuit quand la chair se détache facilement de l'arête.",
+        "Apri con attenzione (vapore bollente!) – il pesce è cotto quando la carne si stacca facilmente dalla lisca.",
+        "Open carefully (hot steam!) – the fish is done when the flesh comes away easily from the bone."
+      ),
+    ],
+    tip: l4(
+      "Funktioniert auch mit Saibling oder Eglifilets – Filets brauchen nur gut 8 Minuten in der Glut.",
+      "Fonctionne aussi avec de l'omble ou des filets de perche – les filets ne demandent que 8 bonnes minutes dans la braise.",
+      "Funziona anche con salmerino o filetti di pesce persico – i filetti richiedono solo 8 minuti abbondanti nella brace.",
+      "Also works with char or perch fillets – fillets need only a good 8 minutes in the embers."
+    ),
+  },
+  {
+    id: "maiskolben-glut",
+    name: l4(
+      "Maiskolben mit Kräuterbutter",
+      "Épis de maïs au beurre aux herbes",
+      "Pannocchie con burro alle erbe",
+      "Corn on the cob with herb butter"
+    ),
+    method: "Offenes Feuer",
+    timeMinutes: 25,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: false,
+    kidFriendly: true,
+    ingredients: [
+      l4("4 Maiskolben", "4 épis de maïs", "4 pannocchie", "4 corn cobs"),
+      l4("80 g Butter", "80 g de beurre", "80 g di burro", "80 g butter"),
+      l4(
+        "Frische Kräuter (Schnittlauch, Petersilie)",
+        "Herbes fraîches (ciboulette, persil)",
+        "Erbe fresche (erba cipollina, prezzemolo)",
+        "Fresh herbs (chives, parsley)"
+      ),
+      l4("Salz", "Sel", "Sale", "Salt"),
+      l4("Alufolie", "Papier alu", "Foglio di alluminio", "Aluminium foil"),
+    ],
+    steps: [
+      l4(
+        "Weiche Butter mit gehackten Kräutern und Salz verrühren.",
+        "Mélanger le beurre mou avec les herbes hachées et le sel.",
+        "Mescola il burro morbido con le erbe tritate e il sale.",
+        "Mix the soft butter with the chopped herbs and salt."
+      ),
+      l4(
+        "Maiskolben schälen und mit je einem Klecks Kräuterbutter in Alufolie wickeln.",
+        "Éplucher les épis et les emballer dans du papier alu avec une noix de beurre aux herbes chacun.",
+        "Pulisci le pannocchie e avvolgile nella stagnola con una noce di burro alle erbe ciascuna.",
+        "Husk the cobs and wrap each in foil with a knob of herb butter."
+      ),
+      l4(
+        "In der Randglut 15–20 Minuten garen, dabei mehrmals drehen.",
+        "Cuire 15–20 minutes en bordure des braises en tournant plusieurs fois.",
+        "Cuoci sul bordo della brace per 15–20 minuti girando più volte.",
+        "Cook in the embers at the edge of the fire for 15–20 minutes, turning several times."
+      ),
+      l4(
+        "Auspacken, mit der restlichen Kräuterbutter bestreichen und nachsalzen.",
+        "Déballer, badigeonner du reste de beurre aux herbes et rectifier le sel.",
+        "Scarta, spennella con il burro alle erbe rimasto e aggiusta di sale.",
+        "Unwrap, brush with the remaining herb butter and season with a little more salt."
+      ),
+    ],
+    tip: l4(
+      "Ohne Folie direkt auf dem Rost werden die Kolben leicht rauchig und knusprig – dafür öfter drehen.",
+      "Sans papier alu, directement sur la grille, les épis deviennent légèrement fumés et croustillants – il faut alors tourner plus souvent.",
+      "Senza stagnola, direttamente sulla griglia, le pannocchie diventano leggermente affumicate e croccanti – in tal caso girale più spesso.",
+      "Without foil, straight on the grate, the cobs turn lightly smoky and crisp – just turn them more often."
+    ),
+  },
+  {
+    id: "poulet-reis-pfanne",
+    name: l4(
+      "One-Pot-Reispfanne mit Poulet",
+      "Poêlée de riz au poulet en une casserole",
+      "Riso al pollo in pentola unica",
+      "One-pot chicken and rice"
+    ),
+    method: "Gaskocher",
+    timeMinutes: 35,
+    servings: 4,
+    difficulty: "mittel",
+    onePot: true,
+    kidFriendly: true,
+    ingredients: [
+      l4(
+        "500 g Pouletbrust",
+        "500 g de blanc de poulet",
+        "500 g di petto di pollo",
+        "500 g chicken breast"
+      ),
+      l4("300 g Reis", "300 g de riz", "300 g di riso", "300 g rice"),
+      l4("1 Peperoni", "1 poivron", "1 peperone", "1 pepper"),
+      l4("1 Zwiebel", "1 oignon", "1 cipolla", "1 onion"),
+      l4(
+        "2 Knoblauchzehen",
+        "2 gousses d'ail",
+        "2 spicchi d'aglio",
+        "2 cloves of garlic"
+      ),
+      l4(
+        "1 TL Paprikapulver",
+        "1 c. à c. de paprika",
+        "1 cucchiaino di paprica",
+        "1 tsp paprika"
+      ),
+      l4("7 dl Bouillon", "7 dl de bouillon", "7 dl di brodo", "700 ml stock"),
+      l4(
+        "Erbsen (Dose oder TK)",
+        "Petits pois (boîte ou surgelés)",
+        "Piselli (scatola o surgelati)",
+        "Peas (tinned or frozen)"
+      ),
+      l4("Öl", "Huile", "Olio", "Oil"),
+    ],
+    steps: [
+      l4(
+        "Poulet würfeln und im Topf mit Öl rundum anbraten, dann herausnehmen.",
+        "Couper le poulet en dés et le faire dorer de tous côtés dans la casserole avec de l'huile, puis le retirer.",
+        "Taglia il pollo a dadini e fallo rosolare da tutti i lati nella pentola con l'olio, poi toglilo.",
+        "Dice the chicken and brown it all over in the pot with oil, then remove it."
+      ),
+      l4(
+        "Zwiebel, Knoblauch und Peperoni-Würfel andünsten, Paprikapulver und Reis kurz mitrösten.",
+        "Faire suer l'oignon, l'ail et les dés de poivron, torréfier brièvement le paprika et le riz avec.",
+        "Fai appassire cipolla, aglio e peperone a dadini, tosta brevemente paprica e riso.",
+        "Sweat the onion, garlic and diced pepper, briefly toasting the paprika and rice with them."
+      ),
+      l4(
+        "Mit Bouillon ablöschen, Poulet zurückgeben und zugedeckt 15–18 Minuten leise köcheln, bis der Reis gar ist.",
+        "Déglacer au bouillon, remettre le poulet et laisser mijoter doucement à couvert 15–18 minutes, jusqu'à ce que le riz soit cuit.",
+        "Sfuma con il brodo, rimetti il pollo e lascia sobbollire coperto per 15–18 minuti, finché il riso è cotto.",
+        "Pour in the stock, return the chicken and simmer gently, covered, for 15–18 minutes until the rice is done."
+      ),
+      l4(
+        "Erbsen unterrühren, 2 Minuten ziehen lassen und abschmecken.",
+        "Incorporer les petits pois, laisser reposer 2 minutes et rectifier l'assaisonnement.",
+        "Incorpora i piselli, lascia riposare 2 minuti e aggiusta di sapore.",
+        "Stir in the peas, let stand for 2 minutes and adjust the seasoning."
+      ),
+    ],
+    tip: l4(
+      "Nicht zu oft umrühren – so bildet sich am Topfboden eine feine Röstschicht wie bei einer Paella.",
+      "Ne pas trop remuer – une fine croûte dorée se forme ainsi au fond de la casserole, comme pour une paella.",
+      "Non mescolare troppo spesso – sul fondo della pentola si forma così una sottile crosticina dorata, come in una paella.",
+      "Don't stir too often – a fine golden crust forms on the bottom of the pot, just like a paella."
+    ),
+  },
+  {
+    id: "raclette-pfaennli",
+    name: l4(
+      "Raclette aus der Pfanne",
+      "Raclette à la poêle",
+      "Raclette in padella",
+      "Pan raclette"
+    ),
+    method: "Beides",
+    timeMinutes: 30,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: false,
+    kidFriendly: true,
+    ingredients: [
+      l4(
+        "800 g kleine Kartoffeln",
+        "800 g de petites pommes de terre",
+        "800 g di patate piccole",
+        "800 g small potatoes"
+      ),
+      l4(
+        "400 g Raclettekäse",
+        "400 g de fromage à raclette",
+        "400 g di formaggio da raclette",
+        "400 g raclette cheese"
+      ),
+      l4(
+        "Essiggurken und Silberzwiebeln",
+        "Cornichons et petits oignons au vinaigre",
+        "Cetriolini e cipolline sott'aceto",
+        "Gherkins and pickled onions"
+      ),
+      l4(
+        "Pfeffer und Paprikapulver",
+        "Poivre et paprika",
+        "Pepe e paprica",
+        "Pepper and paprika"
+      ),
+    ],
+    steps: [
+      l4(
+        "Kartoffeln in der Schale in Salzwasser ca. 20 Minuten gar kochen (Gschwellti).",
+        "Cuire les pommes de terre en robe env. 20 minutes à l'eau salée.",
+        "Lessa le patate con la buccia in acqua salata per circa 20 minuti.",
+        "Boil the potatoes in their skins in salted water for about 20 minutes."
+      ),
+      l4(
+        "Käsescheiben portionsweise in der beschichteten Pfanne bei kleiner Hitze schmelzen – auf dem Kocher oder am Rand des Feuerrosts.",
+        "Faire fondre les tranches de fromage par portions dans la poêle antiadhésive à feu doux – sur le réchaud ou au bord de la grille du feu.",
+        "Fai fondere le fette di formaggio a porzioni nella padella antiaderente a fuoco basso – sul fornello o sul bordo della griglia del fuoco.",
+        "Melt the cheese slices in batches in the non-stick pan over low heat – on the stove or at the edge of the fire grate."
+      ),
+      l4(
+        "Den geschmolzenen Käse über die Kartoffeln ziehen und mit Pfeffer oder Paprika bestreuen.",
+        "Racler le fromage fondu sur les pommes de terre et saupoudrer de poivre ou de paprika.",
+        "Versa il formaggio fuso sulle patate e spolvera con pepe o paprica.",
+        "Scrape the melted cheese over the potatoes and sprinkle with pepper or paprika."
+      ),
+      l4(
+        "Mit Essiggurken und Silberzwiebeln servieren – und gleich die nächste Portion schmelzen.",
+        "Servir avec les cornichons et les petits oignons – et faire fondre aussitôt la portion suivante.",
+        "Servi con cetriolini e cipolline – e metti subito a fondere la porzione successiva.",
+        "Serve with gherkins and pickled onions – and start melting the next batch straight away."
+      ),
+    ],
+    tip: l4(
+      "Mit einem Deckel schmilzt der Käse schneller und gleichmässiger – und das Camp duftet wie eine Skihütte.",
+      "Avec un couvercle, le fromage fond plus vite et plus régulièrement – et le camp embaume comme un chalet de ski.",
+      "Con un coperchio il formaggio fonde più in fretta e in modo uniforme – e il campo profuma come una baita.",
+      "With a lid, the cheese melts faster and more evenly – and the camp smells like a ski chalet."
+    ),
+  },
+  {
+    id: "thon-wraps",
+    name: l4(
+      "Thon-Wraps ohne Kochen",
+      "Wraps au thon sans cuisson",
+      "Wrap al tonno senza cottura",
+      "No-cook tuna wraps"
+    ),
+    method: "Beides",
+    timeMinutes: 10,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: false,
+    kidFriendly: true,
+    ingredients: [
+      l4(
+        "4 Tortilla-Wraps",
+        "4 tortillas (wraps)",
+        "4 tortilla (wrap)",
+        "4 tortilla wraps"
+      ),
+      l4(
+        "2 Dosen Thon",
+        "2 boîtes de thon",
+        "2 scatolette di tonno",
+        "2 tins of tuna"
+      ),
+      l4(
+        "3 EL Mayonnaise",
+        "3 c. à s. de mayonnaise",
+        "3 cucchiai di maionese",
+        "3 tbsp mayonnaise"
+      ),
+      l4(
+        "1 kleine Dose Mais",
+        "1 petite boîte de maïs",
+        "1 scatoletta di mais",
+        "1 small tin of sweetcorn"
+      ),
+      l4(
+        "Salatblätter",
+        "Feuilles de salade",
+        "Foglie d'insalata",
+        "Lettuce leaves"
+      ),
+      l4("1 Gurke", "1 concombre", "1 cetriolo", "1 cucumber"),
+      l4("Pfeffer", "Poivre", "Pepe", "Pepper"),
+    ],
+    steps: [
+      l4(
+        "Thon abtropfen lassen und mit Mayonnaise, Mais und Pfeffer zu einer Creme mischen.",
+        "Égoutter le thon et le mélanger avec la mayonnaise, le maïs et le poivre en une crème.",
+        "Scola il tonno e mescolalo con maionese, mais e pepe fino a ottenere una crema.",
+        "Drain the tuna and mix it with the mayonnaise, sweetcorn and pepper into a creamy filling."
+      ),
+      l4(
+        "Wraps mit Salatblättern belegen und die Thon-Creme darauf verteilen.",
+        "Garnir les tortillas de feuilles de salade et répartir la crème de thon dessus.",
+        "Farcisci i wrap con le foglie d'insalata e distribuisci sopra la crema di tonno.",
+        "Cover the wraps with lettuce leaves and spread the tuna filling on top."
+      ),
+      l4(
+        "Gurkenstreifen darauflegen, die Seiten einschlagen und satt aufrollen.",
+        "Ajouter des lamelles de concombre, rabattre les côtés et rouler bien serré.",
+        "Aggiungi striscioline di cetriolo, ripiega i lati e arrotola ben stretto.",
+        "Add cucumber strips, fold in the sides and roll up tightly."
+      ),
+      l4(
+        "Halbieren und sofort essen – oder eingewickelt als Proviant auf die Wanderung mitnehmen.",
+        "Couper en deux et déguster tout de suite – ou emballer comme provision pour la randonnée.",
+        "Taglia a metà e mangia subito – oppure avvolgili come provvista per l'escursione.",
+        "Cut in half and eat straight away – or wrap them up as provisions for a hike."
+      ),
+    ],
+    tip: l4(
+      "Die Rettung bei Regen und Feuerverbot: kein Kocher, kein Feuer, kein Abwasch.",
+      "Le sauvetage en cas de pluie ou d'interdiction de feu: pas de réchaud, pas de feu, pas de vaisselle.",
+      "La salvezza con la pioggia o il divieto di fuoco: niente fornello, niente fuoco, niente stoviglie da lavare.",
+      "The lifesaver in rain or during fire bans: no stove, no fire, no washing-up."
+    ),
+  },
+  {
+    id: "grill-ananas",
+    name: l4(
+      "Grillierte Ananas mit Honig",
+      "Ananas grillé au miel",
+      "Ananas grigliato al miele",
+      "Grilled pineapple with honey"
+    ),
+    method: "Offenes Feuer",
+    timeMinutes: 15,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: false,
+    kidFriendly: true,
+    ingredients: [
+      l4(
+        "1 reife Ananas",
+        "1 ananas mûr",
+        "1 ananas maturo",
+        "1 ripe pineapple"
+      ),
+      l4(
+        "3 EL Honig",
+        "3 c. à s. de miel",
+        "3 cucchiai di miele",
+        "3 tbsp honey"
+      ),
+      l4(
+        "1 Limette (Saft)",
+        "1 citron vert (jus)",
+        "1 lime (succo)",
+        "1 lime (juice)"
+      ),
+      l4(
+        "1 Prise Zimt",
+        "1 pincée de cannelle",
+        "1 pizzico di cannella",
+        "1 pinch of cinnamon"
+      ),
+    ],
+    steps: [
+      l4(
+        "Ananas schälen, vierteln, den Strunk entfernen und in dicke Spalten schneiden.",
+        "Peler l'ananas, le couper en quatre, retirer le cœur et détailler en quartiers épais.",
+        "Sbuccia l'ananas, taglialo in quattro, elimina il torsolo e taglia a spicchi spessi.",
+        "Peel the pineapple, quarter it, remove the core and cut into thick wedges."
+      ),
+      l4(
+        "Honig mit Limettensaft und Zimt verrühren und die Spalten damit bepinseln.",
+        "Mélanger le miel avec le jus de citron vert et la cannelle et en badigeonner les quartiers.",
+        "Mescola il miele con il succo di lime e la cannella e spennella gli spicchi.",
+        "Mix the honey with the lime juice and cinnamon and brush the wedges with it."
+      ),
+      l4(
+        "Auf dem Rost über der Glut je Seite 3–4 Minuten grillieren, bis sich braune Röststreifen zeigen.",
+        "Griller sur la grille au-dessus des braises 3–4 minutes par face, jusqu'à l'apparition de marques dorées.",
+        "Griglia sulla griglia sopra la brace per 3–4 minuti per lato, finché compaiono le striature dorate.",
+        "Grill on the grate over the embers for 3–4 minutes per side, until brown grill marks appear."
+      ),
+      l4(
+        "Mit dem restlichen Honig beträufeln und warm geniessen.",
+        "Arroser du reste de miel et déguster chaud.",
+        "Irrora con il miele rimasto e gusta caldo.",
+        "Drizzle with the remaining honey and enjoy warm."
+      ),
+    ],
+    tip: l4(
+      "Die Hitze karamellisiert den Fruchtzucker – die Ananas schmeckt doppelt so süss. Funktioniert auch am Spiess über dem Feuer.",
+      "La chaleur caramélise le sucre du fruit – l'ananas devient deux fois plus doux. Fonctionne aussi en brochette au-dessus du feu.",
+      "Il calore caramella lo zucchero della frutta – l'ananas diventa dolcissimo. Funziona anche allo spiedo sopra il fuoco.",
+      "The heat caramelises the fruit sugar – the pineapple tastes twice as sweet. Also works on a skewer over the fire."
+    ),
+  },
+  {
+    id: "gerstensuppe",
+    name: l4(
+      "Bündner Gerstensuppe",
+      "Soupe grisonne à l'orge",
+      "Zuppa d'orzo grigionese",
+      "Grisons barley soup"
+    ),
+    method: "Gaskocher",
+    timeMinutes: 45,
+    servings: 4,
+    difficulty: "mittel",
+    onePot: true,
+    kidFriendly: true,
+    ingredients: [
+      l4(
+        "150 g Rollgerste",
+        "150 g d'orge perlé",
+        "150 g di orzo perlato",
+        "150 g pearl barley"
+      ),
+      l4(
+        "100 g Speckwürfeli oder Bündnerfleisch",
+        "100 g de lardons ou de viande des Grisons",
+        "100 g di pancetta a dadini o carne secca dei Grigioni",
+        "100 g diced bacon or Grisons air-dried beef"
+      ),
+      l4("2 Rüebli", "2 carottes", "2 carote", "2 carrots"),
+      l4("1 Stange Lauch", "1 poireau", "1 porro", "1 leek"),
+      l4(
+        "1 Stück Sellerie",
+        "1 morceau de céleri",
+        "1 pezzo di sedano",
+        "1 piece of celeriac"
+      ),
+      l4(
+        "1,2 l Bouillon",
+        "1,2 l de bouillon",
+        "1,2 l di brodo",
+        "1.2 l stock"
+      ),
+      l4("1 dl Rahm", "1 dl de crème", "1 dl di panna", "100 ml cream"),
+      l4("Pfeffer", "Poivre", "Pepe", "Pepper"),
+    ],
+    steps: [
+      l4(
+        "Speck im Topf anbraten, das klein geschnittene Gemüse zugeben und kurz mitdünsten.",
+        "Faire revenir les lardons dans la casserole, ajouter les légumes coupés en petits morceaux et les faire suer brièvement.",
+        "Rosola la pancetta nella pentola, aggiungi le verdure tagliate a pezzetti e falle appassire brevemente.",
+        "Fry the bacon in the pot, add the finely chopped vegetables and sweat them briefly."
+      ),
+      l4(
+        "Gerste einrühren, mit Bouillon ablöschen und aufkochen.",
+        "Incorporer l'orge, déglacer au bouillon et porter à ébullition.",
+        "Incorpora l'orzo, sfuma con il brodo e porta a ebollizione.",
+        "Stir in the barley, pour in the stock and bring to the boil."
+      ),
+      l4(
+        "Zugedeckt 35–40 Minuten leise köcheln, bis die Gerste weich ist, ab und zu umrühren.",
+        "Laisser mijoter doucement à couvert 35–40 minutes, jusqu'à ce que l'orge soit tendre, en remuant de temps en temps.",
+        "Lascia sobbollire coperto per 35–40 minuti, finché l'orzo è morbido, mescolando di tanto in tanto.",
+        "Simmer gently, covered, for 35–40 minutes until the barley is tender, stirring occasionally."
+      ),
+      l4(
+        "Rahm unterrühren und mit Pfeffer abschmecken.",
+        "Incorporer la crème et rectifier l'assaisonnement au poivre.",
+        "Incorpora la panna e aggiusta di pepe.",
+        "Stir in the cream and season with pepper."
+      ),
+    ],
+    tip: l4(
+      "Wärmt nach einem Regentag zuverlässig durch – und schmeckt am zweiten Tag fast noch besser: Reste einfach mit etwas Wasser aufkochen.",
+      "Réchauffe à coup sûr après une journée de pluie – et elle est presque meilleure le lendemain: il suffit de réchauffer les restes avec un peu d'eau.",
+      "Riscalda a colpo sicuro dopo una giornata di pioggia – e il giorno dopo è quasi più buona: basta riscaldare gli avanzi con un po' d'acqua.",
+      "Reliably warms you up after a rainy day – and tastes almost better the next day: just reheat the leftovers with a little water."
+    ),
+  },
+  {
+    id: "fotzelschnitten",
+    name: l4(
+      "Fotzelschnitten",
+      "Pain perdu (Fotzelschnitten)",
+      "Fotzelschnitten (pane dorato)",
+      "Fotzelschnitten (Swiss French toast)"
+    ),
+    method: "Gaskocher",
+    timeMinutes: 15,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: true,
+    kidFriendly: true,
+    ingredients: [
+      l4(
+        "8 Scheiben altbackenes Brot oder Zopf",
+        "8 tranches de pain rassis ou de tresse",
+        "8 fette di pane raffermo o treccia",
+        "8 slices of stale bread or plaited loaf"
+      ),
+      l4("3 Eier", "3 œufs", "3 uova", "3 eggs"),
+      l4("2 dl Milch", "2 dl de lait", "2 dl di latte", "200 ml milk"),
+      l4(
+        "2 EL Zucker",
+        "2 c. à s. de sucre",
+        "2 cucchiai di zucchero",
+        "2 tbsp sugar"
+      ),
+      l4(
+        "1 TL Zimt",
+        "1 c. à c. de cannelle",
+        "1 cucchiaino di cannella",
+        "1 tsp cinnamon"
+      ),
+      l4(
+        "Butter zum Braten",
+        "Beurre pour la cuisson",
+        "Burro per la cottura",
+        "Butter for frying"
+      ),
+    ],
+    steps: [
+      l4(
+        "Eier, Milch und die Hälfte des Zuckers verquirlen.",
+        "Battre les œufs avec le lait et la moitié du sucre.",
+        "Sbatti le uova con il latte e metà dello zucchero.",
+        "Whisk the eggs with the milk and half of the sugar."
+      ),
+      l4(
+        "Brotscheiben kurz darin wenden und vollsaugen lassen.",
+        "Tremper brièvement les tranches de pain et les laisser s'imbiber.",
+        "Passa brevemente le fette di pane nel composto e lasciale impregnare.",
+        "Briefly turn the bread slices in the mixture and let them soak it up."
+      ),
+      l4(
+        "In der Butterpfanne beidseitig goldbraun braten.",
+        "Dorer des deux côtés dans la poêle beurrée.",
+        "Fai dorare da entrambi i lati nella padella imburrata.",
+        "Fry in the buttered pan until golden brown on both sides."
+      ),
+      l4(
+        "Zimt und restlichen Zucker mischen und die heissen Schnitten damit bestreuen.",
+        "Mélanger la cannelle et le reste du sucre et en saupoudrer les tranches chaudes.",
+        "Mescola la cannella con lo zucchero rimasto e cospargi le fette calde.",
+        "Mix the cinnamon with the remaining sugar and sprinkle it over the hot slices."
+      ),
+    ],
+    tip: l4(
+      "Die Schweizer Antwort auf French Toast – perfekt, um Brot vom Vortag zu retten. Mit Apfelmus auch als Dessert ein Hit.",
+      "La réponse suisse au pain doré – parfait pour sauver le pain de la veille. Avec de la compote de pommes, c'est aussi un succès en dessert.",
+      "La risposta svizzera al french toast – perfetta per recuperare il pane del giorno prima. Con la composta di mele è un successo anche come dessert.",
+      "The Swiss answer to French toast – perfect for rescuing yesterday's bread. With apple sauce it's a hit as dessert too."
+    ),
+  },
 ];
