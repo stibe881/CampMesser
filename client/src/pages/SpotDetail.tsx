@@ -4,6 +4,8 @@ import {
   AlertTriangle,
   BookOpen,
   CalendarDays,
+  CalendarRange,
+  ChevronDown,
   Compass,
   Droplets,
   Loader2,
@@ -15,6 +17,16 @@ import {
   Share2,
   Sunrise,
 } from "lucide-react";
+import {
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
@@ -27,6 +39,13 @@ import { trpc } from "@/lib/trpc";
 import { getSunTimes } from "@/lib/sun";
 import { loadObstacleProfiles } from "@/lib/obstacleStore";
 import { computeTripStats, tripNights } from "@shared/trips";
+import {
+  aggregateMonthlyClimate,
+  bestTravelMonths,
+  climateRequestUrl,
+  climateYearRange,
+  type MonthlyClimate,
+} from "@shared/climate";
 import { describeWeatherCode } from "@shared/weather";
 import { fetchDossierWeather, type DossierWeather } from "@/lib/dossierWeather";
 import { useI18n } from "@/i18n";
@@ -35,6 +54,19 @@ import { cn } from "@/lib/utils";
 
 // Wetter-Abruf ausgelagert: teilt sich das Dossier mit der öffentlichen
 // Teil-Ansicht (/platz/:token)
+
+/** Ladezustand «Beste Reisezeit»: die Archiv-API wird erst auf Klick befragt. */
+type ClimateState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "error" }
+  | {
+      status: "ready";
+      months: MonthlyClimate[];
+      best: number[];
+      fromYear: number;
+      toYear: number;
+    };
 
 export default function SpotDetailPage() {
   const { lang, t } = useI18n();
@@ -49,6 +81,8 @@ export default function SpotDetailPage() {
   });
   const [weather, setWeather] = useState<DossierWeather | null>(null);
   const [weatherFailed, setWeatherFailed] = useState(false);
+  const [climateOpen, setClimateOpen] = useState(false);
+  const [climate, setClimate] = useState<ClimateState>({ status: "idle" });
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const shareMutation = trpc.spots.share.useMutation();
@@ -87,6 +121,64 @@ export default function SpotDetailPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spot?.id, lang]);
+
+  // Klima-Abschnitt beim Platzwechsel zurücksetzen (Daten gehören zum Ort)
+  useEffect(() => {
+    setClimateOpen(false);
+    setClimate({ status: "idle" });
+  }, [spotId]);
+
+  // Historisches Wetter (letzte 5 volle Jahre) laden – bewusst erst auf Klick,
+  // die Archive-API ist deutlich träger als die Vorhersage-API.
+  const loadClimate = async (lat: number, lon: number) => {
+    setClimate({ status: "loading" });
+    try {
+      const range = climateYearRange(new Date());
+      const res = await fetch(
+        climateRequestUrl(lat, lon, range.startDate, range.endDate)
+      );
+      if (!res.ok) throw new Error(`climate service error ${res.status}`);
+      const json = await res.json();
+      const months = aggregateMonthlyClimate(json.daily);
+      setClimate({
+        status: "ready",
+        months,
+        best: bestTravelMonths(months),
+        fromYear: range.fromYear,
+        toYear: range.toYear,
+      });
+    } catch {
+      setClimate({ status: "error" });
+    }
+  };
+
+  const toggleClimate = () => {
+    const next = !climateOpen;
+    setClimateOpen(next);
+    if (next && climate.status === "idle" && spot) {
+      void loadClimate(spot.latitude, spot.longitude);
+    }
+  };
+
+  // Monatsnamen in der aktiven Sprache (Jahr egal – nur der Monat zählt)
+  const monthLabel = (month: number, style: "short" | "long") =>
+    new Date(2000, month - 1, 1).toLocaleDateString(LOCALE_TAGS[lang], {
+      month: style,
+    });
+
+  const climateChartData = useMemo(
+    () =>
+      climate.status === "ready"
+        ? climate.months.map(m => ({
+            label: monthLabel(m.month, "short"),
+            max: m.avgTempMaxC,
+            min: m.avgTempMinC,
+            rain: m.rainDays,
+          }))
+        : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [climate, lang]
+  );
 
   const sun = useMemo(
     () =>
@@ -307,6 +399,146 @@ export default function SpotDetailPage() {
             </>
           )}
         </CardContent>
+      </Card>
+
+      {/* Beste Reisezeit: historisches Wetter, lädt erst beim Aufklappen */}
+      <Card className="mb-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">
+            <button
+              type="button"
+              onClick={toggleClimate}
+              aria-expanded={climateOpen}
+              aria-controls="climate-section"
+              className="flex w-full items-center gap-2 text-left"
+            >
+              <CalendarRange
+                className="h-4 w-4 text-primary"
+                aria-hidden="true"
+              />
+              {t.spotDetail.climateTitle}
+              <ChevronDown
+                className={cn(
+                  "ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                  climateOpen && "rotate-180"
+                )}
+                aria-hidden="true"
+              />
+            </button>
+          </CardTitle>
+        </CardHeader>
+        {climateOpen && (
+          <CardContent id="climate-section">
+            <p className="mb-3 text-sm text-muted-foreground">
+              {t.spotDetail.climateIntro}
+            </p>
+            {climate.status === "loading" && (
+              <div
+                aria-busy="true"
+                aria-label={t.spotDetail.climateLoadingAria}
+              >
+                <Skeleton className="h-48 w-full rounded-lg" />
+              </div>
+            )}
+            {climate.status === "error" && (
+              <p className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+                <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+                {t.spotDetail.climateFailed}
+                <button
+                  type="button"
+                  onClick={() => loadClimate(spot.latitude, spot.longitude)}
+                  className="font-medium text-primary underline"
+                >
+                  {t.spotDetail.climateRetry}
+                </button>
+              </p>
+            )}
+            {climate.status === "ready" && (
+              <>
+                {climate.best.length > 0 && (
+                  <p className="mb-3 flex flex-wrap items-center gap-1.5 text-sm">
+                    <span className="font-medium">
+                      {t.spotDetail.climateBestTitle}
+                    </span>
+                    {climate.best.map(month => (
+                      <span
+                        key={month}
+                        className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-xs font-medium"
+                      >
+                        {monthLabel(month, "long")}
+                      </span>
+                    ))}
+                  </p>
+                )}
+                <div className="h-52 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart
+                      data={climateChartData}
+                      margin={{ top: 4, right: -18, bottom: 0, left: -18 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        className="stroke-border/60"
+                      />
+                      <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+                      <YAxis yAxisId="temp" tick={{ fontSize: 10 }} />
+                      <YAxis
+                        yAxisId="rain"
+                        orientation="right"
+                        domain={[
+                          0,
+                          (max: number) => Math.max(10, Math.ceil(max)),
+                        ]}
+                        tick={{ fontSize: 10 }}
+                      />
+                      <Tooltip
+                        formatter={(value: number, name: string) =>
+                          name === t.spotDetail.climateChartRain
+                            ? [`${value} ${t.spotDetail.climateDaysUnit}`, name]
+                            : [`${value} °C`, name]
+                        }
+                      />
+                      <Bar
+                        yAxisId="rain"
+                        dataKey="rain"
+                        name={t.spotDetail.climateChartRain}
+                        fill="var(--chart-2)"
+                        fillOpacity={0.55}
+                        isAnimationActive={false}
+                      />
+                      <Line
+                        yAxisId="temp"
+                        type="monotone"
+                        dataKey="max"
+                        name={t.spotDetail.climateChartMax}
+                        stroke="var(--chart-1)"
+                        strokeWidth={2}
+                        dot={false}
+                        isAnimationActive={false}
+                      />
+                      <Line
+                        yAxisId="temp"
+                        type="monotone"
+                        dataKey="min"
+                        name={t.spotDetail.climateChartMin}
+                        stroke="var(--chart-4)"
+                        strokeWidth={2}
+                        dot={false}
+                        isAnimationActive={false}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {t.spotDetail.climateLegend}
+                </p>
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  {t.spotDetail.climateSource(climate.fromYear, climate.toYear)}
+                </p>
+              </>
+            )}
+          </CardContent>
+        )}
       </Card>
 
       {/* Hindernis-Profil */}

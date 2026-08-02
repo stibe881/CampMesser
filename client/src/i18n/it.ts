@@ -266,6 +266,41 @@ export const it: Translation = {
     deleteItemAria: name => `Eliminare ${name}`,
     emptyList:
       "Questa lista è ancora vuota – aggiungi sopra la tua prima voce.",
+    assignFailed: "Assegnazione non riuscita",
+    assignButtonAria: name => `Assegnare ${name} a una persona`,
+    assignInputAria: name => `Persona che prepara ${name}`,
+    assignPlaceholder: "Nome (ad es. Mamma)",
+    assignSave: "Assegna",
+    assignRemove: "Rimuovi l'assegnazione",
+    assignSuggestionAria: (person, item) => `Assegnare ${item} a ${person}`,
+    filterTitle: "Chi prepara cosa?",
+    filterGroupAria: "Filtrare le voci per persona",
+    filterAll: "Tutti",
+    filterUnassigned: "Senza assegnazione",
+    filterEmpty: "Nessuna voce per questo filtro.",
+    filteredCount: (checked, total) =>
+      `Nel filtro: ${checked} su ${total} preparate`,
+    totalCount: (checked, total) => `In totale: ${checked} su ${total}`,
+    filterProgressAria: pct =>
+      `Avanzamento nel filtro: ${pct} per cento preparato`,
+    printButton: "Stampa",
+  },
+  packListPrint: {
+    docTitle: name => `${name} – lista bagagli da stampare`,
+    docTitleFallback: "Lista bagagli",
+    appTitle: "CampMesser – il coltellino svizzero per il campeggio in tenda",
+    notFound: "Questa lista bagagli non è stata trovata.",
+    printButton: "Stampa / Salva come PDF",
+    printBrowserHint:
+      "Nell'app installata il pulsante apre la vista nel browser – da lì stampa o salva come PDF dal menu.",
+    headerKicker: "CampMesser · Lista bagagli",
+    meta: (items, categories) =>
+      `${items} ${items === 1 ? "voce" : "voci"} · ${categories} ${categories === 1 ? "categoria" : "categorie"}`,
+    printedOn: date => `Stato: ${date}`,
+    personFilterInfo: name => `Solo le voci di ${name}`,
+    emptyList: "Questa lista non contiene voci.",
+    footer:
+      "Niente di dimenticato – buon viaggio! · CampMesser – il coltellino svizzero per il campeggio in tenda",
   },
   sharedPackList: {
     loadingShared: "Caricamento della lista condivisa …",
@@ -394,6 +429,27 @@ export const it: Translation = {
     forecast7: "Previsioni a 7 giorni",
     dataSource:
       "Fonte dati: Open-Meteo (migliore risoluzione disponibile per la tua posizione, in Svizzera MeteoSvizzera ICON-CH). Le allerte sono calcolate dalle previsioni e non sostituiscono le allerte ufficiali di MeteoSvizzera.",
+    compareButton: "Confronta con un altro luogo",
+    compareTitle: "Confronta luoghi",
+    compareAria: "Confronto meteo di due luoghi",
+    compareCloseAria: "Chiudi il confronto",
+    compareSearchLabel: "Cerca un secondo luogo",
+    compareSearchPlaceholder: "ad es. Bellinzona o Fiesch",
+    compareSearchButton: "Cerca",
+    compareSearchingAria: "Ricerca del luogo in corso",
+    compareSearchFailed:
+      "La ricerca del luogo non è riuscita – riprova più tardi.",
+    compareNoResults: "Nessun luogo trovato – controlla la grafia.",
+    compareResultsAria: "Luoghi trovati",
+    compareSpotsLabel: "Oppure scegli una piazzola salvata:",
+    compareChange: "Cambia luogo",
+    compareLoadingAria: "Caricamento delle previsioni di confronto",
+    compareLoadFailed:
+      "Impossibile caricare le previsioni del luogo di confronto.",
+    compareCaption: (a, b) => `Confronto a 7 giorni: ${a} e ${b}`,
+    compareDayHeader: "Giorno",
+    compareSrRain: "Pioggia",
+    compareSrWind: "Raffiche",
   },
   water: {
     title: "Calcolatore dell'acqua potabile",
@@ -952,6 +1008,21 @@ export const it: Translation = {
     qrText:
       "Fai scansionare il codice con la fotocamera del telefono – il dossier della piazzola si apre subito, senza digitare né accedere.",
     tentFinderLink: "Ritrova la tenda",
+    climateTitle: "Miglior periodo di viaggio",
+    climateIntro:
+      "Valori mensili da cinque anni di archivio meteo: massime e minime medie e giorni di pioggia al mese in questa piazzola.",
+    climateLoadingAria: "Caricamento dei dati climatici",
+    climateFailed: "Impossibile caricare i dati climatici.",
+    climateRetry: "Riprova",
+    climateBestTitle: "Mesi migliori:",
+    climateChartMax: "Massima media giornaliera",
+    climateChartMin: "Minima media giornaliera",
+    climateChartRain: "Giorni di pioggia",
+    climateDaysUnit: "giorni",
+    climateLegend:
+      "Linee = massima/minima media giornaliera (°C, asse sinistro) · Barre = giorni di pioggia al mese (oltre 1 mm, asse destro).",
+    climateSource: (from, to) =>
+      `Fonte: archivio meteo Open-Meteo, anni ${from}–${to}. Mesi migliori = i più caldi con meno giorni di pioggia.`,
   },
   tentFinder: {
     title: "Trova-tenda",

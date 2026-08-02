@@ -271,6 +271,43 @@ export const de = {
     deleteItemAria: (name: string) => `${name} löschen`,
     emptyList:
       "Diese Liste ist noch leer – füge oben deinen ersten Eintrag hinzu.",
+    assignFailed: "Zuordnung fehlgeschlagen",
+    assignButtonAria: (name: string) => `${name} einer Person zuweisen`,
+    assignInputAria: (name: string) => `Person, die ${name} packt`,
+    assignPlaceholder: "Name (z. B. Mama)",
+    assignSave: "Zuweisen",
+    assignRemove: "Zuordnung entfernen",
+    assignSuggestionAria: (person: string, item: string) =>
+      `${item} an ${person} zuweisen`,
+    filterTitle: "Wer packt was?",
+    filterGroupAria: "Einträge nach Person filtern",
+    filterAll: "Alle",
+    filterUnassigned: "Ohne Zuordnung",
+    filterEmpty: "Für diesen Filter gibt es keine Einträge.",
+    filteredCount: (checked: number, total: number) =>
+      `Im Filter: ${checked} von ${total} gepackt`,
+    totalCount: (checked: number, total: number) =>
+      `Gesamt: ${checked} von ${total}`,
+    filterProgressAria: (pct: number) =>
+      `Fortschritt im Filter: ${pct} Prozent gepackt`,
+    printButton: "Drucken",
+  },
+  packListPrint: {
+    docTitle: (name: string) => `${name} – Packliste zum Ausdrucken`,
+    docTitleFallback: "Packliste",
+    appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    notFound: "Diese Packliste wurde nicht gefunden.",
+    printButton: "Drucken / Als PDF sichern",
+    printBrowserHint:
+      "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
+    headerKicker: "CampMesser · Packliste",
+    meta: (items: number, categories: number) =>
+      `${items} ${items === 1 ? "Eintrag" : "Einträge"} · ${categories} ${categories === 1 ? "Kategorie" : "Kategorien"}`,
+    printedOn: (date: string) => `Stand: ${date}`,
+    personFilterInfo: (name: string) => `Nur Einträge von ${name}`,
+    emptyList: "Diese Liste hat keine Einträge.",
+    footer:
+      "Nichts vergessen – gute Reise! · CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
   },
   sharedPackList: {
     loadingShared: "Geteilte Liste wird geladen …",
@@ -399,6 +436,27 @@ export const de = {
     forecast7: "7-Tage-Vorhersage",
     dataSource:
       "Datenquelle: Open-Meteo (beste verfügbare Auflösung für deinen Standort, in der Schweiz MeteoSchweiz ICON-CH). Warnungen werden aus der Vorhersage berechnet und ersetzen keine offiziellen Warnungen von MeteoSchweiz.",
+    compareButton: "Mit anderem Ort vergleichen",
+    compareTitle: "Orte vergleichen",
+    compareAria: "Wetter-Vergleich zweier Orte",
+    compareCloseAria: "Vergleich schliessen",
+    compareSearchLabel: "Zweiten Ort suchen",
+    compareSearchPlaceholder: "z. B. Bellinzona oder Fiesch",
+    compareSearchButton: "Suchen",
+    compareSearchingAria: "Ortssuche läuft",
+    compareSearchFailed:
+      "Ortssuche fehlgeschlagen – bitte später erneut versuchen.",
+    compareNoResults: "Kein Ort gefunden – prüfe die Schreibweise.",
+    compareResultsAria: "Gefundene Orte",
+    compareSpotsLabel: "Oder einen gespeicherten Zeltplatz wählen:",
+    compareChange: "Ort ändern",
+    compareLoadingAria: "Vergleichs-Prognose wird geladen",
+    compareLoadFailed:
+      "Prognose für den Vergleichsort konnte nicht geladen werden.",
+    compareCaption: (a: string, b: string) => `7-Tage-Vergleich: ${a} und ${b}`,
+    compareDayHeader: "Tag",
+    compareSrRain: "Regen",
+    compareSrWind: "Windböen",
   },
   water: {
     title: "Trinkwasser-Rechner",
@@ -961,6 +1019,21 @@ export const de = {
     qrText:
       "Lass andere den Code mit der Handy-Kamera scannen – das Platz-Dossier öffnet sich sofort, ganz ohne Tippen oder Anmeldung.",
     tentFinderLink: "Zelt finden",
+    climateTitle: "Beste Reisezeit",
+    climateIntro:
+      "Monatswerte aus fünf Jahren Wetterarchiv: durchschnittliche Höchst- und Tiefstwerte sowie Regentage pro Monat an diesem Platz.",
+    climateLoadingAria: "Klimadaten werden geladen",
+    climateFailed: "Klimadaten konnten nicht geladen werden.",
+    climateRetry: "Erneut versuchen",
+    climateBestTitle: "Beste Monate:",
+    climateChartMax: "Ø Tagesmaximum",
+    climateChartMin: "Ø Tagesminimum",
+    climateChartRain: "Regentage",
+    climateDaysUnit: "Tage",
+    climateLegend:
+      "Linien = durchschnittliches Tagesmaximum/-minimum (°C, linke Achse) · Balken = Regentage pro Monat (mehr als 1 mm, rechte Achse).",
+    climateSource: (from: number, to: number) =>
+      `Quelle: Open-Meteo Wetterarchiv, Jahre ${from}–${to}. Beste Monate = wärmste mit den wenigsten Regentagen.`,
   },
   tentFinder: {
     title: "Zelt-Finder",

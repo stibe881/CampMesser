@@ -262,6 +262,41 @@ export const en: Translation = {
     markUnpacked: name => `Mark ${name} as unpacked`,
     deleteItemAria: name => `Delete ${name}`,
     emptyList: "This list is still empty – add your first item above.",
+    assignFailed: "Assignment failed",
+    assignButtonAria: name => `Assign ${name} to a person`,
+    assignInputAria: name => `Person packing ${name}`,
+    assignPlaceholder: "Name (e.g. Mum)",
+    assignSave: "Assign",
+    assignRemove: "Remove assignment",
+    assignSuggestionAria: (person, item) => `Assign ${item} to ${person}`,
+    filterTitle: "Who packs what?",
+    filterGroupAria: "Filter items by person",
+    filterAll: "All",
+    filterUnassigned: "Unassigned",
+    filterEmpty: "No items for this filter.",
+    filteredCount: (checked, total) =>
+      `In this filter: ${checked} of ${total} packed`,
+    totalCount: (checked, total) => `Total: ${checked} of ${total}`,
+    filterProgressAria: pct =>
+      `Progress in this filter: ${pct} per cent packed`,
+    printButton: "Print",
+  },
+  packListPrint: {
+    docTitle: name => `${name} – printable packing list`,
+    docTitleFallback: "Packing list",
+    appTitle: "CampMesser – the Swiss army knife for tent camping",
+    notFound: "This packing list could not be found.",
+    printButton: "Print / Save as PDF",
+    printBrowserHint:
+      "In the installed app this button opens the view in your browser – print or save as PDF from its menu there.",
+    headerKicker: "CampMesser · Packing list",
+    meta: (items, categories) =>
+      `${items} ${items === 1 ? "item" : "items"} · ${categories} ${categories === 1 ? "category" : "categories"}`,
+    printedOn: date => `As of ${date}`,
+    personFilterInfo: name => `Only items for ${name}`,
+    emptyList: "This list has no items.",
+    footer:
+      "Nothing forgotten – have a great trip! · CampMesser – the Swiss army knife for tent camping",
   },
   sharedPackList: {
     loadingShared: "Loading shared list …",
@@ -387,6 +422,26 @@ export const en: Translation = {
     forecast7: "7-day forecast",
     dataSource:
       "Data source: Open-Meteo (best available resolution for your location, in Switzerland MeteoSwiss ICON-CH). Alerts are computed from the forecast and do not replace official MeteoSwiss warnings.",
+    compareButton: "Compare with another place",
+    compareTitle: "Compare places",
+    compareAria: "Weather comparison of two places",
+    compareCloseAria: "Close comparison",
+    compareSearchLabel: "Search for a second place",
+    compareSearchPlaceholder: "e.g. Bellinzona or Fiesch",
+    compareSearchButton: "Search",
+    compareSearchingAria: "Place search in progress",
+    compareSearchFailed: "Place search failed – please try again later.",
+    compareNoResults: "No place found – check the spelling.",
+    compareResultsAria: "Places found",
+    compareSpotsLabel: "Or pick a saved pitch:",
+    compareChange: "Change place",
+    compareLoadingAria: "Loading comparison forecast",
+    compareLoadFailed:
+      "The forecast for the comparison place could not be loaded.",
+    compareCaption: (a, b) => `7-day comparison: ${a} and ${b}`,
+    compareDayHeader: "Day",
+    compareSrRain: "Rain",
+    compareSrWind: "Wind gusts",
   },
   water: {
     title: "Drinking water calculator",
@@ -937,6 +992,21 @@ export const en: Translation = {
     qrText:
       "Let others scan the code with their phone camera – the pitch dossier opens immediately, no typing or sign-in needed.",
     tentFinderLink: "Find your tent",
+    climateTitle: "Best time to visit",
+    climateIntro:
+      "Monthly values from five years of weather archive: average daily highs and lows plus rain days per month at this pitch.",
+    climateLoadingAria: "Loading climate data",
+    climateFailed: "Climate data could not be loaded.",
+    climateRetry: "Try again",
+    climateBestTitle: "Best months:",
+    climateChartMax: "Avg daily high",
+    climateChartMin: "Avg daily low",
+    climateChartRain: "Rain days",
+    climateDaysUnit: "days",
+    climateLegend:
+      "Lines = average daily high/low (°C, left axis) · Bars = rain days per month (more than 1 mm, right axis).",
+    climateSource: (from, to) =>
+      `Source: Open-Meteo weather archive, years ${from}–${to}. Best months = warmest with the fewest rain days.`,
   },
   tentFinder: {
     title: "Tent finder",

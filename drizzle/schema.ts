@@ -97,6 +97,8 @@ export const packItems = mysqlTable(
       .default("Allgemein"),
     quantity: int("quantity").notNull().default(1),
     checked: boolean("checked").notNull().default(false),
+    /** Wer packt das? Freier Name einer Person – null = niemandem zugeordnet. */
+    assignee: varchar("assignee", { length: 80 }),
     sortOrder: int("sortOrder").notNull().default(0),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },

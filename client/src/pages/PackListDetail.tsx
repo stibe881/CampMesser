@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "wouter";
+import { Link, useParams } from "wouter";
 import {
   Link2,
   Loader2,
   Package,
   Plus,
+  Printer,
   QrCode,
   Scale,
   Share2,
   Trash2,
+  UserRound,
+  UserRoundPlus,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
@@ -25,6 +28,9 @@ import { familyAddOns } from "@shared/packTemplates";
 import { computePackWeight, formatGrams } from "@shared/packWeight";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { cn } from "@/lib/utils";
+
+/** Filter-Sonderwert: Einträge ohne Personen-Zuordnung. */
+const FILTER_UNASSIGNED = "__unassigned__";
 
 export default function PackListDetailPage() {
   const params = useParams<{ id: string }>();
@@ -44,6 +50,11 @@ export default function PackListDetailPage() {
   const [newCategory, setNewCategory] = useState("");
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  /** null = alle anzeigen, FILTER_UNASSIGNED = ohne Zuordnung, sonst Personenname. */
+  const [personFilter, setPersonFilter] = useState<string | null>(null);
+  /** Eintrag, dessen Personen-Zuordnung gerade bearbeitet wird. */
+  const [assignItemId, setAssignItemId] = useState<number | null>(null);
+  const [assignDraft, setAssignDraft] = useState("");
 
   // QR-Code zum Teil-Link erzeugen: am Platz einfach abscannen lassen statt Link verschicken
   useEffect(() => {
@@ -96,6 +107,34 @@ export default function PackListDetailPage() {
     },
   });
 
+  const assignMutation = trpc.packing.updateItem.useMutation({
+    onMutate: async input => {
+      await utils.packing.items.cancel({ listId });
+      const prev = utils.packing.items.getData({ listId });
+      utils.packing.items.setData({ listId }, old =>
+        old
+          ? {
+              ...old,
+              items: old.items.map(i =>
+                i.id === input.id ? { ...i, assignee: input.assignee } : i
+              ),
+            }
+          : old
+      );
+      return { prev };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) utils.packing.items.setData({ listId }, ctx.prev);
+      toast.error(t.packListDetail.assignFailed);
+    },
+  });
+
+  const assignPerson = (itemId: number, assignee: string | null) => {
+    assignMutation.mutate({ id: itemId, assignee });
+    setAssignItemId(null);
+    setAssignDraft("");
+  };
+
   const addMutation = trpc.packing.addItems.useMutation({
     onSuccess: () => {
       utils.packing.items.invalidate({ listId });
@@ -140,9 +179,38 @@ export default function PackListDetailPage() {
     );
   };
 
+  // Alle bereits vergebenen Personennamen – für Filter-Chips und Vorschläge
+  const assigneeNames = useMemo(() => {
+    const names: string[] = [];
+    for (const item of query.data?.items ?? []) {
+      const name = item.assignee?.trim();
+      if (name && !names.includes(name)) names.push(name);
+    }
+    return names.sort((a, b) => a.localeCompare(b, LOCALE_TAGS[lang]));
+  }, [query.data?.items, lang]);
+
+  // Aktiven Filter zurücksetzen, wenn die letzte Zuordnung dieser Person wegfällt
+  useEffect(() => {
+    if (
+      personFilter !== null &&
+      personFilter !== FILTER_UNASSIGNED &&
+      !assigneeNames.includes(personFilter)
+    ) {
+      setPersonFilter(null);
+    }
+  }, [personFilter, assigneeNames]);
+
+  const matchesPersonFilter = (assignee: string | null) =>
+    personFilter === null ||
+    (personFilter === FILTER_UNASSIGNED
+      ? !assignee
+      : (assignee ?? "").trim() === personFilter);
+
   const generalCategory = t.packListDetail.generalCategory;
   const grouped = useMemo(() => {
-    const items = query.data?.items ?? [];
+    const items = (query.data?.items ?? []).filter(i =>
+      matchesPersonFilter(i.assignee)
+    );
     const map = new Map<string, (typeof items)[number][]>();
     for (const item of items) {
       const key = item.category || generalCategory;
@@ -150,7 +218,8 @@ export default function PackListDetailPage() {
       map.get(key)!.push(item);
     }
     return Array.from(map.entries());
-  }, [query.data?.items, generalCategory]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.data?.items, generalCategory, personFilter]);
 
   // Gewichts-Bilanz über den Namens-Abgleich mit dem Inventar
   const weight = useMemo(
@@ -209,6 +278,13 @@ export default function PackListDetailPage() {
   const items = query.data.items;
   const checkedCount = items.filter(i => i.checked).length;
   const progress = items.length > 0 ? (checkedCount / items.length) * 100 : 0;
+  const filterActive = personFilter !== null;
+  const filteredItems = items.filter(i => matchesPersonFilter(i.assignee));
+  const filteredChecked = filteredItems.filter(i => i.checked).length;
+  const filteredProgress =
+    filteredItems.length > 0
+      ? (filteredChecked / filteredItems.length) * 100
+      : 0;
 
   return (
     <div className="container max-w-3xl py-6">
@@ -221,9 +297,24 @@ export default function PackListDetailPage() {
 
       <div className="mb-2">
         <Progress
-          value={progress}
-          aria-label={t.packListDetail.progressAria(Math.round(progress))}
+          value={filterActive ? filteredProgress : progress}
+          aria-label={
+            filterActive
+              ? t.packListDetail.filterProgressAria(
+                  Math.round(filteredProgress)
+                )
+              : t.packListDetail.progressAria(Math.round(progress))
+          }
         />
+        {filterActive && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            {t.packListDetail.filteredCount(
+              filteredChecked,
+              filteredItems.length
+            )}{" "}
+            · {t.packListDetail.totalCount(checkedCount, items.length)}
+          </p>
+        )}
       </div>
 
       {/* Gewichts-Bilanz aus dem Inventar-Abgleich */}
@@ -257,19 +348,33 @@ export default function PackListDetailPage() {
       )}
       {weight.matchedCount === 0 && <div className="mb-4" />}
 
-      {/* Liste teilen */}
+      {/* Liste teilen & drucken */}
       <div className="mb-6">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => shareMutation.mutate({ listId })}
-          disabled={shareMutation.isPending}
-        >
-          <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          {shareMutation.isPending
-            ? t.packListDetail.shareCreating
-            : t.packListDetail.shareButton}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => shareMutation.mutate({ listId })}
+            disabled={shareMutation.isPending}
+          >
+            <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {shareMutation.isPending
+              ? t.packListDetail.shareCreating
+              : t.packListDetail.shareButton}
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link
+              href={`/packlisten/${listId}/drucken${
+                personFilter && personFilter !== FILTER_UNASSIGNED
+                  ? `?person=${encodeURIComponent(personFilter)}`
+                  : ""
+              }`}
+            >
+              <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.packListDetail.printButton}
+            </Link>
+          </Button>
+        </div>
         {shareUrl && (
           <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
             <Link2
@@ -416,6 +521,45 @@ export default function PackListDetailPage() {
         ))}
       </div>
 
+      {/* Personen-Filter: Wer packt was? */}
+      {assigneeNames.length > 0 && (
+        <div className="mb-5">
+          <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
+            <UserRound className="h-4 w-4 text-primary" aria-hidden="true" />
+            {t.packListDetail.filterTitle}
+          </p>
+          <div
+            className="flex flex-wrap gap-1.5"
+            role="group"
+            aria-label={t.packListDetail.filterGroupAria}
+          >
+            {[
+              { value: null, label: t.packListDetail.filterAll },
+              ...assigneeNames.map(name => ({ value: name, label: name })),
+              {
+                value: FILTER_UNASSIGNED,
+                label: t.packListDetail.filterUnassigned,
+              },
+            ].map(chip => (
+              <button
+                key={chip.value ?? "__all__"}
+                type="button"
+                aria-pressed={personFilter === chip.value}
+                onClick={() => setPersonFilter(chip.value)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  personFilter === chip.value
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-muted/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                )}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Gruppierte Einträge */}
       {grouped.map(([category, categoryItems]) => (
         <div key={category} className="mb-5">
@@ -427,7 +571,7 @@ export default function PackListDetailPage() {
               <li
                 key={item.id}
                 className={cn(
-                  "group flex items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5 transition-colors",
+                  "group flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5 transition-colors",
                   item.checked && "bg-muted/60"
                 )}
               >
@@ -460,6 +604,32 @@ export default function PackListDetailPage() {
                     </span>
                   )}
                 </label>
+                {item.assignee && (
+                  <span className="inline-flex max-w-32 items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
+                    <UserRound
+                      className="h-3 w-3 shrink-0"
+                      aria-hidden="true"
+                    />
+                    <span className="truncate">{item.assignee}</span>
+                  </span>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-muted-foreground/50 hover:text-foreground"
+                  onClick={() => {
+                    if (assignItemId === item.id) {
+                      setAssignItemId(null);
+                    } else {
+                      setAssignItemId(item.id);
+                      setAssignDraft(item.assignee ?? "");
+                    }
+                  }}
+                  aria-label={t.packListDetail.assignButtonAria(item.name)}
+                  aria-expanded={assignItemId === item.id}
+                >
+                  <UserRoundPlus className="h-3.5 w-3.5" aria-hidden="true" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -469,6 +639,61 @@ export default function PackListDetailPage() {
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 </Button>
+                {assignItemId === item.id && (
+                  <form
+                    className="flex w-full flex-wrap items-center gap-2 border-t border-border pt-2"
+                    onSubmit={e => {
+                      e.preventDefault();
+                      const name = assignDraft.trim().slice(0, 80);
+                      if (name) assignPerson(item.id, name);
+                    }}
+                  >
+                    <Input
+                      value={assignDraft}
+                      onChange={e => setAssignDraft(e.target.value)}
+                      placeholder={t.packListDetail.assignPlaceholder}
+                      aria-label={t.packListDetail.assignInputAria(item.name)}
+                      maxLength={80}
+                      autoFocus
+                      className="h-8 w-36 text-sm"
+                    />
+                    <Button
+                      type="submit"
+                      size="sm"
+                      className="h-8"
+                      disabled={!assignDraft.trim()}
+                    >
+                      {t.packListDetail.assignSave}
+                    </Button>
+                    {item.assignee && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-8"
+                        onClick={() => assignPerson(item.id, null)}
+                      >
+                        {t.packListDetail.assignRemove}
+                      </Button>
+                    )}
+                    {assigneeNames
+                      .filter(name => name !== item.assignee)
+                      .map(name => (
+                        <button
+                          key={name}
+                          type="button"
+                          onClick={() => assignPerson(item.id, name)}
+                          className="rounded-full border border-border bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                          aria-label={t.packListDetail.assignSuggestionAria(
+                            name,
+                            item.name
+                          )}
+                        >
+                          {name}
+                        </button>
+                      ))}
+                  </form>
+                )}
               </li>
             ))}
           </ul>
@@ -478,6 +703,12 @@ export default function PackListDetailPage() {
       {items.length === 0 && (
         <p className="py-8 text-center text-muted-foreground">
           {t.packListDetail.emptyList}
+        </p>
+      )}
+
+      {items.length > 0 && filterActive && filteredItems.length === 0 && (
+        <p className="py-8 text-center text-muted-foreground">
+          {t.packListDetail.filterEmpty}
         </p>
       )}
     </div>

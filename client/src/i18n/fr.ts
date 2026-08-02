@@ -270,6 +270,41 @@ export const fr: Translation = {
     deleteItemAria: name => `Supprimer ${name}`,
     emptyList:
       "Cette liste est encore vide – ajoute ta première entrée ci-dessus.",
+    assignFailed: "Échec de l'attribution",
+    assignButtonAria: name => `Attribuer ${name} à une personne`,
+    assignInputAria: name => `Personne qui emballe ${name}`,
+    assignPlaceholder: "Nom (p. ex. Maman)",
+    assignSave: "Attribuer",
+    assignRemove: "Retirer l'attribution",
+    assignSuggestionAria: (person, item) => `Attribuer ${item} à ${person}`,
+    filterTitle: "Qui emballe quoi ?",
+    filterGroupAria: "Filtrer les entrées par personne",
+    filterAll: "Tous",
+    filterUnassigned: "Sans attribution",
+    filterEmpty: "Aucune entrée pour ce filtre.",
+    filteredCount: (checked, total) =>
+      `Dans le filtre : ${checked} sur ${total} emballés`,
+    totalCount: (checked, total) => `Au total : ${checked} sur ${total}`,
+    filterProgressAria: pct =>
+      `Progression dans le filtre : ${pct} pour cent emballé`,
+    printButton: "Imprimer",
+  },
+  packListPrint: {
+    docTitle: name => `${name} – liste de bagages à imprimer`,
+    docTitleFallback: "Liste de bagages",
+    appTitle: "CampMesser – le couteau suisse du camping sous tente",
+    notFound: "Cette liste de bagages est introuvable.",
+    printButton: "Imprimer / Enregistrer en PDF",
+    printBrowserHint:
+      "Dans l'app installée, le bouton ouvre la vue dans le navigateur – imprime ou enregistre en PDF depuis son menu.",
+    headerKicker: "CampMesser · Liste de bagages",
+    meta: (items, categories) =>
+      `${items} ${items === 1 ? "entrée" : "entrées"} · ${categories} ${categories === 1 ? "catégorie" : "catégories"}`,
+    printedOn: date => `État : ${date}`,
+    personFilterInfo: name => `Seulement les entrées de ${name}`,
+    emptyList: "Cette liste ne contient aucune entrée.",
+    footer:
+      "Rien d'oublié – bon voyage ! · CampMesser – le couteau suisse du camping sous tente",
   },
   sharedPackList: {
     loadingShared: "Chargement de la liste partagée …",
@@ -398,6 +433,26 @@ export const fr: Translation = {
     forecast7: "Prévisions à 7 jours",
     dataSource:
       "Source des données : Open-Meteo (meilleure résolution disponible pour ta position, en Suisse MétéoSuisse ICON-CH). Les alertes sont calculées à partir des prévisions et ne remplacent pas les alertes officielles de MétéoSuisse.",
+    compareButton: "Comparer avec un autre lieu",
+    compareTitle: "Comparer des lieux",
+    compareAria: "Comparaison météo de deux lieux",
+    compareCloseAria: "Fermer la comparaison",
+    compareSearchLabel: "Chercher un deuxième lieu",
+    compareSearchPlaceholder: "p. ex. Bellinzone ou Fiesch",
+    compareSearchButton: "Chercher",
+    compareSearchingAria: "Recherche de lieu en cours",
+    compareSearchFailed: "La recherche de lieu a échoué – réessaie plus tard.",
+    compareNoResults: "Aucun lieu trouvé – vérifie l'orthographe.",
+    compareResultsAria: "Lieux trouvés",
+    compareSpotsLabel: "Ou choisir un emplacement enregistré :",
+    compareChange: "Changer de lieu",
+    compareLoadingAria: "Chargement des prévisions de comparaison",
+    compareLoadFailed:
+      "Impossible de charger les prévisions du lieu de comparaison.",
+    compareCaption: (a, b) => `Comparaison à 7 jours : ${a} et ${b}`,
+    compareDayHeader: "Jour",
+    compareSrRain: "Pluie",
+    compareSrWind: "Rafales",
   },
   water: {
     title: "Calculateur d'eau potable",
@@ -960,6 +1015,21 @@ export const fr: Translation = {
     qrText:
       "Fais scanner le code avec l'appareil photo du téléphone – le dossier de l'emplacement s'ouvre immédiatement, sans saisie ni connexion.",
     tentFinderLink: "Retrouver la tente",
+    climateTitle: "Meilleure période de voyage",
+    climateIntro:
+      "Valeurs mensuelles issues de cinq ans d'archives météo : maximales et minimales moyennes ainsi que jours de pluie par mois à cet emplacement.",
+    climateLoadingAria: "Chargement des données climatiques",
+    climateFailed: "Impossible de charger les données climatiques.",
+    climateRetry: "Réessayer",
+    climateBestTitle: "Meilleurs mois :",
+    climateChartMax: "Max. journalier moyen",
+    climateChartMin: "Min. journalier moyen",
+    climateChartRain: "Jours de pluie",
+    climateDaysUnit: "jours",
+    climateLegend:
+      "Lignes = maximum/minimum journalier moyen (°C, axe gauche) · Barres = jours de pluie par mois (plus de 1 mm, axe droit).",
+    climateSource: (from, to) =>
+      `Source : archives météo Open-Meteo, années ${from}–${to}. Meilleurs mois = les plus chauds avec le moins de jours de pluie.`,
   },
   tentFinder: {
     title: "Retrouve-tente",

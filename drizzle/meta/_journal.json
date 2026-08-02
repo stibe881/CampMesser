@@ -162,6 +162,13 @@
       "when": 1785663985312,
       "tag": "0022_sweet_deadpool",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1785666028239,
+      "tag": "0023_sudden_moon_knight",
+      "breakpoints": true
     }
   ]
 }

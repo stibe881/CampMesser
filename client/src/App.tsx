@@ -22,6 +22,7 @@ const pageLoaders = {
   SunCompass: () => import("./pages/SunCompass"),
   PackLists: () => import("./pages/PackLists"),
   PackListDetail: () => import("./pages/PackListDetail"),
+  PackListPrint: () => import("./pages/PackListPrint"),
   Inventory: () => import("./pages/Inventory"),
   FirstAid: () => import("./pages/FirstAid"),
   Knots: () => import("./pages/Knots"),
@@ -85,6 +86,7 @@ const SosPage = lazyWithRetry(pageLoaders.Sos);
 const SunCompassPage = lazyWithRetry(pageLoaders.SunCompass);
 const PackListsPage = lazyWithRetry(pageLoaders.PackLists);
 const PackListDetailPage = lazyWithRetry(pageLoaders.PackListDetail);
+const PackListPrintPage = lazyWithRetry(pageLoaders.PackListPrint);
 const InventoryPage = lazyWithRetry(pageLoaders.Inventory);
 const FirstAidPage = lazyWithRetry(pageLoaders.FirstAid);
 const KnotsPage = lazyWithRetry(pageLoaders.Knots);
@@ -134,6 +136,11 @@ function Router() {
           <Route path={"/sos"} component={SosPage} />
           <Route path={"/sonne"} component={SunCompassPage} />
           <Route path={"/packlisten"} component={PackListsPage} />
+          {/* Druckroute VOR der Detail-Route, sonst fängt :id auch «drucken» ab */}
+          <Route
+            path={"/packlisten/:id/drucken"}
+            component={PackListPrintPage}
+          />
           <Route path={"/packlisten/:id"} component={PackListDetailPage} />
           <Route path={"/inventar"} component={InventoryPage} />
           <Route path={"/erste-hilfe"} component={FirstAidPage} />

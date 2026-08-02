@@ -8,6 +8,7 @@ import { useI18n } from "@/i18n";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { customHuntDbId, customHuntToScavengerHunt } from "@/lib/customHunts";
+import { isStandaloneApp } from "@/lib/standalone";
 
 /**
  * Druckfreundliche Ansicht einer Schnitzeljagd: Stationen, Rätsel und
@@ -15,17 +16,6 @@ import { customHuntDbId, customHuntToScavengerHunt } from "@/lib/customHunts";
  * auf die Suche gehen können. PDF entsteht über den Browser-Druckdialog.
  * Unterstützt eingebaute und eigene Jagden (IDs mit «eigene-»-Präfix).
  */
-/**
- * In der installierten PWA (Standalone-Modus) ist window.print() auf Android
- * und iOS wirkungslos – dort öffnen wir die Ansicht stattdessen in einem
- * echten Browser-Tab, wo der Druckdialog («Als PDF sichern») funktioniert.
- */
-function isStandaloneApp(): boolean {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true
-  );
-}
 
 export default function HuntPrintPage() {
   const { lang, t } = useI18n();
