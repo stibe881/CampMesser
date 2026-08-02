@@ -964,6 +964,61 @@ export const fr: Translation = {
     empty:
       "Pas encore d'entrées – note ci-dessus ton premier séjour en camping.",
   },
+  firstAid: {
+    title: "Guide de premiers secours",
+    subtitle:
+      "Guide compact pour les blessures typiques en plein air – entièrement disponible hors ligne.",
+    offlineNote:
+      "Tous les contenus sont enregistrés dans l'app et utilisables sans connexion Internet.",
+    filterAria: "Filtrer par gravité",
+    filterAll: "Tous les sujets",
+    severity: {
+      leicht: "léger",
+      mittel: "moyen",
+      ernst: "grave",
+    },
+    recognizeTitle: "Reconnaître",
+    helpTitle: "Comment aider",
+    disclaimer:
+      "Remarque : ce guide ne remplace ni un avis médical ni un cours de premiers secours. En cas de doute, toujours appeler le 112 ou la Rega au 1414.",
+  },
+  knots: {
+    title: "Bibliothèque de nœuds",
+    subtitle:
+      "Les nœuds outdoor les plus importants avec des instructions pas à pas – disponibles hors ligne.",
+    offlineNote:
+      "Toutes les instructions sont enregistrées dans l'app et utilisables sans connexion Internet.",
+    quizTitle: "Quiz des nœuds",
+    quizStartAria: "Démarrer le quiz des nœuds",
+    quizTeaser: "8 situations, 4 réponses – quel est le bon nœud ?",
+    quizDescription:
+      "Quel nœud convient à la situation ? Entraîne-toi jusqu'à ce que les gestes soient acquis.",
+    quizProgressAria: "Progression du quiz",
+    questionOf: (current, total) => `Question ${current} sur ${total}`,
+    points: n => `${n} points`,
+    answerAria: option => `Réponse : ${option}`,
+    resultLine: (score, total) => `${score} sur ${total} justes !`,
+    resultPerfect:
+      "Pro des nœuds ! Il ne manque plus que l'entraînement avec une vraie corde.",
+    resultGood:
+      "Solide ! Revois les nœuds manqués dans la bibliothèque ci-dessous.",
+    resultTryAgain:
+      "Pas de souci – la bibliothèque ci-dessous explique chaque nœud pas à pas.",
+    newRound: "Nouvelle partie",
+    finish: "Terminer",
+    showResult: "Afficher le résultat",
+    nextQuestion: "Question suivante",
+    filterAria: "Filtrer par catégorie",
+    filterAll: "Tous",
+    difficultyAria: level => `Difficulté ${level} sur 3`,
+    openAria: name => `Ouvrir les instructions pour ${name}`,
+    cardImageAlt: name => `Instructions pas à pas : ${name}`,
+    detailImageAlt: name => `Image pas à pas : faire le ${name}`,
+    alsoKnownAs: name => `aussi : ${name}`,
+    campingTitle: "En camping",
+    stepsTitle: "Pas à pas",
+    proTipTitle: "Astuce de pro",
+  },
   notFound: {
     heading: "Page introuvable",
     text1: "Cette page n'existe malheureusement pas.",

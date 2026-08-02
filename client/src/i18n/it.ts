@@ -955,6 +955,60 @@ export const it: Translation = {
     empty:
       "Ancora nessuna voce – annota qui sopra il tuo primo soggiorno in campeggio.",
   },
+  firstAid: {
+    title: "Guida di primo soccorso",
+    subtitle:
+      "Guida compatta per gli infortuni tipici all'aria aperta – completamente disponibile offline.",
+    offlineNote:
+      "Tutti i contenuti sono salvati nell'app e utilizzabili senza connessione a Internet.",
+    filterAria: "Filtra per gravità",
+    filterAll: "Tutti i temi",
+    severity: {
+      leicht: "lieve",
+      mittel: "medio",
+      ernst: "grave",
+    },
+    recognizeTitle: "Riconoscere",
+    helpTitle: "Come aiutare",
+    disclaimer:
+      "Nota: questa guida non sostituisce né un consulto medico né un corso di primo soccorso. Nel dubbio, chiamare sempre il 112 o la Rega al 1414.",
+  },
+  knots: {
+    title: "Biblioteca dei nodi",
+    subtitle:
+      "I nodi outdoor più importanti con istruzioni passo per passo – disponibili offline.",
+    offlineNote:
+      "Tutte le istruzioni sono salvate nell'app e utilizzabili senza connessione a Internet.",
+    quizTitle: "Quiz dei nodi",
+    quizStartAria: "Avvia il quiz dei nodi",
+    quizTeaser: "8 situazioni, 4 risposte – qual è il nodo giusto?",
+    quizDescription:
+      "Quale nodo si adatta alla situazione? Esercitati finché i gesti non sono automatici.",
+    quizProgressAria: "Avanzamento del quiz",
+    questionOf: (current, total) => `Domanda ${current} di ${total}`,
+    points: n => `${n} punti`,
+    answerAria: option => `Risposta: ${option}`,
+    resultLine: (score, total) => `${score} su ${total} giuste!`,
+    resultPerfect:
+      "Esperto di nodi! Ora manca solo l'esercizio con una corda vera.",
+    resultGood: "Solido! Riguarda i nodi sbagliati nella biblioteca qui sotto.",
+    resultTryAgain:
+      "Nessun problema – la biblioteca qui sotto spiega ogni nodo passo per passo.",
+    newRound: "Nuova partita",
+    finish: "Fine",
+    showResult: "Mostra il risultato",
+    nextQuestion: "Prossima domanda",
+    filterAria: "Filtra per categoria",
+    filterAll: "Tutti",
+    difficultyAria: level => `Difficoltà ${level} di 3`,
+    openAria: name => `Apri le istruzioni per ${name}`,
+    cardImageAlt: name => `Istruzioni passo per passo: ${name}`,
+    detailImageAlt: name => `Immagine passo per passo: fare il nodo ${name}`,
+    alsoKnownAs: name => `anche: ${name}`,
+    campingTitle: "In campeggio",
+    stepsTitle: "Passo per passo",
+    proTipTitle: "Consiglio da pro",
+  },
   notFound: {
     heading: "Pagina non trovata",
     text1: "Questa pagina purtroppo non esiste.",

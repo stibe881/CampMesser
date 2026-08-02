@@ -31,15 +31,17 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 - [x] Spots, SpotDetail, SharedSpot, Trips (shared/trips.ts: computeTripStats
       mit lang-Parameter für die Orts-Sortierung; obstacles/obstacleProfiles
       enthalten keine Anzeigetexte)
-- [ ] FirstAid, Knots (+Quiz), Nature, Recipes (+Editor), Food
+- [x] FirstAid, Knots (+Quiz; knotQuiz.ts mit lang-Parameter, Kategorien als
+      Schlüssel + `knotCategoryLabels`-L4 in data/knots.ts)
+- [ ] Nature, Recipes (+Editor), Food
 - [ ] Family (+Editoren), HuntPrint
 - [x] NotFound, ErrorBoundary, LoginPrompt, PageHeader-Verwendungen
 
 ### Inhalts-Daten (L4)
 
 - [x] data/modules.ts (Titel/Beschreibungen)
-- [ ] data/firstAid.ts (10 Themen)
-- [ ] data/knots.ts (8 Knoten)
+- [x] data/firstAid.ts (10 Themen)
+- [x] data/knots.ts (8 Knoten)
 - [ ] data/nature.ts (16 Einträge + Kategorien)
 - [ ] data/recipes.ts (18 Rezepte inkl. Zutaten/Schritte)
 - [ ] data/familyActivities.ts (6 Jagden, Quizze)

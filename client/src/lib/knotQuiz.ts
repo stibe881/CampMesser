@@ -1,9 +1,11 @@
 /**
  * Knoten-Quiz: baut aus der Knoten-Bibliothek Karteikarten-Fragen
  * («Situation → welcher Knoten?»). RNG ist injizierbar, damit die Logik
- * deterministisch testbar bleibt.
+ * deterministisch testbar bleibt. Alle Texte werden in der gewünschten
+ * Sprache aus den L4-Daten gepickt (Default Deutsch).
  */
 import type { Knot } from "@/data/knots";
+import { pick, type Language } from "@shared/i18n";
 
 export interface KnotQuizQuestion {
   /** Die Situation, z. B. «Tarp zwischen zwei Bäumen spannen» */
@@ -30,28 +32,30 @@ function shuffle<T>(list: T[], rng: () => number): T[] {
 export function buildKnotQuiz(
   all: Knot[],
   count = 8,
-  rng: () => number = Math.random
+  rng: () => number = Math.random,
+  lang: Language = "de"
 ): KnotQuizQuestion[] {
   if (all.length < 4) return [];
   return shuffle(all, rng)
     .slice(0, count)
     .map(knot => {
       // Situation abwechselnd aus dem Camping-Einsatz oder dem Anwendungsfall
-      const prompt = rng() < 0.5 ? knot.campingUse : knot.useCase;
+      const prompt = pick(rng() < 0.5 ? knot.campingUse : knot.useCase, lang);
       const wrong = shuffle(
         all.filter(k => k.id !== knot.id),
         rng
       )
         .slice(0, 3)
-        .map(k => k.name);
-      const options = shuffle([knot.name, ...wrong], rng);
+        .map(k => pick(k.name, lang));
+      const name = pick(knot.name, lang);
+      const options = shuffle([name, ...wrong], rng);
       return {
         prompt,
         options,
-        correctIndex: options.indexOf(knot.name),
+        correctIndex: options.indexOf(name),
         knotId: knot.id,
-        knotName: knot.name,
-        proTip: knot.proTip,
+        knotName: name,
+        proTip: pick(knot.proTip, lang),
       };
     });
 }

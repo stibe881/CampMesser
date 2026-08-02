@@ -6,7 +6,7 @@
  * als auch künftige L4-Felder korrekt in der aktiven Sprache landen.
  */
 import { firstAidTopics } from "@/data/firstAid";
-import { knots } from "@/data/knots";
+import { knotCategoryLabels, knots } from "@/data/knots";
 import { groupLabels, modules } from "@/data/modules";
 import { natureEntries } from "@/data/nature";
 import { recipes } from "@/data/recipes";
@@ -119,7 +119,7 @@ function buildIndex(lang: Language): IndexEntry[] {
   for (const k of knots) {
     add(`knot-${k.id}`, p(k.name), "knots", "/knoten", p(k.useCase), [
       k.altName ? p(k.altName) : undefined,
-      p(k.category),
+      p(knotCategoryLabels[k.category]),
       p(k.useCase),
       p(k.campingUse),
       ...k.steps.map(s => p(s)),

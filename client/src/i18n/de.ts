@@ -961,6 +961,64 @@ export const de = {
     empty:
       "Noch keine Einträge – halte oben deinen ersten Camping-Aufenthalt fest.",
   },
+  firstAid: {
+    title: "Erste-Hilfe-Guide",
+    subtitle:
+      "Kompakter Ratgeber für typische Outdoor-Verletzungen – vollständig offline verfügbar.",
+    offlineNote:
+      "Alle Inhalte sind in der App gespeichert und ohne Internetverbindung nutzbar.",
+    filterAria: "Nach Schweregrad filtern",
+    filterAll: "Alle Themen",
+    severity: {
+      leicht: "leicht",
+      mittel: "mittel",
+      ernst: "ernst",
+    },
+    recognizeTitle: "Erkennen",
+    helpTitle: "So hilfst du",
+    disclaimer:
+      "Hinweis: Dieser Guide ersetzt keine ärztliche Beratung und keinen Erste-Hilfe-Kurs. Im Zweifel immer den Notruf 112 oder die Rega 1414 kontaktieren.",
+  },
+  knots: {
+    title: "Knoten-Bibliothek",
+    subtitle:
+      "Die wichtigsten Outdoor-Knoten mit Schritt-für-Schritt-Anleitungen – offline verfügbar.",
+    offlineNote:
+      "Alle Anleitungen sind in der App gespeichert und ohne Internetverbindung nutzbar.",
+    quizTitle: "Knoten-Quiz",
+    quizStartAria: "Knoten-Quiz starten",
+    quizTeaser: "8 Situationen, 4 Antworten – welcher Knoten ist der richtige?",
+    quizDescription:
+      "Welcher Knoten passt zur Situation? Übe, bis die Griffe sitzen.",
+    quizProgressAria: "Quiz-Fortschritt",
+    questionOf: (current: number, total: number) =>
+      `Frage ${current} von ${total}`,
+    points: (n: number) => `${n} Punkte`,
+    answerAria: (option: string) => `Antwort: ${option}`,
+    resultLine: (score: number, total: number) =>
+      `${score} von ${total} richtig!`,
+    resultPerfect:
+      "Knoten-Profi! Jetzt fehlt nur noch die Übung mit echtem Seil.",
+    resultGood:
+      "Solide! Schau dir die verpassten Knoten in der Bibliothek nochmal an.",
+    resultTryAgain:
+      "Kein Problem – die Bibliothek unten erklärt jeden Knoten Schritt für Schritt.",
+    newRound: "Neue Runde",
+    finish: "Fertig",
+    showResult: "Ergebnis anzeigen",
+    nextQuestion: "Nächste Frage",
+    filterAria: "Nach Kategorie filtern",
+    filterAll: "Alle",
+    difficultyAria: (level: number) => `Schwierigkeit ${level} von 3`,
+    openAria: (name: string) => `Anleitung für ${name} öffnen`,
+    cardImageAlt: (name: string) => `Schritt-für-Schritt-Anleitung: ${name}`,
+    detailImageAlt: (name: string) =>
+      `Schritt-für-Schritt-Bild: ${name} binden`,
+    alsoKnownAs: (name: string) => `auch: ${name}`,
+    campingTitle: "Beim Camping",
+    stepsTitle: "Schritt für Schritt",
+    proTipTitle: "Profi-Tipp",
+  },
   notFound: {
     heading: "Seite nicht gefunden",
     text1: "Diese Seite gibt es leider nicht.",

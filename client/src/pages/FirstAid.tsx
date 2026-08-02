@@ -24,7 +24,9 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { firstAidTopics, type FirstAidTopic } from "@/data/firstAid";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
+import { pick } from "@shared/i18n";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Bug,
@@ -47,31 +49,28 @@ const severityStyle: Record<FirstAidTopic["severity"], string> = {
 };
 
 export default function FirstAidPage() {
+  const { lang, t } = useI18n();
   const [filter, setFilter] = useState<"alle" | FirstAidTopic["severity"]>(
     "alle"
   );
   const topics =
     filter === "alle"
       ? firstAidTopics
-      : firstAidTopics.filter(t => t.severity === filter);
+      : firstAidTopics.filter(topic => topic.severity === filter);
 
   return (
     <div className="container max-w-3xl py-6">
-      <PageHeader
-        title="Erste-Hilfe-Guide"
-        subtitle="Kompakter Ratgeber für typische Outdoor-Verletzungen – vollständig offline verfügbar."
-      />
+      <PageHeader title={t.firstAid.title} subtitle={t.firstAid.subtitle} />
 
       <div className="mb-4 flex items-center gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
         <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
-        Alle Inhalte sind in der App gespeichert und ohne Internetverbindung
-        nutzbar.
+        {t.firstAid.offlineNote}
       </div>
 
       <div
         className="mb-6 flex flex-wrap gap-2"
         role="group"
-        aria-label="Nach Schweregrad filtern"
+        aria-label={t.firstAid.filterAria}
       >
         {(["alle", "leicht", "mittel", "ernst"] as const).map(s => (
           <button
@@ -86,7 +85,7 @@ export default function FirstAidPage() {
             )}
             aria-pressed={filter === s}
           >
-            {s === "alle" ? "Alle Themen" : s}
+            {s === "alle" ? t.firstAid.filterAll : t.firstAid.severity[s]}
           </button>
         ))}
       </div>
@@ -106,51 +105,56 @@ export default function FirstAidPage() {
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </span>
                   <div>
-                    <p className="font-semibold">{topic.title}</p>
+                    <p className="font-semibold">{pick(topic.title, lang)}</p>
                     <Badge
                       className={cn(
                         "mt-0.5 capitalize",
                         severityStyle[topic.severity]
                       )}
                     >
-                      {topic.severity}
+                      {t.firstAid.severity[topic.severity]}
                     </Badge>
                   </div>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
                 <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-                  {topic.summary}
+                  {pick(topic.summary, lang)}
                 </p>
 
                 <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  Erkennen
+                  {t.firstAid.recognizeTitle}
                 </h3>
                 <ul className="mb-4 space-y-1 text-sm">
-                  {topic.symptoms.map(s => (
-                    <li key={s} className="flex gap-2">
-                      <span
-                        className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
-                        aria-hidden="true"
-                      />
-                      {s}
-                    </li>
-                  ))}
+                  {topic.symptoms.map(s => {
+                    const text = pick(s, lang);
+                    return (
+                      <li key={text} className="flex gap-2">
+                        <span
+                          className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                          aria-hidden="true"
+                        />
+                        {text}
+                      </li>
+                    );
+                  })}
                 </ul>
 
                 <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  So hilfst du
+                  {t.firstAid.helpTitle}
                 </h3>
                 <ol className="mb-4 space-y-2.5">
                   {topic.steps.map((step, i) => (
-                    <li key={step.title} className="flex gap-3">
+                    <li key={step.title.de} className="flex gap-3">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                         {i + 1}
                       </span>
                       <div>
-                        <p className="text-sm font-semibold">{step.title}</p>
+                        <p className="text-sm font-semibold">
+                          {pick(step.title, lang)}
+                        </p>
                         <p className="text-sm text-muted-foreground">
-                          {step.text}
+                          {pick(step.text, lang)}
                         </p>
                       </div>
                     </li>
@@ -162,7 +166,9 @@ export default function FirstAidPage() {
                     className="h-4 w-4 shrink-0 text-destructive"
                     aria-hidden="true"
                   />
-                  <p className="text-sm text-foreground">{topic.warning}</p>
+                  <p className="text-sm text-foreground">
+                    {pick(topic.warning, lang)}
+                  </p>
                 </div>
 
                 {topic.kidNote && (
@@ -171,7 +177,7 @@ export default function FirstAidPage() {
                       className="h-4 w-4 shrink-0 text-primary"
                       aria-hidden="true"
                     />
-                    <p className="text-sm">{topic.kidNote}</p>
+                    <p className="text-sm">{pick(topic.kidNote, lang)}</p>
                   </div>
                 )}
               </AccordionContent>
@@ -181,9 +187,7 @@ export default function FirstAidPage() {
       </Accordion>
 
       <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
-        Hinweis: Dieser Guide ersetzt keine ärztliche Beratung und keinen
-        Erste-Hilfe-Kurs. Im Zweifel immer den Notruf 112 oder die Rega 1414
-        kontaktieren.
+        {t.firstAid.disclaimer}
       </p>
     </div>
   );

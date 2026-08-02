@@ -18,14 +18,22 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { knots, type Knot } from "@/data/knots";
+import {
+  knotCategoryLabels,
+  knots,
+  type Knot,
+  type KnotCategory,
+} from "@/data/knots";
+import { useI18n } from "@/i18n";
 import { buildKnotQuiz, type KnotQuizQuestion } from "@/lib/knotQuiz";
 import { cn } from "@/lib/utils";
+import { pick } from "@shared/i18n";
 
 /** Übungsmodus: «Welcher Knoten passt zur Situation?» als Karteikarten-Quiz. */
 function KnotQuizDialog({ onClose }: { onClose: () => void }) {
+  const { lang, t } = useI18n();
   const [questions, setQuestions] = useState<KnotQuizQuestion[]>(() =>
-    buildKnotQuiz(knots, 8)
+    buildKnotQuiz(knots, 8, Math.random, lang)
   );
   const [current, setCurrent] = useState(0);
   const [answered, setAnswered] = useState<number | null>(null);
@@ -35,7 +43,7 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
   const question = questions[current];
 
   const restart = () => {
-    setQuestions(buildKnotQuiz(knots, 8));
+    setQuestions(buildKnotQuiz(knots, 8, Math.random, lang));
     setCurrent(0);
     setAnswered(null);
     setScore(0);
@@ -45,10 +53,10 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
   return (
     <DialogContent className="max-h-[85vh] overflow-y-auto">
       <DialogHeader>
-        <DialogTitle className="font-serif text-xl">Knoten-Quiz</DialogTitle>
-        <DialogDescription>
-          Welcher Knoten passt zur Situation? Übe, bis die Griffe sitzen.
-        </DialogDescription>
+        <DialogTitle className="font-serif text-xl">
+          {t.knots.quizTitle}
+        </DialogTitle>
+        <DialogDescription>{t.knots.quizDescription}</DialogDescription>
       </DialogHeader>
 
       {finished ? (
@@ -58,36 +66,34 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
             aria-hidden="true"
           />
           <p className="font-serif text-2xl font-bold">
-            {score} von {questions.length} richtig!
+            {t.knots.resultLine(score, questions.length)}
           </p>
           <p className="text-sm text-muted-foreground">
             {score === questions.length
-              ? "Knoten-Profi! Jetzt fehlt nur noch die Übung mit echtem Seil."
+              ? t.knots.resultPerfect
               : score >= questions.length / 2
-                ? "Solide! Schau dir die verpassten Knoten in der Bibliothek nochmal an."
-                : "Kein Problem – die Bibliothek unten erklärt jeden Knoten Schritt für Schritt."}
+                ? t.knots.resultGood
+                : t.knots.resultTryAgain}
           </p>
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1" onClick={restart}>
               <RotateCcw className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              Neue Runde
+              {t.knots.newRound}
             </Button>
             <Button className="flex-1" onClick={onClose}>
-              Fertig
+              {t.knots.finish}
             </Button>
           </div>
         </div>
       ) : (
         <div className="space-y-4">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>
-              Frage {current + 1} von {questions.length}
-            </span>
-            <span>{score} Punkte</span>
+            <span>{t.knots.questionOf(current + 1, questions.length)}</span>
+            <span>{t.knots.points(score)}</span>
           </div>
           <Progress
             value={(current / questions.length) * 100}
-            aria-label="Quiz-Fortschritt"
+            aria-label={t.knots.quizProgressAria}
           />
           <p className="font-semibold">{question.prompt}</p>
           <div className="space-y-2">
@@ -120,7 +126,7 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
                       !isCorrect &&
                       "border-border opacity-60"
                   )}
-                  aria-label={`Antwort: ${option}`}
+                  aria-label={t.knots.answerAria(option)}
                 >
                   {option}
                   {answered !== null && isCorrect && (
@@ -152,8 +158,8 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
                 }}
               >
                 {current + 1 >= questions.length
-                  ? "Ergebnis anzeigen"
-                  : "Nächste Frage"}
+                  ? t.knots.showResult
+                  : t.knots.nextQuestion}
               </Button>
             </>
           )}
@@ -164,19 +170,16 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
 }
 
 const categories = [
-  "Alle",
-  "Befestigen",
-  "Spannen",
-  "Verbinden",
-  "Schlaufen",
+  "alle",
+  "befestigen",
+  "spannen",
+  "verbinden",
+  "schlaufen",
 ] as const;
 
-function DifficultyDots({ level }: { level: 1 | 2 | 3 }) {
+function DifficultyDots({ level, label }: { level: 1 | 2 | 3; label: string }) {
   return (
-    <span
-      className="flex items-center gap-1"
-      aria-label={`Schwierigkeit ${level} von 3`}
-    >
+    <span className="flex items-center gap-1" aria-label={label}>
       {[1, 2, 3].map(i => (
         <span
           key={i}
@@ -192,24 +195,21 @@ function DifficultyDots({ level }: { level: 1 | 2 | 3 }) {
 }
 
 export default function KnotsPage() {
-  const [category, setCategory] = useState<(typeof categories)[number]>("Alle");
+  const { lang, t } = useI18n();
+  const [category, setCategory] = useState<"alle" | KnotCategory>("alle");
   const [selected, setSelected] = useState<Knot | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
 
   const filtered =
-    category === "Alle" ? knots : knots.filter(k => k.category === category);
+    category === "alle" ? knots : knots.filter(k => k.category === category);
 
   return (
     <div className="container py-6">
-      <PageHeader
-        title="Knoten-Bibliothek"
-        subtitle="Die wichtigsten Outdoor-Knoten mit Schritt-für-Schritt-Anleitungen – offline verfügbar."
-      />
+      <PageHeader title={t.knots.title} subtitle={t.knots.subtitle} />
 
       <div className="mb-4 flex items-center gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
         <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
-        Alle Anleitungen sind in der App gespeichert und ohne Internetverbindung
-        nutzbar.
+        {t.knots.offlineNote}
       </div>
 
       {/* Übungsmodus */}
@@ -217,15 +217,15 @@ export default function KnotsPage() {
         type="button"
         onClick={() => setQuizOpen(true)}
         className="mb-6 flex w-full items-center gap-4 rounded-xl border border-primary/40 bg-accent/40 p-4 text-left transition-all hover:border-primary hover:shadow-md active:scale-[0.99]"
-        aria-label="Knoten-Quiz starten"
+        aria-label={t.knots.quizStartAria}
       >
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <GraduationCap className="h-5.5 w-5.5" aria-hidden="true" />
         </span>
         <span>
-          <span className="block font-semibold">Knoten-Quiz</span>
+          <span className="block font-semibold">{t.knots.quizTitle}</span>
           <span className="mt-0.5 block text-sm text-muted-foreground">
-            8 Situationen, 4 Antworten – welcher Knoten ist der richtige?
+            {t.knots.quizTeaser}
           </span>
         </span>
       </button>
@@ -233,7 +233,7 @@ export default function KnotsPage() {
       <div
         className="mb-6 flex flex-wrap gap-2"
         role="group"
-        aria-label="Nach Kategorie filtern"
+        aria-label={t.knots.filterAria}
       >
         {categories.map(c => (
           <button
@@ -248,46 +248,58 @@ export default function KnotsPage() {
             )}
             aria-pressed={category === c}
           >
-            {c}
+            {c === "alle"
+              ? t.knots.filterAll
+              : pick(knotCategoryLabels[c], lang)}
           </button>
         ))}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map(knot => (
-          <button
-            key={knot.id}
-            type="button"
-            onClick={() => setSelected(knot)}
-            className="flex flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
-            aria-label={`Anleitung für ${knot.name} öffnen`}
-          >
-            {knot.image && (
-              <img
-                src={knot.image}
-                alt={`Schritt-für-Schritt-Anleitung: ${knot.name}`}
-                loading="lazy"
-                className="aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
-              />
-            )}
-            <div className="flex w-full items-center justify-between">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                <Cable className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <DifficultyDots level={knot.difficulty} />
-            </div>
-            <div>
-              <p className="font-semibold">{knot.name}</p>
-              {knot.altName && (
-                <p className="text-xs text-muted-foreground">
-                  auch: {knot.altName}
-                </p>
+        {filtered.map(knot => {
+          const name = pick(knot.name, lang);
+          return (
+            <button
+              key={knot.id}
+              type="button"
+              onClick={() => setSelected(knot)}
+              className="flex flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
+              aria-label={t.knots.openAria(name)}
+            >
+              {knot.image && (
+                <img
+                  src={knot.image}
+                  alt={t.knots.cardImageAlt(name)}
+                  loading="lazy"
+                  className="aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
+                />
               )}
-            </div>
-            <Badge variant="secondary">{knot.category}</Badge>
-            <p className="text-sm text-muted-foreground">{knot.useCase}</p>
-          </button>
-        ))}
+              <div className="flex w-full items-center justify-between">
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                  <Cable className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <DifficultyDots
+                  level={knot.difficulty}
+                  label={t.knots.difficultyAria(knot.difficulty)}
+                />
+              </div>
+              <div>
+                <p className="font-semibold">{name}</p>
+                {knot.altName && (
+                  <p className="text-xs text-muted-foreground">
+                    {t.knots.alsoKnownAs(pick(knot.altName, lang))}
+                  </p>
+                )}
+              </div>
+              <Badge variant="secondary">
+                {pick(knotCategoryLabels[knot.category], lang)}
+              </Badge>
+              <p className="text-sm text-muted-foreground">
+                {pick(knot.useCase, lang)}
+              </p>
+            </button>
+          );
+        })}
       </div>
 
       <Dialog
@@ -299,35 +311,39 @@ export default function KnotsPage() {
             <>
               <DialogHeader>
                 <DialogTitle className="font-serif text-xl">
-                  {selected.name}
+                  {pick(selected.name, lang)}
                   {selected.altName && (
                     <span className="ml-2 text-sm font-normal text-muted-foreground">
-                      ({selected.altName})
+                      ({pick(selected.altName, lang)})
                     </span>
                   )}
                 </DialogTitle>
-                <DialogDescription>{selected.useCase}</DialogDescription>
+                <DialogDescription>
+                  {pick(selected.useCase, lang)}
+                </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4">
                 {selected.image && (
                   <img
                     src={selected.image}
-                    alt={`Schritt-für-Schritt-Bild: ${selected.name} binden`}
+                    alt={t.knots.detailImageAlt(pick(selected.name, lang))}
                     loading="lazy"
                     className="w-full rounded-lg border border-border/60"
                   />
                 )}
                 <div className="rounded-lg bg-accent/60 p-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Beim Camping
+                    {t.knots.campingTitle}
                   </p>
-                  <p className="mt-1 text-sm">{selected.campingUse}</p>
+                  <p className="mt-1 text-sm">
+                    {pick(selected.campingUse, lang)}
+                  </p>
                 </div>
 
                 <div>
                   <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                    Schritt für Schritt
+                    {t.knots.stepsTitle}
                   </h3>
                   <ol className="space-y-2.5">
                     {selected.steps.map((step, i) => (
@@ -335,7 +351,7 @@ export default function KnotsPage() {
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                           {i + 1}
                         </span>
-                        <p className="text-sm">{step}</p>
+                        <p className="text-sm">{pick(step, lang)}</p>
                       </li>
                     ))}
                   </ol>
@@ -343,9 +359,9 @@ export default function KnotsPage() {
 
                 <div className="rounded-lg border border-border bg-muted/50 p-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Profi-Tipp
+                    {t.knots.proTipTitle}
                   </p>
-                  <p className="mt-1 text-sm">{selected.proTip}</p>
+                  <p className="mt-1 text-sm">{pick(selected.proTip, lang)}</p>
                 </div>
               </div>
             </>

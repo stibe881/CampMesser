@@ -940,6 +940,60 @@ export const en: Translation = {
     entriesTitle: "Your stays",
     empty: "No entries yet – record your first camping stay above.",
   },
+  firstAid: {
+    title: "First aid guide",
+    subtitle:
+      "A compact guide to typical outdoor injuries – fully available offline.",
+    offlineNote:
+      "All content is stored in the app and can be used without an internet connection.",
+    filterAria: "Filter by severity",
+    filterAll: "All topics",
+    severity: {
+      leicht: "minor",
+      mittel: "moderate",
+      ernst: "serious",
+    },
+    recognizeTitle: "Recognise",
+    helpTitle: "How to help",
+    disclaimer:
+      "Note: this guide does not replace medical advice or a first aid course. When in doubt, always call 112 or Rega on 1414.",
+  },
+  knots: {
+    title: "Knot library",
+    subtitle:
+      "The most important outdoor knots with step-by-step instructions – available offline.",
+    offlineNote:
+      "All instructions are stored in the app and can be used without an internet connection.",
+    quizTitle: "Knot quiz",
+    quizStartAria: "Start the knot quiz",
+    quizTeaser: "8 situations, 4 answers – which knot is the right one?",
+    quizDescription:
+      "Which knot fits the situation? Practise until the moves stick.",
+    quizProgressAria: "Quiz progress",
+    questionOf: (current, total) => `Question ${current} of ${total}`,
+    points: n => `${n} points`,
+    answerAria: option => `Answer: ${option}`,
+    resultLine: (score, total) => `${score} out of ${total} correct!`,
+    resultPerfect: "Knot pro! All that's left is practising with a real rope.",
+    resultGood:
+      "Solid! Take another look at the knots you missed in the library below.",
+    resultTryAgain:
+      "No problem – the library below explains every knot step by step.",
+    newRound: "New round",
+    finish: "Done",
+    showResult: "Show result",
+    nextQuestion: "Next question",
+    filterAria: "Filter by category",
+    filterAll: "All",
+    difficultyAria: level => `Difficulty ${level} of 3`,
+    openAria: name => `Open instructions for ${name}`,
+    cardImageAlt: name => `Step-by-step instructions: ${name}`,
+    detailImageAlt: name => `Step-by-step image: tying the ${name}`,
+    alsoKnownAs: name => `also: ${name}`,
+    campingTitle: "When camping",
+    stepsTitle: "Step by step",
+    proTipTitle: "Pro tip",
+  },
   notFound: {
     heading: "Page not found",
     text1: "Sorry, this page doesn't exist.",
