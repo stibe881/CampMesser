@@ -548,7 +548,8 @@ function CookingModeDialog({
 
 /** Filter-Schlüssel: «alle» plus die gespeicherten Methoden-Schlüssel. */
 const methodFilters = ["alle", "Gaskocher", "Offenes Feuer"] as const;
-const timeFilters = ["alle", "15", "30"] as const;
+/** Zubereitungszeit-Chips: «Beliebig», ≤ 20 Min. und ≤ 45 Min. (#163). */
+const timeFilters = ["alle", "20", "45"] as const;
 
 export default function RecipesPage() {
   const { lang, t } = useI18n();
@@ -625,7 +626,10 @@ export default function RecipesPage() {
       if (favoritesOnly && !favorites.includes(r.id)) return false;
       if (method !== "alle" && r.method !== method && r.method !== "Beides")
         return false;
-      if (maxTime !== "alle" && r.timeMinutes > Number(maxTime)) return false;
+      // Rezepte ohne (gültige) Zeitangabe bei aktivem Zeit-Filter ausblenden –
+      // die Negation schliesst auch NaN/fehlende Werte aus.
+      if (maxTime !== "alle" && !(r.timeMinutes <= Number(maxTime)))
+        return false;
       if (search.trim()) {
         const q = search.trim().toLowerCase();
         const inName = pick(r.name, lang).toLowerCase().includes(q);
