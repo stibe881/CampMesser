@@ -569,6 +569,49 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteFoodItem(input.id, ctx.user.id)),
   }),
+  push: router({
+    /** Öffentlicher VAPID-Schlüssel (null = Push serverseitig nicht konfiguriert). */
+    vapidKey: publicProcedure.query(async () => {
+      const { pushConfigured } = await import("./push");
+      return pushConfigured()
+        ? { publicKey: process.env.VAPID_PUBLIC_KEY! }
+        : { publicKey: null };
+    }),
+    subscribe: protectedProcedure
+      .input(
+        z.object({
+          endpoint: z.string().min(10).max(500),
+          p256dh: z.string().min(10).max(255),
+          auth: z.string().min(5).max(255),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { saveSubscription } = await import("./push");
+        await saveSubscription(
+          ctx.user.id,
+          input.endpoint,
+          input.p256dh,
+          input.auth
+        );
+        return { success: true } as const;
+      }),
+    unsubscribe: protectedProcedure
+      .input(z.object({ endpoint: z.string().min(10).max(500) }))
+      .mutation(async ({ ctx, input }) => {
+        const { deleteSubscription } = await import("./push");
+        await deleteSubscription(ctx.user.id, input.endpoint);
+        return { success: true } as const;
+      }),
+    status: protectedProcedure
+      .input(z.object({ endpoint: z.string().min(10).max(500) }))
+      .query(async ({ ctx, input }) => {
+        const { hasSubscription } = await import("./push");
+        return {
+          subscribed: await hasSubscription(ctx.user.id, input.endpoint),
+        };
+      }),
+  }),
+
   recipes: router({
     list: protectedProcedure.query(({ ctx }) =>
       db.getCustomRecipes(ctx.user.id)

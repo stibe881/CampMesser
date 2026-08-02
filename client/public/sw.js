@@ -46,6 +46,44 @@ self.addEventListener("message", event => {
   }
 });
 
+// Unwetter-Push: Warnungen für gespeicherte Zeltplätze anzeigen
+self.addEventListener("push", event => {
+  let data = { title: "CampMesser", body: "", url: "/wetter" };
+  try {
+    data = { ...data, ...event.data.json() };
+  } catch {
+    /* Payload nicht lesbar – Standardtext anzeigen */
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: "/icons/icon-192.png",
+      badge: "/icons/favicon-32.png",
+      data: { url: data.url },
+      tag: "campmesser-weather-alert",
+    })
+  );
+});
+
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  const url =
+    (event.notification.data && event.notification.data.url) || "/wetter";
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then(clients => {
+        for (const client of clients) {
+          if ("focus" in client) {
+            client.navigate(url);
+            return client.focus();
+          }
+        }
+        return self.clients.openWindow(url);
+      })
+  );
+});
+
 self.addEventListener("fetch", event => {
   const { request } = event;
   if (request.method !== "GET") return;

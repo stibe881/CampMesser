@@ -175,6 +175,20 @@ Solange die Secrets fehlen, überspringt der Workflow das Deployment mit einem H
 
 Die Anwendung bietet unter `/api/health` einen Health-Endpoint: HTTP 200 mit `{"status":"ok"}`, wenn Prozess und Datenbank erreichbar sind, sonst 503. Richte einen kostenlosen Uptime-Dienst (z. B. UptimeRobot oder Better Stack) auf `https://campmesser.ch/api/health` ein, damit du bei einem Ausfall per E-Mail gewarnt wirst, statt ihn zufällig zu bemerken.
 
+## Unwetter-Push einrichten (optional)
+
+Die App kann Push-Benachrichtigungen senden, wenn an einem gespeicherten Zeltplatz Sturm, Gewitter oder Starkregen droht. Einrichtung:
+
+1. VAPID-Schlüsselpaar erzeugen: `pnpm exec web-push generate-vapid-keys` (auf dem Server im App-Verzeichnis oder lokal). Die beiden Werte als `VAPID_PUBLIC_KEY` und `VAPID_PRIVATE_KEY` in die `.env` eintragen, dazu `VAPID_SUBJECT` (deine Kontakt-Mailadresse) und ein zufälliges `CRON_SECRET`.
+2. Anwendung neu starten. In der App erscheint dann unter **Zeltplatz-Favoriten** der Schalter «Unwetter-Warnungen» – jede Nutzerin aktiviert ihn pro Gerät selbst.
+3. Den Warn-Check regelmässig auslösen (Passenger legt den Node-Prozess schlafen, deshalb per Cronjob): in konsoleH unter **Services → Cronjobs** z. B. stündlich anlegen:
+
+```
+curl -fsS "https://campmesser.ch/api/push/check?secret=DEIN_CRON_SECRET" > /dev/null
+```
+
+Der Endpoint prüft alle Plätze abonnierter Nutzer*innen und sendet pro Warnlage genau eine Benachrichtigung; entspannte Lagen setzen den Zähler zurück. Ungültig gewordene Abos werden automatisch aufgeräumt.
+
 ## Datenbank-Backup
 
 Die App speichert echte Nutzerdaten (Konten, Packlisten, Tagebuch, Einstellungen) – richte deshalb ein regelmässiges Backup ein. Das beiliegende Skript erzeugt einen komprimierten `mysqldump` und behält automatisch die letzten 14 Sicherungen:

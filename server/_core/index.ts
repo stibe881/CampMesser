@@ -142,6 +142,23 @@ async function startServer() {
     }
     res.json({ success: true });
   });
+  // Unwetter-Push-Check: wird vom konsoleH-Cronjob aufgerufen (Passenger
+  // legt den Prozess schlafen, ein interner Scheduler wäre unzuverlässig).
+  // Abgesichert über CRON_SECRET, damit niemand fremde Checks auslösen kann.
+  app.get("/api/push/check", async (req, res) => {
+    const secret = process.env.CRON_SECRET;
+    if (!secret || req.query.secret !== secret) {
+      res.status(403).json({ error: "forbidden" });
+      return;
+    }
+    try {
+      const { checkAndNotify } = await import("../push");
+      const result = await checkAndNotify();
+      res.json({ status: "ok", ...result });
+    } catch (error) {
+      res.status(500).json({ status: "error", message: String(error) });
+    }
+  });
   // tRPC API
   app.use(
     "/api/trpc",

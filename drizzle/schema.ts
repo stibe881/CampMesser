@@ -192,6 +192,30 @@ export const tripLogs = mysqlTable(
 export type TripLog = typeof tripLogs.$inferSelect;
 export type InsertTripLog = typeof tripLogs.$inferInsert;
 
+/** Web-Push-Abos für Unwetter-Warnungen an gespeicherten Zeltplätzen. */
+export const pushSubscriptions = mysqlTable(
+  "pushSubscriptions",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Push-Endpoint des Browsers (eindeutig pro Gerät/Browser) */
+    endpoint: varchar("endpoint", { length: 500 }).notNull(),
+    p256dh: varchar("p256dh", { length: 255 }).notNull(),
+    auth: varchar("auth", { length: 255 }).notNull(),
+    /** Schlüssel der zuletzt gemeldeten Warnlage (verhindert Doppel-Pushes) */
+    lastAlertKey: varchar("lastAlertKey", { length: 255 }),
+    lastNotifiedAt: timestamp("lastNotifiedAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    index("pushSubscriptions_userId").on(table.userId),
+    uniqueIndex("pushSubscriptions_endpoint").on(table.endpoint),
+  ]
+);
+
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
+
 /** Eigene Campingrezepte aus dem Editor im Rezeptbuch. */
 export const customRecipes = mysqlTable(
   "customRecipes",

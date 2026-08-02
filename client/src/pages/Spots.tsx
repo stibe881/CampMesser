@@ -1,6 +1,7 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
+  BellRing,
   Droplets,
   LocateFixed,
   MapIcon,
@@ -12,6 +13,13 @@ import {
   Trash2,
   Wind,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import {
+  getExistingSubscription,
+  pushSupported,
+  subscribeBrowser,
+  unsubscribeBrowser,
+} from "@/lib/pushClient";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -289,6 +297,81 @@ function SpotMapPicker({
   );
 }
 
+/** Opt-in für Unwetter-Push: warnt bei Sturm/Gewitter an gespeicherten Plätzen. */
+function PushOptIn({ hasSpots }: { hasSpots: boolean }) {
+  const vapidQuery = trpc.push.vapidKey.useQuery(undefined, {
+    staleTime: Infinity,
+  });
+  const subscribeMutation = trpc.push.subscribe.useMutation();
+  const unsubscribeMutation = trpc.push.unsubscribe.useMutation();
+  const [enabled, setEnabled] = useState<boolean | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!pushSupported()) {
+      setEnabled(false);
+      return;
+    }
+    getExistingSubscription()
+      .then(sub => setEnabled(Boolean(sub)))
+      .catch(() => setEnabled(false));
+  }, []);
+
+  // Ausblenden, wenn der Browser kein Push kann oder der Server keine
+  // VAPID-Schlüssel konfiguriert hat (siehe DEPLOYMENT-HETZNER.md)
+  if (!pushSupported() || !vapidQuery.data?.publicKey) return null;
+
+  const toggle = async (next: boolean) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (next) {
+        const sub = await subscribeBrowser(vapidQuery.data!.publicKey!);
+        await subscribeMutation.mutateAsync(sub);
+        setEnabled(true);
+        toast.success(
+          "Unwetter-Warnungen aktiviert – du wirst bei Sturm oder Gewitter an deinen Plätzen benachrichtigt"
+        );
+      } else {
+        const endpoint = await unsubscribeBrowser();
+        if (endpoint) await unsubscribeMutation.mutateAsync({ endpoint });
+        setEnabled(false);
+        toast.success("Unwetter-Warnungen deaktiviert");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Aktion fehlgeschlagen"
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Card className="mb-5">
+      <CardContent className="flex items-center justify-between gap-3 pt-5">
+        <div className="min-w-0">
+          <p className="flex items-center gap-1.5 text-sm font-semibold">
+            <BellRing className="h-4 w-4 text-primary" aria-hidden="true" />
+            Unwetter-Warnungen für deine Plätze
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Push-Benachrichtigung bei Sturm, Gewitter oder Starkregen an einem
+            deiner gespeicherten Zeltplätze.
+            {!hasSpots && " Speichere zuerst einen Zeltplatz."}
+          </p>
+        </div>
+        <Switch
+          checked={enabled ?? false}
+          disabled={busy || enabled === null}
+          onCheckedChange={toggle}
+          aria-label="Unwetter-Warnungen für gespeicherte Zeltplätze aktivieren"
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function SpotsPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const utils = trpc.useUtils();
@@ -395,6 +478,8 @@ export default function SpotsPage() {
             <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
             Zeltplatz hinzufügen
           </Button>
+
+          <PushOptIn hasSpots={(spots?.length ?? 0) > 0} />
 
           {isLoading && (
             <div className="space-y-3">
