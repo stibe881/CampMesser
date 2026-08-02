@@ -119,6 +119,23 @@ export function migrateTargets(
   return { targets, changed: true };
 }
 
+/**
+ * Ziel umbenennen: neuer Name wird wie beim Anlegen validiert (trimmen,
+ * auf MAX_NAME_LENGTH kürzen, leer verboten). Liefert eine NEUE Liste mit
+ * dem umbenannten Ziel – oder null, wenn der Name (nach Trimmen) leer ist
+ * oder kein Ziel mit dieser id existiert. Die Eingabe bleibt unverändert.
+ */
+export function renameTarget(
+  targets: TentFinderTarget[],
+  id: string,
+  name: string
+): TentFinderTarget[] | null {
+  const trimmed = name.trim().slice(0, MAX_NAME_LENGTH);
+  if (!trimmed) return null;
+  if (!targets.some(t => t.id === id)) return null;
+  return targets.map(t => (t.id === id ? { ...t, name: trimmed } : t));
+}
+
 /** Neue, praktisch kollisionsfreie Ziel-id (crypto.randomUUID mit Fallback). */
 export function newTargetId(): string {
   const c = globalThis.crypto as Crypto | undefined;

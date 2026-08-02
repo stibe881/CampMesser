@@ -1428,6 +1428,9 @@ export const fr: Translation = {
     deleteAria: name => `Supprimer la cible «${name}»`,
     deleteConfirm: name => `Vraiment supprimer la cible «${name}» ?`,
     deletedToast: name => `«${name}» supprimé`,
+    renameAria: (name: string) => `Renommer la cible «${name}»`,
+    renameInputAria: "Nouveau nom de la cible",
+    renamedToast: (name: string) => `Renommé en «${name}»`,
     remembering: "Recherche de la position …",
     rememberFailed: "Impossible de déterminer la position",
     noTarget:

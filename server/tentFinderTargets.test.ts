@@ -4,6 +4,7 @@ import {
   MAX_TARGETS,
   migrateTargets,
   newTargetId,
+  renameTarget,
   sanitizeTargets,
   type TentFinderTarget,
 } from "../client/src/lib/tentFinderTargets";
@@ -120,6 +121,36 @@ describe("migrateTargets", () => {
     const { targets, changed } = migrateTargets("{{{", legacyRaw, "Zelt");
     expect(changed).toBe(true);
     expect(targets.map(t => t.name)).toEqual(["Zelt"]);
+  });
+});
+
+describe("renameTarget", () => {
+  const list = [target(), target({ id: "b", name: "Duschen" })];
+
+  it("benennt genau das Ziel mit der id um und lässt andere unangetastet", () => {
+    const renamed = renameTarget(list, "b", "Abwaschstelle");
+    expect(renamed?.map(t => t.name)).toEqual(["Zelt", "Abwaschstelle"]);
+    // Koordinaten und id bleiben erhalten
+    expect(renamed?.[1]).toMatchObject({ id: "b", lat: 46.95, lon: 7.44 });
+  });
+
+  it("trimmt und kürzt den neuen Namen wie beim Anlegen", () => {
+    const renamed = renameTarget(
+      list,
+      "a",
+      `  ${"x".repeat(MAX_NAME_LENGTH + 10)}  `
+    );
+    expect(renamed?.[0].name).toHaveLength(MAX_NAME_LENGTH);
+  });
+
+  it("lehnt leere Namen und unbekannte ids ab (null)", () => {
+    expect(renameTarget(list, "a", "   ")).toBeNull();
+    expect(renameTarget(list, "gibtsNicht", "Neu")).toBeNull();
+  });
+
+  it("ändert die übergebene Liste nicht (reine Funktion)", () => {
+    renameTarget(list, "b", "Neu");
+    expect(list[1].name).toBe("Duschen");
   });
 });
 

@@ -1412,6 +1412,9 @@ export const it: Translation = {
     deleteAria: name => `Elimina la meta «${name}»`,
     deleteConfirm: name => `Eliminare davvero la meta «${name}»?`,
     deletedToast: name => `«${name}» eliminata`,
+    renameAria: (name: string) => `Rinomina la meta «${name}»`,
+    renameInputAria: "Nuovo nome della meta",
+    renamedToast: (name: string) => `Rinominata in «${name}»`,
     remembering: "Ricerca della posizione …",
     rememberFailed: "Impossibile determinare la posizione",
     noTarget:

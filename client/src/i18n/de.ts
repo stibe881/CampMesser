@@ -1429,6 +1429,9 @@ export const de = {
     deleteAria: (name: string) => `Ziel «${name}» löschen`,
     deleteConfirm: (name: string) => `Ziel «${name}» wirklich löschen?`,
     deletedToast: (name: string) => `«${name}» gelöscht`,
+    renameAria: (name: string) => `Ziel «${name}» umbenennen`,
+    renameInputAria: "Neuer Name des Ziels",
+    renamedToast: (name: string) => `In «${name}» umbenannt`,
     remembering: "Standort wird ermittelt …",
     rememberFailed: "Standort konnte nicht ermittelt werden",
     noTarget:

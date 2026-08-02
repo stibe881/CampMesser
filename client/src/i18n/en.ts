@@ -1382,6 +1382,9 @@ export const en: Translation = {
     deleteAria: name => `Delete target “${name}”`,
     deleteConfirm: name => `Really delete target “${name}”?`,
     deletedToast: name => `“${name}” deleted`,
+    renameAria: (name: string) => `Rename target “${name}”`,
+    renameInputAria: "New name of the target",
+    renamedToast: (name: string) => `Renamed to “${name}”`,
     remembering: "Getting your location …",
     rememberFailed: "Could not determine your location",
     noTarget:

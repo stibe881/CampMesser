@@ -6,6 +6,7 @@ import {
   LocateFixed,
   Map as MapIcon,
   MapPin,
+  Pencil,
   Tent,
   Trash2,
 } from "lucide-react";
@@ -25,6 +26,7 @@ import {
   TARGETS_KEY,
   migrateTargets,
   newTargetId,
+  renameTarget,
   sanitizeTargets,
   type TentFinderTarget,
 } from "@/lib/tentFinderTargets";
@@ -237,6 +239,31 @@ export default function TentFinderPage() {
     saveTargets(targets.filter(x => x.id !== doomed.id));
     if (selection === `target:${doomed.id}`) setSelection(null);
     toast.success(t.tentFinder.deletedToast(doomed.name));
+  };
+
+  // ---- Ziel umbenennen: Inline-Textfeld, Enter/Blur speichert, Escape bricht ab ----
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  /** Escape gedrückt → der folgende Blur darf NICHT speichern. */
+  const renameCancelledRef = useRef(false);
+
+  const startRename = (tgt: TentFinderTarget) => {
+    renameCancelledRef.current = false;
+    setRenamingId(tgt.id);
+    setRenameValue(tgt.name);
+  };
+
+  /** Neuen Namen übernehmen (Validierung wie beim Anlegen, Sync inklusive). */
+  const commitRename = (tgt: TentFinderTarget) => {
+    const next = renameTarget(targets, tgt.id, renameValue);
+    if (next === null) {
+      toast.error(t.tentFinder.nameMissing);
+      return;
+    }
+    const renamed = next.find(x => x.id === tgt.id);
+    if (!renamed || renamed.name === tgt.name) return; // unverändert
+    saveTargets(next);
+    toast.success(t.tentFinder.renamedToast(renamed.name));
   };
 
   // Peilung und Distanz (reine Geometrie – offline verfügbar)
@@ -475,20 +502,62 @@ export default function TentFinderPage() {
                 {t.tentFinder.ownTargetsTitle}
               </p>
               <ul className="space-y-1.5">
-                {targets.map(tgt => (
-                  <li key={tgt.id} className="flex items-center gap-1.5">
-                    {optionRow(`target:${tgt.id}`, tgt.name, tgt.lat, tgt.lon)}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="shrink-0 text-muted-foreground hover:text-destructive"
-                      aria-label={t.tentFinder.deleteAria(tgt.name)}
-                      onClick={() => deleteTarget(tgt)}
-                    >
-                      <Trash2 className="h-4 w-4" aria-hidden="true" />
-                    </Button>
-                  </li>
-                ))}
+                {targets.map(tgt =>
+                  renamingId === tgt.id ? (
+                    <li key={tgt.id} className="flex items-center gap-1.5">
+                      {/* Inline-Umbenennen: Enter/Blur speichert, Escape bricht ab */}
+                      <Input
+                        autoFocus
+                        value={renameValue}
+                        onChange={e => setRenameValue(e.target.value)}
+                        maxLength={MAX_NAME_LENGTH}
+                        aria-label={t.tentFinder.renameInputAria}
+                        onFocus={e => e.currentTarget.select()}
+                        onKeyDown={e => {
+                          if (e.key === "Enter") {
+                            e.currentTarget.blur();
+                          } else if (e.key === "Escape") {
+                            renameCancelledRef.current = true;
+                            e.currentTarget.blur();
+                          }
+                        }}
+                        onBlur={() => {
+                          const cancelled = renameCancelledRef.current;
+                          renameCancelledRef.current = false;
+                          setRenamingId(null);
+                          if (!cancelled) commitRename(tgt);
+                        }}
+                      />
+                    </li>
+                  ) : (
+                    <li key={tgt.id} className="flex items-center gap-1.5">
+                      {optionRow(
+                        `target:${tgt.id}`,
+                        tgt.name,
+                        tgt.lat,
+                        tgt.lon
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 text-muted-foreground hover:text-foreground"
+                        aria-label={t.tentFinder.renameAria(tgt.name)}
+                        onClick={() => startRename(tgt)}
+                      >
+                        <Pencil className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 text-muted-foreground hover:text-destructive"
+                        aria-label={t.tentFinder.deleteAria(tgt.name)}
+                        onClick={() => deleteTarget(tgt)}
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    </li>
+                  )
+                )}
               </ul>
             </div>
           )}
