@@ -1009,6 +1009,14 @@ export const en: Translation = {
     useLocation: "Use current location",
     noteLabel: "Note (optional)",
     notePlaceholder: "e.g. spot by the stream, shady in the morning",
+    attrFilterAria: "Filter by attributes",
+    attrFilterShade: "Plenty of shade",
+    attrFilterQuiet: "Quiet",
+    attrFilterWifi: "Wi-Fi",
+    attrFilterPower: "Power at the pitch",
+    attrFilterDogs: "Dogs allowed",
+    attrFilterKids: "Child-friendly",
+    attrFilterEmpty: "No saved spot matches all selected attributes.",
   },
   mapView: {
     title: "Map of pitches & trips",
@@ -1118,6 +1126,16 @@ export const en: Translation = {
     galleryCounter: (n: number, total: number) => `Photo ${n} of ${total}`,
     galleryPrev: "Previous photo",
     galleryNext: "Next photo",
+    attributesTitle: "Attributes",
+    attributesEmpty:
+      "No attributes recorded yet – note what makes this spot: shade, sanitary facilities, noise and more.",
+    attributesEditButton: "Edit attributes",
+    attributesDialogTitle: "Edit attributes",
+    attributesDialogDesc:
+      "Pick the matching value for each attribute – leave open what you don't know (yet).",
+    attributeUnset: "Not specified",
+    attributeGroupAria: (name: string) => `Choose a value for ${name}`,
+    attributesSaved: "Attributes saved",
   },
   tentFinder: {
     title: "Tent finder",

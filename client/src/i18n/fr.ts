@@ -1038,6 +1038,15 @@ export const fr: Translation = {
     useLocation: "Utiliser la position actuelle",
     noteLabel: "Note (facultatif)",
     notePlaceholder: "p. ex. place au bord du ruisseau, ombragée le matin",
+    attrFilterAria: "Filtrer par caractéristiques",
+    attrFilterShade: "Beaucoup d'ombre",
+    attrFilterQuiet: "Calme",
+    attrFilterWifi: "Wi-Fi",
+    attrFilterPower: "Électricité sur l'emplacement",
+    attrFilterDogs: "Chiens admis",
+    attrFilterKids: "Adapté aux enfants",
+    attrFilterEmpty:
+      "Aucun emplacement enregistré ne remplit toutes les caractéristiques choisies.",
   },
   mapView: {
     title: "Carte des emplacements & voyages",
@@ -1149,6 +1158,16 @@ export const fr: Translation = {
     galleryCounter: (n: number, total: number) => `Photo ${n} sur ${total}`,
     galleryPrev: "Photo précédente",
     galleryNext: "Photo suivante",
+    attributesTitle: "Caractéristiques",
+    attributesEmpty:
+      "Aucune caractéristique saisie pour l'instant – note ce qui fait cet emplacement : ombre, sanitaires, bruit et plus.",
+    attributesEditButton: "Modifier les caractéristiques",
+    attributesDialogTitle: "Modifier les caractéristiques",
+    attributesDialogDesc:
+      "Choisis la valeur qui convient pour chaque caractéristique – laisse vide ce que tu ne sais pas (encore).",
+    attributeUnset: "Sans indication",
+    attributeGroupAria: name => `Choisir la valeur pour ${name}`,
+    attributesSaved: "Caractéristiques enregistrées",
   },
   tentFinder: {
     title: "Retrouve-tente",

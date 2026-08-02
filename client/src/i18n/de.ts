@@ -1035,6 +1035,15 @@ export const de = {
     useLocation: "Aktuellen Standort übernehmen",
     noteLabel: "Notiz (optional)",
     notePlaceholder: "z. B. Platz am Bach, schattig am Morgen",
+    attrFilterAria: "Nach Eigenschaften filtern",
+    attrFilterShade: "Viel Schatten",
+    attrFilterQuiet: "Ruhig",
+    attrFilterWifi: "WLAN",
+    attrFilterPower: "Strom am Platz",
+    attrFilterDogs: "Hunde erlaubt",
+    attrFilterKids: "Kinderfreundlich",
+    attrFilterEmpty:
+      "Kein gespeicherter Platz erfüllt alle gewählten Eigenschaften.",
   },
   mapView: {
     title: "Karte der Plätze & Reisen",
@@ -1148,6 +1157,16 @@ export const de = {
     galleryCounter: (n: number, total: number) => `Foto ${n} von ${total}`,
     galleryPrev: "Vorheriges Foto",
     galleryNext: "Nächstes Foto",
+    attributesTitle: "Eigenschaften",
+    attributesEmpty:
+      "Noch keine Eigenschaften erfasst – halte fest, was den Platz ausmacht: Schatten, Sanitär, Lärm und mehr.",
+    attributesEditButton: "Eigenschaften bearbeiten",
+    attributesDialogTitle: "Eigenschaften bearbeiten",
+    attributesDialogDesc:
+      "Wähle pro Eigenschaft den passenden Wert – lass offen, was du (noch) nicht weisst.",
+    attributeUnset: "Keine Angabe",
+    attributeGroupAria: (name: string) => `Wert für ${name} wählen`,
+    attributesSaved: "Eigenschaften gespeichert",
   },
   tentFinder: {
     title: "Zelt-Finder",

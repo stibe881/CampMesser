@@ -1024,6 +1024,15 @@ export const it: Translation = {
     useLocation: "Usa la posizione attuale",
     noteLabel: "Nota (facoltativa)",
     notePlaceholder: "ad es. posto vicino al ruscello, ombreggiato al mattino",
+    attrFilterAria: "Filtra per caratteristiche",
+    attrFilterShade: "Molta ombra",
+    attrFilterQuiet: "Tranquillo",
+    attrFilterWifi: "Wi-Fi",
+    attrFilterPower: "Corrente in piazzola",
+    attrFilterDogs: "Cani ammessi",
+    attrFilterKids: "Adatto ai bambini",
+    attrFilterEmpty:
+      "Nessuna piazzola salvata soddisfa tutte le caratteristiche scelte.",
   },
   mapView: {
     title: "Mappa delle piazzole e dei viaggi",
@@ -1136,6 +1145,16 @@ export const it: Translation = {
     galleryCounter: (n: number, total: number) => `Foto ${n} di ${total}`,
     galleryPrev: "Foto precedente",
     galleryNext: "Foto successiva",
+    attributesTitle: "Caratteristiche",
+    attributesEmpty:
+      "Nessuna caratteristica ancora registrata – annota cosa contraddistingue la piazzola: ombra, sanitari, rumore e altro.",
+    attributesEditButton: "Modifica caratteristiche",
+    attributesDialogTitle: "Modifica caratteristiche",
+    attributesDialogDesc:
+      "Scegli il valore adatto per ogni caratteristica – lascia vuoto ciò che (ancora) non sai.",
+    attributeUnset: "Nessuna indicazione",
+    attributeGroupAria: (name: string) => `Scegli il valore per ${name}`,
+    attributesSaved: "Caratteristiche salvate",
   },
   tentFinder: {
     title: "Trova-tenda",

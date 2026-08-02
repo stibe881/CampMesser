@@ -450,7 +450,7 @@ export async function addCampSpot(data: InsertCampSpot) {
 export async function updateCampSpot(
   id: number,
   userId: number,
-  data: Partial<Pick<InsertCampSpot, "name" | "note">>
+  data: Partial<Pick<InsertCampSpot, "name" | "note" | "attributesJson">>
 ) {
   const db = requireDb(await getDb());
   await db

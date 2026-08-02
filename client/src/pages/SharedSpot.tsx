@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import SpotAttributeChips from "@/components/SpotAttributeChips";
+import { parseSpotAttributes } from "@shared/spotAttributes";
 import { trpc } from "@/lib/trpc";
 import { getSunTimes } from "@/lib/sun";
 import { describeWeatherCode } from "@shared/weather";
@@ -101,6 +103,13 @@ export default function SharedSpotPage() {
       {spot.note && (
         <p className="mt-2 text-sm text-muted-foreground">{spot.note}</p>
       )}
+
+      {/* Platz-Eigenschaften – unkritisch und für Empfänger*innen hilfreich */}
+      <SpotAttributeChips
+        attributes={parseSpotAttributes(spot.attributesJson)}
+        lang={lang}
+        className="mt-3"
+      />
 
       {/* Sonne heute */}
       <Card className="mb-4 mt-5">

@@ -33,11 +33,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapView } from "@/components/Map";
+import SpotAttributeChips from "@/components/SpotAttributeChips";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { getSunTimes } from "@/lib/sun";
 import { useI18n, useT } from "@/i18n";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
+import { cn } from "@/lib/utils";
+import {
+  parseSpotAttributes,
+  type SpotAttributeKey,
+} from "@shared/spotAttributes";
 import {
   describeWeatherCode,
   detectAlerts,
@@ -107,6 +113,7 @@ function SpotCard({
     latitude: number;
     longitude: number;
     note: string | null;
+    attributesJson: string | null;
   };
   onDelete: () => void;
 }) {
@@ -157,6 +164,12 @@ function SpotCard({
             {spot.note && (
               <p className="mt-1 text-sm text-muted-foreground">{spot.note}</p>
             )}
+            <SpotAttributeChips
+              attributes={parseSpotAttributes(spot.attributesJson)}
+              lang={lang}
+              compact
+              className="mt-2"
+            />
           </div>
           <Button
             variant="ghost"
@@ -346,6 +359,16 @@ function PushOptIn({ hasSpots }: { hasSpots: boolean }) {
   );
 }
 
+/** Schlanke Eigenschafts-Filter: nur Ja/Nein- und Top-Werte des Katalogs. */
+const ATTR_FILTERS: { id: string; key: SpotAttributeKey; value: string }[] = [
+  { id: "shade", key: "shade", value: "much" },
+  { id: "quiet", key: "noise", value: "quiet" },
+  { id: "wifi", key: "wifi", value: "yes" },
+  { id: "power", key: "power", value: "yes" },
+  { id: "dogs", key: "dogs", value: "yes" },
+  { id: "kids", key: "kids", value: "yes" },
+];
+
 export default function SpotsPage() {
   const t = useT();
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -353,6 +376,39 @@ export default function SpotsPage() {
   const { data: spots, isLoading } = trpc.spots.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+
+  // Eigenschafts-Filter: alle aktiven Chips müssen zutreffen (UND-Verknüpfung)
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const attrsById = useMemo(() => {
+    const map = new Map<number, ReturnType<typeof parseSpotAttributes>>();
+    (spots ?? []).forEach(s =>
+      map.set(s.id, parseSpotAttributes(s.attributesJson))
+    );
+    return map;
+  }, [spots]);
+  const hasAnyAttributes = useMemo(
+    () => Array.from(attrsById.values()).some(a => Object.keys(a).length > 0),
+    [attrsById]
+  );
+  const visibleSpots = useMemo(
+    () =>
+      (spots ?? []).filter(s =>
+        activeFilters.every(id => {
+          const filter = ATTR_FILTERS.find(f => f.id === id);
+          if (!filter) return true;
+          return attrsById.get(s.id)?.[filter.key] === filter.value;
+        })
+      ),
+    [spots, activeFilters, attrsById]
+  );
+  const filterLabels: Record<string, string> = {
+    shade: t.spots.attrFilterShade,
+    quiet: t.spots.attrFilterQuiet,
+    wifi: t.spots.attrFilterWifi,
+    power: t.spots.attrFilterPower,
+    dogs: t.spots.attrFilterDogs,
+    kids: t.spots.attrFilterKids,
+  };
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
@@ -451,6 +507,40 @@ export default function SpotsPage() {
 
           <PushOptIn hasSpots={(spots?.length ?? 0) > 0} />
 
+          {hasAnyAttributes && (
+            <div
+              className="mb-4 flex flex-wrap gap-2"
+              role="group"
+              aria-label={t.spots.attrFilterAria}
+            >
+              {ATTR_FILTERS.map(filter => {
+                const active = activeFilters.includes(filter.id);
+                return (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    onClick={() =>
+                      setActiveFilters(prev =>
+                        active
+                          ? prev.filter(id => id !== filter.id)
+                          : [...prev, filter.id]
+                      )
+                    }
+                    className={cn(
+                      "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:text-foreground"
+                    )}
+                    aria-pressed={active}
+                  >
+                    {filterLabels[filter.id]}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {isLoading && (
             <div className="space-y-3">
               <Skeleton className="h-32 w-full rounded-xl" />
@@ -470,8 +560,16 @@ export default function SpotsPage() {
             </Card>
           )}
 
+          {!isLoading &&
+            (spots?.length ?? 0) > 0 &&
+            visibleSpots.length === 0 && (
+              <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
+                {t.spots.attrFilterEmpty}
+              </p>
+            )}
+
           <div className="space-y-3">
-            {spots?.map(spot => (
+            {visibleSpots.map(spot => (
               <SpotCard
                 key={spot.id}
                 spot={spot}

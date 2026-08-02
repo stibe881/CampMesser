@@ -19,12 +19,30 @@ import {
   MIN_QUIZ_OPTIONS,
 } from "@shared/quizzes";
 import { MEALS } from "@shared/menuPlan";
+import {
+  parseSpotAttributes,
+  SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
+} from "@shared/spotAttributes";
 import { RECIPE_DIFFICULTIES, RECIPE_METHODS } from "@shared/customRecipes";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
+
+/**
+ * Platz-Eigenschaften validieren: über den defensiven Parser laufen lassen
+ * und normalisiert ablegen – ohne gültige Attribute wird null gespeichert.
+ * undefined (Feld nicht angefasst) wird unverändert durchgereicht.
+ */
+function normalizeSpotAttributesJson(
+  raw: string | null | undefined
+): string | null | undefined {
+  if (raw === undefined) return undefined;
+  if (raw === null) return null;
+  const attrs = parseSpotAttributes(raw);
+  return Object.keys(attrs).length > 0 ? JSON.stringify(attrs) : null;
+}
 
 /** Eingabe-Format eigener Quizze: 1–30 Fragen mit je 2–4 Optionen. */
 const customQuizInput = z.object({
@@ -1361,10 +1379,18 @@ export const appRouter = router({
           latitude: z.number().min(-90).max(90),
           longitude: z.number().min(-180).max(180),
           note: z.string().max(500).optional(),
+          attributesJson: z
+            .string()
+            .max(SPOT_ATTRIBUTES_JSON_MAX_LENGTH)
+            .optional(),
         })
       )
       .mutation(({ ctx, input }) =>
-        db.addCampSpot({ userId: ctx.user.id, ...input })
+        db.addCampSpot({
+          userId: ctx.user.id,
+          ...input,
+          attributesJson: normalizeSpotAttributesJson(input.attributesJson),
+        })
       ),
     update: protectedProcedure
       .input(
@@ -1372,11 +1398,19 @@ export const appRouter = router({
           id: z.number(),
           name: z.string().min(1).max(120).optional(),
           note: z.string().max(500).optional(),
+          attributesJson: z
+            .string()
+            .max(SPOT_ATTRIBUTES_JSON_MAX_LENGTH)
+            .nullable()
+            .optional(),
         })
       )
       .mutation(({ ctx, input }) => {
         const { id, ...data } = input;
-        return db.updateCampSpot(id, ctx.user.id, data);
+        return db.updateCampSpot(id, ctx.user.id, {
+          ...data,
+          attributesJson: normalizeSpotAttributesJson(data.attributesJson),
+        });
       }),
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
@@ -1454,6 +1488,8 @@ export const appRouter = router({
           latitude: spot.latitude,
           longitude: spot.longitude,
           note: spot.note,
+          // Eigenschaften sind unkritisch und für Empfänger*innen hilfreich
+          attributesJson: spot.attributesJson,
         };
       }),
   }),

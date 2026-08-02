@@ -16,6 +16,7 @@ import {
   Mountain,
   QrCode,
   Share2,
+  SlidersHorizontal,
   Sunrise,
 } from "lucide-react";
 import {
@@ -33,9 +34,23 @@ import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import PhotoGallery from "@/components/PhotoGallery";
+import SpotAttributeChips from "@/components/SpotAttributeChips";
 import { MAX_PHOTOS_PER_SPOT } from "@shared/tripPhotos";
+import {
+  parseSpotAttributes,
+  SPOT_ATTRIBUTES,
+  type SpotAttributes,
+} from "@shared/spotAttributes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -52,7 +67,7 @@ import {
 import { describeWeatherCode } from "@shared/weather";
 import { fetchDossierWeather, type DossierWeather } from "@/lib/dossierWeather";
 import { useI18n } from "@/i18n";
-import { LOCALE_TAGS } from "@shared/i18n";
+import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { cn } from "@/lib/utils";
 
 // Wetter-Abruf ausgelagert: teilt sich das Dossier mit der öffentlichen
@@ -90,6 +105,9 @@ export default function SpotDetailPage() {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const shareMutation = trpc.spots.share.useMutation();
   const unshareMutation = trpc.spots.unshare.useMutation();
+  const updateMutation = trpc.spots.update.useMutation();
+  const [attrDialogOpen, setAttrDialogOpen] = useState(false);
+  const [attrDraft, setAttrDraft] = useState<SpotAttributes>({});
   const utils = trpc.useUtils();
   const photosQuery = trpc.spots.photos.list.useQuery(
     { spotId },
@@ -259,6 +277,29 @@ export default function SpotDetailPage() {
     );
   }
 
+  const attributes = parseSpotAttributes(spot.attributesJson);
+
+  const openAttrDialog = () => {
+    setAttrDraft(attributes);
+    setAttrDialogOpen(true);
+  };
+
+  const saveAttributes = () => {
+    const json =
+      Object.keys(attrDraft).length > 0 ? JSON.stringify(attrDraft) : null;
+    updateMutation.mutate(
+      { id: spot.id, attributesJson: json },
+      {
+        onSuccess: () => {
+          utils.spots.list.invalidate();
+          setAttrDialogOpen(false);
+          toast.success(t.spotDetail.attributesSaved);
+        },
+        onError: () => toast.error(t.common.saveFailed),
+      }
+    );
+  };
+
   return (
     <div className="container max-w-3xl py-6">
       <PageHeader
@@ -282,8 +323,38 @@ export default function SpotDetailPage() {
         </Link>
       </Button>
 
-      {/* Sonne heute */}
+      {/* Platz-Eigenschaften: Schatten, Sanitär, Lärm, WLAN … */}
       <Card className="mb-4 mt-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <SlidersHorizontal
+              className="h-4 w-4 text-primary"
+              aria-hidden="true"
+            />
+            {t.spotDetail.attributesTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {Object.keys(attributes).length > 0 ? (
+            <SpotAttributeChips attributes={attributes} lang={lang} />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {t.spotDetail.attributesEmpty}
+            </p>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={openAttrDialog}
+          >
+            {t.spotDetail.attributesEditButton}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Sonne heute */}
+      <Card className="mb-4">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Sunrise className="h-4 w-4 text-chart-4" aria-hidden="true" />
@@ -808,6 +879,91 @@ export default function SpotDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Eigenschaften bearbeiten */}
+      <Dialog open={attrDialogOpen} onOpenChange={setAttrDialogOpen}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-serif">
+              {t.spotDetail.attributesDialogTitle}
+            </DialogTitle>
+            <DialogDescription>
+              {t.spotDetail.attributesDialogDesc}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {SPOT_ATTRIBUTES.map(def => {
+              const current = attrDraft[def.key];
+              return (
+                <div key={def.key}>
+                  <p className="mb-1.5 text-sm font-medium">
+                    {pick(def.label, lang)}
+                  </p>
+                  <div
+                    className="flex flex-wrap gap-1.5"
+                    role="group"
+                    aria-label={t.spotDetail.attributeGroupAria(
+                      pick(def.label, lang)
+                    )}
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setAttrDraft(prev => {
+                          const next = { ...prev };
+                          delete next[def.key];
+                          return next;
+                        })
+                      }
+                      className={cn(
+                        "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                        current === undefined
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:text-foreground"
+                      )}
+                      aria-pressed={current === undefined}
+                    >
+                      {t.spotDetail.attributeUnset}
+                    </button>
+                    {def.values.map(value => (
+                      <button
+                        key={value.value}
+                        type="button"
+                        onClick={() =>
+                          setAttrDraft(prev => ({
+                            ...prev,
+                            [def.key]: value.value,
+                          }))
+                        }
+                        className={cn(
+                          "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                          current === value.value
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:text-foreground"
+                        )}
+                        aria-pressed={current === value.value}
+                      >
+                        {pick(value.label, lang)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAttrDialogOpen(false)}>
+              {t.common.cancel}
+            </Button>
+            <Button
+              onClick={saveAttributes}
+              disabled={updateMutation.isPending}
+            >
+              {updateMutation.isPending ? t.common.saving : t.common.save}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

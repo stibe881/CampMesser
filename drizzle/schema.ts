@@ -51,6 +51,8 @@ export const campSpots = mysqlTable(
     latitude: double("latitude").notNull(),
     longitude: double("longitude").notNull(),
     note: text("note"),
+    /** Platz-Eigenschaften als JSON-Objekt {schluessel: wert} – Katalog in shared/spotAttributes.ts */
+    attributesJson: text("attributesJson"),
     /** Öffentlicher Teil-Token: Wer den Link kennt, sieht das Platz-Dossier (nur lesend). */
     shareToken: varchar("shareToken", { length: 32 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
