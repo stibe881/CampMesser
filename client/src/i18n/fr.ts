@@ -300,6 +300,10 @@ export const fr: Translation = {
     markPacked: name => `Marquer ${name} comme emballé`,
     markUnpacked: name => `Marquer ${name} comme non emballé`,
     deleteItemAria: name => `Supprimer ${name}`,
+    reorderAria: name => `Déplacer ${name} – glisser pour trier`,
+    reorderDisabledTitle:
+      "Pour trier, désactive d'abord le filtre par personne",
+    reorderFailed: "Le nouvel ordre n'a pas pu être enregistré",
     emptyList:
       "Cette liste est encore vide – ajoute ta première entrée ci-dessus.",
     assignFailed: "Échec de l'attribution",

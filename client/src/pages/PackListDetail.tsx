@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "wouter";
 import {
   BookmarkPlus,
+  GripVertical,
   Link2,
   Loader2,
   Package,
@@ -33,6 +34,7 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
+import { usePointerDrag } from "@/lib/usePointerDrag";
 import { familyAddOns } from "@shared/packTemplates";
 import { computePackWeight, formatGrams } from "@shared/packWeight";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
@@ -242,6 +244,63 @@ export default function PackListDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.data?.items, generalCategory, personFilter]);
 
+  // Bei aktivem Personen-Filter ist die Liste unvollständig – Sortieren deaktiviert
+  const filterActive = personFilter !== null;
+
+  const reorderMutation = trpc.packing.reorderItems.useMutation({
+    onMutate: async input => {
+      await utils.packing.items.cancel({ listId });
+      const prev = utils.packing.items.getData({ listId });
+      // Optimistisch: Einträge sofort in der neuen Reihenfolge zeigen
+      utils.packing.items.setData({ listId }, old => {
+        if (!old) return old;
+        const byId = new Map(old.items.map(i => [i.id, i]));
+        const included = new Set(input.itemIds);
+        const next = input.itemIds
+          .map((id, idx) => {
+            const item = byId.get(id);
+            return item ? { ...item, sortOrder: idx } : null;
+          })
+          .filter((i): i is NonNullable<typeof i> => i !== null);
+        return {
+          ...old,
+          items: [...next, ...old.items.filter(i => !included.has(i.id))],
+        };
+      });
+      return { prev };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) utils.packing.items.setData({ listId }, ctx.prev);
+      toast.error(t.packListDetail.reorderFailed);
+    },
+  });
+
+  /** Eintrag innerhalb seiner Kategorie verschieben und Gesamt-Reihenfolge speichern. */
+  const moveItem = (category: string, fromIdStr: string, toIdStr: string) => {
+    const fromId = Number(fromIdStr);
+    const toId = Number(toIdStr);
+    const flat: number[] = [];
+    for (const [cat, catItems] of grouped) {
+      const ids = catItems.map(i => i.id);
+      if (cat === category) {
+        const fromIdx = ids.indexOf(fromId);
+        const toIdx = ids.indexOf(toId);
+        if (fromIdx !== -1 && toIdx !== -1) {
+          ids.splice(toIdx, 0, ...ids.splice(fromIdx, 1));
+        }
+      }
+      flat.push(...ids);
+    }
+    if (flat.length > 0) reorderMutation.mutate({ listId, itemIds: flat });
+  };
+
+  // Geteilte Pointer-Drag-Logik (Maus + Touch) – gleiche wie beim Kachel-Sortieren
+  const drag = usePointerDrag({
+    onDrop: moveItem,
+    handleSelector: "[data-drag-handle]",
+    disabled: filterActive,
+  });
+
   // Gewichts-Bilanz über den Namens-Abgleich mit dem Inventar
   const weight = useMemo(
     () => computePackWeight(query.data?.items ?? [], inventoryQuery.data ?? []),
@@ -299,7 +358,6 @@ export default function PackListDetailPage() {
   const items = query.data.items;
   const checkedCount = items.filter(i => i.checked).length;
   const progress = items.length > 0 ? (checkedCount / items.length) * 100 : 0;
-  const filterActive = personFilter !== null;
   const filteredItems = items.filter(i => matchesPersonFilter(i.assignee));
   const filteredChecked = filteredItems.filter(i => i.checked).length;
   const filteredProgress =
@@ -600,15 +658,42 @@ export default function PackListDetailPage() {
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             {category}
           </h2>
-          <ul className="space-y-1.5">
+          <ul
+            className={cn("space-y-1.5", drag.dragId !== null && "select-none")}
+          >
             {categoryItems.map(item => (
               <li
                 key={item.id}
+                {...drag.dragProps(category, String(item.id))}
                 className={cn(
                   "group flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5 transition-colors",
-                  item.checked && "bg-muted/60"
+                  item.checked && "bg-muted/60",
+                  drag.dragId === String(item.id) &&
+                    "border-primary opacity-60",
+                  drag.dragOverId === String(item.id) &&
+                    drag.dragId !== String(item.id) &&
+                    "border-primary bg-accent/40"
                 )}
               >
+                <button
+                  type="button"
+                  data-drag-handle
+                  disabled={filterActive}
+                  title={
+                    filterActive
+                      ? t.packListDetail.reorderDisabledTitle
+                      : undefined
+                  }
+                  aria-label={t.packListDetail.reorderAria(item.name)}
+                  className={cn(
+                    "-ml-1.5 shrink-0 touch-none rounded p-0.5 text-muted-foreground/50",
+                    filterActive
+                      ? "cursor-not-allowed opacity-40"
+                      : "cursor-grab hover:text-foreground active:cursor-grabbing"
+                  )}
+                >
+                  <GripVertical className="h-4 w-4" aria-hidden="true" />
+                </button>
                 <Checkbox
                   id={`item-${item.id}`}
                   checked={item.checked}

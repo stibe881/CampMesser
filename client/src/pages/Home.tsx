@@ -45,8 +45,9 @@ import {
   TreePine,
   Users,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getRecentModules } from "@/components/AppShell";
+import { usePointerDrag } from "@/lib/usePointerDrag";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { searchKnowledge, searchOwnContent } from "@/lib/globalSearch";
 import {
@@ -558,7 +559,6 @@ export default function Home() {
   const [sortMode, setSortMode] = useState(false);
   const [order, setOrder] = useState<string[]>(() => loadModuleOrder());
   const [hidden, setHidden] = useState<string[]>(() => loadHiddenModules());
-  const [dragPath, setDragPath] = useState<string | null>(null);
 
   // Geräte-Sync: Server-Stand gewinnt beim Laden, lokale Änderungen werden gepusht
   const orderSync = useSyncedSetting<string[]>("moduleOrder", value => {
@@ -583,32 +583,10 @@ export default function Home() {
     saveHiddenModules(next);
     hiddenSync.push(next);
   };
-  const [dragOverPath, setDragOverPath] = useState<string | null>(null);
-  const dragInfo = useRef<{
-    from: string;
-    group: (typeof groups)[number];
-  } | null>(null);
-  const dragOverRef = useRef<string | null>(null);
-
-  /** Kachel unter dem Zeiger ermitteln (funktioniert für Maus und Touch). */
-  const tileUnderPointer = (
-    x: number,
-    y: number,
-    group: string
-  ): string | null => {
-    const el = document.elementFromPoint(x, y) as HTMLElement | null;
-    const tile = el?.closest<HTMLElement>("[data-drag-path]");
-    if (!tile || tile.dataset.dragGroup !== group) return null;
-    return tile.dataset.dragPath ?? null;
-  };
-
-  /** Zieh-Zustand zurücksetzen. */
-  const endDrag = () => {
-    dragInfo.current = null;
-    dragOverRef.current = null;
-    setDragPath(null);
-    setDragOverPath(null);
-  };
+  // Geteilte Pointer-Drag-Logik (Maus + Touch) – auch von den Packlisten genutzt
+  const drag = usePointerDrag<(typeof groups)[number]>({
+    onDrop: (group, from, to) => moveModule(group, from, to),
+  });
 
   /** Module einer Gruppe in gespeicherter Reihenfolge liefern. */
   const orderedModules = (group: (typeof groups)[number]) => {
@@ -771,44 +749,13 @@ export default function Home() {
                     return (
                       <div
                         key={m.path}
-                        data-drag-path={m.path}
-                        data-drag-group={group}
-                        onPointerDown={e => {
-                          // Klicks auf die Pfeil-Buttons nicht als Ziehen werten
-                          if ((e.target as HTMLElement).closest("button"))
-                            return;
-                          dragInfo.current = { from: m.path, group };
-                          dragOverRef.current = null;
-                          setDragPath(m.path);
-                          e.currentTarget.setPointerCapture(e.pointerId);
-                        }}
-                        onPointerMove={e => {
-                          if (!dragInfo.current) return;
-                          const over = tileUnderPointer(
-                            e.clientX,
-                            e.clientY,
-                            group
-                          );
-                          if (over !== dragOverRef.current) {
-                            dragOverRef.current = over;
-                            setDragOverPath(over);
-                          }
-                        }}
-                        onPointerUp={() => {
-                          const info = dragInfo.current;
-                          const over = dragOverRef.current;
-                          if (info && over && over !== info.from) {
-                            moveModule(info.group, info.from, over);
-                          }
-                          endDrag();
-                        }}
-                        onPointerCancel={endDrag}
+                        {...drag.dragProps(group, m.path)}
                         className={
                           "flex touch-none select-none items-start gap-4 rounded-xl border bg-card p-4 shadow-sm transition-all " +
                           (isHidden ? "opacity-45 " : "") +
-                          (dragPath === m.path
+                          (drag.dragId === m.path
                             ? "border-primary opacity-60"
-                            : dragOverPath === m.path
+                            : drag.dragOverId === m.path
                               ? "border-solid border-primary bg-accent/40"
                               : "cursor-grab border-dashed border-primary/40 active:cursor-grabbing")
                         }

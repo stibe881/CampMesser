@@ -594,6 +594,28 @@ export const appRouter = router({
     toggleItem: protectedProcedure
       .input(z.object({ id: z.number(), checked: z.boolean() }))
       .mutation(({ input }) => db.setPackItemChecked(input.id, input.checked)),
+    /** Neue Reihenfolge (Drag-and-drop) speichern: Positionen 0..n in Übergabe-Reihenfolge. */
+    reorderItems: protectedProcedure
+      .input(
+        z.object({
+          listId: z.number(),
+          itemIds: z.array(z.number().int()).min(1).max(500),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const list = await db.getPackList(input.listId, ctx.user.id);
+        if (!list)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Liste nicht gefunden",
+          });
+        const items = await db.getPackItems(input.listId);
+        const valid = new Set(items.map(i => i.id));
+        // Nur Einträge dieser Liste umsortieren – fremde IDs werden ignoriert
+        const ids = input.itemIds.filter(id => valid.has(id));
+        if (ids.length > 0) await db.reorderPackItems(input.listId, ids);
+        return { success: true } as const;
+      }),
     /** Personen-Zuordnung («Wer packt das?») setzen; null entfernt sie wieder. */
     updateItem: protectedProcedure
       .input(

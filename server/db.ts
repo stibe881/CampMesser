@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   campSpots,
@@ -164,7 +164,11 @@ export async function deletePackList(id: number, userId: number) {
 
 export async function getPackItems(listId: number) {
   const db = requireDb(await getDb());
-  return db.select().from(packItems).where(eq(packItems.listId, listId));
+  return db
+    .select()
+    .from(packItems)
+    .where(eq(packItems.listId, listId))
+    .orderBy(asc(packItems.sortOrder), asc(packItems.id));
 }
 
 export async function addPackItems(items: InsertPackItem[]) {
@@ -187,6 +191,19 @@ export async function setPackItemAssignee(id: number, assignee: string | null) {
 export async function deletePackItem(id: number) {
   const db = requireDb(await getDb());
   await db.delete(packItems).where(eq(packItems.id, id));
+}
+
+/** Neue Reihenfolge einer Liste speichern: sortOrder = Position 0..n. */
+export async function reorderPackItems(listId: number, itemIds: number[]) {
+  const db = requireDb(await getDb());
+  await Promise.all(
+    itemIds.map((id, idx) =>
+      db
+        .update(packItems)
+        .set({ sortOrder: idx })
+        .where(and(eq(packItems.id, id), eq(packItems.listId, listId)))
+    )
+  );
 }
 
 // ── Eigene Packlisten-Vorlagen ──

@@ -294,6 +294,9 @@ export const it: Translation = {
     markPacked: name => `Segnare ${name} come preparato`,
     markUnpacked: name => `Segnare ${name} come non preparato`,
     deleteItemAria: name => `Eliminare ${name}`,
+    reorderAria: name => `Sposta ${name} – trascina per ordinare`,
+    reorderDisabledTitle: "Per ordinare disattiva prima il filtro per persona",
+    reorderFailed: "Impossibile salvare il nuovo ordine",
     emptyList:
       "Questa lista è ancora vuota – aggiungi sopra la tua prima voce.",
     assignFailed: "Assegnazione non riuscita",

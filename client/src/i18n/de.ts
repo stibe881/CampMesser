@@ -299,6 +299,9 @@ export const de = {
     markPacked: (name: string) => `${name} als gepackt markieren`,
     markUnpacked: (name: string) => `${name} als ungepackt markieren`,
     deleteItemAria: (name: string) => `${name} löschen`,
+    reorderAria: (name: string) => `${name} verschieben – ziehen zum Sortieren`,
+    reorderDisabledTitle: "Zum Sortieren zuerst den Personen-Filter aufheben",
+    reorderFailed: "Neue Reihenfolge konnte nicht gespeichert werden",
     emptyList:
       "Diese Liste ist noch leer – füge oben deinen ersten Eintrag hinzu.",
     assignFailed: "Zuordnung fehlgeschlagen",
