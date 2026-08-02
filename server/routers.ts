@@ -712,6 +712,19 @@ export const appRouter = router({
     toggleItem: protectedProcedure
       .input(z.object({ id: z.number(), checked: z.boolean() }))
       .mutation(({ input }) => db.setPackItemChecked(input.id, input.checked)),
+    /** Alle Haken einer eigenen Liste lösen – z. B. vor dem nächsten Trip. */
+    uncheckAll: protectedProcedure
+      .input(z.object({ listId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const list = await db.getPackList(input.listId, ctx.user.id);
+        if (!list)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Liste nicht gefunden",
+          });
+        await db.uncheckAllPackItems(input.listId);
+        return { success: true } as const;
+      }),
     /** Neue Reihenfolge (Drag-and-drop) speichern: Positionen 0..n in Übergabe-Reihenfolge. */
     reorderItems: protectedProcedure
       .input(

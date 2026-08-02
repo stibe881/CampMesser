@@ -1,5 +1,9 @@
 # CampMesser – Projekt TODO
 
+## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 18)
+
+- [x] Packliste zurücksetzen: tRPC packing.uncheckAll {listId} mit Besitz-Prüfung (getPackList, sonst NOT_FOUND) setzt über db.uncheckAllPackItems alle Einträge der Liste auf checked=false; UI in PackListDetail.tsx: Knopf «Alle Haken lösen» (RotateCcw) bei den Listen-Aktionen neben Teilen/Drucken/Als-Vorlage, nur sichtbar wenn mindestens ein Eintrag abgehakt ist, mit confirm-Rückfrage (Einzahl/Mehrzahl je nach Anzahl Haken), optimistischem Update (alle Haken sofort weg, Rollback + Fehler-Toast bei Serverfehler) und Erfolgs-Toast; 4 neue packListDetail-Schlüssel in DE/FR/IT/EN
+
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 17)
 
 - [x] Campingplätze aus OpenStreetMap entdecken: zuschaltbarer Layer auf der Karte (Toggle-Chip «Campingplätze entdecken», Standard AUS) fragt die Overpass-API für den aktuellen Ausschnitt ab (tourism=camp_site als node/way, max. 100 Ergebnisse); bei Kartenbewegung kein automatisches Nachladen, sondern Button «In diesem Ausschnitt suchen» (Overpass ist rate-limitiert), bei Zoom < 9 Hinweis «bitte näher zoomen»; defensiver Parser `parseCampsites` in client/src/lib/overpass.ts (node → lat/lon, way → center, Tags name/website/phone, Duplikat- und Limit-Schutz) mit 6 Tests in server/overpass.test.ts; eigene blaue Marker samt Legenden-Eintrag, Popup mit Name (Fallback «Campingplatz»), Website-Link, Telefon, Quelle «© OpenStreetMap» und «Als Favorit übernehmen» (spots.add → Toast, Pin wird nach dem Refetch zum grünen Favoriten); mapView-Namespace in allen 4 Sprachen erweitert

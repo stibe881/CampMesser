@@ -398,6 +398,13 @@ export const de = {
     budgetRemoved: "Gewichts-Budget entfernt",
     budgetSaveFailed: "Budget konnte nicht gespeichert werden",
     budgetInvalid: "Gib ein Gewicht zwischen 0,1 und 500 kg ein",
+    uncheckAllButton: "Alle Haken lösen",
+    uncheckAllConfirm: (n: number) =>
+      n === 1
+        ? "Den gesetzten Haken wirklich lösen? Der Eintrag bleibt erhalten."
+        : `Wirklich alle ${n} Haken lösen? Die Einträge bleiben erhalten.`,
+    uncheckAllDone: "Alle Haken gelöst – bereit fürs nächste Packen",
+    uncheckAllFailed: "Haken konnten nicht gelöst werden",
   },
   packListPrint: {
     docTitle: (name: string) => `${name} – Packliste zum Ausdrucken`,

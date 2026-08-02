@@ -398,6 +398,14 @@ export const fr: Translation = {
     budgetRemoved: "Budget de poids supprimé",
     budgetSaveFailed: "Le budget n'a pas pu être enregistré",
     budgetInvalid: "Indique un poids entre 0,1 et 500 kg",
+    uncheckAllButton: "Décocher tout",
+    uncheckAllConfirm: (n: number) =>
+      n === 1
+        ? "Vraiment décocher la coche ? L'élément est conservé."
+        : `Vraiment décocher les ${n} coches ? Les éléments sont conservés.`,
+    uncheckAllDone:
+      "Toutes les coches sont enlevées – prêt·e pour le prochain paquetage",
+    uncheckAllFailed: "Impossible d'enlever les coches",
   },
   packListPrint: {
     docTitle: name => `${name} – liste de bagages à imprimer`,

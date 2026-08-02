@@ -191,6 +191,15 @@ export async function setPackItemChecked(id: number, checked: boolean) {
   await db.update(packItems).set({ checked }).where(eq(packItems.id, id));
 }
 
+/** Alle Einträge einer Liste auf «ungepackt» zurücksetzen. */
+export async function uncheckAllPackItems(listId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .update(packItems)
+    .set({ checked: false })
+    .where(eq(packItems.listId, listId));
+}
+
 /** Personen-Zuordnung («Wer packt das?») setzen oder mit null entfernen. */
 export async function setPackItemAssignee(id: number, assignee: string | null) {
   const db = requireDb(await getDb());

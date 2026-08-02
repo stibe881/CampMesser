@@ -390,6 +390,13 @@ export const it: Translation = {
     budgetRemoved: "Budget di peso rimosso",
     budgetSaveFailed: "Impossibile salvare il budget",
     budgetInvalid: "Inserisci un peso tra 0,1 e 500 kg",
+    uncheckAllButton: "Togli tutte le spunte",
+    uncheckAllConfirm: (n: number) =>
+      n === 1
+        ? "Togliere davvero la spunta? La voce rimane."
+        : `Togliere davvero tutte le ${n} spunte? Le voci rimangono.`,
+    uncheckAllDone: "Tutte le spunte tolte – pronto per il prossimo bagaglio",
+    uncheckAllFailed: "Impossibile togliere le spunte",
   },
   packListPrint: {
     docTitle: name => `${name} – lista bagagli da stampare`,

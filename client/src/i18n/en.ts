@@ -383,6 +383,13 @@ export const en: Translation = {
     budgetRemoved: "Weight budget removed",
     budgetSaveFailed: "The budget could not be saved",
     budgetInvalid: "Enter a weight between 0.1 and 500 kg",
+    uncheckAllButton: "Untick all",
+    uncheckAllConfirm: (n: number) =>
+      n === 1
+        ? "Really untick the checked item? The item itself is kept."
+        : `Really untick all ${n} checked items? The items themselves are kept.`,
+    uncheckAllDone: "All ticks removed – ready for the next packing",
+    uncheckAllFailed: "Could not remove the ticks",
   },
   packListPrint: {
     docTitle: name => `${name} – printable packing list`,

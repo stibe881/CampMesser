@@ -9,6 +9,7 @@ import {
   Plus,
   Printer,
   QrCode,
+  RotateCcw,
   Scale,
   Share2,
   Trash2,
@@ -134,6 +135,25 @@ export default function PackListDetailPage() {
     onError: (_e, _v, ctx) => {
       if (ctx?.prev) utils.packing.items.setData({ listId }, ctx.prev);
       toast.error(t.packListDetail.toggleFailed);
+    },
+  });
+
+  // Alle Haken lösen – optimistisch, damit die Liste sofort «frisch» aussieht
+  const uncheckAllMutation = trpc.packing.uncheckAll.useMutation({
+    onMutate: async () => {
+      await utils.packing.items.cancel({ listId });
+      const prev = utils.packing.items.getData({ listId });
+      utils.packing.items.setData({ listId }, old =>
+        old
+          ? { ...old, items: old.items.map(i => ({ ...i, checked: false })) }
+          : old
+      );
+      return { prev };
+    },
+    onSuccess: () => toast.success(t.packListDetail.uncheckAllDone),
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) utils.packing.items.setData({ listId }, ctx.prev);
+      toast.error(t.packListDetail.uncheckAllFailed);
     },
   });
 
@@ -571,6 +591,21 @@ export default function PackListDetailPage() {
             <BookmarkPlus className="mr-1.5 h-4 w-4" aria-hidden="true" />
             {t.packListDetail.saveTemplateButton}
           </Button>
+          {checkedCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={uncheckAllMutation.isPending}
+              onClick={() => {
+                if (confirm(t.packListDetail.uncheckAllConfirm(checkedCount))) {
+                  uncheckAllMutation.mutate({ listId });
+                }
+              }}
+            >
+              <RotateCcw className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.packListDetail.uncheckAllButton}
+            </Button>
+          )}
         </div>
         {shareUrl && (
           <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
