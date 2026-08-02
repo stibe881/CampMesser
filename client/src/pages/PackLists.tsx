@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import {
+  Baby,
   Backpack,
   Bike,
   Copy,
+  ListChecks,
   ListPlus,
   Loader2,
   Plus,
@@ -14,6 +16,7 @@ import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +30,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
-import { packScenarios } from "@shared/packTemplates";
+import { familyAddOns, packScenarios } from "@shared/packTemplates";
 import { pick } from "@shared/i18n";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +54,8 @@ export default function PackListsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [scenario, setScenario] = useState("solo");
   const [name, setName] = useState("");
+  // Familien-Checkliste, für die gerade eine Ziel-Liste gewählt wird
+  const [addOnId, setAddOnId] = useState<string | null>(null);
 
   const createMutation = trpc.packing.createList.useMutation({
     onSuccess: () => {
@@ -73,6 +78,38 @@ export default function PackListsPage() {
     },
     onError: () => toast.error(t.packLists.duplicateFailed),
   });
+
+  const addItemsMutation = trpc.packing.addItems.useMutation({
+    onError: () => toast.error(t.packLists.addOnAddFailed),
+  });
+
+  const activeAddOn = familyAddOns.find(a => a.id === addOnId) ?? null;
+
+  /** Einträge des gewählten Pakets in der aktiven Sprache in die Liste übernehmen. */
+  const addAddOnToList = (list: { id: number; name: string }) => {
+    if (!activeAddOn) return;
+    addItemsMutation.mutate(
+      {
+        listId: list.id,
+        // Vorlagen-Einträge in der aktuellen Sprache speichern – die Liste
+        // selbst bleibt einsprachig.
+        items: activeAddOn.items.map(i => ({
+          name: pick(i.name, lang),
+          category: pick(i.category, lang),
+          quantity: i.quantity ?? 1,
+        })),
+      },
+      {
+        onSuccess: () => {
+          utils.packing.items.invalidate({ listId: list.id });
+          toast.success(
+            t.packLists.addOnAdded(pick(activeAddOn.label, lang), list.name)
+          );
+          setAddOnId(null);
+        },
+      }
+    );
+  };
 
   if (loading) {
     return (
@@ -265,6 +302,114 @@ export default function PackListsPage() {
           </p>
         </div>
       )}
+
+      {/* Checklisten für Familien: fertige Pakete in eine Liste übernehmen */}
+      <h2 className="mb-1 mt-10 font-serif text-xl font-semibold">
+        {t.packLists.familyTitle}
+      </h2>
+      <p className="mb-3 text-sm text-muted-foreground">
+        {t.packLists.familySubtitle}
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {familyAddOns.map(addOn => (
+          <Card key={addOn.id}>
+            <CardContent className="pt-6">
+              <div className="mb-2 flex items-center gap-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                  <Baby className="h-4.5 w-4.5" aria-hidden="true" />
+                </span>
+                <p className="font-semibold">{pick(addOn.label, lang)}</p>
+              </div>
+              <p className="mb-3 text-sm text-muted-foreground">
+                {pick(addOn.description, lang)}
+              </p>
+              <ul className="mb-4 space-y-1 text-sm">
+                {addOn.items.slice(0, 4).map(item => (
+                  <li key={item.name.de} className="flex gap-2">
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                      aria-hidden="true"
+                    />
+                    {pick(item.name, lang)}
+                  </li>
+                ))}
+                {addOn.items.length > 4 && (
+                  <li className="text-xs text-muted-foreground">
+                    {t.packLists.moreItems(addOn.items.length - 4)}
+                  </li>
+                )}
+              </ul>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAddOnId(addOn.id)}
+                aria-label={t.packLists.addToPackListAria(
+                  pick(addOn.label, lang)
+                )}
+              >
+                <ListChecks className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {t.packLists.addToPackList}
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Ziel-Liste für das gewählte Paket auswählen */}
+      <Dialog
+        open={activeAddOn !== null}
+        onOpenChange={open => !open && setAddOnId(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.packLists.chooseListTitle}</DialogTitle>
+            <DialogDescription>
+              {activeAddOn
+                ? t.packLists.chooseListDescription(
+                    pick(activeAddOn.label, lang)
+                  )
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          {listsQuery.data && listsQuery.data.length > 0 ? (
+            <div className="space-y-2">
+              {listsQuery.data.map(list => {
+                const Icon = scenarioIcons[list.scenario] ?? ListPlus;
+                return (
+                  <button
+                    key={list.id}
+                    type="button"
+                    disabled={addItemsMutation.isPending}
+                    onClick={() => addAddOnToList(list)}
+                    className="flex w-full items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5 text-left text-sm font-medium transition-all hover:border-primary/40 disabled:opacity-50"
+                  >
+                    <Icon
+                      className="h-4 w-4 shrink-0 text-primary"
+                      aria-hidden="true"
+                    />
+                    <span className="flex-1 truncate">{list.name}</span>
+                    {addItemsMutation.isPending ? (
+                      <Loader2
+                        className="h-4 w-4 shrink-0 animate-spin text-muted-foreground"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <Plus
+                        className="h-4 w-4 shrink-0 text-muted-foreground"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {t.packLists.noListsForAddOn}
+            </p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

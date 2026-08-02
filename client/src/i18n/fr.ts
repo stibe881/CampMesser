@@ -210,6 +210,20 @@ export const fr: Translation = {
     deleteConfirm: name => `Vraiment supprimer la liste «${name}» ?`,
     emptyTitle: "Pas encore de liste de bagages",
     emptyText: "Crée ta première liste – choisis simplement un scénario.",
+    familyTitle: "Checklists pour les familles",
+    familySubtitle:
+      "Des paquets prêts à l'emploi pour camper avec des enfants – reprends les entrées dans une de tes listes.",
+    moreItems: (n: number) => `… et ${n} autres entrées`,
+    addToPackList: "Ajouter à une liste de bagages",
+    addToPackListAria: label =>
+      `Ajouter le paquet ${label} à une liste de bagages`,
+    chooseListTitle: "Choisir une liste de bagages",
+    chooseListDescription: label =>
+      `Dans quelle liste veux-tu reprendre les entrées de «${label}» ?`,
+    addOnAdded: (label, list) => `«${label}» ajouté à «${list}»`,
+    addOnAddFailed: "Impossible d'ajouter les entrées",
+    noListsForAddOn:
+      "Crée d'abord une liste de bagages – tu pourras ensuite reprendre le paquet.",
   },
   packListDetail: {
     backLabel: "Listes de bagages",
@@ -1343,10 +1357,6 @@ export const fr: Translation = {
       "Listes de bagages adaptées aux enfants, occupations pendant le montage de la tente et savoir nature ludique.",
     offlineNote:
       "Les chasses au trésor et les quiz fonctionnent entièrement hors ligne – idéal pour les campings isolés.",
-    checklistsTitle: "Checklists pour les familles",
-    moreItems: (n: number) => `… et ${n} autres entrées`,
-    toPackListsAria: "Vers les listes de bagages pour ajouter le paquet",
-    addToPackList: "Ajouter à une liste de bagages",
     huntsTitle: "Chasses au trésor",
     huntsSubtitle:
       "De quoi occuper les enfants pendant que la tente se monte – la progression est enregistrée sur l'appareil.",

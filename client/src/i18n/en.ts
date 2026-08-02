@@ -206,6 +206,19 @@ export const en: Translation = {
     deleteConfirm: name => `Really delete the list "${name}"?`,
     emptyTitle: "No packing lists yet",
     emptyText: "Create your first list – simply pick a scenario.",
+    familyTitle: "Checklists for families",
+    familySubtitle:
+      "Ready-made bundles for camping with kids – add the entries to one of your lists.",
+    moreItems: (n: number) => `… and ${n} more items`,
+    addToPackList: "Add to a packing list",
+    addToPackListAria: label => `Add the ${label} bundle to a packing list`,
+    chooseListTitle: "Choose a packing list",
+    chooseListDescription: label =>
+      `Which list should the entries from "${label}" be added to?`,
+    addOnAdded: (label, list) => `"${label}" added to "${list}"`,
+    addOnAddFailed: "The entries could not be added",
+    noListsForAddOn:
+      "Create a packing list first – then you can add the bundle.",
   },
   packListDetail: {
     backLabel: "Packing lists",
@@ -1304,10 +1317,6 @@ export const en: Translation = {
       "Child-safe packing lists, things to do while the tent goes up and playful nature knowledge.",
     offlineNote:
       "Scavenger hunts and quizzes work fully offline – ideal for remote campsites.",
-    checklistsTitle: "Checklists for families",
-    moreItems: (n: number) => `… and ${n} more items`,
-    toPackListsAria: "To the packing lists to add the bundle",
-    addToPackList: "Add to a packing list",
     huntsTitle: "Scavenger hunts",
     huntsSubtitle:
       "Keeps the kids busy while the tent goes up – progress is saved on the device.",

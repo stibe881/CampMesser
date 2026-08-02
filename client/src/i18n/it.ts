@@ -207,6 +207,20 @@ export const it: Translation = {
     deleteConfirm: name => `Eliminare davvero la lista «${name}»?`,
     emptyTitle: "Ancora nessuna lista bagagli",
     emptyText: "Crea la tua prima lista – scegli semplicemente uno scenario.",
+    familyTitle: "Checklist per famiglie",
+    familySubtitle:
+      "Pacchetti pronti per il campeggio con i bambini – riprendi le voci in una delle tue liste.",
+    moreItems: (n: number) => `… e altre ${n} voci`,
+    addToPackList: "Aggiungi a una lista bagagli",
+    addToPackListAria: label =>
+      `Aggiungere il pacchetto ${label} a una lista bagagli`,
+    chooseListTitle: "Scegli una lista bagagli",
+    chooseListDescription: label =>
+      `In quale lista vuoi riprendere le voci di «${label}»?`,
+    addOnAdded: (label, list) => `«${label}» aggiunto a «${list}»`,
+    addOnAddFailed: "Impossibile aggiungere le voci",
+    noListsForAddOn:
+      "Crea prima una lista bagagli – poi potrai riprendere il pacchetto.",
   },
   packListDetail: {
     backLabel: "Liste bagagli",
@@ -1328,10 +1342,6 @@ export const it: Translation = {
       "Liste bagagli a misura di bambino, attività durante il montaggio della tenda e conoscenze sulla natura in forma di gioco.",
     offlineNote:
       "Cacce al tesoro e quiz funzionano completamente offline – l'ideale per campeggi isolati.",
-    checklistsTitle: "Checklist per famiglie",
-    moreItems: (n: number) => `… e altre ${n} voci`,
-    toPackListsAria: "Alle liste bagagli per aggiungere il pacchetto",
-    addToPackList: "Aggiungi a una lista bagagli",
     huntsTitle: "Cacce al tesoro",
     huntsSubtitle:
       "Qualcosa da fare per i bambini mentre si monta la tenda – i progressi vengono salvati sul dispositivo.",

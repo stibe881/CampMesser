@@ -210,6 +210,21 @@ export const de = {
     deleteConfirm: (name: string) => `Liste «${name}» wirklich löschen?`,
     emptyTitle: "Noch keine Packlisten",
     emptyText: "Erstelle deine erste Liste – wähle einfach ein Szenario aus.",
+    familyTitle: "Checklisten für Familien",
+    familySubtitle:
+      "Fertige Pakete fürs Camping mit Kindern – übernimm die Einträge in eine deiner Listen.",
+    moreItems: (n: number) => `… und ${n} weitere Einträge`,
+    addToPackList: "Zu einer Packliste hinzufügen",
+    addToPackListAria: (label: string) =>
+      `Paket ${label} zu einer Packliste hinzufügen`,
+    chooseListTitle: "Packliste wählen",
+    chooseListDescription: (label: string) =>
+      `In welche Liste sollen die Einträge aus «${label}» übernommen werden?`,
+    addOnAdded: (label: string, list: string) =>
+      `«${label}» zu «${list}» hinzugefügt`,
+    addOnAddFailed: "Einträge konnten nicht hinzugefügt werden",
+    noListsForAddOn:
+      "Erstelle zuerst eine Packliste – danach kannst du das Paket übernehmen.",
   },
   packListDetail: {
     backLabel: "Packlisten",
@@ -1342,10 +1357,6 @@ export const de = {
       "Kindersichere Packlisten, Beschäftigung beim Zeltaufbau und spielerisches Naturwissen.",
     offlineNote:
       "Schnitzeljagden und Quizze funktionieren komplett offline – ideal für abgelegene Zeltplätze.",
-    checklistsTitle: "Checklisten für Familien",
-    moreItems: (n: number) => `… und ${n} weitere Einträge`,
-    toPackListsAria: "Zu den Packlisten, um das Paket hinzuzufügen",
-    addToPackList: "Zu einer Packliste hinzufügen",
     huntsTitle: "Schnitzeljagden",
     huntsSubtitle:
       "Beschäftigung für die Kinder, während das Zelt steht – der Fortschritt wird auf dem Gerät gespeichert.",

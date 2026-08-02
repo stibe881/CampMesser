@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import {
-  Baby,
   BadgeCheck,
   Compass as CompassIcon,
   Gift,
   Lightbulb,
-  ListChecks,
   Map,
   PartyPopper,
   Pencil,
@@ -20,7 +18,6 @@ import {
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -41,7 +38,6 @@ import {
   type NatureQuiz,
   type ScavengerHunt,
 } from "@/data/familyActivities";
-import { familyAddOns } from "@shared/packTemplates";
 import { pick, type Language } from "@shared/i18n";
 import { useI18n, useT } from "@/i18n";
 import { MAX_STATIONS, parseHuntStations } from "@shared/hunts";
@@ -748,50 +744,6 @@ export default function FamilyPage() {
       <div className="mb-6 flex items-center gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
         <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
         {t.family.offlineNote}
-      </div>
-
-      {/* Checklisten-Pakete */}
-      <h2 className="mb-3 font-serif text-xl font-semibold">
-        {t.family.checklistsTitle}
-      </h2>
-      <div className="mb-8 grid gap-3 sm:grid-cols-2">
-        {familyAddOns.map(addOn => (
-          <Card key={addOn.id}>
-            <CardContent className="pt-6">
-              <div className="mb-2 flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                  <Baby className="h-4.5 w-4.5" aria-hidden="true" />
-                </span>
-                <p className="font-semibold">{pick(addOn.label, lang)}</p>
-              </div>
-              <p className="mb-3 text-sm text-muted-foreground">
-                {pick(addOn.description, lang)}
-              </p>
-              <ul className="mb-4 space-y-1 text-sm">
-                {addOn.items.slice(0, 4).map(item => (
-                  <li key={item.name.de} className="flex gap-2">
-                    <span
-                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
-                      aria-hidden="true"
-                    />
-                    {pick(item.name, lang)}
-                  </li>
-                ))}
-                {addOn.items.length > 4 && (
-                  <li className="text-xs text-muted-foreground">
-                    {t.family.moreItems(addOn.items.length - 4)}
-                  </li>
-                )}
-              </ul>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/packlisten" aria-label={t.family.toPackListsAria}>
-                  <ListChecks className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                  {t.family.addToPackList}
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
       </div>
 
       {/* Schnitzeljagden */}
