@@ -35,6 +35,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { recipes } from "@/data/recipes";
 import { customRecipeToRecipe } from "@/lib/customRecipesClient";
+import { loadRecipeFavorites } from "@/lib/recipeFavorites";
 import { RECIPE_METHOD_LABELS } from "@shared/customRecipes";
 import { expiryInfo, expirySortKey, type ExpiryState } from "@shared/food";
 import type { FoodTemplateItem } from "@shared/foodTemplates";
@@ -174,6 +175,10 @@ export default function FoodPage() {
   const customRecipesQuery = trpc.recipes.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  // Rezept-Favoriten (einmal beim Laden gelesen) als leichter Bonus bei Gleichstand
+  const [favoriteIds] = useState<ReadonlySet<string>>(
+    () => new Set(loadRecipeFavorites())
+  );
   const suggestions = useMemo(() => {
     if (foodNames.length === 0) return [];
     const pool = [
@@ -191,10 +196,13 @@ export default function FoodPage() {
       .filter(s => s.score > 0)
       .sort(
         (a, b) =>
-          b.score - a.score || a.recipe.timeMinutes - b.recipe.timeMinutes
+          b.score - a.score ||
+          Number(favoriteIds.has(b.recipe.id)) -
+            Number(favoriteIds.has(a.recipe.id)) ||
+          a.recipe.timeMinutes - b.recipe.timeMinutes
       )
       .slice(0, 5);
-  }, [foodNames, customRecipesQuery.data, lang]);
+  }, [foodNames, customRecipesQuery.data, lang, favoriteIds]);
 
   if (loading) {
     return (

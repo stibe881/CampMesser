@@ -1568,6 +1568,13 @@ export const en: Translation = {
     stepsTitle: "Preparation",
     tipTitle: "Tip",
     deleteConfirm: (name: string) => `Really delete the recipe “${name}”?`,
+    favoritesFilter: "Favourites",
+    favoriteAria: (name: string) => `Save ${name} as a favourite`,
+    unfavoriteAria: (name: string) => `Remove ${name} from favourites`,
+    favoriteSave: "Save as favourite",
+    favoriteSaved: "Favourite",
+    favoritesEmpty:
+      "No favourites yet – tap the heart on a recipe to collect it here.",
     editor: {
       titleEdit: "Edit recipe",
       titleNew: "Create your own recipe",

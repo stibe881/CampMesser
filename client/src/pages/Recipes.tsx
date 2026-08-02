@@ -5,6 +5,7 @@ import {
   Clock,
   CookingPot,
   Flame,
+  Heart,
   ImagePlus,
   Pencil,
   Plus,
@@ -48,6 +49,13 @@ import {
   type CustomRecipeRow,
 } from "@/lib/customRecipesClient";
 import { resizeImageForUpload } from "@/lib/imageResize";
+import {
+  loadRecipeFavorites,
+  sanitizeRecipeFavorites,
+  storeRecipeFavorites,
+  toggleFavorite,
+} from "@/lib/recipeFavorites";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { cn } from "@/lib/utils";
 
 /** Editor für eigene Rezepte: erstellen und bearbeiten (Zutaten/Schritte zeilenweise). */
@@ -415,6 +423,26 @@ export default function RecipesPage() {
   const [maxTime, setMaxTime] = useState<string>("alle");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Recipe | null>(null);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+
+  // Favoriten: localStorage als schnelle Quelle, Geräte-Sync fürs Konto
+  const [favorites, setFavorites] = useState<string[]>(() =>
+    loadRecipeFavorites()
+  );
+  const favoritesSync = useSyncedSetting<string[]>("recipeFavorites", value => {
+    const clean = sanitizeRecipeFavorites(value);
+    setFavorites(clean);
+    storeRecipeFavorites(clean);
+  });
+  const handleToggleFavorite = (recipeId: string) => {
+    setFavorites(prev => {
+      const next = toggleFavorite(prev, recipeId);
+      storeRecipeFavorites(next);
+      favoritesSync.push(next);
+      return next;
+    });
+  };
+  const isFavorite = (recipeId: string) => favorites.includes(recipeId);
 
   // Schnellaktion «Rezept suchen» (?suche=1): Fokus direkt ins Suchfeld
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -458,7 +486,8 @@ export default function RecipesPage() {
   );
 
   const filtered = useMemo(() => {
-    return allRecipes.filter(r => {
+    const matching = allRecipes.filter(r => {
+      if (favoritesOnly && !favorites.includes(r.id)) return false;
       if (method !== "alle" && r.method !== method && r.method !== "Beides")
         return false;
       if (maxTime !== "alle" && r.timeMinutes > Number(maxTime)) return false;
@@ -472,7 +501,12 @@ export default function RecipesPage() {
       }
       return true;
     });
-  }, [allRecipes, method, maxTime, search, lang]);
+    // Favoriten zuoberst – innerhalb beider Gruppen bleibt die Reihenfolge stabil
+    return [
+      ...matching.filter(r => favorites.includes(r.id)),
+      ...matching.filter(r => !favorites.includes(r.id)),
+    ];
+  }, [allRecipes, method, maxTime, search, lang, favorites, favoritesOnly]);
 
   const customRowFor = (recipe: Recipe): CustomRecipeRow | undefined =>
     customQuery.data?.find(row => `eigenes-${row.id}` === recipe.id);
@@ -554,6 +588,26 @@ export default function RecipesPage() {
               </button>
             ))}
           </div>
+          <span className="text-border" aria-hidden="true">
+            ·
+          </span>
+          <button
+            type="button"
+            onClick={() => setFavoritesOnly(v => !v)}
+            aria-pressed={favoritesOnly}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+              favoritesOnly
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Heart
+              className={cn("h-3.5 w-3.5", favoritesOnly && "fill-current")}
+              aria-hidden="true"
+            />
+            {t.recipes.favoritesFilter}
+          </button>
         </div>
       </div>
 
@@ -573,69 +627,99 @@ export default function RecipesPage() {
       {/* Rezept-Karten */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map(recipe => (
-          <button
-            key={recipe.id}
-            type="button"
-            onClick={() => setSelected(recipe)}
-            className="flex flex-col items-start gap-2.5 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
-            aria-label={t.recipes.openRecipeAria(pick(recipe.name, lang))}
-          >
-            {recipe.image && (
-              <img
-                src={recipe.image}
-                alt={t.recipes.photoAlt(pick(recipe.name, lang))}
-                loading="lazy"
-                className="aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
-              />
-            )}
-            <div className="flex w-full items-center justify-between">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                {recipe.method === "Offenes Feuer" ? (
-                  <Flame className="h-5 w-5" aria-hidden="true" />
-                ) : (
-                  <CookingPot className="h-5 w-5" aria-hidden="true" />
+          <div key={recipe.id} className="relative">
+            {/* Herz separat über der Karte – Buttons dürfen nicht verschachtelt sein */}
+            <button
+              type="button"
+              onClick={() => handleToggleFavorite(recipe.id)}
+              aria-pressed={isFavorite(recipe.id)}
+              aria-label={
+                isFavorite(recipe.id)
+                  ? t.recipes.unfavoriteAria(pick(recipe.name, lang))
+                  : t.recipes.favoriteAria(pick(recipe.name, lang))
+              }
+              className="absolute right-2.5 top-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 shadow-sm backdrop-blur-sm transition-colors hover:bg-background"
+            >
+              <Heart
+                className={cn(
+                  "h-4 w-4",
+                  isFavorite(recipe.id)
+                    ? "fill-red-500 text-red-500"
+                    : "text-muted-foreground"
                 )}
-              </span>
-              <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-                {t.recipes.minutes(recipe.timeMinutes)}
-              </span>
-            </div>
-            <p className="font-semibold">{pick(recipe.name, lang)}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {customRowFor(recipe) && (
-                <Badge className="gap-1 border-0 bg-primary/15 text-primary">
-                  <ChefHat className="h-3 w-3" aria-hidden="true" />
-                  {t.recipes.ownBadge}
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelected(recipe)}
+              className="flex h-full w-full flex-col items-start gap-2.5 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
+              aria-label={t.recipes.openRecipeAria(pick(recipe.name, lang))}
+            >
+              {recipe.image && (
+                <img
+                  src={recipe.image}
+                  alt={t.recipes.photoAlt(pick(recipe.name, lang))}
+                  loading="lazy"
+                  className="aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
+                />
+              )}
+              <div
+                className={cn(
+                  "flex w-full items-center justify-between",
+                  !recipe.image && "pr-9"
+                )}
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                  {recipe.method === "Offenes Feuer" ? (
+                    <Flame className="h-5 w-5" aria-hidden="true" />
+                  ) : (
+                    <CookingPot className="h-5 w-5" aria-hidden="true" />
+                  )}
+                </span>
+                <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                  {t.recipes.minutes(recipe.timeMinutes)}
+                </span>
+              </div>
+              <p className="font-semibold">{pick(recipe.name, lang)}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {customRowFor(recipe) && (
+                  <Badge className="gap-1 border-0 bg-primary/15 text-primary">
+                    <ChefHat className="h-3 w-3" aria-hidden="true" />
+                    {t.recipes.ownBadge}
+                  </Badge>
+                )}
+                <Badge variant="secondary">
+                  {pick(RECIPE_METHOD_LABELS[recipe.method], lang)}
                 </Badge>
-              )}
-              <Badge variant="secondary">
-                {pick(RECIPE_METHOD_LABELS[recipe.method], lang)}
-              </Badge>
-              {recipe.onePot && (
-                <Badge variant="outline">{t.recipes.onePotBadge}</Badge>
-              )}
-              {recipe.kidFriendly && (
-                <Badge variant="outline" className="gap-1">
-                  <Baby className="h-3 w-3" aria-hidden="true" />
-                  {t.recipes.kidsBadge}
-                </Badge>
-              )}
-            </div>
-            <p className="line-clamp-2 text-sm text-muted-foreground">
-              {recipe.ingredients
-                .slice(0, 4)
-                .map(i => pick(i, lang))
-                .join(", ")}{" "}
-              …
-            </p>
-          </button>
+                {recipe.onePot && (
+                  <Badge variant="outline">{t.recipes.onePotBadge}</Badge>
+                )}
+                {recipe.kidFriendly && (
+                  <Badge variant="outline" className="gap-1">
+                    <Baby className="h-3 w-3" aria-hidden="true" />
+                    {t.recipes.kidsBadge}
+                  </Badge>
+                )}
+              </div>
+              <p className="line-clamp-2 text-sm text-muted-foreground">
+                {recipe.ingredients
+                  .slice(0, 4)
+                  .map(i => pick(i, lang))
+                  .join(", ")}{" "}
+                …
+              </p>
+            </button>
+          </div>
         ))}
       </div>
 
       {filtered.length === 0 && (
         <p className="py-10 text-center text-muted-foreground">
-          {t.recipes.emptyState}
+          {favoritesOnly && favorites.length === 0
+            ? t.recipes.favoritesEmpty
+            : t.recipes.emptyState}
         </p>
       )}
 
@@ -665,6 +749,25 @@ export default function RecipesPage() {
                   </span>
                 </DialogDescription>
               </DialogHeader>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-fit"
+                aria-pressed={isFavorite(selected.id)}
+                onClick={() => handleToggleFavorite(selected.id)}
+              >
+                <Heart
+                  className={cn(
+                    "mr-1.5 h-4 w-4",
+                    isFavorite(selected.id) && "fill-red-500 text-red-500"
+                  )}
+                  aria-hidden="true"
+                />
+                {isFavorite(selected.id)
+                  ? t.recipes.favoriteSaved
+                  : t.recipes.favoriteSave}
+              </Button>
 
               <div className="space-y-4">
                 {selected.image && (
@@ -770,6 +873,10 @@ export default function RecipesPage() {
                           )
                         ) {
                           removeMutation.mutate({ id: row.id });
+                          // Gelöschte eigene Rezepte auch aus den Favoriten räumen
+                          if (isFavorite(selected.id)) {
+                            handleToggleFavorite(selected.id);
+                          }
                           setSelected(null);
                         }
                       }}

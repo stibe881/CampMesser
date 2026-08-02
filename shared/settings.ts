@@ -18,6 +18,8 @@ export const SYNCED_SETTING_KEYS = [
   "language",
   /** Lernfortschritt des Knoten-Quiz (Statistik pro Knoten) */
   "knotProgress",
+  /** Favorisierte Rezepte (statische Ids + «eigenes-<id>») */
+  "recipeFavorites",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];

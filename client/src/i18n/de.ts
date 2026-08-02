@@ -1622,6 +1622,13 @@ export const de = {
     stepsTitle: "Zubereitung",
     tipTitle: "Tipp",
     deleteConfirm: (name: string) => `Rezept «${name}» wirklich löschen?`,
+    favoritesFilter: "Favoriten",
+    favoriteAria: (name: string) => `${name} als Favorit speichern`,
+    unfavoriteAria: (name: string) => `${name} aus den Favoriten entfernen`,
+    favoriteSave: "Als Favorit speichern",
+    favoriteSaved: "Favorit",
+    favoritesEmpty:
+      "Noch keine Favoriten – tippe auf das Herz eines Rezepts, um es hier zu sammeln.",
     editor: {
       titleEdit: "Rezept bearbeiten",
       titleNew: "Eigenes Rezept erstellen",

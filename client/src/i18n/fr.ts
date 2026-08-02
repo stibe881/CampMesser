@@ -1621,6 +1621,13 @@ export const fr: Translation = {
     tipTitle: "Astuce",
     deleteConfirm: (name: string) =>
       `Supprimer vraiment la recette « ${name} » ?`,
+    favoritesFilter: "Favoris",
+    favoriteAria: (name: string) => `Enregistrer ${name} comme favori`,
+    unfavoriteAria: (name: string) => `Retirer ${name} des favoris`,
+    favoriteSave: "Enregistrer comme favori",
+    favoriteSaved: "Favori",
+    favoritesEmpty:
+      "Pas encore de favoris – touche le cœur d'une recette pour la retrouver ici.",
     editor: {
       titleEdit: "Modifier la recette",
       titleNew: "Créer ma propre recette",
