@@ -15,6 +15,8 @@ import {
   Sparkles,
   Trash2,
   Trophy,
+  Volume2,
+  VolumeX,
   WifiOff,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -55,6 +57,7 @@ import {
   customQuizToNatureQuiz,
   type CustomQuizRow,
 } from "@/lib/customQuizzes";
+import { useSpeech } from "@/lib/speech";
 import { cn } from "@/lib/utils";
 
 /** Buchstabe einer Station in der aktiven Sprache ("" = keiner). */
@@ -631,6 +634,30 @@ function HuntDialog({
   const doneCount = checked.filter(Boolean).length;
   const allDone = doneCount === hunt.stations.length;
 
+  // ── Vorlese-Modus: eine Station gleichzeitig, Stationswechsel stoppt ──
+  const speech = useSpeech();
+  const [speakingStation, setSpeakingStation] = useState<number | null>(null);
+  useEffect(() => {
+    if (!speech.speaking) setSpeakingStation(null);
+  }, [speech.speaking]);
+  const stopSpeaking = () => {
+    speech.stop();
+    setSpeakingStation(null);
+  };
+  /** Geschichte + Aufgabe (+ aufgedeckter Hinweis) der Station vorlesen. */
+  const toggleSpeak = (index: number, station: HuntStation) => {
+    if (speakingStation === index) {
+      stopSpeaking();
+      return;
+    }
+    const parts = [pick(station.story, lang), pick(station.task, lang)];
+    if (revealedHints[index] && station.hint) {
+      parts.push(pick(station.hint, lang));
+    }
+    speech.speak(parts.filter(Boolean).join("\n"), lang);
+    setSpeakingStation(index);
+  };
+
   // Abschluss nur melden, wenn die Jagd IN DIESER SITZUNG fertig wurde –
   // eine schon beim Öffnen komplette Jagd (localStorage) zählt nicht erneut.
   const sawIncompleteRef = useRef(false);
@@ -726,31 +753,61 @@ function HuntDialog({
                 <Checkbox
                   id={`${hunt.id}-station-${i}`}
                   checked={checked[i]}
-                  onCheckedChange={value =>
+                  onCheckedChange={value => {
+                    // Stationswechsel: laufendes Vorlesen stoppen
+                    stopSpeaking();
                     setChecked(prev =>
                       prev.map((c, idx) => (idx === i ? value === true : c))
-                    )
-                  }
+                    );
+                  }}
                   className="mt-0.5"
                   aria-label={t.family.stationDoneAria(
                     pick(station.title, lang)
                   )}
                 />
                 <div className="min-w-0 flex-1">
-                  <label
-                    htmlFor={`${hunt.id}-station-${i}`}
-                    className={cn(
-                      "cursor-pointer text-sm font-semibold",
-                      checked[i] && "text-muted-foreground"
+                  <div className="flex items-start justify-between gap-2">
+                    <label
+                      htmlFor={`${hunt.id}-station-${i}`}
+                      className={cn(
+                        "cursor-pointer text-sm font-semibold",
+                        checked[i] && "text-muted-foreground"
+                      )}
+                    >
+                      {pick(station.title, lang)}
+                      {letter && checked[i] && (
+                        <span className="ml-2 rounded bg-accent px-1.5 py-0.5 font-mono text-xs font-bold text-primary">
+                          {t.family.letterBadge(letter)}
+                        </span>
+                      )}
+                    </label>
+                    {speech.supported && (
+                      <button
+                        type="button"
+                        onClick={() => toggleSpeak(i, station)}
+                        aria-pressed={speakingStation === i}
+                        aria-label={
+                          speakingStation === i
+                            ? t.family.readAloudStopAria(
+                                pick(station.title, lang)
+                              )
+                            : t.family.readAloudAria(pick(station.title, lang))
+                        }
+                        className={cn(
+                          "-mr-1 -mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors",
+                          speakingStation === i
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        )}
+                      >
+                        {speakingStation === i ? (
+                          <VolumeX className="h-4 w-4" aria-hidden="true" />
+                        ) : (
+                          <Volume2 className="h-4 w-4" aria-hidden="true" />
+                        )}
+                      </button>
                     )}
-                  >
-                    {pick(station.title, lang)}
-                    {letter && checked[i] && (
-                      <span className="ml-2 rounded bg-accent px-1.5 py-0.5 font-mono text-xs font-bold text-primary">
-                        {t.family.letterBadge(letter)}
-                      </span>
-                    )}
-                  </label>
+                  </div>
                   <p className="mt-1 text-xs italic text-muted-foreground">
                     {pick(station.story, lang)}
                   </p>
@@ -829,6 +886,7 @@ function HuntDialog({
           variant="outline"
           className="flex-1"
           onClick={() => {
+            stopSpeaking();
             setChecked(new Array(hunt.stations.length).fill(false));
             setRevealedHints({});
           }}

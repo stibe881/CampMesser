@@ -1932,6 +1932,9 @@ export const fr: Translation = {
     stationDoneAria: (title: string) => `Étape réussie : ${title}`,
     letterBadge: (letter: string) => `Lettre : ${letter}`,
     showHint: "Afficher l'indice",
+    readAloudAria: (title: string) => `Lire l'étape ${title} à voix haute`,
+    readAloudStopAria: (title: string) =>
+      `Arrêter la lecture de l'étape ${title}`,
     secretStations: (n: number) =>
       n === 1
         ? "Encore 1 étape secrète – coche l'étape actuelle pour continuer !"

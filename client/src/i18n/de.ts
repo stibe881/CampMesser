@@ -1929,6 +1929,9 @@ export const de = {
     stationDoneAria: (title: string) => `Station geschafft: ${title}`,
     letterBadge: (letter: string) => `Buchstabe: ${letter}`,
     showHint: "Hinweis anzeigen",
+    readAloudAria: (title: string) => `Station ${title} vorlesen`,
+    readAloudStopAria: (title: string) =>
+      `Vorlesen von Station ${title} stoppen`,
     secretStations: (n: number) =>
       n === 1
         ? "Noch 1 geheime Station – hake die aktuelle Station ab, um weiterzukommen!"

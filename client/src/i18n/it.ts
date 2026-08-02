@@ -1914,6 +1914,9 @@ export const it: Translation = {
     stationDoneAria: (title: string) => `Tappa completata: ${title}`,
     letterBadge: (letter: string) => `Lettera: ${letter}`,
     showHint: "Mostra indizio",
+    readAloudAria: (title: string) => `Leggi la tappa ${title} ad alta voce`,
+    readAloudStopAria: (title: string) =>
+      `Interrompi la lettura della tappa ${title}`,
     secretStations: (n: number) =>
       n === 1
         ? "Ancora 1 tappa segreta – spunta la tappa attuale per proseguire!"

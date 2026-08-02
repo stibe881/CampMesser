@@ -1873,6 +1873,8 @@ export const en: Translation = {
     stationDoneAria: (title: string) => `Station done: ${title}`,
     letterBadge: (letter: string) => `Letter: ${letter}`,
     showHint: "Show hint",
+    readAloudAria: (title: string) => `Read station ${title} aloud`,
+    readAloudStopAria: (title: string) => `Stop reading station ${title}`,
     secretStations: (n: number) =>
       n === 1
         ? "1 more secret station – tick off the current station to move on!"
