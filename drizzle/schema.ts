@@ -192,6 +192,31 @@ export const tripLogs = mysqlTable(
 export type TripLog = typeof tripLogs.$inferSelect;
 export type InsertTripLog = typeof tripLogs.$inferInsert;
 
+/**
+ * Fotos zum Reise-Tagebuch: die Datei liegt unter uploads/trips/<fileName>
+ * auf dem Webspace (server/tripPhotoStorage.ts), hier nur die Metadaten.
+ */
+export const tripPhotos = mysqlTable(
+  "tripPhotos",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Zugehöriger Tagebuch-/Trip-Eintrag (tripLogs.id) */
+    tripId: int("tripId").notNull(),
+    /** Serverseitig generierter Dateiname (nanoid + .jpg/.png/.webp) */
+    fileName: varchar("fileName", { length: 64 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    index("tripPhotos_userId").on(table.userId),
+    index("tripPhotos_tripId").on(table.tripId),
+    uniqueIndex("tripPhotos_fileName").on(table.fileName),
+  ]
+);
+
+export type TripPhoto = typeof tripPhotos.$inferSelect;
+export type InsertTripPhoto = typeof tripPhotos.$inferInsert;
+
 /** Web-Push-Abos für Unwetter-Warnungen an gespeicherten Zeltplätzen. */
 export const pushSubscriptions = mysqlTable(
   "pushSubscriptions",

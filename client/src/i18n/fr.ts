@@ -977,6 +977,32 @@ export const fr: Translation = {
     entriesTitle: "Tes séjours",
     empty:
       "Pas encore d'entrées – note ci-dessus ton premier séjour en camping.",
+    addPhotos: "Ajouter des photos",
+    addPhotosAria: name => `Ajouter des photos au séjour ${name}`,
+    photoCountHint: (n, max) => `${n} sur ${max} photos`,
+    photoUploading: n =>
+      n === 1 ? "1 photo en cours d'envoi …" : `${n} photos en cours d'envoi …`,
+    photoUploaded: n =>
+      n === 1 ? "Photo enregistrée" : `${n} photos enregistrées`,
+    photoLimitReached: max =>
+      `Maximum ${max} photos par séjour – les photos en trop ont été ignorées`,
+    photoTooLarge: name => `${name} : l'image est trop grande (max. 5 Mo)`,
+    photoUnsupportedType: name =>
+      `${name} : format non pris en charge – JPEG, PNG et WebP sont autorisés`,
+    photoHeic: name =>
+      `${name} : HEIC/HEIF n'est pas pris en charge – exporte la photo en JPEG`,
+    photoReadFailed: name => `${name} : impossible de lire l'image`,
+    photoUploadFailed: name => `${name} : échec de l'envoi`,
+    photosLoadFailed: "Impossible de charger les photos",
+    photoDeleteConfirm: "Supprimer définitivement cette photo ?",
+    photoDeleted: "Photo supprimée",
+    photoDeleteAria: n => `Supprimer la photo ${n}`,
+    photoAlt: (n, place) => `Photo ${n} du séjour ${place}`,
+    photoOpenAria: (n, place) => `Ouvrir la photo ${n} de ${place} en grand`,
+    galleryTitle: place => `Photos – ${place}`,
+    galleryCounter: (n, total) => `Photo ${n} sur ${total}`,
+    galleryPrev: "Photo précédente",
+    galleryNext: "Photo suivante",
   },
   firstAid: {
     title: "Guide de premiers secours",

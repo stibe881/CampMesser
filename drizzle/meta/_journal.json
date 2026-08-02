@@ -134,6 +134,13 @@
       "when": 1785640802402,
       "tag": "0018_slim_blindfold",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1785641505684,
+      "tag": "0019_mushy_invaders",
+      "breakpoints": true
     }
   ]
 }

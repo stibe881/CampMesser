@@ -187,7 +187,7 @@ Die App kann Push-Benachrichtigungen senden, wenn an einem gespeicherten Zeltpla
 curl -fsS "https://campmesser.ch/api/push/check?secret=DEIN_CRON_SECRET" > /dev/null
 ```
 
-Der Endpoint prüft alle Plätze abonnierter Nutzer*innen und sendet pro Warnlage genau eine Benachrichtigung; entspannte Lagen setzen den Zähler zurück. Ungültig gewordene Abos werden automatisch aufgeräumt.
+Der Endpoint prüft alle Plätze abonnierter Nutzer\*innen und sendet pro Warnlage genau eine Benachrichtigung; entspannte Lagen setzen den Zähler zurück. Ungültig gewordene Abos werden automatisch aufgeräumt.
 
 ## Datenbank-Backup
 
@@ -211,6 +211,10 @@ gunzip < ~/backups/campmesser/campmesser-JJJJMMTT-HHMMSS.sql.gz | \
 ```
 
 Lade die Sicherungen gelegentlich zusätzlich auf einen anderen Rechner herunter – ein Backup auf demselben Server schützt nicht vor dem Verlust des Accounts selbst.
+
+## Foto-Uploads (uploads/)
+
+Die Fotos aus dem Reise-Tagebuch liegen als Dateien unter `~/campmesser/uploads/trips/` (neben `dist/`), nur die Metadaten stehen in der Datenbank. Das Verzeichnis ist bewusst nicht versioniert (`.gitignore`); das Deployment per `git pull` und das Deploy-Skript lassen es unangetastet – falls du je auf ein Sync-Verfahren wie `rsync --delete` umstellst, musst du `uploads/` zwingend ausnehmen (`--exclude 'uploads/'`), sonst gehen die Fotos verloren. **Backup-Hinweis:** Der `mysqldump` sichert die Fotos nicht mit – sichere `uploads/` zusätzlich, z. B. gelegentlich per `tar czf ~/backups/campmesser/uploads-$(date +%Y%m%d).tar.gz -C ~/campmesser uploads` oder per SFTP-Download auf einen anderen Rechner.
 
 ## Sicherheitshinweis
 

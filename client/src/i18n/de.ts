@@ -974,6 +974,35 @@ export const de = {
     entriesTitle: "Deine Aufenthalte",
     empty:
       "Noch keine Einträge – halte oben deinen ersten Camping-Aufenthalt fest.",
+    addPhotos: "Fotos hinzufügen",
+    addPhotosAria: (name: string) => `Fotos zum Aufenthalt ${name} hinzufügen`,
+    photoCountHint: (n: number, max: number) => `${n} von ${max} Fotos`,
+    photoUploading: (n: number) =>
+      n === 1 ? "1 Foto wird hochgeladen …" : `${n} Fotos werden hochgeladen …`,
+    photoUploaded: (n: number) =>
+      n === 1 ? "Foto gespeichert" : `${n} Fotos gespeichert`,
+    photoLimitReached: (max: number) =>
+      `Maximal ${max} Fotos pro Aufenthalt – überzählige wurden übersprungen`,
+    photoTooLarge: (name: string) =>
+      `${name}: Das Bild ist zu gross (max. 5 MB)`,
+    photoUnsupportedType: (name: string) =>
+      `${name}: Format nicht unterstützt – erlaubt sind JPEG, PNG und WebP`,
+    photoHeic: (name: string) =>
+      `${name}: HEIC/HEIF wird nicht unterstützt – bitte das Foto als JPEG exportieren`,
+    photoReadFailed: (name: string) =>
+      `${name}: Das Bild konnte nicht gelesen werden`,
+    photoUploadFailed: (name: string) => `${name}: Upload fehlgeschlagen`,
+    photosLoadFailed: "Fotos konnten nicht geladen werden",
+    photoDeleteConfirm: "Dieses Foto endgültig löschen?",
+    photoDeleted: "Foto gelöscht",
+    photoDeleteAria: (n: number) => `Foto ${n} löschen`,
+    photoAlt: (n: number, place: string) => `Foto ${n} vom Aufenthalt ${place}`,
+    photoOpenAria: (n: number, place: string) =>
+      `Foto ${n} von ${place} in Grossansicht öffnen`,
+    galleryTitle: (place: string) => `Fotos – ${place}`,
+    galleryCounter: (n: number, total: number) => `Foto ${n} von ${total}`,
+    galleryPrev: "Vorheriges Foto",
+    galleryNext: "Nächstes Foto",
   },
   firstAid: {
     title: "Erste-Hilfe-Guide",

@@ -24,7 +24,14 @@ else
 fi
 
 echo "==> Neueste Version holen"
+# Wichtig: Das Deployment läuft über git pull und baut in-place – das
+# unversionierte uploads/-Verzeichnis (Tagebuch-Fotos, in .gitignore)
+# bleibt dabei unangetastet. Falls je auf rsync o. Ä. umgestellt wird:
+# uploads/ zwingend ausnehmen (rsync --exclude 'uploads/').
 git pull --ff-only
+
+echo "==> Upload-Verzeichnis sicherstellen"
+mkdir -p uploads/trips
 
 echo "==> Abhängigkeiten installieren"
 $PKG install

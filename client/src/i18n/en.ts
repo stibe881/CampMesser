@@ -953,6 +953,31 @@ export const en: Translation = {
     deleteEntryAria: name => `Delete entry ${name}`,
     entriesTitle: "Your stays",
     empty: "No entries yet – record your first camping stay above.",
+    addPhotos: "Add photos",
+    addPhotosAria: name => `Add photos to the stay ${name}`,
+    photoCountHint: (n, max) => `${n} of ${max} photos`,
+    photoUploading: n =>
+      n === 1 ? "Uploading 1 photo …" : `Uploading ${n} photos …`,
+    photoUploaded: n => (n === 1 ? "Photo saved" : `${n} photos saved`),
+    photoLimitReached: max =>
+      `At most ${max} photos per stay – extra photos were skipped`,
+    photoTooLarge: name => `${name}: the image is too large (max. 5 MB)`,
+    photoUnsupportedType: name =>
+      `${name}: unsupported format – JPEG, PNG and WebP are allowed`,
+    photoHeic: name =>
+      `${name}: HEIC/HEIF is not supported – please export the photo as JPEG`,
+    photoReadFailed: name => `${name}: the image could not be read`,
+    photoUploadFailed: name => `${name}: upload failed`,
+    photosLoadFailed: "Photos could not be loaded",
+    photoDeleteConfirm: "Delete this photo permanently?",
+    photoDeleted: "Photo deleted",
+    photoDeleteAria: n => `Delete photo ${n}`,
+    photoAlt: (n, place) => `Photo ${n} from the stay at ${place}`,
+    photoOpenAria: (n, place) => `Open photo ${n} of ${place} in full view`,
+    galleryTitle: place => `Photos – ${place}`,
+    galleryCounter: (n, total) => `Photo ${n} of ${total}`,
+    galleryPrev: "Previous photo",
+    galleryNext: "Next photo",
   },
   firstAid: {
     title: "First aid guide",

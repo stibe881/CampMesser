@@ -16,6 +16,7 @@ import {
   InsertPowerConsumer,
   InsertShoppingItem,
   InsertTripLog,
+  InsertTripPhoto,
   InsertUser,
   inventoryItems,
   menuEntries,
@@ -24,6 +25,7 @@ import {
   powerConsumers,
   shoppingItems,
   tripLogs,
+  tripPhotos,
   users,
   userSettings,
 } from "../drizzle/schema";
@@ -404,6 +406,65 @@ export async function deleteTripLog(id: number, userId: number) {
   await db
     .delete(menuEntries)
     .where(and(eq(menuEntries.tripId, id), eq(menuEntries.userId, userId)));
+}
+
+// ── Fotos im Reise-Tagebuch ──
+export async function getTripPhotos(tripId: number, userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripPhotos)
+    .where(and(eq(tripPhotos.tripId, tripId), eq(tripPhotos.userId, userId)))
+    .orderBy(tripPhotos.id);
+}
+
+export async function countTripPhotos(tripId: number, userId: number) {
+  return (await getTripPhotos(tripId, userId)).length;
+}
+
+export async function addTripPhoto(data: InsertTripPhoto) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(tripPhotos).values(data);
+  return result.insertId;
+}
+
+/** Einzelnes Foto laden (nur eigenes). */
+export async function getTripPhoto(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripPhotos)
+    .where(and(eq(tripPhotos.id, id), eq(tripPhotos.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/** Foto anhand des Dateinamens laden – nur für die Besitzerin/den Besitzer. */
+export async function getTripPhotoByFileName(fileName: string, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripPhotos)
+    .where(
+      and(eq(tripPhotos.fileName, fileName), eq(tripPhotos.userId, userId))
+    )
+    .limit(1);
+  return rows[0];
+}
+
+export async function deleteTripPhoto(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(tripPhotos)
+    .where(and(eq(tripPhotos.id, id), eq(tripPhotos.userId, userId)));
+}
+
+/** Alle Foto-Zeilen eines Trips löschen (Dateien löscht der Aufrufer). */
+export async function deleteTripPhotosForTrip(tripId: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(tripPhotos)
+    .where(and(eq(tripPhotos.tripId, tripId), eq(tripPhotos.userId, userId)));
 }
 
 // ── Menüplan pro Trip ──

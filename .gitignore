@@ -30,6 +30,9 @@ build/
 ehthumbs.db
 Thumbs.db
 
+# Nutzer-Uploads (Tagebuch-Fotos) – liegen nur auf dem Server, nie im Repo
+uploads/
+
 # Logs
 logs
 *.log

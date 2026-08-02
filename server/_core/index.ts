@@ -159,6 +159,122 @@ async function startServer() {
       res.status(500).json({ status: "error", message: String(error) });
     }
   });
+  // ── Fotos im Reise-Tagebuch ─────────────────────────────────────────────
+  // Uploads liegen als Dateien unter uploads/trips/ auf dem Webspace
+  // (kein S3). Auth läuft über dieselbe Session-Prüfung wie tRPC
+  // (sdk.authenticateRequest: Session-Cookie bzw. Bearer-Fallback).
+  const { MAX_PHOTO_BYTES, MAX_PHOTOS_PER_TRIP, PHOTO_MIME_EXTENSIONS } =
+    await import("@shared/tripPhotos");
+  /** Session prüfen; bei ungültiger Session wird 401 gesendet und null geliefert. */
+  const authenticatePhotoRequest = async (
+    req: express.Request,
+    res: express.Response
+  ) => {
+    try {
+      const { sdk } = await import("./sdk");
+      return await sdk.authenticateRequest(req);
+    } catch {
+      res.status(401).json({ error: "unauthorized" });
+      return null;
+    }
+  };
+  // Upload: der Client verkleinert das Bild vorab (Canvas, max. 1600 px)
+  // und schickt es als Raw-Body mit Bild-MIME – Multipart/multer ist
+  // dafür unnötig. Serverseitig wird bewusst nicht transformiert
+  // (keine sharp-Abhängigkeit auf dem Webhosting).
+  app.post(
+    "/api/trips/:tripId/photos",
+    express.raw({ type: "image/*", limit: MAX_PHOTO_BYTES }),
+    async (req, res) => {
+      try {
+        const user = await authenticatePhotoRequest(req, res);
+        if (!user) return;
+        const tripId = Number(req.params.tripId);
+        if (!Number.isInteger(tripId) || tripId <= 0) {
+          res.status(400).json({ error: "badRequest" });
+          return;
+        }
+        const db = await import("../db");
+        const trip = await db.getTripLog(tripId, user.id);
+        if (!trip) {
+          res.status(404).json({ error: "notFound" });
+          return;
+        }
+        const contentType = String(req.headers["content-type"] ?? "")
+          .split(";")[0]
+          .trim()
+          .toLowerCase();
+        if (contentType === "image/heic" || contentType === "image/heif") {
+          res.status(415).json({ error: "heicNotSupported" });
+          return;
+        }
+        const extension = PHOTO_MIME_EXTENSIONS[contentType];
+        if (!extension) {
+          res.status(415).json({ error: "unsupportedType" });
+          return;
+        }
+        const body = req.body as unknown;
+        if (!Buffer.isBuffer(body) || body.length === 0) {
+          res.status(400).json({ error: "emptyBody" });
+          return;
+        }
+        if (body.length > MAX_PHOTO_BYTES) {
+          res.status(413).json({ error: "tooLarge" });
+          return;
+        }
+        if (
+          (await db.countTripPhotos(tripId, user.id)) >= MAX_PHOTOS_PER_TRIP
+        ) {
+          res.status(409).json({ error: "limitReached" });
+          return;
+        }
+        const { nanoid } = await import("nanoid");
+        const fileName = `${nanoid(16)}${extension}`;
+        const { saveTripPhotoFile } = await import("../tripPhotoStorage");
+        await saveTripPhotoFile(fileName, body);
+        const id = await db.addTripPhoto({ userId: user.id, tripId, fileName });
+        res.json({ id, fileName });
+      } catch (error) {
+        console.error("[TripPhotos] Upload fehlgeschlagen:", error);
+        if (!res.headersSent) res.status(500).json({ error: "serverError" });
+      }
+    }
+  );
+  // Auslieferung: Fotos sind privat – nur die Besitzerin/der Besitzer
+  // (DB-Lookup über fileName + userId) bekommt die Datei zu sehen.
+  app.get("/api/trips/photos/:fileName", async (req, res) => {
+    try {
+      const user = await authenticatePhotoRequest(req, res);
+      if (!user) return;
+      const { TRIP_PHOTO_FILENAME_PATTERN, tripPhotoPath } = await import(
+        "../tripPhotoStorage"
+      );
+      const fileName = req.params.fileName;
+      if (!TRIP_PHOTO_FILENAME_PATTERN.test(fileName)) {
+        res.status(400).json({ error: "badRequest" });
+        return;
+      }
+      const db = await import("../db");
+      const photo = await db.getTripPhotoByFileName(fileName, user.id);
+      if (!photo) {
+        res.status(404).json({ error: "notFound" });
+        return;
+      }
+      res.sendFile(
+        tripPhotoPath(fileName),
+        { headers: { "Cache-Control": "private, max-age=3600" } },
+        error => {
+          // Datei fehlt auf der Platte (z. B. nach Server-Umzug ohne uploads/)
+          if (error && !res.headersSent) {
+            res.status(404).json({ error: "notFound" });
+          }
+        }
+      );
+    } catch (error) {
+      console.error("[TripPhotos] Auslieferung fehlgeschlagen:", error);
+      if (!res.headersSent) res.status(500).json({ error: "serverError" });
+    }
+  });
   // tRPC API
   app.use(
     "/api/trpc",

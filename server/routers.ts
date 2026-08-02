@@ -883,7 +883,45 @@ export const appRouter = router({
       }),
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(({ ctx, input }) => db.deleteTripLog(input.id, ctx.user.id)),
+      .mutation(async ({ ctx, input }) => {
+        // Zugehörige Fotos mitlöschen: erst Dateinamen sichern, dann
+        // DB-Zeilen und zuletzt die Dateien auf dem Webspace entfernen.
+        const photos = await db.getTripPhotos(input.id, ctx.user.id);
+        await db.deleteTripLog(input.id, ctx.user.id);
+        await db.deleteTripPhotosForTrip(input.id, ctx.user.id);
+        if (photos.length > 0) {
+          const { deleteTripPhotoFiles } = await import("./tripPhotoStorage");
+          await deleteTripPhotoFiles(photos.map(p => p.fileName));
+        }
+      }),
+    photos: router({
+      /** Fotos eines eigenen Trips (leere Liste, wenn der Trip nicht dir gehört). */
+      list: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          const trip = await db.getTripLog(input.tripId, ctx.user.id);
+          if (!trip) {
+            return [] as Awaited<ReturnType<typeof db.getTripPhotos>>;
+          }
+          return db.getTripPhotos(input.tripId, ctx.user.id);
+        }),
+      /** Einzelnes Foto löschen (DB-Zeile + Datei auf dem Webspace). */
+      remove: protectedProcedure
+        .input(z.object({ photoId: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const photo = await db.getTripPhoto(input.photoId, ctx.user.id);
+          if (!photo) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Foto nicht gefunden.",
+            });
+          }
+          await db.deleteTripPhoto(input.photoId, ctx.user.id);
+          const { deleteTripPhotoFiles } = await import("./tripPhotoStorage");
+          await deleteTripPhotoFiles([photo.fileName]);
+          return { success: true } as const;
+        }),
+    }),
   }),
   menu: router({
     /** Trip samt Menüplan-Einträgen (null, wenn der Trip nicht dir gehört). */
