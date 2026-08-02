@@ -331,6 +331,19 @@ export const appRouter = router({
     deleteList: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deletePackList(input.id, ctx.user.id)),
+    /** Leichter Pack-Fortschritt einer Liste (für den Trip-Planer). */
+    progress: protectedProcedure
+      .input(z.object({ listId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const list = await db.getPackList(input.listId, ctx.user.id);
+        if (!list) return null;
+        const items = await db.getPackItems(input.listId);
+        return {
+          name: list.name,
+          total: items.length,
+          checked: items.filter(i => i.checked).length,
+        };
+      }),
     /** Liste samt Einträgen kopieren – alles unabgehakt, ohne Teil-Link. */
     duplicateList: protectedProcedure
       .input(z.object({ id: z.number() }))
@@ -648,6 +661,7 @@ export const appRouter = router({
         z
           .object({
             spotId: z.number().int().positive().nullish(),
+            packListId: z.number().int().positive().nullish(),
             location: z.string().max(140).nullish(),
             title: z.string().max(140).nullish(),
             notes: z.string().max(2000).nullish(),
@@ -675,9 +689,20 @@ export const appRouter = router({
             });
           }
         }
+        // Nur eigene Packlisten dürfen verknüpft werden
+        if (input.packListId != null) {
+          const list = await db.getPackList(input.packListId, ctx.user.id);
+          if (!list) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Packliste nicht gefunden.",
+            });
+          }
+        }
         const id = await db.addTripLog({
           userId: ctx.user.id,
           spotId: input.spotId ?? null,
+          packListId: input.packListId ?? null,
           location: input.location?.trim() || null,
           title: input.title?.trim() || null,
           notes: input.notes?.trim() || null,

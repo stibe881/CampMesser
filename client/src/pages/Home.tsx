@@ -25,6 +25,10 @@ import { useEffect, useRef, useState } from "react";
 import { getRecentModules } from "@/components/AppShell";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { searchKnowledge } from "@/lib/globalSearch";
+import { daysUntilTrip, isUpcomingTrip } from "@shared/trips";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import { CalendarClock, ListChecks } from "lucide-react";
 
 const ORDER_KEY = "campmesser.moduleOrder";
 const HIDDEN_KEY = "campmesser.hiddenModules";
@@ -83,6 +87,79 @@ interface HomeWeather {
 }
 
 /** Kompaktes Wetter-Widget: aktuelle Lage + höchste Warnung am Standort. */
+/** Countdown zum nächsten geplanten Trip aus dem Reise-Tagebuch. */
+function NextTripWidget() {
+  const { isAuthenticated } = useAuth();
+  const tripsQuery = trpc.trips.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+  const spotsQuery = trpc.spots.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+  const today = new Date().toISOString().slice(0, 10);
+  const next = (tripsQuery.data ?? [])
+    .filter(t => isUpcomingTrip(t.startDate, today))
+    .sort((a, b) => a.startDate.localeCompare(b.startDate))[0];
+  const progress = trpc.packing.progress.useQuery(
+    { listId: next?.packListId ?? 0 },
+    { enabled: Boolean(next?.packListId) }
+  );
+  if (!next) return null;
+
+  const place =
+    next.title ||
+    (next.spotId != null
+      ? (spotsQuery.data?.find(s => s.id === next.spotId)?.name ?? "")
+      : (next.location ?? "")) ||
+    "Nächster Trip";
+  const days = daysUntilTrip(next.startDate, today);
+  const packed = progress.data;
+  const pct =
+    packed && packed.total > 0
+      ? Math.round((packed.checked / packed.total) * 100)
+      : null;
+
+  return (
+    <Link
+      href="/tagebuch"
+      className="mb-6 flex items-center gap-4 rounded-xl border border-primary/40 bg-accent/30 p-4 shadow-sm transition-all hover:border-primary hover:shadow-md"
+      aria-label={`Nächster geplanter Aufenthalt: ${place}`}
+    >
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <CalendarClock className="h-5.5 w-5.5" aria-hidden="true" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex flex-wrap items-baseline gap-x-2">
+          <span className="font-semibold">{place}</span>
+          <span className="text-sm font-semibold text-primary">
+            {days === 0
+              ? "Heute geht's los!"
+              : days === 1
+                ? "Morgen geht's los!"
+                : `Noch ${days} Tage`}
+          </span>
+        </span>
+        {pct !== null && packed ? (
+          <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <ListChecks className="h-3 w-3 shrink-0" aria-hidden="true" />
+            {packed.name}: {packed.checked} von {packed.total} gepackt ({pct} %)
+          </span>
+        ) : (
+          <span className="mt-0.5 block text-xs text-muted-foreground">
+            Geplanter Aufenthalt im Reise-Tagebuch
+          </span>
+        )}
+      </span>
+      <ArrowRight
+        className="h-4 w-4 shrink-0 text-muted-foreground/50"
+        aria-hidden="true"
+      />
+    </Link>
+  );
+}
+
 function WeatherWidget() {
   const [weather, setWeather] = useState<HomeWeather | null>(null);
 
@@ -448,6 +525,7 @@ export default function Home() {
 
       {/* Modul-Grid */}
       <section className="container py-8 md:py-12">
+        <NextTripWidget />
         <WeatherWidget />
         <KnowledgeSearch />
         <RecentModules hidden={hidden} />

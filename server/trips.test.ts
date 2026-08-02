@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { computeTripStats, nightsByYear, tripNights } from "@shared/trips";
+import {
+  computeTripStats,
+  daysUntilTrip,
+  isUpcomingTrip,
+  nightsByYear,
+  tripNights,
+} from "@shared/trips";
 
 describe("tripNights", () => {
   it("zählt die Nächte zwischen An- und Abreise", () => {
@@ -84,5 +90,19 @@ describe("computeTripStats", () => {
       nightsByYear: {},
       topPlaces: [],
     });
+  });
+});
+
+describe("isUpcomingTrip / daysUntilTrip", () => {
+  it("erkennt geplante Aufenthalte (Anreise heute oder später)", () => {
+    expect(isUpcomingTrip("2026-08-01", "2026-08-01")).toBe(true);
+    expect(isUpcomingTrip("2026-08-15", "2026-08-01")).toBe(true);
+    expect(isUpcomingTrip("2026-07-31", "2026-08-01")).toBe(false);
+  });
+
+  it("zählt die Tage bis zur Anreise", () => {
+    expect(daysUntilTrip("2026-08-12", "2026-08-01")).toBe(11);
+    expect(daysUntilTrip("2026-08-01", "2026-08-01")).toBe(0);
+    expect(daysUntilTrip("2026-09-01", "2026-08-30")).toBe(2);
   });
 });

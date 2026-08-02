@@ -52,6 +52,19 @@ export function nightsByYear(
   return result;
 }
 
+/** Ist der Aufenthalt aus heutiger Sicht geplant (Anreise heute oder später)? */
+export function isUpcomingTrip(startDate: string, today: string): boolean {
+  return startDate >= today;
+}
+
+/** Tage bis zur Anreise (0 = heute; negativ bei laufenden/vergangenen Trips). */
+export function daysUntilTrip(startDate: string, today: string): number {
+  const start = Date.parse(`${startDate}T00:00:00Z`);
+  const now = Date.parse(`${today}T00:00:00Z`);
+  if (Number.isNaN(start) || Number.isNaN(now)) return 0;
+  return Math.round((start - now) / DAY_MS);
+}
+
 /** Gesamt-Statistik über alle Tagebuch-Einträge. */
 export function computeTripStats(trips: TripLike[]): TripStats {
   const stats: TripStats = {
