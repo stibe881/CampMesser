@@ -8,8 +8,8 @@ import type { TrpcContext } from "./_core/context";
  * Migrationen). Lokal ohne Datenbank wird die Datei übersprungen.
  * Ablauf: Registrieren → Anmelden → Daten quer durch alle Nutzer-Tabellen
  * anlegen (Packliste, Einstellung, Zeltplatz mit Foto, Trip mit Foto und Menüplan,
- * Rezept mit Foto, Schnitzeljagd, Quiz, Einkaufsliste, Kühlbox samt Vorlage,
- * Push-Abo, Heim-Standort)
+ * Rezept mit Foto, Schnitzeljagd, Quiz, Kinder-Profil mit Abzeichen und
+ * Zählern, Einkaufsliste, Kühlbox samt Vorlage, Push-Abo, Heim-Standort)
  * → Konto löschen → prüfen, dass die Lösch-Kaskade alle Tabellen und
  * die Upload-Dateien erfasst hat.
  */
@@ -162,6 +162,49 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         },
       ],
     });
+    // Kinder-Profile & Abzeichen: anlegen, umbenennen, Zähler fortschreiben,
+    // Abzeichen idempotent vergeben; Kind löschen räumt Abzeichen + Zähler weg
+    const { id: childId } = await authed.family.children.add({ name: "Mia" });
+    const { id: secondChildId } = await authed.family.children.add({
+      name: "Temp",
+    });
+    await authed.family.children.rename({ id: childId, name: "Mia-Lena" });
+    const childrenList = await authed.family.children.list();
+    expect(childrenList.find(c => c.id === childId)?.name).toBe("Mia-Lena");
+    const statsAfterHunt = await authed.family.stats.record({
+      childId,
+      type: "huntCompleted",
+    });
+    expect(statsAfterHunt.huntsCompleted).toBe(1);
+    const statsAfterQuiz = await authed.family.stats.record({
+      childId,
+      type: "quizCompleted",
+      correctStreak: 7,
+    });
+    expect(statsAfterQuiz).toEqual({
+      huntsCompleted: 1,
+      quizzesCompleted: 1,
+      bestStreak: 7,
+    });
+    await authed.family.badges.award({ childId, badgeId: "hunt-first" });
+    await authed.family.badges.award({ childId, badgeId: "hunt-first" });
+    const badges = await authed.family.badges.listByChild({ childId });
+    expect(badges.filter(b => b.badgeId === "hunt-first")).toHaveLength(1);
+    await authed.family.badges.award({
+      childId: secondChildId,
+      badgeId: "quiz-first",
+    });
+    await authed.family.stats.record({
+      childId: secondChildId,
+      type: "quizCompleted",
+    });
+    await authed.family.children.remove({ id: secondChildId });
+    expect(
+      await authed.family.badges.listByChild({ childId: secondChildId })
+    ).toHaveLength(0);
+    expect(
+      (await authed.family.children.list()).some(c => c.id === secondChildId)
+    ).toBe(false);
     await authed.shopping.add({ name: "CI-Zutat" });
     // Einkaufsliste teilen: Token ist idempotent, öffentlicher Abruf und
     // Abhaken über den Teil-Link funktionieren ohne Anmeldung
@@ -285,6 +328,18 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.customQuizzes)
         .where(eq(schema.customQuizzes.userId, uid)),
+      dbc
+        .select()
+        .from(schema.familyChildren)
+        .where(eq(schema.familyChildren.userId, uid)),
+      dbc
+        .select()
+        .from(schema.childBadges)
+        .where(eq(schema.childBadges.userId, uid)),
+      dbc
+        .select()
+        .from(schema.childStats)
+        .where(eq(schema.childStats.userId, uid)),
       dbc
         .select()
         .from(schema.shoppingItems)

@@ -1817,6 +1817,26 @@ export const en: Translation = {
     newQuiz: "Create a new quiz",
     newQuizAria: "Create a new quiz",
     quizDeleteConfirm: (title: string) => `Really delete quiz "${title}"?`,
+    childrenTitle: "Children & badges",
+    childrenSubtitle:
+      "Add your children – they collect badges in scavenger hunts and quizzes.",
+    childrenEmpty:
+      "No children yet – add a name below so badges can be collected.",
+    childNamePlaceholder: "Child's name",
+    addChild: "Add child",
+    renameChildAria: (name: string) => `Rename ${name}`,
+    renameSaveAria: (name: string) => `Save new name for ${name}`,
+    deleteChildConfirm: (name: string) =>
+      `Really delete ${name} along with all collected badges?`,
+    deleteChildAria: (name: string) => `Delete ${name}`,
+    badgeCount: (n: number, total: number) => `${n} of ${total} badges`,
+    badgeEarnedOn: (date: string) => `Earned on ${date}`,
+    badgeEarnedToast: (child: string, badge: string) =>
+      `${child} earned a new badge: ${badge}`,
+    whoPlaysTitle: "Who's playing?",
+    whoPlaysDescription:
+      "Choose who plays – the child collects badges for completed hunts and quizzes.",
+    whoPlaysNobody: "Play without badges",
     quizEditor: {
       titleEdit: "Edit quiz",
       titleNew: "Create your own quiz",

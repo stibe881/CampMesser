@@ -1876,6 +1876,27 @@ export const fr: Translation = {
     newQuizAria: "Créer un nouveau quiz",
     quizDeleteConfirm: (title: string) =>
       `Vraiment supprimer le quiz « ${title} » ?`,
+    childrenTitle: "Enfants & badges",
+    childrenSubtitle:
+      "Ajoute tes enfants – ils collectionnent des badges lors des chasses au trésor et des quiz.",
+    childrenEmpty:
+      "Aucun enfant pour l'instant – ajoute un prénom ci-dessous pour pouvoir collectionner des badges.",
+    childNamePlaceholder: "Prénom de l'enfant",
+    addChild: "Ajouter un enfant",
+    renameChildAria: (name: string) => `Renommer ${name}`,
+    renameSaveAria: (name: string) =>
+      `Enregistrer le nouveau prénom de ${name}`,
+    deleteChildConfirm: (name: string) =>
+      `Vraiment supprimer ${name} avec tous ses badges ?`,
+    deleteChildAria: (name: string) => `Supprimer ${name}`,
+    badgeCount: (n: number, total: number) => `${n} badge(s) sur ${total}`,
+    badgeEarnedOn: (date: string) => `Obtenu le ${date}`,
+    badgeEarnedToast: (child: string, badge: string) =>
+      `${child} a gagné un nouveau badge : ${badge}`,
+    whoPlaysTitle: "Qui joue ?",
+    whoPlaysDescription:
+      "Choisis qui joue – l'enfant collectionne des badges pour les chasses et quiz terminés.",
+    whoPlaysNobody: "Jouer sans badges",
     quizEditor: {
       titleEdit: "Modifier le quiz",
       titleNew: "Créer son propre quiz",

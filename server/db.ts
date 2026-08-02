@@ -1,7 +1,11 @@
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   campSpots,
+  childBadges,
+  childStats,
+  familyChildren,
+  InsertFamilyChild,
   customHunts,
   customQuizzes,
   customRecipes,
@@ -1018,6 +1022,123 @@ export async function deleteCustomQuiz(id: number, userId: number) {
   await db
     .delete(customQuizzes)
     .where(and(eq(customQuizzes.id, id), eq(customQuizzes.userId, userId)));
+}
+
+// ── Familien-Modus: Kinder-Profile, Abzeichen & Zähler ──
+export async function getFamilyChildren(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(familyChildren)
+    .where(eq(familyChildren.userId, userId))
+    .orderBy(asc(familyChildren.id));
+}
+
+/** Einzelnes Kind laden (nur eigenes). */
+export async function getFamilyChild(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(familyChildren)
+    .where(and(eq(familyChildren.id, id), eq(familyChildren.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+export async function addFamilyChild(data: InsertFamilyChild) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(familyChildren).values(data);
+  return result.insertId;
+}
+
+export async function renameFamilyChild(
+  id: number,
+  userId: number,
+  name: string
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(familyChildren)
+    .set({ name })
+    .where(and(eq(familyChildren.id, id), eq(familyChildren.userId, userId)));
+}
+
+/** Kind löschen – Abzeichen und Zähler gehen mit (kein DB-FK, daher manuell). */
+export async function deleteFamilyChild(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(childBadges)
+    .where(and(eq(childBadges.childId, id), eq(childBadges.userId, userId)));
+  await db
+    .delete(childStats)
+    .where(and(eq(childStats.childId, id), eq(childStats.userId, userId)));
+  await db
+    .delete(familyChildren)
+    .where(and(eq(familyChildren.id, id), eq(familyChildren.userId, userId)));
+}
+
+export async function getChildBadges(userId: number, childId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(childBadges)
+    .where(
+      and(eq(childBadges.userId, userId), eq(childBadges.childId, childId))
+    )
+    .orderBy(asc(childBadges.id));
+}
+
+/**
+ * Abzeichen vergeben – idempotent: der unique Index childId+badgeId macht
+ * die zweite Vergabe zum No-op (earnedAt bleibt das Erst-Datum).
+ */
+export async function awardChildBadge(
+  userId: number,
+  childId: number,
+  badgeId: string
+) {
+  const db = requireDb(await getDb());
+  await db
+    .insert(childBadges)
+    .values({ userId, childId, badgeId })
+    .onDuplicateKeyUpdate({ set: { badgeId } });
+}
+
+/**
+ * Ereignis-Zähler eines Kindes atomar fortschreiben (eine Upsert-Anweisung:
+ * Zähler inkrementieren, beste Serie per GREATEST) und den neuen Stand laden.
+ */
+export async function recordChildEvent(
+  userId: number,
+  childId: number,
+  event: { hunt?: boolean; quiz?: boolean; streak?: number }
+) {
+  const db = requireDb(await getDb());
+  const huntInc = event.hunt ? 1 : 0;
+  const quizInc = event.quiz ? 1 : 0;
+  const streak = Math.max(0, event.streak ?? 0);
+  await db
+    .insert(childStats)
+    .values({
+      userId,
+      childId,
+      huntsCompleted: huntInc,
+      quizzesCompleted: quizInc,
+      bestStreak: streak,
+    })
+    .onDuplicateKeyUpdate({
+      set: {
+        huntsCompleted: sql`${childStats.huntsCompleted} + ${huntInc}`,
+        quizzesCompleted: sql`${childStats.quizzesCompleted} + ${quizInc}`,
+        bestStreak: sql`GREATEST(${childStats.bestStreak}, ${streak})`,
+      },
+    });
+  const rows = await db
+    .select()
+    .from(childStats)
+    .where(and(eq(childStats.userId, userId), eq(childStats.childId, childId)))
+    .limit(1);
+  return rows[0];
 }
 
 // ── Synchronisierte Einstellungen ──

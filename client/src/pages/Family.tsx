@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import {
+  Award,
   BadgeCheck,
+  Check,
   Compass as CompassIcon,
   Gift,
   Lightbulb,
@@ -38,7 +40,8 @@ import {
   type NatureQuiz,
   type ScavengerHunt,
 } from "@/data/familyActivities";
-import { pick, type Language } from "@shared/i18n";
+import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
+import { BADGES, earnedBadges, type BadgeEvent } from "@shared/badges";
 import { useI18n, useT } from "@/i18n";
 import { MAX_STATIONS, parseHuntStations } from "@shared/hunts";
 import { MAX_QUIZ_QUESTIONS, parseQuizQuestions } from "@shared/quizzes";
@@ -57,6 +60,38 @@ import { cn } from "@/lib/utils";
 /** Buchstabe einer Station in der aktiven Sprache ("" = keiner). */
 const stationLetter = (station: HuntStation, lang: Language): string =>
   station.letter ? pick(station.letter, lang) : "";
+
+/** Zuletzt gewähltes Kind fürs «Wer spielt?»-Vorauswählen. */
+const ACTIVE_CHILD_KEY = "campmesser.activeChild";
+
+function loadStoredActiveChild(): number | null {
+  try {
+    const raw = localStorage.getItem(ACTIVE_CHILD_KEY);
+    if (raw) {
+      const id = Number(raw);
+      if (Number.isInteger(id) && id > 0) return id;
+    }
+  } catch {
+    // Speicher blockiert – ohne Vorauswahl starten
+  }
+  return null;
+}
+
+function storeActiveChild(id: number | null) {
+  try {
+    if (id === null) localStorage.removeItem(ACTIVE_CHILD_KEY);
+    else localStorage.setItem(ACTIVE_CHILD_KEY, String(id));
+  } catch {
+    // Speicher blockiert – die Auswahl gilt trotzdem für diese Sitzung
+  }
+}
+
+/** Ergebnis eines fertig gespielten Quiz für die Abzeichen-Prüfung. */
+interface QuizResult {
+  quizId: string;
+  perfect: boolean;
+  correctStreak: number;
+}
 
 /** Formular-Zustand einer Station im Editor. */
 interface EditorStation {
@@ -581,9 +616,12 @@ function useHuntProgress(huntId: string, taskCount: number) {
 function HuntDialog({
   hunt,
   onClose,
+  onCompleted,
 }: {
   hunt: ScavengerHunt;
   onClose: () => void;
+  /** Wird gemeldet, wenn die Jagd in dieser Sitzung fertig abgehakt wurde. */
+  onCompleted?: () => void;
 }) {
   const { lang, t } = useI18n();
   const [checked, setChecked] = useHuntProgress(hunt.id, hunt.stations.length);
@@ -592,6 +630,22 @@ function HuntDialog({
   );
   const doneCount = checked.filter(Boolean).length;
   const allDone = doneCount === hunt.stations.length;
+
+  // Abschluss nur melden, wenn die Jagd IN DIESER SITZUNG fertig wurde –
+  // eine schon beim Öffnen komplette Jagd (localStorage) zählt nicht erneut.
+  const sawIncompleteRef = useRef(false);
+  const onCompletedRef = useRef(onCompleted);
+  onCompletedRef.current = onCompleted;
+  useEffect(() => {
+    if (!allDone) {
+      sawIncompleteRef.current = true;
+      return;
+    }
+    if (sawIncompleteRef.current) {
+      sawIncompleteRef.current = false;
+      onCompletedRef.current?.();
+    }
+  }, [allDone]);
   // Die nächste offene Station – nur bis dahin wird die Geschichte enthüllt
   const nextOpenIndex = checked.findIndex(c => !c);
   const visibleCount =
@@ -794,15 +848,21 @@ function HuntDialog({
 function QuizDialog({
   quiz,
   onClose,
+  onCompleted,
 }: {
   quiz: NatureQuiz;
   onClose: () => void;
+  /** Wird nach der letzten Frage mit dem Ergebnis gemeldet (Abzeichen). */
+  onCompleted?: (result: QuizResult) => void;
 }) {
   const { lang, t } = useI18n();
   const [current, setCurrent] = useState(0);
   const [answered, setAnswered] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
+  // Antwort-Serie fürs Serien-Abzeichen: aktuelle und beste Serie des Durchgangs
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
 
   const question = quiz.questions[current];
   // Eigene Quizze dürfen die Erklärung weglassen – dann keinen leeren Kasten zeigen
@@ -812,12 +872,24 @@ function QuizDialog({
   const answer = (idx: number) => {
     if (answered !== null) return;
     setAnswered(idx);
-    if (idx === question.correctIndex) setScore(s => s + 1);
+    if (idx === question.correctIndex) {
+      setScore(s => s + 1);
+      const nextStreak = streak + 1;
+      setStreak(nextStreak);
+      if (nextStreak > bestStreak) setBestStreak(nextStreak);
+    } else {
+      setStreak(0);
+    }
   };
 
   const next = () => {
     if (current + 1 >= quiz.questions.length) {
       setFinished(true);
+      onCompleted?.({
+        quizId: quiz.id,
+        perfect: score === quiz.questions.length,
+        correctStreak: bestStreak,
+      });
     } else {
       setCurrent(c => c + 1);
       setAnswered(null);
@@ -829,6 +901,8 @@ function QuizDialog({
     setAnswered(null);
     setScore(0);
     setFinished(false);
+    setStreak(0);
+    setBestStreak(0);
   };
 
   return (
@@ -939,6 +1013,215 @@ function QuizDialog({
   );
 }
 
+/**
+ * Abzeichen-Galerie eines Kindes: verdiente farbig mit Datum, offene
+ * ausgegraut mit der Bedingung als Hinweis.
+ */
+function ChildBadgeGallery({ childId }: { childId: number }) {
+  const { lang, t } = useI18n();
+  const badgesQuery = trpc.family.badges.listByChild.useQuery({ childId });
+  // Kein `new Map(...)`: der Bezeichner Map ist hier das lucide-Icon
+  const earnedAtById: Record<string, Date | string> = {};
+  (badgesQuery.data ?? []).forEach(b => {
+    earnedAtById[b.badgeId] = b.earnedAt;
+  });
+  const earnedCount = Object.keys(earnedAtById).length;
+  const fmtDate = (value: Date | string) =>
+    new Date(value).toLocaleDateString(LOCALE_TAGS[lang], {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  return (
+    <div>
+      <p className="mb-2 text-xs text-muted-foreground">
+        {t.family.badgeCount(earnedCount, BADGES.length)}
+      </p>
+      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {BADGES.map(def => {
+          const earnedAt = earnedAtById[def.id];
+          return (
+            <li
+              key={def.id}
+              className={cn(
+                "rounded-lg border p-2.5 text-center",
+                earnedAt
+                  ? "border-primary/40 bg-accent"
+                  : "border-dashed border-border opacity-60"
+              )}
+            >
+              <span
+                className={cn("block text-2xl", !earnedAt && "grayscale")}
+                aria-hidden="true"
+              >
+                {def.emoji}
+              </span>
+              <span className="mt-1 block text-xs font-semibold">
+                {pick(def.title, lang)}
+              </span>
+              <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
+                {earnedAt
+                  ? t.family.badgeEarnedOn(fmtDate(earnedAt))
+                  : pick(def.description, lang)}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/**
+ * Abschnitt «Kinder & Abzeichen»: Kinder-Profile verwalten (Name anlegen,
+ * umbenennen, löschen) und pro Kind die Abzeichen-Galerie zeigen.
+ */
+function ChildrenSection({
+  children: kids,
+}: {
+  children: { id: number; name: string }[];
+}) {
+  const t = useT();
+  const utils = trpc.useUtils();
+  const [newName, setNewName] = useState("");
+  // null = keine Umbenennung offen, sonst {id, name} des Formulars
+  const [editing, setEditing] = useState<{ id: number; name: string } | null>(
+    null
+  );
+
+  const addMutation = trpc.family.children.add.useMutation({
+    onSuccess: () => {
+      utils.family.children.list.invalidate();
+      setNewName("");
+    },
+    onError: () => toast.error(t.common.saveFailed),
+  });
+  const renameMutation = trpc.family.children.rename.useMutation({
+    onSuccess: () => {
+      utils.family.children.list.invalidate();
+      setEditing(null);
+    },
+    onError: () => toast.error(t.common.saveFailed),
+  });
+  const removeMutation = trpc.family.children.remove.useMutation({
+    onSuccess: () => utils.family.children.list.invalidate(),
+    onError: () => toast.error(t.common.deleteFailed),
+  });
+
+  return (
+    <>
+      <h2 className="mb-1 flex items-center gap-2 font-serif text-xl font-semibold">
+        <Award className="h-5 w-5 text-primary" aria-hidden="true" />
+        {t.family.childrenTitle}
+      </h2>
+      <p className="mb-3 text-sm text-muted-foreground">
+        {t.family.childrenSubtitle}
+      </p>
+      {kids.length === 0 && (
+        <p className="mb-3 rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
+          {t.family.childrenEmpty}
+        </p>
+      )}
+      <div className="mb-4 space-y-3">
+        {kids.map(child => (
+          <div
+            key={child.id}
+            className="rounded-xl border border-border bg-card p-4"
+          >
+            <div className="mb-3 flex items-center gap-2">
+              {editing?.id === child.id ? (
+                <form
+                  className="flex flex-1 items-center gap-2"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    const name = editing.name.trim();
+                    if (!name) return;
+                    renameMutation.mutate({ id: child.id, name });
+                  }}
+                >
+                  <Input
+                    value={editing.name}
+                    maxLength={60}
+                    autoFocus
+                    onChange={e =>
+                      setEditing({ id: child.id, name: e.target.value })
+                    }
+                    aria-label={t.family.renameChildAria(child.name)}
+                  />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    className="h-8 w-8 shrink-0"
+                    disabled={!editing.name.trim() || renameMutation.isPending}
+                    aria-label={t.family.renameSaveAria(child.name)}
+                  >
+                    <Check className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                </form>
+              ) : (
+                <>
+                  <p className="min-w-0 flex-1 truncate font-semibold">
+                    {child.name}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEditing({ id: child.id, name: child.name })
+                    }
+                    className="shrink-0 text-muted-foreground transition-colors hover:text-primary"
+                    aria-label={t.family.renameChildAria(child.name)}
+                  >
+                    <Pencil className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm(t.family.deleteChildConfirm(child.name))) {
+                        removeMutation.mutate({ id: child.id });
+                      }
+                    }}
+                    className="shrink-0 text-muted-foreground transition-colors hover:text-destructive"
+                    aria-label={t.family.deleteChildAria(child.name)}
+                  >
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </>
+              )}
+            </div>
+            <ChildBadgeGallery childId={child.id} />
+          </div>
+        ))}
+      </div>
+      <form
+        className="mb-8 flex items-center gap-2"
+        onSubmit={e => {
+          e.preventDefault();
+          const name = newName.trim();
+          if (!name) return;
+          addMutation.mutate({ name });
+        }}
+      >
+        <Input
+          className="max-w-60"
+          placeholder={t.family.childNamePlaceholder}
+          value={newName}
+          maxLength={60}
+          onChange={e => setNewName(e.target.value)}
+          aria-label={t.family.childNamePlaceholder}
+        />
+        <Button
+          type="submit"
+          variant="outline"
+          disabled={!newName.trim() || addMutation.isPending}
+        >
+          <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          {t.family.addChild}
+        </Button>
+      </form>
+    </>
+  );
+}
+
 export default function FamilyPage() {
   const { lang, t } = useI18n();
   const [activeHunt, setActiveHunt] = useState<ScavengerHunt | null>(null);
@@ -968,6 +1251,91 @@ export default function FamilyPage() {
     onError: () => toast.error(t.common.deleteFailed),
   });
 
+  // ── Kinder-Profile & Abzeichen ──
+  const childrenQuery = trpc.family.children.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const children = childrenQuery.data ?? [];
+  const [activeChildId, setActiveChildId] = useState<number | null>(
+    loadStoredActiveChild
+  );
+  // Noch nicht gestartete Aktivität, solange «Wer spielt?» offen ist
+  const [pendingActivity, setPendingActivity] = useState<
+    { hunt: ScavengerHunt } | { quiz: NatureQuiz } | null
+  >(null);
+
+  const recordMutation = trpc.family.stats.record.useMutation();
+  const awardMutation = trpc.family.badges.award.useMutation();
+
+  /** Jagd/Quiz starten – mit Kindern zuerst «Wer spielt?» fragen. */
+  const startHunt = (hunt: ScavengerHunt) => {
+    if (isAuthenticated && children.length > 0) {
+      setPendingActivity({ hunt });
+    } else {
+      setActiveHunt(hunt);
+    }
+  };
+  const startQuiz = (quiz: NatureQuiz) => {
+    if (isAuthenticated && children.length > 0) {
+      setPendingActivity({ quiz });
+    } else {
+      setActiveQuiz(quiz);
+    }
+  };
+
+  /** Auswahl im «Wer spielt?»-Dialog: Kind merken und Aktivität starten. */
+  const chooseChild = (childId: number | null) => {
+    setActiveChildId(childId);
+    storeActiveChild(childId);
+    if (pendingActivity) {
+      if ("hunt" in pendingActivity) setActiveHunt(pendingActivity.hunt);
+      else setActiveQuiz(pendingActivity.quiz);
+    }
+    setPendingActivity(null);
+  };
+
+  /**
+   * Abschluss einer Jagd/eines Quiz: Zähler des Kindes atomar fortschreiben,
+   * Bedingungen prüfen und neue Abzeichen idempotent vergeben – schlicht
+   * gefeiert mit einem Toast pro Abzeichen. Fehler bleiben still.
+   */
+  const handleCompleted = async (event: BadgeEvent) => {
+    const child = children.find(c => c.id === activeChildId);
+    if (!child) return;
+    try {
+      const stats = await recordMutation.mutateAsync({
+        childId: child.id,
+        type: event.type,
+        correctStreak:
+          event.type === "quizCompleted" ? event.correctStreak : undefined,
+      });
+      const candidates = earnedBadges(stats, event);
+      const existing = await utils.family.badges.listByChild.fetch({
+        childId: child.id,
+      });
+      const owned = new Set(existing.map(b => b.badgeId));
+      const fresh = candidates.filter(id => !owned.has(id));
+      for (const badgeId of fresh) {
+        await awardMutation.mutateAsync({ childId: child.id, badgeId });
+        const def = BADGES.find(b => b.id === badgeId);
+        if (def) {
+          toast.success(
+            t.family.badgeEarnedToast(
+              child.name,
+              `${def.emoji} ${pick(def.title, lang)}`
+            )
+          );
+        }
+      }
+      if (fresh.length > 0) {
+        utils.family.badges.listByChild.invalidate({ childId: child.id });
+      }
+    } catch {
+      // Offline/Fehler: kein Abzeichen-Update – die Vergabe ist idempotent,
+      // beim nächsten Abschluss klappt es wieder
+    }
+  };
+
   return (
     <div className="container py-6">
       <PageHeader title={t.family.title} subtitle={t.family.subtitle} />
@@ -976,6 +1344,11 @@ export default function FamilyPage() {
         <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
         {t.family.offlineNote}
       </div>
+
+      {/* Kinder-Profile & Abzeichen */}
+      {isAuthenticated && !childrenQuery.isLoading && (
+        <ChildrenSection children={children} />
+      )}
 
       {/* Schnitzeljagden */}
       <h2 className="mb-1 font-serif text-xl font-semibold">
@@ -992,7 +1365,7 @@ export default function FamilyPage() {
           >
             <button
               type="button"
-              onClick={() => setActiveHunt(hunt)}
+              onClick={() => startHunt(hunt)}
               className="flex items-start gap-3.5 text-left active:scale-[0.99]"
               aria-label={t.family.startHuntAria(pick(hunt.title, lang))}
             >
@@ -1016,7 +1389,7 @@ export default function FamilyPage() {
             <div className="mt-3 flex items-center gap-4 border-t border-border/60 pt-2.5 text-xs">
               <button
                 type="button"
-                onClick={() => setActiveHunt(hunt)}
+                onClick={() => startHunt(hunt)}
                 className="font-medium text-primary hover:underline"
               >
                 {t.family.playOnPhone}
@@ -1051,7 +1424,7 @@ export default function FamilyPage() {
                 >
                   <button
                     type="button"
-                    onClick={() => setActiveHunt(hunt)}
+                    onClick={() => startHunt(hunt)}
                     className="flex items-start gap-3.5 text-left active:scale-[0.99]"
                     aria-label={t.family.startHuntAria(row.title)}
                   >
@@ -1073,7 +1446,7 @@ export default function FamilyPage() {
                   <div className="mt-3 flex items-center gap-4 border-t border-border/60 pt-2.5 text-xs">
                     <button
                       type="button"
-                      onClick={() => setActiveHunt(hunt)}
+                      onClick={() => startHunt(hunt)}
                       className="font-medium text-primary hover:underline"
                     >
                       {t.family.play}
@@ -1140,7 +1513,7 @@ export default function FamilyPage() {
           <button
             key={quiz.id}
             type="button"
-            onClick={() => setActiveQuiz(quiz)}
+            onClick={() => startQuiz(quiz)}
             className="flex flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
             aria-label={t.family.startQuizAria(pick(quiz.title, lang))}
           >
@@ -1168,7 +1541,7 @@ export default function FamilyPage() {
               >
                 <button
                   type="button"
-                  onClick={() => setActiveQuiz(quiz)}
+                  onClick={() => startQuiz(quiz)}
                   className="flex flex-1 flex-col items-start gap-2 text-left active:scale-[0.99]"
                   aria-label={t.family.startQuizAria(row.title)}
                 >
@@ -1186,7 +1559,7 @@ export default function FamilyPage() {
                 <div className="mt-3 flex items-center gap-4 border-t border-border/60 pt-2.5 text-xs">
                   <button
                     type="button"
-                    onClick={() => setActiveQuiz(quiz)}
+                    onClick={() => startQuiz(quiz)}
                     className="font-medium text-primary hover:underline"
                   >
                     {t.family.play}
@@ -1228,12 +1601,49 @@ export default function FamilyPage() {
         )}
       </div>
 
+      {/* «Wer spielt?»: Kind wählen, bevor Jagd/Quiz startet */}
+      <Dialog
+        open={pendingActivity !== null}
+        onOpenChange={open => !open && setPendingActivity(null)}
+      >
+        {pendingActivity !== null && (
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="font-serif text-xl">
+                {t.family.whoPlaysTitle}
+              </DialogTitle>
+              <DialogDescription>
+                {t.family.whoPlaysDescription}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-2">
+              {children.map(child => (
+                <Button
+                  key={child.id}
+                  variant={child.id === activeChildId ? "default" : "outline"}
+                  onClick={() => chooseChild(child.id)}
+                >
+                  {child.name}
+                </Button>
+              ))}
+              <Button variant="ghost" onClick={() => chooseChild(null)}>
+                {t.family.whoPlaysNobody}
+              </Button>
+            </div>
+          </DialogContent>
+        )}
+      </Dialog>
+
       <Dialog
         open={activeHunt !== null}
         onOpenChange={open => !open && setActiveHunt(null)}
       >
         {activeHunt && (
-          <HuntDialog hunt={activeHunt} onClose={() => setActiveHunt(null)} />
+          <HuntDialog
+            hunt={activeHunt}
+            onClose={() => setActiveHunt(null)}
+            onCompleted={() => void handleCompleted({ type: "huntCompleted" })}
+          />
         )}
       </Dialog>
       <Dialog
@@ -1241,7 +1651,13 @@ export default function FamilyPage() {
         onOpenChange={open => !open && setActiveQuiz(null)}
       >
         {activeQuiz && (
-          <QuizDialog quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />
+          <QuizDialog
+            quiz={activeQuiz}
+            onClose={() => setActiveQuiz(null)}
+            onCompleted={result =>
+              void handleCompleted({ type: "quizCompleted", ...result })
+            }
+          />
         )}
       </Dialog>
       <Dialog

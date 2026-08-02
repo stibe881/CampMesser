@@ -12,6 +12,9 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   use: {
     baseURL: "http://127.0.0.1:3900",
+    // Die App erkennt seit Runde 15 die Browsersprache beim Erstbesuch –
+    // die Tests prüfen deutsche Texte, also deterministisch de-CH erzwingen.
+    locale: "de-CH",
     launchOptions: process.env.PW_CHROMIUM_PATH
       ? { executablePath: process.env.PW_CHROMIUM_PATH }
       : {},

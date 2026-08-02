@@ -1858,6 +1858,26 @@ export const it: Translation = {
     newQuizAria: "Crea un nuovo quiz",
     quizDeleteConfirm: (title: string) =>
       `Eliminare davvero il quiz «${title}»?`,
+    childrenTitle: "Bambini e distintivi",
+    childrenSubtitle:
+      "Aggiungi i tuoi bambini – raccolgono distintivi nelle cacce al tesoro e nei quiz.",
+    childrenEmpty:
+      "Nessun bambino ancora – aggiungi un nome qui sotto per poter raccogliere distintivi.",
+    childNamePlaceholder: "Nome del bambino",
+    addChild: "Aggiungi bambino",
+    renameChildAria: (name: string) => `Rinomina ${name}`,
+    renameSaveAria: (name: string) => `Salva il nuovo nome di ${name}`,
+    deleteChildConfirm: (name: string) =>
+      `Eliminare davvero ${name} con tutti i distintivi raccolti?`,
+    deleteChildAria: (name: string) => `Elimina ${name}`,
+    badgeCount: (n: number, total: number) => `${n} distintivi su ${total}`,
+    badgeEarnedOn: (date: string) => `Ottenuto il ${date}`,
+    badgeEarnedToast: (child: string, badge: string) =>
+      `${child} ha un nuovo distintivo: ${badge}`,
+    whoPlaysTitle: "Chi gioca?",
+    whoPlaysDescription:
+      "Scegli chi gioca – il bambino raccoglie distintivi per cacce e quiz completati.",
+    whoPlaysNobody: "Gioca senza distintivi",
     quizEditor: {
       titleEdit: "Modifica quiz",
       titleNew: "Crea il tuo quiz",

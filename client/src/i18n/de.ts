@@ -1873,6 +1873,26 @@ export const de = {
     newQuiz: "Neues Quiz erstellen",
     newQuizAria: "Neues Quiz erstellen",
     quizDeleteConfirm: (title: string) => `Quiz «${title}» wirklich löschen?`,
+    childrenTitle: "Kinder & Abzeichen",
+    childrenSubtitle:
+      "Lege deine Kinder an – bei Schnitzeljagden und Quizzen sammeln sie Abzeichen.",
+    childrenEmpty:
+      "Noch keine Kinder angelegt – füge unten einen Namen hinzu, damit Abzeichen gesammelt werden können.",
+    childNamePlaceholder: "Name des Kindes",
+    addChild: "Kind hinzufügen",
+    renameChildAria: (name: string) => `${name} umbenennen`,
+    renameSaveAria: (name: string) => `Neuen Namen für ${name} speichern`,
+    deleteChildConfirm: (name: string) =>
+      `${name} samt allen gesammelten Abzeichen wirklich löschen?`,
+    deleteChildAria: (name: string) => `${name} löschen`,
+    badgeCount: (n: number, total: number) => `${n} von ${total} Abzeichen`,
+    badgeEarnedOn: (date: string) => `Verdient am ${date}`,
+    badgeEarnedToast: (child: string, badge: string) =>
+      `${child} hat ein neues Abzeichen: ${badge}`,
+    whoPlaysTitle: "Wer spielt?",
+    whoPlaysDescription:
+      "Wähle, wer spielt – das Kind sammelt Abzeichen für abgeschlossene Jagden und Quizze.",
+    whoPlaysNobody: "Ohne Abzeichen spielen",
     quizEditor: {
       titleEdit: "Quiz bearbeiten",
       titleNew: "Eigenes Quiz erstellen",

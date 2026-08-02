@@ -13,6 +13,7 @@ import {
   SYNCED_SETTING_KEYS,
 } from "@shared/settings";
 import { MAX_STATIONS, solutionWordFromStations } from "@shared/hunts";
+import { isBadgeId } from "@shared/badges";
 import {
   MAX_QUIZ_OPTIONS,
   MAX_QUIZ_QUESTIONS,
@@ -1446,6 +1447,120 @@ export const appRouter = router({
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteCustomQuiz(input.id, ctx.user.id)),
+  }),
+
+  /** Familien-Modus: Kinder-Profile, Abzeichen und Ereignis-Zähler. */
+  family: router({
+    children: router({
+      list: protectedProcedure.query(({ ctx }) =>
+        db.getFamilyChildren(ctx.user.id)
+      ),
+      add: protectedProcedure
+        .input(z.object({ name: z.string().trim().min(1).max(60) }))
+        .mutation(async ({ ctx, input }) => {
+          const id = await db.addFamilyChild({
+            userId: ctx.user.id,
+            name: input.name.trim(),
+          });
+          return { id };
+        }),
+      rename: protectedProcedure
+        .input(
+          z.object({
+            id: z.number().int().positive(),
+            name: z.string().trim().min(1).max(60),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const child = await db.getFamilyChild(input.id, ctx.user.id);
+          if (!child) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Kind nicht gefunden.",
+            });
+          }
+          await db.renameFamilyChild(input.id, ctx.user.id, input.name.trim());
+          return { success: true } as const;
+        }),
+      /** Kind entfernen – seine Abzeichen und Zähler gehen mit. */
+      remove: protectedProcedure
+        .input(z.object({ id: z.number().int().positive() }))
+        .mutation(({ ctx, input }) =>
+          db.deleteFamilyChild(input.id, ctx.user.id)
+        ),
+    }),
+    badges: router({
+      /** Abzeichen eines eigenen Kindes (leere Liste bei fremder childId). */
+      listByChild: protectedProcedure
+        .input(z.object({ childId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          const child = await db.getFamilyChild(input.childId, ctx.user.id);
+          if (!child) {
+            return [] as Awaited<ReturnType<typeof db.getChildBadges>>;
+          }
+          return db.getChildBadges(ctx.user.id, input.childId);
+        }),
+      /** Abzeichen vergeben – idempotent (zweite Vergabe ist ein No-op). */
+      award: protectedProcedure
+        .input(
+          z.object({
+            childId: z.number().int().positive(),
+            badgeId: z.string().min(1).max(40),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          if (!isBadgeId(input.badgeId)) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Unbekanntes Abzeichen.",
+            });
+          }
+          const child = await db.getFamilyChild(input.childId, ctx.user.id);
+          if (!child) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Kind nicht gefunden.",
+            });
+          }
+          await db.awardChildBadge(ctx.user.id, input.childId, input.badgeId);
+          return { success: true } as const;
+        }),
+    }),
+    stats: router({
+      /**
+       * Abgeschlossene Jagd/Quiz atomar in den Zählern des Kindes
+       * fortschreiben; liefert den neuen Stand für die Abzeichen-Prüfung.
+       */
+      record: protectedProcedure
+        .input(
+          z.object({
+            childId: z.number().int().positive(),
+            type: z.enum(["huntCompleted", "quizCompleted"]),
+            correctStreak: z.number().int().min(0).max(1000).optional(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const child = await db.getFamilyChild(input.childId, ctx.user.id);
+          if (!child) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Kind nicht gefunden.",
+            });
+          }
+          const stats = await db.recordChildEvent(
+            ctx.user.id,
+            input.childId,
+            input.type === "huntCompleted"
+              ? { hunt: true }
+              : { quiz: true, streak: input.correctStreak }
+          );
+          return {
+            huntsCompleted: stats?.huntsCompleted ?? 0,
+            quizzesCompleted: stats?.quizzesCompleted ?? 0,
+            bestStreak: stats?.bestStreak ?? 0,
+          };
+        }),
+    }),
   }),
 
   settings: router({

@@ -548,6 +548,78 @@ export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
 
 /**
+ * Kinder-Profile im Familien-Modus: pro Konto mehrere Kinder, die bei
+ * Schnitzeljagden und Quizzen Abzeichen sammeln. Nur der Name – bewusst
+ * ohne weitere personenbezogene Daten.
+ */
+export const familyChildren = mysqlTable(
+  "familyChildren",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 60 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("familyChildren_userId").on(table.userId)]
+);
+
+export type FamilyChild = typeof familyChildren.$inferSelect;
+export type InsertFamilyChild = typeof familyChildren.$inferInsert;
+
+/**
+ * Verdiente Abzeichen pro Kind: badgeId verweist auf den Katalog in
+ * shared/badges.ts. Einmal verdient bleibt verdient (unique childId+badgeId,
+ * Vergabe idempotent).
+ */
+export const childBadges = mysqlTable(
+  "childBadges",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Zugehöriges Kind (familyChildren.id) */
+    childId: int("childId").notNull(),
+    /** Abzeichen-Schlüssel aus dem Katalog (shared/badges.ts) */
+    badgeId: varchar("badgeId", { length: 40 }).notNull(),
+    earnedAt: timestamp("earnedAt").defaultNow().notNull(),
+  },
+  table => [
+    index("childBadges_userId").on(table.userId),
+    uniqueIndex("childBadges_child_badge").on(table.childId, table.badgeId),
+  ]
+);
+
+export type ChildBadge = typeof childBadges.$inferSelect;
+export type InsertChildBadge = typeof childBadges.$inferInsert;
+
+/**
+ * Zähler pro Kind für die Abzeichen-Bedingungen (Jagden/Quizze gespielt,
+ * beste Antwort-Serie) – atomar per Upsert gepflegt, eine Zeile pro Kind.
+ */
+export const childStats = mysqlTable(
+  "childStats",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Zugehöriges Kind (familyChildren.id), genau eine Zeile pro Kind */
+    childId: int("childId").notNull(),
+    /** Abgeschlossene Schnitzeljagden */
+    huntsCompleted: int("huntsCompleted").default(0).notNull(),
+    /** Fertig gespielte Quizze */
+    quizzesCompleted: int("quizzesCompleted").default(0).notNull(),
+    /** Längste Serie richtig beantworteter Fragen */
+    bestStreak: int("bestStreak").default(0).notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    index("childStats_userId").on(table.userId),
+    uniqueIndex("childStats_childId").on(table.childId),
+  ]
+);
+
+export type ChildStats = typeof childStats.$inferSelect;
+export type InsertChildStats = typeof childStats.$inferInsert;
+
+/**
  * Geräteübergreifend synchronisierte Client-Einstellungen: pro Nutzer*in und
  * Schlüssel ein JSON-serialisierter Wert (z. B. Kachel-Reihenfolge, Hindernis-Profil).
  */
