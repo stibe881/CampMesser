@@ -76,6 +76,11 @@ export const packLists = mysqlTable(
     scenario: varchar("scenario", { length: 60 }).notNull().default("custom"),
     /** Gewichts-Budget in Gramm – null = kein Budget gesetzt. */
     weightBudgetGrams: int("weightBudgetGrams"),
+    /**
+     * Personen der Liste als JSON-Array von Namen (max. 10, je ≤ 80 Zeichen);
+     * null = keine Personen-Bereiche. Parser in shared/packPersons.ts.
+     */
+    personsJson: text("personsJson"),
     /** Öffentlicher Teil-Token: Wer den Link kennt, kann die Liste sehen und abhaken. */
     shareToken: varchar("shareToken", { length: 32 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),

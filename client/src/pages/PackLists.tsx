@@ -16,6 +16,7 @@ import {
   Share2,
   Trash2,
   Users,
+  X,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
@@ -37,6 +38,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { familyAddOns, packScenarios } from "@shared/packTemplates";
+import { MAX_PERSONS } from "@shared/packPersons";
 import { formatGrams } from "@shared/packWeight";
 import { pick } from "@shared/i18n";
 import { cn } from "@/lib/utils";
@@ -66,6 +68,9 @@ export default function PackListsPage() {
   /** Gewählte eigene Vorlage – hat Vorrang vor dem Szenario. */
   const [templateChoice, setTemplateChoice] = useState<number | null>(null);
   const [name, setName] = useState("");
+  /** Optionale Personen-Bereiche der neuen Liste (Chips, Enter fügt hinzu). */
+  const [persons, setPersons] = useState<string[]>([]);
+  const [personDraft, setPersonDraft] = useState("");
   // Familien-Checkliste, für die gerade eine Ziel-Liste gewählt wird
   const [addOnId, setAddOnId] = useState<string | null>(null);
   /** Vorlage, deren Teil-Link gerade im Dialog gezeigt wird. */
@@ -104,6 +109,8 @@ export default function PackListsPage() {
       utils.packing.lists.invalidate();
       setDialogOpen(false);
       setName("");
+      setPersons([]);
+      setPersonDraft("");
       toast.success(t.packLists.created);
     },
     onError: () => toast.error(t.packLists.createFailed),
@@ -115,10 +122,35 @@ export default function PackListsPage() {
         utils.packing.lists.invalidate();
         setDialogOpen(false);
         setName("");
+        setPersons([]);
+        setPersonDraft("");
         toast.success(t.packLists.created);
       },
       onError: () => toast.error(t.packLists.createFailed),
     });
+
+  /** Personen-Chip hinzufügen (Enter im Feld oder Plus-Knopf). */
+  const addPersonChip = () => {
+    const person = personDraft.trim().slice(0, 80);
+    if (!person || persons.length >= MAX_PERSONS) return;
+    if (!persons.some(p => p.toLowerCase() === person.toLowerCase())) {
+      setPersons([...persons, person]);
+    }
+    setPersonDraft("");
+  };
+
+  /** Chips plus allenfalls noch nicht bestätigte Eingabe im Feld. */
+  const finalPersons = () => {
+    const person = personDraft.trim().slice(0, 80);
+    if (
+      person &&
+      persons.length < MAX_PERSONS &&
+      !persons.some(p => p.toLowerCase() === person.toLowerCase())
+    ) {
+      return [...persons, person];
+    }
+    return persons;
+  };
 
   const deleteMutation = trpc.packing.deleteList.useMutation({
     onSuccess: () => utils.packing.lists.invalidate(),
@@ -387,6 +419,64 @@ export default function PackListsPage() {
                 onChange={e => setName(e.target.value)}
               />
             </div>
+            {/* Optionale Personen: jede bekommt einen eigenen Bereich auf der Liste */}
+            <div>
+              <Label htmlFor="list-persons">{t.packLists.personsLabel}</Label>
+              {persons.length > 0 && (
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {persons.map(person => (
+                    <span
+                      key={person}
+                      className="inline-flex max-w-48 items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-accent-foreground"
+                    >
+                      <span className="truncate">{person}</span>
+                      <button
+                        type="button"
+                        className="shrink-0 rounded-full text-accent-foreground/70 transition-colors hover:text-accent-foreground"
+                        onClick={() =>
+                          setPersons(persons.filter(p => p !== person))
+                        }
+                        aria-label={t.packLists.personsRemoveAria(person)}
+                      >
+                        <X className="h-3 w-3" aria-hidden="true" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="mt-1.5 flex gap-2">
+                <Input
+                  id="list-persons"
+                  value={personDraft}
+                  maxLength={80}
+                  placeholder={t.packLists.personsPlaceholder}
+                  onChange={e => setPersonDraft(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addPersonChip();
+                    }
+                  }}
+                  disabled={persons.length >= MAX_PERSONS}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={addPersonChip}
+                  disabled={
+                    !personDraft.trim() || persons.length >= MAX_PERSONS
+                  }
+                  aria-label={t.packLists.personsAddAria}
+                >
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t.packLists.personsHint}
+              </p>
+            </div>
             <Button
               className="w-full"
               disabled={
@@ -398,6 +488,7 @@ export default function PackListsPage() {
                   createFromTemplateMutation.mutate({
                     templateId: selectedTemplate.id,
                     listName: finalName,
+                    persons: finalPersons(),
                   });
                   return;
                 }
@@ -406,7 +497,12 @@ export default function PackListsPage() {
                   (selectedScenario
                     ? pick(selectedScenario.label, lang)
                     : t.packLists.defaultName);
-                createMutation.mutate({ name: finalName, scenario, lang });
+                createMutation.mutate({
+                  name: finalName,
+                  scenario,
+                  lang,
+                  persons: finalPersons(),
+                });
               }}
             >
               {(createMutation.isPending ||

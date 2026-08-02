@@ -8,11 +8,12 @@ import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { isStandaloneApp } from "@/lib/standalone";
 import { LOCALE_TAGS } from "@shared/i18n";
+import { parsePersons } from "@shared/packPersons";
 
 /**
- * Druckfreundliche Ansicht einer Packliste: Kategorien als Abschnitte,
- * pro Eintrag ein Papier-Kästchen zum Abhaken, Menge und – falls zugewiesen –
- * die packende Person. PDF entsteht über den Browser-Druckdialog.
+ * Druckfreundliche Ansicht einer Packliste: nach Person gruppiert
+ * («Allgemein» zuerst), innerhalb nach Kategorie, pro Eintrag ein
+ * Papier-Kästchen zum Abhaken. PDF entsteht über den Browser-Druckdialog.
  * Mit ?person=<Name> lässt sich nur der Anteil einer Person drucken.
  */
 export default function PackListPrintPage() {
@@ -83,14 +84,40 @@ export default function PackListPrintPage() {
       personFilter === null || (item.assignee ?? "").trim() === personFilter
   );
 
-  // Kategorien in Listen-Reihenfolge gruppieren (wie in der Detail-Ansicht)
-  const grouped: [string, typeof items][] = [];
+  // Nach Person gruppieren: «Allgemein» (null) zuerst, dann die verwalteten
+  // Personen, danach Alt-Zuordnungen, die nur am assignee-Feld hängen.
+  const persons = parsePersons(query.data?.list?.personsJson);
+  const personKeys: (string | null)[] = [null, ...persons];
   for (const item of items) {
-    const key = item.category || t.packListDetail.generalCategory;
-    const group = grouped.find(([category]) => category === key);
-    if (group) group[1].push(item);
-    else grouped.push([key, [item]]);
+    const name = item.assignee?.trim();
+    if (name && !personKeys.includes(name)) personKeys.push(name);
   }
+  const sections = personKeys
+    .map(person => {
+      const sectionItems = items.filter(item =>
+        person === null
+          ? !item.assignee?.trim()
+          : (item.assignee ?? "").trim() === person
+      );
+      // Kategorien in Listen-Reihenfolge gruppieren (wie in der Detail-Ansicht)
+      const grouped: [string, typeof sectionItems][] = [];
+      for (const item of sectionItems) {
+        const key = item.category || t.packListDetail.generalCategory;
+        const group = grouped.find(([category]) => category === key);
+        if (group) group[1].push(item);
+        else grouped.push([key, [item]]);
+      }
+      return { person, items: sectionItems, grouped };
+    })
+    .filter(section => section.items.length > 0);
+  const categoryCount = new Set(
+    items.map(item => item.category || t.packListDetail.generalCategory)
+  ).size;
+  // Personen-Überschriften nur, wenn es wirklich mehrere Bereiche gibt und
+  // nicht bereits auf eine Person gefiltert wird.
+  const showPersonHeadings =
+    personFilter === null &&
+    !(sections.length <= 1 && sections[0]?.person == null);
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-8 print:max-w-none print:px-0 print:py-0">
@@ -131,7 +158,7 @@ export default function PackListPrintPage() {
           </p>
           <h1 className="mt-1 font-serif text-3xl font-bold">{list.name}</h1>
           <p className="mt-1 text-sm">
-            {t.packListPrint.meta(items.length, grouped.length)}
+            {t.packListPrint.meta(items.length, categoryCount)}
             {" · "}
             {t.packListPrint.printedOn(
               new Date().toLocaleDateString(LOCALE_TAGS[lang], {
@@ -152,41 +179,48 @@ export default function PackListPrintPage() {
           <p className="text-sm">{t.packListPrint.emptyList}</p>
         )}
 
-        <section className="space-y-5">
-          {grouped.map(([category, categoryItems]) => (
-            <div key={category}>
-              <h2 className="mb-2 border-b border-foreground/30 pb-1 text-sm font-bold uppercase tracking-wide">
-                {category}
-              </h2>
-              <ul className="space-y-1.5">
-                {categoryItems.map(item => (
-                  <li
-                    key={item.id}
-                    className="print-station flex items-center gap-3 text-sm"
-                  >
-                    <span
-                      className="inline-block h-4 w-4 shrink-0 rounded border-2 border-foreground"
-                      aria-hidden="true"
-                    />
-                    <span className="min-w-0 flex-1">
-                      {item.name}
-                      {item.quantity > 1 && (
-                        <span className="ml-1.5 text-xs">
-                          × {item.quantity}
+        <div className="space-y-7">
+          {sections.map(section => (
+            <section
+              key={section.person ?? "__general__"}
+              className="space-y-5"
+            >
+              {showPersonHeadings && (
+                <h2 className="border-b border-foreground pb-1 font-serif text-xl font-bold">
+                  {section.person ?? t.packListDetail.sectionGeneral}
+                </h2>
+              )}
+              {section.grouped.map(([category, categoryItems]) => (
+                <div key={category}>
+                  <h3 className="mb-2 border-b border-foreground/30 pb-1 text-sm font-bold uppercase tracking-wide">
+                    {category}
+                  </h3>
+                  <ul className="space-y-1.5">
+                    {categoryItems.map(item => (
+                      <li
+                        key={item.id}
+                        className="print-station flex items-center gap-3 text-sm"
+                      >
+                        <span
+                          className="inline-block h-4 w-4 shrink-0 rounded border-2 border-foreground"
+                          aria-hidden="true"
+                        />
+                        <span className="min-w-0 flex-1">
+                          {item.name}
+                          {item.quantity > 1 && (
+                            <span className="ml-1.5 text-xs">
+                              × {item.quantity}
+                            </span>
+                          )}
                         </span>
-                      )}
-                    </span>
-                    {item.assignee && !personFilter && (
-                      <span className="max-w-32 truncate rounded-full border border-foreground/50 px-2 py-0.5 text-xs">
-                        {item.assignee}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </section>
           ))}
-        </section>
+        </div>
 
         <footer className="mt-8 border-t border-foreground/30 pt-3 text-center text-xs">
           {t.packListPrint.footer}

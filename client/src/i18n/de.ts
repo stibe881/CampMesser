@@ -286,6 +286,12 @@ export const de = {
     nameLabel: "Name der Liste",
     namePlaceholder: (label: string) => `z. B. ${label} Sommer`,
     namePlaceholderFallback: "Name",
+    personsLabel: "Personen (optional)",
+    personsPlaceholder: "Name eingeben, Enter fügt hinzu",
+    personsAddAria: "Person zur neuen Liste hinzufügen",
+    personsRemoveAria: (name: string) => `Person ${name} wieder entfernen`,
+    personsHint:
+      "Jede Person bekommt einen eigenen Bereich auf der Liste – «Allgemein» gibt es immer.",
     createList: "Liste erstellen",
     defaultName: "Meine Packliste",
     created: "Packliste erstellt",
@@ -388,10 +394,9 @@ export const de = {
     markUnpacked: (name: string) => `${name} als ungepackt markieren`,
     deleteItemAria: (name: string) => `${name} löschen`,
     reorderAria: (name: string) => `${name} verschieben – ziehen zum Sortieren`,
-    reorderDisabledTitle: "Zum Sortieren zuerst den Personen-Filter aufheben",
     reorderFailed: "Neue Reihenfolge konnte nicht gespeichert werden",
     emptyList:
-      "Diese Liste ist noch leer – füge oben deinen ersten Eintrag hinzu.",
+      "Diese Liste ist noch leer – füge unten in einem Bereich deinen ersten Eintrag hinzu.",
     assignFailed: "Zuordnung fehlgeschlagen",
     assignButtonAria: (name: string) => `${name} einer Person zuweisen`,
     assignInputAria: (name: string) => `Person, die ${name} packt`,
@@ -400,17 +405,27 @@ export const de = {
     assignRemove: "Zuordnung entfernen",
     assignSuggestionAria: (person: string, item: string) =>
       `${item} an ${person} zuweisen`,
-    filterTitle: "Wer packt was?",
-    filterGroupAria: "Einträge nach Person filtern",
-    filterAll: "Alle",
-    filterUnassigned: "Ohne Zuordnung",
-    filterEmpty: "Für diesen Filter gibt es keine Einträge.",
-    filteredCount: (checked: number, total: number) =>
-      `Im Filter: ${checked} von ${total} gepackt`,
-    totalCount: (checked: number, total: number) =>
-      `Gesamt: ${checked} von ${total}`,
-    filterProgressAria: (pct: number) =>
-      `Fortschritt im Filter: ${pct} Prozent gepackt`,
+    sectionGeneral: "Allgemein",
+    sectionProgress: (checked: number, total: number) =>
+      `${checked} von ${total} gepackt`,
+    sectionEmpty: "Noch keine Einträge in diesem Bereich.",
+    sectionAddNameAria: (section: string) =>
+      `Neuer Eintrag im Bereich ${section}`,
+    sectionAddAria: (section: string) =>
+      `Eintrag im Bereich ${section} hinzufügen`,
+    printPersonAria: (name: string) => `Nur die Einträge von ${name} drucken`,
+    managePersonsButton: "Personen verwalten",
+    managePersonsTitle: "Personen verwalten",
+    managePersonsDescription:
+      "Jede Person bekommt einen eigenen Bereich auf der Liste. Einträge ohne Person stehen unter «Allgemein».",
+    personsEmpty: "Noch keine Personen – füge unten die erste hinzu.",
+    personNameAria: "Name der neuen Person",
+    addPersonButton: "Hinzufügen",
+    removePersonAria: (name: string) => `Person ${name} entfernen`,
+    removePersonConfirm: (name: string) =>
+      `Person «${name}» wirklich entfernen? Ihre Einträge wandern zurück zu «Allgemein».`,
+    personsSaveFailed: "Personen konnten nicht gespeichert werden",
+    personsMaxHint: "Höchstens 10 Personen pro Liste.",
     printButton: "Drucken",
     saveTemplateButton: "Als Vorlage speichern",
     saveTemplateAria: (name: string) => `Liste ${name} als Vorlage speichern`,

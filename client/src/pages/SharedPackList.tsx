@@ -79,10 +79,34 @@ export default function SharedPackListPage() {
   const checkedCount = items.filter(i => i.checked).length;
   const progress = items.length > 0 ? (checkedCount / items.length) * 100 : 0;
 
-  const grouped = items.reduce<Record<string, typeof items>>((acc, item) => {
-    (acc[item.category] ??= []).push(item);
-    return acc;
-  }, {});
+  // Nach Person gruppieren: «Allgemein» (ohne Zuordnung) zuerst, dann die
+  // Personen der Liste, danach Alt-Zuordnungen nur aus dem assignee-Feld.
+  const personKeys: (string | null)[] = [null, ...list.persons];
+  for (const item of items) {
+    const name = item.assignee?.trim();
+    if (name && !personKeys.includes(name)) personKeys.push(name);
+  }
+  const sections = personKeys
+    .map(person => {
+      const sectionItems = items.filter(item =>
+        person === null
+          ? !item.assignee?.trim()
+          : (item.assignee ?? "").trim() === person
+      );
+      const grouped = sectionItems.reduce<Record<string, typeof items>>(
+        (acc, item) => {
+          (acc[item.category] ??= []).push(item);
+          return acc;
+        },
+        {}
+      );
+      return { person, items: sectionItems, grouped };
+    })
+    .filter(section => section.items.length > 0);
+  // Personen-Überschriften nur, wenn es wirklich mehrere Bereiche gibt
+  const showPersonHeadings = !(
+    sections.length <= 1 && sections[0]?.person == null
+  );
 
   return (
     <div className="container max-w-3xl py-6">
@@ -119,59 +143,75 @@ export default function SharedPackListPage() {
         </Card>
       )}
 
-      <div className="space-y-5">
-        {Object.entries(grouped).map(([category, categoryItems]) => (
-          <section key={category}>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              {category}
-            </h2>
-            <ul className="space-y-1.5">
-              {categoryItems.map(item => (
-                <li
-                  key={item.id}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5",
-                    item.checked && "bg-muted/60"
-                  )}
-                >
-                  <Checkbox
-                    id={`shared-item-${item.id}`}
-                    checked={item.checked}
-                    onCheckedChange={value =>
-                      toggleMutation.mutate({
-                        token,
-                        itemId: item.id,
-                        checked: value === true,
-                      })
-                    }
-                    aria-label={t.sharedPackList.checkAria(item.name)}
+      <div className="space-y-7">
+        {sections.map(section => (
+          <section key={section.person ?? "__general__"}>
+            {showPersonHeadings && (
+              <h2 className="mb-3 flex items-center gap-1.5 border-b border-border pb-1.5 font-serif text-lg font-semibold">
+                {section.person ? (
+                  <UserRound
+                    className="h-4.5 w-4.5 text-primary"
+                    aria-hidden="true"
                   />
-                  <label
-                    htmlFor={`shared-item-${item.id}`}
-                    className={cn(
-                      "flex-1 cursor-pointer text-sm",
-                      item.checked && "text-muted-foreground line-through"
-                    )}
-                  >
-                    {item.name}
-                    {item.quantity > 1 && (
-                      <span className="ml-1.5 text-xs text-muted-foreground">
-                        × {item.quantity}
-                      </span>
-                    )}
-                  </label>
-                  {item.assignee && (
-                    <span className="inline-flex max-w-32 items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
-                      <UserRound
-                        className="h-3 w-3 shrink-0"
-                        aria-hidden="true"
-                      />
-                      <span className="truncate">{item.assignee}</span>
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
+                ) : (
+                  <Users
+                    className="h-4.5 w-4.5 text-primary"
+                    aria-hidden="true"
+                  />
+                )}
+                {section.person ?? t.packListDetail.sectionGeneral}
+              </h2>
+            )}
+            <div className="space-y-5">
+              {Object.entries(section.grouped).map(
+                ([category, categoryItems]) => (
+                  <div key={category}>
+                    <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      {category}
+                    </h3>
+                    <ul className="space-y-1.5">
+                      {categoryItems.map(item => (
+                        <li
+                          key={item.id}
+                          className={cn(
+                            "flex items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5",
+                            item.checked && "bg-muted/60"
+                          )}
+                        >
+                          <Checkbox
+                            id={`shared-item-${item.id}`}
+                            checked={item.checked}
+                            onCheckedChange={value =>
+                              toggleMutation.mutate({
+                                token,
+                                itemId: item.id,
+                                checked: value === true,
+                              })
+                            }
+                            aria-label={t.sharedPackList.checkAria(item.name)}
+                          />
+                          <label
+                            htmlFor={`shared-item-${item.id}`}
+                            className={cn(
+                              "flex-1 cursor-pointer text-sm",
+                              item.checked &&
+                                "text-muted-foreground line-through"
+                            )}
+                          >
+                            {item.name}
+                            {item.quantity > 1 && (
+                              <span className="ml-1.5 text-xs text-muted-foreground">
+                                × {item.quantity}
+                              </span>
+                            )}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )
+              )}
+            </div>
           </section>
         ))}
       </div>

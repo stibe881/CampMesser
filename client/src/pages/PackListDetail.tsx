@@ -16,6 +16,7 @@ import {
   Trash2,
   UserRound,
   UserRoundPlus,
+  Users,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
@@ -45,6 +46,7 @@ import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { usePointerDrag } from "@/lib/usePointerDrag";
 import { familyAddOns } from "@shared/packTemplates";
+import { MAX_PERSONS, parsePersons } from "@shared/packPersons";
 import {
   computePackWeight,
   formatGrams,
@@ -53,8 +55,8 @@ import {
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { cn } from "@/lib/utils";
 
-/** Filter-Sonderwert: Einträge ohne Personen-Zuordnung. */
-const FILTER_UNASSIGNED = "__unassigned__";
+/** Bereichs-Schlüssel für Einträge ohne Personen-Zuordnung («Allgemein»). */
+const SECTION_GENERAL = "__general__";
 
 /** Select-Sonderwert: «Neue Kategorie …» öffnet ein Inline-Namensfeld. */
 const CATEGORY_NEW = "__new-category__";
@@ -115,6 +117,93 @@ function CategorySelect({
   );
 }
 
+/**
+ * «Artikel hinzufügen»-Formular eines Bereichs: legt neue Einträge direkt in
+ * dem Bereich (assignee) an, mit Kategorie-Auswahl inkl. «Neue Kategorie …».
+ */
+function SectionAddForm({
+  listId,
+  assignee,
+  categories,
+  sectionLabel,
+}: {
+  listId: number;
+  /** null = Bereich «Allgemein». */
+  assignee: string | null;
+  categories: string[];
+  sectionLabel: string;
+}) {
+  const { t } = useI18n();
+  const utils = trpc.useUtils();
+  const [name, setName] = useState("");
+  const [catChoice, setCatChoice] = useState("");
+  const [catName, setCatName] = useState("");
+
+  const addMutation = trpc.packing.addItems.useMutation({
+    onSuccess: () => {
+      utils.packing.items.invalidate({ listId });
+      setName("");
+      setCatName("");
+    },
+    onError: () => toast.error(t.packListDetail.addFailed),
+  });
+
+  // Gültige Auswahl: Nutzerwahl, sonst erste Kategorie der Liste
+  const effectiveChoice =
+    catChoice === CATEGORY_NEW || categories.includes(catChoice)
+      ? catChoice
+      : (categories[0] ?? CATEGORY_NEW);
+
+  return (
+    <form
+      className="mt-3 flex flex-wrap gap-2"
+      onSubmit={e => {
+        e.preventDefault();
+        if (!name.trim()) return;
+        addMutation.mutate({
+          listId,
+          items: [
+            {
+              name: name.trim(),
+              category:
+                effectiveChoice === CATEGORY_NEW
+                  ? catName.trim().slice(0, 80) ||
+                    t.packListDetail.defaultCategory
+                  : effectiveChoice,
+              quantity: 1,
+              assignee,
+            },
+          ],
+        });
+      }}
+    >
+      <Input
+        placeholder={t.packListDetail.addPlaceholder}
+        className="min-w-40 flex-1"
+        value={name}
+        onChange={e => setName(e.target.value)}
+        maxLength={160}
+        aria-label={t.packListDetail.sectionAddNameAria(sectionLabel)}
+      />
+      <CategorySelect
+        categories={categories}
+        choice={effectiveChoice}
+        onChoiceChange={setCatChoice}
+        newName={catName}
+        onNewNameChange={setCatName}
+        selectAria={t.packListDetail.categoryAria}
+      />
+      <Button
+        type="submit"
+        disabled={addMutation.isPending || !name.trim()}
+        aria-label={t.packListDetail.sectionAddAria(sectionLabel)}
+      >
+        <Plus className="h-4 w-4" aria-hidden="true" />
+      </Button>
+    </form>
+  );
+}
+
 export default function PackListDetailPage() {
   const params = useParams<{ id: string }>();
   const listId = Number(params.id);
@@ -129,21 +218,18 @@ export default function PackListDetailPage() {
     enabled: isAuthenticated,
   });
 
-  const [newItem, setNewItem] = useState("");
-  /** Kategorie-Auswahl im Hinzufügen-Formular ("" = noch keine Auswahl). */
-  const [newCatChoice, setNewCatChoice] = useState("");
-  const [newCatName, setNewCatName] = useState("");
   /** Eintrag, dessen Kategorie gerade bearbeitet wird. */
   const [editCatItemId, setEditCatItemId] = useState<number | null>(null);
   const [editCatChoice, setEditCatChoice] = useState<string>(CATEGORY_NEW);
   const [editCatName, setEditCatName] = useState("");
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  /** null = alle anzeigen, FILTER_UNASSIGNED = ohne Zuordnung, sonst Personenname. */
-  const [personFilter, setPersonFilter] = useState<string | null>(null);
   /** Eintrag, dessen Personen-Zuordnung gerade bearbeitet wird. */
   const [assignItemId, setAssignItemId] = useState<number | null>(null);
   const [assignDraft, setAssignDraft] = useState("");
+  /** Dialog «Personen verwalten» mit Namensfeld. */
+  const [personsDialogOpen, setPersonsDialogOpen] = useState(false);
+  const [personDraft, setPersonDraft] = useState("");
   /** Dialog «Als Vorlage speichern» mit Namensfeld. */
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState("");
@@ -272,11 +358,17 @@ export default function PackListDetailPage() {
     setAssignDraft("");
   };
 
-  const addMutation = trpc.packing.addItems.useMutation({
+  // Personen-Bereiche speichern (Dialog «Personen verwalten»)
+  const setPersonsMutation = trpc.packing.setPersons.useMutation({
     onSuccess: () => {
       utils.packing.items.invalidate({ listId });
-      setNewItem("");
+      setPersonDraft("");
     },
+    onError: () => toast.error(t.packListDetail.personsSaveFailed),
+  });
+
+  const addMutation = trpc.packing.addItems.useMutation({
+    onSuccess: () => utils.packing.items.invalidate({ listId }),
     onError: () => toast.error(t.packListDetail.addFailed),
   });
 
@@ -326,62 +418,59 @@ export default function PackListDetailPage() {
     return cats;
   }, [query.data?.items]);
 
-  // Gültige Auswahl fürs Hinzufügen: Nutzerwahl, sonst erste Kategorie der Liste
-  const effectiveNewCatChoice =
-    newCatChoice === CATEGORY_NEW || categories.includes(newCatChoice)
-      ? newCatChoice
-      : (categories[0] ?? CATEGORY_NEW);
+  // Personen-Bereiche der Liste (aus personsJson)
+  const persons = useMemo(
+    () => parsePersons(query.data?.list?.personsJson),
+    [query.data?.list?.personsJson]
+  );
 
-  /** Kategorie-Auswahl + Inline-Namensfeld in die zu speichernde Kategorie übersetzen. */
-  const resolveNewCategory = () =>
-    effectiveNewCatChoice === CATEGORY_NEW
-      ? newCatName.trim().slice(0, 80) || t.packListDetail.defaultCategory
-      : effectiveNewCatChoice;
-
-  // Alle bereits vergebenen Personennamen – für Filter-Chips und Vorschläge
-  const assigneeNames = useMemo(() => {
-    const names: string[] = [];
+  // Abwärtskompatibilität: Personen, die nur noch über das assignee-Feld an
+  // Einträgen hängen, erscheinen ebenfalls als eigener Bereich.
+  const extraAssignees = useMemo(() => {
+    const extras: string[] = [];
     for (const item of query.data?.items ?? []) {
       const name = item.assignee?.trim();
-      if (name && !names.includes(name)) names.push(name);
+      if (name && !persons.includes(name) && !extras.includes(name))
+        extras.push(name);
     }
-    return names.sort((a, b) => a.localeCompare(b, LOCALE_TAGS[lang]));
-  }, [query.data?.items, lang]);
+    return extras.sort((a, b) => a.localeCompare(b, LOCALE_TAGS[lang]));
+  }, [query.data?.items, persons, lang]);
 
-  // Aktiven Filter zurücksetzen, wenn die letzte Zuordnung dieser Person wegfällt
-  useEffect(() => {
-    if (
-      personFilter !== null &&
-      personFilter !== FILTER_UNASSIGNED &&
-      !assigneeNames.includes(personFilter)
-    ) {
-      setPersonFilter(null);
-    }
-  }, [personFilter, assigneeNames]);
-
-  const matchesPersonFilter = (assignee: string | null) =>
-    personFilter === null ||
-    (personFilter === FILTER_UNASSIGNED
-      ? !assignee
-      : (assignee ?? "").trim() === personFilter);
+  // Vorschläge fürs Zuweisen: verwaltete Personen zuerst, dann Alt-Zuordnungen
+  const suggestionNames = useMemo(
+    () => [...persons, ...extraAssignees],
+    [persons, extraAssignees]
+  );
 
   const generalCategory = t.packListDetail.generalCategory;
-  const grouped = useMemo(() => {
-    const items = (query.data?.items ?? []).filter(i =>
-      matchesPersonFilter(i.assignee)
-    );
-    const map = new Map<string, (typeof items)[number][]>();
-    for (const item of items) {
-      const key = item.category || generalCategory;
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(item);
-    }
-    return Array.from(map.entries());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.data?.items, generalCategory, personFilter]);
 
-  // Bei aktivem Personen-Filter ist die Liste unvollständig – Sortieren deaktiviert
-  const filterActive = personFilter !== null;
+  /**
+   * Primäre Gliederung nach Person: zuoberst «Allgemein» (assignee null),
+   * darunter ein Bereich pro Person – innerhalb nach Kategorie gruppiert.
+   */
+  const sections = useMemo(() => {
+    const items = query.data?.items ?? [];
+    const defs: (string | null)[] = [null, ...persons, ...extraAssignees];
+    return defs.map(person => {
+      const sectionItems = items.filter(i =>
+        person === null
+          ? !i.assignee?.trim()
+          : (i.assignee ?? "").trim() === person
+      );
+      const map = new Map<string, typeof sectionItems>();
+      for (const item of sectionItems) {
+        const key = item.category || generalCategory;
+        if (!map.has(key)) map.set(key, []);
+        map.get(key)!.push(item);
+      }
+      return {
+        person,
+        key: person ?? SECTION_GENERAL,
+        items: sectionItems,
+        groups: Array.from(map.entries()),
+      };
+    });
+  }, [query.data?.items, persons, extraAssignees, generalCategory]);
 
   const reorderMutation = trpc.packing.reorderItems.useMutation({
     onMutate: async input => {
@@ -411,21 +500,35 @@ export default function PackListDetailPage() {
     },
   });
 
-  /** Eintrag innerhalb seiner Kategorie verschieben und Gesamt-Reihenfolge speichern. */
-  const moveItem = (category: string, fromIdStr: string, toIdStr: string) => {
+  /**
+   * Eintrag innerhalb seiner Kategorie (im selben Bereich) verschieben und
+   * die Gesamt-Reihenfolge speichern. Die Drag-Gruppe ist JSON-codiert
+   * [Bereichs-Schlüssel, Kategorie], damit gleiche Kategorien in
+   * verschiedenen Bereichen getrennt bleiben.
+   */
+  const moveItem = (group: string, fromIdStr: string, toIdStr: string) => {
+    let sectionKey = "";
+    let category = "";
+    try {
+      [sectionKey, category] = JSON.parse(group) as [string, string];
+    } catch {
+      return;
+    }
     const fromId = Number(fromIdStr);
     const toId = Number(toIdStr);
     const flat: number[] = [];
-    for (const [cat, catItems] of grouped) {
-      const ids = catItems.map(i => i.id);
-      if (cat === category) {
-        const fromIdx = ids.indexOf(fromId);
-        const toIdx = ids.indexOf(toId);
-        if (fromIdx !== -1 && toIdx !== -1) {
-          ids.splice(toIdx, 0, ...ids.splice(fromIdx, 1));
+    for (const section of sections) {
+      for (const [cat, catItems] of section.groups) {
+        const ids = catItems.map(i => i.id);
+        if (section.key === sectionKey && cat === category) {
+          const fromIdx = ids.indexOf(fromId);
+          const toIdx = ids.indexOf(toId);
+          if (fromIdx !== -1 && toIdx !== -1) {
+            ids.splice(toIdx, 0, ...ids.splice(fromIdx, 1));
+          }
         }
+        flat.push(...ids);
       }
-      flat.push(...ids);
     }
     if (flat.length > 0) reorderMutation.mutate({ listId, itemIds: flat });
   };
@@ -434,7 +537,6 @@ export default function PackListDetailPage() {
   const drag = usePointerDrag({
     onDrop: moveItem,
     handleSelector: "[data-drag-handle]",
-    disabled: filterActive,
   });
 
   // Gewichts-Bilanz über den Namens-Abgleich mit dem Inventar
@@ -528,12 +630,6 @@ export default function PackListDetailPage() {
   };
   const checkedCount = items.filter(i => i.checked).length;
   const progress = items.length > 0 ? (checkedCount / items.length) * 100 : 0;
-  const filteredItems = items.filter(i => matchesPersonFilter(i.assignee));
-  const filteredChecked = filteredItems.filter(i => i.checked).length;
-  const filteredProgress =
-    filteredItems.length > 0
-      ? (filteredChecked / filteredItems.length) * 100
-      : 0;
 
   return (
     <div className="container max-w-3xl py-6">
@@ -546,24 +642,9 @@ export default function PackListDetailPage() {
 
       <div className="mb-2">
         <Progress
-          value={filterActive ? filteredProgress : progress}
-          aria-label={
-            filterActive
-              ? t.packListDetail.filterProgressAria(
-                  Math.round(filteredProgress)
-                )
-              : t.packListDetail.progressAria(Math.round(progress))
-          }
+          value={progress}
+          aria-label={t.packListDetail.progressAria(Math.round(progress))}
         />
-        {filterActive && (
-          <p className="mt-1 text-xs text-muted-foreground">
-            {t.packListDetail.filteredCount(
-              filteredChecked,
-              filteredItems.length
-            )}{" "}
-            · {t.packListDetail.totalCount(checkedCount, items.length)}
-          </p>
-        )}
       </div>
 
       {/* Gewichts-Bilanz aus dem Inventar-Abgleich + Gewichts-Budget */}
@@ -676,16 +757,18 @@ export default function PackListDetailPage() {
               : t.packListDetail.shareButton}
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link
-              href={`/packlisten/${listId}/drucken${
-                personFilter && personFilter !== FILTER_UNASSIGNED
-                  ? `?person=${encodeURIComponent(personFilter)}`
-                  : ""
-              }`}
-            >
+            <Link href={`/packlisten/${listId}/drucken`}>
               <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
               {t.packListDetail.printButton}
             </Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPersonsDialogOpen(true)}
+          >
+            <Users className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.packListDetail.managePersonsButton}
           </Button>
           <Button
             variant="outline"
@@ -765,49 +848,6 @@ export default function PackListDetailPage() {
         </p>
       </div>
 
-      {/* Neuen Eintrag hinzufügen */}
-      <form
-        className="mb-6 flex flex-wrap gap-2"
-        onSubmit={e => {
-          e.preventDefault();
-          if (!newItem.trim()) return;
-          addMutation.mutate({
-            listId,
-            items: [
-              {
-                name: newItem.trim(),
-                category: resolveNewCategory(),
-                quantity: 1,
-              },
-            ],
-          });
-          setNewCatName("");
-        }}
-      >
-        <Input
-          placeholder={t.packListDetail.addPlaceholder}
-          className="min-w-40 flex-1"
-          value={newItem}
-          onChange={e => setNewItem(e.target.value)}
-          aria-label={t.packListDetail.addNameAria}
-        />
-        <CategorySelect
-          categories={categories}
-          choice={effectiveNewCatChoice}
-          onChoiceChange={setNewCatChoice}
-          newName={newCatName}
-          onNewNameChange={setNewCatName}
-          selectAria={t.packListDetail.categoryAria}
-        />
-        <Button
-          type="submit"
-          disabled={addMutation.isPending || !newItem.trim()}
-          aria-label={t.packListDetail.addAria}
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-        </Button>
-      </form>
-
       {/* Aus dem Inventar übernehmen */}
       {inventorySuggestions.length > 0 && (
         <div className="mb-6">
@@ -864,282 +904,392 @@ export default function PackListDetailPage() {
         ))}
       </div>
 
-      {/* Personen-Filter: Wer packt was? */}
-      {assigneeNames.length > 0 && (
-        <div className="mb-5">
-          <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
-            <UserRound className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t.packListDetail.filterTitle}
-          </p>
-          <div
-            className="flex flex-wrap gap-1.5"
-            role="group"
-            aria-label={t.packListDetail.filterGroupAria}
-          >
-            {[
-              { value: null, label: t.packListDetail.filterAll },
-              ...assigneeNames.map(name => ({ value: name, label: name })),
-              {
-                value: FILTER_UNASSIGNED,
-                label: t.packListDetail.filterUnassigned,
-              },
-            ].map(chip => (
-              <button
-                key={chip.value ?? "__all__"}
-                type="button"
-                aria-pressed={personFilter === chip.value}
-                onClick={() => setPersonFilter(chip.value)}
-                className={cn(
-                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                  personFilter === chip.value
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-muted/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                )}
-              >
-                {chip.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Gruppierte Einträge */}
-      {grouped.map(([category, categoryItems]) => (
-        <div key={category} className="mb-5">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            {category}
-          </h2>
-          <ul
-            className={cn("space-y-1.5", drag.dragId !== null && "select-none")}
-          >
-            {categoryItems.map(item => (
-              <li
-                key={item.id}
-                {...drag.dragProps(category, String(item.id))}
-                className={cn(
-                  "group flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5 transition-colors",
-                  item.checked && "bg-muted/60",
-                  drag.dragId === String(item.id) &&
-                    "border-primary opacity-60",
-                  drag.dragOverId === String(item.id) &&
-                    drag.dragId !== String(item.id) &&
-                    "border-primary bg-accent/40"
-                )}
-              >
-                <button
-                  type="button"
-                  data-drag-handle
-                  disabled={filterActive}
-                  title={
-                    filterActive
-                      ? t.packListDetail.reorderDisabledTitle
-                      : undefined
-                  }
-                  aria-label={t.packListDetail.reorderAria(item.name)}
-                  className={cn(
-                    "-ml-1.5 shrink-0 touch-none rounded p-0.5 text-muted-foreground/50",
-                    filterActive
-                      ? "cursor-not-allowed opacity-40"
-                      : "cursor-grab hover:text-foreground active:cursor-grabbing"
-                  )}
-                >
-                  <GripVertical className="h-4 w-4" aria-hidden="true" />
-                </button>
-                <Checkbox
-                  id={`item-${item.id}`}
-                  checked={item.checked}
-                  onCheckedChange={checked =>
-                    toggleMutation.mutate({
-                      id: item.id,
-                      checked: checked === true,
-                    })
-                  }
-                  aria-label={
-                    item.checked
-                      ? t.packListDetail.markUnpacked(item.name)
-                      : t.packListDetail.markPacked(item.name)
-                  }
-                />
-                <label
-                  htmlFor={`item-${item.id}`}
-                  className={cn(
-                    "flex-1 cursor-pointer text-sm",
-                    item.checked && "text-muted-foreground line-through"
-                  )}
-                >
-                  {item.name}
-                  {item.quantity > 1 && (
-                    <span className="ml-1.5 text-xs text-muted-foreground">
-                      × {item.quantity}
-                    </span>
-                  )}
-                </label>
-                {item.assignee && (
-                  <span className="inline-flex max-w-32 items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
-                    <UserRound
-                      className="h-3 w-3 shrink-0"
-                      aria-hidden="true"
-                    />
-                    <span className="truncate">{item.assignee}</span>
-                  </span>
-                )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-muted-foreground/50 hover:text-foreground"
-                  onClick={() => {
-                    if (assignItemId === item.id) {
-                      setAssignItemId(null);
-                    } else {
-                      setAssignItemId(item.id);
-                      setAssignDraft(item.assignee ?? "");
-                      setEditCatItemId(null);
-                    }
-                  }}
-                  aria-label={t.packListDetail.assignButtonAria(item.name)}
-                  aria-expanded={assignItemId === item.id}
-                >
-                  <UserRoundPlus className="h-3.5 w-3.5" aria-hidden="true" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-muted-foreground/50 hover:text-foreground"
-                  onClick={() => {
-                    if (editCatItemId === item.id) {
-                      setEditCatItemId(null);
-                    } else {
-                      setEditCatItemId(item.id);
-                      const known = categories.includes(item.category);
-                      setEditCatChoice(known ? item.category : CATEGORY_NEW);
-                      setEditCatName(known ? "" : item.category);
-                      setAssignItemId(null);
-                    }
-                  }}
-                  aria-label={t.packListDetail.editCategoryAria(item.name)}
-                  aria-expanded={editCatItemId === item.id}
-                >
-                  <Tag className="h-3.5 w-3.5" aria-hidden="true" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-muted-foreground/50 hover:text-destructive"
-                  onClick={() => deleteMutation.mutate({ id: item.id })}
-                  aria-label={t.packListDetail.deleteItemAria(item.name)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                </Button>
-                {assignItemId === item.id && (
-                  <form
-                    className="flex w-full flex-wrap items-center gap-2 border-t border-border pt-2"
-                    onSubmit={e => {
-                      e.preventDefault();
-                      const name = assignDraft.trim().slice(0, 80);
-                      if (name) assignPerson(item.id, name);
-                    }}
-                  >
-                    <Input
-                      value={assignDraft}
-                      onChange={e => setAssignDraft(e.target.value)}
-                      placeholder={t.packListDetail.assignPlaceholder}
-                      aria-label={t.packListDetail.assignInputAria(item.name)}
-                      maxLength={80}
-                      autoFocus
-                      className="h-8 w-36 text-sm"
-                    />
-                    <Button
-                      type="submit"
-                      size="sm"
-                      className="h-8"
-                      disabled={!assignDraft.trim()}
-                    >
-                      {t.packListDetail.assignSave}
-                    </Button>
-                    {item.assignee && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        className="h-8"
-                        onClick={() => assignPerson(item.id, null)}
-                      >
-                        {t.packListDetail.assignRemove}
-                      </Button>
-                    )}
-                    {assigneeNames
-                      .filter(name => name !== item.assignee)
-                      .map(name => (
-                        <button
-                          key={name}
-                          type="button"
-                          onClick={() => assignPerson(item.id, name)}
-                          className="rounded-full border border-border bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-                          aria-label={t.packListDetail.assignSuggestionAria(
-                            name,
-                            item.name
-                          )}
-                        >
-                          {name}
-                        </button>
-                      ))}
-                  </form>
-                )}
-                {editCatItemId === item.id && (
-                  <form
-                    className="flex w-full flex-wrap items-center gap-2 border-t border-border pt-2"
-                    onSubmit={e => {
-                      e.preventDefault();
-                      const category =
-                        editCatChoice === CATEGORY_NEW
-                          ? editCatName.trim().slice(0, 80)
-                          : editCatChoice;
-                      if (!category) return;
-                      updateItemMutation.mutate({ id: item.id, category });
-                      setEditCatItemId(null);
-                      setEditCatName("");
-                    }}
-                  >
-                    <CategorySelect
-                      categories={categories}
-                      choice={editCatChoice}
-                      onChoiceChange={setEditCatChoice}
-                      newName={editCatName}
-                      onNewNameChange={setEditCatName}
-                      selectAria={t.packListDetail.editCategorySelectAria(
-                        item.name
-                      )}
-                      className="h-8 text-sm"
-                    />
-                    <Button
-                      type="submit"
-                      size="sm"
-                      className="h-8"
-                      disabled={
-                        editCatChoice === CATEGORY_NEW && !editCatName.trim()
-                      }
-                    >
-                      {t.packListDetail.categorySave}
-                    </Button>
-                  </form>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-
       {items.length === 0 && (
-        <p className="py-8 text-center text-muted-foreground">
+        <p className="py-4 text-center text-muted-foreground">
           {t.packListDetail.emptyList}
         </p>
       )}
 
-      {items.length > 0 && filterActive && filteredItems.length === 0 && (
-        <p className="py-8 text-center text-muted-foreground">
-          {t.packListDetail.filterEmpty}
-        </p>
-      )}
+      {/* Bereiche: «Allgemein» zuoberst, danach ein Bereich pro Person */}
+      {sections.map(section => {
+        const sectionLabel = section.person ?? t.packListDetail.sectionGeneral;
+        const sectionChecked = section.items.filter(i => i.checked).length;
+        return (
+          <section key={section.key} className="mb-8">
+            <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-border pb-1.5">
+              <h2 className="flex items-center gap-1.5 font-serif text-lg font-semibold">
+                {section.person ? (
+                  <UserRound
+                    className="h-4.5 w-4.5 text-primary"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Users
+                    className="h-4.5 w-4.5 text-primary"
+                    aria-hidden="true"
+                  />
+                )}
+                {sectionLabel}
+              </h2>
+              {section.items.length > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  {t.packListDetail.sectionProgress(
+                    sectionChecked,
+                    section.items.length
+                  )}
+                </span>
+              )}
+              {section.person && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-auto h-7 w-7 text-muted-foreground/60 hover:text-foreground"
+                  asChild
+                >
+                  <Link
+                    href={`/packlisten/${listId}/drucken?person=${encodeURIComponent(
+                      section.person
+                    )}`}
+                    aria-label={t.packListDetail.printPersonAria(
+                      section.person
+                    )}
+                  >
+                    <Printer className="h-3.5 w-3.5" aria-hidden="true" />
+                  </Link>
+                </Button>
+              )}
+            </div>
+
+            {section.items.length === 0 && (
+              <p className="mb-2 text-sm text-muted-foreground">
+                {t.packListDetail.sectionEmpty}
+              </p>
+            )}
+
+            {section.groups.map(([category, categoryItems]) => (
+              <div key={category} className="mb-4">
+                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  {category}
+                </h3>
+                <ul
+                  className={cn(
+                    "space-y-1.5",
+                    drag.dragId !== null && "select-none"
+                  )}
+                >
+                  {categoryItems.map(item => (
+                    <li
+                      key={item.id}
+                      {...drag.dragProps(
+                        JSON.stringify([section.key, category]),
+                        String(item.id)
+                      )}
+                      className={cn(
+                        "group flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5 transition-colors",
+                        item.checked && "bg-muted/60",
+                        drag.dragId === String(item.id) &&
+                          "border-primary opacity-60",
+                        drag.dragOverId === String(item.id) &&
+                          drag.dragId !== String(item.id) &&
+                          "border-primary bg-accent/40"
+                      )}
+                    >
+                      <button
+                        type="button"
+                        data-drag-handle
+                        aria-label={t.packListDetail.reorderAria(item.name)}
+                        className="-ml-1.5 shrink-0 cursor-grab touch-none rounded p-0.5 text-muted-foreground/50 hover:text-foreground active:cursor-grabbing"
+                      >
+                        <GripVertical className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                      <Checkbox
+                        id={`item-${item.id}`}
+                        checked={item.checked}
+                        onCheckedChange={checked =>
+                          toggleMutation.mutate({
+                            id: item.id,
+                            checked: checked === true,
+                          })
+                        }
+                        aria-label={
+                          item.checked
+                            ? t.packListDetail.markUnpacked(item.name)
+                            : t.packListDetail.markPacked(item.name)
+                        }
+                      />
+                      <label
+                        htmlFor={`item-${item.id}`}
+                        className={cn(
+                          "flex-1 cursor-pointer text-sm",
+                          item.checked && "text-muted-foreground line-through"
+                        )}
+                      >
+                        {item.name}
+                        {item.quantity > 1 && (
+                          <span className="ml-1.5 text-xs text-muted-foreground">
+                            × {item.quantity}
+                          </span>
+                        )}
+                      </label>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground/50 hover:text-foreground"
+                        onClick={() => {
+                          if (assignItemId === item.id) {
+                            setAssignItemId(null);
+                          } else {
+                            setAssignItemId(item.id);
+                            setAssignDraft(item.assignee ?? "");
+                            setEditCatItemId(null);
+                          }
+                        }}
+                        aria-label={t.packListDetail.assignButtonAria(
+                          item.name
+                        )}
+                        aria-expanded={assignItemId === item.id}
+                      >
+                        <UserRoundPlus
+                          className="h-3.5 w-3.5"
+                          aria-hidden="true"
+                        />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground/50 hover:text-foreground"
+                        onClick={() => {
+                          if (editCatItemId === item.id) {
+                            setEditCatItemId(null);
+                          } else {
+                            setEditCatItemId(item.id);
+                            const known = categories.includes(item.category);
+                            setEditCatChoice(
+                              known ? item.category : CATEGORY_NEW
+                            );
+                            setEditCatName(known ? "" : item.category);
+                            setAssignItemId(null);
+                          }
+                        }}
+                        aria-label={t.packListDetail.editCategoryAria(
+                          item.name
+                        )}
+                        aria-expanded={editCatItemId === item.id}
+                      >
+                        <Tag className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground/50 hover:text-destructive"
+                        onClick={() => deleteMutation.mutate({ id: item.id })}
+                        aria-label={t.packListDetail.deleteItemAria(item.name)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
+                      {assignItemId === item.id && (
+                        <form
+                          className="flex w-full flex-wrap items-center gap-2 border-t border-border pt-2"
+                          onSubmit={e => {
+                            e.preventDefault();
+                            const name = assignDraft.trim().slice(0, 80);
+                            if (name) assignPerson(item.id, name);
+                          }}
+                        >
+                          <Input
+                            value={assignDraft}
+                            onChange={e => setAssignDraft(e.target.value)}
+                            placeholder={t.packListDetail.assignPlaceholder}
+                            aria-label={t.packListDetail.assignInputAria(
+                              item.name
+                            )}
+                            maxLength={80}
+                            autoFocus
+                            className="h-8 w-36 text-sm"
+                          />
+                          <Button
+                            type="submit"
+                            size="sm"
+                            className="h-8"
+                            disabled={!assignDraft.trim()}
+                          >
+                            {t.packListDetail.assignSave}
+                          </Button>
+                          {item.assignee && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              className="h-8"
+                              onClick={() => assignPerson(item.id, null)}
+                            >
+                              {t.packListDetail.assignRemove}
+                            </Button>
+                          )}
+                          {suggestionNames
+                            .filter(name => name !== item.assignee?.trim())
+                            .map(name => (
+                              <button
+                                key={name}
+                                type="button"
+                                onClick={() => assignPerson(item.id, name)}
+                                className="rounded-full border border-border bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                                aria-label={t.packListDetail.assignSuggestionAria(
+                                  name,
+                                  item.name
+                                )}
+                              >
+                                {name}
+                              </button>
+                            ))}
+                        </form>
+                      )}
+                      {editCatItemId === item.id && (
+                        <form
+                          className="flex w-full flex-wrap items-center gap-2 border-t border-border pt-2"
+                          onSubmit={e => {
+                            e.preventDefault();
+                            const category =
+                              editCatChoice === CATEGORY_NEW
+                                ? editCatName.trim().slice(0, 80)
+                                : editCatChoice;
+                            if (!category) return;
+                            updateItemMutation.mutate({
+                              id: item.id,
+                              category,
+                            });
+                            setEditCatItemId(null);
+                            setEditCatName("");
+                          }}
+                        >
+                          <CategorySelect
+                            categories={categories}
+                            choice={editCatChoice}
+                            onChoiceChange={setEditCatChoice}
+                            newName={editCatName}
+                            onNewNameChange={setEditCatName}
+                            selectAria={t.packListDetail.editCategorySelectAria(
+                              item.name
+                            )}
+                            className="h-8 text-sm"
+                          />
+                          <Button
+                            type="submit"
+                            size="sm"
+                            className="h-8"
+                            disabled={
+                              editCatChoice === CATEGORY_NEW &&
+                              !editCatName.trim()
+                            }
+                          >
+                            {t.packListDetail.categorySave}
+                          </Button>
+                        </form>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+
+            {/* Eigener «Artikel hinzufügen» pro Bereich */}
+            <SectionAddForm
+              listId={listId}
+              assignee={section.person}
+              categories={categories}
+              sectionLabel={sectionLabel}
+            />
+          </section>
+        );
+      })}
+
+      {/* Dialog «Personen verwalten» */}
+      <Dialog open={personsDialogOpen} onOpenChange={setPersonsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.packListDetail.managePersonsTitle}</DialogTitle>
+            <DialogDescription>
+              {t.packListDetail.managePersonsDescription}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            {persons.length === 0 && (
+              <p className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
+                {t.packListDetail.personsEmpty}
+              </p>
+            )}
+            {persons.map(person => (
+              <div
+                key={person}
+                className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2"
+              >
+                <UserRound
+                  className="h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                  {person}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                  disabled={setPersonsMutation.isPending}
+                  onClick={() => {
+                    if (confirm(t.packListDetail.removePersonConfirm(person))) {
+                      setPersonsMutation.mutate({
+                        listId,
+                        persons: persons.filter(p => p !== person),
+                      });
+                    }
+                  }}
+                  aria-label={t.packListDetail.removePersonAria(person)}
+                >
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <form
+            className="flex items-center gap-2"
+            onSubmit={e => {
+              e.preventDefault();
+              const name = personDraft.trim().slice(0, 80);
+              if (!name || persons.length >= MAX_PERSONS) return;
+              setPersonsMutation.mutate({
+                listId,
+                persons: [...persons, name],
+              });
+            }}
+          >
+            <Input
+              value={personDraft}
+              onChange={e => setPersonDraft(e.target.value)}
+              placeholder={t.packListDetail.assignPlaceholder}
+              aria-label={t.packListDetail.personNameAria}
+              maxLength={80}
+              disabled={persons.length >= MAX_PERSONS}
+            />
+            <Button
+              type="submit"
+              variant="outline"
+              disabled={
+                !personDraft.trim() ||
+                setPersonsMutation.isPending ||
+                persons.length >= MAX_PERSONS
+              }
+            >
+              <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.packListDetail.addPersonButton}
+            </Button>
+          </form>
+          {persons.length >= MAX_PERSONS && (
+            <p className="text-xs text-muted-foreground">
+              {t.packListDetail.personsMaxHint}
+            </p>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog «Als Vorlage speichern» */}
       <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>

@@ -7,6 +7,13 @@ import {
   parseCustomTemplateItems,
   type CustomTemplateItem,
 } from "@shared/packTemplates";
+import {
+  MAX_PERSON_NAME_LENGTH,
+  MAX_PERSONS,
+  normalizePersons,
+  parsePersons,
+  serializePersons,
+} from "@shared/packPersons";
 import { l4, pick } from "@shared/i18n";
 import {
   SETTING_VALUE_MAX_LENGTH,
@@ -554,6 +561,11 @@ export const appRouter = router({
           // Vorlagen-Einträge werden in der aktuellen UI-Sprache gespeichert –
           // Listen-Inhalte in der DB bleiben bewusst einsprachig.
           lang: z.enum(["de", "fr", "it", "en"]).default("de"),
+          /** Optionale Personen-Bereiche («Allgemein» gibt es immer). */
+          persons: z
+            .array(z.string().max(MAX_PERSON_NAME_LENGTH))
+            .max(MAX_PERSONS)
+            .optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -561,6 +573,7 @@ export const appRouter = router({
           userId: ctx.user.id,
           name: input.name,
           scenario: input.scenario,
+          personsJson: serializePersons(input.persons ?? []),
         });
         const scenario = packScenarios.find(s => s.id === input.scenario);
         if (scenario && scenario.items.length > 0) {
@@ -616,6 +629,8 @@ export const appRouter = router({
           userId: ctx.user.id,
           name: `${list.name} (${copySuffix})`.slice(0, 120),
           scenario: list.scenario,
+          // Personen-Bereiche und Zuordnungen mitkopieren – nur Haken/Teil-Link nicht
+          personsJson: list.personsJson,
         });
         await db.addPackItems(
           items.map(item => ({
@@ -623,6 +638,7 @@ export const appRouter = router({
             name: item.name,
             category: item.category,
             quantity: item.quantity,
+            assignee: item.assignee,
             sortOrder: item.sortOrder,
           }))
         );
@@ -771,6 +787,11 @@ export const appRouter = router({
         z.object({
           templateId: z.number(),
           listName: z.string().trim().min(1).max(120),
+          /** Optionale Personen-Bereiche («Allgemein» gibt es immer). */
+          persons: z
+            .array(z.string().max(MAX_PERSON_NAME_LENGTH))
+            .max(MAX_PERSONS)
+            .optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -788,6 +809,7 @@ export const appRouter = router({
           userId: ctx.user.id,
           name: input.listName,
           scenario: "custom",
+          personsJson: serializePersons(input.persons ?? []),
         });
         await db.addPackItems(
           items.map((item, idx) => ({
@@ -822,6 +844,14 @@ export const appRouter = router({
               name: z.string().min(1).max(160),
               category: z.string().max(80).default("Allgemein"),
               quantity: z.number().int().min(1).max(99).default(1),
+              /** Bereich der Person – null/weggelassen = «Allgemein». */
+              assignee: z
+                .string()
+                .trim()
+                .min(1)
+                .max(MAX_PERSON_NAME_LENGTH)
+                .nullable()
+                .optional(),
             })
           ),
         })
@@ -840,6 +870,39 @@ export const appRouter = router({
     toggleItem: protectedProcedure
       .input(z.object({ id: z.number(), checked: z.boolean() }))
       .mutation(({ input }) => db.setPackItemChecked(input.id, input.checked)),
+    /**
+     * Personen-Bereiche der Liste setzen. Einträge entfernter Personen
+     * wandern zurück in den Bereich «Allgemein» (assignee null).
+     */
+    setPersons: protectedProcedure
+      .input(
+        z.object({
+          listId: z.number(),
+          persons: z
+            .array(z.string().max(MAX_PERSON_NAME_LENGTH))
+            .max(MAX_PERSONS),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const list = await db.getPackList(input.listId, ctx.user.id);
+        if (!list)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Liste nicht gefunden",
+          });
+        const next = normalizePersons(input.persons);
+        const removed = parsePersons(list.personsJson).filter(
+          person => !next.includes(person)
+        );
+        if (removed.length > 0)
+          await db.clearPackItemAssignees(input.listId, removed);
+        await db.setPackListPersons(
+          input.listId,
+          ctx.user.id,
+          serializePersons(next)
+        );
+        return { persons: next };
+      }),
     /** Alle Haken einer eigenen Liste lösen – z. B. vor dem nächsten Trip. */
     uncheckAll: protectedProcedure
       .input(z.object({ listId: z.number() }))
@@ -949,7 +1012,12 @@ export const appRouter = router({
         }
         const items = await db.getPackItems(list.id);
         return {
-          list: { id: list.id, name: list.name, scenario: list.scenario },
+          list: {
+            id: list.id,
+            name: list.name,
+            scenario: list.scenario,
+            persons: parsePersons(list.personsJson),
+          },
           items,
         };
       }),

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   campSpots,
@@ -316,6 +316,37 @@ export async function setPackListWeightBudget(
     .update(packLists)
     .set({ weightBudgetGrams: grams })
     .where(and(eq(packLists.id, id), eq(packLists.userId, userId)));
+}
+
+/** Personen-Bereiche (JSON-Array von Namen) setzen; null entfernt sie. */
+export async function setPackListPersons(
+  id: number,
+  userId: number,
+  personsJson: string | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(packLists)
+    .set({ personsJson })
+    .where(and(eq(packLists.id, id), eq(packLists.userId, userId)));
+}
+
+/**
+ * Zuordnungen entfernter Personen lösen: ihre Einträge wandern zurück in den
+ * Bereich «Allgemein» (assignee null).
+ */
+export async function clearPackItemAssignees(
+  listId: number,
+  assignees: string[]
+) {
+  if (assignees.length === 0) return;
+  const db = requireDb(await getDb());
+  await db
+    .update(packItems)
+    .set({ assignee: null })
+    .where(
+      and(eq(packItems.listId, listId), inArray(packItems.assignee, assignees))
+    );
 }
 
 /** Teil-Token setzen oder entfernen (nur für die eigene Liste). */
