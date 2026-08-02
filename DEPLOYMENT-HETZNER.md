@@ -150,6 +150,8 @@ So richtest du das Postfach bei Hetzner ein:
 
 `APP_URL` ist die öffentliche Adresse der Anwendung und bestimmt, auf welche Domain die Links in den Reset-Mails zeigen. Fehlt die Angabe, verwendet der Server den Host der jeweiligen Anfrage. Nach dem Eintragen die Anwendung in konsoleH einmal neu aktivieren und den Versand über «Passwort vergessen?» auf der Anmeldeseite testen (auch den Spam-Ordner prüfen).
 
+**Wichtig für die Passkey-Anmeldung (WebAuthn):** `APP_URL` legt zusätzlich die Passkey-Domäne (rpID/Origin) fest und muss deshalb exakt auf die öffentliche Adresse zeigen, im Livebetrieb also `https://campmesser.ch`. Stimmt der Wert nicht mit der im Browser aufgerufenen Domain überein, schlagen das Anlegen und die Anmeldung mit Passkeys fehl; bereits angelegte Passkeys sind an die Domäne gebunden und würden nach einem Domain-Wechsel nicht mehr funktionieren.
+
 ## Schritt 7: Funktionsprüfung
 
 Prüfe nach dem Start, ob die Startseite mitsamt Hintergrundbild lädt, ob sich ein Testkonto registrieren lässt und ob eine angelegte Packliste nach dem Neuladen erhalten bleibt. Der letzte Punkt bestätigt, dass die Datenbankverbindung steht. Öffne zusätzlich ein Wissens-Modul wie das Rezeptbuch, um die Bildauslieferung zu kontrollieren.

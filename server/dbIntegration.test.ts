@@ -10,7 +10,7 @@ import type { TrpcContext } from "./_core/context";
  * anlegen (Packliste, Einstellung, Zeltplatz mit Foto, Trip mit Foto und Menüplan,
  * Rezept mit Foto, Inventar-Gegenstand mit Foto, Schnitzeljagd, Quiz,
  * Kinder-Profil mit Abzeichen und Zählern, Einkaufsliste, Kühlbox samt
- * Vorlage, Push-Abo, Heim-Standort)
+ * Vorlage, Push-Abo, Heim-Standort, Passkey)
  * → Konto löschen → prüfen, dass die Lösch-Kaskade alle Tabellen und
  * die Upload-Dateien erfasst hat.
  */
@@ -259,6 +259,22 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       p256dh: "p".repeat(20),
       auth: "a".repeat(10),
     });
+    // Passkey direkt anlegen (die echte WebAuthn-Zeremonie braucht einen
+    // Browser) – Auflisten und die Lösch-Kaskade laufen über die DB
+    {
+      const { getDb: getDbLocal } = await import("./db");
+      const schemaLocal = await import("../drizzle/schema");
+      await (await getDbLocal())!.insert(schemaLocal.passkeys).values({
+        userId: (user as NonNullable<typeof user>).id,
+        credentialId: `ci-credential-${Date.now()}`,
+        publicKey: Buffer.from("ci-public-key").toString("base64url"),
+        counter: 0,
+        transports: "internal",
+        name: "CI-Passkey",
+      });
+    }
+    const passkeyList = await authed.auth.passkeyList();
+    expect(passkeyList.some(p => p.name === "CI-Passkey")).toBe(true);
 
     // Foto-Uploads simulieren: DB-Einträge plus echte Dateien auf dem Webspace
     const { getDb } = await import("./db");
@@ -388,6 +404,7 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.passwordResetTokens)
         .where(eq(schema.passwordResetTokens.userId, uid)),
+      dbc.select().from(schema.passkeys).where(eq(schema.passkeys.userId, uid)),
     ]);
     expect(remaining.map(rows => rows.length)).toEqual(remaining.map(() => 0));
 

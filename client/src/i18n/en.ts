@@ -147,6 +147,11 @@ export const en: Translation = {
     createAccount: "Create account",
     knowledgeNote:
       "The knowledge modules (first aid, knots, nature, recipes) also work without an account – you only need an account to save your own data.",
+    passkeyOr: "or",
+    passkeyButton: "Sign in with passkey",
+    passkeyWaiting: "Waiting for the passkey …",
+    passkeyFailed:
+      "Passkey sign-in did not work. Try again or sign in with your password.",
   },
   profile: {
     title: "Profile",
@@ -230,6 +235,24 @@ export const en: Translation = {
     homeSaved: "Home location saved",
     homeRemoved: "Home location removed",
     homeRemoveAria: "Remove home location",
+    passkeysTitle: "Security: passkeys",
+    passkeysIntro:
+      "With a passkey you sign in without a password – using fingerprint, face or device code. Your password stays valid as well.",
+    passkeysEmpty: "No passkey saved yet.",
+    passkeyAddedOn: (date: string) => `added on ${date}`,
+    passkeyNameLabel: "Passkey name",
+    passkeyNamePlaceholder: "e.g. Alex's phone",
+    passkeyDefaultName: "Passkey",
+    passkeyAddButton: "Add passkey",
+    passkeyAdding: "Waiting for confirmation …",
+    passkeyAdded: "Passkey saved",
+    passkeyAddFailed: "The passkey could not be created. Please try again.",
+    passkeyExists: "A passkey is already saved on this device.",
+    passkeyRemoveAria: (name: string) => `Remove passkey “${name}”`,
+    passkeyRemoveConfirm: (name: string) =>
+      `Really remove passkey “${name}”? Signing in with it will no longer be possible.`,
+    passkeyRemoved: "Passkey removed",
+    passkeysUnsupported: "Your browser does not support passkeys.",
   },
   packLists: {
     title: "Packing lists",

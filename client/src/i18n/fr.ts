@@ -149,6 +149,11 @@ export const fr: Translation = {
     createAccount: "Créer un compte",
     knowledgeNote:
       "Les modules de savoir (premiers secours, nœuds, nature, recettes) fonctionnent aussi sans compte – tu n'as besoin d'un compte que pour enregistrer tes propres données.",
+    passkeyOr: "ou",
+    passkeyButton: "Se connecter avec un passkey",
+    passkeyWaiting: "En attente du passkey …",
+    passkeyFailed:
+      "La connexion par passkey n'a pas fonctionné. Réessaie ou connecte-toi avec ton mot de passe.",
   },
   profile: {
     title: "Profil",
@@ -238,6 +243,24 @@ export const fr: Translation = {
     homeSaved: "Lieu de domicile enregistré",
     homeRemoved: "Lieu de domicile supprimé",
     homeRemoveAria: "Supprimer le lieu de domicile",
+    passkeysTitle: "Sécurité : passkeys",
+    passkeysIntro:
+      "Avec un passkey, tu te connectes sans mot de passe – par empreinte digitale, visage ou code de l'appareil. Ton mot de passe reste valable en plus.",
+    passkeysEmpty: "Aucun passkey enregistré pour l'instant.",
+    passkeyAddedOn: (date: string) => `ajouté le ${date}`,
+    passkeyNameLabel: "Nom du passkey",
+    passkeyNamePlaceholder: "p. ex. téléphone d'Alex",
+    passkeyDefaultName: "Passkey",
+    passkeyAddButton: "Ajouter un passkey",
+    passkeyAdding: "En attente de confirmation …",
+    passkeyAdded: "Passkey enregistré",
+    passkeyAddFailed: "Le passkey n'a pas pu être créé. Réessaie.",
+    passkeyExists: "Un passkey est déjà enregistré sur cet appareil.",
+    passkeyRemoveAria: (name: string) => `Supprimer le passkey «${name}»`,
+    passkeyRemoveConfirm: (name: string) =>
+      `Vraiment supprimer le passkey «${name}» ? La connexion avec celui-ci ne sera plus possible.`,
+    passkeyRemoved: "Passkey supprimé",
+    passkeysUnsupported: "Ton navigateur ne prend pas en charge les passkeys.",
   },
   packLists: {
     title: "Listes de bagages",

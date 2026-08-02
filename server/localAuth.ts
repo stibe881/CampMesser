@@ -160,6 +160,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     pushSubscriptions,
     userSettings,
     passwordResetTokens,
+    passkeys,
   } = await import("../drizzle/schema");
   const { inArray } = await import("drizzle-orm");
   // Dateinamen der Foto-Uploads sichern, bevor die DB-Zeilen fallen –
@@ -220,6 +221,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db
     .delete(passwordResetTokens)
     .where(eq(passwordResetTokens.userId, userId));
+  await db.delete(passkeys).where(eq(passkeys.userId, userId));
   await db.delete(users).where(eq(users.id, userId));
   // Zuletzt die Upload-Dateien vom Webspace entfernen – fehlende Dateien
   // blockieren nie, und verwaiste Dateien sind schlimmstenfalls harmlos.

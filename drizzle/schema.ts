@@ -628,6 +628,39 @@ export type ChildStats = typeof childStats.$inferSelect;
 export type InsertChildStats = typeof childStats.$inferInsert;
 
 /**
+ * Passkeys (WebAuthn): pro Konto beliebig viele Anmelde-Credentials als
+ * Alternative zum Passwort. Gespeichert werden die Base64URL-codierte
+ * Credential-Id des Authenticators, der öffentliche Schlüssel (COSE) und der
+ * Signatur-Zähler (Schutz vor geklonten Authenticators) – niemals private
+ * Schlüssel. Die kurzlebigen Challenges leben in-memory (server/passkeys.ts).
+ */
+export const passkeys = mysqlTable(
+  "passkeys",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Base64URL-codierte Credential-Id des Authenticators (weltweit eindeutig) */
+    credentialId: varchar("credentialId", { length: 255 }).notNull(),
+    /** Base64URL-codierter öffentlicher Schlüssel (COSE-Format) */
+    publicKey: text("publicKey").notNull(),
+    /** Signatur-Zähler des Authenticators (0 bei Geräten ohne Zähler) */
+    counter: int("counter").notNull().default(0),
+    /** Transports des Authenticators als Komma-Liste (z. B. «internal,hybrid») */
+    transports: varchar("transports", { length: 255 }),
+    /** Frei wählbarer Anzeigename, z. B. der Gerätename */
+    name: varchar("name", { length: 80 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    index("passkeys_userId").on(table.userId),
+    uniqueIndex("passkeys_credentialId").on(table.credentialId),
+  ]
+);
+
+export type Passkey = typeof passkeys.$inferSelect;
+export type InsertPasskey = typeof passkeys.$inferInsert;
+
+/**
  * Geräteübergreifend synchronisierte Client-Einstellungen: pro Nutzer*in und
  * Schlüssel ein JSON-serialisierter Wert (z. B. Kachel-Reihenfolge, Hindernis-Profil).
  */

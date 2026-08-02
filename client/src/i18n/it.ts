@@ -147,6 +147,11 @@ export const it: Translation = {
     createAccount: "Crea account",
     knowledgeNote:
       "I moduli di conoscenza (primo soccorso, nodi, natura, ricette) funzionano anche senza account – un account ti serve solo per salvare i tuoi dati.",
+    passkeyOr: "oppure",
+    passkeyButton: "Accedi con passkey",
+    passkeyWaiting: "In attesa della passkey …",
+    passkeyFailed:
+      "L'accesso con la passkey non è riuscito. Riprova oppure accedi con la password.",
   },
   profile: {
     title: "Profilo",
@@ -234,6 +239,24 @@ export const it: Translation = {
     homeSaved: "Località di casa salvata",
     homeRemoved: "Località di casa rimossa",
     homeRemoveAria: "Rimuovi la località di casa",
+    passkeysTitle: "Sicurezza: passkey",
+    passkeysIntro:
+      "Con una passkey accedi senza password – con impronta digitale, volto o codice del dispositivo. La tua password resta comunque valida.",
+    passkeysEmpty: "Nessuna passkey salvata finora.",
+    passkeyAddedOn: (date: string) => `aggiunta il ${date}`,
+    passkeyNameLabel: "Nome della passkey",
+    passkeyNamePlaceholder: "es. telefono di Alex",
+    passkeyDefaultName: "Passkey",
+    passkeyAddButton: "Aggiungi passkey",
+    passkeyAdding: "In attesa di conferma …",
+    passkeyAdded: "Passkey salvata",
+    passkeyAddFailed: "Non è stato possibile creare la passkey. Riprova.",
+    passkeyExists: "Su questo dispositivo è già salvata una passkey.",
+    passkeyRemoveAria: (name: string) => `Rimuovi la passkey «${name}»`,
+    passkeyRemoveConfirm: (name: string) =>
+      `Rimuovere davvero la passkey «${name}»? L'accesso con essa non sarà più possibile.`,
+    passkeyRemoved: "Passkey rimossa",
+    passkeysUnsupported: "Il tuo browser non supporta le passkey.",
   },
   packLists: {
     title: "Liste bagagli",

@@ -150,6 +150,11 @@ export const de = {
     createAccount: "Konto erstellen",
     knowledgeNote:
       "Die Wissens-Module (Erste Hilfe, Knoten, Natur, Rezepte) funktionieren auch ohne Konto – ein Konto brauchst du nur zum Speichern eigener Daten.",
+    passkeyOr: "oder",
+    passkeyButton: "Mit Passkey anmelden",
+    passkeyWaiting: "Warte auf den Passkey …",
+    passkeyFailed:
+      "Die Passkey-Anmeldung hat nicht geklappt. Versuch es erneut oder melde dich mit dem Passwort an.",
   },
   profile: {
     title: "Profil",
@@ -236,6 +241,25 @@ export const de = {
     homeSaved: "Heim-Standort gespeichert",
     homeRemoved: "Heim-Standort entfernt",
     homeRemoveAria: "Heim-Standort entfernen",
+    passkeysTitle: "Sicherheit: Passkeys",
+    passkeysIntro:
+      "Mit einem Passkey meldest du dich ohne Passwort an – per Fingerabdruck, Gesicht oder Geräte-Code. Dein Passwort bleibt zusätzlich gültig.",
+    passkeysEmpty: "Noch kein Passkey hinterlegt.",
+    passkeyAddedOn: (date: string) => `hinzugefügt am ${date}`,
+    passkeyNameLabel: "Name des Passkeys",
+    passkeyNamePlaceholder: "z. B. Handy Alex",
+    passkeyDefaultName: "Passkey",
+    passkeyAddButton: "Passkey hinzufügen",
+    passkeyAdding: "Warte auf Bestätigung …",
+    passkeyAdded: "Passkey gespeichert",
+    passkeyAddFailed:
+      "Der Passkey konnte nicht angelegt werden. Versuch es erneut.",
+    passkeyExists: "Auf diesem Gerät ist bereits ein Passkey hinterlegt.",
+    passkeyRemoveAria: (name: string) => `Passkey «${name}» entfernen`,
+    passkeyRemoveConfirm: (name: string) =>
+      `Passkey «${name}» wirklich entfernen? Die Anmeldung damit ist danach nicht mehr möglich.`,
+    passkeyRemoved: "Passkey entfernt",
+    passkeysUnsupported: "Dein Browser unterstützt keine Passkeys.",
   },
   packLists: {
     title: "Packlisten",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import {
   LogIn,
@@ -7,7 +7,12 @@ import {
   KeyRound,
   ArrowLeft,
   MailCheck,
+  Fingerprint,
 } from "lucide-react";
+import {
+  browserSupportsWebAuthn,
+  startAuthentication,
+} from "@simplewebauthn/browser";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -83,6 +88,35 @@ export default function LoginPage() {
   const submitLogin = (e: React.FormEvent) => {
     e.preventDefault();
     loginMutation.mutate({ email: loginEmail, password: loginPassword });
+  };
+
+  // Passkey-Anmeldung: nur anbieten, wenn der Browser WebAuthn kann.
+  const passkeySupported = useMemo(() => browserSupportsWebAuthn(), []);
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
+  const passkeyOptionsMutation = trpc.auth.passkeyLoginOptions.useMutation();
+  const passkeyVerifyMutation = trpc.auth.passkeyLoginVerify.useMutation();
+
+  const loginWithPasskey = async () => {
+    if (passkeyBusy) return;
+    setPasskeyBusy(true);
+    try {
+      // Mit eingetippter E-Mail werden die Passkeys des Kontos angeboten,
+      // ohne entscheidet das Gerät (discoverable Credential).
+      const options = await passkeyOptionsMutation.mutateAsync({
+        email: loginEmail.trim() || undefined,
+      });
+      const response = await startAuthentication({ optionsJSON: options });
+      const result = await passkeyVerifyMutation.mutateAsync({ response });
+      await afterAuth(result.name);
+    } catch (error) {
+      // Abbruch durch die Nutzer*in (NotAllowedError) still übergehen
+      const name = (error as { name?: string } | null)?.name;
+      if (name !== "NotAllowedError" && name !== "AbortError") {
+        toast.error(t.login.passkeyFailed);
+      }
+    } finally {
+      setPasskeyBusy(false);
+    }
   };
 
   const submitRegister = (e: React.FormEvent) => {
@@ -305,6 +339,32 @@ export default function LoginPage() {
                     {t.login.forgotPassword}
                   </button>
                 </form>
+                {passkeySupported && (
+                  <div className="mt-4">
+                    <div className="flex items-center gap-3">
+                      <span className="h-px flex-1 bg-border" />
+                      <span className="text-xs text-muted-foreground">
+                        {t.login.passkeyOr}
+                      </span>
+                      <span className="h-px flex-1 bg-border" />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-4 w-full"
+                      disabled={passkeyBusy}
+                      onClick={() => void loginWithPasskey()}
+                    >
+                      <Fingerprint
+                        className="mr-1.5 h-4 w-4"
+                        aria-hidden="true"
+                      />
+                      {passkeyBusy
+                        ? t.login.passkeyWaiting
+                        : t.login.passkeyButton}
+                    </Button>
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="register">

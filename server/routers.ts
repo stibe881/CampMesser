@@ -414,6 +414,129 @@ export const appRouter = router({
         });
         return { success: true } as const;
       }),
+    /**
+     * Passkey-Registrierung, Schritt 1: WebAuthn-Optionen fürs eingeloggte
+     * Konto (excludeCredentials verhindert Duplikate, Challenge 5 Min gültig).
+     */
+    passkeyRegisterOptions: protectedProcedure.mutation(async ({ ctx }) => {
+      const { createRegistrationOptions, rpIdFrom } =
+        await import("./passkeys");
+      const rpID = rpIdFrom(process.env.APP_URL, ctx.req.get("host"));
+      return createRegistrationOptions(ctx.user, rpID);
+    }),
+    /** Passkey-Registrierung, Schritt 2: Browser-Antwort prüfen und speichern. */
+    passkeyRegisterVerify: protectedProcedure
+      .input(
+        z.object({
+          /** RegistrationResponseJSON aus startRegistration() – Struktur prüft der Verifier */
+          response: z.custom<object>(v => typeof v === "object" && v !== null),
+          name: z.string().trim().min(1).max(80),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { verifyAndSavePasskey, rpIdFrom, originFrom } =
+          await import("./passkeys");
+        const host = ctx.req.get("host");
+        const rpID = rpIdFrom(process.env.APP_URL, host);
+        const origin = originFrom(process.env.APP_URL, ctx.req.protocol, host);
+        try {
+          const saved = await verifyAndSavePasskey(
+            ctx.user.id,
+            input.response as unknown as import("@simplewebauthn/server").RegistrationResponseJSON,
+            rpID,
+            origin,
+            input.name
+          );
+          return { success: true, ...saved } as const;
+        } catch (error) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Der Passkey konnte nicht gespeichert werden.",
+          });
+        }
+      }),
+    /** Passkeys des Kontos (nur Anzeige-Daten, nie Schlüsselmaterial). */
+    passkeyList: protectedProcedure.query(async ({ ctx }) => {
+      const { listPasskeys } = await import("./passkeys");
+      const rows = await listPasskeys(ctx.user.id);
+      return rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        createdAt: row.createdAt,
+      }));
+    }),
+    /** Passkey wieder entfernen (fremde Ids sind ein No-op). */
+    passkeyRemove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const { deletePasskey } = await import("./passkeys");
+        await deletePasskey(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+    /**
+     * Passkey-Login, Schritt 1 (öffentlich): mit E-Mail werden die
+     * Credentials des Kontos angeboten, ohne entscheidet das Gerät
+     * (discoverable). Unbekannte E-Mails verraten nichts.
+     */
+    passkeyLoginOptions: publicProcedure
+      .input(z.object({ email: z.string().max(320).optional() }))
+      .mutation(async ({ ctx, input }) => {
+        const { createLoginOptions, rpIdFrom } = await import("./passkeys");
+        const { normalizeEmail } = await import("./localAuth");
+        const email = input.email?.trim()
+          ? normalizeEmail(input.email)
+          : undefined;
+        // rpID auf demselben Weg abgeleitet wie in Schritt 2
+        return createLoginOptions(
+          email,
+          rpIdFrom(process.env.APP_URL, ctx.req.get("host"))
+        );
+      }),
+    /**
+     * Passkey-Login, Schritt 2 (öffentlich): Antwort verifizieren, Zähler
+     * fortschreiben und dieselbe Session setzen wie beim Passwort-Login.
+     */
+    passkeyLoginVerify: publicProcedure
+      .input(
+        z.object({
+          /** AuthenticationResponseJSON aus startAuthentication() */
+          response: z.custom<object>(v => typeof v === "object" && v !== null),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { verifyPasskeyLogin, rpIdFrom, originFrom } =
+          await import("./passkeys");
+        const host = ctx.req.get("host");
+        const rpID = rpIdFrom(process.env.APP_URL, host);
+        const origin = originFrom(process.env.APP_URL, ctx.req.protocol, host);
+        let user;
+        try {
+          user = await verifyPasskeyLogin(
+            input.response as unknown as import("@simplewebauthn/server").AuthenticationResponseJSON,
+            rpID,
+            origin
+          );
+        } catch (error) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Die Passkey-Anmeldung ist fehlgeschlagen.",
+          });
+        }
+        const { createLocalSessionToken } = await import("./localAuth");
+        const token = await createLocalSessionToken(user);
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, token, {
+          ...cookieOptions,
+          maxAge: ONE_YEAR_MS,
+        });
+        return { success: true, name: user.name } as const;
+      }),
   }),
 
   packing: router({
