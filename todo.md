@@ -1,5 +1,9 @@
 # CampMesser – Projekt TODO
 
+## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 12)
+
+- [x] Zelt-Finder-Ziele auf der Karte (/karte): die gespeicherten Zelt-Finder-Ziele (localStorage campmesser.tentFinderTargets inkl. einmaliger Migration des Alt-Ziels und Geräte-Sync über useSyncedSetting – gleicher Ladeweg wie im Zelt-Finder, die Karte liest nur und pusht nie) erscheinen zusätzlich zu den Zeltplatz-Pins als eigene bernsteinfarbene Fadenkreuz-divIcons; Popup mit Ziel-Name, Typ-Zeile «Zelt-Finder-Ziel» und Link «Anpeilen →» in den Zelt-Finder (/zeltfinder?target=<id> – TentFinder wertet den neuen Query-Param analog zu ?spot= aus und wählt das Ziel vor); fitBounds spannt sich über Zeltplatz- UND Ziel-Pins, leerer Zustand erst wenn beides fehlt; Legende unter der Karte zweigeteilt (Zelt-Symbol = Zeltplätze, Fadenkreuz = Ziele, Ziel-Zeile nur wenn vorhanden); 3 neue mapView-Schlüssel (targetKind/aimTarget/targetLegend) in DE/FR/IT/EN
+
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 11)
 
 - [x] Konto-Löschung räumt jetzt wirklich alle Nutzerdaten auf: deleteUserAccount (server/localAuth.ts) löschte bisher nur Packlisten (+Positionen), Inventar, Energie-Verbraucher, Kühlbox, Zeltplätze und Reset-Tokens – neu fallen zusätzlich Reise-Tagebuch (tripLogs), Tagebuch-Fotos (tripPhotos inkl. Dateien unter uploads/trips/), Menüpläne (menuEntries), eigene Rezepte (customRecipes inkl. Foto-Dateien unter uploads/recipes/), eigene Schnitzeljagden (customHunts), Einkaufsliste (shoppingItems), Push-Abos (pushSubscriptions) und synchronisierte Einstellungen (userSettings); Dateinamen werden vor dem DB-Löschen gesichert und die Upload-Dateien zuletzt entfernt (Muster wie trips.remove/recipes.remove, fehlende Dateien blockieren nie); DB-Integrationstest erweitert: legt vor dem Löschen Daten in allen Nutzer-Tabellen samt echten Upload-Dateien an und prüft danach, dass alle 12 Tabellen leer und die Dateien weg sind (gegen echtes MySQL 8 verifiziert)

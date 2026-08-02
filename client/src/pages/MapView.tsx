@@ -5,12 +5,15 @@
  * diesem Platz stattfanden (Verknüpfung über spotId oder Orts-Namen,
  * case-insensitiv – gleiche Idee wie computeTripStats).
  *
+ * Zusätzlich erscheinen die gespeicherten Zelt-Finder-Ziele (Zelt, Duschen …)
+ * als eigene bernsteinfarbene Pins – mit «Anpeilen»-Link in den Zelt-Finder.
+ *
  * Tagebuch-Einträge mit reinem Freitext-Ort haben keine Koordinaten und
  * erscheinen deshalb nicht als eigene Pins.
  */
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { MapPin, Tent } from "lucide-react";
+import { LocateFixed, MapPin, Tent } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import PageHeader from "@/components/PageHeader";
@@ -19,6 +22,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
+import {
+  LEGACY_TARGET_KEY,
+  TARGETS_KEY,
+  migrateTargets,
+  sanitizeTargets,
+  type TentFinderTarget,
+} from "@/lib/tentFinderTargets";
 import { useT } from "@/i18n";
 import { tripNights } from "@shared/trips";
 
@@ -42,11 +53,22 @@ const spotIcon = L.divIcon({
   popupAnchor: [0, -16],
 });
 
+/** Zelt-Finder-Ziel als bernsteinfarbener Fadenkreuz-Marker (gleiches divIcon-Muster). */
+const targetIcon = L.divIcon({
+  className: "",
+  html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#b45309" stroke="#ffffff" stroke-width="2.5"/><circle cx="14" cy="14" r="3" fill="#ffffff"/><path d="M14 5.5v4M14 18.5v4M5.5 14h4M18.5 14h4" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/></svg>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -16],
+});
+
 function SpotsMap({
   spots,
+  targets,
   nightsBySpotId,
 }: {
   spots: SpotPin[];
+  targets: TentFinderTarget[];
   nightsBySpotId: Map<number, number>;
 }) {
   const t = useT();
@@ -116,15 +138,46 @@ function SpotsMap({
       marker.addTo(layer);
     });
 
-    if (spots.length > 0) {
-      const bounds = L.latLngBounds(
-        spots.map(s => [s.latitude, s.longitude] as L.LatLngTuple)
-      );
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+    // Zelt-Finder-Ziele als eigene Pins – Popup mit «Anpeilen»-Link
+    targets.forEach(tgt => {
+      const marker = L.marker([tgt.lat, tgt.lon], {
+        icon: targetIcon,
+        alt: tgt.name,
+      });
+      const popup = document.createElement("div");
+      popup.className = "space-y-1";
+      const name = document.createElement("p");
+      name.className = "font-semibold";
+      name.textContent = tgt.name;
+      popup.appendChild(name);
+      const kind = document.createElement("p");
+      kind.className = "text-xs";
+      kind.textContent = t.mapView.targetKind;
+      popup.appendChild(kind);
+      const href = `/zeltfinder?target=${encodeURIComponent(tgt.id)}`;
+      const link = document.createElement("a");
+      link.href = href;
+      link.textContent = t.mapView.aimTarget;
+      link.className = "text-sm font-medium underline";
+      link.addEventListener("click", event => {
+        event.preventDefault();
+        navigate(href);
+      });
+      popup.appendChild(link);
+      marker.bindPopup(popup);
+      marker.addTo(layer);
+    });
+
+    const points: L.LatLngTuple[] = [
+      ...spots.map(s => [s.latitude, s.longitude] as L.LatLngTuple),
+      ...targets.map(tgt => [tgt.lat, tgt.lon] as L.LatLngTuple),
+    ];
+    if (points.length > 0) {
+      map.fitBounds(L.latLngBounds(points), { padding: [40, 40], maxZoom: 13 });
     } else {
       map.setView(FALLBACK_CENTER, FALLBACK_ZOOM);
     }
-  }, [spots, nightsBySpotId, t, navigate]);
+  }, [spots, targets, nightsBySpotId, t, navigate]);
 
   return (
     <div
@@ -145,6 +198,35 @@ export default function MapViewPage() {
   );
   const { data: trips } = trpc.trips.list.useQuery(undefined, {
     enabled: isAuthenticated,
+  });
+
+  // Zelt-Finder-Ziele wie im Zelt-Finder laden (inkl. einmaliger Migration des Alt-Ziels)
+  const [targets, setTargets] = useState<TentFinderTarget[]>(() => {
+    try {
+      const { targets: initial, changed } = migrateTargets(
+        localStorage.getItem(TARGETS_KEY),
+        localStorage.getItem(LEGACY_TARGET_KEY),
+        t.tentFinder.suggestionTent
+      );
+      if (changed) {
+        localStorage.setItem(TARGETS_KEY, JSON.stringify(initial));
+        localStorage.removeItem(LEGACY_TARGET_KEY);
+      }
+      return initial;
+    } catch {
+      return [];
+    }
+  });
+
+  // Geräte-Sync: Konto-Stand übernehmen (die Karte liest nur, push braucht sie nicht)
+  useSyncedSetting<TentFinderTarget[]>("tentFinderTargets", value => {
+    const clean = sanitizeTargets(value);
+    setTargets(clean);
+    try {
+      localStorage.setItem(TARGETS_KEY, JSON.stringify(clean));
+    } catch {
+      /* Sitzung reicht */
+    }
   });
 
   // Übernachtungen pro Platz: Tagebuch-Einträge über spotId zuordnen,
@@ -193,7 +275,7 @@ export default function MapViewPage() {
         <Skeleton className="h-[65vh] min-h-80 w-full rounded-xl" />
       ) : (
         <>
-          {spotPins.length === 0 && (
+          {spotPins.length === 0 && targets.length === 0 && (
             <Card className="mb-4">
               <CardContent className="flex flex-col items-center gap-2 py-8 text-center">
                 <MapPin
@@ -212,11 +294,26 @@ export default function MapViewPage() {
               </CardContent>
             </Card>
           )}
-          <SpotsMap spots={spotPins} nightsBySpotId={nightsBySpotId} />
-          <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Tent className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-            {t.mapView.legend(spotPins.length)}
-          </p>
+          <SpotsMap
+            spots={spotPins}
+            targets={targets}
+            nightsBySpotId={nightsBySpotId}
+          />
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Tent className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+              {t.mapView.legend(spotPins.length)}
+            </span>
+            {targets.length > 0 && (
+              <span className="flex items-center gap-1.5">
+                <LocateFixed
+                  className="h-3.5 w-3.5 text-amber-glow"
+                  aria-hidden="true"
+                />
+                {t.mapView.targetLegend(targets.length)}
+              </span>
+            )}
+          </div>
         </>
       )}
     </div>

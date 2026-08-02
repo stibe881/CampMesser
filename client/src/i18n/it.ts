@@ -981,6 +981,12 @@ export const it: Translation = {
       n === 1
         ? "1 piazzola salvata sulla mappa"
         : `${n} piazzole salvate sulla mappa`,
+    targetKind: "Meta del Trova-tenda",
+    aimTarget: "Punta qui →",
+    targetLegend: (n: number) =>
+      n === 1
+        ? "1 meta del Trova-tenda sulla mappa"
+        : `${n} mete del Trova-tenda sulla mappa`,
   },
   spotDetail: {
     fallbackTitle: "Piazzola",

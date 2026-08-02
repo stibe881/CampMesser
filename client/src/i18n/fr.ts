@@ -988,6 +988,12 @@ export const fr: Translation = {
       n === 1
         ? "1 emplacement enregistré sur la carte"
         : `${n} emplacements enregistrés sur la carte`,
+    targetKind: "Cible du Retrouve-tente",
+    aimTarget: "Mettre le cap →",
+    targetLegend: (n: number) =>
+      n === 1
+        ? "1 cible du Retrouve-tente sur la carte"
+        : `${n} cibles du Retrouve-tente sur la carte`,
   },
   spotDetail: {
     fallbackTitle: "Emplacement",

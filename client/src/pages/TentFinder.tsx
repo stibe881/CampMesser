@@ -109,10 +109,14 @@ export default function TentFinderPage() {
     targetsSync.push(next);
   };
 
-  // ?spot=<id> wählt den Zeltplatz aus dem Dossier vor
+  // ?spot=<id> wählt den Zeltplatz aus dem Dossier vor,
+  // ?target=<id> ein eigenes Ziel (z. B. von der Karte der Plätze)
   const [selection, setSelection] = useState<string | null>(() => {
-    const spotParam = new URLSearchParams(window.location.search).get("spot");
-    return spotParam ? `spot:${spotParam}` : null;
+    const params = new URLSearchParams(window.location.search);
+    const spotParam = params.get("spot");
+    if (spotParam) return `spot:${spotParam}`;
+    const targetParam = params.get("target");
+    return targetParam ? `target:${targetParam}` : null;
   });
   const [newName, setNewName] = useState("");
   const [saving, setSaving] = useState(false);

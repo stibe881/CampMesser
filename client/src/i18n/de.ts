@@ -991,6 +991,12 @@ export const de = {
       n === 1
         ? "1 gespeicherter Zeltplatz auf der Karte"
         : `${n} gespeicherte Zeltplätze auf der Karte`,
+    targetKind: "Zelt-Finder-Ziel",
+    aimTarget: "Anpeilen →",
+    targetLegend: (n: number) =>
+      n === 1
+        ? "1 Zelt-Finder-Ziel auf der Karte"
+        : `${n} Zelt-Finder-Ziele auf der Karte`,
   },
   spotDetail: {
     fallbackTitle: "Zeltplatz",

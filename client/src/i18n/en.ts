@@ -965,6 +965,12 @@ export const en: Translation = {
     toDossier: "Open dossier →",
     legend: (n: number) =>
       n === 1 ? "1 saved pitch on the map" : `${n} saved pitches on the map`,
+    targetKind: "Tent finder target",
+    aimTarget: "Point me there →",
+    targetLegend: (n: number) =>
+      n === 1
+        ? "1 tent finder target on the map"
+        : `${n} tent finder targets on the map`,
   },
   spotDetail: {
     fallbackTitle: "Pitch",
