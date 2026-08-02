@@ -34,7 +34,7 @@ export interface Module {
   title: L4;
   description: L4;
   icon: React.ComponentType<{ className?: string }>;
-  group: "Planung" | "Sicherheit" | "Erste Hilfe" | "Energie & Wasser";
+  group: "reise" | "vorOrt" | "Sicherheit" | "Erste Hilfe" | "Energie & Wasser";
   offline?: boolean;
 }
 
@@ -54,7 +54,7 @@ export const modules: Module[] = [
       "Sun position, sunrise and sunset at your location"
     ),
     icon: Compass,
-    group: "Planung",
+    group: "vorOrt",
   },
   {
     path: "/packlisten",
@@ -71,7 +71,7 @@ export const modules: Module[] = [
       "Scenario-based checklists to tick off"
     ),
     icon: ListChecks,
-    group: "Planung",
+    group: "reise",
   },
   {
     path: "/inventar",
@@ -83,7 +83,7 @@ export const modules: Module[] = [
       "Track your gear with weight and volume"
     ),
     icon: Package,
-    group: "Planung",
+    group: "reise",
   },
   {
     path: "/packen",
@@ -100,7 +100,7 @@ export const modules: Module[] = [
       "Keep weight and packed size under control"
     ),
     icon: Scale,
-    group: "Planung",
+    group: "reise",
   },
   {
     path: "/familie",
@@ -117,7 +117,7 @@ export const modules: Module[] = [
       "Kids' checklists, scavenger hunts and quizzes"
     ),
     icon: Users,
-    group: "Planung",
+    group: "reise",
   },
   {
     path: "/zeltplaetze",
@@ -134,7 +134,7 @@ export const modules: Module[] = [
       "Save places, check weather and sun in advance"
     ),
     icon: Tent,
-    group: "Planung",
+    group: "vorOrt",
   },
   {
     path: "/zeltfinder",
@@ -146,7 +146,7 @@ export const modules: Module[] = [
       "Compass arrow and distance back to your tent"
     ),
     icon: LocateFixed,
-    group: "Planung",
+    group: "vorOrt",
     offline: true,
   },
   {
@@ -164,7 +164,7 @@ export const modules: Module[] = [
       "Log your stays, count nights and favourite spots"
     ),
     icon: BookOpen,
-    group: "Planung",
+    group: "reise",
   },
   {
     path: "/rasen",
@@ -176,7 +176,7 @@ export const modules: Module[] = [
       "How long can the tent stay on the grass?"
     ),
     icon: Sprout,
-    group: "Planung",
+    group: "vorOrt",
     offline: true,
   },
   {
@@ -189,7 +189,7 @@ export const modules: Module[] = [
       "Level your caravan and table with the motion sensor"
     ),
     icon: Gauge,
-    group: "Planung",
+    group: "vorOrt",
     offline: true,
   },
   {
@@ -241,7 +241,7 @@ export const modules: Module[] = [
       "Will the laundry dry before sunset?"
     ),
     icon: Shirt,
-    group: "Planung",
+    group: "vorOrt",
   },
   {
     path: "/nachtruhe",
@@ -398,7 +398,8 @@ export const modules: Module[] = [
 ];
 
 export const groups = [
-  "Planung",
+  "reise",
+  "vorOrt",
   "Sicherheit",
   "Erste Hilfe",
   "Energie & Wasser",
@@ -406,7 +407,13 @@ export const groups = [
 
 /** Anzeige-Namen der Gruppen (die Gruppen-Schlüssel selbst bleiben stabil). */
 export const groupLabels: Record<(typeof groups)[number], L4> = {
-  Planung: l4("Planung", "Planification", "Pianificazione", "Planning"),
+  reise: l4(
+    "Reise planen",
+    "Planifier le voyage",
+    "Pianificare il viaggio",
+    "Plan your trip"
+  ),
+  vorOrt: l4("Vor Ort", "Sur place", "Sul posto", "On site"),
   Sicherheit: l4("Sicherheit", "Sécurité", "Sicurezza", "Safety"),
   "Erste Hilfe": l4(
     "Erste Hilfe",
