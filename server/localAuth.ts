@@ -142,9 +142,27 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     powerConsumers,
     foodItems,
     campSpots,
+    tripLogs,
+    tripPhotos,
+    menuEntries,
+    customRecipes,
+    customHunts,
+    shoppingItems,
+    pushSubscriptions,
+    userSettings,
     passwordResetTokens,
   } = await import("../drizzle/schema");
   const { inArray } = await import("drizzle-orm");
+  // Dateinamen der Foto-Uploads sichern, bevor die DB-Zeilen fallen –
+  // der DB-Eintrag ist die Wahrheit (Muster wie trips.remove/recipes.remove).
+  const photoRows = await db
+    .select({ fileName: tripPhotos.fileName })
+    .from(tripPhotos)
+    .where(eq(tripPhotos.userId, userId));
+  const recipeRows = await db
+    .select({ imageFileName: customRecipes.imageFileName })
+    .from(customRecipes)
+    .where(eq(customRecipes.userId, userId));
   // Packlisten-Positionen zuerst (referenzieren Listen)
   const lists = await db
     .select({ id: packLists.id })
@@ -159,10 +177,32 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(powerConsumers).where(eq(powerConsumers.userId, userId));
   await db.delete(foodItems).where(eq(foodItems.userId, userId));
   await db.delete(campSpots).where(eq(campSpots.userId, userId));
+  // Reise-Tagebuch samt Fotos und Menüplänen (referenzieren Trips)
+  await db.delete(tripPhotos).where(eq(tripPhotos.userId, userId));
+  await db.delete(menuEntries).where(eq(menuEntries.userId, userId));
+  await db.delete(tripLogs).where(eq(tripLogs.userId, userId));
+  await db.delete(customRecipes).where(eq(customRecipes.userId, userId));
+  await db.delete(customHunts).where(eq(customHunts.userId, userId));
+  await db.delete(shoppingItems).where(eq(shoppingItems.userId, userId));
+  await db
+    .delete(pushSubscriptions)
+    .where(eq(pushSubscriptions.userId, userId));
+  await db.delete(userSettings).where(eq(userSettings.userId, userId));
   await db
     .delete(passwordResetTokens)
     .where(eq(passwordResetTokens.userId, userId));
   await db.delete(users).where(eq(users.id, userId));
+  // Zuletzt die Upload-Dateien vom Webspace entfernen – fehlende Dateien
+  // blockieren nie, und verwaiste Dateien sind schlimmstenfalls harmlos.
+  const { tripPhotoStorage, recipePhotoStorage } = await import(
+    "./photoStorage"
+  );
+  await tripPhotoStorage.deleteFiles(photoRows.map(p => p.fileName));
+  await recipePhotoStorage.deleteFiles(
+    recipeRows
+      .map(r => r.imageFileName)
+      .filter((name): name is string => Boolean(name))
+  );
 }
 
 /** Konto anhand der numerischen Id nachschlagen (z. B. für den Passwort-Reset). */
