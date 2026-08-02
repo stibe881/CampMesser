@@ -436,6 +436,27 @@ export const de = {
     forecast7: "7-Tage-Vorhersage",
     dataSource:
       "Datenquelle: Open-Meteo (beste verfügbare Auflösung für deinen Standort, in der Schweiz MeteoSchweiz ICON-CH). Warnungen werden aus der Vorhersage berechnet und ersetzen keine offiziellen Warnungen von MeteoSchweiz.",
+    compareButton: "Mit anderem Ort vergleichen",
+    compareTitle: "Orte vergleichen",
+    compareAria: "Wetter-Vergleich zweier Orte",
+    compareCloseAria: "Vergleich schliessen",
+    compareSearchLabel: "Zweiten Ort suchen",
+    compareSearchPlaceholder: "z. B. Bellinzona oder Fiesch",
+    compareSearchButton: "Suchen",
+    compareSearchingAria: "Ortssuche läuft",
+    compareSearchFailed:
+      "Ortssuche fehlgeschlagen – bitte später erneut versuchen.",
+    compareNoResults: "Kein Ort gefunden – prüfe die Schreibweise.",
+    compareResultsAria: "Gefundene Orte",
+    compareSpotsLabel: "Oder einen gespeicherten Zeltplatz wählen:",
+    compareChange: "Ort ändern",
+    compareLoadingAria: "Vergleichs-Prognose wird geladen",
+    compareLoadFailed:
+      "Prognose für den Vergleichsort konnte nicht geladen werden.",
+    compareCaption: (a: string, b: string) => `7-Tage-Vergleich: ${a} und ${b}`,
+    compareDayHeader: "Tag",
+    compareSrRain: "Regen",
+    compareSrWind: "Windböen",
   },
   water: {
     title: "Trinkwasser-Rechner",

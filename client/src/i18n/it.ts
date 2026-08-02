@@ -429,6 +429,27 @@ export const it: Translation = {
     forecast7: "Previsioni a 7 giorni",
     dataSource:
       "Fonte dati: Open-Meteo (migliore risoluzione disponibile per la tua posizione, in Svizzera MeteoSvizzera ICON-CH). Le allerte sono calcolate dalle previsioni e non sostituiscono le allerte ufficiali di MeteoSvizzera.",
+    compareButton: "Confronta con un altro luogo",
+    compareTitle: "Confronta luoghi",
+    compareAria: "Confronto meteo di due luoghi",
+    compareCloseAria: "Chiudi il confronto",
+    compareSearchLabel: "Cerca un secondo luogo",
+    compareSearchPlaceholder: "ad es. Bellinzona o Fiesch",
+    compareSearchButton: "Cerca",
+    compareSearchingAria: "Ricerca del luogo in corso",
+    compareSearchFailed:
+      "La ricerca del luogo non è riuscita – riprova più tardi.",
+    compareNoResults: "Nessun luogo trovato – controlla la grafia.",
+    compareResultsAria: "Luoghi trovati",
+    compareSpotsLabel: "Oppure scegli una piazzola salvata:",
+    compareChange: "Cambia luogo",
+    compareLoadingAria: "Caricamento delle previsioni di confronto",
+    compareLoadFailed:
+      "Impossibile caricare le previsioni del luogo di confronto.",
+    compareCaption: (a, b) => `Confronto a 7 giorni: ${a} e ${b}`,
+    compareDayHeader: "Giorno",
+    compareSrRain: "Pioggia",
+    compareSrWind: "Raffiche",
   },
   water: {
     title: "Calcolatore dell'acqua potabile",
