@@ -1607,6 +1607,7 @@ export const it: Translation = {
     hubStopFailed: "Terminazione non riuscita",
     hubQrAlt: name => `Codice QR del link dell'hub per ${name}`,
     hubQrHint: "Basta scansionarlo per aprirlo.",
+    printEntryAria: name => `Stampare il rapporto di viaggio di ${name}`,
   },
   tripInvite: {
     badge: "Invito al viaggio",
@@ -1643,6 +1644,25 @@ export const it: Translation = {
       "Questa lista bagagli al momento non è condivisa separatamente – solo visualizzazione, non si può spuntare.",
     footer:
       "Condiviso con CampMesser – il coltellino svizzero per il campeggio in tenda.",
+  },
+  tripPrint: {
+    docTitle: name => `${name} – Rapporto di viaggio da stampare`,
+    docTitleFallback: "Rapporto di viaggio",
+    appTitle: "CampMesser – Il coltellino svizzero per il campeggio in tenda",
+    notFound: "Questo soggiorno non è stato trovato.",
+    printButton: "Stampa / Salva come PDF",
+    printBrowserHint:
+      "Nell'app installata questo pulsante apre la vista nel browser – lì stampa o salva come PDF dal menu.",
+    headerKicker: "CampMesser · Rapporto di viaggio",
+    printedOn: date => `Stato: ${date}`,
+    ratingAria: n => `Valutazione: ${n} stelle su 5`,
+    notesTitle: "Note",
+    menuTitle: "Piano dei menu",
+    dayHeader: "Giorno",
+    photosTitle: "Foto",
+    photoAlt: (n, name) => `Foto ${n} del soggiorno ${name}`,
+    footer:
+      "Bei ricordi! · CampMesser – il coltellino svizzero per il campeggio in tenda",
   },
   firstAid: {
     title: "Guida di primo soccorso",

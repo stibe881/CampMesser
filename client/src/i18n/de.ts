@@ -1626,6 +1626,7 @@ export const de = {
     hubStopFailed: "Beenden fehlgeschlagen",
     hubQrAlt: (name: string) => `QR-Code des Reise-Hub-Links für ${name}`,
     hubQrHint: "Zum Öffnen einfach scannen.",
+    printEntryAria: (name: string) => `Reisebericht von ${name} drucken`,
   },
   tripInvite: {
     badge: "Reise-Einladung",
@@ -1662,6 +1663,25 @@ export const de = {
       "Diese Packliste wird momentan nicht separat geteilt – nur Ansicht, Abhaken ist nicht möglich.",
     footer:
       "Geteilt mit CampMesser – dem Schweizer Taschenmesser fürs Zelt-Camping.",
+  },
+  tripPrint: {
+    docTitle: (name: string) => `${name} – Reisebericht zum Ausdrucken`,
+    docTitleFallback: "Reisebericht",
+    appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    notFound: "Dieser Aufenthalt wurde nicht gefunden.",
+    printButton: "Drucken / Als PDF sichern",
+    printBrowserHint:
+      "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
+    headerKicker: "CampMesser · Reisebericht",
+    printedOn: (date: string) => `Stand: ${date}`,
+    ratingAria: (n: number) => `Bewertung: ${n} von 5 Sternen`,
+    notesTitle: "Notizen",
+    menuTitle: "Menüplan",
+    dayHeader: "Tag",
+    photosTitle: "Fotos",
+    photoAlt: (n: number, name: string) => `Foto ${n} vom Aufenthalt ${name}`,
+    footer:
+      "Schöne Erinnerungen! · CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
   },
   firstAid: {
     title: "Erste-Hilfe-Guide",

@@ -1621,6 +1621,8 @@ export const fr: Translation = {
     hubStopFailed: "Échec de l'arrêt",
     hubQrAlt: (name: string) => `Code QR du lien du hub pour ${name}`,
     hubQrHint: "Il suffit de le scanner pour l'ouvrir.",
+    printEntryAria: (name: string) =>
+      `Imprimer le rapport de voyage de ${name}`,
   },
   tripInvite: {
     badge: "Invitation au voyage",
@@ -1656,6 +1658,25 @@ export const fr: Translation = {
       "Cette liste de bagages n'est pas partagée séparément pour le moment – consultation seule, impossible de cocher.",
     footer:
       "Partagé avec CampMesser – le couteau suisse du camping sous tente.",
+  },
+  tripPrint: {
+    docTitle: name => `${name} – Rapport de voyage à imprimer`,
+    docTitleFallback: "Rapport de voyage",
+    appTitle: "CampMesser – Le couteau suisse du camping sous tente",
+    notFound: "Ce séjour est introuvable.",
+    printButton: "Imprimer / Enregistrer en PDF",
+    printBrowserHint:
+      "Dans l'app installée, ce bouton ouvre la vue dans le navigateur – imprime ou enregistre en PDF via le menu.",
+    headerKicker: "CampMesser · Rapport de voyage",
+    printedOn: date => `État : ${date}`,
+    ratingAria: n => `Évaluation : ${n} étoiles sur 5`,
+    notesTitle: "Notes",
+    menuTitle: "Plan des menus",
+    dayHeader: "Jour",
+    photosTitle: "Photos",
+    photoAlt: (n, name) => `Photo ${n} du séjour ${name}`,
+    footer:
+      "De beaux souvenirs ! · CampMesser – le couteau suisse du camping sous tente",
   },
   firstAid: {
     title: "Guide de premiers secours",

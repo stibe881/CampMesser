@@ -1567,6 +1567,7 @@ export const en: Translation = {
     hubStopFailed: "Stopping failed",
     hubQrAlt: name => `QR code of the trip hub link for ${name}`,
     hubQrHint: "Simply scan it to open.",
+    printEntryAria: name => `Print the trip report of ${name}`,
   },
   tripInvite: {
     badge: "Trip invitation",
@@ -1601,6 +1602,25 @@ export const en: Translation = {
     packListNotShared:
       "This packing list is currently not shared separately – view only, ticking off is not possible.",
     footer: "Shared with CampMesser – the Swiss army knife for tent camping.",
+  },
+  tripPrint: {
+    docTitle: name => `${name} – Trip report for printing`,
+    docTitleFallback: "Trip report",
+    appTitle: "CampMesser – The Swiss army knife for tent camping",
+    notFound: "This stay was not found.",
+    printButton: "Print / Save as PDF",
+    printBrowserHint:
+      "In the installed app this button opens the view in the browser – print or save as PDF from the menu there.",
+    headerKicker: "CampMesser · Trip report",
+    printedOn: date => `As of: ${date}`,
+    ratingAria: n => `Rating: ${n} of 5 stars`,
+    notesTitle: "Notes",
+    menuTitle: "Menu plan",
+    dayHeader: "Day",
+    photosTitle: "Photos",
+    photoAlt: (n, name) => `Photo ${n} of the stay ${name}`,
+    footer:
+      "Great memories! · CampMesser – the Swiss army knife for tent camping",
   },
   firstAid: {
     title: "First aid guide",

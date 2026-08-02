@@ -43,6 +43,7 @@ const pageLoaders = {
   SpotDetail: () => import("./pages/SpotDetail"),
   TentFinder: () => import("./pages/TentFinder"),
   Trips: () => import("./pages/Trips"),
+  TripPrint: () => import("./pages/TripPrint"),
   MenuPlan: () => import("./pages/MenuPlan"),
   MenuPlanPrint: () => import("./pages/MenuPlanPrint"),
   Level: () => import("./pages/Level"),
@@ -113,6 +114,7 @@ const MapViewPage = lazyWithRetry(pageLoaders.MapView);
 const SpotDetailPage = lazyWithRetry(pageLoaders.SpotDetail);
 const TentFinderPage = lazyWithRetry(pageLoaders.TentFinder);
 const TripsPage = lazyWithRetry(pageLoaders.Trips);
+const TripPrintPage = lazyWithRetry(pageLoaders.TripPrint);
 const MenuPlanPage = lazyWithRetry(pageLoaders.MenuPlan);
 const MenuPlanPrintPage = lazyWithRetry(pageLoaders.MenuPlanPrint);
 const LevelPage = lazyWithRetry(pageLoaders.Level);
@@ -174,6 +176,8 @@ function Router() {
           <Route path={"/zeltplaetze/:id"} component={SpotDetailPage} />
           <Route path={"/zeltfinder"} component={TentFinderPage} />
           <Route path={"/tagebuch"} component={TripsPage} />
+          {/* Druckroute VOR möglichen parametrisierten Tagebuch-Routen registrieren */}
+          <Route path={"/tagebuch/:id/drucken"} component={TripPrintPage} />
           {/* Druckroute VOR der Basis-Route, sonst fängt :tripId auch «drucken» ab */}
           <Route
             path={"/menueplan/:tripId/drucken"}

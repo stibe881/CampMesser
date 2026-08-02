@@ -14,6 +14,7 @@ import {
   Moon,
   Pencil,
   Plus,
+  Printer,
   Share2,
   Sparkles,
   Star,
@@ -2167,6 +2168,21 @@ export default function TripsPage() {
                       )}
                     >
                       <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                    </Button>
+                    <Button
+                      asChild
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+                    >
+                      <Link
+                        href={`/tagebuch/${trip.id}/drucken`}
+                        aria-label={t.trips.printEntryAria(
+                          trip.title || placeName(trip)
+                        )}
+                      >
+                        <Printer className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Link>
                     </Button>
                     {trip.role === "owner" ? (
                       <>
