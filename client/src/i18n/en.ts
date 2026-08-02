@@ -994,6 +994,48 @@ export const en: Translation = {
     stepsTitle: "Step by step",
     proTipTitle: "Pro tip",
   },
+  nature: {
+    title: "Nature Explorer",
+    subtitle:
+      "Animal tracks, constellations and trees – explained for kids and available offline.",
+    offlineNote:
+      "The entire encyclopedia is stored in the app and can be used without an internet connection.",
+    moonSectionAria: "Moon phase calendar",
+    moonTitle: "The moon tonight",
+    illuminated: pct => `${pct} % illuminated`,
+    stargazing: label => `Stargazing: ${label}`,
+    quality: {
+      hervorragend: "excellent",
+      gut: "good",
+      mittel: "fair",
+      schlecht: "poor",
+    },
+    fullMoonsTitle: "🌕 Next full moons",
+    fullMoonsNote: "Ideal for night hikes – the moon lights the way.",
+    newMoonsTitle: "🌑 Next new moons",
+    newMoonsNote:
+      "Darkest sky – the best nights for constellations and the Milky Way.",
+    moonCalcNote:
+      "Calculated directly on the device (accurate to ±1 day) – also works offline.",
+    meteorSectionAria: "Shooting star calendar",
+    meteorTitle: "Next shooting star nights",
+    activeNow: "Active now",
+    peakToday: "Peak tonight!",
+    peakTomorrow: "Peak tomorrow",
+    peakInDays: n => `Peak in ${n} days`,
+    meteorRate: n => `up to ${n} meteors/h`,
+    radiantDirection: r => `looking ${r}`,
+    moonInterferes: pct =>
+      `Moon interferes: ${pct} % illuminated at the peak – bright meteors are still visible.`,
+    moonOk: pct => `Good moon conditions: only ${pct} % illuminated.`,
+    meteorFootnote:
+      "Rates apply to a dark sky without light pollution. Dates are roughly the same every year, calculated offline on the device.",
+    categoryAria: "Choose a category",
+    imageAlt: name => `Illustration: ${name}`,
+    featuresTitle: "Identifying features",
+    funFactTitle: "Did you know?",
+    kidsTitle: "For kids:",
+  },
   notFound: {
     heading: "Page not found",
     text1: "Sorry, this page doesn't exist.",

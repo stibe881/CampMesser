@@ -1019,6 +1019,49 @@ export const fr: Translation = {
     stepsTitle: "Pas à pas",
     proTipTitle: "Astuce de pro",
   },
+  nature: {
+    title: "Explorateur nature",
+    subtitle:
+      "Traces d'animaux, constellations et arbres – expliqués pour les enfants et disponibles hors ligne.",
+    offlineNote:
+      "Tout le lexique est enregistré dans l'app et utilisable sans connexion Internet.",
+    moonSectionAria: "Calendrier des phases de la lune",
+    moonTitle: "La lune cette nuit",
+    illuminated: pct => `Éclairée à ${pct} %`,
+    stargazing: label => `Observation des étoiles : ${label}`,
+    quality: {
+      hervorragend: "excellente",
+      gut: "bonne",
+      mittel: "moyenne",
+      schlecht: "mauvaise",
+    },
+    fullMoonsTitle: "🌕 Prochaines pleines lunes",
+    fullMoonsNote:
+      "Idéal pour les randonnées nocturnes – la lune éclaire le chemin.",
+    newMoonsTitle: "🌑 Prochaines nouvelles lunes",
+    newMoonsNote:
+      "Ciel le plus sombre – les meilleures nuits pour les constellations et la Voie lactée.",
+    moonCalcNote:
+      "Le calcul se fait directement sur l'appareil (précision ±1 jour) – fonctionne aussi hors ligne.",
+    meteorSectionAria: "Calendrier des étoiles filantes",
+    meteorTitle: "Prochaines nuits d'étoiles filantes",
+    activeNow: "Actif maintenant",
+    peakToday: "Maximum cette nuit !",
+    peakTomorrow: "Maximum demain",
+    peakInDays: n => `Maximum dans ${n} jours`,
+    meteorRate: n => `jusqu'à ${n} météores/h`,
+    radiantDirection: r => `direction ${r}`,
+    moonInterferes: pct =>
+      `La lune gêne : éclairée à ${pct} % au maximum – les météores brillants restent tout de même visibles.`,
+    moonOk: pct => `Bonne position de la lune : éclairée à ${pct} % seulement.`,
+    meteorFootnote:
+      "Les taux valent pour un ciel sombre sans pollution lumineuse. Les dates sont à peu près les mêmes chaque année, calcul hors ligne sur l'appareil.",
+    categoryAria: "Choisir une catégorie",
+    imageAlt: name => `Illustration : ${name}`,
+    featuresTitle: "Signes distinctifs",
+    funFactTitle: "Le savais-tu ?",
+    kidsTitle: "Pour les enfants :",
+  },
   notFound: {
     heading: "Page introuvable",
     text1: "Cette page n'existe malheureusement pas.",

@@ -1019,6 +1019,48 @@ export const de = {
     stepsTitle: "Schritt für Schritt",
     proTipTitle: "Profi-Tipp",
   },
+  nature: {
+    title: "Natur-Entdecker",
+    subtitle:
+      "Tierspuren, Sternbilder und Bäume – kindgerecht erklärt und offline verfügbar.",
+    offlineNote:
+      "Das ganze Lexikon ist in der App gespeichert und ohne Internetverbindung nutzbar.",
+    moonSectionAria: "Mondphasen-Kalender",
+    moonTitle: "Mond heute Nacht",
+    illuminated: (pct: number) => `Zu ${pct} % beleuchtet`,
+    stargazing: (label: string) => `Sterne schauen: ${label}`,
+    quality: {
+      hervorragend: "hervorragend",
+      gut: "gut",
+      mittel: "mittel",
+      schlecht: "schlecht",
+    },
+    fullMoonsTitle: "🌕 Nächste Vollmonde",
+    fullMoonsNote: "Ideal für Nachtwanderungen – der Mond leuchtet den Weg.",
+    newMoonsTitle: "🌑 Nächste Neumonde",
+    newMoonsNote:
+      "Dunkelster Himmel – beste Nächte für Sternbilder und Milchstrasse.",
+    moonCalcNote:
+      "Berechnung erfolgt direkt auf dem Gerät (±1 Tag genau) – funktioniert auch offline.",
+    meteorSectionAria: "Sternschnuppen-Kalender",
+    meteorTitle: "Nächste Sternschnuppen-Nächte",
+    activeNow: "Jetzt aktiv",
+    peakToday: "Maximum heute Nacht!",
+    peakTomorrow: "Maximum morgen",
+    peakInDays: (n: number) => `Maximum in ${n} Tagen`,
+    meteorRate: (n: number) => `bis ${n} Meteore/h`,
+    radiantDirection: (r: string) => `Blickrichtung ${r}`,
+    moonInterferes: (pct: number) =>
+      `Mond stört: am Maximum zu ${pct} % beleuchtet – helle Meteore sind trotzdem sichtbar.`,
+    moonOk: (pct: number) => `Guter Mondstand: nur ${pct} % beleuchtet.`,
+    meteorFootnote:
+      "Raten gelten für dunklen Himmel ohne Lichtverschmutzung. Termine jährlich ungefähr gleich, Berechnung offline auf dem Gerät.",
+    categoryAria: "Kategorie wählen",
+    imageAlt: (name: string) => `Illustration: ${name}`,
+    featuresTitle: "Erkennungsmerkmale",
+    funFactTitle: "Wusstest du?",
+    kidsTitle: "Für Kinder:",
+  },
   notFound: {
     heading: "Seite nicht gefunden",
     text1: "Diese Seite gibt es leider nicht.",

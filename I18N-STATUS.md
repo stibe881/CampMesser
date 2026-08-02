@@ -33,7 +33,9 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
       enthalten keine Anzeigetexte)
 - [x] FirstAid, Knots (+Quiz; knotQuiz.ts mit lang-Parameter, Kategorien als
       Schlüssel + `knotCategoryLabels`-L4 in data/knots.ts)
-- [ ] Nature, Recipes (+Editor), Food
+- [x] Nature (Namespace `nature`; Mond-/Meteor-Abschnitte, Score-Label via
+      Wörterbuch, Kategorien/Einträge via L4 + pick)
+- [ ] Recipes (+Editor), Food
 - [ ] Family (+Editoren), HuntPrint
 - [x] NotFound, ErrorBoundary, LoginPrompt, PageHeader-Verwendungen
 
@@ -42,7 +44,8 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 - [x] data/modules.ts (Titel/Beschreibungen)
 - [x] data/firstAid.ts (10 Themen)
 - [x] data/knots.ts (8 Knoten)
-- [ ] data/nature.ts (16 Einträge + Kategorien)
+- [x] data/nature.ts (16 Einträge + Kategorien; Trivialnamen je Sprache,
+      wissenschaftliche Namen als sprachneutrale Strings)
 - [ ] data/recipes.ts (18 Rezepte inkl. Zutaten/Schritte)
 - [ ] data/familyActivities.ts (6 Jagden, Quizze)
 - [x] data/emergency.ts

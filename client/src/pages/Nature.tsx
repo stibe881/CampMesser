@@ -52,7 +52,7 @@ function fmtDate(d: Date, lang: Language) {
 
 /** Mondphasen-Kalender: aktuelle Phase, Sternbeobachtungs-Tipp und nächste Termine – rein offline berechnet. */
 function MoonCalendar() {
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
   const [now] = useState(() => new Date());
   const moon = useMemo(() => getMoonInfo(now, lang), [now, lang]);
   const quality = useMemo(
@@ -65,11 +65,13 @@ function MoonCalendar() {
   return (
     <section
       className="mb-6 rounded-xl border border-border bg-card p-4"
-      aria-label="Mondphasen-Kalender"
+      aria-label={t.nature.moonSectionAria}
     >
       <div className="mb-3 flex items-center gap-2">
         <Moon className="h-4 w-4 text-primary" aria-hidden="true" />
-        <h2 className="font-serif text-lg font-semibold">Mond heute Nacht</h2>
+        <h2 className="font-serif text-lg font-semibold">
+          {t.nature.moonTitle}
+        </h2>
       </div>
 
       <div className="flex items-center gap-4">
@@ -79,12 +81,12 @@ function MoonCalendar() {
         <div>
           <p className="font-semibold">{moon.phaseLabel}</p>
           <p className="text-sm text-muted-foreground">
-            Zu {Math.round(moon.illumination * 100)} % beleuchtet
+            {t.nature.illuminated(Math.round(moon.illumination * 100))}
           </p>
           <Badge
             className={cn("mt-1.5 border-0", QUALITY_STYLES[quality.score])}
           >
-            Sterne schauen: {quality.score}
+            {t.nature.stargazing(t.nature.quality[quality.score])}
           </Badge>
         </div>
       </div>
@@ -92,31 +94,34 @@ function MoonCalendar() {
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-lg bg-accent/50 p-3">
-          <p className="mb-1.5 text-sm font-semibold">🌕 Nächste Vollmonde</p>
+          <p className="mb-1.5 text-sm font-semibold">
+            {t.nature.fullMoonsTitle}
+          </p>
           <ul className="space-y-1 text-sm text-muted-foreground">
             {fullMoons.map((d, i) => (
               <li key={i}>{fmtDate(d, lang)}</li>
             ))}
           </ul>
           <p className="mt-1.5 text-xs text-muted-foreground">
-            Ideal für Nachtwanderungen – der Mond leuchtet den Weg.
+            {t.nature.fullMoonsNote}
           </p>
         </div>
         <div className="rounded-lg bg-accent/50 p-3">
-          <p className="mb-1.5 text-sm font-semibold">🌑 Nächste Neumonde</p>
+          <p className="mb-1.5 text-sm font-semibold">
+            {t.nature.newMoonsTitle}
+          </p>
           <ul className="space-y-1 text-sm text-muted-foreground">
             {newMoons.map((d, i) => (
               <li key={i}>{fmtDate(d, lang)}</li>
             ))}
           </ul>
           <p className="mt-1.5 text-xs text-muted-foreground">
-            Dunkelster Himmel – beste Nächte für Sternbilder und Milchstrasse.
+            {t.nature.newMoonsNote}
           </p>
         </div>
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        Berechnung erfolgt direkt auf dem Gerät (±1 Tag genau) – funktioniert
-        auch offline.
+        {t.nature.moonCalcNote}
       </p>
     </section>
   );
@@ -124,19 +129,19 @@ function MoonCalendar() {
 
 /** Sternschnuppen-Kalender: die nächsten Strom-Maxima inkl. Mondstörung – offline berechnet. */
 function MeteorCalendar() {
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
   const [now] = useState(() => new Date());
   const showers = useMemo(() => upcomingShowers(now, 4), [now]);
 
   return (
     <section
       className="mb-6 rounded-xl border border-border bg-card p-4"
-      aria-label="Sternschnuppen-Kalender"
+      aria-label={t.nature.meteorSectionAria}
     >
       <div className="mb-3 flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
         <h2 className="font-serif text-lg font-semibold">
-          Nächste Sternschnuppen-Nächte
+          {t.nature.meteorTitle}
         </h2>
       </div>
       <ul className="space-y-3">
@@ -146,20 +151,21 @@ function MeteorCalendar() {
               <p className="font-semibold">{pick(entry.shower.name, lang)}</p>
               {entry.activeNow && (
                 <Badge className="border-0 bg-primary/15 text-primary">
-                  Jetzt aktiv
+                  {t.nature.activeNow}
                 </Badge>
               )}
               <span className="ml-auto text-sm text-muted-foreground">
                 {entry.daysUntilPeak === 0
-                  ? "Maximum heute Nacht!"
+                  ? t.nature.peakToday
                   : entry.daysUntilPeak === 1
-                    ? "Maximum morgen"
-                    : `Maximum in ${entry.daysUntilPeak} Tagen`}
+                    ? t.nature.peakTomorrow
+                    : t.nature.peakInDays(entry.daysUntilPeak)}
               </span>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              {fmtDate(entry.peakDate, lang)} · bis {entry.shower.zhr} Meteore/h
-              · Blickrichtung {pick(entry.shower.radiant, lang)}
+              {fmtDate(entry.peakDate, lang)} ·{" "}
+              {t.nature.meteorRate(entry.shower.zhr)} ·{" "}
+              {t.nature.radiantDirection(pick(entry.shower.radiant, lang))}
             </p>
             <p className="mt-1.5 text-sm">{pick(entry.shower.tip, lang)}</p>
             <p
@@ -171,36 +177,34 @@ function MeteorCalendar() {
               )}
             >
               {entry.moonInterferes
-                ? `Mond stört: am Maximum zu ${Math.round(entry.moonIllumination * 100)} % beleuchtet – helle Meteore sind trotzdem sichtbar.`
-                : `Guter Mondstand: nur ${Math.round(entry.moonIllumination * 100)} % beleuchtet.`}
+                ? t.nature.moonInterferes(
+                    Math.round(entry.moonIllumination * 100)
+                  )
+                : t.nature.moonOk(Math.round(entry.moonIllumination * 100))}
             </p>
           </li>
         ))}
       </ul>
       <p className="mt-3 text-xs text-muted-foreground">
-        Raten gelten für dunklen Himmel ohne Lichtverschmutzung. Termine
-        jährlich ungefähr gleich, Berechnung offline auf dem Gerät.
+        {t.nature.meteorFootnote}
       </p>
     </section>
   );
 }
 
 export default function NaturePage() {
+  const { lang, t } = useI18n();
   const [category, setCategory] = useState<string>("tierspuren");
   const activeCategory = natureCategories.find(c => c.id === category)!;
   const entries = natureEntries.filter(e => e.category === category);
 
   return (
     <div className="container max-w-3xl py-6">
-      <PageHeader
-        title="Natur-Entdecker"
-        subtitle="Tierspuren, Sternbilder und Bäume – kindgerecht erklärt und offline verfügbar."
-      />
+      <PageHeader title={t.nature.title} subtitle={t.nature.subtitle} />
 
       <div className="mb-4 flex items-center gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
         <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
-        Das ganze Lexikon ist in der App gespeichert und ohne Internetverbindung
-        nutzbar.
+        {t.nature.offlineNote}
       </div>
 
       <MoonCalendar />
@@ -209,7 +213,7 @@ export default function NaturePage() {
       <div
         className="mb-4 grid grid-cols-3 gap-2"
         role="group"
-        aria-label="Kategorie wählen"
+        aria-label={t.nature.categoryAria}
       >
         {natureCategories.map(c => {
           const Icon = iconMap[c.icon] ?? TreePine;
@@ -227,14 +231,16 @@ export default function NaturePage() {
               aria-pressed={category === c.id}
             >
               <Icon className="h-6 w-6" aria-hidden="true" />
-              <span className="text-sm font-semibold">{c.label}</span>
+              <span className="text-sm font-semibold">
+                {pick(c.label, lang)}
+              </span>
             </button>
           );
         })}
       </div>
 
       <p className="mb-5 text-sm text-muted-foreground">
-        {activeCategory.intro}
+        {pick(activeCategory.intro, lang)}
       </p>
 
       <Accordion type="single" collapsible className="space-y-3">
@@ -246,10 +252,10 @@ export default function NaturePage() {
           >
             <AccordionTrigger className="px-4 py-3.5 hover:no-underline">
               <div className="text-left">
-                <p className="font-semibold">{entry.name}</p>
+                <p className="font-semibold">{pick(entry.name, lang)}</p>
                 {entry.latinOrExtra && (
                   <p className="text-xs italic text-muted-foreground">
-                    {entry.latinOrExtra}
+                    {pick(entry.latinOrExtra, lang)}
                   </p>
                 )}
               </div>
@@ -258,26 +264,26 @@ export default function NaturePage() {
               {entry.image && (
                 <img
                   src={entry.image}
-                  alt={`Illustration: ${entry.name}`}
+                  alt={t.nature.imageAlt(pick(entry.name, lang))}
                   loading="lazy"
                   className="mb-4 aspect-[4/3] w-full rounded-lg border border-border object-cover"
                 />
               )}
               <p className="mb-4 text-sm leading-relaxed">
-                {entry.description}
+                {pick(entry.description, lang)}
               </p>
 
               <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Erkennungsmerkmale
+                {t.nature.featuresTitle}
               </h3>
               <ul className="mb-4 space-y-1 text-sm">
                 {entry.features.map(f => (
-                  <li key={f} className="flex gap-2">
+                  <li key={f.de} className="flex gap-2">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
                       aria-hidden="true"
                     />
-                    {f}
+                    {pick(f, lang)}
                   </li>
                 ))}
               </ul>
@@ -288,8 +294,8 @@ export default function NaturePage() {
                   aria-hidden="true"
                 />
                 <p className="text-sm">
-                  <span className="font-semibold">Wusstest du?</span>{" "}
-                  {entry.funFact}
+                  <span className="font-semibold">{t.nature.funFactTitle}</span>{" "}
+                  {pick(entry.funFact, lang)}
                 </p>
               </div>
 
@@ -299,8 +305,8 @@ export default function NaturePage() {
                   aria-hidden="true"
                 />
                 <p className="text-sm">
-                  <span className="font-semibold">Für Kinder:</span>{" "}
-                  {entry.kidQuestion}
+                  <span className="font-semibold">{t.nature.kidsTitle}</span>{" "}
+                  {pick(entry.kidQuestion, lang)}
                 </p>
               </div>
             </AccordionContent>

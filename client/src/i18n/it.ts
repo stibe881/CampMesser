@@ -1009,6 +1009,49 @@ export const it: Translation = {
     stepsTitle: "Passo per passo",
     proTipTitle: "Consiglio da pro",
   },
+  nature: {
+    title: "Esploratore della natura",
+    subtitle:
+      "Tracce di animali, costellazioni e alberi – spiegati a misura di bambino e disponibili offline.",
+    offlineNote:
+      "L'intero lessico è salvato nell'app e utilizzabile senza connessione Internet.",
+    moonSectionAria: "Calendario delle fasi lunari",
+    moonTitle: "La luna stanotte",
+    illuminated: pct => `Illuminata al ${pct} %`,
+    stargazing: label => `Osservare le stelle: ${label}`,
+    quality: {
+      hervorragend: "eccellente",
+      gut: "buona",
+      mittel: "media",
+      schlecht: "scarsa",
+    },
+    fullMoonsTitle: "🌕 Prossime lune piene",
+    fullMoonsNote:
+      "Ideale per le escursioni notturne – la luna illumina il cammino.",
+    newMoonsTitle: "🌑 Prossime lune nuove",
+    newMoonsNote:
+      "Cielo più scuro – le notti migliori per costellazioni e Via Lattea.",
+    moonCalcNote:
+      "Il calcolo avviene direttamente sul dispositivo (precisione ±1 giorno) – funziona anche offline.",
+    meteorSectionAria: "Calendario delle stelle cadenti",
+    meteorTitle: "Prossime notti di stelle cadenti",
+    activeNow: "Attivo ora",
+    peakToday: "Massimo stanotte!",
+    peakTomorrow: "Massimo domani",
+    peakInDays: n => `Massimo tra ${n} giorni`,
+    meteorRate: n => `fino a ${n} meteore/h`,
+    radiantDirection: r => `direzione ${r}`,
+    moonInterferes: pct =>
+      `La luna disturba: al massimo è illuminata al ${pct} % – le meteore luminose restano comunque visibili.`,
+    moonOk: pct => `Buona posizione della luna: illuminata solo al ${pct} %.`,
+    meteorFootnote:
+      "I tassi valgono per un cielo scuro senza inquinamento luminoso. Le date sono circa le stesse ogni anno, calcolo offline sul dispositivo.",
+    categoryAria: "Scegli una categoria",
+    imageAlt: name => `Illustrazione: ${name}`,
+    featuresTitle: "Segni di riconoscimento",
+    funFactTitle: "Lo sapevi?",
+    kidsTitle: "Per i bambini:",
+  },
   notFound: {
     heading: "Pagina non trovata",
     text1: "Questa pagina purtroppo non esiste.",
