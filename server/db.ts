@@ -202,10 +202,17 @@ export async function uncheckAllPackItems(listId: number) {
     .where(eq(packItems.listId, listId));
 }
 
-/** Personen-Zuordnung («Wer packt das?») setzen oder mit null entfernen. */
-export async function setPackItemAssignee(id: number, assignee: string | null) {
+/**
+ * Eintrag anpassen: Personen-Zuordnung («Wer packt das?», null entfernt sie)
+ * und/oder Kategorie. Nicht übergebene Felder bleiben unverändert.
+ */
+export async function updatePackItem(
+  id: number,
+  data: { assignee?: string | null; category?: string }
+) {
+  if (data.assignee === undefined && data.category === undefined) return;
   const db = requireDb(await getDb());
-  await db.update(packItems).set({ assignee }).where(eq(packItems.id, id));
+  await db.update(packItems).set(data).where(eq(packItems.id, id));
 }
 
 export async function deletePackItem(id: number) {

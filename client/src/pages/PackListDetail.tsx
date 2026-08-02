@@ -12,6 +12,7 @@ import {
   RotateCcw,
   Scale,
   Share2,
+  Tag,
   Trash2,
   UserRound,
   UserRoundPlus,
@@ -32,6 +33,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
@@ -48,6 +56,65 @@ import { cn } from "@/lib/utils";
 /** Filter-Sonderwert: Einträge ohne Personen-Zuordnung. */
 const FILTER_UNASSIGNED = "__unassigned__";
 
+/** Select-Sonderwert: «Neue Kategorie …» öffnet ein Inline-Namensfeld. */
+const CATEGORY_NEW = "__new-category__";
+
+/**
+ * Kategorie-Auswahl für Einträge: alle in der Liste vorhandenen Kategorien
+ * plus «Neue Kategorie …», die ein Inline-Namensfeld öffnet.
+ */
+function CategorySelect({
+  categories,
+  choice,
+  onChoiceChange,
+  newName,
+  onNewNameChange,
+  selectAria,
+  className,
+}: {
+  categories: string[];
+  choice: string;
+  onChoiceChange: (value: string) => void;
+  newName: string;
+  onNewNameChange: (value: string) => void;
+  selectAria: string;
+  className?: string;
+}) {
+  const { t } = useI18n();
+  return (
+    <>
+      <Select value={choice} onValueChange={onChoiceChange}>
+        <SelectTrigger
+          className={cn("w-40", className)}
+          aria-label={selectAria}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {categories.map(cat => (
+            <SelectItem key={cat} value={cat}>
+              {cat}
+            </SelectItem>
+          ))}
+          <SelectItem value={CATEGORY_NEW}>
+            {t.packListDetail.newCategoryOption}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+      {choice === CATEGORY_NEW && (
+        <Input
+          value={newName}
+          onChange={e => onNewNameChange(e.target.value)}
+          placeholder={t.packListDetail.newCategoryPlaceholder}
+          aria-label={t.packListDetail.newCategoryAria}
+          maxLength={80}
+          className={cn("w-40", className)}
+        />
+      )}
+    </>
+  );
+}
+
 export default function PackListDetailPage() {
   const params = useParams<{ id: string }>();
   const listId = Number(params.id);
@@ -63,7 +130,13 @@ export default function PackListDetailPage() {
   });
 
   const [newItem, setNewItem] = useState("");
-  const [newCategory, setNewCategory] = useState("");
+  /** Kategorie-Auswahl im Hinzufügen-Formular ("" = noch keine Auswahl). */
+  const [newCatChoice, setNewCatChoice] = useState("");
+  const [newCatName, setNewCatName] = useState("");
+  /** Eintrag, dessen Kategorie gerade bearbeitet wird. */
+  const [editCatItemId, setEditCatItemId] = useState<number | null>(null);
+  const [editCatChoice, setEditCatChoice] = useState<string>(CATEGORY_NEW);
+  const [editCatName, setEditCatName] = useState("");
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   /** null = alle anzeigen, FILTER_UNASSIGNED = ohne Zuordnung, sonst Personenname. */
@@ -157,7 +230,7 @@ export default function PackListDetailPage() {
     },
   });
 
-  const assignMutation = trpc.packing.updateItem.useMutation({
+  const updateItemMutation = trpc.packing.updateItem.useMutation({
     onMutate: async input => {
       await utils.packing.items.cancel({ listId });
       const prev = utils.packing.items.getData({ listId });
@@ -166,21 +239,35 @@ export default function PackListDetailPage() {
           ? {
               ...old,
               items: old.items.map(i =>
-                i.id === input.id ? { ...i, assignee: input.assignee } : i
+                i.id === input.id
+                  ? {
+                      ...i,
+                      ...(input.assignee !== undefined
+                        ? { assignee: input.assignee }
+                        : {}),
+                      ...(input.category !== undefined
+                        ? { category: input.category }
+                        : {}),
+                    }
+                  : i
               ),
             }
           : old
       );
       return { prev };
     },
-    onError: (_e, _v, ctx) => {
+    onError: (_e, vars, ctx) => {
       if (ctx?.prev) utils.packing.items.setData({ listId }, ctx.prev);
-      toast.error(t.packListDetail.assignFailed);
+      toast.error(
+        vars.category !== undefined
+          ? t.packListDetail.categoryUpdateFailed
+          : t.packListDetail.assignFailed
+      );
     },
   });
 
   const assignPerson = (itemId: number, assignee: string | null) => {
-    assignMutation.mutate({ id: itemId, assignee });
+    updateItemMutation.mutate({ id: itemId, assignee });
     setAssignItemId(null);
     setAssignDraft("");
   };
@@ -228,6 +315,28 @@ export default function PackListDetailPage() {
       }
     );
   };
+
+  // Alle vorhandenen Kategorien der Liste (in Reihenfolge des Auftretens)
+  const categories = useMemo(() => {
+    const cats: string[] = [];
+    for (const item of query.data?.items ?? []) {
+      const cat = item.category.trim();
+      if (cat && !cats.includes(cat)) cats.push(cat);
+    }
+    return cats;
+  }, [query.data?.items]);
+
+  // Gültige Auswahl fürs Hinzufügen: Nutzerwahl, sonst erste Kategorie der Liste
+  const effectiveNewCatChoice =
+    newCatChoice === CATEGORY_NEW || categories.includes(newCatChoice)
+      ? newCatChoice
+      : (categories[0] ?? CATEGORY_NEW);
+
+  /** Kategorie-Auswahl + Inline-Namensfeld in die zu speichernde Kategorie übersetzen. */
+  const resolveNewCategory = () =>
+    effectiveNewCatChoice === CATEGORY_NEW
+      ? newCatName.trim().slice(0, 80) || t.packListDetail.defaultCategory
+      : effectiveNewCatChoice;
 
   // Alle bereits vergebenen Personennamen – für Filter-Chips und Vorschläge
   const assigneeNames = useMemo(() => {
@@ -658,7 +767,7 @@ export default function PackListDetailPage() {
 
       {/* Neuen Eintrag hinzufügen */}
       <form
-        className="mb-6 flex gap-2"
+        className="mb-6 flex flex-wrap gap-2"
         onSubmit={e => {
           e.preventDefault();
           if (!newItem.trim()) return;
@@ -667,26 +776,28 @@ export default function PackListDetailPage() {
             items: [
               {
                 name: newItem.trim(),
-                category:
-                  newCategory.trim() || t.packListDetail.defaultCategory,
+                category: resolveNewCategory(),
                 quantity: 1,
               },
             ],
           });
+          setNewCatName("");
         }}
       >
         <Input
           placeholder={t.packListDetail.addPlaceholder}
+          className="min-w-40 flex-1"
           value={newItem}
           onChange={e => setNewItem(e.target.value)}
           aria-label={t.packListDetail.addNameAria}
         />
-        <Input
-          placeholder={t.packListDetail.categoryPlaceholder}
-          className="hidden w-40 sm:block"
-          value={newCategory}
-          onChange={e => setNewCategory(e.target.value)}
-          aria-label={t.packListDetail.categoryAria}
+        <CategorySelect
+          categories={categories}
+          choice={effectiveNewCatChoice}
+          onChoiceChange={setNewCatChoice}
+          newName={newCatName}
+          onNewNameChange={setNewCatName}
+          selectAria={t.packListDetail.categoryAria}
         />
         <Button
           type="submit"
@@ -882,12 +993,33 @@ export default function PackListDetailPage() {
                     } else {
                       setAssignItemId(item.id);
                       setAssignDraft(item.assignee ?? "");
+                      setEditCatItemId(null);
                     }
                   }}
                   aria-label={t.packListDetail.assignButtonAria(item.name)}
                   aria-expanded={assignItemId === item.id}
                 >
                   <UserRoundPlus className="h-3.5 w-3.5" aria-hidden="true" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-muted-foreground/50 hover:text-foreground"
+                  onClick={() => {
+                    if (editCatItemId === item.id) {
+                      setEditCatItemId(null);
+                    } else {
+                      setEditCatItemId(item.id);
+                      const known = categories.includes(item.category);
+                      setEditCatChoice(known ? item.category : CATEGORY_NEW);
+                      setEditCatName(known ? "" : item.category);
+                      setAssignItemId(null);
+                    }
+                  }}
+                  aria-label={t.packListDetail.editCategoryAria(item.name)}
+                  aria-expanded={editCatItemId === item.id}
+                >
+                  <Tag className="h-3.5 w-3.5" aria-hidden="true" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -951,6 +1083,44 @@ export default function PackListDetailPage() {
                           {name}
                         </button>
                       ))}
+                  </form>
+                )}
+                {editCatItemId === item.id && (
+                  <form
+                    className="flex w-full flex-wrap items-center gap-2 border-t border-border pt-2"
+                    onSubmit={e => {
+                      e.preventDefault();
+                      const category =
+                        editCatChoice === CATEGORY_NEW
+                          ? editCatName.trim().slice(0, 80)
+                          : editCatChoice;
+                      if (!category) return;
+                      updateItemMutation.mutate({ id: item.id, category });
+                      setEditCatItemId(null);
+                      setEditCatName("");
+                    }}
+                  >
+                    <CategorySelect
+                      categories={categories}
+                      choice={editCatChoice}
+                      onChoiceChange={setEditCatChoice}
+                      newName={editCatName}
+                      onNewNameChange={setEditCatName}
+                      selectAria={t.packListDetail.editCategorySelectAria(
+                        item.name
+                      )}
+                      className="h-8 text-sm"
+                    />
+                    <Button
+                      type="submit"
+                      size="sm"
+                      className="h-8"
+                      disabled={
+                        editCatChoice === CATEGORY_NEW && !editCatName.trim()
+                      }
+                    >
+                      {t.packListDetail.categorySave}
+                    </Button>
                   </form>
                 )}
               </li>

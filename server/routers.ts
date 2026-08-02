@@ -875,16 +875,23 @@ export const appRouter = router({
         if (ids.length > 0) await db.reorderPackItems(input.listId, ids);
         return { success: true } as const;
       }),
-    /** Personen-Zuordnung («Wer packt das?») setzen; null entfernt sie wieder. */
+    /**
+     * Eintrag anpassen: Personen-Zuordnung («Wer packt das?», null entfernt
+     * sie) und/oder Kategorie – Kategorien sind frei, neue entstehen implizit.
+     */
     updateItem: protectedProcedure
       .input(
         z.object({
           id: z.number(),
-          assignee: z.string().trim().min(1).max(80).nullable(),
+          assignee: z.string().trim().min(1).max(80).nullable().optional(),
+          category: z.string().trim().min(1).max(80).optional(),
         })
       )
       .mutation(({ input }) =>
-        db.setPackItemAssignee(input.id, input.assignee)
+        db.updatePackItem(input.id, {
+          ...(input.assignee !== undefined ? { assignee: input.assignee } : {}),
+          ...(input.category !== undefined ? { category: input.category } : {}),
+        })
       ),
     deleteItem: protectedProcedure
       .input(z.object({ id: z.number() }))
