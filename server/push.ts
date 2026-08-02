@@ -1,7 +1,8 @@
 /**
  * Web-Push für Unwetter-Warnungen an gespeicherten Zeltplätzen,
- * MHD-Erinnerungen für die Kühlbox (Lebensmittel, die heute oder morgen ablaufen)
- * und Trip-Countdowns (3 Tage vor der Anreise, inkl. Pack-Fortschritt).
+ * MHD-Erinnerungen für die Kühlbox (Lebensmittel, die heute oder morgen ablaufen),
+ * Trip-Countdowns (3 Tage vor der Anreise, inkl. Pack-Fortschritt) und
+ * Zelt-Trocknungs-Erinnerungen am Tag nach der Heimkehr (bei Regen am Platz).
  * Der Check läuft über /api/push/check (konsoleH-Cronjob), weil Passenger
  * den Node-Prozess bei Inaktivität schlafen legt und ein interner Scheduler
  * deshalb unzuverlässig wäre.
@@ -189,6 +190,8 @@ export interface PushCheckResult {
   foodSent: number;
   /** Verschickte Trip-Countdowns (Reise-Tagebuch) */
   tripSent: number;
+  /** Verschickte Zelt-Trocknungs-Erinnerungen (Tag nach der Heimkehr) */
+  drySent: number;
   removed: number;
 }
 
@@ -307,6 +310,105 @@ export function buildTripAlert(
   return { title, body, key: `trip:${trip.id}` };
 }
 
+export interface DryingAlert {
+  title: string;
+  body: string;
+  /** Dedup-Schlüssel «dry:<tripId>» – pro Heimkehr nur eine Erinnerung */
+  key: string;
+}
+
+/** Ein Aufenthalt, soweit für die Trocknungs-Erinnerung relevant. */
+export interface TripForDrying {
+  id: number;
+  /** Anzeigename: Titel des Eintrags, sonst Zeltplatz-Favorit bzw. Freitext-Ort */
+  name: string;
+  endDate: string;
+}
+
+/** Ab dieser Regensumme (mm) während des Aufenthalts wird ans Trocknen erinnert. */
+export const DRY_ALERT_RAIN_MM = 3;
+
+const DAY_MS = 86400000;
+
+/** ISO-Datum des Vortags (null bei ungültigem Datum). */
+function isoYesterday(today: string): string | null {
+  const t = Date.parse(`${today}T00:00:00Z`);
+  if (Number.isNaN(t)) return null;
+  return new Date(t - DAY_MS).toISOString().slice(0, 10);
+}
+
+/**
+ * Zelt-Trocknungs-Erinnerung bauen: gemeldet wird ein Aufenthalt, der GESTERN
+ * endete. `rainByTripId` enthält die Regensumme (mm) des Aufenthaltszeitraums
+ * für Trips mit bekannten Koordinaten – ab 3 mm wird konkret ans Trocknen
+ * erinnert. Fehlt die Regensumme (Freitext-Ort ohne Koordinaten oder
+ * Wetterdienst nicht erreichbar), gibt es eine neutrale Auslüften-Erinnerung.
+ * Bei mehreren Heimkehren gewinnt der Trip mit dem meisten Regen (Neutrale
+ * zuletzt, Gleichstand: kleinste Id). Reine Funktion (für Tests exportiert);
+ * `today` als ISO-Datum YYYY-MM-DD.
+ * Texte deutsch, weil der Server die Sprache der Nutzer*innen nicht kennt.
+ */
+export function buildDryingAlert(
+  trips: TripForDrying[],
+  rainByTripId: Map<number, number>,
+  today: string
+): DryingAlert | null {
+  const yesterday = isoYesterday(today);
+  if (!yesterday) return null;
+  const candidates = trips
+    .filter(trip => trip.endDate === yesterday)
+    .map(trip => ({ trip, rain: rainByTripId.get(trip.id) }))
+    .filter(x => x.rain === undefined || x.rain >= DRY_ALERT_RAIN_MM)
+    .sort((a, b) => (b.rain ?? -1) - (a.rain ?? -1) || a.trip.id - b.trip.id);
+  const first = candidates[0];
+  if (!first) return null;
+
+  const { trip, rain } = first;
+  if (rain !== undefined) {
+    return {
+      title: "⛺ Zelt trocknen nicht vergessen",
+      body: `Während «${trip.name}» sind rund ${Math.round(rain)} mm Regen gefallen – häng das Zelt zum Trocknen auf, bevor es ins Lager kommt.`,
+      key: `dry:${trip.id}`,
+    };
+  }
+  return {
+    title: "⛺ Zelt auslüften nicht vergessen",
+    body: `Willkommen zurück von «${trip.name}» – lüfte das Zelt gut aus, bevor es ins Lager kommt.`,
+    key: `dry:${trip.id}`,
+  };
+}
+
+/** Open-Meteo erlaubt höchstens so viele vergangene Tage im Forecast-Endpoint. */
+const RAIN_MAX_PAST_DAYS = 92;
+
+/**
+ * Tages-Niederschlag der letzten `pastDays` Tage (plus heute) für einen Punkt –
+ * über den Forecast-Endpoint mit past_days, weil das Archiv die jüngsten Tage
+ * noch nicht führt.
+ */
+async function dailyRainFor(
+  lat: number,
+  lon: number,
+  pastDays: number
+): Promise<{ time: string[]; precipitation: (number | null)[] }> {
+  const params = new URLSearchParams({
+    latitude: lat.toFixed(3),
+    longitude: lon.toFixed(3),
+    timezone: "auto",
+    past_days: String(pastDays),
+    forecast_days: "1",
+    daily: "precipitation_sum",
+  });
+  const res = await fetch(
+    `https://api.open-meteo.com/v1/forecast?${params.toString()}`
+  );
+  if (!res.ok) throw new Error(`Wetterdienst antwortet nicht (${res.status})`);
+  const json = (await res.json()) as {
+    daily: { time: string[]; precipitation_sum: (number | null)[] };
+  };
+  return { time: json.daily.time, precipitation: json.daily.precipitation_sum };
+}
+
 /** Heutiges Datum als ISO-String in der lokalen Serverzeit (nicht UTC). */
 function localIsoDate(now = new Date()): string {
   const y = now.getFullYear();
@@ -329,6 +431,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     sent: 0,
     foodSent: 0,
     tripSent: 0,
+    drySent: 0,
     removed: 0,
   };
   if (!pushConfigured()) return result;
@@ -416,6 +519,75 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       today
     );
     if (alert) tripAlertByUser.set(userId, alert);
+  }
+
+  // Zelt-Trocknung: gestern beendete Trips – Regensumme pro Trip mit Koordinaten
+  const yesterday = isoYesterday(today);
+  const endedYesterday = allTrips.filter(trip => trip.endDate === yesterday);
+  const spotById = new Map(spots.map(s => [s.id, s]));
+  const rainByTripId = new Map<number, number>();
+  if (endedYesterday.length > 0) {
+    // Regen pro gerundeter Koordinate nur einmal abrufen (Muster alertCache);
+    // past_days muss den frühesten Anreisetag an dieser Koordinate abdecken.
+    const pastDaysByCoord = new Map<string, number>();
+    for (const trip of endedYesterday) {
+      const spot = trip.spotId !== null ? spotById.get(trip.spotId) : undefined;
+      if (!spot) continue;
+      const key = `${spot.latitude.toFixed(2)},${spot.longitude.toFixed(2)}`;
+      const needed = Math.min(
+        RAIN_MAX_PAST_DAYS,
+        Math.max(1, -daysUntilTrip(trip.startDate, today))
+      );
+      pastDaysByCoord.set(key, Math.max(pastDaysByCoord.get(key) ?? 1, needed));
+    }
+    const rainCache = new Map<
+      string,
+      Awaited<ReturnType<typeof dailyRainFor>>
+    >();
+    for (const trip of endedYesterday) {
+      const spot = trip.spotId !== null ? spotById.get(trip.spotId) : undefined;
+      if (!spot) continue; // Freitext-Ort: keine Koordinaten → neutrale Erinnerung
+      const cacheKey = `${spot.latitude.toFixed(2)},${spot.longitude.toFixed(2)}`;
+      let daily = rainCache.get(cacheKey);
+      if (!daily) {
+        try {
+          daily = await dailyRainFor(
+            spot.latitude,
+            spot.longitude,
+            pastDaysByCoord.get(cacheKey) ?? 1
+          );
+        } catch {
+          continue; // Wetterdienst nicht erreichbar → neutrale Erinnerung
+        }
+        rainCache.set(cacheKey, daily);
+      }
+      let sum = 0;
+      daily.time.forEach((day, i) => {
+        if (day >= trip.startDate && day <= trip.endDate) {
+          sum += Number(daily!.precipitation[i] ?? 0);
+        }
+      });
+      rainByTripId.set(trip.id, sum);
+    }
+  }
+  const dryAlertByUser = new Map<number, DryingAlert>();
+  for (const userId of userIds) {
+    const alert = buildDryingAlert(
+      endedYesterday
+        .filter(trip => trip.userId === userId)
+        .map(trip => ({
+          id: trip.id,
+          name:
+            trip.title ||
+            (trip.spotId !== null ? spotNameById.get(trip.spotId) : null) ||
+            trip.location ||
+            "Camping-Aufenthalt",
+          endDate: trip.endDate,
+        })),
+      rainByTripId,
+      today
+    );
+    if (alert) dryAlertByUser.set(userId, alert);
   }
 
   // Wetter pro gerundeter Koordinate nur einmal abrufen
@@ -544,27 +716,49 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     }
 
     // ── Reise-Tagebuch: Trip-Countdown (max. eine Nachricht pro Trip) ──
-    const tripAlert = tripAlertByUser.get(sub.userId);
-    if (
-      !subscriptionWants(sub, "trip") ||
-      !tripAlert ||
-      tripAlert.key === sub.lastTripKey
-    )
-      continue;
-    const tripPayload = JSON.stringify({
-      title: tripAlert.title,
-      body: tripAlert.body,
-      url: "/tagebuch",
-      // Eigener Tag, damit der Countdown andere Meldungen nicht ersetzt
-      tag: "campmesser-trip-countdown",
-    });
-    const outcome = await sendTo(sub, tripPayload);
-    if (outcome === "sent") {
-      result.tripSent += 1;
-      await db
-        .update(pushSubscriptions)
-        .set({ lastTripKey: tripAlert.key, lastNotifiedAt: new Date() })
-        .where(eq(pushSubscriptions.id, sub.id));
+    const tripAlert = subscriptionWants(sub, "trip")
+      ? tripAlertByUser.get(sub.userId)
+      : undefined;
+    if (tripAlert && tripAlert.key !== sub.lastTripKey) {
+      const tripPayload = JSON.stringify({
+        title: tripAlert.title,
+        body: tripAlert.body,
+        url: "/tagebuch",
+        // Eigener Tag, damit der Countdown andere Meldungen nicht ersetzt
+        tag: "campmesser-trip-countdown",
+      });
+      const outcome = await sendTo(sub, tripPayload);
+      if (outcome === "sent") {
+        result.tripSent += 1;
+        await db
+          .update(pushSubscriptions)
+          .set({ lastTripKey: tripAlert.key, lastNotifiedAt: new Date() })
+          .where(eq(pushSubscriptions.id, sub.id));
+      } else if (outcome === "gone") {
+        continue;
+      }
+    }
+
+    // ── Zelt-Trocknung: Erinnerung am Tag nach der Heimkehr (Flag wantsTrips) ──
+    const dryAlert = subscriptionWants(sub, "trip")
+      ? dryAlertByUser.get(sub.userId)
+      : undefined;
+    if (dryAlert && dryAlert.key !== sub.lastDryKey) {
+      const dryPayload = JSON.stringify({
+        title: dryAlert.title,
+        body: dryAlert.body,
+        url: "/trockenzeiten",
+        // Eigener Tag, damit die Erinnerung andere Meldungen nicht ersetzt
+        tag: "campmesser-tent-drying",
+      });
+      const outcome = await sendTo(sub, dryPayload);
+      if (outcome === "sent") {
+        result.drySent += 1;
+        await db
+          .update(pushSubscriptions)
+          .set({ lastDryKey: dryAlert.key, lastNotifiedAt: new Date() })
+          .where(eq(pushSubscriptions.id, sub.id));
+      }
     }
   }
   return result;

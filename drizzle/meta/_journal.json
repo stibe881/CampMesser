@@ -211,6 +211,13 @@
       "when": 1785674413605,
       "tag": "0029_windy_synch",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1785674913903,
+      "tag": "0030_classy_warbird",
+      "breakpoints": true
     }
   ]
 }

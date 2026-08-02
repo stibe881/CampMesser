@@ -293,6 +293,8 @@ export const pushSubscriptions = mysqlTable(
     lastFoodKey: varchar("lastFoodKey", { length: 64 }),
     /** Schlüssel des zuletzt gemeldeten Trip-Countdowns («trip:<tripId>»): max. 1 Erinnerung pro Trip */
     lastTripKey: varchar("lastTripKey", { length: 64 }),
+    /** Schlüssel der letzten Trocknungs-Erinnerung («dry:<tripId>»): max. 1 Erinnerung pro Heimkehr */
+    lastDryKey: varchar("lastDryKey", { length: 64 }),
     lastNotifiedAt: timestamp("lastNotifiedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
