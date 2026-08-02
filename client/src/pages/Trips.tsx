@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Award,
   BookOpen,
   CalendarClock,
   CalendarDays,
@@ -33,6 +34,7 @@ import PhotoGallery from "@/components/PhotoGallery";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -62,6 +64,7 @@ import {
   isUpcomingTrip,
   tripNights,
 } from "@shared/trips";
+import { milestones } from "@shared/milestones";
 import {
   packingSuggestions,
   type ForecastDay,
@@ -1214,6 +1217,31 @@ export default function TripsPage() {
   );
   const currentYear = new Date().getFullYear();
 
+  // Meilensteine über die abgeschlossenen Aufenthalte: erreichte als farbige
+  // Chips, dazu die nächsten offenen (höchster Fortschritt zuerst, max. 3)
+  const milestoneItems = useMemo(
+    () => milestones(pastTripLikes, today, lang),
+    [pastTripLikes, today, lang]
+  );
+  const achievedMilestones = useMemo(
+    () => milestoneItems.filter(m => m.achieved),
+    [milestoneItems]
+  );
+  const nextMilestones = useMemo(
+    () =>
+      milestoneItems
+        .filter(m => !m.achieved)
+        .sort((a, b) => b.current / b.target - a.current / a.target)
+        .slice(0, 3),
+    [milestoneItems]
+  );
+  const fmtMilestoneDate = (iso: string): string =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
   // Jahresrückblick: Jahre mit vergangenen Trips, Default = aktuellstes Jahr
   const reviewYears = useMemo(() => {
     const years = new Set<number>();
@@ -1455,6 +1483,62 @@ export default function TripsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Meilensteine: erreichte farbig, die nächsten offenen mit Fortschritt */}
+      {trips.length > 0 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <h2 className="mb-3 flex items-center gap-2 font-serif text-base font-semibold">
+              <Award className="h-4 w-4 text-primary" aria-hidden="true" />
+              {t.trips.milestonesTitle}
+            </h2>
+            {achievedMilestones.length > 0 && (
+              <ul className="flex flex-wrap gap-1.5">
+                {achievedMilestones.map(m => (
+                  <li
+                    key={m.id}
+                    className="flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-medium text-primary"
+                  >
+                    <Award className="h-3 w-3 shrink-0" aria-hidden="true" />
+                    {m.label}
+                    {m.achievedOn && (
+                      <span className="font-normal text-primary/80">
+                        ·{" "}
+                        {t.trips.milestonesAchievedOn(
+                          fmtMilestoneDate(m.achievedOn)
+                        )}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {nextMilestones.length > 0 && (
+              <div className={achievedMilestones.length > 0 ? "mt-4" : ""}>
+                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t.trips.milestonesNextTitle}
+                </h3>
+                <ul className="space-y-2.5">
+                  {nextMilestones.map(m => (
+                    <li key={m.id}>
+                      <div className="mb-1 flex items-center justify-between gap-2 text-sm">
+                        <span>{m.label}</span>
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {t.trips.milestonesProgress(m.current, m.target)}
+                        </span>
+                      </div>
+                      <Progress
+                        value={(m.current / m.target) * 100}
+                        aria-label={`${m.label}: ${t.trips.milestonesProgress(m.current, m.target)}`}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Jahresrückblick: nur wenn mindestens ein vergangener Trip existiert */}
       {yearReview && (

@@ -1623,6 +1623,10 @@ export const fr: Translation = {
     hubQrHint: "Il suffit de le scanner pour l'ouvrir.",
     printEntryAria: (name: string) =>
       `Imprimer le rapport de voyage de ${name}`,
+    milestonesTitle: "Jalons",
+    milestonesAchievedOn: date => `atteint le ${date}`,
+    milestonesNextTitle: "Prochains objectifs",
+    milestonesProgress: (current, target) => `${current} sur ${target}`,
   },
   tripInvite: {
     badge: "Invitation au voyage",

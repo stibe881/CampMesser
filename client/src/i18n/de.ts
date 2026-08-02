@@ -1627,6 +1627,11 @@ export const de = {
     hubQrAlt: (name: string) => `QR-Code des Reise-Hub-Links für ${name}`,
     hubQrHint: "Zum Öffnen einfach scannen.",
     printEntryAria: (name: string) => `Reisebericht von ${name} drucken`,
+    milestonesTitle: "Meilensteine",
+    milestonesAchievedOn: (date: string) => `erreicht am ${date}`,
+    milestonesNextTitle: "Nächste Ziele",
+    milestonesProgress: (current: number, target: number) =>
+      `${current} von ${target}`,
   },
   tripInvite: {
     badge: "Reise-Einladung",

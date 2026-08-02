@@ -1568,6 +1568,10 @@ export const en: Translation = {
     hubQrAlt: name => `QR code of the trip hub link for ${name}`,
     hubQrHint: "Simply scan it to open.",
     printEntryAria: name => `Print the trip report of ${name}`,
+    milestonesTitle: "Milestones",
+    milestonesAchievedOn: date => `achieved on ${date}`,
+    milestonesNextTitle: "Next goals",
+    milestonesProgress: (current, target) => `${current} of ${target}`,
   },
   tripInvite: {
     badge: "Trip invitation",
