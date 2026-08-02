@@ -2153,6 +2153,9 @@ export const fr: Translation = {
     editExpiryLabel: "Date limite de consommation",
     editSave: "Enregistrer",
     editFailed: "La modification n'a pas pu être enregistrée",
+    sortAria: "Trier les provisions",
+    sortByExpiry: "Par expiration",
+    sortByName: "Par nom",
   },
   shopping: {
     title: "Liste de courses",

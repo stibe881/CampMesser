@@ -2160,6 +2160,9 @@ export const de = {
     editExpiryLabel: "Mindesthaltbarkeitsdatum",
     editSave: "Speichern",
     editFailed: "Änderung konnte nicht gespeichert werden",
+    sortAria: "Vorräte sortieren",
+    sortByExpiry: "Nach Ablauf",
+    sortByName: "Nach Name",
   },
   shopping: {
     title: "Einkaufsliste",

@@ -2077,6 +2077,9 @@ export const en: Translation = {
     editExpiryLabel: "Best-before date",
     editSave: "Save",
     editFailed: "The change could not be saved",
+    sortAria: "Sort supplies",
+    sortByExpiry: "By expiry",
+    sortByName: "By name",
   },
   shopping: {
     title: "Shopping list",

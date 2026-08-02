@@ -37,7 +37,13 @@ import { recipes } from "@/data/recipes";
 import { customRecipeToRecipe } from "@/lib/customRecipesClient";
 import { loadRecipeFavorites } from "@/lib/recipeFavorites";
 import { RECIPE_METHOD_LABELS } from "@shared/customRecipes";
-import { expiryInfo, expirySortKey, type ExpiryState } from "@shared/food";
+import { expiryInfo, type ExpiryState } from "@shared/food";
+import {
+  loadFoodSort,
+  sortFoodItems,
+  storeFoodSort,
+  type FoodSortMode,
+} from "@/lib/foodSort";
 import type { FoodTemplateItem } from "@shared/foodTemplates";
 import { pick } from "@shared/i18n";
 import { useI18n } from "@/i18n";
@@ -90,6 +96,13 @@ export default function FoodPage() {
   const [quantity, setQuantity] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const today = new Date().toISOString().slice(0, 10);
+
+  // Sortier-Wahl «Nach Ablauf / Nach Name» – wird pro Gerät gemerkt
+  const [sortMode, setSortMode] = useState<FoodSortMode>(() => loadFoodSort());
+  const changeSort = (mode: FoodSortMode) => {
+    setSortMode(mode);
+    storeFoodSort(mode);
+  };
 
   const addMutation = trpc.food.add.useMutation({
     onSuccess: () => {
@@ -252,10 +265,8 @@ export default function FoodPage() {
     );
   }
 
-  // «Verbrauche zuerst»: ablaufende Vorräte nach vorne, ohne Datum ans Ende
-  const items = [...(query.data ?? [])].sort(
-    (a, b) => expirySortKey(a.expiryDate) - expirySortKey(b.expiryDate)
-  );
+  // Sortierung: «Nach Ablauf» (Standard, Verbrauche-zuerst) oder «Nach Name»
+  const items = sortFoodItems(query.data ?? [], sortMode, lang);
   const urgentCount = items.filter(i => {
     const info = expiryInfo(i.expiryDate, today, lang);
     return info && info.state !== "ok";
@@ -514,6 +525,31 @@ export default function FoodPage() {
         </div>
       ) : items.length > 0 ? (
         <>
+          {/* Umschalter «Nach Ablauf / Nach Name» */}
+          {items.length > 1 && (
+            <div
+              className="mb-3 inline-flex items-center gap-1 rounded-lg bg-muted p-1"
+              role="group"
+              aria-label={t.food.sortAria}
+            >
+              {(["expiry", "name"] as const).map(mode => (
+                <button
+                  key={mode}
+                  type="button"
+                  aria-pressed={sortMode === mode}
+                  onClick={() => changeSort(mode)}
+                  className={cn(
+                    "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                    sortMode === mode
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {mode === "expiry" ? t.food.sortByExpiry : t.food.sortByName}
+                </button>
+              ))}
+            </div>
+          )}
           {urgentCount > 0 && (
             <p className="mb-3 rounded-lg bg-accent px-4 py-2.5 text-sm text-accent-foreground">
               {urgentCount === 1

@@ -2132,6 +2132,9 @@ export const it: Translation = {
     editExpiryLabel: "Termine minimo di conservazione",
     editSave: "Salva",
     editFailed: "La modifica non è stata salvata",
+    sortAria: "Ordina le provviste",
+    sortByExpiry: "Per scadenza",
+    sortByName: "Per nome",
   },
   shopping: {
     title: "Lista della spesa",
