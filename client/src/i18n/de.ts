@@ -1708,6 +1708,36 @@ export const de = {
     reorderAria: (name: string) => `${name} verschieben`,
     reorderFailed: "Neue Reihenfolge konnte nicht gespeichert werden",
     printButton: "Drucken",
+    shareButton: "Teilen",
+    shareAria: "Einkaufsliste per Link teilen",
+    shareTitle: "Einkaufsliste teilen",
+    shareDescription:
+      "Alle mit diesem Link sehen deine Einkaufsliste und können ohne Anmeldung mit abhaken.",
+    shareCopied: "Teil-Link kopiert – einfach an die Mitreisenden schicken",
+    shareFailed: "Teil-Link konnte nicht erstellt werden",
+    unshareButton: "Teilen beenden",
+    unshared: "Teilen beendet – der Link ist nicht mehr gültig",
+    unshareFailed: "Teilen konnte nicht beendet werden",
+    shareQrAlt: "QR-Code zum Teil-Link der Einkaufsliste",
+    shareQrTitle: "QR-Code abscannen",
+    shareQrText:
+      "Mitreisende scannen den Code mit der Handykamera und sind direkt auf der Liste.",
+  },
+  sharedShopping: {
+    loading: "Geteilte Einkaufsliste wird geladen …",
+    notFoundTitle: "Einkaufsliste nicht gefunden",
+    backHome: "Startseite",
+    invalidLink:
+      "Dieser Teil-Link ist ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
+    subtitle: (open: number, total: number) =>
+      `Geteilte Einkaufsliste · ${open} von ${total} Einträgen offen`,
+    sharedInfo:
+      "Gemeinsames Einkaufen: Alle mit diesem Link sehen den gleichen Stand – die Anzeige aktualisiert sich automatisch.",
+    emptyList: "Diese Einkaufsliste ist noch leer.",
+    allDone: "Alles eingekauft – keine offenen Einträge.",
+    checkAria: (name: string) => `${name} abhaken`,
+    uncheckAria: (name: string) => `${name} wieder öffnen`,
+    toggleFailed: "Abhaken fehlgeschlagen",
   },
   shoppingPrint: {
     docTitle: "Einkaufsliste zum Ausdrucken",

@@ -1,18 +1,29 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   GripVertical,
+  Link2,
   Loader2,
   Plus,
   Printer,
+  QrCode,
+  Share2,
   ShoppingCart,
   Trash2,
 } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
+import QRCode from "qrcode";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -53,6 +64,52 @@ export default function ShoppingPage() {
   });
   const [name, setName] = useState("");
   const [newCategory, setNewCategory] = useState<string>(NO_CATEGORY);
+  /** Teil-Link, der gerade im Dialog gezeigt wird (null = Dialog zu). */
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareQr, setShareQr] = useState<string | null>(null);
+
+  // QR-Code zum Teil-Link erzeugen (Muster PackLists): einfach abscannen lassen
+  useEffect(() => {
+    if (!shareUrl) {
+      setShareQr(null);
+      return;
+    }
+    QRCode.toDataURL(shareUrl, {
+      width: 480,
+      margin: 1,
+      errorCorrectionLevel: "M",
+    })
+      .then(setShareQr)
+      .catch(() => setShareQr(null));
+  }, [shareUrl]);
+
+  const shareMutation = trpc.shopping.share.useMutation({
+    onError: () => toast.error(t.shopping.shareFailed),
+  });
+
+  /** Teil-Link erzeugen (idempotent), Dialog öffnen, Link kopieren. */
+  const openShare = () => {
+    shareMutation.mutate(undefined, {
+      onSuccess: async ({ token }) => {
+        const url = `${window.location.origin}/einkaufsliste/${token}`;
+        setShareUrl(url);
+        try {
+          await navigator.clipboard.writeText(url);
+          toast.success(t.shopping.shareCopied);
+        } catch {
+          // Zwischenablage blockiert – der Link steht im Dialog
+        }
+      },
+    });
+  };
+
+  const unshareMutation = trpc.shopping.unshare.useMutation({
+    onSuccess: () => {
+      setShareUrl(null);
+      toast.success(t.shopping.unshared);
+    },
+    onError: () => toast.error(t.shopping.unshareFailed),
+  });
 
   const invalidate = () => utils.shopping.list.invalidate();
   const addMutation = trpc.shopping.add.useMutation({
@@ -275,6 +332,16 @@ export default function ShoppingPage() {
                     </Link>
                   </Button>
                 )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={shareMutation.isPending}
+                  onClick={openShare}
+                  aria-label={t.shopping.shareAria}
+                >
+                  <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {t.shopping.shareButton}
+                </Button>
               </span>
             </h2>
             {openItems.length === 0 ? (
@@ -454,6 +521,78 @@ export default function ShoppingPage() {
           )}
         </div>
       )}
+
+      {/* Teil-Link der Einkaufsliste: Link + QR-Code, Teilen beenden */}
+      <Dialog
+        open={shareUrl !== null}
+        onOpenChange={open => !open && setShareUrl(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.shopping.shareTitle}</DialogTitle>
+            <DialogDescription>{t.shopping.shareDescription}</DialogDescription>
+          </DialogHeader>
+          {shareUrl && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+                <Link2
+                  className="h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                <code className="min-w-0 flex-1 truncate text-xs">
+                  {shareUrl}
+                </code>
+                <button
+                  type="button"
+                  className="shrink-0 text-xs font-medium text-primary hover:underline"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(shareUrl);
+                      toast.success(t.common.linkCopied);
+                    } catch {
+                      toast.error(t.common.copyFailed);
+                    }
+                  }}
+                >
+                  {t.common.copy}
+                </button>
+              </div>
+              {shareQr && (
+                <div className="flex items-center gap-4 rounded-lg border border-border bg-card p-4">
+                  {/* Weisser Rahmen, damit der Code auch im Dark Mode scannbar bleibt */}
+                  <div className="shrink-0 rounded-md bg-white p-2 shadow-sm">
+                    <img
+                      src={shareQr}
+                      alt={t.shopping.shareQrAlt}
+                      className="h-36 w-36"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1.5 text-sm font-semibold">
+                      <QrCode
+                        className="h-4 w-4 text-primary"
+                        aria-hidden="true"
+                      />
+                      {t.shopping.shareQrTitle}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t.shopping.shareQrText}
+                    </p>
+                  </div>
+                </div>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={unshareMutation.isPending}
+                onClick={() => unshareMutation.mutate()}
+              >
+                {t.shopping.unshareButton}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

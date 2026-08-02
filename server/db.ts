@@ -32,6 +32,7 @@ import {
   packTemplatesCustom,
   powerConsumers,
   shoppingItems,
+  shoppingShares,
   spotPhotos,
   InsertSpotPhoto,
   tripLogs,
@@ -521,6 +522,40 @@ export async function deleteCheckedShoppingItems(userId: number) {
 export async function clearShoppingItems(userId: number) {
   const db = requireDb(await getDb());
   await db.delete(shoppingItems).where(eq(shoppingItems.userId, userId));
+}
+
+/** Teil-Zeile der eigenen Einkaufsliste (undefined = nicht geteilt). */
+export async function getShoppingShare(userId: number) {
+  const db = requireDb(await getDb());
+  const result = await db
+    .select()
+    .from(shoppingShares)
+    .where(eq(shoppingShares.userId, userId))
+    .limit(1);
+  return result[0];
+}
+
+/** Teil-Token für die eigene Einkaufsliste anlegen (eine Zeile pro Konto). */
+export async function createShoppingShare(userId: number, token: string) {
+  const db = requireDb(await getDb());
+  await db.insert(shoppingShares).values({ userId, shareToken: token });
+}
+
+/** Teilen der Einkaufsliste beenden: Zeile entfernen, Link wird ungültig. */
+export async function deleteShoppingShare(userId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(shoppingShares).where(eq(shoppingShares.userId, userId));
+}
+
+/** Geteilte Einkaufsliste anhand des Tokens finden (öffentlich, ohne Login). */
+export async function getShoppingShareByToken(token: string) {
+  const db = requireDb(await getDb());
+  const result = await db
+    .select()
+    .from(shoppingShares)
+    .where(eq(shoppingShares.shareToken, token))
+    .limit(1);
+  return result[0];
 }
 
 // ── Zeltplatz-Favoriten ──

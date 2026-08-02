@@ -494,6 +494,28 @@ export type ShoppingItem = typeof shoppingItems.$inferSelect;
 export type InsertShoppingItem = typeof shoppingItems.$inferInsert;
 
 /**
+ * Teil-Links der Einkaufsliste: die Liste ist EINE Liste pro Nutzer*in,
+ * deshalb genau eine Teil-Zeile pro Konto (userId unique). Wer den Token
+ * kennt, kann die Liste sehen und mit abhaken.
+ */
+export const shoppingShares = mysqlTable(
+  "shoppingShares",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    shareToken: varchar("shareToken", { length: 64 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    uniqueIndex("shoppingShares_userId").on(table.userId),
+    uniqueIndex("shoppingShares_shareToken").on(table.shareToken),
+  ]
+);
+
+export type ShoppingShare = typeof shoppingShares.$inferSelect;
+export type InsertShoppingShare = typeof shoppingShares.$inferInsert;
+
+/**
  * Passwort-Reset per E-Mail: pro Anfrage ein Token (32 Zufallsbytes, hex),
  * von dem nur der sha256-Hash gespeichert wird – der Klartext steht
  * ausschliesslich im E-Mail-Link. 60 Minuten gültig, einmalig verwendbar.

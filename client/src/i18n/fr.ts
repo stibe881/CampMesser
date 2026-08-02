@@ -1708,6 +1708,37 @@ export const fr: Translation = {
     reorderAria: (name: string) => `Déplacer ${name}`,
     reorderFailed: "Le nouvel ordre n'a pas pu être enregistré",
     printButton: "Imprimer",
+    shareButton: "Partager",
+    shareAria: "Partager la liste de courses par lien",
+    shareTitle: "Partager la liste de courses",
+    shareDescription:
+      "Toutes les personnes disposant de ce lien voient ta liste de courses et peuvent cocher sans se connecter.",
+    shareCopied:
+      "Lien de partage copié – envoie-le simplement à tes compagnons de voyage",
+    shareFailed: "Le lien de partage n'a pas pu être créé",
+    unshareButton: "Arrêter le partage",
+    unshared: "Partage terminé – le lien n'est plus valable",
+    unshareFailed: "Le partage n'a pas pu être arrêté",
+    shareQrAlt: "Code QR du lien de partage de la liste de courses",
+    shareQrTitle: "Scanner le code QR",
+    shareQrText:
+      "Tes compagnons scannent le code avec l'appareil photo du téléphone et arrivent directement sur la liste.",
+  },
+  sharedShopping: {
+    loading: "Chargement de la liste de courses partagée …",
+    notFoundTitle: "Liste de courses introuvable",
+    backHome: "Page d'accueil",
+    invalidLink:
+      "Ce lien de partage est invalide ou a été retiré par sa propriétaire ou son propriétaire.",
+    subtitle: (open: number, total: number) =>
+      `Liste de courses partagée · ${open} article${open === 1 ? "" : "s"} sur ${total} encore ouvert${open === 1 ? "" : "s"}`,
+    sharedInfo:
+      "Courses en commun : toutes les personnes avec ce lien voient le même état – l'affichage se met à jour automatiquement.",
+    emptyList: "Cette liste de courses est encore vide.",
+    allDone: "Tout est acheté – aucun article ouvert.",
+    checkAria: (name: string) => `Cocher ${name}`,
+    uncheckAria: (name: string) => `Rouvrir ${name}`,
+    toggleFailed: "Échec du cochage",
   },
   shoppingPrint: {
     docTitle: "Liste de courses à imprimer",

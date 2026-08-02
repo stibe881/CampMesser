@@ -483,7 +483,12 @@ async function startServer() {
   // Der HTML-Loader wird je nach Modus (Vite/Build) unten gesetzt.
   let loadSpaHtml: ((url: string) => Promise<string>) | null = null;
   app.get(
-    ["/liste/:token", "/platz/:token", "/vorlage/:token"],
+    [
+      "/liste/:token",
+      "/platz/:token",
+      "/vorlage/:token",
+      "/einkaufsliste/:token",
+    ],
     async (req, res, next) => {
       try {
         if (!loadSpaHtml) {

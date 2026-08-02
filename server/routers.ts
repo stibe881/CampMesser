@@ -949,6 +949,68 @@ export const appRouter = router({
     clear: protectedProcedure.mutation(({ ctx }) =>
       db.clearShoppingItems(ctx.user.id)
     ),
+    /** Teil-Link erzeugen (idempotent): gibt den Token zurück. */
+    share: protectedProcedure.mutation(async ({ ctx }) => {
+      const existing = await db.getShoppingShare(ctx.user.id);
+      if (existing) return { token: existing.shareToken };
+      const token = nanoid(16);
+      await db.createShoppingShare(ctx.user.id, token);
+      return { token };
+    }),
+    /** Teilen beenden: Token entfernen, Link wird ungültig. */
+    unshare: protectedProcedure.mutation(async ({ ctx }) => {
+      await db.deleteShoppingShare(ctx.user.id);
+      return { success: true } as const;
+    }),
+    /** Geteilte Einkaufsliste öffentlich abrufen (kein Login nötig). */
+    sharedGet: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .query(async ({ input }) => {
+        const share = await db.getShoppingShareByToken(input.token);
+        if (!share) {
+          return {
+            active: false as const,
+            items: [] as {
+              id: number;
+              name: string;
+              checked: boolean;
+              category: string | null;
+            }[],
+          };
+        }
+        const items = await db.getShoppingItems(share.userId);
+        return {
+          active: true as const,
+          items: items.map(i => ({
+            id: i.id,
+            name: i.name,
+            checked: i.checked,
+            category: i.category,
+          })),
+        };
+      }),
+    /** Abhaken über den Teil-Link (kein Login nötig, Token dient als Berechtigung). */
+    sharedToggle: publicProcedure
+      .input(
+        z.object({
+          token: z.string().min(8).max(64),
+          itemId: z.number(),
+          checked: z.boolean(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const share = await db.getShoppingShareByToken(input.token);
+        if (!share) throw new Error("Geteilte Einkaufsliste nicht gefunden");
+        const items = await db.getShoppingItems(share.userId);
+        if (!items.some(i => i.id === input.itemId))
+          throw new Error("Eintrag gehört nicht zu dieser Liste");
+        await db.setShoppingItemChecked(
+          input.itemId,
+          share.userId,
+          input.checked
+        );
+        return { success: true } as const;
+      }),
   }),
 
   energy: router({

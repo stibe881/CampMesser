@@ -1690,6 +1690,37 @@ export const it: Translation = {
     reorderAria: (name: string) => `Sposta ${name}`,
     reorderFailed: "Il nuovo ordine non è stato salvato",
     printButton: "Stampa",
+    shareButton: "Condividi",
+    shareAria: "Condividi la lista della spesa tramite link",
+    shareTitle: "Condividi la lista della spesa",
+    shareDescription:
+      "Chiunque abbia questo link vede la tua lista della spesa e può spuntare le voci senza accedere.",
+    shareCopied:
+      "Link di condivisione copiato – invialo ai tuoi compagni di viaggio",
+    shareFailed: "Impossibile creare il link di condivisione",
+    unshareButton: "Termina condivisione",
+    unshared: "Condivisione terminata – il link non è più valido",
+    unshareFailed: "Impossibile terminare la condivisione",
+    shareQrAlt: "Codice QR del link di condivisione della lista della spesa",
+    shareQrTitle: "Scansiona il codice QR",
+    shareQrText:
+      "I compagni scansionano il codice con la fotocamera del telefono e arrivano direttamente alla lista.",
+  },
+  sharedShopping: {
+    loading: "Caricamento della lista della spesa condivisa …",
+    notFoundTitle: "Lista della spesa non trovata",
+    backHome: "Pagina iniziale",
+    invalidLink:
+      "Questo link di condivisione non è valido o è stato ritirato dalla proprietaria o dal proprietario.",
+    subtitle: (open: number, total: number) =>
+      `Lista della spesa condivisa · ${open} di ${total} voci aperte`,
+    sharedInfo:
+      "Spesa in comune: chi ha questo link vede lo stesso stato – la visualizzazione si aggiorna automaticamente.",
+    emptyList: "Questa lista della spesa è ancora vuota.",
+    allDone: "Tutto comprato – nessuna voce aperta.",
+    checkAria: (name: string) => `Spunta ${name}`,
+    uncheckAria: (name: string) => `Riapri ${name}`,
+    toggleFailed: "Spunta non riuscita",
   },
   shoppingPrint: {
     docTitle: "Lista della spesa da stampare",

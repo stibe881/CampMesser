@@ -50,6 +50,7 @@ const pageLoaders = {
   Lawn: () => import("./pages/Lawn"),
   Profile: () => import("./pages/Profile"),
   SharedPackList: () => import("./pages/SharedPackList"),
+  SharedShopping: () => import("./pages/SharedShopping"),
   SharedSpot: () => import("./pages/SharedSpot"),
   SharedTemplate: () => import("./pages/SharedTemplate"),
   HuntPrint: () => import("./pages/HuntPrint"),
@@ -117,6 +118,7 @@ const LoginPage = lazyWithRetry(pageLoaders.Login);
 const LawnPage = lazyWithRetry(pageLoaders.Lawn);
 const ProfilePage = lazyWithRetry(pageLoaders.Profile);
 const SharedPackListPage = lazyWithRetry(pageLoaders.SharedPackList);
+const SharedShoppingPage = lazyWithRetry(pageLoaders.SharedShopping);
 const SharedSpotPage = lazyWithRetry(pageLoaders.SharedSpot);
 const SharedTemplatePage = lazyWithRetry(pageLoaders.SharedTemplate);
 const HuntPrintPage = lazyWithRetry(pageLoaders.HuntPrint);
@@ -179,6 +181,10 @@ function Router() {
           <Route path={"/rasen"} component={LawnPage} />
           <Route path={"/profil"} component={ProfilePage} />
           <Route path={"/liste/:token"} component={SharedPackListPage} />
+          <Route
+            path={"/einkaufsliste/:token"}
+            component={SharedShoppingPage}
+          />
           <Route path={"/platz/:token"} component={SharedSpotPage} />
           <Route path={"/vorlage/:token"} component={SharedTemplatePage} />
           <Route path={"/familie/drucken/:id"} component={HuntPrintPage} />

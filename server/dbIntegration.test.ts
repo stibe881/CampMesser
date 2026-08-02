@@ -163,6 +163,29 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       ],
     });
     await authed.shopping.add({ name: "CI-Zutat" });
+    // Einkaufsliste teilen: Token ist idempotent, öffentlicher Abruf und
+    // Abhaken über den Teil-Link funktionieren ohne Anmeldung
+    const { token: shoppingToken } = await authed.shopping.share();
+    expect(shoppingToken.length).toBeGreaterThanOrEqual(8);
+    expect((await authed.shopping.share()).token).toBe(shoppingToken);
+    const publicCaller = appRouter.createCaller(anonContext().ctx);
+    const sharedShopping = await publicCaller.shopping.sharedGet({
+      token: shoppingToken,
+    });
+    expect(sharedShopping.active).toBe(true);
+    const sharedItem = sharedShopping.items.find(i => i.name === "CI-Zutat");
+    expect(sharedItem).toBeDefined();
+    await publicCaller.shopping.sharedToggle({
+      token: shoppingToken,
+      itemId: sharedItem!.id,
+      checked: true,
+    });
+    const sharedAfterToggle = await publicCaller.shopping.sharedGet({
+      token: shoppingToken,
+    });
+    expect(
+      sharedAfterToggle.items.find(i => i.id === sharedItem!.id)?.checked
+    ).toBe(true);
     await authed.food.add({ name: "CI-Vorrat" });
     // Kühlbox-Vorlage anlegen und laden: vorhandener gleichnamiger Eintrag
     // wird übersprungen, der neue mit MHD (heute + 5 Tage) eingefügt
@@ -266,6 +289,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.shoppingItems)
         .where(eq(schema.shoppingItems.userId, uid)),
+      dbc
+        .select()
+        .from(schema.shoppingShares)
+        .where(eq(schema.shoppingShares.userId, uid)),
       dbc
         .select()
         .from(schema.foodItems)

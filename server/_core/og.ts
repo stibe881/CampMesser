@@ -1,6 +1,6 @@
 /**
  * OpenGraph-Vorschau für geteilte Links (/liste/:token, /platz/:token,
- * /vorlage/:token).
+ * /vorlage/:token, /einkaufsliste/:token).
  * Messenger und soziale Netzwerke laden das SPA-HTML ohne JavaScript –
  * deshalb injiziert der Server für bekannte Teil-Token OG-Meta-Tags in den
  * <head>, bevor das HTML ausgeliefert wird. Unbekannte Token bekommen das
@@ -73,7 +73,7 @@ export async function ogMetaForShareRequest(
   path: string,
   origin: string
 ): Promise<OgMeta | null> {
-  const match = /^\/(liste|platz|vorlage)\/([^/]+)$/.exec(path);
+  const match = /^\/(liste|platz|vorlage|einkaufsliste)\/([^/]+)$/.exec(path);
   if (!match) return null;
   const [, kind, token] = match;
   if (!TOKEN_PATTERN.test(token)) return null;
@@ -104,6 +104,21 @@ export async function ogMetaForShareRequest(
     return {
       title: `${template.name} – CampMesser`,
       description: `Geteilte Packvorlage mit ${count} – zum Übernehmen als eigene Vorlage.`,
+      url,
+      image,
+    };
+  }
+
+  if (kind === "einkaufsliste") {
+    const share = await db.getShoppingShareByToken(token);
+    if (!share) return null;
+    const items = await db.getShoppingItems(share.userId);
+    const open = items.filter(i => !i.checked).length;
+    const count =
+      open === 1 ? "1 offenem Eintrag" : `${open} offenen Einträgen`;
+    return {
+      title: "Einkaufsliste – CampMesser",
+      description: `Geteilte Einkaufsliste mit ${count} – zum Mitbringen und Abhaken.`,
       url,
       image,
     };

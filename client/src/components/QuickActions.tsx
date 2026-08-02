@@ -51,6 +51,7 @@ function isQuietRoute(path: string): boolean {
   return (
     path.includes("/drucken") ||
     path.startsWith("/liste/") ||
+    path.startsWith("/einkaufsliste/") ||
     path.startsWith("/platz/") ||
     path.startsWith("/vorlage/")
   );

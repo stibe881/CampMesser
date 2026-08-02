@@ -1651,6 +1651,36 @@ export const en: Translation = {
     reorderAria: (name: string) => `Move ${name}`,
     reorderFailed: "The new order could not be saved",
     printButton: "Print",
+    shareButton: "Share",
+    shareAria: "Share the shopping list via link",
+    shareTitle: "Share shopping list",
+    shareDescription:
+      "Anyone with this link can see your shopping list and tick items off without signing in.",
+    shareCopied: "Share link copied – just send it to your travel companions",
+    shareFailed: "The share link could not be created",
+    unshareButton: "Stop sharing",
+    unshared: "Sharing stopped – the link is no longer valid",
+    unshareFailed: "Sharing could not be stopped",
+    shareQrAlt: "QR code for the shopping list share link",
+    shareQrTitle: "Scan the QR code",
+    shareQrText:
+      "Companions scan the code with their phone camera and land straight on the list.",
+  },
+  sharedShopping: {
+    loading: "Loading shared shopping list …",
+    notFoundTitle: "Shopping list not found",
+    backHome: "Home",
+    invalidLink:
+      "This share link is invalid or has been withdrawn by its owner.",
+    subtitle: (open: number, total: number) =>
+      `Shared shopping list · ${open} of ${total} items open`,
+    sharedInfo:
+      "Shopping together: everyone with this link sees the same state – the view refreshes automatically.",
+    emptyList: "This shopping list is still empty.",
+    allDone: "Everything bought – no open items.",
+    checkAria: (name: string) => `Tick off ${name}`,
+    uncheckAria: (name: string) => `Reopen ${name}`,
+    toggleFailed: "Ticking off failed",
   },
   shoppingPrint: {
     docTitle: "Printable shopping list",
