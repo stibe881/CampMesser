@@ -1698,6 +1698,15 @@ export const en: Translation = {
     noPlannedRecipes:
       "No recipes assigned yet – choose recipes in the meal slots first.",
     printButton: "Print",
+    autofillButton: "Fill automatically",
+    autofillNothing: "No empty meal slots to fill.",
+    autofillDone: (n: number) =>
+      n === 1
+        ? "1 meal planned automatically"
+        : `${n} meals planned automatically`,
+    autofillUndo: "Undo",
+    autofillUndone: "Automatic plan removed",
+    autofillFailed: "Automatic filling failed",
   },
   menuPlanPrint: {
     docTitle: (name: string) => `${name} – printable meal plan`,

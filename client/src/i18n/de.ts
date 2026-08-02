@@ -1754,6 +1754,15 @@ export const de = {
     noPlannedRecipes:
       "Noch keine Rezepte zugewiesen – wähle zuerst Rezepte in den Mahlzeiten-Slots.",
     printButton: "Drucken",
+    autofillButton: "Automatisch füllen",
+    autofillNothing: "Keine leeren Mahlzeiten-Slots zum Füllen gefunden.",
+    autofillDone: (n: number) =>
+      n === 1
+        ? "1 Mahlzeit automatisch geplant"
+        : `${n} Mahlzeiten automatisch geplant`,
+    autofillUndo: "Rückgängig",
+    autofillUndone: "Automatische Planung wieder entfernt",
+    autofillFailed: "Automatisches Füllen fehlgeschlagen",
   },
   menuPlanPrint: {
     docTitle: (name: string) => `${name} – Menüplan zum Ausdrucken`,

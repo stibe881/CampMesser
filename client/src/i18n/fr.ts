@@ -1754,6 +1754,15 @@ export const fr: Translation = {
     noPlannedRecipes:
       "Aucune recette attribuée pour l'instant – choisis d'abord des recettes dans les créneaux de repas.",
     printButton: "Imprimer",
+    autofillButton: "Remplir automatiquement",
+    autofillNothing: "Aucun créneau de repas vide à remplir.",
+    autofillDone: (n: number) =>
+      n === 1
+        ? "1 repas planifié automatiquement"
+        : `${n} repas planifiés automatiquement`,
+    autofillUndo: "Annuler",
+    autofillUndone: "Planification automatique retirée",
+    autofillFailed: "Le remplissage automatique a échoué",
   },
   menuPlanPrint: {
     docTitle: (name: string) => `${name} – plan des repas à imprimer`,

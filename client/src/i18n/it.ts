@@ -1737,6 +1737,15 @@ export const it: Translation = {
     noPlannedRecipes:
       "Ancora nessuna ricetta assegnata – scegli prima le ricette negli slot dei pasti.",
     printButton: "Stampa",
+    autofillButton: "Riempi automaticamente",
+    autofillNothing: "Nessuno slot dei pasti vuoto da riempire.",
+    autofillDone: (n: number) =>
+      n === 1
+        ? "1 pasto pianificato automaticamente"
+        : `${n} pasti pianificati automaticamente`,
+    autofillUndo: "Annulla",
+    autofillUndone: "Pianificazione automatica rimossa",
+    autofillFailed: "Riempimento automatico non riuscito",
   },
   menuPlanPrint: {
     docTitle: (name: string) => `${name} – piano dei pasti da stampare`,

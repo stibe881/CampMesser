@@ -11,6 +11,7 @@ import {
   Search,
   ShoppingCart,
   UtensilsCrossed,
+  Wand2,
   X,
 } from "lucide-react";
 import { Link, useLocation, useParams } from "wouter";
@@ -35,10 +36,12 @@ import { recipes } from "@/data/recipes";
 import { parseStringList } from "@shared/customRecipes";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import {
+  autofillMenuPlan,
   MEALS,
   MEAL_LABELS,
   mergeIngredientLines,
   tripDays,
+  type AutofillRecipe,
   type Meal,
 } from "@shared/menuPlan";
 
@@ -47,6 +50,22 @@ interface PickerSlot {
   day: string;
   meal: Meal;
 }
+
+/**
+ * Frühstückstaugliche eingebaute Rezepte: das Rezeptbuch kennt keine
+ * Frühstücks-Kategorie, deshalb ordnet der Client per Id zu.
+ */
+const BREAKFAST_RECIPE_IDS = new Set(["porridge", "eier-broetli"]);
+
+/** Beilagen und Desserts – als automatische Hauptmahlzeit ungeeignet. */
+const AUTOFILL_EXCLUDED_IDS = new Set([
+  "schlangenbrot",
+  "bananen-schoggi",
+  "apfel-zimt-glut",
+]);
+
+/** Präfix, unter dem eigene Rezepte in die Autofill-Rotation wandern. */
+const CUSTOM_PREFIX = "custom-";
 
 /**
  * Menüplan pro Trip: Tage des Aufenthalts als Raster mit vier
@@ -94,6 +113,10 @@ export default function MenuPlanPage() {
     onSuccess: () => utils.menu.listByTrip.invalidate({ tripId }),
     onError: () => toast.error(t.common.deleteFailed),
   });
+  // Autofill nutzt eigene Mutations-Instanzen ohne Dialog-Nebenwirkungen
+  const autofillSetMutation = trpc.menu.set.useMutation();
+  const autofillRemoveMutation = trpc.menu.remove.useMutation();
+  const [autofillBusy, setAutofillBusy] = useState(false);
   const addToShoppingMutation = trpc.shopping.addMany.useMutation({
     onSuccess: result => {
       utils.shopping.list.invalidate();
@@ -194,6 +217,98 @@ export default function MenuPlanPage() {
     return mergeIngredientLines(lines).map(i => i.slice(0, 160));
   }, [entries, staticById, customById, lang]);
 
+  /** Rezept-Vorrat fürs automatische Füllen: eingebaute + eigene Rezepte. */
+  const autofillRecipes = useMemo<AutofillRecipe[]>(() => {
+    const builtIn = recipes
+      .filter(r => !AUTOFILL_EXCLUDED_IDS.has(r.id))
+      .map(r => ({
+        id: r.id,
+        kind: BREAKFAST_RECIPE_IDS.has(r.id)
+          ? ("breakfast" as const)
+          : ("main" as const),
+      }));
+    const own = customRows.map(r => ({
+      id: `${CUSTOM_PREFIX}${r.id}`,
+      kind: "main" as const,
+    }));
+    return [...builtIn, ...own];
+  }, [customRows]);
+
+  /** Die soeben automatisch gesetzten Slots wieder leeren (Toast-Aktion). */
+  const undoAutofill = async (slots: { day: string; meal: Meal }[]) => {
+    try {
+      await Promise.all(
+        slots.map(slot =>
+          autofillRemoveMutation.mutateAsync({
+            tripId,
+            day: slot.day,
+            meal: slot.meal,
+          })
+        )
+      );
+      toast.success(t.menuPlan.autofillUndone);
+    } catch {
+      toast.error(t.common.deleteFailed);
+    } finally {
+      utils.menu.listByTrip.invalidate({ tripId });
+    }
+  };
+
+  /**
+   * Leere Slots automatisch füllen: deterministisch über die Trip-Id,
+   * Snacks bleiben aussen vor. Der Erfolgs-Toast bietet «Rückgängig» an,
+   * das nur die soeben gesetzten Einträge wieder entfernt.
+   */
+  const runAutofill = async () => {
+    const assignments = autofillMenuPlan({
+      days,
+      meals: ["breakfast", "lunch", "dinner"],
+      existing: entries.map(e => ({
+        day: e.day,
+        meal: e.meal,
+        recipeId: e.recipeId,
+      })),
+      recipes: autofillRecipes,
+      seed: tripId,
+    });
+    if (assignments.length === 0) {
+      toast.info(t.menuPlan.autofillNothing);
+      return;
+    }
+    setAutofillBusy(true);
+    try {
+      await Promise.all(
+        assignments.map(a =>
+          autofillSetMutation.mutateAsync({
+            tripId,
+            day: a.day,
+            meal: a.meal,
+            ...(a.recipeId.startsWith(CUSTOM_PREFIX)
+              ? {
+                  customRecipeId: Number(
+                    a.recipeId.slice(CUSTOM_PREFIX.length)
+                  ),
+                }
+              : { recipeId: a.recipeId }),
+          })
+        )
+      );
+      toast.success(t.menuPlan.autofillDone(assignments.length), {
+        duration: 10000,
+        action: {
+          label: t.menuPlan.autofillUndo,
+          onClick: () =>
+            undoAutofill(assignments.map(a => ({ day: a.day, meal: a.meal }))),
+        },
+      });
+    } catch {
+      toast.error(t.menuPlan.autofillFailed);
+    } finally {
+      setAutofillBusy(false);
+      utils.menu.listByTrip.invalidate({ tripId });
+    }
+  };
+
   if (loading || (isAuthenticated && menuQuery.isLoading)) {
     return (
       <div className="container flex justify-center py-16">
@@ -268,8 +383,24 @@ export default function MenuPlanPage() {
         </Button>
       </div>
 
-      {/* Brücke zur Einkaufsliste & Druckansicht */}
+      {/* Automatisch füllen, Brücke zur Einkaufsliste & Druckansicht */}
       <div className="mb-6 flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={autofillBusy}
+          onClick={runAutofill}
+        >
+          {autofillBusy ? (
+            <Loader2
+              className="mr-1.5 h-4 w-4 animate-spin"
+              aria-hidden="true"
+            />
+          ) : (
+            <Wand2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          )}
+          {t.menuPlan.autofillButton}
+        </Button>
         <Button
           variant="outline"
           size="sm"
