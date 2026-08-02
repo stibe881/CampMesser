@@ -442,6 +442,19 @@ export const en: Translation = {
     compareDayHeader: "Day",
     compareSrRain: "Rain",
     compareSrWind: "Wind gusts",
+    radarTitle: "Rain radar",
+    radarAria: "Rain radar",
+    radarIntro:
+      "Precipitation over the last hour and short-term forecast (nowcast) around the selected place – as an animation.",
+    radarLoadingAria: "Loading rain radar",
+    radarFailed: "The rain radar could not be loaded.",
+    radarMapAria: "Rain radar map",
+    radarPlayAria: "Play radar animation",
+    radarPauseAria: "Pause radar animation",
+    radarTimestamp: time => `Radar image from ${time}`,
+    radarForecastBadge: "Forecast",
+    radarSource:
+      "Radar data: RainViewer · Map: OpenStreetMap. Nowcast frames are a short-term extrapolation.",
   },
   water: {
     title: "Drinking water calculator",

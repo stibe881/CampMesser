@@ -35,6 +35,7 @@ import {
   YAxis,
 } from "recharts";
 import PageHeader from "@/components/PageHeader";
+import RainRadar from "@/components/RainRadar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -1252,6 +1253,15 @@ export default function WeatherPage() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Regenradar: Leaflet-Karte mit RainViewer-Animation, lädt erst beim Aufklappen */}
+          {coords && (
+            <RainRadar
+              key={`${coords.lat.toFixed(3)},${coords.lon.toFixed(3)}`}
+              lat={coords.lat}
+              lon={coords.lon}
+            />
+          )}
 
           {/* 7-Tage */}
           <h2 className="mb-2.5 font-serif text-lg font-semibold">

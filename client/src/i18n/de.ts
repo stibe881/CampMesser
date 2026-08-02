@@ -457,6 +457,19 @@ export const de = {
     compareDayHeader: "Tag",
     compareSrRain: "Regen",
     compareSrWind: "Windböen",
+    radarTitle: "Regenradar",
+    radarAria: "Regenradar",
+    radarIntro:
+      "Niederschlag der letzten Stunde und Kurzfrist-Prognose (Nowcast) rund um den gewählten Ort – als Animation.",
+    radarLoadingAria: "Regenradar wird geladen",
+    radarFailed: "Regenradar konnte nicht geladen werden.",
+    radarMapAria: "Regenradar-Karte",
+    radarPlayAria: "Radar-Animation abspielen",
+    radarPauseAria: "Radar-Animation anhalten",
+    radarTimestamp: (time: string) => `Radarbild von ${time}`,
+    radarForecastBadge: "Prognose",
+    radarSource:
+      "Radardaten: RainViewer · Karte: OpenStreetMap. Nowcast-Frames sind eine kurzfristige Hochrechnung.",
   },
   water: {
     title: "Trinkwasser-Rechner",
