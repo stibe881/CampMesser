@@ -1371,6 +1371,17 @@ export const fr: Translation = {
     campingTitle: "En camping",
     stepsTitle: "Pas à pas",
     proTipTitle: "Astuce de pro",
+    masterySecure: "Acquis",
+    masteryPractice: "À réviser",
+    openAriaLevel: (name, level) =>
+      `Ouvrir les instructions pour ${name} – niveau : ${level}`,
+    practiceFilter: "Seulement à réviser",
+    practiceFilterAria: "Afficher uniquement les nœuds à réviser",
+    practiceEmpty:
+      "Aucun nœud à réviser dans cette sélection – lance le quiz pour construire ton niveau.",
+    reviewTitle: "Ces nœuds demandent encore de l'exercice :",
+    reviewAllSecure:
+      "Tous les nœuds interrogés sont acquis – continue avec une vraie corde !",
   },
   nature: {
     title: "Explorateur nature",

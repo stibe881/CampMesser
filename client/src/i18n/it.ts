@@ -1356,6 +1356,17 @@ export const it: Translation = {
     campingTitle: "In campeggio",
     stepsTitle: "Passo per passo",
     proTipTitle: "Consiglio da pro",
+    masterySecure: "Sicuro",
+    masteryPractice: "Da ripassare",
+    openAriaLevel: (name, level) =>
+      `Apri le istruzioni per ${name} – livello: ${level}`,
+    practiceFilter: "Solo da ripassare",
+    practiceFilterAria: "Mostra solo i nodi da ripassare",
+    practiceEmpty:
+      "Nessun nodo da ripassare in questa selezione – avvia il quiz per costruire il tuo livello.",
+    reviewTitle: "Questi nodi hanno ancora bisogno di esercizio:",
+    reviewAllSecure:
+      "Tutti i nodi del quiz sono sicuri – continua con una corda vera!",
   },
   nature: {
     title: "Esploratore della natura",

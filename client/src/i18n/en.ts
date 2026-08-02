@@ -1329,6 +1329,17 @@ export const en: Translation = {
     campingTitle: "When camping",
     stepsTitle: "Step by step",
     proTipTitle: "Pro tip",
+    masterySecure: "Mastered",
+    masteryPractice: "Practise",
+    openAriaLevel: (name, level) =>
+      `Open instructions for ${name} – progress: ${level}`,
+    practiceFilter: "Needs practice only",
+    practiceFilterAria: "Show only knots that need practice",
+    practiceEmpty:
+      "No knots need practice in this selection – start the quiz to build up your progress.",
+    reviewTitle: "These knots still need practice:",
+    reviewAllSecure:
+      "All quizzed knots are solid – keep going with a real rope!",
   },
   nature: {
     title: "Nature Explorer",

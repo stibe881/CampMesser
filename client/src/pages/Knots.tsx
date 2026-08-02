@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   BadgeCheck,
   Cable,
+  Check,
   GraduationCap,
   RotateCcw,
   Trophy,
@@ -26,11 +27,57 @@ import {
 } from "@/data/knots";
 import { useI18n } from "@/i18n";
 import { buildKnotQuiz, type KnotQuizQuestion } from "@/lib/knotQuiz";
+import {
+  loadKnotProgress,
+  masteryLevel,
+  recordAnswer,
+  sanitizeKnotProgress,
+  storeKnotProgress,
+  type KnotProgress,
+  type MasteryLevel,
+} from "@/lib/knotProgress";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { cn } from "@/lib/utils";
 import { pick } from "@shared/i18n";
 
+/** Beherrschungs-Badge eines Knotens: sicher = grün mit Häkchen, üben = amber. */
+function MasteryBadge({
+  level,
+  label,
+}: {
+  level: MasteryLevel;
+  label: string;
+}) {
+  if (level === "neu") return null;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
+        level === "sicher"
+          ? "border-primary/40 bg-primary/10 text-primary"
+          : "border-amber-600/40 bg-amber-500/15 text-amber-800 dark:text-amber-300"
+      )}
+    >
+      {level === "sicher" && <Check className="h-3 w-3" aria-hidden="true" />}
+      {label}
+    </span>
+  );
+}
+
 /** Übungsmodus: «Welcher Knoten passt zur Situation?» als Karteikarten-Quiz. */
-function KnotQuizDialog({ onClose }: { onClose: () => void }) {
+function KnotQuizDialog({
+  onClose,
+  onAnswer,
+  progress,
+  onOpenKnot,
+}: {
+  onClose: () => void;
+  /** Meldet jede beantwortete Frage (Knoten-Id, richtig/falsch) an die Statistik */
+  onAnswer: (knotId: string, correct: boolean) => void;
+  progress: KnotProgress;
+  /** Quiz schliessen und die Anleitung des Knotens öffnen */
+  onOpenKnot: (knotId: string) => void;
+}) {
   const { lang, t } = useI18n();
   const [questions, setQuestions] = useState<KnotQuizQuestion[]>(() =>
     buildKnotQuiz(knots, 8, Math.random, lang)
@@ -75,6 +122,42 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
                 ? t.knots.resultGood
                 : t.knots.resultTryAgain}
           </p>
+          {(() => {
+            // Auswertung: abgefragte Knoten, die noch nicht «sicher» sitzen
+            const toPractice = questions
+              .map(q => knots.find(k => k.id === q.knotId))
+              .filter((k): k is Knot => Boolean(k))
+              .filter(k => masteryLevel(progress, k.id) !== "sicher");
+            if (toPractice.length === 0) {
+              return (
+                <p className="rounded-lg bg-accent/60 p-3 text-sm">
+                  {t.knots.reviewAllSecure}
+                </p>
+              );
+            }
+            return (
+              <div className="rounded-lg bg-muted p-3 text-left">
+                <p className="text-sm font-semibold">{t.knots.reviewTitle}</p>
+                <ul className="mt-2 flex flex-wrap gap-1.5">
+                  {toPractice.map(knot => {
+                    const name = pick(knot.name, lang);
+                    return (
+                      <li key={knot.id}>
+                        <button
+                          type="button"
+                          onClick={() => onOpenKnot(knot.id)}
+                          className="rounded-full border border-amber-600/40 bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-800 hover:border-amber-600 dark:text-amber-300"
+                          aria-label={t.knots.openAria(name)}
+                        >
+                          {name}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })()}
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1" onClick={restart}>
               <RotateCcw className="mr-1.5 h-4 w-4" aria-hidden="true" />
@@ -107,7 +190,9 @@ function KnotQuizDialog({ onClose }: { onClose: () => void }) {
                   onClick={() => {
                     if (answered !== null) return;
                     setAnswered(idx);
-                    if (idx === question.correctIndex) setScore(s => s + 1);
+                    const correct = idx === question.correctIndex;
+                    if (correct) setScore(s => s + 1);
+                    onAnswer(question.knotId, correct);
                   }}
                   disabled={answered !== null}
                   className={cn(
@@ -199,9 +284,37 @@ export default function KnotsPage() {
   const [category, setCategory] = useState<"alle" | KnotCategory>("alle");
   const [selected, setSelected] = useState<Knot | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [practiceOnly, setPracticeOnly] = useState(false);
 
-  const filtered =
-    category === "alle" ? knots : knots.filter(k => k.category === category);
+  // Lernfortschritt: localStorage als schnelle Quelle, Geräte-Sync fürs Konto
+  const [progress, setProgress] = useState<KnotProgress>(() =>
+    loadKnotProgress()
+  );
+  const progressRef = useRef(progress);
+  progressRef.current = progress;
+  const progressSync = useSyncedSetting<KnotProgress>("knotProgress", value => {
+    const clean = sanitizeKnotProgress(value);
+    setProgress(clean);
+    storeKnotProgress(clean);
+  });
+  const handleAnswer = (knotId: string, correct: boolean) => {
+    const next = recordAnswer(progressRef.current, knotId, correct);
+    progressRef.current = next;
+    setProgress(next);
+    storeKnotProgress(next);
+    progressSync.push(next);
+  };
+
+  const masteryLabels: Record<Exclude<MasteryLevel, "neu">, string> = {
+    sicher: t.knots.masterySecure,
+    üben: t.knots.masteryPractice,
+  };
+
+  const filtered = knots.filter(
+    k =>
+      (category === "alle" || k.category === category) &&
+      (!practiceOnly || masteryLevel(progress, k.id) === "üben")
+  );
 
   return (
     <div className="container py-6">
@@ -253,18 +366,43 @@ export default function KnotsPage() {
               : pick(knotCategoryLabels[c], lang)}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => setPracticeOnly(v => !v)}
+          className={cn(
+            "rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
+            practiceOnly
+              ? "bg-amber-600 text-white dark:bg-amber-500 dark:text-black"
+              : "bg-muted text-muted-foreground hover:text-foreground"
+          )}
+          aria-pressed={practiceOnly}
+          aria-label={t.knots.practiceFilterAria}
+        >
+          {t.knots.practiceFilter}
+        </button>
       </div>
+
+      {filtered.length === 0 && (
+        <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
+          {t.knots.practiceEmpty}
+        </p>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map(knot => {
           const name = pick(knot.name, lang);
+          const level = masteryLevel(progress, knot.id);
           return (
             <button
               key={knot.id}
               type="button"
               onClick={() => setSelected(knot)}
               className="flex flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
-              aria-label={t.knots.openAria(name)}
+              aria-label={
+                level === "neu"
+                  ? t.knots.openAria(name)
+                  : t.knots.openAriaLevel(name, masteryLabels[level])
+              }
             >
               {knot.image && (
                 <img
@@ -291,9 +429,14 @@ export default function KnotsPage() {
                   </p>
                 )}
               </div>
-              <Badge variant="secondary">
-                {pick(knotCategoryLabels[knot.category], lang)}
-              </Badge>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Badge variant="secondary">
+                  {pick(knotCategoryLabels[knot.category], lang)}
+                </Badge>
+                {level !== "neu" && (
+                  <MasteryBadge level={level} label={masteryLabels[level]} />
+                )}
+              </div>
               <p className="text-sm text-muted-foreground">
                 {pick(knot.useCase, lang)}
               </p>
@@ -373,7 +516,18 @@ export default function KnotsPage() {
         open={quizOpen}
         onOpenChange={open => !open && setQuizOpen(false)}
       >
-        {quizOpen && <KnotQuizDialog onClose={() => setQuizOpen(false)} />}
+        {quizOpen && (
+          <KnotQuizDialog
+            onClose={() => setQuizOpen(false)}
+            onAnswer={handleAnswer}
+            progress={progress}
+            onOpenKnot={knotId => {
+              setQuizOpen(false);
+              const knot = knots.find(k => k.id === knotId);
+              if (knot) setSelected(knot);
+            }}
+          />
+        )}
       </Dialog>
     </div>
   );

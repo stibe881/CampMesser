@@ -16,6 +16,8 @@ export const SYNCED_SETTING_KEYS = [
   "tentFinderTargets",
   /** Gewählte App-Sprache (de/fr/it/en) */
   "language",
+  /** Lernfortschritt des Knoten-Quiz (Statistik pro Knoten) */
+  "knotProgress",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];

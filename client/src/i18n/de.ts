@@ -1375,6 +1375,17 @@ export const de = {
     campingTitle: "Beim Camping",
     stepsTitle: "Schritt für Schritt",
     proTipTitle: "Profi-Tipp",
+    masterySecure: "Sicher",
+    masteryPractice: "Üben",
+    openAriaLevel: (name: string, level: string) =>
+      `Anleitung für ${name} öffnen – Lernstand: ${level}`,
+    practiceFilter: "Nur zu übende",
+    practiceFilterAria: "Nur Knoten mit Übungsbedarf anzeigen",
+    practiceEmpty:
+      "Kein Knoten mit Übungsbedarf in dieser Auswahl – starte das Quiz, um deinen Lernstand aufzubauen.",
+    reviewTitle: "Diese Knoten brauchst du noch:",
+    reviewAllSecure:
+      "Alle abgefragten Knoten sitzen – weiter so mit echtem Seil!",
   },
   nature: {
     title: "Natur-Entdecker",
