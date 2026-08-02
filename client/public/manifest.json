@@ -63,6 +63,45 @@
           "type": "image/png"
         }
       ]
+    },
+    {
+      "name": "Einkaufsliste",
+      "short_name": "Einkauf",
+      "description": "Offene Einkäufe abhaken",
+      "url": "/einkauf",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Meine Reisen",
+      "short_name": "Reisen",
+      "description": "Aufenthalte planen und festhalten",
+      "url": "/tagebuch",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Karte der Plätze",
+      "short_name": "Karte",
+      "description": "Zeltplätze und Ziele auf der Karte",
+      "url": "/karte",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ],
   "icons": [
