@@ -314,8 +314,10 @@ function OnboardingCard() {
                   {label}
                 </span>
               ) : step.locked ? (
+                // Volles text-muted-foreground statt /50: die abgeschwächte
+                // Variante fiel im axe-Kontrast-Check durch (2.1 : 1)
                 <span
-                  className="text-muted-foreground/50"
+                  className="text-muted-foreground"
                   aria-label={t.home.onboardingLockedAria(label)}
                 >
                   {label}
