@@ -44,6 +44,7 @@ import {
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
+import { hapticTick } from "@/lib/haptics";
 import { usePointerDrag } from "@/lib/usePointerDrag";
 import { familyAddOns } from "@shared/packTemplates";
 import { MAX_PERSONS, parsePersons } from "@shared/packPersons";
@@ -288,6 +289,7 @@ export default function PackListDetailPage() {
 
   const toggleMutation = trpc.packing.toggleItem.useMutation({
     onMutate: async input => {
+      hapticTick();
       await utils.packing.items.cancel({ listId });
       const prev = utils.packing.items.getData({ listId });
       utils.packing.items.setData({ listId }, old =>

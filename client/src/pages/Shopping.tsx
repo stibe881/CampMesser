@@ -47,6 +47,7 @@ import {
   type ShoppingHistoryEntry,
 } from "@/lib/shoppingHistory";
 import { trpc } from "@/lib/trpc";
+import { hapticTick } from "@/lib/haptics";
 import { usePointerDrag } from "@/lib/usePointerDrag";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { cn } from "@/lib/utils";
@@ -170,6 +171,7 @@ export default function ShoppingPage() {
     onError: () => toast.error(t.shopping.detailsFailed),
   });
   const toggleMutation = trpc.shopping.toggle.useMutation({
+    onMutate: () => hapticTick(),
     onSuccess: invalidate,
     onError: () => toast.error(t.common.actionFailed),
   });
