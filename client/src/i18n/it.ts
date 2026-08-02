@@ -987,6 +987,21 @@ export const it: Translation = {
     qrText:
       "Fai scansionare il codice con la fotocamera del telefono – il dossier della piazzola si apre subito, senza digitare né accedere.",
     tentFinderLink: "Ritrova la tenda",
+    climateTitle: "Miglior periodo di viaggio",
+    climateIntro:
+      "Valori mensili da cinque anni di archivio meteo: massime e minime medie e giorni di pioggia al mese in questa piazzola.",
+    climateLoadingAria: "Caricamento dei dati climatici",
+    climateFailed: "Impossibile caricare i dati climatici.",
+    climateRetry: "Riprova",
+    climateBestTitle: "Mesi migliori:",
+    climateChartMax: "Massima media giornaliera",
+    climateChartMin: "Minima media giornaliera",
+    climateChartRain: "Giorni di pioggia",
+    climateDaysUnit: "giorni",
+    climateLegend:
+      "Linee = massima/minima media giornaliera (°C, asse sinistro) · Barre = giorni di pioggia al mese (oltre 1 mm, asse destro).",
+    climateSource: (from, to) =>
+      `Fonte: archivio meteo Open-Meteo, anni ${from}–${to}. Mesi migliori = i più caldi con meno giorni di pioggia.`,
   },
   tentFinder: {
     title: "Trova-tenda",

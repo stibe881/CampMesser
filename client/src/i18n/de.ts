@@ -998,6 +998,21 @@ export const de = {
     qrText:
       "Lass andere den Code mit der Handy-Kamera scannen – das Platz-Dossier öffnet sich sofort, ganz ohne Tippen oder Anmeldung.",
     tentFinderLink: "Zelt finden",
+    climateTitle: "Beste Reisezeit",
+    climateIntro:
+      "Monatswerte aus fünf Jahren Wetterarchiv: durchschnittliche Höchst- und Tiefstwerte sowie Regentage pro Monat an diesem Platz.",
+    climateLoadingAria: "Klimadaten werden geladen",
+    climateFailed: "Klimadaten konnten nicht geladen werden.",
+    climateRetry: "Erneut versuchen",
+    climateBestTitle: "Beste Monate:",
+    climateChartMax: "Ø Tagesmaximum",
+    climateChartMin: "Ø Tagesminimum",
+    climateChartRain: "Regentage",
+    climateDaysUnit: "Tage",
+    climateLegend:
+      "Linien = durchschnittliches Tagesmaximum/-minimum (°C, linke Achse) · Balken = Regentage pro Monat (mehr als 1 mm, rechte Achse).",
+    climateSource: (from: number, to: number) =>
+      `Quelle: Open-Meteo Wetterarchiv, Jahre ${from}–${to}. Beste Monate = wärmste mit den wenigsten Regentagen.`,
   },
   tentFinder: {
     title: "Zelt-Finder",

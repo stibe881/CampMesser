@@ -995,6 +995,21 @@ export const fr: Translation = {
     qrText:
       "Fais scanner le code avec l'appareil photo du téléphone – le dossier de l'emplacement s'ouvre immédiatement, sans saisie ni connexion.",
     tentFinderLink: "Retrouver la tente",
+    climateTitle: "Meilleure période de voyage",
+    climateIntro:
+      "Valeurs mensuelles issues de cinq ans d'archives météo : maximales et minimales moyennes ainsi que jours de pluie par mois à cet emplacement.",
+    climateLoadingAria: "Chargement des données climatiques",
+    climateFailed: "Impossible de charger les données climatiques.",
+    climateRetry: "Réessayer",
+    climateBestTitle: "Meilleurs mois :",
+    climateChartMax: "Max. journalier moyen",
+    climateChartMin: "Min. journalier moyen",
+    climateChartRain: "Jours de pluie",
+    climateDaysUnit: "jours",
+    climateLegend:
+      "Lignes = maximum/minimum journalier moyen (°C, axe gauche) · Barres = jours de pluie par mois (plus de 1 mm, axe droit).",
+    climateSource: (from, to) =>
+      `Source : archives météo Open-Meteo, années ${from}–${to}. Meilleurs mois = les plus chauds avec le moins de jours de pluie.`,
   },
   tentFinder: {
     title: "Retrouve-tente",

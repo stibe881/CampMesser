@@ -972,6 +972,21 @@ export const en: Translation = {
     qrText:
       "Let others scan the code with their phone camera – the pitch dossier opens immediately, no typing or sign-in needed.",
     tentFinderLink: "Find your tent",
+    climateTitle: "Best time to visit",
+    climateIntro:
+      "Monthly values from five years of weather archive: average daily highs and lows plus rain days per month at this pitch.",
+    climateLoadingAria: "Loading climate data",
+    climateFailed: "Climate data could not be loaded.",
+    climateRetry: "Try again",
+    climateBestTitle: "Best months:",
+    climateChartMax: "Avg daily high",
+    climateChartMin: "Avg daily low",
+    climateChartRain: "Rain days",
+    climateDaysUnit: "days",
+    climateLegend:
+      "Lines = average daily high/low (°C, left axis) · Bars = rain days per month (more than 1 mm, right axis).",
+    climateSource: (from, to) =>
+      `Source: Open-Meteo weather archive, years ${from}–${to}. Best months = warmest with the fewest rain days.`,
   },
   tentFinder: {
     title: "Tent finder",
