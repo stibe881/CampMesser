@@ -8,14 +8,7 @@
 import { l4, type L4 } from "./i18n";
 
 export type SpotAttributeKey =
-  | "shade"
-  | "sanitary"
-  | "noise"
-  | "wifi"
-  | "power"
-  | "dogs"
-  | "kids"
-  | "shop";
+  "shade" | "sanitary" | "noise" | "wifi" | "power" | "dogs" | "kids" | "shop";
 
 export interface SpotAttributeValue {
   /** Technischer Wert, wie er im JSON steht */

@@ -15,12 +15,7 @@ import { LOCALE_TAGS, l4, pick, type L4, type Language } from "@shared/i18n";
 
 /** Kategorie-Schlüssel eines Treffers – das Anzeige-Label liefert das Wörterbuch. */
 export type SearchCategory =
-  | "module"
-  | "firstAid"
-  | "knots"
-  | "recipes"
-  | "nature"
-  | "own";
+  "module" | "firstAid" | "knots" | "recipes" | "nature" | "own";
 
 export interface SearchResult {
   id: string;

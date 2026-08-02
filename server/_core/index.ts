@@ -250,9 +250,8 @@ async function startServer() {
     try {
       const user = await authenticatePhotoRequest(req, res);
       if (!user) return;
-      const { PHOTO_FILENAME_PATTERN, tripPhotoStorage } = await import(
-        "../photoStorage"
-      );
+      const { PHOTO_FILENAME_PATTERN, tripPhotoStorage } =
+        await import("../photoStorage");
       const fileName = req.params.fileName;
       if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
         res.status(400).json({ error: "badRequest" });
@@ -346,9 +345,8 @@ async function startServer() {
     try {
       const user = await authenticatePhotoRequest(req, res);
       if (!user) return;
-      const { PHOTO_FILENAME_PATTERN, recipePhotoStorage } = await import(
-        "../photoStorage"
-      );
+      const { PHOTO_FILENAME_PATTERN, recipePhotoStorage } =
+        await import("../photoStorage");
       const fileName = req.params.fileName;
       if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
         res.status(400).json({ error: "badRequest" });
@@ -443,9 +441,8 @@ async function startServer() {
     try {
       const user = await authenticatePhotoRequest(req, res);
       if (!user) return;
-      const { PHOTO_FILENAME_PATTERN, spotPhotoStorage } = await import(
-        "../photoStorage"
-      );
+      const { PHOTO_FILENAME_PATTERN, spotPhotoStorage } =
+        await import("../photoStorage");
       const fileName = req.params.fileName;
       if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
         res.status(400).json({ error: "badRequest" });

@@ -296,9 +296,8 @@ export const appRouter = router({
     deleteAccount: protectedProcedure
       .input(z.object({ password: z.string().min(1).max(200) }))
       .mutation(async ({ ctx, input }) => {
-        const { verifyPassword, deleteUserAccount } = await import(
-          "./localAuth"
-        );
+        const { verifyPassword, deleteUserAccount } =
+          await import("./localAuth");
         if (ctx.user.passwordHash) {
           const ok = await verifyPassword(
             input.password,
@@ -324,9 +323,8 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const { mailConfigured, sendPasswordResetMail } = await import(
-          "./mailer"
-        );
+        const { mailConfigured, sendPasswordResetMail } =
+          await import("./mailer");
         if (!mailConfigured()) {
           // Der Client übersetzt diesen Fall anhand des Fehler-Codes.
           throw new TRPCError({
