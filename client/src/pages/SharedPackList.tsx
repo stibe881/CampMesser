@@ -5,6 +5,7 @@ import PageHeader from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
+import { useT } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +16,7 @@ import { cn } from "@/lib/utils";
 export default function SharedPackListPage() {
   const params = useParams<{ token: string }>();
   const token = params.token ?? "";
+  const t = useT();
   const utils = trpc.useUtils();
 
   const query = trpc.packing.sharedGet.useQuery(
@@ -40,7 +42,7 @@ export default function SharedPackListPage() {
     },
     onError: (_e, _i, ctx) => {
       utils.packing.sharedGet.setData({ token }, ctx?.prev);
-      toast.error("Abhaken fehlgeschlagen");
+      toast.error(t.sharedPackList.toggleFailed);
     },
     onSettled: () => utils.packing.sharedGet.invalidate({ token }),
   });
@@ -50,7 +52,7 @@ export default function SharedPackListPage() {
       <div className="container max-w-3xl py-6">
         <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-          Geteilte Liste wird geladen …
+          {t.sharedPackList.loadingShared}
         </div>
       </div>
     );
@@ -60,14 +62,13 @@ export default function SharedPackListPage() {
     return (
       <div className="container max-w-3xl py-6">
         <PageHeader
-          title="Liste nicht gefunden"
+          title={t.sharedPackList.notFoundTitle}
           backHref="/"
-          backLabel="Startseite"
+          backLabel={t.sharedPackList.backHome}
         />
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            Dieser Teil-Link ist ungültig oder wurde von der Besitzerin bzw. dem
-            Besitzer zurückgezogen.
+            {t.sharedPackList.invalidLink}
           </CardContent>
         </Card>
       </div>
@@ -87,21 +88,20 @@ export default function SharedPackListPage() {
     <div className="container max-w-3xl py-6">
       <PageHeader
         title={list.name}
-        subtitle={`Geteilte Packliste · ${checkedCount} von ${items.length} Einträgen gepackt`}
+        subtitle={t.sharedPackList.subtitle(checkedCount, items.length)}
         backHref="/"
-        backLabel="Startseite"
+        backLabel={t.sharedPackList.backHome}
       />
 
       <div className="mb-4 flex items-center gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
         <Users className="h-4 w-4 shrink-0" aria-hidden="true" />
-        Gemeinsames Abhaken: Alle mit diesem Link sehen den gleichen Stand – die
-        Anzeige aktualisiert sich automatisch.
+        {t.sharedPackList.sharedInfo}
       </div>
 
       <div className="mb-6">
         <Progress
           value={progress}
-          aria-label={`Fortschritt: ${Math.round(progress)} Prozent gepackt`}
+          aria-label={t.sharedPackList.progressAria(Math.round(progress))}
         />
       </div>
 
@@ -113,7 +113,7 @@ export default function SharedPackListPage() {
               aria-hidden="true"
             />
             <p className="text-sm text-muted-foreground">
-              Diese Liste ist noch leer.
+              {t.sharedPackList.emptyList}
             </p>
           </CardContent>
         </Card>
@@ -144,7 +144,7 @@ export default function SharedPackListPage() {
                         checked: value === true,
                       })
                     }
-                    aria-label={`${item.name} abhaken`}
+                    aria-label={t.sharedPackList.checkAria(item.name)}
                   />
                   <label
                     htmlFor={`shared-item-${item.id}`}

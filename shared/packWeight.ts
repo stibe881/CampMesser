@@ -2,6 +2,7 @@
  * Gewichts- und Volumen-Bilanz einer Packliste über den Namens-Abgleich mit
  * dem Inventar. Reine Funktionen – von Client und Tests genutzt.
  */
+import type { Language } from "./i18n";
 
 export interface PackItemLike {
   name: string;
@@ -66,10 +67,11 @@ export function computePackWeight(
   return summary;
 }
 
-/** Gramm menschenlesbar formatieren, z. B. 12480 → «12,5 kg». */
-export function formatGrams(grams: number): string {
+/** Gramm menschenlesbar formatieren, z. B. 12480 → «12,5 kg» (en: «12.5 kg»). */
+export function formatGrams(grams: number, lang: Language = "de"): string {
   if (grams >= 1000) {
-    return `${(grams / 1000).toFixed(1).replace(".", ",")} kg`;
+    const value = (grams / 1000).toFixed(1);
+    return `${lang === "en" ? value : value.replace(".", ",")} kg`;
   }
   return `${Math.round(grams)} g`;
 }

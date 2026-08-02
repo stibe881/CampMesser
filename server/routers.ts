@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import { z } from "zod";
 import { ONE_YEAR_MS } from "@shared/const";
 import { packScenarios } from "@shared/packTemplates";
+import { l4, pick } from "@shared/i18n";
 import {
   SETTING_VALUE_MAX_LENGTH,
   SYNCED_SETTING_KEYS,
@@ -307,6 +308,9 @@ export const appRouter = router({
         z.object({
           name: z.string().min(1).max(120),
           scenario: z.string().max(60),
+          // Vorlagen-Einträge werden in der aktuellen UI-Sprache gespeichert –
+          // Listen-Inhalte in der DB bleiben bewusst einsprachig.
+          lang: z.enum(["de", "fr", "it", "en"]).default("de"),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -320,8 +324,8 @@ export const appRouter = router({
           await db.addPackItems(
             scenario.items.map((item, idx) => ({
               listId,
-              name: item.name,
-              category: item.category,
+              name: pick(item.name, input.lang),
+              category: pick(item.category, input.lang),
               quantity: item.quantity ?? 1,
               sortOrder: idx,
             }))
@@ -347,7 +351,12 @@ export const appRouter = router({
       }),
     /** Liste samt Einträgen kopieren – alles unabgehakt, ohne Teil-Link. */
     duplicateList: protectedProcedure
-      .input(z.object({ id: z.number() }))
+      .input(
+        z.object({
+          id: z.number(),
+          lang: z.enum(["de", "fr", "it", "en"]).default("de"),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const list = await db.getPackList(input.id, ctx.user.id);
         if (!list)
@@ -356,9 +365,13 @@ export const appRouter = router({
             message: "Liste nicht gefunden",
           });
         const items = await db.getPackItems(input.id);
+        const copySuffix = pick(
+          l4("Kopie", "copie", "copia", "copy"),
+          input.lang
+        );
         const newListId = await db.createPackList({
           userId: ctx.user.id,
-          name: `${list.name} (Kopie)`.slice(0, 120),
+          name: `${list.name} (${copySuffix})`.slice(0, 120),
           scenario: list.scenario,
         });
         await db.addPackItems(

@@ -25,8 +25,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { packScenarios } from "@shared/packTemplates";
+import { pick } from "@shared/i18n";
 import { cn } from "@/lib/utils";
 
 const scenarioIcons: Record<
@@ -41,6 +43,7 @@ const scenarioIcons: Record<
 
 export default function PackListsPage() {
   const { isAuthenticated, loading } = useAuth();
+  const { lang, t } = useI18n();
   const utils = trpc.useUtils();
   const listsQuery = trpc.packing.lists.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -54,9 +57,9 @@ export default function PackListsPage() {
       utils.packing.lists.invalidate();
       setDialogOpen(false);
       setName("");
-      toast.success("Packliste erstellt");
+      toast.success(t.packLists.created);
     },
-    onError: () => toast.error("Liste konnte nicht erstellt werden"),
+    onError: () => toast.error(t.packLists.createFailed),
   });
 
   const deleteMutation = trpc.packing.deleteList.useMutation({
@@ -66,9 +69,9 @@ export default function PackListsPage() {
   const duplicateMutation = trpc.packing.duplicateList.useMutation({
     onSuccess: () => {
       utils.packing.lists.invalidate();
-      toast.success("Liste kopiert – alle Einträge sind unabgehakt");
+      toast.success(t.packLists.duplicated);
     },
-    onError: () => toast.error("Kopieren fehlgeschlagen"),
+    onError: () => toast.error(t.packLists.duplicateFailed),
   });
 
   if (loading) {
@@ -76,7 +79,7 @@ export default function PackListsPage() {
       <div className="container flex justify-center py-16">
         <Loader2
           className="h-6 w-6 animate-spin text-muted-foreground"
-          aria-label="Lädt"
+          aria-label={t.common.loading}
         />
       </div>
     );
@@ -85,11 +88,8 @@ export default function PackListsPage() {
   if (!isAuthenticated) {
     return (
       <div className="container py-6">
-        <PageHeader
-          title="Packlisten"
-          subtitle="Szenario-basierte Checklisten, die du abhaken und erweitern kannst."
-        />
-        <LoginPrompt feature="deine Packlisten" />
+        <PageHeader title={t.packLists.title} subtitle={t.packLists.subtitle} />
+        <LoginPrompt feature={t.packLists.loginFeature} />
       </div>
     );
   }
@@ -98,24 +98,20 @@ export default function PackListsPage() {
 
   return (
     <div className="container py-6">
-      <PageHeader
-        title="Packlisten"
-        subtitle="Szenario-basierte Checklisten, die du abhaken und erweitern kannst."
-      />
+      <PageHeader title={t.packLists.title} subtitle={t.packLists.subtitle} />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
-          <Button className="mb-6" aria-label="Neue Packliste erstellen">
+          <Button className="mb-6" aria-label={t.packLists.newListAria}>
             <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-            Neue Packliste
+            {t.packLists.newList}
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Neue Packliste</DialogTitle>
+            <DialogTitle>{t.packLists.newList}</DialogTitle>
             <DialogDescription>
-              Wähle ein Szenario – die passende Basis-Ausrüstung wird
-              automatisch eingetragen.
+              {t.packLists.dialogDescription}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -134,12 +130,14 @@ export default function PackListsPage() {
                         : "border-border hover:border-primary/40"
                     )}
                     aria-pressed={scenario === s.id}
-                    aria-label={`Szenario ${s.label} wählen`}
+                    aria-label={t.packLists.scenarioAria(pick(s.label, lang))}
                   >
                     <Icon className="h-5 w-5 text-primary" aria-hidden="true" />
-                    <span className="text-sm font-semibold">{s.label}</span>
+                    <span className="text-sm font-semibold">
+                      {pick(s.label, lang)}
+                    </span>
                     <span className="text-xs text-muted-foreground">
-                      {s.description}
+                      {pick(s.description, lang)}
                     </span>
                   </button>
                 );
@@ -147,18 +145,20 @@ export default function PackListsPage() {
             </div>
             {selectedScenario && selectedScenario.items.length > 0 && (
               <p className="text-xs text-muted-foreground">
-                Enthält {selectedScenario.items.length} vorbereitete Einträge.
+                {t.packLists.preparedItems(selectedScenario.items.length)}
               </p>
             )}
             <div>
-              <Label htmlFor="list-name">Name der Liste</Label>
+              <Label htmlFor="list-name">{t.packLists.nameLabel}</Label>
               <Input
                 id="list-name"
                 className="mt-1.5"
                 placeholder={
                   selectedScenario
-                    ? `z. B. ${selectedScenario.label} Sommer`
-                    : "Name"
+                    ? t.packLists.namePlaceholder(
+                        pick(selectedScenario.label, lang)
+                      )
+                    : t.packLists.namePlaceholderFallback
                 }
                 value={name}
                 onChange={e => setName(e.target.value)}
@@ -169,8 +169,11 @@ export default function PackListsPage() {
               disabled={createMutation.isPending}
               onClick={() => {
                 const finalName =
-                  name.trim() || selectedScenario?.label || "Meine Packliste";
-                createMutation.mutate({ name: finalName, scenario });
+                  name.trim() ||
+                  (selectedScenario
+                    ? pick(selectedScenario.label, lang)
+                    : t.packLists.defaultName);
+                createMutation.mutate({ name: finalName, scenario, lang });
               }}
             >
               {createMutation.isPending && (
@@ -179,7 +182,7 @@ export default function PackListsPage() {
                   aria-hidden="true"
                 />
               )}
-              Liste erstellen
+              {t.packLists.createList}
             </Button>
           </div>
         </DialogContent>
@@ -189,16 +192,19 @@ export default function PackListsPage() {
         <div className="flex justify-center py-10">
           <Loader2
             className="h-6 w-6 animate-spin text-muted-foreground"
-            aria-label="Lädt"
+            aria-label={t.common.loading}
           />
         </div>
       ) : listsQuery.data && listsQuery.data.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2">
           {listsQuery.data.map(list => {
             const Icon = scenarioIcons[list.scenario] ?? ListPlus;
-            const scenarioLabel =
-              packScenarios.find(s => s.id === list.scenario)?.label ??
-              "Eigene Liste";
+            const scenarioOfList = packScenarios.find(
+              s => s.id === list.scenario
+            );
+            const scenarioLabel = scenarioOfList
+              ? pick(scenarioOfList.label, lang)
+              : pick(packScenarios.find(s => s.id === "custom")!.label, lang);
             return (
               <div
                 key={list.id}
@@ -207,7 +213,7 @@ export default function PackListsPage() {
                 <Link
                   href={`/packlisten/${list.id}`}
                   className="absolute inset-0"
-                  aria-label={`Packliste ${list.name} öffnen`}
+                  aria-label={t.packLists.openAria(list.name)}
                 />
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                   <Icon className="h-5 w-5" aria-hidden="true" />
@@ -223,8 +229,10 @@ export default function PackListsPage() {
                   size="icon"
                   className="relative z-10 text-muted-foreground hover:text-primary"
                   disabled={duplicateMutation.isPending}
-                  onClick={() => duplicateMutation.mutate({ id: list.id })}
-                  aria-label={`Packliste ${list.name} duplizieren`}
+                  onClick={() =>
+                    duplicateMutation.mutate({ id: list.id, lang })
+                  }
+                  aria-label={t.packLists.duplicateAria(list.name)}
                 >
                   <Copy className="h-4 w-4" aria-hidden="true" />
                 </Button>
@@ -233,11 +241,11 @@ export default function PackListsPage() {
                   size="icon"
                   className="relative z-10 text-muted-foreground hover:text-destructive"
                   onClick={() => {
-                    if (confirm(`Liste «${list.name}» wirklich löschen?`)) {
+                    if (confirm(t.packLists.deleteConfirm(list.name))) {
                       deleteMutation.mutate({ id: list.id });
                     }
                   }}
-                  aria-label={`Packliste ${list.name} löschen`}
+                  aria-label={t.packLists.deleteAria(list.name)}
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </Button>
@@ -251,9 +259,9 @@ export default function PackListsPage() {
             className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
             aria-hidden="true"
           />
-          <p className="font-medium">Noch keine Packlisten</p>
+          <p className="font-medium">{t.packLists.emptyTitle}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Erstelle deine erste Liste – wähle einfach ein Szenario aus.
+            {t.packLists.emptyText}
           </p>
         </div>
       )}

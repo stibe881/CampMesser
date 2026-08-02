@@ -19,15 +19,18 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { familyAddOns } from "@shared/packTemplates";
 import { computePackWeight, formatGrams } from "@shared/packWeight";
+import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { cn } from "@/lib/utils";
 
 export default function PackListDetailPage() {
   const params = useParams<{ id: string }>();
   const listId = Number(params.id);
   const { isAuthenticated, loading } = useAuth();
+  const { lang, t } = useI18n();
   const utils = trpc.useUtils();
   const query = trpc.packing.items.useQuery(
     { listId },
@@ -63,12 +66,12 @@ export default function PackListDetailPage() {
       setShareUrl(url);
       try {
         await navigator.clipboard.writeText(url);
-        toast.success("Teil-Link kopiert – schick ihn deinen Mitreisenden!");
+        toast.success(t.packListDetail.shareCopied);
       } catch {
-        toast.success("Teil-Link erstellt – kopiere ihn unten.");
+        toast.success(t.packListDetail.shareCreated);
       }
     },
-    onError: () => toast.error("Teilen fehlgeschlagen"),
+    onError: () => toast.error(t.packListDetail.shareFailed),
   });
 
   const toggleMutation = trpc.packing.toggleItem.useMutation({
@@ -89,7 +92,7 @@ export default function PackListDetailPage() {
     },
     onError: (_e, _v, ctx) => {
       if (ctx?.prev) utils.packing.items.setData({ listId }, ctx.prev);
-      toast.error("Änderung fehlgeschlagen");
+      toast.error(t.packListDetail.toggleFailed);
     },
   });
 
@@ -98,7 +101,7 @@ export default function PackListDetailPage() {
       utils.packing.items.invalidate({ listId });
       setNewItem("");
     },
-    onError: () => toast.error("Eintrag konnte nicht hinzugefügt werden"),
+    onError: () => toast.error(t.packListDetail.addFailed),
   });
 
   const deleteMutation = trpc.packing.deleteItem.useMutation({
@@ -112,7 +115,7 @@ export default function PackListDetailPage() {
     },
     onError: (_e, _v, ctx) => {
       if (ctx?.prev) utils.packing.items.setData({ listId }, ctx.prev);
-      toast.error("Löschen fehlgeschlagen");
+      toast.error(t.common.deleteFailed);
     },
   });
 
@@ -122,26 +125,32 @@ export default function PackListDetailPage() {
     addMutation.mutate(
       {
         listId,
+        // Vorlagen-Einträge in der aktuellen Sprache speichern – die Liste
+        // selbst bleibt einsprachig.
         items: addOn.items.map(i => ({
-          name: i.name,
-          category: i.category,
+          name: pick(i.name, lang),
+          category: pick(i.category, lang),
           quantity: i.quantity ?? 1,
         })),
       },
-      { onSuccess: () => toast.success(`«${addOn.label}» hinzugefügt`) }
+      {
+        onSuccess: () =>
+          toast.success(t.packListDetail.addOnAdded(pick(addOn.label, lang))),
+      }
     );
   };
 
+  const generalCategory = t.packListDetail.generalCategory;
   const grouped = useMemo(() => {
     const items = query.data?.items ?? [];
     const map = new Map<string, (typeof items)[number][]>();
     for (const item of items) {
-      const key = item.category || "Allgemein";
+      const key = item.category || generalCategory;
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(item);
     }
     return Array.from(map.entries());
-  }, [query.data?.items]);
+  }, [query.data?.items, generalCategory]);
 
   // Gewichts-Bilanz über den Namens-Abgleich mit dem Inventar
   const weight = useMemo(
@@ -166,7 +175,7 @@ export default function PackListDetailPage() {
       <div className="container flex justify-center py-16">
         <Loader2
           className="h-6 w-6 animate-spin text-muted-foreground"
-          aria-label="Lädt"
+          aria-label={t.common.loading}
         />
       </div>
     );
@@ -176,11 +185,11 @@ export default function PackListDetailPage() {
     return (
       <div className="container py-6">
         <PageHeader
-          title="Packliste"
+          title={t.packListDetail.fallbackTitle}
           backHref="/packlisten"
-          backLabel="Packlisten"
+          backLabel={t.packListDetail.backLabel}
         />
-        <LoginPrompt feature="deine Packlisten" />
+        <LoginPrompt feature={t.packListDetail.loginFeature} />
       </div>
     );
   }
@@ -189,9 +198,9 @@ export default function PackListDetailPage() {
     return (
       <div className="container py-6">
         <PageHeader
-          title="Packliste nicht gefunden"
+          title={t.packListDetail.notFound}
           backHref="/packlisten"
-          backLabel="Packlisten"
+          backLabel={t.packListDetail.backLabel}
         />
       </div>
     );
@@ -205,15 +214,15 @@ export default function PackListDetailPage() {
     <div className="container max-w-3xl py-6">
       <PageHeader
         title={query.data.list.name}
-        subtitle={`${checkedCount} von ${items.length} Einträgen gepackt`}
+        subtitle={t.packListDetail.packedCount(checkedCount, items.length)}
         backHref="/packlisten"
-        backLabel="Packlisten"
+        backLabel={t.packListDetail.backLabel}
       />
 
       <div className="mb-2">
         <Progress
           value={progress}
-          aria-label={`Fortschritt: ${Math.round(progress)} Prozent gepackt`}
+          aria-label={t.packListDetail.progressAria(Math.round(progress))}
         />
       </div>
 
@@ -223,23 +232,26 @@ export default function PackListDetailPage() {
           <span className="flex items-center gap-1.5">
             <Scale className="h-4 w-4 text-primary" aria-hidden="true" />
             <span className="font-medium text-foreground">
-              {formatGrams(weight.totalGrams)}
+              {formatGrams(weight.totalGrams, lang)}
             </span>
-            gesamt
+            {t.packListDetail.weightTotal}
           </span>
           <span>
             <span className="font-medium text-foreground">
-              {formatGrams(weight.packedGrams)}
+              {formatGrams(weight.packedGrams, lang)}
             </span>{" "}
-            gepackt
+            {t.packListDetail.weightPacked}
           </span>
           <span>
-            {weight.totalVolumeLiters.toLocaleString("de-CH")} l Volumen
+            {t.packListDetail.volumeLine(
+              weight.totalVolumeLiters.toLocaleString(LOCALE_TAGS[lang])
+            )}
           </span>
           <span className="text-xs">
-            ({weight.matchedCount} von{" "}
-            {weight.matchedCount + weight.unmatchedCount} Einträgen im Inventar
-            gefunden)
+            {t.packListDetail.matchedInfo(
+              weight.matchedCount,
+              weight.matchedCount + weight.unmatchedCount
+            )}
           </span>
         </p>
       )}
@@ -255,8 +267,8 @@ export default function PackListDetailPage() {
         >
           <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
           {shareMutation.isPending
-            ? "Link wird erstellt …"
-            : "Liste per Link teilen"}
+            ? t.packListDetail.shareCreating
+            : t.packListDetail.shareButton}
         </Button>
         {shareUrl && (
           <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
@@ -271,15 +283,13 @@ export default function PackListDetailPage() {
               onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(shareUrl);
-                  toast.success("Link kopiert");
+                  toast.success(t.common.linkCopied);
                 } catch {
-                  toast.error(
-                    "Kopieren nicht möglich – bitte manuell markieren"
-                  );
+                  toast.error(t.common.copyFailed);
                 }
               }}
             >
-              Kopieren
+              {t.common.copy}
             </button>
           </div>
         )}
@@ -289,25 +299,23 @@ export default function PackListDetailPage() {
             <div className="shrink-0 rounded-md bg-white p-2 shadow-sm">
               <img
                 src={qrDataUrl}
-                alt={`QR-Code zum Teil-Link der Liste ${query.data.list.name}`}
+                alt={t.packListDetail.qrAlt(query.data.list.name)}
                 className="h-36 w-36"
               />
             </div>
             <div className="min-w-0">
               <p className="flex items-center gap-1.5 text-sm font-semibold">
                 <QrCode className="h-4 w-4 text-primary" aria-hidden="true" />
-                Direkt am Platz übergeben
+                {t.packListDetail.qrTitle}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Lass deine Mitreisenden den Code mit der Handy-Kamera scannen –
-                die Liste öffnet sich sofort, ganz ohne Tippen oder Anmeldung.
+                {t.packListDetail.qrText}
               </p>
             </div>
           </div>
         )}
         <p className="mt-1.5 text-xs text-muted-foreground">
-          Wer den Link hat, kann die Liste sehen und mit dir gemeinsam abhaken –
-          ganz ohne Anmeldung.
+          {t.packListDetail.shareHint}
         </p>
       </div>
 
@@ -322,7 +330,8 @@ export default function PackListDetailPage() {
             items: [
               {
                 name: newItem.trim(),
-                category: newCategory.trim() || "Eigene",
+                category:
+                  newCategory.trim() || t.packListDetail.defaultCategory,
                 quantity: 1,
               },
             ],
@@ -330,22 +339,22 @@ export default function PackListDetailPage() {
         }}
       >
         <Input
-          placeholder="Eintrag hinzufügen …"
+          placeholder={t.packListDetail.addPlaceholder}
           value={newItem}
           onChange={e => setNewItem(e.target.value)}
-          aria-label="Name des neuen Eintrags"
+          aria-label={t.packListDetail.addNameAria}
         />
         <Input
-          placeholder="Kategorie"
+          placeholder={t.packListDetail.categoryPlaceholder}
           className="hidden w-40 sm:block"
           value={newCategory}
           onChange={e => setNewCategory(e.target.value)}
-          aria-label="Kategorie des neuen Eintrags"
+          aria-label={t.packListDetail.categoryAria}
         />
         <Button
           type="submit"
           disabled={addMutation.isPending || !newItem.trim()}
-          aria-label="Eintrag hinzufügen"
+          aria-label={t.packListDetail.addAria}
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
         </Button>
@@ -356,7 +365,7 @@ export default function PackListDetailPage() {
         <div className="mb-6">
           <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
             <Package className="h-4 w-4 text-primary" aria-hidden="true" />
-            Aus deinem Inventar übernehmen
+            {t.packListDetail.inventoryTitle}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {inventorySuggestions.slice(0, 20).map(inv => (
@@ -373,20 +382,19 @@ export default function PackListDetailPage() {
                   })
                 }
                 className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-                aria-label={`${inv.name} aus dem Inventar zur Liste hinzufügen`}
+                aria-label={t.packListDetail.inventoryAddAria(inv.name)}
               >
                 + {inv.name}
                 {inv.weightGrams > 0 && (
                   <span className="ml-1 opacity-70">
-                    ({formatGrams(inv.weightGrams)})
+                    ({formatGrams(inv.weightGrams, lang)})
                   </span>
                 )}
               </button>
             ))}
           </div>
           <p className="mt-1.5 text-xs text-muted-foreground">
-            Einträge mit Inventar-Treffer zählen automatisch zur Gewichts-Bilanz
-            oben.
+            {t.packListDetail.inventoryHint}
           </p>
         </div>
       )}
@@ -400,10 +408,10 @@ export default function PackListDetailPage() {
             size="sm"
             onClick={() => addAddOn(a.id)}
             disabled={addMutation.isPending}
-            aria-label={`Paket ${a.label} zur Liste hinzufügen`}
+            aria-label={t.packListDetail.addOnAria(pick(a.label, lang))}
           >
             <Plus className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
-            {a.label}
+            {pick(a.label, lang)}
           </Button>
         ))}
       </div>
@@ -432,7 +440,11 @@ export default function PackListDetailPage() {
                       checked: checked === true,
                     })
                   }
-                  aria-label={`${item.name} ${item.checked ? "als ungepackt" : "als gepackt"} markieren`}
+                  aria-label={
+                    item.checked
+                      ? t.packListDetail.markUnpacked(item.name)
+                      : t.packListDetail.markPacked(item.name)
+                  }
                 />
                 <label
                   htmlFor={`item-${item.id}`}
@@ -453,7 +465,7 @@ export default function PackListDetailPage() {
                   size="icon"
                   className="h-7 w-7 text-muted-foreground/50 hover:text-destructive"
                   onClick={() => deleteMutation.mutate({ id: item.id })}
-                  aria-label={`${item.name} löschen`}
+                  aria-label={t.packListDetail.deleteItemAria(item.name)}
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 </Button>
@@ -465,7 +477,7 @@ export default function PackListDetailPage() {
 
       {items.length === 0 && (
         <p className="py-8 text-center text-muted-foreground">
-          Diese Liste ist noch leer – füge oben deinen ersten Eintrag hinzu.
+          {t.packListDetail.emptyList}
         </p>
       )}
     </div>

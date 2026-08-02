@@ -11,8 +11,8 @@ import {
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useT } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { analyzePack, transportProfiles } from "@shared/calculators";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,7 @@ const profileIcons: Record<
 
 export default function PackOptimizerPage() {
   const { isAuthenticated, loading } = useAuth();
+  const t = useT();
   const query = trpc.inventory.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -53,7 +54,7 @@ export default function PackOptimizerPage() {
       <div className="container flex justify-center py-16">
         <Loader2
           className="h-6 w-6 animate-spin text-muted-foreground"
-          aria-label="Lädt"
+          aria-label={t.common.loading}
         />
       </div>
     );
@@ -63,10 +64,10 @@ export default function PackOptimizerPage() {
     return (
       <div className="container py-6">
         <PageHeader
-          title="Pack-Optimierung"
-          subtitle="Gewicht und Packmass deiner Ausrüstung im Blick – abgestimmt auf dein Fahrzeug."
+          title={t.packOptimizer.title}
+          subtitle={t.packOptimizer.subtitleLoggedOut}
         />
-        <LoginPrompt feature="deine Pack-Analyse" />
+        <LoginPrompt feature={t.packOptimizer.loginFeature} />
       </div>
     );
   }
@@ -81,16 +82,18 @@ export default function PackOptimizerPage() {
   return (
     <div className="container max-w-3xl py-6">
       <PageHeader
-        title="Pack-Optimierung"
-        subtitle="Basiert auf deinem Inventar: Gewicht und Volumen im Vergleich zur Kapazität deines Transports."
+        title={t.packOptimizer.title}
+        subtitle={t.packOptimizer.subtitle}
       />
 
       {/* Transportprofil */}
-      <h2 className="mb-3 font-serif text-lg font-semibold">Transportmittel</h2>
+      <h2 className="mb-3 font-serif text-lg font-semibold">
+        {t.packOptimizer.transportTitle}
+      </h2>
       <div
         className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4"
         role="group"
-        aria-label="Transportmittel wählen"
+        aria-label={t.packOptimizer.transportGroupAria}
       >
         {transportProfiles.map(p => {
           const Icon = profileIcons[p.id] ?? Car;
@@ -122,7 +125,7 @@ export default function PackOptimizerPage() {
         <CardContent className="space-y-5 pt-6">
           <div>
             <div className="mb-1.5 flex items-center justify-between text-sm">
-              <span className="font-medium">Gewicht</span>
+              <span className="font-medium">{t.packOptimizer.weight}</span>
               <span className="font-mono">
                 {analysis.totalWeightKg.toFixed(1)} / {profile.maxWeightKg} kg
               </span>
@@ -133,7 +136,9 @@ export default function PackOptimizerPage() {
               aria-valuenow={Math.round(analysis.weightPercent)}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-label={`Gewichtsauslastung ${Math.round(analysis.weightPercent)} Prozent`}
+              aria-label={t.packOptimizer.weightPercentAria(
+                Math.round(analysis.weightPercent)
+              )}
             >
               <div
                 className={cn(
@@ -146,7 +151,7 @@ export default function PackOptimizerPage() {
           </div>
           <div>
             <div className="mb-1.5 flex items-center justify-between text-sm">
-              <span className="font-medium">Volumen</span>
+              <span className="font-medium">{t.packOptimizer.volume}</span>
               <span className="font-mono">
                 {analysis.totalVolumeLiters.toFixed(0)} /{" "}
                 {profile.maxVolumeLiters} l
@@ -158,7 +163,9 @@ export default function PackOptimizerPage() {
               aria-valuenow={Math.round(analysis.volumePercent)}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-label={`Volumenauslastung ${Math.round(analysis.volumePercent)} Prozent`}
+              aria-label={t.packOptimizer.volumePercentAria(
+                Math.round(analysis.volumePercent)
+              )}
             >
               <div
                 className={cn(
@@ -175,7 +182,7 @@ export default function PackOptimizerPage() {
 
       {/* Hinweise */}
       <h2 className="mb-3 font-serif text-lg font-semibold">
-        Optimierungshinweise
+        {t.packOptimizer.hintsTitle}
       </h2>
       <ul className="mb-6 space-y-2">
         {analysis.hints.map(hint => (
@@ -199,7 +206,7 @@ export default function PackOptimizerPage() {
             <CardContent className="pt-6">
               <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 <Scale className="h-4 w-4" aria-hidden="true" />
-                Schwerste Positionen
+                {t.packOptimizer.heaviestTitle}
               </h3>
               <ol className="space-y-2 text-sm">
                 {analysis.heaviestItems.map(item => (
@@ -221,7 +228,7 @@ export default function PackOptimizerPage() {
             <CardContent className="pt-6">
               <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 <Backpack className="h-4 w-4" aria-hidden="true" />
-                Grösste Positionen
+                {t.packOptimizer.bulkiestTitle}
               </h3>
               <ol className="space-y-2 text-sm">
                 {analysis.bulkiestItems.map(item => (
@@ -243,14 +250,14 @@ export default function PackOptimizerPage() {
 
       {(query.data ?? []).length === 0 && (
         <p className="mt-4 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          Dein Inventar ist noch leer.{" "}
+          {t.packOptimizer.emptyPrefix}{" "}
           <Link
             href="/inventar"
             className="font-medium text-primary hover:underline"
           >
-            Erfasse zuerst deine Ausrüstung
+            {t.packOptimizer.emptyLink}
           </Link>{" "}
-          mit Gewicht und Volumen.
+          {t.packOptimizer.emptySuffix}
         </p>
       )}
     </div>

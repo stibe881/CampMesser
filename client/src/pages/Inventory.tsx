@@ -21,19 +21,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useI18n } from "@/i18n";
+import { l4, pick, type L4 } from "@shared/i18n";
 import { trpc } from "@/lib/trpc";
 
-export const inventoryCategories = [
-  "Schlafen",
-  "Küche",
-  "Kleidung",
-  "Werkzeug",
-  "Licht & Energie",
-  "Sicherheit",
-  "Hygiene",
-  "Kinder",
-  "Komfort",
-  "Allgemein",
+/**
+ * Kategorien fürs Inventar – gespeichert wird die Fassung in der aktuellen
+ * Sprache (DB-Inhalte bleiben einsprachig, wie bei den Packlisten-Vorlagen).
+ */
+export const inventoryCategories: L4[] = [
+  l4("Schlafen", "Sommeil", "Dormire", "Sleeping"),
+  l4("Küche", "Cuisine", "Cucina", "Kitchen"),
+  l4("Kleidung", "Vêtements", "Abbigliamento", "Clothing"),
+  l4("Werkzeug", "Outils", "Attrezzi", "Tools"),
+  l4("Licht & Energie", "Lumière & énergie", "Luce & energia", "Light & power"),
+  l4("Sicherheit", "Sécurité", "Sicurezza", "Safety"),
+  l4("Hygiene", "Hygiène", "Igiene", "Hygiene"),
+  l4("Kinder", "Enfants", "Bambini", "Kids"),
+  l4("Komfort", "Confort", "Comfort", "Comfort"),
+  l4("Allgemein", "Général", "Generale", "General"),
 ];
 
 interface FormState {
@@ -45,38 +51,43 @@ interface FormState {
   quantity: string;
 }
 
-const emptyForm: FormState = {
-  name: "",
-  category: "Allgemein",
-  weightGrams: "",
-  volumeLiters: "",
-  quantity: "1",
-};
-
 export default function InventoryPage() {
   const { isAuthenticated, loading } = useAuth();
+  const { lang, t } = useI18n();
   const utils = trpc.useUtils();
   const query = trpc.inventory.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const categoryOptions = useMemo(
+    () => inventoryCategories.map(c => pick(c, lang)),
+    [lang]
+  );
+  const emptyForm: FormState = {
+    name: "",
+    category: pick(inventoryCategories[inventoryCategories.length - 1], lang),
+    weightGrams: "",
+    volumeLiters: "",
+    quantity: "1",
+  };
   const [form, setForm] = useState<FormState>(emptyForm);
 
   const addMutation = trpc.inventory.add.useMutation({
     onSuccess: () => {
       utils.inventory.list.invalidate();
       setDialogOpen(false);
-      toast.success("Ausrüstung erfasst");
+      toast.success(t.inventory.created);
     },
-    onError: () => toast.error("Speichern fehlgeschlagen"),
+    onError: () => toast.error(t.common.saveFailed),
   });
   const updateMutation = trpc.inventory.update.useMutation({
     onSuccess: () => {
       utils.inventory.list.invalidate();
       setDialogOpen(false);
-      toast.success("Änderungen gespeichert");
+      toast.success(t.inventory.updated);
     },
-    onError: () => toast.error("Speichern fehlgeschlagen"),
+    onError: () => toast.error(t.common.saveFailed),
   });
   const removeMutation = trpc.inventory.remove.useMutation({
     onSuccess: () => utils.inventory.list.invalidate(),
@@ -120,7 +131,7 @@ export default function InventoryPage() {
       quantity: Math.max(1, Math.round(Number(form.quantity) || 1)),
     };
     if (!data.name) {
-      toast.error("Bitte einen Namen eingeben");
+      toast.error(t.inventory.nameRequired);
       return;
     }
     if (form.id) {
@@ -135,7 +146,7 @@ export default function InventoryPage() {
       <div className="container flex justify-center py-16">
         <Loader2
           className="h-6 w-6 animate-spin text-muted-foreground"
-          aria-label="Lädt"
+          aria-label={t.common.loading}
         />
       </div>
     );
@@ -145,71 +156,83 @@ export default function InventoryPage() {
     return (
       <div className="container py-6">
         <PageHeader
-          title="Inventar"
-          subtitle="Erfasse dein Campingmaterial mit Gewicht und Volumen."
+          title={t.inventory.title}
+          subtitle={t.inventory.subtitleLoggedOut}
         />
-        <LoginPrompt feature="dein Inventar" />
+        <LoginPrompt feature={t.inventory.loginFeature} />
       </div>
     );
   }
 
   const items = query.data ?? [];
+  // Beim Bearbeiten kann eine (z. B. in anderer Sprache) gespeicherte
+  // Kategorie auftauchen, die nicht in der Liste steht – als Option ergänzen.
+  const selectOptions = categoryOptions.includes(form.category)
+    ? categoryOptions
+    : form.category
+      ? [form.category, ...categoryOptions]
+      : categoryOptions;
 
   return (
     <div className="container py-6">
-      <PageHeader
-        title="Inventar"
-        subtitle="Erfasse dein Campingmaterial – Gewicht und Volumen fliessen direkt in die Pack-Optimierung ein."
-      />
+      <PageHeader title={t.inventory.title} subtitle={t.inventory.subtitle} />
 
       {/* Übersicht */}
       <div className="mb-6 grid grid-cols-3 gap-3">
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <p className="text-2xl font-bold">{totals.count}</p>
-          <p className="text-xs text-muted-foreground">Gegenstände</p>
+          <p className="text-xs text-muted-foreground">
+            {t.inventory.itemsCount}
+          </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <p className="text-2xl font-bold">{totals.weightKg.toFixed(1)} kg</p>
-          <p className="text-xs text-muted-foreground">Gesamtgewicht</p>
+          <p className="text-xs text-muted-foreground">
+            {t.inventory.totalWeight}
+          </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <p className="text-2xl font-bold">{totals.volume.toFixed(0)} l</p>
-          <p className="text-xs text-muted-foreground">Gesamtvolumen</p>
+          <p className="text-xs text-muted-foreground">
+            {t.inventory.totalVolume}
+          </p>
         </div>
       </div>
 
       <Button
         className="mb-6"
         onClick={openNew}
-        aria-label="Neue Ausrüstung erfassen"
+        aria-label={t.inventory.addAria}
       >
         <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-        Ausrüstung erfassen
+        {t.inventory.addButton}
       </Button>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {form.id ? "Ausrüstung bearbeiten" : "Neue Ausrüstung"}
+              {form.id
+                ? t.inventory.dialogTitleEdit
+                : t.inventory.dialogTitleNew}
             </DialogTitle>
             <DialogDescription>
-              Gewicht und Volumen helfen später bei der Pack-Optimierung.
+              {t.inventory.dialogDescription}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="inv-name">Name</Label>
+              <Label htmlFor="inv-name">{t.inventory.nameLabel}</Label>
               <Input
                 id="inv-name"
                 className="mt-1.5"
-                placeholder="z. B. Schlafsack Komfort -5 °C"
+                placeholder={t.inventory.namePlaceholder}
                 value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
               />
             </div>
             <div>
-              <Label htmlFor="inv-category">Kategorie</Label>
+              <Label htmlFor="inv-category">{t.inventory.categoryLabel}</Label>
               <Select
                 value={form.category}
                 onValueChange={v => setForm(f => ({ ...f, category: v }))}
@@ -217,12 +240,12 @@ export default function InventoryPage() {
                 <SelectTrigger
                   id="inv-category"
                   className="mt-1.5"
-                  aria-label="Kategorie wählen"
+                  aria-label={t.inventory.categoryAria}
                 >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {inventoryCategories.map(c => (
+                  {selectOptions.map(c => (
                     <SelectItem key={c} value={c}>
                       {c}
                     </SelectItem>
@@ -232,7 +255,7 @@ export default function InventoryPage() {
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <Label htmlFor="inv-weight">Gewicht (g)</Label>
+                <Label htmlFor="inv-weight">{t.inventory.weightLabel}</Label>
                 <Input
                   id="inv-weight"
                   className="mt-1.5"
@@ -246,7 +269,7 @@ export default function InventoryPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="inv-volume">Volumen (l)</Label>
+                <Label htmlFor="inv-volume">{t.inventory.volumeLabel}</Label>
                 <Input
                   id="inv-volume"
                   className="mt-1.5"
@@ -261,7 +284,9 @@ export default function InventoryPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="inv-quantity">Anzahl</Label>
+                <Label htmlFor="inv-quantity">
+                  {t.inventory.quantityLabel}
+                </Label>
                 <Input
                   id="inv-quantity"
                   className="mt-1.5"
@@ -285,7 +310,7 @@ export default function InventoryPage() {
                   aria-hidden="true"
                 />
               )}
-              {form.id ? "Speichern" : "Erfassen"}
+              {form.id ? t.common.save : t.inventory.submitNew}
             </Button>
           </div>
         </DialogContent>
@@ -295,7 +320,7 @@ export default function InventoryPage() {
         <div className="flex justify-center py-10">
           <Loader2
             className="h-6 w-6 animate-spin text-muted-foreground"
-            aria-label="Lädt"
+            aria-label={t.common.loading}
           />
         </div>
       ) : items.length > 0 ? (
@@ -303,17 +328,22 @@ export default function InventoryPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50 text-left">
-                <th className="px-4 py-2.5 font-semibold">Name</th>
+                <th className="px-4 py-2.5 font-semibold">
+                  {t.inventory.tableName}
+                </th>
                 <th className="hidden px-4 py-2.5 font-semibold sm:table-cell">
-                  Kategorie
+                  {t.inventory.tableCategory}
                 </th>
                 <th className="px-4 py-2.5 text-right font-semibold">
-                  Gewicht
+                  {t.inventory.tableWeight}
                 </th>
                 <th className="hidden px-4 py-2.5 text-right font-semibold sm:table-cell">
-                  Volumen
+                  {t.inventory.tableVolume}
                 </th>
-                <th className="px-2 py-2.5" aria-label="Aktionen"></th>
+                <th
+                  className="px-2 py-2.5"
+                  aria-label={t.inventory.actionsAria}
+                ></th>
               </tr>
             </thead>
             <tbody>
@@ -351,7 +381,7 @@ export default function InventoryPage() {
                         size="icon"
                         className="h-8 w-8 text-muted-foreground"
                         onClick={() => openEdit(item)}
-                        aria-label={`${item.name} bearbeiten`}
+                        aria-label={t.inventory.editAria(item.name)}
                       >
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                       </Button>
@@ -360,11 +390,11 @@ export default function InventoryPage() {
                         size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
                         onClick={() => {
-                          if (confirm(`«${item.name}» wirklich löschen?`)) {
+                          if (confirm(t.inventory.deleteConfirm(item.name))) {
                             removeMutation.mutate({ id: item.id });
                           }
                         }}
-                        aria-label={`${item.name} löschen`}
+                        aria-label={t.inventory.deleteAria(item.name)}
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                       </Button>
@@ -381,9 +411,9 @@ export default function InventoryPage() {
             className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
             aria-hidden="true"
           />
-          <p className="font-medium">Noch keine Ausrüstung erfasst</p>
+          <p className="font-medium">{t.inventory.emptyTitle}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Beginne mit den grossen Teilen: Zelt, Schlafsack, Isomatte.
+            {t.inventory.emptyText}
           </p>
         </div>
       )}

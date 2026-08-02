@@ -24,7 +24,7 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 - [x] AppShell (Navigation, Gruppen, Konto-Menü)
 - [x] Home (Hero, Widgets, Suche, Sortier-Modus)
 - [x] Login, Profile
-- [ ] PackLists, PackListDetail, SharedPackList, PackOptimizer, Inventory
+- [x] PackLists, PackListDetail, SharedPackList, PackOptimizer, Inventory
 - [ ] Sos, Weather, SunCompass, Energy, Water, Drying, Quiet, Lawn, Level
 - [ ] Spots, SpotDetail, SharedSpot, Trips
 - [ ] FirstAid, Knots (+Quiz), Nature, Recipes (+Editor), Food
@@ -40,7 +40,7 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 - [ ] data/recipes.ts (18 Rezepte inkl. Zutaten/Schritte)
 - [ ] data/familyActivities.ts (6 Jagden, Quizze)
 - [ ] data/emergency.ts
-- [ ] shared/packTemplates.ts (Szenarien + Einträge)
+- [x] shared/packTemplates.ts (Szenarien + Einträge)
 
 ### Shared-Logik mit Nutzertexten (lang-Parameter)
 

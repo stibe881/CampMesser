@@ -41,6 +41,8 @@ import {
   type ScavengerHunt,
 } from "@/data/familyActivities";
 import { familyAddOns } from "@shared/packTemplates";
+import { pick } from "@shared/i18n";
+import { useI18n } from "@/i18n";
 import { MAX_STATIONS, parseHuntStations } from "@shared/hunts";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -700,6 +702,7 @@ function QuizDialog({
 }
 
 export default function FamilyPage() {
+  const { lang } = useI18n();
   const [activeHunt, setActiveHunt] = useState<ScavengerHunt | null>(null);
   const [activeQuiz, setActiveQuiz] = useState<NatureQuiz | null>(null);
   const { isAuthenticated } = useAuth();
@@ -741,19 +744,19 @@ export default function FamilyPage() {
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                   <Baby className="h-4.5 w-4.5" aria-hidden="true" />
                 </span>
-                <p className="font-semibold">{addOn.label}</p>
+                <p className="font-semibold">{pick(addOn.label, lang)}</p>
               </div>
               <p className="mb-3 text-sm text-muted-foreground">
-                {addOn.description}
+                {pick(addOn.description, lang)}
               </p>
               <ul className="mb-4 space-y-1 text-sm">
                 {addOn.items.slice(0, 4).map(item => (
-                  <li key={item.name} className="flex gap-2">
+                  <li key={item.name.de} className="flex gap-2">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
                       aria-hidden="true"
                     />
-                    {item.name}
+                    {pick(item.name, lang)}
                   </li>
                 ))}
                 {addOn.items.length > 4 && (
