@@ -62,7 +62,7 @@ export const en: Translation = {
     tripDaysLeft: n => `${n} days to go`,
     tripPacked: (name, checked, total, pct) =>
       `${name}: ${checked} of ${total} packed (${pct} %)`,
-    tripPlannedNote: "Planned stay in the travel journal",
+    tripPlannedNote: "Planned stay in “My trips”",
     weatherAria: (temp, label) =>
       `Current weather: ${temp} degrees, ${label} – open the weather module`,
     weatherNoAlerts: "No severe weather warnings at your location",
@@ -1085,7 +1085,7 @@ export const en: Translation = {
   mapView: {
     title: "Map of pitches & trips",
     subtitle:
-      "All your saved pitches at a glance – with overnight stays from the travel journal. The map needs an internet connection.",
+      "All your saved pitches at a glance – with overnight stays from “My trips”. The map needs an internet connection.",
     loginFeature: "your pitch map",
     mapAria: "Map with your saved pitches",
     empty:
@@ -1093,8 +1093,8 @@ export const en: Translation = {
     emptyCta: "Go to favourite pitches",
     nightsHere: (n: number) =>
       n === 1
-        ? "1 overnight stay according to the journal"
-        : `${n} overnight stays according to the journal`,
+        ? "1 overnight stay according to “My trips”"
+        : `${n} overnight stays according to “My trips”`,
     toDossier: "Open dossier →",
     legend: (n: number) =>
       n === 1 ? "1 saved pitch on the map" : `${n} saved pitches on the map`,
@@ -1129,11 +1129,11 @@ export const en: Translation = {
     staysTitle: "Your stays here",
     nightsTotalLabel: n => `${n === 1 ? "night" : "nights"} in total`,
     staysCountLabel: n => (n === 1 ? "stay" : "stays"),
-    staysEmpty: "No stay at this pitch in the diary yet.",
-    toDiary: "To the travel diary",
+    staysEmpty: "No stay at this pitch in “My trips” yet.",
+    toDiary: "Go to “My trips”",
     shareTitle: "Share pitch",
     shareDesc:
-      "Anyone with the link sees this pitch's name, coordinates, weather and sun times – without signing in and read-only. Your notes, obstacles and diary entries stay private.",
+      "Anyone with the link sees this pitch's name, coordinates, weather and sun times – without signing in and read-only. Your notes, obstacles and trip entries stay private.",
     stopShare: "Stop sharing",
     stopShared: "Sharing stopped – the link is no longer valid",
     shareLinkCopied: "Share link copied",
@@ -1267,9 +1267,9 @@ export const en: Translation = {
     footer: "Shared with CampMesser – the Swiss army knife for tent camping.",
   },
   trips: {
-    title: "Travel diary",
+    title: "My trips",
     subtitle: "Record your camping stays: places, nights and memories.",
-    loginFeature: "your travel diary",
+    loginFeature: "your trips",
     packProgress: (name, checked, total) =>
       `${name}: ${checked} of ${total} packed`,
     entrySaved: "Entry saved",
@@ -1713,7 +1713,7 @@ export const en: Translation = {
     notFoundTitle: "Stay not found",
     notFoundText:
       "This stay does not exist or does not belong to your account.",
-    backToTrips: "Go to travel journal",
+    backToTrips: "Go to “My trips”",
     daysCount: (n: number) => (n === 1 ? "1 day" : `${n} days`),
     slotEmpty: "Nothing planned yet",
     planSlotAria: (meal: string, day: string) => `Plan ${meal} on ${day}`,
@@ -1945,7 +1945,7 @@ export const en: Translation = {
     subtitle: "Get going right away – no detour via the home page.",
     searchPlaceholder: "Search for an action …",
     noResults: "No action found.",
-    newTrip: "New diary entry",
+    newTrip: "New trip entry",
     newPackList: "New packing list",
     recipeSearch: "Find a recipe",
     sos: "SOS & emergency",

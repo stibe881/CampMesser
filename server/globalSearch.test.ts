@@ -29,8 +29,9 @@ describe("searchKnowledge", () => {
   it("findet die Werkzeug-Module selbst", () => {
     const level = searchKnowledge("wasserwaage");
     expect(level[0]).toMatchObject({ module: "module", path: "/wasserwaage" });
-    const diary = searchKnowledge("tagebuch");
-    expect(diary.some(r => r.path === "/tagebuch")).toBe(true);
+    // Modul heisst inzwischen «Meine Reisen» (Route /tagebuch bleibt)
+    const trips = searchKnowledge("reisen");
+    expect(trips.some(r => r.path === "/tagebuch")).toBe(true);
   });
 
   it("faltet Umlaute: «kase» findet dieselben Treffer wie «käse»", () => {

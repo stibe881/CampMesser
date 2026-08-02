@@ -2,6 +2,8 @@
 
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 16)
 
+- [x] Modul «Reise-Tagebuch» in «Meine Reisen» umbenannt (FR «Mes voyages», IT «I miei viaggi», EN «My trips»): Kachel-Titel in client/src/data/modules.ts, Seitentitel/PageHeader (trips.title/loginFeature) sowie alle Stellen, an denen «Tagebuch» als Modulname auftaucht, in allen 4 Wörterbüchern (home.tripPlannedNote, mapView.subtitle/nightsHere, spots.staysEmpty/toDiary/shareDesc, menuPlan.backToTrips, quickActions.newTrip → «Neuer Reise-Eintrag»); Route /tagebuch und alle internen Schlüssel unverändert; server/push.ts hat keine Nutzertexte mit «Tagebuch» (nur Kommentare, dort mit umformuliert), manifest.json enthält kein «Tagebuch»
+
 - [x] Tagebuch-Einträge nachträglich bearbeiten (Bugreport «kann man nach dem Speichern nicht mehr bearbeiten»): tRPC trips.update {id, spotId, packListId, location, title, notes, startDate, endDate, rating} mit derselben Validierung wie add (Datums-Reihenfolge, Ort-oder-Spot-Pflicht, Besitz-Prüfung von Eintrag/Zeltplatz/Packliste) via neuem db.updateTripLog; ändern sich Zeitraum, Freitext-Ort oder verknüpfter Zeltplatz, wird weatherJson auf null zurückgesetzt – TripWeatherArchive (Trips.tsx) holt und speichert das Wetterarchiv beim nächsten Besuch automatisch neu; UI: Stift-Knopf an geplanten UND vergangenen Einträgen lädt den Eintrag vorausgefüllt ins bestehende Formular (Bearbeiten-Modus mit Titel «Eintrag bearbeiten», «Änderungen speichern» + «Abbrechen», scrollt zum Formular), Speichern ruft trips.update; 5 neue trips-Schlüssel in DE/FR/IT/EN
 
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 15)

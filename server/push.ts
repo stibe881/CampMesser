@@ -205,7 +205,7 @@ export interface PushCheckResult {
   sent: number;
   /** Verschickte MHD-Erinnerungen (Kühlbox) */
   foodSent: number;
-  /** Verschickte Trip-Countdowns (Reise-Tagebuch) */
+  /** Verschickte Trip-Countdowns (Modul «Meine Reisen») */
   tripSent: number;
   /** Verschickte Zelt-Trocknungs-Erinnerungen (Tag nach der Heimkehr) */
   drySent: number;
@@ -614,7 +614,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     if (alert) foodAlertByUser.set(userId, alert);
   }
 
-  // Reise-Tagebuch: Trip-Countdowns pro Nutzer*in vorbereiten
+  // Meine Reisen: Trip-Countdowns pro Nutzer*in vorbereiten
   const allTrips = await db
     .select()
     .from(tripLogs)
@@ -918,7 +918,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       }
     }
 
-    // ── Reise-Tagebuch: Trip-Countdown (max. eine Nachricht pro Trip) ──
+    // ── Meine Reisen: Trip-Countdown (max. eine Nachricht pro Trip) ──
     const tripAlert = subscriptionWants(sub, "trip")
       ? tripAlertByUser.get(sub.userId)
       : undefined;

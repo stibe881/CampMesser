@@ -169,12 +169,7 @@ export const modules: Module[] = [
   },
   {
     path: "/tagebuch",
-    title: l4(
-      "Reise-Tagebuch",
-      "Journal de voyage",
-      "Diario di viaggio",
-      "Travel journal"
-    ),
+    title: l4("Meine Reisen", "Mes voyages", "I miei viaggi", "My trips"),
     description: l4(
       "Aufenthalte festhalten, Nächte und Lieblingsplätze zählen",
       "Note tes séjours, compte les nuits et tes lieux préférés",

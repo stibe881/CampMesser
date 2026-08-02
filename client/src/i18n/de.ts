@@ -63,7 +63,7 @@ export const de = {
     tripDaysLeft: (n: number) => `Noch ${n} Tage`,
     tripPacked: (name: string, checked: number, total: number, pct: number) =>
       `${name}: ${checked} von ${total} gepackt (${pct} %)`,
-    tripPlannedNote: "Geplanter Aufenthalt im Reise-Tagebuch",
+    tripPlannedNote: "Geplanter Aufenthalt in «Meine Reisen»",
     weatherAria: (temp: number, label: string) =>
       `Aktuelles Wetter: ${temp} Grad, ${label} – zum Wetter-Modul`,
     weatherNoAlerts: "Keine Unwetterwarnungen an deinem Standort",
@@ -1116,7 +1116,7 @@ export const de = {
   mapView: {
     title: "Karte der Plätze & Reisen",
     subtitle:
-      "Alle gespeicherten Zeltplätze auf einen Blick – mit den Übernachtungen aus dem Reise-Tagebuch. Die Karte braucht eine Internetverbindung.",
+      "Alle gespeicherten Zeltplätze auf einen Blick – mit den Übernachtungen aus «Meine Reisen». Die Karte braucht eine Internetverbindung.",
     loginFeature: "deine Zeltplatz-Karte",
     mapAria: "Karte mit deinen gespeicherten Zeltplätzen",
     empty:
@@ -1124,8 +1124,8 @@ export const de = {
     emptyCta: "Zu den Zeltplatz-Favoriten",
     nightsHere: (n: number) =>
       n === 1
-        ? "1 Übernachtung laut Tagebuch"
-        : `${n} Übernachtungen laut Tagebuch`,
+        ? "1 Übernachtung laut «Meine Reisen»"
+        : `${n} Übernachtungen laut «Meine Reisen»`,
     toDossier: "Zum Dossier →",
     legend: (n: number) =>
       n === 1
@@ -1163,11 +1163,11 @@ export const de = {
     nightsTotalLabel: (n: number) => `${n === 1 ? "Nacht" : "Nächte"} gesamt`,
     staysCountLabel: (n: number): string =>
       n === 1 ? "Aufenthalt" : "Aufenthalte",
-    staysEmpty: "Noch kein Aufenthalt an diesem Platz im Tagebuch.",
-    toDiary: "Zum Reise-Tagebuch",
+    staysEmpty: "Noch kein Aufenthalt an diesem Platz in «Meine Reisen».",
+    toDiary: "Zu «Meine Reisen»",
     shareTitle: "Platz teilen",
     shareDesc:
-      "Wer den Link hat, sieht Name, Koordinaten, Wetter und Sonnenzeiten dieses Platzes – ohne Anmeldung und nur lesend. Deine Notizen, Hindernisse und Tagebuch-Einträge bleiben privat.",
+      "Wer den Link hat, sieht Name, Koordinaten, Wetter und Sonnenzeiten dieses Platzes – ohne Anmeldung und nur lesend. Deine Notizen, Hindernisse und Reise-Einträge bleiben privat.",
     stopShare: "Teilen beenden",
     stopShared: "Teilen beendet – der Link ist ungültig",
     shareLinkCopied: "Teil-Link kopiert",
@@ -1307,10 +1307,10 @@ export const de = {
       "Geteilt mit CampMesser – dem Schweizer Taschenmesser fürs Zelt-Camping.",
   },
   trips: {
-    title: "Reise-Tagebuch",
+    title: "Meine Reisen",
     subtitle:
       "Deine Camping-Aufenthalte festhalten: Orte, Nächte und Erinnerungen.",
-    loginFeature: "dein Reise-Tagebuch",
+    loginFeature: "deine Reisen",
     packProgress: (name: string, checked: number, total: number) =>
       `${name}: ${checked} von ${total} gepackt`,
     entrySaved: "Eintrag gespeichert",
@@ -1770,7 +1770,7 @@ export const de = {
     notFoundTitle: "Aufenthalt nicht gefunden",
     notFoundText:
       "Dieser Aufenthalt existiert nicht oder gehört nicht zu deinem Konto.",
-    backToTrips: "Zum Reise-Tagebuch",
+    backToTrips: "Zu «Meine Reisen»",
     daysCount: (n: number) => (n === 1 ? "1 Tag" : `${n} Tage`),
     slotEmpty: "Noch nichts geplant",
     planSlotAria: (meal: string, day: string) => `${meal} am ${day} planen`,
@@ -2003,7 +2003,7 @@ export const de = {
     subtitle: "Direkt loslegen – ohne Umweg über die Startseite.",
     searchPlaceholder: "Aktion suchen …",
     noResults: "Keine Aktion gefunden.",
-    newTrip: "Neuer Tagebuch-Eintrag",
+    newTrip: "Neuer Reise-Eintrag",
     newPackList: "Neue Packliste",
     recipeSearch: "Rezept suchen",
     sos: "SOS & Notfall",

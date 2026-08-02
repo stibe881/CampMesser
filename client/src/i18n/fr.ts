@@ -62,7 +62,7 @@ export const fr: Translation = {
     tripDaysLeft: n => `Encore ${n} jours`,
     tripPacked: (name, checked, total, pct) =>
       `${name} : ${checked} sur ${total} emballés (${pct} %)`,
-    tripPlannedNote: "Séjour planifié dans le journal de voyage",
+    tripPlannedNote: "Séjour planifié dans «Mes voyages»",
     weatherAria: (temp, label) =>
       `Météo actuelle : ${temp} degrés, ${label} – vers le module météo`,
     weatherNoAlerts: "Aucune alerte d'intempéries à ton emplacement",
@@ -1119,14 +1119,16 @@ export const fr: Translation = {
   mapView: {
     title: "Carte des emplacements & voyages",
     subtitle:
-      "Tous tes emplacements enregistrés en un coup d'œil – avec les nuitées du journal de voyage. La carte nécessite une connexion Internet.",
+      "Tous tes emplacements enregistrés en un coup d'œil – avec les nuitées de «Mes voyages». La carte nécessite une connexion Internet.",
     loginFeature: "ta carte des emplacements",
     mapAria: "Carte avec tes emplacements enregistrés",
     empty:
       "Aucun emplacement sur la carte pour l'instant. Enregistre d'abord un emplacement favori, il apparaîtra ici comme épingle.",
     emptyCta: "Vers les emplacements favoris",
     nightsHere: (n: number) =>
-      n === 1 ? "1 nuitée selon le journal" : `${n} nuitées selon le journal`,
+      n === 1
+        ? "1 nuitée selon «Mes voyages»"
+        : `${n} nuitées selon «Mes voyages»`,
     toDossier: "Vers le dossier →",
     legend: (n: number) =>
       n === 1
@@ -1163,11 +1165,11 @@ export const fr: Translation = {
     staysTitle: "Tes séjours ici",
     nightsTotalLabel: n => `${n === 1 ? "nuit" : "nuits"} au total`,
     staysCountLabel: n => (n === 1 ? "séjour" : "séjours"),
-    staysEmpty: "Encore aucun séjour à cet emplacement dans le journal.",
-    toDiary: "Vers le journal de voyage",
+    staysEmpty: "Encore aucun séjour à cet emplacement dans «Mes voyages».",
+    toDiary: "Vers «Mes voyages»",
     shareTitle: "Partager l'emplacement",
     shareDesc:
-      "Toute personne disposant du lien voit le nom, les coordonnées, la météo et les heures de soleil de cet emplacement – sans connexion et en lecture seule. Tes notes, obstacles et entrées de journal restent privés.",
+      "Toute personne disposant du lien voit le nom, les coordonnées, la météo et les heures de soleil de cet emplacement – sans connexion et en lecture seule. Tes notes, obstacles et entrées de voyage restent privés.",
     stopShare: "Arrêter le partage",
     stopShared: "Partage terminé – le lien n'est plus valable",
     shareLinkCopied: "Lien de partage copié",
@@ -1308,10 +1310,10 @@ export const fr: Translation = {
       "Partagé avec CampMesser – le couteau suisse du camping sous tente.",
   },
   trips: {
-    title: "Journal de voyage",
+    title: "Mes voyages",
     subtitle:
       "Garde une trace de tes séjours en camping : lieux, nuits et souvenirs.",
-    loginFeature: "ton journal de voyage",
+    loginFeature: "tes voyages",
     packProgress: (name, checked, total) =>
       `${name} : ${checked} sur ${total} emballés`,
     entrySaved: "Entrée enregistrée",
@@ -1770,7 +1772,7 @@ export const fr: Translation = {
     loginFeature: "ton plan des repas",
     notFoundTitle: "Séjour introuvable",
     notFoundText: "Ce séjour n'existe pas ou n'appartient pas à ton compte.",
-    backToTrips: "Vers le journal de voyage",
+    backToTrips: "Vers «Mes voyages»",
     daysCount: (n: number) => (n === 1 ? "1 jour" : `${n} jours`),
     slotEmpty: "Rien de prévu pour l'instant",
     planSlotAria: (meal: string, day: string) => `Planifier ${meal} le ${day}`,
@@ -2008,7 +2010,7 @@ export const fr: Translation = {
     subtitle: "Va droit au but – sans passer par la page d'accueil.",
     searchPlaceholder: "Chercher une action …",
     noResults: "Aucune action trouvée.",
-    newTrip: "Nouvelle entrée de journal",
+    newTrip: "Nouvelle entrée de voyage",
     newPackList: "Nouvelle liste de bagages",
     recipeSearch: "Chercher une recette",
     sos: "SOS & urgence",

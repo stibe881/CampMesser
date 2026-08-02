@@ -61,7 +61,7 @@ export const it: Translation = {
     tripDaysLeft: n => `Ancora ${n} giorni`,
     tripPacked: (name, checked, total, pct) =>
       `${name}: ${checked} su ${total} pronti (${pct} %)`,
-    tripPlannedNote: "Soggiorno pianificato nel diario di viaggio",
+    tripPlannedNote: "Soggiorno pianificato in «I miei viaggi»",
     weatherAria: (temp, label) =>
       `Meteo attuale: ${temp} gradi, ${label} – al modulo meteo`,
     weatherNoAlerts: "Nessuna allerta maltempo nella tua posizione",
@@ -1105,7 +1105,7 @@ export const it: Translation = {
   mapView: {
     title: "Mappa delle piazzole e dei viaggi",
     subtitle:
-      "Tutte le piazzole salvate a colpo d'occhio – con i pernottamenti del diario di viaggio. La mappa richiede una connessione Internet.",
+      "Tutte le piazzole salvate a colpo d'occhio – con i pernottamenti di «I miei viaggi». La mappa richiede una connessione Internet.",
     loginFeature: "la tua mappa delle piazzole",
     mapAria: "Mappa con le tue piazzole salvate",
     empty:
@@ -1113,8 +1113,8 @@ export const it: Translation = {
     emptyCta: "Alle piazzole preferite",
     nightsHere: (n: number) =>
       n === 1
-        ? "1 pernottamento secondo il diario"
-        : `${n} pernottamenti secondo il diario`,
+        ? "1 pernottamento secondo «I miei viaggi»"
+        : `${n} pernottamenti secondo «I miei viaggi»`,
     toDossier: "Al dossier →",
     legend: (n: number) =>
       n === 1
@@ -1151,11 +1151,12 @@ export const it: Translation = {
     staysTitle: "I tuoi soggiorni qui",
     nightsTotalLabel: n => `${n === 1 ? "notte" : "notti"} in totale`,
     staysCountLabel: n => (n === 1 ? "soggiorno" : "soggiorni"),
-    staysEmpty: "Ancora nessun soggiorno in questa piazzola nel diario.",
-    toDiary: "Al diario di viaggio",
+    staysEmpty:
+      "Ancora nessun soggiorno in questa piazzola in «I miei viaggi».",
+    toDiary: "A «I miei viaggi»",
     shareTitle: "Condividi piazzola",
     shareDesc:
-      "Chi ha il link vede nome, coordinate, meteo e orari del sole di questa piazzola – senza accesso e in sola lettura. Le tue note, gli ostacoli e le voci del diario restano privati.",
+      "Chi ha il link vede nome, coordinate, meteo e orari del sole di questa piazzola – senza accesso e in sola lettura. Le tue note, gli ostacoli e le voci di viaggio restano privati.",
     stopShare: "Termina condivisione",
     stopShared: "Condivisione terminata – il link non è più valido",
     shareLinkCopied: "Link di condivisione copiato",
@@ -1295,9 +1296,9 @@ export const it: Translation = {
       "Condiviso con CampMesser – il coltellino svizzero per il campeggio in tenda.",
   },
   trips: {
-    title: "Diario di viaggio",
+    title: "I miei viaggi",
     subtitle: "Annota i tuoi soggiorni in campeggio: luoghi, notti e ricordi.",
-    loginFeature: "il tuo diario di viaggio",
+    loginFeature: "i tuoi viaggi",
     packProgress: (name, checked, total) =>
       `${name}: ${checked} su ${total} pronti`,
     entrySaved: "Voce salvata",
@@ -1754,7 +1755,7 @@ export const it: Translation = {
     notFoundTitle: "Soggiorno non trovato",
     notFoundText:
       "Questo soggiorno non esiste oppure non appartiene al tuo account.",
-    backToTrips: "Al diario di viaggio",
+    backToTrips: "A «I miei viaggi»",
     daysCount: (n: number) => (n === 1 ? "1 giorno" : `${n} giorni`),
     slotEmpty: "Ancora niente in programma",
     planSlotAria: (meal: string, day: string) => `Pianifica ${meal} il ${day}`,
@@ -1990,7 +1991,7 @@ export const it: Translation = {
     subtitle: "Parti subito – senza passare dalla pagina iniziale.",
     searchPlaceholder: "Cerca un'azione …",
     noResults: "Nessuna azione trovata.",
-    newTrip: "Nuova voce di diario",
+    newTrip: "Nuova voce di viaggio",
     newPackList: "Nuova lista bagagli",
     recipeSearch: "Cerca una ricetta",
     sos: "SOS & emergenza",
