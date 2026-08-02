@@ -37,3 +37,24 @@ describe("packing sharing", () => {
     ).rejects.toThrow();
   });
 });
+
+describe("trips hub sharing", () => {
+  it("verweigert anonymes Erstellen eines Reise-Hub-Links", async () => {
+    const caller = appRouter.createCaller(createAnonContext());
+    await expect(caller.trips.share({ tripId: 1 })).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+  });
+
+  it("verweigert anonymes Beenden des Reise-Hub-Teilens", async () => {
+    const caller = appRouter.createCaller(createAnonContext());
+    await expect(caller.trips.unshare({ tripId: 1 })).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+  });
+
+  it("lehnt zu kurze Tokens bei sharedGet ab (Input-Validierung)", async () => {
+    const caller = appRouter.createCaller(createAnonContext());
+    await expect(caller.trips.sharedGet({ token: "abc" })).rejects.toThrow();
+  });
+});

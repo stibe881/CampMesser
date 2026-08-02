@@ -1595,6 +1595,18 @@ export const it: Translation = {
     leaveConfirm: name => `Vuoi davvero lasciare il viaggio «${name}»?`,
     leftTrip: "Hai lasciato il viaggio",
     leaveFailed: "Impossibile lasciare il viaggio",
+    hubShareAria: name => `Condividere l'hub del viaggio ${name}`,
+    hubDialogTitle: "Condividere l'hub del viaggio",
+    hubDialogDesc:
+      "Un link pubblico raggruppa info del viaggio, piazzola, piano dei menu e lista bagagli (sola lettura, senza foto). La lista bagagli si può spuntare tramite il link.",
+    hubCreate: "Crea il link dell'hub",
+    hubCreateFailed: "Impossibile creare il link",
+    hubLinkCreated: "Link dell'hub creato",
+    hubStopShare: "Termina la condivisione",
+    hubStopped: "Condivisione terminata – il link non è più valido",
+    hubStopFailed: "Terminazione non riuscita",
+    hubQrAlt: name => `Codice QR del link dell'hub per ${name}`,
+    hubQrHint: "Basta scansionarlo per aprirlo.",
   },
   tripInvite: {
     badge: "Invito al viaggio",
@@ -1614,6 +1626,23 @@ export const it: Translation = {
     acceptFailed: "Impossibile accettare l'invito",
     loginHint: "Accedi o crea un account per accettare l'invito.",
     loginCta: "Accedi e unisciti",
+  },
+  sharedTrip: {
+    badge: "Viaggio condiviso",
+    invalid: "Questo link di condivisione non è più valido.",
+    invalidHint:
+      "La proprietaria o il proprietario ha terminato la condivisione.",
+    infoTitle: "Info del viaggio",
+    notesTitle: "Note",
+    ratingAria: n => `Valutazione: ${n} stelle su 5`,
+    spotTitle: "Piazzola",
+    menuTitle: "Piano dei menu",
+    dayHeader: "Giorno",
+    packListTitle: "Lista bagagli",
+    packListNotShared:
+      "Questa lista bagagli al momento non è condivisa separatamente – solo visualizzazione, non si può spuntare.",
+    footer:
+      "Condiviso con CampMesser – il coltellino svizzero per il campeggio in tenda.",
   },
   firstAid: {
     title: "Guida di primo soccorso",

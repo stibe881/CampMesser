@@ -2462,6 +2462,116 @@ export const appRouter = router({
           return { success: true } as const;
         }),
     }),
+    /**
+     * Teil-Link für den Reise-Hub erzeugen (nur Besitzerin/Besitzer):
+     * ein öffentlicher Read-only-Link, unabhängig von den Reise-Mitgliedern.
+     * Hat die verknüpfte Packliste noch keinen Teil-Token, bekommt sie hier
+     * einen – so funktioniert das Abhaken im Hub über die BESTEHENDE
+     * geteilte-Listen-Mechanik (packing.sharedToggle) unverändert.
+     */
+    share: protectedProcedure
+      .input(z.object({ tripId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.getTripLog(input.tripId, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        if (trip.packListId != null) {
+          const list = await db.getPackList(trip.packListId, ctx.user.id);
+          if (list && !list.shareToken) {
+            await db.setPackListShareToken(list.id, ctx.user.id, nanoid(16));
+          }
+        }
+        if (trip.shareToken) return { token: trip.shareToken };
+        const token = nanoid(16);
+        await db.setTripLogShareToken(input.tripId, ctx.user.id, token);
+        return { token };
+      }),
+    /**
+     * Teilen des Reise-Hubs beenden: Token entfernen, Link wird ungültig.
+     * Der Teil-Token einer verknüpften Packliste bleibt bewusst bestehen –
+     * die Liste kann unabhängig geteilt worden sein (packing.unshare räumt ihn).
+     */
+    unshare: protectedProcedure
+      .input(z.object({ tripId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.setTripLogShareToken(input.tripId, ctx.user.id, null);
+        return { success: true } as const;
+      }),
+    /**
+     * Geteilten Reise-Hub öffentlich abrufen (kein Login nötig): Reise-Infos,
+     * Platz-Basisdaten (Muster spots.sharedGet), Menüplan (eigene Rezepte
+     * serverseitig als Name aufgelöst – öffentlich nicht abrufbar; statische
+     * Rezept-Ids löst der Client in der aktiven Sprache auf) und die
+     * verknüpfte Packliste samt Teil-Token fürs Abhaken. BEWUSST ohne Fotos.
+     */
+    sharedGet: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .query(async ({ input }) => {
+        const trip = await db.getTripLogByShareToken(input.token);
+        if (!trip) return null;
+        const spot =
+          trip.spotId != null
+            ? await db.getCampSpot(trip.spotId, trip.userId)
+            : undefined;
+        const entries = await db.getMenuEntriesForTrip(trip.id);
+        const customNameById = new Map<number, string>();
+        if (entries.some(e => e.customRecipeId != null)) {
+          const own = await db.getCustomRecipes(trip.userId);
+          own.forEach(r => customNameById.set(r.id, r.name));
+        }
+        let packList: {
+          name: string;
+          shareToken: string | null;
+          persons: string[];
+          items: Awaited<ReturnType<typeof db.getPackItems>>;
+        } | null = null;
+        if (trip.packListId != null) {
+          const list = await db.getPackList(trip.packListId, trip.userId);
+          if (list) {
+            packList = {
+              name: list.name,
+              shareToken: list.shareToken,
+              persons: parsePersons(list.personsJson),
+              items: await db.getPackItems(list.id),
+            };
+          }
+        }
+        return {
+          trip: {
+            title: trip.title,
+            location: trip.location,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            notes: trip.notes,
+            rating: trip.rating,
+            weatherJson: trip.weatherJson,
+          },
+          spot: spot
+            ? {
+                name: spot.name,
+                latitude: spot.latitude,
+                longitude: spot.longitude,
+                note: spot.note,
+                attributesJson: spot.attributesJson,
+              }
+            : null,
+          menu: entries.map(e => ({
+            day: e.day,
+            meal: e.meal,
+            recipeId: e.recipeId,
+            customRecipeName:
+              e.customRecipeId != null
+                ? (customNameById.get(e.customRecipeId) ?? null)
+                : null,
+            freeText: e.freeText,
+          })),
+          packList,
+        };
+      }),
   }),
   menu: router({
     /** Trip samt Menüplan-Einträgen (null, wenn kein Zugriff besteht). */

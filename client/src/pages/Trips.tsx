@@ -882,6 +882,139 @@ function TripMembersDialog({
   );
 }
 
+/**
+ * Dialog «Reise-Hub teilen» (nur für eigene Reisen): erzeugt den öffentlichen
+ * Read-only-Link (Reise-Infos, Platz, Menüplan, Packliste – ohne Fotos),
+ * zeigt ihn samt QR-Code und beendet das Teilen (Muster der Teilen-Dialoge).
+ */
+function TripShareDialog({
+  trip,
+  onClose,
+}: {
+  trip: { id: number; name: string; shareToken: string | null } | null;
+  onClose: () => void;
+}) {
+  const t = useT();
+  const utils = trpc.useUtils();
+  const open = trip !== null;
+  const shareUrl = trip?.shareToken
+    ? `${window.location.origin}/reise/${trip.shareToken}`
+    : null;
+
+  // QR-Code zum Hub-Link: am Lagerfeuer einfach abscannen lassen
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!shareUrl) {
+      setQrDataUrl(null);
+      return;
+    }
+    QRCode.toDataURL(shareUrl, {
+      width: 480,
+      margin: 1,
+      errorCorrectionLevel: "M",
+    })
+      .then(setQrDataUrl)
+      .catch(() => setQrDataUrl(null));
+  }, [shareUrl]);
+
+  const shareMutation = trpc.trips.share.useMutation({
+    onSuccess: async ({ token }) => {
+      utils.trips.list.invalidate();
+      // Link direkt in die Zwischenablage – der Dialog zeigt ihn zusätzlich an
+      try {
+        await navigator.clipboard.writeText(
+          `${window.location.origin}/reise/${token}`
+        );
+        toast.success(t.common.linkCopied);
+      } catch {
+        toast.success(t.trips.hubLinkCreated);
+      }
+    },
+    onError: () => toast.error(t.trips.hubCreateFailed),
+  });
+  const unshareMutation = trpc.trips.unshare.useMutation({
+    onSuccess: () => {
+      utils.trips.list.invalidate();
+      toast.success(t.trips.hubStopped);
+    },
+    onError: () => toast.error(t.trips.hubStopFailed),
+  });
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={o => {
+        if (!o) onClose();
+      }}
+    >
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-serif">
+            {t.trips.hubDialogTitle}
+            {trip ? ` – ${trip.name}` : ""}
+          </DialogTitle>
+          <DialogDescription>{t.trips.hubDialogDesc}</DialogDescription>
+        </DialogHeader>
+        {trip &&
+          (shareUrl ? (
+            <div>
+              <p className="break-all rounded-lg bg-muted px-3 py-2 font-mono text-xs">
+                {shareUrl}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(shareUrl);
+                      toast.success(t.common.linkCopied);
+                    } catch {
+                      toast.error(t.common.copyFailed);
+                    }
+                  }}
+                >
+                  <Copy className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {t.common.copy}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={unshareMutation.isPending}
+                  onClick={() => unshareMutation.mutate({ tripId: trip.id })}
+                >
+                  {t.trips.hubStopShare}
+                </Button>
+              </div>
+              {qrDataUrl && (
+                <div className="mt-3 text-center">
+                  {/* Weisser Rahmen, damit der QR-Code auch im Dark Mode lesbar bleibt */}
+                  <img
+                    src={qrDataUrl}
+                    alt={t.trips.hubQrAlt(trip.name)}
+                    className="mx-auto w-40 rounded-lg bg-white p-2"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {t.trips.hubQrHint}
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              disabled={shareMutation.isPending}
+              onClick={() => shareMutation.mutate({ tripId: trip.id })}
+            >
+              <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.trips.hubCreate}
+            </Button>
+          ))}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function TripsPage() {
   const { lang, t } = useI18n();
   const { isAuthenticated, loading } = useAuth();
@@ -994,6 +1127,11 @@ export default function TripsPage() {
     id: number;
     name: string;
   } | null>(null);
+
+  /** Reise, deren «Reise-Hub teilen»-Dialog gerade offen ist (null = zu). */
+  const [hubTrip, setHubTrip] = useState<{ id: number; name: string } | null>(
+    null
+  );
 
   const setRatingMutation = trpc.trips.setRating.useMutation({
     onSuccess: () => utils.trips.list.invalidate(),
@@ -1850,6 +1988,25 @@ export default function TripsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+                            onClick={() =>
+                              setHubTrip({
+                                id: trip.id,
+                                name: trip.title || placeName(trip),
+                              })
+                            }
+                            aria-label={t.trips.hubShareAria(
+                              trip.title || placeName(trip)
+                            )}
+                          >
+                            <Share2
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
                             onClick={() =>
                               removeMutation.mutate({ id: trip.id })
@@ -2032,6 +2189,22 @@ export default function TripsPage() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+                          onClick={() =>
+                            setHubTrip({
+                              id: trip.id,
+                              name: trip.title || placeName(trip),
+                            })
+                          }
+                          aria-label={t.trips.hubShareAria(
+                            trip.title || placeName(trip)
+                          )}
+                        >
+                          <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
                           onClick={() => removeMutation.mutate({ id: trip.id })}
                           aria-label={t.trips.deleteEntryAria(
@@ -2078,6 +2251,21 @@ export default function TripsPage() {
       <TripMembersDialog
         trip={membersTrip}
         onClose={() => setMembersTrip(null)}
+      />
+
+      {/* Dialog «Reise-Hub teilen» der gewählten eigenen Reise – der aktuelle
+          Teil-Token kommt live aus trips.list (bleibt nach Mutationen frisch) */}
+      <TripShareDialog
+        trip={
+          hubTrip
+            ? {
+                ...hubTrip,
+                shareToken:
+                  allTrips.find(tr => tr.id === hubTrip.id)?.shareToken ?? null,
+              }
+            : null
+        }
+        onClose={() => setHubTrip(null)}
       />
     </div>
   );

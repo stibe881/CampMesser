@@ -1609,6 +1609,18 @@ export const fr: Translation = {
     leaveConfirm: name => `Vraiment quitter le voyage « ${name} » ?`,
     leftTrip: "Tu as quitté le voyage",
     leaveFailed: "Impossible de quitter le voyage",
+    hubShareAria: (name: string) => `Partager le hub du voyage ${name}`,
+    hubDialogTitle: "Partager le hub du voyage",
+    hubDialogDesc:
+      "Un lien public regroupe infos du voyage, emplacement, plan des menus et liste de bagages (lecture seule, sans photos). La liste de bagages peut être cochée via le lien.",
+    hubCreate: "Créer le lien du hub",
+    hubCreateFailed: "Le lien n'a pas pu être créé",
+    hubLinkCreated: "Lien du hub créé",
+    hubStopShare: "Arrêter le partage",
+    hubStopped: "Partage arrêté – le lien n'est plus valable",
+    hubStopFailed: "Échec de l'arrêt",
+    hubQrAlt: (name: string) => `Code QR du lien du hub pour ${name}`,
+    hubQrHint: "Il suffit de le scanner pour l'ouvrir.",
   },
   tripInvite: {
     badge: "Invitation au voyage",
@@ -1628,6 +1640,22 @@ export const fr: Translation = {
     acceptFailed: "Impossible d'accepter l'invitation",
     loginHint: "Connecte-toi ou crée un compte pour accepter l'invitation.",
     loginCta: "Se connecter et rejoindre",
+  },
+  sharedTrip: {
+    badge: "Voyage partagé",
+    invalid: "Ce lien de partage n'est plus valable.",
+    invalidHint: "La ou le propriétaire a arrêté le partage.",
+    infoTitle: "Infos du voyage",
+    notesTitle: "Notes",
+    ratingAria: (n: number) => `Évaluation : ${n} étoiles sur 5`,
+    spotTitle: "Emplacement",
+    menuTitle: "Plan des menus",
+    dayHeader: "Jour",
+    packListTitle: "Liste de bagages",
+    packListNotShared:
+      "Cette liste de bagages n'est pas partagée séparément pour le moment – consultation seule, impossible de cocher.",
+    footer:
+      "Partagé avec CampMesser – le couteau suisse du camping sous tente.",
   },
   firstAid: {
     title: "Guide de premiers secours",

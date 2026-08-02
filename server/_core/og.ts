@@ -1,6 +1,6 @@
 /**
  * OpenGraph-Vorschau für geteilte Links (/liste/:token, /platz/:token,
- * /vorlage/:token, /einkaufsliste/:token).
+ * /vorlage/:token, /einkaufsliste/:token, /reise/:token).
  * Messenger und soziale Netzwerke laden das SPA-HTML ohne JavaScript –
  * deshalb injiziert der Server für bekannte Teil-Token OG-Meta-Tags in den
  * <head>, bevor das HTML ausgeliefert wird. Unbekannte Token bekommen das
@@ -73,7 +73,9 @@ export async function ogMetaForShareRequest(
   path: string,
   origin: string
 ): Promise<OgMeta | null> {
-  const match = /^\/(liste|platz|vorlage|einkaufsliste)\/([^/]+)$/.exec(path);
+  const match = /^\/(liste|platz|vorlage|einkaufsliste|reise)\/([^/]+)$/.exec(
+    path
+  );
   if (!match) return null;
   const [, kind, token] = match;
   if (!TOKEN_PATTERN.test(token)) return null;
@@ -119,6 +121,24 @@ export async function ogMetaForShareRequest(
     return {
       title: "Einkaufsliste – CampMesser",
       description: `Geteilte Einkaufsliste mit ${count} – zum Mitbringen und Abhaken.`,
+      url,
+      image,
+    };
+  }
+
+  if (kind === "reise") {
+    const trip = await db.getTripLogByShareToken(token);
+    if (!trip) return null;
+    let place = trip.location;
+    if (!place && trip.spotId != null) {
+      const spot = await db.getCampSpot(trip.spotId, trip.userId);
+      place = spot?.name ?? null;
+    }
+    const name = trip.title || place || "Reise";
+    return {
+      title: `${name} – CampMesser`,
+      description:
+        "Geteilter Reise-Hub mit Reise-Infos, Platz, Menüplan und Packliste – zum Mitlesen und Mitpacken.",
       url,
       image,
     };

@@ -253,6 +253,12 @@ export const tripLogs = mysqlTable(
     weatherJson: text("weatherJson"),
     /** Titelbild des Eintrags (tripPhotos.id); null = kein Titelbild */
     coverPhotoId: int("coverPhotoId"),
+    /**
+     * Öffentlicher Teil-Token des Reise-Hubs: Wer den Link kennt, sieht die
+     * Reise samt Platz-Basisdaten, Menüplan und Packliste (ohne Fotos).
+     * Unabhängig von den Reise-Mitgliedern (tripMembers); null = nicht geteilt.
+     */
+    shareToken: varchar("shareToken", { length: 64 }).unique(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },

@@ -1614,6 +1614,18 @@ export const de = {
     leaveConfirm: (name: string) => `Die Reise «${name}» wirklich verlassen?`,
     leftTrip: "Du hast die Reise verlassen",
     leaveFailed: "Verlassen fehlgeschlagen",
+    hubShareAria: (name: string) => `Reise-Hub von ${name} teilen`,
+    hubDialogTitle: "Reise-Hub teilen",
+    hubDialogDesc:
+      "Ein öffentlicher Link bündelt Reise-Infos, Platz, Menüplan und Packliste (nur lesend, ohne Fotos). Die Packliste lässt sich über den Link abhaken.",
+    hubCreate: "Hub-Link erzeugen",
+    hubCreateFailed: "Link konnte nicht erstellt werden",
+    hubLinkCreated: "Hub-Link erstellt",
+    hubStopShare: "Teilen beenden",
+    hubStopped: "Teilen beendet – der Link ist nicht mehr gültig",
+    hubStopFailed: "Beenden fehlgeschlagen",
+    hubQrAlt: (name: string) => `QR-Code des Reise-Hub-Links für ${name}`,
+    hubQrHint: "Zum Öffnen einfach scannen.",
   },
   tripInvite: {
     badge: "Reise-Einladung",
@@ -1634,6 +1646,22 @@ export const de = {
     loginHint:
       "Melde dich an oder erstelle ein Konto, um die Einladung anzunehmen.",
     loginCta: "Anmelden und beitreten",
+  },
+  sharedTrip: {
+    badge: "Geteilte Reise",
+    invalid: "Dieser Teil-Link ist nicht mehr gültig.",
+    invalidHint: "Die Besitzerin oder der Besitzer hat das Teilen beendet.",
+    infoTitle: "Reise-Infos",
+    notesTitle: "Notizen",
+    ratingAria: (n: number) => `Bewertung: ${n} von 5 Sternen`,
+    spotTitle: "Zeltplatz",
+    menuTitle: "Menüplan",
+    dayHeader: "Tag",
+    packListTitle: "Packliste",
+    packListNotShared:
+      "Diese Packliste wird momentan nicht separat geteilt – nur Ansicht, Abhaken ist nicht möglich.",
+    footer:
+      "Geteilt mit CampMesser – dem Schweizer Taschenmesser fürs Zelt-Camping.",
   },
   firstAid: {
     title: "Erste-Hilfe-Guide",

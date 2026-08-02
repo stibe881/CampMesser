@@ -1071,6 +1071,32 @@ export async function deleteTripInvite(tripId: number) {
   await db.delete(tripInvites).where(eq(tripInvites.tripId, tripId));
 }
 
+// ── Reise-Hub teilen (öffentlicher Read-only-Link, unabhängig von Mitgliedern) ──
+
+/** Teil-Token des Reise-Hubs setzen oder entfernen (nur eigene Reise). */
+export async function setTripLogShareToken(
+  id: number,
+  userId: number,
+  token: string | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripLogs)
+    .set({ shareToken: token })
+    .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
+}
+
+/** Geteilte Reise anhand des Hub-Tokens laden (öffentlich, ohne Login). */
+export async function getTripLogByShareToken(token: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripLogs)
+    .where(eq(tripLogs.shareToken, token))
+    .limit(1);
+  return rows[0];
+}
+
 /** Einladung anhand des Tokens laden (öffentlich, ohne Login). */
 export async function getTripInviteByToken(token: string) {
   const db = requireDb(await getDb());
