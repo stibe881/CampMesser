@@ -918,6 +918,43 @@ export const it: Translation = {
     qrTitle: "Da passare direttamente sul posto",
     qrText:
       "Fai scansionare il codice con la fotocamera del telefono – il dossier della piazzola si apre subito, senza digitare né accedere.",
+    tentFinderLink: "Ritrova la tenda",
+  },
+  tentFinder: {
+    title: "Trova-tenda",
+    subtitle:
+      "Rotta bussola e distanza per ritrovare la tua tenda – anche di notte o nei campeggi grandi.",
+    targetTitle: "Meta",
+    targetSelectAria: "Scegli la meta",
+    savedTarget: "Posizione memorizzata",
+    savedTargetInfo: d => `Memorizzata il ${d}`,
+    rememberButton: "Memorizza la posizione attuale come meta",
+    remembering: "Ricerca della posizione …",
+    rememberSaved:
+      "Posizione memorizzata come meta – ora ritroverai la strada fin qui",
+    rememberFailed: "Impossibile determinare la posizione",
+    loginHint:
+      "Con l'accesso puoi scegliere come meta anche le tue piazzole salvate.",
+    noTarget:
+      "Nessuna meta scelta. Memorizza la tua posizione attuale proprio accanto alla tenda – oppure scegli una piazzola salvata.",
+    geoUnsupported: "Il tuo dispositivo non supporta la geolocalizzazione.",
+    geoDenied:
+      "Accesso alla posizione negato – consentilo nelle impostazioni del browser.",
+    geoFailed: "Posizione non disponibile.",
+    geoWaiting: "Ricerca della posizione GPS …",
+    accuracyInfo: m => `Precisione GPS ±${m} m`,
+    directionText: (dir, dist) =>
+      `La meta è in direzione ${dir}, a ${dist} da qui.`,
+    arrowAria: (dir, dist) =>
+      `Freccia di direzione: meta in direzione ${dir}, a ${dist}`,
+    arrived: "Ci sei quasi – guardati attorno!",
+    compassActivate: "Attiva la bussola",
+    compassActivateHint:
+      "Perché la freccia possa ruotare, CampMesser ha bisogno di accedere alla bussola del tuo dispositivo.",
+    movementHint:
+      "Direzione ricavata dal tuo movimento – la freccia è corretta solo finché avanzi.",
+    noCompassHint:
+      "Nessuna bussola disponibile: la freccia non può ruotare. Orientati con il punto cardinale – oppure fai qualche passo e CampMesser ricaverà la direzione dal tuo movimento.",
   },
   sharedSpot: {
     invalid: "Questo link di condivisione non è più valido.",

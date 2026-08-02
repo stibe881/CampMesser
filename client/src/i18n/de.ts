@@ -926,6 +926,43 @@ export const de = {
     qrTitle: "Direkt am Platz weitergeben",
     qrText:
       "Lass andere den Code mit der Handy-Kamera scannen – das Platz-Dossier öffnet sich sofort, ganz ohne Tippen oder Anmeldung.",
+    tentFinderLink: "Zelt finden",
+  },
+  tentFinder: {
+    title: "Zelt-Finder",
+    subtitle:
+      "Kompass-Peilung und Distanz zurück zu deinem Zelt – auch nachts oder auf grossen Plätzen.",
+    targetTitle: "Ziel",
+    targetSelectAria: "Ziel wählen",
+    savedTarget: "Gemerkter Standort",
+    savedTargetInfo: (d: string) => `Gemerkt am ${d}`,
+    rememberButton: "Aktuellen Standort als Ziel merken",
+    remembering: "Standort wird ermittelt …",
+    rememberSaved:
+      "Standort als Ziel gemerkt – du findest jetzt hierher zurück",
+    rememberFailed: "Standort konnte nicht ermittelt werden",
+    loginHint:
+      "Angemeldet kannst du auch deine gespeicherten Zeltplätze als Ziel wählen.",
+    noTarget:
+      "Noch kein Ziel gewählt. Merke dir deinen aktuellen Standort direkt beim Zelt – oder wähle einen gespeicherten Zeltplatz.",
+    geoUnsupported: "Dein Gerät unterstützt keine Standortbestimmung.",
+    geoDenied:
+      "Standortfreigabe verweigert – erlaube den Zugriff in den Browser-Einstellungen.",
+    geoFailed: "Standort nicht verfügbar.",
+    geoWaiting: "GPS-Position wird gesucht …",
+    accuracyInfo: (m: number) => `GPS-Genauigkeit ±${m} m`,
+    directionText: (dir: string, dist: string) =>
+      `Das Ziel liegt im ${dir}, ${dist} entfernt.`,
+    arrowAria: (dir: string, dist: string) =>
+      `Richtungspfeil: Ziel im ${dir}, ${dist} entfernt`,
+    arrived: "Du bist praktisch da – schau dich um!",
+    compassActivate: "Kompass aktivieren",
+    compassActivateHint:
+      "Damit der Pfeil mitdrehen kann, braucht CampMesser Zugriff auf den Kompass deines Geräts.",
+    movementHint:
+      "Richtung aus deiner Bewegung übernommen – der Pfeil stimmt nur, solange du dich vorwärts bewegst.",
+    noCompassHint:
+      "Kein Kompass verfügbar: Der Pfeil kann nicht mitdrehen. Richte dich nach der Himmelsrichtung – oder geh ein paar Schritte, dann übernimmt CampMesser die Richtung aus deiner Bewegung.",
   },
   sharedSpot: {
     invalid: "Dieser Teil-Link ist nicht mehr gültig.",

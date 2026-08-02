@@ -7,6 +7,7 @@ import {
   Compass,
   Droplets,
   Loader2,
+  LocateFixed,
   MapPin,
   Moon,
   Mountain,
@@ -171,6 +172,14 @@ export default function SpotDetailPage() {
       {spot.note && (
         <p className="mb-4 text-sm text-muted-foreground">{spot.note}</p>
       )}
+
+      {/* Zelt-Finder: Kompass-Peilung zu diesem Platz */}
+      <Button asChild variant="outline" size="sm" className="mt-1">
+        <Link href={`/zeltfinder?spot=${spot.id}`}>
+          <LocateFixed className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          {t.spotDetail.tentFinderLink}
+        </Link>
+      </Button>
 
       {/* Sonne heute */}
       <Card className="mb-4 mt-4">

@@ -928,6 +928,43 @@ export const fr: Translation = {
     qrTitle: "À transmettre directement sur place",
     qrText:
       "Fais scanner le code avec l'appareil photo du téléphone – le dossier de l'emplacement s'ouvre immédiatement, sans saisie ni connexion.",
+    tentFinderLink: "Retrouver la tente",
+  },
+  tentFinder: {
+    title: "Retrouve-tente",
+    subtitle:
+      "Cap boussole et distance pour retrouver ta tente – même de nuit ou sur les grands campings.",
+    targetTitle: "Cible",
+    targetSelectAria: "Choisir la cible",
+    savedTarget: "Position mémorisée",
+    savedTargetInfo: d => `Mémorisée le ${d}`,
+    rememberButton: "Mémoriser la position actuelle comme cible",
+    remembering: "Recherche de la position …",
+    rememberSaved:
+      "Position mémorisée comme cible – tu retrouveras ton chemin jusqu'ici",
+    rememberFailed: "Impossible de déterminer la position",
+    loginHint:
+      "Connecté·e, tu peux aussi choisir tes emplacements enregistrés comme cible.",
+    noTarget:
+      "Aucune cible choisie. Mémorise ta position actuelle juste à côté de la tente – ou choisis un emplacement enregistré.",
+    geoUnsupported: "Ton appareil ne permet pas la géolocalisation.",
+    geoDenied:
+      "Accès à la position refusé – autorise-le dans les réglages du navigateur.",
+    geoFailed: "Position indisponible.",
+    geoWaiting: "Recherche de la position GPS …",
+    accuracyInfo: m => `Précision GPS ±${m} m`,
+    directionText: (dir, dist) =>
+      `La cible est en direction ${dir}, à ${dist}.`,
+    arrowAria: (dir, dist) =>
+      `Flèche de direction : cible en direction ${dir}, à ${dist}`,
+    arrived: "Tu y es presque – regarde autour de toi !",
+    compassActivate: "Activer la boussole",
+    compassActivateHint:
+      "Pour que la flèche puisse tourner, CampMesser a besoin d'accéder à la boussole de ton appareil.",
+    movementHint:
+      "Direction reprise de ton déplacement – la flèche n'est correcte que tant que tu avances.",
+    noCompassHint:
+      "Pas de boussole disponible : la flèche ne peut pas tourner. Oriente-toi avec le point cardinal – ou fais quelques pas, CampMesser reprendra alors la direction de ton déplacement.",
   },
   sharedSpot: {
     invalid: "Ce lien de partage n'est plus valable.",

@@ -15,6 +15,7 @@ import {
   Droplets,
   Gauge,
   ListChecks,
+  LocateFixed,
   Moon,
   Package,
   Refrigerator,
@@ -134,6 +135,19 @@ export const modules: Module[] = [
     ),
     icon: Tent,
     group: "Planung",
+  },
+  {
+    path: "/zeltfinder",
+    title: l4("Zelt-Finder", "Retrouve-tente", "Trova-tenda", "Tent finder"),
+    description: l4(
+      "Kompass-Pfeil und Distanz zurück zum Zelt",
+      "Flèche boussole et distance pour retrouver la tente",
+      "Freccia bussola e distanza per ritrovare la tenda",
+      "Compass arrow and distance back to your tent"
+    ),
+    icon: LocateFixed,
+    group: "Planung",
+    offline: true,
   },
   {
     path: "/tagebuch",

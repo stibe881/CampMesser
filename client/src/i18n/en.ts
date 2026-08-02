@@ -906,6 +906,40 @@ export const en: Translation = {
     qrTitle: "Hand over right at the pitch",
     qrText:
       "Let others scan the code with their phone camera – the pitch dossier opens immediately, no typing or sign-in needed.",
+    tentFinderLink: "Find your tent",
+  },
+  tentFinder: {
+    title: "Tent finder",
+    subtitle:
+      "Compass bearing and distance back to your tent – even at night or on large campsites.",
+    targetTitle: "Target",
+    targetSelectAria: "Choose target",
+    savedTarget: "Remembered location",
+    savedTargetInfo: d => `Remembered on ${d}`,
+    rememberButton: "Remember current location as target",
+    remembering: "Getting your location …",
+    rememberSaved:
+      "Location remembered as target – you can now find your way back here",
+    rememberFailed: "Could not determine your location",
+    loginHint: "Signed in, you can also pick your saved pitches as the target.",
+    noTarget:
+      "No target chosen yet. Remember your current location right by the tent – or pick a saved pitch.",
+    geoUnsupported: "Your device does not support location services.",
+    geoDenied: "Location access denied – allow it in your browser settings.",
+    geoFailed: "Location unavailable.",
+    geoWaiting: "Looking for your GPS position …",
+    accuracyInfo: m => `GPS accuracy ±${m} m`,
+    directionText: (dir, dist) => `The target is to the ${dir}, ${dist} away.`,
+    arrowAria: (dir, dist) =>
+      `Direction arrow: target to the ${dir}, ${dist} away`,
+    arrived: "You are practically there – look around!",
+    compassActivate: "Enable compass",
+    compassActivateHint:
+      "For the arrow to rotate, CampMesser needs access to your device's compass.",
+    movementHint:
+      "Direction taken from your movement – the arrow is only correct while you keep walking.",
+    noCompassHint:
+      "No compass available: the arrow cannot rotate. Use the cardinal direction instead – or walk a few steps and CampMesser will take the direction from your movement.",
   },
   sharedSpot: {
     invalid: "This share link is no longer valid.",

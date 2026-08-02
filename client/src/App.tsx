@@ -38,6 +38,7 @@ const pageLoaders = {
   Quiet: () => import("./pages/Quiet"),
   Spots: () => import("./pages/Spots"),
   SpotDetail: () => import("./pages/SpotDetail"),
+  TentFinder: () => import("./pages/TentFinder"),
   Trips: () => import("./pages/Trips"),
   MenuPlan: () => import("./pages/MenuPlan"),
   Level: () => import("./pages/Level"),
@@ -99,6 +100,7 @@ const DryingPage = lazyWithRetry(pageLoaders.Drying);
 const QuietPage = lazyWithRetry(pageLoaders.Quiet);
 const SpotsPage = lazyWithRetry(pageLoaders.Spots);
 const SpotDetailPage = lazyWithRetry(pageLoaders.SpotDetail);
+const TentFinderPage = lazyWithRetry(pageLoaders.TentFinder);
 const TripsPage = lazyWithRetry(pageLoaders.Trips);
 const MenuPlanPage = lazyWithRetry(pageLoaders.MenuPlan);
 const LevelPage = lazyWithRetry(pageLoaders.Level);
@@ -147,6 +149,7 @@ function Router() {
           <Route path={"/nachtruhe"} component={QuietPage} />
           <Route path={"/zeltplaetze"} component={SpotsPage} />
           <Route path={"/zeltplaetze/:id"} component={SpotDetailPage} />
+          <Route path={"/zeltfinder"} component={TentFinderPage} />
           <Route path={"/tagebuch"} component={TripsPage} />
           <Route path={"/menueplan/:tripId"} component={MenuPlanPage} />
           <Route path={"/wasserwaage"} component={LevelPage} />
