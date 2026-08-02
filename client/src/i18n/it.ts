@@ -1127,6 +1127,26 @@ export const it: Translation = {
         ? "1 meta del Trova-tenda sulla mappa"
         : `${n} mete del Trova-tenda sulla mappa`,
     routeLink: "Percorso →",
+    discoverToggle: "Scopri i campeggi",
+    discoverSearchHere: "Cerca in questa zona",
+    discoverLoading: "Caricamento dei campeggi …",
+    discoverZoomHint: "Zooma di più per cercare i campeggi.",
+    discoverError: "Impossibile caricare i campeggi – riprova più tardi.",
+    discoverCount: (n: number) =>
+      n === 0
+        ? "Nessun campeggio trovato in questa zona."
+        : n === 1
+          ? "1 campeggio trovato"
+          : `${n} campeggi trovati`,
+    discoverLegend: (n: number) =>
+      n === 1
+        ? "1 campeggio scoperto (OpenStreetMap)"
+        : `${n} campeggi scoperti (OpenStreetMap)`,
+    osmFallbackName: "Campeggio",
+    osmWebsite: "Sito web →",
+    osmSource: "© OpenStreetMap",
+    adoptFavorite: "Salva come preferito",
+    adopted: (name: string) => `«${name}» salvato tra i preferiti`,
   },
   spotDetail: {
     fallbackTitle: "Piazzola",

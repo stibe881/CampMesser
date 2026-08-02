@@ -1,5 +1,9 @@
 # CampMesser – Projekt TODO
 
+## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 17)
+
+- [x] Campingplätze aus OpenStreetMap entdecken: zuschaltbarer Layer auf der Karte (Toggle-Chip «Campingplätze entdecken», Standard AUS) fragt die Overpass-API für den aktuellen Ausschnitt ab (tourism=camp_site als node/way, max. 100 Ergebnisse); bei Kartenbewegung kein automatisches Nachladen, sondern Button «In diesem Ausschnitt suchen» (Overpass ist rate-limitiert), bei Zoom < 9 Hinweis «bitte näher zoomen»; defensiver Parser `parseCampsites` in client/src/lib/overpass.ts (node → lat/lon, way → center, Tags name/website/phone, Duplikat- und Limit-Schutz) mit 6 Tests in server/overpass.test.ts; eigene blaue Marker samt Legenden-Eintrag, Popup mit Name (Fallback «Campingplatz»), Website-Link, Telefon, Quelle «© OpenStreetMap» und «Als Favorit übernehmen» (spots.add → Toast, Pin wird nach dem Refetch zum grünen Favoriten); mapView-Namespace in allen 4 Sprachen erweitert
+
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 16)
 
 - [x] 12 weitere Rezepte im Rezeptbuch (client/src/data/recipes.ts, neu 30 eingebaute Rezepte), vollständig als L4 in DE/FR/IT/EN mit Mengen für 4 Personen (CH-Deutsch «EL/TL», FR «c. à s./c. à c.», IT «cucchiaio/cucchiaino», EN «tbsp/tsp»), bewusst ohne Bild (die UI rendert Bilder nur wenn vorhanden, OfflinePrecache filtert undefined): Overnight-Birchermüesli (Frühstück ohne Kochen), Camping-Pancakes und Fotzelschnitten (Frühstück, Gaskocher), Rösti mit Spiegelei + Raclette aus der Pfanne (vegetarische Hauptgerichte), Ghackets mit Hörnli, One-Pot-Reispfanne mit Poulet und Bündner Gerstensuppe (Gaskocher), Forellen-Päckli und Maiskolben mit Kräuterbutter (Offenes Feuer), Thon-Wraps ohne Kochen, Grillierte Ananas mit Honig (Dessert); Menüplan-Autofill-Heuristik in MenuPlan.tsx nachgeführt (BREAKFAST_RECIPE_IDS + die 3 neuen Frühstücks-Ids, AUTOFILL_EXCLUDED_IDS + Maiskolben/Ananas); keine Duplikate zu den bestehenden 18 Rezepten

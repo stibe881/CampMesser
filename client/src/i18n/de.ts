@@ -1138,6 +1138,27 @@ export const de = {
         ? "1 Zelt-Finder-Ziel auf der Karte"
         : `${n} Zelt-Finder-Ziele auf der Karte`,
     routeLink: "Route →",
+    discoverToggle: "Campingplätze entdecken",
+    discoverSearchHere: "In diesem Ausschnitt suchen",
+    discoverLoading: "Campingplätze werden geladen …",
+    discoverZoomHint: "Bitte näher zoomen, um Campingplätze zu suchen.",
+    discoverError:
+      "Campingplätze konnten nicht geladen werden – bitte später erneut versuchen.",
+    discoverCount: (n: number) =>
+      n === 0
+        ? "Keine Campingplätze in diesem Ausschnitt gefunden."
+        : n === 1
+          ? "1 Campingplatz gefunden"
+          : `${n} Campingplätze gefunden`,
+    discoverLegend: (n: number) =>
+      n === 1
+        ? "1 entdeckter Campingplatz (OpenStreetMap)"
+        : `${n} entdeckte Campingplätze (OpenStreetMap)`,
+    osmFallbackName: "Campingplatz",
+    osmWebsite: "Website →",
+    osmSource: "© OpenStreetMap",
+    adoptFavorite: "Als Favorit übernehmen",
+    adopted: (name: string) => `«${name}» als Favorit gespeichert`,
   },
   spotDetail: {
     fallbackTitle: "Zeltplatz",

@@ -1141,6 +1141,26 @@ export const fr: Translation = {
         ? "1 cible du Retrouve-tente sur la carte"
         : `${n} cibles du Retrouve-tente sur la carte`,
     routeLink: "Itinéraire →",
+    discoverToggle: "Découvrir des campings",
+    discoverSearchHere: "Chercher dans cette zone",
+    discoverLoading: "Chargement des campings …",
+    discoverZoomHint: "Zoome davantage pour chercher des campings.",
+    discoverError: "Impossible de charger les campings – réessaie plus tard.",
+    discoverCount: (n: number) =>
+      n === 0
+        ? "Aucun camping trouvé dans cette zone."
+        : n === 1
+          ? "1 camping trouvé"
+          : `${n} campings trouvés`,
+    discoverLegend: (n: number) =>
+      n === 1
+        ? "1 camping découvert (OpenStreetMap)"
+        : `${n} campings découverts (OpenStreetMap)`,
+    osmFallbackName: "Camping",
+    osmWebsite: "Site web →",
+    osmSource: "© OpenStreetMap",
+    adoptFavorite: "Enregistrer comme favori",
+    adopted: (name: string) => `«${name}» enregistré comme favori`,
   },
   spotDetail: {
     fallbackTitle: "Emplacement",

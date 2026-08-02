@@ -8,14 +8,21 @@
  * Zusätzlich erscheinen die gespeicherten Zelt-Finder-Ziele (Zelt, Duschen …)
  * als eigene bernsteinfarbene Pins – mit «Anpeilen»-Link in den Zelt-Finder.
  *
+ * Zuschaltbarer Entdecker-Layer: auf Wunsch fragt die Karte die Overpass-API
+ * nach Campingplätzen (tourism=camp_site) im aktuellen Ausschnitt – bewusst
+ * nie automatisch beim Verschieben (Overpass ist rate-limitiert), sondern nur
+ * per Klick auf «In diesem Ausschnitt suchen». Gefundene Plätze lassen sich
+ * direkt als Favorit übernehmen.
+ *
  * Tagebuch-Einträge mit reinem Freitext-Ort haben keine Koordinaten und
  * erscheinen deshalb nicht als eigene Pins.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { LocateFixed, MapPin, Tent } from "lucide-react";
+import { Compass, LocateFixed, MapPin, Search, Tent } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,12 +32,20 @@ import { trpc } from "@/lib/trpc";
 import { directionsUrl } from "@/lib/directions";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import {
+  OVERPASS_MIN_ZOOM,
+  OVERPASS_URL,
+  overpassQuery,
+  parseCampsites,
+  type OsmCampsite,
+} from "@/lib/overpass";
+import {
   LEGACY_TARGET_KEY,
   TARGETS_KEY,
   migrateTargets,
   sanitizeTargets,
   type TentFinderTarget,
 } from "@/lib/tentFinderTargets";
+import { cn } from "@/lib/utils";
 import { useT } from "@/i18n";
 import { tripNights } from "@shared/trips";
 
@@ -63,6 +78,24 @@ const targetIcon = L.divIcon({
   popupAnchor: [0, -16],
 });
 
+/** Entdeckter OSM-Campingplatz: blauer Kreis mit Zelt-Umriss (dritte Farbe). */
+const campsiteIcon = L.divIcon({
+  className: "",
+  html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#0369a1" stroke="#ffffff" stroke-width="2.5"/><path d="M14 8.5 20 19h-4.2L14 15.8 12.2 19H8Z" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -16],
+});
+
+/** Liegt der OSM-Platz praktisch auf einem Favoriten? (~50 m Toleranz) */
+function isNearFavorite(campsite: OsmCampsite, spots: SpotPin[]): boolean {
+  return spots.some(
+    s =>
+      Math.abs(s.latitude - campsite.lat) < 0.0005 &&
+      Math.abs(s.longitude - campsite.lon) < 0.0005
+  );
+}
+
 function SpotsMap({
   spots,
   targets,
@@ -74,9 +107,22 @@ function SpotsMap({
 }) {
   const t = useT();
   const [, navigate] = useLocation();
+  const utils = trpc.useUtils();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
+  const campLayerRef = useRef<L.LayerGroup | null>(null);
+  const didFitRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Entdecker-Layer: Zustand der Overpass-Suche (Standard AUS)
+  const [discoverOn, setDiscoverOn] = useState(false);
+  const [campsites, setCampsites] = useState<OsmCampsite[]>([]);
+  const [discoverLoading, setDiscoverLoading] = useState(false);
+  const [discoverError, setDiscoverError] = useState(false);
+  const [needsZoom, setNeedsZoom] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [moved, setMoved] = useState(false);
 
   // Karte einmalig initialisieren und beim Verlassen sauber abbauen
   useEffect(() => {
@@ -92,13 +138,86 @@ function SpotsMap({
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
     markersRef.current = L.layerGroup().addTo(map);
+    campLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
     return () => {
+      abortRef.current?.abort();
       map.remove();
       mapRef.current = null;
       markersRef.current = null;
+      campLayerRef.current = null;
     };
   }, []);
+
+  /** Overpass für den aktuellen Ausschnitt abfragen (nie automatisch beim Verschieben). */
+  const searchHere = useCallback(async () => {
+    const map = mapRef.current;
+    if (!map) return;
+    setMoved(false);
+    if (map.getZoom() < OVERPASS_MIN_ZOOM) {
+      setNeedsZoom(true);
+      setDiscoverError(false);
+      return;
+    }
+    setNeedsZoom(false);
+    setDiscoverError(false);
+    setDiscoverLoading(true);
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const b = map.getBounds();
+    try {
+      const res = await fetch(OVERPASS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `data=${encodeURIComponent(
+          overpassQuery(b.getSouth(), b.getWest(), b.getNorth(), b.getEast())
+        )}`,
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`overpass ${res.status}`);
+      const json: unknown = await res.json();
+      setCampsites(parseCampsites(json));
+      setSearched(true);
+      setDiscoverLoading(false);
+    } catch {
+      if (controller.signal.aborted) return;
+      setDiscoverLoading(false);
+      setDiscoverError(true);
+    }
+  }, []);
+
+  /** Toggle-Chip: Einschalten sucht sofort, Ausschalten räumt alles weg. */
+  const toggleDiscover = useCallback(() => {
+    setDiscoverOn(prev => {
+      const next = !prev;
+      if (next) {
+        void searchHere();
+      } else {
+        abortRef.current?.abort();
+        setCampsites([]);
+        setDiscoverLoading(false);
+        setDiscoverError(false);
+        setNeedsZoom(false);
+        setSearched(false);
+        setMoved(false);
+      }
+      return next;
+    });
+  }, [searchHere]);
+
+  // Kartenbewegung merken: statt automatisch neu zu laden, zeigen wir den Such-Button
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !discoverOn) return;
+    const onMove = () => setMoved(true);
+    map.on("moveend", onMove);
+    map.on("zoomend", onMove);
+    return () => {
+      map.off("moveend", onMove);
+      map.off("zoomend", onMove);
+    };
+  }, [discoverOn]);
 
   // Pins nachführen, sobald Plätze oder Übernachtungszahlen ändern
   useEffect(() => {
@@ -177,24 +296,171 @@ function SpotsMap({
       marker.addTo(layer);
     });
 
-    const points: L.LatLngTuple[] = [
-      ...spots.map(s => [s.latitude, s.longitude] as L.LatLngTuple),
-      ...targets.map(tgt => [tgt.lat, tgt.lon] as L.LatLngTuple),
-    ];
-    if (points.length > 0) {
-      map.fitBounds(L.latLngBounds(points), { padding: [40, 40], maxZoom: 13 });
-    } else {
-      map.setView(FALLBACK_CENTER, FALLBACK_ZOOM);
+    // Nur beim ersten Aufbau einpassen – spätere Refetches (z. B. nach dem
+    // Übernehmen eines OSM-Platzes) sollen den Ausschnitt nicht verspringen.
+    if (!didFitRef.current) {
+      didFitRef.current = true;
+      const points: L.LatLngTuple[] = [
+        ...spots.map(s => [s.latitude, s.longitude] as L.LatLngTuple),
+        ...targets.map(tgt => [tgt.lat, tgt.lon] as L.LatLngTuple),
+      ];
+      if (points.length > 0) {
+        map.fitBounds(L.latLngBounds(points), {
+          padding: [40, 40],
+          maxZoom: 13,
+        });
+      } else {
+        map.setView(FALLBACK_CENTER, FALLBACK_ZOOM);
+      }
     }
   }, [spots, targets, nightsBySpotId, t, navigate]);
 
+  // Entdeckte OSM-Campingplätze als eigene (blaue) Pins nachführen
+  useEffect(() => {
+    const map = mapRef.current;
+    const layer = campLayerRef.current;
+    if (!map || !layer) return;
+    layer.clearLayers();
+
+    campsites.forEach(site => {
+      // Bereits übernommene Plätze nicht doppelt zeigen – dort steht nach dem
+      // Refetch der grüne Favoriten-Pin.
+      if (isNearFavorite(site, spots)) return;
+      const displayName = site.name ?? t.mapView.osmFallbackName;
+      const marker = L.marker([site.lat, site.lon], {
+        icon: campsiteIcon,
+        alt: displayName,
+      });
+      const popup = document.createElement("div");
+      popup.className = "space-y-1";
+      const name = document.createElement("p");
+      name.className = "font-semibold";
+      name.textContent = displayName;
+      popup.appendChild(name);
+      if (site.website) {
+        const websiteLink = document.createElement("a");
+        websiteLink.href = site.website;
+        websiteLink.target = "_blank";
+        websiteLink.rel = "noopener noreferrer";
+        websiteLink.textContent = t.mapView.osmWebsite;
+        websiteLink.className = "block text-sm font-medium underline";
+        popup.appendChild(websiteLink);
+      }
+      if (site.phone) {
+        const phone = document.createElement("p");
+        phone.className = "text-xs";
+        phone.textContent = site.phone;
+        popup.appendChild(phone);
+      }
+      const adopt = document.createElement("button");
+      adopt.type = "button";
+      adopt.textContent = t.mapView.adoptFavorite;
+      adopt.className = "block text-sm font-medium underline";
+      adopt.addEventListener("click", async () => {
+        adopt.disabled = true;
+        try {
+          await utils.client.spots.add.mutate({
+            name: displayName,
+            latitude: site.lat,
+            longitude: site.lon,
+          });
+          toast.success(t.mapView.adopted(displayName));
+          void utils.spots.list.invalidate();
+          map.closePopup();
+        } catch {
+          toast.error(t.common.saveFailed);
+          adopt.disabled = false;
+        }
+      });
+      popup.appendChild(adopt);
+      const source = document.createElement("p");
+      source.className = "text-xs text-muted-foreground";
+      source.textContent = t.mapView.osmSource;
+      popup.appendChild(source);
+      marker.bindPopup(popup);
+      marker.addTo(layer);
+    });
+  }, [campsites, spots, t, utils]);
+
+  const visibleCampsites = useMemo(
+    () => campsites.filter(site => !isNearFavorite(site, spots)),
+    [campsites, spots]
+  );
+
   return (
-    <div
-      ref={containerRef}
-      role="region"
-      aria-label={t.mapView.mapAria}
-      className="h-[65vh] min-h-80 w-full rounded-xl border border-border"
-    />
+    <>
+      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <button
+          type="button"
+          onClick={toggleDiscover}
+          aria-pressed={discoverOn}
+          className={cn(
+            "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+            discoverOn
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Compass className="h-3.5 w-3.5" aria-hidden="true" />
+          {t.mapView.discoverToggle}
+        </button>
+        {discoverOn && (
+          <span className="text-xs text-muted-foreground" role="status">
+            {discoverLoading
+              ? t.mapView.discoverLoading
+              : discoverError
+                ? t.mapView.discoverError
+                : needsZoom
+                  ? t.mapView.discoverZoomHint
+                  : searched
+                    ? t.mapView.discoverCount(campsites.length)
+                    : null}
+          </span>
+        )}
+      </div>
+      <div className="relative">
+        <div
+          ref={containerRef}
+          role="region"
+          aria-label={t.mapView.mapAria}
+          className="h-[65vh] min-h-80 w-full rounded-xl border border-border"
+        />
+        {discoverOn && moved && !discoverLoading && (
+          <button
+            type="button"
+            onClick={() => void searchHere()}
+            className="absolute left-1/2 top-3 z-[1000] flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-background px-3.5 py-1.5 text-xs font-medium shadow-md hover:bg-muted"
+          >
+            <Search className="h-3.5 w-3.5" aria-hidden="true" />
+            {t.mapView.discoverSearchHere}
+          </button>
+        )}
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          <Tent className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+          {t.mapView.legend(spots.length)}
+        </span>
+        {targets.length > 0 && (
+          <span className="flex items-center gap-1.5">
+            <LocateFixed
+              className="h-3.5 w-3.5 text-amber-glow"
+              aria-hidden="true"
+            />
+            {t.mapView.targetLegend(targets.length)}
+          </span>
+        )}
+        {discoverOn && visibleCampsites.length > 0 && (
+          <span className="flex items-center gap-1.5">
+            <Compass
+              className="h-3.5 w-3.5 text-sky-700 dark:text-sky-400"
+              aria-hidden="true"
+            />
+            {t.mapView.discoverLegend(visibleCampsites.length)}
+          </span>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -308,21 +574,6 @@ export default function MapViewPage() {
             targets={targets}
             nightsBySpotId={nightsBySpotId}
           />
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <Tent className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-              {t.mapView.legend(spotPins.length)}
-            </span>
-            {targets.length > 0 && (
-              <span className="flex items-center gap-1.5">
-                <LocateFixed
-                  className="h-3.5 w-3.5 text-amber-glow"
-                  aria-hidden="true"
-                />
-                {t.mapView.targetLegend(targets.length)}
-              </span>
-            )}
-          </div>
         </>
       )}
     </div>

@@ -1105,6 +1105,26 @@ export const en: Translation = {
         ? "1 tent finder target on the map"
         : `${n} tent finder targets on the map`,
     routeLink: "Directions →",
+    discoverToggle: "Discover campsites",
+    discoverSearchHere: "Search this area",
+    discoverLoading: "Loading campsites …",
+    discoverZoomHint: "Zoom in further to search for campsites.",
+    discoverError: "Could not load campsites – please try again later.",
+    discoverCount: (n: number) =>
+      n === 0
+        ? "No campsites found in this area."
+        : n === 1
+          ? "1 campsite found"
+          : `${n} campsites found`,
+    discoverLegend: (n: number) =>
+      n === 1
+        ? "1 discovered campsite (OpenStreetMap)"
+        : `${n} discovered campsites (OpenStreetMap)`,
+    osmFallbackName: "Campsite",
+    osmWebsite: "Website →",
+    osmSource: "© OpenStreetMap",
+    adoptFavorite: "Save as favourite",
+    adopted: (name: string) => `“${name}” saved as favourite`,
   },
   spotDetail: {
     fallbackTitle: "Pitch",
