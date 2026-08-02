@@ -696,6 +696,9 @@ export const en: Translation = {
     radarForecastBadge: "Forecast",
     radarSource:
       "Radar data: RainViewer · Map: OpenStreetMap. Nowcast frames are a short-term extrapolation.",
+    rainSoonAria: "Short-term rain notice",
+    rainStartsAt: time => `Rain starts around ${time}`,
+    rainEndsAt: time => `Rain stops around ${time}`,
   },
   water: {
     title: "Drinking water calculator",

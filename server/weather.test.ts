@@ -3,8 +3,10 @@ import {
   describeUvIndex,
   describeWeatherCode,
   detectAlerts,
+  nextRainWindow,
   uvLevelForIndex,
   type HourlyWeather,
+  type RainSlot,
 } from "../shared/weather";
 import { calcWaterNeeds } from "../shared/calculators";
 
@@ -157,5 +159,60 @@ describe("calcWaterNeeds mit Hunden und Körperpflege", () => {
     expect(result.dogLiters).toBe(0);
     expect(result.comfortHygieneLiters).toBe(0);
     expect(result.totalLiters).toBeCloseTo(2, 1);
+  });
+});
+
+describe("nextRainWindow", () => {
+  /** 15-Minuten-Slots ab 14:00 lokaler Zeit; mm[i] = Menge des i-ten Slots. */
+  function slots(mm: number[]): RainSlot[] {
+    const base = new Date(2026, 7, 2, 14, 0, 0, 0);
+    return mm.map((precipitationMm, i) => ({
+      time: new Date(base.getTime() + i * 15 * 60000).toISOString(),
+      precipitationMm,
+    }));
+  }
+  const now = new Date(2026, 7, 2, 14, 5, 0, 0); // im ersten Slot (14:00–14:15)
+
+  it("meldet Regen, der bald beginnt (inkl. Ende)", () => {
+    const result = nextRainWindow(slots([0, 0, 0.3, 0.5, 0]), now);
+    expect(result).not.toBeNull();
+    expect(result!.ongoing).toBe(false);
+    expect(new Date(result!.startsAt!).getTime()).toBe(
+      new Date(2026, 7, 2, 14, 30).getTime()
+    );
+    expect(new Date(result!.endsAt!).getTime()).toBe(
+      new Date(2026, 7, 2, 15, 0).getTime()
+    );
+  });
+
+  it("erkennt laufenden Regen und wann er aufhört", () => {
+    const result = nextRainWindow(slots([0.4, 0.2, 0, 0]), now);
+    expect(result).not.toBeNull();
+    expect(result!.ongoing).toBe(true);
+    expect(result!.startsAt).toBeNull();
+    expect(new Date(result!.endsAt!).getTime()).toBe(
+      new Date(2026, 7, 2, 14, 30).getTime()
+    );
+  });
+
+  it("liefert null ohne Regen und bei leeren Daten", () => {
+    expect(nextRainWindow(slots([0, 0.05, 0, 0]), now)).toBeNull();
+    expect(nextRainWindow([], now)).toBeNull();
+  });
+
+  it("lässt endsAt offen, wenn der Regen die Datenreichweite überdauert", () => {
+    const result = nextRainWindow(slots([0, 0.2, 0.4, 0.6]), now);
+    expect(result!.ongoing).toBe(false);
+    expect(result!.endsAt).toBeNull();
+  });
+
+  it("ignoriert bereits vergangene Slots", () => {
+    // «now» liegt im dritten Slot – der Regen der ersten beiden ist vorbei
+    const later = new Date(2026, 7, 2, 14, 35, 0, 0);
+    const result = nextRainWindow(slots([0.5, 0.5, 0, 0.2, 0]), later);
+    expect(result!.ongoing).toBe(false);
+    expect(new Date(result!.startsAt!).getTime()).toBe(
+      new Date(2026, 7, 2, 14, 45).getTime()
+    );
   });
 });

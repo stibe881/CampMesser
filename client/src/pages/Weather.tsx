@@ -52,8 +52,10 @@ import {
   describeUvIndex,
   describeWeatherCode,
   detectAlerts,
+  nextRainWindow,
   type DailyWeather,
   type HourlyWeather,
+  type RainSlot,
   type UvLevel,
   type WeatherAlert,
 } from "@shared/weather";
@@ -104,6 +106,8 @@ interface WeatherData {
   hourlyAll: HourlyWeather[];
   /** 16 Prognosetage: Tag 1–7 für die Detail-Ansicht, Tag 8+ als Ausblick. */
   daily: DailyWeather[];
+  /** 15-Minuten-Regenprognose ab der aktuellen Viertelstunde (~4 h). */
+  minutely: RainSlot[];
   current: {
     temperatureC: number;
     apparentC: number;
@@ -134,6 +138,11 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
     // brechen. Deshalb: ein Abruf, und unten werden die Stunden clientseitig
     // auf die ersten 7 Tage beschnitten.
     forecast_days: "16",
+    // Regen-Kurzfrist: 15-Minuten-Niederschlag im selben Abruf.
+    // forecast_minutely_15 beginnt (anders als forecast_hours) bei der
+    // AKTUELLEN Viertelstunde – 16 Slots reichen für den 2-h-Hinweis.
+    minutely_15: "precipitation",
+    forecast_minutely_15: "16",
     current: "temperature_2m,apparent_temperature,weather_code,wind_speed_10m",
     hourly:
       "temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,weather_code,cape,cloud_cover",
@@ -188,10 +197,19 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
     })
   );
 
+  // 15-Minuten-Slots defensiv lesen – nicht jede Region liefert minutely_15
+  const minutely: RainSlot[] = (
+    (json.minutely_15?.time as string[] | undefined) ?? []
+  ).map((time: string, i: number) => ({
+    time,
+    precipitationMm: json.minutely_15.precipitation?.[i] ?? 0,
+  }));
+
   return {
     hourly: hourlyFromNow,
     hourlyAll,
     daily,
+    minutely,
     current: {
       temperatureC: json.current.temperature_2m,
       apparentC: json.current.apparent_temperature,
@@ -760,6 +778,30 @@ export default function WeatherPage() {
     () => (data ? detectAlerts(data.hourly, lang) : []),
     [data, lang]
   );
+  // Regen-Kurzfrist-Hinweis: nur zeigen, wenn Regen innerhalb der nächsten
+  // 2 Stunden beginnt oder aufhört – sonst bleibt die Zeile weg.
+  const rainNotice = useMemo(() => {
+    if (!data) return null;
+    const now = new Date();
+    const window = nextRainWindow(data.minutely, now);
+    if (!window) return null;
+    const limit = now.getTime() + 2 * 3600000;
+    if (
+      !window.ongoing &&
+      window.startsAt &&
+      new Date(window.startsAt).getTime() <= limit
+    ) {
+      return { kind: "start" as const, time: new Date(window.startsAt) };
+    }
+    if (
+      window.ongoing &&
+      window.endsAt &&
+      new Date(window.endsAt).getTime() <= limit
+    ) {
+      return { kind: "end" as const, time: new Date(window.endsAt) };
+    }
+    return null;
+  }, [data]);
   const next24 = data?.hourly.slice(0, 24) ?? [];
   // Heutiger Max-UV (WHO-Skala) – Wert kommt aus demselben Forecast-Abruf
   const uvToday = data?.daily[0]?.uvIndexMax ?? null;
@@ -936,6 +978,34 @@ export default function WeatherPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Regen-Kurzfrist: dezente Zeile, nur wenn in den nächsten 2 h
+              Regen beginnt oder aufhört (15-Minuten-Prognose) */}
+          {rainNotice && (
+            <p
+              role="status"
+              aria-label={t.weather.rainSoonAria}
+              className="mb-4 flex items-center gap-2 rounded-xl border border-chart-2/40 bg-chart-2/10 px-4 py-2.5 text-sm"
+            >
+              <CloudRain
+                className="h-4 w-4 shrink-0 text-chart-2"
+                aria-hidden="true"
+              />
+              {rainNotice.kind === "start"
+                ? t.weather.rainStartsAt(
+                    rainNotice.time.toLocaleTimeString(LOCALE_TAGS[lang], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  )
+                : t.weather.rainEndsAt(
+                    rainNotice.time.toLocaleTimeString(LOCALE_TAGS[lang], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  )}
+            </p>
+          )}
 
           {/* Warnungen */}
           <section

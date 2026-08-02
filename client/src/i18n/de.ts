@@ -727,6 +727,9 @@ export const de = {
     radarForecastBadge: "Prognose",
     radarSource:
       "Radardaten: RainViewer · Karte: OpenStreetMap. Nowcast-Frames sind eine kurzfristige Hochrechnung.",
+    rainSoonAria: "Regen-Kurzfrist-Hinweis",
+    rainStartsAt: (time: string) => `Regen beginnt ca. ${time}`,
+    rainEndsAt: (time: string) => `Regen hört ca. ${time} auf`,
   },
   water: {
     title: "Trinkwasser-Rechner",

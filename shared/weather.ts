@@ -33,6 +33,69 @@ export interface DailyWeather {
   uvIndexMax: number;
 }
 
+/** Ein 15-Minuten-Slot der Open-Meteo-Kurzfrist-Prognose (minutely_15). */
+export interface RainSlot {
+  /** Beginn des Slots (lokale ISO-Zeit, deckt [time, time + 15 min) ab) */
+  time: string;
+  precipitationMm: number;
+}
+
+/** Nächstes Regen-Fenster ab «jetzt» aus den 15-Minuten-Slots. */
+export interface RainWindow {
+  /** Beginn des nächsten Regens (null, wenn es bereits regnet) */
+  startsAt: string | null;
+  /** Ende des Regens (null, wenn er über die Datenreichweite hinaus anhält) */
+  endsAt: string | null;
+  /** Regnet es zum Zeitpunkt `now` bereits? */
+  ongoing: boolean;
+}
+
+/** Ab dieser Menge pro 15 Minuten gilt ein Slot als «Regen». */
+const RAIN_SLOT_MM = 0.1;
+const SLOT_MS = 15 * 60000;
+
+/**
+ * Wann beginnt bzw. endet der nächste Regen? Betrachtet werden alle Slots
+ * ab dem, der `now` enthält (Slots decken jeweils 15 Minuten ab).
+ * Rückgabe null, wenn in der Datenreichweite kein Regen (mehr) ansteht.
+ */
+export function nextRainWindow(
+  slots: RainSlot[],
+  now: Date
+): RainWindow | null {
+  const relevant = slots.filter(s => {
+    const t = new Date(s.time).getTime();
+    return Number.isFinite(t) && t + SLOT_MS > now.getTime();
+  });
+  if (relevant.length === 0) return null;
+  const rainy = relevant.map(s => (s.precipitationMm ?? 0) >= RAIN_SLOT_MM);
+
+  if (rainy[0]) {
+    // Es regnet bereits – Ende = erster trockener Slot danach
+    const endIdx = rainy.findIndex(r => !r);
+    return {
+      ongoing: true,
+      startsAt: null,
+      endsAt: endIdx === -1 ? null : relevant[endIdx].time,
+    };
+  }
+
+  const startIdx = rainy.findIndex(r => r);
+  if (startIdx === -1) return null;
+  let endIdx: number | null = null;
+  for (let i = startIdx + 1; i < rainy.length; i++) {
+    if (!rainy[i]) {
+      endIdx = i;
+      break;
+    }
+  }
+  return {
+    ongoing: false,
+    startsAt: relevant[startIdx].time,
+    endsAt: endIdx === null ? null : relevant[endIdx].time,
+  };
+}
+
 export type AlertSeverity = "info" | "warnung" | "gefahr";
 
 export interface WeatherAlert {
