@@ -47,6 +47,17 @@ describe("expiryInfo", () => {
   it("rechnet über Monatsgrenzen korrekt", () => {
     expect(expiryInfo("2026-09-01", "2026-08-30")?.daysLeft).toBe(2);
   });
+
+  it("liefert Labels in der gewünschten Sprache (Default de)", () => {
+    expect(expiryInfo("2026-08-01", TODAY, "fr")?.label).toBe(
+      "expire aujourd'hui"
+    );
+    expect(expiryInfo("2026-08-02", TODAY, "it")?.label).toBe("scade domani");
+    expect(expiryInfo("2026-07-27", TODAY, "en")?.label).toBe(
+      "expired 5 days ago"
+    );
+    expect(expiryInfo("2026-08-04", TODAY, "en")?.label).toBe("3 days left");
+  });
 });
 
 describe("expirySortKey", () => {

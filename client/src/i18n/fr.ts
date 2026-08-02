@@ -1062,6 +1062,95 @@ export const fr: Translation = {
     funFactTitle: "Le savais-tu ?",
     kidsTitle: "Pour les enfants :",
   },
+  recipes: {
+    title: "Livre de recettes Campfire",
+    subtitle:
+      "Des recettes simples pour réchaud à gaz et feu ouvert – filtrables par ingrédients et par temps.",
+    offlineNote:
+      "Toutes les recettes sont enregistrées dans l'app et utilisables sans connexion Internet.",
+    searchPlaceholder:
+      "Chercher une recette ou un ingrédient (p. ex. « haricots ») …",
+    searchAria: "Chercher une recette ou un ingrédient",
+    methodFilterAria: "Filtrer par méthode de cuisson",
+    timeFilterAria: "Filtrer par temps de préparation",
+    filterAll: "Toutes",
+    timeAny: "Peu importe",
+    timeMax: (n: number) => `≤ ${n} min`,
+    minutes: (n: number) => `${n} min`,
+    servings: (n: number) => `${n} portions`,
+    createOwn: "Créer ma propre recette",
+    openRecipeAria: (name: string) => `Ouvrir la recette ${name}`,
+    photoAlt: (name: string) => `Photo : ${name}`,
+    ownBadge: "Perso",
+    onePotBadge: "One-pot",
+    kidsBadge: "Enfants",
+    emptyState:
+      "Aucune recette trouvée – essaie d'autres filtres ou termes de recherche.",
+    ingredientsTitle: "Ingrédients",
+    stepsTitle: "Préparation",
+    tipTitle: "Astuce",
+    deleteConfirm: (name: string) =>
+      `Supprimer vraiment la recette « ${name} » ?`,
+    editor: {
+      titleEdit: "Modifier la recette",
+      titleNew: "Créer ma propre recette",
+      description:
+        "Ta recette apparaît dans le livre de recettes et est prise en compte dans les suggestions de la glacière.",
+      nameLabel: "Nom",
+      namePlaceholder: "p. ex. Les Älplermagronen de grand-maman",
+      methodLabel: "Cuisson",
+      difficultyLabel: "Difficulté",
+      timeLabel: "Temps (minutes)",
+      servingsLabel: "Portions",
+      onePot: "One-pot",
+      kidFriendly: "Adapté aux enfants",
+      ingredientsLabel: "Ingrédients (un par ligne)",
+      ingredientsPlaceholder:
+        "400 g de macaronis\n200 g de fromage de montagne\n2 oignons",
+      stepsLabel: "Préparation (une étape par ligne)",
+      stepsPlaceholder:
+        "Porter l'eau à ébullition et cuire les macaronis.\nFaire dorer les oignons.\nSuperposer le tout et laisser fondre le fromage.",
+      tipLabel: "Astuce (facultatif)",
+      tipPlaceholder: "p. ex. Servir avec de la compote de pommes",
+      saved: "Recette enregistrée",
+      updated: "Recette mise à jour",
+    },
+  },
+  food: {
+    title: "Inventaire de la glacière",
+    subtitleLoggedOut:
+      "Qu'est-ce qu'il reste ? Saisis tes provisions et reçois des suggestions de recettes adaptées.",
+    subtitle:
+      "Qu'est-ce qu'il reste ? Saisis tes provisions et reçois des suggestions de recettes one-pot adaptées.",
+    loginFeature: "ton inventaire de glacière",
+    addPlaceholder: "p. ex. tomates, fromage, haricots …",
+    addNameAria: "Ajouter un aliment",
+    expiryAria: "Date limite de consommation (facultatif)",
+    submitAria: "Enregistrer l'aliment",
+    addFailed: "L'entrée n'a pas pu être enregistrée",
+    dateHint:
+      "Date = durée de conservation minimale (facultatif). Les provisions qui expirent bientôt passent en tête et sont marquées.",
+    urgentOne: "Une provision devrait être consommée bientôt",
+    urgentMany: (n: number) =>
+      `${n} provisions devraient être consommées bientôt`,
+    urgentSuffix: " – les suggestions de recettes ci-dessous t'y aident.",
+    removeAria: (name: string) => `Retirer ${name}`,
+    emptyTitle: "Glacière encore vide",
+    emptyText:
+      "Saisis ce que tu as avec toi – nous te proposons des recettes adaptées.",
+    suggestionsTitle: "Voici ce que tu peux cuisiner avec",
+    suggestionsSubtitle:
+      "Trié selon le nombre de tes provisions présentes dans la recette.",
+    matchCount: (n: number) =>
+      `${n} ${n === 1 ? "ingrédient disponible" : "ingrédients disponibles"}`,
+    minutes: (n: number) => `${n} min`,
+    servings: (n: number) => `${n} portions`,
+    onePotSuffix: " · one-pot",
+    ingredientsPrefix: "Ingrédients :",
+    bookPrefix: "Tu trouves toutes les instructions dans le ",
+    bookLink: "livre de recettes Campfire",
+    bookSuffix: ".",
+  },
   notFound: {
     heading: "Page introuvable",
     text1: "Cette page n'existe malheureusement pas.",

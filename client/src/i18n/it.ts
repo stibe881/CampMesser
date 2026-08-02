@@ -1052,6 +1052,93 @@ export const it: Translation = {
     funFactTitle: "Lo sapevi?",
     kidsTitle: "Per i bambini:",
   },
+  recipes: {
+    title: "Ricettario Campfire",
+    subtitle:
+      "Ricette semplici per fornello a gas e fuoco vivo – filtrabili per ingredienti e tempo.",
+    offlineNote:
+      "Tutte le ricette sono salvate nell'app e utilizzabili senza connessione Internet.",
+    searchPlaceholder:
+      "Cerca una ricetta o un ingrediente (ad es. «fagioli») …",
+    searchAria: "Cerca una ricetta o un ingrediente",
+    methodFilterAria: "Filtra per metodo di cottura",
+    timeFilterAria: "Filtra per tempo di preparazione",
+    filterAll: "Tutte",
+    timeAny: "Qualsiasi",
+    timeMax: (n: number) => `≤ ${n} min`,
+    minutes: (n: number) => `${n} min`,
+    servings: (n: number) => `${n} porzioni`,
+    createOwn: "Crea una ricetta personale",
+    openRecipeAria: (name: string) => `Apri la ricetta ${name}`,
+    photoAlt: (name: string) => `Foto: ${name}`,
+    ownBadge: "Personale",
+    onePotBadge: "One-pot",
+    kidsBadge: "Bambini",
+    emptyState:
+      "Nessuna ricetta trovata – prova altri filtri o termini di ricerca.",
+    ingredientsTitle: "Ingredienti",
+    stepsTitle: "Preparazione",
+    tipTitle: "Consiglio",
+    deleteConfirm: (name: string) => `Eliminare davvero la ricetta «${name}»?`,
+    editor: {
+      titleEdit: "Modifica ricetta",
+      titleNew: "Crea una ricetta personale",
+      description:
+        "La tua ricetta appare nel ricettario e viene considerata nei suggerimenti del frigo box.",
+      nameLabel: "Nome",
+      namePlaceholder: "ad es. Gli Älplermagronen della nonna",
+      methodLabel: "Cottura",
+      difficultyLabel: "Difficoltà",
+      timeLabel: "Tempo (minuti)",
+      servingsLabel: "Porzioni",
+      onePot: "One-pot",
+      kidFriendly: "Adatta ai bambini",
+      ingredientsLabel: "Ingredienti (uno per riga)",
+      ingredientsPlaceholder:
+        "400 g di maccheroni\n200 g di formaggio di montagna\n2 cipolle",
+      stepsLabel: "Preparazione (un passo per riga)",
+      stepsPlaceholder:
+        "Porta l'acqua a ebollizione e cuoci i maccheroni.\nRosola le cipolle.\nDisponi a strati e lascia fondere il formaggio.",
+      tipLabel: "Consiglio (facoltativo)",
+      tipPlaceholder: "ad es. Servire con composta di mele",
+      saved: "Ricetta salvata",
+      updated: "Ricetta aggiornata",
+    },
+  },
+  food: {
+    title: "Inventario del frigo box",
+    subtitleLoggedOut:
+      "Cosa c'è ancora? Registra le tue scorte e ricevi suggerimenti di ricette adatte.",
+    subtitle:
+      "Cosa c'è ancora? Registra le tue scorte e ricevi suggerimenti di ricette one-pot adatte.",
+    loginFeature: "il tuo inventario del frigo box",
+    addPlaceholder: "ad es. pomodori, formaggio, fagioli …",
+    addNameAria: "Aggiungi alimento",
+    expiryAria: "Termine minimo di conservazione (facoltativo)",
+    submitAria: "Salva alimento",
+    addFailed: "La voce non è stata salvata",
+    dateHint:
+      "Data = termine minimo di conservazione (facoltativo). Le scorte in scadenza passano in testa e vengono contrassegnate.",
+    urgentOne: "Una scorta dovrebbe essere consumata presto",
+    urgentMany: (n: number) => `${n} scorte dovrebbero essere consumate presto`,
+    urgentSuffix: " – i suggerimenti di ricette qui sotto ti aiutano.",
+    removeAria: (name: string) => `Rimuovi ${name}`,
+    emptyTitle: "Frigo box ancora vuoto",
+    emptyText:
+      "Registra quello che hai con te – ti suggeriamo le ricette adatte.",
+    suggestionsTitle: "Ecco cosa puoi cucinarci",
+    suggestionsSubtitle:
+      "Ordinato in base a quante delle tue scorte compaiono nella ricetta.",
+    matchCount: (n: number) =>
+      `${n} ${n === 1 ? "ingrediente disponibile" : "ingredienti disponibili"}`,
+    minutes: (n: number) => `${n} min`,
+    servings: (n: number) => `${n} porzioni`,
+    onePotSuffix: " · one-pot",
+    ingredientsPrefix: "Ingredienti:",
+    bookPrefix: "Trovi tutte le istruzioni nel ",
+    bookLink: "ricettario Campfire",
+    bookSuffix: ".",
+  },
   notFound: {
     heading: "Pagina non trovata",
     text1: "Questa pagina purtroppo non esiste.",

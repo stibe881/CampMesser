@@ -35,7 +35,10 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
       Schlüssel + `knotCategoryLabels`-L4 in data/knots.ts)
 - [x] Nature (Namespace `nature`; Mond-/Meteor-Abschnitte, Score-Label via
       Wörterbuch, Kategorien/Einträge via L4 + pick)
-- [ ] Recipes (+Editor), Food
+- [x] Recipes (+Editor), Food (Namespaces `recipes`/`food`; Methoden/
+      Schwierigkeit als Schlüssel + `RECIPE_METHOD_LABELS`/
+      `RECIPE_DIFFICULTY_LABELS`-L4 in shared/customRecipes.ts; eigene
+      Rezepte bleiben Strings, Anzeige via pick)
 - [ ] Family (+Editoren), HuntPrint
 - [x] NotFound, ErrorBoundary, LoginPrompt, PageHeader-Verwendungen
 
@@ -46,7 +49,7 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 - [x] data/knots.ts (8 Knoten)
 - [x] data/nature.ts (16 Einträge + Kategorien; Trivialnamen je Sprache,
       wissenschaftliche Namen als sprachneutrale Strings)
-- [ ] data/recipes.ts (18 Rezepte inkl. Zutaten/Schritte)
+- [x] data/recipes.ts (18 Rezepte inkl. Zutaten/Schritte)
 - [ ] data/familyActivities.ts (6 Jagden, Quizze)
 - [x] data/emergency.ts
 - [x] shared/packTemplates.ts (Szenarien + Einträge)
@@ -63,7 +66,7 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
       lang-Parameter)
 - [x] shared/lawn.ts (formatHours mit lang-Parameter; Verdict-/Options-Texte
       liegen im lawn-Namespace des Wörterbuchs)
-- [ ] shared/food.ts (MHD-Labels)
+- [x] shared/food.ts (MHD-Labels via lang-Parameter, Default de)
 - [x] shared/calculators.ts (Transport-Profile als L4, analyzePack-Hinweise mit
       lang-Parameter; PackOptimizer reicht lang durch)
 

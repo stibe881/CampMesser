@@ -30,9 +30,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { recipes, type Recipe } from "@/data/recipes";
 import {
   RECIPE_DIFFICULTIES,
+  RECIPE_DIFFICULTY_LABELS,
   RECIPE_METHODS,
+  RECIPE_METHOD_LABELS,
   parseStringList,
 } from "@shared/customRecipes";
+import { pick } from "@shared/i18n";
+import { useI18n } from "@/i18n";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import {
@@ -49,6 +53,7 @@ function RecipeEditorDialog({
   initial: CustomRecipeRow | null;
   onClose: () => void;
 }) {
+  const { lang, t } = useI18n();
   const utils = trpc.useUtils();
   const [name, setName] = useState(initial?.name ?? "");
   const [method, setMethod] = useState<(typeof RECIPE_METHODS)[number]>(
@@ -72,10 +77,12 @@ function RecipeEditorDialog({
   const saveMutation = trpc.recipes.save.useMutation({
     onSuccess: () => {
       utils.recipes.list.invalidate();
-      toast.success(initial ? "Rezept aktualisiert" : "Rezept gespeichert");
+      toast.success(
+        initial ? t.recipes.editor.updated : t.recipes.editor.saved
+      );
       onClose();
     },
-    onError: e => toast.error(e.message || "Speichern fehlgeschlagen"),
+    onError: e => toast.error(e.message || t.common.saveFailed),
   });
 
   const toLines = (value: string) =>
@@ -91,20 +98,17 @@ function RecipeEditorDialog({
     <DialogContent className="max-h-[85vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle className="font-serif text-xl">
-          {initial ? "Rezept bearbeiten" : "Eigenes Rezept erstellen"}
+          {initial ? t.recipes.editor.titleEdit : t.recipes.editor.titleNew}
         </DialogTitle>
-        <DialogDescription>
-          Dein Rezept erscheint im Rezeptbuch und wird bei den
-          Kühlbox-Vorschlägen berücksichtigt.
-        </DialogDescription>
+        <DialogDescription>{t.recipes.editor.description}</DialogDescription>
       </DialogHeader>
       <div className="space-y-3">
         <div>
-          <Label htmlFor="recipe-name">Name</Label>
+          <Label htmlFor="recipe-name">{t.recipes.editor.nameLabel}</Label>
           <Input
             id="recipe-name"
             className="mt-1.5"
-            placeholder="z. B. Grosis Älplermagronen"
+            placeholder={t.recipes.editor.namePlaceholder}
             value={name}
             maxLength={120}
             onChange={e => setName(e.target.value)}
@@ -112,7 +116,9 @@ function RecipeEditorDialog({
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label className="mb-1.5 block">Zubereitung</Label>
+            <Label className="mb-1.5 block">
+              {t.recipes.editor.methodLabel}
+            </Label>
             <div className="flex flex-wrap gap-1.5">
               {RECIPE_METHODS.map(m => (
                 <button
@@ -127,13 +133,15 @@ function RecipeEditorDialog({
                   )}
                   aria-pressed={method === m}
                 >
-                  {m}
+                  {pick(RECIPE_METHOD_LABELS[m], lang)}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <Label className="mb-1.5 block">Schwierigkeit</Label>
+            <Label className="mb-1.5 block">
+              {t.recipes.editor.difficultyLabel}
+            </Label>
             <div className="flex gap-1.5">
               {RECIPE_DIFFICULTIES.map(d => (
                 <button
@@ -148,7 +156,7 @@ function RecipeEditorDialog({
                   )}
                   aria-pressed={difficulty === d}
                 >
-                  {d}
+                  {pick(RECIPE_DIFFICULTY_LABELS[d], lang)}
                 </button>
               ))}
             </div>
@@ -156,7 +164,7 @@ function RecipeEditorDialog({
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label htmlFor="recipe-time">Zeit (Minuten)</Label>
+            <Label htmlFor="recipe-time">{t.recipes.editor.timeLabel}</Label>
             <Input
               id="recipe-time"
               className="mt-1.5"
@@ -168,7 +176,9 @@ function RecipeEditorDialog({
             />
           </div>
           <div>
-            <Label htmlFor="recipe-servings">Portionen</Label>
+            <Label htmlFor="recipe-servings">
+              {t.recipes.editor.servingsLabel}
+            </Label>
             <Input
               id="recipe-servings"
               className="mt-1.5"
@@ -182,46 +192,44 @@ function RecipeEditorDialog({
         </div>
         <div className="grid grid-cols-2 gap-3">
           <label className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm">
-            One-Pot
+            {t.recipes.editor.onePot}
             <Switch checked={onePot} onCheckedChange={setOnePot} />
           </label>
           <label className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm">
-            Kinderfreundlich
+            {t.recipes.editor.kidFriendly}
             <Switch checked={kidFriendly} onCheckedChange={setKidFriendly} />
           </label>
         </div>
         <div>
-          <Label htmlFor="recipe-ingredients">Zutaten (eine pro Zeile)</Label>
+          <Label htmlFor="recipe-ingredients">
+            {t.recipes.editor.ingredientsLabel}
+          </Label>
           <Textarea
             id="recipe-ingredients"
             className="mt-1.5 font-mono text-sm"
             rows={5}
-            placeholder={"400 g Magronen\n200 g Bergkäse\n2 Zwiebeln"}
+            placeholder={t.recipes.editor.ingredientsPlaceholder}
             value={ingredients}
             onChange={e => setIngredients(e.target.value)}
           />
         </div>
         <div>
-          <Label htmlFor="recipe-steps">
-            Zubereitung (ein Schritt pro Zeile)
-          </Label>
+          <Label htmlFor="recipe-steps">{t.recipes.editor.stepsLabel}</Label>
           <Textarea
             id="recipe-steps"
             className="mt-1.5 text-sm"
             rows={5}
-            placeholder={
-              "Wasser aufkochen und Magronen garen.\nZwiebeln rösten.\nAlles schichten und Käse schmelzen lassen."
-            }
+            placeholder={t.recipes.editor.stepsPlaceholder}
             value={steps}
             onChange={e => setSteps(e.target.value)}
           />
         </div>
         <div>
-          <Label htmlFor="recipe-tip">Tipp (optional)</Label>
+          <Label htmlFor="recipe-tip">{t.recipes.editor.tipLabel}</Label>
           <Input
             id="recipe-tip"
             className="mt-1.5"
-            placeholder="z. B. Mit Apfelmus servieren"
+            placeholder={t.recipes.editor.tipPlaceholder}
             value={tip}
             maxLength={600}
             onChange={e => setTip(e.target.value)}
@@ -229,7 +237,7 @@ function RecipeEditorDialog({
         </div>
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1" onClick={onClose}>
-            Abbrechen
+            {t.common.cancel}
           </Button>
           <Button
             className="flex-1"
@@ -250,7 +258,7 @@ function RecipeEditorDialog({
               })
             }
           >
-            {saveMutation.isPending ? "Wird gespeichert …" : "Speichern"}
+            {saveMutation.isPending ? t.common.saving : t.common.save}
           </Button>
         </div>
       </div>
@@ -258,15 +266,13 @@ function RecipeEditorDialog({
   );
 }
 
-const methodFilters = ["Alle", "Gaskocher", "Offenes Feuer"] as const;
-const timeFilters = [
-  { id: "alle", label: "Beliebig" },
-  { id: "15", label: "≤ 15 Min." },
-  { id: "30", label: "≤ 30 Min." },
-] as const;
+/** Filter-Schlüssel: «alle» plus die gespeicherten Methoden-Schlüssel. */
+const methodFilters = ["alle", "Gaskocher", "Offenes Feuer"] as const;
+const timeFilters = ["alle", "15", "30"] as const;
 
 export default function RecipesPage() {
-  const [method, setMethod] = useState<(typeof methodFilters)[number]>("Alle");
+  const { lang, t } = useI18n();
+  const [method, setMethod] = useState<(typeof methodFilters)[number]>("alle");
   const [maxTime, setMaxTime] = useState<string>("alle");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Recipe | null>(null);
@@ -281,7 +287,7 @@ export default function RecipesPage() {
   >(null);
   const removeMutation = trpc.recipes.remove.useMutation({
     onSuccess: () => utils.recipes.list.invalidate(),
-    onError: () => toast.error("Löschen fehlgeschlagen"),
+    onError: () => toast.error(t.common.deleteFailed),
   });
 
   // Eigene Rezepte zuoberst, dann die eingebauten
@@ -292,35 +298,31 @@ export default function RecipesPage() {
 
   const filtered = useMemo(() => {
     return allRecipes.filter(r => {
-      if (method !== "Alle" && r.method !== method && r.method !== "Beides")
+      if (method !== "alle" && r.method !== method && r.method !== "Beides")
         return false;
       if (maxTime !== "alle" && r.timeMinutes > Number(maxTime)) return false;
       if (search.trim()) {
         const q = search.trim().toLowerCase();
-        const inName = r.name.toLowerCase().includes(q);
+        const inName = pick(r.name, lang).toLowerCase().includes(q);
         const inIngredients = r.ingredients.some(i =>
-          i.toLowerCase().includes(q)
+          pick(i, lang).toLowerCase().includes(q)
         );
         if (!inName && !inIngredients) return false;
       }
       return true;
     });
-  }, [allRecipes, method, maxTime, search]);
+  }, [allRecipes, method, maxTime, search, lang]);
 
   const customRowFor = (recipe: Recipe): CustomRecipeRow | undefined =>
     customQuery.data?.find(row => `eigenes-${row.id}` === recipe.id);
 
   return (
     <div className="container py-6">
-      <PageHeader
-        title="Campfire-Rezeptbuch"
-        subtitle="Einfache Rezepte für Gaskocher und offenes Feuer – filterbar nach Zutaten und Zeit."
-      />
+      <PageHeader title={t.recipes.title} subtitle={t.recipes.subtitle} />
 
       <div className="mb-4 flex items-center gap-2 rounded-lg bg-accent/60 px-3.5 py-2.5 text-sm text-accent-foreground">
         <WifiOff className="h-4 w-4 shrink-0" aria-hidden="true" />
-        Alle Rezepte sind in der App gespeichert und ohne Internetverbindung
-        nutzbar.
+        {t.recipes.offlineNote}
       </div>
 
       {/* Filter */}
@@ -332,17 +334,17 @@ export default function RecipesPage() {
           />
           <Input
             className="pl-9"
-            placeholder="Nach Rezept oder Zutat suchen (z. B. «Bohnen») …"
+            placeholder={t.recipes.searchPlaceholder}
             value={search}
             onChange={e => setSearch(e.target.value)}
-            aria-label="Nach Rezept oder Zutat suchen"
+            aria-label={t.recipes.searchAria}
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div
             className="flex gap-1.5"
             role="group"
-            aria-label="Nach Kochmethode filtern"
+            aria-label={t.recipes.methodFilterAria}
           >
             {methodFilters.map(m => (
               <button
@@ -357,7 +359,9 @@ export default function RecipesPage() {
                 )}
                 aria-pressed={method === m}
               >
-                {m}
+                {m === "alle"
+                  ? t.recipes.filterAll
+                  : pick(RECIPE_METHOD_LABELS[m], lang)}
               </button>
             ))}
           </div>
@@ -367,22 +371,24 @@ export default function RecipesPage() {
           <div
             className="flex gap-1.5"
             role="group"
-            aria-label="Nach Zubereitungszeit filtern"
+            aria-label={t.recipes.timeFilterAria}
           >
-            {timeFilters.map(t => (
+            {timeFilters.map(id => (
               <button
-                key={t.id}
+                key={id}
                 type="button"
-                onClick={() => setMaxTime(t.id)}
+                onClick={() => setMaxTime(id)}
                 className={cn(
                   "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-                  maxTime === t.id
+                  maxTime === id
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:text-foreground"
                 )}
-                aria-pressed={maxTime === t.id}
+                aria-pressed={maxTime === id}
               >
-                {t.label}
+                {id === "alle"
+                  ? t.recipes.timeAny
+                  : t.recipes.timeMax(Number(id))}
               </button>
             ))}
           </div>
@@ -398,7 +404,7 @@ export default function RecipesPage() {
           onClick={() => setEditorState("neu")}
         >
           <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          Eigenes Rezept erstellen
+          {t.recipes.createOwn}
         </Button>
       )}
 
@@ -410,12 +416,12 @@ export default function RecipesPage() {
             type="button"
             onClick={() => setSelected(recipe)}
             className="flex flex-col items-start gap-2.5 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
-            aria-label={`Rezept ${recipe.name} öffnen`}
+            aria-label={t.recipes.openRecipeAria(pick(recipe.name, lang))}
           >
             {recipe.image && (
               <img
                 src={recipe.image}
-                alt={`Foto: ${recipe.name}`}
+                alt={t.recipes.photoAlt(pick(recipe.name, lang))}
                 loading="lazy"
                 className="aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
               />
@@ -430,28 +436,36 @@ export default function RecipesPage() {
               </span>
               <span className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-                {recipe.timeMinutes} Min.
+                {t.recipes.minutes(recipe.timeMinutes)}
               </span>
             </div>
-            <p className="font-semibold">{recipe.name}</p>
+            <p className="font-semibold">{pick(recipe.name, lang)}</p>
             <div className="flex flex-wrap gap-1.5">
               {customRowFor(recipe) && (
                 <Badge className="gap-1 border-0 bg-primary/15 text-primary">
                   <ChefHat className="h-3 w-3" aria-hidden="true" />
-                  Eigenes
+                  {t.recipes.ownBadge}
                 </Badge>
               )}
-              <Badge variant="secondary">{recipe.method}</Badge>
-              {recipe.onePot && <Badge variant="outline">One-Pot</Badge>}
+              <Badge variant="secondary">
+                {pick(RECIPE_METHOD_LABELS[recipe.method], lang)}
+              </Badge>
+              {recipe.onePot && (
+                <Badge variant="outline">{t.recipes.onePotBadge}</Badge>
+              )}
               {recipe.kidFriendly && (
                 <Badge variant="outline" className="gap-1">
                   <Baby className="h-3 w-3" aria-hidden="true" />
-                  Kinder
+                  {t.recipes.kidsBadge}
                 </Badge>
               )}
             </div>
             <p className="line-clamp-2 text-sm text-muted-foreground">
-              {recipe.ingredients.slice(0, 4).join(", ")} …
+              {recipe.ingredients
+                .slice(0, 4)
+                .map(i => pick(i, lang))
+                .join(", ")}{" "}
+              …
             </p>
           </button>
         ))}
@@ -459,7 +473,7 @@ export default function RecipesPage() {
 
       {filtered.length === 0 && (
         <p className="py-10 text-center text-muted-foreground">
-          Keine Rezepte gefunden – versuche andere Filter oder Suchbegriffe.
+          {t.recipes.emptyState}
         </p>
       )}
 
@@ -473,18 +487,20 @@ export default function RecipesPage() {
             <>
               <DialogHeader>
                 <DialogTitle className="font-serif text-xl">
-                  {selected.name}
+                  {pick(selected.name, lang)}
                 </DialogTitle>
                 <DialogDescription className="flex flex-wrap items-center gap-3">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-                    {selected.timeMinutes} Min.
+                    {t.recipes.minutes(selected.timeMinutes)}
                   </span>
                   <span className="flex items-center gap-1">
                     <Users className="h-3.5 w-3.5" aria-hidden="true" />
-                    {selected.servings} Portionen
+                    {t.recipes.servings(selected.servings)}
                   </span>
-                  <span>{selected.method}</span>
+                  <span>
+                    {pick(RECIPE_METHOD_LABELS[selected.method], lang)}
+                  </span>
                 </DialogDescription>
               </DialogHeader>
 
@@ -492,23 +508,23 @@ export default function RecipesPage() {
                 {selected.image && (
                   <img
                     src={selected.image}
-                    alt={`Foto: ${selected.name}`}
+                    alt={t.recipes.photoAlt(pick(selected.name, lang))}
                     loading="lazy"
                     className="aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
                   />
                 )}
                 <div>
                   <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                    Zutaten
+                    {t.recipes.ingredientsTitle}
                   </h3>
                   <ul className="grid grid-cols-2 gap-1 text-sm">
-                    {selected.ingredients.map(i => (
-                      <li key={i} className="flex gap-2">
+                    {selected.ingredients.map((i, idx) => (
+                      <li key={idx} className="flex gap-2">
                         <span
                           className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
                           aria-hidden="true"
                         />
-                        {i}
+                        {pick(i, lang)}
                       </li>
                     ))}
                   </ul>
@@ -516,7 +532,7 @@ export default function RecipesPage() {
 
                 <div>
                   <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                    Zubereitung
+                    {t.recipes.stepsTitle}
                   </h3>
                   <ol className="space-y-2.5">
                     {selected.steps.map((step, i) => (
@@ -524,7 +540,7 @@ export default function RecipesPage() {
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                           {i + 1}
                         </span>
-                        <p className="text-sm">{step}</p>
+                        <p className="text-sm">{pick(step, lang)}</p>
                       </li>
                     ))}
                   </ol>
@@ -533,9 +549,9 @@ export default function RecipesPage() {
                 {selected.tip && (
                   <div className="rounded-lg bg-accent/60 p-3">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Tipp
+                      {t.recipes.tipTitle}
                     </p>
-                    <p className="mt-1 text-sm">{selected.tip}</p>
+                    <p className="mt-1 text-sm">{pick(selected.tip, lang)}</p>
                   </div>
                 )}
 
@@ -555,7 +571,7 @@ export default function RecipesPage() {
                       }}
                     >
                       <Pencil className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                      Bearbeiten
+                      {t.common.edit}
                     </Button>
                     <Button
                       variant="outline"
@@ -565,7 +581,9 @@ export default function RecipesPage() {
                         const row = customRowFor(selected);
                         if (
                           row &&
-                          confirm(`Rezept «${selected.name}» wirklich löschen?`)
+                          confirm(
+                            t.recipes.deleteConfirm(pick(selected.name, lang))
+                          )
                         ) {
                           removeMutation.mutate({ id: row.id });
                           setSelected(null);
@@ -573,7 +591,7 @@ export default function RecipesPage() {
                       }}
                     >
                       <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                      Löschen
+                      {t.common.delete}
                     </Button>
                   </div>
                 )}

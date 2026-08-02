@@ -12,7 +12,10 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { recipes } from "@/data/recipes";
 import { customRecipeToRecipe } from "@/lib/customRecipesClient";
+import { RECIPE_METHOD_LABELS } from "@shared/customRecipes";
 import { expiryInfo, expirySortKey, type ExpiryState } from "@shared/food";
+import { pick } from "@shared/i18n";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 /** Chip-Stile je Haltbarkeits-Zustand. */
@@ -23,13 +26,15 @@ const expiryStyles: Record<ExpiryState, string> = {
   ok: "border-border bg-card",
 };
 
-/** Einfache Normalisierung für den Zutaten-Abgleich. */
+/** Einfache Normalisierung für den Zutaten-Abgleich (Umlaute/Akzente falten). */
 function normalize(s: string): string {
   return s
     .toLowerCase()
     .replace(/ä/g, "a")
     .replace(/ö/g, "o")
     .replace(/ü/g, "u")
+    .replace(/é|è|ê/g, "e")
+    .replace(/à|â/g, "a")
     .replace(/[^a-z]/g, "");
 }
 
@@ -50,6 +55,7 @@ function matchScore(foodNames: string[], ingredients: string[]): number {
 }
 
 export default function FoodPage() {
+  const { lang, t } = useI18n();
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
   const query = trpc.food.list.useQuery(undefined, {
@@ -65,7 +71,7 @@ export default function FoodPage() {
       setName("");
       setExpiryDate("");
     },
-    onError: () => toast.error("Eintrag konnte nicht gespeichert werden"),
+    onError: () => toast.error(t.food.addFailed),
   });
   const removeMutation = trpc.food.remove.useMutation({
     onSuccess: () => utils.food.list.invalidate(),
@@ -87,21 +93,27 @@ export default function FoodPage() {
       ...recipes,
     ];
     return pool
-      .map(r => ({ recipe: r, score: matchScore(foodNames, r.ingredients) }))
+      .map(r => ({
+        recipe: r,
+        score: matchScore(
+          foodNames,
+          r.ingredients.map(i => pick(i, lang))
+        ),
+      }))
       .filter(s => s.score > 0)
       .sort(
         (a, b) =>
           b.score - a.score || a.recipe.timeMinutes - b.recipe.timeMinutes
       )
       .slice(0, 5);
-  }, [foodNames, customRecipesQuery.data]);
+  }, [foodNames, customRecipesQuery.data, lang]);
 
   if (loading) {
     return (
       <div className="container flex justify-center py-16">
         <Loader2
           className="h-6 w-6 animate-spin text-muted-foreground"
-          aria-label="Lädt"
+          aria-label={t.common.loading}
         />
       </div>
     );
@@ -110,11 +122,8 @@ export default function FoodPage() {
   if (!isAuthenticated) {
     return (
       <div className="container py-6">
-        <PageHeader
-          title="Kühlbox-Inventar"
-          subtitle="Was ist noch da? Erfasse deine Vorräte und erhalte passende Rezeptvorschläge."
-        />
-        <LoginPrompt feature="dein Kühlbox-Inventar" />
+        <PageHeader title={t.food.title} subtitle={t.food.subtitleLoggedOut} />
+        <LoginPrompt feature={t.food.loginFeature} />
       </div>
     );
   }
@@ -124,16 +133,13 @@ export default function FoodPage() {
     (a, b) => expirySortKey(a.expiryDate) - expirySortKey(b.expiryDate)
   );
   const urgentCount = items.filter(i => {
-    const info = expiryInfo(i.expiryDate, today);
+    const info = expiryInfo(i.expiryDate, today, lang);
     return info && info.state !== "ok";
   }).length;
 
   return (
     <div className="container max-w-2xl py-6">
-      <PageHeader
-        title="Kühlbox-Inventar"
-        subtitle="Was ist noch da? Erfasse deine Vorräte und erhalte passende One-Pot-Rezeptvorschläge."
-      />
+      <PageHeader title={t.food.title} subtitle={t.food.subtitle} />
 
       <form
         className="mb-2 flex gap-2"
@@ -147,10 +153,10 @@ export default function FoodPage() {
         }}
       >
         <Input
-          placeholder="z. B. Tomaten, Käse, Bohnen …"
+          placeholder={t.food.addPlaceholder}
           value={name}
           onChange={e => setName(e.target.value)}
-          aria-label="Lebensmittel hinzufügen"
+          aria-label={t.food.addNameAria}
         />
         <Input
           type="date"
@@ -158,26 +164,23 @@ export default function FoodPage() {
           value={expiryDate}
           min={today}
           onChange={e => setExpiryDate(e.target.value)}
-          aria-label="Mindesthaltbarkeitsdatum (optional)"
+          aria-label={t.food.expiryAria}
         />
         <Button
           type="submit"
           disabled={addMutation.isPending || !name.trim()}
-          aria-label="Lebensmittel speichern"
+          aria-label={t.food.submitAria}
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
         </Button>
       </form>
-      <p className="mb-5 text-xs text-muted-foreground">
-        Datum = Mindesthaltbarkeit (optional). Bald ablaufende Vorräte rutschen
-        nach vorne und werden markiert.
-      </p>
+      <p className="mb-5 text-xs text-muted-foreground">{t.food.dateHint}</p>
 
       {query.isLoading ? (
         <div className="flex justify-center py-8">
           <Loader2
             className="h-6 w-6 animate-spin text-muted-foreground"
-            aria-label="Lädt"
+            aria-label={t.common.loading}
           />
         </div>
       ) : items.length > 0 ? (
@@ -185,14 +188,14 @@ export default function FoodPage() {
           {urgentCount > 0 && (
             <p className="mb-3 rounded-lg bg-accent px-4 py-2.5 text-sm text-accent-foreground">
               {urgentCount === 1
-                ? "Ein Vorrat sollte bald verbraucht werden"
-                : `${urgentCount} Vorräte sollten bald verbraucht werden`}{" "}
-              – die Rezeptvorschläge unten helfen dabei.
+                ? t.food.urgentOne
+                : t.food.urgentMany(urgentCount)}
+              {t.food.urgentSuffix}
             </p>
           )}
           <div className="mb-8 flex flex-wrap gap-2">
             {items.map(item => {
-              const info = expiryInfo(item.expiryDate, today);
+              const info = expiryInfo(item.expiryDate, today, lang);
               return (
                 <span
                   key={item.id}
@@ -218,7 +221,7 @@ export default function FoodPage() {
                     type="button"
                     onClick={() => removeMutation.mutate({ id: item.id })}
                     className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive"
-                    aria-label={`${item.name} entfernen`}
+                    aria-label={t.food.removeAria(item.name)}
                   >
                     <Trash2 className="h-3 w-3" aria-hidden="true" />
                   </button>
@@ -233,10 +236,9 @@ export default function FoodPage() {
             className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
             aria-hidden="true"
           />
-          <p className="font-medium">Kühlbox noch leer</p>
+          <p className="font-medium">{t.food.emptyTitle}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Trage ein, was du dabei hast – wir schlagen dir passende Rezepte
-            vor.
+            {t.food.emptyText}
           </p>
         </div>
       )}
@@ -246,42 +248,44 @@ export default function FoodPage() {
         <>
           <h2 className="mb-1 flex items-center gap-2 font-serif text-lg font-semibold">
             <ChefHat className="h-5 w-5 text-primary" aria-hidden="true" />
-            Das kannst du damit kochen
+            {t.food.suggestionsTitle}
           </h2>
           <p className="mb-4 text-sm text-muted-foreground">
-            Sortiert danach, wie viele deiner Vorräte im Rezept vorkommen.
+            {t.food.suggestionsSubtitle}
           </p>
           <div className="space-y-3">
             {suggestions.map(({ recipe, score }) => (
               <Card key={recipe.id}>
                 <CardContent className="pt-6">
                   <div className="mb-1.5 flex items-center justify-between">
-                    <p className="font-semibold">{recipe.name}</p>
+                    <p className="font-semibold">{pick(recipe.name, lang)}</p>
                     <Badge variant="secondary">
-                      {score} {score === 1 ? "Zutat" : "Zutaten"} vorhanden
+                      {t.food.matchCount(score)}
                     </Badge>
                   </div>
                   <p className="mb-2 text-sm text-muted-foreground">
-                    {recipe.method} · {recipe.timeMinutes} Min. ·{" "}
-                    {recipe.servings} Portionen
-                    {recipe.onePot && " · One-Pot"}
+                    {pick(RECIPE_METHOD_LABELS[recipe.method], lang)} ·{" "}
+                    {t.food.minutes(recipe.timeMinutes)} ·{" "}
+                    {t.food.servings(recipe.servings)}
+                    {recipe.onePot && t.food.onePotSuffix}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Zutaten: {recipe.ingredients.join(", ")}
+                    {t.food.ingredientsPrefix}{" "}
+                    {recipe.ingredients.map(i => pick(i, lang)).join(", ")}
                   </p>
                 </CardContent>
               </Card>
             ))}
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
-            Alle Anleitungen findest du im{" "}
+            {t.food.bookPrefix}
             <Link
               href="/rezepte"
               className="font-medium text-primary hover:underline"
             >
-              Campfire-Rezeptbuch
+              {t.food.bookLink}
             </Link>
-            .
+            {t.food.bookSuffix}
           </p>
         </>
       )}

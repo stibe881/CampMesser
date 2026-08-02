@@ -10,6 +10,7 @@ import { knotCategoryLabels, knots } from "@/data/knots";
 import { groupLabels, modules } from "@/data/modules";
 import { natureEntries } from "@/data/nature";
 import { recipes } from "@/data/recipes";
+import { RECIPE_METHOD_LABELS } from "@shared/customRecipes";
 import { LOCALE_TAGS, l4, pick, type L4, type Language } from "@shared/i18n";
 
 /** Kategorie-Schlüssel eines Treffers – das Anzeige-Label liefert das Wörterbuch. */
@@ -132,12 +133,12 @@ function buildIndex(lang: Language): IndexEntry[] {
       p(r.name),
       "recipes",
       "/rezepte",
-      `${p(r.method)} · ${r.timeMinutes} ${p(MIN_ABBR)} · ${p(INGREDIENTS_LABEL)}: ${r.ingredients
+      `${p(RECIPE_METHOD_LABELS[r.method])} · ${r.timeMinutes} ${p(MIN_ABBR)} · ${p(INGREDIENTS_LABEL)}: ${r.ingredients
         .slice(0, 5)
         .map(i => p(i))
         .join(", ")}`,
       [
-        p(r.method),
+        p(RECIPE_METHOD_LABELS[r.method]),
         ...r.ingredients.map(i => p(i)),
         ...r.steps.map(s => p(s)),
         r.tip ? p(r.tip) : undefined,
