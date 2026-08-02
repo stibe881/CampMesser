@@ -2036,6 +2036,9 @@ export const de = {
     favoriteSaved: "Favorit",
     favoritesEmpty:
       "Noch keine Favoriten – tippe auf das Herz eines Rezepts, um es hier zu sammeln.",
+    randomButton: "Würfeln",
+    randomAria: "Zufälliges Rezept aus der gefilterten Auswahl öffnen",
+    randomAgain: "Nochmals würfeln",
     cookingMode: "Kochmodus",
     cookingModeAria: (name: string) => `Kochmodus für ${name} starten`,
     cookingStepProgress: (current: number, total: number) =>

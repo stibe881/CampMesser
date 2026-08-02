@@ -1955,6 +1955,9 @@ export const en: Translation = {
     favoriteSaved: "Favourite",
     favoritesEmpty:
       "No favourites yet – tap the heart on a recipe to collect it here.",
+    randomButton: "Surprise me",
+    randomAria: "Open a random recipe from the filtered selection",
+    randomAgain: "Roll again",
     cookingMode: "Cooking mode",
     cookingModeAria: (name: string) => `Start cooking mode for ${name}`,
     cookingStepProgress: (current: number, total: number) =>

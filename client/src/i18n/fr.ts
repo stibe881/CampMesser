@@ -2025,6 +2025,9 @@ export const fr: Translation = {
     favoriteSaved: "Favori",
     favoritesEmpty:
       "Pas encore de favoris – touche le cœur d'une recette pour la retrouver ici.",
+    randomButton: "Au hasard",
+    randomAria: "Ouvrir une recette au hasard dans la sélection filtrée",
+    randomAgain: "Relancer le dé",
     cookingMode: "Mode cuisine",
     cookingModeAria: (name: string) => `Démarrer le mode cuisine pour ${name}`,
     cookingStepProgress: (current: number, total: number) =>

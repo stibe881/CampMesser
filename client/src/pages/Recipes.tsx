@@ -8,6 +8,7 @@ import {
   ChevronUp,
   Clock,
   CookingPot,
+  Dices,
   Flame,
   Heart,
   ImagePlus,
@@ -560,6 +561,8 @@ export default function RecipesPage() {
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   // Kochmodus-Vollbild fürs aktuell geöffnete Rezept
   const [cookingMode, setCookingMode] = useState(false);
+  // Detail-Dialog wurde über den Würfel geöffnet → «Nochmals würfeln» anbieten
+  const [diceMode, setDiceMode] = useState(false);
 
   // Favoriten: localStorage als schnelle Quelle, Geräte-Sync fürs Konto
   const [favorites, setFavorites] = useState<string[]>(() =>
@@ -649,6 +652,22 @@ export default function RecipesPage() {
 
   const customRowFor = (recipe: Recipe): CustomRecipeRow | undefined =>
     customQuery.data?.find(row => `eigenes-${row.id}` === recipe.id);
+
+  /**
+   * Zufallsrezept (#164): zieht ein zufälliges Rezept aus der aktuell
+   * gefilterten Menge und öffnet dessen Detail-Dialog. Beim erneuten
+   * Würfeln wird das gerade offene Rezept ausgeschlossen – nie zweimal
+   * dasselbe hintereinander (ausser es gibt nur eines).
+   */
+  const rollRandomRecipe = () => {
+    const pool =
+      selected && filtered.length > 1
+        ? filtered.filter(r => r.id !== selected.id)
+        : filtered;
+    if (pool.length === 0) return;
+    setDiceMode(true);
+    setSelected(pool[Math.floor(Math.random() * pool.length)]);
+  };
 
   return (
     <div className="container py-6">
@@ -747,6 +766,20 @@ export default function RecipesPage() {
             />
             {t.recipes.favoritesFilter}
           </button>
+          <span className="text-border" aria-hidden="true">
+            ·
+          </span>
+          {/* Würfel: zufälliges Rezept aus der gefilterten Menge öffnen */}
+          <button
+            type="button"
+            onClick={rollRandomRecipe}
+            disabled={filtered.length === 0}
+            aria-label={t.recipes.randomAria}
+            className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50 disabled:hover:text-muted-foreground"
+          >
+            <Dices className="h-3.5 w-3.5" aria-hidden="true" />
+            {t.recipes.randomButton}
+          </button>
         </div>
       </div>
 
@@ -791,7 +824,10 @@ export default function RecipesPage() {
             </button>
             <button
               type="button"
-              onClick={() => setSelected(recipe)}
+              onClick={() => {
+                setDiceMode(false);
+                setSelected(recipe);
+              }}
               className="flex h-full w-full flex-col items-start gap-2.5 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
               aria-label={t.recipes.openRecipeAria(pick(recipe.name, lang))}
             >
@@ -869,6 +905,7 @@ export default function RecipesPage() {
           if (!open) {
             setSelected(null);
             setCookingMode(false);
+            setDiceMode(false);
           }
         }}
       >
@@ -925,6 +962,18 @@ export default function RecipesPage() {
                   <CookingPot className="mr-1.5 h-4 w-4" aria-hidden="true" />
                   {t.recipes.cookingMode}
                 </Button>
+                {/* Nur nach Würfel-Öffnung: direkt das nächste Rezept ziehen */}
+                {diceMode && filtered.length > 1 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-fit"
+                    onClick={rollRandomRecipe}
+                  >
+                    <Dices className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    {t.recipes.randomAgain}
+                  </Button>
+                )}
               </div>
 
               <div className="space-y-4">
