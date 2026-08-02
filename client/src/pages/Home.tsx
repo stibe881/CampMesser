@@ -23,7 +23,29 @@ import {
   type HourlyWeather,
 } from "@shared/weather";
 import { getSunTimes } from "@/lib/sun";
-import { useEffect, useRef, useState } from "react";
+import {
+  dailyTip,
+  dayOfYear,
+  type DailyTipIcon,
+  type DayWeather,
+} from "@shared/dailyTips";
+import { getMoonInfo, stargazingQuality } from "@shared/moon";
+import { isShowerActive, meteorShowers } from "@shared/astro";
+import { recipes } from "@/data/recipes";
+import {
+  Cable,
+  CloudRain,
+  CookingPot,
+  Cross,
+  Droplets,
+  Lightbulb,
+  Moon,
+  Sparkles,
+  Sun,
+  TreePine,
+  Users,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getRecentModules } from "@/components/AppShell";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { searchKnowledge, searchOwnContent } from "@/lib/globalSearch";
@@ -93,7 +115,6 @@ interface HomeWeather {
   alert: { title: string; severity: "info" | "warnung" | "gefahr" } | null;
 }
 
-/** Kompaktes Wetter-Widget: aktuelle Lage + höchste Warnung am Standort. */
 /** Countdown zum nächsten geplanten Trip aus dem Reise-Tagebuch. */
 function NextTripWidget() {
   const t = useT();
@@ -168,9 +189,21 @@ function NextTripWidget() {
   );
 }
 
-function WeatherWidget() {
-  const { lang, t } = useI18n();
+/**
+ * Wetter der Startseite EINMAL laden und teilen: das Wetter-Widget zeigt die
+ * aktuelle Lage + Warnungen, der «Tipp des Tages» nutzt die daily-Aggregate
+ * (heute/morgen) aus derselben Antwort – kein doppelter Fetch.
+ */
+function useHomeWeather(lang: ReturnType<typeof useI18n>["lang"]): {
+  weather: HomeWeather | null;
+  today?: DayWeather;
+  tomorrow?: DayWeather;
+} {
   const [weather, setWeather] = useState<HomeWeather | null>(null);
+  const [daily, setDaily] = useState<{
+    today?: DayWeather;
+    tomorrow?: DayWeather;
+  }>({});
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -185,6 +218,8 @@ function WeatherWidget() {
             current: "temperature_2m,weather_code,wind_speed_10m",
             hourly:
               "temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,weather_code,cape,cloud_cover",
+            daily:
+              "weather_code,temperature_2m_max,precipitation_probability_max",
           });
           const res = await fetch(
             `https://api.open-meteo.com/v1/forecast?${params.toString()}`
@@ -216,8 +251,20 @@ function WeatherWidget() {
               ? { title: alerts[0].title, severity: alerts[0].severity }
               : null,
           });
+          const dayAt = (i: number): DayWeather | undefined => {
+            const code = json.daily?.weather_code?.[i];
+            const tMax = json.daily?.temperature_2m_max?.[i];
+            if (typeof code !== "number" || typeof tMax !== "number")
+              return undefined;
+            return {
+              code,
+              tMax,
+              precipProb: json.daily?.precipitation_probability_max?.[i] ?? 0,
+            };
+          };
+          setDaily({ today: dayAt(0), tomorrow: dayAt(1) });
         } catch {
-          // Ohne Netz bleibt das Widget einfach ausgeblendet
+          // Ohne Netz bleiben Wetter-Widget und Wetter-Tipps einfach aus
         }
       },
       () => {},
@@ -225,6 +272,11 @@ function WeatherWidget() {
     );
   }, [lang]);
 
+  return { weather, today: daily.today, tomorrow: daily.tomorrow };
+}
+
+function WeatherWidget({ weather }: { weather: HomeWeather | null }) {
+  const { t } = useI18n();
   if (!weather) return null;
   return (
     <Link
@@ -267,6 +319,78 @@ function WeatherWidget() {
             {t.home.weatherNoAlerts}
           </span>
         )}
+      </span>
+      <ArrowRight
+        className="h-4 w-4 shrink-0 text-muted-foreground/50"
+        aria-hidden="true"
+      />
+    </Link>
+  );
+}
+
+/** Icon-Schlüssel aus shared/dailyTips.ts auf lucide-Komponenten mappen. */
+const TIP_ICONS: Record<DailyTipIcon, typeof Sparkles> = {
+  sparkles: Sparkles,
+  droplets: Droplets,
+  cloudRain: CloudRain,
+  moon: Moon,
+  sun: Sun,
+  cookingPot: CookingPot,
+  cable: Cable,
+  cross: Cross,
+  users: Users,
+  treePine: TreePine,
+};
+
+/**
+ * «Tipp des Tages»: kleine Karte mit genau einem Tages-Tipp aus Wetter
+ * (geteilte Daten des Wetter-Widgets), Mond/Astro (reine Berechnung) und
+ * Datum – verlinkt aufs passende Modul. Ohne Standort/Wetter greifen die
+ * wetterfreien Regeln bzw. die Fallback-Rotation.
+ */
+function TipOfDayWidget({
+  today,
+  tomorrow,
+}: {
+  today?: DayWeather;
+  tomorrow?: DayWeather;
+}) {
+  const { lang, t } = useI18n();
+  const tip = useMemo(() => {
+    const now = new Date();
+    const moon = getMoonInfo(now, lang);
+    const active = meteorShowers.find(s => isShowerActive(s, now));
+    const doy = dayOfYear(now);
+    return dailyTip(
+      {
+        weatherToday: today,
+        weatherTomorrow: tomorrow,
+        moonIllumination: moon.illumination,
+        stargazingQuality: stargazingQuality(moon.illumination, lang).score,
+        activeMeteorShower: active ? pick(active.name, lang) : undefined,
+        month: now.getMonth() + 1,
+        dayOfYear: doy,
+        recipeOfDay: pick(recipes[doy % recipes.length].name, lang),
+      },
+      lang
+    );
+  }, [today, tomorrow, lang]);
+  const Icon = TIP_ICONS[tip.icon];
+  return (
+    <Link
+      href={tip.path}
+      className="mb-6 flex items-center gap-4 rounded-xl border border-border/70 bg-card p-4 shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
+      aria-label={t.home.tipOfDayAria(tip.text)}
+    >
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+        <Icon className="h-5.5 w-5.5" aria-hidden="true" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <Lightbulb className="h-3 w-3" aria-hidden="true" />
+          {t.home.tipOfDayTitle}
+        </span>
+        <span className="mt-0.5 block text-sm">{tip.text}</span>
       </span>
       <ArrowRight
         className="h-4 w-4 shrink-0 text-muted-foreground/50"
@@ -426,6 +550,7 @@ function RecentModules({ hidden }: { hidden: string[] }) {
 
 export default function Home() {
   const { lang, t } = useI18n();
+  const homeWeather = useHomeWeather(lang);
   const [sunTimes, setSunTimes] = useState<{
     sunrise: Date;
     sunset: Date;
@@ -598,7 +723,11 @@ export default function Home() {
       {/* Modul-Grid */}
       <section className="container py-8 md:py-12">
         <NextTripWidget />
-        <WeatherWidget />
+        <WeatherWidget weather={homeWeather.weather} />
+        <TipOfDayWidget
+          today={homeWeather.today}
+          tomorrow={homeWeather.tomorrow}
+        />
         <KnowledgeSearch />
         <RecentModules hidden={hidden} />
         <div className="mb-4 flex items-center justify-end">

@@ -66,6 +66,8 @@ export const en: Translation = {
     weatherAria: (temp, label) =>
       `Current weather: ${temp} degrees, ${label} – open the weather module`,
     weatherNoAlerts: "No severe weather warnings at your location",
+    tipOfDayTitle: "Tip of the day",
+    tipOfDayAria: (text: string) => `Tip of the day: ${text}`,
     searchPlaceholder: "Search knowledge: tick bite, clove hitch, recipes …",
     searchAria: "Search the knowledge modules",
     searchNoResults:

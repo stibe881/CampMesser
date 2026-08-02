@@ -67,6 +67,8 @@ export const de = {
     weatherAria: (temp: number, label: string) =>
       `Aktuelles Wetter: ${temp} Grad, ${label} – zum Wetter-Modul`,
     weatherNoAlerts: "Keine Unwetterwarnungen an deinem Standort",
+    tipOfDayTitle: "Tipp des Tages",
+    tipOfDayAria: (text: string) => `Tipp des Tages: ${text}`,
     searchPlaceholder: "Wissen durchsuchen: Zeckenbiss, Mastwurf, Rezepte …",
     searchAria: "Wissensmodule durchsuchen",
     searchNoResults:
