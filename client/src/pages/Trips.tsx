@@ -11,6 +11,7 @@ import {
   Tent,
   Trash2,
   Trophy,
+  UtensilsCrossed,
 } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
@@ -427,6 +428,25 @@ export default function TripsPage() {
                       {trip.packListId != null && (
                         <PackProgress listId={trip.packListId} />
                       )}
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                      >
+                        <Link
+                          href={`/menueplan/${trip.id}`}
+                          aria-label={t.trips.menuPlanAria(
+                            trip.title || placeName(trip)
+                          )}
+                        >
+                          <UtensilsCrossed
+                            className="mr-1.5 h-4 w-4"
+                            aria-hidden="true"
+                          />
+                          {t.trips.menuPlanButton}
+                        </Link>
+                      </Button>
                       {trip.notes && (
                         <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
                           {trip.notes}

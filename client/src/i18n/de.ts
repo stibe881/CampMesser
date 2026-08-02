@@ -955,6 +955,8 @@ export const de = {
           ? "Morgen geht's los!"
           : `Noch ${days} Tage`,
     nightsCount: (n: number) => (n === 1 ? "1 Nacht" : `${n} Nächte`),
+    menuPlanButton: "Menüplan",
+    menuPlanAria: (name: string) => `Menüplan für ${name} öffnen`,
     deletePlannedAria: (name: string) => `Geplanten Aufenthalt ${name} löschen`,
     deleteEntryAria: (name: string) => `Eintrag ${name} löschen`,
     entriesTitle: "Deine Aufenthalte",
@@ -1176,6 +1178,36 @@ export const de = {
         : `${n} Zutaten auf die Einkaufsliste gesetzt`,
     openList: "Zur Einkaufsliste",
     addIngredients: "Zutaten auf die Einkaufsliste",
+  },
+  menuPlan: {
+    title: "Menüplan",
+    subtitle:
+      "Plane für jeden Tag deines Aufenthalts, was auf den Campingtisch kommt.",
+    loginFeature: "deinen Menüplan",
+    notFoundTitle: "Aufenthalt nicht gefunden",
+    notFoundText:
+      "Dieser Aufenthalt existiert nicht oder gehört nicht zu deinem Konto.",
+    backToTrips: "Zum Reise-Tagebuch",
+    daysCount: (n: number) => (n === 1 ? "1 Tag" : `${n} Tage`),
+    slotEmpty: "Noch nichts geplant",
+    planSlotAria: (meal: string, day: string) => `${meal} am ${day} planen`,
+    clearSlotAria: (meal: string, day: string) => `${meal} am ${day} leeren`,
+    dialogTitle: (meal: string) => `${meal} planen`,
+    dialogDescription:
+      "Wähle ein Rezept aus dem Rezeptbuch oder trage einen Freitext ein.",
+    searchPlaceholder: "Rezept suchen …",
+    searchAria: "Rezept suchen",
+    chooseRecipeAria: (name: string) => `Rezept ${name} wählen`,
+    minutes: (n: number) => `${n} Min.`,
+    ownBadge: "Eigenes",
+    noRecipesFound: "Keine Rezepte gefunden – nutze den Freitext unten.",
+    freeTextLabel: "Oder Freitext",
+    freeTextPlaceholder: "z. B. Reste vom Vortag, Pizzeria im Dorf …",
+    freeTextSave: "Freitext übernehmen",
+    saved: "Menüplan aktualisiert",
+    addIngredients: "Zutaten der geplanten Rezepte auf die Einkaufsliste",
+    noPlannedRecipes:
+      "Noch keine Rezepte zugewiesen – wähle zuerst Rezepte in den Mahlzeiten-Slots.",
   },
   family: {
     title: "Familien-Modus",

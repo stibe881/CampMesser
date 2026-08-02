@@ -12,11 +12,13 @@ import {
   InsertInventoryItem,
   InsertPackItem,
   InsertPackList,
+  InsertMenuEntry,
   InsertPowerConsumer,
   InsertShoppingItem,
   InsertTripLog,
   InsertUser,
   inventoryItems,
+  menuEntries,
   packItems,
   packLists,
   powerConsumers,
@@ -382,11 +384,70 @@ export async function addTripLog(data: InsertTripLog) {
   return result.insertId;
 }
 
+/** Einzelnen Tagebuch-/Trip-Eintrag laden (nur eigener). */
+export async function getTripLog(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripLogs)
+    .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
 export async function deleteTripLog(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db
     .delete(tripLogs)
     .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
+  // Zugehörige Menüplan-Einträge mitlöschen (kein DB-FK, daher manuell)
+  await db
+    .delete(menuEntries)
+    .where(and(eq(menuEntries.tripId, id), eq(menuEntries.userId, userId)));
+}
+
+// ── Menüplan pro Trip ──
+export async function getMenuEntries(tripId: number, userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(menuEntries)
+    .where(and(eq(menuEntries.tripId, tripId), eq(menuEntries.userId, userId)))
+    .orderBy(menuEntries.day, menuEntries.id);
+}
+
+/** Eintrag pro Tag+Mahlzeit setzen oder ersetzen (Upsert über Unique-Index). */
+export async function upsertMenuEntry(data: InsertMenuEntry) {
+  const db = requireDb(await getDb());
+  await db
+    .insert(menuEntries)
+    .values(data)
+    .onDuplicateKeyUpdate({
+      set: {
+        recipeId: data.recipeId ?? null,
+        customRecipeId: data.customRecipeId ?? null,
+        freeText: data.freeText ?? null,
+      },
+    });
+}
+
+export async function deleteMenuEntry(
+  tripId: number,
+  userId: number,
+  day: string,
+  meal: "breakfast" | "lunch" | "dinner" | "snack"
+) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(menuEntries)
+    .where(
+      and(
+        eq(menuEntries.tripId, tripId),
+        eq(menuEntries.userId, userId),
+        eq(menuEntries.day, day),
+        eq(menuEntries.meal, meal)
+      )
+    );
 }
 
 /** Teil-Token eines Zeltplatzes setzen oder entfernen (nur eigener Favorit). */

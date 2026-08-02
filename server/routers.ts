@@ -9,6 +9,7 @@ import {
   SYNCED_SETTING_KEYS,
 } from "@shared/settings";
 import { MAX_STATIONS, solutionWordFromStations } from "@shared/hunts";
+import { MEALS } from "@shared/menuPlan";
 import { RECIPE_DIFFICULTIES, RECIPE_METHODS } from "@shared/customRecipes";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
@@ -883,6 +884,97 @@ export const appRouter = router({
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteTripLog(input.id, ctx.user.id)),
+  }),
+  menu: router({
+    /** Trip samt Menüplan-Einträgen (null, wenn der Trip nicht dir gehört). */
+    listByTrip: protectedProcedure
+      .input(z.object({ tripId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const trip = await db.getTripLog(input.tripId, ctx.user.id);
+        if (!trip) {
+          return {
+            trip: null,
+            entries: [] as Awaited<ReturnType<typeof db.getMenuEntries>>,
+          };
+        }
+        const entries = await db.getMenuEntries(input.tripId, ctx.user.id);
+        return { trip, entries };
+      }),
+    /** Slot setzen: genau eine Quelle (Rezept, eigenes Rezept oder Freitext). */
+    set: protectedProcedure
+      .input(
+        z
+          .object({
+            tripId: z.number().int().positive(),
+            day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            meal: z.enum(MEALS),
+            recipeId: z.string().min(1).max(80).nullish(),
+            customRecipeId: z.number().int().positive().nullish(),
+            freeText: z.string().min(1).max(200).nullish(),
+          })
+          .refine(
+            v =>
+              [v.recipeId, v.customRecipeId, v.freeText?.trim()].filter(Boolean)
+                .length === 1,
+            {
+              message:
+                "Bitte genau ein Rezept, ein eigenes Rezept oder einen Freitext angeben.",
+            }
+          )
+      )
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.getTripLog(input.tripId, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        if (input.day < trip.startDate || input.day > trip.endDate) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Der Tag liegt ausserhalb des Aufenthalts.",
+          });
+        }
+        // Nur eigene Rezepte dürfen verknüpft werden
+        if (input.customRecipeId != null) {
+          const own = await db.getCustomRecipes(ctx.user.id);
+          if (!own.some(r => r.id === input.customRecipeId)) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Rezept nicht gefunden.",
+            });
+          }
+        }
+        await db.upsertMenuEntry({
+          userId: ctx.user.id,
+          tripId: input.tripId,
+          day: input.day,
+          meal: input.meal,
+          recipeId: input.recipeId ?? null,
+          customRecipeId: input.customRecipeId ?? null,
+          freeText: input.freeText?.trim() || null,
+        });
+        return { success: true } as const;
+      }),
+    /** Slot leeren. */
+    remove: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number().int().positive(),
+          day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          meal: z.enum(MEALS),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteMenuEntry(
+          input.tripId,
+          ctx.user.id,
+          input.day,
+          input.meal
+        );
+        return { success: true } as const;
+      }),
   }),
   spots: router({
     list: protectedProcedure.query(({ ctx }) => db.getCampSpots(ctx.user.id)),

@@ -3,6 +3,7 @@
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 9)
 
 - [x] Einkaufsliste (/einkauf): eigenes Modul mit abhakbarer Liste (offen oben, erledigt durchgestrichen unten), Schnell-Eingabe, «Erledigte entfernen» und «Liste leeren»; Tabelle shoppingItems (Migration 0016), tRPC-Router shopping (list/add/addMany/toggle/remove/removeChecked/clear); Rezept-Detail übernimmt Zutaten in der aktiven Sprache per Button auf die Liste (Toast mit Direktlink); Modul-Kachel + Namespace shopping in DE/FR/IT/EN
+- [x] Menüplan pro Trip (/menueplan/:tripId): Tage des Aufenthalts als Raster mit 4 Mahlzeiten-Slots (Morgen-/Mittag-/Abendessen, Znüni/Zvieri); pro Slot Rezept aus dem Rezeptbuch (statisch oder eigenes, Dialog mit Suche) oder Freitext, Slot leeren, Upsert pro Tag+Mahlzeit; Tabelle menuEntries (Migration 0017, Unique-Index trip/day/meal), Router menu (listByTrip/set/remove); Einstieg über «Menüplan»-Button bei geplanten Aufenthalten; Button «Zutaten der geplanten Rezepte auf die Einkaufsliste» (Duplikate zusammengefasst, aktive Sprache); reine Logik in shared/menuPlan.ts (tripDays/mergeIngredientLines, 10 Tests); Namespace menuPlan in DE/FR/IT/EN
 
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 8)
 

@@ -274,6 +274,44 @@ export const customHunts = mysqlTable(
 export type CustomHunt = typeof customHunts.$inferSelect;
 export type InsertCustomHunt = typeof customHunts.$inferInsert;
 
+/**
+ * Menüplan pro Trip: ein Eintrag pro Tag und Mahlzeit eines geplanten
+ * Aufenthalts (tripId → tripLogs.id). Entweder ein statisches Rezept
+ * (recipeId), ein eigenes Rezept (customRecipeId) oder Freitext.
+ */
+export const menuEntries = mysqlTable(
+  "menuEntries",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Verknüpfter Tagebuch-/Trip-Eintrag (tripLogs.id) */
+    tripId: int("tripId").notNull(),
+    day: date("day", { mode: "string" }).notNull(),
+    meal: mysqlEnum("meal", ["breakfast", "lunch", "dinner", "snack"])
+      .notNull()
+      .default("dinner"),
+    /** Statische Rezept-Id aus dem Rezeptbuch (client/src/data/recipes.ts) */
+    recipeId: varchar("recipeId", { length: 80 }),
+    /** Eigenes Rezept (customRecipes.id) */
+    customRecipeId: int("customRecipeId"),
+    /** Freitext, wenn kein Rezept verknüpft ist */
+    freeText: varchar("freeText", { length: 200 }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    index("menuEntries_userId").on(table.userId),
+    index("menuEntries_tripId").on(table.tripId),
+    uniqueIndex("menuEntries_trip_day_meal").on(
+      table.tripId,
+      table.day,
+      table.meal
+    ),
+  ]
+);
+
+export type MenuEntry = typeof menuEntries.$inferSelect;
+export type InsertMenuEntry = typeof menuEntries.$inferInsert;
+
 /** Einkaufsliste: abhakbare Einträge pro Nutzer*in (manuell oder aus Rezepten). */
 export const shoppingItems = mysqlTable(
   "shoppingItems",

@@ -958,6 +958,8 @@ export const fr: Translation = {
           ? "Départ demain !"
           : `Encore ${days} jours`,
     nightsCount: n => (n === 1 ? "1 nuit" : `${n} nuits`),
+    menuPlanButton: "Plan des repas",
+    menuPlanAria: (name: string) => `Ouvrir le plan des repas de ${name}`,
     deletePlannedAria: name => `Supprimer le séjour prévu ${name}`,
     deleteEntryAria: name => `Supprimer l'entrée ${name}`,
     entriesTitle: "Tes séjours",
@@ -1181,6 +1183,36 @@ export const fr: Translation = {
         : `${n} ingrédients ajoutés à la liste de courses`,
     openList: "Vers la liste de courses",
     addIngredients: "Ingrédients sur la liste de courses",
+  },
+  menuPlan: {
+    title: "Plan des repas",
+    subtitle:
+      "Planifie pour chaque jour de ton séjour ce qui arrive sur la table de camping.",
+    loginFeature: "ton plan des repas",
+    notFoundTitle: "Séjour introuvable",
+    notFoundText: "Ce séjour n'existe pas ou n'appartient pas à ton compte.",
+    backToTrips: "Vers le journal de voyage",
+    daysCount: (n: number) => (n === 1 ? "1 jour" : `${n} jours`),
+    slotEmpty: "Rien de prévu pour l'instant",
+    planSlotAria: (meal: string, day: string) => `Planifier ${meal} le ${day}`,
+    clearSlotAria: (meal: string, day: string) => `Vider ${meal} le ${day}`,
+    dialogTitle: (meal: string) => `Planifier : ${meal}`,
+    dialogDescription:
+      "Choisis une recette du livre de recettes ou saisis un texte libre.",
+    searchPlaceholder: "Chercher une recette …",
+    searchAria: "Chercher une recette",
+    chooseRecipeAria: (name: string) => `Choisir la recette ${name}`,
+    minutes: (n: number) => `${n} min`,
+    ownBadge: "Personnelle",
+    noRecipesFound:
+      "Aucune recette trouvée – utilise le texte libre ci-dessous.",
+    freeTextLabel: "Ou texte libre",
+    freeTextPlaceholder: "p. ex. restes de la veille, pizzeria du village …",
+    freeTextSave: "Utiliser le texte libre",
+    saved: "Plan des repas mis à jour",
+    addIngredients: "Ingrédients des recettes prévues sur la liste de courses",
+    noPlannedRecipes:
+      "Aucune recette attribuée pour l'instant – choisis d'abord des recettes dans les créneaux de repas.",
   },
   family: {
     title: "Mode famille",

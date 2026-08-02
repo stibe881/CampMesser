@@ -935,6 +935,8 @@ export const en: Translation = {
           ? "It starts tomorrow!"
           : `${days} days to go`,
     nightsCount: n => (n === 1 ? "1 night" : `${n} nights`),
+    menuPlanButton: "Meal plan",
+    menuPlanAria: (name: string) => `Open the meal plan for ${name}`,
     deletePlannedAria: name => `Delete planned stay ${name}`,
     deleteEntryAria: name => `Delete entry ${name}`,
     entriesTitle: "Your stays",
@@ -1148,6 +1150,37 @@ export const en: Translation = {
         : `${n} ingredients added to the shopping list`,
     openList: "Go to shopping list",
     addIngredients: "Add ingredients to shopping list",
+  },
+  menuPlan: {
+    title: "Meal plan",
+    subtitle:
+      "Plan what lands on the camping table for every day of your stay.",
+    loginFeature: "your meal plan",
+    notFoundTitle: "Stay not found",
+    notFoundText:
+      "This stay does not exist or does not belong to your account.",
+    backToTrips: "Go to travel journal",
+    daysCount: (n: number) => (n === 1 ? "1 day" : `${n} days`),
+    slotEmpty: "Nothing planned yet",
+    planSlotAria: (meal: string, day: string) => `Plan ${meal} on ${day}`,
+    clearSlotAria: (meal: string, day: string) => `Clear ${meal} on ${day}`,
+    dialogTitle: (meal: string) => `Plan ${meal}`,
+    dialogDescription:
+      "Choose a recipe from the recipe book or enter free text.",
+    searchPlaceholder: "Search recipes …",
+    searchAria: "Search recipes",
+    chooseRecipeAria: (name: string) => `Choose recipe ${name}`,
+    minutes: (n: number) => `${n} min`,
+    ownBadge: "Own",
+    noRecipesFound: "No recipes found – use the free text below.",
+    freeTextLabel: "Or free text",
+    freeTextPlaceholder:
+      "e.g. yesterday's leftovers, pizzeria in the village …",
+    freeTextSave: "Use free text",
+    saved: "Meal plan updated",
+    addIngredients: "Add ingredients of planned recipes to the shopping list",
+    noPlannedRecipes:
+      "No recipes assigned yet – choose recipes in the meal slots first.",
   },
   family: {
     title: "Family mode",

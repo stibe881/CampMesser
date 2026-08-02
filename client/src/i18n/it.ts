@@ -949,6 +949,8 @@ export const it: Translation = {
           ? "Si parte domani!"
           : `Ancora ${days} giorni`,
     nightsCount: n => (n === 1 ? "1 notte" : `${n} notti`),
+    menuPlanButton: "Piano dei pasti",
+    menuPlanAria: (name: string) => `Apri il piano dei pasti di ${name}`,
     deletePlannedAria: name => `Elimina il soggiorno pianificato ${name}`,
     deleteEntryAria: name => `Elimina la voce ${name}`,
     entriesTitle: "I tuoi soggiorni",
@@ -1168,6 +1170,37 @@ export const it: Translation = {
         : `${n} ingredienti aggiunti alla lista della spesa`,
     openList: "Alla lista della spesa",
     addIngredients: "Ingredienti sulla lista della spesa",
+  },
+  menuPlan: {
+    title: "Piano dei pasti",
+    subtitle:
+      "Pianifica per ogni giorno del tuo soggiorno cosa arriva sul tavolo da campeggio.",
+    loginFeature: "il tuo piano dei pasti",
+    notFoundTitle: "Soggiorno non trovato",
+    notFoundText:
+      "Questo soggiorno non esiste oppure non appartiene al tuo account.",
+    backToTrips: "Al diario di viaggio",
+    daysCount: (n: number) => (n === 1 ? "1 giorno" : `${n} giorni`),
+    slotEmpty: "Ancora niente in programma",
+    planSlotAria: (meal: string, day: string) => `Pianifica ${meal} il ${day}`,
+    clearSlotAria: (meal: string, day: string) => `Svuota ${meal} il ${day}`,
+    dialogTitle: (meal: string) => `Pianifica: ${meal}`,
+    dialogDescription:
+      "Scegli una ricetta dal ricettario oppure inserisci un testo libero.",
+    searchPlaceholder: "Cerca una ricetta …",
+    searchAria: "Cerca una ricetta",
+    chooseRecipeAria: (name: string) => `Scegli la ricetta ${name}`,
+    minutes: (n: number) => `${n} min`,
+    ownBadge: "Propria",
+    noRecipesFound: "Nessuna ricetta trovata – usa il testo libero qui sotto.",
+    freeTextLabel: "Oppure testo libero",
+    freeTextPlaceholder: "es. avanzi del giorno prima, pizzeria del paese …",
+    freeTextSave: "Usa il testo libero",
+    saved: "Piano dei pasti aggiornato",
+    addIngredients:
+      "Ingredienti delle ricette pianificate sulla lista della spesa",
+    noPlannedRecipes:
+      "Ancora nessuna ricetta assegnata – scegli prima le ricette negli slot dei pasti.",
   },
   family: {
     title: "Modalità famiglia",

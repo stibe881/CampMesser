@@ -120,6 +120,13 @@
       "when": 1785639743731,
       "tag": "0016_special_diamondback",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1785639950222,
+      "tag": "0017_lumpy_edwin_jarvis",
+      "breakpoints": true
     }
   ]
 }
