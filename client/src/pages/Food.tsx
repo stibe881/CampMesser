@@ -87,6 +87,7 @@ export default function FoodPage() {
     enabled: isAuthenticated,
   });
   const [name, setName] = useState("");
+  const [quantity, setQuantity] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const today = new Date().toISOString().slice(0, 10);
 
@@ -94,6 +95,7 @@ export default function FoodPage() {
     onSuccess: () => {
       utils.food.list.invalidate();
       setName("");
+      setQuantity("");
       setExpiryDate("");
     },
     onError: () => toast.error(t.food.addFailed),
@@ -101,6 +103,31 @@ export default function FoodPage() {
   const removeMutation = trpc.food.remove.useMutation({
     onSuccess: () => utils.food.list.invalidate(),
   });
+
+  // ── Eintrag bearbeiten: Menge & MHD nachträglich anpassen ──
+  const [editItem, setEditItem] = useState<{ id: number; name: string } | null>(
+    null
+  );
+  const [editQuantity, setEditQuantity] = useState("");
+  const [editExpiry, setEditExpiry] = useState("");
+  const updateMutation = trpc.food.update.useMutation({
+    onSuccess: () => {
+      utils.food.list.invalidate();
+      setEditItem(null);
+    },
+    onError: () => toast.error(t.food.editFailed),
+  });
+  /** Bearbeiten-Dialog mit den aktuellen Werten des Eintrags öffnen. */
+  const openEdit = (item: {
+    id: number;
+    name: string;
+    quantity: string | null;
+    expiryDate: string | null;
+  }) => {
+    setEditQuantity(item.quantity ?? "");
+    setEditExpiry(item.expiryDate ?? "");
+    setEditItem({ id: item.id, name: item.name });
+  };
   // «Nachkaufen»: Lebensmittel auf die Einkaufsliste setzen (Server verhindert
   // Duplikate, wenn der Name bereits unabgehakt auf der Liste steht)
   const [, navigate] = useLocation();
@@ -158,9 +185,10 @@ export default function FoodPage() {
     if (!templateName.trim()) return;
     const items: FoodTemplateItem[] = (query.data ?? []).map(item => {
       const info = expiryInfo(item.expiryDate, today, lang);
-      return info
-        ? { name: item.name, expiryDays: Math.max(0, info.daysLeft) }
-        : { name: item.name };
+      const base: FoodTemplateItem = { name: item.name };
+      if (item.quantity) base.quantity = item.quantity;
+      if (info) base.expiryDays = Math.max(0, info.daysLeft);
+      return base;
     });
     if (items.length === 0) return;
     createTemplateMutation.mutate({ name: templateName.trim(), items });
@@ -238,21 +266,31 @@ export default function FoodPage() {
       <PageHeader title={t.food.title} subtitle={t.food.subtitle} />
 
       <form
-        className="mb-2 flex gap-2"
+        className="mb-2 flex flex-wrap gap-2"
         onSubmit={e => {
           e.preventDefault();
           if (!name.trim()) return;
           addMutation.mutate({
             name: name.trim(),
+            quantity: quantity.trim().slice(0, 40) || undefined,
             expiryDate: expiryDate || null,
           });
         }}
       >
         <Input
+          className="min-w-40 flex-1"
           placeholder={t.food.addPlaceholder}
           value={name}
           onChange={e => setName(e.target.value)}
           aria-label={t.food.addNameAria}
+        />
+        <Input
+          className="w-24 shrink-0"
+          value={quantity}
+          maxLength={40}
+          placeholder={t.food.quantityPlaceholder}
+          aria-label={t.food.addQuantityAria}
+          onChange={e => setQuantity(e.target.value)}
         />
         <Input
           type="date"
@@ -408,6 +446,65 @@ export default function FoodPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Dialog: Menge & MHD eines Eintrags bearbeiten */}
+      <Dialog
+        open={editItem !== null}
+        onOpenChange={open => !open && setEditItem(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editItem?.name}</DialogTitle>
+            <DialogDescription>{t.food.editDesc}</DialogDescription>
+          </DialogHeader>
+          <form
+            className="grid gap-3"
+            onSubmit={e => {
+              e.preventDefault();
+              if (!editItem) return;
+              updateMutation.mutate({
+                id: editItem.id,
+                quantity: editQuantity.trim().slice(0, 40) || null,
+                expiryDate: editExpiry || null,
+              });
+            }}
+          >
+            <div>
+              <Label htmlFor="food-edit-quantity">
+                {t.food.editQuantityLabel}
+              </Label>
+              <Input
+                id="food-edit-quantity"
+                className="mt-1.5"
+                value={editQuantity}
+                maxLength={40}
+                placeholder={t.food.editQuantityPlaceholder}
+                onChange={e => setEditQuantity(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div>
+              <Label htmlFor="food-edit-expiry">{t.food.editExpiryLabel}</Label>
+              <Input
+                id="food-edit-expiry"
+                type="date"
+                className="mt-1.5"
+                value={editExpiry}
+                onChange={e => setEditExpiry(e.target.value)}
+              />
+            </div>
+            <Button type="submit" disabled={updateMutation.isPending}>
+              {updateMutation.isPending && (
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              )}
+              {t.food.editSave}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {query.isLoading ? (
         <div className="flex justify-center py-8">
           <Loader2
@@ -436,7 +533,19 @@ export default function FoodPage() {
                     expiryStyles[info?.state ?? "ok"]
                   )}
                 >
-                  {item.name}
+                  <button
+                    type="button"
+                    className="rounded hover:underline"
+                    onClick={() => openEdit(item)}
+                    aria-label={t.food.editAria(item.name)}
+                  >
+                    {item.name}
+                  </button>
+                  {item.quantity && (
+                    <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-normal text-muted-foreground">
+                      {item.quantity}
+                    </span>
+                  )}
                   {info && info.state !== "ok" && (
                     <span
                       className={cn(

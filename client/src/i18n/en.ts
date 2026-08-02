@@ -2067,6 +2067,16 @@ export const en: Translation = {
     templateDeleteAria: (name: string) => `Delete template ${name}`,
     templateDeleteConfirm: (name: string) =>
       `Really delete template “${name}”?`,
+    quantityPlaceholder: "Quantity",
+    addQuantityAria: "Quantity for the new item (optional)",
+    editAria: (name: string) => `Edit ${name} – adjust quantity and date`,
+    editDesc:
+      "Adjust quantity and best-before date – empty fields remove the value.",
+    editQuantityLabel: "Quantity",
+    editQuantityPlaceholder: "e.g. 2× or 500 g",
+    editExpiryLabel: "Best-before date",
+    editSave: "Save",
+    editFailed: "The change could not be saved",
   },
   shopping: {
     title: "Shopping list",

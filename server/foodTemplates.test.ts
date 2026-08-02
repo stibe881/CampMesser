@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  MAX_FOOD_ITEM_QUANTITY_LENGTH,
   MAX_FOOD_TEMPLATE_ITEMS,
   MAX_EXPIRY_DAYS,
   expiryDateFromDays,
@@ -48,6 +49,34 @@ describe("parseFoodTemplateItems", () => {
       undefined,
       3,
       MAX_EXPIRY_DAYS,
+    ]);
+  });
+
+  it("liest die optionale Menge und bleibt für alte Vorlagen abwärtskompatibel", () => {
+    const json = JSON.stringify([
+      { name: "Milch", quantity: "1 l", expiryDays: 5 },
+      // Alte Vorlage ohne quantity-Feld
+      { name: "Salz" },
+    ]);
+    expect(parseFoodTemplateItems(json)).toEqual([
+      { name: "Milch", quantity: "1 l", expiryDays: 5 },
+      { name: "Salz" },
+    ]);
+  });
+
+  it("verwirft unbrauchbare Mengen und trimmt/kappt gültige", () => {
+    const json = JSON.stringify([
+      { name: "a", quantity: 5 },
+      { name: "b", quantity: "   " },
+      { name: "c", quantity: "  500 g  " },
+      { name: "d", quantity: "x".repeat(200) },
+    ]);
+    const items = parseFoodTemplateItems(json);
+    expect(items.map(i => i.quantity)).toEqual([
+      undefined,
+      undefined,
+      "500 g",
+      "x".repeat(MAX_FOOD_ITEM_QUANTITY_LENGTH),
     ]);
   });
 

@@ -2150,6 +2150,16 @@ export const de = {
     templateDeleteAria: (name: string) => `Vorlage ${name} löschen`,
     templateDeleteConfirm: (name: string) =>
       `Vorlage «${name}» wirklich löschen?`,
+    quantityPlaceholder: "Menge",
+    addQuantityAria: "Menge für den neuen Eintrag (optional)",
+    editAria: (name: string) => `${name} bearbeiten – Menge und MHD anpassen`,
+    editDesc:
+      "Menge und Mindesthaltbarkeitsdatum anpassen – leere Felder entfernen den Wert.",
+    editQuantityLabel: "Menge",
+    editQuantityPlaceholder: "z. B. 2× oder 500 g",
+    editExpiryLabel: "Mindesthaltbarkeitsdatum",
+    editSave: "Speichern",
+    editFailed: "Änderung konnte nicht gespeichert werden",
   },
   shopping: {
     title: "Einkaufsliste",

@@ -2142,6 +2142,17 @@ export const fr: Translation = {
     templateDeleteAria: (name: string) => `Supprimer le modèle ${name}`,
     templateDeleteConfirm: (name: string) =>
       `Vraiment supprimer le modèle « ${name} » ?`,
+    quantityPlaceholder: "Quantité",
+    addQuantityAria: "Quantité pour la nouvelle entrée (facultatif)",
+    editAria: (name: string) =>
+      `Modifier ${name} – adapter la quantité et la DLC`,
+    editDesc:
+      "Adapter la quantité et la date limite de consommation – les champs vides suppriment la valeur.",
+    editQuantityLabel: "Quantité",
+    editQuantityPlaceholder: "p. ex. 2× ou 500 g",
+    editExpiryLabel: "Date limite de consommation",
+    editSave: "Enregistrer",
+    editFailed: "La modification n'a pas pu être enregistrée",
   },
   shopping: {
     title: "Liste de courses",

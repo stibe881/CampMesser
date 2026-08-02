@@ -2122,6 +2122,16 @@ export const it: Translation = {
     templateDeleteAria: (name: string) => `Elimina il modello ${name}`,
     templateDeleteConfirm: (name: string) =>
       `Eliminare davvero il modello «${name}»?`,
+    quantityPlaceholder: "Quantità",
+    addQuantityAria: "Quantità per la nuova voce (facoltativo)",
+    editAria: (name: string) => `Modifica ${name} – quantità e TMC`,
+    editDesc:
+      "Adatta la quantità e il termine minimo di conservazione – i campi vuoti rimuovono il valore.",
+    editQuantityLabel: "Quantità",
+    editQuantityPlaceholder: "es. 2× o 500 g",
+    editExpiryLabel: "Termine minimo di conservazione",
+    editSave: "Salva",
+    editFailed: "La modifica non è stata salvata",
   },
   shopping: {
     title: "Lista della spesa",

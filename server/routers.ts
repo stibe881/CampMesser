@@ -30,6 +30,7 @@ import {
   expiryDateFromDays,
   MAX_EXPIRY_DAYS,
   MAX_FOOD_ITEM_NAME_LENGTH,
+  MAX_FOOD_ITEM_QUANTITY_LENGTH,
   MAX_FOOD_TEMPLATE_ITEMS,
   parseFoodTemplateItems,
 } from "@shared/foodTemplates";
@@ -1790,6 +1791,32 @@ export const appRouter = router({
           expiryDate: input.expiryDate ?? null,
         })
       ),
+    /** Menge und/oder MHD eines Eintrags anpassen (null = Feld leeren). */
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          quantity: z
+            .string()
+            .trim()
+            .max(MAX_FOOD_ITEM_QUANTITY_LENGTH)
+            .nullish(),
+          expiryDate: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/)
+            .nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const data: { quantity?: string | null; expiryDate?: string | null } =
+          {};
+        if (input.quantity !== undefined)
+          data.quantity = input.quantity || null;
+        if (input.expiryDate !== undefined)
+          data.expiryDate = input.expiryDate ?? null;
+        await db.updateFoodItem(input.id, ctx.user.id, data);
+        return { success: true } as const;
+      }),
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteFoodItem(input.id, ctx.user.id)),
@@ -1814,6 +1841,12 @@ export const appRouter = router({
             .array(
               z.object({
                 name: z.string().trim().min(1).max(MAX_FOOD_ITEM_NAME_LENGTH),
+                quantity: z
+                  .string()
+                  .trim()
+                  .min(1)
+                  .max(MAX_FOOD_ITEM_QUANTITY_LENGTH)
+                  .optional(),
                 expiryDays: z
                   .number()
                   .int()
@@ -1882,6 +1915,7 @@ export const appRouter = router({
           toInsert.map(item => ({
             userId: ctx.user.id,
             name: item.name,
+            quantity: item.quantity,
             expiryDate: expiryDateFromDays(input.today, item.expiryDays),
           }))
         );

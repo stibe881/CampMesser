@@ -649,6 +649,18 @@ export async function addFoodItem(data: InsertFoodItem) {
   return result.insertId;
 }
 
+export async function updateFoodItem(
+  id: number,
+  userId: number,
+  data: Partial<Pick<InsertFoodItem, "quantity" | "expiryDate">>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(foodItems)
+    .set(data)
+    .where(and(eq(foodItems.id, id), eq(foodItems.userId, userId)));
+}
+
 export async function deleteFoodItem(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db

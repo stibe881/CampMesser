@@ -7,6 +7,8 @@
 export interface FoodTemplateItem {
   /** Lebensmittel-Name, z. B. «Milch» */
   name: string;
+  /** Menge & Einheit als Freitext, z. B. «2×» oder «500 g» (optional). */
+  quantity?: string;
   /**
    * Restlaufzeit in Tagen – wird beim Laden der Vorlage in ein konkretes
    * MHD (heute + X Tage) umgerechnet. Ohne Wert bleibt der Eintrag ohne MHD.
@@ -16,6 +18,7 @@ export interface FoodTemplateItem {
 
 export const MAX_FOOD_TEMPLATE_ITEMS = 100;
 export const MAX_FOOD_ITEM_NAME_LENGTH = 160;
+export const MAX_FOOD_ITEM_QUANTITY_LENGTH = 80;
 export const MAX_EXPIRY_DAYS = 3650;
 
 /** itemsJson defensiv parsen – kaputte Daten ergeben eine leere Vorlage. */
@@ -27,11 +30,16 @@ export function parseFoodTemplateItems(json: string): FoodTemplateItem[] {
     for (const entry of parsed) {
       if (items.length >= MAX_FOOD_TEMPLATE_ITEMS) break;
       if (typeof entry !== "object" || entry === null) continue;
-      const { name, expiryDays } = entry as Record<string, unknown>;
+      const { name, quantity, expiryDays } = entry as Record<string, unknown>;
       if (typeof name !== "string" || name.trim().length === 0) continue;
       const item: FoodTemplateItem = {
         name: name.trim().slice(0, MAX_FOOD_ITEM_NAME_LENGTH),
       };
+      // Menge nur übernehmen, wenn sie ein nicht-leerer String ist –
+      // ältere Vorlagen ohne quantity bleiben unverändert lesbar.
+      if (typeof quantity === "string" && quantity.trim().length > 0) {
+        item.quantity = quantity.trim().slice(0, MAX_FOOD_ITEM_QUANTITY_LENGTH);
+      }
       if (
         typeof expiryDays === "number" &&
         Number.isFinite(expiryDays) &&
