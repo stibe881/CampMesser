@@ -2199,6 +2199,23 @@ export const it: Translation = {
     shareQrText:
       "I compagni scansionano il codice con la fotocamera del telefono e arrivano direttamente alla lista.",
     suggestionsAria: "Suggerimenti dalla cronologia e dalla lista",
+    putAwayButton: "Sistema la spesa",
+    putAwayTitle: "Sistema la spesa nel frigo box",
+    putAwayDesc:
+      "Seleziona gli acquisti spuntati e indica facoltativamente un termine minimo di conservazione. Le voci riprese passano nel tuo inventario del frigo box e vengono tolte dalla lista della spesa.",
+    putAwayItemAria: (name: string) => `Metti ${name} nel frigo box`,
+    putAwayExpiryAria: (name: string) =>
+      `Termine minimo di conservazione per ${name} (facoltativo)`,
+    putAwayAlreadyInFood: "già nel frigo box",
+    putAwayConfirm: (n: number) =>
+      n === 1 ? "Sistema 1 voce" : `Sistema ${n} voci`,
+    putAwayDone: (n: number) =>
+      n === 1
+        ? "1 acquisto messo nel frigo box"
+        : `${n} acquisti messi nel frigo box`,
+    putAwayOpenFood: "Al frigo box",
+    putAwayFailed:
+      "Sistemazione non riuscita – le voci non ancora riprese restano sulla lista",
   },
   sharedShopping: {
     loading: "Caricamento della lista della spesa condivisa …",

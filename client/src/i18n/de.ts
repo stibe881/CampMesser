@@ -2227,6 +2227,23 @@ export const de = {
     shareQrText:
       "Mitreisende scannen den Code mit der Handykamera und sind direkt auf der Liste.",
     suggestionsAria: "Vorschläge aus Verlauf und Liste",
+    putAwayButton: "Einkäufe einräumen",
+    putAwayTitle: "Einkäufe in die Kühlbox einräumen",
+    putAwayDesc:
+      "Wähle die abgehakten Einkäufe aus und gib optional ein Mindesthaltbarkeitsdatum an. Übernommene Einträge wandern in dein Kühlbox-Inventar und werden von der Einkaufsliste entfernt.",
+    putAwayItemAria: (name: string) => `${name} in die Kühlbox übernehmen`,
+    putAwayExpiryAria: (name: string) =>
+      `Mindesthaltbarkeitsdatum für ${name} (optional)`,
+    putAwayAlreadyInFood: "bereits in der Kühlbox",
+    putAwayConfirm: (n: number) =>
+      n === 1 ? "1 Eintrag einräumen" : `${n} Einträge einräumen`,
+    putAwayDone: (n: number) =>
+      n === 1
+        ? "1 Einkauf in die Kühlbox gelegt"
+        : `${n} Einkäufe in die Kühlbox gelegt`,
+    putAwayOpenFood: "Zur Kühlbox",
+    putAwayFailed:
+      "Einräumen fehlgeschlagen – noch nicht übernommene Einträge bleiben auf der Liste",
   },
   sharedShopping: {
     loading: "Geteilte Einkaufsliste wird geladen …",

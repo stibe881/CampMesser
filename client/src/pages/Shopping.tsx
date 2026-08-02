@@ -6,6 +6,7 @@ import {
   Plus,
   Printer,
   QrCode,
+  Refrigerator,
   Share2,
   ShoppingCart,
   Trash2,
@@ -17,6 +18,7 @@ import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import ShoppingItemDetailsPopover from "@/components/ShoppingItemDetailsPopover";
 import ShoppingNameAutocomplete from "@/components/ShoppingNameAutocomplete";
+import StorePurchasesDialog from "@/components/StorePurchasesDialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -79,6 +81,8 @@ export default function ShoppingPage() {
   /** Teil-Link, der gerade im Dialog gezeigt wird (null = Dialog zu). */
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareQr, setShareQr] = useState<string | null>(null);
+  /** «Einkäufe einräumen»: abgehakte Einträge in die Kühlbox übernehmen. */
+  const [putAwayOpen, setPutAwayOpen] = useState(false);
 
   // Einkaufs-Verlauf für Autocomplete: lokal + Geräte-Sync (Server gewinnt beim Laden)
   const [history, setHistory] = useState<ShoppingHistoryEntry[]>(() =>
@@ -605,6 +609,14 @@ export default function ShoppingPage() {
                 <Button
                   variant="outline"
                   size="sm"
+                  onClick={() => setPutAwayOpen(true)}
+                >
+                  <Refrigerator className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {t.shopping.putAwayButton}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   disabled={removeCheckedMutation.isPending}
                   onClick={() => removeCheckedMutation.mutate()}
                 >
@@ -629,6 +641,18 @@ export default function ShoppingPage() {
           )}
         </div>
       )}
+
+      {/* «Einkäufe einräumen»: abgehakte Einträge in die Kühlbox übernehmen */}
+      <StorePurchasesDialog
+        open={putAwayOpen}
+        onOpenChange={setPutAwayOpen}
+        items={doneItems.map(i => ({
+          id: i.id,
+          name: i.name,
+          quantity: i.quantity,
+        }))}
+        removeItem={id => removeMutation.mutateAsync({ id })}
+      />
 
       {/* Teil-Link der Einkaufsliste: Link + QR-Code, Teilen beenden */}
       <Dialog

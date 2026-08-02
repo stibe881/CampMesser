@@ -4,6 +4,7 @@ import {
   GripVertical,
   Loader2,
   Plus,
+  Refrigerator,
   ShoppingBasket,
   Trash2,
   UtensilsCrossed,
@@ -14,6 +15,7 @@ import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import ShoppingItemDetailsPopover from "@/components/ShoppingItemDetailsPopover";
 import ShoppingNameAutocomplete from "@/components/ShoppingNameAutocomplete";
+import StorePurchasesDialog from "@/components/StorePurchasesDialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -77,6 +79,8 @@ export default function TripShoppingPage() {
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
   const [newCategory, setNewCategory] = useState<string>(NO_CATEGORY);
+  /** «Einkäufe einräumen»: abgehakte Einträge in die EIGENE Kühlbox übernehmen. */
+  const [putAwayOpen, setPutAwayOpen] = useState(false);
 
   // Einkaufs-Verlauf für Autocomplete: der persönliche Verlauf (lokal +
   // Geräte-Sync) gilt auch auf der gemeinsamen Reise-Liste.
@@ -623,7 +627,15 @@ export default function TripShoppingPage() {
                   );
                 })}
               </ul>
-              <div className="mt-3">
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPutAwayOpen(true)}
+                >
+                  <Refrigerator className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {t.shopping.putAwayButton}
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -638,6 +650,19 @@ export default function TripShoppingPage() {
           )}
         </div>
       )}
+
+      {/* «Einkäufe einräumen»: Kühlbox ist persönlich – die Einträge landen
+          im EIGENEN Kühlbox-Inventar und verschwinden von der Reise-Liste. */}
+      <StorePurchasesDialog
+        open={putAwayOpen}
+        onOpenChange={setPutAwayOpen}
+        items={doneItems.map(i => ({
+          id: i.id,
+          name: i.name,
+          quantity: i.quantity,
+        }))}
+        removeItem={id => removeMutation.mutateAsync({ tripId, id })}
+      />
     </div>
   );
 }

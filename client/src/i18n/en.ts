@@ -2143,6 +2143,23 @@ export const en: Translation = {
     shareQrText:
       "Companions scan the code with their phone camera and land straight on the list.",
     suggestionsAria: "Suggestions from history and list",
+    putAwayButton: "Put purchases away",
+    putAwayTitle: "Put purchases into the cool box",
+    putAwayDesc:
+      "Select the ticked purchases and optionally add a best-before date. Transferred items go into your cool box inventory and are removed from the shopping list.",
+    putAwayItemAria: (name: string) => `Put ${name} into the cool box`,
+    putAwayExpiryAria: (name: string) =>
+      `Best-before date for ${name} (optional)`,
+    putAwayAlreadyInFood: "already in the cool box",
+    putAwayConfirm: (n: number) =>
+      n === 1 ? "Put 1 item away" : `Put ${n} items away`,
+    putAwayDone: (n: number) =>
+      n === 1
+        ? "1 purchase put into the cool box"
+        : `${n} purchases put into the cool box`,
+    putAwayOpenFood: "To the cool box",
+    putAwayFailed:
+      "Putting away failed – items not yet transferred stay on the list",
   },
   sharedShopping: {
     loading: "Loading shared shopping list …",

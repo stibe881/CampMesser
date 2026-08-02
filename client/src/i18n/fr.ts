@@ -2221,6 +2221,23 @@ export const fr: Translation = {
     shareQrText:
       "Tes compagnons scannent le code avec l'appareil photo du téléphone et arrivent directement sur la liste.",
     suggestionsAria: "Suggestions de l'historique et de la liste",
+    putAwayButton: "Ranger les courses",
+    putAwayTitle: "Ranger les courses dans la glacière",
+    putAwayDesc:
+      "Sélectionne les courses cochées et indique en option une date limite de consommation. Les articles repris passent dans ton inventaire de glacière et sont retirés de la liste de courses.",
+    putAwayItemAria: (name: string) => `Ranger ${name} dans la glacière`,
+    putAwayExpiryAria: (name: string) =>
+      `Date limite de consommation pour ${name} (facultatif)`,
+    putAwayAlreadyInFood: "déjà dans la glacière",
+    putAwayConfirm: (n: number) =>
+      n === 1 ? "Ranger 1 article" : `Ranger ${n} articles`,
+    putAwayDone: (n: number) =>
+      n === 1
+        ? "1 achat rangé dans la glacière"
+        : `${n} achats rangés dans la glacière`,
+    putAwayOpenFood: "Vers la glacière",
+    putAwayFailed:
+      "Le rangement a échoué – les articles pas encore repris restent sur la liste",
   },
   sharedShopping: {
     loading: "Chargement de la liste de courses partagée …",
