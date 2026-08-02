@@ -10,12 +10,13 @@ import {
   MapPin,
   Moon,
   Mountain,
+  Share2,
   Sunrise,
-  Sunset,
-  Wind,
 } from "lucide-react";
+import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -23,70 +24,12 @@ import { trpc } from "@/lib/trpc";
 import { getSunTimes } from "@/lib/sun";
 import { loadObstacleProfiles } from "@/lib/obstacleStore";
 import { computeTripStats, tripNights } from "@shared/trips";
-import {
-  describeWeatherCode,
-  detectAlerts,
-  type HourlyWeather,
-  type WeatherAlert,
-} from "@shared/weather";
+import { describeWeatherCode } from "@shared/weather";
+import { fetchDossierWeather, type DossierWeather } from "@/lib/dossierWeather";
 import { cn } from "@/lib/utils";
 
-interface DossierWeather {
-  daily: {
-    date: string;
-    tempMaxC: number;
-    tempMinC: number;
-    precipProbability: number;
-    weatherCode: number;
-  }[];
-  alerts: WeatherAlert[];
-}
-
-/** Kompakte Wetterdaten fürs Dossier: 3 Tage plus Warnungen aus 48 h. */
-async function fetchDossierWeather(
-  lat: number,
-  lon: number
-): Promise<DossierWeather> {
-  const params = new URLSearchParams({
-    latitude: lat.toFixed(4),
-    longitude: lon.toFixed(4),
-    timezone: "auto",
-    forecast_days: "3",
-    daily:
-      "temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code",
-    hourly:
-      "temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,weather_code,cape,cloud_cover",
-  });
-  const res = await fetch(
-    `https://api.open-meteo.com/v1/forecast?${params.toString()}`
-  );
-  if (!res.ok) throw new Error("Wetterdienst nicht erreichbar");
-  const json = await res.json();
-  const hourly: HourlyWeather[] = (json.hourly.time as string[]).map(
-    (time: string, i: number) => ({
-      time,
-      temperatureC: json.hourly.temperature_2m[i],
-      apparentC: json.hourly.apparent_temperature[i],
-      precipitationMm: json.hourly.precipitation[i],
-      precipitationProbability: json.hourly.precipitation_probability?.[i] ?? 0,
-      windSpeedKmh: json.hourly.wind_speed_10m[i],
-      windGustsKmh: json.hourly.wind_gusts_10m[i],
-      weatherCode: json.hourly.weather_code[i],
-      cape: json.hourly.cape?.[i] ?? 0,
-      cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
-    })
-  );
-  return {
-    daily: (json.daily.time as string[]).map((date: string, i: number) => ({
-      date,
-      tempMaxC: json.daily.temperature_2m_max[i],
-      tempMinC: json.daily.temperature_2m_min[i],
-      precipProbability: json.daily.precipitation_probability_max?.[i] ?? 0,
-      weatherCode: json.daily.weather_code[i],
-    })),
-    alerts: detectAlerts(hourly),
-  };
-}
+// Wetter-Abruf ausgelagert: teilt sich das Dossier mit der öffentlichen
+// Teil-Ansicht (/platz/:token)
 
 export default function SpotDetailPage() {
   const params = useParams<{ id: string }>();
@@ -100,6 +43,9 @@ export default function SpotDetailPage() {
   });
   const [weather, setWeather] = useState<DossierWeather | null>(null);
   const [weatherFailed, setWeatherFailed] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const shareMutation = trpc.spots.share.useMutation();
+  const unshareMutation = trpc.spots.unshare.useMutation();
 
   const spot = spotsQuery.data?.find(s => s.id === spotId);
 
@@ -425,6 +371,90 @@ export default function SpotDetailPage() {
             <BookOpen className="h-4 w-4" aria-hidden="true" />
             Zum Reise-Tagebuch
           </Link>
+        </CardContent>
+      </Card>
+
+      {/* Dossier teilen */}
+      <Card className="mt-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Share2 className="h-4 w-4 text-primary" aria-hidden="true" />
+            Platz teilen
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-3 text-sm text-muted-foreground">
+            Wer den Link hat, sieht Name, Koordinaten, Wetter und Sonnenzeiten
+            dieses Platzes – ohne Anmeldung und nur lesend. Deine Notizen,
+            Hindernisse und Tagebuch-Einträge bleiben privat.
+          </p>
+          {shareUrl ? (
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+              <code className="min-w-0 flex-1 truncate text-xs">
+                {shareUrl}
+              </code>
+              <button
+                type="button"
+                className="shrink-0 text-xs font-medium text-primary hover:underline"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    toast.success("Link kopiert");
+                  } catch {
+                    toast.error(
+                      "Kopieren nicht möglich – bitte manuell markieren"
+                    );
+                  }
+                }}
+              >
+                Kopieren
+              </button>
+              <button
+                type="button"
+                className="shrink-0 text-xs font-medium text-muted-foreground hover:text-destructive"
+                onClick={() =>
+                  unshareMutation.mutate(
+                    { id: spot.id },
+                    {
+                      onSuccess: () => {
+                        setShareUrl(null);
+                        toast.success("Teilen beendet – der Link ist ungültig");
+                      },
+                    }
+                  )
+                }
+              >
+                Teilen beenden
+              </button>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={shareMutation.isPending}
+              onClick={() =>
+                shareMutation.mutate(
+                  { id: spot.id },
+                  {
+                    onSuccess: async ({ token }) => {
+                      const url = `${window.location.origin}/platz/${token}`;
+                      setShareUrl(url);
+                      try {
+                        await navigator.clipboard.writeText(url);
+                        toast.success("Teil-Link kopiert");
+                      } catch {
+                        toast.success("Teil-Link erstellt – kopiere ihn oben");
+                      }
+                    },
+                    onError: () => toast.error("Teilen fehlgeschlagen"),
+                  }
+                )
+              }
+            >
+              <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              Platz per Link teilen
+            </Button>
+          )}
         </CardContent>
       </Card>
     </div>

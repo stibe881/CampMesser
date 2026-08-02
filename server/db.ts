@@ -334,6 +334,30 @@ export async function deleteTripLog(id: number, userId: number) {
     .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
 }
 
+/** Teil-Token eines Zeltplatzes setzen oder entfernen (nur eigener Favorit). */
+export async function setCampSpotShareToken(
+  id: number,
+  userId: number,
+  token: string | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(campSpots)
+    .set({ shareToken: token })
+    .where(and(eq(campSpots.id, id), eq(campSpots.userId, userId)));
+}
+
+/** Geteilten Zeltplatz anhand des Tokens laden (öffentlich, ohne Login). */
+export async function getCampSpotByToken(token: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(campSpots)
+    .where(eq(campSpots.shareToken, token))
+    .limit(1);
+  return rows[0];
+}
+
 // ── Eigene Schnitzeljagden ──
 export async function getCustomHunts(userId: number) {
   const db = requireDb(await getDb());

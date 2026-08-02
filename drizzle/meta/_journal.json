@@ -92,6 +92,13 @@
       "when": 1785629595061,
       "tag": "0012_bitter_zzzax",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1785629875183,
+      "tag": "0013_sticky_vanisher",
+      "breakpoints": true
     }
   ]
 }

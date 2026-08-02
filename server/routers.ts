@@ -744,6 +744,43 @@ export const appRouter = router({
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteCampSpot(input.id, ctx.user.id)),
+    /** Teil-Link fürs Platz-Dossier erzeugen: gibt den Token zurück. */
+    share: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const spots = await db.getCampSpots(ctx.user.id);
+        const spot = spots.find(s => s.id === input.id);
+        if (!spot) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Zeltplatz nicht gefunden.",
+          });
+        }
+        if (spot.shareToken) return { token: spot.shareToken };
+        const token = nanoid(16);
+        await db.setCampSpotShareToken(input.id, ctx.user.id, token);
+        return { token };
+      }),
+    /** Teilen beenden: Token entfernen, Link wird ungültig. */
+    unshare: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.setCampSpotShareToken(input.id, ctx.user.id, null);
+        return { success: true } as const;
+      }),
+    /** Geteilten Zeltplatz öffentlich abrufen (nur lesend, ohne Login). */
+    sharedGet: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(32) }))
+      .query(async ({ input }) => {
+        const spot = await db.getCampSpotByToken(input.token);
+        if (!spot) return null;
+        return {
+          name: spot.name,
+          latitude: spot.latitude,
+          longitude: spot.longitude,
+          note: spot.note,
+        };
+      }),
   }),
 });
 

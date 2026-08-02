@@ -50,9 +50,14 @@ export const campSpots = mysqlTable(
     latitude: double("latitude").notNull(),
     longitude: double("longitude").notNull(),
     note: text("note"),
+    /** Öffentlicher Teil-Token: Wer den Link kennt, sieht das Platz-Dossier (nur lesend). */
+    shareToken: varchar("shareToken", { length: 32 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
-  table => [index("campSpots_userId").on(table.userId)]
+  table => [
+    index("campSpots_userId").on(table.userId),
+    index("campSpots_shareToken").on(table.shareToken),
+  ]
 );
 
 export type CampSpot = typeof campSpots.$inferSelect;
