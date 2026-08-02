@@ -453,6 +453,19 @@ export const fr: Translation = {
     compareDayHeader: "Jour",
     compareSrRain: "Pluie",
     compareSrWind: "Rafales",
+    radarTitle: "Radar de pluie",
+    radarAria: "Radar de pluie",
+    radarIntro:
+      "Précipitations de la dernière heure et prévision à très court terme (nowcast) autour du lieu choisi – en animation.",
+    radarLoadingAria: "Chargement du radar de pluie",
+    radarFailed: "Impossible de charger le radar de pluie.",
+    radarMapAria: "Carte du radar de pluie",
+    radarPlayAria: "Lancer l'animation du radar",
+    radarPauseAria: "Mettre l'animation du radar en pause",
+    radarTimestamp: time => `Image radar de ${time}`,
+    radarForecastBadge: "Prévision",
+    radarSource:
+      "Données radar : RainViewer · Carte : OpenStreetMap. Les images nowcast sont une extrapolation à très court terme.",
   },
   water: {
     title: "Calculateur d'eau potable",
@@ -1134,6 +1147,14 @@ export const fr: Translation = {
       "Le plus bel emplacement, la meilleure recette, quoi changer la prochaine fois …",
     submit: "Enregistrer l'entrée",
     plannedTitle: "Séjours prévus",
+    holidaySectionLabel: "Vacances scolaires & jours fériés",
+    holidayCantonAria:
+      "Choisir le canton pour les indications de vacances et jours fériés",
+    holidayCantonNone: "Aucun canton – pas d'indications",
+    holidaySchoolBadge: name => `Pendant les vacances scolaires (${name})`,
+    holidayPublicBadge: (date, name) => `Jour férié le ${date} : ${name}`,
+    holidaySource:
+      "Données de vacances et jours fériés : OpenHolidays API, sans garantie.",
     countdown: days =>
       days === 0
         ? "C'est parti aujourd'hui !"

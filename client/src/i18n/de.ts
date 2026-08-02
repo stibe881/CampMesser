@@ -457,6 +457,19 @@ export const de = {
     compareDayHeader: "Tag",
     compareSrRain: "Regen",
     compareSrWind: "Windböen",
+    radarTitle: "Regenradar",
+    radarAria: "Regenradar",
+    radarIntro:
+      "Niederschlag der letzten Stunde und Kurzfrist-Prognose (Nowcast) rund um den gewählten Ort – als Animation.",
+    radarLoadingAria: "Regenradar wird geladen",
+    radarFailed: "Regenradar konnte nicht geladen werden.",
+    radarMapAria: "Regenradar-Karte",
+    radarPlayAria: "Radar-Animation abspielen",
+    radarPauseAria: "Radar-Animation anhalten",
+    radarTimestamp: (time: string) => `Radarbild von ${time}`,
+    radarForecastBadge: "Prognose",
+    radarSource:
+      "Radardaten: RainViewer · Karte: OpenStreetMap. Nowcast-Frames sind eine kurzfristige Hochrechnung.",
   },
   water: {
     title: "Trinkwasser-Rechner",
@@ -1138,6 +1151,13 @@ export const de = {
       "Schönster Stellplatz, bestes Rezept, was beim nächsten Mal anders …",
     submit: "Eintrag speichern",
     plannedTitle: "Geplante Aufenthalte",
+    holidaySectionLabel: "Schulferien & Feiertage",
+    holidayCantonAria: "Kanton für Ferien- und Feiertags-Hinweise wählen",
+    holidayCantonNone: "Kein Kanton – keine Hinweise",
+    holidaySchoolBadge: (name: string) => `Liegt in den Schulferien (${name})`,
+    holidayPublicBadge: (date: string, name: string) =>
+      `Feiertag am ${date}: ${name}`,
+    holidaySource: "Ferien- und Feiertagsdaten: OpenHolidays API, ohne Gewähr.",
     countdown: (days: number) =>
       days === 0
         ? "Heute geht's los!"

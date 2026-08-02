@@ -1,10 +1,11 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BookOpen,
   CalendarClock,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  GraduationCap,
   ImagePlus,
   ListChecks,
   Loader2,
@@ -12,6 +13,7 @@ import {
   Moon,
   Plus,
   Sparkles,
+  Star,
   Tent,
   Trash2,
   Trophy,
@@ -54,9 +56,90 @@ import {
   isUpcomingTrip,
   tripNights,
 } from "@shared/trips";
+import {
+  CANTONS,
+  holidayDisplayName,
+  overlappingHolidays,
+} from "@shared/holidays";
+import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 
 /** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
 const FREE_LOCATION = "frei";
+
+/** Gemerkter Kanton für die Ferien-/Feiertags-Hinweise. */
+const HOLIDAY_CANTON_KEY = "campmesser.holidayCanton";
+/** Auswahlwert für «kein Kanton» (keine Hinweise). */
+const HOLIDAY_CANTON_NONE = "keiner";
+
+function loadStoredHolidayCanton(): string {
+  try {
+    const stored = localStorage.getItem(HOLIDAY_CANTON_KEY);
+    if (stored && CANTONS.some(c => c.code === stored)) return stored;
+  } catch {
+    // Speicher blockiert – einfach ohne Vorauswahl starten
+  }
+  return HOLIDAY_CANTON_NONE;
+}
+
+/**
+ * Ferien-/Feiertags-Hinweise eines geplanten Aufenthalts: Badges nur, wenn
+ * der Zeitraum Schulferien oder Feiertage des gewählten Kantons überlappt.
+ */
+function TripHolidayHints({
+  startDate,
+  endDate,
+  holidays,
+}: {
+  startDate: string;
+  endDate: string;
+  holidays: CantonHolidays;
+}) {
+  const { lang, t } = useI18n();
+  // Gleiche Ferien können mehrfach vorkommen (Schulkreise) – Namen deduplizieren
+  const schoolNames = Array.from(
+    new Set(
+      overlappingHolidays(startDate, endDate, holidays.school).map(h =>
+        holidayDisplayName(h, lang)
+      )
+    )
+  );
+  const publicDays = overlappingHolidays(
+    startDate,
+    endDate,
+    holidays.publicHolidays
+  );
+  if (schoolNames.length === 0 && publicDays.length === 0) return null;
+  const fmtDay = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
+      day: "2-digit",
+      month: "2-digit",
+    });
+  return (
+    <p className="mt-1.5 flex flex-wrap gap-1.5">
+      {schoolNames.map(name => (
+        <span
+          key={`schule-${name}`}
+          className="flex items-center gap-1 rounded-full bg-chart-4/15 px-2.5 py-0.5 text-xs font-medium"
+        >
+          <GraduationCap className="h-3 w-3 shrink-0" aria-hidden="true" />
+          {t.trips.holidaySchoolBadge(name)}
+        </span>
+      ))}
+      {publicDays.map(h => (
+        <span
+          key={`feiertag-${h.id}`}
+          className="flex items-center gap-1 rounded-full bg-chart-1/15 px-2.5 py-0.5 text-xs font-medium"
+        >
+          <Star className="h-3 w-3 shrink-0" aria-hidden="true" />
+          {t.trips.holidayPublicBadge(
+            fmtDay(h.startDate),
+            holidayDisplayName(h, lang)
+          )}
+        </span>
+      ))}
+    </p>
+  );
+}
 
 /** Pack-Fortschritt einer verknüpften Liste, z. B. «12 von 19 gepackt». */
 function PackProgress({ listId }: { listId: number }) {
@@ -450,6 +533,40 @@ export default function TripsPage() {
     [pastTripLikes, reviewYear, lang]
   );
 
+  // Schulferien & Feiertage des gewählten Kantons für die geplanten Aufenthalte.
+  // Fehler bleiben still (holidays = null) – die Hinweise werden dann weggelassen.
+  const [holidayCanton, setHolidayCanton] = useState<string>(
+    loadStoredHolidayCanton
+  );
+  const [holidays, setHolidays] = useState<CantonHolidays | null>(null);
+
+  const selectHolidayCanton = (code: string) => {
+    setHolidayCanton(code);
+    try {
+      if (code === HOLIDAY_CANTON_NONE) {
+        localStorage.removeItem(HOLIDAY_CANTON_KEY);
+      } else {
+        localStorage.setItem(HOLIDAY_CANTON_KEY, code);
+      }
+    } catch {
+      // Speicher blockiert – die Auswahl gilt trotzdem für diese Sitzung
+    }
+  };
+
+  useEffect(() => {
+    if (holidayCanton === HOLIDAY_CANTON_NONE || plannedTrips.length === 0) {
+      setHolidays(null);
+      return;
+    }
+    let cancelled = false;
+    void loadCantonHolidays(holidayCanton).then(result => {
+      if (!cancelled) setHolidays(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [holidayCanton, plannedTrips.length]);
+
   if (loading || (isAuthenticated && tripsQuery.isLoading)) {
     return (
       <div className="container flex justify-center py-16">
@@ -767,6 +884,39 @@ export default function TripsPage() {
             />
             {t.trips.plannedTitle}
           </h2>
+          {/* Kantons-Auswahl für Ferien-/Feiertags-Hinweise */}
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <Label
+              htmlFor="holiday-canton"
+              className="text-xs text-muted-foreground"
+            >
+              {t.trips.holidaySectionLabel}
+            </Label>
+            <Select value={holidayCanton} onValueChange={selectHolidayCanton}>
+              <SelectTrigger
+                id="holiday-canton"
+                className="w-60"
+                aria-label={t.trips.holidayCantonAria}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={HOLIDAY_CANTON_NONE}>
+                  {t.trips.holidayCantonNone}
+                </SelectItem>
+                {CANTONS.map(canton => (
+                  <SelectItem key={canton.code} value={canton.code}>
+                    {canton.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {holidays && (
+            <p className="mb-3 text-xs text-muted-foreground">
+              {t.trips.holidaySource}
+            </p>
+          )}
           <ul className="mb-8 space-y-3">
             {plannedTrips.map(trip => {
               const days = daysUntilTrip(trip.startDate, today);
@@ -806,6 +956,13 @@ export default function TripsPage() {
                           {t.trips.nightsCount(nights)}
                         </span>
                       </p>
+                      {holidays && (
+                        <TripHolidayHints
+                          startDate={trip.startDate}
+                          endDate={trip.endDate}
+                          holidays={holidays}
+                        />
+                      )}
                       {trip.packListId != null && (
                         <PackProgress listId={trip.packListId} />
                       )}
