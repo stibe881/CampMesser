@@ -1144,7 +1144,6 @@ export const en: Translation = {
     qrTitle: "Hand over right at the pitch",
     qrText:
       "Let others scan the code with their phone camera – the pitch dossier opens immediately, no typing or sign-in needed.",
-    tentFinderLink: "Find your tent",
     climateTitle: "Best time to visit",
     climateIntro:
       "Monthly values from five years of weather archive: average daily highs and lows plus rain days per month at this pitch.",
@@ -1210,7 +1209,6 @@ export const en: Translation = {
       "Compass bearing and distance back to your tent – even at night or on large campsites.",
     targetTitle: "Target",
     ownTargetsTitle: "Your targets",
-    spotsTitle: "Saved pitches",
     empty:
       "No targets saved yet. Stand where you want to find your way back to later – for example right by the tent – give the place a name and save your location.",
     addTitle: "Save current location as …",
@@ -1232,7 +1230,6 @@ export const en: Translation = {
     deletedToast: name => `“${name}” deleted`,
     remembering: "Getting your location …",
     rememberFailed: "Could not determine your location",
-    loginHint: "Signed in, you can also pick your saved pitches as the target.",
     noTarget:
       "No target chosen. Tap a target above – or save your current location under a name.",
     geoUnsupported: "Your device does not support location services.",

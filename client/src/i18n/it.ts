@@ -1167,7 +1167,6 @@ export const it: Translation = {
     qrTitle: "Da passare direttamente sul posto",
     qrText:
       "Fai scansionare il codice con la fotocamera del telefono – il dossier della piazzola si apre subito, senza digitare né accedere.",
-    tentFinderLink: "Ritrova la tenda",
     climateTitle: "Miglior periodo di viaggio",
     climateIntro:
       "Valori mensili da cinque anni di archivio meteo: massime e minime medie e giorni di pioggia al mese in questa piazzola.",
@@ -1234,7 +1233,6 @@ export const it: Translation = {
       "Rotta bussola e distanza per ritrovare la tua tenda – anche di notte o nei campeggi grandi.",
     targetTitle: "Meta",
     ownTargetsTitle: "Le tue mete",
-    spotsTitle: "Piazzole salvate",
     empty:
       "Nessuna meta salvata finora. Mettiti dove vorrai tornare più tardi – ad esempio proprio accanto alla tenda – dai un nome al punto e salva la tua posizione.",
     addTitle: "Salva la posizione attuale come …",
@@ -1256,8 +1254,6 @@ export const it: Translation = {
     deletedToast: name => `«${name}» eliminata`,
     remembering: "Ricerca della posizione …",
     rememberFailed: "Impossibile determinare la posizione",
-    loginHint:
-      "Con l'accesso puoi scegliere come meta anche le tue piazzole salvate.",
     noTarget:
       "Nessuna meta scelta. Tocca una meta qui sopra – oppure salva la tua posizione attuale con un nome.",
     geoUnsupported: "Il tuo dispositivo non supporta la geolocalizzazione.",

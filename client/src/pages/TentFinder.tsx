@@ -12,8 +12,6 @@ import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { trpc } from "@/lib/trpc";
 import { useDeviceHeading } from "@/hooks/useDeviceHeading";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import {
@@ -34,9 +32,9 @@ import { cn } from "@/lib/utils";
 
 /**
  * Zelt-Finder: Kompass-Peilung und Distanz zu beliebig vielen benannten
- * Zielen (Zelt, Duschen, Abwaschstelle …) oder zu einem gespeicherten
- * Zeltplatz. Funktioniert offline (reine Geometrie, GPS + Sensoren) –
- * nur Zeltplatz-Liste und Geräte-Sync laufen über den Server.
+ * Zielen (Zelt, Duschen, Abwaschstelle …). Funktioniert offline
+ * (reine Geometrie, GPS + Sensoren) – nur der Geräte-Sync der Ziele
+ * läuft über den Server.
  */
 
 function storeTargets(targets: TentFinderTarget[]) {
@@ -69,11 +67,6 @@ interface GeoState {
 
 export default function TentFinderPage() {
   const { lang, t } = useI18n();
-  const { isAuthenticated } = useAuth();
-  const spotsQuery = trpc.spots.list.useQuery(undefined, {
-    enabled: isAuthenticated,
-  });
-  const spots = spotsQuery.data ?? [];
 
   // Benannte Ziele laden; altes Einzel-Ziel wird einmalig als «Zelt» übernommen
   const [targets, setTargets] = useState<TentFinderTarget[]>(() => {
@@ -109,12 +102,9 @@ export default function TentFinderPage() {
     targetsSync.push(next);
   };
 
-  // ?spot=<id> wählt den Zeltplatz aus dem Dossier vor,
-  // ?target=<id> ein eigenes Ziel (z. B. von der Karte der Plätze)
+  // ?target=<id> wählt ein eigenes Ziel vor (z. B. von der Karte der Plätze)
   const [selection, setSelection] = useState<string | null>(() => {
     const params = new URLSearchParams(window.location.search);
-    const spotParam = params.get("spot");
-    if (spotParam) return `spot:${spotParam}`;
     const targetParam = params.get("target");
     return targetParam ? `target:${targetParam}` : null;
   });
@@ -172,15 +162,8 @@ export default function TentFinderPage() {
       const own = targets.find(x => x.id === id);
       return own ? { name: own.name, lat: own.lat, lon: own.lon } : null;
     }
-    if (effectiveSelection?.startsWith("spot:")) {
-      const id = Number(effectiveSelection.slice(5));
-      const spot = spots.find(s => s.id === id);
-      return spot
-        ? { name: spot.name, lat: spot.latitude, lon: spot.longitude }
-        : null;
-    }
     return null;
-  }, [effectiveSelection, targets, spots]);
+  }, [effectiveSelection, targets]);
 
   const saveHere = () => {
     const name = newName.trim().slice(0, MAX_NAME_LENGTH);
@@ -302,7 +285,7 @@ export default function TentFinderPage() {
             </span>
           </div>
 
-          {targets.length === 0 && spots.length === 0 && (
+          {targets.length === 0 && (
             <p className="text-sm text-muted-foreground">
               {t.tentFinder.empty}
             </p>
@@ -332,22 +315,7 @@ export default function TentFinderPage() {
             </div>
           )}
 
-          {spots.length > 0 && (
-            <div>
-              <p className="mb-1.5 text-xs font-medium text-muted-foreground">
-                {t.tentFinder.spotsTitle}
-              </p>
-              <ul className="space-y-1.5">
-                {spots.map(s => (
-                  <li key={s.id} className="flex">
-                    {optionRow(`spot:${s.id}`, s.name, s.latitude, s.longitude)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {!target && (targets.length > 0 || spots.length > 0) && (
+          {!target && targets.length > 0 && (
             <p className="text-sm text-muted-foreground">
               {t.tentFinder.noTarget}
             </p>
@@ -395,11 +363,6 @@ export default function TentFinderPage() {
               )}
               {saving ? t.tentFinder.remembering : t.tentFinder.saveButton}
             </Button>
-            {!isAuthenticated && (
-              <p className="text-xs text-muted-foreground">
-                {t.tentFinder.loginHint}
-              </p>
-            )}
           </div>
         </CardContent>
       </Card>

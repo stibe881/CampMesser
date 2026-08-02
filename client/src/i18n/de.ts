@@ -1178,7 +1178,6 @@ export const de = {
     qrTitle: "Direkt am Platz weitergeben",
     qrText:
       "Lass andere den Code mit der Handy-Kamera scannen – das Platz-Dossier öffnet sich sofort, ganz ohne Tippen oder Anmeldung.",
-    tentFinderLink: "Zelt finden",
     climateTitle: "Beste Reisezeit",
     climateIntro:
       "Monatswerte aus fünf Jahren Wetterarchiv: durchschnittliche Höchst- und Tiefstwerte sowie Regentage pro Monat an diesem Platz.",
@@ -1245,7 +1244,6 @@ export const de = {
       "Kompass-Peilung und Distanz zurück zu deinem Zelt – auch nachts oder auf grossen Plätzen.",
     targetTitle: "Ziel",
     ownTargetsTitle: "Eigene Ziele",
-    spotsTitle: "Gespeicherte Zeltplätze",
     empty:
       "Noch keine Ziele gespeichert. Stell dich dorthin, wo du später zurückfinden willst – zum Beispiel direkt beim Zelt – gib dem Ort einen Namen und speichere deinen Standort.",
     addTitle: "Aktuellen Standort speichern unter …",
@@ -1268,8 +1266,6 @@ export const de = {
     deletedToast: (name: string) => `«${name}» gelöscht`,
     remembering: "Standort wird ermittelt …",
     rememberFailed: "Standort konnte nicht ermittelt werden",
-    loginHint:
-      "Angemeldet kannst du auch deine gespeicherten Zeltplätze als Ziel wählen.",
     noTarget:
       "Kein Ziel gewählt. Tippe oben auf ein Ziel – oder speichere deinen aktuellen Standort unter einem Namen.",
     geoUnsupported: "Dein Gerät unterstützt keine Standortbestimmung.",

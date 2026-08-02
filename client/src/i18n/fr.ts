@@ -1180,7 +1180,6 @@ export const fr: Translation = {
     qrTitle: "À transmettre directement sur place",
     qrText:
       "Fais scanner le code avec l'appareil photo du téléphone – le dossier de l'emplacement s'ouvre immédiatement, sans saisie ni connexion.",
-    tentFinderLink: "Retrouver la tente",
     climateTitle: "Meilleure période de voyage",
     climateIntro:
       "Valeurs mensuelles issues de cinq ans d'archives météo : maximales et minimales moyennes ainsi que jours de pluie par mois à cet emplacement.",
@@ -1248,7 +1247,6 @@ export const fr: Translation = {
       "Cap boussole et distance pour retrouver ta tente – même de nuit ou sur les grands campings.",
     targetTitle: "Cible",
     ownTargetsTitle: "Tes cibles",
-    spotsTitle: "Emplacements enregistrés",
     empty:
       "Aucune cible enregistrée pour l'instant. Place-toi là où tu voudras revenir plus tard – par exemple juste à côté de la tente – donne un nom à l'endroit et enregistre ta position.",
     addTitle: "Enregistrer la position actuelle sous …",
@@ -1271,8 +1269,6 @@ export const fr: Translation = {
     deletedToast: name => `«${name}» supprimé`,
     remembering: "Recherche de la position …",
     rememberFailed: "Impossible de déterminer la position",
-    loginHint:
-      "Connecté·e, tu peux aussi choisir tes emplacements enregistrés comme cible.",
     noTarget:
       "Aucune cible choisie. Touche une cible ci-dessus – ou enregistre ta position actuelle sous un nom.",
     geoUnsupported: "Ton appareil ne permet pas la géolocalisation.",

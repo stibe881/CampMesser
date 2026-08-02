@@ -10,7 +10,6 @@ import {
   Droplets,
   Images,
   Loader2,
-  LocateFixed,
   MapPin,
   Moon,
   Mountain,
@@ -317,14 +316,8 @@ export default function SpotDetailPage() {
         <p className="mb-4 text-sm text-muted-foreground">{spot.note}</p>
       )}
 
-      {/* Zelt-Finder: Kompass-Peilung zu diesem Platz + Anreise-Route */}
+      {/* Anreise-Route zum Platz */}
       <div className="mt-1 flex flex-wrap gap-2">
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/zeltfinder?spot=${spot.id}`}>
-            <LocateFixed className="mr-1.5 h-4 w-4" aria-hidden="true" />
-            {t.spotDetail.tentFinderLink}
-          </Link>
-        </Button>
         <Button asChild variant="outline" size="sm">
           <a
             href={directionsUrl(spot.latitude, spot.longitude)}
