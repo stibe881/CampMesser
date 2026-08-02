@@ -189,7 +189,7 @@ export const de = {
     notificationsTitle: "Mitteilungen",
     pushDeviceTitle: "Push auf diesem Gerät",
     pushDeviceDesc:
-      "Benachrichtigungen zu Unwetter, Kühlbox-MHD und Trip-Countdown.",
+      "Benachrichtigungen zu Unwetter, Kühlbox-MHD, Trip-Countdown und Sternschnuppen-Nächten.",
     pushDeviceAria: "Push-Mitteilungen auf diesem Gerät aktivieren",
     pushUnsupported: "Dein Browser unterstützt keine Push-Mitteilungen.",
     pushNotConfigured: "Push ist serverseitig nicht eingerichtet.",
@@ -204,6 +204,9 @@ export const de = {
       "Wenn Lebensmittel in der Kühlbox heute oder morgen ablaufen.",
     prefTrips: "Trip-Countdown",
     prefTripsDesc: "3 Tage vor der Anreise, inklusive Packlisten-Stand.",
+    prefAstro: "Sternschnuppen-Nächte",
+    prefAstroDesc:
+      "Wenn an deinem Heim-Standort eine klare Nacht auf ein Sternschnuppen-Maximum trifft.",
     prefToggleAria: (label: string) => `${label} an- oder abschalten`,
     homeTitle: "Heim-Standort",
     homeIntro:

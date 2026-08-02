@@ -189,7 +189,7 @@ export const fr: Translation = {
     notificationsTitle: "Notifications",
     pushDeviceTitle: "Push sur cet appareil",
     pushDeviceDesc:
-      "Notifications pour les intempéries, la DLC de la glacière et le compte à rebours du séjour.",
+      "Notifications pour les intempéries, la DLC de la glacière, le compte à rebours du séjour et les nuits d'étoiles filantes.",
     pushDeviceAria: "Activer les notifications push sur cet appareil",
     pushUnsupported:
       "Ton navigateur ne prend pas en charge les notifications push.",
@@ -206,6 +206,9 @@ export const fr: Translation = {
     prefTrips: "Compte à rebours du séjour",
     prefTripsDesc:
       "3 jours avant l'arrivée, avec l'état de la liste de bagages.",
+    prefAstro: "Nuits d'étoiles filantes",
+    prefAstroDesc:
+      "Quand une nuit claire coïncide avec un maximum d'étoiles filantes à ton lieu de domicile.",
     prefToggleAria: (label: string) => `Activer ou désactiver ${label}`,
     homeTitle: "Lieu de domicile",
     homeIntro:

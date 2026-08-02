@@ -1089,6 +1089,7 @@ export const appRouter = router({
           wantsWeather: z.boolean().optional(),
           wantsFood: z.boolean().optional(),
           wantsTrips: z.boolean().optional(),
+          wantsAstro: z.boolean().optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {

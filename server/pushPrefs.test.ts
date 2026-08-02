@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { subscriptionWants, type PushKind, type PushPrefs } from "./push";
 
-const KINDS: PushKind[] = ["weather", "food", "trip"];
+const KINDS: PushKind[] = ["weather", "food", "trip", "astro"];
 
 function prefs(overrides: Partial<PushPrefs> = {}): PushPrefs {
   // Default wie in der DB: alle Flags an
@@ -9,6 +9,7 @@ function prefs(overrides: Partial<PushPrefs> = {}): PushPrefs {
     wantsWeather: true,
     wantsFood: true,
     wantsTrips: true,
+    wantsAstro: true,
     ...overrides,
   };
 }
@@ -25,6 +26,7 @@ describe("subscriptionWants", () => {
       { off: { wantsWeather: false }, blocked: "weather" },
       { off: { wantsFood: false }, blocked: "food" },
       { off: { wantsTrips: false }, blocked: "trip" },
+      { off: { wantsAstro: false }, blocked: "astro" },
     ];
     for (const { off, blocked } of cases) {
       const p = prefs(off);
@@ -39,6 +41,7 @@ describe("subscriptionWants", () => {
       wantsWeather: false,
       wantsFood: false,
       wantsTrips: false,
+      wantsAstro: false,
     });
     for (const kind of KINDS) {
       expect(subscriptionWants(allOff, kind)).toBe(false);

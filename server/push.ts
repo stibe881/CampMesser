@@ -2,8 +2,9 @@
  * Web-Push für Unwetter-Warnungen an gespeicherten Zeltplätzen und am
  * Heim-Standort, MHD-Erinnerungen für die Kühlbox (Lebensmittel, die heute
  * oder morgen ablaufen), Trip-Countdowns (3 Tage vor der Anreise, inkl.
- * Pack-Fortschritt) und Zelt-Trocknungs-Erinnerungen am Tag nach der
- * Heimkehr (bei Regen am Platz).
+ * Pack-Fortschritt), Zelt-Trocknungs-Erinnerungen am Tag nach der
+ * Heimkehr (bei Regen am Platz) und Sternschnuppen-Tipps, wenn am Heim-Ort
+ * eine klare, mondarme Nacht auf ein aktives Strom-Maximum trifft.
  * Der Check läuft über /api/push/check (konsoleH-Cronjob), weil Passenger
  * den Node-Prozess bei Inaktivität schlafen legt und ein interner Scheduler
  * deshalb unzuverlässig wäre.
@@ -18,7 +19,14 @@ import {
   pushSubscriptions,
   tripLogs,
 } from "../drizzle/schema";
+import {
+  isShowerActive,
+  meteorShowers,
+  type MeteorShower,
+} from "../shared/astro";
 import { expiryInfo } from "../shared/food";
+import { pick } from "../shared/i18n";
+import { getMoonInfo } from "../shared/moon";
 import { daysUntilTrip } from "../shared/trips";
 import { detectAlerts, type HourlyWeather } from "../shared/weather";
 import { getDb } from "./db";
@@ -63,13 +71,14 @@ export async function deleteSubscription(userId: number, endpoint: string) {
 }
 
 /** Mitteilungs-Arten, die pro Abo (Gerät) einzeln abschaltbar sind. */
-export type PushKind = "weather" | "food" | "trip";
+export type PushKind = "weather" | "food" | "trip" | "astro";
 
-/** Die drei Mitteilungs-Flags eines Abos (Default: alles an). */
+/** Die vier Mitteilungs-Flags eines Abos (Default: alles an). */
 export interface PushPrefs {
   wantsWeather: boolean;
   wantsFood: boolean;
   wantsTrips: boolean;
+  wantsAstro: boolean;
 }
 
 /**
@@ -84,6 +93,8 @@ export function subscriptionWants(prefs: PushPrefs, kind: PushKind): boolean {
       return prefs.wantsFood;
     case "trip":
       return prefs.wantsTrips;
+    case "astro":
+      return prefs.wantsAstro;
   }
 }
 
@@ -99,6 +110,7 @@ export async function getSubscriptionPrefs(
       wantsWeather: pushSubscriptions.wantsWeather,
       wantsFood: pushSubscriptions.wantsFood,
       wantsTrips: pushSubscriptions.wantsTrips,
+      wantsAstro: pushSubscriptions.wantsAstro,
     })
     .from(pushSubscriptions)
     .where(
@@ -197,6 +209,8 @@ export interface PushCheckResult {
   tripSent: number;
   /** Verschickte Zelt-Trocknungs-Erinnerungen (Tag nach der Heimkehr) */
   drySent: number;
+  /** Verschickte Sternschnuppen-Tipps (klare Nacht am Heim-Ort) */
+  astroSent: number;
   removed: number;
 }
 
@@ -383,6 +397,129 @@ export function buildDryingAlert(
   };
 }
 
+export interface AstroAlert {
+  title: string;
+  body: string;
+  /** Dedup-Schlüssel «astro:YYYY-MM-DD» – max. ein Sternschnuppen-Tipp pro Nacht und Abo */
+  key: string;
+}
+
+/** Nacht-Bewölkung (Mittel 21–24 Uhr) unter diesem Wert gilt als klarer Himmel. */
+export const ASTRO_CLOUD_MAX_PERCENT = 40;
+/** Ab dieser Mond-Beleuchtung (0–1) überstrahlt der Mond die Sternschnuppen. */
+export const ASTRO_MOON_MAX_ILLUMINATION = 0.6;
+/** So viele Tage um das Strom-Maximum gilt der Strom als «in Peak-Nähe». */
+export const ASTRO_PEAK_WINDOW_DAYS = 3;
+/** Gesendet wird nur abends (Europe/Zurich), Stunde von–bis (inklusive). */
+export const ASTRO_SEND_HOUR_FROM = 17;
+export const ASTRO_SEND_HOUR_TO = 21;
+
+/**
+ * Aktiver Sternschnuppen-Strom in Peak-Nähe (±3 Tage) am Stichtag – bei
+ * mehreren Kandidaten gewinnt der nächste Peak, bei Gleichstand die höhere
+ * Rate. Peaks im Vor-/Folgejahr werden mitgeprüft (Ströme über den
+ * Jahreswechsel, z. B. Quadrantiden). Reine Funktion (für Tests exportiert).
+ */
+export function showerNearPeak(date: Date): MeteorShower | null {
+  const startOfDay = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  ).getTime();
+  let best: { shower: MeteorShower; diff: number } | null = null;
+  for (const shower of meteorShowers) {
+    if (!isShowerActive(shower, date)) continue;
+    for (const year of [
+      date.getFullYear() - 1,
+      date.getFullYear(),
+      date.getFullYear() + 1,
+    ]) {
+      const peak = new Date(year, shower.peakMonth - 1, shower.peakDay);
+      // Runden fängt Sommerzeit-Wechsel (23/25-Stunden-Tage) ab
+      const diff = Math.abs(Math.round((peak.getTime() - startOfDay) / DAY_MS));
+      if (diff > ASTRO_PEAK_WINDOW_DAYS) continue;
+      if (
+        !best ||
+        diff < best.diff ||
+        (diff === best.diff && shower.zhr > best.shower.zhr)
+      ) {
+        best = { shower, diff };
+      }
+    }
+  }
+  return best?.shower ?? null;
+}
+
+/**
+ * Mittlere Bewölkung (%) der Nacht-Stunden 21–24 Uhr des Datums aus der
+ * Stunden-Prognose; null, wenn keine passenden Stunden vorliegen.
+ * Reine Funktion (für Tests exportiert).
+ */
+export function nightCloudCover(
+  hourly: Pick<HourlyWeather, "time" | "cloudCover">[],
+  date: string
+): number | null {
+  const values = hourly
+    .filter(h => h.time.startsWith(date) && Number(h.time.slice(11, 13)) >= 21)
+    .map(h => h.cloudCover);
+  if (values.length === 0) return null;
+  return values.reduce((sum, v) => sum + v, 0) / values.length;
+}
+
+/**
+ * Sternschnuppen-Tipp bauen: aktiver Strom in Peak-Nähe, klare Nacht
+ * (Bewölkung 21–24 Uhr unter 40 %) und wenig Mondlicht (unter 60 %
+ * beleuchtet) – sonst null. Reine Funktion (für Tests exportiert);
+ * `date` als ISO-Datum YYYY-MM-DD der Beobachtungsnacht.
+ * Texte deutsch, weil der Server die Sprache der Nutzer*innen nicht kennt.
+ */
+export function buildMeteorAlert(input: {
+  date: string;
+  /** Mittlere Nacht-Bewölkung in % (null = unbekannt → kein Tipp) */
+  cloudCoverNight: number | null;
+  /** Mond-Beleuchtung 0–1 */
+  moonIllumination: number;
+  /** Aktiver Strom in Peak-Nähe (null = keiner) */
+  activeShower: { name: string; zhr: number } | null;
+  /** Anzeigename des geprüften Orts (Heim-Standort) */
+  placeName: string;
+}): AstroAlert | null {
+  if (!input.activeShower) return null;
+  if (
+    input.cloudCoverNight === null ||
+    input.cloudCoverNight >= ASTRO_CLOUD_MAX_PERCENT
+  ) {
+    return null;
+  }
+  if (input.moonIllumination >= ASTRO_MOON_MAX_ILLUMINATION) return null;
+  return {
+    title: `🌠 Heute Nacht: ${input.activeShower.name}`,
+    body: `Klarer Himmel am Ort «${input.placeName}» – bis zu ${input.activeShower.zhr} Sternschnuppen pro Stunde.`,
+    key: `astro:${input.date}`,
+  };
+}
+
+/** Stunde (0–23) in Europe/Zurich – der Server könnte in UTC laufen. */
+function zurichHour(now = new Date()): number {
+  return Number(
+    new Intl.DateTimeFormat("de-CH", {
+      timeZone: "Europe/Zurich",
+      hour: "numeric",
+      hour12: false,
+    }).format(now)
+  );
+}
+
+/** ISO-Datum (YYYY-MM-DD) in Europe/Zurich (en-CA formatiert genau so). */
+function zurichIsoDate(now = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Zurich",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+}
+
 /** Open-Meteo erlaubt höchstens so viele vergangene Tage im Forecast-Endpoint. */
 const RAIN_MAX_PAST_DAYS = 92;
 
@@ -426,8 +563,8 @@ function localIsoDate(now = new Date()): string {
  * Alle Abos prüfen: für jeden Zeltplatz der abonnierten Nutzer*innen die
  * Warnlage berechnen und bei Sturm/Gewitter & Co. (Stufe «gefahr») einen
  * Push senden. Dieselbe Warnlage wird pro Abo nur einmal gemeldet.
- * Die Mitteilungs-Flags pro Abo (wantsWeather/wantsFood/wantsTrips) werden
- * über subscriptionWants respektiert.
+ * Die Mitteilungs-Flags pro Abo (wantsWeather/wantsFood/wantsTrips/
+ * wantsAstro) werden über subscriptionWants respektiert.
  */
 export async function checkAndNotify(): Promise<PushCheckResult> {
   const result: PushCheckResult = {
@@ -437,6 +574,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     foodSent: 0,
     tripSent: 0,
     drySent: 0,
+    astroSent: 0,
     removed: 0,
   };
   if (!pushConfigured()) return result;
@@ -658,6 +796,33 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     }
   }
 
+  // Sternschnuppen: klarer Abendhimmel am Heim-Ort während eines aktiven
+  // Strom-Maximums – nur abends (17–21 Uhr Europe/Zurich) geprüft, damit der
+  // Tipp zur kommenden Nacht passt und der stündliche Cron nicht öfter feuert.
+  const astroAlertByUser = new Map<number, AstroAlert>();
+  const hour = zurichHour();
+  if (hour >= ASTRO_SEND_HOUR_FROM && hour <= ASTRO_SEND_HOUR_TO) {
+    const astroDate = zurichIsoDate();
+    const astroNoon = new Date(`${astroDate}T12:00:00`);
+    const shower = showerNearPeak(astroNoon);
+    const moonIllumination = getMoonInfo(astroNoon).illumination;
+    // Strom-/Mond-Vorprüfung spart die Wetter-Auswertung an ruhigen Abenden
+    if (shower && moonIllumination < ASTRO_MOON_MAX_ILLUMINATION) {
+      for (const home of homes) {
+        const hourly = await cachedHourly(home.latitude, home.longitude);
+        if (!hourly) continue;
+        const alert = buildMeteorAlert({
+          date: astroDate,
+          cloudCoverNight: nightCloudCover(hourly, astroDate),
+          moonIllumination,
+          activeShower: { name: pick(shower.name, "de"), zhr: shower.zhr },
+          placeName: home.name,
+        });
+        if (alert) astroAlertByUser.set(home.userId, alert);
+      }
+    }
+  }
+
   /** Push an ein Abo senden; bei widerrufenem Abo (404/410) das Abo löschen. */
   async function sendTo(
     sub: (typeof subs)[number],
@@ -795,6 +960,30 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         await db
           .update(pushSubscriptions)
           .set({ lastDryKey: dryAlert.key, lastNotifiedAt: new Date() })
+          .where(eq(pushSubscriptions.id, sub.id));
+      } else if (outcome === "gone") {
+        continue;
+      }
+    }
+
+    // ── Sternschnuppen: Tipp bei klarer Nacht am Heim-Ort (max. 1 pro Nacht) ──
+    const astroAlert = subscriptionWants(sub, "astro")
+      ? astroAlertByUser.get(sub.userId)
+      : undefined;
+    if (astroAlert && astroAlert.key !== sub.lastAstroKey) {
+      const astroPayload = JSON.stringify({
+        title: astroAlert.title,
+        body: astroAlert.body,
+        url: "/natur",
+        // Eigener Tag, damit der Tipp andere Meldungen nicht ersetzt
+        tag: "campmesser-astro",
+      });
+      const outcome = await sendTo(sub, astroPayload);
+      if (outcome === "sent") {
+        result.astroSent += 1;
+        await db
+          .update(pushSubscriptions)
+          .set({ lastAstroKey: astroAlert.key, lastNotifiedAt: new Date() })
           .where(eq(pushSubscriptions.id, sub.id));
       }
     }

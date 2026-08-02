@@ -187,7 +187,7 @@ export const it: Translation = {
     notificationsTitle: "Notifiche",
     pushDeviceTitle: "Push su questo dispositivo",
     pushDeviceDesc:
-      "Notifiche per maltempo, TMC del frigo box e conto alla rovescia del soggiorno.",
+      "Notifiche per maltempo, TMC del frigo box, conto alla rovescia del soggiorno e notti di stelle cadenti.",
     pushDeviceAria: "Attiva le notifiche push su questo dispositivo",
     pushUnsupported: "Il tuo browser non supporta le notifiche push.",
     pushNotConfigured: "Il push non è configurato lato server.",
@@ -202,6 +202,9 @@ export const it: Translation = {
     prefTrips: "Conto alla rovescia del soggiorno",
     prefTripsDesc:
       "3 giorni prima dell'arrivo, incluso lo stato della lista bagagli.",
+    prefAstro: "Notti di stelle cadenti",
+    prefAstroDesc:
+      "Quando una notte serena coincide con un massimo di stelle cadenti nella tua località di casa.",
     prefToggleAria: (label: string) => `Attiva o disattiva ${label}`,
     homeTitle: "Località di casa",
     homeIntro:

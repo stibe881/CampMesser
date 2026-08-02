@@ -47,7 +47,7 @@ import {
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
 
-type PushFlag = "wantsWeather" | "wantsFood" | "wantsTrips";
+type PushFlag = "wantsWeather" | "wantsFood" | "wantsTrips" | "wantsAstro";
 
 /**
  * Abschnitt «Mitteilungen»: Push-Abo dieses Geräts (an/aus) plus
@@ -77,7 +77,9 @@ function NotificationsCard() {
         ? { wantsWeather: value }
         : flag === "wantsFood"
           ? { wantsFood: value }
-          : { wantsTrips: value };
+          : flag === "wantsTrips"
+            ? { wantsTrips: value }
+            : { wantsAstro: value };
     setPrefsMutation.mutate({ endpoint: push.endpoint, ...patch });
   };
 
@@ -96,6 +98,11 @@ function NotificationsCard() {
       flag: "wantsTrips",
       label: t.profile.prefTrips,
       desc: t.profile.prefTripsDesc,
+    },
+    {
+      flag: "wantsAstro",
+      label: t.profile.prefAstro,
+      desc: t.profile.prefAstroDesc,
     },
   ];
 

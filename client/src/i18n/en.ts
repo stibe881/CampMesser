@@ -185,7 +185,7 @@ export const en: Translation = {
     notificationsTitle: "Notifications",
     pushDeviceTitle: "Push on this device",
     pushDeviceDesc:
-      "Notifications for storms, cool box best-before dates and the trip countdown.",
+      "Notifications for storms, cool box best-before dates, the trip countdown and shooting-star nights.",
     pushDeviceAria: "Enable push notifications on this device",
     pushUnsupported: "Your browser does not support push notifications.",
     pushNotConfigured: "Push is not configured on the server.",
@@ -199,6 +199,9 @@ export const en: Translation = {
     prefTrips: "Trip countdown",
     prefTripsDesc:
       "3 days before arrival, including your packing list progress.",
+    prefAstro: "Shooting-star nights",
+    prefAstroDesc:
+      "When a clear night coincides with a meteor shower peak at your home location.",
     prefToggleAria: (label: string) => `Turn ${label} on or off`,
     homeTitle: "Home location",
     homeIntro:
