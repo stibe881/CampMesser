@@ -30,6 +30,7 @@ import {
   sanitizeTargets,
   type TentFinderTarget,
 } from "@/lib/tentFinderTargets";
+import { createBaseLayer, loadMapLayer } from "@/lib/mapLayers";
 import { bearingDegrees, distanceMeters } from "@shared/geo";
 import { compassDirection } from "@shared/solar";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
@@ -368,11 +369,9 @@ export default function TentFinderPage() {
       zoom: MAP_FALLBACK_ZOOM,
       scrollWheelZoom: false,
     });
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
+    // Gleicher Basis-Layer wie auf der grossen Karte (dort gewählte
+    // Karte/Satellit-Darstellung wird über localStorage übernommen)
+    createBaseLayer(L, loadMapLayer()).addTo(map);
     targetLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
     fitDoneRef.current = false;

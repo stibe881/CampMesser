@@ -1287,6 +1287,9 @@ export const it: Translation = {
       n === 1
         ? "1 osservazione della natura sulla mappa"
         : `${n} osservazioni della natura sulla mappa`,
+    layerGroupAria: "Scegli la visualizzazione della mappa",
+    layerMap: "Mappa",
+    layerSatellite: "Satellite",
   },
   spotDetail: {
     fallbackTitle: "Piazzola",

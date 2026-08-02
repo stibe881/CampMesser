@@ -8,6 +8,11 @@
  * Zusätzlich erscheinen die gespeicherten Zelt-Finder-Ziele (Zelt, Duschen …)
  * als eigene bernsteinfarbene Pins – mit «Anpeilen»-Link in den Zelt-Finder.
  *
+ * Basis-Layer umschaltbar: «Karte» (OpenStreetMap) oder «Satellit» (Esri
+ * World Imagery). Die Wahl wird in localStorage gemerkt und der Layer beim
+ * Umschalten getauscht, ohne die Karte neu aufzubauen – Ausschnitt, Pins und
+ * offene Popups bleiben erhalten.
+ *
  * Zuschaltbarer Entdecker-Layer: auf Wunsch fragt die Karte die Overpass-API
  * nach Campingplätzen (tourism=camp_site) im aktuellen Ausschnitt – bewusst
  * nie automatisch beim Verschieben (Overpass ist rate-limitiert), sondern nur
@@ -27,8 +32,10 @@ import { Link, useLocation } from "wouter";
 import {
   Compass,
   LocateFixed,
+  Map as MapIcon,
   MapPin,
   PawPrint,
+  Satellite,
   Search,
   Tent,
 } from "lucide-react";
@@ -61,6 +68,12 @@ import {
   parseCampsites,
   type OsmCampsite,
 } from "@/lib/overpass";
+import {
+  createBaseLayer,
+  loadMapLayer,
+  storeMapLayer,
+  type MapLayerKind,
+} from "@/lib/mapLayers";
 import {
   LEGACY_TARGET_KEY,
   TARGETS_KEY,
@@ -154,6 +167,7 @@ function SpotsMap({
   const utils = trpc.useUtils();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const baseLayerRef = useRef<L.TileLayer | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
   const campLayerRef = useRef<L.LayerGroup | null>(null);
   const didFitRef = useRef(false);
@@ -165,6 +179,9 @@ function SpotsMap({
     null
   );
   const [newName, setNewName] = useState("");
+
+  // Basis-Layer «Karte / Satellit» – Wahl bleibt in localStorage erhalten
+  const [layerKind, setLayerKind] = useState<MapLayerKind>(loadMapLayer);
 
   // Entdecker-Layer: Zustand der Overpass-Suche (Standard AUS)
   const [discoverOn, setDiscoverOn] = useState(false);
@@ -183,11 +200,8 @@ function SpotsMap({
       zoom: FALLBACK_ZOOM,
       scrollWheelZoom: true,
     });
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
+    // Der Basis-Layer (Karte/Satellit) kommt aus dem eigenen Effect darunter –
+    // so lässt er sich später tauschen, ohne die Karte neu aufzubauen.
     markersRef.current = L.layerGroup().addTo(map);
     campLayerRef.current = L.layerGroup().addTo(map);
     // Klick auf freie Kartenstelle → Dialog «Favorit hier anlegen?».
@@ -206,9 +220,26 @@ function SpotsMap({
       abortRef.current?.abort();
       map.remove();
       mapRef.current = null;
+      baseLayerRef.current = null;
       markersRef.current = null;
       campLayerRef.current = null;
     };
+  }, []);
+
+  // Basis-Layer (Karte/Satellit) setzen bzw. tauschen – erst hinzufügen,
+  // dann den alten entfernen, damit die Karte nie «leer» aufblitzt.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const next = createBaseLayer(L, layerKind).addTo(map);
+    baseLayerRef.current?.remove();
+    baseLayerRef.current = next;
+  }, [layerKind]);
+
+  /** Umschalter «Karte / Satellit»: Wahl merken und Layer tauschen. */
+  const switchLayer = useCallback((kind: MapLayerKind) => {
+    setLayerKind(kind);
+    storeMapLayer(kind);
   }, []);
 
   /** Overpass für den aktuellen Ausschnitt abfragen (nie automatisch beim Verschieben). */
@@ -509,6 +540,40 @@ function SpotsMap({
   return (
     <>
       <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div
+          role="group"
+          aria-label={t.mapView.layerGroupAria}
+          className="flex items-center rounded-full bg-muted p-0.5"
+        >
+          <button
+            type="button"
+            onClick={() => switchLayer("map")}
+            aria-pressed={layerKind === "map"}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors",
+              layerKind === "map"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <MapIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            {t.mapView.layerMap}
+          </button>
+          <button
+            type="button"
+            onClick={() => switchLayer("satellite")}
+            aria-pressed={layerKind === "satellite"}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors",
+              layerKind === "satellite"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Satellite className="h-3.5 w-3.5" aria-hidden="true" />
+            {t.mapView.layerSatellite}
+          </button>
+        </div>
         <button
           type="button"
           onClick={toggleDiscover}

@@ -1302,6 +1302,9 @@ export const fr: Translation = {
       n === 1
         ? "1 observation nature sur la carte"
         : `${n} observations nature sur la carte`,
+    layerGroupAria: "Choisir l'affichage de la carte",
+    layerMap: "Carte",
+    layerSatellite: "Satellite",
   },
   spotDetail: {
     fallbackTitle: "Emplacement",

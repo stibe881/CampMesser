@@ -1303,6 +1303,9 @@ export const de = {
       n === 1
         ? "1 Natur-Beobachtung auf der Karte"
         : `${n} Natur-Beobachtungen auf der Karte`,
+    layerGroupAria: "Kartendarstellung wählen",
+    layerMap: "Karte",
+    layerSatellite: "Satellit",
   },
   spotDetail: {
     fallbackTitle: "Zeltplatz",
