@@ -493,6 +493,10 @@ export const shoppingItems = mysqlTable(
     position: int("position").notNull().default(0),
     /** Laden-Kategorie (Schlüssel aus shared/shopping.ts); null = ohne Kategorie */
     category: varchar("category", { length: 40 }),
+    /** Freitext-Menge («2×», «500 g»); null = ohne Mengenangabe */
+    quantity: varchar("quantity", { length: 40 }),
+    /** Kurze Notiz zum Eintrag («Aktion», «laktosefrei»); null = keine */
+    note: varchar("note", { length: 160 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("shoppingItems_userId").on(table.userId)]

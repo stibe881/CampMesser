@@ -152,7 +152,19 @@ export default function ShoppingPrintPage() {
                       className="inline-block h-4 w-4 shrink-0 rounded border-2 border-foreground"
                       aria-hidden="true"
                     />
-                    <span className="min-w-0 flex-1">{item.name}</span>
+                    <span className="min-w-0 flex-1">
+                      {item.name}
+                      {item.quantity && (
+                        <span className="ml-2 font-semibold">
+                          {item.quantity}
+                        </span>
+                      )}
+                      {item.note && (
+                        <span className="block text-xs text-foreground/70">
+                          {item.note}
+                        </span>
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>

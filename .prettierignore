@@ -29,6 +29,7 @@ pnpm-lock.yaml
 # IDE files
 .vscode/
 .idea/
+.claude/
 
 # OS files
 .DS_Store

@@ -172,9 +172,21 @@ export default function SharedShoppingPage() {
                           />
                           <label
                             htmlFor={`shared-shopping-${item.id}`}
-                            className="min-w-0 flex-1 cursor-pointer break-words text-sm"
+                            className="min-w-0 flex-1 cursor-pointer"
                           >
-                            {item.name}
+                            <span className="break-words text-sm">
+                              {item.name}
+                              {item.quantity && (
+                                <span className="ml-2 inline-block rounded bg-muted px-1.5 py-0.5 align-middle text-xs font-medium text-muted-foreground">
+                                  {item.quantity}
+                                </span>
+                              )}
+                            </span>
+                            {item.note && (
+                              <span className="block break-words text-xs text-muted-foreground">
+                                {item.note}
+                              </span>
+                            )}
                           </label>
                         </li>
                       ))}
@@ -213,9 +225,21 @@ export default function SharedShoppingPage() {
                     />
                     <label
                       htmlFor={`shared-shopping-${item.id}`}
-                      className="min-w-0 flex-1 cursor-pointer break-words text-sm text-muted-foreground line-through"
+                      className="min-w-0 flex-1 cursor-pointer"
                     >
-                      {item.name}
+                      <span className="break-words text-sm text-muted-foreground line-through">
+                        {item.name}
+                        {item.quantity && (
+                          <span className="ml-2 inline-block rounded bg-muted px-1.5 py-0.5 align-middle text-xs font-medium no-underline">
+                            {item.quantity}
+                          </span>
+                        )}
+                      </span>
+                      {item.note && (
+                        <span className="block break-words text-xs text-muted-foreground/70">
+                          {item.note}
+                        </span>
+                      )}
                     </label>
                   </li>
                 ))}

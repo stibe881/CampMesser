@@ -873,13 +873,17 @@ export const appRouter = router({
         z.object({
           name: z.string().min(1).max(160),
           category: z.enum(SHOPPING_CATEGORIES).nullish(),
+          quantity: z.string().max(40).nullish(),
+          note: z.string().max(160).nullish(),
         })
       )
       .mutation(async ({ ctx, input }) => {
         const items = await db.getShoppingItems(ctx.user.id);
         const name = input.name.trim();
         // Duplikat-Schutz: steht der Name bereits unabgehakt auf der Liste
-        // (case-insensitiv), wird kein zweiter Eintrag angelegt.
+        // (case-insensitiv), wird kein zweiter Eintrag angelegt. Eine
+        // mitgeschickte Menge/Notiz wird dann NICHT übernommen – der Client
+        // zeigt einen Info-Toast, damit nichts stillschweigend verloren geht.
         const alreadyOpen = items.some(
           i => !i.checked && i.name.trim().toLowerCase() === name.toLowerCase()
         );
@@ -892,15 +896,30 @@ export const appRouter = router({
             name,
             position: nextPosition,
             category: input.category ?? null,
+            quantity: input.quantity?.trim() || null,
+            note: input.note?.trim() || null,
           },
         ]);
         return { success: true, added: true } as const;
       }),
-    /** Mehrere Einträge auf einmal (z. B. Zutaten eines Rezepts). */
+    /** Mehrere Einträge auf einmal (z. B. Zutaten eines Rezepts) – wahlweise
+     * als blosser Name oder als Objekt mit optionaler Menge/Notiz. */
     addMany: protectedProcedure
       .input(
         z.object({
-          names: z.array(z.string().min(1).max(160)).min(1).max(100),
+          names: z
+            .array(
+              z.union([
+                z.string().min(1).max(160),
+                z.object({
+                  name: z.string().min(1).max(160),
+                  quantity: z.string().max(40).nullish(),
+                  note: z.string().max(160).nullish(),
+                }),
+              ])
+            )
+            .min(1)
+            .max(100),
           category: z.enum(SHOPPING_CATEGORIES).nullish(),
         })
       )
@@ -909,15 +928,39 @@ export const appRouter = router({
         const nextPosition =
           items.reduce((max, i) => Math.max(max, i.position), 0) + 1;
         await db.addShoppingItems(
-          input.names.map((name, idx) => ({
-            userId: ctx.user.id,
-            name: name.trim(),
-            position: nextPosition + idx,
-            category: input.category ?? null,
-          }))
+          input.names.map((entry, idx) => {
+            const obj = typeof entry === "string" ? { name: entry } : entry;
+            return {
+              userId: ctx.user.id,
+              name: obj.name.trim(),
+              position: nextPosition + idx,
+              category: input.category ?? null,
+              quantity: ("quantity" in obj && obj.quantity?.trim()) || null,
+              note: ("note" in obj && obj.note?.trim()) || null,
+            };
+          })
         );
         return { added: input.names.length };
       }),
+    /** Menge und/oder Notiz eines eigenen Eintrags setzen (null/"" entfernt). */
+    updateItem: protectedProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          quantity: z.string().max(40).nullish(),
+          note: z.string().max(160).nullish(),
+        })
+      )
+      .mutation(({ ctx, input }) =>
+        db.updateShoppingItemDetails(input.id, ctx.user.id, {
+          ...(input.quantity !== undefined
+            ? { quantity: input.quantity?.trim() || null }
+            : {}),
+          ...(input.note !== undefined
+            ? { note: input.note?.trim() || null }
+            : {}),
+        })
+      ),
     /** Laden-Kategorie eines Eintrags setzen; null entfernt sie wieder. */
     setCategory: protectedProcedure
       .input(
@@ -982,6 +1025,8 @@ export const appRouter = router({
               name: string;
               checked: boolean;
               category: string | null;
+              quantity: string | null;
+              note: string | null;
             }[],
           };
         }
@@ -993,6 +1038,8 @@ export const appRouter = router({
             name: i.name,
             checked: i.checked,
             category: i.category,
+            quantity: i.quantity,
+            note: i.note,
           })),
         };
       }),

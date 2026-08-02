@@ -492,6 +492,20 @@ export async function setShoppingItemCategory(
     .where(and(eq(shoppingItems.id, id), eq(shoppingItems.userId, userId)));
 }
 
+/** Menge und/oder Notiz eines Eintrags setzen (nur eigene Zeilen; null entfernt). */
+export async function updateShoppingItemDetails(
+  id: number,
+  userId: number,
+  data: { quantity?: string | null; note?: string | null }
+) {
+  if (Object.keys(data).length === 0) return;
+  const db = requireDb(await getDb());
+  await db
+    .update(shoppingItems)
+    .set(data)
+    .where(and(eq(shoppingItems.id, id), eq(shoppingItems.userId, userId)));
+}
+
 /** Neue Reihenfolge der Einkaufsliste speichern: position = 0..n. */
 export async function reorderShoppingItems(userId: number, itemIds: number[]) {
   const db = requireDb(await getDb());
