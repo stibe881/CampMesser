@@ -1590,6 +1590,33 @@ export const fr: Translation = {
     answerAria: (option: string) => `Réponse : ${option}`,
     showResult: "Afficher le résultat",
     nextQuestion: "Question suivante",
+    ownBadge: "Personnel",
+    newQuiz: "Créer un nouveau quiz",
+    newQuizAria: "Créer un nouveau quiz",
+    quizDeleteConfirm: (title: string) =>
+      `Vraiment supprimer le quiz « ${title} » ?`,
+    quizEditor: {
+      titleEdit: "Modifier le quiz",
+      titleNew: "Créer son propre quiz",
+      description:
+        "Tes propres questions avec réponses et explication – enregistré dans ton compte, jouable comme les quiz intégrés.",
+      updated: "Quiz mis à jour",
+      created: "Quiz créé",
+      titleLabel: "Titre",
+      titlePlaceholder: "p. ex. Le quiz de notre camping",
+      questionsTitle: (n: number) => `Questions (${n})`,
+      questionPlaceholder: "Question, p. ex. « Quel oiseau chante la nuit ? »",
+      questionAria: (n: number) => `Question ${n}`,
+      removeQuestionAria: (n: number) => `Supprimer la question ${n}`,
+      correctHint: "Marque la bonne réponse avec le point à gauche.",
+      optionPlaceholder: (n: number) => `Réponse ${n}`,
+      optionAria: (q: number, o: number) => `Réponse ${o} de la question ${q}`,
+      correctAria: (q: number, o: number) =>
+        `Marquer la réponse ${o} de la question ${q} comme correcte`,
+      explanationPlaceholder: "Explication après la réponse (facultatif)",
+      explanationAria: (n: number) => `Explication de la question ${n}`,
+      addQuestion: "Ajouter une question",
+    },
     editor: {
       titleEdit: "Modifier la chasse au trésor",
       titleNew: "Créer sa propre chasse au trésor",

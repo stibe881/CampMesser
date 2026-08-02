@@ -148,6 +148,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     menuEntries,
     customRecipes,
     customHunts,
+    customQuizzes,
     shoppingItems,
     pushSubscriptions,
     userSettings,
@@ -187,6 +188,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(tripLogs).where(eq(tripLogs.userId, userId));
   await db.delete(customRecipes).where(eq(customRecipes.userId, userId));
   await db.delete(customHunts).where(eq(customHunts.userId, userId));
+  await db.delete(customQuizzes).where(eq(customQuizzes.userId, userId));
   await db.delete(shoppingItems).where(eq(shoppingItems.userId, userId));
   await db
     .delete(pushSubscriptions)

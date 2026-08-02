@@ -1572,6 +1572,33 @@ export const it: Translation = {
     answerAria: (option: string) => `Risposta: ${option}`,
     showResult: "Mostra il risultato",
     nextQuestion: "Prossima domanda",
+    ownBadge: "Personale",
+    newQuiz: "Crea un nuovo quiz",
+    newQuizAria: "Crea un nuovo quiz",
+    quizDeleteConfirm: (title: string) =>
+      `Eliminare davvero il quiz «${title}»?`,
+    quizEditor: {
+      titleEdit: "Modifica quiz",
+      titleNew: "Crea il tuo quiz",
+      description:
+        "Le tue domande con risposte e spiegazione – salvato nel tuo account, giocabile come i quiz integrati.",
+      updated: "Quiz aggiornato",
+      created: "Quiz creato",
+      titleLabel: "Titolo",
+      titlePlaceholder: "ad es. Il quiz del nostro campeggio",
+      questionsTitle: (n: number) => `Domande (${n})`,
+      questionPlaceholder: "Domanda, ad es. «Quale uccello canta di notte?»",
+      questionAria: (n: number) => `Domanda ${n}`,
+      removeQuestionAria: (n: number) => `Rimuovi la domanda ${n}`,
+      correctHint: "Segna la risposta giusta con il punto a sinistra.",
+      optionPlaceholder: (n: number) => `Risposta ${n}`,
+      optionAria: (q: number, o: number) => `Risposta ${o} della domanda ${q}`,
+      correctAria: (q: number, o: number) =>
+        `Segna la risposta ${o} della domanda ${q} come corretta`,
+      explanationPlaceholder: "Spiegazione dopo la risposta (facoltativa)",
+      explanationAria: (n: number) => `Spiegazione della domanda ${n}`,
+      addQuestion: "Aggiungi una domanda",
+    },
     editor: {
       titleEdit: "Modifica caccia al tesoro",
       titleNew: "Crea la tua caccia al tesoro",

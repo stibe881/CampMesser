@@ -8,7 +8,7 @@ import type { TrpcContext } from "./_core/context";
  * Migrationen). Lokal ohne Datenbank wird die Datei übersprungen.
  * Ablauf: Registrieren → Anmelden → Daten quer durch alle Nutzer-Tabellen
  * anlegen (Packliste, Einstellung, Zeltplatz, Trip mit Foto und Menüplan,
- * Rezept mit Foto, Schnitzeljagd, Einkaufsliste, Kühlbox, Push-Abo)
+ * Rezept mit Foto, Schnitzeljagd, Quiz, Einkaufsliste, Kühlbox, Push-Abo)
  * → Konto löschen → prüfen, dass die Lösch-Kaskade alle Tabellen und
  * die Upload-Dateien erfasst hat.
  */
@@ -150,6 +150,17 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       durationMinutes: 30,
       stations: [{ title: "Station 1", story: "", task: "Suchen" }],
     });
+    await authed.quizzes.create({
+      title: "CI-Quiz",
+      questions: [
+        {
+          question: "Frage?",
+          options: ["Ja", "Nein"],
+          correctIndex: 0,
+          explanation: "Weil.",
+        },
+      ],
+    });
     await authed.shopping.add({ name: "CI-Zutat" });
     await authed.food.add({ name: "CI-Vorrat" });
     await authed.push.subscribe({
@@ -216,6 +227,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.customHunts)
         .where(eq(schema.customHunts.userId, uid)),
+      dbc
+        .select()
+        .from(schema.customQuizzes)
+        .where(eq(schema.customQuizzes.userId, uid)),
       dbc
         .select()
         .from(schema.shoppingItems)

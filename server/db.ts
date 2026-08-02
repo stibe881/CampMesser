@@ -3,8 +3,10 @@ import { drizzle } from "drizzle-orm/mysql2";
 import {
   campSpots,
   customHunts,
+  customQuizzes,
   customRecipes,
   InsertCustomHunt,
+  InsertCustomQuiz,
   InsertCustomRecipe,
   foodItems,
   InsertCampSpot,
@@ -697,6 +699,41 @@ export async function deleteCustomHunt(id: number, userId: number) {
   await db
     .delete(customHunts)
     .where(and(eq(customHunts.id, id), eq(customHunts.userId, userId)));
+}
+
+// ── Eigene Quizze ──
+export async function getCustomQuizzes(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(customQuizzes)
+    .where(eq(customQuizzes.userId, userId))
+    .orderBy(desc(customQuizzes.id));
+}
+
+export async function addCustomQuiz(data: InsertCustomQuiz) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(customQuizzes).values(data);
+  return result.insertId;
+}
+
+export async function updateCustomQuiz(
+  id: number,
+  userId: number,
+  data: Partial<Omit<InsertCustomQuiz, "id" | "userId">>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(customQuizzes)
+    .set(data)
+    .where(and(eq(customQuizzes.id, id), eq(customQuizzes.userId, userId)));
+}
+
+export async function deleteCustomQuiz(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(customQuizzes)
+    .where(and(eq(customQuizzes.id, id), eq(customQuizzes.userId, userId)));
 }
 
 // ── Synchronisierte Einstellungen ──

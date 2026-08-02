@@ -41,12 +41,17 @@ import {
 import { pick, type Language } from "@shared/i18n";
 import { useI18n, useT } from "@/i18n";
 import { MAX_STATIONS, parseHuntStations } from "@shared/hunts";
+import { MAX_QUIZ_QUESTIONS, parseQuizQuestions } from "@shared/quizzes";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import {
   customHuntToScavengerHunt,
   type CustomHuntRow,
 } from "@/lib/customHunts";
+import {
+  customQuizToNatureQuiz,
+  type CustomQuizRow,
+} from "@/lib/customQuizzes";
 import { cn } from "@/lib/utils";
 
 /** Buchstabe einer Station in der aktiven Sprache ("" = keiner). */
@@ -336,6 +341,216 @@ function HuntEditorDialog({
   );
 }
 
+/** Formular-Zustand einer Quiz-Frage im Editor. */
+interface EditorQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+const emptyQuestion = (): EditorQuestion => ({
+  question: "",
+  options: ["", "", ""],
+  correctIndex: 0,
+  explanation: "",
+});
+
+/** Editor für eigene Quizze: erstellen und bearbeiten. */
+function QuizEditorDialog({
+  initial,
+  onClose,
+}: {
+  initial: CustomQuizRow | null;
+  onClose: () => void;
+}) {
+  const t = useT();
+  const qe = t.family.quizEditor;
+  const utils = trpc.useUtils();
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [questions, setQuestions] = useState<EditorQuestion[]>(() => {
+    if (initial) {
+      const parsed = parseQuizQuestions(initial.questionsJson);
+      if (parsed.length > 0) {
+        return parsed.map(q => ({
+          question: q.question,
+          options: [...q.options],
+          correctIndex: q.correctIndex,
+          explanation: q.explanation ?? "",
+        }));
+      }
+    }
+    return [emptyQuestion()];
+  });
+
+  const onSaved = () => {
+    utils.quizzes.list.invalidate();
+    toast.success(initial ? qe.updated : qe.created);
+    onClose();
+  };
+  const onSaveError = (e: { message?: string }) =>
+    toast.error(e.message || t.common.saveFailed);
+  const createMutation = trpc.quizzes.create.useMutation({
+    onSuccess: onSaved,
+    onError: onSaveError,
+  });
+  const updateMutation = trpc.quizzes.update.useMutation({
+    onSuccess: onSaved,
+    onError: onSaveError,
+  });
+  const isPending = createMutation.isPending || updateMutation.isPending;
+
+  const updateQuestion = (index: number, patch: Partial<EditorQuestion>) =>
+    setQuestions(prev =>
+      prev.map((q, i) => (i === index ? { ...q, ...patch } : q))
+    );
+
+  const canSave =
+    title.trim() &&
+    questions.length > 0 &&
+    questions.every(
+      q => q.question.trim() && q.options.every(option => option.trim())
+    );
+
+  const save = () => {
+    const payload = {
+      title: title.trim(),
+      questions: questions.map(q => ({
+        question: q.question.trim(),
+        options: q.options.map(option => option.trim()),
+        correctIndex: q.correctIndex,
+        explanation: q.explanation.trim() || undefined,
+      })),
+    };
+    if (initial) updateMutation.mutate({ id: initial.id, ...payload });
+    else createMutation.mutate(payload);
+  };
+
+  return (
+    <DialogContent className="max-h-[85vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle className="font-serif text-xl">
+          {initial ? qe.titleEdit : qe.titleNew}
+        </DialogTitle>
+        <DialogDescription>{qe.description}</DialogDescription>
+      </DialogHeader>
+
+      <div className="space-y-3">
+        <div>
+          <Label htmlFor="quiz-title">{qe.titleLabel}</Label>
+          <Input
+            id="quiz-title"
+            className="mt-1.5"
+            placeholder={qe.titlePlaceholder}
+            value={title}
+            maxLength={140}
+            onChange={e => setTitle(e.target.value)}
+          />
+        </div>
+
+        {/* Fragen */}
+        <div>
+          <p className="mb-2 text-sm font-semibold">
+            {qe.questionsTitle(questions.length)}
+          </p>
+          <div className="space-y-3">
+            {questions.map((q, i) => (
+              <div key={i} className="rounded-lg border border-border p-3">
+                <div className="mb-2 flex items-start gap-2">
+                  <Textarea
+                    rows={2}
+                    placeholder={qe.questionPlaceholder}
+                    value={q.question}
+                    onChange={e =>
+                      updateQuestion(i, { question: e.target.value })
+                    }
+                    aria-label={qe.questionAria(i + 1)}
+                  />
+                  <button
+                    type="button"
+                    disabled={questions.length <= 1}
+                    onClick={() =>
+                      setQuestions(prev => prev.filter((_, idx) => idx !== i))
+                    }
+                    className="mt-1 shrink-0 text-muted-foreground transition-colors hover:text-destructive disabled:opacity-30"
+                    aria-label={qe.removeQuestionAria(i + 1)}
+                  >
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+                <p className="mb-1.5 text-xs text-muted-foreground">
+                  {qe.correctHint}
+                </p>
+                <div className="mb-2 space-y-2">
+                  {q.options.map((option, j) => (
+                    <div key={j} className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name={`quiz-correct-${i}`}
+                        checked={q.correctIndex === j}
+                        onChange={() => updateQuestion(i, { correctIndex: j })}
+                        className="h-4 w-4 shrink-0 accent-primary"
+                        aria-label={qe.correctAria(i + 1, j + 1)}
+                      />
+                      <Input
+                        placeholder={qe.optionPlaceholder(j + 1)}
+                        value={option}
+                        maxLength={200}
+                        onChange={e =>
+                          updateQuestion(i, {
+                            options: q.options.map((o, idx) =>
+                              idx === j ? e.target.value : o
+                            ),
+                          })
+                        }
+                        aria-label={qe.optionAria(i + 1, j + 1)}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <Input
+                  placeholder={qe.explanationPlaceholder}
+                  value={q.explanation}
+                  maxLength={1000}
+                  onChange={e =>
+                    updateQuestion(i, { explanation: e.target.value })
+                  }
+                  aria-label={qe.explanationAria(i + 1)}
+                />
+              </div>
+            ))}
+          </div>
+          {questions.length < MAX_QUIZ_QUESTIONS && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => setQuestions(prev => [...prev, emptyQuestion()])}
+            >
+              <Plus className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+              {qe.addQuestion}
+            </Button>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          <Button variant="outline" className="flex-1" onClick={onClose}>
+            {t.common.cancel}
+          </Button>
+          <Button
+            className="flex-1"
+            disabled={!canSave || isPending}
+            onClick={save}
+          >
+            {isPending ? t.common.saving : t.common.save}
+          </Button>
+        </div>
+      </div>
+    </DialogContent>
+  );
+}
+
 /** Fortschritt der Schnitzeljagden wird lokal gespeichert – funktioniert offline. */
 function useHuntProgress(huntId: string, taskCount: number) {
   const storageKey = `campmesser-hunt-${huntId}`;
@@ -590,6 +805,9 @@ function QuizDialog({
   const [finished, setFinished] = useState(false);
 
   const question = quiz.questions[current];
+  // Eigene Quizze dürfen die Erklärung weglassen – dann keinen leeren Kasten zeigen
+  const explanationText =
+    answered !== null && question ? pick(question.explanation, lang) : "";
 
   const answer = (idx: number) => {
     if (answered !== null) return;
@@ -703,9 +921,11 @@ function QuizDialog({
           </div>
           {answered !== null && (
             <>
-              <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
-                {pick(question.explanation, lang)}
-              </p>
+              {explanationText && (
+                <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
+                  {explanationText}
+                </p>
+              )}
               <Button className="w-full" onClick={next}>
                 {current + 1 >= quiz.questions.length
                   ? t.family.showResult
@@ -734,6 +954,17 @@ export default function FamilyPage() {
   );
   const removeHuntMutation = trpc.hunts.remove.useMutation({
     onSuccess: () => utils.hunts.list.invalidate(),
+    onError: () => toast.error(t.common.deleteFailed),
+  });
+  const customQuizzesQuery = trpc.quizzes.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  // null = Quiz-Editor zu, "neu" = neues Quiz, sonst das zu bearbeitende Quiz
+  const [quizEditorState, setQuizEditorState] = useState<
+    CustomQuizRow | "neu" | null
+  >(null);
+  const removeQuizMutation = trpc.quizzes.remove.useMutation({
+    onSuccess: () => utils.quizzes.list.invalidate(),
     onError: () => toast.error(t.common.deleteFailed),
   });
 
@@ -925,6 +1156,76 @@ export default function FamilyPage() {
             </span>
           </button>
         ))}
+
+        {/* Eigene Quizze: spielbar über denselben Player, mit «Eigenes»-Badge */}
+        {isAuthenticated &&
+          (customQuizzesQuery.data ?? []).map(row => {
+            const quiz = customQuizToNatureQuiz(row);
+            return (
+              <div
+                key={row.id}
+                className="flex flex-col rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/40 hover:shadow-md"
+              >
+                <button
+                  type="button"
+                  onClick={() => setActiveQuiz(quiz)}
+                  className="flex flex-1 flex-col items-start gap-2 text-left active:scale-[0.99]"
+                  aria-label={t.family.startQuizAria(row.title)}
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                    <CompassIcon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <span className="font-semibold">{row.title}</span>
+                  <span className="flex flex-wrap gap-1.5">
+                    <Badge variant="secondary">
+                      {t.family.questionCount(quiz.questions.length)}
+                    </Badge>
+                    <Badge variant="outline">{t.family.ownBadge}</Badge>
+                  </span>
+                </button>
+                <div className="mt-3 flex items-center gap-4 border-t border-border/60 pt-2.5 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setActiveQuiz(quiz)}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    {t.family.play}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setQuizEditorState(row)}
+                    className="flex items-center gap-1 font-medium text-primary hover:underline"
+                  >
+                    <Pencil className="h-3 w-3" aria-hidden="true" />
+                    {t.common.edit}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm(t.family.quizDeleteConfirm(row.title))) {
+                        removeQuizMutation.mutate({ id: row.id });
+                      }
+                    }}
+                    className="ml-auto flex items-center gap-1 font-medium text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-3 w-3" aria-hidden="true" />
+                    {t.common.delete}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        {isAuthenticated && (
+          <button
+            type="button"
+            onClick={() => setQuizEditorState("neu")}
+            className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-primary/50 p-4 text-primary transition-all hover:border-primary hover:bg-accent/40 active:scale-[0.99]"
+            aria-label={t.family.newQuizAria}
+          >
+            <Plus className="h-6 w-6" aria-hidden="true" />
+            <span className="text-sm font-semibold">{t.family.newQuiz}</span>
+          </button>
+        )}
       </div>
 
       <Dialog
@@ -951,6 +1252,17 @@ export default function FamilyPage() {
           <HuntEditorDialog
             initial={editorState === "neu" ? null : editorState}
             onClose={() => setEditorState(null)}
+          />
+        )}
+      </Dialog>
+      <Dialog
+        open={quizEditorState !== null}
+        onOpenChange={open => !open && setQuizEditorState(null)}
+      >
+        {quizEditorState !== null && (
+          <QuizEditorDialog
+            initial={quizEditorState === "neu" ? null : quizEditorState}
+            onClose={() => setQuizEditorState(null)}
           />
         )}
       </Dialog>

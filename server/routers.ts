@@ -13,6 +13,11 @@ import {
   SYNCED_SETTING_KEYS,
 } from "@shared/settings";
 import { MAX_STATIONS, solutionWordFromStations } from "@shared/hunts";
+import {
+  MAX_QUIZ_OPTIONS,
+  MAX_QUIZ_QUESTIONS,
+  MIN_QUIZ_OPTIONS,
+} from "@shared/quizzes";
 import { MEALS } from "@shared/menuPlan";
 import { RECIPE_DIFFICULTIES, RECIPE_METHODS } from "@shared/customRecipes";
 import { TRPCError } from "@trpc/server";
@@ -20,6 +25,43 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
+
+/** Eingabe-Format eigener Quizze: 1–30 Fragen mit je 2–4 Optionen. */
+const customQuizInput = z.object({
+  title: z.string().min(1).max(140),
+  questions: z
+    .array(
+      z
+        .object({
+          question: z.string().min(1).max(500),
+          options: z
+            .array(z.string().min(1).max(200))
+            .min(MIN_QUIZ_OPTIONS)
+            .max(MAX_QUIZ_OPTIONS),
+          correctIndex: z.number().int().min(0),
+          explanation: z.string().max(1000).optional(),
+        })
+        .refine(q => q.correctIndex < q.options.length, {
+          message: "correctIndex liegt ausserhalb der Optionen.",
+        })
+    )
+    .min(1)
+    .max(MAX_QUIZ_QUESTIONS),
+});
+
+/** Fragen normalisiert (getrimmt, leere Erklärung entfernt) als JSON ablegen. */
+function serializeQuizQuestions(
+  questions: z.infer<typeof customQuizInput>["questions"]
+): string {
+  return JSON.stringify(
+    questions.map(q => ({
+      question: q.question.trim(),
+      options: q.options.map(o => o.trim()),
+      correctIndex: q.correctIndex,
+      explanation: q.explanation?.trim() || undefined,
+    }))
+  );
+}
 
 export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -996,6 +1038,41 @@ export const appRouter = router({
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteCustomHunt(input.id, ctx.user.id)),
+  }),
+
+  quizzes: router({
+    list: protectedProcedure.query(({ ctx }) =>
+      db.getCustomQuizzes(ctx.user.id)
+    ),
+    create: protectedProcedure
+      .input(customQuizInput)
+      .mutation(async ({ ctx, input }) => {
+        const id = await db.addCustomQuiz({
+          userId: ctx.user.id,
+          title: input.title.trim(),
+          questionsJson: serializeQuizQuestions(input.questions),
+        });
+        return { id };
+      }),
+    update: protectedProcedure
+      .input(customQuizInput.extend({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const own = await db.getCustomQuizzes(ctx.user.id);
+        if (!own.some(q => q.id === input.id)) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Quiz nicht gefunden.",
+          });
+        }
+        await db.updateCustomQuiz(input.id, ctx.user.id, {
+          title: input.title.trim(),
+          questionsJson: serializeQuizQuestions(input.questions),
+        });
+        return { id: input.id };
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ ctx, input }) => db.deleteCustomQuiz(input.id, ctx.user.id)),
   }),
 
   settings: router({

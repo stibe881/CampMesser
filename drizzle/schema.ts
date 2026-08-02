@@ -337,6 +337,23 @@ export const customHunts = mysqlTable(
 export type CustomHunt = typeof customHunts.$inferSelect;
 export type InsertCustomHunt = typeof customHunts.$inferInsert;
 
+/** Eigene Quizze aus dem Editor im Familien-Modus. */
+export const customQuizzes = mysqlTable(
+  "customQuizzes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    title: varchar("title", { length: 140 }).notNull(),
+    /** Fragen als JSON-Array ({question, options[], correctIndex, explanation?}) */
+    questionsJson: text("questionsJson").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("customQuizzes_userId").on(table.userId)]
+);
+
+export type CustomQuiz = typeof customQuizzes.$inferSelect;
+export type InsertCustomQuiz = typeof customQuizzes.$inferInsert;
+
 /**
  * Menüplan pro Trip: ein Eintrag pro Tag und Mahlzeit eines geplanten
  * Aufenthalts (tripId → tripLogs.id). Entweder ein statisches Rezept
