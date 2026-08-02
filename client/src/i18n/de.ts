@@ -1332,6 +1332,8 @@ export const de = {
     layerGroupAria: "Kartendarstellung wählen",
     layerMap: "Karte",
     layerSatellite: "Satellit",
+    clusterAria: (n: number) =>
+      `Gruppe aus ${n} Pins – antippen zum Hineinzoomen`,
   },
   spotDetail: {
     fallbackTitle: "Zeltplatz",

@@ -1316,6 +1316,8 @@ export const it: Translation = {
     layerGroupAria: "Scegli la visualizzazione della mappa",
     layerMap: "Mappa",
     layerSatellite: "Satellite",
+    clusterAria: (n: number) =>
+      `Gruppo di ${n} segnaposto – tocca per ingrandire`,
   },
   spotDetail: {
     fallbackTitle: "Piazzola",

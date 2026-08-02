@@ -26,6 +26,15 @@
  *
  * Tagebuch-Einträge mit reinem Freitext-Ort haben keine Koordinaten und
  * erscheinen deshalb nicht als eigene Pins.
+ *
+ * Pin-Gruppierung: Liegen mehrere Pins (Favoriten, Ziele, Beobachtungen,
+ * OSM-Funde) auf der aktuellen Zoomstufe näher als ~48 Pixel beieinander,
+ * fasst die eigene leichte Cluster-Logik (lib/mapCluster) sie zu einem
+ * Zahlen-Kreis zusammen – eingefärbt nach dem dominanten Pin-Typ, neutral
+ * bei Gleichstand. Klick auf den Kreis zoomt auf die enthaltenen Pins.
+ * Nach jedem Zoom wird neu gruppiert (der Marker-Layer wird komplett neu
+ * aufgebaut – bei < 500 Pins unkritisch); reines Verschieben ändert die
+ * Pixel-Abstände nicht und braucht deshalb keinen Neuaufbau.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -74,6 +83,7 @@ import {
   storeMapLayer,
   type MapLayerKind,
 } from "@/lib/mapLayers";
+import { CLUSTER_THRESHOLD_PX, clusterPoints } from "@/lib/mapCluster";
 import {
   LEGACY_TARGET_KEY,
   TARGETS_KEY,
@@ -142,6 +152,49 @@ const sightingIcon = L.divIcon({
   popupAnchor: [0, -16],
 });
 
+/** Pin-Typen für die Cluster-Färbung (Farben wie die jeweiligen Einzel-Icons). */
+type PinKind = "spot" | "target" | "sighting" | "campsite";
+
+const PIN_COLORS: Record<PinKind, string> = {
+  spot: "#2f6b4f",
+  target: "#b45309",
+  sighting: "#7c3aed",
+  campsite: "#0369a1",
+};
+
+/** Neutrales Grau, wenn kein Pin-Typ im Cluster klar dominiert. */
+const CLUSTER_NEUTRAL_COLOR = "#475569";
+
+/** Farbe des dominanten Pin-Typs – bei Gleichstand neutral. */
+function clusterColor(kinds: readonly PinKind[]): string {
+  const counts = new Map<PinKind, number>();
+  kinds.forEach(kind => counts.set(kind, (counts.get(kind) ?? 0) + 1));
+  let bestKind: PinKind | null = null;
+  let bestCount = 0;
+  let tied = false;
+  counts.forEach((count, kind) => {
+    if (count > bestCount) {
+      bestKind = kind;
+      bestCount = count;
+      tied = false;
+    } else if (count === bestCount) {
+      tied = true;
+    }
+  });
+  return bestKind && !tied ? PIN_COLORS[bestKind] : CLUSTER_NEUTRAL_COLOR;
+}
+
+/** Zahlen-Kreis für gruppierte Pins – Grösse wächst leicht mit der Anzahl. */
+function clusterIcon(count: number, color: string, label: string): L.DivIcon {
+  const size = count < 10 ? 34 : count < 100 ? 40 : 46;
+  return L.divIcon({
+    className: "",
+    html: `<div role="img" aria-label="${label}" style="width:${size}px;height:${size}px;border-radius:9999px;background:${color};color:#ffffff;border:2.5px solid #ffffff;box-shadow:0 1px 4px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;">${count}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+}
+
 /** Liegt der OSM-Platz praktisch auf einem Favoriten? (~50 m Toleranz) */
 function isNearFavorite(campsite: OsmCampsite, spots: SpotPin[]): boolean {
   return spots.some(
@@ -169,7 +222,6 @@ function SpotsMap({
   const mapRef = useRef<L.Map | null>(null);
   const baseLayerRef = useRef<L.TileLayer | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
-  const campLayerRef = useRef<L.LayerGroup | null>(null);
   const didFitRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
   const popupJustClosedRef = useRef(0);
@@ -192,6 +244,11 @@ function SpotsMap({
   const [searched, setSearched] = useState(false);
   const [moved, setMoved] = useState(false);
 
+  // Aktuelle Zoomstufe für die Pin-Gruppierung: nach jedem Zoom werden die
+  // Cluster neu berechnet. Verschieben ändert die Pixel-Abstände nicht
+  // (map.project ist unabhängig vom Ausschnitt), darum reicht zoomend.
+  const [clusterZoom, setClusterZoom] = useState(FALLBACK_ZOOM);
+
   // Karte einmalig initialisieren und beim Verlassen sauber abbauen
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -203,7 +260,8 @@ function SpotsMap({
     // Der Basis-Layer (Karte/Satellit) kommt aus dem eigenen Effect darunter –
     // so lässt er sich später tauschen, ohne die Karte neu aufzubauen.
     markersRef.current = L.layerGroup().addTo(map);
-    campLayerRef.current = L.layerGroup().addTo(map);
+    // Zoomstufe für die Pin-Gruppierung nachführen (löst den Neuaufbau aus)
+    map.on("zoomend", () => setClusterZoom(map.getZoom()));
     // Klick auf freie Kartenstelle → Dialog «Favorit hier anlegen?».
     // Marker/Popups schlucken ihre Klicks selbst, Panning feuert kein click.
     // Ein Klick, der gerade erst ein Popup geschlossen hat, soll aber nur
@@ -222,7 +280,6 @@ function SpotsMap({
       mapRef.current = null;
       baseLayerRef.current = null;
       markersRef.current = null;
-      campLayerRef.current = null;
     };
   }, []);
 
@@ -312,14 +369,23 @@ function SpotsMap({
     };
   }, [discoverOn]);
 
-  // Pins nachführen, sobald Plätze oder Übernachtungszahlen ändern
+  // Bereits übernommene OSM-Plätze nicht doppelt zeigen – dort steht nach dem
+  // Refetch der grüne Favoriten-Pin.
+  const visibleCampsites = useMemo(
+    () => campsites.filter(site => !isNearFavorite(site, spots)),
+    [campsites, spots]
+  );
+
+  // Alle Pins (Favoriten, Ziele, Beobachtungen, OSM-Funde) nachführen und
+  // pro Zoomstufe gruppieren: nahe Pins werden zu einem Zahlen-Kreis
+  // zusammengefasst, Klick darauf zoomt auf die enthaltenen Pins.
   useEffect(() => {
     const map = mapRef.current;
     const layer = markersRef.current;
     if (!map || !layer) return;
     layer.clearLayers();
 
-    spots.forEach(spot => {
+    const createSpotMarker = (spot: SpotPin): L.Marker => {
       const marker = L.marker([spot.latitude, spot.longitude], {
         icon: spotIcon,
         alt: spot.name,
@@ -356,11 +422,11 @@ function SpotsMap({
       route.className = "block text-sm font-medium underline";
       popup.appendChild(route);
       marker.bindPopup(popup);
-      marker.addTo(layer);
-    });
+      return marker;
+    };
 
     // Zelt-Finder-Ziele als eigene Pins – Popup mit «Anpeilen»-Link
-    targets.forEach(tgt => {
+    const createTargetMarker = (tgt: TentFinderTarget): L.Marker => {
       const marker = L.marker([tgt.lat, tgt.lon], {
         icon: targetIcon,
         alt: tgt.name,
@@ -386,12 +452,12 @@ function SpotsMap({
       });
       popup.appendChild(link);
       marker.bindPopup(popup);
-      marker.addTo(layer);
-    });
+      return marker;
+    };
 
     // Natur-Beobachtungen mit Koordinaten als eigene (violette) Pins –
     // Popup mit Titel und Beobachtungs-Datum.
-    sightings.forEach(sighting => {
+    const createSightingMarker = (sighting: SightingPin): L.Marker => {
       const marker = L.marker([sighting.lat, sighting.lon], {
         icon: sightingIcon,
         alt: sighting.title,
@@ -407,39 +473,11 @@ function SpotsMap({
       kind.textContent = `${t.mapView.sightingKind} · ${sighting.dateLabel}`;
       popup.appendChild(kind);
       marker.bindPopup(popup);
-      marker.addTo(layer);
-    });
+      return marker;
+    };
 
-    // Nur beim ersten Aufbau einpassen – spätere Refetches (z. B. nach dem
-    // Übernehmen eines OSM-Platzes) sollen den Ausschnitt nicht verspringen.
-    if (!didFitRef.current) {
-      didFitRef.current = true;
-      const points: L.LatLngTuple[] = [
-        ...spots.map(s => [s.latitude, s.longitude] as L.LatLngTuple),
-        ...targets.map(tgt => [tgt.lat, tgt.lon] as L.LatLngTuple),
-      ];
-      if (points.length > 0) {
-        map.fitBounds(L.latLngBounds(points), {
-          padding: [40, 40],
-          maxZoom: 13,
-        });
-      } else {
-        map.setView(FALLBACK_CENTER, FALLBACK_ZOOM);
-      }
-    }
-  }, [spots, targets, sightings, nightsBySpotId, t, navigate]);
-
-  // Entdeckte OSM-Campingplätze als eigene (blaue) Pins nachführen
-  useEffect(() => {
-    const map = mapRef.current;
-    const layer = campLayerRef.current;
-    if (!map || !layer) return;
-    layer.clearLayers();
-
-    campsites.forEach(site => {
-      // Bereits übernommene Plätze nicht doppelt zeigen – dort steht nach dem
-      // Refetch der grüne Favoriten-Pin.
-      if (isNearFavorite(site, spots)) return;
+    // Entdeckte OSM-Campingplätze als eigene (blaue) Pins
+    const createCampsiteMarker = (site: OsmCampsite): L.Marker => {
       const displayName = site.name ?? t.mapView.osmFallbackName;
       const marker = L.marker([site.lat, site.lon], {
         icon: campsiteIcon,
@@ -492,14 +530,106 @@ function SpotsMap({
       source.textContent = t.mapView.osmSource;
       popup.appendChild(source);
       marker.bindPopup(popup);
+      return marker;
+    };
+
+    // Alle sichtbaren Pins einsammeln und pro Zoomstufe gruppieren.
+    // `map.project` liefert absolute Pixel-Koordinaten der Zoomstufe –
+    // unabhängig vom Ausschnitt, deshalb genügt der Neuaufbau nach Zoom.
+    interface MapPin {
+      lat: number;
+      lon: number;
+      kind: PinKind;
+      createMarker: () => L.Marker;
+    }
+    const pins: MapPin[] = [
+      ...spots.map<MapPin>(spot => ({
+        lat: spot.latitude,
+        lon: spot.longitude,
+        kind: "spot",
+        createMarker: () => createSpotMarker(spot),
+      })),
+      ...targets.map<MapPin>(tgt => ({
+        lat: tgt.lat,
+        lon: tgt.lon,
+        kind: "target",
+        createMarker: () => createTargetMarker(tgt),
+      })),
+      ...sightings.map<MapPin>(sighting => ({
+        lat: sighting.lat,
+        lon: sighting.lon,
+        kind: "sighting",
+        createMarker: () => createSightingMarker(sighting),
+      })),
+      ...visibleCampsites.map<MapPin>(site => ({
+        lat: site.lat,
+        lon: site.lon,
+        kind: "campsite",
+        createMarker: () => createCampsiteMarker(site),
+      })),
+    ];
+
+    const clusters = clusterPoints(
+      pins,
+      (lat, lon) => map.project([lat, lon], clusterZoom),
+      CLUSTER_THRESHOLD_PX
+    );
+
+    clusters.forEach(cluster => {
+      if (cluster.points.length === 1) {
+        cluster.points[0].createMarker().addTo(layer);
+        return;
+      }
+      const label = t.mapView.clusterAria(cluster.points.length);
+      const marker = L.marker([cluster.lat, cluster.lon], {
+        icon: clusterIcon(
+          cluster.points.length,
+          clusterColor(cluster.points.map(p => p.kind)),
+          label
+        ),
+        alt: label,
+      });
+      // Klick auf den Zahlen-Kreis: auf die enthaltenen Pins zoomen –
+      // maxZoom verhindert Endlos-Zoom bei praktisch identischen Punkten.
+      marker.on("click", () => {
+        map.fitBounds(
+          L.latLngBounds(
+            cluster.points.map(p => [p.lat, p.lon] as L.LatLngTuple)
+          ),
+          { padding: [40, 40], maxZoom: 18 }
+        );
+      });
       marker.addTo(layer);
     });
-  }, [campsites, spots, t, utils]);
 
-  const visibleCampsites = useMemo(
-    () => campsites.filter(site => !isNearFavorite(site, spots)),
-    [campsites, spots]
-  );
+    // Nur beim ersten Aufbau einpassen – spätere Refetches (z. B. nach dem
+    // Übernehmen eines OSM-Platzes) sollen den Ausschnitt nicht verspringen.
+    if (!didFitRef.current) {
+      didFitRef.current = true;
+      const points: L.LatLngTuple[] = [
+        ...spots.map(s => [s.latitude, s.longitude] as L.LatLngTuple),
+        ...targets.map(tgt => [tgt.lat, tgt.lon] as L.LatLngTuple),
+      ];
+      if (points.length > 0) {
+        map.fitBounds(L.latLngBounds(points), {
+          padding: [40, 40],
+          maxZoom: 13,
+        });
+      } else {
+        map.setView(FALLBACK_CENTER, FALLBACK_ZOOM);
+      }
+    }
+  }, [
+    spots,
+    targets,
+    sightings,
+    visibleCampsites,
+    nightsBySpotId,
+    clusterZoom,
+    t,
+    navigate,
+    utils,
+  ]);
 
   // Neuen Favoriten aus dem Karten-Klick anlegen (Toast mit Dossier-Link)
   const createMutation = trpc.spots.add.useMutation({

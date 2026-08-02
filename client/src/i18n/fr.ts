@@ -1332,6 +1332,7 @@ export const fr: Translation = {
     layerGroupAria: "Choisir l'affichage de la carte",
     layerMap: "Carte",
     layerSatellite: "Satellite",
+    clusterAria: (n: number) => `Groupe de ${n} épingles – touche pour zoomer`,
   },
   spotDetail: {
     fallbackTitle: "Emplacement",

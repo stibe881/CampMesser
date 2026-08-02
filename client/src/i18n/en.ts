@@ -1287,6 +1287,7 @@ export const en: Translation = {
     layerGroupAria: "Choose map style",
     layerMap: "Map",
     layerSatellite: "Satellite",
+    clusterAria: (n: number) => `Cluster of ${n} pins – tap to zoom in`,
   },
   spotDetail: {
     fallbackTitle: "Pitch",
