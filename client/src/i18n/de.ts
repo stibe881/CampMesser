@@ -79,6 +79,14 @@ export const de = {
     weatherNoAlerts: "Keine Unwetterwarnungen an deinem Standort",
     tipOfDayTitle: "Tipp des Tages",
     tipOfDayAria: (text: string) => `Tipp des Tages: ${text}`,
+    gearDueText: (n: number) =>
+      n === 1
+        ? "1 Pflege-Aufgabe deiner Ausrüstung ist fällig"
+        : `${n} Pflege-Aufgaben deiner Ausrüstung sind fällig`,
+    gearDueAria: (n: number) =>
+      n === 1
+        ? "1 fällige Pflege-Aufgabe – Inventar öffnen"
+        : `${n} fällige Pflege-Aufgaben – Inventar öffnen`,
     searchPlaceholder: "Wissen durchsuchen: Zeckenbiss, Mastwurf, Rezepte …",
     searchAria: "Wissensmodule durchsuchen",
     searchNoResults:
@@ -204,7 +212,7 @@ export const de = {
     notificationsTitle: "Mitteilungen",
     pushDeviceTitle: "Push auf diesem Gerät",
     pushDeviceDesc:
-      "Benachrichtigungen zu Unwetter, Kühlbox-MHD, Trip-Countdown und Sternschnuppen-Nächten.",
+      "Benachrichtigungen zu Unwetter, Kühlbox-MHD, Trip-Countdown, Sternschnuppen-Nächten und Ausrüstungs-Pflege.",
     pushDeviceAria: "Push-Mitteilungen auf diesem Gerät aktivieren",
     pushUnsupported: "Dein Browser unterstützt keine Push-Mitteilungen.",
     pushNotConfigured: "Push ist serverseitig nicht eingerichtet.",
@@ -222,6 +230,9 @@ export const de = {
     prefAstro: "Sternschnuppen-Nächte",
     prefAstroDesc:
       "Wenn an deinem Heim-Standort eine klare Nacht auf ein Sternschnuppen-Maximum trifft.",
+    prefGear: "Pflege-Erinnerungen",
+    prefGearDesc:
+      "Höchstens einmal pro Monat, wenn Ausrüstungs-Pflege fällig ist.",
     prefToggleAria: (label: string) => `${label} an- oder abschalten`,
     homeTitle: "Heim-Standort",
     homeIntro:
@@ -559,6 +570,38 @@ export const de = {
     photoDialogDescription: "Foto des Gegenstands in gross.",
     emptyTitle: "Noch keine Ausrüstung erfasst",
     emptyText: "Beginne mit den grossen Teilen: Zelt, Schlafsack, Isomatte.",
+    gearTitle: "Pflege & Wartung",
+    gearIntro:
+      "Wiederkehrende Aufgaben wie Imprägnieren oder Batterien prüfen – fällige Aufgaben werden markiert und per Push erinnert.",
+    gearAddButton: "Aufgabe hinzufügen",
+    gearAddAria: "Neue Pflege-Aufgabe hinzufügen",
+    gearDialogTitle: "Pflege-Aufgabe hinzufügen",
+    gearDialogDescription:
+      "Übernimm einen Vorschlag oder erfasse eine eigene Aufgabe mit Intervall.",
+    gearSuggestionsLabel: "Vorschläge",
+    gearSuggestionAria: (title: string) => `Vorschlag «${title}» übernehmen`,
+    gearTitleLabel: "Aufgabe",
+    gearTitlePlaceholder: "z. B. Zelt imprägnieren",
+    gearIntervalLabel: "Intervall (Monate)",
+    gearIntervalText: (n: number) =>
+      n === 1 ? "jeden Monat" : `alle ${n} Monate`,
+    gearSubmit: "Hinzufügen",
+    gearCreated: "Pflege-Aufgabe hinzugefügt",
+    gearTitleRequired: "Bitte einen Aufgaben-Titel eingeben",
+    gearEmpty:
+      "Noch keine Pflege-Aufgaben – übernimm einen Vorschlag oder lege eine eigene an.",
+    gearDueBadge: "Fällig",
+    gearSoonBadge: "Bald fällig",
+    gearDueOn: (date: string) => `Fällig am ${date}`,
+    gearLastDone: (date: string) => `zuletzt erledigt am ${date}`,
+    gearNeverDone: "noch nie erledigt",
+    gearDoneButton: "Erledigt",
+    gearDoneAria: (title: string) => `«${title}» als erledigt markieren`,
+    gearMarkedDone: "Als erledigt markiert",
+    gearRemoveAria: (title: string) => `Pflege-Aufgabe «${title}» löschen`,
+    gearRemoveConfirm: (title: string) =>
+      `Pflege-Aufgabe «${title}» wirklich löschen?`,
+    gearRemoved: "Pflege-Aufgabe gelöscht",
   },
   weather: {
     title: "Camp-Wetter",

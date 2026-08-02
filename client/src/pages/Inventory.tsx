@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Check,
   ImagePlus,
   Loader2,
   Package,
   Pencil,
   Plus,
   Trash2,
+  Wrench,
 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
@@ -29,7 +31,8 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
-import { l4, pick, type L4 } from "@shared/i18n";
+import { l4, LOCALE_TAGS, pick, type L4 } from "@shared/i18n";
+import { GEAR_TASK_SUGGESTIONS, gearTaskDue } from "@shared/gearTasks";
 import { resizeImageForUpload } from "@/lib/imageResize";
 import { trpc } from "@/lib/trpc";
 
@@ -54,6 +57,236 @@ export const inventoryCategories: L4[] = [
   l4("Komfort", "Confort", "Comfort", "Comfort"),
   l4("Allgemein", "Général", "Generale", "General"),
 ];
+
+/**
+ * Abschnitt «Pflege & Wartung»: wiederkehrende Aufgaben (z. B. Zelt
+ * imprägnieren) mit Fälligkeits-Badge (fällig rot, bald = innerhalb 30 Tagen
+ * amber, sonst Termin), «Erledigt»-Knopf (lastDoneAt = heute vom Gerät) und
+ * Hinzufügen aus Katalog-Vorschlägen (shared/gearTasks.ts) oder frei.
+ */
+function GearCareSection() {
+  const { lang, t } = useI18n();
+  const utils = trpc.useUtils();
+  const query = trpc.gear.list.useQuery();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [months, setMonths] = useState("12");
+  const today = new Date().toISOString().slice(0, 10);
+
+  const addMutation = trpc.gear.add.useMutation({
+    onSuccess: () => {
+      toast.success(t.inventory.gearCreated);
+      setDialogOpen(false);
+      void utils.gear.list.invalidate();
+    },
+    onError: () => toast.error(t.common.saveFailed),
+  });
+  const markDoneMutation = trpc.gear.markDone.useMutation({
+    onSuccess: () => {
+      toast.success(t.inventory.gearMarkedDone);
+      void utils.gear.list.invalidate();
+    },
+    onError: () => toast.error(t.common.actionFailed),
+  });
+  const removeMutation = trpc.gear.remove.useMutation({
+    onSuccess: () => {
+      toast.success(t.inventory.gearRemoved);
+      void utils.gear.list.invalidate();
+    },
+    onError: () => toast.error(t.common.deleteFailed),
+  });
+
+  const formatDay = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+  const submit = () => {
+    const trimmed = title.trim();
+    if (!trimmed) {
+      toast.error(t.inventory.gearTitleRequired);
+      return;
+    }
+    const intervalMonths = Math.max(
+      1,
+      Math.min(120, Math.round(Number(months) || 12))
+    );
+    addMutation.mutate({ title: trimmed, intervalMonths });
+  };
+
+  const tasks = query.data ?? [];
+
+  return (
+    <section className="mt-10" aria-labelledby="gear-care-title">
+      <h2
+        id="gear-care-title"
+        className="flex items-center gap-2 text-lg font-semibold"
+      >
+        <Wrench className="h-5 w-5 text-primary" aria-hidden="true" />
+        {t.inventory.gearTitle}
+      </h2>
+      <p className="mt-1 mb-4 text-sm text-muted-foreground">
+        {t.inventory.gearIntro}
+      </p>
+      <Button
+        variant="outline"
+        className="mb-4"
+        onClick={() => {
+          setTitle("");
+          setMonths("12");
+          setDialogOpen(true);
+        }}
+        aria-label={t.inventory.gearAddAria}
+      >
+        <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+        {t.inventory.gearAddButton}
+      </Button>
+
+      {tasks.length > 0 ? (
+        <ul className="space-y-2">
+          {tasks.map(task => {
+            const info = gearTaskDue(task, today);
+            return (
+              <li
+                key={task.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
+              >
+                <div className="min-w-0">
+                  <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                    <span className="truncate">{task.title}</span>
+                    {info.due ? (
+                      <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive">
+                        {t.inventory.gearDueBadge}
+                      </span>
+                    ) : info.soon ? (
+                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                        {t.inventory.gearSoonBadge}
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                        {t.inventory.gearDueOn(formatDay(info.dueDate))}
+                      </span>
+                    )}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {t.inventory.gearIntervalText(task.intervalMonths)} ·{" "}
+                    {task.lastDoneAt
+                      ? t.inventory.gearLastDone(formatDay(task.lastDoneAt))
+                      : t.inventory.gearNeverDone}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={markDoneMutation.isPending}
+                    onClick={() =>
+                      markDoneMutation.mutate({ id: task.id, today })
+                    }
+                    aria-label={t.inventory.gearDoneAria(task.title)}
+                  >
+                    <Check className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                    {t.inventory.gearDoneButton}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    disabled={removeMutation.isPending}
+                    onClick={() => {
+                      if (confirm(t.inventory.gearRemoveConfirm(task.title))) {
+                        removeMutation.mutate({ id: task.id });
+                      }
+                    }}
+                    aria-label={t.inventory.gearRemoveAria(task.title)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  </Button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+          {t.inventory.gearEmpty}
+        </div>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.inventory.gearDialogTitle}</DialogTitle>
+            <DialogDescription>
+              {t.inventory.gearDialogDescription}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="mb-1.5 block">
+                {t.inventory.gearSuggestionsLabel}
+              </Label>
+              <div className="flex flex-wrap gap-1.5">
+                {GEAR_TASK_SUGGESTIONS.map(suggestion => {
+                  const label = pick(suggestion.title, lang);
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      className="rounded-full border border-border px-3 py-1 text-xs transition-colors hover:bg-accent"
+                      onClick={() => {
+                        setTitle(label);
+                        setMonths(String(suggestion.intervalMonths));
+                      }}
+                      aria-label={t.inventory.gearSuggestionAria(label)}
+                    >
+                      {label} ·{" "}
+                      {t.inventory.gearIntervalText(suggestion.intervalMonths)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="gear-title">{t.inventory.gearTitleLabel}</Label>
+              <Input
+                id="gear-title"
+                className="mt-1.5"
+                placeholder={t.inventory.gearTitlePlaceholder}
+                value={title}
+                maxLength={120}
+                onChange={e => setTitle(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="gear-interval">
+                {t.inventory.gearIntervalLabel}
+              </Label>
+              <Input
+                id="gear-interval"
+                className="mt-1.5"
+                type="number"
+                min="1"
+                max="120"
+                value={months}
+                onChange={e => setMonths(e.target.value)}
+              />
+            </div>
+            <Button
+              className="w-full"
+              disabled={addMutation.isPending}
+              onClick={submit}
+            >
+              {t.inventory.gearSubmit}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+}
 
 interface FormState {
   id?: number;
@@ -596,6 +829,8 @@ export default function InventoryPage() {
           </p>
         </div>
       )}
+
+      <GearCareSection />
 
       {/* Vollbild-Ansicht eines Fotos (Klick aufs Thumbnail) */}
       <Dialog

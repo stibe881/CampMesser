@@ -207,6 +207,16 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       (await authed.family.children.list()).some(c => c.id === secondChildId)
     ).toBe(false);
     const invItemId = await authed.inventory.add({ name: "CI-Zelt" });
+    // Ausrüstungs-Pflege: Aufgabe anlegen, erledigen (lastDoneAt = heute)
+    const { id: gearTaskId } = await authed.gear.add({
+      title: "CI-Zelt imprägnieren",
+      intervalMonths: 24,
+    });
+    await authed.gear.markDone({ id: gearTaskId, today: "2026-08-02" });
+    const gearList = await authed.gear.list();
+    expect(gearList.find(g => g.id === gearTaskId)?.lastDoneAt).toBe(
+      "2026-08-02"
+    );
     await authed.shopping.add({ name: "CI-Zutat" });
     // Einkaufsliste teilen: Token ist idempotent, öffentlicher Abruf und
     // Abhaken über den Teil-Link funktionieren ohne Anmeldung
@@ -405,6 +415,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .from(schema.passwordResetTokens)
         .where(eq(schema.passwordResetTokens.userId, uid)),
       dbc.select().from(schema.passkeys).where(eq(schema.passkeys.userId, uid)),
+      dbc
+        .select()
+        .from(schema.gearTasks)
+        .where(eq(schema.gearTasks.userId, uid)),
     ]);
     expect(remaining.map(rows => rows.length)).toEqual(remaining.map(() => 0));
 

@@ -28,6 +28,11 @@ import {
 } from "@shared/foodTemplates";
 import { MEALS } from "@shared/menuPlan";
 import {
+  MAX_GEAR_INTERVAL_MONTHS,
+  MAX_GEAR_TASK_TITLE_LENGTH,
+  MIN_GEAR_INTERVAL_MONTHS,
+} from "@shared/gearTasks";
+import {
   TRIP_WEATHER_MAX_PRECIP_MM,
   TRIP_WEATHER_MAX_RAIN_DAYS,
   TRIP_WEATHER_TEMP_MAX,
@@ -1027,6 +1032,72 @@ export const appRouter = router({
       }),
   }),
 
+  /** Ausrüstungs-Pflege: wiederkehrende Wartungsaufgaben (Fälligkeit in shared/gearTasks.ts). */
+  gear: router({
+    list: protectedProcedure.query(({ ctx }) => db.getGearTasks(ctx.user.id)),
+    add: protectedProcedure
+      .input(
+        z.object({
+          title: z.string().trim().min(1).max(MAX_GEAR_TASK_TITLE_LENGTH),
+          intervalMonths: z
+            .number()
+            .int()
+            .min(MIN_GEAR_INTERVAL_MONTHS)
+            .max(MAX_GEAR_INTERVAL_MONTHS),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const id = await db.addGearTask({ userId: ctx.user.id, ...input });
+        return { id };
+      }),
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          title: z
+            .string()
+            .trim()
+            .min(1)
+            .max(MAX_GEAR_TASK_TITLE_LENGTH)
+            .optional(),
+          intervalMonths: z
+            .number()
+            .int()
+            .min(MIN_GEAR_INTERVAL_MONTHS)
+            .max(MAX_GEAR_INTERVAL_MONTHS)
+            .optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { id, ...data } = input;
+        await db.updateGearTask(id, ctx.user.id, data);
+        return { success: true } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteGearTask(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+    /**
+     * Aufgabe als erledigt markieren: lastDoneAt = heute. «Heute» kommt vom
+     * Gerät (Muster foodTemplates.applyTemplate) gegen Zeitzonen-Sprünge.
+     */
+    markDone: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          today: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.updateGearTask(input.id, ctx.user.id, {
+          lastDoneAt: input.today,
+        });
+        return { success: true } as const;
+      }),
+  }),
+
   shopping: router({
     list: protectedProcedure.query(({ ctx }) =>
       db.getShoppingItems(ctx.user.id)
@@ -1468,6 +1539,7 @@ export const appRouter = router({
           wantsFood: z.boolean().optional(),
           wantsTrips: z.boolean().optional(),
           wantsAstro: z.boolean().optional(),
+          wantsGear: z.boolean().optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {

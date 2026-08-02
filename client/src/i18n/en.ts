@@ -78,6 +78,12 @@ export const en: Translation = {
     weatherNoAlerts: "No severe weather warnings at your location",
     tipOfDayTitle: "Tip of the day",
     tipOfDayAria: (text: string) => `Tip of the day: ${text}`,
+    gearDueText: (n: number) =>
+      n === 1 ? "1 gear care task is due" : `${n} gear care tasks are due`,
+    gearDueAria: (n: number) =>
+      n === 1
+        ? "1 care task due – open inventory"
+        : `${n} care tasks due – open inventory`,
     searchPlaceholder: "Search knowledge: tick bite, clove hitch, recipes …",
     searchAria: "Search the knowledge modules",
     searchNoResults:
@@ -200,7 +206,7 @@ export const en: Translation = {
     notificationsTitle: "Notifications",
     pushDeviceTitle: "Push on this device",
     pushDeviceDesc:
-      "Notifications for storms, cool box best-before dates, the trip countdown and shooting-star nights.",
+      "Notifications for storms, cool box best-before dates, the trip countdown, shooting-star nights and gear care.",
     pushDeviceAria: "Enable push notifications on this device",
     pushUnsupported: "Your browser does not support push notifications.",
     pushNotConfigured: "Push is not configured on the server.",
@@ -217,6 +223,8 @@ export const en: Translation = {
     prefAstro: "Shooting-star nights",
     prefAstroDesc:
       "When a clear night coincides with a meteor shower peak at your home location.",
+    prefGear: "Care reminders",
+    prefGearDesc: "At most once a month, when gear care is due.",
     prefToggleAria: (label: string) => `Turn ${label} on or off`,
     homeTitle: "Home location",
     homeIntro:
@@ -539,6 +547,36 @@ export const en: Translation = {
     photoDialogDescription: "Large view of the item's photo.",
     emptyTitle: "No gear recorded yet",
     emptyText: "Start with the big pieces: tent, sleeping bag, sleeping mat.",
+    gearTitle: "Care & maintenance",
+    gearIntro:
+      "Recurring tasks such as re-waterproofing or checking batteries – due tasks are highlighted and a push reminder is sent.",
+    gearAddButton: "Add task",
+    gearAddAria: "Add a new care task",
+    gearDialogTitle: "Add care task",
+    gearDialogDescription:
+      "Pick a suggestion or enter your own task with an interval.",
+    gearSuggestionsLabel: "Suggestions",
+    gearSuggestionAria: (title: string) => `Use suggestion “${title}”`,
+    gearTitleLabel: "Task",
+    gearTitlePlaceholder: "e.g. re-waterproof the tent",
+    gearIntervalLabel: "Interval (months)",
+    gearIntervalText: (n: number) =>
+      n === 1 ? "every month" : `every ${n} months`,
+    gearSubmit: "Add",
+    gearCreated: "Care task added",
+    gearTitleRequired: "Please enter a task title",
+    gearEmpty: "No care tasks yet – pick a suggestion or create your own.",
+    gearDueBadge: "Due",
+    gearSoonBadge: "Due soon",
+    gearDueOn: (date: string) => `Due on ${date}`,
+    gearLastDone: (date: string) => `last done on ${date}`,
+    gearNeverDone: "never done yet",
+    gearDoneButton: "Done",
+    gearDoneAria: (title: string) => `Mark “${title}” as done`,
+    gearMarkedDone: "Marked as done",
+    gearRemoveAria: (title: string) => `Delete care task “${title}”`,
+    gearRemoveConfirm: (title: string) => `Really delete care task “${title}”?`,
+    gearRemoved: "Care task deleted",
   },
   weather: {
     title: "Camp weather",

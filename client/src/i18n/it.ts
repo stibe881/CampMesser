@@ -77,6 +77,14 @@ export const it: Translation = {
     weatherNoAlerts: "Nessuna allerta maltempo nella tua posizione",
     tipOfDayTitle: "Consiglio del giorno",
     tipOfDayAria: (text: string) => `Consiglio del giorno: ${text}`,
+    gearDueText: (n: number) =>
+      n === 1
+        ? "1 attività di manutenzione della tua attrezzatura è in scadenza"
+        : `${n} attività di manutenzione della tua attrezzatura sono in scadenza`,
+    gearDueAria: (n: number) =>
+      n === 1
+        ? "1 attività di manutenzione in scadenza – apri l'inventario"
+        : `${n} attività di manutenzione in scadenza – apri l'inventario`,
     searchPlaceholder:
       "Cerca nel sapere: morso di zecca, nodo parlato, ricette …",
     searchAria: "Cerca nei moduli di conoscenza",
@@ -202,7 +210,7 @@ export const it: Translation = {
     notificationsTitle: "Notifiche",
     pushDeviceTitle: "Push su questo dispositivo",
     pushDeviceDesc:
-      "Notifiche per maltempo, TMC del frigo box, conto alla rovescia del soggiorno e notti di stelle cadenti.",
+      "Notifiche per maltempo, TMC del frigo box, conto alla rovescia del soggiorno, notti di stelle cadenti e manutenzione dell'attrezzatura.",
     pushDeviceAria: "Attiva le notifiche push su questo dispositivo",
     pushUnsupported: "Il tuo browser non supporta le notifiche push.",
     pushNotConfigured: "Il push non è configurato lato server.",
@@ -220,6 +228,9 @@ export const it: Translation = {
     prefAstro: "Notti di stelle cadenti",
     prefAstroDesc:
       "Quando una notte serena coincide con un massimo di stelle cadenti nella tua località di casa.",
+    prefGear: "Promemoria di manutenzione",
+    prefGearDesc:
+      "Al massimo una volta al mese, quando la manutenzione dell'attrezzatura è in scadenza.",
     prefToggleAria: (label: string) => `Attiva o disattiva ${label}`,
     homeTitle: "Località di casa",
     homeIntro:
@@ -551,6 +562,39 @@ export const it: Translation = {
     emptyTitle: "Ancora nessuna attrezzatura registrata",
     emptyText:
       "Comincia dai pezzi grandi: tenda, sacco a pelo, materassino isolante.",
+    gearTitle: "Cura & manutenzione",
+    gearIntro:
+      "Attività ricorrenti come impermeabilizzare o controllare le batterie – le attività in scadenza vengono evidenziate e ricordate via push.",
+    gearAddButton: "Aggiungi attività",
+    gearAddAria: "Aggiungi una nuova attività di manutenzione",
+    gearDialogTitle: "Aggiungi attività di manutenzione",
+    gearDialogDescription:
+      "Riprendi un suggerimento oppure crea un'attività personalizzata con intervallo.",
+    gearSuggestionsLabel: "Suggerimenti",
+    gearSuggestionAria: (title: string) =>
+      `Riprendi il suggerimento «${title}»`,
+    gearTitleLabel: "Attività",
+    gearTitlePlaceholder: "es. impermeabilizzare la tenda",
+    gearIntervalLabel: "Intervallo (mesi)",
+    gearIntervalText: (n: number) => (n === 1 ? "ogni mese" : `ogni ${n} mesi`),
+    gearSubmit: "Aggiungi",
+    gearCreated: "Attività di manutenzione aggiunta",
+    gearTitleRequired: "Inserisci un titolo per l'attività",
+    gearEmpty:
+      "Ancora nessuna attività di manutenzione – riprendi un suggerimento o creane una.",
+    gearDueBadge: "In scadenza",
+    gearSoonBadge: "Presto in scadenza",
+    gearDueOn: (date: string) => `Scade il ${date}`,
+    gearLastDone: (date: string) => `ultima volta il ${date}`,
+    gearNeverDone: "mai ancora fatta",
+    gearDoneButton: "Fatto",
+    gearDoneAria: (title: string) => `Segna «${title}» come fatta`,
+    gearMarkedDone: "Segnata come fatta",
+    gearRemoveAria: (title: string) =>
+      `Elimina l'attività di manutenzione «${title}»`,
+    gearRemoveConfirm: (title: string) =>
+      `Eliminare davvero l'attività di manutenzione «${title}»?`,
+    gearRemoved: "Attività di manutenzione eliminata",
   },
   weather: {
     title: "Meteo del campo",

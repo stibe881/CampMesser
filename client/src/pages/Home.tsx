@@ -44,7 +44,9 @@ import {
   Sun,
   TreePine,
   Users,
+  Wrench,
 } from "lucide-react";
+import { gearTaskDue } from "@shared/gearTasks";
 import { useEffect, useMemo, useState } from "react";
 import { getRecentModules } from "@/components/AppShell";
 import { usePointerDrag } from "@/lib/usePointerDrag";
@@ -552,6 +554,43 @@ function TipOfDayWidget({
 }
 
 /**
+ * Dezenter Hinweis unter dem Tipp des Tages: Anzahl fälliger Ausrüstungs-
+ * Pflege-Aufgaben (shared/gearTasks.ts), verlinkt aufs Inventar. Erscheint
+ * nur angemeldet und nur, wenn tatsächlich etwas fällig ist.
+ */
+function GearCareHint() {
+  const { t } = useI18n();
+  const { isAuthenticated } = useAuth();
+  const query = trpc.gear.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+  const today = new Date().toISOString().slice(0, 10);
+  const dueCount = useMemo(
+    () =>
+      (query.data ?? []).filter(task => gearTaskDue(task, today).due).length,
+    [query.data, today]
+  );
+  if (!isAuthenticated || dueCount === 0) return null;
+  return (
+    <Link
+      href="/inventar"
+      className="mb-6 -mt-3 flex items-center gap-2.5 rounded-lg border border-border/60 bg-muted/40 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+      aria-label={t.home.gearDueAria(dueCount)}
+    >
+      <Wrench className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+      <span className="min-w-0 flex-1 truncate">
+        {t.home.gearDueText(dueCount)}
+      </span>
+      <ArrowRight
+        className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50"
+        aria-hidden="true"
+      />
+    </Link>
+  );
+}
+
+/**
  * Globale Suche über die Offline-Wissensmodule (Erste Hilfe, Knoten, Rezepte,
  * Natur) – angemeldet zusätzlich über eigene Inhalte (Packlisten, Zeltplätze,
  * eigene Rezepte/Jagden/Quizze, Zelt-Finder-Ziele). Die Nutzerdaten werden
@@ -856,6 +895,7 @@ export default function Home() {
           today={homeWeather.today}
           tomorrow={homeWeather.tomorrow}
         />
+        <GearCareHint />
         <KnowledgeSearch />
         <RecentModules hidden={hidden} />
         <div className="mb-4 flex items-center justify-end">

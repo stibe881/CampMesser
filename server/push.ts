@@ -14,6 +14,7 @@ import webpush from "web-push";
 import {
   campSpots,
   foodItems,
+  gearTasks,
   homeLocations,
   packItems,
   pushSubscriptions,
@@ -25,6 +26,7 @@ import {
   type MeteorShower,
 } from "../shared/astro";
 import { expiryInfo } from "../shared/food";
+import { gearTaskDue, type GearTaskLike } from "../shared/gearTasks";
 import { pick } from "../shared/i18n";
 import { getMoonInfo } from "../shared/moon";
 import { daysUntilTrip } from "../shared/trips";
@@ -71,14 +73,15 @@ export async function deleteSubscription(userId: number, endpoint: string) {
 }
 
 /** Mitteilungs-Arten, die pro Abo (Gerät) einzeln abschaltbar sind. */
-export type PushKind = "weather" | "food" | "trip" | "astro";
+export type PushKind = "weather" | "food" | "trip" | "astro" | "gear";
 
-/** Die vier Mitteilungs-Flags eines Abos (Default: alles an). */
+/** Die fünf Mitteilungs-Flags eines Abos (Default: alles an). */
 export interface PushPrefs {
   wantsWeather: boolean;
   wantsFood: boolean;
   wantsTrips: boolean;
   wantsAstro: boolean;
+  wantsGear: boolean;
 }
 
 /**
@@ -95,6 +98,8 @@ export function subscriptionWants(prefs: PushPrefs, kind: PushKind): boolean {
       return prefs.wantsTrips;
     case "astro":
       return prefs.wantsAstro;
+    case "gear":
+      return prefs.wantsGear;
   }
 }
 
@@ -111,6 +116,7 @@ export async function getSubscriptionPrefs(
       wantsFood: pushSubscriptions.wantsFood,
       wantsTrips: pushSubscriptions.wantsTrips,
       wantsAstro: pushSubscriptions.wantsAstro,
+      wantsGear: pushSubscriptions.wantsGear,
     })
     .from(pushSubscriptions)
     .where(
@@ -211,6 +217,8 @@ export interface PushCheckResult {
   drySent: number;
   /** Verschickte Sternschnuppen-Tipps (klare Nacht am Heim-Ort) */
   astroSent: number;
+  /** Verschickte Pflege-Erinnerungen (fällige Ausrüstungs-Aufgaben) */
+  gearSent: number;
   removed: number;
 }
 
@@ -260,6 +268,47 @@ export function buildFoodAlert(
     title: "🧊 Kühlbox: MHD-Erinnerung",
     body,
     key: `food:${today}`,
+  };
+}
+
+export interface GearAlert {
+  title: string;
+  body: string;
+  /** Dedup-Schlüssel «gear:YYYY-MM» – max. eine Pflege-Erinnerung pro Monat und Abo */
+  key: string;
+}
+
+/** Wie viele Aufgaben-Titel in der Pflege-Erinnerung ausgeschrieben werden. */
+const GEAR_ALERT_MAX_NAMES = 3;
+
+/**
+ * Pflege-Erinnerung bauen: berücksichtigt alle am Stichtag fälligen
+ * Aufgaben (gearTaskDue aus shared/gearTasks.ts). Gibt null zurück, wenn
+ * nichts fällig ist. Der Schlüssel «gear:YYYY-MM» begrenzt die Erinnerung
+ * auf einmal pro Monat und Abo – der Cron läuft stündlich.
+ * Reine Funktion (für Tests exportiert); `today` als ISO-Datum YYYY-MM-DD.
+ * Texte deutsch, weil der Server die Sprache der Nutzer*innen nicht kennt.
+ */
+export function buildGearAlert(
+  tasks: (GearTaskLike & { title: string })[],
+  today: string
+): GearAlert | null {
+  const due = tasks
+    .filter(task => gearTaskDue(task, today).due)
+    .sort((a, b) => a.title.localeCompare(b.title, "de"));
+  if (due.length === 0) return null;
+
+  const names = due.slice(0, GEAR_ALERT_MAX_NAMES).map(t => t.title);
+  const rest = due.length - names.length;
+  const nameList = names.join(", ") + (rest > 0 ? ` und ${rest} weitere` : "");
+  const body =
+    due.length === 1
+      ? `1 Pflege-Aufgabe ist fällig: ${nameList}`
+      : `${due.length} Pflege-Aufgaben sind fällig: ${nameList}`;
+  return {
+    title: "🛠️ Ausrüstung: Pflege fällig",
+    body,
+    key: `gear:${today.slice(0, 7)}`,
   };
 }
 
@@ -564,7 +613,7 @@ function localIsoDate(now = new Date()): string {
  * Warnlage berechnen und bei Sturm/Gewitter & Co. (Stufe «gefahr») einen
  * Push senden. Dieselbe Warnlage wird pro Abo nur einmal gemeldet.
  * Die Mitteilungs-Flags pro Abo (wantsWeather/wantsFood/wantsTrips/
- * wantsAstro) werden über subscriptionWants respektiert.
+ * wantsAstro/wantsGear) werden über subscriptionWants respektiert.
  */
 export async function checkAndNotify(): Promise<PushCheckResult> {
   const result: PushCheckResult = {
@@ -575,6 +624,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     tripSent: 0,
     drySent: 0,
     astroSent: 0,
+    gearSent: 0,
     removed: 0,
   };
   if (!pushConfigured()) return result;
@@ -612,6 +662,20 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       today
     );
     if (alert) foodAlertByUser.set(userId, alert);
+  }
+
+  // Ausrüstung: fällige Pflege-Aufgaben pro Nutzer*in vorbereiten
+  const allGearTasks = await db
+    .select()
+    .from(gearTasks)
+    .where(inArray(gearTasks.userId, userIds));
+  const gearAlertByUser = new Map<number, GearAlert>();
+  for (const userId of userIds) {
+    const alert = buildGearAlert(
+      allGearTasks.filter(task => task.userId === userId),
+      today
+    );
+    if (alert) gearAlertByUser.set(userId, alert);
   }
 
   // Meine Reisen: Trip-Countdowns pro Nutzer*in vorbereiten
@@ -960,6 +1024,30 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         await db
           .update(pushSubscriptions)
           .set({ lastDryKey: dryAlert.key, lastNotifiedAt: new Date() })
+          .where(eq(pushSubscriptions.id, sub.id));
+      } else if (outcome === "gone") {
+        continue;
+      }
+    }
+
+    // ── Ausrüstung: Pflege-Erinnerung (max. eine pro Monat und Abo) ──
+    const gearAlert = subscriptionWants(sub, "gear")
+      ? gearAlertByUser.get(sub.userId)
+      : undefined;
+    if (gearAlert && gearAlert.key !== sub.lastGearKey) {
+      const gearPayload = JSON.stringify({
+        title: gearAlert.title,
+        body: gearAlert.body,
+        url: "/inventar",
+        // Eigener Tag, damit die Erinnerung andere Meldungen nicht ersetzt
+        tag: "campmesser-gear-care",
+      });
+      const outcome = await sendTo(sub, gearPayload);
+      if (outcome === "sent") {
+        result.gearSent += 1;
+        await db
+          .update(pushSubscriptions)
+          .set({ lastGearKey: gearAlert.key, lastNotifiedAt: new Date() })
           .where(eq(pushSubscriptions.id, sub.id));
       } else if (outcome === "gone") {
         continue;

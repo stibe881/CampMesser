@@ -302,6 +302,13 @@
       "when": 1785691332744,
       "tag": "0042_smooth_true_believers",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "5",
+      "when": 1785691856020,
+      "tag": "0043_numerous_vulcan",
+      "breakpoints": true
     }
   ]
 }

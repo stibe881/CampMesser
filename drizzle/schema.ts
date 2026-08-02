@@ -347,6 +347,8 @@ export const pushSubscriptions = mysqlTable(
     wantsTrips: boolean("wantsTrips").notNull().default(true),
     /** Mitteilungs-Einstellung dieses Geräts: Sternschnuppen-Tipp bei klarer Nacht */
     wantsAstro: boolean("wantsAstro").notNull().default(true),
+    /** Mitteilungs-Einstellung dieses Geräts: Erinnerung an fällige Ausrüstungs-Pflege */
+    wantsGear: boolean("wantsGear").notNull().default(true),
     /** Schlüssel der zuletzt gemeldeten Warnlage (verhindert Doppel-Pushes) */
     lastAlertKey: varchar("lastAlertKey", { length: 255 }),
     /** Schlüssel der letzten MHD-Erinnerung («food:YYYY-MM-DD»): max. 1 Kühlbox-Push pro Tag */
@@ -357,6 +359,8 @@ export const pushSubscriptions = mysqlTable(
     lastDryKey: varchar("lastDryKey", { length: 64 }),
     /** Schlüssel des letzten Sternschnuppen-Tipps («astro:YYYY-MM-DD»): max. 1 pro Nacht */
     lastAstroKey: varchar("lastAstroKey", { length: 64 }),
+    /** Schlüssel der letzten Pflege-Erinnerung («gear:YYYY-MM»): max. 1 pro Monat */
+    lastGearKey: varchar("lastGearKey", { length: 64 }),
     lastNotifiedAt: timestamp("lastNotifiedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
@@ -626,6 +630,30 @@ export const childStats = mysqlTable(
 
 export type ChildStats = typeof childStats.$inferSelect;
 export type InsertChildStats = typeof childStats.$inferInsert;
+
+/**
+ * Ausrüstungs-Pflege-Aufgaben: wiederkehrende Wartung (z. B. Zelt
+ * imprägnieren) mit Intervall in Monaten. lastDoneAt = zuletzt erledigt
+ * (null = noch nie; dann zählt das Anlage-Datum als Basis) – die
+ * Fälligkeits-Logik liegt in shared/gearTasks.ts.
+ */
+export const gearTasks = mysqlTable(
+  "gearTasks",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    title: varchar("title", { length: 120 }).notNull(),
+    /** Wartungs-Intervall in Monaten (1–120) */
+    intervalMonths: int("intervalMonths").notNull(),
+    /** Zuletzt erledigt (ISO-Datum); null = noch nie */
+    lastDoneAt: date("lastDoneAt", { mode: "string" }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("gearTasks_userId").on(table.userId)]
+);
+
+export type GearTask = typeof gearTasks.$inferSelect;
+export type InsertGearTask = typeof gearTasks.$inferInsert;
 
 /**
  * Passkeys (WebAuthn): pro Konto beliebig viele Anmelde-Credentials als

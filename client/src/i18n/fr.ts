@@ -78,6 +78,14 @@ export const fr: Translation = {
     weatherNoAlerts: "Aucune alerte d'intempéries à ton emplacement",
     tipOfDayTitle: "Conseil du jour",
     tipOfDayAria: (text: string) => `Conseil du jour : ${text}`,
+    gearDueText: (n: number) =>
+      n === 1
+        ? "1 tâche d'entretien de ton équipement est due"
+        : `${n} tâches d'entretien de ton équipement sont dues`,
+    gearDueAria: (n: number) =>
+      n === 1
+        ? "1 tâche d'entretien due – ouvrir l'inventaire"
+        : `${n} tâches d'entretien dues – ouvrir l'inventaire`,
     searchPlaceholder:
       "Rechercher : morsure de tique, nœud de cabestan, recettes …",
     searchAria: "Rechercher dans les modules de savoir",
@@ -204,7 +212,7 @@ export const fr: Translation = {
     notificationsTitle: "Notifications",
     pushDeviceTitle: "Push sur cet appareil",
     pushDeviceDesc:
-      "Notifications pour les intempéries, la DLC de la glacière, le compte à rebours du séjour et les nuits d'étoiles filantes.",
+      "Notifications pour les intempéries, la DLC de la glacière, le compte à rebours du séjour, les nuits d'étoiles filantes et l'entretien de l'équipement.",
     pushDeviceAria: "Activer les notifications push sur cet appareil",
     pushUnsupported:
       "Ton navigateur ne prend pas en charge les notifications push.",
@@ -224,6 +232,9 @@ export const fr: Translation = {
     prefAstro: "Nuits d'étoiles filantes",
     prefAstroDesc:
       "Quand une nuit claire coïncide avec un maximum d'étoiles filantes à ton lieu de domicile.",
+    prefGear: "Rappels d'entretien",
+    prefGearDesc:
+      "Au plus une fois par mois, quand l'entretien de l'équipement est dû.",
     prefToggleAria: (label: string) => `Activer ou désactiver ${label}`,
     homeTitle: "Lieu de domicile",
     homeIntro:
@@ -560,6 +571,39 @@ export const fr: Translation = {
     emptyTitle: "Pas encore d'équipement saisi",
     emptyText:
       "Commence par les grandes pièces : tente, sac de couchage, matelas isolant.",
+    gearTitle: "Entretien & maintenance",
+    gearIntro:
+      "Tâches récurrentes comme imperméabiliser ou contrôler les piles – les tâches dues sont marquées et rappelées par push.",
+    gearAddButton: "Ajouter une tâche",
+    gearAddAria: "Ajouter une nouvelle tâche d'entretien",
+    gearDialogTitle: "Ajouter une tâche d'entretien",
+    gearDialogDescription:
+      "Reprends une suggestion ou saisis ta propre tâche avec un intervalle.",
+    gearSuggestionsLabel: "Suggestions",
+    gearSuggestionAria: (title: string) => `Reprendre la suggestion «${title}»`,
+    gearTitleLabel: "Tâche",
+    gearTitlePlaceholder: "p. ex. imperméabiliser la tente",
+    gearIntervalLabel: "Intervalle (mois)",
+    gearIntervalText: (n: number) =>
+      n === 1 ? "chaque mois" : `tous les ${n} mois`,
+    gearSubmit: "Ajouter",
+    gearCreated: "Tâche d'entretien ajoutée",
+    gearTitleRequired: "Saisis un titre de tâche",
+    gearEmpty:
+      "Pas encore de tâches d'entretien – reprends une suggestion ou crées-en une.",
+    gearDueBadge: "Due",
+    gearSoonBadge: "Bientôt due",
+    gearDueOn: (date: string) => `Due le ${date}`,
+    gearLastDone: (date: string) => `dernière fois le ${date}`,
+    gearNeverDone: "jamais encore faite",
+    gearDoneButton: "Fait",
+    gearDoneAria: (title: string) => `Marquer «${title}» comme faite`,
+    gearMarkedDone: "Marquée comme faite",
+    gearRemoveAria: (title: string) =>
+      `Supprimer la tâche d'entretien «${title}»`,
+    gearRemoveConfirm: (title: string) =>
+      `Vraiment supprimer la tâche d'entretien «${title}» ?`,
+    gearRemoved: "Tâche d'entretien supprimée",
   },
   weather: {
     title: "Météo du camp",

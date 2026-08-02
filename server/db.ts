@@ -14,7 +14,9 @@ import {
   InsertCustomRecipe,
   foodItems,
   foodTemplates,
+  gearTasks,
   homeLocations,
+  InsertGearTask,
   InsertCampSpot,
   InsertFoodItem,
   InsertFoodTemplate,
@@ -395,6 +397,41 @@ export async function deleteInventoryItem(id: number, userId: number) {
   await db
     .delete(inventoryItems)
     .where(and(eq(inventoryItems.id, id), eq(inventoryItems.userId, userId)));
+}
+
+// ── Ausrüstungs-Pflege (wiederkehrende Wartungsaufgaben) ──
+export async function getGearTasks(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(gearTasks)
+    .where(eq(gearTasks.userId, userId))
+    .orderBy(asc(gearTasks.createdAt), asc(gearTasks.id));
+}
+
+export async function addGearTask(data: InsertGearTask) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(gearTasks).values(data);
+  return result.insertId;
+}
+
+export async function updateGearTask(
+  id: number,
+  userId: number,
+  data: Partial<Pick<InsertGearTask, "title" | "intervalMonths" | "lastDoneAt">>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(gearTasks)
+    .set(data)
+    .where(and(eq(gearTasks.id, id), eq(gearTasks.userId, userId)));
+}
+
+export async function deleteGearTask(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(gearTasks)
+    .where(and(eq(gearTasks.id, id), eq(gearTasks.userId, userId)));
 }
 
 // ── Energie-Verbraucher ──
