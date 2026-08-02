@@ -20,6 +20,16 @@ import {
   Tent,
   Wind,
 } from "lucide-react";
+import {
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -287,6 +297,16 @@ export default function WeatherPage() {
     [data]
   );
   const next24 = data?.hourly.slice(0, 24) ?? [];
+  // Regen-Grafik: 48 h mit Menge und Wahrscheinlichkeit
+  const rainData = useMemo(
+    () =>
+      (data?.hourly.slice(0, 48) ?? []).map(h => ({
+        label: `${new Date(h.time).getHours()}:00`,
+        mm: h.precipitationMm,
+        prob: h.precipitationProbability,
+      })),
+    [data]
+  );
 
   return (
     <div className="container max-w-3xl py-6 md:py-8">
@@ -545,6 +565,75 @@ export default function WeatherPage() {
               ))}
             </div>
           </div>
+
+          {/* Niederschlags-Grafik: wann genau kommt der Regen? */}
+          <h2 className="mb-2.5 font-serif text-lg font-semibold">
+            Regen: nächste 48 Stunden
+          </h2>
+          <Card className="mb-6">
+            <CardContent className="pt-5">
+              <div className="h-44 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart
+                    data={rainData}
+                    margin={{ top: 4, right: -18, bottom: 0, left: -18 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      className="stroke-border/60"
+                    />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 10 }}
+                      interval="preserveStartEnd"
+                      minTickGap={36}
+                    />
+                    <YAxis
+                      yAxisId="mm"
+                      domain={[0, (max: number) => Math.max(2, Math.ceil(max))]}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <YAxis
+                      yAxisId="prob"
+                      orientation="right"
+                      domain={[0, 100]}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <Tooltip
+                      formatter={(value: number, name: string) =>
+                        name === "Regen"
+                          ? [`${value.toFixed(1)} mm/h`, "Regen"]
+                          : [`${Math.round(value)} %`, "Wahrscheinlichkeit"]
+                      }
+                      labelFormatter={(label: string) => `${label} Uhr`}
+                    />
+                    <Bar
+                      yAxisId="mm"
+                      dataKey="mm"
+                      name="Regen"
+                      fill="var(--chart-2)"
+                      fillOpacity={0.75}
+                      isAnimationActive={false}
+                    />
+                    <Line
+                      yAxisId="prob"
+                      type="monotone"
+                      dataKey="prob"
+                      name="Wahrscheinlichkeit"
+                      stroke="var(--chart-4)"
+                      strokeWidth={2}
+                      dot={false}
+                      isAnimationActive={false}
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Balken = Regenmenge (mm/h, linke Achse) · Linie =
+                Regenwahrscheinlichkeit (%, rechte Achse).
+              </p>
+            </CardContent>
+          </Card>
 
           {/* 7-Tage */}
           <h2 className="mb-2.5 font-serif text-lg font-semibold">

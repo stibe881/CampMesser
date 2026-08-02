@@ -41,7 +41,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 const severityStyle: Record<FirstAidTopic["severity"], string> = {
   leicht: "bg-secondary text-secondary-foreground",
-  mittel: "bg-chart-1/20 text-amber-glow",
+  // Dunkler Text statt amber-glow: 4.5:1-Kontrast auf dem hellen Amber-Hintergrund
+  mittel: "bg-chart-1/20 text-foreground",
   ernst: "bg-destructive/10 text-destructive",
 };
 
