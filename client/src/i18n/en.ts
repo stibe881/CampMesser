@@ -839,7 +839,7 @@ export const en: Translation = {
     pushDisabled: "Storm alerts disabled",
     pushTitle: "Storm alerts for your pitches",
     pushDesc:
-      "Push notification for storms, thunderstorms or heavy rain at one of your saved pitches.",
+      "Push notification for storms, thunderstorms or heavy rain at one of your saved pitches. CampMesser also reminds you when food in the cool box is about to expire.",
     pushSaveFirst: "Save a pitch first.",
     pushAria: "Enable storm alerts for saved pitches",
     geoUnsupported: "Your device does not support geolocation.",

@@ -46,7 +46,8 @@ self.addEventListener("message", event => {
   }
 });
 
-// Unwetter-Push: Warnungen für gespeicherte Zeltplätze anzeigen
+// Push-Meldungen: Unwetter-Warnungen und Kühlbox-MHD-Erinnerungen anzeigen.
+// Der Payload-Tag trennt die beiden, damit sie sich nicht gegenseitig ersetzen.
 self.addEventListener("push", event => {
   let data = { title: "CampMesser", body: "", url: "/wetter" };
   try {
@@ -60,7 +61,7 @@ self.addEventListener("push", event => {
       icon: "/icons/icon-192.png",
       badge: "/icons/favicon-32.png",
       data: { url: data.url },
-      tag: "campmesser-weather-alert",
+      tag: data.tag || "campmesser-weather-alert",
     })
   );
 });

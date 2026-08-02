@@ -858,7 +858,7 @@ export const fr: Translation = {
     pushDisabled: "Alertes intempéries désactivées",
     pushTitle: "Alertes intempéries pour tes emplacements",
     pushDesc:
-      "Notification push en cas de tempête, d'orage ou de fortes pluies sur l'un de tes emplacements enregistrés.",
+      "Notification push en cas de tempête, d'orage ou de fortes pluies sur l'un de tes emplacements enregistrés. CampMesser te rappelle aussi quand des aliments de la glacière arrivent bientôt à expiration.",
     pushSaveFirst: "Enregistre d'abord un emplacement.",
     pushAria:
       "Activer les alertes intempéries pour les emplacements enregistrés",

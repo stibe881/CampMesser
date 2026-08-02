@@ -1,12 +1,14 @@
 /**
- * Web-Push für Unwetter-Warnungen an gespeicherten Zeltplätzen.
+ * Web-Push für Unwetter-Warnungen an gespeicherten Zeltplätzen sowie
+ * MHD-Erinnerungen für die Kühlbox (Lebensmittel, die heute oder morgen ablaufen).
  * Der Check läuft über /api/push/check (konsoleH-Cronjob), weil Passenger
  * den Node-Prozess bei Inaktivität schlafen legt und ein interner Scheduler
  * deshalb unzuverlässig wäre.
  */
 import { and, eq, inArray } from "drizzle-orm";
 import webpush from "web-push";
-import { campSpots, pushSubscriptions } from "../drizzle/schema";
+import { campSpots, foodItems, pushSubscriptions } from "../drizzle/schema";
+import { expiryInfo } from "../shared/food";
 import { detectAlerts, type HourlyWeather } from "../shared/weather";
 import { getDb } from "./db";
 
@@ -106,7 +108,66 @@ export interface PushCheckResult {
   subscriptions: number;
   spotsChecked: number;
   sent: number;
+  /** Verschickte MHD-Erinnerungen (Kühlbox) */
+  foodSent: number;
   removed: number;
+}
+
+export interface FoodAlert {
+  title: string;
+  body: string;
+  /** Dedup-Schlüssel «food:YYYY-MM-DD» – max. eine MHD-Erinnerung pro Tag und Abo */
+  key: string;
+}
+
+/** Wie viele Namen in der MHD-Nachricht ausgeschrieben werden. */
+const FOOD_ALERT_MAX_NAMES = 3;
+
+/**
+ * MHD-Erinnerung für die Kühlbox bauen: berücksichtigt Einträge, die HEUTE
+ * oder MORGEN ablaufen. Gibt null zurück, wenn nichts ansteht.
+ * Reine Funktion (für Tests exportiert); `today` als ISO-Datum YYYY-MM-DD.
+ * Texte deutsch, weil der Server die Sprache der Nutzer*innen nicht kennt.
+ */
+export function buildFoodAlert(
+  items: { name: string; expiryDate: string | null }[],
+  today: string
+): FoodAlert | null {
+  const expiring = items
+    .map(item => ({
+      name: item.name,
+      info: expiryInfo(item.expiryDate, today),
+    }))
+    .filter(
+      (x): x is { name: string; info: NonNullable<typeof x.info> } =>
+        x.info !== null && (x.info.daysLeft === 0 || x.info.daysLeft === 1)
+    )
+    .sort(
+      (a, b) =>
+        a.info.daysLeft - b.info.daysLeft || a.name.localeCompare(b.name, "de")
+    );
+  if (expiring.length === 0) return null;
+
+  const names = expiring.slice(0, FOOD_ALERT_MAX_NAMES).map(x => x.name);
+  const rest = expiring.length - names.length;
+  const nameList = names.join(", ") + (rest > 0 ? ` und ${rest} weitere` : "");
+  const body =
+    expiring.length === 1
+      ? `1 Lebensmittel läuft bald ab: ${nameList}`
+      : `${expiring.length} Lebensmittel laufen bald ab: ${nameList}`;
+  return {
+    title: "🧊 Kühlbox: MHD-Erinnerung",
+    body,
+    key: `food:${today}`,
+  };
+}
+
+/** Heutiges Datum als ISO-String in der lokalen Serverzeit (nicht UTC). */
+function localIsoDate(now = new Date()): string {
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 /**
@@ -119,6 +180,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     subscriptions: 0,
     spotsChecked: 0,
     sent: 0,
+    foodSent: 0,
     removed: 0,
   };
   if (!pushConfigured()) return result;
@@ -135,6 +197,23 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     .select()
     .from(campSpots)
     .where(inArray(campSpots.userId, userIds));
+
+  // Kühlbox: MHD-Erinnerungen pro Nutzer*in vorbereiten
+  const today = localIsoDate();
+  const food = await db
+    .select()
+    .from(foodItems)
+    .where(inArray(foodItems.userId, userIds));
+  const foodAlertByUser = new Map<number, FoodAlert>();
+  for (const userId of userIds) {
+    const alert = buildFoodAlert(
+      food
+        .filter(f => f.userId === userId)
+        .map(f => ({ name: f.name, expiryDate: f.expiryDate })),
+      today
+    );
+    if (alert) foodAlertByUser.set(userId, alert);
+  }
 
   // Wetter pro gerundeter Koordinate nur einmal abrufen
   const alertCache = new Map<string, Awaited<ReturnType<typeof alertsFor>>>();
@@ -166,33 +245,11 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     }
   }
 
-  for (const sub of subs) {
-    const dangers = dangersByUser.get(sub.userId) ?? [];
-    const alertKey = dangers
-      .map(d => d.key)
-      .sort()
-      .join("|");
-    if (dangers.length === 0) {
-      // Lage entspannt: Schlüssel zurücksetzen, damit die nächste Warnung wieder meldet
-      if (sub.lastAlertKey) {
-        await db
-          .update(pushSubscriptions)
-          .set({ lastAlertKey: null })
-          .where(eq(pushSubscriptions.id, sub.id));
-      }
-      continue;
-    }
-    if (alertKey === sub.lastAlertKey) continue;
-
-    const first = dangers[0];
-    const payload = JSON.stringify({
-      title: `⚠️ ${first.title} – ${first.spotName}`,
-      body:
-        dangers.length > 1
-          ? `${first.description} (+${dangers.length - 1} weitere Warnungen an deinen Plätzen)`
-          : first.description,
-      url: "/wetter",
-    });
+  /** Push an ein Abo senden; bei widerrufenem Abo (404/410) das Abo löschen. */
+  async function sendTo(
+    sub: (typeof subs)[number],
+    payload: string
+  ): Promise<"sent" | "gone" | "error"> {
     try {
       await webpush.sendNotification(
         {
@@ -201,20 +258,78 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         },
         payload
       );
-      result.sent += 1;
-      await db
-        .update(pushSubscriptions)
-        .set({ lastAlertKey: alertKey, lastNotifiedAt: new Date() })
-        .where(eq(pushSubscriptions.id, sub.id));
+      return "sent";
     } catch (error) {
       const status = (error as { statusCode?: number }).statusCode;
       // 404/410: Abo existiert nicht mehr (Browser hat es widerrufen)
+      // (db! – die Null-Prüfung oben erreicht die Closure-Analyse von tsc nicht)
       if (status === 404 || status === 410) {
-        await db
+        await db!
           .delete(pushSubscriptions)
           .where(eq(pushSubscriptions.id, sub.id));
         result.removed += 1;
+        return "gone";
       }
+      return "error";
+    }
+  }
+
+  for (const sub of subs) {
+    // ── Unwetter an gespeicherten Plätzen ──
+    const dangers = dangersByUser.get(sub.userId) ?? [];
+    const alertKey = dangers
+      .map(d => d.key)
+      .sort()
+      .join("|");
+    let subGone = false;
+    if (dangers.length === 0) {
+      // Lage entspannt: Schlüssel zurücksetzen, damit die nächste Warnung wieder meldet
+      if (sub.lastAlertKey) {
+        await db
+          .update(pushSubscriptions)
+          .set({ lastAlertKey: null })
+          .where(eq(pushSubscriptions.id, sub.id));
+      }
+    } else if (alertKey !== sub.lastAlertKey) {
+      const first = dangers[0];
+      const payload = JSON.stringify({
+        title: `⚠️ ${first.title} – ${first.spotName}`,
+        body:
+          dangers.length > 1
+            ? `${first.description} (+${dangers.length - 1} weitere Warnungen an deinen Plätzen)`
+            : first.description,
+        url: "/wetter",
+      });
+      const outcome = await sendTo(sub, payload);
+      if (outcome === "sent") {
+        result.sent += 1;
+        await db
+          .update(pushSubscriptions)
+          .set({ lastAlertKey: alertKey, lastNotifiedAt: new Date() })
+          .where(eq(pushSubscriptions.id, sub.id));
+      } else if (outcome === "gone") {
+        subGone = true;
+      }
+    }
+    if (subGone) continue;
+
+    // ── Kühlbox: MHD-Erinnerung (max. eine pro Tag und Abo) ──
+    const foodAlert = foodAlertByUser.get(sub.userId);
+    if (!foodAlert || foodAlert.key === sub.lastFoodKey) continue;
+    const foodPayload = JSON.stringify({
+      title: foodAlert.title,
+      body: foodAlert.body,
+      url: "/kuehlbox",
+      // Eigener Tag, damit die Erinnerung eine Unwetter-Meldung nicht ersetzt
+      tag: "campmesser-food-expiry",
+    });
+    const outcome = await sendTo(sub, foodPayload);
+    if (outcome === "sent") {
+      result.foodSent += 1;
+      await db
+        .update(pushSubscriptions)
+        .set({ lastFoodKey: foodAlert.key, lastNotifiedAt: new Date() })
+        .where(eq(pushSubscriptions.id, sub.id));
     }
   }
   return result;

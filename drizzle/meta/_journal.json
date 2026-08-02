@@ -127,6 +127,13 @@
       "when": 1785639950222,
       "tag": "0017_lumpy_edwin_jarvis",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1785640802402,
+      "tag": "0018_slim_blindfold",
+      "breakpoints": true
     }
   ]
 }

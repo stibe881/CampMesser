@@ -851,7 +851,7 @@ export const it: Translation = {
     pushDisabled: "Allerte maltempo disattivate",
     pushTitle: "Allerte maltempo per le tue piazzole",
     pushDesc:
-      "Notifica push in caso di tempesta, temporale o pioggia intensa su una delle tue piazzole salvate.",
+      "Notifica push in caso di tempesta, temporale o pioggia intensa su una delle tue piazzole salvate. CampMesser ti ricorda inoltre quando gli alimenti nel frigo box stanno per scadere.",
     pushSaveFirst: "Salva prima una piazzola.",
     pushAria: "Attiva le allerte maltempo per le piazzole salvate",
     geoUnsupported: "Il tuo dispositivo non supporta la geolocalizzazione.",

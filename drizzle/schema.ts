@@ -204,6 +204,8 @@ export const pushSubscriptions = mysqlTable(
     auth: varchar("auth", { length: 255 }).notNull(),
     /** Schlüssel der zuletzt gemeldeten Warnlage (verhindert Doppel-Pushes) */
     lastAlertKey: varchar("lastAlertKey", { length: 255 }),
+    /** Schlüssel der letzten MHD-Erinnerung («food:YYYY-MM-DD»): max. 1 Kühlbox-Push pro Tag */
+    lastFoodKey: varchar("lastFoodKey", { length: 64 }),
     lastNotifiedAt: timestamp("lastNotifiedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
