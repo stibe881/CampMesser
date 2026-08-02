@@ -7,7 +7,8 @@ import type { TrpcContext } from "./_core/context";
  * DATABASE_URL gesetzt ist (CI-Job mit MySQL-Service und angewendeten
  * Migrationen). Lokal ohne Datenbank wird die Datei übersprungen.
  * Ablauf: Registrieren → Anmelden → Daten quer durch alle Nutzer-Tabellen
- * anlegen (Packliste, Einstellung, Zeltplatz mit Foto, Trip mit Foto und Menüplan,
+ * anlegen (Packliste, Einstellung, Zeltplatz mit Foto, Trip mit Foto,
+ * Menüplan und Reise-Einkaufsliste,
  * Rezept mit Foto, Inventar-Gegenstand mit Foto, Schnitzeljagd, Quiz,
  * Kinder-Profil mit Abzeichen und Zählern, Einkaufsliste, Kühlbox samt
  * Vorlage, Push-Abo, Heim-Standort, Passkey)
@@ -406,6 +407,57 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     expect(menuShared.trip?.title).toBe("Gemeinsame Reise");
     expect(menuShared.entries.some(e => e.freeText === "Fondue")).toBe(true);
 
+    // Reise-Einkaufsliste: Owner und Mitglied teilen sich dieselbe Liste
+    await authed.tripShopping.add({
+      tripId,
+      name: "CI-Reise-Zutat",
+      quantity: "2×",
+    });
+    const tripShoppingForMember = await memberCaller.tripShopping.listByTrip({
+      tripId,
+    });
+    expect(tripShoppingForMember.trip?.id).toBe(tripId);
+    const sharedTripItem = tripShoppingForMember.items.find(
+      i => i.name === "CI-Reise-Zutat"
+    );
+    expect(sharedTripItem?.quantity).toBe("2×");
+    await memberCaller.tripShopping.toggle({
+      tripId,
+      id: sharedTripItem!.id,
+      checked: true,
+    });
+    await memberCaller.tripShopping.add({ tripId, name: "CI-Mitglied-Zutat" });
+    const tripShoppingForOwner = await authed.tripShopping.listByTrip({
+      tripId,
+    });
+    expect(
+      tripShoppingForOwner.items.find(i => i.id === sharedTripItem!.id)?.checked
+    ).toBe(true);
+    const memberItem = tripShoppingForOwner.items.find(
+      i => i.name === "CI-Mitglied-Zutat"
+    );
+    expect(memberItem?.createdByUserId).toBe(
+      (memberUser as NonNullable<typeof memberUser>).id
+    );
+    // Die geteilte Reise-Liste markiert die Reise in trips.list als geteilt
+    expect(
+      (await authed.trips.list()).find(tr => tr.id === tripId)?.shared
+    ).toBe(true);
+    // Fremde sehen die Reise-Liste nicht und dürfen nichts anlegen
+    expect(
+      (await outsiderCaller.tripShopping.listByTrip({ tripId })).trip
+    ).toBeNull();
+    await expect(
+      outsiderCaller.tripShopping.add({ tripId, name: "CI-Fremd-Zutat" })
+    ).rejects.toThrow();
+    await expect(
+      outsiderCaller.tripShopping.toggle({
+        tripId,
+        id: sharedTripItem!.id,
+        checked: false,
+      })
+    ).rejects.toThrow();
+
     // Verknüpfte Packliste: einsehen und abhaken
     const sharedListView = await memberCaller.packing.items({ listId });
     expect(sharedListView.list?.id).toBe(listId);
@@ -615,7 +667,8 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.natureSightings)
         .where(eq(schema.natureSightings.userId, uid)),
-      // Reise-Mitglieder und Einladungs-Links der eigenen Reisen sind weg
+      // Reise-Mitglieder, Einladungs-Links und Reise-Einkaufsliste der
+      // eigenen Reisen sind weg (auch Einträge von Mitreisenden)
       dbc
         .select()
         .from(schema.tripMembers)
@@ -624,6 +677,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.tripInvites)
         .where(eq(schema.tripInvites.tripId, tripId)),
+      dbc
+        .select()
+        .from(schema.tripShoppingItems)
+        .where(eq(schema.tripShoppingItems.tripId, tripId)),
     ]);
     expect(remaining.map(rows => rows.length)).toEqual(remaining.map(() => 0));
 

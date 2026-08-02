@@ -594,6 +594,39 @@ export type ShoppingShare = typeof shoppingShares.$inferSelect;
 export type InsertShoppingShare = typeof shoppingShares.$inferInsert;
 
 /**
+ * Gemeinsame Einkaufsliste pro Reise: Besitzerin/Besitzer und Mitreisende
+ * (tripMembers) teilen sich die Liste – die Berechtigung prüft der Router
+ * über canAccessTrip, nicht über eine userId-Spalte. createdByUserId dient
+ * nur der Anzeige «von <Name>»; löscht ein Mitglied sein Konto, bleiben
+ * seine Einträge in fremden Reisen bewusst erhalten (tote Referenz ist ok,
+ * die Anzeige fällt dann einfach weg).
+ */
+export const tripShoppingItems = mysqlTable(
+  "tripShoppingItems",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    /** Zugehöriger Tagebuch-/Trip-Eintrag (tripLogs.id) */
+    tripId: int("tripId").notNull(),
+    name: varchar("name", { length: 160 }).notNull(),
+    /** Freitext-Menge («2×», «500 g»); null = ohne Mengenangabe */
+    quantity: varchar("quantity", { length: 40 }),
+    /** Kurze Notiz zum Eintrag («Aktion», «laktosefrei»); null = keine */
+    note: varchar("note", { length: 160 }),
+    /** Laden-Kategorie (Schlüssel aus shared/shopping.ts); null = ohne Kategorie */
+    category: varchar("category", { length: 40 }),
+    checked: boolean("checked").notNull().default(false),
+    position: int("position").notNull().default(0),
+    /** Konto, das den Eintrag angelegt hat (users.id) – nur für die Anzeige */
+    createdByUserId: int("createdByUserId").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("tripShoppingItems_tripId").on(table.tripId)]
+);
+
+export type TripShoppingItem = typeof tripShoppingItems.$inferSelect;
+export type InsertTripShoppingItem = typeof tripShoppingItems.$inferInsert;
+
+/**
  * Passwort-Reset per E-Mail: pro Anfrage ein Token (32 Zufallsbytes, hex),
  * von dem nur der sha256-Hash gespeichert wird – der Klartext steht
  * ausschliesslich im E-Mail-Link. 60 Minuten gültig, einmalig verwendbar.

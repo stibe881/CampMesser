@@ -31,6 +31,7 @@ import {
   InsertNatureSighting,
   InsertTripLog,
   InsertTripPhoto,
+  InsertTripShoppingItem,
   InsertUser,
   inventoryItems,
   menuEntries,
@@ -47,6 +48,7 @@ import {
   tripLogs,
   tripMembers,
   tripPhotos,
+  tripShoppingItems,
   users,
   userSettings,
 } from "../drizzle/schema";
@@ -801,6 +803,113 @@ export async function getShoppingShareByToken(token: string) {
   return result[0];
 }
 
+// ── Reise-Einkaufsliste ──
+// Alle Funktionen sind über tripId gescoped; die Berechtigung (Owner oder
+// Mitreisende*r) prüft der Router VOR jedem Aufruf via canAccessTrip.
+
+export async function getTripShoppingItems(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripShoppingItems)
+    .where(eq(tripShoppingItems.tripId, tripId))
+    .orderBy(tripShoppingItems.position, tripShoppingItems.id);
+}
+
+export async function addTripShoppingItems(items: InsertTripShoppingItem[]) {
+  if (items.length === 0) return;
+  const db = requireDb(await getDb());
+  await db.insert(tripShoppingItems).values(items);
+}
+
+export async function setTripShoppingItemChecked(
+  id: number,
+  tripId: number,
+  checked: boolean
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripShoppingItems)
+    .set({ checked })
+    .where(
+      and(eq(tripShoppingItems.id, id), eq(tripShoppingItems.tripId, tripId))
+    );
+}
+
+/** Laden-Kategorie eines Reise-Eintrags setzen; null = «Ohne Kategorie». */
+export async function setTripShoppingItemCategory(
+  id: number,
+  tripId: number,
+  category: string | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripShoppingItems)
+    .set({ category })
+    .where(
+      and(eq(tripShoppingItems.id, id), eq(tripShoppingItems.tripId, tripId))
+    );
+}
+
+/** Menge und/oder Notiz eines Reise-Eintrags setzen (null entfernt). */
+export async function updateTripShoppingItemDetails(
+  id: number,
+  tripId: number,
+  data: { quantity?: string | null; note?: string | null }
+) {
+  if (Object.keys(data).length === 0) return;
+  const db = requireDb(await getDb());
+  await db
+    .update(tripShoppingItems)
+    .set(data)
+    .where(
+      and(eq(tripShoppingItems.id, id), eq(tripShoppingItems.tripId, tripId))
+    );
+}
+
+/** Neue Reihenfolge der Reise-Einkaufsliste speichern: position = 0..n. */
+export async function reorderTripShoppingItems(
+  tripId: number,
+  itemIds: number[]
+) {
+  const db = requireDb(await getDb());
+  await Promise.all(
+    itemIds.map((id, idx) =>
+      db
+        .update(tripShoppingItems)
+        .set({ position: idx })
+        .where(
+          and(
+            eq(tripShoppingItems.id, id),
+            eq(tripShoppingItems.tripId, tripId)
+          )
+        )
+    )
+  );
+}
+
+export async function deleteTripShoppingItem(id: number, tripId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(tripShoppingItems)
+    .where(
+      and(eq(tripShoppingItems.id, id), eq(tripShoppingItems.tripId, tripId))
+    );
+}
+
+/** Alle abgehakten Einträge der Reise-Einkaufsliste entfernen. */
+export async function deleteCheckedTripShoppingItems(tripId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(tripShoppingItems)
+    .where(
+      and(
+        eq(tripShoppingItems.tripId, tripId),
+        eq(tripShoppingItems.checked, true)
+      )
+    );
+}
+
 // ── Zeltplatz-Favoriten ──
 export async function getCampSpots(userId: number) {
   const db = requireDb(await getDb());
@@ -1013,6 +1122,8 @@ export async function deleteTripLog(id: number, userId: number) {
   // Mitglieder und offene Einladungs-Links der Reise mit aufräumen
   await db.delete(tripMembers).where(eq(tripMembers.tripId, id));
   await db.delete(tripInvites).where(eq(tripInvites.tripId, id));
+  // Gemeinsame Reise-Einkaufsliste hängt an der Reise – ebenfalls weg
+  await db.delete(tripShoppingItems).where(eq(tripShoppingItems.tripId, id));
 }
 
 // ── Reise-Mitglieder & Einladungen ──
@@ -1066,6 +1177,20 @@ export async function removeTripMember(tripId: number, userId: number) {
   await db
     .delete(tripMembers)
     .where(and(eq(tripMembers.tripId, tripId), eq(tripMembers.userId, userId)));
+}
+
+/**
+ * Reise-Ids mit mindestens einem eingeladenen Mitglied – für die
+ * «geteilt»-Markierung in trips.list, ohne pro Reise einzeln abzufragen.
+ */
+export async function getSharedTripIds(tripIds: number[]) {
+  if (tripIds.length === 0) return new Set<number>();
+  const db = requireDb(await getDb());
+  const rows = await db
+    .selectDistinct({ tripId: tripMembers.tripId })
+    .from(tripMembers)
+    .where(inArray(tripMembers.tripId, tripIds));
+  return new Set(rows.map(r => r.tripId));
 }
 
 /** Mitglieder einer Reise samt Anzeige-Daten (Name/E-Mail) der Konten. */

@@ -9,6 +9,7 @@ import {
   Plus,
   Printer,
   Search,
+  ShoppingBasket,
   ShoppingCart,
   UtensilsCrossed,
   Wand2,
@@ -98,10 +99,19 @@ export default function MenuPlanPage() {
   const spotsQuery = trpc.spots.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  // Mitreisende der Reise: bei geteilten Reisen (Owner + mind. 1 Mitglied)
+  // fragt die Zutaten-Brücke, auf WELCHE Einkaufsliste die Zutaten sollen
+  const membersQuery = trpc.trips.members.list.useQuery(
+    { tripId },
+    { enabled: Boolean(menuQuery.data?.trip), retry: false }
+  );
+  const isSharedTrip = (membersQuery.data?.members.length ?? 0) > 1;
 
   const [picker, setPicker] = useState<PickerSlot | null>(null);
   const [search, setSearch] = useState("");
   const [freeText, setFreeText] = useState("");
+  /** Auswahl «Persönliche Liste / Reise-Liste» offen (nur geteilte Reisen). */
+  const [listChoiceOpen, setListChoiceOpen] = useState(false);
 
   const closePicker = () => {
     setPicker(null);
@@ -132,6 +142,18 @@ export default function MenuPlanPage() {
         action: {
           label: t.shopping.openList,
           onClick: () => navigate("/einkauf"),
+        },
+      });
+    },
+    onError: () => toast.error(t.shopping.addFailed),
+  });
+  const addToTripShoppingMutation = trpc.tripShopping.addMany.useMutation({
+    onSuccess: result => {
+      utils.tripShopping.listByTrip.invalidate({ tripId });
+      toast.success(t.tripShopping.addedFromMenu(result.added), {
+        action: {
+          label: t.tripShopping.openList,
+          onClick: () => navigate(`/menueplan/${tripId}/einkauf`),
         },
       });
     },
@@ -317,6 +339,24 @@ export default function MenuPlanPage() {
     }
   };
 
+  /**
+   * Zutaten-Brücke: Bei geteilten Reisen fragt ein kleiner Dialog, ob die
+   * Zutaten auf die gemeinsame Reise-Liste (Standard) oder die persönliche
+   * Einkaufsliste sollen; bei privaten Reisen geht es ohne Nachfrage auf
+   * die persönliche Liste (Verhalten wie bisher).
+   */
+  const addIngredientsToList = () => {
+    if (plannedIngredients.length === 0) {
+      toast.error(t.menuPlan.noPlannedRecipes);
+      return;
+    }
+    if (isSharedTrip) {
+      setListChoiceOpen(true);
+      return;
+    }
+    addToShoppingMutation.mutate({ names: plannedIngredients });
+  };
+
   if (loading || (isAuthenticated && menuQuery.isLoading)) {
     return (
       <div className="container flex justify-center py-16">
@@ -412,17 +452,23 @@ export default function MenuPlanPage() {
         <Button
           variant="outline"
           size="sm"
-          disabled={addToShoppingMutation.isPending}
-          onClick={() => {
-            if (plannedIngredients.length === 0) {
-              toast.error(t.menuPlan.noPlannedRecipes);
-              return;
-            }
-            addToShoppingMutation.mutate({ names: plannedIngredients });
-          }}
+          disabled={
+            addToShoppingMutation.isPending ||
+            addToTripShoppingMutation.isPending
+          }
+          onClick={addIngredientsToList}
         >
           <ShoppingCart className="mr-1.5 h-4 w-4" aria-hidden="true" />
           {t.menuPlan.addIngredients}
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link
+            href={`/menueplan/${tripId}/einkauf`}
+            aria-label={t.tripShopping.openAria(tripName)}
+          >
+            <ShoppingBasket className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.tripShopping.openButton}
+          </Link>
         </Button>
         <Button asChild variant="outline" size="sm">
           <Link href={`/menueplan/${tripId}/drucken`}>
@@ -608,6 +654,68 @@ export default function MenuPlanPage() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Geteilte Reise: Zutaten auf die Reise-Liste (Standard) oder die persönliche */}
+      <Dialog open={listChoiceOpen} onOpenChange={setListChoiceOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl">
+              {t.tripShopping.chooseTitle}
+            </DialogTitle>
+            <DialogDescription>
+              {t.tripShopping.chooseDescription}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <button
+              type="button"
+              autoFocus
+              className="flex w-full items-center gap-3 rounded-lg border border-primary/40 bg-accent/40 px-3 py-2.5 text-left transition-colors hover:bg-accent"
+              onClick={() => {
+                setListChoiceOpen(false);
+                addToTripShoppingMutation.mutate({
+                  tripId,
+                  names: plannedIngredients,
+                });
+              }}
+            >
+              <ShoppingBasket
+                className="h-5 w-5 shrink-0 text-primary"
+                aria-hidden="true"
+              />
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold">
+                  {t.tripShopping.chooseTripList}
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  {t.tripShopping.chooseTripListHint}
+                </span>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center gap-3 rounded-lg border border-border px-3 py-2.5 text-left transition-colors hover:bg-accent/50"
+              onClick={() => {
+                setListChoiceOpen(false);
+                addToShoppingMutation.mutate({ names: plannedIngredients });
+              }}
+            >
+              <ShoppingCart
+                className="h-5 w-5 shrink-0 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold">
+                  {t.tripShopping.choosePersonalList}
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  {t.tripShopping.choosePersonalListHint}
+                </span>
+              </span>
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

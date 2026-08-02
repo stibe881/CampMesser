@@ -46,6 +46,7 @@ const pageLoaders = {
   TripPrint: () => import("./pages/TripPrint"),
   MenuPlan: () => import("./pages/MenuPlan"),
   MenuPlanPrint: () => import("./pages/MenuPlanPrint"),
+  TripShopping: () => import("./pages/TripShopping"),
   Level: () => import("./pages/Level"),
   Login: () => import("./pages/Login"),
   Lawn: () => import("./pages/Lawn"),
@@ -118,6 +119,7 @@ const TripsPage = lazyWithRetry(pageLoaders.Trips);
 const TripPrintPage = lazyWithRetry(pageLoaders.TripPrint);
 const MenuPlanPage = lazyWithRetry(pageLoaders.MenuPlan);
 const MenuPlanPrintPage = lazyWithRetry(pageLoaders.MenuPlanPrint);
+const TripShoppingPage = lazyWithRetry(pageLoaders.TripShopping);
 const LevelPage = lazyWithRetry(pageLoaders.Level);
 const LoginPage = lazyWithRetry(pageLoaders.Login);
 const LawnPage = lazyWithRetry(pageLoaders.Lawn);
@@ -184,6 +186,11 @@ function Router() {
           <Route
             path={"/menueplan/:tripId/drucken"}
             component={MenuPlanPrintPage}
+          />
+          {/* Reise-Einkaufsliste ebenfalls VOR der Basis-Route registrieren */}
+          <Route
+            path={"/menueplan/:tripId/einkauf"}
+            component={TripShoppingPage}
           />
           <Route path={"/menueplan/:tripId"} component={MenuPlanPage} />
           <Route path={"/wasserwaage"} component={LevelPage} />

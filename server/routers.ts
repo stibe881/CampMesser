@@ -108,6 +108,21 @@ function serializeQuizQuestions(
   );
 }
 
+/**
+ * Zugriff auf eine Reise erzwingen (Owner ODER eingeladenes Mitglied) –
+ * wirft NOT_FOUND, wenn die Reise fehlt oder das Konto keinen Zugriff hat.
+ */
+async function requireTripAccess(tripId: number, userId: number) {
+  const trip = await db.canAccessTrip(tripId, userId);
+  if (!trip) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Aufenthalt nicht gefunden.",
+    });
+  }
+  return trip;
+}
+
 export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
@@ -1498,6 +1513,196 @@ export const appRouter = router({
       }),
   }),
 
+  /**
+   * Gemeinsame Einkaufsliste pro Reise: Spiegel des shopping-Routers, aber
+   * die Berechtigung läuft über canAccessTrip (Owner ODER Mitreisende*r)
+   * statt über die userId der Einträge. Alle Schreibzugriffe sind zusätzlich
+   * über tripId gescoped, damit keine fremden Zeilen erwischt werden.
+   */
+  tripShopping: router({
+    /** Trip samt Reise-Einkaufsliste (trip null, wenn kein Zugriff besteht). */
+    listByTrip: protectedProcedure
+      .input(z.object({ tripId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+        if (!trip) {
+          return {
+            trip: null,
+            items: [] as Awaited<ReturnType<typeof db.getTripShoppingItems>>,
+          };
+        }
+        const items = await db.getTripShoppingItems(input.tripId);
+        return { trip, items };
+      }),
+    add: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number().int().positive(),
+          name: z.string().min(1).max(160),
+          category: z.enum(SHOPPING_CATEGORIES).nullish(),
+          quantity: z.string().max(40).nullish(),
+          note: z.string().max(160).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await requireTripAccess(input.tripId, ctx.user.id);
+        const items = await db.getTripShoppingItems(input.tripId);
+        const name = input.name.trim();
+        // Duplikat-Schutz wie auf der persönlichen Liste: steht der Name
+        // bereits unabgehakt auf der Liste, wird kein zweiter Eintrag angelegt.
+        const alreadyOpen = items.some(
+          i => !i.checked && i.name.trim().toLowerCase() === name.toLowerCase()
+        );
+        if (alreadyOpen) return { success: true, added: false } as const;
+        const nextPosition =
+          items.reduce((max, i) => Math.max(max, i.position), 0) + 1;
+        await db.addTripShoppingItems([
+          {
+            tripId: input.tripId,
+            createdByUserId: ctx.user.id,
+            name,
+            position: nextPosition,
+            category: input.category ?? null,
+            quantity: input.quantity?.trim() || null,
+            note: input.note?.trim() || null,
+          },
+        ]);
+        return { success: true, added: true } as const;
+      }),
+    /** Mehrere Einträge auf einmal (z. B. Zutaten des Menüplans). */
+    addMany: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number().int().positive(),
+          names: z
+            .array(
+              z.union([
+                z.string().min(1).max(160),
+                z.object({
+                  name: z.string().min(1).max(160),
+                  quantity: z.string().max(40).nullish(),
+                  note: z.string().max(160).nullish(),
+                }),
+              ])
+            )
+            .min(1)
+            .max(100),
+          category: z.enum(SHOPPING_CATEGORIES).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await requireTripAccess(input.tripId, ctx.user.id);
+        const items = await db.getTripShoppingItems(input.tripId);
+        const nextPosition =
+          items.reduce((max, i) => Math.max(max, i.position), 0) + 1;
+        await db.addTripShoppingItems(
+          input.names.map((entry, idx) => {
+            const obj = typeof entry === "string" ? { name: entry } : entry;
+            return {
+              tripId: input.tripId,
+              createdByUserId: ctx.user.id,
+              name: obj.name.trim(),
+              position: nextPosition + idx,
+              category: input.category ?? null,
+              quantity: ("quantity" in obj && obj.quantity?.trim()) || null,
+              note: ("note" in obj && obj.note?.trim()) || null,
+            };
+          })
+        );
+        return { added: input.names.length };
+      }),
+    /** Menge und/oder Notiz eines Eintrags setzen (null/"" entfernt). */
+    updateItem: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number().int().positive(),
+          id: z.number(),
+          quantity: z.string().max(40).nullish(),
+          note: z.string().max(160).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await requireTripAccess(input.tripId, ctx.user.id);
+        await db.updateTripShoppingItemDetails(input.id, input.tripId, {
+          ...(input.quantity !== undefined
+            ? { quantity: input.quantity?.trim() || null }
+            : {}),
+          ...(input.note !== undefined
+            ? { note: input.note?.trim() || null }
+            : {}),
+        });
+        return { success: true } as const;
+      }),
+    /** Laden-Kategorie eines Eintrags setzen; null entfernt sie wieder. */
+    setCategory: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number().int().positive(),
+          id: z.number(),
+          category: z.enum(SHOPPING_CATEGORIES).nullable(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await requireTripAccess(input.tripId, ctx.user.id);
+        await db.setTripShoppingItemCategory(
+          input.id,
+          input.tripId,
+          input.category
+        );
+        return { success: true } as const;
+      }),
+    /** Neue Reihenfolge (Drag-and-drop) speichern: Positionen 0..n. */
+    reorder: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number().int().positive(),
+          itemIds: z.array(z.number().int()).min(1).max(500),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await requireTripAccess(input.tripId, ctx.user.id);
+        const items = await db.getTripShoppingItems(input.tripId);
+        const valid = new Set(items.map(i => i.id));
+        // Nur Einträge dieser Reise umsortieren – fremde IDs werden ignoriert
+        const ids = input.itemIds.filter(id => valid.has(id));
+        if (ids.length > 0)
+          await db.reorderTripShoppingItems(input.tripId, ids);
+        return { success: true } as const;
+      }),
+    toggle: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number().int().positive(),
+          id: z.number(),
+          checked: z.boolean(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await requireTripAccess(input.tripId, ctx.user.id);
+        await db.setTripShoppingItemChecked(
+          input.id,
+          input.tripId,
+          input.checked
+        );
+        return { success: true } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ tripId: z.number().int().positive(), id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await requireTripAccess(input.tripId, ctx.user.id);
+        await db.deleteTripShoppingItem(input.id, input.tripId);
+        return { success: true } as const;
+      }),
+    /** Alle abgehakten Einträge der Reise-Liste entfernen. */
+    removeChecked: protectedProcedure
+      .input(z.object({ tripId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await requireTripAccess(input.tripId, ctx.user.id);
+        await db.deleteCheckedTripShoppingItems(input.tripId);
+        return { success: true } as const;
+      }),
+  }),
+
   energy: router({
     consumers: protectedProcedure.query(({ ctx }) =>
       db.getPowerConsumers(ctx.user.id)
@@ -2075,18 +2280,23 @@ export const appRouter = router({
         db.getTripLogs(ctx.user.id),
         db.getMemberTripLogs(ctx.user.id),
       ]);
+      // «geteilt»-Markierung eigener Reisen (mind. 1 Mitglied) in EINER
+      // Abfrage – der Client zeigt dafür z. B. die Reise-Einkaufsliste an
+      const sharedOwnIds = await db.getSharedTripIds(own.map(t => t.id));
       const merged = [
         ...own.map(trip => ({
           ...trip,
           role: "owner" as const,
           ownerName: null as string | null,
           spotName: null as string | null,
+          shared: sharedOwnIds.has(trip.id),
         })),
         ...member.map(({ trip, ownerName, ownerEmail, spotName }) => ({
           ...trip,
           role: "member" as const,
           ownerName: ownerName ?? ownerEmail ?? null,
           spotName,
+          shared: true,
         })),
       ];
       merged.sort(

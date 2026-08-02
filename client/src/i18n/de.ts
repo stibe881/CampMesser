@@ -2162,6 +2162,31 @@ export const de = {
     autofillUndone: "Automatische Planung wieder entfernt",
     autofillFailed: "Automatisches Füllen fehlgeschlagen",
   },
+  tripShopping: {
+    title: "Reise-Einkaufsliste",
+    subtitle:
+      "Die gemeinsame Einkaufsliste dieser Reise – alle Mitreisenden sehen und bearbeiten denselben Stand.",
+    loginFeature: "die Reise-Einkaufsliste",
+    openButton: "Reise-Einkaufsliste",
+    openAria: (name: string) => `Reise-Einkaufsliste für ${name} öffnen`,
+    backToMenuPlan: "Zum Menüplan",
+    emptyTitle: "Noch keine Einträge",
+    emptyText:
+      "Füge oben Einträge hinzu – oder übernimm die Zutaten der geplanten Rezepte aus dem Menüplan.",
+    byUser: (name: string) => `von ${name}`,
+    chooseTitle: "Auf welche Einkaufsliste?",
+    chooseDescription:
+      "Diese Reise ist geteilt: Die Zutaten können auf die gemeinsame Reise-Liste oder auf deine persönliche Einkaufsliste.",
+    chooseTripList: "Reise-Liste",
+    chooseTripListHint: "Gemeinsam mit allen Mitreisenden",
+    choosePersonalList: "Persönliche Liste",
+    choosePersonalListHint: "Nur für dich sichtbar",
+    addedFromMenu: (n: number) =>
+      n === 1
+        ? "1 Zutat auf die Reise-Einkaufsliste gesetzt"
+        : `${n} Zutaten auf die Reise-Einkaufsliste gesetzt`,
+    openList: "Zur Reise-Liste",
+  },
   menuPlanPrint: {
     docTitle: (name: string) => `${name} – Menüplan zum Ausdrucken`,
     docTitleFallback: "Menüplan",

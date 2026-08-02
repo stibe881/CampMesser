@@ -2156,6 +2156,31 @@ export const fr: Translation = {
     autofillUndone: "Planification automatique retirée",
     autofillFailed: "Le remplissage automatique a échoué",
   },
+  tripShopping: {
+    title: "Liste de courses du séjour",
+    subtitle:
+      "La liste de courses commune de ce séjour – toutes les personnes du voyage voient et modifient le même état.",
+    loginFeature: "la liste de courses du séjour",
+    openButton: "Liste de courses du séjour",
+    openAria: (name: string) => `Ouvrir la liste de courses du séjour ${name}`,
+    backToMenuPlan: "Vers le plan des repas",
+    emptyTitle: "Pas encore d'entrées",
+    emptyText:
+      "Ajoute des entrées ci-dessus – ou reprends les ingrédients des recettes prévues depuis le plan des repas.",
+    byUser: (name: string) => `par ${name}`,
+    chooseTitle: "Sur quelle liste de courses ?",
+    chooseDescription:
+      "Ce séjour est partagé : les ingrédients peuvent aller sur la liste commune du séjour ou sur ta liste de courses personnelle.",
+    chooseTripList: "Liste du séjour",
+    chooseTripListHint: "En commun avec toutes les personnes du voyage",
+    choosePersonalList: "Liste personnelle",
+    choosePersonalListHint: "Visible uniquement par toi",
+    addedFromMenu: (n: number) =>
+      n === 1
+        ? "1 ingrédient ajouté à la liste de courses du séjour"
+        : `${n} ingrédients ajoutés à la liste de courses du séjour`,
+    openList: "Vers la liste du séjour",
+  },
   menuPlanPrint: {
     docTitle: (name: string) => `${name} – plan des repas à imprimer`,
     docTitleFallback: "Plan des repas",

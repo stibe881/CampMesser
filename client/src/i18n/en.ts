@@ -2087,6 +2087,31 @@ export const en: Translation = {
     autofillUndone: "Automatic plan removed",
     autofillFailed: "Automatic filling failed",
   },
+  tripShopping: {
+    title: "Trip shopping list",
+    subtitle:
+      "The shared shopping list for this trip – everyone on the trip sees and edits the same state.",
+    loginFeature: "the trip shopping list",
+    openButton: "Trip shopping list",
+    openAria: (name: string) => `Open the trip shopping list for ${name}`,
+    backToMenuPlan: "To the meal plan",
+    emptyTitle: "No entries yet",
+    emptyText:
+      "Add entries above – or take over the ingredients of the planned recipes from the meal plan.",
+    byUser: (name: string) => `by ${name}`,
+    chooseTitle: "Which shopping list?",
+    chooseDescription:
+      "This trip is shared: the ingredients can go on the shared trip list or on your personal shopping list.",
+    chooseTripList: "Trip list",
+    chooseTripListHint: "Shared with everyone on the trip",
+    choosePersonalList: "Personal list",
+    choosePersonalListHint: "Visible only to you",
+    addedFromMenu: (n: number) =>
+      n === 1
+        ? "1 ingredient added to the trip shopping list"
+        : `${n} ingredients added to the trip shopping list`,
+    openList: "To the trip list",
+  },
   menuPlanPrint: {
     docTitle: (name: string) => `${name} – printable meal plan`,
     docTitleFallback: "Meal plan",

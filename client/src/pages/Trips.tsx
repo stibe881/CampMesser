@@ -17,6 +17,7 @@ import {
   Plus,
   Printer,
   Share2,
+  ShoppingBasket,
   Sparkles,
   Star,
   Tent,
@@ -2010,25 +2011,40 @@ export default function TripsPage() {
                           endDate={trip.endDate}
                         />
                       )}
-                      <Button
-                        asChild
-                        variant="outline"
-                        size="sm"
-                        className="mt-2"
-                      >
-                        <Link
-                          href={`/menueplan/${trip.id}`}
-                          aria-label={t.trips.menuPlanAria(
-                            trip.title || placeName(trip)
-                          )}
-                        >
-                          <UtensilsCrossed
-                            className="mr-1.5 h-4 w-4"
-                            aria-hidden="true"
-                          />
-                          {t.trips.menuPlanButton}
-                        </Link>
-                      </Button>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <Button asChild variant="outline" size="sm">
+                          <Link
+                            href={`/menueplan/${trip.id}`}
+                            aria-label={t.trips.menuPlanAria(
+                              trip.title || placeName(trip)
+                            )}
+                          >
+                            <UtensilsCrossed
+                              className="mr-1.5 h-4 w-4"
+                              aria-hidden="true"
+                            />
+                            {t.trips.menuPlanButton}
+                          </Link>
+                        </Button>
+                        {/* Reise-Einkaufsliste nur bei geteilten Reisen –
+                            private Reisen nutzen die persönliche Liste */}
+                        {trip.shared && (
+                          <Button asChild variant="outline" size="sm">
+                            <Link
+                              href={`/menueplan/${trip.id}/einkauf`}
+                              aria-label={t.tripShopping.openAria(
+                                trip.title || placeName(trip)
+                              )}
+                            >
+                              <ShoppingBasket
+                                className="mr-1.5 h-4 w-4"
+                                aria-hidden="true"
+                              />
+                              {t.tripShopping.openButton}
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
                       {trip.notes && (
                         <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
                           {trip.notes}

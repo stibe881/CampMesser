@@ -2138,6 +2138,31 @@ export const it: Translation = {
     autofillUndone: "Pianificazione automatica rimossa",
     autofillFailed: "Riempimento automatico non riuscito",
   },
+  tripShopping: {
+    title: "Lista della spesa del viaggio",
+    subtitle:
+      "La lista della spesa comune di questo viaggio – tutti i compagni di viaggio vedono e modificano lo stesso stato.",
+    loginFeature: "la lista della spesa del viaggio",
+    openButton: "Lista spesa del viaggio",
+    openAria: (name: string) => `Apri la lista della spesa del viaggio ${name}`,
+    backToMenuPlan: "Al piano dei pasti",
+    emptyTitle: "Ancora nessuna voce",
+    emptyText:
+      "Aggiungi voci qui sopra – oppure riprendi gli ingredienti delle ricette pianificate dal piano dei pasti.",
+    byUser: (name: string) => `di ${name}`,
+    chooseTitle: "Su quale lista della spesa?",
+    chooseDescription:
+      "Questo viaggio è condiviso: gli ingredienti possono andare sulla lista comune del viaggio o sulla tua lista personale.",
+    chooseTripList: "Lista del viaggio",
+    chooseTripListHint: "In comune con tutti i compagni di viaggio",
+    choosePersonalList: "Lista personale",
+    choosePersonalListHint: "Visibile solo a te",
+    addedFromMenu: (n: number) =>
+      n === 1
+        ? "1 ingrediente aggiunto alla lista della spesa del viaggio"
+        : `${n} ingredienti aggiunti alla lista della spesa del viaggio`,
+    openList: "Alla lista del viaggio",
+  },
   menuPlanPrint: {
     docTitle: (name: string) => `${name} – piano dei pasti da stampare`,
     docTitleFallback: "Piano dei pasti",
