@@ -770,9 +770,36 @@ export const appRouter = router({
       }),
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(({ ctx, input }) =>
-        db.deleteCustomRecipe(input.id, ctx.user.id)
-      ),
+      .mutation(async ({ ctx, input }) => {
+        // Foto-Datei mitputzen: erst Dateinamen sichern, dann DB-Zeile
+        // löschen und zuletzt die Datei auf dem Webspace entfernen.
+        const recipe = await db.getCustomRecipe(input.id, ctx.user.id);
+        await db.deleteCustomRecipe(input.id, ctx.user.id);
+        if (recipe?.imageFileName) {
+          const { recipePhotoStorage } = await import("./photoStorage");
+          await recipePhotoStorage.deleteFiles([recipe.imageFileName]);
+        }
+      }),
+    /** Foto eines eigenen Rezepts entfernen (Feld + Datei auf dem Webspace). */
+    removePhoto: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const recipe = await db.getCustomRecipe(input.id, ctx.user.id);
+        if (!recipe) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Rezept nicht gefunden.",
+          });
+        }
+        if (recipe.imageFileName) {
+          await db.updateCustomRecipe(input.id, ctx.user.id, {
+            imageFileName: null,
+          });
+          const { recipePhotoStorage } = await import("./photoStorage");
+          await recipePhotoStorage.deleteFiles([recipe.imageFileName]);
+        }
+        return { success: true } as const;
+      }),
   }),
 
   hunts: router({
@@ -927,8 +954,8 @@ export const appRouter = router({
         await db.deleteTripLog(input.id, ctx.user.id);
         await db.deleteTripPhotosForTrip(input.id, ctx.user.id);
         if (photos.length > 0) {
-          const { deleteTripPhotoFiles } = await import("./tripPhotoStorage");
-          await deleteTripPhotoFiles(photos.map(p => p.fileName));
+          const { tripPhotoStorage } = await import("./photoStorage");
+          await tripPhotoStorage.deleteFiles(photos.map(p => p.fileName));
         }
       }),
     photos: router({
@@ -954,8 +981,8 @@ export const appRouter = router({
             });
           }
           await db.deleteTripPhoto(input.photoId, ctx.user.id);
-          const { deleteTripPhotoFiles } = await import("./tripPhotoStorage");
-          await deleteTripPhotoFiles([photo.fileName]);
+          const { tripPhotoStorage } = await import("./photoStorage");
+          await tripPhotoStorage.deleteFiles([photo.fileName]);
           return { success: true } as const;
         }),
     }),

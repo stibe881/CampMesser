@@ -230,8 +230,8 @@ async function startServer() {
         }
         const { nanoid } = await import("nanoid");
         const fileName = `${nanoid(16)}${extension}`;
-        const { saveTripPhotoFile } = await import("../tripPhotoStorage");
-        await saveTripPhotoFile(fileName, body);
+        const { tripPhotoStorage } = await import("../photoStorage");
+        await tripPhotoStorage.saveFile(fileName, body);
         const id = await db.addTripPhoto({ userId: user.id, tripId, fileName });
         res.json({ id, fileName });
       } catch (error) {
@@ -246,11 +246,11 @@ async function startServer() {
     try {
       const user = await authenticatePhotoRequest(req, res);
       if (!user) return;
-      const { TRIP_PHOTO_FILENAME_PATTERN, tripPhotoPath } = await import(
-        "../tripPhotoStorage"
+      const { PHOTO_FILENAME_PATTERN, tripPhotoStorage } = await import(
+        "../photoStorage"
       );
       const fileName = req.params.fileName;
-      if (!TRIP_PHOTO_FILENAME_PATTERN.test(fileName)) {
+      if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
         res.status(400).json({ error: "badRequest" });
         return;
       }
@@ -261,7 +261,7 @@ async function startServer() {
         return;
       }
       res.sendFile(
-        tripPhotoPath(fileName),
+        tripPhotoStorage.photoPath(fileName),
         { headers: { "Cache-Control": "private, max-age=3600" } },
         error => {
           // Datei fehlt auf der Platte (z. B. nach Server-Umzug ohne uploads/)
@@ -272,6 +272,102 @@ async function startServer() {
       );
     } catch (error) {
       console.error("[TripPhotos] Auslieferung fehlgeschlagen:", error);
+      if (!res.headersSent) res.status(500).json({ error: "serverError" });
+    }
+  });
+  // ── Foto für eigene Rezepte ─────────────────────────────────────────────
+  // Gleiche Technik wie die Tagebuch-Fotos (Raw-Body, Client-Resize,
+  // Ablage unter uploads/recipes/), aber genau EIN Foto pro Rezept:
+  // ein neuer Upload ersetzt das bisherige Foto.
+  app.post(
+    "/api/recipes/:recipeId/photo",
+    express.raw({ type: "image/*", limit: MAX_PHOTO_BYTES }),
+    async (req, res) => {
+      try {
+        const user = await authenticatePhotoRequest(req, res);
+        if (!user) return;
+        const recipeId = Number(req.params.recipeId);
+        if (!Number.isInteger(recipeId) || recipeId <= 0) {
+          res.status(400).json({ error: "badRequest" });
+          return;
+        }
+        const db = await import("../db");
+        const recipe = await db.getCustomRecipe(recipeId, user.id);
+        if (!recipe) {
+          res.status(404).json({ error: "notFound" });
+          return;
+        }
+        const contentType = String(req.headers["content-type"] ?? "")
+          .split(";")[0]
+          .trim()
+          .toLowerCase();
+        if (contentType === "image/heic" || contentType === "image/heif") {
+          res.status(415).json({ error: "heicNotSupported" });
+          return;
+        }
+        const extension = PHOTO_MIME_EXTENSIONS[contentType];
+        if (!extension) {
+          res.status(415).json({ error: "unsupportedType" });
+          return;
+        }
+        const body = req.body as unknown;
+        if (!Buffer.isBuffer(body) || body.length === 0) {
+          res.status(400).json({ error: "emptyBody" });
+          return;
+        }
+        if (body.length > MAX_PHOTO_BYTES) {
+          res.status(413).json({ error: "tooLarge" });
+          return;
+        }
+        const { nanoid } = await import("nanoid");
+        const fileName = `${nanoid(16)}${extension}`;
+        const { recipePhotoStorage } = await import("../photoStorage");
+        await recipePhotoStorage.saveFile(fileName, body);
+        await db.updateCustomRecipe(recipeId, user.id, {
+          imageFileName: fileName,
+        });
+        // Altes Foto erst nach erfolgreichem DB-Update entfernen
+        if (recipe.imageFileName) {
+          await recipePhotoStorage.deleteFiles([recipe.imageFileName]);
+        }
+        res.json({ fileName });
+      } catch (error) {
+        console.error("[RecipePhotos] Upload fehlgeschlagen:", error);
+        if (!res.headersSent) res.status(500).json({ error: "serverError" });
+      }
+    }
+  );
+  // Auslieferung: nur die Besitzerin/der Besitzer des Rezepts sieht das Foto.
+  app.get("/api/recipes/photos/:fileName", async (req, res) => {
+    try {
+      const user = await authenticatePhotoRequest(req, res);
+      if (!user) return;
+      const { PHOTO_FILENAME_PATTERN, recipePhotoStorage } = await import(
+        "../photoStorage"
+      );
+      const fileName = req.params.fileName;
+      if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
+        res.status(400).json({ error: "badRequest" });
+        return;
+      }
+      const db = await import("../db");
+      const recipe = await db.getCustomRecipeByImageFileName(fileName, user.id);
+      if (!recipe) {
+        res.status(404).json({ error: "notFound" });
+        return;
+      }
+      res.sendFile(
+        recipePhotoStorage.photoPath(fileName),
+        { headers: { "Cache-Control": "private, max-age=3600" } },
+        error => {
+          // Datei fehlt auf der Platte (z. B. nach Server-Umzug ohne uploads/)
+          if (error && !res.headersSent) {
+            res.status(404).json({ error: "notFound" });
+          }
+        }
+      );
+    } catch (error) {
+      console.error("[RecipePhotos] Auslieferung fehlgeschlagen:", error);
       if (!res.headersSent) res.status(500).json({ error: "serverError" });
     }
   });

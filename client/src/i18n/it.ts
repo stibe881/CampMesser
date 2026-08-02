@@ -1211,6 +1211,20 @@ export const it: Translation = {
       tipPlaceholder: "ad es. Servire con composta di mele",
       saved: "Ricetta salvata",
       updated: "Ricetta aggiornata",
+      photoLabel: "Foto (facoltativo)",
+      photoChoose: "Scegli una foto",
+      photoChange: "Cambia foto",
+      photoRemove: "Rimuovi foto",
+      photoPreviewAlt: "Anteprima della foto della ricetta",
+      photoHint:
+        "JPEG, PNG o WebP – la foto viene ridotta automaticamente prima del caricamento.",
+      photoUploading: "Caricamento della foto …",
+      photoUploadFailed: "Ricetta salvata, ma la foto non è stata caricata.",
+      photoTooLarge: "La foto è troppo grande (max. 5 MB).",
+      photoHeic:
+        "Il browser non può leggere HEIC/HEIF – esporta la foto come JPEG.",
+      photoReadFailed: "L'immagine non è stata letta.",
+      photoRemoveFailed: "La foto non è stata rimossa.",
     },
   },
   food: {

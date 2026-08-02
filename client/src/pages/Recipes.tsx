@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Baby,
   ChefHat,
   Clock,
   CookingPot,
   Flame,
+  ImagePlus,
   Pencil,
   Plus,
   Search,
@@ -43,8 +44,10 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import {
   customRecipeToRecipe,
+  recipePhotoUrl,
   type CustomRecipeRow,
 } from "@/lib/customRecipesClient";
+import { resizeImageForUpload } from "@/lib/imageResize";
 import { cn } from "@/lib/utils";
 
 /** Editor für eigene Rezepte: erstellen und bearbeiten (Zutaten/Schritte zeilenweise). */
@@ -75,17 +78,23 @@ function RecipeEditorDialog({
     initial ? parseStringList(initial.stepsJson, 20).join("\n") : ""
   );
   const [tip, setTip] = useState(initial?.tip ?? "");
+  // Foto: neu ausgewählt (bereits verkleinert), Vorschau-URL und
+  // «bestehendes Foto entfernen»-Wunsch – ausgeführt wird alles beim Speichern.
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  const [removePhoto, setRemovePhoto] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
-  const saveMutation = trpc.recipes.save.useMutation({
-    onSuccess: () => {
-      utils.recipes.list.invalidate();
-      toast.success(
-        initial ? t.recipes.editor.updated : t.recipes.editor.saved
-      );
-      onClose();
-    },
-    onError: e => toast.error(e.message || t.common.saveFailed),
-  });
+  // Objekt-URL der Vorschau beim Ersetzen/Schliessen wieder freigeben
+  useEffect(() => {
+    return () => {
+      if (photoPreviewUrl) URL.revokeObjectURL(photoPreviewUrl);
+    };
+  }, [photoPreviewUrl]);
+
+  const saveMutation = trpc.recipes.save.useMutation();
+  const removePhotoMutation = trpc.recipes.removePhoto.useMutation();
 
   const toLines = (value: string) =>
     value
@@ -95,6 +104,94 @@ function RecipeEditorDialog({
 
   const canSave =
     name.trim() && toLines(ingredients).length > 0 && toLines(steps).length > 0;
+
+  // Aktuelle Vorschau: neues Foto > bestehendes Foto (sofern nicht entfernt)
+  const previewUrl =
+    photoPreviewUrl ??
+    (initial?.imageFileName && !removePhoto
+      ? recipePhotoUrl(initial.imageFileName)
+      : null);
+
+  const handlePhotoSelected = async (fileList: FileList | null) => {
+    const file = fileList?.[0];
+    if (photoInputRef.current) photoInputRef.current.value = "";
+    if (!file) return;
+    try {
+      const blob = await resizeImageForUpload(file);
+      setPhotoBlob(blob);
+      setPhotoPreviewUrl(URL.createObjectURL(blob));
+      setRemovePhoto(false);
+    } catch {
+      // Dekodieren fehlgeschlagen – bei HEIC/HEIF gezielt darauf hinweisen
+      const isHeic =
+        /image\/hei[cf]/.test(file.type) || /\.hei[cf]$/i.test(file.name);
+      toast.error(
+        isHeic ? t.recipes.editor.photoHeic : t.recipes.editor.photoReadFailed
+      );
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoBlob(null);
+    setPhotoPreviewUrl(null);
+    if (initial?.imageFileName) setRemovePhoto(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      const { id } = await saveMutation.mutateAsync({
+        id: initial?.id,
+        name: name.trim(),
+        method,
+        difficulty,
+        timeMinutes: Math.min(600, Math.max(5, Number(time) || 30)),
+        servings: Math.min(20, Math.max(1, Number(servings) || 4)),
+        onePot,
+        kidFriendly,
+        ingredients: toLines(ingredients).slice(0, 30),
+        steps: toLines(steps).slice(0, 20),
+        tip: tip.trim() || null,
+      });
+      // Foto-Schritt nach dem Speichern: Upload ersetzt ein bestehendes
+      // Foto serverseitig, Entfernen läuft über tRPC.
+      if (photoBlob) {
+        setPhotoUploading(true);
+        try {
+          const response = await fetch(`/api/recipes/${id}/photo`, {
+            method: "POST",
+            headers: { "Content-Type": "image/jpeg" },
+            body: photoBlob,
+            credentials: "include",
+          });
+          if (!response.ok) {
+            toast.error(
+              response.status === 413
+                ? t.recipes.editor.photoTooLarge
+                : t.recipes.editor.photoUploadFailed
+            );
+          }
+        } catch {
+          toast.error(t.recipes.editor.photoUploadFailed);
+        } finally {
+          setPhotoUploading(false);
+        }
+      } else if (removePhoto && initial?.imageFileName) {
+        try {
+          await removePhotoMutation.mutateAsync({ id });
+        } catch {
+          toast.error(t.recipes.editor.photoRemoveFailed);
+        }
+      }
+      utils.recipes.list.invalidate();
+      toast.success(
+        initial ? t.recipes.editor.updated : t.recipes.editor.saved
+      );
+      onClose();
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "";
+      toast.error(message || t.common.saveFailed);
+    }
+  };
 
   return (
     <DialogContent className="max-h-[85vh] overflow-y-auto">
@@ -115,6 +212,51 @@ function RecipeEditorDialog({
             maxLength={120}
             onChange={e => setName(e.target.value)}
           />
+        </div>
+        <div>
+          <Label className="mb-1.5 block">{t.recipes.editor.photoLabel}</Label>
+          {previewUrl && (
+            <img
+              src={previewUrl}
+              alt={t.recipes.editor.photoPreviewAlt}
+              className="mb-2 aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
+            />
+          )}
+          <div className="flex gap-2">
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={e => handlePhotoSelected(e.target.files)}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => photoInputRef.current?.click()}
+            >
+              <ImagePlus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {previewUrl
+                ? t.recipes.editor.photoChange
+                : t.recipes.editor.photoChoose}
+            </Button>
+            {previewUrl && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={handleRemovePhoto}
+              >
+                <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {t.recipes.editor.photoRemove}
+              </Button>
+            )}
+          </div>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            {t.recipes.editor.photoHint}
+          </p>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -243,24 +385,19 @@ function RecipeEditorDialog({
           </Button>
           <Button
             className="flex-1"
-            disabled={!canSave || saveMutation.isPending}
-            onClick={() =>
-              saveMutation.mutate({
-                id: initial?.id,
-                name: name.trim(),
-                method,
-                difficulty,
-                timeMinutes: Math.min(600, Math.max(5, Number(time) || 30)),
-                servings: Math.min(20, Math.max(1, Number(servings) || 4)),
-                onePot,
-                kidFriendly,
-                ingredients: toLines(ingredients).slice(0, 30),
-                steps: toLines(steps).slice(0, 20),
-                tip: tip.trim() || null,
-              })
+            disabled={
+              !canSave ||
+              saveMutation.isPending ||
+              removePhotoMutation.isPending ||
+              photoUploading
             }
+            onClick={handleSave}
           >
-            {saveMutation.isPending ? t.common.saving : t.common.save}
+            {photoUploading
+              ? t.recipes.editor.photoUploading
+              : saveMutation.isPending || removePhotoMutation.isPending
+                ? t.common.saving
+                : t.common.save}
           </Button>
         </div>
       </div>

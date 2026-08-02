@@ -194,7 +194,7 @@ export type InsertTripLog = typeof tripLogs.$inferInsert;
 
 /**
  * Fotos zum Reise-Tagebuch: die Datei liegt unter uploads/trips/<fileName>
- * auf dem Webspace (server/tripPhotoStorage.ts), hier nur die Metadaten.
+ * auf dem Webspace (server/photoStorage.ts), hier nur die Metadaten.
  */
 export const tripPhotos = mysqlTable(
   "tripPhotos",
@@ -266,6 +266,8 @@ export const customRecipes = mysqlTable(
     /** Zubereitungsschritte als JSON-Array von Strings */
     stepsJson: text("stepsJson").notNull(),
     tip: text("tip"),
+    /** Dateiname des Rezept-Fotos unter uploads/recipes/ (server/photoStorage.ts) */
+    imageFileName: varchar("imageFileName", { length: 64 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },

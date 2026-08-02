@@ -22,15 +22,22 @@ export interface CustomRecipeRow {
   ingredientsJson: string;
   stepsJson: string;
   tip: string | null;
+  imageFileName: string | null;
 }
 
 /** Präfix der Anzeige-IDs eigener Rezepte (z. B. «eigenes-7»). */
 export const CUSTOM_RECIPE_ID_PREFIX = "eigenes-";
 
+/** Private Foto-URL eines eigenen Rezepts (Auth über Session-Cookie). */
+export function recipePhotoUrl(fileName: string): string {
+  return `/api/recipes/photos/${fileName}`;
+}
+
 export function customRecipeToRecipe(row: CustomRecipeRow): Recipe {
   return {
     id: `${CUSTOM_RECIPE_ID_PREFIX}${row.id}`,
     name: row.name,
+    image: row.imageFileName ? recipePhotoUrl(row.imageFileName) : undefined,
     method: normalizeMethod(row.method),
     timeMinutes: row.timeMinutes,
     servings: row.servings,

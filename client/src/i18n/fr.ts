@@ -1224,6 +1224,21 @@ export const fr: Translation = {
       tipPlaceholder: "p. ex. Servir avec de la compote de pommes",
       saved: "Recette enregistrée",
       updated: "Recette mise à jour",
+      photoLabel: "Photo (facultatif)",
+      photoChoose: "Choisir une photo",
+      photoChange: "Changer la photo",
+      photoRemove: "Supprimer la photo",
+      photoPreviewAlt: "Aperçu de la photo de la recette",
+      photoHint:
+        "JPEG, PNG ou WebP – la photo est automatiquement réduite avant l'envoi.",
+      photoUploading: "Envoi de la photo …",
+      photoUploadFailed:
+        "Recette enregistrée, mais la photo n'a pas pu être envoyée.",
+      photoTooLarge: "La photo est trop lourde (max. 5 Mo).",
+      photoHeic:
+        "Le navigateur ne peut pas lire le HEIC/HEIF – exporte la photo en JPEG.",
+      photoReadFailed: "L'image n'a pas pu être lue.",
+      photoRemoveFailed: "La photo n'a pas pu être supprimée.",
     },
   },
   food: {

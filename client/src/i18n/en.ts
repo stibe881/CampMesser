@@ -1188,6 +1188,20 @@ export const en: Translation = {
       tipPlaceholder: "e.g. Serve with apple sauce",
       saved: "Recipe saved",
       updated: "Recipe updated",
+      photoLabel: "Photo (optional)",
+      photoChoose: "Choose photo",
+      photoChange: "Change photo",
+      photoRemove: "Remove photo",
+      photoPreviewAlt: "Preview of the recipe photo",
+      photoHint:
+        "JPEG, PNG or WebP – the photo is resized automatically before upload.",
+      photoUploading: "Uploading photo …",
+      photoUploadFailed: "Recipe saved, but the photo could not be uploaded.",
+      photoTooLarge: "The photo is too large (max. 5 MB).",
+      photoHeic:
+        "The browser cannot read HEIC/HEIF – please export the photo as JPEG.",
+      photoReadFailed: "The image could not be read.",
+      photoRemoveFailed: "The photo could not be removed.",
     },
   },
   food: {

@@ -1,0 +1,1 @@
+ALTER TABLE `customRecipes` ADD `imageFileName` varchar(64);

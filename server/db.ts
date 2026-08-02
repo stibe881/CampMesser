@@ -545,6 +545,36 @@ export async function getCustomRecipes(userId: number) {
     .orderBy(desc(customRecipes.id));
 }
 
+/** Einzelnes eigenes Rezept (nur, wenn es der Person gehört). */
+export async function getCustomRecipe(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(customRecipes)
+    .where(and(eq(customRecipes.id, id), eq(customRecipes.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/** Eigenes Rezept über den Foto-Dateinamen (für die private Auslieferung). */
+export async function getCustomRecipeByImageFileName(
+  fileName: string,
+  userId: number
+) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(customRecipes)
+    .where(
+      and(
+        eq(customRecipes.imageFileName, fileName),
+        eq(customRecipes.userId, userId)
+      )
+    )
+    .limit(1);
+  return rows[0];
+}
+
 export async function addCustomRecipe(data: InsertCustomRecipe) {
   const db = requireDb(await getDb());
   const [result] = await db.insert(customRecipes).values(data);
