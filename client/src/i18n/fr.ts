@@ -935,18 +935,34 @@ export const fr: Translation = {
     subtitle:
       "Cap boussole et distance pour retrouver ta tente – même de nuit ou sur les grands campings.",
     targetTitle: "Cible",
-    targetSelectAria: "Choisir la cible",
-    savedTarget: "Position mémorisée",
-    savedTargetInfo: d => `Mémorisée le ${d}`,
-    rememberButton: "Mémoriser la position actuelle comme cible",
+    ownTargetsTitle: "Tes cibles",
+    spotsTitle: "Emplacements enregistrés",
+    empty:
+      "Aucune cible enregistrée pour l'instant. Place-toi là où tu voudras revenir plus tard – par exemple juste à côté de la tente – donne un nom à l'endroit et enregistre ta position.",
+    addTitle: "Enregistrer la position actuelle sous …",
+    nameAria: "Nom de la cible",
+    namePlaceholder: "p. ex. Tente ou Douches",
+    suggestionsAria: "Suggestions de noms",
+    suggestionTent: "Tente",
+    suggestionShowers: "Douches",
+    suggestionWc: "WC",
+    suggestionDishes: "Coin vaisselle",
+    suggestionPlayground: "Place de jeux",
+    suggestionReception: "Réception",
+    saveButton: "Enregistrer la position",
+    nameMissing: "Donne d'abord un nom à la cible",
+    tooMany: "Trop de cibles – supprimes-en d'abord une",
+    savedToast: name =>
+      `«${name}» enregistré – tu retrouveras ton chemin jusqu'ici`,
+    deleteAria: name => `Supprimer la cible «${name}»`,
+    deleteConfirm: name => `Vraiment supprimer la cible «${name}» ?`,
+    deletedToast: name => `«${name}» supprimé`,
     remembering: "Recherche de la position …",
-    rememberSaved:
-      "Position mémorisée comme cible – tu retrouveras ton chemin jusqu'ici",
     rememberFailed: "Impossible de déterminer la position",
     loginHint:
       "Connecté·e, tu peux aussi choisir tes emplacements enregistrés comme cible.",
     noTarget:
-      "Aucune cible choisie. Mémorise ta position actuelle juste à côté de la tente – ou choisis un emplacement enregistré.",
+      "Aucune cible choisie. Touche une cible ci-dessus – ou enregistre ta position actuelle sous un nom.",
     geoUnsupported: "Ton appareil ne permet pas la géolocalisation.",
     geoDenied:
       "Accès à la position refusé – autorise-le dans les réglages du navigateur.",

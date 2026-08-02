@@ -1,61 +1,47 @@
 import { useEffect, useMemo, useState } from "react";
-import { Compass, Loader2, LocateFixed, MapPin, Tent } from "lucide-react";
+import {
+  Compass,
+  Loader2,
+  LocateFixed,
+  MapPin,
+  Tent,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useDeviceHeading } from "@/hooks/useDeviceHeading";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
+import {
+  LEGACY_TARGET_KEY,
+  MAX_NAME_LENGTH,
+  MAX_TARGETS,
+  TARGETS_KEY,
+  migrateTargets,
+  newTargetId,
+  sanitizeTargets,
+  type TentFinderTarget,
+} from "@/lib/tentFinderTargets";
 import { bearingDegrees, distanceMeters } from "@shared/geo";
 import { compassDirection } from "@shared/solar";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
 import { useI18n } from "@/i18n";
+import { cn } from "@/lib/utils";
 
 /**
- * Zelt-Finder: Kompass-Peilung und Distanz zum gespeicherten Zeltplatz oder
- * zu einem lokal gemerkten Standort. Funktioniert offline (reine Geometrie,
- * GPS + Sensoren) – nur die Zeltplatz-Liste kommt per tRPC.
+ * Zelt-Finder: Kompass-Peilung und Distanz zu beliebig vielen benannten
+ * Zielen (Zelt, Duschen, Abwaschstelle …) oder zu einem gespeicherten
+ * Zeltplatz. Funktioniert offline (reine Geometrie, GPS + Sensoren) –
+ * nur Zeltplatz-Liste und Geräte-Sync laufen über den Server.
  */
 
-const TARGET_KEY = "campmesser.tentFinderTarget";
-
-interface SavedTarget {
-  lat: number;
-  lon: number;
-  savedAt: number;
-}
-
-function loadSavedTarget(): SavedTarget | null {
+function storeTargets(targets: TentFinderTarget[]) {
   try {
-    const raw = localStorage.getItem(TARGET_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as SavedTarget;
-    if (
-      typeof parsed?.lat === "number" &&
-      typeof parsed?.lon === "number" &&
-      Number.isFinite(parsed.lat) &&
-      Number.isFinite(parsed.lon)
-    ) {
-      return parsed;
-    }
-  } catch {
-    /* kein gemerktes Ziel */
-  }
-  return null;
-}
-
-function storeSavedTarget(target: SavedTarget) {
-  try {
-    localStorage.setItem(TARGET_KEY, JSON.stringify(target));
+    localStorage.setItem(TARGETS_KEY, JSON.stringify(targets));
   } catch {
     /* Sitzung reicht */
   }
@@ -89,15 +75,47 @@ export default function TentFinderPage() {
   });
   const spots = spotsQuery.data ?? [];
 
-  const [savedTarget, setSavedTarget] = useState<SavedTarget | null>(() =>
-    loadSavedTarget()
+  // Benannte Ziele laden; altes Einzel-Ziel wird einmalig als «Zelt» übernommen
+  const [targets, setTargets] = useState<TentFinderTarget[]>(() => {
+    try {
+      const { targets: initial, changed } = migrateTargets(
+        localStorage.getItem(TARGETS_KEY),
+        localStorage.getItem(LEGACY_TARGET_KEY),
+        t.tentFinder.suggestionTent
+      );
+      if (changed) {
+        storeTargets(initial);
+        localStorage.removeItem(LEGACY_TARGET_KEY);
+      }
+      return initial;
+    } catch {
+      return [];
+    }
+  });
+
+  // Geräte-Sync: Ziele vom Konto übernehmen bzw. Änderungen hochladen
+  const targetsSync = useSyncedSetting<TentFinderTarget[]>(
+    "tentFinderTargets",
+    value => {
+      const clean = sanitizeTargets(value);
+      setTargets(clean);
+      storeTargets(clean);
+    }
   );
+
+  const saveTargets = (next: TentFinderTarget[]) => {
+    setTargets(next);
+    storeTargets(next);
+    targetsSync.push(next);
+  };
+
   // ?spot=<id> wählt den Zeltplatz aus dem Dossier vor
   const [selection, setSelection] = useState<string | null>(() => {
     const spotParam = new URLSearchParams(window.location.search).get("spot");
     return spotParam ? `spot:${spotParam}` : null;
   });
-  const [remembering, setRemembering] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [saving, setSaving] = useState(false);
   const [geo, setGeo] = useState<GeoState>({ status: "loading" });
   const { heading, permission, start } = useDeviceHeading();
 
@@ -135,21 +153,20 @@ export default function TentFinderPage() {
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
-  const effectiveSelection = selection ?? (savedTarget ? "saved" : null);
+  // Ohne explizite Wahl: zuletzt gespeichertes eigenes Ziel anpeilen
+  const effectiveSelection =
+    selection ??
+    (targets.length > 0 ? `target:${targets[targets.length - 1].id}` : null);
 
   const target = useMemo<{
     name: string;
     lat: number;
     lon: number;
   } | null>(() => {
-    if (effectiveSelection === "saved") {
-      return savedTarget
-        ? {
-            name: t.tentFinder.savedTarget,
-            lat: savedTarget.lat,
-            lon: savedTarget.lon,
-          }
-        : null;
+    if (effectiveSelection?.startsWith("target:")) {
+      const id = effectiveSelection.slice(7);
+      const own = targets.find(x => x.id === id);
+      return own ? { name: own.name, lat: own.lat, lon: own.lon } : null;
     }
     if (effectiveSelection?.startsWith("spot:")) {
       const id = Number(effectiveSelection.slice(5));
@@ -159,33 +176,51 @@ export default function TentFinderPage() {
         : null;
     }
     return null;
-  }, [effectiveSelection, savedTarget, spots, t]);
+  }, [effectiveSelection, targets, spots]);
 
-  const rememberHere = () => {
+  const saveHere = () => {
+    const name = newName.trim().slice(0, MAX_NAME_LENGTH);
+    if (!name) {
+      toast.error(t.tentFinder.nameMissing);
+      return;
+    }
+    if (targets.length >= MAX_TARGETS) {
+      toast.error(t.tentFinder.tooMany);
+      return;
+    }
     if (!navigator.geolocation) {
       toast.error(t.tentFinder.geoUnsupported);
       return;
     }
-    setRemembering(true);
+    setSaving(true);
     navigator.geolocation.getCurrentPosition(
       pos => {
-        const next: SavedTarget = {
+        const next: TentFinderTarget = {
+          id: newTargetId(),
+          name,
           lat: pos.coords.latitude,
           lon: pos.coords.longitude,
           savedAt: Date.now(),
         };
-        storeSavedTarget(next);
-        setSavedTarget(next);
-        setSelection("saved");
-        setRemembering(false);
-        toast.success(t.tentFinder.rememberSaved);
+        saveTargets([...targets, next]);
+        setSelection(`target:${next.id}`);
+        setNewName("");
+        setSaving(false);
+        toast.success(t.tentFinder.savedToast(name));
       },
       () => {
-        setRemembering(false);
+        setSaving(false);
         toast.error(t.tentFinder.rememberFailed);
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
+  };
+
+  const deleteTarget = (doomed: TentFinderTarget) => {
+    if (!confirm(t.tentFinder.deleteConfirm(doomed.name))) return;
+    saveTargets(targets.filter(x => x.id !== doomed.id));
+    if (selection === `target:${doomed.id}`) setSelection(null);
+    toast.success(t.tentFinder.deletedToast(doomed.name));
   };
 
   // Peilung und Distanz (reine Geometrie – offline verfügbar)
@@ -215,12 +250,39 @@ export default function TentFinderPage() {
   const distanceLabel =
     distance !== null ? formatDistance(distance, lang) : null;
 
-  const selectOptions: { value: string; label: string }[] = [
-    ...(savedTarget
-      ? [{ value: "saved", label: t.tentFinder.savedTarget }]
-      : []),
-    ...spots.map(s => ({ value: `spot:${s.id}`, label: s.name })),
+  const suggestions = [
+    t.tentFinder.suggestionTent,
+    t.tentFinder.suggestionShowers,
+    t.tentFinder.suggestionWc,
+    t.tentFinder.suggestionDishes,
+    t.tentFinder.suggestionPlayground,
+    t.tentFinder.suggestionReception,
   ];
+
+  const optionRow = (value: string, name: string, lat: number, lon: number) => {
+    const active = effectiveSelection === value;
+    const dist = fix ? distanceMeters(fix.lat, fix.lon, lat, lon) : null;
+    return (
+      <button
+        type="button"
+        onClick={() => setSelection(value)}
+        aria-pressed={active}
+        className={cn(
+          "flex min-w-0 flex-1 items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
+          active
+            ? "border-primary bg-primary/10 font-medium"
+            : "border-border hover:bg-muted"
+        )}
+      >
+        <span className="truncate">{name}</span>
+        {dist !== null && (
+          <span className="shrink-0 font-mono text-xs text-muted-foreground">
+            {formatDistance(dist, lang)}
+          </span>
+        )}
+      </button>
+    );
+  };
 
   return (
     <div className="container max-w-xl py-6">
@@ -228,82 +290,113 @@ export default function TentFinderPage() {
 
       {/* Ziel wählen */}
       <Card className="mb-4">
-        <CardContent className="space-y-3 pt-6">
+        <CardContent className="space-y-4 pt-6">
           <div className="flex items-center gap-2">
             <Tent className="h-4 w-4 text-primary" aria-hidden="true" />
             <span className="text-sm font-semibold">
               {t.tentFinder.targetTitle}
             </span>
           </div>
-          {selectOptions.length > 0 && (
+
+          {targets.length === 0 && spots.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              {t.tentFinder.empty}
+            </p>
+          )}
+
+          {targets.length > 0 && (
             <div>
-              <Label className="sr-only" htmlFor="tent-finder-target">
-                {t.tentFinder.targetSelectAria}
-              </Label>
-              <Select
-                value={effectiveSelection ?? undefined}
-                onValueChange={setSelection}
-              >
-                <SelectTrigger
-                  id="tent-finder-target"
-                  aria-label={t.tentFinder.targetSelectAria}
-                >
-                  <SelectValue placeholder={t.tentFinder.targetSelectAria} />
-                </SelectTrigger>
-                <SelectContent>
-                  {selectOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+                {t.tentFinder.ownTargetsTitle}
+              </p>
+              <ul className="space-y-1.5">
+                {targets.map(tgt => (
+                  <li key={tgt.id} className="flex items-center gap-1.5">
+                    {optionRow(`target:${tgt.id}`, tgt.name, tgt.lat, tgt.lon)}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 text-muted-foreground hover:text-destructive"
+                      aria-label={t.tentFinder.deleteAria(tgt.name)}
+                      onClick={() => deleteTarget(tgt)}
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
-          {savedTarget && (
-            <p className="text-xs text-muted-foreground">
-              {t.tentFinder.savedTargetInfo(
-                new Date(savedTarget.savedAt).toLocaleString(
-                  LOCALE_TAGS[lang],
-                  {
-                    day: "numeric",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  }
-                )
-              )}{" "}
-              · {savedTarget.lat.toFixed(4)}°, {savedTarget.lon.toFixed(4)}°
-            </p>
+
+          {spots.length > 0 && (
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+                {t.tentFinder.spotsTitle}
+              </p>
+              <ul className="space-y-1.5">
+                {spots.map(s => (
+                  <li key={s.id} className="flex">
+                    {optionRow(`spot:${s.id}`, s.name, s.latitude, s.longitude)}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={remembering}
-            onClick={rememberHere}
-          >
-            {remembering ? (
-              <Loader2
-                className="mr-1.5 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-            ) : (
-              <LocateFixed className="mr-1.5 h-4 w-4" aria-hidden="true" />
-            )}
-            {remembering
-              ? t.tentFinder.remembering
-              : t.tentFinder.rememberButton}
-          </Button>
-          {!isAuthenticated && (
-            <p className="text-xs text-muted-foreground">
-              {t.tentFinder.loginHint}
-            </p>
-          )}
-          {!target && (
+
+          {!target && (targets.length > 0 || spots.length > 0) && (
             <p className="text-sm text-muted-foreground">
               {t.tentFinder.noTarget}
             </p>
           )}
+
+          {/* Aktuellen Standort unter eigenem Namen speichern */}
+          <div className="space-y-2 border-t border-border pt-4">
+            <p className="text-sm font-medium">{t.tentFinder.addTitle}</p>
+            <Input
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              maxLength={MAX_NAME_LENGTH}
+              placeholder={t.tentFinder.namePlaceholder}
+              aria-label={t.tentFinder.nameAria}
+            />
+            <div
+              className="flex flex-wrap gap-1.5"
+              role="group"
+              aria-label={t.tentFinder.suggestionsAria}
+            >
+              {suggestions.map(s => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setNewName(s)}
+                  className="rounded-full border border-border bg-muted px-2.5 py-1 text-xs transition-colors hover:bg-accent"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={saving}
+              onClick={saveHere}
+            >
+              {saving ? (
+                <Loader2
+                  className="mr-1.5 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <LocateFixed className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              )}
+              {saving ? t.tentFinder.remembering : t.tentFinder.saveButton}
+            </Button>
+            {!isAuthenticated && (
+              <p className="text-xs text-muted-foreground">
+                {t.tentFinder.loginHint}
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
 

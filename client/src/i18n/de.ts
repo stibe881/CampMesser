@@ -933,18 +933,34 @@ export const de = {
     subtitle:
       "Kompass-Peilung und Distanz zurück zu deinem Zelt – auch nachts oder auf grossen Plätzen.",
     targetTitle: "Ziel",
-    targetSelectAria: "Ziel wählen",
-    savedTarget: "Gemerkter Standort",
-    savedTargetInfo: (d: string) => `Gemerkt am ${d}`,
-    rememberButton: "Aktuellen Standort als Ziel merken",
+    ownTargetsTitle: "Eigene Ziele",
+    spotsTitle: "Gespeicherte Zeltplätze",
+    empty:
+      "Noch keine Ziele gespeichert. Stell dich dorthin, wo du später zurückfinden willst – zum Beispiel direkt beim Zelt – gib dem Ort einen Namen und speichere deinen Standort.",
+    addTitle: "Aktuellen Standort speichern unter …",
+    nameAria: "Name des Ziels",
+    namePlaceholder: "z. B. Zelt oder Duschen",
+    suggestionsAria: "Namensvorschläge",
+    suggestionTent: "Zelt",
+    suggestionShowers: "Duschen",
+    suggestionWc: "WC",
+    suggestionDishes: "Abwaschstelle",
+    suggestionPlayground: "Spielplatz",
+    suggestionReception: "Rezeption",
+    saveButton: "Standort speichern",
+    nameMissing: "Gib dem Ziel zuerst einen Namen",
+    tooMany: "Zu viele Ziele – lösche zuerst eines",
+    savedToast: (name: string) =>
+      `«${name}» gespeichert – du findest jetzt hierher zurück`,
+    deleteAria: (name: string) => `Ziel «${name}» löschen`,
+    deleteConfirm: (name: string) => `Ziel «${name}» wirklich löschen?`,
+    deletedToast: (name: string) => `«${name}» gelöscht`,
     remembering: "Standort wird ermittelt …",
-    rememberSaved:
-      "Standort als Ziel gemerkt – du findest jetzt hierher zurück",
     rememberFailed: "Standort konnte nicht ermittelt werden",
     loginHint:
       "Angemeldet kannst du auch deine gespeicherten Zeltplätze als Ziel wählen.",
     noTarget:
-      "Noch kein Ziel gewählt. Merke dir deinen aktuellen Standort direkt beim Zelt – oder wähle einen gespeicherten Zeltplatz.",
+      "Kein Ziel gewählt. Tippe oben auf ein Ziel – oder speichere deinen aktuellen Standort unter einem Namen.",
     geoUnsupported: "Dein Gerät unterstützt keine Standortbestimmung.",
     geoDenied:
       "Standortfreigabe verweigert – erlaube den Zugriff in den Browser-Einstellungen.",

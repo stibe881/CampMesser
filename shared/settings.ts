@@ -12,6 +12,8 @@ export const SYNCED_SETTING_KEYS = [
   "sunObstacles",
   /** Eigene Materialien im Trockenzeiten-Rechner */
   "dryingCustomItems",
+  /** Benannte Ziele des Zelt-Finders (Zelt, Duschen …) */
+  "tentFinderTargets",
   /** Gewählte App-Sprache (de/fr/it/en) */
   "language",
 ] as const;
