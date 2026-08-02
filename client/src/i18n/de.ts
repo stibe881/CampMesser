@@ -2153,6 +2153,7 @@ export const de = {
     shareQrTitle: "QR-Code abscannen",
     shareQrText:
       "Mitreisende scannen den Code mit der Handykamera und sind direkt auf der Liste.",
+    suggestionsAria: "Vorschläge aus Verlauf und Liste",
   },
   sharedShopping: {
     loading: "Geteilte Einkaufsliste wird geladen …",

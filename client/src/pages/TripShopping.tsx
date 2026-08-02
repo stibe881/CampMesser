@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import ShoppingItemDetailsPopover from "@/components/ShoppingItemDetailsPopover";
+import ShoppingNameAutocomplete from "@/components/ShoppingNameAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -25,8 +26,17 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
+import {
+  loadShoppingHistory,
+  rememberShoppingEntry,
+  sanitizeShoppingHistory,
+  saveShoppingHistory,
+  shoppingSuggestions,
+  type ShoppingHistoryEntry,
+} from "@/lib/shoppingHistory";
 import { trpc } from "@/lib/trpc";
 import { usePointerDrag } from "@/lib/usePointerDrag";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { cn } from "@/lib/utils";
 import { pick } from "@shared/i18n";
 import {
@@ -68,6 +78,27 @@ export default function TripShoppingPage() {
   const [quantity, setQuantity] = useState("");
   const [newCategory, setNewCategory] = useState<string>(NO_CATEGORY);
 
+  // Einkaufs-Verlauf für Autocomplete: der persönliche Verlauf (lokal +
+  // Geräte-Sync) gilt auch auf der gemeinsamen Reise-Liste.
+  const [history, setHistory] = useState<ShoppingHistoryEntry[]>(() =>
+    loadShoppingHistory()
+  );
+  const historySync = useSyncedSetting<ShoppingHistoryEntry[]>(
+    "shoppingHistory",
+    value => {
+      const clean = sanitizeShoppingHistory(value);
+      setHistory(clean);
+      saveShoppingHistory(clean);
+    }
+  );
+  /** Frisch hinzugefügten Eintrag im Verlauf vermerken (Gerät + Konto). */
+  const rememberEntry = (entry: ShoppingHistoryEntry) => {
+    const next = rememberShoppingEntry(history, entry);
+    setHistory(next);
+    saveShoppingHistory(next);
+    historySync.push(next);
+  };
+
   const invalidate = () => utils.tripShopping.listByTrip.invalidate({ tripId });
   const addMutation = trpc.tripShopping.add.useMutation({
     onSuccess: (result, variables) => {
@@ -75,6 +106,11 @@ export default function TripShoppingPage() {
       // Duplikat-Schutz des Servers: steht der Name schon unabgehakt auf der
       // Liste, wird nichts angelegt – Info-Toast statt stillem Verwerfen.
       if (!result.added) toast.info(t.shopping.alreadyOnList(variables.name));
+      rememberEntry({
+        name: variables.name,
+        category: variables.category ?? null,
+        quantity: variables.quantity ?? null,
+      });
       setName("");
       setQuantity("");
     },
@@ -128,6 +164,29 @@ export default function TripShoppingPage() {
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
   const openItems = useMemo(() => items.filter(i => !i.checked), [items]);
   const doneItems = useMemo(() => items.filter(i => i.checked), [items]);
+
+  // Autocomplete-Vorschläge: Verlauf (neueste zuerst) vor den Listen-Einträgen
+  const suggestions = useMemo(
+    () =>
+      shoppingSuggestions(name, [
+        ...history,
+        ...items.map(i => ({
+          name: i.name,
+          category: i.category,
+          quantity: i.quantity,
+        })),
+      ]),
+    [name, history, items]
+  );
+
+  /** Vorschlag übernehmen: Name plus gemerkte Kategorie/Menge setzen. */
+  const applySuggestion = (entry: ShoppingHistoryEntry) => {
+    setName(entry.name);
+    setNewCategory(
+      isShoppingCategory(entry.category) ? entry.category : NO_CATEGORY
+    );
+    setQuantity(entry.quantity ?? "");
+  };
 
   /** Mitreisenden-Namen für die «von <Name>»-Anzeige (nur bei geteilten Reisen). */
   const members = membersQuery.data?.members ?? [];
@@ -293,13 +352,14 @@ export default function TripShoppingPage() {
           submit();
         }}
       >
-        <Input
+        <ShoppingNameAutocomplete
           className="min-w-40 flex-1"
           value={name}
-          maxLength={160}
+          onChange={setName}
+          onPick={applySuggestion}
+          suggestions={suggestions}
           placeholder={t.shopping.addPlaceholder}
-          aria-label={t.shopping.addNameAria}
-          onChange={e => setName(e.target.value)}
+          ariaLabel={t.shopping.addNameAria}
         />
         <Input
           className="w-24"

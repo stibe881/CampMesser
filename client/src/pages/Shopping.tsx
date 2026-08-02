@@ -16,6 +16,7 @@ import QRCode from "qrcode";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import ShoppingItemDetailsPopover from "@/components/ShoppingItemDetailsPopover";
+import ShoppingNameAutocomplete from "@/components/ShoppingNameAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -35,8 +36,17 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
+import {
+  loadShoppingHistory,
+  rememberShoppingEntry,
+  sanitizeShoppingHistory,
+  saveShoppingHistory,
+  shoppingSuggestions,
+  type ShoppingHistoryEntry,
+} from "@/lib/shoppingHistory";
 import { trpc } from "@/lib/trpc";
 import { usePointerDrag } from "@/lib/usePointerDrag";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { cn } from "@/lib/utils";
 import { pick } from "@shared/i18n";
 import {
@@ -69,6 +79,26 @@ export default function ShoppingPage() {
   /** Teil-Link, der gerade im Dialog gezeigt wird (null = Dialog zu). */
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareQr, setShareQr] = useState<string | null>(null);
+
+  // Einkaufs-Verlauf für Autocomplete: lokal + Geräte-Sync (Server gewinnt beim Laden)
+  const [history, setHistory] = useState<ShoppingHistoryEntry[]>(() =>
+    loadShoppingHistory()
+  );
+  const historySync = useSyncedSetting<ShoppingHistoryEntry[]>(
+    "shoppingHistory",
+    value => {
+      const clean = sanitizeShoppingHistory(value);
+      setHistory(clean);
+      saveShoppingHistory(clean);
+    }
+  );
+  /** Frisch hinzugefügten Eintrag im Verlauf vermerken (Gerät + Konto). */
+  const rememberEntry = (entry: ShoppingHistoryEntry) => {
+    const next = rememberShoppingEntry(history, entry);
+    setHistory(next);
+    saveShoppingHistory(next);
+    historySync.push(next);
+  };
 
   // QR-Code zum Teil-Link erzeugen (Muster PackLists): einfach abscannen lassen
   useEffect(() => {
@@ -121,6 +151,11 @@ export default function ShoppingPage() {
       // Liste, wird nichts angelegt – die mitgeschickte Menge wäre sonst
       // stillschweigend weg, deshalb ein Info-Toast statt Stille.
       if (!result.added) toast.info(t.shopping.alreadyOnList(variables.name));
+      rememberEntry({
+        name: variables.name,
+        category: variables.category ?? null,
+        quantity: variables.quantity ?? null,
+      });
       setName("");
       setQuantity("");
     },
@@ -176,6 +211,29 @@ export default function ShoppingPage() {
   const items = useMemo(() => query.data ?? [], [query.data]);
   const openItems = useMemo(() => items.filter(i => !i.checked), [items]);
   const doneItems = useMemo(() => items.filter(i => i.checked), [items]);
+
+  // Autocomplete-Vorschläge: Verlauf (neueste zuerst) vor den Listen-Einträgen
+  const suggestions = useMemo(
+    () =>
+      shoppingSuggestions(name, [
+        ...history,
+        ...items.map(i => ({
+          name: i.name,
+          category: i.category,
+          quantity: i.quantity,
+        })),
+      ]),
+    [name, history, items]
+  );
+
+  /** Vorschlag übernehmen: Name plus gemerkte Kategorie/Menge setzen. */
+  const applySuggestion = (entry: ShoppingHistoryEntry) => {
+    setName(entry.name);
+    setNewCategory(
+      isShoppingCategory(entry.category) ? entry.category : NO_CATEGORY
+    );
+    setQuantity(entry.quantity ?? "");
+  };
 
   /** Offene Einträge nach Kategorie gruppiert – Katalog-Reihenfolge, ohne Kategorie zuletzt. */
   const grouped = useMemo(() => {
@@ -274,13 +332,14 @@ export default function ShoppingPage() {
           submit();
         }}
       >
-        <Input
+        <ShoppingNameAutocomplete
           className="min-w-40 flex-1"
           value={name}
-          maxLength={160}
+          onChange={setName}
+          onPick={applySuggestion}
+          suggestions={suggestions}
           placeholder={t.shopping.addPlaceholder}
-          aria-label={t.shopping.addNameAria}
-          onChange={e => setName(e.target.value)}
+          ariaLabel={t.shopping.addNameAria}
         />
         <Input
           className="w-24"

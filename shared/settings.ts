@@ -20,6 +20,8 @@ export const SYNCED_SETTING_KEYS = [
   "knotProgress",
   /** Favorisierte Rezepte (statische Ids + «eigenes-<id>») */
   "recipeFavorites",
+  /** Einkaufs-Verlauf für Autocomplete-Vorschläge */
+  "shoppingHistory",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];

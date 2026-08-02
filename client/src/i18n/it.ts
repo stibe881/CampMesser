@@ -2127,6 +2127,7 @@ export const it: Translation = {
     shareQrTitle: "Scansiona il codice QR",
     shareQrText:
       "I compagni scansionano il codice con la fotocamera del telefono e arrivano direttamente alla lista.",
+    suggestionsAria: "Suggerimenti dalla cronologia e dalla lista",
   },
   sharedShopping: {
     loading: "Caricamento della lista della spesa condivisa …",
