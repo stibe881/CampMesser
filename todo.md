@@ -8,8 +8,7 @@
 - [x] Wetter: 48-h-Niederschlagsgrafik (Menge + Wahrscheinlichkeit, zwei Achsen)
 - [x] Unwetter-Push: Web Push (VAPID) für gespeicherte Zeltplätze – Opt-in bei den Favoriten, Tabelle pushSubscriptions (Migration 0015), Check-Endpoint /api/push/check für konsoleH-Cron, SW-Push-Handler; Doku in DEPLOYMENT-HETZNER.md
 - [x] Accessibility: 3 axe-core-Checks (WCAG 2A/2AA) in der CI; gefundene Verstösse behoben (Zoom-Sperre entfernt, Kontrast Erste-Hilfe-Badge)
-- [ ] Mehrsprachigkeit DE/FR/IT/EN – IN ARBEIT: Infrastruktur fertig (shared/i18n.ts, LanguageProvider mit Sync, Sprachwahl im Header, Wörterbücher de/fr/it/en typgeprüft, AppShell umgestellt); Rest gemäss I18N-STATUS.md (alle Seiten + alle Inhalts-Daten)
-
+- [x] Mehrsprachigkeit DE/FR/IT/EN – komplett: Infrastruktur (shared/i18n.ts, LanguageProvider mit Sync, Sprachwahl im Header), alle Seiten über typgeprüfte Wörterbücher de/fr/it/en, alle Inhalts-Daten als L4, shared-Funktionen mit lang-Parameter, Datums-/Zahlformate via LOCALE_TAGS; Wörterbuch-Strukturtest in server/i18n.test.ts
 
 ## Erweiterungen (Nutzerwunsch 01.08.2026, Runde 7)
 

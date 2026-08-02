@@ -306,7 +306,7 @@ function SpotMapPicker({
 
 /** Opt-in für Unwetter-Push: warnt bei Sturm/Gewitter an gespeicherten Plätzen. */
 function PushOptIn({ hasSpots }: { hasSpots: boolean }) {
-  const t = useT();
+  const { lang, t } = useI18n();
   const vapidQuery = trpc.push.vapidKey.useQuery(undefined, {
     staleTime: Infinity,
   });
@@ -334,7 +334,7 @@ function PushOptIn({ hasSpots }: { hasSpots: boolean }) {
     setBusy(true);
     try {
       if (next) {
-        const sub = await subscribeBrowser(vapidQuery.data!.publicKey!);
+        const sub = await subscribeBrowser(vapidQuery.data!.publicKey!, lang);
         await subscribeMutation.mutateAsync(sub);
         setEnabled(true);
         toast.success(t.spots.pushEnabled);

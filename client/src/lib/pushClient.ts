@@ -2,6 +2,23 @@
  * Web-Push im Browser: Abo anlegen/lösen für Unwetter-Warnungen.
  * Reine Browser-Helfer – die Server-Seite verwaltet der push-Router.
  */
+import { l4, pick, type Language } from "@shared/i18n";
+
+// Fehlertexte landen via error.message direkt im Toast – deshalb L4.
+const ERRORS = {
+  notAllowed: l4(
+    "Benachrichtigungen wurden nicht erlaubt.",
+    "Les notifications n'ont pas été autorisées.",
+    "Le notifiche non sono state autorizzate.",
+    "Notifications were not allowed."
+  ),
+  unreadable: l4(
+    "Push-Abo konnte nicht gelesen werden.",
+    "L'abonnement push n'a pas pu être lu.",
+    "Impossibile leggere l'abbonamento push.",
+    "Push subscription could not be read."
+  ),
+};
 
 export function pushSupported(): boolean {
   return (
@@ -47,11 +64,12 @@ export async function getExistingSubscription(): Promise<BrowserSubscription | n
 
 /** Berechtigung anfragen und Push-Abo im Browser anlegen. */
 export async function subscribeBrowser(
-  vapidPublicKey: string
+  vapidPublicKey: string,
+  lang: Language = "de"
 ): Promise<BrowserSubscription> {
   const permission = await Notification.requestPermission();
   if (permission !== "granted") {
-    throw new Error("Benachrichtigungen wurden nicht erlaubt.");
+    throw new Error(pick(ERRORS.notAllowed, lang));
   }
   const registration = await navigator.serviceWorker.ready;
   const sub = await registration.pushManager.subscribe({
@@ -62,7 +80,7 @@ export async function subscribeBrowser(
   });
   const json = sub.toJSON();
   if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
-    throw new Error("Push-Abo konnte nicht gelesen werden.");
+    throw new Error(pick(ERRORS.unreadable, lang));
   }
   return {
     endpoint: json.endpoint,
