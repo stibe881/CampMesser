@@ -1631,6 +1631,32 @@ export const fr: Translation = {
     bookPrefix: "Tu trouves toutes les instructions dans le ",
     bookLink: "livre de recettes Campfire",
     bookSuffix: ".",
+    templateSaveButton: "Enregistrer comme modèle",
+    templateLoadButton: "Charger un modèle",
+    templateSaveTitle: "Enregistrer le contenu actuel comme modèle",
+    templateSaveDesc: (n: number) =>
+      `${n === 1 ? "1 entrée sera enregistrée" : `${n} entrées seront enregistrées`} – pour les provisions avec DLC, nous retenons la durée restante en jours.`,
+    templateNameLabel: "Nom du modèle",
+    templateNamePlaceholder: "p. ex. remplissage type week-end",
+    templateSaveConfirm: "Enregistrer le modèle",
+    templateSaved: "Modèle enregistré – disponible via « Charger un modèle »",
+    templateSaveFailed: "Le modèle n'a pas pu être enregistré",
+    templateLoadTitle: "Charger un modèle",
+    templateLoadDesc:
+      "Les entrées sont ajoutées à la glacière. Les durées restantes enregistrées sont converties en DLC à partir d'aujourd'hui ; les entrées du même nom déjà présentes sont ignorées.",
+    templateEmpty: "Aucun modèle enregistré pour l'instant.",
+    templateItemCount: (n: number) => (n === 1 ? "1 entrée" : `${n} entrées`),
+    templateApply: "Charger",
+    templateApplied: (added: number, skipped: number) =>
+      `${added === 1 ? "1 entrée ajoutée" : `${added} entrées ajoutées`}${
+        skipped > 0 ? `, ${skipped} déjà présente(s) – ignorée(s)` : ""
+      }`,
+    templateApplyFailed: "Le modèle n'a pas pu être chargé",
+    templateDeleted: "Modèle supprimé",
+    templateDeleteFailed: "Le modèle n'a pas pu être supprimé",
+    templateDeleteAria: (name: string) => `Supprimer le modèle ${name}`,
+    templateDeleteConfirm: (name: string) =>
+      `Vraiment supprimer le modèle « ${name} » ?`,
   },
   shopping: {
     title: "Liste de courses",

@@ -9,9 +9,11 @@ import {
   InsertCustomQuiz,
   InsertCustomRecipe,
   foodItems,
+  foodTemplates,
   homeLocations,
   InsertCampSpot,
   InsertFoodItem,
+  InsertFoodTemplate,
   InsertHomeLocation,
   InsertInventoryItem,
   InsertPackItem,
@@ -402,6 +404,46 @@ export async function deleteFoodItem(id: number, userId: number) {
   await db
     .delete(foodItems)
     .where(and(eq(foodItems.id, id), eq(foodItems.userId, userId)));
+}
+
+// ── Kühlbox-Vorlagen («Standardfüllung») ──
+export async function getFoodTemplates(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(foodTemplates)
+    .where(eq(foodTemplates.userId, userId))
+    .orderBy(desc(foodTemplates.id));
+}
+
+export async function getFoodTemplate(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(foodTemplates)
+    .where(and(eq(foodTemplates.id, id), eq(foodTemplates.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+export async function createFoodTemplate(data: InsertFoodTemplate) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(foodTemplates).values(data);
+  return result.insertId;
+}
+
+export async function deleteFoodTemplate(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(foodTemplates)
+    .where(and(eq(foodTemplates.id, id), eq(foodTemplates.userId, userId)));
+}
+
+/** Mehrere Kühlbox-Einträge auf einmal anlegen (Vorlage laden). */
+export async function addFoodItems(items: InsertFoodItem[]) {
+  const db = requireDb(await getDb());
+  if (items.length === 0) return;
+  await db.insert(foodItems).values(items);
 }
 
 // ── Einkaufsliste ──

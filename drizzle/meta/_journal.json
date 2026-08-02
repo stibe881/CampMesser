@@ -246,6 +246,13 @@
       "when": 1785678553748,
       "tag": "0034_awesome_celestials",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "5",
+      "when": 1785679391413,
+      "tag": "0035_abnormal_guardian",
+      "breakpoints": true
     }
   ]
 }

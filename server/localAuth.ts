@@ -142,6 +142,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     inventoryItems,
     powerConsumers,
     foodItems,
+    foodTemplates,
     campSpots,
     homeLocations,
     spotPhotos,
@@ -187,6 +188,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(inventoryItems).where(eq(inventoryItems.userId, userId));
   await db.delete(powerConsumers).where(eq(powerConsumers.userId, userId));
   await db.delete(foodItems).where(eq(foodItems.userId, userId));
+  await db.delete(foodTemplates).where(eq(foodTemplates.userId, userId));
   await db.delete(homeLocations).where(eq(homeLocations.userId, userId));
   await db.delete(spotPhotos).where(eq(spotPhotos.userId, userId));
   await db.delete(campSpots).where(eq(campSpots.userId, userId));

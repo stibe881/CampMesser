@@ -1576,6 +1576,32 @@ export const en: Translation = {
     bookPrefix: "You'll find all the instructions in the ",
     bookLink: "Campfire recipe book",
     bookSuffix: ".",
+    templateSaveButton: "Save as template",
+    templateLoadButton: "Load template",
+    templateSaveTitle: "Save current contents as a template",
+    templateSaveDesc: (n: number) =>
+      `${n === 1 ? "1 item" : `${n} items`} will be saved – for supplies with a best-before date we remember the remaining days.`,
+    templateNameLabel: "Template name",
+    templateNamePlaceholder: "e.g. weekend standard fill",
+    templateSaveConfirm: "Save template",
+    templateSaved: "Template saved – available via “Load template”",
+    templateSaveFailed: "The template could not be saved",
+    templateLoadTitle: "Load template",
+    templateLoadDesc:
+      "The items are added to the cool box. Saved remaining days are converted into a best-before date starting today; existing items with the same name are skipped.",
+    templateEmpty: "No templates saved yet.",
+    templateItemCount: (n: number) => (n === 1 ? "1 item" : `${n} items`),
+    templateApply: "Load",
+    templateApplied: (added: number, skipped: number) =>
+      `${added === 1 ? "1 item added" : `${added} items added`}${
+        skipped > 0 ? `, ${skipped} already there – skipped` : ""
+      }`,
+    templateApplyFailed: "The template could not be loaded",
+    templateDeleted: "Template deleted",
+    templateDeleteFailed: "The template could not be deleted",
+    templateDeleteAria: (name: string) => `Delete template ${name}`,
+    templateDeleteConfirm: (name: string) =>
+      `Really delete template “${name}”?`,
   },
   shopping: {
     title: "Shopping list",

@@ -1631,6 +1631,32 @@ export const de = {
     bookPrefix: "Alle Anleitungen findest du im ",
     bookLink: "Campfire-Rezeptbuch",
     bookSuffix: ".",
+    templateSaveButton: "Als Vorlage speichern",
+    templateLoadButton: "Vorlage laden",
+    templateSaveTitle: "Aktuelle Füllung als Vorlage speichern",
+    templateSaveDesc: (n: number) =>
+      `${n === 1 ? "1 Eintrag wird" : `${n} Einträge werden`} gespeichert – bei Vorräten mit MHD merken wir uns die Restlaufzeit in Tagen.`,
+    templateNameLabel: "Name der Vorlage",
+    templateNamePlaceholder: "z. B. Wochenend-Standardfüllung",
+    templateSaveConfirm: "Vorlage speichern",
+    templateSaved: "Vorlage gespeichert – über «Vorlage laden» abrufbar",
+    templateSaveFailed: "Vorlage konnte nicht gespeichert werden",
+    templateLoadTitle: "Vorlage laden",
+    templateLoadDesc:
+      "Die Einträge werden in die Kühlbox eingefügt. Gespeicherte Restlaufzeiten werden ab heute in ein MHD umgerechnet; bereits vorhandene gleichnamige Einträge werden übersprungen.",
+    templateEmpty: "Noch keine Vorlagen gespeichert.",
+    templateItemCount: (n: number) => (n === 1 ? "1 Eintrag" : `${n} Einträge`),
+    templateApply: "Laden",
+    templateApplied: (added: number, skipped: number) =>
+      `${added === 1 ? "1 Eintrag" : `${added} Einträge`} eingefügt${
+        skipped > 0 ? `, ${skipped} schon vorhanden – übersprungen` : ""
+      }`,
+    templateApplyFailed: "Vorlage konnte nicht geladen werden",
+    templateDeleted: "Vorlage gelöscht",
+    templateDeleteFailed: "Vorlage konnte nicht gelöscht werden",
+    templateDeleteAria: (name: string) => `Vorlage ${name} löschen`,
+    templateDeleteConfirm: (name: string) =>
+      `Vorlage «${name}» wirklich löschen?`,
   },
   shopping: {
     title: "Einkaufsliste",

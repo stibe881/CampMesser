@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import {
+  BookmarkPlus,
   ChefHat,
+  FolderOpen,
   Loader2,
   Plus,
   Refrigerator,
@@ -15,6 +17,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +37,7 @@ import { recipes } from "@/data/recipes";
 import { customRecipeToRecipe } from "@/lib/customRecipesClient";
 import { RECIPE_METHOD_LABELS } from "@shared/customRecipes";
 import { expiryInfo, expirySortKey, type ExpiryState } from "@shared/food";
+import type { FoodTemplateItem } from "@shared/foodTemplates";
 import { pick } from "@shared/i18n";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -108,6 +119,51 @@ export default function FoodPage() {
     },
     onError: () => toast.error(t.food.addToShoppingFailed),
   });
+
+  // ── Kühlbox-Vorlagen («Standardfüllung») ──
+  const templatesQuery = trpc.foodTemplates.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [loadTemplateOpen, setLoadTemplateOpen] = useState(false);
+  const createTemplateMutation = trpc.foodTemplates.create.useMutation({
+    onSuccess: () => {
+      utils.foodTemplates.list.invalidate();
+      setSaveTemplateOpen(false);
+      setTemplateName("");
+      toast.success(t.food.templateSaved);
+    },
+    onError: () => toast.error(t.food.templateSaveFailed),
+  });
+  const applyTemplateMutation = trpc.foodTemplates.applyTemplate.useMutation({
+    onSuccess: result => {
+      utils.food.list.invalidate();
+      setLoadTemplateOpen(false);
+      toast.success(t.food.templateApplied(result.added, result.skipped));
+    },
+    onError: () => toast.error(t.food.templateApplyFailed),
+  });
+  const removeTemplateMutation = trpc.foodTemplates.remove.useMutation({
+    onSuccess: () => {
+      utils.foodTemplates.list.invalidate();
+      toast.success(t.food.templateDeleted);
+    },
+    onError: () => toast.error(t.food.templateDeleteFailed),
+  });
+
+  /** Aktuelle Füllung einfrieren: Name + Restlaufzeit in Tagen (falls MHD gesetzt). */
+  const saveCurrentAsTemplate = () => {
+    if (!templateName.trim()) return;
+    const items: FoodTemplateItem[] = (query.data ?? []).map(item => {
+      const info = expiryInfo(item.expiryDate, today, lang);
+      return info
+        ? { name: item.name, expiryDays: Math.max(0, info.daysLeft) }
+        : { name: item.name };
+    });
+    if (items.length === 0) return;
+    createTemplateMutation.mutate({ name: templateName.trim(), items });
+  };
 
   const foodNames = useMemo(
     () => (query.data ?? []).map(f => f.name),
@@ -206,7 +262,143 @@ export default function FoodPage() {
           <Plus className="h-4 w-4" aria-hidden="true" />
         </Button>
       </form>
-      <p className="mb-5 text-xs text-muted-foreground">{t.food.dateHint}</p>
+      <p className="mb-3 text-xs text-muted-foreground">{t.food.dateHint}</p>
+
+      {/* Vorlagen: aktuelle Füllung einfrieren bzw. gespeicherte laden */}
+      {(items.length > 0 || (templatesQuery.data ?? []).length > 0) && (
+        <div className="mb-5 flex flex-wrap gap-2">
+          {items.length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setSaveTemplateOpen(true)}
+            >
+              <BookmarkPlus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.food.templateSaveButton}
+            </Button>
+          )}
+          {(templatesQuery.data ?? []).length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setLoadTemplateOpen(true)}
+            >
+              <FolderOpen className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.food.templateLoadButton}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Dialog: aktuelle Füllung als Vorlage speichern */}
+      <Dialog open={saveTemplateOpen} onOpenChange={setSaveTemplateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.food.templateSaveTitle}</DialogTitle>
+            <DialogDescription>
+              {t.food.templateSaveDesc(items.length)}
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            className="grid gap-3"
+            onSubmit={e => {
+              e.preventDefault();
+              saveCurrentAsTemplate();
+            }}
+          >
+            <div>
+              <Label htmlFor="food-template-name">
+                {t.food.templateNameLabel}
+              </Label>
+              <Input
+                id="food-template-name"
+                className="mt-1.5"
+                value={templateName}
+                onChange={e => setTemplateName(e.target.value)}
+                placeholder={t.food.templateNamePlaceholder}
+                maxLength={120}
+                autoFocus
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={
+                !templateName.trim() || createTemplateMutation.isPending
+              }
+            >
+              {createTemplateMutation.isPending && (
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              )}
+              {t.food.templateSaveConfirm}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: Vorlage laden oder löschen */}
+      <Dialog open={loadTemplateOpen} onOpenChange={setLoadTemplateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.food.templateLoadTitle}</DialogTitle>
+            <DialogDescription>{t.food.templateLoadDesc}</DialogDescription>
+          </DialogHeader>
+          {(templatesQuery.data ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {t.food.templateEmpty}
+            </p>
+          ) : (
+            <ul className="grid gap-2">
+              {(templatesQuery.data ?? []).map(template => (
+                <li
+                  key={template.id}
+                  className="flex items-center gap-2 rounded-lg border border-border px-3 py-2"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">
+                      {template.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.food.templateItemCount(template.items.length)}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={applyTemplateMutation.isPending}
+                    onClick={() =>
+                      applyTemplateMutation.mutate({
+                        templateId: template.id,
+                        today,
+                      })
+                    }
+                  >
+                    {t.food.templateApply}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-destructive"
+                    aria-label={t.food.templateDeleteAria(template.name)}
+                    disabled={removeTemplateMutation.isPending}
+                    onClick={() => {
+                      if (confirm(t.food.templateDeleteConfirm(template.name)))
+                        removeTemplateMutation.mutate({ id: template.id });
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {query.isLoading ? (
         <div className="flex justify-center py-8">

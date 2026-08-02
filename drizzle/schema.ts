@@ -195,6 +195,29 @@ export const foodItems = mysqlTable(
 export type FoodItem = typeof foodItems.$inferSelect;
 export type InsertFoodItem = typeof foodItems.$inferInsert;
 
+/**
+ * Kühlbox-Vorlagen («Standardfüllung»): eine gespeicherte Füllung als
+ * wiederverwendbare Vorlage. Die Einträge liegen als JSON-Array von
+ * {name, expiryDays?} im Textfeld (gleiches Muster wie
+ * packTemplatesCustom.itemsJson) – expiryDays ist die Restlaufzeit in Tagen
+ * und wird beim Laden in ein konkretes MHD (heute + X Tage) umgerechnet.
+ */
+export const foodTemplates = mysqlTable(
+  "foodTemplates",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 120 }).notNull(),
+    /** Einträge als JSON-Array von {name, expiryDays?} */
+    itemsJson: text("itemsJson").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("foodTemplates_userId").on(table.userId)]
+);
+
+export type FoodTemplate = typeof foodTemplates.$inferSelect;
+export type InsertFoodTemplate = typeof foodTemplates.$inferInsert;
+
 /** Reise-Tagebuch: ein Eintrag pro Camping-Aufenthalt, optional mit Zeltplatz-Favorit verknüpft. */
 export const tripLogs = mysqlTable(
   "tripLogs",

@@ -8,8 +8,8 @@ import type { TrpcContext } from "./_core/context";
  * Migrationen). Lokal ohne Datenbank wird die Datei übersprungen.
  * Ablauf: Registrieren → Anmelden → Daten quer durch alle Nutzer-Tabellen
  * anlegen (Packliste, Einstellung, Zeltplatz mit Foto, Trip mit Foto und Menüplan,
- * Rezept mit Foto, Schnitzeljagd, Quiz, Einkaufsliste, Kühlbox, Push-Abo,
- * Heim-Standort)
+ * Rezept mit Foto, Schnitzeljagd, Quiz, Einkaufsliste, Kühlbox samt Vorlage,
+ * Push-Abo, Heim-Standort)
  * → Konto löschen → prüfen, dass die Lösch-Kaskade alle Tabellen und
  * die Upload-Dateien erfasst hat.
  */
@@ -164,6 +164,22 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     });
     await authed.shopping.add({ name: "CI-Zutat" });
     await authed.food.add({ name: "CI-Vorrat" });
+    // Kühlbox-Vorlage anlegen und laden: vorhandener gleichnamiger Eintrag
+    // wird übersprungen, der neue mit MHD (heute + 5 Tage) eingefügt
+    const { templateId: foodTemplateId } = await authed.foodTemplates.create({
+      name: "CI-Standardfüllung",
+      items: [{ name: "CI-Vorrat" }, { name: "CI-Milch", expiryDays: 5 }],
+    });
+    expect(foodTemplateId).toBeTruthy();
+    const applied = await authed.foodTemplates.applyTemplate({
+      templateId: foodTemplateId,
+      today: "2026-08-02",
+    });
+    expect(applied).toEqual({ added: 1, skipped: 1 });
+    const foodAfterApply = await authed.food.list();
+    expect(foodAfterApply.find(i => i.name === "CI-Milch")?.expiryDate).toBe(
+      "2026-08-07"
+    );
     await authed.home.set({
       name: "CI-Zuhause",
       latitude: 46.95,
@@ -254,6 +270,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.foodItems)
         .where(eq(schema.foodItems.userId, uid)),
+      dbc
+        .select()
+        .from(schema.foodTemplates)
+        .where(eq(schema.foodTemplates.userId, uid)),
       dbc
         .select()
         .from(schema.homeLocations)

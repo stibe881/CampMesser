@@ -18,6 +18,13 @@ import {
   MAX_QUIZ_QUESTIONS,
   MIN_QUIZ_OPTIONS,
 } from "@shared/quizzes";
+import {
+  expiryDateFromDays,
+  MAX_EXPIRY_DAYS,
+  MAX_FOOD_ITEM_NAME_LENGTH,
+  MAX_FOOD_TEMPLATE_ITEMS,
+  parseFoodTemplateItems,
+} from "@shared/foodTemplates";
 import { MEALS } from "@shared/menuPlan";
 import { SHOPPING_CATEGORIES } from "@shared/shopping";
 import {
@@ -1005,6 +1012,100 @@ export const appRouter = router({
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteFoodItem(input.id, ctx.user.id)),
+  }),
+  foodTemplates: router({
+    /** Eigene Kühlbox-Vorlagen samt geparsten Einträgen (neuste zuerst). */
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const rows = await db.getFoodTemplates(ctx.user.id);
+      return rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        items: parseFoodTemplateItems(row.itemsJson),
+        createdAt: row.createdAt,
+      }));
+    }),
+    /** Aktuelle Kühlbox-Füllung als Vorlage einfrieren (Name + Restlaufzeit in Tagen). */
+    create: protectedProcedure
+      .input(
+        z.object({
+          name: z.string().trim().min(1).max(120),
+          items: z
+            .array(
+              z.object({
+                name: z.string().trim().min(1).max(MAX_FOOD_ITEM_NAME_LENGTH),
+                expiryDays: z
+                  .number()
+                  .int()
+                  .min(0)
+                  .max(MAX_EXPIRY_DAYS)
+                  .optional(),
+              })
+            )
+            .min(1)
+            .max(MAX_FOOD_TEMPLATE_ITEMS),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const templateId = await db.createFoodTemplate({
+          userId: ctx.user.id,
+          name: input.name,
+          itemsJson: JSON.stringify(input.items),
+        });
+        return { templateId };
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ ctx, input }) =>
+        db.deleteFoodTemplate(input.id, ctx.user.id)
+      ),
+    /**
+     * Vorlage in die Kühlbox laden: expiryDays wird beim Einfügen in ein
+     * konkretes MHD (heute + X Tage) umgerechnet; gleichnamige vorhandene
+     * Einträge (case-insensitiv, getrimmt) werden übersprungen.
+     */
+    applyTemplate: protectedProcedure
+      .input(
+        z.object({
+          templateId: z.number(),
+          /** «Heute» aus Sicht des Geräts – vermeidet Zeitzonen-Sprünge. */
+          today: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const template = await db.getFoodTemplate(
+          input.templateId,
+          ctx.user.id
+        );
+        if (!template)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Vorlage nicht gefunden",
+          });
+        const items = parseFoodTemplateItems(template.itemsJson);
+        const existing = await db.getFoodItems(ctx.user.id);
+        const existingNames = new Set(
+          existing.map(i => i.name.trim().toLowerCase())
+        );
+        const toInsert: typeof items = [];
+        let skipped = 0;
+        for (const item of items) {
+          const key = item.name.trim().toLowerCase();
+          if (existingNames.has(key)) {
+            skipped += 1;
+            continue;
+          }
+          existingNames.add(key);
+          toInsert.push(item);
+        }
+        await db.addFoodItems(
+          toInsert.map(item => ({
+            userId: ctx.user.id,
+            name: item.name,
+            expiryDate: expiryDateFromDays(input.today, item.expiryDays),
+          }))
+        );
+        return { added: toInsert.length, skipped };
+      }),
   }),
   home: router({
     /** Heim-Standort der Nutzer*in (null = keiner gesetzt). */

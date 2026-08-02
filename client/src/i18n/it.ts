@@ -1614,6 +1614,32 @@ export const it: Translation = {
     bookPrefix: "Trovi tutte le istruzioni nel ",
     bookLink: "ricettario Campfire",
     bookSuffix: ".",
+    templateSaveButton: "Salva come modello",
+    templateLoadButton: "Carica modello",
+    templateSaveTitle: "Salva il contenuto attuale come modello",
+    templateSaveDesc: (n: number) =>
+      `${n === 1 ? "Verrà salvata 1 voce" : `Verranno salvate ${n} voci`} – per le scorte con TMC memorizziamo i giorni rimanenti.`,
+    templateNameLabel: "Nome del modello",
+    templateNamePlaceholder: "ad es. dotazione weekend",
+    templateSaveConfirm: "Salva modello",
+    templateSaved: "Modello salvato – disponibile tramite «Carica modello»",
+    templateSaveFailed: "Il modello non è stato salvato",
+    templateLoadTitle: "Carica modello",
+    templateLoadDesc:
+      "Le voci vengono aggiunte al frigo box. I giorni rimanenti salvati vengono convertiti in un TMC a partire da oggi; le voci omonime già presenti vengono saltate.",
+    templateEmpty: "Nessun modello salvato finora.",
+    templateItemCount: (n: number) => (n === 1 ? "1 voce" : `${n} voci`),
+    templateApply: "Carica",
+    templateApplied: (added: number, skipped: number) =>
+      `${added === 1 ? "1 voce aggiunta" : `${added} voci aggiunte`}${
+        skipped > 0 ? `, ${skipped} già presente/i – saltata/e` : ""
+      }`,
+    templateApplyFailed: "Il modello non è stato caricato",
+    templateDeleted: "Modello eliminato",
+    templateDeleteFailed: "Il modello non è stato eliminato",
+    templateDeleteAria: (name: string) => `Elimina il modello ${name}`,
+    templateDeleteConfirm: (name: string) =>
+      `Eliminare davvero il modello «${name}»?`,
   },
   shopping: {
     title: "Lista della spesa",
