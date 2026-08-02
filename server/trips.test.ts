@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   computeTripStats,
   computeYearReview,
+  currentTripDay,
   daysUntilTrip,
   isUpcomingTrip,
   nightsByYear,
@@ -223,5 +224,52 @@ describe("isUpcomingTrip / daysUntilTrip", () => {
     expect(daysUntilTrip("2026-08-12", "2026-08-01")).toBe(11);
     expect(daysUntilTrip("2026-08-01", "2026-08-01")).toBe(0);
     expect(daysUntilTrip("2026-09-01", "2026-08-30")).toBe(2);
+  });
+});
+
+describe("currentTripDay", () => {
+  const trip = { startDate: "2026-08-10", endDate: "2026-08-14" };
+
+  it("liefert Tag 1 am Anreisetag (erste Grenze)", () => {
+    expect(currentTripDay(trip, "2026-08-10")).toEqual({ day: 1, total: 5 });
+  });
+
+  it("liefert den letzten Tag am Abreisetag (zweite Grenze)", () => {
+    expect(currentTripDay(trip, "2026-08-14")).toEqual({ day: 5, total: 5 });
+  });
+
+  it("zählt Tage in der Mitte des Aufenthalts", () => {
+    expect(currentTripDay(trip, "2026-08-12")).toEqual({ day: 3, total: 5 });
+  });
+
+  it("liefert null vor der Anreise und nach der Abreise", () => {
+    expect(currentTripDay(trip, "2026-08-09")).toBeNull();
+    expect(currentTripDay(trip, "2026-08-15")).toBeNull();
+  });
+
+  it("behandelt einen Tagesausflug (Anreise = Abreise) als Tag 1 von 1", () => {
+    const dayTrip = { startDate: "2026-08-10", endDate: "2026-08-10" };
+    expect(currentTripDay(dayTrip, "2026-08-10")).toEqual({ day: 1, total: 1 });
+  });
+
+  it("zählt über Monatsgrenzen korrekt", () => {
+    const trip2 = { startDate: "2026-07-30", endDate: "2026-08-02" };
+    expect(currentTripDay(trip2, "2026-08-01")).toEqual({ day: 3, total: 4 });
+  });
+
+  it("liefert null bei ungültigen oder verdrehten Daten", () => {
+    expect(
+      currentTripDay(
+        { startDate: "kaputt", endDate: "2026-08-14" },
+        "2026-08-12"
+      )
+    ).toBeNull();
+    expect(
+      currentTripDay(
+        { startDate: "2026-08-14", endDate: "2026-08-10" },
+        "2026-08-12"
+      )
+    ).toBeNull();
+    expect(currentTripDay(trip, "kaputt")).toBeNull();
   });
 });

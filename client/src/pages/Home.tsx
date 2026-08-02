@@ -55,10 +55,17 @@ import {
   sanitizeTargets,
   type TentFinderTarget,
 } from "@/lib/tentFinderTargets";
-import { daysUntilTrip, isUpcomingTrip } from "@shared/trips";
+import { currentTripDay, daysUntilTrip, isUpcomingTrip } from "@shared/trips";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { CalendarClock, ListChecks } from "lucide-react";
+import {
+  CalendarClock,
+  ListChecks,
+  MapPin,
+  ShoppingCart,
+  Tent,
+  UtensilsCrossed,
+} from "lucide-react";
 
 const ORDER_KEY = "campmesser.moduleOrder";
 const HIDDEN_KEY = "campmesser.hiddenModules";
@@ -116,7 +123,71 @@ interface HomeWeather {
   alert: { title: string; severity: "info" | "warnung" | "gefahr" } | null;
 }
 
-/** Countdown zum nächsten geplanten Trip aus dem Reise-Tagebuch. */
+/**
+ * Kompaktes Wetter am Ort des laufenden Aufenthalts: kleiner eigener Abruf
+ * der aktuellen Lage (Open-Meteo) an den Zeltplatz-Koordinaten – bewusst
+ * getrennt von useHomeWeather, das den Geräte-Standort nutzt. Ohne Netz
+ * bleibt die Zeile einfach weg.
+ */
+function CurrentTripWeather({
+  latitude,
+  longitude,
+}: {
+  latitude: number;
+  longitude: number;
+}) {
+  const { lang } = useI18n();
+  const [weather, setWeather] = useState<{
+    temperatureC: number;
+    label: string;
+  } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const params = new URLSearchParams({
+      latitude: latitude.toFixed(4),
+      longitude: longitude.toFixed(4),
+      timezone: "auto",
+      forecast_days: "1",
+      current: "temperature_2m,weather_code",
+    });
+    fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`)
+      .then(res =>
+        res.ok ? res.json() : Promise.reject(new Error("weather unavailable"))
+      )
+      .then(json => {
+        if (cancelled) return;
+        const temp = json?.current?.temperature_2m;
+        const code = json?.current?.weather_code;
+        if (typeof temp !== "number" || typeof code !== "number") return;
+        setWeather({
+          temperatureC: temp,
+          label: describeWeatherCode(code, lang).label,
+        });
+      })
+      .catch(() => {
+        // Wetterdienst nicht erreichbar – Zeile still weglassen
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [latitude, longitude, lang]);
+
+  if (!weather) return null;
+  return (
+    <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+      <CloudSunRain className="h-3 w-3 shrink-0" aria-hidden="true" />
+      {Math.round(weather.temperatureC)}° · {weather.label}
+    </span>
+  );
+}
+
+/**
+ * Trip-Widget der Startseite: Läuft HEUTE ein Aufenthalt (Anreise ≤ heute ≤
+ * Abreise), zeigt es «Du bist in <Ort> – Tag X von Y» mit kompaktem Wetter
+ * vor Ort und Schnellzugriffen (Menüplan, Platz-Dossier, Einkaufsliste) –
+ * sonst wie bisher den Countdown zum nächsten geplanten Trip.
+ */
 function NextTripWidget() {
   const t = useT();
   const { isAuthenticated } = useAuth();
@@ -129,21 +200,100 @@ function NextTripWidget() {
     staleTime: 60_000,
   });
   const today = new Date().toISOString().slice(0, 10);
+  // Laufender Aufenthalt: heute innerhalb des Zeitraums – bei Überlappung
+  // gewinnt der zuletzt angetretene.
+  const current = (tripsQuery.data ?? [])
+    .filter(trip => currentTripDay(trip, today) !== null)
+    .sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
   const next = (tripsQuery.data ?? [])
-    .filter(t => isUpcomingTrip(t.startDate, today))
+    .filter(trip => isUpcomingTrip(trip.startDate, today))
     .sort((a, b) => a.startDate.localeCompare(b.startDate))[0];
   const progress = trpc.packing.progress.useQuery(
     { listId: next?.packListId ?? 0 },
-    { enabled: Boolean(next?.packListId) }
+    { enabled: Boolean(next?.packListId) && !current }
   );
+
+  const tripPlace = (trip: NonNullable<typeof next>): string =>
+    trip.title ||
+    (trip.spotId != null
+      ? (spotsQuery.data?.find(s => s.id === trip.spotId)?.name ?? "")
+      : (trip.location ?? "")) ||
+    t.home.nextTripFallback;
+
+  if (current) {
+    const day = currentTripDay(current, today);
+    const place = tripPlace(current);
+    const spot =
+      current.spotId != null
+        ? spotsQuery.data?.find(s => s.id === current.spotId)
+        : undefined;
+    const linkClass =
+      "inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium shadow-sm transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.98]";
+    return (
+      <div
+        className="mb-6 rounded-xl border border-primary/40 bg-accent/30 p-4 shadow-sm"
+        aria-label={t.home.currentTripAria(place)}
+      >
+        <div className="flex items-center gap-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Tent className="h-5.5 w-5.5" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="flex flex-wrap items-baseline gap-x-2">
+              <span className="font-semibold">
+                {t.home.currentTripTitle(place)}
+              </span>
+              {day && (
+                <span className="text-sm font-semibold text-primary">
+                  {t.home.currentTripDay(day.day, day.total)}
+                </span>
+              )}
+            </span>
+            {spot && (
+              <CurrentTripWeather
+                latitude={spot.latitude}
+                longitude={spot.longitude}
+              />
+            )}
+          </span>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link
+            href={`/menueplan/${current.id}`}
+            className={linkClass}
+            aria-label={t.home.currentTripMenuAria(place)}
+          >
+            <UtensilsCrossed
+              className="h-3.5 w-3.5 text-primary"
+              aria-hidden="true"
+            />
+            {t.home.currentTripMenuLink}
+          </Link>
+          {current.spotId != null && (
+            <Link
+              href={`/zeltplaetze/${current.spotId}`}
+              className={linkClass}
+              aria-label={t.home.currentTripSpotAria(place)}
+            >
+              <MapPin className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+              {t.home.currentTripSpotLink}
+            </Link>
+          )}
+          <Link href="/einkauf" className={linkClass}>
+            <ShoppingCart
+              className="h-3.5 w-3.5 text-primary"
+              aria-hidden="true"
+            />
+            {t.home.currentTripShoppingLink}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (!next) return null;
 
-  const place =
-    next.title ||
-    (next.spotId != null
-      ? (spotsQuery.data?.find(s => s.id === next.spotId)?.name ?? "")
-      : (next.location ?? "")) ||
-    t.home.nextTripFallback;
+  const place = tripPlace(next);
   const days = daysUntilTrip(next.startDate, today);
   const packed = progress.data;
   const pct =

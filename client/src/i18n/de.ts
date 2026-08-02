@@ -64,6 +64,15 @@ export const de = {
     tripPacked: (name: string, checked: number, total: number, pct: number) =>
       `${name}: ${checked} von ${total} gepackt (${pct} %)`,
     tripPlannedNote: "Geplanter Aufenthalt in «Meine Reisen»",
+    currentTripAria: (place: string) => `Laufender Aufenthalt in ${place}`,
+    currentTripTitle: (place: string) => `Du bist in ${place}`,
+    currentTripDay: (day: number, total: number) => `Tag ${day} von ${total}`,
+    currentTripMenuLink: "Menüplan",
+    currentTripMenuAria: (place: string) =>
+      `Menüplan des Aufenthalts in ${place} öffnen`,
+    currentTripSpotLink: "Platz-Dossier",
+    currentTripSpotAria: (place: string) => `Platz-Dossier zu ${place} öffnen`,
+    currentTripShoppingLink: "Einkaufsliste",
     weatherAria: (temp: number, label: string) =>
       `Aktuelles Wetter: ${temp} Grad, ${label} – zum Wetter-Modul`,
     weatherNoAlerts: "Keine Unwetterwarnungen an deinem Standort",

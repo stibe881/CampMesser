@@ -80,6 +80,26 @@ export function daysUntilTrip(startDate: string, today: string): number {
   return Math.round((start - now) / DAY_MS);
 }
 
+/**
+ * Laufender Aufenthalt: liegt `today` innerhalb des Zeitraums (Anreise ≤
+ * heute ≤ Abreise), liefert die Funktion den 1-basierten Aufenthaltstag und
+ * die Gesamtzahl der Tage («Tag X von Y»), sonst null. Ungültige Daten → null.
+ */
+export function currentTripDay(
+  trip: Pick<TripLike, "startDate" | "endDate">,
+  today: string
+): { day: number; total: number } | null {
+  const start = parseIsoDay(trip.startDate);
+  const end = parseIsoDay(trip.endDate);
+  const now = parseIsoDay(today);
+  if (start === null || end === null || now === null) return null;
+  if (end < start || now < start || now > end) return null;
+  return {
+    day: Math.round((now - start) / DAY_MS) + 1,
+    total: Math.round((end - start) / DAY_MS) + 1,
+  };
+}
+
 /** Ein Ort mit Nächte-Zahl für die Highlights des Jahresrückblicks. */
 export interface YearHighlight {
   name: string;

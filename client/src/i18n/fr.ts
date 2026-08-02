@@ -63,6 +63,15 @@ export const fr: Translation = {
     tripPacked: (name, checked, total, pct) =>
       `${name} : ${checked} sur ${total} emballés (${pct} %)`,
     tripPlannedNote: "Séjour planifié dans «Mes voyages»",
+    currentTripAria: place => `Séjour en cours à ${place}`,
+    currentTripTitle: place => `Tu es à ${place}`,
+    currentTripDay: (day, total) => `Jour ${day} sur ${total}`,
+    currentTripMenuLink: "Plan des repas",
+    currentTripMenuAria: place =>
+      `Ouvrir le plan des repas du séjour à ${place}`,
+    currentTripSpotLink: "Dossier de l'emplacement",
+    currentTripSpotAria: place => `Ouvrir le dossier de l'emplacement ${place}`,
+    currentTripShoppingLink: "Liste de courses",
     weatherAria: (temp, label) =>
       `Météo actuelle : ${temp} degrés, ${label} – vers le module météo`,
     weatherNoAlerts: "Aucune alerte d'intempéries à ton emplacement",
