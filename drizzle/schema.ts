@@ -231,6 +231,8 @@ export const pushSubscriptions = mysqlTable(
     lastAlertKey: varchar("lastAlertKey", { length: 255 }),
     /** Schlüssel der letzten MHD-Erinnerung («food:YYYY-MM-DD»): max. 1 Kühlbox-Push pro Tag */
     lastFoodKey: varchar("lastFoodKey", { length: 64 }),
+    /** Schlüssel des zuletzt gemeldeten Trip-Countdowns («trip:<tripId>»): max. 1 Erinnerung pro Trip */
+    lastTripKey: varchar("lastTripKey", { length: 64 }),
     lastNotifiedAt: timestamp("lastNotifiedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },

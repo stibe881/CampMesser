@@ -1,14 +1,22 @@
 /**
- * Web-Push für Unwetter-Warnungen an gespeicherten Zeltplätzen sowie
- * MHD-Erinnerungen für die Kühlbox (Lebensmittel, die heute oder morgen ablaufen).
+ * Web-Push für Unwetter-Warnungen an gespeicherten Zeltplätzen,
+ * MHD-Erinnerungen für die Kühlbox (Lebensmittel, die heute oder morgen ablaufen)
+ * und Trip-Countdowns (3 Tage vor der Anreise, inkl. Pack-Fortschritt).
  * Der Check läuft über /api/push/check (konsoleH-Cronjob), weil Passenger
  * den Node-Prozess bei Inaktivität schlafen legt und ein interner Scheduler
  * deshalb unzuverlässig wäre.
  */
 import { and, eq, inArray } from "drizzle-orm";
 import webpush from "web-push";
-import { campSpots, foodItems, pushSubscriptions } from "../drizzle/schema";
+import {
+  campSpots,
+  foodItems,
+  packItems,
+  pushSubscriptions,
+  tripLogs,
+} from "../drizzle/schema";
 import { expiryInfo } from "../shared/food";
+import { daysUntilTrip } from "../shared/trips";
 import { detectAlerts, type HourlyWeather } from "../shared/weather";
 import { getDb } from "./db";
 
@@ -110,6 +118,8 @@ export interface PushCheckResult {
   sent: number;
   /** Verschickte MHD-Erinnerungen (Kühlbox) */
   foodSent: number;
+  /** Verschickte Trip-Countdowns (Reise-Tagebuch) */
+  tripSent: number;
   removed: number;
 }
 
@@ -162,6 +172,72 @@ export function buildFoodAlert(
   };
 }
 
+export interface TripAlert {
+  title: string;
+  body: string;
+  /** Dedup-Schlüssel «trip:<tripId>» – pro Trip nur eine Countdown-Nachricht */
+  key: string;
+}
+
+/** Ein geplanter Aufenthalt, soweit für den Countdown-Push relevant. */
+export interface TripForAlert {
+  id: number;
+  /** Anzeigename: Titel des Eintrags, sonst Zeltplatz-Favorit bzw. Freitext-Ort */
+  name: string;
+  startDate: string;
+  packListId: number | null;
+}
+
+/** Pack-Fortschritt einer Liste (Logik analog packing.progress im Router). */
+export interface PackProgressLike {
+  total: number;
+  checked: number;
+}
+
+/** So viele Tage vor der Anreise wird spätestens erinnert. */
+const TRIP_ALERT_MAX_DAYS = 3;
+
+/**
+ * Trip-Countdown bauen: gemeldet wird der am nächsten bevorstehende Aufenthalt,
+ * sobald die Anreise 3 Tage entfernt ist. Hat der Cron diesen Zeitpunkt verpasst
+ * (Server schlief), greift die Erinnerung auch noch 2 oder 1 Tag vorher – dank
+ * Dedup über den Schlüssel «trip:<id>» aber nur bei der ersten erreichten Schwelle.
+ * Ist eine Packliste verknüpft, wird der Pack-Fortschritt (analog packing.progress)
+ * mitgeschickt. Gibt null zurück, wenn kein Aufenthalt im Fenster liegt.
+ * Reine Funktion (für Tests exportiert); `today` als ISO-Datum YYYY-MM-DD.
+ * Texte deutsch, weil der Server die Sprache der Nutzer*innen nicht kennt.
+ */
+export function buildTripAlert(
+  trips: TripForAlert[],
+  progressByList: Map<number, PackProgressLike>,
+  today: string
+): TripAlert | null {
+  const upcoming = trips
+    .map(trip => ({ trip, days: daysUntilTrip(trip.startDate, today) }))
+    .filter(x => x.days >= 1 && x.days <= TRIP_ALERT_MAX_DAYS)
+    .sort(
+      (a, b) =>
+        a.days - b.days ||
+        a.trip.startDate.localeCompare(b.trip.startDate) ||
+        a.trip.id - b.trip.id
+    );
+  const next = upcoming[0];
+  if (!next) return null;
+
+  const { trip, days } = next;
+  const title = `⛺ In ${days === 1 ? "1 Tag" : `${days} Tagen`}: ${trip.name}`;
+  const progress =
+    trip.packListId !== null ? progressByList.get(trip.packListId) : undefined;
+  const pct =
+    progress && progress.total > 0
+      ? Math.round((progress.checked / progress.total) * 100)
+      : 0;
+  const body = progress
+    ? `Packliste zu ${pct} % erledigt`
+    : "Dein Aufenthalt beginnt bald – denk ans Packen.";
+  return { title, body, key: `trip:${trip.id}` };
+}
+
 /** Heutiges Datum als ISO-String in der lokalen Serverzeit (nicht UTC). */
 function localIsoDate(now = new Date()): string {
   const y = now.getFullYear();
@@ -181,6 +257,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     spotsChecked: 0,
     sent: 0,
     foodSent: 0,
+    tripSent: 0,
     removed: 0,
   };
   if (!pushConfigured()) return result;
@@ -213,6 +290,61 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       today
     );
     if (alert) foodAlertByUser.set(userId, alert);
+  }
+
+  // Reise-Tagebuch: Trip-Countdowns pro Nutzer*in vorbereiten
+  const allTrips = await db
+    .select()
+    .from(tripLogs)
+    .where(inArray(tripLogs.userId, userIds));
+  const upcomingTrips = allTrips.filter(trip => {
+    const days = daysUntilTrip(trip.startDate, today);
+    return days >= 1 && days <= 3;
+  });
+  // Pack-Fortschritt der verknüpften Listen (Logik analog packing.progress)
+  const packListIds = Array.from(
+    new Set(
+      upcomingTrips
+        .map(trip => trip.packListId)
+        .filter((id): id is number => id !== null)
+    )
+  );
+  const progressByList = new Map<number, PackProgressLike>();
+  if (packListIds.length > 0) {
+    const items = await db
+      .select({ listId: packItems.listId, checked: packItems.checked })
+      .from(packItems)
+      .where(inArray(packItems.listId, packListIds));
+    for (const item of items) {
+      const progress = progressByList.get(item.listId) ?? {
+        total: 0,
+        checked: 0,
+      };
+      progress.total += 1;
+      if (item.checked) progress.checked += 1;
+      progressByList.set(item.listId, progress);
+    }
+  }
+  const spotNameById = new Map(spots.map(s => [s.id, s.name]));
+  const tripAlertByUser = new Map<number, TripAlert>();
+  for (const userId of userIds) {
+    const alert = buildTripAlert(
+      upcomingTrips
+        .filter(trip => trip.userId === userId)
+        .map(trip => ({
+          id: trip.id,
+          name:
+            trip.title ||
+            (trip.spotId !== null ? spotNameById.get(trip.spotId) : null) ||
+            trip.location ||
+            "Camping-Aufenthalt",
+          startDate: trip.startDate,
+          packListId: trip.packListId,
+        })),
+      progressByList,
+      today
+    );
+    if (alert) tripAlertByUser.set(userId, alert);
   }
 
   // Wetter pro gerundeter Koordinate nur einmal abrufen
@@ -315,20 +447,42 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
 
     // ── Kühlbox: MHD-Erinnerung (max. eine pro Tag und Abo) ──
     const foodAlert = foodAlertByUser.get(sub.userId);
-    if (!foodAlert || foodAlert.key === sub.lastFoodKey) continue;
-    const foodPayload = JSON.stringify({
-      title: foodAlert.title,
-      body: foodAlert.body,
-      url: "/kuehlbox",
-      // Eigener Tag, damit die Erinnerung eine Unwetter-Meldung nicht ersetzt
-      tag: "campmesser-food-expiry",
+    if (foodAlert && foodAlert.key !== sub.lastFoodKey) {
+      const foodPayload = JSON.stringify({
+        title: foodAlert.title,
+        body: foodAlert.body,
+        url: "/kuehlbox",
+        // Eigener Tag, damit die Erinnerung eine Unwetter-Meldung nicht ersetzt
+        tag: "campmesser-food-expiry",
+      });
+      const outcome = await sendTo(sub, foodPayload);
+      if (outcome === "sent") {
+        result.foodSent += 1;
+        await db
+          .update(pushSubscriptions)
+          .set({ lastFoodKey: foodAlert.key, lastNotifiedAt: new Date() })
+          .where(eq(pushSubscriptions.id, sub.id));
+      } else if (outcome === "gone") {
+        continue;
+      }
+    }
+
+    // ── Reise-Tagebuch: Trip-Countdown (max. eine Nachricht pro Trip) ──
+    const tripAlert = tripAlertByUser.get(sub.userId);
+    if (!tripAlert || tripAlert.key === sub.lastTripKey) continue;
+    const tripPayload = JSON.stringify({
+      title: tripAlert.title,
+      body: tripAlert.body,
+      url: "/tagebuch",
+      // Eigener Tag, damit der Countdown andere Meldungen nicht ersetzt
+      tag: "campmesser-trip-countdown",
     });
-    const outcome = await sendTo(sub, foodPayload);
+    const outcome = await sendTo(sub, tripPayload);
     if (outcome === "sent") {
-      result.foodSent += 1;
+      result.tripSent += 1;
       await db
         .update(pushSubscriptions)
-        .set({ lastFoodKey: foodAlert.key, lastNotifiedAt: new Date() })
+        .set({ lastTripKey: tripAlert.key, lastNotifiedAt: new Date() })
         .where(eq(pushSubscriptions.id, sub.id));
     }
   }

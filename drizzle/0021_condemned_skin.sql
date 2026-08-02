@@ -1,0 +1,1 @@
+ALTER TABLE `pushSubscriptions` ADD `lastTripKey` varchar(64);

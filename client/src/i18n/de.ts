@@ -864,7 +864,7 @@ export const de = {
     pushDisabled: "Unwetter-Warnungen deaktiviert",
     pushTitle: "Unwetter-Warnungen für deine Plätze",
     pushDesc:
-      "Push-Benachrichtigung bei Sturm, Gewitter oder Starkregen an einem deiner gespeicherten Zeltplätze. Zusätzlich erinnert dich CampMesser, wenn Lebensmittel in der Kühlbox bald ablaufen.",
+      "Push-Benachrichtigung bei Sturm, Gewitter oder Starkregen an einem deiner gespeicherten Zeltplätze. Zusätzlich erinnert dich CampMesser, wenn Lebensmittel in der Kühlbox bald ablaufen – und 3 Tage vor einem geplanten Aufenthalt inklusive Packlisten-Stand.",
     pushSaveFirst: "Speichere zuerst einen Zeltplatz.",
     pushAria: "Unwetter-Warnungen für gespeicherte Zeltplätze aktivieren",
     geoUnsupported: "Dein Gerät unterstützt keine Standortbestimmung.",
