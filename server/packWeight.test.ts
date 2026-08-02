@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { computePackWeight, formatGrams } from "@shared/packWeight";
+import {
+  computePackWeight,
+  formatGrams,
+  weightBudgetStatus,
+} from "@shared/packWeight";
 
 const inventory = [
   { name: "Zelt", weightGrams: 3200, volumeLiters: 12 },
@@ -49,5 +53,57 @@ describe("formatGrams", () => {
     expect(formatGrams(450)).toBe("450 g");
     expect(formatGrams(12480)).toBe("12,5 kg");
     expect(formatGrams(1000)).toBe("1,0 kg");
+  });
+});
+
+describe("weightBudgetStatus", () => {
+  it("meldet ok unter 90 Prozent", () => {
+    expect(weightBudgetStatus(4000, 10000)).toEqual({
+      level: "ok",
+      percent: 40,
+      overGrams: 0,
+    });
+    expect(weightBudgetStatus(0, 10000)).toEqual({
+      level: "ok",
+      percent: 0,
+      overGrams: 0,
+    });
+  });
+
+  it("warnt ab 90 Prozent, solange das Budget nicht überschritten ist", () => {
+    expect(weightBudgetStatus(9000, 10000)).toEqual({
+      level: "warn",
+      percent: 90,
+      overGrams: 0,
+    });
+    // Exakt am Budget: 100 %, aber noch nichts drüber
+    expect(weightBudgetStatus(10000, 10000)).toEqual({
+      level: "warn",
+      percent: 100,
+      overGrams: 0,
+    });
+  });
+
+  it("meldet over mit Überschuss in Gramm oberhalb des Budgets", () => {
+    expect(weightBudgetStatus(12500, 10000)).toEqual({
+      level: "over",
+      percent: 125,
+      overGrams: 2500,
+    });
+  });
+
+  it("rundet erst ab 90 gerundeten Prozent zur Warnung", () => {
+    // 8949/10000 → 89 % gerundet → noch ok
+    expect(weightBudgetStatus(8949, 10000).level).toBe("ok");
+    // 8950/10000 → 90 % gerundet → warn
+    expect(weightBudgetStatus(8950, 10000).level).toBe("warn");
+  });
+
+  it("bleibt bei ungültigem Budget von 0 defensiv (0 Prozent, Überschuss zählt)", () => {
+    expect(weightBudgetStatus(5000, 0)).toEqual({
+      level: "over",
+      percent: 0,
+      overGrams: 5000,
+    });
   });
 });

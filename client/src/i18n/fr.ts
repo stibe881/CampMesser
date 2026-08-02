@@ -256,6 +256,7 @@ export const fr: Translation = {
       `Vraiment supprimer le modèle «${name}» ?`,
     templateDeleted: "Modèle supprimé",
     templateDeleteFailed: "Le modèle n'a pas pu être supprimé",
+    budgetBadge: weight => `Budget ${weight}`,
   },
   packListDetail: {
     backLabel: "Listes de bagages",
@@ -335,6 +336,24 @@ export const fr: Translation = {
     templateSaved:
       "Modèle enregistré – disponible à la création de nouvelles listes",
     templateSaveFailed: "Le modèle n'a pas pu être enregistré",
+    budgetSetButton: "Définir un budget de poids",
+    budgetEdit: "Ajuster",
+    budgetEditAria: "Ajuster le budget de poids",
+    budgetLine: (total, budget) => `${total} sur ${budget} de budget`,
+    budgetPercent: pct => `${pct} % du budget utilisé`,
+    budgetOver: excess => `${excess} au-dessus du budget`,
+    budgetProgressAria: pct => `Poids : ${pct} pour cent du budget`,
+    budgetDialogTitle: "Définir un budget de poids",
+    budgetDialogDescription:
+      "Fixe le poids maximal de tes bagages. Le bilan compare le poids actuel issu de l'inventaire avec ton budget.",
+    budgetLabel: "Budget en kg",
+    budgetPlaceholder: "p. ex. 15,5",
+    budgetSave: "Enregistrer le budget",
+    budgetRemove: "Supprimer le budget",
+    budgetSaved: "Budget de poids enregistré",
+    budgetRemoved: "Budget de poids supprimé",
+    budgetSaveFailed: "Le budget n'a pas pu être enregistré",
+    budgetInvalid: "Indique un poids entre 0,1 et 500 kg",
   },
   packListPrint: {
     docTitle: name => `${name} – liste de bagages à imprimer`,

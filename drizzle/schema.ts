@@ -72,6 +72,8 @@ export const packLists = mysqlTable(
     userId: int("userId").notNull(),
     name: varchar("name", { length: 120 }).notNull(),
     scenario: varchar("scenario", { length: 60 }).notNull().default("custom"),
+    /** Gewichts-Budget in Gramm – null = kein Budget gesetzt. */
+    weightBudgetGrams: int("weightBudgetGrams"),
     /** Öffentlicher Teil-Token: Wer den Link kennt, kann die Liste sehen und abhaken. */
     shareToken: varchar("shareToken", { length: 32 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),

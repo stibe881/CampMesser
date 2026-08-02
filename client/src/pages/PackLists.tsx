@@ -10,6 +10,7 @@ import {
   ListPlus,
   Loader2,
   Plus,
+  Scale,
   Trash2,
   Users,
 } from "lucide-react";
@@ -32,6 +33,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { familyAddOns, packScenarios } from "@shared/packTemplates";
+import { formatGrams } from "@shared/packWeight";
 import { pick } from "@shared/i18n";
 import { cn } from "@/lib/utils";
 
@@ -374,6 +376,14 @@ export default function PackListsPage() {
                   <p className="text-sm text-muted-foreground">
                     {scenarioLabel}
                   </p>
+                  {list.weightBudgetGrams != null && (
+                    <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
+                      <Scale className="h-3 w-3" aria-hidden="true" />
+                      {t.packLists.budgetBadge(
+                        formatGrams(list.weightBudgetGrams, lang)
+                      )}
+                    </span>
+                  )}
                 </div>
                 <Button
                   variant="ghost"

@@ -249,6 +249,19 @@ export async function deletePackTemplate(id: number, userId: number) {
     );
 }
 
+/** Gewichts-Budget in Gramm setzen oder mit null entfernen (nur eigene Liste). */
+export async function setPackListWeightBudget(
+  id: number,
+  userId: number,
+  grams: number | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(packLists)
+    .set({ weightBudgetGrams: grams })
+    .where(and(eq(packLists.id, id), eq(packLists.userId, userId)));
+}
+
 /** Teil-Token setzen oder entfernen (nur für die eigene Liste). */
 export async function setPackListShareToken(
   id: number,

@@ -36,7 +36,11 @@ import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { usePointerDrag } from "@/lib/usePointerDrag";
 import { familyAddOns } from "@shared/packTemplates";
-import { computePackWeight, formatGrams } from "@shared/packWeight";
+import {
+  computePackWeight,
+  formatGrams,
+  weightBudgetStatus,
+} from "@shared/packWeight";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { cn } from "@/lib/utils";
 
@@ -69,6 +73,9 @@ export default function PackListDetailPage() {
   /** Dialog «Als Vorlage speichern» mit Namensfeld. */
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState("");
+  /** Dialog «Gewichts-Budget» mit kg-Eingabe. */
+  const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
+  const [budgetDraft, setBudgetDraft] = useState("");
 
   // QR-Code zum Teil-Link erzeugen: am Platz einfach abscannen lassen statt Link verschicken
   useEffect(() => {
@@ -307,6 +314,29 @@ export default function PackListDetailPage() {
     [query.data?.items, inventoryQuery.data]
   );
 
+  const budgetMutation = trpc.packing.setWeightBudget.useMutation({
+    onSuccess: (_data, vars) => {
+      utils.packing.items.invalidate({ listId });
+      // Budget-Badge in der Listen-Übersicht aktuell halten
+      utils.packing.lists.invalidate();
+      setBudgetDialogOpen(false);
+      toast.success(
+        vars.grams === null
+          ? t.packListDetail.budgetRemoved
+          : t.packListDetail.budgetSaved
+      );
+    },
+    onError: () => toast.error(t.packListDetail.budgetSaveFailed),
+  });
+
+  /** kg-Eingabe («12,5» oder «12.5») in Gramm umrechnen; null bei ungültig. */
+  const parseKgToGrams = (raw: string): number | null => {
+    const value = Number.parseFloat(raw.trim().replace(",", "."));
+    if (!Number.isFinite(value)) return null;
+    const grams = Math.round(value * 1000);
+    return grams >= 100 && grams <= 500000 ? grams : null;
+  };
+
   // Inventar-Gegenstände, die noch nicht auf der Liste stehen (per Name)
   const inventorySuggestions = useMemo(() => {
     const listNames = new Set(
@@ -356,6 +386,17 @@ export default function PackListDetailPage() {
   }
 
   const items = query.data.items;
+  const budgetGrams = query.data.list.weightBudgetGrams ?? null;
+  const budget =
+    budgetGrams !== null
+      ? weightBudgetStatus(weight.totalGrams, budgetGrams)
+      : null;
+  /** Budget-Dialog öffnen, Eingabefeld mit dem aktuellen Budget (kg) vorbefüllen. */
+  const openBudgetDialog = () => {
+    const kg = budgetGrams !== null ? (budgetGrams / 1000).toString() : "";
+    setBudgetDraft(lang === "en" ? kg : kg.replace(".", ","));
+    setBudgetDialogOpen(true);
+  };
   const checkedCount = items.filter(i => i.checked).length;
   const progress = items.length > 0 ? (checkedCount / items.length) * 100 : 0;
   const filteredItems = items.filter(i => matchesPersonFilter(i.assignee));
@@ -396,36 +437,100 @@ export default function PackListDetailPage() {
         )}
       </div>
 
-      {/* Gewichts-Bilanz aus dem Inventar-Abgleich */}
-      {weight.matchedCount > 0 && (
-        <p className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <Scale className="h-4 w-4 text-primary" aria-hidden="true" />
-            <span className="font-medium text-foreground">
-              {formatGrams(weight.totalGrams, lang)}
-            </span>
-            {t.packListDetail.weightTotal}
-          </span>
-          <span>
-            <span className="font-medium text-foreground">
-              {formatGrams(weight.packedGrams, lang)}
-            </span>{" "}
-            {t.packListDetail.weightPacked}
-          </span>
-          <span>
-            {t.packListDetail.volumeLine(
-              weight.totalVolumeLiters.toLocaleString(LOCALE_TAGS[lang])
-            )}
-          </span>
-          <span className="text-xs">
-            {t.packListDetail.matchedInfo(
-              weight.matchedCount,
-              weight.matchedCount + weight.unmatchedCount
-            )}
-          </span>
-        </p>
+      {/* Gewichts-Bilanz aus dem Inventar-Abgleich + Gewichts-Budget */}
+      {(weight.matchedCount > 0 || budget !== null) && (
+        <div className="mb-6 space-y-2.5">
+          {weight.matchedCount > 0 && (
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <Scale className="h-4 w-4 text-primary" aria-hidden="true" />
+                <span className="font-medium text-foreground">
+                  {formatGrams(weight.totalGrams, lang)}
+                </span>
+                {t.packListDetail.weightTotal}
+              </span>
+              <span>
+                <span className="font-medium text-foreground">
+                  {formatGrams(weight.packedGrams, lang)}
+                </span>{" "}
+                {t.packListDetail.weightPacked}
+              </span>
+              <span>
+                {t.packListDetail.volumeLine(
+                  weight.totalVolumeLiters.toLocaleString(LOCALE_TAGS[lang])
+                )}
+              </span>
+              <span className="text-xs">
+                {t.packListDetail.matchedInfo(
+                  weight.matchedCount,
+                  weight.matchedCount + weight.unmatchedCount
+                )}
+              </span>
+            </p>
+          )}
+          {budget !== null && budgetGrams !== null ? (
+            <div className="space-y-1.5 rounded-lg border border-border bg-card px-3.5 py-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-medium">
+                  {t.packListDetail.budgetLine(
+                    formatGrams(weight.totalGrams, lang),
+                    formatGrams(budgetGrams, lang)
+                  )}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={openBudgetDialog}
+                  aria-label={t.packListDetail.budgetEditAria}
+                >
+                  {t.packListDetail.budgetEdit}
+                </Button>
+              </div>
+              <div
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.min(100, budget.percent)}
+                aria-label={t.packListDetail.budgetProgressAria(budget.percent)}
+                className="h-2 w-full overflow-hidden rounded-full bg-muted"
+              >
+                <div
+                  className={cn(
+                    "h-full rounded-full transition-all",
+                    budget.level === "over"
+                      ? "bg-destructive"
+                      : budget.level === "warn"
+                        ? "bg-amber-500"
+                        : "bg-primary"
+                  )}
+                  style={{ width: `${Math.min(100, budget.percent)}%` }}
+                />
+              </div>
+              <p
+                className={cn(
+                  "text-xs",
+                  budget.level === "over"
+                    ? "font-medium text-destructive"
+                    : "text-muted-foreground"
+                )}
+              >
+                {budget.level === "over"
+                  ? t.packListDetail.budgetOver(
+                      formatGrams(budget.overGrams, lang)
+                    )
+                  : t.packListDetail.budgetPercent(budget.percent)}
+              </p>
+            </div>
+          ) : (
+            <Button variant="outline" size="sm" onClick={openBudgetDialog}>
+              <Scale className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.packListDetail.budgetSetButton}
+            </Button>
+          )}
+        </div>
       )}
-      {weight.matchedCount === 0 && <div className="mb-4" />}
+      {weight.matchedCount === 0 && budget === null && <div className="mb-4" />}
 
       {/* Liste teilen & drucken */}
       <div className="mb-6">
@@ -872,6 +977,66 @@ export default function PackListDetailPage() {
               )}
               {t.packListDetail.saveTemplateConfirm}
             </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog «Gewichts-Budget» */}
+      <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.packListDetail.budgetDialogTitle}</DialogTitle>
+            <DialogDescription>
+              {t.packListDetail.budgetDialogDescription}
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              const grams = parseKgToGrams(budgetDraft);
+              if (grams === null) {
+                toast.error(t.packListDetail.budgetInvalid);
+                return;
+              }
+              budgetMutation.mutate({ listId, grams });
+            }}
+          >
+            <Label htmlFor="weight-budget">
+              {t.packListDetail.budgetLabel}
+            </Label>
+            <Input
+              id="weight-budget"
+              className="mt-1.5"
+              inputMode="decimal"
+              placeholder={t.packListDetail.budgetPlaceholder}
+              value={budgetDraft}
+              onChange={e => setBudgetDraft(e.target.value)}
+              autoFocus
+            />
+            <Button
+              type="submit"
+              className="mt-4 w-full"
+              disabled={budgetMutation.isPending || !budgetDraft.trim()}
+            >
+              {budgetMutation.isPending && (
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              )}
+              {t.packListDetail.budgetSave}
+            </Button>
+            {budgetGrams !== null && (
+              <Button
+                type="button"
+                variant="ghost"
+                className="mt-2 w-full text-muted-foreground hover:text-destructive"
+                disabled={budgetMutation.isPending}
+                onClick={() => budgetMutation.mutate({ listId, grams: null })}
+              >
+                {t.packListDetail.budgetRemove}
+              </Button>
+            )}
           </form>
         </DialogContent>
       </Dialog>

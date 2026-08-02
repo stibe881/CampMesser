@@ -630,6 +630,28 @@ export const appRouter = router({
     deleteItem: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => db.deletePackItem(input.id)),
+    /** Gewichts-Budget in Gramm setzen; null entfernt es wieder. */
+    setWeightBudget: protectedProcedure
+      .input(
+        z.object({
+          listId: z.number(),
+          grams: z.number().int().min(1).max(500000).nullable(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const list = await db.getPackList(input.listId, ctx.user.id);
+        if (!list)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Liste nicht gefunden",
+          });
+        await db.setPackListWeightBudget(
+          input.listId,
+          ctx.user.id,
+          input.grams
+        );
+        return { success: true } as const;
+      }),
     /** Teil-Link erzeugen: gibt den Token zurück. */
     share: protectedProcedure
       .input(z.object({ listId: z.number() }))

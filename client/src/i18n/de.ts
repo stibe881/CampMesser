@@ -255,6 +255,7 @@ export const de = {
       `Vorlage «${name}» wirklich löschen?`,
     templateDeleted: "Vorlage gelöscht",
     templateDeleteFailed: "Vorlage konnte nicht gelöscht werden",
+    budgetBadge: (weight: string) => `Budget ${weight}`,
   },
   packListDetail: {
     backLabel: "Packlisten",
@@ -333,6 +334,25 @@ export const de = {
     saveTemplateConfirm: "Vorlage speichern",
     templateSaved: "Vorlage gespeichert – beim Anlegen neuer Listen wählbar",
     templateSaveFailed: "Vorlage konnte nicht gespeichert werden",
+    budgetSetButton: "Gewichts-Budget festlegen",
+    budgetEdit: "Anpassen",
+    budgetEditAria: "Gewichts-Budget anpassen",
+    budgetLine: (total: string, budget: string) =>
+      `${total} von ${budget} Budget`,
+    budgetPercent: (pct: number) => `${pct} % des Budgets ausgeschöpft`,
+    budgetOver: (excess: string) => `${excess} über dem Budget`,
+    budgetProgressAria: (pct: number) => `Gewicht: ${pct} Prozent des Budgets`,
+    budgetDialogTitle: "Gewichts-Budget festlegen",
+    budgetDialogDescription:
+      "Lege fest, wie schwer dein Gepäck höchstens sein darf. Die Bilanz vergleicht das Ist-Gewicht aus dem Inventar-Abgleich mit deinem Budget.",
+    budgetLabel: "Budget in kg",
+    budgetPlaceholder: "z. B. 15,5",
+    budgetSave: "Budget speichern",
+    budgetRemove: "Budget entfernen",
+    budgetSaved: "Gewichts-Budget gespeichert",
+    budgetRemoved: "Gewichts-Budget entfernt",
+    budgetSaveFailed: "Budget konnte nicht gespeichert werden",
+    budgetInvalid: "Gib ein Gewicht zwischen 0,1 und 500 kg ein",
   },
   packListPrint: {
     docTitle: (name: string) => `${name} – Packliste zum Ausdrucken`,
