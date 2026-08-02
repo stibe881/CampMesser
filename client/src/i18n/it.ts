@@ -894,6 +894,25 @@ export const it: Translation = {
     noteLabel: "Nota (facoltativa)",
     notePlaceholder: "ad es. posto vicino al ruscello, ombreggiato al mattino",
   },
+  mapView: {
+    title: "Mappa delle piazzole e dei viaggi",
+    subtitle:
+      "Tutte le piazzole salvate a colpo d'occhio – con i pernottamenti del diario di viaggio. La mappa richiede una connessione Internet.",
+    loginFeature: "la tua mappa delle piazzole",
+    mapAria: "Mappa con le tue piazzole salvate",
+    empty:
+      "Ancora nessuna piazzola sulla mappa. Salva prima una piazzola preferita: apparirà qui come segnaposto.",
+    emptyCta: "Alle piazzole preferite",
+    nightsHere: (n: number) =>
+      n === 1
+        ? "1 pernottamento secondo il diario"
+        : `${n} pernottamenti secondo il diario`,
+    toDossier: "Al dossier →",
+    legend: (n: number) =>
+      n === 1
+        ? "1 piazzola salvata sulla mappa"
+        : `${n} piazzole salvate sulla mappa`,
+  },
   spotDetail: {
     fallbackTitle: "Piazzola",
     backLabel: "Piazzole",

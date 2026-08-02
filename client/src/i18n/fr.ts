@@ -904,6 +904,23 @@ export const fr: Translation = {
     noteLabel: "Note (facultatif)",
     notePlaceholder: "p. ex. place au bord du ruisseau, ombragée le matin",
   },
+  mapView: {
+    title: "Carte des emplacements & voyages",
+    subtitle:
+      "Tous tes emplacements enregistrés en un coup d'œil – avec les nuitées du journal de voyage. La carte nécessite une connexion Internet.",
+    loginFeature: "ta carte des emplacements",
+    mapAria: "Carte avec tes emplacements enregistrés",
+    empty:
+      "Aucun emplacement sur la carte pour l'instant. Enregistre d'abord un emplacement favori, il apparaîtra ici comme épingle.",
+    emptyCta: "Vers les emplacements favoris",
+    nightsHere: (n: number) =>
+      n === 1 ? "1 nuitée selon le journal" : `${n} nuitées selon le journal`,
+    toDossier: "Vers le dossier →",
+    legend: (n: number) =>
+      n === 1
+        ? "1 emplacement enregistré sur la carte"
+        : `${n} emplacements enregistrés sur la carte`,
+  },
   spotDetail: {
     fallbackTitle: "Emplacement",
     backLabel: "Emplacements",

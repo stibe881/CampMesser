@@ -37,6 +37,7 @@ const pageLoaders = {
   Drying: () => import("./pages/Drying"),
   Quiet: () => import("./pages/Quiet"),
   Spots: () => import("./pages/Spots"),
+  MapView: () => import("./pages/MapView"),
   SpotDetail: () => import("./pages/SpotDetail"),
   TentFinder: () => import("./pages/TentFinder"),
   Trips: () => import("./pages/Trips"),
@@ -99,6 +100,7 @@ const WeatherPage = lazyWithRetry(pageLoaders.Weather);
 const DryingPage = lazyWithRetry(pageLoaders.Drying);
 const QuietPage = lazyWithRetry(pageLoaders.Quiet);
 const SpotsPage = lazyWithRetry(pageLoaders.Spots);
+const MapViewPage = lazyWithRetry(pageLoaders.MapView);
 const SpotDetailPage = lazyWithRetry(pageLoaders.SpotDetail);
 const TentFinderPage = lazyWithRetry(pageLoaders.TentFinder);
 const TripsPage = lazyWithRetry(pageLoaders.Trips);
@@ -148,6 +150,7 @@ function Router() {
           <Route path={"/trockenzeiten"} component={DryingPage} />
           <Route path={"/nachtruhe"} component={QuietPage} />
           <Route path={"/zeltplaetze"} component={SpotsPage} />
+          <Route path={"/karte"} component={MapViewPage} />
           <Route path={"/zeltplaetze/:id"} component={SpotDetailPage} />
           <Route path={"/zeltfinder"} component={TentFinderPage} />
           <Route path={"/tagebuch"} component={TripsPage} />

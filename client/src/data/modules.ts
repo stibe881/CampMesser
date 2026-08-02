@@ -16,6 +16,7 @@ import {
   Gauge,
   ListChecks,
   LocateFixed,
+  Map as MapIcon,
   Moon,
   Package,
   Refrigerator,
@@ -134,6 +135,23 @@ export const modules: Module[] = [
       "Save places, check weather and sun in advance"
     ),
     icon: Tent,
+    group: "vorOrt",
+  },
+  {
+    path: "/karte",
+    title: l4(
+      "Karte der Plätze",
+      "Carte des emplacements",
+      "Mappa delle piazzole",
+      "Pitch map"
+    ),
+    description: l4(
+      "Alle gespeicherten Zeltplätze mit Übernachtungen auf der Karte",
+      "Tous les emplacements enregistrés avec les nuitées sur la carte",
+      "Tutte le piazzole salvate con i pernottamenti sulla mappa",
+      "All saved pitches with overnight stays on the map"
+    ),
+    icon: MapIcon,
     group: "vorOrt",
   },
   {

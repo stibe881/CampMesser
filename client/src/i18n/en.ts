@@ -881,6 +881,23 @@ export const en: Translation = {
     noteLabel: "Note (optional)",
     notePlaceholder: "e.g. spot by the stream, shady in the morning",
   },
+  mapView: {
+    title: "Map of pitches & trips",
+    subtitle:
+      "All your saved pitches at a glance – with overnight stays from the travel journal. The map needs an internet connection.",
+    loginFeature: "your pitch map",
+    mapAria: "Map with your saved pitches",
+    empty:
+      "No pitches on the map yet. Save a favourite pitch first and it will appear here as a pin.",
+    emptyCta: "Go to favourite pitches",
+    nightsHere: (n: number) =>
+      n === 1
+        ? "1 overnight stay according to the journal"
+        : `${n} overnight stays according to the journal`,
+    toDossier: "Open dossier →",
+    legend: (n: number) =>
+      n === 1 ? "1 saved pitch on the map" : `${n} saved pitches on the map`,
+  },
   spotDetail: {
     fallbackTitle: "Pitch",
     backLabel: "Pitches",

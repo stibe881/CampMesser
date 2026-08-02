@@ -902,6 +902,25 @@ export const de = {
     noteLabel: "Notiz (optional)",
     notePlaceholder: "z. B. Platz am Bach, schattig am Morgen",
   },
+  mapView: {
+    title: "Karte der Plätze & Reisen",
+    subtitle:
+      "Alle gespeicherten Zeltplätze auf einen Blick – mit den Übernachtungen aus dem Reise-Tagebuch. Die Karte braucht eine Internetverbindung.",
+    loginFeature: "deine Zeltplatz-Karte",
+    mapAria: "Karte mit deinen gespeicherten Zeltplätzen",
+    empty:
+      "Noch keine Plätze auf der Karte. Speichere zuerst einen Zeltplatz-Favoriten, dann erscheint er hier als Pin.",
+    emptyCta: "Zu den Zeltplatz-Favoriten",
+    nightsHere: (n: number) =>
+      n === 1
+        ? "1 Übernachtung laut Tagebuch"
+        : `${n} Übernachtungen laut Tagebuch`,
+    toDossier: "Zum Dossier →",
+    legend: (n: number) =>
+      n === 1
+        ? "1 gespeicherter Zeltplatz auf der Karte"
+        : `${n} gespeicherte Zeltplätze auf der Karte`,
+  },
   spotDetail: {
     fallbackTitle: "Zeltplatz",
     backLabel: "Zeltplätze",
