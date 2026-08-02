@@ -1,5 +1,16 @@
 # CampMesser – Projekt TODO
 
+## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 8)
+
+- [x] Trip-Planer: Tagebuch-Einträge mit Zukunfts-Datum als «Geplante Aufenthalte» mit Countdown, optionaler Packlisten-Verknüpfung (packListId, Migration 0012) und Pack-Fortschritt; Startseiten-Widget «Nächster Trip»
+- [x] Platz-Dossier per Link teilen: Teil-Token an campSpots (Migration 0013), öffentliche Seite /platz/:token mit Sonnenzeiten und 3-Tage-Wetter, Teilen-Karte im Dossier
+- [x] Eigene Rezepte: Editor im Rezeptbuch (Tabelle customRecipes, Migration 0014), Anzeige mit Badge «Eigenes», Kühlbox-Vorschläge berücksichtigen eigene Rezepte
+- [x] Wetter: 48-h-Niederschlagsgrafik (Menge + Wahrscheinlichkeit, zwei Achsen)
+- [x] Unwetter-Push: Web Push (VAPID) für gespeicherte Zeltplätze – Opt-in bei den Favoriten, Tabelle pushSubscriptions (Migration 0015), Check-Endpoint /api/push/check für konsoleH-Cron, SW-Push-Handler; Doku in DEPLOYMENT-HETZNER.md
+- [x] Accessibility: 3 axe-core-Checks (WCAG 2A/2AA) in der CI; gefundene Verstösse behoben (Zoom-Sperre entfernt, Kontrast Erste-Hilfe-Badge)
+- [ ] Mehrsprachigkeit DE/FR/IT/EN – IN ARBEIT: Infrastruktur fertig (shared/i18n.ts, LanguageProvider mit Sync, Sprachwahl im Header, Wörterbücher de/fr/it/en typgeprüft, AppShell umgestellt); Rest gemäss I18N-STATUS.md (alle Seiten + alle Inhalts-Daten)
+
+
 ## Erweiterungen (Nutzerwunsch 01.08.2026, Runde 7)
 
 - [x] Schnitzeljagd-Editor im Familien-Modus: eigene Jagden mit Story, bis zu 12 Stationen (Rätsel/Hinweis/Buchstabe) und Schatz-Finale erstellen, bearbeiten, löschen; Lösungswort automatisch aus den Buchstaben; gleicher Player (schrittweise Enthüllung) und gleiche Druckansicht wie eingebaute Jagden (Tabelle customHunts, Migration 0011, shared/hunts.ts mit 6 Tests)
