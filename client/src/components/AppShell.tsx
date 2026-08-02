@@ -11,6 +11,7 @@ import {
   LogIn,
   LogOut,
   UserRound,
+  MonitorSmartphone,
   Moon,
   Sun,
 } from "lucide-react";
@@ -99,7 +100,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [headerHidden, setHeaderHidden] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { preference, toggleTheme } = useTheme();
   const { lang, t, setLang } = useI18n();
 
   // Beim Seitenwechsel nach oben scrollen
@@ -173,13 +174,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               onClick={() => toggleTheme?.()}
               className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
               aria-label={
-                theme === "dark" ? t.shell.themeLight : t.shell.themeDark
+                preference === "light"
+                  ? t.shell.themeDark
+                  : preference === "dark"
+                    ? t.shell.themeAuto
+                    : t.shell.themeLight
               }
             >
-              {theme === "dark" ? (
-                <Sun className="h-4 w-4" aria-hidden="true" />
-              ) : (
+              {/* Icon zeigt jeweils das Design, das der nächste Klick aktiviert */}
+              {preference === "light" ? (
                 <Moon className="h-4 w-4" aria-hidden="true" />
+              ) : preference === "dark" ? (
+                <MonitorSmartphone className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Sun className="h-4 w-4" aria-hidden="true" />
               )}
             </button>
             {isAuthenticated ? (

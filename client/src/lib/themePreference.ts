@@ -1,21 +1,45 @@
 /**
- * Design-Präferenz (Hell/Dunkel) aus dem Profil – eigenes Modul, damit der
- * App-Start sie lesen kann, ohne die ganze Profil-Seite ins Haupt-Bundle zu ziehen.
+ * Design-Präferenz (Hell/Dunkel/Automatisch) aus dem Profil – eigenes Modul,
+ * damit der App-Start sie lesen kann, ohne die ganze Profil-Seite ins
+ * Haupt-Bundle zu ziehen.
  */
 const THEME_PREF_KEY = "campmesser.themePreference";
 
-/** Gespeicherte Design-Präferenz lesen ("light" | "dark" | null). */
-export function getThemePreference(): "light" | "dark" | null {
+/** Wählbare Design-Präferenz: fest hell/dunkel oder dem System folgen. */
+export type ThemePreference = "light" | "dark" | "auto";
+
+/** Tatsächlich angewendetes Design. */
+export type ResolvedTheme = "light" | "dark";
+
+/** Prüft, ob ein gespeicherter Wert eine gültige Design-Präferenz ist. */
+export function isThemePreference(v: unknown): v is ThemePreference {
+  return v === "light" || v === "dark" || v === "auto";
+}
+
+/**
+ * Reine Auflösungs-Logik: "auto" folgt der System-Einstellung
+ * (prefers-color-scheme), feste Werte bleiben unverändert.
+ */
+export function resolveTheme(
+  pref: ThemePreference,
+  systemDark: boolean
+): ResolvedTheme {
+  if (pref === "auto") return systemDark ? "dark" : "light";
+  return pref;
+}
+
+/** Gespeicherte Design-Präferenz lesen ("light" | "dark" | "auto" | null). */
+export function getThemePreference(): ThemePreference | null {
   try {
     const v = localStorage.getItem(THEME_PREF_KEY);
-    return v === "light" || v === "dark" ? v : null;
+    return isThemePreference(v) ? v : null;
   } catch {
     return null;
   }
 }
 
 /** Design-Präferenz auf dem Gerät speichern. */
-export function saveThemePreference(pref: "light" | "dark") {
+export function saveThemePreference(pref: ThemePreference) {
   try {
     localStorage.setItem(THEME_PREF_KEY, pref);
   } catch {

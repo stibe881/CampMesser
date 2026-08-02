@@ -3,6 +3,7 @@
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 10)
 
 - [x] QR-Code fürs Platz-Dossier-Teilen: die Teilen-Karte im Platz-Dossier zeigt zum Teil-Link (/platz/:token) denselben QR-Code wie die Packlisten (qrcode-Dependency, weisser Rahmen für Dark-Mode-Scanbarkeit, alt-Text mit Platzname); neue Schlüssel qrAlt/qrTitle/qrText im Namespace spotDetail in DE/FR/IT/EN
+- [x] Theme-Option «Automatisch (System)»: dritte Design-Präferenz "auto" folgt prefers-color-scheme inkl. Live-Wechsel (matchMedia-Listener im ThemeProvider); Header-Toggle schaltet zyklisch hell → dunkel → auto (MonitorSmartphone-Icon, aria-Label je Zustand), Profil-Karte mit drittem Button; gespeicherte hell/dunkel-Werte bleiben gültig, Neu-Nutzer-Default bleibt hell («auto» ist Opt-in), kein Geräte-Sync (Theme war bisher nicht gesynct); reine Logik resolveTheme/isThemePreference in client/src/lib/themePreference.ts mit 4 Tests; neue Schlüssel shell.themeAuto und profile.themeAuto/themeSavedAuto in DE/FR/IT/EN
 
 ## Erweiterungen (Nutzerwunsch 02.08.2026, Runde 9)
 

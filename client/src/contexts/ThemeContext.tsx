@@ -1,10 +1,20 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-
-type Theme = "light" | "dark";
+import {
+  isThemePreference,
+  resolveTheme,
+  type ResolvedTheme,
+  type ThemePreference,
+} from "@/lib/themePreference";
 
 interface ThemeContextType {
-  theme: Theme;
+  /** Tatsächlich angewendetes Design (bei "auto" aufgelöst). */
+  theme: ResolvedTheme;
+  /** Gewählte Präferenz inkl. "auto" (folgt dem System). */
+  preference: ThemePreference;
+  /** Zyklisch weiterschalten: hell → dunkel → auto. */
   toggleTheme?: () => void;
+  /** Präferenz direkt setzen (z. B. aus dem Profil). */
+  setPreference?: (pref: ThemePreference) => void;
   switchable: boolean;
 }
 
@@ -12,8 +22,17 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 interface ThemeProviderProps {
   children: React.ReactNode;
-  defaultTheme?: Theme;
+  defaultTheme?: ThemePreference;
   switchable?: boolean;
+}
+
+/** Liest die System-Einstellung (prefers-color-scheme) sicher aus. */
+function systemPrefersDark(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
 }
 
 export function ThemeProvider({
@@ -21,13 +40,25 @@ export function ThemeProvider({
   defaultTheme = "light",
   switchable = false,
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
+  const [preference, setPreferenceState] = useState<ThemePreference>(() => {
     if (switchable) {
       const stored = localStorage.getItem("theme");
-      return (stored as Theme) || defaultTheme;
+      return isThemePreference(stored) ? stored : defaultTheme;
     }
     return defaultTheme;
   });
+  const [systemDark, setSystemDark] = useState(systemPrefersDark);
+
+  // Bei "auto" der System-Einstellung live folgen
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+
+  const theme = resolveTheme(preference, systemDark);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -36,20 +67,30 @@ export function ThemeProvider({
     } else {
       root.classList.remove("dark");
     }
+  }, [theme]);
 
+  useEffect(() => {
     if (switchable) {
-      localStorage.setItem("theme", theme);
+      localStorage.setItem("theme", preference);
     }
-  }, [theme, switchable]);
+  }, [preference, switchable]);
 
   const toggleTheme = switchable
     ? () => {
-        setTheme(prev => (prev === "light" ? "dark" : "light"));
+        setPreferenceState(prev =>
+          prev === "light" ? "dark" : prev === "dark" ? "auto" : "light"
+        );
       }
     : undefined;
 
+  const setPreference = switchable
+    ? (pref: ThemePreference) => setPreferenceState(pref)
+    : undefined;
+
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, switchable }}>
+    <ThemeContext.Provider
+      value={{ theme, preference, toggleTheme, setPreference, switchable }}
+    >
       {children}
     </ThemeContext.Provider>
   );

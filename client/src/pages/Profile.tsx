@@ -8,6 +8,7 @@ import {
   Palette,
   Sun,
   Moon,
+  MonitorSmartphone,
   LogOut,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
@@ -30,7 +31,11 @@ import {
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
-import { getThemePreference, saveThemePreference } from "@/lib/themePreference";
+import {
+  getThemePreference,
+  saveThemePreference,
+  type ThemePreference,
+} from "@/lib/themePreference";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
 
@@ -38,7 +43,7 @@ import { LOCALE_TAGS } from "@shared/i18n";
 export default function ProfilePage() {
   const { lang, t } = useI18n();
   const { user, isAuthenticated, loading, logout, refresh } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { setPreference } = useTheme();
   const utils = trpc.useUtils();
 
   const [name, setName] = useState("");
@@ -48,7 +53,7 @@ export default function ProfilePage() {
   const [deletePw, setDeletePw] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [emailPw, setEmailPw] = useState("");
-  const [themePref, setThemePref] = useState<"light" | "dark" | null>(() =>
+  const [themePref, setThemePref] = useState<ThemePreference | null>(() =>
     getThemePreference()
   );
 
@@ -92,12 +97,16 @@ export default function ProfilePage() {
   });
 
   /** Design-Präferenz speichern und sofort anwenden. */
-  const chooseTheme = (pref: "light" | "dark") => {
+  const chooseTheme = (pref: ThemePreference) => {
     saveThemePreference(pref);
     setThemePref(pref);
-    if (theme !== pref) toggleTheme?.();
+    setPreference?.(pref);
     toast.success(
-      pref === "dark" ? t.profile.themeSavedDark : t.profile.themeSavedLight
+      pref === "dark"
+        ? t.profile.themeSavedDark
+        : pref === "auto"
+          ? t.profile.themeSavedAuto
+          : t.profile.themeSavedLight
     );
   };
 
@@ -154,6 +163,18 @@ export default function ProfilePage() {
             >
               <Moon className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
               {t.profile.themeDark}
+            </Button>
+            <Button
+              type="button"
+              variant={themePref === "auto" ? "default" : "outline"}
+              className="flex-1"
+              onClick={() => chooseTheme("auto")}
+            >
+              <MonitorSmartphone
+                className="mr-1.5 h-4 w-4"
+                aria-hidden="true"
+              />{" "}
+              {t.profile.themeAuto}
             </Button>
           </div>
         </CardContent>
