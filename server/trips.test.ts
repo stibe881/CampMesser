@@ -90,7 +90,20 @@ describe("computeTripStats", () => {
       totalNights: 0,
       nightsByYear: {},
       topPlaces: [],
+      avgRating: null,
     });
+  });
+
+  it("mittelt die Sterne-Bewertungen (unbewertete Einträge zählen nicht)", () => {
+    const rated = [
+      { ...trips[0], rating: 5 },
+      { ...trips[1], rating: 2 },
+      { ...trips[2], rating: null },
+      trips[3],
+    ];
+    expect(computeTripStats(rated).avgRating).toBeCloseTo(3.5);
+    // Ohne einzige Bewertung bleibt der Schnitt null
+    expect(computeTripStats(trips).avgRating).toBeNull();
   });
 });
 
@@ -166,6 +179,35 @@ describe("computeYearReview", () => {
       places: 0,
       topPlace: null,
       longestStay: null,
+      bestRated: null,
+    });
+  });
+
+  it("kürt den best bewerteten Platz über die Ø-Bewertung", () => {
+    const rated = [
+      { ...trips[0], rating: 4 }, // Aareschlucht: (4+3)/2 = 3.5
+      { ...trips[1], rating: 3 },
+      { ...trips[2], rating: 5 }, // Seefeld: 5
+      trips[3], // unbewertet – zählt nicht
+    ];
+    const review = computeYearReview(rated, 2026);
+    expect(review.bestRated).toEqual({ name: "Camping Seefeld", rating: 5 });
+  });
+
+  it("bestRated bleibt null ohne einzige Bewertung", () => {
+    expect(computeYearReview(trips, 2026).bestRated).toBeNull();
+  });
+
+  it("bei gleicher Ø-Bewertung gewinnt der Platz mit mehr Bewertungen", () => {
+    const rated = [
+      { ...trips[0], rating: 4 },
+      { ...trips[1], rating: 4 },
+      { ...trips[2], rating: 4 },
+    ];
+    const review = computeYearReview(rated, 2026);
+    expect(review.bestRated).toEqual({
+      name: "Camping Aareschlucht",
+      rating: 4,
     });
   });
 });

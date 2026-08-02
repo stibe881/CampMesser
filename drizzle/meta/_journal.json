@@ -176,6 +176,13 @@
       "when": 1785669901930,
       "tag": "0024_fair_sabra",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1785670263660,
+      "tag": "0025_soft_invisible_woman",
+      "breakpoints": true
     }
   ]
 }

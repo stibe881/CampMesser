@@ -448,6 +448,19 @@ export async function getTripLog(id: number, userId: number) {
   return rows[0];
 }
 
+/** Sterne-Bewertung (1–5) setzen oder mit null entfernen (nur eigener Eintrag). */
+export async function setTripLogRating(
+  id: number,
+  userId: number,
+  rating: number | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripLogs)
+    .set({ rating })
+    .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
+}
+
 export async function deleteTripLog(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db

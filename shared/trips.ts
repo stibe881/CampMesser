@@ -9,6 +9,8 @@ export interface TripLike {
   endDate: string;
   /** Anzeigename des Orts (Favorit oder Freitext) */
   placeName?: string | null;
+  /** Sterne-Bewertung 1–5; null/undefined = nicht bewertet */
+  rating?: number | null;
 }
 
 export interface TripStats {
@@ -18,6 +20,18 @@ export interface TripStats {
   nightsByYear: Record<number, number>;
   /** Orte nach Nächten absteigend sortiert */
   topPlaces: { name: string; nights: number }[];
+  /** Ø-Bewertung über alle bewerteten Einträge; null = keine Bewertung */
+  avgRating: number | null;
+}
+
+/** Gültige Bewertung (ganze Zahl 1–5) oder null. */
+function validRating(rating: number | null | undefined): number | null {
+  return typeof rating === "number" &&
+    Number.isInteger(rating) &&
+    rating >= 1 &&
+    rating <= 5
+    ? rating
+    : null;
 }
 
 const DAY_MS = 86400000;
@@ -84,6 +98,8 @@ export interface YearReview {
   topPlace: YearHighlight | null;
   /** Längster Aufenthalt am Stück (Ort + Nächte) */
   longestStay: YearHighlight | null;
+  /** Best bewerteter Platz (höchste Ø-Bewertung, mindestens 1 Bewertung) */
+  bestRated: { name: string; rating: number } | null;
 }
 
 /**
@@ -108,8 +124,10 @@ export function computeYearReview(
     places: 0,
     topPlace: null,
     longestStay: null,
+    bestRated: null,
   };
   const placeNights = new Map<string, number>();
+  const placeRatings = new Map<string, { sum: number; count: number }>();
   const places = new Set<string>();
   for (const trip of inYear) {
     const nights = tripNights(trip.startDate, trip.endDate);
@@ -119,6 +137,13 @@ export function computeYearReview(
       places.add(place);
       if (nights > 0) {
         placeNights.set(place, (placeNights.get(place) ?? 0) + nights);
+      }
+      const rating = validRating(trip.rating);
+      if (rating !== null) {
+        const entry = placeRatings.get(place) ?? { sum: 0, count: 0 };
+        entry.sum += rating;
+        entry.count += 1;
+        placeRatings.set(place, entry);
       }
     }
     // Längster Aufenthalt: bei Gleichstand gewinnt der zuerst eingetragene
@@ -137,6 +162,22 @@ export function computeYearReview(
         b.nights - a.nights || a.name.localeCompare(b.name, LOCALE_TAGS[lang])
     );
   review.topPlace = ranked[0] ?? null;
+  // Best bewerteter Platz: höchste Ø-Bewertung, bei Gleichstand mehr
+  // Bewertungen, dann alphabetisch – deterministisch in jeder Sprache.
+  const rankedByRating = Array.from(placeRatings.entries())
+    .map(([name, { sum, count }]) => ({
+      name,
+      rating: sum / count,
+      count,
+    }))
+    .sort(
+      (a, b) =>
+        b.rating - a.rating ||
+        b.count - a.count ||
+        a.name.localeCompare(b.name, LOCALE_TAGS[lang])
+    );
+  const best = rankedByRating[0];
+  review.bestRated = best ? { name: best.name, rating: best.rating } : null;
   return review;
 }
 
@@ -150,8 +191,11 @@ export function computeTripStats(
     totalNights: 0,
     nightsByYear: {},
     topPlaces: [],
+    avgRating: null,
   };
   const placeNights = new Map<string, number>();
+  let ratingSum = 0;
+  let ratingCount = 0;
   for (const trip of trips) {
     const nights = tripNights(trip.startDate, trip.endDate);
     stats.totalNights += nights;
@@ -164,7 +208,13 @@ export function computeTripStats(
     if (place && nights > 0) {
       placeNights.set(place, (placeNights.get(place) ?? 0) + nights);
     }
+    const rating = validRating(trip.rating);
+    if (rating !== null) {
+      ratingSum += rating;
+      ratingCount += 1;
+    }
   }
+  if (ratingCount > 0) stats.avgRating = ratingSum / ratingCount;
   stats.topPlaces = Array.from(placeNights.entries())
     .map(([name, nights]) => ({ name, nights }))
     .sort(

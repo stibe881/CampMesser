@@ -9,6 +9,7 @@ import {
   mysqlTable,
   text,
   timestamp,
+  tinyint,
   uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
@@ -206,6 +207,8 @@ export const tripLogs = mysqlTable(
     startDate: date("startDate", { mode: "string" }).notNull(),
     /** Abreise – Nächte ergeben sich aus der Differenz der beiden Daten */
     endDate: date("endDate", { mode: "string" }).notNull(),
+    /** Sterne-Bewertung 1–5; null = (noch) nicht bewertet */
+    rating: tinyint("rating"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },

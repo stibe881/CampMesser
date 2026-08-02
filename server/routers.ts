@@ -1001,6 +1001,7 @@ export const appRouter = router({
             notes: z.string().max(2000).nullish(),
             startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
             endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            rating: z.number().int().min(1).max(5).nullable().optional(),
           })
           .refine(v => v.endDate >= v.startDate, {
             message: "Die Abreise darf nicht vor der Anreise liegen.",
@@ -1042,8 +1043,28 @@ export const appRouter = router({
           notes: input.notes?.trim() || null,
           startDate: input.startDate,
           endDate: input.endDate,
+          rating: input.rating ?? null,
         });
         return { id };
+      }),
+    /** Sterne-Bewertung nachträglich setzen oder mit null wieder entfernen. */
+    setRating: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          rating: z.number().int().min(1).max(5).nullable(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.getTripLog(input.id, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        await db.setTripLogRating(input.id, ctx.user.id, input.rating);
+        return { success: true } as const;
       }),
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))

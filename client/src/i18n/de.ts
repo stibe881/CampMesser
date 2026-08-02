@@ -1224,6 +1224,16 @@ export const de = {
     galleryCounter: (n: number, total: number) => `Foto ${n} von ${total}`,
     galleryPrev: "Vorheriges Foto",
     galleryNext: "Nächstes Foto",
+    ratingLabel: "Bewertung (optional)",
+    ratingFormAria: "Bewertung in Sternen wählen",
+    ratingGroupAria: (name: string) => `Bewertung für ${name}`,
+    rateStarAria: (n: number) =>
+      n === 1 ? "Mit 1 Stern bewerten" : `Mit ${n} Sternen bewerten`,
+    removeRatingAria: "Bewertung entfernen",
+    ratingSaveFailed: "Bewertung konnte nicht gespeichert werden",
+    avgRatingLabel: "Ø Bewertung",
+    bestRatedLabel: "Best bewerteter Platz",
+    starsAvg: (value: string) => `Ø ${value} Sterne`,
   },
   firstAid: {
     title: "Erste-Hilfe-Guide",

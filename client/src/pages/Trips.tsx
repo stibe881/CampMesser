@@ -49,6 +49,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useI18n, useT } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
+import { cn } from "@/lib/utils";
 import {
   computeTripStats,
   computeYearReview,
@@ -138,6 +139,63 @@ function TripHolidayHints({
         </span>
       ))}
     </p>
+  );
+}
+
+/**
+ * 5 klickbare Sterne als radiogroup – ein Klick auf den bereits gewählten
+ * Stern wählt die Bewertung wieder ab (onChange(null)).
+ */
+function StarRating({
+  value,
+  onChange,
+  groupLabel,
+  disabled,
+  size = "md",
+}: {
+  value: number | null;
+  onChange: (rating: number | null) => void;
+  groupLabel: string;
+  disabled?: boolean;
+  size?: "sm" | "md";
+}) {
+  const t = useT();
+  const starClass = size === "sm" ? "h-4 w-4" : "h-6 w-6";
+  return (
+    <div
+      role="radiogroup"
+      aria-label={groupLabel}
+      className="flex items-center gap-0.5"
+    >
+      {[1, 2, 3, 4, 5].map(n => {
+        const active = value !== null && n <= value;
+        const selected = value === n;
+        return (
+          <button
+            key={n}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            disabled={disabled}
+            aria-label={
+              selected ? t.trips.removeRatingAria : t.trips.rateStarAria(n)
+            }
+            onClick={() => onChange(selected ? null : n)}
+            className="rounded p-0.5 transition-transform hover:scale-110 disabled:opacity-50"
+          >
+            <Star
+              className={cn(
+                starClass,
+                active
+                  ? "fill-chart-1 text-chart-1"
+                  : "text-muted-foreground/40"
+              )}
+              aria-hidden="true"
+            />
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -449,6 +507,10 @@ export default function TripsPage() {
     return `${fmt(startDate)} – ${fmt(endDate)}`;
   };
 
+  /** Ø-Bewertung mit maximal einer Nachkommastelle in der aktiven Sprache. */
+  const fmtRating = (value: number): string =>
+    value.toLocaleString(LOCALE_TAGS[lang], { maximumFractionDigits: 1 });
+
   const today = new Date().toISOString().slice(0, 10);
   const [spotChoice, setSpotChoice] = useState<string>(FREE_LOCATION);
   // "keine" = ohne Packliste, sonst Listen-ID
@@ -460,11 +522,14 @@ export default function TripsPage() {
     startDate: today,
     endDate: today,
   });
+  /** Sterne-Bewertung des neuen Eintrags (null = ohne Bewertung). */
+  const [formRating, setFormRating] = useState<number | null>(null);
 
   const addMutation = trpc.trips.add.useMutation({
     onSuccess: () => {
       utils.trips.list.invalidate();
       setForm(f => ({ ...f, location: "", title: "", notes: "" }));
+      setFormRating(null);
       toast.success(t.trips.entrySaved);
     },
     onError: e => toast.error(e.message || t.trips.entrySaveFailed),
@@ -473,6 +538,11 @@ export default function TripsPage() {
   const removeMutation = trpc.trips.remove.useMutation({
     onSuccess: () => utils.trips.list.invalidate(),
     onError: () => toast.error(t.common.deleteFailed),
+  });
+
+  const setRatingMutation = trpc.trips.setRating.useMutation({
+    onSuccess: () => utils.trips.list.invalidate(),
+    onError: () => toast.error(t.trips.ratingSaveFailed),
   });
 
   const spots = spotsQuery.data ?? [];
@@ -505,6 +575,7 @@ export default function TripsPage() {
         startDate: t.startDate,
         endDate: t.endDate,
         placeName: placeName(t),
+        rating: t.rating,
       })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [trips, spots]
@@ -594,7 +665,7 @@ export default function TripsPage() {
       {/* Statistik */}
       <Card className="mb-6">
         <CardContent className="pt-6">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
             <div className="text-center">
               <p className="font-serif text-2xl font-bold text-primary">
                 {stats.nightsByYear[currentYear] ?? 0}
@@ -627,6 +698,18 @@ export default function TripsPage() {
               </p>
               <p className="text-xs text-muted-foreground">
                 {t.trips.favoriteLabel}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="flex items-center justify-center gap-1 text-2xl font-bold">
+                <Star
+                  className="h-4 w-4 shrink-0 fill-chart-1 text-chart-1"
+                  aria-hidden="true"
+                />
+                {stats.avgRating !== null ? fmtRating(stats.avgRating) : "–"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t.trips.avgRatingLabel}
               </p>
             </div>
           </div>
@@ -716,6 +799,23 @@ export default function TripsPage() {
                     : ""}
                 </p>
               </div>
+              <div className="text-center">
+                <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
+                  <Star
+                    className="h-4 w-4 shrink-0 fill-chart-1 text-chart-1"
+                    aria-hidden="true"
+                  />
+                  <span className="truncate">
+                    {yearReview.bestRated?.name ?? "–"}
+                  </span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t.trips.bestRatedLabel}
+                  {yearReview.bestRated
+                    ? ` · ${t.trips.starsAvg(fmtRating(yearReview.bestRated.rating))}`
+                    : ""}
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -747,6 +847,7 @@ export default function TripsPage() {
                 notes: form.notes.trim() || null,
                 startDate: form.startDate,
                 endDate: form.endDate,
+                rating: formRating,
               });
             }}
           >
@@ -861,6 +962,16 @@ export default function TripsPage() {
                 value={form.notes}
                 onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
               />
+            </div>
+            <div>
+              <Label>{t.trips.ratingLabel}</Label>
+              <div className="mt-1.5">
+                <StarRating
+                  value={formRating}
+                  onChange={setFormRating}
+                  groupLabel={t.trips.ratingFormAria}
+                />
+              </div>
             </div>
             <Button
               type="submit"
@@ -1059,6 +1170,19 @@ export default function TripsPage() {
                         {t.trips.nightsCount(nights)}
                       </span>
                     </p>
+                    <div className="mt-1.5">
+                      <StarRating
+                        size="sm"
+                        value={trip.rating ?? null}
+                        disabled={setRatingMutation.isPending}
+                        onChange={rating =>
+                          setRatingMutation.mutate({ id: trip.id, rating })
+                        }
+                        groupLabel={t.trips.ratingGroupAria(
+                          trip.title || placeName(trip)
+                        )}
+                      />
+                    </div>
                     {trip.notes && (
                       <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
                         {trip.notes}

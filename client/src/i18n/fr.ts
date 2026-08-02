@@ -1220,6 +1220,16 @@ export const fr: Translation = {
     galleryCounter: (n, total) => `Photo ${n} sur ${total}`,
     galleryPrev: "Photo précédente",
     galleryNext: "Photo suivante",
+    ratingLabel: "Évaluation (optionnelle)",
+    ratingFormAria: "Choisir une évaluation en étoiles",
+    ratingGroupAria: (name: string) => `Évaluation pour ${name}`,
+    rateStarAria: (n: number) =>
+      n === 1 ? "Évaluer avec 1 étoile" : `Évaluer avec ${n} étoiles`,
+    removeRatingAria: "Retirer l'évaluation",
+    ratingSaveFailed: "L'évaluation n'a pas pu être enregistrée",
+    avgRatingLabel: "Note moyenne",
+    bestRatedLabel: "Emplacement le mieux noté",
+    starsAvg: (value: string) => `Ø ${value} étoiles`,
   },
   firstAid: {
     title: "Guide de premiers secours",
