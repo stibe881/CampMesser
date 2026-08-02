@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import { groupLabels, groups, modules } from "@/data/modules";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
-import { useI18n, useT } from "@/i18n";
+import { MEAL_LABELS, MEALS } from "@shared/menuPlan";
+import { useI18n } from "@/i18n";
 import {
   describeWeatherCode,
   detectAlerts,
@@ -191,7 +192,7 @@ function CurrentTripWeather({
  * sonst wie bisher den Countdown zum nächsten geplanten Trip.
  */
 function NextTripWidget() {
-  const t = useT();
+  const { lang, t } = useI18n();
   const { isAuthenticated } = useAuth();
   const tripsQuery = trpc.trips.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -214,6 +215,46 @@ function NextTripWidget() {
     { listId: next?.packListId ?? 0 },
     { enabled: Boolean(next?.packListId) && !current }
   );
+
+  // Heutige Mahlzeiten des laufenden Aufenthalts: Menüplan nur laden, wenn
+  // wirklich ein Trip läuft; eigene Rezepte nur, wenn heute eines verplant ist.
+  const menuQuery = trpc.menu.listByTrip.useQuery(
+    { tripId: current?.id ?? 0 },
+    { enabled: Boolean(current), staleTime: 60_000 }
+  );
+  const todayEntries = (menuQuery.data?.entries ?? []).filter(
+    e => e.day === today
+  );
+  const customRecipesQuery = trpc.recipes.list.useQuery(undefined, {
+    enabled:
+      Boolean(current) && todayEntries.some(e => e.customRecipeId != null),
+    staleTime: 60_000,
+  });
+
+  /** Anzeigetitel eines Menüplan-Eintrags in der aktiven Sprache. */
+  const mealTitle = (entry: (typeof todayEntries)[number]): string | null => {
+    if (entry.recipeId) {
+      const recipe = recipes.find(r => r.id === entry.recipeId);
+      return recipe ? pick(recipe.name, lang) : entry.recipeId;
+    }
+    if (entry.customRecipeId != null) {
+      return (
+        customRecipesQuery.data?.find(r => r.id === entry.customRecipeId)
+          ?.name ?? null
+      );
+    }
+    return entry.freeText ?? null;
+  };
+
+  // «Frühstück: X · Mittag: Y · Abend: Z» – nur belegte Slots, sonst leer
+  const mealsLine = MEALS.map(meal => {
+    const entry = todayEntries.find(e => e.meal === meal);
+    if (!entry) return null;
+    const title = mealTitle(entry);
+    return title ? `${pick(MEAL_LABELS[meal], lang)}: ${title}` : null;
+  })
+    .filter((part): part is string => part !== null)
+    .join(" · ");
 
   const tripPlace = (trip: NonNullable<typeof next>): string =>
     trip.title ||
@@ -256,6 +297,16 @@ function NextTripWidget() {
                 latitude={spot.latitude}
                 longitude={spot.longitude}
               />
+            )}
+            {mealsLine && (
+              <span className="mt-0.5 flex items-start gap-1.5 text-xs text-muted-foreground">
+                <UtensilsCrossed
+                  className="mt-0.5 h-3 w-3 shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="sr-only">{t.home.currentTripMealsSr}</span>
+                <span className="min-w-0">{mealsLine}</span>
+              </span>
             )}
           </span>
         </div>

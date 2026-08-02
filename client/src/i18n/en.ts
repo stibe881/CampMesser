@@ -73,6 +73,7 @@ export const en: Translation = {
     currentTripSpotLink: "Pitch dossier",
     currentTripSpotAria: place => `Open the pitch dossier for ${place}`,
     currentTripShoppingLink: "Shopping list",
+    currentTripMealsSr: "Today's meals:",
     weatherAria: (temp, label) =>
       `Current weather: ${temp} degrees, ${label} – open the weather module`,
     weatherNoAlerts: "No severe weather warnings at your location",

@@ -73,6 +73,7 @@ export const fr: Translation = {
     currentTripSpotLink: "Dossier de l'emplacement",
     currentTripSpotAria: place => `Ouvrir le dossier de l'emplacement ${place}`,
     currentTripShoppingLink: "Liste de courses",
+    currentTripMealsSr: "Repas d'aujourd'hui :",
     weatherAria: (temp, label) =>
       `Météo actuelle : ${temp} degrés, ${label} – vers le module météo`,
     weatherNoAlerts: "Aucune alerte d'intempéries à ton emplacement",

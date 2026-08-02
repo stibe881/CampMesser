@@ -74,6 +74,7 @@ export const de = {
     currentTripSpotLink: "Platz-Dossier",
     currentTripSpotAria: (place: string) => `Platz-Dossier zu ${place} öffnen`,
     currentTripShoppingLink: "Einkaufsliste",
+    currentTripMealsSr: "Heutige Mahlzeiten:",
     weatherAria: (temp: number, label: string) =>
       `Aktuelles Wetter: ${temp} Grad, ${label} – zum Wetter-Modul`,
     weatherNoAlerts: "Keine Unwetterwarnungen an deinem Standort",
