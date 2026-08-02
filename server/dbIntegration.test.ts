@@ -8,8 +8,9 @@ import type { TrpcContext } from "./_core/context";
  * Migrationen). Lokal ohne Datenbank wird die Datei übersprungen.
  * Ablauf: Registrieren → Anmelden → Daten quer durch alle Nutzer-Tabellen
  * anlegen (Packliste, Einstellung, Zeltplatz mit Foto, Trip mit Foto und Menüplan,
- * Rezept mit Foto, Schnitzeljagd, Quiz, Kinder-Profil mit Abzeichen und
- * Zählern, Einkaufsliste, Kühlbox samt Vorlage, Push-Abo, Heim-Standort)
+ * Rezept mit Foto, Inventar-Gegenstand mit Foto, Schnitzeljagd, Quiz,
+ * Kinder-Profil mit Abzeichen und Zählern, Einkaufsliste, Kühlbox samt
+ * Vorlage, Push-Abo, Heim-Standort)
  * → Konto löschen → prüfen, dass die Lösch-Kaskade alle Tabellen und
  * die Upload-Dateien erfasst hat.
  */
@@ -205,6 +206,7 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     expect(
       (await authed.family.children.list()).some(c => c.id === secondChildId)
     ).toBe(false);
+    const invItemId = await authed.inventory.add({ name: "CI-Zelt" });
     await authed.shopping.add({ name: "CI-Zutat" });
     // Einkaufsliste teilen: Token ist idempotent, öffentlicher Abruf und
     // Abhaken über den Teil-Link funktionieren ohne Anmeldung
@@ -262,17 +264,23 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     const { getDb } = await import("./db");
     const schema = await import("../drizzle/schema");
     const { eq } = await import("drizzle-orm");
-    const { tripPhotoStorage, recipePhotoStorage, spotPhotoStorage } =
-      await import("./photoStorage");
+    const {
+      tripPhotoStorage,
+      recipePhotoStorage,
+      spotPhotoStorage,
+      inventoryPhotoStorage,
+    } = await import("./photoStorage");
     const fs = await import("node:fs/promises");
     const dbc = (await getDb())!;
     const uid = (user as NonNullable<typeof user>).id;
     const tripFile = `ci-trip-${Date.now()}.jpg`;
     const recipeFile = `ci-recipe-${Date.now()}.jpg`;
     const spotFile = `ci-spot-${Date.now()}.jpg`;
+    const inventoryFile = `ci-inventory-${Date.now()}.jpg`;
     await tripPhotoStorage.saveFile(tripFile, Buffer.from("x"));
     await recipePhotoStorage.saveFile(recipeFile, Buffer.from("x"));
     await spotPhotoStorage.saveFile(spotFile, Buffer.from("x"));
+    await inventoryPhotoStorage.saveFile(inventoryFile, Buffer.from("x"));
     await dbc
       .insert(schema.tripPhotos)
       .values({ userId: uid, tripId, fileName: tripFile });
@@ -283,6 +291,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     await dbc
       .insert(schema.spotPhotos)
       .values({ userId: uid, spotId, fileName: spotFile });
+    await dbc
+      .update(schema.inventoryItems)
+      .set({ imageFileName: inventoryFile })
+      .where(eq(schema.inventoryItems.id, invItemId));
 
     // Aufräumen: Konto löschen entfernt auch die angelegten Daten
     const deleted = await authed.auth.deleteAccount({ password });
@@ -342,6 +354,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .where(eq(schema.childStats.userId, uid)),
       dbc
         .select()
+        .from(schema.inventoryItems)
+        .where(eq(schema.inventoryItems.userId, uid)),
+      dbc
+        .select()
         .from(schema.shoppingItems)
         .where(eq(schema.shoppingItems.userId, uid)),
       dbc
@@ -384,6 +400,9 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     ).rejects.toThrow();
     await expect(
       fs.access(spotPhotoStorage.photoPath(spotFile))
+    ).rejects.toThrow();
+    await expect(
+      fs.access(inventoryPhotoStorage.photoPath(inventoryFile))
     ).rejects.toThrow();
   });
 });

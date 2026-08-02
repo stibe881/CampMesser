@@ -872,9 +872,36 @@ export const appRouter = router({
       }),
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(({ ctx, input }) =>
-        db.deleteInventoryItem(input.id, ctx.user.id)
-      ),
+      .mutation(async ({ ctx, input }) => {
+        // Foto-Datei mitputzen: erst Dateinamen sichern, dann DB-Zeile
+        // löschen und zuletzt die Datei auf dem Webspace entfernen.
+        const item = await db.getInventoryItem(input.id, ctx.user.id);
+        await db.deleteInventoryItem(input.id, ctx.user.id);
+        if (item?.imageFileName) {
+          const { inventoryPhotoStorage } = await import("./photoStorage");
+          await inventoryPhotoStorage.deleteFiles([item.imageFileName]);
+        }
+      }),
+    /** Foto eines Gegenstands entfernen (Feld + Datei auf dem Webspace). */
+    removePhoto: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const item = await db.getInventoryItem(input.id, ctx.user.id);
+        if (!item) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Gegenstand nicht gefunden.",
+          });
+        }
+        if (item.imageFileName) {
+          await db.updateInventoryItem(input.id, ctx.user.id, {
+            imageFileName: null,
+          });
+          const { inventoryPhotoStorage } = await import("./photoStorage");
+          await inventoryPhotoStorage.deleteFiles([item.imageFileName]);
+        }
+        return { success: true } as const;
+      }),
   }),
 
   shopping: router({

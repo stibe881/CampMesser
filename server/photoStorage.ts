@@ -58,3 +58,6 @@ export const recipePhotoStorage = createPhotoStorage("recipes");
 
 /** Fotos zu Zeltplatz-Favoriten: uploads/spots/<fileName> */
 export const spotPhotoStorage = createPhotoStorage("spots");
+
+/** Fotos zu Inventar-Gegenständen: uploads/inventory/<fileName> */
+export const inventoryPhotoStorage = createPhotoStorage("inventory");

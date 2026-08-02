@@ -25,13 +25,13 @@ fi
 
 echo "==> Neueste Version holen"
 # Wichtig: Das Deployment läuft über git pull und baut in-place – das
-# unversionierte uploads/-Verzeichnis (Tagebuch-, Rezept- und Zeltplatz-Fotos,
-# in .gitignore) bleibt dabei unangetastet. Falls je auf rsync o. Ä. umgestellt
-# wird: uploads/ zwingend ausnehmen (rsync --exclude 'uploads/').
+# unversionierte uploads/-Verzeichnis (Tagebuch-, Rezept-, Zeltplatz- und
+# Inventar-Fotos, in .gitignore) bleibt dabei unangetastet. Falls je auf rsync
+# o. Ä. umgestellt wird: uploads/ zwingend ausnehmen (rsync --exclude 'uploads/').
 git pull --ff-only
 
 echo "==> Upload-Verzeichnisse sicherstellen"
-mkdir -p uploads/trips uploads/recipes uploads/spots
+mkdir -p uploads/trips uploads/recipes uploads/spots uploads/inventory
 
 echo "==> Abhängigkeiten installieren"
 $PKG install

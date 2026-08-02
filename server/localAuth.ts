@@ -176,6 +176,10 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     .select({ fileName: spotPhotos.fileName })
     .from(spotPhotos)
     .where(eq(spotPhotos.userId, userId));
+  const inventoryRows = await db
+    .select({ imageFileName: inventoryItems.imageFileName })
+    .from(inventoryItems)
+    .where(eq(inventoryItems.userId, userId));
   // Packlisten-Positionen zuerst (referenzieren Listen)
   const lists = await db
     .select({ id: packLists.id })
@@ -219,8 +223,12 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(users).where(eq(users.id, userId));
   // Zuletzt die Upload-Dateien vom Webspace entfernen – fehlende Dateien
   // blockieren nie, und verwaiste Dateien sind schlimmstenfalls harmlos.
-  const { tripPhotoStorage, recipePhotoStorage, spotPhotoStorage } =
-    await import("./photoStorage");
+  const {
+    tripPhotoStorage,
+    recipePhotoStorage,
+    spotPhotoStorage,
+    inventoryPhotoStorage,
+  } = await import("./photoStorage");
   await tripPhotoStorage.deleteFiles(photoRows.map(p => p.fileName));
   await recipePhotoStorage.deleteFiles(
     recipeRows
@@ -228,6 +236,11 @@ export async function deleteUserAccount(userId: number): Promise<void> {
       .filter((name): name is string => Boolean(name))
   );
   await spotPhotoStorage.deleteFiles(spotPhotoRows.map(p => p.fileName));
+  await inventoryPhotoStorage.deleteFiles(
+    inventoryRows
+      .map(r => r.imageFileName)
+      .filter((name): name is string => Boolean(name))
+  );
 }
 
 /** Konto anhand der numerischen Id nachschlagen (z. B. für den Passwort-Reset). */

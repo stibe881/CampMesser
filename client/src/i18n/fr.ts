@@ -517,6 +517,23 @@ export const fr: Translation = {
     editAria: name => `Modifier ${name}`,
     deleteAria: name => `Supprimer ${name}`,
     deleteConfirm: name => `Vraiment supprimer «${name}» ?`,
+    photoLabel: "Photo (facultatif)",
+    photoChoose: "Choisir une photo",
+    photoChange: "Changer la photo",
+    photoRemove: "Supprimer la photo",
+    photoPreviewAlt: "Aperçu de la photo de l'équipement",
+    photoHint:
+      "JPEG, PNG ou WebP – la photo est automatiquement réduite avant l'envoi.",
+    photoUploading: "Envoi de la photo …",
+    photoUploadFailed: "Enregistré, mais la photo n'a pas pu être téléversée.",
+    photoTooLarge: "La photo est trop grande (max. 5 Mo).",
+    photoHeic: "Le navigateur ne peut pas lire le HEIC/HEIF – exporte en JPEG.",
+    photoReadFailed: "L'image n'a pas pu être lue.",
+    photoRemoveFailed: "La photo n'a pas pu être supprimée.",
+    photoThumbAria: (name: string) =>
+      `Afficher la photo de ${name} en plein écran`,
+    photoDialogAlt: (name: string) => `Photo de ${name}`,
+    photoDialogDescription: "Photo de l'objet en grand.",
     emptyTitle: "Pas encore d'équipement saisi",
     emptyText:
       "Commence par les grandes pièces : tente, sac de couchage, matelas isolant.",

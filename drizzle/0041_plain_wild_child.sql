@@ -1,0 +1,1 @@
+ALTER TABLE `inventoryItems` ADD `imageFileName` varchar(64);

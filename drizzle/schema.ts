@@ -150,6 +150,8 @@ export const inventoryItems = mysqlTable(
     volumeLiters: float("volumeLiters").notNull().default(0),
     quantity: int("quantity").notNull().default(1),
     notes: text("notes"),
+    /** Dateiname des Fotos unter uploads/inventory/ (genau EIN Foto pro Gegenstand). */
+    imageFileName: varchar("imageFileName", { length: 64 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },

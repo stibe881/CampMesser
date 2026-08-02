@@ -342,6 +342,36 @@ export async function getInventory(userId: number) {
     .where(eq(inventoryItems.userId, userId));
 }
 
+/** Einzelner Inventar-Gegenstand (nur, wenn er der Person gehört). */
+export async function getInventoryItem(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(inventoryItems)
+    .where(and(eq(inventoryItems.id, id), eq(inventoryItems.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/** Inventar-Gegenstand über den Foto-Dateinamen (für die private Auslieferung). */
+export async function getInventoryItemByImageFileName(
+  fileName: string,
+  userId: number
+) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(inventoryItems)
+    .where(
+      and(
+        eq(inventoryItems.imageFileName, fileName),
+        eq(inventoryItems.userId, userId)
+      )
+    )
+    .limit(1);
+  return rows[0];
+}
+
 export async function addInventoryItem(data: InsertInventoryItem) {
   const db = requireDb(await getDb());
   const [result] = await db.insert(inventoryItems).values(data);

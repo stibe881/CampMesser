@@ -1,5 +1,12 @@
-import { useMemo, useState } from "react";
-import { Loader2, Package, Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ImagePlus,
+  Loader2,
+  Package,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -23,7 +30,13 @@ import {
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { l4, pick, type L4 } from "@shared/i18n";
+import { resizeImageForUpload } from "@/lib/imageResize";
 import { trpc } from "@/lib/trpc";
+
+/** Private Foto-URL eines Inventar-Gegenstands (Auth über Session-Cookie). */
+function inventoryPhotoUrl(fileName: string): string {
+  return `/api/inventory/photos/${fileName}`;
+}
 
 /**
  * Kategorien fürs Inventar – gespeichert wird die Fassung in der aktuellen
@@ -49,6 +62,8 @@ interface FormState {
   weightGrams: string;
   volumeLiters: string;
   quantity: string;
+  /** Bestehendes Foto des bearbeiteten Gegenstands (Dateiname) */
+  imageFileName: string | null;
 }
 
 export default function InventoryPage() {
@@ -70,25 +85,32 @@ export default function InventoryPage() {
     weightGrams: "",
     volumeLiters: "",
     quantity: "1",
+    imageFileName: null,
   };
   const [form, setForm] = useState<FormState>(emptyForm);
+  // Foto: neu ausgewählt (bereits verkleinert), Vorschau-URL und
+  // «bestehendes Foto entfernen»-Wunsch – ausgeführt wird alles beim Speichern.
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  const [removePhoto, setRemovePhoto] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  // Vollbild-Ansicht eines Eintrags-Fotos (Klick aufs Thumbnail)
+  const [viewPhoto, setViewPhoto] = useState<{
+    fileName: string;
+    name: string;
+  } | null>(null);
 
-  const addMutation = trpc.inventory.add.useMutation({
-    onSuccess: () => {
-      utils.inventory.list.invalidate();
-      setDialogOpen(false);
-      toast.success(t.inventory.created);
-    },
-    onError: () => toast.error(t.common.saveFailed),
-  });
-  const updateMutation = trpc.inventory.update.useMutation({
-    onSuccess: () => {
-      utils.inventory.list.invalidate();
-      setDialogOpen(false);
-      toast.success(t.inventory.updated);
-    },
-    onError: () => toast.error(t.common.saveFailed),
-  });
+  // Objekt-URL der Vorschau beim Ersetzen/Schliessen wieder freigeben
+  useEffect(() => {
+    return () => {
+      if (photoPreviewUrl) URL.revokeObjectURL(photoPreviewUrl);
+    };
+  }, [photoPreviewUrl]);
+
+  const addMutation = trpc.inventory.add.useMutation();
+  const updateMutation = trpc.inventory.update.useMutation();
+  const removePhotoMutation = trpc.inventory.removePhoto.useMutation();
   const removeMutation = trpc.inventory.remove.useMutation({
     onSuccess: () => utils.inventory.list.invalidate(),
   });
@@ -105,8 +127,15 @@ export default function InventoryPage() {
     };
   }, [query.data]);
 
+  const resetPhotoState = () => {
+    setPhotoBlob(null);
+    setPhotoPreviewUrl(null);
+    setRemovePhoto(false);
+  };
+
   const openNew = () => {
     setForm(emptyForm);
+    resetPhotoState();
     setDialogOpen(true);
   };
 
@@ -118,11 +147,43 @@ export default function InventoryPage() {
       weightGrams: String(item.weightGrams || ""),
       volumeLiters: String(item.volumeLiters || ""),
       quantity: String(item.quantity),
+      imageFileName: item.imageFileName ?? null,
     });
+    resetPhotoState();
     setDialogOpen(true);
   };
 
-  const submit = () => {
+  // Aktuelle Vorschau: neues Foto > bestehendes Foto (sofern nicht entfernt)
+  const previewUrl =
+    photoPreviewUrl ??
+    (form.imageFileName && !removePhoto
+      ? inventoryPhotoUrl(form.imageFileName)
+      : null);
+
+  const handlePhotoSelected = async (fileList: FileList | null) => {
+    const file = fileList?.[0];
+    if (photoInputRef.current) photoInputRef.current.value = "";
+    if (!file) return;
+    try {
+      const blob = await resizeImageForUpload(file);
+      setPhotoBlob(blob);
+      setPhotoPreviewUrl(URL.createObjectURL(blob));
+      setRemovePhoto(false);
+    } catch {
+      // Dekodieren fehlgeschlagen – bei HEIC/HEIF gezielt darauf hinweisen
+      const isHeic =
+        /image\/hei[cf]/.test(file.type) || /\.hei[cf]$/i.test(file.name);
+      toast.error(isHeic ? t.inventory.photoHeic : t.inventory.photoReadFailed);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoBlob(null);
+    setPhotoPreviewUrl(null);
+    if (form.imageFileName) setRemovePhoto(true);
+  };
+
+  const submit = async () => {
     const data = {
       name: form.name.trim(),
       category: form.category,
@@ -134,10 +195,49 @@ export default function InventoryPage() {
       toast.error(t.inventory.nameRequired);
       return;
     }
-    if (form.id) {
-      updateMutation.mutate({ id: form.id, ...data });
-    } else {
-      addMutation.mutate(data);
+    try {
+      let id: number;
+      if (form.id) {
+        await updateMutation.mutateAsync({ id: form.id, ...data });
+        id = form.id;
+      } else {
+        id = await addMutation.mutateAsync(data);
+      }
+      // Foto-Schritt nach dem Speichern: Upload ersetzt ein bestehendes
+      // Foto serverseitig, Entfernen läuft über tRPC.
+      if (photoBlob) {
+        setPhotoUploading(true);
+        try {
+          const response = await fetch(`/api/inventory/${id}/photo`, {
+            method: "POST",
+            headers: { "Content-Type": "image/jpeg" },
+            body: photoBlob,
+            credentials: "include",
+          });
+          if (!response.ok) {
+            toast.error(
+              response.status === 413
+                ? t.inventory.photoTooLarge
+                : t.inventory.photoUploadFailed
+            );
+          }
+        } catch {
+          toast.error(t.inventory.photoUploadFailed);
+        } finally {
+          setPhotoUploading(false);
+        }
+      } else if (removePhoto && form.imageFileName) {
+        try {
+          await removePhotoMutation.mutateAsync({ id });
+        } catch {
+          toast.error(t.inventory.photoRemoveFailed);
+        }
+      }
+      utils.inventory.list.invalidate();
+      setDialogOpen(false);
+      toast.success(form.id ? t.inventory.updated : t.inventory.created);
+    } catch {
+      toast.error(t.common.saveFailed);
     }
   };
 
@@ -299,18 +399,73 @@ export default function InventoryPage() {
                 />
               </div>
             </div>
+            <div>
+              <Label className="mb-1.5 block">{t.inventory.photoLabel}</Label>
+              {previewUrl && (
+                <img
+                  src={previewUrl}
+                  alt={t.inventory.photoPreviewAlt}
+                  className="mb-2 aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
+                />
+              )}
+              <div className="flex gap-2">
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => handlePhotoSelected(e.target.files)}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => photoInputRef.current?.click()}
+                >
+                  <ImagePlus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {previewUrl
+                    ? t.inventory.photoChange
+                    : t.inventory.photoChoose}
+                </Button>
+                {previewUrl && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={handleRemovePhoto}
+                  >
+                    <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    {t.inventory.photoRemove}
+                  </Button>
+                )}
+              </div>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                {t.inventory.photoHint}
+              </p>
+            </div>
             <Button
               className="w-full"
-              onClick={submit}
-              disabled={addMutation.isPending || updateMutation.isPending}
+              onClick={() => void submit()}
+              disabled={
+                addMutation.isPending ||
+                updateMutation.isPending ||
+                photoUploading
+              }
             >
-              {(addMutation.isPending || updateMutation.isPending) && (
+              {(addMutation.isPending ||
+                updateMutation.isPending ||
+                photoUploading) && (
                 <Loader2
                   className="mr-2 h-4 w-4 animate-spin"
                   aria-hidden="true"
                 />
               )}
-              {form.id ? t.common.save : t.inventory.submitNew}
+              {photoUploading
+                ? t.inventory.photoUploading
+                : form.id
+                  ? t.common.save
+                  : t.inventory.submitNew}
             </Button>
           </div>
         </DialogContent>
@@ -353,15 +508,39 @@ export default function InventoryPage() {
                   className="border-b border-border/60 last:border-0 hover:bg-muted/30"
                 >
                   <td className="px-4 py-2.5">
-                    <span className="font-medium">{item.name}</span>
-                    {item.quantity > 1 && (
-                      <span className="ml-1.5 text-xs text-muted-foreground">
-                        × {item.quantity}
-                      </span>
-                    )}
-                    <span className="block text-xs text-muted-foreground sm:hidden">
-                      {item.category}
-                    </span>
+                    <div className="flex items-center gap-2.5">
+                      {item.imageFileName && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setViewPhoto({
+                              fileName: item.imageFileName!,
+                              name: item.name,
+                            })
+                          }
+                          aria-label={t.inventory.photoThumbAria(item.name)}
+                          className="shrink-0 overflow-hidden rounded-md border border-border/60"
+                        >
+                          <img
+                            src={inventoryPhotoUrl(item.imageFileName)}
+                            alt=""
+                            loading="lazy"
+                            className="h-9 w-9 object-cover"
+                          />
+                        </button>
+                      )}
+                      <div>
+                        <span className="font-medium">{item.name}</span>
+                        {item.quantity > 1 && (
+                          <span className="ml-1.5 text-xs text-muted-foreground">
+                            × {item.quantity}
+                          </span>
+                        )}
+                        <span className="block text-xs text-muted-foreground sm:hidden">
+                          {item.category}
+                        </span>
+                      </div>
+                    </div>
                   </td>
                   <td className="hidden px-4 py-2.5 text-muted-foreground sm:table-cell">
                     {item.category}
@@ -417,6 +596,30 @@ export default function InventoryPage() {
           </p>
         </div>
       )}
+
+      {/* Vollbild-Ansicht eines Fotos (Klick aufs Thumbnail) */}
+      <Dialog
+        open={viewPhoto !== null}
+        onOpenChange={open => {
+          if (!open) setViewPhoto(null);
+        }}
+      >
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{viewPhoto?.name}</DialogTitle>
+            <DialogDescription>
+              {t.inventory.photoDialogDescription}
+            </DialogDescription>
+          </DialogHeader>
+          {viewPhoto && (
+            <img
+              src={inventoryPhotoUrl(viewPhoto.fileName)}
+              alt={t.inventory.photoDialogAlt(viewPhoto.name)}
+              className="max-h-[70vh] w-full rounded-lg object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
