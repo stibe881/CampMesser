@@ -2988,6 +2988,10 @@ export const appRouter = router({
                 longitude: spot.longitude,
                 note: spot.note,
                 attributesJson: spot.attributesJson,
+                // Kontakt & Check-in – unkritisch und für Mitreisende hilfreich
+                receptionPhone: spot.receptionPhone,
+                checkinInfo: spot.checkinInfo,
+                parcelNumber: spot.parcelNumber,
               }
             : null,
           menu: entries.map(e => ({
@@ -3130,6 +3134,9 @@ export const appRouter = router({
             .string()
             .max(SPOT_ATTRIBUTES_JSON_MAX_LENGTH)
             .optional(),
+          receptionPhone: z.string().max(40).nullish(),
+          checkinInfo: z.string().max(120).nullish(),
+          parcelNumber: z.string().max(40).nullish(),
         })
       )
       .mutation(({ ctx, input }) =>
@@ -3137,6 +3144,10 @@ export const appRouter = router({
           userId: ctx.user.id,
           ...input,
           attributesJson: normalizeSpotAttributesJson(input.attributesJson),
+          // Kontaktdaten trimmen; leere Eingaben landen als null in der DB
+          receptionPhone: input.receptionPhone?.trim() || null,
+          checkinInfo: input.checkinInfo?.trim() || null,
+          parcelNumber: input.parcelNumber?.trim() || null,
         })
       ),
     update: protectedProcedure
@@ -3150,13 +3161,28 @@ export const appRouter = router({
             .max(SPOT_ATTRIBUTES_JSON_MAX_LENGTH)
             .nullable()
             .optional(),
+          receptionPhone: z.string().max(40).nullish(),
+          checkinInfo: z.string().max(120).nullish(),
+          parcelNumber: z.string().max(40).nullish(),
         })
       )
       .mutation(({ ctx, input }) => {
-        const { id, ...data } = input;
+        const { id, receptionPhone, checkinInfo, parcelNumber, ...data } =
+          input;
         return db.updateCampSpot(id, ctx.user.id, {
           ...data,
           attributesJson: normalizeSpotAttributesJson(data.attributesJson),
+          // Kontaktdaten nur anfassen, wenn sie mitgeschickt wurden;
+          // getrimmt, leere Eingaben löschen den Wert (null)
+          ...(receptionPhone !== undefined
+            ? { receptionPhone: receptionPhone?.trim() || null }
+            : {}),
+          ...(checkinInfo !== undefined
+            ? { checkinInfo: checkinInfo?.trim() || null }
+            : {}),
+          ...(parcelNumber !== undefined
+            ? { parcelNumber: parcelNumber?.trim() || null }
+            : {}),
         });
       }),
     remove: protectedProcedure
@@ -3237,6 +3263,10 @@ export const appRouter = router({
           note: spot.note,
           // Eigenschaften sind unkritisch und für Empfänger*innen hilfreich
           attributesJson: spot.attributesJson,
+          // Kontakt & Check-in ebenso – praktisch für Mitreisende vor Ort
+          receptionPhone: spot.receptionPhone,
+          checkinInfo: spot.checkinInfo,
+          parcelNumber: spot.parcelNumber,
         };
       }),
   }),

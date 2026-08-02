@@ -7,6 +7,7 @@ import {
   Loader2,
   MapPin,
   Moon,
+  Phone,
   Star,
   Tent,
   UserRound,
@@ -262,6 +263,43 @@ export default function SharedTripPage() {
               lang={lang}
               className="mt-3"
             />
+            {/* Kontakt & Check-in – nur wenn etwas hinterlegt ist */}
+            {(spot.receptionPhone || spot.checkinInfo || spot.parcelNumber) && (
+              <dl className="mt-3 space-y-1.5 border-t border-border pt-3 text-sm">
+                {spot.receptionPhone && (
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                    <dt className="flex w-36 shrink-0 items-center gap-1.5 text-muted-foreground">
+                      <Phone className="h-3.5 w-3.5" aria-hidden="true" />
+                      {t.sharedTrip.contactPhone}
+                    </dt>
+                    <dd>
+                      <a
+                        href={`tel:${spot.receptionPhone.replace(/[^+\d]/g, "")}`}
+                        className="font-medium text-primary hover:underline"
+                      >
+                        {spot.receptionPhone}
+                      </a>
+                    </dd>
+                  </div>
+                )}
+                {spot.checkinInfo && (
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                    <dt className="w-36 shrink-0 text-muted-foreground">
+                      {t.sharedTrip.contactCheckin}
+                    </dt>
+                    <dd>{spot.checkinInfo}</dd>
+                  </div>
+                )}
+                {spot.parcelNumber && (
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                    <dt className="w-36 shrink-0 text-muted-foreground">
+                      {t.sharedTrip.contactParcel}
+                    </dt>
+                    <dd>{spot.parcelNumber}</dd>
+                  </div>
+                )}
+              </dl>
+            )}
           </CardContent>
         </Card>
       )}

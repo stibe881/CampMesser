@@ -14,6 +14,7 @@ import {
   Moon,
   Mountain,
   Navigation,
+  Phone,
   QrCode,
   Share2,
   SlidersHorizontal,
@@ -43,6 +44,8 @@ import {
 } from "@shared/spotAttributes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -109,6 +112,12 @@ export default function SpotDetailPage() {
   const updateMutation = trpc.spots.update.useMutation();
   const [attrDialogOpen, setAttrDialogOpen] = useState(false);
   const [attrDraft, setAttrDraft] = useState<SpotAttributes>({});
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [contactDraft, setContactDraft] = useState({
+    phone: "",
+    checkin: "",
+    parcel: "",
+  });
   const utils = trpc.useUtils();
   const photosQuery = trpc.spots.photos.list.useQuery(
     { spotId },
@@ -285,6 +294,39 @@ export default function SpotDetailPage() {
     setAttrDialogOpen(true);
   };
 
+  const openContactDialog = () => {
+    setContactDraft({
+      phone: spot.receptionPhone ?? "",
+      checkin: spot.checkinInfo ?? "",
+      parcel: spot.parcelNumber ?? "",
+    });
+    setContactDialogOpen(true);
+  };
+
+  const saveContact = () => {
+    updateMutation.mutate(
+      {
+        id: spot.id,
+        receptionPhone: contactDraft.phone,
+        checkinInfo: contactDraft.checkin,
+        parcelNumber: contactDraft.parcel,
+      },
+      {
+        onSuccess: () => {
+          utils.spots.list.invalidate();
+          setContactDialogOpen(false);
+          toast.success(t.spotDetail.contactSaved);
+        },
+        onError: () => toast.error(t.common.saveFailed),
+      }
+    );
+  };
+
+  /** Etwas zum Anzeigen? Sonst zeigt die Karte den Leer-Hinweis. */
+  const hasContact = Boolean(
+    spot.receptionPhone || spot.checkinInfo || spot.parcelNumber
+  );
+
   const saveAttributes = () => {
     const json =
       Object.keys(attrDraft).length > 0 ? JSON.stringify(attrDraft) : null;
@@ -357,6 +399,66 @@ export default function SpotDetailPage() {
             onClick={openAttrDialog}
           >
             {t.spotDetail.attributesEditButton}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Kontakt & Check-in: Rezeptions-Telefon, Zeiten, Parzellen-Nummer */}
+      <Card className="mb-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
+            {t.spotDetail.contactTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {hasContact ? (
+            <dl className="space-y-2 text-sm">
+              {spot.receptionPhone && (
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                  <dt className="w-36 shrink-0 text-muted-foreground">
+                    {t.spotDetail.contactPhoneLabel}
+                  </dt>
+                  <dd>
+                    <a
+                      href={`tel:${spot.receptionPhone.replace(/[^+\d]/g, "")}`}
+                      className="font-medium text-primary hover:underline"
+                      aria-label={t.spotDetail.contactPhoneAria(spot.name)}
+                    >
+                      {spot.receptionPhone}
+                    </a>
+                  </dd>
+                </div>
+              )}
+              {spot.checkinInfo && (
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                  <dt className="w-36 shrink-0 text-muted-foreground">
+                    {t.spotDetail.contactCheckinLabel}
+                  </dt>
+                  <dd>{spot.checkinInfo}</dd>
+                </div>
+              )}
+              {spot.parcelNumber && (
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                  <dt className="w-36 shrink-0 text-muted-foreground">
+                    {t.spotDetail.contactParcelLabel}
+                  </dt>
+                  <dd>{spot.parcelNumber}</dd>
+                </div>
+              )}
+            </dl>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {t.spotDetail.contactEmpty}
+            </p>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={openContactDialog}
+          >
+            {t.spotDetail.contactEditButton}
           </Button>
         </CardContent>
       </Card>
@@ -967,6 +1069,79 @@ export default function SpotDetailPage() {
               onClick={saveAttributes}
               disabled={updateMutation.isPending}
             >
+              {updateMutation.isPending ? t.common.saving : t.common.save}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Kontakt & Check-in bearbeiten (Muster Eigenschaften-Dialog) */}
+      <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif">
+              {t.spotDetail.contactDialogTitle}
+            </DialogTitle>
+            <DialogDescription>
+              {t.spotDetail.contactDialogDesc}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="contact-phone">
+                {t.spotDetail.contactPhoneLabel}
+              </Label>
+              <Input
+                id="contact-phone"
+                type="tel"
+                maxLength={40}
+                value={contactDraft.phone}
+                onChange={e =>
+                  setContactDraft(prev => ({ ...prev, phone: e.target.value }))
+                }
+                placeholder={t.spotDetail.contactPhonePlaceholder}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="contact-checkin">
+                {t.spotDetail.contactCheckinLabel}
+              </Label>
+              <Input
+                id="contact-checkin"
+                maxLength={120}
+                value={contactDraft.checkin}
+                onChange={e =>
+                  setContactDraft(prev => ({
+                    ...prev,
+                    checkin: e.target.value,
+                  }))
+                }
+                placeholder={t.spotDetail.contactCheckinPlaceholder}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="contact-parcel">
+                {t.spotDetail.contactParcelLabel}
+              </Label>
+              <Input
+                id="contact-parcel"
+                maxLength={40}
+                value={contactDraft.parcel}
+                onChange={e =>
+                  setContactDraft(prev => ({ ...prev, parcel: e.target.value }))
+                }
+                placeholder={t.spotDetail.contactParcelPlaceholder}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setContactDialogOpen(false)}
+            >
+              {t.common.cancel}
+            </Button>
+            <Button onClick={saveContact} disabled={updateMutation.isPending}>
               {updateMutation.isPending ? t.common.saving : t.common.save}
             </Button>
           </DialogFooter>

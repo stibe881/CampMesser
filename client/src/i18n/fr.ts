@@ -1401,6 +1401,21 @@ export const fr: Translation = {
     attributesSaved: "Caractéristiques enregistrées",
     routeButton: "Itinéraire",
     routeAria: "Ouvrir l'itinéraire vers cet emplacement dans l'app de cartes",
+    contactTitle: "Contact & check-in",
+    contactEmpty:
+      "Pas encore de coordonnées – note le téléphone de la réception, les horaires de check-in et ton numéro de parcelle.",
+    contactEditButton: "Modifier les coordonnées",
+    contactDialogTitle: "Modifier contact & check-in",
+    contactDialogDesc:
+      "Tous les champs sont facultatifs – les champs vides ne s'affichent pas.",
+    contactPhoneLabel: "Téléphone réception",
+    contactPhonePlaceholder: "p. ex. +41 33 123 45 67",
+    contactPhoneAria: (name: string) => `Appeler la réception de ${name}`,
+    contactCheckinLabel: "Horaires de check-in",
+    contactCheckinPlaceholder: "p. ex. check-in 14h–18h, check-out jusqu'à 11h",
+    contactParcelLabel: "Numéro de parcelle",
+    contactParcelPlaceholder: "p. ex. B12",
+    contactSaved: "Coordonnées enregistrées",
   },
   tentFinder: {
     title: "Retrouve-tente",
@@ -1475,6 +1490,10 @@ export const fr: Translation = {
     weatherFailed: "Impossible de charger la météo.",
     moreAlerts: n => ` (+${n} ${n === 1 ? "autre" : "autres"})`,
     noAlerts: "Aucune alerte intempéries dans les prochaines 48 heures.",
+    contactTitle: "Contact & check-in",
+    contactPhone: "Téléphone réception",
+    contactCheckin: "Check-in",
+    contactParcel: "Parcelle",
     footer:
       "Partagé avec CampMesser – le couteau suisse du camping sous tente.",
   },
@@ -1699,6 +1718,9 @@ export const fr: Translation = {
     menuTitle: "Plan des menus",
     dayHeader: "Jour",
     packListTitle: "Liste de bagages",
+    contactPhone: "Téléphone réception",
+    contactCheckin: "Check-in",
+    contactParcel: "Parcelle",
     packListNotShared:
       "Cette liste de bagages n'est pas partagée séparément pour le moment – consultation seule, impossible de cocher.",
     footer:

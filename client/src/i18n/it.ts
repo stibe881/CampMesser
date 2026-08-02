@@ -1386,6 +1386,21 @@ export const it: Translation = {
     attributesSaved: "Caratteristiche salvate",
     routeButton: "Percorso",
     routeAria: "Apri il percorso verso questa piazzola nell'app di mappe",
+    contactTitle: "Contatto & check-in",
+    contactEmpty:
+      "Nessun contatto salvato – annota il telefono della reception, gli orari di check-in e il numero della tua piazzola.",
+    contactEditButton: "Modifica contatti",
+    contactDialogTitle: "Modifica contatto & check-in",
+    contactDialogDesc:
+      "Tutti i campi sono facoltativi – i campi vuoti non vengono mostrati.",
+    contactPhoneLabel: "Telefono reception",
+    contactPhonePlaceholder: "es. +41 33 123 45 67",
+    contactPhoneAria: (name: string) => `Chiama la reception di ${name}`,
+    contactCheckinLabel: "Orari di check-in",
+    contactCheckinPlaceholder: "es. check-in 14–18, check-out entro le 11",
+    contactParcelLabel: "Numero piazzola",
+    contactParcelPlaceholder: "es. B12",
+    contactSaved: "Contatti salvati",
   },
   tentFinder: {
     title: "Trova-tenda",
@@ -1460,6 +1475,10 @@ export const it: Translation = {
     weatherFailed: "Impossibile caricare il meteo.",
     moreAlerts: n => ` (+${n} ${n === 1 ? "altra" : "altre"})`,
     noAlerts: "Nessuna allerta maltempo nelle prossime 48 ore.",
+    contactTitle: "Contatto & check-in",
+    contactPhone: "Telefono reception",
+    contactCheckin: "Check-in",
+    contactParcel: "Piazzola",
     footer:
       "Condiviso con CampMesser – il coltellino svizzero per il campeggio in tenda.",
   },
@@ -1684,6 +1703,9 @@ export const it: Translation = {
     menuTitle: "Piano dei menu",
     dayHeader: "Giorno",
     packListTitle: "Lista bagagli",
+    contactPhone: "Telefono reception",
+    contactCheckin: "Check-in",
+    contactParcel: "Piazzola",
     packListNotShared:
       "Questa lista bagagli al momento non è condivisa separatamente – solo visualizzazione, non si può spuntare.",
     footer:

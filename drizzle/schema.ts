@@ -53,6 +53,12 @@ export const campSpots = mysqlTable(
     note: text("note"),
     /** Platz-Eigenschaften als JSON-Objekt {schluessel: wert} – Katalog in shared/spotAttributes.ts */
     attributesJson: text("attributesJson"),
+    /** Telefonnummer der Rezeption – im Dossier als tel:-Link. */
+    receptionPhone: varchar("receptionPhone", { length: 40 }),
+    /** Check-in-/Check-out-Zeiten als Freitext (z. B. «Check-in 14–18 Uhr»). */
+    checkinInfo: varchar("checkinInfo", { length: 120 }),
+    /** Parzellen-/Stellplatz-Nummer. */
+    parcelNumber: varchar("parcelNumber", { length: 40 }),
     /** Öffentlicher Teil-Token: Wer den Link kennt, sieht das Platz-Dossier (nur lesend). */
     shareToken: varchar("shareToken", { length: 32 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),

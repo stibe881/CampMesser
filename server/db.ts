@@ -954,7 +954,17 @@ export async function addCampSpot(data: InsertCampSpot) {
 export async function updateCampSpot(
   id: number,
   userId: number,
-  data: Partial<Pick<InsertCampSpot, "name" | "note" | "attributesJson">>
+  data: Partial<
+    Pick<
+      InsertCampSpot,
+      | "name"
+      | "note"
+      | "attributesJson"
+      | "receptionPhone"
+      | "checkinInfo"
+      | "parcelNumber"
+    >
+  >
 ) {
   const db = requireDb(await getDb());
   await db

@@ -5,6 +5,7 @@ import {
   Droplets,
   Loader2,
   MapPin,
+  Phone,
   Sunrise,
   Tent,
 } from "lucide-react";
@@ -110,6 +111,53 @@ export default function SharedSpotPage() {
         lang={lang}
         className="mt-3"
       />
+
+      {/* Kontakt & Check-in – nur wenn etwas hinterlegt ist */}
+      {(spot.receptionPhone || spot.checkinInfo || spot.parcelNumber) && (
+        <Card className="mt-5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
+              {t.sharedSpot.contactTitle}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="space-y-2 text-sm">
+              {spot.receptionPhone && (
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                  <dt className="w-36 shrink-0 text-muted-foreground">
+                    {t.sharedSpot.contactPhone}
+                  </dt>
+                  <dd>
+                    <a
+                      href={`tel:${spot.receptionPhone.replace(/[^+\d]/g, "")}`}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      {spot.receptionPhone}
+                    </a>
+                  </dd>
+                </div>
+              )}
+              {spot.checkinInfo && (
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                  <dt className="w-36 shrink-0 text-muted-foreground">
+                    {t.sharedSpot.contactCheckin}
+                  </dt>
+                  <dd>{spot.checkinInfo}</dd>
+                </div>
+              )}
+              {spot.parcelNumber && (
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                  <dt className="w-36 shrink-0 text-muted-foreground">
+                    {t.sharedSpot.contactParcel}
+                  </dt>
+                  <dd>{spot.parcelNumber}</dd>
+                </div>
+              )}
+            </dl>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Sonne heute */}
       <Card className="mb-4 mt-5">

@@ -1402,6 +1402,21 @@ export const de = {
     attributesSaved: "Eigenschaften gespeichert",
     routeButton: "Route",
     routeAria: "Route zu diesem Platz in der Karten-App öffnen",
+    contactTitle: "Kontakt & Check-in",
+    contactEmpty:
+      "Noch keine Kontaktdaten erfasst – halte die Telefonnummer der Rezeption, die Check-in-Zeiten und deine Parzellen-Nummer fest.",
+    contactEditButton: "Kontaktdaten bearbeiten",
+    contactDialogTitle: "Kontakt & Check-in bearbeiten",
+    contactDialogDesc:
+      "Alle Felder sind optional – leere Felder werden nicht angezeigt.",
+    contactPhoneLabel: "Telefon Rezeption",
+    contactPhonePlaceholder: "z. B. +41 33 123 45 67",
+    contactPhoneAria: (name: string) => `Rezeption von ${name} anrufen`,
+    contactCheckinLabel: "Check-in-Zeiten",
+    contactCheckinPlaceholder: "z. B. Check-in 14–18 Uhr, Check-out bis 11 Uhr",
+    contactParcelLabel: "Parzellen-Nummer",
+    contactParcelPlaceholder: "z. B. B12",
+    contactSaved: "Kontaktdaten gespeichert",
   },
   tentFinder: {
     title: "Zelt-Finder",
@@ -1477,6 +1492,10 @@ export const de = {
     weatherFailed: "Wetter konnte nicht geladen werden.",
     moreAlerts: (n: number) => ` (+${n} weitere)`,
     noAlerts: "Keine Unwetterwarnungen in den nächsten 48 Stunden.",
+    contactTitle: "Kontakt & Check-in",
+    contactPhone: "Telefon Rezeption",
+    contactCheckin: "Check-in",
+    contactParcel: "Parzelle",
     footer:
       "Geteilt mit CampMesser – dem Schweizer Taschenmesser fürs Zelt-Camping.",
   },
@@ -1706,6 +1725,9 @@ export const de = {
     menuTitle: "Menüplan",
     dayHeader: "Tag",
     packListTitle: "Packliste",
+    contactPhone: "Telefon Rezeption",
+    contactCheckin: "Check-in",
+    contactParcel: "Parzelle",
     packListNotShared:
       "Diese Packliste wird momentan nicht separat geteilt – nur Ansicht, Abhaken ist nicht möglich.",
     footer:
