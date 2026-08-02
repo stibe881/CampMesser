@@ -163,8 +163,12 @@ async function startServer() {
   // Uploads liegen als Dateien unter uploads/trips/ auf dem Webspace
   // (kein S3). Auth läuft über dieselbe Session-Prüfung wie tRPC
   // (sdk.authenticateRequest: Session-Cookie bzw. Bearer-Fallback).
-  const { MAX_PHOTO_BYTES, MAX_PHOTOS_PER_TRIP, PHOTO_MIME_EXTENSIONS } =
-    await import("@shared/tripPhotos");
+  const {
+    MAX_PHOTO_BYTES,
+    MAX_PHOTOS_PER_TRIP,
+    MAX_PHOTOS_PER_SPOT,
+    PHOTO_MIME_EXTENSIONS,
+  } = await import("@shared/tripPhotos");
   /** Session prüfen; bei ungültiger Session wird 401 gesendet und null geliefert. */
   const authenticatePhotoRequest = async (
     req: express.Request,
@@ -368,6 +372,103 @@ async function startServer() {
       );
     } catch (error) {
       console.error("[RecipePhotos] Auslieferung fehlgeschlagen:", error);
+      if (!res.headersSent) res.status(500).json({ error: "serverError" });
+    }
+  });
+  // ── Fotos für Zeltplatz-Favoriten ───────────────────────────────────────
+  // Gleiche Technik wie die Tagebuch-Fotos (Raw-Body, Client-Resize,
+  // Ablage unter uploads/spots/), max. 12 Fotos pro Platz. Die Fotos sind
+  // privat – die geteilte Ansicht (/platz/:token) zeigt sie bewusst nicht.
+  app.post(
+    "/api/spots/:spotId/photos",
+    express.raw({ type: "image/*", limit: MAX_PHOTO_BYTES }),
+    async (req, res) => {
+      try {
+        const user = await authenticatePhotoRequest(req, res);
+        if (!user) return;
+        const spotId = Number(req.params.spotId);
+        if (!Number.isInteger(spotId) || spotId <= 0) {
+          res.status(400).json({ error: "badRequest" });
+          return;
+        }
+        const db = await import("../db");
+        const spot = await db.getCampSpot(spotId, user.id);
+        if (!spot) {
+          res.status(404).json({ error: "notFound" });
+          return;
+        }
+        const contentType = String(req.headers["content-type"] ?? "")
+          .split(";")[0]
+          .trim()
+          .toLowerCase();
+        if (contentType === "image/heic" || contentType === "image/heif") {
+          res.status(415).json({ error: "heicNotSupported" });
+          return;
+        }
+        const extension = PHOTO_MIME_EXTENSIONS[contentType];
+        if (!extension) {
+          res.status(415).json({ error: "unsupportedType" });
+          return;
+        }
+        const body = req.body as unknown;
+        if (!Buffer.isBuffer(body) || body.length === 0) {
+          res.status(400).json({ error: "emptyBody" });
+          return;
+        }
+        if (body.length > MAX_PHOTO_BYTES) {
+          res.status(413).json({ error: "tooLarge" });
+          return;
+        }
+        if (
+          (await db.countSpotPhotos(spotId, user.id)) >= MAX_PHOTOS_PER_SPOT
+        ) {
+          res.status(409).json({ error: "limitReached" });
+          return;
+        }
+        const { nanoid } = await import("nanoid");
+        const fileName = `${nanoid(16)}${extension}`;
+        const { spotPhotoStorage } = await import("../photoStorage");
+        await spotPhotoStorage.saveFile(fileName, body);
+        const id = await db.addSpotPhoto({ userId: user.id, spotId, fileName });
+        res.json({ id, fileName });
+      } catch (error) {
+        console.error("[SpotPhotos] Upload fehlgeschlagen:", error);
+        if (!res.headersSent) res.status(500).json({ error: "serverError" });
+      }
+    }
+  );
+  // Auslieferung: Fotos sind privat – nur die Besitzerin/der Besitzer
+  // (DB-Lookup über fileName + userId) bekommt die Datei zu sehen.
+  app.get("/api/spots/photos/:fileName", async (req, res) => {
+    try {
+      const user = await authenticatePhotoRequest(req, res);
+      if (!user) return;
+      const { PHOTO_FILENAME_PATTERN, spotPhotoStorage } = await import(
+        "../photoStorage"
+      );
+      const fileName = req.params.fileName;
+      if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
+        res.status(400).json({ error: "badRequest" });
+        return;
+      }
+      const db = await import("../db");
+      const photo = await db.getSpotPhotoByFileName(fileName, user.id);
+      if (!photo) {
+        res.status(404).json({ error: "notFound" });
+        return;
+      }
+      res.sendFile(
+        spotPhotoStorage.photoPath(fileName),
+        { headers: { "Cache-Control": "private, max-age=3600" } },
+        error => {
+          // Datei fehlt auf der Platte (z. B. nach Server-Umzug ohne uploads/)
+          if (error && !res.headersSent) {
+            res.status(404).json({ error: "notFound" });
+          }
+        }
+      );
+    } catch (error) {
+      console.error("[SpotPhotos] Auslieferung fehlgeschlagen:", error);
       if (!res.headersSent) res.status(500).json({ error: "serverError" });
     }
   });

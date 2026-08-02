@@ -1090,6 +1090,38 @@ export const de = {
       "Linien = durchschnittliches Tagesmaximum/-minimum (°C, linke Achse) · Balken = Regentage pro Monat (mehr als 1 mm, rechte Achse).",
     climateSource: (from: number, to: number) =>
       `Quelle: Open-Meteo Wetterarchiv, Jahre ${from}–${to}. Beste Monate = wärmste mit den wenigsten Regentagen.`,
+    photosTitle: "Fotos",
+    photosHint:
+      "Merk dir den Platz mit Bildern – Stellplatz, Aussicht, Infotafel. Nur für dich sichtbar; die geteilte Dossier-Ansicht zeigt keine Fotos.",
+    addPhotos: "Fotos hinzufügen",
+    addPhotosAria: (name: string) => `Fotos zum Platz ${name} hinzufügen`,
+    photoCountHint: (n: number, max: number) => `${n} von ${max} Fotos`,
+    photoUploading: (n: number) =>
+      n === 1 ? "1 Foto wird hochgeladen …" : `${n} Fotos werden hochgeladen …`,
+    photoUploaded: (n: number) =>
+      n === 1 ? "Foto gespeichert" : `${n} Fotos gespeichert`,
+    photoLimitReached: (max: number) =>
+      `Maximal ${max} Fotos pro Platz – überzählige wurden übersprungen`,
+    photoTooLarge: (name: string) =>
+      `${name}: Das Bild ist zu gross (max. 5 MB)`,
+    photoUnsupportedType: (name: string) =>
+      `${name}: Format nicht unterstützt – erlaubt sind JPEG, PNG und WebP`,
+    photoHeic: (name: string) =>
+      `${name}: HEIC/HEIF wird nicht unterstützt – bitte das Foto als JPEG exportieren`,
+    photoReadFailed: (name: string) =>
+      `${name}: Das Bild konnte nicht gelesen werden`,
+    photoUploadFailed: (name: string) => `${name}: Upload fehlgeschlagen`,
+    photosLoadFailed: "Fotos konnten nicht geladen werden",
+    photoDeleteConfirm: "Dieses Foto endgültig löschen?",
+    photoDeleted: "Foto gelöscht",
+    photoDeleteAria: (n: number) => `Foto ${n} löschen`,
+    photoAlt: (n: number, place: string) => `Foto ${n} vom Platz ${place}`,
+    photoOpenAria: (n: number, place: string) =>
+      `Foto ${n} von ${place} in Grossansicht öffnen`,
+    galleryTitle: (place: string) => `Fotos – ${place}`,
+    galleryCounter: (n: number, total: number) => `Foto ${n} von ${total}`,
+    galleryPrev: "Vorheriges Foto",
+    galleryNext: "Nächstes Foto",
   },
   tentFinder: {
     title: "Zelt-Finder",

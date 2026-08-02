@@ -1090,6 +1090,39 @@ export const fr: Translation = {
       "Lignes = maximum/minimum journalier moyen (°C, axe gauche) · Barres = jours de pluie par mois (plus de 1 mm, axe droit).",
     climateSource: (from, to) =>
       `Source : archives météo Open-Meteo, années ${from}–${to}. Meilleurs mois = les plus chauds avec le moins de jours de pluie.`,
+    photosTitle: "Photos",
+    photosHint:
+      "Garde une trace de l'emplacement en images – parcelle, vue, panneau d'infos. Visible seulement par toi ; la vue partagée du dossier n'affiche aucune photo.",
+    addPhotos: "Ajouter des photos",
+    addPhotosAria: (name: string) =>
+      `Ajouter des photos à l'emplacement ${name}`,
+    photoCountHint: (n: number, max: number) => `${n} sur ${max} photos`,
+    photoUploading: (n: number) =>
+      n === 1 ? "1 photo en cours d'envoi …" : `${n} photos en cours d'envoi …`,
+    photoUploaded: (n: number) =>
+      n === 1 ? "Photo enregistrée" : `${n} photos enregistrées`,
+    photoLimitReached: (max: number) =>
+      `Maximum ${max} photos par emplacement – les photos en trop ont été ignorées`,
+    photoTooLarge: (name: string) =>
+      `${name} : l'image est trop grande (max. 5 Mo)`,
+    photoUnsupportedType: (name: string) =>
+      `${name} : format non pris en charge – JPEG, PNG et WebP sont autorisés`,
+    photoHeic: (name: string) =>
+      `${name} : HEIC/HEIF n'est pas pris en charge – exporte la photo en JPEG`,
+    photoReadFailed: (name: string) => `${name} : impossible de lire l'image`,
+    photoUploadFailed: (name: string) => `${name} : échec de l'envoi`,
+    photosLoadFailed: "Impossible de charger les photos",
+    photoDeleteConfirm: "Supprimer définitivement cette photo ?",
+    photoDeleted: "Photo supprimée",
+    photoDeleteAria: (n: number) => `Supprimer la photo ${n}`,
+    photoAlt: (n: number, place: string) =>
+      `Photo ${n} de l'emplacement ${place}`,
+    photoOpenAria: (n: number, place: string) =>
+      `Ouvrir la photo ${n} de ${place} en grand`,
+    galleryTitle: (place: string) => `Photos – ${place}`,
+    galleryCounter: (n: number, total: number) => `Photo ${n} sur ${total}`,
+    galleryPrev: "Photo précédente",
+    galleryNext: "Photo suivante",
   },
   tentFinder: {
     title: "Retrouve-tente",

@@ -243,6 +243,32 @@ export const tripPhotos = mysqlTable(
 export type TripPhoto = typeof tripPhotos.$inferSelect;
 export type InsertTripPhoto = typeof tripPhotos.$inferInsert;
 
+/**
+ * Fotos zu Zeltplatz-Favoriten: die Datei liegt unter uploads/spots/<fileName>
+ * auf dem Webspace (server/photoStorage.ts), hier nur die Metadaten.
+ * Bewusst privat – die geteilte Ansicht (/platz/:token) zeigt keine Fotos.
+ */
+export const spotPhotos = mysqlTable(
+  "spotPhotos",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Zugehöriger Zeltplatz-Favorit (campSpots.id) */
+    spotId: int("spotId").notNull(),
+    /** Serverseitig generierter Dateiname (nanoid + .jpg/.png/.webp) */
+    fileName: varchar("fileName", { length: 64 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    index("spotPhotos_userId").on(table.userId),
+    index("spotPhotos_spotId").on(table.spotId),
+    uniqueIndex("spotPhotos_fileName").on(table.fileName),
+  ]
+);
+
+export type SpotPhoto = typeof spotPhotos.$inferSelect;
+export type InsertSpotPhoto = typeof spotPhotos.$inferInsert;
+
 /** Web-Push-Abos für Unwetter-Warnungen an gespeicherten Zeltplätzen. */
 export const pushSubscriptions = mysqlTable(
   "pushSubscriptions",

@@ -55,3 +55,6 @@ export const tripPhotoStorage = createPhotoStorage("trips");
 
 /** Fotos eigener Rezepte: uploads/recipes/<fileName> */
 export const recipePhotoStorage = createPhotoStorage("recipes");
+
+/** Fotos zu Zeltplatz-Favoriten: uploads/spots/<fileName> */
+export const spotPhotoStorage = createPhotoStorage("spots");

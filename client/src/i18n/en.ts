@@ -1062,6 +1062,37 @@ export const en: Translation = {
       "Lines = average daily high/low (°C, left axis) · Bars = rain days per month (more than 1 mm, right axis).",
     climateSource: (from, to) =>
       `Source: Open-Meteo weather archive, years ${from}–${to}. Best months = warmest with the fewest rain days.`,
+    photosTitle: "Photos",
+    photosHint:
+      "Remember the pitch with pictures – spot, view, info board. Visible only to you; the shared dossier view shows no photos.",
+    addPhotos: "Add photos",
+    addPhotosAria: (name: string) => `Add photos to the pitch ${name}`,
+    photoCountHint: (n: number, max: number) => `${n} of ${max} photos`,
+    photoUploading: (n: number) =>
+      n === 1 ? "Uploading 1 photo …" : `Uploading ${n} photos …`,
+    photoUploaded: (n: number) =>
+      n === 1 ? "Photo saved" : `${n} photos saved`,
+    photoLimitReached: (max: number) =>
+      `At most ${max} photos per pitch – extra photos were skipped`,
+    photoTooLarge: (name: string) =>
+      `${name}: the image is too large (max. 5 MB)`,
+    photoUnsupportedType: (name: string) =>
+      `${name}: unsupported format – JPEG, PNG and WebP are allowed`,
+    photoHeic: (name: string) =>
+      `${name}: HEIC/HEIF is not supported – please export the photo as JPEG`,
+    photoReadFailed: (name: string) => `${name}: the image could not be read`,
+    photoUploadFailed: (name: string) => `${name}: upload failed`,
+    photosLoadFailed: "Photos could not be loaded",
+    photoDeleteConfirm: "Delete this photo permanently?",
+    photoDeleted: "Photo deleted",
+    photoDeleteAria: (n: number) => `Delete photo ${n}`,
+    photoAlt: (n: number, place: string) => `Photo ${n} of the pitch ${place}`,
+    photoOpenAria: (n: number, place: string) =>
+      `Open photo ${n} of ${place} in full view`,
+    galleryTitle: (place: string) => `Photos – ${place}`,
+    galleryCounter: (n: number, total: number) => `Photo ${n} of ${total}`,
+    galleryPrev: "Previous photo",
+    galleryNext: "Next photo",
   },
   tentFinder: {
     title: "Tent finder",

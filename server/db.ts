@@ -28,6 +28,8 @@ import {
   packTemplatesCustom,
   powerConsumers,
   shoppingItems,
+  spotPhotos,
+  InsertSpotPhoto,
   tripLogs,
   tripPhotos,
   users,
@@ -398,6 +400,17 @@ export async function getCampSpots(userId: number) {
   return db.select().from(campSpots).where(eq(campSpots.userId, userId));
 }
 
+/** Einzelnen Zeltplatz-Favoriten laden (nur eigener). */
+export async function getCampSpot(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(campSpots)
+    .where(and(eq(campSpots.id, id), eq(campSpots.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
 export async function addCampSpot(data: InsertCampSpot) {
   const db = requireDb(await getDb());
   const [result] = await db.insert(campSpots).values(data);
@@ -575,6 +588,65 @@ export async function deleteMenuEntry(
         eq(menuEntries.meal, meal)
       )
     );
+}
+
+// ── Fotos zu Zeltplatz-Favoriten ──
+export async function getSpotPhotos(spotId: number, userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(spotPhotos)
+    .where(and(eq(spotPhotos.spotId, spotId), eq(spotPhotos.userId, userId)))
+    .orderBy(spotPhotos.id);
+}
+
+export async function countSpotPhotos(spotId: number, userId: number) {
+  return (await getSpotPhotos(spotId, userId)).length;
+}
+
+export async function addSpotPhoto(data: InsertSpotPhoto) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(spotPhotos).values(data);
+  return result.insertId;
+}
+
+/** Einzelnes Foto laden (nur eigenes). */
+export async function getSpotPhoto(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(spotPhotos)
+    .where(and(eq(spotPhotos.id, id), eq(spotPhotos.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/** Foto anhand des Dateinamens laden – nur für die Besitzerin/den Besitzer. */
+export async function getSpotPhotoByFileName(fileName: string, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(spotPhotos)
+    .where(
+      and(eq(spotPhotos.fileName, fileName), eq(spotPhotos.userId, userId))
+    )
+    .limit(1);
+  return rows[0];
+}
+
+export async function deleteSpotPhoto(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(spotPhotos)
+    .where(and(eq(spotPhotos.id, id), eq(spotPhotos.userId, userId)));
+}
+
+/** Alle Foto-Zeilen eines Platzes löschen (Dateien löscht der Aufrufer). */
+export async function deleteSpotPhotosForSpot(spotId: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(spotPhotos)
+    .where(and(eq(spotPhotos.spotId, spotId), eq(spotPhotos.userId, userId)));
 }
 
 /** Teil-Token eines Zeltplatzes setzen oder entfernen (nur eigener Favorit). */

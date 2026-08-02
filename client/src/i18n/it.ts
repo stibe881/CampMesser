@@ -1079,6 +1079,38 @@ export const it: Translation = {
       "Linee = massima/minima media giornaliera (°C, asse sinistro) · Barre = giorni di pioggia al mese (oltre 1 mm, asse destro).",
     climateSource: (from, to) =>
       `Fonte: archivio meteo Open-Meteo, anni ${from}–${to}. Mesi migliori = i più caldi con meno giorni di pioggia.`,
+    photosTitle: "Foto",
+    photosHint:
+      "Ricorda la piazzola con le immagini – posto tenda, vista, bacheca. Visibili solo a te; la vista condivisa del dossier non mostra alcuna foto.",
+    addPhotos: "Aggiungi foto",
+    addPhotosAria: (name: string) => `Aggiungi foto alla piazzola ${name}`,
+    photoCountHint: (n: number, max: number) => `${n} di ${max} foto`,
+    photoUploading: (n: number) =>
+      n === 1 ? "1 foto in caricamento …" : `${n} foto in caricamento …`,
+    photoUploaded: (n: number) =>
+      n === 1 ? "Foto salvata" : `${n} foto salvate`,
+    photoLimitReached: (max: number) =>
+      `Massimo ${max} foto per piazzola – quelle in eccesso sono state ignorate`,
+    photoTooLarge: (name: string) =>
+      `${name}: l'immagine è troppo grande (max. 5 MB)`,
+    photoUnsupportedType: (name: string) =>
+      `${name}: formato non supportato – sono ammessi JPEG, PNG e WebP`,
+    photoHeic: (name: string) =>
+      `${name}: HEIC/HEIF non è supportato – esporta la foto come JPEG`,
+    photoReadFailed: (name: string) =>
+      `${name}: impossibile leggere l'immagine`,
+    photoUploadFailed: (name: string) => `${name}: caricamento non riuscito`,
+    photosLoadFailed: "Impossibile caricare le foto",
+    photoDeleteConfirm: "Eliminare definitivamente questa foto?",
+    photoDeleted: "Foto eliminata",
+    photoDeleteAria: (n: number) => `Elimina la foto ${n}`,
+    photoAlt: (n: number, place: string) => `Foto ${n} della piazzola ${place}`,
+    photoOpenAria: (n: number, place: string) =>
+      `Apri la foto ${n} di ${place} a schermo intero`,
+    galleryTitle: (place: string) => `Foto – ${place}`,
+    galleryCounter: (n: number, total: number) => `Foto ${n} di ${total}`,
+    galleryPrev: "Foto precedente",
+    galleryNext: "Foto successiva",
   },
   tentFinder: {
     title: "Trova-tenda",

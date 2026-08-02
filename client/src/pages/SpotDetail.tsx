@@ -8,6 +8,7 @@ import {
   ChevronDown,
   Compass,
   Droplets,
+  Images,
   Loader2,
   LocateFixed,
   MapPin,
@@ -31,6 +32,8 @@ import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
+import PhotoGallery from "@/components/PhotoGallery";
+import { MAX_PHOTOS_PER_SPOT } from "@shared/tripPhotos";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -87,6 +90,12 @@ export default function SpotDetailPage() {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const shareMutation = trpc.spots.share.useMutation();
   const unshareMutation = trpc.spots.unshare.useMutation();
+  const utils = trpc.useUtils();
+  const photosQuery = trpc.spots.photos.list.useQuery(
+    { spotId },
+    { enabled: isAuthenticated && Number.isInteger(spotId) && spotId > 0 }
+  );
+  const removePhotoMutation = trpc.spots.photos.remove.useMutation();
 
   // QR-Code zum Teil-Link erzeugen: am Platz einfach abscannen lassen statt Link verschicken
   useEffect(() => {
@@ -640,6 +649,57 @@ export default function SpotDetailPage() {
             <BookOpen className="h-4 w-4" aria-hidden="true" />
             {t.spotDetail.toDiary}
           </Link>
+        </CardContent>
+      </Card>
+
+      {/* Fotos: privat – die geteilte Ansicht (/platz/:token) zeigt sie nicht */}
+      <Card className="mt-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Images className="h-4 w-4 text-primary" aria-hidden="true" />
+            {t.spotDetail.photosTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            {t.spotDetail.photosHint}
+          </p>
+          <PhotoGallery
+            photos={photosQuery.data ?? []}
+            loadFailed={photosQuery.isError}
+            name={spot.name}
+            maxPhotos={MAX_PHOTOS_PER_SPOT}
+            uploadUrl={`/api/spots/${spot.id}/photos`}
+            photoSrc={fileName => `/api/spots/photos/${fileName}`}
+            onChanged={() => utils.spots.photos.list.invalidate({ spotId })}
+            deletePhoto={photoId =>
+              removePhotoMutation.mutateAsync({ photoId })
+            }
+            texts={{
+              addPhotos: t.spotDetail.addPhotos,
+              addPhotosAria: t.spotDetail.addPhotosAria,
+              photoCountHint: t.spotDetail.photoCountHint,
+              photoUploading: t.spotDetail.photoUploading,
+              photoUploaded: t.spotDetail.photoUploaded,
+              photoLimitReached: t.spotDetail.photoLimitReached,
+              photoTooLarge: t.spotDetail.photoTooLarge,
+              photoUnsupportedType: t.spotDetail.photoUnsupportedType,
+              photoHeic: t.spotDetail.photoHeic,
+              photoReadFailed: t.spotDetail.photoReadFailed,
+              photoUploadFailed: t.spotDetail.photoUploadFailed,
+              photosLoadFailed: t.spotDetail.photosLoadFailed,
+              photoDeleteConfirm: t.spotDetail.photoDeleteConfirm,
+              photoDeleted: t.spotDetail.photoDeleted,
+              photoDeleteAria: t.spotDetail.photoDeleteAria,
+              photoAlt: t.spotDetail.photoAlt,
+              photoOpenAria: t.spotDetail.photoOpenAria,
+              galleryTitle: t.spotDetail.galleryTitle,
+              galleryCounter: t.spotDetail.galleryCounter,
+              galleryPrev: t.spotDetail.galleryPrev,
+              galleryNext: t.spotDetail.galleryNext,
+              deleteFailed: t.common.deleteFailed,
+            }}
+          />
         </CardContent>
       </Card>
 

@@ -1336,7 +1336,45 @@ export const appRouter = router({
       }),
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(({ ctx, input }) => db.deleteCampSpot(input.id, ctx.user.id)),
+      .mutation(async ({ ctx, input }) => {
+        // Zugehörige Fotos mitlöschen: erst Dateinamen sichern, dann
+        // DB-Zeilen und zuletzt die Dateien auf dem Webspace entfernen.
+        const photos = await db.getSpotPhotos(input.id, ctx.user.id);
+        await db.deleteCampSpot(input.id, ctx.user.id);
+        await db.deleteSpotPhotosForSpot(input.id, ctx.user.id);
+        if (photos.length > 0) {
+          const { spotPhotoStorage } = await import("./photoStorage");
+          await spotPhotoStorage.deleteFiles(photos.map(p => p.fileName));
+        }
+      }),
+    photos: router({
+      /** Fotos eines eigenen Platzes (leere Liste, wenn der Platz nicht dir gehört). */
+      list: protectedProcedure
+        .input(z.object({ spotId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          const spot = await db.getCampSpot(input.spotId, ctx.user.id);
+          if (!spot) {
+            return [] as Awaited<ReturnType<typeof db.getSpotPhotos>>;
+          }
+          return db.getSpotPhotos(input.spotId, ctx.user.id);
+        }),
+      /** Einzelnes Foto löschen (DB-Zeile + Datei auf dem Webspace). */
+      remove: protectedProcedure
+        .input(z.object({ photoId: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const photo = await db.getSpotPhoto(input.photoId, ctx.user.id);
+          if (!photo) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Foto nicht gefunden.",
+            });
+          }
+          await db.deleteSpotPhoto(input.photoId, ctx.user.id);
+          const { spotPhotoStorage } = await import("./photoStorage");
+          await spotPhotoStorage.deleteFiles([photo.fileName]);
+          return { success: true } as const;
+        }),
+    }),
     /** Teil-Link fürs Platz-Dossier erzeugen: gibt den Token zurück. */
     share: protectedProcedure
       .input(z.object({ id: z.number() }))

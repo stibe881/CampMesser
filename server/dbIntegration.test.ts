@@ -7,7 +7,7 @@ import type { TrpcContext } from "./_core/context";
  * DATABASE_URL gesetzt ist (CI-Job mit MySQL-Service und angewendeten
  * Migrationen). Lokal ohne Datenbank wird die Datei übersprungen.
  * Ablauf: Registrieren → Anmelden → Daten quer durch alle Nutzer-Tabellen
- * anlegen (Packliste, Einstellung, Zeltplatz, Trip mit Foto und Menüplan,
+ * anlegen (Packliste, Einstellung, Zeltplatz mit Foto, Trip mit Foto und Menüplan,
  * Rezept mit Foto, Schnitzeljagd, Quiz, Einkaufsliste, Kühlbox, Push-Abo)
  * → Konto löschen → prüfen, dass die Lösch-Kaskade alle Tabellen und
  * die Upload-Dateien erfasst hat.
@@ -116,7 +116,7 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
 
     // Daten quer durch alle Nutzer-Tabellen anlegen, damit die Lösch-Kaskade
     // des Kontos wirklich jede Tabelle erfasst
-    await authed.spots.add({
+    const spotId = await authed.spots.add({
       name: "CI-Platz",
       latitude: 46.8,
       longitude: 8.2,
@@ -173,16 +173,17 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     const { getDb } = await import("./db");
     const schema = await import("../drizzle/schema");
     const { eq } = await import("drizzle-orm");
-    const { tripPhotoStorage, recipePhotoStorage } = await import(
-      "./photoStorage"
-    );
+    const { tripPhotoStorage, recipePhotoStorage, spotPhotoStorage } =
+      await import("./photoStorage");
     const fs = await import("node:fs/promises");
     const dbc = (await getDb())!;
     const uid = (user as NonNullable<typeof user>).id;
     const tripFile = `ci-trip-${Date.now()}.jpg`;
     const recipeFile = `ci-recipe-${Date.now()}.jpg`;
+    const spotFile = `ci-spot-${Date.now()}.jpg`;
     await tripPhotoStorage.saveFile(tripFile, Buffer.from("x"));
     await recipePhotoStorage.saveFile(recipeFile, Buffer.from("x"));
+    await spotPhotoStorage.saveFile(spotFile, Buffer.from("x"));
     await dbc
       .insert(schema.tripPhotos)
       .values({ userId: uid, tripId, fileName: tripFile });
@@ -190,6 +191,9 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       .update(schema.customRecipes)
       .set({ imageFileName: recipeFile })
       .where(eq(schema.customRecipes.id, recipeId));
+    await dbc
+      .insert(schema.spotPhotos)
+      .values({ userId: uid, spotId, fileName: spotFile });
 
     // Aufräumen: Konto löschen entfernt auch die angelegten Daten
     const deleted = await authed.auth.deleteAccount({ password });
@@ -210,6 +214,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.campSpots)
         .where(eq(schema.campSpots.userId, uid)),
+      dbc
+        .select()
+        .from(schema.spotPhotos)
+        .where(eq(schema.spotPhotos.userId, uid)),
       dbc.select().from(schema.tripLogs).where(eq(schema.tripLogs.userId, uid)),
       dbc
         .select()
@@ -260,6 +268,9 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     ).rejects.toThrow();
     await expect(
       fs.access(recipePhotoStorage.photoPath(recipeFile))
+    ).rejects.toThrow();
+    await expect(
+      fs.access(spotPhotoStorage.photoPath(spotFile))
     ).rejects.toThrow();
   });
 });
