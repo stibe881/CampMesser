@@ -283,6 +283,24 @@ export const it: Translation = {
     totalCount: (checked, total) => `In totale: ${checked} su ${total}`,
     filterProgressAria: pct =>
       `Avanzamento nel filtro: ${pct} per cento preparato`,
+    printButton: "Stampa",
+  },
+  packListPrint: {
+    docTitle: name => `${name} – lista bagagli da stampare`,
+    docTitleFallback: "Lista bagagli",
+    appTitle: "CampMesser – il coltellino svizzero per il campeggio in tenda",
+    notFound: "Questa lista bagagli non è stata trovata.",
+    printButton: "Stampa / Salva come PDF",
+    printBrowserHint:
+      "Nell'app installata il pulsante apre la vista nel browser – da lì stampa o salva come PDF dal menu.",
+    headerKicker: "CampMesser · Lista bagagli",
+    meta: (items, categories) =>
+      `${items} ${items === 1 ? "voce" : "voci"} · ${categories} ${categories === 1 ? "categoria" : "categorie"}`,
+    printedOn: date => `Stato: ${date}`,
+    personFilterInfo: name => `Solo le voci di ${name}`,
+    emptyList: "Questa lista non contiene voci.",
+    footer:
+      "Niente di dimenticato – buon viaggio! · CampMesser – il coltellino svizzero per il campeggio in tenda",
   },
   sharedPackList: {
     loadingShared: "Caricamento della lista condivisa …",

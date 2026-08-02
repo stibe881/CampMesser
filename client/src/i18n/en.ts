@@ -279,6 +279,24 @@ export const en: Translation = {
     totalCount: (checked, total) => `Total: ${checked} of ${total}`,
     filterProgressAria: pct =>
       `Progress in this filter: ${pct} per cent packed`,
+    printButton: "Print",
+  },
+  packListPrint: {
+    docTitle: name => `${name} – printable packing list`,
+    docTitleFallback: "Packing list",
+    appTitle: "CampMesser – the Swiss army knife for tent camping",
+    notFound: "This packing list could not be found.",
+    printButton: "Print / Save as PDF",
+    printBrowserHint:
+      "In the installed app this button opens the view in your browser – print or save as PDF from its menu there.",
+    headerKicker: "CampMesser · Packing list",
+    meta: (items, categories) =>
+      `${items} ${items === 1 ? "item" : "items"} · ${categories} ${categories === 1 ? "category" : "categories"}`,
+    printedOn: date => `As of ${date}`,
+    personFilterInfo: name => `Only items for ${name}`,
+    emptyList: "This list has no items.",
+    footer:
+      "Nothing forgotten – have a great trip! · CampMesser – the Swiss army knife for tent camping",
   },
   sharedPackList: {
     loadingShared: "Loading shared list …",

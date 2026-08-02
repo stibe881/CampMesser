@@ -290,6 +290,24 @@ export const de = {
       `Gesamt: ${checked} von ${total}`,
     filterProgressAria: (pct: number) =>
       `Fortschritt im Filter: ${pct} Prozent gepackt`,
+    printButton: "Drucken",
+  },
+  packListPrint: {
+    docTitle: (name: string) => `${name} – Packliste zum Ausdrucken`,
+    docTitleFallback: "Packliste",
+    appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    notFound: "Diese Packliste wurde nicht gefunden.",
+    printButton: "Drucken / Als PDF sichern",
+    printBrowserHint:
+      "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
+    headerKicker: "CampMesser · Packliste",
+    meta: (items: number, categories: number) =>
+      `${items} ${items === 1 ? "Eintrag" : "Einträge"} · ${categories} ${categories === 1 ? "Kategorie" : "Kategorien"}`,
+    printedOn: (date: string) => `Stand: ${date}`,
+    personFilterInfo: (name: string) => `Nur Einträge von ${name}`,
+    emptyList: "Diese Liste hat keine Einträge.",
+    footer:
+      "Nichts vergessen – gute Reise! · CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
   },
   sharedPackList: {
     loadingShared: "Geteilte Liste wird geladen …",

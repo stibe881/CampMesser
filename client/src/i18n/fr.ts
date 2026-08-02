@@ -287,6 +287,24 @@ export const fr: Translation = {
     totalCount: (checked, total) => `Au total : ${checked} sur ${total}`,
     filterProgressAria: pct =>
       `Progression dans le filtre : ${pct} pour cent emballé`,
+    printButton: "Imprimer",
+  },
+  packListPrint: {
+    docTitle: name => `${name} – liste de bagages à imprimer`,
+    docTitleFallback: "Liste de bagages",
+    appTitle: "CampMesser – le couteau suisse du camping sous tente",
+    notFound: "Cette liste de bagages est introuvable.",
+    printButton: "Imprimer / Enregistrer en PDF",
+    printBrowserHint:
+      "Dans l'app installée, le bouton ouvre la vue dans le navigateur – imprime ou enregistre en PDF depuis son menu.",
+    headerKicker: "CampMesser · Liste de bagages",
+    meta: (items, categories) =>
+      `${items} ${items === 1 ? "entrée" : "entrées"} · ${categories} ${categories === 1 ? "catégorie" : "catégories"}`,
+    printedOn: date => `État : ${date}`,
+    personFilterInfo: name => `Seulement les entrées de ${name}`,
+    emptyList: "Cette liste ne contient aucune entrée.",
+    footer:
+      "Rien d'oublié – bon voyage ! · CampMesser – le couteau suisse du camping sous tente",
   },
   sharedPackList: {
     loadingShared: "Chargement de la liste partagée …",

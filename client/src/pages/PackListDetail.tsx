@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "wouter";
+import { Link, useParams } from "wouter";
 import {
   Link2,
   Loader2,
   Package,
   Plus,
+  Printer,
   QrCode,
   Scale,
   Share2,
@@ -347,19 +348,33 @@ export default function PackListDetailPage() {
       )}
       {weight.matchedCount === 0 && <div className="mb-4" />}
 
-      {/* Liste teilen */}
+      {/* Liste teilen & drucken */}
       <div className="mb-6">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => shareMutation.mutate({ listId })}
-          disabled={shareMutation.isPending}
-        >
-          <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          {shareMutation.isPending
-            ? t.packListDetail.shareCreating
-            : t.packListDetail.shareButton}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => shareMutation.mutate({ listId })}
+            disabled={shareMutation.isPending}
+          >
+            <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {shareMutation.isPending
+              ? t.packListDetail.shareCreating
+              : t.packListDetail.shareButton}
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link
+              href={`/packlisten/${listId}/drucken${
+                personFilter && personFilter !== FILTER_UNASSIGNED
+                  ? `?person=${encodeURIComponent(personFilter)}`
+                  : ""
+              }`}
+            >
+              <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.packListDetail.printButton}
+            </Link>
+          </Button>
+        </div>
         {shareUrl && (
           <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
             <Link2
