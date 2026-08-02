@@ -452,6 +452,8 @@ export const it: Translation = {
         : `Togliere davvero tutte le ${n} spunte? Le voci rimangono.`,
     uncheckAllDone: "Tutte le spunte tolte – pronto per il prossimo bagaglio",
     uncheckAllFailed: "Impossibile togliere le spunte",
+    editedByTitle: (name, date) => `Ultima modifica di ${name} il ${date}`,
+    editedByBadgeAria: name => `Ultima modifica di ${name}`,
   },
   packListPrint: {
     docTitle: name => `${name} – lista bagagli da stampare`,
@@ -2151,6 +2153,8 @@ export const it: Translation = {
     autofillUndo: "Annulla",
     autofillUndone: "Pianificazione automatica rimossa",
     autofillFailed: "Riempimento automatico non riuscito",
+    editedBy: name => `di ${name}`,
+    editedByTitle: (name, date) => `Ultima modifica di ${name} il ${date}`,
   },
   tripShopping: {
     title: "Lista della spesa del viaggio",

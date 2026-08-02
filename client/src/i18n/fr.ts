@@ -460,6 +460,9 @@ export const fr: Translation = {
     uncheckAllDone:
       "Toutes les coches sont enlevées – prêt·e pour le prochain paquetage",
     uncheckAllFailed: "Impossible d'enlever les coches",
+    editedByTitle: (name, date) =>
+      `Dernière modification par ${name} le ${date}`,
+    editedByBadgeAria: name => `Dernière modification par ${name}`,
   },
   packListPrint: {
     docTitle: name => `${name} – liste de bagages à imprimer`,
@@ -2169,6 +2172,9 @@ export const fr: Translation = {
     autofillUndo: "Annuler",
     autofillUndone: "Planification automatique retirée",
     autofillFailed: "Le remplissage automatique a échoué",
+    editedBy: name => `par ${name}`,
+    editedByTitle: (name, date) =>
+      `Dernière modification par ${name} le ${date}`,
   },
   tripShopping: {
     title: "Liste de courses du séjour",

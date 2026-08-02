@@ -463,6 +463,9 @@ export const de = {
         : `Wirklich alle ${n} Haken lösen? Die Einträge bleiben erhalten.`,
     uncheckAllDone: "Alle Haken gelöst – bereit fürs nächste Packen",
     uncheckAllFailed: "Haken konnten nicht gelöst werden",
+    editedByTitle: (name: string, date: string) =>
+      `Zuletzt geändert von ${name} am ${date}`,
+    editedByBadgeAria: (name: string) => `Zuletzt geändert von ${name}`,
   },
   packListPrint: {
     docTitle: (name: string) => `${name} – Packliste zum Ausdrucken`,
@@ -2175,6 +2178,9 @@ export const de = {
     autofillUndo: "Rückgängig",
     autofillUndone: "Automatische Planung wieder entfernt",
     autofillFailed: "Automatisches Füllen fehlgeschlagen",
+    editedBy: (name: string) => `von ${name}`,
+    editedByTitle: (name: string, date: string) =>
+      `Zuletzt geändert von ${name} am ${date}`,
   },
   tripShopping: {
     title: "Reise-Einkaufsliste",

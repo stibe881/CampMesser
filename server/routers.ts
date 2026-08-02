@@ -840,19 +840,47 @@ export const appRouter = router({
         );
         return { listId };
       }),
-    /** Liste samt Einträgen – auch für Mitreisende einer verknüpften Reise. */
+    /**
+     * Liste samt Einträgen – auch für Mitreisende einer verknüpften Reise.
+     * Bei Listen an GEMEINSAMEN Reisen (sharedTrip) wird pro Eintrag der
+     * Anzeigename von updatedByUserId mitgeliefert («Zuletzt geändert von»);
+     * private Listen sparen sich die Auflösung.
+     */
     items: protectedProcedure
       .input(z.object({ listId: z.number() }))
       .query(async ({ ctx, input }) => {
+        type ItemWithEditor = Awaited<
+          ReturnType<typeof db.getPackItems>
+        >[number] & { updatedByName: string | null };
         const list = await db.canAccessList(input.listId, ctx.user.id);
         if (!list) {
           return {
             list: null,
-            items: [] as Awaited<ReturnType<typeof db.getPackItems>>,
+            sharedTrip: false,
+            items: [] as ItemWithEditor[],
           };
         }
         const items = await db.getPackItems(input.listId);
-        return { list, items };
+        const sharedTrip =
+          (await db.getListSharedTripId(input.listId, list.userId)) != null;
+        const names = sharedTrip
+          ? await db.getUserDisplayNames(
+              items
+                .map(i => i.updatedByUserId)
+                .filter((id): id is number => id != null)
+            )
+          : new Map<number, string>();
+        return {
+          list,
+          sharedTrip,
+          items: items.map<ItemWithEditor>(item => ({
+            ...item,
+            updatedByName:
+              item.updatedByUserId != null
+                ? (names.get(item.updatedByUserId) ?? null)
+                : null,
+          })),
+        };
       }),
     addItems: protectedProcedure
       .input(
@@ -882,6 +910,7 @@ export const appRouter = router({
           input.items.map((item, idx) => ({
             listId: input.listId,
             sortOrder: 1000 + idx,
+            updatedByUserId: ctx.user.id,
             ...item,
           }))
         );
@@ -896,7 +925,7 @@ export const appRouter = router({
             message: "Eintrag nicht gefunden",
           });
         }
-        await db.setPackItemChecked(input.id, input.checked);
+        await db.setPackItemChecked(input.id, input.checked, ctx.user.id);
       }),
     /**
      * Personen-Bereiche der Liste setzen. Einträge entfernter Personen
@@ -989,6 +1018,7 @@ export const appRouter = router({
         await db.updatePackItem(input.id, {
           ...(input.assignee !== undefined ? { assignee: input.assignee } : {}),
           ...(input.category !== undefined ? { category: input.category } : {}),
+          updatedByUserId: ctx.user.id,
         });
       }),
     deleteItem: protectedProcedure
@@ -1080,7 +1110,8 @@ export const appRouter = router({
         const items = await db.getPackItems(list.id);
         if (!items.some(i => i.id === input.itemId))
           throw new Error("Eintrag gehört nicht zu dieser Liste");
-        await db.setPackItemChecked(input.itemId, input.checked);
+        // Anonym über den Teil-Link → keine «Zuletzt geändert von»-Zuordnung
+        await db.setPackItemChecked(input.itemId, input.checked, null);
         return { success: true } as const;
       }),
   }),
@@ -2877,19 +2908,38 @@ export const appRouter = router({
       }),
   }),
   menu: router({
-    /** Trip samt Menüplan-Einträgen (null, wenn kein Zugriff besteht). */
+    /**
+     * Trip samt Menüplan-Einträgen (null, wenn kein Zugriff besteht).
+     * Pro Eintrag wird der Anzeigename von updatedByUserId aufgelöst
+     * («von <Name>» bei gemeinsamen Reisen) – EINE Zusatzabfrage über
+     * die vorkommenden Konten.
+     */
     listByTrip: protectedProcedure
       .input(z.object({ tripId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
+        type EntryWithEditor = Awaited<
+          ReturnType<typeof db.getMenuEntriesForTrip>
+        >[number] & { updatedByName: string | null };
         const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
         if (!trip) {
-          return {
-            trip: null,
-            entries: [] as Awaited<ReturnType<typeof db.getMenuEntriesForTrip>>,
-          };
+          return { trip: null, entries: [] as EntryWithEditor[] };
         }
         const entries = await db.getMenuEntriesForTrip(input.tripId);
-        return { trip, entries };
+        const names = await db.getUserDisplayNames(
+          entries
+            .map(e => e.updatedByUserId)
+            .filter((id): id is number => id != null)
+        );
+        return {
+          trip,
+          entries: entries.map<EntryWithEditor>(entry => ({
+            ...entry,
+            updatedByName:
+              entry.updatedByUserId != null
+                ? (names.get(entry.updatedByUserId) ?? null)
+                : null,
+          })),
+        };
       }),
     /** Slot setzen: genau eine Quelle (Rezept, eigenes Rezept oder Freitext). */
     set: protectedProcedure
@@ -2945,6 +2995,7 @@ export const appRouter = router({
           recipeId: input.recipeId ?? null,
           customRecipeId: input.customRecipeId ?? null,
           freeText: input.freeText?.trim() || null,
+          updatedByUserId: ctx.user.id,
         });
         return { success: true } as const;
       }),

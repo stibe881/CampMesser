@@ -443,6 +443,8 @@ export const en: Translation = {
         : `Really untick all ${n} checked items? The items themselves are kept.`,
     uncheckAllDone: "All ticks removed – ready for the next packing",
     uncheckAllFailed: "Could not remove the ticks",
+    editedByTitle: (name, date) => `Last changed by ${name} on ${date}`,
+    editedByBadgeAria: name => `Last changed by ${name}`,
   },
   packListPrint: {
     docTitle: name => `${name} – printable packing list`,
@@ -2100,6 +2102,8 @@ export const en: Translation = {
     autofillUndo: "Undo",
     autofillUndone: "Automatic plan removed",
     autofillFailed: "Automatic filling failed",
+    editedBy: name => `by ${name}`,
+    editedByTitle: (name, date) => `Last changed by ${name} on ${date}`,
   },
   tripShopping: {
     title: "Trip shopping list",

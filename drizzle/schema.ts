@@ -111,6 +111,13 @@ export const packItems = mysqlTable(
     assignee: varchar("assignee", { length: 80 }),
     sortOrder: int("sortOrder").notNull().default(0),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
+    /**
+     * Wer den Eintrag zuletzt angelegt/abgehakt/geändert hat – nur für die
+     * «Zuletzt geändert von»-Anzeige bei gemeinsamen Reisen. Massen-Aktionen
+     * (uncheckAll, reorder) lassen das Feld bewusst unverändert.
+     */
+    updatedByUserId: int("updatedByUserId"),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
   table => [index("packItems_listId").on(table.listId)]
 );
@@ -533,6 +540,12 @@ export const menuEntries = mysqlTable(
     /** Freitext, wenn kein Rezept verknüpft ist */
     freeText: varchar("freeText", { length: 200 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
+    /**
+     * Wer den Slot zuletzt gesetzt hat – nur für die «von <Name>»-Anzeige
+     * bei gemeinsamen Reisen (null bei Alt-Einträgen).
+     */
+    updatedByUserId: int("updatedByUserId"),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
   table => [
     index("menuEntries_userId").on(table.userId),

@@ -236,9 +236,21 @@ export async function addPackItems(items: InsertPackItem[]) {
   await db.insert(packItems).values(items);
 }
 
-export async function setPackItemChecked(id: number, checked: boolean) {
+/**
+ * Haken setzen/lösen; updatedByUserId hält fest, WER es war («Zuletzt
+ * geändert von» bei gemeinsamen Reisen) – null bei anonymen Änderungen
+ * über den Teil-Link (löscht eine allfällige alte Zuordnung).
+ */
+export async function setPackItemChecked(
+  id: number,
+  checked: boolean,
+  updatedByUserId: number | null
+) {
   const db = requireDb(await getDb());
-  await db.update(packItems).set({ checked }).where(eq(packItems.id, id));
+  await db
+    .update(packItems)
+    .set({ checked, updatedByUserId })
+    .where(eq(packItems.id, id));
 }
 
 /** Alle Einträge einer Liste auf «ungepackt» zurücksetzen. */
@@ -252,11 +264,17 @@ export async function uncheckAllPackItems(listId: number) {
 
 /**
  * Eintrag anpassen: Personen-Zuordnung («Wer packt das?», null entfernt sie)
- * und/oder Kategorie. Nicht übergebene Felder bleiben unverändert.
+ * und/oder Kategorie. Nicht übergebene Felder bleiben unverändert;
+ * updatedByUserId hält fest, wer die Änderung gemacht hat (Anzeige bei
+ * gemeinsamen Reisen).
  */
 export async function updatePackItem(
   id: number,
-  data: { assignee?: string | null; category?: string }
+  data: {
+    assignee?: string | null;
+    category?: string;
+    updatedByUserId?: number;
+  }
 ) {
   if (data.assignee === undefined && data.category === undefined) return;
   const db = requireDb(await getDb());
@@ -1209,6 +1227,42 @@ export async function getTripMembersWithUsers(tripId: number) {
     .orderBy(asc(tripMembers.id));
 }
 
+/**
+ * Anzeigenamen mehrerer Konten in EINER Abfrage (Name, sonst E-Mail,
+ * sonst #id) – für «Zuletzt geändert von»-Anzeigen bei gemeinsamen Reisen.
+ */
+export async function getUserDisplayNames(ids: number[]) {
+  const map = new Map<number, string>();
+  const unique = Array.from(new Set(ids));
+  if (unique.length === 0) return map;
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select({ id: users.id, name: users.name, email: users.email })
+    .from(users)
+    .where(inArray(users.id, unique));
+  rows.forEach(r => map.set(r.id, r.name || r.email || `#${r.id}`));
+  return map;
+}
+
+/**
+ * Ist die Packliste mit einer GEMEINSAMEN Reise ihrer Besitzerin/ihres
+ * Besitzers verknüpft (mind. 1 Mitglied)? Liefert die Trip-Id, sonst null –
+ * eine Abfrage, damit packing.items das «Zuletzt geändert von»-Feld nur
+ * für geteilte Listen auflösen muss.
+ */
+export async function getListSharedTripId(listId: number, ownerUserId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select({ tripId: tripLogs.id })
+    .from(tripLogs)
+    .innerJoin(tripMembers, eq(tripMembers.tripId, tripLogs.id))
+    .where(
+      and(eq(tripLogs.packListId, listId), eq(tripLogs.userId, ownerUserId))
+    )
+    .limit(1);
+  return rows[0]?.tripId ?? null;
+}
+
 /** Konto-Zeile für Anzeige-Zwecke (Owner-Name in Mitglieder-Liste/Einladung). */
 export async function getUserById(id: number) {
   const db = requireDb(await getDb());
@@ -1467,6 +1521,7 @@ export async function upsertMenuEntry(data: InsertMenuEntry) {
         recipeId: data.recipeId ?? null,
         customRecipeId: data.customRecipeId ?? null,
         freeText: data.freeText ?? null,
+        updatedByUserId: data.updatedByUserId ?? null,
       },
     });
 }

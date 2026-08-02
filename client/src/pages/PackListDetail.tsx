@@ -61,6 +61,17 @@ const SECTION_GENERAL = "__general__";
 /** Select-Sonderwert: «Neue Kategorie …» öffnet ein Inline-Namensfeld. */
 const CATEGORY_NEW = "__new-category__";
 
+/** Initialen (max. 2 Buchstaben) fürs «Zuletzt geändert von»-Badge. */
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return (
+    parts
+      .slice(0, 2)
+      .map(part => part[0].toUpperCase())
+      .join("") || "?"
+  );
+}
+
 /**
  * Kategorie-Auswahl für Einträge: alle in der Liste vorhandenen Kategorien
  * plus «Neue Kategorie …», die ein Inline-Namensfeld öffnet.
@@ -207,7 +218,7 @@ function SectionAddForm({
 export default function PackListDetailPage() {
   const params = useParams<{ id: string }>();
   const listId = Number(params.id);
-  const { isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
   const query = trpc.packing.items.useQuery(
@@ -443,6 +454,30 @@ export default function PackListDetailPage() {
   );
 
   const generalCategory = t.packListDetail.generalCategory;
+
+  // «Zuletzt geändert von …»: nur bei Listen an GEMEINSAMEN Reisen und nur
+  // für Änderungen ANDERER (die eigenen sind nicht spannend) – private
+  // Listen bleiben komplett unverändert.
+  const isSharedTripList = query.data?.sharedTrip === true;
+  const editorLabel = (item: {
+    updatedByUserId: number | null;
+    updatedByName: string | null;
+  }): string | null =>
+    isSharedTripList &&
+    item.updatedByName &&
+    item.updatedByUserId != null &&
+    item.updatedByUserId !== user?.id
+      ? item.updatedByName
+      : null;
+  /** Zeitpunkt der letzten Änderung fürs title-Tooltip. */
+  const formatEditedAt = (value: Date | string) =>
+    new Date(value).toLocaleString(LOCALE_TAGS[lang], {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
   /**
    * Primäre Gliederung nach Person: zuoberst «Allgemein» (assignee null),
@@ -1019,6 +1054,14 @@ export default function PackListDetailPage() {
                       />
                       <label
                         htmlFor={`item-${item.id}`}
+                        title={
+                          editorLabel(item)
+                            ? t.packListDetail.editedByTitle(
+                                editorLabel(item)!,
+                                formatEditedAt(item.updatedAt)
+                              )
+                            : undefined
+                        }
                         className={cn(
                           "flex-1 cursor-pointer text-sm",
                           item.checked && "text-muted-foreground line-through"
@@ -1028,6 +1071,18 @@ export default function PackListDetailPage() {
                         {item.quantity > 1 && (
                           <span className="ml-1.5 text-xs text-muted-foreground">
                             × {item.quantity}
+                          </span>
+                        )}
+                        {editorLabel(item) && (
+                          <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-secondary px-1 align-middle text-[10px] font-semibold text-secondary-foreground">
+                            <span aria-hidden="true">
+                              {initialsOf(editorLabel(item)!)}
+                            </span>
+                            <span className="sr-only">
+                              {t.packListDetail.editedByBadgeAria(
+                                editorLabel(item)!
+                              )}
+                            </span>
                           </span>
                         )}
                       </label>

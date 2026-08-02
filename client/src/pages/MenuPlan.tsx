@@ -205,6 +205,16 @@ export default function MenuPlanPage() {
       month: "short",
     });
 
+  /** Zeitpunkt der letzten Änderung fürs «von <Name>»-Tooltip. */
+  const formatEditedAt = (value: Date | string) =>
+    new Date(value).toLocaleString(LOCALE_TAGS[lang], {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
   /** Rezept-Auswahl im Dialog: eigene Rezepte zuoberst, dann eingebaute. */
   const pickerRecipes = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -509,6 +519,18 @@ export default function MenuPlanPage() {
                               <ChefHat className="h-3 w-3" aria-hidden="true" />
                               {t.menuPlan.ownBadge}
                             </Badge>
+                          )}
+                          {/* «von <Name>» nur bei geteilten Reisen */}
+                          {isSharedTrip && entry.updatedByName && (
+                            <span
+                              className="ml-1.5 text-xs font-normal text-muted-foreground"
+                              title={t.menuPlan.editedByTitle(
+                                entry.updatedByName,
+                                formatEditedAt(entry.updatedAt)
+                              )}
+                            >
+                              {t.menuPlan.editedBy(entry.updatedByName)}
+                            </span>
                           )}
                         </span>
                         <Button
