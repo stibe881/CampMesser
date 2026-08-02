@@ -330,6 +330,13 @@
       "when": 1785696534514,
       "tag": "0046_zippy_blade",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "5",
+      "when": 1785697587141,
+      "tag": "0047_windy_red_ghost",
+      "breakpoints": true
     }
   ]
 }

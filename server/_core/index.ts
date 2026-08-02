@@ -467,6 +467,99 @@ async function startServer() {
       if (!res.headersSent) res.status(500).json({ error: "serverError" });
     }
   });
+  // ── Foto für Natur-Beobachtungen ────────────────────────────────────────
+  // Gleiche Technik wie das Inventar-Foto (Raw-Body, Client-Resize, Ablage
+  // unter uploads/sightings/), genau EIN Foto pro Beobachtung: ein neuer
+  // Upload ersetzt das bisherige Foto.
+  app.post(
+    "/api/sightings/:id/photo",
+    express.raw({ type: "image/*", limit: MAX_PHOTO_BYTES }),
+    async (req, res) => {
+      try {
+        const user = await authenticatePhotoRequest(req, res);
+        if (!user) return;
+        const sightingId = Number(req.params.id);
+        if (!Number.isInteger(sightingId) || sightingId <= 0) {
+          res.status(400).json({ error: "badRequest" });
+          return;
+        }
+        const db = await import("../db");
+        const sighting = await db.getNatureSighting(sightingId, user.id);
+        if (!sighting) {
+          res.status(404).json({ error: "notFound" });
+          return;
+        }
+        const contentType = String(req.headers["content-type"] ?? "")
+          .split(";")[0]
+          .trim()
+          .toLowerCase();
+        if (contentType === "image/heic" || contentType === "image/heif") {
+          res.status(415).json({ error: "heicNotSupported" });
+          return;
+        }
+        const extension = PHOTO_MIME_EXTENSIONS[contentType];
+        if (!extension) {
+          res.status(415).json({ error: "unsupportedType" });
+          return;
+        }
+        const body = req.body as unknown;
+        if (!Buffer.isBuffer(body) || body.length === 0) {
+          res.status(400).json({ error: "emptyBody" });
+          return;
+        }
+        if (body.length > MAX_PHOTO_BYTES) {
+          res.status(413).json({ error: "tooLarge" });
+          return;
+        }
+        const { nanoid } = await import("nanoid");
+        const fileName = `${nanoid(16)}${extension}`;
+        const { sightingPhotoStorage } = await import("../photoStorage");
+        await sightingPhotoStorage.saveFile(fileName, body);
+        await db.updateNatureSighting(sightingId, user.id, { fileName });
+        // Altes Foto erst nach erfolgreichem DB-Update entfernen
+        if (sighting.fileName) {
+          await sightingPhotoStorage.deleteFiles([sighting.fileName]);
+        }
+        res.json({ fileName });
+      } catch (error) {
+        console.error("[SightingPhotos] Upload fehlgeschlagen:", error);
+        if (!res.headersSent) res.status(500).json({ error: "serverError" });
+      }
+    }
+  );
+  // Auslieferung: nur die Besitzerin/der Besitzer der Beobachtung sieht das Foto.
+  app.get("/api/sightings/photos/:fileName", async (req, res) => {
+    try {
+      const user = await authenticatePhotoRequest(req, res);
+      if (!user) return;
+      const { PHOTO_FILENAME_PATTERN, sightingPhotoStorage } =
+        await import("../photoStorage");
+      const fileName = req.params.fileName;
+      if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
+        res.status(400).json({ error: "badRequest" });
+        return;
+      }
+      const db = await import("../db");
+      const sighting = await db.getNatureSightingByFileName(fileName, user.id);
+      if (!sighting) {
+        res.status(404).json({ error: "notFound" });
+        return;
+      }
+      res.sendFile(
+        sightingPhotoStorage.photoPath(fileName),
+        { headers: { "Cache-Control": "private, max-age=3600" } },
+        error => {
+          // Datei fehlt auf der Platte (z. B. nach Server-Umzug ohne uploads/)
+          if (error && !res.headersSent) {
+            res.status(404).json({ error: "notFound" });
+          }
+        }
+      );
+    } catch (error) {
+      console.error("[SightingPhotos] Auslieferung fehlgeschlagen:", error);
+      if (!res.headersSent) res.status(500).json({ error: "serverError" });
+    }
+  });
   // ── Fotos für Zeltplatz-Favoriten ───────────────────────────────────────
   // Gleiche Technik wie die Tagebuch-Fotos (Raw-Body, Client-Resize,
   // Ablage unter uploads/spots/), max. 12 Fotos pro Platz. Die Fotos sind

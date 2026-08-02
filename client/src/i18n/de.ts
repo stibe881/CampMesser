@@ -1295,6 +1295,11 @@ export const de = {
     createConfirm: "Favorit anlegen",
     createdToast: (name: string) => `«${name}» als Favorit angelegt`,
     createdToastAction: "Zum Dossier",
+    sightingKind: "Natur-Beobachtung",
+    sightingLegend: (n: number) =>
+      n === 1
+        ? "1 Natur-Beobachtung auf der Karte"
+        : `${n} Natur-Beobachtungen auf der Karte`,
   },
   spotDetail: {
     fallbackTitle: "Zeltplatz",
@@ -1805,6 +1810,64 @@ export const de = {
     featuresTitle: "Erkennungsmerkmale",
     funFactTitle: "Wusstest du?",
     kidsTitle: "Für Kinder:",
+    sightings: {
+      title: "Meine Beobachtungen",
+      sectionAria: "Meine Natur-Beobachtungen",
+      intro:
+        "Halte fest, was du draussen entdeckt hast – mit Datum, Standort, Notiz und Foto. Beobachtungen mit Standort erscheinen zusätzlich als Pins auf der Karte.",
+      loginFeature: "dein Beobachtungs-Tagebuch",
+      loadFailed: "Beobachtungen konnten nicht geladen werden.",
+      empty:
+        "Noch keine Beobachtungen – erfasse deine erste Sichtung, zum Beispiel ein Reh am Waldrand.",
+      count: (n: number) => (n === 1 ? "1 Beobachtung" : `${n} Beobachtungen`),
+      addButton: "Beobachtung erfassen",
+      addAria: "Neue Beobachtung erfassen",
+      dialogTitleNew: "Neue Beobachtung",
+      dialogTitleEdit: "Beobachtung bearbeiten",
+      dialogDescription:
+        "Wähle einen Eintrag aus dem Lexikon als Vorschlag oder gib einen eigenen Titel ein.",
+      entryLabel: "Art aus dem Lexikon (optional)",
+      entryNone: "Kein Lexikon-Eintrag",
+      titleLabel: "Titel",
+      titlePlaceholder: "z. B. Reh am Waldrand",
+      titleRequired:
+        "Bitte gib einen Titel ein oder wähle einen Lexikon-Eintrag.",
+      dateLabel: "Datum",
+      locationLegend: "Standort (optional)",
+      useLocation: "Aktuellen Standort übernehmen",
+      locating: "Standort wird ermittelt …",
+      locationSet: (lat: string, lon: string) => `Standort: ${lat}, ${lon}`,
+      removeLocation: "Standort entfernen",
+      locationFailed:
+        "Standort konnte nicht ermittelt werden – bitte Berechtigung prüfen.",
+      locationUnsupported: "Dieses Gerät stellt keinen Standort bereit.",
+      onMapHint: "Erscheint als Pin auf der Karte.",
+      noteLabel: "Notiz (optional)",
+      notePlaceholder: "z. B. Spuren im Schlamm, zwei Jungtiere",
+      photoLabel: "Foto (optional)",
+      photoChoose: "Foto auswählen",
+      photoChange: "Foto ändern",
+      photoRemove: "Foto entfernen",
+      photoPreviewAlt: "Vorschau des Beobachtungs-Fotos",
+      photoHint:
+        "JPEG, PNG oder WebP – wird vor dem Hochladen automatisch verkleinert.",
+      photoUploading: "Foto wird hochgeladen …",
+      photoUploadFailed:
+        "Gespeichert, aber das Foto konnte nicht hochgeladen werden.",
+      photoTooLarge: "Das Foto ist zu gross (max. 5 MB).",
+      photoHeic:
+        "HEIC/HEIF kann der Browser nicht lesen – bitte als JPEG exportieren.",
+      photoReadFailed: "Das Bild konnte nicht gelesen werden.",
+      photoRemoveFailed: "Das Foto konnte nicht entfernt werden.",
+      photoAlt: (title: string) => `Foto der Beobachtung ${title}`,
+      created: "Beobachtung gespeichert",
+      updated: "Änderungen gespeichert",
+      deleted: "Beobachtung gelöscht",
+      editAria: (title: string) => `Beobachtung «${title}» bearbeiten`,
+      deleteAria: (title: string) => `Beobachtung «${title}» löschen`,
+      deleteConfirm: (title: string) =>
+        `Beobachtung «${title}» wirklich löschen?`,
+    },
   },
   recipes: {
     title: "Campfire-Rezeptbuch",

@@ -716,6 +716,36 @@ export type GearTask = typeof gearTasks.$inferSelect;
 export type InsertGearTask = typeof gearTasks.$inferInsert;
 
 /**
+ * Natur-Beobachtungen: persönliches Sichtungs-Tagebuch im Natur-Modul.
+ * Optional mit Verweis auf einen Wissens-Eintrag (client/src/data/nature.ts),
+ * Standort-Koordinaten (erscheinen als Pins auf /karte) und genau EINEM Foto
+ * als Datei unter uploads/sightings/ (Muster inventoryItems.imageFileName).
+ */
+export const natureSightings = mysqlTable(
+  "natureSightings",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    title: varchar("title", { length: 120 }).notNull(),
+    /** Id eines Wissens-Eintrags aus data/nature.ts; null = freie Beobachtung */
+    entryId: varchar("entryId", { length: 60 }),
+    /** Beobachtungs-Datum (ISO) */
+    sightedAt: date("sightedAt", { mode: "string" }).notNull(),
+    /** Standort der Sichtung; null = ohne Koordinaten (kein Karten-Pin) */
+    lat: double("lat"),
+    lon: double("lon"),
+    note: varchar("note", { length: 500 }),
+    /** Dateiname des Fotos unter uploads/sightings/ (genau EIN Foto pro Sichtung) */
+    fileName: varchar("fileName", { length: 64 }).unique(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("natureSightings_userId").on(table.userId)]
+);
+
+export type NatureSighting = typeof natureSightings.$inferSelect;
+export type InsertNatureSighting = typeof natureSightings.$inferInsert;
+
+/**
  * Passkeys (WebAuthn): pro Konto beliebig viele Anmelde-Credentials als
  * Alternative zum Passwort. Gespeichert werden die Base64URL-codierte
  * Credential-Id des Authenticators, der öffentliche Schlüssel (COSE) und der

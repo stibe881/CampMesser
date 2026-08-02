@@ -1136,6 +1136,99 @@ export const appRouter = router({
       }),
   }),
 
+  /** Natur-Beobachtungen: persönliches Sichtungs-Tagebuch im Natur-Modul. */
+  sightings: router({
+    list: protectedProcedure.query(({ ctx }) =>
+      db.getNatureSightings(ctx.user.id)
+    ),
+    add: protectedProcedure
+      .input(
+        z.object({
+          title: z.string().trim().min(1).max(120),
+          entryId: z.string().max(60).nullish(),
+          sightedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          lat: z.number().min(-90).max(90).nullish(),
+          lon: z.number().min(-180).max(180).nullish(),
+          note: z.string().max(500).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const id = await db.addNatureSighting({
+          userId: ctx.user.id,
+          title: input.title,
+          entryId: input.entryId ?? null,
+          sightedAt: input.sightedAt,
+          lat: input.lat ?? null,
+          lon: input.lon ?? null,
+          note: input.note?.trim() || null,
+        });
+        return { id };
+      }),
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          title: z.string().trim().min(1).max(120),
+          entryId: z.string().max(60).nullish(),
+          sightedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          lat: z.number().min(-90).max(90).nullish(),
+          lon: z.number().min(-180).max(180).nullish(),
+          note: z.string().max(500).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const sighting = await db.getNatureSighting(input.id, ctx.user.id);
+        if (!sighting) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Beobachtung nicht gefunden.",
+          });
+        }
+        await db.updateNatureSighting(input.id, ctx.user.id, {
+          title: input.title,
+          entryId: input.entryId ?? null,
+          sightedAt: input.sightedAt,
+          lat: input.lat ?? null,
+          lon: input.lon ?? null,
+          note: input.note?.trim() || null,
+        });
+        return { success: true } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        // Foto-Datei mitputzen: erst Dateinamen sichern, dann DB-Zeile
+        // löschen und zuletzt die Datei auf dem Webspace entfernen.
+        const sighting = await db.getNatureSighting(input.id, ctx.user.id);
+        await db.deleteNatureSighting(input.id, ctx.user.id);
+        if (sighting?.fileName) {
+          const { sightingPhotoStorage } = await import("./photoStorage");
+          await sightingPhotoStorage.deleteFiles([sighting.fileName]);
+        }
+        return { success: true } as const;
+      }),
+    /** Foto einer Beobachtung entfernen (Feld + Datei auf dem Webspace). */
+    removePhoto: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const sighting = await db.getNatureSighting(input.id, ctx.user.id);
+        if (!sighting) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Beobachtung nicht gefunden.",
+          });
+        }
+        if (sighting.fileName) {
+          await db.updateNatureSighting(input.id, ctx.user.id, {
+            fileName: null,
+          });
+          const { sightingPhotoStorage } = await import("./photoStorage");
+          await sightingPhotoStorage.deleteFiles([sighting.fileName]);
+        }
+        return { success: true } as const;
+      }),
+  }),
+
   /** Ausrüstungs-Pflege: wiederkehrende Wartungsaufgaben (Fälligkeit in shared/gearTasks.ts). */
   gear: router({
     list: protectedProcedure.query(({ ctx }) => db.getGearTasks(ctx.user.id)),

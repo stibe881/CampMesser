@@ -207,6 +207,28 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       (await authed.family.children.list()).some(c => c.id === secondChildId)
     ).toBe(false);
     const invItemId = await authed.inventory.add({ name: "CI-Zelt" });
+    // Natur-Beobachtungen: anlegen, bearbeiten, auflisten (Foto weiter unten)
+    const { id: sightingId } = await authed.sightings.add({
+      title: "CI-Reh",
+      entryId: "reh",
+      sightedAt: "2026-08-01",
+      lat: 46.8,
+      lon: 8.2,
+      note: "Am Waldrand",
+    });
+    await authed.sightings.update({
+      id: sightingId,
+      title: "CI-Reh am Abend",
+      entryId: "reh",
+      sightedAt: "2026-08-01",
+      lat: 46.8,
+      lon: 8.2,
+    });
+    const sightings = await authed.sightings.list();
+    expect(sightings.find(s => s.id === sightingId)?.title).toBe(
+      "CI-Reh am Abend"
+    );
+    expect(sightings.find(s => s.id === sightingId)?.note).toBeNull();
     // Ausrüstungs-Pflege: Aufgabe anlegen, erledigen (lastDoneAt = heute)
     const { id: gearTaskId } = await authed.gear.add({
       title: "CI-Zelt imprägnieren",
@@ -458,6 +480,7 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       recipePhotoStorage,
       spotPhotoStorage,
       inventoryPhotoStorage,
+      sightingPhotoStorage,
     } = await import("./photoStorage");
     const fs = await import("node:fs/promises");
     const dbc = (await getDb())!;
@@ -466,10 +489,12 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     const recipeFile = `ci-recipe-${Date.now()}.jpg`;
     const spotFile = `ci-spot-${Date.now()}.jpg`;
     const inventoryFile = `ci-inventory-${Date.now()}.jpg`;
+    const sightingFile = `ci-sighting-${Date.now()}.jpg`;
     await tripPhotoStorage.saveFile(tripFile, Buffer.from("x"));
     await recipePhotoStorage.saveFile(recipeFile, Buffer.from("x"));
     await spotPhotoStorage.saveFile(spotFile, Buffer.from("x"));
     await inventoryPhotoStorage.saveFile(inventoryFile, Buffer.from("x"));
+    await sightingPhotoStorage.saveFile(sightingFile, Buffer.from("x"));
     await dbc
       .insert(schema.tripPhotos)
       .values({ userId: uid, tripId, fileName: tripFile });
@@ -484,6 +509,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       .update(schema.inventoryItems)
       .set({ imageFileName: inventoryFile })
       .where(eq(schema.inventoryItems.id, invItemId));
+    await dbc
+      .update(schema.natureSightings)
+      .set({ fileName: sightingFile })
+      .where(eq(schema.natureSightings.id, sightingId));
 
     // Aufräumen: Konto löschen entfernt auch die angelegten Daten
     const deleted = await authed.auth.deleteAccount({ password });
@@ -582,6 +611,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.gearTasks)
         .where(eq(schema.gearTasks.userId, uid)),
+      dbc
+        .select()
+        .from(schema.natureSightings)
+        .where(eq(schema.natureSightings.userId, uid)),
       // Reise-Mitglieder und Einladungs-Links der eigenen Reisen sind weg
       dbc
         .select()
@@ -617,6 +650,9 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     ).rejects.toThrow();
     await expect(
       fs.access(inventoryPhotoStorage.photoPath(inventoryFile))
+    ).rejects.toThrow();
+    await expect(
+      fs.access(sightingPhotoStorage.photoPath(sightingFile))
     ).rejects.toThrow();
   });
 });

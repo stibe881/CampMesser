@@ -31,7 +31,7 @@ echo "==> Neueste Version holen"
 git pull --ff-only
 
 echo "==> Upload-Verzeichnisse sicherstellen"
-mkdir -p uploads/trips uploads/recipes uploads/spots uploads/inventory
+mkdir -p uploads/trips uploads/recipes uploads/spots uploads/inventory uploads/sightings
 
 echo "==> Abhängigkeiten installieren"
 $PKG install

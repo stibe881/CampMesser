@@ -164,6 +164,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     passwordResetTokens,
     passkeys,
     gearTasks,
+    natureSightings,
   } = await import("../drizzle/schema");
   const { inArray, or } = await import("drizzle-orm");
   // Eigene Reisen zuerst ermitteln: deren Mitglieder, Einladungs-Links und
@@ -199,6 +200,10 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     .select({ imageFileName: inventoryItems.imageFileName })
     .from(inventoryItems)
     .where(eq(inventoryItems.userId, userId));
+  const sightingRows = await db
+    .select({ fileName: natureSightings.fileName })
+    .from(natureSightings)
+    .where(eq(natureSightings.userId, userId));
   // Packlisten-Positionen zuerst (referenzieren Listen)
   const lists = await db
     .select({ id: packLists.id })
@@ -257,6 +262,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     .where(eq(passwordResetTokens.userId, userId));
   await db.delete(passkeys).where(eq(passkeys.userId, userId));
   await db.delete(gearTasks).where(eq(gearTasks.userId, userId));
+  await db.delete(natureSightings).where(eq(natureSightings.userId, userId));
   await db.delete(users).where(eq(users.id, userId));
   // Zuletzt die Upload-Dateien vom Webspace entfernen – fehlende Dateien
   // blockieren nie, und verwaiste Dateien sind schlimmstenfalls harmlos.
@@ -265,6 +271,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     recipePhotoStorage,
     spotPhotoStorage,
     inventoryPhotoStorage,
+    sightingPhotoStorage,
   } = await import("./photoStorage");
   await tripPhotoStorage.deleteFiles(photoRows.map(p => p.fileName));
   await recipePhotoStorage.deleteFiles(
@@ -276,6 +283,11 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await inventoryPhotoStorage.deleteFiles(
     inventoryRows
       .map(r => r.imageFileName)
+      .filter((name): name is string => Boolean(name))
+  );
+  await sightingPhotoStorage.deleteFiles(
+    sightingRows
+      .map(r => r.fileName)
       .filter((name): name is string => Boolean(name))
   );
 }

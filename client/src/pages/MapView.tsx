@@ -24,7 +24,14 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Compass, LocateFixed, MapPin, Search, Tent } from "lucide-react";
+import {
+  Compass,
+  LocateFixed,
+  MapPin,
+  PawPrint,
+  Search,
+  Tent,
+} from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { toast } from "sonner";
@@ -62,7 +69,8 @@ import {
   type TentFinderTarget,
 } from "@/lib/tentFinderTargets";
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n";
+import { useI18n, useT } from "@/i18n";
+import { LOCALE_TAGS } from "@shared/i18n";
 import { tripNights } from "@shared/trips";
 
 interface SpotPin {
@@ -70,6 +78,15 @@ interface SpotPin {
   name: string;
   latitude: number;
   longitude: number;
+}
+
+/** Natur-Beobachtung mit Koordinaten – Datum bereits sprachrichtig formatiert. */
+interface SightingPin {
+  id: number;
+  title: string;
+  dateLabel: string;
+  lat: number;
+  lon: number;
 }
 
 /** Schweiz als Ausgangs-Ausschnitt, solange keine Pins vorhanden sind. */
@@ -103,6 +120,15 @@ const campsiteIcon = L.divIcon({
   popupAnchor: [0, -16],
 });
 
+/** Natur-Beobachtung: violetter Kreis mit Pfoten-Punkten (vierte Farbe). */
+const sightingIcon = L.divIcon({
+  className: "",
+  html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#7c3aed" stroke="#ffffff" stroke-width="2.5"/><ellipse cx="14" cy="16.5" rx="3.4" ry="2.9" fill="#ffffff"/><circle cx="9.6" cy="12.4" r="1.7" fill="#ffffff"/><circle cx="13" cy="10.4" r="1.7" fill="#ffffff"/><circle cx="16.8" cy="10.9" r="1.7" fill="#ffffff"/><circle cx="19.4" cy="13.7" r="1.6" fill="#ffffff"/></svg>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -16],
+});
+
 /** Liegt der OSM-Platz praktisch auf einem Favoriten? (~50 m Toleranz) */
 function isNearFavorite(campsite: OsmCampsite, spots: SpotPin[]): boolean {
   return spots.some(
@@ -115,10 +141,12 @@ function isNearFavorite(campsite: OsmCampsite, spots: SpotPin[]): boolean {
 function SpotsMap({
   spots,
   targets,
+  sightings,
   nightsBySpotId,
 }: {
   spots: SpotPin[];
   targets: TentFinderTarget[];
+  sightings: SightingPin[];
   nightsBySpotId: Map<number, number>;
 }) {
   const t = useT();
@@ -330,6 +358,27 @@ function SpotsMap({
       marker.addTo(layer);
     });
 
+    // Natur-Beobachtungen mit Koordinaten als eigene (violette) Pins –
+    // Popup mit Titel und Beobachtungs-Datum.
+    sightings.forEach(sighting => {
+      const marker = L.marker([sighting.lat, sighting.lon], {
+        icon: sightingIcon,
+        alt: sighting.title,
+      });
+      const popup = document.createElement("div");
+      popup.className = "space-y-1";
+      const name = document.createElement("p");
+      name.className = "font-semibold";
+      name.textContent = sighting.title;
+      popup.appendChild(name);
+      const kind = document.createElement("p");
+      kind.className = "text-xs";
+      kind.textContent = `${t.mapView.sightingKind} · ${sighting.dateLabel}`;
+      popup.appendChild(kind);
+      marker.bindPopup(popup);
+      marker.addTo(layer);
+    });
+
     // Nur beim ersten Aufbau einpassen – spätere Refetches (z. B. nach dem
     // Übernehmen eines OSM-Platzes) sollen den Ausschnitt nicht verspringen.
     if (!didFitRef.current) {
@@ -347,7 +396,7 @@ function SpotsMap({
         map.setView(FALLBACK_CENTER, FALLBACK_ZOOM);
       }
     }
-  }, [spots, targets, nightsBySpotId, t, navigate]);
+  }, [spots, targets, sightings, nightsBySpotId, t, navigate]);
 
   // Entdeckte OSM-Campingplätze als eigene (blaue) Pins nachführen
   useEffect(() => {
@@ -520,6 +569,15 @@ function SpotsMap({
             {t.mapView.targetLegend(targets.length)}
           </span>
         )}
+        {sightings.length > 0 && (
+          <span className="flex items-center gap-1.5">
+            <PawPrint
+              className="h-3.5 w-3.5 text-violet-700 dark:text-violet-400"
+              aria-hidden="true"
+            />
+            {t.mapView.sightingLegend(sightings.length)}
+          </span>
+        )}
         {discoverOn && visibleCampsites.length > 0 && (
           <span className="flex items-center gap-1.5">
             <Compass
@@ -587,13 +645,16 @@ function SpotsMap({
 }
 
 export default function MapViewPage() {
-  const t = useT();
+  const { lang, t } = useI18n();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const { data: spots, isLoading: spotsLoading } = trpc.spots.list.useQuery(
     undefined,
     { enabled: isAuthenticated }
   );
   const { data: trips } = trpc.trips.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const { data: sightingsData } = trpc.sightings.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
 
@@ -662,6 +723,25 @@ export default function MapViewPage() {
     [spots]
   );
 
+  // Natur-Beobachtungen mit Koordinaten – das Datum wird hier sprachrichtig
+  // vorformatiert, damit der Karten-Popup-Aufbau reine Strings erhält.
+  const sightingPins = useMemo<SightingPin[]>(
+    () =>
+      (sightingsData ?? [])
+        .filter(s => s.lat != null && s.lon != null)
+        .map(s => ({
+          id: s.id,
+          title: s.title,
+          dateLabel: new Date(`${s.sightedAt}T00:00:00`).toLocaleDateString(
+            LOCALE_TAGS[lang],
+            { day: "numeric", month: "long", year: "numeric" }
+          ),
+          lat: s.lat as number,
+          lon: s.lon as number,
+        })),
+    [sightingsData, lang]
+  );
+
   return (
     <div className="container max-w-5xl py-6 md:py-8">
       <PageHeader title={t.mapView.title} subtitle={t.mapView.subtitle} />
@@ -694,6 +774,7 @@ export default function MapViewPage() {
           <SpotsMap
             spots={spotPins}
             targets={targets}
+            sightings={sightingPins}
             nightsBySpotId={nightsBySpotId}
           />
         </>

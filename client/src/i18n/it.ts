@@ -1280,6 +1280,11 @@ export const it: Translation = {
     createConfirm: "Crea preferito",
     createdToast: (name: string) => `«${name}» creato come preferito`,
     createdToastAction: "Al dossier",
+    sightingKind: "Osservazione della natura",
+    sightingLegend: (n: number) =>
+      n === 1
+        ? "1 osservazione della natura sulla mappa"
+        : `${n} osservazioni della natura sulla mappa`,
   },
   spotDetail: {
     fallbackTitle: "Piazzola",
@@ -1782,6 +1787,61 @@ export const it: Translation = {
     featuresTitle: "Segni di riconoscimento",
     funFactTitle: "Lo sapevi?",
     kidsTitle: "Per i bambini:",
+    sightings: {
+      title: "Le mie osservazioni",
+      sectionAria: "Le mie osservazioni della natura",
+      intro:
+        "Annota ciò che hai scoperto all'aperto – con data, posizione, nota e foto. Le osservazioni con posizione appaiono anche come pin sulla mappa.",
+      loginFeature: "il tuo diario delle osservazioni",
+      loadFailed: "Le osservazioni non sono state caricate.",
+      empty:
+        "Ancora nessuna osservazione – registra il tuo primo avvistamento, per esempio un capriolo al margine del bosco.",
+      count: (n: number) => (n === 1 ? "1 osservazione" : `${n} osservazioni`),
+      addButton: "Aggiungi osservazione",
+      addAria: "Aggiungi una nuova osservazione",
+      dialogTitleNew: "Nuova osservazione",
+      dialogTitleEdit: "Modifica osservazione",
+      dialogDescription:
+        "Scegli una voce del lessico come suggerimento oppure inserisci un titolo tuo.",
+      entryLabel: "Specie dal lessico (facoltativo)",
+      entryNone: "Nessuna voce del lessico",
+      titleLabel: "Titolo",
+      titlePlaceholder: "es. Capriolo al margine del bosco",
+      titleRequired: "Inserisci un titolo o scegli una voce del lessico.",
+      dateLabel: "Data",
+      locationLegend: "Posizione (facoltativo)",
+      useLocation: "Usa la posizione attuale",
+      locating: "Ricerca della posizione …",
+      locationSet: (lat: string, lon: string) => `Posizione: ${lat}, ${lon}`,
+      removeLocation: "Rimuovi la posizione",
+      locationFailed:
+        "Impossibile determinare la posizione – controlla l'autorizzazione.",
+      locationUnsupported: "Questo dispositivo non fornisce la posizione.",
+      onMapHint: "Appare come pin sulla mappa.",
+      noteLabel: "Nota (facoltativo)",
+      notePlaceholder: "es. tracce nel fango, due cuccioli",
+      photoLabel: "Foto (facoltativo)",
+      photoChoose: "Scegli foto",
+      photoChange: "Cambia foto",
+      photoRemove: "Rimuovi foto",
+      photoPreviewAlt: "Anteprima della foto dell'osservazione",
+      photoHint:
+        "JPEG, PNG o WebP – viene ridotta automaticamente prima del caricamento.",
+      photoUploading: "Caricamento della foto …",
+      photoUploadFailed: "Salvato, ma la foto non è stata caricata.",
+      photoTooLarge: "La foto è troppo grande (max. 5 MB).",
+      photoHeic: "Il browser non può leggere HEIC/HEIF – esporta come JPEG.",
+      photoReadFailed: "L'immagine non è stata letta.",
+      photoRemoveFailed: "La foto non è stata rimossa.",
+      photoAlt: (title: string) => `Foto dell'osservazione ${title}`,
+      created: "Osservazione salvata",
+      updated: "Modifiche salvate",
+      deleted: "Osservazione eliminata",
+      editAria: (title: string) => `Modifica l'osservazione «${title}»`,
+      deleteAria: (title: string) => `Elimina l'osservazione «${title}»`,
+      deleteConfirm: (title: string) =>
+        `Eliminare davvero l'osservazione «${title}»?`,
+    },
   },
   recipes: {
     title: "Ricettario Campfire",

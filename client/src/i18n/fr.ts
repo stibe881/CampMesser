@@ -1294,6 +1294,11 @@ export const fr: Translation = {
     createConfirm: "Créer le favori",
     createdToast: (name: string) => `«${name}» créé comme favori`,
     createdToastAction: "Vers le dossier",
+    sightingKind: "Observation nature",
+    sightingLegend: (n: number) =>
+      n === 1
+        ? "1 observation nature sur la carte"
+        : `${n} observations nature sur la carte`,
   },
   spotDetail: {
     fallbackTitle: "Emplacement",
@@ -1797,6 +1802,61 @@ export const fr: Translation = {
     featuresTitle: "Signes distinctifs",
     funFactTitle: "Le savais-tu ?",
     kidsTitle: "Pour les enfants :",
+    sightings: {
+      title: "Mes observations",
+      sectionAria: "Mes observations nature",
+      intro:
+        "Note ce que tu as découvert dehors – avec date, position, note et photo. Les observations avec position apparaissent aussi comme épingles sur la carte.",
+      loginFeature: "ton journal d'observations",
+      loadFailed: "Les observations n'ont pas pu être chargées.",
+      empty:
+        "Pas encore d'observations – note ta première rencontre, par exemple un chevreuil en lisière de forêt.",
+      count: (n: number) => (n === 1 ? "1 observation" : `${n} observations`),
+      addButton: "Ajouter une observation",
+      addAria: "Ajouter une nouvelle observation",
+      dialogTitleNew: "Nouvelle observation",
+      dialogTitleEdit: "Modifier l'observation",
+      dialogDescription:
+        "Choisis une entrée du lexique comme suggestion ou saisis ton propre titre.",
+      entryLabel: "Espèce du lexique (facultatif)",
+      entryNone: "Aucune entrée du lexique",
+      titleLabel: "Titre",
+      titlePlaceholder: "p. ex. Chevreuil en lisière de forêt",
+      titleRequired: "Saisis un titre ou choisis une entrée du lexique.",
+      dateLabel: "Date",
+      locationLegend: "Position (facultatif)",
+      useLocation: "Utiliser la position actuelle",
+      locating: "Recherche de la position …",
+      locationSet: (lat: string, lon: string) => `Position : ${lat}, ${lon}`,
+      removeLocation: "Supprimer la position",
+      locationFailed:
+        "La position n'a pas pu être déterminée – vérifie l'autorisation.",
+      locationUnsupported: "Cet appareil ne fournit pas de position.",
+      onMapHint: "Apparaît comme épingle sur la carte.",
+      noteLabel: "Note (facultatif)",
+      notePlaceholder: "p. ex. traces dans la boue, deux petits",
+      photoLabel: "Photo (facultatif)",
+      photoChoose: "Choisir une photo",
+      photoChange: "Changer la photo",
+      photoRemove: "Supprimer la photo",
+      photoPreviewAlt: "Aperçu de la photo de l'observation",
+      photoHint: "JPEG, PNG ou WebP – réduite automatiquement avant l'envoi.",
+      photoUploading: "Envoi de la photo …",
+      photoUploadFailed: "Enregistré, mais la photo n'a pas pu être envoyée.",
+      photoTooLarge: "La photo est trop grande (max. 5 Mo).",
+      photoHeic:
+        "Le navigateur ne peut pas lire le HEIC/HEIF – exporte en JPEG.",
+      photoReadFailed: "L'image n'a pas pu être lue.",
+      photoRemoveFailed: "La photo n'a pas pu être supprimée.",
+      photoAlt: (title: string) => `Photo de l'observation ${title}`,
+      created: "Observation enregistrée",
+      updated: "Modifications enregistrées",
+      deleted: "Observation supprimée",
+      editAria: (title: string) => `Modifier l'observation «${title}»`,
+      deleteAria: (title: string) => `Supprimer l'observation «${title}»`,
+      deleteConfirm: (title: string) =>
+        `Vraiment supprimer l'observation «${title}» ?`,
+    },
   },
   recipes: {
     title: "Livre de recettes Campfire",

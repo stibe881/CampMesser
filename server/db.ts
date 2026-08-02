@@ -28,11 +28,13 @@ import {
   InsertMenuEntry,
   InsertPowerConsumer,
   InsertShoppingItem,
+  InsertNatureSighting,
   InsertTripLog,
   InsertTripPhoto,
   InsertUser,
   inventoryItems,
   menuEntries,
+  natureSightings,
   packItems,
   packLists,
   packTemplatesCustom,
@@ -479,6 +481,71 @@ export async function deleteInventoryItem(id: number, userId: number) {
   await db
     .delete(inventoryItems)
     .where(and(eq(inventoryItems.id, id), eq(inventoryItems.userId, userId)));
+}
+
+// ── Natur-Beobachtungen (Sichtungs-Tagebuch) ──
+export async function getNatureSightings(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(natureSightings)
+    .where(eq(natureSightings.userId, userId))
+    .orderBy(desc(natureSightings.sightedAt), desc(natureSightings.id));
+}
+
+/** Einzelne Beobachtung (nur, wenn sie der Person gehört). */
+export async function getNatureSighting(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(natureSightings)
+    .where(and(eq(natureSightings.id, id), eq(natureSightings.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/** Beobachtung über den Foto-Dateinamen (für die private Auslieferung). */
+export async function getNatureSightingByFileName(
+  fileName: string,
+  userId: number
+) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(natureSightings)
+    .where(
+      and(
+        eq(natureSightings.fileName, fileName),
+        eq(natureSightings.userId, userId)
+      )
+    )
+    .limit(1);
+  return rows[0];
+}
+
+export async function addNatureSighting(data: InsertNatureSighting) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(natureSightings).values(data);
+  return result.insertId;
+}
+
+export async function updateNatureSighting(
+  id: number,
+  userId: number,
+  data: Partial<InsertNatureSighting>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(natureSightings)
+    .set(data)
+    .where(and(eq(natureSightings.id, id), eq(natureSightings.userId, userId)));
+}
+
+export async function deleteNatureSighting(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(natureSightings)
+    .where(and(eq(natureSightings.id, id), eq(natureSightings.userId, userId)));
 }
 
 // ── Ausrüstungs-Pflege (wiederkehrende Wartungsaufgaben) ──
