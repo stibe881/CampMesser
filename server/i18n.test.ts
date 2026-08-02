@@ -5,7 +5,13 @@
  * dass alle vier Wörterbücher exakt dieselbe Struktur haben.
  */
 import { describe, expect, it } from "vitest";
-import { LANGUAGES, LOCALE_TAGS, l4, pick } from "../shared/i18n";
+import {
+  LANGUAGES,
+  LOCALE_TAGS,
+  detectLanguage,
+  l4,
+  pick,
+} from "../shared/i18n";
 import { de } from "../client/src/i18n/de";
 import { fr } from "../client/src/i18n/fr";
 import { it as itDict } from "../client/src/i18n/it";
@@ -30,6 +36,40 @@ describe("i18n-Helfer", () => {
       // Muss von Intl akzeptiert werden (wirft sonst RangeError)
       expect(() => new Intl.DateTimeFormat(LOCALE_TAGS[lang])).not.toThrow();
     }
+  });
+});
+
+describe("detectLanguage (Startsprache aus Browsersprachen)", () => {
+  it("erkennt fr-CH als Französisch", () => {
+    expect(detectLanguage(["fr-CH", "fr", "en"])).toBe("fr");
+  });
+
+  it("erkennt it ohne Regions-Tag als Italienisch", () => {
+    expect(detectLanguage(["it"])).toBe("it");
+  });
+
+  it("erkennt en-GB als Englisch", () => {
+    expect(detectLanguage(["en-GB", "en-US"])).toBe("en");
+  });
+
+  it("liefert für de-CH Deutsch", () => {
+    expect(detectLanguage(["de-CH", "de"])).toBe("de");
+  });
+
+  it("fällt bei unbekannten Sprachen auf Deutsch zurück", () => {
+    expect(detectLanguage(["es-ES", "pt-BR"])).toBe("de");
+  });
+
+  it("nimmt bei unbekannter Erstsprache die nächste unterstützte", () => {
+    expect(detectLanguage(["es-ES", "fr-FR"])).toBe("fr");
+  });
+
+  it("fällt bei leerer Liste auf Deutsch zurück", () => {
+    expect(detectLanguage([])).toBe("de");
+  });
+
+  it("ist unempfindlich gegenüber Gross-/Kleinschreibung", () => {
+    expect(detectLanguage(["EN-GB"])).toBe("en");
   });
 });
 

@@ -32,6 +32,22 @@ export function l4(de: string, fr: string, it: string, en: string): L4 {
   return { de, fr, it, en };
 }
 
+/**
+ * Browsersprachen (navigator.languages) auf eine unterstützte Sprache
+ * abbilden – für den echten Erstbesuch ohne gespeicherte Sprachwahl.
+ * Die erste Sprache der Liste, deren Primär-Tag fr/it/en/de ist, gewinnt;
+ * ohne Treffer bleibt Deutsch der Standard.
+ */
+export function detectLanguage(navLangs: readonly string[]): Language {
+  for (let i = 0; i < navLangs.length; i++) {
+    const primary = (navLangs[i] ?? "").trim().toLowerCase().split("-")[0];
+    if ((LANGUAGES as readonly string[]).includes(primary)) {
+      return primary as Language;
+    }
+  }
+  return "de";
+}
+
 /** Datums-/Zeit-Locale je Sprache (Schweizer Varianten). */
 export const LOCALE_TAGS: Record<Language, string> = {
   de: "de-CH",

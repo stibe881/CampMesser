@@ -11,7 +11,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { LANGUAGES, type Language } from "@shared/i18n";
+import { LANGUAGES, detectLanguage, type Language } from "@shared/i18n";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { de, type Translation } from "./de";
 
@@ -48,7 +48,19 @@ export function getStoredLanguage(): Language {
   } catch {
     /* Standard */
   }
-  return "de";
+  // Echter Erstbesuch ohne gespeicherte Wahl: Browsersprache erkennen.
+  // Bewusst NICHT sofort in localStorage schreiben – das erledigt der
+  // erste applyLang-Durchlauf des Providers (bzw. der Geräte-Sync, dessen
+  // Server-Wert weiterhin gewinnt).
+  try {
+    const navLangs =
+      navigator.languages && navigator.languages.length > 0
+        ? navigator.languages
+        : [navigator.language];
+    return detectLanguage(navLangs.filter(Boolean));
+  } catch {
+    return "de";
+  }
 }
 
 interface I18nContextValue {
