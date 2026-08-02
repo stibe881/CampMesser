@@ -7,6 +7,7 @@ import {
   ChevronDown,
   CloudSun,
   Copy,
+  CopyPlus,
   GraduationCap,
   List,
   ListChecks,
@@ -50,6 +51,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -1036,6 +1038,130 @@ function TripShareDialog({
   );
 }
 
+/** Vorschlags-Abstand der Kopie: Anreise heute + 30 Tage. */
+const DUPLICATE_OFFSET_DAYS = 30;
+const DAY_MS = 86400000;
+
+/** ISO-Datum (YYYY-MM-DD) um n Tage verschieben – UTC-basiert. */
+function addDaysIso(iso: string, days: number): string {
+  return new Date(Date.parse(`${iso}T00:00:00Z`) + days * DAY_MS)
+    .toISOString()
+    .slice(0, 10);
+}
+
+/** Ganze Tage zwischen zwei ISO-Daten (endIso − startIso; ungültig = 0). */
+function diffDaysIso(startIso: string, endIso: string): number {
+  const start = Date.parse(`${startIso}T00:00:00Z`);
+  const end = Date.parse(`${endIso}T00:00:00Z`);
+  if (Number.isNaN(start) || Number.isNaN(end)) return 0;
+  return Math.round((end - start) / DAY_MS);
+}
+
+/**
+ * Dialog «Reise duplizieren»: neue Von/Bis-Daten wählen (Vorschlag: gleiche
+ * Dauer ab heute + 30 Tage), Bestätigen legt über trips.duplicate eine neue
+ * geplante Reise an – Ort, Verknüpfungen und Menüplan werden übernommen,
+ * Notizen/Bewertung/Fotos/Wetter nicht.
+ */
+function TripDuplicateDialog({
+  trip,
+  onClose,
+}: {
+  trip: { id: number; name: string; startDate: string; endDate: string } | null;
+  onClose: () => void;
+}) {
+  const t = useT();
+  const utils = trpc.useUtils();
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Beim Öffnen: gleiche Dauer wie das Original, Anreise heute + 30 Tage
+  useEffect(() => {
+    if (!trip) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const start = addDaysIso(today, DUPLICATE_OFFSET_DAYS);
+    setStartDate(start);
+    setEndDate(
+      addDaysIso(start, Math.max(0, diffDaysIso(trip.startDate, trip.endDate)))
+    );
+  }, [trip]);
+
+  const duplicateMutation = trpc.trips.duplicate.useMutation({
+    onSuccess: () => {
+      utils.trips.list.invalidate();
+      toast.success(t.trips.duplicated);
+      onClose();
+    },
+    onError: e => toast.error(e.message || t.trips.duplicateFailed),
+  });
+
+  return (
+    <Dialog
+      open={trip !== null}
+      onOpenChange={o => {
+        if (!o) onClose();
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="font-serif">
+            {t.trips.duplicateDialogTitle}
+            {trip ? ` – ${trip.name}` : ""}
+          </DialogTitle>
+          <DialogDescription>{t.trips.duplicateDialogDesc}</DialogDescription>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="duplicate-start">{t.trips.arrivalLabel}</Label>
+            <Input
+              id="duplicate-start"
+              type="date"
+              value={startDate}
+              onChange={e => {
+                const value = e.target.value;
+                // Dauer beibehalten: die Abreise wandert mit der Anreise mit
+                const duration = Math.max(0, diffDaysIso(startDate, endDate));
+                setStartDate(value);
+                if (value) setEndDate(addDaysIso(value, duration));
+              }}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="duplicate-end">{t.trips.departureLabel}</Label>
+            <Input
+              id="duplicate-end"
+              type="date"
+              value={endDate}
+              min={startDate || undefined}
+              onChange={e => setEndDate(e.target.value)}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            {t.common.cancel}
+          </Button>
+          <Button
+            disabled={
+              duplicateMutation.isPending ||
+              !startDate ||
+              !endDate ||
+              endDate < startDate
+            }
+            onClick={() => {
+              if (!trip) return;
+              duplicateMutation.mutate({ tripId: trip.id, startDate, endDate });
+            }}
+          >
+            <CopyPlus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.trips.duplicateSubmit}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function TripsPage() {
   const { lang, t } = useI18n();
   const { isAuthenticated, loading } = useAuth();
@@ -1153,6 +1279,14 @@ export default function TripsPage() {
   const [hubTrip, setHubTrip] = useState<{ id: number; name: string } | null>(
     null
   );
+
+  /** Reise, deren «Duplizieren»-Dialog gerade offen ist (null = zu). */
+  const [duplicateTrip, setDuplicateTrip] = useState<{
+    id: number;
+    name: string;
+    startDate: string;
+    endDate: string;
+  } | null>(null);
 
   const setRatingMutation = trpc.trips.setRating.useMutation({
     onSuccess: () => utils.trips.list.invalidate(),
@@ -2168,6 +2302,25 @@ export default function TripsPage() {
                       >
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+                        onClick={() =>
+                          setDuplicateTrip({
+                            id: trip.id,
+                            name: trip.title || placeName(trip),
+                            startDate: trip.startDate,
+                            endDate: trip.endDate,
+                          })
+                        }
+                        aria-label={t.trips.duplicateAria(
+                          trip.title || placeName(trip)
+                        )}
+                        title={t.trips.duplicateDialogTitle}
+                      >
+                        <CopyPlus className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
                       {trip.role === "owner" ? (
                         <>
                           <Button
@@ -2392,6 +2545,28 @@ export default function TripsPage() {
                             />
                           </Link>
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+                          onClick={() =>
+                            setDuplicateTrip({
+                              id: trip.id,
+                              name: trip.title || placeName(trip),
+                              startDate: trip.startDate,
+                              endDate: trip.endDate,
+                            })
+                          }
+                          aria-label={t.trips.duplicateAria(
+                            trip.title || placeName(trip)
+                          )}
+                          title={t.trips.duplicateDialogTitle}
+                        >
+                          <CopyPlus
+                            className="h-3.5 w-3.5"
+                            aria-hidden="true"
+                          />
+                        </Button>
                         {trip.role === "owner" ? (
                           <>
                             <Button
@@ -2506,6 +2681,12 @@ export default function TripsPage() {
             : null
         }
         onClose={() => setHubTrip(null)}
+      />
+
+      {/* Dialog «Reise duplizieren» – neue Daten wählen, gleiche Dauer als Vorschlag */}
+      <TripDuplicateDialog
+        trip={duplicateTrip}
+        onClose={() => setDuplicateTrip(null)}
       />
     </div>
   );

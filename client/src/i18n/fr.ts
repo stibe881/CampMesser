@@ -1658,6 +1658,13 @@ export const fr: Translation = {
     calLegendShared: "Voyage partagé",
     calLegendSchool: "Vacances scolaires",
     calLegendPublic: "Jour férié",
+    duplicateAria: (name: string) => `Dupliquer le voyage ${name}`,
+    duplicateDialogTitle: "Dupliquer le voyage",
+    duplicateDialogDesc:
+      "Le lieu, l'emplacement, la liste de bagages et le plan des menus sont repris – pas les notes, l'évaluation, les photos ni la météo. Choisis les nouvelles dates de voyage.",
+    duplicateSubmit: "Dupliquer",
+    duplicated: "Voyage dupliqué – il figure dans les séjours planifiés",
+    duplicateFailed: "Échec de la duplication",
   },
   tripInvite: {
     badge: "Invitation au voyage",

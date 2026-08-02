@@ -1601,6 +1601,13 @@ export const en: Translation = {
     calLegendShared: "Shared trip",
     calLegendSchool: "School holidays",
     calLegendPublic: "Public holiday",
+    duplicateAria: (name: string) => `Duplicate trip ${name}`,
+    duplicateDialogTitle: "Duplicate trip",
+    duplicateDialogDesc:
+      "Place, pitch, packing list and menu plan are carried over – notes, rating, photos and weather are not. Choose the new travel dates.",
+    duplicateSubmit: "Duplicate",
+    duplicated: "Trip duplicated – you'll find it under planned stays",
+    duplicateFailed: "Duplicating failed",
   },
   tripInvite: {
     badge: "Trip invitation",

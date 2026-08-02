@@ -1664,6 +1664,13 @@ export const de = {
     calLegendShared: "Gemeinsame Reise",
     calLegendSchool: "Schulferien",
     calLegendPublic: "Feiertag",
+    duplicateAria: (name: string) => `Reise ${name} duplizieren`,
+    duplicateDialogTitle: "Reise duplizieren",
+    duplicateDialogDesc:
+      "Ort, Zeltplatz, Packliste und Menüplan werden übernommen – Notizen, Bewertung, Fotos und Wetter nicht. Wähle die neuen Reisedaten.",
+    duplicateSubmit: "Duplizieren",
+    duplicated: "Reise dupliziert – sie steht bei den geplanten Aufenthalten",
+    duplicateFailed: "Duplizieren fehlgeschlagen",
   },
   tripInvite: {
     badge: "Reise-Einladung",

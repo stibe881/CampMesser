@@ -33,7 +33,7 @@ import {
   MAX_FOOD_TEMPLATE_ITEMS,
   parseFoodTemplateItems,
 } from "@shared/foodTemplates";
-import { MEALS } from "@shared/menuPlan";
+import { MEALS, remapMenuDays } from "@shared/menuPlan";
 import {
   MAX_GEAR_INTERVAL_MONTHS,
   MAX_GEAR_TASK_TITLE_LENGTH,
@@ -2504,6 +2504,103 @@ export const appRouter = router({
         }
         await db.setTripLogRating(input.id, trip.userId, input.rating);
         return { success: true } as const;
+      }),
+    /**
+     * Reise duplizieren: legt eine neue geplante Reise mit neuem Zeitraum an –
+     * die Kopie gehört IMMER dem aufrufenden Konto (auch Mitreisende dürfen
+     * duplizieren). Übernommen werden Titel, Ort sowie Zeltplatz- und
+     * Packlisten-Verknüpfung (Verknüpfungen nur, wenn die Reise dem Aufrufer
+     * gehört – bei Mitglieds-Trips wird stattdessen der Platzname als
+     * Freitext-Ort gesetzt); der Menüplan wird auf die neuen Daten gemappt
+     * (Tag 1 → Tag 1, überzählige Tage verworfen). Notizen, Bewertung,
+     * Wetterarchiv, Fotos, Mitglieder und Teil-Token werden bewusst NICHT
+     * kopiert.
+     */
+    duplicate: protectedProcedure
+      .input(
+        z
+          .object({
+            tripId: z.number().int().positive(),
+            startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          })
+          .refine(v => v.endDate >= v.startDate, {
+            message: "Die Abreise darf nicht vor der Anreise liegen.",
+          })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        const isOwner = trip.userId === ctx.user.id;
+        // Zeltplatz/Packliste gehören der Besitzerin/dem Besitzer – für die
+        // Kopie eines Mitglieds-Trips wird der Platzname zum Freitext-Ort.
+        let location = trip.location;
+        if (!isOwner && trip.spotId != null && !location) {
+          const spot = await db.getCampSpot(trip.spotId, trip.userId);
+          location = spot?.name ?? null;
+        }
+        const id = await db.addTripLog({
+          userId: ctx.user.id,
+          spotId: isOwner ? trip.spotId : null,
+          packListId: isOwner ? trip.packListId : null,
+          location,
+          title: trip.title,
+          notes: null,
+          startDate: input.startDate,
+          endDate: input.endDate,
+          rating: null,
+        });
+        // Menüplan-Einträge auf die neuen Daten mappen (Tag 1 → Tag 1)
+        const entries = await db.getMenuEntriesForTrip(input.tripId);
+        const mapped = remapMenuDays(
+          entries,
+          trip.startDate,
+          input.startDate,
+          input.endDate
+        );
+        // Eigene Rezepte anderer Konten dürfen nicht verknüpft werden –
+        // solche Slots werden als Freitext mit dem Rezeptnamen übernommen.
+        const needCustom = mapped.some(e => e.customRecipeId != null);
+        const ownRecipeIds = new Set<number>(
+          needCustom
+            ? (await db.getCustomRecipes(ctx.user.id)).map(r => r.id)
+            : []
+        );
+        const foreignNames = new Map<number, string>();
+        if (needCustom && !isOwner) {
+          (await db.getCustomRecipes(trip.userId)).forEach(r =>
+            foreignNames.set(r.id, r.name)
+          );
+        }
+        for (const entry of mapped) {
+          let customRecipeId = entry.customRecipeId;
+          let freeText = entry.freeText;
+          if (customRecipeId != null && !ownRecipeIds.has(customRecipeId)) {
+            freeText =
+              foreignNames.get(customRecipeId)?.slice(0, 200) ?? freeText;
+            customRecipeId = null;
+          }
+          // Slot ohne verbliebene Quelle überspringen (statt leer anzulegen)
+          if (entry.recipeId == null && customRecipeId == null && !freeText) {
+            continue;
+          }
+          await db.upsertMenuEntry({
+            userId: ctx.user.id,
+            tripId: id,
+            day: entry.day,
+            meal: entry.meal,
+            recipeId: entry.recipeId,
+            customRecipeId,
+            freeText,
+            updatedByUserId: ctx.user.id,
+          });
+        }
+        return { id };
       }),
     /**
      * Wetterarchiv eines vergangenen Aufenthalts speichern: der Client holt

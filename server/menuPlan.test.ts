@@ -5,6 +5,7 @@ import {
   MEALS,
   MEAL_LABELS,
   mergeIngredientLines,
+  remapMenuDays,
   tripDays,
   type AutofillRecipe,
   type Meal,
@@ -69,6 +70,88 @@ describe("mergeIngredientLines", () => {
       "Pfeffer",
       "Öl",
     ]);
+  });
+});
+
+describe("remapMenuDays", () => {
+  const entries = [
+    { day: "2026-07-10", meal: "breakfast", recipeId: "porridge" },
+    { day: "2026-07-11", meal: "dinner", recipeId: "pasta" },
+    { day: "2026-07-13", meal: "lunch", recipeId: "chili" },
+  ];
+
+  it("bildet Tag 1 → Tag 1 auf den neuen Zeitraum ab", () => {
+    const mapped = remapMenuDays(
+      entries,
+      "2026-07-10",
+      "2026-09-01",
+      "2026-09-04"
+    );
+    expect(mapped).toEqual([
+      { day: "2026-09-01", meal: "breakfast", recipeId: "porridge" },
+      { day: "2026-09-02", meal: "dinner", recipeId: "pasta" },
+      { day: "2026-09-04", meal: "lunch", recipeId: "chili" },
+    ]);
+  });
+
+  it("verwirft Einträge hinter dem neuen Abreisetag (kürzere Reise)", () => {
+    const mapped = remapMenuDays(
+      entries,
+      "2026-07-10",
+      "2026-09-01",
+      "2026-09-02"
+    );
+    expect(mapped.map(e => e.day)).toEqual(["2026-09-01", "2026-09-02"]);
+  });
+
+  it("lässt bei einer längeren Reise die zusätzlichen Tage einfach leer", () => {
+    const mapped = remapMenuDays(
+      entries,
+      "2026-07-10",
+      "2026-09-01",
+      "2026-09-30"
+    );
+    expect(mapped).toHaveLength(entries.length);
+  });
+
+  it("funktioniert über Monats- und Jahresgrenzen", () => {
+    const mapped = remapMenuDays(
+      [{ day: "2026-12-31", meal: "dinner" }],
+      "2026-12-30",
+      "2027-02-27",
+      "2027-03-01"
+    );
+    expect(mapped).toEqual([{ day: "2027-02-28", meal: "dinner" }]);
+  });
+
+  it("verwirft Einträge vor der alten Anreise und mit kaputtem Tag", () => {
+    const mapped = remapMenuDays(
+      [
+        { day: "2026-07-09", meal: "dinner" },
+        { day: "kaputt", meal: "lunch" },
+        { day: "2026-07-10", meal: "breakfast" },
+      ],
+      "2026-07-10",
+      "2026-09-01",
+      "2026-09-03"
+    );
+    expect(mapped).toEqual([{ day: "2026-09-01", meal: "breakfast" }]);
+  });
+
+  it("liefert bei ungültigen Rahmendaten eine leere Liste", () => {
+    expect(
+      remapMenuDays(entries, "kaputt", "2026-09-01", "2026-09-04")
+    ).toEqual([]);
+    expect(remapMenuDays(entries, "2026-07-10", "", "2026-09-04")).toEqual([]);
+    expect(remapMenuDays(entries, "2026-07-10", "2026-09-01", "nix")).toEqual(
+      []
+    );
+  });
+
+  it("ändert die übergebenen Einträge nicht (reine Funktion)", () => {
+    const input = [{ day: "2026-07-10", meal: "dinner" }];
+    remapMenuDays(input, "2026-07-10", "2026-09-01", "2026-09-04");
+    expect(input[0].day).toBe("2026-07-10");
   });
 });
 

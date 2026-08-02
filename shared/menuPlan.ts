@@ -46,6 +46,37 @@ export function tripDays(startDate: string, endDate: string): string[] {
   return days;
 }
 
+/**
+ * Menüplan-Einträge beim Duplizieren einer Reise auf den neuen Zeitraum
+ * abbilden: Tag 1 → Tag 1 usw. (gleicher Abstand zum Anreisetag). Einträge,
+ * deren Tag ausserhalb des neuen Zeitraums läge, werden verworfen – ebenso
+ * Einträge mit ungültigem Tag oder vor der alten Anreise. Ungültige
+ * Rahmendaten → leere Liste. Reine Funktion, ändert die Eingabe nicht.
+ */
+export function remapMenuDays<T extends { day: string }>(
+  entries: T[],
+  oldStartDate: string,
+  newStartDate: string,
+  newEndDate: string
+): T[] {
+  const oldStart = parseIsoDay(oldStartDate);
+  const newStart = parseIsoDay(newStartDate);
+  const newEnd = parseIsoDay(newEndDate);
+  if (oldStart === null || newStart === null || newEnd === null) return [];
+  const result: T[] = [];
+  entries.forEach(entry => {
+    const day = parseIsoDay(entry.day);
+    if (day === null || day < oldStart) return;
+    const newDay = newStart + (day - oldStart);
+    if (newDay > newEnd) return;
+    result.push({
+      ...entry,
+      day: new Date(newDay).toISOString().slice(0, 10),
+    });
+  });
+  return result;
+}
+
 /** Eignung eines Rezepts fürs automatische Füllen (Heuristik liegt im Client). */
 export type AutofillKind = "breakfast" | "main" | "any";
 
