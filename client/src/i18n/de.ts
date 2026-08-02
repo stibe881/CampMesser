@@ -1102,6 +1102,9 @@ export const de = {
     attrFilterKids: "Kinderfreundlich",
     attrFilterEmpty:
       "Kein gespeicherter Platz erfüllt alle gewählten Eigenschaften.",
+    routeLink: "Route →",
+    routeAria: (name: string) =>
+      `Route zum Platz ${name} in der Karten-App öffnen`,
   },
   mapView: {
     title: "Karte der Plätze & Reisen",
@@ -1127,6 +1130,7 @@ export const de = {
       n === 1
         ? "1 Zelt-Finder-Ziel auf der Karte"
         : `${n} Zelt-Finder-Ziele auf der Karte`,
+    routeLink: "Route →",
   },
   spotDetail: {
     fallbackTitle: "Zeltplatz",
@@ -1225,6 +1229,8 @@ export const de = {
     attributeUnset: "Keine Angabe",
     attributeGroupAria: (name: string) => `Wert für ${name} wählen`,
     attributesSaved: "Eigenschaften gespeichert",
+    routeButton: "Route",
+    routeAria: "Route zu diesem Platz in der Karten-App öffnen",
   },
   tentFinder: {
     title: "Zelt-Finder",

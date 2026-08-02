@@ -22,6 +22,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { directionsUrl } from "@/lib/directions";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import {
   LEGACY_TARGET_KEY,
@@ -128,12 +129,20 @@ function SpotsMap({
       const link = document.createElement("a");
       link.href = `/zeltplaetze/${spot.id}`;
       link.textContent = t.mapView.toDossier;
-      link.className = "text-sm font-medium underline";
+      link.className = "block text-sm font-medium underline";
       link.addEventListener("click", event => {
         event.preventDefault();
         navigate(`/zeltplaetze/${spot.id}`);
       });
       popup.appendChild(link);
+      // Anreise-Route: externer Karten-Link (Apple/Google je nach Gerät)
+      const route = document.createElement("a");
+      route.href = directionsUrl(spot.latitude, spot.longitude);
+      route.target = "_blank";
+      route.rel = "noopener noreferrer";
+      route.textContent = t.mapView.routeLink;
+      route.className = "block text-sm font-medium underline";
+      popup.appendChild(route);
       marker.bindPopup(popup);
       marker.addTo(layer);
     });

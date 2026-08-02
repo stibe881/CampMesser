@@ -36,6 +36,7 @@ import { MapView } from "@/components/Map";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { directionsUrl } from "@/lib/directions";
 import { getSunTimes } from "@/lib/sun";
 import { useI18n, useT } from "@/i18n";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
@@ -202,6 +203,15 @@ function SpotCard({
             className="font-medium text-primary hover:underline"
           >
             {t.spots.sunLink}
+          </a>
+          <a
+            href={directionsUrl(spot.latitude, spot.longitude)}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t.spots.routeAria(spot.name)}
+            className="font-medium text-primary hover:underline"
+          >
+            {t.spots.routeLink}
           </a>
         </div>
 

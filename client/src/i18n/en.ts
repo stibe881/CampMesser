@@ -1072,6 +1072,9 @@ export const en: Translation = {
     attrFilterDogs: "Dogs allowed",
     attrFilterKids: "Child-friendly",
     attrFilterEmpty: "No saved spot matches all selected attributes.",
+    routeLink: "Directions →",
+    routeAria: (name: string) =>
+      `Open directions to the pitch ${name} in your maps app`,
   },
   mapView: {
     title: "Map of pitches & trips",
@@ -1095,6 +1098,7 @@ export const en: Translation = {
       n === 1
         ? "1 tent finder target on the map"
         : `${n} tent finder targets on the map`,
+    routeLink: "Directions →",
   },
   spotDetail: {
     fallbackTitle: "Pitch",
@@ -1191,6 +1195,8 @@ export const en: Translation = {
     attributeUnset: "Not specified",
     attributeGroupAria: (name: string) => `Choose a value for ${name}`,
     attributesSaved: "Attributes saved",
+    routeButton: "Directions",
+    routeAria: "Open directions to this pitch in your maps app",
   },
   tentFinder: {
     title: "Tent finder",

@@ -1091,6 +1091,9 @@ export const it: Translation = {
     attrFilterKids: "Adatto ai bambini",
     attrFilterEmpty:
       "Nessuna piazzola salvata soddisfa tutte le caratteristiche scelte.",
+    routeLink: "Percorso →",
+    routeAria: (name: string) =>
+      `Apri il percorso verso la piazzola ${name} nell'app di mappe`,
   },
   mapView: {
     title: "Mappa delle piazzole e dei viaggi",
@@ -1116,6 +1119,7 @@ export const it: Translation = {
       n === 1
         ? "1 meta del Trova-tenda sulla mappa"
         : `${n} mete del Trova-tenda sulla mappa`,
+    routeLink: "Percorso →",
   },
   spotDetail: {
     fallbackTitle: "Piazzola",
@@ -1213,6 +1217,8 @@ export const it: Translation = {
     attributeUnset: "Nessuna indicazione",
     attributeGroupAria: (name: string) => `Scegli il valore per ${name}`,
     attributesSaved: "Caratteristiche salvate",
+    routeButton: "Percorso",
+    routeAria: "Apri il percorso verso questa piazzola nell'app di mappe",
   },
   tentFinder: {
     title: "Trova-tenda",

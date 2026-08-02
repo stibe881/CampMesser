@@ -1105,6 +1105,9 @@ export const fr: Translation = {
     attrFilterKids: "Adapté aux enfants",
     attrFilterEmpty:
       "Aucun emplacement enregistré ne remplit toutes les caractéristiques choisies.",
+    routeLink: "Itinéraire →",
+    routeAria: (name: string) =>
+      `Ouvrir l'itinéraire vers l'emplacement ${name} dans l'app de cartes`,
   },
   mapView: {
     title: "Carte des emplacements & voyages",
@@ -1128,6 +1131,7 @@ export const fr: Translation = {
       n === 1
         ? "1 cible du Retrouve-tente sur la carte"
         : `${n} cibles du Retrouve-tente sur la carte`,
+    routeLink: "Itinéraire →",
   },
   spotDetail: {
     fallbackTitle: "Emplacement",
@@ -1226,6 +1230,8 @@ export const fr: Translation = {
     attributeUnset: "Sans indication",
     attributeGroupAria: name => `Choisir la valeur pour ${name}`,
     attributesSaved: "Caractéristiques enregistrées",
+    routeButton: "Itinéraire",
+    routeAria: "Ouvrir l'itinéraire vers cet emplacement dans l'app de cartes",
   },
   tentFinder: {
     title: "Retrouve-tente",

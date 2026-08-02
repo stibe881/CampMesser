@@ -14,6 +14,7 @@ import {
   MapPin,
   Moon,
   Mountain,
+  Navigation,
   QrCode,
   Share2,
   SlidersHorizontal,
@@ -54,6 +55,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { directionsUrl } from "@/lib/directions";
 import { getSunTimes } from "@/lib/sun";
 import { loadObstacleProfiles } from "@/lib/obstacleStore";
 import { computeTripStats, tripNights } from "@shared/trips";
@@ -315,13 +317,26 @@ export default function SpotDetailPage() {
         <p className="mb-4 text-sm text-muted-foreground">{spot.note}</p>
       )}
 
-      {/* Zelt-Finder: Kompass-Peilung zu diesem Platz */}
-      <Button asChild variant="outline" size="sm" className="mt-1">
-        <Link href={`/zeltfinder?spot=${spot.id}`}>
-          <LocateFixed className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          {t.spotDetail.tentFinderLink}
-        </Link>
-      </Button>
+      {/* Zelt-Finder: Kompass-Peilung zu diesem Platz + Anreise-Route */}
+      <div className="mt-1 flex flex-wrap gap-2">
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/zeltfinder?spot=${spot.id}`}>
+            <LocateFixed className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.spotDetail.tentFinderLink}
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <a
+            href={directionsUrl(spot.latitude, spot.longitude)}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t.spotDetail.routeAria}
+          >
+            <Navigation className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.spotDetail.routeButton}
+          </a>
+        </Button>
+      </div>
 
       {/* Platz-Eigenschaften: Schatten, Sanitär, Lärm, WLAN … */}
       <Card className="mb-4 mt-4">
