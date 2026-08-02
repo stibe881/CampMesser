@@ -571,6 +571,9 @@ export const de = {
     chartLegend:
       "Balken = Regenmenge (mm/h, linke Achse) · Linie = Regenwahrscheinlichkeit (%, rechte Achse).",
     forecast7: "7-Tage-Vorhersage",
+    week2Title: "Woche 2",
+    week2Hint: "Ausblick – geringere Zuverlässigkeit",
+    week2Aria: "Ausblick auf Woche 2",
     dayToggleAria: (day: string) =>
       `Stundenverlauf für ${day} ein- oder ausblenden`,
     chartTemp: "Temperatur",

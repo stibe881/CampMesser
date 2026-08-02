@@ -552,6 +552,9 @@ export const en: Translation = {
     chartLegend:
       "Bars = rainfall (mm/h, left axis) · Line = rain probability (%, right axis).",
     forecast7: "7-day forecast",
+    week2Title: "Week 2",
+    week2Hint: "Outlook – lower reliability",
+    week2Aria: "Week 2 outlook",
     dayToggleAria: (day: string) => `Show or hide the hourly detail for ${day}`,
     chartTemp: "Temperature",
     hourlyLegend:

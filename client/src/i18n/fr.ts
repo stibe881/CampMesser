@@ -573,6 +573,9 @@ export const fr: Translation = {
     chartLegend:
       "Barres = quantité de pluie (mm/h, axe gauche) · Ligne = probabilité de pluie (%, axe droit).",
     forecast7: "Prévisions à 7 jours",
+    week2Title: "Semaine 2",
+    week2Hint: "Tendance – fiabilité réduite",
+    week2Aria: "Tendance pour la semaine 2",
     dayToggleAria: (day: string) =>
       `Afficher ou masquer le détail horaire pour ${day}`,
     chartTemp: "Température",

@@ -100,8 +100,9 @@ function WeatherIcon({
 interface WeatherData {
   /** Stunden ab der aktuellen Stunde (für 24-h-Leiste, Regen-Grafik, Warnungen). */
   hourly: HourlyWeather[];
-  /** Alle Stunden der 7 Prognosetage (0–24 Uhr, für das Tages-Detail). */
+  /** Alle Stunden der ersten 7 Prognosetage (0–24 Uhr, für das Tages-Detail). */
   hourlyAll: HourlyWeather[];
+  /** 16 Prognosetage: Tag 1–7 für die Detail-Ansicht, Tag 8+ als Ausblick. */
   daily: DailyWeather[];
   current: {
     temperatureC: number;
@@ -126,7 +127,13 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
     latitude: lat.toFixed(4),
     longitude: lon.toFixed(4),
     timezone: "auto",
-    forecast_days: "7",
+    // 16 Tage für den «Woche 2»-Ausblick. Die Stundendaten kommen dabei
+    // ebenfalls für 16 Tage mit – ein serverseitiges Begrenzen per
+    // forecast_hours=168 würde die Stunden aber an der AKTUELLEN Stunde
+    // statt um Mitternacht starten lassen und so das Tages-Detail (0–24 Uhr)
+    // brechen. Deshalb: ein Abruf, und unten werden die Stunden clientseitig
+    // auf die ersten 7 Tage beschnitten.
+    forecast_days: "16",
     current: "temperature_2m,apparent_temperature,weather_code,wind_speed_10m",
     hourly:
       "temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,weather_code,cape,cloud_cover",
@@ -139,9 +146,12 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
   if (!res.ok) throw new WeatherServiceError(res.status);
   const json = await res.json();
 
-  // Alle Stunden der 7 Prognosetage – das Tages-Detail braucht 0–24 Uhr
-  const hourlyAll: HourlyWeather[] = (json.hourly.time as string[]).map(
-    (time: string, i: number) => ({
+  // Alle Stunden der ersten 7 Prognosetage – das Tages-Detail braucht 0–24 Uhr.
+  // Der Ausblick (Tag 8+) kommt bewusst ohne Stunden-Detail aus, deshalb
+  // werden die restlichen Stunden gleich verworfen (ISO-Datumsvergleich).
+  const lastDetailDate = (json.daily.time as string[])[6] ?? "9999-12-31";
+  const hourlyAll: HourlyWeather[] = (json.hourly.time as string[])
+    .map((time: string, i: number) => ({
       time,
       temperatureC: json.hourly.temperature_2m[i],
       apparentC: json.hourly.apparent_temperature[i],
@@ -152,8 +162,8 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
       weatherCode: json.hourly.weather_code[i],
       cape: json.hourly.cape?.[i] ?? 0,
       cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
-    })
-  );
+    }))
+    .filter(h => h.time.slice(0, 10) <= lastDetailDate);
 
   // Ab der aktuellen Stunde (lokale API-Zeit ist bereits Ortszeit durch timezone=auto)
   const nowLocalHour = hourlyAll.findIndex(
@@ -1217,7 +1227,7 @@ export default function WeatherPage() {
           </h2>
           <Card>
             <CardContent className="divide-y divide-border/60 pt-2">
-              {data.daily.map((d, i) => {
+              {data.daily.slice(0, 7).map((d, i) => {
                 const dayLabel =
                   i === 0
                     ? t.common.today
@@ -1368,11 +1378,66 @@ export default function WeatherPage() {
             </CardContent>
           </Card>
 
+          {/* Woche 2: kompakter Ausblick ohne Stunden-Detail – die Prognose
+              ist so weit voraus deutlich unsicherer, daher der Hinweis. */}
+          {data.daily.length > 7 && (
+            <section aria-label={t.weather.week2Aria} className="mt-6">
+              <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                <h2 className="font-serif text-lg font-semibold">
+                  {t.weather.week2Title}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {t.weather.week2Hint}
+                </p>
+              </div>
+              <Card>
+                <CardContent className="divide-y divide-border/60 pt-2">
+                  {data.daily.slice(7).map(d => (
+                    <div key={d.date} className="flex items-center gap-3 py-2">
+                      <p className="w-16 text-sm font-medium">
+                        {new Date(d.date).toLocaleDateString(
+                          LOCALE_TAGS[lang],
+                          { weekday: "short", day: "numeric" }
+                        )}
+                      </p>
+                      <WeatherIcon
+                        code={d.weatherCode}
+                        className="h-5 w-5 shrink-0 text-primary"
+                      />
+                      <span className="sr-only">
+                        {describeWeatherCode(d.weatherCode, lang).label}
+                      </span>
+                      <p className="flex w-14 items-center gap-1 text-xs text-chart-2">
+                        <Droplets
+                          className="h-3 w-3 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <span className="sr-only">
+                          {t.weather.compareSrRain}:{" "}
+                        </span>
+                        {Math.round(d.precipitationProbabilityMax)}%
+                      </p>
+                      <p className="ml-auto text-sm">
+                        <span className="font-semibold">
+                          {Math.round(d.tempMaxC)}°
+                        </span>
+                        <span className="text-muted-foreground">
+                          {" "}
+                          / {Math.round(d.tempMinC)}°
+                        </span>
+                      </p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </section>
+          )}
+
           {/* Orte vergleichen: 7-Tage-Prognosen zweier Orte nebeneinander */}
           {compareOpen ? (
             <CompareSection
               baseLabel={locationLabel ?? t.weather.myLocation}
-              baseDaily={data.daily}
+              baseDaily={data.daily.slice(0, 7)}
               spots={spots}
               onClose={() => setCompareOpen(false)}
             />
