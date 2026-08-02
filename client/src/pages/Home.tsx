@@ -164,7 +164,7 @@ function NextTripWidget() {
 }
 
 function WeatherWidget() {
-  const t = useT();
+  const { lang, t } = useI18n();
   const [weather, setWeather] = useState<HomeWeather | null>(null);
 
   useEffect(() => {
@@ -202,11 +202,11 @@ function WeatherWidget() {
                 cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
               })
             ) ?? [];
-          const alerts = detectAlerts(hourly);
+          const alerts = detectAlerts(hourly, lang);
           setWeather({
             temperatureC: json.current.temperature_2m,
             windKmh: json.current.wind_speed_10m,
-            label: describeWeatherCode(json.current.weather_code).label,
+            label: describeWeatherCode(json.current.weather_code, lang).label,
             alert: alerts[0]
               ? { title: alerts[0].title, severity: alerts[0].severity }
               : null,
@@ -218,7 +218,7 @@ function WeatherWidget() {
       () => {},
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }
     );
-  }, []);
+  }, [lang]);
 
   if (!weather) return null;
   return (

@@ -2,6 +2,7 @@
  * Kompakte Wetterdaten fürs Platz-Dossier (eigene und geteilte Ansicht):
  * 3 Tage Vorschau plus Unwetterwarnungen aus 48 Stunden.
  */
+import type { Language } from "@shared/i18n";
 import {
   detectAlerts,
   type HourlyWeather,
@@ -21,7 +22,8 @@ export interface DossierWeather {
 
 export async function fetchDossierWeather(
   lat: number,
-  lon: number
+  lon: number,
+  lang: Language = "de"
 ): Promise<DossierWeather> {
   const params = new URLSearchParams({
     latitude: lat.toFixed(4),
@@ -60,6 +62,6 @@ export async function fetchDossierWeather(
       precipProbability: json.daily.precipitation_probability_max?.[i] ?? 0,
       weatherCode: json.daily.weather_code[i],
     })),
-    alerts: detectAlerts(hourly),
+    alerts: detectAlerts(hourly, lang),
   };
 }

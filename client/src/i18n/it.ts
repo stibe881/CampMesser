@@ -320,6 +320,97 @@ export const it: Translation = {
     emptyText:
       "Comincia dai pezzi grandi: tenda, sacco a pelo, materassino isolante.",
   },
+  weather: {
+    title: "Meteo del campo",
+    subtitle: "Previsioni iperlocali e allerte maltempo per la tua piazzola.",
+    locationGroupAria: "Scegli il luogo per le previsioni meteo",
+    myLocation: "La mia posizione",
+    loadingAria: "Caricamento dei dati meteo",
+    retry: "Riprova",
+    offlineHint:
+      "Nota: il modulo meteo ha bisogno di una connessione Internet e della tua posizione. I moduli offline (primo soccorso, nodi, natura) continuano a funzionare senza rete.",
+    serviceError: status => `Il servizio meteo non risponde (${status})`,
+    loadFailed: "Impossibile caricare i dati meteo.",
+    geoUnsupported: "Il tuo dispositivo non supporta la geolocalizzazione.",
+    geoDenied:
+      "Posizione non disponibile. Consenti l'accesso alla posizione nel browser.",
+    elevation: m => `${m} m s.l.m.`,
+    feelsLike: deg => `Percepiti ${deg}°`,
+    refreshAria: "Aggiorna il meteo",
+    alertsAria: "Allerte maltempo",
+    noAlerts:
+      "Nessuna allerta maltempo per le prossime 48 ore – buone condizioni per il campo.",
+    severity: {
+      gefahr: "Pericolo",
+      warnung: "Allerta",
+      info: "Info",
+    },
+    fireAria: "Pericolo di incendio boschivo",
+    fireTitle: title => `Pericolo di incendio boschivo: ${title}`,
+    fireLevelBadge: level => `Grado ${level}/5`,
+    fireValidFrom: date => `valido dal ${date}`,
+    fireSourcePrefix:
+      "Fonte: carta dei pericoli dell'UFAM. Fanno stato le decisioni cantonali – dettagli su ",
+    next24: "Prossime 24 ore",
+    rain48: "Pioggia: prossime 48 ore",
+    chartRain: "Pioggia",
+    chartProb: "Probabilità",
+    chartTooltipHour: label => `ore ${label}`,
+    chartLegend:
+      "Barre = quantità di pioggia (mm/h, asse sinistro) · Linea = probabilità di pioggia (%, asse destro).",
+    forecast7: "Previsioni a 7 giorni",
+    dataSource:
+      "Fonte dati: Open-Meteo (migliore risoluzione disponibile per la tua posizione, in Svizzera MeteoSvizzera ICON-CH). Le allerte sono calcolate dalle previsioni e non sostituiscono le allerte ufficiali di MeteoSvizzera.",
+  },
+  water: {
+    title: "Calcolatore dell'acqua potabile",
+    subtitle:
+      "Quanta acqua devi portare se la piazzola non ha un allacciamento all'acqua potabile?",
+    liters: n => `${n} litri`,
+    recommendedNote:
+      "quantità totale consigliata, riserva di sicurezza del 20 % inclusa",
+    canisterNote: n => `Corrisponde a circa ${n} taniche da 10 litri`,
+    adults: "Adulti",
+    children: "Bambini",
+    dogs: "Cani",
+    daysWithoutWater: "Giorni senza allacciamento all'acqua",
+    decreaseAria: label => `Riduci ${label}`,
+    increaseAria: label => `Aumenta ${label}`,
+    tempLabel: "Temperatura massima giornaliera prevista",
+    tempSliderAria: "Temperatura massima giornaliera prevista in gradi Celsius",
+    tempAuto: (days, temp) =>
+      `Ripreso automaticamente: massimo dei prossimi ${days} giorni nella tua posizione (${temp} °C).`,
+    tempReapply: temp => `Riprendi la previsione (${temp} °C)`,
+    tempHint:
+      "Da 20 °C calcoliamo un supplemento di 0.5 l per persona al giorno ogni 5 °C.",
+    activityTitle: "Livello di attività",
+    activityGroupAria: "Scegli il livello di attività",
+    activityCalm: "Tranquillo",
+    activityCalmHint: "Campo & bagni",
+    activityNormal: "Normale",
+    activityNormalHint: "Passeggiate",
+    activityActive: "Attivo",
+    activityActiveHint: "Escursioni & sport",
+    cookingTitle: "Includi cucina & stoviglie",
+    cookingHint: "+1.5 l per persona al giorno",
+    cookingAria: "Includi l'acqua per cucinare e lavare le stoviglie",
+    comfortTitle: "Igiene personale confortevole",
+    comfortHint: "Lavaggio rapido o doccia solare: +4 l per persona al giorno",
+    comfortAria: "Includi l'acqua per un'igiene personale confortevole",
+    breakdownTitle: "Dettaglio",
+    rowAdults: (perDay, n, days) =>
+      `Bere adulti (${perDay} l/giorno × ${n} × ${days} giorni)`,
+    rowChildren: (perDay, n, days) =>
+      `Bere bambini (${perDay} l/giorno × ${n} × ${days} giorni)`,
+    rowDogs: (perDay, n, days) =>
+      `Cani (${perDay} l/giorno × ${n} × ${days} giorni)`,
+    rowCooking: "Cucina & stoviglie",
+    rowComfort: "Igiene personale confortevole",
+    rowReserve: "Riserva di sicurezza (20 %)",
+    rowTotal: "Totale consigliato",
+    footnote:
+      "Nota: valori indicativi per un clima temperato. In caso di ondate di caldo, altitudine o lavoro fisico pianifica con più margine. Il valore per i cani vale per cani di taglia media (ca. 20 kg). Usa l'acqua dei ruscelli solo filtrata o bollita.",
+  },
   notFound: {
     heading: "Pagina non trovata",
     text1: "Questa pagina purtroppo non esiste.",

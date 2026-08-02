@@ -26,12 +26,14 @@ import { loadObstacleProfiles } from "@/lib/obstacleStore";
 import { computeTripStats, tripNights } from "@shared/trips";
 import { describeWeatherCode } from "@shared/weather";
 import { fetchDossierWeather, type DossierWeather } from "@/lib/dossierWeather";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 // Wetter-Abruf ausgelagert: teilt sich das Dossier mit der öffentlichen
 // Teil-Ansicht (/platz/:token)
 
 export default function SpotDetailPage() {
+  const { lang } = useI18n();
   const params = useParams<{ id: string }>();
   const spotId = Number(params.id);
   const { isAuthenticated, loading } = useAuth();
@@ -53,7 +55,7 @@ export default function SpotDetailPage() {
     if (!spot) return;
     let cancelled = false;
     setWeatherFailed(false);
-    fetchDossierWeather(spot.latitude, spot.longitude)
+    fetchDossierWeather(spot.latitude, spot.longitude, lang)
       .then(data => {
         if (!cancelled) setWeather(data);
       })
@@ -64,7 +66,7 @@ export default function SpotDetailPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spot?.id]);
+  }, [spot?.id, lang]);
 
   const sun = useMemo(
     () =>
@@ -243,7 +245,7 @@ export default function SpotDetailPage() {
                           })}
                     </span>
                     <span className="flex-1 text-muted-foreground">
-                      {describeWeatherCode(d.weatherCode).label}
+                      {describeWeatherCode(d.weatherCode, lang).label}
                     </span>
                     <span className="flex items-center gap-1 text-xs text-chart-2">
                       <Droplets className="h-3 w-3" aria-hidden="true" />

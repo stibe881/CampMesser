@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   dangerLevelFromTitle,
+  describeFireDanger,
   FIRE_DANGER_LEVELS,
   fireDangerRequestUrl,
   parseFireDangerResponse,
 } from "@shared/fireDanger";
+import { LANGUAGES } from "@shared/i18n";
 
 // Reale Antwortstruktur der GeoAdmin-Identify-API (gekürzt)
 const sampleResponse = {
@@ -75,11 +77,20 @@ describe("parseFireDangerResponse", () => {
 });
 
 describe("FIRE_DANGER_LEVELS", () => {
-  it("liefert für jede Stufe Titel und Feuerregeln", () => {
+  it("liefert für jede Stufe Titel und Feuerregeln in allen Sprachen", () => {
     for (const level of [1, 2, 3, 4, 5] as const) {
-      expect(FIRE_DANGER_LEVELS[level].title.length).toBeGreaterThan(0);
-      expect(FIRE_DANGER_LEVELS[level].advice.length).toBeGreaterThan(20);
+      for (const lang of LANGUAGES) {
+        expect(FIRE_DANGER_LEVELS[level].title[lang].length).toBeGreaterThan(0);
+        expect(FIRE_DANGER_LEVELS[level].advice[lang].length).toBeGreaterThan(
+          20
+        );
+      }
     }
+  });
+
+  it("describeFireDanger liefert standardmässig Deutsch", () => {
+    expect(describeFireDanger(3).title).toBe("Erhebliche Gefahr");
+    expect(describeFireDanger(3, "fr").title).toBe("Danger marqué");
   });
 });
 

@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { calcWaterNeeds, type WaterInput } from "@shared/calculators";
+import { useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 function Counter({
@@ -29,6 +30,7 @@ function Counter({
   min?: number;
   max?: number;
 }) {
+  const t = useT();
   return (
     <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3">
       <span className="text-sm font-medium">{label}</span>
@@ -39,7 +41,7 @@ function Counter({
           className="h-8 w-8"
           onClick={() => onChange(Math.max(min, value - 1))}
           disabled={value <= min}
-          aria-label={`${label} verringern`}
+          aria-label={t.water.decreaseAria(label)}
         >
           <Minus className="h-3.5 w-3.5" aria-hidden="true" />
         </Button>
@@ -55,7 +57,7 @@ function Counter({
           className="h-8 w-8"
           onClick={() => onChange(Math.min(max, value + 1))}
           disabled={value >= max}
-          aria-label={`${label} erhöhen`}
+          aria-label={t.water.increaseAria(label)}
         >
           <Plus className="h-3.5 w-3.5" aria-hidden="true" />
         </Button>
@@ -65,6 +67,7 @@ function Counter({
 }
 
 export default function WaterPage() {
+  const t = useT();
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(2);
   const [dogs, setDogs] = useState(0);
@@ -143,10 +146,7 @@ export default function WaterPage() {
 
   return (
     <div className="container max-w-2xl py-6">
-      <PageHeader
-        title="Trinkwasser-Rechner"
-        subtitle="Wie viel Wasser musst du mitnehmen, wenn es am Zeltplatz keinen Frischwasseranschluss gibt?"
-      />
+      <PageHeader title={t.water.title} subtitle={t.water.subtitle} />
 
       {/* Ergebnis */}
       <Card className="mb-6 border-primary/40 bg-accent/40">
@@ -156,13 +156,13 @@ export default function WaterPage() {
             aria-hidden="true"
           />
           <p className="font-serif text-4xl font-bold text-primary">
-            {result.recommendedLiters} Liter
+            {t.water.liters(result.recommendedLiters)}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            empfohlene Gesamtmenge inkl. 20 % Sicherheitsreserve
+            {t.water.recommendedNote}
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            Das entspricht etwa {canisters} × 10-Liter-Kanister
+            {t.water.canisterNote(canisters)}
           </p>
         </CardContent>
       </Card>
@@ -170,26 +170,26 @@ export default function WaterPage() {
       {/* Eingaben */}
       <div className="mb-4 space-y-2.5">
         <Counter
-          label="Erwachsene"
+          label={t.water.adults}
           value={adults}
           onChange={setAdults}
           min={0}
         />
         <Counter
-          label="Kinder"
+          label={t.water.children}
           value={children}
           onChange={setChildren}
           min={0}
         />
         <Counter
-          label="Hunde"
+          label={t.water.dogs}
           value={dogs}
           onChange={setDogs}
           min={0}
           max={6}
         />
         <Counter
-          label="Tage ohne Wasseranschluss"
+          label={t.water.daysWithoutWater}
           value={days}
           onChange={setDays}
           min={1}
@@ -205,7 +205,7 @@ export default function WaterPage() {
                 className="h-4 w-4 text-destructive"
                 aria-hidden="true"
               />
-              Erwartete Tageshöchsttemperatur
+              {t.water.tempLabel}
             </Label>
             <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-sm font-semibold">
               {maxTempC} °C
@@ -222,12 +222,11 @@ export default function WaterPage() {
               // Manuelles Ziehen schaltet die automatische Übernahme ab
               if (tempAuto) setTempAuto(false);
             }}
-            aria-label="Erwartete Tageshöchsttemperatur in Grad Celsius"
+            aria-label={t.water.tempSliderAria}
           />
           {forecast && tempAuto && (
             <p className="mt-2 text-xs text-primary">
-              Automatisch übernommen: Höchstwert der nächsten {forecast.days}{" "}
-              Tage an deinem Standort ({forecast.maxTemp} °C).
+              {t.water.tempAuto(forecast.days, forecast.maxTemp)}
             </p>
           )}
           {forecast && !tempAuto && (
@@ -239,29 +238,40 @@ export default function WaterPage() {
                 setMaxTempC(forecast.maxTemp);
               }}
             >
-              Prognose wieder übernehmen ({forecast.maxTemp} °C)
+              {t.water.tempReapply(forecast.maxTemp)}
             </button>
           )}
           <p className="mt-2 text-xs text-muted-foreground">
-            Ab 20 °C rechnen wir pro 5 °C einen Zuschlag von 0.5 l pro Person
-            und Tag.
+            {t.water.tempHint}
           </p>
         </CardContent>
       </Card>
 
       <Card className="mb-4">
         <CardContent className="pt-6">
-          <p className="mb-2 text-sm font-medium">Aktivitätslevel</p>
+          <p className="mb-2 text-sm font-medium">{t.water.activityTitle}</p>
           <div
             className="grid grid-cols-3 gap-2"
             role="group"
-            aria-label="Aktivitätslevel wählen"
+            aria-label={t.water.activityGroupAria}
           >
             {(
               [
-                { id: "ruhig", label: "Ruhig", hint: "Camp & Baden" },
-                { id: "normal", label: "Normal", hint: "Spaziergänge" },
-                { id: "aktiv", label: "Aktiv", hint: "Wandern & Sport" },
+                {
+                  id: "ruhig",
+                  label: t.water.activityCalm,
+                  hint: t.water.activityCalmHint,
+                },
+                {
+                  id: "normal",
+                  label: t.water.activityNormal,
+                  hint: t.water.activityNormalHint,
+                },
+                {
+                  id: "aktiv",
+                  label: t.water.activityActive,
+                  hint: t.water.activityActiveHint,
+                },
               ] as const
             ).map(a => (
               <button
@@ -289,15 +299,15 @@ export default function WaterPage() {
       <Card className="mb-6">
         <CardContent className="flex items-center justify-between pt-6">
           <div>
-            <p className="text-sm font-medium">Kochen & Abwasch einrechnen</p>
+            <p className="text-sm font-medium">{t.water.cookingTitle}</p>
             <p className="text-xs text-muted-foreground">
-              +1.5 l pro Person und Tag
+              {t.water.cookingHint}
             </p>
           </div>
           <Switch
             checked={includeCookingHygiene}
             onCheckedChange={setIncludeCookingHygiene}
-            aria-label="Wasser für Kochen und Abwasch einrechnen"
+            aria-label={t.water.cookingAria}
           />
         </CardContent>
       </Card>
@@ -307,29 +317,34 @@ export default function WaterPage() {
           <div>
             <p className="flex items-center gap-1.5 text-sm font-medium">
               <ShowerHead className="h-4 w-4 text-chart-5" aria-hidden="true" />
-              Komfortable Körperpflege
+              {t.water.comfortTitle}
             </p>
             <p className="text-xs text-muted-foreground">
-              Katzenwäsche oder Solar-Dusche: +4 l pro Person und Tag
+              {t.water.comfortHint}
             </p>
           </div>
           <Switch
             checked={includeComfortHygiene}
             onCheckedChange={setIncludeComfortHygiene}
-            aria-label="Wasser für komfortable Körperpflege einrechnen"
+            aria-label={t.water.comfortAria}
           />
         </CardContent>
       </Card>
 
       {/* Aufschlüsselung */}
-      <h2 className="mb-3 font-serif text-lg font-semibold">Aufschlüsselung</h2>
+      <h2 className="mb-3 font-serif text-lg font-semibold">
+        {t.water.breakdownTitle}
+      </h2>
       <div className="overflow-hidden rounded-xl border border-border">
         <table className="w-full text-sm">
           <tbody>
             <tr className="border-b border-border/60">
               <td className="px-4 py-2.5 text-muted-foreground">
-                Trinken Erwachsene ({result.drinkingLitersPerAdult.toFixed(1)}{" "}
-                l/Tag × {adults} × {days} Tage)
+                {t.water.rowAdults(
+                  result.drinkingLitersPerAdult.toFixed(1),
+                  adults,
+                  days
+                )}
               </td>
               <td className="px-4 py-2.5 text-right font-mono">
                 {(adults * result.drinkingLitersPerAdult * days).toFixed(1)} l
@@ -337,8 +352,11 @@ export default function WaterPage() {
             </tr>
             <tr className="border-b border-border/60">
               <td className="px-4 py-2.5 text-muted-foreground">
-                Trinken Kinder ({result.drinkingLitersPerChild.toFixed(1)} l/Tag
-                × {children} × {days} Tage)
+                {t.water.rowChildren(
+                  result.drinkingLitersPerChild.toFixed(1),
+                  children,
+                  days
+                )}
               </td>
               <td className="px-4 py-2.5 text-right font-mono">
                 {(children * result.drinkingLitersPerChild * days).toFixed(1)} l
@@ -349,8 +367,11 @@ export default function WaterPage() {
                 <td className="px-4 py-2.5 text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5">
                     <Dog className="h-3.5 w-3.5" aria-hidden="true" />
-                    Hunde ({result.drinkingLitersPerDog.toFixed(1)} l/Tag ×{" "}
-                    {dogs} × {days} Tage)
+                    {t.water.rowDogs(
+                      result.drinkingLitersPerDog.toFixed(1),
+                      dogs,
+                      days
+                    )}
                   </span>
                 </td>
                 <td className="px-4 py-2.5 text-right font-mono">
@@ -360,7 +381,7 @@ export default function WaterPage() {
             )}
             <tr className="border-b border-border/60">
               <td className="px-4 py-2.5 text-muted-foreground">
-                Kochen & Abwasch
+                {t.water.rowCooking}
               </td>
               <td className="px-4 py-2.5 text-right font-mono">
                 {result.cookingHygieneLiters.toFixed(1)} l
@@ -369,7 +390,7 @@ export default function WaterPage() {
             {includeComfortHygiene && (
               <tr className="border-b border-border/60">
                 <td className="px-4 py-2.5 text-muted-foreground">
-                  Körperpflege komfortabel
+                  {t.water.rowComfort}
                 </td>
                 <td className="px-4 py-2.5 text-right font-mono">
                   {result.comfortHygieneLiters.toFixed(1)} l
@@ -378,14 +399,14 @@ export default function WaterPage() {
             )}
             <tr className="border-b border-border/60">
               <td className="px-4 py-2.5 text-muted-foreground">
-                Sicherheitsreserve (20 %)
+                {t.water.rowReserve}
               </td>
               <td className="px-4 py-2.5 text-right font-mono">
                 {(result.recommendedLiters - result.totalLiters).toFixed(1)} l
               </td>
             </tr>
             <tr className="bg-muted/40 font-semibold">
-              <td className="px-4 py-2.5">Total empfohlen</td>
+              <td className="px-4 py-2.5">{t.water.rowTotal}</td>
               <td className="px-4 py-2.5 text-right font-mono">
                 {result.recommendedLiters} l
               </td>
@@ -395,10 +416,7 @@ export default function WaterPage() {
       </div>
 
       <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-        Hinweis: Werte sind Richtwerte für gemässigtes Klima. Bei Hitzewellen,
-        Höhenlagen oder körperlicher Arbeit grosszügiger planen. Hunde-Richtwert
-        gilt für mittelgrosse Hunde (ca. 20 kg). Wasser aus Bächen nur gefiltert
-        oder abgekocht verwenden.
+        {t.water.footnote}
       </p>
     </div>
   );

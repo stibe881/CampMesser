@@ -320,6 +320,98 @@ export const de = {
     emptyTitle: "Noch keine Ausrüstung erfasst",
     emptyText: "Beginne mit den grossen Teilen: Zelt, Schlafsack, Isomatte.",
   },
+  weather: {
+    title: "Camp-Wetter",
+    subtitle:
+      "Hyperlokale Vorhersage und Unwetterwarnungen für deinen Zeltplatz.",
+    locationGroupAria: "Ort für die Wettervorhersage wählen",
+    myLocation: "Mein Standort",
+    loadingAria: "Wetterdaten werden geladen",
+    retry: "Erneut versuchen",
+    offlineHint:
+      "Hinweis: Das Wetter-Modul braucht eine Internetverbindung und deinen Standort. Die Offline-Module (Erste Hilfe, Knoten, Natur) funktionieren weiterhin ohne Netz.",
+    serviceError: (status: number) =>
+      `Wetterdienst antwortet nicht (${status})`,
+    loadFailed: "Wetterdaten konnten nicht geladen werden.",
+    geoUnsupported: "Dein Gerät unterstützt keine Standortbestimmung.",
+    geoDenied:
+      "Standort nicht verfügbar. Bitte Standortfreigabe im Browser erlauben.",
+    elevation: (m: number) => `${m} m ü. M.`,
+    feelsLike: (deg: number) => `Gefühlt ${deg}°`,
+    refreshAria: "Wetter aktualisieren",
+    alertsAria: "Unwetterwarnungen",
+    noAlerts:
+      "Keine Unwetterwarnungen für die nächsten 48 Stunden – gute Bedingungen fürs Camp.",
+    severity: {
+      gefahr: "Gefahr",
+      warnung: "Warnung",
+      info: "Info",
+    },
+    fireAria: "Waldbrandgefahr",
+    fireTitle: (title: string) => `Waldbrandgefahr: ${title}`,
+    fireLevelBadge: (level: number) => `Stufe ${level}/5`,
+    fireValidFrom: (date: string) => `gültig seit ${date}`,
+    fireSourcePrefix:
+      "Quelle: BAFU-Warnkarte. Rechtlich verbindlich sind die kantonalen Verfügungen – Details auf ",
+    next24: "Nächste 24 Stunden",
+    rain48: "Regen: nächste 48 Stunden",
+    chartRain: "Regen",
+    chartProb: "Wahrscheinlichkeit",
+    chartTooltipHour: (label: string) => `${label} Uhr`,
+    chartLegend:
+      "Balken = Regenmenge (mm/h, linke Achse) · Linie = Regenwahrscheinlichkeit (%, rechte Achse).",
+    forecast7: "7-Tage-Vorhersage",
+    dataSource:
+      "Datenquelle: Open-Meteo (beste verfügbare Auflösung für deinen Standort, in der Schweiz MeteoSchweiz ICON-CH). Warnungen werden aus der Vorhersage berechnet und ersetzen keine offiziellen Warnungen von MeteoSchweiz.",
+  },
+  water: {
+    title: "Trinkwasser-Rechner",
+    subtitle:
+      "Wie viel Wasser musst du mitnehmen, wenn es am Zeltplatz keinen Frischwasseranschluss gibt?",
+    liters: (n: number) => `${n} Liter`,
+    recommendedNote: "empfohlene Gesamtmenge inkl. 20 % Sicherheitsreserve",
+    canisterNote: (n: number) => `Das entspricht etwa ${n} × 10-Liter-Kanister`,
+    adults: "Erwachsene",
+    children: "Kinder",
+    dogs: "Hunde",
+    daysWithoutWater: "Tage ohne Wasseranschluss",
+    decreaseAria: (label: string) => `${label} verringern`,
+    increaseAria: (label: string) => `${label} erhöhen`,
+    tempLabel: "Erwartete Tageshöchsttemperatur",
+    tempSliderAria: "Erwartete Tageshöchsttemperatur in Grad Celsius",
+    tempAuto: (days: number, temp: number) =>
+      `Automatisch übernommen: Höchstwert der nächsten ${days} Tage an deinem Standort (${temp} °C).`,
+    tempReapply: (temp: number) => `Prognose wieder übernehmen (${temp} °C)`,
+    tempHint:
+      "Ab 20 °C rechnen wir pro 5 °C einen Zuschlag von 0.5 l pro Person und Tag.",
+    activityTitle: "Aktivitätslevel",
+    activityGroupAria: "Aktivitätslevel wählen",
+    activityCalm: "Ruhig",
+    activityCalmHint: "Camp & Baden",
+    activityNormal: "Normal",
+    activityNormalHint: "Spaziergänge",
+    activityActive: "Aktiv",
+    activityActiveHint: "Wandern & Sport",
+    cookingTitle: "Kochen & Abwasch einrechnen",
+    cookingHint: "+1.5 l pro Person und Tag",
+    cookingAria: "Wasser für Kochen und Abwasch einrechnen",
+    comfortTitle: "Komfortable Körperpflege",
+    comfortHint: "Katzenwäsche oder Solar-Dusche: +4 l pro Person und Tag",
+    comfortAria: "Wasser für komfortable Körperpflege einrechnen",
+    breakdownTitle: "Aufschlüsselung",
+    rowAdults: (perDay: string, n: number, days: number) =>
+      `Trinken Erwachsene (${perDay} l/Tag × ${n} × ${days} Tage)`,
+    rowChildren: (perDay: string, n: number, days: number) =>
+      `Trinken Kinder (${perDay} l/Tag × ${n} × ${days} Tage)`,
+    rowDogs: (perDay: string, n: number, days: number) =>
+      `Hunde (${perDay} l/Tag × ${n} × ${days} Tage)`,
+    rowCooking: "Kochen & Abwasch",
+    rowComfort: "Körperpflege komfortabel",
+    rowReserve: "Sicherheitsreserve (20 %)",
+    rowTotal: "Total empfohlen",
+    footnote:
+      "Hinweis: Werte sind Richtwerte für gemässigtes Klima. Bei Hitzewellen, Höhenlagen oder körperlicher Arbeit grosszügiger planen. Hunde-Richtwert gilt für mittelgrosse Hunde (ca. 20 kg). Wasser aus Bächen nur gefiltert oder abgekocht verwenden.",
+  },
   notFound: {
     heading: "Seite nicht gefunden",
     text1: "Diese Seite gibt es leider nicht.",

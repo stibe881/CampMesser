@@ -14,6 +14,7 @@ import { trpc } from "@/lib/trpc";
 import { getSunTimes } from "@/lib/sun";
 import { describeWeatherCode } from "@shared/weather";
 import { fetchDossierWeather, type DossierWeather } from "@/lib/dossierWeather";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,6 +22,7 @@ import { cn } from "@/lib/utils";
  * Name, Koordinaten, Sonnenzeiten und Wetter – ohne Anmeldung erreichbar.
  */
 export default function SharedSpotPage() {
+  const { lang } = useI18n();
   const params = useParams<{ token: string }>();
   const spotQuery = trpc.spots.sharedGet.useQuery(
     { token: params.token ?? "" },
@@ -33,7 +35,7 @@ export default function SharedSpotPage() {
   useEffect(() => {
     if (!spot) return;
     let cancelled = false;
-    fetchDossierWeather(spot.latitude, spot.longitude)
+    fetchDossierWeather(spot.latitude, spot.longitude, lang)
       .then(data => {
         if (!cancelled) setWeather(data);
       })
@@ -43,7 +45,7 @@ export default function SharedSpotPage() {
     return () => {
       cancelled = true;
     };
-  }, [spot]);
+  }, [spot, lang]);
 
   const sun = useMemo(
     () =>
@@ -185,7 +187,7 @@ export default function SharedSpotPage() {
                           })}
                     </span>
                     <span className="flex-1 text-muted-foreground">
-                      {describeWeatherCode(d.weatherCode).label}
+                      {describeWeatherCode(d.weatherCode, lang).label}
                     </span>
                     <span className="flex items-center gap-1 text-xs text-chart-2">
                       <Droplets className="h-3 w-3" aria-hidden="true" />

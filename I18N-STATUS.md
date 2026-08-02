@@ -25,7 +25,8 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 - [x] Home (Hero, Widgets, Suche, Sortier-Modus)
 - [x] Login, Profile
 - [x] PackLists, PackListDetail, SharedPackList, PackOptimizer, Inventory
-- [ ] Sos, Weather, SunCompass, Energy, Water, Drying, Quiet, Lawn, Level
+- [x] Weather, Water
+- [ ] Sos, SunCompass, Energy, Drying, Quiet, Lawn, Level
 - [ ] Spots, SpotDetail, SharedSpot, Trips
 - [ ] FirstAid, Knots (+Quiz), Nature, Recipes (+Editor), Food
 - [ ] Family (+Editoren), HuntPrint
@@ -44,8 +45,8 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 
 ### Shared-Logik mit Nutzertexten (lang-Parameter)
 
-- [ ] shared/weather.ts (describeWeatherCode, detectAlerts)
-- [ ] shared/fireDanger.ts (Stufen + Regeln)
+- [x] shared/weather.ts (describeWeatherCode, detectAlerts)
+- [x] shared/fireDanger.ts (Stufen + Regeln)
 - [ ] shared/astro.ts (Namen ok, Tipps/Radiant)
 - [ ] shared/moon.ts (Phasen-Labels, stargazingQuality)
 - [ ] shared/level.ts (Unterleg-Tipps)

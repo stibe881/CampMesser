@@ -322,6 +322,100 @@ export const fr: Translation = {
     emptyText:
       "Commence par les grandes pièces : tente, sac de couchage, matelas isolant.",
   },
+  weather: {
+    title: "Météo du camp",
+    subtitle:
+      "Prévisions hyperlocales et alertes d'intempéries pour ton emplacement.",
+    locationGroupAria: "Choisir le lieu des prévisions météo",
+    myLocation: "Ma position",
+    loadingAria: "Chargement des données météo",
+    retry: "Réessayer",
+    offlineHint:
+      "Remarque : le module météo a besoin d'une connexion Internet et de ta position. Les modules hors ligne (premiers secours, nœuds, nature) continuent de fonctionner sans réseau.",
+    serviceError: status => `Le service météo ne répond pas (${status})`,
+    loadFailed: "Impossible de charger les données météo.",
+    geoUnsupported: "Ton appareil ne prend pas en charge la géolocalisation.",
+    geoDenied:
+      "Position indisponible. Autorise l'accès à la position dans le navigateur.",
+    elevation: m => `${m} m d'altitude`,
+    feelsLike: deg => `Ressenti ${deg}°`,
+    refreshAria: "Actualiser la météo",
+    alertsAria: "Alertes d'intempéries",
+    noAlerts:
+      "Aucune alerte d'intempéries pour les prochaines 48 heures – bonnes conditions pour le camp.",
+    severity: {
+      gefahr: "Danger",
+      warnung: "Alerte",
+      info: "Info",
+    },
+    fireAria: "Danger d'incendie de forêt",
+    fireTitle: title => `Danger d'incendie de forêt : ${title}`,
+    fireLevelBadge: level => `Degré ${level}/5`,
+    fireValidFrom: date => `valable depuis le ${date}`,
+    fireSourcePrefix:
+      "Source : carte des dangers de l'OFEV. Seules les décisions cantonales font foi – détails sur ",
+    next24: "Prochaines 24 heures",
+    rain48: "Pluie : prochaines 48 heures",
+    chartRain: "Pluie",
+    chartProb: "Probabilité",
+    chartTooltipHour: label => `${label}`,
+    chartLegend:
+      "Barres = quantité de pluie (mm/h, axe gauche) · Ligne = probabilité de pluie (%, axe droit).",
+    forecast7: "Prévisions à 7 jours",
+    dataSource:
+      "Source des données : Open-Meteo (meilleure résolution disponible pour ta position, en Suisse MétéoSuisse ICON-CH). Les alertes sont calculées à partir des prévisions et ne remplacent pas les alertes officielles de MétéoSuisse.",
+  },
+  water: {
+    title: "Calculateur d'eau potable",
+    subtitle:
+      "Quelle quantité d'eau emporter quand l'emplacement n'a pas de raccordement en eau fraîche ?",
+    liters: n => `${n} litres`,
+    recommendedNote:
+      "quantité totale recommandée, réserve de sécurité de 20 % incluse",
+    canisterNote: n => `Cela correspond à environ ${n} bidons de 10 litres`,
+    adults: "Adultes",
+    children: "Enfants",
+    dogs: "Chiens",
+    daysWithoutWater: "Jours sans raccordement en eau",
+    decreaseAria: label => `Diminuer ${label}`,
+    increaseAria: label => `Augmenter ${label}`,
+    tempLabel: "Température maximale journalière attendue",
+    tempSliderAria:
+      "Température maximale journalière attendue en degrés Celsius",
+    tempAuto: (days, temp) =>
+      `Repris automatiquement : maximum des ${days} prochains jours à ta position (${temp} °C).`,
+    tempReapply: temp => `Reprendre la prévision (${temp} °C)`,
+    tempHint:
+      "À partir de 20 °C, nous comptons un supplément de 0.5 l par personne et par jour tous les 5 °C.",
+    activityTitle: "Niveau d'activité",
+    activityGroupAria: "Choisir le niveau d'activité",
+    activityCalm: "Calme",
+    activityCalmHint: "Camp & baignade",
+    activityNormal: "Normal",
+    activityNormalHint: "Promenades",
+    activityActive: "Actif",
+    activityActiveHint: "Randonnée & sport",
+    cookingTitle: "Inclure cuisine & vaisselle",
+    cookingHint: "+1.5 l par personne et par jour",
+    cookingAria: "Inclure l'eau pour la cuisine et la vaisselle",
+    comfortTitle: "Toilette confortable",
+    comfortHint:
+      "Toilette rapide ou douche solaire : +4 l par personne et par jour",
+    comfortAria: "Inclure l'eau pour une toilette confortable",
+    breakdownTitle: "Détail",
+    rowAdults: (perDay, n, days) =>
+      `Boisson adultes (${perDay} l/jour × ${n} × ${days} jours)`,
+    rowChildren: (perDay, n, days) =>
+      `Boisson enfants (${perDay} l/jour × ${n} × ${days} jours)`,
+    rowDogs: (perDay, n, days) =>
+      `Chiens (${perDay} l/jour × ${n} × ${days} jours)`,
+    rowCooking: "Cuisine & vaisselle",
+    rowComfort: "Toilette confortable",
+    rowReserve: "Réserve de sécurité (20 %)",
+    rowTotal: "Total recommandé",
+    footnote:
+      "Remarque : valeurs indicatives pour un climat tempéré. En cas de canicule, d'altitude ou de travail physique, prévois plus large. La valeur pour les chiens vaut pour un chien de taille moyenne (env. 20 kg). N'utilise l'eau des ruisseaux que filtrée ou bouillie.",
+  },
   notFound: {
     heading: "Page introuvable",
     text1: "Cette page n'existe malheureusement pas.",

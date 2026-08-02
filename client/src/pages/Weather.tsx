@@ -35,8 +35,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
+import { LOCALE_TAGS } from "@shared/i18n";
 import {
   describeWeatherCode,
   detectAlerts,
@@ -45,7 +47,7 @@ import {
   type WeatherAlert,
 } from "@shared/weather";
 import {
-  FIRE_DANGER_LEVELS,
+  describeFireDanger,
   fireDangerRequestUrl,
   parseFireDangerResponse,
   type FireDangerInfo,
@@ -90,6 +92,13 @@ interface WeatherData {
 
 type LoadState = "idle" | "locating" | "loading" | "ready" | "error";
 
+/** HTTP-Fehler des Wetterdienstes – der Status wird im UI übersetzt angezeigt. */
+class WeatherServiceError extends Error {
+  constructor(public readonly status: number) {
+    super(`weather service error ${status}`);
+  }
+}
+
 async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
   const params = new URLSearchParams({
     latitude: lat.toFixed(4),
@@ -105,7 +114,7 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
   const res = await fetch(
     `https://api.open-meteo.com/v1/forecast?${params.toString()}`
   );
-  if (!res.ok) throw new Error(`Wetterdienst antwortet nicht (${res.status})`);
+  if (!res.ok) throw new WeatherServiceError(res.status);
   const json = await res.json();
 
   const nowIso = new Date().toISOString().slice(0, 13);
@@ -198,6 +207,7 @@ const fireLevelStyles: Record<FireDangerLevel, string> = {
 };
 
 export default function WeatherPage() {
+  const { lang, t } = useI18n();
   const [state, setState] = useState<LoadState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(
@@ -243,9 +253,9 @@ export default function WeatherPage() {
     } catch (e) {
       setState("error");
       setError(
-        e instanceof Error
-          ? e.message
-          : "Wetterdaten konnten nicht geladen werden."
+        e instanceof WeatherServiceError
+          ? t.weather.serviceError(e.status)
+          : t.weather.loadFailed
       );
     }
   };
@@ -257,7 +267,7 @@ export default function WeatherPage() {
     setLocationLabel(null);
     if (!navigator.geolocation) {
       setState("error");
-      setError("Dein Gerät unterstützt keine Standortbestimmung.");
+      setError(t.weather.geoUnsupported);
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -267,9 +277,7 @@ export default function WeatherPage() {
       },
       () => {
         setState("error");
-        setError(
-          "Standort nicht verfügbar. Bitte Standortfreigabe im Browser erlauben."
-        );
+        setError(t.weather.geoDenied);
       },
       { enableHighAccuracy: true, timeout: 12000 }
     );
@@ -293,8 +301,8 @@ export default function WeatherPage() {
   }, []);
 
   const alerts: WeatherAlert[] = useMemo(
-    () => (data ? detectAlerts(data.hourly) : []),
-    [data]
+    () => (data ? detectAlerts(data.hourly, lang) : []),
+    [data, lang]
   );
   const next24 = data?.hourly.slice(0, 24) ?? [];
   // Regen-Grafik: 48 h mit Menge und Wahrscheinlichkeit
@@ -310,17 +318,14 @@ export default function WeatherPage() {
 
   return (
     <div className="container max-w-3xl py-6 md:py-8">
-      <PageHeader
-        title="Camp-Wetter"
-        subtitle="Hyperlokale Vorhersage und Unwetterwarnungen für deinen Zeltplatz."
-      />
+      <PageHeader title={t.weather.title} subtitle={t.weather.subtitle} />
 
       {/* Ortsauswahl: eigener Standort oder gespeicherte Zeltplatz-Favoriten */}
       {(spots?.length ?? 0) > 0 && (
         <div
           className="mb-4 flex flex-wrap items-center gap-2"
           role="group"
-          aria-label="Ort für die Wettervorhersage wählen"
+          aria-label={t.weather.locationGroupAria}
         >
           <button
             type="button"
@@ -333,7 +338,7 @@ export default function WeatherPage() {
             )}
           >
             <LocateFixed className="h-3.5 w-3.5" aria-hidden="true" />
-            Mein Standort
+            {t.weather.myLocation}
           </button>
           {spots!.map(spot => (
             <button
@@ -358,7 +363,7 @@ export default function WeatherPage() {
         <div
           className="space-y-3"
           aria-busy="true"
-          aria-label="Wetterdaten werden geladen"
+          aria-label={t.weather.loadingAria}
         >
           <Skeleton className="h-28 w-full rounded-xl" />
           <Skeleton className="h-40 w-full rounded-xl" />
@@ -376,12 +381,10 @@ export default function WeatherPage() {
             <p className="text-sm text-muted-foreground">{error}</p>
             <Button onClick={load} className="mt-1">
               <LocateFixed className="mr-2 h-4 w-4" aria-hidden="true" />
-              Erneut versuchen
+              {t.weather.retry}
             </Button>
             <p className="max-w-sm text-xs text-muted-foreground">
-              Hinweis: Das Wetter-Modul braucht eine Internetverbindung und
-              deinen Standort. Die Offline-Module (Erste Hilfe, Knoten, Natur)
-              funktionieren weiterhin ohne Netz.
+              {t.weather.offlineHint}
             </p>
           </CardContent>
         </Card>
@@ -400,14 +403,14 @@ export default function WeatherPage() {
                       (coords
                         ? `${coords.lat.toFixed(3)}°, ${coords.lon.toFixed(3)}°`
                         : "")}{" "}
-                    · {Math.round(data.elevation)} m ü. M.
+                    · {t.weather.elevation(Math.round(data.elevation))}
                   </p>
                   <p className="mt-1 font-serif text-4xl font-semibold">
                     {Math.round(data.current.temperatureC)}°
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Gefühlt {Math.round(data.current.apparentC)}° ·{" "}
-                    {describeWeatherCode(data.current.weatherCode).label}
+                    {t.weather.feelsLike(Math.round(data.current.apparentC))} ·{" "}
+                    {describeWeatherCode(data.current.weatherCode, lang).label}
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-2">
@@ -427,24 +430,30 @@ export default function WeatherPage() {
                     className="h-4 w-4 text-chart-4"
                     aria-hidden="true"
                   />
-                  {new Date(data.daily[0].sunrise).toLocaleTimeString("de-CH", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {new Date(data.daily[0].sunrise).toLocaleTimeString(
+                    LOCALE_TAGS[lang],
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }
+                  )}
                   <Sunset
                     className="ml-3 h-4 w-4 text-chart-1"
                     aria-hidden="true"
                   />
-                  {new Date(data.daily[0].sunset).toLocaleTimeString("de-CH", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {new Date(data.daily[0].sunset).toLocaleTimeString(
+                    LOCALE_TAGS[lang],
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }
+                  )}
                 </p>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={load}
-                  aria-label="Wetter aktualisieren"
+                  aria-label={t.weather.refreshAria}
                 >
                   <RefreshCw className="h-4 w-4" aria-hidden="true" />
                 </Button>
@@ -453,15 +462,17 @@ export default function WeatherPage() {
           </Card>
 
           {/* Warnungen */}
-          <section aria-label="Unwetterwarnungen" className="mb-6 space-y-2.5">
+          <section
+            aria-label={t.weather.alertsAria}
+            className="mb-6 space-y-2.5"
+          >
             {alerts.length === 0 ? (
               <div className="flex items-center gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
                 <Info
                   className="h-4 w-4 shrink-0 text-primary"
                   aria-hidden="true"
                 />
-                Keine Unwetterwarnungen für die nächsten 48 Stunden – gute
-                Bedingungen fürs Camp.
+                {t.weather.noAlerts}
               </div>
             ) : (
               alerts.map(alert => (
@@ -480,7 +491,7 @@ export default function WeatherPage() {
                     />
                     {alert.title}
                     <span className="ml-auto rounded-full bg-background/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
-                      {alert.severity}
+                      {t.weather.severity[alert.severity]}
                     </span>
                   </p>
                   <p className="mt-1 text-sm">{alert.description}</p>
@@ -492,7 +503,7 @@ export default function WeatherPage() {
 
           {/* Waldbrandgefahr (nur Schweiz) */}
           {fireDanger && (
-            <section aria-label="Waldbrandgefahr" className="mb-6">
+            <section aria-label={t.weather.fireAria} className="mb-6">
               <div
                 className={cn(
                   "rounded-xl border px-4 py-3",
@@ -502,22 +513,23 @@ export default function WeatherPage() {
               >
                 <p className="flex items-center gap-2 text-sm font-semibold">
                   <Flame className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  Waldbrandgefahr: {fireDanger.title}
+                  {t.weather.fireTitle(
+                    describeFireDanger(fireDanger.level, lang).title
+                  )}
                   <span className="ml-auto rounded-full bg-background/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
-                    Stufe {fireDanger.level}/5
+                    {t.weather.fireLevelBadge(fireDanger.level)}
                   </span>
                 </p>
                 <p className="mt-1 text-sm">
                   {fireDanger.regionName}
                   {fireDanger.validFrom &&
-                    ` · gültig seit ${fireDanger.validFrom}`}
+                    ` · ${t.weather.fireValidFrom(fireDanger.validFrom)}`}
                 </p>
                 <p className="mt-1.5 text-xs opacity-90">
-                  {FIRE_DANGER_LEVELS[fireDanger.level].advice}
+                  {describeFireDanger(fireDanger.level, lang).advice}
                 </p>
                 <p className="mt-1.5 text-xs opacity-75">
-                  Quelle: BAFU-Warnkarte. Rechtlich verbindlich sind die
-                  kantonalen Verfügungen – Details auf{" "}
+                  {t.weather.fireSourcePrefix}
                   <a
                     href="https://www.waldbrandgefahr.ch"
                     target="_blank"
@@ -534,7 +546,7 @@ export default function WeatherPage() {
 
           {/* Stundenverlauf */}
           <h2 className="mb-2.5 font-serif text-lg font-semibold">
-            Nächste 24 Stunden
+            {t.weather.next24}
           </h2>
           <div className="mb-6 overflow-x-auto rounded-xl border border-border/70 bg-card">
             <div className="flex min-w-max gap-0 px-2 py-3">
@@ -568,7 +580,7 @@ export default function WeatherPage() {
 
           {/* Niederschlags-Grafik: wann genau kommt der Regen? */}
           <h2 className="mb-2.5 font-serif text-lg font-semibold">
-            Regen: nächste 48 Stunden
+            {t.weather.rain48}
           </h2>
           <Card className="mb-6">
             <CardContent className="pt-5">
@@ -601,16 +613,18 @@ export default function WeatherPage() {
                     />
                     <Tooltip
                       formatter={(value: number, name: string) =>
-                        name === "Regen"
-                          ? [`${value.toFixed(1)} mm/h`, "Regen"]
-                          : [`${Math.round(value)} %`, "Wahrscheinlichkeit"]
+                        name === t.weather.chartRain
+                          ? [`${value.toFixed(1)} mm/h`, t.weather.chartRain]
+                          : [`${Math.round(value)} %`, t.weather.chartProb]
                       }
-                      labelFormatter={(label: string) => `${label} Uhr`}
+                      labelFormatter={(label: string) =>
+                        t.weather.chartTooltipHour(label)
+                      }
                     />
                     <Bar
                       yAxisId="mm"
                       dataKey="mm"
-                      name="Regen"
+                      name={t.weather.chartRain}
                       fill="var(--chart-2)"
                       fillOpacity={0.75}
                       isAnimationActive={false}
@@ -619,7 +633,7 @@ export default function WeatherPage() {
                       yAxisId="prob"
                       type="monotone"
                       dataKey="prob"
-                      name="Wahrscheinlichkeit"
+                      name={t.weather.chartProb}
                       stroke="var(--chart-4)"
                       strokeWidth={2}
                       dot={false}
@@ -629,15 +643,14 @@ export default function WeatherPage() {
                 </ResponsiveContainer>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                Balken = Regenmenge (mm/h, linke Achse) · Linie =
-                Regenwahrscheinlichkeit (%, rechte Achse).
+                {t.weather.chartLegend}
               </p>
             </CardContent>
           </Card>
 
           {/* 7-Tage */}
           <h2 className="mb-2.5 font-serif text-lg font-semibold">
-            7-Tage-Vorhersage
+            {t.weather.forecast7}
           </h2>
           <Card>
             <CardContent className="divide-y divide-border/60 pt-2">
@@ -645,8 +658,8 @@ export default function WeatherPage() {
                 <div key={d.date} className="flex items-center gap-3 py-2.5">
                   <p className="w-16 text-sm font-medium">
                     {i === 0
-                      ? "Heute"
-                      : new Date(d.date).toLocaleDateString("de-CH", {
+                      ? t.common.today
+                      : new Date(d.date).toLocaleDateString(LOCALE_TAGS[lang], {
                           weekday: "short",
                           day: "numeric",
                         })}
@@ -678,10 +691,7 @@ export default function WeatherPage() {
           </Card>
 
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-            Datenquelle: Open-Meteo (beste verfügbare Auflösung für deinen
-            Standort, in der Schweiz MeteoSchweiz ICON-CH). Warnungen werden aus
-            der Vorhersage berechnet und ersetzen keine offiziellen Warnungen
-            von MeteoSchweiz.
+            {t.weather.dataSource}
           </p>
         </>
       )}

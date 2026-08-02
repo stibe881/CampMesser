@@ -40,6 +40,8 @@ import { MapView } from "@/components/Map";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { getSunTimes } from "@/lib/sun";
+import { useI18n } from "@/i18n";
+import type { Language } from "@shared/i18n";
 import {
   describeWeatherCode,
   detectAlerts,
@@ -57,7 +59,8 @@ interface SpotForecast {
 
 async function fetchSpotForecast(
   lat: number,
-  lon: number
+  lon: number,
+  lang: Language
 ): Promise<SpotForecast> {
   const params = new URLSearchParams({
     latitude: lat.toFixed(4),
@@ -94,7 +97,7 @@ async function fetchSpotForecast(
     precipProbability: json.daily.precipitation_probability_max?.[0] ?? 0,
     windGustsKmh: json.daily.wind_gusts_10m_max[0],
     weatherCode: json.daily.weather_code[0],
-    alerts: detectAlerts(hourly),
+    alerts: detectAlerts(hourly, lang),
   };
 }
 
@@ -111,6 +114,7 @@ function SpotCard({
   };
   onDelete: () => void;
 }) {
+  const { lang } = useI18n();
   const [forecast, setForecast] = useState<SpotForecast | null>(null);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -128,7 +132,7 @@ function SpotCard({
     setLoading(true);
     setFailed(false);
     try {
-      setForecast(await fetchSpotForecast(spot.latitude, spot.longitude));
+      setForecast(await fetchSpotForecast(spot.latitude, spot.longitude, lang));
     } catch {
       setFailed(true);
     } finally {
@@ -213,7 +217,7 @@ function SpotCard({
           <div className="mt-3 rounded-lg bg-accent/50 p-3">
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">
-                {describeWeatherCode(forecast.weatherCode).label}
+                {describeWeatherCode(forecast.weatherCode, lang).label}
               </span>
               <span>
                 <span className="font-semibold">
