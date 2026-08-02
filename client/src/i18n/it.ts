@@ -113,6 +113,21 @@ export const it: Translation = {
     showAria: title => `Mostra di nuovo ${title}`,
     hideAria: title => `Nascondi ${title}`,
     openAria: title => `Apri ${title}`,
+    onboardingTitle: "Primi passi",
+    onboardingSubtitle:
+      "Ecco come preparare CampMesser per la tua prossima avventura.",
+    onboardingDismissAria: "Nascondi la scheda dei primi passi",
+    onboardingSteps: {
+      account: "Crea un account o accedi",
+      spot: "Salva la prima piazzola",
+      packList: "Crea la prima lista bagagli",
+      trip: "Pianifica il primo viaggio",
+      push: "Attiva le notifiche push",
+    },
+    onboardingOptional: "facoltativo",
+    onboardingDoneAria: label => `${label} – fatto`,
+    onboardingOpenAria: label => `${label} – apri ora`,
+    onboardingLockedAria: label => `${label} – possibile solo dopo l'accesso`,
   },
   login: {
     title: "Accedi",

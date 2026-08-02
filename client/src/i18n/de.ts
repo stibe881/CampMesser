@@ -114,6 +114,21 @@ export const de = {
     showAria: (title: string) => `${title} wieder einblenden`,
     hideAria: (title: string) => `${title} ausblenden`,
     openAria: (title: string) => `${title} öffnen`,
+    onboardingTitle: "Erste Schritte",
+    onboardingSubtitle: "So richtest du CampMesser fürs nächste Abenteuer ein.",
+    onboardingDismissAria: "Erste-Schritte-Karte ausblenden",
+    onboardingSteps: {
+      account: "Konto erstellen oder anmelden",
+      spot: "Ersten Zeltplatz speichern",
+      packList: "Erste Packliste anlegen",
+      trip: "Erste Reise planen",
+      push: "Push-Mitteilungen aktivieren",
+    },
+    onboardingOptional: "optional",
+    onboardingDoneAria: (label: string) => `${label} – erledigt`,
+    onboardingOpenAria: (label: string) => `${label} – jetzt öffnen`,
+    onboardingLockedAria: (label: string) =>
+      `${label} – erst nach der Anmeldung möglich`,
   },
   login: {
     title: "Anmelden",

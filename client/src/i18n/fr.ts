@@ -114,6 +114,22 @@ export const fr: Translation = {
     showAria: title => `Réafficher ${title}`,
     hideAria: title => `Masquer ${title}`,
     openAria: title => `Ouvrir ${title}`,
+    onboardingTitle: "Premiers pas",
+    onboardingSubtitle:
+      "Voilà comment préparer CampMesser pour ta prochaine aventure.",
+    onboardingDismissAria: "Masquer la carte des premiers pas",
+    onboardingSteps: {
+      account: "Créer un compte ou se connecter",
+      spot: "Enregistrer un premier emplacement",
+      packList: "Créer une première liste de bagages",
+      trip: "Planifier un premier voyage",
+      push: "Activer les notifications push",
+    },
+    onboardingOptional: "facultatif",
+    onboardingDoneAria: label => `${label} – terminé`,
+    onboardingOpenAria: label => `${label} – ouvrir maintenant`,
+    onboardingLockedAria: label =>
+      `${label} – possible seulement après la connexion`,
   },
   login: {
     title: "Connexion",
