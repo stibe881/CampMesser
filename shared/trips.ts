@@ -2,6 +2,7 @@
  * Reise-Tagebuch: Nächte-Berechnung und Statistik über alle Einträge.
  * Reine Funktionen auf ISO-Datumsstrings (YYYY-MM-DD) – testbar ohne DB.
  */
+import { LOCALE_TAGS, type Language } from "./i18n";
 
 export interface TripLike {
   startDate: string;
@@ -65,8 +66,11 @@ export function daysUntilTrip(startDate: string, today: string): number {
   return Math.round((start - now) / DAY_MS);
 }
 
-/** Gesamt-Statistik über alle Tagebuch-Einträge. */
-export function computeTripStats(trips: TripLike[]): TripStats {
+/** Gesamt-Statistik über alle Tagebuch-Einträge (lang steuert nur die Orts-Sortierung). */
+export function computeTripStats(
+  trips: TripLike[],
+  lang: Language = "de"
+): TripStats {
   const stats: TripStats = {
     totalTrips: trips.length,
     totalNights: 0,
@@ -90,7 +94,8 @@ export function computeTripStats(trips: TripLike[]): TripStats {
   stats.topPlaces = Array.from(placeNights.entries())
     .map(([name, nights]) => ({ name, nights }))
     .sort(
-      (a, b) => b.nights - a.nights || a.name.localeCompare(b.name, "de-CH")
+      (a, b) =>
+        b.nights - a.nights || a.name.localeCompare(b.name, LOCALE_TAGS[lang])
     );
   return stats;
 }

@@ -30,6 +30,8 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { useI18n, useT } from "@/i18n";
+import { LOCALE_TAGS } from "@shared/i18n";
 import {
   computeTripStats,
   daysUntilTrip,
@@ -42,6 +44,7 @@ const FREE_LOCATION = "frei";
 
 /** Pack-Fortschritt einer verknüpften Liste, z. B. «12 von 19 gepackt». */
 function PackProgress({ listId }: { listId: number }) {
+  const t = useT();
   const progress = trpc.packing.progress.useQuery({ listId });
   if (!progress.data) return null;
   const { name, total, checked } = progress.data;
@@ -56,25 +59,15 @@ function PackProgress({ listId }: { listId: number }) {
         aria-hidden="true"
       />
       <span className="min-w-0 flex-1 truncate">
-        {name}: {checked} von {total} gepackt
+        {t.trips.packProgress(name, checked, total)}
       </span>
       <span className="font-mono text-xs font-semibold">{pct} %</span>
     </Link>
   );
 }
 
-function formatRange(startDate: string, endDate: string): string {
-  const fmt = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString("de-CH", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  if (startDate === endDate) return fmt(startDate);
-  return `${fmt(startDate)} – ${fmt(endDate)}`;
-}
-
 export default function TripsPage() {
+  const { lang, t } = useI18n();
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
   const tripsQuery = trpc.trips.list.useQuery(undefined, {
@@ -86,6 +79,17 @@ export default function TripsPage() {
   const listsQuery = trpc.packing.lists.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+
+  const formatRange = (startDate: string, endDate: string): string => {
+    const fmt = (iso: string) =>
+      new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    if (startDate === endDate) return fmt(startDate);
+    return `${fmt(startDate)} – ${fmt(endDate)}`;
+  };
 
   const today = new Date().toISOString().slice(0, 10);
   const [spotChoice, setSpotChoice] = useState<string>(FREE_LOCATION);
@@ -103,15 +107,14 @@ export default function TripsPage() {
     onSuccess: () => {
       utils.trips.list.invalidate();
       setForm(f => ({ ...f, location: "", title: "", notes: "" }));
-      toast.success("Eintrag gespeichert");
+      toast.success(t.trips.entrySaved);
     },
-    onError: e =>
-      toast.error(e.message || "Eintrag konnte nicht gespeichert werden"),
+    onError: e => toast.error(e.message || t.trips.entrySaveFailed),
   });
 
   const removeMutation = trpc.trips.remove.useMutation({
     onSuccess: () => utils.trips.list.invalidate(),
-    onError: () => toast.error("Löschen fehlgeschlagen"),
+    onError: () => toast.error(t.common.deleteFailed),
   });
 
   const spots = spotsQuery.data ?? [];
@@ -135,7 +138,7 @@ export default function TripsPage() {
       const spot = spots.find(s => s.id === trip.spotId);
       if (spot) return spot.name;
     }
-    return trip.location ?? "Unbekannter Ort";
+    return trip.location ?? t.trips.unknownPlace;
   };
 
   const stats = useMemo(
@@ -145,10 +148,11 @@ export default function TripsPage() {
           startDate: t.startDate,
           endDate: t.endDate,
           placeName: placeName(t),
-        }))
+        })),
+        lang
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [trips, spots]
+    [trips, spots, lang]
   );
   const currentYear = new Date().getFullYear();
 
@@ -157,7 +161,7 @@ export default function TripsPage() {
       <div className="container flex justify-center py-16">
         <Loader2
           className="h-6 w-6 animate-spin text-muted-foreground"
-          aria-label="Lädt"
+          aria-label={t.common.loading}
         />
       </div>
     );
@@ -166,21 +170,15 @@ export default function TripsPage() {
   if (!isAuthenticated) {
     return (
       <div className="container py-6">
-        <PageHeader
-          title="Reise-Tagebuch"
-          subtitle="Deine Camping-Aufenthalte festhalten: Orte, Nächte und Erinnerungen."
-        />
-        <LoginPrompt feature="dein Reise-Tagebuch" />
+        <PageHeader title={t.trips.title} subtitle={t.trips.subtitle} />
+        <LoginPrompt feature={t.trips.loginFeature} />
       </div>
     );
   }
 
   return (
     <div className="container max-w-3xl py-6">
-      <PageHeader
-        title="Reise-Tagebuch"
-        subtitle="Deine Camping-Aufenthalte festhalten: Orte, Nächte und Erinnerungen."
-      />
+      <PageHeader title={t.trips.title} subtitle={t.trips.subtitle} />
 
       {/* Statistik */}
       <Card className="mb-6">
@@ -191,16 +189,20 @@ export default function TripsPage() {
                 {stats.nightsByYear[currentYear] ?? 0}
               </p>
               <p className="text-xs text-muted-foreground">
-                Nächte {currentYear}
+                {t.trips.nightsInYear(currentYear)}
               </p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold">{stats.totalNights}</p>
-              <p className="text-xs text-muted-foreground">Nächte gesamt</p>
+              <p className="text-xs text-muted-foreground">
+                {t.trips.nightsTotal}
+              </p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold">{stats.totalTrips}</p>
-              <p className="text-xs text-muted-foreground">Aufenthalte</p>
+              <p className="text-xs text-muted-foreground">
+                {t.trips.staysLabel}
+              </p>
             </div>
             <div className="text-center">
               <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
@@ -212,7 +214,9 @@ export default function TripsPage() {
                   {stats.topPlaces[0]?.name ?? "–"}
                 </span>
               </p>
-              <p className="text-xs text-muted-foreground">Lieblingsplatz</p>
+              <p className="text-xs text-muted-foreground">
+                {t.trips.favoriteLabel}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -223,7 +227,7 @@ export default function TripsPage() {
         <CardContent className="pt-6">
           <h2 className="mb-4 flex items-center gap-2 font-serif text-base font-semibold">
             <BookOpen className="h-4 w-4 text-primary" aria-hidden="true" />
-            Aufenthalt eintragen
+            {t.trips.newEntryTitle}
           </h2>
           <form
             className="grid gap-3"
@@ -232,9 +236,7 @@ export default function TripsPage() {
               const spotId =
                 spotChoice === FREE_LOCATION ? null : Number(spotChoice);
               if (spotId === null && !form.location.trim()) {
-                toast.error(
-                  "Bitte einen Zeltplatz wählen oder einen Ort eintragen"
-                );
+                toast.error(t.trips.choosePlaceError);
                 return;
               }
               addMutation.mutate({
@@ -251,14 +253,14 @@ export default function TripsPage() {
           >
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <Label htmlFor="trip-spot">Ort</Label>
+                <Label htmlFor="trip-spot">{t.trips.placeLabel}</Label>
                 <Select value={spotChoice} onValueChange={setSpotChoice}>
                   <SelectTrigger id="trip-spot" className="mt-1.5 w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={FREE_LOCATION}>
-                      Ort frei eintragen …
+                      {t.trips.freeLocationOption}
                     </SelectItem>
                     {spots.map(s => (
                       <SelectItem key={s.id} value={String(s.id)}>
@@ -270,11 +272,13 @@ export default function TripsPage() {
               </div>
               {spotChoice === FREE_LOCATION && (
                 <div>
-                  <Label htmlFor="trip-location">Ortsname</Label>
+                  <Label htmlFor="trip-location">
+                    {t.trips.locationNameLabel}
+                  </Label>
                   <Input
                     id="trip-location"
                     className="mt-1.5"
-                    placeholder="z. B. Camping Aareschlucht"
+                    placeholder={t.trips.locationPlaceholder}
                     value={form.location}
                     onChange={e =>
                       setForm(f => ({ ...f, location: e.target.value }))
@@ -283,7 +287,7 @@ export default function TripsPage() {
                 </div>
               )}
               <div>
-                <Label htmlFor="trip-packlist">Packliste (optional)</Label>
+                <Label htmlFor="trip-packlist">{t.trips.packListLabel}</Label>
                 <Select
                   value={packListChoice}
                   onValueChange={setPackListChoice}
@@ -292,7 +296,7 @@ export default function TripsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="keine">Ohne Packliste</SelectItem>
+                    <SelectItem value="keine">{t.trips.noPackList}</SelectItem>
                     {(listsQuery.data ?? []).map(l => (
                       <SelectItem key={l.id} value={String(l.id)}>
                         {l.name}
@@ -304,7 +308,7 @@ export default function TripsPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="trip-start">Anreise</Label>
+                <Label htmlFor="trip-start">{t.trips.arrivalLabel}</Label>
                 <Input
                   id="trip-start"
                   className="mt-1.5"
@@ -324,7 +328,7 @@ export default function TripsPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="trip-end">Abreise</Label>
+                <Label htmlFor="trip-end">{t.trips.departureLabel}</Label>
                 <Input
                   id="trip-end"
                   className="mt-1.5"
@@ -339,22 +343,22 @@ export default function TripsPage() {
               </div>
             </div>
             <div>
-              <Label htmlFor="trip-title">Titel (optional)</Label>
+              <Label htmlFor="trip-title">{t.trips.titleLabel}</Label>
               <Input
                 id="trip-title"
                 className="mt-1.5"
-                placeholder="z. B. Familienferien am See"
+                placeholder={t.trips.titlePlaceholder}
                 value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
               />
             </div>
             <div>
-              <Label htmlFor="trip-notes">Notizen (optional)</Label>
+              <Label htmlFor="trip-notes">{t.trips.notesLabel}</Label>
               <Textarea
                 id="trip-notes"
                 className="mt-1.5"
                 rows={3}
-                placeholder="Schönster Stellplatz, bestes Rezept, was beim nächsten Mal anders …"
+                placeholder={t.trips.notesPlaceholder}
                 value={form.notes}
                 onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
               />
@@ -365,9 +369,7 @@ export default function TripsPage() {
               className="justify-self-start"
             >
               <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              {addMutation.isPending
-                ? "Wird gespeichert …"
-                : "Eintrag speichern"}
+              {addMutation.isPending ? t.common.saving : t.trips.submit}
             </Button>
           </form>
         </CardContent>
@@ -381,7 +383,7 @@ export default function TripsPage() {
               className="h-5 w-5 text-primary"
               aria-hidden="true"
             />
-            Geplante Aufenthalte
+            {t.trips.plannedTitle}
           </h2>
           <ul className="mb-8 space-y-3">
             {plannedTrips.map(trip => {
@@ -400,11 +402,7 @@ export default function TripsPage() {
                       <p className="flex flex-wrap items-center gap-2 font-semibold">
                         {trip.title || placeName(trip)}
                         <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                          {days === 0
-                            ? "Heute geht's los!"
-                            : days === 1
-                              ? "Morgen geht's los!"
-                              : `Noch ${days} Tage`}
+                          {t.trips.countdown(days)}
                         </span>
                       </p>
                       <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
@@ -423,7 +421,7 @@ export default function TripsPage() {
                         </span>
                         <span className="flex items-center gap-1">
                           <Moon className="h-3 w-3" aria-hidden="true" />
-                          {nights === 1 ? "1 Nacht" : `${nights} Nächte`}
+                          {t.trips.nightsCount(nights)}
                         </span>
                       </p>
                       {trip.packListId != null && (
@@ -440,7 +438,9 @@ export default function TripsPage() {
                       size="icon"
                       className="h-8 w-8 shrink-0 text-muted-foreground/60 hover:text-destructive"
                       onClick={() => removeMutation.mutate({ id: trip.id })}
-                      aria-label={`Geplanten Aufenthalt ${trip.title || placeName(trip)} löschen`}
+                      aria-label={t.trips.deletePlannedAria(
+                        trip.title || placeName(trip)
+                      )}
                     >
                       <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                     </Button>
@@ -454,12 +454,11 @@ export default function TripsPage() {
 
       {/* Einträge */}
       <h2 className="mb-3 font-serif text-lg font-semibold">
-        Deine Aufenthalte
+        {t.trips.entriesTitle}
       </h2>
       {trips.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          Noch keine Einträge – halte oben deinen ersten Camping-Aufenthalt
-          fest.
+          {t.trips.empty}
         </p>
       ) : (
         <ul className="space-y-3">
@@ -495,7 +494,7 @@ export default function TripsPage() {
                       </span>
                       <span className="flex items-center gap-1">
                         <Moon className="h-3 w-3" aria-hidden="true" />
-                        {nights === 1 ? "1 Nacht" : `${nights} Nächte`}
+                        {t.trips.nightsCount(nights)}
                       </span>
                     </p>
                     {trip.notes && (
@@ -509,7 +508,9 @@ export default function TripsPage() {
                     size="icon"
                     className="h-8 w-8 shrink-0 text-muted-foreground/60 hover:text-destructive"
                     onClick={() => removeMutation.mutate({ id: trip.id })}
-                    aria-label={`Eintrag ${trip.title || placeName(trip)} löschen`}
+                    aria-label={t.trips.deleteEntryAria(
+                      trip.title || placeName(trip)
+                    )}
                   >
                     <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                   </Button>

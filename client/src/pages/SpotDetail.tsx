@@ -27,13 +27,14 @@ import { computeTripStats, tripNights } from "@shared/trips";
 import { describeWeatherCode } from "@shared/weather";
 import { fetchDossierWeather, type DossierWeather } from "@/lib/dossierWeather";
 import { useI18n } from "@/i18n";
+import { LOCALE_TAGS } from "@shared/i18n";
 import { cn } from "@/lib/utils";
 
 // Wetter-Abruf ausgelagert: teilt sich das Dossier mit der öffentlichen
 // Teil-Ansicht (/platz/:token)
 
 export default function SpotDetailPage() {
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
   const params = useParams<{ id: string }>();
   const spotId = Number(params.id);
   const { isAuthenticated, loading } = useAuth();
@@ -88,14 +89,18 @@ export default function SpotDetailPage() {
           startDate: t.startDate,
           endDate: t.endDate,
           placeName: "x",
-        }))
+        })),
+        lang
       ),
-    [spotTrips]
+    [spotTrips, lang]
   );
 
   const fmtTime = (d: Date | null) =>
     d
-      ? d.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })
+      ? d.toLocaleTimeString(LOCALE_TAGS[lang], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
       : "–";
 
   if (loading || (isAuthenticated && spotsQuery.isLoading)) {
@@ -103,7 +108,7 @@ export default function SpotDetailPage() {
       <div className="container flex justify-center py-16">
         <Loader2
           className="h-6 w-6 animate-spin text-muted-foreground"
-          aria-label="Lädt"
+          aria-label={t.common.loading}
         />
       </div>
     );
@@ -113,11 +118,11 @@ export default function SpotDetailPage() {
     return (
       <div className="container py-6">
         <PageHeader
-          title="Zeltplatz"
+          title={t.spotDetail.fallbackTitle}
           backHref="/zeltplaetze"
-          backLabel="Zeltplätze"
+          backLabel={t.spotDetail.backLabel}
         />
-        <LoginPrompt feature="deine Zeltplatz-Favoriten" />
+        <LoginPrompt feature={t.spots.loginFeature} />
       </div>
     );
   }
@@ -126,9 +131,9 @@ export default function SpotDetailPage() {
     return (
       <div className="container py-6">
         <PageHeader
-          title="Zeltplatz nicht gefunden"
+          title={t.spotDetail.notFoundTitle}
           backHref="/zeltplaetze"
-          backLabel="Zeltplätze"
+          backLabel={t.spotDetail.backLabel}
         />
       </div>
     );
@@ -139,7 +144,7 @@ export default function SpotDetailPage() {
       <PageHeader
         title={spot.name}
         backHref="/zeltplaetze"
-        backLabel="Zeltplätze"
+        backLabel={t.spotDetail.backLabel}
       />
       <p className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
         <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
@@ -154,7 +159,7 @@ export default function SpotDetailPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Sunrise className="h-4 w-4 text-chart-4" aria-hidden="true" />
-            Sonne heute an diesem Platz
+            {t.spotDetail.sunTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -163,19 +168,25 @@ export default function SpotDetailPage() {
               <p className="font-mono text-lg font-bold">
                 {fmtTime(sun?.sunrise ?? null)}
               </p>
-              <p className="text-xs text-muted-foreground">Aufgang</p>
+              <p className="text-xs text-muted-foreground">
+                {t.spotDetail.sunrise}
+              </p>
             </div>
             <div className="rounded-lg bg-accent/50 py-2.5">
               <p className="font-mono text-lg font-bold">
                 {fmtTime(sun?.solarNoon ?? null)}
               </p>
-              <p className="text-xs text-muted-foreground">Höchststand</p>
+              <p className="text-xs text-muted-foreground">
+                {t.spotDetail.noon}
+              </p>
             </div>
             <div className="rounded-lg bg-accent/50 py-2.5">
               <p className="font-mono text-lg font-bold">
                 {fmtTime(sun?.sunset ?? null)}
               </p>
-              <p className="text-xs text-muted-foreground">Untergang</p>
+              <p className="text-xs text-muted-foreground">
+                {t.spotDetail.sunset}
+              </p>
             </div>
           </div>
           <Link
@@ -183,7 +194,7 @@ export default function SpotDetailPage() {
             className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
           >
             <Compass className="h-4 w-4" aria-hidden="true" />
-            Sonnenbahn und Schatten im Kompass ansehen
+            {t.spotDetail.sunCompassLink}
           </Link>
         </CardContent>
       </Card>
@@ -193,14 +204,14 @@ export default function SpotDetailPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Droplets className="h-4 w-4 text-chart-2" aria-hidden="true" />
-            Wetter-Vorschau
+            {t.spotDetail.weatherTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {weatherFailed && (
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-              Wetter konnte nicht geladen werden (offline?).
+              {t.spotDetail.weatherFailed}
             </p>
           )}
           {!weather && !weatherFailed && (
@@ -223,11 +234,11 @@ export default function SpotDetailPage() {
                   />
                   {weather.alerts[0].title}
                   {weather.alerts.length > 1 &&
-                    ` (+${weather.alerts.length - 1} weitere)`}
+                    t.spotDetail.moreAlerts(weather.alerts.length - 1)}
                 </p>
               ) : (
                 <p className="mb-3 text-sm text-muted-foreground">
-                  Keine Unwetterwarnungen in den nächsten 48 Stunden.
+                  {t.spotDetail.noAlerts}
                 </p>
               )}
               <div className="divide-y divide-border/60">
@@ -238,11 +249,14 @@ export default function SpotDetailPage() {
                   >
                     <span className="w-16 font-medium">
                       {i === 0
-                        ? "Heute"
-                        : new Date(d.date).toLocaleDateString("de-CH", {
-                            weekday: "short",
-                            day: "numeric",
-                          })}
+                        ? t.common.today
+                        : new Date(d.date).toLocaleDateString(
+                            LOCALE_TAGS[lang],
+                            {
+                              weekday: "short",
+                              day: "numeric",
+                            }
+                          )}
                     </span>
                     <span className="flex-1 text-muted-foreground">
                       {describeWeatherCode(d.weatherCode, lang).label}
@@ -273,24 +287,17 @@ export default function SpotDetailPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Mountain className="h-4 w-4 text-primary" aria-hidden="true" />
-            Hindernis-Profil
+            {t.spotDetail.obstacleTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {obstacles.length > 0 ? (
             <p className="text-sm text-muted-foreground">
-              {obstacles.length}{" "}
-              {obstacles.length === 1
-                ? "Hindernis erfasst"
-                : "Hindernisse erfasst"}{" "}
-              – Schattenzeiten und Panel-Ausrichtung berücksichtigen dieses
-              Profil automatisch.
+              {t.spotDetail.obstaclesRecorded(obstacles.length)}
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Für diesen Platz ist noch kein Hindernis-Profil erfasst. Trage
-              Bäume, Berge oder Gebäude im Sonnen-Kompass ein, um Schattenzeiten
-              zu sehen.
+              {t.spotDetail.obstacleEmpty}
             </p>
           )}
           <Link
@@ -298,8 +305,9 @@ export default function SpotDetailPage() {
             className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
           >
             <Compass className="h-4 w-4" aria-hidden="true" />
-            Profil im Sonnen-Kompass{" "}
-            {obstacles.length > 0 ? "bearbeiten" : "anlegen"}
+            {obstacles.length > 0
+              ? t.spotDetail.obstacleEdit
+              : t.spotDetail.obstacleCreate}
           </Link>
         </CardContent>
       </Card>
@@ -309,7 +317,7 @@ export default function SpotDetailPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <BookOpen className="h-4 w-4 text-primary" aria-hidden="true" />
-            Deine Aufenthalte hier
+            {t.spotDetail.staysTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -322,7 +330,7 @@ export default function SpotDetailPage() {
                     {tripStats.totalNights}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {tripStats.totalNights === 1 ? "Nacht" : "Nächte"} gesamt
+                    {t.spotDetail.nightsTotalLabel(tripStats.totalNights)}
                   </p>
                 </div>
                 <div className="rounded-lg bg-accent/50 py-2.5">
@@ -330,7 +338,7 @@ export default function SpotDetailPage() {
                     {spotTrips.length}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {spotTrips.length === 1 ? "Aufenthalt" : "Aufenthalte"}
+                    {t.spotDetail.staysCountLabel(spotTrips.length)}
                   </p>
                 </div>
               </div>
@@ -345,7 +353,7 @@ export default function SpotDetailPage() {
                       aria-hidden="true"
                     />
                     {new Date(`${trip.startDate}T00:00:00`).toLocaleDateString(
-                      "de-CH",
+                      LOCALE_TAGS[lang],
                       {
                         day: "numeric",
                         month: "short",
@@ -354,8 +362,8 @@ export default function SpotDetailPage() {
                     )}{" "}
                     · {tripNights(trip.startDate, trip.endDate)}{" "}
                     {tripNights(trip.startDate, trip.endDate) === 1
-                      ? "Nacht"
-                      : "Nächte"}
+                      ? t.common.night
+                      : t.common.nights}
                     {trip.title && ` · ${trip.title}`}
                   </li>
                 ))}
@@ -363,7 +371,7 @@ export default function SpotDetailPage() {
             </>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Noch kein Aufenthalt an diesem Platz im Tagebuch.
+              {t.spotDetail.staysEmpty}
             </p>
           )}
           <Link
@@ -371,7 +379,7 @@ export default function SpotDetailPage() {
             className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
           >
             <BookOpen className="h-4 w-4" aria-hidden="true" />
-            Zum Reise-Tagebuch
+            {t.spotDetail.toDiary}
           </Link>
         </CardContent>
       </Card>
@@ -381,14 +389,12 @@ export default function SpotDetailPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Share2 className="h-4 w-4 text-primary" aria-hidden="true" />
-            Platz teilen
+            {t.spotDetail.shareTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="mb-3 text-sm text-muted-foreground">
-            Wer den Link hat, sieht Name, Koordinaten, Wetter und Sonnenzeiten
-            dieses Platzes – ohne Anmeldung und nur lesend. Deine Notizen,
-            Hindernisse und Tagebuch-Einträge bleiben privat.
+            {t.spotDetail.shareDesc}
           </p>
           {shareUrl ? (
             <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
@@ -401,15 +407,13 @@ export default function SpotDetailPage() {
                 onClick={async () => {
                   try {
                     await navigator.clipboard.writeText(shareUrl);
-                    toast.success("Link kopiert");
+                    toast.success(t.common.linkCopied);
                   } catch {
-                    toast.error(
-                      "Kopieren nicht möglich – bitte manuell markieren"
-                    );
+                    toast.error(t.common.copyFailed);
                   }
                 }}
               >
-                Kopieren
+                {t.common.copy}
               </button>
               <button
                 type="button"
@@ -420,13 +424,13 @@ export default function SpotDetailPage() {
                     {
                       onSuccess: () => {
                         setShareUrl(null);
-                        toast.success("Teilen beendet – der Link ist ungültig");
+                        toast.success(t.spotDetail.stopShared);
                       },
                     }
                   )
                 }
               >
-                Teilen beenden
+                {t.spotDetail.stopShare}
               </button>
             </div>
           ) : (
@@ -443,18 +447,18 @@ export default function SpotDetailPage() {
                       setShareUrl(url);
                       try {
                         await navigator.clipboard.writeText(url);
-                        toast.success("Teil-Link kopiert");
+                        toast.success(t.spotDetail.shareLinkCopied);
                       } catch {
-                        toast.success("Teil-Link erstellt – kopiere ihn oben");
+                        toast.success(t.spotDetail.shareLinkCreated);
                       }
                     },
-                    onError: () => toast.error("Teilen fehlgeschlagen"),
+                    onError: () => toast.error(t.spotDetail.shareFailed),
                   }
                 )
               }
             >
               <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              Platz per Link teilen
+              {t.spotDetail.shareButton}
             </Button>
           )}
         </CardContent>

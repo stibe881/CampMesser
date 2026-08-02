@@ -15,6 +15,7 @@ import { getSunTimes } from "@/lib/sun";
 import { describeWeatherCode } from "@shared/weather";
 import { fetchDossierWeather, type DossierWeather } from "@/lib/dossierWeather";
 import { useI18n } from "@/i18n";
+import { LOCALE_TAGS } from "@shared/i18n";
 import { cn } from "@/lib/utils";
 
 /**
@@ -22,7 +23,7 @@ import { cn } from "@/lib/utils";
  * Name, Koordinaten, Sonnenzeiten und Wetter – ohne Anmeldung erreichbar.
  */
 export default function SharedSpotPage() {
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
   const params = useParams<{ token: string }>();
   const spotQuery = trpc.spots.sharedGet.useQuery(
     { token: params.token ?? "" },
@@ -54,7 +55,10 @@ export default function SharedSpotPage() {
   );
   const fmtTime = (d: Date | null) =>
     d
-      ? d.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })
+      ? d.toLocaleTimeString(LOCALE_TAGS[lang], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
       : "–";
 
   if (spotQuery.isLoading) {
@@ -62,7 +66,7 @@ export default function SharedSpotPage() {
       <div className="container flex justify-center py-16">
         <Loader2
           className="h-6 w-6 animate-spin text-muted-foreground"
-          aria-label="Lädt"
+          aria-label={t.common.loading}
         />
       </div>
     );
@@ -75,9 +79,9 @@ export default function SharedSpotPage() {
           className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
           aria-hidden="true"
         />
-        <p className="font-medium">Dieser Teil-Link ist nicht mehr gültig.</p>
+        <p className="font-medium">{t.sharedSpot.invalid}</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          Die Besitzerin oder der Besitzer hat das Teilen beendet.
+          {t.sharedSpot.invalidHint}
         </p>
       </div>
     );
@@ -87,7 +91,7 @@ export default function SharedSpotPage() {
     <div className="container max-w-2xl py-6">
       <p className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
         <Tent className="h-3.5 w-3.5" aria-hidden="true" />
-        Geteilter Zeltplatz
+        {t.sharedSpot.badge}
       </p>
       <h1 className="font-serif text-2xl font-bold md:text-3xl">{spot.name}</h1>
       <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -103,7 +107,7 @@ export default function SharedSpotPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Sunrise className="h-4 w-4 text-chart-4" aria-hidden="true" />
-            Sonne heute
+            {t.sharedSpot.sunTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -112,19 +116,25 @@ export default function SharedSpotPage() {
               <p className="font-mono text-lg font-bold">
                 {fmtTime(sun?.sunrise ?? null)}
               </p>
-              <p className="text-xs text-muted-foreground">Aufgang</p>
+              <p className="text-xs text-muted-foreground">
+                {t.sharedSpot.sunrise}
+              </p>
             </div>
             <div className="rounded-lg bg-accent/50 py-2.5">
               <p className="font-mono text-lg font-bold">
                 {fmtTime(sun?.solarNoon ?? null)}
               </p>
-              <p className="text-xs text-muted-foreground">Höchststand</p>
+              <p className="text-xs text-muted-foreground">
+                {t.sharedSpot.noon}
+              </p>
             </div>
             <div className="rounded-lg bg-accent/50 py-2.5">
               <p className="font-mono text-lg font-bold">
                 {fmtTime(sun?.sunset ?? null)}
               </p>
-              <p className="text-xs text-muted-foreground">Untergang</p>
+              <p className="text-xs text-muted-foreground">
+                {t.sharedSpot.sunset}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -135,14 +145,14 @@ export default function SharedSpotPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Droplets className="h-4 w-4 text-chart-2" aria-hidden="true" />
-            Wetter-Vorschau
+            {t.sharedSpot.weatherTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {weatherFailed && (
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-              Wetter konnte nicht geladen werden.
+              {t.sharedSpot.weatherFailed}
             </p>
           )}
           {!weather && !weatherFailed && (
@@ -165,11 +175,11 @@ export default function SharedSpotPage() {
                   />
                   {weather.alerts[0].title}
                   {weather.alerts.length > 1 &&
-                    ` (+${weather.alerts.length - 1} weitere)`}
+                    t.sharedSpot.moreAlerts(weather.alerts.length - 1)}
                 </p>
               ) : (
                 <p className="mb-3 text-sm text-muted-foreground">
-                  Keine Unwetterwarnungen in den nächsten 48 Stunden.
+                  {t.sharedSpot.noAlerts}
                 </p>
               )}
               <div className="divide-y divide-border/60">
@@ -180,11 +190,14 @@ export default function SharedSpotPage() {
                   >
                     <span className="w-16 font-medium">
                       {i === 0
-                        ? "Heute"
-                        : new Date(d.date).toLocaleDateString("de-CH", {
-                            weekday: "short",
-                            day: "numeric",
-                          })}
+                        ? t.common.today
+                        : new Date(d.date).toLocaleDateString(
+                            LOCALE_TAGS[lang],
+                            {
+                              weekday: "short",
+                              day: "numeric",
+                            }
+                          )}
                     </span>
                     <span className="flex-1 text-muted-foreground">
                       {describeWeatherCode(d.weatherCode, lang).label}
@@ -211,7 +224,7 @@ export default function SharedSpotPage() {
       </Card>
 
       <p className="mt-5 text-center text-xs text-muted-foreground">
-        Geteilt mit CampMesser – dem Schweizer Taschenmesser fürs Zelt-Camping.
+        {t.sharedSpot.footer}
       </p>
     </div>
   );

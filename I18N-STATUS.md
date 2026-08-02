@@ -28,7 +28,9 @@ Diese Datei trackt den Fortschritt und wird nach Abschluss gelöscht.
 - [x] Weather, Water
 - [x] SunCompass, Level
 - [x] Sos, Energy, Drying, Quiet, Lawn
-- [ ] Spots, SpotDetail, SharedSpot, Trips
+- [x] Spots, SpotDetail, SharedSpot, Trips (shared/trips.ts: computeTripStats
+      mit lang-Parameter für die Orts-Sortierung; obstacles/obstacleProfiles
+      enthalten keine Anzeigetexte)
 - [ ] FirstAid, Knots (+Quiz), Nature, Recipes (+Editor), Food
 - [ ] Family (+Editoren), HuntPrint
 - [x] NotFound, ErrorBoundary, LoginPrompt, PageHeader-Verwendungen

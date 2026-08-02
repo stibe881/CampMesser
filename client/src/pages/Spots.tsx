@@ -40,8 +40,8 @@ import { MapView } from "@/components/Map";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { getSunTimes } from "@/lib/sun";
-import { useI18n } from "@/i18n";
-import type { Language } from "@shared/i18n";
+import { useI18n, useT } from "@/i18n";
+import { LOCALE_TAGS, type Language } from "@shared/i18n";
 import {
   describeWeatherCode,
   detectAlerts,
@@ -75,7 +75,7 @@ async function fetchSpotForecast(
   const res = await fetch(
     `https://api.open-meteo.com/v1/forecast?${params.toString()}`
   );
-  if (!res.ok) throw new Error("Wetterdienst nicht erreichbar");
+  if (!res.ok) throw new Error("weather service unavailable");
   const json = await res.json();
   const hourly = (json.hourly.time as string[]).map(
     (time: string, i: number) => ({
@@ -114,7 +114,7 @@ function SpotCard({
   };
   onDelete: () => void;
 }) {
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
   const [forecast, setForecast] = useState<SpotForecast | null>(null);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -123,10 +123,13 @@ function SpotCard({
     const times = getSunTimes(new Date(), spot.latitude, spot.longitude);
     const fmt = (d: Date | null) =>
       d
-        ? d.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })
+        ? d.toLocaleTimeString(LOCALE_TAGS[lang], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
         : "–";
     return { sunrise: fmt(times.sunrise), sunset: fmt(times.sunset) };
-  }, [spot.latitude, spot.longitude]);
+  }, [spot.latitude, spot.longitude, lang]);
 
   const loadForecast = async () => {
     setLoading(true);
@@ -163,7 +166,7 @@ function SpotCard({
             variant="ghost"
             size="icon"
             onClick={onDelete}
-            aria-label={`${spot.name} löschen`}
+            aria-label={t.spots.deleteAria(spot.name)}
             className="shrink-0 text-muted-foreground hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -183,13 +186,13 @@ function SpotCard({
             href={`/zeltplaetze/${spot.id}`}
             className="ml-auto font-medium text-primary hover:underline"
           >
-            Dossier →
+            {t.spots.dossierLink}
           </a>
           <a
             href={`/sonne?lat=${spot.latitude}&lon=${spot.longitude}&name=${encodeURIComponent(spot.name)}&spot=${spot.id}`}
             className="font-medium text-primary hover:underline"
           >
-            Sonnenstand →
+            {t.spots.sunLink}
           </a>
         </div>
 
@@ -200,16 +203,16 @@ function SpotCard({
             className="mt-3 w-full"
             onClick={loadForecast}
           >
-            Wetter-Vorschau laden
+            {t.spots.loadForecast}
           </Button>
         )}
         {loading && <Skeleton className="mt-3 h-16 w-full rounded-lg" />}
         {failed && (
           <p className="mt-3 flex items-center gap-1.5 text-xs text-destructive">
             <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-            Wetter konnte nicht geladen werden.
+            {t.spots.weatherFailed}
             <button type="button" onClick={loadForecast} className="underline">
-              Nochmals versuchen
+              {t.spots.retry}
             </button>
           </p>
         )}
@@ -236,7 +239,7 @@ function SpotCard({
               </span>
               <span className="flex items-center gap-1">
                 <Wind className="h-3 w-3" aria-hidden="true" />
-                Böen {Math.round(forecast.windGustsKmh)} km/h
+                {t.spots.gusts(Math.round(forecast.windGustsKmh))}
               </span>
             </div>
             {forecast.alerts.length > 0 && (
@@ -303,6 +306,7 @@ function SpotMapPicker({
 
 /** Opt-in für Unwetter-Push: warnt bei Sturm/Gewitter an gespeicherten Plätzen. */
 function PushOptIn({ hasSpots }: { hasSpots: boolean }) {
+  const t = useT();
   const vapidQuery = trpc.push.vapidKey.useQuery(undefined, {
     staleTime: Infinity,
   });
@@ -333,18 +337,16 @@ function PushOptIn({ hasSpots }: { hasSpots: boolean }) {
         const sub = await subscribeBrowser(vapidQuery.data!.publicKey!);
         await subscribeMutation.mutateAsync(sub);
         setEnabled(true);
-        toast.success(
-          "Unwetter-Warnungen aktiviert – du wirst bei Sturm oder Gewitter an deinen Plätzen benachrichtigt"
-        );
+        toast.success(t.spots.pushEnabled);
       } else {
         const endpoint = await unsubscribeBrowser();
         if (endpoint) await unsubscribeMutation.mutateAsync({ endpoint });
         setEnabled(false);
-        toast.success("Unwetter-Warnungen deaktiviert");
+        toast.success(t.spots.pushDisabled);
       }
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Aktion fehlgeschlagen"
+        error instanceof Error ? error.message : t.common.actionFailed
       );
     } finally {
       setBusy(false);
@@ -357,19 +359,18 @@ function PushOptIn({ hasSpots }: { hasSpots: boolean }) {
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 text-sm font-semibold">
             <BellRing className="h-4 w-4 text-primary" aria-hidden="true" />
-            Unwetter-Warnungen für deine Plätze
+            {t.spots.pushTitle}
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Push-Benachrichtigung bei Sturm, Gewitter oder Starkregen an einem
-            deiner gespeicherten Zeltplätze.
-            {!hasSpots && " Speichere zuerst einen Zeltplatz."}
+            {t.spots.pushDesc}
+            {!hasSpots && ` ${t.spots.pushSaveFirst}`}
           </p>
         </div>
         <Switch
           checked={enabled ?? false}
           disabled={busy || enabled === null}
           onCheckedChange={toggle}
-          aria-label="Unwetter-Warnungen für gespeicherte Zeltplätze aktivieren"
+          aria-label={t.spots.pushAria}
         />
       </CardContent>
     </Card>
@@ -377,6 +378,7 @@ function PushOptIn({ hasSpots }: { hasSpots: boolean }) {
 }
 
 export default function SpotsPage() {
+  const t = useT();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const utils = trpc.useUtils();
   const { data: spots, isLoading } = trpc.spots.list.useQuery(undefined, {
@@ -399,9 +401,9 @@ export default function SpotsPage() {
       setLat("");
       setLon("");
       setNote("");
-      toast.success("Zeltplatz gespeichert");
+      toast.success(t.spots.saved);
     },
-    onError: () => toast.error("Speichern fehlgeschlagen"),
+    onError: () => toast.error(t.common.saveFailed),
   });
   const removeMutation = trpc.spots.remove.useMutation({
     onMutate: async input => {
@@ -414,14 +416,14 @@ export default function SpotsPage() {
     },
     onError: (_e, _i, ctx) => {
       utils.spots.list.setData(undefined, ctx?.prev);
-      toast.error("Löschen fehlgeschlagen");
+      toast.error(t.common.deleteFailed);
     },
     onSettled: () => utils.spots.list.invalidate(),
   });
 
   const useCurrentLocation = () => {
     if (!navigator.geolocation) {
-      toast.error("Dein Gerät unterstützt keine Standortbestimmung.");
+      toast.error(t.spots.geoUnsupported);
       return;
     }
     setLocating(true);
@@ -432,7 +434,7 @@ export default function SpotsPage() {
         setLocating(false);
       },
       () => {
-        toast.error("Standort nicht verfügbar.");
+        toast.error(t.spots.geoUnavailable);
         setLocating(false);
       },
       { enableHighAccuracy: true, timeout: 12000 }
@@ -443,7 +445,7 @@ export default function SpotsPage() {
     const latNum = parseFloat(lat.replace(",", "."));
     const lonNum = parseFloat(lon.replace(",", "."));
     if (!name.trim()) {
-      toast.error("Bitte einen Namen eingeben.");
+      toast.error(t.spots.nameRequired);
       return;
     }
     if (
@@ -454,9 +456,7 @@ export default function SpotsPage() {
       lonNum < -180 ||
       lonNum > 180
     ) {
-      toast.error(
-        "Bitte gültige Koordinaten eingeben (z. B. 46.8182 und 8.2275)."
-      );
+      toast.error(t.spots.coordsInvalid);
       return;
     }
     addMutation.mutate({
@@ -469,18 +469,15 @@ export default function SpotsPage() {
 
   return (
     <div className="container max-w-3xl py-6 md:py-8">
-      <PageHeader
-        title="Zeltplatz-Favoriten"
-        subtitle="Speichere geplante Zeltplätze und rufe Wetter und Sonnenstand im Voraus ab."
-      />
+      <PageHeader title={t.spots.title} subtitle={t.spots.subtitle} />
 
       {!authLoading && !isAuthenticated ? (
-        <LoginPrompt feature="deine Zeltplatz-Favoriten" />
+        <LoginPrompt feature={t.spots.loginFeature} />
       ) : (
         <>
           <Button onClick={() => setDialogOpen(true)} className="mb-5">
             <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-            Zeltplatz hinzufügen
+            {t.spots.addSpot}
           </Button>
 
           <PushOptIn hasSpots={(spots?.length ?? 0) > 0} />
@@ -499,11 +496,7 @@ export default function SpotsPage() {
                   className="h-8 w-8 text-muted-foreground/50"
                   aria-hidden="true"
                 />
-                <p className="text-sm text-muted-foreground">
-                  Noch keine Favoriten. Speichere deinen ersten geplanten
-                  Zeltplatz – per Koordinaten oder direkt mit deinem aktuellen
-                  Standort.
-                </p>
+                <p className="text-sm text-muted-foreground">{t.spots.empty}</p>
               </CardContent>
             </Card>
           )}
@@ -524,21 +517,18 @@ export default function SpotsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-serif">
-              Zeltplatz speichern
+              {t.spots.dialogTitle}
             </DialogTitle>
-            <DialogDescription>
-              Tippe auf die Karte, übernimm deinen aktuellen Standort oder gib
-              die Koordinaten von Hand ein.
-            </DialogDescription>
+            <DialogDescription>{t.spots.dialogDesc}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label htmlFor="spot-name">Name</Label>
+              <Label htmlFor="spot-name">{t.spots.nameLabel}</Label>
               <Input
                 id="spot-name"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="z. B. Camping Grindelwald"
+                placeholder={t.spots.namePlaceholder}
                 maxLength={120}
               />
             </div>
@@ -546,14 +536,14 @@ export default function SpotsPage() {
               <div className="mb-1.5 flex items-center justify-between">
                 <Label className="flex items-center gap-1.5">
                   <MapIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                  Ort auf der Karte wählen
+                  {t.spots.mapLabel}
                 </Label>
                 <button
                   type="button"
                   onClick={() => setShowMap(v => !v)}
                   className="text-xs font-medium text-primary hover:underline"
                 >
-                  {showMap ? "Karte ausblenden" : "Karte anzeigen"}
+                  {showMap ? t.spots.mapHide : t.spots.mapShow}
                 </button>
               </div>
               {showMap && dialogOpen && (
@@ -578,7 +568,7 @@ export default function SpotsPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="spot-lat">Breitengrad</Label>
+                <Label htmlFor="spot-lat">{t.spots.latLabel}</Label>
                 <Input
                   id="spot-lat"
                   value={lat}
@@ -588,7 +578,7 @@ export default function SpotsPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="spot-lon">Längengrad</Label>
+                <Label htmlFor="spot-lon">{t.spots.lonLabel}</Label>
                 <Input
                   id="spot-lon"
                   value={lon}
@@ -607,27 +597,25 @@ export default function SpotsPage() {
               className="w-full"
             >
               <LocateFixed className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              {locating
-                ? "Standort wird ermittelt …"
-                : "Aktuellen Standort übernehmen"}
+              {locating ? t.spots.locating : t.spots.useLocation}
             </Button>
             <div>
-              <Label htmlFor="spot-note">Notiz (optional)</Label>
+              <Label htmlFor="spot-note">{t.spots.noteLabel}</Label>
               <Input
                 id="spot-note"
                 value={note}
                 onChange={e => setNote(e.target.value)}
-                placeholder="z. B. Platz am Bach, schattig am Morgen"
+                placeholder={t.spots.notePlaceholder}
                 maxLength={500}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Abbrechen
+              {t.common.cancel}
             </Button>
             <Button onClick={submit} disabled={addMutation.isPending}>
-              {addMutation.isPending ? "Speichern …" : "Speichern"}
+              {addMutation.isPending ? t.common.saving : t.common.save}
             </Button>
           </DialogFooter>
         </DialogContent>
