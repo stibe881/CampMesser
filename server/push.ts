@@ -5,11 +5,14 @@
  * Pack-Fortschritt), Zelt-Trocknungs-Erinnerungen am Tag nach der
  * Heimkehr (bei Regen am Platz) und Sternschnuppen-Tipps, wenn am Heim-Ort
  * eine klare, mondarme Nacht auf ein aktives Strom-Maximum trifft.
+ * Jede erfolgreich versendete Meldung landet zusätzlich im
+ * Benachrichtigungs-Verlauf (#201, Tabelle pushLog) – einmal pro Konto,
+ * nicht pro Gerät.
  * Der Check läuft über /api/push/check (konsoleH-Cronjob), weil Passenger
  * den Node-Prozess bei Inaktivität schlafen legt und ein interner Scheduler
  * deshalb unzuverlässig wäre.
  */
-import { and, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import webpush from "web-push";
 import {
   campSpots,
@@ -17,6 +20,7 @@ import {
   gearTasks,
   homeLocations,
   packItems,
+  pushLog,
   pushSubscriptions,
   tripLogs,
 } from "../drizzle/schema";
@@ -78,6 +82,80 @@ export async function deleteSubscription(userId: number, endpoint: string) {
 
 /** Mitteilungs-Arten, die pro Abo (Gerät) einzeln abschaltbar sind. */
 export type PushKind = "weather" | "food" | "trip" | "astro" | "gear";
+
+/**
+ * Arten im Benachrichtigungs-Verlauf (#201): wie PushKind, aber mit den beiden
+ * Sonderfällen, die am Flag «trip» hängen und trotzdem eigene Meldungen sind.
+ */
+export type PushLogKind = PushKind | "drying" | "evepack";
+
+/** So viele Einträge behält der Verlauf pro Konto (ältere fallen weg). */
+export const PUSH_LOG_LIMIT = 50;
+/** So viele überzählige Einträge räumt ein Durchgang höchstens weg. */
+const PUSH_LOG_PRUNE_BATCH = 200;
+
+/** Text auf die Spaltenlänge kürzen – der Verlauf ist nur eine Kopie. */
+function clamp(text: string, max: number): string {
+  return text.length > max ? text.slice(0, max) : text;
+}
+
+/**
+ * Einen versendeten Push im Verlauf festhalten und dabei aufräumen: alles
+ * jenseits der PUSH_LOG_LIMIT neuesten Einträge desselben Kontos fällt weg.
+ * Der Verlauf hängt am KONTO, nicht am Gerät – bei mehreren Geräten schreibt
+ * checkAndNotify deshalb nur einen Eintrag pro Meldung (Dedup pro Lauf).
+ */
+export async function recordPushLog(entry: {
+  userId: number;
+  kind: PushLogKind;
+  title: string;
+  body: string;
+  url: string | null;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(pushLog).values({
+    userId: entry.userId,
+    kind: entry.kind,
+    title: clamp(entry.title, 160),
+    body: clamp(entry.body, 500),
+    url: entry.url === null ? null : clamp(entry.url, 200),
+  });
+  const stale = await db
+    .select({ id: pushLog.id })
+    .from(pushLog)
+    .where(eq(pushLog.userId, entry.userId))
+    .orderBy(desc(pushLog.sentAt), desc(pushLog.id))
+    .limit(PUSH_LOG_PRUNE_BATCH)
+    .offset(PUSH_LOG_LIMIT);
+  if (stale.length > 0) {
+    await db.delete(pushLog).where(
+      inArray(
+        pushLog.id,
+        stale.map(row => row.id)
+      )
+    );
+  }
+}
+
+/** Eigener Benachrichtigungs-Verlauf, neueste zuerst (max. PUSH_LOG_LIMIT). */
+export async function getPushLog(userId: number, limit = PUSH_LOG_LIMIT) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: pushLog.id,
+      kind: pushLog.kind,
+      title: pushLog.title,
+      body: pushLog.body,
+      url: pushLog.url,
+      sentAt: pushLog.sentAt,
+    })
+    .from(pushLog)
+    .where(eq(pushLog.userId, userId))
+    .orderBy(desc(pushLog.sentAt), desc(pushLog.id))
+    .limit(Math.max(1, Math.min(limit, PUSH_LOG_LIMIT)));
+}
 
 /**
  * Mitteilungs-Einstellungen eines Abos: die fünf Flags (Default: alles an)
@@ -1029,6 +1107,28 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     }
   }
 
+  /**
+   * Verlauf-Eintrag zu einer versendeten Meldung – aber nur EINMAL pro Konto
+   * und Meldung: hat dieselbe Person mehrere Geräte, sendet die Schleife den
+   * Push zwar an jedes Abo, im Verlauf steht die Meldung trotzdem nur einmal.
+   * Der Dedup-Schlüssel ist derselbe, über den auch die Abos entscheiden, ob
+   * sie eine Meldung schon erhalten haben.
+   */
+  const loggedPushes = new Set<string>();
+  async function logPushOnce(
+    userId: number,
+    kind: PushLogKind,
+    dedupKey: string,
+    title: string,
+    body: string,
+    url: string
+  ): Promise<void> {
+    const key = `${userId}|${kind}|${dedupKey}`;
+    if (loggedPushes.has(key)) return;
+    loggedPushes.add(key);
+    await recordPushLog({ userId, kind, title, body, url });
+  }
+
   for (const sub of subs) {
     // ── Unwetter an gespeicherten Plätzen ──
     // Warnungen pro Abo ableiten: die Warn-Schwellen hängen am Gerät.
@@ -1063,17 +1163,27 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       alertKey !== sub.lastAlertKey
     ) {
       const first = dangers[0];
+      const weatherTitle = `⚠️ ${first.title} – ${first.spotName}`;
+      const weatherBody =
+        dangers.length > 1
+          ? `${first.description} (+${dangers.length - 1} weitere Warnungen an deinen Plätzen)`
+          : first.description;
       const payload = JSON.stringify({
-        title: `⚠️ ${first.title} – ${first.spotName}`,
-        body:
-          dangers.length > 1
-            ? `${first.description} (+${dangers.length - 1} weitere Warnungen an deinen Plätzen)`
-            : first.description,
+        title: weatherTitle,
+        body: weatherBody,
         url: "/wetter",
       });
       const outcome = await sendTo(sub, payload);
       if (outcome === "sent") {
         result.sent += 1;
+        await logPushOnce(
+          sub.userId,
+          "weather",
+          alertKey,
+          weatherTitle,
+          weatherBody,
+          "/wetter"
+        );
         await db
           .update(pushSubscriptions)
           .set({ lastAlertKey: alertKey, lastNotifiedAt: new Date() })
@@ -1099,6 +1209,14 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       const outcome = await sendTo(sub, foodPayload);
       if (outcome === "sent") {
         result.foodSent += 1;
+        await logPushOnce(
+          sub.userId,
+          "food",
+          foodAlert.key,
+          foodAlert.title,
+          foodAlert.body,
+          "/kuehlbox"
+        );
         await db
           .update(pushSubscriptions)
           .set({ lastFoodKey: foodAlert.key, lastNotifiedAt: new Date() })
@@ -1123,6 +1241,14 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       const outcome = await sendTo(sub, tripPayload);
       if (outcome === "sent") {
         result.tripSent += 1;
+        await logPushOnce(
+          sub.userId,
+          "trip",
+          tripAlert.key,
+          tripAlert.title,
+          tripAlert.body,
+          "/tagebuch"
+        );
         await db
           .update(pushSubscriptions)
           .set({ lastTripKey: tripAlert.key, lastNotifiedAt: new Date() })
@@ -1147,6 +1273,14 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       const outcome = await sendTo(sub, evePackPayload);
       if (outcome === "sent") {
         result.evePackSent += 1;
+        await logPushOnce(
+          sub.userId,
+          "evepack",
+          evePackAlert.key,
+          evePackAlert.title,
+          evePackAlert.body,
+          "/packlisten"
+        );
         await db
           .update(pushSubscriptions)
           .set({ lastEvePackKey: evePackAlert.key, lastNotifiedAt: new Date() })
@@ -1171,6 +1305,14 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       const outcome = await sendTo(sub, dryPayload);
       if (outcome === "sent") {
         result.drySent += 1;
+        await logPushOnce(
+          sub.userId,
+          "drying",
+          dryAlert.key,
+          dryAlert.title,
+          dryAlert.body,
+          "/trockenzeiten"
+        );
         await db
           .update(pushSubscriptions)
           .set({ lastDryKey: dryAlert.key, lastNotifiedAt: new Date() })
@@ -1195,6 +1337,14 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       const outcome = await sendTo(sub, gearPayload);
       if (outcome === "sent") {
         result.gearSent += 1;
+        await logPushOnce(
+          sub.userId,
+          "gear",
+          gearAlert.key,
+          gearAlert.title,
+          gearAlert.body,
+          "/inventar"
+        );
         await db
           .update(pushSubscriptions)
           .set({ lastGearKey: gearAlert.key, lastNotifiedAt: new Date() })
@@ -1219,6 +1369,14 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       const outcome = await sendTo(sub, astroPayload);
       if (outcome === "sent") {
         result.astroSent += 1;
+        await logPushOnce(
+          sub.userId,
+          "astro",
+          astroAlert.key,
+          astroAlert.title,
+          astroAlert.body,
+          "/natur"
+        );
         await db
           .update(pushSubscriptions)
           .set({ lastAstroKey: astroAlert.key, lastNotifiedAt: new Date() })

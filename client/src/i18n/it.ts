@@ -323,6 +323,22 @@ export const it: Translation = {
     thresholdRainHint: (standard: number, min: number, max: number) =>
       `Standard ${standard} · possibile ${min}–${max}`,
     thresholdReset: "Standard",
+    historyTitle: "Cronologia",
+    historyToggleAria: "Aprire o chiudere la cronologia delle notifiche",
+    historyHint:
+      "Le ultime notifiche inviate al tuo account – le più recenti per prime.",
+    historyEmpty:
+      "Nessuna notifica inviata finora. Appena ci sarà qualcosa, la trovi qui.",
+    historyOpenAria: (title: string) => `Apri «${title}»`,
+    historyKind: {
+      weather: "Maltempo",
+      food: "Frigo box",
+      trip: "Viaggio",
+      drying: "Asciugare la tenda",
+      astro: "Stelle cadenti",
+      gear: "Attrezzatura",
+      evepack: "Controllo della vigilia",
+    },
     homeTitle: "Località di casa",
     homeIntro:
       "Salva il luogo in cui abiti per ricevere allerte maltempo e consigli sulle stelle cadenti anche per casa – senza piazzola salvata.",

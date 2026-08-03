@@ -705,6 +705,36 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       expiresAt: new Date(Date.now() + 60 * 1000),
     });
 
+    // Benachrichtigungs-Verlauf (#201): mehr Einträge schreiben als der
+    // Verlauf behält – ältere müssen beim Schreiben wegfallen
+    const { recordPushLog, PUSH_LOG_LIMIT } = await import("./push");
+    for (let i = 1; i <= PUSH_LOG_LIMIT + 3; i++) {
+      await recordPushLog({
+        userId: uid,
+        kind: "weather",
+        title: `CI-Push ${i}`,
+        body: `CI-Meldung ${i}`,
+        url: "/wetter",
+      });
+    }
+    const pushLogRows = await authed.push.log({});
+    expect(pushLogRows.length).toBe(PUSH_LOG_LIMIT);
+    // Neueste zuerst – die drei ältesten sind weggeräumt
+    expect(pushLogRows[0].title).toBe(`CI-Push ${PUSH_LOG_LIMIT + 3}`);
+    expect(pushLogRows[0].kind).toBe("weather");
+    expect(pushLogRows[0].url).toBe("/wetter");
+    expect(pushLogRows.some(row => row.title === "CI-Push 1")).toBe(false);
+    expect(
+      (
+        await dbc
+          .select()
+          .from(schema.pushLog)
+          .where(eq(schema.pushLog.userId, uid))
+      ).length
+    ).toBe(PUSH_LOG_LIMIT);
+    // limit begrenzt die Ausgabe zusätzlich
+    expect((await authed.push.log({ limit: 5 })).length).toBe(5);
+
     // Aufräumen: Konto löschen entfernt auch die angelegten Daten
     const deleted = await authed.auth.deleteAccount({ password });
     expect(deleted.success).toBe(true);
@@ -789,6 +819,7 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.pushSubscriptions)
         .where(eq(schema.pushSubscriptions.userId, uid)),
+      dbc.select().from(schema.pushLog).where(eq(schema.pushLog.userId, uid)),
       dbc
         .select()
         .from(schema.userSettings)

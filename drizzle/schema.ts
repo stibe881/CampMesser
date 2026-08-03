@@ -1006,3 +1006,30 @@ export const userSettings = mysqlTable(
 
 export type UserSetting = typeof userSettings.$inferSelect;
 export type InsertUserSetting = typeof userSettings.$inferInsert;
+
+/**
+ * Benachrichtigungs-Verlauf (#201): jede erfolgreich versendete Push-Meldung
+ * wird hier EINMAL pro Konto festgehalten (nicht pro Gerät), damit man im
+ * Profil nachlesen kann, was man verpasst hat. `kind` ist eine der
+ * Mitteilungs-Arten (weather|food|trip|drying|astro|gear|evepack), `url` die
+ * hinterlegte Route der Meldung. Der Verlauf ist bewusst kurz: server/push.ts
+ * behält pro Konto nur die PUSH_LOG_LIMIT neuesten Einträge.
+ */
+export const pushLog = mysqlTable(
+  "pushLog",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Art der Meldung (weather|food|trip|drying|astro|gear|evepack) */
+    kind: varchar("kind", { length: 20 }).notNull(),
+    title: varchar("title", { length: 160 }).notNull(),
+    body: varchar("body", { length: 500 }).notNull(),
+    /** Route, die der Klick öffnet (z. B. «/wetter»); null = keine */
+    url: varchar("url", { length: 200 }),
+    sentAt: timestamp("sentAt").defaultNow().notNull(),
+  },
+  table => [index("pushLog_user_sentAt").on(table.userId, table.sentAt)]
+);
+
+export type PushLogEntry = typeof pushLog.$inferSelect;
+export type InsertPushLogEntry = typeof pushLog.$inferInsert;

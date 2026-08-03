@@ -176,6 +176,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     shoppingItems,
     shoppingShares,
     pushSubscriptions,
+    pushLog,
     userSettings,
     passwordResetTokens,
     emailVerifyTokens,
@@ -294,6 +295,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db
     .delete(pushSubscriptions)
     .where(eq(pushSubscriptions.userId, userId));
+  // Benachrichtigungs-Verlauf (#201) hängt direkt am Konto
+  await db.delete(pushLog).where(eq(pushLog.userId, userId));
   await db.delete(userSettings).where(eq(userSettings.userId, userId));
   // Zeckenstich-Merker (#179) hängen direkt am Konto
   await db.delete(tickBites).where(eq(tickBites.userId, userId));

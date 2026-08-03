@@ -315,6 +315,22 @@ export const en: Translation = {
     thresholdRainHint: (standard: number, min: number, max: number) =>
       `Standard ${standard} · possible ${min}–${max}`,
     thresholdReset: "Standard",
+    historyTitle: "History",
+    historyToggleAria: "Expand or collapse the notification history",
+    historyHint:
+      "The latest notifications sent to your account – newest first.",
+    historyEmpty:
+      "No notifications sent yet. As soon as something comes up, you will find it here.",
+    historyOpenAria: (title: string) => `Open “${title}”`,
+    historyKind: {
+      weather: "Severe weather",
+      food: "Cool box",
+      trip: "Trip",
+      drying: "Tent drying",
+      astro: "Meteor shower",
+      gear: "Gear",
+      evepack: "Evening check",
+    },
     homeTitle: "Home location",
     homeIntro:
       "Save where you live to get storm alerts and shooting-star tips for home too – no saved pitch needed.",

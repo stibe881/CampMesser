@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Mitteilungen: Im Profil klappst du neu den «Verlauf» auf und liest nach, welche Push-Meldungen dein Konto zuletzt bekommen hat – mit Symbol, Zeitpunkt und Klick direkt ins passende Modul.",
+        "Notifications : dans ton profil, ouvre le nouvel « historique » pour relire les dernières notifications envoyées à ton compte – avec icône, horodatage et accès direct au module concerné.",
+        "Notifiche: nel profilo apri la nuova «cronologia» e rileggi le ultime notifiche ricevute dal tuo account – con icona, orario e accesso diretto al modulo giusto.",
+        "Notifications: in your profile you can now open the new “history” and read back which push messages your account received – with icon, timestamp and a tap straight into the matching module."
+      ),
+      l4(
         "Passwörter: Beim Registrieren, beim Passwort-Wechsel im Profil und beim Zurücksetzen zeigt dir ein Balken sofort, wie stark dein Passwort ist – mit kurzen Tipps, solange es noch schwach ist.",
         "Mots de passe : à l'inscription, lors du changement dans le profil et lors de la réinitialisation, une barre t'indique aussitôt la force de ton mot de passe – avec de brefs conseils tant qu'il reste faible.",
         "Password: alla registrazione, al cambio nel profilo e al ripristino una barra ti mostra subito quanto è forte la tua password – con brevi consigli finché è ancora debole.",

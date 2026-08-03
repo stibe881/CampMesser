@@ -2376,6 +2376,17 @@ export const appRouter = router({
         await setSubscriptionPrefs(ctx.user.id, endpoint, prefs);
         return { success: true } as const;
       }),
+    /**
+     * Benachrichtigungs-Verlauf (#201): die eigenen Meldungen, neueste zuerst.
+     * Mehr als PUSH_LOG_LIMIT Einträge gibt es nie – server/push.ts räumt
+     * ältere beim Schreiben weg.
+     */
+    log: protectedProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(50).optional() }))
+      .query(async ({ ctx, input }) => {
+        const { getPushLog, PUSH_LOG_LIMIT } = await import("./push");
+        return getPushLog(ctx.user.id, input.limit ?? PUSH_LOG_LIMIT);
+      }),
   }),
 
   recipes: router({

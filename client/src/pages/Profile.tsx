@@ -19,7 +19,17 @@ import {
   Plus,
   Sparkles,
   MailWarning,
+  Backpack,
+  ChevronDown,
+  CloudLightning,
+  History,
+  Refrigerator,
+  Tent,
+  Wind,
+  Wrench,
+  type LucideIcon,
 } from "lucide-react";
+import { useLocation } from "wouter";
 import {
   browserSupportsWebAuthn,
   startRegistration,
@@ -69,9 +79,127 @@ import {
 type PushFlag =
   "wantsWeather" | "wantsFood" | "wantsTrips" | "wantsAstro" | "wantsGear";
 
+/** Symbol je Mitteilungs-Art im Verlauf (unbekannte Arten: Glocke). */
+const PUSH_KIND_ICONS: Record<string, LucideIcon> = {
+  weather: CloudLightning,
+  food: Refrigerator,
+  trip: Tent,
+  drying: Wind,
+  astro: Sparkles,
+  gear: Wrench,
+  evepack: Backpack,
+};
+
+/**
+ * Benachrichtigungs-Verlauf (#201): aufklappbare Liste der letzten Meldungen
+ * des KONTOS (nicht des Geräts) – Symbol je Art, Titel, Text und Zeitpunkt;
+ * ein Klick öffnet die hinterlegte Route. Geladen wird erst beim Aufklappen.
+ */
+function PushHistory() {
+  const { lang, t } = useI18n();
+  const [, navigate] = useLocation();
+  const [open, setOpen] = useState(false);
+  const logQuery = trpc.push.log.useQuery({}, { enabled: open });
+  const entries = logQuery.data ?? [];
+
+  /** Art-Bezeichnung, mit Rückfall auf den rohen Schlüssel. */
+  const kindLabel = (kind: string) =>
+    t.profile.historyKind[kind as keyof typeof t.profile.historyKind] ?? kind;
+
+  return (
+    <div className="mt-4 border-t border-border pt-4">
+      <button
+        type="button"
+        className="flex w-full items-center justify-between gap-2 text-left"
+        aria-expanded={open}
+        aria-label={t.profile.historyToggleAria}
+        onClick={() => setOpen(value => !value)}
+      >
+        <span className="flex items-center gap-2 text-sm font-medium">
+          <History className="h-4 w-4 text-primary" aria-hidden="true" />
+          {t.profile.historyTitle}
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
+          aria-hidden="true"
+        />
+      </button>
+      {open && (
+        <div className="mt-3">
+          {logQuery.isPending ? (
+            <p className="text-xs text-muted-foreground">
+              {t.common.loading} …
+            </p>
+          ) : entries.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              {t.profile.historyEmpty}
+            </p>
+          ) : (
+            <>
+              <p className="mb-2 text-xs text-muted-foreground">
+                {t.profile.historyHint}
+              </p>
+              <ul className="space-y-1.5">
+                {entries.map(entry => {
+                  const Icon = PUSH_KIND_ICONS[entry.kind] ?? BellRing;
+                  const url = entry.url;
+                  const content = (
+                    <>
+                      <Icon
+                        className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-medium">
+                          {entry.title}
+                        </span>
+                        <span className="mt-0.5 block text-xs text-muted-foreground">
+                          {entry.body}
+                        </span>
+                        <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                          {kindLabel(entry.kind)} ·{" "}
+                          {new Date(entry.sentAt).toLocaleString(
+                            LOCALE_TAGS[lang],
+                            { dateStyle: "short", timeStyle: "short" }
+                          )}
+                        </span>
+                      </span>
+                    </>
+                  );
+                  return (
+                    <li key={entry.id}>
+                      {url ? (
+                        <button
+                          type="button"
+                          className="flex w-full gap-2 rounded-md border border-border p-2 text-left hover:bg-accent"
+                          aria-label={t.profile.historyOpenAria(entry.title)}
+                          onClick={() => navigate(url)}
+                        >
+                          {content}
+                        </button>
+                      ) : (
+                        <div className="flex w-full gap-2 rounded-md border border-border p-2">
+                          {content}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /**
  * Abschnitt «Mitteilungen»: Push-Abo dieses Geräts (an/aus) plus
- * Feineinstellungen, welche Mitteilungs-Arten das Gerät erhalten soll.
+ * Feineinstellungen, welche Mitteilungs-Arten das Gerät erhalten soll,
+ * und darunter der aufklappbare Benachrichtigungs-Verlauf des Kontos.
  */
 function NotificationsCard() {
   const { t } = useI18n();
@@ -349,6 +477,7 @@ function NotificationsCard() {
             )}
           </>
         )}
+        <PushHistory />
       </CardContent>
     </Card>
   );

@@ -329,6 +329,22 @@ export const fr: Translation = {
     thresholdRainHint: (standard: number, min: number, max: number) =>
       `Standard ${standard} · possible ${min}–${max}`,
     thresholdReset: "Standard",
+    historyTitle: "Historique",
+    historyToggleAria: "Ouvrir ou fermer l'historique des notifications",
+    historyHint:
+      "Les dernières notifications envoyées à ton compte – les plus récentes en premier.",
+    historyEmpty:
+      "Aucune notification envoyée pour l'instant. Dès qu'il y aura du nouveau, tu le trouveras ici.",
+    historyOpenAria: (title: string) => `Ouvrir « ${title} »`,
+    historyKind: {
+      weather: "Intempéries",
+      food: "Glacière",
+      trip: "Voyage",
+      drying: "Séchage de la tente",
+      astro: "Étoiles filantes",
+      gear: "Équipement",
+      evepack: "Contrôle de la veille",
+    },
     homeTitle: "Lieu de domicile",
     homeIntro:
       "Enregistre ton domicile pour recevoir les alertes intempéries et les conseils étoiles filantes aussi pour chez toi – sans emplacement enregistré.",

@@ -326,6 +326,21 @@ export const de = {
     thresholdRainHint: (standard: number, min: number, max: number) =>
       `Standard ${standard} · möglich ${min}–${max}`,
     thresholdReset: "Standard",
+    historyTitle: "Verlauf",
+    historyToggleAria: "Benachrichtigungs-Verlauf ein- oder ausklappen",
+    historyHint: "Die letzten Mitteilungen an dein Konto – neueste zuerst.",
+    historyEmpty:
+      "Noch keine Mitteilungen verschickt. Sobald etwas ansteht, findest du es hier.",
+    historyOpenAria: (title: string) => `«${title}» öffnen`,
+    historyKind: {
+      weather: "Unwetter",
+      food: "Kühlbox",
+      trip: "Reise",
+      drying: "Zelt trocknen",
+      astro: "Sternschnuppen",
+      gear: "Ausrüstung",
+      evepack: "Vorabend-Check",
+    },
     homeTitle: "Heim-Standort",
     homeIntro:
       "Hinterlege deinen Wohnort, um Unwetter-Warnungen und Sternschnuppen-Tipps auch für zu Hause zu erhalten – ganz ohne gespeicherten Zeltplatz.",
