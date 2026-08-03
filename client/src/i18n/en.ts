@@ -513,9 +513,10 @@ export const en: Translation = {
   },
   sharedPackList: {
     loadingShared: "Loading shared list …",
-    notFoundTitle: "List not found",
+    notFoundTitle: "Link expired or invalid",
     backHome: "Home page",
-    invalidLink: "This share link is invalid or has been revoked by its owner.",
+    invalidLink:
+      "This share link has expired, is invalid or has been revoked by its owner.",
     toggleFailed: "Ticking off failed",
     subtitle: (checked, total) =>
       `Shared packing list · ${checked} of ${total} items packed`,
@@ -527,10 +528,10 @@ export const en: Translation = {
   },
   sharedTemplate: {
     loading: "Loading shared template …",
-    notFoundTitle: "Template not found",
+    notFoundTitle: "Link expired or invalid",
     backHome: "Home",
     invalidLink:
-      "This share link is invalid or has been withdrawn by its owner.",
+      "This share link has expired, is invalid or has been withdrawn by its owner.",
     subtitle: n =>
       n === 1
         ? "Shared packing template · 1 item"
@@ -548,10 +549,10 @@ export const en: Translation = {
   },
   sharedQuiz: {
     loading: "Loading shared quiz …",
-    notFoundTitle: "Quiz not found",
+    notFoundTitle: "Link expired or invalid",
     backHome: "Home",
     invalidLink:
-      "This share link is invalid or has been withdrawn by its owner.",
+      "This share link has expired, is invalid or has been withdrawn by its owner.",
     subtitle: "Shared quiz",
     sharedInfo:
       "Shared quiz: have a look – with an account you can save it as your own quiz in family mode.",
@@ -569,10 +570,10 @@ export const en: Translation = {
   },
   sharedRecipe: {
     loading: "Loading shared recipe …",
-    notFoundTitle: "Recipe not found",
+    notFoundTitle: "Link expired or invalid",
     backHome: "Home",
     invalidLink:
-      "This share link is invalid or has been withdrawn by its owner.",
+      "This share link has expired, is invalid or has been withdrawn by its owner.",
     subtitle: "Shared recipe",
     sharedInfo:
       "Shared recipe: cook it – with an account you can save it as your own recipe in your recipe book.",
@@ -1631,8 +1632,8 @@ export const en: Translation = {
     mapRetry: "Try again",
   },
   sharedSpot: {
-    invalid: "This share link is no longer valid.",
-    invalidHint: "The owner has stopped sharing.",
+    invalid: "This share link has expired or is no longer valid.",
+    invalidHint: "It has expired or the owner has stopped sharing.",
     badge: "Shared pitch",
     sunTitle: "Sun today",
     sunrise: "Sunrise",
@@ -1901,8 +1902,8 @@ export const en: Translation = {
   },
   sharedTrip: {
     badge: "Shared trip",
-    invalid: "This share link is no longer valid.",
-    invalidHint: "The owner has stopped sharing.",
+    invalid: "This share link has expired or is no longer valid.",
+    invalidHint: "It has expired or the owner has stopped sharing.",
     infoTitle: "Trip info",
     notesTitle: "Notes",
     ratingAria: n => `Rating: ${n} of 5 stars`,
@@ -2413,10 +2414,10 @@ export const en: Translation = {
   },
   sharedShopping: {
     loading: "Loading shared shopping list …",
-    notFoundTitle: "Shopping list not found",
+    notFoundTitle: "Link expired or invalid",
     backHome: "Home",
     invalidLink:
-      "This share link is invalid or has been withdrawn by its owner.",
+      "This share link has expired, is invalid or has been withdrawn by its owner.",
     subtitle: (open: number, total: number) =>
       `Shared shopping list · ${open} of ${total} items open`,
     sharedInfo:
@@ -2854,5 +2855,14 @@ export const en: Translation = {
         ? "1 photo was added to the trip."
         : `${n} photos were added to the trip.`,
     toTrip: "Open trip",
+  },
+
+  sharing: {
+    validityLabel: "Valid",
+    validityUnlimited: "unlimited",
+    validityDays: n => `${n} days`,
+    validityAria: "Validity of the share link",
+    expiresOn: date => `Expires on ${date}`,
+    expiredOrInvalid: "Link expired or invalid",
   },
 };

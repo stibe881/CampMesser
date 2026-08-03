@@ -534,10 +534,10 @@ export const fr: Translation = {
   },
   sharedPackList: {
     loadingShared: "Chargement de la liste partagée …",
-    notFoundTitle: "Liste introuvable",
+    notFoundTitle: "Lien expiré ou invalide",
     backHome: "Page d'accueil",
     invalidLink:
-      "Ce lien de partage est invalide ou a été retiré par sa ou son propriétaire.",
+      "Ce lien de partage a expiré, est invalide ou a été retiré par sa ou son propriétaire.",
     toggleFailed: "Échec du cochage",
     subtitle: (checked, total) =>
       `Liste de bagages partagée · ${checked} entrées sur ${total} emballées`,
@@ -549,10 +549,10 @@ export const fr: Translation = {
   },
   sharedTemplate: {
     loading: "Chargement du modèle partagé …",
-    notFoundTitle: "Modèle introuvable",
+    notFoundTitle: "Lien expiré ou invalide",
     backHome: "Accueil",
     invalidLink:
-      "Ce lien de partage est invalide ou a été retiré par sa propriétaire ou son propriétaire.",
+      "Ce lien de partage a expiré, est invalide ou a été retiré par sa propriétaire ou son propriétaire.",
     subtitle: n =>
       n === 1
         ? "Modèle de bagages partagé · 1 entrée"
@@ -572,10 +572,10 @@ export const fr: Translation = {
   },
   sharedQuiz: {
     loading: "Chargement du quiz partagé …",
-    notFoundTitle: "Quiz introuvable",
+    notFoundTitle: "Lien expiré ou invalide",
     backHome: "Accueil",
     invalidLink:
-      "Ce lien de partage est invalide ou a été retiré par sa propriétaire ou son propriétaire.",
+      "Ce lien de partage a expiré, est invalide ou a été retiré par sa propriétaire ou son propriétaire.",
     subtitle: "Quiz partagé",
     sharedInfo:
       "Quiz partagé : regarde-le – avec un compte, tu peux le reprendre comme quiz personnel dans ton mode famille.",
@@ -593,10 +593,10 @@ export const fr: Translation = {
   },
   sharedRecipe: {
     loading: "Chargement de la recette partagée …",
-    notFoundTitle: "Recette introuvable",
+    notFoundTitle: "Lien expiré ou invalide",
     backHome: "Accueil",
     invalidLink:
-      "Ce lien de partage n'est pas valable ou a été retiré par sa propriétaire ou son propriétaire.",
+      "Ce lien de partage a expiré, n'est pas valable ou a été retiré par sa propriétaire ou son propriétaire.",
     subtitle: "Recette partagée",
     sharedInfo:
       "Recette partagée : cuisine-la – avec un compte, tu peux la reprendre comme recette perso dans ton livre de recettes.",
@@ -1688,8 +1688,8 @@ export const fr: Translation = {
     mapRetry: "Réessayer",
   },
   sharedSpot: {
-    invalid: "Ce lien de partage n'est plus valable.",
-    invalidHint: "La ou le propriétaire a mis fin au partage.",
+    invalid: "Ce lien de partage a expiré ou n'est plus valable.",
+    invalidHint: "Il a expiré ou la ou le propriétaire a mis fin au partage.",
     badge: "Emplacement partagé",
     sunTitle: "Soleil aujourd'hui",
     sunrise: "Lever",
@@ -1969,8 +1969,8 @@ export const fr: Translation = {
   },
   sharedTrip: {
     badge: "Voyage partagé",
-    invalid: "Ce lien de partage n'est plus valable.",
-    invalidHint: "La ou le propriétaire a arrêté le partage.",
+    invalid: "Ce lien de partage a expiré ou n'est plus valable.",
+    invalidHint: "Il a expiré ou la ou le propriétaire a arrêté le partage.",
     infoTitle: "Infos du voyage",
     notesTitle: "Notes",
     ratingAria: (n: number) => `Évaluation : ${n} étoiles sur 5`,
@@ -2496,10 +2496,10 @@ export const fr: Translation = {
   },
   sharedShopping: {
     loading: "Chargement de la liste de courses partagée …",
-    notFoundTitle: "Liste de courses introuvable",
+    notFoundTitle: "Lien expiré ou invalide",
     backHome: "Page d'accueil",
     invalidLink:
-      "Ce lien de partage est invalide ou a été retiré par sa propriétaire ou son propriétaire.",
+      "Ce lien de partage a expiré, est invalide ou a été retiré par sa propriétaire ou son propriétaire.",
     subtitle: (open: number, total: number) =>
       `Liste de courses partagée · ${open} article${open === 1 ? "" : "s"} sur ${total} encore ouvert${open === 1 ? "" : "s"}`,
     sharedInfo:
@@ -2947,5 +2947,14 @@ export const fr: Translation = {
         ? "1 photo a été ajoutée au voyage."
         : `${n} photos ont été ajoutées au voyage.`,
     toTrip: "Vers le voyage",
+  },
+
+  sharing: {
+    validityLabel: "Valable",
+    validityUnlimited: "illimité",
+    validityDays: n => `${n} jours`,
+    validityAria: "Validité du lien de partage",
+    expiresOn: date => `Expire le ${date}`,
+    expiredOrInvalid: "Lien expiré ou invalide",
   },
 };

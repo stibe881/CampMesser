@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
+import type { ShareExpiryDays } from "@shared/sharing";
 import {
   Award,
   CalendarClock,
@@ -1188,12 +1190,19 @@ function TripShareDialog({
   trip,
   onClose,
 }: {
-  trip: { id: number; name: string; shareToken: string | null } | null;
+  trip: {
+    id: number;
+    name: string;
+    shareToken: string | null;
+    shareExpiresAt: Date | null;
+  } | null;
   onClose: () => void;
 }) {
   const t = useT();
   const utils = trpc.useUtils();
   const open = trip !== null;
+  /** Im Dialog gewählte Gültigkeit; null = unbegrenzt. */
+  const [expiresIn, setExpiresIn] = useState<ShareExpiryDays | null>(null);
   const shareUrl = trip?.shareToken
     ? `${window.location.origin}/reise/${trip.shareToken}`
     : null;
@@ -1283,6 +1292,19 @@ function TripShareDialog({
                   {t.trips.hubStopShare}
                 </Button>
               </div>
+              <div className="mt-2 space-y-1">
+                <ShareExpirySelect
+                  value={expiresIn}
+                  onChange={days => {
+                    setExpiresIn(days);
+                    shareMutation.mutate({
+                      tripId: trip.id,
+                      expiresInDays: days,
+                    });
+                  }}
+                />
+                <ShareExpiryNote expiresAt={trip.shareExpiresAt} />
+              </div>
               {qrDataUrl && (
                 <div className="mt-3 text-center">
                   {/* Weisser Rahmen, damit der QR-Code auch im Dark Mode lesbar bleibt */}
@@ -1298,14 +1320,22 @@ function TripShareDialog({
               )}
             </div>
           ) : (
-            <Button
-              size="sm"
-              disabled={shareMutation.isPending}
-              onClick={() => shareMutation.mutate({ tripId: trip.id })}
-            >
-              <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              {t.trips.hubCreate}
-            </Button>
+            <div className="space-y-2">
+              <ShareExpirySelect value={expiresIn} onChange={setExpiresIn} />
+              <Button
+                size="sm"
+                disabled={shareMutation.isPending}
+                onClick={() =>
+                  shareMutation.mutate({
+                    tripId: trip.id,
+                    expiresInDays: expiresIn,
+                  })
+                }
+              >
+                <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {t.trips.hubCreate}
+              </Button>
+            </div>
           ))}
       </DialogContent>
     </Dialog>
@@ -3149,6 +3179,9 @@ export default function TripsPage() {
                 ...hubTrip,
                 shareToken:
                   allTrips.find(tr => tr.id === hubTrip.id)?.shareToken ?? null,
+                shareExpiresAt:
+                  allTrips.find(tr => tr.id === hubTrip.id)?.shareExpiresAt ??
+                  null,
               }
             : null
         }

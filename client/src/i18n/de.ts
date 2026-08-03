@@ -537,10 +537,10 @@ export const de = {
   },
   sharedPackList: {
     loadingShared: "Geteilte Liste wird geladen …",
-    notFoundTitle: "Liste nicht gefunden",
+    notFoundTitle: "Link abgelaufen oder ungültig",
     backHome: "Startseite",
     invalidLink:
-      "Dieser Teil-Link ist ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
+      "Dieser Teil-Link ist abgelaufen, ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
     toggleFailed: "Abhaken fehlgeschlagen",
     subtitle: (checked: number, total: number) =>
       `Geteilte Packliste · ${checked} von ${total} Einträgen gepackt`,
@@ -552,10 +552,10 @@ export const de = {
   },
   sharedTemplate: {
     loading: "Geteilte Vorlage wird geladen …",
-    notFoundTitle: "Vorlage nicht gefunden",
+    notFoundTitle: "Link abgelaufen oder ungültig",
     backHome: "Startseite",
     invalidLink:
-      "Dieser Teil-Link ist ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
+      "Dieser Teil-Link ist abgelaufen, ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
     subtitle: (n: number) =>
       n === 1
         ? "Geteilte Packvorlage · 1 Eintrag"
@@ -574,10 +574,10 @@ export const de = {
   },
   sharedQuiz: {
     loading: "Geteiltes Quiz wird geladen …",
-    notFoundTitle: "Quiz nicht gefunden",
+    notFoundTitle: "Link abgelaufen oder ungültig",
     backHome: "Startseite",
     invalidLink:
-      "Dieser Teil-Link ist ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
+      "Dieser Teil-Link ist abgelaufen, ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
     subtitle: "Geteiltes Quiz",
     sharedInfo:
       "Geteiltes Quiz: Schau es dir an – mit einem Konto kannst du es als eigenes Quiz in deinen Familien-Modus übernehmen.",
@@ -595,10 +595,10 @@ export const de = {
   },
   sharedRecipe: {
     loading: "Geteiltes Rezept wird geladen …",
-    notFoundTitle: "Rezept nicht gefunden",
+    notFoundTitle: "Link abgelaufen oder ungültig",
     backHome: "Startseite",
     invalidLink:
-      "Dieser Teil-Link ist ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
+      "Dieser Teil-Link ist abgelaufen, ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
     subtitle: "Geteiltes Rezept",
     sharedInfo:
       "Geteiltes Rezept: Koch es nach – mit einem Konto kannst du es als eigenes Rezept in dein Rezeptbuch übernehmen.",
@@ -1690,8 +1690,9 @@ export const de = {
     mapRetry: "Erneut versuchen",
   },
   sharedSpot: {
-    invalid: "Dieser Teil-Link ist nicht mehr gültig.",
-    invalidHint: "Die Besitzerin oder der Besitzer hat das Teilen beendet.",
+    invalid: "Dieser Teil-Link ist abgelaufen oder nicht mehr gültig.",
+    invalidHint:
+      "Er ist abgelaufen oder die Besitzerin bzw. der Besitzer hat das Teilen beendet.",
     badge: "Geteilter Zeltplatz",
     sunTitle: "Sonne heute",
     sunrise: "Aufgang",
@@ -1977,8 +1978,9 @@ export const de = {
   },
   sharedTrip: {
     badge: "Geteilte Reise",
-    invalid: "Dieser Teil-Link ist nicht mehr gültig.",
-    invalidHint: "Die Besitzerin oder der Besitzer hat das Teilen beendet.",
+    invalid: "Dieser Teil-Link ist abgelaufen oder nicht mehr gültig.",
+    invalidHint:
+      "Er ist abgelaufen oder die Besitzerin bzw. der Besitzer hat das Teilen beendet.",
     infoTitle: "Reise-Infos",
     notesTitle: "Notizen",
     ratingAria: (n: number) => `Bewertung: ${n} von 5 Sternen`,
@@ -2502,10 +2504,10 @@ export const de = {
   },
   sharedShopping: {
     loading: "Geteilte Einkaufsliste wird geladen …",
-    notFoundTitle: "Einkaufsliste nicht gefunden",
+    notFoundTitle: "Link abgelaufen oder ungültig",
     backHome: "Startseite",
     invalidLink:
-      "Dieser Teil-Link ist ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
+      "Dieser Teil-Link ist abgelaufen, ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
     subtitle: (open: number, total: number) =>
       `Geteilte Einkaufsliste · ${open} von ${total} Einträgen offen`,
     sharedInfo:
@@ -2951,6 +2953,16 @@ export const de = {
         ? "1 Foto wurde zur Reise hinzugefügt."
         : `${n} Fotos wurden zur Reise hinzugefügt.`,
     toTrip: "Zur Reise",
+  },
+
+  /** Gemeinsame Texte rund ums Teilen per Link (alle Teilen-Dialoge). */
+  sharing: {
+    validityLabel: "Gültig",
+    validityUnlimited: "unbegrenzt",
+    validityDays: (n: number) => `${n} Tage`,
+    validityAria: "Gültigkeit des Teil-Links",
+    expiresOn: (date: string) => `Läuft ab am ${date}`,
+    expiredOrInvalid: "Link abgelaufen oder ungültig",
   },
 };
 

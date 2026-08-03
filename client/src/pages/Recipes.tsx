@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
+import type { ShareExpiryDays } from "@shared/sharing";
 import {
   Baby,
   ChefHat,
@@ -635,8 +637,13 @@ export default function RecipesPage() {
     id: number;
     name: string;
     url: string;
+    expiresAt: Date | null;
   } | null>(null);
   const [shareQr, setShareQr] = useState<string | null>(null);
+  /** Im Dialog gewählte Gültigkeit; null = unbegrenzt. */
+  const [shareExpiresIn, setShareExpiresIn] = useState<ShareExpiryDays | null>(
+    null
+  );
 
   // QR-Code zum Teil-Link erzeugen: einfach abscannen lassen
   useEffect(() => {
@@ -658,13 +665,22 @@ export default function RecipesPage() {
   });
 
   /** Teil-Link des Rezepts erzeugen (idempotent), Dialog öffnen, Link kopieren. */
-  const openRecipeShare = (recipe: { id: number; name: string }) => {
+  const openRecipeShare = (
+    recipe: { id: number; name: string },
+    // undefined = Gültigkeit unverändert lassen (Dialog nur öffnen)
+    expiresInDays?: ShareExpiryDays | null
+  ) => {
     shareMutation.mutate(
-      { id: recipe.id },
+      { id: recipe.id, expiresInDays },
       {
-        onSuccess: async ({ token }) => {
+        onSuccess: async ({ token, expiresAt }) => {
           const url = `${window.location.origin}/rezept/${token}`;
-          setRecipeShare({ id: recipe.id, name: recipe.name, url });
+          setRecipeShare({
+            id: recipe.id,
+            name: recipe.name,
+            url,
+            expiresAt,
+          });
           utils.recipes.list.invalidate();
           try {
             await navigator.clipboard.writeText(url);
@@ -1426,6 +1442,16 @@ export default function RecipesPage() {
                   </div>
                 </div>
               )}
+              <div className="space-y-1">
+                <ShareExpirySelect
+                  value={shareExpiresIn}
+                  onChange={days => {
+                    setShareExpiresIn(days);
+                    openRecipeShare(recipeShare, days);
+                  }}
+                />
+                <ShareExpiryNote expiresAt={recipeShare.expiresAt} />
+              </div>
               <Button
                 variant="outline"
                 size="sm"

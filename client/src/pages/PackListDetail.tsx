@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
+import type { ShareExpiryDays } from "@shared/sharing";
 import { Link, useParams } from "wouter";
 import {
   BookmarkPlus,
@@ -235,6 +237,10 @@ export default function PackListDetailPage() {
   const [editCatChoice, setEditCatChoice] = useState<string>(CATEGORY_NEW);
   const [editCatName, setEditCatName] = useState("");
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareExpiresIn, setShareExpiresIn] = useState<ShareExpiryDays | null>(
+    null
+  );
+  const [shareExpiresAt, setShareExpiresAt] = useState<Date | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   /** Eintrag, dessen Personen-Zuordnung gerade bearbeitet wird. */
   const [assignItemId, setAssignItemId] = useState<number | null>(null);
@@ -265,9 +271,10 @@ export default function PackListDetailPage() {
   }, [shareUrl]);
 
   const shareMutation = trpc.packing.share.useMutation({
-    onSuccess: async ({ token }) => {
+    onSuccess: async ({ token, expiresAt }) => {
       const url = `${window.location.origin}/liste/${token}`;
       setShareUrl(url);
+      setShareExpiresAt(expiresAt);
       try {
         await navigator.clipboard.writeText(url);
         toast.success(t.packListDetail.shareCopied);
@@ -821,7 +828,9 @@ export default function PackListDetailPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => shareMutation.mutate({ listId })}
+            onClick={() =>
+              shareMutation.mutate({ listId, expiresInDays: shareExpiresIn })
+            }
             disabled={shareMutation.isPending}
           >
             <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
@@ -872,6 +881,11 @@ export default function PackListDetailPage() {
             </Button>
           )}
         </div>
+        <ShareExpirySelect
+          className="mt-2"
+          value={shareExpiresIn}
+          onChange={setShareExpiresIn}
+        />
         {shareUrl && (
           <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
             <Link2
@@ -894,6 +908,9 @@ export default function PackListDetailPage() {
               {t.common.copy}
             </button>
           </div>
+        )}
+        {shareUrl && (
+          <ShareExpiryNote className="mt-1" expiresAt={shareExpiresAt} />
         )}
         {qrDataUrl && (
           <div className="mt-3 flex items-center gap-4 rounded-lg border border-border bg-card p-4">

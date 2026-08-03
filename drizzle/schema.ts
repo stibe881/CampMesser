@@ -63,6 +63,8 @@ export const campSpots = mysqlTable(
     parcelNumber: varchar("parcelNumber", { length: 40 }),
     /** Öffentlicher Teil-Token: Wer den Link kennt, sieht das Platz-Dossier (nur lesend). */
     shareToken: varchar("shareToken", { length: 32 }),
+    /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
+    shareExpiresAt: timestamp("shareExpiresAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [
@@ -91,6 +93,8 @@ export const packLists = mysqlTable(
     personsJson: text("personsJson"),
     /** Öffentlicher Teil-Token: Wer den Link kennt, kann die Liste sehen und abhaken. */
     shareToken: varchar("shareToken", { length: 32 }),
+    /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
+    shareExpiresAt: timestamp("shareExpiresAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
@@ -148,6 +152,8 @@ export const packTemplatesCustom = mysqlTable(
     itemsJson: text("itemsJson").notNull(),
     /** Öffentlicher Teil-Token: Wer den Link kennt, kann die Vorlage sehen und übernehmen. */
     shareToken: varchar("shareToken", { length: 64 }).unique(),
+    /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
+    shareExpiresAt: timestamp("shareExpiresAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("packTemplatesCustom_userId").on(table.userId)]
@@ -287,6 +293,8 @@ export const tripLogs = mysqlTable(
      * Unabhängig von den Reise-Mitgliedern (tripMembers); null = nicht geteilt.
      */
     shareToken: varchar("shareToken", { length: 64 }).unique(),
+    /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
+    shareExpiresAt: timestamp("shareExpiresAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
@@ -495,6 +503,8 @@ export const customRecipes = mysqlTable(
      * es übernehmen. Das private Rezept-Foto wird bewusst NICHT mitgeteilt.
      */
     shareToken: varchar("shareToken", { length: 64 }).unique(),
+    /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
+    shareExpiresAt: timestamp("shareExpiresAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
@@ -543,6 +553,8 @@ export const customQuizzes = mysqlTable(
     questionsJson: text("questionsJson").notNull(),
     /** Öffentlicher Teil-Token: Wer den Link kennt, kann das Quiz sehen und übernehmen. */
     shareToken: varchar("shareToken", { length: 64 }).unique(),
+    /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
+    shareExpiresAt: timestamp("shareExpiresAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("customQuizzes_userId").on(table.userId)]
@@ -656,6 +668,8 @@ export const shoppingShares = mysqlTable(
     id: int("id").autoincrement().primaryKey(),
     userId: int("userId").notNull(),
     shareToken: varchar("shareToken", { length: 64 }).notNull(),
+    /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
+    shareExpiresAt: timestamp("shareExpiresAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [

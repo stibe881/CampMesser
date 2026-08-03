@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
+import type { ShareExpiryDays } from "@shared/sharing";
 import { Link } from "wouter";
 import {
   Award,
@@ -1709,8 +1711,13 @@ export default function FamilyPage() {
     id: number;
     title: string;
     url: string;
+    expiresAt: Date | null;
   } | null>(null);
   const [quizQr, setQuizQr] = useState<string | null>(null);
+  /** Im Dialog gewählte Gültigkeit; null = unbegrenzt. */
+  const [quizExpiresIn, setQuizExpiresIn] = useState<ShareExpiryDays | null>(
+    null
+  );
 
   // QR-Code zum Teil-Link erzeugen: einfach abscannen lassen
   useEffect(() => {
@@ -1732,13 +1739,17 @@ export default function FamilyPage() {
   });
 
   /** Teil-Link des Quiz erzeugen (idempotent), Dialog öffnen, Link kopieren. */
-  const openQuizShare = (quiz: { id: number; title: string }) => {
+  const openQuizShare = (
+    quiz: { id: number; title: string },
+    // undefined = Gültigkeit unverändert lassen (Dialog nur öffnen)
+    expiresInDays?: ShareExpiryDays | null
+  ) => {
     shareQuizMutation.mutate(
-      { id: quiz.id },
+      { id: quiz.id, expiresInDays },
       {
-        onSuccess: async ({ token }) => {
+        onSuccess: async ({ token, expiresAt }) => {
           const url = `${window.location.origin}/quiz/${token}`;
-          setQuizShare({ id: quiz.id, title: quiz.title, url });
+          setQuizShare({ id: quiz.id, title: quiz.title, url, expiresAt });
           utils.quizzes.list.invalidate();
           try {
             await navigator.clipboard.writeText(url);
@@ -2434,6 +2445,16 @@ export default function FamilyPage() {
                   </div>
                 </div>
               )}
+              <div className="space-y-1">
+                <ShareExpirySelect
+                  value={quizExpiresIn}
+                  onChange={days => {
+                    setQuizExpiresIn(days);
+                    openQuizShare(quizShare, days);
+                  }}
+                />
+                <ShareExpiryNote expiresAt={quizShare.expiresAt} />
+              </div>
               <Button
                 variant="outline"
                 size="sm"

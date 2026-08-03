@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
+import type { ShareExpiryDays } from "@shared/sharing";
 import { Link, useSearch } from "wouter";
 import {
   Baby,
@@ -78,8 +80,12 @@ export default function PackListsPage() {
     id: number;
     name: string;
     url: string;
+    expiresAt: Date | null;
   } | null>(null);
   const [templateQr, setTemplateQr] = useState<string | null>(null);
+  /** Im Dialog gewählte Gültigkeit; null = unbegrenzt. */
+  const [templateExpiresIn, setTemplateExpiresIn] =
+    useState<ShareExpiryDays | null>(null);
 
   // Schnellaktion «Neue Packliste» (?neu=1): den Neue-Liste-Dialog öffnen
   const searchParams = useSearch();
@@ -181,13 +187,22 @@ export default function PackListsPage() {
   });
 
   /** Teil-Link der Vorlage erzeugen (idempotent), Dialog öffnen, Link kopieren. */
-  const openTemplateShare = (template: { id: number; name: string }) => {
+  const openTemplateShare = (
+    template: { id: number; name: string },
+    // undefined = Gültigkeit unverändert lassen (Dialog nur öffnen)
+    expiresInDays?: ShareExpiryDays | null
+  ) => {
     shareTemplateMutation.mutate(
-      { id: template.id },
+      { id: template.id, expiresInDays },
       {
-        onSuccess: async ({ token }) => {
+        onSuccess: async ({ token, expiresAt }) => {
           const url = `${window.location.origin}/vorlage/${token}`;
-          setTemplateShare({ id: template.id, name: template.name, url });
+          setTemplateShare({
+            id: template.id,
+            name: template.name,
+            url,
+            expiresAt,
+          });
           utils.packing.listTemplates.invalidate();
           try {
             await navigator.clipboard.writeText(url);
@@ -773,6 +788,16 @@ export default function PackListsPage() {
                   </div>
                 </div>
               )}
+              <div className="space-y-1">
+                <ShareExpirySelect
+                  value={templateExpiresIn}
+                  onChange={days => {
+                    setTemplateExpiresIn(days);
+                    openTemplateShare(templateShare, days);
+                  }}
+                />
+                <ShareExpiryNote expiresAt={templateShare.expiresAt} />
+              </div>
               <Button
                 variant="outline"
                 size="sm"

@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
+import type { ShareExpiryDays } from "@shared/sharing";
 import { Link, useParams } from "wouter";
 import {
   AlertTriangle,
@@ -106,6 +108,10 @@ export default function SpotDetailPage() {
   const [climateOpen, setClimateOpen] = useState(false);
   const [climate, setClimate] = useState<ClimateState>({ status: "idle" });
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareExpiresIn, setShareExpiresIn] = useState<ShareExpiryDays | null>(
+    null
+  );
+  const [shareExpiresAt, setShareExpiresAt] = useState<Date | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const shareMutation = trpc.spots.share.useMutation();
   const unshareMutation = trpc.spots.unshare.useMutation();
@@ -934,6 +940,23 @@ export default function SpotDetailPage() {
                   {t.spotDetail.stopShare}
                 </button>
               </div>
+              <div className="mt-2 space-y-1">
+                <ShareExpirySelect
+                  value={shareExpiresIn}
+                  onChange={days => {
+                    setShareExpiresIn(days);
+                    shareMutation.mutate(
+                      { id: spot.id, expiresInDays: days },
+                      {
+                        onSuccess: ({ expiresAt }) =>
+                          setShareExpiresAt(expiresAt),
+                        onError: () => toast.error(t.spotDetail.shareFailed),
+                      }
+                    );
+                  }}
+                />
+                <ShareExpiryNote expiresAt={shareExpiresAt} />
+              </div>
               {qrDataUrl && (
                 <div className="mt-3 flex items-center gap-4 rounded-lg border border-border bg-card p-4">
                   {/* Weisser Rahmen, damit der Code auch im Dark Mode zuverlässig scannbar bleibt */}
@@ -960,32 +983,39 @@ export default function SpotDetailPage() {
               )}
             </div>
           ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={shareMutation.isPending}
-              onClick={() =>
-                shareMutation.mutate(
-                  { id: spot.id },
-                  {
-                    onSuccess: async ({ token }) => {
-                      const url = `${window.location.origin}/platz/${token}`;
-                      setShareUrl(url);
-                      try {
-                        await navigator.clipboard.writeText(url);
-                        toast.success(t.spotDetail.shareLinkCopied);
-                      } catch {
-                        toast.success(t.spotDetail.shareLinkCreated);
-                      }
-                    },
-                    onError: () => toast.error(t.spotDetail.shareFailed),
-                  }
-                )
-              }
-            >
-              <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              {t.spotDetail.shareButton}
-            </Button>
+            <div className="space-y-2">
+              <ShareExpirySelect
+                value={shareExpiresIn}
+                onChange={setShareExpiresIn}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={shareMutation.isPending}
+                onClick={() =>
+                  shareMutation.mutate(
+                    { id: spot.id, expiresInDays: shareExpiresIn },
+                    {
+                      onSuccess: async ({ token, expiresAt }) => {
+                        const url = `${window.location.origin}/platz/${token}`;
+                        setShareUrl(url);
+                        setShareExpiresAt(expiresAt);
+                        try {
+                          await navigator.clipboard.writeText(url);
+                          toast.success(t.spotDetail.shareLinkCopied);
+                        } catch {
+                          toast.success(t.spotDetail.shareLinkCreated);
+                        }
+                      },
+                      onError: () => toast.error(t.spotDetail.shareFailed),
+                    }
+                  )
+                }
+              >
+                <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {t.spotDetail.shareButton}
+              </Button>
+            </div>
           )}
         </CardContent>
       </Card>

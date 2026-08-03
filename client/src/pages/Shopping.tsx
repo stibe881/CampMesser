@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
+import type { ShareExpiryDays } from "@shared/sharing";
 import {
   GripVertical,
   Link2,
@@ -81,6 +83,11 @@ export default function ShoppingPage() {
   const [newCategory, setNewCategory] = useState<string>(NO_CATEGORY);
   /** Teil-Link, der gerade im Dialog gezeigt wird (null = Dialog zu). */
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  /** Im Dialog gewählte Gültigkeit; null = unbegrenzt. */
+  const [shareExpiresIn, setShareExpiresIn] = useState<ShareExpiryDays | null>(
+    null
+  );
+  const [shareExpiresAt, setShareExpiresAt] = useState<Date | null>(null);
   const [shareQr, setShareQr] = useState<string | null>(null);
   /** «Einkäufe einräumen»: abgehakte Einträge in die Kühlbox übernehmen. */
   const [putAwayOpen, setPutAwayOpen] = useState(false);
@@ -125,19 +132,26 @@ export default function ShoppingPage() {
   });
 
   /** Teil-Link erzeugen (idempotent), Dialog öffnen, Link kopieren. */
-  const openShare = () => {
-    shareMutation.mutate(undefined, {
-      onSuccess: async ({ token }) => {
-        const url = `${window.location.origin}/einkaufsliste/${token}`;
-        setShareUrl(url);
-        try {
-          await navigator.clipboard.writeText(url);
-          toast.success(t.shopping.shareCopied);
-        } catch {
-          // Zwischenablage blockiert – der Link steht im Dialog
-        }
-      },
-    });
+  const openShare = (
+    // undefined = Gültigkeit unverändert lassen (Dialog nur öffnen)
+    expiresInDays?: ShareExpiryDays | null
+  ) => {
+    shareMutation.mutate(
+      expiresInDays === undefined ? undefined : { expiresInDays },
+      {
+        onSuccess: async ({ token, expiresAt }) => {
+          const url = `${window.location.origin}/einkaufsliste/${token}`;
+          setShareUrl(url);
+          setShareExpiresAt(expiresAt);
+          try {
+            await navigator.clipboard.writeText(url);
+            toast.success(t.shopping.shareCopied);
+          } catch {
+            // Zwischenablage blockiert – der Link steht im Dialog
+          }
+        },
+      }
+    );
   };
 
   const unshareMutation = trpc.shopping.unshare.useMutation({
@@ -421,7 +435,7 @@ export default function ShoppingPage() {
                   variant="outline"
                   size="sm"
                   disabled={shareMutation.isPending}
-                  onClick={openShare}
+                  onClick={() => openShare()}
                   aria-label={t.shopping.shareAria}
                 >
                   <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
@@ -715,6 +729,16 @@ export default function ShoppingPage() {
                   </div>
                 </div>
               )}
+              <div className="space-y-1">
+                <ShareExpirySelect
+                  value={shareExpiresIn}
+                  onChange={days => {
+                    setShareExpiresIn(days);
+                    openShare(days);
+                  }}
+                />
+                <ShareExpiryNote expiresAt={shareExpiresAt} />
+              </div>
               <Button
                 variant="outline"
                 size="sm"

@@ -524,10 +524,10 @@ export const it: Translation = {
   },
   sharedPackList: {
     loadingShared: "Caricamento della lista condivisa …",
-    notFoundTitle: "Lista non trovata",
+    notFoundTitle: "Link scaduto o non valido",
     backHome: "Pagina iniziale",
     invalidLink:
-      "Questo link di condivisione non è valido o è stato ritirato dalla proprietaria o dal proprietario.",
+      "Questo link di condivisione è scaduto, non è valido o è stato ritirato dalla proprietaria o dal proprietario.",
     toggleFailed: "Spunta non riuscita",
     subtitle: (checked, total) =>
       `Lista bagagli condivisa · ${checked} voci su ${total} preparate`,
@@ -539,10 +539,10 @@ export const it: Translation = {
   },
   sharedTemplate: {
     loading: "Caricamento del modello condiviso …",
-    notFoundTitle: "Modello non trovato",
+    notFoundTitle: "Link scaduto o non valido",
     backHome: "Pagina iniziale",
     invalidLink:
-      "Questo link di condivisione non è valido o è stato ritirato dalla proprietaria o dal proprietario.",
+      "Questo link di condivisione è scaduto, non è valido o è stato ritirato dalla proprietaria o dal proprietario.",
     subtitle: n =>
       n === 1
         ? "Modello bagagli condiviso · 1 voce"
@@ -561,10 +561,10 @@ export const it: Translation = {
   },
   sharedQuiz: {
     loading: "Caricamento del quiz condiviso …",
-    notFoundTitle: "Quiz non trovato",
+    notFoundTitle: "Link scaduto o non valido",
     backHome: "Pagina iniziale",
     invalidLink:
-      "Questo link di condivisione non è valido o è stato ritirato dalla proprietaria o dal proprietario.",
+      "Questo link di condivisione è scaduto, non è valido o è stato ritirato dalla proprietaria o dal proprietario.",
     subtitle: "Quiz condiviso",
     sharedInfo:
       "Quiz condiviso: dai un'occhiata – con un account puoi salvarlo come tuo quiz nella modalità famiglia.",
@@ -582,10 +582,10 @@ export const it: Translation = {
   },
   sharedRecipe: {
     loading: "Caricamento della ricetta condivisa …",
-    notFoundTitle: "Ricetta non trovata",
+    notFoundTitle: "Link scaduto o non valido",
     backHome: "Home",
     invalidLink:
-      "Questo link di condivisione non è valido oppure è stato ritirato da chi lo ha creato.",
+      "Questo link di condivisione è scaduto, non è valido oppure è stato ritirato da chi lo ha creato.",
     subtitle: "Ricetta condivisa",
     sharedInfo:
       "Ricetta condivisa: provala – con un account puoi salvarla come ricetta personale nel tuo ricettario.",
@@ -1671,9 +1671,9 @@ export const it: Translation = {
     mapRetry: "Riprova",
   },
   sharedSpot: {
-    invalid: "Questo link di condivisione non è più valido.",
+    invalid: "Questo link di condivisione è scaduto o non è più valido.",
     invalidHint:
-      "La proprietaria o il proprietario ha terminato la condivisione.",
+      "È scaduto oppure la proprietaria o il proprietario ha terminato la condivisione.",
     badge: "Piazzola condivisa",
     sunTitle: "Sole oggi",
     sunrise: "Alba",
@@ -1951,9 +1951,9 @@ export const it: Translation = {
   },
   sharedTrip: {
     badge: "Viaggio condiviso",
-    invalid: "Questo link di condivisione non è più valido.",
+    invalid: "Questo link di condivisione è scaduto o non è più valido.",
     invalidHint:
-      "La proprietaria o il proprietario ha terminato la condivisione.",
+      "È scaduto oppure la proprietaria o il proprietario ha terminato la condivisione.",
     infoTitle: "Info del viaggio",
     notesTitle: "Note",
     ratingAria: n => `Valutazione: ${n} stelle su 5`,
@@ -2474,10 +2474,10 @@ export const it: Translation = {
   },
   sharedShopping: {
     loading: "Caricamento della lista della spesa condivisa …",
-    notFoundTitle: "Lista della spesa non trovata",
+    notFoundTitle: "Link scaduto o non valido",
     backHome: "Pagina iniziale",
     invalidLink:
-      "Questo link di condivisione non è valido o è stato ritirato dalla proprietaria o dal proprietario.",
+      "Questo link di condivisione è scaduto, non è valido o è stato ritirato dalla proprietaria o dal proprietario.",
     subtitle: (open: number, total: number) =>
       `Lista della spesa condivisa · ${open} di ${total} voci aperte`,
     sharedInfo:
@@ -2924,5 +2924,14 @@ export const it: Translation = {
         ? "1 foto è stata aggiunta al viaggio."
         : `${n} foto sono state aggiunte al viaggio.`,
     toTrip: "Al viaggio",
+  },
+
+  sharing: {
+    validityLabel: "Valido",
+    validityUnlimited: "illimitato",
+    validityDays: n => `${n} giorni`,
+    validityAria: "Validità del link di condivisione",
+    expiresOn: date => `Scade il ${date}`,
+    expiredOrInvalid: "Link scaduto o non valido",
   },
 };

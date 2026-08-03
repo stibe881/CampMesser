@@ -1,4 +1,5 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { isShareExpired } from "@shared/sharing";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   campSpots,
@@ -347,12 +348,14 @@ export async function deletePackTemplate(id: number, userId: number) {
 export async function setPackTemplateShareToken(
   id: number,
   userId: number,
-  token: string | null
+  token: string | null,
+  expiresAt: Date | null = null
 ) {
   const db = requireDb(await getDb());
   await db
     .update(packTemplatesCustom)
-    .set({ shareToken: token })
+    // Ohne Token gibt es auch keinen Ablauf mehr
+    .set({ shareToken: token, shareExpiresAt: token ? expiresAt : null })
     .where(
       and(
         eq(packTemplatesCustom.id, id),
@@ -369,7 +372,9 @@ export async function getPackTemplateByToken(token: string) {
     .from(packTemplatesCustom)
     .where(eq(packTemplatesCustom.shareToken, token))
     .limit(1);
-  return result[0];
+  const row = result[0];
+  // Abgelaufene Teil-Links verhalten sich wie unbekannte Tokens
+  return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
 }
 
 /** Gewichts-Budget in Gramm setzen oder mit null entfernen (nur eigene Liste). */
@@ -420,12 +425,14 @@ export async function clearPackItemAssignees(
 export async function setPackListShareToken(
   id: number,
   userId: number,
-  token: string | null
+  token: string | null,
+  expiresAt: Date | null = null
 ) {
   const db = requireDb(await getDb());
   await db
     .update(packLists)
-    .set({ shareToken: token })
+    // Ohne Token gibt es auch keinen Ablauf mehr
+    .set({ shareToken: token, shareExpiresAt: token ? expiresAt : null })
     .where(and(eq(packLists.id, id), eq(packLists.userId, userId)));
 }
 
@@ -437,7 +444,9 @@ export async function getPackListByToken(token: string) {
     .from(packLists)
     .where(eq(packLists.shareToken, token))
     .limit(1);
-  return result[0];
+  const row = result[0];
+  // Abgelaufene Teil-Links verhalten sich wie unbekannte Tokens
+  return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
 }
 
 // ── Inventar ──
@@ -831,9 +840,27 @@ export async function getShoppingShare(userId: number) {
 }
 
 /** Teil-Token für die eigene Einkaufsliste anlegen (eine Zeile pro Konto). */
-export async function createShoppingShare(userId: number, token: string) {
+export async function createShoppingShare(
+  userId: number,
+  token: string,
+  expiresAt: Date | null = null
+) {
   const db = requireDb(await getDb());
-  await db.insert(shoppingShares).values({ userId, shareToken: token });
+  await db
+    .insert(shoppingShares)
+    .values({ userId, shareToken: token, shareExpiresAt: expiresAt });
+}
+
+/** Ablauf des bestehenden Einkaufslisten-Links neu setzen (null = unbegrenzt). */
+export async function setShoppingShareExpiry(
+  userId: number,
+  expiresAt: Date | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(shoppingShares)
+    .set({ shareExpiresAt: expiresAt })
+    .where(eq(shoppingShares.userId, userId));
 }
 
 /** Teilen der Einkaufsliste beenden: Zeile entfernen, Link wird ungültig. */
@@ -850,7 +877,9 @@ export async function getShoppingShareByToken(token: string) {
     .from(shoppingShares)
     .where(eq(shoppingShares.shareToken, token))
     .limit(1);
-  return result[0];
+  const row = result[0];
+  // Abgelaufene Teil-Links verhalten sich wie unbekannte Tokens
+  return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
 }
 
 // ── Reise-Einkaufsliste ──
@@ -1369,12 +1398,14 @@ export async function deleteTripInvite(tripId: number) {
 export async function setTripLogShareToken(
   id: number,
   userId: number,
-  token: string | null
+  token: string | null,
+  expiresAt: Date | null = null
 ) {
   const db = requireDb(await getDb());
   await db
     .update(tripLogs)
-    .set({ shareToken: token })
+    // Ohne Token gibt es auch keinen Ablauf mehr
+    .set({ shareToken: token, shareExpiresAt: token ? expiresAt : null })
     .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
 }
 
@@ -1386,7 +1417,9 @@ export async function getTripLogByShareToken(token: string) {
     .from(tripLogs)
     .where(eq(tripLogs.shareToken, token))
     .limit(1);
-  return rows[0];
+  const row = rows[0];
+  // Abgelaufene Teil-Links verhalten sich wie unbekannte Tokens
+  return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
 }
 
 /** Einladung anhand des Tokens laden (öffentlich, ohne Login). */
@@ -1691,12 +1724,14 @@ export async function deleteSpotPhotosForSpot(spotId: number, userId: number) {
 export async function setCampSpotShareToken(
   id: number,
   userId: number,
-  token: string | null
+  token: string | null,
+  expiresAt: Date | null = null
 ) {
   const db = requireDb(await getDb());
   await db
     .update(campSpots)
-    .set({ shareToken: token })
+    // Ohne Token gibt es auch keinen Ablauf mehr
+    .set({ shareToken: token, shareExpiresAt: token ? expiresAt : null })
     .where(and(eq(campSpots.id, id), eq(campSpots.userId, userId)));
 }
 
@@ -1708,7 +1743,9 @@ export async function getCampSpotByToken(token: string) {
     .from(campSpots)
     .where(eq(campSpots.shareToken, token))
     .limit(1);
-  return rows[0];
+  const row = rows[0];
+  // Abgelaufene Teil-Links verhalten sich wie unbekannte Tokens
+  return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
 }
 
 // ── Eigene Rezepte ──
@@ -1736,12 +1773,14 @@ export async function getCustomRecipe(id: number, userId: number) {
 export async function setCustomRecipeShareToken(
   id: number,
   userId: number,
-  token: string | null
+  token: string | null,
+  expiresAt: Date | null = null
 ) {
   const db = requireDb(await getDb());
   await db
     .update(customRecipes)
-    .set({ shareToken: token })
+    // Ohne Token gibt es auch keinen Ablauf mehr
+    .set({ shareToken: token, shareExpiresAt: token ? expiresAt : null })
     .where(and(eq(customRecipes.id, id), eq(customRecipes.userId, userId)));
 }
 
@@ -1753,7 +1792,9 @@ export async function getCustomRecipeByToken(token: string) {
     .from(customRecipes)
     .where(eq(customRecipes.shareToken, token))
     .limit(1);
-  return rows[0];
+  const row = rows[0];
+  // Abgelaufene Teil-Links verhalten sich wie unbekannte Tokens
+  return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
 }
 
 /** Eigenes Rezept über den Foto-Dateinamen (für die private Auslieferung). */
@@ -1865,12 +1906,14 @@ export async function addCustomQuiz(data: InsertCustomQuiz) {
 export async function setCustomQuizShareToken(
   id: number,
   userId: number,
-  token: string | null
+  token: string | null,
+  expiresAt: Date | null = null
 ) {
   const db = requireDb(await getDb());
   await db
     .update(customQuizzes)
-    .set({ shareToken: token })
+    // Ohne Token gibt es auch keinen Ablauf mehr
+    .set({ shareToken: token, shareExpiresAt: token ? expiresAt : null })
     .where(and(eq(customQuizzes.id, id), eq(customQuizzes.userId, userId)));
 }
 
@@ -1882,7 +1925,9 @@ export async function getCustomQuizByToken(token: string) {
     .from(customQuizzes)
     .where(eq(customQuizzes.shareToken, token))
     .limit(1);
-  return rows[0];
+  const row = rows[0];
+  // Abgelaufene Teil-Links verhalten sich wie unbekannte Tokens
+  return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
 }
 
 export async function updateCustomQuiz(

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
+import {
+  SHARE_EXPIRY_DAYS,
+  isShareExpired,
+  sanitizeShareExpiryDays,
+  shareExpiryFromDays,
+} from "@shared/sharing";
 
 function createAnonContext(): TrpcContext {
   return {
@@ -56,5 +62,77 @@ describe("trips hub sharing", () => {
   it("lehnt zu kurze Tokens bei sharedGet ab (Input-Validierung)", async () => {
     const caller = appRouter.createCaller(createAnonContext());
     await expect(caller.trips.sharedGet({ token: "abc" })).rejects.toThrow();
+  });
+});
+
+const now = new Date("2026-08-03T12:00:00Z");
+
+describe("sanitizeShareExpiryDays", () => {
+  it("lässt die erlaubten Dauern durch", () => {
+    SHARE_EXPIRY_DAYS.forEach(days =>
+      expect(sanitizeShareExpiryDays(days)).toBe(days)
+    );
+  });
+
+  it("macht aus allem anderen «unbegrenzt» (null)", () => {
+    expect(sanitizeShareExpiryDays(null)).toBeNull();
+    expect(sanitizeShareExpiryDays(undefined)).toBeNull();
+    expect(sanitizeShareExpiryDays(14)).toBeNull();
+    expect(sanitizeShareExpiryDays("30")).toBeNull();
+  });
+});
+
+describe("shareExpiryFromDays", () => {
+  it("rechnet ganze Tage ab jetzt", () => {
+    expect(shareExpiryFromDays(7, now)).toEqual(
+      new Date("2026-08-10T12:00:00Z")
+    );
+    expect(shareExpiryFromDays(90, now)).toEqual(
+      new Date("2026-11-01T12:00:00Z")
+    );
+  });
+
+  it("liefert für «unbegrenzt» und für Unbekanntes null", () => {
+    expect(shareExpiryFromDays(null, now)).toBeNull();
+    expect(shareExpiryFromDays(undefined, now)).toBeNull();
+    expect(shareExpiryFromDays(14 as never, now)).toBeNull();
+  });
+});
+
+describe("isShareExpired", () => {
+  it("gilt ohne Ablauf nie als abgelaufen", () => {
+    expect(isShareExpired(null, now)).toBe(false);
+    expect(isShareExpired(undefined, now)).toBe(false);
+  });
+
+  it("vergleicht mit dem angegebenen Zeitpunkt", () => {
+    expect(isShareExpired(new Date("2026-08-03T12:00:01Z"), now)).toBe(false);
+    expect(isShareExpired(new Date("2026-08-03T11:59:59Z"), now)).toBe(true);
+  });
+
+  it("zählt den Ablauf-Zeitpunkt selbst schon als abgelaufen", () => {
+    expect(isShareExpired(now, now)).toBe(true);
+  });
+
+  it("versteht ISO-Strings und Millisekunden", () => {
+    expect(isShareExpired("2026-08-02T12:00:00Z", now)).toBe(true);
+    expect(isShareExpired("2026-08-04T12:00:00Z", now)).toBe(false);
+    expect(isShareExpired(now.getTime() - 1, now)).toBe(true);
+  });
+
+  it("behandelt kaputte Werte als abgelaufen (im Zweifel nicht herausgeben)", () => {
+    expect(isShareExpired("gestern", now)).toBe(true);
+    expect(isShareExpired(Number.NaN, now)).toBe(true);
+  });
+
+  it("passt zu shareExpiryFromDays: frisch gültig, später abgelaufen", () => {
+    const expires = shareExpiryFromDays(7, now);
+    expect(isShareExpired(expires, now)).toBe(false);
+    expect(isShareExpired(expires, new Date("2026-08-10T11:59:00Z"))).toBe(
+      false
+    );
+    expect(isShareExpired(expires, new Date("2026-08-11T12:00:00Z"))).toBe(
+      true
+    );
   });
 });

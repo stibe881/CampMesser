@@ -1,6 +1,11 @@
 import { COOKIE_NAME } from "@shared/const";
 import { nanoid } from "nanoid";
 import { z } from "zod";
+import {
+  SHARE_EXPIRY_DAYS,
+  shareExpiryFromDays,
+  type ShareExpiryDays,
+} from "@shared/sharing";
 import { ONE_YEAR_MS } from "@shared/const";
 import {
   packScenarios,
@@ -86,6 +91,31 @@ function normalizeSpotAttributesJson(
 }
 
 /** Eingabe-Format eigener Quizze: 1–30 Fragen mit je 2–4 Optionen. */
+/**
+ * Gültigkeitsdauer eines Teil-Links: 7/30/90 Tage oder weggelassen/null für
+ * «unbegrenzt». Wird von allen share-Prozeduren gleich entgegengenommen.
+ */
+const shareExpiryInput = z
+  .union([
+    z.literal(SHARE_EXPIRY_DAYS[0]),
+    z.literal(SHARE_EXPIRY_DAYS[1]),
+    z.literal(SHARE_EXPIRY_DAYS[2]),
+  ])
+  .nullish();
+
+/**
+ * Ablauf-Zeitpunkt aus der gewünschten Dauer. Wichtig: `undefined` heisst
+ * «Gültigkeit unverändert lassen» (der Aufrufer hat gar nichts gewählt, z. B.
+ * weil er nur den bestehenden Link nochmals anzeigt), `null` heisst
+ * ausdrücklich «unbegrenzt».
+ */
+function shareExpiryFor(
+  days: ShareExpiryDays | null | undefined,
+  current: Date | null = null
+): Date | null {
+  return days === undefined ? current : shareExpiryFromDays(days);
+}
+
 const customQuizInput = z.object({
   title: z.string().min(1).max(140),
   questions: z
@@ -833,12 +863,13 @@ export const appRouter = router({
         name: row.name,
         items: parseCustomTemplateItems(row.itemsJson),
         shareToken: row.shareToken,
+        shareExpiresAt: row.shareExpiresAt,
         createdAt: row.createdAt,
       }));
     }),
     /** Teil-Link für eine eigene Vorlage erzeugen: gibt den Token zurück. */
     shareTemplate: protectedProcedure
-      .input(z.object({ id: z.number() }))
+      .input(z.object({ id: z.number(), expiresInDays: shareExpiryInput }))
       .mutation(async ({ ctx, input }) => {
         const template = await db.getPackTemplate(input.id, ctx.user.id);
         if (!template)
@@ -846,10 +877,19 @@ export const appRouter = router({
             code: "NOT_FOUND",
             message: "Vorlage nicht gefunden",
           });
-        if (template.shareToken) return { token: template.shareToken };
-        const token = nanoid(16);
-        await db.setPackTemplateShareToken(input.id, ctx.user.id, token);
-        return { token };
+        // Bestehenden Token behalten, aber die gewünschte Gültigkeit neu setzen
+        const expiresAt = shareExpiryFor(
+          input.expiresInDays,
+          template.shareExpiresAt
+        );
+        const token = template.shareToken ?? nanoid(16);
+        await db.setPackTemplateShareToken(
+          input.id,
+          ctx.user.id,
+          token,
+          expiresAt
+        );
+        return { token, expiresAt };
       }),
     /** Teilen der Vorlage beenden: Token entfernen, Link wird ungültig. */
     unshareTemplate: protectedProcedure
@@ -1208,14 +1248,22 @@ export const appRouter = router({
       }),
     /** Teil-Link erzeugen: gibt den Token zurück. */
     share: protectedProcedure
-      .input(z.object({ listId: z.number() }))
+      .input(z.object({ listId: z.number(), expiresInDays: shareExpiryInput }))
       .mutation(async ({ ctx, input }) => {
         const list = await db.getPackList(input.listId, ctx.user.id);
         if (!list) throw new Error("Liste nicht gefunden");
-        if (list.shareToken) return { token: list.shareToken };
-        const token = nanoid(16);
-        await db.setPackListShareToken(input.listId, ctx.user.id, token);
-        return { token };
+        const expiresAt = shareExpiryFor(
+          input.expiresInDays,
+          list.shareExpiresAt
+        );
+        const token = list.shareToken ?? nanoid(16);
+        await db.setPackListShareToken(
+          input.listId,
+          ctx.user.id,
+          token,
+          expiresAt
+        );
+        return { token, expiresAt };
       }),
     /** Teilen beenden: Token entfernen, Link wird ungültig. */
     unshare: protectedProcedure
@@ -1665,13 +1713,22 @@ export const appRouter = router({
       db.clearShoppingItems(ctx.user.id)
     ),
     /** Teil-Link erzeugen (idempotent): gibt den Token zurück. */
-    share: protectedProcedure.mutation(async ({ ctx }) => {
-      const existing = await db.getShoppingShare(ctx.user.id);
-      if (existing) return { token: existing.shareToken };
-      const token = nanoid(16);
-      await db.createShoppingShare(ctx.user.id, token);
-      return { token };
-    }),
+    share: protectedProcedure
+      .input(z.object({ expiresInDays: shareExpiryInput }).optional())
+      .mutation(async ({ ctx, input }) => {
+        const existing = await db.getShoppingShare(ctx.user.id);
+        const expiresAt = shareExpiryFor(
+          input?.expiresInDays,
+          existing?.shareExpiresAt ?? null
+        );
+        if (existing) {
+          await db.setShoppingShareExpiry(ctx.user.id, expiresAt);
+          return { token: existing.shareToken, expiresAt };
+        }
+        const token = nanoid(16);
+        await db.createShoppingShare(ctx.user.id, token, expiresAt);
+        return { token, expiresAt };
+      }),
     /** Teilen beenden: Token entfernen, Link wird ungültig. */
     unshare: protectedProcedure.mutation(async ({ ctx }) => {
       await db.deleteShoppingShare(ctx.user.id);
@@ -2303,7 +2360,7 @@ export const appRouter = router({
       }),
     /** Teil-Link für ein eigenes Rezept erzeugen: gibt den Token zurück. */
     share: protectedProcedure
-      .input(z.object({ id: z.number() }))
+      .input(z.object({ id: z.number(), expiresInDays: shareExpiryInput }))
       .mutation(async ({ ctx, input }) => {
         const recipe = await db.getCustomRecipe(input.id, ctx.user.id);
         if (!recipe)
@@ -2311,10 +2368,18 @@ export const appRouter = router({
             code: "NOT_FOUND",
             message: "Rezept nicht gefunden.",
           });
-        if (recipe.shareToken) return { token: recipe.shareToken };
-        const token = nanoid(16);
-        await db.setCustomRecipeShareToken(input.id, ctx.user.id, token);
-        return { token };
+        const expiresAt = shareExpiryFor(
+          input.expiresInDays,
+          recipe.shareExpiresAt
+        );
+        const token = recipe.shareToken ?? nanoid(16);
+        await db.setCustomRecipeShareToken(
+          input.id,
+          ctx.user.id,
+          token,
+          expiresAt
+        );
+        return { token, expiresAt };
       }),
     /** Teilen des Rezepts beenden: Token entfernen, Link wird ungültig. */
     unshare: protectedProcedure
@@ -2483,7 +2548,7 @@ export const appRouter = router({
       .mutation(({ ctx, input }) => db.deleteCustomQuiz(input.id, ctx.user.id)),
     /** Teil-Link für ein eigenes Quiz erzeugen: gibt den Token zurück. */
     share: protectedProcedure
-      .input(z.object({ id: z.number() }))
+      .input(z.object({ id: z.number(), expiresInDays: shareExpiryInput }))
       .mutation(async ({ ctx, input }) => {
         const quiz = await db.getCustomQuiz(input.id, ctx.user.id);
         if (!quiz)
@@ -2491,10 +2556,18 @@ export const appRouter = router({
             code: "NOT_FOUND",
             message: "Quiz nicht gefunden.",
           });
-        if (quiz.shareToken) return { token: quiz.shareToken };
-        const token = nanoid(16);
-        await db.setCustomQuizShareToken(input.id, ctx.user.id, token);
-        return { token };
+        const expiresAt = shareExpiryFor(
+          input.expiresInDays,
+          quiz.shareExpiresAt
+        );
+        const token = quiz.shareToken ?? nanoid(16);
+        await db.setCustomQuizShareToken(
+          input.id,
+          ctx.user.id,
+          token,
+          expiresAt
+        );
+        return { token, expiresAt };
       }),
     /** Teilen des Quiz beenden: Token entfernen, Link wird ungültig. */
     unshare: protectedProcedure
@@ -3304,7 +3377,12 @@ export const appRouter = router({
      * geteilte-Listen-Mechanik (packing.sharedToggle) unverändert.
      */
     share: protectedProcedure
-      .input(z.object({ tripId: z.number().int().positive() }))
+      .input(
+        z.object({
+          tripId: z.number().int().positive(),
+          expiresInDays: shareExpiryInput,
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const trip = await db.getTripLog(input.tripId, ctx.user.id);
         if (!trip) {
@@ -3313,16 +3391,32 @@ export const appRouter = router({
             message: "Aufenthalt nicht gefunden.",
           });
         }
+        const expiresAt = shareExpiryFor(
+          input.expiresInDays,
+          trip.shareExpiresAt
+        );
         if (trip.packListId != null) {
           const list = await db.getPackList(trip.packListId, ctx.user.id);
+          // Neu erzeugter Listen-Token läuft mit dem Hub ab; ein bereits
+          // bestehender bleibt unangetastet (die Liste kann eigenständig
+          // geteilt sein).
           if (list && !list.shareToken) {
-            await db.setPackListShareToken(list.id, ctx.user.id, nanoid(16));
+            await db.setPackListShareToken(
+              list.id,
+              ctx.user.id,
+              nanoid(16),
+              expiresAt
+            );
           }
         }
-        if (trip.shareToken) return { token: trip.shareToken };
-        const token = nanoid(16);
-        await db.setTripLogShareToken(input.tripId, ctx.user.id, token);
-        return { token };
+        const token = trip.shareToken ?? nanoid(16);
+        await db.setTripLogShareToken(
+          input.tripId,
+          ctx.user.id,
+          token,
+          expiresAt
+        );
+        return { token, expiresAt };
       }),
     /**
      * Teilen des Reise-Hubs beenden: Token entfernen, Link wird ungültig.
@@ -3677,7 +3771,7 @@ export const appRouter = router({
     }),
     /** Teil-Link fürs Platz-Dossier erzeugen: gibt den Token zurück. */
     share: protectedProcedure
-      .input(z.object({ id: z.number() }))
+      .input(z.object({ id: z.number(), expiresInDays: shareExpiryInput }))
       .mutation(async ({ ctx, input }) => {
         const spots = await db.getCampSpots(ctx.user.id);
         const spot = spots.find(s => s.id === input.id);
@@ -3687,10 +3781,13 @@ export const appRouter = router({
             message: "Zeltplatz nicht gefunden.",
           });
         }
-        if (spot.shareToken) return { token: spot.shareToken };
-        const token = nanoid(16);
-        await db.setCampSpotShareToken(input.id, ctx.user.id, token);
-        return { token };
+        const expiresAt = shareExpiryFor(
+          input.expiresInDays,
+          spot.shareExpiresAt
+        );
+        const token = spot.shareToken ?? nanoid(16);
+        await db.setCampSpotShareToken(input.id, ctx.user.id, token, expiresAt);
+        return { token, expiresAt };
       }),
     /** Teilen beenden: Token entfernen, Link wird ungültig. */
     unshare: protectedProcedure

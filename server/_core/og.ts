@@ -5,7 +5,9 @@
  * Messenger und soziale Netzwerke laden das SPA-HTML ohne JavaScript –
  * deshalb injiziert der Server für bekannte Teil-Token OG-Meta-Tags in den
  * <head>, bevor das HTML ausgeliefert wird. Unbekannte Token bekommen das
- * normale SPA-HTML (kein Unterschied nach aussen).
+ * normale SPA-HTML (kein Unterschied nach aussen). Abgelaufene Teil-Links
+ * verhalten sich dabei wie unbekannte: die db.get*ByToken-Funktionen prüfen
+ * shareExpiresAt (shared/sharing.ts) und liefern nichts mehr zurück.
  * Beschreibungstexte deutsch, weil der Server die Sprache der Betrachter*innen
  * nicht kennt.
  */
