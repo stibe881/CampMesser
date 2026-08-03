@@ -53,36 +53,6 @@ zeigen lassen (HTTP-Check, erwartet Status 200; bei DB-Problemen liefert der
 Endpoint 503 und der Dienst alarmiert per E-Mail/Push). Intervall 5 Minuten
 reicht.
 
-## 4. SMTP + APP_URL in der Server-`.env` (Passwort-Reset-Mails)
-
-In konsoleH ein Postfach anlegen (z. B. `no-reply@campmesser.ch`) und in der
-`.env` auf dem Server ergänzen (Vorlage: `env.hetzner.template`):
-
-```ini
-SMTP_HOST=mail.your-server.de     # Hetzner-Mailserver laut konsoleH
-SMTP_PORT=587                     # STARTTLS
-SMTP_USER=no-reply@campmesser.ch
-SMTP_PASS=<Postfach-Passwort>
-SMTP_FROM=no-reply@campmesser.ch
-APP_URL=https://campmesser.ch
-```
-
-Danach Passenger neu starten (`touch ~/campmesser/tmp/restart.txt`).
-Ohne diese Werte meldet «Passwort vergessen?» sauber, dass der Versand
-derzeit nicht verfügbar ist – die App läuft trotzdem.
-
-## 5. Web-Push (Unwetter, MHD, Trip-Countdown)
-
-Falls noch nicht geschehen (Details in `DEPLOYMENT-HETZNER.md`):
-
-1. VAPID-Schlüssel erzeugen: `pnpm exec web-push generate-vapid-keys`
-2. In der `.env`: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`,
-   `VAPID_SUBJECT=mailto:stefan.gross@stibe.me`, `CRON_SECRET=<zufällig>`
-3. konsoleH-Cronjob (stündlich oder alle 30 min):
-   ```
-   curl -fsS "https://campmesser.ch/api/push/check?secret=<CRON_SECRET>" >/dev/null
-   ```
-
 ## 6. Ausflugfinder-Anbindung (Ausflüge auf Karte und im Platz-Dossier)
 
 CampMesser zeigt die Ausflugsziele aus deiner eigenen **Ausflugfinder**-App –
