@@ -2191,6 +2191,26 @@ export const fr: Translation = {
     reviewAllSecure:
       "Tous les nœuds interrogés sont acquis – continue avec une vraie corde !",
   },
+  phrasebook: {
+    title: "Aide linguistique",
+    subtitle:
+      "Les phrases de camping essentielles en allemand, français, italien et anglais – disponibles hors ligne.",
+    offlineNote:
+      "Toutes les phrases sont enregistrées dans l'app et fonctionnent sans connexion Internet.",
+    targetLabel: "Langue cible",
+    targetAria: "Choisir la langue cible",
+    sameLanguageHint:
+      "La langue cible et la langue de l'app sont identiques – choisis une autre langue ci-dessus pour voir la traduction.",
+    searchPlaceholder: "Chercher une phrase …",
+    searchAria: "Rechercher dans l'aide linguistique",
+    searchEmpty: "Aucune phrase trouvée – essaie un autre mot-clé.",
+    copyAria: (text: string) => `Copier « ${text} »`,
+    copied: "Phrase copiée.",
+    copyFailed: "La copie n'a pas fonctionné.",
+    speakAria: (text: string) => `Lire « ${text} » à voix haute`,
+    stopAria: "Arrêter la lecture",
+    countLine: (n: number) => `${n} phrases`,
+  },
   nature: {
     title: "Explorateur nature",
     subtitle:

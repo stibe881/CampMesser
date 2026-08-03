@@ -2201,6 +2201,26 @@ export const de = {
     reviewAllSecure:
       "Alle abgefragten Knoten sitzen – weiter so mit echtem Seil!",
   },
+  phrasebook: {
+    title: "Sprachhilfe",
+    subtitle:
+      "Die wichtigsten Camping-Sätze in Deutsch, Französisch, Italienisch und Englisch – offline verfügbar.",
+    offlineNote:
+      "Alle Sätze sind in der App gespeichert und funktionieren ohne Internetverbindung.",
+    targetLabel: "Zielsprache",
+    targetAria: "Zielsprache wählen",
+    sameLanguageHint:
+      "Zielsprache und App-Sprache sind gleich – wähl oben eine andere Sprache, damit du die Übersetzung siehst.",
+    searchPlaceholder: "Satz suchen …",
+    searchAria: "Sprachhilfe durchsuchen",
+    searchEmpty: "Kein Satz gefunden – versuch ein anderes Stichwort.",
+    copyAria: (text: string) => `«${text}» kopieren`,
+    copied: "Satz kopiert.",
+    copyFailed: "Kopieren hat nicht geklappt.",
+    speakAria: (text: string) => `«${text}» vorlesen`,
+    stopAria: "Vorlesen stoppen",
+    countLine: (n: number) => `${n} Sätze`,
+  },
   nature: {
     title: "Natur-Entdecker",
     subtitle:

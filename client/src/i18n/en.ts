@@ -2118,6 +2118,26 @@ export const en: Translation = {
     reviewAllSecure:
       "All quizzed knots are solid – keep going with a real rope!",
   },
+  phrasebook: {
+    title: "Phrasebook",
+    subtitle:
+      "The most useful camping phrases in German, French, Italian and English – available offline.",
+    offlineNote:
+      "All phrases are stored in the app and work without an internet connection.",
+    targetLabel: "Target language",
+    targetAria: "Choose the target language",
+    sameLanguageHint:
+      "Target language and app language are the same – pick another language above to see the translation.",
+    searchPlaceholder: "Search for a phrase …",
+    searchAria: "Search the phrasebook",
+    searchEmpty: "No phrase found – try another keyword.",
+    copyAria: (text: string) => `Copy “${text}”`,
+    copied: "Phrase copied.",
+    copyFailed: "Copying did not work.",
+    speakAria: (text: string) => `Read “${text}” aloud`,
+    stopAria: "Stop reading aloud",
+    countLine: (n: number) => `${n} phrases`,
+  },
   nature: {
     title: "Nature Explorer",
     subtitle:

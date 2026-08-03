@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Sprachhilfe: Das neue Modul «Sprachhilfe» hat 60 Camping-Sätze von der Rezeption bis zum Notfall parat – du wählst die Zielsprache, siehst die Bedeutung in deiner App-Sprache, kopierst den Satz oder lässt ihn dir vorlesen.",
+        "Aide linguistique : le nouveau module « Aide linguistique » propose 60 phrases de camping, de la réception à l'urgence – tu choisis la langue cible, tu vois le sens dans la langue de l'app, tu copies la phrase ou tu te la fais lire à voix haute.",
+        "Aiuto linguistico: il nuovo modulo «Aiuto linguistico» offre 60 frasi da campeggio, dalla reception all'emergenza – scegli la lingua di destinazione, vedi il significato nella lingua dell'app, copi la frase o te la fai leggere ad alta voce.",
+        "Phrasebook: the new “Phrasebook” module holds 60 camping phrases from reception to emergency – pick the target language, see the meaning in your app language, copy the phrase or have it read aloud."
+      ),
+      l4(
         "Familien-Modus: Zwei neue Schnitzeljagden warten auf dich – «Die Steinjäger» rund um Bachsteine, Farben und Kristalle sowie «Die Wind-Detektive» mit Windrichtung, Wolken und Wetter-Prognose. Beide mit Lösungswort, Stoppuhr und Druckansicht.",
         "Mode famille : deux nouvelles chasses au trésor t'attendent – « Les chasseurs de pierres » autour des galets, des couleurs et des cristaux, et « Les détectives du vent » avec direction du vent, nuages et pronostic météo. Les deux avec mot mystère, chronomètre et impression.",
         "Modalità famiglia: due nuove cacce al tesoro ti aspettano – «I cacciatori di sassi» tra ciottoli, colori e cristalli e «I detective del vento» con direzione del vento, nuvole e previsione del tempo. Entrambe con parola segreta, cronometro e stampa.",

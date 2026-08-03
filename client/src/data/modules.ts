@@ -15,6 +15,7 @@ import {
   Cross,
   Droplets,
   Gauge,
+  Languages,
   ListChecks,
   LocateFixed,
   Map as MapIcon,
@@ -369,6 +370,24 @@ export const modules: Module[] = [
     ),
     icon: ShoppingCart,
     group: "Erste Hilfe",
+  },
+  {
+    path: "/sprachhilfe",
+    title: l4(
+      "Sprachhilfe",
+      "Aide linguistique",
+      "Aiuto linguistico",
+      "Phrasebook"
+    ),
+    description: l4(
+      "Camping-Sätze in vier Sprachen, zum Zeigen und Vorlesen",
+      "Phrases de camping en quatre langues, à montrer et à écouter",
+      "Frasi da campeggio in quattro lingue, da mostrare e ascoltare",
+      "Camping phrases in four languages, to show and to hear"
+    ),
+    icon: Languages,
+    group: "Erste Hilfe",
+    offline: true,
   },
   {
     path: "/familie",

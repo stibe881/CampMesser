@@ -2173,6 +2173,26 @@ export const it: Translation = {
     reviewAllSecure:
       "Tutti i nodi del quiz sono sicuri – continua con una corda vera!",
   },
+  phrasebook: {
+    title: "Aiuto linguistico",
+    subtitle:
+      "Le frasi da campeggio più importanti in tedesco, francese, italiano e inglese – disponibili offline.",
+    offlineNote:
+      "Tutte le frasi sono salvate nell'app e funzionano senza connessione a Internet.",
+    targetLabel: "Lingua di destinazione",
+    targetAria: "Scegli la lingua di destinazione",
+    sameLanguageHint:
+      "La lingua di destinazione è uguale a quella dell'app – scegline un'altra qui sopra per vedere la traduzione.",
+    searchPlaceholder: "Cerca una frase …",
+    searchAria: "Cerca nell'aiuto linguistico",
+    searchEmpty: "Nessuna frase trovata – prova con un'altra parola chiave.",
+    copyAria: (text: string) => `Copia «${text}»`,
+    copied: "Frase copiata.",
+    copyFailed: "La copia non è riuscita.",
+    speakAria: (text: string) => `Leggi «${text}» ad alta voce`,
+    stopAria: "Interrompi la lettura",
+    countLine: (n: number) => `${n} frasi`,
+  },
   nature: {
     title: "Esploratore della natura",
     subtitle:
