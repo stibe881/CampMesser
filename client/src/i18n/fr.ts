@@ -2488,6 +2488,11 @@ export const fr: Translation = {
     quizQrTitle: "Transmettre directement",
     quizQrText:
       "Laisse les autres scanner le code avec l'appareil photo du téléphone – le quiz s'ouvre aussitôt.",
+    stopwatchAria: "Temps écoulé du chronomètre",
+    bestTimeBadge: (time: string) => `Record : ${time}`,
+    newBestTimeLine: (time: string) => `${time} – Nouveau record !`,
+    finishTimeLine: (time: string, best: string) =>
+      `Ton temps : ${time} · Record : ${best}`,
     childrenTitle: "Enfants & badges",
     childrenSubtitle:
       "Ajoute tes enfants – ils collectionnent des badges lors des chasses au trésor et des quiz.",

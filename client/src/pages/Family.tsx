@@ -18,6 +18,7 @@ import {
   Share2,
   Sparkles,
   Swords,
+  Timer,
   Trash2,
   Trophy,
   Volume2,
@@ -69,6 +70,15 @@ import {
   duelQuestionIndex,
   duelWinner,
 } from "@/lib/quizDuel";
+import {
+  formatHuntSeconds,
+  loadHuntBestTimes,
+  recordHuntTime,
+  sanitizeHuntBestTimes,
+  storeHuntBestTimes,
+  type HuntBestTimes,
+} from "@/lib/huntTimes";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { useSpeech } from "@/lib/speech";
 import { cn } from "@/lib/utils";
 
@@ -630,13 +640,19 @@ function useHuntProgress(huntId: string, taskCount: number) {
 
 function HuntDialog({
   hunt,
+  bestTime,
   onClose,
   onCompleted,
+  onFinished,
 }: {
   hunt: ScavengerHunt;
+  /** Bisherige Bestzeit dieser Jagd in Sekunden (null = noch keine). */
+  bestTime: number | null;
   onClose: () => void;
   /** Wird gemeldet, wenn die Jagd in dieser Sitzung fertig abgehakt wurde. */
   onCompleted?: () => void;
+  /** Wird beim Abschluss mit der gestoppten Zeit in Sekunden gemeldet. */
+  onFinished?: (seconds: number) => void;
 }) {
   const { lang, t } = useI18n();
   const [checked, setChecked] = useHuntProgress(hunt.id, hunt.stations.length);
@@ -645,6 +661,22 @@ function HuntDialog({
   );
   const doneCount = checked.filter(Boolean).length;
   const allDone = doneCount === hunt.stations.length;
+
+  // ── Stoppuhr: läuft ab dem Öffnen, Schliessen bricht ab (kein Pausieren) ──
+  const startRef = useRef(Date.now());
+  const [elapsed, setElapsed] = useState(0);
+  /** Ergebnis der in DIESER SITZUNG beendeten Jagd (null = noch offen). */
+  const [finish, setFinish] = useState<{
+    seconds: number;
+    isNewBest: boolean;
+  } | null>(null);
+  useEffect(() => {
+    if (allDone) return;
+    const id = window.setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startRef.current) / 1000));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [allDone]);
 
   // ── Vorlese-Modus: eine Station gleichzeitig, Stationswechsel stoppt ──
   const speech = useSpeech();
@@ -675,6 +707,10 @@ function HuntDialog({
   const sawIncompleteRef = useRef(false);
   const onCompletedRef = useRef(onCompleted);
   onCompletedRef.current = onCompleted;
+  const onFinishedRef = useRef(onFinished);
+  onFinishedRef.current = onFinished;
+  const bestTimeRef = useRef(bestTime);
+  bestTimeRef.current = bestTime;
   useEffect(() => {
     if (!allDone) {
       sawIncompleteRef.current = true;
@@ -682,6 +718,18 @@ function HuntDialog({
     }
     if (sawIncompleteRef.current) {
       sawIncompleteRef.current = false;
+      // Stoppuhr anhalten und gegen die bisherige Bestzeit vergleichen
+      const seconds = Math.max(
+        1,
+        Math.floor((Date.now() - startRef.current) / 1000)
+      );
+      setElapsed(seconds);
+      const previous = bestTimeRef.current;
+      setFinish({
+        seconds,
+        isNewBest: previous === null || seconds < previous,
+      });
+      onFinishedRef.current?.(seconds);
       onCompletedRef.current?.();
     }
   }, [allDone]);
@@ -707,6 +755,16 @@ function HuntDialog({
           {pick(hunt.ageHint, lang)} ·{" "}
           {t.family.durationLong(hunt.durationMinutes)}
         </DialogDescription>
+        {/* Dezente Stoppuhr: läuft ab dem Öffnen mit */}
+        {(!allDone || finish !== null) && (
+          <p
+            className="flex items-center gap-1 text-xs tabular-nums text-muted-foreground"
+            aria-label={t.family.stopwatchAria}
+          >
+            <Timer className="h-3.5 w-3.5" aria-hidden="true" />
+            {formatHuntSeconds(finish ? finish.seconds : elapsed)}
+          </p>
+        )}
       </DialogHeader>
       <p className="rounded-lg bg-accent/60 p-3 text-sm italic text-accent-foreground">
         {pick(hunt.intro, lang)}
@@ -891,6 +949,21 @@ function HuntDialog({
             />
             {pick(hunt.finale, lang)}
           </p>
+          {/* Gestoppte Zeit im Vergleich zur Bestzeit dieser Jagd */}
+          {finish && (
+            <p className="flex items-center gap-2 text-sm font-medium">
+              <Timer
+                className="h-4 w-4 shrink-0 text-primary"
+                aria-hidden="true"
+              />
+              {finish.isNewBest
+                ? t.family.newBestTimeLine(formatHuntSeconds(finish.seconds))
+                : t.family.finishTimeLine(
+                    formatHuntSeconds(finish.seconds),
+                    formatHuntSeconds(bestTime ?? finish.seconds)
+                  )}
+            </p>
+          )}
         </div>
       )}
       <div className="flex gap-2">
@@ -901,6 +974,10 @@ function HuntDialog({
             stopSpeaking();
             setChecked(new Array(hunt.stations.length).fill(false));
             setRevealedHints({});
+            // Stoppuhr neu starten
+            startRef.current = Date.now();
+            setElapsed(0);
+            setFinish(null);
           }}
           aria-label={t.family.resetAria}
         >
@@ -1580,6 +1657,34 @@ export default function FamilyPage() {
     onSuccess: () => utils.hunts.list.invalidate(),
     onError: () => toast.error(t.common.deleteFailed),
   });
+
+  // ── Schnitzeljagd-Bestzeiten: localStorage als schnelle Quelle, Geräte-Sync fürs Konto ──
+  const [bestTimes, setBestTimes] = useState<HuntBestTimes>(() =>
+    loadHuntBestTimes()
+  );
+  const bestTimesRef = useRef(bestTimes);
+  bestTimesRef.current = bestTimes;
+  const bestTimesSync = useSyncedSetting<HuntBestTimes>(
+    "huntBestTimes",
+    value => {
+      const clean = sanitizeHuntBestTimes(value);
+      setBestTimes(clean);
+      storeHuntBestTimes(clean);
+    }
+  );
+  /** Gestoppte Zeit einer beendeten Jagd festhalten (nur bessere gewinnen). */
+  const handleHuntFinished = (huntId: string, seconds: number) => {
+    const { times, isNewBest } = recordHuntTime(
+      bestTimesRef.current,
+      huntId,
+      seconds
+    );
+    if (!isNewBest) return;
+    bestTimesRef.current = times;
+    setBestTimes(times);
+    storeHuntBestTimes(times);
+    bestTimesSync.push(times);
+  };
   const customQuizzesQuery = trpc.quizzes.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -1813,6 +1918,14 @@ export default function FamilyPage() {
                 <span className="mt-1.5 line-clamp-2 block text-xs italic text-muted-foreground">
                   {pick(hunt.intro, lang)}
                 </span>
+                {bestTimes[hunt.id] != null && (
+                  <span className="mt-1.5 flex items-center gap-1 text-xs font-medium text-primary">
+                    <Timer className="h-3 w-3" aria-hidden="true" />
+                    {t.family.bestTimeBadge(
+                      formatHuntSeconds(bestTimes[hunt.id])
+                    )}
+                  </span>
+                )}
               </span>
             </button>
             <div className="mt-3 flex items-center gap-4 border-t border-border/60 pt-2.5 text-xs">
@@ -1870,6 +1983,14 @@ export default function FamilyPage() {
                       <span className="mt-1.5 line-clamp-2 block text-xs italic text-muted-foreground">
                         {row.intro}
                       </span>
+                      {bestTimes[hunt.id] != null && (
+                        <span className="mt-1.5 flex items-center gap-1 text-xs font-medium text-primary">
+                          <Timer className="h-3 w-3" aria-hidden="true" />
+                          {t.family.bestTimeBadge(
+                            formatHuntSeconds(bestTimes[hunt.id])
+                          )}
+                        </span>
+                      )}
                     </span>
                   </button>
                   <div className="mt-3 flex items-center gap-4 border-t border-border/60 pt-2.5 text-xs">
@@ -2150,8 +2271,10 @@ export default function FamilyPage() {
         {activeHunt && (
           <HuntDialog
             hunt={activeHunt}
+            bestTime={bestTimes[activeHunt.id] ?? null}
             onClose={() => setActiveHunt(null)}
             onCompleted={() => void handleCompleted({ type: "huntCompleted" })}
+            onFinished={seconds => handleHuntFinished(activeHunt.id, seconds)}
           />
         )}
       </Dialog>

@@ -2407,6 +2407,11 @@ export const en: Translation = {
     quizQrTitle: "Hand it over directly",
     quizQrText:
       "Let others scan the code with their phone camera – the quiz opens right away.",
+    stopwatchAria: "Elapsed stopwatch time",
+    bestTimeBadge: (time: string) => `Best time: ${time}`,
+    newBestTimeLine: (time: string) => `${time} – new best time!`,
+    finishTimeLine: (time: string, best: string) =>
+      `Your time: ${time} · best time: ${best}`,
     childrenTitle: "Children & badges",
     childrenSubtitle:
       "Add your children – they collect badges in scavenger hunts and quizzes.",

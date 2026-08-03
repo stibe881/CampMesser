@@ -2465,6 +2465,11 @@ export const it: Translation = {
     quizQrTitle: "Passalo direttamente",
     quizQrText:
       "Fai scansionare il codice con la fotocamera del telefono – il quiz si apre subito.",
+    stopwatchAria: "Tempo trascorso del cronometro",
+    bestTimeBadge: (time: string) => `Record: ${time}`,
+    newBestTimeLine: (time: string) => `${time} – Nuovo record!`,
+    finishTimeLine: (time: string, best: string) =>
+      `Il tuo tempo: ${time} · Record: ${best}`,
     childrenTitle: "Bambini e distintivi",
     childrenSubtitle:
       "Aggiungi i tuoi bambini – raccolgono distintivi nelle cacce al tesoro e nei quiz.",

@@ -18,6 +18,8 @@ export const SYNCED_SETTING_KEYS = [
   "language",
   /** Lernfortschritt des Knoten-Quiz (Statistik pro Knoten) */
   "knotProgress",
+  /** Bestzeiten der Schnitzeljagden (Sekunden pro Jagd-Id) */
+  "huntBestTimes",
   /** Favorisierte Rezepte (statische Ids + «eigenes-<id>») */
   "recipeFavorites",
   /** Einkaufs-Verlauf für Autocomplete-Vorschläge */

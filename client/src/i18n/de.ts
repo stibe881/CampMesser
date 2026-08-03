@@ -2492,6 +2492,11 @@ export const de = {
     quizQrTitle: "Direkt weitergeben",
     quizQrText:
       "Lass andere den Code mit der Handy-Kamera scannen – das Quiz öffnet sich sofort.",
+    stopwatchAria: "Verstrichene Zeit der Stoppuhr",
+    bestTimeBadge: (time: string) => `Bestzeit: ${time}`,
+    newBestTimeLine: (time: string) => `${time} – Neue Bestzeit!`,
+    finishTimeLine: (time: string, best: string) =>
+      `Deine Zeit: ${time} · Bestzeit: ${best}`,
     childrenTitle: "Kinder & Abzeichen",
     childrenSubtitle:
       "Lege deine Kinder an – bei Schnitzeljagden und Quizzen sammeln sie Abzeichen.",
