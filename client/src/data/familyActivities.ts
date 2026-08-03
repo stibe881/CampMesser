@@ -1068,6 +1068,332 @@ export const scavengerHunts: ScavengerHunt[] = [
       "Your trial letters spell 'BRAVE' – exactly what you have shown! You are ceremonially appointed night watcher of the campsite and may guard the evening light tonight."
     ),
   },
+  {
+    id: "steinjagd",
+    title: l4(
+      "Die Steinjäger",
+      "Les chasseurs de pierres",
+      "I cacciatori di sassi",
+      "The Stone Hunters"
+    ),
+    ageHint: l4(
+      "ab ca. 4 Jahren",
+      "dès 4 ans env.",
+      "da circa 4 anni",
+      "from about 4 years"
+    ),
+    durationMinutes: 25,
+    intro: l4(
+      "Jeder Stein erzählt eine Geschichte: von Bergen, von Wasser und von sehr viel Zeit. Die Gilde der Steinjäger*innen sucht Nachwuchs – bestehe fünf Aufgaben, sammle deine Buchstaben und werde aufgenommen!",
+      "Chaque pierre raconte une histoire : celle des montagnes, de l'eau et de beaucoup de temps. La guilde des chasseuses et chasseurs de pierres cherche de la relève – réussis cinq missions, récolte tes lettres et rejoins-la !",
+      "Ogni sasso racconta una storia: quella delle montagne, dell'acqua e di tantissimo tempo. La gilda dei cacciatori di sassi cerca nuove leve – supera cinque prove, raccogli le tue lettere ed entra a farne parte!",
+      "Every stone tells a story: of mountains, of water and of a great deal of time. The guild of stone hunters is looking for new members – complete five missions, collect your letters and join!"
+    ),
+    preparation: l4(
+      "Vorbereitung für Erwachsene: Ein Stoffbeutel oder eine Schachtel für die Funde, wenn möglich eine Lupe. Sicherheit: nicht auf Felsen klettern, keine Steine werfen und nicht an steilen Bachufern suchen. In Schutzgebieten bleiben die Steine, wo sie sind – am Schluss zurücklegen. Belohnung: Der schönste Stein darf mit nach Hause (oder wird bemalt).",
+      "Préparation pour les adultes : un sac en tissu ou une boîte pour les trouvailles, si possible une loupe. Sécurité : ne pas grimper sur les rochers, ne pas lancer de pierres et ne pas chercher sur des berges escarpées. Dans les zones protégées, les pierres restent où elles sont – à remettre en place à la fin. Récompense : la plus belle pierre peut rentrer à la maison (ou être peinte).",
+      "Preparazione per gli adulti: un sacchetto di stoffa o una scatola per i ritrovamenti, se possibile una lente. Sicurezza: non arrampicarsi sulle rocce, non lanciare sassi e non cercare su rive ripide. Nelle aree protette i sassi restano dove sono – alla fine si rimettono a posto. Ricompensa: il sasso più bello può tornare a casa (o essere dipinto).",
+      "Preparation for adults: a cloth bag or box for the finds, a magnifying glass if possible. Safety: no climbing on rocks, no throwing stones and no searching on steep banks. In protected areas the stones stay where they are – put them back at the end. Reward: the finest stone may come home (or be painted)."
+    ),
+    stations: [
+      {
+        title: l4(
+          "Auftrag 1: Der glatte Wanderer",
+          "Mission 1 : Le voyageur tout lisse",
+          "Missione 1: Il viaggiatore liscio",
+          "Mission 1: The Smooth Traveller"
+        ),
+        story: l4(
+          "Manche Steine sind jahrelang mit dem Wasser gereist – sie sind rund geschliffen.",
+          "Certaines pierres ont voyagé des années avec l'eau – elles en sont ressorties toutes rondes.",
+          "Alcuni sassi hanno viaggiato per anni con l'acqua – si sono levigati fino a diventare tondi.",
+          "Some stones have travelled with the water for years – they have been ground round."
+        ),
+        task: l4(
+          "Finde den glattesten Stein, den du entdecken kannst. Streich mit dem Finger darüber: Fühlt er sich an wie Seife?",
+          "Trouve la pierre la plus lisse que tu peux dénicher. Passe le doigt dessus : on dirait du savon ?",
+          "Trova il sasso più liscio che riesci a scovare. Passaci sopra il dito: sembra sapone?",
+          "Find the smoothest stone you can. Run a finger over it: does it feel like soap?"
+        ),
+        hint: l4(
+          "Am Bach oder Seeufer liegen die rundesten Steine – dort schleift das Wasser.",
+          "Les pierres les plus rondes se trouvent au bord d'un ruisseau ou d'un lac – c'est là que l'eau polit.",
+          "I sassi più tondi stanno lungo un ruscello o sulla riva del lago – lì l'acqua leviga.",
+          "The roundest stones lie by a stream or lakeshore – that's where the water does the polishing."
+        ),
+        letter: l4("S", "R", "S", "R"),
+      },
+      {
+        title: l4(
+          "Auftrag 2: Der Farb-Fund",
+          "Mission 2 : La trouvaille colorée",
+          "Missione 2: Il ritrovamento colorato",
+          "Mission 2: The Colour Find"
+        ),
+        story: l4(
+          "Steinjäger*innen erkennen Schätze an ihrer Farbe.",
+          "Les chasseurs de pierres reconnaissent les trésors à leur couleur.",
+          "I cacciatori di sassi riconoscono i tesori dal colore.",
+          "Stone hunters recognise treasures by their colour."
+        ),
+        task: l4(
+          "Suche einen Stein, der anders aussieht als alle anderen: mit Streifen, Punkten oder einer ungewöhnlichen Farbe. Mach ihn nass – die Farben leuchten dann viel stärker!",
+          "Cherche une pierre différente de toutes les autres : avec des rayures, des points ou une couleur inhabituelle. Mouille-la – les couleurs ressortent bien plus fort !",
+          "Cerca un sasso diverso da tutti gli altri: con righe, puntini o un colore insolito. Bagnalo – i colori risaltano molto di più!",
+          "Look for a stone that stands out from all the others: with stripes, spots or an unusual colour. Wet it – the colours become far brighter!"
+        ),
+        letter: l4("T", "O", "A", "O"),
+      },
+      {
+        title: l4(
+          "Auftrag 3: Der Klang-Test",
+          "Mission 3 : Le test sonore",
+          "Missione 3: La prova del suono",
+          "Mission 3: The Sound Test"
+        ),
+        story: l4(
+          "Harte und weiche Steine klingen völlig verschieden.",
+          "Les pierres dures et tendres sonnent tout à fait différemment.",
+          "I sassi duri e quelli teneri suonano in modo del tutto diverso.",
+          "Hard and soft stones sound completely different."
+        ),
+        task: l4(
+          "Klopf zwei Steine vorsichtig gegeneinander (nicht gegen die Finger!). Klingt es hell wie eine Glocke oder dumpf wie ein Klotz? Finde einen von jeder Sorte.",
+          "Frappe doucement deux pierres l'une contre l'autre (pas contre tes doigts !). Le son est-il clair comme une cloche ou sourd comme un bloc ? Trouve-en une de chaque sorte.",
+          "Batti con delicatezza due sassi uno contro l'altro (non contro le dita!). Il suono è chiaro come una campana o sordo come un blocco? Trovane uno di ogni tipo.",
+          "Gently knock two stones together (not against your fingers!). Does it ring bright like a bell or sound dull like a block? Find one of each kind."
+        ),
+        hint: l4(
+          "Sandstein bröselt und klingt dumpf, harter Granit klingt hell.",
+          "Le grès s'effrite et sonne sourd, le granit dur sonne clair.",
+          "L'arenaria si sbriciola e suona sorda, il granito duro suona chiaro.",
+          "Sandstone crumbles and sounds dull, hard granite rings bright."
+        ),
+        letter: l4("E", "C", "S", "C"),
+      },
+      {
+        title: l4(
+          "Auftrag 4: Der Glitzer-Blick",
+          "Mission 4 : Le coup d'œil scintillant",
+          "Missione 4: Lo sguardo luccicante",
+          "Mission 4: The Glitter Check"
+        ),
+        story: l4(
+          "In vielen Steinen stecken winzige Spiegel: Kristalle.",
+          "Beaucoup de pierres cachent de minuscules miroirs : des cristaux.",
+          "In tanti sassi ci sono minuscoli specchi: i cristalli.",
+          "Many stones hold tiny mirrors: crystals."
+        ),
+        task: l4(
+          "Halte deine Steine ins Licht und dreh sie langsam. Findest du einen, der glitzert? Das sind echte Kristalle – zum Beispiel Glimmer im Granit.",
+          "Tiens tes pierres à la lumière et tourne-les lentement. En trouves-tu une qui scintille ? Ce sont de vrais cristaux – par exemple du mica dans le granit.",
+          "Metti i tuoi sassi alla luce e giralli lentamente. Ne trovi uno che luccica? Sono cristalli veri – per esempio la mica nel granito.",
+          "Hold your stones up to the light and turn them slowly. Can you find one that sparkles? Those are real crystals – mica in granite, for instance."
+        ),
+        letter: l4("I", "H", "S", "K"),
+      },
+      {
+        title: l4(
+          "Auftrag 5: Der Steinturm",
+          "Mission 5 : La tour de pierres",
+          "Missione 5: La torre di sassi",
+          "Mission 5: The Stone Tower"
+        ),
+        story: l4(
+          "Die letzte Prüfung braucht ruhige Hände.",
+          "La dernière épreuve demande des mains calmes.",
+          "L'ultima prova richiede mani ferme.",
+          "The final test calls for steady hands."
+        ),
+        task: l4(
+          "Baue aus deinen Funden einen möglichst hohen Turm – grosse Steine nach unten. Wie viele schaffst du? Danach baust du ihn wieder ab und legst die Steine zurück.",
+          "Construis avec tes trouvailles une tour la plus haute possible – les grosses pierres en bas. Combien arrives-tu à empiler ? Ensuite, démonte-la et remets les pierres en place.",
+          "Costruisci con i tuoi ritrovamenti una torre più alta possibile – i sassi grandi in basso. Quanti ci riesci a mettere? Poi smontala e rimetti i sassi al loro posto.",
+          "Build the tallest tower you can from your finds – big stones at the bottom. How many can you stack? Afterwards take it apart again and put the stones back."
+        ),
+        hint: l4(
+          "Flache Steine halten besser als runde – such dir die richtigen aus.",
+          "Les pierres plates tiennent mieux que les rondes – choisis bien.",
+          "I sassi piatti stanno meglio di quelli tondi – scegli bene.",
+          "Flat stones hold better than round ones – pick the right ones."
+        ),
+        letter: l4("N", "E", "O", ""),
+      },
+    ],
+    solutionWord: l4("STEIN", "ROCHE", "SASSO", "ROCK"),
+    finale: l4(
+      "Deine Buchstaben ergeben «STEIN» – die Gilde nimmt dich auf! Such dir einen Lieblingsstein als Glücksstein aus (bemalen erlaubt) und leg die anderen dorthin zurück, wo du sie gefunden hast.",
+      "Tes lettres forment « ROCHE » – la guilde t'accepte ! Choisis une pierre préférée comme porte-bonheur (tu peux la peindre) et remets les autres là où tu les as trouvées.",
+      "Le tue lettere formano «SASSO» – la gilda ti accoglie! Scegli un sasso preferito come portafortuna (puoi dipingerlo) e rimetti gli altri dove li hai trovati.",
+      "Your letters spell 'ROCK' – the guild takes you in! Pick a favourite stone as your lucky charm (painting allowed) and put the others back where you found them."
+    ),
+  },
+  {
+    id: "wind-detektive",
+    title: l4(
+      "Die Wind-Detektive",
+      "Les détectives du vent",
+      "I detective del vento",
+      "The Wind Detectives"
+    ),
+    ageHint: l4(
+      "ab ca. 6 Jahren",
+      "dès 6 ans env.",
+      "da circa 6 anni",
+      "from about 6 years"
+    ),
+    durationMinutes: 20,
+    intro: l4(
+      "Der Wind ist unsichtbar – aber er hinterlässt überall Spuren. Als Wind-Detektiv*in findest du heraus, woher er heute kommt, wie stark er ist und was er fürs Wetter bedeutet. Fünf Ermittlungen, fünf Buchstaben!",
+      "Le vent est invisible – mais il laisse des traces partout. En tant que détective du vent, tu découvres d'où il souffle aujourd'hui, quelle est sa force et ce qu'il annonce comme temps. Cinq enquêtes, cinq lettres !",
+      "Il vento è invisibile – ma lascia tracce ovunque. Come detective del vento scopri da dove soffia oggi, quanto è forte e che tempo annuncia. Cinque indagini, cinque lettere!",
+      "The wind is invisible – but it leaves traces everywhere. As a wind detective you work out where it comes from today, how strong it is and what it means for the weather. Five investigations, five letters!"
+    ),
+    preparation: l4(
+      "Vorbereitung für Erwachsene: Ein Taschentuch oder Bändel als Windfahne genügt; das Wetter-Modul der App eignet sich zum Nachprüfen. Sicherheit: Bei Sturm- oder Gewitterwarnung nicht in den Wald und nicht unter grosse Bäume – dann die Jagd verschieben.",
+      "Préparation pour les adultes : un mouchoir ou un ruban suffit comme manche à air ; le module météo de l'appli permet de vérifier. Sécurité : en cas d'alerte tempête ou orage, ne pas aller en forêt ni sous de grands arbres – reporter la chasse.",
+      "Preparazione per gli adulti: basta un fazzoletto o un nastro come manica a vento; il modulo meteo dell'app serve per verificare. Sicurezza: in caso di allerta vento forte o temporali non andare nel bosco né sotto alberi grandi – meglio rimandare la caccia.",
+      "Preparation for adults: a tissue or ribbon is enough as a wind vane; the app's weather module is handy for checking. Safety: if storms or thunderstorms are forecast, stay out of the forest and away from big trees – postpone the hunt."
+    ),
+    stations: [
+      {
+        title: l4(
+          "Ermittlung 1: Die Windfahne",
+          "Enquête 1 : La manche à air",
+          "Indagine 1: La manica a vento",
+          "Investigation 1: The Wind Vane"
+        ),
+        story: l4(
+          "Zuerst musst du wissen, woher der Verdächtige kommt.",
+          "Il faut d'abord savoir d'où vient le suspect.",
+          "Prima devi sapere da dove arriva il sospettato.",
+          "First you need to know where the suspect comes from."
+        ),
+        task: l4(
+          "Halte ein Taschentuch oder einen Grashalm hoch und schau, wohin es weht. Zeig mit dem Arm dorthin, WOHER der Wind kommt – das ist seine Richtung.",
+          "Tiens un mouchoir ou un brin d'herbe en l'air et regarde dans quelle direction il s'envole. Pointe le bras vers l'endroit D'OÙ vient le vent – c'est sa direction.",
+          "Tieni in alto un fazzoletto o un filo d'erba e guarda dove viene spinto. Indica con il braccio DA DOVE arriva il vento – questa è la sua direzione.",
+          "Hold up a tissue or a blade of grass and see which way it blows. Point your arm to where the wind is coming FROM – that is its direction."
+        ),
+        hint: l4(
+          "Ein nasser Finger hilft: Die Seite, die kalt wird, zeigt zum Wind.",
+          "Un doigt mouillé aide : le côté qui devient froid indique le vent.",
+          "Un dito bagnato aiuta: il lato che diventa freddo indica il vento.",
+          "A wet finger helps: the side that turns cold points into the wind."
+        ),
+        letter: l4("W", "V", "V", "W"),
+      },
+      {
+        title: l4(
+          "Ermittlung 2: Die Wolken-Akte",
+          "Enquête 2 : Le dossier des nuages",
+          "Indagine 2: Il fascicolo delle nuvole",
+          "Investigation 2: The Cloud File"
+        ),
+        story: l4(
+          "Der Wind schiebt die Wolken – sie verraten seine Pläne.",
+          "Le vent pousse les nuages – ils trahissent ses plans.",
+          "Il vento spinge le nuvole – e loro svelano i suoi piani.",
+          "The wind pushes the clouds – they give away its plans."
+        ),
+        task: l4(
+          "Schau in den Himmel: Sind es kleine Schäfchenwolken, lange Schleier oder hohe Türme? Ziehen sie schnell oder langsam?",
+          "Regarde le ciel : de petits moutons, de longs voiles ou de hautes tours ? Défilent-ils vite ou lentement ?",
+          "Guarda il cielo: piccole pecorelle, lunghi veli o alte torri? Passano veloci o lente?",
+          "Look at the sky: little fluffy clouds, long veils or tall towers? Are they moving fast or slowly?"
+        ),
+        hint: l4(
+          "Hohe Wolkentürme mit dunklem Boden bedeuten: Gewitter möglich.",
+          "De hautes tours de nuages à base sombre annoncent un orage possible.",
+          "Alte torri di nuvole con la base scura significano: possibile temporale.",
+          "Tall cloud towers with a dark base mean: a thunderstorm is possible."
+        ),
+        letter: l4("I", "E", "E", "I"),
+      },
+      {
+        title: l4(
+          "Ermittlung 3: Der Stärke-Test",
+          "Enquête 3 : Le test de force",
+          "Indagine 3: La prova della forza",
+          "Investigation 3: The Strength Test"
+        ),
+        story: l4(
+          "Wie kräftig ist der Verdächtige heute?",
+          "Quelle est la force du suspect aujourd'hui ?",
+          "Quanto è forte oggi il sospettato?",
+          "How strong is the suspect today?"
+        ),
+        task: l4(
+          "Beobachte die Bäume: Bewegen sich nur die Blätter (leichter Wind), schwanken die Äste (frischer Wind) oder biegen sich ganze Stämme (starker Wind)?",
+          "Observe les arbres : seules les feuilles bougent (vent léger), les branches oscillent (vent frais) ou les troncs entiers plient (vent fort) ?",
+          "Osserva gli alberi: si muovono solo le foglie (vento leggero), oscillano i rami (vento fresco) o si piegano interi tronchi (vento forte)?",
+          "Watch the trees: are only the leaves moving (light wind), are the branches swaying (fresh wind) or are whole trunks bending (strong wind)?"
+        ),
+        letter: l4("N", "N", "N", "N"),
+      },
+      {
+        title: l4(
+          "Ermittlung 4: Der Zelt-Check",
+          "Enquête 4 : Le contrôle de la tente",
+          "Indagine 4: Il controllo della tenda",
+          "Investigation 4: The Tent Check"
+        ),
+        story: l4(
+          "Ein guter Detektiv schützt auch das eigene Lager.",
+          "Un bon détective protège aussi son propre camp.",
+          "Un bravo detective protegge anche il proprio campo.",
+          "A good detective also protects their own camp."
+        ),
+        task: l4(
+          "Geh ums Zelt: Auf welche Seite drückt der Wind? Sind dort die Heringe fest und die Leinen gespannt? Steht etwas Leichtes draussen, das wegfliegen könnte?",
+          "Fais le tour de la tente : de quel côté le vent appuie-t-il ? Les sardines tiennent-elles et les cordes sont-elles tendues ? Reste-t-il dehors quelque chose de léger qui pourrait s'envoler ?",
+          "Fai il giro della tenda: da che parte spinge il vento? I picchetti tengono bene e i tiranti sono tesi? C'è fuori qualcosa di leggero che potrebbe volare via?",
+          "Walk around the tent: which side is the wind pushing on? Are the pegs firm and the guy lines taut? Is anything light lying outside that could blow away?"
+        ),
+        hint: l4(
+          "Ein Zelt steht am besten mit der kleinsten Seite im Wind.",
+          "Une tente tient le mieux avec son côté le plus étroit face au vent.",
+          "Una tenda regge meglio con il lato più stretto rivolto al vento.",
+          "A tent copes best with its narrowest side facing the wind."
+        ),
+        letter: l4("D", "T", "T", "D"),
+      },
+      {
+        title: l4(
+          "Ermittlung 5: Die Prognose",
+          "Enquête 5 : Le pronostic",
+          "Indagine 5: La previsione",
+          "Investigation 5: The Forecast"
+        ),
+        story: l4(
+          "Zum Schluss wagen Detektive eine Vorhersage.",
+          "Pour finir, les détectives osent une prédiction.",
+          "Alla fine i detective azzardano una previsione.",
+          "Finally, detectives dare to make a prediction."
+        ),
+        task: l4(
+          "Sag laut voraus, wie das Wetter morgen wird – und begründe es mit Wind und Wolken. Morgen früh prüfst du, ob du richtig lagst!",
+          "Annonce à voix haute le temps qu'il fera demain – et justifie avec le vent et les nuages. Demain matin, tu vérifieras si tu avais raison !",
+          "Di' ad alta voce che tempo farà domani – e spiegalo con vento e nuvole. Domani mattina controlli se ci avevi preso!",
+          "Say out loud what the weather will do tomorrow – and back it up with wind and clouds. Tomorrow morning you check whether you were right!"
+        ),
+        hint: l4(
+          "Im Wetter-Modul dieser App kannst du deine Prognose vergleichen.",
+          "Le module météo de cette appli te permet de comparer ton pronostic.",
+          "Nel modulo meteo di questa app puoi confrontare la tua previsione.",
+          "The weather module of this app lets you compare your forecast."
+        ),
+        letter: l4("", "", "O", ""),
+      },
+    ],
+    solutionWord: l4("WIND", "VENT", "VENTO", "WIND"),
+    finale: l4(
+      "Deine Buchstaben ergeben «WIND» – Fall gelöst! Du bist ab jetzt offizielle*r Wind-Detektiv*in des Lagers und meldest jeden Abend, aus welcher Richtung der Wind weht.",
+      "Tes lettres forment « VENT » – affaire résolue ! Tu es désormais détective du vent officiel·le du camp et tu annonces chaque soir d'où souffle le vent.",
+      "Le tue lettere formano «VENTO» – caso risolto! Da adesso sei il detective ufficiale del vento del campo e ogni sera annunci da che parte soffia.",
+      "Your letters spell 'WIND' – case closed! From now on you are the camp's official wind detective and report every evening which way the wind is blowing."
+    ),
+  },
 ];
 
 export const natureQuizzes: NatureQuiz[] = [

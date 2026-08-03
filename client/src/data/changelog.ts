@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Familien-Modus: Zwei neue Schnitzeljagden warten auf dich – «Die Steinjäger» rund um Bachsteine, Farben und Kristalle sowie «Die Wind-Detektive» mit Windrichtung, Wolken und Wetter-Prognose. Beide mit Lösungswort, Stoppuhr und Druckansicht.",
+        "Mode famille : deux nouvelles chasses au trésor t'attendent – « Les chasseurs de pierres » autour des galets, des couleurs et des cristaux, et « Les détectives du vent » avec direction du vent, nuages et pronostic météo. Les deux avec mot mystère, chronomètre et impression.",
+        "Modalità famiglia: due nuove cacce al tesoro ti aspettano – «I cacciatori di sassi» tra ciottoli, colori e cristalli e «I detective del vento» con direzione del vento, nuvole e previsione del tempo. Entrambe con parola segreta, cronometro e stampa.",
+        "Family mode: two new scavenger hunts are waiting – “The Stone Hunters” about river pebbles, colours and crystals, and “The Wind Detectives” with wind direction, clouds and a weather forecast. Both with a solution word, stopwatch and print view."
+      ),
+      l4(
         "Natur-Entdecker: Acht neue Arten füllen das Lexikon – Feldhase, Biber und Steinmarder bei den Tierspuren, Perseus und die Plejaden am Himmel sowie Bergahorn, Waldföhre und Vogelbeere bei den Bäumen. Natur-Quiz, Sammelalbum und Suche nehmen sie automatisch mit.",
         "Explorateur nature : huit nouvelles espèces enrichissent le lexique – lièvre, castor et fouine côté traces, Persée et les Pléiades dans le ciel, ainsi qu'érable sycomore, pin sylvestre et sorbier côté arbres. Le quiz nature, l'album et la recherche les intègrent automatiquement.",
         "Esploratore della natura: otto nuove specie arricchiscono il lessico – lepre, castoro e faina tra le tracce, Perseo e le Pleiadi in cielo, oltre ad acero di monte, pino silvestre e sorbo tra gli alberi. Quiz, album e ricerca li includono in automatico.",
