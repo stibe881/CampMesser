@@ -1203,11 +1203,115 @@ export const fr: Translation = {
       caravan: "Caravane",
     },
     profileTolerance: (deg: string) => `Tolérance ±${deg}°`,
+    manageVehicles: "Véhicules & charge utile",
     soundLabel: "Signal sonore",
     soundHint:
       "Bref son et vibration dès que c'est de niveau – de nouveau seulement si tu quittes le niveau entre-temps.",
     calibrationHint:
       "« Mettre à zéro ici » compense une coque de téléphone ou une table de travers : pose le téléphone sur une surface dont tu sais qu'elle est plane et mets à zéro là. Pour la caravane : pose le téléphone sur le sol ou un plan de travail à l'intérieur et cale le côté bas avec des cales jusqu'à ce que la bulle soit au centre.",
+  },
+  payload: {
+    title: "Calculateur de charge utile",
+    subtitle:
+      "Ton attelage est-il surchargé ? Limites, chargement et feu tricolore en un coup d'œil.",
+    disclaimer:
+      "Aide à l'orientation sans garantie : seuls le permis de circulation et la balance font foi. Pèse ton attelage chargé avant le départ sur un pont-bascule public – ce calcul ne le remplace pas.",
+    rigTitle: "Attelage",
+    towLabel: "Véhicule tracteur",
+    trailerLabel: "Remorque",
+    noneOption: "Aucun véhicule choisi",
+    noTrailerOption: "Sans remorque",
+    showVehicles: "Modifier les véhicules",
+    hideVehicles: "Replier les véhicules",
+    vehiclesHint: "Le niveau à bulle utilise les mêmes profils.",
+    limitsHint:
+      "Toutes les valeurs figurent dans le permis de circulation. Laisse vide ce que tu ne connais pas – le feu reste alors gris au lieu de vert.",
+    nameLabel: "Nom",
+    kindLabel: "Type",
+    roleLabel: "Rôle",
+    roleNames: {
+      tow: "Véhicule tracteur",
+      trailer: "Remorque",
+      none: "Hébergement",
+    },
+    emptyKgLabel: "Poids à vide (kg)",
+    grossKgLabel: "Poids total admissible (kg)",
+    towKgLabel: "Charge tractable admissible (kg)",
+    noseKgLabel: "Charge sur la boule admissible (kg)",
+    axleKgLabel: "Charge par essieu admissible (kg)",
+    addVehicle: "Ajouter un véhicule",
+    newVehicleName: "Nouveau véhicule",
+    deleteVehicleAria: (name: string) => `Supprimer ${name}`,
+    deleteVehicleConfirm: (name: string) =>
+      `Vraiment supprimer « ${name} » ? Le niveau à bulle perd aussi ce profil.`,
+    loadTitle: "Chargement",
+    personsLabel: "Personnes",
+    personKgLabel: "kg par personne",
+    personsHint: (kg: string) => `${kg} dans le véhicule tracteur`,
+    personsDecreaseAria: "Une personne de moins",
+    personsIncreaseAria: "Une personne de plus",
+    packListLabel: "Liste de bagages comme chargement",
+    packListNone: "Aucune liste de bagages",
+    packListWeight: (kg: string) => `${kg} d'après l'inventaire`,
+    packListMissing: (n: number) =>
+      `${n} articles sans poids dans l'inventaire – ils manquent dans le total`,
+    packListLoggedOut:
+      "Connecte-toi pour reprendre une liste de bagages avec son poids comme chargement.",
+    positionLabel: "Position",
+    positionNames: {
+      tow: "Véhicule tracteur",
+      trailer: "Remorque",
+    },
+    itemsTitle: "Postes libres",
+    itemsHint:
+      "Pour tout ce qui n'est pas sur la liste : eau dans le réservoir, bouteille de gaz, vélos, auvent.",
+    itemLabelPlaceholder: "Quoi ?",
+    itemKgPlaceholder: "kg",
+    addItem: "Ajouter",
+    removeItemAria: (label: string) => `Retirer ${label}`,
+    noseMeasuredLabel: "Charge sur la boule mesurée (kg)",
+    noseMeasuredHint:
+      "Laisse vide : nous comptons 5 % du poids de la remorque.",
+    resultTitle: "Résultat",
+    noVehicleHint:
+      "Choisis un véhicule tracteur ou une remorque – et nous calculons.",
+    checkNames: {
+      towGross: "Poids total du véhicule tracteur",
+      trailerGross: "Poids total de la remorque",
+      towCapacity: "Charge tractable",
+      noseWeight: "Charge sur la boule",
+      towAxle: "Charge par essieu du tracteur",
+      trailerAxle: "Charge par essieu de la remorque",
+    },
+    statusNames: {
+      ok: "dans le vert",
+      tight: "juste",
+      over: "surchargé",
+      unknown: "pas clair",
+    },
+    verdict: {
+      ok: "Tout est dans le vert – bonne route !",
+      tight:
+        "Juste : au moins une limite est presque atteinte. Pèse l'attelage avant de partir.",
+      over: "Surchargé : au moins une limite est dépassée. Tu ne peux pas partir comme ça.",
+      unknown:
+        "Pas encore de verdict : il manque des données. Reprends les valeurs du permis de circulation.",
+    },
+    checkLine: (actual: string, limit: string, rest: string) =>
+      `${actual} sur ${limit} · ${rest}`,
+    freeLeft: (kg: string) => `${kg} de libre`,
+    overBy: (kg: string) => `${kg} de trop`,
+    missingLimit: "Limite non saisie – complète-la sur le véhicule.",
+    missingValue: "Poids à vide manquant – impossible de calculer sans lui.",
+    notComputable:
+      "Pas calculable sans balance : la répartition du poids sur les essieux dépend de l'empattement et de l'endroit où tu charges.",
+    estimatedNote: "avec une charge sur la boule estimée",
+    totalsLine: (tow: string, trailer: string, train: string) =>
+      `Tracteur ${tow} · Remorque ${trailer} · Attelage ${train}`,
+    noseRule: (min: string, max: string, rec: string) =>
+      `Règle empirique pour la charge sur la boule : 4 à 7 % du poids réel de la remorque, donc ${min} à ${max} ici. Utilise au mieux la charge admissible (jusqu'à ${rec}) – trop peu de poids sur le timon fait louvoyer l'attelage.`,
+    levelHint: "Le véhicule est-il déjà de niveau ? Mêmes profils dans le",
+    levelLink: "niveau à bulle",
   },
   sos: {
     title: "SOS & tableau de bord d'urgence",

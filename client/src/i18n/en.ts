@@ -1156,11 +1156,114 @@ export const en: Translation = {
       caravan: "Caravan",
     },
     profileTolerance: (deg: string) => `Tolerance ±${deg}°`,
+    manageVehicles: "Vehicles & payload",
     soundLabel: "Signal tone",
     soundHint:
       "Short tone and vibration as soon as it is level – it only sounds again once you have left the level position.",
     calibrationHint:
       "“Zero here” compensates for a crooked phone case or table top: place the phone on a surface you know is level and zero it there. For the caravan: place the phone on the floor or a worktop inside and shim the low side with wedges until the bubble is in the centre.",
+  },
+  payload: {
+    title: "Payload calculator",
+    subtitle:
+      "Is your rig overloaded? Limits, load and traffic light at a glance.",
+    disclaimer:
+      "Guidance only, no guarantee: the vehicle registration document and the weighbridge are what count. Weigh your loaded rig on a public weighbridge before you set off – this calculation is no substitute.",
+    rigTitle: "Rig",
+    towLabel: "Towing vehicle",
+    trailerLabel: "Trailer",
+    noneOption: "No vehicle selected",
+    noTrailerOption: "Without trailer",
+    showVehicles: "Edit vehicles",
+    hideVehicles: "Collapse vehicles",
+    vehiclesHint: "The spirit level uses the same profiles.",
+    limitsHint:
+      "All values are in the vehicle registration document. Leave blank whatever you do not know – the light then stays grey instead of green.",
+    nameLabel: "Name",
+    kindLabel: "Type",
+    roleLabel: "Role",
+    roleNames: {
+      tow: "Towing vehicle",
+      trailer: "Trailer",
+      none: "Accommodation",
+    },
+    emptyKgLabel: "Kerb weight (kg)",
+    grossKgLabel: "Permitted gross weight (kg)",
+    towKgLabel: "Permitted towing capacity (kg)",
+    noseKgLabel: "Permitted nose weight (kg)",
+    axleKgLabel: "Permitted axle load (kg)",
+    addVehicle: "Add vehicle",
+    newVehicleName: "New vehicle",
+    deleteVehicleAria: (name: string) => `Delete ${name}`,
+    deleteVehicleConfirm: (name: string) =>
+      `Really delete “${name}”? The spirit level loses this profile too.`,
+    loadTitle: "Load",
+    personsLabel: "People",
+    personKgLabel: "kg per person",
+    personsHint: (kg: string) => `${kg} in the towing vehicle`,
+    personsDecreaseAria: "One person fewer",
+    personsIncreaseAria: "One person more",
+    packListLabel: "Packing list as load",
+    packListNone: "No packing list",
+    packListWeight: (kg: string) => `${kg} from the inventory match`,
+    packListMissing: (n: number) =>
+      `${n} items without a weight in the inventory – they are missing from the total`,
+    packListLoggedOut:
+      "Sign in to use a packing list and its weight as your load.",
+    positionLabel: "Position",
+    positionNames: {
+      tow: "Towing vehicle",
+      trailer: "Trailer",
+    },
+    itemsTitle: "Extra items",
+    itemsHint:
+      "For everything not on the packing list: water in the tank, gas bottle, bikes, awning.",
+    itemLabelPlaceholder: "What?",
+    itemKgPlaceholder: "kg",
+    addItem: "Add",
+    removeItemAria: (label: string) => `Remove ${label}`,
+    noseMeasuredLabel: "Measured nose weight (kg)",
+    noseMeasuredHint: "Leave blank: we assume 5% of the trailer weight.",
+    resultTitle: "Result",
+    noVehicleHint:
+      "Pick a towing vehicle or a trailer – then we can do the maths.",
+    checkNames: {
+      towGross: "Gross weight of towing vehicle",
+      trailerGross: "Gross weight of trailer",
+      towCapacity: "Towing capacity",
+      noseWeight: "Nose weight",
+      towAxle: "Axle load of towing vehicle",
+      trailerAxle: "Axle load of trailer",
+    },
+    statusNames: {
+      ok: "well within limits",
+      tight: "tight",
+      over: "overloaded",
+      unknown: "unclear",
+    },
+    verdict: {
+      ok: "All within limits – have a good trip!",
+      tight:
+        "Tight: at least one limit is almost reached. Weigh the rig before you drive.",
+      over: "Overloaded: at least one limit is exceeded. You must not set off like this.",
+      unknown:
+        "No verdict yet: some figures are missing. Add the values from the registration document.",
+    },
+    checkLine: (actual: string, limit: string, rest: string) =>
+      `${actual} of ${limit} · ${rest}`,
+    freeLeft: (kg: string) => `${kg} left`,
+    overBy: (kg: string) => `${kg} too much`,
+    missingLimit: "Limit not recorded – add it to the vehicle.",
+    missingValue: "Kerb weight missing – nothing to calculate without it.",
+    notComputable:
+      "Not computable without a weighbridge: how the weight sits on the axles depends on the wheelbase and where you load.",
+    estimatedNote: "with an estimated nose weight",
+    totalsLine: (tow: string, trailer: string, train: string) =>
+      `Towing vehicle ${tow} · Trailer ${trailer} · Rig ${train}`,
+    noseRule: (min: string, max: string, rec: string) =>
+      `Rule of thumb for nose weight: 4–7% of the trailer's actual weight, so ${min} to ${max} here. Use as much of the permitted nose weight as you can (up to ${rec}) – too little weight on the drawbar makes the rig snake.`,
+    levelHint: "Is the vehicle level already? The same profiles drive the",
+    levelLink: "spirit level",
   },
   sos: {
     title: "SOS & emergency dashboard",

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Crosshair, Gauge, RotateCcw, Smartphone } from "lucide-react";
+import { Link } from "wouter";
+import { Crosshair, Gauge, RotateCcw, Scale, Smartphone } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,22 +9,27 @@ import { Switch } from "@/components/ui/switch";
 import {
   bubblePosition,
   levelingAdvice,
-  sanitizeLevelProfile,
   screenTilt,
-  LEVEL_PROFILES,
   LEVEL_TOLERANCES,
   type LevelProfile,
   type Tilt,
 } from "@shared/level";
+import { findVehicle, type VehicleProfile } from "@shared/vehicles";
 import { type Language } from "@shared/i18n";
 import { useI18n } from "@/i18n";
 import { useDeviceTilt } from "@/hooks/useDeviceTilt";
+import {
+  acceptSyncedVehicles,
+  loadVehicles,
+  saveSelectedVehicleId,
+  selectedVehicleId,
+} from "@/lib/vehicleStore";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { useWakeLock } from "@/lib/useWakeLock";
 import { cn } from "@/lib/utils";
 
 const CALIBRATION_KEY = "campmesser.levelCalibration";
 const SOUND_KEY = "campmesser.levelSound";
-const PROFILE_KEY = "campmesser.levelProfile";
 /** Ausschlag der Libelle: bei dieser Neigung liegt die Blase am Rand. */
 const MAX_DEG = 10;
 /** Signalton: Frequenz und Dauer des kurzen «im Lot»-Pieps. */
@@ -42,22 +48,6 @@ function loadSoundEnabled(): boolean {
 function saveSoundEnabled(enabled: boolean) {
   try {
     localStorage.setItem(SOUND_KEY, enabled ? "1" : "0");
-  } catch {
-    /* Sitzung reicht */
-  }
-}
-
-function loadProfile(): LevelProfile {
-  try {
-    return sanitizeLevelProfile(localStorage.getItem(PROFILE_KEY));
-  } catch {
-    return sanitizeLevelProfile(null);
-  }
-}
-
-function saveProfile(profile: LevelProfile) {
-  try {
-    localStorage.setItem(PROFILE_KEY, profile);
   } catch {
     /* Sitzung reicht */
   }
@@ -143,9 +133,9 @@ function currentScreenAngle(): number {
   return typeof legacy === "number" ? legacy : 0;
 }
 
-/** Toleranz eines Profils als Zahl (Dezimal-Komma ausser im Englischen). */
-function fmtTolerance(profile: LevelProfile, lang: Language): string {
-  const fixed = LEVEL_TOLERANCES[profile].toFixed(1);
+/** Toleranz einer Fahrzeug-Art als Zahl (Dezimal-Komma ausser im Englischen). */
+function fmtTolerance(kind: LevelProfile, lang: Language): string {
+  const fixed = LEVEL_TOLERANCES[kind].toFixed(1);
   return lang === "en" ? fixed : fixed.replace(".", ",");
 }
 
@@ -168,7 +158,23 @@ export default function LevelPage() {
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() =>
     loadSoundEnabled()
   );
-  const [profile, setProfile] = useState<LevelProfile>(() => loadProfile());
+  // Fahrzeug-Profile: geteilt mit dem Zuladungs-Rechner (#227). Beim ersten
+  // Aufruf entstehen die drei bekannten Profile (Zelt/Bus/Wohnwagen).
+  const initialVehicles = useState(() => loadVehicles(t.level.profileNames))[0];
+  const [vehicles, setVehicles] = useState<VehicleProfile[]>(
+    initialVehicles.vehicles
+  );
+  const [vehicleId, setVehicleId] = useState<string>(
+    initialVehicles.selectedId
+  );
+  useSyncedSetting<VehicleProfile[]>("vehicles", value => {
+    const synced = acceptSyncedVehicles(value);
+    if (synced.length === 0) return;
+    setVehicles(synced);
+    setVehicleId(current => selectedVehicleId(synced, current));
+  });
+  const vehicle = findVehicle(vehicles, vehicleId) ?? vehicles[0] ?? null;
+  const kind: LevelProfile = vehicle?.kind ?? "caravan";
 
   // Sensor direkt starten (Android/Desktop); iOS verlangt den Button unten
   useEffect(() => {
@@ -200,7 +206,7 @@ export default function LevelPage() {
         : null,
     [rawTilt, calibration]
   );
-  const advice = tilt ? levelingAdvice(tilt, undefined, lang, profile) : null;
+  const advice = tilt ? levelingAdvice(tilt, undefined, lang, kind) : null;
   const bubble = tilt ? bubblePosition(tilt, MAX_DEG) : { x: 0, y: 0 };
   const isCalibrated = calibration.pitch !== 0 || calibration.roll !== 0;
 
@@ -260,29 +266,39 @@ export default function LevelPage() {
             role="group"
             aria-label={t.level.profileLabel}
           >
-            {LEVEL_PROFILES.map(p => (
+            {vehicles.map(v => (
               <button
-                key={p}
+                key={v.id}
                 type="button"
                 onClick={() => {
-                  setProfile(p);
-                  saveProfile(p);
+                  setVehicleId(v.id);
+                  saveSelectedVehicleId(v.id);
                 }}
                 className={cn(
                   "rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
-                  profile === p
+                  vehicle?.id === v.id
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:text-foreground"
                 )}
-                aria-pressed={profile === p}
+                aria-pressed={vehicle?.id === v.id}
               >
-                {t.level.profileNames[p]}
+                {v.name}
               </button>
             ))}
             <span className="text-xs text-muted-foreground">
-              {t.level.profileTolerance(fmtTolerance(profile, lang))}
+              {t.level.profileTolerance(fmtTolerance(kind, lang))}
             </span>
           </div>
+          {/* Dieselben Profile führen den Zuladungs-Rechner (#227) */}
+          <p className="mb-4 -mt-2 text-xs text-muted-foreground">
+            <Link
+              href="/zuladung"
+              className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+            >
+              <Scale className="h-3.5 w-3.5" aria-hidden="true" />
+              {t.level.manageVehicles}
+            </Link>
+          </p>
 
           {/* Libelle */}
           <Card

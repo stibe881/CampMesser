@@ -1199,11 +1199,114 @@ export const de = {
       caravan: "Wohnwagen",
     },
     profileTolerance: (deg: string) => `Toleranz ±${deg}°`,
+    manageVehicles: "Fahrzeuge & Zuladung",
     soundLabel: "Signalton",
     soundHint:
       "Kurzer Ton und Vibration, sobald es im Lot ist – erst wieder, wenn du die Waage zwischendurch verlässt.",
     calibrationHint:
       "«Hier nullen» gleicht eine schiefe Handy-Hülle oder Tischplatte aus: Lege das Handy auf eine Fläche, von der du weisst, dass sie eben ist, und nulle dort. Für den Wohnwagen: Handy auf den Boden oder eine Arbeitsfläche im Innern legen und die tiefe Seite mit Keilen unterlegen, bis die Blase in der Mitte ist.",
+  },
+  payload: {
+    title: "Zuladungs-Rechner",
+    subtitle:
+      "Ist dein Gespann überladen? Grenzwerte, Ladung und Ampel auf einen Blick.",
+    disclaimer:
+      "Orientierungshilfe ohne Gewähr: Verbindlich sind der Fahrzeugausweis und die Waage. Wieg dein beladenes Gespann vor der Abfahrt auf einer öffentlichen Brückenwaage – diese Rechnung ersetzt das nicht.",
+    rigTitle: "Gespann",
+    towLabel: "Zugfahrzeug",
+    trailerLabel: "Anhänger",
+    noneOption: "Kein Fahrzeug gewählt",
+    noTrailerOption: "Ohne Anhänger",
+    showVehicles: "Fahrzeuge bearbeiten",
+    hideVehicles: "Fahrzeuge zuklappen",
+    vehiclesHint: "Dieselben Profile nutzt die Wasserwaage.",
+    limitsHint:
+      "Alle Werte stehen im Fahrzeugausweis. Lass leer, was du nicht kennst – dann bleibt die Ampel grau statt grün.",
+    nameLabel: "Name",
+    kindLabel: "Art",
+    roleLabel: "Rolle",
+    roleNames: {
+      tow: "Zugfahrzeug",
+      trailer: "Anhänger",
+      none: "Unterkunft",
+    },
+    emptyKgLabel: "Leergewicht (kg)",
+    grossKgLabel: "Zul. Gesamtgewicht (kg)",
+    towKgLabel: "Zul. Anhängelast (kg)",
+    noseKgLabel: "Zul. Stützlast (kg)",
+    axleKgLabel: "Zul. Achslast (kg)",
+    addVehicle: "Fahrzeug hinzufügen",
+    newVehicleName: "Neues Fahrzeug",
+    deleteVehicleAria: (name: string) => `${name} löschen`,
+    deleteVehicleConfirm: (name: string) =>
+      `«${name}» wirklich löschen? Die Wasserwaage verliert das Profil ebenfalls.`,
+    loadTitle: "Ladung",
+    personsLabel: "Personen",
+    personKgLabel: "kg pro Person",
+    personsHint: (kg: string) => `${kg} im Zugfahrzeug`,
+    personsDecreaseAria: "Eine Person weniger",
+    personsIncreaseAria: "Eine Person mehr",
+    packListLabel: "Packliste als Ladung",
+    packListNone: "Keine Packliste",
+    packListWeight: (kg: string) => `${kg} aus dem Inventar-Abgleich`,
+    packListMissing: (n: number) =>
+      `${n} Einträge ohne Gewicht im Inventar – die fehlen in der Summe`,
+    packListLoggedOut:
+      "Melde dich an, um eine Packliste samt Gewicht als Ladung zu übernehmen.",
+    positionLabel: "Position",
+    positionNames: {
+      tow: "Zugfahrzeug",
+      trailer: "Anhänger",
+    },
+    itemsTitle: "Freie Posten",
+    itemsHint:
+      "Für alles, was nicht auf der Packliste steht: Wasser im Tank, Gasflasche, Velos, Vorzelt.",
+    itemLabelPlaceholder: "Was?",
+    itemKgPlaceholder: "kg",
+    addItem: "Hinzufügen",
+    removeItemAria: (label: string) => `${label} entfernen`,
+    noseMeasuredLabel: "Gemessene Stützlast (kg)",
+    noseMeasuredHint: "Leer lassen: Wir rechnen mit 5 % des Anhängergewichts.",
+    resultTitle: "Ergebnis",
+    noVehicleHint:
+      "Wähl ein Zugfahrzeug oder einen Anhänger – dann rechnen wir.",
+    checkNames: {
+      towGross: "Gesamtgewicht Zugfahrzeug",
+      trailerGross: "Gesamtgewicht Anhänger",
+      towCapacity: "Anhängelast",
+      noseWeight: "Stützlast",
+      towAxle: "Achslast Zugfahrzeug",
+      trailerAxle: "Achslast Anhänger",
+    },
+    statusNames: {
+      ok: "im grünen Bereich",
+      tight: "knapp",
+      over: "überladen",
+      unknown: "unklar",
+    },
+    verdict: {
+      ok: "Alles im grünen Bereich – gute Fahrt!",
+      tight:
+        "Knapp: Mindestens ein Grenzwert ist fast erreicht. Wieg das Gespann vor der Fahrt.",
+      over: "Überladen: Mindestens ein Grenzwert ist überschritten. So darfst du nicht losfahren.",
+      unknown:
+        "Noch kein Urteil: Es fehlen Angaben. Trag die Werte aus dem Fahrzeugausweis nach.",
+    },
+    checkLine: (actual: string, limit: string, rest: string) =>
+      `${actual} von ${limit} · ${rest}`,
+    freeLeft: (kg: string) => `${kg} frei`,
+    overBy: (kg: string) => `${kg} zu viel`,
+    missingLimit: "Grenzwert nicht erfasst – trag ihn beim Fahrzeug nach.",
+    missingValue: "Leergewicht fehlt – ohne das lässt sich nichts rechnen.",
+    notComputable:
+      "Ohne Waage nicht berechenbar: Wie sich das Gewicht auf die Achsen verteilt, hängt an Radstand und Ladeort.",
+    estimatedNote: "mit geschätzter Stützlast",
+    totalsLine: (tow: string, trailer: string, train: string) =>
+      `Zugfahrzeug ${tow} · Anhänger ${trailer} · Gespann ${train}`,
+    noseRule: (min: string, max: string, rec: string) =>
+      `Faustregel Stützlast: 4–7 % des tatsächlichen Anhängergewichts, hier also ${min} bis ${max}. Nutz die zulässige Stützlast möglichst aus (bis ${rec}) – zu wenig Druck auf der Deichsel bringt das Gespann ins Schlingern.`,
+    levelHint: "Steht das Fahrzeug schon eben? Dieselben Profile führen die",
+    levelLink: "Wasserwaage",
   },
   sos: {
     title: "SOS & Notfall-Dashboard",

@@ -30,6 +30,7 @@ import {
   Sprout,
   Tent,
   TreePine,
+  Truck,
   Users,
 } from "lucide-react";
 
@@ -218,6 +219,24 @@ export const modules: Module[] = [
     ),
     icon: Gauge,
     group: "vorOrt",
+    offline: true,
+  },
+  {
+    path: "/zuladung",
+    title: l4(
+      "Zuladungs-Rechner",
+      "Calculateur de charge utile",
+      "Calcolatore del carico",
+      "Payload calculator"
+    ),
+    description: l4(
+      "Ist das Gespann überladen? Gesamtgewicht, Anhängelast, Stützlast",
+      "L'attelage est-il surchargé ? Poids total, charge tractable, charge sur la boule",
+      "Il traino è sovraccarico? Peso totale, massa rimorchiabile, carico sul gancio",
+      "Is the rig overloaded? Gross weight, towing capacity, nose weight"
+    ),
+    icon: Truck,
+    group: "reise",
     offline: true,
   },
   {

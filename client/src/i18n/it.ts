@@ -1185,11 +1185,114 @@ export const it: Translation = {
       caravan: "Caravan",
     },
     profileTolerance: (deg: string) => `Tolleranza ±${deg}°`,
+    manageVehicles: "Veicoli e carico",
     soundLabel: "Segnale acustico",
     soundHint:
       "Breve suono e vibrazione appena sei in bolla – di nuovo solo se nel frattempo esci dalla bolla.",
     calibrationHint:
       "«Azzera qui» compensa una custodia del telefono o un piano storti: appoggia il telefono su una superficie che sai essere piana e azzera lì. Per il caravan: appoggia il telefono sul pavimento o su un piano di lavoro all'interno e metti dei cunei sotto il lato basso finché la bolla è al centro.",
+  },
+  payload: {
+    title: "Calcolatore del carico",
+    subtitle:
+      "Il tuo traino è sovraccarico? Limiti, carico e semaforo in un colpo d'occhio.",
+    disclaimer:
+      "Aiuto orientativo senza garanzia: fanno fede la licenza di circolazione e la pesa. Prima di partire pesa il traino carico su una pesa a ponte pubblica – questo calcolo non la sostituisce.",
+    rigTitle: "Traino",
+    towLabel: "Veicolo trainante",
+    trailerLabel: "Rimorchio",
+    noneOption: "Nessun veicolo scelto",
+    noTrailerOption: "Senza rimorchio",
+    showVehicles: "Modifica i veicoli",
+    hideVehicles: "Chiudi i veicoli",
+    vehiclesHint: "La livella usa gli stessi profili.",
+    limitsHint:
+      "Tutti i valori si trovano nella licenza di circolazione. Lascia vuoto ciò che non conosci – il semaforo resta grigio invece che verde.",
+    nameLabel: "Nome",
+    kindLabel: "Tipo",
+    roleLabel: "Ruolo",
+    roleNames: {
+      tow: "Veicolo trainante",
+      trailer: "Rimorchio",
+      none: "Alloggio",
+    },
+    emptyKgLabel: "Peso a vuoto (kg)",
+    grossKgLabel: "Peso totale ammesso (kg)",
+    towKgLabel: "Massa rimorchiabile ammessa (kg)",
+    noseKgLabel: "Carico sul gancio ammesso (kg)",
+    axleKgLabel: "Carico per asse ammesso (kg)",
+    addVehicle: "Aggiungi veicolo",
+    newVehicleName: "Nuovo veicolo",
+    deleteVehicleAria: (name: string) => `Elimina ${name}`,
+    deleteVehicleConfirm: (name: string) =>
+      `Vuoi davvero eliminare «${name}»? Anche la livella perde questo profilo.`,
+    loadTitle: "Carico",
+    personsLabel: "Persone",
+    personKgLabel: "kg a persona",
+    personsHint: (kg: string) => `${kg} nel veicolo trainante`,
+    personsDecreaseAria: "Una persona in meno",
+    personsIncreaseAria: "Una persona in più",
+    packListLabel: "Lista bagagli come carico",
+    packListNone: "Nessuna lista bagagli",
+    packListWeight: (kg: string) => `${kg} dal confronto con l'inventario`,
+    packListMissing: (n: number) =>
+      `${n} voci senza peso nell'inventario – mancano nel totale`,
+    packListLoggedOut:
+      "Accedi per usare una lista bagagli con il suo peso come carico.",
+    positionLabel: "Posizione",
+    positionNames: {
+      tow: "Veicolo trainante",
+      trailer: "Rimorchio",
+    },
+    itemsTitle: "Voci libere",
+    itemsHint:
+      "Per tutto ciò che non è nella lista: acqua nel serbatoio, bombola del gas, biciclette, veranda.",
+    itemLabelPlaceholder: "Che cosa?",
+    itemKgPlaceholder: "kg",
+    addItem: "Aggiungi",
+    removeItemAria: (label: string) => `Togli ${label}`,
+    noseMeasuredLabel: "Carico sul gancio misurato (kg)",
+    noseMeasuredHint: "Lascia vuoto: calcoliamo il 5 % del peso del rimorchio.",
+    resultTitle: "Risultato",
+    noVehicleHint:
+      "Scegli un veicolo trainante o un rimorchio – poi calcoliamo noi.",
+    checkNames: {
+      towGross: "Peso totale del veicolo trainante",
+      trailerGross: "Peso totale del rimorchio",
+      towCapacity: "Massa rimorchiabile",
+      noseWeight: "Carico sul gancio",
+      towAxle: "Carico per asse del trainante",
+      trailerAxle: "Carico per asse del rimorchio",
+    },
+    statusNames: {
+      ok: "tutto a posto",
+      tight: "al limite",
+      over: "sovraccarico",
+      unknown: "poco chiaro",
+    },
+    verdict: {
+      ok: "Tutto a posto – buon viaggio!",
+      tight:
+        "Al limite: almeno un valore è quasi raggiunto. Pesa il traino prima di partire.",
+      over: "Sovraccarico: almeno un limite è superato. Così non puoi metterti in strada.",
+      unknown:
+        "Ancora nessun verdetto: mancano dei dati. Riporta i valori della licenza di circolazione.",
+    },
+    checkLine: (actual: string, limit: string, rest: string) =>
+      `${actual} su ${limit} · ${rest}`,
+    freeLeft: (kg: string) => `${kg} liberi`,
+    overBy: (kg: string) => `${kg} di troppo`,
+    missingLimit: "Limite non registrato – aggiungilo nel veicolo.",
+    missingValue: "Manca il peso a vuoto – senza non si calcola nulla.",
+    notComputable:
+      "Non calcolabile senza pesa: la ripartizione del peso sugli assi dipende dal passo e da dove carichi.",
+    estimatedNote: "con carico sul gancio stimato",
+    totalsLine: (tow: string, trailer: string, train: string) =>
+      `Trainante ${tow} · Rimorchio ${trailer} · Traino ${train}`,
+    noseRule: (min: string, max: string, rec: string) =>
+      `Regola pratica per il carico sul gancio: 4–7 % del peso reale del rimorchio, qui quindi da ${min} a ${max}. Sfrutta il più possibile il carico ammesso (fino a ${rec}) – troppo poco peso sul timone fa serpeggiare il traino.`,
+    levelHint: "Il veicolo è già in piano? Gli stessi profili guidano la",
+    levelLink: "livella",
   },
   sos: {
     title: "SOS & dashboard d'emergenza",

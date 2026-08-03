@@ -30,6 +30,10 @@ export const SYNCED_SETTING_KEYS = [
   "weatherPlaces",
   /** Allergie-Profil: eigene Pollenarten im Wetter-Modul */
   "pollenProfile",
+  /** Fahrzeug-Profile (Wasserwaage + Zuladungs-Rechner) */
+  "vehicles",
+  /** Zuladungs-Plan: Fahrzeugwahl, Personen und freie Posten */
+  "payloadPlan",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];
