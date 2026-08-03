@@ -3144,6 +3144,45 @@ export const de = {
       "Daten aus OpenStreetMap über die Overpass-API – abgefragt nur auf deinen Klick. Länge, Höhenmeter und Schwierigkeit stehen nur dort, wo sie in OSM gepflegt sind, sonst «–». Markierung im Gelände und Wegzustand können abweichen: nimm Karte und Wetterbericht mit.",
   },
 
+  /** Dunkelheitskarte pro Platz (#239). */
+  darkSky: {
+    sectionAria: "Geschätzte Dunkelheit des Himmels an diesem Ort",
+    title: "Dunkler Himmel",
+    badge: (bortle: number) => `Bortle ${bortle}`,
+    subtitle: "Wie dunkel ist der Himmel an deinem Standort?",
+    subtitleAtPlace: (place: string) =>
+      `Wie dunkel ist der Himmel bei ${place}?`,
+    outsideCoverage:
+      "Für diesen Ort liegen keine Lichtquellen-Daten vor – der Datensatz deckt die Schweiz und das grenznahe Ausland ab. Eine Einstufung wäre hier geraten, deshalb zeigt CampMesser lieber keine.",
+    scaleAria: (bortle: number) =>
+      `Bortle-Skala von 1 (sehr dunkel) bis 9 (Innenstadt), geschätzte Stufe ${bortle}`,
+    scaleDark: "dunkel",
+    scaleBright: "hell",
+    classLine: (bortle: number, label: string) => `Bortle ${bortle} · ${label}`,
+    locating: "Standort wird bestimmt …",
+    noLocation:
+      "Für die Einstufung braucht CampMesser deinen Standort – gib die Ortung frei oder speichere einen Zeltplatz.",
+    tonightTitle: "Heute Nacht",
+    tonightLoading: "Bewölkung wird geladen …",
+    tonightWorthIt:
+      "Heute Nacht lohnt es sich besonders: dunkler Himmel, klare Nacht und wenig Mondlicht kommen zusammen. Nimm dir 20 Minuten fürs Dunkelwerden der Augen.",
+    tonightClouds: (percent: number) =>
+      `Für heute Nacht sind rund ${percent} % Bewölkung gemeldet – warte lieber auf eine klarere Nacht.`,
+    tonightMoon: (percent: number) =>
+      `Der Mond ist zu ${percent} % beleuchtet und überstrahlt die schwachen Sterne. Für die Milchstrasse sind die Nächte um Neumond die besseren.`,
+    tonightBrightSky:
+      "Die Nacht ist klar und der Mond stört kaum – nur ist der Himmel hier zu hell für schwache Sterne. Mond, Planeten und ISS-Überflüge lohnen sich trotzdem.",
+    tonightUnknown:
+      "Für heute Nacht liegt gerade keine Bewölkungs-Prognose vor.",
+    cloudLine: (percent: number) => `Bewölkung ab 21 Uhr: rund ${percent} %`,
+    moonLine: (percent: number) => `Mond: ${percent} % beleuchtet`,
+    astroLink: "Zum Sternenhimmel im Natur-Modul",
+    nearestTitle: "Nächste Lichtquellen:",
+    nearestItem: (name: string, distance: string) => `${name} ${distance}`,
+    estimateNote:
+      "Schätzung, keine Messung: Eine frei abrufbare Messung der Himmelshelligkeit gibt es nicht. CampMesser rechnet die Einstufung aus der Distanz zu den grössten Städten und Agglomerationen. Berge, die eine Lichtglocke abschirmen, Flutlicht gleich nebenan oder feuchte Luft kennt die Formel nicht – vor Ort kann es dunkler oder heller sein.",
+  },
+
   recipes: {
     title: "Campfire-Rezeptbuch",
     subtitle:

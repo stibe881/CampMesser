@@ -36,6 +36,7 @@ import { getMoonInfo } from "../shared/moon";
 import { daysUntilTrip } from "../shared/trips";
 import {
   detectAlerts,
+  nightCloudCover,
   type AlertThresholds,
   type HourlyWeather,
 } from "../shared/weather";
@@ -662,20 +663,11 @@ export function showerNearPeak(date: Date): MeteorShower | null {
 }
 
 /**
- * Mittlere Bewölkung (%) der Nacht-Stunden 21–24 Uhr des Datums aus der
- * Stunden-Prognose; null, wenn keine passenden Stunden vorliegen.
- * Reine Funktion (für Tests exportiert).
+ * Mittlere Nacht-Bewölkung: liegt seit der Dunkelheitskarte (#239) in
+ * shared/weather.ts, weil sie auch der Client braucht – hier nur
+ * weitergereicht, damit Aufrufer und Tests unverändert bleiben.
  */
-export function nightCloudCover(
-  hourly: Pick<HourlyWeather, "time" | "cloudCover">[],
-  date: string
-): number | null {
-  const values = hourly
-    .filter(h => h.time.startsWith(date) && Number(h.time.slice(11, 13)) >= 21)
-    .map(h => h.cloudCover);
-  if (values.length === 0) return null;
-  return values.reduce((sum, v) => sum + v, 0) / values.length;
-}
+export { nightCloudCover };
 
 /**
  * Sternschnuppen-Tipp bauen: aktiver Strom in Peak-Nähe, klare Nacht

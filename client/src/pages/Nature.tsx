@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import FishingLog from "@/components/FishingLog";
 import LoginPrompt from "@/components/LoginPrompt";
+import DarkSkyPanel from "@/components/DarkSkyPanel";
 import RedLightMode from "@/components/RedLightMode";
 import { Button } from "@/components/ui/button";
 import {
@@ -100,7 +101,7 @@ import {
 } from "@shared/season";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useDeviceHeading } from "@/hooks/useDeviceHeading";
-import { useI18n } from "@/i18n";
+import { useI18n, useT } from "@/i18n";
 import { resizeImageForUpload } from "@/lib/imageResize";
 import {
   collectionProgress,
@@ -665,6 +666,45 @@ function useStargazingLocation(): {
   }, [spotsLoading, spots]);
 
   return { coords, placeName, locating };
+}
+
+/**
+ * Dunkler Himmel am Beobachtungsort (#239): geschätzte Bortle-Klasse plus
+ * «heute Nacht lohnt es sich besonders», wenn dunkler Himmel, klare Nacht
+ * und wenig Mondlicht zusammenkommen. Ort wie bei ISS-Überflügen und
+ * Sternbild-Finder: GPS zuerst, sonst der erste gespeicherte Zeltplatz.
+ */
+function DarkSkySection() {
+  const t = useT();
+  const { coords, placeName, locating } = useStargazingLocation();
+
+  if (!coords) {
+    return (
+      <section
+        className="mb-6 rounded-xl border border-border bg-card p-4"
+        aria-label={t.darkSky.sectionAria}
+      >
+        <div className="mb-1 flex items-center gap-2">
+          <Telescope className="h-4 w-4 text-primary" aria-hidden="true" />
+          <h2 className="font-serif text-lg font-semibold">
+            {t.darkSky.title}
+          </h2>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {locating ? t.darkSky.locating : t.darkSky.noLocation}
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <DarkSkyPanel
+      latitude={coords.lat}
+      longitude={coords.lon}
+      placeName={placeName}
+      className="mb-6"
+    />
+  );
 }
 
 /**
@@ -1658,6 +1698,7 @@ export default function NaturePage() {
       </div>
 
       <MoonCalendar />
+      <DarkSkySection />
       <MeteorCalendar />
       <IssPasses />
       <ConstellationFinder onOpenEntry={openLexiconEntry} />

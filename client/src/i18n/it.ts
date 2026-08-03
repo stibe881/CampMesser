@@ -3113,6 +3113,45 @@ export const it: Translation = {
       "Dati di OpenStreetMap tramite l'API Overpass – interrogata solo su tuo clic. Lunghezza, dislivello e difficoltà compaiono solo dove sono curati in OSM, altrimenti «–». La segnaletica sul terreno e lo stato del sentiero possono differire: porta con te carta e bollettino meteo.",
   },
 
+  /** Carta dell'oscurità per piazzola (#239). */
+  darkSky: {
+    sectionAria: "Oscurità stimata del cielo in questo luogo",
+    title: "Cielo buio",
+    badge: (bortle: number) => `Bortle ${bortle}`,
+    subtitle: "Quanto è buio il cielo alla tua posizione?",
+    subtitleAtPlace: (place: string) => `Quanto è buio il cielo a ${place}?`,
+    outsideCoverage:
+      "Per questo luogo non ci sono dati sulle sorgenti luminose – il set di dati copre la Svizzera e le zone di confine. Una classificazione qui sarebbe indovinata, perciò CampMesser preferisce non mostrarne nessuna.",
+    scaleAria: (bortle: number) =>
+      `Scala di Bortle da 1 (molto buio) a 9 (centro città), livello stimato ${bortle}`,
+    scaleDark: "buio",
+    scaleBright: "chiaro",
+    classLine: (bortle: number, label: string) => `Bortle ${bortle} · ${label}`,
+    locating: "Posizione in corso di rilevamento …",
+    noLocation:
+      "Per la classificazione CampMesser ha bisogno della tua posizione – abilita la localizzazione oppure salva una piazzola.",
+    tonightTitle: "Questa notte",
+    tonightLoading: "Caricamento della nuvolosità …",
+    tonightWorthIt:
+      "Questa notte ne vale particolarmente la pena: cielo buio, notte serena e poca luce lunare si incontrano. Concediti 20 minuti perché gli occhi si abituino.",
+    tonightClouds: (percent: number) =>
+      `Per questa notte è annunciato circa il ${percent} % di nuvolosità – meglio aspettare una notte più serena.`,
+    tonightMoon: (percent: number) =>
+      `La Luna è illuminata al ${percent} % e copre le stelle deboli. Per la Via Lattea sono migliori le notti attorno alla luna nuova.`,
+    tonightBrightSky:
+      "La notte è serena e la Luna disturba poco – ma qui il cielo è troppo chiaro per le stelle deboli. Luna, pianeti e passaggi della ISS valgono comunque la pena.",
+    tonightUnknown:
+      "Per questa notte non c'è al momento nessuna previsione di nuvolosità.",
+    cloudLine: (percent: number) =>
+      `Nuvolosità dalle 21: circa il ${percent} %`,
+    moonLine: (percent: number) => `Luna: illuminata al ${percent} %`,
+    astroLink: "Al cielo stellato nel modulo natura",
+    nearestTitle: "Sorgenti luminose più vicine:",
+    nearestItem: (name: string, distance: string) => `${name} ${distance}`,
+    estimateNote:
+      "Stima, non misura: non esiste una misura liberamente accessibile della luminosità del cielo. CampMesser calcola la classificazione dalla distanza dalle maggiori città e agglomerazioni. La formula non conosce le montagne che schermano un alone, i fari proprio accanto o l'aria umida – sul posto può essere più buio o più chiaro.",
+  },
+
   recipes: {
     title: "Ricettario Campfire",
     subtitle:

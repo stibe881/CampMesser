@@ -3040,6 +3040,43 @@ export const en: Translation = {
       "Data from OpenStreetMap via the Overpass API – queried only when you tap. Length, elevation and difficulty only appear where they are maintained in OSM, otherwise “–”. Waymarking on the ground and the state of the path may differ: take a map and the weather forecast with you.",
   },
 
+  /** Dark sky map per pitch (#239). */
+  darkSky: {
+    sectionAria: "Estimated darkness of the sky at this location",
+    title: "Dark sky",
+    badge: (bortle: number) => `Bortle ${bortle}`,
+    subtitle: "How dark is the sky at your location?",
+    subtitleAtPlace: (place: string) => `How dark is the sky at ${place}?`,
+    outsideCoverage:
+      "There is no light source data for this location – the dataset covers Switzerland and the neighbouring border regions. A classification here would be guesswork, so CampMesser shows none.",
+    scaleAria: (bortle: number) =>
+      `Bortle scale from 1 (very dark) to 9 (inner city), estimated level ${bortle}`,
+    scaleDark: "dark",
+    scaleBright: "bright",
+    classLine: (bortle: number, label: string) => `Bortle ${bortle} · ${label}`,
+    locating: "Determining location …",
+    noLocation:
+      "For the classification CampMesser needs your location – allow positioning or save a pitch.",
+    tonightTitle: "Tonight",
+    tonightLoading: "Loading cloud cover …",
+    tonightWorthIt:
+      "Tonight is especially worth it: dark sky, clear night and little moonlight come together. Give yourself 20 minutes for your eyes to adapt.",
+    tonightClouds: (percent: number) =>
+      `About ${percent} % cloud cover is forecast for tonight – better wait for a clearer night.`,
+    tonightMoon: (percent: number) =>
+      `The Moon is ${percent} % lit and drowns out the faint stars. For the Milky Way the nights around new moon are the better ones.`,
+    tonightBrightSky:
+      "The night is clear and the Moon hardly gets in the way – the sky here is simply too bright for faint stars. The Moon, the planets and ISS passes are still worth it.",
+    tonightUnknown: "There is no cloud forecast available for tonight.",
+    cloudLine: (percent: number) => `Cloud cover from 9 pm: about ${percent} %`,
+    moonLine: (percent: number) => `Moon: ${percent} % lit`,
+    astroLink: "To the night sky in the nature module",
+    nearestTitle: "Nearest light sources:",
+    nearestItem: (name: string, distance: string) => `${name} ${distance}`,
+    estimateNote:
+      "An estimate, not a measurement: there is no freely available measurement of sky brightness. CampMesser works the classification out from the distance to the largest towns and urban areas. The formula knows nothing of mountains that block a light dome, floodlights next door or humid air – on the ground it may be darker or brighter.",
+  },
+
   recipes: {
     title: "Campfire recipe book",
     subtitle:

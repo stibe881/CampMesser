@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import PhotoGallery from "@/components/PhotoGallery";
+import DarkSkyPanel from "@/components/DarkSkyPanel";
 import NearbyHikes from "@/components/NearbyHikes";
 import TickRiskPanel from "@/components/TickRiskPanel";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
@@ -982,6 +983,15 @@ export default function SpotDetailPage() {
           </Link>
         </CardContent>
       </Card>
+
+      {/* Dunkler Himmel: geschätzte Bortle-Klasse plus «heute Nacht» */}
+      <DarkSkyPanel
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        astroLink
+        className="mb-4"
+      />
 
       {/* Wetter */}
       <Card className="mb-4">

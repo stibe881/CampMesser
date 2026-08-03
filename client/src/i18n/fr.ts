@@ -3139,6 +3139,46 @@ export const fr: Translation = {
       "Données d'OpenStreetMap via l'API Overpass – interrogée uniquement sur ton clic. Longueur, dénivelé et difficulté n'apparaissent que là où ils sont renseignés dans OSM, sinon « – ». Le balisage sur le terrain et l'état du chemin peuvent différer : emporte carte et bulletin météo.",
   },
 
+  /** Carte de l'obscurité par emplacement (#239). */
+  darkSky: {
+    sectionAria: "Obscurité estimée du ciel à cet endroit",
+    title: "Ciel sombre",
+    badge: (bortle: number) => `Bortle ${bortle}`,
+    subtitle: "Quelle est l'obscurité du ciel à ta position ?",
+    subtitleAtPlace: (place: string) =>
+      `Quelle est l'obscurité du ciel à ${place} ?`,
+    outsideCoverage:
+      "Aucune donnée de sources lumineuses pour ce lieu – le jeu de données couvre la Suisse et les régions frontalières. Un classement serait deviné ici, CampMesser préfère donc n'en afficher aucun.",
+    scaleAria: (bortle: number) =>
+      `Échelle de Bortle de 1 (très sombre) à 9 (centre-ville), niveau estimé ${bortle}`,
+    scaleDark: "sombre",
+    scaleBright: "clair",
+    classLine: (bortle: number, label: string) => `Bortle ${bortle} · ${label}`,
+    locating: "Position en cours de détermination …",
+    noLocation:
+      "Pour le classement, CampMesser a besoin de ta position – autorise la localisation ou enregistre un emplacement.",
+    tonightTitle: "Cette nuit",
+    tonightLoading: "Chargement de la nébulosité …",
+    tonightWorthIt:
+      "Cette nuit en vaut particulièrement la peine : ciel sombre, nuit claire et peu de clair de lune se rejoignent. Accorde-toi 20 minutes pour que tes yeux s'habituent.",
+    tonightClouds: (percent: number) =>
+      `Environ ${percent} % de nébulosité sont annoncés cette nuit – attends plutôt une nuit plus claire.`,
+    tonightMoon: (percent: number) =>
+      `La Lune est éclairée à ${percent} % et noie les étoiles faibles. Pour la Voie lactée, les nuits autour de la nouvelle lune sont meilleures.`,
+    tonightBrightSky:
+      "La nuit est claire et la Lune ne gêne guère – mais le ciel est ici trop lumineux pour les étoiles faibles. La Lune, les planètes et les passages de l'ISS valent tout de même la peine.",
+    tonightUnknown:
+      "Aucune prévision de nébulosité n'est disponible pour cette nuit.",
+    cloudLine: (percent: number) =>
+      `Nébulosité dès 21 h : environ ${percent} %`,
+    moonLine: (percent: number) => `Lune : éclairée à ${percent} %`,
+    astroLink: "Vers le ciel étoilé dans le module nature",
+    nearestTitle: "Sources lumineuses les plus proches :",
+    nearestItem: (name: string, distance: string) => `${name} ${distance}`,
+    estimateNote:
+      "Estimation, pas mesure : il n'existe pas de mesure librement accessible de la luminosité du ciel. CampMesser calcule le classement à partir de la distance aux plus grandes villes et agglomérations. La formule ignore les montagnes qui masquent un halo, un éclairage puissant juste à côté ou l'air humide – sur place, il peut faire plus sombre ou plus clair.",
+  },
+
   recipes: {
     title: "Livre de recettes Campfire",
     subtitle:

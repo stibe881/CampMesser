@@ -769,3 +769,22 @@ function formatHour(isoTime: string, lang: Language): string {
     lang
   );
 }
+
+/**
+ * Mittlere Bewölkung (%) der Nacht-Stunden ab 21 Uhr des Datums aus der
+ * Stunden-Prognose; null, wenn keine passenden Stunden vorliegen.
+ *
+ * Lag früher in server/push.ts (Sternschnuppen-Erinnerung) und steht seit
+ * der Dunkelheitskarte (#239) hier, weil sie auch im Client gebraucht wird –
+ * push.ts reicht sie unverändert weiter.
+ */
+export function nightCloudCover(
+  hourly: Pick<HourlyWeather, "time" | "cloudCover">[],
+  date: string
+): number | null {
+  const values = hourly
+    .filter(h => h.time.startsWith(date) && Number(h.time.slice(11, 13)) >= 21)
+    .map(h => h.cloudCover);
+  if (values.length === 0) return null;
+  return values.reduce((sum, v) => sum + v, 0) / values.length;
+}
