@@ -37,6 +37,11 @@ import SpotAttributeChips from "@/components/SpotAttributeChips";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { directionsUrl } from "@/lib/directions";
+import {
+  fetchElevation,
+  formatElevation,
+  useAutoElevation,
+} from "@/lib/elevation";
 import { getSunTimes } from "@/lib/sun";
 import { useI18n, useT } from "@/i18n";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
@@ -115,10 +120,13 @@ function SpotCard({
     longitude: number;
     note: string | null;
     attributesJson: string | null;
+    elevationM: number | null;
   };
   onDelete: () => void;
 }) {
   const { lang, t } = useI18n();
+  // Fehlt die Höhe über Meer, holt der Hook sie still bei Open-Meteo nach
+  useAutoElevation(spot);
   const [forecast, setForecast] = useState<SpotForecast | null>(null);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -161,6 +169,12 @@ function SpotCard({
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {spot.latitude.toFixed(4)}°, {spot.longitude.toFixed(4)}°
+              {spot.elevationM !== null && (
+                <>
+                  {" · "}
+                  {t.spots.elevation(formatElevation(spot.elevationM, lang))}
+                </>
+              )}
             </p>
             {spot.note && (
               <p className="mt-1 text-sm text-muted-foreground">{spot.note}</p>
@@ -427,6 +441,8 @@ export default function SpotsPage() {
   const [note, setNote] = useState("");
   const [locating, setLocating] = useState(false);
   const [showMap, setShowMap] = useState(true);
+  // Deckt auch den kurzen Höhen-Abruf vor dem eigentlichen Speichern ab
+  const [saving, setSaving] = useState(false);
 
   const addMutation = trpc.spots.add.useMutation({
     onSuccess: () => {
@@ -476,7 +492,7 @@ export default function SpotsPage() {
     );
   };
 
-  const submit = () => {
+  const submit = async () => {
     const latNum = parseFloat(lat.replace(",", "."));
     const lonNum = parseFloat(lon.replace(",", "."));
     if (!name.trim()) {
@@ -494,11 +510,17 @@ export default function SpotsPage() {
       toast.error(t.spots.coordsInvalid);
       return;
     }
+    // Höhe über Meer gleich mitspeichern; schlägt der Abruf fehl, wird der
+    // Platz trotzdem angelegt und die Höhe später nachgeholt.
+    setSaving(true);
+    const elevationM = await fetchElevation(latNum, lonNum);
+    setSaving(false);
     addMutation.mutate({
       name: name.trim(),
       latitude: latNum,
       longitude: lonNum,
       note: note.trim() || undefined,
+      elevationM,
     });
   };
 
@@ -691,8 +713,13 @@ export default function SpotsPage() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               {t.common.cancel}
             </Button>
-            <Button onClick={submit} disabled={addMutation.isPending}>
-              {addMutation.isPending ? t.common.saving : t.common.save}
+            <Button
+              onClick={() => void submit()}
+              disabled={saving || addMutation.isPending}
+            >
+              {saving || addMutation.isPending
+                ? t.common.saving
+                : t.common.save}
             </Button>
           </DialogFooter>
         </DialogContent>

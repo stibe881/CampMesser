@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Zeltplätze: Deine Plätze kennen jetzt ihre Höhe über Meer – sie wird automatisch ermittelt, steht auf der Favoriten-Karte und im Dossier und wird dort um einen Hinweis zur Höhenlage ergänzt (kühlere Nächte, warmer Schlafsack oder Frostgefahr im Sommer).",
+        "Emplacements : tes emplacements connaissent désormais leur altitude – elle est déterminée automatiquement, s'affiche sur la carte des favoris et dans le dossier, où elle s'accompagne d'un conseil sur l'altitude (nuits plus fraîches, sac de couchage chaud ou risque de gel en été).",
+        "Piazzole: le tue piazzole ora conoscono la loro quota – viene rilevata automaticamente, compare sulla scheda dei preferiti e nel dossier, dove trovi anche un consiglio sulla quota (notti più fresche, sacco a pelo caldo o rischio di gelo d'estate).",
+        "Pitches: your pitches now know their elevation – it is determined automatically, shows on the favourites card and in the dossier, where it comes with a hint about the altitude (chilly nights, warm sleeping bag or frost risk in summer)."
+      ),
+      l4(
         "Sprachhilfe: Das neue Modul «Sprachhilfe» hat 60 Camping-Sätze von der Rezeption bis zum Notfall parat – du wählst die Zielsprache, siehst die Bedeutung in deiner App-Sprache, kopierst den Satz oder lässt ihn dir vorlesen.",
         "Aide linguistique : le nouveau module « Aide linguistique » propose 60 phrases de camping, de la réception à l'urgence – tu choisis la langue cible, tu vois le sens dans la langue de l'app, tu copies la phrase ou tu te la fais lire à voix haute.",
         "Aiuto linguistico: il nuovo modulo «Aiuto linguistico» offre 60 frasi da campeggio, dalla reception all'emergenza – scegli la lingua di destinazione, vedi il significato nella lingua dell'app, copi la frase o te la fai leggere ad alta voce.",

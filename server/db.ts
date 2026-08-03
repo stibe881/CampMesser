@@ -1080,6 +1080,7 @@ export async function updateCampSpot(
       | "receptionPhone"
       | "checkinInfo"
       | "parcelNumber"
+      | "elevationM"
     >
   >
 ) {

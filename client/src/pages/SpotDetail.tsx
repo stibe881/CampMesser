@@ -15,6 +15,7 @@ import {
   MapPin,
   Moon,
   Mountain,
+  MountainSnow,
   Navigation,
   Phone,
   QrCode,
@@ -60,6 +61,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { directionsUrl } from "@/lib/directions";
+import { formatElevation, useAutoElevation } from "@/lib/elevation";
+import { altitudeHint } from "@shared/altitude";
 import { getSunTimes } from "@/lib/sun";
 import { loadObstacleProfiles } from "@/lib/obstacleStore";
 import { computeTripStats, tripNights } from "@shared/trips";
@@ -147,6 +150,9 @@ export default function SpotDetailPage() {
   }, [shareUrl]);
 
   const spot = spotsQuery.data?.find(s => s.id === spotId);
+
+  // Höhe über Meer einmalig bei Open-Meteo holen, falls noch nicht gespeichert
+  useAutoElevation(spot);
 
   useEffect(() => {
     if (!spot) return;
@@ -360,6 +366,19 @@ export default function SpotDetailPage() {
         <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
         {spot.latitude.toFixed(4)}°, {spot.longitude.toFixed(4)}°
       </p>
+      {spot.elevationM !== null && (
+        <>
+          <p className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <MountainSnow className="h-3.5 w-3.5" aria-hidden="true" />
+            {t.spotDetail.elevation(formatElevation(spot.elevationM, lang))}
+          </p>
+          {altitudeHint(spot.elevationM, lang) && (
+            <p className="mb-2 rounded-lg bg-accent/50 px-3 py-2 text-xs text-accent-foreground">
+              {altitudeHint(spot.elevationM, lang)}
+            </p>
+          )}
+        </>
+      )}
       {spot.note && (
         <p className="mb-4 text-sm text-muted-foreground">{spot.note}</p>
       )}

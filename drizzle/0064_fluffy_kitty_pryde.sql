@@ -1,0 +1,1 @@
+ALTER TABLE `campSpots` ADD `elevationM` int;

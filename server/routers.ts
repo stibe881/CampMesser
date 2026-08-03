@@ -112,6 +112,12 @@ const shareExpiryInput = z
   .nullish();
 
 /**
+ * Höhe über Meer eines Zeltplatzes in Metern. Die Spanne deckt vom Toten Meer
+ * bis ins Hochgebirge alles ab; weggelassen/null heisst «nicht bekannt».
+ */
+const SPOT_ELEVATION_INPUT = z.number().int().min(-500).max(9000).nullish();
+
+/**
  * Ablauf-Zeitpunkt aus der gewünschten Dauer. Wichtig: `undefined` heisst
  * «Gültigkeit unverändert lassen» (der Aufrufer hat gar nichts gewählt, z. B.
  * weil er nur den bestehenden Link nochmals anzeigt), `null` heisst
@@ -3857,6 +3863,8 @@ export const appRouter = router({
           receptionPhone: z.string().max(40).nullish(),
           checkinInfo: z.string().max(120).nullish(),
           parcelNumber: z.string().max(40).nullish(),
+          // Höhe über Meer: der Client ermittelt sie bei Open-Meteo
+          elevationM: SPOT_ELEVATION_INPUT,
         })
       )
       .mutation(({ ctx, input }) =>
@@ -3884,6 +3892,7 @@ export const appRouter = router({
           receptionPhone: z.string().max(40).nullish(),
           checkinInfo: z.string().max(120).nullish(),
           parcelNumber: z.string().max(40).nullish(),
+          elevationM: SPOT_ELEVATION_INPUT,
         })
       )
       .mutation(({ ctx, input }) => {

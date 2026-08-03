@@ -61,6 +61,11 @@ export const campSpots = mysqlTable(
     checkinInfo: varchar("checkinInfo", { length: 120 }),
     /** Parzellen-/Stellplatz-Nummer. */
     parcelNumber: varchar("parcelNumber", { length: 40 }),
+    /**
+     * Höhe über Meer in Metern; null = noch nicht ermittelt. Der Client holt
+     * den Wert einmalig bei der Open-Meteo-Elevation-API und speichert ihn.
+     */
+    elevationM: int("elevationM"),
     /** Öffentlicher Teil-Token: Wer den Link kennt, sieht das Platz-Dossier (nur lesend). */
     shareToken: varchar("shareToken", { length: 32 }),
     /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
