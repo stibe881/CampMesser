@@ -6,6 +6,7 @@
  * Anzeigetexte sind vollständig übersetzt (L4); Default-Sprache bleibt Deutsch.
  */
 
+import { monthGrid, type MonthGridDay } from "./calendar";
 import { l4, pick, type L4, type Language } from "./i18n";
 
 export const SYNODIC_MONTH_DAYS = 29.530588853;
@@ -163,6 +164,48 @@ export function nextNewMoons(from: Date, count: number): Date[] {
     );
   }
   return result;
+}
+
+/** Eine Tages-Zelle der Mondkalender-Monatsansicht. */
+export interface MoonMonthDay extends MonthGridDay {
+  /** Beleuchteter Anteil 0–1 (berechnet für 12 Uhr UTC des Tages) */
+  illumination: number;
+  phase: MoonPhaseId;
+  phaseLabel: string;
+  symbol: string;
+  /** Tag des Neumonds dieser Lunation */
+  isNewMoon: boolean;
+  /** Tag des Vollmonds dieser Lunation */
+  isFullMoon: boolean;
+}
+
+/**
+ * Monatsgitter (Wochen ab Montag, inkl. Überhang) mit Mondphase pro Tag.
+ * Bezugszeitpunkt ist jeweils 12 Uhr UTC – so bleibt das Ergebnis unabhängig
+ * von der Zeitzone des Geräts. Da das Mondalter von Mittag zu Mittag um genau
+ * einen Tag wächst, fällt pro Lunation genau ein Tag ins Fenster [0, 1) bzw.
+ * [halber Monat, halber Monat + 1) – das sind die Neu- und Vollmond-Tage.
+ */
+export function moonMonth(
+  year: number,
+  month: number,
+  lang: Language = "de"
+): MoonMonthDay[][] {
+  const halfMonth = SYNODIC_MONTH_DAYS / 2;
+  return monthGrid(year, month).map(week =>
+    week.map(day => {
+      const info = getMoonInfo(new Date(`${day.iso}T12:00:00Z`), lang);
+      return {
+        ...day,
+        illumination: info.illumination,
+        phase: info.phase,
+        phaseLabel: info.phaseLabel,
+        symbol: info.symbol,
+        isNewMoon: info.ageDays < 1,
+        isFullMoon: info.ageDays >= halfMonth && info.ageDays < halfMonth + 1,
+      };
+    })
+  );
 }
 
 const STARGAZING_NOTES: Record<

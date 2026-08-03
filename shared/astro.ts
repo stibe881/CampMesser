@@ -304,6 +304,38 @@ export function isShowerActive(shower: MeteorShower, date: Date): boolean {
   return dayKey >= fromKey || dayKey <= toKey;
 }
 
+/** Fenster um das Maximum, in dem ein Strom im Kalender markiert wird (Tage). */
+export const PEAK_WINDOW_DAYS = 3;
+
+/**
+ * Ströme, deren Maximum höchstens `windowDays` Tage vom Datum entfernt liegt –
+ * für die Nacht-Markierung in der Mondkalender-Monatsansicht. Geprüft wird das
+ * Maximum im Vorjahr, im laufenden und im Folgejahr, damit Ströme rund um den
+ * Jahreswechsel (Quadrantiden, Ursiden) korrekt erfasst werden.
+ */
+export function showersNearPeak(
+  date: Date,
+  windowDays = PEAK_WINDOW_DAYS
+): MeteorShower[] {
+  const day = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  ).getTime();
+  return meteorShowers.filter(shower =>
+    [-1, 0, 1].some(offset => {
+      const peak = new Date(
+        date.getFullYear() + offset,
+        shower.peakMonth - 1,
+        shower.peakDay
+      ).getTime();
+      // Über Sommer-/Winterzeit-Wechsel kann die Differenz um eine Stunde
+      // abweichen – deshalb auf ganze Tage runden statt exakt zu vergleichen.
+      return Math.abs(Math.round((peak - day) / DAY_MS)) <= windowDays;
+    })
+  );
+}
+
 /** Die nächsten Strom-Maxima ab Stichtag, sortiert nach Nähe. */
 export function upcomingShowers(from: Date, count = 4): UpcomingShower[] {
   const startOfDay = new Date(

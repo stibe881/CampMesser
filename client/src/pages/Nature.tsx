@@ -3,6 +3,9 @@ import {
   Binoculars,
   CalendarCheck,
   CalendarDays,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Flashlight,
   HelpCircle,
   ImagePlus,
@@ -50,11 +53,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { natureCategories, natureEntries } from "@/data/nature";
 import {
   getMoonInfo,
+  moonMonth,
   nextFullMoons,
   nextNewMoons,
   stargazingQuality,
+  type MoonPhaseId,
 } from "@shared/moon";
-import { upcomingShowers } from "@shared/astro";
+import { addMonths } from "@shared/calendar";
+import {
+  PEAK_WINDOW_DAYS,
+  showersNearPeak,
+  upcomingShowers,
+} from "@shared/astro";
 import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
 import { inSeason } from "@shared/season";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -97,6 +107,260 @@ function monthName(month: number, lang: Language): string {
   });
 }
 
+/** Zunehmende Phasen – bestimmt, auf welcher Seite das Symbol beleuchtet ist. */
+const WAXING_PHASES: MoonPhaseId[] = [
+  "neumond",
+  "zunehmende-sichel",
+  "erstes-viertel",
+  "zunehmender-mond",
+];
+
+/**
+ * Kleines Mondphasen-Symbol: heller Kreis mit Schattenanteil.
+ * Aus der Beleuchtung folgt der Phasenwinkel (illumination = (1 − cos φ)/2),
+ * dessen Kosinus die Halbachse des Terminators (der Licht-Schatten-Grenze)
+ * liefert – so entstehen Sichel und «Buckelmond» mit derselben Formel.
+ */
+function MoonGlyph({
+  illumination,
+  waxing,
+}: {
+  illumination: number;
+  waxing: boolean;
+}) {
+  const r = 9;
+  const rx = r * Math.abs(1 - 2 * illumination);
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className="h-5 w-5"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle
+        cx="10"
+        cy="10"
+        r={r}
+        className="fill-muted stroke-border"
+        strokeWidth="0.75"
+      />
+      {/* Halbkreis auf der beleuchteten Seite … */}
+      <path
+        d={`M 10 1 A ${r} ${r} 0 0 ${waxing ? 1 : 0} 10 19 Z`}
+        className="fill-amber-glow"
+      />
+      {/* … und darüber der Terminator, hell bei mehr als halbem Mond. */}
+      <ellipse
+        cx="10"
+        cy="10"
+        rx={rx}
+        ry={r}
+        className={illumination > 0.5 ? "fill-amber-glow" : "fill-muted"}
+      />
+    </svg>
+  );
+}
+
+/**
+ * Aufklappbare Monatsansicht des Mondkalenders: Monatsgitter (Start Montag)
+ * mit Phasen-Symbol pro Tag, hervorgehobenen Neu-/Vollmonden und markierten
+ * Sternschnuppen-Nächten (Maximum ±3 Tage). Alles offline berechnet.
+ */
+function MoonMonthView({ today }: { today: Date }) {
+  const { lang, t } = useI18n();
+  const [cursor, setCursor] = useState(() => ({
+    year: today.getFullYear(),
+    month: today.getMonth() + 1,
+  }));
+  const weeks = useMemo(
+    () => moonMonth(cursor.year, cursor.month, lang),
+    [cursor, lang]
+  );
+  const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const caption = new Date(
+    Date.UTC(cursor.year, cursor.month - 1, 1)
+  ).toLocaleDateString(LOCALE_TAGS[lang], {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  // Wochentags-Kürzel aus einer bekannten Montags-Woche (1.1.2024 war ein Montag)
+  const weekdays = useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, i) =>
+        new Date(Date.UTC(2024, 0, 1 + i)).toLocaleDateString(
+          LOCALE_TAGS[lang],
+          { weekday: "short", timeZone: "UTC" }
+        )
+      ),
+    [lang]
+  );
+  const isCurrentMonth =
+    cursor.year === today.getFullYear() &&
+    cursor.month === today.getMonth() + 1;
+
+  return (
+    <div className="mt-4 rounded-lg border border-border/60 p-3">
+      <div className="mb-2 flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-8 w-8"
+          aria-label={t.nature.moonMonthPrev}
+          onClick={() => setCursor(c => addMonths(c.year, c.month, -1))}
+        >
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+        </Button>
+        <p className="flex-1 text-center text-sm font-semibold">{caption}</p>
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-8 w-8"
+          aria-label={t.nature.moonMonthNext}
+          onClick={() => setCursor(c => addMonths(c.year, c.month, 1))}
+        >
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
+        </Button>
+      </div>
+      {!isCurrentMonth && (
+        <div className="mb-2 text-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              setCursor({
+                year: today.getFullYear(),
+                month: today.getMonth() + 1,
+              })
+            }
+          >
+            {t.nature.moonMonthToday}
+          </Button>
+        </div>
+      )}
+
+      <table
+        className="w-full table-fixed border-collapse"
+        aria-label={t.nature.moonMonthTableAria(caption)}
+      >
+        <thead>
+          <tr>
+            {weekdays.map(name => (
+              <th
+                key={name}
+                scope="col"
+                className="pb-1 text-center text-[11px] font-medium text-muted-foreground"
+              >
+                {name}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {weeks.map(week => (
+            <tr key={week[0].iso}>
+              {week.map(day => {
+                const showers = showersNearPeak(
+                  new Date(`${day.iso}T12:00:00Z`)
+                );
+                const isToday = day.iso === todayIso;
+                const dateLabel = new Date(
+                  `${day.iso}T12:00:00Z`
+                ).toLocaleDateString(LOCALE_TAGS[lang], {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  timeZone: "UTC",
+                });
+                const parts = [
+                  t.nature.moonMonthDayAria(dateLabel, day.phaseLabel),
+                ];
+                if (showers.length > 0) {
+                  parts.push(
+                    t.nature.moonMonthMeteorAria(
+                      showers.map(s => pick(s.name, lang)).join(", ")
+                    )
+                  );
+                }
+                if (isToday) parts.push(t.nature.moonMonthTodayAria);
+                return (
+                  <td
+                    key={day.iso}
+                    className="p-0.5"
+                    aria-label={parts.join(", ")}
+                  >
+                    <div
+                      className={cn(
+                        "flex flex-col items-center gap-0.5 rounded-md border p-1",
+                        isToday
+                          ? "border-primary bg-accent"
+                          : "border-transparent",
+                        !day.inMonth && "opacity-40"
+                      )}
+                    >
+                      <span className="text-[11px] leading-none text-muted-foreground">
+                        {Number(day.iso.slice(8, 10))}
+                      </span>
+                      <MoonGlyph
+                        illumination={day.illumination}
+                        waxing={WAXING_PHASES.includes(day.phase)}
+                      />
+                      <span className="flex h-3 items-center gap-0.5">
+                        {(day.isNewMoon || day.isFullMoon) && (
+                          <span className="text-[9px] font-semibold leading-none text-primary">
+                            {day.isNewMoon
+                              ? t.nature.moonMonthNewShort
+                              : t.nature.moonMonthFullShort}
+                          </span>
+                        )}
+                        {showers.length > 0 && (
+                          <Sparkles
+                            className="h-2.5 w-2.5 text-chart-1"
+                            aria-hidden="true"
+                          />
+                        )}
+                      </span>
+                    </div>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <li className="flex items-center gap-1.5">
+          <span className="font-semibold text-primary">
+            {t.nature.moonMonthNewShort}
+          </span>
+          {t.nature.moonMonthLegendNew}
+        </li>
+        <li className="flex items-center gap-1.5">
+          <span className="font-semibold text-primary">
+            {t.nature.moonMonthFullShort}
+          </span>
+          {t.nature.moonMonthLegendFull}
+        </li>
+        <li className="flex items-center gap-1.5">
+          <Sparkles className="h-3 w-3 text-chart-1" aria-hidden="true" />
+          {t.nature.moonMonthLegendMeteor(PEAK_WINDOW_DAYS)}
+        </li>
+        <li className="flex items-center gap-1.5">
+          <span
+            className="h-3 w-3 rounded-sm border border-primary bg-accent"
+            aria-hidden="true"
+          />
+          {t.nature.moonMonthLegendToday}
+        </li>
+      </ul>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {t.nature.moonMonthNote}
+      </p>
+    </div>
+  );
+}
+
 /** Mondphasen-Kalender: aktuelle Phase, Sternbeobachtungs-Tipp und nächste Termine – rein offline berechnet. */
 function MoonCalendar() {
   const { lang, t } = useI18n();
@@ -108,6 +372,7 @@ function MoonCalendar() {
   );
   const fullMoons = useMemo(() => nextFullMoons(now, 3), [now]);
   const newMoons = useMemo(() => nextNewMoons(now, 3), [now]);
+  const [monthOpen, setMonthOpen] = useState(false);
 
   return (
     <section
@@ -167,6 +432,30 @@ function MoonCalendar() {
           </p>
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setMonthOpen(v => !v)}
+        aria-expanded={monthOpen}
+        aria-controls="mond-monatsansicht"
+        className="mt-4 flex w-full items-center gap-2 rounded-lg border border-border bg-accent/40 px-3 py-2 text-sm font-medium transition-colors hover:border-primary/40"
+      >
+        <CalendarDays className="h-4 w-4 text-primary" aria-hidden="true" />
+        {monthOpen
+          ? t.nature.moonMonthToggleHide
+          : t.nature.moonMonthToggleShow}
+        <ChevronDown
+          className={cn(
+            "ml-auto h-4 w-4 transition-transform",
+            monthOpen && "rotate-180"
+          )}
+          aria-hidden="true"
+        />
+      </button>
+      <div id="mond-monatsansicht">
+        {monthOpen && <MoonMonthView today={now} />}
+      </div>
+
       <p className="mt-3 text-xs text-muted-foreground">
         {t.nature.moonCalcNote}
       </p>
