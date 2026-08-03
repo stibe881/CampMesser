@@ -2937,19 +2937,29 @@ export const de = {
       "Gilt für Ober-/Unterhitze. Bei Umluft rund 20 °C weniger einstellen.",
   },
   food: {
-    title: "Kühlbox-Inventar",
+    title: "Kühlbox & Trockenvorrat",
     subtitleLoggedOut:
       "Was ist noch da? Erfasse deine Vorräte und erhalte passende Rezeptvorschläge.",
-    subtitle:
-      "Was ist noch da? Erfasse deine Vorräte und erhalte passende One-Pot-Rezeptvorschläge.",
-    loginFeature: "dein Kühlbox-Inventar",
-    addPlaceholder: "z. B. Tomaten, Käse, Bohnen …",
+    subtitleCooled:
+      "Was ist noch da? Erfasse deine gekühlten Vorräte und erhalte passende One-Pot-Rezeptvorschläge.",
+    subtitleDry:
+      "Konserven, Teigwaren, Kaffee, Gewürze: alles Ungekühlte im zweiten Lager – nach Kategorien geordnet.",
+    loginFeature: "deine Vorräte",
+    storageAria: "Lager wählen",
+    noUnit: "ohne Einheit",
+    unitAria: "Einheit zur Menge (optional)",
+    noCategory: "Ohne Kategorie",
+    categoryAria: "Kategorie im Trockenvorrat (optional)",
+    addPlaceholderCooled: "z. B. Tomaten, Käse, Bohnen …",
+    addPlaceholderDry: "z. B. Ravioli-Dose, Spaghetti, Kaffee …",
     addNameAria: "Lebensmittel hinzufügen",
     expiryAria: "Mindesthaltbarkeitsdatum (optional)",
     submitAria: "Lebensmittel speichern",
     addFailed: "Eintrag konnte nicht gespeichert werden",
     dateHint:
       "Datum = Mindesthaltbarkeit (optional). Bald ablaufende Vorräte rutschen nach vorne und werden markiert.",
+    dateHintDry:
+      "Datum = Mindesthaltbarkeit (optional). Auch im Trockenvorrat rutschen bald ablaufende Sachen nach vorne und werden markiert.",
     urgentOne: "Ein Vorrat sollte bald verbraucht werden",
     urgentMany: (n: number) => `${n} Vorräte sollten bald verbraucht werden`,
     urgentSuffix: " – die Rezeptvorschläge unten helfen dabei.",
@@ -2964,9 +2974,12 @@ export const de = {
     emptyTitle: "Kühlbox noch leer",
     emptyText:
       "Trage ein, was du dabei hast – wir schlagen dir passende Rezepte vor.",
+    emptyTitleDry: "Trockenvorrat noch leer",
+    emptyTextDry:
+      "Konserven, Teigwaren, Reis, Kaffee, Gewürze: trage ein, was ungekühlt im Schrank steht.",
     suggestionsTitle: "Resteverwertung",
     suggestionsSubtitle:
-      "Was du aus dem kochen kannst, was noch da ist – Rezepte mit bald ablaufenden Vorräten zuerst.",
+      "Was du aus dem kochen kannst, was noch da ist – aus Kühlbox und Trockenvorrat, Rezepte mit bald ablaufenden Vorräten zuerst.",
     haveCount: (have: number, total: number) =>
       `${have} von ${total} Zutaten hast du`,
     urgentInRecipe: (n: number) =>
@@ -3012,11 +3025,15 @@ export const de = {
       `Vorlage «${name}» wirklich löschen?`,
     quantityPlaceholder: "Menge",
     addQuantityAria: "Menge für den neuen Eintrag (optional)",
-    editAria: (name: string) => `${name} bearbeiten – Menge und MHD anpassen`,
+    editAria: (name: string) =>
+      `${name} bearbeiten – Menge, Lager und MHD anpassen`,
     editDesc:
-      "Menge und Mindesthaltbarkeitsdatum anpassen – leere Felder entfernen den Wert.",
+      "Menge, Einheit, Lager, Kategorie und Mindesthaltbarkeitsdatum anpassen – leere Felder entfernen den Wert.",
     editQuantityLabel: "Menge",
     editQuantityPlaceholder: "z. B. 2× oder 500 g",
+    editUnitLabel: "Einheit",
+    editStorageLabel: "Lager",
+    editCategoryLabel: "Kategorie",
     editExpiryLabel: "Mindesthaltbarkeitsdatum",
     editSave: "Speichern",
     editFailed: "Änderung konnte nicht gespeichert werden",
@@ -3089,20 +3106,21 @@ export const de = {
       "Mitreisende scannen den Code mit der Handykamera und sind direkt auf der Liste.",
     suggestionsAria: "Vorschläge aus Verlauf und Liste",
     putAwayButton: "Einkäufe einräumen",
-    putAwayTitle: "Einkäufe in die Kühlbox einräumen",
+    putAwayTitle: "Einkäufe einräumen",
     putAwayDesc:
-      "Wähle die abgehakten Einkäufe aus und gib optional ein Mindesthaltbarkeitsdatum an. Übernommene Einträge wandern in dein Kühlbox-Inventar und werden von der Einkaufsliste entfernt.",
-    putAwayItemAria: (name: string) => `${name} in die Kühlbox übernehmen`,
+      "Wähle das Lager und die abgehakten Einkäufe aus und gib optional ein Mindesthaltbarkeitsdatum an. Übernommene Einträge wandern in deinen Vorrat und werden von der Einkaufsliste entfernt.",
+    putAwayStorageLabel: "Lager",
+    putAwayItemAria: (name: string) => `${name} in den Vorrat übernehmen`,
     putAwayExpiryAria: (name: string) =>
       `Mindesthaltbarkeitsdatum für ${name} (optional)`,
-    putAwayAlreadyInFood: "bereits in der Kühlbox",
+    putAwayAlreadyInFood: "schon im Vorrat",
     putAwayConfirm: (n: number) =>
       n === 1 ? "1 Eintrag einräumen" : `${n} Einträge einräumen`,
     putAwayDone: (n: number) =>
       n === 1
-        ? "1 Einkauf in die Kühlbox gelegt"
-        : `${n} Einkäufe in die Kühlbox gelegt`,
-    putAwayOpenFood: "Zur Kühlbox",
+        ? "1 Einkauf in den Vorrat gelegt"
+        : `${n} Einkäufe in den Vorrat gelegt`,
+    putAwayOpenFood: "Zu den Vorräten",
     putAwayFailed:
       "Einräumen fehlgeschlagen – noch nicht übernommene Einträge bleiben auf der Liste",
     listsAria: "Einkaufsliste wählen",

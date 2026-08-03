@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import {
+  Archive,
   BookmarkPlus,
   ChefHat,
   FolderOpen,
@@ -34,18 +35,45 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { recipes } from "@/data/recipes";
 import { customRecipeToRecipe } from "@/lib/customRecipesClient";
 import { loadRecipeFavorites } from "@/lib/recipeFavorites";
 import { RECIPE_METHOD_LABELS } from "@shared/customRecipes";
-import { expiryInfo, type ExpiryState } from "@shared/food";
+import {
+  expiryInfo,
+  formatFoodQuantity,
+  groupFoodByCategory,
+  isFoodCategory,
+  isFoodUnit,
+  normalizeFoodStorage,
+  shoppingCategoryForFood,
+  FOOD_CATEGORIES,
+  FOOD_CATEGORY_LABELS,
+  FOOD_STORAGES,
+  FOOD_STORAGE_LABELS,
+  FOOD_UNITS,
+  FOOD_UNIT_LABELS,
+  type ExpiryState,
+  type FoodCategory,
+  type FoodStorage,
+  type FoodUnit,
+} from "@shared/food";
 import { leftoverSuggestions, type LeftoverRecipe } from "@shared/leftovers";
 import {
   loadFoodSort,
+  loadFoodStorage,
   sortFoodItems,
   storeFoodSort,
+  storeFoodStorage,
   type FoodSortMode,
 } from "@/lib/foodSort";
 import type { FoodTemplateItem } from "@shared/foodTemplates";
@@ -61,6 +89,15 @@ const expiryStyles: Record<ExpiryState, string> = {
   ok: "border-border bg-card",
 };
 
+/** Select-Wert für «ohne Einheit»/«ohne Kategorie» (Radix erlaubt kein ""). */
+const NONE = "none" as const;
+
+/** Sinnbild je Lager: Kühlbox vs. Trockenvorrat-Schrank. */
+const storageIcons: Record<FoodStorage, typeof Refrigerator> = {
+  cooled: Refrigerator,
+  dry: Archive,
+};
+
 export default function FoodPage() {
   const { lang, t } = useI18n();
   const { isAuthenticated, loading } = useAuth();
@@ -70,8 +107,17 @@ export default function FoodPage() {
   });
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [unit, setUnit] = useState<string>(NONE);
+  const [category, setCategory] = useState<string>(NONE);
   const [expiryDate, setExpiryDate] = useState("");
   const today = new Date().toISOString().slice(0, 10);
+
+  // Lager-Wahl «Kühlbox / Trockenvorrat» (#233) – wird pro Gerät gemerkt
+  const [storage, setStorage] = useState<FoodStorage>(() => loadFoodStorage());
+  const changeStorage = (next: FoodStorage) => {
+    setStorage(next);
+    storeFoodStorage(next);
+  };
 
   // Sortier-Wahl «Nach Ablauf / Nach Name» – wird pro Gerät gemerkt
   const [sortMode, setSortMode] = useState<FoodSortMode>(() => loadFoodSort());
@@ -85,6 +131,8 @@ export default function FoodPage() {
       utils.food.list.invalidate();
       setName("");
       setQuantity("");
+      setUnit(NONE);
+      setCategory(NONE);
       setExpiryDate("");
     },
     onError: () => toast.error(t.food.addFailed),
@@ -93,11 +141,14 @@ export default function FoodPage() {
     onSuccess: () => utils.food.list.invalidate(),
   });
 
-  // ── Eintrag bearbeiten: Menge & MHD nachträglich anpassen ──
+  // ── Eintrag bearbeiten: Menge, Einheit, Kategorie, Lager & MHD anpassen ──
   const [editItem, setEditItem] = useState<{ id: number; name: string } | null>(
     null
   );
   const [editQuantity, setEditQuantity] = useState("");
+  const [editUnit, setEditUnit] = useState<string>(NONE);
+  const [editCategory, setEditCategory] = useState<string>(NONE);
+  const [editStorage, setEditStorage] = useState<FoodStorage>("cooled");
   const [editExpiry, setEditExpiry] = useState("");
   const updateMutation = trpc.food.update.useMutation({
     onSuccess: () => {
@@ -111,9 +162,15 @@ export default function FoodPage() {
     id: number;
     name: string;
     quantity: string | null;
+    unit: string | null;
+    category: string | null;
+    storage: string;
     expiryDate: string | null;
   }) => {
     setEditQuantity(item.quantity ?? "");
+    setEditUnit(isFoodUnit(item.unit) ? item.unit : NONE);
+    setEditCategory(isFoodCategory(item.category) ? item.category : NONE);
+    setEditStorage(normalizeFoodStorage(item.storage));
     setEditExpiry(item.expiryDate ?? "");
     setEditItem({ id: item.id, name: item.name });
   };
@@ -147,11 +204,16 @@ export default function FoodPage() {
     },
     onError: () => toast.error(t.food.addToShoppingFailed),
   });
-  /** «Nachkaufen» immer auf die gewählte Ziel-Liste. */
-  const addToShopping = (name: string) =>
+  /**
+   * «Nachkaufen» immer auf die gewählte Ziel-Liste. Die Vorrats-Kategorie
+   * eines Trockenvorrats wird dabei in die passende Laden-Kategorie
+   * übersetzt (#233) – der Eintrag landet gleich im richtigen Regal.
+   */
+  const addToShopping = (item: { name: string; category?: string | null }) =>
     addToShoppingMutation.mutate({
-      name,
+      name: item.name,
       listId: shoppingTarget.listId ?? undefined,
+      category: shoppingCategoryForFood(item.category),
     });
 
   // ── Kühlbox-Vorlagen («Standardfüllung») ──
@@ -186,7 +248,12 @@ export default function FoodPage() {
     onError: () => toast.error(t.food.templateDeleteFailed),
   });
 
-  /** Aktuelle Füllung einfrieren: Name + Restlaufzeit in Tagen (falls MHD gesetzt). */
+  /**
+   * Aktuelle Füllung einfrieren: Name + Restlaufzeit in Tagen (falls MHD
+   * gesetzt), dazu Lager, Einheit und Kategorie. Gespeichert wird IMMER die
+   * ganze Füllung – beide Lager, damit eine Vorlage die Standardausrüstung
+   * vollständig abbildet.
+   */
   const saveCurrentAsTemplate = () => {
     if (!templateName.trim()) return;
     const items: FoodTemplateItem[] = (query.data ?? []).map(item => {
@@ -194,6 +261,9 @@ export default function FoodPage() {
       const base: FoodTemplateItem = { name: item.name };
       if (item.quantity) base.quantity = item.quantity;
       if (info) base.expiryDays = Math.max(0, info.daysLeft);
+      base.storage = normalizeFoodStorage(item.storage);
+      if (isFoodUnit(item.unit)) base.unit = item.unit;
+      if (isFoodCategory(item.category)) base.category = item.category;
       return base;
     });
     if (items.length === 0) return;
@@ -286,16 +356,148 @@ export default function FoodPage() {
     );
   }
 
+  const allItems = query.data ?? [];
+  /** Wie viele Vorräte liegen je Lager? – Zahl im Umschalter. */
+  const countFor = (key: FoodStorage) =>
+    allItems.filter(i => normalizeFoodStorage(i.storage) === key).length;
   // Sortierung: «Nach Ablauf» (Standard, Verbrauche-zuerst) oder «Nach Name»
-  const items = sortFoodItems(query.data ?? [], sortMode, lang);
+  const items = sortFoodItems(
+    allItems.filter(i => normalizeFoodStorage(i.storage) === storage),
+    sortMode,
+    lang
+  );
+  // Im Trockenvorrat nach Kategorie gruppiert, in der Kühlbox als eine Reihe
+  const groups =
+    storage === "dry"
+      ? groupFoodByCategory(items)
+      : [{ category: null as FoodCategory | null, items }];
   const urgentCount = items.filter(i => {
     const info = expiryInfo(i.expiryDate, today, lang);
     return info && info.state !== "ok";
   }).length;
 
+  /** Ein Vorrat als Chip – gleich in beiden Lagern. */
+  const renderItem = (item: (typeof items)[number]) => {
+    const info = expiryInfo(item.expiryDate, today, lang);
+    const amount = formatFoodQuantity(item.quantity, item.unit, lang);
+    return (
+      <span
+        key={item.id}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full border py-1 pl-3.5 pr-1.5 text-sm font-medium",
+          expiryStyles[info?.state ?? "ok"]
+        )}
+      >
+        <button
+          type="button"
+          className="rounded hover:underline"
+          onClick={() => openEdit(item)}
+          aria-label={t.food.editAria(item.name)}
+        >
+          {item.name}
+        </button>
+        {amount && (
+          <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-normal text-muted-foreground">
+            {amount}
+          </span>
+        )}
+        {info && info.state !== "ok" && (
+          <span
+            className={cn(
+              "text-xs font-normal",
+              info.state === "soon"
+                ? "text-muted-foreground"
+                : "text-destructive"
+            )}
+          >
+            {info.label}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={() => addToShopping(item)}
+          className={cn(
+            "flex h-6 w-6 items-center justify-center rounded-full transition-colors",
+            // Abgelaufene Vorräte: Nachkaufen-Aktion prominent zeigen
+            info?.state === "expired"
+              ? "bg-primary/15 text-primary hover:bg-primary/25"
+              : "text-muted-foreground/60 hover:bg-primary/10 hover:text-primary"
+          )}
+          aria-label={t.food.addToShoppingAria(item.name)}
+        >
+          <ShoppingCart className="h-3 w-3" aria-hidden="true" />
+        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive"
+              aria-label={t.food.removeAria(item.name)}
+            >
+              <Trash2 className="h-3 w-3" aria-hidden="true" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => removeMutation.mutate({ id: item.id })}
+            >
+              <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+              {t.food.deleteOnly}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                addToShopping(item);
+                removeMutation.mutate({ id: item.id });
+              }}
+            >
+              <ShoppingCart className="mr-2 h-4 w-4" aria-hidden="true" />
+              {t.food.deleteAndShop}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </span>
+    );
+  };
+
+  const StorageIcon = storageIcons[storage];
+
   return (
     <div className="container max-w-2xl py-6">
-      <PageHeader title={t.food.title} subtitle={t.food.subtitle} />
+      <PageHeader
+        title={t.food.title}
+        subtitle={
+          storage === "dry" ? t.food.subtitleDry : t.food.subtitleCooled
+        }
+      />
+
+      {/* Lager-Umschalter (#233): Kühlbox oder Trockenvorrat-Schrank */}
+      <div
+        className="mb-4 inline-flex items-center gap-1 rounded-lg bg-muted p-1"
+        role="group"
+        aria-label={t.food.storageAria}
+      >
+        {FOOD_STORAGES.map(key => {
+          const Icon = storageIcons[key];
+          return (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={storage === key}
+              onClick={() => changeStorage(key)}
+              className={cn(
+                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                storage === key
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Icon className="h-4 w-4" aria-hidden="true" />
+              {pick(FOOD_STORAGE_LABELS[key], lang)}
+              <span className="opacity-70">{countFor(key)}</span>
+            </button>
+          );
+        })}
+      </div>
 
       <form
         className="mb-2 flex flex-wrap gap-2"
@@ -305,25 +507,68 @@ export default function FoodPage() {
           addMutation.mutate({
             name: name.trim(),
             quantity: quantity.trim().slice(0, 40) || undefined,
+            storage,
+            unit: unit === NONE ? null : (unit as FoodUnit),
+            // Kategorien ordnen den Trockenvorrat-Schrank – die Kühlbox
+            // bleibt bewusst eine einfache Reihe.
+            category:
+              storage === "dry" && category !== NONE
+                ? (category as FoodCategory)
+                : null,
             expiryDate: expiryDate || null,
           });
         }}
       >
         <Input
           className="min-w-40 flex-1"
-          placeholder={t.food.addPlaceholder}
+          placeholder={
+            storage === "dry"
+              ? t.food.addPlaceholderDry
+              : t.food.addPlaceholderCooled
+          }
           value={name}
           onChange={e => setName(e.target.value)}
           aria-label={t.food.addNameAria}
         />
         <Input
-          className="w-24 shrink-0"
+          className="w-20 shrink-0"
           value={quantity}
           maxLength={40}
           placeholder={t.food.quantityPlaceholder}
           aria-label={t.food.addQuantityAria}
           onChange={e => setQuantity(e.target.value)}
         />
+        <Select value={unit} onValueChange={setUnit}>
+          <SelectTrigger className="w-28 shrink-0" aria-label={t.food.unitAria}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={NONE}>{t.food.noUnit}</SelectItem>
+            {FOOD_UNITS.map(key => (
+              <SelectItem key={key} value={key}>
+                {pick(FOOD_UNIT_LABELS[key], lang)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {storage === "dry" && (
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger
+              className="w-44 shrink-0"
+              aria-label={t.food.categoryAria}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>{t.food.noCategory}</SelectItem>
+              {FOOD_CATEGORIES.map(key => (
+                <SelectItem key={key} value={key}>
+                  {pick(FOOD_CATEGORY_LABELS[key], lang)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
         <Input
           type="date"
           className="w-40 shrink-0"
@@ -340,7 +585,9 @@ export default function FoodPage() {
           <Plus className="h-4 w-4" aria-hidden="true" />
         </Button>
       </form>
-      <p className="mb-3 text-xs text-muted-foreground">{t.food.dateHint}</p>
+      <p className="mb-3 text-xs text-muted-foreground">
+        {storage === "dry" ? t.food.dateHintDry : t.food.dateHint}
+      </p>
 
       {/* Ziel-Liste fürs «Nachkaufen», sobald es mehrere Listen gibt (#215) */}
       <ShoppingTargetSelect target={shoppingTarget} className="mb-5 max-w-56" />
@@ -499,24 +746,88 @@ export default function FoodPage() {
               updateMutation.mutate({
                 id: editItem.id,
                 quantity: editQuantity.trim().slice(0, 40) || null,
+                storage: editStorage,
+                unit: editUnit === NONE ? null : (editUnit as FoodUnit),
+                category:
+                  editStorage === "dry" && editCategory !== NONE
+                    ? (editCategory as FoodCategory)
+                    : null,
                 expiryDate: editExpiry || null,
               });
             }}
           >
-            <div>
-              <Label htmlFor="food-edit-quantity">
-                {t.food.editQuantityLabel}
-              </Label>
-              <Input
-                id="food-edit-quantity"
-                className="mt-1.5"
-                value={editQuantity}
-                maxLength={40}
-                placeholder={t.food.editQuantityPlaceholder}
-                onChange={e => setEditQuantity(e.target.value)}
-                autoFocus
-              />
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Label htmlFor="food-edit-quantity">
+                  {t.food.editQuantityLabel}
+                </Label>
+                <Input
+                  id="food-edit-quantity"
+                  className="mt-1.5"
+                  value={editQuantity}
+                  maxLength={40}
+                  placeholder={t.food.editQuantityPlaceholder}
+                  onChange={e => setEditQuantity(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div className="w-32">
+                <Label htmlFor="food-edit-unit">{t.food.editUnitLabel}</Label>
+                <Select value={editUnit} onValueChange={setEditUnit}>
+                  <SelectTrigger id="food-edit-unit" className="mt-1.5">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>{t.food.noUnit}</SelectItem>
+                    {FOOD_UNITS.map(key => (
+                      <SelectItem key={key} value={key}>
+                        {pick(FOOD_UNIT_LABELS[key], lang)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+            <div>
+              <Label htmlFor="food-edit-storage">
+                {t.food.editStorageLabel}
+              </Label>
+              <Select
+                value={editStorage}
+                onValueChange={value => setEditStorage(value as FoodStorage)}
+              >
+                <SelectTrigger id="food-edit-storage" className="mt-1.5">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FOOD_STORAGES.map(key => (
+                    <SelectItem key={key} value={key}>
+                      {pick(FOOD_STORAGE_LABELS[key], lang)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {editStorage === "dry" && (
+              <div>
+                <Label htmlFor="food-edit-category">
+                  {t.food.editCategoryLabel}
+                </Label>
+                <Select value={editCategory} onValueChange={setEditCategory}>
+                  <SelectTrigger id="food-edit-category" className="mt-1.5">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>{t.food.noCategory}</SelectItem>
+                    {FOOD_CATEGORIES.map(key => (
+                      <SelectItem key={key} value={key}>
+                        {pick(FOOD_CATEGORY_LABELS[key], lang)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <Label htmlFor="food-edit-expiry">{t.food.editExpiryLabel}</Label>
               <Input
@@ -582,101 +893,35 @@ export default function FoodPage() {
               {t.food.urgentSuffix}
             </p>
           )}
-          <div className="mb-8 flex flex-wrap gap-2">
-            {items.map(item => {
-              const info = expiryInfo(item.expiryDate, today, lang);
-              return (
-                <span
-                  key={item.id}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full border py-1 pl-3.5 pr-1.5 text-sm font-medium",
-                    expiryStyles[info?.state ?? "ok"]
-                  )}
-                >
-                  <button
-                    type="button"
-                    className="rounded hover:underline"
-                    onClick={() => openEdit(item)}
-                    aria-label={t.food.editAria(item.name)}
-                  >
-                    {item.name}
-                  </button>
-                  {item.quantity && (
-                    <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-normal text-muted-foreground">
-                      {item.quantity}
-                    </span>
-                  )}
-                  {info && info.state !== "ok" && (
-                    <span
-                      className={cn(
-                        "text-xs font-normal",
-                        info.state === "soon"
-                          ? "text-muted-foreground"
-                          : "text-destructive"
-                      )}
-                    >
-                      {info.label}
-                    </span>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => addToShopping(item.name)}
-                    className={cn(
-                      "flex h-6 w-6 items-center justify-center rounded-full transition-colors",
-                      // Abgelaufene Vorräte: Nachkaufen-Aktion prominent zeigen
-                      info?.state === "expired"
-                        ? "bg-primary/15 text-primary hover:bg-primary/25"
-                        : "text-muted-foreground/60 hover:bg-primary/10 hover:text-primary"
-                    )}
-                    aria-label={t.food.addToShoppingAria(item.name)}
-                  >
-                    <ShoppingCart className="h-3 w-3" aria-hidden="true" />
-                  </button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive"
-                        aria-label={t.food.removeAria(item.name)}
-                      >
-                        <Trash2 className="h-3 w-3" aria-hidden="true" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => removeMutation.mutate({ id: item.id })}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
-                        {t.food.deleteOnly}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          addToShopping(item.name);
-                          removeMutation.mutate({ id: item.id });
-                        }}
-                      >
-                        <ShoppingCart
-                          className="mr-2 h-4 w-4"
-                          aria-hidden="true"
-                        />
-                        {t.food.deleteAndShop}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </span>
-              );
-            })}
+          {/* Trockenvorrat nach Kategorie geordnet, Kühlbox als eine Reihe */}
+          <div className="mb-8 space-y-4">
+            {groups.map(group => (
+              <div key={group.category ?? "none"}>
+                {storage === "dry" && (
+                  <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {group.category === null
+                      ? t.food.noCategory
+                      : pick(FOOD_CATEGORY_LABELS[group.category], lang)}
+                  </h3>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  {group.items.map(renderItem)}
+                </div>
+              </div>
+            ))}
           </div>
         </>
       ) : (
         <div className="mb-8 rounded-xl border border-dashed border-border p-8 text-center">
-          <Refrigerator
+          <StorageIcon
             className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
             aria-hidden="true"
           />
-          <p className="font-medium">{t.food.emptyTitle}</p>
+          <p className="font-medium">
+            {storage === "dry" ? t.food.emptyTitleDry : t.food.emptyTitle}
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {t.food.emptyText}
+            {storage === "dry" ? t.food.emptyTextDry : t.food.emptyText}
           </p>
         </div>
       )}

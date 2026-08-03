@@ -743,7 +743,12 @@ export async function addFoodItem(data: InsertFoodItem) {
 export async function updateFoodItem(
   id: number,
   userId: number,
-  data: Partial<Pick<InsertFoodItem, "quantity" | "expiryDate">>
+  data: Partial<
+    Pick<
+      InsertFoodItem,
+      "quantity" | "expiryDate" | "storage" | "unit" | "category"
+    >
+  >
 ) {
   const db = requireDb(await getDb());
   await db

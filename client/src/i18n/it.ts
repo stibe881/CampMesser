@@ -2908,19 +2908,29 @@ export const it: Translation = {
       "Vale per il calore sopra/sotto. Con la ventilazione imposta circa 20 °C in meno.",
   },
   food: {
-    title: "Inventario del frigo box",
+    title: "Frigo box e dispensa",
     subtitleLoggedOut:
       "Cosa c'è ancora? Registra le tue scorte e ricevi suggerimenti di ricette adatte.",
-    subtitle:
-      "Cosa c'è ancora? Registra le tue scorte e ricevi suggerimenti di ricette one-pot adatte.",
-    loginFeature: "il tuo inventario del frigo box",
-    addPlaceholder: "ad es. pomodori, formaggio, fagioli …",
+    subtitleCooled:
+      "Cosa c'è ancora? Registra le tue scorte refrigerate e ricevi suggerimenti di ricette one-pot adatte.",
+    subtitleDry:
+      "Conserve, pasta, caffè, spezie: tutto quello che non va in fresco nel secondo magazzino – ordinato per categorie.",
+    loginFeature: "le tue scorte",
+    storageAria: "Scegli il magazzino",
+    noUnit: "senza unità",
+    unitAria: "Unità della quantità (facoltativo)",
+    noCategory: "Senza categoria",
+    categoryAria: "Categoria nella dispensa (facoltativo)",
+    addPlaceholderCooled: "ad es. pomodori, formaggio, fagioli …",
+    addPlaceholderDry: "ad es. scatola di ravioli, spaghetti, caffè …",
     addNameAria: "Aggiungi alimento",
     expiryAria: "Termine minimo di conservazione (facoltativo)",
     submitAria: "Salva alimento",
     addFailed: "La voce non è stata salvata",
     dateHint:
       "Data = termine minimo di conservazione (facoltativo). Le scorte in scadenza passano in testa e vengono contrassegnate.",
+    dateHintDry:
+      "Data = termine minimo di conservazione (facoltativo). Anche nella dispensa quello che scade presto passa in testa e viene contrassegnato.",
     urgentOne: "Una scorta dovrebbe essere consumata presto",
     urgentMany: (n: number) => `${n} scorte dovrebbero essere consumate presto`,
     urgentSuffix: " – i suggerimenti di ricette qui sotto ti aiutano.",
@@ -2936,9 +2946,12 @@ export const it: Translation = {
     emptyTitle: "Frigo box ancora vuoto",
     emptyText:
       "Registra quello che hai con te – ti suggeriamo le ricette adatte.",
+    emptyTitleDry: "Dispensa ancora vuota",
+    emptyTextDry:
+      "Conserve, pasta, riso, caffè, spezie: registra quello che sta nella dispensa.",
     suggestionsTitle: "Usa gli avanzi",
     suggestionsSubtitle:
-      "Cosa puoi cucinare con quello che c'è ancora – prima le ricette con scorte che scadono presto.",
+      "Cosa puoi cucinare con quello che c'è ancora – da frigo box e dispensa, prima le ricette con scorte che scadono presto.",
     haveCount: (have: number, total: number) =>
       `hai ${have} ingredienti su ${total}`,
     urgentInRecipe: (n: number) =>
@@ -2984,11 +2997,14 @@ export const it: Translation = {
       `Eliminare davvero il modello «${name}»?`,
     quantityPlaceholder: "Quantità",
     addQuantityAria: "Quantità per la nuova voce (facoltativo)",
-    editAria: (name: string) => `Modifica ${name} – quantità e TMC`,
+    editAria: (name: string) => `Modifica ${name} – quantità, magazzino e TMC`,
     editDesc:
-      "Adatta la quantità e il termine minimo di conservazione – i campi vuoti rimuovono il valore.",
+      "Adatta quantità, unità, magazzino, categoria e termine minimo di conservazione – i campi vuoti rimuovono il valore.",
     editQuantityLabel: "Quantità",
     editQuantityPlaceholder: "es. 2× o 500 g",
+    editUnitLabel: "Unità",
+    editStorageLabel: "Magazzino",
+    editCategoryLabel: "Categoria",
     editExpiryLabel: "Termine minimo di conservazione",
     editSave: "Salva",
     editFailed: "La modifica non è stata salvata",
@@ -3061,20 +3077,21 @@ export const it: Translation = {
       "I compagni scansionano il codice con la fotocamera del telefono e arrivano direttamente alla lista.",
     suggestionsAria: "Suggerimenti dalla cronologia e dalla lista",
     putAwayButton: "Sistema la spesa",
-    putAwayTitle: "Sistema la spesa nel frigo box",
+    putAwayTitle: "Sistema la spesa",
     putAwayDesc:
-      "Seleziona gli acquisti spuntati e indica facoltativamente un termine minimo di conservazione. Le voci riprese passano nel tuo inventario del frigo box e vengono tolte dalla lista della spesa.",
-    putAwayItemAria: (name: string) => `Metti ${name} nel frigo box`,
+      "Scegli il magazzino e gli acquisti spuntati e indica facoltativamente un termine minimo di conservazione. Le voci riprese passano nelle tue scorte e vengono tolte dalla lista della spesa.",
+    putAwayStorageLabel: "Magazzino",
+    putAwayItemAria: (name: string) => `Metti ${name} nelle scorte`,
     putAwayExpiryAria: (name: string) =>
       `Termine minimo di conservazione per ${name} (facoltativo)`,
-    putAwayAlreadyInFood: "già nel frigo box",
+    putAwayAlreadyInFood: "già nelle scorte",
     putAwayConfirm: (n: number) =>
       n === 1 ? "Sistema 1 voce" : `Sistema ${n} voci`,
     putAwayDone: (n: number) =>
       n === 1
-        ? "1 acquisto messo nel frigo box"
-        : `${n} acquisti messi nel frigo box`,
-    putAwayOpenFood: "Al frigo box",
+        ? "1 acquisto messo nelle scorte"
+        : `${n} acquisti messi nelle scorte`,
+    putAwayOpenFood: "Alle scorte",
     putAwayFailed:
       "Sistemazione non riuscita – le voci non ancora riprese restano sulla lista",
     listsAria: "Scegli la lista della spesa",

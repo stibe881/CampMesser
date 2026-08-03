@@ -232,7 +232,15 @@ export const powerConsumers = mysqlTable(
 export type PowerConsumer = typeof powerConsumers.$inferSelect;
 export type InsertPowerConsumer = typeof powerConsumers.$inferInsert;
 
-/** Lebensmittel-Inventar (Kühlbox) für Rezeptvorschläge. */
+/**
+ * Lebensmittel-Vorrat für Rezeptvorschläge und MHD-Erinnerungen.
+ *
+ * Seit #233 liegen BEIDE Lager in dieser Tabelle: `storage` unterscheidet die
+ * gekühlten Vorräte («cooled», Kühlbox) vom Trockenvorrat-Schrank («dry»,
+ * Konserven, Teigwaren, Kaffee, Gewürze). Eine zweite Tabelle hätte
+ * Einkaufsliste, MHD-Push, Resteverwertung und Vorlagen verdoppelt –
+ * bestehende Einträge sind mit dem Spalten-Standard «cooled» gekühlt.
+ */
 export const foodItems = mysqlTable(
   "foodItems",
   {
@@ -240,6 +248,12 @@ export const foodItems = mysqlTable(
     userId: int("userId").notNull(),
     name: varchar("name", { length: 160 }).notNull(),
     quantity: varchar("quantity", { length: 80 }),
+    /** Lagerort: cooled (Kühlbox) | dry (Trockenvorrat) – Schlüssel aus shared/food.ts */
+    storage: varchar("storage", { length: 10 }).notNull().default("cooled"),
+    /** Einheiten-Schlüssel zur Menge (piece|pack|g|kg|ml|l|can|bottle); null = Freitext-Menge */
+    unit: varchar("unit", { length: 16 }),
+    /** Vorrats-Kategorie (Schlüssel aus shared/food.ts); null = ohne Kategorie */
+    category: varchar("category", { length: 24 }),
     /** Mindesthaltbarkeitsdatum (optional) für «Verbrauche zuerst»-Hinweise */
     expiryDate: date("expiryDate", { mode: "string" }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),

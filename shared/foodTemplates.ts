@@ -1,8 +1,19 @@
 /**
- * Kühlbox-Vorlagen («Standardfüllung»): Eintrags-Format und sichere
+ * Vorrats-Vorlagen («Standardfüllung»): Eintrags-Format und sichere
  * JSON-Übersetzung. Reine Funktionen – von Client, Server und Tests genutzt
  * (Muster shared/quizzes.ts / shared/packTemplates.ts).
+ *
+ * Seit #233 merkt sich eine Vorlage auch Lagerort, Einheit und Kategorie;
+ * ältere Vorlagen ohne diese Felder laden weiterhin in die Kühlbox.
  */
+import {
+  isFoodCategory,
+  isFoodStorage,
+  isFoodUnit,
+  type FoodCategory,
+  type FoodStorage,
+  type FoodUnit,
+} from "./food";
 
 export interface FoodTemplateItem {
   /** Lebensmittel-Name, z. B. «Milch» */
@@ -14,6 +25,12 @@ export interface FoodTemplateItem {
    * MHD (heute + X Tage) umgerechnet. Ohne Wert bleibt der Eintrag ohne MHD.
    */
   expiryDays?: number;
+  /** Lagerort (cooled|dry); ohne Angabe = Kühlbox. */
+  storage?: FoodStorage;
+  /** Einheit zur Menge (piece|pack|g|…); ohne Angabe = Freitext-Menge. */
+  unit?: FoodUnit;
+  /** Vorrats-Kategorie (cans|pasta|…); ohne Angabe = keine. */
+  category?: FoodCategory;
 }
 
 export const MAX_FOOD_TEMPLATE_ITEMS = 100;
@@ -30,7 +47,8 @@ export function parseFoodTemplateItems(json: string): FoodTemplateItem[] {
     for (const entry of parsed) {
       if (items.length >= MAX_FOOD_TEMPLATE_ITEMS) break;
       if (typeof entry !== "object" || entry === null) continue;
-      const { name, quantity, expiryDays } = entry as Record<string, unknown>;
+      const { name, quantity, expiryDays, storage, unit, category } =
+        entry as Record<string, unknown>;
       if (typeof name !== "string" || name.trim().length === 0) continue;
       const item: FoodTemplateItem = {
         name: name.trim().slice(0, MAX_FOOD_ITEM_NAME_LENGTH),
@@ -46,6 +64,15 @@ export function parseFoodTemplateItems(json: string): FoodTemplateItem[] {
         expiryDays >= 0
       ) {
         item.expiryDays = Math.min(MAX_EXPIRY_DAYS, Math.round(expiryDays));
+      }
+      // Lagerort/Einheit/Kategorie nur übernehmen, wenn sie bekannt sind –
+      // Vorlagen von vor #233 kommen ganz ohne diese Felder.
+      if (typeof storage === "string" && isFoodStorage(storage)) {
+        item.storage = storage;
+      }
+      if (typeof unit === "string" && isFoodUnit(unit)) item.unit = unit;
+      if (typeof category === "string" && isFoodCategory(category)) {
+        item.category = category;
       }
       items.push(item);
     }

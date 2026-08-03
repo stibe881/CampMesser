@@ -2836,19 +2836,29 @@ export const en: Translation = {
       "Applies to top/bottom heat. With a fan oven, set around 20 °C less.",
   },
   food: {
-    title: "Cool box inventory",
+    title: "Cool box & dry store",
     subtitleLoggedOut:
       "What's left? Record your supplies and get matching recipe suggestions.",
-    subtitle:
-      "What's left? Record your supplies and get matching one-pot recipe suggestions.",
-    loginFeature: "your cool box inventory",
-    addPlaceholder: "e.g. tomatoes, cheese, beans …",
+    subtitleCooled:
+      "What's left? Record your chilled supplies and get matching one-pot recipe suggestions.",
+    subtitleDry:
+      "Tins, pasta, coffee, spices: everything unchilled in the second store – sorted by category.",
+    loginFeature: "your supplies",
+    storageAria: "Choose store",
+    noUnit: "no unit",
+    unitAria: "Unit for the quantity (optional)",
+    noCategory: "No category",
+    categoryAria: "Category in the dry store (optional)",
+    addPlaceholderCooled: "e.g. tomatoes, cheese, beans …",
+    addPlaceholderDry: "e.g. tin of ravioli, spaghetti, coffee …",
     addNameAria: "Add food item",
     expiryAria: "Best-before date (optional)",
     submitAria: "Save food item",
     addFailed: "The entry could not be saved",
     dateHint:
       "Date = best-before date (optional). Supplies that expire soon move to the front and are highlighted.",
+    dateHintDry:
+      "Date = best-before date (optional). In the dry store, too, items that expire soon move to the front and are highlighted.",
     urgentOne: "One supply should be used up soon",
     urgentMany: (n: number) => `${n} supplies should be used up soon`,
     urgentSuffix: " – the recipe suggestions below help with that.",
@@ -2862,9 +2872,12 @@ export const en: Translation = {
     deleteAndShop: "Delete and add to shopping list",
     emptyTitle: "Cool box still empty",
     emptyText: "Enter what you have with you – we'll suggest matching recipes.",
+    emptyTitleDry: "Dry store still empty",
+    emptyTextDry:
+      "Tins, pasta, rice, coffee, spices: enter what sits unchilled in the cupboard.",
     suggestionsTitle: "Use up leftovers",
     suggestionsSubtitle:
-      "What you can cook from what is left – recipes using supplies that expire soon come first.",
+      "What you can cook from what is left – from the cool box and the dry store, recipes using supplies that expire soon come first.",
     haveCount: (have: number, total: number) =>
       `you have ${have} of ${total} ingredients`,
     urgentInRecipe: (n: number) =>
@@ -2910,11 +2923,15 @@ export const en: Translation = {
       `Really delete template “${name}”?`,
     quantityPlaceholder: "Quantity",
     addQuantityAria: "Quantity for the new item (optional)",
-    editAria: (name: string) => `Edit ${name} – adjust quantity and date`,
+    editAria: (name: string) =>
+      `Edit ${name} – adjust quantity, store and date`,
     editDesc:
-      "Adjust quantity and best-before date – empty fields remove the value.",
+      "Adjust quantity, unit, store, category and best-before date – empty fields remove the value.",
     editQuantityLabel: "Quantity",
     editQuantityPlaceholder: "e.g. 2× or 500 g",
+    editUnitLabel: "Unit",
+    editStorageLabel: "Store",
+    editCategoryLabel: "Category",
     editExpiryLabel: "Best-before date",
     editSave: "Save",
     editFailed: "The change could not be saved",
@@ -2986,20 +3003,21 @@ export const en: Translation = {
       "Companions scan the code with their phone camera and land straight on the list.",
     suggestionsAria: "Suggestions from history and list",
     putAwayButton: "Put purchases away",
-    putAwayTitle: "Put purchases into the cool box",
+    putAwayTitle: "Put purchases away",
     putAwayDesc:
-      "Select the ticked purchases and optionally add a best-before date. Transferred items go into your cool box inventory and are removed from the shopping list.",
-    putAwayItemAria: (name: string) => `Put ${name} into the cool box`,
+      "Choose the store and the ticked purchases, and optionally add a best-before date. Transferred items go into your supplies and are removed from the shopping list.",
+    putAwayStorageLabel: "Store",
+    putAwayItemAria: (name: string) => `Put ${name} into your supplies`,
     putAwayExpiryAria: (name: string) =>
       `Best-before date for ${name} (optional)`,
-    putAwayAlreadyInFood: "already in the cool box",
+    putAwayAlreadyInFood: "already in your supplies",
     putAwayConfirm: (n: number) =>
       n === 1 ? "Put 1 item away" : `Put ${n} items away`,
     putAwayDone: (n: number) =>
       n === 1
-        ? "1 purchase put into the cool box"
-        : `${n} purchases put into the cool box`,
-    putAwayOpenFood: "To the cool box",
+        ? "1 purchase put into your supplies"
+        : `${n} purchases put into your supplies`,
+    putAwayOpenFood: "To your supplies",
     putAwayFailed:
       "Putting away failed – items not yet transferred stay on the list",
     listsAria: "Choose shopping list",

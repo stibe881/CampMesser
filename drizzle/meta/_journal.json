@@ -498,6 +498,13 @@
       "when": 1785768596220,
       "tag": "0070_wild_morlun",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "5",
+      "when": 1785775299890,
+      "tag": "0071_easy_ulik",
+      "breakpoints": true
     }
   ]
 }

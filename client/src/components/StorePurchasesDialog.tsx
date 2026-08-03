@@ -12,8 +12,23 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
+import { pick } from "@shared/i18n";
+import {
+  normalizeFoodStorage,
+  DEFAULT_FOOD_STORAGE,
+  FOOD_STORAGES,
+  FOOD_STORAGE_LABELS,
+  type FoodStorage,
+} from "@shared/food";
 
 /** Abgehakter Einkaufslisten-Eintrag, der eingeräumt werden kann. */
 export interface StorePurchaseItem {
@@ -36,9 +51,10 @@ interface Props {
 
 /**
  * «Einkäufe einräumen»: abgehakte Einkäufe (vorausgewählt, optional mit MHD)
- * in die persönliche Kühlbox übernehmen (food.add mit Name + Menge) und von
- * der Einkaufsliste entfernen. Gleichnamige Lebensmittel dürfen mehrfach in
- * der Kühlbox stehen – bereits vorhandene werden nur gekennzeichnet.
+ * in den persönlichen Vorrat übernehmen (food.add mit Name + Menge) und von
+ * der Einkaufsliste entfernen. Seit #233 wählst du oben das Lager – Kühlbox
+ * oder Trockenvorrat-Schrank. Gleichnamige Lebensmittel dürfen mehrfach im
+ * Vorrat stehen – bereits vorhandene werden nur gekennzeichnet.
  */
 export default function StorePurchasesDialog({
   open,
@@ -46,7 +62,7 @@ export default function StorePurchasesDialog({
   items,
   removeItem,
 }: Props) {
-  const { t } = useI18n();
+  const { lang, t } = useI18n();
   const utils = trpc.useUtils();
   const [, navigate] = useLocation();
   const today = new Date().toISOString().slice(0, 10);
@@ -57,6 +73,8 @@ export default function StorePurchasesDialog({
   const [selected, setSelected] = useState<ReadonlySet<number>>(new Set());
   const [expiry, setExpiry] = useState<Record<number, string>>({});
   const [saving, setSaving] = useState(false);
+  /** Ziel-Lager der Übernahme (#233) – gilt für alle gewählten Einträge. */
+  const [storage, setStorage] = useState<FoodStorage>(DEFAULT_FOOD_STORAGE);
   useEffect(() => {
     if (!open) return;
     setSnapshot(items);
@@ -66,11 +84,16 @@ export default function StorePurchasesDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Kühlbox-Bestand für die «bereits in der Kühlbox»-Kennzeichnung
+  // Vorrats-Bestand des Ziel-Lagers für die «schon vorhanden»-Kennzeichnung
   const foodQuery = trpc.food.list.useQuery(undefined, { enabled: open });
   const existingNames = useMemo(
-    () => new Set((foodQuery.data ?? []).map(f => f.name.trim().toLowerCase())),
-    [foodQuery.data]
+    () =>
+      new Set(
+        (foodQuery.data ?? [])
+          .filter(f => normalizeFoodStorage(f.storage) === storage)
+          .map(f => f.name.trim().toLowerCase())
+      ),
+    [foodQuery.data, storage]
   );
 
   const addMutation = trpc.food.add.useMutation();
@@ -96,6 +119,7 @@ export default function StorePurchasesDialog({
         await addMutation.mutateAsync({
           name: item.name,
           quantity: item.quantity ?? undefined,
+          storage,
           expiryDate: expiry[item.id] || null,
         });
         await removeItem(item.id);
@@ -125,6 +149,29 @@ export default function StorePurchasesDialog({
           <DialogTitle>{t.shopping.putAwayTitle}</DialogTitle>
           <DialogDescription>{t.shopping.putAwayDesc}</DialogDescription>
         </DialogHeader>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-muted-foreground">
+            {t.shopping.putAwayStorageLabel}
+          </span>
+          <Select
+            value={storage}
+            onValueChange={value => setStorage(value as FoodStorage)}
+          >
+            <SelectTrigger
+              className="w-44"
+              aria-label={t.shopping.putAwayStorageLabel}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {FOOD_STORAGES.map(key => (
+                <SelectItem key={key} value={key}>
+                  {pick(FOOD_STORAGE_LABELS[key], lang)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <ul className="grid max-h-[50vh] gap-2 overflow-y-auto">
           {snapshot.map(item => {
             const already = existingNames.has(item.name.trim().toLowerCase());

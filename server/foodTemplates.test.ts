@@ -52,6 +52,22 @@ describe("parseFoodTemplateItems", () => {
     ]);
   });
 
+  it("liest Lager, Einheit und Kategorie – Unbekanntes fällt weg (#233)", () => {
+    const json = JSON.stringify([
+      { name: "Ravioli", storage: "dry", unit: "can", category: "cans" },
+      { name: "Milch", storage: "cooled", unit: "l" },
+      { name: "Rätsel", storage: "keller", unit: "eimer", category: "xy" },
+      // Vorlage von vor #233: ganz ohne die neuen Felder
+      { name: "Salz" },
+    ]);
+    expect(parseFoodTemplateItems(json)).toEqual([
+      { name: "Ravioli", storage: "dry", unit: "can", category: "cans" },
+      { name: "Milch", storage: "cooled", unit: "l" },
+      { name: "Rätsel" },
+      { name: "Salz" },
+    ]);
+  });
+
   it("liest die optionale Menge und bleibt für alte Vorlagen abwärtskompatibel", () => {
     const json = JSON.stringify([
       { name: "Milch", quantity: "1 l", expiryDays: 5 },

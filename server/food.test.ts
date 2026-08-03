@@ -2,8 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   expiryInfo,
   expirySortKey,
+  formatFoodQuantity,
+  groupFoodByCategory,
+  isFoodStorage,
   matchFoodItems,
   normalizeFoodName,
+  normalizeFoodStorage,
+  shoppingCategoryForFood,
 } from "@shared/food";
 
 const TODAY = "2026-08-01";
@@ -137,5 +142,68 @@ describe("matchFoodItems", () => {
     expect(matchFoodItems([], items)).toEqual([]);
     expect(matchFoodItems(["Tomaten"], [])).toEqual([]);
     expect(matchFoodItems(["   "], items)).toEqual([]);
+  });
+});
+
+describe("Lagerorte (#233)", () => {
+  it("erkennt gültige Lagerorte", () => {
+    expect(isFoodStorage("cooled")).toBe(true);
+    expect(isFoodStorage("dry")).toBe(true);
+    expect(isFoodStorage("kuehl")).toBe(false);
+    expect(isFoodStorage(null)).toBe(false);
+  });
+
+  it("lässt alles Unbekannte als gekühlt weiterleben", () => {
+    expect(normalizeFoodStorage(null)).toBe("cooled");
+    expect(normalizeFoodStorage(undefined)).toBe("cooled");
+    expect(normalizeFoodStorage("")).toBe("cooled");
+    expect(normalizeFoodStorage("dry")).toBe("dry");
+  });
+});
+
+describe("formatFoodQuantity", () => {
+  it("setzt Menge und Einheit zusammen", () => {
+    expect(formatFoodQuantity("500", "g")).toBe("500 g");
+    expect(formatFoodQuantity("2", "piece")).toBe("2 Stk.");
+    expect(formatFoodQuantity("2", "piece", "fr")).toBe("2 pce");
+    expect(formatFoodQuantity("1", "can", "it")).toBe("1 lattina");
+  });
+
+  it("zeigt Alt-Einträge und Freitext unverändert", () => {
+    expect(formatFoodQuantity("500 g", null)).toBe("500 g");
+    expect(formatFoodQuantity("2×", "unsinn")).toBe("2×");
+  });
+
+  it("gibt ohne Menge nichts zurück", () => {
+    expect(formatFoodQuantity(null, "g")).toBeNull();
+    expect(formatFoodQuantity("   ", "g")).toBeNull();
+  });
+});
+
+describe("Vorrats-Kategorien", () => {
+  it("übersetzt in die passende Laden-Kategorie", () => {
+    expect(shoppingCategoryForFood("cans")).toBe("dry");
+    expect(shoppingCategoryForFood("drinks")).toBe("drinks");
+    expect(shoppingCategoryForFood("other")).toBe("other");
+    expect(shoppingCategoryForFood(null)).toBeNull();
+    expect(shoppingCategoryForFood("unbekannt")).toBeNull();
+  });
+
+  it("gruppiert in Katalog-Reihenfolge, Unkategorisiertes zuletzt", () => {
+    const items = [
+      { id: 1, category: "spices" },
+      { id: 2, category: null },
+      { id: 3, category: "cans" },
+      { id: 4, category: "spices" },
+      { id: 5, category: "kaputt" },
+    ];
+    const groups = groupFoodByCategory(items);
+    expect(groups.map(g => g.category)).toEqual(["cans", "spices", null]);
+    expect(groups[1].items.map(i => i.id)).toEqual([1, 4]);
+    expect(groups[2].items.map(i => i.id)).toEqual([2, 5]);
+  });
+
+  it("liefert für einen leeren Bestand keine Gruppen", () => {
+    expect(groupFoodByCategory([])).toEqual([]);
   });
 });

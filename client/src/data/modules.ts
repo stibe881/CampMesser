@@ -358,10 +358,10 @@ export const modules: Module[] = [
   {
     path: "/kuehlbox",
     title: l4(
-      "Kühlbox-Inventar",
-      "Inventaire de la glacière",
-      "Inventario frigo box",
-      "Cool box inventory"
+      "Kühlbox & Trockenvorrat",
+      "Glacière & provisions sèches",
+      "Frigo box e dispensa",
+      "Cool box & dry store"
     ),
     description: l4(
       "Vorräte erfassen, passende Rezepte finden",

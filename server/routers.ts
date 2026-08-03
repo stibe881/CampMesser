@@ -45,6 +45,14 @@ import {
   parseFoodTemplateItems,
 } from "@shared/foodTemplates";
 import {
+  FOOD_CATEGORIES,
+  FOOD_STORAGES,
+  FOOD_UNITS,
+  DEFAULT_FOOD_STORAGE,
+  normalizeFoodStorage,
+  type FoodStorage,
+} from "@shared/food";
+import {
   EXPENSE_CATEGORIES,
   EXPENSE_DESCRIPTION_MAX_LENGTH,
   EXPENSE_MAX_RAPPEN,
@@ -2382,6 +2390,10 @@ export const appRouter = router({
         z.object({
           name: z.string().min(1).max(160),
           quantity: z.string().max(80).optional(),
+          /** Lagerort (#233): ohne Angabe landet der Eintrag in der Kühlbox. */
+          storage: z.enum(FOOD_STORAGES).optional(),
+          unit: z.enum(FOOD_UNITS).nullish(),
+          category: z.enum(FOOD_CATEGORIES).nullish(),
           expiryDate: z
             .string()
             .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -2393,10 +2405,17 @@ export const appRouter = router({
           userId: ctx.user.id,
           name: input.name,
           quantity: input.quantity,
+          storage: input.storage ?? DEFAULT_FOOD_STORAGE,
+          unit: input.unit ?? null,
+          category: input.category ?? null,
           expiryDate: input.expiryDate ?? null,
         })
       ),
-    /** Menge und/oder MHD eines Eintrags anpassen (null = Feld leeren). */
+    /**
+     * Menge, Einheit, Kategorie, Lagerort und/oder MHD eines Eintrags
+     * anpassen (null = Feld leeren). Über `storage` wandert ein Vorrat
+     * zwischen Kühlbox und Trockenvorrat-Schrank.
+     */
     update: protectedProcedure
       .input(
         z.object({
@@ -2406,6 +2425,9 @@ export const appRouter = router({
             .trim()
             .max(MAX_FOOD_ITEM_QUANTITY_LENGTH)
             .nullish(),
+          storage: z.enum(FOOD_STORAGES).optional(),
+          unit: z.enum(FOOD_UNITS).nullish(),
+          category: z.enum(FOOD_CATEGORIES).nullish(),
           expiryDate: z
             .string()
             .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -2413,10 +2435,19 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const data: { quantity?: string | null; expiryDate?: string | null } =
-          {};
+        const data: {
+          quantity?: string | null;
+          storage?: FoodStorage;
+          unit?: string | null;
+          category?: string | null;
+          expiryDate?: string | null;
+        } = {};
         if (input.quantity !== undefined)
           data.quantity = input.quantity || null;
+        if (input.storage !== undefined) data.storage = input.storage;
+        if (input.unit !== undefined) data.unit = input.unit ?? null;
+        if (input.category !== undefined)
+          data.category = input.category ?? null;
         if (input.expiryDate !== undefined)
           data.expiryDate = input.expiryDate ?? null;
         await db.updateFoodItem(input.id, ctx.user.id, data);
@@ -2458,6 +2489,9 @@ export const appRouter = router({
                   .min(0)
                   .max(MAX_EXPIRY_DAYS)
                   .optional(),
+                storage: z.enum(FOOD_STORAGES).optional(),
+                unit: z.enum(FOOD_UNITS).optional(),
+                category: z.enum(FOOD_CATEGORIES).optional(),
               })
             )
             .min(1)
@@ -2502,18 +2536,22 @@ export const appRouter = router({
           });
         const items = parseFoodTemplateItems(template.itemsJson);
         const existing = await db.getFoodItems(ctx.user.id);
-        const existingNames = new Set(
-          existing.map(i => i.name.trim().toLowerCase())
+        // Doppelt-Schutz pro LAGER (#233): dieselbe Konserve darf in der
+        // Kühlbox und im Trockenvorrat stehen, im selben Lager aber nur einmal.
+        const keyOf = (name: string, storage: string | null | undefined) =>
+          `${normalizeFoodStorage(storage)}:${name.trim().toLowerCase()}`;
+        const existingKeys = new Set(
+          existing.map(i => keyOf(i.name, i.storage))
         );
         const toInsert: typeof items = [];
         let skipped = 0;
         for (const item of items) {
-          const key = item.name.trim().toLowerCase();
-          if (existingNames.has(key)) {
+          const key = keyOf(item.name, item.storage);
+          if (existingKeys.has(key)) {
             skipped += 1;
             continue;
           }
-          existingNames.add(key);
+          existingKeys.add(key);
           toInsert.push(item);
         }
         await db.addFoodItems(
@@ -2521,6 +2559,9 @@ export const appRouter = router({
             userId: ctx.user.id,
             name: item.name,
             quantity: item.quantity,
+            storage: normalizeFoodStorage(item.storage),
+            unit: item.unit ?? null,
+            category: item.category ?? null,
             expiryDate: expiryDateFromDays(input.today, item.expiryDays),
           }))
         );

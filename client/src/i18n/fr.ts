@@ -2934,19 +2934,29 @@ export const fr: Translation = {
       "Vaut pour la chaleur voûte/sole. En chaleur tournante, régler environ 20 °C de moins.",
   },
   food: {
-    title: "Inventaire de la glacière",
+    title: "Glacière & provisions sèches",
     subtitleLoggedOut:
       "Qu'est-ce qu'il reste ? Saisis tes provisions et reçois des suggestions de recettes adaptées.",
-    subtitle:
-      "Qu'est-ce qu'il reste ? Saisis tes provisions et reçois des suggestions de recettes one-pot adaptées.",
-    loginFeature: "ton inventaire de glacière",
-    addPlaceholder: "p. ex. tomates, fromage, haricots …",
+    subtitleCooled:
+      "Qu'est-ce qu'il reste ? Saisis tes provisions réfrigérées et reçois des suggestions de recettes one-pot adaptées.",
+    subtitleDry:
+      "Conserves, pâtes, café, épices : tout ce qui n'est pas réfrigéré dans le deuxième garde-manger – rangé par catégories.",
+    loginFeature: "tes provisions",
+    storageAria: "Choisir le rangement",
+    noUnit: "sans unité",
+    unitAria: "Unité de la quantité (facultatif)",
+    noCategory: "Sans catégorie",
+    categoryAria: "Catégorie dans les provisions sèches (facultatif)",
+    addPlaceholderCooled: "p. ex. tomates, fromage, haricots …",
+    addPlaceholderDry: "p. ex. boîte de raviolis, spaghettis, café …",
     addNameAria: "Ajouter un aliment",
     expiryAria: "Date limite de consommation (facultatif)",
     submitAria: "Enregistrer l'aliment",
     addFailed: "L'entrée n'a pas pu être enregistrée",
     dateHint:
       "Date = durée de conservation minimale (facultatif). Les provisions qui expirent bientôt passent en tête et sont marquées.",
+    dateHintDry:
+      "Date = durée de conservation minimale (facultatif). Dans les provisions sèches aussi, ce qui expire bientôt passe en tête et est marqué.",
     urgentOne: "Une provision devrait être consommée bientôt",
     urgentMany: (n: number) =>
       `${n} provisions devraient être consommées bientôt`,
@@ -2963,9 +2973,12 @@ export const fr: Translation = {
     emptyTitle: "Glacière encore vide",
     emptyText:
       "Saisis ce que tu as avec toi – nous te proposons des recettes adaptées.",
+    emptyTitleDry: "Provisions sèches encore vides",
+    emptyTextDry:
+      "Conserves, pâtes, riz, café, épices : saisis ce qui se trouve dans le garde-manger.",
     suggestionsTitle: "Cuisiner les restes",
     suggestionsSubtitle:
-      "Ce que tu peux cuisiner avec ce qu'il reste – les recettes avec des provisions bientôt périmées d'abord.",
+      "Ce que tu peux cuisiner avec ce qu'il reste – de la glacière et des provisions sèches, les recettes avec des provisions bientôt périmées d'abord.",
     haveCount: (have: number, total: number) =>
       `tu as ${have} ingrédients sur ${total}`,
     urgentInRecipe: (n: number) =>
@@ -3014,11 +3027,14 @@ export const fr: Translation = {
     quantityPlaceholder: "Quantité",
     addQuantityAria: "Quantité pour la nouvelle entrée (facultatif)",
     editAria: (name: string) =>
-      `Modifier ${name} – adapter la quantité et la DLC`,
+      `Modifier ${name} – adapter la quantité, le rangement et la DLC`,
     editDesc:
-      "Adapter la quantité et la date limite de consommation – les champs vides suppriment la valeur.",
+      "Adapter la quantité, l'unité, le rangement, la catégorie et la date limite de consommation – les champs vides suppriment la valeur.",
     editQuantityLabel: "Quantité",
     editQuantityPlaceholder: "p. ex. 2× ou 500 g",
+    editUnitLabel: "Unité",
+    editStorageLabel: "Rangement",
+    editCategoryLabel: "Catégorie",
     editExpiryLabel: "Date limite de consommation",
     editSave: "Enregistrer",
     editFailed: "La modification n'a pas pu être enregistrée",
@@ -3092,20 +3108,21 @@ export const fr: Translation = {
       "Tes compagnons scannent le code avec l'appareil photo du téléphone et arrivent directement sur la liste.",
     suggestionsAria: "Suggestions de l'historique et de la liste",
     putAwayButton: "Ranger les courses",
-    putAwayTitle: "Ranger les courses dans la glacière",
+    putAwayTitle: "Ranger les courses",
     putAwayDesc:
-      "Sélectionne les courses cochées et indique en option une date limite de consommation. Les articles repris passent dans ton inventaire de glacière et sont retirés de la liste de courses.",
-    putAwayItemAria: (name: string) => `Ranger ${name} dans la glacière`,
+      "Choisis le rangement et les courses cochées, et indique en option une date limite de consommation. Les articles repris passent dans tes provisions et sont retirés de la liste de courses.",
+    putAwayStorageLabel: "Rangement",
+    putAwayItemAria: (name: string) => `Ranger ${name} dans les provisions`,
     putAwayExpiryAria: (name: string) =>
       `Date limite de consommation pour ${name} (facultatif)`,
-    putAwayAlreadyInFood: "déjà dans la glacière",
+    putAwayAlreadyInFood: "déjà dans les provisions",
     putAwayConfirm: (n: number) =>
       n === 1 ? "Ranger 1 article" : `Ranger ${n} articles`,
     putAwayDone: (n: number) =>
       n === 1
-        ? "1 achat rangé dans la glacière"
-        : `${n} achats rangés dans la glacière`,
-    putAwayOpenFood: "Vers la glacière",
+        ? "1 achat rangé dans les provisions"
+        : `${n} achats rangés dans les provisions`,
+    putAwayOpenFood: "Vers les provisions",
     putAwayFailed:
       "Le rangement a échoué – les articles pas encore repris restent sur la liste",
     listsAria: "Choisir la liste de courses",

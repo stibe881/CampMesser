@@ -1,10 +1,16 @@
 /**
- * Sortierung fürs Kühlbox-Inventar: «Nach Ablauf» (Standard – ablaufende
- * Vorräte zuerst, Einträge ohne MHD zuletzt) oder «Nach Name» (alphabetisch
- * in der aktiven Sprache). Die Wahl wird in localStorage gemerkt.
- * Reine Sortier-Funktion – von der Seite und den Tests genutzt.
+ * Ansicht-Einstellungen der Vorrats-Seite: Sortierung («Nach Ablauf» –
+ * Standard, ablaufende Vorräte zuerst, Einträge ohne MHD zuletzt – oder
+ * «Nach Name», alphabetisch in der aktiven Sprache) und das zuletzt
+ * gewählte Lager (#233). Beides merkt sich das Gerät in localStorage.
+ * Reine Funktionen – von der Seite und den Tests genutzt.
  */
-import { expirySortKey } from "@shared/food";
+import {
+  expirySortKey,
+  isFoodStorage,
+  DEFAULT_FOOD_STORAGE,
+  type FoodStorage,
+} from "@shared/food";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
 
 export type FoodSortMode = "expiry" | "name";
@@ -29,6 +35,26 @@ export function loadFoodSort(): FoodSortMode {
 export function storeFoodSort(mode: FoodSortMode) {
   try {
     localStorage.setItem(FOOD_SORT_KEY, mode);
+  } catch {
+    /* Sitzung reicht */
+  }
+}
+
+export const FOOD_STORAGE_KEY = "campmesser.foodStorage";
+
+/** Zuletzt gewähltes Lager lesen – Unbekanntes fällt auf die Kühlbox zurück. */
+export function loadFoodStorage(): FoodStorage {
+  try {
+    const raw = localStorage.getItem(FOOD_STORAGE_KEY);
+    return isFoodStorage(raw) ? raw : DEFAULT_FOOD_STORAGE;
+  } catch {
+    return DEFAULT_FOOD_STORAGE;
+  }
+}
+
+export function storeFoodStorage(storage: FoodStorage) {
+  try {
+    localStorage.setItem(FOOD_STORAGE_KEY, storage);
   } catch {
     /* Sitzung reicht */
   }
