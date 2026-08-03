@@ -2606,7 +2606,7 @@ export const en: Translation = {
   nature: {
     title: "Nature Explorer",
     subtitle:
-      "Animal tracks, constellations and trees – explained for kids and available offline.",
+      "Animal tracks, constellations, trees, mushrooms and wild berries – explained for kids and available offline.",
     offlineNote:
       "The entire encyclopedia is stored in the app and can be used without an internet connection.",
     moonSectionAria: "Moon phase calendar",
@@ -2674,6 +2674,15 @@ export const en: Translation = {
     nowFilterAria: "Only show entries currently in season",
     nowFilterEmpty:
       "Nothing in this category is in season right now – switch off the filter to see all entries.",
+    safetyTitle: "Identify first, eat second",
+    rulesTitle: "Picking is regulated by the cantons",
+    habitatTitle: "Where you find it:",
+    useTitle: "Use:",
+    lookalikeTitle: "Risk of confusion",
+    lookalikeIntro:
+      "These species look similar – read them before you take anything home.",
+    lookalikeCheck:
+      "When in doubt: do not eat it, take the whole find to the official mushroom inspection service. Suspected poisoning: Tox Info Suisse 145.",
     collection: {
       title: "Species album",
       progress: (seen: number, total: number) =>

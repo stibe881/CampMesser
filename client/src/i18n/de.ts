@@ -2704,7 +2704,7 @@ export const de = {
   nature: {
     title: "Natur-Entdecker",
     subtitle:
-      "Tierspuren, Sternbilder und Bäume – kindgerecht erklärt und offline verfügbar.",
+      "Tierspuren, Sternbilder, Bäume, Pilze und Wildbeeren – kindgerecht erklärt und offline verfügbar.",
     offlineNote:
       "Das ganze Lexikon ist in der App gespeichert und ohne Internetverbindung nutzbar.",
     moonSectionAria: "Mondphasen-Kalender",
@@ -2772,6 +2772,15 @@ export const de = {
     nowFilterAria: "Nur Einträge zeigen, die jetzt Saison haben",
     nowFilterEmpty:
       "In dieser Kategorie hat gerade nichts Saison – schalte den Filter aus, um alle Einträge zu sehen.",
+    safetyTitle: "Erst bestimmen, dann essen",
+    rulesTitle: "Sammeln ist kantonal geregelt",
+    habitatTitle: "Wo du es findest:",
+    useTitle: "Verwendung:",
+    lookalikeTitle: "Verwechslungsgefahr",
+    lookalikeIntro:
+      "Diese Arten sehen ähnlich aus – lies sie, bevor du etwas mitnimmst.",
+    lookalikeCheck:
+      "Im Zweifel: nicht essen, sondern den ganzen Fund der amtlichen Pilzkontrollstelle zeigen. Vergiftungsverdacht: Tox Info Suisse 145.",
     collection: {
       title: "Arten-Sammelalbum",
       progress: (seen: number, total: number) =>

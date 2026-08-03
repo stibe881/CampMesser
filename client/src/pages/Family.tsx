@@ -67,7 +67,7 @@ import {
   customQuizToNatureQuiz,
   type CustomQuizRow,
 } from "@/lib/customQuizzes";
-import { natureEntries } from "@/data/nature";
+import { quizEntries } from "@/data/nature";
 import { buildNatureQuiz, NATURE_QUIZ_QUESTIONS } from "@/lib/natureQuiz";
 import {
   duelFinished,
@@ -1824,7 +1824,7 @@ export default function FamilyPage() {
       id: NATURE_LEXICON_QUIZ_ID,
       title: t.family.lexiconQuizTitle,
       ageHint: t.family.lexiconQuizAgeHint,
-      questions: buildNatureQuiz(natureEntries, lang),
+      questions: buildNatureQuiz(quizEntries, lang),
     });
   };
 

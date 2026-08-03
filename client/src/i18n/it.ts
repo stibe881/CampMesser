@@ -2671,7 +2671,7 @@ export const it: Translation = {
   nature: {
     title: "Esploratore della natura",
     subtitle:
-      "Tracce di animali, costellazioni e alberi – spiegati a misura di bambino e disponibili offline.",
+      "Tracce di animali, costellazioni, alberi, funghi e bacche selvatiche – spiegati a misura di bambino e disponibili offline.",
     offlineNote:
       "L'intero lessico è salvato nell'app e utilizzabile senza connessione Internet.",
     moonSectionAria: "Calendario delle fasi lunari",
@@ -2740,6 +2740,15 @@ export const it: Translation = {
     nowFilterAria: "Mostra solo le voci attualmente di stagione",
     nowFilterEmpty:
       "In questa categoria al momento niente è di stagione – disattiva il filtro per vedere tutte le voci.",
+    safetyTitle: "Prima identifica, poi mangia",
+    rulesTitle: "La raccolta è regolata dai cantoni",
+    habitatTitle: "Dove lo trovi:",
+    useTitle: "Uso:",
+    lookalikeTitle: "Rischio di confusione",
+    lookalikeIntro:
+      "Queste specie si assomigliano – leggile prima di portare via qualcosa.",
+    lookalikeCheck:
+      "Nel dubbio: non mangiare, ma mostrare tutto il raccolto all'ispettorato ufficiale dei funghi. Sospetta intossicazione: Tox Info Suisse 145.",
     collection: {
       title: "Album delle specie",
       progress: (seen: number, total: number) =>

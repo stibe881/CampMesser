@@ -2697,7 +2697,7 @@ export const fr: Translation = {
   nature: {
     title: "Explorateur nature",
     subtitle:
-      "Traces d'animaux, constellations et arbres – expliqués pour les enfants et disponibles hors ligne.",
+      "Traces d'animaux, constellations, arbres, champignons et baies sauvages – expliqués pour les enfants et disponibles hors ligne.",
     offlineNote:
       "Tout le lexique est enregistré dans l'app et utilisable sans connexion Internet.",
     moonSectionAria: "Calendrier des phases de la lune",
@@ -2766,6 +2766,15 @@ export const fr: Translation = {
     nowFilterAria: "N'afficher que les entrées actuellement de saison",
     nowFilterEmpty:
       "Rien n'est de saison dans cette catégorie en ce moment – désactive le filtre pour voir toutes les entrées.",
+    safetyTitle: "D'abord identifier, ensuite manger",
+    rulesTitle: "La cueillette est réglée par les cantons",
+    habitatTitle: "Où tu le trouves :",
+    useTitle: "Utilisation :",
+    lookalikeTitle: "Risque de confusion",
+    lookalikeIntro:
+      "Ces espèces se ressemblent – lis-les avant d'emporter quoi que ce soit.",
+    lookalikeCheck:
+      "En cas de doute : ne pas manger, mais montrer toute la récolte au contrôle officiel des champignons. Suspicion d'intoxication : Tox Info Suisse 145.",
     collection: {
       title: "Album des espèces",
       progress: (seen: number, total: number) =>

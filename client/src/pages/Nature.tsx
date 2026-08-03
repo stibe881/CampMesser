@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  AlertTriangle,
   Binoculars,
   CalendarCheck,
   CalendarDays,
+  Cherry,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -10,19 +12,23 @@ import {
   Flashlight,
   HelpCircle,
   ImagePlus,
+  Info,
   LayoutGrid,
   Lightbulb,
   Loader2,
   LocateFixed,
+  MapPin,
   Moon,
   PawPrint,
   Pencil,
   Plus,
   Satellite,
   Sparkles,
+  Sprout,
   Telescope,
   Trash2,
   TreePine,
+  UtensilsCrossed,
   WifiOff,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -86,7 +92,12 @@ import {
 } from "@shared/skyPosition";
 import { compassDirection } from "@shared/solar";
 import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
-import { inSeason } from "@shared/season";
+import {
+  ALL_MONTHS,
+  inSeason,
+  seasonMonths,
+  type Season,
+} from "@shared/season";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useDeviceHeading } from "@/hooks/useDeviceHeading";
 import { useI18n } from "@/i18n";
@@ -107,6 +118,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   PawPrint,
   Sparkles,
   TreePine,
+  Sprout,
+  Cherry,
 };
 
 const QUALITY_STYLES: Record<string, string> = {
@@ -138,6 +151,40 @@ function monthName(month: number, lang: Language): string {
   return new Date(2000, month - 1, 1).toLocaleDateString(LOCALE_TAGS[lang], {
     month: "long",
   });
+}
+
+/** Einbuchstabiges Monats-Kürzel für den Saison-Streifen, z. B. «M». */
+function monthNarrow(month: number, lang: Language): string {
+  return new Date(2000, month - 1, 1).toLocaleDateString(LOCALE_TAGS[lang], {
+    month: "narrow",
+  });
+}
+
+/**
+ * Zwölf-Monats-Streifen einer Saison: die Monate der Saison sind eingefärbt.
+ * Die Monatsliste kommt aus `seasonMonths` (@shared/season), damit Zeiträume
+ * über den Jahreswechsel – Schlehe Oktober bis Januar – ohne Sonderfall
+ * stimmen. Rein visuell: die Saison steht als Text daneben, darum aria-hidden.
+ */
+function SeasonStrip({ season, lang }: { season: Season; lang: Language }) {
+  const active = seasonMonths(season);
+  return (
+    <ul className="mb-4 grid grid-cols-12 gap-0.5" aria-hidden="true">
+      {ALL_MONTHS.map(month => (
+        <li
+          key={month}
+          className={cn(
+            "rounded-sm py-1 text-center text-[10px] font-semibold uppercase",
+            active.includes(month)
+              ? "bg-primary/20 text-primary"
+              : "bg-muted text-muted-foreground"
+          )}
+        >
+          {monthNarrow(month, lang)}
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 /** Zunehmende Phasen – bestimmt, auf welcher Seite das Symbol beleuchtet ist. */
@@ -1623,7 +1670,7 @@ export default function NaturePage() {
       {redLight && <RedLightMode onExit={() => setRedLight(false)} />}
 
       <div
-        className="mb-4 grid grid-cols-3 gap-2"
+        className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-5"
         role="group"
         aria-label={t.nature.categoryAria}
       >
@@ -1654,6 +1701,35 @@ export default function NaturePage() {
       <p className="mb-4 text-sm text-muted-foreground">
         {pick(activeCategory.intro, lang)}
       </p>
+
+      {/* Sicherheits-Warnung der Kategorie (Pilze, Beeren) – nicht im
+          Kleingedruckten, sondern über der Liste. */}
+      {activeCategory.warning && (
+        <div className="mb-3 flex gap-2.5 rounded-lg border border-destructive/40 bg-destructive/10 p-3">
+          <AlertTriangle
+            className="mt-0.5 h-4 w-4 shrink-0 text-destructive"
+            aria-hidden="true"
+          />
+          <div className="text-sm">
+            <p className="font-semibold text-destructive">
+              {t.nature.safetyTitle}
+            </p>
+            <p className="mt-1">{pick(activeCategory.warning, lang)}</p>
+          </div>
+        </div>
+      )}
+      {activeCategory.rulesHint && (
+        <div className="mb-4 flex gap-2.5 rounded-lg bg-accent/60 p-3">
+          <Info
+            className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+            aria-hidden="true"
+          />
+          <div className="text-sm">
+            <p className="font-semibold">{t.nature.rulesTitle}</p>
+            <p className="mt-1">{pick(activeCategory.rulesHint, lang)}</p>
+          </div>
+        </div>
+      )}
 
       <button
         type="button"
@@ -1715,15 +1791,45 @@ export default function NaturePage() {
               </p>
 
               {entry.season && (
-                <p className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-                  <CalendarDays
-                    className="h-4 w-4 shrink-0 text-primary"
+                <>
+                  <p className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+                    <CalendarDays
+                      className="h-4 w-4 shrink-0 text-primary"
+                      aria-hidden="true"
+                    />
+                    {t.nature.seasonLine(
+                      monthName(entry.season.from, lang),
+                      monthName(entry.season.to, lang)
+                    )}
+                  </p>
+                  <SeasonStrip season={entry.season} lang={lang} />
+                </>
+              )}
+
+              {entry.habitat && (
+                <p className="mb-3 flex gap-2 text-sm">
+                  <MapPin
+                    className="mt-0.5 h-4 w-4 shrink-0 text-primary"
                     aria-hidden="true"
                   />
-                  {t.nature.seasonLine(
-                    monthName(entry.season.from, lang),
-                    monthName(entry.season.to, lang)
-                  )}
+                  <span>
+                    <span className="font-semibold">
+                      {t.nature.habitatTitle}
+                    </span>{" "}
+                    {pick(entry.habitat, lang)}
+                  </span>
+                </p>
+              )}
+              {entry.use && (
+                <p className="mb-4 flex gap-2 text-sm">
+                  <UtensilsCrossed
+                    className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                    aria-hidden="true"
+                  />
+                  <span>
+                    <span className="font-semibold">{t.nature.useTitle}</span>{" "}
+                    {pick(entry.use, lang)}
+                  </span>
                 </p>
               )}
 
@@ -1763,6 +1869,35 @@ export default function NaturePage() {
                   {pick(entry.kidQuestion, lang)}
                 </p>
               </div>
+
+              {entry.lookalikes && entry.lookalikes.length > 0 && (
+                <div className="mt-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3">
+                  <p className="flex items-center gap-2 font-semibold text-destructive">
+                    <AlertTriangle
+                      className="h-4 w-4 shrink-0"
+                      aria-hidden="true"
+                    />
+                    {t.nature.lookalikeTitle}
+                  </p>
+                  <p className="mt-1 text-sm">{t.nature.lookalikeIntro}</p>
+                  <ul className="mt-2 space-y-2">
+                    {entry.lookalikes.map(look => (
+                      <li key={look.latin} className="text-sm">
+                        <p className="font-semibold">
+                          {pick(look.name, lang)}{" "}
+                          <span className="font-normal italic text-muted-foreground">
+                            {look.latin}
+                          </span>
+                        </p>
+                        <p>{pick(look.warning, lang)}</p>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-2 text-xs font-medium">
+                    {t.nature.lookalikeCheck}
+                  </p>
+                </div>
+              )}
             </AccordionContent>
           </AccordionItem>
         ))}

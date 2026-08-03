@@ -23,7 +23,20 @@ import img_natur_eiche from "@/assets/natur-eiche.webp";
 import img_natur_birke from "@/assets/natur-birke.webp";
 import img_natur_laerche from "@/assets/natur-laerche.webp";
 
-export type NatureCategoryId = "tierspuren" | "sternbilder" | "baeume";
+export type NatureCategoryId =
+  "tierspuren" | "sternbilder" | "baeume" | "pilze" | "beeren";
+
+/**
+ * Giftiger Doppelgänger eines Speisepilzes (#237). Steht bei Pilz-Einträgen
+ * ZWINGEND – ein Pilzeintrag ohne Verwechslungsgefahr wäre fahrlässig.
+ */
+export interface NatureLookalike {
+  name: L4;
+  /** Wissenschaftlicher Name – sprachneutral. */
+  latin: string;
+  /** Woran du den Doppelgänger erkennst und was er anrichtet. */
+  warning: L4;
+}
 
 export interface NatureEntry {
   id: string;
@@ -41,6 +54,12 @@ export interface NatureEntry {
    * fehlt das Feld, ist der Eintrag ganzjährig zu sehen.
    */
   season?: Season;
+  /** Wo der Eintrag wächst bzw. vorkommt (Saisonkalender #237). */
+  habitat?: L4;
+  /** Wofür man ihn verwendet (Saisonkalender #237). */
+  use?: L4;
+  /** Giftige Doppelgänger – bei Pilzen Pflicht. */
+  lookalikes?: NatureLookalike[];
 }
 
 export interface NatureCategory {
@@ -48,6 +67,13 @@ export interface NatureCategory {
   label: L4;
   icon: string;
   intro: L4;
+  /**
+   * Ernst gemeinte Sicherheits-Warnung der Kategorie (Pilze und Beeren) –
+   * wird über der Liste angezeigt, nicht bloss im Kleingedruckten.
+   */
+  warning?: L4;
+  /** Hinweis auf kantonale Sammelbeschränkungen. */
+  rulesHint?: L4;
 }
 
 export const natureCategories: NatureCategory[] = [
@@ -92,6 +118,57 @@ export const natureCategories: NatureCategory[] = [
       "Feuilles, aiguilles, écorce – voici comment reconnaître les arbres les plus fréquents autour du camp.",
       "Foglie, aghi, corteccia – ecco come riconoscere gli alberi più comuni attorno al campo.",
       "Leaves, needles, bark – how to recognise the most common trees around camp."
+    ),
+  },
+  {
+    id: "pilze",
+    label: l4("Pilze", "Champignons", "Funghi", "Mushrooms"),
+    icon: "Sprout",
+    intro: l4(
+      "Wann wächst was? Die gängigen Speisepilze mit Saison, Fundort – und ihren giftigen Doppelgängern.",
+      "Quand pousse quoi ? Les champignons comestibles courants avec leur saison, leur habitat – et leurs sosies toxiques.",
+      "Quando cresce cosa? I funghi commestibili più comuni con stagione, habitat – e i loro sosia velenosi.",
+      "What grows when? The common edible mushrooms with season, habitat – and their poisonous look-alikes."
+    ),
+    warning: l4(
+      "Iss nur, was du sicher bestimmt hast. Diese Seite ersetzt keine Bestimmung: Ein paar Zeilen Text und ein Merkmal reichen nie, um einen Pilz freizugeben. Der Grüne Knollenblätterpilz wird regelmässig mit Champignons und Täublingen verwechselt und ist schon in kleiner Menge tödlich – Symptome kommen oft erst nach Stunden, wenn das Gift die Leber bereits angreift. Im geringsten Zweifel: nicht essen, sondern den ganzen Fund der amtlichen Pilzkontrollstelle deiner Gemeinde zeigen. Sie ist gratis oder kostet wenig. Bei Verdacht auf eine Vergiftung: Tox Info Suisse 145.",
+      "Ne mange que ce que tu as identifié avec certitude. Cette page ne remplace pas une détermination : quelques lignes et un seul critère ne suffisent jamais à libérer un champignon. L'amanite phalloïde est régulièrement confondue avec des champignons de couche et des russules et elle est mortelle en petite quantité – les symptômes n'arrivent souvent qu'après plusieurs heures, quand le poison attaque déjà le foie. Au moindre doute : ne pas manger, mais montrer toute la récolte au contrôle officiel des champignons de ta commune. Il est gratuit ou peu coûteux. En cas de suspicion d'intoxication : Tox Info Suisse 145.",
+      "Mangia solo ciò che hai identificato con certezza. Questa pagina non sostituisce una determinazione: poche righe e un solo carattere non bastano mai per liberare un fungo. L'amanita falloide viene regolarmente confusa con prataioli e russule ed è mortale già in piccola quantità – i sintomi arrivano spesso solo dopo ore, quando il veleno attacca già il fegato. Al minimo dubbio: non mangiare, ma mostrare tutto il raccolto all'ispettorato ufficiale dei funghi del tuo comune. È gratuito o costa poco. In caso di sospetta intossicazione: Tox Info Suisse 145.",
+      "Only eat what you have identified with certainty. This page does not replace identification: a few lines of text and one feature are never enough to clear a mushroom. The death cap is regularly mistaken for field mushrooms and brittlegills and is lethal in small amounts – symptoms often appear only after hours, when the toxin is already attacking the liver. At the slightest doubt: do not eat it, take the whole find to your municipality's official mushroom inspection service. It is free or costs little. If you suspect poisoning: Tox Info Suisse 145."
+    ),
+    rulesHint: l4(
+      "Sammeln ist kantonal geregelt: Viele Kantone kennen eine Mengenbegrenzung (verbreitet 1 kg pro Person und Tag), Schonzeiten in den ersten Tagen jedes Monats und Sammelverbote in Schutzgebieten und Reservaten. Prüf vor dem Sammeln die Regeln deines Kantons und der Gemeinde.",
+      "La cueillette est réglée par les cantons : de nombreux cantons connaissent une limite de quantité (couramment 1 kg par personne et par jour), des périodes de protection les premiers jours de chaque mois et des interdictions de cueillette dans les zones protégées et les réserves. Vérifie les règles de ton canton et de ta commune avant de cueillir.",
+      "La raccolta è regolata dai cantoni: molti cantoni prevedono un limite di quantità (di solito 1 kg per persona al giorno), periodi di divieto nei primi giorni di ogni mese e divieti di raccolta nelle zone protette e nelle riserve. Prima di raccogliere controlla le regole del tuo cantone e del comune.",
+      "Picking is regulated by the cantons: many cantons have a quantity limit (commonly 1 kg per person per day), closed periods in the first days of each month and picking bans in protected areas and reserves. Check the rules of your canton and municipality before you pick."
+    ),
+  },
+  {
+    id: "beeren",
+    label: l4(
+      "Wildbeeren",
+      "Baies sauvages",
+      "Bacche selvatiche",
+      "Wild berries"
+    ),
+    icon: "Cherry",
+    intro: l4(
+      "Von der Heidelbeere im Juli bis zur Schlehe nach dem ersten Frost – wann du was am Wegrand findest.",
+      "De la myrtille en juillet à la prunelle après les premières gelées – ce que tu trouves quand au bord du chemin.",
+      "Dal mirtillo di luglio alla prugnola dopo la prima gelata – cosa trovi e quando lungo il sentiero.",
+      "From bilberries in July to sloes after the first frost – what you find by the wayside and when."
+    ),
+    warning: l4(
+      "Auch bei Beeren gilt: nur essen, was du sicher bestimmt hast. Tollkirsche, Seidelbast, Aronstab und Zaunrübe stehen an denselben Wegrändern und sind giftig, für Kinder schon in kleiner Menge. Beeren gut waschen – der Fuchsbandwurm ist selten, aber die Vorsicht kostet nichts. Bei Verdacht auf eine Vergiftung: Tox Info Suisse 145.",
+      "Pour les baies aussi : ne mange que ce que tu as identifié avec certitude. Belladone, daphné, arum et bryone poussent aux mêmes bords de chemin et sont toxiques, pour les enfants déjà en petite quantité. Lave bien les baies – l'échinocoque est rare, mais la prudence ne coûte rien. En cas de suspicion d'intoxication : Tox Info Suisse 145.",
+      "Anche per le bacche vale: mangia solo ciò che hai identificato con certezza. Belladonna, dafne, gigaro e brionia crescono sugli stessi bordi di sentiero e sono velenosi, per i bambini già in piccola quantità. Lava bene le bacche – l'echinococco è raro, ma la prudenza non costa nulla. In caso di sospetta intossicazione: Tox Info Suisse 145.",
+      "Berries too: only eat what you have identified with certainty. Deadly nightshade, mezereon, lords-and-ladies and white bryony grow along the same paths and are poisonous, for children even in small amounts. Wash berries well – the fox tapeworm is rare, but caution costs nothing. If you suspect poisoning: Tox Info Suisse 145."
+    ),
+    rulesHint: l4(
+      "Auch fürs Beerensammeln gelten kantonale Regeln: meist eine Handmenge für den Eigengebrauch, in Schutzgebieten und Reservaten oft gar nichts. Auf Privatgrund fragst du zuerst.",
+      "La cueillette des baies suit aussi des règles cantonales : le plus souvent une quantité pour la consommation personnelle, et rien du tout dans les zones protégées et les réserves. Sur terrain privé, demande d'abord.",
+      "Anche per le bacche valgono regole cantonali: di solito una quantità per il consumo proprio, nelle zone protette e nelle riserve spesso nulla. Su terreno privato chiedi prima.",
+      "Berry picking follows cantonal rules too: usually a hand-picked amount for your own use, and nothing at all in protected areas and reserves. On private land, ask first."
     ),
   },
 ];
@@ -1257,4 +1334,886 @@ export const natureEntries: NatureEntry[] = [
       ),
     ],
   },
+  // ── Pilze (#237) ──
+  {
+    id: "steinpilz",
+    name: l4("Steinpilz", "Cèpe de Bordeaux", "Porcino", "Penny bun"),
+    latinOrExtra: "Boletus edulis",
+    category: "pilze",
+    season: { from: 7, to: 10 },
+    description: l4(
+      "Der bekannteste Röhrling: brauner, oft leicht klebriger Hut, darunter weisse bis grüngelbe Röhren statt Lamellen, und ein bauchiger heller Stiel mit feinem weissem Netz oben. Das Fleisch bleibt beim Anschneiden weiss.",
+      "Le bolet le plus connu : chapeau brun, souvent un peu visqueux, dessous des tubes blancs à jaune verdâtre au lieu de lames, et un pied ventru clair portant un fin réseau blanc vers le haut. La chair reste blanche à la coupe.",
+      "Il boleto più conosciuto: cappello bruno, spesso un po' vischioso, sotto tubuli bianchi o giallo-verdi invece delle lamelle, e un gambo panciuto chiaro con un fine reticolo bianco in alto. La carne resta bianca al taglio.",
+      "The best-known bolete: brown, often slightly sticky cap, white to greenish-yellow tubes instead of gills underneath, and a bulbous pale stem with a fine white net at the top. The flesh stays white when cut."
+    ),
+    habitat: l4(
+      "Fichten-, Buchen- und Eichenwälder, gern am Waldrand und an moosigen Böschungen, ab 800 m auch später im Jahr.",
+      "Forêts d'épicéas, de hêtres et de chênes, volontiers en lisière et sur les talus moussus ; au-dessus de 800 m aussi plus tard dans l'année.",
+      "Boschi di abete rosso, faggio e quercia, volentieri ai margini e su scarpate muschiose; sopra gli 800 m anche più tardi nell'anno.",
+      "Spruce, beech and oak woods, often at the forest edge and on mossy banks; above 800 m also later in the year."
+    ),
+    use: l4(
+      "Jung roh im Salat, sonst gebraten, als Risotto oder in Scheiben getrocknet – getrocknet wird das Aroma am stärksten.",
+      "Jeune en salade crue, sinon poêlé, en risotto ou séché en lamelles – c'est séché que l'arôme est le plus fort.",
+      "Da giovane crudo in insalata, altrimenti in padella, in risotto o essiccato a fette – essiccato l'aroma è più intenso.",
+      "Young and raw in a salad, otherwise fried, in risotto or dried in slices – dried, the aroma is strongest."
+    ),
+    funFact: l4(
+      "Ein Steinpilz wächst nicht aus dem Nichts: Unter dem Boden lebt sein Pilzgeflecht seit Jahren mit den Baumwurzeln zusammen und tauscht Wasser gegen Zucker.",
+      "Un cèpe ne surgit pas de nulle part : sous le sol, son mycélium vit depuis des années avec les racines des arbres et échange de l'eau contre du sucre.",
+      "Un porcino non nasce dal nulla: sotto terra il suo micelio vive da anni assieme alle radici degli alberi e scambia acqua con zucchero.",
+      "A penny bun does not appear from nowhere: below ground its mycelium has lived with the tree roots for years, trading water for sugar."
+    ),
+    kidQuestion: l4(
+      "Schau dir die Unterseite an: Siehst du feine Röhren wie ein Schwamm – oder Lamellen wie Buchseiten?",
+      "Regarde le dessous : vois-tu de fins tubes comme une éponge – ou des lames comme les pages d'un livre ?",
+      "Guarda la parte inferiore: vedi tubuli fini come una spugna – oppure lamelle come pagine di un libro?",
+      "Look underneath: do you see fine tubes like a sponge – or gills like the pages of a book?"
+    ),
+    features: [
+      l4(
+        "Röhren statt Lamellen, weiss bis grüngelb",
+        "Tubes au lieu de lames, blancs à jaune verdâtre",
+        "Tubuli invece di lamelle, da bianchi a giallo-verdi",
+        "Tubes instead of gills, white to greenish yellow"
+      ),
+      l4(
+        "Heller Stiel mit feinem weissem Netz",
+        "Pied clair avec un fin réseau blanc",
+        "Gambo chiaro con fine reticolo bianco",
+        "Pale stem with a fine white net"
+      ),
+      l4(
+        "Fleisch bleibt beim Anschneiden weiss",
+        "La chair reste blanche à la coupe",
+        "La carne resta bianca al taglio",
+        "Flesh stays white when cut"
+      ),
+    ],
+    lookalikes: [
+      {
+        name: l4(
+          "Gallenröhrling",
+          "Bolet amer",
+          "Boleto amaro",
+          "Bitter bolete"
+        ),
+        latin: "Tylopilus felleus",
+        warning: l4(
+          "Nicht giftig, aber bitter wie Galle – ein einziger Hut verdirbt die ganze Pfanne. Erkennungszeichen: rosa angehauchte Röhren und ein grobes, dunkles Netz auf dem Stiel.",
+          "Non toxique mais amer comme le fiel – un seul chapeau gâche toute la poêlée. Signes : tubes teintés de rose et réseau grossier et foncé sur le pied.",
+          "Non velenoso ma amaro come il fiele – un solo cappello rovina l'intera padella. Segni: tubuli rosati e reticolo grossolano e scuro sul gambo.",
+          "Not poisonous but bitter as gall – a single cap ruins the whole pan. Signs: pink-tinged tubes and a coarse, dark net on the stem."
+        ),
+      },
+      {
+        name: l4(
+          "Satansröhrling",
+          "Bolet Satan",
+          "Boleto di Satana",
+          "Devil's bolete"
+        ),
+        latin: "Rubroboletus satanas",
+        warning: l4(
+          "Giftig, führt zu heftigem Erbrechen. Heller Hut, aber rote Röhrenmündungen und ein rot geflammter Stiel; das Fleisch blaut beim Anschneiden. Wächst auf Kalk unter Eichen und Buchen.",
+          "Toxique, provoque de violents vomissements. Chapeau clair, mais pores rouges et pied flammé de rouge ; la chair bleuit à la coupe. Pousse sur calcaire sous chênes et hêtres.",
+          "Velenoso, provoca vomito violento. Cappello chiaro, ma pori rossi e gambo fiammato di rosso; la carne vira al blu al taglio. Cresce su calcare sotto querce e faggi.",
+          "Poisonous, causes violent vomiting. Pale cap, but red pore mouths and a red-flamed stem; the flesh turns blue when cut. Grows on limestone under oaks and beeches."
+        ),
+      },
+    ],
+  },
+  {
+    id: "eierschwamm",
+    name: l4(
+      "Eierschwamm (Pfifferling)",
+      "Girolle",
+      "Finferlo (gallinaccio)",
+      "Chanterelle"
+    ),
+    latinOrExtra: "Cantharellus cibarius",
+    category: "pilze",
+    season: { from: 6, to: 10 },
+    description: l4(
+      "Dottergelb von oben bis unten, trichterförmig mit welligem Rand. Unten keine echten Lamellen, sondern stumpfe Leisten, die weit am Stiel hinunterlaufen. Riecht deutlich nach Aprikose.",
+      "Jaune d'œuf du chapeau au pied, en forme d'entonnoir à bord ondulé. Dessous, pas de vraies lames mais des plis épais qui descendent longuement sur le pied. Odeur nette d'abricot.",
+      "Giallo tuorlo da cima a fondo, a imbuto con bordo ondulato. Sotto non ha vere lamelle ma pliche spesse che scendono a lungo sul gambo. Odore netto di albicocca.",
+      "Egg-yellow from top to bottom, funnel-shaped with a wavy edge. Underneath there are no true gills but blunt ridges running far down the stem. Smells distinctly of apricot."
+    ),
+    habitat: l4(
+      "Moos- und Heidelbeerpolster in Nadel- und Mischwäldern, oft truppweise an derselben Stelle über Jahre.",
+      "Coussins de mousse et de myrtilles en forêts de conifères et mixtes, souvent en troupes au même endroit pendant des années.",
+      "Cuscini di muschio e mirtillo in boschi di conifere e misti, spesso a gruppi nello stesso posto per anni.",
+      "Moss and bilberry cushions in conifer and mixed woods, often in troops at the same spot for years."
+    ),
+    use: l4(
+      "In Butter mit Zwiebeln gebraten, zu Rührei oder Rahmsauce. Nicht trocknen – er wird zäh; besser einfrieren nach kurzem Anbraten.",
+      "Poêlée au beurre avec des oignons, avec des œufs brouillés ou en sauce à la crème. Ne pas sécher – il devient coriace ; mieux vaut le congeler après un rapide passage à la poêle.",
+      "In padella con burro e cipolla, con uova strapazzate o in salsa di panna. Non essiccarlo – diventa coriaceo; meglio congelarlo dopo una breve rosolatura.",
+      "Fried in butter with onions, with scrambled eggs or in a cream sauce. Do not dry it – it turns tough; better to freeze it after a quick fry."
+    ),
+    funFact: l4(
+      "Eierschwämme werden fast nie madig: Sie enthalten Stoffe, die Insektenlarven fernhalten.",
+      "Les girolles sont presque jamais véreuses : elles contiennent des substances qui tiennent les larves d'insectes à distance.",
+      "I finferli non sono quasi mai bacati: contengono sostanze che tengono lontane le larve degli insetti.",
+      "Chanterelles are almost never maggoty: they contain substances that keep insect larvae away."
+    ),
+    kidQuestion: l4(
+      "Riech einmal daran: Findest du den Duft nach Aprikose?",
+      "Sens-le une fois : trouves-tu le parfum d'abricot ?",
+      "Annusalo: senti il profumo di albicocca?",
+      "Give it a sniff: can you find the apricot scent?"
+    ),
+    features: [
+      l4(
+        "Durchgehend dottergelb, trichterförmig",
+        "Entièrement jaune d'œuf, en entonnoir",
+        "Tutto giallo tuorlo, a imbuto",
+        "Egg-yellow throughout, funnel-shaped"
+      ),
+      l4(
+        "Stumpfe Leisten statt scharfer Lamellen",
+        "Plis épais au lieu de lames fines",
+        "Pliche spesse invece di lamelle sottili",
+        "Blunt ridges instead of sharp gills"
+      ),
+      l4(
+        "Aprikosen-Duft, festes Fleisch",
+        "Odeur d'abricot, chair ferme",
+        "Odore di albicocca, carne soda",
+        "Apricot scent, firm flesh"
+      ),
+    ],
+    lookalikes: [
+      {
+        name: l4(
+          "Falscher Pfifferling",
+          "Fausse girolle",
+          "Falso finferlo",
+          "False chanterelle"
+        ),
+        latin: "Hygrophoropsis aurantiaca",
+        warning: l4(
+          "Orange statt dottergelb, mit echten, dünnen und gegabelten Lamellen und weichem Fleisch. Gilt als unverträglich und löst bei manchen Magen-Darm-Beschwerden aus.",
+          "Orange au lieu de jaune d'œuf, avec de vraies lames fines et fourchues et une chair molle. Réputée indigeste, elle provoque chez certains des troubles digestifs.",
+          "Arancione invece che giallo tuorlo, con vere lamelle sottili e forcate e carne molle. È considerato indigesto e in alcuni provoca disturbi gastrointestinali.",
+          "Orange instead of egg-yellow, with true thin, forked gills and soft flesh. Considered indigestible and causes stomach upsets in some people."
+        ),
+      },
+      {
+        name: l4(
+          "Ölbaumtrichterling",
+          "Clitocybe de l'olivier",
+          "Fungo dell'olivo",
+          "Jack-o'-lantern"
+        ),
+        latin: "Omphalotus olearius",
+        warning: l4(
+          "Giftig, führt zu stundenlangem Erbrechen. Leuchtend orange, deutlich grösser, mit echten Lamellen; wächst büschelig an Stümpfen und Wurzeln von Laubbäumen, nie einzeln im Moos.",
+          "Toxique, provoque des vomissements pendant des heures. Orange vif, nettement plus grand, avec de vraies lames ; pousse en touffes sur les souches et racines de feuillus, jamais isolé dans la mousse.",
+          "Velenoso, provoca vomito per ore. Arancione acceso, decisamente più grande, con vere lamelle; cresce a ciuffi su ceppi e radici di latifoglie, mai isolato nel muschio.",
+          "Poisonous, causes hours of vomiting. Bright orange, clearly larger, with true gills; grows in tufts on stumps and roots of broadleaf trees, never singly in moss."
+        ),
+      },
+    ],
+  },
+  {
+    id: "maronenroehrling",
+    name: l4("Maronenröhrling", "Bolet bai", "Boleto baio", "Bay bolete"),
+    latinOrExtra: "Imleria badia",
+    category: "pilze",
+    season: { from: 8, to: 11 },
+    description: l4(
+      "Kastanienbrauner, bei Nässe klebriger Hut. Die Röhren sind blassgelb und blauen auf Druck deutlich – das gehört dazu und ist kein Warnzeichen. Der Stiel ist braun faserig, ohne Netz.",
+      "Chapeau brun châtaigne, visqueux par temps humide. Les tubes sont jaune pâle et bleuissent nettement à la pression – c'est normal, ce n'est pas un signal d'alarme. Le pied est brun fibrilleux, sans réseau.",
+      "Cappello bruno castagna, vischioso con l'umidità. I tubuli sono giallo pallido e virano nettamente al blu alla pressione – è normale, non è un segnale d'allarme. Il gambo è bruno fibrilloso, senza reticolo.",
+      "Chestnut-brown cap, sticky when damp. The tubes are pale yellow and turn distinctly blue when pressed – that is normal, not a warning sign. The stem is brown and fibrous, without a net."
+    ),
+    habitat: l4(
+      "Nadelwälder, besonders unter Fichten auf saurem Boden; hält länger durch als der Steinpilz und steht oft bis in den November.",
+      "Forêts de conifères, surtout sous les épicéas sur sol acide ; il tient plus longtemps que le cèpe et se trouve souvent jusqu'en novembre.",
+      "Boschi di conifere, soprattutto sotto abeti rossi su suolo acido; resiste più a lungo del porcino e si trova spesso fino a novembre.",
+      "Conifer woods, especially under spruce on acid soils; it lasts longer than the penny bun and often stands into November."
+    ),
+    use: l4(
+      "Wie der Steinpilz zu verwenden, etwas milder. Junge Hüte trocknen gut, alte Röhren vor dem Kochen abziehen.",
+      "S'utilise comme le cèpe, en un peu plus doux. Les jeunes chapeaux sèchent bien ; retire les tubes des vieux avant cuisson.",
+      "Si usa come il porcino, un po' più delicato. I cappelli giovani si essiccano bene; togli i tubuli da quelli vecchi prima di cuocerli.",
+      "Used like the penny bun, a little milder. Young caps dry well; strip the tubes from old ones before cooking."
+    ),
+    funFact: l4(
+      "Das Blauen ist eine Reaktion mit dem Luftsauerstoff und verschwindet beim Kochen wieder.",
+      "Le bleuissement est une réaction avec l'oxygène de l'air et disparaît à la cuisson.",
+      "Il viraggio al blu è una reazione con l'ossigeno dell'aria e sparisce con la cottura.",
+      "The blueing is a reaction with the oxygen in the air and disappears again when cooked."
+    ),
+    kidQuestion: l4(
+      "Drück vorsichtig auf die Unterseite: Wird der Fleck blau?",
+      "Appuie doucement sur le dessous : la tache devient-elle bleue ?",
+      "Premi delicatamente la parte inferiore: la macchia diventa blu?",
+      "Press the underside gently: does the mark turn blue?"
+    ),
+    features: [
+      l4(
+        "Kastanienbrauner, bei Nässe klebriger Hut",
+        "Chapeau brun châtaigne, visqueux par temps humide",
+        "Cappello bruno castagna, vischioso con l'umidità",
+        "Chestnut-brown cap, sticky when damp"
+      ),
+      l4(
+        "Blassgelbe Röhren, blauen auf Druck",
+        "Tubes jaune pâle, bleuissant à la pression",
+        "Tubuli giallo pallido, virano al blu alla pressione",
+        "Pale yellow tubes, blueing when pressed"
+      ),
+      l4(
+        "Brauner Stiel ohne Netz",
+        "Pied brun sans réseau",
+        "Gambo bruno senza reticolo",
+        "Brown stem without a net"
+      ),
+    ],
+    lookalikes: [
+      {
+        name: l4(
+          "Gallenröhrling",
+          "Bolet amer",
+          "Boleto amaro",
+          "Bitter bolete"
+        ),
+        latin: "Tylopilus felleus",
+        warning: l4(
+          "Steht im selben Wald und wird auch mit der Marone verwechselt: rosa Röhren, grobes Netz am Stiel, bitter. Eine Zungenspitze am rohen Fleisch verrät ihn – der Bissen wird danach ausgespuckt.",
+          "Il pousse dans la même forêt et se confond aussi avec le bolet bai : tubes roses, réseau grossier sur le pied, amer. Une pointe de langue sur la chair crue le trahit – la bouchée est ensuite recrachée.",
+          "Cresce nello stesso bosco e si confonde anche con il boleto baio: tubuli rosa, reticolo grossolano sul gambo, amaro. Una punta di lingua sulla carne cruda lo tradisce – il boccone va poi sputato.",
+          "It grows in the same wood and is mistaken for the bay bolete too: pink tubes, coarse net on the stem, bitter. A touch of the tongue on the raw flesh gives it away – then spit it out."
+        ),
+      },
+    ],
+  },
+  {
+    id: "parasol",
+    name: l4(
+      "Parasol (Riesenschirmling)",
+      "Coulemelle",
+      "Mazza di tamburo",
+      "Parasol mushroom"
+    ),
+    latinOrExtra: "Macrolepiota procera",
+    category: "pilze",
+    season: { from: 7, to: 10 },
+    description: l4(
+      "Bis 30 cm breiter Hut, beige mit groben braunen Schuppen und einem glatten Buckel in der Mitte. Der lange Stiel ist genattert wie eine Schlangenhaut und trägt einen verschiebbaren Ring. Junge Exemplare sehen aus wie ein Paukenschlägel.",
+      "Chapeau jusqu'à 30 cm, beige à grosses écailles brunes et mamelon lisse au centre. Le long pied est zébré comme une peau de serpent et porte un anneau coulissant. Les jeunes ressemblent à une baguette de tambour.",
+      "Cappello fino a 30 cm, beige con grosse squame brune e un umbone liscio al centro. Il gambo lungo è zebrato come pelle di serpente e porta un anello scorrevole. Gli esemplari giovani sembrano una bacchetta da tamburo.",
+      "Cap up to 30 cm across, beige with coarse brown scales and a smooth boss in the middle. The long stem is snake-patterned and carries a movable ring. Young ones look like a drumstick."
+    ),
+    habitat: l4(
+      "Wiesen, Weiden, Waldränder und lichte Wälder – gern dort, wo Gras und Wald aneinanderstossen.",
+      "Prairies, pâturages, lisières et forêts claires – volontiers là où l'herbe et la forêt se touchent.",
+      "Prati, pascoli, margini del bosco e boschi radi – volentieri dove erba e bosco si toccano.",
+      "Meadows, pastures, forest edges and open woods – often where grass and forest meet."
+    ),
+    use: l4(
+      "Der Klassiker: Hut paniert wie ein Schnitzel braten. Der zähe Stiel wird getrocknet und zu Pilzpulver gemahlen.",
+      "Le classique : chapeau pané et poêlé comme une escalope. Le pied coriace se sèche et se moud en poudre de champignon.",
+      "Il classico: cappello impanato e fritto come una cotoletta. Il gambo coriaceo si essicca e si macina in polvere di funghi.",
+      "The classic: bread the cap and fry it like a schnitzel. The tough stem is dried and ground into mushroom powder."
+    ),
+    funFact: l4(
+      "Der Ring lässt sich am Stiel hoch- und runterschieben wie ein Ring an einem Finger – das kann kein anderer heimischer Pilz.",
+      "L'anneau se déplace le long du pied comme une bague sur un doigt – aucun autre champignon indigène ne fait cela.",
+      "L'anello scorre su e giù lungo il gambo come un anello su un dito – nessun altro fungo nostrano lo fa.",
+      "The ring slides up and down the stem like a ring on a finger – no other native mushroom does that."
+    ),
+    kidQuestion: l4(
+      "Schau dir den Stiel an: Erkennst du das Muster einer Schlangenhaut?",
+      "Regarde le pied : reconnais-tu le motif d'une peau de serpent ?",
+      "Guarda il gambo: riconosci il disegno di una pelle di serpente?",
+      "Look at the stem: can you make out a snakeskin pattern?"
+    ),
+    features: [
+      l4(
+        "Grosser beiger Hut mit braunen Schuppen",
+        "Grand chapeau beige à écailles brunes",
+        "Grande cappello beige con squame brune",
+        "Large beige cap with brown scales"
+      ),
+      l4(
+        "Genatterter Stiel, verschiebbarer Ring",
+        "Pied zébré, anneau coulissant",
+        "Gambo zebrato, anello scorrevole",
+        "Snake-patterned stem, movable ring"
+      ),
+      l4(
+        "Weisse Lamellen, weisser Sporenstaub",
+        "Lames blanches, sporée blanche",
+        "Lamelle bianche, sporata bianca",
+        "White gills, white spore print"
+      ),
+    ],
+    lookalikes: [
+      {
+        name: l4(
+          "Grüner Knollenblätterpilz",
+          "Amanite phalloïde",
+          "Amanita falloide",
+          "Death cap"
+        ),
+        latin: "Amanita phalloides",
+        warning: l4(
+          "TÖDLICH GIFTIG, schon ein halber Hut kann reichen. Er hat einen glatten, oliv-grünlichen Hut, weisse Lamellen, einen Ring UND unten eine häutige Scheide in einer Knolle – graben statt abschneiden, sonst siehst du die Knolle gar nie. Junge Parasole ohne aufgeschirmten Hut sind besonders heikel.",
+          "MORTELLE, un demi-chapeau peut suffire. Chapeau lisse vert olivâtre, lames blanches, un anneau ET, à la base, une volve membraneuse dans un bulbe – déterre au lieu de couper, sinon tu ne verras jamais le bulbe. Les jeunes coulemelles au chapeau encore fermé sont particulièrement délicates.",
+          "MORTALE, può bastare mezzo cappello. Cappello liscio verde oliva, lamelle bianche, un anello E alla base una volva membranosa in un bulbo – estrai invece di tagliare, altrimenti il bulbo non lo vedi mai. Le mazze di tamburo giovani, ancora chiuse, sono particolarmente insidiose.",
+          "DEADLY POISONOUS, half a cap can be enough. Smooth olive-green cap, white gills, a ring AND a membranous sac in a bulb at the base – dig it up instead of cutting, or you will never see the bulb. Young parasols with an unopened cap are especially tricky."
+        ),
+      },
+      {
+        name: l4(
+          "Gift-Riesenschirmling",
+          "Lépiote brun-incarnat",
+          "Lepiota velenosa",
+          "Poisonous parasol"
+        ),
+        latin: "Chlorophyllum brunneum",
+        warning: l4(
+          "Verursacht heftige Magen-Darm-Beschwerden. Kleiner, mit gerandeter Knolle statt schlankem Stiel, und das Fleisch verfärbt sich beim Anschneiden orangerot bis braun. Wächst gern auf gedüngten Wiesen, Komposthaufen und in Gärten.",
+          "Provoque de violents troubles digestifs. Plus petite, avec un bulbe marginé au lieu d'un pied élancé, et la chair vire à l'orange rougeâtre ou au brun à la coupe. Pousse volontiers sur prairies fumées, tas de compost et dans les jardins.",
+          "Provoca forti disturbi gastrointestinali. Più piccola, con bulbo marginato invece di un gambo slanciato, e la carne vira all'arancio-rosso o al bruno al taglio. Cresce volentieri su prati concimati, cumuli di compost e nei giardini.",
+          "Causes severe stomach and bowel upsets. Smaller, with a rimmed bulb instead of a slender stem, and the flesh turns orange-red to brown when cut. Likes manured meadows, compost heaps and gardens."
+        ),
+      },
+    ],
+  },
+  {
+    id: "morchel",
+    name: l4("Speisemorchel", "Morille", "Spugnola", "Morel"),
+    latinOrExtra: "Morchella esculenta",
+    category: "pilze",
+    season: { from: 3, to: 5 },
+    description: l4(
+      "Ein Frühlingspilz mit wabenförmigem, gelbbraunem Hut – wie ein kleiner Schwamm auf einem hohlen weisslichen Stiel. Wichtig: Hut und Stiel sind INNEN durchgehend hohl, ohne Wattefüllung.",
+      "Un champignon de printemps au chapeau alvéolé brun-jaune – comme une petite éponge sur un pied blanchâtre creux. Important : chapeau et pied sont creux à l'intérieur, sans bourre cotonneuse.",
+      "Un fungo di primavera con cappello alveolato bruno-giallo – come una piccola spugna su un gambo biancastro cavo. Importante: cappello e gambo sono cavi all'interno, senza imbottitura cotonosa.",
+      "A spring mushroom with a honeycombed yellow-brown cap – like a small sponge on a hollow whitish stem. Important: cap and stem are hollow inside, with no cottony filling."
+    ),
+    habitat: l4(
+      "Auenwälder, Eschen- und Ulmenbestände, Obstgärten, Rindenmulch und Brandstellen – oft an überraschenden Orten in Siedlungsnähe.",
+      "Forêts alluviales, peuplements de frênes et d'ormes, vergers, paillis d'écorce et places à feu – souvent à des endroits surprenants près des habitations.",
+      "Boschi golenali, frassineti e olmeti, frutteti, corteccia sminuzzata e zone bruciate – spesso in luoghi sorprendenti vicino agli abitati.",
+      "Floodplain woods, ash and elm stands, orchards, bark mulch and old fire sites – often in surprising places near settlements."
+    ),
+    use: l4(
+      "IMMER durchgaren – roh und ungenügend gekocht sind Morcheln unverträglich. Klassisch in Rahmsauce; sie trocknen sehr gut.",
+      "TOUJOURS bien cuire – crues ou insuffisamment cuites, les morilles sont indigestes. Classiquement en sauce à la crème ; elles sèchent très bien.",
+      "SEMPRE ben cotte – crude o poco cotte le spugnole sono indigeste. Classiche in salsa di panna; si essiccano molto bene.",
+      "ALWAYS cook them through – raw or undercooked, morels are indigestible. Classically in a cream sauce; they dry very well."
+    ),
+    funFact: l4(
+      "Nach einem Waldbrand oder auf frischem Rindenmulch schiessen Morcheln oft massenhaft aus dem Boden – ein Jahr später ist wieder nichts.",
+      "Après un incendie de forêt ou sur un paillis d'écorce frais, les morilles sortent souvent en masse – un an plus tard, plus rien.",
+      "Dopo un incendio boschivo o su corteccia fresca le spugnole spuntano spesso in massa – un anno dopo non c'è più nulla.",
+      "After a forest fire or on fresh bark mulch, morels often erupt in numbers – a year later there is nothing again."
+    ),
+    kidQuestion: l4(
+      "Schneide ihn längs durch (mit einer erwachsenen Person): Ist er innen ganz hohl?",
+      "Coupe-le en deux dans la longueur (avec un adulte) : est-il entièrement creux à l'intérieur ?",
+      "Taglialo per il lungo (con un adulto): è completamente cavo all'interno?",
+      "Cut it lengthwise (with a grown-up): is it completely hollow inside?"
+    ),
+    features: [
+      l4(
+        "Wabenförmiger Hut mit Gruben und Rippen",
+        "Chapeau alvéolé à fossettes et côtes",
+        "Cappello alveolato con fossette e costole",
+        "Honeycombed cap with pits and ribs"
+      ),
+      l4(
+        "Hut und Stiel innen durchgehend hohl",
+        "Chapeau et pied creux d'un bout à l'autre",
+        "Cappello e gambo cavi da cima a fondo",
+        "Cap and stem hollow all the way through"
+      ),
+      l4(
+        "Hut ist mit dem Stiel verwachsen",
+        "Chapeau soudé au pied",
+        "Cappello saldato al gambo",
+        "Cap fused to the stem"
+      ),
+    ],
+    lookalikes: [
+      {
+        name: l4(
+          "Frühjahrslorchel",
+          "Gyromitre comestible",
+          "Falsa spugnola",
+          "False morel"
+        ),
+        latin: "Gyromitra esculenta",
+        warning: l4(
+          "Giftig, das Gyromitrin schädigt die Leber und gilt als krebserregend – auch das Kochwasser und der Dampf sind gefährlich. Der Hut ist nicht wabig, sondern hirnartig gewunden und rotbraun, das Innere kammerig statt hohl. Wächst zur gleichen Zeit unter Kiefern.",
+          "Toxique : la gyromitrine attaque le foie et est considérée comme cancérogène – l'eau de cuisson et la vapeur sont aussi dangereuses. Le chapeau n'est pas alvéolé mais circonvolu comme un cerveau et brun-rouge, l'intérieur cloisonné au lieu d'être creux. Pousse en même temps sous les pins.",
+          "Velenosa: la girometrina danneggia il fegato ed è considerata cancerogena – anche l'acqua di cottura e il vapore sono pericolosi. Il cappello non è alveolato ma circonvoluto come un cervello e bruno-rosso, l'interno è camerato invece che cavo. Cresce nello stesso periodo sotto i pini.",
+          "Poisonous: gyromitrin damages the liver and is considered carcinogenic – the cooking water and the steam are dangerous too. The cap is not honeycombed but brain-like and red-brown, the inside chambered rather than hollow. Grows at the same time under pines."
+        ),
+      },
+    ],
+  },
+  {
+    id: "herbsttrompete",
+    name: l4(
+      "Herbsttrompete (Totentrompete)",
+      "Trompette-des-morts",
+      "Trombetta dei morti",
+      "Horn of plenty"
+    ),
+    latinOrExtra: "Craterellus cornucopioides",
+    category: "pilze",
+    season: { from: 8, to: 11 },
+    description: l4(
+      "Ein dünnfleischiger, grauschwarzer Trichter, der oben offen ist und bis zum Boden durchgeht – wie ein kleines Horn. Aussen glatt bis leicht runzlig, ohne Lamellen. Im nassen Laub praktisch unsichtbar.",
+      "Un entonnoir gris-noir à chair fine, ouvert en haut et creux jusqu'en bas – comme une petite corne. Extérieur lisse à légèrement ridé, sans lames. Presque invisible dans les feuilles mouillées.",
+      "Un imbuto grigio-nero dalla carne sottile, aperto in alto e cavo fino in fondo – come un piccolo corno. Esterno liscio o leggermente rugoso, senza lamelle. Nelle foglie bagnate è quasi invisibile.",
+      "A thin-fleshed, grey-black funnel, open at the top and hollow to the base – like a small horn. Smooth to slightly wrinkled outside, without gills. Practically invisible in wet leaf litter."
+    ),
+    habitat: l4(
+      "Buchen- und Eichenwälder auf kalkhaltigem Boden, in Gruppen im Laub – wer eine findet, findet meist zwanzig.",
+      "Hêtraies et chênaies sur sol calcaire, en groupes dans les feuilles – qui en trouve une en trouve souvent vingt.",
+      "Faggete e querceti su suolo calcareo, a gruppi tra le foglie – chi ne trova una ne trova spesso venti.",
+      "Beech and oak woods on limy soils, in groups in the litter – find one and you usually find twenty."
+    ),
+    use: l4(
+      "Getrocknet und gemahlen ein kräftiges Würzpulver; frisch in Rahmsaucen und Risotto. Vor dem Kochen der Länge nach aufschneiden und ausspülen – im Trichter sitzen Nadeln und Schnecken.",
+      "Séchée et moulue, une poudre aromatique puissante ; fraîche en sauce à la crème et en risotto. Avant la cuisson, la fendre dans la longueur et la rincer – aiguilles et limaces logent dans l'entonnoir.",
+      "Essiccata e macinata è una polvere aromatica intensa; fresca in salse di panna e risotto. Prima di cuocerla tagliala per il lungo e sciacquala – nell'imbuto stanno aghi e lumache.",
+      "Dried and ground it makes a powerful seasoning powder; fresh it suits cream sauces and risotto. Before cooking, cut it lengthwise and rinse – needles and slugs sit inside the funnel."
+    ),
+    funFact: l4(
+      "Der düstere Name kommt vom Aussehen und von der Saison um Allerheiligen – gefährlich ist an ihr nichts.",
+      "Le nom lugubre vient de son apparence et de sa saison autour de la Toussaint – elle n'a rien de dangereux.",
+      "Il nome lugubre viene dall'aspetto e dalla stagione attorno a Ognissanti – di pericoloso non ha nulla.",
+      "The gloomy name comes from its looks and its season around All Saints' Day – there is nothing dangerous about it."
+    ),
+    kidQuestion: l4(
+      "Knie dich hin und schau ins Laub: Wie viele Trompeten entdeckst du auf einem Quadratmeter?",
+      "Mets-toi à genoux et regarde dans les feuilles : combien de trompettes découvres-tu sur un mètre carré ?",
+      "Inginocchiati e guarda tra le foglie: quante trombette scopri su un metro quadrato?",
+      "Kneel down and look into the leaves: how many horns can you spot on one square metre?"
+    ),
+    features: [
+      l4(
+        "Grauschwarzer, bis unten hohler Trichter",
+        "Entonnoir gris-noir, creux jusqu'en bas",
+        "Imbuto grigio-nero, cavo fino in fondo",
+        "Grey-black funnel, hollow to the base"
+      ),
+      l4(
+        "Aussen glatt bis runzlig, keine Lamellen",
+        "Extérieur lisse à ridé, sans lames",
+        "Esterno liscio o rugoso, senza lamelle",
+        "Smooth to wrinkled outside, no gills"
+      ),
+      l4(
+        "Dünnes, brüchiges Fleisch",
+        "Chair mince et cassante",
+        "Carne sottile e fragile",
+        "Thin, brittle flesh"
+      ),
+    ],
+    lookalikes: [
+      {
+        name: l4(
+          "Trompetenpfifferling",
+          "Chanterelle en tube",
+          "Finferla",
+          "Yellowfoot"
+        ),
+        latin: "Craterellus tubaeformis",
+        warning: l4(
+          "Ebenfalls essbar, darum harmlos zu verwechseln: gelber Stiel und deutliche Leisten aussen. Die eigentliche Gefahr liegt woanders – im dunklen Laub greift man schnell daneben. Nimm jeden Pilz einzeln in die Hand, bevor er in den Korb wandert.",
+          "Également comestible, la confusion est donc sans danger : pied jaune et plis marqués à l'extérieur. Le vrai risque est ailleurs – dans les feuilles sombres, on attrape vite autre chose. Prends chaque champignon en main avant de le mettre au panier.",
+          "Anch'essa commestibile, quindi la confusione è innocua: gambo giallo e pliche evidenti all'esterno. Il vero pericolo è altrove – tra le foglie scure si afferra in fretta qualcos'altro. Prendi in mano ogni fungo prima di metterlo nel cesto.",
+          "Also edible, so the mix-up is harmless: yellow stem and clear ridges outside. The real risk lies elsewhere – in dark litter you easily grab something else. Pick up every mushroom individually before it goes into the basket."
+        ),
+      },
+    ],
+  },
+  // ── Wildbeeren (#237) ──
+  {
+    id: "heidelbeere",
+    name: l4("Heidelbeere", "Myrtille", "Mirtillo", "Bilberry"),
+    latinOrExtra: "Vaccinium myrtillus",
+    category: "beeren",
+    season: { from: 7, to: 9 },
+    description: l4(
+      "Ein kniehoher Zwergstrauch mit kantigen grünen Zweigen und kleinen, blau bereiften Beeren. Das Fruchtfleisch ist innen dunkelviolett – daher die blaue Zunge.",
+      "Un sous-arbrisseau à hauteur de genou, aux rameaux verts anguleux et aux petites baies bleutées. La chair est violet foncé à l'intérieur – d'où la langue bleue.",
+      "Un arbusto nano alto fino al ginocchio, con rametti verdi spigolosi e piccole bacche pruinose di blu. La polpa è viola scuro all'interno – da qui la lingua blu.",
+      "A knee-high dwarf shrub with angular green twigs and small, blue-bloomed berries. The flesh is dark purple inside – hence the blue tongue."
+    ),
+    habitat: l4(
+      "Saure Böden in Nadelwäldern und auf Bergweiden, von etwa 500 bis über 2000 m; je höher, desto später reif.",
+      "Sols acides en forêts de conifères et sur les pâturages de montagne, d'environ 500 à plus de 2000 m ; plus c'est haut, plus c'est tardif.",
+      "Suoli acidi nei boschi di conifere e sui pascoli di montagna, da circa 500 a oltre 2000 m; più in alto, più tardi maturano.",
+      "Acid soils in conifer woods and on mountain pastures, from about 500 to over 2000 m; the higher up, the later they ripen."
+    ),
+    use: l4(
+      "Roh, als Konfitüre, im Kuchen oder als Sirup. Waschen, bevor du sie isst.",
+      "Crues, en confiture, en gâteau ou en sirop. Lave-les avant de les manger.",
+      "Crudi, in confettura, nella torta o come sciroppo. Lavali prima di mangiarli.",
+      "Raw, as jam, in a cake or as a cordial. Wash them before eating."
+    ),
+    funFact: l4(
+      "Die Kulturheidelbeere aus dem Laden ist innen hell – nur die wilde Heidelbeere färbt Zunge und Finger blau.",
+      "La myrtille cultivée du magasin est claire à l'intérieur – seule la myrtille sauvage colore la langue et les doigts en bleu.",
+      "Il mirtillo coltivato del negozio è chiaro all'interno – solo quello selvatico colora lingua e dita di blu.",
+      "The cultivated blueberry from the shop is pale inside – only the wild bilberry turns your tongue and fingers blue."
+    ),
+    kidQuestion: l4(
+      "Streck nach drei Beeren die Zunge heraus: Welche Farbe hat sie?",
+      "Après trois baies, tire la langue : de quelle couleur est-elle ?",
+      "Dopo tre bacche tira fuori la lingua: di che colore è?",
+      "After three berries, stick out your tongue: what colour is it?"
+    ),
+    features: [
+      l4(
+        "Kantige, immergrün wirkende Zweige",
+        "Rameaux anguleux, d'aspect toujours vert",
+        "Rametti spigolosi, d'aspetto sempreverde",
+        "Angular twigs that look evergreen"
+      ),
+      l4(
+        "Beeren einzeln in den Blattachseln",
+        "Baies isolées à l'aisselle des feuilles",
+        "Bacche singole all'ascella delle foglie",
+        "Berries singly in the leaf axils"
+      ),
+      l4(
+        "Fruchtfleisch dunkelviolett",
+        "Chair violet foncé",
+        "Polpa viola scuro",
+        "Dark purple flesh"
+      ),
+    ],
+    lookalikes: [
+      {
+        name: l4("Tollkirsche", "Belladone", "Belladonna", "Deadly nightshade"),
+        latin: "Atropa belladonna",
+        warning: l4(
+          "Hochgiftig, für Kinder können wenige Beeren tödlich sein. Sie sitzt an einer mannshohen Staude, ist einzeln, kirschgross, glänzend schwarz und steht auf einem fünfzipfligen grünen Kelchstern – nie an einem kniehohen Zwergstrauch.",
+          "Très toxique ; pour les enfants, quelques baies peuvent être mortelles. Elle pousse sur une grande plante herbacée, isolée, de la taille d'une cerise, noir brillant, posée sur un calice vert à cinq pointes – jamais sur un sous-arbrisseau bas.",
+          "Molto velenosa; per i bambini poche bacche possono essere mortali. Sta su una pianta erbacea alta, è singola, grossa come una ciliegia, nero lucido e poggia su un calice verde a cinque punte – mai su un arbusto nano basso.",
+          "Highly poisonous; for children a few berries can be lethal. It sits on a tall herb, singly, cherry-sized, glossy black, on a five-pointed green calyx – never on a knee-high dwarf shrub."
+        ),
+      },
+    ],
+  },
+  {
+    id: "brombeere",
+    name: l4("Brombeere", "Mûre sauvage", "Mora di rovo", "Blackberry"),
+    latinOrExtra: "Rubus fruticosus",
+    category: "beeren",
+    season: { from: 8, to: 10 },
+    description: l4(
+      "Ein rankender Strauch mit kräftigen, gebogenen Stacheln. Die Sammelfrucht ist glänzend schwarz und lässt sich nur mitsamt dem weissen Fruchtboden pflücken – der bleibt in der Beere.",
+      "Un arbuste sarmenteux aux aiguillons robustes et recourbés. Le fruit composé est noir brillant et ne se cueille qu'avec le réceptacle blanc – qui reste dans la baie.",
+      "Un arbusto rampicante con aculei robusti e ricurvi. Il frutto composto è nero lucido e si stacca solo assieme al ricettacolo bianco – che resta nella bacca.",
+      "A scrambling shrub with strong, curved prickles. The aggregate fruit is glossy black and comes away only with the white core – which stays inside the berry."
+    ),
+    habitat: l4(
+      "Waldränder, Hecken, Bahndämme und Brachflächen bis etwa 1500 m – oft in undurchdringlichen Dickichten.",
+      "Lisières, haies, talus de chemin de fer et friches jusque vers 1500 m – souvent en fourrés impénétrables.",
+      "Margini del bosco, siepi, scarpate ferroviarie e incolti fino a circa 1500 m – spesso in boscaglie impenetrabili.",
+      "Forest edges, hedges, railway embankments and waste ground up to about 1500 m – often in impenetrable thickets."
+    ),
+    use: l4(
+      "Roh, als Konfitüre oder Sirup; die jungen Blätter geben einen guten Tee.",
+      "Crues, en confiture ou en sirop ; les jeunes feuilles donnent une bonne tisane.",
+      "Crude, in confettura o sciroppo; le foglie giovani danno un buon infuso.",
+      "Raw, as jam or cordial; the young leaves make a good tea."
+    ),
+    funFact: l4(
+      "Brombeeren bilden ihre Samen oft ohne Befruchtung – deshalb gibt es in Europa Hunderte fast gleich aussehender Kleinarten.",
+      "Les mûres forment souvent leurs graines sans fécondation – d'où des centaines de micro-espèces presque identiques en Europe.",
+      "I rovi formano spesso i semi senza fecondazione – per questo in Europa esistono centinaia di microspecie quasi identiche.",
+      "Blackberries often set seed without fertilisation – which is why Europe has hundreds of nearly identical microspecies."
+    ),
+    kidQuestion: l4(
+      "Fahr vorsichtig mit dem Finger den Zweig entlang: In welche Richtung zeigen die Stacheln?",
+      "Passe prudemment le doigt le long de la tige : dans quelle direction pointent les aiguillons ?",
+      "Passa con cautela il dito lungo il ramo: in che direzione puntano gli aculei?",
+      "Run a finger carefully along the stem: which way do the prickles point?"
+    ),
+    features: [
+      l4(
+        "Kräftige, gebogene Stacheln am Trieb",
+        "Aiguillons robustes et recourbés sur la tige",
+        "Aculei robusti e ricurvi sul fusto",
+        "Strong, curved prickles on the stem"
+      ),
+      l4(
+        "Glänzend schwarze Sammelfrucht",
+        "Fruit composé noir brillant",
+        "Frutto composto nero lucido",
+        "Glossy black aggregate fruit"
+      ),
+      l4(
+        "Weisser Fruchtboden bleibt in der Beere",
+        "Le réceptacle blanc reste dans la baie",
+        "Il ricettacolo bianco resta nella bacca",
+        "The white core stays inside the berry"
+      ),
+    ],
+  },
+  {
+    id: "himbeere",
+    name: l4("Himbeere", "Framboise sauvage", "Lampone", "Raspberry"),
+    latinOrExtra: "Rubus idaeus",
+    category: "beeren",
+    season: { from: 6, to: 8 },
+    description: l4(
+      "Aufrechte Ruten mit feinen, weichen Stacheln und unterseits weissfilzigen Blättern. Die rote Sammelfrucht löst sich als hohler Fingerhut vom Fruchtboden – der bleibt am Strauch.",
+      "Tiges dressées à fins aiguillons souples et feuilles blanches tomenteuses dessous. Le fruit rouge se détache comme un dé à coudre creux – le réceptacle reste sur la plante.",
+      "Fusti eretti con aculei fini e morbidi e foglie bianco-tomentose sotto. Il frutto rosso si stacca come un ditale cavo – il ricettacolo resta sulla pianta.",
+      "Upright canes with fine, soft prickles and leaves white-felted underneath. The red fruit comes off like a hollow thimble – the core stays on the plant."
+    ),
+    habitat: l4(
+      "Schlagflächen, Lawinenzüge, Waldränder und Lichtungen bis über 2000 m – überall dort, wo Licht in den Wald fällt.",
+      "Coupes, couloirs d'avalanche, lisières et clairières jusqu'au-dessus de 2000 m – partout où la lumière entre en forêt.",
+      "Tagliate, canaloni da valanga, margini e radure fin oltre i 2000 m – ovunque la luce entri nel bosco.",
+      "Clear-cuts, avalanche tracks, forest edges and clearings up to over 2000 m – wherever light reaches the forest floor."
+    ),
+    use: l4(
+      "Roh, als Konfitüre, Sirup oder im Dessert. Sie hält sich kaum einen Tag – gleich verarbeiten.",
+      "Crue, en confiture, en sirop ou en dessert. Elle ne tient guère une journée – à travailler tout de suite.",
+      "Crudo, in confettura, sciroppo o dessert. Si conserva a malapena un giorno – lavoralo subito.",
+      "Raw, as jam, cordial or in a dessert. It barely keeps a day – process it straight away."
+    ),
+    funFact: l4(
+      "Der hohle Fingerhut ist das sicherste Erkennungszeichen: Bleibt der weisse Zapfen am Strauch, hast du eine Himbeere.",
+      "Le dé à coudre creux est le signe le plus sûr : si le cône blanc reste sur la plante, tu as une framboise.",
+      "Il ditale cavo è il segno più sicuro: se il cono bianco resta sulla pianta, hai un lampone.",
+      "The hollow thimble is the surest sign: if the white cone stays on the plant, you have a raspberry."
+    ),
+    kidQuestion: l4(
+      "Zieh eine reife Beere ab: Bleibt der weisse Zapfen am Strauch zurück?",
+      "Cueille une baie mûre : le cône blanc reste-t-il sur la plante ?",
+      "Stacca una bacca matura: il cono bianco resta sulla pianta?",
+      "Pull off a ripe berry: does the white cone stay on the plant?"
+    ),
+    features: [
+      l4(
+        "Aufrechte Ruten mit weichen Stacheln",
+        "Tiges dressées à aiguillons souples",
+        "Fusti eretti con aculei morbidi",
+        "Upright canes with soft prickles"
+      ),
+      l4(
+        "Blattunterseite weissfilzig",
+        "Dessous des feuilles blanc tomenteux",
+        "Pagina inferiore delle foglie bianco-tomentosa",
+        "Leaf undersides white-felted"
+      ),
+      l4(
+        "Frucht löst sich hohl vom Fruchtboden",
+        "Le fruit se détache creux du réceptacle",
+        "Il frutto si stacca cavo dal ricettacolo",
+        "The fruit comes off hollow from the core"
+      ),
+    ],
+  },
+  {
+    id: "holunder",
+    name: l4("Schwarzer Holunder", "Sureau noir", "Sambuco nero", "Elderberry"),
+    latinOrExtra: "Sambucus nigra",
+    category: "beeren",
+    season: { from: 8, to: 9 },
+    description: l4(
+      "Ein grosser Strauch oder kleiner Baum mit gefiederten Blättern und schweren, hängenden Dolden aus glänzend schwarzen Beeren. Die Zweige sind innen mit weissem Mark gefüllt.",
+      "Un grand arbuste ou petit arbre à feuilles composées et à lourdes ombelles pendantes de baies noir brillant. Les rameaux sont remplis d'une moelle blanche.",
+      "Un grande arbusto o piccolo albero con foglie composte e pesanti ombrelle pendenti di bacche nero lucido. I rami sono pieni di midollo bianco.",
+      "A large shrub or small tree with pinnate leaves and heavy, drooping umbels of glossy black berries. The twigs are filled with white pith."
+    ),
+    habitat: l4(
+      "Hecken, Waldränder, Bachufer und Hofplätze – gern auf stickstoffreichem Boden nahe bei Menschen.",
+      "Haies, lisières, bords de ruisseaux et cours de ferme – volontiers sur sols riches en azote près des habitations.",
+      "Siepi, margini del bosco, rive dei ruscelli e cortili – volentieri su suoli ricchi di azoto vicino alle case.",
+      "Hedges, forest edges, stream banks and farmyards – happily on nitrogen-rich soils close to people."
+    ),
+    use: l4(
+      "NUR gekocht: Roh sind die Beeren unverträglich und lösen Übelkeit aus. Gekocht werden sie zu Sirup, Gelee oder Suppe; die Blüten im Juni ergeben Sirup und Küchlein.",
+      "SEULEMENT cuites : crues, les baies sont indigestes et provoquent des nausées. Cuites, elles donnent sirop, gelée ou soupe ; les fleurs de juin font du sirop et des beignets.",
+      "SOLO cotte: crude le bacche sono indigeste e provocano nausea. Cotte danno sciroppo, gelatina o zuppa; i fiori di giugno danno sciroppo e frittelle.",
+      "ONLY cooked: raw, the berries are indigestible and cause nausea. Cooked they make cordial, jelly or soup; the June flowers make cordial and fritters."
+    ),
+    funFact: l4(
+      "Der Saft färbt so kräftig, dass er früher zum Färben von Stoff und Wein verwendet wurde – auf hellen Jacken bleibt er auch heute.",
+      "Le jus teint si fort qu'il servait autrefois à colorer tissus et vin – sur une veste claire, il tient encore aujourd'hui.",
+      "Il succo tinge così forte che un tempo si usava per colorare stoffe e vino – su una giacca chiara resiste ancora oggi.",
+      "The juice stains so strongly that it was once used to dye cloth and wine – on a light jacket it still holds today."
+    ),
+    kidQuestion: l4(
+      "Schau dir die Dolde an: Hängt sie nach unten – oder steht sie aufrecht?",
+      "Regarde l'ombelle : pend-elle vers le bas – ou est-elle dressée ?",
+      "Guarda l'ombrella: pende verso il basso – o è eretta?",
+      "Look at the umbel: does it hang down – or stand upright?"
+    ),
+    features: [
+      l4(
+        "Gefiederte Blätter, weisses Mark im Zweig",
+        "Feuilles composées, moelle blanche dans le rameau",
+        "Foglie composte, midollo bianco nel ramo",
+        "Pinnate leaves, white pith in the twig"
+      ),
+      l4(
+        "Schwere Dolden hängen nach unten",
+        "Lourdes ombelles pendantes",
+        "Ombrelle pesanti che pendono",
+        "Heavy umbels hanging downwards"
+      ),
+      l4(
+        "Verholzter Strauch, oft mannshoch und höher",
+        "Arbuste ligneux, souvent plus haut qu'un adulte",
+        "Arbusto legnoso, spesso più alto di una persona",
+        "Woody shrub, often taller than a person"
+      ),
+    ],
+    lookalikes: [
+      {
+        name: l4("Attich (Zwergholunder)", "Hièble", "Ebbio", "Dwarf elder"),
+        latin: "Sambucus ebulus",
+        warning: l4(
+          "Giftig – schon wenige Beeren führen zu Erbrechen und Durchfall. Er ist krautig statt verholzt, wird kaum mannshoch, seine Dolden stehen AUFRECHT, und die zerriebenen Blätter stinken unangenehm.",
+          "Toxique – quelques baies suffisent à provoquer vomissements et diarrhées. Il est herbacé et non ligneux, dépasse rarement la taille d'un adulte, ses ombelles sont DRESSÉES et ses feuilles froissées sentent mauvais.",
+          "Velenoso – bastano poche bacche per provocare vomito e diarrea. È erbaceo e non legnoso, supera raramente l'altezza di una persona, le sue ombrelle sono ERETTE e le foglie stropicciate puzzano.",
+          "Poisonous – a few berries are enough to cause vomiting and diarrhoea. It is herbaceous, not woody, rarely taller than a person, its umbels stand UPRIGHT, and the crushed leaves smell unpleasant."
+        ),
+      },
+    ],
+  },
+  {
+    id: "hagebutte",
+    name: l4("Hagebutte", "Cynorrhodon", "Rosa canina", "Rosehip"),
+    latinOrExtra: "Rosa canina",
+    category: "beeren",
+    season: { from: 9, to: 12 },
+    description: l4(
+      "Die leuchtend rote Scheinfrucht der Hundsrose, oval bis flaschenförmig, mit einem eingetrockneten Kelchrest an der Spitze. Innen sitzen harte Nüsschen zwischen feinen Härchen.",
+      "Le faux-fruit rouge vif de l'églantier, ovale à piriforme, portant un reste de calice sec à la pointe. À l'intérieur, des akènes durs entre de fins poils.",
+      "Il falso frutto rosso acceso della rosa canina, ovale o a fiaschetto, con un resto di calice secco all'apice. Dentro ci sono acheni duri tra peli sottili.",
+      "The bright red false fruit of the dog rose, oval to flask-shaped, with a dried calyx remnant at the tip. Inside sit hard nutlets among fine hairs."
+    ),
+    habitat: l4(
+      "Hecken, Böschungen, Waldränder und Weiden bis etwa 1500 m; nach dem ersten Frost wird sie weich und süss.",
+      "Haies, talus, lisières et pâturages jusque vers 1500 m ; après les premières gelées, il devient mou et sucré.",
+      "Siepi, scarpate, margini del bosco e pascoli fino a circa 1500 m; dopo la prima gelata diventa morbida e dolce.",
+      "Hedges, banks, forest edges and pastures up to about 1500 m; after the first frost it turns soft and sweet."
+    ),
+    use: l4(
+      "Zu Mus, Konfitüre oder Tee. Die Härchen im Innern reizen die Haut – Früchte halbieren, auskratzen und gut ausspülen.",
+      "En purée, confiture ou tisane. Les poils intérieurs irritent la peau – coupe les fruits en deux, gratte-les et rince bien.",
+      "In purea, confettura o infuso. I peli interni irritano la pelle – taglia i frutti a metà, raschiali e sciacqua bene.",
+      "As a purée, jam or tea. The hairs inside irritate the skin – halve the fruits, scrape them out and rinse well."
+    ),
+    funFact: l4(
+      "Hagebutten enthalten mehr Vitamin C als Zitronen – und die Härchen waren früher das Juckpulver auf dem Pausenplatz.",
+      "Les cynorrhodons contiennent plus de vitamine C que les citrons – et leurs poils servaient autrefois de poil à gratter dans la cour d'école.",
+      "Le rose canine contengono più vitamina C dei limoni – e i loro peli erano un tempo la polvere pizzicante del cortile.",
+      "Rosehips contain more vitamin C than lemons – and the hairs were once the itching powder of the schoolyard."
+    ),
+    kidQuestion: l4(
+      "Halbiere eine Hagebutte: Wie viele harte Kerne zählst du darin?",
+      "Coupe un cynorrhodon en deux : combien de graines dures comptes-tu ?",
+      "Taglia a metà una rosa canina: quanti semi duri conti?",
+      "Cut a rosehip in half: how many hard seeds can you count?"
+    ),
+    features: [
+      l4(
+        "Leuchtend rot, oval bis flaschenförmig",
+        "Rouge vif, ovale à piriforme",
+        "Rosso acceso, ovale o a fiaschetto",
+        "Bright red, oval to flask-shaped"
+      ),
+      l4(
+        "Vertrockneter Kelchrest an der Spitze",
+        "Reste de calice sec à la pointe",
+        "Resto di calice secco all'apice",
+        "Dried calyx remnant at the tip"
+      ),
+      l4(
+        "Strauch mit gebogenen Stacheln",
+        "Arbuste à aiguillons recourbés",
+        "Arbusto con aculei ricurvi",
+        "Shrub with curved prickles"
+      ),
+    ],
+  },
+  {
+    id: "schlehe",
+    name: l4("Schlehe", "Prunelle", "Prugnola", "Sloe"),
+    latinOrExtra: "Prunus spinosa",
+    category: "beeren",
+    season: { from: 10, to: 1 },
+    description: l4(
+      "Kleine, blau bereifte Steinfrüchte an einem sparrigen, dornigen Strauch. Roh zieht die Schlehe den Mund zusammen – nach dem ersten Frost wird sie milder.",
+      "Petites drupes bleutées sur un arbuste épineux et divariqué. Crue, la prunelle serre la bouche – après les premières gelées, elle s'adoucit.",
+      "Piccole drupe pruinose di blu su un arbusto spinoso e divaricato. Cruda la prugnola allappa – dopo la prima gelata diventa più dolce.",
+      "Small, blue-bloomed stone fruits on a stiff, thorny shrub. Raw, a sloe puckers your mouth – after the first frost it grows milder."
+    ),
+    habitat: l4(
+      "Sonnige Hecken, Waldsäume und Böschungen; blüht schon im März weiss, lange bevor die Blätter kommen.",
+      "Haies ensoleillées, lisières et talus ; elle fleurit en blanc dès mars, bien avant les feuilles.",
+      "Siepi soleggiate, orli boschivi e scarpate; fiorisce in bianco già a marzo, molto prima delle foglie.",
+      "Sunny hedges, wood margins and banks; it flowers white as early as March, long before the leaves appear."
+    ),
+    use: l4(
+      "Zu Gelee, Likör oder Sirup; roh nur sparsam. Ein Frost oder eine Nacht im Tiefkühler nimmt die Gerbstoffe.",
+      "En gelée, liqueur ou sirop ; crue, avec parcimonie. Une gelée ou une nuit au congélateur enlève les tanins.",
+      "In gelatina, liquore o sciroppo; cruda solo con parsimonia. Una gelata o una notte in congelatore toglie i tannini.",
+      "As jelly, liqueur or cordial; raw only sparingly. A frost or a night in the freezer takes out the tannins."
+    ),
+    funFact: l4(
+      "Die Schlehe ist die Urform unserer Zwetschge – und ihre Dornen sind so hart, dass Hecken daraus früher als Zaun genügten.",
+      "La prunelle est la forme sauvage de nos quetsches – et ses épines sont si dures que les haies suffisaient autrefois comme clôture.",
+      "La prugnola è la forma originaria delle nostre susine – e le sue spine sono così dure che un tempo la siepe bastava come recinto.",
+      "The sloe is the ancestor of our plums – and its thorns are so hard that a hedge of it once served as a fence."
+    ),
+    kidQuestion: l4(
+      "Streich mit dem Finger über eine Schlehe: Was passiert mit dem blauen Reif?",
+      "Passe le doigt sur une prunelle : qu'arrive-t-il à la pruine bleue ?",
+      "Passa il dito su una prugnola: cosa succede alla pruina blu?",
+      "Wipe a sloe with your finger: what happens to the blue bloom?"
+    ),
+    features: [
+      l4(
+        "Blau bereifte, erbsengrosse Steinfrucht",
+        "Drupe bleutée de la taille d'un pois",
+        "Drupa pruinosa grossa come un pisello",
+        "Blue-bloomed stone fruit the size of a pea"
+      ),
+      l4(
+        "Sparriger Strauch mit echten Dornen",
+        "Arbuste divariqué à véritables épines",
+        "Arbusto divaricato con vere spine",
+        "Stiff shrub with true thorns"
+      ),
+      l4(
+        "Weisse Blüte im März vor dem Laub",
+        "Floraison blanche en mars avant les feuilles",
+        "Fioritura bianca a marzo prima delle foglie",
+        "White blossom in March before the leaves"
+      ),
+    ],
+  },
 ];
+
+/**
+ * Einträge für das automatisch erzeugte Natur-Quiz (Familien-Bereich).
+ * Die Pilze bleiben bewusst draussen: Eine Quizfrage «welche Art passt zu
+ * dieser Beschreibung?» darf nie den Eindruck erwecken, man könne Speisepilze
+ * spielerisch bestimmen. Dafür gibt es die amtliche Pilzkontrollstelle.
+ */
+export const quizEntries: NatureEntry[] = natureEntries.filter(
+  entry => entry.category !== "pilze"
+);
