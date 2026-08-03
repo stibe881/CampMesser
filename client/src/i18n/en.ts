@@ -1039,6 +1039,9 @@ export const en: Translation = {
     levelNow: "Level – perfect position!",
     zeroHere: "Zero here",
     resetCalibration: "Reset calibration",
+    soundLabel: "Signal tone",
+    soundHint:
+      "Short tone and vibration as soon as it is level – it only sounds again once you have left the level position.",
     calibrationHint:
       "“Zero here” compensates for a crooked phone case or table top: place the phone on a surface you know is level and zero it there. For the caravan: place the phone on the floor or a worktop inside and shim the low side with wedges until the bubble is in the centre.",
   },

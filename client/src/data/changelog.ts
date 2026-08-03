@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Wasserwaage: sobald der Stand im Lot ist, meldet sich die App mit einem kurzen Ton und einer Vibration – abschaltbar über den Schalter «Signalton».",
+        "Niveau à bulle : dès que la position est de niveau, l'app te le signale par un bref son et une vibration – désactivable avec l'interrupteur « signal sonore ».",
+        "Livella: appena sei in bolla, l'app te lo segnala con un breve suono e una vibrazione – disattivabile con l'interruttore «segnale acustico».",
+        "Spirit level: as soon as everything is level, the app lets you know with a short tone and a vibration – switch it off with “signal tone”."
+      ),
+      l4(
         "Rezepte: nach dem Kochen trägst du die verbrauchten Zutaten mit einem Tipp aus der Kühlbox aus – die App schlägt dir die passenden Vorräte vor.",
         "Recettes : après avoir cuisiné, tu retires les ingrédients utilisés de la glacière en un geste – l'app te propose les provisions correspondantes.",
         "Ricette: dopo aver cucinato togli gli ingredienti consumati dal frigo box con un tocco – l'app ti propone le scorte corrispondenti.",

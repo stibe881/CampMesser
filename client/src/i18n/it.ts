@@ -1067,6 +1067,9 @@ export const it: Translation = {
     levelNow: "In bolla – posizione perfetta!",
     zeroHere: "Azzera qui",
     resetCalibration: "Reimposta la calibrazione",
+    soundLabel: "Segnale acustico",
+    soundHint:
+      "Breve suono e vibrazione appena sei in bolla – di nuovo solo se nel frattempo esci dalla bolla.",
     calibrationHint:
       "«Azzera qui» compensa una custodia del telefono o un piano storti: appoggia il telefono su una superficie che sai essere piana e azzera lì. Per il caravan: appoggia il telefono sul pavimento o su un piano di lavoro all'interno e metti dei cunei sotto il lato basso finché la bolla è al centro.",
   },

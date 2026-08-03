@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Crosshair, Gauge, RotateCcw, Smartphone } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   bubblePosition,
   levelingAdvice,
@@ -16,8 +18,79 @@ import { useWakeLock } from "@/lib/useWakeLock";
 import { cn } from "@/lib/utils";
 
 const CALIBRATION_KEY = "campmesser.levelCalibration";
+const SOUND_KEY = "campmesser.levelSound";
 /** Ausschlag der Libelle: bei dieser Neigung liegt die Blase am Rand. */
 const MAX_DEG = 10;
+/** Signalton: Frequenz und Dauer des kurzen «im Lot»-Pieps. */
+const BEEP_HZ = 880;
+const BEEP_MS = 120;
+
+function loadSoundEnabled(): boolean {
+  try {
+    // Standard: an – nur ein ausdrückliches "0" schaltet ab.
+    return localStorage.getItem(SOUND_KEY) !== "0";
+  } catch {
+    return true;
+  }
+}
+
+function saveSoundEnabled(enabled: boolean) {
+  try {
+    localStorage.setItem(SOUND_KEY, enabled ? "1" : "0");
+  } catch {
+    /* Sitzung reicht */
+  }
+}
+
+/** Wiederverwendeter AudioContext – erst beim ersten Ton erzeugt. */
+let audioCtx: AudioContext | null = null;
+
+/**
+ * Kurzer Signalton per WebAudio-Oszillator (keine Audiodatei, funktioniert
+ * offline). Die Hüllkurve steigt/fällt sanft, damit es nicht knackst.
+ * Auf Geräten ohne WebAudio oder mit blockiertem Audio bleibt es lautlos –
+ * der visuelle Status ist ohnehin führend.
+ */
+function playLevelBeep() {
+  try {
+    const Ctor =
+      typeof window === "undefined"
+        ? undefined
+        : (window.AudioContext ??
+          (window as { webkitAudioContext?: typeof AudioContext })
+            .webkitAudioContext);
+    if (!Ctor) return;
+    if (!audioCtx) audioCtx = new Ctor();
+    void audioCtx.resume?.();
+    const ctx = audioCtx;
+    const now = ctx.currentTime;
+    const end = now + BEEP_MS / 1000;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(BEEP_HZ, now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.22, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, end);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(end + 0.02);
+  } catch {
+    /* Ton ist Beiwerk */
+  }
+}
+
+/** Kurze Vibration (Android); auf iOS/Desktop ein No-op. */
+function vibrateLevel() {
+  try {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate?.(BEEP_MS);
+    }
+  } catch {
+    /* egal */
+  }
+}
 
 function loadCalibration(): Tilt {
   try {
@@ -65,6 +138,9 @@ export default function LevelPage() {
   const [screenAngle, setScreenAngle] = useState<number>(() =>
     typeof window === "undefined" ? 0 : currentScreenAngle()
   );
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(() =>
+    loadSoundEnabled()
+  );
 
   // Sensor direkt starten (Android/Desktop); iOS verlangt den Button unten
   useEffect(() => {
@@ -99,6 +175,19 @@ export default function LevelPage() {
   const advice = tilt ? levelingAdvice(tilt, undefined, lang) : null;
   const bubble = tilt ? bubblePosition(tilt, MAX_DEG) : { x: 0, y: 0 };
   const isCalibrated = calibration.pitch !== 0 || calibration.roll !== 0;
+
+  // Signal nur beim ÜBERGANG «nicht im Lot» → «im Lot»; solange es im Lot
+  // bleibt, passiert nichts mehr. Erst wenn der Zustand verlassen wurde,
+  // kann es beim nächsten Treffer wieder piepsen.
+  const wasLevel = useRef(false);
+  useEffect(() => {
+    const nowLevel = advice?.level === true;
+    if (nowLevel && !wasLevel.current && soundEnabled) {
+      playLevelBeep();
+      vibrateLevel();
+    }
+    wasLevel.current = nowLevel;
+  }, [advice?.level, soundEnabled]);
 
   return (
     <div className="container max-w-xl py-6">
@@ -202,11 +291,17 @@ export default function LevelPage() {
               {/* Status und Tipps */}
               {advice && (
                 <div className="mt-4 w-full">
-                  {advice.level ? (
-                    <p className="rounded-lg bg-primary/10 px-4 py-2.5 text-center text-sm font-semibold text-primary">
-                      {t.level.levelNow}
-                    </p>
-                  ) : (
+                  {/* Der visuelle Status ist führend: die Live-Region bleibt
+                      dauerhaft im DOM und wird nur beim «im Lot» gefüllt –
+                      die laufend wechselnden Tipps stehen bewusst daneben. */}
+                  <div role="status">
+                    {advice.level && (
+                      <p className="rounded-lg bg-primary/10 px-4 py-2.5 text-center text-sm font-semibold text-primary">
+                        {t.level.levelNow}
+                      </p>
+                    )}
+                  </div>
+                  {!advice.level && (
                     <ul className="space-y-1.5">
                       {advice.tips.map(tip => (
                         <li
@@ -253,6 +348,28 @@ export default function LevelPage() {
               </Button>
             )}
           </div>
+          {/* Signalton */}
+          <div className="mt-4 flex items-center gap-3">
+            <Switch
+              id="level-sound"
+              checked={soundEnabled}
+              onCheckedChange={checked => {
+                setSoundEnabled(checked);
+                saveSoundEnabled(checked);
+                // Direkt hörbar machen, was der Schalter bewirkt
+                if (checked) playLevelBeep();
+              }}
+            />
+            <div>
+              <Label htmlFor="level-sound" className="text-sm">
+                {t.level.soundLabel}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {t.level.soundHint}
+              </p>
+            </div>
+          </div>
+
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
             {t.level.calibrationHint}
           </p>

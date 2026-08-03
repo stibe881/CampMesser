@@ -1079,6 +1079,9 @@ export const de = {
     levelNow: "In Waage – perfekter Stand!",
     zeroHere: "Hier nullen",
     resetCalibration: "Kalibrierung zurücksetzen",
+    soundLabel: "Signalton",
+    soundHint:
+      "Kurzer Ton und Vibration, sobald es im Lot ist – erst wieder, wenn du die Waage zwischendurch verlässt.",
     calibrationHint:
       "«Hier nullen» gleicht eine schiefe Handy-Hülle oder Tischplatte aus: Lege das Handy auf eine Fläche, von der du weisst, dass sie eben ist, und nulle dort. Für den Wohnwagen: Handy auf den Boden oder eine Arbeitsfläche im Innern legen und die tiefe Seite mit Keilen unterlegen, bis die Blase in der Mitte ist.",
   },

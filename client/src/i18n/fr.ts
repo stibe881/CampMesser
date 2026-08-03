@@ -1080,6 +1080,9 @@ export const fr: Translation = {
     levelNow: "De niveau – position parfaite !",
     zeroHere: "Mettre à zéro ici",
     resetCalibration: "Réinitialiser le calibrage",
+    soundLabel: "Signal sonore",
+    soundHint:
+      "Bref son et vibration dès que c'est de niveau – de nouveau seulement si tu quittes le niveau entre-temps.",
     calibrationHint:
       "« Mettre à zéro ici » compense une coque de téléphone ou une table de travers : pose le téléphone sur une surface dont tu sais qu'elle est plane et mets à zéro là. Pour la caravane : pose le téléphone sur le sol ou un plan de travail à l'intérieur et cale le côté bas avec des cales jusqu'à ce que la bulle soit au centre.",
   },
