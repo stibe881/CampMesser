@@ -4273,6 +4273,45 @@ export const it: Translation = {
     toTrip: "Al viaggio",
   },
 
+  notes: {
+    title: "Note",
+    subtitle:
+      "Note libere con parole chiave – per tutto ciò che non trova posto in nessun altro modulo.",
+    loginFeature: "le tue note",
+    addButton: "Nuova nota",
+    searchPlaceholder: "Cerca nelle note …",
+    searchAria: "Cerca nei titoli, nei testi e nelle parole chiave",
+    tagFilterAria: "Filtra per parole chiave",
+    tagFilterClear: "Togli il filtro",
+    emptyTitle: "Ancora nessuna nota",
+    emptyBody:
+      "Annota quello che non trova posto altrove – il numero del custode, il trucco per estrarre i picchetti, un'idea per la prossima estate.",
+    noMatches: "Nessuna nota corrisponde alla tua ricerca.",
+    untitled: "Senza titolo",
+    updatedAt: (date: string) => `modificata il ${date}`,
+    newTitle: "Nuova nota",
+    editTitle: "Modifica la nota",
+    dialogDesc:
+      "Il titolo è facoltativo. Le parole chiave ti aiutano a ritrovare le note – compaiono come filtri sopra l'elenco.",
+    titleLabel: "Titolo (facoltativo)",
+    titlePlaceholder: "p. es. idee per il Ticino",
+    textLabel: "Nota",
+    textPlaceholder: "Scrivi liberamente …",
+    tagsLabel: "Parole chiave",
+    tagsPlaceholder: "p. es. Ticino, estate, tenda",
+    tagsHint: (max: number) =>
+      `Separale con la virgola, al massimo ${max} parole chiave. Maiuscole e minuscole non contano.`,
+    textRequired: "Scrivi prima qualcosa.",
+    save: "Salva",
+    saved: "Nota salvata",
+    updated: "Nota aggiornata",
+    saveFailed: "Impossibile salvare la nota",
+    deleted: "Nota eliminata",
+    deleteFailed: "Impossibile eliminare la nota",
+    deleteConfirm: "Vuoi davvero eliminare questa nota?",
+    editAria: (title: string) => `Modifica la nota ${title}`,
+    deleteAria: (title: string) => `Elimina la nota ${title}`,
+  },
   stats: {
     title: "Statistiche",
     subtitle:

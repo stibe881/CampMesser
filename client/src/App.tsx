@@ -55,6 +55,7 @@ const pageLoaders = {
   Countries: () => import("./pages/Countries"),
   Login: () => import("./pages/Login"),
   Lawn: () => import("./pages/Lawn"),
+  Notes: () => import("./pages/Notes"),
   Profile: () => import("./pages/Profile"),
   SharedPackList: () => import("./pages/SharedPackList"),
   SharedShopping: () => import("./pages/SharedShopping"),
@@ -137,6 +138,7 @@ const PayloadPage = lazyWithRetry(pageLoaders.Payload);
 const CountriesPage = lazyWithRetry(pageLoaders.Countries);
 const LoginPage = lazyWithRetry(pageLoaders.Login);
 const LawnPage = lazyWithRetry(pageLoaders.Lawn);
+const NotesPage = lazyWithRetry(pageLoaders.Notes);
 const ProfilePage = lazyWithRetry(pageLoaders.Profile);
 const SharedPackListPage = lazyWithRetry(pageLoaders.SharedPackList);
 const SharedShoppingPage = lazyWithRetry(pageLoaders.SharedShopping);
@@ -219,6 +221,7 @@ function Router() {
           <Route path={"/laenderregeln"} component={CountriesPage} />
           <Route path={"/anmelden"} component={LoginPage} />
           <Route path={"/rasen"} component={LawnPage} />
+          <Route path={"/notizen"} component={NotesPage} />
           <Route path={"/profil"} component={ProfilePage} />
           <Route path={"/liste/:token"} component={SharedPackListPage} />
           <Route

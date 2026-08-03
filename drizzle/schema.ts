@@ -1345,3 +1345,34 @@ export const pushLog = mysqlTable(
 
 export type PushLogEntry = typeof pushLog.$inferSelect;
 export type InsertPushLogEntry = typeof pushLog.$inferInsert;
+
+/**
+ * Freie Notizen (#246): das Auffangbecken für alles, was in kein anderes
+ * Modul passt – ein Gedanke zum nächsten Sommer, die Nummer des
+ * Platzwarts, der Trick mit dem Heringszieher. Titel ist optional, der
+ * Text trägt den Inhalt.
+ *
+ * Die Stichwörter stehen als KOMMAGETRENNTER Text in `tags`, nicht als
+ * JSON: es ist eine flache Liste kurzer Wörter ohne Struktur, und so bleibt
+ * sie auch mit einem einfachen LIKE durchsuchbar. Gesäubert (getrimmt,
+ * entdoppelt, gekappt) wird ausschliesslich über shared/notes.ts, damit
+ * Client und Router dieselbe Fassung schreiben.
+ */
+export const userNotes = mysqlTable(
+  "userNotes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Überschrift der Notiz; null = ohne Titel (dann trägt der Text sie) */
+    title: varchar("title", { length: 140 }),
+    text: text("text").notNull(),
+    /** Stichwörter, kommagetrennt und normalisiert (shared/notes.ts) */
+    tags: varchar("tags", { length: 300 }).notNull().default(""),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("userNotes_userId").on(table.userId)]
+);
+
+export type UserNote = typeof userNotes.$inferSelect;
+export type InsertUserNote = typeof userNotes.$inferInsert;

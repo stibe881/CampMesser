@@ -65,6 +65,8 @@ import {
   tripPhotos,
   tripShoppingItems,
   users,
+  userNotes,
+  InsertUserNote,
   userSettings,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -2763,4 +2765,57 @@ export async function upsertUserSetting(
     .insert(userSettings)
     .values({ userId, key, value })
     .onDuplicateKeyUpdate({ set: { value } });
+}
+
+// ── Freie Notizen (#246) ──
+
+/**
+ * Notizen eines Kontos, zuletzt geänderte zuoberst. Die endgültige
+ * Reihenfolge macht shared/notes.ts (sortNotes), damit sie testbar bleibt –
+ * die Sortierung hier spart nur den Umweg über die volle Liste.
+ */
+export async function getUserNotes(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(userNotes)
+    .where(eq(userNotes.userId, userId))
+    .orderBy(desc(userNotes.updatedAt), desc(userNotes.id));
+}
+
+/** Einzelne Notiz eines Kontos (undefined = fremd oder nicht vorhanden). */
+export async function getUserNote(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(userNotes)
+    .where(and(eq(userNotes.id, id), eq(userNotes.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+export async function addUserNote(data: InsertUserNote) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(userNotes).values(data);
+  return result.insertId;
+}
+
+/** Notiz ändern – die userId-Bedingung hält fremde Notizen unantastbar. */
+export async function updateUserNote(
+  id: number,
+  userId: number,
+  data: Partial<InsertUserNote>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(userNotes)
+    .set(data)
+    .where(and(eq(userNotes.id, id), eq(userNotes.userId, userId)));
+}
+
+export async function deleteUserNote(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(userNotes)
+    .where(and(eq(userNotes.id, id), eq(userNotes.userId, userId)));
 }

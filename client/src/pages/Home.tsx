@@ -1044,7 +1044,7 @@ function TickBiteHint() {
 /**
  * Globale Suche über die Offline-Wissensmodule (Erste Hilfe, Knoten, Rezepte,
  * Natur) – angemeldet zusätzlich über eigene Inhalte (Packlisten, Zeltplätze,
- * eigene Rezepte/Jagden/Quizze, Zelt-Finder-Ziele). Die Nutzerdaten werden
+ * eigene Rezepte/Jagden/Quizze, Zelt-Finder-Ziele, Notizen). Die Nutzerdaten werden
  * erst geladen, wenn das Suchfeld benutzt wird (enabled-Flag), nicht beim
  * Seitenaufbau.
  */
@@ -1103,6 +1103,7 @@ function KnowledgeSearch() {
   const recipesQuery = trpc.recipes.list.useQuery(undefined, queryOpts);
   const huntsQuery = trpc.hunts.list.useQuery(undefined, queryOpts);
   const quizzesQuery = trpc.quizzes.list.useQuery(undefined, queryOpts);
+  const notesQuery = trpc.notes.list.useQuery(undefined, queryOpts);
 
   /** Beim ersten Fokus/Tippen: tRPC-Queries freischalten, lokale Ziele lesen. */
   const activate = () => {
@@ -1130,6 +1131,7 @@ function KnowledgeSearch() {
             hunts: huntsQuery.data,
             quizzes: quizzesQuery.data,
             tentTargets,
+            notes: notesQuery.data,
           },
           6,
           lang

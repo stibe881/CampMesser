@@ -13,6 +13,7 @@ import { recipes } from "@/data/recipes";
 import { RECIPE_METHOD_LABELS } from "@shared/customRecipes";
 import { LOCALE_TAGS, l4, pick, type L4, type Language } from "@shared/i18n";
 import { fuzzyWordMatch, levenshtein, normalizeText } from "@shared/textMatch";
+import { parseNoteTags } from "@shared/notes";
 
 // Die fehlertoleranten Grundfunktionen liegen neu in shared/textMatch.ts,
 // damit auch der Resteverwertungs-Abgleich (#235) sie nutzt. Für bestehende
@@ -230,6 +231,12 @@ export interface OwnContent {
   hunts?: { id: number; title: string }[];
   quizzes?: { id: number; title: string }[];
   tentTargets?: { id: string; name: string }[];
+  notes?: {
+    id: number;
+    title?: string | null;
+    text: string;
+    tags?: string | null;
+  }[];
 }
 
 /** Typ-Labels für die Snippet-Zeile eigener Treffer. */
@@ -260,7 +267,11 @@ const OWN_KIND_LABELS = {
     "Obiettivo del trova-tenda",
     "Tent finder target"
   ),
+  note: l4("Notiz", "Note", "Nota", "Note"),
 };
+
+/** Notiz ohne Titel: die Überschrift kommt dann aus dem Text. */
+const NOTE_UNTITLED = l4("Notiz", "Note", "Nota", "Note");
 
 /**
  * Eigene Inhalte durchsuchen (Packlisten, Zeltplätze, eigene Rezepte,
@@ -345,6 +356,22 @@ export function searchOwnContent(
       p(target.name),
       `/zeltfinder?target=${encodeURIComponent(target.id)}`,
       p(OWN_KIND_LABELS.tentTarget)
+    );
+  }
+  // Freie Notizen (#246): gesucht wird über Titel, Text UND Stichwörter.
+  // Ohne Titel trägt die erste Textzeile die Überschrift – eine Notiz ganz
+  // ohne Titel soll im Treffer trotzdem wiedererkennbar sein.
+  for (const note of own.notes ?? []) {
+    const tags = parseNoteTags(note.tags);
+    const firstLine = note.text.split("\n")[0]?.trim() ?? "";
+    const title = note.title?.trim() || firstLine || p(NOTE_UNTITLED);
+    const kind = p(OWN_KIND_LABELS.note);
+    add(
+      `own-note-${note.id}`,
+      title,
+      "/notizen",
+      tags.length > 0 ? `${kind} · ${tags.join(", ")}` : kind,
+      [note.text, tags.join(" ")]
     );
   }
 

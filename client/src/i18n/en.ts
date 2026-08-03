@@ -4176,6 +4176,45 @@ export const en: Translation = {
     toTrip: "Open trip",
   },
 
+  notes: {
+    title: "Notes",
+    subtitle:
+      "Free-form notes with keywords – for everything that fits into no other module.",
+    loginFeature: "your notes",
+    addButton: "New note",
+    searchPlaceholder: "Search notes …",
+    searchAria: "Search notes by title, text and keywords",
+    tagFilterAria: "Filter by keywords",
+    tagFilterClear: "Clear filter",
+    emptyTitle: "No notes yet",
+    emptyBody:
+      "Jot down whatever fits nowhere else – the warden's number, the trick with the peg puller, an idea for next summer.",
+    noMatches: "No note matches your search.",
+    untitled: "Untitled",
+    updatedAt: (date: string) => `last changed on ${date}`,
+    newTitle: "New note",
+    editTitle: "Edit note",
+    dialogDesc:
+      "The title is optional. Keywords help you find things again – they show up as filters above the list.",
+    titleLabel: "Title (optional)",
+    titlePlaceholder: "e.g. ideas for Ticino",
+    textLabel: "Note",
+    textPlaceholder: "Just start writing …",
+    tagsLabel: "Keywords",
+    tagsPlaceholder: "e.g. Ticino, summer, tent",
+    tagsHint: (max: number) =>
+      `Separate with commas, ${max} keywords at most. Upper and lower case do not matter.`,
+    textRequired: "Please write something first.",
+    save: "Save",
+    saved: "Note saved",
+    updated: "Note updated",
+    saveFailed: "The note could not be saved",
+    deleted: "Note deleted",
+    deleteFailed: "The note could not be deleted",
+    deleteConfirm: "Really delete this note?",
+    editAria: (title: string) => `Edit note ${title}`,
+    deleteAria: (title: string) => `Delete note ${title}`,
+  },
   stats: {
     title: "Statistics",
     subtitle:

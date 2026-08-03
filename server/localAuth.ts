@@ -187,6 +187,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     natureSightings,
     fishCatches,
     tickBites,
+    userNotes,
   } = await import("../drizzle/schema");
   const { inArray, or } = await import("drizzle-orm");
   // Eigene Reisen zuerst ermitteln: deren Mitglieder, Einladungs-Links und
@@ -327,6 +328,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(natureSightings).where(eq(natureSightings.userId, userId));
   // Fangbuch (#236) hängt direkt am Konto
   await db.delete(fishCatches).where(eq(fishCatches.userId, userId));
+  // Freie Notizen (#246) hängen ebenfalls direkt am Konto
+  await db.delete(userNotes).where(eq(userNotes.userId, userId));
   await db.delete(users).where(eq(users.id, userId));
   // Zuletzt die Upload-Dateien vom Webspace entfernen – fehlende Dateien
   // blockieren nie, und verwaiste Dateien sind schlimmstenfalls harmlos.

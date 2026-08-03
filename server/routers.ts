@@ -70,6 +70,15 @@ import {
   normalizeTripBoardText,
   sortTripBoardEntries,
 } from "@shared/tripBoard";
+import {
+  NOTE_TAG_MAX_LENGTH,
+  NOTE_TEXT_MAX_LENGTH,
+  NOTE_TITLE_MAX_LENGTH,
+  normalizeNoteText,
+  normalizeNoteTitle,
+  serializeNoteTags,
+  sortNotes,
+} from "@shared/notes";
 import { MEALS, remapMenuDays } from "@shared/menuPlan";
 import {
   MAX_GEAR_INTERVAL_MONTHS,
@@ -4975,6 +4984,99 @@ export const appRouter = router({
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(async ({ ctx, input }) => {
         await db.deleteHikeTrack(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+  }),
+
+  /**
+   * Freie Notizen (#246): schlichtes CRUD auf eigenen Notizen. Titel, Text
+   * und Stichwörter laufen durch shared/notes.ts, damit der Server exakt so
+   * säubert wie die Eingabemaske – die Stichwörter landen kommagetrennt und
+   * entdoppelt in EINER Spalte.
+   */
+  notes: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const rows = await db.getUserNotes(ctx.user.id);
+      // Reihenfolge kommt aus shared/, damit sie testbar bleibt
+      return sortNotes(rows);
+    }),
+    add: protectedProcedure
+      .input(
+        z.object({
+          title: z
+            .string()
+            .max(NOTE_TITLE_MAX_LENGTH * 2)
+            .nullish(),
+          text: z
+            .string()
+            .min(1)
+            .max(NOTE_TEXT_MAX_LENGTH * 2),
+          tags: z.array(z.string().max(NOTE_TAG_MAX_LENGTH * 2)).optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const text = normalizeNoteText(input.text);
+        if (!text) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Die Notiz braucht einen Text.",
+          });
+        }
+        const id = await db.addUserNote({
+          userId: ctx.user.id,
+          title: normalizeNoteTitle(input.title),
+          text,
+          tags: serializeNoteTags(input.tags ?? []),
+        });
+        return { id };
+      }),
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          title: z
+            .string()
+            .max(NOTE_TITLE_MAX_LENGTH * 2)
+            .nullish(),
+          text: z
+            .string()
+            .min(1)
+            .max(NOTE_TEXT_MAX_LENGTH * 2)
+            .optional(),
+          tags: z.array(z.string().max(NOTE_TAG_MAX_LENGTH * 2)).optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const note = await db.getUserNote(input.id, ctx.user.id);
+        if (!note) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Notiz nicht gefunden.",
+          });
+        }
+        const text =
+          input.text !== undefined ? normalizeNoteText(input.text) : undefined;
+        if (text !== undefined && !text) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Die Notiz braucht einen Text.",
+          });
+        }
+        await db.updateUserNote(input.id, ctx.user.id, {
+          ...(input.title !== undefined
+            ? { title: normalizeNoteTitle(input.title) }
+            : {}),
+          ...(text !== undefined ? { text } : {}),
+          ...(input.tags !== undefined
+            ? { tags: serializeNoteTags(input.tags) }
+            : {}),
+        });
+        return { success: true } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteUserNote(input.id, ctx.user.id);
         return { success: true } as const;
       }),
   }),

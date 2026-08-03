@@ -4309,6 +4309,45 @@ export const de = {
   },
 
   /** Statistik-Dashboard: bündelt vorhandene Auswertungen an einem Ort. */
+  notes: {
+    title: "Notizen",
+    subtitle:
+      "Freie Notizen mit Stichwörtern – für alles, was in kein anderes Modul passt.",
+    loginFeature: "deine Notizen",
+    addButton: "Neue Notiz",
+    searchPlaceholder: "Notizen durchsuchen …",
+    searchAria: "Notizen nach Titel, Text und Stichwörtern durchsuchen",
+    tagFilterAria: "Nach Stichwörtern filtern",
+    tagFilterClear: "Filter aufheben",
+    emptyTitle: "Noch keine Notiz",
+    emptyBody:
+      "Halte fest, was dir sonst nirgends unterkommt – die Nummer des Platzwarts, der Trick mit dem Heringszieher, eine Idee für nächsten Sommer.",
+    noMatches: "Keine Notiz passt zu deiner Suche.",
+    untitled: "Ohne Titel",
+    updatedAt: (date: string) => `zuletzt geändert am ${date}`,
+    newTitle: "Neue Notiz",
+    editTitle: "Notiz bearbeiten",
+    dialogDesc:
+      "Der Titel ist freiwillig. Stichwörter hilfst du dir selbst beim Wiederfinden – sie tauchen als Filter über der Liste auf.",
+    titleLabel: "Titel (optional)",
+    titlePlaceholder: "z. B. Ideen fürs Tessin",
+    textLabel: "Notiz",
+    textPlaceholder: "Schreib einfach drauflos …",
+    tagsLabel: "Stichwörter",
+    tagsPlaceholder: "z. B. Tessin, Sommer, Zelt",
+    tagsHint: (max: number) =>
+      `Mit Komma trennen, höchstens ${max} Stichwörter. Gross- und Kleinschreibung ist egal.`,
+    textRequired: "Bitte zuerst etwas schreiben.",
+    save: "Speichern",
+    saved: "Notiz gespeichert",
+    updated: "Notiz aktualisiert",
+    saveFailed: "Notiz konnte nicht gespeichert werden",
+    deleted: "Notiz gelöscht",
+    deleteFailed: "Notiz konnte nicht gelöscht werden",
+    deleteConfirm: "Diese Notiz wirklich löschen?",
+    editAria: (title: string) => `Notiz ${title} bearbeiten`,
+    deleteAria: (title: string) => `Notiz ${title} löschen`,
+  },
   stats: {
     title: "Statistik",
     subtitle:

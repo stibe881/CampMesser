@@ -4310,6 +4310,45 @@ export const fr: Translation = {
     toTrip: "Vers le voyage",
   },
 
+  notes: {
+    title: "Notes",
+    subtitle:
+      "Notes libres avec mots-clés – pour tout ce qui n'a sa place dans aucun autre module.",
+    loginFeature: "tes notes",
+    addButton: "Nouvelle note",
+    searchPlaceholder: "Rechercher dans les notes …",
+    searchAria: "Rechercher dans les titres, les textes et les mots-clés",
+    tagFilterAria: "Filtrer par mots-clés",
+    tagFilterClear: "Enlever le filtre",
+    emptyTitle: "Aucune note pour l'instant",
+    emptyBody:
+      "Note ce qui ne trouve place nulle part ailleurs – le numéro du gardien, l'astuce de l'arrache-piquet, une idée pour l'été prochain.",
+    noMatches: "Aucune note ne correspond à ta recherche.",
+    untitled: "Sans titre",
+    updatedAt: (date: string) => `modifiée le ${date}`,
+    newTitle: "Nouvelle note",
+    editTitle: "Modifier la note",
+    dialogDesc:
+      "Le titre est facultatif. Les mots-clés t'aident à retrouver tes notes – ils apparaissent comme filtres au-dessus de la liste.",
+    titleLabel: "Titre (facultatif)",
+    titlePlaceholder: "p. ex. idées pour le Tessin",
+    textLabel: "Note",
+    textPlaceholder: "Écris simplement …",
+    tagsLabel: "Mots-clés",
+    tagsPlaceholder: "p. ex. Tessin, été, tente",
+    tagsHint: (max: number) =>
+      `Sépare-les par des virgules, ${max} mots-clés au maximum. Les majuscules n'ont pas d'importance.`,
+    textRequired: "Écris d'abord quelque chose.",
+    save: "Enregistrer",
+    saved: "Note enregistrée",
+    updated: "Note mise à jour",
+    saveFailed: "La note n'a pas pu être enregistrée",
+    deleted: "Note supprimée",
+    deleteFailed: "La note n'a pas pu être supprimée",
+    deleteConfirm: "Supprimer vraiment cette note ?",
+    editAria: (title: string) => `Modifier la note ${title}`,
+    deleteAria: (title: string) => `Supprimer la note ${title}`,
+  },
   stats: {
     title: "Statistiques",
     subtitle:
