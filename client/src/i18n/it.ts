@@ -2232,6 +2232,22 @@ export const it: Translation = {
     unshareButton: "Termina la condivisione",
     unshared: "Link di condivisione ritirato",
     unshareFailed: "Non è stato possibile ritirare il link di condivisione",
+    destockButton: "Togli gli ingredienti dal frigo box",
+    destockAria: (name: string) =>
+      `Togli gli ingredienti di ${name} dal frigo box`,
+    destockTitle: "Togli dal frigo box",
+    destockDescription:
+      "Queste scorte corrispondono agli ingredienti della ricetta. Scegli cosa hai consumato.",
+    destockMatchedBy: (ingredient: string) => `corrisponde a «${ingredient}»`,
+    destockNoMatches:
+      "Nessuna voce corrispondente nel tuo frigo box – non c'è nulla da togliere.",
+    destockConfirm: (n: number) =>
+      n === 1 ? "Togli 1 voce" : `Togli ${n} voci`,
+    destockDone: (n: number) =>
+      n === 1
+        ? "1 voce rimossa dal frigo box"
+        : `${n} voci rimosse dal frigo box`,
+    destockFailed: "Non è stato possibile rimuovere le voci",
     editor: {
       titleEdit: "Modifica ricetta",
       titleNew: "Crea una ricetta personale",

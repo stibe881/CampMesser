@@ -2250,6 +2250,22 @@ export const fr: Translation = {
     unshareButton: "Arrêter le partage",
     unshared: "Lien de partage retiré",
     unshareFailed: "Le lien de partage n'a pas pu être retiré",
+    destockButton: "Retirer les ingrédients de la glacière",
+    destockAria: (name: string) =>
+      `Retirer les ingrédients de ${name} de la glacière`,
+    destockTitle: "Retirer de la glacière",
+    destockDescription:
+      "Ces provisions correspondent aux ingrédients de la recette. Choisis ce que tu as utilisé.",
+    destockMatchedBy: (ingredient: string) => `correspond à « ${ingredient} »`,
+    destockNoMatches:
+      "Aucune entrée correspondante dans ta glacière – il n'y a rien à retirer.",
+    destockConfirm: (n: number) =>
+      n === 1 ? "Retirer 1 entrée" : `Retirer ${n} entrées`,
+    destockDone: (n: number) =>
+      n === 1
+        ? "1 entrée retirée de la glacière"
+        : `${n} entrées retirées de la glacière`,
+    destockFailed: "Les entrées n'ont pas pu être retirées",
     editor: {
       titleEdit: "Modifier la recette",
       titleNew: "Créer ma propre recette",

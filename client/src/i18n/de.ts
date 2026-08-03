@@ -2261,6 +2261,22 @@ export const de = {
     unshareButton: "Teilen beenden",
     unshared: "Teil-Link zurückgezogen",
     unshareFailed: "Teil-Link konnte nicht zurückgezogen werden",
+    destockButton: "Zutaten aus der Kühlbox austragen",
+    destockAria: (name: string) =>
+      `Zutaten von ${name} aus der Kühlbox austragen`,
+    destockTitle: "Aus der Kühlbox austragen",
+    destockDescription:
+      "Diese Vorräte passen zu den Zutaten des Rezepts. Wähle aus, was du aufgebraucht hast.",
+    destockMatchedBy: (ingredient: string) => `passt zu «${ingredient}»`,
+    destockNoMatches:
+      "Keine passenden Einträge in deiner Kühlbox – hier gibt es nichts auszutragen.",
+    destockConfirm: (n: number) =>
+      n === 1 ? "1 Eintrag austragen" : `${n} Einträge austragen`,
+    destockDone: (n: number) =>
+      n === 1
+        ? "1 Eintrag aus der Kühlbox entfernt"
+        : `${n} Einträge aus der Kühlbox entfernt`,
+    destockFailed: "Einträge konnten nicht entfernt werden",
     editor: {
       titleEdit: "Rezept bearbeiten",
       titleNew: "Eigenes Rezept erstellen",

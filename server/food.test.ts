@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { expiryInfo, expirySortKey } from "@shared/food";
+import {
+  expiryInfo,
+  expirySortKey,
+  matchFoodItems,
+  normalizeFoodName,
+} from "@shared/food";
 
 const TODAY = "2026-08-01";
 
@@ -71,5 +76,66 @@ describe("expirySortKey", () => {
       (a, b) => expirySortKey(a.expiryDate) - expirySortKey(b.expiryDate)
     );
     expect(sorted.map(i => i.name)).toEqual(["Zuerst", "Später", "Ohne"]);
+  });
+});
+
+describe("normalizeFoodName", () => {
+  it("faltet Umlaute, Akzente und Satzzeichen weg", () => {
+    expect(normalizeFoodName("Käse")).toBe("kase");
+    expect(normalizeFoodName("Gruyère")).toBe("gruyere");
+    expect(normalizeFoodName("400 g Magronen")).toBe("gmagronen");
+    expect(normalizeFoodName("  ")).toBe("");
+  });
+});
+
+describe("matchFoodItems", () => {
+  const items = [
+    { id: 1, name: "Tomaten" },
+    { id: 2, name: "Bergkäse" },
+    { id: 3, name: "Ei" },
+    { id: 4, name: "Zucchetti" },
+  ];
+
+  it("findet Treffer als Teilstring in beide Richtungen", () => {
+    const matches = matchFoodItems(
+      ["4 Tomaten, gewürfelt", "200 g Käse", "Salz"],
+      items
+    );
+    expect(matches.map(m => m.item.id)).toEqual([1, 2]);
+    expect(matches[0].ingredient).toBe("4 Tomaten, gewürfelt");
+    expect(matches[1].ingredient).toBe("200 g Käse");
+  });
+
+  it("ignoriert zu kurze Einträge wie «Ei»", () => {
+    expect(matchFoodItems(["3 Eier"], items)).toEqual([]);
+  });
+
+  it("gleicht Umlaute und Akzente ab", () => {
+    const matches = matchFoodItems(
+      ["Gruyere reiben"],
+      [{ id: 9, name: "Gruyère" }]
+    );
+    expect(matches.map(m => m.item.id)).toEqual([9]);
+  });
+
+  it("nennt jeden Eintrag höchstens einmal – mit der ersten Zutat", () => {
+    const matches = matchFoodItems(
+      ["2 Tomaten", "1 Dose Tomaten, geschält"],
+      items
+    );
+    expect(matches).toHaveLength(1);
+    expect(matches[0].ingredient).toBe("2 Tomaten");
+  });
+
+  it("behält die Reihenfolge der Kühlbox bei", () => {
+    const matches = matchFoodItems(["Zucchetti", "Tomaten"], items);
+    expect(matches.map(m => m.item.id)).toEqual([1, 4]);
+  });
+
+  it("liefert ohne Treffer oder ohne Daten eine leere Liste", () => {
+    expect(matchFoodItems(["Reis", "Linsen"], items)).toEqual([]);
+    expect(matchFoodItems([], items)).toEqual([]);
+    expect(matchFoodItems(["Tomaten"], [])).toEqual([]);
+    expect(matchFoodItems(["   "], items)).toEqual([]);
   });
 });

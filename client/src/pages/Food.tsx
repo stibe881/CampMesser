@@ -37,7 +37,12 @@ import { recipes } from "@/data/recipes";
 import { customRecipeToRecipe } from "@/lib/customRecipesClient";
 import { loadRecipeFavorites } from "@/lib/recipeFavorites";
 import { RECIPE_METHOD_LABELS } from "@shared/customRecipes";
-import { expiryInfo, type ExpiryState } from "@shared/food";
+import {
+  expiryInfo,
+  FOOD_MATCH_MIN_LENGTH,
+  normalizeFoodName,
+  type ExpiryState,
+} from "@shared/food";
 import {
   loadFoodSort,
   sortFoodItems,
@@ -57,25 +62,13 @@ const expiryStyles: Record<ExpiryState, string> = {
   ok: "border-border bg-card",
 };
 
-/** Einfache Normalisierung für den Zutaten-Abgleich (Umlaute/Akzente falten). */
-function normalize(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/ä/g, "a")
-    .replace(/ö/g, "o")
-    .replace(/ü/g, "u")
-    .replace(/é|è|ê/g, "e")
-    .replace(/à|â/g, "a")
-    .replace(/[^a-z]/g, "");
-}
-
 function matchScore(foodNames: string[], ingredients: string[]): number {
   let score = 0;
   for (const food of foodNames) {
-    const nf = normalize(food);
-    if (nf.length < 3) continue;
+    const nf = normalizeFoodName(food);
+    if (nf.length < FOOD_MATCH_MIN_LENGTH) continue;
     for (const ing of ingredients) {
-      const ni = normalize(ing);
+      const ni = normalizeFoodName(ing);
       if (ni.includes(nf) || nf.includes(ni)) {
         score += 1;
         break;

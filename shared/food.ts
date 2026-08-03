@@ -101,6 +101,71 @@ export function expiryInfo(
 }
 
 /**
+ * Einfache Normalisierung für den Zutaten-Abgleich: Kleinschreibung,
+ * Umlaute/Akzente falten und alles ausser a–z entfernen (Mengen, Einheiten
+ * und Satzzeichen fallen so weg).
+ */
+export function normalizeFoodName(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/ä/g, "a")
+    .replace(/ö/g, "o")
+    .replace(/ü/g, "u")
+    .replace(/é|è|ê/g, "e")
+    .replace(/à|â/g, "a")
+    .replace(/[^a-z]/g, "");
+}
+
+/**
+ * Kürzeste normalisierte Länge, die noch verglichen wird – kürzere Namen
+ * («Ei», «Öl») würden sonst in fast jeder Zutat als Teilstring auftauchen.
+ */
+export const FOOD_MATCH_MIN_LENGTH = 3;
+
+/** Minimal nötige Felder eines Kühlbox-Eintrags fürs Matching. */
+export interface FoodItemLike {
+  id: number;
+  name: string;
+}
+
+/** Ein Kühlbox-Eintrag samt der Rezept-Zutat, die ihn getroffen hat. */
+export interface FoodMatch<T extends FoodItemLike> {
+  item: T;
+  ingredient: string;
+}
+
+/**
+ * Rezept-Zutaten mit den Kühlbox-Einträgen abgleichen (#190): getroffen wird,
+ * wenn der normalisierte Name des Eintrags in der normalisierten Zutat steckt
+ * oder umgekehrt («Tomaten» ↔ «4 Tomaten, gewürfelt», «Käse» ↔ «Bergkäse»).
+ * Jeder Eintrag erscheint höchstens einmal – mit der ERSTEN passenden Zutat;
+ * die Reihenfolge der Kühlbox bleibt erhalten.
+ */
+export function matchFoodItems<T extends FoodItemLike>(
+  ingredients: string[],
+  foodItems: T[]
+): FoodMatch<T>[] {
+  const normalizedIngredients = ingredients
+    .map(ingredient => ({
+      ingredient,
+      normalized: normalizeFoodName(ingredient),
+    }))
+    .filter(entry => entry.normalized.length > 0);
+  const matches: FoodMatch<T>[] = [];
+  foodItems.forEach(item => {
+    const normalizedName = normalizeFoodName(item.name);
+    if (normalizedName.length < FOOD_MATCH_MIN_LENGTH) return;
+    const hit = normalizedIngredients.find(
+      entry =>
+        entry.normalized.includes(normalizedName) ||
+        normalizedName.includes(entry.normalized)
+    );
+    if (hit) matches.push({ item, ingredient: hit.ingredient });
+  });
+  return matches;
+}
+
+/**
  * Sortierschlüssel für «Verbrauche zuerst»: ablaufende Einträge zuerst
  * (früheste zuerst), Einträge ohne Datum ans Ende.
  */

@@ -2175,6 +2175,22 @@ export const en: Translation = {
     unshareButton: "Stop sharing",
     unshared: "Share link withdrawn",
     unshareFailed: "The share link could not be withdrawn",
+    destockButton: "Remove ingredients from the cool box",
+    destockAria: (name: string) =>
+      `Remove the ingredients of ${name} from the cool box`,
+    destockTitle: "Remove from the cool box",
+    destockDescription:
+      "These supplies match the ingredients of the recipe. Pick what you have used up.",
+    destockMatchedBy: (ingredient: string) => `matches “${ingredient}”`,
+    destockNoMatches:
+      "No matching entries in your cool box – there is nothing to remove here.",
+    destockConfirm: (n: number) =>
+      n === 1 ? "Remove 1 entry" : `Remove ${n} entries`,
+    destockDone: (n: number) =>
+      n === 1
+        ? "1 entry removed from the cool box"
+        : `${n} entries removed from the cool box`,
+    destockFailed: "The entries could not be removed",
     editor: {
       titleEdit: "Edit recipe",
       titleNew: "Create your own recipe",

@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Rezepte: nach dem Kochen trägst du die verbrauchten Zutaten mit einem Tipp aus der Kühlbox aus – die App schlägt dir die passenden Vorräte vor.",
+        "Recettes : après avoir cuisiné, tu retires les ingrédients utilisés de la glacière en un geste – l'app te propose les provisions correspondantes.",
+        "Ricette: dopo aver cucinato togli gli ingredienti consumati dal frigo box con un tocco – l'app ti propone le scorte corrispondenti.",
+        "Recipes: after cooking you remove the used ingredients from the cool box in one go – the app suggests the matching supplies."
+      ),
+      l4(
         "Menüplan: tippe auf ein geplantes Rezept und du siehst Zutaten und Zubereitung direkt im Menüplan – ohne ins Rezeptbuch zu wechseln.",
         "Menus : touche une recette planifiée et tu vois les ingrédients et la préparation directement dans les menus – sans passer par le livre de recettes.",
         "Menu: tocca una ricetta pianificata e vedi ingredienti e preparazione direttamente nel menu – senza passare dal ricettario.",

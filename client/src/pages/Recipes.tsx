@@ -17,6 +17,7 @@ import {
   Pencil,
   Plus,
   QrCode,
+  Refrigerator,
   Search,
   Share2,
   ShoppingCart,
@@ -37,6 +38,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -49,6 +51,7 @@ import {
   RECIPE_METHOD_LABELS,
   parseStringList,
 } from "@shared/customRecipes";
+import { matchFoodItems } from "@shared/food";
 import { pick } from "@shared/i18n";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -432,9 +435,12 @@ function RecipeEditorDialog({
 function CookingModeDialog({
   recipe,
   onClose,
+  onDestock,
 }: {
   recipe: Recipe;
   onClose: () => void;
+  /** Nur eingeloggt gesetzt: Zutaten nach dem Kochen aus der Kühlbox austragen */
+  onDestock?: () => void;
 }) {
   const { lang, t } = useI18n();
   const wakeLock = useWakeLock();
@@ -521,6 +527,21 @@ function CookingModeDialog({
           </ul>
         )}
       </div>
+
+      {/* Abschluss: Gekochtes gleich aus der Kühlbox austragen (#190) */}
+      {isLast && onDestock && (
+        <div className="border-t border-border px-4 pt-3 sm:px-6">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={onDestock}
+            aria-label={t.recipes.destockAria(pick(recipe.name, lang))}
+          >
+            <Refrigerator className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.recipes.destockButton}
+          </Button>
+        </div>
+      )}
 
       {/* Grosse Blätter-Flächen */}
       <div className="grid grid-cols-2 gap-2 border-t border-border p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6">
@@ -664,6 +685,52 @@ export default function RecipesPage() {
     },
     onError: () => toast.error(t.recipes.unshareFailed),
   });
+
+  // ── Gekochtes aus der Kühlbox austragen (#190) ──
+  const foodQuery = trpc.food.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  /** Austragen-Dialog offen (Rezept steckt in `selected`). */
+  const [destockOpen, setDestockOpen] = useState(false);
+  /** Angehakte Kühlbox-Einträge (Ids) – beim Öffnen alle Treffer. */
+  const [destockIds, setDestockIds] = useState<number[]>([]);
+
+  /** Treffer zwischen den Zutaten des offenen Rezepts und der Kühlbox. */
+  const destockMatches = useMemo(
+    () =>
+      selected
+        ? matchFoodItems(
+            selected.ingredients.map(i => pick(i, lang)),
+            foodQuery.data ?? []
+          )
+        : [],
+    [selected, lang, foodQuery.data]
+  );
+
+  const openDestock = () => {
+    setDestockIds(destockMatches.map(m => m.item.id));
+    setDestockOpen(true);
+  };
+
+  const removeFoodMutation = trpc.food.remove.useMutation();
+  const [destockBusy, setDestockBusy] = useState(false);
+
+  /** Die angehakten Einträge aus der Kühlbox entfernen. */
+  const confirmDestock = async () => {
+    const ids = destockIds;
+    if (ids.length === 0) return;
+    setDestockBusy(true);
+    try {
+      await Promise.all(ids.map(id => removeFoodMutation.mutateAsync({ id })));
+      toast.success(t.recipes.destockDone(ids.length));
+      setDestockOpen(false);
+    } catch {
+      toast.error(t.recipes.destockFailed);
+    } finally {
+      setDestockBusy(false);
+      utils.food.list.invalidate();
+    }
+  };
 
   const [, navigate] = useLocation();
   // Zutaten in der aktiven Sprache auf die Einkaufsliste übernehmen
@@ -1090,6 +1157,24 @@ export default function RecipesPage() {
                       {t.shopping.addIngredients}
                     </Button>
                   )}
+                  {/* Nach dem Kochen: Zutaten aus der Kühlbox austragen (#190) */}
+                  {isAuthenticated && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="ml-2 mt-3"
+                      onClick={openDestock}
+                      aria-label={t.recipes.destockAria(
+                        pick(selected.name, lang)
+                      )}
+                    >
+                      <Refrigerator
+                        className="mr-1.5 h-4 w-4"
+                        aria-hidden="true"
+                      />
+                      {t.recipes.destockButton}
+                    </Button>
+                  )}
                 </div>
 
                 <div>
@@ -1193,8 +1278,81 @@ export default function RecipesPage() {
           <CookingModeDialog
             recipe={selected}
             onClose={() => setCookingMode(false)}
+            onDestock={isAuthenticated ? openDestock : undefined}
           />
         )}
+      </Dialog>
+
+      {/* Gekochtes aus der Kühlbox austragen: Treffer bestätigen und entfernen */}
+      <Dialog
+        open={destockOpen}
+        onOpenChange={open => !open && setDestockOpen(false)}
+      >
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl">
+              {t.recipes.destockTitle}
+            </DialogTitle>
+            <DialogDescription>
+              {t.recipes.destockDescription}
+            </DialogDescription>
+          </DialogHeader>
+          {destockMatches.length === 0 ? (
+            <p className="py-4 text-sm text-muted-foreground">
+              {t.recipes.destockNoMatches}
+            </p>
+          ) : (
+            <div className="space-y-3">
+              <ul className="space-y-1">
+                {destockMatches.map(match => {
+                  const checked = destockIds.includes(match.item.id);
+                  return (
+                    <li key={match.item.id}>
+                      <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm">
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={value =>
+                            setDestockIds(prev =>
+                              value === true
+                                ? [...prev, match.item.id]
+                                : prev.filter(id => id !== match.item.id)
+                            )
+                          }
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-medium">
+                            {match.item.name}
+                          </span>
+                          <span className="block text-xs text-muted-foreground">
+                            {t.recipes.destockMatchedBy(match.ingredient)}
+                          </span>
+                        </span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setDestockOpen(false)}
+                >
+                  {t.common.cancel}
+                </Button>
+                <Button
+                  className="flex-1"
+                  disabled={destockIds.length === 0 || destockBusy}
+                  onClick={confirmDestock}
+                >
+                  {destockBusy
+                    ? t.common.saving
+                    : t.recipes.destockConfirm(destockIds.length)}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
       </Dialog>
 
       <Dialog
