@@ -53,24 +53,6 @@ zeigen lassen (HTTP-Check, erwartet Status 200; bei DB-Problemen liefert der
 Endpoint 503 und der Dienst alarmiert per E-Mail/Push). Intervall 5 Minuten
 reicht.
 
-## 4. SMTP + APP_URL in der Server-`.env` (Passwort-Reset-Mails)
-
-In konsoleH ein Postfach anlegen (z. B. `no-reply@campmesser.ch`) und in der
-`.env` auf dem Server ergänzen (Vorlage: `env.hetzner.template`):
-
-```ini
-SMTP_HOST=mail.your-server.de     # Hetzner-Mailserver laut konsoleH
-SMTP_PORT=587                     # STARTTLS
-SMTP_USER=no-reply@campmesser.ch
-SMTP_PASS=<Postfach-Passwort>
-SMTP_FROM=no-reply@campmesser.ch
-APP_URL=https://campmesser.ch
-```
-
-Danach Passenger neu starten (`touch ~/campmesser/tmp/restart.txt`).
-Ohne diese Werte meldet «Passwort vergessen?» sauber, dass der Versand
-derzeit nicht verfügbar ist – die App läuft trotzdem.
-
 
 ## 6. Ausflugfinder-Anbindung (Ausflüge auf Karte und im Platz-Dossier)
 
