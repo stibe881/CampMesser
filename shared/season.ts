@@ -18,6 +18,48 @@ export interface Season {
 /** Alle zwölf Monate als Zahlen 1–12 (Reihenfolge Januar → Dezember). */
 export const ALL_MONTHS: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
+/**
+ * Die vier Jahreszeiten als Schlüssel. Gebraucht, wo ein Eintrag nicht
+ * einen krummen Monatsbereich hat, sondern schlicht «eine Herbstgeschichte»
+ * ist (Gute-Nacht-Geschichten #241).
+ */
+export type SeasonKey = "spring" | "summer" | "autumn" | "winter";
+
+/** Die vier Jahreszeiten in Kalender-Reihenfolge (Frühling zuerst). */
+export const SEASON_KEYS: SeasonKey[] = [
+  "spring",
+  "summer",
+  "autumn",
+  "winter",
+];
+
+/**
+ * Monatsbereiche der Jahreszeiten – meteorologisch gerechnet (März–Mai,
+ * Juni–August, September–November, Dezember–Februar) und nicht nach den
+ * Sonnenwenden. Das passt besser zu «wonach fühlt es sich draussen an»
+ * und hält die Grenzen auf ganzen Monaten, mit denen `inSeason()` rechnet.
+ */
+export const SEASON_RANGES: Record<SeasonKey, Season> = {
+  spring: { from: 3, to: 5 },
+  summer: { from: 6, to: 8 },
+  autumn: { from: 9, to: 11 },
+  winter: { from: 12, to: 2 },
+};
+
+/** Zu welcher Jahreszeit gehört der Monat (1–12)? Faltet Werte ausserhalb zurück. */
+export function seasonKeyForMonth(month: number): SeasonKey {
+  const normalized = normalizeMonth(month);
+  return (
+    SEASON_KEYS.find(key => inSeason(SEASON_RANGES[key], normalized)) ??
+    "winter"
+  );
+}
+
+/** Jahreszeit des Datums (lokale Zeitzone) – für «passt zu heute»-Filter. */
+export function seasonKeyForDate(date: Date): SeasonKey {
+  return seasonKeyForMonth(date.getMonth() + 1);
+}
+
 /** Monat auf 1–12 zurückfalten (13 → 1, 0 → 12) – auch für Rückwärtsschritte. */
 export function normalizeMonth(month: number): number {
   return ((((Math.round(month) - 1) % 12) + 12) % 12) + 1;

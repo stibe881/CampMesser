@@ -4034,6 +4034,35 @@ export const de = {
     maxCardsReached: (n: number) =>
       `Mehr als ${n} Karten gleichzeitig gehen nicht – entferne zuerst eine.`,
   },
+  bedtimeStories: {
+    title: "Gute-Nacht-Geschichten",
+    subtitle:
+      "Kurze Vorlesegeschichten aus Wald, Berg und Zeltplatz – drei bis fünf Minuten, dann ist Ruhe.",
+    empty:
+      "Zu dieser Auswahl gibt es keine Geschichte – nimm eine andere Jahreszeit oder ein anderes Alter.",
+    seasonFilterLabel: "Jahreszeit:",
+    seasonAll: "Alle",
+    seasonAllYear: "das ganze Jahr",
+    season: {
+      spring: "Frühling",
+      summer: "Sommer",
+      autumn: "Herbst",
+      winter: "Winter",
+    },
+    ageFilterLabel: "Alter:",
+    ageAll: "Alle",
+    ageOption: (age: number) => `${age} Jahre`,
+    ageBadge: (age: number) => `ab ${age} Jahren`,
+    minutesBadge: (minutes: number) => `${minutes} Min. vorlesen`,
+    readBadge: "schon vorgelesen",
+    openAria: (title: string) => `Geschichte ${title} öffnen`,
+    readAloud: "Vorlesen lassen",
+    readAloudStop: "Vorlesen stoppen",
+    readAloudAria: (title: string) => `Geschichte ${title} vorlesen`,
+    readAloudStopAria: (title: string) => `Vorlesen von ${title} stoppen`,
+    markRead: "Als vorgelesen merken",
+    markUnread: "Merker entfernen",
+  },
   huntPrint: {
     docTitle: (title: string) => `${title} – Schnitzeljagd zum Ausdrucken`,
     docTitleFallback: "Schnitzeljagd",

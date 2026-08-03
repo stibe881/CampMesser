@@ -86,6 +86,7 @@ import {
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { useSpeech } from "@/lib/speech";
 import TravelBingo from "@/components/TravelBingo";
+import BedtimeStories from "@/components/BedtimeStories";
 import { cn } from "@/lib/utils";
 
 /** Buchstabe einer Station in der aktiven Sprache ("" = keiner). */
@@ -2225,6 +2226,9 @@ export default function FamilyPage() {
       <div className="mt-8">
         <TravelBingo />
       </div>
+
+      {/* Gute-Nacht-Geschichten – zum Vorlesen im Zelt */}
+      <BedtimeStories />
 
       {/* «Wer spielt?»: Kind wählen, bevor Jagd/Quiz startet */}
       <Dialog

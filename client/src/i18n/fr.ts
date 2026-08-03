@@ -4036,6 +4036,35 @@ export const fr: Translation = {
     maxCardsReached: (n: number) =>
       `Pas plus de ${n} cartes à la fois – supprime-en une d'abord.`,
   },
+  bedtimeStories: {
+    title: "Histoires du soir",
+    subtitle:
+      "De courtes histoires à lire à voix haute – forêt, montagne et camping, trois à cinq minutes, et puis au lit.",
+    empty:
+      "Aucune histoire ne correspond à cette sélection – choisis une autre saison ou un autre âge.",
+    seasonFilterLabel: "Saison :",
+    seasonAll: "Toutes",
+    seasonAllYear: "toute l'année",
+    season: {
+      spring: "Printemps",
+      summer: "Été",
+      autumn: "Automne",
+      winter: "Hiver",
+    },
+    ageFilterLabel: "Âge :",
+    ageAll: "Tous",
+    ageOption: (age: number) => `${age} ans`,
+    ageBadge: (age: number) => `dès ${age} ans`,
+    minutesBadge: (minutes: number) => `${minutes} min de lecture`,
+    readBadge: "déjà lue",
+    openAria: (title: string) => `Ouvrir l'histoire ${title}`,
+    readAloud: "Écouter l'histoire",
+    readAloudStop: "Arrêter la lecture",
+    readAloudAria: (title: string) => `Lire l'histoire ${title} à voix haute`,
+    readAloudStopAria: (title: string) => `Arrêter la lecture de ${title}`,
+    markRead: "Marquer comme lue",
+    markUnread: "Enlever le marqueur",
+  },
   huntPrint: {
     docTitle: (title: string) => `${title} – chasse au trésor à imprimer`,
     docTitleFallback: "Chasse au trésor",
