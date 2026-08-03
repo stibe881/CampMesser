@@ -409,6 +409,16 @@ export const fr: Translation = {
     templateQrText:
       "Fais scanner le code avec l'appareil photo du téléphone – le modèle s'ouvre immédiatement.",
     templateSharedBadge: "partagé",
+    archiveAria: (name: string) => `Archiver la liste de bagages ${name}`,
+    unarchiveAria: (name: string) => `Restaurer la liste de bagages ${name}`,
+    archived: "Liste archivée",
+    unarchived: "Liste restaurée",
+    archiveFailed: "Échec de l'archivage",
+    archiveSectionTitle: (n: number) => `Archives (${n})`,
+    archiveSectionAria: "Ouvrir ou fermer les listes de bagages archivées",
+    archiveHint:
+      "Les listes archivées restent complètes avec toutes leurs entrées – elles n'apparaissent simplement plus dans les listes de sélection.",
+    archivedBadge: "archivée",
   },
   packListDetail: {
     backLabel: "Listes de bagages",

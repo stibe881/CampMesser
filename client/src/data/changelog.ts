@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Packlisten: Alte Listen wanderst du neu ins «Archiv» statt sie zu löschen – sie bleiben komplett erhalten, verschwinden aber aus der Übersicht und den Auswahl-Listen.",
+        "Listes de bagages : range désormais tes anciennes listes dans les « archives » au lieu de les supprimer – elles restent complètes mais disparaissent de l'aperçu et des listes de sélection.",
+        "Liste bagagli: le vecchie liste finiscono ora nell'«archivio» invece di essere eliminate – restano complete ma spariscono dalla panoramica e dagli elenchi di scelta.",
+        "Packing lists: move old lists into the “archive” instead of deleting them – they stay complete but disappear from the overview and from selection lists."
+      ),
+      l4(
         "Meine Reisen: Bei laufenden und vergangenen Reisen führst du neu ein «Reise-Tagebuch» – pro Reisetag ein kurzer Eintrag, bei gemeinsamen Reisen mit «von …»; die Druckansicht nimmt es mit.",
         "Mes voyages : pour les séjours en cours et passés, tu tiens désormais un « journal de voyage » – une entrée par jour, avec « par … » sur les voyages partagés ; la vue d'impression le reprend.",
         "I miei viaggi: per i soggiorni in corso e passati tieni ora un «diario di viaggio» – una voce per ogni giorno, con «di …» nei viaggi condivisi; la stampa lo include.",

@@ -404,6 +404,16 @@ export const it: Translation = {
     templateQrText:
       "Fai scansionare il codice con la fotocamera del telefono – il modello si apre subito.",
     templateSharedBadge: "condiviso",
+    archiveAria: (name: string) => `Archivia la lista bagagli ${name}`,
+    unarchiveAria: (name: string) => `Ripristina la lista bagagli ${name}`,
+    archived: "Lista archiviata",
+    unarchived: "Lista ripristinata",
+    archiveFailed: "Archiviazione non riuscita",
+    archiveSectionTitle: (n: number) => `Archivio (${n})`,
+    archiveSectionAria: "Apri o chiudi le liste bagagli archiviate",
+    archiveHint:
+      "Le liste archiviate restano complete di tutte le voci – semplicemente non compaiono più negli elenchi di scelta.",
+    archivedBadge: "archiviata",
   },
   packListDetail: {
     backLabel: "Liste bagagli",

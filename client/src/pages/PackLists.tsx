@@ -3,10 +3,13 @@ import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
 import { Link, useSearch } from "wouter";
 import {
+  Archive,
+  ArchiveRestore,
   Baby,
   Backpack,
   Bike,
   Bookmark,
+  ChevronDown,
   Copy,
   Link2,
   ListChecks,
@@ -162,6 +165,19 @@ export default function PackListsPage() {
     onSuccess: () => utils.packing.lists.invalidate(),
   });
 
+  /** Archiv-Abschnitt ist bewusst standardmässig eingeklappt (#194). */
+  const [archiveOpen, setArchiveOpen] = useState(false);
+
+  const archiveMutation = trpc.packing.setArchived.useMutation({
+    onSuccess: (_data, vars) => {
+      utils.packing.lists.invalidate();
+      toast.success(
+        vars.archived ? t.packLists.archived : t.packLists.unarchived
+      );
+    },
+    onError: () => toast.error(t.packLists.archiveFailed),
+  });
+
   const deleteTemplateMutation = trpc.packing.deleteTemplate.useMutation({
     onSuccess: () => {
       utils.packing.listTemplates.invalidate();
@@ -276,6 +292,105 @@ export default function PackListsPage() {
   const templates = templatesQuery.data ?? [];
   const selectedTemplate =
     templates.find(tpl => tpl.id === templateChoice) ?? null;
+
+  // Archivierte Listen (#194) erscheinen nur im eigenen Abschnitt unten und
+  // NICHT in Auswahl-Listen (hier: Ziel-Liste der Familien-Checklisten).
+  const allLists = listsQuery.data ?? [];
+  const activeLists = allLists.filter(list => list.archivedAt == null);
+  const archivedLists = allLists.filter(list => list.archivedAt != null);
+
+  /** Eine Listen-Karte – archivierte bekommen «Wiederherstellen» statt «Archivieren». */
+  const renderListCard = (list: (typeof allLists)[number]) => {
+    const archived = list.archivedAt != null;
+    const Icon = scenarioIcons[list.scenario] ?? ListPlus;
+    const scenarioOfList = packScenarios.find(s => s.id === list.scenario);
+    const scenarioLabel = scenarioOfList
+      ? pick(scenarioOfList.label, lang)
+      : pick(packScenarios.find(s => s.id === "custom")!.label, lang);
+    return (
+      <div
+        key={list.id}
+        className={cn(
+          "group relative flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/40 hover:shadow-md",
+          archived && "opacity-80"
+        )}
+      >
+        <Link
+          href={`/packlisten/${list.id}`}
+          className="absolute inset-0"
+          aria-label={t.packLists.openAria(list.name)}
+        />
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <div className="flex-1">
+          <p className="font-semibold">{list.name}</p>
+          <p className="text-sm text-muted-foreground">{scenarioLabel}</p>
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            {list.weightBudgetGrams != null && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
+                <Scale className="h-3 w-3" aria-hidden="true" />
+                {t.packLists.budgetBadge(
+                  formatGrams(list.weightBudgetGrams, lang)
+                )}
+              </span>
+            )}
+            {archived && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                <Archive className="h-3 w-3" aria-hidden="true" />
+                {t.packLists.archivedBadge}
+              </span>
+            )}
+          </div>
+        </div>
+        {!archived && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative z-10 text-muted-foreground hover:text-primary"
+            disabled={duplicateMutation.isPending}
+            onClick={() => duplicateMutation.mutate({ id: list.id, lang })}
+            aria-label={t.packLists.duplicateAria(list.name)}
+          >
+            <Copy className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative z-10 text-muted-foreground hover:text-primary"
+          disabled={archiveMutation.isPending}
+          onClick={() =>
+            archiveMutation.mutate({ listId: list.id, archived: !archived })
+          }
+          aria-label={
+            archived
+              ? t.packLists.unarchiveAria(list.name)
+              : t.packLists.archiveAria(list.name)
+          }
+        >
+          {archived ? (
+            <ArchiveRestore className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <Archive className="h-4 w-4" aria-hidden="true" />
+          )}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative z-10 text-muted-foreground hover:text-destructive"
+          onClick={() => {
+            if (confirm(t.packLists.deleteConfirm(list.name))) {
+              deleteMutation.mutate({ id: list.id });
+            }
+          }}
+          aria-label={t.packLists.deleteAria(list.name)}
+        >
+          <Trash2 className="h-4 w-4" aria-hidden="true" />
+        </Button>
+      </div>
+    );
+  };
 
   return (
     <div className="container py-6">
@@ -540,71 +655,9 @@ export default function PackListsPage() {
             aria-label={t.common.loading}
           />
         </div>
-      ) : listsQuery.data && listsQuery.data.length > 0 ? (
+      ) : activeLists.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2">
-          {listsQuery.data.map(list => {
-            const Icon = scenarioIcons[list.scenario] ?? ListPlus;
-            const scenarioOfList = packScenarios.find(
-              s => s.id === list.scenario
-            );
-            const scenarioLabel = scenarioOfList
-              ? pick(scenarioOfList.label, lang)
-              : pick(packScenarios.find(s => s.id === "custom")!.label, lang);
-            return (
-              <div
-                key={list.id}
-                className="group relative flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/40 hover:shadow-md"
-              >
-                <Link
-                  href={`/packlisten/${list.id}`}
-                  className="absolute inset-0"
-                  aria-label={t.packLists.openAria(list.name)}
-                />
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <div className="flex-1">
-                  <p className="font-semibold">{list.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {scenarioLabel}
-                  </p>
-                  {list.weightBudgetGrams != null && (
-                    <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
-                      <Scale className="h-3 w-3" aria-hidden="true" />
-                      {t.packLists.budgetBadge(
-                        formatGrams(list.weightBudgetGrams, lang)
-                      )}
-                    </span>
-                  )}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative z-10 text-muted-foreground hover:text-primary"
-                  disabled={duplicateMutation.isPending}
-                  onClick={() =>
-                    duplicateMutation.mutate({ id: list.id, lang })
-                  }
-                  aria-label={t.packLists.duplicateAria(list.name)}
-                >
-                  <Copy className="h-4 w-4" aria-hidden="true" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative z-10 text-muted-foreground hover:text-destructive"
-                  onClick={() => {
-                    if (confirm(t.packLists.deleteConfirm(list.name))) {
-                      deleteMutation.mutate({ id: list.id });
-                    }
-                  }}
-                  aria-label={t.packLists.deleteAria(list.name)}
-                >
-                  <Trash2 className="h-4 w-4" aria-hidden="true" />
-                </Button>
-              </div>
-            );
-          })}
+          {activeLists.map(renderListCard)}
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-border p-10 text-center">
@@ -616,6 +669,44 @@ export default function PackListsPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             {t.packLists.emptyText}
           </p>
+        </div>
+      )}
+
+      {/* Archiv (#194): standardmässig eingeklappt, damit es nicht stört */}
+      {archivedLists.length > 0 && (
+        <div className="mt-4 rounded-xl border border-border bg-card">
+          <button
+            type="button"
+            onClick={() => setArchiveOpen(o => !o)}
+            aria-expanded={archiveOpen}
+            aria-label={t.packLists.archiveSectionAria}
+            className="flex w-full items-center gap-2 px-4 py-3 text-sm"
+          >
+            <Archive
+              className="h-4 w-4 shrink-0 text-primary"
+              aria-hidden="true"
+            />
+            <span className="min-w-0 flex-1 truncate text-left font-medium">
+              {t.packLists.archiveSectionTitle(archivedLists.length)}
+            </span>
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                archiveOpen && "rotate-180"
+              )}
+              aria-hidden="true"
+            />
+          </button>
+          {archiveOpen && (
+            <div className="border-t border-border px-4 py-3">
+              <p className="mb-3 text-xs text-muted-foreground">
+                {t.packLists.archiveHint}
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {archivedLists.map(renderListCard)}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -687,9 +778,9 @@ export default function PackListsPage() {
                 : ""}
             </DialogDescription>
           </DialogHeader>
-          {listsQuery.data && listsQuery.data.length > 0 ? (
+          {activeLists.length > 0 ? (
             <div className="space-y-2">
-              {listsQuery.data.map(list => {
+              {activeLists.map(list => {
                 const Icon = scenarioIcons[list.scenario] ?? ListPlus;
                 return (
                   <button

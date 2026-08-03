@@ -410,6 +410,16 @@ export const de = {
     templateQrText:
       "Lass andere den Code mit der Handy-Kamera scannen – die Vorlage öffnet sich sofort.",
     templateSharedBadge: "geteilt",
+    archiveAria: (name: string) => `Packliste ${name} archivieren`,
+    unarchiveAria: (name: string) => `Packliste ${name} wiederherstellen`,
+    archived: "Liste archiviert",
+    unarchived: "Liste wiederhergestellt",
+    archiveFailed: "Archivieren fehlgeschlagen",
+    archiveSectionTitle: (n: number) => `Archiv (${n})`,
+    archiveSectionAria: "Archivierte Packlisten auf- oder zuklappen",
+    archiveHint:
+      "Archivierte Listen bleiben mit allen Einträgen erhalten – sie tauchen nur nicht mehr in den Auswahl-Listen auf.",
+    archivedBadge: "archiviert",
   },
   packListDetail: {
     backLabel: "Packlisten",

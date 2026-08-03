@@ -767,6 +767,28 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deletePackList(input.id, ctx.user.id)),
     /**
+     * Liste archivieren oder wieder hervorholen (#194): archivierte Listen
+     * bleiben samt Einträgen erhalten, verschwinden in der Übersicht aber
+     * ins eingeklappte Archiv und aus allen Auswahl-Listen.
+     */
+    setArchived: protectedProcedure
+      .input(
+        z.object({
+          listId: z.number().int().positive(),
+          archived: z.boolean(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const list = await db.getPackList(input.listId, ctx.user.id);
+        if (!list)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Liste nicht gefunden",
+          });
+        await db.setPackListArchived(input.listId, ctx.user.id, input.archived);
+        return { success: true } as const;
+      }),
+    /**
      * Leichter Pack-Fortschritt einer Liste (für den Trip-Planer) – auch für
      * Mitreisende einer Reise mit verknüpfter Liste.
      */

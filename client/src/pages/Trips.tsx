@@ -2619,11 +2619,20 @@ export default function TripsPage() {
                       <SelectItem value="keine">
                         {t.trips.noPackList}
                       </SelectItem>
-                      {(listsQuery.data ?? []).map(l => (
-                        <SelectItem key={l.id} value={String(l.id)}>
-                          {l.name}
-                        </SelectItem>
-                      ))}
+                      {/* Archivierte Packlisten (#194) tauchen in der
+                          Auswahl nicht auf – bereits verknüpfte bleiben
+                          aber wählbar, damit nichts stillschweigend abfällt */}
+                      {(listsQuery.data ?? [])
+                        .filter(
+                          l =>
+                            l.archivedAt == null ||
+                            String(l.id) === packListChoice
+                        )
+                        .map(l => (
+                          <SelectItem key={l.id} value={String(l.id)}>
+                            {l.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>

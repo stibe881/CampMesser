@@ -89,6 +89,16 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     expect(listId).toBeTruthy();
     const lists = await authed.packing.lists();
     expect(lists.some(l => l.name === "CI-Liste")).toBe(true);
+    // Archivieren (#194): archivedAt wird gesetzt und lässt sich zurücknehmen
+    expect(lists.find(l => l.id === listId)?.archivedAt).toBeNull();
+    await authed.packing.setArchived({ listId, archived: true });
+    expect(
+      (await authed.packing.lists()).find(l => l.id === listId)?.archivedAt
+    ).toBeInstanceOf(Date);
+    await authed.packing.setArchived({ listId, archived: false });
+    expect(
+      (await authed.packing.lists()).find(l => l.id === listId)?.archivedAt
+    ).toBeNull();
 
     // Eigene Vorlage aus der Liste einfrieren und daraus eine neue Liste bauen
     const { templateId } = await authed.packing.saveAsTemplate({

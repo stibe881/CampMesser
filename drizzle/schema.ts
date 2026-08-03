@@ -95,6 +95,12 @@ export const packLists = mysqlTable(
     shareToken: varchar("shareToken", { length: 32 }),
     /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
     shareExpiresAt: timestamp("shareExpiresAt"),
+    /**
+     * Archiviert seit (#194); null = aktive Liste. Archivierte Listen bleiben
+     * mit allen Einträgen erhalten, erscheinen in der Übersicht aber nur im
+     * eingeklappten Archiv und tauchen in Auswahl-Listen nicht mehr auf.
+     */
+    archivedAt: timestamp("archivedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },

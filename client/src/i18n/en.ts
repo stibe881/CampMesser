@@ -394,6 +394,16 @@ export const en: Translation = {
     templateQrText:
       "Let others scan the code with their phone camera – the template opens immediately.",
     templateSharedBadge: "shared",
+    archiveAria: (name: string) => `Archive packing list ${name}`,
+    unarchiveAria: (name: string) => `Restore packing list ${name}`,
+    archived: "List archived",
+    unarchived: "List restored",
+    archiveFailed: "Archiving failed",
+    archiveSectionTitle: (n: number) => `Archive (${n})`,
+    archiveSectionAria: "Expand or collapse archived packing lists",
+    archiveHint:
+      "Archived lists keep all their items – they simply no longer appear in selection lists.",
+    archivedBadge: "archived",
   },
   packListDetail: {
     backLabel: "Packing lists",

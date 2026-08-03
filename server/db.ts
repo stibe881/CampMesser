@@ -216,6 +216,22 @@ export async function getPackItem(id: number) {
   return rows[0];
 }
 
+/**
+ * Liste archivieren (archivedAt = jetzt) oder wieder aktivieren (null) –
+ * die Einträge bleiben unangetastet erhalten (#194).
+ */
+export async function setPackListArchived(
+  id: number,
+  userId: number,
+  archived: boolean
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(packLists)
+    .set({ archivedAt: archived ? new Date() : null })
+    .where(and(eq(packLists.id, id), eq(packLists.userId, userId)));
+}
+
 export async function deletePackList(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db.delete(packItems).where(eq(packItems.listId, id));
