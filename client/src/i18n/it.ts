@@ -47,6 +47,8 @@ export const it: Translation = {
     },
   },
   home: {
+    recentSearches: "Ricerche recenti:",
+    recentSearchesClear: "cancella",
     heroImageAlt:
       "Tenda con pannelli solari e falò davanti alle Alpi svizzere al tramonto",
     heroKicker: "Il tuo coltellino svizzero per il campeggio in tenda",

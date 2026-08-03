@@ -95,6 +95,8 @@ export const de = {
         ? "1 fällige Pflege-Aufgabe – Inventar öffnen"
         : `${n} fällige Pflege-Aufgaben – Inventar öffnen`,
     searchPlaceholder: "Wissen durchsuchen: Zeckenbiss, Mastwurf, Rezepte …",
+    recentSearches: "Kürzlich gesucht:",
+    recentSearchesClear: "löschen",
     searchAria: "Wissensmodule durchsuchen",
     searchNoResults:
       "Nichts gefunden – probiere einen anderen Begriff (z. B. «Verbrennung» oder «Knoten»).",

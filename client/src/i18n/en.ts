@@ -92,6 +92,8 @@ export const en: Translation = {
         ? "1 care task due – open inventory"
         : `${n} care tasks due – open inventory`,
     searchPlaceholder: "Search knowledge: tick bite, clove hitch, recipes …",
+    recentSearches: "Recent searches:",
+    recentSearchesClear: "clear",
     searchAria: "Search the knowledge modules",
     searchNoResults:
       "Nothing found – try a different term (e.g. “burn” or “knot”).",

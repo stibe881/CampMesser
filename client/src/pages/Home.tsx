@@ -814,12 +814,53 @@ function GearCareHint() {
  * erst geladen, wenn das Suchfeld benutzt wird (enabled-Flag), nicht beim
  * Seitenaufbau.
  */
+const RECENT_SEARCHES_KEY = "campmesser.recentSearches";
+
+function loadRecentSearches(): string[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) ?? "[]");
+    if (Array.isArray(raw)) {
+      return raw.filter(v => typeof v === "string" && v.trim()).slice(0, 8);
+    }
+  } catch {
+    /* egal */
+  }
+  return [];
+}
+
 function KnowledgeSearch() {
   const { lang, t } = useI18n();
   const { isAuthenticated } = useAuth();
   const [query, setQuery] = useState("");
   const [activated, setActivated] = useState(false);
   const [tentTargets, setTentTargets] = useState<TentFinderTarget[]>([]);
+  const [focused, setFocused] = useState(false);
+  const [recent, setRecent] = useState<string[]>([]);
+
+  /** Suchbegriff beim Klick auf ein Resultat in den Verlauf aufnehmen. */
+  const rememberSearch = () => {
+    const term = query.trim();
+    if (term.length < 2) return;
+    const next = [
+      term,
+      ...recent.filter(r => r.toLowerCase() !== term.toLowerCase()),
+    ].slice(0, 8);
+    setRecent(next);
+    try {
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
+    } catch {
+      /* egal */
+    }
+  };
+
+  const clearRecent = () => {
+    setRecent([]);
+    try {
+      localStorage.removeItem(RECENT_SEARCHES_KEY);
+    } catch {
+      /* egal */
+    }
+  };
 
   const enabled = isAuthenticated && activated;
   const queryOpts = { enabled, staleTime: 60_000 } as const;
@@ -833,6 +874,7 @@ function KnowledgeSearch() {
   const activate = () => {
     if (activated) return;
     setActivated(true);
+    setRecent(loadRecentSearches());
     try {
       setTentTargets(
         sanitizeTargets(JSON.parse(localStorage.getItem(TARGETS_KEY) ?? "[]"))
@@ -872,7 +914,14 @@ function KnowledgeSearch() {
         <input
           type="search"
           value={query}
-          onFocus={activate}
+          onFocus={() => {
+            activate();
+            setFocused(true);
+          }}
+          onBlur={() => {
+            // Verzögert, damit Klicks auf die Verlaufs-Chips noch greifen
+            window.setTimeout(() => setFocused(false), 150);
+          }}
           onChange={e => {
             activate();
             setQuery(e.target.value);
@@ -882,6 +931,31 @@ function KnowledgeSearch() {
           className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
         />
       </div>
+      {!hasQuery && focused && recent.length > 0 && (
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          <span className="text-xs text-muted-foreground">
+            {t.home.recentSearches}
+          </span>
+          {recent.map(term => (
+            <button
+              key={term}
+              type="button"
+              onClick={() => setQuery(term)}
+              className="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {term}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={clearRecent}
+            aria-label={t.home.recentSearchesClear}
+            className="rounded-full px-1.5 py-1 text-xs text-muted-foreground/70 underline-offset-2 hover:underline"
+          >
+            {t.home.recentSearchesClear}
+          </button>
+        </div>
+      )}
       {hasQuery && (
         <div className="mt-2 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           {combined.length === 0 ? (
@@ -894,6 +968,7 @@ function KnowledgeSearch() {
                 <li key={r.id}>
                   <Link
                     href={r.path}
+                    onClick={rememberSearch}
                     className="flex items-start gap-3 px-4 py-2.5 transition-colors hover:bg-accent/50"
                   >
                     <span className="mt-0.5 shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-secondary-foreground">

@@ -47,6 +47,8 @@ export const fr: Translation = {
     },
   },
   home: {
+    recentSearches: "Recherches récentes :",
+    recentSearchesClear: "effacer",
     heroImageAlt:
       "Tente avec panneaux solaires et feu de camp devant les Alpes suisses au coucher du soleil",
     heroKicker: "Ton couteau suisse pour le camping sous tente",
