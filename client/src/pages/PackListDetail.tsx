@@ -449,10 +449,42 @@ export default function PackListDetailPage() {
     return extras.sort((a, b) => a.localeCompare(b, LOCALE_TAGS[lang]));
   }, [query.data?.items, persons, lang]);
 
+  /** Eigener Anzeigename (Name, sonst E-Mail) – für die «Du»-Markierung. */
+  const ownName = (user?.name || user?.email || "").trim();
+
+  /**
+   * Der eigene Personen-Bereich, falls vorhanden (Namensvergleich ohne
+   * Gross-/Kleinschreibung, weil Namen frei getippt werden können).
+   */
+  const ownPerson = useMemo(() => {
+    if (!ownName) return null;
+    return persons.find(p => p.toLowerCase() === ownName.toLowerCase()) ?? null;
+  }, [persons, ownName]);
+
+  /** Anzeige-Reihenfolge: der eigene Bereich steht direkt nach «Allgemein». */
+  const orderedPersons = useMemo(
+    () =>
+      ownPerson
+        ? [ownPerson, ...persons.filter(p => p !== ownPerson)]
+        : persons,
+    [persons, ownPerson]
+  );
+
+  /**
+   * Mitreisende der verknüpften Reise, die noch keinen Bereich haben –
+   * Vorschläge im Dialog «Personen verwalten» (nur bei geteilten Reisen).
+   */
+  const memberSuggestions = useMemo(() => {
+    const known = persons.map(p => p.toLowerCase());
+    return (query.data?.tripMemberNames ?? []).filter(
+      name => !known.includes(name.toLowerCase())
+    );
+  }, [query.data?.tripMemberNames, persons]);
+
   // Vorschläge fürs Zuweisen: verwaltete Personen zuerst, dann Alt-Zuordnungen
   const suggestionNames = useMemo(
-    () => [...persons, ...extraAssignees],
-    [persons, extraAssignees]
+    () => [...orderedPersons, ...extraAssignees],
+    [orderedPersons, extraAssignees]
   );
 
   const generalCategory = t.packListDetail.generalCategory;
@@ -487,7 +519,11 @@ export default function PackListDetailPage() {
    */
   const sections = useMemo(() => {
     const items = query.data?.items ?? [];
-    const defs: (string | null)[] = [null, ...persons, ...extraAssignees];
+    const defs: (string | null)[] = [
+      null,
+      ...orderedPersons,
+      ...extraAssignees,
+    ];
     return defs.map(person => {
       const sectionItems = items.filter(i =>
         person === null
@@ -507,7 +543,7 @@ export default function PackListDetailPage() {
         groups: Array.from(map.entries()),
       };
     });
-  }, [query.data?.items, persons, extraAssignees, generalCategory]);
+  }, [query.data?.items, orderedPersons, extraAssignees, generalCategory]);
 
   const reorderMutation = trpc.packing.reorderItems.useMutation({
     onMutate: async input => {
@@ -968,6 +1004,11 @@ export default function PackListDetailPage() {
                 )}
                 {sectionLabel}
               </h2>
+              {section.person !== null && section.person === ownPerson && (
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.7rem] font-medium text-primary">
+                  {t.packListDetail.ownPersonBadge}
+                </span>
+              )}
               {section.items.length > 0 && (
                 <span className="text-xs text-muted-foreground">
                   {t.packListDetail.sectionProgress(
@@ -1344,6 +1385,46 @@ export default function PackListDetailPage() {
             <p className="text-xs text-muted-foreground">
               {t.packListDetail.personsMaxHint}
             </p>
+          )}
+          {/* Mitreisende der verknüpften Reise als Ein-Klick-Vorschläge */}
+          {isSharedTripList && memberSuggestions.length > 0 && (
+            <div className="rounded-lg border border-dashed border-border p-3">
+              <p className="mb-1 flex items-center gap-1.5 text-sm font-medium">
+                <Users className="h-4 w-4 text-primary" aria-hidden="true" />
+                {t.packListDetail.tripMembersTitle}
+              </p>
+              <p className="mb-2 text-xs text-muted-foreground">
+                {t.packListDetail.tripMembersHint}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {memberSuggestions.map(name => (
+                  <Button
+                    key={name}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    disabled={
+                      setPersonsMutation.isPending ||
+                      persons.length >= MAX_PERSONS
+                    }
+                    aria-label={t.packListDetail.addTripMemberAria(name)}
+                    onClick={() =>
+                      setPersonsMutation.mutate({
+                        listId,
+                        persons: [...persons, name],
+                      })
+                    }
+                  >
+                    <UserRoundPlus
+                      className="mr-1 h-3.5 w-3.5"
+                      aria-hidden="true"
+                    />
+                    {name}
+                  </Button>
+                ))}
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>

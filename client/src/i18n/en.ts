@@ -451,6 +451,11 @@ export const en: Translation = {
       `Really remove the person "${name}"? Their items move back to "General".`,
     personsSaveFailed: "The people could not be saved",
     personsMaxHint: "At most 10 people per list.",
+    tripMembersTitle: "Add travel companions",
+    tripMembersHint:
+      "This list is linked to a shared trip – tap a name to create a section for them.",
+    addTripMemberAria: (name: string) => `Add ${name} as a person to the list`,
+    ownPersonBadge: "You",
     printButton: "Print",
     saveTemplateButton: "Save as template",
     saveTemplateAria: (name: string) => `Save the list ${name} as a template`,

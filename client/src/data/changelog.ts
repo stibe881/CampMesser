@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Packliste: gehört sie zu einer geteilten Reise, fügst du deine Mitreisenden mit einem Tipp als Personen-Bereich hinzu – dein eigener Bereich steht zuoberst.",
+        "Liste de bagages : si elle appartient à un séjour partagé, tu ajoutes tes compagnons de voyage comme section en un clic – ta propre section reste tout en haut.",
+        "Lista bagagli: se appartiene a un viaggio condiviso, aggiungi i tuoi compagni come sezione con un tocco – la tua sezione resta in cima.",
+        "Packing list: if it belongs to a shared trip, add your travel companions as a section with one tap – your own section stays at the top."
+      ),
+      l4(
         "Pollenflug: markiere deine Allergie-Arten – sie stehen zuoberst, auf Wunsch zeigt die App nur sie.",
         "Pollens : marque les types qui te font réagir – ils apparaissent en premier, et l'app peut n'afficher qu'eux.",
         "Pollini: segna i tipi a cui sei allergico – compaiono per primi e, se vuoi, l'app mostra solo quelli.",

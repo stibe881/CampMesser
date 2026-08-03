@@ -966,7 +966,9 @@ export const appRouter = router({
      * Liste samt Einträgen – auch für Mitreisende einer verknüpften Reise.
      * Bei Listen an GEMEINSAMEN Reisen (sharedTrip) wird pro Eintrag der
      * Anzeigename von updatedByUserId mitgeliefert («Zuletzt geändert von»);
-     * private Listen sparen sich die Auflösung.
+     * private Listen sparen sich die Auflösung. Zusätzlich liefern geteilte
+     * Listen die Anzeigenamen aller Mitreisenden (Besitzer:in zuerst) –
+     * daraus baut der Client die Vorschläge «Mitreisende hinzufügen».
      */
     items: protectedProcedure
       .input(z.object({ listId: z.number() }))
@@ -979,22 +981,43 @@ export const appRouter = router({
           return {
             list: null,
             sharedTrip: false,
+            tripMemberNames: [] as string[],
             items: [] as ItemWithEditor[],
           };
         }
         const items = await db.getPackItems(input.listId);
-        const sharedTrip =
-          (await db.getListSharedTripId(input.listId, list.userId)) != null;
+        const sharedTripId = await db.getListSharedTripId(
+          input.listId,
+          list.userId
+        );
+        const sharedTrip = sharedTripId != null;
+        // Bei geteilten Reisen brauchen wir die Konten der Mitreisenden
+        // ohnehin – Besitzer:in zuerst, danach in Einladungs-Reihenfolge.
+        const memberIds =
+          sharedTripId != null
+            ? [
+                list.userId,
+                ...(await db.getTripMembersWithUsers(sharedTripId)).map(
+                  m => m.userId
+                ),
+              ]
+            : [];
         const names = sharedTrip
-          ? await db.getUserDisplayNames(
-              items
+          ? await db.getUserDisplayNames([
+              ...items
                 .map(i => i.updatedByUserId)
-                .filter((id): id is number => id != null)
-            )
+                .filter((id): id is number => id != null),
+              ...memberIds,
+            ])
           : new Map<number, string>();
         return {
           list,
           sharedTrip,
+          // normalizePersons trimmt, kürzt auf 80 Zeichen und entfernt
+          // Duplikate – die Vorschläge passen damit 1:1 zu setPersons.
+          tripMemberNames: normalizePersons(
+            memberIds.map(id => names.get(id) ?? "")
+          ),
           items: items.map<ItemWithEditor>(item => ({
             ...item,
             updatedByName:

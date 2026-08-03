@@ -467,6 +467,12 @@ export const fr: Translation = {
       `Vraiment retirer la personne « ${name} » ? Ses entrées retournent sous « Général ».`,
     personsSaveFailed: "Les personnes n'ont pas pu être enregistrées",
     personsMaxHint: "Au maximum 10 personnes par liste.",
+    tripMembersTitle: "Ajouter des compagnons de voyage",
+    tripMembersHint:
+      "Cette liste est reliée à un séjour partagé – touche un nom pour lui créer une section.",
+    addTripMemberAria: (name: string) =>
+      `Ajouter ${name} comme personne à la liste`,
+    ownPersonBadge: "Toi",
     printButton: "Imprimer",
     saveTemplateButton: "Enregistrer comme modèle",
     saveTemplateAria: (name: string) =>

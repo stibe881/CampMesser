@@ -472,6 +472,12 @@ export const de = {
       `Person «${name}» wirklich entfernen? Ihre Einträge wandern zurück zu «Allgemein».`,
     personsSaveFailed: "Personen konnten nicht gespeichert werden",
     personsMaxHint: "Höchstens 10 Personen pro Liste.",
+    tripMembersTitle: "Mitreisende hinzufügen",
+    tripMembersHint:
+      "Diese Liste hängt an einer geteilten Reise – tippe auf einen Namen, um dafür einen Bereich anzulegen.",
+    addTripMemberAria: (name: string) =>
+      `${name} als Person zur Liste hinzufügen`,
+    ownPersonBadge: "Du",
     printButton: "Drucken",
     saveTemplateButton: "Als Vorlage speichern",
     saveTemplateAria: (name: string) => `Liste ${name} als Vorlage speichern`,

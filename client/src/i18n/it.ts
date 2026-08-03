@@ -461,6 +461,12 @@ export const it: Translation = {
       `Rimuovere davvero la persona «${name}»? Le sue voci tornano sotto «Generale».`,
     personsSaveFailed: "Impossibile salvare le persone",
     personsMaxHint: "Al massimo 10 persone per lista.",
+    tripMembersTitle: "Aggiungi compagni di viaggio",
+    tripMembersHint:
+      "Questa lista è collegata a un viaggio condiviso: tocca un nome per creargli una sezione.",
+    addTripMemberAria: (name: string) =>
+      `Aggiungi ${name} come persona alla lista`,
+    ownPersonBadge: "Tu",
     printButton: "Stampa",
     saveTemplateButton: "Salva come modello",
     saveTemplateAria: (name: string) => `Salvare la lista ${name} come modello`,
