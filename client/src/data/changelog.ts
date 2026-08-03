@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Familien-Modus: das neue «Natur-Quiz» würfelt seine Fragen bei jedem Start frisch aus dem Natur-Lexikon – auch im Duell spielbar.",
+        "Mode famille : le nouveau « quiz nature » tire ses questions du lexique nature à chaque démarrage – jouable aussi en duel.",
+        "Modalità famiglia: il nuovo «quiz natura» estrae le sue domande dal lessico della natura a ogni avvio – giocabile anche in duello.",
+        "Family mode: the new “nature quiz” draws fresh questions from the nature guide every time you start it – also playable as a duel."
+      ),
+      l4(
         "Natur: der Mondkalender hat neu eine Monatsansicht mit Phasen-Symbol pro Tag, hervorgehobenen Neu- und Vollmonden und markierten Sternschnuppen-Nächten.",
         "Nature : le calendrier lunaire propose désormais une vue mensuelle avec un symbole de phase par jour, les nouvelles et pleines lunes mises en évidence et les nuits d'étoiles filantes signalées.",
         "Natura: il calendario lunare ha ora una vista mensile con il simbolo della fase per ogni giorno, luna nuova e piena in evidenza e le notti di stelle cadenti segnalate.",

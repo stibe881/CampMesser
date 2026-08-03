@@ -2557,6 +2557,11 @@ export const fr: Translation = {
     quizzesSubtitlePrefix: "Apprendre en jouant – en complément du ",
     quizzesSubtitleLink: "lexique Explorateur nature",
     quizzesSubtitleSuffix: ".",
+    lexiconQuizTitle: "Quiz nature",
+    lexiconQuizAgeHint: "dès 7 ans env.",
+    lexiconQuizBadge: "issu du lexique",
+    lexiconQuizHint:
+      "Recomposé à partir du lexique nature à chaque démarrage – jouable aussi en duel.",
     startQuizAria: (title: string) => `Démarrer le quiz ${title}`,
     questionCount: (n: number) => `${n} questions`,
     progressAria: (done: number, total: number) =>

@@ -2564,6 +2564,11 @@ export const de = {
     quizzesSubtitlePrefix: "Spielerisch lernen – passend zum ",
     quizzesSubtitleLink: "Natur-Entdecker-Lexikon",
     quizzesSubtitleSuffix: ".",
+    lexiconQuizTitle: "Natur-Quiz",
+    lexiconQuizAgeHint: "ab ca. 7 Jahren",
+    lexiconQuizBadge: "aus dem Lexikon",
+    lexiconQuizHint:
+      "Wird bei jedem Start neu aus dem Natur-Lexikon zusammengestellt – auch im Duell spielbar.",
     startQuizAria: (title: string) => `Quiz ${title} starten`,
     questionCount: (n: number) => `${n} Fragen`,
     progressAria: (done: number, total: number) =>

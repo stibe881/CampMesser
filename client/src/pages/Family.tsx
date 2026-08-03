@@ -6,6 +6,7 @@ import {
   Check,
   Compass as CompassIcon,
   Gift,
+  Leaf,
   Lightbulb,
   Link2,
   Map,
@@ -64,6 +65,8 @@ import {
   customQuizToNatureQuiz,
   type CustomQuizRow,
 } from "@/lib/customQuizzes";
+import { natureEntries } from "@/data/nature";
+import { buildNatureQuiz, NATURE_QUIZ_QUESTIONS } from "@/lib/natureQuiz";
 import {
   duelFinished,
   duelPlayer,
@@ -88,6 +91,9 @@ const stationLetter = (station: HuntStation, lang: Language): string =>
 
 /** Zuletzt gewähltes Kind fürs «Wer spielt?»-Vorauswählen. */
 const ACTIVE_CHILD_KEY = "campmesser.activeChild";
+
+/** Player-Id des automatisch erzeugten Natur-Lexikon-Quiz. */
+const NATURE_LEXICON_QUIZ_ID = "natur-lexikon-quiz";
 
 function loadStoredActiveChild(): number | null {
   try {
@@ -1796,6 +1802,21 @@ export default function FamilyPage() {
     }
   };
 
+  /**
+   * Natur-Quiz: wird bei jedem Start frisch aus dem Lexikon gewürfelt
+   * (Fragen und Optionen sind darum jedes Mal neu). Danach läuft es über
+   * denselben Quiz-Player wie die eingebauten Quizze – inklusive Duell,
+   * Zähler und Abzeichen.
+   */
+  const startNatureLexiconQuiz = () => {
+    startQuiz({
+      id: NATURE_LEXICON_QUIZ_ID,
+      title: t.family.lexiconQuizTitle,
+      ageHint: t.family.lexiconQuizAgeHint,
+      questions: buildNatureQuiz(natureEntries, lang),
+    });
+  };
+
   /** Auswahl im «Wer spielt?»-Dialog: Kind merken und Aktivität starten. */
   const chooseChild = (childId: number | null) => {
     setActiveChildId(childId);
@@ -2079,6 +2100,28 @@ export default function FamilyPage() {
             </span>
           </button>
         ))}
+
+        {/* Natur-Quiz: bei jedem Start frisch aus dem Lexikon erzeugt */}
+        <button
+          type="button"
+          onClick={startNatureLexiconQuiz}
+          className="flex flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
+          aria-label={t.family.startQuizAria(t.family.lexiconQuizTitle)}
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
+            <Leaf className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <span className="font-semibold">{t.family.lexiconQuizTitle}</span>
+          <span className="flex flex-wrap gap-1.5">
+            <Badge variant="secondary">
+              {t.family.questionCount(NATURE_QUIZ_QUESTIONS)}
+            </Badge>
+            <Badge variant="outline">{t.family.lexiconQuizBadge}</Badge>
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {t.family.lexiconQuizHint}
+          </span>
+        </button>
 
         {/* Eigene Quizze: spielbar über denselben Player, mit «Eigenes»-Badge */}
         {isAuthenticated &&
