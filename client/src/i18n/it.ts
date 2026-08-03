@@ -2936,15 +2936,23 @@ export const it: Translation = {
     emptyTitle: "Frigo box ancora vuoto",
     emptyText:
       "Registra quello che hai con te – ti suggeriamo le ricette adatte.",
-    suggestionsTitle: "Ecco cosa puoi cucinarci",
+    suggestionsTitle: "Usa gli avanzi",
     suggestionsSubtitle:
-      "Ordinato in base a quante delle tue scorte compaiono nella ricetta.",
-    matchCount: (n: number) =>
-      `${n} ${n === 1 ? "ingrediente disponibile" : "ingredienti disponibili"}`,
+      "Cosa puoi cucinare con quello che c'è ancora – prima le ricette con scorte che scadono presto.",
+    haveCount: (have: number, total: number) =>
+      `hai ${have} ingredienti su ${total}`,
+    urgentInRecipe: (n: number) =>
+      n === 1 ? "1 scorta scade presto" : `${n} scorte scadono presto`,
+    havePrefix: "Hai:",
+    missingPrefix: "Manca:",
+    missingNone: "C'è tutto – puoi iniziare subito.",
+    addMissing: "Quel che manca nella lista della spesa",
+    addMissingAria: (name: string) =>
+      `Metti gli ingredienti mancanti di ${name} nella lista della spesa`,
+    openRecipe: "Apri la ricetta",
     minutes: (n: number) => `${n} min`,
     servings: (n: number) => `${n} porzioni`,
     onePotSuffix: " · one-pot",
-    ingredientsPrefix: "Ingredienti:",
     bookPrefix: "Trovi tutte le istruzioni nel ",
     bookLink: "ricettario Campfire",
     bookSuffix: ".",

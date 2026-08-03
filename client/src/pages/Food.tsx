@@ -40,12 +40,8 @@ import { recipes } from "@/data/recipes";
 import { customRecipeToRecipe } from "@/lib/customRecipesClient";
 import { loadRecipeFavorites } from "@/lib/recipeFavorites";
 import { RECIPE_METHOD_LABELS } from "@shared/customRecipes";
-import {
-  expiryInfo,
-  FOOD_MATCH_MIN_LENGTH,
-  normalizeFoodName,
-  type ExpiryState,
-} from "@shared/food";
+import { expiryInfo, type ExpiryState } from "@shared/food";
+import { leftoverSuggestions, type LeftoverRecipe } from "@shared/leftovers";
 import {
   loadFoodSort,
   sortFoodItems,
@@ -64,22 +60,6 @@ const expiryStyles: Record<ExpiryState, string> = {
   soon: "border-chart-4/70 bg-chart-4/10",
   ok: "border-border bg-card",
 };
-
-function matchScore(foodNames: string[], ingredients: string[]): number {
-  let score = 0;
-  for (const food of foodNames) {
-    const nf = normalizeFoodName(food);
-    if (nf.length < FOOD_MATCH_MIN_LENGTH) continue;
-    for (const ing of ingredients) {
-      const ni = normalizeFoodName(ing);
-      if (ni.includes(nf) || nf.includes(ni)) {
-        score += 1;
-        break;
-      }
-    }
-  }
-  return score;
-}
 
 export default function FoodPage() {
   const { lang, t } = useI18n();
@@ -220,11 +200,7 @@ export default function FoodPage() {
     createTemplateMutation.mutate({ name: templateName.trim(), items });
   };
 
-  const foodNames = useMemo(
-    () => (query.data ?? []).map(f => f.name),
-    [query.data]
-  );
-
+  // ── Resteverwertung (#235) ──
   // Eigene Rezepte zählen bei den Vorschlägen mit
   const customRecipesQuery = trpc.recipes.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -233,30 +209,62 @@ export default function FoodPage() {
   const [favoriteIds] = useState<ReadonlySet<string>>(
     () => new Set(loadRecipeFavorites())
   );
-  const suggestions = useMemo(() => {
-    if (foodNames.length === 0) return [];
-    const pool = [
+  /** Rezept-Vorrat für den Abgleich: eigene Rezepte zuerst, dann die eingebauten. */
+  const recipePool = useMemo(
+    () => [
       ...(customRecipesQuery.data ?? []).map(customRecipeToRecipe),
       ...recipes,
-    ];
-    return pool
-      .map(r => ({
-        recipe: r,
-        score: matchScore(
-          foodNames,
-          r.ingredients.map(i => pick(i, lang))
-        ),
-      }))
-      .filter(s => s.score > 0)
-      .sort(
-        (a, b) =>
-          b.score - a.score ||
-          Number(favoriteIds.has(b.recipe.id)) -
-            Number(favoriteIds.has(a.recipe.id)) ||
-          a.recipe.timeMinutes - b.recipe.timeMinutes
-      )
-      .slice(0, 5);
-  }, [foodNames, customRecipesQuery.data, lang, favoriteIds]);
+    ],
+    [customRecipesQuery.data]
+  );
+  const recipeById = useMemo(() => {
+    const map = new Map<string, (typeof recipePool)[number]>();
+    recipePool.forEach(r => map.set(r.id, r));
+    return map;
+  }, [recipePool]);
+  /**
+   * Vorschläge aus dem aktuellen Bestand – der Abgleich (fehlertolerant, mit
+   * Bevorzugung bald ablaufender Vorräte) liegt in shared/leftovers.ts.
+   */
+  const suggestions = useMemo(() => {
+    const stock = (query.data ?? []).map(item => ({
+      id: item.id,
+      name: item.name,
+      expiryDate: item.expiryDate,
+    }));
+    if (stock.length === 0) return [];
+    const pool: LeftoverRecipe[] = recipePool.map(r => ({
+      id: r.id,
+      name: pick(r.name, lang),
+      ingredients: r.ingredients.map(i => pick(i, lang)),
+      timeMinutes: r.timeMinutes,
+      favorite: favoriteIds.has(r.id),
+    }));
+    return leftoverSuggestions({ recipes: pool, stock, today, limit: 5 });
+  }, [query.data, recipePool, lang, favoriteIds, today]);
+
+  /** Fehlende Zutaten eines Vorschlags auf die Einkaufsliste setzen. */
+  const addMissingMutation = trpc.shopping.addMany.useMutation({
+    onSuccess: result => {
+      utils.shopping.list.invalidate();
+      utils.shopping.lists.invalidate();
+      toast.success(t.shopping.addedFromRecipe(result.added), {
+        action: {
+          label: t.shopping.openList,
+          onClick: () => navigate("/einkauf"),
+        },
+      });
+    },
+    onError: () => toast.error(t.shopping.addFailed),
+  });
+  const addMissing = (recipeName: string, missing: string[]) =>
+    addMissingMutation.mutate({
+      listId: shoppingTarget.listId ?? undefined,
+      names: missing.slice(0, 100).map(name => ({
+        name: name.slice(0, 160),
+        note: t.shopping.fromRecipe(recipeName).slice(0, 160),
+      })),
+    });
 
   if (loading) {
     return (
@@ -673,7 +681,7 @@ export default function FoodPage() {
         </div>
       )}
 
-      {/* Rezeptvorschläge */}
+      {/* Resteverwertung: Vorschläge aus dem Bestand (#235) */}
       {suggestions.length > 0 && (
         <>
           <h2 className="mb-1 flex items-center gap-2 font-serif text-lg font-semibold">
@@ -684,28 +692,99 @@ export default function FoodPage() {
             {t.food.suggestionsSubtitle}
           </p>
           <div className="space-y-3">
-            {suggestions.map(({ recipe, score }) => (
-              <Card key={recipe.id}>
-                <CardContent className="pt-6">
-                  <div className="mb-1.5 flex items-center justify-between">
-                    <p className="font-semibold">{pick(recipe.name, lang)}</p>
-                    <Badge variant="secondary">
-                      {t.food.matchCount(score)}
-                    </Badge>
-                  </div>
-                  <p className="mb-2 text-sm text-muted-foreground">
-                    {pick(RECIPE_METHOD_LABELS[recipe.method], lang)} ·{" "}
-                    {t.food.minutes(recipe.timeMinutes)} ·{" "}
-                    {t.food.servings(recipe.servings)}
-                    {recipe.onePot && t.food.onePotSuffix}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {t.food.ingredientsPrefix}{" "}
-                    {recipe.ingredients.map(i => pick(i, lang)).join(", ")}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+            {suggestions.map(suggestion => {
+              const source = recipeById.get(suggestion.recipe.id);
+              return (
+                <Card key={suggestion.recipe.id}>
+                  <CardContent className="pt-6">
+                    <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-semibold">{suggestion.recipe.name}</p>
+                      <span className="flex flex-wrap gap-1.5">
+                        <Badge variant="secondary">
+                          {t.food.haveCount(
+                            suggestion.matched.length,
+                            suggestion.total
+                          )}
+                        </Badge>
+                        {suggestion.urgentCount > 0 && (
+                          <Badge
+                            variant="outline"
+                            className="border-chart-4/70 bg-chart-4/10"
+                          >
+                            {t.food.urgentInRecipe(suggestion.urgentCount)}
+                          </Badge>
+                        )}
+                      </span>
+                    </div>
+                    {source && (
+                      <p className="mb-2 text-sm text-muted-foreground">
+                        {pick(RECIPE_METHOD_LABELS[source.method], lang)} ·{" "}
+                        {t.food.minutes(source.timeMinutes)} ·{" "}
+                        {t.food.servings(source.servings)}
+                        {source.onePot && t.food.onePotSuffix}
+                      </p>
+                    )}
+                    <p className="text-sm">
+                      <span className="font-medium">{t.food.havePrefix}</span>{" "}
+                      <span className="text-muted-foreground">
+                        {suggestion.matched
+                          .map(match => match.item.name)
+                          .join(", ")}
+                      </span>
+                    </p>
+                    {suggestion.missing.length > 0 ? (
+                      <p className="mt-1 text-sm">
+                        <span className="font-medium">
+                          {t.food.missingPrefix}
+                        </span>{" "}
+                        <span className="text-muted-foreground">
+                          {suggestion.missing.join(", ")}
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-sm font-medium text-primary">
+                        {t.food.missingNone}
+                      </p>
+                    )}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {suggestion.missing.length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={addMissingMutation.isPending}
+                          aria-label={t.food.addMissingAria(
+                            suggestion.recipe.name
+                          )}
+                          onClick={() =>
+                            addMissing(
+                              suggestion.recipe.name,
+                              suggestion.missing
+                            )
+                          }
+                        >
+                          <ShoppingCart
+                            className="mr-1.5 h-4 w-4"
+                            aria-hidden="true"
+                          />
+                          {t.food.addMissing}
+                        </Button>
+                      )}
+                      <Button asChild variant="ghost" size="sm">
+                        <Link
+                          href={`/rezepte?rezept=${encodeURIComponent(suggestion.recipe.id)}`}
+                        >
+                          <ChefHat
+                            className="mr-1.5 h-4 w-4"
+                            aria-hidden="true"
+                          />
+                          {t.food.openRecipe}
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             {t.food.bookPrefix}

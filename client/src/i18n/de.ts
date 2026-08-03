@@ -2964,15 +2964,23 @@ export const de = {
     emptyTitle: "Kühlbox noch leer",
     emptyText:
       "Trage ein, was du dabei hast – wir schlagen dir passende Rezepte vor.",
-    suggestionsTitle: "Das kannst du damit kochen",
+    suggestionsTitle: "Resteverwertung",
     suggestionsSubtitle:
-      "Sortiert danach, wie viele deiner Vorräte im Rezept vorkommen.",
-    matchCount: (n: number) =>
-      `${n} ${n === 1 ? "Zutat" : "Zutaten"} vorhanden`,
+      "Was du aus dem kochen kannst, was noch da ist – Rezepte mit bald ablaufenden Vorräten zuerst.",
+    haveCount: (have: number, total: number) =>
+      `${have} von ${total} Zutaten hast du`,
+    urgentInRecipe: (n: number) =>
+      n === 1 ? "1 Vorrat läuft bald ab" : `${n} Vorräte laufen bald ab`,
+    havePrefix: "Du hast:",
+    missingPrefix: "Es fehlt:",
+    missingNone: "Alles da – du kannst sofort loslegen.",
+    addMissing: "Fehlendes auf die Einkaufsliste",
+    addMissingAria: (name: string) =>
+      `Fehlende Zutaten von ${name} auf die Einkaufsliste setzen`,
+    openRecipe: "Rezept öffnen",
     minutes: (n: number) => `${n} Min.`,
     servings: (n: number) => `${n} Portionen`,
     onePotSuffix: " · One-Pot",
-    ingredientsPrefix: "Zutaten:",
     bookPrefix: "Alle Anleitungen findest du im ",
     bookLink: "Campfire-Rezeptbuch",
     bookSuffix: ".",

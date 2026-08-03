@@ -2963,15 +2963,25 @@ export const fr: Translation = {
     emptyTitle: "Glacière encore vide",
     emptyText:
       "Saisis ce que tu as avec toi – nous te proposons des recettes adaptées.",
-    suggestionsTitle: "Voici ce que tu peux cuisiner avec",
+    suggestionsTitle: "Cuisiner les restes",
     suggestionsSubtitle:
-      "Trié selon le nombre de tes provisions présentes dans la recette.",
-    matchCount: (n: number) =>
-      `${n} ${n === 1 ? "ingrédient disponible" : "ingrédients disponibles"}`,
+      "Ce que tu peux cuisiner avec ce qu'il reste – les recettes avec des provisions bientôt périmées d'abord.",
+    haveCount: (have: number, total: number) =>
+      `tu as ${have} ingrédients sur ${total}`,
+    urgentInRecipe: (n: number) =>
+      n === 1
+        ? "1 provision périme bientôt"
+        : `${n} provisions périment bientôt`,
+    havePrefix: "Tu as :",
+    missingPrefix: "Il manque :",
+    missingNone: "Tout y est – tu peux commencer tout de suite.",
+    addMissing: "Ce qui manque dans la liste de courses",
+    addMissingAria: (name: string) =>
+      `Mettre les ingrédients manquants de ${name} dans la liste de courses`,
+    openRecipe: "Ouvrir la recette",
     minutes: (n: number) => `${n} min`,
     servings: (n: number) => `${n} portions`,
     onePotSuffix: " · one-pot",
-    ingredientsPrefix: "Ingrédients :",
     bookPrefix: "Tu trouves toutes les instructions dans le ",
     bookLink: "livre de recettes Campfire",
     bookSuffix: ".",

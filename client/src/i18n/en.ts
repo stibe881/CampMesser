@@ -2862,15 +2862,23 @@ export const en: Translation = {
     deleteAndShop: "Delete and add to shopping list",
     emptyTitle: "Cool box still empty",
     emptyText: "Enter what you have with you – we'll suggest matching recipes.",
-    suggestionsTitle: "Here's what you can cook with it",
+    suggestionsTitle: "Use up leftovers",
     suggestionsSubtitle:
-      "Sorted by how many of your supplies appear in the recipe.",
-    matchCount: (n: number) =>
-      `${n} ${n === 1 ? "ingredient" : "ingredients"} available`,
+      "What you can cook from what is left – recipes using supplies that expire soon come first.",
+    haveCount: (have: number, total: number) =>
+      `you have ${have} of ${total} ingredients`,
+    urgentInRecipe: (n: number) =>
+      n === 1 ? "1 supply expires soon" : `${n} supplies expire soon`,
+    havePrefix: "You have:",
+    missingPrefix: "Missing:",
+    missingNone: "All there – you can start right away.",
+    addMissing: "Missing items to the shopping list",
+    addMissingAria: (name: string) =>
+      `Add the missing ingredients of ${name} to the shopping list`,
+    openRecipe: "Open recipe",
     minutes: (n: number) => `${n} min`,
     servings: (n: number) => `${n} servings`,
     onePotSuffix: " · one-pot",
-    ingredientsPrefix: "Ingredients:",
     bookPrefix: "You'll find all the instructions in the ",
     bookLink: "Campfire recipe book",
     bookSuffix: ".",
