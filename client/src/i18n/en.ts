@@ -80,6 +80,15 @@ export const en: Translation = {
     currentTripSpotAria: place => `Open the pitch dossier for ${place}`,
     currentTripShoppingLink: "Shopping list",
     currentTripMealsSr: "Today's meals:",
+    anniversaryTitleOne: "One year ago",
+    anniversaryTitleMany: years => `${years} years ago`,
+    anniversaryNights: n => (n === 1 ? "1 night" : `${n} nights`),
+    anniversaryRatingAria: stars =>
+      stars === 1 ? "1 of 5 stars" : `${stars} of 5 stars`,
+    anniversaryLink: "View in the journal",
+    anniversaryLinkAria: place => `View the entry for ${place} in the journal`,
+    anniversaryPhotoAlt: place => `Cover photo of ${place}`,
+    anniversaryDismissAria: "Hide this reminder for today",
     weatherAria: (temp, label) =>
       `Current weather: ${temp} degrees, ${label} – open the weather module`,
     weatherNoAlerts: "No severe weather warnings at your location",

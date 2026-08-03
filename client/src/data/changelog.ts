@@ -33,6 +33,12 @@ export const changelog: ChangelogBlock[] = [
         "New “Statistics” tile: all your figures in one place – trips, weather luck, year comparison, milestones, knot progress, species album and your children's badges."
       ),
       l4(
+        "Startseite: «Vor einem Jahr» erinnert dich am Jahrestag an vergangene Aufenthalte – mit Ort, Nächten, Bewertung und Titelbild; für heute wegklickbar.",
+        "Accueil : « Il y a un an » te rappelle tes séjours passés le jour anniversaire – avec le lieu, les nuits, la note et la photo principale ; masquable pour la journée.",
+        "Pagina iniziale: «Un anno fa» ti ricorda i soggiorni passati nel giorno dell'anniversario – con luogo, notti, valutazione e immagine principale; si può nascondere per oggi.",
+        "Home: “One year ago” reminds you of past stays on their anniversary – with place, nights, rating and cover photo; dismissable for the day."
+      ),
+      l4(
         "Teilen: Beim Erzeugen eines Teil-Links wählst du neu, wie lange er gültig bleibt – unbegrenzt oder 7, 30 bzw. 90 Tage. Danach führt der Link ins Leere.",
         "Partage : en créant un lien de partage, tu choisis désormais sa durée de validité – illimitée ou 7, 30 ou 90 jours. Ensuite, le lien ne mène plus nulle part.",
         "Condivisione: quando crei un link di condivisione scegli quanto resta valido – illimitato oppure 7, 30 o 90 giorni. Dopo il link non porta più a nulla.",

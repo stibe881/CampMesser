@@ -81,6 +81,16 @@ export const de = {
     currentTripSpotAria: (place: string) => `Platz-Dossier zu ${place} öffnen`,
     currentTripShoppingLink: "Einkaufsliste",
     currentTripMealsSr: "Heutige Mahlzeiten:",
+    anniversaryTitleOne: "Vor einem Jahr",
+    anniversaryTitleMany: (years: number) => `Vor ${years} Jahren`,
+    anniversaryNights: (n: number) => (n === 1 ? "1 Nacht" : `${n} Nächte`),
+    anniversaryRatingAria: (stars: number) =>
+      stars === 1 ? "1 von 5 Sternen" : `${stars} von 5 Sternen`,
+    anniversaryLink: "Im Tagebuch ansehen",
+    anniversaryLinkAria: (place: string) =>
+      `Eintrag zu ${place} im Tagebuch ansehen`,
+    anniversaryPhotoAlt: (place: string) => `Titelbild von ${place}`,
+    anniversaryDismissAria: "Erinnerung für heute ausblenden",
     weatherAria: (temp: number, label: string) =>
       `Aktuelles Wetter: ${temp} Grad, ${label} – zum Wetter-Modul`,
     weatherNoAlerts: "Keine Unwetterwarnungen an deinem Standort",

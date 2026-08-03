@@ -82,6 +82,16 @@ export const fr: Translation = {
     currentTripSpotAria: place => `Ouvrir le dossier de l'emplacement ${place}`,
     currentTripShoppingLink: "Liste de courses",
     currentTripMealsSr: "Repas d'aujourd'hui :",
+    anniversaryTitleOne: "Il y a un an",
+    anniversaryTitleMany: years => `Il y a ${years} ans`,
+    anniversaryNights: n => (n === 1 ? "1 nuit" : `${n} nuits`),
+    anniversaryRatingAria: stars =>
+      stars === 1 ? "1 étoile sur 5" : `${stars} étoiles sur 5`,
+    anniversaryLink: "Voir dans le journal",
+    anniversaryLinkAria: place =>
+      `Voir l'entrée sur ${place} dans le journal de voyage`,
+    anniversaryPhotoAlt: place => `Photo principale de ${place}`,
+    anniversaryDismissAria: "Masquer ce rappel pour aujourd'hui",
     weatherAria: (temp, label) =>
       `Météo actuelle : ${temp} degrés, ${label} – vers le module météo`,
     weatherNoAlerts: "Aucune alerte d'intempéries à ton emplacement",

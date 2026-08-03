@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  anniversaryTrips,
   nightsPerYear,
   computeTripStats,
   computeYearReview,
@@ -299,5 +300,75 @@ describe("nightsPerYear", () => {
       nightsPerYear([{ startDate: "2026-08-10", endDate: "2026-08-10" }])
     ).toEqual([]);
     expect(nightsPerYear([])).toEqual([]);
+  });
+});
+
+describe("anniversaryTrips", () => {
+  it("findet den Aufenthalt von vor genau einem Jahr", () => {
+    const trips = [{ startDate: "2025-08-01", endDate: "2025-08-08" }];
+    expect(anniversaryTrips(trips, "2026-08-03")).toEqual([
+      { trip: trips[0], yearsAgo: 1 },
+    ]);
+  });
+
+  it("berücksichtigt die Toleranz von ±3 Tagen", () => {
+    // Jahrestag 2025-08-03: Aufenthalt endete 3 Tage davor → noch Treffer
+    const inside = [{ startDate: "2025-07-28", endDate: "2025-07-31" }];
+    expect(anniversaryTrips(inside, "2026-08-03")).toHaveLength(1);
+    // 4 Tage davor → kein Treffer mehr
+    const outside = [{ startDate: "2025-07-27", endDate: "2025-07-30" }];
+    expect(anniversaryTrips(outside, "2026-08-03")).toEqual([]);
+  });
+
+  it("liefert mehrere Treffer nach Jahres-Abstand sortiert", () => {
+    const trips = [
+      { startDate: "2022-08-02", endDate: "2022-08-09" },
+      { startDate: "2025-08-02", endDate: "2025-08-09" },
+      { startDate: "2024-08-02", endDate: "2024-08-09" },
+    ];
+    expect(
+      anniversaryTrips(trips, "2026-08-03").map(hit => hit.yearsAgo)
+    ).toEqual([1, 2, 4]);
+  });
+
+  it("zählt einen langen Aufenthalt nur einmal – mit dem kleinsten Abstand", () => {
+    const trips = [{ startDate: "2023-08-01", endDate: "2025-08-10" }];
+    expect(anniversaryTrips(trips, "2026-08-03")).toEqual([
+      { trip: trips[0], yearsAgo: 1 },
+    ]);
+  });
+
+  it("geht über den Jahreswechsel korrekt zurück", () => {
+    const trips = [{ startDate: "2025-12-28", endDate: "2026-01-04" }];
+    expect(anniversaryTrips(trips, "2027-01-02")).toEqual([
+      { trip: trips[0], yearsAgo: 1 },
+    ]);
+  });
+
+  it("klemmt den 29. Februar auf den 28. statt in den März zu rutschen", () => {
+    // Heute 29.02.2028 → Jahrestag 2027: 28.02. (Toleranz ±3 Tage)
+    const trips = [{ startDate: "2027-02-25", endDate: "2027-02-26" }];
+    expect(anniversaryTrips(trips, "2028-02-29")).toEqual([
+      { trip: trips[0], yearsAgo: 1 },
+    ]);
+  });
+
+  it("ignoriert Aufenthalte ausserhalb der letzten fünf Jahre", () => {
+    const trips = [{ startDate: "2020-08-01", endDate: "2020-08-08" }];
+    expect(anniversaryTrips(trips, "2026-08-03")).toEqual([]);
+  });
+
+  it("verwirft kaputte Daten und ein kaputtes Heute", () => {
+    const trips = [
+      { startDate: "kaputt", endDate: "2025-08-08" },
+      { startDate: "2025-08-08", endDate: "2025-08-01" },
+    ];
+    expect(anniversaryTrips(trips, "2026-08-03")).toEqual([]);
+    expect(
+      anniversaryTrips(
+        [{ startDate: "2025-08-01", endDate: "2025-08-08" }],
+        "x"
+      )
+    ).toEqual([]);
   });
 });

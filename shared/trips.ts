@@ -88,6 +88,76 @@ export function nightsPerYear(
     .sort((a, b) => a.year - b.year);
 }
 
+/** So viele Jahre zurück wird nach Jahrestagen gesucht (1 … 5 Jahre). */
+export const ANNIVERSARY_MAX_YEARS = 5;
+
+/** Toleranz um den Jahrestag herum – ±3 Tage gelten noch als Treffer. */
+export const ANNIVERSARY_TOLERANCE_DAYS = 3;
+
+/** Ein Aufenthalt mit seinem Jahres-Abstand zu heute. */
+export interface AnniversaryTrip<T> {
+  trip: T;
+  /** Wie viele Jahre ist es her? (1 = «Vor einem Jahr») */
+  yearsAgo: number;
+}
+
+/** Letzter Tag eines Monats (0-basierter Monat), Schaltjahre inklusive. */
+function daysInMonth(year: number, month: number): number {
+  return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+}
+
+/**
+ * Datum um `delta` Jahre verschieben (UTC-Mitternacht). Der 29. Februar
+ * wird in Nicht-Schaltjahren auf den 28. Februar geklemmt statt in den
+ * März zu rutschen – der Jahrestag bleibt so im richtigen Monat.
+ */
+function shiftYears(dayMs: number, delta: number): number {
+  const date = new Date(dayMs);
+  const year = date.getUTCFullYear() + delta;
+  const month = date.getUTCMonth();
+  const day = Math.min(date.getUTCDate(), daysInMonth(year, month));
+  return Date.UTC(year, month, day);
+}
+
+/**
+ * «Vor einem Jahr»-Erinnerungen: alle Aufenthalte, deren Zeitraum (jeweils
+ * um ANNIVERSARY_TOLERANCE_DAYS erweitert) den Tag «heute minus N Jahre»
+ * enthält – N von 1 bis ANNIVERSARY_MAX_YEARS. Pro Aufenthalt zählt der
+ * KLEINSTE passende Jahres-Abstand, damit ein langer Aufenthalt nicht
+ * mehrfach erscheint. Sortiert nach Jahres-Abstand aufsteigend, bei
+ * Gleichstand nach Anreisedatum – rein und ohne Zeitzonen-Fallen (alle
+ * Daten sind ISO-Tage in UTC).
+ */
+export function anniversaryTrips<
+  T extends Pick<TripLike, "startDate" | "endDate">,
+>(trips: T[], today: string): AnniversaryTrip<T>[] {
+  const now = parseIsoDay(today);
+  if (now === null) return [];
+  const tolerance = ANNIVERSARY_TOLERANCE_DAYS * DAY_MS;
+  const targets: number[] = [];
+  for (let yearsAgo = 1; yearsAgo <= ANNIVERSARY_MAX_YEARS; yearsAgo++) {
+    targets.push(shiftYears(now, -yearsAgo));
+  }
+  const hits: AnniversaryTrip<T>[] = [];
+  for (const trip of trips) {
+    const start = parseIsoDay(trip.startDate);
+    const end = parseIsoDay(trip.endDate);
+    if (start === null || end === null || end < start) continue;
+    for (let i = 0; i < targets.length; i++) {
+      const target = targets[i];
+      if (target >= start - tolerance && target <= end + tolerance) {
+        hits.push({ trip, yearsAgo: i + 1 });
+        break;
+      }
+    }
+  }
+  return hits.sort(
+    (a, b) =>
+      a.yearsAgo - b.yearsAgo ||
+      a.trip.startDate.localeCompare(b.trip.startDate)
+  );
+}
+
 /** Ist der Aufenthalt aus heutiger Sicht geplant (Anreise heute oder später)? */
 export function isUpcomingTrip(startDate: string, today: string): boolean {
   return startDate >= today;
