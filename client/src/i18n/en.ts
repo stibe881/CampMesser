@@ -2027,6 +2027,18 @@ export const en: Translation = {
     nowFilterAria: "Only show entries currently in season",
     nowFilterEmpty:
       "Nothing in this category is in season right now – switch off the filter to see all entries.",
+    collection: {
+      title: "Species album",
+      progress: (seen: number, total: number) =>
+        `${seen} of ${total} species spotted`,
+      progressAria: "Collection progress",
+      notSeen: "still open",
+      seenAria: (name: string, date: string) =>
+        `${name} – first spotted on ${date}. Open the guide entry.`,
+      openAria: (name: string) =>
+        `${name} – not spotted yet. Open the guide entry.`,
+      hint: "Link an observation to a species from the guide so it shows up in colour here.",
+    },
     sightings: {
       title: "My sightings",
       sectionAria: "My nature sightings",

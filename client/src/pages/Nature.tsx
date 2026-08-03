@@ -9,6 +9,7 @@ import {
   Flashlight,
   HelpCircle,
   ImagePlus,
+  LayoutGrid,
   Lightbulb,
   Loader2,
   LocateFixed,
@@ -49,8 +50,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import { natureCategories, natureEntries } from "@/data/nature";
+import {
+  natureCategories,
+  natureEntries,
+  type NatureEntry,
+} from "@/data/nature";
 import {
   getMoonInfo,
   moonMonth,
@@ -70,6 +76,10 @@ import { inSeason } from "@shared/season";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { resizeImageForUpload } from "@/lib/imageResize";
+import {
+  collectionProgress,
+  type CollectionSighting,
+} from "@/lib/natureCollection";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 
@@ -567,6 +577,104 @@ function RedLightSection({
   );
 }
 
+/**
+ * Arten-Sammelalbum: alle Lexikon-Arten als Raster – beobachtete farbig mit
+ * dem Datum der ersten Sichtung, offene ausgegraut. Ein Klick öffnet den
+ * Lexikon-Eintrag weiter unten auf der Seite.
+ */
+function CollectionAlbum({
+  sightings,
+  onOpenEntry,
+}: {
+  sightings: CollectionSighting[];
+  onOpenEntry: (entry: NatureEntry) => void;
+}) {
+  const { lang, t } = useI18n();
+  const tc = t.nature.collection;
+  const progress = useMemo(
+    () => collectionProgress(natureEntries, sightings),
+    [sightings]
+  );
+
+  return (
+    <div className="mt-5 border-t border-border/60 pt-4">
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <LayoutGrid className="h-4 w-4 text-primary" aria-hidden="true" />
+        <h3 className="font-semibold">{tc.title}</h3>
+        <span className="ml-auto text-sm text-muted-foreground">
+          {tc.progress(progress.seenCount, progress.total)}
+        </span>
+      </div>
+      <Progress
+        value={Math.round(progress.ratio * 100)}
+        className="mb-3 h-2"
+        aria-label={tc.progressAria}
+      />
+      <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+        {progress.items.map(item => {
+          const name = pick(item.entry.name, lang);
+          const seenOn = item.firstSeen
+            ? fmtDate(new Date(`${item.firstSeen}T00:00:00`), lang)
+            : null;
+          return (
+            <li key={item.entry.id}>
+              <button
+                type="button"
+                onClick={() => onOpenEntry(item.entry)}
+                aria-label={
+                  seenOn ? tc.seenAria(name, seenOn) : tc.openAria(name)
+                }
+                className={cn(
+                  "flex h-full w-full flex-col items-center gap-1 rounded-lg border p-2 text-center transition-colors hover:border-primary/50",
+                  item.firstSeen
+                    ? "border-primary/40 bg-accent/50"
+                    : "border-border bg-card"
+                )}
+              >
+                {item.entry.image ? (
+                  <img
+                    src={item.entry.image}
+                    alt=""
+                    loading="lazy"
+                    className={cn(
+                      "h-12 w-full rounded-md object-cover",
+                      !item.firstSeen && "opacity-40 grayscale"
+                    )}
+                  />
+                ) : (
+                  <span
+                    className={cn(
+                      "flex h-12 w-full items-center justify-center rounded-md bg-muted",
+                      !item.firstSeen && "opacity-40"
+                    )}
+                  >
+                    <TreePine
+                      className="h-5 w-5 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  </span>
+                )}
+                <span
+                  className={cn(
+                    "text-xs font-medium leading-tight",
+                    !item.firstSeen && "text-muted-foreground"
+                  )}
+                >
+                  {name}
+                </span>
+                <span className="text-[10px] leading-tight text-muted-foreground">
+                  {seenOn ?? tc.notSeen}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-2 text-xs text-muted-foreground">{tc.hint}</p>
+    </div>
+  );
+}
+
 /** Formular-Zustand einer Beobachtung – Foto-Schritte laufen beim Speichern. */
 interface SightingFormState {
   id?: number;
@@ -592,7 +700,11 @@ function todayIso(): string {
  * Arten-Chip, Formular mit Lexikon-Vorschlag, Geolocation-Knopf und Foto.
  * Beobachtungen mit Koordinaten erscheinen zusätzlich als Pins auf /karte.
  */
-function SightingsSection() {
+function SightingsSection({
+  onOpenEntry,
+}: {
+  onOpenEntry: (entry: NatureEntry) => void;
+}) {
   const { lang, t } = useI18n();
   const ts = t.nature.sightings;
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -911,6 +1023,13 @@ function SightingsSection() {
         </ul>
       )}
 
+      {isAuthenticated &&
+        !authLoading &&
+        !query.isLoading &&
+        !query.isError && (
+          <CollectionAlbum sightings={sightings} onOpenEntry={onOpenEntry} />
+        )}
+
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
@@ -1092,12 +1211,35 @@ export default function NaturePage() {
   const [redLight, setRedLight] = useState(false);
   // «Jetzt zu sehen»: nur Einträge, deren Saison den aktuellen Monat umfasst
   const [nowOnly, setNowOnly] = useState(false);
+  // Offener Lexikon-Eintrag (Accordion kontrolliert, damit das Sammelalbum
+  // gezielt einen Eintrag aufklappen kann); "" = alles zu.
+  const [openEntryId, setOpenEntryId] = useState("");
+  // Nur nach einem Klick im Sammelalbum wird gescrollt – nicht beim normalen
+  // Auf- und Zuklappen im Lexikon.
+  const scrollToRef = useRef<string | null>(null);
   const currentMonth = new Date().getMonth() + 1;
   const activeCategory = natureCategories.find(c => c.id === category)!;
   const entries = natureEntries.filter(
     e =>
       e.category === category && (!nowOnly || inSeason(e.season, currentMonth))
   );
+
+  /** Aus dem Sammelalbum zum Lexikon-Eintrag springen und ihn aufklappen. */
+  const openLexiconEntry = (entry: NatureEntry) => {
+    setCategory(entry.category);
+    // Der Saison-Filter könnte den Eintrag ausblenden – deshalb zurücksetzen
+    setNowOnly(false);
+    setOpenEntryId(entry.id);
+    scrollToRef.current = entry.id;
+  };
+
+  useEffect(() => {
+    if (!scrollToRef.current || scrollToRef.current !== openEntryId) return;
+    scrollToRef.current = null;
+    document
+      .getElementById(`natur-eintrag-${openEntryId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [openEntryId, category, nowOnly]);
 
   return (
     <div className="container max-w-3xl py-6">
@@ -1110,7 +1252,7 @@ export default function NaturePage() {
 
       <MoonCalendar />
       <MeteorCalendar />
-      <SightingsSection />
+      <SightingsSection onOpenEntry={openLexiconEntry} />
       <RedLightSection
         active={redLight}
         onToggle={() => setRedLight(v => !v)}
@@ -1172,10 +1314,17 @@ export default function NaturePage() {
         </p>
       )}
 
-      <Accordion type="single" collapsible className="space-y-3">
+      <Accordion
+        type="single"
+        collapsible
+        className="space-y-3"
+        value={openEntryId}
+        onValueChange={setOpenEntryId}
+      >
         {entries.map(entry => (
           <AccordionItem
             key={entry.id}
+            id={`natur-eintrag-${entry.id}`}
             value={entry.id}
             className="overflow-hidden rounded-xl border border-border bg-card px-0"
           >

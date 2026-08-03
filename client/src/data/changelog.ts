@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Natur: das neue Sammelalbum zeigt dir, welche Arten du schon beobachtet hast – mit Datum der ersten Sichtung und Sprung ins Lexikon.",
+        "Nature : le nouvel album te montre les espèces que tu as déjà observées – avec la date de la première observation et un lien vers le lexique.",
+        "Natura: il nuovo album ti mostra quali specie hai già osservato – con la data del primo avvistamento e il salto al lessico.",
+        "Nature: the new album shows which species you have already spotted – with the date of the first sighting and a jump into the guide."
+      ),
+      l4(
         "Familien-Modus: das neue «Natur-Quiz» würfelt seine Fragen bei jedem Start frisch aus dem Natur-Lexikon – auch im Duell spielbar.",
         "Mode famille : le nouveau « quiz nature » tire ses questions du lexique nature à chaque démarrage – jouable aussi en duel.",
         "Modalità famiglia: il nuovo «quiz natura» estrae le sue domande dal lessico della natura a ogni avvio – giocabile anche in duello.",

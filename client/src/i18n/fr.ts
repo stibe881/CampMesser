@@ -2097,6 +2097,18 @@ export const fr: Translation = {
     nowFilterAria: "N'afficher que les entrées actuellement de saison",
     nowFilterEmpty:
       "Rien n'est de saison dans cette catégorie en ce moment – désactive le filtre pour voir toutes les entrées.",
+    collection: {
+      title: "Album des espèces",
+      progress: (seen: number, total: number) =>
+        `${seen} espèces observées sur ${total}`,
+      progressAria: "Progression de la collection",
+      notSeen: "encore à trouver",
+      seenAria: (name: string, date: string) =>
+        `${name} – observé pour la première fois le ${date}. Ouvrir la fiche du lexique.`,
+      openAria: (name: string) =>
+        `${name} – pas encore observé. Ouvrir la fiche du lexique.`,
+      hint: "Relie une observation à une espèce du lexique pour qu'elle apparaisse en couleur ici.",
+    },
     sightings: {
       title: "Mes observations",
       sectionAria: "Mes observations nature",

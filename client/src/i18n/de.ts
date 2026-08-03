@@ -2108,6 +2108,18 @@ export const de = {
     nowFilterAria: "Nur Einträge zeigen, die jetzt Saison haben",
     nowFilterEmpty:
       "In dieser Kategorie hat gerade nichts Saison – schalte den Filter aus, um alle Einträge zu sehen.",
+    collection: {
+      title: "Arten-Sammelalbum",
+      progress: (seen: number, total: number) =>
+        `${seen} von ${total} Arten beobachtet`,
+      progressAria: "Sammel-Fortschritt",
+      notSeen: "noch offen",
+      seenAria: (name: string, date: string) =>
+        `${name} – erstmals beobachtet am ${date}. Lexikon-Eintrag öffnen.`,
+      openAria: (name: string) =>
+        `${name} – noch nicht beobachtet. Lexikon-Eintrag öffnen.`,
+      hint: "Verknüpfe eine Beobachtung mit einer Art aus dem Lexikon, damit sie hier farbig wird.",
+    },
     sightings: {
       title: "Meine Beobachtungen",
       sectionAria: "Meine Natur-Beobachtungen",

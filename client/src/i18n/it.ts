@@ -2080,6 +2080,18 @@ export const it: Translation = {
     nowFilterAria: "Mostra solo le voci attualmente di stagione",
     nowFilterEmpty:
       "In questa categoria al momento niente è di stagione – disattiva il filtro per vedere tutte le voci.",
+    collection: {
+      title: "Album delle specie",
+      progress: (seen: number, total: number) =>
+        `${seen} specie osservate su ${total}`,
+      progressAria: "Progressi della collezione",
+      notSeen: "ancora da trovare",
+      seenAria: (name: string, date: string) =>
+        `${name} – osservato per la prima volta il ${date}. Apri la voce del lessico.`,
+      openAria: (name: string) =>
+        `${name} – non ancora osservato. Apri la voce del lessico.`,
+      hint: "Collega un'osservazione a una specie del lessico affinché qui appaia a colori.",
+    },
     sightings: {
       title: "Le mie osservazioni",
       sectionAria: "Le mie osservazioni della natura",
