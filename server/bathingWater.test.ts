@@ -1,0 +1,237 @@
+import { describe, expect, it } from "vitest";
+import {
+  bathingComfort,
+  hydroLatestUrl,
+  marineWaterUrl,
+  MAX_STATION_DISTANCE_M,
+  nearestWaterStation,
+  parseHydroLatest,
+  parseMarineWater,
+  TREND_THRESHOLD_C,
+  waterStations,
+  waterTrend,
+  type WaterStation,
+} from "@shared/bathingWater";
+
+describe("waterStations", () => {
+  it("hat einen sauberen Datensatz mit eindeutigen Nummern", () => {
+    expect(waterStations.length).toBeGreaterThan(200);
+    const ids = new Set(waterStations.map(s => s.id));
+    expect(ids.size).toBe(waterStations.length);
+    waterStations.forEach(station => {
+      expect(station.name.length).toBeGreaterThan(0);
+      expect(station.waterBody.length).toBeGreaterThan(0);
+      // Alle Messstellen liegen in der Schweiz
+      expect(station.latitude).toBeGreaterThan(45.7);
+      expect(station.latitude).toBeLessThan(47.9);
+      expect(station.longitude).toBeGreaterThan(5.8);
+      expect(station.longitude).toBeLessThan(10.6);
+    });
+  });
+
+  it("enthält See- und Fluss-Messstellen und solche mit Temperatur", () => {
+    expect(waterStations.some(s => s.type === "lake")).toBe(true);
+    expect(waterStations.some(s => s.type === "river")).toBe(true);
+    expect(
+      waterStations.filter(s => s.measuresTemperature).length
+    ).toBeGreaterThan(50);
+  });
+});
+
+describe("nearestWaterStation", () => {
+  const stations: WaterStation[] = [
+    {
+      id: "nah-ohne",
+      name: "Nah ohne Temperatur",
+      waterBody: "Bach",
+      type: "river",
+      latitude: 47.0,
+      longitude: 8.0,
+      measuresTemperature: false,
+    },
+    {
+      id: "mittel-mit",
+      name: "Etwas weiter mit Temperatur",
+      waterBody: "See",
+      type: "lake",
+      latitude: 47.05,
+      longitude: 8.0,
+      measuresTemperature: true,
+    },
+    {
+      id: "fern-mit",
+      name: "Weit weg",
+      waterBody: "Fluss",
+      type: "river",
+      latitude: 47.9,
+      longitude: 8.0,
+      measuresTemperature: true,
+    },
+  ];
+
+  it("bevorzugt die nächste Stelle MIT Wassertemperatur", () => {
+    const found = nearestWaterStation(47.0, 8.0, { stations });
+    expect(found?.station.id).toBe("mittel-mit");
+    expect(found?.distanceM).toBeGreaterThan(5000);
+    expect(found?.distanceM).toBeLessThan(6000);
+  });
+
+  it("nimmt eine reine Pegel-Stelle, wenn keine Temperatur in Reichweite ist", () => {
+    const found = nearestWaterStation(47.0, 8.0, {
+      stations: [stations[0], stations[2]],
+    });
+    expect(found?.station.id).toBe("nah-ohne");
+  });
+
+  it("liefert mit requireTemperature nur Temperatur-Stellen", () => {
+    const found = nearestWaterStation(47.0, 8.0, {
+      stations: [stations[0]],
+      requireTemperature: true,
+    });
+    expect(found).toBeNull();
+  });
+
+  it("gibt ausserhalb des Umkreises nichts zurück", () => {
+    // 47.5°N liegt von allen drei Test-Stellen mehr als 40 km entfernt
+    expect(
+      nearestWaterStation(47.5, 8.0, { stations, maxDistanceM: 1000 })
+    ).toBeNull();
+    // Mitten im Atlantik ist keine Schweizer Messstelle in der Nähe
+    expect(nearestWaterStation(30, -40)).toBeNull();
+  });
+
+  it("verträgt kaputte Koordinaten und leere Listen", () => {
+    expect(nearestWaterStation(Number.NaN, 8.0, { stations })).toBeNull();
+    expect(nearestWaterStation(47.0, 8.0, { stations: [] })).toBeNull();
+  });
+
+  it("findet im echten Datensatz die Stelle am Vierwaldstättersee", () => {
+    const found = nearestWaterStation(47.0502, 8.3093);
+    expect(found).not.toBeNull();
+    expect(found!.distanceM).toBeLessThan(MAX_STATION_DISTANCE_M);
+    expect(found!.station.measuresTemperature).toBe(true);
+  });
+});
+
+describe("hydroLatestUrl und parseHydroLatest", () => {
+  it("fragt genau eine Stelle mit den nötigen Parametern ab", () => {
+    const url = hydroLatestUrl("2135");
+    expect(url).toContain("api.existenz.ch/apiv1/hydro/latest");
+    expect(url).toContain("locations=2135");
+    expect(url).toContain("temperature");
+    expect(url).toContain("flow");
+    expect(url).toContain("height");
+    expect(url).toContain("app=CampMesser");
+  });
+
+  it("liest Temperatur, Abfluss und Pegel der richtigen Stelle", () => {
+    const reading = parseHydroLatest(
+      {
+        payload: [
+          { timestamp: 1785768600, loc: "2135", par: "temperature", val: 21.4 },
+          { timestamp: 1785768600, loc: "2135", par: "flow", val: 194.5 },
+          { timestamp: 1785769200, loc: "2135", par: "height", val: 502.1 },
+          { timestamp: 1785768600, loc: "9999", par: "temperature", val: 4 },
+        ],
+      },
+      "2135"
+    );
+    expect(reading.temperatureC).toBe(21.4);
+    expect(reading.flowM3s).toBe(194.5);
+    expect(reading.levelMasl).toBe(502.1);
+    // Der jüngste Zeitstempel der übernommenen Werte gewinnt
+    expect(reading.measuredAtMs).toBe(1785769200000);
+  });
+
+  it("ignoriert unbekannte Parameter und kaputte Werte", () => {
+    const reading = parseHydroLatest(
+      {
+        payload: [
+          { timestamp: 1785768600, loc: "2135", par: "acidity", val: 8.5 },
+          { timestamp: 1785768600, loc: "2135", par: "temperature", val: null },
+          { timestamp: "kaputt", loc: "2135", par: "flow", val: 12 },
+        ],
+      },
+      "2135"
+    );
+    expect(reading.temperatureC).toBeNull();
+    expect(reading.flowM3s).toBe(12);
+    // Kaputter Zeitstempel darf keinen Zeitpunkt erfinden
+    expect(reading.measuredAtMs).toBeNull();
+  });
+
+  it("verträgt fehlende und kaputte Antworten", () => {
+    expect(parseHydroLatest(null, "2135").temperatureC).toBeNull();
+    expect(parseHydroLatest({}, "2135").flowM3s).toBeNull();
+    expect(parseHydroLatest({ payload: "nein" }, "2135").levelMasl).toBeNull();
+  });
+});
+
+describe("marineWaterUrl und parseMarineWater", () => {
+  it("fragt aktuellen Wert und Verlauf ab", () => {
+    const url = marineWaterUrl(43.5432, 7.1234);
+    expect(url).toContain("marine-api.open-meteo.com/v1/marine");
+    expect(url).toContain("latitude=43.5432");
+    expect(url).toContain("current=sea_surface_temperature");
+    expect(url).toContain("past_days=1");
+  });
+
+  it("liest den aktuellen Wert samt Vergleichswert von vor sechs Stunden", () => {
+    const marine = parseMarineWater({
+      current: { time: "2026-08-03T15:00", sea_surface_temperature: 24.5 },
+      hourly: {
+        time: ["2026-08-03T09:00", "2026-08-03T12:00", "2026-08-03T15:00"],
+        sea_surface_temperature: [23.1, 23.9, 24.5],
+      },
+    });
+    expect(marine?.temperatureC).toBe(24.5);
+    expect(marine?.measuredAtMs).toBe(Date.parse("2026-08-03T15:00Z"));
+    expect(marine?.previousC).toBe(23.1);
+  });
+
+  it("gibt über Land (lauter null) nichts zurück", () => {
+    expect(
+      parseMarineWater({
+        current: { time: "2026-08-03T15:00", sea_surface_temperature: null },
+      })
+    ).toBeNull();
+    expect(parseMarineWater({})).toBeNull();
+    expect(parseMarineWater(null)).toBeNull();
+  });
+
+  it("kommt ohne Verlauf aus", () => {
+    const marine = parseMarineWater({
+      current: { time: "2026-08-03T15:00", sea_surface_temperature: 24.5 },
+    });
+    expect(marine?.previousC).toBeNull();
+  });
+});
+
+describe("waterTrend", () => {
+  it("erkennt steigend, fallend und gleichbleibend", () => {
+    expect(waterTrend(21, 20)).toBe("rising");
+    expect(waterTrend(20, 21)).toBe("falling");
+    expect(waterTrend(20.1, 20)).toBe("steady");
+  });
+
+  it("nimmt die Schwelle genau", () => {
+    expect(waterTrend(20 + TREND_THRESHOLD_C, 20)).toBe("rising");
+    expect(waterTrend(20 + TREND_THRESHOLD_C - 0.01, 20)).toBe("steady");
+  });
+
+  it("behauptet ohne Vergleichswert nichts", () => {
+    expect(waterTrend(21, null)).toBe("unknown");
+    expect(waterTrend(21, Number.NaN)).toBe("unknown");
+  });
+});
+
+describe("bathingComfort", () => {
+  it("staffelt von kalt bis warm", () => {
+    expect(bathingComfort(9)).toBe("cold");
+    expect(bathingComfort(14.9)).toBe("cold");
+    expect(bathingComfort(15)).toBe("brisk");
+    expect(bathingComfort(19)).toBe("pleasant");
+    expect(bathingComfort(23)).toBe("warm");
+    expect(bathingComfort(28)).toBe("warm");
+  });
+});

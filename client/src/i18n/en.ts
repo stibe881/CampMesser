@@ -2501,6 +2501,36 @@ export const en: Translation = {
         `Really delete the sighting “${title}”?`,
     },
   },
+  /** Bathing water info in the pitch dossier (#223). */
+  bathingWater: {
+    title: "Water & swimming",
+    stationLine: (waterBody: string, station: string, distance: string) =>
+      `${waterBody} · ${station} gauging station, ${distance} away`,
+    marineLine: "Sea water temperature at your pitch",
+    noTemperature:
+      "This station does not measure water temperature – only level and discharge.",
+    comfort: {
+      cold: "cold",
+      brisk: "brisk",
+      pleasant: "pleasant",
+      warm: "warm",
+    },
+    trend: {
+      rising: "rising",
+      steady: "steady",
+      falling: "falling",
+    },
+    flowLabel: "Discharge",
+    flowValue: (value: string) => `${value} m³/s`,
+    levelLabel: "Level",
+    levelValue: (value: string) => `${value} m above sea level`,
+    measuredAt: (when: string) => `Measured on ${when}`,
+    sourceStation: "Source: FOEN open hydrological data via api.existenz.ch",
+    sourceMarine: "Source: Open-Meteo Marine",
+    safetyNote:
+      "These are readings from the nearest station, not from your swimming spot. They say nothing about currents, water quality or bathing rules – check the signs on site.",
+  },
+
   /** ISS passes in the astro section (#222). */
   iss: {
     sectionAria: "Visible passes of the ISS space station",

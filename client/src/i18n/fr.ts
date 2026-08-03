@@ -2591,6 +2591,37 @@ export const fr: Translation = {
         `Vraiment supprimer l'observation «${title}» ?`,
     },
   },
+  /** Info baignade dans le dossier de l'emplacement (#223). */
+  bathingWater: {
+    title: "Eau & baignade",
+    stationLine: (waterBody: string, station: string, distance: string) =>
+      `${waterBody} · station de mesure ${station}, à ${distance}`,
+    marineLine: "Température de l'eau de mer à ton emplacement",
+    noTemperature:
+      "Cette station ne mesure pas la température de l'eau – il n'y a que le niveau et le débit.",
+    comfort: {
+      cold: "froide",
+      brisk: "fraîche",
+      pleasant: "agréable",
+      warm: "chaude",
+    },
+    trend: {
+      rising: "en hausse",
+      steady: "stable",
+      falling: "en baisse",
+    },
+    flowLabel: "Débit",
+    flowValue: (value: string) => `${value} m³/s`,
+    levelLabel: "Niveau",
+    levelValue: (value: string) => `${value} m d'altitude`,
+    measuredAt: (when: string) => `Mesuré le ${when}`,
+    sourceStation:
+      "Source : données hydrologiques ouvertes de l'OFEV via api.existenz.ch",
+    sourceMarine: "Source : Open-Meteo Marine",
+    safetyNote:
+      "Ce sont les mesures de la station la plus proche, pas de ton lieu de baignade. Elles ne disent rien du courant, de la qualité de l'eau ni des règles de baignade – fie-toi à la signalisation sur place.",
+  },
+
   /** Passages de l'ISS dans la partie astro (#222). */
   iss: {
     sectionAria: "Passages visibles de la station spatiale ISS",

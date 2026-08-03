@@ -43,7 +43,7 @@ import {
   type TentFinderTarget,
 } from "@/lib/tentFinderTargets";
 import { createBaseLayer, loadMapLayer } from "@/lib/mapLayers";
-import { bearingDegrees, distanceMeters } from "@shared/geo";
+import { bearingDegrees, distanceMeters, formatDistance } from "@shared/geo";
 import { compassDirection } from "@shared/solar";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
 import { useI18n } from "@/i18n";
@@ -106,16 +106,6 @@ function targetPinIcon(
 
 /** Ladezustand der lazy geladenen Leaflet-Bibliothek. */
 type MiniMapState = "idle" | "loading" | "error" | "ready";
-
-/** Distanz formatieren: unter 1 km in Metern, sonst km mit einer Nachkommastelle. */
-function formatDistance(meters: number, lang: Language): string {
-  if (meters < 1000) return `${Math.round(meters)} m`;
-  const km = new Intl.NumberFormat(LOCALE_TAGS[lang], {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  }).format(meters / 1000);
-  return `${km} km`;
-}
 
 interface GeoState {
   status: "loading" | "ok" | "error";

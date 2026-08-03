@@ -2568,6 +2568,37 @@ export const it: Translation = {
         `Eliminare davvero l'osservazione «${title}»?`,
     },
   },
+  /** Info balneazione nel dossier della piazzola (#223). */
+  bathingWater: {
+    title: "Acqua e balneazione",
+    stationLine: (waterBody: string, station: string, distance: string) =>
+      `${waterBody} · stazione di misura ${station}, a ${distance}`,
+    marineLine: "Temperatura dell'acqua di mare alla tua piazzola",
+    noTemperature:
+      "Questa stazione non misura la temperatura dell'acqua – ci sono solo livello e portata.",
+    comfort: {
+      cold: "fredda",
+      brisk: "fresca",
+      pleasant: "piacevole",
+      warm: "calda",
+    },
+    trend: {
+      rising: "in aumento",
+      steady: "stabile",
+      falling: "in calo",
+    },
+    flowLabel: "Portata",
+    flowValue: (value: string) => `${value} m³/s`,
+    levelLabel: "Livello",
+    levelValue: (value: string) => `${value} m s.l.m.`,
+    measuredAt: (when: string) => `Misurato il ${when}`,
+    sourceStation:
+      "Fonte: dati idrologici aperti dell'UFAM tramite api.existenz.ch",
+    sourceMarine: "Fonte: Open-Meteo Marine",
+    safetyNote:
+      "Sono i valori della stazione più vicina, non del tuo punto di balneazione. Non dicono nulla su corrente, qualità dell'acqua e regole di balneazione – guarda la segnaletica sul posto.",
+  },
+
   /** Passaggi della ISS nella parte astro (#222). */
   iss: {
     sectionAria: "Passaggi visibili della stazione spaziale ISS",

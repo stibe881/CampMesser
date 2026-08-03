@@ -1,8 +1,9 @@
 /**
- * Reine Geodäsie-Helfer für den Zelt-Finder: Grosskreis-Distanz (Haversine)
- * und Anfangs-Peilung zwischen zwei WGS84-Koordinaten. Bewusst ohne
- * Abhängigkeiten und Seiteneffekte, damit Client und Tests sie direkt nutzen.
+ * Reine Geodäsie-Helfer: Grosskreis-Distanz (Haversine) und Anfangs-Peilung
+ * zwischen zwei WGS84-Koordinaten, dazu die Distanz-Ausgabe. Ohne
+ * Seiteneffekte, damit Client, Server und Tests sie direkt nutzen.
  */
+import { LOCALE_TAGS, type Language } from "./i18n";
 
 /** Mittlerer Erdradius in Metern. */
 const EARTH_RADIUS_M = 6371000;
@@ -48,4 +49,14 @@ export function bearingDegrees(
     Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLambda);
   const theta = (Math.atan2(y, x) * 180) / Math.PI;
   return (theta + 360) % 360;
+}
+
+/** Distanz formatieren: unter 1 km in Metern, sonst km mit einer Nachkommastelle. */
+export function formatDistance(meters: number, lang: Language = "de"): string {
+  if (meters < 1000) return `${Math.round(meters)} m`;
+  const km = new Intl.NumberFormat(LOCALE_TAGS[lang], {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(meters / 1000);
+  return `${km} km`;
 }

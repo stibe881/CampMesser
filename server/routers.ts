@@ -28,6 +28,7 @@ import {
 } from "@shared/settings";
 import { MAX_STATIONS, solutionWordFromStations } from "@shared/hunts";
 import { selectVisiblePasses } from "@shared/iss";
+import { nearestWaterStation, waterTrend } from "@shared/bathingWater";
 import { isBadgeId } from "@shared/badges";
 import {
   MAX_QUIZ_OPTIONS,
@@ -4344,6 +4345,68 @@ export const appRouter = router({
           passes: selectVisiblePasses(raw, input.latitude, input.longitude),
           /** Wurden überhaupt Überflüge geliefert? Trennt «keine sichtbaren» von «Quelle stumm». */
           sourceReachable: raw.length > 0,
+        };
+      }),
+  }),
+
+  /**
+   * Badestellen-Info (#223): Wassertemperatur, Abfluss und Pegel am Platz.
+   * In der Schweiz aus den offenen Hydrodaten der nächstgelegenen Messstelle
+   * (Auswahl in shared/bathingWater.ts), sonst die Meerwasser-Temperatur der
+   * Marine-API. Kein Login nötig – die Daten hängen nur am Ort.
+   */
+  water: router({
+    nearby: publicProcedure
+      .input(
+        z.object({
+          latitude: z.number().min(-90).max(90),
+          longitude: z.number().min(-180).max(180),
+        })
+      )
+      .query(async ({ input }) => {
+        const { fetchMarineWater, fetchStationReading } =
+          await import("./bathingWater");
+        const nearest = nearestWaterStation(input.latitude, input.longitude);
+        if (nearest) {
+          const reading = await fetchStationReading(nearest.station.id);
+          // Eine stumme Messstelle ist wertlos – dann lieber am Meer nachsehen.
+          if (
+            reading.temperatureC !== null ||
+            reading.flowM3s !== null ||
+            reading.levelMasl !== null
+          ) {
+            return {
+              source: "station" as const,
+              station: {
+                id: nearest.station.id,
+                name: nearest.station.name,
+                waterBody: nearest.station.waterBody,
+                type: nearest.station.type,
+                distanceM: Math.round(nearest.distanceM),
+              },
+              reading,
+              marine: null,
+            };
+          }
+        }
+        const marine = await fetchMarineWater(input.latitude, input.longitude);
+        if (!marine) {
+          return {
+            source: "none" as const,
+            station: null,
+            reading: null,
+            marine: null,
+          };
+        }
+        return {
+          source: "marine" as const,
+          station: null,
+          reading: null,
+          marine: {
+            temperatureC: marine.temperatureC,
+            measuredAtMs: marine.measuredAtMs,
+            trend: waterTrend(marine.temperatureC, marine.previousC),
+          },
         };
       }),
   }),

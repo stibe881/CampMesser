@@ -2601,6 +2601,36 @@ export const de = {
         `Beobachtung «${title}» wirklich löschen?`,
     },
   },
+  /** Badestellen-Info im Platz-Dossier (#223). */
+  bathingWater: {
+    title: "Wasser & Baden",
+    stationLine: (waterBody: string, station: string, distance: string) =>
+      `${waterBody} · Messstelle ${station}, ${distance} entfernt`,
+    marineLine: "Meerwasser-Temperatur an deinem Platz",
+    noTemperature:
+      "Diese Messstelle misst keine Wassertemperatur – es gibt nur Pegel und Abfluss.",
+    comfort: {
+      cold: "kalt",
+      brisk: "frisch",
+      pleasant: "angenehm",
+      warm: "warm",
+    },
+    trend: {
+      rising: "steigend",
+      steady: "gleichbleibend",
+      falling: "fallend",
+    },
+    flowLabel: "Abfluss",
+    flowValue: (value: string) => `${value} m³/s`,
+    levelLabel: "Pegel",
+    levelValue: (value: string) => `${value} m ü. M.`,
+    measuredAt: (when: string) => `Gemessen am ${when}`,
+    sourceStation: "Quelle: offene Hydrodaten des BAFU über api.existenz.ch",
+    sourceMarine: "Quelle: Open-Meteo Marine",
+    safetyNote:
+      "Die Werte sind Messwerte der nächstgelegenen Stelle, nicht deiner Badestelle. Zu Strömung, Wasserqualität und Baderegeln sagen sie nichts – schau vor Ort auf die Beschilderung.",
+  },
+
   /** ISS-Überflüge im Astro-Bereich (#222). */
   iss: {
     sectionAria: "Sichtbare Überflüge der Raumstation ISS",
