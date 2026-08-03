@@ -2888,6 +2888,26 @@ export const fr: Translation = {
     barExpiredAria: (name: string) =>
       `Le minuteur ${name} est écoulé – retour à la recette`,
   },
+  servings: {
+    question: "Pour combien de personnes ?",
+    personCount: (n: number) => (n === 1 ? "1 personne" : `${n} personnes`),
+    decreaseAria: "Une personne de moins",
+    increaseAria: "Une personne de plus",
+    baseHint: (n: number) =>
+      `Recette de base pour ${n === 1 ? "1 personne" : `${n} personnes`}`,
+    scaledNote:
+      "Les quantités sont converties. Les lignes sans quantité («Sel selon le goût») restent telles quelles.",
+    reset: "Réinitialiser",
+    resetAria: "Revenir au nombre de portions de la recette",
+    menuTitle: "Convertir les quantités",
+    menuToggleAria:
+      "Convertir les quantités du menu pour un nombre de personnes",
+    menuOff: "comme dans la recette",
+    menuHint:
+      "Vaut pour l'aperçu des ingrédients et pour la reprise dans la liste de courses.",
+    menuScaledTo: (n: number) =>
+      `converti pour ${n === 1 ? "1 personne" : `${n} personnes`}`,
+  },
   food: {
     title: "Inventaire de la glacière",
     subtitleLoggedOut:

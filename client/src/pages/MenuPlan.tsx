@@ -35,9 +35,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import ServingsStepper from "@/components/ServingsStepper";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
+import { loadMenuPersons, storeMenuPersons } from "@/lib/menuPersons";
 import { recipes } from "@/data/recipes";
 import {
   normalizeMethod,
@@ -45,6 +48,7 @@ import {
   RECIPE_METHOD_LABELS,
 } from "@shared/customRecipes";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
+import { clampServings, scaleIngredientsForServings } from "@shared/servings";
 import {
   autofillMenuPlan,
   MEALS,
@@ -72,7 +76,10 @@ interface RecipePreview {
   /** Anzeigetext der Zubereitungsart (bereits gepickt) */
   methodLabel: string;
   own: boolean;
+  /** Zutaten in der aktiven Sprache, bereits auf `scaledTo` umgerechnet */
   ingredients: string[];
+  /** Personenzahl, auf die umgerechnet wurde; null = wie im Rezept */
+  scaledTo: number | null;
   steps: string[];
   tip: string | null;
 }
@@ -131,6 +138,13 @@ export default function MenuPlanPage() {
     { enabled: Boolean(menuQuery.data?.trip), retry: false }
   );
   const isSharedTrip = (membersQuery.data?.members.length ?? 0) > 1;
+  /**
+   * Vorschlag beim Einschalten der Umrechnung: bei gemeinsamen Reisen die
+   * Zahl der Mitreisenden, sonst die übliche Rezept-Grundzahl 4.
+   */
+  const defaultPersons = isSharedTrip
+    ? clampServings(membersQuery.data?.members.length ?? 4)
+    : 4;
 
   const [picker, setPicker] = useState<PickerSlot | null>(null);
   /** Offene Rezept-Vorschau (null = zu). */
@@ -144,6 +158,18 @@ export default function MenuPlanPage() {
   } | null>(null);
   /** Auswahl «Persönliche Liste / Reise-Liste» offen (nur geteilte Reisen). */
   const [listChoiceOpen, setListChoiceOpen] = useState(false);
+  /**
+   * Personenzahl fürs Umrechnen der Mengen (#231); null = wie im Rezept.
+   * Pro Reise und Gerät gemerkt – sie wirkt auf die Zutaten-Vorschau und auf
+   * die Übernahme auf die Einkaufsliste.
+   */
+  const [persons, setPersons] = useState<number | null>(() =>
+    Number.isInteger(tripId) ? loadMenuPersons(tripId) : null
+  );
+  const changePersons = (next: number | null) => {
+    setPersons(next);
+    if (Number.isInteger(tripId)) storeMenuPersons(tripId, next);
+  };
 
   const closePicker = () => {
     setPicker(null);
@@ -259,6 +285,23 @@ export default function MenuPlanPage() {
   };
 
   /**
+   * Zutaten-Zeilen eines Rezepts auf die eingestellte Personenzahl umrechnen
+   * (#231). Ohne eingestellte Zahl bleiben sie Zeichen für Zeichen gleich.
+   */
+  const scaleForPersons = (
+    lines: string[],
+    recipeServings: number
+  ): string[] =>
+    persons === null
+      ? lines
+      : scaleIngredientsForServings(
+          lines,
+          clampServings(recipeServings),
+          persons,
+          lang
+        );
+
+  /**
    * Das Rezept eines Slots für die Vorschau auflösen – eingebaute Rezepte über
    * pick(), eigene über die JSON-Spalten. Freitext-Slots und Rezepte, die es
    * nicht (mehr) gibt, liefern null: dort bleibt die Zeile wie bisher.
@@ -275,7 +318,11 @@ export default function MenuPlanPage() {
         servings: recipe.servings,
         methodLabel: pick(RECIPE_METHOD_LABELS[recipe.method], lang),
         own: false,
-        ingredients: recipe.ingredients.map(i => pick(i, lang)),
+        ingredients: scaleForPersons(
+          recipe.ingredients.map(i => pick(i, lang)),
+          recipe.servings
+        ),
+        scaledTo: persons,
         steps: recipe.steps.map(s => pick(s, lang)),
         tip: recipe.tip ? pick(recipe.tip, lang) : null,
       };
@@ -292,7 +339,11 @@ export default function MenuPlanPage() {
           lang
         ),
         own: true,
-        ingredients: parseStringList(row.ingredientsJson),
+        ingredients: scaleForPersons(
+          parseStringList(row.ingredientsJson),
+          row.servings
+        ),
+        scaledTo: persons,
         steps: parseStringList(row.stepsJson, 20),
         tip: row.tip,
       };
@@ -349,20 +400,40 @@ export default function MenuPlanPage() {
   const plannedIngredients = useMemo(() => {
     const lines: string[] = [];
     const originByLine = new Map<string, string>();
-    const push = (line: string, recipeTitle: string) => {
-      lines.push(line);
-      if (!originByLine.has(line)) originByLine.set(line, recipeTitle);
+    /** Zutaten eines Rezepts – auf die Personenzahl umgerechnet (#231). */
+    const push = (
+      recipeLines: string[],
+      recipeServings: number,
+      recipeTitle: string
+    ) => {
+      const scaled =
+        persons === null
+          ? recipeLines
+          : scaleIngredientsForServings(
+              recipeLines,
+              clampServings(recipeServings),
+              persons,
+              lang
+            );
+      scaled.forEach(line => {
+        lines.push(line);
+        if (!originByLine.has(line)) originByLine.set(line, recipeTitle);
+      });
     };
     entries.forEach(entry => {
       if (entry.recipeId) {
         const recipe = staticById.get(entry.recipeId);
-        recipe?.ingredients.forEach(i =>
-          push(pick(i, lang), pick(recipe.name, lang))
-        );
+        if (recipe) {
+          push(
+            recipe.ingredients.map(i => pick(i, lang)),
+            recipe.servings,
+            pick(recipe.name, lang)
+          );
+        }
       } else if (entry.customRecipeId != null) {
         const row = customById.get(entry.customRecipeId);
         if (row) {
-          parseStringList(row.ingredientsJson).forEach(i => push(i, row.name));
+          push(parseStringList(row.ingredientsJson), row.servings, row.name);
         }
       }
     });
@@ -373,7 +444,7 @@ export default function MenuPlanPage() {
         note: origin ? t.shopping.fromRecipe(origin).slice(0, 160) : undefined,
       };
     });
-  }, [entries, staticById, customById, lang, t]);
+  }, [entries, staticById, customById, lang, t, persons]);
 
   /** Rezept-Vorrat fürs automatische Füllen: eingebaute + eigene Rezepte. */
   const autofillRecipes = useMemo<AutofillRecipe[]>(() => {
@@ -608,6 +679,34 @@ export default function MenuPlanPage() {
             {t.menuPlan.printButton}
           </Link>
         </Button>
+      </div>
+
+      {/* Mengen auf eine Personenzahl umrechnen (#231) */}
+      <div className="mb-6 rounded-xl border border-border bg-card px-4 py-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span className="flex items-center gap-1.5 text-sm font-medium">
+            <Users className="h-4 w-4 text-primary" aria-hidden="true" />
+            {t.servings.menuTitle}
+          </span>
+          <Switch
+            checked={persons !== null}
+            aria-label={t.servings.menuToggleAria}
+            onCheckedChange={on => changePersons(on ? defaultPersons : null)}
+          />
+          {persons === null ? (
+            <span className="text-sm text-muted-foreground">
+              {t.servings.menuOff}
+            </span>
+          ) : (
+            <ServingsStepper
+              value={persons}
+              onChange={next => changePersons(next)}
+            />
+          )}
+        </div>
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          {t.servings.menuHint}
+        </p>
       </div>
 
       {/* Tage-Raster */}
@@ -857,6 +956,8 @@ export default function MenuPlanPage() {
                   <span className="flex items-center gap-1">
                     <Users className="h-3.5 w-3.5" aria-hidden="true" />
                     {t.menuPlan.previewServings(preview.servings)}
+                    {preview.scaledTo !== null &&
+                      ` · ${t.servings.menuScaledTo(preview.scaledTo)}`}
                   </span>
                   <span>{preview.methodLabel}</span>
                 </DialogDescription>

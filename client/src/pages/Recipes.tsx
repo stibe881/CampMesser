@@ -22,6 +22,7 @@ import {
   Plus,
   QrCode,
   Refrigerator,
+  RotateCcw,
   Search,
   Share2,
   ShoppingCart,
@@ -35,6 +36,7 @@ import QRCode from "qrcode";
 import { useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import ServingsStepper from "@/components/ServingsStepper";
 import ShoppingTargetSelect, {
   useShoppingTarget,
 } from "@/components/ShoppingTargetSelect";
@@ -70,6 +72,7 @@ import {
   QUICK_TIMER_MINUTES,
 } from "@shared/cookTimer";
 import { pick } from "@shared/i18n";
+import { clampServings, scaleIngredientsForServings } from "@shared/servings";
 import { useI18n, useT } from "@/i18n";
 import {
   isExpired,
@@ -713,10 +716,13 @@ function RecipeTimerSection({
  */
 function CookingModeDialog({
   recipe,
+  ingredients,
   onClose,
   onDestock,
 }: {
   recipe: Recipe;
+  /** Zutaten in der aktiven Sprache, bereits auf die Personenzahl umgerechnet */
+  ingredients: string[];
   onClose: () => void;
   /** Nur eingeloggt gesetzt: Zutaten nach dem Kochen aus der Kühlbox austragen */
   onDestock?: () => void;
@@ -802,13 +808,13 @@ function CookingModeDialog({
             id="cooking-ingredients"
             className="grid max-h-44 gap-x-4 gap-y-1 overflow-y-auto pb-3 text-sm sm:grid-cols-2"
           >
-            {recipe.ingredients.map((i, idx) => (
+            {ingredients.map((ingredient, idx) => (
               <li key={idx} className="flex gap-2">
                 <span
                   className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
                   aria-hidden="true"
                 />
-                {pick(i, lang)}
+                {ingredient}
               </li>
             ))}
           </ul>
@@ -875,6 +881,12 @@ export default function RecipesPage() {
   const [cookingMode, setCookingMode] = useState(false);
   // Detail-Dialog wurde über den Würfel geöffnet → «Nochmals würfeln» anbieten
   const [diceMode, setDiceMode] = useState(false);
+  /**
+   * Personenzahl im offenen Rezept (#231); null = Portionen des Rezepts.
+   * Beim Schliessen des Detail-Dialogs wieder auf null – jedes Rezept startet
+   * mit seiner eigenen Portionenzahl.
+   */
+  const [servings, setServings] = useState<number | null>(null);
 
   // Favoriten: localStorage als schnelle Quelle, Geräte-Sync fürs Konto
   const [favorites, setFavorites] = useState<string[]>(() =>
@@ -1114,6 +1126,28 @@ export default function RecipesPage() {
 
   const customRowFor = (recipe: Recipe): CustomRecipeRow | undefined =>
     customQuery.data?.find(row => `eigenes-${row.id}` === recipe.id);
+
+  // ── Portionen skalieren (#231) ──
+  /** Portionenzahl des offenen Rezepts (Grundlage der Umrechnung). */
+  const baseServings = selected ? clampServings(selected.servings) : 4;
+  /** Eingestellte Personenzahl – ohne eigene Wahl die des Rezepts. */
+  const targetServings = servings ?? baseServings;
+  /**
+   * Zutaten in der aktiven Sprache, auf die eingestellte Personenzahl
+   * umgerechnet. Bei gleicher Zahl kommen die Zeilen unverändert zurück.
+   */
+  const scaledIngredients = useMemo(
+    () =>
+      selected
+        ? scaleIngredientsForServings(
+            selected.ingredients.map(i => pick(i, lang)),
+            baseServings,
+            targetServings,
+            lang
+          )
+        : [],
+    [selected, baseServings, targetServings, lang]
+  );
 
   /**
    * Zufallsrezept (#164): zieht ein zufälliges Rezept aus der aktuell
@@ -1368,6 +1402,7 @@ export default function RecipesPage() {
             setSelected(null);
             setCookingMode(false);
             setDiceMode(false);
+            setServings(null);
           }
         }}
       >
@@ -1385,7 +1420,7 @@ export default function RecipesPage() {
                   </span>
                   <span className="flex items-center gap-1">
                     <Users className="h-3.5 w-3.5" aria-hidden="true" />
-                    {t.recipes.servings(selected.servings)}
+                    {t.servings.baseHint(baseServings)}
                   </span>
                   <span>
                     {pick(RECIPE_METHOD_LABELS[selected.method], lang)}
@@ -1451,14 +1486,45 @@ export default function RecipesPage() {
                   <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                     {t.recipes.ingredientsTitle}
                   </h3>
+                  {/* Portionen skalieren (#231): Mengen rechnen mit */}
+                  <div className="mb-3 rounded-lg border border-border px-3 py-2.5">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                      <span className="text-sm font-medium">
+                        {t.servings.question}
+                      </span>
+                      <ServingsStepper
+                        value={targetServings}
+                        onChange={setServings}
+                      />
+                      {targetServings !== baseServings && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label={t.servings.resetAria}
+                          onClick={() => setServings(null)}
+                        >
+                          <RotateCcw
+                            className="mr-1.5 h-3.5 w-3.5"
+                            aria-hidden="true"
+                          />
+                          {t.servings.reset}
+                        </Button>
+                      )}
+                    </div>
+                    {targetServings !== baseServings && (
+                      <p className="mt-1.5 text-xs text-muted-foreground">
+                        {t.servings.scaledNote}
+                      </p>
+                    )}
+                  </div>
                   <ul className="grid grid-cols-2 gap-1 text-sm">
-                    {selected.ingredients.map((i, idx) => (
+                    {scaledIngredients.map((ingredient, idx) => (
                       <li key={idx} className="flex gap-2">
                         <span
                           className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
                           aria-hidden="true"
                         />
-                        {pick(i, lang)}
+                        {ingredient}
                       </li>
                     ))}
                   </ul>
@@ -1471,8 +1537,9 @@ export default function RecipesPage() {
                       onClick={() =>
                         addToShoppingMutation.mutate({
                           listId: shoppingTarget.listId ?? undefined,
-                          names: selected.ingredients
-                            .map(i => pick(i, lang).trim())
+                          // Mengen in der eingestellten Personenzahl (#231)
+                          names: scaledIngredients
+                            .map(i => i.trim())
                             .filter(Boolean)
                             .map(i => ({
                               name: i.slice(0, 160),
@@ -1631,6 +1698,7 @@ export default function RecipesPage() {
         {cookingMode && selected && (
           <CookingModeDialog
             recipe={selected}
+            ingredients={scaledIngredients}
             onClose={() => setCookingMode(false)}
             onDestock={isAuthenticated ? openDestock : undefined}
           />

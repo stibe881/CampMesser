@@ -2791,6 +2791,25 @@ export const en: Translation = {
     barExpiredAria: (name: string) =>
       `Timer ${name} has finished – back to the recipe`,
   },
+  servings: {
+    question: "How many people?",
+    personCount: (n: number) => (n === 1 ? "1 person" : `${n} people`),
+    decreaseAria: "One person fewer",
+    increaseAria: "One person more",
+    baseHint: (n: number) =>
+      `Base recipe for ${n === 1 ? "1 person" : `${n} people`}`,
+    scaledNote:
+      "Quantities are converted. Lines without a quantity (“salt to taste”) stay as they are.",
+    reset: "Reset",
+    resetAria: "Back to the servings of the recipe",
+    menuTitle: "Convert quantities",
+    menuToggleAria: "Convert the menu quantities for a number of people",
+    menuOff: "as in the recipe",
+    menuHint:
+      "Applies to the ingredient preview and to adding the items to the shopping list.",
+    menuScaledTo: (n: number) =>
+      `converted for ${n === 1 ? "1 person" : `${n} people`}`,
+  },
   food: {
     title: "Cool box inventory",
     subtitleLoggedOut:

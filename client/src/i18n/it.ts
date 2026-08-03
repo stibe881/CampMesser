@@ -2863,6 +2863,25 @@ export const it: Translation = {
     barExpiredAria: (name: string) =>
       `Il timer ${name} è scaduto – torna alla ricetta`,
   },
+  servings: {
+    question: "Per quante persone?",
+    personCount: (n: number) => (n === 1 ? "1 persona" : `${n} persone`),
+    decreaseAria: "Una persona in meno",
+    increaseAria: "Una persona in più",
+    baseHint: (n: number) =>
+      `Ricetta base per ${n === 1 ? "1 persona" : `${n} persone`}`,
+    scaledNote:
+      "Le quantità sono convertite. Le righe senza quantità («Sale q.b.») restano come sono.",
+    reset: "Reimposta",
+    resetAria: "Torna alle porzioni della ricetta",
+    menuTitle: "Converti le quantità",
+    menuToggleAria: "Converti le quantità del menù per un numero di persone",
+    menuOff: "come nella ricetta",
+    menuHint:
+      "Vale per l'anteprima degli ingredienti e per il trasferimento nella lista della spesa.",
+    menuScaledTo: (n: number) =>
+      `convertito per ${n === 1 ? "1 persona" : `${n} persone`}`,
+  },
   food: {
     title: "Inventario del frigo box",
     subtitleLoggedOut:

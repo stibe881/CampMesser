@@ -2892,6 +2892,25 @@ export const de = {
     barExpiredAria: (name: string) =>
       `Timer ${name} ist abgelaufen – zurück zum Rezept`,
   },
+  servings: {
+    question: "Für wie viele Personen?",
+    personCount: (n: number) => (n === 1 ? "1 Person" : `${n} Personen`),
+    decreaseAria: "Eine Person weniger",
+    increaseAria: "Eine Person mehr",
+    baseHint: (n: number) =>
+      `Grundrezept für ${n === 1 ? "1 Person" : `${n} Personen`}`,
+    scaledNote:
+      "Die Mengen sind umgerechnet. Zeilen ohne Menge («Salz nach Geschmack») bleiben stehen, wie sie sind.",
+    reset: "Zurücksetzen",
+    resetAria: "Zurück zur Portionenzahl des Rezepts",
+    menuTitle: "Mengen umrechnen",
+    menuToggleAria: "Mengen des Menüplans auf eine Personenzahl umrechnen",
+    menuOff: "wie im Rezept",
+    menuHint:
+      "Gilt für die Zutaten-Vorschau und für die Übernahme auf die Einkaufsliste.",
+    menuScaledTo: (n: number) =>
+      `umgerechnet auf ${n === 1 ? "1 Person" : `${n} Personen`}`,
+  },
   food: {
     title: "Kühlbox-Inventar",
     subtitleLoggedOut:
