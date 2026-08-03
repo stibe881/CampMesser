@@ -2961,6 +2961,39 @@ export const en: Translation = {
     detailsQuantityPlaceholder: "e.g. 2× or 500 g",
     detailsNoteLabel: "Note",
     detailsNotePlaceholder: "e.g. on offer, lactose-free …",
+    detailsPriceLabel: "Price (CHF)",
+    detailsPricePlaceholder: "e.g. 3.50",
+    detailsPriceHint:
+      "Leave empty if you do not want to record a price. The total sits at the top of the list.",
+    detailsPriceBooked:
+      "Already transferred to the trip fund – the price stays as it was booked.",
+    totalLabel: "Total:",
+    totalBreakdown: (open: string, checked: string) =>
+      `open ${open} · ticked ${checked}`,
+    totalBooked: (booked: string) => `booked ${booked}`,
+    bookedBadge: "booked",
+    bookButton: (sum: string) => `To the trip fund (${sum})`,
+    bookTitle: "Transfer to the trip fund",
+    bookDesc:
+      "The ticked purchases with a price are booked as a single expense in the trip fund. Booked items are never counted again.",
+    bookNothing: "Nothing to transfer: no ticked item with a price is open.",
+    bookItemAria: (name: string) => `Include ${name}`,
+    bookSumLabel: (n: number) =>
+      n === 1 ? "1 item – total" : `${n} items – total`,
+    bookTripLabel: "Trip",
+    bookTripFallback: "Stay",
+    bookNoTrips:
+      "You do not have a trip in the journal yet – create one first and the trip fund follows.",
+    bookCategoryLabel: "Category",
+    bookDayLabel: "Date",
+    bookDescriptionLabel: "Description",
+    bookDescriptionPlaceholder: "e.g. big shop at Migros",
+    bookPaidByLabel: "Paid by",
+    bookPaidByPlaceholder: "Name",
+    bookConfirm: (sum: string) => `Book ${sum}`,
+    bookDone: (n: number, sum: string) =>
+      `${n === 1 ? "1 item" : `${n} items`} booked as ${sum} in the trip fund`,
+    bookFailed: "The transfer to the trip fund did not work",
     detailsFailed: "Quantity/note could not be saved",
     openTitle: "Still to buy",
     doneTitle: "Done",

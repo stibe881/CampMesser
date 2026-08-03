@@ -8,11 +8,13 @@ import {
   ShoppingBasket,
   Trash2,
   UtensilsCrossed,
+  Wallet,
 } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
+import ShoppingBookingDialog from "@/components/ShoppingBookingDialog";
 import ShoppingItemDetailsPopover from "@/components/ShoppingItemDetailsPopover";
 import ShoppingNameAutocomplete from "@/components/ShoppingNameAutocomplete";
 import StorePurchasesDialog from "@/components/StorePurchasesDialog";
@@ -37,6 +39,7 @@ import {
   type ShoppingHistoryEntry,
 } from "@/lib/shoppingHistory";
 import { trpc } from "@/lib/trpc";
+import { formatChf } from "@/lib/money";
 import { hapticTick } from "@/lib/haptics";
 import { usePointerDrag } from "@/lib/usePointerDrag";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
@@ -48,6 +51,7 @@ import {
   SHOPPING_CATEGORY_LABELS,
   type ShoppingCategory,
 } from "@shared/shopping";
+import { isBooked, shoppingPriceTotals } from "@shared/shoppingPrices";
 
 /** Select-Wert für «Ohne Kategorie» (Radix erlaubt keinen leeren String). */
 const NO_CATEGORY = "none" as const;
@@ -82,6 +86,8 @@ export default function TripShoppingPage() {
   const [newCategory, setNewCategory] = useState<string>(NO_CATEGORY);
   /** «Einkäufe einräumen»: abgehakte Einträge in die EIGENE Kühlbox übernehmen. */
   const [putAwayOpen, setPutAwayOpen] = useState(false);
+  /** «In die Reisekasse»: abgehakte Preise als Ausgabe dieser Reise (#234). */
+  const [bookOpen, setBookOpen] = useState(false);
 
   // Einkaufs-Verlauf für Autocomplete: der persönliche Verlauf (lokal +
   // Geräte-Sync) gilt auch auf der gemeinsamen Reise-Liste.
@@ -138,6 +144,21 @@ export default function TripShoppingPage() {
     onSuccess: invalidate,
     onError: () => toast.error(t.common.deleteFailed),
   });
+  // Übernahme in die Reisekasse (#234): die Reise steht hier bereits fest
+  const bookMutation = trpc.tripShopping.bookToTrip.useMutation({
+    onSuccess: result => {
+      invalidate();
+      utils.trips.expenses.list.invalidate({ tripId });
+      setBookOpen(false);
+      toast.success(
+        t.shopping.bookDone(
+          result.count,
+          `${t.tripExpenses.currency} ${formatChf(result.amountRappen, lang)}`
+        )
+      );
+    },
+    onError: e => toast.error(e.message || t.shopping.bookFailed),
+  });
   const setCategoryMutation = trpc.tripShopping.setCategory.useMutation({
     onSuccess: invalidate,
     onError: () => toast.error(t.shopping.categoryChangeFailed),
@@ -170,6 +191,10 @@ export default function TripShoppingPage() {
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
   const openItems = useMemo(() => items.filter(i => !i.checked), [items]);
   const doneItems = useMemo(() => items.filter(i => i.checked), [items]);
+  /** Laufende Summe der erfassten Preise (#234). */
+  const totals = useMemo(() => shoppingPriceTotals(items), [items]);
+  const money = (rappen: number) =>
+    `${t.tripExpenses.currency} ${formatChf(rappen, lang)}`;
 
   // Autocomplete-Vorschläge: Verlauf (neueste zuerst) vor den Listen-Einträgen
   const suggestions = useMemo(
@@ -401,6 +426,24 @@ export default function TripShoppingPage() {
         </Button>
       </form>
 
+      {/* Laufende Summe der erfassten Preise (#234) */}
+      {totals.pricedCount > 0 && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-xl border border-border bg-card px-4 py-2.5">
+          <span className="text-sm font-semibold">
+            {t.shopping.totalLabel}{" "}
+            <span className="tabular-nums">{money(totals.totalRappen)}</span>
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {t.shopping.totalBreakdown(
+              money(totals.openRappen),
+              money(totals.bookableRappen)
+            )}
+            {totals.bookedRappen > 0 &&
+              ` · ${t.shopping.totalBooked(money(totals.bookedRappen))}`}
+          </span>
+        </div>
+      )}
+
       {items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border p-10 text-center">
           <ShoppingBasket
@@ -486,6 +529,11 @@ export default function TripShoppingPage() {
                                       {item.quantity}
                                     </span>
                                   )}
+                                  {item.priceRappen ? (
+                                    <span className="ml-2 align-middle text-xs font-medium tabular-nums text-muted-foreground">
+                                      {money(item.priceRappen)}
+                                    </span>
+                                  ) : null}
                                 </span>
                                 {(item.note || by) && (
                                   <p className="break-words text-xs text-muted-foreground">
@@ -605,6 +653,16 @@ export default function TripShoppingPage() {
                               {item.quantity}
                             </span>
                           )}
+                          {item.priceRappen ? (
+                            <span className="ml-2 align-middle text-xs font-medium tabular-nums no-underline">
+                              {money(item.priceRappen)}
+                            </span>
+                          ) : null}
+                          {isBooked(item) && (
+                            <span className="ml-2 inline-block rounded-full border border-primary/50 bg-primary/10 px-2 py-0.5 align-middle text-xs font-medium text-primary no-underline">
+                              {t.shopping.bookedBadge}
+                            </span>
+                          )}
                         </span>
                         {(item.note || by) && (
                           <p className="break-words text-xs text-muted-foreground/70">
@@ -630,6 +688,12 @@ export default function TripShoppingPage() {
                 })}
               </ul>
               <div className="mt-3 flex flex-wrap gap-2">
+                {totals.bookableCount > 0 && (
+                  <Button size="sm" onClick={() => setBookOpen(true)}>
+                    <Wallet className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    {t.shopping.bookButton(money(totals.bookableRappen))}
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
@@ -652,6 +716,16 @@ export default function TripShoppingPage() {
           )}
         </div>
       )}
+
+      {/* «In die Reisekasse»: Reise steht fest, Kategorie «Essen» vorbelegt */}
+      <ShoppingBookingDialog
+        open={bookOpen}
+        onOpenChange={setBookOpen}
+        items={doneItems}
+        fixedTripId={tripId}
+        saving={bookMutation.isPending}
+        onBook={input => bookMutation.mutateAsync(input)}
+      />
 
       {/* «Einkäufe einräumen»: Kühlbox ist persönlich – die Einträge landen
           im EIGENEN Kühlbox-Inventar und verschwinden von der Reise-Liste. */}

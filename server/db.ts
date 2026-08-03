@@ -996,7 +996,11 @@ export async function setShoppingItemCategory(
 export async function updateShoppingItemDetails(
   id: number,
   userId: number,
-  data: { quantity?: string | null; note?: string | null }
+  data: {
+    quantity?: string | null;
+    note?: string | null;
+    priceRappen?: number | null;
+  }
 ) {
   if (Object.keys(data).length === 0) return;
   const db = requireDb(await getDb());
@@ -1004,6 +1008,31 @@ export async function updateShoppingItemDetails(
     .update(shoppingItems)
     .set(data)
     .where(and(eq(shoppingItems.id, id), eq(shoppingItems.userId, userId)));
+}
+
+/**
+ * Einträge als «in der Reisekasse verbucht» markieren (#234): setzt
+ * bookedExpenseId auf die Ausgabe. Nur eigene, noch UNVERBUCHTE Zeilen
+ * werden angefasst – zwei gleichzeitige Übernahmen können denselben
+ * Einkauf so nicht doppelt zählen.
+ */
+export async function markShoppingItemsBooked(
+  userId: number,
+  itemIds: number[],
+  expenseId: number
+) {
+  if (itemIds.length === 0) return;
+  const db = requireDb(await getDb());
+  await db
+    .update(shoppingItems)
+    .set({ bookedExpenseId: expenseId })
+    .where(
+      and(
+        eq(shoppingItems.userId, userId),
+        inArray(shoppingItems.id, itemIds),
+        isNull(shoppingItems.bookedExpenseId)
+      )
+    );
 }
 
 /** Neue Reihenfolge der Einkaufsliste speichern: position = 0..n. */
@@ -1183,7 +1212,11 @@ export async function setTripShoppingItemCategory(
 export async function updateTripShoppingItemDetails(
   id: number,
   tripId: number,
-  data: { quantity?: string | null; note?: string | null }
+  data: {
+    quantity?: string | null;
+    note?: string | null;
+    priceRappen?: number | null;
+  }
 ) {
   if (Object.keys(data).length === 0) return;
   const db = requireDb(await getDb());
@@ -1192,6 +1225,26 @@ export async function updateTripShoppingItemDetails(
     .set(data)
     .where(
       and(eq(tripShoppingItems.id, id), eq(tripShoppingItems.tripId, tripId))
+    );
+}
+
+/** Einträge der Reise-Liste als in der Reisekasse verbucht markieren (#234). */
+export async function markTripShoppingItemsBooked(
+  tripId: number,
+  itemIds: number[],
+  expenseId: number
+) {
+  if (itemIds.length === 0) return;
+  const db = requireDb(await getDb());
+  await db
+    .update(tripShoppingItems)
+    .set({ bookedExpenseId: expenseId })
+    .where(
+      and(
+        eq(tripShoppingItems.tripId, tripId),
+        inArray(tripShoppingItems.id, itemIds),
+        isNull(tripShoppingItems.bookedExpenseId)
+      )
     );
 }
 

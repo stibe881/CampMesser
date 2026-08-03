@@ -45,6 +45,10 @@ import {
   parseFoodTemplateItems,
 } from "@shared/foodTemplates";
 import {
+  shoppingBooking,
+  MAX_SHOPPING_PRICE_RAPPEN,
+} from "@shared/shoppingPrices";
+import {
   FOOD_CATEGORIES,
   FOOD_STORAGES,
   FOOD_UNITS,
@@ -1978,13 +1982,22 @@ export const appRouter = router({
         );
         return { added: input.names.length, listId: list.id };
       }),
-    /** Menge und/oder Notiz eines eigenen Eintrags setzen (null/"" entfernt). */
+    /**
+     * Menge, Notiz und/oder Preis eines eigenen Eintrags setzen
+     * (null/"" entfernt den Wert). Der Preis kommt als Rappen-Ganzzahl.
+     */
     updateItem: protectedProcedure
       .input(
         z.object({
           id: z.number(),
           quantity: z.string().max(40).nullish(),
           note: z.string().max(160).nullish(),
+          priceRappen: z
+            .number()
+            .int()
+            .min(0)
+            .max(MAX_SHOPPING_PRICE_RAPPEN)
+            .nullish(),
         })
       )
       .mutation(({ ctx, input }) =>
@@ -1995,8 +2008,67 @@ export const appRouter = router({
           ...(input.note !== undefined
             ? { note: input.note?.trim() || null }
             : {}),
+          ...(input.priceRappen !== undefined
+            ? { priceRappen: input.priceRappen || null }
+            : {}),
         })
       ),
+    /**
+     * Einkauf abschliessen (#234): die abgehakten, noch nicht verbuchten
+     * Einträge mit Preis werden als EINE Ausgabe in die Reisekasse einer
+     * Reise übernommen und danach als verbucht markiert. Ohne `itemIds`
+     * zählen alle übernehmbaren Einträge der Liste.
+     */
+    bookToTrip: protectedProcedure
+      .input(
+        z.object({
+          listId: z.number().int().positive().optional(),
+          tripId: z.number().int().positive(),
+          itemIds: z.array(z.number().int()).max(500).optional(),
+          category: z.enum(EXPENSE_CATEGORIES).default("essen"),
+          description: z.string().max(EXPENSE_DESCRIPTION_MAX_LENGTH).nullish(),
+          day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          paidBy: z.string().min(1).max(EXPENSE_PAID_BY_MAX_LENGTH),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const list = await requireShoppingList(ctx.user.id, input.listId);
+        const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        const items = await db.getShoppingItems(ctx.user.id, list.id);
+        const booking = shoppingBooking(items, input.itemIds);
+        if (booking.count === 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Nichts zu übernehmen – keine abgehakten Preise offen.",
+          });
+        }
+        const amountRappen = Math.min(booking.rappen, EXPENSE_MAX_RAPPEN);
+        const expenseId = await db.addTripExpense({
+          tripId: input.tripId,
+          userId: ctx.user.id,
+          amountRappen,
+          category: input.category,
+          description: input.description?.trim() || null,
+          day: input.day,
+          paidBy: input.paidBy.trim(),
+        });
+        await db.markShoppingItemsBooked(
+          ctx.user.id,
+          booking.itemIds,
+          Number(expenseId)
+        );
+        return {
+          expenseId: Number(expenseId),
+          amountRappen,
+          count: booking.count,
+        };
+      }),
     /** Laden-Kategorie eines Eintrags setzen; null entfernt sie wieder. */
     setCategory: protectedProcedure
       .input(
@@ -2256,7 +2328,7 @@ export const appRouter = router({
         );
         return { added: input.names.length };
       }),
-    /** Menge und/oder Notiz eines Eintrags setzen (null/"" entfernt). */
+    /** Menge, Notiz und/oder Preis eines Eintrags setzen (null/"" entfernt). */
     updateItem: protectedProcedure
       .input(
         z.object({
@@ -2264,6 +2336,12 @@ export const appRouter = router({
           id: z.number(),
           quantity: z.string().max(40).nullish(),
           note: z.string().max(160).nullish(),
+          priceRappen: z
+            .number()
+            .int()
+            .min(0)
+            .max(MAX_SHOPPING_PRICE_RAPPEN)
+            .nullish(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -2275,8 +2353,58 @@ export const appRouter = router({
           ...(input.note !== undefined
             ? { note: input.note?.trim() || null }
             : {}),
+          ...(input.priceRappen !== undefined
+            ? { priceRappen: input.priceRappen || null }
+            : {}),
         });
         return { success: true } as const;
+      }),
+    /**
+     * Einkauf abschliessen (#234): abgehakte, unverbuchte Einträge mit Preis
+     * als eine Ausgabe in die Reisekasse DIESER Reise übernehmen. Die Reise
+     * steht damit fest – auf der Reise-Liste gibt es nichts zu wählen.
+     */
+    bookToTrip: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number().int().positive(),
+          itemIds: z.array(z.number().int()).max(500).optional(),
+          category: z.enum(EXPENSE_CATEGORIES).default("essen"),
+          description: z.string().max(EXPENSE_DESCRIPTION_MAX_LENGTH).nullish(),
+          day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          paidBy: z.string().min(1).max(EXPENSE_PAID_BY_MAX_LENGTH),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await requireTripAccess(input.tripId, ctx.user.id);
+        const items = await db.getTripShoppingItems(input.tripId);
+        const booking = shoppingBooking(items, input.itemIds);
+        if (booking.count === 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Nichts zu übernehmen – keine abgehakten Preise offen.",
+          });
+        }
+        const amountRappen = Math.min(booking.rappen, EXPENSE_MAX_RAPPEN);
+        const expenseId = await db.addTripExpense({
+          tripId: input.tripId,
+          userId: ctx.user.id,
+          amountRappen,
+          category: input.category,
+          description: input.description?.trim() || null,
+          day: input.day,
+          paidBy: input.paidBy.trim(),
+        });
+        await db.markTripShoppingItemsBooked(
+          input.tripId,
+          booking.itemIds,
+          Number(expenseId)
+        );
+        return {
+          expenseId: Number(expenseId),
+          amountRappen,
+          count: booking.count,
+        };
       }),
     /** Laden-Kategorie eines Eintrags setzen; null entfernt sie wieder. */
     setCategory: protectedProcedure

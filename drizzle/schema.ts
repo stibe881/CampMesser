@@ -778,6 +778,20 @@ export const shoppingItems = mysqlTable(
     quantity: varchar("quantity", { length: 40 }),
     /** Kurze Notiz zum Eintrag («Aktion», «laktosefrei»); null = keine */
     note: varchar("note", { length: 160 }),
+    /**
+     * Preis in RAPPEN (#234, Muster inventoryItems.priceRappen); null = kein
+     * Preis erfasst. Grundlage der laufenden Summe und der Übernahme in die
+     * Reisekasse.
+     */
+    priceRappen: int("priceRappen"),
+    /**
+     * Verbuchungs-Merker (#234): Id der tripExpenses-Zeile, in der dieser
+     * Eintrag als Ausgabe steckt; null = noch nicht übernommen. Verbuchte
+     * Einträge werden nie ein zweites Mal gezählt. Wird die Ausgabe später
+     * gelöscht, bleibt der Merker bewusst stehen – der Einkauf war ja
+     * einmal verbucht, und die tote Referenz stört nirgends.
+     */
+    bookedExpenseId: int("bookedExpenseId"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [
@@ -840,6 +854,13 @@ export const tripShoppingItems = mysqlTable(
     category: varchar("category", { length: 40 }),
     checked: boolean("checked").notNull().default(false),
     position: int("position").notNull().default(0),
+    /** Preis in RAPPEN (#234); null = kein Preis erfasst */
+    priceRappen: int("priceRappen"),
+    /**
+     * Verbuchungs-Merker (#234): Id der tripExpenses-Zeile, in der dieser
+     * Eintrag als Ausgabe steckt; null = noch nicht übernommen.
+     */
+    bookedExpenseId: int("bookedExpenseId"),
     /** Konto, das den Eintrag angelegt hat (users.id) – nur für die Anzeige */
     createdByUserId: int("createdByUserId").notNull(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),

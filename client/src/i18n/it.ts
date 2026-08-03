@@ -3034,6 +3034,40 @@ export const it: Translation = {
     detailsQuantityPlaceholder: "es. 2× oppure 500 g",
     detailsNoteLabel: "Nota",
     detailsNotePlaceholder: "es. in azione, senza lattosio …",
+    detailsPriceLabel: "Prezzo (CHF)",
+    detailsPricePlaceholder: "es. 3.50",
+    detailsPriceHint:
+      "Lascia vuoto se non vuoi registrare un prezzo. Il totale è in cima alla lista.",
+    detailsPriceBooked:
+      "Già ripreso nella cassa di viaggio – il prezzo resta come è stato registrato.",
+    totalLabel: "Totale:",
+    totalBreakdown: (open: string, checked: string) =>
+      `in sospeso ${open} · spuntati ${checked}`,
+    totalBooked: (booked: string) => `registrato ${booked}`,
+    bookedBadge: "registrato",
+    bookButton: (sum: string) => `Nella cassa di viaggio (${sum})`,
+    bookTitle: "Riprendi nella cassa di viaggio",
+    bookDesc:
+      "Gli acquisti spuntati con un prezzo vengono registrati come una sola spesa nella cassa di viaggio. Le voci registrate non contano una seconda volta.",
+    bookNothing:
+      "Niente da riprendere: non c'è nessuna voce spuntata con un prezzo.",
+    bookItemAria: (name: string) => `Registra anche ${name}`,
+    bookSumLabel: (n: number) =>
+      n === 1 ? "1 voce – totale" : `${n} voci – totale`,
+    bookTripLabel: "Viaggio",
+    bookTripFallback: "Soggiorno",
+    bookNoTrips:
+      "Non hai ancora nessun viaggio nel diario – creane uno prima, poi ci sarà anche la cassa di viaggio.",
+    bookCategoryLabel: "Categoria",
+    bookDayLabel: "Data",
+    bookDescriptionLabel: "Descrizione",
+    bookDescriptionPlaceholder: "es. spesa grande Migros",
+    bookPaidByLabel: "Pagato da",
+    bookPaidByPlaceholder: "Nome",
+    bookConfirm: (sum: string) => `Registra ${sum}`,
+    bookDone: (n: number, sum: string) =>
+      `${n === 1 ? "1 voce registrata" : `${n} voci registrate`} come ${sum} nella cassa di viaggio`,
+    bookFailed: "La ripresa nella cassa di viaggio non è riuscita",
     detailsFailed: "Quantità/nota non salvata",
     openTitle: "Ancora da comprare",
     doneTitle: "Fatto",

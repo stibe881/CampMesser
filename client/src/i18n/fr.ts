@@ -3064,6 +3064,40 @@ export const fr: Translation = {
     detailsQuantityPlaceholder: "p. ex. 2× ou 500 g",
     detailsNoteLabel: "Note",
     detailsNotePlaceholder: "p. ex. en action, sans lactose …",
+    detailsPriceLabel: "Prix (CHF)",
+    detailsPricePlaceholder: "p. ex. 3.50",
+    detailsPriceHint:
+      "Laisse vide si tu ne veux pas saisir de prix. Le total figure en haut de la liste.",
+    detailsPriceBooked:
+      "Déjà repris dans la caisse de voyage – le prix reste tel qu'il a été comptabilisé.",
+    totalLabel: "Total :",
+    totalBreakdown: (open: string, checked: string) =>
+      `en attente ${open} · cochés ${checked}`,
+    totalBooked: (booked: string) => `comptabilisé ${booked}`,
+    bookedBadge: "comptabilisé",
+    bookButton: (sum: string) => `Vers la caisse de voyage (${sum})`,
+    bookTitle: "Reprendre dans la caisse de voyage",
+    bookDesc:
+      "Les courses cochées avec un prix sont comptabilisées comme une seule dépense dans la caisse de voyage. Les entrées comptabilisées ne comptent plus une deuxième fois.",
+    bookNothing:
+      "Rien à reprendre : aucune entrée cochée avec un prix n'est en attente.",
+    bookItemAria: (name: string) => `Comptabiliser ${name}`,
+    bookSumLabel: (n: number) =>
+      n === 1 ? "1 entrée – total" : `${n} entrées – total`,
+    bookTripLabel: "Voyage",
+    bookTripFallback: "Séjour",
+    bookNoTrips:
+      "Tu n'as encore aucun voyage dans le journal – crées-en un d'abord, la caisse de voyage suivra.",
+    bookCategoryLabel: "Catégorie",
+    bookDayLabel: "Date",
+    bookDescriptionLabel: "Description",
+    bookDescriptionPlaceholder: "p. ex. grandes courses Migros",
+    bookPaidByLabel: "Payé par",
+    bookPaidByPlaceholder: "Nom",
+    bookConfirm: (sum: string) => `Comptabiliser ${sum}`,
+    bookDone: (n: number, sum: string) =>
+      `${n === 1 ? "1 entrée comptabilisée" : `${n} entrées comptabilisées`} pour ${sum} dans la caisse de voyage`,
+    bookFailed: "La reprise dans la caisse de voyage a échoué",
     detailsFailed: "La quantité/note n'a pas pu être enregistrée",
     openTitle: "Encore à acheter",
     doneTitle: "Fait",

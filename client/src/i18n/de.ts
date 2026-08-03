@@ -3063,6 +3063,40 @@ export const de = {
     detailsQuantityPlaceholder: "z. B. 2× oder 500 g",
     detailsNoteLabel: "Notiz",
     detailsNotePlaceholder: "z. B. Aktion, laktosefrei …",
+    detailsPriceLabel: "Preis (CHF)",
+    detailsPricePlaceholder: "z. B. 3.50",
+    detailsPriceHint:
+      "Leer lassen, wenn du keinen Preis erfassen willst. Die Summe steht oben auf der Liste.",
+    detailsPriceBooked:
+      "Schon in die Reisekasse übernommen – der Preis bleibt, wie er verbucht wurde.",
+    totalLabel: "Summe:",
+    totalBreakdown: (open: string, checked: string) =>
+      `offen ${open} · abgehakt ${checked}`,
+    totalBooked: (booked: string) => `verbucht ${booked}`,
+    bookedBadge: "verbucht",
+    bookButton: (sum: string) => `In die Reisekasse (${sum})`,
+    bookTitle: "In die Reisekasse übernehmen",
+    bookDesc:
+      "Die abgehakten Einkäufe mit Preis werden als eine Ausgabe in der Reisekasse verbucht. Verbuchte Einträge zählen später nicht noch einmal mit.",
+    bookNothing:
+      "Nichts zu übernehmen: Es ist kein abgehakter Eintrag mit Preis offen.",
+    bookItemAria: (name: string) => `${name} mitverbuchen`,
+    bookSumLabel: (n: number) =>
+      n === 1 ? "1 Eintrag – Summe" : `${n} Einträge – Summe`,
+    bookTripLabel: "Reise",
+    bookTripFallback: "Aufenthalt",
+    bookNoTrips:
+      "Du hast noch keine Reise im Tagebuch – leg zuerst eine an, dann gibt es auch eine Reisekasse.",
+    bookCategoryLabel: "Kategorie",
+    bookDayLabel: "Datum",
+    bookDescriptionLabel: "Beschreibung",
+    bookDescriptionPlaceholder: "z. B. Grosseinkauf Migros",
+    bookPaidByLabel: "Bezahlt von",
+    bookPaidByPlaceholder: "Name",
+    bookConfirm: (sum: string) => `${sum} verbuchen`,
+    bookDone: (n: number, sum: string) =>
+      `${n === 1 ? "1 Eintrag" : `${n} Einträge`} als ${sum} in der Reisekasse verbucht`,
+    bookFailed: "Die Übernahme in die Reisekasse hat nicht geklappt",
     detailsFailed: "Menge/Notiz konnte nicht gespeichert werden",
     openTitle: "Noch zu kaufen",
     doneTitle: "Erledigt",

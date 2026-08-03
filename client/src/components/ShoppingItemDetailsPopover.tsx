@@ -9,11 +9,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useI18n } from "@/i18n";
+import { parseChfInput, rappenToInput } from "@/lib/money";
+import { MAX_SHOPPING_PRICE_RAPPEN } from "@shared/shoppingPrices";
 
 /**
- * Popover zum nachträglichen Bearbeiten von Menge und Notiz eines
+ * Popover zum nachträglichen Bearbeiten von Menge, Notiz und Preis eines
  * Einkaufslisten-Eintrags (persönliche UND Reise-Liste). Leere Felder
- * entfernen den jeweiligen Wert wieder (Server: "" → null).
+ * entfernen den jeweiligen Wert wieder (Server: "" → null). Der Preis wird
+ * wie in der Reisekasse in Franken eingegeben und als Rappen gespeichert
+ * (#234); ein bereits verbuchter Eintrag lässt ihn nicht mehr ändern.
  */
 export default function ShoppingItemDetailsPopover({
   item,
@@ -25,34 +29,44 @@ export default function ShoppingItemDetailsPopover({
     name: string;
     quantity: string | null;
     note: string | null;
+    priceRappen?: number | null;
+    bookedExpenseId?: number | null;
   };
   saving: boolean;
   onSave: (data: {
     id: number;
     quantity: string;
     note: string;
+    priceRappen: number | null;
   }) => Promise<unknown>;
 }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [quantity, setQuantity] = useState("");
   const [note, setNote] = useState("");
+  const [price, setPrice] = useState("");
+  const booked = (item.bookedExpenseId ?? 0) > 0;
 
   /** Beim Öffnen die Felder mit dem aktuellen Stand des Eintrags füllen. */
   const handleOpenChange = (next: boolean) => {
     if (next) {
       setQuantity(item.quantity ?? "");
       setNote(item.note ?? "");
+      setPrice(rappenToInput(item.priceRappen ?? null));
     }
     setOpen(next);
   };
 
   const save = async () => {
+    // Leeres Feld = Preis entfernen; unlesbare Eingaben ergeben ebenfalls null.
+    const parsed = price.trim() ? parseChfInput(price) : null;
     try {
       await onSave({
         id: item.id,
         quantity: quantity.trim().slice(0, 40),
         note: note.trim().slice(0, 160),
+        priceRappen:
+          parsed === null ? null : Math.min(parsed, MAX_SHOPPING_PRICE_RAPPEN),
       });
       setOpen(false);
     } catch {
@@ -104,6 +118,26 @@ export default function ShoppingItemDetailsPopover({
               placeholder={t.shopping.detailsNotePlaceholder}
               onChange={e => setNote(e.target.value)}
             />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor={`shopping-price-${item.id}`}>
+              {t.shopping.detailsPriceLabel}
+            </Label>
+            <Input
+              id={`shopping-price-${item.id}`}
+              type="text"
+              inputMode="decimal"
+              value={price}
+              maxLength={12}
+              disabled={booked}
+              placeholder={t.shopping.detailsPricePlaceholder}
+              onChange={e => setPrice(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              {booked
+                ? t.shopping.detailsPriceBooked
+                : t.shopping.detailsPriceHint}
+            </p>
           </div>
           <Button type="submit" size="sm" className="w-full" disabled={saving}>
             {t.common.save}
