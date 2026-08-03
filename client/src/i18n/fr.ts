@@ -126,6 +126,17 @@ export const fr: Translation = {
     sortHint:
       "Glisse les tuiles à leur nouvelle position (au sein du groupe) ou utilise les boutons fléchés. Avec le bouton œil, tu masques ou réaffiches des tuiles. Connecté·e, ta sélection est reprise sur tous tes appareils.",
     hiddenBadge: "Masqué",
+    widgetsTitle: "Widgets",
+    widgetsHint:
+      "Choisis les zones qui apparaissent au-dessus des tuiles. Le message d'accueil, la recherche et les tuiles elles-mêmes restent toujours visibles. Une fois connecté·e, ton choix s'applique à tous tes appareils.",
+    widgetNames: {
+      onboarding: "Premiers pas",
+      trip: "Séjour en cours / prochain",
+      anniversary: "Il y a un an",
+      weather: "Météo",
+      tip: "Astuce du jour",
+      recent: "Utilisés récemment",
+    },
     moveAria: title => `Déplacer ${title}`,
     moveUpAria: title => `Avancer ${title}`,
     moveDownAria: title => `Reculer ${title}`,

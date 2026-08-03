@@ -122,6 +122,17 @@ export const en: Translation = {
     sortHint:
       "Drag the tiles to their new position (within the group) or use the arrow buttons. The eye button hides tiles or brings them back. When signed in, your selection is applied on all your devices.",
     hiddenBadge: "Hidden",
+    widgetsTitle: "Widgets",
+    widgetsHint:
+      "Choose which sections appear above the tiles. The greeting, the search and the tiles themselves always stay visible. When signed in, your choice applies on all your devices.",
+    widgetNames: {
+      onboarding: "First steps",
+      trip: "Current/next trip",
+      anniversary: "One year ago",
+      weather: "Weather",
+      tip: "Tip of the day",
+      recent: "Recently used",
+    },
     moveAria: title => `Move ${title}`,
     moveUpAria: title => `Move ${title} forward`,
     moveDownAria: title => `Move ${title} back`,

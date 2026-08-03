@@ -33,6 +33,12 @@ export const changelog: ChangelogBlock[] = [
         "New “Statistics” tile: all your figures in one place – trips, weather luck, year comparison, milestones, knot progress, species album and your children's badges."
       ),
       l4(
+        "Startseite: Im Sortier-Modus schaltest du unter «Widgets» einzelne Bereiche ab – Wetter, Tipp des Tages, Reise-Widget, Erste Schritte, «Vor einem Jahr» und «Zuletzt genutzt».",
+        "Accueil : en mode tri, la section « Widgets » te permet de désactiver certaines zones – météo, astuce du jour, séjour, premiers pas, « il y a un an » et « utilisés récemment ».",
+        "Pagina iniziale: in modalità ordinamento la sezione «Widget» ti lascia disattivare singole zone – meteo, consiglio del giorno, viaggio, primi passi, «un anno fa» e «usati di recente».",
+        "Home: in sorting mode the “Widgets” section lets you switch off individual sections – weather, tip of the day, trip widget, first steps, “one year ago” and “recently used”."
+      ),
+      l4(
         "Startseite: «Vor einem Jahr» erinnert dich am Jahrestag an vergangene Aufenthalte – mit Ort, Nächten, Bewertung und Titelbild; für heute wegklickbar.",
         "Accueil : « Il y a un an » te rappelle tes séjours passés le jour anniversaire – avec le lieu, les nuits, la note et la photo principale ; masquable pour la journée.",
         "Pagina iniziale: «Un anno fa» ti ricorda i soggiorni passati nel giorno dell'anniversario – con luogo, notti, valutazione e immagine principale; si può nascondere per oggi.",

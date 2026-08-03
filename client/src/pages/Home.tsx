@@ -60,6 +60,15 @@ import {
   type OnboardingStepId,
 } from "@/lib/onboarding";
 import { getExistingSubscription, pushSupported } from "@/lib/pushClient";
+import {
+  isWidgetVisible,
+  loadHiddenWidgets,
+  OPTIONAL_WIDGETS,
+  sanitizeHiddenWidgets,
+  storeHiddenWidgets,
+  toggleWidget,
+  type OptionalWidgetId,
+} from "@/lib/homeWidgets";
 import { usePointerDrag } from "@/lib/usePointerDrag";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { searchKnowledge, searchOwnContent } from "@/lib/globalSearch";
@@ -1195,6 +1204,9 @@ export default function Home() {
   const [sortMode, setSortMode] = useState(false);
   const [order, setOrder] = useState<string[]>(() => loadModuleOrder());
   const [hidden, setHidden] = useState<string[]>(() => loadHiddenModules());
+  const [hiddenWidgets, setHiddenWidgets] = useState<OptionalWidgetId[]>(() =>
+    loadHiddenWidgets()
+  );
 
   // Geräte-Sync: Server-Stand gewinnt beim Laden, lokale Änderungen werden gepusht
   const orderSync = useSyncedSetting<string[]>("moduleOrder", value => {
@@ -1209,6 +1221,20 @@ export default function Home() {
     setHidden(clean);
     saveHiddenModules(clean);
   });
+
+  const widgetSync = useSyncedSetting<unknown>("hiddenWidgets", value => {
+    const clean = sanitizeHiddenWidgets(value);
+    setHiddenWidgets(clean);
+    storeHiddenWidgets(clean);
+  });
+
+  /** Widget aus- oder wieder einblenden (nur im Sortier-Modus erreichbar). */
+  const toggleWidgetVisibility = (id: OptionalWidgetId) => {
+    const next = toggleWidget(hiddenWidgets, id);
+    setHiddenWidgets(next);
+    storeHiddenWidgets(next);
+    widgetSync.push(next);
+  };
 
   /** Kachel aus- oder wieder einblenden (nur im Sortier-Modus erreichbar). */
   const toggleHidden = (path: string) => {
@@ -1336,17 +1362,25 @@ export default function Home() {
 
       {/* Modul-Grid */}
       <section className="container py-8 md:py-12">
-        <OnboardingCard />
-        <NextTripWidget />
-        <AnniversaryCard />
-        <WeatherWidget weather={homeWeather.weather} />
-        <TipOfDayWidget
-          today={homeWeather.today}
-          tomorrow={homeWeather.tomorrow}
-        />
-        <GearCareHint />
+        {isWidgetVisible(hiddenWidgets, "onboarding") && <OnboardingCard />}
+        {isWidgetVisible(hiddenWidgets, "trip") && <NextTripWidget />}
+        {isWidgetVisible(hiddenWidgets, "anniversary") && <AnniversaryCard />}
+        {isWidgetVisible(hiddenWidgets, "weather") && (
+          <WeatherWidget weather={homeWeather.weather} />
+        )}
+        {isWidgetVisible(hiddenWidgets, "tip") && (
+          <>
+            <TipOfDayWidget
+              today={homeWeather.today}
+              tomorrow={homeWeather.tomorrow}
+            />
+            <GearCareHint />
+          </>
+        )}
         <KnowledgeSearch />
-        <RecentModules hidden={hidden} />
+        {isWidgetVisible(hiddenWidgets, "recent") && (
+          <RecentModules hidden={hidden} />
+        )}
         <div className="mb-4 flex items-center justify-end">
           <button
             type="button"
@@ -1367,6 +1401,67 @@ export default function Home() {
           <p className="mb-4 rounded-lg bg-accent px-4 py-2.5 text-sm text-accent-foreground">
             {t.home.sortHint}
           </p>
+        )}
+        {/* Widgets ein-/ausblenden: Hero, Suche und die Kacheln bleiben
+            Pflicht und stehen deshalb bewusst nicht zur Auswahl. */}
+        {sortMode && (
+          <section
+            className="mb-8 rounded-xl border border-border/70 bg-card p-4 shadow-sm"
+            aria-label={t.home.widgetsTitle}
+          >
+            <h2 className="font-serif text-base font-semibold">
+              {t.home.widgetsTitle}
+            </h2>
+            <p className="mb-3 mt-0.5 text-xs text-muted-foreground">
+              {t.home.widgetsHint}
+            </p>
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {OPTIONAL_WIDGETS.map(id => {
+                const label = t.home.widgetNames[id];
+                const isHidden = !isWidgetVisible(hiddenWidgets, id);
+                return (
+                  <li key={id}>
+                    <button
+                      type="button"
+                      onClick={() => toggleWidgetVisibility(id)}
+                      aria-pressed={!isHidden}
+                      aria-label={
+                        isHidden
+                          ? t.home.showAria(label)
+                          : t.home.hideAria(label)
+                      }
+                      className={
+                        "flex w-full items-center gap-2.5 rounded-lg border px-3 py-2 text-sm transition-colors " +
+                        (isHidden
+                          ? "border-border bg-muted/40 text-muted-foreground"
+                          : "border-primary/40 bg-accent/40 text-foreground")
+                      }
+                    >
+                      {isHidden ? (
+                        <EyeOff
+                          className="h-4 w-4 shrink-0"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <Eye
+                          className="h-4 w-4 shrink-0 text-primary"
+                          aria-hidden="true"
+                        />
+                      )}
+                      <span className="min-w-0 flex-1 truncate text-left">
+                        {label}
+                      </span>
+                      {isHidden && (
+                        <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-secondary-foreground">
+                          {t.home.hiddenBadge}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
         )}
         {groups.map(group => {
           // Im Normal-Modus verschwinden ausgeblendete Kacheln (und leere Gruppen),

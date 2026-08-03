@@ -125,6 +125,17 @@ export const it: Translation = {
     sortHint:
       "Trascina le tessere nella nuova posizione (all'interno del gruppo) oppure usa i pulsanti freccia. Con il pulsante occhio nascondi o mostri di nuovo le tessere. Se hai eseguito l'accesso, la selezione vale su tutti i tuoi dispositivi.",
     hiddenBadge: "Nascosto",
+    widgetsTitle: "Widget",
+    widgetsHint:
+      "Scegli quali sezioni compaiono sopra le schede. Il saluto, la ricerca e le schede stesse restano sempre visibili. Da connesso la scelta vale su tutti i tuoi dispositivi.",
+    widgetNames: {
+      onboarding: "Primi passi",
+      trip: "Soggiorno in corso / prossimo",
+      anniversary: "Un anno fa",
+      weather: "Meteo",
+      tip: "Consiglio del giorno",
+      recent: "Usati di recente",
+    },
     moveAria: title => `Sposta ${title}`,
     moveUpAria: title => `Sposta ${title} in avanti`,
     moveDownAria: title => `Sposta ${title} indietro`,

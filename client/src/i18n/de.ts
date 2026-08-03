@@ -126,6 +126,17 @@ export const de = {
     sortHint:
       "Ziehe die Kacheln an ihre neue Position (innerhalb der Gruppe) oder nutze die Pfeil-Buttons. Mit dem Augen-Button blendest du Kacheln aus oder wieder ein. Angemeldet wird die Auswahl auf allen deinen Geräten übernommen.",
     hiddenBadge: "Ausgeblendet",
+    widgetsTitle: "Widgets",
+    widgetsHint:
+      "Wähle, welche Bereiche über den Kacheln erscheinen. Begrüssung, Suche und die Kacheln selbst bleiben immer sichtbar. Angemeldet gilt die Auswahl auf allen deinen Geräten.",
+    widgetNames: {
+      onboarding: "Erste Schritte",
+      trip: "Laufende/nächste Reise",
+      anniversary: "Vor einem Jahr",
+      weather: "Wetter",
+      tip: "Tipp des Tages",
+      recent: "Zuletzt genutzt",
+    },
     moveAria: (title: string) => `${title} verschieben`,
     moveUpAria: (title: string) => `${title} nach vorne verschieben`,
     moveDownAria: (title: string) => `${title} nach hinten verschieben`,

@@ -8,6 +8,8 @@ export const SYNCED_SETTING_KEYS = [
   "moduleOrder",
   /** Auf der Startseite ausgeblendete Kacheln */
   "hiddenModules",
+  /** Auf der Startseite ausgeblendete Widgets (Wetter, Tipp des Tages …) */
+  "hiddenWidgets",
   /** Hindernis-Profil des Sonnen-Kompasses */
   "sunObstacles",
   /** Eigene Materialien im Trockenzeiten-Rechner */
