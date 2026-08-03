@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  masteryCounts,
   masteryLevel,
   RECENT_LIMIT,
   recordAnswer,
@@ -115,5 +116,51 @@ describe("sanitizeKnotProgress", () => {
     });
     expect(result.a.recent.length).toBeLessThanOrEqual(RECENT_LIMIT);
     expect(result.a.recent.every(r => typeof r === "boolean")).toBe(true);
+  });
+});
+
+describe("masteryCounts", () => {
+  it("zählt sicher, üben und neu über die Knoten-Liste", () => {
+    const stats: KnotProgress = {
+      sicher: { recent: [true, true, true], correct: 3, total: 3 },
+      ueben: { recent: [true, false], correct: 1, total: 2 },
+    };
+    expect(masteryCounts(stats, ["sicher", "ueben", "neu"])).toEqual({
+      secure: 1,
+      practice: 1,
+      fresh: 1,
+      total: 3,
+    });
+  });
+
+  it("zählt ohne Statistik alle Knoten als neu", () => {
+    expect(masteryCounts({}, ["a", "b"])).toEqual({
+      secure: 0,
+      practice: 0,
+      fresh: 2,
+      total: 2,
+    });
+  });
+
+  it("ignoriert Statistiken zu unbekannten Knoten und doppelte Ids", () => {
+    const stats: KnotProgress = {
+      a: { recent: [true, true, true], correct: 3, total: 3 },
+      fremd: { recent: [true, true, true], correct: 3, total: 3 },
+    };
+    expect(masteryCounts(stats, ["a", "a"])).toEqual({
+      secure: 1,
+      practice: 0,
+      fresh: 0,
+      total: 1,
+    });
+  });
+
+  it("liefert bei leerer Knoten-Liste lauter Nullen", () => {
+    expect(masteryCounts({}, [])).toEqual({
+      secure: 0,
+      practice: 0,
+      fresh: 0,
+      total: 0,
+    });
   });
 });

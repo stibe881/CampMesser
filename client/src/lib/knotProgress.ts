@@ -67,6 +67,45 @@ export function masteryLevel(
   return "üben";
 }
 
+/** Zähler pro Beherrschungs-Grad über eine Menge von Knoten. */
+export interface MasteryCounts {
+  secure: number;
+  practice: number;
+  fresh: number;
+  /** Anzahl betrachteter Knoten (secure + practice + fresh) */
+  total: number;
+}
+
+/**
+ * Wie viele der gegebenen Knoten sind «sicher», «üben» bzw. «neu»?
+ * Reine Auswertung fürs Statistik-Dashboard – Knoten ohne Eintrag in der
+ * Statistik zählen als «neu», Einträge zu unbekannten Knoten werden
+ * ignoriert (die Knoten-Liste gibt den Rahmen vor). Doppelte Ids zählen
+ * nur einmal.
+ */
+export function masteryCounts(
+  stats: KnotProgress,
+  knotIds: string[]
+): MasteryCounts {
+  const counts: MasteryCounts = {
+    secure: 0,
+    practice: 0,
+    fresh: 0,
+    total: 0,
+  };
+  const seen: Record<string, true> = {};
+  for (const knotId of knotIds) {
+    if (seen[knotId]) continue;
+    seen[knotId] = true;
+    counts.total += 1;
+    const level = masteryLevel(stats, knotId);
+    if (level === "sicher") counts.secure += 1;
+    else if (level === "üben") counts.practice += 1;
+    else counts.fresh += 1;
+  }
+  return counts;
+}
+
 /**
  * Unbekannte Daten (localStorage/Geräte-Sync) defensiv in eine saubere
  * Statistik überführen: nur plausible Einträge, Zähler nie negativ,

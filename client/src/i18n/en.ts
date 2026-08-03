@@ -2857,6 +2857,54 @@ export const en: Translation = {
     toTrip: "Open trip",
   },
 
+  stats: {
+    title: "Statistics",
+    subtitle:
+      "All your figures at a glance – trips, weather luck, milestones, knots, species and family.",
+    loginFeature: "the statistics",
+    tripsTitle: "Trip statistics",
+    tripsLink: "My trips",
+    tripsEmpty: "No stays recorded yet.",
+    nightsInYear: year => `Nights ${year}`,
+    nightsTotal: "Nights in total",
+    staysLabel: "Stays",
+    favoriteLabel: "Favourite pitch",
+    avgRatingLabel: "Avg. rating",
+    weatherLuckTitle: "Weather luck",
+    weatherLuckDry: pct => `${pct}% of your camping days were dry`,
+    weatherLuckAvgMax: temp => `avg daily high ${temp}°`,
+    weatherLuckWarmest: (place, temp) => `warmest place: ${place} (${temp}°)`,
+    weatherLuckHint: n =>
+      n === 1
+        ? "Based on the weather archive of 1 stay"
+        : `Based on the weather archive of ${n} stays`,
+    yearCompareTitle: "Nights per year",
+    nightsCount: n => (n === 1 ? "1 night" : `${n} nights`),
+    milestonesTitle: "Milestones",
+    milestonesAchieved: (achieved, total) =>
+      `${achieved} of ${total} milestones reached`,
+    milestonesNextTitle: "Next goals",
+    milestonesProgress: (current, target) => `${current} of ${target}`,
+    knotsTitle: "Knot progress",
+    knotsLink: "Practise knots",
+    knotsSummary: (secure, total) => `${secure} of ${total} knots are solid`,
+    knotsProgressAria: "Share of knots mastered",
+    knotsSecure: "solid",
+    knotsPractice: "practise",
+    knotsFresh: "new",
+    natureTitle: "Species album",
+    natureLink: "Open nature",
+    natureCollection: (seen, total) => `${seen} of ${total} species spotted`,
+    natureSightings: n => (n === 1 ? "1 sighting" : `${n} sightings`),
+    natureProgressAria: "Progress of the species album",
+    familyTitle: "Children's badges",
+    familyLink: "Family mode",
+    familyBadges: (earned, total) => `${earned} of ${total} badges`,
+    familyEmpty: "No child profiles created yet.",
+    footnote:
+      "All numbers come from your own entries – this page only shows them; you change them in the respective module.",
+  },
+
   sharing: {
     validityLabel: "Valid",
     validityUnlimited: "unlimited",

@@ -2926,6 +2926,55 @@ export const it: Translation = {
     toTrip: "Al viaggio",
   },
 
+  stats: {
+    title: "Statistiche",
+    subtitle:
+      "Tutte le tue analisi in un colpo d'occhio – viaggi, fortuna meteo, traguardi, nodi, specie e famiglia.",
+    loginFeature: "le statistiche",
+    tripsTitle: "Statistiche dei viaggi",
+    tripsLink: "I miei viaggi",
+    tripsEmpty: "Nessun soggiorno registrato finora.",
+    nightsInYear: year => `Notti ${year}`,
+    nightsTotal: "Notti in totale",
+    staysLabel: "Soggiorni",
+    favoriteLabel: "Piazzola preferita",
+    avgRatingLabel: "Valutazione media",
+    weatherLuckTitle: "Fortuna meteo",
+    weatherLuckDry: pct =>
+      `Il ${pct} % dei tuoi giorni di campeggio è stato asciutto`,
+    weatherLuckAvgMax: temp => `massima giornaliera media ${temp}°`,
+    weatherLuckWarmest: (place, temp) => `luogo più caldo: ${place} (${temp}°)`,
+    weatherLuckHint: n =>
+      n === 1
+        ? "Dall'archivio meteo di 1 soggiorno"
+        : `Dall'archivio meteo di ${n} soggiorni`,
+    yearCompareTitle: "Notti per anno",
+    nightsCount: n => (n === 1 ? "1 notte" : `${n} notti`),
+    milestonesTitle: "Traguardi",
+    milestonesAchieved: (achieved, total) =>
+      `${achieved} traguardi raggiunti su ${total}`,
+    milestonesNextTitle: "Prossimi obiettivi",
+    milestonesProgress: (current, target) => `${current} di ${target}`,
+    knotsTitle: "Progressi con i nodi",
+    knotsLink: "Allenati",
+    knotsSummary: (secure, total) => `${secure} nodi su ${total} sono sicuri`,
+    knotsProgressAria: "Quota di nodi padroneggiati",
+    knotsSecure: "sicuri",
+    knotsPractice: "da ripassare",
+    knotsFresh: "nuovi",
+    natureTitle: "Album delle specie",
+    natureLink: "Apri Natura",
+    natureCollection: (seen, total) => `${seen} specie osservate su ${total}`,
+    natureSightings: n => (n === 1 ? "1 osservazione" : `${n} osservazioni`),
+    natureProgressAria: "Progresso dell'album delle specie",
+    familyTitle: "Distintivi dei bambini",
+    familyLink: "Modalità famiglia",
+    familyBadges: (earned, total) => `${earned} distintivi su ${total}`,
+    familyEmpty: "Nessun profilo bambino creato finora.",
+    footnote:
+      "Tutti i numeri nascono dalle tue registrazioni – questa pagina li mostra soltanto, li modifichi nel modulo corrispondente.",
+  },
+
   sharing: {
     validityLabel: "Valido",
     validityUnlimited: "illimitato",

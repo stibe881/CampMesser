@@ -2955,6 +2955,62 @@ export const de = {
     toTrip: "Zur Reise",
   },
 
+  /** Statistik-Dashboard: bündelt vorhandene Auswertungen an einem Ort. */
+  stats: {
+    title: "Statistik",
+    subtitle:
+      "Alle Auswertungen auf einen Blick – Reisen, Wetter-Glück, Meilensteine, Knoten, Arten und Familie.",
+    loginFeature: "die Statistik",
+    tripsTitle: "Reise-Statistik",
+    tripsLink: "Meine Reisen",
+    tripsEmpty: "Noch keine Aufenthalte erfasst.",
+    nightsInYear: (year: number) => `Nächte ${year}`,
+    nightsTotal: "Nächte gesamt",
+    staysLabel: "Aufenthalte",
+    favoriteLabel: "Lieblingsplatz",
+    avgRatingLabel: "Ø Bewertung",
+    weatherLuckTitle: "Wetter-Glück",
+    weatherLuckDry: (pct: number) =>
+      `${pct} % deiner Campingtage waren trocken`,
+    weatherLuckAvgMax: (temp: number) => `Ø Tagesmaximum ${temp}°`,
+    weatherLuckWarmest: (place: string, temp: number) =>
+      `wärmster Ort: ${place} (${temp}°)`,
+    weatherLuckHint: (n: number) =>
+      n === 1
+        ? "Aus dem Wetterarchiv von 1 Aufenthalt"
+        : `Aus dem Wetterarchiv von ${n} Aufenthalten`,
+    yearCompareTitle: "Übernachtungen pro Jahr",
+    nightsCount: (n: number) => (n === 1 ? "1 Nacht" : `${n} Nächte`),
+    milestonesTitle: "Meilensteine",
+    milestonesAchieved: (achieved: number, total: number) =>
+      `${achieved} von ${total} Meilensteinen erreicht`,
+    milestonesNextTitle: "Nächste Ziele",
+    milestonesProgress: (current: number, target: number) =>
+      `${current} von ${target}`,
+    knotsTitle: "Knoten-Lernfortschritt",
+    knotsLink: "Knoten üben",
+    knotsSummary: (secure: number, total: number) =>
+      `${secure} von ${total} Knoten sitzen sicher`,
+    knotsProgressAria: "Anteil sicher beherrschter Knoten",
+    knotsSecure: "sicher",
+    knotsPractice: "üben",
+    knotsFresh: "neu",
+    natureTitle: "Natur-Sammelalbum",
+    natureLink: "Natur öffnen",
+    natureCollection: (seen: number, total: number) =>
+      `${seen} von ${total} Arten beobachtet`,
+    natureSightings: (n: number) =>
+      n === 1 ? "1 Beobachtung" : `${n} Beobachtungen`,
+    natureProgressAria: "Sammel-Fortschritt des Arten-Albums",
+    familyTitle: "Abzeichen der Kinder",
+    familyLink: "Familien-Modus",
+    familyBadges: (earned: number, total: number) =>
+      `${earned} von ${total} Abzeichen`,
+    familyEmpty: "Noch keine Kinder-Profile angelegt.",
+    footnote:
+      "Alle Zahlen entstehen aus deinen eigenen Einträgen – diese Seite zeigt sie nur an, ändern kannst du sie im jeweiligen Modul.",
+  },
+
   /** Gemeinsame Texte rund ums Teilen per Link (alle Teilen-Dialoge). */
   sharing: {
     validityLabel: "Gültig",

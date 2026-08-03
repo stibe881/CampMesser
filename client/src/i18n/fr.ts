@@ -2949,6 +2949,55 @@ export const fr: Translation = {
     toTrip: "Vers le voyage",
   },
 
+  stats: {
+    title: "Statistiques",
+    subtitle:
+      "Toutes tes analyses en un coup d'œil – voyages, chance météo, jalons, nœuds, espèces et famille.",
+    loginFeature: "les statistiques",
+    tripsTitle: "Statistiques des voyages",
+    tripsLink: "Mes voyages",
+    tripsEmpty: "Aucun séjour enregistré pour l'instant.",
+    nightsInYear: year => `Nuits ${year}`,
+    nightsTotal: "Nuits au total",
+    staysLabel: "Séjours",
+    favoriteLabel: "Emplacement préféré",
+    avgRatingLabel: "Note moyenne",
+    weatherLuckTitle: "Chance météo",
+    weatherLuckDry: pct => `${pct} % de tes jours de camping ont été secs`,
+    weatherLuckAvgMax: temp => `max. journalier moyen ${temp}°`,
+    weatherLuckWarmest: (place, temp) =>
+      `lieu le plus chaud : ${place} (${temp}°)`,
+    weatherLuckHint: n =>
+      n === 1
+        ? "D'après l'archive météo de 1 séjour"
+        : `D'après l'archive météo de ${n} séjours`,
+    yearCompareTitle: "Nuitées par année",
+    nightsCount: n => (n === 1 ? "1 nuit" : `${n} nuits`),
+    milestonesTitle: "Jalons",
+    milestonesAchieved: (achieved, total) =>
+      `${achieved} jalons atteints sur ${total}`,
+    milestonesNextTitle: "Prochains objectifs",
+    milestonesProgress: (current, target) => `${current} sur ${target}`,
+    knotsTitle: "Progression des nœuds",
+    knotsLink: "S'entraîner",
+    knotsSummary: (secure, total) => `${secure} nœuds sur ${total} sont acquis`,
+    knotsProgressAria: "Part des nœuds maîtrisés",
+    knotsSecure: "acquis",
+    knotsPractice: "à réviser",
+    knotsFresh: "nouveaux",
+    natureTitle: "Album des espèces",
+    natureLink: "Ouvrir Nature",
+    natureCollection: (seen, total) => `${seen} espèces observées sur ${total}`,
+    natureSightings: n => (n === 1 ? "1 observation" : `${n} observations`),
+    natureProgressAria: "Progression de l'album des espèces",
+    familyTitle: "Badges des enfants",
+    familyLink: "Mode famille",
+    familyBadges: (earned, total) => `${earned} badges sur ${total}`,
+    familyEmpty: "Aucun profil d'enfant créé pour l'instant.",
+    footnote:
+      "Tous ces chiffres viennent de tes propres saisies – cette page ne fait que les afficher, tu les modifies dans le module concerné.",
+  },
+
   sharing: {
     validityLabel: "Valable",
     validityUnlimited: "illimité",
