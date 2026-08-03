@@ -1968,6 +1968,20 @@ export const fr: Translation = {
     duplicateSubmit: "Dupliquer",
     duplicated: "Voyage dupliqué – il figure dans les séjours planifiés",
     duplicateFailed: "Échec de la duplication",
+    journalTitle: "Journal de voyage",
+    journalToggleAria: (name: string) =>
+      `Ouvrir ou fermer le journal de voyage de ${name}`,
+    journalHint:
+      "Note ce qui s'est passé chaque jour du séjour – seuls toi et tes compagnons de voyage le voyez.",
+    journalCount: (n: number) => (n === 1 ? "1 entrée" : `${n} entrées`),
+    journalEmptyDay: "Rien de noté pour l'instant",
+    journalPlaceholder: "Qu'est-ce qui s'est passé aujourd'hui ?",
+    journalEditAria: (day: string) => `Modifier l'entrée du ${day}`,
+    journalSave: "Enregistrer",
+    journalSaved: "Entrée du journal enregistrée",
+    journalDeleted: "Entrée du journal supprimée",
+    journalSaveFailed: "Impossible d'enregistrer l'entrée du journal",
+    journalBy: (name: string) => `par ${name}`,
   },
   tripInvite: {
     badge: "Invitation au voyage",

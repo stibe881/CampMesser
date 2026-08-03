@@ -1900,6 +1900,20 @@ export const en: Translation = {
     duplicateSubmit: "Duplicate",
     duplicated: "Trip duplicated – you'll find it under planned stays",
     duplicateFailed: "Duplicating failed",
+    journalTitle: "Trip journal",
+    journalToggleAria: (name: string) =>
+      `Expand or collapse the trip journal of ${name}`,
+    journalHint:
+      "Record what happened on each day of the trip – only you and your fellow travellers can see it.",
+    journalCount: (n: number) => (n === 1 ? "1 entry" : `${n} entries`),
+    journalEmptyDay: "Nothing recorded yet",
+    journalPlaceholder: "What happened today?",
+    journalEditAria: (day: string) => `Edit the entry of ${day}`,
+    journalSave: "Save",
+    journalSaved: "Journal entry saved",
+    journalDeleted: "Journal entry deleted",
+    journalSaveFailed: "Journal entry could not be saved",
+    journalBy: (name: string) => `by ${name}`,
   },
   tripInvite: {
     badge: "Trip invitation",

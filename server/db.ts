@@ -47,6 +47,7 @@ import {
   spotPhotos,
   InsertSpotPhoto,
   tripInvites,
+  tripJournal,
   tripLogs,
   tripMembers,
   tripPhotos,
@@ -1212,6 +1213,8 @@ export async function deleteTripLog(id: number, userId: number) {
   await db.delete(menuEntries).where(eq(menuEntries.tripId, id));
   // Tages-Notizen des Menüplans hängen ebenfalls an der Reise
   await db.delete(menuDayNotes).where(eq(menuDayNotes.tripId, id));
+  // Tages-Journal der Reise (#192) hängt wie die Notizen an der Reise
+  await db.delete(tripJournal).where(eq(tripJournal.tripId, id));
   // Mitglieder und offene Einladungs-Links der Reise mit aufräumen
   await db.delete(tripMembers).where(eq(tripMembers.tripId, id));
   await db.delete(tripInvites).where(eq(tripInvites.tripId, id));
@@ -1659,6 +1662,47 @@ export async function deleteMenuDayNote(tripId: number, day: string) {
   await db
     .delete(menuDayNotes)
     .where(and(eq(menuDayNotes.tripId, tripId), eq(menuDayNotes.day, day)));
+}
+
+// ── Tages-Journal der Reise (#192) ──
+
+/**
+ * Journal-Einträge einer Reise (aufsteigend nach Tag) – nur NACH einer
+ * canAccessTrip-Prüfung im Router verwenden.
+ */
+export async function getTripJournal(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripJournal)
+    .where(eq(tripJournal.tripId, tripId))
+    .orderBy(tripJournal.day);
+}
+
+/**
+ * Journal-Eintrag setzen oder ersetzen (Upsert über unique tripId+day) –
+ * nur NACH einer canAccessTrip-Prüfung im Router verwenden. createdByUserId
+ * hält fest, wer zuletzt geschrieben hat.
+ */
+export async function upsertTripJournalEntry(
+  tripId: number,
+  day: string,
+  text: string,
+  createdByUserId: number | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .insert(tripJournal)
+    .values({ tripId, day, text, createdByUserId })
+    .onDuplicateKeyUpdate({ set: { text, createdByUserId } });
+}
+
+/** Journal-Eintrag löschen – nur NACH einer canAccessTrip-Prüfung im Router. */
+export async function deleteTripJournalEntry(tripId: number, day: string) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(tripJournal)
+    .where(and(eq(tripJournal.tripId, tripId), eq(tripJournal.day, day)));
 }
 
 // ── Fotos zu Zeltplatz-Favoriten ──

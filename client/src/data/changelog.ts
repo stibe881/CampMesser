@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Meine Reisen: Bei laufenden und vergangenen Reisen führst du neu ein «Reise-Tagebuch» – pro Reisetag ein kurzer Eintrag, bei gemeinsamen Reisen mit «von …»; die Druckansicht nimmt es mit.",
+        "Mes voyages : pour les séjours en cours et passés, tu tiens désormais un « journal de voyage » – une entrée par jour, avec « par … » sur les voyages partagés ; la vue d'impression le reprend.",
+        "I miei viaggi: per i soggiorni in corso e passati tieni ora un «diario di viaggio» – una voce per ogni giorno, con «di …» nei viaggi condivisi; la stampa lo include.",
+        "My trips: for ongoing and past stays you can now keep a “trip journal” – one entry per day, with “by …” on shared trips; the print view includes it."
+      ),
+      l4(
         "Neue Kachel «Statistik»: alle Auswertungen an einem Ort – Reisen, Wetter-Glück, Jahres-Vergleich, Meilensteine, Knoten-Fortschritt, Arten-Album und die Abzeichen deiner Kinder.",
         "Nouvelle tuile « Statistiques » : toutes tes analyses au même endroit – voyages, chance météo, comparaison annuelle, jalons, progression des nœuds, album des espèces et badges de tes enfants.",
         "Nuova scheda «Statistiche»: tutte le analisi in un posto – viaggi, fortuna meteo, confronto annuale, traguardi, progressi con i nodi, album delle specie e distintivi dei tuoi bambini.",

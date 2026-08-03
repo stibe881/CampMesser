@@ -1976,6 +1976,20 @@ export const de = {
     duplicateSubmit: "Duplizieren",
     duplicated: "Reise dupliziert – sie steht bei den geplanten Aufenthalten",
     duplicateFailed: "Duplizieren fehlgeschlagen",
+    journalTitle: "Reise-Tagebuch",
+    journalToggleAria: (name: string) =>
+      `Reise-Tagebuch von ${name} auf- oder zuklappen`,
+    journalHint:
+      "Halte pro Reisetag fest, was los war – nur du und deine Mitreisenden sehen es.",
+    journalCount: (n: number) => (n === 1 ? "1 Eintrag" : `${n} Einträge`),
+    journalEmptyDay: "Noch nichts festgehalten",
+    journalPlaceholder: "Was war heute los?",
+    journalEditAria: (day: string) => `Eintrag vom ${day} bearbeiten`,
+    journalSave: "Speichern",
+    journalSaved: "Tagebuch-Eintrag gespeichert",
+    journalDeleted: "Tagebuch-Eintrag gelöscht",
+    journalSaveFailed: "Tagebuch-Eintrag konnte nicht gespeichert werden",
+    journalBy: (name: string) => `von ${name}`,
   },
   tripInvite: {
     badge: "Reise-Einladung",

@@ -155,6 +155,21 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     await expect(
       authed.menu.setDayNote({ tripId, day: "2026-08-05", note: "X" })
     ).rejects.toThrow();
+    // Tages-Journal (#192): Eintrag setzen, ausserhalb des Zeitraums abweisen
+    await authed.trips.journal.set({
+      tripId,
+      day: "2026-08-01",
+      text: "Angekommen und Zelt aufgestellt.",
+    });
+    await expect(
+      authed.trips.journal.set({ tripId, day: "2026-08-05", text: "X" })
+    ).rejects.toThrow();
+    const journalOwn = await authed.trips.journal.list({ tripId });
+    expect(journalOwn).toHaveLength(1);
+    expect(journalOwn[0]).toMatchObject({
+      day: "2026-08-01",
+      text: "Angekommen und Zelt aufgestellt.",
+    });
     await authed.hunts.save({
       title: "CI-Jagd",
       intro: "Los",
@@ -455,6 +470,32 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       note: "Fondue-Abend",
     });
 
+    // Tages-Journal (#192): Mitreisende dürfen mitschreiben, überschreiben
+    // und per leerem Text löschen; der Anzeigename kommt als createdByName mit
+    await memberCaller.trips.journal.set({
+      tripId,
+      day: "2026-08-02",
+      text: "Wanderung zum See.",
+    });
+    await memberCaller.trips.journal.set({
+      tripId,
+      day: "2026-08-01",
+      text: "Angekommen, Zelt steht.",
+    });
+    const journalShared = await memberCaller.trips.journal.list({ tripId });
+    expect(journalShared).toHaveLength(2);
+    expect(journalShared[0]).toMatchObject({
+      day: "2026-08-01",
+      text: "Angekommen, Zelt steht.",
+    });
+    expect(journalShared[1]?.createdByName).toBe("CI Mitglied");
+    await memberCaller.trips.journal.set({
+      tripId,
+      day: "2026-08-02",
+      text: "   ",
+    });
+    expect(await authed.trips.journal.list({ tripId })).toHaveLength(1);
+
     // Reise-Einkaufsliste: Owner und Mitglied teilen sich dieselbe Liste
     await authed.tripShopping.add({
       tripId,
@@ -753,6 +794,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.menuDayNotes)
         .where(eq(schema.menuDayNotes.tripId, tripId)),
+      dbc
+        .select()
+        .from(schema.tripJournal)
+        .where(eq(schema.tripJournal.tripId, tripId)),
     ]);
     expect(remaining.map(rows => rows.length)).toEqual(remaining.map(() => 0));
 

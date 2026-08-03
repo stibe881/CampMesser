@@ -1950,6 +1950,20 @@ export const it: Translation = {
     duplicateSubmit: "Duplica",
     duplicated: "Viaggio duplicato – lo trovi tra i soggiorni pianificati",
     duplicateFailed: "Duplicazione non riuscita",
+    journalTitle: "Diario di viaggio",
+    journalToggleAria: (name: string) =>
+      `Apri o chiudi il diario di viaggio di ${name}`,
+    journalHint:
+      "Annota giorno per giorno com'è andata – lo vedete solo tu e i tuoi compagni di viaggio.",
+    journalCount: (n: number) => (n === 1 ? "1 voce" : `${n} voci`),
+    journalEmptyDay: "Ancora nulla di annotato",
+    journalPlaceholder: "Com'è andata oggi?",
+    journalEditAria: (day: string) => `Modifica la voce del ${day}`,
+    journalSave: "Salva",
+    journalSaved: "Voce del diario salvata",
+    journalDeleted: "Voce del diario eliminata",
+    journalSaveFailed: "Impossibile salvare la voce del diario",
+    journalBy: (name: string) => `di ${name}`,
   },
   tripInvite: {
     badge: "Invito al viaggio",

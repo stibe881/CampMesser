@@ -43,6 +43,9 @@ function parseIsoDay(iso: string): number | null {
   return Number.isNaN(t) ? null : t;
 }
 
+/** Maximale Länge eines Tages-Journal-Eintrags (#192, DB: varchar(2000)). */
+export const TRIP_JOURNAL_MAX_LENGTH = 2000;
+
 /** Anzahl Nächte zwischen An- und Abreise (gleicher Tag = 0, ungültig = 0). */
 export function tripNights(startDate: string, endDate: string): number {
   const start = parseIsoDay(startDate);

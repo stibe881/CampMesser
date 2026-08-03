@@ -52,6 +52,7 @@ import {
   TRIP_WEATHER_TEMP_MAX,
   TRIP_WEATHER_TEMP_MIN,
 } from "@shared/tripWeather";
+import { TRIP_JOURNAL_MAX_LENGTH } from "@shared/trips";
 import { SHOPPING_CATEGORIES } from "@shared/shopping";
 import {
   parseSpotAttributes,
@@ -3203,6 +3204,72 @@ export const appRouter = router({
           await db.clearTripLogCoverPhoto(photo.tripId, trip.userId, photo.id);
           const { tripPhotoStorage } = await import("./photoStorage");
           await tripPhotoStorage.deleteFiles([photo.fileName]);
+          return { success: true } as const;
+        }),
+    }),
+    /**
+     * Tages-Journal einer Reise (#192): ein Freitext-Eintrag pro Reisetag.
+     * Wie beim Menüplan gehört das Journal zur REISE – Mitreisende dürfen
+     * mitschreiben (canAccessTrip). Pro Eintrag wird der Anzeigename von
+     * createdByUserId aufgelöst («von <Name>» bei gemeinsamen Reisen).
+     */
+    journal: router({
+      list: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          type JournalEntry = Awaited<
+            ReturnType<typeof db.getTripJournal>
+          >[number] & { createdByName: string | null };
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) return [] as JournalEntry[];
+          const entries = await db.getTripJournal(input.tripId);
+          const names = await db.getUserDisplayNames(
+            entries
+              .map(e => e.createdByUserId)
+              .filter((id): id is number => id != null)
+          );
+          return entries.map<JournalEntry>(entry => ({
+            ...entry,
+            createdByName:
+              entry.createdByUserId != null
+                ? (names.get(entry.createdByUserId) ?? null)
+                : null,
+          }));
+        }),
+      /** Eintrag setzen oder löschen – leerer/fehlender Text löscht den Tag. */
+      set: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            text: z.string().max(TRIP_JOURNAL_MAX_LENGTH).nullish(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          if (input.day < trip.startDate || input.day > trip.endDate) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Der Tag liegt ausserhalb des Aufenthalts.",
+            });
+          }
+          const text = input.text?.trim() || null;
+          if (text) {
+            await db.upsertTripJournalEntry(
+              input.tripId,
+              input.day,
+              text,
+              ctx.user.id
+            );
+          } else {
+            await db.deleteTripJournalEntry(input.tripId, input.day);
+          }
           return { success: true } as const;
         }),
     }),

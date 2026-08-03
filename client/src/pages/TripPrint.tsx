@@ -46,6 +46,11 @@ export default function TripPrintPage() {
     { tripId },
     { enabled: isAuthenticated && validId }
   );
+  // Tages-Journal (#192) – wird als eigener Abschnitt mitgedruckt
+  const journalQuery = trpc.trips.journal.list.useQuery(
+    { tripId },
+    { enabled: isAuthenticated && validId }
+  );
   const customQuery = trpc.recipes.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -97,6 +102,11 @@ export default function TripPrintPage() {
     return map;
   }, [customQuery.data]);
 
+  const journalEntries = useMemo(
+    () => journalQuery.data ?? [],
+    [journalQuery.data]
+  );
+
   const entryFor = (day: string, meal: Meal) =>
     entries.find(e => e.day === day && e.meal === meal);
 
@@ -117,6 +127,12 @@ export default function TripPrintPage() {
       weekday: "short",
       day: "numeric",
       month: "short",
+    });
+  const fmtJournalDay = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
     });
   const formatRange = (startDate: string, endDate: string): string => {
     const fmt = (iso: string) =>
@@ -332,6 +348,28 @@ export default function TripPrintPage() {
                 </tbody>
               </table>
             </div>
+          </section>
+        )}
+
+        {/* Tages-Journal (#192): nur Tage mit Eintrag, chronologisch */}
+        {journalEntries.length > 0 && (
+          <section className="mb-6">
+            <h2 className="mb-2 border-b border-foreground/30 pb-1 text-sm font-bold uppercase tracking-wide">
+              {t.trips.journalTitle}
+            </h2>
+            <ul className="space-y-2.5">
+              {journalEntries.map(entry => (
+                <li key={entry.id} className="print-station">
+                  <p className="text-xs font-semibold capitalize">
+                    {fmtJournalDay(entry.day)}
+                    {entry.createdByName
+                      ? ` · ${t.trips.journalBy(entry.createdByName)}`
+                      : ""}
+                  </p>
+                  <p className="whitespace-pre-line text-sm">{entry.text}</p>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 
