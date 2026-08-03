@@ -104,6 +104,14 @@ export const de = {
       n === 1
         ? "1 fällige Pflege-Aufgabe – Inventar öffnen"
         : `${n} fällige Pflege-Aufgaben – Inventar öffnen`,
+    tickDueText: (n: number) =>
+      n === 1
+        ? "1 Zeckenstich ist noch zu beobachten"
+        : `${n} Zeckenstiche sind noch zu beobachten`,
+    tickDueAria: (n: number) =>
+      n === 1
+        ? "1 Zeckenstich in Beobachtung – Erste Hilfe öffnen"
+        : `${n} Zeckenstiche in Beobachtung – Erste Hilfe öffnen`,
     searchPlaceholder: "Wissen durchsuchen: Zeckenbiss, Mastwurf, Rezepte …",
     recentSearches: "Kürzlich gesucht:",
     recentSearchesClear: "löschen",
@@ -2077,6 +2085,38 @@ export const de = {
     helpTitle: "So hilfst du",
     disclaimer:
       "Hinweis: Dieser Guide ersetzt keine ärztliche Beratung und keinen Erste-Hilfe-Kurs. Im Zweifel immer den Notruf 112 oder die Rega 1414 kontaktieren.",
+    tickTitle: "Zeckenstich-Merker",
+    tickSubtitle:
+      "Halte einen Zeckenstich fest und behalte die Einstichstelle zwei Wochen im Auge.",
+    tickGuestHint:
+      "Melde dich an, um Zeckenstiche festzuhalten und an die Beobachtung erinnert zu werden.",
+    tickMedicalNote:
+      "Wichtig: Zeigt sich rund um die Einstichstelle eine sich ausbreitende Rötung, oder kommen Fieber, Kopf- oder Gliederschmerzen dazu, lass das ärztlich abklären. Das gilt auch noch Wochen nach dem Stich.",
+    tickDateLabel: "Datum des Stichs",
+    tickBodyPartLabel: "Körperstelle (optional)",
+    tickBodyPartPlaceholder: "z. B. Kniekehle links",
+    tickNoteLabel: "Notiz (optional)",
+    tickNotePlaceholder: "z. B. Zecke vollständig entfernt",
+    tickAddButton: "Stich erfassen",
+    tickAdded: "Zeckenstich erfasst",
+    tickAddFailed: "Zeckenstich konnte nicht erfasst werden",
+    tickOpenTitle: "In Beobachtung",
+    tickOpenEmpty: "Zurzeit ist kein Zeckenstich in Beobachtung.",
+    tickDaysLeft: (n: number) =>
+      n === 1 ? "noch 1 Tag beobachten" : `noch ${n} Tage beobachten`,
+    tickBitAt: (date: string) => `Stich am ${date}`,
+    tickResolveButton: "erledigt",
+    tickResolveAria: (date: string) =>
+      `Beobachtung des Stichs vom ${date} abschliessen`,
+    tickResolved: "Beobachtung abgeschlossen",
+    tickResolveFailed: "Beobachtung konnte nicht abgeschlossen werden",
+    tickReopenAria: (date: string) =>
+      `Stich vom ${date} wieder in Beobachtung nehmen`,
+    tickDeleteAria: (date: string) => `Stich vom ${date} löschen`,
+    tickDeleteConfirm: "Diesen Zeckenstich-Eintrag wirklich löschen?",
+    tickDeleted: "Eintrag gelöscht",
+    tickDoneTitle: (n: number) => `Erledigt (${n})`,
+    tickDoneToggleAria: "Erledigte Zeckenstiche auf- oder zuklappen",
   },
   knots: {
     title: "Knoten-Bibliothek",

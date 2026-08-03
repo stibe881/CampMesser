@@ -100,6 +100,14 @@ export const en: Translation = {
       n === 1
         ? "1 care task due – open inventory"
         : `${n} care tasks due – open inventory`,
+    tickDueText: (n: number) =>
+      n === 1
+        ? "1 tick bite still needs watching"
+        : `${n} tick bites still need watching`,
+    tickDueAria: (n: number) =>
+      n === 1
+        ? "1 tick bite under observation – open first aid"
+        : `${n} tick bites under observation – open first aid`,
     searchPlaceholder: "Search knowledge: tick bite, clove hitch, recipes …",
     recentSearches: "Recent searches:",
     recentSearchesClear: "clear",
@@ -1998,6 +2006,37 @@ export const en: Translation = {
     helpTitle: "How to help",
     disclaimer:
       "Note: this guide does not replace medical advice or a first aid course. When in doubt, always call 112 or Rega on 1414.",
+    tickTitle: "Tick bite reminder",
+    tickSubtitle:
+      "Record a tick bite and keep an eye on the bite site for two weeks.",
+    tickGuestHint:
+      "Sign in to record tick bites and get reminded to keep watching them.",
+    tickMedicalNote:
+      "Important: if a spreading redness appears around the bite site, or if fever, headache or aching limbs set in, have it checked by a doctor. This also applies weeks after the bite.",
+    tickDateLabel: "Date of the bite",
+    tickBodyPartLabel: "Body part (optional)",
+    tickBodyPartPlaceholder: "e.g. back of the left knee",
+    tickNoteLabel: "Note (optional)",
+    tickNotePlaceholder: "e.g. tick removed completely",
+    tickAddButton: "Record bite",
+    tickAdded: "Tick bite recorded",
+    tickAddFailed: "Tick bite could not be recorded",
+    tickOpenTitle: "Under observation",
+    tickOpenEmpty: "No tick bite is currently under observation.",
+    tickDaysLeft: (n: number) =>
+      n === 1 ? "1 more day to watch" : `${n} more days to watch`,
+    tickBitAt: (date: string) => `Bite on ${date}`,
+    tickResolveButton: "done",
+    tickResolveAria: (date: string) => `Finish observing the bite from ${date}`,
+    tickResolved: "Observation finished",
+    tickResolveFailed: "Observation could not be finished",
+    tickReopenAria: (date: string) =>
+      `Put the bite from ${date} back under observation`,
+    tickDeleteAria: (date: string) => `Delete the bite from ${date}`,
+    tickDeleteConfirm: "Really delete this tick bite entry?",
+    tickDeleted: "Entry deleted",
+    tickDoneTitle: (n: number) => `Done (${n})`,
+    tickDoneToggleAria: "Expand or collapse finished tick bites",
   },
   knots: {
     title: "Knot library",

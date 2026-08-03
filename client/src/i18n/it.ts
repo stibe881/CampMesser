@@ -104,6 +104,14 @@ export const it: Translation = {
       n === 1
         ? "1 attività di manutenzione in scadenza – apri l'inventario"
         : `${n} attività di manutenzione in scadenza – apri l'inventario`,
+    tickDueText: (n: number) =>
+      n === 1
+        ? "1 morso di zecca è ancora da osservare"
+        : `${n} morsi di zecca sono ancora da osservare`,
+    tickDueAria: (n: number) =>
+      n === 1
+        ? "1 morso di zecca in osservazione – apri il primo soccorso"
+        : `${n} morsi di zecca in osservazione – apri il primo soccorso`,
     searchPlaceholder:
       "Cerca nel sapere: morso di zecca, nodo parlato, ricette …",
     searchAria: "Cerca nei moduli di conoscenza",
@@ -2050,6 +2058,40 @@ export const it: Translation = {
     helpTitle: "Come aiutare",
     disclaimer:
       "Nota: questa guida non sostituisce né un consulto medico né un corso di primo soccorso. Nel dubbio, chiamare sempre il 112 o la Rega al 1414.",
+    tickTitle: "Promemoria morsi di zecca",
+    tickSubtitle:
+      "Annota un morso di zecca e tieni d'occhio il punto del morso per due settimane.",
+    tickGuestHint:
+      "Accedi per annotare i morsi di zecca e ricevere il promemoria dell'osservazione.",
+    tickMedicalNote:
+      "Importante: se attorno al punto del morso compare un rossore che si allarga, oppure se arrivano febbre, mal di testa o dolori muscolari, fatti visitare da un medico. Vale anche a settimane di distanza dal morso.",
+    tickDateLabel: "Data del morso",
+    tickBodyPartLabel: "Parte del corpo (facoltativo)",
+    tickBodyPartPlaceholder: "p. es. incavo del ginocchio sinistro",
+    tickNoteLabel: "Nota (facoltativo)",
+    tickNotePlaceholder: "p. es. zecca rimossa completamente",
+    tickAddButton: "Annota il morso",
+    tickAdded: "Morso di zecca annotato",
+    tickAddFailed: "Impossibile annotare il morso di zecca",
+    tickOpenTitle: "In osservazione",
+    tickOpenEmpty: "Al momento nessun morso di zecca è in osservazione.",
+    tickDaysLeft: (n: number) =>
+      n === 1
+        ? "ancora 1 giorno da osservare"
+        : `ancora ${n} giorni da osservare`,
+    tickBitAt: (date: string) => `Morso il ${date}`,
+    tickResolveButton: "fatto",
+    tickResolveAria: (date: string) =>
+      `Concludi l'osservazione del morso del ${date}`,
+    tickResolved: "Osservazione conclusa",
+    tickResolveFailed: "Impossibile concludere l'osservazione",
+    tickReopenAria: (date: string) =>
+      `Rimetti in osservazione il morso del ${date}`,
+    tickDeleteAria: (date: string) => `Elimina il morso del ${date}`,
+    tickDeleteConfirm: "Vuoi davvero eliminare questa voce?",
+    tickDeleted: "Voce eliminata",
+    tickDoneTitle: (n: number) => `Conclusi (${n})`,
+    tickDoneToggleAria: "Apri o chiudi i morsi di zecca conclusi",
   },
   knots: {
     title: "Biblioteca dei nodi",

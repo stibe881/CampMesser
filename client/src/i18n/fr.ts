@@ -105,6 +105,14 @@ export const fr: Translation = {
       n === 1
         ? "1 tâche d'entretien due – ouvrir l'inventaire"
         : `${n} tâches d'entretien dues – ouvrir l'inventaire`,
+    tickDueText: (n: number) =>
+      n === 1
+        ? "1 piqûre de tique reste à surveiller"
+        : `${n} piqûres de tique restent à surveiller`,
+    tickDueAria: (n: number) =>
+      n === 1
+        ? "1 piqûre de tique sous surveillance – ouvrir les premiers secours"
+        : `${n} piqûres de tique sous surveillance – ouvrir les premiers secours`,
     searchPlaceholder:
       "Rechercher : morsure de tique, nœud de cabestan, recettes …",
     searchAria: "Rechercher dans les modules de savoir",
@@ -2067,6 +2075,39 @@ export const fr: Translation = {
     helpTitle: "Comment aider",
     disclaimer:
       "Remarque : ce guide ne remplace ni un avis médical ni un cours de premiers secours. En cas de doute, toujours appeler le 112 ou la Rega au 1414.",
+    tickTitle: "Mémo piqûres de tique",
+    tickSubtitle:
+      "Note une piqûre de tique et garde le point de piqûre à l'œil pendant deux semaines.",
+    tickGuestHint:
+      "Connecte-toi pour noter tes piqûres de tique et être rappelé·e de les surveiller.",
+    tickMedicalNote:
+      "Important : si une rougeur s'étend autour du point de piqûre, ou si de la fièvre, des maux de tête ou des douleurs musculaires apparaissent, fais-toi examiner par un médecin. Cela vaut aussi plusieurs semaines après la piqûre.",
+    tickDateLabel: "Date de la piqûre",
+    tickBodyPartLabel: "Endroit du corps (facultatif)",
+    tickBodyPartPlaceholder: "p. ex. creux du genou gauche",
+    tickNoteLabel: "Note (facultatif)",
+    tickNotePlaceholder: "p. ex. tique entièrement retirée",
+    tickAddButton: "Noter la piqûre",
+    tickAdded: "Piqûre de tique notée",
+    tickAddFailed: "Impossible de noter la piqûre de tique",
+    tickOpenTitle: "Sous surveillance",
+    tickOpenEmpty:
+      "Aucune piqûre de tique n'est actuellement sous surveillance.",
+    tickDaysLeft: (n: number) =>
+      n === 1 ? "encore 1 jour à surveiller" : `encore ${n} jours à surveiller`,
+    tickBitAt: (date: string) => `Piqûre le ${date}`,
+    tickResolveButton: "terminé",
+    tickResolveAria: (date: string) =>
+      `Terminer la surveillance de la piqûre du ${date}`,
+    tickResolved: "Surveillance terminée",
+    tickResolveFailed: "Impossible de terminer la surveillance",
+    tickReopenAria: (date: string) =>
+      `Remettre la piqûre du ${date} sous surveillance`,
+    tickDeleteAria: (date: string) => `Supprimer la piqûre du ${date}`,
+    tickDeleteConfirm: "Vraiment supprimer cette piqûre de tique ?",
+    tickDeleted: "Entrée supprimée",
+    tickDoneTitle: (n: number) => `Terminées (${n})`,
+    tickDoneToggleAria: "Ouvrir ou fermer les piqûres de tique terminées",
   },
   knots: {
     title: "Bibliothèque de nœuds",

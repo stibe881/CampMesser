@@ -46,6 +46,8 @@ import {
   shoppingShares,
   spotPhotos,
   InsertSpotPhoto,
+  tickBites,
+  InsertTickBite,
   tripInvites,
   tripJournal,
   tripLogs,
@@ -647,6 +649,43 @@ export async function deleteGearTask(id: number, userId: number) {
   await db
     .delete(gearTasks)
     .where(and(eq(gearTasks.id, id), eq(gearTasks.userId, userId)));
+}
+
+// ── Zeckenstich-Merker (#179) ──
+export async function getTickBites(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tickBites)
+    .where(eq(tickBites.userId, userId))
+    .orderBy(desc(tickBites.bitAt), desc(tickBites.id));
+}
+
+export async function addTickBite(data: InsertTickBite) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(tickBites).values(data);
+  return result.insertId;
+}
+
+export async function updateTickBite(
+  id: number,
+  userId: number,
+  data: Partial<
+    Pick<InsertTickBite, "bitAt" | "bodyPart" | "note" | "resolvedAt">
+  >
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tickBites)
+    .set(data)
+    .where(and(eq(tickBites.id, id), eq(tickBites.userId, userId)));
+}
+
+export async function deleteTickBite(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(tickBites)
+    .where(and(eq(tickBites.id, id), eq(tickBites.userId, userId)));
 }
 
 // ── Energie-Verbraucher ──

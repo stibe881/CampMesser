@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Erste Hilfe: Der neue «Zeckenstich-Merker» hält Datum, Körperstelle und Notiz fest und zeigt dir zwei Wochen lang, wie lange du die Stelle noch beobachten solltest – fällige Beobachtungen stehen auch auf der Startseite.",
+        "Premiers secours : le nouveau « mémo piqûres de tique » retient la date, l'endroit et une note, et t'indique pendant deux semaines combien de temps surveiller encore – les surveillances en cours apparaissent aussi sur l'accueil.",
+        "Primo soccorso: il nuovo «promemoria morsi di zecca» annota data, parte del corpo e nota e per due settimane ti mostra quanto ancora osservare – le osservazioni in corso compaiono anche sulla pagina iniziale.",
+        "First aid: the new “tick bite reminder” records date, body part and a note and shows you for two weeks how much longer to watch the spot – open observations also appear on the home page."
+      ),
+      l4(
         "Packlisten: Alte Listen wanderst du neu ins «Archiv» statt sie zu löschen – sie bleiben komplett erhalten, verschwinden aber aus der Übersicht und den Auswahl-Listen.",
         "Listes de bagages : range désormais tes anciennes listes dans les « archives » au lieu de les supprimer – elles restent complètes mais disparaissent de l'aperçu et des listes de sélection.",
         "Liste bagagli: le vecchie liste finiscono ora nell'«archivio» invece di essere eliminate – restano complete ma spariscono dalla panoramica e dagli elenchi di scelta.",

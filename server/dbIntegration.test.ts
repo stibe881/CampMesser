@@ -284,6 +284,30 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     expect(gearList.find(g => g.id === gearTaskId)?.lastDoneAt).toBe(
       "2026-08-02"
     );
+    // Zeckenstich-Merker (#179): erfassen, bearbeiten, abhaken, wieder öffnen
+    const { id: tickBiteId } = await authed.tickBites.add({
+      bitAt: "2026-08-01",
+      bodyPart: "Kniekehle links",
+      note: "Zecke vollständig entfernt",
+    });
+    await authed.tickBites.update({
+      id: tickBiteId,
+      bodyPart: "Kniekehle rechts",
+    });
+    const tickBitesAfterUpdate = await authed.tickBites.list();
+    const tickBite = tickBitesAfterUpdate.find(b => b.id === tickBiteId);
+    expect(tickBite?.bodyPart).toBe("Kniekehle rechts");
+    expect(tickBite?.bitAt).toBe("2026-08-01");
+    expect(tickBite?.resolvedAt).toBeNull();
+    await authed.tickBites.resolve({ id: tickBiteId, today: "2026-08-10" });
+    expect(
+      (await authed.tickBites.list()).find(b => b.id === tickBiteId)?.resolvedAt
+    ).toBe("2026-08-10");
+    await authed.tickBites.resolve({ id: tickBiteId, today: null });
+    expect(
+      (await authed.tickBites.list()).find(b => b.id === tickBiteId)?.resolvedAt
+    ).toBeNull();
+
     await authed.shopping.add({ name: "CI-Zutat" });
     // Einkaufsliste teilen: Token ist idempotent, öffentlicher Abruf und
     // Abhaken über den Teil-Link funktionieren ohne Anmeldung
@@ -786,6 +810,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.natureSightings)
         .where(eq(schema.natureSightings.userId, uid)),
+      dbc
+        .select()
+        .from(schema.tickBites)
+        .where(eq(schema.tickBites.userId, uid)),
       // Reise-Mitglieder, Einladungs-Links und Reise-Einkaufsliste der
       // eigenen Reisen sind weg (auch Einträge von Mitreisenden)
       dbc

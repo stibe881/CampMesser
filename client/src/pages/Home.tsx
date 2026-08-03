@@ -37,6 +37,7 @@ import { getMoonInfo, stargazingQuality } from "@shared/moon";
 import { isShowerActive, meteorShowers } from "@shared/astro";
 import { recipes } from "@/data/recipes";
 import {
+  Bug,
   Cable,
   CloudRain,
   CookingPot,
@@ -51,6 +52,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { gearTaskDue } from "@shared/gearTasks";
+import { tickObservationStatus } from "@shared/tickBites";
 import { useEffect, useMemo, useState } from "react";
 import { getRecentModules } from "@/components/AppShell";
 import {
@@ -966,6 +968,45 @@ function GearCareHint() {
 }
 
 /**
+ * Dezente Zeile neben dem Pflege-Hinweis: Anzahl Zeckenstiche, deren
+ * 14-Tage-Beobachtung (shared/tickBites.ts) noch läuft – verlinkt auf die
+ * Erste Hilfe. Erscheint nur angemeldet und nur bei offenen Stichen.
+ */
+function TickBiteHint() {
+  const { t } = useI18n();
+  const { isAuthenticated } = useAuth();
+  const query = trpc.tickBites.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+  const today = new Date().toISOString().slice(0, 10);
+  const openCount = useMemo(
+    () =>
+      (query.data ?? []).filter(
+        bite => !tickObservationStatus(bite, today).done
+      ).length,
+    [query.data, today]
+  );
+  if (!isAuthenticated || openCount === 0) return null;
+  return (
+    <Link
+      href="/erste-hilfe"
+      className="mb-6 -mt-3 flex items-center gap-2.5 rounded-lg border border-border/60 bg-muted/40 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+      aria-label={t.home.tickDueAria(openCount)}
+    >
+      <Bug className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+      <span className="min-w-0 flex-1 truncate">
+        {t.home.tickDueText(openCount)}
+      </span>
+      <ArrowRight
+        className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50"
+        aria-hidden="true"
+      />
+    </Link>
+  );
+}
+
+/**
  * Globale Suche über die Offline-Wissensmodule (Erste Hilfe, Knoten, Rezepte,
  * Natur) – angemeldet zusätzlich über eigene Inhalte (Packlisten, Zeltplätze,
  * eigene Rezepte/Jagden/Quizze, Zelt-Finder-Ziele). Die Nutzerdaten werden
@@ -1375,6 +1416,7 @@ export default function Home() {
               tomorrow={homeWeather.tomorrow}
             />
             <GearCareHint />
+            <TickBiteHint />
           </>
         )}
         <KnowledgeSearch />

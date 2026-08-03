@@ -898,6 +898,33 @@ export type GearTask = typeof gearTasks.$inferSelect;
 export type InsertGearTask = typeof gearTasks.$inferInsert;
 
 /**
+ * Zeckenstich-Merker (#179): erfasste Stiche pro Konto, damit die
+ * Einstichstelle rund zwei Wochen beobachtet werden kann. Die reine
+ * Fristen-Logik liegt in shared/tickBites.ts; die App bewertet nichts
+ * medizinisch, sie erinnert nur ans Nachschauen.
+ */
+export const tickBites = mysqlTable(
+  "tickBites",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Datum des Stichs (ISO) */
+    bitAt: date("bitAt", { mode: "string" }).notNull(),
+    /** Körperstelle als Freitext («Kniekehle links»); null = ohne Angabe */
+    bodyPart: varchar("bodyPart", { length: 80 }),
+    /** Kurze Notiz («Zecke vollständig entfernt»); null = keine */
+    note: varchar("note", { length: 500 }),
+    /** Beobachtung abgeschlossen am (ISO); null = noch offen */
+    resolvedAt: date("resolvedAt", { mode: "string" }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("tickBites_userId").on(table.userId)]
+);
+
+export type TickBite = typeof tickBites.$inferSelect;
+export type InsertTickBite = typeof tickBites.$inferInsert;
+
+/**
  * Natur-Beobachtungen: persönliches Sichtungs-Tagebuch im Natur-Modul.
  * Optional mit Verweis auf einen Wissens-Eintrag (client/src/data/nature.ts),
  * Standort-Koordinaten (erscheinen als Pins auf /karte) und genau EINEM Foto

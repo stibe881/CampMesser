@@ -53,6 +53,10 @@ import {
   TRIP_WEATHER_TEMP_MIN,
 } from "@shared/tripWeather";
 import { TRIP_JOURNAL_MAX_LENGTH } from "@shared/trips";
+import {
+  MAX_TICK_BODY_PART_LENGTH,
+  MAX_TICK_NOTE_LENGTH,
+} from "@shared/tickBites";
 import { SHOPPING_CATEGORIES } from "@shared/shopping";
 import {
   parseSpotAttributes,
@@ -76,6 +80,9 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
+
+/** ISO-Datum (YYYY-MM-DD) als Eingabe-Muster. */
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
  * Platz-Eigenschaften validieren: über den defensiven Parser laufen lassen
@@ -1596,6 +1603,76 @@ export const appRouter = router({
         await db.updateGearTask(input.id, ctx.user.id, {
           lastDoneAt: input.today,
         });
+        return { success: true } as const;
+      }),
+  }),
+
+  /**
+   * Zeckenstich-Merker (#179): erfasste Stiche pro Konto samt
+   * Beobachtungsfenster. Die Fristen-Logik liegt in shared/tickBites.ts –
+   * der Server speichert nur, er bewertet nichts medizinisch.
+   */
+  tickBites: router({
+    list: protectedProcedure.query(({ ctx }) => db.getTickBites(ctx.user.id)),
+    add: protectedProcedure
+      .input(
+        z.object({
+          bitAt: z.string().regex(ISO_DAY),
+          bodyPart: z.string().trim().max(MAX_TICK_BODY_PART_LENGTH).nullish(),
+          note: z.string().trim().max(MAX_TICK_NOTE_LENGTH).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const id = await db.addTickBite({
+          userId: ctx.user.id,
+          bitAt: input.bitAt,
+          bodyPart: input.bodyPart?.trim() || null,
+          note: input.note?.trim() || null,
+        });
+        return { id };
+      }),
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          bitAt: z.string().regex(ISO_DAY).optional(),
+          bodyPart: z.string().trim().max(MAX_TICK_BODY_PART_LENGTH).nullish(),
+          note: z.string().trim().max(MAX_TICK_NOTE_LENGTH).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.updateTickBite(input.id, ctx.user.id, {
+          ...(input.bitAt !== undefined ? { bitAt: input.bitAt } : {}),
+          ...(input.bodyPart !== undefined
+            ? { bodyPart: input.bodyPart?.trim() || null }
+            : {}),
+          ...(input.note !== undefined
+            ? { note: input.note?.trim() || null }
+            : {}),
+        });
+        return { success: true } as const;
+      }),
+    /**
+     * Beobachtung abschliessen (resolvedAt = mitgeschicktes «heute» vom
+     * Gerät, Muster gear.markDone) oder mit null wieder öffnen.
+     */
+    resolve: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          today: z.string().regex(ISO_DAY).nullable(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.updateTickBite(input.id, ctx.user.id, {
+          resolvedAt: input.today,
+        });
+        return { success: true } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteTickBite(input.id, ctx.user.id);
         return { success: true } as const;
       }),
   }),

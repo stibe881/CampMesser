@@ -182,6 +182,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     passkeys,
     gearTasks,
     natureSightings,
+    tickBites,
   } = await import("../drizzle/schema");
   const { inArray, or } = await import("drizzle-orm");
   // Eigene Reisen zuerst ermitteln: deren Mitglieder, Einladungs-Links und
@@ -294,6 +295,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     .delete(pushSubscriptions)
     .where(eq(pushSubscriptions.userId, userId));
   await db.delete(userSettings).where(eq(userSettings.userId, userId));
+  // Zeckenstich-Merker (#179) hängen direkt am Konto
+  await db.delete(tickBites).where(eq(tickBites.userId, userId));
   await db
     .delete(passwordResetTokens)
     .where(eq(passwordResetTokens.userId, userId));

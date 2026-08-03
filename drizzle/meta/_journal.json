@@ -435,6 +435,13 @@
       "when": 1785752225714,
       "tag": "0061_strange_reavers",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "5",
+      "when": 1785752461772,
+      "tag": "0062_colossal_silver_centurion",
+      "breakpoints": true
     }
   ]
 }
