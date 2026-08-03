@@ -12,6 +12,7 @@ import {
   Search,
   ShoppingBasket,
   ShoppingCart,
+  Users,
   UtensilsCrossed,
   Wand2,
   X,
@@ -35,7 +36,11 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { recipes } from "@/data/recipes";
-import { parseStringList } from "@shared/customRecipes";
+import {
+  normalizeMethod,
+  parseStringList,
+  RECIPE_METHOD_LABELS,
+} from "@shared/customRecipes";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import {
   autofillMenuPlan,
@@ -51,6 +56,22 @@ import {
 interface PickerSlot {
   day: string;
   meal: Meal;
+}
+
+/**
+ * Rezept-Vorschau (#182): das zugewiesene Rezept in der aktiven Sprache,
+ * bereits aufgelöst – egal ob eingebautes oder eigenes Rezept.
+ */
+interface RecipePreview {
+  name: string;
+  timeMinutes: number;
+  servings: number;
+  /** Anzeigetext der Zubereitungsart (bereits gepickt) */
+  methodLabel: string;
+  own: boolean;
+  ingredients: string[];
+  steps: string[];
+  tip: string | null;
 }
 
 /**
@@ -109,6 +130,8 @@ export default function MenuPlanPage() {
   const isSharedTrip = (membersQuery.data?.members.length ?? 0) > 1;
 
   const [picker, setPicker] = useState<PickerSlot | null>(null);
+  /** Offene Rezept-Vorschau (null = zu). */
+  const [preview, setPreview] = useState<RecipePreview | null>(null);
   const [search, setSearch] = useState("");
   const [freeText, setFreeText] = useState("");
   /** Tages-Notiz-Editor: Tag + aktueller Eingabewert (null = zu). */
@@ -219,6 +242,48 @@ export default function MenuPlanPage() {
       return customById.get(entry.customRecipeId)?.name ?? "–";
     }
     return entry.freeText ?? "–";
+  };
+
+  /**
+   * Das Rezept eines Slots für die Vorschau auflösen – eingebaute Rezepte über
+   * pick(), eigene über die JSON-Spalten. Freitext-Slots und Rezepte, die es
+   * nicht (mehr) gibt, liefern null: dort bleibt die Zeile wie bisher.
+   */
+  const previewFor = (
+    entry: NonNullable<ReturnType<typeof entryFor>>
+  ): RecipePreview | null => {
+    if (entry.recipeId) {
+      const recipe = staticById.get(entry.recipeId);
+      if (!recipe) return null;
+      return {
+        name: pick(recipe.name, lang),
+        timeMinutes: recipe.timeMinutes,
+        servings: recipe.servings,
+        methodLabel: pick(RECIPE_METHOD_LABELS[recipe.method], lang),
+        own: false,
+        ingredients: recipe.ingredients.map(i => pick(i, lang)),
+        steps: recipe.steps.map(s => pick(s, lang)),
+        tip: recipe.tip ? pick(recipe.tip, lang) : null,
+      };
+    }
+    if (entry.customRecipeId != null) {
+      const row = customById.get(entry.customRecipeId);
+      if (!row) return null;
+      return {
+        name: row.name,
+        timeMinutes: row.timeMinutes,
+        servings: row.servings,
+        methodLabel: pick(
+          RECIPE_METHOD_LABELS[normalizeMethod(row.method)],
+          lang
+        ),
+        own: true,
+        ingredients: parseStringList(row.ingredientsJson),
+        steps: parseStringList(row.stepsJson, 20),
+        tip: row.tip,
+      };
+    }
+    return null;
   };
 
   const formatDay = (iso: string) =>
@@ -561,6 +626,9 @@ export default function MenuPlanPage() {
               {MEALS.map(meal => {
                 const entry = entryFor(day, meal);
                 const mealLabel = pick(MEAL_LABELS[meal], lang);
+                // Nur zugewiesene Rezepte lassen sich vorab ansehen –
+                // Freitext-Slots bleiben unverändert.
+                const slotPreview = entry ? previewFor(entry) : null;
                 return (
                   <li
                     key={meal}
@@ -572,7 +640,20 @@ export default function MenuPlanPage() {
                     {entry ? (
                       <>
                         <span className="min-w-0 flex-1 break-words text-sm font-medium">
-                          {entryTitle(entry)}
+                          {slotPreview ? (
+                            <button
+                              type="button"
+                              className="rounded text-left underline-offset-4 transition-colors hover:text-primary hover:underline"
+                              onClick={() => setPreview(slotPreview)}
+                              aria-label={t.menuPlan.previewAria(
+                                slotPreview.name
+                              )}
+                            >
+                              {entryTitle(entry)}
+                            </button>
+                          ) : (
+                            entryTitle(entry)
+                          )}
                           {entry.customRecipeId != null && (
                             <Badge className="ml-1.5 gap-1 border-0 bg-primary/15 align-middle text-primary">
                               <ChefHat className="h-3 w-3" aria-hidden="true" />
@@ -732,6 +813,88 @@ export default function MenuPlanPage() {
                     </Button>
                   </div>
                 </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Rezept-Vorschau: Zutaten und Zubereitung ohne die Seite zu verlassen */}
+      <Dialog
+        open={preview !== null}
+        onOpenChange={open => !open && setPreview(null)}
+      >
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
+          {preview && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-serif text-xl">
+                  {preview.name}
+                </DialogTitle>
+                <DialogDescription className="flex flex-wrap items-center gap-3">
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                    {t.menuPlan.minutes(preview.timeMinutes)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                    {t.menuPlan.previewServings(preview.servings)}
+                  </span>
+                  <span>{preview.methodLabel}</span>
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                {preview.own && (
+                  <Badge className="gap-1 border-0 bg-primary/15 text-primary">
+                    <ChefHat className="h-3 w-3" aria-hidden="true" />
+                    {t.menuPlan.ownBadge}
+                  </Badge>
+                )}
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t.menuPlan.previewIngredients}
+                  </h3>
+                  <ul className="grid grid-cols-2 gap-1 text-sm">
+                    {preview.ingredients.map((ingredient, idx) => (
+                      <li key={idx} className="flex gap-2">
+                        <span
+                          className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                          aria-hidden="true"
+                        />
+                        {ingredient}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t.menuPlan.previewSteps}
+                  </h3>
+                  <ol className="space-y-2.5">
+                    {preview.steps.map((step, idx) => (
+                      <li key={idx} className="flex gap-3">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                          {idx + 1}
+                        </span>
+                        <p className="text-sm">{step}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+                {preview.tip && (
+                  <div className="rounded-lg bg-accent/60 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {t.menuPlan.previewTip}
+                    </p>
+                    <p className="mt-1 text-sm">{preview.tip}</p>
+                  </div>
+                )}
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/rezepte">
+                    <CookingPot className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    {t.menuPlan.previewOpenInBook}
+                  </Link>
+                </Button>
               </div>
             </>
           )}

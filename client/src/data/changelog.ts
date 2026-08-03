@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Menüplan: tippe auf ein geplantes Rezept und du siehst Zutaten und Zubereitung direkt im Menüplan – ohne ins Rezeptbuch zu wechseln.",
+        "Menus : touche une recette planifiée et tu vois les ingrédients et la préparation directement dans les menus – sans passer par le livre de recettes.",
+        "Menu: tocca una ricetta pianificata e vedi ingredienti e preparazione direttamente nel menu – senza passare dal ricettario.",
+        "Meal plan: tap a planned recipe and you see the ingredients and method right in the plan – no detour via the recipe book."
+      ),
+      l4(
         "Rezeptbuch: eigene Rezepte teilst du neu per Link oder QR-Code – wer ihn hat, sieht Zutaten und Zubereitung und kann das Rezept übernehmen (dein Foto bleibt privat).",
         "Livre de recettes : tu partages désormais tes recettes perso par lien ou code QR – qui l'a voit les ingrédients et la préparation et peut reprendre la recette (ta photo reste privée).",
         "Ricettario: ora condividi le tue ricette personali con un link o un codice QR – chi lo riceve vede ingredienti e preparazione e può salvare la ricetta (la tua foto resta privata).",

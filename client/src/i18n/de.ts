@@ -2544,6 +2544,12 @@ export const de = {
     dayNoteRemove: "Notiz entfernen",
     dayNoteSaved: "Notiz gespeichert",
     dayNoteRemoved: "Notiz entfernt",
+    previewAria: (name: string) => `Rezept ${name} ansehen`,
+    previewServings: (n: number) => `${n} Portionen`,
+    previewIngredients: "Zutaten",
+    previewSteps: "Zubereitung",
+    previewTip: "Tipp",
+    previewOpenInBook: "Im Rezeptbuch öffnen",
   },
   tripShopping: {
     title: "Reise-Einkaufsliste",

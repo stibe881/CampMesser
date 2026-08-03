@@ -2538,6 +2538,12 @@ export const fr: Translation = {
     dayNoteRemove: "Supprimer la note",
     dayNoteSaved: "Note enregistrée",
     dayNoteRemoved: "Note supprimée",
+    previewAria: (name: string) => `Voir la recette ${name}`,
+    previewServings: (n: number) => `${n} portions`,
+    previewIngredients: "Ingrédients",
+    previewSteps: "Préparation",
+    previewTip: "Astuce",
+    previewOpenInBook: "Ouvrir dans le livre de recettes",
   },
   tripShopping: {
     title: "Liste de courses du séjour",
