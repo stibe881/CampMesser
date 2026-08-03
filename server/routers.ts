@@ -62,6 +62,13 @@ import {
 } from "@shared/tripWeather";
 import { TRIP_JOURNAL_MAX_LENGTH } from "@shared/trips";
 import {
+  MAX_TRACK_POINTS,
+  serializeTrackPoints,
+  TRACK_NAME_MAX_LENGTH,
+  trackStats,
+  type TrackPoint,
+} from "@shared/track";
+import {
   MAX_TICK_BODY_PART_LENGTH,
   MAX_TICK_NOTE_LENGTH,
 } from "@shared/tickBites";
@@ -3531,6 +3538,9 @@ export const appRouter = router({
         await db.deleteAllTripPhotosForTrip(input.id);
         // Reisekasse gehört zur Reise und wird mitgelöscht (#219)
         await db.deleteAllTripExpensesForTrip(input.id);
+        // Aufgezeichnete Wanderungen (#220) bleiben bestehen und verlieren
+        // nur ihre Reise-Zuordnung – sie gehören der Person, nicht der Reise.
+        await db.detachHikeTracksFromTrip(input.id);
         if (photos.length > 0) {
           const { tripPhotoStorage } = await import("./photoStorage");
           await tripPhotoStorage.deleteFiles(photos.map(p => p.fileName));
@@ -4218,6 +4228,106 @@ export const appRouter = router({
         return { success: true } as const;
       }),
   }),
+  /**
+   * Aufgezeichnete Wanderungen (#220). Die Punktreihe kommt vom Client (dort
+   * wird sie beim Aufzeichnen bereits gefiltert), die STATISTIK rechnet immer
+   * der Server mit `trackStats()` – so steht in der Datenbank nie eine Zahl,
+   * die nicht zur gespeicherten Punktreihe passt.
+   */
+  tracks: router({
+    /** Eigene Tracks, neuste zuoberst – ohne Punktreihe (siehe db.getHikeTracks). */
+    list: protectedProcedure.query(({ ctx }) => db.getHikeTracks(ctx.user.id)),
+    /** Einzelnen Track samt Punkten laden (für Karte und GPX-Export). */
+    get: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const track = await db.getHikeTrack(input.id, ctx.user.id);
+        if (!track) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Wanderung nicht gefunden.",
+          });
+        }
+        return track;
+      }),
+    add: protectedProcedure
+      .input(
+        z.object({
+          name: z.string().trim().min(1).max(TRACK_NAME_MAX_LENGTH),
+          tripId: z.number().int().positive().nullish(),
+          points: z
+            .array(
+              z.object({
+                lat: z.number().min(-90).max(90),
+                lon: z.number().min(-180).max(180),
+                ele: z.number().min(-500).max(9000).nullish(),
+                t: z.number().int().positive(),
+              })
+            )
+            .min(2)
+            .max(MAX_TRACK_POINTS),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        // Reise-Zuordnung nur mit Zugriff – Mitreisende dürfen ihre
+        // Wanderung ebenfalls an die gemeinsame Reise hängen.
+        if (input.tripId != null) {
+          await requireTripAccess(input.tripId, ctx.user.id);
+        }
+        const points: TrackPoint[] = input.points
+          .map(p => ({ lat: p.lat, lon: p.lon, ele: p.ele ?? null, t: p.t }))
+          .sort((a, b) => a.t - b.t);
+        const stats = trackStats(points);
+        const id = await db.addHikeTrack({
+          userId: ctx.user.id,
+          tripId: input.tripId ?? null,
+          name: input.name.trim(),
+          startedAt: new Date(points[0].t),
+          endedAt: new Date(points[points.length - 1].t),
+          distanceM: stats.distanceM,
+          durationS: stats.durationS,
+          ascentM: stats.ascentM,
+          descentM: stats.descentM,
+          pointsJson: serializeTrackPoints(points),
+        });
+        return { id, ...stats };
+      }),
+    /** Umbenennen und/oder Reise-Zuordnung ändern (Punkte bleiben unberührt). */
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          name: z.string().trim().min(1).max(TRACK_NAME_MAX_LENGTH).optional(),
+          tripId: z.number().int().positive().nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const track = await db.getHikeTrack(input.id, ctx.user.id);
+        if (!track) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Wanderung nicht gefunden.",
+          });
+        }
+        if (input.tripId != null) {
+          await requireTripAccess(input.tripId, ctx.user.id);
+        }
+        await db.updateHikeTrack(input.id, ctx.user.id, {
+          ...(input.name !== undefined ? { name: input.name.trim() } : {}),
+          ...(input.tripId !== undefined
+            ? { tripId: input.tripId ?? null }
+            : {}),
+        });
+        return { success: true } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteHikeTrack(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+  }),
+
   spots: router({
     list: protectedProcedure.query(({ ctx }) => db.getCampSpots(ctx.user.id)),
     add: protectedProcedure

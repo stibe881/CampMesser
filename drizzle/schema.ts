@@ -5,6 +5,7 @@ import {
   float,
   index,
   int,
+  mediumtext,
   mysqlEnum,
   mysqlTable,
   text,
@@ -1038,6 +1039,55 @@ export const natureSightings = mysqlTable(
 
 export type NatureSighting = typeof natureSightings.$inferSelect;
 export type InsertNatureSighting = typeof natureSightings.$inferInsert;
+
+/**
+ * Aufgezeichnete Wanderungen (#220): eine Zeile pro Track.
+ *
+ * Die Punktreihe steht als KOMPAKTES JSON-Tupel-Array in `pointsJson`
+ * (`[[lat, lon, ele|null, t], …]`, Format in shared/track.ts) – eine eigene
+ * Punkte-Tabelle wäre bei mehreren tausend Zeilen pro Wanderung reine
+ * Schreiblast, gelesen wird ein Track ohnehin immer als Ganzes.
+ * Die Spalte ist `mediumtext` (16 MB): `text` mit 64 KB reicht für eine
+ * Tageswanderung nicht zuverlässig.
+ *
+ * Die Statistik (Strecke, Dauer, Höhenmeter) liegt bewusst als Spalte daneben,
+ * obwohl sie sich aus den Punkten ergibt: die Liste zeigt Dutzende Tracks und
+ * müsste sonst jedes Mal alle Punktreihen parsen. Berechnet wird sie
+ * ausschliesslich serverseitig mit `trackStats()`.
+ *
+ * `tripId` ist optional – eine Wanderung kann zu einer Reise gehören, muss
+ * aber nicht. Beim Löschen der Reise bleibt der Track erhalten und verliert
+ * nur die Zuordnung.
+ */
+export const hikeTracks = mysqlTable(
+  "hikeTracks",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Zugeordnete Reise (tripLogs.id); null = ohne Reise */
+    tripId: int("tripId"),
+    name: varchar("name", { length: 80 }).notNull(),
+    /** Zeitpunkt des ersten und des letzten Punkts */
+    startedAt: timestamp("startedAt").notNull(),
+    endedAt: timestamp("endedAt").notNull(),
+    /** Statistik aus shared/track.ts – serverseitig berechnet */
+    distanceM: int("distanceM").notNull().default(0),
+    durationS: int("durationS").notNull().default(0),
+    ascentM: int("ascentM").notNull().default(0),
+    descentM: int("descentM").notNull().default(0),
+    /** Punktreihe als kompaktes Tupel-JSON (shared/track.ts) */
+    pointsJson: mediumtext("pointsJson").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    index("hikeTracks_userId").on(table.userId),
+    index("hikeTracks_tripId").on(table.tripId),
+  ]
+);
+
+export type HikeTrack = typeof hikeTracks.$inferSelect;
+export type InsertHikeTrack = typeof hikeTracks.$inferInsert;
 
 /**
  * Passkeys (WebAuthn): pro Konto beliebig viele Anmelde-Credentials als

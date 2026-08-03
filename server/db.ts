@@ -16,8 +16,10 @@ import {
   foodItems,
   foodTemplates,
   gearTasks,
+  hikeTracks,
   homeLocations,
   InsertGearTask,
+  InsertHikeTrack,
   InsertCampSpot,
   InsertFoodItem,
   InsertFoodTemplate,
@@ -1999,6 +2001,86 @@ export async function deleteTripExpense(id: number) {
 export async function deleteAllTripExpensesForTrip(tripId: number) {
   const db = requireDb(await getDb());
   await db.delete(tripExpenses).where(eq(tripExpenses.tripId, tripId));
+}
+
+// ── Aufgezeichnete Wanderungen (#220) ──
+
+/**
+ * Tracks eines Kontos, neuste zuoberst – OHNE die Punktreihe. Die Liste
+ * zeigt nur Name und Statistik; `pointsJson` kann pro Track hunderte
+ * Kilobyte gross sein und wird deshalb erst beim Öffnen eines Tracks
+ * nachgeladen (getHikeTrack).
+ */
+export async function getHikeTracks(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select({
+      id: hikeTracks.id,
+      userId: hikeTracks.userId,
+      tripId: hikeTracks.tripId,
+      name: hikeTracks.name,
+      startedAt: hikeTracks.startedAt,
+      endedAt: hikeTracks.endedAt,
+      distanceM: hikeTracks.distanceM,
+      durationS: hikeTracks.durationS,
+      ascentM: hikeTracks.ascentM,
+      descentM: hikeTracks.descentM,
+      createdAt: hikeTracks.createdAt,
+    })
+    .from(hikeTracks)
+    .where(eq(hikeTracks.userId, userId))
+    .orderBy(desc(hikeTracks.startedAt), desc(hikeTracks.id));
+}
+
+/** Einzelnen Track samt Punktreihe laden (nur eigener Track). */
+export async function getHikeTrack(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(hikeTracks)
+    .where(and(eq(hikeTracks.id, id), eq(hikeTracks.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/** Aufgezeichnete Wanderung speichern. */
+export async function addHikeTrack(data: InsertHikeTrack) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(hikeTracks).values(data);
+  return result.insertId;
+}
+
+/** Track umbenennen bzw. einer Reise zuordnen (nur eigener Track). */
+export async function updateHikeTrack(
+  id: number,
+  userId: number,
+  data: Partial<InsertHikeTrack>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(hikeTracks)
+    .set(data)
+    .where(and(eq(hikeTracks.id, id), eq(hikeTracks.userId, userId)));
+}
+
+/** Track löschen (nur eigener Track). */
+export async function deleteHikeTrack(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(hikeTracks)
+    .where(and(eq(hikeTracks.id, id), eq(hikeTracks.userId, userId)));
+}
+
+/**
+ * Beim Löschen einer Reise: Tracks behalten, nur die Zuordnung lösen –
+ * eine Wanderung ist auch ohne ihre Reise etwas wert.
+ */
+export async function detachHikeTracksFromTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .update(hikeTracks)
+    .set({ tripId: null })
+    .where(eq(hikeTracks.tripId, tripId));
 }
 
 // ── Fotos zu Zeltplatz-Favoriten ──

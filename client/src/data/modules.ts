@@ -14,6 +14,7 @@ import {
   CookingPot,
   Cross,
   Droplets,
+  Footprints,
   Gauge,
   Languages,
   ListChecks,
@@ -151,6 +152,23 @@ export const modules: Module[] = [
     icon: LocateFixed,
     group: "vorOrt",
     offline: true,
+  },
+  {
+    path: "/wanderung",
+    title: l4(
+      "Wanderung aufzeichnen",
+      "Enregistrer une randonnée",
+      "Registra un'escursione",
+      "Record a hike"
+    ),
+    description: l4(
+      "GPS-Track mit Strecke, Dauer, Tempo und Höhenmetern",
+      "Trace GPS avec distance, durée, allure et dénivelé",
+      "Traccia GPS con distanza, durata, andatura e dislivello",
+      "GPS track with distance, duration, pace and elevation"
+    ),
+    icon: Footprints,
+    group: "vorOrt",
   },
   {
     path: "/tagebuch",
