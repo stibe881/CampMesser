@@ -1430,6 +1430,44 @@ export const de = {
       "Die Vorlagen sind Anhaltspunkte aus der Praxis – bei Kompressorgeräten ist die Laufzeit gemeint, nicht die Standzeit. Was auf dem Typenschild steht, gilt vor der Vorlage.",
     solarLabel: "Solarpanels (W gesamt)",
     solarHint: "z. B. 2 × 200-W-Panels = 400",
+    mountLabel: "Aufstellung",
+    mountRoof: "Fest auf dem Dach",
+    mountPortable: "Mobil aufgestellt",
+    mountRoofHint:
+      "Flach montiert: Wir rechnen mit der Einstrahlung auf die waagrechte Fläche.",
+    mountPortableHint:
+      "Frei aufgestellt und in die Sonne gedreht: Wir holen die Einstrahlung gleich für die Neigung und Ausrichtung, die weiter unten empfohlen werden.",
+    forecastTitle: "Ertragsprognose",
+    forecastSubtitle: (d: number) =>
+      `Erwarteter Ertrag deiner Anlage für die nächsten ${d} Tage.`,
+    forecastTilted:
+      "Grundlage ist die Einstrahlung auf dein aufgestelltes Panel.",
+    forecastHorizontal:
+      "Grundlage ist die Einstrahlung auf die waagrechte Fläche.",
+    noPanelHint:
+      "Trag oben die Nennleistung deiner Panels ein, dann rechnen wir den Ertrag aus.",
+    dayYield: (wh: string, kwh: number) => `${wh} · ${kwh} kWh/m²`,
+    dayBattery: (p: number) => `${p} % Speicher`,
+    balanceTotals: (y: string, c: string, d: number) =>
+      `Über ${d} Tage: ${y} Ertrag gegen ${c} Verbrauch.`,
+    wastedHint: (wh: string) =>
+      `${wh} davon passen nicht mehr in den vollen Speicher.`,
+    balanceCovered: (d: number) =>
+      `Die Sonne trägt dich durch alle ${d} Tage – der Speicher bleibt über der Entladegrenze.`,
+    balanceEmpty: (date: string, d: number) =>
+      `Am ${date} ist der nutzbare Vorrat aufgebraucht – die Sonne reicht für ${d} Tage.`,
+    balanceNoStorage:
+      "Ohne erfasste Kapazität zeigen wir nur Ertrag und Verbrauch, nicht den Speicherstand.",
+    efficiencyIntro: (p: number) =>
+      `Gerechnet mit ${p} % Systemwirkungsgrad – so setzt er sich zusammen:`,
+    lossNames: {
+      controller: "Laderegler",
+      cable: "Kabel & Stecker",
+      temperature: "Temperatur",
+      soiling: "Verschmutzung & Alterung",
+    },
+    yieldSourceForecast: "Solarertrag aus der Einstrahlungs-Prognose.",
+    yieldSourceSunHours: "Solarertrag aus deinen effektiven Sonnenstunden.",
     sunHoursLabel: "Effektive Sonnenstunden pro Tag",
     sunAutoLabel: "Automatisch aus Wetter-Prognose übernehmen",
     sunAutoAria: "Sonnenstunden automatisch aus der Wetter-Prognose übernehmen",
@@ -1447,7 +1485,7 @@ export const de = {
       "Richtwerte Schweiz: Sommer sonnig 5–6 h, wechselhaft 3–4 h, bedeckt 1–2 h. Verschattung durch Bäume oder Berge reduziert den Wert deutlich – prüfe den Sonnenverlauf im ",
     sunCompassLink: "Sonnenstand-Kompass",
     guidelineSuffix:
-      ". Die Rechnung berücksichtigt bereits einen Systemverlust von 30 %.",
+      ". Im Auto-Modus rechnet der Ertrag mit der Einstrahlungs-Prognose, dein Sonnenstunden-Wert bleibt als Anhaltspunkt.",
     alignmentTitle: "Optimale Panel-Ausrichtung heute",
     alignmentDirection: "Ausrichtung",
     alignmentTilt: "Neigung",

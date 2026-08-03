@@ -473,10 +473,10 @@ export const modules: Module[] = [
       "Energy budget"
     ),
     description: l4(
-      "Autarkie-Dauer mit Solar und Powerstation",
-      "Autonomie avec solaire et powerstation",
-      "Autonomia con solare e powerstation",
-      "Off-grid duration with solar and power station"
+      "Reichweite, Verbrauch und Solarertrag-Prognose",
+      "Autonomie, consommation et prévision solaire",
+      "Autonomia, consumo e previsione solare",
+      "Runtime, consumption and solar yield forecast"
     ),
     icon: BatteryCharging,
     group: "Energie & Wasser",

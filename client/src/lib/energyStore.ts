@@ -8,8 +8,13 @@
  * braucht es dafür nicht – das sind Einstellungen, keine Daten.
  */
 import { sanitizePowerStorage, type PowerStorage } from "@shared/powerBudget";
+import {
+  sanitizeSolarPanel,
+  type SolarPanelSetup,
+} from "@shared/solarForecast";
 
 export const POWER_STORAGE_KEY = "campmesser.powerStorage";
+export const SOLAR_PANEL_KEY = "campmesser.solarPanel";
 
 function readJson(key: string): unknown {
   try {
@@ -29,5 +34,17 @@ export function savePowerStorage(storage: PowerStorage) {
     localStorage.setItem(POWER_STORAGE_KEY, JSON.stringify(storage));
   } catch {
     /* Speicher voll oder blockiert – die Sitzung funktioniert trotzdem */
+  }
+}
+
+export function loadSolarPanel(): SolarPanelSetup {
+  return sanitizeSolarPanel(readJson(SOLAR_PANEL_KEY));
+}
+
+export function saveSolarPanel(panel: SolarPanelSetup) {
+  try {
+    localStorage.setItem(SOLAR_PANEL_KEY, JSON.stringify(panel));
+  } catch {
+    /* Sitzung reicht */
   }
 }

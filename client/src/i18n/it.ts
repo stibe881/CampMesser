@@ -1414,6 +1414,43 @@ export const it: Translation = {
       "I modelli sono valori indicativi presi dalla pratica – per gli apparecchi a compressore si intende il tempo di funzionamento, non quello di presenza. Vale quanto sta scritto sulla targhetta.",
     solarLabel: "Pannelli solari (W totali)",
     solarHint: "ad es. 2 pannelli da 200 W = 400",
+    mountLabel: "Installazione",
+    mountRoof: "Fissi sul tetto",
+    mountPortable: "Mobili, appoggiati",
+    mountRoofHint:
+      "Montaggio in piano: calcoliamo con l'irraggiamento sulla superficie orizzontale.",
+    mountPortableHint:
+      "Appoggiati liberamente e girati verso il sole: chiediamo l'irraggiamento direttamente per l'inclinazione e l'orientamento consigliati più sotto.",
+    forecastTitle: "Previsione di resa",
+    forecastSubtitle: (d: number) =>
+      `Resa attesa del tuo impianto per i prossimi ${d} giorni.`,
+    forecastTilted: "La base è l'irraggiamento sul tuo pannello orientato.",
+    forecastHorizontal:
+      "La base è l'irraggiamento sulla superficie orizzontale.",
+    noPanelHint:
+      "Inserisci sopra la potenza nominale dei tuoi pannelli e ti calcoliamo la resa.",
+    dayYield: (wh: string, kwh: number) => `${wh} · ${kwh} kWh/m²`,
+    dayBattery: (p: number) => `${p} % di accumulo`,
+    balanceTotals: (y: string, c: string, d: number) =>
+      `Su ${d} giorni: ${y} di resa contro ${c} di consumo.`,
+    wastedHint: (wh: string) =>
+      `Di questi ${wh} non entrano più nell'accumulatore pieno.`,
+    balanceCovered: (d: number) =>
+      `Il sole ti porta per tutti i ${d} giorni – l'accumulatore resta sopra il limite di scarica.`,
+    balanceEmpty: (date: string, d: number) =>
+      `Il ${date} la scorta utilizzabile è esaurita – il sole basta per ${d} giorni.`,
+    balanceNoStorage:
+      "Senza capacità inserita mostriamo solo resa e consumo, non lo stato dell'accumulatore.",
+    efficiencyIntro: (p: number) =>
+      `Calcolato con un rendimento di sistema del ${p} % – ecco come si compone:`,
+    lossNames: {
+      controller: "Regolatore di carica",
+      cable: "Cavi e connettori",
+      temperature: "Temperatura",
+      soiling: "Sporco e invecchiamento",
+    },
+    yieldSourceForecast: "Resa solare dalla previsione di irraggiamento.",
+    yieldSourceSunHours: "Resa solare dalle tue ore di sole effettive.",
     sunHoursLabel: "Ore di sole effettive al giorno",
     sunAutoLabel: "Riprendi automaticamente dalle previsioni meteo",
     sunAutoAria:
@@ -1432,7 +1469,7 @@ export const it: Translation = {
       "Valori indicativi per la Svizzera: estate soleggiata 5–6 h, variabile 3–4 h, coperto 1–2 h. L'ombra di alberi o montagne riduce nettamente il valore – controlla il percorso del sole nella ",
     sunCompassLink: "bussola solare",
     guidelineSuffix:
-      ". Il calcolo tiene già conto di una perdita di sistema del 30 %.",
+      ". In modalità automatica la resa si calcola con la previsione di irraggiamento; le tue ore di sole restano un riferimento.",
     alignmentTitle: "Orientamento ottimale dei pannelli oggi",
     alignmentDirection: "Orientamento",
     alignmentTilt: "Inclinazione",

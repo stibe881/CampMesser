@@ -21,7 +21,6 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
-import { calcEnergyBudget } from "@shared/calculators";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { compassDirection, computeSolarAlignment } from "@shared/solar";
 import {
@@ -38,9 +37,28 @@ import {
   usablePercentOf,
   type PowerStorage,
 } from "@shared/powerBudget";
+import {
+  DEFAULT_SYSTEM_EFFICIENCY,
+  SOLAR_FORECAST_DAYS,
+  SOLAR_LOSS_STEPS,
+  averageYieldWh,
+  dailyYieldWh,
+  parseSolarForecast,
+  sanitizeSolarPanel,
+  solarBalance,
+  solarForecastUrl,
+  yieldFromSunHours,
+  type RadiationDay,
+  type SolarPanelSetup,
+} from "@shared/solarForecast";
 import { loadObstacleProfiles } from "@/lib/obstacleStore";
 import { getProfileObstacles } from "@shared/obstacleProfiles";
-import { loadPowerStorage, savePowerStorage } from "@/lib/energyStore";
+import {
+  loadPowerStorage,
+  loadSolarPanel,
+  savePowerStorage,
+  saveSolarPanel,
+} from "@/lib/energyStore";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { cn } from "@/lib/utils";
 
@@ -93,7 +111,26 @@ export default function EnergyPage() {
     storageSync.push(next);
   };
 
-  const [solarWatts, setSolarWatts] = useState("400");
+  // Solaranlage (#230): Nennleistung und Aufstellung, ebenfalls über den Geräte-Sync
+  const [panel, setPanel] = useState<SolarPanelSetup>(() => loadSolarPanel());
+  const [solarWatts, setSolarWatts] = useState(() =>
+    numberToInput(loadSolarPanel().watts)
+  );
+  const panelRef = useRef(panel);
+  panelRef.current = panel;
+  const panelSync = useSyncedSetting<SolarPanelSetup>("solarPanel", value => {
+    const clean = sanitizeSolarPanel(value);
+    setPanel(clean);
+    setSolarWatts(numberToInput(clean.watts));
+  });
+  const writePanel = (patch: Partial<SolarPanelSetup>) => {
+    const next = sanitizeSolarPanel({ ...panel, ...patch });
+    setPanel(next);
+    panelRef.current = next;
+    saveSolarPanel(next);
+    panelSync.push(next);
+  };
+
   const [sunHours, setSunHours] = useState(4);
   // Auto: Prognose-Wert wird übernommen; Manuell: eigener Wert bleibt bestehen
   const [sunHoursAuto, setSunHoursAuto] = useState(true);
@@ -105,7 +142,8 @@ export default function EnergyPage() {
     | {
         status: "ok";
         avgSunHours: number;
-        days: number;
+        /** Tageswerte der Einstrahlung – Grundlage der Ertrags-Prognose (#230) */
+        days: RadiationDay[];
         // null = eigener Standort, sonst Name des Zeltplatz-Favoriten
         sourceSpotName: string | null;
       }
@@ -127,7 +165,13 @@ export default function EnergyPage() {
   const spotsRef = useRef<typeof spotsQuery.data>(undefined);
   spotsRef.current = spotsQuery.data;
 
-  /** Sonnenschein-Prognose für Koordinaten laden und als effektive Sonnenstunden übernehmen. */
+  /**
+   * Prognose für Koordinaten laden: Sonnenschein-Dauer (für die effektiven
+   * Sonnenstunden) und Einstrahlung (für den Ertrag, #230) im selben Abruf.
+   * Ein frei aufgestelltes Panel richtet man in die Sonne – dann fragen wir
+   * die Einstrahlung gleich für die Neigung und Ausrichtung ab, welche die
+   * Ausrichtungshilfe für diesen Ort empfiehlt.
+   */
   const fetchSunshine = async (
     lat: number,
     lng: number,
@@ -135,28 +179,38 @@ export default function EnergyPage() {
     spotId?: number
   ) => {
     setPanelCoords({ lat, lng, spotId });
-    const params = new URLSearchParams({
-      latitude: lat.toFixed(4),
-      longitude: lng.toFixed(4),
-      timezone: "auto",
-      forecast_days: "3",
-      daily: "sunshine_duration",
-    });
+    const alignment =
+      panelRef.current.mount === "portable"
+        ? computeSolarAlignment(
+            new Date(),
+            lat,
+            lng,
+            getProfileObstacles(profiles, spotId ?? null)
+          )
+        : null;
     const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?${params.toString()}`
+      solarForecastUrl(
+        lat,
+        lng,
+        SOLAR_FORECAST_DAYS,
+        alignment ? { tilt: alignment.tilt, azimuth: alignment.azimuth } : null
+      )
     );
     if (!res.ok) throw new Error("Wetterdienst nicht erreichbar");
-    const json = await res.json();
-    const durations: number[] = json.daily?.sunshine_duration ?? [];
-    if (durations.length === 0) throw new Error("Keine Daten");
+    const days = parseSolarForecast(await res.json());
+    if (days.length === 0) throw new Error("Keine Daten");
+    const withSunshine = days.filter(d => d.sunshineHours !== null);
     const avgHours =
-      durations.reduce((s, d) => s + (d ?? 0), 0) / durations.length / 3600;
+      withSunshine.length > 0
+        ? withSunshine.reduce((s, d) => s + (d.sunshineHours ?? 0), 0) /
+          withSunshine.length
+        : 0;
     const rounded = Math.min(10, Math.round(avgHours * 2) / 2);
     if (sunHoursAutoRef.current) setSunHours(rounded);
     setForecastState({
       status: "ok",
       avgSunHours: rounded,
-      days: durations.length,
+      days,
       sourceSpotName,
     });
   };
@@ -252,17 +306,30 @@ export default function EnergyPage() {
     [consumers]
   );
 
-  // Solarertrag pro Tag: Nennleistung × effektive Sonnenstunden × Systemwirkungsgrad
-  const solarWhPerDay = useMemo(
-    () =>
-      calcEnergyBudget({
-        batteryWh: 0,
-        solarPanelWatts: Number(solarWatts) || 0,
-        sunHoursPerDay: sunHours,
-        consumers: [],
-      }).dailySolarYieldWh,
-    [solarWatts, sunHours]
+  // Ertrags-Prognose (#230): Einstrahlung je Tag × Nennleistung × Wirkungsgrad
+  const panelWatts = panel.watts ?? 0;
+  const radiationDays = useMemo(
+    () => (forecastState.status === "ok" ? forecastState.days : []),
+    [forecastState]
   );
+  const yieldDays = useMemo(
+    () =>
+      radiationDays.map(day => ({
+        date: day.date,
+        irradiationKwhPerM2: day.irradiationKwhPerM2,
+        tilted: day.tilted,
+        yieldWh: dailyYieldWh(panelWatts, day.irradiationKwhPerM2),
+      })),
+    [radiationDays, panelWatts]
+  );
+  // Im Auto-Modus zählt die Einstrahlungs-Prognose, im manuellen Modus der
+  // eigene Sonnenstunden-Wert – zwei Wege zur selben Zahl, nie beide zugleich.
+  const forecastYieldPerDay =
+    yieldDays.length > 0 && panelWatts > 0 ? averageYieldWh(yieldDays) : null;
+  const usesForecastYield = sunHoursAuto && forecastYieldPerDay !== null;
+  const solarWhPerDay = usesForecastYield
+    ? (forecastYieldPerDay ?? 0)
+    : yieldFromSunHours(panelWatts, sunHours);
 
   const result = useMemo(
     () =>
@@ -279,6 +346,18 @@ export default function EnergyPage() {
   );
   const sharePercent = (name: string) =>
     shares.find(s => s.name === name)?.percent ?? null;
+
+  // Gegenüberstellung Ertrag ↔ Verbrauch über die Prognosetage
+  const balance = useMemo(
+    () =>
+      solarBalance({
+        days: yieldDays,
+        dailyConsumptionWh: result.dailyConsumptionWh,
+        startWh: result.availableWh,
+        usableWh: result.usableWh,
+      }),
+    [yieldDays, result.dailyConsumptionWh, result.availableWh, result.usableWh]
+  );
 
   // Optimale Panel-Ausrichtung für heute am zuletzt geladenen Ort. Kam die
   // Prognose von einem Zeltplatz-Favoriten, gilt dessen Hindernis-Profil,
@@ -334,6 +413,16 @@ export default function EnergyPage() {
           ? t.energy.rangeOverMax(range.value)
           : t.energy.rangeUnknown;
   const defaultUsablePercent = DEFAULT_USABLE_PERCENT[storage.chemistry];
+
+  /** Prognosetag als kurzes Datum (Mittag, damit die Zeitzone nichts verschiebt). */
+  const formatForecastDay = (date: string) =>
+    date
+      ? new Date(`${date}T12:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        })
+      : "";
 
   const timeFormat: Intl.DateTimeFormatOptions = {
     hour: "2-digit",
@@ -399,6 +488,14 @@ export default function EnergyPage() {
               </p>
             </div>
           </div>
+
+          {panelWatts > 0 && (
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              {usesForecastYield
+                ? t.energy.yieldSourceForecast
+                : t.energy.yieldSourceSunHours}
+            </p>
+          )}
 
           {/* Restkapazität: was über der Tiefentlade-Reserve wirklich übrig ist */}
           <p className="mt-4 text-center text-xs text-muted-foreground">
@@ -637,7 +734,7 @@ export default function EnergyPage() {
         </CardContent>
       </Card>
 
-      {/* Solaranlage */}
+      {/* Solaranlage: Nennleistung und Aufstellung */}
       <Card className="mb-6">
         <CardContent className="pt-6">
           <div className="mb-1.5 flex items-center gap-2">
@@ -649,10 +746,46 @@ export default function EnergyPage() {
             type="number"
             min="0"
             value={solarWatts}
-            onChange={e => setSolarWatts(e.target.value)}
+            onChange={e => {
+              setSolarWatts(e.target.value);
+              writePanel({ watts: parseNumberInput(e.target.value) });
+            }}
           />
           <p className="mt-1.5 text-xs text-muted-foreground">
             {t.energy.solarHint}
+          </p>
+
+          <Label className="mt-4 block text-xs text-muted-foreground">
+            {t.energy.mountLabel}
+          </Label>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {(["roof", "portable"] as const).map(mount => (
+              <button
+                key={mount}
+                type="button"
+                aria-pressed={panel.mount === mount}
+                onClick={() => {
+                  if (panel.mount === mount) return;
+                  writePanel({ mount });
+                  // Die Aufstellung entscheidet, welche Einstrahlung wir
+                  // abrufen – darum gleich neu laden
+                  applyWeatherForecast();
+                }}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  panel.mount === mount
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-muted/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                )}
+              >
+                {mount === "roof" ? t.energy.mountRoof : t.energy.mountPortable}
+              </button>
+            ))}
+          </div>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            {panel.mount === "roof"
+              ? t.energy.mountRoofHint
+              : t.energy.mountPortableHint}
           </p>
         </CardContent>
       </Card>
@@ -720,7 +853,7 @@ export default function EnergyPage() {
             <p className="mt-2 text-xs text-primary">
               {t.energy.forecastOk(
                 forecastState.avgSunHours,
-                forecastState.days,
+                forecastState.days.length,
                 forecastState.sourceSpotName === null
                   ? t.energy.sourceLocation
                   : t.energy.sourceSpot(forecastState.sourceSpotName)
@@ -744,6 +877,119 @@ export default function EnergyPage() {
           </p>
         </CardContent>
       </Card>
+
+      {/* Ertragsprognose: Einstrahlung → Ertrag → Vergleich mit dem Verbrauch */}
+      {yieldDays.length > 0 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="mb-1.5 flex items-center gap-2">
+              <Sun className="h-4 w-4 text-chart-1" aria-hidden="true" />
+              <h2 className="font-serif text-base font-semibold">
+                {t.energy.forecastTitle}
+              </h2>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t.energy.forecastSubtitle(yieldDays.length)}{" "}
+              {yieldDays[0].tilted
+                ? t.energy.forecastTilted
+                : t.energy.forecastHorizontal}
+            </p>
+
+            {panelWatts <= 0 ? (
+              <p className="mt-3 text-xs text-muted-foreground">
+                {t.energy.noPanelHint}
+              </p>
+            ) : (
+              <>
+                <ul className="mt-3 space-y-1.5">
+                  {balance.days.map((day, index) => (
+                    <li
+                      key={day.date}
+                      className={cn(
+                        "grid grid-cols-[5.5rem_1fr_auto] items-center gap-3 rounded-lg border px-3 py-2 text-xs",
+                        day.empty
+                          ? "border-destructive/50 bg-destructive/5"
+                          : "border-border"
+                      )}
+                    >
+                      <span className="font-semibold">
+                        {formatForecastDay(day.date)}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {t.energy.dayYield(
+                          formatWh(day.yieldWh, lang),
+                          yieldDays[index].irradiationKwhPerM2
+                        )}
+                      </span>
+                      <span
+                        className={cn(
+                          "font-mono font-semibold",
+                          day.empty
+                            ? "text-destructive"
+                            : day.netWh >= 0
+                              ? "text-primary"
+                              : "text-foreground"
+                        )}
+                      >
+                        {day.batteryPercent !== null
+                          ? t.energy.dayBattery(day.batteryPercent)
+                          : `${day.netWh >= 0 ? "+" : "−"}${formatWh(
+                              Math.abs(day.netWh),
+                              lang
+                            )}`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <p className="mt-3 text-xs text-muted-foreground">
+                  {t.energy.balanceTotals(
+                    formatWh(balance.totalYieldWh, lang),
+                    formatWh(balance.totalConsumptionWh, lang),
+                    balance.days.length
+                  )}
+                  {balance.wastedWh > 0 && (
+                    <>
+                      {" "}
+                      {t.energy.wastedHint(formatWh(balance.wastedWh, lang))}
+                    </>
+                  )}
+                </p>
+
+                <p
+                  className={cn(
+                    "mt-2 text-xs font-medium",
+                    result.usableWh === null
+                      ? "text-muted-foreground"
+                      : balance.covered
+                        ? "text-primary"
+                        : "text-destructive"
+                  )}
+                >
+                  {result.usableWh === null
+                    ? t.energy.balanceNoStorage
+                    : balance.covered
+                      ? t.energy.balanceCovered(balance.days.length)
+                      : t.energy.balanceEmpty(
+                          formatForecastDay(balance.firstEmptyDate ?? ""),
+                          balance.coveredDays
+                        )}
+                </p>
+
+                <p className="mt-3 text-xs text-muted-foreground">
+                  {t.energy.efficiencyIntro(
+                    Math.round(DEFAULT_SYSTEM_EFFICIENCY * 100)
+                  )}{" "}
+                  {SOLAR_LOSS_STEPS.map(
+                    step =>
+                      `${t.energy.lossNames[step.key]} −${step.lossPercent} %`
+                  ).join(" · ")}
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Panel-Ausrichtung heute */}
       {alignment && (

@@ -1434,6 +1434,45 @@ export const fr: Translation = {
       "Les modèles sont des ordres de grandeur tirés de la pratique – pour les appareils à compresseur, il s'agit du temps de fonctionnement, pas du temps de présence. Ce qui figure sur la plaque signalétique prime.",
     solarLabel: "Panneaux solaires (W au total)",
     solarHint: "p. ex. 2 panneaux de 200 W = 400",
+    mountLabel: "Installation",
+    mountRoof: "Fixe sur le toit",
+    mountPortable: "Mobile, posé au sol",
+    mountRoofHint:
+      "Monté à plat : nous calculons avec le rayonnement sur la surface horizontale.",
+    mountPortableHint:
+      "Posé librement et orienté vers le soleil : nous demandons le rayonnement directement pour l'inclinaison et l'orientation recommandées plus bas.",
+    forecastTitle: "Prévision de production",
+    forecastSubtitle: (d: number) =>
+      `Production attendue de ton installation pour les ${d} prochains jours.`,
+    forecastTilted: "La base est le rayonnement sur ton panneau orienté.",
+    forecastHorizontal:
+      "La base est le rayonnement sur la surface horizontale.",
+    noPanelHint:
+      "Saisis ci-dessus la puissance nominale de tes panneaux et nous calculons la production.",
+    dayYield: (wh: string, kwh: number) => `${wh} · ${kwh} kWh/m²`,
+    dayBattery: (p: number) => `${p} % de stockage`,
+    balanceTotals: (y: string, c: string, d: number) =>
+      `Sur ${d} jours : ${y} produits contre ${c} consommés.`,
+    wastedHint: (wh: string) =>
+      `Dont ${wh} n'entrent plus dans le stockage plein.`,
+    balanceCovered: (d: number) =>
+      `Le soleil te porte pendant les ${d} jours – le stockage reste au-dessus de la limite de décharge.`,
+    balanceEmpty: (date: string, d: number) =>
+      `Le ${date}, la réserve utilisable est épuisée – le soleil suffit pour ${d} jours.`,
+    balanceNoStorage:
+      "Sans capacité saisie, nous montrons seulement la production et la consommation, pas l'état du stockage.",
+    efficiencyIntro: (p: number) =>
+      `Calculé avec ${p} % de rendement système – voici sa composition :`,
+    lossNames: {
+      controller: "Régulateur de charge",
+      cable: "Câbles & connecteurs",
+      temperature: "Température",
+      soiling: "Salissure & vieillissement",
+    },
+    yieldSourceForecast:
+      "Production solaire issue de la prévision de rayonnement.",
+    yieldSourceSunHours:
+      "Production solaire issue de tes heures d'ensoleillement effectives.",
     sunHoursLabel: "Heures de soleil effectives par jour",
     sunAutoLabel: "Reprendre automatiquement depuis les prévisions météo",
     sunAutoAria:
@@ -1452,7 +1491,7 @@ export const fr: Translation = {
       "Valeurs indicatives pour la Suisse : été ensoleillé 5–6 h, variable 3–4 h, couvert 1–2 h. L'ombre des arbres ou des montagnes réduit nettement la valeur – vérifie la course du soleil dans la ",
     sunCompassLink: "boussole solaire",
     guidelineSuffix:
-      ". Le calcul tient déjà compte d'une perte système de 30 %.",
+      ". En mode automatique, la production est calculée avec la prévision de rayonnement ; tes heures d'ensoleillement restent un repère.",
     alignmentTitle: "Orientation optimale des panneaux aujourd'hui",
     alignmentDirection: "Orientation",
     alignmentTilt: "Inclinaison",

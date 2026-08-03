@@ -1386,6 +1386,42 @@ export const en: Translation = {
       "The templates are practical ballpark figures – for compressor appliances the running time is meant, not the standing time. Whatever the rating plate says wins.",
     solarLabel: "Solar panels (W total)",
     solarHint: "e.g. 2 × 200 W panels = 400",
+    mountLabel: "Installation",
+    mountRoof: "Fixed on the roof",
+    mountPortable: "Portable, set up",
+    mountRoofHint:
+      "Mounted flat: we calculate with the radiation on the horizontal surface.",
+    mountPortableHint:
+      "Set up freely and turned towards the sun: we request the radiation straight away for the tilt and orientation recommended below.",
+    forecastTitle: "Yield forecast",
+    forecastSubtitle: (d: number) =>
+      `Expected yield of your system for the next ${d} days.`,
+    forecastTilted: "Based on the radiation on your angled panel.",
+    forecastHorizontal: "Based on the radiation on the horizontal surface.",
+    noPanelHint:
+      "Enter the rated power of your panels above and we work out the yield.",
+    dayYield: (wh: string, kwh: number) => `${wh} · ${kwh} kWh/m²`,
+    dayBattery: (p: number) => `${p} % storage`,
+    balanceTotals: (y: string, c: string, d: number) =>
+      `Over ${d} days: ${y} yield against ${c} consumption.`,
+    wastedHint: (wh: string) =>
+      `${wh} of that no longer fits into the full storage.`,
+    balanceCovered: (d: number) =>
+      `The sun carries you through all ${d} days – the storage stays above the discharge limit.`,
+    balanceEmpty: (date: string, d: number) =>
+      `On ${date} the usable reserve runs out – the sun lasts for ${d} days.`,
+    balanceNoStorage:
+      "Without a capacity entered we only show yield and consumption, not the state of the storage.",
+    efficiencyIntro: (p: number) =>
+      `Calculated with ${p} % system efficiency – this is how it adds up:`,
+    lossNames: {
+      controller: "Charge controller",
+      cable: "Cables & connectors",
+      temperature: "Temperature",
+      soiling: "Soiling & ageing",
+    },
+    yieldSourceForecast: "Solar yield from the radiation forecast.",
+    yieldSourceSunHours: "Solar yield from your effective sunshine hours.",
     sunHoursLabel: "Effective sun hours per day",
     sunAutoLabel: "Apply automatically from the weather forecast",
     sunAutoAria: "Apply sun hours automatically from the weather forecast",
@@ -1403,7 +1439,7 @@ export const en: Translation = {
       "Guide values for Switzerland: sunny summer 5–6 h, changeable 3–4 h, overcast 1–2 h. Shading from trees or mountains reduces the value significantly – check the sun's path in the ",
     sunCompassLink: "sun compass",
     guidelineSuffix:
-      ". The calculation already accounts for a 30% system loss.",
+      ". In automatic mode the yield is calculated from the radiation forecast; your sunshine hours stay as a reference.",
     alignmentTitle: "Optimal panel alignment today",
     alignmentDirection: "Direction",
     alignmentTilt: "Tilt",

@@ -1,54 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   analyzePack,
-  calcEnergyBudget,
   calcWaterNeeds,
   transportProfiles,
 } from "../shared/calculators";
 import { familyAddOns, packScenarios } from "../shared/packTemplates";
-
-describe("calcEnergyBudget", () => {
-  it("berechnet Verbrauch, Solarertrag und Autarkie korrekt", () => {
-    const result = calcEnergyBudget({
-      batteryWh: 1024,
-      solarPanelWatts: 400,
-      sunHoursPerDay: 4,
-      consumers: [
-        { name: "Kühlbox", watts: 45, hoursPerDay: 8 },
-        { name: "Laptop", watts: 60, hoursPerDay: 2 },
-      ],
-    });
-    expect(result.dailyConsumptionWh).toBe(45 * 8 + 60 * 2); // 480
-    expect(result.dailySolarYieldWh).toBeCloseTo(400 * 4 * 0.7); // 1120
-    expect(result.selfSufficient).toBe(true);
-    expect(result.autonomyDays).toBe(Infinity);
-  });
-
-  it("berechnet endliche Autarkie ohne ausreichend Solar", () => {
-    const result = calcEnergyBudget({
-      batteryWh: 1024,
-      solarPanelWatts: 0,
-      sunHoursPerDay: 0,
-      consumers: [{ name: "Kühlbox", watts: 45, hoursPerDay: 8 }],
-    });
-    expect(result.dailyConsumptionWh).toBe(360);
-    expect(result.autonomyDays).toBeCloseTo(1024 / 360);
-    expect(result.selfSufficient).toBe(false);
-  });
-
-  it("ignoriert deaktivierte Verbraucher", () => {
-    const result = calcEnergyBudget({
-      batteryWh: 1024,
-      solarPanelWatts: 0,
-      sunHoursPerDay: 0,
-      consumers: [
-        { name: "A", watts: 100, hoursPerDay: 1, enabled: false },
-        { name: "B", watts: 50, hoursPerDay: 2, enabled: true },
-      ],
-    });
-    expect(result.dailyConsumptionWh).toBe(100);
-  });
-});
 
 describe("calcWaterNeeds", () => {
   it("berechnet Basisbedarf bei mildem Wetter", () => {

@@ -36,6 +36,8 @@ export const SYNCED_SETTING_KEYS = [
   "payloadPlan",
   /** Strom-Speicher des Energie-Budgets (Kapazität, Bauart, Ladestand) */
   "powerStorage",
+  /** Eigene Solaranlage (Nennleistung, Aufstellung) für die Ertrags-Prognose */
+  "solarPanel",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];

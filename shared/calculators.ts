@@ -1,66 +1,13 @@
 /**
- * Berechnungslogik für Energie-Budget, Trinkwasser und Pack-Optimierung.
+ * Berechnungslogik für Trinkwasser und Pack-Optimierung.
  * Reine Funktionen – von Client und Tests gemeinsam genutzt.
+ *
+ * Das Energie-Budget lebt seit #229/#230 in shared/powerBudget.ts und
+ * shared/solarForecast.ts: Dort steht der Speicher mit seinem nutzbaren
+ * Anteil, und der Systemwirkungsgrad der Solaranlage ist als Verlustkette
+ * nachvollziehbar statt als pauschale 0,7.
  */
 import { l4, pick, type L4, type Language } from "./i18n";
-
-export interface ConsumerInput {
-  name: string;
-  watts: number;
-  hoursPerDay: number;
-  enabled?: boolean;
-}
-
-export interface EnergyBudgetInput {
-  batteryWh: number;
-  consumers: ConsumerInput[];
-  /** Solarpanel-Nennleistung gesamt in Watt (z. B. 2× 200 W = 400) */
-  solarPanelWatts: number;
-  /** Effektive Sonnenstunden pro Tag (wetter- und jahreszeitabhängig) */
-  sunHoursPerDay: number;
-  /** Systemwirkungsgrad Solar (Ausrichtung, Kabel, Laderegler), Standard 0.7 */
-  solarEfficiency?: number;
-}
-
-export interface EnergyBudgetResult {
-  dailyConsumptionWh: number;
-  dailySolarYieldWh: number;
-  netDailyWh: number;
-  /** Autarkie in Tagen; Infinity, wenn Solar den Verbrauch deckt */
-  autonomyDays: number;
-  selfSufficient: boolean;
-}
-
-export function calcEnergyBudget(input: EnergyBudgetInput): EnergyBudgetResult {
-  const efficiency = input.solarEfficiency ?? 0.7;
-  const dailyConsumptionWh = input.consumers
-    .filter(c => c.enabled !== false)
-    .reduce(
-      (sum, c) => sum + Math.max(0, c.watts) * Math.max(0, c.hoursPerDay),
-      0
-    );
-  const dailySolarYieldWh =
-    Math.max(0, input.solarPanelWatts) *
-    Math.max(0, input.sunHoursPerDay) *
-    efficiency;
-  const netDailyWh = dailyConsumptionWh - dailySolarYieldWh;
-  const selfSufficient = netDailyWh <= 0 && dailyConsumptionWh > 0;
-  let autonomyDays: number;
-  if (dailyConsumptionWh === 0) {
-    autonomyDays = Infinity;
-  } else if (netDailyWh <= 0) {
-    autonomyDays = Infinity;
-  } else {
-    autonomyDays = input.batteryWh / netDailyWh;
-  }
-  return {
-    dailyConsumptionWh,
-    dailySolarYieldWh,
-    netDailyWh,
-    autonomyDays,
-    selfSufficient,
-  };
-}
 
 export interface WaterInput {
   adults: number;
