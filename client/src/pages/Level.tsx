@@ -8,7 +8,11 @@ import { Switch } from "@/components/ui/switch";
 import {
   bubblePosition,
   levelingAdvice,
+  sanitizeLevelProfile,
   screenTilt,
+  LEVEL_PROFILES,
+  LEVEL_TOLERANCES,
+  type LevelProfile,
   type Tilt,
 } from "@shared/level";
 import { type Language } from "@shared/i18n";
@@ -19,6 +23,7 @@ import { cn } from "@/lib/utils";
 
 const CALIBRATION_KEY = "campmesser.levelCalibration";
 const SOUND_KEY = "campmesser.levelSound";
+const PROFILE_KEY = "campmesser.levelProfile";
 /** Ausschlag der Libelle: bei dieser Neigung liegt die Blase am Rand. */
 const MAX_DEG = 10;
 /** Signalton: Frequenz und Dauer des kurzen «im Lot»-Pieps. */
@@ -37,6 +42,22 @@ function loadSoundEnabled(): boolean {
 function saveSoundEnabled(enabled: boolean) {
   try {
     localStorage.setItem(SOUND_KEY, enabled ? "1" : "0");
+  } catch {
+    /* Sitzung reicht */
+  }
+}
+
+function loadProfile(): LevelProfile {
+  try {
+    return sanitizeLevelProfile(localStorage.getItem(PROFILE_KEY));
+  } catch {
+    return sanitizeLevelProfile(null);
+  }
+}
+
+function saveProfile(profile: LevelProfile) {
+  try {
+    localStorage.setItem(PROFILE_KEY, profile);
   } catch {
     /* Sitzung reicht */
   }
@@ -122,6 +143,12 @@ function currentScreenAngle(): number {
   return typeof legacy === "number" ? legacy : 0;
 }
 
+/** Toleranz eines Profils als Zahl (Dezimal-Komma ausser im Englischen). */
+function fmtTolerance(profile: LevelProfile, lang: Language): string {
+  const fixed = LEVEL_TOLERANCES[profile].toFixed(1);
+  return lang === "en" ? fixed : fixed.replace(".", ",");
+}
+
 /** Grad-Wert mit Vorzeichen formatieren (Dezimal-Komma ausser im Englischen). */
 function fmtDeg(v: number, lang: Language): string {
   const sign = v > 0 ? "+" : v < 0 ? "−" : "";
@@ -141,6 +168,7 @@ export default function LevelPage() {
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() =>
     loadSoundEnabled()
   );
+  const [profile, setProfile] = useState<LevelProfile>(() => loadProfile());
 
   // Sensor direkt starten (Android/Desktop); iOS verlangt den Button unten
   useEffect(() => {
@@ -172,7 +200,7 @@ export default function LevelPage() {
         : null,
     [rawTilt, calibration]
   );
-  const advice = tilt ? levelingAdvice(tilt, undefined, lang) : null;
+  const advice = tilt ? levelingAdvice(tilt, undefined, lang, profile) : null;
   const bubble = tilt ? bubblePosition(tilt, MAX_DEG) : { x: 0, y: 0 };
   const isCalibrated = calibration.pitch !== 0 || calibration.roll !== 0;
 
@@ -226,6 +254,36 @@ export default function LevelPage() {
 
       {active && (
         <>
+          {/* Fahrzeug-Profil: bestimmt Toleranz und Formulierung der Tipps */}
+          <div
+            className="mb-4 flex flex-wrap items-center gap-2"
+            role="group"
+            aria-label={t.level.profileLabel}
+          >
+            {LEVEL_PROFILES.map(p => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => {
+                  setProfile(p);
+                  saveProfile(p);
+                }}
+                className={cn(
+                  "rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
+                  profile === p
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                )}
+                aria-pressed={profile === p}
+              >
+                {t.level.profileNames[p]}
+              </button>
+            ))}
+            <span className="text-xs text-muted-foreground">
+              {t.level.profileTolerance(fmtTolerance(profile, lang))}
+            </span>
+          </div>
+
           {/* Libelle */}
           <Card
             className={cn(

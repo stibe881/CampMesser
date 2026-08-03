@@ -1079,6 +1079,13 @@ export const de = {
     levelNow: "In Waage – perfekter Stand!",
     zeroHere: "Hier nullen",
     resetCalibration: "Kalibrierung zurücksetzen",
+    profileLabel: "Fahrzeug-Profil",
+    profileNames: {
+      tent: "Zelt",
+      bus: "Bus",
+      caravan: "Wohnwagen",
+    },
+    profileTolerance: (deg: string) => `Toleranz ±${deg}°`,
     soundLabel: "Signalton",
     soundHint:
       "Kurzer Ton und Vibration, sobald es im Lot ist – erst wieder, wenn du die Waage zwischendurch verlässt.",

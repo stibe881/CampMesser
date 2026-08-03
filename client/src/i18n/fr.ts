@@ -1080,6 +1080,13 @@ export const fr: Translation = {
     levelNow: "De niveau – position parfaite !",
     zeroHere: "Mettre à zéro ici",
     resetCalibration: "Réinitialiser le calibrage",
+    profileLabel: "Profil de véhicule",
+    profileNames: {
+      tent: "Tente",
+      bus: "Van",
+      caravan: "Caravane",
+    },
+    profileTolerance: (deg: string) => `Tolérance ±${deg}°`,
     soundLabel: "Signal sonore",
     soundHint:
       "Bref son et vibration dès que c'est de niveau – de nouveau seulement si tu quittes le niveau entre-temps.",

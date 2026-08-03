@@ -1067,6 +1067,13 @@ export const it: Translation = {
     levelNow: "In bolla – posizione perfetta!",
     zeroHere: "Azzera qui",
     resetCalibration: "Reimposta la calibrazione",
+    profileLabel: "Profilo del veicolo",
+    profileNames: {
+      tent: "Tenda",
+      bus: "Van",
+      caravan: "Caravan",
+    },
+    profileTolerance: (deg: string) => `Tolleranza ±${deg}°`,
     soundLabel: "Segnale acustico",
     soundHint:
       "Breve suono e vibrazione appena sei in bolla – di nuovo solo se nel frattempo esci dalla bolla.",

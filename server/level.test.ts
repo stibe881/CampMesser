@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { bubblePosition, levelingAdvice, screenTilt } from "@shared/level";
+import {
+  bubblePosition,
+  levelingAdvice,
+  sanitizeLevelProfile,
+  screenTilt,
+  DEFAULT_LEVEL_PROFILE,
+  LEVEL_TOLERANCES,
+} from "@shared/level";
 
 describe("screenTilt", () => {
   it("übernimmt beta/gamma in natürlicher Ausrichtung (obere Kante höher = pitch positiv)", () => {
@@ -51,5 +58,64 @@ describe("levelingAdvice", () => {
   it("gibt nur für die verletzte Achse einen Tipp", () => {
     const advice = levelingAdvice({ pitch: -1.0, roll: 0.1 });
     expect(advice.tips).toEqual(["Hinten ist 1,0° höher – lege vorne unter."]);
+  });
+});
+
+describe("Fahrzeug-Profile", () => {
+  it("hat als Standard den Wohnwagen mit der bisherigen Toleranz 0,4°", () => {
+    expect(DEFAULT_LEVEL_PROFILE).toBe("caravan");
+    expect(LEVEL_TOLERANCES[DEFAULT_LEVEL_PROFILE]).toBe(0.4);
+    // Ohne Profil-Argument muss exakt dasselbe herauskommen wie mit «caravan»
+    const tilt = { pitch: 0.6, roll: -0.9 };
+    expect(levelingAdvice(tilt)).toEqual(
+      levelingAdvice(tilt, undefined, "de", "caravan")
+    );
+  });
+
+  it("nutzt die Toleranz des Profils: 1,0° ist im Zelt in Waage, im Bus nicht", () => {
+    const tilt = { pitch: 1.0, roll: 0 };
+    expect(levelingAdvice(tilt, undefined, "de", "tent").level).toBe(true);
+    expect(levelingAdvice(tilt, undefined, "de", "bus").level).toBe(false);
+    expect(levelingAdvice(tilt, undefined, "de", "caravan").level).toBe(false);
+  });
+
+  it("gibt profilspezifische Tipps", () => {
+    const tilt = { pitch: 2.0, roll: -2.0 };
+    expect(levelingAdvice(tilt, undefined, "de", "tent").tips).toEqual([
+      "Vorne ist 2,0° höher – schlaf mit dem Kopf nach vorne oder polstere hinten unter der Matte.",
+      "Links ist 2,0° höher – dreh das Zelt quer oder polstere rechts unter der Matte.",
+    ]);
+    expect(levelingAdvice(tilt, undefined, "de", "bus").tips).toEqual([
+      "Vorne ist 2,0° höher – fahr mit den Hinterrädern auf Keile.",
+      "Links ist 2,0° höher – fahr mit den rechten Rädern auf Keile.",
+    ]);
+  });
+
+  it("übersetzt die profilspezifischen Tipps", () => {
+    expect(
+      levelingAdvice({ pitch: 0, roll: 2.0 }, undefined, "en", "bus").tips
+    ).toEqual([
+      "The right side is 2.0° higher – drive the left wheels onto levelling ramps.",
+    ]);
+    expect(
+      levelingAdvice({ pitch: 0, roll: 2.0 }, undefined, "fr", "tent").tips
+    ).toEqual([
+      "La droite est plus haute de 2,0° – tourne la tente ou rembourre sous le matelas à gauche.",
+    ]);
+  });
+
+  it("lässt eine ausdrücklich übergebene Toleranz vorgehen", () => {
+    // Profil «tent» erlaubt 1,5°, hier wird auf 0,1° verschärft
+    expect(
+      levelingAdvice({ pitch: 0.5, roll: 0 }, 0.1, "de", "tent").level
+    ).toBe(false);
+  });
+
+  it("führt unbekannte gespeicherte Profile auf den Standard zurück", () => {
+    expect(sanitizeLevelProfile("tent")).toBe("tent");
+    expect(sanitizeLevelProfile("bus")).toBe("bus");
+    expect(sanitizeLevelProfile("wohnmobil")).toBe(DEFAULT_LEVEL_PROFILE);
+    expect(sanitizeLevelProfile(null)).toBe(DEFAULT_LEVEL_PROFILE);
+    expect(sanitizeLevelProfile(42)).toBe(DEFAULT_LEVEL_PROFILE);
   });
 });
