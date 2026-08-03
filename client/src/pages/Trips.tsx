@@ -27,6 +27,7 @@ import {
   Printer,
   Share2,
   ShoppingBasket,
+  Signpost,
   Sparkles,
   Star,
   Tent,
@@ -68,6 +69,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useI18n, useT } from "@/i18n";
 import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
+import { findCountryRules, guessCountryCode } from "@/data/roadRules";
 import {
   COLLAGE_LAYOUTS,
   collageCapacity,
@@ -2601,6 +2603,21 @@ export default function TripsPage() {
     return trip.location ?? t.trips.unknownPlace;
   };
 
+  /**
+   * Zielland einer Reise (#228): geraten aus Titel, Ortsname und dem Namen des
+   * verknüpften Zeltplatzes. Aus den Koordinaten allein liesse sich das Land
+   * ohne Grenzdaten nicht verlässlich bestimmen – ohne Treffer bleibt es null
+   * und die Länderauswahl übernimmt.
+   */
+  const tripCountry = (trip: (typeof trips)[number]): string | null =>
+    guessCountryCode(`${trip.title ?? ""} ${placeName(trip)}`);
+
+  /** Name des geratenen Ziellands in der UI-Sprache – oder null. */
+  const tripCountryName = (trip: (typeof trips)[number]): string | null => {
+    const country = findCountryRules(tripCountry(trip));
+    return country ? pick(country.name, lang) : null;
+  };
+
   /** Eintrag ins Formular laden und den Dialog im Bearbeiten-Modus öffnen. */
   const startEdit = (trip: (typeof allTrips)[number]) => {
     setEditingId(trip.id);
@@ -3731,6 +3748,33 @@ export default function TripsPage() {
                             </Link>
                           </Button>
                         )}
+                        {/* Maut, Vignette & Regeln (#228): das Zielland raten
+                            wir aus Reise-Titel und Ortsnamen – ohne Treffer
+                            führt der Knopf zur Länderauswahl */}
+                        <Button asChild variant="outline" size="sm">
+                          <Link
+                            href={
+                              tripCountry(trip)
+                                ? `/laenderregeln?land=${tripCountry(trip)}`
+                                : "/laenderregeln"
+                            }
+                            aria-label={t.trips.roadRulesAria(
+                              trip.title || placeName(trip)
+                            )}
+                          >
+                            <Signpost
+                              className="mr-1.5 h-4 w-4"
+                              aria-hidden="true"
+                            />
+                            {t.trips.roadRulesButton}
+                            {tripCountryName(trip) && (
+                              <span className="text-muted-foreground">
+                                {" · "}
+                                {tripCountryName(trip)}
+                              </span>
+                            )}
+                          </Link>
+                        </Button>
                       </div>
                       {trip.notes && (
                         <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">

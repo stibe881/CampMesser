@@ -26,6 +26,7 @@ import {
   Scale,
   Shirt,
   ShoppingCart,
+  Signpost,
   Siren,
   Sprout,
   Tent,
@@ -236,6 +237,24 @@ export const modules: Module[] = [
       "Is the rig overloaded? Gross weight, towing capacity, nose weight"
     ),
     icon: Truck,
+    group: "reise",
+    offline: true,
+  },
+  {
+    path: "/laenderregeln",
+    title: l4(
+      "Maut, Vignette & Regeln",
+      "Péage, vignette & règles",
+      "Pedaggi, vignetta e regole",
+      "Tolls, vignettes & rules"
+    ),
+    description: l4(
+      "Kurzinfo je Land: Maut, Tempo mit Anhänger, Pflichtausrüstung, Notruf",
+      "Fiche par pays : péage, vitesse avec remorque, équipement obligatoire, urgences",
+      "Scheda per paese: pedaggi, velocità con rimorchio, dotazione obbligatoria, emergenze",
+      "Country briefing: tolls, speeds when towing, mandatory kit, emergency number"
+    ),
+    icon: Signpost,
     group: "reise",
     offline: true,
   },

@@ -1308,6 +1308,31 @@ export const de = {
     levelHint: "Steht das Fahrzeug schon eben? Dieselben Profile führen die",
     levelLink: "Wasserwaage",
   },
+  roadRules: {
+    title: "Maut, Vignette & Regeln",
+    subtitle:
+      "Kurzinfo fürs Zielland: Maut, Tempo mit Anhänger, Pflichtausrüstung, Notruf.",
+    disclaimer:
+      "Regeln, Preise und Grenzwerte ändern sich – diese Übersicht ist eine Orientierung, keine Rechtsauskunft. Prüf vor der Fahrt die Angaben deines Automobilclubs oder der Behörden im Zielland.",
+    countryLabel: "Land wählen",
+    tollTitle: "Vignette & Maut",
+    trailerTitle: "Anhänger",
+    speedTitle: "Tempo mit Anhänger",
+    roadNames: {
+      motorway: "Autobahn",
+      rural: "Landstrasse",
+      urban: "Innerorts",
+    },
+    bacTitle: "Promillegrenze",
+    permille: (value: string) => `${value} ‰`,
+    equipmentTitle: "Pflicht an Bord",
+    zonesTitle: "Umweltzonen",
+    emergencyTitle: "Notruf",
+    callAria: (number: string) => `Notruf ${number} anrufen`,
+    campingTitle: "Übernachten & Campen",
+    updatedLine: (country: string, date: string) =>
+      `${country}: Stand ${date}. Angaben in km/h; ohne Gewähr.`,
+  },
   sos: {
     title: "SOS & Notfall-Dashboard",
     subtitle:
@@ -2170,6 +2195,9 @@ export const de = {
           : `Noch ${days} Tage`,
     nightsCount: (n: number) => (n === 1 ? "1 Nacht" : `${n} Nächte`),
     menuPlanButton: "Menüplan",
+    roadRulesButton: "Maut & Regeln",
+    roadRulesAria: (name: string) =>
+      `Maut und Regeln fürs Zielland von ${name}`,
     menuPlanAria: (name: string) => `Menüplan für ${name} öffnen`,
     deletePlannedAria: (name: string) => `Geplanten Aufenthalt ${name} löschen`,
     deleteEntryAria: (name: string) => `Eintrag ${name} löschen`,

@@ -1313,6 +1313,31 @@ export const fr: Translation = {
     levelHint: "Le véhicule est-il déjà de niveau ? Mêmes profils dans le",
     levelLink: "niveau à bulle",
   },
+  roadRules: {
+    title: "Péage, vignette & règles",
+    subtitle:
+      "Fiche pour le pays de destination : péage, vitesse avec remorque, équipement obligatoire, urgences.",
+    disclaimer:
+      "Les règles, les prix et les limites changent – cet aperçu est une orientation, pas un renseignement juridique. Vérifie avant le départ auprès de ton automobile-club ou des autorités du pays.",
+    countryLabel: "Choisir le pays",
+    tollTitle: "Vignette & péage",
+    trailerTitle: "Remorque",
+    speedTitle: "Vitesse avec remorque",
+    roadNames: {
+      motorway: "Autoroute",
+      rural: "Route",
+      urban: "En localité",
+    },
+    bacTitle: "Taux d'alcoolémie",
+    permille: (value: string) => `${value} ‰`,
+    equipmentTitle: "Obligatoire à bord",
+    zonesTitle: "Zones environnementales",
+    emergencyTitle: "Appel d'urgence",
+    callAria: (number: string) => `Appeler le numéro d'urgence ${number}`,
+    campingTitle: "Nuitées & camping",
+    updatedLine: (country: string, date: string) =>
+      `${country} : état au ${date}. Valeurs en km/h ; sans garantie.`,
+  },
   sos: {
     title: "SOS & tableau de bord d'urgence",
     subtitle:
@@ -2171,6 +2196,9 @@ export const fr: Translation = {
           : `Encore ${days} jours`,
     nightsCount: n => (n === 1 ? "1 nuit" : `${n} nuits`),
     menuPlanButton: "Plan des repas",
+    roadRulesButton: "Péage & règles",
+    roadRulesAria: (name: string) =>
+      `Péage et règles pour la destination de ${name}`,
     menuPlanAria: (name: string) => `Ouvrir le plan des repas de ${name}`,
     deletePlannedAria: name => `Supprimer le séjour prévu ${name}`,
     deleteEntryAria: name => `Supprimer l'entrée ${name}`,

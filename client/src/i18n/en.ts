@@ -1265,6 +1265,31 @@ export const en: Translation = {
     levelHint: "Is the vehicle level already? The same profiles drive the",
     levelLink: "spirit level",
   },
+  roadRules: {
+    title: "Tolls, vignettes & rules",
+    subtitle:
+      "Briefing for your destination: tolls, speeds when towing, mandatory kit, emergency number.",
+    disclaimer:
+      "Rules, prices and limits change – this overview is guidance, not legal advice. Check with your automobile club or the authorities of your destination before you set off.",
+    countryLabel: "Choose country",
+    tollTitle: "Vignette & toll",
+    trailerTitle: "Trailer",
+    speedTitle: "Speed when towing",
+    roadNames: {
+      motorway: "Motorway",
+      rural: "Rural road",
+      urban: "Built-up area",
+    },
+    bacTitle: "Blood alcohol limit",
+    permille: (value: string) => `${value} ‰`,
+    equipmentTitle: "Required on board",
+    zonesTitle: "Low emission zones",
+    emergencyTitle: "Emergency number",
+    callAria: (number: string) => `Call emergency number ${number}`,
+    campingTitle: "Overnight stays & camping",
+    updatedLine: (country: string, date: string) =>
+      `${country}: as of ${date}. Figures in km/h; no guarantee.`,
+  },
   sos: {
     title: "SOS & emergency dashboard",
     subtitle:
@@ -2096,6 +2121,9 @@ export const en: Translation = {
           : `${days} days to go`,
     nightsCount: n => (n === 1 ? "1 night" : `${n} nights`),
     menuPlanButton: "Meal plan",
+    roadRulesButton: "Tolls & rules",
+    roadRulesAria: (name: string) =>
+      `Tolls and rules for the destination of ${name}`,
     menuPlanAria: (name: string) => `Open the meal plan for ${name}`,
     deletePlannedAria: name => `Delete planned stay ${name}`,
     deleteEntryAria: name => `Delete entry ${name}`,

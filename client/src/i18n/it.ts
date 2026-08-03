@@ -1294,6 +1294,31 @@ export const it: Translation = {
     levelHint: "Il veicolo è già in piano? Gli stessi profili guidano la",
     levelLink: "livella",
   },
+  roadRules: {
+    title: "Pedaggi, vignetta e regole",
+    subtitle:
+      "Scheda per il paese di destinazione: pedaggi, velocità con rimorchio, dotazione obbligatoria, emergenze.",
+    disclaimer:
+      "Regole, prezzi e limiti cambiano – questa panoramica è un orientamento, non un'informazione legale. Prima di partire verifica presso il tuo automobile club o le autorità del paese.",
+    countryLabel: "Scegli il paese",
+    tollTitle: "Vignetta e pedaggi",
+    trailerTitle: "Rimorchio",
+    speedTitle: "Velocità con rimorchio",
+    roadNames: {
+      motorway: "Autostrada",
+      rural: "Strada extraurbana",
+      urban: "Centro abitato",
+    },
+    bacTitle: "Tasso alcolemico",
+    permille: (value: string) => `${value} ‰`,
+    equipmentTitle: "Obbligatorio a bordo",
+    zonesTitle: "Zone ambientali",
+    emergencyTitle: "Numero d'emergenza",
+    callAria: (number: string) => `Chiama il numero d'emergenza ${number}`,
+    campingTitle: "Pernottamento e campeggio",
+    updatedLine: (country: string, date: string) =>
+      `${country}: aggiornato al ${date}. Valori in km/h; senza garanzia.`,
+  },
   sos: {
     title: "SOS & dashboard d'emergenza",
     subtitle:
@@ -2148,6 +2173,9 @@ export const it: Translation = {
           : `Ancora ${days} giorni`,
     nightsCount: n => (n === 1 ? "1 notte" : `${n} notti`),
     menuPlanButton: "Piano dei pasti",
+    roadRulesButton: "Pedaggi e regole",
+    roadRulesAria: (name: string) =>
+      `Pedaggi e regole per la destinazione di ${name}`,
     menuPlanAria: (name: string) => `Apri il piano dei pasti di ${name}`,
     deletePlannedAria: name => `Elimina il soggiorno pianificato ${name}`,
     deleteEntryAria: name => `Elimina la voce ${name}`,
