@@ -485,4 +485,254 @@ export const knots: Knot[] = [
       "Very secure, but almost impossible to untie after heavy loading – meant for permanent joins."
     ),
   },
+  {
+    id: "truckerhitch",
+    name: l4(
+      "Trucker-Hitch",
+      "Nœud de camionneur",
+      "Nodo del carrettiere",
+      "Trucker's hitch"
+    ),
+    altName: l4(
+      "Fuhrmannsknoten",
+      "Nœud de charretier",
+      "Nodo del camionista",
+      "Power cinch"
+    ),
+    category: "spannen",
+    difficulty: 3,
+    useCase: l4(
+      "Flaschenzug-Effekt: Eine Leine mit Hebelwirkung strammziehen und die Spannung sofort festsetzen.",
+      "Effet de palan : tendre fortement une corde grâce à un démultiplicateur et bloquer aussitôt la tension.",
+      "Effetto paranco: tendere fortemente una corda con un rinvio e bloccare subito la tensione.",
+      "A pulley effect: pull a line really tight with mechanical advantage and lock the tension straight away."
+    ),
+    campingUse: l4(
+      "Tarp-Firstleine bretthart spannen oder Gepäck auf dem Dachträger festzurren – ganz ohne Leinenspanner.",
+      "Tendre la faîtière du tarp comme une planche ou arrimer les bagages sur la galerie – sans aucun tendeur.",
+      "Tendere la corda di colmo del tarp come una tavola o fissare i bagagli sul portapacchi – senza alcun tenditore.",
+      "Pull a tarp ridgeline drum-tight or lash luggage onto a roof rack – with no line tensioner at all."
+    ),
+    steps: [
+      l4(
+        "Ein Ende der Leine am ersten Fixpunkt (Baum, Öse) fest anschlagen.",
+        "Amarrer solidement un bout de la corde au premier point fixe (arbre, anneau).",
+        "Fissare saldamente un capo della corda al primo punto fisso (albero, anello).",
+        "Tie one end of the line firmly to the first anchor (tree, ring)."
+      ),
+      l4(
+        "Etwa auf halbem Weg eine Schlaufe in die Leine legen – sie dient als Umlenkrolle.",
+        "Former une boucle à mi-chemin dans la corde – elle sert de poulie de renvoi.",
+        "Formare un'asola a metà corda – funge da carrucola di rinvio.",
+        "Form a loop about halfway along the line – it acts as a pulley."
+      ),
+      l4(
+        "Das lose Ende um den zweiten Fixpunkt (Hering, Ring, Stange) führen und von unten zurück durch die Schlaufe ziehen.",
+        "Passer le bout libre autour du deuxième point fixe (sardine, anneau, mât) et le ramener dans la boucle par en dessous.",
+        "Passare il capo libero attorno al secondo punto fisso (picchetto, anello, palina) e riportarlo nell'asola dal basso.",
+        "Take the working end around the second anchor (peg, ring, pole) and back up through the loop from below."
+      ),
+      l4(
+        "Am losen Ende ziehen, bis die Leine straff ist – die Schlaufe verdreifacht dabei deine Zugkraft.",
+        "Tirer sur le bout libre jusqu'à ce que la corde soit tendue – la boucle triple ta force de traction.",
+        "Tirare il capo libero finché la corda è tesa – l'asola triplica la tua forza di trazione.",
+        "Pull on the working end until the line is taut – the loop roughly triples your pulling force."
+      ),
+      l4(
+        "Die Spannung mit zwei halben Schlägen direkt unter der Schlaufe sichern; den letzten als Slipstek legen, damit er sich schnell öffnen lässt.",
+        "Bloquer la tension avec deux demi-clés juste sous la boucle ; faire la dernière en demi-clé gansée pour pouvoir l'ouvrir vite.",
+        "Bloccare la tensione con due mezzi colli subito sotto l'asola; fare l'ultimo con una gassa, così si apre in fretta.",
+        "Lock the tension with two half hitches just below the loop; make the last one slipped so it opens quickly."
+      ),
+    ],
+    proTip: l4(
+      "Die Umlenkschlaufe belastet die Leine stark – bei dünnen Schnüren nicht mit voller Kraft ziehen. Als Schlaufe eignet sich ein Palstek, wenn du sie später wieder lösen willst.",
+      "La boucle de renvoi sollicite fortement la corde – avec des cordelettes fines, ne tire pas de toutes tes forces. Un nœud de chaise fait une bonne boucle si tu veux la défaire ensuite.",
+      "L'asola di rinvio sollecita molto la corda – con cordini sottili non tirare a tutta forza. Come asola va bene una gassa d'amante, se poi vuoi scioglierla.",
+      "The pulley loop puts a lot of strain on the line – do not haul with full force on thin cord. A bowline makes a good loop if you want to undo it later."
+    ),
+  },
+  {
+    id: "slipstek",
+    name: l4(
+      "Slipstek",
+      "Demi-clé gansée",
+      "Mezzo collo con gassa",
+      "Slipped half hitch"
+    ),
+    altName: l4(
+      "Halber Schlag auf Slip",
+      "Demi-clé à ganse",
+      "Mezzo collo a occhiello",
+      "Quick-release hitch"
+    ),
+    category: "befestigen",
+    difficulty: 1,
+    useCase: l4(
+      "Eine Befestigung, die sich mit einem einzigen Zug am losen Ende wieder öffnet.",
+      "Une fixation qui s'ouvre d'un seul coup en tirant sur le bout libre.",
+      "Un fissaggio che si apre con un solo tiro sul capo libero.",
+      "A tie-off that opens again with a single pull on the free end."
+    ),
+    campingUse: l4(
+      "Wäscheleine, Tarp-Abspannung oder Sackverschluss, den du in Sekunden lösen willst – klappt auch mit klammen Fingern und Handschuhen.",
+      "Corde à linge, hauban de tarp ou fermeture de sac que tu veux défaire en quelques secondes – même avec les doigts gelés ou des gants.",
+      "Corda per il bucato, tirante del tarp o chiusura di un sacco da sciogliere in pochi secondi – funziona anche con le dita infreddolite o con i guanti.",
+      "A washing line, tarp guy line or sack tie you want to release in seconds – it works with cold fingers or gloves on."
+    ),
+    steps: [
+      l4(
+        "Das Seil um Pfahl, Baum oder Ring legen.",
+        "Passer la corde autour du poteau, de l'arbre ou de l'anneau.",
+        "Passare la corda attorno al palo, all'albero o all'anello.",
+        "Pass the rope around the post, tree or ring."
+      ),
+      l4(
+        "Das lose Ende über die stehende Leine führen, sodass ein halber Schlag entsteht – aber noch nichts durchziehen.",
+        "Faire passer le bout libre par-dessus le brin fixe pour former une demi-clé – sans encore rien engager.",
+        "Portare il capo libero sopra la corda fissa formando un mezzo collo – senza ancora infilare nulla.",
+        "Bring the working end over the standing line to form a half hitch – but do not tuck anything through yet."
+      ),
+      l4(
+        "Statt des Endes eine Bucht (doppelt gelegte Schlaufe) durch den Schlag stecken.",
+        "Engager une ganse (boucle double) dans la demi-clé, à la place du bout.",
+        "Infilare nel mezzo collo un doppino (asola ripiegata) invece del capo.",
+        "Push a bight (a doubled loop) through the hitch instead of the end."
+      ),
+      l4(
+        "Festziehen – der Knoten hält. Ein Zug am losen Ende zieht die Bucht heraus und öffnet ihn sofort.",
+        "Serrer – le nœud tient. Un coup sur le bout libre retire la ganse et l'ouvre aussitôt.",
+        "Stringere – il nodo tiene. Un tiro sul capo libero sfila il doppino e lo apre subito.",
+        "Tighten – the knot holds. One pull on the free end draws the bight out and releases it instantly."
+      ),
+    ],
+    proTip: l4(
+      "Unter Dauerzug lieber zwei halbe Schläge legen und nur den zweiten gansen – ein einzelner Slipstek kann sich sonst von selbst öffnen. Nie zur Sicherung von Personen verwenden.",
+      "Sous tension permanente, mieux vaut faire deux demi-clés et ne ganser que la seconde – une demi-clé gansée seule peut s'ouvrir d'elle-même. Ne jamais l'utiliser pour assurer des personnes.",
+      "Sotto tensione continua meglio fare due mezzi colli e mettere la gassa solo sul secondo – da solo il mezzo collo con gassa può aprirsi da sé. Mai usarlo per assicurare persone.",
+      "Under constant load, tie two half hitches and slip only the second – a single slipped half hitch can shake loose on its own. Never use it to secure people."
+    ),
+  },
+  {
+    id: "zimmermannsschlag",
+    name: l4(
+      "Zimmermannsschlag",
+      "Nœud de bois",
+      "Nodo del legnaiolo",
+      "Timber hitch"
+    ),
+    altName: l4(
+      "Holzfällerstek",
+      "Nœud de bûcheron",
+      "Nodo del taglialegna",
+      "Lumberman's hitch"
+    ),
+    category: "befestigen",
+    difficulty: 1,
+    useCase: l4(
+      "Ein Seil an einem runden Gegenstand anschlagen, um ihn zu ziehen oder zu bündeln – und danach mühelos wieder lösen.",
+      "Amarrer une corde à un objet cylindrique pour le tirer ou le fagoter – et la défaire ensuite sans effort.",
+      "Legare una corda a un oggetto cilindrico per trascinarlo o per farne un fascio – e scioglierla poi senza fatica.",
+      "Attach a rope to a round object in order to drag or bundle it – and undo it again effortlessly."
+    ),
+    campingUse: l4(
+      "Feuerholz zu einem Bündel schnüren, einen Ast aus dem Weg ziehen oder die Tarp-Firstleine am Stamm anschlagen.",
+      "Fagoter du bois de feu, tirer une branche hors du chemin ou amarrer la faîtière du tarp au tronc.",
+      "Legare la legna da ardere in un fascio, trascinare via un ramo o fissare al tronco la corda di colmo del tarp.",
+      "Bundle up firewood, drag a branch out of the way or anchor a tarp ridgeline to a trunk."
+    ),
+    steps: [
+      l4(
+        "Das lose Ende um den Stamm oder das Holzbündel legen.",
+        "Passer le bout libre autour du tronc ou du fagot de bois.",
+        "Passare il capo libero attorno al tronco o al fascio di legna.",
+        "Pass the working end around the trunk or the bundle of wood."
+      ),
+      l4(
+        "Das Ende einmal um die stehende Leine schlagen.",
+        "Faire un tour du bout autour du brin fixe.",
+        "Fare un giro del capo attorno alla corda fissa.",
+        "Take the end once around the standing line."
+      ),
+      l4(
+        "Das Ende drei- bis fünfmal um sich selbst wickeln – innerhalb der Schlinge und in Zugrichtung.",
+        "Enrouler le bout trois à cinq fois autour de lui-même – à l'intérieur de la boucle et dans le sens de la traction.",
+        "Avvolgere il capo tre-cinque volte attorno a sé stesso – dentro l'anello e nel senso della trazione.",
+        "Wrap the end around itself three to five times – inside the loop and in the direction of pull."
+      ),
+      l4(
+        "An der stehenden Leine ziehen: Die Wicklungen legen sich um das Holz und klemmen fest.",
+        "Tirer sur le brin fixe : les tours se plaquent contre le bois et se coincent.",
+        "Tirare la corda fissa: gli avvolgimenti si stringono attorno al legno e si bloccano.",
+        "Pull on the standing line: the wraps bed down against the wood and grip."
+      ),
+    ],
+    proTip: l4(
+      "Der Knoten hält nur unter Zug – ohne Last fällt er von selbst auseinander, genau deshalb ist er so schnell wieder gelöst. Zum Ziehen zusätzlich einen halben Schlag weiter vorn setzen, dann bleibt die Richtung stabil.",
+      "Le nœud ne tient que sous traction – sans charge il se défait tout seul, d'où sa rapidité de démontage. Pour tirer, ajoute une demi-clé plus en avant : la direction reste stable.",
+      "Il nodo tiene solo sotto trazione – senza carico si disfa da solo, ed è proprio per questo che si scioglie in un attimo. Per trascinare, aggiungi un mezzo collo più avanti: la direzione resta stabile.",
+      "The hitch only holds under tension – with no load it falls apart by itself, which is exactly why it comes off so quickly. For dragging, add a half hitch further along so the direction stays stable."
+    ),
+  },
+  {
+    id: "achterschlaufe",
+    name: l4(
+      "Achterschlaufe",
+      "Nœud en huit double",
+      "Nodo a otto ripassato",
+      "Figure-eight loop"
+    ),
+    altName: l4(
+      "Doppelter Achterknoten",
+      "Huit repassé",
+      "Asola a otto",
+      "Figure-eight on a bight"
+    ),
+    category: "schlaufen",
+    difficulty: 2,
+    useCase: l4(
+      "Sehr sichere feste Schlaufe – auch mitten in der Leine, ohne dass ein Seilende frei sein muss.",
+      "Boucle fixe très sûre – réalisable aussi en plein milieu de la corde, sans avoir besoin d'un bout libre.",
+      "Asola fissa molto sicura – realizzabile anche in mezzo alla corda, senza bisogno di un capo libero.",
+      "A very secure fixed loop – it can be tied in the middle of a line, with no free end needed."
+    ),
+    campingUse: l4(
+      "Aufhängepunkte in der Tarp-Firstleine, Griffschlaufen zum Ziehen oder eine Öse zum Einhängen der Wäscheleine.",
+      "Points d'accrochage sur la faîtière du tarp, poignées pour tirer ou œillet pour accrocher la corde à linge.",
+      "Punti di aggancio sulla corda di colmo del tarp, maniglie per tirare o un occhiello per agganciare la corda del bucato.",
+      "Attachment points along a tarp ridgeline, grab loops for pulling or an eye to hook a washing line into."
+    ),
+    steps: [
+      l4(
+        "Das Seil an der gewünschten Stelle zu einer Bucht doppeln – so gross, wie die Schlaufe später sein soll.",
+        "Doubler la corde à l'endroit voulu pour former une ganse – de la taille souhaitée pour la boucle.",
+        "Piegare la corda nel punto desiderato formando un doppino – grande quanto sarà l'asola.",
+        "Double the rope into a bight at the chosen spot – as big as you want the finished loop."
+      ),
+      l4(
+        "Mit dem doppelten Strang ein Auge legen und einmal um den Strang herumführen.",
+        "Former une boucle avec le brin double et faire un tour autour de lui.",
+        "Con il capo doppio formare un occhiello e fare un giro attorno al capo stesso.",
+        "Form an eye with the doubled strand and take it once around itself."
+      ),
+      l4(
+        "Die Bucht von oben durch das Auge stecken – es entsteht eine liegende «8».",
+        "Passer la ganse dans la boucle par le haut – un «8» couché apparaît.",
+        "Infilare il doppino nell'occhiello dall'alto – si forma un «8» coricato.",
+        "Push the bight down through the eye – a sideways figure '8' appears."
+      ),
+      l4(
+        "Alle vier Stränge einzeln und gleichmässig festziehen, damit der Knoten sauber und flach liegt.",
+        "Serrer les quatre brins un par un et régulièrement, pour que le nœud soit propre et plat.",
+        "Stringere i quattro capi uno a uno e in modo uniforme, così il nodo resta ordinato e piatto.",
+        "Tighten all four strands one by one and evenly so the knot sits neat and flat."
+      ),
+    ],
+    proTip: l4(
+      "Zum Prüfen die «8» mit dem Finger nachfahren: Die beiden Stränge müssen im ganzen Knoten parallel laufen, ohne sich zu kreuzen. Im Gegensatz zum Palstek hält die Achterschlaufe auch bei wechselnder Belastung.",
+      "Pour contrôler, suis le «8» avec le doigt : les deux brins doivent rester parallèles dans tout le nœud, sans se croiser. Contrairement au nœud de chaise, la boucle en huit tient aussi sous charge variable.",
+      "Per controllare, segui l'«8» con il dito: i due capi devono restare paralleli in tutto il nodo, senza incrociarsi. A differenza della gassa d'amante, l'asola a otto tiene anche con carichi variabili.",
+      "To check it, trace the '8' with a finger: both strands must run parallel throughout the knot without crossing. Unlike a bowline, the figure-eight loop also holds under changing loads."
+    ),
+  },
 ];

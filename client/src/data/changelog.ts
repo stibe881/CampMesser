@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Knoten: Vier neue Anleitungen ergänzen die Bibliothek – Trucker-Hitch zum bretthart Spannen, Slipstek zum Lösen mit einem Zug, Zimmermannsschlag fürs Holzbündel und die Achterschlaufe als sichere Schlaufe. Quiz und Lernfortschritt nehmen sie automatisch mit.",
+        "Nœuds : quatre nouvelles fiches enrichissent la bibliothèque – nœud de camionneur pour tendre à bloc, demi-clé gansée qui s'ouvre d'un seul geste, nœud de bois pour les fagots et nœud en huit double comme boucle sûre. Le quiz et ta progression les intègrent automatiquement.",
+        "Nodi: quattro nuove schede arricchiscono la biblioteca – nodo del carrettiere per tendere al massimo, mezzo collo con gassa che si apre con un tiro solo, nodo del legnaiolo per i fasci di legna e nodo a otto ripassato come asola sicura. Quiz e progressi li includono in automatico.",
+        "Knots: four new guides join the library – trucker's hitch for drum-tight lines, slipped half hitch that opens with one pull, timber hitch for firewood bundles and the figure-eight loop as a secure loop. The quiz and your learning progress pick them up automatically."
+      ),
+      l4(
         "Mitteilungen: Im Profil klappst du neu den «Verlauf» auf und liest nach, welche Push-Meldungen dein Konto zuletzt bekommen hat – mit Symbol, Zeitpunkt und Klick direkt ins passende Modul.",
         "Notifications : dans ton profil, ouvre le nouvel « historique » pour relire les dernières notifications envoyées à ton compte – avec icône, horodatage et accès direct au module concerné.",
         "Notifiche: nel profilo apri la nuova «cronologia» e rileggi le ultime notifiche ricevute dal tuo account – con icona, orario e accesso diretto al modulo giusto.",
