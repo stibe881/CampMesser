@@ -2568,6 +2568,30 @@ export const it: Translation = {
         `Eliminare davvero l'osservazione «${title}»?`,
     },
   },
+  /** Passaggi della ISS nella parte astro (#222). */
+  iss: {
+    sectionAria: "Passaggi visibili della stazione spaziale ISS",
+    title: "Passaggi della ISS",
+    subtitle:
+      "I prossimi passaggi visibili della stazione spaziale dalla tua posizione.",
+    subtitleAtPlace: (place: string) =>
+      `I prossimi passaggi visibili della stazione spaziale vicino a ${place}.`,
+    loading: "Calcolo dei passaggi …",
+    noLocation:
+      "Per i passaggi CampMesser ha bisogno della tua posizione – autorizza la localizzazione o salva una piazzola.",
+    loadFailed:
+      "Al momento non è stato possibile caricare i passaggi. Riprova più tardi.",
+    noneVisible:
+      "Nei prossimi quattro giorni da qui non è visibile nessun passaggio. Cambia ogni poche settimane – ripassa più tardi.",
+    duration: (minutes: number) =>
+      minutes === 1 ? "1 minuto" : `${minutes} minuti`,
+    path: (path: string) => `Percorso nel cielo: ${path}`,
+    maxElevation: (degrees: number) => `fino a ${degrees}° sopra l'orizzonte`,
+    brightness: (magnitude: string) => `Luminosità ca. ${magnitude} mag`,
+    footnote:
+      "La ISS è visibile solo al crepuscolo e nella prima metà della notte: a terra deve essere buio mentre il sole illumina ancora la stazione. Attraversa il cielo come un punto luminoso e regolare – senza lampeggiare. Orari e luminosità sono valori approssimativi, esci qualche minuto prima.",
+  },
+
   recipes: {
     title: "Ricettario Campfire",
     subtitle:

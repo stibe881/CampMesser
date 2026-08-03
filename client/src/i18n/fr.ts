@@ -2591,6 +2591,31 @@ export const fr: Translation = {
         `Vraiment supprimer l'observation «${title}» ?`,
     },
   },
+  /** Passages de l'ISS dans la partie astro (#222). */
+  iss: {
+    sectionAria: "Passages visibles de la station spatiale ISS",
+    title: "Passages de l'ISS",
+    subtitle:
+      "Les prochains passages visibles de la station spatiale depuis ta position.",
+    subtitleAtPlace: (place: string) =>
+      `Les prochains passages visibles de la station spatiale près de ${place}.`,
+    loading: "Calcul des passages …",
+    noLocation:
+      "Pour les passages, CampMesser a besoin de ta position – autorise la localisation ou enregistre un emplacement.",
+    loadFailed:
+      "Les passages n'ont pas pu être chargés pour l'instant. Réessaie plus tard.",
+    noneVisible:
+      "Aucun passage visible d'ici dans les quatre prochains jours. Cela change toutes les quelques semaines – repasse plus tard.",
+    duration: (minutes: number) =>
+      minutes === 1 ? "1 minute" : `${minutes} minutes`,
+    path: (path: string) => `Trajet dans le ciel : ${path}`,
+    maxElevation: (degrees: number) =>
+      `jusqu'à ${degrees}° au-dessus de l'horizon`,
+    brightness: (magnitude: string) => `Éclat env. ${magnitude} mag`,
+    footnote:
+      "L'ISS n'est visible qu'au crépuscule et en première partie de nuit : il doit faire sombre au sol pendant que le soleil éclaire encore la station. Elle traverse le ciel comme un point brillant et régulier – sans clignoter. Les heures et l'éclat sont des valeurs approchées, sors quelques minutes à l'avance.",
+  },
+
   recipes: {
     title: "Livre de recettes Campfire",
     subtitle:

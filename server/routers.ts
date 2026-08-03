@@ -27,6 +27,7 @@ import {
   SYNCED_SETTING_KEYS,
 } from "@shared/settings";
 import { MAX_STATIONS, solutionWordFromStations } from "@shared/hunts";
+import { selectVisiblePasses } from "@shared/iss";
 import { isBadgeId } from "@shared/badges";
 import {
   MAX_QUIZ_OPTIONS,
@@ -4317,6 +4318,32 @@ export const appRouter = router({
           accuracyM: share.accuracyM,
           capturedAt: share.capturedAt,
           expiresAt: share.shareExpiresAt,
+        };
+      }),
+  }),
+
+  /**
+   * ISS-Überflüge (#222). Die geometrisch möglichen Überflüge kommen von
+   * einer freien Schnittstelle (server/iss.ts, mit Zwischenspeicher), welche
+   * davon SICHTBAR ist, entscheidet `selectVisiblePasses` aus shared/iss.ts:
+   * dunkel am Boden, Station noch in der Sonne. Kein Login nötig – die Daten
+   * hängen nur am Ort, nicht am Konto.
+   */
+  iss: router({
+    passes: publicProcedure
+      .input(
+        z.object({
+          latitude: z.number().min(-90).max(90),
+          longitude: z.number().min(-180).max(180),
+        })
+      )
+      .query(async ({ input }) => {
+        const { fetchIssPasses } = await import("./iss");
+        const raw = await fetchIssPasses(input.latitude, input.longitude);
+        return {
+          passes: selectVisiblePasses(raw, input.latitude, input.longitude),
+          /** Wurden überhaupt Überflüge geliefert? Trennt «keine sichtbaren» von «Quelle stumm». */
+          sourceReachable: raw.length > 0,
         };
       }),
   }),

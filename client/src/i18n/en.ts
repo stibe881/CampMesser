@@ -2501,6 +2501,29 @@ export const en: Translation = {
         `Really delete the sighting “${title}”?`,
     },
   },
+  /** ISS passes in the astro section (#222). */
+  iss: {
+    sectionAria: "Visible passes of the ISS space station",
+    title: "ISS passes",
+    subtitle:
+      "The next visible passes of the space station over your location.",
+    subtitleAtPlace: (place: string) =>
+      `The next visible passes of the space station near ${place}.`,
+    loading: "Working out the passes …",
+    noLocation:
+      "CampMesser needs your location for the passes – allow location access or save a pitch.",
+    loadFailed: "The passes could not be loaded right now. Try again later.",
+    noneVisible:
+      "No pass is visible from here in the next four days. That changes every few weeks – check back later.",
+    duration: (minutes: number) =>
+      minutes === 1 ? "1 minute" : `${minutes} minutes`,
+    path: (path: string) => `Path across the sky: ${path}`,
+    maxElevation: (degrees: number) => `up to ${degrees}° above the horizon`,
+    brightness: (magnitude: string) => `Brightness approx. ${magnitude} mag`,
+    footnote:
+      "The ISS is only visible at dusk and in the first half of the night: it has to be dark on the ground while the sun still reaches the station. It crosses the sky as a steady bright dot – no blinking. Times and brightness are approximate, so head outside a few minutes early.",
+  },
+
   recipes: {
     title: "Campfire recipe book",
     subtitle:

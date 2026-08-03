@@ -2601,6 +2601,30 @@ export const de = {
         `Beobachtung «${title}» wirklich löschen?`,
     },
   },
+  /** ISS-Überflüge im Astro-Bereich (#222). */
+  iss: {
+    sectionAria: "Sichtbare Überflüge der Raumstation ISS",
+    title: "ISS-Überflüge",
+    subtitle:
+      "Die nächsten sichtbaren Überflüge der Raumstation an deinem Standort.",
+    subtitleAtPlace: (place: string) =>
+      `Die nächsten sichtbaren Überflüge der Raumstation bei ${place}.`,
+    loading: "Überflüge werden berechnet …",
+    noLocation:
+      "Für die Überflüge braucht CampMesser deinen Standort – gib die Ortung frei oder speichere einen Zeltplatz.",
+    loadFailed:
+      "Die Überflüge konnten gerade nicht geladen werden. Versuch es später nochmals.",
+    noneVisible:
+      "In den nächsten vier Tagen ist von hier aus kein Überflug zu sehen. Das wechselt alle paar Wochen – schau später wieder vorbei.",
+    duration: (minutes: number) =>
+      minutes === 1 ? "1 Minute" : `${minutes} Minuten`,
+    path: (path: string) => `Weg über den Himmel: ${path}`,
+    maxElevation: (degrees: number) => `bis ${degrees}° über dem Horizont`,
+    brightness: (magnitude: string) => `Helligkeit ca. ${magnitude} mag`,
+    footnote:
+      "Sichtbar ist die ISS nur in der Dämmerung und in der ersten Nachthälfte: unten muss es dunkel sein, oben muss die Sonne die Station noch treffen. Sie zieht als ruhiger heller Punkt über den Himmel – ohne Blinken. Zeiten und Helligkeit sind Näherungswerte, sei ein paar Minuten früher draussen.",
+  },
+
   recipes: {
     title: "Campfire-Rezeptbuch",
     subtitle:

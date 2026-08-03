@@ -17,6 +17,7 @@ import {
   PawPrint,
   Pencil,
   Plus,
+  Satellite,
   Sparkles,
   Trash2,
   TreePine,
@@ -71,6 +72,7 @@ import {
   showersNearPeak,
   upcomingShowers,
 } from "@shared/astro";
+import { passPathText } from "@shared/iss";
 import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
 import { inSeason } from "@shared/season";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -107,6 +109,14 @@ function fmtDate(d: Date, lang: Language) {
     day: "numeric",
     month: "long",
     year: "numeric",
+  });
+}
+
+/** Uhrzeit in der aktiven Sprache, z. B. «21:34». */
+function fmtTime(d: Date, lang: Language) {
+  return d.toLocaleTimeString(LOCALE_TAGS[lang], {
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -534,6 +544,126 @@ function MeteorCalendar() {
       <p className="mt-3 text-xs text-muted-foreground">
         {t.nature.meteorFootnote}
       </p>
+    </section>
+  );
+}
+
+/**
+ * ISS-Überflüge (#222): die nächsten SICHTBAREN Überflüge der Raumstation
+ * über dem eigenen Standort. Die Bahnrechnung macht der Server (server/iss.ts
+ * mit Zwischenspeicher), die Auswahl der sichtbaren Überflüge shared/iss.ts.
+ * Ort: bevorzugt GPS, sonst der erste gespeicherte Zeltplatz.
+ */
+function IssPasses() {
+  const { lang, t } = useI18n();
+  const { isAuthenticated } = useAuth();
+  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(
+    null
+  );
+  const [placeName, setPlaceName] = useState<string | null>(null);
+  const [locating, setLocating] = useState(true);
+  const spotsQuery = trpc.spots.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  // Standort einmalig bestimmen: GPS zuerst, sonst der erste Zeltplatz.
+  // Ohne beides bleibt der Abschnitt bei seinem Hinweis.
+  const spots = spotsQuery.data;
+  const spotsLoading = isAuthenticated && spotsQuery.isPending;
+  useEffect(() => {
+    if (coords || spotsLoading) return;
+    let cancelled = false;
+    const fallbackToSpot = () => {
+      if (cancelled) return;
+      const spot = spots?.[0];
+      if (spot) {
+        setCoords({ lat: spot.latitude, lon: spot.longitude });
+        setPlaceName(spot.name);
+      }
+      setLocating(false);
+    };
+    if (!navigator.geolocation) {
+      fallbackToSpot();
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        if (cancelled) return;
+        setCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+        setPlaceName(null);
+        setLocating(false);
+      },
+      fallbackToSpot,
+      { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 }
+    );
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spotsLoading, spots]);
+
+  const passesQuery = trpc.iss.passes.useQuery(
+    { latitude: coords?.lat ?? 0, longitude: coords?.lon ?? 0 },
+    { enabled: coords !== null, staleTime: 30 * 60 * 1000 }
+  );
+  const passes = passesQuery.data?.passes ?? [];
+
+  return (
+    <section
+      className="mb-6 rounded-xl border border-border bg-card p-4"
+      aria-label={t.iss.sectionAria}
+    >
+      <div className="mb-1 flex items-center gap-2">
+        <Satellite className="h-4 w-4 text-primary" aria-hidden="true" />
+        <h2 className="font-serif text-lg font-semibold">{t.iss.title}</h2>
+      </div>
+      <p className="mb-3 text-sm text-muted-foreground">
+        {placeName ? t.iss.subtitleAtPlace(placeName) : t.iss.subtitle}
+      </p>
+
+      {locating || (coords !== null && passesQuery.isPending) ? (
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          {t.iss.loading}
+        </p>
+      ) : coords === null ? (
+        <p className="text-sm text-muted-foreground">{t.iss.noLocation}</p>
+      ) : passesQuery.isError ? (
+        <p className="text-sm text-muted-foreground">{t.iss.loadFailed}</p>
+      ) : passes.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          {passesQuery.data?.sourceReachable
+            ? t.iss.noneVisible
+            : t.iss.loadFailed}
+        </p>
+      ) : (
+        <ul className="space-y-3">
+          {passes.map(pass => (
+            <li key={pass.startMs} className="rounded-lg bg-accent/50 p-3">
+              <div className="flex flex-wrap items-baseline gap-x-2">
+                <p className="font-semibold">
+                  {fmtDate(new Date(pass.startMs), lang)}
+                </p>
+                <p className="font-semibold text-primary">
+                  {fmtTime(new Date(pass.startMs), lang)}
+                </p>
+                <span className="ml-auto text-sm text-muted-foreground">
+                  {t.iss.duration(pass.durationMinutes)}
+                </span>
+              </div>
+              <p className="mt-1 text-sm">
+                {t.iss.path(passPathText(pass, lang))}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t.iss.maxElevation(Math.round(pass.maxElevationDeg))} ·{" "}
+                {t.iss.brightness(pass.magnitude.toFixed(1))}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="mt-3 text-xs text-muted-foreground">{t.iss.footnote}</p>
     </section>
   );
 }
@@ -1252,6 +1382,7 @@ export default function NaturePage() {
 
       <MoonCalendar />
       <MeteorCalendar />
+      <IssPasses />
       <SightingsSection onOpenEntry={openLexiconEntry} />
       <RedLightSection
         active={redLight}
