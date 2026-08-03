@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
+  ArrowRight,
+  BarChart3,
   UserRound,
   KeyRound,
   Mail,
@@ -29,7 +31,7 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import {
   browserSupportsWebAuthn,
   startRegistration,
@@ -1035,6 +1037,25 @@ export default function ProfilePage() {
       </Card>
 
       <NotificationsCard />
+
+      {/* Statistik: auf Nutzerwunsch im Profil statt als Startseiten-Kachel */}
+      <Card className="mb-5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <BarChart3 className="h-4 w-4 text-primary" aria-hidden="true" />
+            {t.stats.title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">{t.stats.subtitle}</p>
+          <Button asChild variant="outline" className="shrink-0">
+            <Link href="/statistik">
+              {t.stats.title}
+              <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       <HomeLocationCard />
 

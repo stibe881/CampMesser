@@ -5,7 +5,6 @@
  */
 import { l4, type L4 } from "@shared/i18n";
 import {
-  BarChart3,
   BatteryCharging,
   BookOpen,
   Cable,
@@ -182,18 +181,6 @@ export const modules: Module[] = [
       "Log your stays, count nights and favourite spots"
     ),
     icon: BookOpen,
-    group: "reise",
-  },
-  {
-    path: "/statistik",
-    title: l4("Statistik", "Statistiques", "Statistiche", "Statistics"),
-    description: l4(
-      "Alle Auswertungen an einem Ort: Reisen, Knoten, Arten, Abzeichen",
-      "Toutes les analyses au même endroit : voyages, nœuds, espèces, badges",
-      "Tutte le analisi in un posto: viaggi, nodi, specie, distintivi",
-      "All your figures in one place: trips, knots, species, badges"
-    ),
-    icon: BarChart3,
     group: "reise",
   },
   {
