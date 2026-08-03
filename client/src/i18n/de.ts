@@ -2690,6 +2690,12 @@ export const de = {
     reloadButton: "Aktualisieren",
     dismiss: "Update-Hinweis schliessen",
   },
+  whatsNew: {
+    title: "Was ist neu",
+    startIntro: "Das hat sich seit deinem letzten Besuch getan:",
+    allIntro: "Alle bisherigen Neuerungen im Überblick:",
+    confirm: "Verstanden",
+  },
   shareTarget: {
     title: "Geteilte Fotos",
     subtitle:

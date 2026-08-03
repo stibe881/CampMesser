@@ -2686,6 +2686,12 @@ export const fr: Translation = {
     reloadButton: "Actualiser",
     dismiss: "Fermer l'avis de mise à jour",
   },
+  whatsNew: {
+    title: "Quoi de neuf",
+    startIntro: "Voici ce qui a changé depuis ta dernière visite :",
+    allIntro: "Toutes les nouveautés en un coup d'œil :",
+    confirm: "Compris",
+  },
   shareTarget: {
     title: "Photos partagées",
     subtitle:

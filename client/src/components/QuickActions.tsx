@@ -46,8 +46,11 @@ import { cn } from "@/lib/utils";
  * Rezept-Suche, SOS) – Gäste sehen nur die Aktionen ohne Login-Pflicht.
  */
 
-/** Auf Druck- und Teil-Ansichten bewusst ausblenden (ruhige Leseansichten). */
-function isQuietRoute(path: string): boolean {
+/**
+ * Auf Druck- und Teil-Ansichten bewusst ausblenden (ruhige Leseansichten).
+ * Auch der «Was ist neu»-Start-Dialog nutzt diese Liste.
+ */
+export function isQuietRoute(path: string): boolean {
   return (
     path.includes("/drucken") ||
     path.startsWith("/liste/") ||

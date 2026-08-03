@@ -2664,6 +2664,12 @@ export const it: Translation = {
     reloadButton: "Aggiorna",
     dismiss: "Chiudi l'avviso di aggiornamento",
   },
+  whatsNew: {
+    title: "Novità",
+    startIntro: "Ecco cosa è cambiato dalla tua ultima visita:",
+    allIntro: "Tutte le novità in sintesi:",
+    confirm: "Capito",
+  },
   shareTarget: {
     title: "Foto condivise",
     subtitle:

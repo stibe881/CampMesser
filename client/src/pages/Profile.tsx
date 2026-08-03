@@ -17,6 +17,7 @@ import {
   Search,
   Fingerprint,
   Plus,
+  Sparkles,
 } from "lucide-react";
 import {
   browserSupportsWebAuthn,
@@ -24,6 +25,8 @@ import {
 } from "@simplewebauthn/browser";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
+import { WhatsNewDialog } from "@/components/WhatsNewDialog";
+import { changelog } from "@/data/changelog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -581,6 +584,8 @@ export default function ProfilePage() {
   const [themePref, setThemePref] = useState<ThemePreference | null>(() =>
     getThemePreference()
   );
+  // «Was ist neu»: Dialog mit ALLEN Changelog-Blöcken (unabhängig vom Marker)
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
 
   useEffect(() => {
     if (user?.name) setName(user.name);
@@ -942,8 +947,28 @@ export default function ProfilePage() {
         </Button>
       </div>
 
+      {/* «Was ist neu»: alle bisherigen Neuerungen nachlesen */}
+      <div className="mt-6 text-center">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground"
+          onClick={() => setWhatsNewOpen(true)}
+        >
+          <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          {t.whatsNew.title}
+        </Button>
+      </div>
+      <WhatsNewDialog
+        open={whatsNewOpen}
+        onOpenChange={setWhatsNewOpen}
+        blocks={changelog}
+        intro={t.whatsNew.allIntro}
+      />
+
       {/* Versions-Anzeige: welcher Build läuft gerade? */}
-      <p className="mt-6 text-center text-xs text-muted-foreground/70">
+      <p className="mt-2 text-center text-xs text-muted-foreground/70">
         {t.profile.versionLine(__APP_VERSION__)}
         {__APP_VERSION__ !== "dev" &&
           t.profile.buildDate(

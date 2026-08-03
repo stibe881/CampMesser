@@ -2599,6 +2599,12 @@ export const en: Translation = {
     reloadButton: "Refresh",
     dismiss: "Dismiss update notice",
   },
+  whatsNew: {
+    title: "What's new",
+    startIntro: "Here is what has changed since your last visit:",
+    allIntro: "All improvements at a glance:",
+    confirm: "Got it",
+  },
   shareTarget: {
     title: "Shared photos",
     subtitle:

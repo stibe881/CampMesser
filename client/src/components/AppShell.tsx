@@ -31,6 +31,7 @@ import BrandLogo from "@/components/BrandLogo";
 import InstallPrompt from "@/components/InstallPrompt";
 import UpdatePrompt from "@/components/UpdatePrompt";
 import QuickActions from "@/components/QuickActions";
+import WhatsNewStartup from "@/components/WhatsNewDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -316,6 +317,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* PWA-Update-Hinweis «Neue Version verfügbar» (gleiches Muster) */}
       <UpdatePrompt />
+
+      {/* «Was ist neu» beim Start – zeigt ungesehene Changelog-Blöcke.
+          Nach «Aktualisieren» im UpdatePrompt lädt die Seite neu, dieser
+          Dialog übernimmt dann automatisch die neuen Einträge. */}
+      <WhatsNewStartup />
 
       {/* Schnellaktionen: FAB (mobil) + Befehls-Palette (Cmd/Ctrl+K) */}
       <QuickActions />
