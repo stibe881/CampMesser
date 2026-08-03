@@ -3060,6 +3060,59 @@ export const it: Translation = {
       "Tutto è calcolato offline da luogo e ora; le indicazioni valgono per un orizzonte libero. Le bussole dei telefoni sono precise a 10-15 gradi – tieni il dispositivo piatto in mano, lontano da metallo e calamite.",
   },
 
+  /** Sentieri escursionistici nelle vicinanze (#238). */
+  nearbyHikes: {
+    sectionAria: "Sentieri escursionistici segnalati nei dintorni",
+    title: "Escursioni nei dintorni",
+    subtitle: "Sentieri escursionistici segnalati attorno alla tua posizione.",
+    subtitleAtPlace: (place: string) =>
+      `Sentieri escursionistici segnalati attorno a ${place}.`,
+    radiusLabel: "Raggio",
+    radiusGroupAria: "Scegli il raggio di ricerca",
+    radiusOption: (km: number) => `${km} km`,
+    searchButton: "Cerca sentieri",
+    searchAgain: "Cerca di nuovo",
+    locating: "Posizione in corso di rilevamento …",
+    loading: "Ricerca dei sentieri …",
+    noLocation:
+      "Per la ricerca CampMesser ha bisogno della tua posizione – abilita la localizzazione oppure apri la sezione nel dossier di una piazzola salvata.",
+    loadFailed:
+      "I sentieri non si sono potuti caricare. Overpass è un servizio gratuito che frena in caso di troppe richieste – riprova tra qualche minuto.",
+    empty: (km: number) =>
+      `Entro ${km} km in OpenStreetMap non è registrato nessun itinerario escursionistico segnalato. Prova con un raggio più grande.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 sentiero trovato" : `${n} sentieri trovati`,
+    unnamed: "Itinerario senza nome",
+    routeWithRef: (ref: string) => `Itinerario ${ref}`,
+    distanceLabel: "In linea d'aria",
+    lengthLabel: "Lunghezza",
+    durationLabel: "Tempo di marcia",
+    ascentLabel: "Salita",
+    unknown: "–",
+    network: {
+      iwn: "Itinerario internazionale a lunga percorrenza",
+      nwn: "Itinerario nazionale",
+      rwn: "Itinerario regionale",
+      lwn: "Itinerario locale",
+    },
+    showMap: "Mostra sulla carta",
+    hideMap: "Chiudi la carta",
+    mapAria: (name: string) => `Carta dell'itinerario ${name}`,
+    mapFailed: "La carta non si è potuta caricare.",
+    sectionLength: (value: string, km: number) =>
+      `Entro ${km} km l'itinerario si estende per ${value} – la carta mostra solo questo tratto.`,
+    navButton: "Naviga verso l'accesso",
+    navAria: (name: string) =>
+      `Navigazione verso il punto più vicino dell'itinerario ${name}`,
+    websiteLink: "Sito web dell'itinerario",
+    durationFlatOnly:
+      "Senza dati altimetrici in OpenStreetMap – il tempo di marcia vale per terreno pianeggiante.",
+    durationNote:
+      "Tempo di marcia secondo la regola del CAS: 4 km/h in piano, più 400 metri di dislivello all'ora in salita e 800 in discesa; si conta la parte maggiore più la metà di quella minore. Le pause non sono comprese.",
+    footnote:
+      "Dati di OpenStreetMap tramite l'API Overpass – interrogata solo su tuo clic. Lunghezza, dislivello e difficoltà compaiono solo dove sono curati in OSM, altrimenti «–». La segnaletica sul terreno e lo stato del sentiero possono differire: porta con te carta e bollettino meteo.",
+  },
+
   recipes: {
     title: "Ricettario Campfire",
     subtitle:

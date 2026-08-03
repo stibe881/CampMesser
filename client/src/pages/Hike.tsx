@@ -10,6 +10,10 @@
  *
  * Leaflet wird erst geladen, wenn eine Karte wirklich aufgeht (dynamischer
  * Import wie im Zelt-Finder) – der Chunk dieser Seite bleibt so schlank.
+ *
+ * Zwischen Aufzeichnung und Track-Liste steht «Wandern in der Umgebung»
+ * (#238): dasselbe Bauteil wie im Platz-Dossier, hier ohne Koordinaten – es
+ * holt sich den Standort auf Klick selbst.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -29,6 +33,7 @@ import { toast } from "sonner";
 import type * as Leaflet from "leaflet";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
+import NearbyHikes from "@/components/NearbyHikes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -538,6 +543,9 @@ export default function HikePage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Wanderwege in der Nähe: OSM-Routen rund um den aktuellen Standort */}
+      <NearbyHikes className="mt-6" />
 
       {/* Gespeicherte Wanderungen */}
       <h2 className="mb-3 mt-6 font-serif text-lg font-semibold">

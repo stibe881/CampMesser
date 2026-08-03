@@ -3092,6 +3092,58 @@ export const de = {
       "Gerechnet wird offline aus Ort und Zeit; die Angaben gelten für einen freien Horizont. Handy-Kompasse sind auf 10 bis 15 Grad genau – halte das Gerät flach in der Hand, weg von Metall und Magneten.",
   },
 
+  /** Wanderwege in der Nähe (#238). */
+  nearbyHikes: {
+    sectionAria: "Markierte Wanderwege in der Umgebung",
+    title: "Wandern in der Umgebung",
+    subtitle: "Markierte Wanderwege rund um deinen Standort.",
+    subtitleAtPlace: (place: string) =>
+      `Markierte Wanderwege rund um ${place}.`,
+    radiusLabel: "Umkreis",
+    radiusGroupAria: "Suchradius wählen",
+    radiusOption: (km: number) => `${km} km`,
+    searchButton: "Wege suchen",
+    searchAgain: "Nochmals suchen",
+    locating: "Standort wird bestimmt …",
+    loading: "Wanderwege werden gesucht …",
+    noLocation:
+      "Für die Suche braucht CampMesser deinen Standort – gib die Ortung frei oder öffne den Abschnitt im Dossier eines gespeicherten Platzes.",
+    loadFailed:
+      "Die Wanderwege konnten gerade nicht geladen werden. Overpass ist ein freier Dienst und bremst bei zu vielen Anfragen – versuch es in ein paar Minuten nochmals.",
+    empty: (km: number) =>
+      `Im Umkreis von ${km} km ist in OpenStreetMap keine markierte Wanderroute eingetragen. Versuch es mit einem grösseren Umkreis.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 Wanderweg gefunden" : `${n} Wanderwege gefunden`,
+    unnamed: "Route ohne Namen",
+    routeWithRef: (ref: string) => `Route ${ref}`,
+    distanceLabel: "Luftlinie",
+    lengthLabel: "Länge",
+    durationLabel: "Gehzeit",
+    ascentLabel: "Aufstieg",
+    unknown: "–",
+    network: {
+      iwn: "Internationaler Weitwanderweg",
+      nwn: "Nationale Route",
+      rwn: "Regionale Route",
+      lwn: "Lokale Route",
+    },
+    showMap: "Auf der Karte zeigen",
+    hideMap: "Karte schliessen",
+    mapAria: (name: string) => `Karte des Wegs ${name}`,
+    mapFailed: "Die Karte konnte nicht geladen werden.",
+    sectionLength: (value: string, km: number) =>
+      `Im Umkreis von ${km} km verläuft der Weg ${value} weit – die Karte zeigt nur dieses Stück.`,
+    navButton: "Zum Einstieg navigieren",
+    navAria: (name: string) => `Navigation zum nächsten Punkt des Wegs ${name}`,
+    websiteLink: "Website der Route",
+    durationFlatOnly:
+      "Ohne Höhendaten in OpenStreetMap – die Gehzeit gilt für flaches Gelände.",
+    durationNote:
+      "Gehzeit nach der SAC-Faustregel: 4 km/h in der Ebene, dazu 400 Höhenmeter pro Stunde aufwärts und 800 abwärts; gezählt wird der grössere Anteil plus die Hälfte des kleineren. Pausen sind nicht enthalten.",
+    footnote:
+      "Daten aus OpenStreetMap über die Overpass-API – abgefragt nur auf deinen Klick. Länge, Höhenmeter und Schwierigkeit stehen nur dort, wo sie in OSM gepflegt sind, sonst «–». Markierung im Gelände und Wegzustand können abweichen: nimm Karte und Wetterbericht mit.",
+  },
+
   recipes: {
     title: "Campfire-Rezeptbuch",
     subtitle:

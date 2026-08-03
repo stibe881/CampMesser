@@ -3086,6 +3086,59 @@ export const fr: Translation = {
       "Tout est calculé hors ligne à partir du lieu et de l'heure ; les indications valent pour un horizon dégagé. Les boussoles de téléphone sont précises à 10 à 15 degrés près – tiens l'appareil à plat dans la main, loin du métal et des aimants.",
   },
 
+  /** Sentiers de randonnée à proximité (#238). */
+  nearbyHikes: {
+    sectionAria: "Sentiers de randonnée balisés aux alentours",
+    title: "Randonner aux alentours",
+    subtitle: "Sentiers de randonnée balisés autour de ta position.",
+    subtitleAtPlace: (place: string) =>
+      `Sentiers de randonnée balisés autour de ${place}.`,
+    radiusLabel: "Rayon",
+    radiusGroupAria: "Choisir le rayon de recherche",
+    radiusOption: (km: number) => `${km} km`,
+    searchButton: "Chercher des sentiers",
+    searchAgain: "Chercher à nouveau",
+    locating: "Position en cours de détermination …",
+    loading: "Recherche des sentiers …",
+    noLocation:
+      "Pour la recherche, CampMesser a besoin de ta position – autorise la localisation ou ouvre la section dans le dossier d'un emplacement enregistré.",
+    loadFailed:
+      "Les sentiers n'ont pas pu être chargés. Overpass est un service gratuit qui freine en cas de trop nombreuses requêtes – réessaie dans quelques minutes.",
+    empty: (km: number) =>
+      `Dans un rayon de ${km} km, aucun itinéraire de randonnée balisé n'est enregistré dans OpenStreetMap. Essaie avec un rayon plus grand.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 sentier trouvé" : `${n} sentiers trouvés`,
+    unnamed: "Itinéraire sans nom",
+    routeWithRef: (ref: string) => `Itinéraire ${ref}`,
+    distanceLabel: "À vol d'oiseau",
+    lengthLabel: "Longueur",
+    durationLabel: "Temps de marche",
+    ascentLabel: "Montée",
+    unknown: "–",
+    network: {
+      iwn: "Itinéraire international de grande randonnée",
+      nwn: "Itinéraire national",
+      rwn: "Itinéraire régional",
+      lwn: "Itinéraire local",
+    },
+    showMap: "Afficher sur la carte",
+    hideMap: "Fermer la carte",
+    mapAria: (name: string) => `Carte de l'itinéraire ${name}`,
+    mapFailed: "La carte n'a pas pu être chargée.",
+    sectionLength: (value: string, km: number) =>
+      `Dans un rayon de ${km} km, l'itinéraire s'étend sur ${value} – la carte ne montre que ce tronçon.`,
+    navButton: "Naviguer vers le départ",
+    navAria: (name: string) =>
+      `Navigation vers le point le plus proche de l'itinéraire ${name}`,
+    websiteLink: "Site web de l'itinéraire",
+    durationFlatOnly:
+      "Pas de données d'altitude dans OpenStreetMap – le temps de marche vaut pour un terrain plat.",
+    durationNote:
+      "Temps de marche selon la règle du CAS : 4 km/h à plat, plus 400 mètres de dénivelé par heure à la montée et 800 à la descente ; on compte la plus grande part plus la moitié de la plus petite. Les pauses ne sont pas comprises.",
+    footnote:
+      "Données d'OpenStreetMap via l'API Overpass – interrogée uniquement sur ton clic. Longueur, dénivelé et difficulté n'apparaissent que là où ils sont renseignés dans OSM, sinon « – ». Le balisage sur le terrain et l'état du chemin peuvent différer : emporte carte et bulletin météo.",
+  },
+
   recipes: {
     title: "Livre de recettes Campfire",
     subtitle:

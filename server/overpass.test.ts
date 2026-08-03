@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 // Overpass-Parser liegt im Client-Code, ist aber reine Logik ohne DOM.
 import {
+  boundingBoxAround,
+  hikingRoutesQuery,
+  OVERPASS_HIKING_MAX_RESULTS,
   OVERPASS_MAX_RESULTS,
   overpassQuery,
   parseCampsites,
+  parseHikingRoutes,
 } from "../client/src/lib/overpass";
 
 describe("overpassQuery", () => {
@@ -133,5 +137,192 @@ describe("parseCampsites", () => {
     const result = parseCampsites({ elements });
     expect(result).toHaveLength(OVERPASS_MAX_RESULTS);
     expect(result[99].id).toBe("node/99");
+  });
+});
+
+describe("boundingBoxAround", () => {
+  it("rechnet den Umkreis in eine Box um (Ost-West mit Kosinus gestreckt)", () => {
+    const box = boundingBoxAround(46.8, 8.2, 10000);
+    expect(box.north - 46.8).toBeCloseTo(10000 / 111320, 6);
+    expect(box.south).toBeLessThan(46.8);
+    // Auf 46.8° Breite ist ein Längengrad rund 68 km lang → grössere Spanne
+    expect(box.east - 8.2).toBeGreaterThan(box.north - 46.8);
+    expect(box.east - 8.2).toBeCloseTo(
+      10000 / (111320 * Math.cos((46.8 * Math.PI) / 180)),
+      6
+    );
+  });
+
+  it("bleibt am Pol endlich und klemmt auf gültige Koordinaten", () => {
+    const box = boundingBoxAround(90, 0, 50000);
+    expect(Number.isFinite(box.east)).toBe(true);
+    expect(box.north).toBeLessThanOrEqual(90);
+    expect(
+      boundingBoxAround(-89.999, 179.999, 100000).south
+    ).toBeGreaterThanOrEqual(-90);
+  });
+});
+
+describe("hikingRoutesQuery", () => {
+  it("fragt Wander-Relationen im Umkreis mit zugeschnittener Geometrie ab", () => {
+    const q = hikingRoutesQuery(46.8, 8.2, 10000);
+    expect(q).toContain("[out:json][timeout:25];");
+    expect(q).toContain('relation["type"="route"]["route"~"^(hiking|foot)$"]');
+    expect(q).toContain("(around:10000,46.80000,8.20000)");
+    expect(q).toContain("out geom(");
+    expect(q).toContain(` ${OVERPASS_HIKING_MAX_RESULTS};`);
+  });
+});
+
+describe("parseHikingRoutes", () => {
+  it("liest Tags und Wegführung je Relations-Mitglied", () => {
+    const routes = parseHikingRoutes({
+      elements: [
+        {
+          type: "relation",
+          id: 42,
+          tags: {
+            name: "Panoramaweg",
+            ref: "12",
+            network: "rwn",
+            distance: "8.5",
+            ascent: "420",
+            descent: "420 m",
+            sac_scale: "mountain_hiking",
+            website: "www.beispiel.ch",
+          },
+          members: [
+            {
+              type: "way",
+              geometry: [
+                { lat: 46.5, lon: 7.2 },
+                { lat: 46.51, lon: 7.21 },
+              ],
+            },
+            {
+              type: "way",
+              geometry: [
+                { lat: 46.52, lon: 7.22 },
+                { lat: 46.53, lon: 7.23 },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    expect(routes).toHaveLength(1);
+    expect(routes[0]).toMatchObject({
+      id: "relation/42",
+      name: "Panoramaweg",
+      ref: "12",
+      network: "rwn",
+      distanceM: 8500,
+      ascentM: 420,
+      descentM: 420,
+      sacScale: "T2",
+      website: "https://www.beispiel.ch",
+    });
+    expect(routes[0].segments).toHaveLength(2);
+    expect(routes[0].segments[0][0]).toEqual({ lat: 46.5, lon: 7.2 });
+  });
+
+  it("lässt fehlende Angaben offen, statt sie zu schätzen", () => {
+    const routes = parseHikingRoutes({
+      elements: [
+        {
+          type: "relation",
+          id: 7,
+          tags: { distance: "etwa 5 km", sac_scale: "sehr steil" },
+          members: [
+            {
+              type: "way",
+              geometry: [
+                { lat: 46.5, lon: 7.2 },
+                { lat: 46.51, lon: 7.21 },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    expect(routes[0].name).toBeUndefined();
+    expect(routes[0].distanceM).toBeUndefined();
+    expect(routes[0].ascentM).toBeUndefined();
+    expect(routes[0].sacScale).toBeUndefined();
+  });
+
+  it("überspringt Relationen ohne brauchbare Wegführung und Duplikate", () => {
+    const routes = parseHikingRoutes({
+      elements: [
+        null,
+        "quatsch",
+        { type: "way", id: 1, members: [] },
+        { type: "relation", id: "2" },
+        { type: "relation", id: 3, members: [] },
+        {
+          type: "relation",
+          id: 4,
+          members: [{ type: "way", geometry: [{ lat: 46.5, lon: 7.2 }] }],
+        },
+        {
+          type: "relation",
+          id: 5,
+          members: [
+            {
+              type: "way",
+              geometry: [
+                { lat: 46.5, lon: "x" },
+                { lat: 46.5, lon: 7.2 },
+                { lat: Number.NaN, lon: 7.2 },
+                { lat: 46.51, lon: 7.2 },
+              ],
+            },
+          ],
+        },
+        {
+          type: "relation",
+          id: 5,
+          members: [
+            {
+              type: "way",
+              geometry: [
+                { lat: 47, lon: 8 },
+                { lat: 47.1, lon: 8.1 },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    expect(routes.map(r => r.id)).toEqual(["relation/5"]);
+    expect(routes[0].segments[0]).toHaveLength(2);
+  });
+
+  it("liefert bei unbrauchbarer Antwort eine leere Liste", () => {
+    expect(parseHikingRoutes(null)).toEqual([]);
+    expect(parseHikingRoutes("html-fehlerseite")).toEqual([]);
+    expect(parseHikingRoutes({ elements: "nope" })).toEqual([]);
+  });
+
+  it("begrenzt das Ergebnis hart", () => {
+    const elements = [];
+    for (let i = 0; i < OVERPASS_HIKING_MAX_RESULTS + 12; i++) {
+      elements.push({
+        type: "relation",
+        id: i,
+        members: [
+          {
+            type: "way",
+            geometry: [
+              { lat: 46.5, lon: 7.2 },
+              { lat: 46.51, lon: 7.2 },
+            ],
+          },
+        ],
+      });
+    }
+    expect(parseHikingRoutes({ elements })).toHaveLength(
+      OVERPASS_HIKING_MAX_RESULTS
+    );
   });
 });

@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import PhotoGallery from "@/components/PhotoGallery";
+import NearbyHikes from "@/components/NearbyHikes";
 import TickRiskPanel from "@/components/TickRiskPanel";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
 import { MAX_PHOTOS_PER_SPOT } from "@shared/tripPhotos";
@@ -1073,6 +1074,14 @@ export default function SpotDetailPage() {
         latitude={spot.latitude}
         longitude={spot.longitude}
         elevationM={spot.elevationM}
+        className="mb-4"
+      />
+
+      {/* Wandern in der Umgebung: markierte OSM-Routen rund um den Platz */}
+      <NearbyHikes
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
         className="mb-4"
       />
 

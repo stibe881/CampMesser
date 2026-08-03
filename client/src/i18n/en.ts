@@ -2987,6 +2987,59 @@ export const en: Translation = {
       "Everything is worked out offline from place and time; the figures assume a clear horizon. Phone compasses are accurate to within 10 to 15 degrees – hold the device flat in your hand, away from metal and magnets.",
   },
 
+  /** Hiking routes nearby (#238). */
+  nearbyHikes: {
+    sectionAria: "Waymarked hiking routes in the area",
+    title: "Hiking in the area",
+    subtitle: "Waymarked hiking routes around your location.",
+    subtitleAtPlace: (place: string) =>
+      `Waymarked hiking routes around ${place}.`,
+    radiusLabel: "Radius",
+    radiusGroupAria: "Choose the search radius",
+    radiusOption: (km: number) => `${km} km`,
+    searchButton: "Search routes",
+    searchAgain: "Search again",
+    locating: "Determining location …",
+    loading: "Searching for routes …",
+    noLocation:
+      "For the search CampMesser needs your location – allow positioning or open the section in the dossier of a saved pitch.",
+    loadFailed:
+      "The routes could not be loaded just now. Overpass is a free service that throttles heavy use – try again in a few minutes.",
+    empty: (km: number) =>
+      `Within ${km} km there is no waymarked hiking route in OpenStreetMap. Try a larger radius.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 route found" : `${n} routes found`,
+    unnamed: "Route without a name",
+    routeWithRef: (ref: string) => `Route ${ref}`,
+    distanceLabel: "As the crow flies",
+    lengthLabel: "Length",
+    durationLabel: "Walking time",
+    ascentLabel: "Ascent",
+    unknown: "–",
+    network: {
+      iwn: "International long-distance route",
+      nwn: "National route",
+      rwn: "Regional route",
+      lwn: "Local route",
+    },
+    showMap: "Show on the map",
+    hideMap: "Close the map",
+    mapAria: (name: string) => `Map of the route ${name}`,
+    mapFailed: "The map could not be loaded.",
+    sectionLength: (value: string, km: number) =>
+      `Within ${km} km the route runs for ${value} – the map only shows this section.`,
+    navButton: "Navigate to the access point",
+    navAria: (name: string) =>
+      `Navigation to the nearest point of the route ${name}`,
+    websiteLink: "Website of the route",
+    durationFlatOnly:
+      "No elevation data in OpenStreetMap – the walking time applies to flat terrain.",
+    durationNote:
+      "Walking time follows the SAC rule of thumb: 4 km/h on the flat, plus 400 metres of ascent per hour and 800 of descent; the larger share counts in full, the smaller one by half. Breaks are not included.",
+    footnote:
+      "Data from OpenStreetMap via the Overpass API – queried only when you tap. Length, elevation and difficulty only appear where they are maintained in OSM, otherwise “–”. Waymarking on the ground and the state of the path may differ: take a map and the weather forecast with you.",
+  },
+
   recipes: {
     title: "Campfire recipe book",
     subtitle:

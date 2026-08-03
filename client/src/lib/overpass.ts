@@ -5,7 +5,19 @@
  * Spiegel/Server auch unvollständige Elemente, die wir still überspringen.
  * Reine Logik ohne DOM, damit sie in vitest (server/overpass.test.ts)
  * testbar bleibt.
+ *
+ * Zweiter Nutzer derselben Anbindung: die markierten Wanderrouten rund um
+ * einen Platz (#238, `hikingRoutesQuery`/`parseHikingRoutes`). Gleiches
+ * Muster, gleiche Rücksicht: gefragt wird nur auf ausdrücklichen Klick, nie
+ * automatisch – Overpass ist rate-limitiert.
  */
+import {
+  parseOsmDistanceMeters,
+  parseOsmElevationMeters,
+  parseSacScale,
+  type GeoPoint,
+  type SacGrade,
+} from "@shared/hiking";
 
 export interface OsmCampsite {
   /** Eindeutig über Element-Typen hinweg, z. B. "node/123" oder "way/456". */
@@ -117,6 +129,181 @@ export function parseCampsites(json: unknown): OsmCampsite[] {
       name: cleanTag(tagObj.name),
       website: cleanWebsite(tagObj.website),
       phone: cleanTag(tagObj.phone),
+    });
+  }
+  return result;
+}
+
+/* ------------------------------------------------------------------ */
+/* Wanderwege in der Nähe (#238)                                       */
+/* ------------------------------------------------------------------ */
+
+/** Eine markierte Wanderroute aus OSM (Relation mit route=hiking/foot). */
+export interface OsmHikingRoute {
+  /** Eindeutige Id, z. B. "relation/123". */
+  id: string;
+  name?: string;
+  /** Wegnummer der Route, z. B. "4" für den Alpenpanorama-Weg. */
+  ref?: string;
+  /** Netz-Ebene: iwn/nwn/rwn/lwn (international … lokal). */
+  network?: string;
+  /** Schwierigkeit nach SAC-Skala – nur wenn sac_scale gepflegt ist. */
+  sacScale?: SacGrade;
+  /** Gesamtlänge in Metern aus dem distance-Tag (nicht aus der Geometrie). */
+  distanceM?: number;
+  /** Aufstieg in Metern aus dem ascent-Tag. */
+  ascentM?: number;
+  /** Abstieg in Metern aus dem descent-Tag. */
+  descentM?: number;
+  website?: string;
+  /**
+   * Wegführung im Suchausschnitt, ein Eintrag je Relations-Mitglied. Overpass
+   * schneidet sie auf die Bounding-Box zu (`out geom(bbox)`) – für einen
+   * Weitwanderweg kommt also nur das Stück in der Nähe.
+   */
+  segments: GeoPoint[][];
+}
+
+/** Auswählbare Suchradien rund um den Platz in Metern. */
+export const HIKING_SEARCH_RADII_M = [5000, 10000, 20000];
+
+/** Voreingestellter Suchradius in Metern. */
+export const HIKING_DEFAULT_RADIUS_M = 10000;
+
+/** Höchstzahl der Routen je Abfrage – die Antwort trägt Geometrie mit. */
+export const OVERPASS_HIKING_MAX_RESULTS = 30;
+
+/** Grad pro Meter in Nord-Süd-Richtung (Erdumfang durch 360). */
+const METERS_PER_DEGREE_LAT = 111320;
+
+/**
+ * Umkreis in eine Bounding-Box umrechnen (grob, aber für den Kartenausschnitt
+ * genau genug): Nord-Süd fix, Ost-West mit dem Kosinus der Breite gestreckt.
+ * Nahe den Polen wird der Kosinus geklemmt, damit die Box endlich bleibt.
+ */
+export function boundingBoxAround(
+  lat: number,
+  lon: number,
+  radiusM: number
+): { south: number; west: number; north: number; east: number } {
+  const dLat = radiusM / METERS_PER_DEGREE_LAT;
+  const cos = Math.max(0.01, Math.cos((lat * Math.PI) / 180));
+  const dLon = radiusM / (METERS_PER_DEGREE_LAT * cos);
+  return {
+    south: Math.max(-90, lat - dLat),
+    west: Math.max(-180, lon - dLon),
+    north: Math.min(90, lat + dLat),
+    east: Math.min(180, lon + dLon),
+  };
+}
+
+/**
+ * Overpass-QL für markierte Wanderrouten im Umkreis: Relationen vom Typ
+ * route mit route=hiking oder route=foot. `out geom(bbox)` liefert die
+ * Wegführung bereits auf den Suchausschnitt zugeschnitten – damit bleibt die
+ * Antwort auch bei Weitwanderwegen klein und die Distanz zum Platz lässt sich
+ * ehrlich am Weg messen statt an dessen Mitte.
+ */
+export function hikingRoutesQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  const box = boundingBoxAround(lat, lon, radiusM);
+  const bbox = [box.south, box.west, box.north, box.east]
+    .map(v => v.toFixed(5))
+    .join(",");
+  const around = `${Math.round(radiusM)},${lat.toFixed(5)},${lon.toFixed(5)}`;
+  return (
+    `[out:json][timeout:25];` +
+    `relation["type"="route"]["route"~"^(hiking|foot)$"](around:${around});` +
+    `out geom(${bbox}) ${OVERPASS_HIKING_MAX_RESULTS};`
+  );
+}
+
+/** Punktreihe eines Relations-Mitglieds defensiv lesen (kaputte Punkte raus). */
+function parseGeometry(value: unknown): GeoPoint[] {
+  if (!Array.isArray(value)) return [];
+  const points: GeoPoint[] = [];
+  for (let i = 0; i < value.length; i++) {
+    const raw = value[i];
+    if (typeof raw !== "object" || raw === null) continue;
+    const { lat, lon } = raw as { lat?: unknown; lon?: unknown };
+    if (
+      typeof lat !== "number" ||
+      typeof lon !== "number" ||
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lon)
+    ) {
+      continue;
+    }
+    points.push({ lat, lon });
+  }
+  return points;
+}
+
+/**
+ * Overpass-JSON in Wanderrouten übersetzen. Relationen ohne einen einzigen
+ * brauchbaren Punkt fliegen raus (ohne Wegführung liesse sich weder Distanz
+ * noch Karte zeigen); Duplikate werden entfernt, das Ergebnis hart begrenzt.
+ * Fehlende Tags bleiben `undefined` – die Oberfläche zeigt dann «–», statt zu
+ * schätzen.
+ */
+export function parseHikingRoutes(json: unknown): OsmHikingRoute[] {
+  if (typeof json !== "object" || json === null) return [];
+  const elements = (json as { elements?: unknown }).elements;
+  if (!Array.isArray(elements)) return [];
+
+  const seen = new Set<string>();
+  const result: OsmHikingRoute[] = [];
+  for (let i = 0; i < elements.length; i++) {
+    if (result.length >= OVERPASS_HIKING_MAX_RESULTS) break;
+    const el = elements[i];
+    if (typeof el !== "object" || el === null) continue;
+    const { type, id, members, tags } = el as {
+      type?: unknown;
+      id?: unknown;
+      members?: unknown;
+      tags?: unknown;
+    };
+    if (type !== "relation" || typeof id !== "number") continue;
+
+    const key = `relation/${id}`;
+    if (seen.has(key)) continue;
+
+    const segments: GeoPoint[][] = [];
+    if (Array.isArray(members)) {
+      for (let m = 0; m < members.length; m++) {
+        const member = members[m];
+        if (typeof member !== "object" || member === null) continue;
+        const points = parseGeometry(
+          (member as { geometry?: unknown }).geometry
+        );
+        if (points.length >= 2) segments.push(points);
+      }
+    }
+    if (segments.length === 0) continue;
+    seen.add(key);
+
+    const tagObj =
+      typeof tags === "object" && tags !== null
+        ? (tags as Record<string, unknown>)
+        : {};
+    const distanceM = parseOsmDistanceMeters(tagObj.distance);
+    const ascentM = parseOsmElevationMeters(tagObj.ascent);
+    const descentM = parseOsmElevationMeters(tagObj.descent);
+    const sacScale = parseSacScale(tagObj.sac_scale);
+    result.push({
+      id: key,
+      name: cleanTag(tagObj.name),
+      ref: cleanTag(tagObj.ref),
+      network: cleanTag(tagObj.network),
+      sacScale: sacScale ?? undefined,
+      distanceM: distanceM ?? undefined,
+      ascentM: ascentM ?? undefined,
+      descentM: descentM ?? undefined,
+      website: cleanWebsite(tagObj.website),
+      segments,
     });
   }
   return result;
