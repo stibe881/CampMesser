@@ -2,6 +2,8 @@ import { COOKIE_NAME } from "@shared/const";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import {
+  LOCATION_SHARE_EXPIRY_HOURS,
+  locationShareExpiry,
   SHARE_EXPIRY_DAYS,
   shareExpiryFromDays,
   type ShareExpiryDays,
@@ -4228,6 +4230,97 @@ export const appRouter = router({
         return { success: true } as const;
       }),
   }),
+  /**
+   * «Hier bin ich»-Standort-Link (#221): teilt die eigene Position über einen
+   * öffentlichen Link. Anders als die übrigen Teil-Links läuft dieser IMMER
+   * ab (1/4/24 Stunden, shared/sharing.ts) – ein Standort soll nicht
+   * unbegrenzt offen im Netz liegen. Pro Konto gibt es höchstens einen Link,
+   * damit «Standort aktualisieren» denselben Link nachführt, statt einen
+   * neuen zu erzeugen.
+   */
+  location: router({
+    /** Eigener aktiver Link (null = keiner oder abgelaufen). */
+    current: protectedProcedure.query(async ({ ctx }) => {
+      const share = await db.getLocationShare(ctx.user.id);
+      if (!share) return null;
+      return {
+        token: share.shareToken,
+        latitude: share.latitude,
+        longitude: share.longitude,
+        accuracyM: share.accuracyM,
+        capturedAt: share.capturedAt,
+        expiresAt: share.shareExpiresAt,
+      };
+    }),
+    /**
+     * Standort teilen bzw. nachführen. Ein bestehender Link behält seinen
+     * Token – wer ihn schon verschickt hat, muss nichts Neues schicken.
+     */
+    share: protectedProcedure
+      .input(
+        z.object({
+          latitude: z.number().min(-90).max(90),
+          longitude: z.number().min(-180).max(180),
+          accuracyM: z.number().min(0).max(100000).nullish(),
+          /** Zeitpunkt der Messung in ms seit Epoch; fehlt = jetzt */
+          capturedAt: z.number().int().positive().nullish(),
+          expiresInHours: z
+            .union([
+              z.literal(LOCATION_SHARE_EXPIRY_HOURS[0]),
+              z.literal(LOCATION_SHARE_EXPIRY_HOURS[1]),
+              z.literal(LOCATION_SHARE_EXPIRY_HOURS[2]),
+            ])
+            .optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const now = new Date();
+        // Ein Messzeitpunkt aus der Zukunft (schief gehende Geräte-Uhr)
+        // würde zu «vor -3 Minuten» führen – deshalb auf jetzt deckeln.
+        const captured =
+          input.capturedAt != null && input.capturedAt <= now.getTime()
+            ? new Date(input.capturedAt)
+            : now;
+        const expiresAt = locationShareExpiry(input.expiresInHours, now);
+        const token = await db.upsertLocationShare({
+          userId: ctx.user.id,
+          token: nanoid(16),
+          latitude: input.latitude,
+          longitude: input.longitude,
+          accuracyM:
+            input.accuracyM == null ? null : Math.round(input.accuracyM),
+          capturedAt: captured,
+          expiresAt,
+        });
+        return { token, expiresAt };
+      }),
+    /** Link vorzeitig beenden – er verhält sich danach wie ein unbekannter. */
+    stop: protectedProcedure.mutation(async ({ ctx }) => {
+      await db.deleteLocationShare(ctx.user.id);
+      return { success: true } as const;
+    }),
+    /**
+     * Geteilten Standort öffentlich abrufen (kein Login nötig). Herausgegeben
+     * werden bewusst nur Position, Genauigkeit, Zeitpunkt und der Anzeigename
+     * – nichts aus dem Konto darüber hinaus.
+     */
+    sharedGet: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .query(async ({ input }) => {
+        const share = await db.getLocationShareByToken(input.token);
+        if (!share) return null;
+        const names = await db.getUserDisplayNames([share.userId]);
+        return {
+          name: names.get(share.userId) ?? null,
+          latitude: share.latitude,
+          longitude: share.longitude,
+          accuracyM: share.accuracyM,
+          capturedAt: share.capturedAt,
+          expiresAt: share.shareExpiresAt,
+        };
+      }),
+  }),
+
   /**
    * Aufgezeichnete Wanderungen (#220). Die Punktreihe kommt vom Client (dort
    * wird sie beim Aufzeichnen bereits gefiltert), die STATISTIK rechnet immer

@@ -777,6 +777,7 @@ async function startServer() {
       "/reise/:token",
       "/quiz/:token",
       "/rezept/:token",
+      "/standort/:token",
     ],
     async (req, res, next) => {
       try {

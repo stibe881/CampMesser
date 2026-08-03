@@ -25,6 +25,7 @@ import {
   InsertFoodTemplate,
   InsertHomeLocation,
   InsertInventoryItem,
+  locationShares,
   InsertPackItem,
   InsertPackList,
   InsertPackTemplateCustom,
@@ -2081,6 +2082,86 @@ export async function detachHikeTracksFromTrip(tripId: number) {
     .update(hikeTracks)
     .set({ tripId: null })
     .where(eq(hikeTracks.tripId, tripId));
+}
+
+// ── «Hier bin ich»-Standort-Links (#221) ──
+
+/** Aktiver Standort-Link eines Kontos (undefined = keiner oder abgelaufen). */
+export async function getLocationShare(userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(locationShares)
+    .where(eq(locationShares.userId, userId))
+    .limit(1);
+  const row = rows[0];
+  return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
+}
+
+/**
+ * Standort-Link anlegen oder auffrischen. Es gibt höchstens einen pro Konto:
+ * existiert bereits eine Zeile, behält sie ihren Token – so bleibt ein
+ * bereits verschickter Link gültig, wenn der Standort nachgeführt wird.
+ * Zurück kommt der gültige Token.
+ */
+export async function upsertLocationShare(data: {
+  userId: number;
+  token: string;
+  latitude: number;
+  longitude: number;
+  accuracyM: number | null;
+  capturedAt: Date;
+  expiresAt: Date;
+}): Promise<string> {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(locationShares)
+    .where(eq(locationShares.userId, data.userId))
+    .limit(1);
+  const existing = rows[0];
+  if (existing) {
+    await db
+      .update(locationShares)
+      .set({
+        latitude: data.latitude,
+        longitude: data.longitude,
+        accuracyM: data.accuracyM,
+        capturedAt: data.capturedAt,
+        shareExpiresAt: data.expiresAt,
+      })
+      .where(eq(locationShares.userId, data.userId));
+    return existing.shareToken;
+  }
+  await db.insert(locationShares).values({
+    userId: data.userId,
+    shareToken: data.token,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    accuracyM: data.accuracyM,
+    capturedAt: data.capturedAt,
+    shareExpiresAt: data.expiresAt,
+  });
+  return data.token;
+}
+
+/** Standort-Link vorzeitig beenden – die Zeile verschwindet ganz. */
+export async function deleteLocationShare(userId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(locationShares).where(eq(locationShares.userId, userId));
+}
+
+/** Geteilten Standort anhand des Tokens laden (öffentlich, ohne Login). */
+export async function getLocationShareByToken(token: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(locationShares)
+    .where(eq(locationShares.shareToken, token))
+    .limit(1);
+  const row = rows[0];
+  // Abgelaufene Standort-Links verhalten sich wie unbekannte Tokens
+  return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
 }
 
 // ── Fotos zu Zeltplatz-Favoriten ──

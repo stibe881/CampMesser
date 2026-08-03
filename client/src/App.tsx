@@ -57,6 +57,7 @@ const pageLoaders = {
   SharedPackList: () => import("./pages/SharedPackList"),
   SharedShopping: () => import("./pages/SharedShopping"),
   SharedSpot: () => import("./pages/SharedSpot"),
+  SharedLocation: () => import("./pages/SharedLocation"),
   SharedTemplate: () => import("./pages/SharedTemplate"),
   SharedQuiz: () => import("./pages/SharedQuiz"),
   SharedRecipe: () => import("./pages/SharedRecipe"),
@@ -136,6 +137,7 @@ const ProfilePage = lazyWithRetry(pageLoaders.Profile);
 const SharedPackListPage = lazyWithRetry(pageLoaders.SharedPackList);
 const SharedShoppingPage = lazyWithRetry(pageLoaders.SharedShopping);
 const SharedSpotPage = lazyWithRetry(pageLoaders.SharedSpot);
+const SharedLocationPage = lazyWithRetry(pageLoaders.SharedLocation);
 const SharedTemplatePage = lazyWithRetry(pageLoaders.SharedTemplate);
 const SharedQuizPage = lazyWithRetry(pageLoaders.SharedQuiz);
 const SharedRecipePage = lazyWithRetry(pageLoaders.SharedRecipe);
@@ -218,6 +220,7 @@ function Router() {
             component={SharedShoppingPage}
           />
           <Route path={"/platz/:token"} component={SharedSpotPage} />
+          <Route path={"/standort/:token"} component={SharedLocationPage} />
           <Route path={"/vorlage/:token"} component={SharedTemplatePage} />
           <Route path={"/quiz/:token"} component={SharedQuizPage} />
           <Route path={"/rezept/:token"} component={SharedRecipePage} />

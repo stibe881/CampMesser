@@ -1090,6 +1090,47 @@ export type HikeTrack = typeof hikeTracks.$inferSelect;
 export type InsertHikeTrack = typeof hikeTracks.$inferInsert;
 
 /**
+ * «Hier bin ich»-Standort-Links (#221): höchstens EIN aktiver Link pro Konto
+ * (uniqueIndex auf userId). Dadurch bleibt derselbe Link gültig, während der
+ * Standort nachgeführt wird – Mitreisende müssen nichts Neues öffnen –, und
+ * es kann niemand versehentlich ein Dutzend Links im Umlauf haben.
+ *
+ * `shareExpiresAt` ist hier NOT NULL: ein Standort ist etwas anderes als eine
+ * Packliste und darf nicht unbegrenzt offen liegen (erlaubte Dauern in
+ * shared/sharing.ts: 1, 4 oder 24 Stunden). «Link deaktivieren» löscht die
+ * Zeile, abgelaufene Links verhalten sich wie unbekannte Tokens.
+ *
+ * `capturedAt` ist der Zeitpunkt der MESSUNG (für «Standort von … vor 5
+ * Minuten»), nicht der des Speicherns – die beiden können bei schlechtem
+ * Empfang deutlich auseinanderliegen.
+ */
+export const locationShares = mysqlTable(
+  "locationShares",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    shareToken: varchar("shareToken", { length: 64 }).notNull(),
+    latitude: double("latitude").notNull(),
+    longitude: double("longitude").notNull(),
+    /** Horizontale Genauigkeit in Metern; null = vom Gerät nicht geliefert */
+    accuracyM: int("accuracyM"),
+    /** Zeitpunkt der Messung (Geolocation-Zeitstempel) */
+    capturedAt: timestamp("capturedAt").notNull(),
+    /** Ablauf des Links (UTC) – immer gesetzt, siehe Kommentar oben */
+    shareExpiresAt: timestamp("shareExpiresAt").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    uniqueIndex("locationShares_userId").on(table.userId),
+    uniqueIndex("locationShares_shareToken").on(table.shareToken),
+  ]
+);
+
+export type LocationShare = typeof locationShares.$inferSelect;
+export type InsertLocationShare = typeof locationShares.$inferInsert;
+
+/**
  * Passkeys (WebAuthn): pro Konto beliebig viele Anmelde-Credentials als
  * Alternative zum Passwort. Gespeichert werden die Base64URL-codierte
  * Credential-Id des Authenticators, der öffentliche Schlüssel (COSE) und der

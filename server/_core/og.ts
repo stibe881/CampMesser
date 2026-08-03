@@ -1,7 +1,7 @@
 /**
  * OpenGraph-Vorschau für geteilte Links (/liste/:token, /platz/:token,
  * /vorlage/:token, /einkaufsliste/:token, /reise/:token, /quiz/:token,
- * /rezept/:token).
+ * /rezept/:token, /standort/:token).
  * Messenger und soziale Netzwerke laden das SPA-HTML ohne JavaScript –
  * deshalb injiziert der Server für bekannte Teil-Token OG-Meta-Tags in den
  * <head>, bevor das HTML ausgeliefert wird. Unbekannte Token bekommen das
@@ -79,7 +79,7 @@ export async function ogMetaForShareRequest(
   origin: string
 ): Promise<OgMeta | null> {
   const match =
-    /^\/(liste|platz|vorlage|einkaufsliste|reise|quiz|rezept)\/([^/]+)$/.exec(
+    /^\/(liste|platz|vorlage|einkaufsliste|reise|quiz|rezept|standort)\/([^/]+)$/.exec(
       path
     );
   if (!match) return null;
@@ -153,6 +153,22 @@ export async function ogMetaForShareRequest(
     return {
       title: `${recipe.name} – CampMesser`,
       description: `Geteiltes Campingrezept mit ${countText} · ${recipe.timeMinutes} Min. – zum Nachkochen und Übernehmen.`,
+      url,
+      image,
+    };
+  }
+
+  if (kind === "standort") {
+    const share = await db.getLocationShareByToken(token);
+    if (!share) return null;
+    const names = await db.getUserDisplayNames([share.userId]);
+    const who = names.get(share.userId);
+    // Bewusst OHNE Koordinaten in der Vorschau: die Position steht auf der
+    // Seite, sie muss nicht zusätzlich in jeder Chat-Vorschau auftauchen.
+    return {
+      title: who ? `Standort von ${who} – CampMesser` : "Standort – CampMesser",
+      description:
+        "Geteilter Standort mit Karte, Koordinaten und Navigation – der Link läuft nach kurzer Zeit ab.",
       url,
       image,
     };

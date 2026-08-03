@@ -3,18 +3,30 @@ import {
   Phone,
   MapPin,
   Copy,
+  QrCode,
   RefreshCw,
   ExternalLink,
   Info,
+  Share2,
 } from "lucide-react";
+import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { emergencyCallGuide, emergencyNumbers } from "@/data/emergency";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
+import { trpc } from "@/lib/trpc";
 import { formatDMS, wgs84ToLV95 } from "@/lib/sun";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
+import {
+  DEFAULT_LOCATION_SHARE_HOURS,
+  LOCATION_SHARE_EXPIRY_HOURS,
+  relativeAge,
+  type LocationShareExpiryHours,
+} from "@shared/sharing";
+import { cn } from "@/lib/utils";
 
 interface GeoState {
   status: "loading" | "ok" | "error";
@@ -24,6 +36,285 @@ interface GeoState {
   altitude?: number | null;
   timestamp?: number;
   errorKey?: "unsupported" | "denied" | "failed";
+}
+
+/** Frische Position holen – bewusst ohne gecachten Wert (maximumAge 0). */
+function currentPosition(): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error("geolocation unsupported"));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0,
+    });
+  });
+}
+
+/**
+ * «Hier bin ich» (#221): Teil-Link mit dem eigenen Standort.
+ *
+ * Der Abschnitt sitzt bewusst im SOS-Modul – hier landet man, wenn es
+ * darauf ankommt, den eigenen Standort loszuwerden, und die Koordinaten
+ * stehen gleich darüber. Es gibt IMMER nur einen aktiven Link pro Konto:
+ * «Standort aktualisieren» führt denselben Link nach, statt einen zweiten
+ * zu erzeugen, und «Link deaktivieren» beendet ihn sofort.
+ */
+function LocationShareCard() {
+  const { lang, t } = useI18n();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const utils = trpc.useUtils();
+  const currentQuery = trpc.location.current.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const shareMutation = trpc.location.share.useMutation();
+  const stopMutation = trpc.location.stop.useMutation();
+  const [hours, setHours] = useState<LocationShareExpiryHours>(
+    DEFAULT_LOCATION_SHARE_HOURS
+  );
+  const [busy, setBusy] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+
+  const share = currentQuery.data ?? null;
+  const url = share
+    ? `${window.location.origin}/standort/${share.token}`
+    : null;
+
+  // QR-Code zum Link: am Lagerfeuer abscannen statt Link tippen
+  useEffect(() => {
+    if (!url) {
+      setQrDataUrl(null);
+      return;
+    }
+    QRCode.toDataURL(url, { width: 480, margin: 1, errorCorrectionLevel: "M" })
+      .then(setQrDataUrl)
+      .catch(() => setQrDataUrl(null));
+  }, [url]);
+
+  /**
+   * Standort holen und teilen bzw. nachführen (derselbe Weg für beides).
+   * `hoursOverride` braucht der Gültigkeits-Umschalter: der React-State ist
+   * im selben Klick noch der alte Wert.
+   */
+  const publish = async (
+    isRefresh: boolean,
+    hoursOverride?: LocationShareExpiryHours
+  ) => {
+    setBusy(true);
+    try {
+      const pos = await currentPosition();
+      const result = await shareMutation.mutateAsync({
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+        accuracyM: pos.coords.accuracy ?? null,
+        capturedAt: pos.timestamp,
+        expiresInHours: hoursOverride ?? hours,
+      });
+      await utils.location.current.invalidate();
+      const link = `${window.location.origin}/standort/${result.token}`;
+      if (isRefresh) {
+        toast.success(t.locationShare.refreshed);
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(link);
+        toast.success(t.locationShare.createdCopied);
+      } catch {
+        toast.success(t.locationShare.created);
+      }
+    } catch {
+      toast.error(t.locationShare.failed);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Systemweites Teilen mit Rückfall aufs Kopieren. */
+  const shareLink = async () => {
+    if (!url) return;
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: t.locationShare.shareTitle, url });
+        return;
+      } catch {
+        // Abgebrochen oder nicht erlaubt – dann eben kopieren
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(t.common.linkCopied);
+    } catch {
+      toast.error(t.common.copyFailed);
+    }
+  };
+
+  const expiryChips = (
+    <div
+      className="flex flex-wrap items-center gap-1.5"
+      role="group"
+      aria-label={t.locationShare.validityAria}
+    >
+      <span className="text-xs text-muted-foreground">
+        {t.locationShare.validityLabel}
+      </span>
+      {LOCATION_SHARE_EXPIRY_HOURS.map(option => (
+        <button
+          key={option}
+          type="button"
+          disabled={busy}
+          onClick={() => {
+            setHours(option);
+            // Bei einem aktiven Link wirkt die neue Dauer sofort – sonst
+            // stünde daneben ein Ablauf, der nicht zur Auswahl passt.
+            if (share) void publish(true, option);
+          }}
+          aria-pressed={hours === option}
+          className={cn(
+            "rounded-full px-2.5 py-1 text-xs font-medium transition-colors",
+            hours === option
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground hover:text-foreground"
+          )}
+        >
+          {t.locationShare.validityHours(option)}
+        </button>
+      ))}
+    </div>
+  );
+
+  return (
+    <Card className="mb-6">
+      <CardContent className="pt-6">
+        <h2 className="mb-2 flex items-center gap-2 font-serif text-lg font-semibold">
+          <Share2 className="h-5 w-5 text-primary" aria-hidden="true" />
+          {t.locationShare.title}
+        </h2>
+        <p className="mb-4 text-sm text-muted-foreground">
+          {t.locationShare.desc}
+        </p>
+
+        {!authLoading && !isAuthenticated ? (
+          <p className="text-sm text-muted-foreground">
+            {t.locationShare.loginHint}
+          </p>
+        ) : share && url ? (
+          <div>
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+              <code className="min-w-0 flex-1 truncate text-xs">{url}</code>
+              <button
+                type="button"
+                className="shrink-0 text-xs font-medium text-primary hover:underline"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(url);
+                    toast.success(t.common.linkCopied);
+                  } catch {
+                    toast.error(t.common.copyFailed);
+                  }
+                }}
+              >
+                {t.common.copy}
+              </button>
+            </div>
+
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t.locationShare.updatedAgo(
+                new Intl.RelativeTimeFormat(LOCALE_TAGS[lang], {
+                  numeric: "auto",
+                }).format(
+                  relativeAge(share.capturedAt).value,
+                  relativeAge(share.capturedAt).unit
+                )
+              )}
+              {share.accuracyM !== null &&
+                ` · ${t.locationShare.accuracy(share.accuracyM)}`}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {t.locationShare.expiresAt(
+                new Date(share.expiresAt).toLocaleString(LOCALE_TAGS[lang], {
+                  day: "2-digit",
+                  month: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              )}
+            </p>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button size="sm" onClick={shareLink}>
+                <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {t.locationShare.share}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={busy}
+                onClick={() => void publish(true)}
+              >
+                <RefreshCw className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {busy ? t.locationShare.locating : t.locationShare.refresh}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive"
+                disabled={stopMutation.isPending}
+                onClick={() => {
+                  if (!window.confirm(t.locationShare.stopConfirm)) return;
+                  stopMutation.mutate(undefined, {
+                    onSuccess: async () => {
+                      await utils.location.current.invalidate();
+                      toast.success(t.locationShare.stopped);
+                    },
+                    onError: () => toast.error(t.common.actionFailed),
+                  });
+                }}
+              >
+                {t.locationShare.stop}
+              </Button>
+            </div>
+
+            <div className="mt-3">{expiryChips}</div>
+
+            {qrDataUrl && (
+              <div className="mt-3 flex items-center gap-4 rounded-lg border border-border bg-card p-4">
+                {/* Weisser Rahmen, damit der Code auch im Dark Mode scannbar bleibt */}
+                <div className="shrink-0 rounded-md bg-white p-2 shadow-sm">
+                  <img
+                    src={qrDataUrl}
+                    alt={t.locationShare.qrAlt}
+                    className="h-32 w-32"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="flex items-center gap-1.5 text-sm font-semibold">
+                    <QrCode
+                      className="h-4 w-4 text-primary"
+                      aria-hidden="true"
+                    />
+                    {t.locationShare.qrTitle}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {t.locationShare.qrText}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {expiryChips}
+            <Button disabled={busy} onClick={() => void publish(false)}>
+              <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {busy ? t.locationShare.locating : t.locationShare.createButton}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function SosPage() {
@@ -168,6 +459,9 @@ export default function SosPage() {
             )}
         </CardContent>
       </Card>
+
+      {/* «Hier bin ich»: Standort-Link für Mitreisende */}
+      <LocationShareCard />
 
       {/* Notfallnummern */}
       <h2 className="mb-3 font-serif text-lg font-semibold">

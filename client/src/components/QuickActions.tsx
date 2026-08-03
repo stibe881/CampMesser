@@ -64,6 +64,7 @@ export function isQuietRoute(path: string): boolean {
     path.startsWith("/rezept/") ||
     path.startsWith("/reise/") ||
     path.startsWith("/reise-einladung/") ||
+    path.startsWith("/standort/") ||
     path.startsWith("/teilen")
   );
 }
