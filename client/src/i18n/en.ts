@@ -3939,6 +3939,49 @@ export const en: Translation = {
     markRead: "Mark as read",
     markUnread: "Remove mark",
   },
+  arrival: {
+    title: "How far still to go?",
+    subtitle:
+      "The progress bar for the back seat: how much of the way to the campsite have you covered already?",
+    loginHint:
+      "Sign in so that CampMesser can offer your saved pitches as a destination.",
+    noSpots:
+      "No pitches saved yet – create a pitch first, then you can choose it as your destination.",
+    suggestedFromTrip:
+      "The pitch of your current or next trip is suggested – you can also pick another one.",
+    suggestedWithoutTrip: "Choose the pitch you are heading for.",
+    targetSelectAria: "Choose the destination of the drive",
+    targetPlaceholder: "Choose destination",
+    start: "Off we go",
+    startNote:
+      "Tapping this sets your current location as the starting point. After that CampMesser takes a rough reading once a minute – that goes easy on the battery.",
+    locationFailed:
+      "Your location could not be determined – without a starting point this sadly does not work.",
+    straightLineBadge: "straight line",
+    straightLineNote:
+      "This is calculated as the straight line. The road is longer – over a mountain pass considerably longer.",
+    stop: "End the drive",
+    progressAria: (name: string) => `Progress of the drive to ${name}`,
+    startLabel: "Start",
+    targetLabel: "Destination",
+    percent: (value: number) => `${value}%`,
+    remaining: (distance: string) => `${distance} to go as the crow flies`,
+    ofTotal: (distance: string) => `of ${distance} in total`,
+    arrived: (name: string) => `Arrived – welcome to ${name}!`,
+    encouragement: (next: number) =>
+      next >= 100
+        ? "The last stretch – you are nearly there!"
+        : `Keep going – the ${next} per cent mark is not far off.`,
+    milestoneToast: (percent: number) => `${percent}% done!`,
+    refresh: "Take a reading now",
+    lastFix: (time: string) => `last reading at ${time}`,
+    noFixYet: "no reading yet",
+    geoDenied:
+      "Location access is blocked – allow it in your browser settings, otherwise the bar stands still.",
+    geoUnsupported: "This browser does not support location services.",
+    geoFailed:
+      "Your location could not be determined just now – CampMesser will try again in a minute.",
+  },
   huntPrint: {
     docTitle: (title: string) => `${title} – printable scavenger hunt`,
     docTitleFallback: "Scavenger hunt",

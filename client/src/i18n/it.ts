@@ -4030,6 +4030,49 @@ export const it: Translation = {
     markRead: "Segna come letta",
     markUnread: "Togli il segno",
   },
+  arrival: {
+    title: "Quanto manca?",
+    subtitle:
+      "La barra di avanzamento per il sedile posteriore: quanta strada verso il campeggio avete già fatto?",
+    loginHint:
+      "Accedi, così CampMesser può proporti come meta le piazzole che hai salvato.",
+    noSpots:
+      "Nessuna piazzola salvata finora – crea prima una piazzola, poi potrai sceglierla come meta.",
+    suggestedFromTrip:
+      "Viene proposta la piazzola del tuo viaggio in corso o del prossimo – puoi anche sceglierne un'altra.",
+    suggestedWithoutTrip: "Scegli la piazzola verso cui siete diretti.",
+    targetSelectAria: "Scegli la meta del viaggio",
+    targetPlaceholder: "Scegli la meta",
+    start: "Si parte",
+    startNote:
+      "Toccando il pulsante la tua posizione attuale diventa il punto di partenza. Poi CampMesser misura in modo approssimativo una volta al minuto – così risparmia la batteria.",
+    locationFailed:
+      "Non è stato possibile determinare la posizione – senza punto di partenza purtroppo non funziona.",
+    straightLineBadge: "in linea d'aria",
+    straightLineNote:
+      "Il calcolo è in linea d'aria. La strada è più lunga – su un passo molto più lunga.",
+    stop: "Termina il viaggio",
+    progressAria: (name: string) => `Avanzamento del viaggio verso ${name}`,
+    startLabel: "Partenza",
+    targetLabel: "Meta",
+    percent: (value: number) => `${value} %`,
+    remaining: (distance: string) => `ancora ${distance} in linea d'aria`,
+    ofTotal: (distance: string) => `su ${distance} in totale`,
+    arrived: (name: string) => `Arrivati – benvenuti a ${name}!`,
+    encouragement: (next: number) =>
+      next >= 100
+        ? "L'ultimo pezzo – ci siete quasi!"
+        : `Continuate così – al traguardo del ${next} per cento manca poco.`,
+    milestoneToast: (percent: number) => `${percent} % fatto!`,
+    refresh: "Misura adesso",
+    lastFix: (time: string) => `ultima misura alle ${time}`,
+    noFixYet: "ancora nessuna misura",
+    geoDenied:
+      "La posizione è bloccata – autorizzala nelle impostazioni del browser, altrimenti la barra resta ferma.",
+    geoUnsupported: "Questo browser non conosce la geolocalizzazione.",
+    geoFailed:
+      "Al momento non è stato possibile rilevare la posizione – CampMesser riprova fra un minuto.",
+  },
   huntPrint: {
     docTitle: (title: string) => `${title} – caccia al tesoro da stampare`,
     docTitleFallback: "Caccia al tesoro",

@@ -87,6 +87,7 @@ import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { useSpeech } from "@/lib/speech";
 import TravelBingo from "@/components/TravelBingo";
 import BedtimeStories from "@/components/BedtimeStories";
+import ArrivalProgress from "@/components/ArrivalProgress";
 import { cn } from "@/lib/utils";
 
 /** Buchstabe einer Station in der aktiven Sprache ("" = keiner). */
@@ -2222,10 +2223,13 @@ export default function FamilyPage() {
         )}
       </div>
 
-      {/* Reise-Bingo für die Fahrt – läuft ohne Konto und ohne Empfang */}
+      {/* «Wie weit noch?» – Fortschrittsbalken zur Ankunft für den Rücksitz */}
       <div className="mt-8">
-        <TravelBingo />
+        <ArrivalProgress />
       </div>
+
+      {/* Reise-Bingo für die Fahrt – läuft ohne Konto und ohne Empfang */}
+      <TravelBingo />
 
       {/* Gute-Nacht-Geschichten – zum Vorlesen im Zelt */}
       <BedtimeStories />

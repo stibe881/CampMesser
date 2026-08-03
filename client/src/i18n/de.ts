@@ -4063,6 +4063,49 @@ export const de = {
     markRead: "Als vorgelesen merken",
     markUnread: "Merker entfernen",
   },
+  arrival: {
+    title: "Wie weit noch?",
+    subtitle:
+      "Der Fortschrittsbalken für den Rücksitz: Wie viel der Strecke zum Zeltplatz habt ihr schon geschafft?",
+    loginHint:
+      "Melde dich an, damit CampMesser deine gespeicherten Plätze als Ziel anbieten kann.",
+    noSpots:
+      "Noch keine Plätze gespeichert – leg zuerst einen Zeltplatz an, dann kannst du ihn als Ziel wählen.",
+    suggestedFromTrip:
+      "Vorgeschlagen ist der Platz deiner laufenden bzw. nächsten Reise – du kannst auch einen anderen wählen.",
+    suggestedWithoutTrip: "Wähle den Zeltplatz, zu dem ihr unterwegs seid.",
+    targetSelectAria: "Ziel der Fahrt wählen",
+    targetPlaceholder: "Ziel wählen",
+    start: "Losfahren",
+    startNote:
+      "Beim Tippen wird dein aktueller Standort als Startpunkt gesetzt. Danach misst CampMesser einmal pro Minute grob nach – das schont den Akku.",
+    locationFailed:
+      "Standort konnte nicht ermittelt werden – ohne Startpunkt geht es leider nicht.",
+    straightLineBadge: "Luftlinie",
+    straightLineNote:
+      "Gerechnet wird die Luftlinie. Die Strasse ist länger – über einen Pass deutlich länger.",
+    stop: "Fahrt beenden",
+    progressAria: (name: string) => `Fortschritt der Fahrt nach ${name}`,
+    startLabel: "Start",
+    targetLabel: "Ziel",
+    percent: (value: number) => `${value} %`,
+    remaining: (distance: string) => `noch ${distance} Luftlinie`,
+    ofTotal: (distance: string) => `von ${distance} insgesamt`,
+    arrived: (name: string) => `Angekommen – willkommen in ${name}!`,
+    encouragement: (next: number) =>
+      next >= 100
+        ? "Das letzte Stück – gleich seid ihr da!"
+        : `Weiter so – bis zur ${next}-Prozent-Marke ist es nicht mehr weit.`,
+    milestoneToast: (percent: number) => `${percent} % geschafft!`,
+    refresh: "Jetzt nachmessen",
+    lastFix: (time: string) => `zuletzt um ${time}`,
+    noFixYet: "noch keine Messung",
+    geoDenied:
+      "Der Standort ist gesperrt – erlaube ihn in den Browser-Einstellungen, sonst steht der Balken still.",
+    geoUnsupported: "Dieser Browser kennt keine Standortbestimmung.",
+    geoFailed:
+      "Der Standort war gerade nicht zu ermitteln – CampMesser versucht es in einer Minute wieder.",
+  },
   huntPrint: {
     docTitle: (title: string) => `${title} – Schnitzeljagd zum Ausdrucken`,
     docTitleFallback: "Schnitzeljagd",
