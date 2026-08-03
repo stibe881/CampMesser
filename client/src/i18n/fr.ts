@@ -1833,6 +1833,9 @@ export const fr: Translation = {
     layerTargets: "Cibles",
     layerSightings: "Observations",
     layerCampsites: "Campings (OSM)",
+    layerExcursions: "Excursions",
+    excursionLegend: (n: number) =>
+      n === 1 ? "1 but d'excursion" : `${n} buts d'excursion`,
   },
   spotDetail: {
     fallbackTitle: "Emplacement",
@@ -3177,6 +3180,55 @@ export const fr: Translation = {
     nearestItem: (name: string, distance: string) => `${name} ${distance}`,
     estimateNote:
       "Estimation, pas mesure : il n'existe pas de mesure librement accessible de la luminosité du ciel. CampMesser calcule le classement à partir de la distance aux plus grandes villes et agglomérations. La formule ignore les montagnes qui masquent un halo, un éclairage puissant juste à côté ou l'air humide – sur place, il peut faire plus sombre ou plus clair.",
+  },
+
+  excursions: {
+    sectionAria: "Buts d'excursion à proximité de cet emplacement",
+    title: "Excursions à proximité",
+    subtitle: "Que peux-tu entreprendre dans les environs ?",
+    subtitleAtPlace: (place: string) =>
+      `Que peux-tu entreprendre autour de ${place} ?`,
+    toggleOpen: "Afficher les excursions",
+    toggleClose: "Masquer les excursions",
+    loading: "Chargement des excursions …",
+    loadFailed:
+      "Les excursions n'ont pas pu être chargées. Réessaie plus tard.",
+    empty:
+      "Aucun but avec coordonnées n'est encore enregistré dans ton app Ausflugfinder.",
+    resultCount: (n: number) =>
+      n === 1 ? "1 but à proximité" : `${n} buts à proximité`,
+    kind: "But d'excursion",
+    distanceAway: (value: string) => `${value} à vol d'oiseau`,
+    costFree: "gratuit",
+    costLabel: "Coût",
+    costAria: (level: number) => `Niveau de coût ${level} sur 4`,
+    detailsShow: "Détails",
+    detailsHide: "Fermer les détails",
+    navButton: "Navigation",
+    navAria: (name: string) => `Navigation vers ${name}`,
+    websiteLink: "Site web",
+    mapLink: "Afficher sur la carte",
+    photoAlt: (name: string) => `Photo de ${name}`,
+    addressLabel: "Adresse",
+    niceToKnowLabel: "Bon à savoir",
+    openingHoursLabel: "Heures d'ouverture",
+    parkingLabel: "Parking",
+    parkingFree: "gratuit",
+    parkingPaid: "payant",
+    ageLabel: "Recommandé",
+    babiesOk: "Faisable avec un bébé",
+    lengthLabel: "Longueur",
+    lengthKm: (km: string) => `${km} km`,
+    tourLoop: "Boucle",
+    tourAToB: "D'un point à un autre",
+    seasonsLabel: "Saison",
+    season: {
+      spring: "Printemps",
+      summer: "Été",
+      autumn: "Automne",
+      winter: "Hiver",
+    },
+    source: "Depuis ton app Ausflugfinder",
   },
 
   recipes: {

@@ -1830,6 +1830,9 @@ export const de = {
     layerTargets: "Ziele",
     layerSightings: "Beobachtungen",
     layerCampsites: "Campingplätze (OSM)",
+    layerExcursions: "Ausflüge",
+    excursionLegend: (n: number) =>
+      n === 1 ? "1 Ausflugsziel" : `${n} Ausflugsziele`,
   },
   spotDetail: {
     fallbackTitle: "Zeltplatz",
@@ -3181,6 +3184,60 @@ export const de = {
     nearestItem: (name: string, distance: string) => `${name} ${distance}`,
     estimateNote:
       "Schätzung, keine Messung: Eine frei abrufbare Messung der Himmelshelligkeit gibt es nicht. CampMesser rechnet die Einstufung aus der Distanz zu den grössten Städten und Agglomerationen. Berge, die eine Lichtglocke abschirmen, Flutlicht gleich nebenan oder feuchte Luft kennt die Formel nicht – vor Ort kann es dunkler oder heller sein.",
+  },
+
+  /**
+   * Ausflugfinder-Anbindung (#271): Beschriftungen rund um die Ausflugsziele
+   * aus der eigenen Ausflugfinder-App. Die Inhalte der Ziele selbst (Name,
+   * Beschreibung, Kategorien) sind Nutzerdaten und bleiben Deutsch.
+   */
+  excursions: {
+    sectionAria: "Ausflugsziele in der Nähe dieses Platzes",
+    title: "Ausflüge in der Nähe",
+    subtitle: "Was kannst du in der Umgebung unternehmen?",
+    subtitleAtPlace: (place: string) =>
+      `Was kannst du rund um ${place} unternehmen?`,
+    toggleOpen: "Ausflüge anzeigen",
+    toggleClose: "Ausflüge ausblenden",
+    loading: "Ausflüge werden geladen …",
+    loadFailed:
+      "Die Ausflüge konnten gerade nicht geladen werden. Versuch es später nochmals.",
+    empty:
+      "In deiner Ausflugfinder-App ist noch kein Ziel mit Koordinaten erfasst.",
+    resultCount: (n: number) =>
+      n === 1 ? "1 Ziel in der Nähe" : `${n} Ziele in der Nähe`,
+    kind: "Ausflugsziel",
+    distanceAway: (value: string) => `${value} Luftlinie`,
+    costFree: "gratis",
+    costLabel: "Kosten",
+    costAria: (level: number) => `Kostenstufe ${level} von 4`,
+    detailsShow: "Details",
+    detailsHide: "Details schliessen",
+    navButton: "Navigation",
+    navAria: (name: string) => `Navigation zu ${name}`,
+    websiteLink: "Website",
+    mapLink: "Auf der Karte zeigen",
+    photoAlt: (name: string) => `Bild von ${name}`,
+    addressLabel: "Adresse",
+    niceToKnowLabel: "Gut zu wissen",
+    openingHoursLabel: "Öffnungszeiten",
+    parkingLabel: "Parkplatz",
+    parkingFree: "gratis",
+    parkingPaid: "kostenpflichtig",
+    ageLabel: "Empfohlen",
+    babiesOk: "Mit Baby machbar",
+    lengthLabel: "Länge",
+    lengthKm: (km: string) => `${km} km`,
+    tourLoop: "Rundtour",
+    tourAToB: "Von A nach B",
+    seasonsLabel: "Saison",
+    season: {
+      spring: "Frühling",
+      summer: "Sommer",
+      autumn: "Herbst",
+      winter: "Winter",
+    },
+    source: "Aus deiner Ausflugfinder-App",
   },
 
   recipes: {

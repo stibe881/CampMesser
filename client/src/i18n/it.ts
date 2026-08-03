@@ -1809,6 +1809,9 @@ export const it: Translation = {
     layerTargets: "Mete",
     layerSightings: "Osservazioni",
     layerCampsites: "Campeggi (OSM)",
+    layerExcursions: "Gite",
+    excursionLegend: (n: number) =>
+      n === 1 ? "1 meta per una gita" : `${n} mete per una gita`,
   },
   spotDetail: {
     fallbackTitle: "Piazzola",
@@ -3150,6 +3153,54 @@ export const it: Translation = {
     nearestItem: (name: string, distance: string) => `${name} ${distance}`,
     estimateNote:
       "Stima, non misura: non esiste una misura liberamente accessibile della luminosità del cielo. CampMesser calcola la classificazione dalla distanza dalle maggiori città e agglomerazioni. La formula non conosce le montagne che schermano un alone, i fari proprio accanto o l'aria umida – sul posto può essere più buio o più chiaro.",
+  },
+
+  excursions: {
+    sectionAria: "Mete per una gita vicino a questa piazzola",
+    title: "Gite nei dintorni",
+    subtitle: "Che cosa puoi fare nei dintorni?",
+    subtitleAtPlace: (place: string) =>
+      `Che cosa puoi fare attorno a ${place}?`,
+    toggleOpen: "Mostra le gite",
+    toggleClose: "Nascondi le gite",
+    loading: "Caricamento delle gite …",
+    loadFailed: "Le gite non si sono potute caricare. Riprova più tardi.",
+    empty:
+      "Nella tua app Ausflugfinder non è ancora registrata nessuna meta con coordinate.",
+    resultCount: (n: number) =>
+      n === 1 ? "1 meta nei dintorni" : `${n} mete nei dintorni`,
+    kind: "Meta per una gita",
+    distanceAway: (value: string) => `${value} in linea d'aria`,
+    costFree: "gratis",
+    costLabel: "Costo",
+    costAria: (level: number) => `Livello di costo ${level} su 4`,
+    detailsShow: "Dettagli",
+    detailsHide: "Chiudi i dettagli",
+    navButton: "Navigazione",
+    navAria: (name: string) => `Navigazione verso ${name}`,
+    websiteLink: "Sito web",
+    mapLink: "Mostra sulla mappa",
+    photoAlt: (name: string) => `Immagine di ${name}`,
+    addressLabel: "Indirizzo",
+    niceToKnowLabel: "Buono a sapersi",
+    openingHoursLabel: "Orari di apertura",
+    parkingLabel: "Parcheggio",
+    parkingFree: "gratuito",
+    parkingPaid: "a pagamento",
+    ageLabel: "Consigliato",
+    babiesOk: "Fattibile con un bebè",
+    lengthLabel: "Lunghezza",
+    lengthKm: (km: string) => `${km} km`,
+    tourLoop: "Percorso ad anello",
+    tourAToB: "Da A a B",
+    seasonsLabel: "Stagione",
+    season: {
+      spring: "Primavera",
+      summer: "Estate",
+      autumn: "Autunno",
+      winter: "Inverno",
+    },
+    source: "Dalla tua app Ausflugfinder",
   },
 
   recipes: {

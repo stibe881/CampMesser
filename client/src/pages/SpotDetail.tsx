@@ -44,6 +44,7 @@ import LoginPrompt from "@/components/LoginPrompt";
 import PhotoGallery from "@/components/PhotoGallery";
 import DarkSkyPanel from "@/components/DarkSkyPanel";
 import NearbyHikes from "@/components/NearbyHikes";
+import NearbyExcursions from "@/components/NearbyExcursions";
 import TickRiskPanel from "@/components/TickRiskPanel";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
 import { MAX_PHOTOS_PER_SPOT } from "@shared/tripPhotos";
@@ -1089,6 +1090,15 @@ export default function SpotDetailPage() {
 
       {/* Wandern in der Umgebung: markierte OSM-Routen rund um den Platz */}
       <NearbyHikes
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mb-4"
+      />
+
+      {/* Ausflüge in der Nähe aus der eigenen Ausflugfinder-App (#271) –
+          lädt erst beim Aufklappen, damit das Dossier nicht darauf wartet */}
+      <NearbyExcursions
         latitude={spot.latitude}
         longitude={spot.longitude}
         placeName={spot.name}

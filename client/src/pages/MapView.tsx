@@ -36,15 +36,26 @@
  * aufgebaut – bei < 500 Pins unkritisch); reines Verschieben ändert die
  * Pixel-Abstände nicht und braucht deshalb keinen Neuaufbau.
  *
- * Ebenen-Filter: Checkbox-Chips blenden die vier Pin-Ebenen (Favoriten,
- * Ziele, Beobachtungen, OSM-Funde) einzeln aus. Die Wahl liegt in
+ * Ebenen-Filter: Checkbox-Chips blenden die Pin-Ebenen (Favoriten, Ziele,
+ * Beobachtungen, OSM-Funde, Ausflüge) einzeln aus. Die Wahl liegt in
  * localStorage (campmesser.mapLayers), Standard alle an; der Filter greift
  * vor dem Clustern, die Legende zeigt nur eingeblendete Ebenen.
+ *
+ * Ebene «Ausflüge» (#271): die Ausflugsziele aus der eigenen
+ * Ausflugfinder-App, geholt über den tRPC-Router `excursions` (serverseitig,
+ * mit Zwischenspeicher – der Zugriffsschlüssel bleibt auf dem Server). Ist
+ * die Anbindung nicht eingerichtet, gibt es die Ebene gar nicht: kein Chip,
+ * keine Pins, keine Fehlermeldung. Das Popup zeigt Titelbild, Name,
+ * Kategorien, Kostenstufe und Region, dazu «Details» (Beschreibung,
+ * Hinweise, Öffnungszeiten, Website) und die Anreise-Navigation. Der Aufruf
+ * `/karte?ausflug=<id>` aus dem Platz-Dossier fährt den Pin an und öffnet
+ * sein Popup.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import {
   Compass,
+  FerrisWheel,
   LocateFixed,
   Ruler,
   Map as MapIcon,
@@ -106,6 +117,7 @@ import { cn } from "@/lib/utils";
 import { useI18n, useT } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { distanceMeters } from "@shared/geo";
+import { costLevelSymbols, type Excursion } from "@shared/excursions";
 import { tripNights } from "@shared/trips";
 
 interface SpotPin {
@@ -170,14 +182,28 @@ const sightingIcon = L.divIcon({
   popupAnchor: [0, -16],
 });
 
+/**
+ * Ausflugsziel aus der Ausflugfinder-App (#271): dunkelroter Kreis mit
+ * Riesenrad-Stern – fünfte Farbe, klar unterscheidbar von Plätzen (grün),
+ * Zielen (bernstein), Beobachtungen (violett) und OSM-Funden (blau).
+ */
+const excursionIcon = L.divIcon({
+  className: "",
+  html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#be123c" stroke="#ffffff" stroke-width="2.5"/><circle cx="14" cy="14" r="5.4" fill="none" stroke="#ffffff" stroke-width="1.6"/><path d="M14 6.6v3M14 18.4v3M6.6 14h3M18.4 14h3M9 9l2.1 2.1M16.9 16.9 19 19M19 9l-2.1 2.1M11.1 16.9 9 19" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -16],
+});
+
 /** Pin-Typen für die Cluster-Färbung (Farben wie die jeweiligen Einzel-Icons). */
-type PinKind = "spot" | "target" | "sighting" | "campsite";
+type PinKind = "spot" | "target" | "sighting" | "campsite" | "excursion";
 
 const PIN_COLORS: Record<PinKind, string> = {
   spot: "#2f6b4f",
   target: "#b45309",
   sighting: "#7c3aed",
   campsite: "#0369a1",
+  excursion: "#be123c",
 };
 
 /** Neutrales Grau, wenn kein Pin-Typ im Cluster klar dominiert. */
@@ -226,11 +252,19 @@ function SpotsMap({
   spots,
   targets,
   sightings,
+  excursions,
+  excursionsAvailable,
+  focusExcursionId,
   nightsBySpotId,
 }: {
   spots: SpotPin[];
   targets: TentFinderTarget[];
   sightings: SightingPin[];
+  excursions: Excursion[];
+  /** Ist die Ausflugfinder-Anbindung eingerichtet? Sonst gibt es die Ebene nicht. */
+  excursionsAvailable: boolean;
+  /** Ausflug, den das Platz-Dossier verlinkt hat (`/karte?ausflug=…`). */
+  focusExcursionId: string | null;
   nightsBySpotId: Map<number, number>;
 }) {
   const { lang, t } = useI18n();
@@ -241,6 +275,10 @@ function SpotsMap({
   const baseLayerRef = useRef<L.TileLayer | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
   const didFitRef = useRef(false);
+  // Aus dem Platz-Dossier angesteuerter Ausflug: einmal anfahren, dann öffnet
+  // der Marker-Aufbau sein Popup. Die Ref merkt sich die bereits erledigte Id,
+  // damit ein späteres Neu-Gruppieren nicht wieder hinspringt.
+  const didFocusRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const popupJustClosedRef = useRef(0);
   // «Mein Standort»: blauer Punkt + Genauigkeitskreis, bei jedem Klick ersetzt
@@ -415,6 +453,21 @@ function SpotsMap({
     };
   }, [discoverOn]);
 
+  // Verlinkter Ausflug: hinfahren, sobald die Ziele geladen sind. Der
+  // Zoom-Wechsel gruppiert neu, danach steht der Pin einzeln da und der
+  // Marker-Aufbau unten öffnet sein Popup.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !focusExcursionId || didFocusRef.current === focusExcursionId) {
+      return;
+    }
+    const target = excursions.find(e => e.id === focusExcursionId);
+    if (!target) return;
+    // Der erste Einpass-Vorgang darf den Ausschnitt nicht wieder wegziehen
+    didFitRef.current = true;
+    map.setView([target.latitude, target.longitude], 14);
+  }, [excursions, focusExcursionId]);
+
   // Bereits übernommene OSM-Plätze nicht doppelt zeigen – dort steht nach dem
   // Refetch der grüne Favoriten-Pin.
   const visibleCampsites = useMemo(
@@ -579,6 +632,117 @@ function SpotsMap({
       return marker;
     };
 
+    // Ausflugsziele aus der Ausflugfinder-App als eigene (dunkelrote) Pins.
+    // Das Popup zeigt Titelbild, Name, Kategorien, Kostenstufe und Region;
+    // «Details» klappt Beschreibung, Hinweise, Öffnungszeiten und Website auf.
+    // Alles per DOM aufgebaut – die Inhalte sind Nutzertexte (kein innerHTML).
+    const createExcursionMarker = (excursion: Excursion): L.Marker => {
+      const marker = L.marker([excursion.latitude, excursion.longitude], {
+        icon: excursionIcon,
+        alt: excursion.name,
+      });
+      const te = t.excursions;
+      const popup = document.createElement("div");
+      popup.className = "space-y-1";
+      popup.style.maxWidth = "230px";
+
+      if (excursion.photoUrl) {
+        const image = document.createElement("img");
+        image.src = excursion.photoUrl;
+        image.alt = te.photoAlt(excursion.name);
+        image.loading = "lazy";
+        image.className = "mb-1 h-24 w-full rounded-md object-cover";
+        popup.appendChild(image);
+      }
+
+      const name = document.createElement("p");
+      name.className = "font-semibold";
+      name.textContent = excursion.name;
+      popup.appendChild(name);
+
+      const facts = [
+        excursion.categories.join(" · ") || null,
+        excursion.region,
+      ].filter((value): value is string => Boolean(value));
+      if (facts.length > 0) {
+        const meta = document.createElement("p");
+        meta.className = "text-xs";
+        meta.textContent = facts.join(" · ");
+        popup.appendChild(meta);
+      }
+
+      const symbols = costLevelSymbols(excursion.costLevel);
+      if (symbols !== null) {
+        const cost = document.createElement("p");
+        cost.className = "text-xs";
+        cost.textContent = `${te.costLabel}: ${
+          symbols === "" ? te.costFree : symbols
+        }`;
+        popup.appendChild(cost);
+      }
+
+      // Details bleiben eingeklappt, damit das Popup klein bleibt
+      const details = document.createElement("div");
+      details.className = "mt-1 space-y-1 text-xs";
+      details.hidden = true;
+      const addDetail = (label: string | null, value: string): void => {
+        const line = document.createElement("p");
+        line.textContent = label ? `${label}: ${value}` : value;
+        details.appendChild(line);
+      };
+      if (excursion.description) addDetail(null, excursion.description);
+      if (excursion.niceToKnow) {
+        addDetail(te.niceToKnowLabel, excursion.niceToKnow);
+      }
+      if (excursion.openingHours) {
+        addDetail(te.openingHoursLabel, excursion.openingHours);
+      }
+      if (excursion.websiteUrl) {
+        const site = document.createElement("a");
+        site.href = excursion.websiteUrl;
+        site.target = "_blank";
+        site.rel = "noopener noreferrer";
+        site.textContent = te.websiteLink;
+        site.className = "block font-medium underline";
+        details.appendChild(site);
+      }
+
+      const hasDetails = details.childElementCount > 0;
+      if (hasDetails) {
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.textContent = te.detailsShow;
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.className = "block text-sm font-medium underline";
+        toggle.addEventListener("click", () => {
+          details.hidden = !details.hidden;
+          toggle.textContent = details.hidden ? te.detailsShow : te.detailsHide;
+          toggle.setAttribute("aria-expanded", String(!details.hidden));
+          // Leaflet rechnet die Popup-Grösse nur auf Zuruf neu
+          marker.getPopup()?.update();
+        });
+        popup.appendChild(toggle);
+        popup.appendChild(details);
+      }
+
+      const route = document.createElement("a");
+      route.href = directionsUrl(excursion.latitude, excursion.longitude);
+      route.target = "_blank";
+      route.rel = "noopener noreferrer";
+      route.textContent = te.navButton;
+      route.setAttribute("aria-label", te.navAria(excursion.name));
+      route.className = "block text-sm font-medium underline";
+      popup.appendChild(route);
+
+      const source = document.createElement("p");
+      source.className = "text-xs text-muted-foreground";
+      source.textContent = te.source;
+      popup.appendChild(source);
+
+      marker.bindPopup(popup);
+      return marker;
+    };
+
     // Alle sichtbaren Pins einsammeln und pro Zoomstufe gruppieren.
     // `map.project` liefert absolute Pixel-Koordinaten der Zoomstufe –
     // unabhängig vom Ausschnitt, deshalb genügt der Neuaufbau nach Zoom.
@@ -587,6 +751,8 @@ function SpotsMap({
       lon: number;
       kind: PinKind;
       createMarker: () => L.Marker;
+      /** Nur bei Ausflügen gesetzt – für den Sprung aus dem Platz-Dossier. */
+      excursionId?: string;
     }
     // Ebenen-Filter greift vor dem Clustern: ausgeblendete Pins zählen nicht mit
     const pins: MapPin[] = [
@@ -622,6 +788,15 @@ function SpotsMap({
             createMarker: () => createCampsiteMarker(site),
           }))
         : []),
+      ...(layerVisibility.excursions
+        ? excursions.map<MapPin>(excursion => ({
+            lat: excursion.latitude,
+            lon: excursion.longitude,
+            kind: "excursion" as const,
+            createMarker: () => createExcursionMarker(excursion),
+            excursionId: excursion.id,
+          }))
+        : []),
     ];
 
     const clusters = clusterPoints(
@@ -632,7 +807,17 @@ function SpotsMap({
 
     clusters.forEach(cluster => {
       if (cluster.points.length === 1) {
-        cluster.points[0].createMarker().addTo(layer);
+        const single = cluster.points[0];
+        const marker = single.createMarker().addTo(layer);
+        // Aus dem Dossier verlinkter Ausflug: sein Popup gleich aufmachen
+        if (
+          single.excursionId &&
+          single.excursionId === focusExcursionId &&
+          didFocusRef.current !== focusExcursionId
+        ) {
+          didFocusRef.current = focusExcursionId;
+          marker.openPopup();
+        }
         return;
       }
       const label = t.mapView.clusterAria(cluster.points.length);
@@ -679,6 +864,8 @@ function SpotsMap({
     targets,
     sightings,
     visibleCampsites,
+    excursions,
+    focusExcursionId,
     nightsBySpotId,
     clusterZoom,
     layerVisibility,
@@ -954,6 +1141,21 @@ function SpotsMap({
                 />
               ),
             },
+            // Die Ausflugs-Ebene erscheint nur, wenn die Anbindung eingerichtet ist
+            ...(excursionsAvailable
+              ? ([
+                  {
+                    key: "excursions",
+                    label: t.mapView.layerExcursions,
+                    icon: (
+                      <FerrisWheel
+                        className="h-3.5 w-3.5 text-rose-700 dark:text-rose-400"
+                        aria-hidden="true"
+                      />
+                    ),
+                  },
+                ] as const)
+              : []),
           ] as const
         ).map(({ key, label, icon }) => (
           <button
@@ -1029,6 +1231,15 @@ function SpotsMap({
               {t.mapView.discoverLegend(visibleCampsites.length)}
             </span>
           )}
+        {layerVisibility.excursions && excursions.length > 0 && (
+          <span className="flex items-center gap-1.5">
+            <FerrisWheel
+              className="h-3.5 w-3.5 text-rose-700 dark:text-rose-400"
+              aria-hidden="true"
+            />
+            {t.mapView.excursionLegend(excursions.length)}
+          </span>
+        )}
       </div>
 
       <Dialog
@@ -1099,6 +1310,30 @@ export default function MapViewPage() {
   const { data: sightingsData } = trpc.sightings.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+
+  // Ausflugfinder-Anbindung (#271): zuerst die billige Frage, ob das Feature
+  // überhaupt eingerichtet ist (fasst die Quelle nicht an) – erst wenn ja,
+  // werden die Ziele geholt. Der Abruf ist serverseitig zwischengespeichert
+  // und liefert die ganze (kleine) Sammlung auf einmal.
+  const { data: excursionStatus } = trpc.excursions.status.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const excursionsAvailable = excursionStatus?.configured === true;
+  const { data: excursionData } = trpc.excursions.list.useQuery(undefined, {
+    enabled: isAuthenticated && excursionsAvailable,
+    staleTime: 10 * 60 * 1000,
+  });
+  const excursions = useMemo<Excursion[]>(
+    () => excursionData?.excursions ?? [],
+    [excursionData]
+  );
+
+  // Aus dem Platz-Dossier verlinktes Ziel: /karte?ausflug=<id>
+  const search = useSearch();
+  const focusExcursionId = useMemo(
+    () => new URLSearchParams(search).get("ausflug"),
+    [search]
+  );
 
   // Zelt-Finder-Ziele wie im Zelt-Finder laden (inkl. einmaliger Migration des Alt-Ziels)
   const [targets, setTargets] = useState<TentFinderTarget[]>(() => {
@@ -1217,6 +1452,9 @@ export default function MapViewPage() {
             spots={spotPins}
             targets={targets}
             sightings={sightingPins}
+            excursions={excursions}
+            excursionsAvailable={excursionsAvailable}
+            focusExcursionId={focusExcursionId}
             nightsBySpotId={nightsBySpotId}
           />
         </>

@@ -4679,6 +4679,38 @@ export const appRouter = router({
   }),
 
   /**
+   * Ausflugfinder-Anbindung (#271): die Ausflugsziele aus der Supabase-
+   * Datenbank der eigenen Ausflugfinder-App. Der Abruf läuft ausschliesslich
+   * serverseitig (server/excursions.ts, mit Zwischenspeicher) – der
+   * Zugriffsschlüssel steht in der `.env` und nie im Browser-Bundle.
+   *
+   * Bewusst angemeldet-only: Es sind die eigenen Daten aus der zweiten App;
+   * CampMesser soll dafür kein offener Weiterleiter werden. Ist die
+   * Anbindung nicht eingerichtet, kommt `configured: false` und die
+   * Oberfläche blendet den Bereich aus – kein Fehlerzustand.
+   */
+  excursions: router({
+    /**
+     * Nur die Frage «gibt es das Feature hier überhaupt?» – ohne die Quelle
+     * anzufassen. Damit können Karte und Dossier den Bereich ausblenden,
+     * ohne auf Supabase zu warten.
+     */
+    status: protectedProcedure.query(async () => {
+      const { isExcursionsConfigured } = await import("./excursions");
+      return { configured: isExcursionsConfigured() };
+    }),
+    /** Alle Ausflugsziele – ohne Filter auf `status`, ausdrücklich alle. */
+    list: protectedProcedure.query(async () => {
+      const { fetchExcursions, isExcursionsConfigured } =
+        await import("./excursions");
+      if (!isExcursionsConfigured()) {
+        return { configured: false as const, excursions: [] };
+      }
+      return { configured: true as const, excursions: await fetchExcursions() };
+    }),
+  }),
+
+  /**
    * Aufgezeichnete Wanderungen (#220). Die Punktreihe kommt vom Client (dort
    * wird sie beim Aufzeichnen bereits gefiltert), die STATISTIK rechnet immer
    * der Server mit `trackStats()` – so steht in der Datenbank nie eine Zahl,

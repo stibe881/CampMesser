@@ -1774,6 +1774,9 @@ export const en: Translation = {
     layerTargets: "Targets",
     layerSightings: "Sightings",
     layerCampsites: "Campsites (OSM)",
+    layerExcursions: "Excursions",
+    excursionLegend: (n: number) =>
+      n === 1 ? "1 excursion destination" : `${n} excursion destinations`,
   },
   spotDetail: {
     fallbackTitle: "Pitch",
@@ -3075,6 +3078,53 @@ export const en: Translation = {
     nearestItem: (name: string, distance: string) => `${name} ${distance}`,
     estimateNote:
       "An estimate, not a measurement: there is no freely available measurement of sky brightness. CampMesser works the classification out from the distance to the largest towns and urban areas. The formula knows nothing of mountains that block a light dome, floodlights next door or humid air – on the ground it may be darker or brighter.",
+  },
+
+  excursions: {
+    sectionAria: "Excursion destinations near this pitch",
+    title: "Excursions nearby",
+    subtitle: "What is there to do in the area?",
+    subtitleAtPlace: (place: string) => `What is there to do around ${place}?`,
+    toggleOpen: "Show excursions",
+    toggleClose: "Hide excursions",
+    loading: "Loading excursions …",
+    loadFailed: "The excursions could not be loaded. Please try again later.",
+    empty:
+      "No destination with coordinates has been recorded in your Ausflugfinder app yet.",
+    resultCount: (n: number) =>
+      n === 1 ? "1 destination nearby" : `${n} destinations nearby`,
+    kind: "Excursion destination",
+    distanceAway: (value: string) => `${value} as the crow flies`,
+    costFree: "free",
+    costLabel: "Cost",
+    costAria: (level: number) => `Cost level ${level} of 4`,
+    detailsShow: "Details",
+    detailsHide: "Close details",
+    navButton: "Navigation",
+    navAria: (name: string) => `Navigate to ${name}`,
+    websiteLink: "Website",
+    mapLink: "Show on the map",
+    photoAlt: (name: string) => `Photo of ${name}`,
+    addressLabel: "Address",
+    niceToKnowLabel: "Good to know",
+    openingHoursLabel: "Opening hours",
+    parkingLabel: "Parking",
+    parkingFree: "free",
+    parkingPaid: "chargeable",
+    ageLabel: "Recommended",
+    babiesOk: "Doable with a baby",
+    lengthLabel: "Length",
+    lengthKm: (km: string) => `${km} km`,
+    tourLoop: "Circular route",
+    tourAToB: "Point to point",
+    seasonsLabel: "Season",
+    season: {
+      spring: "Spring",
+      summer: "Summer",
+      autumn: "Autumn",
+      winter: "Winter",
+    },
+    source: "From your Ausflugfinder app",
   },
 
   recipes: {

@@ -47,6 +47,8 @@ export interface MapLayerVisibility {
   targets: boolean;
   sightings: boolean;
   campsites: boolean;
+  /** Ausflugsziele aus der Ausflugfinder-App (#271). */
+  excursions: boolean;
 }
 
 export const DEFAULT_LAYER_VISIBILITY: MapLayerVisibility = {
@@ -54,6 +56,7 @@ export const DEFAULT_LAYER_VISIBILITY: MapLayerVisibility = {
   targets: true,
   sightings: true,
   campsites: true,
+  excursions: true,
 };
 
 /** Gemerkte Ebenen-Wahl lesen – fehlende/kaputte Werte fallen auf «an» zurück. */
@@ -73,6 +76,7 @@ export function loadLayerVisibility(): MapLayerVisibility {
       targets: read("targets"),
       sightings: read("sightings"),
       campsites: read("campsites"),
+      excursions: read("excursions"),
     };
   } catch {
     return { ...DEFAULT_LAYER_VISIBILITY };

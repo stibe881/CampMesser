@@ -83,7 +83,40 @@ Falls noch nicht geschehen (Details in `DEPLOYMENT-HETZNER.md`):
    curl -fsS "https://campmesser.ch/api/push/check?secret=<CRON_SECRET>" >/dev/null
    ```
 
-## 6. Merge nach `main`
+## 6. Ausflugfinder-Anbindung (Ausflüge auf Karte und im Platz-Dossier)
+
+CampMesser zeigt die Ausflugsziele aus deiner eigenen **Ausflugfinder**-App –
+als eigene Pin-Ebene «Ausflüge» auf der Karte und als Abschnitt «Ausflüge in
+der Nähe» im Platz-Dossier. Der Abruf läuft **ausschliesslich serverseitig**
+(tRPC-Router `excursions`, Zwischenspeicher 12 Minuten): Der Zugriffsschlüssel
+steht in der `.env` auf dem Server und landet **nie im Browser-Bundle**.
+
+Dafür in der Server-`.env` ergänzen (Vorlage: `env.hetzner.template`):
+
+```ini
+AUSFLUGFINDER_SUPABASE_URL=https://iopejcjkmuievlaclecn.supabase.co
+AUSFLUGFINDER_SUPABASE_ANON_KEY=<anon public key aus dem Supabase-Dashboard>
+```
+
+Den Schlüssel findest du im **Supabase-Dashboard → Project Settings → API**
+unter «Project API keys» → `anon` `public`. Er steht bewusst **nirgends im
+Repository** – bitte direkt auf dem Server eintragen und die `.env` weiterhin
+mit `chmod 600` schützen. Danach Passenger neu starten
+(`touch ~/campmesser/tmp/restart.txt`).
+
+Zur Kontrolle: Nach dem Neustart erscheint auf `/karte` der Ebenen-Chip
+«Ausflüge»; ohne die beiden Werte bleibt der ganze Bereich unsichtbar (kein
+Fehlerzustand, keine leere Liste).
+
+Angezeigt werden **alle** Einträge der Tabelle `ausfluege` – bewusst ohne
+Filter auf `status`. Die Texte der Ausflüge sind deine eigenen Daten und
+erscheinen unverändert auf Deutsch; übersetzt sind nur die Beschriftungen
+rundherum.
+
+Für die lokale Entwicklung dieselben zwei Zeilen in eine `.env` im
+Projektverzeichnis legen (`dotenv` liest sie beim Start).
+
+## 7. Merge nach `main`
 
 Der Feature-Branch `claude/projekt-laden-eb1rox` enthält alle neuen Runden
 (Mehrsprachigkeit, Runde 9 + 10) und ist getestet. Sobald du bereit bist,
