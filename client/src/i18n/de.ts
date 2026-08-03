@@ -1757,7 +1757,7 @@ export const de = {
       `Route zum Platz ${name} in der Karten-App öffnen`,
   },
   mapView: {
-    title: "Karte der Plätze & Reisen",
+    title: "Karte",
     subtitle:
       "Alle gespeicherten Zeltplätze auf einen Blick – mit den Übernachtungen aus «Meine Reisen». Die Karte braucht eine Internetverbindung.",
     loginFeature: "deine Zeltplatz-Karte",

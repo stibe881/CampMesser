@@ -1762,7 +1762,7 @@ export const fr: Translation = {
       `Ouvrir l'itinéraire vers l'emplacement ${name} dans l'app de cartes`,
   },
   mapView: {
-    title: "Carte des emplacements & voyages",
+    title: "Carte",
     subtitle:
       "Tous tes emplacements enregistrés en un coup d'œil – avec les nuitées de «Mes voyages». La carte nécessite une connexion Internet.",
     loginFeature: "ta carte des emplacements",

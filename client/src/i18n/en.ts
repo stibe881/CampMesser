@@ -1705,7 +1705,7 @@ export const en: Translation = {
       `Open directions to the pitch ${name} in your maps app`,
   },
   mapView: {
-    title: "Map of pitches & trips",
+    title: "Map",
     subtitle:
       "All your saved pitches at a glance – with overnight stays from “My trips”. The map needs an internet connection.",
     loginFeature: "your pitch map",

@@ -1737,7 +1737,7 @@ export const it: Translation = {
       `Apri il percorso verso la piazzola ${name} nell'app di mappe`,
   },
   mapView: {
-    title: "Mappa delle piazzole e dei viaggi",
+    title: "Mappa",
     subtitle:
       "Tutte le piazzole salvate a colpo d'occhio – con i pernottamenti di «I miei viaggi». La mappa richiede una connessione Internet.",
     loginFeature: "la tua mappa delle piazzole",
