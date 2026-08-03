@@ -12,15 +12,19 @@ import {
   Flame,
   Heart,
   ImagePlus,
+  Link2,
   MonitorSmartphone,
   Pencil,
   Plus,
+  QrCode,
   Search,
+  Share2,
   ShoppingCart,
   Trash2,
   Users,
   WifiOff,
 } from "lucide-react";
+import QRCode from "qrcode";
 import { useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
@@ -603,6 +607,64 @@ export default function RecipesPage() {
     onSuccess: () => utils.recipes.list.invalidate(),
     onError: () => toast.error(t.common.deleteFailed),
   });
+
+  // ── Eigenes Rezept per Link teilen (#176, Muster geteilte Quizze) ──
+  /** Rezept, dessen Teil-Link gerade im Dialog gezeigt wird. */
+  const [recipeShare, setRecipeShare] = useState<{
+    id: number;
+    name: string;
+    url: string;
+  } | null>(null);
+  const [shareQr, setShareQr] = useState<string | null>(null);
+
+  // QR-Code zum Teil-Link erzeugen: einfach abscannen lassen
+  useEffect(() => {
+    if (!recipeShare) {
+      setShareQr(null);
+      return;
+    }
+    QRCode.toDataURL(recipeShare.url, {
+      width: 480,
+      margin: 1,
+      errorCorrectionLevel: "M",
+    })
+      .then(setShareQr)
+      .catch(() => setShareQr(null));
+  }, [recipeShare]);
+
+  const shareMutation = trpc.recipes.share.useMutation({
+    onError: () => toast.error(t.recipes.shareFailed),
+  });
+
+  /** Teil-Link des Rezepts erzeugen (idempotent), Dialog öffnen, Link kopieren. */
+  const openRecipeShare = (recipe: { id: number; name: string }) => {
+    shareMutation.mutate(
+      { id: recipe.id },
+      {
+        onSuccess: async ({ token }) => {
+          const url = `${window.location.origin}/rezept/${token}`;
+          setRecipeShare({ id: recipe.id, name: recipe.name, url });
+          utils.recipes.list.invalidate();
+          try {
+            await navigator.clipboard.writeText(url);
+            toast.success(t.recipes.shareCopied);
+          } catch {
+            // Zwischenablage blockiert – der Link steht im Dialog
+          }
+        },
+      }
+    );
+  };
+
+  const unshareMutation = trpc.recipes.unshare.useMutation({
+    onSuccess: () => {
+      utils.recipes.list.invalidate();
+      setRecipeShare(null);
+      toast.success(t.recipes.unshared);
+    },
+    onError: () => toast.error(t.recipes.unshareFailed),
+  });
+
   const [, navigate] = useLocation();
   // Zutaten in der aktiven Sprache auf die Einkaufsliste übernehmen
   const addToShoppingMutation = trpc.shopping.addMany.useMutation({
@@ -1055,9 +1117,26 @@ export default function RecipesPage() {
                   </div>
                 )}
 
-                {/* Eigene Rezepte lassen sich bearbeiten und löschen */}
+                {/* Eigene Rezepte lassen sich teilen, bearbeiten und löschen */}
                 {customRowFor(selected) && (
-                  <div className="flex gap-2 border-t border-border/60 pt-3">
+                  <div className="flex flex-wrap gap-2 border-t border-border/60 pt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      disabled={shareMutation.isPending}
+                      aria-label={t.recipes.shareAria(
+                        pick(selected.name, lang)
+                      )}
+                      onClick={() => {
+                        const row = customRowFor(selected);
+                        if (row)
+                          openRecipeShare({ id: row.id, name: row.name });
+                      }}
+                    >
+                      <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                      {t.recipes.shareButton}
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -1128,6 +1207,78 @@ export default function RecipesPage() {
             onClose={() => setEditorState(null)}
           />
         )}
+      </Dialog>
+
+      {/* Teil-Link eines eigenen Rezepts: Link zum Kopieren + QR-Code */}
+      <Dialog
+        open={recipeShare !== null}
+        onOpenChange={open => !open && setRecipeShare(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.recipes.shareTitle}</DialogTitle>
+            <DialogDescription>{t.recipes.shareDescription}</DialogDescription>
+          </DialogHeader>
+          {recipeShare && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+                <Link2
+                  className="h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                <code className="min-w-0 flex-1 truncate text-xs">
+                  {recipeShare.url}
+                </code>
+                <button
+                  type="button"
+                  className="shrink-0 text-xs font-medium text-primary hover:underline"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(recipeShare.url);
+                      toast.success(t.common.linkCopied);
+                    } catch {
+                      toast.error(t.common.copyFailed);
+                    }
+                  }}
+                >
+                  {t.common.copy}
+                </button>
+              </div>
+              {shareQr && (
+                <div className="flex items-center gap-4 rounded-lg border border-border bg-card p-4">
+                  {/* Weisser Rahmen, damit der Code auch im Dark Mode scannbar bleibt */}
+                  <div className="shrink-0 rounded-md bg-white p-2 shadow-sm">
+                    <img
+                      src={shareQr}
+                      alt={t.recipes.shareQrAlt(recipeShare.name)}
+                      className="h-36 w-36"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1.5 text-sm font-semibold">
+                      <QrCode
+                        className="h-4 w-4 text-primary"
+                        aria-hidden="true"
+                      />
+                      {t.recipes.shareQrTitle}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t.recipes.shareQrText}
+                    </p>
+                  </div>
+                </div>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={unshareMutation.isPending}
+                onClick={() => unshareMutation.mutate({ id: recipeShare.id })}
+              >
+                {t.recipes.unshareButton}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
       </Dialog>
     </div>
   );

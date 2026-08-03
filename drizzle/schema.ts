@@ -490,6 +490,11 @@ export const customRecipes = mysqlTable(
     tip: text("tip"),
     /** Dateiname des Rezept-Fotos unter uploads/recipes/ (server/photoStorage.ts) */
     imageFileName: varchar("imageFileName", { length: 64 }),
+    /**
+     * Öffentlicher Teil-Token: Wer den Link kennt, sieht das Rezept und kann
+     * es übernehmen. Das private Rezept-Foto wird bewusst NICHT mitgeteilt.
+     */
+    shareToken: varchar("shareToken", { length: 64 }).unique(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },

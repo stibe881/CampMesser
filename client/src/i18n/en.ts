@@ -567,6 +567,29 @@ export const en: Translation = {
         : `… and ${n} more questions await after saving.`,
     emptyQuiz: "This quiz has no questions.",
   },
+  sharedRecipe: {
+    loading: "Loading shared recipe …",
+    notFoundTitle: "Recipe not found",
+    backHome: "Home",
+    invalidLink:
+      "This share link is invalid or has been withdrawn by its owner.",
+    subtitle: "Shared recipe",
+    sharedInfo:
+      "Shared recipe: cook it – with an account you can save it as your own recipe in your recipe book.",
+    importButton: "Save as my own recipe",
+    imported: "Recipe saved – you will find it in the recipe book",
+    importFailed: "The recipe could not be saved",
+    loginHint: "Sign in to save the recipe to your recipe book.",
+    minutes: (n: number) => `${n} min`,
+    servings: (n: number) => `${n} servings`,
+    onePotBadge: "One-pot",
+    kidsBadge: "Kids",
+    ingredientsTitle: "Ingredients",
+    stepsTitle: "Method",
+    tipTitle: "Tip",
+    photoNote:
+      "The recipe photo stays private and is not passed on through the share link.",
+  },
   packOptimizer: {
     title: "Pack optimisation",
     subtitleLoggedOut:
@@ -2139,6 +2162,19 @@ export const en: Translation = {
     cookingDone: "Done",
     cookingIngredientsShow: "Show ingredients",
     cookingIngredientsHide: "Hide ingredients",
+    shareButton: "Share",
+    shareAria: (name: string) => `Share recipe ${name} via link`,
+    shareTitle: "Share recipe",
+    shareDescription:
+      "Anyone with the link can see the recipe and save it. Your recipe photo stays private.",
+    shareCopied: "Share link copied",
+    shareFailed: "The share link could not be created",
+    shareQrTitle: "QR code",
+    shareQrText: "Let others scan it round the fire – quicker than typing.",
+    shareQrAlt: (name: string) => `QR code for the shared recipe ${name}`,
+    unshareButton: "Stop sharing",
+    unshared: "Share link withdrawn",
+    unshareFailed: "The share link could not be withdrawn",
     editor: {
       titleEdit: "Edit recipe",
       titleNew: "Create your own recipe",

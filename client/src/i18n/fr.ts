@@ -591,6 +591,30 @@ export const fr: Translation = {
         : `… et ${n} autres questions t'attendent après la reprise.`,
     emptyQuiz: "Ce quiz n'a pas de questions.",
   },
+  sharedRecipe: {
+    loading: "Chargement de la recette partagée …",
+    notFoundTitle: "Recette introuvable",
+    backHome: "Accueil",
+    invalidLink:
+      "Ce lien de partage n'est pas valable ou a été retiré par sa propriétaire ou son propriétaire.",
+    subtitle: "Recette partagée",
+    sharedInfo:
+      "Recette partagée : cuisine-la – avec un compte, tu peux la reprendre comme recette perso dans ton livre de recettes.",
+    importButton: "Reprendre comme recette perso",
+    imported: "Recette reprise – tu la trouves dans le livre de recettes",
+    importFailed: "La recette n'a pas pu être reprise",
+    loginHint:
+      "Connecte-toi pour reprendre la recette dans ton livre de recettes.",
+    minutes: (n: number) => `${n} min`,
+    servings: (n: number) => `${n} portions`,
+    onePotBadge: "One-pot",
+    kidsBadge: "Enfants",
+    ingredientsTitle: "Ingrédients",
+    stepsTitle: "Préparation",
+    tipTitle: "Astuce",
+    photoNote:
+      "La photo de la recette reste privée et n'est pas transmise via le lien de partage.",
+  },
   packOptimizer: {
     title: "Optimisation des bagages",
     subtitleLoggedOut:
@@ -2213,6 +2237,19 @@ export const fr: Translation = {
     cookingDone: "Terminé",
     cookingIngredientsShow: "Afficher les ingrédients",
     cookingIngredientsHide: "Masquer les ingrédients",
+    shareButton: "Partager",
+    shareAria: (name: string) => `Partager la recette ${name} par lien`,
+    shareTitle: "Partager la recette",
+    shareDescription:
+      "Toute personne qui a le lien voit la recette et peut la reprendre. Ta photo de recette reste privée.",
+    shareCopied: "Lien de partage copié",
+    shareFailed: "Le lien de partage n'a pas pu être créé",
+    shareQrTitle: "Code QR",
+    shareQrText: "À scanner autour du feu – plus rapide que de taper.",
+    shareQrAlt: (name: string) => `Code QR vers la recette partagée ${name}`,
+    unshareButton: "Arrêter le partage",
+    unshared: "Lien de partage retiré",
+    unshareFailed: "Le lien de partage n'a pas pu être retiré",
     editor: {
       titleEdit: "Modifier la recette",
       titleNew: "Créer ma propre recette",

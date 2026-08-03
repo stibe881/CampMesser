@@ -580,6 +580,29 @@ export const it: Translation = {
         : `… e altre ${n} domande ti aspettano dopo il salvataggio.`,
     emptyQuiz: "Questo quiz non ha domande.",
   },
+  sharedRecipe: {
+    loading: "Caricamento della ricetta condivisa …",
+    notFoundTitle: "Ricetta non trovata",
+    backHome: "Home",
+    invalidLink:
+      "Questo link di condivisione non è valido oppure è stato ritirato da chi lo ha creato.",
+    subtitle: "Ricetta condivisa",
+    sharedInfo:
+      "Ricetta condivisa: provala – con un account puoi salvarla come ricetta personale nel tuo ricettario.",
+    importButton: "Salva come ricetta personale",
+    imported: "Ricetta salvata – la trovi nel ricettario",
+    importFailed: "Non è stato possibile salvare la ricetta",
+    loginHint: "Accedi per salvare la ricetta nel tuo ricettario.",
+    minutes: (n: number) => `${n} min`,
+    servings: (n: number) => `${n} porzioni`,
+    onePotBadge: "One-pot",
+    kidsBadge: "Bambini",
+    ingredientsTitle: "Ingredienti",
+    stepsTitle: "Preparazione",
+    tipTitle: "Consiglio",
+    photoNote:
+      "La foto della ricetta resta privata e non viene condivisa tramite il link.",
+  },
   packOptimizer: {
     title: "Ottimizzazione bagagli",
     subtitleLoggedOut:
@@ -2195,6 +2218,20 @@ export const it: Translation = {
     cookingDone: "Fatto",
     cookingIngredientsShow: "Mostra ingredienti",
     cookingIngredientsHide: "Nascondi ingredienti",
+    shareButton: "Condividi",
+    shareAria: (name: string) => `Condividi la ricetta ${name} tramite link`,
+    shareTitle: "Condividi la ricetta",
+    shareDescription:
+      "Chi conosce il link vede la ricetta e può salvarla. La tua foto della ricetta resta privata.",
+    shareCopied: "Link di condivisione copiato",
+    shareFailed: "Non è stato possibile creare il link di condivisione",
+    shareQrTitle: "Codice QR",
+    shareQrText:
+      "Fallo scansionare attorno al fuoco – più veloce che digitare.",
+    shareQrAlt: (name: string) => `Codice QR della ricetta condivisa ${name}`,
+    unshareButton: "Termina la condivisione",
+    unshared: "Link di condivisione ritirato",
+    unshareFailed: "Non è stato possibile ritirare il link di condivisione",
     editor: {
       titleEdit: "Modifica ricetta",
       titleNew: "Crea una ricetta personale",

@@ -1732,6 +1732,30 @@ export async function getCustomRecipe(id: number, userId: number) {
   return rows[0];
 }
 
+/** Teil-Token eines Rezepts setzen oder entfernen (nur fürs eigene Rezept). */
+export async function setCustomRecipeShareToken(
+  id: number,
+  userId: number,
+  token: string | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(customRecipes)
+    .set({ shareToken: token })
+    .where(and(eq(customRecipes.id, id), eq(customRecipes.userId, userId)));
+}
+
+/** Geteiltes Rezept anhand des Tokens laden (öffentlich, ohne Login). */
+export async function getCustomRecipeByToken(token: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(customRecipes)
+    .where(eq(customRecipes.shareToken, token))
+    .limit(1);
+  return rows[0];
+}
+
 /** Eigenes Rezept über den Foto-Dateinamen (für die private Auslieferung). */
 export async function getCustomRecipeByImageFileName(
   fileName: string,

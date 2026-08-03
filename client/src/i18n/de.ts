@@ -593,6 +593,29 @@ export const de = {
         : `… und ${n} weitere Fragen warten nach dem Übernehmen.`,
     emptyQuiz: "Dieses Quiz hat keine Fragen.",
   },
+  sharedRecipe: {
+    loading: "Geteiltes Rezept wird geladen …",
+    notFoundTitle: "Rezept nicht gefunden",
+    backHome: "Startseite",
+    invalidLink:
+      "Dieser Teil-Link ist ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
+    subtitle: "Geteiltes Rezept",
+    sharedInfo:
+      "Geteiltes Rezept: Koch es nach – mit einem Konto kannst du es als eigenes Rezept in dein Rezeptbuch übernehmen.",
+    importButton: "Als eigenes Rezept übernehmen",
+    imported: "Rezept übernommen – du findest es im Rezeptbuch",
+    importFailed: "Rezept konnte nicht übernommen werden",
+    loginHint: "Melde dich an, um das Rezept in dein Rezeptbuch zu übernehmen.",
+    minutes: (n: number) => `${n} Min.`,
+    servings: (n: number) => `${n} Portionen`,
+    onePotBadge: "One-Pot",
+    kidsBadge: "Kinder",
+    ingredientsTitle: "Zutaten",
+    stepsTitle: "Zubereitung",
+    tipTitle: "Tipp",
+    photoNote:
+      "Das Foto des Rezepts bleibt privat und wird über den Teil-Link nicht mitgeteilt.",
+  },
   packOptimizer: {
     title: "Pack-Optimierung",
     subtitleLoggedOut:
@@ -2225,6 +2248,19 @@ export const de = {
     cookingDone: "Fertig",
     cookingIngredientsShow: "Zutaten anzeigen",
     cookingIngredientsHide: "Zutaten ausblenden",
+    shareButton: "Teilen",
+    shareAria: (name: string) => `Rezept ${name} per Link teilen`,
+    shareTitle: "Rezept teilen",
+    shareDescription:
+      "Wer den Link kennt, sieht das Rezept und kann es übernehmen. Dein Rezept-Foto bleibt privat.",
+    shareCopied: "Teil-Link kopiert",
+    shareFailed: "Teil-Link konnte nicht erzeugt werden",
+    shareQrTitle: "QR-Code",
+    shareQrText: "Am Lagerfeuer abscannen lassen – schneller als tippen.",
+    shareQrAlt: (name: string) => `QR-Code zum geteilten Rezept ${name}`,
+    unshareButton: "Teilen beenden",
+    unshared: "Teil-Link zurückgezogen",
+    unshareFailed: "Teil-Link konnte nicht zurückgezogen werden",
     editor: {
       titleEdit: "Rezept bearbeiten",
       titleNew: "Eigenes Rezept erstellen",

@@ -1,6 +1,7 @@
 /**
  * OpenGraph-Vorschau für geteilte Links (/liste/:token, /platz/:token,
- * /vorlage/:token, /einkaufsliste/:token, /reise/:token, /quiz/:token).
+ * /vorlage/:token, /einkaufsliste/:token, /reise/:token, /quiz/:token,
+ * /rezept/:token).
  * Messenger und soziale Netzwerke laden das SPA-HTML ohne JavaScript –
  * deshalb injiziert der Server für bekannte Teil-Token OG-Meta-Tags in den
  * <head>, bevor das HTML ausgeliefert wird. Unbekannte Token bekommen das
@@ -8,6 +9,7 @@
  * Beschreibungstexte deutsch, weil der Server die Sprache der Betrachter*innen
  * nicht kennt.
  */
+import { parseStringList } from "@shared/customRecipes";
 import { parseCustomTemplateItems } from "@shared/packTemplates";
 import { parseQuizQuestions } from "@shared/quizzes";
 
@@ -75,7 +77,9 @@ export async function ogMetaForShareRequest(
   origin: string
 ): Promise<OgMeta | null> {
   const match =
-    /^\/(liste|platz|vorlage|einkaufsliste|reise|quiz)\/([^/]+)$/.exec(path);
+    /^\/(liste|platz|vorlage|einkaufsliste|reise|quiz|rezept)\/([^/]+)$/.exec(
+      path
+    );
   if (!match) return null;
   const [, kind, token] = match;
   if (!TOKEN_PATTERN.test(token)) return null;
@@ -134,6 +138,19 @@ export async function ogMetaForShareRequest(
     return {
       title: `${quiz.title} – CampMesser`,
       description: `Geteiltes Quiz mit ${countText} – zum Übernehmen und Mitspielen.`,
+      url,
+      image,
+    };
+  }
+
+  if (kind === "rezept") {
+    const recipe = await db.getCustomRecipeByToken(token);
+    if (!recipe) return null;
+    const count = parseStringList(recipe.ingredientsJson).length;
+    const countText = count === 1 ? "1 Zutat" : `${count} Zutaten`;
+    return {
+      title: `${recipe.name} – CampMesser`,
+      description: `Geteiltes Campingrezept mit ${countText} · ${recipe.timeMinutes} Min. – zum Nachkochen und Übernehmen.`,
       url,
       image,
     };

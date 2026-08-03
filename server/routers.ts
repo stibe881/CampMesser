@@ -52,7 +52,13 @@ import {
   parseSpotAttributes,
   SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
 } from "@shared/spotAttributes";
-import { RECIPE_DIFFICULTIES, RECIPE_METHODS } from "@shared/customRecipes";
+import {
+  normalizeDifficulty,
+  normalizeMethod,
+  parseStringList,
+  RECIPE_DIFFICULTIES,
+  RECIPE_METHODS,
+} from "@shared/customRecipes";
 import {
   RAIN_THRESHOLD_MAX_MM,
   RAIN_THRESHOLD_MIN_MM,
@@ -2294,6 +2300,87 @@ export const appRouter = router({
           await recipePhotoStorage.deleteFiles([recipe.imageFileName]);
         }
         return { success: true } as const;
+      }),
+    /** Teil-Link für ein eigenes Rezept erzeugen: gibt den Token zurück. */
+    share: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const recipe = await db.getCustomRecipe(input.id, ctx.user.id);
+        if (!recipe)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Rezept nicht gefunden.",
+          });
+        if (recipe.shareToken) return { token: recipe.shareToken };
+        const token = nanoid(16);
+        await db.setCustomRecipeShareToken(input.id, ctx.user.id, token);
+        return { token };
+      }),
+    /** Teilen des Rezepts beenden: Token entfernen, Link wird ungültig. */
+    unshare: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.setCustomRecipeShareToken(input.id, ctx.user.id, null);
+        return { success: true } as const;
+      }),
+    /**
+     * Geteiltes Rezept öffentlich abrufen (kein Login nötig): Titel,
+     * Eckdaten, Zutaten und Schritte. Das Rezept-FOTO bleibt bewusst privat
+     * (es liegt hinter der Session-geschützten Auslieferung) und wird hier
+     * nicht mitgeliefert.
+     */
+    sharedGet: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .query(async ({ input }) => {
+        const recipe = await db.getCustomRecipeByToken(input.token);
+        if (!recipe) return { recipe: null };
+        return {
+          recipe: {
+            name: recipe.name,
+            method: normalizeMethod(recipe.method),
+            difficulty: normalizeDifficulty(recipe.difficulty),
+            timeMinutes: recipe.timeMinutes,
+            servings: recipe.servings,
+            onePot: recipe.onePot,
+            kidFriendly: recipe.kidFriendly,
+            ingredients: parseStringList(recipe.ingredientsJson),
+            steps: parseStringList(recipe.stepsJson, 20),
+            tip: recipe.tip,
+          },
+        };
+      }),
+    /** Geteiltes Rezept als eigenes Rezept übernehmen (Kopie ohne Foto). */
+    importShared: protectedProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .mutation(async ({ ctx, input }) => {
+        const recipe = await db.getCustomRecipeByToken(input.token);
+        if (!recipe)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Geteiltes Rezept nicht gefunden.",
+          });
+        // Über die defensiven Parser re-serialisieren – kaputte Daten bleiben draussen
+        const ingredients = parseStringList(recipe.ingredientsJson);
+        const steps = parseStringList(recipe.stepsJson, 20);
+        if (ingredients.length === 0 || steps.length === 0)
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Das geteilte Rezept ist unvollständig.",
+          });
+        const id = await db.addCustomRecipe({
+          userId: ctx.user.id,
+          name: recipe.name,
+          method: normalizeMethod(recipe.method),
+          timeMinutes: recipe.timeMinutes,
+          servings: recipe.servings,
+          difficulty: normalizeDifficulty(recipe.difficulty),
+          onePot: recipe.onePot,
+          kidFriendly: recipe.kidFriendly,
+          ingredientsJson: JSON.stringify(ingredients),
+          stepsJson: JSON.stringify(steps),
+          tip: recipe.tip,
+        });
+        return { id };
       }),
   }),
 
