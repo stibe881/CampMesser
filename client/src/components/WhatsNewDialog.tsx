@@ -4,10 +4,12 @@ import { useI18n } from "@/i18n";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { changelog, type ChangelogBlock } from "@/data/changelog";
 import {
+  blocksToShowOnStartup,
+  hasExistingAppData,
   latestBlockId,
   loadLastSeenId,
+  loadStorageKeys,
   storeLastSeenId,
-  unseenBlocks,
 } from "@/lib/whatsNew";
 import { isQuietRoute } from "@/components/QuickActions";
 import { Button } from "@/components/ui/button";
@@ -101,8 +103,10 @@ export function WhatsNewDialog({
 
 /**
  * Start-Logik (im AppShell eingebunden): prüft beim App-Start EINMAL den
- * Gesehen-Marker. Erstbesuch (kein Marker) → nichts zeigen, nur Marker setzen,
- * damit Neuinstallationen nicht mit alter Historie begrüsst werden. Sonst
+ * Gesehen-Marker. Echter Erstbesuch (kein Marker UND keine App-Daten) → nichts
+ * zeigen, nur Marker setzen, damit Neuinstallationen nicht mit alter Historie
+ * begrüsst werden. Bestehende Installationen ohne Marker (erster Start nach
+ * dem Update, das diese Funktion mitbringt) sehen den neuesten Block. Sonst
  * erscheinen die ungesehenen Blöcke kurz verzögert – ausser auf ruhigen
  * Druck-/Teil-Routen (Ausblendeliste der Schnellaktionen).
  */
@@ -115,12 +119,14 @@ export default function WhatsNewStartup() {
     const latest = latestBlockId(changelog);
     if (!latest) return;
     const lastSeen = loadLastSeenId();
-    if (lastSeen === null) {
-      storeLastSeenId(latest);
+    const existing = hasExistingAppData(loadStorageKeys());
+    const unseen = blocksToShowOnStartup(changelog, lastSeen, existing);
+    if (unseen.length === 0) {
+      // Echter Erstbesuch: nur den Marker setzen, damit die Historie beim
+      // nächsten Start nicht nachträglich auftaucht.
+      if (lastSeen === null) storeLastSeenId(latest);
       return;
     }
-    const unseen = unseenBlocks(changelog, lastSeen);
-    if (unseen.length === 0) return;
     const timer = window.setTimeout(() => {
       // Ruhige Lese-Ansichten (Druck/Teil-Links) nicht unterbrechen –
       // der Marker bleibt, der Hinweis kommt beim nächsten Start wieder.

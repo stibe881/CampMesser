@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { latestBlockId, unseenBlocks } from "../client/src/lib/whatsNew";
+import {
+  blocksToShowOnStartup,
+  CHANGELOG_SEEN_KEY,
+  hasExistingAppData,
+  latestBlockId,
+  unseenBlocks,
+} from "../client/src/lib/whatsNew";
 import { changelog, type ChangelogBlock } from "../client/src/data/changelog";
 
 /** Testdaten: drei Blöcke, neuester zuoberst (wie die echte Liste). */
@@ -61,5 +67,40 @@ describe("changelog-Daten", () => {
     const ids = changelog.map(block => block.id);
     const sorted = [...ids].sort((a, b) => b.localeCompare(a));
     expect(ids).toEqual(sorted);
+  });
+});
+
+describe("hasExistingAppData / blocksToShowOnStartup", () => {
+  const blocks = [
+    { id: "2026-08-03.1", date: "2026-08-03", entries: [] },
+    { id: "2026-07-01.1", date: "2026-07-01", entries: [] },
+  ];
+
+  it("erkennt eine bestehende Installation an anderen App-Schlüsseln", () => {
+    expect(hasExistingAppData(["campmesser.language"])).toBe(true);
+    expect(hasExistingAppData(["campmesser.recentModules", "theme"])).toBe(
+      true
+    );
+  });
+
+  it("wertet den Gesehen-Marker allein NICHT als bestehende Installation", () => {
+    expect(hasExistingAppData([CHANGELOG_SEEN_KEY])).toBe(false);
+    expect(hasExistingAppData([])).toBe(false);
+    expect(hasExistingAppData(["fremd.key"])).toBe(false);
+  });
+
+  it("zeigt bestehenden Installationen ohne Marker den neuesten Block", () => {
+    expect(blocksToShowOnStartup(blocks, null, true)).toEqual([blocks[0]]);
+  });
+
+  it("zeigt echten Erstbesuchern nichts", () => {
+    expect(blocksToShowOnStartup(blocks, null, false)).toEqual([]);
+  });
+
+  it("nutzt mit Marker weiterhin die ungesehenen Blöcke", () => {
+    expect(blocksToShowOnStartup(blocks, "2026-07-01.1", true)).toEqual([
+      blocks[0],
+    ]);
+    expect(blocksToShowOnStartup(blocks, "2026-08-03.1", true)).toEqual([]);
   });
 });
