@@ -8,6 +8,7 @@ import {
   Link2,
   Loader2,
   Package,
+  Pencil,
   Plus,
   Printer,
   QrCode,
@@ -236,6 +237,10 @@ export default function PackListDetailPage() {
     enabled: isAuthenticated,
   });
 
+  /** Eintrag, dessen Name/Menge gerade bearbeitet wird. */
+  const [editItemId, setEditItemId] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editQty, setEditQty] = useState("1");
   /** Eintrag, dessen Kategorie gerade bearbeitet wird. */
   const [editCatItemId, setEditCatItemId] = useState<number | null>(null);
   const [editCatChoice, setEditCatChoice] = useState<string>(CATEGORY_NEW);
@@ -352,6 +357,10 @@ export default function PackListDetailPage() {
                 i.id === input.id
                   ? {
                       ...i,
+                      ...(input.name !== undefined ? { name: input.name } : {}),
+                      ...(input.quantity !== undefined
+                        ? { quantity: input.quantity }
+                        : {}),
                       ...(input.assignee !== undefined
                         ? { assignee: input.assignee }
                         : {}),
@@ -1168,6 +1177,7 @@ export default function PackListDetailPage() {
                             setAssignItemId(item.id);
                             setAssignDraft(item.assignee ?? "");
                             setEditCatItemId(null);
+                            setEditItemId(null);
                           }
                         }}
                         aria-label={t.packListDetail.assignButtonAria(
@@ -1185,6 +1195,26 @@ export default function PackListDetailPage() {
                         size="icon"
                         className="h-7 w-7 text-muted-foreground/50 hover:text-foreground"
                         onClick={() => {
+                          if (editItemId === item.id) {
+                            setEditItemId(null);
+                          } else {
+                            setEditItemId(item.id);
+                            setEditName(item.name);
+                            setEditQty(String(item.quantity));
+                            setEditCatItemId(null);
+                            setAssignItemId(null);
+                          }
+                        }}
+                        aria-label={t.packListDetail.editItemAria(item.name)}
+                        aria-expanded={editItemId === item.id}
+                      >
+                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground/50 hover:text-foreground"
+                        onClick={() => {
                           if (editCatItemId === item.id) {
                             setEditCatItemId(null);
                           } else {
@@ -1195,6 +1225,7 @@ export default function PackListDetailPage() {
                             );
                             setEditCatName(known ? "" : item.category);
                             setAssignItemId(null);
+                            setEditItemId(null);
                           }
                         }}
                         aria-label={t.packListDetail.editCategoryAria(
@@ -1213,6 +1244,55 @@ export default function PackListDetailPage() {
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                       </Button>
+                      {editItemId === item.id && (
+                        <form
+                          className="flex w-full flex-wrap items-center gap-2 border-t border-border pt-2"
+                          onSubmit={e => {
+                            e.preventDefault();
+                            const name = editName.trim().slice(0, 160);
+                            const quantity = Math.min(
+                              999,
+                              Math.max(1, Math.round(Number(editQty)) || 1)
+                            );
+                            if (!name) return;
+                            updateItemMutation.mutate({
+                              id: item.id,
+                              name,
+                              quantity,
+                            });
+                            setEditItemId(null);
+                          }}
+                        >
+                          <Input
+                            value={editName}
+                            onChange={e => setEditName(e.target.value)}
+                            aria-label={t.packListDetail.editNameAria(
+                              item.name
+                            )}
+                            maxLength={160}
+                            autoFocus
+                            className="h-8 min-w-36 flex-1 text-sm"
+                          />
+                          <Input
+                            type="number"
+                            inputMode="numeric"
+                            min={1}
+                            max={999}
+                            value={editQty}
+                            onChange={e => setEditQty(e.target.value)}
+                            aria-label={t.packListDetail.editQtyAria(item.name)}
+                            className="h-8 w-20 text-sm"
+                          />
+                          <Button
+                            type="submit"
+                            size="sm"
+                            className="h-8"
+                            disabled={!editName.trim()}
+                          >
+                            {t.common.save}
+                          </Button>
+                        </form>
+                      )}
                       {assignItemId === item.id && (
                         <form
                           className="flex w-full flex-wrap items-center gap-2 border-t border-border pt-2"

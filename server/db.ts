@@ -304,12 +304,20 @@ export async function uncheckAllPackItems(listId: number) {
 export async function updatePackItem(
   id: number,
   data: {
+    name?: string;
+    quantity?: number;
     assignee?: string | null;
     category?: string;
     updatedByUserId?: number;
   }
 ) {
-  if (data.assignee === undefined && data.category === undefined) return;
+  if (
+    data.name === undefined &&
+    data.quantity === undefined &&
+    data.assignee === undefined &&
+    data.category === undefined
+  )
+    return;
   const db = requireDb(await getDb());
   await db.update(packItems).set(data).where(eq(packItems.id, id));
 }

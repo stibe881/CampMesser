@@ -485,6 +485,9 @@ export const en: Translation = {
     newCategoryPlaceholder: "New category",
     newCategoryAria: "Name of the new category",
     editCategoryAria: (name: string) => `Change category of ${name}`,
+    editItemAria: (name: string) => `Edit ${name}`,
+    editNameAria: (name: string) => `New name for ${name}`,
+    editQtyAria: (name: string) => `Quantity of ${name}`,
     editCategorySelectAria: (name: string) => `New category for ${name}`,
     categorySave: "Save category",
     categoryUpdateFailed: "Category could not be changed",
@@ -4377,6 +4380,37 @@ export const en: Translation = {
     familyEmpty: "No child profiles created yet.",
     footnote:
       "All numbers come from your own entries – this page only shows them; you change them in the respective module.",
+  },
+
+  transit: {
+    sectionAria: "Public transport from the pitch",
+    title: "Public transport",
+    subtitle: "Stops nearby and their next departures.",
+    subtitleAtPlace: place =>
+      `Stops around ${place} and their next departures.`,
+    loadingStations: "Searching for stops …",
+    loadingBoard: "Loading departures …",
+    loadFailed:
+      "The timetable could not be loaded just now. Try again in a moment.",
+    emptyStations:
+      "The Swiss timetable finds no stop here. It covers Switzerland and cross-border traffic – for a pitch further abroad, CampMesser knows nothing at this point.",
+    emptyBoard: "No departure is listed from this stop any time soon.",
+    kind: {
+      train: "Train",
+      bus: "Bus",
+      tram: "Tram",
+      ship: "Boat",
+      cableway: "Cable car",
+      other: "Stop",
+    },
+    stationAria: name => `Show departures from ${name}`,
+    distanceAway: value => `${value} away`,
+    delay: minutes => `+${minutes} min`,
+    platform: value => `Platform ${value}`,
+    refresh: "Refresh",
+    refreshStations: "Search for stops again",
+    source:
+      "Timetable data from transport.opendata.ch – queried only when you click. Only upcoming departures are shown; delays appear wherever the timetable reports them.",
   },
 
   sharing: {

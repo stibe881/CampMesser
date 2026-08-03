@@ -1371,13 +1371,16 @@ export const appRouter = router({
         return { success: true } as const;
       }),
     /**
-     * Eintrag anpassen: Personen-Zuordnung («Wer packt das?», null entfernt
-     * sie) und/oder Kategorie – Kategorien sind frei, neue entstehen implizit.
+     * Eintrag anpassen: Name, Menge, Personen-Zuordnung («Wer packt das?»,
+     * null entfernt sie) und/oder Kategorie – Kategorien sind frei, neue
+     * entstehen implizit.
      */
     updateItem: protectedProcedure
       .input(
         z.object({
           id: z.number(),
+          name: z.string().trim().min(1).max(160).optional(),
+          quantity: z.number().int().min(1).max(999).optional(),
           assignee: z.string().trim().min(1).max(80).nullable().optional(),
           category: z.string().trim().min(1).max(80).optional(),
         })
@@ -1391,6 +1394,8 @@ export const appRouter = router({
           });
         }
         await db.updatePackItem(input.id, {
+          ...(input.name !== undefined ? { name: input.name } : {}),
+          ...(input.quantity !== undefined ? { quantity: input.quantity } : {}),
           ...(input.assignee !== undefined ? { assignee: input.assignee } : {}),
           ...(input.category !== undefined ? { category: input.category } : {}),
           updatedByUserId: ctx.user.id,
