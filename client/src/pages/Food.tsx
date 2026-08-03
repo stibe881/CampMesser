@@ -12,6 +12,9 @@ import {
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
 import PageHeader from "@/components/PageHeader";
+import ShoppingTargetSelect, {
+  useShoppingTarget,
+} from "@/components/ShoppingTargetSelect";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -137,22 +140,39 @@ export default function FoodPage() {
   // «Nachkaufen»: Lebensmittel auf die Einkaufsliste setzen (Server verhindert
   // Duplikate, wenn der Name bereits unabgehakt auf der Liste steht)
   const [, navigate] = useLocation();
+  // Ziel-Liste des «Nachkaufen» (#215): zuletzt genutzte persönliche Liste
+  const shoppingTarget = useShoppingTarget(isAuthenticated);
   const addToShoppingMutation = trpc.shopping.add.useMutation({
     onSuccess: (result, variables) => {
       utils.shopping.list.invalidate();
+      utils.shopping.lists.invalidate();
+      const listName = shoppingTarget.lists.find(
+        l => l.id === variables.listId
+      )?.name;
       if (result.added) {
-        toast.success(t.food.addedToShopping(variables.name), {
-          action: {
-            label: t.shopping.openList,
-            onClick: () => navigate("/einkauf"),
-          },
-        });
+        toast.success(
+          shoppingTarget.lists.length > 1 && listName
+            ? t.shopping.addedToNamedList(variables.name, listName)
+            : t.food.addedToShopping(variables.name),
+          {
+            action: {
+              label: t.shopping.openList,
+              onClick: () => navigate("/einkauf"),
+            },
+          }
+        );
       } else {
         toast.info(t.food.alreadyOnShopping(variables.name));
       }
     },
     onError: () => toast.error(t.food.addToShoppingFailed),
   });
+  /** «Nachkaufen» immer auf die gewählte Ziel-Liste. */
+  const addToShopping = (name: string) =>
+    addToShoppingMutation.mutate({
+      name,
+      listId: shoppingTarget.listId ?? undefined,
+    });
 
   // ── Kühlbox-Vorlagen («Standardfüllung») ──
   const templatesQuery = trpc.foodTemplates.list.useQuery(undefined, {
@@ -313,6 +333,9 @@ export default function FoodPage() {
         </Button>
       </form>
       <p className="mb-3 text-xs text-muted-foreground">{t.food.dateHint}</p>
+
+      {/* Ziel-Liste fürs «Nachkaufen», sobald es mehrere Listen gibt (#215) */}
+      <ShoppingTargetSelect target={shoppingTarget} className="mb-5 max-w-56" />
 
       {/* Vorlagen: aktuelle Füllung einfrieren bzw. gespeicherte laden */}
       {(items.length > 0 || (templatesQuery.data ?? []).length > 0) && (
@@ -589,9 +612,7 @@ export default function FoodPage() {
                   )}
                   <button
                     type="button"
-                    onClick={() =>
-                      addToShoppingMutation.mutate({ name: item.name })
-                    }
+                    onClick={() => addToShopping(item.name)}
                     className={cn(
                       "flex h-6 w-6 items-center justify-center rounded-full transition-colors",
                       // Abgelaufene Vorräte: Nachkaufen-Aktion prominent zeigen
@@ -622,7 +643,7 @@ export default function FoodPage() {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => {
-                          addToShoppingMutation.mutate({ name: item.name });
+                          addToShopping(item.name);
                           removeMutation.mutate({ id: item.id });
                         }}
                       >

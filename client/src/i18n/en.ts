@@ -2581,6 +2581,38 @@ export const en: Translation = {
     putAwayOpenFood: "To the cool box",
     putAwayFailed:
       "Putting away failed – items not yet transferred stay on the list",
+    listsAria: "Choose shopping list",
+    listCounts: (open: number, done: number) => `${open} open · ${done} done`,
+    manageListsButton: "Lists",
+    manageListsAria: "Manage shopping lists",
+    manageListsTitle: "Manage shopping lists",
+    manageListsDescription:
+      "Create more lists (e.g. “Weekly shop” and “Camping”), rename them, reorder them – or delete a list along with its entries.",
+    newListPlaceholder: "Name of the new list",
+    newListButton: "Create",
+    listCreated: (name: string) => `List “${name}” created`,
+    listCreateFailed: "List could not be created",
+    listNameAria: (name: string) => `Name of ${name}`,
+    listSaveNameAria: (name: string) => `Save the new name of ${name}`,
+    listRenamed: "List renamed",
+    listRenameFailed: "List could not be renamed",
+    listDeleteAria: (name: string) => `Delete list ${name}`,
+    listDeleteConfirm: (name: string) =>
+      `Delete list “${name}” with all its entries?`,
+    listDeleted: "List deleted",
+    listDeleteFailed: "List could not be deleted",
+    listDeleteLastHint: "The last list always stays.",
+    listMoveUpAria: (name: string) => `Move ${name} up`,
+    listMoveDownAria: (name: string) => `Move ${name} down`,
+    listOrderFailed: "List order could not be saved",
+    targetListLabel: "Target list",
+    targetListAria: "Choose the target list",
+    addedToNamedList: (name: string, list: string) =>
+      `${name} added to “${list}”`,
+    addedFromRecipeToList: (n: number, list: string) =>
+      n === 1
+        ? `1 ingredient added to “${list}”`
+        : `${n} ingredients added to “${list}”`,
   },
   sharedShopping: {
     loading: "Loading shared shopping list …",

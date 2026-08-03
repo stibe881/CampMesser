@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { isShareExpired } from "@shared/sharing";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
@@ -43,6 +43,7 @@ import {
   packTemplatesCustom,
   powerConsumers,
   shoppingItems,
+  shoppingLists,
   shoppingShares,
   spotPhotos,
   InsertSpotPhoto,
@@ -793,13 +794,160 @@ export async function addFoodItems(items: InsertFoodItem[]) {
   await db.insert(foodItems).values(items);
 }
 
+// ── Einkaufslisten (#215) ──
+// Seit #215 hat jedes Konto BELIEBIG VIELE persönliche Einkaufslisten.
+// Einträge (shoppingItems.listId) und Teil-Links (shoppingShares.listId)
+// hängen an einer Liste; beide Spalten sind nullable, damit Bestände aus der
+// Zeit der EINEN Liste erhalten bleiben. ensureDefaultShoppingList() holt
+// diese Altdaten beim ersten Zugriff idempotent nach.
+
+/** Alle Listen eines Kontos in Anzeige-Reihenfolge (position, dann id). */
+export async function getShoppingLists(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(shoppingLists)
+    .where(eq(shoppingLists.userId, userId))
+    .orderBy(shoppingLists.position, shoppingLists.id);
+}
+
+/** Einzelne Liste MIT Besitz-Prüfung (undefined = fremd oder nicht da). */
+export async function getShoppingList(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(shoppingLists)
+    .where(and(eq(shoppingLists.id, id), eq(shoppingLists.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/** Neue Liste ans Ende hängen; gibt die frisch vergebene Id zurück. */
+export async function createShoppingList(userId: number, name: string) {
+  const db = requireDb(await getDb());
+  const existing = await getShoppingLists(userId);
+  const position =
+    existing.reduce((max, l) => Math.max(max, l.position), -1) + 1;
+  const [result] = await db
+    .insert(shoppingLists)
+    .values({ userId, name, position });
+  return result.insertId;
+}
+
+/** Liste umbenennen (nur eigene). */
+export async function renameShoppingList(
+  id: number,
+  userId: number,
+  name: string
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(shoppingLists)
+    .set({ name })
+    .where(and(eq(shoppingLists.id, id), eq(shoppingLists.userId, userId)));
+}
+
+/** Liste samt Einträgen und Teil-Link löschen (nur eigene). */
+export async function deleteShoppingList(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(shoppingItems)
+    .where(and(eq(shoppingItems.userId, userId), eq(shoppingItems.listId, id)));
+  await db
+    .delete(shoppingShares)
+    .where(
+      and(eq(shoppingShares.userId, userId), eq(shoppingShares.listId, id))
+    );
+  await db
+    .delete(shoppingLists)
+    .where(and(eq(shoppingLists.id, id), eq(shoppingLists.userId, userId)));
+}
+
+/** Neue Reihenfolge der Listen speichern: position = 0..n. */
+export async function reorderShoppingLists(userId: number, ids: number[]) {
+  const db = requireDb(await getDb());
+  await Promise.all(
+    ids.map((id, idx) =>
+      db
+        .update(shoppingLists)
+        .set({ position: idx })
+        .where(and(eq(shoppingLists.id, id), eq(shoppingLists.userId, userId)))
+    )
+  );
+}
+
+/**
+ * Übergangs-Migration im Code (idempotent): sorgt dafür, dass ein Konto
+ * mindestens EINE Liste hat und dass Einträge/Teil-Links ohne listId an der
+ * ersten Liste hängen. Wird von shopping.lists/shopping.list aufgerufen und
+ * ist damit die einzige Stelle, die Altbestände nachzieht. Rückgabe: die
+ * Liste, an der die Altdaten nun hängen (= die erste Liste des Kontos).
+ */
+export async function ensureDefaultShoppingList(
+  userId: number,
+  defaultName: string
+) {
+  const db = requireDb(await getDb());
+  const lists = await getShoppingLists(userId);
+  let target = lists[0];
+  if (!target) {
+    const id = await createShoppingList(userId, defaultName);
+    target = {
+      id,
+      userId,
+      name: defaultName,
+      position: 0,
+      createdAt: new Date(),
+    };
+  }
+  // Alt-Einträge (listId IS NULL) an die erste Liste hängen
+  await db
+    .update(shoppingItems)
+    .set({ listId: target.id })
+    .where(and(eq(shoppingItems.userId, userId), isNull(shoppingItems.listId)));
+  // Alt-Teil-Link (listId IS NULL) übernehmen – existiert für die Ziel-Liste
+  // bereits ein Token, gewinnt dieses und die Alt-Zeile fällt weg
+  // (verhindert eine Kollision mit unique(userId, listId)).
+  const shares = await db
+    .select()
+    .from(shoppingShares)
+    .where(eq(shoppingShares.userId, userId));
+  const legacy = shares.filter(s => s.listId === null);
+  if (legacy.length > 0) {
+    const hasTarget = shares.some(s => s.listId === target.id);
+    if (hasTarget) {
+      await db
+        .delete(shoppingShares)
+        .where(
+          and(eq(shoppingShares.userId, userId), isNull(shoppingShares.listId))
+        );
+    } else {
+      await db
+        .update(shoppingShares)
+        .set({ listId: target.id })
+        .where(
+          and(eq(shoppingShares.userId, userId), isNull(shoppingShares.listId))
+        );
+    }
+  }
+  return target;
+}
+
 // ── Einkaufsliste ──
-export async function getShoppingItems(userId: number) {
+/** Einträge eines Kontos; mit listId nur die der gewünschten Liste. */
+export async function getShoppingItems(userId: number, listId?: number) {
   const db = requireDb(await getDb());
   return db
     .select()
     .from(shoppingItems)
-    .where(eq(shoppingItems.userId, userId))
+    .where(
+      listId === undefined
+        ? eq(shoppingItems.userId, userId)
+        : and(
+            eq(shoppingItems.userId, userId),
+            eq(shoppingItems.listId, listId)
+          )
+    )
     .orderBy(shoppingItems.position, shoppingItems.id);
 }
 
@@ -868,61 +1016,96 @@ export async function deleteShoppingItem(id: number, userId: number) {
     .where(and(eq(shoppingItems.id, id), eq(shoppingItems.userId, userId)));
 }
 
-/** Alle abgehakten Einträge der Einkaufsliste entfernen. */
-export async function deleteCheckedShoppingItems(userId: number) {
+/**
+ * Einträge ohne Listen-Zuordnung (Bestand aus der Zeit der EINEN Liste).
+ * Nur für den öffentlichen Teil-Link nötig, falls dessen Zeile noch keine
+ * listId trägt und die Besitzerin die App seit #215 nie geöffnet hat.
+ */
+export async function getUnassignedShoppingItems(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(shoppingItems)
+    .where(and(eq(shoppingItems.userId, userId), isNull(shoppingItems.listId)))
+    .orderBy(shoppingItems.position, shoppingItems.id);
+}
+
+/** Alle abgehakten Einträge einer Einkaufsliste entfernen. */
+export async function deleteCheckedShoppingItems(
+  userId: number,
+  listId: number
+) {
   const db = requireDb(await getDb());
   await db
     .delete(shoppingItems)
     .where(
-      and(eq(shoppingItems.userId, userId), eq(shoppingItems.checked, true))
+      and(
+        eq(shoppingItems.userId, userId),
+        eq(shoppingItems.listId, listId),
+        eq(shoppingItems.checked, true)
+      )
     );
 }
 
-/** Die ganze Einkaufsliste leeren. */
-export async function clearShoppingItems(userId: number) {
+/** Eine Einkaufsliste leeren (die Liste selbst bleibt bestehen). */
+export async function clearShoppingItems(userId: number, listId: number) {
   const db = requireDb(await getDb());
-  await db.delete(shoppingItems).where(eq(shoppingItems.userId, userId));
+  await db
+    .delete(shoppingItems)
+    .where(
+      and(eq(shoppingItems.userId, userId), eq(shoppingItems.listId, listId))
+    );
 }
 
-/** Teil-Zeile der eigenen Einkaufsliste (undefined = nicht geteilt). */
-export async function getShoppingShare(userId: number) {
+/** Teil-Zeile einer eigenen Einkaufsliste (undefined = nicht geteilt). */
+export async function getShoppingShare(userId: number, listId: number) {
   const db = requireDb(await getDb());
   const result = await db
     .select()
     .from(shoppingShares)
-    .where(eq(shoppingShares.userId, userId))
+    .where(
+      and(eq(shoppingShares.userId, userId), eq(shoppingShares.listId, listId))
+    )
     .limit(1);
   return result[0];
 }
 
-/** Teil-Token für die eigene Einkaufsliste anlegen (eine Zeile pro Konto). */
+/** Teil-Token für eine Einkaufsliste anlegen (eine Zeile pro Liste). */
 export async function createShoppingShare(
   userId: number,
+  listId: number,
   token: string,
   expiresAt: Date | null = null
 ) {
   const db = requireDb(await getDb());
   await db
     .insert(shoppingShares)
-    .values({ userId, shareToken: token, shareExpiresAt: expiresAt });
+    .values({ userId, listId, shareToken: token, shareExpiresAt: expiresAt });
 }
 
 /** Ablauf des bestehenden Einkaufslisten-Links neu setzen (null = unbegrenzt). */
 export async function setShoppingShareExpiry(
   userId: number,
+  listId: number,
   expiresAt: Date | null
 ) {
   const db = requireDb(await getDb());
   await db
     .update(shoppingShares)
     .set({ shareExpiresAt: expiresAt })
-    .where(eq(shoppingShares.userId, userId));
+    .where(
+      and(eq(shoppingShares.userId, userId), eq(shoppingShares.listId, listId))
+    );
 }
 
-/** Teilen der Einkaufsliste beenden: Zeile entfernen, Link wird ungültig. */
-export async function deleteShoppingShare(userId: number) {
+/** Teilen einer Einkaufsliste beenden: Zeile entfernen, Link wird ungültig. */
+export async function deleteShoppingShare(userId: number, listId: number) {
   const db = requireDb(await getDb());
-  await db.delete(shoppingShares).where(eq(shoppingShares.userId, userId));
+  await db
+    .delete(shoppingShares)
+    .where(
+      and(eq(shoppingShares.userId, userId), eq(shoppingShares.listId, listId))
+    );
 }
 
 /** Geteilte Einkaufsliste anhand des Tokens finden (öffentlich, ohne Login). */

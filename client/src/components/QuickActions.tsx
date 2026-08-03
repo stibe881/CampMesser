@@ -12,6 +12,9 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useT } from "@/i18n";
+import ShoppingTargetSelect, {
+  useShoppingTarget,
+} from "@/components/ShoppingTargetSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -107,11 +110,25 @@ export default function QuickActions() {
     return () => window.removeEventListener("keydown", onKey);
   }, [hidden]);
 
+  // Ziel-Liste der Schnellaktion (#215): zuletzt genutzte persönliche Liste
+  // Listen erst laden, wenn die Schnellaktion offen ist – sonst würde jede
+  // Seite die Einkaufslisten abfragen
+  const shoppingTarget = useShoppingTarget(
+    isAuthenticated && (paletteOpen || sheetOpen)
+  );
   const addToShoppingMutation = trpc.shopping.add.useMutation({
     onSuccess: (result, variables) => {
       utils.shopping.list.invalidate();
+      utils.shopping.lists.invalidate();
+      const listName = shoppingTarget.lists.find(
+        l => l.id === variables.listId
+      )?.name;
       if (result.added) {
-        toast.success(t.quickActions.shoppingAdded(variables.name));
+        toast.success(
+          shoppingTarget.lists.length > 1 && listName
+            ? t.shopping.addedToNamedList(variables.name, listName)
+            : t.quickActions.shoppingAdded(variables.name)
+        );
       } else {
         toast.info(t.quickActions.shoppingExists(variables.name));
       }
@@ -170,7 +187,10 @@ export default function QuickActions() {
   const submitShoppingItem = () => {
     const name = itemName.trim();
     if (!name || addToShoppingMutation.isPending) return;
-    addToShoppingMutation.mutate({ name });
+    addToShoppingMutation.mutate({
+      name,
+      listId: shoppingTarget.listId ?? undefined,
+    });
   };
 
   /** Inline-Eingabe für die Einkaufsliste (im Sheet und in der Palette). */
@@ -201,6 +221,8 @@ export default function QuickActions() {
           {t.quickActions.shoppingSubmit}
         </Button>
       </div>
+      {/* Ziel-Liste, sobald es mehrere persönliche Listen gibt (#215) */}
+      <ShoppingTargetSelect target={shoppingTarget} />
     </form>
   );
 

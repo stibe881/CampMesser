@@ -20,6 +20,8 @@ import {
  * Öffentliche Ansicht einer geteilten Einkaufsliste: Mitreisende können ohne
  * Anmeldung mitlesen und beim Einkaufen mit abhaken. Der Link-Token dient als
  * Zugang; ein Refetch-Intervall hält den Stand aller Beteiligten frisch.
+ * Seit #215 hängt der Token an EINER persönlichen Liste – deren Name steht
+ * als Titel über der Seite.
  */
 export default function SharedShoppingPage() {
   const params = useParams<{ token: string }>();
@@ -111,7 +113,7 @@ export default function SharedShoppingPage() {
   return (
     <div className="container max-w-2xl py-6">
       <PageHeader
-        title={t.shopping.title}
+        title={query.data.name ?? t.shopping.title}
         subtitle={t.sharedShopping.subtitle(openItems.length, items.length)}
         backHref="/"
         backLabel={t.sharedShopping.backHome}

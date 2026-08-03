@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Einkaufsliste: Du kannst jetzt mehrere persönliche Listen führen – etwa «Wocheneinkauf» und «Camping». Oben schaltest du mit einem Tipp um, im Verwalten-Dialog legst du Listen an, benennst, sortierst und löschst sie; Teilen, Drucken und Übernahmen aus Rezepten, Menüplan oder Kühlbox beziehen sich immer auf die gewählte Liste. Deine bisherige Liste bleibt vollständig erhalten.",
+        "Liste de courses : tu peux désormais tenir plusieurs listes personnelles – par exemple « Courses de la semaine » et « Camping ». En haut, tu bascules d'un tap, et la fenêtre de gestion te permet de créer, renommer, réordonner et supprimer des listes ; le partage, l'impression et les reprises depuis les recettes, le menu ou la glacière portent toujours sur la liste choisie. Ta liste actuelle est intégralement conservée.",
+        "Lista della spesa: ora puoi tenere più liste personali – per esempio «Spesa settimanale» e «Campeggio». In alto passi da una all'altra con un tocco e nella finestra di gestione le crei, rinomini, riordini ed elimini; condivisione, stampa e importazioni da ricette, menù o frigo box riguardano sempre la lista scelta. La tua lista attuale resta intatta.",
+        "Shopping list: you can now keep several personal lists – say “Weekly shop” and “Camping”. Switch between them with one tap at the top, and use the manage dialog to create, rename, reorder and delete lists; sharing, printing and imports from recipes, the meal plan or the cool box always apply to the selected list. Your existing list is kept in full."
+      ),
+      l4(
         "Inventar: Verliehene Ausrüstung geht nicht mehr vergessen – vermerke pro Gegenstand, an wen und seit wann du ihn verliehen hast, erkenne ihn am Badge «verliehen an …» und buche ihn mit einem Klick zurück; der Chip «Verliehen (N)» zeigt dir alles Ausgeliehene auf einen Blick.",
         "Inventaire : le matériel prêté ne se perd plus – note pour chaque objet à qui tu l'as prêté et depuis quand, repère-le grâce au badge « prêté à … » et récupère-le d'un clic ; la puce « Prêtés (N) » te montre d'un coup d'œil tout ce qui est sorti.",
         "Inventario: l'attrezzatura prestata non si dimentica più – annota per ogni oggetto a chi l'hai prestato e da quando, riconoscilo dal badge «prestato a …» e registralo come restituito con un clic; il chip «Prestati (N)» ti mostra a colpo d'occhio tutto ciò che è in prestito.",

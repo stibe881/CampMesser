@@ -20,6 +20,9 @@ import {
 import { Link, useLocation, useParams } from "wouter";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import ShoppingTargetSelect, {
+  useShoppingTarget,
+} from "@/components/ShoppingTargetSelect";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -177,15 +180,26 @@ export default function MenuPlanPage() {
   const autofillSetMutation = trpc.menu.set.useMutation();
   const autofillRemoveMutation = trpc.menu.remove.useMutation();
   const [autofillBusy, setAutofillBusy] = useState(false);
+  // Ziel-Liste der persönlichen Übernahme (#215)
+  const shoppingTarget = useShoppingTarget(isAuthenticated);
   const addToShoppingMutation = trpc.shopping.addMany.useMutation({
-    onSuccess: result => {
+    onSuccess: (result, variables) => {
       utils.shopping.list.invalidate();
-      toast.success(t.shopping.addedFromRecipe(result.added), {
-        action: {
-          label: t.shopping.openList,
-          onClick: () => navigate("/einkauf"),
-        },
-      });
+      utils.shopping.lists.invalidate();
+      const listName = shoppingTarget.lists.find(
+        l => l.id === variables.listId
+      )?.name;
+      toast.success(
+        shoppingTarget.lists.length > 1 && listName
+          ? t.shopping.addedFromRecipeToList(result.added, listName)
+          : t.shopping.addedFromRecipe(result.added),
+        {
+          action: {
+            label: t.shopping.openList,
+            onClick: () => navigate("/einkauf"),
+          },
+        }
+      );
     },
     onError: () => toast.error(t.shopping.addFailed),
   });
@@ -468,7 +482,10 @@ export default function MenuPlanPage() {
       setListChoiceOpen(true);
       return;
     }
-    addToShoppingMutation.mutate({ names: plannedIngredients });
+    addToShoppingMutation.mutate({
+      listId: shoppingTarget.listId ?? undefined,
+      names: plannedIngredients,
+    });
   };
 
   if (loading || (isAuthenticated && menuQuery.isLoading)) {
@@ -575,6 +592,7 @@ export default function MenuPlanPage() {
           <ShoppingCart className="mr-1.5 h-4 w-4" aria-hidden="true" />
           {t.menuPlan.addIngredients}
         </Button>
+        <ShoppingTargetSelect target={shoppingTarget} className="w-44" />
         <Button asChild variant="outline" size="sm">
           <Link
             href={`/menueplan/${tripId}/einkauf`}
@@ -1031,7 +1049,10 @@ export default function MenuPlanPage() {
               className="flex w-full items-center gap-3 rounded-lg border border-border px-3 py-2.5 text-left transition-colors hover:bg-accent/50"
               onClick={() => {
                 setListChoiceOpen(false);
-                addToShoppingMutation.mutate({ names: plannedIngredients });
+                addToShoppingMutation.mutate({
+                  listId: shoppingTarget.listId ?? undefined,
+                  names: plannedIngredients,
+                });
               }}
             >
               <ShoppingCart
@@ -1047,6 +1068,8 @@ export default function MenuPlanPage() {
                 </span>
               </span>
             </button>
+            {/* Bei mehreren persönlichen Listen: Ziel-Liste wählen (#215) */}
+            <ShoppingTargetSelect target={shoppingTarget} className="px-1" />
           </div>
         </DialogContent>
       </Dialog>

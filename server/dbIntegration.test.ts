@@ -10,7 +10,8 @@ import type { TrpcContext } from "./_core/context";
  * anlegen (Packliste, Einstellung, Zeltplatz mit Foto, Trip mit Foto,
  * Menüplan und Reise-Einkaufsliste,
  * Rezept mit Foto, Inventar-Gegenstand mit Foto, Schnitzeljagd, Quiz,
- * Kinder-Profil mit Abzeichen und Zählern, Einkaufsliste, Kühlbox samt
+ * Kinder-Profil mit Abzeichen und Zählern, Einkaufslisten (inkl.
+ * Übergangs-Migration von Bestand ohne listId), Kühlbox samt
  * Vorlage, Push-Abo, Heim-Standort, Passkey)
  * → Konto löschen → prüfen, dass die Lösch-Kaskade alle Tabellen und
  * die Upload-Dateien erfasst hat.
@@ -307,6 +308,74 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     expect(
       (await authed.tickBites.list()).find(b => b.id === tickBiteId)?.resolvedAt
     ).toBeNull();
+
+    // ── Einkaufslisten (#215) inkl. Übergangs-Migration ──
+    // Altbestand simulieren: ein Eintrag und ein Teil-Link OHNE listId,
+    // wie sie aus der Zeit der EINEN Einkaufsliste stammen
+    const legacyToken = `ci-legacy-${Date.now()}`;
+    {
+      const { getDb: getDbLocal } = await import("./db");
+      const schemaLocal = await import("../drizzle/schema");
+      const dbLocal = (await getDbLocal())!;
+      await dbLocal.insert(schemaLocal.shoppingItems).values({
+        userId: (user as NonNullable<typeof user>).id,
+        name: "CI-Altbestand",
+        position: 0,
+      });
+      await dbLocal.insert(schemaLocal.shoppingShares).values({
+        userId: (user as NonNullable<typeof user>).id,
+        shareToken: legacyToken,
+      });
+    }
+    // Erster Zugriff legt die Standard-Liste an und zieht die Altdaten nach
+    const shoppingLists = await authed.shopping.lists({ lang: "de" });
+    expect(shoppingLists.length).toBe(1);
+    const defaultListId = shoppingLists[0].id;
+    expect(shoppingLists[0].name).toBe("Einkaufsliste");
+    expect(shoppingLists[0].openCount).toBe(1);
+    const migratedItems = await authed.shopping.list({ listId: defaultListId });
+    expect(migratedItems.some(i => i.name === "CI-Altbestand")).toBe(true);
+    // Der alte Teil-Link zeigt weiterhin dieselbe (nun benannte) Liste
+    const legacyShared = await appRouter
+      .createCaller(anonContext().ctx)
+      .shopping.sharedGet({ token: legacyToken });
+    expect(legacyShared.active).toBe(true);
+    expect(legacyShared.name).toBe("Einkaufsliste");
+    expect(legacyShared.items.some(i => i.name === "CI-Altbestand")).toBe(true);
+
+    // Zweite Liste: anlegen, umbenennen, befüllen, sortieren
+    const secondList = await authed.shopping.createList({ name: "CI-Camping" });
+    await authed.shopping.renameList({
+      id: secondList.id,
+      name: "CI-Wochenende",
+    });
+    await authed.shopping.add({ listId: secondList.id, name: "CI-Holzkohle" });
+    const secondItems = await authed.shopping.list({ listId: secondList.id });
+    expect(secondItems.map(i => i.name)).toEqual(["CI-Holzkohle"]);
+    // Einträge bleiben pro Liste getrennt
+    expect(
+      (await authed.shopping.list({ listId: defaultListId })).some(
+        i => i.name === "CI-Holzkohle"
+      )
+    ).toBe(false);
+    await authed.shopping.reorderLists({
+      listIds: [secondList.id, defaultListId],
+    });
+    const reordered = await authed.shopping.lists({ lang: "de" });
+    expect(reordered.map(l => l.id)).toEqual([secondList.id, defaultListId]);
+    expect(reordered.find(l => l.id === secondList.id)?.name).toBe(
+      "CI-Wochenende"
+    );
+    // Löschen nimmt die Einträge mit; die letzte Liste bleibt bestehen
+    await authed.shopping.deleteList({ id: secondList.id });
+    expect((await authed.shopping.lists({ lang: "de" })).length).toBe(1);
+    await expect(
+      authed.shopping.deleteList({ id: defaultListId })
+    ).rejects.toThrow();
+    // Fremde Listen-Ids werden abgewiesen
+    await expect(
+      authed.shopping.list({ listId: secondList.id })
+    ).rejects.toThrow();
 
     await authed.shopping.add({ name: "CI-Zutat" });
     // Einkaufsliste teilen: Token ist idempotent, öffentlicher Abruf und
@@ -803,6 +872,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.shoppingShares)
         .where(eq(schema.shoppingShares.userId, uid)),
+      dbc
+        .select()
+        .from(schema.shoppingLists)
+        .where(eq(schema.shoppingLists.userId, uid)),
       dbc
         .select()
         .from(schema.foodItems)

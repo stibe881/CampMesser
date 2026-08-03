@@ -2,8 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
 import {
+  Check,
+  ChevronDown,
+  ChevronUp,
   GripVertical,
   Link2,
+  ListChecks,
   Loader2,
   Plus,
   Printer,
@@ -21,6 +25,7 @@ import LoginPrompt from "@/components/LoginPrompt";
 import ShoppingItemDetailsPopover from "@/components/ShoppingItemDetailsPopover";
 import ShoppingNameAutocomplete from "@/components/ShoppingNameAutocomplete";
 import StorePurchasesDialog from "@/components/StorePurchasesDialog";
+import { useShoppingTarget } from "@/components/ShoppingTargetSelect";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -56,6 +61,7 @@ import { cn } from "@/lib/utils";
 import { pick } from "@shared/i18n";
 import {
   isShoppingCategory,
+  MAX_SHOPPING_LIST_NAME_LENGTH,
   SHOPPING_CATEGORIES,
   SHOPPING_CATEGORY_LABELS,
   type ShoppingCategory,
@@ -70,14 +76,28 @@ const NO_CATEGORY = "none" as const;
  * «Ohne Kategorie» zuletzt) und lassen sich per Griff innerhalb der Gruppe
  * umsortieren; erledigte stehen durchgestrichen darunter. Zutaten kommen
  * wahlweise direkt aus dem Rezeptbuch (shopping.addMany).
+ *
+ * Seit #215 gibt es MEHRERE persönliche Listen: die Chips oben schalten um
+ * (die Auswahl merkt sich das Gerät), der Verwalten-Dialog legt Listen an,
+ * benennt sie um, sortiert und löscht sie. Teilen, Drucken und «Einräumen»
+ * beziehen sich immer auf die aktive Liste.
  */
 export default function ShoppingPage() {
   const { isAuthenticated, loading } = useAuth();
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
-  const query = trpc.shopping.list.useQuery(undefined, {
-    enabled: isAuthenticated,
+  // Aktive Liste (#215): gemerkte Auswahl, sonst die erste Liste
+  const target = useShoppingTarget(isAuthenticated);
+  const activeListId = target.listId;
+  const listInput = { listId: activeListId ?? undefined };
+  const query = trpc.shopping.list.useQuery(listInput, {
+    enabled: isAuthenticated && activeListId !== null,
   });
+  /** Verwalten-Dialog offen? */
+  const [manageOpen, setManageOpen] = useState(false);
+  const [newListName, setNewListName] = useState("");
+  /** Zwischenstand der Namensfelder im Verwalten-Dialog (Id → Name). */
+  const [nameDrafts, setNameDrafts] = useState<Record<number, string>>({});
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
   const [newCategory, setNewCategory] = useState<string>(NO_CATEGORY);
@@ -131,13 +151,15 @@ export default function ShoppingPage() {
     onError: () => toast.error(t.shopping.shareFailed),
   });
 
-  /** Teil-Link erzeugen (idempotent), Dialog öffnen, Link kopieren. */
+  /** Teil-Link der aktiven Liste erzeugen (idempotent), Dialog öffnen, kopieren. */
   const openShare = (
     // undefined = Gültigkeit unverändert lassen (Dialog nur öffnen)
     expiresInDays?: ShareExpiryDays | null
   ) => {
     shareMutation.mutate(
-      expiresInDays === undefined ? undefined : { expiresInDays },
+      expiresInDays === undefined
+        ? { listId: activeListId ?? undefined }
+        : { listId: activeListId ?? undefined, expiresInDays },
       {
         onSuccess: async ({ token, expiresAt }) => {
           const url = `${window.location.origin}/einkaufsliste/${token}`;
@@ -162,7 +184,11 @@ export default function ShoppingPage() {
     onError: () => toast.error(t.shopping.unshareFailed),
   });
 
-  const invalidate = () => utils.shopping.list.invalidate();
+  /** Einträge UND Zähler der Listen neu laden. */
+  const invalidate = () => {
+    utils.shopping.list.invalidate();
+    utils.shopping.lists.invalidate();
+  };
   const addMutation = trpc.shopping.add.useMutation({
     onSuccess: (result, variables) => {
       invalidate();
@@ -207,10 +233,10 @@ export default function ShoppingPage() {
   });
   const reorderMutation = trpc.shopping.reorder.useMutation({
     onMutate: async input => {
-      await utils.shopping.list.cancel();
-      const prev = utils.shopping.list.getData();
+      await utils.shopping.list.cancel(listInput);
+      const prev = utils.shopping.list.getData(listInput);
       // Optimistisch: Einträge sofort in der neuen Reihenfolge zeigen
-      utils.shopping.list.setData(undefined, old => {
+      utils.shopping.list.setData(listInput, old => {
         if (!old) return old;
         const byId = new Map(old.map(i => [i.id, i]));
         const ordered = input.itemIds
@@ -222,11 +248,64 @@ export default function ShoppingPage() {
       return { prev };
     },
     onError: (_e, _v, ctx) => {
-      if (ctx?.prev) utils.shopping.list.setData(undefined, ctx.prev);
+      if (ctx?.prev) utils.shopping.list.setData(listInput, ctx.prev);
       toast.error(t.shopping.reorderFailed);
     },
     onSettled: invalidate,
   });
+
+  // ── Listen verwalten (#215) ──
+  /** Nach Listen-Änderungen: Umschalter, Zähler und Einträge neu laden. */
+  const invalidateLists = () => {
+    utils.shopping.lists.invalidate();
+    utils.shopping.list.invalidate();
+  };
+  const createListMutation = trpc.shopping.createList.useMutation({
+    onSuccess: result => {
+      invalidateLists();
+      target.setListId(result.id);
+      setNewListName("");
+      toast.success(t.shopping.listCreated(result.name));
+    },
+    onError: () => toast.error(t.shopping.listCreateFailed),
+  });
+  const renameListMutation = trpc.shopping.renameList.useMutation({
+    onSuccess: () => {
+      invalidateLists();
+      toast.success(t.shopping.listRenamed);
+    },
+    onError: () => toast.error(t.shopping.listRenameFailed),
+  });
+  const deleteListMutation = trpc.shopping.deleteList.useMutation({
+    onSuccess: (_result, variables) => {
+      invalidateLists();
+      // Die aktive Liste ist weg: auf die erste verbleibende umschalten
+      if (variables.id === activeListId) {
+        const next = target.lists.find(l => l.id !== variables.id);
+        if (next) target.setListId(next.id);
+      }
+      setNameDrafts({});
+      toast.success(t.shopping.listDeleted);
+    },
+    onError: () => toast.error(t.shopping.listDeleteFailed),
+  });
+  const reorderListsMutation = trpc.shopping.reorderLists.useMutation({
+    onSuccess: invalidateLists,
+    onError: () => toast.error(t.shopping.listOrderFailed),
+  });
+
+  /** Namensfeld einer Liste im Verwalten-Dialog (Entwurf oder gespeichert). */
+  const draftName = (list: { id: number; name: string }) =>
+    nameDrafts[list.id] ?? list.name;
+
+  /** Liste um eine Position nach oben/unten schieben. */
+  const moveList = (index: number, delta: number) => {
+    const ids = target.lists.map(l => l.id);
+    const to = index + delta;
+    if (to < 0 || to >= ids.length) return;
+    ids.splice(to, 0, ...ids.splice(index, 1));
+    reorderListsMutation.mutate({ listIds: ids });
+  };
 
   const items = useMemo(() => query.data ?? [], [query.data]);
   const openItems = useMemo(() => items.filter(i => !i.checked), [items]);
@@ -297,7 +376,11 @@ export default function ShoppingPage() {
     }
     // Erledigte behalten ihre Plätze am Ende der Gesamt-Reihenfolge
     flat.push(...doneItems.map(i => i.id));
-    if (flat.length > 0) reorderMutation.mutate({ itemIds: flat });
+    if (flat.length > 0)
+      reorderMutation.mutate({
+        listId: activeListId ?? undefined,
+        itemIds: flat,
+      });
   };
 
   // Geteilte Pointer-Drag-Logik (Maus + Touch) – gleiches Muster wie Packlisten
@@ -310,6 +393,7 @@ export default function ShoppingPage() {
     const trimmed = name.trim();
     if (!trimmed) return;
     addMutation.mutate({
+      listId: activeListId ?? undefined,
       name: trimmed.slice(0, 160),
       category:
         newCategory === NO_CATEGORY ? null : (newCategory as ShoppingCategory),
@@ -343,6 +427,45 @@ export default function ShoppingPage() {
   return (
     <div className="container max-w-2xl py-6">
       <PageHeader title={t.shopping.title} subtitle={t.shopping.subtitle} />
+
+      {/* Listen-Umschalter (#215): Chips mit Anzahl offener Einträge */}
+      {target.lists.length > 0 && (
+        <div
+          className="mb-4 flex flex-wrap items-center gap-2"
+          role="group"
+          aria-label={t.shopping.listsAria}
+        >
+          {target.lists.map(list => (
+            <button
+              key={list.id}
+              type="button"
+              aria-pressed={list.id === activeListId}
+              onClick={() => target.setListId(list.id)}
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                list.id === activeListId
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {list.name}
+              <span className="ml-1.5 opacity-70">{list.openCount}</span>
+            </button>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setNameDrafts({});
+              setManageOpen(true);
+            }}
+            aria-label={t.shopping.manageListsAria}
+          >
+            <ListChecks className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.shopping.manageListsButton}
+          </Button>
+        </div>
+      )}
 
       {/* Schnelles Hinzufügen mit optionaler Kategorie */}
       <form
@@ -395,7 +518,7 @@ export default function ShoppingPage() {
         </Button>
       </form>
 
-      {query.isLoading ? (
+      {query.isLoading || activeListId === null ? (
         <div className="flex justify-center py-10">
           <Loader2
             className="h-6 w-6 animate-spin text-muted-foreground"
@@ -425,7 +548,13 @@ export default function ShoppingPage() {
                 </span>
                 {openItems.length > 0 && (
                   <Button asChild variant="outline" size="sm">
-                    <Link href="/einkauf/drucken">
+                    <Link
+                      href={
+                        activeListId === null
+                          ? "/einkauf/drucken"
+                          : `/einkauf/drucken?liste=${activeListId}`
+                      }
+                    >
                       <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
                       {t.shopping.printButton}
                     </Link>
@@ -634,7 +763,11 @@ export default function ShoppingPage() {
                   variant="outline"
                   size="sm"
                   disabled={removeCheckedMutation.isPending}
-                  onClick={() => removeCheckedMutation.mutate()}
+                  onClick={() =>
+                    removeCheckedMutation.mutate({
+                      listId: activeListId ?? undefined,
+                    })
+                  }
                 >
                   <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
                   {t.shopping.removeChecked}
@@ -646,7 +779,9 @@ export default function ShoppingPage() {
                   disabled={clearMutation.isPending}
                   onClick={() => {
                     if (confirm(t.shopping.clearConfirm)) {
-                      clearMutation.mutate();
+                      clearMutation.mutate({
+                        listId: activeListId ?? undefined,
+                      });
                     }
                   }}
                 >
@@ -657,6 +792,132 @@ export default function ShoppingPage() {
           )}
         </div>
       )}
+
+      {/* Listen verwalten (#215): anlegen, umbenennen, sortieren, löschen */}
+      <Dialog
+        open={manageOpen}
+        onOpenChange={open => {
+          setManageOpen(open);
+          if (!open) setNameDrafts({});
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.shopping.manageListsTitle}</DialogTitle>
+            <DialogDescription>
+              {t.shopping.manageListsDescription}
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            className="flex gap-2"
+            onSubmit={e => {
+              e.preventDefault();
+              const trimmed = newListName.trim();
+              if (!trimmed) return;
+              createListMutation.mutate({
+                name: trimmed.slice(0, MAX_SHOPPING_LIST_NAME_LENGTH),
+              });
+            }}
+          >
+            <Input
+              value={newListName}
+              maxLength={MAX_SHOPPING_LIST_NAME_LENGTH}
+              placeholder={t.shopping.newListPlaceholder}
+              aria-label={t.shopping.newListPlaceholder}
+              onChange={e => setNewListName(e.target.value)}
+            />
+            <Button
+              type="submit"
+              disabled={!newListName.trim() || createListMutation.isPending}
+            >
+              <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.shopping.newListButton}
+            </Button>
+          </form>
+          <ul className="space-y-2">
+            {target.lists.map((list, index) => (
+              <li key={list.id} className="flex items-start gap-1.5">
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    disabled={index === 0}
+                    onClick={() => moveList(index, -1)}
+                    aria-label={t.shopping.listMoveUpAria(list.name)}
+                    className="rounded p-0.5 text-muted-foreground/60 hover:text-foreground disabled:opacity-30"
+                  >
+                    <ChevronUp className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={index === target.lists.length - 1}
+                    onClick={() => moveList(index, 1)}
+                    aria-label={t.shopping.listMoveDownAria(list.name)}
+                    className="rounded p-0.5 text-muted-foreground/60 hover:text-foreground disabled:opacity-30"
+                  >
+                    <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <Input
+                    value={draftName(list)}
+                    maxLength={MAX_SHOPPING_LIST_NAME_LENGTH}
+                    aria-label={t.shopping.listNameAria(list.name)}
+                    onChange={e =>
+                      setNameDrafts(prev => ({
+                        ...prev,
+                        [list.id]: e.target.value,
+                      }))
+                    }
+                  />
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {t.shopping.listCounts(list.openCount, list.doneCount)}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 shrink-0 text-muted-foreground/70 hover:text-foreground"
+                  disabled={
+                    !draftName(list).trim() ||
+                    draftName(list).trim() === list.name ||
+                    renameListMutation.isPending
+                  }
+                  aria-label={t.shopping.listSaveNameAria(list.name)}
+                  onClick={() =>
+                    renameListMutation.mutate({
+                      id: list.id,
+                      name: draftName(list)
+                        .trim()
+                        .slice(0, MAX_SHOPPING_LIST_NAME_LENGTH),
+                    })
+                  }
+                >
+                  <Check className="h-4 w-4" aria-hidden="true" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 shrink-0 text-muted-foreground/60 hover:text-destructive"
+                  disabled={
+                    target.lists.length <= 1 || deleteListMutation.isPending
+                  }
+                  aria-label={t.shopping.listDeleteAria(list.name)}
+                  onClick={() => {
+                    if (confirm(t.shopping.listDeleteConfirm(list.name))) {
+                      deleteListMutation.mutate({ id: list.id });
+                    }
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-muted-foreground">
+            {t.shopping.listDeleteLastHint}
+          </p>
+        </DialogContent>
+      </Dialog>
 
       {/* «Einkäufe einräumen»: abgehakte Einträge in die Kühlbox übernehmen */}
       <StorePurchasesDialog
@@ -743,7 +1004,9 @@ export default function ShoppingPage() {
                 variant="outline"
                 size="sm"
                 disabled={unshareMutation.isPending}
-                onClick={() => unshareMutation.mutate()}
+                onClick={() =>
+                  unshareMutation.mutate({ listId: activeListId ?? undefined })
+                }
               >
                 {t.shopping.unshareButton}
               </Button>

@@ -2672,6 +2672,39 @@ export const fr: Translation = {
     putAwayOpenFood: "Vers la glacière",
     putAwayFailed:
       "Le rangement a échoué – les articles pas encore repris restent sur la liste",
+    listsAria: "Choisir la liste de courses",
+    listCounts: (open: number, done: number) =>
+      `${open} à acheter · ${done} faits`,
+    manageListsButton: "Listes",
+    manageListsAria: "Gérer les listes de courses",
+    manageListsTitle: "Gérer les listes de courses",
+    manageListsDescription:
+      "Crée d'autres listes (p. ex. « Courses de la semaine » et « Camping »), renomme-les, réordonne-les – ou supprime une liste avec toutes ses entrées.",
+    newListPlaceholder: "Nom de la nouvelle liste",
+    newListButton: "Créer",
+    listCreated: (name: string) => `Liste « ${name} » créée`,
+    listCreateFailed: "Impossible de créer la liste",
+    listNameAria: (name: string) => `Nom de ${name}`,
+    listSaveNameAria: (name: string) => `Enregistrer le nouveau nom de ${name}`,
+    listRenamed: "Liste renommée",
+    listRenameFailed: "Impossible de renommer la liste",
+    listDeleteAria: (name: string) => `Supprimer la liste ${name}`,
+    listDeleteConfirm: (name: string) =>
+      `Supprimer la liste « ${name} » avec toutes ses entrées ?`,
+    listDeleted: "Liste supprimée",
+    listDeleteFailed: "Impossible de supprimer la liste",
+    listDeleteLastHint: "La dernière liste est conservée.",
+    listMoveUpAria: (name: string) => `Déplacer ${name} vers le haut`,
+    listMoveDownAria: (name: string) => `Déplacer ${name} vers le bas`,
+    listOrderFailed: "Impossible d'enregistrer l'ordre des listes",
+    targetListLabel: "Liste de destination",
+    targetListAria: "Choisir la liste de destination",
+    addedToNamedList: (name: string, list: string) =>
+      `${name} ajouté à « ${list} »`,
+    addedFromRecipeToList: (n: number, list: string) =>
+      n === 1
+        ? `1 ingrédient ajouté à « ${list} »`
+        : `${n} ingrédients ajoutés à « ${list} »`,
   },
   sharedShopping: {
     loading: "Chargement de la liste de courses partagée …",

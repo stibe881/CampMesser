@@ -681,12 +681,38 @@ export const tripJournal = mysqlTable(
 export type TripJournalEntry = typeof tripJournal.$inferSelect;
 export type InsertTripJournalEntry = typeof tripJournal.$inferInsert;
 
+/**
+ * Persönliche Einkaufslisten (#215): pro Konto beliebig viele benannte
+ * Listen («Wocheneinkauf», «Camping»). Die Reihenfolge im Umschalter steckt
+ * in position (0..n); gelöscht wird eine Liste samt ihren Einträgen.
+ */
+export const shoppingLists = mysqlTable(
+  "shoppingLists",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 80 }).notNull(),
+    position: int("position").notNull().default(0),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("shoppingLists_userId").on(table.userId)]
+);
+
+export type ShoppingList = typeof shoppingLists.$inferSelect;
+export type InsertShoppingList = typeof shoppingLists.$inferInsert;
+
 /** Einkaufsliste: abhakbare Einträge pro Nutzer*in (manuell oder aus Rezepten). */
 export const shoppingItems = mysqlTable(
   "shoppingItems",
   {
     id: int("id").autoincrement().primaryKey(),
     userId: int("userId").notNull(),
+    /**
+     * Zugehörige Liste (shoppingLists.id). Nullable als Übergang für Bestände
+     * aus der Zeit der EINEN Liste – beim ersten Zugriff hängt
+     * ensureDefaultShoppingList() diese Einträge an die Standard-Liste.
+     */
+    listId: int("listId"),
     name: varchar("name", { length: 160 }).notNull(),
     checked: boolean("checked").notNull().default(false),
     position: int("position").notNull().default(0),
@@ -698,29 +724,36 @@ export const shoppingItems = mysqlTable(
     note: varchar("note", { length: 160 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
-  table => [index("shoppingItems_userId").on(table.userId)]
+  table => [
+    index("shoppingItems_userId").on(table.userId),
+    index("shoppingItems_listId").on(table.listId),
+  ]
 );
 
 export type ShoppingItem = typeof shoppingItems.$inferSelect;
 export type InsertShoppingItem = typeof shoppingItems.$inferInsert;
 
 /**
- * Teil-Links der Einkaufsliste: die Liste ist EINE Liste pro Nutzer*in,
- * deshalb genau eine Teil-Zeile pro Konto (userId unique). Wer den Token
- * kennt, kann die Liste sehen und mit abhaken.
+ * Teil-Links der Einkaufslisten: seit #215 wird PRO LISTE geteilt, also
+ * höchstens eine Teil-Zeile je (userId, listId). listId ist nullable, damit
+ * Alt-Zeilen aus der Zeit der einen Liste erhalten bleiben –
+ * ensureDefaultShoppingList() trägt dort die Standard-Liste nach.
+ * Wer den Token kennt, kann die Liste sehen und mit abhaken.
  */
 export const shoppingShares = mysqlTable(
   "shoppingShares",
   {
     id: int("id").autoincrement().primaryKey(),
     userId: int("userId").notNull(),
+    /** Geteilte Liste (shoppingLists.id); null = Alt-Zeile vor #215 */
+    listId: int("listId"),
     shareToken: varchar("shareToken", { length: 64 }).notNull(),
     /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
     shareExpiresAt: timestamp("shareExpiresAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [
-    uniqueIndex("shoppingShares_userId").on(table.userId),
+    uniqueIndex("shoppingShares_user_list").on(table.userId, table.listId),
     uniqueIndex("shoppingShares_shareToken").on(table.shareToken),
   ]
 );

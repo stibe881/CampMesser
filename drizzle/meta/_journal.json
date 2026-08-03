@@ -470,6 +470,13 @@
       "when": 1785763560057,
       "tag": "0066_high_nekra",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "5",
+      "when": 1785764132481,
+      "tag": "0067_blue_goblin_queen",
+      "breakpoints": true
     }
   ]
 }

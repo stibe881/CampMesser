@@ -2648,6 +2648,39 @@ export const it: Translation = {
     putAwayOpenFood: "Al frigo box",
     putAwayFailed:
       "Sistemazione non riuscita – le voci non ancora riprese restano sulla lista",
+    listsAria: "Scegli la lista della spesa",
+    listCounts: (open: number, done: number) =>
+      `${open} da comprare · ${done} fatti`,
+    manageListsButton: "Liste",
+    manageListsAria: "Gestisci le liste della spesa",
+    manageListsTitle: "Gestisci le liste della spesa",
+    manageListsDescription:
+      "Crea altre liste (per es. «Spesa settimanale» e «Campeggio»), rinominale, riordinale – oppure elimina una lista con tutte le sue voci.",
+    newListPlaceholder: "Nome della nuova lista",
+    newListButton: "Crea",
+    listCreated: (name: string) => `Lista «${name}» creata`,
+    listCreateFailed: "Impossibile creare la lista",
+    listNameAria: (name: string) => `Nome di ${name}`,
+    listSaveNameAria: (name: string) => `Salva il nuovo nome di ${name}`,
+    listRenamed: "Lista rinominata",
+    listRenameFailed: "Impossibile rinominare la lista",
+    listDeleteAria: (name: string) => `Elimina la lista ${name}`,
+    listDeleteConfirm: (name: string) =>
+      `Eliminare la lista «${name}» con tutte le sue voci?`,
+    listDeleted: "Lista eliminata",
+    listDeleteFailed: "Impossibile eliminare la lista",
+    listDeleteLastHint: "L'ultima lista resta sempre.",
+    listMoveUpAria: (name: string) => `Sposta ${name} in alto`,
+    listMoveDownAria: (name: string) => `Sposta ${name} in basso`,
+    listOrderFailed: "Impossibile salvare l'ordine delle liste",
+    targetListLabel: "Lista di destinazione",
+    targetListAria: "Scegli la lista di destinazione",
+    addedToNamedList: (name: string, list: string) =>
+      `${name} aggiunto a «${list}»`,
+    addedFromRecipeToList: (n: number, list: string) =>
+      n === 1
+        ? `1 ingrediente aggiunto a «${list}»`
+        : `${n} ingredienti aggiunti a «${list}»`,
   },
   sharedShopping: {
     loading: "Caricamento della lista della spesa condivisa …",

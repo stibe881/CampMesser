@@ -19,14 +19,33 @@ import {
  * Laden-Kategorien gruppiert (Katalog-Reihenfolge, «Ohne Kategorie» zuletzt),
  * pro Eintrag ein Papier-Kästchen zum Abhaken im Laden. PDF entsteht über
  * den Browser-Druckdialog.
+ *
+ * Welche der persönlichen Listen gedruckt wird, steht in `?liste=<id>` (#215);
+ * ohne Parameter druckt die erste bzw. Standard-Liste.
  */
 export default function ShoppingPrintPage() {
   const { lang, t } = useI18n();
   const standalone = isStandaloneApp();
   const { isAuthenticated, loading } = useAuth();
-  const query = trpc.shopping.list.useQuery(undefined, {
-    enabled: isAuthenticated,
-  });
+  // Gewünschte Liste aus der Adresse (?liste=12); ungültige Werte = Vorgabe
+  const listId = useMemo(() => {
+    const raw = new URLSearchParams(window.location.search).get("liste");
+    const id = Number(raw);
+    return raw && Number.isInteger(id) && id > 0 ? id : undefined;
+  }, []);
+  const query = trpc.shopping.list.useQuery(
+    { listId, lang },
+    { enabled: isAuthenticated }
+  );
+  const listsQuery = trpc.shopping.lists.useQuery(
+    { lang },
+    { enabled: isAuthenticated }
+  );
+  /** Name der gedruckten Liste (null, solange unbekannt). */
+  const listName =
+    (listId === undefined
+      ? listsQuery.data?.[0]?.name
+      : listsQuery.data?.find(l => l.id === listId)?.name) ?? null;
 
   useEffect(() => {
     document.title = t.shoppingPrint.docTitle;
@@ -115,7 +134,7 @@ export default function ShoppingPrintPage() {
             {t.shoppingPrint.headerKicker}
           </p>
           <h1 className="mt-1 font-serif text-3xl font-bold">
-            {t.shoppingPrint.title}
+            {listName ?? t.shoppingPrint.title}
           </h1>
           <p className="mt-1 text-sm">
             {t.shoppingPrint.meta(openItems.length, grouped.length)}

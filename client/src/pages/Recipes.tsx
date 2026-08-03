@@ -31,6 +31,9 @@ import QRCode from "qrcode";
 import { useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import ShoppingTargetSelect, {
+  useShoppingTarget,
+} from "@/components/ShoppingTargetSelect";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -749,16 +752,28 @@ export default function RecipesPage() {
   };
 
   const [, navigate] = useLocation();
+  // Ziel-Liste der Übernahme (#215): zuletzt genutzte Liste, wählbar sobald
+  // es mehr als eine Liste gibt
+  const shoppingTarget = useShoppingTarget(isAuthenticated);
   // Zutaten in der aktiven Sprache auf die Einkaufsliste übernehmen
   const addToShoppingMutation = trpc.shopping.addMany.useMutation({
-    onSuccess: result => {
+    onSuccess: (result, variables) => {
       utils.shopping.list.invalidate();
-      toast.success(t.shopping.addedFromRecipe(result.added), {
-        action: {
-          label: t.shopping.openList,
-          onClick: () => navigate("/einkauf"),
-        },
-      });
+      utils.shopping.lists.invalidate();
+      const listName = shoppingTarget.lists.find(
+        l => l.id === variables.listId
+      )?.name;
+      toast.success(
+        shoppingTarget.lists.length > 1 && listName
+          ? t.shopping.addedFromRecipeToList(result.added, listName)
+          : t.shopping.addedFromRecipe(result.added),
+        {
+          action: {
+            label: t.shopping.openList,
+            onClick: () => navigate("/einkauf"),
+          },
+        }
+      );
     },
     onError: () => toast.error(t.shopping.addFailed),
   });
@@ -1153,6 +1168,7 @@ export default function RecipesPage() {
                       disabled={addToShoppingMutation.isPending}
                       onClick={() =>
                         addToShoppingMutation.mutate({
+                          listId: shoppingTarget.listId ?? undefined,
                           names: selected.ingredients
                             .map(i => pick(i, lang).trim())
                             .filter(Boolean)
@@ -1172,6 +1188,12 @@ export default function RecipesPage() {
                       />
                       {t.shopping.addIngredients}
                     </Button>
+                  )}
+                  {isAuthenticated && (
+                    <ShoppingTargetSelect
+                      target={shoppingTarget}
+                      className="mt-3 max-w-56"
+                    />
                   )}
                   {/* Nach dem Kochen: Zutaten aus der Kühlbox austragen (#190) */}
                   {isAuthenticated && (

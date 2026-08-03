@@ -2673,6 +2673,39 @@ export const de = {
     putAwayOpenFood: "Zur Kühlbox",
     putAwayFailed:
       "Einräumen fehlgeschlagen – noch nicht übernommene Einträge bleiben auf der Liste",
+    listsAria: "Einkaufsliste wählen",
+    listCounts: (open: number, done: number) =>
+      `${open} offen · ${done} erledigt`,
+    manageListsButton: "Listen",
+    manageListsAria: "Einkaufslisten verwalten",
+    manageListsTitle: "Einkaufslisten verwalten",
+    manageListsDescription:
+      "Lege weitere Listen an (z. B. «Wocheneinkauf» und «Camping»), benenne sie um, sortiere sie – oder lösche eine Liste samt ihren Einträgen.",
+    newListPlaceholder: "Name der neuen Liste",
+    newListButton: "Anlegen",
+    listCreated: (name: string) => `Liste «${name}» angelegt`,
+    listCreateFailed: "Liste konnte nicht angelegt werden",
+    listNameAria: (name: string) => `Name von ${name}`,
+    listSaveNameAria: (name: string) => `Neuen Namen von ${name} speichern`,
+    listRenamed: "Liste umbenannt",
+    listRenameFailed: "Liste konnte nicht umbenannt werden",
+    listDeleteAria: (name: string) => `Liste ${name} löschen`,
+    listDeleteConfirm: (name: string) =>
+      `Liste «${name}» mit allen Einträgen löschen?`,
+    listDeleted: "Liste gelöscht",
+    listDeleteFailed: "Liste konnte nicht gelöscht werden",
+    listDeleteLastHint: "Die letzte Liste bleibt bestehen.",
+    listMoveUpAria: (name: string) => `${name} nach oben schieben`,
+    listMoveDownAria: (name: string) => `${name} nach unten schieben`,
+    listOrderFailed: "Reihenfolge der Listen konnte nicht gespeichert werden",
+    targetListLabel: "Ziel-Liste",
+    targetListAria: "Ziel-Liste für die Übernahme wählen",
+    addedToNamedList: (name: string, list: string) =>
+      `${name} auf «${list}» gesetzt`,
+    addedFromRecipeToList: (n: number, list: string) =>
+      n === 1
+        ? `1 Zutat auf «${list}» gesetzt`
+        : `${n} Zutaten auf «${list}» gesetzt`,
   },
   sharedShopping: {
     loading: "Geteilte Einkaufsliste wird geladen …",

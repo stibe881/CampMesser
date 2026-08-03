@@ -19,7 +19,7 @@ import {
   parsePersons,
   serializePersons,
 } from "@shared/packPersons";
-import { l4, pick } from "@shared/i18n";
+import { l4, pick, type Language } from "@shared/i18n";
 import {
   SETTING_VALUE_MAX_LENGTH,
   SYNCED_SETTING_KEYS,
@@ -59,7 +59,11 @@ import {
   MAX_TICK_BODY_PART_LENGTH,
   MAX_TICK_NOTE_LENGTH,
 } from "@shared/tickBites";
-import { SHOPPING_CATEGORIES } from "@shared/shopping";
+import {
+  DEFAULT_SHOPPING_LIST_NAME,
+  MAX_SHOPPING_LIST_NAME_LENGTH,
+  SHOPPING_CATEGORIES,
+} from "@shared/shopping";
 import {
   parseSpotAttributes,
   SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
@@ -218,6 +222,36 @@ async function requireTripAccess(tripId: number, userId: number) {
     });
   }
   return trip;
+}
+
+/** App-Sprache als Eingabe (für serverseitig erzeugte Texte). */
+const shoppingLangInput = z.enum(["de", "fr", "it", "en"]).default("de");
+
+/**
+ * Ziel-Liste einer Einkaufs-Aktion bestimmen (#215): mit `listId` wird der
+ * Besitz geprüft, ohne `listId` greift die erste Liste des Kontos – dabei
+ * legt ensureDefaultShoppingList() bei Bedarf die Standard-Liste an und holt
+ * Bestände ohne listId nach. So funktionieren auch alte Clients weiter.
+ */
+async function requireShoppingList(
+  userId: number,
+  listId: number | undefined,
+  lang: Language = "de"
+) {
+  if (listId === undefined) {
+    return db.ensureDefaultShoppingList(
+      userId,
+      pick(DEFAULT_SHOPPING_LIST_NAME, lang)
+    );
+  }
+  const list = await db.getShoppingList(listId, userId);
+  if (!list) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Einkaufsliste nicht gefunden.",
+    });
+  }
+  return list;
 }
 
 export const appRouter = router({
@@ -1730,12 +1764,118 @@ export const appRouter = router({
   }),
 
   shopping: router({
-    list: protectedProcedure.query(({ ctx }) =>
-      db.getShoppingItems(ctx.user.id)
-    ),
+    /**
+     * Alle persönlichen Listen mit Zählern (#215). Ruft die Übergangs-Hilfe
+     * auf, damit Konten aus der Zeit der EINEN Liste automatisch eine
+     * Standard-Liste bekommen und keine Einträge verlieren.
+     */
+    lists: protectedProcedure
+      .input(z.object({ lang: shoppingLangInput }).optional())
+      .query(async ({ ctx, input }) => {
+        await db.ensureDefaultShoppingList(
+          ctx.user.id,
+          pick(DEFAULT_SHOPPING_LIST_NAME, input?.lang ?? "de")
+        );
+        const [lists, items] = await Promise.all([
+          db.getShoppingLists(ctx.user.id),
+          db.getShoppingItems(ctx.user.id),
+        ]);
+        return lists.map(list => {
+          const own = items.filter(i => i.listId === list.id);
+          return {
+            id: list.id,
+            name: list.name,
+            position: list.position,
+            openCount: own.filter(i => !i.checked).length,
+            doneCount: own.filter(i => i.checked).length,
+          };
+        });
+      }),
+    /** Neue Liste anlegen (Name getrimmt); gibt die Id zurück. */
+    createList: protectedProcedure
+      .input(
+        z.object({
+          name: z.string().min(1).max(MAX_SHOPPING_LIST_NAME_LENGTH),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const name = input.name.trim().slice(0, MAX_SHOPPING_LIST_NAME_LENGTH);
+        if (!name) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Name darf nicht leer sein.",
+          });
+        }
+        const id = await db.createShoppingList(ctx.user.id, name);
+        return { id, name };
+      }),
+    /** Liste umbenennen (nur eigene). */
+    renameList: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          name: z.string().min(1).max(MAX_SHOPPING_LIST_NAME_LENGTH),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await requireShoppingList(ctx.user.id, input.id);
+        const name = input.name.trim().slice(0, MAX_SHOPPING_LIST_NAME_LENGTH);
+        if (!name) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Name darf nicht leer sein.",
+          });
+        }
+        await db.renameShoppingList(input.id, ctx.user.id, name);
+        return { success: true } as const;
+      }),
+    /** Liste samt Einträgen löschen – die letzte Liste bleibt bestehen. */
+    deleteList: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await requireShoppingList(ctx.user.id, input.id);
+        const lists = await db.getShoppingLists(ctx.user.id);
+        if (lists.length <= 1) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Die letzte Einkaufsliste lässt sich nicht löschen.",
+          });
+        }
+        await db.deleteShoppingList(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+    /** Neue Reihenfolge der Listen speichern (fremde Ids werden ignoriert). */
+    reorderLists: protectedProcedure
+      .input(z.object({ listIds: z.array(z.number().int()).min(1).max(100) }))
+      .mutation(async ({ ctx, input }) => {
+        const lists = await db.getShoppingLists(ctx.user.id);
+        const valid = new Set(lists.map(l => l.id));
+        const ids = input.listIds.filter(id => valid.has(id));
+        if (ids.length > 0) await db.reorderShoppingLists(ctx.user.id, ids);
+        return { success: true } as const;
+      }),
+    /** Einträge einer Liste (ohne listId: erste bzw. Standard-Liste). */
+    list: protectedProcedure
+      .input(
+        z
+          .object({
+            listId: z.number().int().positive().optional(),
+            lang: shoppingLangInput,
+          })
+          .optional()
+      )
+      .query(async ({ ctx, input }) => {
+        const list = await requireShoppingList(
+          ctx.user.id,
+          input?.listId,
+          input?.lang ?? "de"
+        );
+        return db.getShoppingItems(ctx.user.id, list.id);
+      }),
     add: protectedProcedure
       .input(
         z.object({
+          listId: z.number().int().positive().optional(),
           name: z.string().min(1).max(160),
           category: z.enum(SHOPPING_CATEGORIES).nullish(),
           quantity: z.string().max(40).nullish(),
@@ -1743,7 +1883,8 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const items = await db.getShoppingItems(ctx.user.id);
+        const list = await requireShoppingList(ctx.user.id, input.listId);
+        const items = await db.getShoppingItems(ctx.user.id, list.id);
         const name = input.name.trim();
         // Duplikat-Schutz: steht der Name bereits unabgehakt auf der Liste
         // (case-insensitiv), wird kein zweiter Eintrag angelegt. Eine
@@ -1752,12 +1893,14 @@ export const appRouter = router({
         const alreadyOpen = items.some(
           i => !i.checked && i.name.trim().toLowerCase() === name.toLowerCase()
         );
-        if (alreadyOpen) return { success: true, added: false } as const;
+        if (alreadyOpen)
+          return { success: true, added: false, listId: list.id } as const;
         const nextPosition =
           items.reduce((max, i) => Math.max(max, i.position), 0) + 1;
         await db.addShoppingItems([
           {
             userId: ctx.user.id,
+            listId: list.id,
             name,
             position: nextPosition,
             category: input.category ?? null,
@@ -1765,13 +1908,14 @@ export const appRouter = router({
             note: input.note?.trim() || null,
           },
         ]);
-        return { success: true, added: true } as const;
+        return { success: true, added: true, listId: list.id } as const;
       }),
     /** Mehrere Einträge auf einmal (z. B. Zutaten eines Rezepts) – wahlweise
      * als blosser Name oder als Objekt mit optionaler Menge/Notiz. */
     addMany: protectedProcedure
       .input(
         z.object({
+          listId: z.number().int().positive().optional(),
           names: z
             .array(
               z.union([
@@ -1789,7 +1933,8 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const items = await db.getShoppingItems(ctx.user.id);
+        const list = await requireShoppingList(ctx.user.id, input.listId);
+        const items = await db.getShoppingItems(ctx.user.id, list.id);
         const nextPosition =
           items.reduce((max, i) => Math.max(max, i.position), 0) + 1;
         await db.addShoppingItems(
@@ -1797,6 +1942,7 @@ export const appRouter = router({
             const obj = typeof entry === "string" ? { name: entry } : entry;
             return {
               userId: ctx.user.id,
+              listId: list.id,
               name: obj.name.trim(),
               position: nextPosition + idx,
               category: input.category ?? null,
@@ -1805,7 +1951,7 @@ export const appRouter = router({
             };
           })
         );
-        return { added: input.names.length };
+        return { added: input.names.length, listId: list.id };
       }),
     /** Menge und/oder Notiz eines eigenen Eintrags setzen (null/"" entfernt). */
     updateItem: protectedProcedure
@@ -1837,13 +1983,19 @@ export const appRouter = router({
       .mutation(({ ctx, input }) =>
         db.setShoppingItemCategory(input.id, ctx.user.id, input.category)
       ),
-    /** Neue Reihenfolge (Drag-and-drop) speichern: Positionen 0..n. */
+    /** Neue Reihenfolge (Drag-and-drop) innerhalb einer Liste speichern. */
     reorder: protectedProcedure
-      .input(z.object({ itemIds: z.array(z.number().int()).min(1).max(500) }))
+      .input(
+        z.object({
+          listId: z.number().int().positive().optional(),
+          itemIds: z.array(z.number().int()).min(1).max(500),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
-        const items = await db.getShoppingItems(ctx.user.id);
+        const list = await requireShoppingList(ctx.user.id, input.listId);
+        const items = await db.getShoppingItems(ctx.user.id, list.id);
         const valid = new Set(items.map(i => i.id));
-        // Nur eigene Einträge umsortieren – fremde IDs werden ignoriert
+        // Nur eigene Einträge DIESER Liste umsortieren – fremde Ids ignorieren
         const ids = input.itemIds.filter(id => valid.has(id));
         if (ids.length > 0) await db.reorderShoppingItems(ctx.user.id, ids);
         return { success: true } as const;
@@ -1858,34 +2010,59 @@ export const appRouter = router({
       .mutation(({ ctx, input }) =>
         db.deleteShoppingItem(input.id, ctx.user.id)
       ),
-    removeChecked: protectedProcedure.mutation(({ ctx }) =>
-      db.deleteCheckedShoppingItems(ctx.user.id)
-    ),
-    clear: protectedProcedure.mutation(({ ctx }) =>
-      db.clearShoppingItems(ctx.user.id)
-    ),
-    /** Teil-Link erzeugen (idempotent): gibt den Token zurück. */
-    share: protectedProcedure
-      .input(z.object({ expiresInDays: shareExpiryInput }).optional())
+    removeChecked: protectedProcedure
+      .input(
+        z.object({ listId: z.number().int().positive().optional() }).optional()
+      )
       .mutation(async ({ ctx, input }) => {
-        const existing = await db.getShoppingShare(ctx.user.id);
+        const list = await requireShoppingList(ctx.user.id, input?.listId);
+        await db.deleteCheckedShoppingItems(ctx.user.id, list.id);
+        return { success: true } as const;
+      }),
+    clear: protectedProcedure
+      .input(
+        z.object({ listId: z.number().int().positive().optional() }).optional()
+      )
+      .mutation(async ({ ctx, input }) => {
+        const list = await requireShoppingList(ctx.user.id, input?.listId);
+        await db.clearShoppingItems(ctx.user.id, list.id);
+        return { success: true } as const;
+      }),
+    /** Teil-Link einer Liste erzeugen (idempotent): gibt den Token zurück. */
+    share: protectedProcedure
+      .input(
+        z
+          .object({
+            listId: z.number().int().positive().optional(),
+            expiresInDays: shareExpiryInput,
+          })
+          .optional()
+      )
+      .mutation(async ({ ctx, input }) => {
+        const list = await requireShoppingList(ctx.user.id, input?.listId);
+        const existing = await db.getShoppingShare(ctx.user.id, list.id);
         const expiresAt = shareExpiryFor(
           input?.expiresInDays,
           existing?.shareExpiresAt ?? null
         );
         if (existing) {
-          await db.setShoppingShareExpiry(ctx.user.id, expiresAt);
+          await db.setShoppingShareExpiry(ctx.user.id, list.id, expiresAt);
           return { token: existing.shareToken, expiresAt };
         }
         const token = nanoid(16);
-        await db.createShoppingShare(ctx.user.id, token, expiresAt);
+        await db.createShoppingShare(ctx.user.id, list.id, token, expiresAt);
         return { token, expiresAt };
       }),
-    /** Teilen beenden: Token entfernen, Link wird ungültig. */
-    unshare: protectedProcedure.mutation(async ({ ctx }) => {
-      await db.deleteShoppingShare(ctx.user.id);
-      return { success: true } as const;
-    }),
+    /** Teilen beenden: Token der Liste entfernen, Link wird ungültig. */
+    unshare: protectedProcedure
+      .input(
+        z.object({ listId: z.number().int().positive().optional() }).optional()
+      )
+      .mutation(async ({ ctx, input }) => {
+        const list = await requireShoppingList(ctx.user.id, input?.listId);
+        await db.deleteShoppingShare(ctx.user.id, list.id);
+        return { success: true } as const;
+      }),
     /** Geteilte Einkaufsliste öffentlich abrufen (kein Login nötig). */
     sharedGet: publicProcedure
       .input(z.object({ token: z.string().min(8).max(64) }))
@@ -1894,6 +2071,7 @@ export const appRouter = router({
         if (!share) {
           return {
             active: false as const,
+            name: null as string | null,
             items: [] as {
               id: number;
               name: string;
@@ -1904,9 +2082,20 @@ export const appRouter = router({
             }[],
           };
         }
-        const items = await db.getShoppingItems(share.userId);
+        // Alt-Zeilen ohne listId zeigen weiterhin die Einträge ohne Liste –
+        // sobald die Besitzerin die App öffnet, zieht ensureDefaultShoppingList
+        // beides auf die Standard-Liste um, ohne dass der Link bricht.
+        const list =
+          share.listId === null
+            ? undefined
+            : await db.getShoppingList(share.listId, share.userId);
+        const items =
+          share.listId === null
+            ? await db.getUnassignedShoppingItems(share.userId)
+            : await db.getShoppingItems(share.userId, share.listId);
         return {
           active: true as const,
+          name: list?.name ?? null,
           items: items.map(i => ({
             id: i.id,
             name: i.name,
@@ -1929,7 +2118,10 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const share = await db.getShoppingShareByToken(input.token);
         if (!share) throw new Error("Geteilte Einkaufsliste nicht gefunden");
-        const items = await db.getShoppingItems(share.userId);
+        const items =
+          share.listId === null
+            ? await db.getUnassignedShoppingItems(share.userId)
+            : await db.getShoppingItems(share.userId, share.listId);
         if (!items.some(i => i.id === input.itemId))
           throw new Error("Eintrag gehört nicht zu dieser Liste");
         await db.setShoppingItemChecked(

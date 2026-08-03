@@ -174,6 +174,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     childBadges,
     childStats,
     shoppingItems,
+    shoppingLists,
     shoppingShares,
     pushSubscriptions,
     pushLog,
@@ -292,6 +293,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(familyChildren).where(eq(familyChildren.userId, userId));
   await db.delete(shoppingItems).where(eq(shoppingItems.userId, userId));
   await db.delete(shoppingShares).where(eq(shoppingShares.userId, userId));
+  // Listen-Hüllen der Einkaufslisten (#215) zuletzt – Einträge sind weg
+  await db.delete(shoppingLists).where(eq(shoppingLists.userId, userId));
   await db
     .delete(pushSubscriptions)
     .where(eq(pushSubscriptions.userId, userId));
