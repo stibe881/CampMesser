@@ -369,6 +369,33 @@ export function describeUvIndex(
   };
 }
 
+/** Standard-Schwellen der Wind-/Regen-Warnungen (MeteoSchweiz-nah). */
+export const WIND_WARN_KMH = 60;
+export const WIND_DANGER_KMH = 90;
+export const RAIN_WARN_MM = 6;
+export const RAIN_DANGER_MM = 15;
+
+/**
+ * Erlaubter Bereich der eigenen Warn-Schwellen – Client (Eingabefelder) und
+ * Server (tRPC-Validierung) teilen sich diese Grenzen.
+ */
+export const WIND_THRESHOLD_MIN_KMH = 30;
+export const WIND_THRESHOLD_MAX_KMH = 150;
+export const RAIN_THRESHOLD_MIN_MM = 5;
+export const RAIN_THRESHOLD_MAX_MM = 100;
+
+/**
+ * Eigene Warn-Schwellen (Push-Einstellungen pro Gerät). Angegeben wird
+ * jeweils der Wert, ab dem die Stufe «Gefahr» gilt – genau die Stufe, die
+ * einen Unwetter-Push auslöst. Fehlt ein Wert, greift der Standard.
+ */
+export interface AlertThresholds {
+  /** Böenspitze in km/h ab Stufe «Gefahr» (Standard 90) */
+  windKmh?: number;
+  /** Regenmenge in mm/h ab Stufe «Gefahr» (Standard 15) */
+  rainMm?: number;
+}
+
 /**
  * Unwetter-Erkennung für die nächsten 48 h – speziell auf Zelt-Camping ausgelegt.
  * Schwellenwerte orientieren sich an MeteoSchweiz-Warnstufen:
@@ -377,16 +404,27 @@ export function describeUvIndex(
  * - Gewitter: WMO 95/96/99 oder CAPE > 1500 J/kg
  * - Hitze: gefühlte Temperatur ab 33 °C
  * - Frost: unter 0 °C
+ *
+ * Mit `thresholds` lassen sich die Wind- und Regen-Gefahrenschwellen eigenen
+ * Wünschen anpassen (Push-Einstellungen). Die Warnstufe darunter rutscht dabei
+ * nie über die Gefahrenschwelle – wer z. B. 40 km/h wählt, bekommt bei 40 km/h
+ * direkt «Gefahr» statt zweier Meldungen. Ohne `thresholds` bleibt alles wie bisher.
  */
 export function detectAlerts(
   hours: HourlyWeather[],
-  lang: Language = "de"
+  lang: Language = "de",
+  thresholds?: AlertThresholds
 ): WeatherAlert[] {
   const alerts: WeatherAlert[] = [];
   const next48 = hours.slice(0, 48);
 
-  const gustHour = next48.find(h => h.windGustsKmh >= 90);
-  const windHour = next48.find(h => h.windGustsKmh >= 60);
+  const windDangerKmh = thresholds?.windKmh ?? WIND_DANGER_KMH;
+  const windWarnKmh = Math.min(WIND_WARN_KMH, windDangerKmh);
+  const rainDangerMm = thresholds?.rainMm ?? RAIN_DANGER_MM;
+  const rainWarnMm = Math.min(RAIN_WARN_MM, rainDangerMm);
+
+  const gustHour = next48.find(h => h.windGustsKmh >= windDangerKmh);
+  const windHour = next48.find(h => h.windGustsKmh >= windWarnKmh);
   if (gustHour) {
     const maxGust = Math.round(Math.max(...next48.map(h => h.windGustsKmh)));
     const when = formatHour(gustHour.time, lang);
@@ -454,8 +492,8 @@ export function detectAlerts(
     });
   }
 
-  const heavyRain = next48.find(h => h.precipitationMm >= 15);
-  const rain = next48.find(h => h.precipitationMm >= 6);
+  const heavyRain = next48.find(h => h.precipitationMm >= rainDangerMm);
+  const rain = next48.find(h => h.precipitationMm >= rainWarnMm);
   if (heavyRain) {
     const maxRain = Math.max(...next48.map(h => h.precipitationMm)).toFixed(0);
     const when = formatHour(heavyRain.time, lang);

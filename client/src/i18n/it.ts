@@ -267,6 +267,16 @@ export const it: Translation = {
     prefGearDesc:
       "Al massimo una volta al mese, quando la manutenzione dell'attrezzatura è in scadenza.",
     prefToggleAria: (label: string) => `Attiva o disattiva ${label}`,
+    thresholdsTitle: "Soglie di allerta personali",
+    thresholdsIntro:
+      "Da quali valori la notifica di maltempo deve svegliarti? Lascia vuoto per il valore standard.",
+    thresholdWind: "Raffiche da (km/h)",
+    thresholdWindHint: (standard: number, min: number, max: number) =>
+      `Standard ${standard} · possibile ${min}–${max}`,
+    thresholdRain: "Pioggia da (mm all'ora)",
+    thresholdRainHint: (standard: number, min: number, max: number) =>
+      `Standard ${standard} · possibile ${min}–${max}`,
+    thresholdReset: "Standard",
     homeTitle: "Località di casa",
     homeIntro:
       "Salva il luogo in cui abiti per ricevere allerte maltempo e consigli sulle stelle cadenti anche per casa – senza piazzola salvata.",

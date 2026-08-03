@@ -272,6 +272,16 @@ export const fr: Translation = {
     prefGearDesc:
       "Au plus une fois par mois, quand l'entretien de l'équipement est dû.",
     prefToggleAria: (label: string) => `Activer ou désactiver ${label}`,
+    thresholdsTitle: "Tes propres seuils d'alerte",
+    thresholdsIntro:
+      "À partir de quelles valeurs la notification d'intempéries doit-elle te réveiller ? Laisse vide pour la valeur standard.",
+    thresholdWind: "Rafales à partir de (km/h)",
+    thresholdWindHint: (standard: number, min: number, max: number) =>
+      `Standard ${standard} · possible ${min}–${max}`,
+    thresholdRain: "Pluie à partir de (mm par heure)",
+    thresholdRainHint: (standard: number, min: number, max: number) =>
+      `Standard ${standard} · possible ${min}–${max}`,
+    thresholdReset: "Standard",
     homeTitle: "Lieu de domicile",
     homeIntro:
       "Enregistre ton domicile pour recevoir les alertes intempéries et les conseils étoiles filantes aussi pour chez toi – sans emplacement enregistré.",

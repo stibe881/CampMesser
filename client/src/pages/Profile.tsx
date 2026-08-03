@@ -56,6 +56,14 @@ import {
 } from "@/lib/themePreference";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
+import {
+  RAIN_DANGER_MM,
+  RAIN_THRESHOLD_MAX_MM,
+  RAIN_THRESHOLD_MIN_MM,
+  WIND_DANGER_KMH,
+  WIND_THRESHOLD_MAX_KMH,
+  WIND_THRESHOLD_MIN_KMH,
+} from "@shared/weather";
 
 type PushFlag =
   "wantsWeather" | "wantsFood" | "wantsTrips" | "wantsAstro" | "wantsGear";
@@ -80,6 +88,58 @@ function NotificationsCard() {
     },
   });
   const prefs = prefsQuery.data?.prefs ?? null;
+
+  // Eigene Warn-Schwellen: als Text im Feld, gespeichert wird beim Verlassen
+  // bzw. mit Enter (leeres Feld = Standardwert).
+  const [windInput, setWindInput] = useState("");
+  const [rainInput, setRainInput] = useState("");
+  const windThreshold = prefs?.windThresholdKmh ?? null;
+  const rainThreshold = prefs?.rainThresholdMm ?? null;
+  useEffect(() => {
+    setWindInput(windThreshold === null ? "" : String(windThreshold));
+  }, [windThreshold]);
+  useEffect(() => {
+    setRainInput(rainThreshold === null ? "" : String(rainThreshold));
+  }, [rainThreshold]);
+
+  /** Eingabe in einen gültigen Schwellenwert überführen (null = Standard). */
+  const parseThreshold = (raw: string, min: number, max: number) => {
+    const trimmed = raw.trim();
+    if (trimmed === "") return null;
+    const value = Number.parseInt(trimmed, 10);
+    if (!Number.isFinite(value)) return null;
+    return Math.min(max, Math.max(min, value));
+  };
+
+  const saveWindThreshold = (raw: string) => {
+    if (!push.endpoint) return;
+    const value = parseThreshold(
+      raw,
+      WIND_THRESHOLD_MIN_KMH,
+      WIND_THRESHOLD_MAX_KMH
+    );
+    setWindInput(value === null ? "" : String(value));
+    if (value === windThreshold) return;
+    setPrefsMutation.mutate({
+      endpoint: push.endpoint,
+      windThresholdKmh: value,
+    });
+  };
+
+  const saveRainThreshold = (raw: string) => {
+    if (!push.endpoint) return;
+    const value = parseThreshold(
+      raw,
+      RAIN_THRESHOLD_MIN_MM,
+      RAIN_THRESHOLD_MAX_MM
+    );
+    setRainInput(value === null ? "" : String(value));
+    if (value === rainThreshold) return;
+    setPrefsMutation.mutate({
+      endpoint: push.endpoint,
+      rainThresholdMm: value,
+    });
+  };
 
   const setFlag = (flag: PushFlag, value: boolean) => {
     if (!push.endpoint) return;
@@ -190,6 +250,100 @@ function NotificationsCard() {
                     />
                   </div>
                 ))}
+                <div className="border-t border-border pt-3">
+                  <p className="text-sm font-medium">
+                    {t.profile.thresholdsTitle}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {t.profile.thresholdsIntro}
+                  </p>
+                  <div className="mt-2.5 space-y-2.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Label
+                        htmlFor="wind-threshold"
+                        className="min-w-32 flex-1 text-sm font-normal"
+                      >
+                        {t.profile.thresholdWind}
+                        <span className="block text-xs font-normal text-muted-foreground">
+                          {t.profile.thresholdWindHint(
+                            WIND_DANGER_KMH,
+                            WIND_THRESHOLD_MIN_KMH,
+                            WIND_THRESHOLD_MAX_KMH
+                          )}
+                        </span>
+                      </Label>
+                      <Input
+                        id="wind-threshold"
+                        type="number"
+                        inputMode="numeric"
+                        className="w-20"
+                        min={WIND_THRESHOLD_MIN_KMH}
+                        max={WIND_THRESHOLD_MAX_KMH}
+                        placeholder={String(WIND_DANGER_KMH)}
+                        value={windInput}
+                        disabled={setPrefsMutation.isPending}
+                        onChange={e => setWindInput(e.target.value)}
+                        onBlur={e => saveWindThreshold(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === "Enter") e.currentTarget.blur();
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={
+                          windThreshold === null || setPrefsMutation.isPending
+                        }
+                        onClick={() => saveWindThreshold("")}
+                      >
+                        {t.profile.thresholdReset}
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Label
+                        htmlFor="rain-threshold"
+                        className="min-w-32 flex-1 text-sm font-normal"
+                      >
+                        {t.profile.thresholdRain}
+                        <span className="block text-xs font-normal text-muted-foreground">
+                          {t.profile.thresholdRainHint(
+                            RAIN_DANGER_MM,
+                            RAIN_THRESHOLD_MIN_MM,
+                            RAIN_THRESHOLD_MAX_MM
+                          )}
+                        </span>
+                      </Label>
+                      <Input
+                        id="rain-threshold"
+                        type="number"
+                        inputMode="numeric"
+                        className="w-20"
+                        min={RAIN_THRESHOLD_MIN_MM}
+                        max={RAIN_THRESHOLD_MAX_MM}
+                        placeholder={String(RAIN_DANGER_MM)}
+                        value={rainInput}
+                        disabled={setPrefsMutation.isPending}
+                        onChange={e => setRainInput(e.target.value)}
+                        onBlur={e => saveRainThreshold(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === "Enter") e.currentTarget.blur();
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={
+                          rainThreshold === null || setPrefsMutation.isPending
+                        }
+                        onClick={() => saveRainThreshold("")}
+                      >
+                        {t.profile.thresholdReset}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </>

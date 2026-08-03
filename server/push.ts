@@ -30,7 +30,11 @@ import { gearTaskDue, type GearTaskLike } from "../shared/gearTasks";
 import { pick } from "../shared/i18n";
 import { getMoonInfo } from "../shared/moon";
 import { daysUntilTrip } from "../shared/trips";
-import { detectAlerts, type HourlyWeather } from "../shared/weather";
+import {
+  detectAlerts,
+  type AlertThresholds,
+  type HourlyWeather,
+} from "../shared/weather";
 import { getDb } from "./db";
 
 export function pushConfigured(): boolean {
@@ -75,13 +79,35 @@ export async function deleteSubscription(userId: number, endpoint: string) {
 /** Mitteilungs-Arten, die pro Abo (Gerät) einzeln abschaltbar sind. */
 export type PushKind = "weather" | "food" | "trip" | "astro" | "gear";
 
-/** Die fünf Mitteilungs-Flags eines Abos (Default: alles an). */
+/**
+ * Mitteilungs-Einstellungen eines Abos: die fünf Flags (Default: alles an)
+ * plus die eigenen Warn-Schwellen des Unwetter-Pushes (null = Standard).
+ */
 export interface PushPrefs {
   wantsWeather: boolean;
   wantsFood: boolean;
   wantsTrips: boolean;
   wantsAstro: boolean;
   wantsGear: boolean;
+  /** Böenspitze in km/h ab «Gefahr» (null = Standard 90) */
+  windThresholdKmh: number | null;
+  /** Regenmenge in mm/h ab «Gefahr» (null = Standard 15) */
+  rainThresholdMm: number | null;
+}
+
+/**
+ * Eigene Warn-Schwellen eines Abos in die Form von detectAlerts bringen –
+ * null bzw. fehlende Werte bedeuten «Standard-Schwelle». Reine Funktion
+ * (für Tests exportiert, Muster subscriptionWants).
+ */
+export function subscriptionThresholds(sub: {
+  windThresholdKmh: number | null;
+  rainThresholdMm: number | null;
+}): AlertThresholds {
+  return {
+    windKmh: sub.windThresholdKmh ?? undefined,
+    rainMm: sub.rainThresholdMm ?? undefined,
+  };
 }
 
 /**
@@ -117,6 +143,8 @@ export async function getSubscriptionPrefs(
       wantsTrips: pushSubscriptions.wantsTrips,
       wantsAstro: pushSubscriptions.wantsAstro,
       wantsGear: pushSubscriptions.wantsGear,
+      windThresholdKmh: pushSubscriptions.windThresholdKmh,
+      rainThresholdMm: pushSubscriptions.rainThresholdMm,
     })
     .from(pushSubscriptions)
     .where(
@@ -821,43 +849,38 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       return null;
     }
   }
-  const dangersByUser = new Map<
-    number,
-    { spotName: string; title: string; description: string; key: string }[]
-  >();
+  /**
+   * Zu prüfende Orte mit ihrer Stundenprognose. Die Warnungen selbst entstehen
+   * erst pro Abo (siehe Schleife unten), weil jedes Gerät eigene Warn-Schwellen
+   * haben kann – der Wetter-Abruf bleibt dank Cache trotzdem einmalig pro Ort.
+   * Schlüssel-Präfix: die spotId bzw. «home», damit die Dedup-Schlüssel von
+   * Platz- und Heim-Warnungen nicht kollidieren.
+   */
+  const weatherPoints: {
+    userId: number;
+    name: string;
+    keyPrefix: string;
+    hourly: HourlyWeather[];
+  }[] = [];
   for (const spot of spots) {
     const hourly = await cachedHourly(spot.latitude, spot.longitude);
     if (!hourly) continue;
-    for (const alert of detectAlerts(hourly).filter(
-      a => a.severity === "gefahr"
-    )) {
-      const list = dangersByUser.get(spot.userId) ?? [];
-      list.push({
-        spotName: spot.name,
-        title: alert.title,
-        description: alert.description,
-        key: `${spot.id}:${alert.id}:${alert.startTime.slice(0, 13)}`,
-      });
-      dangersByUser.set(spot.userId, list);
-    }
+    weatherPoints.push({
+      userId: spot.userId,
+      name: spot.name,
+      keyPrefix: String(spot.id),
+      hourly,
+    });
   }
-  // Heim-Standort: gleiche Unwetter-Prüfung; Schlüssel-Präfix «home:» statt
-  // spotId, damit der Dedup-Schlüssel nicht mit Platz-Warnungen kollidiert.
   for (const home of homes) {
     const hourly = await cachedHourly(home.latitude, home.longitude);
     if (!hourly) continue;
-    for (const alert of detectAlerts(hourly).filter(
-      a => a.severity === "gefahr"
-    )) {
-      const list = dangersByUser.get(home.userId) ?? [];
-      list.push({
-        spotName: home.name,
-        title: alert.title,
-        description: alert.description,
-        key: `home:${alert.id}:${alert.startTime.slice(0, 13)}`,
-      });
-      dangersByUser.set(home.userId, list);
-    }
+    weatherPoints.push({
+      userId: home.userId,
+      name: home.name,
+      keyPrefix: "home",
+      hourly,
+    });
   }
 
   // Sternschnuppen: klarer Abendhimmel am Heim-Ort während eines aktiven
@@ -918,7 +941,20 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
 
   for (const sub of subs) {
     // ── Unwetter an gespeicherten Plätzen ──
-    const dangers = dangersByUser.get(sub.userId) ?? [];
+    // Warnungen pro Abo ableiten: die Warn-Schwellen hängen am Gerät.
+    const thresholds = subscriptionThresholds(sub);
+    const dangers = weatherPoints
+      .filter(point => point.userId === sub.userId)
+      .flatMap(point =>
+        detectAlerts(point.hourly, "de", thresholds)
+          .filter(a => a.severity === "gefahr")
+          .map(alert => ({
+            spotName: point.name,
+            title: alert.title,
+            description: alert.description,
+            key: `${point.keyPrefix}:${alert.id}:${alert.startTime.slice(0, 13)}`,
+          }))
+      );
     const alertKey = dangers
       .map(d => d.key)
       .sort()

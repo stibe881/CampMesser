@@ -53,6 +53,12 @@ import {
   SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
 } from "@shared/spotAttributes";
 import { RECIPE_DIFFICULTIES, RECIPE_METHODS } from "@shared/customRecipes";
+import {
+  RAIN_THRESHOLD_MAX_MM,
+  RAIN_THRESHOLD_MIN_MM,
+  WIND_THRESHOLD_MAX_KMH,
+  WIND_THRESHOLD_MIN_KMH,
+} from "@shared/weather";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -2149,7 +2155,10 @@ export const appRouter = router({
           prefs: await getSubscriptionPrefs(ctx.user.id, input.endpoint),
         };
       }),
-    /** Mitteilungs-Flags des Abos dieses Geräts setzen (teilweise erlaubt). */
+    /**
+     * Mitteilungs-Flags des Abos dieses Geräts setzen (teilweise erlaubt).
+     * Die beiden Warn-Schwellen akzeptieren zusätzlich null = Standardwert.
+     */
     setPrefs: protectedProcedure
       .input(
         z.object({
@@ -2159,6 +2168,20 @@ export const appRouter = router({
           wantsTrips: z.boolean().optional(),
           wantsAstro: z.boolean().optional(),
           wantsGear: z.boolean().optional(),
+          windThresholdKmh: z
+            .number()
+            .int()
+            .min(WIND_THRESHOLD_MIN_KMH)
+            .max(WIND_THRESHOLD_MAX_KMH)
+            .nullable()
+            .optional(),
+          rainThresholdMm: z
+            .number()
+            .int()
+            .min(RAIN_THRESHOLD_MIN_MM)
+            .max(RAIN_THRESHOLD_MAX_MM)
+            .nullable()
+            .optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {

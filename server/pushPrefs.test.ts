@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { subscriptionWants, type PushKind, type PushPrefs } from "./push";
+import {
+  subscriptionThresholds,
+  subscriptionWants,
+  type PushKind,
+  type PushPrefs,
+} from "./push";
 
 const KINDS: PushKind[] = ["weather", "food", "trip", "astro", "gear"];
 
@@ -11,6 +16,8 @@ function prefs(overrides: Partial<PushPrefs> = {}): PushPrefs {
     wantsTrips: true,
     wantsAstro: true,
     wantsGear: true,
+    windThresholdKmh: null,
+    rainThresholdMm: null,
     ...overrides,
   };
 }
@@ -49,5 +56,29 @@ describe("subscriptionWants", () => {
     for (const kind of KINDS) {
       expect(subscriptionWants(allOff, kind)).toBe(false);
     }
+  });
+});
+
+describe("subscriptionThresholds", () => {
+  it("liefert ohne eigene Werte leere Schwellen (Standard greift)", () => {
+    expect(subscriptionThresholds(prefs())).toEqual({
+      windKmh: undefined,
+      rainMm: undefined,
+    });
+  });
+
+  it("reicht eigene Wind- und Regen-Schwellen durch", () => {
+    expect(
+      subscriptionThresholds(
+        prefs({ windThresholdKmh: 45, rainThresholdMm: 8 })
+      )
+    ).toEqual({ windKmh: 45, rainMm: 8 });
+  });
+
+  it("mischt eigene und Standard-Schwelle", () => {
+    expect(subscriptionThresholds(prefs({ windThresholdKmh: 120 }))).toEqual({
+      windKmh: 120,
+      rainMm: undefined,
+    });
   });
 });

@@ -113,6 +113,78 @@ describe("detectAlerts", () => {
   });
 });
 
+describe("detectAlerts mit eigenen Warn-Schwellen", () => {
+  /** 48 ruhige Stunden mit einer auffälligen Stunde in der Mitte. */
+  function withPeak(peak: Partial<HourlyWeather>) {
+    return Array.from({ length: 48 }, (_, i) => hour(i === 6 ? peak : {}, i));
+  }
+
+  it("lässt die Standard-Schwellen unverändert (ohne thresholds)", () => {
+    // 70 km/h: Warnung, aber keine Gefahr; 8 mm: Warnung, keine Gefahr
+    const wind = detectAlerts(withPeak({ windGustsKmh: 70 }));
+    expect(wind.some(a => a.id === "wind" && a.severity === "warnung")).toBe(
+      true
+    );
+    const rain = detectAlerts(withPeak({ precipitationMm: 8 }));
+    expect(rain.some(a => a.id === "regen" && a.severity === "warnung")).toBe(
+      true
+    );
+  });
+
+  it("meldet mit eigener Wind-Schwelle schon früher Gefahr", () => {
+    const alerts = detectAlerts(withPeak({ windGustsKmh: 50 }), "de", {
+      windKmh: 45,
+    });
+    expect(alerts.some(a => a.id === "sturm" && a.severity === "gefahr")).toBe(
+      true
+    );
+    // Die Warnstufe rutscht nicht über die Gefahrenschwelle – nur eine Meldung
+    expect(alerts.filter(a => a.id === "wind")).toHaveLength(0);
+  });
+
+  it("meldet mit eigener Regen-Schwelle schon früher Gefahr", () => {
+    const alerts = detectAlerts(withPeak({ precipitationMm: 9 }), "de", {
+      rainMm: 8,
+    });
+    expect(
+      alerts.some(a => a.id === "starkregen" && a.severity === "gefahr")
+    ).toBe(true);
+    expect(alerts.filter(a => a.id === "regen")).toHaveLength(0);
+  });
+
+  it("schweigt mit höher gesetzten Schwellen bei sonst gefährlichen Werten", () => {
+    const wind = detectAlerts(withPeak({ windGustsKmh: 95 }), "de", {
+      windKmh: 140,
+    });
+    expect(wind.some(a => a.severity === "gefahr")).toBe(false);
+    // Die Standard-Warnstufe (60 km/h) greift weiterhin
+    expect(wind.some(a => a.id === "wind" && a.severity === "warnung")).toBe(
+      true
+    );
+    const rain = detectAlerts(withPeak({ precipitationMm: 20 }), "de", {
+      rainMm: 50,
+    });
+    expect(rain.some(a => a.severity === "gefahr")).toBe(false);
+    expect(rain.some(a => a.id === "regen" && a.severity === "warnung")).toBe(
+      true
+    );
+  });
+
+  it("wirkt je Wetterart getrennt (nur Wind gesetzt)", () => {
+    const alerts = detectAlerts(
+      Array.from({ length: 48 }, (_, i) =>
+        hour(i === 6 ? { windGustsKmh: 50, precipitationMm: 20 } : {}, i)
+      ),
+      "de",
+      { windKmh: 45 }
+    );
+    expect(alerts.some(a => a.id === "sturm")).toBe(true);
+    expect(
+      alerts.some(a => a.id === "starkregen" && a.severity === "gefahr")
+    ).toBe(true);
+  });
+});
+
 describe("calcWaterNeeds mit Hunden und Körperpflege", () => {
   it("rechnet Hunde-Wasserbedarf ein", () => {
     const base = calcWaterNeeds({

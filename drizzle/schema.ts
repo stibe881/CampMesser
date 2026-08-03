@@ -437,6 +437,10 @@ export const pushSubscriptions = mysqlTable(
     wantsAstro: boolean("wantsAstro").notNull().default(true),
     /** Mitteilungs-Einstellung dieses Geräts: Erinnerung an fällige Ausrüstungs-Pflege */
     wantsGear: boolean("wantsGear").notNull().default(true),
+    /** Eigene Wind-Schwelle für den Unwetter-Push in km/h (null = Standard 90) */
+    windThresholdKmh: int("windThresholdKmh"),
+    /** Eigene Regen-Schwelle für den Unwetter-Push in mm/h (null = Standard 15) */
+    rainThresholdMm: int("rainThresholdMm"),
     /** Schlüssel der zuletzt gemeldeten Warnlage (verhindert Doppel-Pushes) */
     lastAlertKey: varchar("lastAlertKey", { length: 255 }),
     /** Schlüssel der letzten MHD-Erinnerung («food:YYYY-MM-DD»): max. 1 Kühlbox-Push pro Tag */

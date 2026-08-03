@@ -270,6 +270,16 @@ export const de = {
     prefGearDesc:
       "Höchstens einmal pro Monat, wenn Ausrüstungs-Pflege fällig ist.",
     prefToggleAria: (label: string) => `${label} an- oder abschalten`,
+    thresholdsTitle: "Eigene Warn-Schwellen",
+    thresholdsIntro:
+      "Ab welchen Werten soll dich der Unwetter-Push wecken? Leer lassen heisst Standard.",
+    thresholdWind: "Windböen ab (km/h)",
+    thresholdWindHint: (standard: number, min: number, max: number) =>
+      `Standard ${standard} · möglich ${min}–${max}`,
+    thresholdRain: "Regen ab (mm pro Stunde)",
+    thresholdRainHint: (standard: number, min: number, max: number) =>
+      `Standard ${standard} · möglich ${min}–${max}`,
+    thresholdReset: "Standard",
     homeTitle: "Heim-Standort",
     homeIntro:
       "Hinterlege deinen Wohnort, um Unwetter-Warnungen und Sternschnuppen-Tipps auch für zu Hause zu erhalten – ganz ohne gespeicherten Zeltplatz.",

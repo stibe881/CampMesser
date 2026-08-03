@@ -260,6 +260,16 @@ export const en: Translation = {
     prefGear: "Care reminders",
     prefGearDesc: "At most once a month, when gear care is due.",
     prefToggleAria: (label: string) => `Turn ${label} on or off`,
+    thresholdsTitle: "Your own alert thresholds",
+    thresholdsIntro:
+      "At which values should the storm notification reach you? Leave empty for the standard value.",
+    thresholdWind: "Gusts from (km/h)",
+    thresholdWindHint: (standard: number, min: number, max: number) =>
+      `Standard ${standard} · possible ${min}–${max}`,
+    thresholdRain: "Rain from (mm per hour)",
+    thresholdRainHint: (standard: number, min: number, max: number) =>
+      `Standard ${standard} · possible ${min}–${max}`,
+    thresholdReset: "Standard",
     homeTitle: "Home location",
     homeIntro:
       "Save where you live to get storm alerts and shooting-star tips for home too – no saved pitch needed.",
