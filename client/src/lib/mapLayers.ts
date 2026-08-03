@@ -56,6 +56,8 @@ export interface MapLayerVisibility {
   excursions: boolean;
   /** Feuer- und Grillstellen aus OpenStreetMap (#247) – Standard aus. */
   firepits: boolean;
+  /** Spiel- und Badeplätze aus OpenStreetMap (#248) – Standard aus. */
+  family: boolean;
 }
 
 export const DEFAULT_LAYER_VISIBILITY: MapLayerVisibility = {
@@ -65,6 +67,7 @@ export const DEFAULT_LAYER_VISIBILITY: MapLayerVisibility = {
   campsites: true,
   excursions: true,
   firepits: false,
+  family: false,
 };
 
 /**
@@ -91,6 +94,7 @@ export function loadLayerVisibility(): MapLayerVisibility {
       campsites: read("campsites"),
       excursions: read("excursions"),
       firepits: read("firepits"),
+      family: read("family"),
     };
   } catch {
     return { ...DEFAULT_LAYER_VISIBILITY };

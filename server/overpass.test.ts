@@ -2,17 +2,23 @@ import { describe, expect, it } from "vitest";
 // Overpass-Parser liegt im Client-Code, ist aber reine Logik ohne DOM.
 import {
   boundingBoxAround,
+  familyPlacesBboxQuery,
+  familyPlacesQuery,
   firepitsBboxQuery,
   firepitsQuery,
   hikingRoutesQuery,
+  nearestFamilyPlaces,
   nearestFirepits,
+  OVERPASS_FAMILY_MAX_RESULTS,
   OVERPASS_FIREPIT_MAX_RESULTS,
   OVERPASS_HIKING_MAX_RESULTS,
   OVERPASS_MAX_RESULTS,
   overpassQuery,
   parseCampsites,
+  parseFamilyPlaces,
   parseFirepits,
   parseHikingRoutes,
+  parseOsmAgeYears,
   parseOsmYesNo,
 } from "../client/src/lib/overpass";
 
@@ -540,5 +546,214 @@ describe("nearestFirepits", () => {
 
   it("liefert bei limit <= 0 nichts", () => {
     expect(nearestFirepits([at(1, 46.81, 8.2)], 46.8, 8.2, 0)).toEqual([]);
+  });
+});
+
+describe("familyPlacesQuery / familyPlacesBboxQuery", () => {
+  it("fragt Spielplätze und Badestellen als node und way im Umkreis ab", () => {
+    const q = familyPlacesQuery(46.8, 8.2, 5000);
+    expect(q).toContain("[out:json][timeout:20];");
+    expect(q).toContain(
+      'node["leisure"="playground"](around:5000,46.80000,8.20000)'
+    );
+    expect(q).toContain(
+      'way["leisure"="playground"](around:5000,46.80000,8.20000)'
+    );
+    expect(q).toContain('node["leisure"~"^(bathing_place|beach_resort)$"]');
+    expect(q).toContain('way["leisure"~"^(bathing_place|beach_resort)$"]');
+    expect(q).toContain(`out center ${OVERPASS_FAMILY_MAX_RESULTS};`);
+  });
+
+  it("schliesst private und gesperrte Strände schon in der Abfrage aus", () => {
+    const q = familyPlacesBboxQuery(46.712345678, 7.1, 46.9, 7.3);
+    expect(q).toContain(
+      'node["natural"="beach"]["access"!~"^(private|no)$"](46.71235,7.10000,46.90000,7.30000)'
+    );
+    expect(q).toContain(
+      'way["natural"="beach"]["access"!~"^(private|no)$"](46.71235,7.10000,46.90000,7.30000)'
+    );
+  });
+});
+
+describe("parseOsmAgeYears", () => {
+  it("übernimmt nur glatte Jahresangaben von 0 bis 18", () => {
+    expect(parseOsmAgeYears("3")).toBe(3);
+    expect(parseOsmAgeYears(" 12 ")).toBe(12);
+    expect(parseOsmAgeYears("0")).toBe(0);
+    expect(parseOsmAgeYears("18")).toBe(18);
+  });
+
+  it("lässt Freitext und unplausible Werte offen", () => {
+    expect(parseOsmAgeYears("ab 3")).toBeUndefined();
+    expect(parseOsmAgeYears("3-12")).toBeUndefined();
+    expect(parseOsmAgeYears("99")).toBeUndefined();
+    expect(parseOsmAgeYears("")).toBeUndefined();
+    expect(parseOsmAgeYears(6)).toBeUndefined();
+  });
+});
+
+describe("parseFamilyPlaces", () => {
+  it("unterscheidet Spielplatz und Badeplatz und liest die passenden Tags", () => {
+    const result = parseFamilyPlaces({
+      elements: [
+        {
+          type: "node",
+          id: 1,
+          lat: 46.5,
+          lon: 7.2,
+          tags: {
+            leisure: "playground",
+            name: "Spielplatz Seematte",
+            min_age: "3",
+            max_age: "12",
+            fenced: "yes",
+            covered: "no",
+          },
+        },
+        {
+          type: "way",
+          id: 2,
+          center: { lat: 46.6, lon: 7.3 },
+          tags: {
+            leisure: "bathing_place",
+            supervised: "yes",
+            fee: "no",
+          },
+        },
+      ],
+    });
+    expect(result[0]).toMatchObject({
+      id: "node/1",
+      kind: "playground",
+      name: "Spielplatz Seematte",
+      minAgeYears: 3,
+      maxAgeYears: 12,
+      fenced: true,
+      covered: false,
+    });
+    expect(result[1]).toMatchObject({
+      id: "way/2",
+      kind: "bathing",
+      supervised: true,
+      fee: false,
+    });
+  });
+
+  it("wertet nur die Tags der jeweiligen Kategorie aus", () => {
+    const result = parseFamilyPlaces({
+      elements: [
+        {
+          type: "node",
+          id: 1,
+          lat: 1,
+          lon: 2,
+          // Eintritt am Spielplatz sagt nichts übers Baden – und umgekehrt
+          tags: { leisure: "playground", fee: "yes", supervised: "yes" },
+        },
+        {
+          type: "node",
+          id: 2,
+          lat: 1,
+          lon: 2,
+          tags: { leisure: "beach_resort", min_age: "6", fenced: "yes" },
+        },
+      ],
+    });
+    expect(result[0].fee).toBeUndefined();
+    expect(result[0].supervised).toBeUndefined();
+    expect(result[1].minAgeYears).toBeUndefined();
+    expect(result[1].fenced).toBeUndefined();
+  });
+
+  it("nimmt Strände nur mit Zugang und überspringt Fremdes", () => {
+    const result = parseFamilyPlaces({
+      elements: [
+        null,
+        { type: "node", id: 1, lat: 1, lon: 2, tags: { amenity: "toilets" } },
+        {
+          type: "node",
+          id: 2,
+          lat: 1,
+          lon: 2,
+          tags: { natural: "beach", access: "private" },
+        },
+        {
+          type: "node",
+          id: 3,
+          lat: 1,
+          lon: 2,
+          tags: { natural: "beach", access: "no" },
+        },
+        { type: "node", id: 4, lat: 1, lon: 2, tags: { natural: "beach" } },
+        {
+          type: "node",
+          id: 5,
+          lat: 1,
+          lon: 2,
+          tags: { natural: "beach", access: "yes" },
+        },
+      ],
+    });
+    expect(result.map(p => p.id)).toEqual(["node/4", "node/5"]);
+    expect(result.every(p => p.kind === "bathing")).toBe(true);
+  });
+
+  it("entfernt Duplikate und begrenzt das Ergebnis hart", () => {
+    const elements: unknown[] = [
+      { type: "node", id: 1, lat: 1, lon: 2, tags: { leisure: "playground" } },
+      { type: "node", id: 1, lat: 9, lon: 9, tags: { leisure: "playground" } },
+    ];
+    expect(parseFamilyPlaces({ elements }).map(p => p.id)).toEqual(["node/1"]);
+
+    const many = [];
+    for (let i = 0; i < OVERPASS_FAMILY_MAX_RESULTS + 7; i++) {
+      many.push({
+        type: "node",
+        id: i,
+        lat: 46.5,
+        lon: 7.2,
+        tags: { leisure: "playground" },
+      });
+    }
+    expect(parseFamilyPlaces({ elements: many })).toHaveLength(
+      OVERPASS_FAMILY_MAX_RESULTS
+    );
+  });
+
+  it("liefert bei unbrauchbarer Antwort eine leere Liste", () => {
+    expect(parseFamilyPlaces(null)).toEqual([]);
+    expect(parseFamilyPlaces("html-fehlerseite")).toEqual([]);
+    expect(parseFamilyPlaces({ elements: "nope" })).toEqual([]);
+  });
+});
+
+describe("nearestFamilyPlaces", () => {
+  const place = (id: number, lat: number, kind: "playground" | "bathing") => ({
+    id: `node/${id}`,
+    lat,
+    lon: 8.2,
+    kind,
+  });
+
+  it("mischt beide Kategorien und sortiert allein nach Luftlinie", () => {
+    const result = nearestFamilyPlaces(
+      [
+        place(1, 46.9, "playground"),
+        place(2, 46.83, "bathing"),
+        place(3, 46.81, "playground"),
+      ],
+      46.8,
+      8.2,
+      2
+    );
+    expect(result.map(entry => entry.place.id)).toEqual(["node/3", "node/2"]);
+    expect(result[0].place.kind).toBe("playground");
+    expect(result[1].place.kind).toBe("bathing");
+  });
+
+  it("liefert bei limit <= 0 nichts", () => {
+    expect(
+      nearestFamilyPlaces([place(1, 46.81, "bathing")], 46.8, 8.2, 0)
+    ).toEqual([]);
   });
 });

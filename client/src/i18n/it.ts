@@ -1828,6 +1828,23 @@ export const it: Translation = {
         ? "1 focolare / griglia (OpenStreetMap)"
         : `${n} focolari / griglie (OpenStreetMap)`,
     firepitSearchHint: "Tocca «Cerca in questa zona».",
+    layerFamily: "Famiglia",
+    familyLoading: "Ricerca di parchi giochi e punti balneabili …",
+    familyZoomHint:
+      "Ingrandisci di più per cercare parchi giochi e punti balneabili.",
+    familyError:
+      "Non è stato possibile caricare parchi giochi e punti balneabili – riprova più tardi.",
+    familyCount: (n: number) =>
+      n === 0
+        ? "Nessun parco giochi o punto balneabile trovato in questa zona."
+        : n === 1
+          ? "1 parco giochi / punto balneabile trovato"
+          : `${n} parchi giochi e punti balneabili trovati`,
+    familyLegend: (n: number) =>
+      n === 1
+        ? "1 parco giochi / punto balneabile (OpenStreetMap)"
+        : `${n} parchi giochi e punti balneabili (OpenStreetMap)`,
+    familySearchHint: "Tocca «Cerca in questa zona».",
   },
   spotDetail: {
     fallbackTitle: "Piazzola",
@@ -3224,6 +3241,45 @@ export const it: Translation = {
     fireDangerShort: "Controlla il pericolo di incendi",
     source:
       "Dati da OpenStreetMap tramite l'API Overpass – interrogata solo al tuo clic. Le caratteristiche compaiono solo dove sono curate in OSM.",
+  },
+
+  /** Parchi giochi e punti balneabili da OpenStreetMap (#248). */
+  familyPlaces: {
+    sectionAria: "Parchi giochi e punti balneabili nei dintorni",
+    title: "Per le famiglie nei dintorni",
+    subtitle: "Parchi giochi e punti balneabili attorno alla tua posizione.",
+    subtitleAtPlace: (place: string) =>
+      `Parchi giochi e punti balneabili attorno a ${place}.`,
+    radiusLabel: "Raggio",
+    radiusGroupAria: "Scegliere il raggio di ricerca",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Ricerca di parchi giochi e punti balneabili …",
+    loadFailed:
+      "Al momento non è stato possibile caricare parchi giochi e punti balneabili. Overpass è un servizio gratuito che rallenta con troppe richieste – riprova tra qualche minuto.",
+    empty: (km: number) =>
+      `Nel raggio di ${km} km non è registrato in OpenStreetMap nessun parco giochi o punto balneabile. Prova con un raggio più grande.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 posto trovato" : `${n} posti trovati`,
+    kind: {
+      playground: "Parco giochi",
+      bathing: "Punto balneabile",
+    },
+    minAge: (years: number) => `da ${years} anni`,
+    maxAge: (years: number) => `fino a ${years} anni`,
+    ageRange: (min: number, max: number) => `${min}–${max} anni`,
+    fenced: "recintato",
+    covered: "coperto",
+    supervised: "sorvegliato",
+    feePaid: "a pagamento",
+    feeFree: "gratuito",
+    distanceAway: (value: string) => `a ${value}`,
+    navButton: "Vai lì",
+    navAria: (name: string) => `Navigazione verso ${name}`,
+    bathingNote: (section: string) =>
+      `La temperatura dell'acqua alla tua piazzola è nella sezione «${section}». Fare il bagno resta sotto la tua responsabilità – osserva il posto prima di tuffarti.`,
+    bathingNoteShort: "Bagno a tuo rischio",
+    source:
+      "Dati da OpenStreetMap tramite l'API Overpass – interrogata solo al tuo clic. Età, recinzione, sorveglianza e ingresso compaiono solo dove sono curati in OSM.",
   },
 
   /** Carta dell'oscurità per piazzola (#239). */

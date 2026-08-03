@@ -1852,6 +1852,23 @@ export const fr: Translation = {
         ? "1 foyer / gril (OpenStreetMap)"
         : `${n} foyers / grils (OpenStreetMap)`,
     firepitSearchHint: "Touche « Chercher dans cette zone ».",
+    layerFamily: "Famille",
+    familyLoading: "Recherche des places de jeux et lieux de baignade …",
+    familyZoomHint:
+      "Zoome davantage pour chercher des places de jeux et lieux de baignade.",
+    familyError:
+      "Les places de jeux et lieux de baignade n'ont pas pu être chargés – réessaie plus tard s'il te plaît.",
+    familyCount: (n: number) =>
+      n === 0
+        ? "Aucune place de jeux ni lieu de baignade trouvé dans cette zone."
+        : n === 1
+          ? "1 place de jeux / lieu de baignade trouvé"
+          : `${n} places de jeux et lieux de baignade trouvés`,
+    familyLegend: (n: number) =>
+      n === 1
+        ? "1 place de jeux / lieu de baignade (OpenStreetMap)"
+        : `${n} places de jeux et lieux de baignade (OpenStreetMap)`,
+    familySearchHint: "Touche « Chercher dans cette zone ».",
   },
   spotDetail: {
     fallbackTitle: "Emplacement",
@@ -3251,6 +3268,45 @@ export const fr: Translation = {
     fireDangerShort: "Vérifier le danger d'incendie",
     source:
       "Données d'OpenStreetMap via l'API Overpass – interrogée uniquement sur ton clic. Les caractéristiques ne figurent que là où elles sont renseignées dans OSM.",
+  },
+
+  /** Places de jeux et lieux de baignade depuis OpenStreetMap (#248). */
+  familyPlaces: {
+    sectionAria: "Places de jeux et lieux de baignade à proximité",
+    title: "Pour les familles à proximité",
+    subtitle: "Places de jeux et lieux de baignade autour de ta position.",
+    subtitleAtPlace: (place: string) =>
+      `Places de jeux et lieux de baignade autour de ${place}.`,
+    radiusLabel: "Rayon",
+    radiusGroupAria: "Choisir le rayon de recherche",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Recherche des places de jeux et lieux de baignade …",
+    loadFailed:
+      "Les places de jeux et lieux de baignade n'ont pas pu être chargés pour l'instant. Overpass est un service gratuit qui freine en cas de trop nombreuses requêtes – réessaie dans quelques minutes.",
+    empty: (km: number) =>
+      `Dans un rayon de ${km} km, aucune place de jeux ni lieu de baignade n'est enregistré dans OpenStreetMap. Essaie avec un rayon plus grand.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 endroit trouvé" : `${n} endroits trouvés`,
+    kind: {
+      playground: "Place de jeux",
+      bathing: "Lieu de baignade",
+    },
+    minAge: (years: number) => `dès ${years} ans`,
+    maxAge: (years: number) => `jusqu'à ${years} ans`,
+    ageRange: (min: number, max: number) => `${min}–${max} ans`,
+    fenced: "clôturé",
+    covered: "couvert",
+    supervised: "surveillé",
+    feePaid: "payant",
+    feeFree: "gratuit",
+    distanceAway: (value: string) => `à ${value}`,
+    navButton: "S'y rendre",
+    navAria: (name: string) => `Navigation vers ${name}`,
+    bathingNote: (section: string) =>
+      `La température de l'eau à ton emplacement figure dans la section « ${section} ». La baignade reste sous ta propre responsabilité – observe l'endroit avant de plonger.`,
+    bathingNoteShort: "Baignade à tes propres risques",
+    source:
+      "Données d'OpenStreetMap via l'API Overpass – interrogée uniquement sur ton clic. Âge, clôture, surveillance et entrée ne figurent que là où ces indications sont renseignées dans OSM.",
   },
 
   /** Carte de l'obscurité par emplacement (#239). */

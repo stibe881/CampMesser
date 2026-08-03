@@ -13,6 +13,9 @@
  *
  * Dritter Nutzer: die offiziellen Feuer- und Grillstellen (#247,
  * `firepitsQuery`/`firepitsBboxQuery`/`parseFirepits`).
+ *
+ * Vierter Nutzer: Spiel- und Badeplätze für die Ebene «Familie» (#248,
+ * `familyPlacesQuery`/`familyPlacesBboxQuery`/`parseFamilyPlaces`).
  */
 import { distanceMeters } from "@shared/geo";
 import {
@@ -468,33 +471,235 @@ export function parseFirepits(json: unknown): OsmFirepit[] {
   return result;
 }
 
+/** Alles, was als Punkt-Fund aus OSM nach Distanz sortiert werden kann. */
+interface OsmPointLike {
+  id: string;
+  lat: number;
+  lon: number;
+}
+
+/**
+ * Punkt-Funde nach Luftlinie zum Bezugspunkt sortieren und auf die nächsten
+ * `limit` kürzen. Bei gleicher Distanz entscheidet die Id – bewusst als
+ * schlichter Zeichenvergleich und NICHT über `localeCompare`, damit die
+ * Reihenfolge in jeder Sprache dieselbe und damit testbar bleibt.
+ */
+function nearestPlaces<T extends OsmPointLike>(
+  list: readonly T[],
+  latitude: number,
+  longitude: number,
+  limit: number
+): { place: T; distanceM: number }[] {
+  if (limit <= 0) return [];
+  return list
+    .map(place => ({
+      place,
+      distanceM: distanceMeters(latitude, longitude, place.lat, place.lon),
+    }))
+    .sort(
+      (a, b) =>
+        a.distanceM - b.distanceM ||
+        (a.place.id < b.place.id ? -1 : a.place.id > b.place.id ? 1 : 0)
+    )
+    .slice(0, limit);
+}
+
 /** Eine Feuerstelle mit der Luftlinie zum Bezugspunkt. */
 export interface FirepitDistance {
   firepit: OsmFirepit;
   distanceM: number;
 }
 
-/**
- * Feuer- und Grillstellen nach Luftlinie sortieren und auf die nächsten
- * `limit` kürzen. Bei gleicher Distanz entscheidet die Id, damit die
- * Reihenfolge stabil und ohne Locale-Einfluss testbar bleibt.
- */
+/** Die nächstgelegenen Feuer- und Grillstellen – für das Platz-Dossier. */
 export function nearestFirepits(
   list: readonly OsmFirepit[],
   latitude: number,
   longitude: number,
   limit: number
 ): FirepitDistance[] {
-  if (limit <= 0) return [];
-  return list
-    .map(firepit => ({
-      firepit,
-      distanceM: distanceMeters(latitude, longitude, firepit.lat, firepit.lon),
-    }))
-    .sort(
-      (a, b) =>
-        a.distanceM - b.distanceM ||
-        (a.firepit.id < b.firepit.id ? -1 : a.firepit.id > b.firepit.id ? 1 : 0)
-    )
-    .slice(0, limit);
+  return nearestPlaces(list, latitude, longitude, limit).map(
+    ({ place, distanceM }) => ({ firepit: place, distanceM })
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Spielplätze & Badeplätze (#248)                                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Zwei Kategorien in einer Ebene: der Spielplatz (`leisure=playground`) und
+ * die offizielle Badestelle (`leisure=bathing_place`, `leisure=beach_resort`
+ * oder `natural=beach` mit Zugang). Beide beantworten dieselbe Frage – «wo
+ * kann ich mit den Kindern hin?» –, tragen aber ganz verschiedene Angaben
+ * und bleiben deshalb unterscheidbar gekennzeichnet.
+ */
+export type FamilyPlaceKind = "playground" | "bathing";
+
+/** Ein Spielplatz oder Badeplatz aus OSM. */
+export interface OsmFamilyPlace {
+  /** Eindeutig über Element-Typen hinweg, z. B. "node/123". */
+  id: string;
+  lat: number;
+  lon: number;
+  kind: FamilyPlaceKind;
+  name?: string;
+  /** Spielplatz: `min_age` – Mindestalter in Jahren. */
+  minAgeYears?: number;
+  /** Spielplatz: `max_age` – Höchstalter in Jahren. */
+  maxAgeYears?: number;
+  /** Spielplatz: `fenced=yes/no` – eingezäunt. */
+  fenced?: boolean;
+  /** Spielplatz: `covered=yes/no` – überdacht/beschattet. */
+  covered?: boolean;
+  /** Badeplatz: `supervised=yes/no` – Aufsicht bzw. Badeaufsicht. */
+  supervised?: boolean;
+  /** Badeplatz: `fee=yes/no` – kostenpflichtig. */
+  fee?: boolean;
+}
+
+/** Auswählbare Suchradien rund um den Platz in Metern. */
+export const FAMILY_SEARCH_RADII_M = [2000, 5000, 10000];
+
+/** Voreingestellter Suchradius in Metern. */
+export const FAMILY_DEFAULT_RADIUS_M = 5000;
+
+/** Höchstzahl der Orte je Abfrage. */
+export const OVERPASS_FAMILY_MAX_RESULTS = 60;
+
+/**
+ * Die abgefragten Element-Arten mit demselben Ortsfilter. Beim natürlichen
+ * Strand kommt eine Zugangs-Bedingung dazu: `["access"!~…]` trifft in
+ * Overpass auch Elemente ganz OHNE access-Tag – gemeint ist also «alles
+ * ausser ausdrücklich privat/gesperrt».
+ */
+function familyElements(filter: string): string {
+  const bathing = `["leisure"~"^(bathing_place|beach_resort)$"]`;
+  const beach = `["natural"="beach"]["access"!~"^(private|no)$"]`;
+  return (
+    `node["leisure"="playground"]${filter};` +
+    `way["leisure"="playground"]${filter};` +
+    `node${bathing}${filter};` +
+    `way${bathing}${filter};` +
+    `node${beach}${filter};` +
+    `way${beach}${filter};`
+  );
+}
+
+/** Overpass-QL für Spiel- und Badeplätze im Umkreis (Platz-Dossier). */
+export function familyPlacesQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  const filter = `(around:${Math.round(radiusM)},${lat.toFixed(5)},${lon.toFixed(5)})`;
+  return (
+    `[out:json][timeout:20];` +
+    `(${familyElements(filter)});` +
+    `out center ${OVERPASS_FAMILY_MAX_RESULTS};`
+  );
+}
+
+/** Overpass-QL für Spiel- und Badeplätze im Kartenausschnitt (Karten-Ebene). */
+export function familyPlacesBboxQuery(
+  south: number,
+  west: number,
+  north: number,
+  east: number
+): string {
+  const bbox = [south, west, north, east].map(v => v.toFixed(5)).join(",");
+  return (
+    `[out:json][timeout:20];` +
+    `(${familyElements(`(${bbox})`)});` +
+    `out center ${OVERPASS_FAMILY_MAX_RESULTS};`
+  );
+}
+
+/**
+ * Altersangabe aus `min_age`/`max_age` lesen. OSM erlaubt hier viel Unfug
+ * («ab 3», «3-12»); übernommen wird nur eine glatte Zahl von 0 bis 18 –
+ * alles andere bleibt `undefined`, statt eine Zahl zu erfinden.
+ */
+export function parseOsmAgeYears(value: unknown): number | undefined {
+  const raw = cleanTag(value);
+  if (!raw || !/^\d{1,2}$/.test(raw)) return undefined;
+  const age = Number(raw);
+  return age >= 0 && age <= 18 ? age : undefined;
+}
+
+/**
+ * Spielplatz, Badeplatz – oder nichts davon? Ein natürlicher Strand zählt
+ * nur, solange er nicht ausdrücklich privat oder gesperrt ist (die Abfrage
+ * schliesst das aus, die Prüfung hier hält auch gemischte Antworten sauber).
+ */
+function familyPlaceKind(
+  tags: Record<string, unknown>
+): FamilyPlaceKind | null {
+  const leisure = cleanTag(tags.leisure);
+  if (leisure === "playground") return "playground";
+  if (leisure === "bathing_place" || leisure === "beach_resort") {
+    return "bathing";
+  }
+  if (cleanTag(tags.natural) === "beach") {
+    const access = cleanTag(tags.access)?.toLowerCase();
+    if (access === "private" || access === "no") return null;
+    return "bathing";
+  }
+  return null;
+}
+
+/**
+ * Overpass-JSON in Spiel- und Badeplätze übersetzen. Ausgewertet werden nur
+ * die Tags, die zur jeweiligen Kategorie gehören – ein `fee` am Spielplatz
+ * sagt nichts über das Baden. Fehlende Tags bleiben `undefined`.
+ */
+export function parseFamilyPlaces(json: unknown): OsmFamilyPlace[] {
+  const elements = readElements(json);
+  const seen = new Set<string>();
+  const result: OsmFamilyPlace[] = [];
+  for (let i = 0; i < elements.length; i++) {
+    if (result.length >= OVERPASS_FAMILY_MAX_RESULTS) break;
+    const point = readPointElement(elements[i]);
+    if (!point || seen.has(point.key)) continue;
+    const kind = familyPlaceKind(point.tags);
+    if (!kind) continue;
+    seen.add(point.key);
+    const tags = point.tags;
+    result.push({
+      id: point.key,
+      lat: point.lat,
+      lon: point.lon,
+      kind,
+      name: cleanTag(tags.name),
+      minAgeYears:
+        kind === "playground" ? parseOsmAgeYears(tags.min_age) : undefined,
+      maxAgeYears:
+        kind === "playground" ? parseOsmAgeYears(tags.max_age) : undefined,
+      fenced: kind === "playground" ? parseOsmYesNo(tags.fenced) : undefined,
+      covered: kind === "playground" ? parseOsmYesNo(tags.covered) : undefined,
+      supervised:
+        kind === "bathing" ? parseOsmYesNo(tags.supervised) : undefined,
+      fee: kind === "bathing" ? parseOsmYesNo(tags.fee) : undefined,
+    });
+  }
+  return result;
+}
+
+/** Ein Spiel- oder Badeplatz mit der Luftlinie zum Bezugspunkt. */
+export interface FamilyPlaceDistance {
+  place: OsmFamilyPlace;
+  distanceM: number;
+}
+
+/**
+ * Die nächstgelegenen Spiel- und Badeplätze – gemischt, allein nach Distanz.
+ * Die Kategorie sortiert bewusst nicht vor: der nächste Ort ist der nächste,
+ * ob Spielplatz oder Badestelle.
+ */
+export function nearestFamilyPlaces(
+  list: readonly OsmFamilyPlace[],
+  latitude: number,
+  longitude: number,
+  limit: number
+): FamilyPlaceDistance[] {
+  return nearestPlaces(list, latitude, longitude, limit);
 }
