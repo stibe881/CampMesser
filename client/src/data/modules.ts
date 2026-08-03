@@ -45,21 +45,16 @@ export interface Module {
 
 export const modules: Module[] = [
   {
-    path: "/sonne",
-    title: l4(
-      "Sonnenstand-Kompass",
-      "Boussole solaire",
-      "Bussola solare",
-      "Sun compass"
-    ),
+    path: "/tagebuch",
+    title: l4("Meine Reisen", "Mes voyages", "I miei viaggi", "My trips"),
     description: l4(
-      "Sonnenposition, Auf- und Untergang am Standort",
-      "Position du soleil, lever et coucher sur place",
-      "Posizione del sole, alba e tramonto sul posto",
-      "Sun position, sunrise and sunset at your location"
+      "Aufenthalte festhalten, Nächte und Lieblingsplätze zählen",
+      "Note tes séjours, compte les nuits et tes lieux préférés",
+      "Annota i soggiorni, conta notti e posti preferiti",
+      "Log your stays, count nights and favourite spots"
     ),
-    icon: Compass,
-    group: "vorOrt",
+    icon: BookOpen,
+    group: "reise",
   },
   {
     path: "/packlisten",
@@ -108,103 +103,6 @@ export const modules: Module[] = [
     group: "reise",
   },
   {
-    path: "/zeltplaetze",
-    title: l4(
-      "Zeltplatz-Favoriten",
-      "Emplacements favoris",
-      "Piazzole preferite",
-      "Favourite pitches"
-    ),
-    description: l4(
-      "Orte speichern, Wetter und Sonne im Voraus prüfen",
-      "Enregistre des lieux, vérifie météo et soleil à l'avance",
-      "Salva i luoghi e controlla in anticipo meteo e sole",
-      "Save places, check weather and sun in advance"
-    ),
-    icon: Tent,
-    group: "vorOrt",
-  },
-  {
-    path: "/karte",
-    title: l4("Karte", "Carte", "Mappa", "Map"),
-    description: l4(
-      "Alle gespeicherten Zeltplätze mit Übernachtungen auf der Karte",
-      "Tous les emplacements enregistrés avec les nuitées sur la carte",
-      "Tutte le piazzole salvate con i pernottamenti sulla mappa",
-      "All saved pitches with overnight stays on the map"
-    ),
-    icon: MapIcon,
-    group: "vorOrt",
-  },
-  {
-    path: "/zeltfinder",
-    title: l4("Zelt-Finder", "Retrouve-tente", "Trova-tenda", "Tent finder"),
-    description: l4(
-      "Kompass-Pfeil und Distanz zurück zum Zelt",
-      "Flèche boussole et distance pour retrouver la tente",
-      "Freccia bussola e distanza per ritrovare la tenda",
-      "Compass arrow and distance back to your tent"
-    ),
-    icon: LocateFixed,
-    group: "vorOrt",
-    offline: true,
-  },
-  {
-    path: "/wanderung",
-    title: l4(
-      "Wanderung aufzeichnen",
-      "Enregistrer une randonnée",
-      "Registra un'escursione",
-      "Record a hike"
-    ),
-    description: l4(
-      "GPS-Track mit Strecke, Dauer, Tempo und Höhenmetern",
-      "Trace GPS avec distance, durée, allure et dénivelé",
-      "Traccia GPS con distanza, durata, andatura e dislivello",
-      "GPS track with distance, duration, pace and elevation"
-    ),
-    icon: Footprints,
-    group: "vorOrt",
-  },
-  {
-    path: "/tagebuch",
-    title: l4("Meine Reisen", "Mes voyages", "I miei viaggi", "My trips"),
-    description: l4(
-      "Aufenthalte festhalten, Nächte und Lieblingsplätze zählen",
-      "Note tes séjours, compte les nuits et tes lieux préférés",
-      "Annota i soggiorni, conta notti e posti preferiti",
-      "Log your stays, count nights and favourite spots"
-    ),
-    icon: BookOpen,
-    group: "reise",
-  },
-  {
-    path: "/rasen",
-    title: l4("Rasenschoner", "Protège-gazon", "Salva-prato", "Lawn saver"),
-    description: l4(
-      "Wie lange darf das Zelt auf dem Rasen stehen?",
-      "Combien de temps la tente peut-elle rester sur l'herbe ?",
-      "Per quanto tempo la tenda può restare sul prato?",
-      "How long can the tent stay on the grass?"
-    ),
-    icon: Sprout,
-    group: "vorOrt",
-    offline: true,
-  },
-  {
-    path: "/wasserwaage",
-    title: l4("Wasserwaage", "Niveau à bulle", "Livella", "Spirit level"),
-    description: l4(
-      "Wohnwagen und Tisch mit dem Lagesensor ausrichten",
-      "Mets la caravane et la table à niveau avec le capteur",
-      "Metti in piano caravan e tavolo con il sensore",
-      "Level your caravan and table with the motion sensor"
-    ),
-    icon: Gauge,
-    group: "vorOrt",
-    offline: true,
-  },
-  {
     path: "/zuladung",
     title: l4(
       "Zuladungs-Rechner",
@@ -241,38 +139,106 @@ export const modules: Module[] = [
     offline: true,
   },
   {
-    path: "/sos",
-    title: l4(
-      "SOS & Notfall",
-      "SOS & urgences",
-      "SOS ed emergenze",
-      "SOS & emergency"
-    ),
+    path: "/karte",
+    title: l4("Karte", "Carte", "Mappa", "Map"),
     description: l4(
-      "GPS-Koordinaten und Notfallnummern",
-      "Coordonnées GPS et numéros d'urgence",
-      "Coordinate GPS e numeri d'emergenza",
-      "GPS coordinates and emergency numbers"
+      "Alle gespeicherten Zeltplätze mit Übernachtungen auf der Karte",
+      "Tous les emplacements enregistrés avec les nuitées sur la carte",
+      "Tutte le piazzole salvate con i pernottamenti sulla mappa",
+      "All saved pitches with overnight stays on the map"
     ),
-    icon: Siren,
-    group: "Sicherheit",
+    icon: MapIcon,
+    group: "vorOrt",
   },
   {
-    path: "/wetter",
+    path: "/zeltplaetze",
     title: l4(
-      "Camp-Wetter",
-      "Météo du camp",
-      "Meteo del campo",
-      "Camp weather"
+      "Zeltplatz-Favoriten",
+      "Emplacements favoris",
+      "Piazzole preferite",
+      "Favourite pitches"
     ),
     description: l4(
-      "Hyperlokale Vorhersage und Unwetterwarnungen",
-      "Prévisions hyperlocales et alertes d'intempéries",
-      "Previsioni iperlocali e allerte maltempo",
-      "Hyperlocal forecast and severe weather warnings"
+      "Orte speichern, Wetter und Sonne im Voraus prüfen",
+      "Enregistre des lieux, vérifie météo et soleil à l'avance",
+      "Salva i luoghi e controlla in anticipo meteo e sole",
+      "Save places, check weather and sun in advance"
     ),
-    icon: CloudSunRain,
-    group: "Sicherheit",
+    icon: Tent,
+    group: "vorOrt",
+  },
+  {
+    path: "/wasserwaage",
+    title: l4("Wasserwaage", "Niveau à bulle", "Livella", "Spirit level"),
+    description: l4(
+      "Wohnwagen und Tisch mit dem Lagesensor ausrichten",
+      "Mets la caravane et la table à niveau avec le capteur",
+      "Metti in piano caravan e tavolo con il sensore",
+      "Level your caravan and table with the motion sensor"
+    ),
+    icon: Gauge,
+    group: "vorOrt",
+    offline: true,
+  },
+  {
+    path: "/sonne",
+    title: l4(
+      "Sonnenstand-Kompass",
+      "Boussole solaire",
+      "Bussola solare",
+      "Sun compass"
+    ),
+    description: l4(
+      "Sonnenposition, Auf- und Untergang am Standort",
+      "Position du soleil, lever et coucher sur place",
+      "Posizione del sole, alba e tramonto sul posto",
+      "Sun position, sunrise and sunset at your location"
+    ),
+    icon: Compass,
+    group: "vorOrt",
+  },
+  {
+    path: "/zeltfinder",
+    title: l4("Zelt-Finder", "Retrouve-tente", "Trova-tenda", "Tent finder"),
+    description: l4(
+      "Kompass-Pfeil und Distanz zurück zum Zelt",
+      "Flèche boussole et distance pour retrouver la tente",
+      "Freccia bussola e distanza per ritrovare la tenda",
+      "Compass arrow and distance back to your tent"
+    ),
+    icon: LocateFixed,
+    group: "vorOrt",
+    offline: true,
+  },
+  {
+    path: "/wanderung",
+    title: l4(
+      "Wanderung aufzeichnen",
+      "Enregistrer une randonnée",
+      "Registra un'escursione",
+      "Record a hike"
+    ),
+    description: l4(
+      "GPS-Track mit Strecke, Dauer, Tempo und Höhenmetern",
+      "Trace GPS avec distance, durée, allure et dénivelé",
+      "Traccia GPS con distanza, durata, andatura e dislivello",
+      "GPS track with distance, duration, pace and elevation"
+    ),
+    icon: Footprints,
+    group: "vorOrt",
+  },
+  {
+    path: "/rasen",
+    title: l4("Rasenschoner", "Protège-gazon", "Salva-prato", "Lawn saver"),
+    description: l4(
+      "Wie lange darf das Zelt auf dem Rasen stehen?",
+      "Combien de temps la tente peut-elle rester sur l'herbe ?",
+      "Per quanto tempo la tenda può restare sul prato?",
+      "How long can the tent stay on the grass?"
+    ),
+    icon: Sprout,
+    group: "vorOrt",
+    offline: true,
   },
   {
     path: "/trockenzeiten",
@@ -292,6 +258,53 @@ export const modules: Module[] = [
     group: "vorOrt",
   },
   {
+    path: "/wetter",
+    title: l4(
+      "Camp-Wetter",
+      "Météo du camp",
+      "Meteo del campo",
+      "Camp weather"
+    ),
+    description: l4(
+      "Hyperlokale Vorhersage und Unwetterwarnungen",
+      "Prévisions hyperlocales et alertes d'intempéries",
+      "Previsioni iperlocali e allerte maltempo",
+      "Hyperlocal forecast and severe weather warnings"
+    ),
+    icon: CloudSunRain,
+    group: "Sicherheit",
+  },
+  {
+    path: "/sos",
+    title: l4(
+      "SOS & Notfall",
+      "SOS & urgences",
+      "SOS ed emergenze",
+      "SOS & emergency"
+    ),
+    description: l4(
+      "GPS-Koordinaten und Notfallnummern",
+      "Coordonnées GPS et numéros d'urgence",
+      "Coordinate GPS e numeri d'emergenza",
+      "GPS coordinates and emergency numbers"
+    ),
+    icon: Siren,
+    group: "Sicherheit",
+  },
+  {
+    path: "/erste-hilfe",
+    title: l4("Erste Hilfe", "Premiers secours", "Primo soccorso", "First aid"),
+    description: l4(
+      "Offline-Ratgeber für Outdoor-Verletzungen",
+      "Guide hors ligne pour les blessures en plein air",
+      "Guida offline per gli infortuni all'aperto",
+      "Offline guide for outdoor injuries"
+    ),
+    icon: Cross,
+    group: "Sicherheit",
+    offline: true,
+  },
+  {
     path: "/nachtruhe",
     title: l4(
       "Camp-Quiet-Timer",
@@ -309,53 +322,38 @@ export const modules: Module[] = [
     group: "Sicherheit",
   },
   {
-    path: "/erste-hilfe",
-    title: l4("Erste Hilfe", "Premiers secours", "Primo soccorso", "First aid"),
-    description: l4(
-      "Offline-Ratgeber für Outdoor-Verletzungen",
-      "Guide hors ligne pour les blessures en plein air",
-      "Guida offline per gli infortuni all'aperto",
-      "Offline guide for outdoor injuries"
+    path: "/energie",
+    title: l4(
+      "Energie-Budget",
+      "Budget énergie",
+      "Budget energia",
+      "Energy budget"
     ),
-    icon: Cross,
-    group: "Sicherheit",
-    offline: true,
+    description: l4(
+      "Reichweite, Verbrauch und Solarertrag-Prognose",
+      "Autonomie, consommation et prévision solaire",
+      "Autonomia, consumo e previsione solare",
+      "Runtime, consumption and solar yield forecast"
+    ),
+    icon: BatteryCharging,
+    group: "Energie & Wasser",
   },
   {
-    path: "/knoten",
+    path: "/wasser",
     title: l4(
-      "Knoten-Bibliothek",
-      "Bibliothèque de nœuds",
-      "Biblioteca dei nodi",
-      "Knot library"
+      "Trinkwasser-Rechner",
+      "Calculateur d'eau potable",
+      "Calcolatore acqua potabile",
+      "Drinking water calculator"
     ),
     description: l4(
-      "Die wichtigsten Outdoor-Knoten, Schritt für Schritt",
-      "Les nœuds outdoor essentiels, pas à pas",
-      "I nodi outdoor più importanti, passo dopo passo",
-      "The key outdoor knots, step by step"
+      "Wasserbedarf für Personen, Tage und Hitze",
+      "Besoins en eau selon personnes, jours et chaleur",
+      "Fabbisogno d'acqua per persone, giorni e caldo",
+      "Water needs for people, days and heat"
     ),
-    icon: Cable,
-    group: "Erste Hilfe",
-    offline: true,
-  },
-  {
-    path: "/natur",
-    title: l4(
-      "Natur-Entdecker",
-      "Explorateur nature",
-      "Esploratore della natura",
-      "Nature explorer"
-    ),
-    description: l4(
-      "Tierspuren, Sternbilder, Bäume, Pilze, Beeren – und dein Fangbuch",
-      "Traces d'animaux, constellations, arbres, champignons, baies – et ton carnet de pêche",
-      "Tracce di animali, costellazioni, alberi, funghi, bacche – e il tuo libretto delle catture",
-      "Animal tracks, constellations, trees, mushrooms, berries – and your catch log"
-    ),
-    icon: TreePine,
-    group: "Erste Hilfe",
-    offline: true,
+    icon: Droplets,
+    group: "Energie & Wasser",
   },
   {
     path: "/rezepte",
@@ -410,6 +408,42 @@ export const modules: Module[] = [
     group: "Erste Hilfe",
   },
   {
+    path: "/knoten",
+    title: l4(
+      "Knoten-Bibliothek",
+      "Bibliothèque de nœuds",
+      "Biblioteca dei nodi",
+      "Knot library"
+    ),
+    description: l4(
+      "Die wichtigsten Outdoor-Knoten, Schritt für Schritt",
+      "Les nœuds outdoor essentiels, pas à pas",
+      "I nodi outdoor più importanti, passo dopo passo",
+      "The key outdoor knots, step by step"
+    ),
+    icon: Cable,
+    group: "Erste Hilfe",
+    offline: true,
+  },
+  {
+    path: "/natur",
+    title: l4(
+      "Natur-Entdecker",
+      "Explorateur nature",
+      "Esploratore della natura",
+      "Nature explorer"
+    ),
+    description: l4(
+      "Tierspuren, Sternbilder, Bäume, Pilze, Beeren – und dein Fangbuch",
+      "Traces d'animaux, constellations, arbres, champignons, baies – et ton carnet de pêche",
+      "Tracce di animali, costellazioni, alberi, funghi, bacche – e il tuo libretto delle catture",
+      "Animal tracks, constellations, trees, mushrooms, berries – and your catch log"
+    ),
+    icon: TreePine,
+    group: "Erste Hilfe",
+    offline: true,
+  },
+  {
     path: "/sprachhilfe",
     title: l4(
       "Sprachhilfe",
@@ -446,48 +480,14 @@ export const modules: Module[] = [
     // bleibt aus historischen Gründen stabil (Anzeige-Label siehe groupLabels)
     group: "Erste Hilfe",
   },
-  {
-    path: "/energie",
-    title: l4(
-      "Energie-Budget",
-      "Budget énergie",
-      "Budget energia",
-      "Energy budget"
-    ),
-    description: l4(
-      "Reichweite, Verbrauch und Solarertrag-Prognose",
-      "Autonomie, consommation et prévision solaire",
-      "Autonomia, consumo e previsione solare",
-      "Runtime, consumption and solar yield forecast"
-    ),
-    icon: BatteryCharging,
-    group: "Energie & Wasser",
-  },
-  {
-    path: "/wasser",
-    title: l4(
-      "Trinkwasser-Rechner",
-      "Calculateur d'eau potable",
-      "Calcolatore acqua potabile",
-      "Drinking water calculator"
-    ),
-    description: l4(
-      "Wasserbedarf für Personen, Tage und Hitze",
-      "Besoins en eau selon personnes, jours et chaleur",
-      "Fabbisogno d'acqua per persone, giorni e caldo",
-      "Water needs for people, days and heat"
-    ),
-    icon: Droplets,
-    group: "Energie & Wasser",
-  },
 ];
 
 export const groups = [
   "reise",
   "vorOrt",
   "Sicherheit",
-  "Erste Hilfe",
   "Energie & Wasser",
+  "Erste Hilfe",
 ] as const;
 
 /** Anzeige-Namen der Gruppen (die Gruppen-Schlüssel selbst bleiben stabil). */
