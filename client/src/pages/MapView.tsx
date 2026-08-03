@@ -46,6 +46,7 @@ import { Link, useLocation } from "wouter";
 import {
   Compass,
   LocateFixed,
+  Ruler,
   Map as MapIcon,
   MapPin,
   PawPrint,
@@ -102,6 +103,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useI18n, useT } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
+import { distanceMeters } from "@shared/geo";
 import { tripNights } from "@shared/trips";
 
 interface SpotPin {
@@ -223,7 +225,7 @@ function SpotsMap({
   sightings: SightingPin[];
   nightsBySpotId: Map<number, number>;
 }) {
-  const t = useT();
+  const { lang, t } = useI18n();
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -233,6 +235,15 @@ function SpotsMap({
   const didFitRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
   const popupJustClosedRef = useRef(0);
+  // «Mein Standort»: blauer Punkt + Genauigkeitskreis, bei jedem Klick ersetzt
+  const locateLayerRef = useRef<L.LayerGroup | null>(null);
+  const [locating, setLocating] = useState(false);
+  // Mess-Modus: zwei Punkte antippen → Luftlinie mit Distanz-Label
+  const [measureOn, setMeasureOn] = useState(false);
+  const measureOnRef = useRef(false);
+  const measurePointsRef = useRef<L.LatLng[]>([]);
+  const measureLayerRef = useRef<L.LayerGroup | null>(null);
+  const measureClickRef = useRef<(latlng: L.LatLng) => void>(() => {});
 
   // Karten-Klick auf freie Stelle: Vorschlag für einen neuen Favoriten
   const [proposed, setProposed] = useState<{ lat: number; lon: number } | null>(
@@ -293,6 +304,11 @@ function SpotsMap({
     });
     map.on("click", (event: L.LeafletMouseEvent) => {
       if (Date.now() - popupJustClosedRef.current < 200) return;
+      // Im Mess-Modus sammeln Klicks Messpunkte statt Favoriten vorzuschlagen
+      if (measureOnRef.current) {
+        measureClickRef.current(event.latlng);
+        return;
+      }
       setProposed({ lat: event.latlng.lat, lon: event.latlng.lng });
     });
     mapRef.current = map;
@@ -699,6 +715,99 @@ function SpotsMap({
     });
   };
 
+  /** Karte auf die aktuelle Position zentrieren (blauer Punkt + Genauigkeit). */
+  const locateMe = () => {
+    const map = mapRef.current;
+    if (!map || !navigator.geolocation) {
+      toast.error(t.mapView.locateFailed);
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setLocating(false);
+        const { latitude, longitude, accuracy } = pos.coords;
+        const m = mapRef.current;
+        if (!m) return;
+        if (!locateLayerRef.current) {
+          locateLayerRef.current = L.layerGroup().addTo(m);
+        }
+        locateLayerRef.current.clearLayers();
+        L.circle([latitude, longitude], {
+          radius: Math.min(accuracy || 30, 500),
+          color: "#3b82f6",
+          weight: 1,
+          fillColor: "#3b82f6",
+          fillOpacity: 0.15,
+        }).addTo(locateLayerRef.current);
+        L.circleMarker([latitude, longitude], {
+          radius: 6,
+          color: "#ffffff",
+          weight: 2,
+          fillColor: "#3b82f6",
+          fillOpacity: 1,
+        }).addTo(locateLayerRef.current);
+        m.setView([latitude, longitude], Math.max(m.getZoom(), 14));
+      },
+      () => {
+        setLocating(false);
+        toast.error(t.mapView.locateFailed);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const clearMeasure = () => {
+    measurePointsRef.current = [];
+    measureLayerRef.current?.clearLayers();
+  };
+
+  /** Mess-Modus an/aus; Ausschalten räumt Punkte und Linie weg. */
+  const toggleMeasure = () => {
+    const next = !measureOnRef.current;
+    measureOnRef.current = next;
+    setMeasureOn(next);
+    if (!next) clearMeasure();
+  };
+
+  // Aktuelle Fassung des Mess-Klicks (der Init-Effect ruft sie über die Ref auf,
+  // damit lang/Übersetzungen nicht in einer veralteten Closure hängen bleiben)
+  measureClickRef.current = (latlng: L.LatLng) => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (!measureLayerRef.current) {
+      measureLayerRef.current = L.layerGroup().addTo(map);
+    }
+    if (measurePointsRef.current.length >= 2) clearMeasure();
+    measurePointsRef.current.push(latlng);
+    const layer = measureLayerRef.current;
+    L.circleMarker(latlng, {
+      radius: 5,
+      color: "#ffffff",
+      weight: 2,
+      fillColor: "#0ea5e9",
+      fillOpacity: 1,
+    }).addTo(layer);
+    if (measurePointsRef.current.length === 2) {
+      const [a, b] = measurePointsRef.current;
+      const dist = distanceMeters(a.lat, a.lng, b.lat, b.lng);
+      const label =
+        dist < 1000
+          ? `${Math.round(dist)} m`
+          : `${(dist / 1000).toLocaleString(LOCALE_TAGS[lang], {
+              maximumFractionDigits: 1,
+            })} km`;
+      L.polyline([a, b], {
+        color: "#0ea5e9",
+        weight: 2,
+        dashArray: "6 4",
+      })
+        .bindTooltip(label, { permanent: true, direction: "center" })
+        .addTo(layer)
+        .openTooltip();
+    }
+  };
+
   return (
     <>
       <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -750,6 +859,34 @@ function SpotsMap({
           <Compass className="h-3.5 w-3.5" aria-hidden="true" />
           {t.mapView.discoverToggle}
         </button>
+        <button
+          type="button"
+          onClick={locateMe}
+          disabled={locating}
+          className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-60"
+        >
+          <LocateFixed className="h-3.5 w-3.5" aria-hidden="true" />
+          {t.mapView.locateButton}
+        </button>
+        <button
+          type="button"
+          onClick={toggleMeasure}
+          aria-pressed={measureOn}
+          className={cn(
+            "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+            measureOn
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Ruler className="h-3.5 w-3.5" aria-hidden="true" />
+          {t.mapView.measureButton}
+        </button>
+        {measureOn && (
+          <span className="text-xs text-muted-foreground" role="status">
+            {t.mapView.measureHint}
+          </span>
+        )}
         {discoverOn && (
           <span className="text-xs text-muted-foreground" role="status">
             {discoverLoading
