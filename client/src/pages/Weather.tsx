@@ -26,6 +26,7 @@ import {
   Sunrise,
   Sunset,
   Tent,
+  TrendingDown,
   Wind,
   X,
 } from "lucide-react";
@@ -69,6 +70,8 @@ import {
   describeWeatherCode,
   detectAlerts,
   nextRainWindow,
+  pressureTrend,
+  PRESSURE_STRONG_HPA,
   type DailyWeather,
   type HourlyWeather,
   type RainSlot,
@@ -253,7 +256,7 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
     forecast_minutely_15: "16",
     current: "temperature_2m,apparent_temperature,weather_code,wind_speed_10m",
     hourly:
-      "temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code,cape,cloud_cover",
+      "temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,wind_direction_10m,pressure_msl,weather_code,cape,cloud_cover",
     daily:
       "temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_gusts_10m_max,weather_code,sunrise,sunset,uv_index_max",
   });
@@ -277,6 +280,7 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
       windSpeedKmh: json.hourly.wind_speed_10m[i],
       windGustsKmh: json.hourly.wind_gusts_10m[i],
       windDirectionDeg: json.hourly.wind_direction_10m?.[i] ?? undefined,
+      pressureHpa: json.hourly.pressure_msl?.[i] ?? undefined,
       weatherCode: json.hourly.weather_code[i],
       cape: json.hourly.cape?.[i] ?? 0,
       cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
@@ -1361,6 +1365,17 @@ export default function WeatherPage() {
     }
     return null;
   }, [data]);
+  // Luftdruck-Trend: als Frühindikator zeigen wir bewusst nur FALLENDEN Druck
+  // (steigender oder gleichbleibender Druck braucht keinen Hinweis).
+  const pressureNotice = useMemo(() => {
+    if (!data) return null;
+    const trend = pressureTrend(data.hourly, new Date());
+    if (!trend || trend.direction !== "falling") return null;
+    return {
+      strong: trend.hPaPer3h <= -PRESSURE_STRONG_HPA,
+      hPa: Math.abs(trend.hPaPer3h).toFixed(1),
+    };
+  }, [data]);
   const next24 = data?.hourly.slice(0, 24) ?? [];
   // Heutiger Max-UV (WHO-Skala) – Wert kommt aus demselben Forecast-Abruf
   const uvToday = data?.daily[0]?.uvIndexMax ?? null;
@@ -1620,6 +1635,23 @@ export default function WeatherPage() {
                       minute: "2-digit",
                     })
                   )}
+            </p>
+          )}
+
+          {/* Luftdruck-Trend: dezenter Frühindikator bei fallendem Druck */}
+          {pressureNotice && (
+            <p
+              role="status"
+              aria-label={t.weather.pressureAria}
+              className="mb-4 flex items-center gap-2 rounded-xl border border-chart-4/40 bg-chart-4/10 px-4 py-2.5 text-sm"
+            >
+              <TrendingDown
+                className="h-4 w-4 shrink-0 text-chart-4"
+                aria-hidden="true"
+              />
+              {pressureNotice.strong
+                ? t.weather.pressureFallingStrong(pressureNotice.hPa)
+                : t.weather.pressureFalling(pressureNotice.hPa)}
             </p>
           )}
 

@@ -23,6 +23,11 @@ export interface HourlyWeather {
    * Osten). Optional: nur das Wetter-Modul ruft `wind_direction_10m` ab.
    */
   windDirectionDeg?: number;
+  /**
+   * Luftdruck auf Meereshöhe in hPa. Optional: nur das Wetter-Modul ruft
+   * `pressure_msl` ab.
+   */
+  pressureHpa?: number;
 }
 
 export interface DailyWeather {
@@ -99,6 +104,80 @@ export function nextRainWindow(
     startsAt: relevant[startIdx].time,
     endsAt: endIdx === null ? null : relevant[endIdx].time,
   };
+}
+
+/** Richtung des Luftdruck-Trends über die kommenden ~3 Stunden. */
+export type PressureDirection = "falling" | "rising" | "steady";
+
+export interface PressureTrend {
+  direction: PressureDirection;
+  /** Änderung in hPa pro 3 Stunden (negativ = fallend), auf das Fenster normiert */
+  hPaPer3h: number;
+}
+
+/** Vergleichsfenster des Luftdruck-Trends in Stunden. */
+const PRESSURE_WINDOW_H = 3;
+/** Unter dieser Änderung (hPa/3 h) gilt der Druck als gleichbleibend. */
+export const PRESSURE_STEADY_HPA = 1;
+/** Ab dieser Änderung (hPa/3 h) ist der Umschwung deutlich. */
+export const PRESSURE_STRONG_HPA = 3;
+/** Kürzeres Fenster als das ergibt keine belastbare Aussage. */
+const PRESSURE_MIN_WINDOW_H = 2;
+
+/**
+ * Luftdruck-Trend als Frühindikator: Vergleich der laufenden Stunde mit der
+ * Prognose rund drei Stunden später (Vergangenheitsdaten sind dafür nicht
+ * nötig – die Stundenprognose ab jetzt genügt). Die Änderung wird auf
+ * hPa pro 3 Stunden normiert, damit ein kürzeres Fenster (Datenende) nicht
+ * fälschlich harmlos wirkt.
+ *
+ * Schwellen: |Δ| < 1 hPa/3 h = gleichbleibend, ab 1 hPa/3 h fallend bzw.
+ * steigend, ab 3 hPa/3 h deutlich (das entscheidet die Anzeige).
+ * Rückgabe null, wenn zu wenige oder unbrauchbare Druckwerte vorliegen.
+ */
+export function pressureTrend(
+  hourly: { time: string; pressureHpa?: number }[],
+  now: Date
+): PressureTrend | null {
+  const points = hourly
+    .map(h => ({ ms: new Date(h.time).getTime(), hPa: h.pressureHpa }))
+    .filter(
+      (p): p is { ms: number; hPa: number } =>
+        Number.isFinite(p.ms) &&
+        typeof p.hPa === "number" &&
+        Number.isFinite(p.hPa)
+    )
+    .sort((a, b) => a.ms - b.ms);
+  if (points.length < 2) return null;
+
+  // Startpunkt: die laufende Stunde (letzter Punkt bis «jetzt»), sonst der erste
+  let startIdx = 0;
+  for (let i = 0; i < points.length; i++) {
+    if (points[i].ms <= now.getTime()) startIdx = i;
+  }
+  const start = points[startIdx];
+  const targetMs = start.ms + PRESSURE_WINDOW_H * 3600000;
+  let end: { ms: number; hPa: number } | null = null;
+  for (let i = startIdx + 1; i < points.length; i++) {
+    if (
+      end === null ||
+      Math.abs(points[i].ms - targetMs) < Math.abs(end.ms - targetMs)
+    ) {
+      end = points[i];
+    }
+  }
+  if (!end) return null;
+  const hours = (end.ms - start.ms) / 3600000;
+  if (hours < PRESSURE_MIN_WINDOW_H) return null;
+
+  const hPaPer3h = ((end.hPa - start.hPa) / hours) * PRESSURE_WINDOW_H;
+  const direction: PressureDirection =
+    hPaPer3h <= -PRESSURE_STEADY_HPA
+      ? "falling"
+      : hPaPer3h >= PRESSURE_STEADY_HPA
+        ? "rising"
+        : "steady";
+  return { direction, hPaPer3h };
 }
 
 export type AlertSeverity = "info" | "warnung" | "gefahr";

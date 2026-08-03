@@ -809,6 +809,11 @@ export const it: Translation = {
     radarSource:
       "Dati radar: RainViewer · Mappa: OpenStreetMap. I frame nowcast sono un'estrapolazione a brevissimo termine.",
     rainSoonAria: "Avviso pioggia a breve termine",
+    pressureAria: "Tendenza della pressione atmosferica",
+    pressureFalling: hPa =>
+      `La pressione atmosferica cala (−${hPa} hPa in 3 ore) – è probabile un cambiamento del tempo.`,
+    pressureFallingStrong: hPa =>
+      `La pressione atmosferica cala fortemente (−${hPa} hPa in 3 ore) – aspettati un netto cambiamento del tempo e metti al sicuro il campo.`,
     rainStartsAt: time => `La pioggia inizia verso le ${time}`,
     rainEndsAt: time => `La pioggia smette verso le ${time}`,
     placeAddButton: "Aggiungi luogo",

@@ -819,6 +819,11 @@ export const fr: Translation = {
     radarSource:
       "Données radar : RainViewer · Carte : OpenStreetMap. Les images nowcast sont une extrapolation à très court terme.",
     rainSoonAria: "Info pluie à court terme",
+    pressureAria: "Tendance de la pression atmosphérique",
+    pressureFalling: hPa =>
+      `La pression atmosphérique baisse (−${hPa} hPa en 3 heures) – un changement de temps est probable.`,
+    pressureFallingStrong: hPa =>
+      `La pression atmosphérique chute fortement (−${hPa} hPa en 3 heures) – attends-toi à un net changement de temps et sécurise ton camp.`,
     rainStartsAt: time => `La pluie commence vers ${time}`,
     rainEndsAt: time => `La pluie cesse vers ${time}`,
     placeAddButton: "Ajouter un lieu",

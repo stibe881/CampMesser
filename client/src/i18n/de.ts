@@ -822,6 +822,11 @@ export const de = {
     radarSource:
       "Radardaten: RainViewer · Karte: OpenStreetMap. Nowcast-Frames sind eine kurzfristige Hochrechnung.",
     rainSoonAria: "Regen-Kurzfrist-Hinweis",
+    pressureAria: "Luftdruck-Trend",
+    pressureFalling: (hPa: string) =>
+      `Der Luftdruck fällt (−${hPa} hPa in 3 Stunden) – ein Wetterumschwung ist wahrscheinlich.`,
+    pressureFallingStrong: (hPa: string) =>
+      `Der Luftdruck fällt stark (−${hPa} hPa in 3 Stunden) – rechne mit einem deutlichen Wetterumschwung und sichere dein Camp.`,
     rainStartsAt: (time: string) => `Regen beginnt ca. ${time}`,
     rainEndsAt: (time: string) => `Regen hört ca. ${time} auf`,
     placeAddButton: "Ort hinzufügen",

@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Wetter: fällt der Luftdruck, warnt dich ein Hinweis frühzeitig vor einem Wetterumschwung.",
+        "Météo : si la pression atmosphérique baisse, un message t'avertit tôt d'un changement de temps.",
+        "Meteo: se la pressione atmosferica cala, un avviso ti segnala per tempo un cambiamento del tempo.",
+        "Weather: if air pressure drops, a notice warns you early about a change in the weather."
+      ),
+      l4(
         "Wetter: im Tages-Detail siehst du neu Windrichtung und Böenspitzen im Verlauf.",
         "Météo : dans le détail du jour, tu vois désormais la direction du vent et les pointes de rafales au fil des heures.",
         "Meteo: nel dettaglio del giorno vedi ora la direzione del vento e le raffiche massime ora per ora.",

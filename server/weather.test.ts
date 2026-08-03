@@ -4,6 +4,9 @@ import {
   describeWeatherCode,
   detectAlerts,
   nextRainWindow,
+  pressureTrend,
+  PRESSURE_STEADY_HPA,
+  PRESSURE_STRONG_HPA,
   uvLevelForIndex,
   type HourlyWeather,
   type RainSlot,
@@ -214,5 +217,77 @@ describe("nextRainWindow", () => {
     expect(new Date(result!.startsAt!).getTime()).toBe(
       new Date(2026, 7, 2, 14, 45).getTime()
     );
+  });
+});
+
+describe("pressureTrend", () => {
+  /** Stundenwerte ab 14:00 lokaler Zeit; hPa[i] = Druck der i-ten Stunde. */
+  function hours(hPa: (number | undefined)[]) {
+    const base = new Date(2026, 7, 2, 14, 0, 0, 0);
+    return hPa.map((pressureHpa, i) => ({
+      time: new Date(base.getTime() + i * 3600000).toISOString(),
+      pressureHpa,
+    }));
+  }
+  const now = new Date(2026, 7, 2, 14, 20, 0, 0); // in der ersten Stunde
+
+  it("erkennt gleichbleibenden Druck (|Δ| < 1 hPa/3 h)", () => {
+    const trend = pressureTrend(hours([1013, 1013, 1012.7, 1012.5]), now);
+    expect(trend).not.toBeNull();
+    expect(trend!.direction).toBe("steady");
+    expect(trend!.hPaPer3h).toBeCloseTo(-0.5, 5);
+  });
+
+  it("erkennt leicht fallenden Druck ab 1 hPa/3 h", () => {
+    const trend = pressureTrend(hours([1015, 1014.4, 1013.8, 1013.2]), now);
+    expect(trend!.direction).toBe("falling");
+    expect(trend!.hPaPer3h).toBeCloseTo(-1.8, 5);
+  });
+
+  it("erkennt stark fallenden Druck (≥ 3 hPa/3 h)", () => {
+    const trend = pressureTrend(hours([1010, 1008.5, 1007, 1005.5]), now);
+    expect(trend!.direction).toBe("falling");
+    expect(trend!.hPaPer3h).toBeCloseTo(-4.5, 5);
+    expect(trend!.hPaPer3h).toBeLessThanOrEqual(-PRESSURE_STRONG_HPA);
+  });
+
+  it("erkennt steigenden Druck", () => {
+    const trend = pressureTrend(hours([1005, 1006, 1007, 1008]), now);
+    expect(trend!.direction).toBe("rising");
+    expect(trend!.hPaPer3h).toBeCloseTo(3, 5);
+  });
+
+  it("liegt die Schwelle genau bei 1 hPa/3 h, gilt der Druck als fallend", () => {
+    const trend = pressureTrend(hours([1013, 1012.7, 1012.3, 1012]), now);
+    expect(trend!.direction).toBe("falling");
+    expect(trend!.hPaPer3h).toBeCloseTo(-PRESSURE_STEADY_HPA, 5);
+  });
+
+  it("normiert ein kürzeres Fenster auf 3 Stunden", () => {
+    // Nur zwei Stunden Vorlauf: −2 hPa/2 h entsprechen −3 hPa/3 h
+    const trend = pressureTrend(hours([1010, 1009, 1008]), now);
+    expect(trend!.direction).toBe("falling");
+    expect(trend!.hPaPer3h).toBeCloseTo(-3, 5);
+  });
+
+  it("liefert null ohne brauchbare Druckwerte", () => {
+    expect(pressureTrend([], now)).toBeNull();
+    expect(pressureTrend(hours([1013]), now)).toBeNull();
+    expect(pressureTrend(hours([undefined, undefined, undefined]), now)).toBe(
+      null
+    );
+    // Zu kurzes Fenster (nur eine Folgestunde) → keine belastbare Aussage
+    expect(pressureTrend(hours([1013, 1010]), now)).toBeNull();
+  });
+
+  it("startet bei der laufenden Stunde, nicht am Listenanfang", () => {
+    const later = new Date(2026, 7, 2, 16, 10, 0, 0); // dritte Stunde
+    // Ab 16:00 steigt der Druck wieder, davor fiel er stark
+    const trend = pressureTrend(
+      hours([1010, 1006, 1004, 1005, 1006, 1007]),
+      later
+    );
+    expect(trend!.direction).toBe("rising");
+    expect(trend!.hPaPer3h).toBeCloseTo(3, 5);
   });
 });
