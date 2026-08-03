@@ -23,8 +23,8 @@ export interface ChangelogBlock {
 
 export const changelog: ChangelogBlock[] = [
   {
-    id: "2026-08-03.1",
-    date: "2026-08-03",
+    id: "2026-08-04.1",
+    date: "2026-08-04",
     entries: [
       l4(
         "Freie Notizen mit Stichwörtern: Die neue Kachel «Notizen» ist das Auffangbecken für alles, was in kein anderes Modul passt – die Nummer des Platzwarts, der Trick mit dem Heringszieher, eine Idee für nächsten Sommer. Titel freiwillig, Text so lang du magst, dazu frei vergebene Stichwörter. Über der Liste stehen deine Stichwörter als Filter-Chips, das Suchfeld durchsucht Titel, Text und Stichwörter – und die Suche auf der Startseite findet deine Notizen jetzt gleich mit.",
