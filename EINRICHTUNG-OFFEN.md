@@ -53,7 +53,6 @@ zeigen lassen (HTTP-Check, erwartet Status 200; bei DB-Problemen liefert der
 Endpoint 503 und der Dienst alarmiert per E-Mail/Push). Intervall 5 Minuten
 reicht.
 
-
 ## 6. Ausflugfinder-Anbindung (Ausflüge auf Karte und im Platz-Dossier)
 
 CampMesser zeigt die Ausflugsziele aus deiner eigenen **Ausflugfinder**-App –
