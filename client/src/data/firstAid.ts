@@ -978,4 +978,412 @@ export const firstAidTopics: FirstAidTopic[] = [
       "For children: give 5 rescue breaths first, then 30:2. For infants and toddlers, press with two fingers or one hand (about 1/3 of the chest depth)."
     ),
   },
+  {
+    id: "fremdkoerperauge",
+    title: l4(
+      "Fremdkörper im Auge",
+      "Corps étranger dans l'œil",
+      "Corpo estraneo nell'occhio",
+      "Foreign body in the eye"
+    ),
+    icon: "Eye",
+    severity: "mittel",
+    summary: l4(
+      "Sand, Asche vom Lagerfeuer, ein Insekt oder eine Wimper reizen das Auge sofort. Meist hilft ruhiges Ausspülen – Reiben macht es schlimmer.",
+      "Du sable, de la cendre du feu de camp, un insecte ou un cil irritent aussitôt l'œil. Un rinçage calme suffit le plus souvent – se frotter l'œil aggrave tout.",
+      "Sabbia, cenere del fuoco, un insetto o un ciglio irritano subito l'occhio. Di solito basta sciacquare con calma – strofinare peggiora la situazione.",
+      "Sand, campfire ash, an insect or an eyelash irritate the eye at once. Calmly rinsing it out usually helps – rubbing makes it worse."
+    ),
+    symptoms: [
+      l4(
+        "Stechen, Tränen und Rötung",
+        "Picotements, larmoiement et rougeur",
+        "Bruciore, lacrimazione e arrossamento",
+        "Stinging, watering and redness"
+      ),
+      l4(
+        "Krampfhaftes Zukneifen und Lichtempfindlichkeit",
+        "Œil fermé de force et sensibilité à la lumière",
+        "Occhio serrato e sensibilità alla luce",
+        "Screwing the eye shut and sensitivity to light"
+      ),
+      l4(
+        "Fremdkörpergefühl, das auch nach dem Blinzeln bleibt",
+        "Sensation de corps étranger qui persiste malgré les clignements",
+        "Sensazione di corpo estraneo che resta anche dopo aver sbattuto le palpebre",
+        "A gritty feeling that stays even after blinking"
+      ),
+    ],
+    steps: [
+      {
+        title: l4(
+          "Nicht reiben",
+          "Ne pas frotter",
+          "Non strofinare",
+          "Do not rub"
+        ),
+        text: l4(
+          "Die betroffene Person soll das Auge nicht reiben – ein Sandkorn zerkratzt sonst die Hornhaut. Vor dem Helfen die Hände waschen.",
+          "La personne ne doit pas se frotter l'œil – un grain de sable rayerait la cornée. Se laver les mains avant d'intervenir.",
+          "La persona non deve strofinarsi l'occhio – un granello di sabbia graffierebbe la cornea. Lavarsi le mani prima di intervenire.",
+          "The casualty must not rub the eye – a grain of sand would scratch the cornea. Wash your hands before helping."
+        ),
+      },
+      {
+        title: l4(
+          "Auge anschauen",
+          "Examiner l'œil",
+          "Guardare l'occhio",
+          "Look at the eye"
+        ),
+        text: l4(
+          "Bei gutem Licht das Unterlid nach unten ziehen und das Oberlid vorsichtig anheben. Die Person soll dabei nach oben, unten, links und rechts schauen.",
+          "À bonne lumière, abaisser la paupière inférieure et soulever doucement la paupière supérieure. Demander à la personne de regarder en haut, en bas, à gauche et à droite.",
+          "Con una buona luce abbassare la palpebra inferiore e sollevare con delicatezza quella superiore. Chiedere alla persona di guardare in alto, in basso, a sinistra e a destra.",
+          "In good light, pull the lower lid down and gently lift the upper lid. Ask the person to look up, down, left and right."
+        ),
+      },
+      {
+        title: l4("Ausspülen", "Rincer", "Sciacquare", "Rinse it out"),
+        text: l4(
+          "Loses Material mit reichlich sauberem Wasser oder steriler Augenspüllösung vom inneren Augenwinkel nach aussen ausspülen. Den Kopf so halten, dass nichts ins gesunde Auge läuft.",
+          "Rincer les particules libres avec beaucoup d'eau propre ou une solution de rinçage oculaire stérile, du coin interne vers l'extérieur. Incliner la tête pour que rien ne coule dans l'œil sain.",
+          "Sciacquare il materiale libero con abbondante acqua pulita o soluzione oculare sterile, dall'angolo interno verso l'esterno. Tenere la testa in modo che nulla scorra nell'occhio sano.",
+          "Rinse loose material out with plenty of clean water or sterile eye wash, from the inner corner outwards. Hold the head so nothing runs into the healthy eye."
+        ),
+      },
+      {
+        title: l4(
+          "Nicht selbst entfernen",
+          "Ne rien retirer soi-même",
+          "Non rimuovere da soli",
+          "Do not remove it yourself"
+        ),
+        text: l4(
+          "Fest sitzende oder eingedrungene Fremdkörper bleiben, wo sie sind. Beide Augen locker abdecken (sie bewegen sich gemeinsam) und ärztliche Hilfe aufsuchen.",
+          "Un corps étranger enclavé ou fiché reste en place. Couvrir les deux yeux sans serrer (ils bougent ensemble) et consulter un médecin.",
+          "Un corpo estraneo conficcato o incastrato resta dov'è. Coprire senza stringere entrambi gli occhi (si muovono insieme) e cercare aiuto medico.",
+          "A stuck or embedded foreign body stays where it is. Cover both eyes loosely (they move together) and get medical help."
+        ),
+      },
+    ],
+    warning: l4(
+      "Bei eingedrungenen Fremdkörpern, anhaltenden Schmerzen, verschwommenem Sehen oder sichtbarer Verletzung von Hornhaut oder Augapfel sofort augenärztlich abklären lassen – bei schwerer Verletzung Notruf 144 (oder 112). Chemikalien oder Kalk im Auge: sofort 10–15 Minuten mit fliessendem Wasser spülen und danach immer zum Arzt.",
+      "En cas de corps étranger fiché, de douleurs persistantes, de vision floue ou de blessure visible de la cornée ou du globe oculaire, consulter immédiatement un ophtalmologue – en cas de blessure grave, appeler le 144 (ou le 112). Produits chimiques ou chaux dans l'œil : rincer aussitôt 10 à 15 minutes à l'eau courante, puis toujours voir un médecin.",
+      "In caso di corpo estraneo conficcato, dolore persistente, vista offuscata o lesione visibile della cornea o del bulbo oculare, farsi visitare subito da un oculista – in caso di lesione grave chiamare il 144 (o il 112). Sostanze chimiche o calce nell'occhio: sciacquare subito 10–15 minuti con acqua corrente e poi andare sempre dal medico.",
+      "With an embedded foreign body, lasting pain, blurred vision or a visible injury to the cornea or eyeball, see an eye doctor immediately – for a serious injury call 144 (or 112). Chemicals or lime in the eye: rinse at once for 10–15 minutes under running water and always see a doctor afterwards."
+    ),
+    kidNote: l4(
+      "Kinder kneifen das Auge oft fest zu. Zu zweit arbeiten: eine Person hält den Kopf ruhig, die andere spült. Im Zweifel lieber gleich ärztlich abklären lassen.",
+      "Les enfants ferment souvent l'œil très fort. Travailler à deux : une personne maintient la tête, l'autre rince. Dans le doute, mieux vaut consulter tout de suite.",
+      "I bambini serrano spesso l'occhio con forza. Meglio in due: una persona tiene ferma la testa, l'altra sciacqua. Nel dubbio, far visitare subito il bambino.",
+      "Children often clamp the eye shut. Work in pairs: one holds the head steady, the other rinses. When in doubt, have it checked straight away."
+    ),
+  },
+  {
+    id: "verschlucken",
+    title: l4(
+      "Verschlucken & Erstickungsgefahr",
+      "Étouffement & obstruction des voies respiratoires",
+      "Soffocamento & ostruzione delle vie aeree",
+      "Choking & blocked airway"
+    ),
+    icon: "Wind",
+    severity: "ernst",
+    summary: l4(
+      "Ein Stück Schlangenbrot, eine Nuss oder ein Bonbon im Hals kann die Atemwege blockieren. Solange die Person kräftig hustet, ist Husten die beste Hilfe.",
+      "Un morceau de pain à la broche, une noix ou un bonbon dans la gorge peut bloquer les voies respiratoires. Tant que la personne tousse fort, la toux est le meilleur secours.",
+      "Un pezzo di pane sullo stecco, una noce o una caramella in gola possono ostruire le vie aeree. Finché la persona tossisce con forza, la tosse è l'aiuto migliore.",
+      "A piece of campfire bread, a nut or a sweet in the throat can block the airway. As long as the person is coughing forcefully, coughing is the best help."
+    ),
+    symptoms: [
+      l4(
+        "Plötzlicher Husten beim Essen, Greifen an den Hals",
+        "Toux soudaine en mangeant, mains à la gorge",
+        "Tosse improvvisa mentre si mangia, mani alla gola",
+        "Sudden coughing while eating, hands to the throat"
+      ),
+      l4(
+        "Pfeifende Atmung oder gar keine Luft mehr, kein Sprechen möglich",
+        "Respiration sifflante ou plus d'air du tout, impossible de parler",
+        "Respiro sibilante o niente aria, impossibile parlare",
+        "Wheezing or no air at all, unable to speak"
+      ),
+      l4(
+        "Blaue Lippen, Panik, danach Bewusstlosigkeit",
+        "Lèvres bleues, panique, puis perte de connaissance",
+        "Labbra blu, panico, poi perdita di coscienza",
+        "Blue lips, panic, then unconsciousness"
+      ),
+    ],
+    steps: [
+      {
+        title: l4(
+          "Husten lassen",
+          "Laisser tousser",
+          "Lasciar tossire",
+          "Let them cough"
+        ),
+        text: l4(
+          "Solange die Person kräftig hustet und Luft bekommt: zum Husten ermutigen und danebenbleiben. Nicht auf den Rücken schlagen und nicht in den Mund greifen.",
+          "Tant que la personne tousse fort et respire : l'encourager à tousser et rester près d'elle. Ne pas taper dans le dos, ne pas mettre les doigts dans sa bouche.",
+          "Finché la persona tossisce con forza e respira: incoraggiarla a tossire e restarle accanto. Non colpire la schiena e non mettere le dita in bocca.",
+          "While the person is coughing strongly and getting air: encourage them to cough and stay with them. Do not slap their back and do not put fingers in their mouth."
+        ),
+      },
+      {
+        title: l4(
+          "Fünf Schläge zwischen die Schulterblätter",
+          "Cinq claques entre les omoplates",
+          "Cinque colpi tra le scapole",
+          "Five back blows"
+        ),
+        text: l4(
+          "Hustet die Person nicht mehr wirksam: Oberkörper nach vorne beugen und mit dem Handballen bis zu fünfmal kräftig zwischen die Schulterblätter schlagen – nach jedem Schlag prüfen, ob der Fremdkörper draussen ist.",
+          "Si la toux n'est plus efficace : pencher le buste en avant et donner jusqu'à cinq claques fermes avec le talon de la main entre les omoplates – vérifier après chaque claque si le corps étranger est sorti.",
+          "Se la tosse non è più efficace: piegare il busto in avanti e dare fino a cinque colpi decisi con il palmo tra le scapole – dopo ogni colpo controllare se il corpo estraneo è uscito.",
+          "If coughing is no longer effective: lean the upper body forward and give up to five firm blows between the shoulder blades with the heel of your hand – check after each blow whether the object has come out."
+        ),
+      },
+      {
+        title: l4(
+          "Fünf Oberbauchkompressionen",
+          "Cinq compressions abdominales",
+          "Cinque compressioni addominali",
+          "Five abdominal thrusts"
+        ),
+        text: l4(
+          "Ohne Erfolg: Heimlich-Handgriff – die Person von hinten umfassen, Faust zwischen Nabel und Brustbein, bis zu fünfmal kräftig nach innen und oben ziehen. Danach wieder fünf Rückenschläge, im Wechsel weiter.",
+          "Sans succès : manœuvre de Heimlich – enlacer la personne par-derrière, poing entre le nombril et le sternum, tirer jusqu'à cinq fois fortement vers l'intérieur et vers le haut. Puis de nouveau cinq claques dans le dos, en alternance.",
+          "Senza risultato: manovra di Heimlich – abbracciare la persona da dietro, pugno tra ombelico e sterno, tirare fino a cinque volte con forza verso l'interno e verso l'alto. Poi di nuovo cinque colpi tra le scapole, alternando.",
+          "If that fails: the Heimlich manoeuvre – stand behind them, fist between navel and breastbone, pull inwards and upwards up to five times. Then five back blows again, alternating."
+        ),
+      },
+      {
+        title: l4(
+          "Notruf und Reanimation",
+          "Alerte et réanimation",
+          "Allarme e rianimazione",
+          "Emergency call and CPR"
+        ),
+        text: l4(
+          "Sofort Notruf 144 (oder 112) – am besten durch eine zweite Person, während du weitermachst. Wird die Person bewusstlos: flach hinlegen und mit der Herzdruckmassage beginnen (siehe «Bewusstlosigkeit & Reanimation»).",
+          "Appeler immédiatement le 144 (ou le 112) – idéalement par une deuxième personne pendant que tu continues. Si la personne perd connaissance : l'allonger à plat et commencer le massage cardiaque (voir « Perte de connaissance & réanimation »).",
+          "Chiamare subito il 144 (o il 112) – meglio se lo fa una seconda persona mentre tu continui. Se la persona perde coscienza: sdraiarla in piano e iniziare il massaggio cardiaco (vedi «Perdita di coscienza & rianimazione»).",
+          "Call 144 (or 112) immediately – ideally have someone else do it while you carry on. If the person becomes unconscious: lay them flat and start chest compressions (see 'Unconsciousness & CPR')."
+        ),
+      },
+    ],
+    warning: l4(
+      "Nach erfolgreichen Oberbauchkompressionen immer ärztlich abklären lassen – innere Verletzungen sind möglich. Bei Säuglingen unter einem Jahr KEINE Oberbauchkompressionen: im Wechsel fünf Rückenschläge und fünf Brustkompressionen.",
+      "Après des compressions abdominales réussies, toujours consulter un médecin – des lésions internes sont possibles. Chez les nourrissons de moins d'un an, PAS de compressions abdominales : alterner cinq claques dans le dos et cinq compressions thoraciques.",
+      "Dopo compressioni addominali riuscite, farsi sempre visitare da un medico – sono possibili lesioni interne. Nei lattanti sotto l'anno NIENTE compressioni addominali: alternare cinque colpi tra le scapole e cinque compressioni toraciche.",
+      "After successful abdominal thrusts, always get checked by a doctor – internal injuries are possible. For infants under one year NO abdominal thrusts: alternate five back blows with five chest compressions."
+    ),
+    kidNote: l4(
+      "Kleinkinder bäuchlings über den Oberschenkel legen, Kopf tief, und fünf Rückenschläge geben. Nüsse, ganze Trauben und harte Bonbons gehören nicht in Kinderhände unter fünf Jahren.",
+      "Coucher les tout-petits à plat ventre sur ta cuisse, tête plus basse que le corps, et donner cinq claques dans le dos. Noix, raisins entiers et bonbons durs n'ont rien à faire dans les mains d'enfants de moins de cinq ans.",
+      "Mettere i bambini piccoli a pancia in giù sulla coscia, con la testa più in basso, e dare cinque colpi tra le scapole. Noci, chicchi d'uva interi e caramelle dure non vanno dati ai bambini sotto i cinque anni.",
+      "Lay toddlers face down over your thigh, head lower than the body, and give five back blows. Nuts, whole grapes and hard sweets do not belong in the hands of children under five."
+    ),
+  },
+  {
+    id: "sonnenbrand",
+    title: l4("Sonnenbrand", "Coup de soleil", "Scottatura solare", "Sunburn"),
+    icon: "SunMedium",
+    severity: "leicht",
+    summary: l4(
+      "Am Wasser, im Schnee und in den Bergen ist die UV-Strahlung besonders hoch. Ein Sonnenbrand zeigt sich erst Stunden später in vollem Ausmass.",
+      "Au bord de l'eau, sur la neige et en montagne, le rayonnement UV est particulièrement fort. Un coup de soleil ne se voit dans toute son ampleur que quelques heures plus tard.",
+      "In riva all'acqua, sulla neve e in montagna la radiazione UV è particolarmente forte. La scottatura si manifesta in pieno solo dopo alcune ore.",
+      "By the water, on snow and in the mountains the UV radiation is especially strong. Sunburn only shows its full extent hours later."
+    ),
+    symptoms: [
+      l4(
+        "Gerötete, heisse und spannende Haut",
+        "Peau rouge, chaude et tendue",
+        "Pelle arrossata, calda e tesa",
+        "Red, hot and tight skin"
+      ),
+      l4(
+        "Brennen und Juckreiz, nach Tagen Schuppung",
+        "Brûlure et démangeaisons, desquamation après quelques jours",
+        "Bruciore e prurito, dopo qualche giorno desquamazione",
+        "Burning and itching, peeling after a few days"
+      ),
+      l4(
+        "Blasen, Kopfschmerzen oder Schüttelfrost bei schwerem Sonnenbrand",
+        "Cloques, maux de tête ou frissons en cas de coup de soleil sévère",
+        "Vesciche, mal di testa o brividi in caso di scottatura grave",
+        "Blisters, headache or chills with severe sunburn"
+      ),
+    ],
+    steps: [
+      {
+        title: l4(
+          "Raus aus der Sonne",
+          "Se mettre à l'abri du soleil",
+          "Via dal sole",
+          "Out of the sun"
+        ),
+        text: l4(
+          "Für den Rest des Tages in den Schatten oder ins Zelt. Betroffene Stellen mit locker sitzender, dicht gewebter Kleidung bedecken.",
+          "À l'ombre ou dans la tente pour le reste de la journée. Couvrir les zones touchées avec des vêtements amples et bien tissés.",
+          "All'ombra o in tenda per il resto della giornata. Coprire le zone colpite con abiti larghi e a trama fitta.",
+          "Into the shade or the tent for the rest of the day. Cover the affected areas with loose, tightly woven clothing."
+        ),
+      },
+      {
+        title: l4("Kühlen", "Refroidir", "Raffreddare", "Cool it"),
+        text: l4(
+          "Kühle, feuchte Umschläge oder lauwarmes Duschen für 15–20 Minuten. Kein Eis direkt auf die Haut.",
+          "Compresses fraîches et humides ou douche tiède pendant 15 à 20 minutes. Pas de glace directement sur la peau.",
+          "Impacchi freschi e umidi o doccia tiepida per 15–20 minuti. Niente ghiaccio direttamente sulla pelle.",
+          "Cool, damp compresses or a lukewarm shower for 15–20 minutes. No ice directly on the skin."
+        ),
+      },
+      {
+        title: l4("Trinken", "Boire", "Bere", "Drink"),
+        text: l4(
+          "Viel trinken: Ein Sonnenbrand entzieht dem Körper Flüssigkeit.",
+          "Boire beaucoup : un coup de soleil déshydrate le corps.",
+          "Bere molto: la scottatura fa perdere liquidi al corpo.",
+          "Drink plenty: sunburn draws fluid out of the body."
+        ),
+      },
+      {
+        title: l4(
+          "Pflegen und schützen",
+          "Soigner et protéger",
+          "Curare e proteggere",
+          "Soothe and protect"
+        ),
+        text: l4(
+          "Feuchtigkeitsspendendes After-Sun-Gel oder eine leichte Lotion auftragen. Blasen nicht öffnen und die Haut in den nächsten Tagen konsequent vor Sonne schützen.",
+          "Appliquer un gel après-soleil hydratant ou une lotion légère. Ne pas percer les cloques et protéger soigneusement la peau du soleil les jours suivants.",
+          "Applicare un gel doposole idratante o una lozione leggera. Non aprire le vesciche e proteggere con cura la pelle dal sole nei giorni successivi.",
+          "Apply a moisturising after-sun gel or a light lotion. Do not burst blisters and keep the skin out of the sun consistently over the next few days."
+        ),
+      },
+    ],
+    warning: l4(
+      "Bei grossflächigen Blasen, Fieber, Schüttelfrost, Übelkeit oder Kreislaufproblemen ärztlich abklären lassen – ebenso bei jedem Sonnenbrand von Säuglingen und Kleinkindern. Keine Hausmittel wie Quark, Butter oder Öl auf die verbrannte Haut. Sonnenbrand mit Kopfschmerzen und Übelkeit kann auf einen Sonnenstich hinweisen (siehe «Sonnenstich & Hitzschlag»).",
+      "En cas de cloques étendues, de fièvre, de frissons, de nausées ou de troubles circulatoires, consulter un médecin – de même pour tout coup de soleil chez un nourrisson ou un petit enfant. Pas de remèdes maison comme le séré, le beurre ou l'huile sur la peau brûlée. Un coup de soleil accompagné de maux de tête et de nausées peut annoncer une insolation (voir « Insolation & coup de chaleur »).",
+      "In caso di vesciche estese, febbre, brividi, nausea o disturbi circolatori, farsi visitare da un medico – lo stesso vale per ogni scottatura di lattanti e bambini piccoli. Niente rimedi casalinghi come quark, burro o olio sulla pelle ustionata. Una scottatura con mal di testa e nausea può indicare un colpo di sole (vedi «Colpo di sole & colpo di calore»).",
+      "See a doctor for extensive blisters, fever, chills, nausea or circulation problems – and for any sunburn in babies and toddlers. No home remedies such as quark, butter or oil on burnt skin. Sunburn with headache and nausea can point to sunstroke (see 'Sunstroke & heatstroke')."
+    ),
+    kidNote: l4(
+      "Kinderhaut verbrennt viel schneller. Säuglinge unter einem Jahr gehören gar nicht in die direkte Sonne; sonst gilt: T-Shirt, Hut und Schatten zuerst, Sonnencreme nur als Ergänzung.",
+      "La peau des enfants brûle bien plus vite. Les nourrissons de moins d'un an ne doivent pas être exposés au soleil direct ; sinon : t-shirt, chapeau et ombre d'abord, la crème solaire seulement en complément.",
+      "La pelle dei bambini si scotta molto più in fretta. I lattanti sotto l'anno non vanno esposti al sole diretto; per gli altri vale: prima maglietta, cappello e ombra, la crema solare solo come complemento.",
+      "Children's skin burns much faster. Babies under one should not be in direct sun at all; otherwise: T-shirt, hat and shade first, sunscreen only as an addition."
+    ),
+  },
+  {
+    id: "durchfall",
+    title: l4(
+      "Durchfall & Erbrechen",
+      "Diarrhée & vomissements",
+      "Diarrea & vomito",
+      "Diarrhoea & vomiting"
+    ),
+    icon: "GlassWater",
+    severity: "mittel",
+    summary: l4(
+      "Ungewohntes Essen, eine unterbrochene Kühlkette oder unsauberes Wasser: Magen-Darm-Infekte sind auf Reisen häufig. Die Hauptgefahr ist der Flüssigkeitsverlust.",
+      "Nourriture inhabituelle, chaîne du froid rompue ou eau douteuse : les infections gastro-intestinales sont fréquentes en voyage. Le principal danger est la perte de liquide.",
+      "Cibo insolito, catena del freddo interrotta o acqua poco pulita: le infezioni gastrointestinali sono frequenti in viaggio. Il pericolo principale è la perdita di liquidi.",
+      "Unfamiliar food, a broken cold chain or unclean water: stomach bugs are common when travelling. The main danger is fluid loss."
+    ),
+    symptoms: [
+      l4(
+        "Häufiger, wässriger Stuhl und Bauchkrämpfe",
+        "Selles fréquentes et liquides, crampes abdominales",
+        "Feci frequenti e acquose, crampi addominali",
+        "Frequent watery stools and stomach cramps"
+      ),
+      l4(
+        "Übelkeit und Erbrechen",
+        "Nausées et vomissements",
+        "Nausea e vomito",
+        "Nausea and vomiting"
+      ),
+      l4(
+        "Zeichen von Flüssigkeitsmangel: starker Durst, trockener Mund, wenig dunkler Urin, Müdigkeit",
+        "Signes de déshydratation : soif intense, bouche sèche, urines rares et foncées, fatigue",
+        "Segni di disidratazione: sete intensa, bocca secca, urina scarsa e scura, stanchezza",
+        "Signs of dehydration: strong thirst, dry mouth, little dark urine, tiredness"
+      ),
+    ],
+    steps: [
+      {
+        title: l4(
+          "Flüssigkeit ersetzen",
+          "Remplacer les liquides",
+          "Reintegrare i liquidi",
+          "Replace fluids"
+        ),
+        text: l4(
+          "Häufig kleine Schlucke trinken: sicher sauberes oder abgekochtes Wasser, ungesüsster Tee, dünne Brühe. Bei starkem Durchfall eine Elektrolytlösung aus der Reiseapotheke nach Packungsangabe zubereiten.",
+          "Boire souvent de petites gorgées : eau sûre ou bouillie, thé non sucré, bouillon léger. En cas de diarrhée importante, préparer une solution de réhydratation de la pharmacie de voyage selon la notice.",
+          "Bere spesso a piccoli sorsi: acqua sicura o bollita, tè non zuccherato, brodo leggero. In caso di diarrea forte, preparare una soluzione reidratante della farmacia da viaggio secondo le indicazioni della confezione.",
+          "Sip small amounts often: safe or boiled water, unsweetened tea, thin broth. For heavy diarrhoea, prepare an oral rehydration solution from the travel first aid kit as stated on the packet."
+        ),
+      },
+      {
+        title: l4(
+          "Leicht essen",
+          "Manger léger",
+          "Mangiare leggero",
+          "Eat lightly"
+        ),
+        text: l4(
+          "Sobald es geht wieder essen: Salzstangen, Zwieback, Reis, Kartoffeln, Banane. Sehr Fettiges, stark Gesüsstes und Alkohol weglassen.",
+          "Remanger dès que possible : bretzels salés, biscottes, riz, pommes de terre, banane. Éviter le très gras, le très sucré et l'alcool.",
+          "Riprendere a mangiare appena possibile: salatini, fette biscottate, riso, patate, banana. Evitare cibi molto grassi, molto zuccherati e l'alcol.",
+          "Start eating again as soon as you can: salted sticks, rusks, rice, potatoes, banana. Leave out very fatty or very sugary food and alcohol."
+        ),
+      },
+      {
+        title: l4(
+          "Hygiene auf dem Platz",
+          "Hygiène sur l'emplacement",
+          "Igiene in piazzola",
+          "Hygiene at the pitch"
+        ),
+        text: l4(
+          "Hände nach jedem Toilettengang und vor dem Kochen gründlich waschen, Geschirr und Handtücher nicht teilen – sonst steckt sich die ganze Gruppe an.",
+          "Se laver soigneusement les mains après chaque passage aux toilettes et avant de cuisiner, ne pas partager vaisselle ni linges – sinon tout le groupe est contaminé.",
+          "Lavarsi bene le mani dopo ogni visita alla toilette e prima di cucinare, non condividere stoviglie e asciugamani – altrimenti si contagia tutto il gruppo.",
+          "Wash hands thoroughly after every toilet visit and before cooking, and do not share dishes or towels – otherwise the whole group catches it."
+        ),
+      },
+      {
+        title: l4(
+          "Ursache abstellen",
+          "Éliminer la cause",
+          "Eliminare la causa",
+          "Deal with the cause"
+        ),
+        text: l4(
+          "Kühlkette unterbrochen? Wasser aus unsicherer Quelle? Verdächtige Lebensmittel entsorgen und Trinkwasser abkochen oder filtern.",
+          "Chaîne du froid rompue ? Eau d'une source douteuse ? Jeter les aliments suspects et faire bouillir ou filtrer l'eau de boisson.",
+          "Catena del freddo interrotta? Acqua da una fonte incerta? Buttare gli alimenti sospetti e bollire o filtrare l'acqua potabile.",
+          "Cold chain broken? Water from a doubtful source? Throw away suspect food and boil or filter your drinking water."
+        ),
+      },
+    ],
+    warning: l4(
+      "Ärztliche Hilfe bei Blut im Stuhl, hohem Fieber, starken oder einseitigen Bauchschmerzen, Erbrechen über mehr als 24 Stunden oder Zeichen von Austrocknung (kaum Urin, eingesunkene Augen, Verwirrtheit) – bei Bewusstseinsstörung Notruf 144 (oder 112). Bei Säuglingen, Kleinkindern, Schwangeren und älteren Menschen früh reagieren. Durchfall-Medikamente nur nach ärztlichem Rat.",
+      "Aide médicale en cas de sang dans les selles, de fièvre élevée, de douleurs abdominales fortes ou localisées, de vomissements durant plus de 24 heures ou de signes de déshydratation (presque plus d'urine, yeux creux, confusion) – en cas de trouble de la conscience, appeler le 144 (ou le 112). Réagir tôt chez les nourrissons, les petits enfants, les femmes enceintes et les personnes âgées. Médicaments antidiarrhéiques uniquement sur avis médical.",
+      "Aiuto medico in caso di sangue nelle feci, febbre alta, dolori addominali forti o localizzati, vomito per più di 24 ore o segni di disidratazione (urina quasi assente, occhi infossati, confusione) – in caso di alterazione della coscienza chiamare il 144 (o il 112). Reagire presto con lattanti, bambini piccoli, donne in gravidanza e anziani. Farmaci antidiarroici solo su indicazione medica.",
+      "Get medical help for blood in the stool, high fever, severe or one-sided abdominal pain, vomiting for more than 24 hours or signs of dehydration (hardly any urine, sunken eyes, confusion) – if consciousness is impaired, call 144 (or 112). React early with babies, toddlers, pregnant women and older people. Anti-diarrhoea medicines only on medical advice."
+    ),
+    kidNote: l4(
+      "Kinder trocknen schnell aus: löffelweise Elektrolytlösung anbieten, auch wenn sie erbrechen. Trinkt ein Kind über Stunden nichts, wirkt es teilnahmslos oder bleibt die Windel trocken – sofort ärztlich abklären lassen.",
+      "Les enfants se déshydratent vite : proposer la solution de réhydratation à la cuillère, même s'ils vomissent. Si un enfant ne boit rien pendant des heures, paraît apathique ou garde une couche sèche – consulter immédiatement.",
+      "I bambini si disidratano in fretta: offrire la soluzione reidratante a cucchiaini, anche se vomitano. Se un bambino non beve per ore, appare apatico o il pannolino resta asciutto – farlo visitare subito.",
+      "Children dehydrate quickly: offer rehydration solution by the spoonful, even if they are being sick. If a child drinks nothing for hours, seems listless or the nappy stays dry – seek medical help at once."
+    ),
+  },
 ];

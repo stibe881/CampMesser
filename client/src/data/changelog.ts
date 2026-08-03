@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Erste Hilfe: Vier neue Themen ergänzen den Guide – Fremdkörper im Auge, Verschlucken & Erstickungsgefahr, Sonnenbrand sowie Durchfall & Erbrechen, je mit Symptomen, Schritten und klaren Warnhinweisen «wann zum Arzt».",
+        "Premiers secours : quatre nouveaux sujets complètent le guide – corps étranger dans l'œil, étouffement, coup de soleil ainsi que diarrhée & vomissements, chacun avec symptômes, gestes et consignes claires « quand consulter ».",
+        "Primo soccorso: quattro nuovi temi completano la guida – corpo estraneo nell'occhio, soffocamento, scottatura solare e diarrea & vomito, ognuno con sintomi, passaggi e avvertenze chiare «quando andare dal medico».",
+        "First aid: four new topics round out the guide – foreign body in the eye, choking, sunburn and diarrhoea & vomiting, each with symptoms, steps and clear “when to see a doctor” warnings."
+      ),
+      l4(
         "Knoten: Vier neue Anleitungen ergänzen die Bibliothek – Trucker-Hitch zum bretthart Spannen, Slipstek zum Lösen mit einem Zug, Zimmermannsschlag fürs Holzbündel und die Achterschlaufe als sichere Schlaufe. Quiz und Lernfortschritt nehmen sie automatisch mit.",
         "Nœuds : quatre nouvelles fiches enrichissent la bibliothèque – nœud de camionneur pour tendre à bloc, demi-clé gansée qui s'ouvre d'un seul geste, nœud de bois pour les fagots et nœud en huit double comme boucle sûre. Le quiz et ta progression les intègrent automatiquement.",
         "Nodi: quattro nuove schede arricchiscono la biblioteca – nodo del carrettiere per tendere al massimo, mezzo collo con gassa che si apre con un tiro solo, nodo del legnaiolo per i fasci di legna e nodo a otto ripassato come asola sicura. Quiz e progressi li includono in automatico.",

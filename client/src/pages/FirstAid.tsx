@@ -8,8 +8,10 @@ import {
   CircleDot,
   Cross,
   Droplets,
+  Eye,
   Flame,
   Footprints,
+  GlassWater,
   HeartPulse,
   Loader2,
   Plus,
@@ -17,8 +19,10 @@ import {
   Slice,
   Snowflake,
   Sun,
+  SunMedium,
   Trash2,
   WifiOff,
+  Wind,
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -53,10 +57,14 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Slice,
   Snowflake,
   Sun,
+  SunMedium,
   Zap,
   CircleDot,
   Droplets,
+  Eye,
+  GlassWater,
   HeartPulse,
+  Wind,
 };
 
 const severityStyle: Record<FirstAidTopic["severity"], string> = {
