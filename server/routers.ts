@@ -40,6 +40,12 @@ import {
   MAX_FOOD_TEMPLATE_ITEMS,
   parseFoodTemplateItems,
 } from "@shared/foodTemplates";
+import {
+  EXPENSE_CATEGORIES,
+  EXPENSE_DESCRIPTION_MAX_LENGTH,
+  EXPENSE_MAX_RAPPEN,
+  EXPENSE_PAID_BY_MAX_LENGTH,
+} from "@shared/expenses";
 import { MEALS, remapMenuDays } from "@shared/menuPlan";
 import {
   MAX_GEAR_INTERVAL_MONTHS,
@@ -3523,6 +3529,8 @@ export const appRouter = router({
         const photos = await db.getTripPhotosForTrip(input.id);
         await db.deleteTripLog(input.id, ctx.user.id);
         await db.deleteAllTripPhotosForTrip(input.id);
+        // Reisekasse gehört zur Reise und wird mitgelöscht (#219)
+        await db.deleteAllTripExpensesForTrip(input.id);
         if (photos.length > 0) {
           const { tripPhotoStorage } = await import("./photoStorage");
           await tripPhotoStorage.deleteFiles(photos.map(p => p.fileName));
@@ -3624,6 +3632,131 @@ export const appRouter = router({
           } else {
             await db.deleteTripJournalEntry(input.tripId, input.day);
           }
+          return { success: true } as const;
+        }),
+    }),
+    /**
+     * Reisekasse (#219): Ausgaben gehören wie das Journal zur REISE –
+     * Mitreisende dürfen erfassen, ändern und löschen (canAccessTrip).
+     * Beträge kommen und gehen ausschliesslich als Rappen-Ganzzahlen.
+     */
+    expenses: router({
+      list: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          type Expense = Awaited<
+            ReturnType<typeof db.getTripExpenses>
+          >[number] & { createdByName: string | null };
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) return [] as Expense[];
+          const rows = await db.getTripExpenses(input.tripId);
+          const names = await db.getUserDisplayNames(rows.map(r => r.userId));
+          return rows.map<Expense>(row => ({
+            ...row,
+            createdByName: names.get(row.userId) ?? null,
+          }));
+        }),
+      add: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            amountRappen: z.number().int().min(1).max(EXPENSE_MAX_RAPPEN),
+            category: z.enum(EXPENSE_CATEGORIES),
+            description: z
+              .string()
+              .max(EXPENSE_DESCRIPTION_MAX_LENGTH)
+              .nullish(),
+            day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            paidBy: z.string().min(1).max(EXPENSE_PAID_BY_MAX_LENGTH),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          const id = await db.addTripExpense({
+            tripId: input.tripId,
+            userId: ctx.user.id,
+            amountRappen: input.amountRappen,
+            category: input.category,
+            description: input.description?.trim() || null,
+            day: input.day,
+            paidBy: input.paidBy.trim(),
+          });
+          return { id };
+        }),
+      update: protectedProcedure
+        .input(
+          z.object({
+            id: z.number().int().positive(),
+            amountRappen: z
+              .number()
+              .int()
+              .min(1)
+              .max(EXPENSE_MAX_RAPPEN)
+              .optional(),
+            category: z.enum(EXPENSE_CATEGORIES).optional(),
+            description: z
+              .string()
+              .max(EXPENSE_DESCRIPTION_MAX_LENGTH)
+              .nullish(),
+            day: z
+              .string()
+              .regex(/^\d{4}-\d{2}-\d{2}$/)
+              .optional(),
+            paidBy: z
+              .string()
+              .min(1)
+              .max(EXPENSE_PAID_BY_MAX_LENGTH)
+              .optional(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const expense = await db.getTripExpenseById(input.id);
+          const trip = expense
+            ? await db.canAccessTrip(expense.tripId, ctx.user.id)
+            : undefined;
+          if (!expense || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Ausgabe nicht gefunden.",
+            });
+          }
+          await db.updateTripExpense(input.id, {
+            ...(input.amountRappen !== undefined
+              ? { amountRappen: input.amountRappen }
+              : {}),
+            ...(input.category !== undefined
+              ? { category: input.category }
+              : {}),
+            ...(input.description !== undefined
+              ? { description: input.description?.trim() || null }
+              : {}),
+            ...(input.day !== undefined ? { day: input.day } : {}),
+            ...(input.paidBy !== undefined
+              ? { paidBy: input.paidBy.trim() }
+              : {}),
+          });
+          return { success: true } as const;
+        }),
+      remove: protectedProcedure
+        .input(z.object({ id: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const expense = await db.getTripExpenseById(input.id);
+          const trip = expense
+            ? await db.canAccessTrip(expense.tripId, ctx.user.id)
+            : undefined;
+          if (!expense || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Ausgabe nicht gefunden.",
+            });
+          }
+          await db.deleteTripExpense(input.id);
           return { success: true } as const;
         }),
     }),

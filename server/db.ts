@@ -49,6 +49,8 @@ import {
   InsertSpotPhoto,
   tickBites,
   InsertTickBite,
+  tripExpenses,
+  InsertTripExpense,
   tripInvites,
   tripJournal,
   tripLogs,
@@ -1942,6 +1944,61 @@ export async function deleteTripJournalEntry(tripId: number, day: string) {
   await db
     .delete(tripJournal)
     .where(and(eq(tripJournal.tripId, tripId), eq(tripJournal.day, day)));
+}
+
+// ── Reisekasse (#219) ──
+
+/**
+ * Ausgaben einer Reise, neuste zuoberst (Tag absteigend, bei gleichem Tag
+ * die zuletzt erfasste zuerst) – nur NACH einer canAccessTrip-Prüfung im
+ * Router verwenden.
+ */
+export async function getTripExpenses(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripExpenses)
+    .where(eq(tripExpenses.tripId, tripId))
+    .orderBy(desc(tripExpenses.day), desc(tripExpenses.id));
+}
+
+/** Einzelne Ausgabe laden (für die Zugriffsprüfung über ihre tripId). */
+export async function getTripExpenseById(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripExpenses)
+    .where(eq(tripExpenses.id, id))
+    .limit(1);
+  return rows[0];
+}
+
+/** Ausgabe erfassen – nur NACH einer canAccessTrip-Prüfung im Router. */
+export async function addTripExpense(data: InsertTripExpense) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(tripExpenses).values(data);
+  return result.insertId;
+}
+
+/** Ausgabe ändern – nur NACH einer canAccessTrip-Prüfung im Router. */
+export async function updateTripExpense(
+  id: number,
+  data: Partial<InsertTripExpense>
+) {
+  const db = requireDb(await getDb());
+  await db.update(tripExpenses).set(data).where(eq(tripExpenses.id, id));
+}
+
+/** Ausgabe löschen – nur NACH einer canAccessTrip-Prüfung im Router. */
+export async function deleteTripExpense(id: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripExpenses).where(eq(tripExpenses.id, id));
+}
+
+/** Alle Ausgaben einer Reise entfernen (beim Löschen der Reise). */
+export async function deleteAllTripExpensesForTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripExpenses).where(eq(tripExpenses.tripId, tripId));
 }
 
 // ── Fotos zu Zeltplatz-Favoriten ──

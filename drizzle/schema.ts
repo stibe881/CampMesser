@@ -682,6 +682,47 @@ export type TripJournalEntry = typeof tripJournal.$inferSelect;
 export type InsertTripJournalEntry = typeof tripJournal.$inferInsert;
 
 /**
+ * Reisekasse (#219): eine Ausgabe pro Zeile. Wie tripJournal gehört der
+ * Eintrag zur REISE – die Berechtigung prüft der Router via canAccessTrip,
+ * damit Mitreisende mitschreiben dürfen. `userId` hält fest, WER erfasst hat
+ * (nicht zwingend die Person, die bezahlt hat – das steht in `paidBy`).
+ *
+ * Der Betrag steht als Ganzzahl in RAPPEN (Muster inventoryItems.priceRappen):
+ * mit Fliesskommazahlen ginge beim Aufteilen sonst ein Rappen verloren.
+ * Eine Währungsspalte gibt es bewusst nicht – das Projekt rechnet durchgehend
+ * in CHF (client/src/lib/money.ts).
+ */
+export const tripExpenses = mysqlTable(
+  "tripExpenses",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    /** Verknüpfte Reise (tripLogs.id) */
+    tripId: int("tripId").notNull(),
+    /** Konto, das die Ausgabe erfasst hat */
+    userId: int("userId").notNull(),
+    /** Betrag in Rappen (immer positiv) */
+    amountRappen: int("amountRappen").notNull(),
+    /** Kategorie-Schlüssel: camping | essen | sprit | freizeit | sonstiges */
+    category: varchar("category", { length: 20 }).notNull(),
+    /** Kurze Beschreibung («Znacht Migros»); leer erlaubt */
+    description: varchar("description", { length: 160 }),
+    /** Tag der Ausgabe */
+    day: date("day", { mode: "string" }).notNull(),
+    /** Wer bezahlt hat – freier Name, Grundlage für «wer schuldet wem» */
+    paidBy: varchar("paidBy", { length: 80 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    index("tripExpenses_tripId").on(table.tripId),
+    index("tripExpenses_userId").on(table.userId),
+  ]
+);
+
+export type TripExpense = typeof tripExpenses.$inferSelect;
+export type InsertTripExpense = typeof tripExpenses.$inferInsert;
+
+/**
  * Persönliche Einkaufslisten (#215): pro Konto beliebig viele benannte
  * Listen («Wocheneinkauf», «Camping»). Die Reihenfolge im Umschalter steckt
  * in position (0..n); gelöscht wird eine Liste samt ihren Einträgen.

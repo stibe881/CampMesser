@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
 import {
+  ArrowRight,
   Award,
   BookOpen,
   CalendarClock,
@@ -31,6 +32,7 @@ import {
   Trophy,
   Users,
   UtensilsCrossed,
+  Wallet,
 } from "lucide-react";
 import { Link, useSearch } from "wouter";
 import { toast } from "sonner";
@@ -63,8 +65,21 @@ import { MAX_PHOTOS_PER_TRIP } from "@shared/tripPhotos";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useI18n, useT } from "@/i18n";
-import { LOCALE_TAGS } from "@shared/i18n";
+import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { cn } from "@/lib/utils";
+import { formatChf, parseChfInput, rappenToInput } from "@/lib/money";
+import {
+  EXPENSE_CATEGORIES,
+  EXPENSE_CATEGORY_LABELS,
+  EXPENSE_DESCRIPTION_MAX_LENGTH,
+  EXPENSE_MAX_RAPPEN,
+  EXPENSE_PAID_BY_MAX_LENGTH,
+  expensesByCategory,
+  expensesTotalRappen,
+  normalizeExpenseCategory,
+  settleUp,
+  type ExpenseCategory,
+} from "@shared/expenses";
 import {
   computeTripStats,
   computeYearReview,
@@ -1022,6 +1037,488 @@ function TripJournal({
                 );
               })}
             </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Balkenfarbe je Kategorie – feste Zuordnung, damit sie wiedererkennbar bleibt. */
+const EXPENSE_CATEGORY_BARS: Record<ExpenseCategory, string> = {
+  camping: "bg-chart-1",
+  essen: "bg-chart-2",
+  sprit: "bg-chart-3",
+  freizeit: "bg-chart-4",
+  sonstiges: "bg-chart-5",
+};
+
+/**
+ * Reisekasse einer Reise (#219): Ausgabenliste mit Summe, Aufteilung nach
+ * Kategorie und «wer schuldet wem». Aufklappbar wie das Reise-Tagebuch –
+ * die Ausgaben werden erst beim Öffnen geladen. Beträge stecken durchgehend
+ * als Rappen-Ganzzahlen in der Datenbank; gerechnet wird in shared/expenses.ts.
+ */
+function TripExpenses({
+  tripId,
+  tripName,
+  defaultDay,
+  shared,
+}: {
+  tripId: number;
+  tripName: string;
+  /** Vorschlag fürs Datumsfeld: heute, sonst der Reisebeginn. */
+  defaultDay: string;
+  shared: boolean;
+}) {
+  const { lang, t } = useI18n();
+  const { user } = useAuth();
+  const utils = trpc.useUtils();
+  const [open, setOpen] = useState(false);
+  /** null = Formular zu, "neu" = neue Ausgabe, sonst die Id der bearbeiteten. */
+  const [editing, setEditing] = useState<number | "neu" | null>(null);
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState<ExpenseCategory>("essen");
+  const [description, setDescription] = useState("");
+  const [day, setDay] = useState(defaultDay);
+  const [paidBy, setPaidBy] = useState("");
+
+  const query = trpc.trips.expenses.list.useQuery(
+    { tripId },
+    { enabled: open }
+  );
+  const expenses = useMemo(() => query.data ?? [], [query.data]);
+
+  const closeForm = () => {
+    setEditing(null);
+    setAmount("");
+    setDescription("");
+  };
+
+  const invalidate = () => utils.trips.expenses.list.invalidate({ tripId });
+
+  const addMutation = trpc.trips.expenses.add.useMutation({
+    onSuccess: () => {
+      invalidate();
+      closeForm();
+      toast.success(t.tripExpenses.saved);
+    },
+    onError: e => toast.error(e.message || t.tripExpenses.saveFailed),
+  });
+  const updateMutation = trpc.trips.expenses.update.useMutation({
+    onSuccess: () => {
+      invalidate();
+      closeForm();
+      toast.success(t.tripExpenses.updated);
+    },
+    onError: e => toast.error(e.message || t.tripExpenses.saveFailed),
+  });
+  const removeMutation = trpc.trips.expenses.remove.useMutation({
+    onSuccess: () => {
+      invalidate();
+      toast.success(t.tripExpenses.deleted);
+    },
+    onError: () => toast.error(t.tripExpenses.deleteFailed),
+  });
+
+  const total = useMemo(() => expensesTotalRappen(expenses), [expenses]);
+  const byCategory = useMemo(() => expensesByCategory(expenses), [expenses]);
+  const settlements = useMemo(
+    () =>
+      settleUp(expenses.map(e => ({ who: e.paidBy, rappen: e.amountRappen }))),
+    [expenses]
+  );
+  /** Bereits erfasste Zahlende – als Vorschläge fürs Namensfeld. */
+  const knownPayers = useMemo(() => {
+    const names: string[] = [];
+    expenses.forEach(e => {
+      const name = e.paidBy.trim();
+      if (name && !names.some(n => n.toLowerCase() === name.toLowerCase())) {
+        names.push(name);
+      }
+    });
+    return names.slice(0, 6);
+  }, [expenses]);
+
+  const money = (rappen: number) =>
+    `${t.tripExpenses.currency} ${formatChf(rappen, lang)}`;
+  const fmtDay = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
+      day: "numeric",
+      month: "short",
+    });
+  const labelOf = (expense: { description: string | null }) =>
+    expense.description?.trim() || t.tripExpenses.untitled;
+
+  const startNew = () => {
+    setEditing("neu");
+    setAmount("");
+    setCategory("essen");
+    setDescription("");
+    setDay(defaultDay);
+    setPaidBy(
+      knownPayers[0] ?? user?.name ?? user?.email ?? t.tripExpenses.meFallback
+    );
+  };
+
+  const startEditExpense = (expense: (typeof expenses)[number]) => {
+    setEditing(expense.id);
+    setAmount(rappenToInput(expense.amountRappen));
+    setCategory(normalizeExpenseCategory(expense.category));
+    setDescription(expense.description ?? "");
+    setDay(expense.day);
+    setPaidBy(expense.paidBy);
+  };
+
+  const submit = () => {
+    const rappen = parseChfInput(amount);
+    if (rappen === null || rappen < 1) {
+      toast.error(t.tripExpenses.amountInvalid);
+      return;
+    }
+    const who = paidBy.trim();
+    if (!who) {
+      toast.error(t.tripExpenses.paidByRequired);
+      return;
+    }
+    const payload = {
+      amountRappen: Math.min(rappen, EXPENSE_MAX_RAPPEN),
+      category,
+      description: description.trim().slice(0, EXPENSE_DESCRIPTION_MAX_LENGTH),
+      day,
+      paidBy: who.slice(0, EXPENSE_PAID_BY_MAX_LENGTH),
+    };
+    if (editing === "neu") addMutation.mutate({ tripId, ...payload });
+    else if (typeof editing === "number")
+      updateMutation.mutate({ id: editing, ...payload });
+  };
+
+  const busy = addMutation.isPending || updateMutation.isPending;
+
+  return (
+    <div className="mt-2 rounded-lg border border-border bg-card">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        aria-label={t.tripExpenses.toggleAria(tripName)}
+        className="flex w-full items-center gap-2 px-3 py-2 text-sm"
+      >
+        <Wallet className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+        <span className="min-w-0 flex-1 truncate text-left font-medium">
+          {t.tripExpenses.title}
+        </span>
+        {open && !query.isLoading && expenses.length > 0 && (
+          <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
+            {money(total)}
+          </span>
+        )}
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+            open && "rotate-180"
+          )}
+          aria-hidden="true"
+        />
+      </button>
+      {open && (
+        <div className="space-y-3 border-t border-border px-3 py-2.5">
+          <p className="text-xs text-muted-foreground">{t.tripExpenses.hint}</p>
+          {query.isLoading ? (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              {t.common.loading}
+            </p>
+          ) : (
+            <>
+              {expenses.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  {t.tripExpenses.empty}
+                </p>
+              ) : (
+                <>
+                  {/* Summe */}
+                  <div className="flex items-baseline justify-between rounded-lg bg-muted/40 px-3 py-2">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {t.tripExpenses.total}
+                    </span>
+                    <span className="font-mono text-lg font-bold tabular-nums">
+                      {money(total)}
+                    </span>
+                  </div>
+
+                  {/* Aufteilung nach Kategorie – schlichte Balken */}
+                  <div>
+                    <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {t.tripExpenses.categoryTitle}
+                    </h4>
+                    <ul className="space-y-1.5">
+                      {byCategory
+                        .filter(entry => entry.rappen > 0)
+                        .map(entry => {
+                          const percent =
+                            total > 0
+                              ? Math.round((entry.rappen / total) * 100)
+                              : 0;
+                          return (
+                            <li key={entry.category}>
+                              <div className="flex items-baseline justify-between text-xs">
+                                <span className="font-medium">
+                                  {pick(
+                                    EXPENSE_CATEGORY_LABELS[entry.category],
+                                    lang
+                                  )}
+                                </span>
+                                <span className="font-mono tabular-nums text-muted-foreground">
+                                  {money(entry.rappen)} ·{" "}
+                                  {t.tripExpenses.categoryShare(percent)}
+                                </span>
+                              </div>
+                              <div
+                                className="mt-0.5 h-2 w-full overflow-hidden rounded-full bg-border"
+                                aria-hidden="true"
+                              >
+                                <div
+                                  className={cn(
+                                    "h-full rounded-full",
+                                    EXPENSE_CATEGORY_BARS[entry.category]
+                                  )}
+                                  style={{ width: `${percent}%` }}
+                                />
+                              </div>
+                            </li>
+                          );
+                        })}
+                    </ul>
+                  </div>
+
+                  {/* Wer schuldet wem */}
+                  <div>
+                    <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {t.tripExpenses.settleTitle}
+                    </h4>
+                    {settlements.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        {t.tripExpenses.settleNone}
+                      </p>
+                    ) : (
+                      <ul className="space-y-1">
+                        {settlements.map((s, i) => (
+                          <li
+                            key={`${s.from}-${s.to}-${i}`}
+                            className="flex flex-wrap items-center gap-1.5 rounded-lg bg-muted/40 px-3 py-1.5 text-sm"
+                          >
+                            <span className="font-medium">{s.from}</span>
+                            <ArrowRight
+                              className="h-3.5 w-3.5 text-muted-foreground"
+                              aria-hidden="true"
+                            />
+                            <span className="font-medium">{s.to}</span>
+                            <span className="ml-auto font-mono font-semibold tabular-nums">
+                              {money(s.rappen)}
+                            </span>
+                            <span className="sr-only">
+                              {t.tripExpenses.settleLine(
+                                s.from,
+                                s.to,
+                                money(s.rappen)
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t.tripExpenses.settleHint}
+                    </p>
+                  </div>
+
+                  {/* Einzelne Ausgaben */}
+                  <ul className="space-y-1">
+                    {expenses.map(expense => (
+                      <li
+                        key={expense.id}
+                        className="flex items-start gap-2 rounded-lg bg-muted/40 px-3 py-2"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="flex flex-wrap items-center gap-x-2 text-sm font-medium">
+                            {labelOf(expense)}
+                            <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-medium text-accent-foreground">
+                              {pick(
+                                EXPENSE_CATEGORY_LABELS[
+                                  normalizeExpenseCategory(expense.category)
+                                ],
+                                lang
+                              )}
+                            </span>
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {fmtDay(expense.day)} ·{" "}
+                            {t.tripExpenses.paidByLine(expense.paidBy)}
+                            {shared && expense.createdByName
+                              ? ` · ${t.tripExpenses.byLine(expense.createdByName)}`
+                              : ""}
+                          </p>
+                        </div>
+                        <span className="shrink-0 font-mono text-sm font-semibold tabular-nums">
+                          {money(expense.amountRappen)}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0 text-muted-foreground/60 hover:text-foreground"
+                          onClick={() => startEditExpense(expense)}
+                          aria-label={t.tripExpenses.editAria(labelOf(expense))}
+                        >
+                          <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0 text-muted-foreground/60 hover:text-destructive"
+                          onClick={() => {
+                            if (
+                              confirm(
+                                t.tripExpenses.deleteConfirm(labelOf(expense))
+                              )
+                            ) {
+                              removeMutation.mutate({ id: expense.id });
+                            }
+                          }}
+                          aria-label={t.tripExpenses.deleteAria(
+                            labelOf(expense)
+                          )}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {/* Erfassen / Bearbeiten */}
+              {editing === null ? (
+                <Button variant="outline" size="sm" onClick={startNew}>
+                  <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {t.tripExpenses.addButton}
+                </Button>
+              ) : (
+                <div className="space-y-2 rounded-lg border border-border p-3">
+                  <p className="text-sm font-semibold">
+                    {editing === "neu"
+                      ? t.tripExpenses.newTitle
+                      : t.tripExpenses.editTitle}
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <div>
+                      <Label htmlFor={`expense-amount-${tripId}`}>
+                        {t.tripExpenses.amountLabel}
+                      </Label>
+                      <Input
+                        id={`expense-amount-${tripId}`}
+                        className="mt-1"
+                        inputMode="decimal"
+                        placeholder={t.tripExpenses.amountPlaceholder}
+                        value={amount}
+                        onChange={e => setAmount(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`expense-day-${tripId}`}>
+                        {t.tripExpenses.dayLabel}
+                      </Label>
+                      <Input
+                        id={`expense-day-${tripId}`}
+                        className="mt-1"
+                        type="date"
+                        value={day}
+                        onChange={e => setDay(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="mb-1 block">
+                      {t.tripExpenses.categoryLabel}
+                    </Label>
+                    <div
+                      className="flex flex-wrap gap-1.5"
+                      role="group"
+                      aria-label={t.tripExpenses.categoryAria}
+                    >
+                      {EXPENSE_CATEGORIES.map(key => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => setCategory(key)}
+                          aria-pressed={category === key}
+                          className={cn(
+                            "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                            category === key
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground hover:text-foreground"
+                          )}
+                        >
+                          {pick(EXPENSE_CATEGORY_LABELS[key], lang)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor={`expense-desc-${tripId}`}>
+                      {t.tripExpenses.descriptionLabel}
+                    </Label>
+                    <Input
+                      id={`expense-desc-${tripId}`}
+                      className="mt-1"
+                      maxLength={EXPENSE_DESCRIPTION_MAX_LENGTH}
+                      placeholder={t.tripExpenses.descriptionPlaceholder}
+                      value={description}
+                      onChange={e => setDescription(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`expense-paidby-${tripId}`}>
+                      {t.tripExpenses.paidByLabel}
+                    </Label>
+                    <Input
+                      id={`expense-paidby-${tripId}`}
+                      className="mt-1"
+                      maxLength={EXPENSE_PAID_BY_MAX_LENGTH}
+                      placeholder={t.tripExpenses.paidByPlaceholder}
+                      value={paidBy}
+                      onChange={e => setPaidBy(e.target.value)}
+                    />
+                    {knownPayers.length > 0 && (
+                      <div
+                        className="mt-1.5 flex flex-wrap gap-1.5"
+                        role="group"
+                        aria-label={t.tripExpenses.paidBySuggestionsAria}
+                      >
+                        {knownPayers.map(name => (
+                          <button
+                            key={name}
+                            type="button"
+                            onClick={() => setPaidBy(name)}
+                            className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                          >
+                            {name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" disabled={busy} onClick={submit}>
+                      {busy ? t.common.saving : t.tripExpenses.save}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={closeForm}>
+                      {t.common.cancel}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -2974,6 +3471,14 @@ export default function TripsPage() {
                           shared={trip.shared || trip.role === "member"}
                         />
                       )}
+                      {/* Reisekasse (#219): auch schon vor der Anreise –
+                          Platzmiete und Sprit fallen oft vorher an */}
+                      <TripExpenses
+                        tripId={trip.id}
+                        tripName={trip.title || placeName(trip)}
+                        defaultDay={today > trip.endDate ? trip.endDate : today}
+                        shared={trip.shared || trip.role === "member"}
+                      />
                       <TripPhotos
                         tripId={trip.id}
                         tripName={trip.title || placeName(trip)}
@@ -3219,6 +3724,15 @@ export default function TripsPage() {
                           tripName={trip.title || placeName(trip)}
                           startDate={trip.startDate}
                           endDate={trip.endDate}
+                          shared={trip.shared || trip.role === "member"}
+                        />
+                        {/* Reisekasse (#219) */}
+                        <TripExpenses
+                          tripId={trip.id}
+                          tripName={trip.title || placeName(trip)}
+                          defaultDay={
+                            today > trip.endDate ? trip.endDate : today
+                          }
                           shared={trip.shared || trip.role === "member"}
                         />
                         <TripPhotos
