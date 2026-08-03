@@ -46,6 +46,7 @@ import PhotoGallery from "@/components/PhotoGallery";
 import DarkSkyPanel from "@/components/DarkSkyPanel";
 import NearbyHikes from "@/components/NearbyHikes";
 import NearbyExcursions from "@/components/NearbyExcursions";
+import NearbyFirepits from "@/components/NearbyFirepits";
 import TickRiskPanel from "@/components/TickRiskPanel";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
 import { MAX_PHOTOS_PER_SPOT } from "@shared/tripPhotos";
@@ -1205,6 +1206,15 @@ export default function SpotDetailPage() {
 
       {/* Wandern in der Umgebung: markierte OSM-Routen rund um den Platz */}
       <NearbyHikes
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mb-4"
+      />
+
+      {/* Feuer- und Grillstellen aus OpenStreetMap (#247) – lädt erst beim
+          Aufklappen, Overpass wird nie automatisch gefragt */}
+      <NearbyFirepits
         latitude={spot.latitude}
         longitude={spot.longitude}
         placeName={spot.name}

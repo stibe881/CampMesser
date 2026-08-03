@@ -1833,6 +1833,22 @@ export const de = {
     layerExcursions: "Ausflüge",
     excursionLegend: (n: number) =>
       n === 1 ? "1 Ausflugsziel" : `${n} Ausflugsziele`,
+    layerFirepits: "Feuerstellen",
+    firepitLoading: "Feuerstellen werden gesucht …",
+    firepitZoomHint: "Bitte näher zoomen, um Feuerstellen zu suchen.",
+    firepitError:
+      "Feuerstellen konnten nicht geladen werden – bitte später erneut versuchen.",
+    firepitCount: (n: number) =>
+      n === 0
+        ? "Keine Feuerstellen in diesem Ausschnitt gefunden."
+        : n === 1
+          ? "1 Feuerstelle gefunden"
+          : `${n} Feuerstellen gefunden`,
+    firepitLegend: (n: number) =>
+      n === 1
+        ? "1 Feuer-/Grillstelle (OpenStreetMap)"
+        : `${n} Feuer-/Grillstellen (OpenStreetMap)`,
+    firepitSearchHint: "Tippe auf «In diesem Ausschnitt suchen».",
   },
   spotDetail: {
     fallbackTitle: "Zeltplatz",
@@ -3202,6 +3218,43 @@ export const de = {
       "Gehzeit nach der SAC-Faustregel: 4 km/h in der Ebene, dazu 400 Höhenmeter pro Stunde aufwärts und 800 abwärts; gezählt wird der grössere Anteil plus die Hälfte des kleineren. Pausen sind nicht enthalten.",
     footnote:
       "Daten aus OpenStreetMap über die Overpass-API – abgefragt nur auf deinen Klick. Länge, Höhenmeter und Schwierigkeit stehen nur dort, wo sie in OSM gepflegt sind, sonst «–». Markierung im Gelände und Wegzustand können abweichen: nimm Karte und Wetterbericht mit.",
+  },
+
+  /** Feuer- und Grillstellen aus OpenStreetMap (#247). */
+  firepits: {
+    sectionAria: "Offizielle Feuer- und Grillstellen in der Nähe",
+    title: "Feuerstellen in der Nähe",
+    subtitle: "Offizielle Feuer- und Grillstellen rund um deinen Standort.",
+    subtitleAtPlace: (place: string) =>
+      `Offizielle Feuer- und Grillstellen rund um ${place}.`,
+    radiusLabel: "Umkreis",
+    radiusGroupAria: "Suchradius wählen",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Feuerstellen werden gesucht …",
+    loadFailed:
+      "Die Feuerstellen konnten gerade nicht geladen werden. Overpass ist ein freier Dienst und bremst bei zu vielen Anfragen – versuch es in ein paar Minuten nochmals.",
+    empty: (km: number) =>
+      `Im Umkreis von ${km} km ist in OpenStreetMap keine Feuer- oder Grillstelle eingetragen. Versuch es mit einem grösseren Umkreis.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 Stelle gefunden" : `${n} Stellen gefunden`,
+    kind: {
+      firepit: "Feuerstelle",
+      bbq: "Grillstelle",
+    },
+    kindHint: {
+      firepit: "offene Feuerstelle",
+      bbq: "fest installierter Grill",
+    },
+    covered: "gedeckt",
+    firewood: "Brennholz vor Ort",
+    drinkingWater: "Trinkwasser",
+    distanceAway: (value: string) => `${value} entfernt`,
+    navButton: "Hinnavigieren",
+    navAria: (name: string) => `Navigation zu ${name}`,
+    fireDangerLink: "Waldbrandgefahr und Feuerverbote ansehen",
+    fireDangerShort: "Waldbrandgefahr prüfen",
+    source:
+      "Daten aus OpenStreetMap über die Overpass-API – abgefragt nur auf deinen Klick. Eigenschaften stehen nur dort, wo sie in OSM gepflegt sind.",
   },
 
   /** Dunkelheitskarte pro Platz (#239). */

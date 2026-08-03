@@ -2,12 +2,18 @@ import { describe, expect, it } from "vitest";
 // Overpass-Parser liegt im Client-Code, ist aber reine Logik ohne DOM.
 import {
   boundingBoxAround,
+  firepitsBboxQuery,
+  firepitsQuery,
   hikingRoutesQuery,
+  nearestFirepits,
+  OVERPASS_FIREPIT_MAX_RESULTS,
   OVERPASS_HIKING_MAX_RESULTS,
   OVERPASS_MAX_RESULTS,
   overpassQuery,
   parseCampsites,
+  parseFirepits,
   parseHikingRoutes,
+  parseOsmYesNo,
 } from "../client/src/lib/overpass";
 
 describe("overpassQuery", () => {
@@ -324,5 +330,215 @@ describe("parseHikingRoutes", () => {
     expect(parseHikingRoutes({ elements })).toHaveLength(
       OVERPASS_HIKING_MAX_RESULTS
     );
+  });
+});
+
+describe("firepitsQuery / firepitsBboxQuery", () => {
+  it("fragt Feuerstellen und Grills als node und way im Umkreis ab", () => {
+    const q = firepitsQuery(46.8, 8.2, 5000);
+    expect(q).toContain("[out:json][timeout:20];");
+    expect(q).toContain(
+      'node["leisure"="firepit"](around:5000,46.80000,8.20000)'
+    );
+    expect(q).toContain(
+      'way["leisure"="firepit"](around:5000,46.80000,8.20000)'
+    );
+    expect(q).toContain('node["amenity"="bbq"](around:5000,46.80000,8.20000)');
+    expect(q).toContain('way["amenity"="bbq"](around:5000,46.80000,8.20000)');
+    expect(q).toContain(`out center ${OVERPASS_FIREPIT_MAX_RESULTS};`);
+  });
+
+  it("nutzt für die Karte dieselben Typen mit gerundeter Bounding-Box", () => {
+    const q = firepitsBboxQuery(46.712345678, 7.1, 46.9, 7.3);
+    expect(q).toContain(
+      'node["leisure"="firepit"](46.71235,7.10000,46.90000,7.30000)'
+    );
+    expect(q).toContain(
+      'way["amenity"="bbq"](46.71235,7.10000,46.90000,7.30000)'
+    );
+    expect(q).toContain(`out center ${OVERPASS_FIREPIT_MAX_RESULTS};`);
+  });
+});
+
+describe("parseOsmYesNo", () => {
+  it("liest yes/no in allen üblichen Schreibweisen", () => {
+    expect(parseOsmYesNo("yes")).toBe(true);
+    expect(parseOsmYesNo(" YES ")).toBe(true);
+    expect(parseOsmYesNo("true")).toBe(true);
+    expect(parseOsmYesNo("1")).toBe(true);
+    expect(parseOsmYesNo("no")).toBe(false);
+    expect(parseOsmYesNo("FALSE")).toBe(false);
+    expect(parseOsmYesNo("0")).toBe(false);
+  });
+
+  it("lässt Uneindeutiges offen, statt zu raten", () => {
+    expect(parseOsmYesNo("limited")).toBeUndefined();
+    expect(parseOsmYesNo("seasonal")).toBeUndefined();
+    expect(parseOsmYesNo("")).toBeUndefined();
+    expect(parseOsmYesNo(undefined)).toBeUndefined();
+    expect(parseOsmYesNo(42)).toBeUndefined();
+  });
+});
+
+describe("parseFirepits", () => {
+  it("unterscheidet Feuerstelle und fest installierten Grill", () => {
+    const result = parseFirepits({
+      elements: [
+        {
+          type: "node",
+          id: 1,
+          lat: 46.5,
+          lon: 7.2,
+          tags: { leisure: "firepit", name: "Feuerstelle Waldrand" },
+        },
+        {
+          type: "way",
+          id: 2,
+          center: { lat: 46.6, lon: 7.3 },
+          tags: { amenity: "bbq" },
+        },
+      ],
+    });
+    expect(result).toEqual([
+      {
+        id: "node/1",
+        lat: 46.5,
+        lon: 7.2,
+        kind: "firepit",
+        name: "Feuerstelle Waldrand",
+        covered: undefined,
+        firewood: undefined,
+        drinkingWater: undefined,
+      },
+      {
+        id: "way/2",
+        lat: 46.6,
+        lon: 7.3,
+        kind: "bbq",
+        name: undefined,
+        covered: undefined,
+        firewood: undefined,
+        drinkingWater: undefined,
+      },
+    ]);
+  });
+
+  it("übernimmt gedeckt, Brennholz und Trinkwasser nur bei klaren Tags", () => {
+    const result = parseFirepits({
+      elements: [
+        {
+          type: "node",
+          id: 1,
+          lat: 1,
+          lon: 2,
+          tags: {
+            leisure: "firepit",
+            covered: "yes",
+            "fuel:wood": "no",
+            drinking_water: "yes",
+          },
+        },
+        {
+          type: "node",
+          id: 2,
+          lat: 1,
+          lon: 2,
+          tags: {
+            leisure: "firepit",
+            covered: "vielleicht",
+            drinking_water: "seasonal",
+          },
+        },
+      ],
+    });
+    expect(result[0].covered).toBe(true);
+    expect(result[0].firewood).toBe(false);
+    expect(result[0].drinkingWater).toBe(true);
+    expect(result[1].covered).toBeUndefined();
+    expect(result[1].firewood).toBeUndefined();
+    expect(result[1].drinkingWater).toBeUndefined();
+  });
+
+  it("überspringt fremde Typen, kaputte Elemente und Duplikate", () => {
+    const result = parseFirepits({
+      elements: [
+        null,
+        "quatsch",
+        { type: "node", id: 1, lat: 1, lon: 2, tags: { amenity: "toilets" } },
+        { type: "node", id: 2, lat: 1, lon: 2 },
+        { type: "relation", id: 3, tags: { leisure: "firepit" } },
+        { type: "way", id: 4, tags: { leisure: "firepit" } },
+        { type: "node", id: 5, lat: 1, lon: 2, tags: { leisure: "firepit" } },
+        { type: "node", id: 5, lat: 9, lon: 9, tags: { amenity: "bbq" } },
+        {
+          type: "way",
+          id: 5,
+          center: { lat: 3, lon: 4 },
+          tags: { amenity: "bbq" },
+        },
+      ],
+    });
+    expect(result.map(f => f.id)).toEqual(["node/5", "way/5"]);
+    expect(result[0].kind).toBe("firepit");
+    expect(result[1].kind).toBe("bbq");
+  });
+
+  it("liefert bei unbrauchbarer Antwort eine leere Liste", () => {
+    expect(parseFirepits(null)).toEqual([]);
+    expect(parseFirepits("html-fehlerseite")).toEqual([]);
+    expect(parseFirepits({ elements: "nope" })).toEqual([]);
+  });
+
+  it("begrenzt das Ergebnis hart", () => {
+    const elements = [];
+    for (let i = 0; i < OVERPASS_FIREPIT_MAX_RESULTS + 9; i++) {
+      elements.push({
+        type: "node",
+        id: i,
+        lat: 46.5,
+        lon: 7.2,
+        tags: { leisure: "firepit" },
+      });
+    }
+    expect(parseFirepits({ elements })).toHaveLength(
+      OVERPASS_FIREPIT_MAX_RESULTS
+    );
+  });
+});
+
+describe("nearestFirepits", () => {
+  const at = (id: number, lat: number, lon: number) => ({
+    id: `node/${id}`,
+    lat,
+    lon,
+    kind: "firepit" as const,
+  });
+
+  it("sortiert nach Luftlinie und kürzt auf die gewünschte Anzahl", () => {
+    const result = nearestFirepits(
+      [at(1, 46.9, 8.2), at(2, 46.81, 8.2), at(3, 46.85, 8.2)],
+      46.8,
+      8.2,
+      2
+    );
+    expect(result.map(entry => entry.firepit.id)).toEqual(["node/2", "node/3"]);
+    expect(result[0].distanceM).toBeLessThan(result[1].distanceM);
+    // rund 1.1 km bei 0.01° Breitenunterschied
+    expect(result[0].distanceM).toBeGreaterThan(1000);
+    expect(result[0].distanceM).toBeLessThan(1200);
+  });
+
+  it("hält die Reihenfolge bei gleicher Distanz über die Id stabil", () => {
+    const result = nearestFirepits(
+      [at(9, 46.81, 8.2), at(2, 46.81, 8.2)],
+      46.8,
+      8.2,
+      5
+    );
+    expect(result.map(entry => entry.firepit.id)).toEqual(["node/2", "node/9"]);
+  });
+
+  it("liefert bei limit <= 0 nichts", () => {
+    expect(nearestFirepits([at(1, 46.81, 8.2)], 46.8, 8.2, 0)).toEqual([]);
   });
 });

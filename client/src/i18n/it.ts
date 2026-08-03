@@ -1812,6 +1812,22 @@ export const it: Translation = {
     layerExcursions: "Gite",
     excursionLegend: (n: number) =>
       n === 1 ? "1 meta per una gita" : `${n} mete per una gita`,
+    layerFirepits: "Focolari",
+    firepitLoading: "Ricerca dei focolari …",
+    firepitZoomHint: "Ingrandisci di più per cercare i focolari.",
+    firepitError:
+      "Non è stato possibile caricare i focolari – riprova più tardi.",
+    firepitCount: (n: number) =>
+      n === 0
+        ? "Nessun focolare trovato in questa zona."
+        : n === 1
+          ? "1 focolare trovato"
+          : `${n} focolari trovati`,
+    firepitLegend: (n: number) =>
+      n === 1
+        ? "1 focolare / griglia (OpenStreetMap)"
+        : `${n} focolari / griglie (OpenStreetMap)`,
+    firepitSearchHint: "Tocca «Cerca in questa zona».",
   },
   spotDetail: {
     fallbackTitle: "Piazzola",
@@ -3171,6 +3187,43 @@ export const it: Translation = {
       "Tempo di marcia secondo la regola del CAS: 4 km/h in piano, più 400 metri di dislivello all'ora in salita e 800 in discesa; si conta la parte maggiore più la metà di quella minore. Le pause non sono comprese.",
     footnote:
       "Dati di OpenStreetMap tramite l'API Overpass – interrogata solo su tuo clic. Lunghezza, dislivello e difficoltà compaiono solo dove sono curati in OSM, altrimenti «–». La segnaletica sul terreno e lo stato del sentiero possono differire: porta con te carta e bollettino meteo.",
+  },
+
+  /** Focolari e griglie da OpenStreetMap (#247). */
+  firepits: {
+    sectionAria: "Focolari e griglie ufficiali nei dintorni",
+    title: "Focolari nei dintorni",
+    subtitle: "Focolari e griglie ufficiali attorno alla tua posizione.",
+    subtitleAtPlace: (place: string) =>
+      `Focolari e griglie ufficiali attorno a ${place}.`,
+    radiusLabel: "Raggio",
+    radiusGroupAria: "Scegliere il raggio di ricerca",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Ricerca dei focolari …",
+    loadFailed:
+      "Al momento non è stato possibile caricare i focolari. Overpass è un servizio gratuito che rallenta con troppe richieste – riprova tra qualche minuto.",
+    empty: (km: number) =>
+      `Nel raggio di ${km} km non è registrato in OpenStreetMap nessun focolare o griglia. Prova con un raggio più grande.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 posto trovato" : `${n} posti trovati`,
+    kind: {
+      firepit: "Focolare",
+      bbq: "Griglia",
+    },
+    kindHint: {
+      firepit: "focolare aperto",
+      bbq: "griglia fissa",
+    },
+    covered: "coperto",
+    firewood: "legna sul posto",
+    drinkingWater: "acqua potabile",
+    distanceAway: (value: string) => `a ${value}`,
+    navButton: "Vai lì",
+    navAria: (name: string) => `Navigazione verso ${name}`,
+    fireDangerLink: "Vedere il pericolo di incendi boschivi e i divieti",
+    fireDangerShort: "Controlla il pericolo di incendi",
+    source:
+      "Dati da OpenStreetMap tramite l'API Overpass – interrogata solo al tuo clic. Le caratteristiche compaiono solo dove sono curate in OSM.",
   },
 
   /** Carta dell'oscurità per piazzola (#239). */

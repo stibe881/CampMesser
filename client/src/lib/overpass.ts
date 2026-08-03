@@ -10,7 +10,11 @@
  * einen Platz (#238, `hikingRoutesQuery`/`parseHikingRoutes`). Gleiches
  * Muster, gleiche Rücksicht: gefragt wird nur auf ausdrücklichen Klick, nie
  * automatisch – Overpass ist rate-limitiert.
+ *
+ * Dritter Nutzer: die offiziellen Feuer- und Grillstellen (#247,
+ * `firepitsQuery`/`firepitsBboxQuery`/`parseFirepits`).
  */
+import { distanceMeters } from "@shared/geo";
 import {
   parseOsmDistanceMeters,
   parseOsmElevationMeters,
@@ -69,66 +73,89 @@ function cleanWebsite(value: unknown): string | undefined {
   return undefined;
 }
 
+/** Die `elements`-Liste einer Overpass-Antwort defensiv lesen. */
+function readElements(json: unknown): unknown[] {
+  if (typeof json !== "object" || json === null) return [];
+  const elements = (json as { elements?: unknown }).elements;
+  return Array.isArray(elements) ? elements : [];
+}
+
+/** Ein Overpass-Element, auf Punkt und Tags heruntergebrochen. */
+interface OsmPointElement {
+  /** Eindeutig über Element-Typen hinweg, z. B. "node/123" oder "way/456". */
+  key: string;
+  lat: number;
+  lon: number;
+  tags: Record<string, unknown>;
+}
+
 /**
- * Overpass-JSON defensiv in Campingplatz-Pins übersetzen:
- * node → lat/lon direkt, way → center.lat/lon (aus `out center`).
+ * node/way defensiv auf einen Punkt reduzieren: node → lat/lon direkt,
+ * way → center.lat/lon (aus `out center`). Alles Unbrauchbare ergibt `null`
+ * und wird von den Parsern still übersprungen.
+ */
+function readPointElement(el: unknown): OsmPointElement | null {
+  if (typeof el !== "object" || el === null) return null;
+  const { type, id, lat, lon, center, tags } = el as {
+    type?: unknown;
+    id?: unknown;
+    lat?: unknown;
+    lon?: unknown;
+    center?: unknown;
+    tags?: unknown;
+  };
+  if ((type !== "node" && type !== "way") || typeof id !== "number") {
+    return null;
+  }
+
+  let pinLat: unknown = lat;
+  let pinLon: unknown = lon;
+  if (type === "way") {
+    if (typeof center !== "object" || center === null) return null;
+    pinLat = (center as { lat?: unknown }).lat;
+    pinLon = (center as { lon?: unknown }).lon;
+  }
+  if (
+    typeof pinLat !== "number" ||
+    typeof pinLon !== "number" ||
+    !Number.isFinite(pinLat) ||
+    !Number.isFinite(pinLon)
+  ) {
+    return null;
+  }
+
+  return {
+    key: `${type}/${id}`,
+    lat: pinLat,
+    lon: pinLon,
+    tags:
+      typeof tags === "object" && tags !== null
+        ? (tags as Record<string, unknown>)
+        : {},
+  };
+}
+
+/**
+ * Overpass-JSON defensiv in Campingplatz-Pins übersetzen.
  * Elemente ohne brauchbare Koordinaten werden übersprungen, Duplikate
  * (gleicher Typ + gleiche id) entfernt, hart auf 100 Ergebnisse begrenzt.
  */
 export function parseCampsites(json: unknown): OsmCampsite[] {
-  if (typeof json !== "object" || json === null) return [];
-  const elements = (json as { elements?: unknown }).elements;
-  if (!Array.isArray(elements)) return [];
-
+  const elements = readElements(json);
   const seen = new Set<string>();
   const result: OsmCampsite[] = [];
   for (let i = 0; i < elements.length; i++) {
     if (result.length >= OVERPASS_MAX_RESULTS) break;
-    const el = elements[i];
-    if (typeof el !== "object" || el === null) continue;
-    const { type, id, lat, lon, center, tags } = el as {
-      type?: unknown;
-      id?: unknown;
-      lat?: unknown;
-      lon?: unknown;
-      center?: unknown;
-      tags?: unknown;
-    };
-    if ((type !== "node" && type !== "way") || typeof id !== "number") {
-      continue;
-    }
-
-    let pinLat: unknown = lat;
-    let pinLon: unknown = lon;
-    if (type === "way") {
-      if (typeof center !== "object" || center === null) continue;
-      pinLat = (center as { lat?: unknown }).lat;
-      pinLon = (center as { lon?: unknown }).lon;
-    }
-    if (
-      typeof pinLat !== "number" ||
-      typeof pinLon !== "number" ||
-      !Number.isFinite(pinLat) ||
-      !Number.isFinite(pinLon)
-    ) {
-      continue;
-    }
-
-    const key = `${type}/${id}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-
-    const tagObj =
-      typeof tags === "object" && tags !== null
-        ? (tags as Record<string, unknown>)
-        : {};
+    const point = readPointElement(elements[i]);
+    if (!point || seen.has(point.key)) continue;
+    seen.add(point.key);
     result.push({
-      id: key,
-      lat: pinLat,
-      lon: pinLon,
-      name: cleanTag(tagObj.name),
-      website: cleanWebsite(tagObj.website),
-      phone: cleanTag(tagObj.phone),
+      id: point.key,
+      lat: point.lat,
+      lon: point.lon,
+      name: cleanTag(point.tags.name),
+      website: cleanWebsite(point.tags.website),
+      phone: cleanTag(point.tags.phone),
     });
   }
   return result;
@@ -250,10 +277,7 @@ function parseGeometry(value: unknown): GeoPoint[] {
  * schätzen.
  */
 export function parseHikingRoutes(json: unknown): OsmHikingRoute[] {
-  if (typeof json !== "object" || json === null) return [];
-  const elements = (json as { elements?: unknown }).elements;
-  if (!Array.isArray(elements)) return [];
-
+  const elements = readElements(json);
   const seen = new Set<string>();
   const result: OsmHikingRoute[] = [];
   for (let i = 0; i < elements.length; i++) {
@@ -307,4 +331,170 @@ export function parseHikingRoutes(json: unknown): OsmHikingRoute[] {
     });
   }
   return result;
+}
+
+/* ------------------------------------------------------------------ */
+/* Feuerstellen & Grillstellen (#247)                                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Zwei klar verschiedene Dinge, die OSM getrennt führt und die wir deshalb
+ * auch getrennt kennzeichnen: `leisure=firepit` ist die offene Feuerstelle
+ * (Ring aus Steinen, Grillrost, meist mit Sitzgelegenheit), `amenity=bbq`
+ * der fest installierte Grill.
+ */
+export type FirepitKind = "firepit" | "bbq";
+
+/** Eine offizielle Feuer- oder Grillstelle aus OSM. */
+export interface OsmFirepit {
+  /** Eindeutig über Element-Typen hinweg, z. B. "node/123". */
+  id: string;
+  lat: number;
+  lon: number;
+  kind: FirepitKind;
+  name?: string;
+  /** `covered=yes/no` – überdacht (Unterstand, Hütte). */
+  covered?: boolean;
+  /** `fuel:wood=yes/no` – Brennholz vor Ort. */
+  firewood?: boolean;
+  /** `drinking_water=yes/no` – Trinkwasser an der Stelle. */
+  drinkingWater?: boolean;
+}
+
+/** Auswählbare Suchradien rund um den Platz in Metern. */
+export const FIREPIT_SEARCH_RADII_M = [2000, 5000, 10000];
+
+/** Voreingestellter Suchradius in Metern – Feuerstellen sucht man zu Fuss. */
+export const FIREPIT_DEFAULT_RADIUS_M = 5000;
+
+/** Höchstzahl der Stellen je Abfrage. */
+export const OVERPASS_FIREPIT_MAX_RESULTS = 60;
+
+/**
+ * Die vier abgefragten Element-Arten mit demselben Ortsfilter (`(around:…)`
+ * oder eine Bounding-Box). Grillstellen sind meist Punkte, grosse Feuerstellen
+ * gelegentlich Flächen – deshalb node UND way.
+ */
+function firepitElements(filter: string): string {
+  return (
+    `node["leisure"="firepit"]${filter};` +
+    `way["leisure"="firepit"]${filter};` +
+    `node["amenity"="bbq"]${filter};` +
+    `way["amenity"="bbq"]${filter};`
+  );
+}
+
+/** Overpass-QL für Feuer- und Grillstellen im Umkreis (Platz-Dossier). */
+export function firepitsQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  const filter = `(around:${Math.round(radiusM)},${lat.toFixed(5)},${lon.toFixed(5)})`;
+  return (
+    `[out:json][timeout:20];` +
+    `(${firepitElements(filter)});` +
+    `out center ${OVERPASS_FIREPIT_MAX_RESULTS};`
+  );
+}
+
+/** Overpass-QL für Feuer- und Grillstellen im Kartenausschnitt (Karten-Ebene). */
+export function firepitsBboxQuery(
+  south: number,
+  west: number,
+  north: number,
+  east: number
+): string {
+  const bbox = [south, west, north, east].map(v => v.toFixed(5)).join(",");
+  return (
+    `[out:json][timeout:20];` +
+    `(${firepitElements(`(${bbox})`)});` +
+    `out center ${OVERPASS_FIREPIT_MAX_RESULTS};`
+  );
+}
+
+/**
+ * OSM-Ja/Nein-Tag lesen. Alles Uneindeutige (`limited`, `seasonal`, Freitext)
+ * bleibt `undefined` – die Oberfläche behauptet dann nichts, statt zu raten.
+ */
+export function parseOsmYesNo(value: unknown): boolean | undefined {
+  const raw = cleanTag(value);
+  if (!raw) return undefined;
+  const normalized = raw.toLowerCase();
+  if (normalized === "yes" || normalized === "true" || normalized === "1") {
+    return true;
+  }
+  if (normalized === "no" || normalized === "false" || normalized === "0") {
+    return false;
+  }
+  return undefined;
+}
+
+/** Feuerstelle oder Grill? Alles andere gehört nicht in diese Ebene. */
+function firepitKind(tags: Record<string, unknown>): FirepitKind | null {
+  if (cleanTag(tags.leisure) === "firepit") return "firepit";
+  if (cleanTag(tags.amenity) === "bbq") return "bbq";
+  return null;
+}
+
+/**
+ * Overpass-JSON in Feuer- und Grillstellen übersetzen. Elemente ohne
+ * passenden Typ-Tag fliegen raus (die Abfrage kann bei zusammengesetzten
+ * Antworten mehr liefern), Duplikate werden entfernt, das Ergebnis hart
+ * begrenzt. Fehlende Tags bleiben `undefined`.
+ */
+export function parseFirepits(json: unknown): OsmFirepit[] {
+  const elements = readElements(json);
+  const seen = new Set<string>();
+  const result: OsmFirepit[] = [];
+  for (let i = 0; i < elements.length; i++) {
+    if (result.length >= OVERPASS_FIREPIT_MAX_RESULTS) break;
+    const point = readPointElement(elements[i]);
+    if (!point || seen.has(point.key)) continue;
+    const kind = firepitKind(point.tags);
+    if (!kind) continue;
+    seen.add(point.key);
+    result.push({
+      id: point.key,
+      lat: point.lat,
+      lon: point.lon,
+      kind,
+      name: cleanTag(point.tags.name),
+      covered: parseOsmYesNo(point.tags.covered),
+      firewood: parseOsmYesNo(point.tags["fuel:wood"]),
+      drinkingWater: parseOsmYesNo(point.tags.drinking_water),
+    });
+  }
+  return result;
+}
+
+/** Eine Feuerstelle mit der Luftlinie zum Bezugspunkt. */
+export interface FirepitDistance {
+  firepit: OsmFirepit;
+  distanceM: number;
+}
+
+/**
+ * Feuer- und Grillstellen nach Luftlinie sortieren und auf die nächsten
+ * `limit` kürzen. Bei gleicher Distanz entscheidet die Id, damit die
+ * Reihenfolge stabil und ohne Locale-Einfluss testbar bleibt.
+ */
+export function nearestFirepits(
+  list: readonly OsmFirepit[],
+  latitude: number,
+  longitude: number,
+  limit: number
+): FirepitDistance[] {
+  if (limit <= 0) return [];
+  return list
+    .map(firepit => ({
+      firepit,
+      distanceM: distanceMeters(latitude, longitude, firepit.lat, firepit.lon),
+    }))
+    .sort(
+      (a, b) =>
+        a.distanceM - b.distanceM ||
+        (a.firepit.id < b.firepit.id ? -1 : a.firepit.id > b.firepit.id ? 1 : 0)
+    )
+    .slice(0, limit);
 }

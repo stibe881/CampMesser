@@ -37,9 +37,18 @@
  * Pixel-Abstände nicht und braucht deshalb keinen Neuaufbau.
  *
  * Ebenen-Filter: Checkbox-Chips blenden die Pin-Ebenen (Favoriten, Ziele,
- * Beobachtungen, OSM-Funde, Ausflüge) einzeln aus. Die Wahl liegt in
- * localStorage (campmesser.mapLayers), Standard alle an; der Filter greift
- * vor dem Clustern, die Legende zeigt nur eingeblendete Ebenen.
+ * Beobachtungen, OSM-Funde, Feuerstellen, Ausflüge) einzeln aus. Die Wahl
+ * liegt in localStorage (campmesser.mapLayers), Standard alle an; der Filter
+ * greift vor dem Clustern, die Legende zeigt nur eingeblendete Ebenen.
+ *
+ * Ebene «Feuerstellen» (#247): offizielle Feuer- und Grillstellen aus OSM
+ * (leisure=firepit bzw. amenity=bbq, beides getrennt gekennzeichnet). Sie
+ * holt ihre Pins ebenfalls über Overpass und ist deshalb standardmässig AUS –
+ * das Einschalten des Chips ist der ausdrückliche Klick, der die Suche im
+ * aktuellen Ausschnitt auslöst; «In diesem Ausschnitt suchen» lädt danach
+ * alle eingeschalteten Overpass-Ebenen neu. Das Popup nennt Typ, gepflegte
+ * Eigenschaften (gedeckt, Brennholz, Trinkwasser), die Navigation und
+ * verlinkt die Waldbrandgefahr-Anzeige im Wetter-Modul.
  *
  * Ebene «Ausflüge» (#271): die Ausflugsziele aus der eigenen
  * Ausflugfinder-App, geholt über den tRPC-Router `excursions` (serverseitig,
@@ -56,6 +65,7 @@ import { Link, useLocation, useSearch } from "wouter";
 import {
   Compass,
   FerrisWheel,
+  Flame,
   LocateFixed,
   Ruler,
   Map as MapIcon,
@@ -90,9 +100,12 @@ import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import {
   OVERPASS_MIN_ZOOM,
   OVERPASS_URL,
+  firepitsBboxQuery,
   overpassQuery,
   parseCampsites,
+  parseFirepits,
   type OsmCampsite,
+  type OsmFirepit,
 } from "@/lib/overpass";
 import {
   createBaseLayer,
@@ -195,8 +208,22 @@ const excursionIcon = L.divIcon({
   popupAnchor: [0, -16],
 });
 
+/**
+ * Feuer- bzw. Grillstelle aus OpenStreetMap (#247): reines Rot mit Flamme –
+ * sechste Farbe, deutlich heller und satter als das Bernstein der Ziele und
+ * das dunkle Karminrot der Ausflüge, dazu ein unverwechselbarer Umriss.
+ */
+const firepitIcon = L.divIcon({
+  className: "",
+  html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#dc2626" stroke="#ffffff" stroke-width="2.5"/><path d="M14.4 6.6c2.5 2.9 4.3 5 4.3 7.8a4.7 4.7 0 0 1-9.4 0c0-1.8.8-3.2 2-4.6.2 1.2.8 2 1.7 2.3.6-2.1.3-3.8-.9-5.7 1 .1 1.7.2 2.3.2Z" fill="#ffffff"/></svg>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -16],
+});
+
 /** Pin-Typen für die Cluster-Färbung (Farben wie die jeweiligen Einzel-Icons). */
-type PinKind = "spot" | "target" | "sighting" | "campsite" | "excursion";
+type PinKind =
+  "spot" | "target" | "sighting" | "campsite" | "excursion" | "firepit";
 
 const PIN_COLORS: Record<PinKind, string> = {
   spot: "#2f6b4f",
@@ -204,6 +231,7 @@ const PIN_COLORS: Record<PinKind, string> = {
   sighting: "#7c3aed",
   campsite: "#0369a1",
   excursion: "#be123c",
+  firepit: "#dc2626",
 };
 
 /** Neutrales Grau, wenn kein Pin-Typ im Cluster klar dominiert. */
@@ -323,6 +351,16 @@ function SpotsMap({
   const [searched, setSearched] = useState(false);
   const [moved, setMoved] = useState(false);
 
+  // Ebene «Feuerstellen» (#247): eigene Overpass-Abfrage, eigener Zustand.
+  // Sie hängt am Ebenen-Chip statt an einem weiteren Knopf oben – Einschalten
+  // sucht sofort im aktuellen Ausschnitt, Ausschalten räumt alles weg.
+  const [firepits, setFirepits] = useState<OsmFirepit[]>([]);
+  const [firepitLoading, setFirepitLoading] = useState(false);
+  const [firepitError, setFirepitError] = useState(false);
+  const [firepitNeedsZoom, setFirepitNeedsZoom] = useState(false);
+  const [firepitSearched, setFirepitSearched] = useState(false);
+  const firepitAbortRef = useRef<AbortController | null>(null);
+
   // Aktuelle Zoomstufe für die Pin-Gruppierung: nach jedem Zoom werden die
   // Cluster neu berechnet. Verschieben ändert die Pixel-Abstände nicht
   // (map.project ist unabhängig vom Ausschnitt), darum reicht zoomend.
@@ -360,6 +398,7 @@ function SpotsMap({
     mapRef.current = map;
     return () => {
       abortRef.current?.abort();
+      firepitAbortRef.current?.abort();
       map.remove();
       mapRef.current = null;
       baseLayerRef.current = null;
@@ -383,8 +422,8 @@ function SpotsMap({
     storeMapLayer(kind);
   }, []);
 
-  /** Overpass für den aktuellen Ausschnitt abfragen (nie automatisch beim Verschieben). */
-  const searchHere = useCallback(async () => {
+  /** Campingplätze für den aktuellen Ausschnitt abfragen (nie automatisch beim Verschieben). */
+  const searchCampsites = useCallback(async () => {
     const map = mapRef.current;
     if (!map) return;
     setMoved(false);
@@ -421,12 +460,62 @@ function SpotsMap({
     }
   }, []);
 
+  /** Feuer- und Grillstellen für den aktuellen Ausschnitt abfragen. */
+  const searchFirepits = useCallback(async () => {
+    const map = mapRef.current;
+    if (!map) return;
+    setMoved(false);
+    if (map.getZoom() < OVERPASS_MIN_ZOOM) {
+      setFirepitNeedsZoom(true);
+      setFirepitError(false);
+      return;
+    }
+    setFirepitNeedsZoom(false);
+    setFirepitError(false);
+    setFirepitLoading(true);
+    firepitAbortRef.current?.abort();
+    const controller = new AbortController();
+    firepitAbortRef.current = controller;
+    const b = map.getBounds();
+    try {
+      const res = await fetch(OVERPASS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `data=${encodeURIComponent(
+          firepitsBboxQuery(
+            b.getSouth(),
+            b.getWest(),
+            b.getNorth(),
+            b.getEast()
+          )
+        )}`,
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`overpass ${res.status}`);
+      const json: unknown = await res.json();
+      setFirepits(parseFirepits(json));
+      setFirepitSearched(true);
+      setFirepitLoading(false);
+    } catch {
+      if (controller.signal.aborted) return;
+      setFirepitLoading(false);
+      setFirepitError(true);
+    }
+  }, []);
+
+  /** «In diesem Ausschnitt suchen»: alle eingeschalteten Overpass-Ebenen neu laden. */
+  const searchHere = useCallback(() => {
+    if (discoverOn) void searchCampsites();
+    if (layerVisibility.firepits) void searchFirepits();
+    setMoved(false);
+  }, [discoverOn, layerVisibility.firepits, searchCampsites, searchFirepits]);
+
   /** Toggle-Chip: Einschalten sucht sofort, Ausschalten räumt alles weg. */
   const toggleDiscover = useCallback(() => {
     setDiscoverOn(prev => {
       const next = !prev;
       if (next) {
-        void searchHere();
+        void searchCampsites();
       } else {
         abortRef.current?.abort();
         setCampsites([]);
@@ -438,12 +527,37 @@ function SpotsMap({
       }
       return next;
     });
-  }, [searchHere]);
+  }, [searchCampsites]);
+
+  /**
+   * Ebenen-Chip antippen. Die Feuerstellen-Ebene holt ihre Pins über
+   * Overpass – Einschalten löst deshalb sofort eine Suche im aktuellen
+   * Ausschnitt aus, Ausschalten bricht ab und räumt weg.
+   */
+  const toggleLayerChip = useCallback(
+    (key: keyof MapLayerVisibility) => {
+      const willBeOn = !layerVisibility[key];
+      toggleLayer(key);
+      if (key !== "firepits") return;
+      if (willBeOn) {
+        void searchFirepits();
+        return;
+      }
+      firepitAbortRef.current?.abort();
+      setFirepits([]);
+      setFirepitLoading(false);
+      setFirepitError(false);
+      setFirepitNeedsZoom(false);
+      setFirepitSearched(false);
+    },
+    [layerVisibility, searchFirepits, toggleLayer]
+  );
 
   // Kartenbewegung merken: statt automatisch neu zu laden, zeigen wir den Such-Button
+  const overpassLayersOn = discoverOn || layerVisibility.firepits;
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !discoverOn) return;
+    if (!map || !overpassLayersOn) return;
     const onMove = () => setMoved(true);
     map.on("moveend", onMove);
     map.on("zoomend", onMove);
@@ -451,7 +565,7 @@ function SpotsMap({
       map.off("moveend", onMove);
       map.off("zoomend", onMove);
     };
-  }, [discoverOn]);
+  }, [overpassLayersOn]);
 
   // Verlinkter Ausflug: hinfahren, sobald die Ziele geladen sind. Der
   // Zoom-Wechsel gruppiert neu, danach steht der Pin einzeln da und der
@@ -632,6 +746,72 @@ function SpotsMap({
       return marker;
     };
 
+    // Feuer- und Grillstellen aus OpenStreetMap als eigene (rote) Pins.
+    // Das Popup nennt den Typ, die gepflegten Eigenschaften und die
+    // Navigation; ob heute überhaupt gefeuert werden darf, sagt die
+    // Waldbrandgefahr-Anzeige im Wetter – dorthin geht der letzte Link,
+    // statt den Hinweis hier zu doppeln.
+    const createFirepitMarker = (firepit: OsmFirepit): L.Marker => {
+      const tf = t.firepits;
+      const kindLabel = tf.kind[firepit.kind];
+      const displayName = firepit.name ?? kindLabel;
+      const marker = L.marker([firepit.lat, firepit.lon], {
+        icon: firepitIcon,
+        alt: displayName,
+      });
+      const popup = document.createElement("div");
+      popup.className = "space-y-1";
+
+      const name = document.createElement("p");
+      name.className = "font-semibold";
+      name.textContent = displayName;
+      popup.appendChild(name);
+
+      const kind = document.createElement("p");
+      kind.className = "text-xs";
+      kind.textContent = `${kindLabel} · ${tf.kindHint[firepit.kind]}`;
+      popup.appendChild(kind);
+
+      const features = [
+        firepit.covered === true ? tf.covered : null,
+        firepit.firewood === true ? tf.firewood : null,
+        firepit.drinkingWater === true ? tf.drinkingWater : null,
+      ].filter((value): value is string => value !== null);
+      if (features.length > 0) {
+        const line = document.createElement("p");
+        line.className = "text-xs";
+        line.textContent = features.join(" · ");
+        popup.appendChild(line);
+      }
+
+      const route = document.createElement("a");
+      route.href = directionsUrl(firepit.lat, firepit.lon);
+      route.target = "_blank";
+      route.rel = "noopener noreferrer";
+      route.textContent = tf.navButton;
+      route.setAttribute("aria-label", tf.navAria(displayName));
+      route.className = "block text-sm font-medium underline";
+      popup.appendChild(route);
+
+      const fireDanger = document.createElement("a");
+      fireDanger.href = "/wetter";
+      fireDanger.textContent = tf.fireDangerShort;
+      fireDanger.className = "block text-sm font-medium underline";
+      fireDanger.addEventListener("click", event => {
+        event.preventDefault();
+        navigate("/wetter");
+      });
+      popup.appendChild(fireDanger);
+
+      const source = document.createElement("p");
+      source.className = "text-xs text-muted-foreground";
+      source.textContent = t.mapView.osmSource;
+      popup.appendChild(source);
+
+      marker.bindPopup(popup);
+      return marker;
+    };
+
     // Ausflugsziele aus der Ausflugfinder-App als eigene (dunkelrote) Pins.
     // Das Popup zeigt Titelbild, Name, Kategorien, Kostenstufe und Region;
     // «Details» klappt Beschreibung, Hinweise, Öffnungszeiten und Website auf.
@@ -797,6 +977,14 @@ function SpotsMap({
             excursionId: excursion.id,
           }))
         : []),
+      ...(layerVisibility.firepits
+        ? firepits.map<MapPin>(firepit => ({
+            lat: firepit.lat,
+            lon: firepit.lon,
+            kind: "firepit" as const,
+            createMarker: () => createFirepitMarker(firepit),
+          }))
+        : []),
     ];
 
     const clusters = clusterPoints(
@@ -865,6 +1053,7 @@ function SpotsMap({
     sightings,
     visibleCampsites,
     excursions,
+    firepits,
     focusExcursionId,
     nightsBySpotId,
     clusterZoom,
@@ -1095,6 +1284,19 @@ function SpotsMap({
                     : null}
           </span>
         )}
+        {layerVisibility.firepits && (
+          <span className="text-xs text-muted-foreground" role="status">
+            {firepitLoading
+              ? t.mapView.firepitLoading
+              : firepitError
+                ? t.mapView.firepitError
+                : firepitNeedsZoom
+                  ? t.mapView.firepitZoomHint
+                  : firepitSearched
+                    ? t.mapView.firepitCount(firepits.length)
+                    : t.mapView.firepitSearchHint}
+          </span>
+        )}
       </div>
       {/* Pin-Ebenen einzeln ein-/ausblenden – Checkbox-Chips, Wahl bleibt erhalten */}
       <div
@@ -1141,6 +1343,16 @@ function SpotsMap({
                 />
               ),
             },
+            {
+              key: "firepits",
+              label: t.mapView.layerFirepits,
+              icon: (
+                <Flame
+                  className="h-3.5 w-3.5 text-red-600 dark:text-red-400"
+                  aria-hidden="true"
+                />
+              ),
+            },
             // Die Ausflugs-Ebene erscheint nur, wenn die Anbindung eingerichtet ist
             ...(excursionsAvailable
               ? ([
@@ -1163,7 +1375,7 @@ function SpotsMap({
             type="button"
             role="checkbox"
             aria-checked={layerVisibility[key]}
-            onClick={() => toggleLayer(key)}
+            onClick={() => toggleLayerChip(key)}
             className={cn(
               "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
               layerVisibility[key]
@@ -1183,10 +1395,10 @@ function SpotsMap({
           aria-label={t.mapView.mapAria}
           className="h-[65vh] min-h-80 w-full rounded-xl border border-border"
         />
-        {discoverOn && moved && !discoverLoading && (
+        {overpassLayersOn && moved && !discoverLoading && !firepitLoading && (
           <button
             type="button"
-            onClick={() => void searchHere()}
+            onClick={searchHere}
             className="absolute left-1/2 top-3 z-[1000] flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-background px-3.5 py-1.5 text-xs font-medium shadow-md hover:bg-muted"
           >
             <Search className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1238,6 +1450,15 @@ function SpotsMap({
               aria-hidden="true"
             />
             {t.mapView.excursionLegend(excursions.length)}
+          </span>
+        )}
+        {layerVisibility.firepits && firepits.length > 0 && (
+          <span className="flex items-center gap-1.5">
+            <Flame
+              className="h-3.5 w-3.5 text-red-600 dark:text-red-400"
+              aria-hidden="true"
+            />
+            {t.mapView.firepitLegend(firepits.length)}
           </span>
         )}
       </div>
