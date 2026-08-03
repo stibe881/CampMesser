@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import PhotoGallery from "@/components/PhotoGallery";
+import TickRiskPanel from "@/components/TickRiskPanel";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
 import { MAX_PHOTOS_PER_SPOT } from "@shared/tripPhotos";
 import {
@@ -1066,6 +1067,14 @@ export default function SpotDetailPage() {
 
       {/* Badestellen-Info: Wassertemperatur, Abfluss und Pegel am Platz */}
       <BathingWaterCard latitude={spot.latitude} longitude={spot.longitude} />
+
+      {/* Zeckenrisiko: FSME-Einstufung der Region plus Saison und Höhenlage */}
+      <TickRiskPanel
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        elevationM={spot.elevationM}
+        className="mb-4"
+      />
 
       {/* Beste Reisezeit: historisches Wetter, lädt erst beim Aufklappen */}
       <Card className="mb-4">

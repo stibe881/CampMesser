@@ -2601,6 +2601,39 @@ export const de = {
         `Beobachtung «${title}» wirklich löschen?`,
     },
   },
+  /** Zecken-Risiko nach Region (#224). */
+  tickRisk: {
+    sectionAria: "Zecken-Risiko an diesem Ort",
+    title: "Zeckenrisiko",
+    activity: {
+      none: "kaum aktiv",
+      low: "wenig aktiv",
+      moderate: "mässig aktiv",
+      high: "sehr aktiv",
+    },
+    activityLine: (month: string) => `So aktiv sind Zecken im ${month}.`,
+    aboveTickLine: (limitM: number) =>
+      `Der Platz liegt über ${limitM} m – so hoch kommen Zecken kaum noch vor.`,
+    inRiskArea:
+      "Dieser Ort liegt in einem Gebiet, das das BAG als FSME-Risikogebiet führt. Wer viel draussen ist, bespricht die Impfung am besten mit der Hausärztin oder dem Hausarzt.",
+    outsideRiskArea: (region: string) =>
+      `Der Kanton ${region} zählt nicht zu den FSME-Risikogebieten des BAG. Zecken gibt es hier trotzdem – auch Borreliose überträgt sich unabhängig davon.`,
+    outsideSwitzerland:
+      "Ausserhalb der Schweiz führt CampMesser keine FSME-Einstufung. Erkundige dich für dein Reiseland vor der Abreise.",
+    switzerlandGeneral:
+      "In der Schweiz gilt das ganze Land als FSME-Risikogebiet – ausser den Kantonen Genf und Tessin.",
+    tipsTitle: "So beugst du vor",
+    tips: [
+      "Auf den Wegen bleiben und hohes Gras, Unterholz und Waldränder meiden.",
+      "Lange Hosen, geschlossene Schuhe, Socken über die Hosenbeine – helle Kleidung, dann siehst du die Zecke früher.",
+      "Zeckenmittel auf Haut und Kleidung auftragen und nach ein paar Stunden auffrischen.",
+      "Abends den ganzen Körper absuchen, bei Kindern besonders Haaransatz, Ohren, Achseln, Leisten und Kniekehlen.",
+      "Eine Zecke möglichst rasch entfernen und die Stelle im Zeckenstich-Merker festhalten.",
+    ],
+    sourceNote:
+      "Einstufung: BAG, Stand Februar 2019. Aktivität grob nach Monat und Höhenlage – eine Orientierungshilfe, kein medizinischer Rat.",
+  },
+
   /** Badestellen-Info im Platz-Dossier (#223). */
   bathingWater: {
     title: "Wasser & Baden",

@@ -2501,6 +2501,40 @@ export const en: Translation = {
         `Really delete the sighting “${title}”?`,
     },
   },
+  /** Tick risk by region (#224). */
+  tickRisk: {
+    sectionAria: "Tick risk at this location",
+    title: "Tick risk",
+    activity: {
+      none: "barely active",
+      low: "slightly active",
+      moderate: "moderately active",
+      high: "very active",
+    },
+    activityLine: (month: string) =>
+      `That is how active ticks are in ${month}.`,
+    aboveTickLine: (limitM: number) =>
+      `The pitch lies above ${limitM} m – ticks are rare at that altitude.`,
+    inRiskArea:
+      "This location lies in an area the FOPH lists as a TBE risk area. If you spend a lot of time outdoors, discuss vaccination with your family doctor.",
+    outsideRiskArea: (region: string) =>
+      `The canton of ${region} is not among the FOPH's TBE risk areas. There are still ticks here – Lyme disease is transmitted regardless of this classification.`,
+    outsideSwitzerland:
+      "Outside Switzerland CampMesser does not provide a TBE classification. Check the situation for your destination before you leave.",
+    switzerlandGeneral:
+      "In Switzerland the whole country counts as a TBE risk area – except the cantons of Geneva and Ticino.",
+    tipsTitle: "How to protect yourself",
+    tips: [
+      "Stay on the paths and avoid tall grass, undergrowth and forest edges.",
+      "Long trousers, closed shoes, socks over the trouser legs – light-coloured clothes let you spot a tick sooner.",
+      "Apply tick repellent to skin and clothing and top it up after a few hours.",
+      "Check your whole body in the evening; with children especially the hairline, ears, armpits, groin and backs of the knees.",
+      "Remove a tick as quickly as possible and record the spot in the tick bite log.",
+    ],
+    sourceNote:
+      "Classification: FOPH, as of February 2019. Activity estimated roughly from month and altitude – guidance, not medical advice.",
+  },
+
   /** Bathing water info in the pitch dossier (#223). */
   bathingWater: {
     title: "Water & swimming",

@@ -2591,6 +2591,40 @@ export const fr: Translation = {
         `Vraiment supprimer l'observation «${title}» ?`,
     },
   },
+  /** Risque de tiques selon la région (#224). */
+  tickRisk: {
+    sectionAria: "Risque de tiques à cet endroit",
+    title: "Risque de tiques",
+    activity: {
+      none: "à peine actives",
+      low: "peu actives",
+      moderate: "moyennement actives",
+      high: "très actives",
+    },
+    activityLine: (month: string) =>
+      `Voilà à quel point les tiques sont actives en ${month}.`,
+    aboveTickLine: (limitM: number) =>
+      `L'emplacement est au-dessus de ${limitM} m – à cette altitude, les tiques sont rares.`,
+    inRiskArea:
+      "Cet endroit se trouve dans une zone que l'OFSP classe comme région à risque de FSME. Si tu passes beaucoup de temps dehors, parles-en à ton médecin de famille pour la vaccination.",
+    outsideRiskArea: (region: string) =>
+      `Le canton de ${region} ne fait pas partie des régions à risque de FSME selon l'OFSP. Il y a tout de même des tiques ici – la borréliose se transmet indépendamment de ce classement.`,
+    outsideSwitzerland:
+      "Hors de Suisse, CampMesser ne fournit pas de classement FSME. Renseigne-toi sur ton pays de destination avant le départ.",
+    switzerlandGeneral:
+      "En Suisse, tout le pays est considéré comme région à risque de FSME – à l'exception des cantons de Genève et du Tessin.",
+    tipsTitle: "Comment te protéger",
+    tips: [
+      "Reste sur les chemins et évite les hautes herbes, les broussailles et les lisières de forêt.",
+      "Pantalon long, chaussures fermées, chaussettes par-dessus le pantalon – des vêtements clairs, tu verras la tique plus tôt.",
+      "Applique un répulsif sur la peau et les habits, et renouvelle-le après quelques heures.",
+      "Le soir, inspecte tout le corps ; chez les enfants surtout la lisière des cheveux, les oreilles, les aisselles, l'aine et le creux des genoux.",
+      "Retire une tique le plus vite possible et note l'endroit dans le carnet des piqûres de tiques.",
+    ],
+    sourceNote:
+      "Classement : OFSP, état février 2019. Activité estimée grossièrement selon le mois et l'altitude – une aide à l'orientation, pas un avis médical.",
+  },
+
   /** Info baignade dans le dossier de l'emplacement (#223). */
   bathingWater: {
     title: "Eau & baignade",

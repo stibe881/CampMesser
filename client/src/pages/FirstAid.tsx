@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import TickRiskPanel from "@/components/TickRiskPanel";
 import {
   Accordion,
   AccordionContent,
@@ -287,6 +288,9 @@ function TickBiteSection() {
       <p className="mb-3 mt-1 text-sm text-muted-foreground">
         {t.firstAid.tickSubtitle}
       </p>
+
+      {/* Zeckenrisiko (#224): Saison und Höhenlage – ohne Ort allgemein für die Schweiz */}
+      <TickRiskPanel className="mb-4" />
 
       <div className="mb-4 flex gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
         <AlertTriangle

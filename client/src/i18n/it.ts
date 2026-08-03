@@ -2568,6 +2568,40 @@ export const it: Translation = {
         `Eliminare davvero l'osservazione «${title}»?`,
     },
   },
+  /** Rischio zecche per regione (#224). */
+  tickRisk: {
+    sectionAria: "Rischio zecche in questo luogo",
+    title: "Rischio zecche",
+    activity: {
+      none: "quasi inattive",
+      low: "poco attive",
+      moderate: "mediamente attive",
+      high: "molto attive",
+    },
+    activityLine: (month: string) =>
+      `Ecco quanto sono attive le zecche in ${month}.`,
+    aboveTickLine: (limitM: number) =>
+      `La piazzola si trova sopra i ${limitM} m – a quest'altitudine le zecche sono rare.`,
+    inRiskArea:
+      "Questo luogo si trova in una zona che l'UFSP classifica come area a rischio TBE. Se stai molto all'aperto, parla della vaccinazione con il tuo medico di famiglia.",
+    outsideRiskArea: (region: string) =>
+      `Il Cantone ${region} non rientra nelle aree a rischio TBE dell'UFSP. Le zecche ci sono lo stesso – la borreliosi si trasmette a prescindere da questa classificazione.`,
+    outsideSwitzerland:
+      "Fuori dalla Svizzera CampMesser non fornisce una classificazione TBE. Informati sul tuo paese di destinazione prima di partire.",
+    switzerlandGeneral:
+      "In Svizzera tutto il paese è considerato area a rischio TBE – tranne i Cantoni Ginevra e Ticino.",
+    tipsTitle: "Come prevenire",
+    tips: [
+      "Resta sui sentieri ed evita erba alta, sottobosco e margini del bosco.",
+      "Pantaloni lunghi, scarpe chiuse, calze sopra i pantaloni – vestiti chiari, così vedi prima la zecca.",
+      "Applica un repellente su pelle e vestiti e rinnovalo dopo qualche ora.",
+      "La sera controlla tutto il corpo; nei bambini soprattutto attaccatura dei capelli, orecchie, ascelle, inguine e cavo del ginocchio.",
+      "Rimuovi la zecca il prima possibile e annota il punto nel promemoria punture di zecca.",
+    ],
+    sourceNote:
+      "Classificazione: UFSP, stato febbraio 2019. Attività stimata a grandi linee secondo mese e altitudine – un orientamento, non un parere medico.",
+  },
+
   /** Info balneazione nel dossier della piazzola (#223). */
   bathingWater: {
     title: "Acqua e balneazione",
