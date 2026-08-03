@@ -181,6 +181,9 @@ export const en: Translation = {
     passkeyWaiting: "Waiting for the passkey …",
     passkeyFailed:
       "Passkey sign-in did not work. Try again or sign in with your password.",
+    emailVerified: "Email address confirmed – thank you!",
+    verifyLinkInvalid:
+      "The confirmation link is invalid or has expired. Request a new one in your profile.",
   },
   profile: {
     title: "Profile",
@@ -203,6 +206,14 @@ export const en: Translation = {
     nameTitle: "Change name",
     nameAria: "Name",
     namePlaceholder: "Your name",
+    verifyHint:
+      "Your email address is not confirmed yet. Check your inbox (including spam) or have the link sent again.",
+    verifyResend: "Resend confirmation email",
+    verifySending: "Sending …",
+    verifySent:
+      "Confirmation email sent – check your inbox (valid for 48 hours).",
+    verifyTooMany: "Too many requests. Please try again in an hour.",
+    verifyUnavailable: "Sending emails is currently unavailable.",
     emailTitle: "Change email address",
     emailCurrentPrefix: "Current:",
     emailCurrentSuffix: ". You will sign in with the new address from now on.",

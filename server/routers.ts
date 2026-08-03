@@ -111,6 +111,43 @@ function serializeQuizQuestions(
 }
 
 /**
+ * Absolute Basis-URL für Links in E-Mails: bevorzugt APP_URL, sonst
+ * Request-Host, sonst Produktions-Domain (Muster Passwort-Reset).
+ */
+function mailBaseUrl(req: {
+  get(name: string): string | undefined;
+  protocol: string;
+}): string {
+  const host = req.get("host");
+  return (
+    process.env.APP_URL?.replace(/\/+$/, "") ??
+    (host ? `${req.protocol}://${host}` : "https://campmesser.ch")
+  );
+}
+
+/**
+ * Bestätigungs-Mail für ein Konto verschicken (Token anlegen, Link bauen).
+ * Fehler beim Versand werden geloggt, aber nie an die Aufrufer durchgereicht –
+ * Registrierung und Adress-Änderung dürfen daran nicht scheitern.
+ */
+async function sendVerifyMailFor(
+  userId: number,
+  email: string,
+  lang: "de" | "fr" | "it" | "en",
+  req: { get(name: string): string | undefined; protocol: string }
+): Promise<void> {
+  try {
+    const { sendVerificationMail } = await import("./mailer");
+    const { createVerifyToken } = await import("./emailVerify");
+    const token = await createVerifyToken(userId);
+    const verifyUrl = `${mailBaseUrl(req)}/anmelden?verify=${token}`;
+    await sendVerificationMail(email, verifyUrl, lang);
+  } catch (err) {
+    console.error("[Mailer] Bestätigungs-Mail fehlgeschlagen:", err);
+  }
+}
+
+/**
  * Zugriff auf eine Reise erzwingen (Owner ODER eingeladenes Mitglied) –
  * wirft NOT_FOUND, wenn die Reise fehlt oder das Konto keinen Zugriff hat.
  */
@@ -129,11 +166,18 @@ export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query(opts => {
+    me: publicProcedure.query(async opts => {
       if (!opts.ctx.user) return null;
       // passwordHash niemals an den Client schicken
       const { passwordHash: _ph, ...safeUser } = opts.ctx.user;
-      return safeUser;
+      const { mailConfigured } = await import("./mailer");
+      return {
+        ...safeUser,
+        /** Ist die E-Mail-Adresse des Kontos bestätigt? */
+        emailVerified: Boolean(safeUser.emailVerifiedAt),
+        /** Nur mit SMTP zeigt der Client Bestätigungs-Hinweis und Neu-Versand. */
+        verifyMailEnabled: mailConfigured(),
+      };
     }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
@@ -148,6 +192,7 @@ export const appRouter = router({
           name: z.string().min(1, "Bitte gib einen Namen ein.").max(100),
           email: z.string().min(3).max(320),
           password: z.string().min(1).max(200),
+          lang: z.enum(["de", "fr", "it", "en"]).default("de"),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -187,6 +232,12 @@ export const appRouter = router({
           ...cookieOptions,
           maxAge: ONE_YEAR_MS,
         });
+        // Mit SMTP eine Bestätigungs-Mail schicken – ohne SMTP läuft die
+        // Registrierung unverändert, das Konto gilt einfach als unbestätigt.
+        const { mailConfigured } = await import("./mailer");
+        if (mailConfigured() && user.email) {
+          await sendVerifyMailFor(user.id, user.email, input.lang, ctx.req);
+        }
         return { success: true, name: user.name } as const;
       }),
     login: publicProcedure
@@ -253,6 +304,7 @@ export const appRouter = router({
         z.object({
           newEmail: z.string().min(3).max(320),
           currentPassword: z.string().min(1).max(200),
+          lang: z.enum(["de", "fr", "it", "en"]).default("de"),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -294,7 +346,12 @@ export const appRouter = router({
           });
         }
         const { updateUserEmail } = await import("./localAuth");
+        // Setzt emailVerifiedAt zurück – die neue Adresse ist unbestätigt
         await updateUserEmail(ctx.user.id, email);
+        const { mailConfigured } = await import("./mailer");
+        if (mailConfigured()) {
+          await sendVerifyMailFor(ctx.user.id, email, input.lang, ctx.req);
+        }
         return { success: true, email } as const;
       }),
     updatePassword: protectedProcedure
@@ -441,6 +498,63 @@ export const appRouter = router({
           ...cookieOptions,
           maxAge: ONE_YEAR_MS,
         });
+        return { success: true } as const;
+      }),
+    /**
+     * E-Mail-Bestätigung über den Link aus der Mail: Token nachschlagen,
+     * Ablauf prüfen, Konto als bestätigt markieren, Tokens löschen.
+     */
+    verifyEmail: publicProcedure
+      .input(z.object({ token: z.string().length(64) }))
+      .mutation(async ({ input }) => {
+        const { findVerifyToken, verifyTokenState, deleteVerifyTokens } =
+          await import("./emailVerify");
+        const entry = await findVerifyToken(input.token);
+        if (!entry || verifyTokenState(entry) !== "valid") {
+          // Der Client übersetzt diesen Fall anhand des Fehler-Codes.
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message:
+              "Der Bestätigungs-Link ist ungültig oder abgelaufen. Fordere einen neuen an.",
+          });
+        }
+        const { markEmailVerified } = await import("./localAuth");
+        await markEmailVerified(entry.userId);
+        await deleteVerifyTokens(entry.userId);
+        return { success: true } as const;
+      }),
+    /**
+     * Bestätigungs-Mail erneut anfordern (eingeloggt): neutrale Antwort,
+     * max. 3 Anfragen pro Stunde und Konto.
+     */
+    resendVerification: protectedProcedure
+      .input(z.object({ lang: z.enum(["de", "fr", "it", "en"]).default("de") }))
+      .mutation(async ({ ctx, input }) => {
+        const { mailConfigured } = await import("./mailer");
+        if (!mailConfigured()) {
+          // Der Client übersetzt diesen Fall anhand des Fehler-Codes.
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "Der E-Mail-Versand ist derzeit nicht verfügbar.",
+          });
+        }
+        const { allowAction } = await import("./rateLimit");
+        if (!allowAction(`verifymail|${ctx.user.id}`, 3, 60 * 60 * 1000)) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message:
+              "Zu viele Anfragen. Bitte versuche es in einer Stunde erneut.",
+          });
+        }
+        // Bereits bestätigt oder ohne E-Mail: neutral Erfolg melden
+        if (ctx.user.email && !ctx.user.emailVerifiedAt) {
+          await sendVerifyMailFor(
+            ctx.user.id,
+            ctx.user.email,
+            input.lang,
+            ctx.req
+          );
+        }
         return { success: true } as const;
       }),
     /**

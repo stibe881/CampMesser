@@ -133,6 +133,8 @@ Meldet das Protokoll einen Portkonflikt, ergänze im Formular eine weitere Umgeb
 
 Über «Passwort vergessen?» auf der Anmeldeseite verschickt CampMesser einen Link per E-Mail, mit dem sich ein neues Passwort setzen lässt (60 Minuten gültig, einmalig verwendbar). Dafür braucht die Anwendung die Zugangsdaten eines Postfachs deiner Domain. Ohne diese Angaben funktioniert die Anmeldung normal weiter; die Reset-Funktion meldet dann lediglich, dass sie derzeit nicht verfügbar ist.
 
+Sobald SMTP konfiguriert ist, ist automatisch auch die **E-Mail-Bestätigung** aktiv: Neue Konten (und geänderte E-Mail-Adressen im Profil) erhalten eine Bestätigungs-Mail mit einem 48 Stunden gültigen Link. Die Bestätigung ist freiwillig – unbestätigte Konten können die App uneingeschränkt nutzen, sehen aber im Profil einen dezenten Hinweis mit der Möglichkeit, die Mail erneut anzufordern. Ohne SMTP entfällt der Versand komplett und es wird nichts blockiert.
+
 So richtest du das Postfach bei Hetzner ein:
 
 1. Lege in konsoleH unter **E-Mail → Postfächer** ein neues Postfach an, z. B. `noreply@campmesser.ch`, und vergib ein starkes Passwort.

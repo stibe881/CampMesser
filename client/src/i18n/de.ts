@@ -187,6 +187,9 @@ export const de = {
     passkeyWaiting: "Warte auf den Passkey …",
     passkeyFailed:
       "Die Passkey-Anmeldung hat nicht geklappt. Versuch es erneut oder melde dich mit dem Passwort an.",
+    emailVerified: "E-Mail-Adresse bestätigt – danke!",
+    verifyLinkInvalid:
+      "Der Bestätigungs-Link ist ungültig oder abgelaufen. Fordere im Profil einen neuen an.",
   },
   profile: {
     title: "Profil",
@@ -210,6 +213,15 @@ export const de = {
     nameTitle: "Name ändern",
     nameAria: "Name",
     namePlaceholder: "Dein Name",
+    verifyHint:
+      "Deine E-Mail-Adresse ist noch nicht bestätigt. Prüfe dein Postfach (auch den Spam-Ordner) oder lass dir den Link erneut schicken.",
+    verifyResend: "Bestätigungs-Mail erneut senden",
+    verifySending: "Wird verschickt …",
+    verifySent:
+      "Bestätigungs-Mail verschickt – prüfe dein Postfach (48 Stunden gültig).",
+    verifyTooMany:
+      "Zu viele Anfragen. Bitte versuche es in einer Stunde erneut.",
+    verifyUnavailable: "Der E-Mail-Versand ist derzeit nicht verfügbar.",
     emailTitle: "E-Mail-Adresse ändern",
     emailCurrentPrefix: "Aktuell:",
     emailCurrentSuffix: ". Mit der neuen Adresse meldest du dich künftig an.",

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import {
   LogIn,
@@ -28,6 +28,8 @@ import { useI18n } from "@/i18n";
  * Eigenständige Anmeldung: E-Mail/Passwort-Login und Registrierung,
  * unabhängig vom Manus-Login. Passwort vergessen: Link per E-Mail anfordern;
  * mit ?reset=<token> in der URL wird das Formular «Neues Passwort setzen» gezeigt.
+ * Mit ?verify=<token> (Link aus der Bestätigungs-Mail) wird die E-Mail-Adresse
+ * bestätigt und danach das normale Anmelde-Formular gezeigt.
  */
 export default function LoginPage() {
   const { lang, t } = useI18n();
@@ -49,6 +51,10 @@ export default function LoginPage() {
   );
   const [resetPw, setResetPw] = useState("");
   const [resetPw2, setResetPw2] = useState("");
+  // E-Mail-Bestätigung: Token aus dem Mail-Link (?verify=<token>)
+  const [verifyToken] = useState<string | null>(
+    () => new URLSearchParams(window.location.search).get("verify") ?? null
+  );
 
   const afterAuth = async (name: string | null) => {
     await utils.auth.me.invalidate();
@@ -86,6 +92,27 @@ export default function LoginPage() {
       else toast.error(err.message);
     },
   });
+
+  // E-Mail-Bestätigung aus dem Mail-Link genau EINMAL auslösen (StrictMode-fest),
+  // danach den Token aus der Adresszeile entfernen und normal anmelden lassen.
+  const verifyMutation = trpc.auth.verifyEmail.useMutation({
+    onSuccess: () => {
+      toast.success(t.login.emailVerified);
+      void utils.auth.me.invalidate();
+    },
+    onError: err => {
+      if (err.data?.code === "NOT_FOUND")
+        toast.error(t.login.verifyLinkInvalid);
+      else toast.error(err.message);
+    },
+  });
+  const verifyFiredRef = useRef(false);
+  useEffect(() => {
+    if (!verifyToken || verifyFiredRef.current) return;
+    verifyFiredRef.current = true;
+    verifyMutation.mutate({ token: verifyToken });
+    navigate("/anmelden", { replace: true });
+  }, [verifyToken, verifyMutation, navigate]);
 
   const submitLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,6 +158,8 @@ export default function LoginPage() {
       name: regName,
       email: regEmail,
       password: regPassword,
+      // Sprache für die Bestätigungs-Mail (falls SMTP konfiguriert ist)
+      lang,
     });
   };
 

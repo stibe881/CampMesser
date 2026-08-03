@@ -107,7 +107,10 @@ export async function updateUserName(
   await db.update(users).set({ name: name.trim() }).where(eq(users.id, userId));
 }
 
-/** E-Mail-Adresse eines Kontos ändern (normalisiert). */
+/**
+ * E-Mail-Adresse eines Kontos ändern (normalisiert). Die neue Adresse ist
+ * noch unbestätigt – emailVerifiedAt wird deshalb zurückgesetzt.
+ */
 export async function updateUserEmail(
   userId: number,
   email: string
@@ -116,7 +119,17 @@ export async function updateUserEmail(
   if (!db) throw new Error("Datenbank nicht verfügbar");
   await db
     .update(users)
-    .set({ email: normalizeEmail(email) })
+    .set({ email: normalizeEmail(email), emailVerifiedAt: null })
+    .where(eq(users.id, userId));
+}
+
+/** E-Mail-Adresse eines Kontos als bestätigt markieren. */
+export async function markEmailVerified(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Datenbank nicht verfügbar");
+  await db
+    .update(users)
+    .set({ emailVerifiedAt: new Date() })
     .where(eq(users.id, userId));
 }
 
@@ -164,6 +177,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     pushSubscriptions,
     userSettings,
     passwordResetTokens,
+    emailVerifyTokens,
     passkeys,
     gearTasks,
     natureSightings,
@@ -274,6 +288,9 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db
     .delete(passwordResetTokens)
     .where(eq(passwordResetTokens.userId, userId));
+  await db
+    .delete(emailVerifyTokens)
+    .where(eq(emailVerifyTokens.userId, userId));
   await db.delete(passkeys).where(eq(passkeys.userId, userId));
   await db.delete(gearTasks).where(eq(gearTasks.userId, userId));
   await db.delete(natureSightings).where(eq(natureSightings.userId, userId));

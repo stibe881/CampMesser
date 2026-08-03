@@ -18,6 +18,7 @@ import {
   Fingerprint,
   Plus,
   Sparkles,
+  MailWarning,
 } from "lucide-react";
 import {
   browserSupportsWebAuthn,
@@ -599,6 +600,18 @@ export default function ProfilePage() {
     },
     onError: e => toast.error(e.message),
   });
+  // Bestätigungs-Mail erneut anfordern (nur sichtbar, wenn SMTP aktiv ist
+  // und die Adresse des Kontos noch unbestätigt ist)
+  const resendMutation = trpc.auth.resendVerification.useMutation({
+    onSuccess: () => toast.success(t.profile.verifySent),
+    onError: e => {
+      if (e.data?.code === "TOO_MANY_REQUESTS")
+        toast.error(t.profile.verifyTooMany);
+      else if (e.data?.code === "PRECONDITION_FAILED")
+        toast.error(t.profile.verifyUnavailable);
+      else toast.error(e.message);
+    },
+  });
   const emailMutation = trpc.auth.updateEmail.useMutation({
     onSuccess: () => {
       toast.success(t.profile.emailUpdated);
@@ -659,6 +672,33 @@ export default function ProfilePage() {
         title={t.profile.title}
         subtitle={t.profile.loggedInAs(user?.email ?? user?.name ?? "")}
       />
+
+      {/* Dezenter Hinweis: E-Mail-Adresse noch unbestätigt (nur mit SMTP) */}
+      {user?.verifyMailEnabled && user.email && !user.emailVerified && (
+        <Card className="mb-5 border-amber-500/40 bg-amber-500/5">
+          <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center">
+            <p className="flex flex-1 items-start gap-2 text-sm">
+              <MailWarning
+                className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400"
+                aria-hidden="true"
+              />
+              {t.profile.verifyHint}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+              disabled={resendMutation.isPending}
+              onClick={() => resendMutation.mutate({ lang })}
+            >
+              {resendMutation.isPending
+                ? t.profile.verifySending
+                : t.profile.verifyResend}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="mb-5">
         <CardHeader className="pb-3">
@@ -768,6 +808,8 @@ export default function ProfilePage() {
               emailMutation.mutate({
                 newEmail: newEmail.trim(),
                 currentPassword: emailPw,
+                // Sprache für die neue Bestätigungs-Mail (falls SMTP aktiv)
+                lang,
               });
             }}
           >

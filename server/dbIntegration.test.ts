@@ -610,6 +610,12 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       .update(schema.natureSightings)
       .set({ fileName: sightingFile })
       .where(eq(schema.natureSightings.id, sightingId));
+    // Offenes E-Mail-Bestätigungs-Token anlegen – die Lösch-Kaskade muss es entfernen
+    await dbc.insert(schema.emailVerifyTokens).values({
+      userId: uid,
+      tokenHash: `ci-verify-${Date.now()}`,
+      expiresAt: new Date(Date.now() + 60 * 1000),
+    });
 
     // Aufräumen: Konto löschen entfernt auch die angelegten Daten
     const deleted = await authed.auth.deleteAccount({ password });
@@ -703,6 +709,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.passwordResetTokens)
         .where(eq(schema.passwordResetTokens.userId, uid)),
+      dbc
+        .select()
+        .from(schema.emailVerifyTokens)
+        .where(eq(schema.emailVerifyTokens.userId, uid)),
       dbc.select().from(schema.passkeys).where(eq(schema.passkeys.userId, uid)),
       dbc
         .select()

@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Neue Konten erhalten eine Bestätigungs-Mail – im Profil kannst du sie jederzeit erneut anfordern.",
+        "Les nouveaux comptes reçoivent un e-mail de confirmation – tu peux le redemander à tout moment dans ton profil.",
+        "I nuovi account ricevono un'e-mail di conferma – puoi richiederla di nuovo in ogni momento nel tuo profilo.",
+        "New accounts receive a confirmation email – you can request it again anytime in your profile."
+      ),
+      l4(
         "Die Suche verzeiht jetzt Tippfehler: «Palstck» findet trotzdem den Palstek.",
         "La recherche pardonne désormais les fautes de frappe : «Palstck» trouve quand même le nœud de chaise.",
         "La ricerca ora perdona gli errori di battitura: «Palstck» trova comunque la gassa d'amante.",

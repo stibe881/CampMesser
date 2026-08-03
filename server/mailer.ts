@@ -68,11 +68,62 @@ export function buildPasswordResetMail(
   };
 }
 
-/** Reset-Mail per SMTP verschicken (Port 465 = TLS, sonst STARTTLS). */
-export async function sendPasswordResetMail(
-  to: string,
-  resetUrl: string,
+// --- E-Mail-Bestätigung nach Registrierung bzw. Adress-Änderung -----------
+
+const verifySubject = l4(
+  "CampMesser: E-Mail-Adresse bestätigen",
+  "CampMesser : confirmer l'adresse e-mail",
+  "CampMesser: conferma l'indirizzo e-mail",
+  "CampMesser: confirm your email address"
+);
+
+const verifyIntro = l4(
+  "schön, dass du dabei bist! Bitte bestätige, dass diese E-Mail-Adresse zu deinem CampMesser-Konto gehört.",
+  "content de te compter parmi nous ! Confirme que cette adresse e-mail appartient bien à ton compte CampMesser.",
+  "che bello averti con noi! Conferma che questo indirizzo e-mail appartiene al tuo account CampMesser.",
+  "great to have you on board! Please confirm that this email address belongs to your CampMesser account."
+);
+
+const verifyAction = l4(
+  "Öffne dazu diesen Link (48 Stunden gültig):",
+  "Ouvre ce lien pour cela (valable 48 heures) :",
+  "Apri questo link (valido 48 ore):",
+  "Open this link to do so (valid for 48 hours):"
+);
+
+const verifyOutro = l4(
+  "Falls du kein Konto bei CampMesser erstellt hast, kannst du diese E-Mail ignorieren.",
+  "Si tu n'as pas créé de compte CampMesser, tu peux ignorer cet e-mail.",
+  "Se non hai creato un account CampMesser, puoi ignorare questa e-mail.",
+  "If you didn't create a CampMesser account, you can ignore this email."
+);
+
+/** Betreff und Text der Bestätigungs-Mail erzeugen (reine Funktion, testbar). */
+export function buildVerificationMail(
+  verifyUrl: string,
   lang: Language
+): { subject: string; text: string } {
+  return {
+    subject: pick(verifySubject, lang),
+    text: [
+      `${pick(salutation, lang)},`,
+      "",
+      pick(verifyIntro, lang),
+      "",
+      pick(verifyAction, lang),
+      verifyUrl,
+      "",
+      pick(verifyOutro, lang),
+      "",
+      "CampMesser",
+    ].join("\n"),
+  };
+}
+
+/** Fertige Mail per SMTP verschicken (Port 465 = TLS, sonst STARTTLS). */
+async function sendMail(
+  to: string,
+  mail: { subject: string; text: string }
 ): Promise<void> {
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
@@ -88,6 +139,23 @@ export async function sendPasswordResetMail(
     secure: port === 465,
     auth: { user, pass },
   });
-  const mail = buildPasswordResetMail(resetUrl, lang);
   await transport.sendMail({ from, to, ...mail });
+}
+
+/** Reset-Mail per SMTP verschicken. */
+export async function sendPasswordResetMail(
+  to: string,
+  resetUrl: string,
+  lang: Language
+): Promise<void> {
+  await sendMail(to, buildPasswordResetMail(resetUrl, lang));
+}
+
+/** Bestätigungs-Mail per SMTP verschicken. */
+export async function sendVerificationMail(
+  to: string,
+  verifyUrl: string,
+  lang: Language
+): Promise<void> {
+  await sendMail(to, buildVerificationMail(verifyUrl, lang));
 }

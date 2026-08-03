@@ -32,6 +32,8 @@ export const users = mysqlTable("users", {
   /** Passwort-Hash (scrypt, Format: salt:hash) für die eigenständige E-Mail-Anmeldung */
   passwordHash: varchar("passwordHash", { length: 256 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
+  /** Zeitpunkt der E-Mail-Bestätigung; null = Adresse (noch) unbestätigt */
+  emailVerifiedAt: timestamp("emailVerifiedAt"),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -703,6 +705,31 @@ export const passwordResetTokens = mysqlTable(
 
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
+
+/**
+ * E-Mail-Bestätigung nach Registrierung bzw. Adress-Änderung: pro Versand ein
+ * Token (32 Zufallsbytes, hex), von dem nur der sha256-Hash gespeichert wird –
+ * der Klartext steht ausschliesslich im E-Mail-Link. 48 Stunden gültig,
+ * bei erfolgreicher Bestätigung werden alle Tokens des Kontos gelöscht.
+ */
+export const emailVerifyTokens = mysqlTable(
+  "emailVerifyTokens",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** sha256-Hex des Tokens (64 Zeichen) */
+    tokenHash: varchar("tokenHash", { length: 64 }).notNull(),
+    expiresAt: timestamp("expiresAt").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    index("emailVerifyTokens_userId").on(table.userId),
+    uniqueIndex("emailVerifyTokens_tokenHash").on(table.tokenHash),
+  ]
+);
+
+export type EmailVerifyToken = typeof emailVerifyTokens.$inferSelect;
+export type InsertEmailVerifyToken = typeof emailVerifyTokens.$inferInsert;
 
 /**
  * Kinder-Profile im Familien-Modus: pro Konto mehrere Kinder, die bei

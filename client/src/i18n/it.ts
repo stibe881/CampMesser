@@ -184,6 +184,9 @@ export const it: Translation = {
     passkeyWaiting: "In attesa della passkey …",
     passkeyFailed:
       "L'accesso con la passkey non è riuscito. Riprova oppure accedi con la password.",
+    emailVerified: "Indirizzo e-mail confermato – grazie!",
+    verifyLinkInvalid:
+      "Il link di conferma non è valido o è scaduto. Richiedine uno nuovo nel tuo profilo.",
   },
   profile: {
     title: "Profilo",
@@ -208,6 +211,14 @@ export const it: Translation = {
     nameTitle: "Cambia nome",
     nameAria: "Nome",
     namePlaceholder: "Il tuo nome",
+    verifyHint:
+      "Il tuo indirizzo e-mail non è ancora confermato. Controlla la tua casella di posta (anche lo spam) oppure fatti rinviare il link.",
+    verifyResend: "Invia di nuovo l'e-mail di conferma",
+    verifySending: "Invio in corso …",
+    verifySent:
+      "E-mail di conferma inviata – controlla la tua casella di posta (valida 48 ore).",
+    verifyTooMany: "Troppe richieste. Riprova tra un'ora.",
+    verifyUnavailable: "L'invio di e-mail al momento non è disponibile.",
     emailTitle: "Cambia indirizzo e-mail",
     emailCurrentPrefix: "Attuale:",
     emailCurrentSuffix: ". D'ora in poi accederai con il nuovo indirizzo.",
