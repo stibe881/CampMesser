@@ -2835,6 +2835,121 @@ export const fr: Translation = {
     },
   },
   /** Risque de tiques selon la région (#224). */
+  fishing: {
+    title: "Carnet de pêche",
+    sectionAria: "Carnet de pêche – mes prises",
+    intro:
+      "Note chaque prise : espèce, longueur, poids, plan d'eau, appât et photo. L'app en tire tes records et le nombre de prises par année.",
+    loginFeature: "ton carnet de pêche",
+    loadFailed: "Impossible de charger les prises.",
+    empty:
+      "Aucune prise pour l'instant – saisis la première, par exemple une truite de rivière de la Sihl.",
+    count: (n: number) => (n === 1 ? "1 prise" : `${n} prises`),
+    addButton: "Saisir une prise",
+    addAria: "Saisir une nouvelle prise",
+    legalTitle: "Le canton a le dernier mot",
+    legalText:
+      "En Suisse, la pêche est réglée par les cantons : périodes de protection, tailles minimales de capture et limites de prises diffèrent d'un canton à l'autre, et même d'un plan d'eau à l'autre. Ici figurent les prescriptions minimales de la Confédération – ton canton peut être plus strict, et il l'est presque toujours. Font foi l'ordonnance cantonale sur la pêche et ton permis.",
+    legalSource: (version: string, date: string) =>
+      `Base : ordonnance relative à la loi fédérale sur la pêche (${version}). État des données : ${date}.`,
+    filterSpeciesLabel: "Espèce",
+    filterWaterLabel: "Plan d'eau",
+    filterAll: "Toutes",
+    filterEmpty: "Aucune prise pour cette sélection.",
+    released: "remise à l'eau",
+    kept: "conservée",
+    lengthShort: (value: string) => `${value} cm`,
+    weightShort: (value: string) => `${value} kg`,
+    photoAlt: (name: string) => `Photo de la prise : ${name}`,
+    editAria: (name: string) => `Modifier la prise « ${name} »`,
+    deleteAria: (name: string) => `Supprimer la prise « ${name} »`,
+    deleteConfirm: (name: string) =>
+      `Supprimer vraiment la prise « ${name} » ?`,
+    statsTitle: "Statistiques",
+    statsSummary: (total: number, released: number, kept: number) =>
+      `${total} prises · ${released} remises à l'eau · ${kept} conservées`,
+    recordsTitle: "Plus grosse prise par espèce",
+    recordNoLength: "jamais mesurée",
+    recordCount: (n: number) => (n === 1 ? "1 prise" : `${n} prises`),
+    yearsTitle: "Prises par année",
+    yearLine: (total: number, released: number) =>
+      `${total} prises, dont ${released} remises à l'eau`,
+    dialogTitleNew: "Nouvelle prise",
+    dialogTitleEdit: "Modifier la prise",
+    dialogDescription:
+      "Choisis une espèce dans le jeu de données – l'app vérifie aussitôt la période de protection et la taille minimale fédérale.",
+    speciesLabel: "Espèce de poisson",
+    speciesOwn: "Saisir une espèce libre",
+    nameLabel: "Nom de l'espèce",
+    namePlaceholder: "p. ex. truite de rivière",
+    nameRequired: "Saisis un nom d'espèce ou choisis une espèce.",
+    dateLabel: "Date",
+    timeLabel: "Heure",
+    lengthLabel: "Longueur (cm)",
+    weightLabel: "Poids (kg)",
+    waterLabel: "Plan d'eau",
+    waterPlaceholder: "p. ex. lac de Zurich ou la Sihl près de Langnau",
+    waterRequired: "Indique le plan d'eau.",
+    methodLabel: "Appât / méthode",
+    methodPlaceholder: "p. ex. nymphe, leurre souple 10 cm",
+    releasedLabel: "Remise à l'eau avec ménagement",
+    noteLabel: "Note (facultatif)",
+    notePlaceholder: "p. ex. tôt le matin, pluie fine",
+    photoLabel: "Photo (facultatif)",
+    photoChoose: "Choisir une photo",
+    photoChange: "Changer la photo",
+    photoRemove: "Supprimer la photo",
+    photoPreviewAlt: "Aperçu de la photo de la prise",
+    photoHint:
+      "JPEG, PNG ou WebP – l'image est réduite automatiquement avant l'envoi.",
+    photoUploading: "Envoi de la photo …",
+    photoUploadFailed: "Enregistré, mais la photo n'a pas pu être envoyée.",
+    photoTooLarge: "La photo est trop grande (max. 5 Mo).",
+    photoHeic:
+      "Le navigateur ne peut pas lire le HEIC/HEIF – exporte en JPEG s'il te plaît.",
+    photoReadFailed: "L'image n'a pas pu être lue.",
+    photoRemoveFailed: "La photo n'a pas pu être supprimée.",
+    created: "Prise enregistrée",
+    updated: "Modifications enregistrées",
+    deleted: "Prise supprimée",
+    hints: {
+      ban: "Interdiction fédérale de capture : cette espèce est en danger d'extinction et ne doit pas être capturée. Décroche l'hameçon dans l'eau et relâche le poisson immédiatement.",
+      report:
+        "Obligation d'annonce : annonce ce poisson sans délai au service cantonal de la pêche.",
+      closedSeason:
+        "À cette date, la période de protection indicative de cette espèce s'applique – dans la plupart des cantons, tu ne peux pas la prélever maintenant. Consulte ton ordonnance cantonale sur la pêche.",
+      underMinLength: (cm: number) =>
+        `En dessous de la taille minimale fédérale de ${cm} cm – à remettre à l'eau. Le canton exige souvent davantage.`,
+      nearMinLength: (cm: number) =>
+        `Juste au-dessus de la taille fédérale de ${cm} cm : de nombreux cantons exigent nettement plus – vérifie avant de prélever.`,
+      cantonal: "Font foi l'ordonnance cantonale sur la pêche et ton permis.",
+    },
+    speciesTitle: "Espèces, périodes de protection et tailles minimales",
+    speciesIntro:
+      "Les principales espèces de la pêche à la ligne en Suisse, avec les prescriptions minimales de la Confédération et ce que les cantons règlent plus strictement en pratique.",
+    federalMin: (cm: number) => `Confédération : au moins ${cm} cm`,
+    federalMinNone: "Confédération : pas de taille minimale",
+    federalWeeks: (weeks: number) =>
+      `période de protection d'au moins ${weeks} semaines`,
+    federalWeeksNone:
+      "aucune période de protection prescrite par la Confédération",
+    guideSeason: (from: string, to: string) =>
+      `Période de protection indicative : du ${from} au ${to}`,
+    guideSeasonNone: "Aucune période de protection courante enregistrée",
+    guideSeasonHint:
+      "Valeur indicative, non contraignante : la Confédération ne fixe que la durée en semaines, le canton fixe le début et la fin.",
+    cantonTitle: "Souvent plus strict dans le canton :",
+    habitatTitle: "Où elle se tient :",
+    methodTitle: "Appât et méthode :",
+    bannedBadge: "Capture interdite",
+    waters: {
+      fliessend: "Eaux courantes",
+      stehend: "Eaux stagnantes",
+      beide: "Eaux courantes et stagnantes",
+    },
+    measureHint:
+      "La mesure va de la pointe de la tête à l'extrémité de la nageoire caudale naturellement déployée (art. 2 al. 2 OLFP).",
+  },
   tickRisk: {
     sectionAria: "Risque de tiques à cet endroit",
     title: "Risque de tiques",

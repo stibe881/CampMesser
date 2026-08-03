@@ -366,10 +366,10 @@ export const modules: Module[] = [
       "Nature explorer"
     ),
     description: l4(
-      "Tierspuren, Sternbilder und Bäume erkennen",
-      "Reconnais traces d'animaux, constellations et arbres",
-      "Riconosci tracce di animali, costellazioni e alberi",
-      "Identify animal tracks, constellations and trees"
+      "Tierspuren, Sternbilder, Bäume – und dein Fangbuch",
+      "Traces d'animaux, constellations, arbres – et ton carnet de pêche",
+      "Tracce di animali, costellazioni, alberi – e il tuo libretto delle catture",
+      "Animal tracks, constellations, trees – and your catch log"
     ),
     icon: TreePine,
     group: "Erste Hilfe",

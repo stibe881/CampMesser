@@ -2843,6 +2843,121 @@ export const de = {
         `Beobachtung «${title}» wirklich löschen?`,
     },
   },
+  /** Fangbuch fürs Angeln (#236). */
+  fishing: {
+    title: "Fangbuch",
+    sectionAria: "Fangbuch – meine Fänge",
+    intro:
+      "Halte jeden Fang fest: Art, Länge, Gewicht, Gewässer, Köder und Foto. Daraus rechnet die App deine Rekorde und die Fänge pro Jahr.",
+    loginFeature: "dein Fangbuch",
+    loadFailed: "Fänge konnten nicht geladen werden.",
+    empty:
+      "Noch keine Fänge – trag deinen ersten ein, zum Beispiel eine Bachforelle aus der Sihl.",
+    count: (n: number) => (n === 1 ? "1 Fang" : `${n} Fänge`),
+    addButton: "Fang erfassen",
+    addAria: "Neuen Fang erfassen",
+    legalTitle: "Der Kanton hat das letzte Wort",
+    legalText:
+      "Die Fischerei ist in der Schweiz kantonal geregelt: Schonzeiten, Fangmindestmasse und Fanglimiten unterscheiden sich je Kanton und sogar je Gewässer. Hier stehen die Mindestvorgaben des Bundes – dein Kanton darf strenger sein und ist es fast immer. Massgebend sind die kantonale Fischereiverordnung und dein Patent.",
+    legalSource: (version: string, date: string) =>
+      `Grundlage: Verordnung zum Bundesgesetz über die Fischerei (${version}). Stand des Datensatzes: ${date}.`,
+    filterSpeciesLabel: "Art",
+    filterWaterLabel: "Gewässer",
+    filterAll: "Alle",
+    filterEmpty: "Zu dieser Auswahl gibt es keine Fänge.",
+    released: "zurückgesetzt",
+    kept: "entnommen",
+    lengthShort: (value: string) => `${value} cm`,
+    weightShort: (value: string) => `${value} kg`,
+    photoAlt: (name: string) => `Foto des Fangs: ${name}`,
+    editAria: (name: string) => `Fang «${name}» bearbeiten`,
+    deleteAria: (name: string) => `Fang «${name}» löschen`,
+    deleteConfirm: (name: string) => `Fang «${name}» wirklich löschen?`,
+    statsTitle: "Statistik",
+    statsSummary: (total: number, released: number, kept: number) =>
+      `${total} Fänge · ${released} zurückgesetzt · ${kept} entnommen`,
+    recordsTitle: "Grösster Fang je Art",
+    recordNoLength: "noch nie gemessen",
+    recordCount: (n: number) => (n === 1 ? "1 Fang" : `${n} Fänge`),
+    yearsTitle: "Fänge pro Jahr",
+    yearLine: (total: number, released: number) =>
+      `${total} Fänge, davon ${released} zurückgesetzt`,
+    dialogTitleNew: "Neuer Fang",
+    dialogTitleEdit: "Fang bearbeiten",
+    dialogDescription:
+      "Wähl eine Art aus dem Datensatz – dann prüft die App gleich Schonzeit und Mindestmass des Bundes.",
+    speciesLabel: "Fischart",
+    speciesOwn: "Eigene Art eintragen",
+    nameLabel: "Art-Name",
+    namePlaceholder: "z. B. Bachforelle",
+    nameRequired: "Bitte gib einen Art-Namen ein oder wähle eine Art.",
+    dateLabel: "Datum",
+    timeLabel: "Uhrzeit",
+    lengthLabel: "Länge (cm)",
+    weightLabel: "Gewicht (kg)",
+    waterLabel: "Gewässer",
+    waterPlaceholder: "z. B. Zürichsee oder Sihl bei Langnau",
+    waterRequired: "Bitte gib das Gewässer an.",
+    methodLabel: "Köder / Methode",
+    methodPlaceholder: "z. B. Nymphe, Gummifisch 10 cm",
+    releasedLabel: "Schonend zurückgesetzt",
+    noteLabel: "Notiz (optional)",
+    notePlaceholder: "z. B. früher Morgen, leichter Regen",
+    photoLabel: "Foto (optional)",
+    photoChoose: "Foto auswählen",
+    photoChange: "Foto ändern",
+    photoRemove: "Foto entfernen",
+    photoPreviewAlt: "Vorschau des Fang-Fotos",
+    photoHint:
+      "JPEG, PNG oder WebP – wird vor dem Hochladen automatisch verkleinert.",
+    photoUploading: "Foto wird hochgeladen …",
+    photoUploadFailed:
+      "Gespeichert, aber das Foto konnte nicht hochgeladen werden.",
+    photoTooLarge: "Das Foto ist zu gross (max. 5 MB).",
+    photoHeic:
+      "HEIC/HEIF kann der Browser nicht lesen – bitte als JPEG exportieren.",
+    photoReadFailed: "Das Bild konnte nicht gelesen werden.",
+    photoRemoveFailed: "Das Foto konnte nicht entfernt werden.",
+    created: "Fang gespeichert",
+    updated: "Änderungen gespeichert",
+    deleted: "Fang gelöscht",
+    hints: {
+      ban: "Fangverbot des Bundes: Diese Art ist vom Aussterben bedroht und darf nicht gefangen werden. Löse den Haken im Wasser und setz den Fisch sofort zurück.",
+      report:
+        "Meldepflicht: Melde diesen Fisch unverzüglich der kantonalen Fischereifachstelle.",
+      closedSeason:
+        "An diesem Datum gilt die Richtwert-Schonzeit dieser Art – in den meisten Kantonen darfst du sie jetzt nicht entnehmen. Schau in deiner kantonalen Fischereiverordnung nach.",
+      underMinLength: (cm: number) =>
+        `Unter dem Fangmindestmass des Bundes von ${cm} cm – zurücksetzen. Der Kanton verlangt oft noch mehr.`,
+      nearMinLength: (cm: number) =>
+        `Knapp über dem Bundesmass von ${cm} cm: Viele Kantone verlangen deutlich mehr – kurz nachschauen, bevor du entnimmst.`,
+      cantonal:
+        "Massgebend sind die kantonale Fischereiverordnung und dein Patent.",
+    },
+    speciesTitle: "Arten, Schonzeiten & Mindestmasse",
+    speciesIntro:
+      "Die wichtigsten Arten der Schweizer Angelfischerei mit den Mindestvorgaben des Bundes und dem, was Kantone in der Praxis strenger regeln.",
+    federalMin: (cm: number) => `Bund: mindestens ${cm} cm`,
+    federalMinNone: "Bund: kein Fangmindestmass",
+    federalWeeks: (weeks: number) => `Schonzeit mindestens ${weeks} Wochen`,
+    federalWeeksNone: "keine Schonzeit vom Bund vorgeschrieben",
+    guideSeason: (from: string, to: string) =>
+      `Richtwert-Schonzeit: ${from} bis ${to}`,
+    guideSeasonNone: "Keine verbreitete Schonzeit hinterlegt",
+    guideSeasonHint:
+      "Richtwert, nicht verbindlich: Der Bund gibt nur die Dauer in Wochen vor, Beginn und Ende legt der Kanton fest.",
+    cantonTitle: "Im Kanton oft strenger:",
+    habitatTitle: "Wo sie steht:",
+    methodTitle: "Köder & Methode:",
+    bannedBadge: "Fangverbot",
+    waters: {
+      fliessend: "Fliessgewässer",
+      stehend: "Stehende Gewässer",
+      beide: "Fliessend und stehend",
+    },
+    measureHint:
+      "Gemessen wird von der Kopfspitze bis zu den Spitzen der natürlich ausgebreiteten Schwanzflosse (VBGF Art. 2 Abs. 2).",
+  },
   /** Zecken-Risiko nach Region (#224). */
   tickRisk: {
     sectionAria: "Zecken-Risiko an diesem Ort",

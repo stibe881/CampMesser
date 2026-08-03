@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import FishingLog from "@/components/FishingLog";
 import LoginPrompt from "@/components/LoginPrompt";
 import RedLightMode from "@/components/RedLightMode";
 import { Button } from "@/components/ui/button";
@@ -1614,6 +1615,7 @@ export default function NaturePage() {
       <IssPasses />
       <ConstellationFinder onOpenEntry={openLexiconEntry} />
       <SightingsSection onOpenEntry={openLexiconEntry} />
+      <FishingLog />
       <RedLightSection
         active={redLight}
         onToggle={() => setRedLight(v => !v)}

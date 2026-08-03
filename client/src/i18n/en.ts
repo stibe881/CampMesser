@@ -2742,6 +2742,118 @@ export const en: Translation = {
     },
   },
   /** Tick risk by region (#224). */
+  fishing: {
+    title: "Catch log",
+    sectionAria: "Catch log – my catches",
+    intro:
+      "Record every catch: species, length, weight, water, bait and photo. The app turns that into your records and catches per year.",
+    loginFeature: "your catch log",
+    loadFailed: "Catches could not be loaded.",
+    empty:
+      "No catches yet – add your first one, for example a brown trout from the Sihl.",
+    count: (n: number) => (n === 1 ? "1 catch" : `${n} catches`),
+    addButton: "Add catch",
+    addAria: "Add a new catch",
+    legalTitle: "The canton has the final say",
+    legalText:
+      "Fishing in Switzerland is regulated by the cantons: closed seasons, minimum sizes and bag limits differ by canton and even by water. What you see here are the federal minimum requirements – your canton may be stricter, and almost always is. The cantonal fishing ordinance and your licence are what count.",
+    legalSource: (version: string, date: string) =>
+      `Basis: Ordinance on the Federal Act on Fisheries (${version}). Data as of ${date}.`,
+    filterSpeciesLabel: "Species",
+    filterWaterLabel: "Water",
+    filterAll: "All",
+    filterEmpty: "No catches for this selection.",
+    released: "released",
+    kept: "kept",
+    lengthShort: (value: string) => `${value} cm`,
+    weightShort: (value: string) => `${value} kg`,
+    photoAlt: (name: string) => `Photo of the catch: ${name}`,
+    editAria: (name: string) => `Edit catch “${name}”`,
+    deleteAria: (name: string) => `Delete catch “${name}”`,
+    deleteConfirm: (name: string) => `Really delete catch “${name}”?`,
+    statsTitle: "Statistics",
+    statsSummary: (total: number, released: number, kept: number) =>
+      `${total} catches · ${released} released · ${kept} kept`,
+    recordsTitle: "Biggest catch per species",
+    recordNoLength: "never measured",
+    recordCount: (n: number) => (n === 1 ? "1 catch" : `${n} catches`),
+    yearsTitle: "Catches per year",
+    yearLine: (total: number, released: number) =>
+      `${total} catches, ${released} of them released`,
+    dialogTitleNew: "New catch",
+    dialogTitleEdit: "Edit catch",
+    dialogDescription:
+      "Pick a species from the data set – the app then checks the federal closed season and minimum size right away.",
+    speciesLabel: "Fish species",
+    speciesOwn: "Enter your own species",
+    nameLabel: "Species name",
+    namePlaceholder: "e.g. brown trout",
+    nameRequired: "Please enter a species name or pick a species.",
+    dateLabel: "Date",
+    timeLabel: "Time",
+    lengthLabel: "Length (cm)",
+    weightLabel: "Weight (kg)",
+    waterLabel: "Water",
+    waterPlaceholder: "e.g. Lake Zurich or the Sihl near Langnau",
+    waterRequired: "Please enter the water.",
+    methodLabel: "Bait / method",
+    methodPlaceholder: "e.g. nymph, 10 cm soft bait",
+    releasedLabel: "Released carefully",
+    noteLabel: "Note (optional)",
+    notePlaceholder: "e.g. early morning, light rain",
+    photoLabel: "Photo (optional)",
+    photoChoose: "Choose photo",
+    photoChange: "Change photo",
+    photoRemove: "Remove photo",
+    photoPreviewAlt: "Preview of the catch photo",
+    photoHint:
+      "JPEG, PNG or WebP – it is resized automatically before uploading.",
+    photoUploading: "Uploading photo …",
+    photoUploadFailed: "Saved, but the photo could not be uploaded.",
+    photoTooLarge: "The photo is too large (max. 5 MB).",
+    photoHeic: "The browser cannot read HEIC/HEIF – please export as JPEG.",
+    photoReadFailed: "The image could not be read.",
+    photoRemoveFailed: "The photo could not be removed.",
+    created: "Catch saved",
+    updated: "Changes saved",
+    deleted: "Catch deleted",
+    hints: {
+      ban: "Federal catch ban: this species is critically endangered and must not be caught. Unhook it in the water and release it immediately.",
+      report:
+        "Reporting duty: report this fish to the cantonal fisheries office without delay.",
+      closedSeason:
+        "On this date the indicative closed season for this species applies – in most cantons you may not take it now. Check your cantonal fishing ordinance.",
+      underMinLength: (cm: number) =>
+        `Below the federal minimum size of ${cm} cm – release it. The canton often asks for more.`,
+      nearMinLength: (cm: number) =>
+        `Just above the federal size of ${cm} cm: many cantons ask for considerably more – check before you keep it.`,
+      cantonal:
+        "The cantonal fishing ordinance and your licence are what count.",
+    },
+    speciesTitle: "Species, closed seasons and minimum sizes",
+    speciesIntro:
+      "The most important species in Swiss angling, with the federal minimum requirements and what cantons regulate more strictly in practice.",
+    federalMin: (cm: number) => `Federal: at least ${cm} cm`,
+    federalMinNone: "Federal: no minimum size",
+    federalWeeks: (weeks: number) => `closed season of at least ${weeks} weeks`,
+    federalWeeksNone: "no closed season prescribed at federal level",
+    guideSeason: (from: string, to: string) =>
+      `Indicative closed season: ${from} to ${to}`,
+    guideSeasonNone: "No common closed season recorded",
+    guideSeasonHint:
+      "Indicative, not binding: the federal level only sets the duration in weeks, the canton sets start and end.",
+    cantonTitle: "Often stricter in the canton:",
+    habitatTitle: "Where it holds:",
+    methodTitle: "Bait and method:",
+    bannedBadge: "Catch ban",
+    waters: {
+      fliessend: "Running water",
+      stehend: "Standing water",
+      beide: "Running and standing water",
+    },
+    measureHint:
+      "Measured from the tip of the head to the tips of the naturally spread tail fin (VBGF art. 2 para. 2).",
+  },
   tickRisk: {
     sectionAria: "Tick risk at this location",
     title: "Tick risk",

@@ -6,6 +6,8 @@ import {
   childBadges,
   childStats,
   familyChildren,
+  fishCatches,
+  InsertFishCatch,
   InsertFamilyChild,
   customHunts,
   customQuizzes,
@@ -620,6 +622,65 @@ export async function deleteNatureSighting(id: number, userId: number) {
   await db
     .delete(natureSightings)
     .where(and(eq(natureSightings.id, id), eq(natureSightings.userId, userId)));
+}
+
+// ── Fangbuch (#236) ──
+export async function getFishCatches(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(fishCatches)
+    .where(eq(fishCatches.userId, userId))
+    .orderBy(desc(fishCatches.caughtAt), desc(fishCatches.id));
+}
+
+/** Einzelner Fang (nur, wenn er der Person gehört). */
+export async function getFishCatch(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(fishCatches)
+    .where(and(eq(fishCatches.id, id), eq(fishCatches.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/** Fang über den Foto-Dateinamen (für die private Auslieferung). */
+export async function getFishCatchByFileName(fileName: string, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(fishCatches)
+    .where(
+      and(eq(fishCatches.fileName, fileName), eq(fishCatches.userId, userId))
+    )
+    .limit(1);
+  return rows[0];
+}
+
+export async function addFishCatch(data: InsertFishCatch) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(fishCatches).values(data);
+  return result.insertId;
+}
+
+export async function updateFishCatch(
+  id: number,
+  userId: number,
+  data: Partial<InsertFishCatch>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(fishCatches)
+    .set(data)
+    .where(and(eq(fishCatches.id, id), eq(fishCatches.userId, userId)));
+}
+
+export async function deleteFishCatch(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(fishCatches)
+    .where(and(eq(fishCatches.id, id), eq(fishCatches.userId, userId)));
 }
 
 // ── Ausrüstungs-Pflege (wiederkehrende Wartungsaufgaben) ──

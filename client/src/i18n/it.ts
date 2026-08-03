@@ -2809,6 +2809,122 @@ export const it: Translation = {
     },
   },
   /** Rischio zecche per regione (#224). */
+  fishing: {
+    title: "Libretto delle catture",
+    sectionAria: "Libretto delle catture – le mie catture",
+    intro:
+      "Annota ogni cattura: specie, lunghezza, peso, corso d'acqua, esca e foto. L'app ne ricava i tuoi record e le catture per anno.",
+    loginFeature: "il tuo libretto delle catture",
+    loadFailed: "Impossibile caricare le catture.",
+    empty:
+      "Ancora nessuna cattura – registra la prima, per esempio una trota di torrente della Sihl.",
+    count: (n: number) => (n === 1 ? "1 cattura" : `${n} catture`),
+    addButton: "Registra una cattura",
+    addAria: "Registra una nuova cattura",
+    legalTitle: "L'ultima parola spetta al cantone",
+    legalText:
+      "In Svizzera la pesca è regolata dai cantoni: periodi di protezione, misure minime di cattura e limiti di cattura variano da cantone a cantone e persino da acqua ad acqua. Qui trovi le prescrizioni minime della Confederazione – il tuo cantone può essere più severo, e quasi sempre lo è. Fanno fede l'ordinanza cantonale sulla pesca e la tua patente.",
+    legalSource: (version: string, date: string) =>
+      `Base: ordinanza concernente la legge federale sulla pesca (${version}). Stato dei dati: ${date}.`,
+    filterSpeciesLabel: "Specie",
+    filterWaterLabel: "Acqua",
+    filterAll: "Tutte",
+    filterEmpty: "Nessuna cattura per questa selezione.",
+    released: "rilasciata",
+    kept: "trattenuta",
+    lengthShort: (value: string) => `${value} cm`,
+    weightShort: (value: string) => `${value} kg`,
+    photoAlt: (name: string) => `Foto della cattura: ${name}`,
+    editAria: (name: string) => `Modifica la cattura «${name}»`,
+    deleteAria: (name: string) => `Elimina la cattura «${name}»`,
+    deleteConfirm: (name: string) =>
+      `Vuoi davvero eliminare la cattura «${name}»?`,
+    statsTitle: "Statistica",
+    statsSummary: (total: number, released: number, kept: number) =>
+      `${total} catture · ${released} rilasciate · ${kept} trattenute`,
+    recordsTitle: "Cattura più grande per specie",
+    recordNoLength: "mai misurata",
+    recordCount: (n: number) => (n === 1 ? "1 cattura" : `${n} catture`),
+    yearsTitle: "Catture per anno",
+    yearLine: (total: number, released: number) =>
+      `${total} catture, di cui ${released} rilasciate`,
+    dialogTitleNew: "Nuova cattura",
+    dialogTitleEdit: "Modifica la cattura",
+    dialogDescription:
+      "Scegli una specie dai dati – l'app controlla subito il periodo di protezione e la misura minima federale.",
+    speciesLabel: "Specie di pesce",
+    speciesOwn: "Inserisci una specie libera",
+    nameLabel: "Nome della specie",
+    namePlaceholder: "p. es. trota di torrente",
+    nameRequired: "Inserisci il nome di una specie o scegline una.",
+    dateLabel: "Data",
+    timeLabel: "Ora",
+    lengthLabel: "Lunghezza (cm)",
+    weightLabel: "Peso (kg)",
+    waterLabel: "Acqua",
+    waterPlaceholder: "p. es. lago di Zurigo o Sihl presso Langnau",
+    waterRequired: "Indica l'acqua.",
+    methodLabel: "Esca / metodo",
+    methodPlaceholder: "p. es. ninfa, esca siliconica 10 cm",
+    releasedLabel: "Rilasciata con delicatezza",
+    noteLabel: "Nota (facoltativa)",
+    notePlaceholder: "p. es. mattino presto, pioggia leggera",
+    photoLabel: "Foto (facoltativa)",
+    photoChoose: "Scegli una foto",
+    photoChange: "Cambia foto",
+    photoRemove: "Rimuovi la foto",
+    photoPreviewAlt: "Anteprima della foto della cattura",
+    photoHint:
+      "JPEG, PNG o WebP – viene ridotta automaticamente prima del caricamento.",
+    photoUploading: "Caricamento della foto …",
+    photoUploadFailed: "Salvato, ma la foto non è stata caricata.",
+    photoTooLarge: "La foto è troppo grande (max. 5 MB).",
+    photoHeic:
+      "Il browser non può leggere HEIC/HEIF – esporta come JPEG, per favore.",
+    photoReadFailed: "Non è stato possibile leggere l'immagine.",
+    photoRemoveFailed: "Non è stato possibile rimuovere la foto.",
+    created: "Cattura salvata",
+    updated: "Modifiche salvate",
+    deleted: "Cattura eliminata",
+    hints: {
+      ban: "Divieto di cattura della Confederazione: questa specie è in pericolo d'estinzione e non può essere catturata. Slama in acqua e rilascia subito il pesce.",
+      report:
+        "Obbligo di annuncio: annuncia questo pesce senza indugio al servizio cantonale della pesca.",
+      closedSeason:
+        "In questa data vale il periodo di protezione indicativo di questa specie – nella maggior parte dei cantoni ora non puoi trattenerla. Controlla l'ordinanza cantonale sulla pesca.",
+      underMinLength: (cm: number) =>
+        `Sotto la misura minima federale di ${cm} cm – rilascia. Il cantone chiede spesso ancora di più.`,
+      nearMinLength: (cm: number) =>
+        `Appena sopra la misura federale di ${cm} cm: molti cantoni chiedono nettamente di più – controlla prima di trattenere.`,
+      cantonal:
+        "Fanno fede l'ordinanza cantonale sulla pesca e la tua patente.",
+    },
+    speciesTitle: "Specie, periodi di protezione e misure minime",
+    speciesIntro:
+      "Le specie più importanti della pesca con la lenza in Svizzera, con le prescrizioni minime della Confederazione e ciò che i cantoni regolano più severamente nella pratica.",
+    federalMin: (cm: number) => `Confederazione: almeno ${cm} cm`,
+    federalMinNone: "Confederazione: nessuna misura minima",
+    federalWeeks: (weeks: number) =>
+      `periodo di protezione di almeno ${weeks} settimane`,
+    federalWeeksNone:
+      "nessun periodo di protezione prescritto dalla Confederazione",
+    guideSeason: (from: string, to: string) =>
+      `Periodo di protezione indicativo: dal ${from} al ${to}`,
+    guideSeasonNone: "Nessun periodo di protezione diffuso registrato",
+    guideSeasonHint:
+      "Valore indicativo, non vincolante: la Confederazione fissa solo la durata in settimane, inizio e fine li stabilisce il cantone.",
+    cantonTitle: "Nel cantone spesso più severo:",
+    habitatTitle: "Dove si trova:",
+    methodTitle: "Esca e metodo:",
+    bannedBadge: "Divieto di cattura",
+    waters: {
+      fliessend: "Acque correnti",
+      stehend: "Acque stagnanti",
+      beide: "Acque correnti e stagnanti",
+    },
+    measureHint:
+      "Si misura dalla punta del capo all'estremità della pinna caudale naturalmente distesa (art. 2 cpv. 2 OLFP).",
+  },
   tickRisk: {
     sectionAria: "Rischio zecche in questo luogo",
     title: "Rischio zecche",

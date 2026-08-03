@@ -68,6 +68,7 @@ import {
   MAX_GEAR_TASK_TITLE_LENGTH,
   MIN_GEAR_INTERVAL_MONTHS,
 } from "@shared/gearTasks";
+import { FISH_MAX_LENGTH_CM, FISH_MAX_WEIGHT_KG } from "@shared/fishing";
 import { MAX_WARRANTY_MONTHS, MIN_WARRANTY_MONTHS } from "@shared/warranty";
 import { MAX_LENT_TO_LENGTH } from "@shared/lending";
 import {
@@ -199,6 +200,45 @@ function serializeQuizQuestions(
       explanation: q.explanation?.trim() || undefined,
     }))
   );
+}
+
+/**
+ * Ein Fang im Fangbuch (#236). Die Grenzen sind absichtlich weit: der
+ * Datensatz in shared/fishing.ts prüft Mindestmass und Schonzeit fachlich,
+ * die Eingabe hier nur formal (kein negatives Mass, kein Roman als Notiz).
+ */
+const fishCatchInput = z.object({
+  /** Id einer Art aus FISH_SPECIES; null = frei erfasst */
+  speciesId: z.string().max(60).nullish(),
+  speciesName: z.string().trim().min(1).max(120),
+  lengthCm: z.number().min(0).max(FISH_MAX_LENGTH_CM).nullish(),
+  weightKg: z.number().min(0).max(FISH_MAX_WEIGHT_KG).nullish(),
+  water: z.string().trim().min(1).max(120),
+  caughtAt: z.string().regex(ISO_DAY),
+  /** Uhrzeit «HH:MM» in 24-Stunden-Schreibweise */
+  caughtTime: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+    .nullish(),
+  method: z.string().max(120).nullish(),
+  released: z.boolean(),
+  note: z.string().max(500).nullish(),
+});
+
+/** Eingabe auf Spaltenwerte abbilden (leere Freitexte werden zu null). */
+function fishCatchValues(input: z.infer<typeof fishCatchInput>) {
+  return {
+    speciesId: input.speciesId?.trim() || null,
+    speciesName: input.speciesName.trim(),
+    lengthCm: input.lengthCm ?? null,
+    weightKg: input.weightKg ?? null,
+    water: input.water.trim(),
+    caughtAt: input.caughtAt,
+    caughtTime: input.caughtTime || null,
+    method: input.method?.trim() || null,
+    released: input.released,
+    note: input.note?.trim() || null,
+  };
 }
 
 /**
@@ -1651,6 +1691,64 @@ export const appRouter = router({
           });
           const { sightingPhotoStorage } = await import("./photoStorage");
           await sightingPhotoStorage.deleteFiles([sighting.fileName]);
+        }
+        return { success: true } as const;
+      }),
+  }),
+
+  /** Fangbuch (#236): eigene Angel-Fänge mit Art, Mass, Gewässer und Foto. */
+  fishing: router({
+    list: protectedProcedure.query(({ ctx }) => db.getFishCatches(ctx.user.id)),
+    add: protectedProcedure
+      .input(fishCatchInput)
+      .mutation(async ({ ctx, input }) => {
+        const id = await db.addFishCatch({
+          userId: ctx.user.id,
+          ...fishCatchValues(input),
+        });
+        return { id };
+      }),
+    update: protectedProcedure
+      .input(fishCatchInput.extend({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const entry = await db.getFishCatch(input.id, ctx.user.id);
+        if (!entry) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Fang nicht gefunden.",
+          });
+        }
+        await db.updateFishCatch(input.id, ctx.user.id, fishCatchValues(input));
+        return { success: true } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        // Foto-Datei mitputzen: erst Dateinamen sichern, dann DB-Zeile
+        // löschen und zuletzt die Datei auf dem Webspace entfernen.
+        const entry = await db.getFishCatch(input.id, ctx.user.id);
+        await db.deleteFishCatch(input.id, ctx.user.id);
+        if (entry?.fileName) {
+          const { catchPhotoStorage } = await import("./photoStorage");
+          await catchPhotoStorage.deleteFiles([entry.fileName]);
+        }
+        return { success: true } as const;
+      }),
+    /** Foto eines Fangs entfernen (Feld + Datei auf dem Webspace). */
+    removePhoto: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const entry = await db.getFishCatch(input.id, ctx.user.id);
+        if (!entry) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Fang nicht gefunden.",
+          });
+        }
+        if (entry.fileName) {
+          await db.updateFishCatch(input.id, ctx.user.id, { fileName: null });
+          const { catchPhotoStorage } = await import("./photoStorage");
+          await catchPhotoStorage.deleteFiles([entry.fileName]);
         }
         return { success: true } as const;
       }),

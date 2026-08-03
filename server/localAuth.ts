@@ -184,6 +184,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     passkeys,
     gearTasks,
     natureSightings,
+    fishCatches,
     tickBites,
   } = await import("../drizzle/schema");
   const { inArray, or } = await import("drizzle-orm");
@@ -227,6 +228,10 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     .select({ fileName: natureSightings.fileName })
     .from(natureSightings)
     .where(eq(natureSightings.userId, userId));
+  const catchRows = await db
+    .select({ fileName: fishCatches.fileName })
+    .from(fishCatches)
+    .where(eq(fishCatches.userId, userId));
   // Packlisten-Positionen zuerst (referenzieren Listen)
   const lists = await db
     .select({ id: packLists.id })
@@ -312,6 +317,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(passkeys).where(eq(passkeys.userId, userId));
   await db.delete(gearTasks).where(eq(gearTasks.userId, userId));
   await db.delete(natureSightings).where(eq(natureSightings.userId, userId));
+  // Fangbuch (#236) hängt direkt am Konto
+  await db.delete(fishCatches).where(eq(fishCatches.userId, userId));
   await db.delete(users).where(eq(users.id, userId));
   // Zuletzt die Upload-Dateien vom Webspace entfernen – fehlende Dateien
   // blockieren nie, und verwaiste Dateien sind schlimmstenfalls harmlos.
@@ -322,6 +329,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     inventoryPhotoStorage,
     receiptPhotoStorage,
     sightingPhotoStorage,
+    catchPhotoStorage,
   } = await import("./photoStorage");
   await tripPhotoStorage.deleteFiles(photoRows.map(p => p.fileName));
   await recipePhotoStorage.deleteFiles(
@@ -342,6 +350,11 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   );
   await sightingPhotoStorage.deleteFiles(
     sightingRows
+      .map(r => r.fileName)
+      .filter((name): name is string => Boolean(name))
+  );
+  await catchPhotoStorage.deleteFiles(
+    catchRows
       .map(r => r.fileName)
       .filter((name): name is string => Boolean(name))
   );

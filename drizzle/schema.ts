@@ -1076,6 +1076,54 @@ export type NatureSighting = typeof natureSightings.$inferSelect;
 export type InsertNatureSighting = typeof natureSightings.$inferInsert;
 
 /**
+ * Fangbuch (#236): ein Angel-Fang pro Zeile.
+ *
+ * Bewusst NICHT in `natureSightings` mitgeführt: ein Fang trägt Länge,
+ * Gewicht, Gewässer, Köder/Methode, Uhrzeit und «zurückgesetzt» – Felder,
+ * die einer Natur-Beobachtung nichts nützen, und das Sichtungs-Tagebuch
+ * hätte für jede Auswertung erst die Fänge herausfiltern müssen.
+ *
+ * `speciesId` verweist auf `FISH_SPECIES` aus shared/fishing.ts (Grundlage
+ * der Schonzeit- und Mindestmass-Prüfung); null = frei erfasste Art.
+ * `speciesName` steht immer da, damit die Liste ohne Datensatz lesbar bleibt.
+ * Datum und Uhrzeit liegen getrennt (Muster `tripLogs.arrivalTime`), die
+ * Uhrzeit ist optional. Genau EIN Foto als Datei unter uploads/catches/.
+ */
+export const fishCatches = mysqlTable(
+  "fishCatches",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Id einer Art aus shared/fishing.ts; null = frei erfasst */
+    speciesId: varchar("speciesId", { length: 60 }),
+    /** Angezeigter Arten-Name (aus dem Datensatz übernommen oder Freitext) */
+    speciesName: varchar("speciesName", { length: 120 }).notNull(),
+    /** Länge in cm; null = nicht gemessen */
+    lengthCm: double("lengthCm"),
+    /** Gewicht in kg; null = nicht gewogen */
+    weightKg: double("weightKg"),
+    /** Gewässer als Freitext («Zürichsee», «Sihl bei Langnau») */
+    water: varchar("water", { length: 120 }).notNull(),
+    /** Fangdatum (ISO) */
+    caughtAt: date("caughtAt", { mode: "string" }).notNull(),
+    /** Uhrzeit «HH:MM»; null = ohne Angabe */
+    caughtTime: varchar("caughtTime", { length: 5 }),
+    /** Köder oder Methode («Nymphe», «Gummifisch 10 cm») */
+    method: varchar("method", { length: 120 }),
+    /** true = schonend zurückgesetzt */
+    released: boolean("released").default(false).notNull(),
+    note: varchar("note", { length: 500 }),
+    /** Dateiname des Fotos unter uploads/catches/ (genau EIN Foto pro Fang) */
+    fileName: varchar("fileName", { length: 64 }).unique(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("fishCatches_userId").on(table.userId)]
+);
+
+export type FishCatch = typeof fishCatches.$inferSelect;
+export type InsertFishCatch = typeof fishCatches.$inferInsert;
+
+/**
  * Aufgezeichnete Wanderungen (#220): eine Zeile pro Track.
  *
  * Die Punktreihe steht als KOMPAKTES JSON-Tupel-Array in `pointsJson`

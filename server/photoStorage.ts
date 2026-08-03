@@ -67,3 +67,6 @@ export const receiptPhotoStorage = createPhotoStorage("receipts");
 
 /** Fotos zu Natur-Beobachtungen: uploads/sightings/<fileName> */
 export const sightingPhotoStorage = createPhotoStorage("sightings");
+
+/** Fotos zu Fängen im Fangbuch: uploads/catches/<fileName> */
+export const catchPhotoStorage = createPhotoStorage("catches");
