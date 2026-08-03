@@ -2456,6 +2456,17 @@ export const fr: Translation = {
     hubQrHint: "Il suffit de le scanner pour l'ouvrir.",
     printEntryAria: (name: string) =>
       `Imprimer le rapport de voyage de ${name}`,
+    icsButton: "Calendrier",
+    icsAria: (name: string) =>
+      `Télécharger ${name} comme entrée d'agenda (.ics)`,
+    icsAllButton: "Tout dans l'agenda",
+    icsAllAria:
+      "Télécharger tous les séjours à venir dans un seul fichier d'agenda (.ics)",
+    icsDone: (n: number) =>
+      n === 1
+        ? "Fichier d'agenda créé – ouvre-le pour ajouter le séjour"
+        : `Fichier d'agenda avec ${n} séjours créé – ouvre-le pour les ajouter`,
+    icsFailed: "Impossible de créer le fichier d'agenda",
     milestonesTitle: "Jalons",
     milestonesAchievedOn: date => `atteint le ${date}`,
     milestonesNextTitle: "Prochains objectifs",

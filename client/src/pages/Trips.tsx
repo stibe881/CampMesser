@@ -6,6 +6,7 @@ import {
   Award,
   BookOpen,
   CalendarClock,
+  CalendarPlus,
   Clock,
   CalendarDays,
   ChevronDown,
@@ -98,6 +99,7 @@ import {
   TRIP_JOURNAL_MAX_LENGTH,
   tripNights,
 } from "@shared/trips";
+import { buildTripIcs, icsFileName, type IcsTrip } from "@shared/ics";
 import { tripDays } from "@shared/menuPlan";
 import {
   countMainSlots,
@@ -2618,6 +2620,58 @@ export default function TripsPage() {
     return country ? pick(country.name, lang) : null;
   };
 
+  /** Reise auf die Minimalform des Kalender-Exports bringen (#244). */
+  const toIcsTrip = (trip: (typeof allTrips)[number]): IcsTrip => {
+    const spot =
+      trip.spotId != null ? spots.find(s => s.id === trip.spotId) : null;
+    return {
+      id: trip.id,
+      title: trip.title || placeName(trip),
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+      arrivalTime: trip.arrivalTime,
+      departureTime: trip.departureTime,
+      placeName: placeName(trip),
+      // Koordinaten nur vom eigenen Zeltplatz-Favoriten; bei Mitglieds-Reisen
+      // kennt der Client nur den Namen des fremden Platzes
+      latitude: spot?.latitude ?? null,
+      longitude: spot?.longitude ?? null,
+    };
+  };
+
+  /**
+   * Kalender-Datei erzeugen und herunterladen – rein im Browser, offline
+   * (gleiches Blob-Muster wie der GPX-Export der Wanderungen).
+   */
+  const downloadIcs = (list: (typeof allTrips)[number][], fileName: string) => {
+    try {
+      const ics = buildTripIcs(list.map(toIcsTrip), {
+        dtstamp: new Date(),
+        lang,
+      });
+      const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast.success(t.trips.icsDone(list.length));
+    } catch {
+      toast.error(t.trips.icsFailed);
+    }
+  };
+
+  /** Eine einzelne Reise als .ics herunterladen. */
+  const downloadTripIcs = (trip: (typeof allTrips)[number]) => {
+    downloadIcs(
+      [trip],
+      icsFileName(trip.title || placeName(trip), trip.startDate)
+    );
+  };
+
   /** Eintrag ins Formular laden und den Dialog im Bearbeiten-Modus öffnen. */
   const startEdit = (trip: (typeof allTrips)[number]) => {
     setEditingId(trip.id);
@@ -3604,13 +3658,31 @@ export default function TripsPage() {
       {/* Geplante Aufenthalte: Trips mit Anreise heute oder später */}
       {tripsView === "list" && plannedTrips.length > 0 && (
         <>
-          <h2 className="mb-3 flex items-center gap-2 font-serif text-lg font-semibold">
-            <CalendarClock
-              className="h-5 w-5 text-primary"
-              aria-hidden="true"
-            />
-            {t.trips.plannedTitle}
-          </h2>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="flex items-center gap-2 font-serif text-lg font-semibold">
+              <CalendarClock
+                className="h-5 w-5 text-primary"
+                aria-hidden="true"
+              />
+              {t.trips.plannedTitle}
+            </h2>
+            {/* Sammel-Export (#244): alle geplanten Reisen in EINER Datei */}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                downloadIcs(
+                  plannedTrips,
+                  icsFileName("campmesser-reisen", today, "reisen")
+                )
+              }
+              aria-label={t.trips.icsAllAria}
+            >
+              <CalendarPlus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.trips.icsAllButton}
+            </Button>
+          </div>
           {/* Kantons-Auswahl für Ferien-/Feiertags-Hinweise */}
           {holidayCantonPicker}
           {holidays && (
@@ -3774,6 +3846,22 @@ export default function TripsPage() {
                               </span>
                             )}
                           </Link>
+                        </Button>
+                        {/* Kalender-Export (#244) */}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => downloadTripIcs(trip)}
+                          aria-label={t.trips.icsAria(
+                            trip.title || placeName(trip)
+                          )}
+                        >
+                          <CalendarPlus
+                            className="mr-1.5 h-4 w-4"
+                            aria-hidden="true"
+                          />
+                          {t.trips.icsButton}
                         </Button>
                       </div>
                       {trip.notes && (
@@ -4105,6 +4193,22 @@ export default function TripsPage() {
                               aria-hidden="true"
                             />
                           </Link>
+                        </Button>
+                        {/* Kalender-Export (#244) – auch für vergangene Reisen */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+                          onClick={() => downloadTripIcs(trip)}
+                          aria-label={t.trips.icsAria(
+                            trip.title || placeName(trip)
+                          )}
+                          title={t.trips.icsButton}
+                        >
+                          <CalendarPlus
+                            className="h-3.5 w-3.5"
+                            aria-hidden="true"
+                          />
                         </Button>
                         <Button
                           variant="ghost"

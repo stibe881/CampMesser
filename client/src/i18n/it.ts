@@ -2432,6 +2432,16 @@ export const it: Translation = {
     hubQrAlt: name => `Codice QR del link dell'hub per ${name}`,
     hubQrHint: "Basta scansionarlo per aprirlo.",
     printEntryAria: name => `Stampare il rapporto di viaggio di ${name}`,
+    icsButton: "Calendario",
+    icsAria: name => `Scaricare ${name} come voce di calendario (.ics)`,
+    icsAllButton: "Tutti nel calendario",
+    icsAllAria:
+      "Scaricare tutti i viaggi in programma in un unico file di calendario (.ics)",
+    icsDone: n =>
+      n === 1
+        ? "File di calendario creato – aprilo per aggiungere il viaggio"
+        : `File di calendario con ${n} viaggi creato – aprilo per aggiungerli`,
+    icsFailed: "Impossibile creare il file di calendario",
     milestonesTitle: "Traguardi",
     milestonesAchievedOn: date => `raggiunto il ${date}`,
     milestonesNextTitle: "Prossimi obiettivi",

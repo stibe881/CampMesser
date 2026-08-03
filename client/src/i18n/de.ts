@@ -2460,6 +2460,17 @@ export const de = {
     hubQrAlt: (name: string) => `QR-Code des Reise-Hub-Links für ${name}`,
     hubQrHint: "Zum Öffnen einfach scannen.",
     printEntryAria: (name: string) => `Reisebericht von ${name} drucken`,
+    icsButton: "Kalender",
+    icsAria: (name: string) =>
+      `${name} als Kalender-Eintrag (.ics) herunterladen`,
+    icsAllButton: "Alle in den Kalender",
+    icsAllAria:
+      "Alle kommenden Reisen als eine Kalender-Datei (.ics) herunterladen",
+    icsDone: (n: number) =>
+      n === 1
+        ? "Kalender-Datei erstellt – öffne sie, um die Reise einzutragen"
+        : `Kalender-Datei mit ${n} Reisen erstellt – öffne sie, um sie einzutragen`,
+    icsFailed: "Kalender-Datei konnte nicht erstellt werden",
     milestonesTitle: "Meilensteine",
     milestonesAchievedOn: (date: string) => `erreicht am ${date}`,
     milestonesNextTitle: "Nächste Ziele",

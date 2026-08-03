@@ -2372,6 +2372,15 @@ export const en: Translation = {
     hubQrAlt: name => `QR code of the trip hub link for ${name}`,
     hubQrHint: "Simply scan it to open.",
     printEntryAria: name => `Print the trip report of ${name}`,
+    icsButton: "Calendar",
+    icsAria: name => `Download ${name} as a calendar entry (.ics)`,
+    icsAllButton: "All to calendar",
+    icsAllAria: "Download all upcoming trips as one calendar file (.ics)",
+    icsDone: n =>
+      n === 1
+        ? "Calendar file created – open it to add the trip"
+        : `Calendar file with ${n} trips created – open it to add them`,
+    icsFailed: "The calendar file could not be created",
     milestonesTitle: "Milestones",
     milestonesAchievedOn: date => `achieved on ${date}`,
     milestonesNextTitle: "Next goals",
