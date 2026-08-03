@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  AlertTriangle,
   BatteryCharging,
   Compass,
   Loader2,
@@ -23,18 +24,38 @@ import { trpc } from "@/lib/trpc";
 import { calcEnergyBudget } from "@shared/calculators";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { compassDirection, computeSolarAlignment } from "@shared/solar";
+import {
+  BATTERY_CHEMISTRIES,
+  COMMON_VOLTAGES,
+  CONSUMER_TEMPLATES,
+  DEFAULT_USABLE_PERCENT,
+  MIN_USABLE_PERCENT,
+  consumerBreakdown,
+  evaluatePowerBudget,
+  formatWh,
+  runtimeDisplay,
+  sanitizePowerStorage,
+  usablePercentOf,
+  type PowerStorage,
+} from "@shared/powerBudget";
 import { loadObstacleProfiles } from "@/lib/obstacleStore";
 import { getProfileObstacles } from "@shared/obstacleProfiles";
+import { loadPowerStorage, savePowerStorage } from "@/lib/energyStore";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { cn } from "@/lib/utils";
 
-const presetConsumers = [
-  { key: "coolbox", watts: 45, hoursPerDay: 8 },
-  { key: "laptop", watts: 60, hoursPerDay: 2 },
-  { key: "drone", watts: 90, hoursPerDay: 1 },
-  { key: "phone", watts: 15, hoursPerDay: 2 },
-  { key: "led", watts: 8, hoursPerDay: 4 },
-  { key: "camera", watts: 20, hoursPerDay: 1.5 },
-] as const;
+/** Zahl aus einem Eingabefeld lesen: leer oder Unsinn ergibt null. */
+function parseNumberInput(value: string): number | null {
+  const cleaned = value.trim().replace(",", ".");
+  if (!cleaned) return null;
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+/** Zahl fürs Eingabefeld: null bleibt leer. */
+function numberToInput(value: number | null): string {
+  return value === null ? "" : String(value);
+}
 
 export default function EnergyPage() {
   const { isAuthenticated, loading } = useAuth();
@@ -44,7 +65,34 @@ export default function EnergyPage() {
     enabled: isAuthenticated,
   });
 
-  const [batteryWh, setBatteryWh] = useState("1024");
+  // Strom-Speicher (#229): Einstellung, keine DB-Tabelle – lokal plus Geräte-Sync
+  const [storage, setStorage] = useState<PowerStorage>(() =>
+    loadPowerStorage()
+  );
+  const [capacityInputs, setCapacityInputs] = useState(() => {
+    const initial = loadPowerStorage();
+    return {
+      wh: numberToInput(initial.capacityWh),
+      ah: numberToInput(initial.capacityAh),
+      voltage: numberToInput(initial.voltage),
+    };
+  });
+  const storageSync = useSyncedSetting<PowerStorage>("powerStorage", value => {
+    const clean = sanitizePowerStorage(value);
+    setStorage(clean);
+    setCapacityInputs({
+      wh: numberToInput(clean.capacityWh),
+      ah: numberToInput(clean.capacityAh),
+      voltage: numberToInput(clean.voltage),
+    });
+  });
+  const writeStorage = (patch: Partial<PowerStorage>) => {
+    const next = sanitizePowerStorage({ ...storage, ...patch });
+    setStorage(next);
+    savePowerStorage(next);
+    storageSync.push(next);
+  };
+
   const [solarWatts, setSolarWatts] = useState("400");
   const [sunHours, setSunHours] = useState(4);
   // Auto: Prognose-Wert wird übernommen; Manuell: eigener Wert bleibt bestehen
@@ -193,21 +241,44 @@ export default function EnergyPage() {
 
   const consumers = useMemo(() => query.data ?? [], [query.data]);
 
-  const result = useMemo(
+  const budgetConsumers = useMemo(
+    () =>
+      consumers.map(c => ({
+        name: c.name,
+        watts: c.watts,
+        hoursPerDay: c.hoursPerDay,
+        enabled: c.enabled,
+      })),
+    [consumers]
+  );
+
+  // Solarertrag pro Tag: Nennleistung × effektive Sonnenstunden × Systemwirkungsgrad
+  const solarWhPerDay = useMemo(
     () =>
       calcEnergyBudget({
-        batteryWh: Number(batteryWh) || 0,
+        batteryWh: 0,
         solarPanelWatts: Number(solarWatts) || 0,
         sunHoursPerDay: sunHours,
-        consumers: consumers.map(c => ({
-          name: c.name,
-          watts: c.watts,
-          hoursPerDay: c.hoursPerDay,
-          enabled: c.enabled,
-        })),
-      }),
-    [batteryWh, solarWatts, sunHours, consumers]
+        consumers: [],
+      }).dailySolarYieldWh,
+    [solarWatts, sunHours]
   );
+
+  const result = useMemo(
+    () =>
+      evaluatePowerBudget({
+        storage,
+        consumers: budgetConsumers,
+        rechargeWhPerDay: solarWhPerDay,
+      }),
+    [storage, budgetConsumers, solarWhPerDay]
+  );
+  const shares = useMemo(
+    () => consumerBreakdown(budgetConsumers),
+    [budgetConsumers]
+  );
+  const sharePercent = (name: string) =>
+    shares.find(s => s.name === name)?.percent ?? null;
 
   // Optimale Panel-Ausrichtung für heute am zuletzt geladenen Ort. Kam die
   // Prognose von einem Zeltplatz-Favoriten, gilt dessen Hindernis-Profil,
@@ -252,13 +323,17 @@ export default function EnergyPage() {
     );
   }
 
-  const autonomyLabel = result.selfSufficient
-    ? t.energy.autonomyUnlimited
-    : result.autonomyDays === Infinity
-      ? "–"
-      : result.autonomyDays >= 14
-        ? t.energy.autonomyMoreThan14
-        : t.energy.autonomyDays(result.autonomyDays.toFixed(1));
+  const range = runtimeDisplay(result);
+  const rangeLabel = result.selfSufficient
+    ? t.energy.rangeSelfSufficient
+    : range.unit === "hours"
+      ? t.energy.rangeHours(range.value)
+      : range.unit === "days"
+        ? t.energy.rangeDays(range.value)
+        : range.unit === "overMax"
+          ? t.energy.rangeOverMax(range.value)
+          : t.energy.rangeUnknown;
+  const defaultUsablePercent = DEFAULT_USABLE_PERCENT[storage.chemistry];
 
   const timeFormat: Intl.DateTimeFormatOptions = {
     hour: "2-digit",
@@ -279,11 +354,18 @@ export default function EnergyPage() {
         <CardContent className="pt-6">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="text-center">
-              <p className="font-serif text-2xl font-bold text-primary">
-                {autonomyLabel}
+              <p
+                className={cn(
+                  "font-serif text-2xl font-bold",
+                  result.status === "critical"
+                    ? "text-destructive"
+                    : "text-primary"
+                )}
+              >
+                {rangeLabel}
               </p>
               <p className="text-xs text-muted-foreground">
-                {t.energy.autonomyLabel}
+                {t.energy.rangeLabel}
               </p>
             </div>
             <div className="text-center">
@@ -296,7 +378,7 @@ export default function EnergyPage() {
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold">
-                {Math.round(result.dailySolarYieldWh)} Wh
+                {Math.round(solarWhPerDay)} Wh
               </p>
               <p className="text-xs text-muted-foreground">
                 {t.energy.solarPerDay}
@@ -317,51 +399,263 @@ export default function EnergyPage() {
               </p>
             </div>
           </div>
+
+          {/* Restkapazität: was über der Tiefentlade-Reserve wirklich übrig ist */}
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            {result.nominalWh !== null &&
+            result.usableWh !== null &&
+            result.reserveWh !== null ? (
+              <>
+                <span className="font-semibold text-foreground">
+                  {t.energy.availableLabel}:{" "}
+                  {formatWh(result.availableWh ?? 0, lang)}
+                </span>{" "}
+                {t.energy.capacitySummary(
+                  formatWh(result.nominalWh, lang),
+                  formatWh(result.usableWh, lang),
+                  formatWh(result.reserveWh, lang)
+                )}
+              </>
+            ) : result.missing.includes("voltage") ? (
+              t.energy.voltageMissing
+            ) : (
+              t.energy.capacityUnknown
+            )}
+          </p>
+
+          {result.deepDischargeRisk && (
+            <p className="mt-3 flex items-start gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-xs text-destructive">
+              <AlertTriangle
+                className="mt-0.5 h-4 w-4 shrink-0"
+                aria-hidden="true"
+              />
+              <span>
+                <strong>{t.energy.deepDischargeTitle}</strong>{" "}
+                {t.energy.deepDischargeText}
+              </span>
+            </p>
+          )}
+
+          {result.missing.includes("storage") && (
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              {t.energy.missingStorageHint}
+            </p>
+          )}
+          {result.missing.includes("consumers") && (
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              {t.energy.missingConsumersHint}
+            </p>
+          )}
         </CardContent>
       </Card>
 
-      {/* Einstellungen */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-2">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="mb-1.5 flex items-center gap-2">
-              <BatteryCharging
-                className="h-4 w-4 text-primary"
-                aria-hidden="true"
+      {/* Speicher: Kapazität, Bauart, nutzbarer Anteil und Ladestand */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="mb-1.5 flex items-center gap-2">
+            <BatteryCharging
+              className="h-4 w-4 text-primary"
+              aria-hidden="true"
+            />
+            <h2 className="font-serif text-base font-semibold">
+              {t.energy.storageTitle}
+            </h2>
+          </div>
+          <p className="mb-3 text-xs text-muted-foreground">
+            {t.energy.storageIntro}
+          </p>
+
+          <Label className="text-xs text-muted-foreground">
+            {t.energy.chemistryLabel}
+          </Label>
+          <div className="mb-4 mt-1.5 flex flex-wrap gap-1.5">
+            {BATTERY_CHEMISTRIES.map(chemistry => (
+              <button
+                key={chemistry}
+                type="button"
+                onClick={() => writeStorage({ chemistry })}
+                aria-pressed={storage.chemistry === chemistry}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  storage.chemistry === chemistry
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-muted/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                )}
+              >
+                {t.energy.chemistryNames[chemistry]}
+              </button>
+            ))}
+          </div>
+
+          <Label className="text-xs text-muted-foreground">
+            {t.energy.modeLabel}
+          </Label>
+          <div className="mb-3 mt-1.5 flex gap-1.5">
+            {(["wh", "ah"] as const).map(mode => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => writeStorage({ mode })}
+                aria-pressed={storage.mode === mode}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  storage.mode === mode
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-muted/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                )}
+              >
+                {mode === "wh" ? t.energy.modeWh : t.energy.modeAh}
+              </button>
+            ))}
+          </div>
+
+          {storage.mode === "wh" ? (
+            <div className="mb-4">
+              <Label htmlFor="capacity-wh">{t.energy.capacityWhLabel}</Label>
+              <Input
+                id="capacity-wh"
+                type="number"
+                min="0"
+                inputMode="decimal"
+                className="mt-1.5"
+                value={capacityInputs.wh}
+                onChange={e => {
+                  setCapacityInputs(v => ({ ...v, wh: e.target.value }));
+                  writeStorage({
+                    capacityWh: parseNumberInput(e.target.value),
+                  });
+                }}
               />
-              <Label htmlFor="battery">{t.energy.batteryLabel}</Label>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                {t.energy.capacityWhHint}
+              </p>
             </div>
-            <Input
-              id="battery"
-              type="number"
-              min="0"
-              value={batteryWh}
-              onChange={e => setBatteryWh(e.target.value)}
-            />
-            <p className="mt-1.5 text-xs text-muted-foreground">
-              {t.energy.batteryHint}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="mb-1.5 flex items-center gap-2">
-              <Sun className="h-4 w-4 text-chart-1" aria-hidden="true" />
-              <Label htmlFor="solar">{t.energy.solarLabel}</Label>
+          ) : (
+            <div className="mb-4 grid gap-3 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="capacity-ah">{t.energy.capacityAhLabel}</Label>
+                <Input
+                  id="capacity-ah"
+                  type="number"
+                  min="0"
+                  inputMode="decimal"
+                  className="mt-1.5"
+                  value={capacityInputs.ah}
+                  onChange={e => {
+                    setCapacityInputs(v => ({ ...v, ah: e.target.value }));
+                    writeStorage({
+                      capacityAh: parseNumberInput(e.target.value),
+                    });
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="voltage">{t.energy.voltageLabel}</Label>
+                <Input
+                  id="voltage"
+                  type="number"
+                  min="0"
+                  inputMode="decimal"
+                  className="mt-1.5"
+                  value={capacityInputs.voltage}
+                  onChange={e => {
+                    setCapacityInputs(v => ({ ...v, voltage: e.target.value }));
+                    writeStorage({ voltage: parseNumberInput(e.target.value) });
+                  }}
+                />
+                <div className="mt-1.5 flex gap-1.5">
+                  {COMMON_VOLTAGES.map(volt => (
+                    <button
+                      key={volt}
+                      type="button"
+                      onClick={() => {
+                        setCapacityInputs(v => ({
+                          ...v,
+                          voltage: String(volt),
+                        }));
+                        writeStorage({ voltage: volt });
+                      }}
+                      className="rounded-full border border-border bg-muted/50 px-2.5 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                    >
+                      {volt} V
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  {t.energy.voltageHint}
+                </p>
+              </div>
             </div>
-            <Input
-              id="solar"
-              type="number"
-              min="0"
-              value={solarWatts}
-              onChange={e => setSolarWatts(e.target.value)}
-            />
-            <p className="mt-1.5 text-xs text-muted-foreground">
-              {t.energy.solarHint}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+
+          <div className="mb-1.5 flex items-center justify-between">
+            <Label htmlFor="usable-share">{t.energy.usableLabel}</Label>
+            <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-sm font-semibold">
+              {usablePercentOf(storage)} %
+            </span>
+          </div>
+          <Slider
+            id="usable-share"
+            min={MIN_USABLE_PERCENT}
+            max={100}
+            step={5}
+            value={[usablePercentOf(storage)]}
+            onValueChange={v => writeStorage({ usablePercent: v[0] })}
+            aria-label={t.energy.usableAria}
+          />
+          <p className="mt-2 text-xs text-muted-foreground">
+            {t.energy.usableDefaultHint(defaultUsablePercent)}
+            {storage.usablePercent !== null && (
+              <>
+                {" "}
+                <button
+                  type="button"
+                  className="font-medium text-primary hover:underline"
+                  onClick={() => writeStorage({ usablePercent: null })}
+                >
+                  {t.energy.usableReset}
+                </button>
+              </>
+            )}
+          </p>
+
+          <div className="mb-1.5 mt-4 flex items-center justify-between">
+            <Label htmlFor="charge-state">{t.energy.chargeLabel}</Label>
+            <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-sm font-semibold">
+              {storage.chargePercent} %
+            </span>
+          </div>
+          <Slider
+            id="charge-state"
+            min={0}
+            max={100}
+            step={5}
+            value={[storage.chargePercent]}
+            onValueChange={v => writeStorage({ chargePercent: v[0] })}
+            aria-label={t.energy.chargeAria}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Solaranlage */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="mb-1.5 flex items-center gap-2">
+            <Sun className="h-4 w-4 text-chart-1" aria-hidden="true" />
+            <Label htmlFor="solar">{t.energy.solarLabel}</Label>
+          </div>
+          <Input
+            id="solar"
+            type="number"
+            min="0"
+            value={solarWatts}
+            onChange={e => setSolarWatts(e.target.value)}
+          />
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            {t.energy.solarHint}
+          </p>
+        </CardContent>
+      </Card>
 
       <Card className="mb-6">
         <CardContent className="pt-6">
@@ -585,28 +879,31 @@ export default function EnergyPage() {
         </Button>
       </form>
 
-      {/* Vorschläge */}
-      <div className="mb-4 flex flex-wrap gap-1.5">
-        {presetConsumers
-          .filter(p => !consumers.some(c => c.name === t.energy.presets[p.key]))
-          .map(p => (
-            <button
-              key={p.key}
-              type="button"
-              onClick={() =>
-                addMutation.mutate({
-                  name: t.energy.presets[p.key],
-                  watts: p.watts,
-                  hoursPerDay: p.hoursPerDay,
-                })
-              }
-              className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-              aria-label={t.energy.presetAddAria(t.energy.presets[p.key])}
-            >
-              + {t.energy.presets[p.key]} ({p.watts} W)
-            </button>
-          ))}
+      {/* Vorlagen: Anhaltspunkte aus der Praxis, keine Herstellerangaben */}
+      <div className="mb-1.5 flex flex-wrap gap-1.5">
+        {CONSUMER_TEMPLATES.filter(
+          p => !consumers.some(c => c.name === t.energy.presets[p.key])
+        ).map(p => (
+          <button
+            key={p.key}
+            type="button"
+            onClick={() =>
+              addMutation.mutate({
+                name: t.energy.presets[p.key],
+                watts: p.watts,
+                hoursPerDay: p.hoursPerDay,
+              })
+            }
+            className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+            aria-label={t.energy.presetAddAria(t.energy.presets[p.key])}
+          >
+            + {t.energy.presets[p.key]} ({p.watts} W)
+          </button>
+        ))}
       </div>
+      <p className="mb-4 text-xs text-muted-foreground">
+        {t.energy.templatesHint}
+      </p>
 
       {query.isLoading ? (
         <div className="flex justify-center py-8">
@@ -619,6 +916,7 @@ export default function EnergyPage() {
         <ul className="space-y-2">
           {consumers.map(c => {
             const dailyWh = c.watts * c.hoursPerDay;
+            const share = c.enabled ? sharePercent(c.name) : null;
             return (
               <li
                 key={c.id}
@@ -638,6 +936,9 @@ export default function EnergyPage() {
                       c.watts,
                       c.hoursPerDay,
                       Math.round(dailyWh)
+                    )}
+                    {share !== null && share > 0 && (
+                      <> · {t.energy.consumerShare(share)}</>
                     )}
                   </p>
                 </div>

@@ -34,6 +34,8 @@ export const SYNCED_SETTING_KEYS = [
   "vehicles",
   /** Zuladungs-Plan: Fahrzeugwahl, Personen und freie Posten */
   "payloadPlan",
+  /** Strom-Speicher des Energie-Budgets (Kapazität, Bauart, Ladestand) */
+  "powerStorage",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];
