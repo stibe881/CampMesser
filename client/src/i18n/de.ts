@@ -3994,6 +3994,46 @@ export const de = {
       finalePlaceholder: "Was passiert, wenn alle Stationen geschafft sind?",
     },
   },
+  travelBingo: {
+    title: "Reise-Bingo",
+    subtitle:
+      "Was entdeckt ihr unterwegs? Antippen, was vorbeikommt – eine volle Reihe, Spalte oder Diagonale ist Bingo.",
+    empty:
+      "Noch keine Karte – leg unten eine an. Zwei Kinder bekommen zwei verschiedene Karten.",
+    howTo:
+      "Jede Karte wird frisch gemischt, darum sieht keine aus wie die andere. Der Fortschritt bleibt auf dem Gerät – auch ohne Empfang.",
+    namePlaceholder: "Name",
+    nameAria: (name: string) => `Name der Karte von ${name}`,
+    newNameAria: "Name für die neue Karte",
+    sizeBadge: (size: number) => `${size} × ${size} Felder`,
+    sizeOption: (size: number) => `${size} × ${size}`,
+    switchSize: (size: number) => `Auf ${size} × ${size}`,
+    switchSizeAria: (name: string, size: number) =>
+      `Karte von ${name} auf ${size} × ${size} umstellen`,
+    cardFallbackName: (n: number) => `Karte ${n}`,
+    cellAria: (label: string) => `${label} – als gefunden markieren`,
+    cellFoundAria: (label: string) =>
+      `${label} – gefunden, antippen zum Zurücknehmen`,
+    progressAria: (name: string) => `Bingo-Fortschritt von ${name}`,
+    foundCount: (done: number, total: number) =>
+      `${done} von ${total} gefunden`,
+    bingoBanner: (lines: number) =>
+      lines === 1
+        ? "Bingo! Eine Linie ist voll."
+        : `Bingo! Schon ${lines} volle Linien.`,
+    fullCardBanner: "Ganze Karte voll – ihr habt alles entdeckt!",
+    bingoToast: (name: string) => `Bingo für ${name}!`,
+    fullCardToast: (name: string) => `${name} hat die ganze Karte voll!`,
+    newCard: "Neue Karte",
+    newCardAria: (name: string) => `Neue Karte für ${name} mischen`,
+    reset: "Zurücksetzen",
+    resetAria: (name: string) => `Fortschritt von ${name} zurücksetzen`,
+    removeConfirm: (name: string) => `Karte von ${name} wirklich entfernen?`,
+    removeAria: (name: string) => `Karte von ${name} entfernen`,
+    addCard: "Karte hinzufügen",
+    maxCardsReached: (n: number) =>
+      `Mehr als ${n} Karten gleichzeitig gehen nicht – entferne zuerst eine.`,
+  },
   huntPrint: {
     docTitle: (title: string) => `${title} – Schnitzeljagd zum Ausdrucken`,
     docTitleFallback: "Schnitzeljagd",

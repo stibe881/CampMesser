@@ -3873,6 +3873,44 @@ export const en: Translation = {
       finalePlaceholder: "What happens when all stations are done?",
     },
   },
+  travelBingo: {
+    title: "Travel bingo",
+    subtitle:
+      "What can you spot on the way? Tap whatever goes past – a full row, column or diagonal is a bingo.",
+    empty:
+      "No card yet – create one below. Two children get two different cards.",
+    howTo:
+      "Every card is shuffled afresh, so no two look alike. Progress stays on the device – even without a signal.",
+    namePlaceholder: "Name",
+    nameAria: (name: string) => `Name of the card belonging to ${name}`,
+    newNameAria: "Name for the new card",
+    sizeBadge: (size: number) => `${size} × ${size} squares`,
+    sizeOption: (size: number) => `${size} × ${size}`,
+    switchSize: (size: number) => `Switch to ${size} × ${size}`,
+    switchSizeAria: (name: string, size: number) =>
+      `Switch the card of ${name} to ${size} × ${size}`,
+    cardFallbackName: (n: number) => `Card ${n}`,
+    cellAria: (label: string) => `${label} – mark as spotted`,
+    cellFoundAria: (label: string) => `${label} – spotted, tap to undo`,
+    progressAria: (name: string) => `Bingo progress of ${name}`,
+    foundCount: (done: number, total: number) => `${done} of ${total} spotted`,
+    bingoBanner: (lines: number) =>
+      lines === 1
+        ? "Bingo! One line is complete."
+        : `Bingo! ${lines} complete lines already.`,
+    fullCardBanner: "Whole card full – you have spotted everything!",
+    bingoToast: (name: string) => `Bingo for ${name}!`,
+    fullCardToast: (name: string) => `${name} has filled the whole card!`,
+    newCard: "New card",
+    newCardAria: (name: string) => `Shuffle a new card for ${name}`,
+    reset: "Reset",
+    resetAria: (name: string) => `Reset the progress of ${name}`,
+    removeConfirm: (name: string) => `Really remove the card of ${name}?`,
+    removeAria: (name: string) => `Remove the card of ${name}`,
+    addCard: "Add card",
+    maxCardsReached: (n: number) =>
+      `No more than ${n} cards at once – remove one first.`,
+  },
   huntPrint: {
     docTitle: (title: string) => `${title} – printable scavenger hunt`,
     docTitleFallback: "Scavenger hunt",

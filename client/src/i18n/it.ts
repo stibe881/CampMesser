@@ -3962,6 +3962,45 @@ export const it: Translation = {
         "Che cosa succede quando tutte le tappe sono completate?",
     },
   },
+  travelBingo: {
+    title: "Bingo di viaggio",
+    subtitle:
+      "Che cosa scoprite lungo la strada? Tocca quello che passa – una riga, una colonna o una diagonale completa è bingo.",
+    empty:
+      "Ancora nessuna cartella – creane una qui sotto. Due bambini ricevono due cartelle diverse.",
+    howTo:
+      "Ogni cartella viene mescolata di nuovo, così nessuna è uguale all'altra. I progressi restano sul dispositivo – anche senza rete.",
+    namePlaceholder: "Nome",
+    nameAria: (name: string) => `Nome della cartella di ${name}`,
+    newNameAria: "Nome della nuova cartella",
+    sizeBadge: (size: number) => `${size} × ${size} caselle`,
+    sizeOption: (size: number) => `${size} × ${size}`,
+    switchSize: (size: number) => `Passa a ${size} × ${size}`,
+    switchSizeAria: (name: string, size: number) =>
+      `Passare la cartella di ${name} a ${size} × ${size}`,
+    cardFallbackName: (n: number) => `Cartella ${n}`,
+    cellAria: (label: string) => `${label} – segna come trovato`,
+    cellFoundAria: (label: string) => `${label} – trovato, tocca per annullare`,
+    progressAria: (name: string) => `Progressi del bingo di ${name}`,
+    foundCount: (done: number, total: number) => `${done} su ${total} trovati`,
+    bingoBanner: (lines: number) =>
+      lines === 1
+        ? "Bingo! Una linea è completa."
+        : `Bingo! Già ${lines} linee complete.`,
+    fullCardBanner: "Cartella tutta piena – avete scoperto tutto!",
+    bingoToast: (name: string) => `Bingo per ${name}!`,
+    fullCardToast: (name: string) => `${name} ha riempito tutta la cartella!`,
+    newCard: "Nuova cartella",
+    newCardAria: (name: string) => `Mescola una nuova cartella per ${name}`,
+    reset: "Azzera",
+    resetAria: (name: string) => `Azzera i progressi di ${name}`,
+    removeConfirm: (name: string) =>
+      `Vuoi davvero rimuovere la cartella di ${name}?`,
+    removeAria: (name: string) => `Rimuovi la cartella di ${name}`,
+    addCard: "Aggiungi cartella",
+    maxCardsReached: (n: number) =>
+      `Non si possono avere più di ${n} cartelle insieme – rimuovine prima una.`,
+  },
   huntPrint: {
     docTitle: (title: string) => `${title} – caccia al tesoro da stampare`,
     docTitleFallback: "Caccia al tesoro",

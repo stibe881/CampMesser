@@ -85,6 +85,7 @@ import {
 } from "@/lib/huntTimes";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { useSpeech } from "@/lib/speech";
+import TravelBingo from "@/components/TravelBingo";
 import { cn } from "@/lib/utils";
 
 /** Buchstabe einer Station in der aktiven Sprache ("" = keiner). */
@@ -2218,6 +2219,11 @@ export default function FamilyPage() {
             <span className="text-sm font-semibold">{t.family.newQuiz}</span>
           </button>
         )}
+      </div>
+
+      {/* Reise-Bingo für die Fahrt – läuft ohne Konto und ohne Empfang */}
+      <div className="mt-8">
+        <TravelBingo />
       </div>
 
       {/* «Wer spielt?»: Kind wählen, bevor Jagd/Quiz startet */}

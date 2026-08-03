@@ -3998,6 +3998,44 @@ export const fr: Translation = {
         "Que se passe-t-il quand toutes les étapes sont réussies ?",
     },
   },
+  travelBingo: {
+    title: "Bingo de voyage",
+    subtitle:
+      "Qu'est-ce que vous découvrez en route ? Touche ce qui passe – une ligne, une colonne ou une diagonale complète, c'est bingo.",
+    empty:
+      "Pas encore de carte – crée-en une ci-dessous. Deux enfants reçoivent deux cartes différentes.",
+    howTo:
+      "Chaque carte est mélangée à neuf, aucune ne ressemble à l'autre. La progression reste sur l'appareil – même sans réseau.",
+    namePlaceholder: "Nom",
+    nameAria: (name: string) => `Nom de la carte de ${name}`,
+    newNameAria: "Nom de la nouvelle carte",
+    sizeBadge: (size: number) => `${size} × ${size} cases`,
+    sizeOption: (size: number) => `${size} × ${size}`,
+    switchSize: (size: number) => `Passer en ${size} × ${size}`,
+    switchSizeAria: (name: string, size: number) =>
+      `Passer la carte de ${name} en ${size} × ${size}`,
+    cardFallbackName: (n: number) => `Carte ${n}`,
+    cellAria: (label: string) => `${label} – marquer comme trouvé`,
+    cellFoundAria: (label: string) => `${label} – trouvé, touche pour annuler`,
+    progressAria: (name: string) => `Progression du bingo de ${name}`,
+    foundCount: (done: number, total: number) => `${done} sur ${total} trouvés`,
+    bingoBanner: (lines: number) =>
+      lines === 1
+        ? "Bingo ! Une ligne est complète."
+        : `Bingo ! Déjà ${lines} lignes complètes.`,
+    fullCardBanner: "Carte entièrement remplie – vous avez tout découvert !",
+    bingoToast: (name: string) => `Bingo pour ${name} !`,
+    fullCardToast: (name: string) => `${name} a rempli toute la carte !`,
+    newCard: "Nouvelle carte",
+    newCardAria: (name: string) => `Mélanger une nouvelle carte pour ${name}`,
+    reset: "Réinitialiser",
+    resetAria: (name: string) => `Réinitialiser la progression de ${name}`,
+    removeConfirm: (name: string) => `Supprimer vraiment la carte de ${name} ?`,
+    removeAria: (name: string) => `Supprimer la carte de ${name}`,
+    addCard: "Ajouter une carte",
+    maxCardsReached: (n: number) =>
+      `Pas plus de ${n} cartes à la fois – supprime-en une d'abord.`,
+  },
   huntPrint: {
     docTitle: (title: string) => `${title} – chasse au trésor à imprimer`,
     docTitleFallback: "Chasse au trésor",
