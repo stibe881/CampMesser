@@ -31,6 +31,7 @@ import BrandLogo from "@/components/BrandLogo";
 import InstallPrompt from "@/components/InstallPrompt";
 import UpdatePrompt from "@/components/UpdatePrompt";
 import QuickActions from "@/components/QuickActions";
+import CookTimerBar from "@/components/CookTimerBar";
 import WhatsNewStartup from "@/components/WhatsNewDialog";
 import {
   DropdownMenu,
@@ -325,6 +326,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Schnellaktionen: FAB (mobil) + Befehls-Palette (Cmd/Ctrl+K) */}
       <QuickActions />
+
+      {/* Küchen-Timer (#218): dezenter Chip, solange ein Timer läuft */}
+      <CookTimerBar />
 
       {/* App-Icon-Zähler (Badging API) – unsichtbar */}
       <AppBadgeUpdater />

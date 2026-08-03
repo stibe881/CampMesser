@@ -2457,6 +2457,36 @@ export const en: Translation = {
       photoRemoveFailed: "The photo could not be removed.",
     },
   },
+  cookTimer: {
+    title: "Kitchen timer",
+    hint: "The timer keeps running when you switch pages – the remaining time shows at the bottom of the app.",
+    quickAria: "Choose the timer duration",
+    quickMinutes: (n: number) => `${n} min`,
+    customLabel: "Custom duration in minutes",
+    customPlaceholder: "Minutes",
+    startButton: "Start",
+    invalidMinutes: (max: number) =>
+      `Please enter between 1 and ${max} minutes.`,
+    tooMany: (max: number) =>
+      `${max} timers are already running – cancel one first.`,
+    started: (minutes: number) => `${minutes} min timer started`,
+    stepTimerAria: (label: string) => `Start a timer for ${label}`,
+    runningLabel: "running",
+    pausedLabel: "paused",
+    expired: "Done – time is up!",
+    dismiss: "Got it",
+    dismissAria: (name: string) => `Acknowledge timer ${name}`,
+    pauseAria: (name: string) => `Pause timer ${name}`,
+    resumeAria: (name: string) => `Resume timer ${name}`,
+    cancelAria: (name: string) => `Cancel timer ${name}`,
+    expiredShort: "Done",
+    pausedShort: "Paused",
+    moreCount: (n: number) => `+${n}`,
+    barOpenAria: (name: string, time: string) =>
+      `Timer ${name}: ${time} left – back to the recipe`,
+    barExpiredAria: (name: string) =>
+      `Timer ${name} has finished – back to the recipe`,
+  },
   food: {
     title: "Cool box inventory",
     subtitleLoggedOut:

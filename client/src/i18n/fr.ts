@@ -2547,6 +2547,35 @@ export const fr: Translation = {
       photoRemoveFailed: "La photo n'a pas pu être supprimée.",
     },
   },
+  cookTimer: {
+    title: "Minuteur de cuisine",
+    hint: "Le minuteur continue même si tu changes de page – le temps restant s'affiche en bas de l'app.",
+    quickAria: "Choisir la durée du minuteur",
+    quickMinutes: (n: number) => `${n} min`,
+    customLabel: "Durée personnalisée en minutes",
+    customPlaceholder: "Minutes",
+    startButton: "Démarrer",
+    invalidMinutes: (max: number) => `Indique entre 1 et ${max} minutes.`,
+    tooMany: (max: number) =>
+      `${max} minuteurs tournent déjà – annules-en un d'abord.`,
+    started: (minutes: number) => `Minuteur de ${minutes} min démarré`,
+    stepTimerAria: (label: string) => `Démarrer un minuteur de ${label}`,
+    runningLabel: "en cours",
+    pausedLabel: "en pause",
+    expired: "C'est prêt – le temps est écoulé !",
+    dismiss: "C'est noté",
+    dismissAria: (name: string) => `Acquitter le minuteur ${name}`,
+    pauseAria: (name: string) => `Mettre le minuteur ${name} en pause`,
+    resumeAria: (name: string) => `Reprendre le minuteur ${name}`,
+    cancelAria: (name: string) => `Annuler le minuteur ${name}`,
+    expiredShort: "Prêt",
+    pausedShort: "Pause",
+    moreCount: (n: number) => `+${n}`,
+    barOpenAria: (name: string, time: string) =>
+      `Minuteur ${name} : encore ${time} – retour à la recette`,
+    barExpiredAria: (name: string) =>
+      `Le minuteur ${name} est écoulé – retour à la recette`,
+  },
   food: {
     title: "Inventaire de la glacière",
     subtitleLoggedOut:

@@ -2555,6 +2555,35 @@ export const de = {
       photoRemoveFailed: "Das Foto konnte nicht entfernt werden.",
     },
   },
+  cookTimer: {
+    title: "Küchen-Timer",
+    hint: "Der Timer läuft weiter, wenn du die Seite wechselst – die Restzeit siehst du unten in der App.",
+    quickAria: "Timer-Dauer wählen",
+    quickMinutes: (n: number) => `${n} Min.`,
+    customLabel: "Eigene Dauer in Minuten",
+    customPlaceholder: "Minuten",
+    startButton: "Starten",
+    invalidMinutes: (max: number) => `Bitte 1 bis ${max} Minuten angeben.`,
+    tooMany: (max: number) =>
+      `Es laufen bereits ${max} Timer – brich zuerst einen ab.`,
+    started: (minutes: number) => `Timer über ${minutes} Min. gestartet`,
+    stepTimerAria: (label: string) => `Timer über ${label} starten`,
+    runningLabel: "läuft",
+    pausedLabel: "pausiert",
+    expired: "Fertig – die Zeit ist um!",
+    dismiss: "Erledigt",
+    dismissAria: (name: string) => `Timer ${name} quittieren`,
+    pauseAria: (name: string) => `Timer ${name} pausieren`,
+    resumeAria: (name: string) => `Timer ${name} fortsetzen`,
+    cancelAria: (name: string) => `Timer ${name} abbrechen`,
+    expiredShort: "Fertig",
+    pausedShort: "Pause",
+    moreCount: (n: number) => `+${n}`,
+    barOpenAria: (name: string, time: string) =>
+      `Timer ${name}: noch ${time} – zurück zum Rezept`,
+    barExpiredAria: (name: string) =>
+      `Timer ${name} ist abgelaufen – zurück zum Rezept`,
+  },
   food: {
     title: "Kühlbox-Inventar",
     subtitleLoggedOut:

@@ -16,16 +16,20 @@ import {
   ImagePlus,
   Link2,
   MonitorSmartphone,
+  Pause,
   Pencil,
+  Play,
   Plus,
   QrCode,
   Refrigerator,
   Search,
   Share2,
   ShoppingCart,
+  Timer as TimerIcon,
   Trash2,
   Users,
   WifiOff,
+  X,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { useLocation, useSearch } from "wouter";
@@ -57,8 +61,25 @@ import {
   parseStringList,
 } from "@shared/customRecipes";
 import { matchFoodItems } from "@shared/food";
+import {
+  formatRemaining,
+  MAX_ACTIVE_TIMERS,
+  MAX_TIMER_MINUTES,
+  parseDurations,
+  parseTimerMinutes,
+  QUICK_TIMER_MINUTES,
+} from "@shared/cookTimer";
 import { pick } from "@shared/i18n";
-import { useI18n } from "@/i18n";
+import { useI18n, useT } from "@/i18n";
+import {
+  isExpired,
+  pauseCookTimer,
+  remainingSeconds,
+  removeCookTimer,
+  resumeCookTimer,
+  startCookTimer,
+  useCookTimers,
+} from "@/lib/cookTimers";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import {
@@ -433,6 +454,259 @@ function RecipeEditorDialog({
 }
 
 /**
+ * Küchen-Timer (#218) – Knöpfe für die im Schritt-Text gefundenen
+ * Zeitangaben («15 Minuten köcheln» → Knopf «15 Minuten»). Ohne erkannte
+ * Zeitangabe wird nichts gerendert.
+ */
+function StepTimerButtons({
+  text,
+  recipeId,
+  recipeName,
+}: {
+  text: string;
+  recipeId: string;
+  recipeName: string;
+}) {
+  const t = useT();
+  const durations = useMemo(() => parseDurations(text), [text]);
+  if (durations.length === 0) return null;
+  return (
+    <span className="mt-1 flex flex-wrap gap-1.5">
+      {durations.map(duration => (
+        <button
+          key={`${duration.label}-${duration.minutes}`}
+          type="button"
+          onClick={() =>
+            startTimerWithToast(t, {
+              name: `${duration.label} · ${recipeName}`,
+              minutes: duration.minutes,
+              recipeId,
+            })
+          }
+          aria-label={t.cookTimer.stepTimerAria(duration.label)}
+          className="inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-accent-foreground transition-colors hover:bg-accent/80"
+        >
+          <TimerIcon className="h-3 w-3" aria-hidden="true" />
+          {duration.label}
+        </button>
+      ))}
+    </span>
+  );
+}
+
+/** Timer starten und das Ergebnis als Toast melden (gemeinsam genutzt). */
+function startTimerWithToast(
+  t: ReturnType<typeof useT>,
+  options: { name: string; minutes: number; recipeId: string }
+) {
+  const id = startCookTimer(options);
+  if (!id) {
+    toast.error(t.cookTimer.tooMany(MAX_ACTIVE_TIMERS));
+    return;
+  }
+  toast.success(t.cookTimer.started(options.minutes));
+}
+
+/**
+ * Liste der laufenden Timer mit grosser Restzeit, Pause/Fortsetzen und
+ * Abbrechen. Abgelaufene Timer bleiben als deutlicher Hinweis stehen, bis
+ * sie quittiert werden.
+ */
+function RunningTimerList({ compact = false }: { compact?: boolean }) {
+  const t = useT();
+  const { timers, now } = useCookTimers();
+  if (timers.length === 0) return null;
+  return (
+    <ul className={cn("space-y-2", compact ? "mt-2" : "mt-3")}>
+      {timers.map(timer => {
+        const remaining = remainingSeconds(timer, now);
+        const expired = isExpired(timer, now);
+        const paused = timer.pausedSeconds !== null;
+        const percent = expired
+          ? 100
+          : Math.min(
+              100,
+              Math.max(
+                0,
+                ((timer.totalSeconds - remaining) / timer.totalSeconds) * 100
+              )
+            );
+        return (
+          <li
+            key={timer.id}
+            className={cn(
+              "rounded-lg border px-3 py-2",
+              expired
+                ? "border-destructive bg-destructive/10"
+                : "border-border bg-muted/40"
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <span
+                className={cn(
+                  "font-mono font-bold tabular-nums",
+                  compact ? "text-2xl" : "text-3xl",
+                  expired && "text-destructive"
+                )}
+                aria-live={expired ? "polite" : "off"}
+              >
+                {formatRemaining(remaining)}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium">
+                  {timer.name}
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  {expired
+                    ? t.cookTimer.expired
+                    : paused
+                      ? t.cookTimer.pausedLabel
+                      : t.cookTimer.runningLabel}
+                </span>
+              </span>
+              {expired ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => removeCookTimer(timer.id)}
+                  aria-label={t.cookTimer.dismissAria(timer.name)}
+                >
+                  {t.cookTimer.dismiss}
+                </Button>
+              ) : (
+                <span className="flex shrink-0 gap-1">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
+                    onClick={() =>
+                      paused
+                        ? resumeCookTimer(timer.id)
+                        : pauseCookTimer(timer.id)
+                    }
+                    aria-label={
+                      paused
+                        ? t.cookTimer.resumeAria(timer.name)
+                        : t.cookTimer.pauseAria(timer.name)
+                    }
+                  >
+                    {paused ? (
+                      <Play className="h-4 w-4" aria-hidden="true" />
+                    ) : (
+                      <Pause className="h-4 w-4" aria-hidden="true" />
+                    )}
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-muted-foreground/70 hover:text-destructive"
+                    onClick={() => removeCookTimer(timer.id)}
+                    aria-label={t.cookTimer.cancelAria(timer.name)}
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                </span>
+              )}
+            </div>
+            {!expired && (
+              <div
+                className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-border"
+                aria-hidden="true"
+              >
+                <div
+                  className={cn(
+                    "h-full rounded-full transition-[width] duration-500",
+                    paused ? "bg-muted-foreground/50" : "bg-primary"
+                  )}
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/**
+ * Timer-Abschnitt im Rezept-Detail: Schnellwahl-Chips, freie Minuten-Eingabe
+ * und die Liste der laufenden Timer. Die Timer laufen über den Zielzeitpunkt
+ * weiter, auch wenn der Dialog geschlossen oder die Seite gewechselt wird.
+ */
+function RecipeTimerSection({
+  recipeId,
+  recipeName,
+}: {
+  recipeId: string;
+  recipeName: string;
+}) {
+  const t = useT();
+  const [custom, setCustom] = useState("");
+
+  const startCustom = () => {
+    const minutes = parseTimerMinutes(custom);
+    if (minutes === null) {
+      toast.error(t.cookTimer.invalidMinutes(MAX_TIMER_MINUTES));
+      return;
+    }
+    startTimerWithToast(t, { name: recipeName, minutes, recipeId });
+    setCustom("");
+  };
+
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <h3 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        <TimerIcon className="h-4 w-4" aria-hidden="true" />
+        {t.cookTimer.title}
+      </h3>
+      <p className="mt-1 text-xs text-muted-foreground">{t.cookTimer.hint}</p>
+      <div
+        className="mt-2 flex flex-wrap gap-1.5"
+        role="group"
+        aria-label={t.cookTimer.quickAria}
+      >
+        {QUICK_TIMER_MINUTES.map(minutes => (
+          <button
+            key={minutes}
+            type="button"
+            onClick={() =>
+              startTimerWithToast(t, { name: recipeName, minutes, recipeId })
+            }
+            className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          >
+            {t.cookTimer.quickMinutes(minutes)}
+          </button>
+        ))}
+      </div>
+      <div className="mt-2 flex gap-2">
+        <Input
+          className="max-w-32"
+          type="number"
+          min={1}
+          max={MAX_TIMER_MINUTES}
+          inputMode="numeric"
+          value={custom}
+          placeholder={t.cookTimer.customPlaceholder}
+          aria-label={t.cookTimer.customLabel}
+          onChange={e => setCustom(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              startCustom();
+            }
+          }}
+        />
+        <Button variant="outline" size="sm" onClick={startCustom}>
+          {t.cookTimer.startButton}
+        </Button>
+      </div>
+      <RunningTimerList />
+    </div>
+  );
+}
+
+/**
  * Kochmodus: Vollbild mit einem Zubereitungsschritt pro Ansicht, grossen
  * Blätter-Flächen und aktivem Wake Lock (Display bleibt an, solange offen).
  * Funktioniert für eingebaute und eigene Rezepte gleichermassen.
@@ -485,7 +759,7 @@ function CookingModeDialog({
 
       {/* Der grosse Schritt-Text */}
       <div className="flex-1 overflow-y-auto px-6 py-8 sm:px-10">
-        <div className="mx-auto flex h-full max-w-2xl items-center">
+        <div className="mx-auto max-w-2xl">
           <p
             ref={stepRef}
             tabIndex={-1}
@@ -494,6 +768,14 @@ function CookingModeDialog({
           >
             {pick(recipe.steps[step] ?? "", lang)}
           </p>
+          {/* Timer direkt zum Schritt (#218) – die Leiste im App-Rahmen liegt
+              hinter dem Vollbild-Dialog, darum hier eine eigene Anzeige */}
+          <StepTimerButtons
+            text={pick(recipe.steps[step] ?? "", lang)}
+            recipeId={recipe.id}
+            recipeName={pick(recipe.name, lang)}
+          />
+          <RunningTimerList compact />
         </div>
       </div>
 
@@ -783,6 +1065,26 @@ export default function RecipesPage() {
     () => [...(customQuery.data ?? []).map(customRecipeToRecipe), ...recipes],
     [customQuery.data]
   );
+
+  /**
+   * Rücksprung aus der Timer-Leiste (#218): /rezepte?rezept=<id> öffnet
+   * direkt das Rezept-Detail. Jede Id wird nur einmal geöffnet – wer den
+   * Dialog schliesst, bekommt ihn nicht sofort wieder vorgesetzt.
+   */
+  const openedRecipeParam = useRef<string | null>(null);
+  useEffect(() => {
+    const wanted = new URLSearchParams(searchParams).get("rezept");
+    if (!wanted) {
+      openedRecipeParam.current = null;
+      return;
+    }
+    if (openedRecipeParam.current === wanted) return;
+    const found = allRecipes.find(r => r.id === wanted);
+    if (!found) return;
+    openedRecipeParam.current = wanted;
+    setDiceMode(false);
+    setSelected(found);
+  }, [searchParams, allRecipes]);
 
   const filtered = useMemo(() => {
     const matching = allRecipes.filter(r => {
@@ -1225,11 +1527,25 @@ export default function RecipesPage() {
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                           {i + 1}
                         </span>
-                        <p className="text-sm">{pick(step, lang)}</p>
+                        <p className="min-w-0 flex-1 text-sm">
+                          {pick(step, lang)}
+                          {/* Zeitangabe im Schritt → Timer mit genau dieser Dauer */}
+                          <StepTimerButtons
+                            text={pick(step, lang)}
+                            recipeId={selected.id}
+                            recipeName={pick(selected.name, lang)}
+                          />
+                        </p>
                       </li>
                     ))}
                   </ol>
                 </div>
+
+                {/* Küchen-Timer zum Rezept (#218) */}
+                <RecipeTimerSection
+                  recipeId={selected.id}
+                  recipeName={pick(selected.name, lang)}
+                />
 
                 {selected.tip && (
                   <div className="rounded-lg bg-accent/60 p-3">

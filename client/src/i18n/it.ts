@@ -2523,6 +2523,35 @@ export const it: Translation = {
       photoRemoveFailed: "La foto non è stata rimossa.",
     },
   },
+  cookTimer: {
+    title: "Timer da cucina",
+    hint: "Il timer continua anche se cambi pagina – il tempo rimanente lo vedi in basso nell'app.",
+    quickAria: "Scegli la durata del timer",
+    quickMinutes: (n: number) => `${n} min`,
+    customLabel: "Durata personalizzata in minuti",
+    customPlaceholder: "Minuti",
+    startButton: "Avvia",
+    invalidMinutes: (max: number) => `Indica da 1 a ${max} minuti.`,
+    tooMany: (max: number) =>
+      `Ci sono già ${max} timer attivi – annullane prima uno.`,
+    started: (minutes: number) => `Timer di ${minutes} min avviato`,
+    stepTimerAria: (label: string) => `Avvia un timer di ${label}`,
+    runningLabel: "in corso",
+    pausedLabel: "in pausa",
+    expired: "Pronto – il tempo è scaduto!",
+    dismiss: "Fatto",
+    dismissAria: (name: string) => `Conferma il timer ${name}`,
+    pauseAria: (name: string) => `Metti in pausa il timer ${name}`,
+    resumeAria: (name: string) => `Riprendi il timer ${name}`,
+    cancelAria: (name: string) => `Annulla il timer ${name}`,
+    expiredShort: "Pronto",
+    pausedShort: "Pausa",
+    moreCount: (n: number) => `+${n}`,
+    barOpenAria: (name: string, time: string) =>
+      `Timer ${name}: mancano ${time} – torna alla ricetta`,
+    barExpiredAria: (name: string) =>
+      `Il timer ${name} è scaduto – torna alla ricetta`,
+  },
   food: {
     title: "Inventario del frigo box",
     subtitleLoggedOut:
