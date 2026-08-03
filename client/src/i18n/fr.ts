@@ -1951,6 +1951,27 @@ export const fr: Translation = {
     contactParcelLabel: "Numéro de parcelle",
     contactParcelPlaceholder: "p. ex. B12",
     contactSaved: "Coordonnées enregistrées",
+    costTitle: "Coût par nuit",
+    costEmpty:
+      "Aucun prix saisi pour l'instant – note ce que coûte une nuit ici, tu pourras ensuite comparer les emplacements dans les statistiques.",
+    costEditButton: "Modifier les coûts",
+    costPriceLabel: "Emplacement par nuit",
+    costExtraLabel: "Taxe de séjour et frais annexes",
+    costNightlyLabel: "Total par nuit",
+    costEstimate: (nights: number, amount: string) =>
+      `Tes ${nights === 1 ? "1 nuit" : `${nights} nuits`} ici représentent environ ${amount} – estimation approximative.`,
+    costHint:
+      "Ce n'est qu'une estimation : CampMesser ne connaît ni les rabais, ni les enfants, ni le chien, ni les suppléments de saison. Ce que tu as vraiment payé figure dans la caisse du séjour concerné.",
+    costDialogTitle: "Modifier le coût par nuit",
+    costDialogDesc:
+      "Les deux champs sont facultatifs – laisser vide signifie « non saisi ».",
+    costPriceInputLabel: "Emplacement par nuit (CHF)",
+    costPricePlaceholder: "p. ex. 42.00",
+    costExtraInputLabel: "Taxe de séjour et frais annexes par nuit (CHF)",
+    costExtraPlaceholder: "p. ex. 3.50",
+    costExtraHelp:
+      "Tout ce qui s'ajoute par nuit : taxe de séjour, électricité, jetons de douche, chien.",
+    costSaved: "Coûts enregistrés",
     offlineMapTitle: "Carte hors ligne",
     offlineMapDesc:
       "Télécharge à l'avance les tuiles de carte autour de cet emplacement – la carte et le radar de tente s'y retrouveront même sans réseau.",
@@ -2435,6 +2456,17 @@ export const fr: Translation = {
     hubQrHint: "Il suffit de le scanner pour l'ouvrir.",
     printEntryAria: (name: string) =>
       `Imprimer le rapport de voyage de ${name}`,
+    icsButton: "Calendrier",
+    icsAria: (name: string) =>
+      `Télécharger ${name} comme entrée d'agenda (.ics)`,
+    icsAllButton: "Tout dans l'agenda",
+    icsAllAria:
+      "Télécharger tous les séjours à venir dans un seul fichier d'agenda (.ics)",
+    icsDone: (n: number) =>
+      n === 1
+        ? "Fichier d'agenda créé – ouvre-le pour ajouter le séjour"
+        : `Fichier d'agenda avec ${n} séjours créé – ouvre-le pour les ajouter`,
+    icsFailed: "Impossible de créer le fichier d'agenda",
     milestonesTitle: "Jalons",
     milestonesAchievedOn: date => `atteint le ${date}`,
     milestonesNextTitle: "Prochains objectifs",
@@ -4274,6 +4306,15 @@ export const fr: Translation = {
       n === 1
         ? "D'après l'archive météo de 1 séjour"
         : `D'après l'archive météo de ${n} séjours`,
+    spotCostsTitle: "Comparatif des emplacements : prix par nuit",
+    spotCostsLink: "Emplacements",
+    spotCostsPerNight: (amount: string) => `${amount} / nuit`,
+    spotCostsEstimate: (nights: number, amount: string) =>
+      `≈ ${amount} pour ${nights === 1 ? "1 nuit" : `${nights} nuits`}`,
+    spotCostsTotal: (amount: string) =>
+      `Toutes tes nuits sur ces emplacements réunies : environ ${amount}.`,
+    spotCostsHint:
+      "Prix par nuit taxe de séjour et frais annexes compris, le moins cher en haut. Les totaux sont le produit nuits × prix et donc de simples estimations – ce que tu as vraiment payé figure dans la caisse du séjour concerné.",
     yearCompareTitle: "Nuitées par année",
     nightsCount: n => (n === 1 ? "1 nuit" : `${n} nuits`),
     milestonesTitle: "Jalons",

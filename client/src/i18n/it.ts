@@ -1927,6 +1927,28 @@ export const it: Translation = {
     contactParcelLabel: "Numero piazzola",
     contactParcelPlaceholder: "es. B12",
     contactSaved: "Contatti salvati",
+    costTitle: "Costo per notte",
+    costEmpty:
+      "Nessun prezzo registrato – annota quanto costa una notte qui, così potrai confrontare le piazzole nelle statistiche.",
+    costEditButton: "Modifica i costi",
+    costPriceLabel: "Piazzola per notte",
+    costExtraLabel: "Tassa di soggiorno e spese accessorie",
+    costNightlyLabel: "Totale per notte",
+    costEstimate: (nights: number, amount: string) =>
+      `Le tue ${nights === 1 ? "1 notte" : `${nights} notti`} qui fanno circa ${amount} – stima approssimativa.`,
+    costHint:
+      "È solo una stima: CampMesser non conosce sconti, bambini, cane o supplementi stagionali. Quanto hai pagato davvero è nella cassa del viaggio corrispondente.",
+    costDialogTitle: "Modifica il costo per notte",
+    costDialogDesc:
+      "Entrambi i campi sono facoltativi – lasciarli vuoti significa «non registrato».",
+    costPriceInputLabel: "Piazzola per notte (CHF)",
+    costPricePlaceholder: "per es. 42.00",
+    costExtraInputLabel:
+      "Tassa di soggiorno e spese accessorie per notte (CHF)",
+    costExtraPlaceholder: "per es. 3.50",
+    costExtraHelp:
+      "Tutto ciò che si aggiunge per notte: tassa di soggiorno, corrente, gettoni doccia, cane.",
+    costSaved: "Costi salvati",
     offlineMapTitle: "Mappa offline",
     offlineMapDesc:
       "Scarica in anticipo le tessere della mappa attorno a questa piazzola – così mappa e trova-tenda funzionano anche senza campo.",
@@ -2410,6 +2432,16 @@ export const it: Translation = {
     hubQrAlt: name => `Codice QR del link dell'hub per ${name}`,
     hubQrHint: "Basta scansionarlo per aprirlo.",
     printEntryAria: name => `Stampare il rapporto di viaggio di ${name}`,
+    icsButton: "Calendario",
+    icsAria: name => `Scaricare ${name} come voce di calendario (.ics)`,
+    icsAllButton: "Tutti nel calendario",
+    icsAllAria:
+      "Scaricare tutti i viaggi in programma in un unico file di calendario (.ics)",
+    icsDone: n =>
+      n === 1
+        ? "File di calendario creato – aprilo per aggiungere il viaggio"
+        : `File di calendario con ${n} viaggi creato – aprilo per aggiungerli`,
+    icsFailed: "Impossibile creare il file di calendario",
     milestonesTitle: "Traguardi",
     milestonesAchievedOn: date => `raggiunto il ${date}`,
     milestonesNextTitle: "Prossimi obiettivi",
@@ -4238,6 +4270,15 @@ export const it: Translation = {
       n === 1
         ? "Dall'archivio meteo di 1 soggiorno"
         : `Dall'archivio meteo di ${n} soggiorni`,
+    spotCostsTitle: "Confronto piazzole: prezzo per notte",
+    spotCostsLink: "Piazzole",
+    spotCostsPerNight: (amount: string) => `${amount} / notte`,
+    spotCostsEstimate: (nights: number, amount: string) =>
+      `≈ ${amount} per ${nights === 1 ? "1 notte" : `${nights} notti`}`,
+    spotCostsTotal: (amount: string) =>
+      `Tutte le tue notti in queste piazzole insieme: circa ${amount}.`,
+    spotCostsHint:
+      "Prezzo per notte inclusa tassa di soggiorno e spese accessorie, la più conveniente in alto. I totali sono notti × prezzo e quindi solo una stima – quanto hai pagato davvero è nella cassa del viaggio corrispondente.",
     yearCompareTitle: "Notti per anno",
     nightsCount: n => (n === 1 ? "1 notte" : `${n} notti`),
     milestonesTitle: "Traguardi",

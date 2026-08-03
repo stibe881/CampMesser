@@ -1889,6 +1889,27 @@ export const en: Translation = {
     contactParcelLabel: "Pitch number",
     contactParcelPlaceholder: "e.g. B12",
     contactSaved: "Contact details saved",
+    costTitle: "Cost per night",
+    costEmpty:
+      "No price recorded yet – note down what a night here costs, then you can compare pitches in the statistics.",
+    costEditButton: "Edit costs",
+    costPriceLabel: "Pitch per night",
+    costExtraLabel: "Tourist tax & extras",
+    costNightlyLabel: "Total per night",
+    costEstimate: (nights: number, amount: string) =>
+      `Your ${nights === 1 ? "1 night" : `${nights} nights`} here add up to roughly ${amount} – a rough estimate.`,
+    costHint:
+      "Only an estimate: CampMesser knows nothing about discounts, children, dogs or seasonal surcharges. What you actually paid is in the trip kitty of the stay in question.",
+    costDialogTitle: "Edit cost per night",
+    costDialogDesc:
+      "Both fields are optional – leaving one empty means “not recorded”.",
+    costPriceInputLabel: "Pitch per night (CHF)",
+    costPricePlaceholder: "e.g. 42.00",
+    costExtraInputLabel: "Tourist tax & extras per night (CHF)",
+    costExtraPlaceholder: "e.g. 3.50",
+    costExtraHelp:
+      "Everything that comes on top per night: tourist tax, electricity, shower tokens, dog.",
+    costSaved: "Costs saved",
     offlineMapTitle: "Offline map",
     offlineMapDesc:
       "Download the map tiles around this pitch in advance – then the map and the tent finder still work without a signal.",
@@ -2351,6 +2372,15 @@ export const en: Translation = {
     hubQrAlt: name => `QR code of the trip hub link for ${name}`,
     hubQrHint: "Simply scan it to open.",
     printEntryAria: name => `Print the trip report of ${name}`,
+    icsButton: "Calendar",
+    icsAria: name => `Download ${name} as a calendar entry (.ics)`,
+    icsAllButton: "All to calendar",
+    icsAllAria: "Download all upcoming trips as one calendar file (.ics)",
+    icsDone: n =>
+      n === 1
+        ? "Calendar file created – open it to add the trip"
+        : `Calendar file with ${n} trips created – open it to add them`,
+    icsFailed: "The calendar file could not be created",
     milestonesTitle: "Milestones",
     milestonesAchievedOn: date => `achieved on ${date}`,
     milestonesNextTitle: "Next goals",
@@ -4143,6 +4173,15 @@ export const en: Translation = {
       n === 1
         ? "Based on the weather archive of 1 stay"
         : `Based on the weather archive of ${n} stays`,
+    spotCostsTitle: "Pitch comparison: price per night",
+    spotCostsLink: "Pitches",
+    spotCostsPerNight: (amount: string) => `${amount} / night`,
+    spotCostsEstimate: (nights: number, amount: string) =>
+      `≈ ${amount} for ${nights === 1 ? "1 night" : `${nights} nights`}`,
+    spotCostsTotal: (amount: string) =>
+      `All your nights at these pitches together: around ${amount}.`,
+    spotCostsHint:
+      "Price per night including tourist tax and extras, cheapest at the top. The totals are nights × price and therefore only an estimate – what you actually paid is in the trip kitty of the stay in question.",
     yearCompareTitle: "Nights per year",
     nightsCount: n => (n === 1 ? "1 night" : `${n} nights`),
     milestonesTitle: "Milestones",

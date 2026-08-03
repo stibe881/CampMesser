@@ -63,6 +63,16 @@ export const campSpots = mysqlTable(
     /** Parzellen-/Stellplatz-Nummer. */
     parcelNumber: varchar("parcelNumber", { length: 40 }),
     /**
+     * Preis pro Nacht in RAPPEN (Muster Reisekasse/Inventar – Ganzzahl statt
+     * Kommazahl, damit keine Rundungsfehler entstehen); null = nicht erfasst.
+     */
+    pricePerNightRappen: int("pricePerNightRappen"),
+    /**
+     * Kurtaxe und Nebenkosten pro Nacht in RAPPEN (Strom, Duschmarken …);
+     * null = nicht erfasst. Wird für den Vergleich zum Preis addiert.
+     */
+    extraPerNightRappen: int("extraPerNightRappen"),
+    /**
      * Höhe über Meer in Metern; null = noch nicht ermittelt. Der Client holt
      * den Wert einmalig bei der Open-Meteo-Elevation-API und speichert ihn.
      */

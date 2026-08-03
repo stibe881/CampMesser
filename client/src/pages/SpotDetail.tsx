@@ -24,6 +24,7 @@ import {
   SlidersHorizontal,
   Sunrise,
   Trash2,
+  Wallet,
   Waves,
   WifiOff,
 } from "lucide-react";
@@ -87,6 +88,8 @@ import {
   zoomLevelsUpTo,
   type OfflineMapPack,
 } from "@/lib/mapTiles";
+import { nightlyRappen } from "@shared/spotCosts";
+import { formatChf, parseChfInput, rappenToInput } from "@/lib/money";
 import { altitudeHint } from "@shared/altitude";
 import { bathingComfort } from "@shared/bathingWater";
 import { formatDistance } from "@shared/geo";
@@ -579,6 +582,10 @@ export default function SpotDetailPage() {
     checkin: "",
     parcel: "",
   });
+  // Platzkosten (#243): beide Beträge als Franken-Text im Formular,
+  // gespeichert wird in Rappen (Muster Reisekasse/Inventar).
+  const [costDialogOpen, setCostDialogOpen] = useState(false);
+  const [costDraft, setCostDraft] = useState({ price: "", extra: "" });
   const utils = trpc.useUtils();
   const photosQuery = trpc.spots.photos.list.useQuery(
     { spotId },
@@ -715,6 +722,10 @@ export default function SpotDetailPage() {
         })
       : "–";
 
+  /** Rappen als «CHF 45.50» – gleiche Schreibweise wie in der Reisekasse. */
+  const fmtChf = (rappen: number) =>
+    `${t.tripExpenses.currency} ${formatChf(rappen, lang)}`;
+
   if (loading || (isAuthenticated && spotsQuery.isLoading)) {
     return (
       <div className="container flex justify-center py-16">
@@ -790,6 +801,41 @@ export default function SpotDetailPage() {
   const hasContact = Boolean(
     spot.receptionPhone || spot.checkinInfo || spot.parcelNumber
   );
+
+  const openCostDialog = () => {
+    setCostDraft({
+      price: rappenToInput(spot.pricePerNightRappen),
+      extra: rappenToInput(spot.extraPerNightRappen),
+    });
+    setCostDialogOpen(true);
+  };
+
+  const saveCosts = () => {
+    updateMutation.mutate(
+      {
+        id: spot.id,
+        // Leeres Feld → 0 → der Server löscht den Wert (null)
+        pricePerNightRappen: parseChfInput(costDraft.price) ?? 0,
+        extraPerNightRappen: parseChfInput(costDraft.extra) ?? 0,
+      },
+      {
+        onSuccess: () => {
+          utils.spots.list.invalidate();
+          setCostDialogOpen(false);
+          toast.success(t.spotDetail.costSaved);
+        },
+        onError: () => toast.error(t.common.saveFailed),
+      }
+    );
+  };
+
+  /** Preis pro Nacht inkl. Nebenkosten in Rappen; null = nichts erfasst. */
+  const spotNightly = nightlyRappen(spot);
+  /** Grobe Kosten-Schätzung für alle bisherigen Nächte an diesem Platz. */
+  const costEstimateRappen =
+    spotNightly !== null && tripStats.totalNights > 0
+      ? spotNightly * tripStats.totalNights
+      : null;
 
   const saveAttributes = () => {
     const json =
@@ -936,6 +982,75 @@ export default function SpotDetailPage() {
             onClick={openContactDialog}
           >
             {t.spotDetail.contactEditButton}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Platzkosten (#243): Preis pro Nacht und Nebenkosten pro Nacht */}
+      <Card className="mb-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Wallet className="h-4 w-4 text-primary" aria-hidden="true" />
+            {t.spotDetail.costTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {spotNightly !== null ? (
+            <>
+              <dl className="space-y-2 text-sm">
+                {spot.pricePerNightRappen ? (
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                    <dt className="w-36 shrink-0 text-muted-foreground">
+                      {t.spotDetail.costPriceLabel}
+                    </dt>
+                    <dd className="font-medium">
+                      {fmtChf(spot.pricePerNightRappen)}
+                    </dd>
+                  </div>
+                ) : null}
+                {spot.extraPerNightRappen ? (
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                    <dt className="w-36 shrink-0 text-muted-foreground">
+                      {t.spotDetail.costExtraLabel}
+                    </dt>
+                    <dd className="font-medium">
+                      {fmtChf(spot.extraPerNightRappen)}
+                    </dd>
+                  </div>
+                ) : null}
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                  <dt className="w-36 shrink-0 text-muted-foreground">
+                    {t.spotDetail.costNightlyLabel}
+                  </dt>
+                  <dd className="font-serif text-lg font-bold text-primary">
+                    {fmtChf(spotNightly)}
+                  </dd>
+                </div>
+              </dl>
+              {costEstimateRappen !== null && (
+                <p className="mt-3 rounded-lg bg-accent/50 px-3 py-2 text-xs text-accent-foreground">
+                  {t.spotDetail.costEstimate(
+                    tripStats.totalNights,
+                    fmtChf(costEstimateRappen)
+                  )}
+                </p>
+              )}
+              <p className="mt-2 text-xs text-muted-foreground">
+                {t.spotDetail.costHint}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {t.spotDetail.costEmpty}
+            </p>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={openCostDialog}
+          >
+            {t.spotDetail.costEditButton}
           </Button>
         </CardContent>
       </Card>
@@ -1683,6 +1798,63 @@ export default function SpotDetailPage() {
               {t.common.cancel}
             </Button>
             <Button onClick={saveContact} disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? t.common.saving : t.common.save}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Platzkosten bearbeiten (#243) */}
+      <Dialog open={costDialogOpen} onOpenChange={setCostDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif">
+              {t.spotDetail.costDialogTitle}
+            </DialogTitle>
+            <DialogDescription>{t.spotDetail.costDialogDesc}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="cost-price">
+                {t.spotDetail.costPriceInputLabel}
+              </Label>
+              <Input
+                id="cost-price"
+                type="text"
+                inputMode="decimal"
+                maxLength={10}
+                value={costDraft.price}
+                onChange={e =>
+                  setCostDraft(prev => ({ ...prev, price: e.target.value }))
+                }
+                placeholder={t.spotDetail.costPricePlaceholder}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="cost-extra">
+                {t.spotDetail.costExtraInputLabel}
+              </Label>
+              <Input
+                id="cost-extra"
+                type="text"
+                inputMode="decimal"
+                maxLength={10}
+                value={costDraft.extra}
+                onChange={e =>
+                  setCostDraft(prev => ({ ...prev, extra: e.target.value }))
+                }
+                placeholder={t.spotDetail.costExtraPlaceholder}
+              />
+              <p className="text-xs text-muted-foreground">
+                {t.spotDetail.costExtraHelp}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCostDialogOpen(false)}>
+              {t.common.cancel}
+            </Button>
+            <Button onClick={saveCosts} disabled={updateMutation.isPending}>
               {updateMutation.isPending ? t.common.saving : t.common.save}
             </Button>
           </DialogFooter>
