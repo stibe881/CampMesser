@@ -41,7 +41,12 @@ export function storeMapLayer(kind: MapLayerKind) {
 
 export const LAYER_VISIBILITY_KEY = "campmesser.mapLayers";
 
-/** Welche Pin-Ebenen die Karte zeigt – Standard: alle an. */
+/**
+ * Welche Pin-Ebenen die Karte zeigt. Standard: alle an – ausser den Ebenen,
+ * die ihre Pins erst über die Overpass-API holen müssen. Die sind aus, bis
+ * sie jemand ausdrücklich einschaltet (Overpass ist rate-limitiert und wird
+ * nie ungefragt belastet).
+ */
 export interface MapLayerVisibility {
   favorites: boolean;
   targets: boolean;
@@ -49,6 +54,10 @@ export interface MapLayerVisibility {
   campsites: boolean;
   /** Ausflugsziele aus der Ausflugfinder-App (#271). */
   excursions: boolean;
+  /** Feuer- und Grillstellen aus OpenStreetMap (#247) – Standard aus. */
+  firepits: boolean;
+  /** Spiel- und Badeplätze aus OpenStreetMap (#248) – Standard aus. */
+  family: boolean;
 }
 
 export const DEFAULT_LAYER_VISIBILITY: MapLayerVisibility = {
@@ -57,9 +66,14 @@ export const DEFAULT_LAYER_VISIBILITY: MapLayerVisibility = {
   sightings: true,
   campsites: true,
   excursions: true,
+  firepits: false,
+  family: false,
 };
 
-/** Gemerkte Ebenen-Wahl lesen – fehlende/kaputte Werte fallen auf «an» zurück. */
+/**
+ * Gemerkte Ebenen-Wahl lesen – fehlende/kaputte Werte fallen auf den
+ * jeweiligen Standard aus `DEFAULT_LAYER_VISIBILITY` zurück.
+ */
 export function loadLayerVisibility(): MapLayerVisibility {
   try {
     const raw = localStorage.getItem(LAYER_VISIBILITY_KEY);
@@ -70,13 +84,17 @@ export function loadLayerVisibility(): MapLayerVisibility {
     }
     const obj = parsed as Record<string, unknown>;
     const read = (key: keyof MapLayerVisibility) =>
-      typeof obj[key] === "boolean" ? (obj[key] as boolean) : true;
+      typeof obj[key] === "boolean"
+        ? (obj[key] as boolean)
+        : DEFAULT_LAYER_VISIBILITY[key];
     return {
       favorites: read("favorites"),
       targets: read("targets"),
       sightings: read("sightings"),
       campsites: read("campsites"),
       excursions: read("excursions"),
+      firepits: read("firepits"),
+      family: read("family"),
     };
   } catch {
     return { ...DEFAULT_LAYER_VISIBILITY };

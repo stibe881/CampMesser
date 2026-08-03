@@ -1836,6 +1836,39 @@ export const fr: Translation = {
     layerExcursions: "Excursions",
     excursionLegend: (n: number) =>
       n === 1 ? "1 but d'excursion" : `${n} buts d'excursion`,
+    layerFirepits: "Foyers",
+    firepitLoading: "Recherche des foyers …",
+    firepitZoomHint: "Zoome davantage pour chercher des foyers.",
+    firepitError:
+      "Les foyers n'ont pas pu être chargés – réessaie plus tard s'il te plaît.",
+    firepitCount: (n: number) =>
+      n === 0
+        ? "Aucun foyer trouvé dans cette zone."
+        : n === 1
+          ? "1 foyer trouvé"
+          : `${n} foyers trouvés`,
+    firepitLegend: (n: number) =>
+      n === 1
+        ? "1 foyer / gril (OpenStreetMap)"
+        : `${n} foyers / grils (OpenStreetMap)`,
+    firepitSearchHint: "Touche « Chercher dans cette zone ».",
+    layerFamily: "Famille",
+    familyLoading: "Recherche des places de jeux et lieux de baignade …",
+    familyZoomHint:
+      "Zoome davantage pour chercher des places de jeux et lieux de baignade.",
+    familyError:
+      "Les places de jeux et lieux de baignade n'ont pas pu être chargés – réessaie plus tard s'il te plaît.",
+    familyCount: (n: number) =>
+      n === 0
+        ? "Aucune place de jeux ni lieu de baignade trouvé dans cette zone."
+        : n === 1
+          ? "1 place de jeux / lieu de baignade trouvé"
+          : `${n} places de jeux et lieux de baignade trouvés`,
+    familyLegend: (n: number) =>
+      n === 1
+        ? "1 place de jeux / lieu de baignade (OpenStreetMap)"
+        : `${n} places de jeux et lieux de baignade (OpenStreetMap)`,
+    familySearchHint: "Touche « Chercher dans cette zone ».",
   },
   spotDetail: {
     fallbackTitle: "Emplacement",
@@ -3198,6 +3231,82 @@ export const fr: Translation = {
       "Temps de marche selon la règle du CAS : 4 km/h à plat, plus 400 mètres de dénivelé par heure à la montée et 800 à la descente ; on compte la plus grande part plus la moitié de la plus petite. Les pauses ne sont pas comprises.",
     footnote:
       "Données d'OpenStreetMap via l'API Overpass – interrogée uniquement sur ton clic. Longueur, dénivelé et difficulté n'apparaissent que là où ils sont renseignés dans OSM, sinon « – ». Le balisage sur le terrain et l'état du chemin peuvent différer : emporte carte et bulletin météo.",
+  },
+
+  /** Foyers et grils depuis OpenStreetMap (#247). */
+  firepits: {
+    sectionAria: "Foyers et grils officiels à proximité",
+    title: "Foyers à proximité",
+    subtitle: "Foyers et grils officiels autour de ta position.",
+    subtitleAtPlace: (place: string) =>
+      `Foyers et grils officiels autour de ${place}.`,
+    radiusLabel: "Rayon",
+    radiusGroupAria: "Choisir le rayon de recherche",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Recherche des foyers …",
+    loadFailed:
+      "Les foyers n'ont pas pu être chargés pour l'instant. Overpass est un service gratuit qui freine en cas de trop nombreuses requêtes – réessaie dans quelques minutes.",
+    empty: (km: number) =>
+      `Dans un rayon de ${km} km, aucun foyer ni gril n'est enregistré dans OpenStreetMap. Essaie avec un rayon plus grand.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 endroit trouvé" : `${n} endroits trouvés`,
+    kind: {
+      firepit: "Foyer",
+      bbq: "Gril",
+    },
+    kindHint: {
+      firepit: "foyer ouvert",
+      bbq: "gril fixe",
+    },
+    covered: "couvert",
+    firewood: "bois sur place",
+    drinkingWater: "eau potable",
+    distanceAway: (value: string) => `à ${value}`,
+    navButton: "S'y rendre",
+    navAria: (name: string) => `Navigation vers ${name}`,
+    fireDangerLink: "Voir le danger d'incendie de forêt et les interdictions",
+    fireDangerShort: "Vérifier le danger d'incendie",
+    source:
+      "Données d'OpenStreetMap via l'API Overpass – interrogée uniquement sur ton clic. Les caractéristiques ne figurent que là où elles sont renseignées dans OSM.",
+  },
+
+  /** Places de jeux et lieux de baignade depuis OpenStreetMap (#248). */
+  familyPlaces: {
+    sectionAria: "Places de jeux et lieux de baignade à proximité",
+    title: "Pour les familles à proximité",
+    subtitle: "Places de jeux et lieux de baignade autour de ta position.",
+    subtitleAtPlace: (place: string) =>
+      `Places de jeux et lieux de baignade autour de ${place}.`,
+    radiusLabel: "Rayon",
+    radiusGroupAria: "Choisir le rayon de recherche",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Recherche des places de jeux et lieux de baignade …",
+    loadFailed:
+      "Les places de jeux et lieux de baignade n'ont pas pu être chargés pour l'instant. Overpass est un service gratuit qui freine en cas de trop nombreuses requêtes – réessaie dans quelques minutes.",
+    empty: (km: number) =>
+      `Dans un rayon de ${km} km, aucune place de jeux ni lieu de baignade n'est enregistré dans OpenStreetMap. Essaie avec un rayon plus grand.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 endroit trouvé" : `${n} endroits trouvés`,
+    kind: {
+      playground: "Place de jeux",
+      bathing: "Lieu de baignade",
+    },
+    minAge: (years: number) => `dès ${years} ans`,
+    maxAge: (years: number) => `jusqu'à ${years} ans`,
+    ageRange: (min: number, max: number) => `${min}–${max} ans`,
+    fenced: "clôturé",
+    covered: "couvert",
+    supervised: "surveillé",
+    feePaid: "payant",
+    feeFree: "gratuit",
+    distanceAway: (value: string) => `à ${value}`,
+    navButton: "S'y rendre",
+    navAria: (name: string) => `Navigation vers ${name}`,
+    bathingNote: (section: string) =>
+      `La température de l'eau à ton emplacement figure dans la section « ${section} ». La baignade reste sous ta propre responsabilité – observe l'endroit avant de plonger.`,
+    bathingNoteShort: "Baignade à tes propres risques",
+    source:
+      "Données d'OpenStreetMap via l'API Overpass – interrogée uniquement sur ton clic. Âge, clôture, surveillance et entrée ne figurent que là où ces indications sont renseignées dans OSM.",
   },
 
   /** Carte de l'obscurité par emplacement (#239). */

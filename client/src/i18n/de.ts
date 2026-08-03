@@ -1833,6 +1833,38 @@ export const de = {
     layerExcursions: "Ausflüge",
     excursionLegend: (n: number) =>
       n === 1 ? "1 Ausflugsziel" : `${n} Ausflugsziele`,
+    layerFirepits: "Feuerstellen",
+    firepitLoading: "Feuerstellen werden gesucht …",
+    firepitZoomHint: "Bitte näher zoomen, um Feuerstellen zu suchen.",
+    firepitError:
+      "Feuerstellen konnten nicht geladen werden – bitte später erneut versuchen.",
+    firepitCount: (n: number) =>
+      n === 0
+        ? "Keine Feuerstellen in diesem Ausschnitt gefunden."
+        : n === 1
+          ? "1 Feuerstelle gefunden"
+          : `${n} Feuerstellen gefunden`,
+    firepitLegend: (n: number) =>
+      n === 1
+        ? "1 Feuer-/Grillstelle (OpenStreetMap)"
+        : `${n} Feuer-/Grillstellen (OpenStreetMap)`,
+    firepitSearchHint: "Tippe auf «In diesem Ausschnitt suchen».",
+    layerFamily: "Familie",
+    familyLoading: "Spiel- und Badeplätze werden gesucht …",
+    familyZoomHint: "Bitte näher zoomen, um Spiel- und Badeplätze zu suchen.",
+    familyError:
+      "Spiel- und Badeplätze konnten nicht geladen werden – bitte später erneut versuchen.",
+    familyCount: (n: number) =>
+      n === 0
+        ? "Keine Spiel- oder Badeplätze in diesem Ausschnitt gefunden."
+        : n === 1
+          ? "1 Spiel-/Badeplatz gefunden"
+          : `${n} Spiel- und Badeplätze gefunden`,
+    familyLegend: (n: number) =>
+      n === 1
+        ? "1 Spiel-/Badeplatz (OpenStreetMap)"
+        : `${n} Spiel- und Badeplätze (OpenStreetMap)`,
+    familySearchHint: "Tippe auf «In diesem Ausschnitt suchen».",
   },
   spotDetail: {
     fallbackTitle: "Zeltplatz",
@@ -3202,6 +3234,82 @@ export const de = {
       "Gehzeit nach der SAC-Faustregel: 4 km/h in der Ebene, dazu 400 Höhenmeter pro Stunde aufwärts und 800 abwärts; gezählt wird der grössere Anteil plus die Hälfte des kleineren. Pausen sind nicht enthalten.",
     footnote:
       "Daten aus OpenStreetMap über die Overpass-API – abgefragt nur auf deinen Klick. Länge, Höhenmeter und Schwierigkeit stehen nur dort, wo sie in OSM gepflegt sind, sonst «–». Markierung im Gelände und Wegzustand können abweichen: nimm Karte und Wetterbericht mit.",
+  },
+
+  /** Feuer- und Grillstellen aus OpenStreetMap (#247). */
+  firepits: {
+    sectionAria: "Offizielle Feuer- und Grillstellen in der Nähe",
+    title: "Feuerstellen in der Nähe",
+    subtitle: "Offizielle Feuer- und Grillstellen rund um deinen Standort.",
+    subtitleAtPlace: (place: string) =>
+      `Offizielle Feuer- und Grillstellen rund um ${place}.`,
+    radiusLabel: "Umkreis",
+    radiusGroupAria: "Suchradius wählen",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Feuerstellen werden gesucht …",
+    loadFailed:
+      "Die Feuerstellen konnten gerade nicht geladen werden. Overpass ist ein freier Dienst und bremst bei zu vielen Anfragen – versuch es in ein paar Minuten nochmals.",
+    empty: (km: number) =>
+      `Im Umkreis von ${km} km ist in OpenStreetMap keine Feuer- oder Grillstelle eingetragen. Versuch es mit einem grösseren Umkreis.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 Stelle gefunden" : `${n} Stellen gefunden`,
+    kind: {
+      firepit: "Feuerstelle",
+      bbq: "Grillstelle",
+    },
+    kindHint: {
+      firepit: "offene Feuerstelle",
+      bbq: "fest installierter Grill",
+    },
+    covered: "gedeckt",
+    firewood: "Brennholz vor Ort",
+    drinkingWater: "Trinkwasser",
+    distanceAway: (value: string) => `${value} entfernt`,
+    navButton: "Hinnavigieren",
+    navAria: (name: string) => `Navigation zu ${name}`,
+    fireDangerLink: "Waldbrandgefahr und Feuerverbote ansehen",
+    fireDangerShort: "Waldbrandgefahr prüfen",
+    source:
+      "Daten aus OpenStreetMap über die Overpass-API – abgefragt nur auf deinen Klick. Eigenschaften stehen nur dort, wo sie in OSM gepflegt sind.",
+  },
+
+  /** Spiel- und Badeplätze aus OpenStreetMap (#248). */
+  familyPlaces: {
+    sectionAria: "Spielplätze und Badeplätze in der Nähe",
+    title: "Für Familien in der Nähe",
+    subtitle: "Spielplätze und Badeplätze rund um deinen Standort.",
+    subtitleAtPlace: (place: string) =>
+      `Spielplätze und Badeplätze rund um ${place}.`,
+    radiusLabel: "Umkreis",
+    radiusGroupAria: "Suchradius wählen",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Spiel- und Badeplätze werden gesucht …",
+    loadFailed:
+      "Die Spiel- und Badeplätze konnten gerade nicht geladen werden. Overpass ist ein freier Dienst und bremst bei zu vielen Anfragen – versuch es in ein paar Minuten nochmals.",
+    empty: (km: number) =>
+      `Im Umkreis von ${km} km ist in OpenStreetMap kein Spiel- oder Badeplatz eingetragen. Versuch es mit einem grösseren Umkreis.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 Ort gefunden" : `${n} Orte gefunden`,
+    kind: {
+      playground: "Spielplatz",
+      bathing: "Badeplatz",
+    },
+    minAge: (years: number) => `ab ${years} Jahren`,
+    maxAge: (years: number) => `bis ${years} Jahre`,
+    ageRange: (min: number, max: number) => `${min}–${max} Jahre`,
+    fenced: "eingezäunt",
+    covered: "gedeckt",
+    supervised: "Aufsicht",
+    feePaid: "kostenpflichtig",
+    feeFree: "gratis",
+    distanceAway: (value: string) => `${value} entfernt`,
+    navButton: "Hinnavigieren",
+    navAria: (name: string) => `Navigation zu ${name}`,
+    bathingNote: (section: string) =>
+      `Die Wassertemperatur an deinem Platz steht im Abschnitt «${section}». Baden bleibt Eigenverantwortung – schau dir die Stelle vor dem Sprung an.`,
+    bathingNoteShort: "Baden auf eigene Verantwortung",
+    source:
+      "Daten aus OpenStreetMap über die Overpass-API – abgefragt nur auf deinen Klick. Angaben zu Alter, Zaun, Aufsicht und Eintritt stehen nur dort, wo sie in OSM gepflegt sind.",
   },
 
   /** Dunkelheitskarte pro Platz (#239). */

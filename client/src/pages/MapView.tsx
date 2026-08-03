@@ -37,9 +37,26 @@
  * Pixel-Abstände nicht und braucht deshalb keinen Neuaufbau.
  *
  * Ebenen-Filter: Checkbox-Chips blenden die Pin-Ebenen (Favoriten, Ziele,
- * Beobachtungen, OSM-Funde, Ausflüge) einzeln aus. Die Wahl liegt in
- * localStorage (campmesser.mapLayers), Standard alle an; der Filter greift
- * vor dem Clustern, die Legende zeigt nur eingeblendete Ebenen.
+ * Beobachtungen, OSM-Funde, Feuerstellen, Familie, Ausflüge) einzeln aus. Die
+ * Wahl liegt in localStorage (campmesser.mapLayers), Standard alle an; der
+ * Filter greift vor dem Clustern, die Legende zeigt nur eingeblendete Ebenen.
+ *
+ * Ebene «Feuerstellen» (#247): offizielle Feuer- und Grillstellen aus OSM
+ * (leisure=firepit bzw. amenity=bbq, beides getrennt gekennzeichnet). Sie
+ * holt ihre Pins ebenfalls über Overpass und ist deshalb standardmässig AUS –
+ * das Einschalten des Chips ist der ausdrückliche Klick, der die Suche im
+ * aktuellen Ausschnitt auslöst; «In diesem Ausschnitt suchen» lädt danach
+ * alle eingeschalteten Overpass-Ebenen neu. Das Popup nennt Typ, gepflegte
+ * Eigenschaften (gedeckt, Brennholz, Trinkwasser), die Navigation und
+ * verlinkt die Waldbrandgefahr-Anzeige im Wetter-Modul.
+ *
+ * Ebene «Familie» (#248): Spielplätze (leisure=playground) und offizielle
+ * Badeplätze (leisure=bathing_place/beach_resort, natural=beach mit Zugang) –
+ * bewusst EINE Ebene statt zwei, weil die Ebenen-Leiste sonst überquillt und
+ * beide dieselbe Frage beantworten. Unterschieden werden sie am Pin-Umriss
+ * (Rutschbahn bzw. Wellen) und im Popup. Sonst gilt dasselbe wie bei den
+ * Feuerstellen: Standard aus, Chip-Klick sucht, Popup mit Angaben und
+ * Navigation.
  *
  * Ebene «Ausflüge» (#271): die Ausflugsziele aus der eigenen
  * Ausflugfinder-App, geholt über den tRPC-Router `excursions` (serverseitig,
@@ -54,8 +71,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import {
+  Baby,
   Compass,
   FerrisWheel,
+  Flame,
   LocateFixed,
   Ruler,
   Map as MapIcon,
@@ -90,9 +109,16 @@ import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import {
   OVERPASS_MIN_ZOOM,
   OVERPASS_URL,
+  familyPlacesBboxQuery,
+  firepitsBboxQuery,
   overpassQuery,
   parseCampsites,
+  parseFamilyPlaces,
+  parseFirepits,
+  type FamilyPlaceKind,
   type OsmCampsite,
+  type OsmFamilyPlace,
+  type OsmFirepit,
 } from "@/lib/overpass";
 import {
   createBaseLayer,
@@ -195,8 +221,49 @@ const excursionIcon = L.divIcon({
   popupAnchor: [0, -16],
 });
 
+/**
+ * Feuer- bzw. Grillstelle aus OpenStreetMap (#247): reines Rot mit Flamme –
+ * sechste Farbe, deutlich heller und satter als das Bernstein der Ziele und
+ * das dunkle Karminrot der Ausflüge, dazu ein unverwechselbarer Umriss.
+ */
+const firepitIcon = L.divIcon({
+  className: "",
+  html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#dc2626" stroke="#ffffff" stroke-width="2.5"/><path d="M14.4 6.6c2.5 2.9 4.3 5 4.3 7.8a4.7 4.7 0 0 1-9.4 0c0-1.8.8-3.2 2-4.6.2 1.2.8 2 1.7 2.3.6-2.1.3-3.8-.9-5.7 1 .1 1.7.2 2.3.2Z" fill="#ffffff"/></svg>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -16],
+});
+
+/**
+ * Spielplatz bzw. Badeplatz (#248): beide in Petrol #0d9488 – siebte Farbe,
+ * klar getrennt vom Platz-Grün und vom Blau der OSM-Campingplätze. Weil beide
+ * zur selben Ebene «Familie» gehören, unterscheidet sie nicht die Farbe,
+ * sondern der Umriss: Rutschbahn für den Spielplatz, Wellen fürs Baden.
+ */
+const FAMILY_GLYPHS: Record<FamilyPlaceKind, string> = {
+  playground: `<path d="M10.2 19.4v-8.2M10.2 11.6h1.8M10.2 14.2h1.8M10.2 16.8h1.8" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round" fill="none"/><path d="M12 10.8c3.1 1.5 5.2 4.5 6.2 8.6" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none"/><path d="M7.8 19.6h12.4" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>`,
+  bathing: `<circle cx="11" cy="10.4" r="2" fill="#ffffff"/><path d="M7.4 15.4c1.3-1.5 2.6-1.5 3.9 0s2.6 1.5 3.9 0 2.6-1.5 3.9 0M7.4 18.8c1.3-1.5 2.6-1.5 3.9 0s2.6 1.5 3.9 0 2.6-1.5 3.9 0" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" fill="none"/>`,
+};
+
+function familyIconFor(kind: FamilyPlaceKind): L.DivIcon {
+  return L.divIcon({
+    className: "",
+    html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#0d9488" stroke="#ffffff" stroke-width="2.5"/>${FAMILY_GLYPHS[kind]}</svg>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -16],
+  });
+}
+
 /** Pin-Typen für die Cluster-Färbung (Farben wie die jeweiligen Einzel-Icons). */
-type PinKind = "spot" | "target" | "sighting" | "campsite" | "excursion";
+type PinKind =
+  | "spot"
+  | "target"
+  | "sighting"
+  | "campsite"
+  | "excursion"
+  | "firepit"
+  | "family";
 
 const PIN_COLORS: Record<PinKind, string> = {
   spot: "#2f6b4f",
@@ -204,6 +271,8 @@ const PIN_COLORS: Record<PinKind, string> = {
   sighting: "#7c3aed",
   campsite: "#0369a1",
   excursion: "#be123c",
+  firepit: "#dc2626",
+  family: "#0d9488",
 };
 
 /** Neutrales Grau, wenn kein Pin-Typ im Cluster klar dominiert. */
@@ -323,6 +392,24 @@ function SpotsMap({
   const [searched, setSearched] = useState(false);
   const [moved, setMoved] = useState(false);
 
+  // Ebene «Feuerstellen» (#247): eigene Overpass-Abfrage, eigener Zustand.
+  // Sie hängt am Ebenen-Chip statt an einem weiteren Knopf oben – Einschalten
+  // sucht sofort im aktuellen Ausschnitt, Ausschalten räumt alles weg.
+  const [firepits, setFirepits] = useState<OsmFirepit[]>([]);
+  const [firepitLoading, setFirepitLoading] = useState(false);
+  const [firepitError, setFirepitError] = useState(false);
+  const [firepitNeedsZoom, setFirepitNeedsZoom] = useState(false);
+  const [firepitSearched, setFirepitSearched] = useState(false);
+  const firepitAbortRef = useRef<AbortController | null>(null);
+
+  // Ebene «Familie» (#248): Spiel- und Badeplätze, gleiches Muster wie oben.
+  const [familyPlaces, setFamilyPlaces] = useState<OsmFamilyPlace[]>([]);
+  const [familyLoading, setFamilyLoading] = useState(false);
+  const [familyError, setFamilyError] = useState(false);
+  const [familyNeedsZoom, setFamilyNeedsZoom] = useState(false);
+  const [familySearched, setFamilySearched] = useState(false);
+  const familyAbortRef = useRef<AbortController | null>(null);
+
   // Aktuelle Zoomstufe für die Pin-Gruppierung: nach jedem Zoom werden die
   // Cluster neu berechnet. Verschieben ändert die Pixel-Abstände nicht
   // (map.project ist unabhängig vom Ausschnitt), darum reicht zoomend.
@@ -360,6 +447,8 @@ function SpotsMap({
     mapRef.current = map;
     return () => {
       abortRef.current?.abort();
+      firepitAbortRef.current?.abort();
+      familyAbortRef.current?.abort();
       map.remove();
       mapRef.current = null;
       baseLayerRef.current = null;
@@ -383,8 +472,8 @@ function SpotsMap({
     storeMapLayer(kind);
   }, []);
 
-  /** Overpass für den aktuellen Ausschnitt abfragen (nie automatisch beim Verschieben). */
-  const searchHere = useCallback(async () => {
+  /** Campingplätze für den aktuellen Ausschnitt abfragen (nie automatisch beim Verschieben). */
+  const searchCampsites = useCallback(async () => {
     const map = mapRef.current;
     if (!map) return;
     setMoved(false);
@@ -421,12 +510,113 @@ function SpotsMap({
     }
   }, []);
 
+  /** Feuer- und Grillstellen für den aktuellen Ausschnitt abfragen. */
+  const searchFirepits = useCallback(async () => {
+    const map = mapRef.current;
+    if (!map) return;
+    setMoved(false);
+    if (map.getZoom() < OVERPASS_MIN_ZOOM) {
+      setFirepitNeedsZoom(true);
+      setFirepitError(false);
+      return;
+    }
+    setFirepitNeedsZoom(false);
+    setFirepitError(false);
+    setFirepitLoading(true);
+    firepitAbortRef.current?.abort();
+    const controller = new AbortController();
+    firepitAbortRef.current = controller;
+    const b = map.getBounds();
+    try {
+      const res = await fetch(OVERPASS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `data=${encodeURIComponent(
+          firepitsBboxQuery(
+            b.getSouth(),
+            b.getWest(),
+            b.getNorth(),
+            b.getEast()
+          )
+        )}`,
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`overpass ${res.status}`);
+      const json: unknown = await res.json();
+      setFirepits(parseFirepits(json));
+      setFirepitSearched(true);
+      setFirepitLoading(false);
+    } catch {
+      if (controller.signal.aborted) return;
+      setFirepitLoading(false);
+      setFirepitError(true);
+    }
+  }, []);
+
+  /** Spiel- und Badeplätze für den aktuellen Ausschnitt abfragen. */
+  const searchFamilyPlaces = useCallback(async () => {
+    const map = mapRef.current;
+    if (!map) return;
+    setMoved(false);
+    if (map.getZoom() < OVERPASS_MIN_ZOOM) {
+      setFamilyNeedsZoom(true);
+      setFamilyError(false);
+      return;
+    }
+    setFamilyNeedsZoom(false);
+    setFamilyError(false);
+    setFamilyLoading(true);
+    familyAbortRef.current?.abort();
+    const controller = new AbortController();
+    familyAbortRef.current = controller;
+    const b = map.getBounds();
+    try {
+      const res = await fetch(OVERPASS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `data=${encodeURIComponent(
+          familyPlacesBboxQuery(
+            b.getSouth(),
+            b.getWest(),
+            b.getNorth(),
+            b.getEast()
+          )
+        )}`,
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`overpass ${res.status}`);
+      const json: unknown = await res.json();
+      setFamilyPlaces(parseFamilyPlaces(json));
+      setFamilySearched(true);
+      setFamilyLoading(false);
+    } catch {
+      if (controller.signal.aborted) return;
+      setFamilyLoading(false);
+      setFamilyError(true);
+    }
+  }, []);
+
+  /** «In diesem Ausschnitt suchen»: alle eingeschalteten Overpass-Ebenen neu laden. */
+  const searchHere = useCallback(() => {
+    if (discoverOn) void searchCampsites();
+    if (layerVisibility.firepits) void searchFirepits();
+    if (layerVisibility.family) void searchFamilyPlaces();
+    setMoved(false);
+  }, [
+    discoverOn,
+    layerVisibility.firepits,
+    layerVisibility.family,
+    searchCampsites,
+    searchFirepits,
+    searchFamilyPlaces,
+  ]);
+
   /** Toggle-Chip: Einschalten sucht sofort, Ausschalten räumt alles weg. */
   const toggleDiscover = useCallback(() => {
     setDiscoverOn(prev => {
       const next = !prev;
       if (next) {
-        void searchHere();
+        void searchCampsites();
       } else {
         abortRef.current?.abort();
         setCampsites([]);
@@ -438,12 +628,59 @@ function SpotsMap({
       }
       return next;
     });
-  }, [searchHere]);
+  }, [searchCampsites]);
+
+  const clearFirepits = useCallback(() => {
+    firepitAbortRef.current?.abort();
+    setFirepits([]);
+    setFirepitLoading(false);
+    setFirepitError(false);
+    setFirepitNeedsZoom(false);
+    setFirepitSearched(false);
+  }, []);
+
+  const clearFamilyPlaces = useCallback(() => {
+    familyAbortRef.current?.abort();
+    setFamilyPlaces([]);
+    setFamilyLoading(false);
+    setFamilyError(false);
+    setFamilyNeedsZoom(false);
+    setFamilySearched(false);
+  }, []);
+
+  /**
+   * Ebenen-Chip antippen. Die Ebenen «Feuerstellen» und «Familie» holen ihre
+   * Pins über Overpass – Einschalten löst deshalb sofort eine Suche im
+   * aktuellen Ausschnitt aus, Ausschalten bricht ab und räumt weg.
+   */
+  const toggleLayerChip = useCallback(
+    (key: keyof MapLayerVisibility) => {
+      const willBeOn = !layerVisibility[key];
+      toggleLayer(key);
+      if (key === "firepits") {
+        if (willBeOn) void searchFirepits();
+        else clearFirepits();
+      } else if (key === "family") {
+        if (willBeOn) void searchFamilyPlaces();
+        else clearFamilyPlaces();
+      }
+    },
+    [
+      clearFamilyPlaces,
+      clearFirepits,
+      layerVisibility,
+      searchFamilyPlaces,
+      searchFirepits,
+      toggleLayer,
+    ]
+  );
 
   // Kartenbewegung merken: statt automatisch neu zu laden, zeigen wir den Such-Button
+  const overpassLayersOn =
+    discoverOn || layerVisibility.firepits || layerVisibility.family;
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !discoverOn) return;
+    if (!map || !overpassLayersOn) return;
     const onMove = () => setMoved(true);
     map.on("moveend", onMove);
     map.on("zoomend", onMove);
@@ -451,7 +688,7 @@ function SpotsMap({
       map.off("moveend", onMove);
       map.off("zoomend", onMove);
     };
-  }, [discoverOn]);
+  }, [overpassLayersOn]);
 
   // Verlinkter Ausflug: hinfahren, sobald die Ziele geladen sind. Der
   // Zoom-Wechsel gruppiert neu, danach steht der Pin einzeln da und der
@@ -632,6 +869,142 @@ function SpotsMap({
       return marker;
     };
 
+    // Feuer- und Grillstellen aus OpenStreetMap als eigene (rote) Pins.
+    // Das Popup nennt den Typ, die gepflegten Eigenschaften und die
+    // Navigation; ob heute überhaupt gefeuert werden darf, sagt die
+    // Waldbrandgefahr-Anzeige im Wetter – dorthin geht der letzte Link,
+    // statt den Hinweis hier zu doppeln.
+    const createFirepitMarker = (firepit: OsmFirepit): L.Marker => {
+      const tf = t.firepits;
+      const kindLabel = tf.kind[firepit.kind];
+      const displayName = firepit.name ?? kindLabel;
+      const marker = L.marker([firepit.lat, firepit.lon], {
+        icon: firepitIcon,
+        alt: displayName,
+      });
+      const popup = document.createElement("div");
+      popup.className = "space-y-1";
+
+      const name = document.createElement("p");
+      name.className = "font-semibold";
+      name.textContent = displayName;
+      popup.appendChild(name);
+
+      const kind = document.createElement("p");
+      kind.className = "text-xs";
+      kind.textContent = `${kindLabel} · ${tf.kindHint[firepit.kind]}`;
+      popup.appendChild(kind);
+
+      const features = [
+        firepit.covered === true ? tf.covered : null,
+        firepit.firewood === true ? tf.firewood : null,
+        firepit.drinkingWater === true ? tf.drinkingWater : null,
+      ].filter((value): value is string => value !== null);
+      if (features.length > 0) {
+        const line = document.createElement("p");
+        line.className = "text-xs";
+        line.textContent = features.join(" · ");
+        popup.appendChild(line);
+      }
+
+      const route = document.createElement("a");
+      route.href = directionsUrl(firepit.lat, firepit.lon);
+      route.target = "_blank";
+      route.rel = "noopener noreferrer";
+      route.textContent = tf.navButton;
+      route.setAttribute("aria-label", tf.navAria(displayName));
+      route.className = "block text-sm font-medium underline";
+      popup.appendChild(route);
+
+      const fireDanger = document.createElement("a");
+      fireDanger.href = "/wetter";
+      fireDanger.textContent = tf.fireDangerShort;
+      fireDanger.className = "block text-sm font-medium underline";
+      fireDanger.addEventListener("click", event => {
+        event.preventDefault();
+        navigate("/wetter");
+      });
+      popup.appendChild(fireDanger);
+
+      const source = document.createElement("p");
+      source.className = "text-xs text-muted-foreground";
+      source.textContent = t.mapView.osmSource;
+      popup.appendChild(source);
+
+      marker.bindPopup(popup);
+      return marker;
+    };
+
+    // Spiel- und Badeplätze als Pins der Ebene «Familie» (petrol). Beide
+    // Kategorien teilen sich Ebene und Farbe, tragen aber je einen eigenen
+    // Umriss und ihre eigenen Angaben. Beim Baden steht zusätzlich der kurze
+    // Eigenverantwortungs-Hinweis – die Wassertemperatur liefert das Dossier.
+    const createFamilyMarker = (place: OsmFamilyPlace): L.Marker => {
+      const tp = t.familyPlaces;
+      const kindLabel = tp.kind[place.kind];
+      const displayName = place.name ?? kindLabel;
+      const marker = L.marker([place.lat, place.lon], {
+        icon: familyIconFor(place.kind),
+        alt: displayName,
+      });
+      const popup = document.createElement("div");
+      popup.className = "space-y-1";
+
+      const name = document.createElement("p");
+      name.className = "font-semibold";
+      name.textContent = displayName;
+      popup.appendChild(name);
+
+      const kind = document.createElement("p");
+      kind.className = "text-xs";
+      kind.textContent = kindLabel;
+      popup.appendChild(kind);
+
+      const features: string[] = [];
+      if (place.minAgeYears !== undefined && place.maxAgeYears !== undefined) {
+        features.push(tp.ageRange(place.minAgeYears, place.maxAgeYears));
+      } else if (place.minAgeYears !== undefined) {
+        features.push(tp.minAge(place.minAgeYears));
+      } else if (place.maxAgeYears !== undefined) {
+        features.push(tp.maxAge(place.maxAgeYears));
+      }
+      if (place.fenced === true) features.push(tp.fenced);
+      if (place.covered === true) features.push(tp.covered);
+      if (place.supervised === true) features.push(tp.supervised);
+      if (place.fee === true) features.push(tp.feePaid);
+      if (place.fee === false) features.push(tp.feeFree);
+      if (features.length > 0) {
+        const line = document.createElement("p");
+        line.className = "text-xs";
+        line.textContent = features.join(" · ");
+        popup.appendChild(line);
+      }
+
+      const route = document.createElement("a");
+      route.href = directionsUrl(place.lat, place.lon);
+      route.target = "_blank";
+      route.rel = "noopener noreferrer";
+      route.textContent = tp.navButton;
+      route.setAttribute("aria-label", tp.navAria(displayName));
+      route.className = "block text-sm font-medium underline";
+      popup.appendChild(route);
+
+      if (place.kind === "bathing") {
+        const care = document.createElement("p");
+        care.className = "text-xs text-muted-foreground";
+        care.textContent = tp.bathingNoteShort;
+        popup.appendChild(care);
+      }
+
+      const source = document.createElement("p");
+      source.className = "text-xs text-muted-foreground";
+      source.textContent = t.mapView.osmSource;
+      popup.appendChild(source);
+
+      marker.bindPopup(popup);
+      return marker;
+    };
+
     // Ausflugsziele aus der Ausflugfinder-App als eigene (dunkelrote) Pins.
     // Das Popup zeigt Titelbild, Name, Kategorien, Kostenstufe und Region;
     // «Details» klappt Beschreibung, Hinweise, Öffnungszeiten und Website auf.
@@ -797,6 +1170,22 @@ function SpotsMap({
             excursionId: excursion.id,
           }))
         : []),
+      ...(layerVisibility.firepits
+        ? firepits.map<MapPin>(firepit => ({
+            lat: firepit.lat,
+            lon: firepit.lon,
+            kind: "firepit" as const,
+            createMarker: () => createFirepitMarker(firepit),
+          }))
+        : []),
+      ...(layerVisibility.family
+        ? familyPlaces.map<MapPin>(place => ({
+            lat: place.lat,
+            lon: place.lon,
+            kind: "family" as const,
+            createMarker: () => createFamilyMarker(place),
+          }))
+        : []),
     ];
 
     const clusters = clusterPoints(
@@ -865,6 +1254,8 @@ function SpotsMap({
     sightings,
     visibleCampsites,
     excursions,
+    firepits,
+    familyPlaces,
     focusExcursionId,
     nightsBySpotId,
     clusterZoom,
@@ -1095,6 +1486,32 @@ function SpotsMap({
                     : null}
           </span>
         )}
+        {layerVisibility.firepits && (
+          <span className="text-xs text-muted-foreground" role="status">
+            {firepitLoading
+              ? t.mapView.firepitLoading
+              : firepitError
+                ? t.mapView.firepitError
+                : firepitNeedsZoom
+                  ? t.mapView.firepitZoomHint
+                  : firepitSearched
+                    ? t.mapView.firepitCount(firepits.length)
+                    : t.mapView.firepitSearchHint}
+          </span>
+        )}
+        {layerVisibility.family && (
+          <span className="text-xs text-muted-foreground" role="status">
+            {familyLoading
+              ? t.mapView.familyLoading
+              : familyError
+                ? t.mapView.familyError
+                : familyNeedsZoom
+                  ? t.mapView.familyZoomHint
+                  : familySearched
+                    ? t.mapView.familyCount(familyPlaces.length)
+                    : t.mapView.familySearchHint}
+          </span>
+        )}
       </div>
       {/* Pin-Ebenen einzeln ein-/ausblenden – Checkbox-Chips, Wahl bleibt erhalten */}
       <div
@@ -1141,6 +1558,26 @@ function SpotsMap({
                 />
               ),
             },
+            {
+              key: "firepits",
+              label: t.mapView.layerFirepits,
+              icon: (
+                <Flame
+                  className="h-3.5 w-3.5 text-red-600 dark:text-red-400"
+                  aria-hidden="true"
+                />
+              ),
+            },
+            {
+              key: "family",
+              label: t.mapView.layerFamily,
+              icon: (
+                <Baby
+                  className="h-3.5 w-3.5 text-teal-700 dark:text-teal-400"
+                  aria-hidden="true"
+                />
+              ),
+            },
             // Die Ausflugs-Ebene erscheint nur, wenn die Anbindung eingerichtet ist
             ...(excursionsAvailable
               ? ([
@@ -1163,7 +1600,7 @@ function SpotsMap({
             type="button"
             role="checkbox"
             aria-checked={layerVisibility[key]}
-            onClick={() => toggleLayer(key)}
+            onClick={() => toggleLayerChip(key)}
             className={cn(
               "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
               layerVisibility[key]
@@ -1183,16 +1620,20 @@ function SpotsMap({
           aria-label={t.mapView.mapAria}
           className="h-[65vh] min-h-80 w-full rounded-xl border border-border"
         />
-        {discoverOn && moved && !discoverLoading && (
-          <button
-            type="button"
-            onClick={() => void searchHere()}
-            className="absolute left-1/2 top-3 z-[1000] flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-background px-3.5 py-1.5 text-xs font-medium shadow-md hover:bg-muted"
-          >
-            <Search className="h-3.5 w-3.5" aria-hidden="true" />
-            {t.mapView.discoverSearchHere}
-          </button>
-        )}
+        {overpassLayersOn &&
+          moved &&
+          !discoverLoading &&
+          !firepitLoading &&
+          !familyLoading && (
+            <button
+              type="button"
+              onClick={searchHere}
+              className="absolute left-1/2 top-3 z-[1000] flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-background px-3.5 py-1.5 text-xs font-medium shadow-md hover:bg-muted"
+            >
+              <Search className="h-3.5 w-3.5" aria-hidden="true" />
+              {t.mapView.discoverSearchHere}
+            </button>
+          )}
       </div>
       {/* Legende: nur eingeblendete Ebenen erscheinen */}
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -1238,6 +1679,24 @@ function SpotsMap({
               aria-hidden="true"
             />
             {t.mapView.excursionLegend(excursions.length)}
+          </span>
+        )}
+        {layerVisibility.firepits && firepits.length > 0 && (
+          <span className="flex items-center gap-1.5">
+            <Flame
+              className="h-3.5 w-3.5 text-red-600 dark:text-red-400"
+              aria-hidden="true"
+            />
+            {t.mapView.firepitLegend(firepits.length)}
+          </span>
+        )}
+        {layerVisibility.family && familyPlaces.length > 0 && (
+          <span className="flex items-center gap-1.5">
+            <Baby
+              className="h-3.5 w-3.5 text-teal-700 dark:text-teal-400"
+              aria-hidden="true"
+            />
+            {t.mapView.familyLegend(familyPlaces.length)}
           </span>
         )}
       </div>

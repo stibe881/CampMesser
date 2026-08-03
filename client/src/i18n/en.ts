@@ -1777,6 +1777,38 @@ export const en: Translation = {
     layerExcursions: "Excursions",
     excursionLegend: (n: number) =>
       n === 1 ? "1 excursion destination" : `${n} excursion destinations`,
+    layerFirepits: "Fire pits",
+    firepitLoading: "Searching for fire pits …",
+    firepitZoomHint: "Please zoom in further to search for fire pits.",
+    firepitError: "Fire pits could not be loaded – please try again later.",
+    firepitCount: (n: number) =>
+      n === 0
+        ? "No fire pits found in this view."
+        : n === 1
+          ? "1 fire pit found"
+          : `${n} fire pits found`,
+    firepitLegend: (n: number) =>
+      n === 1
+        ? "1 fire pit / barbecue (OpenStreetMap)"
+        : `${n} fire pits / barbecues (OpenStreetMap)`,
+    firepitSearchHint: "Tap “Search this area”.",
+    layerFamily: "Family",
+    familyLoading: "Searching for playgrounds and bathing spots …",
+    familyZoomHint:
+      "Please zoom in further to search for playgrounds and bathing spots.",
+    familyError:
+      "Playgrounds and bathing spots could not be loaded – please try again later.",
+    familyCount: (n: number) =>
+      n === 0
+        ? "No playgrounds or bathing spots found in this view."
+        : n === 1
+          ? "1 playground / bathing spot found"
+          : `${n} playgrounds and bathing spots found`,
+    familyLegend: (n: number) =>
+      n === 1
+        ? "1 playground / bathing spot (OpenStreetMap)"
+        : `${n} playgrounds and bathing spots (OpenStreetMap)`,
+    familySearchHint: "Tap “Search this area”.",
   },
   spotDetail: {
     fallbackTitle: "Pitch",
@@ -3095,6 +3127,81 @@ export const en: Translation = {
       "Walking time follows the SAC rule of thumb: 4 km/h on the flat, plus 400 metres of ascent per hour and 800 of descent; the larger share counts in full, the smaller one by half. Breaks are not included.",
     footnote:
       "Data from OpenStreetMap via the Overpass API – queried only when you tap. Length, elevation and difficulty only appear where they are maintained in OSM, otherwise “–”. Waymarking on the ground and the state of the path may differ: take a map and the weather forecast with you.",
+  },
+
+  /** Fire pits and barbecues from OpenStreetMap (#247). */
+  firepits: {
+    sectionAria: "Official fire pits and barbecues nearby",
+    title: "Fire pits nearby",
+    subtitle: "Official fire pits and barbecues around your location.",
+    subtitleAtPlace: (place: string) =>
+      `Official fire pits and barbecues around ${place}.`,
+    radiusLabel: "Radius",
+    radiusGroupAria: "Choose search radius",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Searching for fire pits …",
+    loadFailed:
+      "The fire pits could not be loaded right now. Overpass is a free service that throttles when there are too many requests – try again in a few minutes.",
+    empty: (km: number) =>
+      `Within ${km} km there is no fire pit or barbecue recorded in OpenStreetMap. Try a larger radius.`,
+    resultCount: (n: number) => (n === 1 ? "1 spot found" : `${n} spots found`),
+    kind: {
+      firepit: "Fire pit",
+      bbq: "Barbecue",
+    },
+    kindHint: {
+      firepit: "open fire pit",
+      bbq: "permanently installed barbecue",
+    },
+    covered: "covered",
+    firewood: "firewood on site",
+    drinkingWater: "drinking water",
+    distanceAway: (value: string) => `${value} away`,
+    navButton: "Navigate there",
+    navAria: (name: string) => `Navigation to ${name}`,
+    fireDangerLink: "View wildfire danger and fire bans",
+    fireDangerShort: "Check wildfire danger",
+    source:
+      "Data from OpenStreetMap via the Overpass API – queried only when you ask. Properties appear only where they are maintained in OSM.",
+  },
+
+  /** Playgrounds and bathing spots from OpenStreetMap (#248). */
+  familyPlaces: {
+    sectionAria: "Playgrounds and bathing spots nearby",
+    title: "For families nearby",
+    subtitle: "Playgrounds and bathing spots around your location.",
+    subtitleAtPlace: (place: string) =>
+      `Playgrounds and bathing spots around ${place}.`,
+    radiusLabel: "Radius",
+    radiusGroupAria: "Choose search radius",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Searching for playgrounds and bathing spots …",
+    loadFailed:
+      "The playgrounds and bathing spots could not be loaded right now. Overpass is a free service that throttles when there are too many requests – try again in a few minutes.",
+    empty: (km: number) =>
+      `Within ${km} km there is no playground or bathing spot recorded in OpenStreetMap. Try a larger radius.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 place found" : `${n} places found`,
+    kind: {
+      playground: "Playground",
+      bathing: "Bathing spot",
+    },
+    minAge: (years: number) => `from age ${years}`,
+    maxAge: (years: number) => `up to age ${years}`,
+    ageRange: (min: number, max: number) => `ages ${min}–${max}`,
+    fenced: "fenced",
+    covered: "covered",
+    supervised: "supervised",
+    feePaid: "admission charged",
+    feeFree: "free",
+    distanceAway: (value: string) => `${value} away`,
+    navButton: "Navigate there",
+    navAria: (name: string) => `Navigation to ${name}`,
+    bathingNote: (section: string) =>
+      `The water temperature at your pitch is in the “${section}” section. Swimming remains your own responsibility – take a look at the spot before you jump in.`,
+    bathingNoteShort: "Swim at your own risk",
+    source:
+      "Data from OpenStreetMap via the Overpass API – queried only when you ask. Age, fencing, supervision and admission appear only where they are maintained in OSM.",
   },
 
   /** Dark sky map per pitch (#239). */
