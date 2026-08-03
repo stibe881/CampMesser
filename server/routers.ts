@@ -46,6 +46,7 @@ import {
   MAX_GEAR_TASK_TITLE_LENGTH,
   MIN_GEAR_INTERVAL_MONTHS,
 } from "@shared/gearTasks";
+import { MAX_WARRANTY_MONTHS, MIN_WARRANTY_MONTHS } from "@shared/warranty";
 import {
   TRIP_WEATHER_MAX_PRECIP_MM,
   TRIP_WEATHER_MAX_RAIN_DAYS,
@@ -1368,6 +1369,13 @@ export const appRouter = router({
             .string()
             .regex(/^\d{4}-\d{2}-\d{2}$/)
             .nullish(),
+          // Garantiedauer in Monaten ab Kaufdatum, null = nicht erfasst
+          warrantyMonths: z
+            .number()
+            .int()
+            .min(MIN_WARRANTY_MONTHS)
+            .max(MAX_WARRANTY_MONTHS)
+            .nullish(),
         })
       )
       .mutation(({ ctx, input }) =>
@@ -1387,6 +1395,12 @@ export const appRouter = router({
           purchaseDate: z
             .string()
             .regex(/^\d{4}-\d{2}-\d{2}$/)
+            .nullish(),
+          warrantyMonths: z
+            .number()
+            .int()
+            .min(MIN_WARRANTY_MONTHS)
+            .max(MAX_WARRANTY_MONTHS)
             .nullish(),
         })
       )

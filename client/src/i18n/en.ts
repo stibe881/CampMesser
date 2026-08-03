@@ -745,6 +745,22 @@ export const en: Translation = {
     priceLabel: "Price (CHF)",
     priceAria: "Purchase price in francs",
     purchaseDateLabel: "Purchase date",
+    warrantyLabel: "Warranty (months)",
+    warrantyAria: "Warranty period in months from the purchase date",
+    warrantyHelp: "From the purchase date – leave empty if you are not sure.",
+    warrantyBadge: (date: string) => `Warranty until ${date}`,
+    warrantyExpiredBadge: (date: string) => `Warranty expired on ${date}`,
+    warrantyDaysLeft: (n: number) =>
+      n === 0
+        ? "Expires today"
+        : n === 1
+          ? "Expires tomorrow"
+          : `Expires in ${n} days`,
+    warrantySoonTitle: (n: number) =>
+      n === 1 ? "1 warranty expires soon" : `${n} warranties expire soon`,
+    warrantySoonText: "Within the next 60 days – worth checking now.",
+    warrantySoonShow: "Show",
+    warrantySoonShowAll: "Show all",
     priceBadge: (chf: string) => `CHF ${chf}`,
     totalValue: (chf: string) => `Total value: CHF ${chf}`,
     totalValueHint: "Sum of all recorded prices × quantity",

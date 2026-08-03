@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Inventar: Erfasse neben dem Kaufdatum neu die Garantiedauer in Monaten – am Gegenstand siehst du dann «Garantie bis …» (grün, amber oder grau), und laufen Garantien in den nächsten 60 Tagen ab, meldet sich oben im Inventar ein Hinweis, der dir auf Klick genau diese Gegenstände zeigt.",
+        "Inventaire : en plus de la date d'achat, tu peux désormais saisir la durée de garantie en mois – l'objet affiche alors « Garantie jusqu'au … » (vert, ambre ou gris), et si des garanties arrivent à échéance dans les 60 prochains jours, un message en haut de l'inventaire te montre ces objets d'un clic.",
+        "Inventario: oltre alla data d'acquisto puoi indicare anche la durata della garanzia in mesi – sull'oggetto compare «Garanzia fino al …» (verde, ambra o grigio) e, se qualche garanzia scade nei prossimi 60 giorni, un avviso in cima all'inventario ti mostra quegli oggetti con un clic.",
+        "Inventory: alongside the purchase date you can now record the warranty period in months – the item then shows “Warranty until …” (green, amber or grey), and if warranties expire within the next 60 days a note at the top of your inventory shows exactly those items with one click."
+      ),
+      l4(
         "Zeltplätze: Deine Plätze kennen jetzt ihre Höhe über Meer – sie wird automatisch ermittelt, steht auf der Favoriten-Karte und im Dossier und wird dort um einen Hinweis zur Höhenlage ergänzt (kühlere Nächte, warmer Schlafsack oder Frostgefahr im Sommer).",
         "Emplacements : tes emplacements connaissent désormais leur altitude – elle est déterminée automatiquement, s'affiche sur la carte des favoris et dans le dossier, où elle s'accompagne d'un conseil sur l'altitude (nuits plus fraîches, sac de couchage chaud ou risque de gel en été).",
         "Piazzole: le tue piazzole ora conoscono la loro quota – viene rilevata automaticamente, compare sulla scheda dei preferiti e nel dossier, dove trovi anche un consiglio sulla quota (notti più fresche, sacco a pelo caldo o rischio di gelo d'estate).",

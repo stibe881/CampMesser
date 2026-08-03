@@ -8,6 +8,7 @@ import {
   Plus,
   Receipt,
   Search,
+  ShieldCheck,
   Trash2,
   Wrench,
 } from "lucide-react";
@@ -35,6 +36,12 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { l4, LOCALE_TAGS, pick, type L4 } from "@shared/i18n";
 import { GEAR_TASK_SUGGESTIONS, gearTaskDue } from "@shared/gearTasks";
+import {
+  countWarrantiesEndingSoon,
+  MAX_WARRANTY_MONTHS,
+  MIN_WARRANTY_MONTHS,
+  warrantyStatus,
+} from "@shared/warranty";
 import { resizeImageForUpload } from "@/lib/imageResize";
 import {
   formatChf,
@@ -49,6 +56,18 @@ import { cn } from "@/lib/utils";
 /** Private Foto-URL eines Inventar-Gegenstands (Auth über Session-Cookie). */
 function inventoryPhotoUrl(fileName: string): string {
   return `/api/inventory/photos/${fileName}`;
+}
+
+/**
+ * Eingabe «Garantie (Monate)» in einen speicherbaren Wert übersetzen:
+ * leer oder unbrauchbar → null, sonst auf 1–240 Monate geklemmt.
+ */
+function parseWarrantyInput(value: string): number | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const months = Math.round(Number(trimmed));
+  if (!Number.isFinite(months) || months < MIN_WARRANTY_MONTHS) return null;
+  return Math.min(MAX_WARRANTY_MONTHS, months);
 }
 
 /** Private Beleg-URL eines Inventar-Gegenstands (Auth über Session-Cookie). */
@@ -314,6 +333,8 @@ interface FormState {
   priceChf: string;
   /** Kaufdatum als ISO-String (YYYY-MM-DD) oder "" */
   purchaseDate: string;
+  /** Garantiedauer in Monaten als Eingabe-String ("" = nicht erfasst) */
+  warrantyMonths: string;
   /** Bestehendes Foto des bearbeiteten Gegenstands (Dateiname) */
   imageFileName: string | null;
   /** Bestehender Beleg des bearbeiteten Gegenstands (Dateiname) */
@@ -331,6 +352,9 @@ export default function InventoryPage() {
   // Suche (Name/Notizen, live) und Kategorien-Filter («» = alle)
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  // Filter aus dem Garantie-Hinweis: nur bald ablaufende Garantien zeigen
+  const [warrantyFilter, setWarrantyFilter] = useState(false);
+  const today = new Date().toISOString().slice(0, 10);
 
   const categoryOptions = useMemo(
     () => inventoryCategories.map(c => pick(c, lang)),
@@ -344,6 +368,7 @@ export default function InventoryPage() {
     quantity: "1",
     priceChf: "",
     purchaseDate: "",
+    warrantyMonths: "",
     imageFileName: null,
     receiptFileName: null,
   };
@@ -426,18 +451,30 @@ export default function InventoryPage() {
     return seen.sort((a, b) => a.localeCompare(b, LOCALE_TAGS[lang]));
   }, [query.data, lang]);
 
+  /** Wie viele Garantien laufen in den nächsten 60 Tagen ab? */
+  const warrantiesEndingSoon = useMemo(
+    () => countWarrantiesEndingSoon(query.data ?? [], today),
+    [query.data, today]
+  );
+
   /** Suche über Name + Notizen (case-insensitiv), kombiniert mit der Kategorie. */
   const filteredItems = useMemo(() => {
     const needle = search.trim().toLowerCase();
     return (query.data ?? []).filter(item => {
       if (categoryFilter && item.category !== categoryFilter) return false;
+      if (
+        warrantyFilter &&
+        warrantyStatus(item.purchaseDate, item.warrantyMonths, today)?.state !==
+          "endingSoon"
+      )
+        return false;
       if (!needle) return true;
       return (
         item.name.toLowerCase().includes(needle) ||
         (item.notes ?? "").toLowerCase().includes(needle)
       );
     });
-  }, [query.data, search, categoryFilter]);
+  }, [query.data, search, categoryFilter, warrantyFilter, today]);
 
   const resetPhotoState = () => {
     setPhotoBlob(null);
@@ -464,6 +501,7 @@ export default function InventoryPage() {
       quantity: String(item.quantity),
       priceChf: rappenToInput(item.priceRappen),
       purchaseDate: item.purchaseDate ?? "",
+      warrantyMonths: item.warrantyMonths ? String(item.warrantyMonths) : "",
       imageFileName: item.imageFileName ?? null,
       receiptFileName: item.receiptFileName ?? null,
     });
@@ -540,6 +578,8 @@ export default function InventoryPage() {
       // Preis in Rappen (null = nicht erfasst), Kaufdatum als ISO-String
       priceRappen: parseChfInput(form.priceChf),
       purchaseDate: form.purchaseDate || null,
+      // Garantiedauer in Monaten (null = nicht erfasst)
+      warrantyMonths: parseWarrantyInput(form.warrantyMonths),
     };
     if (!data.name) {
       toast.error(t.inventory.nameRequired);
@@ -645,11 +685,20 @@ export default function InventoryPage() {
 
   const allItems = query.data ?? [];
   const items = filteredItems;
-  const filterActive = search.trim() !== "" || categoryFilter !== "";
+  const filterActive =
+    search.trim() !== "" || categoryFilter !== "" || warrantyFilter;
   const resetFilters = () => {
     setSearch("");
     setCategoryFilter("");
+    setWarrantyFilter(false);
   };
+  /** Datum kurz und in der App-Sprache (z. B. 03.08.2026). */
+  const formatDay = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   // Beim Bearbeiten kann eine (z. B. in anderer Sprache) gespeicherte
   // Kategorie auftauchen, die nicht in der Liste steht – als Option ergänzen.
   const selectOptions = categoryOptions.includes(form.category)
@@ -694,6 +743,34 @@ export default function InventoryPage() {
             {t.inventory.totalValueHint}
           </p>
         </div>
+      )}
+
+      {/* Dezenter Hinweis auf bald ablaufende Garantien – Klick filtert danach */}
+      {warrantiesEndingSoon > 0 && (
+        <button
+          type="button"
+          onClick={() => setWarrantyFilter(v => !v)}
+          aria-pressed={warrantyFilter}
+          className="mb-6 flex w-full items-center gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-left transition-colors hover:bg-amber-500/15"
+        >
+          <ShieldCheck
+            className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400"
+            aria-hidden="true"
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-medium">
+              {t.inventory.warrantySoonTitle(warrantiesEndingSoon)}
+            </span>
+            <span className="block text-xs text-muted-foreground">
+              {t.inventory.warrantySoonText}
+            </span>
+          </span>
+          <span className="shrink-0 text-xs font-semibold text-amber-700 dark:text-amber-400">
+            {warrantyFilter
+              ? t.inventory.warrantySoonShowAll
+              : t.inventory.warrantySoonShow}
+          </span>
+        </button>
       )}
 
       <Button
@@ -827,6 +904,28 @@ export default function InventoryPage() {
                     setForm(f => ({ ...f, purchaseDate: e.target.value }))
                   }
                 />
+              </div>
+              <div>
+                <Label htmlFor="inv-warranty">
+                  {t.inventory.warrantyLabel}
+                </Label>
+                <Input
+                  id="inv-warranty"
+                  className="mt-1.5"
+                  type="number"
+                  min={MIN_WARRANTY_MONTHS}
+                  max={MAX_WARRANTY_MONTHS}
+                  inputMode="numeric"
+                  placeholder="24"
+                  aria-label={t.inventory.warrantyAria}
+                  value={form.warrantyMonths}
+                  onChange={e =>
+                    setForm(f => ({ ...f, warrantyMonths: e.target.value }))
+                  }
+                />
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  {t.inventory.warrantyHelp}
+                </p>
               </div>
             </div>
             <div>
@@ -1069,110 +1168,146 @@ export default function InventoryPage() {
               </tr>
             </thead>
             <tbody>
-              {items.map(item => (
-                <tr
-                  key={item.id}
-                  className="border-b border-border/60 last:border-0 hover:bg-muted/30"
-                >
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-center gap-2.5">
-                      {item.imageFileName && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setViewPhoto({
-                              fileName: item.imageFileName!,
-                              name: item.name,
-                            })
-                          }
-                          aria-label={t.inventory.photoThumbAria(item.name)}
-                          className="shrink-0 overflow-hidden rounded-md border border-border/60"
-                        >
-                          <img
-                            src={inventoryPhotoUrl(item.imageFileName)}
-                            alt=""
-                            loading="lazy"
-                            className="h-9 w-9 object-cover"
-                          />
-                        </button>
-                      )}
-                      <div>
-                        <span className="font-medium">{item.name}</span>
-                        {item.quantity > 1 && (
-                          <span className="ml-1.5 text-xs text-muted-foreground">
-                            × {item.quantity}
-                          </span>
-                        )}
-                        {item.priceRappen ? (
-                          <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                            {t.inventory.priceBadge(
-                              formatChf(item.priceRappen, lang)
-                            )}
-                          </span>
-                        ) : null}
-                        {item.receiptFileName && (
+              {items.map(item => {
+                const warranty = warrantyStatus(
+                  item.purchaseDate,
+                  item.warrantyMonths,
+                  today
+                );
+                return (
+                  <tr
+                    key={item.id}
+                    className="border-b border-border/60 last:border-0 hover:bg-muted/30"
+                  >
+                    <td className="px-4 py-2.5">
+                      <div className="flex items-center gap-2.5">
+                        {item.imageFileName && (
                           <button
                             type="button"
-                            className="ml-1.5 align-middle text-muted-foreground transition-colors hover:text-foreground"
                             onClick={() =>
-                              setViewReceipt({
-                                fileName: item.receiptFileName!,
+                              setViewPhoto({
+                                fileName: item.imageFileName!,
                                 name: item.name,
                               })
                             }
-                            aria-label={t.inventory.receiptIconAria(item.name)}
+                            aria-label={t.inventory.photoThumbAria(item.name)}
+                            className="shrink-0 overflow-hidden rounded-md border border-border/60"
                           >
-                            <Receipt
-                              className="inline h-3.5 w-3.5"
-                              aria-hidden="true"
+                            <img
+                              src={inventoryPhotoUrl(item.imageFileName)}
+                              alt=""
+                              loading="lazy"
+                              className="h-9 w-9 object-cover"
                             />
                           </button>
                         )}
-                        <span className="block text-xs text-muted-foreground sm:hidden">
-                          {item.category}
-                        </span>
+                        <div>
+                          <span className="font-medium">{item.name}</span>
+                          {item.quantity > 1 && (
+                            <span className="ml-1.5 text-xs text-muted-foreground">
+                              × {item.quantity}
+                            </span>
+                          )}
+                          {item.priceRappen ? (
+                            <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                              {t.inventory.priceBadge(
+                                formatChf(item.priceRappen, lang)
+                              )}
+                            </span>
+                          ) : null}
+                          {item.receiptFileName && (
+                            <button
+                              type="button"
+                              className="ml-1.5 align-middle text-muted-foreground transition-colors hover:text-foreground"
+                              onClick={() =>
+                                setViewReceipt({
+                                  fileName: item.receiptFileName!,
+                                  name: item.name,
+                                })
+                              }
+                              aria-label={t.inventory.receiptIconAria(
+                                item.name
+                              )}
+                            >
+                              <Receipt
+                                className="inline h-3.5 w-3.5"
+                                aria-hidden="true"
+                              />
+                            </button>
+                          )}
+                          {warranty && (
+                            <span
+                              title={
+                                warranty.state === "expired"
+                                  ? undefined
+                                  : t.inventory.warrantyDaysLeft(
+                                      warranty.daysLeft
+                                    )
+                              }
+                              className={cn(
+                                "ml-1.5 rounded-full px-2 py-0.5 text-xs font-medium",
+                                warranty.state === "active"
+                                  ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+                                  : warranty.state === "endingSoon"
+                                    ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+                                    : "bg-muted text-muted-foreground"
+                              )}
+                            >
+                              {warranty.state === "expired"
+                                ? t.inventory.warrantyExpiredBadge(
+                                    formatDay(warranty.endsOn)
+                                  )
+                                : t.inventory.warrantyBadge(
+                                    formatDay(warranty.endsOn)
+                                  )}
+                            </span>
+                          )}
+                          <span className="block text-xs text-muted-foreground sm:hidden">
+                            {item.category}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="hidden px-4 py-2.5 text-muted-foreground sm:table-cell">
-                    {item.category}
-                  </td>
-                  <td className="px-4 py-2.5 text-right font-mono text-xs">
-                    {item.weightGrams >= 1000
-                      ? `${(item.weightGrams / 1000).toFixed(1)} kg`
-                      : `${item.weightGrams} g`}
-                  </td>
-                  <td className="hidden px-4 py-2.5 text-right font-mono text-xs sm:table-cell">
-                    {item.volumeLiters} l
-                  </td>
-                  <td className="px-2 py-2.5">
-                    <div className="flex justify-end gap-0.5">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground"
-                        onClick={() => openEdit(item)}
-                        aria-label={t.inventory.editAria(item.name)}
-                      >
-                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => {
-                          if (confirm(t.inventory.deleteConfirm(item.name))) {
-                            removeMutation.mutate({ id: item.id });
-                          }
-                        }}
-                        aria-label={t.inventory.deleteAria(item.name)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="hidden px-4 py-2.5 text-muted-foreground sm:table-cell">
+                      {item.category}
+                    </td>
+                    <td className="px-4 py-2.5 text-right font-mono text-xs">
+                      {item.weightGrams >= 1000
+                        ? `${(item.weightGrams / 1000).toFixed(1)} kg`
+                        : `${item.weightGrams} g`}
+                    </td>
+                    <td className="hidden px-4 py-2.5 text-right font-mono text-xs sm:table-cell">
+                      {item.volumeLiters} l
+                    </td>
+                    <td className="px-2 py-2.5">
+                      <div className="flex justify-end gap-0.5">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground"
+                          onClick={() => openEdit(item)}
+                          aria-label={t.inventory.editAria(item.name)}
+                        >
+                          <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => {
+                            if (confirm(t.inventory.deleteConfirm(item.name))) {
+                              removeMutation.mutate({ id: item.id });
+                            }
+                          }}
+                          aria-label={t.inventory.deleteAria(item.name)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

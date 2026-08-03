@@ -773,6 +773,22 @@ export const de = {
     priceLabel: "Preis (CHF)",
     priceAria: "Kaufpreis in Franken",
     purchaseDateLabel: "Kaufdatum",
+    warrantyLabel: "Garantie (Monate)",
+    warrantyAria: "Garantiedauer in Monaten ab Kaufdatum",
+    warrantyHelp: "Ab Kaufdatum – leer lassen, wenn du es nicht weisst.",
+    warrantyBadge: (date: string) => `Garantie bis ${date}`,
+    warrantyExpiredBadge: (date: string) => `Garantie abgelaufen am ${date}`,
+    warrantyDaysLeft: (n: number) =>
+      n === 0
+        ? "Läuft heute ab"
+        : n === 1
+          ? "Läuft morgen ab"
+          : `Läuft in ${n} Tagen ab`,
+    warrantySoonTitle: (n: number) =>
+      n === 1 ? "1 Garantie läuft bald ab" : `${n} Garantien laufen bald ab`,
+    warrantySoonText: "In den nächsten 60 Tagen – jetzt prüfen lohnt sich.",
+    warrantySoonShow: "Anzeigen",
+    warrantySoonShowAll: "Alle anzeigen",
     priceBadge: (chf: string) => `CHF ${chf}`,
     totalValue: (chf: string) => `Gesamtwert: CHF ${chf}`,
     totalValueHint: "Summe aller erfassten Preise × Anzahl",

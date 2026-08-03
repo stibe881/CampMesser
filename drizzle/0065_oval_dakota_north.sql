@@ -1,0 +1,1 @@
+ALTER TABLE `inventoryItems` ADD `warrantyMonths` int;

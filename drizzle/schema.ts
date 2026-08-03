@@ -193,6 +193,8 @@ export const inventoryItems = mysqlTable(
     priceRappen: int("priceRappen"),
     /** Kaufdatum (ISO YYYY-MM-DD); null = nicht erfasst. */
     purchaseDate: date("purchaseDate", { mode: "string" }),
+    /** Garantiedauer in Monaten ab Kaufdatum; null = nicht erfasst. */
+    warrantyMonths: int("warrantyMonths"),
     /** Dateiname des Belegs unter uploads/receipts/ (genau EIN Beleg pro Gegenstand). */
     receiptFileName: varchar("receiptFileName", { length: 64 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
