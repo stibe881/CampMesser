@@ -23,6 +23,7 @@ import {
   QrCode,
   Refrigerator,
   RotateCcw,
+  Scale,
   Search,
   Share2,
   ShoppingCart,
@@ -35,6 +36,7 @@ import {
 import QRCode from "qrcode";
 import { useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
+import KitchenConverterDialog from "@/components/KitchenConverter";
 import PageHeader from "@/components/PageHeader";
 import ServingsStepper from "@/components/ServingsStepper";
 import ShoppingTargetSelect, {
@@ -887,6 +889,8 @@ export default function RecipesPage() {
    * mit seiner eigenen Portionenzahl.
    */
   const [servings, setServings] = useState<number | null>(null);
+  /** Mass- & Temperatur-Umrechner (#232) – offen/zu. */
+  const [converterOpen, setConverterOpen] = useState(false);
 
   // Favoriten: localStorage als schnelle Quelle, Geräte-Sync fürs Konto
   const [favorites, setFavorites] = useState<string[]>(() =>
@@ -1279,18 +1283,28 @@ export default function RecipesPage() {
         </div>
       </div>
 
-      {/* Eigenes Rezept erstellen */}
-      {isAuthenticated && (
+      {/* Eigenes Rezept erstellen & Mass-Umrechner */}
+      <div className="mb-4 flex flex-wrap gap-2">
+        {isAuthenticated && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setEditorState("neu")}
+          >
+            <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.recipes.createOwn}
+          </Button>
+        )}
         <Button
           variant="outline"
           size="sm"
-          className="mb-4"
-          onClick={() => setEditorState("neu")}
+          aria-label={t.converter.openAria}
+          onClick={() => setConverterOpen(true)}
         >
-          <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          {t.recipes.createOwn}
+          <Scale className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          {t.converter.openButton}
         </Button>
-      )}
+      </div>
 
       {/* Rezept-Karten */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -1458,6 +1472,17 @@ export default function RecipesPage() {
                 >
                   <CookingPot className="mr-1.5 h-4 w-4" aria-hidden="true" />
                   {t.recipes.cookingMode}
+                </Button>
+                {/* Mass- & Temperatur-Umrechner direkt aus dem Rezept (#232) */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-fit"
+                  aria-label={t.converter.openAria}
+                  onClick={() => setConverterOpen(true)}
+                >
+                  <Scale className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {t.converter.openButton}
                 </Button>
                 {/* Nur nach Würfel-Öffnung: direkt das nächste Rezept ziehen */}
                 {diceMode && filtered.length > 1 && (
@@ -1775,6 +1800,11 @@ export default function RecipesPage() {
             </div>
           )}
         </DialogContent>
+      </Dialog>
+
+      {/* Mass- & Temperatur-Umrechner (#232) – liegt über dem Rezept-Detail */}
+      <Dialog open={converterOpen} onOpenChange={setConverterOpen}>
+        {converterOpen && <KitchenConverterDialog />}
       </Dialog>
 
       <Dialog

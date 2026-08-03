@@ -2882,6 +2882,31 @@ export const it: Translation = {
     menuScaledTo: (n: number) =>
       `convertito per ${n === 1 ? "1 persona" : `${n} persone`}`,
   },
+  converter: {
+    openButton: "Convertitore",
+    openAria: "Apri il convertitore di misure e temperature",
+    title: "Misure e temperature",
+    description:
+      "Converti mentre cucini in piazzola: tazze, cucchiai, grammi e gradi.",
+    amountLabel: "Quantità",
+    unitLabel: "Misura",
+    volumeTitle: "Tazze e cucchiai",
+    weightTitle: "Grammi ↔ millilitri",
+    ingredientLabel: "Ingrediente",
+    directionAria: "Scegli il senso della conversione",
+    gramsToMl: "g → ml",
+    mlToGrams: "ml → g",
+    weightHint:
+      "Calcolato con la densità da cucina – valori per ingredienti non pressati, non una bilancia da laboratorio. 1 tazza = 2 dl, 1 cucchiaio = 15 ml, 1 cucchiaino = 5 ml.",
+    tempTitle: "Temperatura",
+    tempLabel: "Temperatura",
+    tempUnitAria: "Scegli l'unità della temperatura inserita",
+    gasMark: (n: number) => `Livello ${n}`,
+    noGasMark: "fuori dalla scala del forno",
+    ovenTitle: "Forno e livello del gas",
+    ovenHint:
+      "Vale per il calore sopra/sotto. Con la ventilazione imposta circa 20 °C in meno.",
+  },
   food: {
     title: "Inventario del frigo box",
     subtitleLoggedOut:

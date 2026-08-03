@@ -2908,6 +2908,31 @@ export const fr: Translation = {
     menuScaledTo: (n: number) =>
       `converti pour ${n === 1 ? "1 personne" : `${n} personnes`}`,
   },
+  converter: {
+    openButton: "Convertisseur",
+    openAria: "Ouvrir le convertisseur de mesures et de températures",
+    title: "Mesures & températures",
+    description:
+      "Convertir en cuisinant sur place : tasses, cuillères, grammes et degrés.",
+    amountLabel: "Quantité",
+    unitLabel: "Mesure",
+    volumeTitle: "Tasses & cuillères",
+    weightTitle: "Grammes ↔ millilitres",
+    ingredientLabel: "Ingrédient",
+    directionAria: "Choisir le sens de la conversion",
+    gramsToMl: "g → ml",
+    mlToGrams: "ml → g",
+    weightHint:
+      "Calculé avec une masse volumique de cuisine – valeurs pour ingrédients non tassés, pas une balance de laboratoire. 1 tasse = 2 dl, 1 cs = 15 ml, 1 cc = 5 ml.",
+    tempTitle: "Température",
+    tempLabel: "Température",
+    tempUnitAria: "Choisir l'unité de la température saisie",
+    gasMark: (n: number) => `Thermostat ${n}`,
+    noGasMark: "hors plage du four",
+    ovenTitle: "Four & thermostat",
+    ovenHint:
+      "Vaut pour la chaleur voûte/sole. En chaleur tournante, régler environ 20 °C de moins.",
+  },
   food: {
     title: "Inventaire de la glacière",
     subtitleLoggedOut:

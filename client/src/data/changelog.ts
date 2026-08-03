@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Rezepte: Der neue Knopf «Umrechner» öffnet ein kleines Küchen-Werkzeug – Tassen, Esslöffel und Teelöffel in Milliliter, Gramm ↔ Milliliter für Mehl, Zucker, Reis, Öl, Wasser und Milch, °C ↔ °F und eine Tabelle mit den Backofen-Gasstufen. Du findest ihn im Rezeptbuch und direkt im offenen Rezept.",
+        "Recettes : le nouveau bouton « Convertisseur » ouvre un petit outil de cuisine – tasses, cuillères à soupe et à café en millilitres, grammes ↔ millilitres pour la farine, le sucre, le riz, l'huile, l'eau et le lait, °C ↔ °F et un tableau des thermostats du four. Tu le trouves dans le livre de recettes et directement dans la recette ouverte.",
+        "Ricette: il nuovo pulsante «Convertitore» apre un piccolo strumento da cucina – tazze, cucchiai e cucchiaini in millilitri, grammi ↔ millilitri per farina, zucchero, riso, olio, acqua e latte, °C ↔ °F e una tabella con i livelli del gas del forno. Lo trovi nel ricettario e direttamente nella ricetta aperta.",
+        "Recipes: the new “Converter” button opens a small kitchen tool – cups, tablespoons and teaspoons into millilitres, grams ↔ millilitres for flour, sugar, rice, oil, water and milk, °C ↔ °F and a table of oven gas marks. You will find it in the recipe book and directly inside an open recipe."
+      ),
+      l4(
         "Rezepte: Im Rezept stellst du neu ein, für wie viele Personen du kochst – die Zutatenmengen rechnen mit (auch Brüche wie «½» und Bereiche wie «2-3»), sinnvoll gerundet und ohne «1,3333 Eier». Die eingestellte Zahl gilt auch, wenn du die Zutaten auf die Einkaufsliste setzt; im Menüplan rechnest du die Mengen mit einem Schalter auf deine Reisegruppe um.",
         "Recettes : dans une recette, tu indiques désormais pour combien de personnes tu cuisines – les quantités des ingrédients suivent (fractions comme « ½ » et fourchettes comme « 2-3 » comprises), arrondies intelligemment et sans « 1,3333 œuf ». Le nombre choisi vaut aussi quand tu reprends les ingrédients dans la liste de courses ; dans le menu, un interrupteur convertit les quantités pour ton groupe.",
         "Ricette: nella ricetta imposti ora per quante persone cucini – le quantità degli ingredienti si adattano (anche frazioni come «½» e intervalli come «2-3»), arrotondate con criterio e senza «1,3333 uova». Il numero impostato vale anche quando trasferisci gli ingredienti nella lista della spesa; nel menù un interruttore converte le quantità per il tuo gruppo.",

@@ -2911,6 +2911,31 @@ export const de = {
     menuScaledTo: (n: number) =>
       `umgerechnet auf ${n === 1 ? "1 Person" : `${n} Personen`}`,
   },
+  converter: {
+    openButton: "Umrechner",
+    openAria: "Mass- und Temperatur-Umrechner öffnen",
+    title: "Mass & Temperatur",
+    description:
+      "Umrechnen fürs Kochen am Platz: Tassen, Löffel, Gramm und Grad.",
+    amountLabel: "Menge",
+    unitLabel: "Mass",
+    volumeTitle: "Tassen & Löffel",
+    weightTitle: "Gramm ↔ Milliliter",
+    ingredientLabel: "Zutat",
+    directionAria: "Richtung der Umrechnung wählen",
+    gramsToMl: "g → ml",
+    mlToGrams: "ml → g",
+    weightHint:
+      "Mit hinterlegter Dichte gerechnet – Küchenwerte für gehäufte Zutaten, keine Laborwaage. 1 Tasse = 2 dl, 1 EL = 15 ml, 1 TL = 5 ml.",
+    tempTitle: "Temperatur",
+    tempLabel: "Temperatur",
+    tempUnitAria: "Einheit der eingegebenen Temperatur wählen",
+    gasMark: (n: number) => `Stufe ${n}`,
+    noGasMark: "keine Backofen-Stufe",
+    ovenTitle: "Backofen & Gasstufe",
+    ovenHint:
+      "Gilt für Ober-/Unterhitze. Bei Umluft rund 20 °C weniger einstellen.",
+  },
   food: {
     title: "Kühlbox-Inventar",
     subtitleLoggedOut:

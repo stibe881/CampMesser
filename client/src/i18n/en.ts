@@ -2810,6 +2810,31 @@ export const en: Translation = {
     menuScaledTo: (n: number) =>
       `converted for ${n === 1 ? "1 person" : `${n} people`}`,
   },
+  converter: {
+    openButton: "Converter",
+    openAria: "Open the measure and temperature converter",
+    title: "Measures & temperature",
+    description:
+      "Converting while cooking at the pitch: cups, spoons, grams and degrees.",
+    amountLabel: "Amount",
+    unitLabel: "Measure",
+    volumeTitle: "Cups & spoons",
+    weightTitle: "Grams ↔ millilitres",
+    ingredientLabel: "Ingredient",
+    directionAria: "Choose the direction of the conversion",
+    gramsToMl: "g → ml",
+    mlToGrams: "ml → g",
+    weightHint:
+      "Calculated with kitchen densities – values for loosely filled ingredients, not a lab scale. 1 cup = 2 dl, 1 tbsp = 15 ml, 1 tsp = 5 ml.",
+    tempTitle: "Temperature",
+    tempLabel: "Temperature",
+    tempUnitAria: "Choose the unit of the temperature you entered",
+    gasMark: (n: number) => `Gas mark ${n}`,
+    noGasMark: "outside the oven range",
+    ovenTitle: "Oven & gas mark",
+    ovenHint:
+      "Applies to top/bottom heat. With a fan oven, set around 20 °C less.",
+  },
   food: {
     title: "Cool box inventory",
     subtitleLoggedOut:
