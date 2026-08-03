@@ -10,8 +10,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
-import { pick } from "@shared/i18n";
-import { isShoppingCategory, SHOPPING_CATEGORY_LABELS } from "@shared/shopping";
+import { shoppingCategoryLabel } from "@shared/shopping";
 import type { ShoppingHistoryEntry } from "@/lib/shoppingHistory";
 
 export default function ShoppingNameAutocomplete({
@@ -74,11 +73,9 @@ export default function ShoppingNameAutocomplete({
     }
   };
 
-  /** Anzeige-Label der gemerkten Kategorie (nur bekannte Schlüssel). */
+  /** Anzeige-Label der gemerkten Kategorie (Katalog-Label oder eigener Name). */
   const categoryLabel = (entry: ShoppingHistoryEntry): string | null =>
-    isShoppingCategory(entry.category)
-      ? pick(SHOPPING_CATEGORY_LABELS[entry.category], lang)
-      : null;
+    shoppingCategoryLabel(entry.category, lang);
 
   return (
     <div className={cn("relative", className)}>
