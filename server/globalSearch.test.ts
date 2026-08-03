@@ -1,10 +1,45 @@
 import { describe, expect, it } from "vitest";
 // Suchindex liegt im Client-Code, ist aber reine Logik ohne DOM.
 import {
+  fuzzyWordMatch,
+  levenshtein,
   searchKnowledge,
   searchOwnContent,
   type OwnContent,
 } from "../client/src/lib/globalSearch";
+
+describe("levenshtein", () => {
+  it("misst die Editier-Distanz korrekt", () => {
+    expect(levenshtein("palstek", "palstek", 2)).toBe(0);
+    expect(levenshtein("palstck", "palstek", 2)).toBe(1);
+    expect(levenshtein("zeltplaz", "zeltplatz", 2)).toBe(1);
+    expect(levenshtein("kitten", "sitting", 3)).toBe(3);
+    expect(levenshtein("", "abc", 3)).toBe(3);
+  });
+
+  it("bricht oberhalb der Schwelle früh ab (max + 1)", () => {
+    expect(levenshtein("abc", "xyz", 1)).toBe(2);
+    expect(levenshtein("kurz", "vielviellaenger", 2)).toBe(3);
+    expect(levenshtein("palsxyz", "palstek", 2)).toBe(3);
+  });
+});
+
+describe("fuzzyWordMatch", () => {
+  it("vergleicht gegen die Wörter des Ziels, nicht den ganzen Text", () => {
+    expect(fuzzyWordMatch("palstck", "der palstek haelt sicher")).toBe(true);
+    expect(fuzzyWordMatch("zeltplaz", "zeltplatz-favoriten")).toBe(true);
+    expect(fuzzyWordMatch("mastwurf", "der palstek haelt sicher")).toBe(false);
+  });
+
+  it("erlaubt 1 Tippfehler ab 4 Zeichen und 2 ab 8 Zeichen", () => {
+    expect(fuzzyWordMatch("knotn", "knoten lernen")).toBe(true);
+    expect(fuzzyWordMatch("zeltplayz", "zeltplatz")).toBe(true);
+    // unter 4 Zeichen keine Toleranz
+    expect(fuzzyWordMatch("zek", "zeh")).toBe(false);
+    // Distanz 2 bei nur 7 Zeichen → kein Treffer
+    expect(fuzzyWordMatch("pilstik", "palstek")).toBe(false);
+  });
+});
 
 describe("searchKnowledge", () => {
   it("findet Erste-Hilfe-Themen über den Titel", () => {
@@ -46,6 +81,37 @@ describe("searchKnowledge", () => {
     expect(results.length).toBeGreaterThan(0);
     expect(results[0].title).toBe("Zeckenbiss");
     expect(searchKnowledge("zecke quesadilla")).toEqual([]);
+  });
+
+  it("toleriert Tippfehler: «Palstck» findet den Palstek", () => {
+    const results = searchKnowledge("Palstck");
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0].title).toBe("Palstek");
+    expect(results[0].module).toBe("knots");
+  });
+
+  it("toleriert Tippfehler: «Zeltplaz» findet die Zeltplatz-Favoriten", () => {
+    const results = searchKnowledge("Zeltplaz");
+    expect(results.some(r => r.path === "/zeltplaetze")).toBe(true);
+  });
+
+  it("rankt Tippfehler-Treffer nach exakten Treffern", () => {
+    // Bei gemischten Ergebnismengen gewinnt der exakte Teilstring-Treffer:
+    // eigener Inhalt «Zeltplatz» (fuzzy zu «zeltplaz») vs. «Zeltplaz» (exakt).
+    const results = searchOwnContent("zeltplaz", {
+      spots: [
+        { id: 1, name: "Zeltplatz Aare", note: null },
+        { id: 2, name: "Zeltplaz-Wiese", note: null },
+      ],
+    });
+    expect(results.map(r => r.path)).toEqual([
+      "/zeltplaetze/2",
+      "/zeltplaetze/1",
+    ]);
+  });
+
+  it("findet nichts bei Distanz 3", () => {
+    expect(searchKnowledge("Palsxyz")).toEqual([]);
   });
 
   it("liefert nichts für leere oder zu kurze Anfragen", () => {

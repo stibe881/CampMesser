@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Die Suche verzeiht jetzt Tippfehler: «Palstck» findet trotzdem den Palstek.",
+        "La recherche pardonne désormais les fautes de frappe : «Palstck» trouve quand même le nœud de chaise.",
+        "La ricerca ora perdona gli errori di battitura: «Palstck» trova comunque la gassa d'amante.",
+        "Search now forgives typos: “Palstck” still finds the bowline."
+      ),
+      l4(
         "Gemeinsame Reise-Einkaufsliste: plane und hake Einkäufe zusammen mit deinen Mitreisenden ab.",
         "Liste de courses de voyage partagée : planifie et coche les achats avec tes compagnons de voyage.",
         "Lista della spesa di viaggio condivisa: pianifica e spunta gli acquisti con i tuoi compagni di viaggio.",
