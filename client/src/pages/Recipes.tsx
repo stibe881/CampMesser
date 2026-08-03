@@ -1011,7 +1011,13 @@ export default function RecipesPage() {
                           names: selected.ingredients
                             .map(i => pick(i, lang).trim())
                             .filter(Boolean)
-                            .map(i => i.slice(0, 160)),
+                            .map(i => ({
+                              name: i.slice(0, 160),
+                              // Herkunft als Notiz: «aus: Rezeptname»
+                              note: t.shopping
+                                .fromRecipe(pick(selected.name, lang))
+                                .slice(0, 160),
+                            })),
                         })
                       }
                     >

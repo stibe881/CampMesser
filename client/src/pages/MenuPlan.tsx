@@ -262,23 +262,39 @@ export default function MenuPlanPage() {
     return [...own, ...builtIn];
   }, [customRows, search, lang]);
 
-  /** Alle Zutaten der zugewiesenen Rezepte, Duplikate zusammengefasst. */
+  /**
+   * Alle Zutaten der zugewiesenen Rezepte, Duplikate zusammengefasst –
+   * mit Rezept-Herkunft als Notiz («aus: Älplermagronen»; bei von
+   * mergeIngredientLines umgeschriebenen Zeilen entfällt die Herkunft).
+   */
   const plannedIngredients = useMemo(() => {
     const lines: string[] = [];
+    const originByLine = new Map<string, string>();
+    const push = (line: string, recipeTitle: string) => {
+      lines.push(line);
+      if (!originByLine.has(line)) originByLine.set(line, recipeTitle);
+    };
     entries.forEach(entry => {
       if (entry.recipeId) {
-        staticById
-          .get(entry.recipeId)
-          ?.ingredients.forEach(i => lines.push(pick(i, lang)));
+        const recipe = staticById.get(entry.recipeId);
+        recipe?.ingredients.forEach(i =>
+          push(pick(i, lang), pick(recipe.name, lang))
+        );
       } else if (entry.customRecipeId != null) {
         const row = customById.get(entry.customRecipeId);
         if (row) {
-          parseStringList(row.ingredientsJson).forEach(i => lines.push(i));
+          parseStringList(row.ingredientsJson).forEach(i => push(i, row.name));
         }
       }
     });
-    return mergeIngredientLines(lines).map(i => i.slice(0, 160));
-  }, [entries, staticById, customById, lang]);
+    return mergeIngredientLines(lines).map(i => {
+      const origin = originByLine.get(i);
+      return {
+        name: i.slice(0, 160),
+        note: origin ? t.shopping.fromRecipe(origin).slice(0, 160) : undefined,
+      };
+    });
+  }, [entries, staticById, customById, lang, t]);
 
   /** Rezept-Vorrat fürs automatische Füllen: eingebaute + eigene Rezepte. */
   const autofillRecipes = useMemo<AutofillRecipe[]>(() => {

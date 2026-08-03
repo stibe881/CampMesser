@@ -2102,6 +2102,7 @@ export const en: Translation = {
     sortByName: "By name",
   },
   shopping: {
+    fromRecipe: (name: string) => `from: ${name}`,
     title: "Shopping list",
     subtitle:
       "Buy everything for camp: tick off items, take ingredients straight from the recipe book.",

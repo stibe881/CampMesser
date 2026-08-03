@@ -2185,6 +2185,7 @@ export const de = {
     sortByName: "Nach Name",
   },
   shopping: {
+    fromRecipe: (name: string) => `aus: ${name}`,
     title: "Einkaufsliste",
     subtitle:
       "Alles fürs Camp einkaufen: Einträge abhaken, Zutaten direkt aus dem Rezeptbuch übernehmen.",

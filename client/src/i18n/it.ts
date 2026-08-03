@@ -2157,6 +2157,7 @@ export const it: Translation = {
     sortByName: "Per nome",
   },
   shopping: {
+    fromRecipe: (name: string) => `da: ${name}`,
     title: "Lista della spesa",
     subtitle:
       "Compra tutto per il campo: spunta le voci, riprendi gli ingredienti direttamente dal ricettario.",

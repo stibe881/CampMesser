@@ -2178,6 +2178,7 @@ export const fr: Translation = {
     sortByName: "Par nom",
   },
   shopping: {
+    fromRecipe: (name: string) => `de : ${name}`,
     title: "Liste de courses",
     subtitle:
       "Tout acheter pour le camp : coche les articles, reprends les ingrédients directement du livre de recettes.",
