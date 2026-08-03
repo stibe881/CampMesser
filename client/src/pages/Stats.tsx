@@ -12,6 +12,7 @@ import {
   Star,
   Trophy,
   Users,
+  Wallet,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -19,6 +20,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { computeTripStats, nightsPerYear } from "@shared/trips";
+import { estimatedTotalRappen, spotCostComparison } from "@shared/spotCosts";
+import { formatChf } from "@/lib/money";
 import { milestones } from "@shared/milestones";
 import { weatherLuck } from "@shared/tripWeather";
 import { BADGES } from "@shared/badges";
@@ -227,7 +230,29 @@ export default function Stats() {
     [sightings]
   );
 
+  // Platz-Vergleich (#243): Preis pro Nacht je Platz, günstigster zuerst.
+  // Die Nächte kommen aus den Reisen mit verknüpftem Zeltplatz.
+  const spotCosts = useMemo(
+    () =>
+      spotCostComparison(
+        spots,
+        trips.map(trip => ({
+          spotId: trip.spotId,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+        })),
+        lang
+      ),
+    [spots, trips, lang]
+  );
+  const spotCostTotal = useMemo(
+    () => estimatedTotalRappen(spotCosts),
+    [spotCosts]
+  );
+
   const children = childrenQuery.data ?? [];
+  const fmtChf = (rappen: number) =>
+    `${t.tripExpenses.currency} ${formatChf(rappen, lang)}`;
   const fmtRating = (value: number) =>
     value.toLocaleString(LOCALE_TAGS[lang], {
       minimumFractionDigits: 1,
@@ -313,6 +338,66 @@ export default function Stats() {
           )}
         </CardContent>
       </Card>
+
+      {/* Platz-Vergleich (#243): nur mit mindestens einem erfassten Preis */}
+      {spotCosts.length > 0 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <SectionHeader
+              icon={Wallet}
+              title={ts.spotCostsTitle}
+              href="/zeltplaetze"
+              linkLabel={ts.spotCostsLink}
+            />
+            <ul className="space-y-2">
+              {spotCosts.map((row, index) => (
+                <li
+                  key={row.spotId}
+                  className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-border/60 pb-2 last:border-0 last:pb-0"
+                >
+                  <span className="flex min-w-0 items-baseline gap-2">
+                    <span className="w-5 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
+                      {index + 1}.
+                    </span>
+                    <Link
+                      href={`/zeltplaetze/${row.spotId}`}
+                      className="truncate text-sm font-medium hover:underline"
+                    >
+                      {row.name}
+                    </Link>
+                  </span>
+                  <span className="flex items-baseline gap-2">
+                    <span
+                      className={cn(
+                        "text-sm font-semibold tabular-nums",
+                        index === 0 && "text-primary"
+                      )}
+                    >
+                      {ts.spotCostsPerNight(fmtChf(row.nightlyRappen))}
+                    </span>
+                    {row.estimatedTotalRappen !== null && (
+                      <span className="text-xs text-muted-foreground">
+                        {ts.spotCostsEstimate(
+                          row.nights,
+                          fmtChf(row.estimatedTotalRappen)
+                        )}
+                      </span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {spotCostTotal > 0 && (
+              <p className="mt-3 text-sm">
+                {ts.spotCostsTotal(fmtChf(spotCostTotal))}
+              </p>
+            )}
+            <p className="mt-2 text-xs text-muted-foreground">
+              {ts.spotCostsHint}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Wetter-Glück: nur mit mindestens einem gespeicherten Wetterarchiv */}
       {luck && (

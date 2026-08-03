@@ -519,6 +519,13 @@
       "when": 1785781794035,
       "tag": "0073_cold_grey_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "5",
+      "when": 1785789707647,
+      "tag": "0074_skinny_the_spike",
+      "breakpoints": true
     }
   ]
 }

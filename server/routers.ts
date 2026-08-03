@@ -99,6 +99,7 @@ import {
   parseSpotAttributes,
   SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
 } from "@shared/spotAttributes";
+import { SPOT_PRICE_MAX_RAPPEN } from "@shared/spotCosts";
 import {
   normalizeDifficulty,
   normalizeMethod,
@@ -153,6 +154,18 @@ const shareExpiryInput = z
  * bis ins Hochgebirge alles ab; weggelassen/null heisst «nicht bekannt».
  */
 const SPOT_ELEVATION_INPUT = z.number().int().min(-500).max(9000).nullish();
+
+/**
+ * Platzkosten (#243): Preis pro Nacht bzw. Kurtaxe/Nebenkosten pro Nacht als
+ * Ganzzahl in RAPPEN (Muster Reisekasse). null löscht den Wert, `undefined`
+ * lässt ihn unverändert; die Obergrenze fängt Tippfehler ab.
+ */
+const SPOT_PRICE_INPUT = z
+  .number()
+  .int()
+  .min(0)
+  .max(SPOT_PRICE_MAX_RAPPEN)
+  .nullish();
 
 /**
  * Ablauf-Zeitpunkt aus der gewünschten Dauer. Wichtig: `undefined` heisst
@@ -4839,6 +4852,9 @@ export const appRouter = router({
           receptionPhone: z.string().max(40).nullish(),
           checkinInfo: z.string().max(120).nullish(),
           parcelNumber: z.string().max(40).nullish(),
+          // Platzkosten (#243) in Rappen
+          pricePerNightRappen: SPOT_PRICE_INPUT,
+          extraPerNightRappen: SPOT_PRICE_INPUT,
           // Höhe über Meer: der Client ermittelt sie bei Open-Meteo
           elevationM: SPOT_ELEVATION_INPUT,
         })
@@ -4852,6 +4868,9 @@ export const appRouter = router({
           receptionPhone: input.receptionPhone?.trim() || null,
           checkinInfo: input.checkinInfo?.trim() || null,
           parcelNumber: input.parcelNumber?.trim() || null,
+          // 0 heisst «nicht erfasst» und landet als null in der DB
+          pricePerNightRappen: input.pricePerNightRappen || null,
+          extraPerNightRappen: input.extraPerNightRappen || null,
         })
       ),
     update: protectedProcedure
@@ -4868,12 +4887,21 @@ export const appRouter = router({
           receptionPhone: z.string().max(40).nullish(),
           checkinInfo: z.string().max(120).nullish(),
           parcelNumber: z.string().max(40).nullish(),
+          pricePerNightRappen: SPOT_PRICE_INPUT,
+          extraPerNightRappen: SPOT_PRICE_INPUT,
           elevationM: SPOT_ELEVATION_INPUT,
         })
       )
       .mutation(({ ctx, input }) => {
-        const { id, receptionPhone, checkinInfo, parcelNumber, ...data } =
-          input;
+        const {
+          id,
+          receptionPhone,
+          checkinInfo,
+          parcelNumber,
+          pricePerNightRappen,
+          extraPerNightRappen,
+          ...data
+        } = input;
         return db.updateCampSpot(id, ctx.user.id, {
           ...data,
           attributesJson: normalizeSpotAttributesJson(data.attributesJson),
@@ -4887,6 +4915,13 @@ export const appRouter = router({
             : {}),
           ...(parcelNumber !== undefined
             ? { parcelNumber: parcelNumber?.trim() || null }
+            : {}),
+          // Platzkosten ebenso: nur anfassen, wenn mitgeschickt; 0 löscht den Wert
+          ...(pricePerNightRappen !== undefined
+            ? { pricePerNightRappen: pricePerNightRappen || null }
+            : {}),
+          ...(extraPerNightRappen !== undefined
+            ? { extraPerNightRappen: extraPerNightRappen || null }
             : {}),
         });
       }),

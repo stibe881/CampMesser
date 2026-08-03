@@ -1948,6 +1948,27 @@ export const de = {
     contactParcelLabel: "Parzellen-Nummer",
     contactParcelPlaceholder: "z. B. B12",
     contactSaved: "Kontaktdaten gespeichert",
+    costTitle: "Kosten pro Nacht",
+    costEmpty:
+      "Noch kein Preis erfasst – halte fest, was eine Nacht hier kostet, dann kannst du die Plätze in der Statistik vergleichen.",
+    costEditButton: "Kosten bearbeiten",
+    costPriceLabel: "Platz pro Nacht",
+    costExtraLabel: "Kurtaxe & Nebenkosten",
+    costNightlyLabel: "Total pro Nacht",
+    costEstimate: (nights: number, amount: string) =>
+      `Deine ${nights === 1 ? "1 Nacht" : `${nights} Nächte`} hier ergeben rund ${amount} – grobe Schätzung.`,
+    costHint:
+      "Nur eine Schätzung: Rabatte, Kinder, Hund und Saison-Zuschläge kennt CampMesser nicht. Was du wirklich bezahlt hast, steht in der Reisekasse der jeweiligen Reise.",
+    costDialogTitle: "Kosten pro Nacht bearbeiten",
+    costDialogDesc:
+      "Beide Felder sind optional – leer lassen heisst «nicht erfasst».",
+    costPriceInputLabel: "Platz pro Nacht (CHF)",
+    costPricePlaceholder: "z. B. 42.00",
+    costExtraInputLabel: "Kurtaxe & Nebenkosten pro Nacht (CHF)",
+    costExtraPlaceholder: "z. B. 3.50",
+    costExtraHelp:
+      "Alles, was pro Nacht dazukommt: Kurtaxe, Strom, Duschmarken, Hund.",
+    costSaved: "Kosten gespeichert",
     offlineMapTitle: "Offline-Karte",
     offlineMapDesc:
       "Lade die Karten-Kacheln rund um diesen Platz vorab herunter – dann finden sich Karte und Zelt-Finder auch ohne Empfang zurecht.",
@@ -4275,6 +4296,15 @@ export const de = {
       n === 1
         ? "Aus dem Wetterarchiv von 1 Aufenthalt"
         : `Aus dem Wetterarchiv von ${n} Aufenthalten`,
+    spotCostsTitle: "Platz-Vergleich: Preis pro Nacht",
+    spotCostsLink: "Zeltplätze",
+    spotCostsPerNight: (amount: string) => `${amount} / Nacht`,
+    spotCostsEstimate: (nights: number, amount: string) =>
+      `≈ ${amount} für ${nights === 1 ? "1 Nacht" : `${nights} Nächte`}`,
+    spotCostsTotal: (amount: string) =>
+      `Alle deine Nächte an diesen Plätzen zusammen: rund ${amount}.`,
+    spotCostsHint:
+      "Preis pro Nacht inklusive Kurtaxe und Nebenkosten, günstigster Platz zuoberst. Die Gesamtbeträge sind Nächte × Preis und damit nur eine Schätzung – was du wirklich bezahlt hast, steht in der Reisekasse der jeweiligen Reise.",
     yearCompareTitle: "Übernachtungen pro Jahr",
     nightsCount: (n: number) => (n === 1 ? "1 Nacht" : `${n} Nächte`),
     milestonesTitle: "Meilensteine",
