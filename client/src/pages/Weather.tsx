@@ -47,6 +47,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
@@ -83,9 +84,18 @@ import {
   parsePollenResponse,
   pollenRequestUrl,
   pollenTypeName,
+  POLLEN_TYPES,
   type PollenLevel,
   type PollenReading,
+  type PollenType,
 } from "@shared/pollen";
+import {
+  loadPollenProfile,
+  sanitizePollenProfile,
+  sortPollenReadings,
+  storePollenProfile,
+  togglePollenType,
+} from "@/lib/pollenProfile";
 import {
   describeFireDanger,
   fireDangerRequestUrl,
@@ -1153,6 +1163,11 @@ export default function WeatherPage() {
   const [placeSearchOpen, setPlaceSearchOpen] = useState(false);
   const [fireDanger, setFireDanger] = useState<FireDangerInfo | null>(null);
   const [pollen, setPollen] = useState<PollenState>({ status: "idle" });
+  // Allergie-Profil (localStorage + Geräte-Sync) und der Nur-meine-Arten-Filter.
+  // Der Filter bleibt bewusst Sitzungs-Zustand – gespeichert wird nur die Auswahl.
+  const [pollenProfile, setPollenProfile] =
+    useState<PollenType[]>(loadPollenProfile);
+  const [onlyMyPollen, setOnlyMyPollen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
   // Aufgeklappter Tag der 7-Tage-Vorschau (Datum) – nur einer gleichzeitig
   const [openDay, setOpenDay] = useState<string | null>(null);
@@ -1175,6 +1190,22 @@ export default function WeatherPage() {
     setPlaces(next);
     storeWeatherPlaces(next);
     placesSync.push(next);
+  };
+
+  // Geräte-Sync des Allergie-Profils (Muster weatherPlaces)
+  const pollenSync = useSyncedSetting<PollenType[]>("pollenProfile", value => {
+    const clean = sanitizePollenProfile(value);
+    setPollenProfile(clean);
+    storePollenProfile(clean);
+  });
+
+  /** Pollenart an-/abwählen und die Auswahl lokal wie im Konto sichern. */
+  const togglePollenProfileType = (type: PollenType) => {
+    const next = togglePollenType(pollenProfile, type);
+    setPollenProfile(next);
+    storePollenProfile(next);
+    pollenSync.push(next);
+    if (next.length === 0) setOnlyMyPollen(false);
   };
 
   // Waldbrandgefahr (offizielle BAFU-Warnkarte) für den gewählten Ort laden.
@@ -1376,6 +1407,14 @@ export default function WeatherPage() {
       hPa: Math.abs(trend.hPaPer3h).toFixed(1),
     };
   }, [data]);
+  // Pollen-Anzeige: eigene Arten zuerst, auf Wunsch nur diese
+  const visiblePollenReadings = useMemo(() => {
+    if (pollen.status !== "ready") return [];
+    const sorted = sortPollenReadings(pollen.readings, pollenProfile);
+    return onlyMyPollen && pollenProfile.length > 0
+      ? sorted.filter(r => pollenProfile.includes(r.type))
+      : sorted;
+  }, [pollen, pollenProfile, onlyMyPollen]);
   const next24 = data?.hourly.slice(0, 24) ?? [];
   // Heutiger Max-UV (WHO-Skala) – Wert kommt aus demselben Forecast-Abruf
   const uvToday = data?.daily[0]?.uvIndexMax ?? null;
@@ -1801,26 +1840,83 @@ export default function WeatherPage() {
                         className="flex flex-wrap gap-2"
                         aria-label={t.weather.pollenListAria}
                       >
-                        {pollen.readings.map(r => (
-                          <li key={r.type}>
-                            <span
-                              className={cn(
-                                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium",
-                                pollenLevelStyles[r.level]
-                              )}
-                            >
-                              <Flower2
-                                className="h-3.5 w-3.5"
-                                aria-hidden="true"
-                              />
-                              {pollenTypeName(r.type, lang)}
-                              <span className="rounded-full bg-background/60 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
-                                {describePollenLevel(r.level, lang)}
+                        {visiblePollenReadings.map(r => {
+                          const mine = pollenProfile.includes(r.type);
+                          return (
+                            <li key={r.type}>
+                              <span
+                                className={cn(
+                                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium",
+                                  pollenLevelStyles[r.level],
+                                  mine && "ring-2 ring-primary/60"
+                                )}
+                              >
+                                <Flower2
+                                  className="h-3.5 w-3.5"
+                                  aria-hidden="true"
+                                />
+                                {pollenTypeName(r.type, lang)}
+                                {mine && (
+                                  <span className="sr-only">
+                                    {t.weather.pollenMineSr}
+                                  </span>
+                                )}
+                                <span className="rounded-full bg-background/60 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+                                  {describePollenLevel(r.level, lang)}
+                                </span>
                               </span>
-                            </span>
-                          </li>
-                        ))}
+                            </li>
+                          );
+                        })}
                       </ul>
+                      {pollenProfile.length > 0 && (
+                        <div className="mt-3 flex items-center gap-2">
+                          <Switch
+                            id="pollen-only-mine"
+                            checked={onlyMyPollen}
+                            onCheckedChange={setOnlyMyPollen}
+                          />
+                          <Label
+                            htmlFor="pollen-only-mine"
+                            className="text-xs font-normal text-muted-foreground"
+                          >
+                            {t.weather.pollenOnlyMine}
+                          </Label>
+                        </div>
+                      )}
+                      <div className="mt-3 border-t border-border/60 pt-3">
+                        <p className="text-xs font-medium">
+                          {t.weather.pollenProfileTitle}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {t.weather.pollenProfileIntro}
+                        </p>
+                        <div
+                          className="mt-2 flex flex-wrap gap-2"
+                          role="group"
+                          aria-label={t.weather.pollenProfileTitle}
+                        >
+                          {POLLEN_TYPES.map(type => {
+                            const active = pollenProfile.includes(type);
+                            return (
+                              <button
+                                key={type}
+                                type="button"
+                                aria-pressed={active}
+                                onClick={() => togglePollenProfileType(type)}
+                                className={cn(
+                                  "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                                  active
+                                    ? "border-primary bg-primary text-primary-foreground"
+                                    : "border-border bg-card text-muted-foreground hover:border-primary/50"
+                                )}
+                              >
+                                {pollenTypeName(type, lang)}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                       <p className="mt-3 text-xs text-muted-foreground">
                         {t.weather.pollenSource}
                       </p>

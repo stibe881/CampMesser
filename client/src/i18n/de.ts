@@ -769,6 +769,11 @@ export const de = {
     pollenNoData: "Für diesen Ort liegen keine Pollendaten vor.",
     pollenSource:
       "Quelle: Open-Meteo Air Quality (CAMS Europa) – aktuelle Belastung der laufenden Stunde.",
+    pollenProfileTitle: "Deine Pollenarten",
+    pollenProfileIntro:
+      "Wähle, welche Arten dich betreffen – sie werden hervorgehoben und zuerst gezeigt.",
+    pollenOnlyMine: "Nur meine Arten zeigen",
+    pollenMineSr: "(deine Art)",
     next24: "Nächste 24 Stunden",
     rain48: "Regen: nächste 48 Stunden",
     chartRain: "Regen",

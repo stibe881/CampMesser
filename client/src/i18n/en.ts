@@ -736,6 +736,11 @@ export const en: Translation = {
     pollenNoData: "No pollen data available for this location.",
     pollenSource:
       "Source: Open-Meteo Air Quality (CAMS Europe) – current load for the ongoing hour.",
+    pollenProfileTitle: "Your pollen types",
+    pollenProfileIntro:
+      "Choose the types that affect you – they are highlighted and listed first.",
+    pollenOnlyMine: "Show only my types",
+    pollenMineSr: "(your type)",
     next24: "Next 24 hours",
     rain48: "Rain: next 48 hours",
     chartRain: "Rain",

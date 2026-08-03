@@ -756,6 +756,11 @@ export const it: Translation = {
     pollenNoData: "Nessun dato sui pollini per questo luogo.",
     pollenSource:
       "Fonte: Open-Meteo Air Quality (CAMS Europa) – carico attuale dell'ora in corso.",
+    pollenProfileTitle: "I tuoi tipi di polline",
+    pollenProfileIntro:
+      "Scegli i tipi che ti riguardano – vengono evidenziati e mostrati per primi.",
+    pollenOnlyMine: "Mostra solo i miei tipi",
+    pollenMineSr: "(il tuo tipo)",
     next24: "Prossime 24 ore",
     rain48: "Pioggia: prossime 48 ore",
     chartRain: "Pioggia",

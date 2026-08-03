@@ -26,6 +26,8 @@ export const SYNCED_SETTING_KEYS = [
   "shoppingHistory",
   /** Gespeicherte Wetter-Orte (Favoriten der Wettervorhersage) */
   "weatherPlaces",
+  /** Allergie-Profil: eigene Pollenarten im Wetter-Modul */
+  "pollenProfile",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];
