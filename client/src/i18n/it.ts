@@ -111,6 +111,10 @@ export const it: Translation = {
     weatherAria: (temp, label) =>
       `Meteo attuale: ${temp} gradi, ${label} – al modulo meteo`,
     weatherNoAlerts: "Nessuna allerta maltempo nella tua posizione",
+    weatherAlertAria: (temp, label, count, severity) =>
+      `Meteo attuale: ${temp} gradi, ${label}. ${
+        count === 1 ? "1 allerta maltempo" : `${count} allerte maltempo`
+      }, livello più alto: ${severity} – alle allerte nel modulo meteo`,
     tipOfDayTitle: "Consiglio del giorno",
     tipOfDayAria: (text: string) => `Consiglio del giorno: ${text}`,
     gearDueText: (n: number) =>

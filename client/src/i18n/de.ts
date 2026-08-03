@@ -111,6 +111,15 @@ export const de = {
     weatherAria: (temp: number, label: string) =>
       `Aktuelles Wetter: ${temp} Grad, ${label} – zum Wetter-Modul`,
     weatherNoAlerts: "Keine Unwetterwarnungen an deinem Standort",
+    weatherAlertAria: (
+      temp: number,
+      label: string,
+      count: number,
+      severity: string
+    ) =>
+      `Aktuelles Wetter: ${temp} Grad, ${label}. ${
+        count === 1 ? "1 Unwetterwarnung" : `${count} Unwetterwarnungen`
+      }, höchste Stufe: ${severity} – zu den Warnungen im Wetter-Modul`,
     tipOfDayTitle: "Tipp des Tages",
     tipOfDayAria: (text: string) => `Tipp des Tages: ${text}`,
     gearDueText: (n: number) =>

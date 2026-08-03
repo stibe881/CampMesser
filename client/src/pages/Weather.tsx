@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   ArrowLeftRight,
@@ -1372,6 +1372,19 @@ export default function WeatherPage() {
     () => (data ? detectAlerts(data.hourly, lang) : []),
     [data, lang]
   );
+
+  // Aus dem Unwetter-Badge der Startseite kommt man mit #warnungen hierher –
+  // der Abschnitt existiert erst, wenn die Prognose da ist, deshalb erst dann
+  // (und genau einmal) hinscrollen.
+  const alertsScrolledRef = useRef(false);
+  useEffect(() => {
+    if (alertsScrolledRef.current || !data) return;
+    if (window.location.hash !== "#warnungen") return;
+    const section = document.getElementById("warnungen");
+    if (!section) return;
+    alertsScrolledRef.current = true;
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [data]);
   // Regen-Kurzfrist-Hinweis: nur zeigen, wenn Regen innerhalb der nächsten
   // 2 Stunden beginnt oder aufhört – sonst bleibt die Zeile weg.
   const rainNotice = useMemo(() => {
@@ -1694,10 +1707,11 @@ export default function WeatherPage() {
             </p>
           )}
 
-          {/* Warnungen */}
+          {/* Warnungen – Anker für das Unwetter-Badge der Startseite */}
           <section
+            id="warnungen"
             aria-label={t.weather.alertsAria}
-            className="mb-6 space-y-2.5"
+            className="mb-6 scroll-mt-20 space-y-2.5"
           >
             {alerts.length === 0 ? (
               <div className="flex items-center gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm">

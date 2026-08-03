@@ -109,6 +109,12 @@ export const en: Translation = {
     weatherAria: (temp, label) =>
       `Current weather: ${temp} degrees, ${label} – open the weather module`,
     weatherNoAlerts: "No severe weather warnings at your location",
+    weatherAlertAria: (temp, label, count, severity) =>
+      `Current weather: ${temp} degrees, ${label}. ${
+        count === 1
+          ? "1 severe weather warning"
+          : `${count} severe weather warnings`
+      }, highest level: ${severity} – open the warnings in the weather module`,
     tipOfDayTitle: "Tip of the day",
     tipOfDayAria: (text: string) => `Tip of the day: ${text}`,
     gearDueText: (n: number) =>

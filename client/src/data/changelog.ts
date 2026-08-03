@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Startseite: Sind an deinem Standort Unwetterwarnungen aktiv, trägt das Wetter-Widget neu ein farbiges Badge mit der Anzahl und der höchsten Stufe – ein Tipp darauf bringt dich direkt zum Warnungs-Abschnitt im Wetter-Modul.",
+        "Accueil : si des alertes d'intempéries sont actives à ton emplacement, la vignette météo affiche désormais un badge coloré avec le nombre et le niveau le plus élevé – un tap t'amène directement à la section des alertes du module météo.",
+        "Home: se nella tua posizione ci sono allerte maltempo attive, il widget meteo mostra ora un badge colorato con il numero e il livello più alto – con un tocco arrivi direttamente alla sezione delle allerte nel modulo meteo.",
+        "Home: when severe weather warnings are active at your location, the weather widget now carries a coloured badge with the count and the highest level – one tap takes you straight to the warnings section in the weather module."
+      ),
+      l4(
         "Einkaufsliste: Du kannst jetzt mehrere persönliche Listen führen – etwa «Wocheneinkauf» und «Camping». Oben schaltest du mit einem Tipp um, im Verwalten-Dialog legst du Listen an, benennst, sortierst und löschst sie; Teilen, Drucken und Übernahmen aus Rezepten, Menüplan oder Kühlbox beziehen sich immer auf die gewählte Liste. Deine bisherige Liste bleibt vollständig erhalten.",
         "Liste de courses : tu peux désormais tenir plusieurs listes personnelles – par exemple « Courses de la semaine » et « Camping ». En haut, tu bascules d'un tap, et la fenêtre de gestion te permet de créer, renommer, réordonner et supprimer des listes ; le partage, l'impression et les reprises depuis les recettes, le menu ou la glacière portent toujours sur la liste choisie. Ta liste actuelle est intégralement conservée.",
         "Lista della spesa: ora puoi tenere più liste personali – per esempio «Spesa settimanale» e «Campeggio». In alto passi da una all'altra con un tocco e nella finestra di gestione le crei, rinomini, riordini ed elimini; condivisione, stampa e importazioni da ricette, menù o frigo box riguardano sempre la lista scelta. La tua lista attuale resta intatta.",

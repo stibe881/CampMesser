@@ -152,6 +152,8 @@ interface HomeWeather {
   windKmh: number;
   label: string;
   alert: { title: string; severity: "info" | "warnung" | "gefahr" } | null;
+  /** Anzahl aller aktiven Warnungen (die höchste Stufe steckt in `alert`). */
+  alertCount: number;
 }
 
 /**
@@ -780,6 +782,7 @@ function useHomeWeather(lang: ReturnType<typeof useI18n>["lang"]): {
             alert: alerts[0]
               ? { title: alerts[0].title, severity: alerts[0].severity }
               : null,
+            alertCount: alerts.length,
           });
           const dayAt = (i: number): DayWeather | undefined => {
             const code = json.daily?.weather_code?.[i];
@@ -805,17 +808,35 @@ function useHomeWeather(lang: ReturnType<typeof useI18n>["lang"]): {
   return { weather, today: daily.today, tomorrow: daily.tomorrow };
 }
 
+/**
+ * Farben des Unwetter-Badges – bewusst identisch zu den Severity-Badges im
+ * Wetter-Modul (severityStyles in pages/Weather.tsx), damit «Gefahr» überall
+ * gleich aussieht.
+ */
+const ALERT_BADGE_STYLES: Record<"info" | "warnung" | "gefahr", string> = {
+  gefahr: "border-destructive/50 bg-destructive/10 text-destructive",
+  warnung: "border-chart-4/50 bg-chart-4/10 text-foreground",
+  info: "border-border bg-secondary/60 text-foreground",
+};
+
 function WeatherWidget({ weather }: { weather: HomeWeather | null }) {
   const { t } = useI18n();
   if (!weather) return null;
+  const alert = weather.alertCount > 0 ? weather.alert : null;
   return (
     <Link
-      href="/wetter"
+      href={alert ? "/wetter#warnungen" : "/wetter"}
       className="mb-6 flex items-center gap-4 rounded-xl border border-border/70 bg-card p-4 shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
-      aria-label={t.home.weatherAria(
-        Math.round(weather.temperatureC),
-        weather.label
-      )}
+      aria-label={
+        alert
+          ? t.home.weatherAlertAria(
+              Math.round(weather.temperatureC),
+              weather.label,
+              weather.alertCount,
+              t.weather.severity[alert.severity]
+            )
+          : t.home.weatherAria(Math.round(weather.temperatureC), weather.label)
+      }
     >
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
         <CloudSunRain className="h-5.5 w-5.5" aria-hidden="true" />
@@ -833,16 +854,16 @@ function WeatherWidget({ weather }: { weather: HomeWeather | null }) {
             {Math.round(weather.windKmh)} km/h
           </span>
         </span>
-        {weather.alert ? (
+        {alert ? (
           <span
             className={
-              weather.alert.severity === "gefahr"
+              alert.severity === "gefahr"
                 ? "mt-0.5 flex items-center gap-1 text-xs font-medium text-destructive"
                 : "mt-0.5 flex items-center gap-1 text-xs font-medium text-foreground"
             }
           >
             <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden="true" />
-            {weather.alert.title}
+            {alert.title}
           </span>
         ) : (
           <span className="mt-0.5 block text-xs text-muted-foreground">
@@ -850,6 +871,20 @@ function WeatherWidget({ weather }: { weather: HomeWeather | null }) {
           </span>
         )}
       </span>
+      {/* Deutliches Badge: Anzahl der Warnungen + höchste Stufe */}
+      {alert && (
+        <span
+          className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg border px-2 py-1 text-[11px] font-semibold leading-none ${ALERT_BADGE_STYLES[alert.severity]}`}
+        >
+          <span className="flex items-center gap-1">
+            <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
+            {weather.alertCount}
+          </span>
+          <span className="text-[9px] font-medium uppercase tracking-wide">
+            {t.weather.severity[alert.severity]}
+          </span>
+        </span>
+      )}
       <ArrowRight
         className="h-4 w-4 shrink-0 text-muted-foreground/50"
         aria-hidden="true"
