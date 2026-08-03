@@ -9,6 +9,7 @@ import { trpc } from "@/lib/trpc";
 import { isStandaloneApp } from "@/lib/standalone";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { parsePersons } from "@shared/packPersons";
+import { sortPackCategoryGroups } from "@shared/packCategories";
 
 /**
  * Druckfreundliche Ansicht einer Packliste: nach Person gruppiert
@@ -99,7 +100,7 @@ export default function PackListPrintPage() {
           ? !item.assignee?.trim()
           : (item.assignee ?? "").trim() === person
       );
-      // Kategorien in Listen-Reihenfolge gruppieren (wie in der Detail-Ansicht)
+      // Nach Kategorie gruppieren, alphabetisch (wie in der Detail-Ansicht)
       const grouped: [string, typeof sectionItems][] = [];
       for (const item of sectionItems) {
         const key = item.category || t.packListDetail.generalCategory;
@@ -107,7 +108,11 @@ export default function PackListPrintPage() {
         if (group) group[1].push(item);
         else grouped.push([key, [item]]);
       }
-      return { person, items: sectionItems, grouped };
+      return {
+        person,
+        items: sectionItems,
+        grouped: sortPackCategoryGroups(grouped, lang),
+      };
     })
     .filter(section => section.items.length > 0);
   const categoryCount = new Set(

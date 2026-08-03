@@ -51,6 +51,10 @@ import { usePointerDrag } from "@/lib/usePointerDrag";
 import { familyAddOns } from "@shared/packTemplates";
 import { MAX_PERSONS, parsePersons } from "@shared/packPersons";
 import {
+  sortPackCategories,
+  sortPackCategoryGroups,
+} from "@shared/packCategories";
+import {
   computePackWeight,
   formatGrams,
   weightBudgetStatus,
@@ -428,15 +432,16 @@ export default function PackListDetailPage() {
     );
   };
 
-  // Alle vorhandenen Kategorien der Liste (in Reihenfolge des Auftretens)
+  // Alle vorhandenen Kategorien der Liste – immer alphabetisch, damit eine
+  // neu angelegte Kategorie an ihrem Platz steht und nicht am Ende.
   const categories = useMemo(() => {
     const cats: string[] = [];
     for (const item of query.data?.items ?? []) {
       const cat = item.category.trim();
       if (cat && !cats.includes(cat)) cats.push(cat);
     }
-    return cats;
-  }, [query.data?.items]);
+    return sortPackCategories(cats, lang);
+  }, [query.data?.items, lang]);
 
   // Personen-Bereiche der Liste (aus personsJson)
   const persons = useMemo(
@@ -547,10 +552,16 @@ export default function PackListDetailPage() {
         person,
         key: person ?? SECTION_GENERAL,
         items: sectionItems,
-        groups: Array.from(map.entries()),
+        groups: sortPackCategoryGroups(Array.from(map.entries()), lang),
       };
     });
-  }, [query.data?.items, orderedPersons, extraAssignees, generalCategory]);
+  }, [
+    query.data?.items,
+    orderedPersons,
+    extraAssignees,
+    generalCategory,
+    lang,
+  ]);
 
   const reorderMutation = trpc.packing.reorderItems.useMutation({
     onMutate: async input => {

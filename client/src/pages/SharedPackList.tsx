@@ -5,9 +5,10 @@ import PageHeader from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { useT } from "@/i18n";
+import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
+import { sortPackCategoryGroups } from "@shared/packCategories";
 
 /**
  * Öffentliche Ansicht einer geteilten Packliste: Mitreisende können ohne
@@ -16,7 +17,7 @@ import { cn } from "@/lib/utils";
 export default function SharedPackListPage() {
   const params = useParams<{ token: string }>();
   const token = params.token ?? "";
-  const t = useT();
+  const { lang, t } = useI18n();
   const utils = trpc.useUtils();
 
   const query = trpc.packing.sharedGet.useQuery(
@@ -93,13 +94,15 @@ export default function SharedPackListPage() {
           ? !item.assignee?.trim()
           : (item.assignee ?? "").trim() === person
       );
-      const grouped = sectionItems.reduce<Record<string, typeof items>>(
+      const byCategory = sectionItems.reduce<Record<string, typeof items>>(
         (acc, item) => {
           (acc[item.category] ??= []).push(item);
           return acc;
         },
         {}
       );
+      // Kategorien alphabetisch – gleiche Reihenfolge wie in der App
+      const grouped = sortPackCategoryGroups(Object.entries(byCategory), lang);
       return { person, items: sectionItems, grouped };
     })
     .filter(section => section.items.length > 0);
@@ -163,54 +166,51 @@ export default function SharedPackListPage() {
               </h2>
             )}
             <div className="space-y-5">
-              {Object.entries(section.grouped).map(
-                ([category, categoryItems]) => (
-                  <div key={category}>
-                    <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                      {category}
-                    </h3>
-                    <ul className="space-y-1.5">
-                      {categoryItems.map(item => (
-                        <li
-                          key={item.id}
+              {section.grouped.map(([category, categoryItems]) => (
+                <div key={category}>
+                  <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    {category}
+                  </h3>
+                  <ul className="space-y-1.5">
+                    {categoryItems.map(item => (
+                      <li
+                        key={item.id}
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5",
+                          item.checked && "bg-muted/60"
+                        )}
+                      >
+                        <Checkbox
+                          id={`shared-item-${item.id}`}
+                          checked={item.checked}
+                          onCheckedChange={value =>
+                            toggleMutation.mutate({
+                              token,
+                              itemId: item.id,
+                              checked: value === true,
+                            })
+                          }
+                          aria-label={t.sharedPackList.checkAria(item.name)}
+                        />
+                        <label
+                          htmlFor={`shared-item-${item.id}`}
                           className={cn(
-                            "flex items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5",
-                            item.checked && "bg-muted/60"
+                            "flex-1 cursor-pointer text-sm",
+                            item.checked && "text-muted-foreground line-through"
                           )}
                         >
-                          <Checkbox
-                            id={`shared-item-${item.id}`}
-                            checked={item.checked}
-                            onCheckedChange={value =>
-                              toggleMutation.mutate({
-                                token,
-                                itemId: item.id,
-                                checked: value === true,
-                              })
-                            }
-                            aria-label={t.sharedPackList.checkAria(item.name)}
-                          />
-                          <label
-                            htmlFor={`shared-item-${item.id}`}
-                            className={cn(
-                              "flex-1 cursor-pointer text-sm",
-                              item.checked &&
-                                "text-muted-foreground line-through"
-                            )}
-                          >
-                            {item.name}
-                            {item.quantity > 1 && (
-                              <span className="ml-1.5 text-xs text-muted-foreground">
-                                × {item.quantity}
-                              </span>
-                            )}
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )
-              )}
+                          {item.name}
+                          {item.quantity > 1 && (
+                            <span className="ml-1.5 text-xs text-muted-foreground">
+                              × {item.quantity}
+                            </span>
+                          )}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           </section>
         ))}
