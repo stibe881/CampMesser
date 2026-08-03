@@ -710,6 +710,7 @@ export const fr: Translation = {
     hourlyLegend:
       "Ligne = température (°C, axe gauche) · Barres = quantité de pluie (mm/h, axe droit).",
     dayWindPeak: (n: number) => `Pointe de vent : rafales jusqu'à ${n} km/h`,
+    dayFeelsLike: (deg: number) => `ressenti jusqu\u2019à ${deg}°`,
     dayHoursEmpty: "Pas de données horaires disponibles pour ce jour.",
     dataSource:
       "Source des données : Open-Meteo (meilleure résolution disponible pour ta position, en Suisse MétéoSuisse ICON-CH). Les alertes sont calculées à partir des prévisions et ne remplacent pas les alertes officielles de MétéoSuisse.",

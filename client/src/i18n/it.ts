@@ -699,6 +699,7 @@ export const it: Translation = {
     hourlyLegend:
       "Linea = temperatura (°C, asse sinistro) · Barre = quantità di pioggia (mm/h, asse destro).",
     dayWindPeak: (n: number) => `Punta di vento: raffiche fino a ${n} km/h`,
+    dayFeelsLike: (deg: number) => `percepiti fino a ${deg}°`,
     dayHoursEmpty: "Nessun dato orario disponibile per questo giorno.",
     dataSource:
       "Fonte dati: Open-Meteo (migliore risoluzione disponibile per la tua posizione, in Svizzera MeteoSvizzera ICON-CH). Le allerte sono calcolate dalle previsioni e non sostituiscono le allerte ufficiali di MeteoSvizzera.",

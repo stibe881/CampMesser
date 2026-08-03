@@ -680,6 +680,7 @@ export const en: Translation = {
     hourlyLegend:
       "Line = temperature (°C, left axis) · Bars = rainfall (mm/h, right axis).",
     dayWindPeak: (n: number) => `Peak wind: gusts up to ${n} km/h`,
+    dayFeelsLike: (deg: number) => `feels like up to ${deg}°`,
     dayHoursEmpty: "No hourly data available for this day.",
     dataSource:
       "Data source: Open-Meteo (best available resolution for your location, in Switzerland MeteoSwiss ICON-CH). Alerts are computed from the forecast and do not replace official MeteoSwiss warnings.",

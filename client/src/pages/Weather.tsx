@@ -1295,6 +1295,7 @@ export default function WeatherPage() {
               }),
               temp: h.temperatureC,
               mm: h.precipitationMm,
+              apparentC: h.apparentC,
             }))
         : [],
     [data, openDay, lang]
@@ -1957,6 +1958,18 @@ export default function WeatherPage() {
                               />
                               {t.weather.dayWindPeak(
                                 Math.round(d.windGustsMaxKmh)
+                              )}
+                              {openDayHours.length > 0 && (
+                                <span className="text-muted-foreground">
+                                  {" · "}
+                                  {t.weather.dayFeelsLike(
+                                    Math.round(
+                                      Math.max(
+                                        ...openDayHours.map(h => h.apparentC)
+                                      )
+                                    )
+                                  )}
+                                </span>
                               )}
                             </p>
                           </>

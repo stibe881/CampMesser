@@ -711,6 +711,7 @@ export const de = {
     hourlyLegend:
       "Linie = Temperatur (°C, linke Achse) · Balken = Regenmenge (mm/h, rechte Achse).",
     dayWindPeak: (n: number) => `Wind-Spitze: Böen bis ${n} km/h`,
+    dayFeelsLike: (deg: number) => `gefühlt bis ${deg}°`,
     dayHoursEmpty: "Keine Stundendaten für diesen Tag verfügbar.",
     dataSource:
       "Datenquelle: Open-Meteo (beste verfügbare Auflösung für deinen Standort, in der Schweiz MeteoSchweiz ICON-CH). Warnungen werden aus der Vorhersage berechnet und ersetzen keine offiziellen Warnungen von MeteoSchweiz.",
