@@ -2507,6 +2507,32 @@ export const fr: Translation = {
     journalSaveFailed: "Impossible d'enregistrer l'entrée du journal",
     journalBy: (name: string) => `par ${name}`,
   },
+  tripBoard: {
+    title: "Panneau d'affichage",
+    toggleAria: (name: string) =>
+      `Ouvrir ou fermer le panneau d'affichage de ${name}`,
+    hint: "Petits messages et tâches pour tous les compagnons de voyage – le panneau se met à jour tout seul.",
+    kindAria: "Choisir le type de note",
+    textAria: "Texte de la note",
+    messagePlaceholder: "p. ex. rendez-vous à 18 h à la place de jeux",
+    taskPlaceholder: "p. ex. aller chercher du pain",
+    addButton: "Épingler",
+    added: "Épinglé au panneau",
+    addFailed: "La note n'a pas pu être épinglée",
+    textRequired: "Écris d'abord quelque chose.",
+    empty: "Rien d'épinglé pour l'instant – lance le premier message.",
+    openTasks: (n: number) =>
+      n === 1 ? "1 tâche ouverte" : `${n} tâches ouvertes`,
+    byLine: (name: string, ago: string) => `de ${name} · ${ago}`,
+    doneLine: (name: string, ago: string) => `fait par ${name} · ${ago}`,
+    doneAria: (text: string) => `Cocher la tâche « ${text} »`,
+    doneFailed: "La tâche n'a pas pu être cochée",
+    unknownPerson: "quelqu'un",
+    removeAria: (text: string) => `Retirer la note « ${text} »`,
+    removeConfirm: "Retirer vraiment cette note ?",
+    removed: "Note retirée",
+    removeFailed: "La note n'a pas pu être retirée",
+  },
   tripExpenses: {
     title: "Caisse du voyage",
     toggleAria: (name: string) =>

@@ -748,6 +748,49 @@ export type TripExpense = typeof tripExpenses.$inferSelect;
 export type InsertTripExpense = typeof tripExpenses.$inferInsert;
 
 /**
+ * Pinnwand einer Reise (#245): kurze Zurufe an die Mitreisenden
+ * («Bringe noch Holzkohle mit») und einfache Aufgaben zum Abhaken
+ * («Brot holen»). Wie Journal und Reisekasse gehört ein Zettel zur REISE –
+ * die Berechtigung prüft der Router via canAccessTrip, damit jedes Mitglied
+ * anpinnen und abhaken darf. `userId` hält fest, WER angepinnt hat
+ * (Anzeige «von <Name>»); löscht dieses Konto sich, bleibt der Zettel in
+ * FREMDEN Reisen bewusst stehen – die Namensanzeige fällt dann einfach weg.
+ *
+ * `kind` unterscheidet Nachricht und Aufgabe (Schlüssel aus
+ * shared/tripBoard.ts). Nur Aufgaben tragen `done`; `doneByUserId`/`doneAt`
+ * sind gesetzt, sobald jemand abhakt, und werden beim Zurücksetzen wieder
+ * geleert.
+ */
+export const tripBoardNotes = mysqlTable(
+  "tripBoardNotes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    /** Zugehörige Reise (tripLogs.id) */
+    tripId: int("tripId").notNull(),
+    /** Konto, das den Zettel angepinnt hat (users.id) – nur für die Anzeige */
+    userId: int("userId").notNull(),
+    /** Art des Zettels: message | task (shared/tripBoard.ts) */
+    kind: varchar("kind", { length: 16 }).notNull().default("message"),
+    text: varchar("text", { length: 500 }).notNull(),
+    /** Nur bei Aufgaben von Bedeutung; Nachrichten bleiben immer false */
+    done: boolean("done").notNull().default(false),
+    /** Konto, das abgehakt hat (users.id); null = offen */
+    doneByUserId: int("doneByUserId"),
+    /** Zeitpunkt des Abhakens (UTC); null = offen */
+    doneAt: timestamp("doneAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    index("tripBoardNotes_tripId").on(table.tripId),
+    index("tripBoardNotes_userId").on(table.userId),
+  ]
+);
+
+export type TripBoardNote = typeof tripBoardNotes.$inferSelect;
+export type InsertTripBoardNote = typeof tripBoardNotes.$inferInsert;
+
+/**
  * Persönliche Einkaufslisten (#215): pro Konto beliebig viele benannte
  * Listen («Wocheneinkauf», «Camping»). Die Reihenfolge im Umschalter steckt
  * in position (0..n); gelöscht wird eine Liste samt ihren Einträgen.

@@ -54,6 +54,8 @@ import {
   InsertSpotPhoto,
   tickBites,
   InsertTickBite,
+  tripBoardNotes,
+  InsertTripBoardNote,
   tripExpenses,
   InsertTripExpense,
   tripInvites,
@@ -2123,6 +2125,61 @@ export async function deleteTripExpense(id: number) {
 export async function deleteAllTripExpensesForTrip(tripId: number) {
   const db = requireDb(await getDb());
   await db.delete(tripExpenses).where(eq(tripExpenses.tripId, tripId));
+}
+
+// ── Pinnwand der Reise (#245) ──
+
+/**
+ * Zettel einer Reise, neuste zuoberst – nur NACH einer canAccessTrip-Prüfung
+ * im Router verwenden. Die endgültige Reihenfolge (erledigte Aufgaben ans
+ * Ende) macht shared/tripBoard.ts, damit sie testbar bleibt.
+ */
+export async function getTripBoardNotes(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripBoardNotes)
+    .where(eq(tripBoardNotes.tripId, tripId))
+    .orderBy(desc(tripBoardNotes.createdAt), desc(tripBoardNotes.id));
+}
+
+/** Einzelnen Zettel laden (für die Zugriffsprüfung über seine tripId). */
+export async function getTripBoardNoteById(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripBoardNotes)
+    .where(eq(tripBoardNotes.id, id))
+    .limit(1);
+  return rows[0];
+}
+
+/** Zettel anpinnen – nur NACH einer canAccessTrip-Prüfung im Router. */
+export async function addTripBoardNote(data: InsertTripBoardNote) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(tripBoardNotes).values(data);
+  return result.insertId;
+}
+
+/** Zettel ändern (Text oder Abhak-Zustand) – nur nach canAccessTrip. */
+export async function updateTripBoardNote(
+  id: number,
+  data: Partial<InsertTripBoardNote>
+) {
+  const db = requireDb(await getDb());
+  await db.update(tripBoardNotes).set(data).where(eq(tripBoardNotes.id, id));
+}
+
+/** Zettel löschen – nur NACH der Rechteprüfung im Router. */
+export async function deleteTripBoardNote(id: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripBoardNotes).where(eq(tripBoardNotes.id, id));
+}
+
+/** Ganze Pinnwand einer Reise entfernen (beim Löschen der Reise). */
+export async function deleteAllTripBoardNotesForTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripBoardNotes).where(eq(tripBoardNotes.tripId, tripId));
 }
 
 // ── Aufgezeichnete Wanderungen (#220) ──
