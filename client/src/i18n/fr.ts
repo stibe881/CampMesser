@@ -2681,6 +2681,44 @@ export const fr: Translation = {
       "L'ISS n'est visible qu'au crépuscule et en première partie de nuit : il doit faire sombre au sol pendant que le soleil éclaire encore la station. Elle traverse le ciel comme un point brillant et régulier – sans clignoter. Les heures et l'éclat sont des valeurs approchées, sors quelques minutes à l'avance.",
   },
 
+  /** Détecteur de constellations : lever le téléphone vers le ciel (#225). */
+  skyFinder: {
+    sectionAria: "Détecteur de constellations avec boussole et inclinaison",
+    title: "Détecteur de constellations",
+    subtitle:
+      "Lève ton téléphone vers le ciel – CampMesser te dit ce qui se trouve dans cette direction.",
+    subtitleAtPlace: (place: string) =>
+      `Lève ton téléphone vers le ciel – voici l'état du ciel à ${place}.`,
+    locating: "Localisation en cours …",
+    noLocation:
+      "Pour le détecteur de constellations, CampMesser a besoin de ta position – autorise la localisation ou enregistre un emplacement.",
+    viewTitle: "Dans ta direction",
+    viewDirection: (direction: string, degrees: number) =>
+      `${direction}, ${degrees}° au-dessus de l'horizon`,
+    viewNothing:
+      "Rien du répertoire ne se trouve dans cette direction pour l'instant. Balaie lentement le ciel avec ton téléphone.",
+    viewGround:
+      "Tu vises sous l'horizon – lève davantage le téléphone vers le ciel.",
+    separation: (degrees: number) => `à environ ${degrees}° du centre`,
+    lexiconLink: "Lire dans le lexique",
+    compassStart: "Démarrer la boussole",
+    compassHint:
+      "Pour la direction du regard, CampMesser a besoin de la boussole de ton appareil – touche « Démarrer la boussole » et autorise l'accès.",
+    compassDenied:
+      "Sans accès à la boussole, impossible de déterminer la direction du regard. Tu peux réessayer – la liste ci-dessous reste valable.",
+    noCompass:
+      "Ton appareil n'a pas de boussole. La liste ci-dessous t'indique quand même ce qui brille cette nuit – avec direction et hauteur au-dessus de l'horizon.",
+    daylightHint:
+      "Il fait encore trop clair pour les étoiles. La liste montre l'état du ciel pour la nuit qui vient.",
+    tonightTitle: (time: string) => `Visible cette nuit (à ${time})`,
+    tonightEmpty:
+      "À cette heure, rien du répertoire n'est assez haut dans le ciel.",
+    position: (direction: string, degrees: number) =>
+      `${direction} · ${degrees}° de hauteur`,
+    footnote:
+      "Tout est calculé hors ligne à partir du lieu et de l'heure ; les indications valent pour un horizon dégagé. Les boussoles de téléphone sont précises à 10 à 15 degrés près – tiens l'appareil à plat dans la main, loin du métal et des aimants.",
+  },
+
   recipes: {
     title: "Livre de recettes Campfire",
     subtitle:

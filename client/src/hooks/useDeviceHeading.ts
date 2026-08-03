@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { smoothHeading } from "@/lib/heading";
+import { HEADING_SMOOTHING_ALPHA, smoothHeading } from "@/lib/heading";
+import { deviceViewAltitude } from "@shared/skyPosition";
 
 /**
  * Liest die Kompass-Ausrichtung des Geräts (0° = Norden, im Uhrzeigersinn).
@@ -12,6 +13,12 @@ import { smoothHeading } from "@/lib/heading";
  * einem exponentiellen Mittel über Winkel (wrap-around-sicher, lib/heading).
  * Davon profitieren ALLE Konsumenten (Zelt-Finder und Sonnen-Kompass) an
  * einer Stelle, ohne dass die Seiten selbst etwas tun müssen.
+ *
+ * Zusätzlich liefert der Hook `viewAltitude`: die HÖHE der Richtung, in die
+ * die Geräterückseite zeigt (−90° Boden, 0° Horizont, +90° Zenit). Der
+ * Sternbild-Finder braucht sie, um zu wissen, wie hoch man ans Firmament
+ * hält; Seiten ohne Neigungsbedarf ignorieren das Feld einfach. Sie bleibt
+ * `null`, solange kein Ereignis beta/gamma mitliefert.
  */
 interface DeviceOrientationEventiOS extends DeviceOrientationEvent {
   webkitCompassHeading?: number;
@@ -21,6 +28,7 @@ type PermissionState = "idle" | "granted" | "denied" | "unsupported";
 
 export function useDeviceHeading() {
   const [heading, setHeading] = useState<number | null>(null);
+  const [viewAltitude, setViewAltitude] = useState<number | null>(null);
   const [active, setActive] = useState(false);
   const [permission, setPermission] = useState<PermissionState>("idle");
   // Ein einziger, stabiler Handler für die gesamte Hook-Lebensdauer: Events werden
@@ -30,6 +38,7 @@ export function useDeviceHeading() {
   const attachedRef = useRef(false);
   // Zuletzt geglätteter Wert für das exponentielle Mittel (null = noch keiner)
   const smoothedRef = useRef<number | null>(null);
+  const smoothedAltitudeRef = useRef<number | null>(null);
   const handlerRef = useRef((e: DeviceOrientationEvent) => {
     if (!enabledRef.current) return;
     const ios = e as DeviceOrientationEventiOS;
@@ -46,6 +55,16 @@ export function useDeviceHeading() {
       const smoothed = smoothHeading(smoothedRef.current, h);
       smoothedRef.current = smoothed;
       setHeading(smoothed);
+    }
+    if (e.beta !== null && e.gamma !== null) {
+      // Neigung: die Höhe läuft nur von −90 bis 90 und kennt keinen
+      // Umschlag – hier genügt das schlichte exponentielle Mittel.
+      const raw = deviceViewAltitude(e.beta, e.gamma);
+      const prev = smoothedAltitudeRef.current;
+      const smoothed =
+        prev === null ? raw : prev + HEADING_SMOOTHING_ALPHA * (raw - prev);
+      smoothedAltitudeRef.current = smoothed;
+      setViewAltitude(smoothed);
     }
   });
 
@@ -64,8 +83,10 @@ export function useDeviceHeading() {
       attachedRef.current = false;
     }
     smoothedRef.current = null;
+    smoothedAltitudeRef.current = null;
     setActive(false);
     setHeading(null);
+    setViewAltitude(null);
   }, []);
 
   const start = useCallback(async () => {
@@ -113,5 +134,5 @@ export function useDeviceHeading() {
 
   useEffect(() => stop, [stop]);
 
-  return { heading, active, permission, start, stop };
+  return { heading, viewAltitude, active, permission, start, stop };
 }

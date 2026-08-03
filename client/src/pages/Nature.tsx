@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Compass,
   Flashlight,
   HelpCircle,
   ImagePlus,
@@ -19,6 +20,7 @@ import {
   Plus,
   Satellite,
   Sparkles,
+  Telescope,
   Trash2,
   TreePine,
   WifiOff,
@@ -73,9 +75,19 @@ import {
   upcomingShowers,
 } from "@shared/astro";
 import { passPathText } from "@shared/iss";
+import {
+  isDarkEnough,
+  nightReferenceTime,
+  objectInView,
+  skyObjectsAt,
+  visibleSkyObjects,
+  type SkySighting,
+} from "@shared/skyPosition";
+import { compassDirection } from "@shared/solar";
 import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
 import { inSeason } from "@shared/season";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useDeviceHeading } from "@/hooks/useDeviceHeading";
 import { useI18n } from "@/i18n";
 import { resizeImageForUpload } from "@/lib/imageResize";
 import {
@@ -549,13 +561,17 @@ function MeteorCalendar() {
 }
 
 /**
- * ISS-Überflüge (#222): die nächsten SICHTBAREN Überflüge der Raumstation
- * über dem eigenen Standort. Die Bahnrechnung macht der Server (server/iss.ts
- * mit Zwischenspeicher), die Auswahl der sichtbaren Überflüge shared/iss.ts.
- * Ort: bevorzugt GPS, sonst der erste gespeicherte Zeltplatz.
+ * Beobachtungsort für die Astro-Abschnitte: bevorzugt GPS, sonst der erste
+ * gespeicherte Zeltplatz (dann mit Namen). Ohne beides bleibt `coords` null –
+ * die Abschnitte zeigen dann ihren Hinweis. Einmal bestimmt, bleibt der Ort
+ * für die Sitzung stehen; ISS-Überflüge und Sternbild-Finder nutzen
+ * dieselbe Logik.
  */
-function IssPasses() {
-  const { lang, t } = useI18n();
+function useStargazingLocation(): {
+  coords: { lat: number; lon: number } | null;
+  placeName: string | null;
+  locating: boolean;
+} {
   const { isAuthenticated } = useAuth();
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(
     null
@@ -566,8 +582,6 @@ function IssPasses() {
     enabled: isAuthenticated,
   });
 
-  // Standort einmalig bestimmen: GPS zuerst, sonst der erste Zeltplatz.
-  // Ohne beides bleibt der Abschnitt bei seinem Hinweis.
   const spots = spotsQuery.data;
   const spotsLoading = isAuthenticated && spotsQuery.isPending;
   useEffect(() => {
@@ -601,6 +615,19 @@ function IssPasses() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spotsLoading, spots]);
+
+  return { coords, placeName, locating };
+}
+
+/**
+ * ISS-Überflüge (#222): die nächsten SICHTBAREN Überflüge der Raumstation
+ * über dem eigenen Standort. Die Bahnrechnung macht der Server (server/iss.ts
+ * mit Zwischenspeicher), die Auswahl der sichtbaren Überflüge shared/iss.ts.
+ * Ort: bevorzugt GPS, sonst der erste gespeicherte Zeltplatz.
+ */
+function IssPasses() {
+  const { lang, t } = useI18n();
+  const { coords, placeName, locating } = useStargazingLocation();
 
   const passesQuery = trpc.iss.passes.useQuery(
     { latitude: coords?.lat ?? 0, longitude: coords?.lon ?? 0 },
@@ -664,6 +691,208 @@ function IssPasses() {
       )}
 
       <p className="mt-3 text-xs text-muted-foreground">{t.iss.footnote}</p>
+    </section>
+  );
+}
+
+/**
+ * Sternbild-Finder (#225): Handy an den Himmel halten und ablesen, welches
+ * Sternbild dort steht. Die Blickrichtung kommt aus dem Kompass (heading,
+ * derselbe geglättete Hook wie im Zelt-Finder), die Blickhöhe aus der Neigung
+ * des Geräts (viewAltitude). Gerechnet wird alles in shared/skyPosition.ts.
+ *
+ * Fallback wie im Zelt-Finder: Ohne Kompass (iOS-Erlaubnis verweigert, kein
+ * Sensor) erscheint ein verständlicher Hinweis samt Knopf zum Nachfragen –
+ * die Liste «heute Nacht sichtbar» steht in jedem Fall.
+ *
+ * Der Rotlicht-Modus (#84) legt seinen Filter über die ganze Seite und greift
+ * dadurch auch hier; der Abschnitt verwendet bewusst keine eigenen
+ * Overlay-Ebenen, die darüber liegen könnten.
+ */
+function ConstellationFinder({
+  onOpenEntry,
+}: {
+  onOpenEntry: (entry: NatureEntry) => void;
+}) {
+  const { lang, t } = useI18n();
+  const { coords, placeName, locating } = useStargazingLocation();
+  const { heading, viewAltitude, permission, start } = useDeviceHeading();
+
+  // Kompass direkt starten (Android/Desktop); iOS verlangt den Knopf unten
+  useEffect(() => {
+    void start();
+  }, [start]);
+
+  // Der Himmel dreht sich – die Positionen alle 20 Sekunden nachführen
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 20000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const nowSightings = useMemo(
+    () => (coords ? skyObjectsAt(now, coords.lat, coords.lon) : []),
+    [coords, now]
+  );
+  const nightTime = useMemo(() => nightReferenceTime(now), [now]);
+  const tonight = useMemo(
+    () => (coords ? visibleSkyObjects(nightTime, coords.lat, coords.lon) : []),
+    [coords, nightTime]
+  );
+  const bright = coords ? !isDarkEnough(now, coords.lat, coords.lon) : false;
+
+  const compassReady = heading !== null && viewAltitude !== null;
+  const inView = compassReady
+    ? objectInView(nowSightings, heading, viewAltitude)
+    : null;
+
+  /** Lexikon-Eintrag zu einem Himmelsobjekt öffnen, sofern es einen gibt. */
+  const openLexicon = (entryId: string | undefined) => {
+    const entry = entryId
+      ? natureEntries.find(candidate => candidate.id === entryId)
+      : undefined;
+    if (entry) onOpenEntry(entry);
+  };
+
+  /** Eine Zeile «Name · Richtung · Höhe» mit optionalem Lexikon-Knopf. */
+  const sightingRow = (sighting: SkySighting) => (
+    <li key={sighting.object.id} className="rounded-lg bg-accent/50 p-3">
+      <div className="flex flex-wrap items-baseline gap-x-2">
+        <p className="font-semibold">{pick(sighting.object.name, lang)}</p>
+        <span className="ml-auto font-mono text-sm text-muted-foreground">
+          {t.skyFinder.position(
+            compassDirection(sighting.position.azimuth, lang),
+            Math.round(sighting.position.altitude)
+          )}
+        </span>
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {pick(sighting.object.hint, lang)}
+      </p>
+      {sighting.object.natureEntryId && (
+        <button
+          type="button"
+          onClick={() => openLexicon(sighting.object.natureEntryId)}
+          className="mt-1.5 text-sm font-medium text-primary underline"
+        >
+          {t.skyFinder.lexiconLink}
+        </button>
+      )}
+    </li>
+  );
+
+  return (
+    <section
+      className="mb-6 rounded-xl border border-border bg-card p-4"
+      aria-label={t.skyFinder.sectionAria}
+    >
+      <div className="mb-1 flex items-center gap-2">
+        <Telescope className="h-4 w-4 text-primary" aria-hidden="true" />
+        <h2 className="font-serif text-lg font-semibold">
+          {t.skyFinder.title}
+        </h2>
+      </div>
+      <p className="mb-3 text-sm text-muted-foreground">
+        {placeName
+          ? t.skyFinder.subtitleAtPlace(placeName)
+          : t.skyFinder.subtitle}
+      </p>
+
+      {locating ? (
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          {t.skyFinder.locating}
+        </p>
+      ) : coords === null ? (
+        <p className="text-sm text-muted-foreground">
+          {t.skyFinder.noLocation}
+        </p>
+      ) : (
+        <>
+          {/* Blickrichtung: nur mit Kompass UND Neigung sinnvoll */}
+          {compassReady ? (
+            <div className="rounded-lg border border-primary/40 bg-primary/5 p-3.5">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {t.skyFinder.viewTitle}
+              </p>
+              <p className="mt-0.5 font-mono text-sm text-muted-foreground">
+                {t.skyFinder.viewDirection(
+                  compassDirection(heading, lang),
+                  Math.round(viewAltitude)
+                )}
+              </p>
+              {inView ? (
+                <>
+                  <p className="mt-2 font-serif text-2xl font-semibold text-primary">
+                    {pick(inView.sighting.object.name, lang)}
+                  </p>
+                  <p className="mt-1 text-sm">
+                    {pick(inView.sighting.object.hint, lang)}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {t.skyFinder.separation(Math.round(inView.separationDeg))}
+                  </p>
+                  {inView.sighting.object.natureEntryId && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openLexicon(inView.sighting.object.natureEntryId)
+                      }
+                      className="mt-1.5 text-sm font-medium text-primary underline"
+                    >
+                      {t.skyFinder.lexiconLink}
+                    </button>
+                  )}
+                </>
+              ) : (
+                <p className="mt-2 text-sm">
+                  {viewAltitude < 0
+                    ? t.skyFinder.viewGround
+                    : t.skyFinder.viewNothing}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-start gap-2 rounded-lg border border-border bg-muted/40 p-3.5">
+              <p className="text-sm text-muted-foreground">
+                {permission === "unsupported"
+                  ? t.skyFinder.noCompass
+                  : permission === "denied"
+                    ? t.skyFinder.compassDenied
+                    : t.skyFinder.compassHint}
+              </p>
+              {permission !== "unsupported" && (
+                <Button size="sm" onClick={() => void start()}>
+                  <Compass className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {t.skyFinder.compassStart}
+                </Button>
+              )}
+            </div>
+          )}
+
+          {bright && (
+            <p className="mt-3 text-sm text-muted-foreground">
+              {t.skyFinder.daylightHint}
+            </p>
+          )}
+
+          {/* Liste – steht auch ohne Kompass immer zur Verfügung */}
+          <h3 className="mb-2 mt-4 text-sm font-semibold">
+            {t.skyFinder.tonightTitle(fmtTime(nightTime, lang))}
+          </h3>
+          {tonight.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {t.skyFinder.tonightEmpty}
+            </p>
+          ) : (
+            <ul className="space-y-2">{tonight.map(sightingRow)}</ul>
+          )}
+        </>
+      )}
+
+      <p className="mt-3 text-xs text-muted-foreground">
+        {t.skyFinder.footnote}
+      </p>
     </section>
   );
 }
@@ -1383,6 +1612,7 @@ export default function NaturePage() {
       <MoonCalendar />
       <MeteorCalendar />
       <IssPasses />
+      <ConstellationFinder onOpenEntry={openLexiconEntry} />
       <SightingsSection onOpenEntry={openLexiconEntry} />
       <RedLightSection
         active={redLight}

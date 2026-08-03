@@ -2657,6 +2657,44 @@ export const it: Translation = {
       "La ISS è visibile solo al crepuscolo e nella prima metà della notte: a terra deve essere buio mentre il sole illumina ancora la stazione. Attraversa il cielo come un punto luminoso e regolare – senza lampeggiare. Orari e luminosità sono valori approssimativi, esci qualche minuto prima.",
   },
 
+  /** Trova-costellazioni: alza il telefono verso il cielo (#225). */
+  skyFinder: {
+    sectionAria: "Trova-costellazioni con bussola e inclinazione",
+    title: "Trova-costellazioni",
+    subtitle:
+      "Alza il telefono verso il cielo – CampMesser ti dice cosa si trova in quella direzione.",
+    subtitleAtPlace: (place: string) =>
+      `Alza il telefono verso il cielo – ecco com'è il cielo a ${place}.`,
+    locating: "Rilevamento della posizione …",
+    noLocation:
+      "Per il trova-costellazioni CampMesser ha bisogno della tua posizione – autorizza la localizzazione o salva una piazzola.",
+    viewTitle: "Nella tua direzione",
+    viewDirection: (direction: string, degrees: number) =>
+      `${direction}, ${degrees}° sopra l'orizzonte`,
+    viewNothing:
+      "In questa direzione al momento non c'è nulla del repertorio. Muovi lentamente il telefono più in là.",
+    viewGround:
+      "Stai puntando sotto l'orizzonte – alza ancora il telefono verso il cielo.",
+    separation: (degrees: number) => `a circa ${degrees}° dal centro`,
+    lexiconLink: "Leggi nel lessico",
+    compassStart: "Avvia la bussola",
+    compassHint:
+      "Per la direzione dello sguardo CampMesser ha bisogno della bussola del tuo dispositivo – tocca «Avvia la bussola» e concedi l'accesso.",
+    compassDenied:
+      "Senza accesso alla bussola non è possibile determinare la direzione dello sguardo. Puoi riprovare – l'elenco qui sotto resta valido.",
+    noCompass:
+      "Il tuo dispositivo non ha una bussola. L'elenco qui sotto ti dice comunque cosa c'è stanotte in cielo – con direzione e altezza sopra l'orizzonte.",
+    daylightHint:
+      "Al momento è ancora troppo chiaro per le stelle. L'elenco mostra com'è il cielo nella notte che arriva.",
+    tonightTitle: (time: string) => `Visibile stanotte (alle ${time})`,
+    tonightEmpty:
+      "A quest'ora nulla del repertorio è abbastanza alto nel cielo.",
+    position: (direction: string, degrees: number) =>
+      `${direction} · ${degrees}° di altezza`,
+    footnote:
+      "Tutto è calcolato offline da luogo e ora; le indicazioni valgono per un orizzonte libero. Le bussole dei telefoni sono precise a 10-15 gradi – tieni il dispositivo piatto in mano, lontano da metallo e calamite.",
+  },
+
   recipes: {
     title: "Ricettario Campfire",
     subtitle:

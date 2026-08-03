@@ -2588,6 +2588,44 @@ export const en: Translation = {
       "The ISS is only visible at dusk and in the first half of the night: it has to be dark on the ground while the sun still reaches the station. It crosses the sky as a steady bright dot – no blinking. Times and brightness are approximate, so head outside a few minutes early.",
   },
 
+  /** Constellation finder: hold the phone up to the sky (#225). */
+  skyFinder: {
+    sectionAria: "Constellation finder using compass and tilt",
+    title: "Constellation finder",
+    subtitle:
+      "Hold your phone up to the sky – CampMesser tells you what stands in that direction.",
+    subtitleAtPlace: (place: string) =>
+      `Hold your phone up to the sky – this is how the sky stands at ${place}.`,
+    locating: "Determining your location …",
+    noLocation:
+      "The constellation finder needs your location – allow location access or save a pitch.",
+    viewTitle: "In your direction",
+    viewDirection: (direction: string, degrees: number) =>
+      `${direction}, ${degrees}° above the horizon`,
+    viewNothing:
+      "Nothing from the catalogue stands in this direction right now. Sweep the phone slowly across the sky.",
+    viewGround:
+      "You are pointing below the horizon – lift the phone further towards the sky.",
+    separation: (degrees: number) => `about ${degrees}° off centre`,
+    lexiconLink: "Read up in the lexicon",
+    compassStart: "Start compass",
+    compassHint:
+      "For the viewing direction CampMesser needs your device compass – tap “Start compass” and allow access.",
+    compassDenied:
+      "Without compass access the viewing direction cannot be worked out. You can try again – the list below still holds.",
+    noCompass:
+      "Your device has no compass. The list below still tells you what stands where tonight – with direction and height above the horizon.",
+    daylightHint:
+      "It is still too bright for stars. The list shows how the sky will stand in the coming night.",
+    tonightTitle: (time: string) => `Visible tonight (at ${time})`,
+    tonightEmpty:
+      "At this time nothing from the catalogue stands high enough in the sky.",
+    position: (direction: string, degrees: number) =>
+      `${direction} · ${degrees}° up`,
+    footnote:
+      "Everything is worked out offline from place and time; the figures assume a clear horizon. Phone compasses are accurate to within 10 to 15 degrees – hold the device flat in your hand, away from metal and magnets.",
+  },
+
   recipes: {
     title: "Campfire recipe book",
     subtitle:

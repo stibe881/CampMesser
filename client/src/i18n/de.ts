@@ -2688,6 +2688,44 @@ export const de = {
       "Sichtbar ist die ISS nur in der Dämmerung und in der ersten Nachthälfte: unten muss es dunkel sein, oben muss die Sonne die Station noch treffen. Sie zieht als ruhiger heller Punkt über den Himmel – ohne Blinken. Zeiten und Helligkeit sind Näherungswerte, sei ein paar Minuten früher draussen.",
   },
 
+  /** Sternbild-Finder: Handy an den Himmel halten (#225). */
+  skyFinder: {
+    sectionAria: "Sternbild-Finder mit Kompass und Neigung",
+    title: "Sternbild-Finder",
+    subtitle:
+      "Halt das Handy an den Himmel – CampMesser sagt dir, was in dieser Richtung steht.",
+    subtitleAtPlace: (place: string) =>
+      `Halt das Handy an den Himmel – so steht der Himmel gerade bei ${place}.`,
+    locating: "Standort wird bestimmt …",
+    noLocation:
+      "Für den Sternbild-Finder braucht CampMesser deinen Standort – gib die Ortung frei oder speichere einen Zeltplatz.",
+    viewTitle: "In Blickrichtung",
+    viewDirection: (direction: string, degrees: number) =>
+      `${direction}, ${degrees}° über dem Horizont`,
+    viewNothing:
+      "In dieser Richtung steht gerade nichts aus dem Bestand. Schwenk das Handy langsam weiter.",
+    viewGround:
+      "Du zeigst unter den Horizont – heb das Handy weiter an den Himmel.",
+    separation: (degrees: number) => `rund ${degrees}° neben der Mitte`,
+    lexiconLink: "Im Lexikon nachlesen",
+    compassStart: "Kompass starten",
+    compassHint:
+      "Für die Blickrichtung braucht CampMesser den Kompass deines Geräts – tipp auf «Kompass starten» und erlaube den Zugriff.",
+    compassDenied:
+      "Ohne Kompass-Zugriff lässt sich die Blickrichtung nicht bestimmen. Du kannst es nochmals versuchen – die Liste unten stimmt auch so.",
+    noCompass:
+      "Dein Gerät hat keinen Kompass. Die Liste unten sagt dir trotzdem, wo heute Nacht was steht – mit Himmelsrichtung und Höhe über dem Horizont.",
+    daylightHint:
+      "Gerade ist es noch zu hell für Sterne. Die Liste zeigt, wie der Himmel in der kommenden Nacht steht.",
+    tonightTitle: (time: string) => `Heute Nacht sichtbar (um ${time})`,
+    tonightEmpty:
+      "Um diese Zeit steht nichts aus dem Bestand hoch genug am Himmel.",
+    position: (direction: string, degrees: number) =>
+      `${direction} · ${degrees}° hoch`,
+    footnote:
+      "Gerechnet wird offline aus Ort und Zeit; die Angaben gelten für einen freien Horizont. Handy-Kompasse sind auf 10 bis 15 Grad genau – halte das Gerät flach in der Hand, weg von Metall und Magneten.",
+  },
+
   recipes: {
     title: "Campfire-Rezeptbuch",
     subtitle:
