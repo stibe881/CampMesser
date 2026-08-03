@@ -1243,6 +1243,12 @@ export const appRouter = router({
           volumeLiters: z.number().min(0).max(5000).default(0),
           quantity: z.number().int().min(1).max(99).default(1),
           notes: z.string().max(1000).optional(),
+          // Kaufpreis in Rappen (Ganzzahl, max. 1 Mio. CHF), null = nicht erfasst
+          priceRappen: z.number().int().min(0).max(100000000).nullish(),
+          purchaseDate: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/)
+            .nullish(),
         })
       )
       .mutation(({ ctx, input }) =>
@@ -1258,6 +1264,11 @@ export const appRouter = router({
           volumeLiters: z.number().min(0).max(5000).optional(),
           quantity: z.number().int().min(1).max(99).optional(),
           notes: z.string().max(1000).optional(),
+          priceRappen: z.number().int().min(0).max(100000000).nullish(),
+          purchaseDate: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/)
+            .nullish(),
         })
       )
       .mutation(({ ctx, input }) => {
@@ -1267,13 +1278,19 @@ export const appRouter = router({
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        // Foto-Datei mitputzen: erst Dateinamen sichern, dann DB-Zeile
-        // löschen und zuletzt die Datei auf dem Webspace entfernen.
+        // Foto- und Beleg-Datei mitputzen: erst Dateinamen sichern, dann
+        // DB-Zeile löschen und zuletzt die Dateien auf dem Webspace entfernen.
         const item = await db.getInventoryItem(input.id, ctx.user.id);
         await db.deleteInventoryItem(input.id, ctx.user.id);
-        if (item?.imageFileName) {
-          const { inventoryPhotoStorage } = await import("./photoStorage");
-          await inventoryPhotoStorage.deleteFiles([item.imageFileName]);
+        if (item?.imageFileName || item?.receiptFileName) {
+          const { inventoryPhotoStorage, receiptPhotoStorage } =
+            await import("./photoStorage");
+          if (item.imageFileName) {
+            await inventoryPhotoStorage.deleteFiles([item.imageFileName]);
+          }
+          if (item.receiptFileName) {
+            await receiptPhotoStorage.deleteFiles([item.receiptFileName]);
+          }
         }
       }),
     /** Foto eines Gegenstands entfernen (Feld + Datei auf dem Webspace). */
@@ -1293,6 +1310,26 @@ export const appRouter = router({
           });
           const { inventoryPhotoStorage } = await import("./photoStorage");
           await inventoryPhotoStorage.deleteFiles([item.imageFileName]);
+        }
+        return { success: true } as const;
+      }),
+    /** Beleg eines Gegenstands entfernen (Feld + Datei auf dem Webspace). */
+    removeReceipt: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const item = await db.getInventoryItem(input.id, ctx.user.id);
+        if (!item) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Gegenstand nicht gefunden.",
+          });
+        }
+        if (item.receiptFileName) {
+          await db.updateInventoryItem(input.id, ctx.user.id, {
+            receiptFileName: null,
+          });
+          const { receiptPhotoStorage } = await import("./photoStorage");
+          await receiptPhotoStorage.deleteFiles([item.receiptFileName]);
         }
         return { success: true } as const;
       }),

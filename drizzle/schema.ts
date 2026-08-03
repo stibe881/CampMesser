@@ -172,10 +172,19 @@ export const inventoryItems = mysqlTable(
     notes: text("notes"),
     /** Dateiname des Fotos unter uploads/inventory/ (genau EIN Foto pro Gegenstand). */
     imageFileName: varchar("imageFileName", { length: 64 }),
+    /** Kaufpreis in Rappen (Ganzzahl, Muster weightGrams); null = nicht erfasst. */
+    priceRappen: int("priceRappen"),
+    /** Kaufdatum (ISO YYYY-MM-DD); null = nicht erfasst. */
+    purchaseDate: date("purchaseDate", { mode: "string" }),
+    /** Dateiname des Belegs unter uploads/receipts/ (genau EIN Beleg pro Gegenstand). */
+    receiptFileName: varchar("receiptFileName", { length: 64 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
-  table => [index("inventoryItems_userId").on(table.userId)]
+  table => [
+    index("inventoryItems_userId").on(table.userId),
+    uniqueIndex("inventoryItems_receiptFileName").on(table.receiptFileName),
+  ]
 );
 
 export type InventoryItem = typeof inventoryItems.$inferSelect;

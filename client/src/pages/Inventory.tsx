@@ -6,6 +6,7 @@ import {
   Package,
   Pencil,
   Plus,
+  Receipt,
   Search,
   Trash2,
   Wrench,
@@ -35,12 +36,24 @@ import { useI18n } from "@/i18n";
 import { l4, LOCALE_TAGS, pick, type L4 } from "@shared/i18n";
 import { GEAR_TASK_SUGGESTIONS, gearTaskDue } from "@shared/gearTasks";
 import { resizeImageForUpload } from "@/lib/imageResize";
+import {
+  formatChf,
+  hasAnyPrice,
+  inventoryTotalRappen,
+  parseChfInput,
+  rappenToInput,
+} from "@/lib/money";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 
 /** Private Foto-URL eines Inventar-Gegenstands (Auth über Session-Cookie). */
 function inventoryPhotoUrl(fileName: string): string {
   return `/api/inventory/photos/${fileName}`;
+}
+
+/** Private Beleg-URL eines Inventar-Gegenstands (Auth über Session-Cookie). */
+function inventoryReceiptUrl(fileName: string): string {
+  return `/api/inventory/receipts/${fileName}`;
 }
 
 /**
@@ -297,8 +310,14 @@ interface FormState {
   weightGrams: string;
   volumeLiters: string;
   quantity: string;
+  /** Kaufpreis als Franken-Eingabe (intern gespeichert werden Rappen) */
+  priceChf: string;
+  /** Kaufdatum als ISO-String (YYYY-MM-DD) oder "" */
+  purchaseDate: string;
   /** Bestehendes Foto des bearbeiteten Gegenstands (Dateiname) */
   imageFileName: string | null;
+  /** Bestehender Beleg des bearbeiteten Gegenstands (Dateiname) */
+  receiptFileName: string | null;
 }
 
 export default function InventoryPage() {
@@ -323,7 +342,10 @@ export default function InventoryPage() {
     weightGrams: "",
     volumeLiters: "",
     quantity: "1",
+    priceChf: "",
+    purchaseDate: "",
     imageFileName: null,
+    receiptFileName: null,
   };
   const [form, setForm] = useState<FormState>(emptyForm);
   // Foto: neu ausgewählt (bereits verkleinert), Vorschau-URL und
@@ -333,8 +355,21 @@ export default function InventoryPage() {
   const [removePhoto, setRemovePhoto] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  // Beleg (Foto der Quittung) – gleiche Mechanik wie beim Gegenstands-Foto
+  const [receiptBlob, setReceiptBlob] = useState<Blob | null>(null);
+  const [receiptPreviewUrl, setReceiptPreviewUrl] = useState<string | null>(
+    null
+  );
+  const [removeReceipt, setRemoveReceipt] = useState(false);
+  const [receiptUploading, setReceiptUploading] = useState(false);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
   // Vollbild-Ansicht eines Eintrags-Fotos (Klick aufs Thumbnail)
   const [viewPhoto, setViewPhoto] = useState<{
+    fileName: string;
+    name: string;
+  } | null>(null);
+  // Vollbild-Ansicht eines Belegs (Klick aufs Beleg-Symbol)
+  const [viewReceipt, setViewReceipt] = useState<{
     fileName: string;
     name: string;
   } | null>(null);
@@ -346,9 +381,16 @@ export default function InventoryPage() {
     };
   }, [photoPreviewUrl]);
 
+  useEffect(() => {
+    return () => {
+      if (receiptPreviewUrl) URL.revokeObjectURL(receiptPreviewUrl);
+    };
+  }, [receiptPreviewUrl]);
+
   const addMutation = trpc.inventory.add.useMutation();
   const updateMutation = trpc.inventory.update.useMutation();
   const removePhotoMutation = trpc.inventory.removePhoto.useMutation();
+  const removeReceiptMutation = trpc.inventory.removeReceipt.useMutation();
   const removeMutation = trpc.inventory.remove.useMutation({
     onSuccess: () => utils.inventory.list.invalidate(),
   });
@@ -362,6 +404,15 @@ export default function InventoryPage() {
         0
       ),
       volume: items.reduce((s, i) => s + i.volumeLiters * i.quantity, 0),
+    };
+  }, [query.data]);
+
+  /** Gesamtwert (Preis × Anzahl) – nur relevant, wenn Preise erfasst sind. */
+  const valueTotal = useMemo(() => {
+    const items = query.data ?? [];
+    return {
+      rappen: inventoryTotalRappen(items),
+      show: hasAnyPrice(items),
     };
   }, [query.data]);
 
@@ -392,6 +443,9 @@ export default function InventoryPage() {
     setPhotoBlob(null);
     setPhotoPreviewUrl(null);
     setRemovePhoto(false);
+    setReceiptBlob(null);
+    setReceiptPreviewUrl(null);
+    setRemoveReceipt(false);
   };
 
   const openNew = () => {
@@ -408,7 +462,10 @@ export default function InventoryPage() {
       weightGrams: String(item.weightGrams || ""),
       volumeLiters: String(item.volumeLiters || ""),
       quantity: String(item.quantity),
+      priceChf: rappenToInput(item.priceRappen),
+      purchaseDate: item.purchaseDate ?? "",
       imageFileName: item.imageFileName ?? null,
+      receiptFileName: item.receiptFileName ?? null,
     });
     resetPhotoState();
     setDialogOpen(true);
@@ -444,6 +501,35 @@ export default function InventoryPage() {
     if (form.imageFileName) setRemovePhoto(true);
   };
 
+  // Aktueller Beleg: neu gewählter > bestehender (sofern nicht entfernt)
+  const receiptPreview =
+    receiptPreviewUrl ??
+    (form.receiptFileName && !removeReceipt
+      ? inventoryReceiptUrl(form.receiptFileName)
+      : null);
+
+  const handleReceiptSelected = async (fileList: FileList | null) => {
+    const file = fileList?.[0];
+    if (receiptInputRef.current) receiptInputRef.current.value = "";
+    if (!file) return;
+    try {
+      const blob = await resizeImageForUpload(file);
+      setReceiptBlob(blob);
+      setReceiptPreviewUrl(URL.createObjectURL(blob));
+      setRemoveReceipt(false);
+    } catch {
+      const isHeic =
+        /image\/hei[cf]/.test(file.type) || /\.hei[cf]$/i.test(file.name);
+      toast.error(isHeic ? t.inventory.photoHeic : t.inventory.photoReadFailed);
+    }
+  };
+
+  const handleRemoveReceipt = () => {
+    setReceiptBlob(null);
+    setReceiptPreviewUrl(null);
+    if (form.receiptFileName) setRemoveReceipt(true);
+  };
+
   const submit = async () => {
     const data = {
       name: form.name.trim(),
@@ -451,6 +537,9 @@ export default function InventoryPage() {
       weightGrams: Math.round(Number(form.weightGrams) || 0),
       volumeLiters: Number(form.volumeLiters) || 0,
       quantity: Math.max(1, Math.round(Number(form.quantity) || 1)),
+      // Preis in Rappen (null = nicht erfasst), Kaufdatum als ISO-String
+      priceRappen: parseChfInput(form.priceChf),
+      purchaseDate: form.purchaseDate || null,
     };
     if (!data.name) {
       toast.error(t.inventory.nameRequired);
@@ -492,6 +581,35 @@ export default function InventoryPage() {
           await removePhotoMutation.mutateAsync({ id });
         } catch {
           toast.error(t.inventory.photoRemoveFailed);
+        }
+      }
+      // Beleg-Schritt: exakt dieselbe Mechanik wie beim Foto
+      if (receiptBlob) {
+        setReceiptUploading(true);
+        try {
+          const response = await fetch(`/api/inventory/${id}/receipt`, {
+            method: "POST",
+            headers: { "Content-Type": "image/jpeg" },
+            body: receiptBlob,
+            credentials: "include",
+          });
+          if (!response.ok) {
+            toast.error(
+              response.status === 413
+                ? t.inventory.photoTooLarge
+                : t.inventory.receiptUploadFailed
+            );
+          }
+        } catch {
+          toast.error(t.inventory.receiptUploadFailed);
+        } finally {
+          setReceiptUploading(false);
+        }
+      } else if (removeReceipt && form.receiptFileName) {
+        try {
+          await removeReceiptMutation.mutateAsync({ id });
+        } catch {
+          toast.error(t.inventory.receiptRemoveFailed);
         }
       }
       utils.inventory.list.invalidate();
@@ -565,6 +683,18 @@ export default function InventoryPage() {
           </p>
         </div>
       </div>
+
+      {/* Gesamtwert – nur, wenn mindestens ein Preis erfasst ist */}
+      {valueTotal.show && (
+        <div className="mb-6 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded-xl border border-border bg-card px-4 py-3">
+          <p className="font-semibold">
+            {t.inventory.totalValue(formatChf(valueTotal.rappen, lang))}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {t.inventory.totalValueHint}
+          </p>
+        </div>
+      )}
 
       <Button
         className="mb-6"
@@ -666,6 +796,39 @@ export default function InventoryPage() {
                 />
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="inv-price">{t.inventory.priceLabel}</Label>
+                <Input
+                  id="inv-price"
+                  className="mt-1.5"
+                  type="number"
+                  min="0"
+                  step="0.05"
+                  inputMode="decimal"
+                  placeholder="129.90"
+                  aria-label={t.inventory.priceAria}
+                  value={form.priceChf}
+                  onChange={e =>
+                    setForm(f => ({ ...f, priceChf: e.target.value }))
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="inv-purchase-date">
+                  {t.inventory.purchaseDateLabel}
+                </Label>
+                <Input
+                  id="inv-purchase-date"
+                  className="mt-1.5"
+                  type="date"
+                  value={form.purchaseDate}
+                  onChange={e =>
+                    setForm(f => ({ ...f, purchaseDate: e.target.value }))
+                  }
+                />
+              </div>
+            </div>
             <div>
               <Label className="mb-1.5 block">{t.inventory.photoLabel}</Label>
               {previewUrl && (
@@ -711,18 +874,78 @@ export default function InventoryPage() {
                 {t.inventory.photoHint}
               </p>
             </div>
+            <div>
+              <Label className="mb-1.5 block">{t.inventory.receiptLabel}</Label>
+              {receiptPreview && (
+                <button
+                  type="button"
+                  className="mb-2 block w-full overflow-hidden rounded-lg border border-border/60"
+                  onClick={() =>
+                    setViewReceipt({
+                      fileName: form.receiptFileName ?? "",
+                      name: form.name,
+                    })
+                  }
+                  disabled={!form.receiptFileName || removeReceipt}
+                  aria-label={t.inventory.receiptIconAria(form.name)}
+                >
+                  <img
+                    src={receiptPreview}
+                    alt={t.inventory.receiptPreviewAlt}
+                    className="aspect-[4/3] w-full object-cover"
+                  />
+                </button>
+              )}
+              <div className="flex gap-2">
+                <input
+                  ref={receiptInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => handleReceiptSelected(e.target.files)}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => receiptInputRef.current?.click()}
+                >
+                  <Receipt className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {receiptPreview
+                    ? t.inventory.receiptChange
+                    : t.inventory.receiptChoose}
+                </Button>
+                {receiptPreview && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={handleRemoveReceipt}
+                  >
+                    <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    {t.inventory.receiptRemove}
+                  </Button>
+                )}
+              </div>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                {t.inventory.receiptHint}
+              </p>
+            </div>
             <Button
               className="w-full"
               onClick={() => void submit()}
               disabled={
                 addMutation.isPending ||
                 updateMutation.isPending ||
-                photoUploading
+                photoUploading ||
+                receiptUploading
               }
             >
               {(addMutation.isPending ||
                 updateMutation.isPending ||
-                photoUploading) && (
+                photoUploading ||
+                receiptUploading) && (
                 <Loader2
                   className="mr-2 h-4 w-4 animate-spin"
                   aria-hidden="true"
@@ -730,9 +953,11 @@ export default function InventoryPage() {
               )}
               {photoUploading
                 ? t.inventory.photoUploading
-                : form.id
-                  ? t.common.save
-                  : t.inventory.submitNew}
+                : receiptUploading
+                  ? t.inventory.receiptUploading
+                  : form.id
+                    ? t.common.save
+                    : t.inventory.submitNew}
             </Button>
           </div>
         </DialogContent>
@@ -878,6 +1103,31 @@ export default function InventoryPage() {
                             × {item.quantity}
                           </span>
                         )}
+                        {item.priceRappen ? (
+                          <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                            {t.inventory.priceBadge(
+                              formatChf(item.priceRappen, lang)
+                            )}
+                          </span>
+                        ) : null}
+                        {item.receiptFileName && (
+                          <button
+                            type="button"
+                            className="ml-1.5 align-middle text-muted-foreground transition-colors hover:text-foreground"
+                            onClick={() =>
+                              setViewReceipt({
+                                fileName: item.receiptFileName!,
+                                name: item.name,
+                              })
+                            }
+                            aria-label={t.inventory.receiptIconAria(item.name)}
+                          >
+                            <Receipt
+                              className="inline h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
+                          </button>
+                        )}
                         <span className="block text-xs text-muted-foreground sm:hidden">
                           {item.category}
                         </span>
@@ -959,6 +1209,34 @@ export default function InventoryPage() {
             <img
               src={inventoryPhotoUrl(viewPhoto.fileName)}
               alt={t.inventory.photoDialogAlt(viewPhoto.name)}
+              className="max-h-[70vh] w-full rounded-lg object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Vollbild-Ansicht eines Belegs (Klick aufs Beleg-Symbol) */}
+      <Dialog
+        open={viewReceipt !== null}
+        onOpenChange={open => {
+          if (!open) setViewReceipt(null);
+        }}
+      >
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>
+              {viewReceipt
+                ? t.inventory.receiptDialogTitle(viewReceipt.name)
+                : ""}
+            </DialogTitle>
+            <DialogDescription>
+              {t.inventory.receiptDialogDescription}
+            </DialogDescription>
+          </DialogHeader>
+          {viewReceipt && (
+            <img
+              src={inventoryReceiptUrl(viewReceipt.fileName)}
+              alt={t.inventory.receiptDialogAlt(viewReceipt.name)}
               className="max-h-[70vh] w-full rounded-lg object-contain"
             />
           )}

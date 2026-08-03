@@ -479,6 +479,25 @@ export async function getInventoryItemByImageFileName(
   return rows[0];
 }
 
+/** Inventar-Gegenstand über den Beleg-Dateinamen (für die private Auslieferung). */
+export async function getInventoryItemByReceiptFileName(
+  fileName: string,
+  userId: number
+) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(inventoryItems)
+    .where(
+      and(
+        eq(inventoryItems.receiptFileName, fileName),
+        eq(inventoryItems.userId, userId)
+      )
+    )
+    .limit(1);
+  return rows[0];
+}
+
 export async function addInventoryItem(data: InsertInventoryItem) {
   const db = requireDb(await getDb());
   const [result] = await db.insert(inventoryItems).values(data);

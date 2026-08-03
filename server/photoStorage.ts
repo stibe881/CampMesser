@@ -62,5 +62,8 @@ export const spotPhotoStorage = createPhotoStorage("spots");
 /** Fotos zu Inventar-Gegenständen: uploads/inventory/<fileName> */
 export const inventoryPhotoStorage = createPhotoStorage("inventory");
 
+/** Belege (Kaufquittungen) zu Inventar-Gegenständen: uploads/receipts/<fileName> */
+export const receiptPhotoStorage = createPhotoStorage("receipts");
+
 /** Fotos zu Natur-Beobachtungen: uploads/sightings/<fileName> */
 export const sightingPhotoStorage = createPhotoStorage("sightings");

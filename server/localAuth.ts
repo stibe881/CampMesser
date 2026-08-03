@@ -213,7 +213,10 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     .from(spotPhotos)
     .where(eq(spotPhotos.userId, userId));
   const inventoryRows = await db
-    .select({ imageFileName: inventoryItems.imageFileName })
+    .select({
+      imageFileName: inventoryItems.imageFileName,
+      receiptFileName: inventoryItems.receiptFileName,
+    })
     .from(inventoryItems)
     .where(eq(inventoryItems.userId, userId));
   const sightingRows = await db
@@ -302,6 +305,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     recipePhotoStorage,
     spotPhotoStorage,
     inventoryPhotoStorage,
+    receiptPhotoStorage,
     sightingPhotoStorage,
   } = await import("./photoStorage");
   await tripPhotoStorage.deleteFiles(photoRows.map(p => p.fileName));
@@ -314,6 +318,11 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await inventoryPhotoStorage.deleteFiles(
     inventoryRows
       .map(r => r.imageFileName)
+      .filter((name): name is string => Boolean(name))
+  );
+  await receiptPhotoStorage.deleteFiles(
+    inventoryRows
+      .map(r => r.receiptFileName)
       .filter((name): name is string => Boolean(name))
   );
   await sightingPhotoStorage.deleteFiles(

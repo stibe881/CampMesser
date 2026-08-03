@@ -216,7 +216,17 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     expect(
       (await authed.family.children.list()).some(c => c.id === secondChildId)
     ).toBe(false);
-    const invItemId = await authed.inventory.add({ name: "CI-Zelt" });
+    const invItemId = await authed.inventory.add({
+      name: "CI-Zelt",
+      priceRappen: 45900,
+      purchaseDate: "2026-07-15",
+    });
+    // Wert und Kaufdatum werden gespeichert und wieder ausgeliefert
+    const invItem = (await authed.inventory.list()).find(
+      i => i.id === invItemId
+    );
+    expect(invItem?.priceRappen).toBe(45900);
+    expect(invItem?.purchaseDate).toBe("2026-07-15");
     // Natur-Beobachtungen: anlegen, bearbeiten, auflisten (Foto weiter unten)
     const { id: sightingId } = await authed.sightings.add({
       title: "CI-Reh",
@@ -577,6 +587,7 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       recipePhotoStorage,
       spotPhotoStorage,
       inventoryPhotoStorage,
+      receiptPhotoStorage,
       sightingPhotoStorage,
     } = await import("./photoStorage");
     const fs = await import("node:fs/promises");
@@ -586,11 +597,13 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     const recipeFile = `ci-recipe-${Date.now()}.jpg`;
     const spotFile = `ci-spot-${Date.now()}.jpg`;
     const inventoryFile = `ci-inventory-${Date.now()}.jpg`;
+    const receiptFile = `ci-receipt-${Date.now()}.jpg`;
     const sightingFile = `ci-sighting-${Date.now()}.jpg`;
     await tripPhotoStorage.saveFile(tripFile, Buffer.from("x"));
     await recipePhotoStorage.saveFile(recipeFile, Buffer.from("x"));
     await spotPhotoStorage.saveFile(spotFile, Buffer.from("x"));
     await inventoryPhotoStorage.saveFile(inventoryFile, Buffer.from("x"));
+    await receiptPhotoStorage.saveFile(receiptFile, Buffer.from("x"));
     await sightingPhotoStorage.saveFile(sightingFile, Buffer.from("x"));
     await dbc
       .insert(schema.tripPhotos)
@@ -604,7 +617,7 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       .values({ userId: uid, spotId, fileName: spotFile });
     await dbc
       .update(schema.inventoryItems)
-      .set({ imageFileName: inventoryFile })
+      .set({ imageFileName: inventoryFile, receiptFileName: receiptFile })
       .where(eq(schema.inventoryItems.id, invItemId));
     await dbc
       .update(schema.natureSightings)
@@ -766,6 +779,9 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     ).rejects.toThrow();
     await expect(
       fs.access(inventoryPhotoStorage.photoPath(inventoryFile))
+    ).rejects.toThrow();
+    await expect(
+      fs.access(receiptPhotoStorage.photoPath(receiptFile))
     ).rejects.toThrow();
     await expect(
       fs.access(sightingPhotoStorage.photoPath(sightingFile))

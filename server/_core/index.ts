@@ -467,6 +467,105 @@ async function startServer() {
       if (!res.headersSent) res.status(500).json({ error: "serverError" });
     }
   });
+  // ── Beleg (Kaufquittung) für Inventar-Gegenstände ───────────────────────
+  // Belege sind in der Praxis Fotos der Quittung – deshalb exakt dieselbe
+  // Technik wie das Gegenstands-Foto (Raw-Body, Client-Resize, Ablage unter
+  // uploads/receipts/), genau EIN Beleg pro Gegenstand: ein neuer Upload
+  // ersetzt den bisherigen Beleg.
+  app.post(
+    "/api/inventory/:itemId/receipt",
+    express.raw({ type: "image/*", limit: MAX_PHOTO_BYTES }),
+    async (req, res) => {
+      try {
+        const user = await authenticatePhotoRequest(req, res);
+        if (!user) return;
+        const itemId = Number(req.params.itemId);
+        if (!Number.isInteger(itemId) || itemId <= 0) {
+          res.status(400).json({ error: "badRequest" });
+          return;
+        }
+        const db = await import("../db");
+        const item = await db.getInventoryItem(itemId, user.id);
+        if (!item) {
+          res.status(404).json({ error: "notFound" });
+          return;
+        }
+        const contentType = String(req.headers["content-type"] ?? "")
+          .split(";")[0]
+          .trim()
+          .toLowerCase();
+        if (contentType === "image/heic" || contentType === "image/heif") {
+          res.status(415).json({ error: "heicNotSupported" });
+          return;
+        }
+        const extension = PHOTO_MIME_EXTENSIONS[contentType];
+        if (!extension) {
+          res.status(415).json({ error: "unsupportedType" });
+          return;
+        }
+        const body = req.body as unknown;
+        if (!Buffer.isBuffer(body) || body.length === 0) {
+          res.status(400).json({ error: "emptyBody" });
+          return;
+        }
+        if (body.length > MAX_PHOTO_BYTES) {
+          res.status(413).json({ error: "tooLarge" });
+          return;
+        }
+        const { nanoid } = await import("nanoid");
+        const fileName = `${nanoid(16)}${extension}`;
+        const { receiptPhotoStorage } = await import("../photoStorage");
+        await receiptPhotoStorage.saveFile(fileName, body);
+        await db.updateInventoryItem(itemId, user.id, {
+          receiptFileName: fileName,
+        });
+        // Alten Beleg erst nach erfolgreichem DB-Update entfernen
+        if (item.receiptFileName) {
+          await receiptPhotoStorage.deleteFiles([item.receiptFileName]);
+        }
+        res.json({ fileName });
+      } catch (error) {
+        console.error("[InventoryReceipts] Upload fehlgeschlagen:", error);
+        if (!res.headersSent) res.status(500).json({ error: "serverError" });
+      }
+    }
+  );
+  // Auslieferung: nur die Besitzerin/der Besitzer des Gegenstands sieht den Beleg.
+  app.get("/api/inventory/receipts/:fileName", async (req, res) => {
+    try {
+      const user = await authenticatePhotoRequest(req, res);
+      if (!user) return;
+      const { PHOTO_FILENAME_PATTERN, receiptPhotoStorage } =
+        await import("../photoStorage");
+      const fileName = req.params.fileName;
+      if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
+        res.status(400).json({ error: "badRequest" });
+        return;
+      }
+      const db = await import("../db");
+      const item = await db.getInventoryItemByReceiptFileName(
+        fileName,
+        user.id
+      );
+      if (!item) {
+        res.status(404).json({ error: "notFound" });
+        return;
+      }
+      res.sendFile(
+        receiptPhotoStorage.photoPath(fileName),
+        { headers: { "Cache-Control": "private, max-age=3600" } },
+        error => {
+          // Datei fehlt auf der Platte (z. B. nach Server-Umzug ohne uploads/)
+          if (error && !res.headersSent) {
+            res.status(404).json({ error: "notFound" });
+          }
+        }
+      );
+    } catch (error) {
+      console.error("[InventoryReceipts] Auslieferung fehlgeschlagen:", error);
+      if (!res.headersSent) res.status(500).json({ error: "serverError" });
+    }
+  });
   // ── Foto für Natur-Beobachtungen ────────────────────────────────────────
   // Gleiche Technik wie das Inventar-Foto (Raw-Body, Client-Resize, Ablage
   // unter uploads/sightings/), genau EIN Foto pro Beobachtung: ein neuer
