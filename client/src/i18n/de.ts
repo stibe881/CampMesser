@@ -544,6 +544,7 @@ export const de = {
       `Eintrag im Bereich ${section} hinzufügen`,
     printPersonAria: (name: string) => `Nur die Einträge von ${name} drucken`,
     managePersonsButton: "Personen verwalten",
+    personTabsAria: "Bereiche der Packliste",
     managePersonsTitle: "Personen verwalten",
     managePersonsDescription:
       "Jede Person bekommt einen eigenen Bereich auf der Liste. Einträge ohne Person stehen unter «Allgemein».",

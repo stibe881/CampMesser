@@ -538,6 +538,7 @@ export const fr: Translation = {
     sectionAddAria: section => `Ajouter une entrée dans la section ${section}`,
     printPersonAria: name => `Imprimer uniquement les entrées de ${name}`,
     managePersonsButton: "Gérer les personnes",
+    personTabsAria: "Sections de la liste de bagages",
     managePersonsTitle: "Gérer les personnes",
     managePersonsDescription:
       "Chaque personne reçoit sa propre section sur la liste. Les entrées sans personne se trouvent sous « Général ».",

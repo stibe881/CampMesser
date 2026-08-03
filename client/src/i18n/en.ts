@@ -520,6 +520,7 @@ export const en: Translation = {
     sectionAddAria: section => `Add an item to the ${section} section`,
     printPersonAria: name => `Print only the items of ${name}`,
     managePersonsButton: "Manage people",
+    personTabsAria: "Packing list sections",
     managePersonsTitle: "Manage people",
     managePersonsDescription:
       'Each person gets their own section on the list. Items without a person are listed under "General".',

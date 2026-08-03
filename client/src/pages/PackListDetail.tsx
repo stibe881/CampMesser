@@ -237,6 +237,8 @@ export default function PackListDetailPage() {
     enabled: isAuthenticated,
   });
 
+  /** Aktiver Bereichs-Tab (SECTION_GENERAL oder Personen-Name). */
+  const [activeSection, setActiveSection] = useState<string>(SECTION_GENERAL);
   /** Eintrag, dessen Name/Menge gerade bearbeitet wird. */
   const [editItemId, setEditItemId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
@@ -571,6 +573,19 @@ export default function PackListDetailPage() {
     generalCategory,
     lang,
   ]);
+
+  /**
+   * Bei Tabs ist nur der gewählte Bereich sichtbar; fällt die gewählte
+   * Person weg (entfernt/umbenannt), springt die Ansicht auf «Allgemein».
+   * Ohne Personen gibt es keine Tabs und der einzige Bereich bleibt stehen.
+   */
+  const visibleSectionKey = sections.some(sec => sec.key === activeSection)
+    ? activeSection
+    : SECTION_GENERAL;
+  const visibleSections =
+    sections.length > 1
+      ? sections.filter(sec => sec.key === visibleSectionKey)
+      : sections;
 
   const reorderMutation = trpc.packing.reorderItems.useMutation({
     onMutate: async input => {
@@ -1020,8 +1035,57 @@ export default function PackListDetailPage() {
         </p>
       )}
 
-      {/* Bereiche: «Allgemein» zuoberst, danach ein Bereich pro Person */}
-      {sections.map(section => {
+      {/* Bereiche als Tabs: «Allgemein» plus ein Tab pro Person – die
+          Bereiche stehen nicht mehr untereinander, sichtbar ist nur der
+          gewählte. Ohne Personen gibt es keine Tab-Leiste. */}
+      {sections.length > 1 && (
+        <div
+          role="tablist"
+          aria-label={t.packListDetail.personTabsAria}
+          className="mb-4 flex gap-1.5 overflow-x-auto border-b border-border pb-px"
+        >
+          {sections.map(section => {
+            const label = section.person ?? t.packListDetail.sectionGeneral;
+            const active = section.key === visibleSectionKey;
+            const done = section.items.filter(i => i.checked).length;
+            return (
+              <button
+                key={section.key}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setActiveSection(section.key)}
+                className={cn(
+                  "flex shrink-0 items-center gap-1.5 rounded-t-lg border-b-2 px-3 py-2 text-sm font-medium transition-colors",
+                  active
+                    ? "border-primary text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {section.person === null ? (
+                  <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                ) : (
+                  <UserRound className="h-3.5 w-3.5" aria-hidden="true" />
+                )}
+                {label}
+                {section.items.length > 0 && (
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 py-0.5 text-[0.65rem] font-semibold",
+                      done === section.items.length
+                        ? "bg-primary/15 text-primary"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {done}/{section.items.length}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {visibleSections.map(section => {
         const sectionLabel = section.person ?? t.packListDetail.sectionGeneral;
         const sectionChecked = section.items.filter(i => i.checked).length;
         return (

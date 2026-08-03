@@ -529,6 +529,7 @@ export const it: Translation = {
     sectionAddAria: section => `Aggiungi una voce nella sezione ${section}`,
     printPersonAria: name => `Stampa solo le voci di ${name}`,
     managePersonsButton: "Gestisci persone",
+    personTabsAria: "Sezioni della lista bagagli",
     managePersonsTitle: "Gestisci persone",
     managePersonsDescription:
       "Ogni persona riceve una propria sezione nella lista. Le voci senza persona stanno sotto «Generale».",
