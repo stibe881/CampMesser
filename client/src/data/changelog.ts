@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Zelt-Finder: gib deinen Zielen ein Symbol (Zelt, Duschen, WC, Wasser …) – du erkennst sie in der Liste, im Kompass-Kopf und als Pin auf der Karte auf einen Blick.",
+        "Boussole tente : donne un symbole à tes destinations (tente, douches, WC, eau …) – tu les reconnais d'un coup d'œil dans la liste, en tête de boussole et sur la carte.",
+        "Trova-tenda: dai un simbolo alle tue destinazioni (tenda, docce, WC, acqua …) – le riconosci al volo nell'elenco, in cima alla bussola e sulla mappa.",
+        "Tent finder: give your destinations a symbol (tent, showers, toilets, water …) – you spot them at a glance in the list, above the compass and as a map pin."
+      ),
+      l4(
         "Wasserwaage: wähle dein Profil «Zelt», «Bus» oder «Wohnwagen» – jedes bringt seine eigene Toleranz und passende Tipps zum Ausgleichen mit.",
         "Niveau à bulle : choisis ton profil « tente », « van » ou « caravane » – chacun a sa propre tolérance et ses conseils de mise à niveau.",
         "Livella: scegli il tuo profilo «tenda», «van» o «caravan» – ognuno ha la sua tolleranza e i consigli giusti per livellare.",

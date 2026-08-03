@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_TARGET_ICON,
   MAX_NAME_LENGTH,
   MAX_TARGETS,
+  TARGET_ICONS,
   migrateTargets,
   newTargetId,
   renameTarget,
+  sanitizeTargetIcon,
   sanitizeTargets,
+  targetIconGlyph,
   type TentFinderTarget,
 } from "../client/src/lib/tentFinderTargets";
 
@@ -151,6 +155,45 @@ describe("renameTarget", () => {
   it("ändert die übergebene Liste nicht (reine Funktion)", () => {
     renameTarget(list, "b", "Neu");
     expect(list[1].name).toBe("Duschen");
+  });
+});
+
+describe("Ziel-Symbole", () => {
+  it("lässt bekannte Symbole durch und macht aus Unbekanntem «other»", () => {
+    TARGET_ICONS.forEach(icon => expect(sanitizeTargetIcon(icon)).toBe(icon));
+    expect(sanitizeTargetIcon("grill")).toBe(DEFAULT_TARGET_ICON);
+    expect(sanitizeTargetIcon(undefined)).toBe(DEFAULT_TARGET_ICON);
+    expect(sanitizeTargetIcon(7)).toBe(DEFAULT_TARGET_ICON);
+  });
+
+  it("hat für jedes Symbol einen SVG-Glyph und fällt sonst auf «other» zurück", () => {
+    TARGET_ICONS.forEach(icon => expect(targetIconGlyph(icon)).toContain("<"));
+    expect(targetIconGlyph(undefined)).toBe(targetIconGlyph("other"));
+  });
+
+  it("übernimmt gültige Symbole und repariert unbekannte beim Bereinigen", () => {
+    const cleaned = sanitizeTargets([
+      target({ id: "a", icon: "shower" }),
+      target({ id: "b", icon: "grillplatz" as never }),
+      target({ id: "c" }),
+    ]);
+    expect(cleaned.map(t => t.icon)).toEqual(["shower", "other", undefined]);
+    // Ziele ohne Symbol behalten das Feld gar nicht erst
+    expect("icon" in cleaned[2]).toBe(false);
+  });
+
+  it("übernimmt beim Umbenennen auch ein neues Symbol", () => {
+    const list = [target({ id: "a", icon: "tent" })];
+    expect(renameTarget(list, "a", "Duschen", "shower")?.[0]).toMatchObject({
+      name: "Duschen",
+      icon: "shower",
+    });
+    // Ohne Symbol-Angabe bleibt das bisherige stehen
+    expect(renameTarget(list, "a", "Duschen")?.[0].icon).toBe("tent");
+    // Unbekanntes Symbol landet auf «other»
+    expect(renameTarget(list, "a", "Duschen", "grill" as never)?.[0].icon).toBe(
+      DEFAULT_TARGET_ICON
+    );
   });
 });
 

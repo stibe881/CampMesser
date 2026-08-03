@@ -1,14 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Bath,
+  Car,
   ChevronDown,
   Compass,
+  ConciergeBell,
+  Droplet,
   Loader2,
   LocateFixed,
   Map as MapIcon,
   MapPin,
   Pencil,
+  ShowerHead,
   Tent,
+  ToyBrick,
   Trash2,
+  type LucideIcon,
 } from "lucide-react";
 import type * as Leaflet from "leaflet";
 import { toast } from "sonner";
@@ -20,14 +27,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDeviceHeading } from "@/hooks/useDeviceHeading";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import {
+  DEFAULT_TARGET_ICON,
   LEGACY_TARGET_KEY,
   MAX_NAME_LENGTH,
   MAX_TARGETS,
   TARGETS_KEY,
+  TARGET_ICONS,
   migrateTargets,
   newTargetId,
   renameTarget,
+  sanitizeTargetIcon,
   sanitizeTargets,
+  targetIconGlyph,
+  type TargetIcon,
   type TentFinderTarget,
 } from "@/lib/tentFinderTargets";
 import { createBaseLayer, loadMapLayer } from "@/lib/mapLayers";
@@ -59,16 +71,34 @@ const MAP_OPEN_KEY = "campmesser.tentFinderMap";
 const MAP_FALLBACK_CENTER: Leaflet.LatLngTuple = [46.8, 8.2];
 const MAP_FALLBACK_ZOOM = 8;
 
+/** Lucide-Symbol je Ziel-Schlüssel (Chips, Ziel-Liste, Kompass-Kopf). */
+const TARGET_ICON_COMPONENTS: Record<TargetIcon, LucideIcon> = {
+  tent: Tent,
+  shower: ShowerHead,
+  wc: Bath,
+  water: Droplet,
+  playground: ToyBrick,
+  reception: ConciergeBell,
+  car: Car,
+  waste: Trash2,
+  other: MapPin,
+};
+
 /**
  * Ziel-Pin als divIcon (keine Bild-Assets nötig – Muster MapView): das aktive
- * Ziel gross und grün, die übrigen als bernsteinfarbenes Fadenkreuz.
+ * Ziel gross und grün, die übrigen bernsteinfarben; im Kreis steht der
+ * SVG-Glyph des gewählten Symbols (ohne Wahl das Fadenkreuz).
  */
-function targetPinIcon(L: typeof Leaflet, active: boolean): Leaflet.DivIcon {
+function targetPinIcon(
+  L: typeof Leaflet,
+  active: boolean,
+  icon: TargetIcon | undefined
+): Leaflet.DivIcon {
   const size = active ? 32 : 26;
   const fill = active ? "#2f6b4f" : "#b45309";
   return L.divIcon({
     className: "",
-    html: `<svg viewBox="0 0 28 28" width="${size}" height="${size}" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="${fill}" stroke="#ffffff" stroke-width="2.5"/><circle cx="14" cy="14" r="3" fill="#ffffff"/><path d="M14 5.5v4M14 18.5v4M5.5 14h4M18.5 14h4" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/></svg>`,
+    html: `<svg viewBox="0 0 28 28" width="${size}" height="${size}" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="${fill}" stroke="#ffffff" stroke-width="2.5"/>${targetIconGlyph(icon)}</svg>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });
@@ -141,6 +171,7 @@ export default function TentFinderPage() {
     return targetParam ? `target:${targetParam}` : null;
   });
   const [newName, setNewName] = useState("");
+  const [newIcon, setNewIcon] = useState<TargetIcon>(DEFAULT_TARGET_ICON);
   const [saving, setSaving] = useState(false);
   const [geo, setGeo] = useState<GeoState>({ status: "loading" });
   const { heading, permission, start } = useDeviceHeading();
@@ -188,11 +219,14 @@ export default function TentFinderPage() {
     name: string;
     lat: number;
     lon: number;
+    icon?: TargetIcon;
   } | null>(() => {
     if (effectiveSelection?.startsWith("target:")) {
       const id = effectiveSelection.slice(7);
       const own = targets.find(x => x.id === id);
-      return own ? { name: own.name, lat: own.lat, lon: own.lon } : null;
+      return own
+        ? { name: own.name, lat: own.lat, lon: own.lon, icon: own.icon }
+        : null;
     }
     return null;
   }, [effectiveSelection, targets]);
@@ -220,10 +254,12 @@ export default function TentFinderPage() {
           lat: pos.coords.latitude,
           lon: pos.coords.longitude,
           savedAt: Date.now(),
+          icon: sanitizeTargetIcon(newIcon),
         };
         saveTargets([...targets, next]);
         setSelection(`target:${next.id}`);
         setNewName("");
+        setNewIcon(DEFAULT_TARGET_ICON);
         setSaving(false);
         toast.success(t.tentFinder.savedToast(name));
       },
@@ -245,24 +281,29 @@ export default function TentFinderPage() {
   // ---- Ziel umbenennen: Inline-Textfeld, Enter/Blur speichert, Escape bricht ab ----
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [renameIcon, setRenameIcon] = useState<TargetIcon>(DEFAULT_TARGET_ICON);
   /** Escape gedrückt → der folgende Blur darf NICHT speichern. */
   const renameCancelledRef = useRef(false);
+  /** Umbenenn-Zeile: Blur INNERHALB der Zeile (Symbol-Chips) beendet sie nicht. */
+  const renameRowRef = useRef<HTMLLIElement | null>(null);
 
   const startRename = (tgt: TentFinderTarget) => {
     renameCancelledRef.current = false;
     setRenamingId(tgt.id);
     setRenameValue(tgt.name);
+    setRenameIcon(sanitizeTargetIcon(tgt.icon));
   };
 
-  /** Neuen Namen übernehmen (Validierung wie beim Anlegen, Sync inklusive). */
+  /** Name und Symbol übernehmen (Validierung wie beim Anlegen, Sync inklusive). */
   const commitRename = (tgt: TentFinderTarget) => {
-    const next = renameTarget(targets, tgt.id, renameValue);
+    const next = renameTarget(targets, tgt.id, renameValue, renameIcon);
     if (next === null) {
       toast.error(t.tentFinder.nameMissing);
       return;
     }
     const renamed = next.find(x => x.id === tgt.id);
-    if (!renamed || renamed.name === tgt.name) return; // unverändert
+    if (!renamed) return;
+    if (renamed.name === tgt.name && renamed.icon === tgt.icon) return; // unverändert
     saveTargets(next);
     toast.success(t.tentFinder.renamedToast(renamed.name));
   };
@@ -393,7 +434,7 @@ export default function TentFinderPage() {
     targets.forEach(tgt => {
       const active = effectiveSelection === `target:${tgt.id}`;
       const marker = L.marker([tgt.lat, tgt.lon], {
-        icon: targetPinIcon(L, active),
+        icon: targetPinIcon(L, active, tgt.icon),
         alt: tgt.name,
         title: tgt.name,
       });
@@ -441,18 +482,67 @@ export default function TentFinderPage() {
     }
   }, [mapOpen, mapState, targets, fix]);
 
-  const suggestions = [
-    t.tentFinder.suggestionTent,
-    t.tentFinder.suggestionShowers,
-    t.tentFinder.suggestionWc,
-    t.tentFinder.suggestionDishes,
-    t.tentFinder.suggestionPlayground,
-    t.tentFinder.suggestionReception,
+  // Vorschläge setzen Name UND passendes Symbol in einem Rutsch
+  const suggestions: { name: string; icon: TargetIcon }[] = [
+    { name: t.tentFinder.suggestionTent, icon: "tent" },
+    { name: t.tentFinder.suggestionShowers, icon: "shower" },
+    { name: t.tentFinder.suggestionWc, icon: "wc" },
+    { name: t.tentFinder.suggestionDishes, icon: "water" },
+    { name: t.tentFinder.suggestionPlayground, icon: "playground" },
+    { name: t.tentFinder.suggestionReception, icon: "reception" },
   ];
 
-  const optionRow = (value: string, name: string, lat: number, lon: number) => {
+  /**
+   * Symbol-Auswahl als kleine Icon-Chips. `keepFocus` verhindert beim
+   * Umbenennen, dass der Klick das Textfeld verlässt (und damit die Zeile
+   * vorzeitig speichert).
+   */
+  const iconChips = (
+    value: TargetIcon,
+    onPick: (icon: TargetIcon) => void,
+    keepFocus = false
+  ) => (
+    <div
+      className="flex flex-wrap gap-1"
+      role="group"
+      aria-label={t.tentFinder.iconLabel}
+    >
+      {TARGET_ICONS.map(key => {
+        const Icon = TARGET_ICON_COMPONENTS[key];
+        const label = t.tentFinder.iconNames[key];
+        return (
+          <button
+            key={key}
+            type="button"
+            onMouseDown={keepFocus ? e => e.preventDefault() : undefined}
+            onClick={() => onPick(key)}
+            aria-pressed={value === key}
+            aria-label={label}
+            title={label}
+            className={cn(
+              "rounded-full border p-1.5 transition-colors",
+              value === key
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border text-muted-foreground hover:bg-muted"
+            )}
+          >
+            <Icon className="h-4 w-4" aria-hidden="true" />
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  const optionRow = (
+    value: string,
+    name: string,
+    lat: number,
+    lon: number,
+    icon: TargetIcon | undefined
+  ) => {
     const active = effectiveSelection === value;
     const dist = fix ? distanceMeters(fix.lat, fix.lon, lat, lon) : null;
+    const Icon = TARGET_ICON_COMPONENTS[sanitizeTargetIcon(icon)];
     return (
       <button
         type="button"
@@ -465,7 +555,13 @@ export default function TentFinderPage() {
             : "border-border hover:bg-muted"
         )}
       >
-        <span className="truncate">{name}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          <Icon
+            className="h-4 w-4 shrink-0 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <span className="truncate">{name}</span>
+        </span>
         {dist !== null && (
           <span className="shrink-0 font-mono text-xs text-muted-foreground">
             {formatDistance(dist, lang)}
@@ -503,7 +599,7 @@ export default function TentFinderPage() {
               <ul className="space-y-1.5">
                 {targets.map(tgt =>
                   renamingId === tgt.id ? (
-                    <li key={tgt.id} className="flex items-center gap-1.5">
+                    <li key={tgt.id} ref={renameRowRef} className="space-y-1.5">
                       {/* Inline-Umbenennen: Enter/Blur speichert, Escape bricht ab */}
                       <Input
                         autoFocus
@@ -520,13 +616,19 @@ export default function TentFinderPage() {
                             e.currentTarget.blur();
                           }
                         }}
-                        onBlur={() => {
+                        onBlur={e => {
+                          // Sprung auf einen Symbol-Chip derselben Zeile
+                          // (Tastatur) darf das Umbenennen nicht beenden
+                          const next = e.relatedTarget as Node | null;
+                          if (next && renameRowRef.current?.contains(next))
+                            return;
                           const cancelled = renameCancelledRef.current;
                           renameCancelledRef.current = false;
                           setRenamingId(null);
                           if (!cancelled) commitRename(tgt);
                         }}
                       />
+                      {iconChips(renameIcon, setRenameIcon, true)}
                     </li>
                   ) : (
                     <li key={tgt.id} className="flex items-center gap-1.5">
@@ -534,7 +636,8 @@ export default function TentFinderPage() {
                         `target:${tgt.id}`,
                         tgt.name,
                         tgt.lat,
-                        tgt.lon
+                        tgt.lon,
+                        tgt.icon
                       )}
                       <Button
                         variant="ghost"
@@ -584,14 +687,23 @@ export default function TentFinderPage() {
             >
               {suggestions.map(s => (
                 <button
-                  key={s}
+                  key={s.name}
                   type="button"
-                  onClick={() => setNewName(s)}
+                  onClick={() => {
+                    setNewName(s.name);
+                    setNewIcon(s.icon);
+                  }}
                   className="rounded-full border border-border bg-muted px-2.5 py-1 text-xs transition-colors hover:bg-accent"
                 >
-                  {s}
+                  {s.name}
                 </button>
               ))}
+            </div>
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-muted-foreground">
+                {t.tentFinder.iconLabel}
+              </p>
+              {iconChips(newIcon, setNewIcon)}
             </div>
             <Button
               variant="outline"
@@ -618,7 +730,13 @@ export default function TentFinderPage() {
         <Card>
           <CardContent className="flex flex-col items-center pt-6">
             <p className="mb-4 flex items-center gap-1.5 text-sm font-medium">
-              <MapPin className="h-4 w-4 text-primary" aria-hidden="true" />
+              {(() => {
+                const Icon =
+                  TARGET_ICON_COMPONENTS[sanitizeTargetIcon(target.icon)];
+                return (
+                  <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+                );
+              })()}
               {target.name}
             </p>
 

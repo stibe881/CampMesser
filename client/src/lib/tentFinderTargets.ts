@@ -13,12 +13,78 @@ export const LEGACY_TARGET_KEY = "campmesser.tentFinderTarget";
 export const MAX_TARGETS = 50;
 export const MAX_NAME_LENGTH = 60;
 
+/** Feste Symbol-Liste für Ziele – nur diese Schlüssel werden gespeichert. */
+export const TARGET_ICONS = [
+  "tent",
+  "shower",
+  "wc",
+  "water",
+  "playground",
+  "reception",
+  "car",
+  "waste",
+  "other",
+] as const;
+
+export type TargetIcon = (typeof TARGET_ICONS)[number];
+
+/** Rückfall-Symbol für Unbekanntes und für Ziele ohne eigene Wahl. */
+export const DEFAULT_TARGET_ICON: TargetIcon = "other";
+
+/** Unbekannte Symbol-Werte auf «other» zurückführen. */
+export function sanitizeTargetIcon(value: unknown): TargetIcon {
+  return TARGET_ICONS.indexOf(value as TargetIcon) >= 0
+    ? (value as TargetIcon)
+    : DEFAULT_TARGET_ICON;
+}
+
 export interface TentFinderTarget {
   id: string;
   name: string;
   lat: number;
   lon: number;
   savedAt: number;
+  /** Symbol für Liste, Kompass-Kopf und Karten-Pin (optional – Alt-Ziele). */
+  icon?: TargetIcon;
+}
+
+/**
+ * Symbol-Glyphen als reines SVG-Markup für einen 28×28-Kreis mit Mittelpunkt
+ * 14/14 – weiss auf farbigem Grund. Bewusst ohne Bild-Assets und ohne
+ * Schriftarten-Abhängigkeit, damit die Karten-Pins auch offline stimmen.
+ */
+const TARGET_ICON_GLYPHS: Record<TargetIcon, string> = {
+  tent: `<path d="M14 7 20.5 20h-4.7L14 16.2 12.2 20H7.5Z" fill="#ffffff"/>`,
+  shower:
+    `<path d="M14 6.5v3.2" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>` +
+    `<path d="M8.6 13.2a5.4 5.4 0 0 1 10.8 0Z" fill="#ffffff"/>` +
+    `<circle cx="10.8" cy="17.2" r="1.15" fill="#ffffff"/><circle cx="14" cy="19" r="1.15" fill="#ffffff"/><circle cx="17.2" cy="17.2" r="1.15" fill="#ffffff"/>`,
+  wc:
+    `<path d="M9.5 8.4h9" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>` +
+    `<path d="M10.4 10.6h7.2l-.9 7.6a1.2 1.2 0 0 1-1.2 1h-3a1.2 1.2 0 0 1-1.2-1Z" fill="#ffffff"/>`,
+  water: `<path d="M14 6.6c3.1 3.7 4.9 6.2 4.9 8.3a4.9 4.9 0 0 1-9.8 0c0-2.1 1.8-4.6 4.9-8.3Z" fill="#ffffff"/>`,
+  playground:
+    `<path d="M7.5 19.5 14 8l6.5 11.5" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>` +
+    `<path d="M14 9.5v4.4" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round"/>` +
+    `<circle cx="14" cy="15.6" r="1.9" fill="#ffffff"/>`,
+  reception:
+    `<circle cx="14" cy="8.9" r="1.5" fill="#ffffff"/>` +
+    `<rect x="12.7" y="11.4" width="2.6" height="7.6" rx="1.3" fill="#ffffff"/>`,
+  car:
+    `<path d="M7.6 17.2v-2.6l1.7-3.5h9.4l1.7 3.5v2.6h-2.2v-1.5H9.8v1.5Z" fill="#ffffff"/>` +
+    `<circle cx="10.7" cy="17.6" r="1.3" fill="#ffffff"/><circle cx="17.3" cy="17.6" r="1.3" fill="#ffffff"/>`,
+  waste:
+    `<path d="M8.6 9.6h10.8" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>` +
+    `<path d="M12 9.6V8.2h4v1.4" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/>` +
+    `<path d="M9.9 11.4h8.2l-.8 7.4a1.2 1.2 0 0 1-1.2 1.1h-4.2a1.2 1.2 0 0 1-1.2-1.1Z" fill="#ffffff"/>`,
+  other:
+    `<circle cx="14" cy="14" r="3" fill="#ffffff"/>` +
+    `<path d="M14 5.5v4M14 18.5v4M5.5 14h4M18.5 14h4" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>`,
+};
+
+/** SVG-Glyph eines Ziels – ohne (oder mit unbekanntem) Symbol das Fadenkreuz. */
+export function targetIconGlyph(icon: TargetIcon | undefined): string {
+  return TARGET_ICON_GLYPHS[sanitizeTargetIcon(icon)];
 }
 
 function isValidCoords(lat: unknown, lon: unknown): lat is number {
@@ -64,6 +130,11 @@ export function sanitizeTargets(value: unknown): TentFinderTarget[] {
       lat: entry.lat as number,
       lon: entry.lon as number,
       savedAt,
+      // Ohne Symbol bleibt das Feld weg (Alt-Ziele); ein vorhandener, aber
+      // unbekannter Wert wird auf «other» zurechtgebogen.
+      ...(entry.icon === undefined || entry.icon === null
+        ? {}
+        : { icon: sanitizeTargetIcon(entry.icon) }),
     });
   }
   return result;
@@ -121,19 +192,30 @@ export function migrateTargets(
 
 /**
  * Ziel umbenennen: neuer Name wird wie beim Anlegen validiert (trimmen,
- * auf MAX_NAME_LENGTH kürzen, leer verboten). Liefert eine NEUE Liste mit
- * dem umbenannten Ziel – oder null, wenn der Name (nach Trimmen) leer ist
+ * auf MAX_NAME_LENGTH kürzen, leer verboten). Ist `icon` gesetzt, wird auch
+ * das Symbol übernommen (unbekannte Werte werden zu «other»); ohne Angabe
+ * bleibt das bisherige Symbol stehen. Liefert eine NEUE Liste mit dem
+ * umbenannten Ziel – oder null, wenn der Name (nach Trimmen) leer ist
  * oder kein Ziel mit dieser id existiert. Die Eingabe bleibt unverändert.
  */
 export function renameTarget(
   targets: TentFinderTarget[],
   id: string,
-  name: string
+  name: string,
+  icon?: TargetIcon
 ): TentFinderTarget[] | null {
   const trimmed = name.trim().slice(0, MAX_NAME_LENGTH);
   if (!trimmed) return null;
   if (!targets.some(t => t.id === id)) return null;
-  return targets.map(t => (t.id === id ? { ...t, name: trimmed } : t));
+  return targets.map(t =>
+    t.id === id
+      ? {
+          ...t,
+          name: trimmed,
+          ...(icon === undefined ? {} : { icon: sanitizeTargetIcon(icon) }),
+        }
+      : t
+  );
 }
 
 /** Neue, praktisch kollisionsfreie Ziel-id (crypto.randomUUID mit Fallback). */

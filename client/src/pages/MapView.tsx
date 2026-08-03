@@ -98,6 +98,8 @@ import {
   TARGETS_KEY,
   migrateTargets,
   sanitizeTargets,
+  targetIconGlyph,
+  type TargetIcon,
   type TentFinderTarget,
 } from "@/lib/tentFinderTargets";
 import { cn } from "@/lib/utils";
@@ -135,14 +137,20 @@ const spotIcon = L.divIcon({
   popupAnchor: [0, -16],
 });
 
-/** Zelt-Finder-Ziel als bernsteinfarbener Fadenkreuz-Marker (gleiches divIcon-Muster). */
-const targetIcon = L.divIcon({
-  className: "",
-  html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#b45309" stroke="#ffffff" stroke-width="2.5"/><circle cx="14" cy="14" r="3" fill="#ffffff"/><path d="M14 5.5v4M14 18.5v4M5.5 14h4M18.5 14h4" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/></svg>`,
-  iconSize: [28, 28],
-  iconAnchor: [14, 14],
-  popupAnchor: [0, -16],
-});
+/**
+ * Zelt-Finder-Ziel als bernsteinfarbener Marker (gleiches divIcon-Muster);
+ * im Kreis steht der SVG-Glyph des gewählten Symbols, ohne Wahl das
+ * Fadenkreuz wie bisher.
+ */
+function targetIconFor(icon: TargetIcon | undefined): L.DivIcon {
+  return L.divIcon({
+    className: "",
+    html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#b45309" stroke="#ffffff" stroke-width="2.5"/>${targetIconGlyph(icon)}</svg>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -16],
+  });
+}
 
 /** Entdeckter OSM-Campingplatz: blauer Kreis mit Zelt-Umriss (dritte Farbe). */
 const campsiteIcon = L.divIcon({
@@ -466,7 +474,7 @@ function SpotsMap({
     // Zelt-Finder-Ziele als eigene Pins – Popup mit «Anpeilen»-Link
     const createTargetMarker = (tgt: TentFinderTarget): L.Marker => {
       const marker = L.marker([tgt.lat, tgt.lon], {
-        icon: targetIcon,
+        icon: targetIconFor(tgt.icon),
         alt: tgt.name,
       });
       const popup = document.createElement("div");
