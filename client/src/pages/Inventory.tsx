@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
+  HandHelping,
   ImagePlus,
   Loader2,
   Package,
@@ -10,6 +11,7 @@ import {
   Search,
   ShieldCheck,
   Trash2,
+  Undo2,
   Wrench,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -42,6 +44,7 @@ import {
   MIN_WARRANTY_MONTHS,
   warrantyStatus,
 } from "@shared/warranty";
+import { countLent, isLent, MAX_LENT_TO_LENGTH } from "@shared/lending";
 import { resizeImageForUpload } from "@/lib/imageResize";
 import {
   formatChf,
@@ -354,7 +357,16 @@ export default function InventoryPage() {
   const [categoryFilter, setCategoryFilter] = useState("");
   // Filter aus dem Garantie-Hinweis: nur bald ablaufende Garantien zeigen
   const [warrantyFilter, setWarrantyFilter] = useState(false);
+  // Filter-Chip «Verliehen (N)»: nur aktuell verliehene Gegenstände zeigen
+  const [lentFilter, setLentFilter] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
+  // Ausleih-Dialog: Gegenstand, an wen und seit wann
+  const [lentDialog, setLentDialog] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const [lentTo, setLentTo] = useState("");
+  const [lentAt, setLentAt] = useState(today);
 
   const categoryOptions = useMemo(
     () => inventoryCategories.map(c => pick(c, lang)),
@@ -419,6 +431,10 @@ export default function InventoryPage() {
   const removeMutation = trpc.inventory.remove.useMutation({
     onSuccess: () => utils.inventory.list.invalidate(),
   });
+  const setLentMutation = trpc.inventory.setLent.useMutation({
+    onSuccess: () => utils.inventory.list.invalidate(),
+    onError: () => toast.error(t.common.saveFailed),
+  });
 
   const totals = useMemo(() => {
     const items = query.data ?? [];
@@ -457,11 +473,15 @@ export default function InventoryPage() {
     [query.data, today]
   );
 
+  /** Wie viele Gegenstände sind aktuell verliehen? */
+  const lentCount = useMemo(() => countLent(query.data ?? []), [query.data]);
+
   /** Suche über Name + Notizen (case-insensitiv), kombiniert mit der Kategorie. */
   const filteredItems = useMemo(() => {
     const needle = search.trim().toLowerCase();
     return (query.data ?? []).filter(item => {
       if (categoryFilter && item.category !== categoryFilter) return false;
+      if (lentFilter && !isLent(item)) return false;
       if (
         warrantyFilter &&
         warrantyStatus(item.purchaseDate, item.warrantyMonths, today)?.state !==
@@ -474,7 +494,7 @@ export default function InventoryPage() {
         (item.notes ?? "").toLowerCase().includes(needle)
       );
     });
-  }, [query.data, search, categoryFilter, warrantyFilter, today]);
+  }, [query.data, search, categoryFilter, warrantyFilter, lentFilter, today]);
 
   const resetPhotoState = () => {
     setPhotoBlob(null);
@@ -686,11 +706,15 @@ export default function InventoryPage() {
   const allItems = query.data ?? [];
   const items = filteredItems;
   const filterActive =
-    search.trim() !== "" || categoryFilter !== "" || warrantyFilter;
+    search.trim() !== "" ||
+    categoryFilter !== "" ||
+    warrantyFilter ||
+    lentFilter;
   const resetFilters = () => {
     setSearch("");
     setCategoryFilter("");
     setWarrantyFilter(false);
+    setLentFilter(false);
   };
   /** Datum kurz und in der App-Sprache (z. B. 03.08.2026). */
   const formatDay = (iso: string) =>
@@ -699,6 +723,48 @@ export default function InventoryPage() {
       month: "2-digit",
       year: "numeric",
     });
+  /** Datum ohne Jahr (z. B. 03.08.) – fürs «verliehen seit»-Badge. */
+  const formatDayShort = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
+      day: "2-digit",
+      month: "2-digit",
+    });
+
+  /** Ausleih-Dialog mit Vorgaben öffnen (Datum = heute). */
+  const openLentDialog = (item: { id: number; name: string }) => {
+    setLentTo("");
+    setLentAt(today);
+    setLentDialog({ id: item.id, name: item.name });
+  };
+
+  const submitLent = () => {
+    if (!lentDialog) return;
+    const name = lentTo.trim();
+    if (!name) {
+      toast.error(t.inventory.lentToRequired);
+      return;
+    }
+    setLentMutation.mutate(
+      {
+        id: lentDialog.id,
+        data: { lentTo: name.slice(0, MAX_LENT_TO_LENGTH), lentAt },
+      },
+      {
+        onSuccess: () => {
+          toast.success(t.inventory.lentSaved);
+          setLentDialog(null);
+        },
+      }
+    );
+  };
+
+  /** Verliehenen Gegenstand zurückbuchen (Name und Datum werden geleert). */
+  const returnLent = (id: number) => {
+    setLentMutation.mutate(
+      { id, data: null },
+      { onSuccess: () => toast.success(t.inventory.lentReturned) }
+    );
+  };
   // Beim Bearbeiten kann eine (z. B. in anderer Sprache) gespeicherte
   // Kategorie auftauchen, die nicht in der Liste steht – als Option ergänzen.
   const selectOptions = categoryOptions.includes(form.category)
@@ -1115,6 +1181,25 @@ export default function InventoryPage() {
               ))}
             </div>
           )}
+          {/* Filter-Chip «Verliehen (N)» – nur, wenn etwas verliehen ist */}
+          {lentCount > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => setLentFilter(v => !v)}
+                aria-pressed={lentFilter}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                  lentFilter
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <HandHelping className="h-3.5 w-3.5" aria-hidden="true" />
+                {t.inventory.lentFilterChip(lentCount)}
+              </button>
+            </div>
+          )}
           {filterActive && (
             <p className="text-xs text-muted-foreground">
               {t.inventory.filterCount(items.length, allItems.length)}
@@ -1262,6 +1347,14 @@ export default function InventoryPage() {
                                   )}
                             </span>
                           )}
+                          {item.lentTo && (
+                            <span className="ml-1.5 rounded-full bg-sky-500/15 px-2 py-0.5 text-xs font-medium text-sky-700 dark:text-sky-400">
+                              {t.inventory.lentBadge(
+                                item.lentTo,
+                                item.lentAt ? formatDayShort(item.lentAt) : "–"
+                              )}
+                            </span>
+                          )}
                           <span className="block text-xs text-muted-foreground sm:hidden">
                             {item.category}
                           </span>
@@ -1281,6 +1374,33 @@ export default function InventoryPage() {
                     </td>
                     <td className="px-2 py-2.5">
                       <div className="flex justify-end gap-0.5">
+                        {item.lentTo ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-sky-700 dark:text-sky-400"
+                            disabled={setLentMutation.isPending}
+                            onClick={() => returnLent(item.id)}
+                            aria-label={t.inventory.lentReturnAria(item.name)}
+                            title={t.inventory.lentReturnButton}
+                          >
+                            <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground"
+                            onClick={() => openLentDialog(item)}
+                            aria-label={t.inventory.lentAria(item.name)}
+                            title={t.inventory.lentButton}
+                          >
+                            <HandHelping
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -1325,6 +1445,60 @@ export default function InventoryPage() {
       )}
 
       <GearCareSection />
+
+      {/* Ausleih-Dialog: an wen und seit wann */}
+      <Dialog
+        open={lentDialog !== null}
+        onOpenChange={open => {
+          if (!open) setLentDialog(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.inventory.lentDialogTitle}</DialogTitle>
+            <DialogDescription>
+              {t.inventory.lentDialogDescription}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm font-medium">{lentDialog?.name}</p>
+            <div>
+              <Label htmlFor="inv-lent-to">{t.inventory.lentToLabel}</Label>
+              <Input
+                id="inv-lent-to"
+                className="mt-1.5"
+                placeholder={t.inventory.lentToPlaceholder}
+                maxLength={MAX_LENT_TO_LENGTH}
+                value={lentTo}
+                onChange={e => setLentTo(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="inv-lent-at">{t.inventory.lentAtLabel}</Label>
+              <Input
+                id="inv-lent-at"
+                className="mt-1.5"
+                type="date"
+                value={lentAt}
+                onChange={e => setLentAt(e.target.value)}
+              />
+            </div>
+            <Button
+              className="w-full"
+              disabled={setLentMutation.isPending}
+              onClick={submitLent}
+            >
+              {setLentMutation.isPending && (
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              )}
+              {t.inventory.lentSubmit}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Vollbild-Ansicht eines Fotos (Klick aufs Thumbnail) */}
       <Dialog

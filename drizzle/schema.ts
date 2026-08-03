@@ -195,6 +195,10 @@ export const inventoryItems = mysqlTable(
     purchaseDate: date("purchaseDate", { mode: "string" }),
     /** Garantiedauer in Monaten ab Kaufdatum; null = nicht erfasst. */
     warrantyMonths: int("warrantyMonths"),
+    /** An wen der Gegenstand verliehen ist; null = nicht verliehen. */
+    lentTo: varchar("lentTo", { length: 80 }),
+    /** Seit wann verliehen (ISO YYYY-MM-DD); null = nicht verliehen. */
+    lentAt: date("lentAt", { mode: "string" }),
     /** Dateiname des Belegs unter uploads/receipts/ (genau EIN Beleg pro Gegenstand). */
     receiptFileName: varchar("receiptFileName", { length: 64 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),

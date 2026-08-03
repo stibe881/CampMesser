@@ -47,6 +47,7 @@ import {
   MIN_GEAR_INTERVAL_MONTHS,
 } from "@shared/gearTasks";
 import { MAX_WARRANTY_MONTHS, MIN_WARRANTY_MONTHS } from "@shared/warranty";
+import { MAX_LENT_TO_LENGTH } from "@shared/lending";
 import {
   TRIP_WEATHER_MAX_PRECIP_MM,
   TRIP_WEATHER_MAX_RAIN_DAYS,
@@ -1425,6 +1426,37 @@ export const appRouter = router({
             await receiptPhotoStorage.deleteFiles([item.receiptFileName]);
           }
         }
+      }),
+    /**
+     * Gegenstand als verliehen vermerken (`data` mit Name und Datum) oder
+     * zurückbuchen (`data: null`). Bewusst eine eigene Prozedur, damit
+     * add/update schlank bleiben.
+     */
+    setLent: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          data: z
+            .object({
+              lentTo: z.string().trim().min(1).max(MAX_LENT_TO_LENGTH),
+              lentAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            })
+            .nullable(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const item = await db.getInventoryItem(input.id, ctx.user.id);
+        if (!item) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Gegenstand nicht gefunden.",
+          });
+        }
+        await db.updateInventoryItem(input.id, ctx.user.id, {
+          lentTo: input.data?.lentTo ?? null,
+          lentAt: input.data?.lentAt ?? null,
+        });
+        return { success: true } as const;
       }),
     /** Foto eines Gegenstands entfernen (Feld + Datei auf dem Webspace). */
     removePhoto: protectedProcedure

@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Inventar: Verliehene Ausrüstung geht nicht mehr vergessen – vermerke pro Gegenstand, an wen und seit wann du ihn verliehen hast, erkenne ihn am Badge «verliehen an …» und buche ihn mit einem Klick zurück; der Chip «Verliehen (N)» zeigt dir alles Ausgeliehene auf einen Blick.",
+        "Inventaire : le matériel prêté ne se perd plus – note pour chaque objet à qui tu l'as prêté et depuis quand, repère-le grâce au badge « prêté à … » et récupère-le d'un clic ; la puce « Prêtés (N) » te montre d'un coup d'œil tout ce qui est sorti.",
+        "Inventario: l'attrezzatura prestata non si dimentica più – annota per ogni oggetto a chi l'hai prestato e da quando, riconoscilo dal badge «prestato a …» e registralo come restituito con un clic; il chip «Prestati (N)» ti mostra a colpo d'occhio tutto ciò che è in prestito.",
+        "Inventory: lent-out gear no longer gets forgotten – record for each item who has it and since when, spot it by the “lent to …” badge and book it back in with one click; the “Lent out (N)” chip shows everything that is out at a glance."
+      ),
+      l4(
         "Inventar: Erfasse neben dem Kaufdatum neu die Garantiedauer in Monaten – am Gegenstand siehst du dann «Garantie bis …» (grün, amber oder grau), und laufen Garantien in den nächsten 60 Tagen ab, meldet sich oben im Inventar ein Hinweis, der dir auf Klick genau diese Gegenstände zeigt.",
         "Inventaire : en plus de la date d'achat, tu peux désormais saisir la durée de garantie en mois – l'objet affiche alors « Garantie jusqu'au … » (vert, ambre ou gris), et si des garanties arrivent à échéance dans les 60 prochains jours, un message en haut de l'inventaire te montre ces objets d'un clic.",
         "Inventario: oltre alla data d'acquisto puoi indicare anche la durata della garanzia in mesi – sull'oggetto compare «Garanzia fino al …» (verde, ambra o grigio) e, se qualche garanzia scade nei prossimi 60 giorni, un avviso in cima all'inventario ti mostra quegli oggetti con un clic.",
