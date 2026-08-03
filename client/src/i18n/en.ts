@@ -741,6 +741,13 @@ export const en: Translation = {
     chartTemp: "Temperature",
     hourlyLegend:
       "Line = temperature (°C, left axis) · Bars = rainfall (mm/h, right axis).",
+    windRowAria: "Wind through the day",
+    windRowLegend:
+      "Arrow = wind direction (points where the wind blows to) · Number = peak gust in km/h.",
+    windSrHour: (time: string, dir: string, gusts: number) =>
+      `${time}: wind from ${dir}, gusts up to ${gusts} km/h`,
+    windSrHourNoDir: (time: string, gusts: number) =>
+      `${time}: gusts up to ${gusts} km/h`,
     dayWindPeak: (n: number) => `Peak wind: gusts up to ${n} km/h`,
     dayFeelsLike: (deg: number) => `feels like up to ${deg}°`,
     dayHoursEmpty: "No hourly data available for this day.",

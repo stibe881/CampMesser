@@ -773,6 +773,13 @@ export const fr: Translation = {
     chartTemp: "Température",
     hourlyLegend:
       "Ligne = température (°C, axe gauche) · Barres = quantité de pluie (mm/h, axe droit).",
+    windRowAria: "Vent au fil de la journée",
+    windRowLegend:
+      "Flèche = direction du vent (indique vers où il souffle) · Chiffre = pointe de rafales en km/h.",
+    windSrHour: (time: string, dir: string, gusts: number) =>
+      `${time} : vent de ${dir}, rafales jusqu'à ${gusts} km/h`,
+    windSrHourNoDir: (time: string, gusts: number) =>
+      `${time} : rafales jusqu'à ${gusts} km/h`,
     dayWindPeak: (n: number) => `Pointe de vent : rafales jusqu'à ${n} km/h`,
     dayFeelsLike: (deg: number) => `ressenti jusqu\u2019à ${deg}°`,
     dayHoursEmpty: "Pas de données horaires disponibles pour ce jour.",

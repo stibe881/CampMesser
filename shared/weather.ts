@@ -18,6 +18,11 @@ export interface HourlyWeather {
   weatherCode: number;
   cape: number;
   cloudCover: number;
+  /**
+   * Windrichtung in Grad, meteorologisch gezählt (0 = aus Norden, 90 = aus
+   * Osten). Optional: nur das Wetter-Modul ruft `wind_direction_10m` ab.
+   */
+  windDirectionDeg?: number;
 }
 
 export interface DailyWeather {

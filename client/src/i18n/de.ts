@@ -775,6 +775,13 @@ export const de = {
     chartTemp: "Temperatur",
     hourlyLegend:
       "Linie = Temperatur (°C, linke Achse) · Balken = Regenmenge (mm/h, rechte Achse).",
+    windRowAria: "Wind im Tagesverlauf",
+    windRowLegend:
+      "Pfeil = Windrichtung (zeigt, wohin der Wind weht) · Zahl = Böenspitze in km/h.",
+    windSrHour: (time: string, dir: string, gusts: number) =>
+      `${time}: Wind aus ${dir}, Böen bis ${gusts} km/h`,
+    windSrHourNoDir: (time: string, gusts: number) =>
+      `${time}: Böen bis ${gusts} km/h`,
     dayWindPeak: (n: number) => `Wind-Spitze: Böen bis ${n} km/h`,
     dayFeelsLike: (deg: number) => `gefühlt bis ${deg}°`,
     dayHoursEmpty: "Keine Stundendaten für diesen Tag verfügbar.",
