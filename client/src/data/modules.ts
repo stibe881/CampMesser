@@ -126,12 +126,7 @@ export const modules: Module[] = [
   },
   {
     path: "/karte",
-    title: l4(
-      "Karte der Plätze",
-      "Carte des emplacements",
-      "Mappa delle piazzole",
-      "Pitch map"
-    ),
+    title: l4("Karte", "Carte", "Mappa", "Map"),
     description: l4(
       "Alle gespeicherten Zeltplätze mit Übernachtungen auf der Karte",
       "Tous les emplacements enregistrés avec les nuitées sur la carte",
