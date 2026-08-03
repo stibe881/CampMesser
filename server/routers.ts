@@ -91,8 +91,9 @@ import {
 } from "@shared/tickBites";
 import {
   DEFAULT_SHOPPING_LIST_NAME,
+  isShoppingCategoryValue,
+  MAX_SHOPPING_CATEGORY_LENGTH,
   MAX_SHOPPING_LIST_NAME_LENGTH,
-  SHOPPING_CATEGORIES,
 } from "@shared/shopping";
 import {
   parseSpotAttributes,
@@ -295,6 +296,18 @@ async function requireTripAccess(tripId: number, userId: number) {
 
 /** App-Sprache als Eingabe (für serverseitig erzeugte Texte). */
 const shoppingLangInput = z.enum(["de", "fr", "it", "en"]).default("de");
+
+/**
+ * Laden-Kategorie eines Einkaufs-Eintrags (#272): entweder ein Schlüssel des
+ * festen Katalogs oder eine eigene Kategorie im Format «custom:<Name>».
+ * Die Längenprüfung deckt sich mit der DB-Spalte (varchar(80)).
+ */
+const shoppingCategoryInput = z
+  .string()
+  .max(MAX_SHOPPING_CATEGORY_LENGTH)
+  .refine(isShoppingCategoryValue, {
+    message: "Unbekannte Kategorie.",
+  });
 
 /**
  * Ziel-Liste einer Einkaufs-Aktion bestimmen (#215): mit `listId` wird der
@@ -2004,7 +2017,7 @@ export const appRouter = router({
         z.object({
           listId: z.number().int().positive().optional(),
           name: z.string().min(1).max(160),
-          category: z.enum(SHOPPING_CATEGORIES).nullish(),
+          category: shoppingCategoryInput.nullish(),
           quantity: z.string().max(40).nullish(),
           note: z.string().max(160).nullish(),
         })
@@ -2056,7 +2069,7 @@ export const appRouter = router({
             )
             .min(1)
             .max(100),
-          category: z.enum(SHOPPING_CATEGORIES).nullish(),
+          category: shoppingCategoryInput.nullish(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -2172,7 +2185,7 @@ export const appRouter = router({
       .input(
         z.object({
           id: z.number(),
-          category: z.enum(SHOPPING_CATEGORIES).nullable(),
+          category: shoppingCategoryInput.nullable(),
         })
       )
       .mutation(({ ctx, input }) =>
@@ -2354,7 +2367,7 @@ export const appRouter = router({
         z.object({
           tripId: z.number().int().positive(),
           name: z.string().min(1).max(160),
-          category: z.enum(SHOPPING_CATEGORIES).nullish(),
+          category: shoppingCategoryInput.nullish(),
           quantity: z.string().max(40).nullish(),
           note: z.string().max(160).nullish(),
         })
@@ -2402,7 +2415,7 @@ export const appRouter = router({
             )
             .min(1)
             .max(100),
-          category: z.enum(SHOPPING_CATEGORIES).nullish(),
+          category: shoppingCategoryInput.nullish(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -2510,7 +2523,7 @@ export const appRouter = router({
         z.object({
           tripId: z.number().int().positive(),
           id: z.number(),
-          category: z.enum(SHOPPING_CATEGORIES).nullable(),
+          category: shoppingCategoryInput.nullable(),
         })
       )
       .mutation(async ({ ctx, input }) => {

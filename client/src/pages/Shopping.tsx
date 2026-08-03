@@ -26,6 +26,10 @@ import LoginPrompt from "@/components/LoginPrompt";
 import ShoppingItemDetailsPopover from "@/components/ShoppingItemDetailsPopover";
 import ShoppingBookingDialog from "@/components/ShoppingBookingDialog";
 import ShoppingNameAutocomplete from "@/components/ShoppingNameAutocomplete";
+import ShoppingCategoryOptions, {
+  CATEGORY_NEW,
+  NO_CATEGORY,
+} from "@/components/ShoppingCategorySelect";
 import StorePurchasesDialog from "@/components/StorePurchasesDialog";
 import { useShoppingTarget } from "@/components/ShoppingTargetSelect";
 import { Button } from "@/components/ui/button";
@@ -41,7 +45,6 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -61,23 +64,22 @@ import { usePointerDrag } from "@/lib/usePointerDrag";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { cn } from "@/lib/utils";
 import { formatChf } from "@/lib/money";
-import { pick } from "@shared/i18n";
 import {
-  isShoppingCategory,
+  customCategory,
+  customShoppingCategories,
+  groupByShoppingCategory,
+  isShoppingCategoryValue,
+  MAX_CUSTOM_CATEGORY_NAME_LENGTH,
   MAX_SHOPPING_LIST_NAME_LENGTH,
-  SHOPPING_CATEGORIES,
-  SHOPPING_CATEGORY_LABELS,
-  type ShoppingCategory,
+  shoppingCategoryLabel,
 } from "@shared/shopping";
 import { isBooked, shoppingPriceTotals } from "@shared/shoppingPrices";
 
-/** Select-Wert für «Ohne Kategorie» (Radix erlaubt keinen leeren String). */
-const NO_CATEGORY = "none" as const;
-
 /**
  * Einkaufsliste: schnelles Erfassen, Abhaken und Aufräumen. Offene Einträge
- * stehen nach Laden-Kategorien gruppiert oben (Reihenfolge des Katalogs,
- * «Ohne Kategorie» zuletzt) und lassen sich per Griff innerhalb der Gruppe
+ * stehen nach Laden-Kategorien gruppiert oben (Reihenfolge des Katalogs, dann
+ * die eigenen Kategorien alphabetisch (#272), «Ohne Kategorie» zuletzt) und
+ * lassen sich per Griff innerhalb der Gruppe
  * umsortieren; erledigte stehen durchgestrichen darunter. Zutaten kommen
  * wahlweise direkt aus dem Rezeptbuch (shopping.addMany).
  *
@@ -105,6 +107,11 @@ export default function ShoppingPage() {
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
   const [newCategory, setNewCategory] = useState<string>(NO_CATEGORY);
+  /** Getippter Name, solange im Erfassen-Formular «Neue Kategorie …» steht. */
+  const [newCategoryName, setNewCategoryName] = useState("");
+  /** Eintrag, für den gerade eine neue Kategorie getippt wird (#272). */
+  const [catItemId, setCatItemId] = useState<number | null>(null);
+  const [catItemName, setCatItemName] = useState("");
   /** Teil-Link, der gerade im Dialog gezeigt wird (null = Dialog zu). */
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   /** Im Dialog gewählte Gültigkeit; null = unbegrenzt. */
@@ -354,34 +361,30 @@ export default function ShoppingPage() {
   const applySuggestion = (entry: ShoppingHistoryEntry) => {
     setName(entry.name);
     setNewCategory(
-      isShoppingCategory(entry.category) ? entry.category : NO_CATEGORY
+      isShoppingCategoryValue(entry.category) ? entry.category : NO_CATEGORY
     );
     setQuantity(entry.quantity ?? "");
   };
 
-  /** Offene Einträge nach Kategorie gruppiert – Katalog-Reihenfolge, ohne Kategorie zuletzt. */
-  const grouped = useMemo(() => {
-    const groups: {
-      key: ShoppingCategory | null;
-      items: typeof openItems;
-    }[] = [];
-    SHOPPING_CATEGORIES.forEach(cat => {
-      const catItems = openItems.filter(i => i.category === cat);
-      if (catItems.length > 0) groups.push({ key: cat, items: catItems });
-    });
-    const uncategorized = openItems.filter(
-      i => !isShoppingCategory(i.category)
-    );
-    if (uncategorized.length > 0)
-      groups.push({ key: null, items: uncategorized });
-    return groups;
-  }, [openItems]);
+  /** Eigene Kategorien, die auf dieser Liste vorkommen (#272) – für die Auswahl. */
+  const customCategories = useMemo(
+    () =>
+      customShoppingCategories(
+        items.map(i => i.category),
+        lang
+      ),
+    [items, lang]
+  );
+
+  /** Offene Einträge nach Kategorie gruppiert – Katalog, eigene, ohne zuletzt. */
+  const grouped = useMemo(
+    () => groupByShoppingCategory(openItems, lang),
+    [openItems, lang]
+  );
 
   /** Anzeige-Label einer Gruppe (null = «Ohne Kategorie»). */
-  const groupLabel = (key: ShoppingCategory | null) =>
-    key === null
-      ? t.shopping.noCategory
-      : pick(SHOPPING_CATEGORY_LABELS[key], lang);
+  const groupLabel = (key: string | null) =>
+    shoppingCategoryLabel(key, lang) ?? t.shopping.noCategory;
 
   /** Eintrag innerhalb seiner Gruppe verschieben und Gesamt-Reihenfolge speichern. */
   const moveItem = (group: string, fromIdStr: string, toIdStr: string) => {
@@ -414,14 +417,21 @@ export default function ShoppingPage() {
     handleSelector: "[data-drag-handle]",
   });
 
+  /** Gewählte Kategorie des Erfassungs-Formulars als speicherbarer Wert. */
+  const chosenCategory = (): string | null => {
+    if (newCategory === NO_CATEGORY) return null;
+    // «Neue Kategorie …» ohne Namen bleibt schlicht ohne Kategorie
+    if (newCategory === CATEGORY_NEW) return customCategory(newCategoryName);
+    return newCategory;
+  };
+
   const submit = () => {
     const trimmed = name.trim();
     if (!trimmed) return;
     addMutation.mutate({
       listId: activeListId ?? undefined,
       name: trimmed.slice(0, 160),
-      category:
-        newCategory === NO_CATEGORY ? null : (newCategory as ShoppingCategory),
+      category: chosenCategory(),
       quantity: quantity.trim().slice(0, 40) || null,
     });
   };
@@ -525,14 +535,19 @@ export default function ShoppingPage() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={NO_CATEGORY}>{t.shopping.noCategory}</SelectItem>
-            {SHOPPING_CATEGORIES.map(cat => (
-              <SelectItem key={cat} value={cat}>
-                {pick(SHOPPING_CATEGORY_LABELS[cat], lang)}
-              </SelectItem>
-            ))}
+            <ShoppingCategoryOptions customCategories={customCategories} />
           </SelectContent>
         </Select>
+        {newCategory === CATEGORY_NEW && (
+          <Input
+            className="w-40"
+            value={newCategoryName}
+            maxLength={MAX_CUSTOM_CATEGORY_NAME_LENGTH}
+            placeholder={t.shopping.newCategoryPlaceholder}
+            aria-label={t.shopping.newCategoryAria}
+            onChange={e => setNewCategoryName(e.target.value)}
+          />
+        )}
         <Button
           type="submit"
           disabled={!name.trim() || addMutation.isPending}
@@ -639,7 +654,7 @@ export default function ShoppingPage() {
                             key={item.id}
                             {...drag.dragProps(groupId, String(item.id))}
                             className={cn(
-                              "flex items-center gap-2 border-b border-border/60 bg-card px-3 py-2.5 transition-colors last:border-0",
+                              "flex flex-wrap items-center gap-2 border-b border-border/60 bg-card px-3 py-2.5 transition-colors last:border-0",
                               drag.dragId === String(item.id) &&
                                 "border-primary opacity-60",
                               drag.dragOverId === String(item.id) &&
@@ -695,19 +710,24 @@ export default function ShoppingPage() {
                             />
                             <Select
                               value={
-                                isShoppingCategory(item.category)
+                                isShoppingCategoryValue(item.category)
                                   ? item.category
                                   : NO_CATEGORY
                               }
-                              onValueChange={value =>
+                              onValueChange={value => {
+                                // «Neue Kategorie …» öffnet erst das Namensfeld
+                                if (value === CATEGORY_NEW) {
+                                  setCatItemId(item.id);
+                                  setCatItemName("");
+                                  return;
+                                }
+                                setCatItemId(null);
                                 setCategoryMutation.mutate({
                                   id: item.id,
                                   category:
-                                    value === NO_CATEGORY
-                                      ? null
-                                      : (value as ShoppingCategory),
-                                })
-                              }
+                                    value === NO_CATEGORY ? null : value,
+                                });
+                              }}
                             >
                               <SelectTrigger
                                 className="h-7 w-auto max-w-32 shrink-0 gap-1 border-0 bg-transparent px-1.5 text-xs text-muted-foreground shadow-none hover:text-foreground"
@@ -718,14 +738,9 @@ export default function ShoppingPage() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent align="end">
-                                <SelectItem value={NO_CATEGORY}>
-                                  {t.shopping.noCategory}
-                                </SelectItem>
-                                {SHOPPING_CATEGORIES.map(cat => (
-                                  <SelectItem key={cat} value={cat}>
-                                    {pick(SHOPPING_CATEGORY_LABELS[cat], lang)}
-                                  </SelectItem>
-                                ))}
+                                <ShoppingCategoryOptions
+                                  customCategories={customCategories}
+                                />
                               </SelectContent>
                             </Select>
                             <Button
@@ -742,6 +757,42 @@ export default function ShoppingPage() {
                                 aria-hidden="true"
                               />
                             </Button>
+                            {/* Inline-Namensfeld für «Neue Kategorie …» (#272) */}
+                            {catItemId === item.id && (
+                              <form
+                                className="flex w-full flex-wrap items-center gap-2 border-t border-border pt-2"
+                                onSubmit={e => {
+                                  e.preventDefault();
+                                  const category = customCategory(catItemName);
+                                  if (!category) return;
+                                  setCategoryMutation.mutate({
+                                    id: item.id,
+                                    category,
+                                  });
+                                  setCatItemId(null);
+                                  setCatItemName("");
+                                }}
+                              >
+                                <Input
+                                  className="h-8 w-40 text-sm"
+                                  value={catItemName}
+                                  maxLength={MAX_CUSTOM_CATEGORY_NAME_LENGTH}
+                                  placeholder={
+                                    t.shopping.newCategoryPlaceholder
+                                  }
+                                  aria-label={t.shopping.newCategoryAria}
+                                  onChange={e => setCatItemName(e.target.value)}
+                                />
+                                <Button
+                                  type="submit"
+                                  size="sm"
+                                  className="h-8"
+                                  disabled={!catItemName.trim()}
+                                >
+                                  {t.shopping.newCategorySave}
+                                </Button>
+                              </form>
+                            )}
                           </li>
                         ))}
                       </ul>

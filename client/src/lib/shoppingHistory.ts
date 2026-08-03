@@ -6,11 +6,11 @@
  * Konto. Pflege und Vorschlags-Ranking sind reine Funktionen – testbar
  * ohne Browser (server/shoppingHistory.test.ts).
  */
-import { isShoppingCategory } from "@shared/shopping";
+import { isShoppingCategoryValue } from "@shared/shopping";
 
 export interface ShoppingHistoryEntry {
   name: string;
-  /** Gemerkte Kategorie (nur bekannte Katalog-Schlüssel), null = ohne */
+  /** Gemerkte Kategorie (Katalog-Schlüssel oder «custom:<Name>»), null = ohne */
   category?: string | null;
   /** Gemerkte Menge, z. B. «2×» oder «500 g» */
   quantity?: string | null;
@@ -35,7 +35,7 @@ function sanitizeEntry(raw: unknown): ShoppingHistoryEntry | null {
   const trimmed = name.trim().slice(0, 160);
   if (!trimmed) return null;
   const entry: ShoppingHistoryEntry = { name: trimmed };
-  if (typeof category === "string" && isShoppingCategory(category)) {
+  if (typeof category === "string" && isShoppingCategoryValue(category)) {
     entry.category = category;
   }
   if (typeof quantity === "string" && quantity.trim()) {

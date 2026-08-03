@@ -8,12 +8,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { pick } from "@shared/i18n";
 import {
-  isShoppingCategory,
-  SHOPPING_CATEGORIES,
-  SHOPPING_CATEGORY_LABELS,
-  type ShoppingCategory,
+  groupByShoppingCategory,
+  shoppingCategoryLabel,
 } from "@shared/shopping";
 
 /**
@@ -61,26 +58,14 @@ export default function SharedShoppingPage() {
   const openItems = useMemo(() => items.filter(i => !i.checked), [items]);
   const doneItems = useMemo(() => items.filter(i => i.checked), [items]);
 
-  /** Offene Einträge nach Laden-Kategorien gruppiert («Ohne Kategorie» zuletzt). */
-  const grouped = useMemo(() => {
-    const groups: { key: ShoppingCategory | null; items: typeof openItems }[] =
-      [];
-    SHOPPING_CATEGORIES.forEach(cat => {
-      const catItems = openItems.filter(i => i.category === cat);
-      if (catItems.length > 0) groups.push({ key: cat, items: catItems });
-    });
-    const uncategorized = openItems.filter(
-      i => !isShoppingCategory(i.category)
-    );
-    if (uncategorized.length > 0)
-      groups.push({ key: null, items: uncategorized });
-    return groups;
-  }, [openItems]);
+  /** Offene Einträge nach Kategorie gruppiert – Katalog, eigene (#272), ohne zuletzt. */
+  const grouped = useMemo(
+    () => groupByShoppingCategory(openItems, lang),
+    [openItems, lang]
+  );
 
-  const groupLabel = (key: ShoppingCategory | null) =>
-    key === null
-      ? t.shopping.noCategory
-      : pick(SHOPPING_CATEGORY_LABELS[key], lang);
+  const groupLabel = (key: string | null) =>
+    shoppingCategoryLabel(key, lang) ?? t.shopping.noCategory;
 
   if (query.isLoading) {
     return (

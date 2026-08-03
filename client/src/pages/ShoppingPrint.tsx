@@ -6,17 +6,16 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { isStandaloneApp } from "@/lib/standalone";
-import { LOCALE_TAGS, pick } from "@shared/i18n";
+import { LOCALE_TAGS } from "@shared/i18n";
 import {
-  isShoppingCategory,
-  SHOPPING_CATEGORIES,
-  SHOPPING_CATEGORY_LABELS,
-  type ShoppingCategory,
+  groupByShoppingCategory,
+  shoppingCategoryLabel,
 } from "@shared/shopping";
 
 /**
  * Druckfreundliche Ansicht der Einkaufsliste: offene Einträge nach
- * Laden-Kategorien gruppiert (Katalog-Reihenfolge, «Ohne Kategorie» zuletzt),
+ * Laden-Kategorien gruppiert (Katalog-Reihenfolge, dann die eigenen
+ * Kategorien alphabetisch (#272), «Ohne Kategorie» zuletzt),
  * pro Eintrag ein Papier-Kästchen zum Abhaken im Laden. PDF entsteht über
  * den Browser-Druckdialog.
  *
@@ -59,23 +58,11 @@ export default function ShoppingPrintPage() {
     [query.data]
   );
 
-  /** Offene Einträge nach Kategorie gruppiert – Katalog-Reihenfolge, ohne Kategorie zuletzt. */
-  const grouped = useMemo(() => {
-    const groups: {
-      key: ShoppingCategory | null;
-      items: typeof openItems;
-    }[] = [];
-    SHOPPING_CATEGORIES.forEach(cat => {
-      const catItems = openItems.filter(i => i.category === cat);
-      if (catItems.length > 0) groups.push({ key: cat, items: catItems });
-    });
-    const uncategorized = openItems.filter(
-      i => !isShoppingCategory(i.category)
-    );
-    if (uncategorized.length > 0)
-      groups.push({ key: null, items: uncategorized });
-    return groups;
-  }, [openItems]);
+  /** Offene Einträge nach Kategorie gruppiert – Katalog, eigene, ohne zuletzt. */
+  const grouped = useMemo(
+    () => groupByShoppingCategory(openItems, lang),
+    [openItems, lang]
+  );
 
   if (loading || (isAuthenticated && query.isLoading)) {
     return (
@@ -157,9 +144,8 @@ export default function ShoppingPrintPage() {
           {grouped.map(group => (
             <div key={group.key ?? "none"}>
               <h2 className="mb-2 border-b border-foreground/30 pb-1 text-sm font-bold uppercase tracking-wide">
-                {group.key === null
-                  ? t.shopping.noCategory
-                  : pick(SHOPPING_CATEGORY_LABELS[group.key], lang)}
+                {shoppingCategoryLabel(group.key, lang) ??
+                  t.shopping.noCategory}
               </h2>
               <ul className="space-y-1.5">
                 {group.items.map(item => (
