@@ -639,6 +639,15 @@ export const it: Translation = {
     emptyTitle: "Ancora nessuna attrezzatura registrata",
     emptyText:
       "Comincia dai pezzi grandi: tenda, sacco a pelo, materassino isolante.",
+    searchPlaceholder: "Cerca nell'inventario …",
+    searchAria: "Cerca nell'inventario per nome o nota",
+    categoryFilterAria: "Filtra per categoria",
+    filterAll: "Tutti",
+    filterCount: (shown: number, total: number) =>
+      `${shown} oggetti su ${total}`,
+    filterEmptyTitle: "Nessun risultato",
+    filterEmptyText: "Modifica la ricerca o scegli un'altra categoria.",
+    filterReset: "Reimposta i filtri",
     gearTitle: "Cura & manutenzione",
     gearIntro:
       "Attività ricorrenti come impermeabilizzare o controllare le batterie – le attività in scadenza vengono evidenziate e ricordate via push.",

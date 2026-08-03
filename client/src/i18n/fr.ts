@@ -649,6 +649,15 @@ export const fr: Translation = {
     emptyTitle: "Pas encore d'équipement saisi",
     emptyText:
       "Commence par les grandes pièces : tente, sac de couchage, matelas isolant.",
+    searchPlaceholder: "Rechercher dans l'inventaire …",
+    searchAria: "Rechercher dans l'inventaire par nom ou note",
+    categoryFilterAria: "Filtrer par catégorie",
+    filterAll: "Tout",
+    filterCount: (shown: number, total: number) =>
+      `${shown} objets sur ${total}`,
+    filterEmptyTitle: "Aucun résultat",
+    filterEmptyText: "Adapte ta recherche ou choisis une autre catégorie.",
+    filterReset: "Réinitialiser les filtres",
     gearTitle: "Entretien & maintenance",
     gearIntro:
       "Tâches récurrentes comme imperméabiliser ou contrôler les piles – les tâches dues sont marquées et rappelées par push.",

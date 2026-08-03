@@ -651,6 +651,15 @@ export const de = {
     photoDialogDescription: "Foto des Gegenstands in gross.",
     emptyTitle: "Noch keine Ausrüstung erfasst",
     emptyText: "Beginne mit den grossen Teilen: Zelt, Schlafsack, Isomatte.",
+    searchPlaceholder: "Inventar durchsuchen …",
+    searchAria: "Inventar nach Name oder Notiz durchsuchen",
+    categoryFilterAria: "Nach Kategorie filtern",
+    filterAll: "Alle",
+    filterCount: (shown: number, total: number) =>
+      `${shown} von ${total} Gegenständen`,
+    filterEmptyTitle: "Keine Treffer",
+    filterEmptyText: "Passe die Suche an oder wähle eine andere Kategorie.",
+    filterReset: "Filter zurücksetzen",
     gearTitle: "Pflege & Wartung",
     gearIntro:
       "Wiederkehrende Aufgaben wie Imprägnieren oder Batterien prüfen – fällige Aufgaben werden markiert und per Push erinnert.",

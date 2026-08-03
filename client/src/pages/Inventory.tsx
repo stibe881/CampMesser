@@ -6,6 +6,7 @@ import {
   Package,
   Pencil,
   Plus,
+  Search,
   Trash2,
   Wrench,
 } from "lucide-react";
@@ -35,6 +36,7 @@ import { l4, LOCALE_TAGS, pick, type L4 } from "@shared/i18n";
 import { GEAR_TASK_SUGGESTIONS, gearTaskDue } from "@shared/gearTasks";
 import { resizeImageForUpload } from "@/lib/imageResize";
 import { trpc } from "@/lib/trpc";
+import { cn } from "@/lib/utils";
 
 /** Private Foto-URL eines Inventar-Gegenstands (Auth über Session-Cookie). */
 function inventoryPhotoUrl(fileName: string): string {
@@ -307,6 +309,9 @@ export default function InventoryPage() {
     enabled: isAuthenticated,
   });
   const [dialogOpen, setDialogOpen] = useState(false);
+  // Suche (Name/Notizen, live) und Kategorien-Filter («» = alle)
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
 
   const categoryOptions = useMemo(
     () => inventoryCategories.map(c => pick(c, lang)),
@@ -359,6 +364,29 @@ export default function InventoryPage() {
       volume: items.reduce((s, i) => s + i.volumeLiters * i.quantity, 0),
     };
   }, [query.data]);
+
+  /** Kategorien, die im Inventar tatsächlich vorkommen (alphabetisch). */
+  const presentCategories = useMemo(() => {
+    const seen: string[] = [];
+    (query.data ?? []).forEach(item => {
+      if (item.category && !seen.includes(item.category))
+        seen.push(item.category);
+    });
+    return seen.sort((a, b) => a.localeCompare(b, LOCALE_TAGS[lang]));
+  }, [query.data, lang]);
+
+  /** Suche über Name + Notizen (case-insensitiv), kombiniert mit der Kategorie. */
+  const filteredItems = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return (query.data ?? []).filter(item => {
+      if (categoryFilter && item.category !== categoryFilter) return false;
+      if (!needle) return true;
+      return (
+        item.name.toLowerCase().includes(needle) ||
+        (item.notes ?? "").toLowerCase().includes(needle)
+      );
+    });
+  }, [query.data, search, categoryFilter]);
 
   const resetPhotoState = () => {
     setPhotoBlob(null);
@@ -497,7 +525,13 @@ export default function InventoryPage() {
     );
   }
 
-  const items = query.data ?? [];
+  const allItems = query.data ?? [];
+  const items = filteredItems;
+  const filterActive = search.trim() !== "" || categoryFilter !== "";
+  const resetFilters = () => {
+    setSearch("");
+    setCategoryFilter("");
+  };
   // Beim Bearbeiten kann eine (z. B. in anderer Sprache) gespeicherte
   // Kategorie auftauchen, die nicht in der Liste steht – als Option ergänzen.
   const selectOptions = categoryOptions.includes(form.category)
@@ -704,12 +738,87 @@ export default function InventoryPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Suche + Kategorien-Filter (nur sinnvoll, wenn es Gegenstände gibt) */}
+      {allItems.length > 0 && (
+        <div className="mb-4 space-y-3">
+          <div className="relative">
+            <Search
+              className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <Input
+              className="pl-9"
+              placeholder={t.inventory.searchPlaceholder}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              aria-label={t.inventory.searchAria}
+            />
+          </div>
+          {presentCategories.length > 1 && (
+            <div
+              className="flex flex-wrap gap-1.5"
+              role="group"
+              aria-label={t.inventory.categoryFilterAria}
+            >
+              <button
+                type="button"
+                onClick={() => setCategoryFilter("")}
+                aria-pressed={categoryFilter === ""}
+                className={cn(
+                  "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                  categoryFilter === ""
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {t.inventory.filterAll}
+              </button>
+              {presentCategories.map(category => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => setCategoryFilter(category)}
+                  aria-pressed={categoryFilter === category}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                    categoryFilter === category
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          )}
+          {filterActive && (
+            <p className="text-xs text-muted-foreground">
+              {t.inventory.filterCount(items.length, allItems.length)}
+            </p>
+          )}
+        </div>
+      )}
+
       {query.isLoading ? (
         <div className="flex justify-center py-10">
           <Loader2
             className="h-6 w-6 animate-spin text-muted-foreground"
             aria-label={t.common.loading}
           />
+        </div>
+      ) : allItems.length > 0 && items.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border p-10 text-center">
+          <Search
+            className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
+            aria-hidden="true"
+          />
+          <p className="font-medium">{t.inventory.filterEmptyTitle}</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t.inventory.filterEmptyText}
+          </p>
+          <Button variant="outline" className="mt-4" onClick={resetFilters}>
+            {t.inventory.filterReset}
+          </Button>
         </div>
       ) : items.length > 0 ? (
         <div className="overflow-hidden rounded-xl border border-border">
