@@ -503,6 +503,9 @@ export const fr: Translation = {
     newCategoryPlaceholder: "Nouvelle catégorie",
     newCategoryAria: "Nom de la nouvelle catégorie",
     editCategoryAria: (name: string) => `Modifier la catégorie de ${name}`,
+    editItemAria: (name: string) => `Modifier ${name}`,
+    editNameAria: (name: string) => `Nouveau nom pour ${name}`,
+    editQtyAria: (name: string) => `Quantité de ${name}`,
     editCategorySelectAria: (name: string) => `Nouvelle catégorie pour ${name}`,
     categorySave: "Enregistrer la catégorie",
     categoryUpdateFailed: "La catégorie n'a pas pu être modifiée",
@@ -535,6 +538,7 @@ export const fr: Translation = {
     sectionAddAria: section => `Ajouter une entrée dans la section ${section}`,
     printPersonAria: name => `Imprimer uniquement les entrées de ${name}`,
     managePersonsButton: "Gérer les personnes",
+    personTabsAria: "Sections de la liste de bagages",
     managePersonsTitle: "Gérer les personnes",
     managePersonsDescription:
       "Chaque personne reçoit sa propre section sur la liste. Les entrées sans personne se trouvent sous « Général ».",
@@ -4514,6 +4518,37 @@ export const fr: Translation = {
     familyEmpty: "Aucun profil d'enfant créé pour l'instant.",
     footnote:
       "Tous ces chiffres viennent de tes propres saisies – cette page ne fait que les afficher, tu les modifies dans le module concerné.",
+  },
+
+  transit: {
+    sectionAria: "Transports publics depuis l'emplacement",
+    title: "Transports publics",
+    subtitle: "Arrêts à proximité et leurs prochains départs.",
+    subtitleAtPlace: place =>
+      `Arrêts autour de ${place} et leurs prochains départs.`,
+    loadingStations: "Recherche des arrêts …",
+    loadingBoard: "Chargement des départs …",
+    loadFailed:
+      "L'horaire n'a pas pu être chargé pour l'instant. Réessaie dans un moment.",
+    emptyStations:
+      "L'horaire suisse ne trouve aucun arrêt ici. Il couvre la Suisse et le trafic frontalier – pour un emplacement plus loin à l'étranger, CampMesser ne sait rien ici.",
+    emptyBoard: "Aucun départ n'est prévu prochainement depuis cet arrêt.",
+    kind: {
+      train: "Train",
+      bus: "Bus",
+      tram: "Tram",
+      ship: "Bateau",
+      cableway: "Téléphérique",
+      other: "Arrêt",
+    },
+    stationAria: name => `Afficher les départs depuis ${name}`,
+    distanceAway: value => `à ${value}`,
+    delay: minutes => `+${minutes} min`,
+    platform: value => `Quai ${value}`,
+    refresh: "Actualiser",
+    refreshStations: "Rechercher à nouveau les arrêts",
+    source:
+      "Données horaires de transport.opendata.ch – interrogées uniquement sur ton clic. Seuls les départs à venir sont affichés ; les retards figurent là où l'horaire les annonce.",
   },
 
   sharing: {

@@ -48,6 +48,7 @@ import NearbyHikes from "@/components/NearbyHikes";
 import NearbyExcursions from "@/components/NearbyExcursions";
 import NearbyFirepits from "@/components/NearbyFirepits";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
+import NearbyTransit from "@/components/NearbyTransit";
 import TickRiskPanel from "@/components/TickRiskPanel";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
 import { MAX_PHOTOS_PER_SPOT } from "@shared/tripPhotos";
@@ -1225,6 +1226,15 @@ export default function SpotDetailPage() {
       {/* Spielplätze und Badeplätze aus OpenStreetMap (#248) – gemischt nach
           Distanz, lädt ebenfalls erst beim Aufklappen */}
       <NearbyFamilyPlaces
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mb-4"
+      />
+
+      {/* ÖV ab Platz (#249): Haltestellen mit Distanz, auf Antippen die
+          Abfahrtstafel – beides erst beim Aufklappen geholt */}
+      <NearbyTransit
         latitude={spot.latitude}
         longitude={spot.longitude}
         placeName={spot.name}

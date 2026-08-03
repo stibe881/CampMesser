@@ -494,6 +494,9 @@ export const it: Translation = {
     newCategoryPlaceholder: "Nuova categoria",
     newCategoryAria: "Nome della nuova categoria",
     editCategoryAria: (name: string) => `Modifica la categoria di ${name}`,
+    editItemAria: (name: string) => `Modifica ${name}`,
+    editNameAria: (name: string) => `Nuovo nome per ${name}`,
+    editQtyAria: (name: string) => `Quantità di ${name}`,
     editCategorySelectAria: (name: string) => `Nuova categoria per ${name}`,
     categorySave: "Salva categoria",
     categoryUpdateFailed: "Impossibile modificare la categoria",
@@ -526,6 +529,7 @@ export const it: Translation = {
     sectionAddAria: section => `Aggiungi una voce nella sezione ${section}`,
     printPersonAria: name => `Stampa solo le voci di ${name}`,
     managePersonsButton: "Gestisci persone",
+    personTabsAria: "Sezioni della lista bagagli",
     managePersonsTitle: "Gestisci persone",
     managePersonsDescription:
       "Ogni persona riceve una propria sezione nella lista. Le voci senza persona stanno sotto «Generale».",
@@ -4477,6 +4481,37 @@ export const it: Translation = {
     familyEmpty: "Nessun profilo bambino creato finora.",
     footnote:
       "Tutti i numeri nascono dalle tue registrazioni – questa pagina li mostra soltanto, li modifichi nel modulo corrispondente.",
+  },
+
+  transit: {
+    sectionAria: "Trasporti pubblici dalla piazzola",
+    title: "Trasporti pubblici",
+    subtitle: "Fermate nei dintorni e le loro prossime partenze.",
+    subtitleAtPlace: place =>
+      `Fermate attorno a ${place} e le loro prossime partenze.`,
+    loadingStations: "Ricerca delle fermate …",
+    loadingBoard: "Caricamento delle partenze …",
+    loadFailed:
+      "L'orario non si è potuto caricare in questo momento. Riprova tra un attimo.",
+    emptyStations:
+      "Qui l'orario svizzero non trova nessuna fermata. Copre la Svizzera e il traffico transfrontaliero – per una piazzola più lontana all'estero CampMesser qui non sa nulla.",
+    emptyBoard: "Da questa fermata non è prevista nessuna partenza a breve.",
+    kind: {
+      train: "Treno",
+      bus: "Autobus",
+      tram: "Tram",
+      ship: "Battello",
+      cableway: "Funivia",
+      other: "Fermata",
+    },
+    stationAria: name => `Mostrare le partenze da ${name}`,
+    distanceAway: value => `a ${value}`,
+    delay: minutes => `+${minutes} min`,
+    platform: value => `Binario ${value}`,
+    refresh: "Aggiornare",
+    refreshStations: "Cercare di nuovo le fermate",
+    source:
+      "Dati d'orario da transport.opendata.ch – interrogati solo su tuo clic. Vengono mostrate solo le partenze future; i ritardi compaiono dove l'orario li segnala.",
   },
 
   sharing: {

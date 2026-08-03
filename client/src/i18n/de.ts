@@ -504,6 +504,9 @@ export const de = {
     newCategoryPlaceholder: "Neue Kategorie",
     newCategoryAria: "Name der neuen Kategorie",
     editCategoryAria: (name: string) => `Kategorie von ${name} ändern`,
+    editItemAria: (name: string) => `${name} bearbeiten`,
+    editNameAria: (name: string) => `Neuer Name für ${name}`,
+    editQtyAria: (name: string) => `Menge von ${name}`,
     editCategorySelectAria: (name: string) => `Neue Kategorie für ${name}`,
     categorySave: "Kategorie speichern",
     categoryUpdateFailed: "Kategorie konnte nicht geändert werden",
@@ -541,6 +544,7 @@ export const de = {
       `Eintrag im Bereich ${section} hinzufügen`,
     printPersonAria: (name: string) => `Nur die Einträge von ${name} drucken`,
     managePersonsButton: "Personen verwalten",
+    personTabsAria: "Bereiche der Packliste",
     managePersonsTitle: "Personen verwalten",
     managePersonsDescription:
       "Jede Person bekommt einen eigenen Bereich auf der Liste. Einträge ohne Person stehen unter «Allgemein».",
@@ -4518,6 +4522,39 @@ export const de = {
     familyEmpty: "Noch keine Kinder-Profile angelegt.",
     footnote:
       "Alle Zahlen entstehen aus deinen eigenen Einträgen – diese Seite zeigt sie nur an, ändern kannst du sie im jeweiligen Modul.",
+  },
+
+  /** ÖV ab Platz: Haltestellen und Abfahrten aus transport.opendata.ch (#249). */
+  transit: {
+    sectionAria: "Öffentlicher Verkehr ab dem Platz",
+    title: "ÖV ab Platz",
+    subtitle: "Haltestellen in der Nähe und ihre nächsten Abfahrten.",
+    subtitleAtPlace: (place: string) =>
+      `Haltestellen rund um ${place} und ihre nächsten Abfahrten.`,
+    loadingStations: "Haltestellen werden gesucht …",
+    loadingBoard: "Abfahrten werden geladen …",
+    loadFailed:
+      "Der Fahrplan konnte gerade nicht geladen werden. Versuch es in einem Moment nochmals.",
+    emptyStations:
+      "Hier findet der Schweizer Fahrplan keine Haltestelle. Er deckt die Schweiz und den Grenzverkehr ab – für einen Platz weiter im Ausland weiss CampMesser an dieser Stelle nichts.",
+    emptyBoard:
+      "Für die nächste Zeit ist ab dieser Haltestelle keine Abfahrt eingetragen.",
+    kind: {
+      train: "Bahn",
+      bus: "Bus",
+      tram: "Tram",
+      ship: "Schiff",
+      cableway: "Seilbahn",
+      other: "Haltestelle",
+    },
+    stationAria: (name: string) => `Abfahrten ab ${name} anzeigen`,
+    distanceAway: (value: string) => `${value} entfernt`,
+    delay: (minutes: number) => `+${minutes} min`,
+    platform: (value: string) => `Kante ${value}`,
+    refresh: "Aktualisieren",
+    refreshStations: "Haltestellen neu suchen",
+    source:
+      "Fahrplandaten von transport.opendata.ch – abgefragt nur auf deinen Klick. Angezeigt werden nur kommende Abfahrten; Verspätungen stehen dort, wo der Fahrplan sie meldet.",
   },
 
   /** Gemeinsame Texte rund ums Teilen per Link (alle Teilen-Dialoge). */
