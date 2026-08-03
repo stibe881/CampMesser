@@ -1,0 +1,1 @@
+ALTER TABLE `pushSubscriptions` ADD `lastEvePackKey` varchar(64);

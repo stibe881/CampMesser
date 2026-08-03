@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Mitteilungen: am Abend vor der Anreise erinnert dich die App, falls die Packliste noch nicht fertig abgehakt ist.",
+        "Notifications : la veille au soir du départ, l'app te rappelle que ta liste de bagages n'est pas encore terminée.",
+        "Notifiche: la sera prima della partenza l'app ti ricorda che la lista bagagli non è ancora completata.",
+        "Notifications: the evening before you leave, the app reminds you if your packing list is not fully ticked off."
+      ),
+      l4(
         "Meine Reisen: die neue Karte «Bereitschaft» zeigt pro geplanter Reise auf einen Blick, was noch fehlt – Packen, Menüplan, Einkäufe und Angaben.",
         "Mes séjours : la nouvelle carte « Préparation » montre pour chaque séjour prévu ce qui manque encore – bagages, menus, courses et informations.",
         "I miei viaggi: la nuova scheda «Preparazione» mostra per ogni viaggio in programma cosa manca ancora – bagagli, pasti, spesa e dati.",

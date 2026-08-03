@@ -243,6 +243,8 @@ export interface PushCheckResult {
   tripSent: number;
   /** Verschickte Zelt-Trocknungs-Erinnerungen (Tag nach der Heimkehr) */
   drySent: number;
+  /** Verschickte Vorabend-Checks (Abend vor der Anreise) */
+  evePackSent: number;
   /** Verschickte Sternschnuppen-Tipps (klare Nacht am Heim-Ort) */
   astroSent: number;
   /** Verschickte Pflege-Erinnerungen (fällige Ausrüstungs-Aufgaben) */
@@ -404,6 +406,60 @@ export function buildTripAlert(
     ? `Packliste zu ${pct} % erledigt`
     : "Dein Aufenthalt beginnt bald – denk ans Packen.";
   return { title, body, key: `trip:${trip.id}` };
+}
+
+export interface EvePackAlert {
+  title: string;
+  body: string;
+  /** Dedup-Schlüssel «evepack:<tripId>» – pro Reise nur ein Vorabend-Check */
+  key: string;
+}
+
+/** Gesendet wird nur abends (Europe/Zurich), Stunde von–bis (inklusive). */
+export const EVE_PACK_SEND_HOUR_FROM = 17;
+export const EVE_PACK_SEND_HOUR_TO = 21;
+
+/**
+ * Vorabend-Check bauen: am Abend VOR der Anreise (Anreise morgen) erinnert
+ * die Meldung an die noch nicht fertige Packliste. Ohne verknüpfte Liste,
+ * ohne Einträge oder bei vollständig abgehakter Liste gibt es bewusst keinen
+ * Push – wer fertig gepackt hat, soll abends seine Ruhe haben. Bei mehreren
+ * Reisen am selben Tag gewinnt die am wenigsten gepackte (Gleichstand:
+ * kleinste Id). Reine Funktion (für Tests exportiert); `today` als ISO-Datum
+ * YYYY-MM-DD. Texte deutsch, weil der Server die Sprache nicht kennt.
+ */
+export function buildEvePackAlert(
+  trips: TripForAlert[],
+  progressByList: Map<number, PackProgressLike>,
+  today: string
+): EvePackAlert | null {
+  const candidates = trips
+    .filter(trip => daysUntilTrip(trip.startDate, today) === 1)
+    .map(trip => ({
+      trip,
+      progress:
+        trip.packListId !== null
+          ? progressByList.get(trip.packListId)
+          : undefined,
+    }))
+    .filter(
+      (x): x is { trip: TripForAlert; progress: PackProgressLike } =>
+        x.progress !== undefined &&
+        x.progress.total > 0 &&
+        x.progress.checked < x.progress.total
+    )
+    .map(x => ({
+      ...x,
+      pct: Math.round((x.progress.checked / x.progress.total) * 100),
+    }))
+    .sort((a, b) => a.pct - b.pct || a.trip.id - b.trip.id);
+  const first = candidates[0];
+  if (!first) return null;
+  return {
+    title: `⛺ Morgen geht's los: ${first.trip.name}`,
+    body: `Packliste zu ${first.pct} % erledigt – schnapp dir den Rest noch heute Abend.`,
+    key: `evepack:${first.trip.id}`,
+  };
 }
 
 export interface DryingAlert {
@@ -651,6 +707,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     foodSent: 0,
     tripSent: 0,
     drySent: 0,
+    evePackSent: 0,
     astroSent: 0,
     gearSent: 0,
     removed: 0,
@@ -759,6 +816,39 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       today
     );
     if (alert) tripAlertByUser.set(userId, alert);
+  }
+
+  /** Anzeigename einer Reise (Titel, sonst Platz-Name bzw. Freitext-Ort). */
+  const tripDisplayName = (trip: (typeof allTrips)[number]) =>
+    trip.title ||
+    (trip.spotId !== null ? spotNameById.get(trip.spotId) : null) ||
+    trip.location ||
+    "Camping-Aufenthalt";
+
+  // Vorabend-Check: Abend vor der Anreise, nur mit unfertiger Packliste –
+  // wie beim Sternschnuppen-Push nur zwischen 17 und 21 Uhr (Europe/Zurich),
+  // damit der stündliche Cron nicht mitten in der Nacht erinnert.
+  const evePackAlertByUser = new Map<number, EvePackAlert>();
+  const eveningHour = zurichHour();
+  if (
+    eveningHour >= EVE_PACK_SEND_HOUR_FROM &&
+    eveningHour <= EVE_PACK_SEND_HOUR_TO
+  ) {
+    for (const userId of userIds) {
+      const alert = buildEvePackAlert(
+        upcomingTrips
+          .filter(trip => trip.userId === userId)
+          .map(trip => ({
+            id: trip.id,
+            name: tripDisplayName(trip),
+            startDate: trip.startDate,
+            packListId: trip.packListId,
+          })),
+        progressByList,
+        today
+      );
+      if (alert) evePackAlertByUser.set(userId, alert);
+    }
   }
 
   // Zelt-Trocknung: gestern beendete Trips – Regensumme pro Trip mit Koordinaten
@@ -1036,6 +1126,30 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         await db
           .update(pushSubscriptions)
           .set({ lastTripKey: tripAlert.key, lastNotifiedAt: new Date() })
+          .where(eq(pushSubscriptions.id, sub.id));
+      } else if (outcome === "gone") {
+        continue;
+      }
+    }
+
+    // ── Vorabend-Check: Abend vor der Anreise (Flag wantsTrips) ──
+    const evePackAlert = subscriptionWants(sub, "trip")
+      ? evePackAlertByUser.get(sub.userId)
+      : undefined;
+    if (evePackAlert && evePackAlert.key !== sub.lastEvePackKey) {
+      const evePackPayload = JSON.stringify({
+        title: evePackAlert.title,
+        body: evePackAlert.body,
+        url: "/packlisten",
+        // Eigener Tag, damit der Check den Countdown nicht ersetzt
+        tag: "campmesser-eve-pack",
+      });
+      const outcome = await sendTo(sub, evePackPayload);
+      if (outcome === "sent") {
+        result.evePackSent += 1;
+        await db
+          .update(pushSubscriptions)
+          .set({ lastEvePackKey: evePackAlert.key, lastNotifiedAt: new Date() })
           .where(eq(pushSubscriptions.id, sub.id));
       } else if (outcome === "gone") {
         continue;

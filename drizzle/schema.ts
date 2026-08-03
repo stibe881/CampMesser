@@ -453,6 +453,8 @@ export const pushSubscriptions = mysqlTable(
     lastAstroKey: varchar("lastAstroKey", { length: 64 }),
     /** Schlüssel der letzten Pflege-Erinnerung («gear:YYYY-MM»): max. 1 pro Monat */
     lastGearKey: varchar("lastGearKey", { length: 64 }),
+    /** Schlüssel des letzten Vorabend-Checks («evepack:<tripId>»): max. 1 pro Reise */
+    lastEvePackKey: varchar("lastEvePackKey", { length: 64 }),
     lastNotifiedAt: timestamp("lastNotifiedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
