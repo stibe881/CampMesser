@@ -62,6 +62,23 @@ import {
   EXPENSE_MAX_RAPPEN,
   EXPENSE_PAID_BY_MAX_LENGTH,
 } from "@shared/expenses";
+import {
+  TRIP_BOARD_KINDS,
+  TRIP_BOARD_TEXT_MAX_LENGTH,
+  canRemoveTripBoardEntry,
+  normalizeTripBoardKind,
+  normalizeTripBoardText,
+  sortTripBoardEntries,
+} from "@shared/tripBoard";
+import {
+  NOTE_TAG_MAX_LENGTH,
+  NOTE_TEXT_MAX_LENGTH,
+  NOTE_TITLE_MAX_LENGTH,
+  normalizeNoteText,
+  normalizeNoteTitle,
+  serializeNoteTags,
+  sortNotes,
+} from "@shared/notes";
 import { MEALS, remapMenuDays } from "@shared/menuPlan";
 import {
   MAX_GEAR_INTERVAL_MONTHS,
@@ -3835,6 +3852,8 @@ export const appRouter = router({
         await db.deleteAllTripPhotosForTrip(input.id);
         // Reisekasse gehört zur Reise und wird mitgelöscht (#219)
         await db.deleteAllTripExpensesForTrip(input.id);
+        // Pinnwand (#245) gehört ebenfalls zur Reise
+        await db.deleteAllTripBoardNotesForTrip(input.id);
         // Aufgezeichnete Wanderungen (#220) bleiben bestehen und verlieren
         // nur ihre Reise-Zuordnung – sie gehören der Person, nicht der Reise.
         await db.detachHikeTracksFromTrip(input.id);
@@ -4064,6 +4083,139 @@ export const appRouter = router({
             });
           }
           await db.deleteTripExpense(input.id);
+          return { success: true } as const;
+        }),
+    }),
+    /**
+     * Pinnwand einer Reise (#245): Zettel gehören wie Journal und Reisekasse
+     * zur REISE – jedes Mitglied darf anpinnen und abhaken (canAccessTrip).
+     * Löschen darf nur, wer den Zettel angepinnt hat, plus die Besitzerin/der
+     * Besitzer der Reise (shared/tripBoard.ts: canRemoveTripBoardEntry).
+     */
+    board: router({
+      list: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          type BoardNote = Awaited<
+            ReturnType<typeof db.getTripBoardNotes>
+          >[number] & {
+            createdByName: string | null;
+            doneByName: string | null;
+            /** Darf das anfragende Konto diesen Zettel löschen? */
+            canRemove: boolean;
+          };
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) return [] as BoardNote[];
+          const rows = await db.getTripBoardNotes(input.tripId);
+          const names = await db.getUserDisplayNames([
+            ...rows.map(r => r.userId),
+            ...rows
+              .map(r => r.doneByUserId)
+              .filter((id): id is number => id !== null),
+          ]);
+          const mapped = rows.map<BoardNote>(row => ({
+            ...row,
+            createdByName: names.get(row.userId) ?? null,
+            doneByName:
+              row.doneByUserId !== null
+                ? (names.get(row.doneByUserId) ?? null)
+                : null,
+            canRemove: canRemoveTripBoardEntry(
+              row.userId,
+              trip.userId,
+              ctx.user.id
+            ),
+          }));
+          // Reihenfolge kommt aus shared/, damit sie testbar bleibt
+          return sortTripBoardEntries(mapped);
+        }),
+      add: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            kind: z.enum(TRIP_BOARD_KINDS),
+            text: z
+              .string()
+              .min(1)
+              .max(TRIP_BOARD_TEXT_MAX_LENGTH * 2),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          // Serverseitig mit derselben Regel kürzen wie im Eingabefeld
+          const text = normalizeTripBoardText(input.text);
+          if (!text) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Der Zettel braucht einen Text.",
+            });
+          }
+          const id = await db.addTripBoardNote({
+            tripId: input.tripId,
+            userId: ctx.user.id,
+            kind: input.kind,
+            text,
+          });
+          return { id };
+        }),
+      /** Aufgabe abhaken oder wieder öffnen – Nachrichten haben keinen Haken. */
+      setDone: protectedProcedure
+        .input(
+          z.object({
+            id: z.number().int().positive(),
+            done: z.boolean(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const note = await db.getTripBoardNoteById(input.id);
+          const trip = note
+            ? await db.canAccessTrip(note.tripId, ctx.user.id)
+            : undefined;
+          if (!note || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Zettel nicht gefunden.",
+            });
+          }
+          if (normalizeTripBoardKind(note.kind) !== "task") {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Nur Aufgaben lassen sich abhaken.",
+            });
+          }
+          await db.updateTripBoardNote(input.id, {
+            done: input.done,
+            doneByUserId: input.done ? ctx.user.id : null,
+            doneAt: input.done ? new Date() : null,
+          });
+          return { success: true } as const;
+        }),
+      remove: protectedProcedure
+        .input(z.object({ id: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const note = await db.getTripBoardNoteById(input.id);
+          const trip = note
+            ? await db.canAccessTrip(note.tripId, ctx.user.id)
+            : undefined;
+          if (!note || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Zettel nicht gefunden.",
+            });
+          }
+          if (!canRemoveTripBoardEntry(note.userId, trip.userId, ctx.user.id)) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "Diesen Zettel darf nur der Urheber entfernen.",
+            });
+          }
+          await db.deleteTripBoardNote(input.id);
           return { success: true } as const;
         }),
     }),
@@ -4832,6 +4984,99 @@ export const appRouter = router({
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(async ({ ctx, input }) => {
         await db.deleteHikeTrack(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+  }),
+
+  /**
+   * Freie Notizen (#246): schlichtes CRUD auf eigenen Notizen. Titel, Text
+   * und Stichwörter laufen durch shared/notes.ts, damit der Server exakt so
+   * säubert wie die Eingabemaske – die Stichwörter landen kommagetrennt und
+   * entdoppelt in EINER Spalte.
+   */
+  notes: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const rows = await db.getUserNotes(ctx.user.id);
+      // Reihenfolge kommt aus shared/, damit sie testbar bleibt
+      return sortNotes(rows);
+    }),
+    add: protectedProcedure
+      .input(
+        z.object({
+          title: z
+            .string()
+            .max(NOTE_TITLE_MAX_LENGTH * 2)
+            .nullish(),
+          text: z
+            .string()
+            .min(1)
+            .max(NOTE_TEXT_MAX_LENGTH * 2),
+          tags: z.array(z.string().max(NOTE_TAG_MAX_LENGTH * 2)).optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const text = normalizeNoteText(input.text);
+        if (!text) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Die Notiz braucht einen Text.",
+          });
+        }
+        const id = await db.addUserNote({
+          userId: ctx.user.id,
+          title: normalizeNoteTitle(input.title),
+          text,
+          tags: serializeNoteTags(input.tags ?? []),
+        });
+        return { id };
+      }),
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          title: z
+            .string()
+            .max(NOTE_TITLE_MAX_LENGTH * 2)
+            .nullish(),
+          text: z
+            .string()
+            .min(1)
+            .max(NOTE_TEXT_MAX_LENGTH * 2)
+            .optional(),
+          tags: z.array(z.string().max(NOTE_TAG_MAX_LENGTH * 2)).optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const note = await db.getUserNote(input.id, ctx.user.id);
+        if (!note) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Notiz nicht gefunden.",
+          });
+        }
+        const text =
+          input.text !== undefined ? normalizeNoteText(input.text) : undefined;
+        if (text !== undefined && !text) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Die Notiz braucht einen Text.",
+          });
+        }
+        await db.updateUserNote(input.id, ctx.user.id, {
+          ...(input.title !== undefined
+            ? { title: normalizeNoteTitle(input.title) }
+            : {}),
+          ...(text !== undefined ? { text } : {}),
+          ...(input.tags !== undefined
+            ? { tags: serializeNoteTags(input.tags) }
+            : {}),
+        });
+        return { success: true } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteUserNote(input.id, ctx.user.id);
         return { success: true } as const;
       }),
   }),

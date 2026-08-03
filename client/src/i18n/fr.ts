@@ -2507,6 +2507,32 @@ export const fr: Translation = {
     journalSaveFailed: "Impossible d'enregistrer l'entrée du journal",
     journalBy: (name: string) => `par ${name}`,
   },
+  tripBoard: {
+    title: "Panneau d'affichage",
+    toggleAria: (name: string) =>
+      `Ouvrir ou fermer le panneau d'affichage de ${name}`,
+    hint: "Petits messages et tâches pour tous les compagnons de voyage – le panneau se met à jour tout seul.",
+    kindAria: "Choisir le type de note",
+    textAria: "Texte de la note",
+    messagePlaceholder: "p. ex. rendez-vous à 18 h à la place de jeux",
+    taskPlaceholder: "p. ex. aller chercher du pain",
+    addButton: "Épingler",
+    added: "Épinglé au panneau",
+    addFailed: "La note n'a pas pu être épinglée",
+    textRequired: "Écris d'abord quelque chose.",
+    empty: "Rien d'épinglé pour l'instant – lance le premier message.",
+    openTasks: (n: number) =>
+      n === 1 ? "1 tâche ouverte" : `${n} tâches ouvertes`,
+    byLine: (name: string, ago: string) => `de ${name} · ${ago}`,
+    doneLine: (name: string, ago: string) => `fait par ${name} · ${ago}`,
+    doneAria: (text: string) => `Cocher la tâche « ${text} »`,
+    doneFailed: "La tâche n'a pas pu être cochée",
+    unknownPerson: "quelqu'un",
+    removeAria: (text: string) => `Retirer la note « ${text} »`,
+    removeConfirm: "Retirer vraiment cette note ?",
+    removed: "Note retirée",
+    removeFailed: "La note n'a pas pu être retirée",
+  },
   tripExpenses: {
     title: "Caisse du voyage",
     toggleAria: (name: string) =>
@@ -4284,6 +4310,45 @@ export const fr: Translation = {
     toTrip: "Vers le voyage",
   },
 
+  notes: {
+    title: "Notes",
+    subtitle:
+      "Notes libres avec mots-clés – pour tout ce qui n'a sa place dans aucun autre module.",
+    loginFeature: "tes notes",
+    addButton: "Nouvelle note",
+    searchPlaceholder: "Rechercher dans les notes …",
+    searchAria: "Rechercher dans les titres, les textes et les mots-clés",
+    tagFilterAria: "Filtrer par mots-clés",
+    tagFilterClear: "Enlever le filtre",
+    emptyTitle: "Aucune note pour l'instant",
+    emptyBody:
+      "Note ce qui ne trouve place nulle part ailleurs – le numéro du gardien, l'astuce de l'arrache-piquet, une idée pour l'été prochain.",
+    noMatches: "Aucune note ne correspond à ta recherche.",
+    untitled: "Sans titre",
+    updatedAt: (date: string) => `modifiée le ${date}`,
+    newTitle: "Nouvelle note",
+    editTitle: "Modifier la note",
+    dialogDesc:
+      "Le titre est facultatif. Les mots-clés t'aident à retrouver tes notes – ils apparaissent comme filtres au-dessus de la liste.",
+    titleLabel: "Titre (facultatif)",
+    titlePlaceholder: "p. ex. idées pour le Tessin",
+    textLabel: "Note",
+    textPlaceholder: "Écris simplement …",
+    tagsLabel: "Mots-clés",
+    tagsPlaceholder: "p. ex. Tessin, été, tente",
+    tagsHint: (max: number) =>
+      `Sépare-les par des virgules, ${max} mots-clés au maximum. Les majuscules n'ont pas d'importance.`,
+    textRequired: "Écris d'abord quelque chose.",
+    save: "Enregistrer",
+    saved: "Note enregistrée",
+    updated: "Note mise à jour",
+    saveFailed: "La note n'a pas pu être enregistrée",
+    deleted: "Note supprimée",
+    deleteFailed: "La note n'a pas pu être supprimée",
+    deleteConfirm: "Supprimer vraiment cette note ?",
+    editAria: (title: string) => `Modifier la note ${title}`,
+    deleteAria: (title: string) => `Supprimer la note ${title}`,
+  },
   stats: {
     title: "Statistiques",
     subtitle:

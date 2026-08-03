@@ -20,6 +20,7 @@ import {
   LocateFixed,
   Map as MapIcon,
   Moon,
+  NotebookPen,
   Package,
   Refrigerator,
   Scale,
@@ -137,6 +138,18 @@ export const modules: Module[] = [
     icon: Signpost,
     group: "reise",
     offline: true,
+  },
+  {
+    path: "/notizen",
+    title: l4("Notizen", "Notes", "Note", "Notes"),
+    description: l4(
+      "Freie Notizen mit Stichwörtern – für alles, was sonst nirgends passt",
+      "Notes libres avec mots-clés – pour tout ce qui n'a pas sa place ailleurs",
+      "Note libere con parole chiave – per tutto ciò che non trova posto altrove",
+      "Free-form notes with keywords – for everything that fits nowhere else"
+    ),
+    icon: NotebookPen,
+    group: "reise",
   },
   {
     path: "/karte",

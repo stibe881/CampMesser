@@ -526,6 +526,20 @@
       "when": 1785789707647,
       "tag": "0074_skinny_the_spike",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "5",
+      "when": 1785794791513,
+      "tag": "0075_yellow_stephen_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "5",
+      "when": 1785795204812,
+      "tag": "0076_wandering_kingpin",
+      "breakpoints": true
     }
   ]
 }

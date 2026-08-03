@@ -54,6 +54,8 @@ import {
   InsertSpotPhoto,
   tickBites,
   InsertTickBite,
+  tripBoardNotes,
+  InsertTripBoardNote,
   tripExpenses,
   InsertTripExpense,
   tripInvites,
@@ -63,6 +65,8 @@ import {
   tripPhotos,
   tripShoppingItems,
   users,
+  userNotes,
+  InsertUserNote,
   userSettings,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -2125,6 +2129,61 @@ export async function deleteAllTripExpensesForTrip(tripId: number) {
   await db.delete(tripExpenses).where(eq(tripExpenses.tripId, tripId));
 }
 
+// ── Pinnwand der Reise (#245) ──
+
+/**
+ * Zettel einer Reise, neuste zuoberst – nur NACH einer canAccessTrip-Prüfung
+ * im Router verwenden. Die endgültige Reihenfolge (erledigte Aufgaben ans
+ * Ende) macht shared/tripBoard.ts, damit sie testbar bleibt.
+ */
+export async function getTripBoardNotes(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripBoardNotes)
+    .where(eq(tripBoardNotes.tripId, tripId))
+    .orderBy(desc(tripBoardNotes.createdAt), desc(tripBoardNotes.id));
+}
+
+/** Einzelnen Zettel laden (für die Zugriffsprüfung über seine tripId). */
+export async function getTripBoardNoteById(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripBoardNotes)
+    .where(eq(tripBoardNotes.id, id))
+    .limit(1);
+  return rows[0];
+}
+
+/** Zettel anpinnen – nur NACH einer canAccessTrip-Prüfung im Router. */
+export async function addTripBoardNote(data: InsertTripBoardNote) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(tripBoardNotes).values(data);
+  return result.insertId;
+}
+
+/** Zettel ändern (Text oder Abhak-Zustand) – nur nach canAccessTrip. */
+export async function updateTripBoardNote(
+  id: number,
+  data: Partial<InsertTripBoardNote>
+) {
+  const db = requireDb(await getDb());
+  await db.update(tripBoardNotes).set(data).where(eq(tripBoardNotes.id, id));
+}
+
+/** Zettel löschen – nur NACH der Rechteprüfung im Router. */
+export async function deleteTripBoardNote(id: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripBoardNotes).where(eq(tripBoardNotes.id, id));
+}
+
+/** Ganze Pinnwand einer Reise entfernen (beim Löschen der Reise). */
+export async function deleteAllTripBoardNotesForTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripBoardNotes).where(eq(tripBoardNotes.tripId, tripId));
+}
+
 // ── Aufgezeichnete Wanderungen (#220) ──
 
 /**
@@ -2706,4 +2765,57 @@ export async function upsertUserSetting(
     .insert(userSettings)
     .values({ userId, key, value })
     .onDuplicateKeyUpdate({ set: { value } });
+}
+
+// ── Freie Notizen (#246) ──
+
+/**
+ * Notizen eines Kontos, zuletzt geänderte zuoberst. Die endgültige
+ * Reihenfolge macht shared/notes.ts (sortNotes), damit sie testbar bleibt –
+ * die Sortierung hier spart nur den Umweg über die volle Liste.
+ */
+export async function getUserNotes(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(userNotes)
+    .where(eq(userNotes.userId, userId))
+    .orderBy(desc(userNotes.updatedAt), desc(userNotes.id));
+}
+
+/** Einzelne Notiz eines Kontos (undefined = fremd oder nicht vorhanden). */
+export async function getUserNote(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(userNotes)
+    .where(and(eq(userNotes.id, id), eq(userNotes.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+export async function addUserNote(data: InsertUserNote) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(userNotes).values(data);
+  return result.insertId;
+}
+
+/** Notiz ändern – die userId-Bedingung hält fremde Notizen unantastbar. */
+export async function updateUserNote(
+  id: number,
+  userId: number,
+  data: Partial<InsertUserNote>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(userNotes)
+    .set(data)
+    .where(and(eq(userNotes.id, id), eq(userNotes.userId, userId)));
+}
+
+export async function deleteUserNote(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(userNotes)
+    .where(and(eq(userNotes.id, id), eq(userNotes.userId, userId)));
 }

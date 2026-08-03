@@ -190,6 +190,36 @@ describe("searchOwnContent", () => {
     expect(searchOwnContent("tessin", { packLists: [] })).toEqual([]);
   });
 
+  // Freie Notizen (#246) – eigene Fixture, damit die Treffer der übrigen
+  // Tests unverändert bleiben.
+  const withNotes: OwnContent = {
+    notes: [
+      {
+        id: 5,
+        title: "Platzwart Aareufer",
+        text: "Telefon 079 123 45 67, ab 8 Uhr erreichbar",
+        tags: "Kontakt,Aare",
+      },
+      { id: 6, title: null, text: "Heringszieher nachkaufen", tags: null },
+    ],
+  };
+
+  it("findet Notizen über Titel, Text und Stichwörter", () => {
+    expect(searchOwnContent("platzwart", withNotes)[0]?.path).toBe("/notizen");
+    expect(searchOwnContent("erreichbar", withNotes)[0]?.id).toBe("own-note-5");
+    expect(searchOwnContent("kontakt", withNotes)[0]?.id).toBe("own-note-5");
+  });
+
+  it("nimmt bei einer Notiz ohne Titel die erste Textzeile", () => {
+    expect(searchOwnContent("heringszieher", withNotes)[0]?.title).toBe(
+      "Heringszieher nachkaufen"
+    );
+  });
+
+  it("kommt mit Notizen ohne Stichwörter zurecht", () => {
+    expect(searchOwnContent("nachkaufen", withNotes)).toHaveLength(1);
+  });
+
   it("respektiert das Limit", () => {
     const many: OwnContent = {
       packLists: Array.from({ length: 10 }, (_, i) => ({

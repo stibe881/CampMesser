@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
-import type { ShareExpiryDays } from "@shared/sharing";
+import { relativeAge, type ShareExpiryDays } from "@shared/sharing";
 import {
   ArrowRight,
   Award,
@@ -22,8 +22,10 @@ import {
   Loader2,
   LogOut,
   MapPin,
+  MessageSquare,
   Moon,
   Pencil,
+  Pin,
   Plus,
   Printer,
   Share2,
@@ -46,6 +48,7 @@ import LoginPrompt from "@/components/LoginPrompt";
 import PhotoGallery from "@/components/PhotoGallery";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
@@ -99,6 +102,15 @@ import {
   TRIP_JOURNAL_MAX_LENGTH,
   tripNights,
 } from "@shared/trips";
+import {
+  TRIP_BOARD_KINDS,
+  TRIP_BOARD_KIND_LABELS,
+  TRIP_BOARD_TEXT_MAX_LENGTH,
+  isValidTripBoardText,
+  normalizeTripBoardKind,
+  tripBoardCounts,
+  type TripBoardKind,
+} from "@shared/tripBoard";
 import { buildTripIcs, icsFileName, type IcsTrip } from "@shared/ics";
 import { tripDays } from "@shared/menuPlan";
 import {
@@ -1044,6 +1056,225 @@ function TripJournal({
                           </Button>
                         </div>
                       </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Pinnwand einer gemeinsamen Reise (#245): kurze Zurufe an die Mitreisenden
+ * und einfache Aufgaben zum Abhaken. Aufklappbar wie Tagebuch und Reisekasse –
+ * die Zettel werden erst beim Öffnen geladen und danach im Muster der
+ * geteilten Listen alle 15 Sekunden aufgefrischt (kein WebSocket).
+ * Sortierung und Zählung stecken in shared/tripBoard.ts.
+ */
+function TripBoard({ tripId, tripName }: { tripId: number; tripName: string }) {
+  const { lang, t } = useI18n();
+  const utils = trpc.useUtils();
+  const [open, setOpen] = useState(false);
+  const [kind, setKind] = useState<TripBoardKind>("message");
+  const [draft, setDraft] = useState("");
+  const query = trpc.trips.board.list.useQuery(
+    { tripId },
+    // Refetch-Intervall wie bei den geteilten Listen (SharedPackList/SharedTrip)
+    { enabled: open, refetchInterval: open ? 15000 : false }
+  );
+  const addMutation = trpc.trips.board.add.useMutation({
+    onSuccess: () => {
+      utils.trips.board.list.invalidate({ tripId });
+      setDraft("");
+      toast.success(t.tripBoard.added);
+    },
+    onError: e => toast.error(e.message || t.tripBoard.addFailed),
+  });
+  const doneMutation = trpc.trips.board.setDone.useMutation({
+    onSuccess: () => utils.trips.board.list.invalidate({ tripId }),
+    onError: e => toast.error(e.message || t.tripBoard.doneFailed),
+  });
+  const removeMutation = trpc.trips.board.remove.useMutation({
+    onSuccess: () => {
+      utils.trips.board.list.invalidate({ tripId });
+      toast.success(t.tripBoard.removed);
+    },
+    onError: e => toast.error(e.message || t.tripBoard.removeFailed),
+  });
+
+  const notes = query.data ?? [];
+  const counts = useMemo(() => tripBoardCounts(notes), [notes]);
+
+  /** «vor 5 Minuten» in der aktiven Sprache (Muster SharedLocation/Sos). */
+  const ago = (timestamp: Date | string) => {
+    const { value, unit } = relativeAge(timestamp);
+    return new Intl.RelativeTimeFormat(LOCALE_TAGS[lang], {
+      numeric: "auto",
+    }).format(value, unit);
+  };
+
+  const submit = () => {
+    if (!isValidTripBoardText(draft)) {
+      toast.error(t.tripBoard.textRequired);
+      return;
+    }
+    addMutation.mutate({ tripId, kind, text: draft });
+  };
+
+  return (
+    <div className="mt-2 rounded-lg border border-border bg-card">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        aria-label={t.tripBoard.toggleAria(tripName)}
+        className="flex w-full items-center gap-2 px-3 py-2 text-sm"
+      >
+        <Pin className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+        <span className="min-w-0 flex-1 truncate text-left font-medium">
+          {t.tripBoard.title}
+        </span>
+        {open && !query.isLoading && counts.openTasks > 0 && (
+          <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
+            {t.tripBoard.openTasks(counts.openTasks)}
+          </span>
+        )}
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+            open && "rotate-180"
+          )}
+          aria-hidden="true"
+        />
+      </button>
+      {open && (
+        <div className="border-t border-border px-3 py-2.5">
+          <p className="mb-2 text-xs text-muted-foreground">
+            {t.tripBoard.hint}
+          </p>
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start">
+            <Select
+              value={kind}
+              onValueChange={v => setKind(v as TripBoardKind)}
+            >
+              <SelectTrigger
+                className="sm:w-40"
+                aria-label={t.tripBoard.kindAria}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TRIP_BOARD_KINDS.map(k => (
+                  <SelectItem key={k} value={k}>
+                    {pick(TRIP_BOARD_KIND_LABELS[k], lang)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Textarea
+              value={draft}
+              rows={2}
+              maxLength={TRIP_BOARD_TEXT_MAX_LENGTH}
+              placeholder={
+                kind === "task"
+                  ? t.tripBoard.taskPlaceholder
+                  : t.tripBoard.messagePlaceholder
+              }
+              onChange={e => setDraft(e.target.value)}
+              aria-label={t.tripBoard.textAria}
+              className="flex-1"
+            />
+            <Button
+              size="sm"
+              className="shrink-0"
+              disabled={addMutation.isPending}
+              onClick={submit}
+            >
+              <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.tripBoard.addButton}
+            </Button>
+          </div>
+          {query.isLoading ? (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              {t.common.loading}
+            </p>
+          ) : notes.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t.tripBoard.empty}</p>
+          ) : (
+            <ul className="space-y-2">
+              {notes.map(note => {
+                const isTask = normalizeTripBoardKind(note.kind) === "task";
+                const done = isTask && note.done;
+                return (
+                  <li
+                    key={note.id}
+                    className={cn(
+                      "flex items-start gap-2 rounded-lg bg-muted/40 px-3 py-2",
+                      done && "opacity-60"
+                    )}
+                  >
+                    {isTask ? (
+                      <Checkbox
+                        checked={note.done}
+                        disabled={doneMutation.isPending}
+                        onCheckedChange={checked =>
+                          doneMutation.mutate({
+                            id: note.id,
+                            done: checked === true,
+                          })
+                        }
+                        aria-label={t.tripBoard.doneAria(note.text)}
+                        className="mt-0.5 shrink-0"
+                      />
+                    ) : (
+                      <MessageSquare
+                        className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={cn(
+                          "whitespace-pre-line break-words text-sm",
+                          done && "line-through"
+                        )}
+                      >
+                        {note.text}
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {t.tripBoard.byLine(
+                          note.createdByName ?? t.tripBoard.unknownPerson,
+                          ago(note.createdAt)
+                        )}
+                      </p>
+                      {done && note.doneAt && (
+                        <p className="text-xs text-muted-foreground">
+                          {t.tripBoard.doneLine(
+                            note.doneByName ?? t.tripBoard.unknownPerson,
+                            ago(note.doneAt)
+                          )}
+                        </p>
+                      )}
+                    </div>
+                    {note.canRemove && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0 text-muted-foreground/60 hover:text-destructive"
+                        disabled={removeMutation.isPending}
+                        onClick={() => {
+                          if (!confirm(t.tripBoard.removeConfirm)) return;
+                          removeMutation.mutate({ id: note.id });
+                        }}
+                        aria-label={t.tripBoard.removeAria(note.text)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
                     )}
                   </li>
                 );
@@ -3888,6 +4119,14 @@ export default function TripsPage() {
                         defaultDay={today > trip.endDate ? trip.endDate : today}
                         shared={trip.shared || trip.role === "member"}
                       />
+                      {/* Pinnwand (#245): nur bei gemeinsamen Reisen – allein
+                          hätte man niemanden, dem man etwas anpinnen könnte */}
+                      {(trip.shared || trip.role === "member") && (
+                        <TripBoard
+                          tripId={trip.id}
+                          tripName={trip.title || placeName(trip)}
+                        />
+                      )}
                       <TripPhotos
                         tripId={trip.id}
                         tripName={trip.title || placeName(trip)}
@@ -4151,6 +4390,13 @@ export default function TripsPage() {
                           }
                           shared={trip.shared || trip.role === "member"}
                         />
+                        {/* Pinnwand (#245): nur bei gemeinsamen Reisen */}
+                        {(trip.shared || trip.role === "member") && (
+                          <TripBoard
+                            tripId={trip.id}
+                            tripName={trip.title || placeName(trip)}
+                          />
+                        )}
                         <TripPhotos
                           tripId={trip.id}
                           tripName={trip.title || placeName(trip)}
