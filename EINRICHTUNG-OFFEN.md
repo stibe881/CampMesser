@@ -71,17 +71,6 @@ Danach Passenger neu starten (`touch ~/campmesser/tmp/restart.txt`).
 Ohne diese Werte meldet «Passwort vergessen?» sauber, dass der Versand
 derzeit nicht verfügbar ist – die App läuft trotzdem.
 
-## 5. Web-Push (Unwetter, MHD, Trip-Countdown)
-
-Falls noch nicht geschehen (Details in `DEPLOYMENT-HETZNER.md`):
-
-1. VAPID-Schlüssel erzeugen: `pnpm exec web-push generate-vapid-keys`
-2. In der `.env`: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`,
-   `VAPID_SUBJECT=mailto:stefan.gross@stibe.me`, `CRON_SECRET=<zufällig>`
-3. konsoleH-Cronjob (stündlich oder alle 30 min):
-   ```
-   curl -fsS "https://campmesser.ch/api/push/check?secret=<CRON_SECRET>" >/dev/null
-   ```
 
 ## 6. Ausflugfinder-Anbindung (Ausflüge auf Karte und im Platz-Dossier)
 
