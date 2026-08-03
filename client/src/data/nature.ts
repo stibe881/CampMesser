@@ -330,6 +330,138 @@ export const natureEntries: NatureEntry[] = [
       ),
     ],
   },
+  {
+    id: "feldhase",
+    name: l4("Feldhase", "Lièvre d'Europe", "Lepre europea", "Brown hare"),
+    latinOrExtra: "Lepus europaeus",
+    category: "tierspuren",
+    description: l4(
+      "Hasenspuren erkennst du an der Vierergruppe: Die langen Hinterpfoten landen VOR den kleinen Vorderpfoten, weil der Hase sie beim Sprung nach vorne schwingt. Die Spur zeigt vier Zehen ohne deutliche Krallen.",
+      "Tu reconnais les traces de lièvre à leur groupe de quatre : les longues pattes arrière se posent DEVANT les petites pattes avant, car le lièvre les projette vers l'avant en bondissant. L'empreinte montre quatre doigts sans griffes marquées.",
+      "Riconosci le orme della lepre dal gruppo di quattro: le lunghe zampe posteriori atterrano DAVANTI a quelle anteriori, perché la lepre le porta in avanti nel salto. L'impronta mostra quattro dita senza unghie marcate.",
+      "You can spot hare tracks by their group of four: the long hind feet land IN FRONT of the small front feet, because the hare swings them forward as it leaps. The print shows four toes without clear claw marks."
+    ),
+    funFact: l4(
+      "Junge Feldhasen kommen mit Fell und offenen Augen zur Welt – Kaninchenbabys dagegen nackt und blind.",
+      "Les levrauts naissent avec leur pelage et les yeux ouverts – les bébés lapins, eux, arrivent nus et aveugles.",
+      "I piccoli di lepre nascono con il pelo e gli occhi aperti – i coniglietti invece nudi e ciechi.",
+      "Young hares are born with fur and open eyes – rabbit kits, by contrast, arrive naked and blind."
+    ),
+    kidQuestion: l4(
+      "Findest du eine Spur, bei der die grossen Abdrücke vorne und die kleinen hinten liegen?",
+      "Tu trouves une trace où les grandes empreintes sont devant et les petites derrière ?",
+      "Riesci a trovare un'orma con le impronte grandi davanti e quelle piccole dietro?",
+      "Can you find a track where the big prints are in front and the small ones behind?"
+    ),
+    features: [
+      l4(
+        "Vierergruppe pro Sprung",
+        "Groupe de quatre à chaque bond",
+        "Gruppo di quattro a ogni balzo",
+        "Group of four per leap"
+      ),
+      l4(
+        "Lange, schmale Hinterpfoten",
+        "Pattes arrière longues et étroites",
+        "Zampe posteriori lunghe e strette",
+        "Long, narrow hind feet"
+      ),
+      l4(
+        "Offene Wiesen und Feldränder",
+        "Prairies ouvertes et bordures de champs",
+        "Prati aperti e bordi dei campi",
+        "Open meadows and field edges"
+      ),
+    ],
+  },
+  {
+    id: "biber",
+    name: l4("Biber", "Castor d'Europe", "Castoro europeo", "Eurasian beaver"),
+    latinOrExtra: "Castor fiber",
+    category: "tierspuren",
+    description: l4(
+      "Am Ufer verrät sich der Biber weniger durch Pfotenabdrücke als durch seine Arbeit: angenagte Bäume mit sanduhrförmigem Stumpf, Nagespäne im Gras und glatte Rutschbahnen ins Wasser. Die Hinterpfote ist bis 15 cm lang und hat Schwimmhäute.",
+      "Au bord de l'eau, le castor se trahit moins par ses empreintes que par son travail : arbres rongés en forme de sablier, copeaux dans l'herbe et glissoires lisses vers l'eau. La patte arrière mesure jusqu'à 15 cm et porte des palmures.",
+      "In riva all'acqua il castoro si tradisce meno con le impronte che con il suo lavoro: alberi rosicchiati a forma di clessidra, trucioli nell'erba e scivoli lisci verso l'acqua. La zampa posteriore misura fino a 15 cm ed è palmata.",
+      "On the bank, the beaver gives itself away less by its prints than by its work: gnawed trees with an hourglass-shaped stump, wood chips in the grass and smooth slides into the water. The hind foot is up to 15 cm long and webbed."
+    ),
+    funFact: l4(
+      "Biberzähne sind orange – der harte Zahnschmelz enthält Eisen und wird beim Nagen von selbst wieder scharf.",
+      "Les dents du castor sont oranges – l'émail dur contient du fer et s'aiguise tout seul en rongeant.",
+      "I denti del castoro sono arancioni – lo smalto duro contiene ferro e si riaffila da solo rosicchiando.",
+      "Beaver teeth are orange – the hard enamel contains iron and resharpens itself as the animal gnaws."
+    ),
+    kidQuestion: l4(
+      "Siehst du am Ufer einen Baumstumpf, der aussieht wie ein angespitzter Bleistift?",
+      "Tu vois au bord de l'eau une souche qui ressemble à un crayon taillé ?",
+      "Vedi in riva un ceppo che sembra una matita temperata?",
+      "Can you see a tree stump on the bank that looks like a sharpened pencil?"
+    ),
+    features: [
+      l4(
+        "Sanduhrförmig angenagte Stämme",
+        "Troncs rongés en forme de sablier",
+        "Tronchi rosicchiati a clessidra",
+        "Trunks gnawed into an hourglass shape"
+      ),
+      l4(
+        "Rutschbahnen und Trampelpfade am Ufer",
+        "Glissoires et sentes sur la rive",
+        "Scivoli e sentieri battuti sulla riva",
+        "Slides and beaten paths on the bank"
+      ),
+      l4(
+        "Grosse Hinterpfote mit Schwimmhäuten",
+        "Grande patte arrière palmée",
+        "Grande zampa posteriore palmata",
+        "Large webbed hind foot"
+      ),
+    ],
+  },
+  {
+    id: "steinmarder",
+    name: l4("Steinmarder", "Fouine", "Faina", "Beech marten"),
+    latinOrExtra: "Martes foina",
+    category: "tierspuren",
+    description: l4(
+      "Der Steinmarder hinterlässt kleine Spuren mit fünf Zehen und feinen Krallenpunkten. Weil er hüpft, liegen die Abdrücke meist paarweise schräg nebeneinander. Er lebt gern in der Nähe von Menschen – auch auf dem Campingplatz.",
+      "La fouine laisse de petites empreintes à cinq doigts avec de fines marques de griffes. Comme elle se déplace par bonds, les traces sont souvent par paires, légèrement décalées. Elle aime vivre près des humains – même au camping.",
+      "La faina lascia piccole impronte con cinque dita e sottili segni delle unghie. Poiché si muove a balzi, le orme stanno spesso in coppia, leggermente sfalsate. Vive volentieri vicino all'uomo – anche in campeggio.",
+      "The beech marten leaves small five-toed prints with fine claw marks. Because it bounds along, the prints usually sit in slanted pairs. It likes living close to people – campsites included."
+    ),
+    funFact: l4(
+      "Marder knabbern gern an Kabeln unter der Motorhaube – parkierte Autos sind für sie eine warme Höhle.",
+      "Les fouines aiment grignoter les câbles sous le capot – une voiture garée est pour elles une tanière bien chaude.",
+      "Alle faine piace rosicchiare i cavi sotto il cofano – un'auto parcheggiata per loro è una tana calda.",
+      "Martens like nibbling cables under the bonnet – a parked car is a nice warm den to them."
+    ),
+    kidQuestion: l4(
+      "Zähl die Zehen im Abdruck: Fünf? Dann war es kein Hund, sondern ein Marder!",
+      "Compte les doigts dans l'empreinte : cinq ? Alors ce n'était pas un chien, mais une fouine !",
+      "Conta le dita nell'impronta: cinque? Allora non era un cane, ma una faina!",
+      "Count the toes in the print: five? Then it wasn't a dog but a marten!"
+    ),
+    features: [
+      l4(
+        "Fünf Zehen mit feinen Krallen",
+        "Cinq doigts avec de fines griffes",
+        "Cinque dita con unghie sottili",
+        "Five toes with fine claws"
+      ),
+      l4(
+        "Paarweise, schräge Sprungspur",
+        "Traces de bonds par paires, en biais",
+        "Orme di salto a coppie, oblique",
+        "Slanted pairs of bounding tracks"
+      ),
+      l4(
+        "Oft bei Scheunen, Autos und Zeltplätzen",
+        "Souvent près des granges, voitures et campings",
+        "Spesso vicino a fienili, auto e campeggi",
+        "Often near barns, cars and campsites"
+      ),
+    ],
+  },
   // ── Sternbilder ──
   {
     id: "grosser-wagen",
@@ -592,6 +724,108 @@ export const natureEntries: NatureEntry[] = [
         "Visible de juin à octobre",
         "Visibile da giugno a ottobre",
         "Visible from June to October"
+      ),
+    ],
+  },
+  {
+    id: "perseus",
+    name: l4("Perseus", "Persée", "Perseo", "Perseus"),
+    latinOrExtra: l4(
+      "Der Held der Sternschnuppen",
+      "Le héros des étoiles filantes",
+      "L'eroe delle stelle cadenti",
+      "The hero of the shooting stars"
+    ),
+    category: "sternbilder",
+    // Herbst- und Wintersternbild; ab den Perseiden im August gut zu sehen
+    season: { from: 8, to: 2 },
+    description: l4(
+      "Perseus steht zwischen Kassiopeia und den Plejaden und sieht aus wie ein leicht geknickter Sternenbogen. Sein bekanntester Stern heisst Algol und ändert alle knapp drei Tage seine Helligkeit.",
+      "Persée se trouve entre Cassiopée et les Pléiades et ressemble à un arc d'étoiles légèrement plié. Son étoile la plus connue s'appelle Algol et change de luminosité tous les trois jours environ.",
+      "Perseo si trova tra Cassiopea e le Pleiadi e sembra un arco di stelle leggermente piegato. La sua stella più nota si chiama Algol e cambia luminosità ogni tre giorni circa.",
+      "Perseus sits between Cassiopeia and the Pleiades and looks like a slightly bent arc of stars. Its best-known star is called Algol and changes brightness roughly every three days."
+    ),
+    funFact: l4(
+      "Im August scheinen die Perseiden-Sternschnuppen aus diesem Sternbild zu regnen – in guten Nächten über 50 pro Stunde.",
+      "En août, les étoiles filantes des Perséides semblent pleuvoir de cette constellation – plus de 50 par heure lors des bonnes nuits.",
+      "In agosto le stelle cadenti delle Perseidi sembrano piovere da questa costellazione – più di 50 all'ora nelle notti migliori.",
+      "In August the Perseid shooting stars seem to rain out of this constellation – over 50 an hour on good nights."
+    ),
+    kidQuestion: l4(
+      "Schau im August in Richtung Kassiopeia: Wie viele Sternschnuppen zählst du in zehn Minuten?",
+      "En août, regarde vers Cassiopée : combien d'étoiles filantes comptes-tu en dix minutes ?",
+      "Ad agosto guarda verso Cassiopea: quante stelle cadenti conti in dieci minuti?",
+      "In August look towards Cassiopeia: how many shooting stars can you count in ten minutes?"
+    ),
+    features: [
+      l4(
+        "Geknickter Sternenbogen",
+        "Arc d'étoiles plié",
+        "Arco di stelle piegato",
+        "Bent arc of stars"
+      ),
+      l4(
+        "Direkt neben Kassiopeia",
+        "Juste à côté de Cassiopée",
+        "Proprio accanto a Cassiopea",
+        "Right next to Cassiopeia"
+      ),
+      l4(
+        "Ausgangspunkt der Perseiden im August",
+        "Point de départ des Perséides en août",
+        "Punto di origine delle Perseidi in agosto",
+        "Radiant of the Perseids in August"
+      ),
+    ],
+  },
+  {
+    id: "plejaden",
+    name: l4("Plejaden", "Pléiades", "Pleiadi", "Pleiades"),
+    latinOrExtra: l4(
+      "Das Siebengestirn",
+      "Les Sept Sœurs",
+      "Le Sette Sorelle",
+      "The Seven Sisters"
+    ),
+    category: "sternbilder",
+    // Von Herbst bis Frühling am Abendhimmel
+    season: { from: 10, to: 4 },
+    description: l4(
+      "Ein kleiner, neblig wirkender Sternhaufen, den viele zuerst für den Kleinen Wagen halten. Mit blossem Auge zählst du sechs bis sieben Sterne, mit dem Feldstecher plötzlich Dutzende.",
+      "Un petit amas d'étoiles d'aspect brumeux, que beaucoup prennent d'abord pour la Petite Ourse. À l'œil nu, tu comptes six à sept étoiles, aux jumelles soudain des dizaines.",
+      "Un piccolo ammasso di stelle dall'aspetto nebbioso, che molti scambiano per il Piccolo Carro. A occhio nudo conti sei o sette stelle, con il binocolo all'improvviso decine.",
+      "A small, hazy-looking star cluster that many people first mistake for the Little Dipper. With the naked eye you count six or seven stars, with binoculars suddenly dozens."
+    ),
+    funFact: l4(
+      "Die Plejaden sind rund 1000 junge Sterne, die zusammen entstanden sind – ein echtes Sternen-Geschwisterpaket.",
+      "Les Pléiades comptent environ 1000 jeunes étoiles nées ensemble – une véritable fratrie stellaire.",
+      "Le Pleiadi sono circa 1000 stelle giovani nate insieme – una vera famiglia di stelle.",
+      "The Pleiades are about 1000 young stars born together – a genuine family of stars."
+    ),
+    kidQuestion: l4(
+      "Wie viele Sterne siehst du ohne Hilfsmittel? Schau einmal knapp daneben – dann wirken sie heller!",
+      "Combien d'étoiles vois-tu sans aide ? Regarde un peu à côté – elles paraissent alors plus brillantes !",
+      "Quante stelle vedi a occhio nudo? Guarda un po' di lato – così sembrano più luminose!",
+      "How many stars can you see unaided? Look slightly to one side – they appear brighter that way!"
+    ),
+    features: [
+      l4(
+        "Kleiner, dicht gedrängter Sternhaufen",
+        "Petit amas d'étoiles serrées",
+        "Piccolo ammasso di stelle fitte",
+        "Small, tightly packed star cluster"
+      ),
+      l4(
+        "Sechs bis sieben Sterne ohne Feldstecher",
+        "Six à sept étoiles sans jumelles",
+        "Sei o sette stelle senza binocolo",
+        "Six or seven stars without binoculars"
+      ),
+      l4(
+        "Oberhalb des Stiers, nahe Orion",
+        "Au-dessus du Taureau, près d'Orion",
+        "Sopra il Toro, vicino a Orione",
+        "Above Taurus, near Orion"
       ),
     ],
   },
@@ -876,6 +1110,150 @@ export const natureEntries: NatureEntry[] = [
         "Petits cônes ronds",
         "Piccole pigne rotonde",
         "Small, round cones"
+      ),
+    ],
+  },
+  {
+    id: "bergahorn",
+    name: l4(
+      "Bergahorn",
+      "Érable sycomore",
+      "Acero di monte",
+      "Sycamore maple"
+    ),
+    latinOrExtra: "Acer pseudoplatanus",
+    category: "baeume",
+    season: { from: 4, to: 10 },
+    description: l4(
+      "Grosse, fünflappige Blätter mit grob gezähntem Rand sitzen sich am Zweig immer paarweise gegenüber. Die Früchte sind zwei zusammengewachsene Flügel, die im Herbst wie Propeller zu Boden trudeln.",
+      "De grandes feuilles à cinq lobes au bord grossièrement denté se font toujours face par paires sur le rameau. Les fruits sont deux ailes soudées qui tombent en automne en tournoyant comme des hélices.",
+      "Grandi foglie a cinque lobi con bordo grossolanamente dentato stanno sempre a coppie opposte sul ramo. I frutti sono due ali unite che in autunno scendono ruotando come eliche.",
+      "Large five-lobed leaves with coarsely toothed edges always sit opposite each other in pairs on the twig. The fruits are two joined wings that spin down like propellers in autumn."
+    ),
+    funFact: l4(
+      "Die Flügelfrüchte lassen sich aufklappen und als «Nasenzwicker» auf die Nase kleben – ein Klassiker unter Kindern.",
+      "Les fruits ailés s'ouvrent et se collent sur le nez comme un « pince-nez » – un grand classique chez les enfants.",
+      "I frutti alati si aprono e si appiccicano sul naso come un «pizzico-naso» – un classico tra i bambini.",
+      "The winged fruits can be split open and stuck on your nose like a 'nose pincher' – a classic children's trick."
+    ),
+    kidQuestion: l4(
+      "Wirf eine Flügelfrucht hoch: Wie lange dreht sie sich, bevor sie landet?",
+      "Lance un fruit ailé en l'air : combien de temps tourne-t-il avant d'atterrir ?",
+      "Lancia in aria un frutto alato: quanto gira prima di atterrare?",
+      "Throw a winged fruit into the air: how long does it spin before it lands?"
+    ),
+    features: [
+      l4(
+        "Fünflappige Blätter, paarweise gegenüber",
+        "Feuilles à cinq lobes, opposées par paires",
+        "Foglie a cinque lobi, opposte a coppie",
+        "Five-lobed leaves in opposite pairs"
+      ),
+      l4(
+        "Propeller-Früchte im Herbst",
+        "Fruits hélicoptères en automne",
+        "Frutti a elica in autunno",
+        "Helicopter fruits in autumn"
+      ),
+      l4(
+        "Rinde blättert in Platten ab",
+        "Écorce qui se détache en plaques",
+        "Corteccia che si sfalda a placche",
+        "Bark flaking off in plates"
+      ),
+    ],
+  },
+  {
+    id: "waldfoehre",
+    name: l4("Waldföhre", "Pin sylvestre", "Pino silvestre", "Scots pine"),
+    latinOrExtra: "Pinus sylvestris",
+    category: "baeume",
+    description: l4(
+      "Die Nadeln stehen immer zu zweit in einer Scheide, sind 4–7 cm lang und leicht gedreht. Das sicherste Erkennungszeichen ist der obere Stammteil: Dort leuchtet die Rinde fuchsrot bis orange.",
+      "Les aiguilles poussent toujours par deux dans une gaine, mesurent 4 à 7 cm et sont légèrement torsadées. Le signe le plus sûr est la partie haute du tronc : l'écorce y brille d'un roux orangé.",
+      "Gli aghi crescono sempre a due a due in una guaina, sono lunghi 4–7 cm e leggermente ritorti. Il segno più sicuro è la parte alta del tronco: lì la corteccia brilla di un rosso volpe tendente all'arancione.",
+      "The needles always grow in pairs in a sheath, are 4–7 cm long and slightly twisted. The surest sign is the upper trunk: there the bark glows fox-red to orange."
+    ),
+    funFact: l4(
+      "Aus dem Harz der Föhre wurde früher Pech gekocht – es dichtete Boote ab und diente als erstes Kaugummi.",
+      "Autrefois, on faisait cuire la résine du pin pour obtenir de la poix – elle rendait les bateaux étanches et servait de premier chewing-gum.",
+      "Un tempo dalla resina del pino si cuoceva la pece – rendeva impermeabili le barche e serviva come prima gomma da masticare.",
+      "In the past, pine resin was boiled down into pitch – it sealed boats and served as the earliest chewing gum."
+    ),
+    kidQuestion: l4(
+      "Zähl die Nadeln an einem Büschel: Immer genau zwei? Dann steht eine Föhre vor dir!",
+      "Compte les aiguilles d'un faisceau : toujours exactement deux ? Alors tu es devant un pin sylvestre !",
+      "Conta gli aghi di un ciuffo: sempre esattamente due? Allora hai davanti un pino silvestre!",
+      "Count the needles in a bundle: always exactly two? Then you're standing in front of a Scots pine!"
+    ),
+    features: [
+      l4(
+        "Nadeln paarweise, leicht gedreht",
+        "Aiguilles par deux, légèrement torsadées",
+        "Aghi a coppie, leggermente ritorti",
+        "Needles in pairs, slightly twisted"
+      ),
+      l4(
+        "Fuchsrote Rinde im oberen Stamm",
+        "Écorce roux orangé en haut du tronc",
+        "Corteccia rosso volpe nella parte alta",
+        "Fox-red bark on the upper trunk"
+      ),
+      l4(
+        "Lockere, schirmartige Krone",
+        "Couronne claire, en forme de parasol",
+        "Chioma rada, a ombrello",
+        "Open, umbrella-like crown"
+      ),
+    ],
+  },
+  {
+    id: "vogelbeere",
+    name: l4(
+      "Vogelbeere",
+      "Sorbier des oiseleurs",
+      "Sorbo degli uccellatori",
+      "Rowan"
+    ),
+    latinOrExtra: "Sorbus aucuparia",
+    category: "baeume",
+    season: { from: 5, to: 10 },
+    description: l4(
+      "Ein kleiner Baum mit gefiederten Blättern aus 9 bis 19 gezähnten Blättchen – fast wie eine Feder. Ab August hängen leuchtend orangerote Beerendolden daran, die man von Weitem sieht.",
+      "Un petit arbre aux feuilles composées de 9 à 19 folioles dentées – presque comme une plume. Dès août, il porte des grappes de baies orange vif visibles de loin.",
+      "Un piccolo albero con foglie composte da 9 a 19 foglioline dentate – quasi come una piuma. Da agosto porta grappoli di bacche rosso-arancio che si vedono da lontano.",
+      "A small tree with pinnate leaves made of 9 to 19 toothed leaflets – almost like a feather. From August it carries clusters of bright orange-red berries visible from afar."
+    ),
+    funFact: l4(
+      "Über 60 Vogelarten fressen die Beeren. Roh schmecken sie uns Menschen bitter – gekocht werden sie zu Gelee.",
+      "Plus de 60 espèces d'oiseaux mangent ces baies. Crues, elles nous paraissent amères – cuites, elles deviennent de la gelée.",
+      "Più di 60 specie di uccelli mangiano queste bacche. Crude a noi sembrano amare – cotte diventano gelatina.",
+      "More than 60 bird species eat the berries. Raw they taste bitter to us – cooked they turn into jelly."
+    ),
+    kidQuestion: l4(
+      "Beobachte einen Vogelbeerbaum im Herbst: Welche Vögel kommen zum Naschen? (Du selbst probierst nichts roh!)",
+      "Observe un sorbier en automne : quels oiseaux viennent se régaler ? (Toi, tu ne goûtes rien de cru !)",
+      "Osserva un sorbo in autunno: quali uccelli vengono a mangiare? (Tu però non assaggi niente di crudo!)",
+      "Watch a rowan in autumn: which birds come for a snack? (You don't taste anything raw yourself!)"
+    ),
+    features: [
+      l4(
+        "Gefiederte Blätter mit vielen Blättchen",
+        "Feuilles composées de nombreuses folioles",
+        "Foglie composte da tante foglioline",
+        "Pinnate leaves with many leaflets"
+      ),
+      l4(
+        "Orangerote Beerendolden ab August",
+        "Grappes de baies orange dès août",
+        "Grappoli di bacche arancioni da agosto",
+        "Orange-red berry clusters from August"
+      ),
+      l4(
+        "Wächst bis weit hinauf in die Berge",
+        "Pousse très haut en altitude",
+        "Cresce fin molto in alto in montagna",
+        "Grows high up into the mountains"
       ),
     ],
   },

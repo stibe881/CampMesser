@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Natur-Entdecker: Acht neue Arten füllen das Lexikon – Feldhase, Biber und Steinmarder bei den Tierspuren, Perseus und die Plejaden am Himmel sowie Bergahorn, Waldföhre und Vogelbeere bei den Bäumen. Natur-Quiz, Sammelalbum und Suche nehmen sie automatisch mit.",
+        "Explorateur nature : huit nouvelles espèces enrichissent le lexique – lièvre, castor et fouine côté traces, Persée et les Pléiades dans le ciel, ainsi qu'érable sycomore, pin sylvestre et sorbier côté arbres. Le quiz nature, l'album et la recherche les intègrent automatiquement.",
+        "Esploratore della natura: otto nuove specie arricchiscono il lessico – lepre, castoro e faina tra le tracce, Perseo e le Pleiadi in cielo, oltre ad acero di monte, pino silvestre e sorbo tra gli alberi. Quiz, album e ricerca li includono in automatico.",
+        "Nature explorer: eight new species join the guide – brown hare, beaver and beech marten among the tracks, Perseus and the Pleiades in the sky, plus sycamore maple, Scots pine and rowan among the trees. The nature quiz, collection album and search pick them up automatically."
+      ),
+      l4(
         "Erste Hilfe: Vier neue Themen ergänzen den Guide – Fremdkörper im Auge, Verschlucken & Erstickungsgefahr, Sonnenbrand sowie Durchfall & Erbrechen, je mit Symptomen, Schritten und klaren Warnhinweisen «wann zum Arzt».",
         "Premiers secours : quatre nouveaux sujets complètent le guide – corps étranger dans l'œil, étouffement, coup de soleil ainsi que diarrhée & vomissements, chacun avec symptômes, gestes et consignes claires « quand consulter ».",
         "Primo soccorso: quattro nuovi temi completano la guida – corpo estraneo nell'occhio, soffocamento, scottatura solare e diarrea & vomito, ognuno con sintomi, passaggi e avvertenze chiare «quando andare dal medico».",
