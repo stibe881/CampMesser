@@ -26,6 +26,7 @@ import {
 } from "@simplewebauthn/browser";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
+import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 import { WhatsNewDialog } from "@/components/WhatsNewDialog";
 import { changelog } from "@/data/changelog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1050,6 +1051,7 @@ export default function ProfilePage() {
                   value={newPw}
                   onChange={e => setNewPw(e.target.value)}
                 />
+                <PasswordStrengthMeter password={newPw} />
               </div>
               <div>
                 <Label htmlFor="pw-new2" className="mb-1.5 block text-xs">

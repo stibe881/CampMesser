@@ -15,6 +15,7 @@ import {
 } from "@simplewebauthn/browser";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -218,6 +219,7 @@ export default function LoginPage() {
                     onChange={e => setResetPw(e.target.value)}
                     placeholder="••••••••"
                   />
+                  <PasswordStrengthMeter password={resetPw} />
                 </div>
                 <div>
                   <Label htmlFor="reset-pw2" className="mb-1.5 block">
@@ -444,6 +446,7 @@ export default function LoginPage() {
                       onChange={e => setRegPassword(e.target.value)}
                       placeholder="••••••••"
                     />
+                    <PasswordStrengthMeter password={regPassword} />
                   </div>
                   <div>
                     <Label htmlFor="reg-password2" className="mb-1.5 block">

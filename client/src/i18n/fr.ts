@@ -24,6 +24,24 @@ export const fr: Translation = {
     offlineBadge: "Hors ligne",
     screenAwake: "L'écran reste allumé",
   },
+  password: {
+    strengthLabel: "Force du mot de passe",
+    weak: "faible",
+    medium: "moyen",
+    good: "bon",
+    strong: "fort",
+    strengthAria: (label: string) => `Force du mot de passe : ${label}`,
+    hints: {
+      tooShort: "Utilise au moins 8 caractères",
+      addLength:
+        "Fais-le plus long – dès 12 caractères, c'est nettement plus sûr",
+      addCase: "Mélange majuscules et minuscules",
+      addNumber: "Ajoute au moins un chiffre",
+      addSpecial: "Ajoute un caractère spécial, p. ex. ! ? #",
+      avoidCommon: "Évite les mots courants et les suites de chiffres",
+      avoidRepeat: "Évite les répétitions comme « aaa »",
+    },
+  },
   shell: {
     toHome: "Vers la page d'accueil",
     themeLight: "Activer le thème clair",

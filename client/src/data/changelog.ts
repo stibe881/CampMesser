@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Passwörter: Beim Registrieren, beim Passwort-Wechsel im Profil und beim Zurücksetzen zeigt dir ein Balken sofort, wie stark dein Passwort ist – mit kurzen Tipps, solange es noch schwach ist.",
+        "Mots de passe : à l'inscription, lors du changement dans le profil et lors de la réinitialisation, une barre t'indique aussitôt la force de ton mot de passe – avec de brefs conseils tant qu'il reste faible.",
+        "Password: alla registrazione, al cambio nel profilo e al ripristino una barra ti mostra subito quanto è forte la tua password – con brevi consigli finché è ancora debole.",
+        "Passwords: when registering, when changing it in your profile and when resetting it, a bar shows you right away how strong your password is – with short tips while it is still weak."
+      ),
+      l4(
         "Erste Hilfe: Der neue «Zeckenstich-Merker» hält Datum, Körperstelle und Notiz fest und zeigt dir zwei Wochen lang, wie lange du die Stelle noch beobachten solltest – fällige Beobachtungen stehen auch auf der Startseite.",
         "Premiers secours : le nouveau « mémo piqûres de tique » retient la date, l'endroit et une note, et t'indique pendant deux semaines combien de temps surveiller encore – les surveillances en cours apparaissent aussi sur l'accueil.",
         "Primo soccorso: il nuovo «promemoria morsi di zecca» annota data, parte del corpo e nota e per due settimane ti mostra quanto ancora osservare – le osservazioni in corso compaiono anche sulla pagina iniziale.",

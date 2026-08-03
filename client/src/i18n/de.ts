@@ -25,6 +25,23 @@ export const de = {
     offlineBadge: "Offline",
     screenAwake: "Display bleibt an",
   },
+  password: {
+    strengthLabel: "Passwort-Stärke",
+    weak: "schwach",
+    medium: "mittel",
+    good: "gut",
+    strong: "stark",
+    strengthAria: (label: string) => `Passwort-Stärke: ${label}`,
+    hints: {
+      tooShort: "Mindestens 8 Zeichen verwenden",
+      addLength: "Länger machen – ab 12 Zeichen wird es deutlich sicherer",
+      addCase: "Gross- und Kleinbuchstaben mischen",
+      addNumber: "Mindestens eine Ziffer einbauen",
+      addSpecial: "Ein Sonderzeichen ergänzen, z. B. ! ? #",
+      avoidCommon: "Häufige Wörter und Zahlenfolgen vermeiden",
+      avoidRepeat: "Wiederholungen wie «aaa» vermeiden",
+    },
+  },
   shell: {
     toHome: "Zur Startseite",
     themeLight: "Helles Design aktivieren",

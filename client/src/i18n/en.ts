@@ -24,6 +24,23 @@ export const en: Translation = {
     offlineBadge: "Offline",
     screenAwake: "Screen stays on",
   },
+  password: {
+    strengthLabel: "Password strength",
+    weak: "weak",
+    medium: "medium",
+    good: "good",
+    strong: "strong",
+    strengthAria: (label: string) => `Password strength: ${label}`,
+    hints: {
+      tooShort: "Use at least 8 characters",
+      addLength: "Make it longer – from 12 characters it gets much safer",
+      addCase: "Mix upper and lower case letters",
+      addNumber: "Add at least one digit",
+      addSpecial: "Add a special character, e.g. ! ? #",
+      avoidCommon: "Avoid common words and number sequences",
+      avoidRepeat: "Avoid repetitions like “aaa”",
+    },
+  },
   shell: {
     toHome: "Go to home page",
     themeLight: "Switch to light theme",
