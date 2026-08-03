@@ -7,12 +7,15 @@ import {
   Compass as CompassIcon,
   Gift,
   Lightbulb,
+  Link2,
   Map,
   PartyPopper,
   Pencil,
   Plus,
   Printer,
+  QrCode,
   RotateCcw,
+  Share2,
   Sparkles,
   Swords,
   Trash2,
@@ -21,6 +24,7 @@ import {
   VolumeX,
   WifiOff,
 } from "lucide-react";
+import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -1588,6 +1592,63 @@ export default function FamilyPage() {
     onError: () => toast.error(t.common.deleteFailed),
   });
 
+  // ── Eigenes Quiz per Link teilen (Muster PackLists-Vorlagen) ──
+  /** Quiz, dessen Teil-Link gerade im Dialog gezeigt wird. */
+  const [quizShare, setQuizShare] = useState<{
+    id: number;
+    title: string;
+    url: string;
+  } | null>(null);
+  const [quizQr, setQuizQr] = useState<string | null>(null);
+
+  // QR-Code zum Teil-Link erzeugen: einfach abscannen lassen
+  useEffect(() => {
+    if (!quizShare) {
+      setQuizQr(null);
+      return;
+    }
+    QRCode.toDataURL(quizShare.url, {
+      width: 480,
+      margin: 1,
+      errorCorrectionLevel: "M",
+    })
+      .then(setQuizQr)
+      .catch(() => setQuizQr(null));
+  }, [quizShare]);
+
+  const shareQuizMutation = trpc.quizzes.share.useMutation({
+    onError: () => toast.error(t.family.quizShareFailed),
+  });
+
+  /** Teil-Link des Quiz erzeugen (idempotent), Dialog öffnen, Link kopieren. */
+  const openQuizShare = (quiz: { id: number; title: string }) => {
+    shareQuizMutation.mutate(
+      { id: quiz.id },
+      {
+        onSuccess: async ({ token }) => {
+          const url = `${window.location.origin}/quiz/${token}`;
+          setQuizShare({ id: quiz.id, title: quiz.title, url });
+          utils.quizzes.list.invalidate();
+          try {
+            await navigator.clipboard.writeText(url);
+            toast.success(t.family.quizShareCopied);
+          } catch {
+            // Zwischenablage blockiert – der Link steht im Dialog
+          }
+        },
+      }
+    );
+  };
+
+  const unshareQuizMutation = trpc.quizzes.unshare.useMutation({
+    onSuccess: () => {
+      utils.quizzes.list.invalidate();
+      setQuizShare(null);
+      toast.success(t.family.quizUnshared);
+    },
+    onError: () => toast.error(t.family.quizUnshareFailed),
+  });
+
   // ── Kinder-Profile & Abzeichen ──
   const childrenQuery = trpc.family.children.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -1922,6 +1983,11 @@ export default function FamilyPage() {
                       {t.family.questionCount(quiz.questions.length)}
                     </Badge>
                     <Badge variant="outline">{t.family.ownBadge}</Badge>
+                    {row.shareToken != null && (
+                      <Badge variant="outline">
+                        {t.family.quizSharedBadge}
+                      </Badge>
+                    )}
                   </span>
                 </button>
                 <div className="mt-3 flex items-center gap-4 border-t border-border/60 pt-2.5 text-xs">
@@ -1939,6 +2005,16 @@ export default function FamilyPage() {
                   >
                     <Pencil className="h-3 w-3" aria-hidden="true" />
                     {t.common.edit}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={shareQuizMutation.isPending}
+                    onClick={() => openQuizShare(row)}
+                    className="flex items-center gap-1 font-medium text-primary hover:underline disabled:opacity-50"
+                    aria-label={t.family.quizShareAria(row.title)}
+                  >
+                    <Share2 className="h-3 w-3" aria-hidden="true" />
+                    {t.family.quizShareButton}
                   </button>
                   <button
                     type="button"
@@ -2129,6 +2205,80 @@ export default function FamilyPage() {
             onClose={() => setQuizEditorState(null)}
           />
         )}
+      </Dialog>
+
+      {/* Teil-Link eines Quiz: Link + QR-Code, Teilen beenden */}
+      <Dialog
+        open={quizShare !== null}
+        onOpenChange={open => !open && setQuizShare(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.family.quizShareTitle}</DialogTitle>
+            <DialogDescription>
+              {t.family.quizShareDescription}
+            </DialogDescription>
+          </DialogHeader>
+          {quizShare && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+                <Link2
+                  className="h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                <code className="min-w-0 flex-1 truncate text-xs">
+                  {quizShare.url}
+                </code>
+                <button
+                  type="button"
+                  className="shrink-0 text-xs font-medium text-primary hover:underline"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(quizShare.url);
+                      toast.success(t.common.linkCopied);
+                    } catch {
+                      toast.error(t.common.copyFailed);
+                    }
+                  }}
+                >
+                  {t.common.copy}
+                </button>
+              </div>
+              {quizQr && (
+                <div className="flex items-center gap-4 rounded-lg border border-border bg-card p-4">
+                  {/* Weisser Rahmen, damit der Code auch im Dark Mode scannbar bleibt */}
+                  <div className="shrink-0 rounded-md bg-white p-2 shadow-sm">
+                    <img
+                      src={quizQr}
+                      alt={t.family.quizQrAlt(quizShare.title)}
+                      className="h-36 w-36"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1.5 text-sm font-semibold">
+                      <QrCode
+                        className="h-4 w-4 text-primary"
+                        aria-hidden="true"
+                      />
+                      {t.family.quizQrTitle}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t.family.quizQrText}
+                    </p>
+                  </div>
+                </div>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={unshareQuizMutation.isPending}
+                onClick={() => unshareQuizMutation.mutate({ id: quizShare.id })}
+              >
+                {t.family.quizUnshare}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
       </Dialog>
     </div>
   );

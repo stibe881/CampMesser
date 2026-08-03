@@ -543,6 +543,27 @@ export const fr: Translation = {
       "Connecte-toi pour reprendre le modèle ou créer une liste de bagages à partir de lui.",
     emptyTemplate: "Ce modèle n'a pas d'entrées.",
   },
+  sharedQuiz: {
+    loading: "Chargement du quiz partagé …",
+    notFoundTitle: "Quiz introuvable",
+    backHome: "Accueil",
+    invalidLink:
+      "Ce lien de partage est invalide ou a été retiré par sa propriétaire ou son propriétaire.",
+    subtitle: "Quiz partagé",
+    sharedInfo:
+      "Quiz partagé : regarde-le – avec un compte, tu peux le reprendre comme quiz personnel dans ton mode famille.",
+    importButton: "Reprendre comme quiz personnel",
+    imported: "Quiz repris – tu le trouves dans le mode famille",
+    importFailed: "Le quiz n'a pas pu être repris",
+    loginHint: "Connecte-toi pour reprendre le quiz comme quiz personnel.",
+    questionCount: n => (n === 1 ? "1 question" : `${n} questions`),
+    sampleQuestionTitle: "Exemple de question",
+    moreQuestions: n =>
+      n === 1
+        ? "… et 1 autre question t'attend après la reprise."
+        : `… et ${n} autres questions t'attendent après la reprise.`,
+    emptyQuiz: "Ce quiz n'a pas de questions.",
+  },
   packOptimizer: {
     title: "Optimisation des bagages",
     subtitleLoggedOut:
@@ -2452,6 +2473,21 @@ export const fr: Translation = {
     newQuizAria: "Créer un nouveau quiz",
     quizDeleteConfirm: (title: string) =>
       `Vraiment supprimer le quiz « ${title} » ?`,
+    quizShareButton: "Partager",
+    quizShareAria: (title: string) => `Partager le quiz ${title} par lien`,
+    quizShareTitle: "Partager le quiz",
+    quizShareDescription:
+      "Qui a le lien peut voir le quiz et, avec un compte, le reprendre comme quiz personnel.",
+    quizShareCopied: "Lien de partage copié – transmets-le !",
+    quizShareFailed: "Le partage a échoué",
+    quizSharedBadge: "partagé",
+    quizUnshare: "Arrêter le partage",
+    quizUnshared: "Partage terminé – le lien n'est plus valable",
+    quizUnshareFailed: "Le partage n'a pas pu être arrêté",
+    quizQrAlt: (title: string) => `Code QR du lien de partage du quiz ${title}`,
+    quizQrTitle: "Transmettre directement",
+    quizQrText:
+      "Laisse les autres scanner le code avec l'appareil photo du téléphone – le quiz s'ouvre aussitôt.",
     childrenTitle: "Enfants & badges",
     childrenSubtitle:
       "Ajoute tes enfants – ils collectionnent des badges lors des chasses au trésor et des quiz.",

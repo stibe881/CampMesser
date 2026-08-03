@@ -55,6 +55,7 @@ const pageLoaders = {
   SharedShopping: () => import("./pages/SharedShopping"),
   SharedSpot: () => import("./pages/SharedSpot"),
   SharedTemplate: () => import("./pages/SharedTemplate"),
+  SharedQuiz: () => import("./pages/SharedQuiz"),
   SharedTrip: () => import("./pages/SharedTrip"),
   TripInvite: () => import("./pages/TripInvite"),
   HuntPrint: () => import("./pages/HuntPrint"),
@@ -129,6 +130,7 @@ const SharedPackListPage = lazyWithRetry(pageLoaders.SharedPackList);
 const SharedShoppingPage = lazyWithRetry(pageLoaders.SharedShopping);
 const SharedSpotPage = lazyWithRetry(pageLoaders.SharedSpot);
 const SharedTemplatePage = lazyWithRetry(pageLoaders.SharedTemplate);
+const SharedQuizPage = lazyWithRetry(pageLoaders.SharedQuiz);
 const SharedTripPage = lazyWithRetry(pageLoaders.SharedTrip);
 const TripInvitePage = lazyWithRetry(pageLoaders.TripInvite);
 const HuntPrintPage = lazyWithRetry(pageLoaders.HuntPrint);
@@ -206,6 +208,7 @@ function Router() {
           />
           <Route path={"/platz/:token"} component={SharedSpotPage} />
           <Route path={"/vorlage/:token"} component={SharedTemplatePage} />
+          <Route path={"/quiz/:token"} component={SharedQuizPage} />
           <Route path={"/reise/:token"} component={SharedTripPage} />
           <Route path={"/reise-einladung/:token"} component={TripInvitePage} />
           <Route path={"/familie/drucken/:id"} component={HuntPrintPage} />

@@ -25,6 +25,7 @@ import {
   MAX_QUIZ_OPTIONS,
   MAX_QUIZ_QUESTIONS,
   MIN_QUIZ_OPTIONS,
+  parseQuizQuestions,
 } from "@shared/quizzes";
 import {
   expiryDateFromDays,
@@ -2196,6 +2197,68 @@ export const appRouter = router({
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ ctx, input }) => db.deleteCustomQuiz(input.id, ctx.user.id)),
+    /** Teil-Link für ein eigenes Quiz erzeugen: gibt den Token zurück. */
+    share: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const quiz = await db.getCustomQuiz(input.id, ctx.user.id);
+        if (!quiz)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Quiz nicht gefunden.",
+          });
+        if (quiz.shareToken) return { token: quiz.shareToken };
+        const token = nanoid(16);
+        await db.setCustomQuizShareToken(input.id, ctx.user.id, token);
+        return { token };
+      }),
+    /** Teilen des Quiz beenden: Token entfernen, Link wird ungültig. */
+    unshare: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.setCustomQuizShareToken(input.id, ctx.user.id, null);
+        return { success: true } as const;
+      }),
+    /** Geteiltes Quiz öffentlich abrufen (kein Login nötig) – ohne Lösungen. */
+    sharedGet: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .query(async ({ input }) => {
+        const quiz = await db.getCustomQuizByToken(input.token);
+        if (!quiz) return { quiz: null };
+        const questions = parseQuizQuestions(quiz.questionsJson);
+        return {
+          quiz: {
+            title: quiz.title,
+            questionCount: questions.length,
+            // Nur die erste Frage als Vorgeschmack – Antworten bleiben geheim
+            sampleQuestion: questions[0]?.question ?? null,
+          },
+        };
+      }),
+    /** Geteiltes Quiz als eigenes Quiz übernehmen (Kopie). */
+    importShared: protectedProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .mutation(async ({ ctx, input }) => {
+        const quiz = await db.getCustomQuizByToken(input.token);
+        if (!quiz)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Geteiltes Quiz nicht gefunden.",
+          });
+        // Über den defensiven Parser re-serialisieren – kaputte Daten bleiben draussen
+        const questions = parseQuizQuestions(quiz.questionsJson);
+        if (questions.length === 0)
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Das geteilte Quiz hat keine gültigen Fragen.",
+          });
+        const id = await db.addCustomQuiz({
+          userId: ctx.user.id,
+          title: quiz.title,
+          questionsJson: JSON.stringify(questions),
+        });
+        return { id };
+      }),
   }),
 
   /** Familien-Modus: Kinder-Profile, Abzeichen und Ereignis-Zähler. */

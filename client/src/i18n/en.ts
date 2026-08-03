@@ -520,6 +520,27 @@ export const en: Translation = {
     loginHint: "Sign in to save the template or create a packing list from it.",
     emptyTemplate: "This template has no items.",
   },
+  sharedQuiz: {
+    loading: "Loading shared quiz …",
+    notFoundTitle: "Quiz not found",
+    backHome: "Home",
+    invalidLink:
+      "This share link is invalid or has been withdrawn by its owner.",
+    subtitle: "Shared quiz",
+    sharedInfo:
+      "Shared quiz: have a look – with an account you can save it as your own quiz in family mode.",
+    importButton: "Save as my own quiz",
+    imported: "Quiz saved – you'll find it in family mode",
+    importFailed: "The quiz could not be saved",
+    loginHint: "Sign in to save the quiz as your own quiz.",
+    questionCount: n => (n === 1 ? "1 question" : `${n} questions`),
+    sampleQuestionTitle: "Sample question",
+    moreQuestions: n =>
+      n === 1
+        ? "… and 1 more question awaits after saving."
+        : `… and ${n} more questions await after saving.`,
+    emptyQuiz: "This quiz has no questions.",
+  },
   packOptimizer: {
     title: "Pack optimisation",
     subtitleLoggedOut:
@@ -2371,6 +2392,21 @@ export const en: Translation = {
     newQuiz: "Create a new quiz",
     newQuizAria: "Create a new quiz",
     quizDeleteConfirm: (title: string) => `Really delete quiz "${title}"?`,
+    quizShareButton: "Share",
+    quizShareAria: (title: string) => `Share the quiz ${title} via link`,
+    quizShareTitle: "Share quiz",
+    quizShareDescription:
+      "Anyone with the link can view the quiz and, with an account, save it as their own quiz.",
+    quizShareCopied: "Share link copied – pass it on!",
+    quizShareFailed: "Sharing failed",
+    quizSharedBadge: "shared",
+    quizUnshare: "Stop sharing",
+    quizUnshared: "Sharing stopped – the link is no longer valid",
+    quizUnshareFailed: "Sharing could not be stopped",
+    quizQrAlt: (title: string) => `QR code for the share link of quiz ${title}`,
+    quizQrTitle: "Hand it over directly",
+    quizQrText:
+      "Let others scan the code with their phone camera – the quiz opens right away.",
     childrenTitle: "Children & badges",
     childrenSubtitle:
       "Add your children – they collect badges in scavenger hunts and quizzes.",

@@ -532,6 +532,27 @@ export const it: Translation = {
       "Accedi per salvare il modello o creare una lista bagagli da esso.",
     emptyTemplate: "Questo modello non ha voci.",
   },
+  sharedQuiz: {
+    loading: "Caricamento del quiz condiviso …",
+    notFoundTitle: "Quiz non trovato",
+    backHome: "Pagina iniziale",
+    invalidLink:
+      "Questo link di condivisione non è valido o è stato ritirato dalla proprietaria o dal proprietario.",
+    subtitle: "Quiz condiviso",
+    sharedInfo:
+      "Quiz condiviso: dai un'occhiata – con un account puoi salvarlo come tuo quiz nella modalità famiglia.",
+    importButton: "Salva come quiz personale",
+    imported: "Quiz salvato – lo trovi nella modalità famiglia",
+    importFailed: "Impossibile salvare il quiz",
+    loginHint: "Accedi per salvare il quiz come quiz personale.",
+    questionCount: n => (n === 1 ? "1 domanda" : `${n} domande`),
+    sampleQuestionTitle: "Domanda di esempio",
+    moreQuestions: n =>
+      n === 1
+        ? "… e 1 altra domanda ti aspetta dopo il salvataggio."
+        : `… e altre ${n} domande ti aspettano dopo il salvataggio.`,
+    emptyQuiz: "Questo quiz non ha domande.",
+  },
   packOptimizer: {
     title: "Ottimizzazione bagagli",
     subtitleLoggedOut:
@@ -2428,6 +2449,22 @@ export const it: Translation = {
     newQuizAria: "Crea un nuovo quiz",
     quizDeleteConfirm: (title: string) =>
       `Eliminare davvero il quiz «${title}»?`,
+    quizShareButton: "Condividi",
+    quizShareAria: (title: string) => `Condividi il quiz ${title} tramite link`,
+    quizShareTitle: "Condividi quiz",
+    quizShareDescription:
+      "Chi ha il link può vedere il quiz e, con un account, salvarlo come quiz personale.",
+    quizShareCopied: "Link di condivisione copiato – inoltralo!",
+    quizShareFailed: "Condivisione non riuscita",
+    quizSharedBadge: "condiviso",
+    quizUnshare: "Termina condivisione",
+    quizUnshared: "Condivisione terminata – il link non è più valido",
+    quizUnshareFailed: "Impossibile terminare la condivisione",
+    quizQrAlt: (title: string) =>
+      `Codice QR del link di condivisione del quiz ${title}`,
+    quizQrTitle: "Passalo direttamente",
+    quizQrText:
+      "Fai scansionare il codice con la fotocamera del telefono – il quiz si apre subito.",
     childrenTitle: "Bambini e distintivi",
     childrenSubtitle:
       "Aggiungi i tuoi bambini – raccolgono distintivi nelle cacce al tesoro e nei quiz.",

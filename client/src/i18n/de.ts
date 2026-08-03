@@ -544,6 +544,27 @@ export const de = {
       "Melde dich an, um die Vorlage zu übernehmen oder eine Packliste daraus zu erstellen.",
     emptyTemplate: "Diese Vorlage hat keine Einträge.",
   },
+  sharedQuiz: {
+    loading: "Geteiltes Quiz wird geladen …",
+    notFoundTitle: "Quiz nicht gefunden",
+    backHome: "Startseite",
+    invalidLink:
+      "Dieser Teil-Link ist ungültig oder wurde von der Besitzerin bzw. dem Besitzer zurückgezogen.",
+    subtitle: "Geteiltes Quiz",
+    sharedInfo:
+      "Geteiltes Quiz: Schau es dir an – mit einem Konto kannst du es als eigenes Quiz in deinen Familien-Modus übernehmen.",
+    importButton: "Als eigenes Quiz übernehmen",
+    imported: "Quiz übernommen – du findest es im Familien-Modus",
+    importFailed: "Quiz konnte nicht übernommen werden",
+    loginHint: "Melde dich an, um das Quiz als eigenes Quiz zu übernehmen.",
+    questionCount: (n: number) => (n === 1 ? "1 Frage" : `${n} Fragen`),
+    sampleQuestionTitle: "Beispielfrage",
+    moreQuestions: (n: number) =>
+      n === 1
+        ? "… und 1 weitere Frage warten nach dem Übernehmen."
+        : `… und ${n} weitere Fragen warten nach dem Übernehmen.`,
+    emptyQuiz: "Dieses Quiz hat keine Fragen.",
+  },
   packOptimizer: {
     title: "Pack-Optimierung",
     subtitleLoggedOut:
@@ -2456,6 +2477,21 @@ export const de = {
     newQuiz: "Neues Quiz erstellen",
     newQuizAria: "Neues Quiz erstellen",
     quizDeleteConfirm: (title: string) => `Quiz «${title}» wirklich löschen?`,
+    quizShareButton: "Teilen",
+    quizShareAria: (title: string) => `Quiz ${title} per Link teilen`,
+    quizShareTitle: "Quiz teilen",
+    quizShareDescription:
+      "Wer den Link hat, kann das Quiz ansehen und mit einem Konto als eigenes Quiz übernehmen.",
+    quizShareCopied: "Teil-Link kopiert – schick ihn weiter!",
+    quizShareFailed: "Teilen fehlgeschlagen",
+    quizSharedBadge: "geteilt",
+    quizUnshare: "Teilen beenden",
+    quizUnshared: "Teilen beendet – der Link ist nicht mehr gültig",
+    quizUnshareFailed: "Teilen konnte nicht beendet werden",
+    quizQrAlt: (title: string) => `QR-Code zum Teil-Link des Quiz ${title}`,
+    quizQrTitle: "Direkt weitergeben",
+    quizQrText:
+      "Lass andere den Code mit der Handy-Kamera scannen – das Quiz öffnet sich sofort.",
     childrenTitle: "Kinder & Abzeichen",
     childrenSubtitle:
       "Lege deine Kinder an – bei Schnitzeljagden und Quizzen sammeln sie Abzeichen.",

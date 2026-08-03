@@ -1,6 +1,6 @@
 /**
  * OpenGraph-Vorschau für geteilte Links (/liste/:token, /platz/:token,
- * /vorlage/:token, /einkaufsliste/:token, /reise/:token).
+ * /vorlage/:token, /einkaufsliste/:token, /reise/:token, /quiz/:token).
  * Messenger und soziale Netzwerke laden das SPA-HTML ohne JavaScript –
  * deshalb injiziert der Server für bekannte Teil-Token OG-Meta-Tags in den
  * <head>, bevor das HTML ausgeliefert wird. Unbekannte Token bekommen das
@@ -9,6 +9,7 @@
  * nicht kennt.
  */
 import { parseCustomTemplateItems } from "@shared/packTemplates";
+import { parseQuizQuestions } from "@shared/quizzes";
 
 export interface OgMeta {
   title: string;
@@ -73,9 +74,8 @@ export async function ogMetaForShareRequest(
   path: string,
   origin: string
 ): Promise<OgMeta | null> {
-  const match = /^\/(liste|platz|vorlage|einkaufsliste|reise)\/([^/]+)$/.exec(
-    path
-  );
+  const match =
+    /^\/(liste|platz|vorlage|einkaufsliste|reise|quiz)\/([^/]+)$/.exec(path);
   if (!match) return null;
   const [, kind, token] = match;
   if (!TOKEN_PATTERN.test(token)) return null;
@@ -121,6 +121,19 @@ export async function ogMetaForShareRequest(
     return {
       title: "Einkaufsliste – CampMesser",
       description: `Geteilte Einkaufsliste mit ${count} – zum Mitbringen und Abhaken.`,
+      url,
+      image,
+    };
+  }
+
+  if (kind === "quiz") {
+    const quiz = await db.getCustomQuizByToken(token);
+    if (!quiz) return null;
+    const count = parseQuizQuestions(quiz.questionsJson).length;
+    const countText = count === 1 ? "1 Frage" : `${count} Fragen`;
+    return {
+      title: `${quiz.title} – CampMesser`,
+      description: `Geteiltes Quiz mit ${countText} – zum Übernehmen und Mitspielen.`,
       url,
       image,
     };

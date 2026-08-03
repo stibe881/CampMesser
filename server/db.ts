@@ -1802,10 +1802,44 @@ export async function getCustomQuizzes(userId: number) {
     .orderBy(desc(customQuizzes.id));
 }
 
+export async function getCustomQuiz(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(customQuizzes)
+    .where(and(eq(customQuizzes.id, id), eq(customQuizzes.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
 export async function addCustomQuiz(data: InsertCustomQuiz) {
   const db = requireDb(await getDb());
   const [result] = await db.insert(customQuizzes).values(data);
   return result.insertId;
+}
+
+/** Teil-Token eines Quiz setzen oder entfernen (nur fürs eigene Quiz). */
+export async function setCustomQuizShareToken(
+  id: number,
+  userId: number,
+  token: string | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(customQuizzes)
+    .set({ shareToken: token })
+    .where(and(eq(customQuizzes.id, id), eq(customQuizzes.userId, userId)));
+}
+
+/** Geteiltes Quiz anhand des Tokens laden (öffentlich, ohne Login). */
+export async function getCustomQuizByToken(token: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(customQuizzes)
+    .where(eq(customQuizzes.shareToken, token))
+    .limit(1);
+  return rows[0];
 }
 
 export async function updateCustomQuiz(

@@ -519,6 +519,8 @@ export const customQuizzes = mysqlTable(
     title: varchar("title", { length: 140 }).notNull(),
     /** Fragen als JSON-Array ({question, options[], correctIndex, explanation?}) */
     questionsJson: text("questionsJson").notNull(),
+    /** Öffentlicher Teil-Token: Wer den Link kennt, kann das Quiz sehen und übernehmen. */
+    shareToken: varchar("shareToken", { length: 64 }).unique(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("customQuizzes_userId").on(table.userId)]
