@@ -2003,6 +2003,29 @@ export const de = {
       `Jahresrückblick ${year} als Bild teilen`,
     yearReviewImageSaved: "Bild heruntergeladen",
     yearReviewShareFailed: "Bild konnte nicht erstellt werden",
+
+    // Foto-Collage pro Reise (#226)
+    collageButton: "Foto-Collage",
+    collageTitle: "Foto-Collage",
+    collageDescription:
+      "Wähle Fotos und Anordnung – CampMesser macht daraus ein Bild zum Teilen, mit Reisename und Zeitraum.",
+    collageLayoutLabel: "Anordnung",
+    collageLayoutNames: {
+      grid2: "Raster 2×2",
+      grid3: "Raster 3×3",
+      hero: "Ein grosses Bild",
+    },
+    collageSelected: (used: number, capacity: number) =>
+      `Fotos: ${used} von ${capacity} Plätzen belegt`,
+    collageSelectAria: (name: string) => `Foto von ${name} für die Collage`,
+    collageTooMany: (capacity: number) =>
+      `In diese Anordnung passen ${capacity} Fotos – die übrigen bleiben weg.`,
+    collageNone: "Wähle mindestens ein Foto aus.",
+    collageShare: "Teilen",
+    collageDownload: "Herunterladen",
+    collageBusy: "Bild wird erstellt …",
+    collageSaved: "Collage heruntergeladen",
+    collageFailed: "Collage konnte nicht erstellt werden",
     newTripButton: "Neue Reise",
     tripFormDialogDesc:
       "Ort, Daten und Erinnerungen deines Aufenthalts festhalten.",

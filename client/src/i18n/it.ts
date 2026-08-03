@@ -1981,6 +1981,29 @@ export const it: Translation = {
       `Condividi la retrospettiva ${year} come immagine`,
     yearReviewImageSaved: "Immagine scaricata",
     yearReviewShareFailed: "Impossibile creare l'immagine",
+
+    // Collage di foto per viaggio (#226)
+    collageButton: "Collage di foto",
+    collageTitle: "Collage di foto",
+    collageDescription:
+      "Scegli le foto e la disposizione – CampMesser ne fa un'immagine da condividere, con nome del viaggio e periodo.",
+    collageLayoutLabel: "Disposizione",
+    collageLayoutNames: {
+      grid2: "Griglia 2×2",
+      grid3: "Griglia 3×3",
+      hero: "Un'immagine grande",
+    },
+    collageSelected: (used: number, capacity: number) =>
+      `Foto: ${used} posti occupati su ${capacity}`,
+    collageSelectAria: (name: string) => `Foto di ${name} per il collage`,
+    collageTooMany: (capacity: number) =>
+      `In questa disposizione stanno ${capacity} foto – le altre restano fuori.`,
+    collageNone: "Scegli almeno una foto.",
+    collageShare: "Condividi",
+    collageDownload: "Scarica",
+    collageBusy: "Creazione dell'immagine …",
+    collageSaved: "Collage scaricato",
+    collageFailed: "Impossibile creare il collage",
     newTripButton: "Nuovo viaggio",
     tripFormDialogDesc: "Annota luogo, date e ricordi del tuo soggiorno.",
     choosePlaceError: "Scegli una piazzola o inserisci un luogo",

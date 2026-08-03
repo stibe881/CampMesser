@@ -2002,6 +2002,29 @@ export const fr: Translation = {
       `Partager la rétrospective ${year} en image`,
     yearReviewImageSaved: "Image téléchargée",
     yearReviewShareFailed: "L'image n'a pas pu être créée",
+
+    // Collage photo par voyage (#226)
+    collageButton: "Collage photo",
+    collageTitle: "Collage photo",
+    collageDescription:
+      "Choisis les photos et la disposition – CampMesser en fait une image à partager, avec le nom du voyage et la période.",
+    collageLayoutLabel: "Disposition",
+    collageLayoutNames: {
+      grid2: "Grille 2×2",
+      grid3: "Grille 3×3",
+      hero: "Une grande image",
+    },
+    collageSelected: (used: number, capacity: number) =>
+      `Photos : ${used} places occupées sur ${capacity}`,
+    collageSelectAria: (name: string) => `Photo de ${name} pour le collage`,
+    collageTooMany: (capacity: number) =>
+      `Cette disposition accueille ${capacity} photos – les autres sont laissées de côté.`,
+    collageNone: "Choisis au moins une photo.",
+    collageShare: "Partager",
+    collageDownload: "Télécharger",
+    collageBusy: "Création de l'image …",
+    collageSaved: "Collage téléchargé",
+    collageFailed: "Le collage n'a pas pu être créé",
     newTripButton: "Nouveau voyage",
     tripFormDialogDesc:
       "Note le lieu, les dates et les souvenirs de ton séjour.",

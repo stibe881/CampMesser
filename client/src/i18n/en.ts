@@ -1930,6 +1930,29 @@ export const en: Translation = {
       `Share the ${year} year in review as an image`,
     yearReviewImageSaved: "Image downloaded",
     yearReviewShareFailed: "The image could not be created",
+
+    // Photo collage per trip (#226)
+    collageButton: "Photo collage",
+    collageTitle: "Photo collage",
+    collageDescription:
+      "Pick the photos and the arrangement – CampMesser turns them into an image to share, with trip name and dates.",
+    collageLayoutLabel: "Arrangement",
+    collageLayoutNames: {
+      grid2: "Grid 2×2",
+      grid3: "Grid 3×3",
+      hero: "One large image",
+    },
+    collageSelected: (used: number, capacity: number) =>
+      `Photos: ${used} of ${capacity} slots filled`,
+    collageSelectAria: (name: string) => `Photo from ${name} for the collage`,
+    collageTooMany: (capacity: number) =>
+      `This arrangement holds ${capacity} photos – the rest are left out.`,
+    collageNone: "Pick at least one photo.",
+    collageShare: "Share",
+    collageDownload: "Download",
+    collageBusy: "Creating the image …",
+    collageSaved: "Collage downloaded",
+    collageFailed: "The collage could not be created",
     newTripButton: "New trip",
     tripFormDialogDesc: "Record the place, dates and memories of your stay.",
     choosePlaceError: "Please choose a pitch or enter a place",

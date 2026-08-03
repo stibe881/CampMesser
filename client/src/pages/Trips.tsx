@@ -12,8 +12,10 @@ import {
   CloudSun,
   Copy,
   CopyPlus,
+  Download,
   Gauge,
   GraduationCap,
+  LayoutGrid,
   List,
   ListChecks,
   Loader2,
@@ -65,7 +67,12 @@ import { MAX_PHOTOS_PER_TRIP } from "@shared/tripPhotos";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useI18n, useT } from "@/i18n";
-import { LOCALE_TAGS, pick } from "@shared/i18n";
+import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
+import {
+  COLLAGE_LAYOUTS,
+  collageCapacity,
+  type CollageLayoutId,
+} from "@shared/collageLayout";
 import { cn } from "@/lib/utils";
 import { formatChf, parseChfInput, rappenToInput } from "@/lib/money";
 import {
@@ -115,6 +122,7 @@ import {
 } from "@shared/holidays";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import { drawYearReview } from "@/lib/yearReviewImage";
+import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 
 /** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
@@ -1529,6 +1537,22 @@ function TripExpenses({
 /** URL eines Trip-Fotos (gleiche Origin – Canvas bleibt dadurch untainted). */
 const tripPhotoSrc = (fileName: string) => `/api/trips/photos/${fileName}`;
 
+/** Zeitraum einer Reise als Text, z. B. «3. Aug. 2026 – 9. Aug. 2026». */
+function formatTripRange(
+  startDate: string,
+  endDate: string,
+  lang: Language
+): string {
+  const fmt = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  if (startDate === endDate) return fmt(startDate);
+  return `${fmt(startDate)} – ${fmt(endDate)}`;
+}
+
 /**
  * Titelbild-Banner eines Tagebuch-Eintrags: zeigt das als Titelbild
  * markierte Foto oben am Eintrag. Nutzt dieselbe Foto-Query wie die Galerie
@@ -1637,6 +1661,267 @@ function TripPhotos({
         deleteFailed: t.common.deleteFailed,
       }}
     />
+  );
+}
+
+/**
+ * Foto-Collage einer Reise (#226): aus den Tagebuch-Fotos ein teilbares Bild
+ * bauen – Fotos und Anordnung wählen, dann teilen oder herunterladen.
+ * Gezeichnet wird mit der Canvas-API im Muster des Jahresrückblick-Bildes
+ * (#91, lib/collageImage.ts); die Kachel-Geometrie kommt aus
+ * shared/collageLayout.ts. Die Fotos werden von der eigenen Origin geladen,
+ * damit das Canvas untainted bleibt und `toBlob` funktioniert.
+ */
+function TripCollage({
+  tripId,
+  tripName,
+  startDate,
+  endDate,
+}: {
+  tripId: number;
+  tripName: string;
+  startDate: string;
+  endDate: string;
+}) {
+  const { lang, t } = useI18n();
+  const photosQuery = trpc.trips.photos.list.useQuery({ tripId });
+  const photos = photosQuery.data ?? [];
+  const [open, setOpen] = useState(false);
+  const [layout, setLayout] = useState<CollageLayoutId>("grid2");
+  /** Ausgewählte Foto-Ids in der Reihenfolge des Antippens. */
+  const [selected, setSelected] = useState<number[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  const capacity = collageCapacity(layout);
+  /** Nur die ersten `capacity` Fotos landen im Bild – der Rest bleibt weg. */
+  const used = selected.slice(0, capacity);
+
+  const openDialog = () => {
+    setSelected(photos.slice(0, collageCapacity(layout)).map(p => p.id));
+    setOpen(true);
+  };
+
+  const togglePhoto = (photoId: number) => {
+    setSelected(prev =>
+      prev.includes(photoId)
+        ? prev.filter(id => id !== photoId)
+        : [...prev, photoId]
+    );
+  };
+
+  /** Ein Foto laden; scheitert es, fällt es still aus der Collage. */
+  const loadPhoto = (fileName: string): Promise<HTMLImageElement | null> =>
+    new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = tripPhotoSrc(fileName);
+    });
+
+  /** Die Collage zeichnen und als PNG-Blob zurückgeben. */
+  const buildBlob = async (): Promise<Blob> => {
+    const files = used
+      .map(id => photos.find(photo => photo.id === id))
+      .filter((photo): photo is (typeof photos)[number] => photo !== undefined);
+    const loaded = await Promise.all(files.map(p => loadPhoto(p.fileName)));
+    const images = loaded.filter(
+      (img): img is HTMLImageElement => img !== null
+    );
+    if (images.length === 0) throw new Error("Kein Foto ladbar");
+    const canvas = document.createElement("canvas");
+    drawCollage(canvas, {
+      photos: images,
+      layout,
+      title: tripName,
+      subtitle: formatTripRange(startDate, endDate, lang),
+    });
+    const blob = await new Promise<Blob | null>(resolve =>
+      canvas.toBlob(resolve, "image/png")
+    );
+    if (!blob) throw new Error("Canvas lieferte kein Bild");
+    return blob;
+  };
+
+  const fileName = `campmesser-collage-${startDate}.png`;
+
+  /** Herunterladen über einen a[download]-Link. */
+  const downloadBlob = (blob: Blob) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success(t.trips.collageSaved);
+  };
+
+  /** Teilen per Web Share API Level 2, sonst herunterladen. */
+  const shareCollage = async () => {
+    setBusy(true);
+    try {
+      const blob = await buildBlob();
+      const file = new File([blob], fileName, { type: "image/png" });
+      if (
+        typeof navigator.canShare === "function" &&
+        navigator.canShare({ files: [file] })
+      ) {
+        await navigator.share({
+          files: [file],
+          title: `CampMesser · ${tripName}`,
+        });
+      } else {
+        downloadBlob(blob);
+      }
+    } catch (error) {
+      // Abbruch des Teilen-Dialogs ist kein Fehler
+      if ((error as DOMException)?.name !== "AbortError") {
+        toast.error(t.trips.collageFailed);
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const downloadCollage = async () => {
+    setBusy(true);
+    try {
+      downloadBlob(await buildBlob());
+    } catch {
+      toast.error(t.trips.collageFailed);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (photos.length === 0) return null;
+
+  return (
+    <div className="mt-2">
+      <Button type="button" variant="outline" size="sm" onClick={openDialog}>
+        <LayoutGrid className="mr-1.5 h-4 w-4" aria-hidden="true" />
+        {t.trips.collageButton}
+      </Button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t.trips.collageTitle}</DialogTitle>
+            <DialogDescription>{t.trips.collageDescription}</DialogDescription>
+          </DialogHeader>
+
+          {/* Anordnung */}
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-muted-foreground">
+              {t.trips.collageLayoutLabel}
+            </p>
+            <div
+              className="flex flex-wrap gap-1.5"
+              role="group"
+              aria-label={t.trips.collageLayoutLabel}
+            >
+              {COLLAGE_LAYOUTS.map(entry => (
+                <button
+                  key={entry.id}
+                  type="button"
+                  onClick={() => setLayout(entry.id)}
+                  aria-pressed={layout === entry.id}
+                  className={cn(
+                    "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                    layout === entry.id
+                      ? "border-primary bg-primary/10 font-medium text-primary"
+                      : "border-border text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  {t.trips.collageLayoutNames[entry.id]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Fotos wählen – die Zahl zeigt die Reihenfolge in der Collage */}
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-muted-foreground">
+              {t.trips.collageSelected(used.length, capacity)}
+            </p>
+            <div className="grid grid-cols-4 gap-2">
+              {photos.map(photo => {
+                const rank = selected.indexOf(photo.id);
+                const inCollage = rank >= 0 && rank < capacity;
+                return (
+                  <button
+                    key={photo.id}
+                    type="button"
+                    onClick={() => togglePhoto(photo.id)}
+                    aria-pressed={rank >= 0}
+                    aria-label={t.trips.collageSelectAria(tripName)}
+                    className={cn(
+                      "relative aspect-square overflow-hidden rounded-lg border-2 transition-all",
+                      inCollage
+                        ? "border-primary"
+                        : "border-transparent opacity-60"
+                    )}
+                  >
+                    <img
+                      src={tripPhotoSrc(photo.fileName)}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
+                    {rank >= 0 && (
+                      <span
+                        className={cn(
+                          "absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-primary-foreground",
+                          inCollage ? "bg-primary" : "bg-muted-foreground"
+                        )}
+                      >
+                        {rank + 1}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {selected.length > capacity && (
+              <p className="text-xs text-muted-foreground">
+                {t.trips.collageTooMany(capacity)}
+              </p>
+            )}
+            {used.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                {t.trips.collageNone}
+              </p>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2 sm:justify-start">
+            <Button
+              type="button"
+              disabled={busy || used.length === 0}
+              onClick={() => void shareCollage()}
+            >
+              {busy ? (
+                <Loader2
+                  className="mr-1.5 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              )}
+              {busy ? t.trips.collageBusy : t.trips.collageShare}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy || used.length === 0}
+              onClick={() => void downloadCollage()}
+            >
+              <Download className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.trips.collageDownload}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
 
@@ -2159,16 +2444,8 @@ export default function TripsPage() {
     enabled: isAuthenticated,
   });
 
-  const formatRange = (startDate: string, endDate: string): string => {
-    const fmt = (iso: string) =>
-      new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-    if (startDate === endDate) return fmt(startDate);
-    return `${fmt(startDate)} – ${fmt(endDate)}`;
-  };
+  const formatRange = (startDate: string, endDate: string): string =>
+    formatTripRange(startDate, endDate, lang);
 
   /** Ø-Bewertung mit maximal einer Nachkommastelle in der aktiven Sprache. */
   const fmtRating = (value: number): string =>
@@ -3484,6 +3761,13 @@ export default function TripsPage() {
                         tripName={trip.title || placeName(trip)}
                         coverPhotoId={trip.coverPhotoId}
                       />
+                      {/* Foto-Collage (#226) */}
+                      <TripCollage
+                        tripId={trip.id}
+                        tripName={trip.title || placeName(trip)}
+                        startDate={trip.startDate}
+                        endDate={trip.endDate}
+                      />
                     </div>
                     <div className="flex shrink-0 flex-col gap-1">
                       <Button
@@ -3739,6 +4023,13 @@ export default function TripsPage() {
                           tripId={trip.id}
                           tripName={trip.title || placeName(trip)}
                           coverPhotoId={trip.coverPhotoId}
+                        />
+                        {/* Foto-Collage (#226) */}
+                        <TripCollage
+                          tripId={trip.id}
+                          tripName={trip.title || placeName(trip)}
+                          startDate={trip.startDate}
+                          endDate={trip.endDate}
                         />
                       </div>
                       <div className="flex shrink-0 flex-col gap-1">
