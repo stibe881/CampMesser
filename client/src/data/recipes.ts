@@ -25,6 +25,18 @@ import img_rezept_steckerlfisch from "@/assets/rezept-steckerlfisch.webp";
 import img_rezept_pfannen_pizza from "@/assets/rezept-pfannen-pizza.webp";
 import img_rezept_minestrone from "@/assets/rezept-minestrone.webp";
 import img_rezept_apfel_zimt from "@/assets/rezept-apfel-zimt.webp";
+import img_rezept_birchermuesli from "@/assets/rezept-birchermuesli.webp";
+import img_rezept_camping_pancakes from "@/assets/rezept-camping-pancakes.webp";
+import img_rezept_roesti_spiegelei from "@/assets/rezept-roesti-spiegelei.webp";
+import img_rezept_ghackets_hoernli from "@/assets/rezept-ghackets-hoernli.webp";
+import img_rezept_forellen from "@/assets/rezept-forellen.webp";
+import img_rezept_maiskolben from "@/assets/rezept-maiskolben.webp";
+import img_rezept_poulet_reis from "@/assets/rezept-poulet-reis.webp";
+import img_rezept_raclette from "@/assets/rezept-raclette.webp";
+import img_rezept_thon_wraps from "@/assets/rezept-thon-wraps.webp";
+import img_rezept_grill_ananas from "@/assets/rezept-grill-ananas.webp";
+import img_rezept_gerstensuppe from "@/assets/rezept-gerstensuppe.webp";
+import img_rezept_fotzelschnitten from "@/assets/rezept-fotzelschnitten.webp";
 
 export interface Recipe {
   id: string;
@@ -1179,6 +1191,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "birchermuesli-overnight",
+    image: img_rezept_birchermuesli,
     name: l4(
       "Overnight-Birchermüesli",
       "Birchermüesli de la veille",
@@ -1260,6 +1273,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "camping-pancakes",
+    image: img_rezept_camping_pancakes,
     name: l4(
       "Camping-Pancakes",
       "Pancakes du camping",
@@ -1342,6 +1356,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "roesti-spiegelei",
+    image: img_rezept_roesti_spiegelei,
     name: l4(
       "Rösti mit Spiegelei",
       "Rösti et œuf au plat",
@@ -1406,6 +1421,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "ghackets-hoernli",
+    image: img_rezept_ghackets_hoernli,
     name: l4(
       "Ghackets mit Hörnli",
       "Viande hachée et cornettes",
@@ -1478,6 +1494,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "forellen-paeckli",
+    image: img_rezept_forellen,
     name: l4(
       "Forellen-Päckli aus der Glut",
       "Papillotes de truite à la braise",
@@ -1548,6 +1565,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "maiskolben-glut",
+    image: img_rezept_maiskolben,
     name: l4(
       "Maiskolben mit Kräuterbutter",
       "Épis de maïs au beurre aux herbes",
@@ -1607,6 +1625,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "poulet-reis-pfanne",
+    image: img_rezept_poulet_reis,
     name: l4(
       "One-Pot-Reispfanne mit Poulet",
       "Poêlée de riz au poulet en une casserole",
@@ -1685,6 +1704,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "raclette-pfaennli",
+    image: img_rezept_raclette,
     name: l4(
       "Raclette aus der Pfanne",
       "Raclette à la poêle",
@@ -1758,6 +1778,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "thon-wraps",
+    image: img_rezept_thon_wraps,
     name: l4(
       "Thon-Wraps ohne Kochen",
       "Wraps au thon sans cuisson",
@@ -1839,6 +1860,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "grill-ananas",
+    image: img_rezept_grill_ananas,
     name: l4(
       "Grillierte Ananas mit Honig",
       "Ananas grillé au miel",
@@ -1912,6 +1934,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "gerstensuppe",
+    image: img_rezept_gerstensuppe,
     name: l4(
       "Bündner Gerstensuppe",
       "Soupe grisonne à l'orge",
@@ -1989,6 +2012,7 @@ export const recipes: Recipe[] = [
   },
   {
     id: "fotzelschnitten",
+    image: img_rezept_fotzelschnitten,
     name: l4(
       "Fotzelschnitten",
       "Pain perdu (Fotzelschnitten)",
