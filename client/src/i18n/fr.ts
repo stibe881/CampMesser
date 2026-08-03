@@ -1731,6 +1731,40 @@ export const fr: Translation = {
     contactParcelLabel: "Numéro de parcelle",
     contactParcelPlaceholder: "p. ex. B12",
     contactSaved: "Coordonnées enregistrées",
+    offlineMapTitle: "Carte hors ligne",
+    offlineMapDesc:
+      "Télécharge à l'avance les tuiles de carte autour de cet emplacement – la carte et le radar de tente s'y retrouveront même sans réseau.",
+    offlineMapRadiusLabel: "Rayon",
+    offlineMapRadiusGroupAria: "Choisir le rayon de la carte hors ligne",
+    offlineMapRadiusOption: km => `${km} km`,
+    offlineMapDetailLabel: "Niveau de détail",
+    offlineMapDetailGroupAria:
+      "Choisir le niveau de détail de la carte hors ligne",
+    offlineMapDetailOption: zoom => `jusqu'au zoom ${zoom}`,
+    offlineMapTileCount: n => (n === 1 ? "1 tuile" : `${n} tuiles`),
+    offlineMapLayerNote: layer => `Vue : ${layer}`,
+    offlineMapCapped: max =>
+      `Limite de ${max} tuiles atteinte – le téléchargement part du centre vers l'extérieur.`,
+    offlineMapDownload: "Télécharger",
+    offlineMapDownloadAria: name =>
+      `Télécharger la carte hors ligne pour ${name}`,
+    offlineMapCancel: "Annuler",
+    offlineMapProgress: (done, total) => `${done} tuiles sur ${total}`,
+    offlineMapSaved: (tiles, size) =>
+      `Enregistré : ${tiles} tuiles, env. ${size} Mo`,
+    offlineMapSavedAt: date => `Téléchargé le ${date}`,
+    offlineMapDelete: "Supprimer",
+    offlineMapDeleteAria: name => `Supprimer la carte hors ligne de ${name}`,
+    offlineMapDeleted: "Carte hors ligne supprimée",
+    offlineMapDone: n =>
+      `${n} tuiles enregistrées – ici, la carte fonctionne désormais aussi hors ligne.`,
+    offlineMapNothing: "Aucune tuile n'a pu être chargée (hors ligne ?).",
+    offlineMapCancelled:
+      "Téléchargement annulé – les tuiles déjà chargées restent enregistrées.",
+    offlineMapUnsupported:
+      "Ce navigateur ne peut pas enregistrer de cartes hors ligne.",
+    offlineMapFairUse:
+      "Les tuiles proviennent d'OpenStreetMap et d'Esri et sont mises à disposition gratuitement. Ne télécharge donc que ce dont tu as vraiment besoin – d'où la limite par emplacement.",
   },
   tentFinder: {
     title: "Retrouve-tente",

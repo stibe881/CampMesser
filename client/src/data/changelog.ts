@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-03",
     entries: [
       l4(
+        "Zeltplätze: Im Platz-Dossier gibt es neu den Abschnitt «Offline-Karte» – wähle Umkreis (2/5/10 km) und Detailgrad, lade die Karten-Kacheln rund um den Platz vorab herunter, und Karte wie Zelt-Finder funktionieren dort auch ohne Empfang. Du siehst laufend die Kachelzahl, den Fortschritt und wie viel gespeichert ist, und kannst das Paket jederzeit wieder löschen.",
+        "Emplacements : le dossier propose désormais la section « Carte hors ligne » – choisis le rayon (2/5/10 km) et le niveau de détail, télécharge à l'avance les tuiles autour de l'emplacement, et la carte comme le radar de tente fonctionnent là-bas même sans réseau. Tu vois en direct le nombre de tuiles, la progression et l'espace occupé, et tu peux supprimer le paquet à tout moment.",
+        "Piazzole: nel dossier trovi ora la sezione «Mappa offline» – scegli il raggio (2/5/10 km) e il livello di dettaglio, scarica in anticipo le tessere attorno alla piazzola e mappa e trova-tenda funzionano lì anche senza campo. Vedi in tempo reale il numero di tessere, l'avanzamento e quanto è salvato, e puoi eliminare il pacchetto quando vuoi.",
+        "Pitches: the pitch dossier now has an “Offline map” section – pick the radius (2/5/10 km) and level of detail, download the map tiles around the pitch in advance, and both the map and the tent finder keep working there without a signal. You see the tile count, the progress and how much is stored, and you can delete the package at any time."
+      ),
+      l4(
         "Startseite: Sind an deinem Standort Unwetterwarnungen aktiv, trägt das Wetter-Widget neu ein farbiges Badge mit der Anzahl und der höchsten Stufe – ein Tipp darauf bringt dich direkt zum Warnungs-Abschnitt im Wetter-Modul.",
         "Accueil : si des alertes d'intempéries sont actives à ton emplacement, la vignette météo affiche désormais un badge coloré avec le nombre et le niveau le plus élevé – un tap t'amène directement à la section des alertes du module météo.",
         "Home: se nella tua posizione ci sono allerte maltempo attive, il widget meteo mostra ora un badge colorato con il numero e il livello più alto – con un tocco arrivi direttamente alla sezione delle allerte nel modulo meteo.",

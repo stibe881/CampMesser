@@ -1729,6 +1729,40 @@ export const de = {
     contactParcelLabel: "Parzellen-Nummer",
     contactParcelPlaceholder: "z. B. B12",
     contactSaved: "Kontaktdaten gespeichert",
+    offlineMapTitle: "Offline-Karte",
+    offlineMapDesc:
+      "Lade die Karten-Kacheln rund um diesen Platz vorab herunter – dann finden sich Karte und Zelt-Finder auch ohne Empfang zurecht.",
+    offlineMapRadiusLabel: "Umkreis",
+    offlineMapRadiusGroupAria: "Umkreis für die Offline-Karte wählen",
+    offlineMapRadiusOption: (km: number) => `${km} km`,
+    offlineMapDetailLabel: "Detailgrad",
+    offlineMapDetailGroupAria: "Detailgrad für die Offline-Karte wählen",
+    offlineMapDetailOption: (zoom: number) => `bis Zoom ${zoom}`,
+    offlineMapTileCount: (n: number) => (n === 1 ? "1 Kachel" : `${n} Kacheln`),
+    offlineMapLayerNote: (layer: string) => `Ansicht: ${layer}`,
+    offlineMapCapped: (max: number) =>
+      `Obergrenze von ${max} Kacheln erreicht – geladen wird von der Mitte nach aussen.`,
+    offlineMapDownload: "Herunterladen",
+    offlineMapDownloadAria: (name: string) =>
+      `Offline-Karte für ${name} herunterladen`,
+    offlineMapCancel: "Abbrechen",
+    offlineMapProgress: (done: number, total: number) =>
+      `${done} von ${total} Kacheln`,
+    offlineMapSaved: (tiles: number, size: string) =>
+      `Gespeichert: ${tiles} Kacheln, ca. ${size} MB`,
+    offlineMapSavedAt: (date: string) => `Geladen am ${date}`,
+    offlineMapDelete: "Löschen",
+    offlineMapDeleteAria: (name: string) => `Offline-Karte für ${name} löschen`,
+    offlineMapDeleted: "Offline-Karte gelöscht",
+    offlineMapDone: (n: number) =>
+      `${n} Kacheln gespeichert – hier funktioniert die Karte jetzt auch offline.`,
+    offlineMapNothing: "Es konnte keine Kachel geladen werden (offline?).",
+    offlineMapCancelled:
+      "Download abgebrochen – bereits geladene Kacheln bleiben gespeichert.",
+    offlineMapUnsupported:
+      "Dieser Browser kann keine Karten offline speichern.",
+    offlineMapFairUse:
+      "Die Kacheln kommen von OpenStreetMap und Esri und werden gratis bereitgestellt. Lade darum nur, was du wirklich brauchst – deshalb die Obergrenze pro Platz.",
   },
   tentFinder: {
     title: "Zelt-Finder",

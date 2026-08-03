@@ -1710,6 +1710,39 @@ export const it: Translation = {
     contactParcelLabel: "Numero piazzola",
     contactParcelPlaceholder: "es. B12",
     contactSaved: "Contatti salvati",
+    offlineMapTitle: "Mappa offline",
+    offlineMapDesc:
+      "Scarica in anticipo le tessere della mappa attorno a questa piazzola – così mappa e trova-tenda funzionano anche senza campo.",
+    offlineMapRadiusLabel: "Raggio",
+    offlineMapRadiusGroupAria: "Scegli il raggio della mappa offline",
+    offlineMapRadiusOption: km => `${km} km`,
+    offlineMapDetailLabel: "Livello di dettaglio",
+    offlineMapDetailGroupAria:
+      "Scegli il livello di dettaglio della mappa offline",
+    offlineMapDetailOption: zoom => `fino allo zoom ${zoom}`,
+    offlineMapTileCount: n => (n === 1 ? "1 tessera" : `${n} tessere`),
+    offlineMapLayerNote: layer => `Vista: ${layer}`,
+    offlineMapCapped: max =>
+      `Limite di ${max} tessere raggiunto – il download parte dal centro verso l'esterno.`,
+    offlineMapDownload: "Scarica",
+    offlineMapDownloadAria: name => `Scarica la mappa offline per ${name}`,
+    offlineMapCancel: "Annulla",
+    offlineMapProgress: (done, total) => `${done} tessere su ${total}`,
+    offlineMapSaved: (tiles, size) =>
+      `Salvato: ${tiles} tessere, circa ${size} MB`,
+    offlineMapSavedAt: date => `Scaricato il ${date}`,
+    offlineMapDelete: "Elimina",
+    offlineMapDeleteAria: name => `Elimina la mappa offline di ${name}`,
+    offlineMapDeleted: "Mappa offline eliminata",
+    offlineMapDone: n =>
+      `${n} tessere salvate – qui la mappa ora funziona anche offline.`,
+    offlineMapNothing:
+      "Non è stato possibile caricare nessuna tessera (offline?).",
+    offlineMapCancelled:
+      "Download annullato – le tessere già caricate restano salvate.",
+    offlineMapUnsupported: "Questo browser non può salvare mappe offline.",
+    offlineMapFairUse:
+      "Le tessere arrivano da OpenStreetMap ed Esri e sono messe a disposizione gratuitamente. Scarica quindi solo ciò che ti serve davvero – da qui il limite per piazzola.",
   },
   tentFinder: {
     title: "Trova-tenda",

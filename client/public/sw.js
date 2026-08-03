@@ -5,7 +5,9 @@
  *   auch komplett offline startet.
  * - Bilder (manus-storage): cache-first, damit Natur-, Knoten- und Rezept-Bilder
  *   nach dem ersten Besuch offline verfügbar sind.
- * - API-Aufrufe (/api/) und externe Dienste (Open-Meteo, Karten): immer Netz,
+ * - Karten-Kacheln (OSM/Esri): cache-first aus dem Offline-Paket, sonst Netz.
+ *   Gespeichert wird NUR, was das Platz-Dossier bewusst vorlädt.
+ * - API-Aufrufe (/api/) und übrige externe Dienste (Open-Meteo): immer Netz,
  *   kein Caching – Live-Daten sollen nicht veralten.
  */
 const CACHE_VERSION = "campmesser-v5";
@@ -15,6 +17,11 @@ const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 // Versions-Präfix, damit der Aufräum-Schritt in "activate" sie nie löscht.
 // Die Seite /teilen liest die Dateien aus und leert den Cache danach selbst.
 const SHARE_CACHE = "campmesser-share";
+// Offline-Pakete der Karten-Kacheln (client/src/lib/mapTiles.ts) – ebenfalls
+// OHNE Versions-Präfix, damit ein App-Update die mühsam geladenen Kacheln
+// nicht wegräumt. Verwaltet wird der Cache allein im Platz-Dossier.
+const MAP_TILE_CACHE = "campmesser-map-tiles";
+const MAP_TILE_HOSTS = ["tile.openstreetmap.org", "server.arcgisonline.com"];
 
 // Routen der Wissens-Module, die offline funktionieren sollen (SPA: alle laden dieselbe Shell)
 const PRECACHE_URLS = ["/", "/manifest.json"];
@@ -36,7 +43,10 @@ self.addEventListener("activate", event => {
         Promise.all(
           keys
             .filter(
-              key => !key.startsWith(CACHE_VERSION) && key !== SHARE_CACHE
+              key =>
+                !key.startsWith(CACHE_VERSION) &&
+                key !== SHARE_CACHE &&
+                key !== MAP_TILE_CACHE
             )
             .map(key => caches.delete(key))
         )
@@ -126,6 +136,23 @@ async function handleShareTargetPost(request) {
   return Response.redirect("/teilen", 303);
 }
 
+/**
+ * Karten-Kacheln: zuerst im Offline-Paket nachschauen, sonst ganz normal aus
+ * dem Netz. Bewusst OHNE Rückschreiben – in den Cache kommt nur, was im
+ * Platz-Dossier ausdrücklich heruntergeladen wurde (Fair Use gegenüber OSM
+ * und Esri, und die Paket-Grösse bleibt vorhersehbar).
+ */
+async function serveMapTile(request) {
+  try {
+    const cache = await caches.open(MAP_TILE_CACHE);
+    const cached = await cache.match(request, { ignoreVary: true });
+    if (cached) return cached;
+  } catch {
+    /* Cache nicht verfügbar – dann eben direkt aus dem Netz */
+  }
+  return fetch(request);
+}
+
 self.addEventListener("fetch", event => {
   const { request } = event;
 
@@ -143,7 +170,13 @@ self.addEventListener("fetch", event => {
 
   if (request.method !== "GET") return;
 
-  // API und externe Dienste: nie cachen
+  // Karten-Kacheln: vorgeladenes Offline-Paket schlägt das Netz
+  if (MAP_TILE_HOSTS.indexOf(url.hostname) !== -1) {
+    event.respondWith(serveMapTile(request));
+    return;
+  }
+
+  // API und übrige externe Dienste: nie cachen
   if (
     url.pathname.startsWith("/api/") ||
     url.pathname.startsWith("/__manus__/") ||
