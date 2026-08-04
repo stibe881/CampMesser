@@ -24,6 +24,7 @@ import {
   Gem,
   Hammer,
   Languages,
+  Leaf,
   ListChecks,
   Sandwich,
   LocateFixed,
@@ -576,6 +577,24 @@ export const modules: Module[] = [
       "Animal tracks, constellations, trees, mushrooms, berries – and your catch log"
     ),
     icon: TreePine,
+    group: "wissen",
+    offline: true,
+  },
+  {
+    path: "/baum-bestimmen",
+    title: l4(
+      "Baum bestimmen",
+      "Identifier un arbre",
+      "Riconosci l'albero",
+      "Identify a tree"
+    ),
+    description: l4(
+      "Frage für Frage zur Baumart – nach dem, was du siehst",
+      "Question après question jusqu'à l'espèce – d'après ce que tu vois",
+      "Domanda dopo domanda fino alla specie – in base a ciò che vedi",
+      "Question by question to the species – based on what you see"
+    ),
+    icon: Leaf,
     group: "wissen",
     offline: true,
   },

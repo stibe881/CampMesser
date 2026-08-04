@@ -33,7 +33,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 6 Punkte
+## Runde 29 – 5 Punkte
 
 ### Reise-Planung
 
@@ -43,7 +43,6 @@ Stand: 4. August 2026
 
 ### Natur
 
-- [ ] **Bestimmungsschlüssel für Bäume** (#293) – Frage für Frage zur Art
 - [ ] **Sternschnuppen-Protokoll** (#294) – Beobachtungsnacht mitzählen, Zeit
       und Richtung festhalten
 

@@ -4010,6 +4010,20 @@ export const de = {
     allDone: "Alles geübt – in einem halben Jahr wieder.",
     note: "Gespeichert wird nur das Datum je Übung, auf diesem Gerät. Keine Namen, keine Nummern: Was ein Kind auswendig können muss, übt man mit ihm, statt es in einer App zu hinterlegen. Nach einem halben Jahr ist eine Übung wieder fällig – Kinder wachsen, und der Platz ist beim nächsten Mal ein anderer.",
   },
+  treeKey: {
+    title: "Baum bestimmen",
+    intro:
+      "Du stehst vor einem Baum und weisst nicht, welcher es ist? Beantworte, was du siehst – nach drei, vier Fragen steht die Art.",
+    step: (number: number) => `Frage ${number}`,
+    resultLabel: "Das ist er wahrscheinlich",
+    markLabel: "Daran erkennst du ihn",
+    checkLabel: "Gegenprobe",
+    confusionLabel: "Verwechselbar mit",
+    toLexicon: "Im Natur-Lexikon nachlesen",
+    back: "Eine Frage zurück",
+    restart: "Von vorne",
+    note: "Der Schlüssel führt zu den neun häufigsten Bäumen unserer Wälder – nicht zu jeder Art. Passt die Gegenprobe nicht, ist es ein anderer Baum: dann lieber weitersuchen als sich festlegen.",
+  },
   rainyDay: {
     title: "Regentag-Ideen",
     intro:

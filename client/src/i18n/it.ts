@@ -3982,6 +3982,20 @@ export const it: Translation = {
     allDone: "Tutto esercitato – di nuovo fra sei mesi.",
     note: "Viene salvata solo la data di ogni esercitazione, su questo dispositivo. Nessun nome, nessun numero: ciò che un bambino deve sapere a memoria si esercita con lui, invece di depositarlo in un'app. Dopo sei mesi un'esercitazione va rifatta – i bambini crescono e il campeggio sarà un altro.",
   },
+  treeKey: {
+    title: "Riconosci l'albero",
+    intro:
+      "Sei davanti a un albero e non sai quale sia? Rispondi a ciò che vedi – dopo tre o quattro domande hai la specie.",
+    step: (number: number) => `Domanda ${number}`,
+    resultLabel: "Probabilmente è questo",
+    markLabel: "Da cosa lo riconosci",
+    checkLabel: "Controprova",
+    confusionLabel: "Si confonde con",
+    toLexicon: "Leggi nel lessico della natura",
+    back: "Domanda precedente",
+    restart: "Ricomincia",
+    note: "La chiave porta ai nove alberi più diffusi dei nostri boschi – non a ogni specie. Se la controprova non torna, è un altro albero: meglio continuare a cercare che decidere in fretta.",
+  },
   rainyDay: {
     title: "Idee per giorni di pioggia",
     intro:

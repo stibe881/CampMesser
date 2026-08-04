@@ -43,6 +43,7 @@ const pageLoaders = {
   RainyDay: () => import("./pages/RainyDay"),
   EmergencyDrill: () => import("./pages/EmergencyDrill"),
   Passport: () => import("./pages/Passport"),
+  TreeKey: () => import("./pages/TreeKey"),
   PackOptimizer: () => import("./pages/PackOptimizer"),
   Family: () => import("./pages/Family"),
   Food: () => import("./pages/Food"),
@@ -140,6 +141,7 @@ const LunchboxPage = lazyWithRetry(pageLoaders.Lunchbox);
 const RainyDayPage = lazyWithRetry(pageLoaders.RainyDay);
 const EmergencyDrillPage = lazyWithRetry(pageLoaders.EmergencyDrill);
 const PassportPage = lazyWithRetry(pageLoaders.Passport);
+const TreeKeyPage = lazyWithRetry(pageLoaders.TreeKey);
 const PackOptimizerPage = lazyWithRetry(pageLoaders.PackOptimizer);
 const FamilyPage = lazyWithRetry(pageLoaders.Family);
 const FoodPage = lazyWithRetry(pageLoaders.Food);
@@ -234,6 +236,7 @@ function Router() {
           <Route path={"/regentag"} component={RainyDayPage} />
           <Route path={"/notfall-uebung"} component={EmergencyDrillPage} />
           <Route path={"/reisepass"} component={PassportPage} />
+          <Route path={"/baum-bestimmen"} component={TreeKeyPage} />
           <Route path={"/packen"} component={PackOptimizerPage} />
           <Route path={"/familie"} component={FamilyPage} />
           <Route path={"/kuehlbox"} component={FoodPage} />

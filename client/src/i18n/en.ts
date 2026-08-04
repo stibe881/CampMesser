@@ -3897,6 +3897,20 @@ export const en: Translation = {
     allDone: "All practised – again in six months.",
     note: "Only the date of each drill is stored, on this device. No names, no numbers: what a child needs to know by heart is practised with them, not filed away in an app. After six months a drill is due again – children grow, and next time the site will be a different one.",
   },
+  treeKey: {
+    title: "Identify a tree",
+    intro:
+      "Standing in front of a tree and not sure which one? Answer what you see – three or four questions and you have the species.",
+    step: (number: number) => `Question ${number}`,
+    resultLabel: "This is most likely it",
+    markLabel: "How you recognise it",
+    checkLabel: "Cross-check",
+    confusionLabel: "Easily confused with",
+    toLexicon: "Read up in the nature guide",
+    back: "One question back",
+    restart: "Start over",
+    note: "The key leads to the nine most common trees of our forests – not to every species. If the cross-check does not fit, it is a different tree: better keep looking than commit.",
+  },
   rainyDay: {
     title: "Rainy-day ideas",
     intro:

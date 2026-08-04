@@ -4007,6 +4007,20 @@ export const fr: Translation = {
     allDone: "Tout est exercé – à refaire dans six mois.",
     note: "Seule la date de chaque exercice est enregistrée, sur cet appareil. Ni noms ni numéros : ce qu'un enfant doit savoir par cœur, on l'exerce avec lui plutôt que de le stocker dans une app. Après six mois, un exercice est à refaire – les enfants grandissent et le camping sera un autre.",
   },
+  treeKey: {
+    title: "Identifier un arbre",
+    intro:
+      "Tu es devant un arbre sans savoir lequel ? Réponds à ce que tu vois – en trois ou quatre questions, l'espèce est trouvée.",
+    step: (number: number) => `Question ${number}`,
+    resultLabel: "C'est probablement lui",
+    markLabel: "Ce qui le trahit",
+    checkLabel: "Contre-épreuve",
+    confusionLabel: "À ne pas confondre avec",
+    toLexicon: "Lire dans le lexique nature",
+    back: "Question précédente",
+    restart: "Recommencer",
+    note: "La clé mène aux neuf arbres les plus fréquents de nos forêts – pas à toutes les espèces. Si la contre-épreuve ne colle pas, c'est un autre arbre : mieux vaut chercher encore que trancher.",
+  },
   rainyDay: {
     title: "Idées pour jour de pluie",
     intro:
