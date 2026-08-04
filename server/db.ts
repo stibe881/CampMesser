@@ -1477,6 +1477,10 @@ export async function updateCampSpot(
       | "pricePerNightRappen"
       | "extraPerNightRappen"
       | "elevationM"
+      | "ratingSanitary"
+      | "ratingQuiet"
+      | "ratingShade"
+      | "ratingKids"
     >
   >
 ) {

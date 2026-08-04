@@ -51,6 +51,7 @@ import PicnicStops from "@/components/PicnicStops";
 import RouteWeather from "@/components/RouteWeather";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
 import NearbyShops from "@/components/NearbyShops";
+import SpotRating from "@/components/SpotRating";
 import NearbyTransit from "@/components/NearbyTransit";
 import TickRiskPanel from "@/components/TickRiskPanel";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
@@ -903,6 +904,19 @@ export default function SpotDetailPage() {
       </div>
 
       {/* Rast unterwegs: Picknickplätze im Korridor der Anfahrt (#250) */}
+      {/* Eigene Bewertung nach Kriterien (#278) – Sanitär, Ruhe, Schatten,
+          Kinderfreundlichkeit einzeln */}
+      <SpotRating
+        spotId={spot.id}
+        ratings={{
+          sanitary: spot.ratingSanitary ?? null,
+          quiet: spot.ratingQuiet ?? null,
+          shade: spot.ratingShade ?? null,
+          kids: spot.ratingKids ?? null,
+        }}
+        className="mb-4"
+      />
+
       {/* Unwetter auf der Fahrtstrecke (#275): Wetter dort, wo man unterwegs
           sein wird – und zu der Zeit, zu der man dort sein wird */}
       <RouteWeather

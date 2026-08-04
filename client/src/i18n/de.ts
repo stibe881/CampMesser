@@ -3827,6 +3827,23 @@ export const de = {
     addAll: (n: number) => `Alle ${n} übernehmen`,
     note: "Vorgeschlagen wird nur, was auf früheren Listen dieses Platzes wirklich stand – keine Standardliste, sondern deine eigene Erfahrung.",
   },
+  spotRating: {
+    sectionAria: "Eigene Bewertung dieses Platzes",
+    title: "Deine Bewertung",
+    subtitle:
+      "Vier Kriterien einzeln – so weisst du beim nächsten Mal, warum dir der Platz gefallen hat.",
+    overall: (value: string, rated: number, total: number) =>
+      `Ø ${value} (${rated} von ${total} bewertet)`,
+    notRated: "Noch nicht bewertet – nochmals antippen nimmt es zurück.",
+    starAria: (stars: number, criterion: string) =>
+      `${criterion}: ${stars} von 5 Sternen`,
+    saveFailed: "Die Bewertung konnte nicht gespeichert werden.",
+    note: "Ein Kriterium darf leer bleiben. Wer im Regen nie draussen sass, kann den Schatten nicht beurteilen – eine erfundene Drei ist schlechter als eine ehrliche Lücke.",
+    compareTitle: "Nach Kriterium vergleichen",
+    compareAll: "Gesamt",
+    compareEmpty: "Noch kein Platz bewertet.",
+    unrated: "–",
+  },
   shops: {
     sectionAria: "Einkaufen in der Nähe",
     title: "Einkaufen in der Nähe",

@@ -77,6 +77,16 @@ export const campSpots = mysqlTable(
      * den Wert einmalig bei der Open-Meteo-Elevation-API und speichert ihn.
      */
     elevationM: int("elevationM"),
+    /**
+     * Eigene Bewertung nach Kriterien (#278), je 1–5 Sterne; null = nicht
+     * bewertet. Bewusst vier Spalten statt einer Tabelle: Es gibt genau
+     * eine Bewertung pro Platz (Plätze gehören ohnehin einem Konto), und
+     * ein leeres Kriterium ist ein gültiger Zustand, kein fehlender Satz.
+     */
+    ratingSanitary: tinyint("ratingSanitary"),
+    ratingQuiet: tinyint("ratingQuiet"),
+    ratingShade: tinyint("ratingShade"),
+    ratingKids: tinyint("ratingKids"),
     /** Öffentlicher Teil-Token: Wer den Link kennt, sieht das Platz-Dossier (nur lesend). */
     shareToken: varchar("shareToken", { length: 32 }),
     /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */

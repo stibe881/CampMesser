@@ -3824,6 +3824,23 @@ export const fr: Translation = {
     addAll: (n: number) => `Tout reprendre (${n})`,
     note: "Ne sont proposés que des objets qui figuraient réellement sur des listes précédentes de cet endroit – pas une liste type, mais ta propre expérience.",
   },
+  spotRating: {
+    sectionAria: "Ton évaluation de cet emplacement",
+    title: "Ton évaluation",
+    subtitle:
+      "Quatre critères séparés – tu sauras la prochaine fois pourquoi l'endroit t'a plu.",
+    overall: (value: string, rated: number, total: number) =>
+      `moy. ${value} (${rated} sur ${total} évalués)`,
+    notRated: "Pas encore évalué – retoucher annule.",
+    starAria: (stars: number, criterion: string) =>
+      `${criterion} : ${stars} étoiles sur 5`,
+    saveFailed: "L'évaluation n'a pas pu être enregistrée.",
+    note: "Un critère peut rester vide. Qui n'est jamais resté dehors sous la pluie ne peut pas juger l'ombre – un trois inventé vaut moins qu'un vide honnête.",
+    compareTitle: "Comparer par critère",
+    compareAll: "Global",
+    compareEmpty: "Aucun emplacement évalué pour l'instant.",
+    unrated: "–",
+  },
   shops: {
     sectionAria: "Faire les courses à proximité",
     title: "Faire les courses à proximité",

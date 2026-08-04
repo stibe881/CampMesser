@@ -3796,6 +3796,23 @@ export const it: Translation = {
     addAll: (n: number) => `Aggiungi tutti (${n})`,
     note: "Vengono proposte solo cose che c'erano davvero nelle liste precedenti di questo posto – non una lista standard, ma la tua esperienza.",
   },
+  spotRating: {
+    sectionAria: "La tua valutazione di questa piazzola",
+    title: "La tua valutazione",
+    subtitle:
+      "Quattro criteri separati – così la prossima volta sai perché il posto ti era piaciuto.",
+    overall: (value: string, rated: number, total: number) =>
+      `media ${value} (${rated} su ${total} valutati)`,
+    notRated: "Non ancora valutato – toccando di nuovo si annulla.",
+    starAria: (stars: number, criterion: string) =>
+      `${criterion}: ${stars} stelle su 5`,
+    saveFailed: "Non è stato possibile salvare la valutazione.",
+    note: "Un criterio può restare vuoto. Chi sotto la pioggia non è mai stato fuori non può giudicare l'ombra – un tre inventato vale meno di un vuoto onesto.",
+    compareTitle: "Confronta per criterio",
+    compareAll: "Totale",
+    compareEmpty: "Nessuna piazzola valutata finora.",
+    unrated: "–",
+  },
   shops: {
     sectionAria: "Fare la spesa nei dintorni",
     title: "Fare la spesa nei dintorni",

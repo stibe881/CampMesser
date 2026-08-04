@@ -18,6 +18,7 @@ import { usePushSubscription } from "@/lib/usePushSubscription";
 import { toast } from "sonner";
 import { Link } from "wouter";
 import PageHeader from "@/components/PageHeader";
+import SpotRatingCompare from "@/components/SpotRatingCompare";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -538,6 +539,22 @@ export default function SpotsPage() {
           </Button>
 
           <PushOptIn hasSpots={(spots?.length ?? 0) > 0} />
+
+          {/* Plätze nach Bewertungs-Kriterien vergleichen (#278) – erscheint
+              erst, wenn mindestens zwei Plätze bewertet sind */}
+          <SpotRatingCompare
+            className="mb-4"
+            spots={(spots ?? []).map(spot => ({
+              id: spot.id,
+              name: spot.name,
+              ratings: {
+                sanitary: spot.ratingSanitary ?? null,
+                quiet: spot.ratingQuiet ?? null,
+                shade: spot.ratingShade ?? null,
+                kids: spot.ratingKids ?? null,
+              },
+            }))}
+          />
 
           {hasAnyAttributes && (
             <div

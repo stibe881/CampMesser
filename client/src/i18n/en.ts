@@ -3715,6 +3715,23 @@ export const en: Translation = {
     addAll: (n: number) => `Add all ${n}`,
     note: "Only things that really were on earlier lists for this place are suggested – not a standard list, but your own experience.",
   },
+  spotRating: {
+    sectionAria: "Your rating of this pitch",
+    title: "Your rating",
+    subtitle:
+      "Four criteria on their own – so next time you know why you liked the place.",
+    overall: (value: string, rated: number, total: number) =>
+      `avg ${value} (${rated} of ${total} rated)`,
+    notRated: "Not rated yet – tapping the same star again clears it.",
+    starAria: (stars: number, criterion: string) =>
+      `${criterion}: ${stars} out of 5 stars`,
+    saveFailed: "The rating could not be saved.",
+    note: "A criterion may stay empty. If you never sat outside in the rain you cannot judge the shade – an invented three is worse than an honest gap.",
+    compareTitle: "Compare by criterion",
+    compareAll: "Overall",
+    compareEmpty: "No pitch rated yet.",
+    unrated: "–",
+  },
   shops: {
     sectionAria: "Shopping nearby",
     title: "Shopping nearby",

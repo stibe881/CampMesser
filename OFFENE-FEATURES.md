@@ -25,14 +25,12 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 28 – 6 Punkte
+## Runde 28 – 5 Punkte
 
 ### Karte & Wetter
 
 ### Platz-Wissen
 
-- [ ] **Eigene Platz-Bewertung** (#278) – Sanitär, Ruhe, Schatten,
-      Kinderfreundlichkeit einzeln bewerten und vergleichen
 - [ ] **Reservation ablegen** (#279) – Buchungsbestätigung als Foto oder PDF an
       der Reise, offline abrufbar
 

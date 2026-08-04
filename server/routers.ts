@@ -148,6 +148,7 @@ import {
   rotateAssignments,
 } from "@shared/chores";
 import { MAX_PACK_SUGGESTIONS, packSuggestions } from "@shared/packHistory";
+import { MAX_STARS, clampStars } from "@shared/spotRatings";
 import {
   parseSpotAttributes,
   SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
@@ -5938,6 +5939,36 @@ export const appRouter = router({
 
   spots: router({
     list: protectedProcedure.query(({ ctx }) => db.getCampSpots(ctx.user.id)),
+    /**
+     * Eigene Bewertung nach Kriterien (#278). Jedes Kriterium darf null
+     * sein – «nicht bewertet» ist ein gültiger Zustand und keine Null.
+     */
+    rate: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          sanitary: z.number().int().min(0).max(MAX_STARS).nullish(),
+          quiet: z.number().int().min(0).max(MAX_STARS).nullish(),
+          shade: z.number().int().min(0).max(MAX_STARS).nullish(),
+          kids: z.number().int().min(0).max(MAX_STARS).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const spot = await db.getCampSpot(input.id, ctx.user.id);
+        if (!spot) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Zeltplatz nicht gefunden.",
+          });
+        }
+        await db.updateCampSpot(input.id, ctx.user.id, {
+          ratingSanitary: clampStars(input.sanitary ?? null),
+          ratingQuiet: clampStars(input.quiet ?? null),
+          ratingShade: clampStars(input.shade ?? null),
+          ratingKids: clampStars(input.kids ?? null),
+        });
+        return { success: true } as const;
+      }),
     add: protectedProcedure
       .input(
         z.object({
