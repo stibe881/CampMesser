@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Redirect, Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import OfflinePrecache from "./components/OfflinePrecache";
 import AppShell from "./components/AppShell";
@@ -30,7 +30,6 @@ const pageLoaders = {
   Clouds: () => import("./pages/Clouds"),
   TentCare: () => import("./pages/TentCare"),
   GearRepair: () => import("./pages/GearRepair"),
-  Treasure: () => import("./pages/Treasure"),
   StoryDice: () => import("./pages/StoryDice"),
   Songbook: () => import("./pages/Songbook"),
   Chores: () => import("./pages/Chores"),
@@ -123,7 +122,6 @@ const NaturePage = lazyWithRetry(pageLoaders.Nature);
 const CloudsPage = lazyWithRetry(pageLoaders.Clouds);
 const TentCarePage = lazyWithRetry(pageLoaders.TentCare);
 const GearRepairPage = lazyWithRetry(pageLoaders.GearRepair);
-const TreasurePage = lazyWithRetry(pageLoaders.Treasure);
 const StoryDicePage = lazyWithRetry(pageLoaders.StoryDice);
 const SongbookPage = lazyWithRetry(pageLoaders.Songbook);
 const ChoresPage = lazyWithRetry(pageLoaders.Chores);
@@ -207,7 +205,12 @@ function Router() {
           <Route path={"/wolken"} component={CloudsPage} />
           <Route path={"/zeltpflege"} component={TentCarePage} />
           <Route path={"/reparatur"} component={GearRepairPage} />
-          <Route path={"/schatzsuche"} component={TreasurePage} />
+          {/* Die GPS-Schatzsuche lebt seit der Zusammenlegung im
+              Familien-Modus; alte Lesezeichen und Startbildschirm-Verknüpfungen
+              sollen trotzdem irgendwo landen */}
+          <Route path={"/schatzsuche"}>
+            <Redirect to="/familie" replace />
+          </Route>
           <Route path={"/erzaehlwuerfel"} component={StoryDicePage} />
           <Route path={"/liederbuch"} component={SongbookPage} />
           <Route path={"/aemtli"} component={ChoresPage} />

@@ -3008,6 +3008,9 @@ export const it: Translation = {
     subtitle:
       "Nascondi tesori sul posto – i bambini cercano con «caldo e freddo» e una freccia.",
     loginFeature: "la caccia al tesoro GPS",
+    openSection: "Apri la caccia al tesoro",
+    openSectionHint:
+      "Posizione e bussola si avviano solo quando apri la caccia al tesoro – altrimenti consumerebbero batteria inutilmente.",
     defaultName: "Caccia al tesoro",
     newHunt: "Nuova caccia",
     removeHunt: "Elimina questa caccia",
@@ -3834,6 +3837,29 @@ export const it: Translation = {
     descent: "Discesa",
     download: "Scarica in GPX",
     note: "Vista condivisa – mappa e profilo provengono dalla registrazione. La serie di punti è stata alleggerita per la panoramica.",
+  },
+  parking: {
+    title: "Auto",
+    targetName: "Auto",
+    empty: "Nessuna posizione memorizzata. Basta un tocco scendendo.",
+    park: "Parcheggiata qui",
+    reparked: "Parcheggiata altrove",
+    parkedToast: "Posizione dell'auto memorizzata.",
+    parkedSince: (time: string, duration: string) =>
+      `Qui dalle ${time} – ${duration}.`,
+    durationHours: (h: number, m: number) => `${h} h ${m} min`,
+    durationMinutes: (m: number) => `${m} min`,
+    limit: "Tempo di sosta:",
+    limitNone: "senza",
+    limitLabel: (minutes: number) =>
+      minutes < 60 ? `${minutes} min` : `${minutes / 60} h`,
+    remaining: (duration: string) => `Ancora ${duration} di sosta.`,
+    expired: "Tempo di sosta scaduto.",
+    noteLabel: "Nota sulla posizione",
+    notePlaceholder: "p. es. livello 3, fila C",
+    navigate: "Torna all'auto",
+    forgetAria: "Elimina la posizione dell'auto",
+    forgotten: "Posizione dell'auto eliminata.",
   },
   routePlan: {
     sectionAria: "Disegnare il percorso in anticipo",

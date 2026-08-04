@@ -25,15 +25,6 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 28 – 1 Punkt
-
-### Wandern
-
-- [ ] **Auto-Standort merken** (#283) – wo steht das Fahrzeug, mit
-      Kompass-Peilung zurück
-
----
-
 ## Runde 29 – 15 Punkte
 
 ### Reise-Planung

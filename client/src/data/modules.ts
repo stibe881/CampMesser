@@ -574,23 +574,6 @@ export const modules: Module[] = [
     offline: true,
   },
   {
-    path: "/schatzsuche",
-    title: l4(
-      "GPS-Schatzsuche",
-      "Chasse au trésor GPS",
-      "Caccia al tesoro GPS",
-      "GPS treasure hunt"
-    ),
-    description: l4(
-      "Verstecke am Platz anlegen, Kinder suchen mit warm und kalt",
-      "Cache des trésors sur place, les enfants cherchent au chaud-froid",
-      "Nascondi tesori sul posto, i bambini cercano con caldo e freddo",
-      "Hide caches on site, kids search by hot and cold"
-    ),
-    icon: Gem,
-    group: "Erste Hilfe",
-  },
-  {
     path: "/erzaehlwuerfel",
     title: l4(
       "Erzählwürfel",
@@ -652,10 +635,10 @@ export const modules: Module[] = [
       "Family mode"
     ),
     description: l4(
-      "Kinder-Checklisten, Schnitzeljagden und Quiz",
-      "Checklists pour enfants, chasses au trésor et quiz",
-      "Checklist per bambini, cacce al tesoro e quiz",
-      "Kids' checklists, scavenger hunts and quizzes"
+      "Schnitzeljagden, Quiz, Abzeichen und GPS-Schatzsuche",
+      "Chasses au trésor, quiz, badges et chasse au trésor GPS",
+      "Cacce al tesoro, quiz, distintivi e caccia al tesoro GPS",
+      "Scavenger hunts, quizzes, badges and GPS treasure hunt"
     ),
     icon: Users,
     // Inhaltlich Wissen & Freizeit – der Gruppen-Schlüssel «Erste Hilfe»

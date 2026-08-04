@@ -31,6 +31,7 @@ import {
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import TreasureHunt from "@/components/TreasureHunt";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -2078,6 +2079,12 @@ export default function FamilyPage() {
           </div>
         </>
       )}
+
+      {/* GPS-Schatzsuche (#267): war eine eigene Kachel zwischen Erste
+          Hilfe und Knoten – dort sucht sie niemand. Sie gehört dorthin, wo
+          Eltern nach Beschäftigung für die Kinder schauen. GPS und Kompass
+          starten erst auf Knopfdruck. */}
+      <TreasureHunt />
 
       {/* Natur-Quizze */}
       <h2 className="mb-1 font-serif text-xl font-semibold">

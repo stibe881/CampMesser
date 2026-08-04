@@ -1,6 +1,11 @@
 /**
  * GPS-Schatzsuche (#267): Verstecke am Platz anlegen und suchen.
  *
+ * Sitzt seit der Zusammenlegung IM FAMILIEN-MODUS statt in einem eigenen
+ * Modul – dort suchen Eltern ohnehin nach Beschäftigung für die Kinder,
+ * und die Schatzsuche stand als eigene Kachel zwischen Erste Hilfe und
+ * Knoten am falschen Ort.
+ *
  * Zwei Rollen in einer Ansicht: Erwachsene legen die Verstecke an – immer
  * am Ort, an dem sie gerade stehen, denn Koordinaten von Hand einzutippen
  * macht niemand. Kinder suchen dann mit «warm/kalt» und einem Pfeil.
@@ -9,12 +14,19 @@
  * liegt, und aus der Schatzsuche wird ein Spaziergang zum Pin. Distanz,
  * Richtung und die Wärme-Stufe reichen – und der Blick geht dorthin, wo er
  * hingehört: nach draussen.
+ *
+ * GPS UND KOMPASS LAUFEN ERST AUF KNOPFDRUCK. Als eigene Seite war das
+ * egal – wer sie öffnete, wollte die Schatzsuche. Im Familien-Modus wäre
+ * es das nicht: Wer nur ein Quiz sucht, soll weder einen Standort-Dialog
+ * sehen noch das GPS mitlaufen lassen.
  */
 import { useEffect, useMemo, useState } from "react";
 import {
+  ChevronDown,
   Compass,
   Eye,
   Flag,
+  Gem,
   MapPin,
   Plus,
   RotateCcw,
@@ -22,7 +34,6 @@ import {
   Trophy,
 } from "lucide-react";
 import { toast } from "sonner";
-import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -70,14 +81,17 @@ const warmthStyles: Record<Warmth, string> = {
   gefunden: "border-primary/40 bg-primary/10 text-primary",
 };
 
-export default function TreasurePage() {
+export default function TreasureHunt({ className }: { className?: string }) {
   const { lang, t } = useI18n();
   const tt = t.treasure;
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
 
+  /** Zu, bis jemand die Schatzsuche wirklich will (GPS, Kompass, Abfrage). */
+  const [open, setOpen] = useState(false);
+
   const huntsQuery = trpc.treasure.list.useQuery(undefined, {
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && open,
   });
   const hunts = useMemo(() => huntsQuery.data ?? [], [huntsQuery.data]);
 
@@ -90,11 +104,13 @@ export default function TreasurePage() {
   const { heading, start } = useDeviceHeading();
 
   useEffect(() => {
+    if (!open) return;
     void start();
-  }, [start]);
+  }, [open, start]);
 
   // Standort laufend verfolgen – ohne ihn geht weder Verstecken noch Suchen
   useEffect(() => {
+    if (!open) return;
     if (!navigator.geolocation) {
       setGeoError(true);
       return;
@@ -112,7 +128,7 @@ export default function TreasurePage() {
       { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 }
     );
     return () => navigator.geolocation.clearWatch(watchId);
-  }, []);
+  }, [open]);
 
   const refresh = () => utils.treasure.list.invalidate();
   const createHunt = trpc.treasure.create.useMutation({
@@ -181,18 +197,46 @@ export default function TreasurePage() {
   }, [fix, target]);
 
   if (loading) return null;
+
+  /** Überschrift des Abschnitts – im Familien-Modus wie die Nachbarn. */
+  const sectionHeading = (
+    <>
+      <h2 className="mb-1 flex items-center gap-2 font-serif text-xl font-semibold">
+        <Gem className="h-5 w-5 text-primary" aria-hidden="true" />
+        {tt.title}
+      </h2>
+      <p className="mb-3 text-sm text-muted-foreground">{tt.subtitle}</p>
+    </>
+  );
+
   if (!isAuthenticated) {
     return (
-      <div className="container max-w-3xl py-6">
-        <PageHeader title={tt.title} subtitle={tt.subtitle} />
+      <section className={cn("mb-8", className)} aria-label={tt.title}>
+        {sectionHeading}
         <LoginPrompt feature={tt.loginFeature} />
-      </div>
+      </section>
+    );
+  }
+
+  if (!open) {
+    return (
+      <section className={cn("mb-8", className)} aria-label={tt.title}>
+        {sectionHeading}
+        <Button variant="outline" onClick={() => setOpen(true)}>
+          <ChevronDown className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          {tt.openSection}
+        </Button>
+        {/* Ehrlich sagen, warum der Knopf da ist und nicht gleich alles läuft */}
+        <p className="mt-2 text-xs text-muted-foreground">
+          {tt.openSectionHint}
+        </p>
+      </section>
     );
   }
 
   return (
-    <div className="container max-w-3xl py-6">
-      <PageHeader title={tt.title} subtitle={tt.subtitle} />
+    <section className={cn("mb-8", className)} aria-label={tt.title}>
+      {sectionHeading}
 
       {geoError && (
         <p className="mb-4 rounded-lg border border-amber-600/40 bg-amber-500/10 p-3 text-sm">
@@ -533,6 +577,6 @@ export default function TreasurePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </section>
   );
 }

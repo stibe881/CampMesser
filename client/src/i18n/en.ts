@@ -2939,6 +2939,9 @@ export const en: Translation = {
     subtitle:
       "Hide caches on site – the kids search by “hot and cold” with an arrow.",
     loginFeature: "the GPS treasure hunt",
+    openSection: "Open the treasure hunt",
+    openSectionHint:
+      "Location and compass only start once you open the treasure hunt – otherwise they would drain the battery for nothing.",
     defaultName: "Treasure hunt",
     newHunt: "New hunt",
     removeHunt: "Delete this hunt",
@@ -3753,6 +3756,29 @@ export const en: Translation = {
     descent: "Descent",
     download: "Download as GPX",
     note: "Shared view – map and profile come from the recording. The point series was thinned for the overview.",
+  },
+  parking: {
+    title: "Car",
+    targetName: "Car",
+    empty: "No spot saved yet. One tap as you get out is enough.",
+    park: "Parked here",
+    reparked: "Parked somewhere else",
+    parkedToast: "Car location saved.",
+    parkedSince: (time: string, duration: string) =>
+      `Here since ${time} – ${duration}.`,
+    durationHours: (h: number, m: number) => `${h} h ${m} min`,
+    durationMinutes: (m: number) => `${m} min`,
+    limit: "Parking time:",
+    limitNone: "none",
+    limitLabel: (minutes: number) =>
+      minutes < 60 ? `${minutes} min` : `${minutes / 60} h`,
+    remaining: (duration: string) => `${duration} of parking left.`,
+    expired: "Parking time is up.",
+    noteLabel: "Note about the spot",
+    notePlaceholder: "e.g. level 3, row C",
+    navigate: "Back to the car",
+    forgetAria: "Delete car location",
+    forgotten: "Car location deleted.",
   },
   routePlan: {
     sectionAria: "Plan a route in advance",

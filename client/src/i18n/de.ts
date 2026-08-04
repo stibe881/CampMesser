@@ -3041,6 +3041,9 @@ export const de = {
     subtitle:
       "Verstecke am Platz anlegen – die Kinder suchen mit «warm und kalt» und einem Pfeil.",
     loginFeature: "die GPS-Schatzsuche",
+    openSection: "Schatzsuche öffnen",
+    openSectionHint:
+      "Standort und Kompass laufen erst, wenn du die Schatzsuche öffnest – sonst brauchen sie hier unnötig Strom.",
     defaultName: "Schatzsuche",
     newHunt: "Neue Suche",
     removeHunt: "Diese Suche löschen",
@@ -3865,6 +3868,29 @@ export const de = {
     descent: "Abstieg",
     download: "Als GPX herunterladen",
     note: "Geteilte Ansicht – Karte und Profil stammen aus der Aufzeichnung. Für die Übersicht wurde die Punktreihe ausgedünnt.",
+  },
+  parking: {
+    title: "Auto",
+    targetName: "Auto",
+    empty: "Noch kein Standort gemerkt. Ein Tipp beim Aussteigen genügt.",
+    park: "Auto hier parkiert",
+    reparked: "Neu hier parkiert",
+    parkedToast: "Auto-Standort gemerkt.",
+    parkedSince: (time: string, duration: string) =>
+      `Seit ${time} hier – ${duration}.`,
+    durationHours: (h: number, m: number) => `${h} h ${m} min`,
+    durationMinutes: (m: number) => `${m} min`,
+    limit: "Parkzeit:",
+    limitNone: "ohne",
+    limitLabel: (minutes: number) =>
+      minutes < 60 ? `${minutes} min` : `${minutes / 60} h`,
+    remaining: (duration: string) => `Noch ${duration} Parkzeit.`,
+    expired: "Parkzeit abgelaufen.",
+    noteLabel: "Notiz zum Standort",
+    notePlaceholder: "z. B. Ebene 3, Reihe C",
+    navigate: "Zurück zum Auto",
+    forgetAria: "Auto-Standort löschen",
+    forgotten: "Auto-Standort gelöscht.",
   },
   routePlan: {
     sectionAria: "Route vorher zeichnen",
