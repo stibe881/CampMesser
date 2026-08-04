@@ -389,7 +389,8 @@ export default function RouteWeather({
               <p className="mt-3 text-sm font-medium">
                 {tr.summary(
                   formatDistance(totalKm * 1000, lang),
-                  Math.round(totalMinutes)
+                  Math.round(totalMinutes),
+                  estimated
                 )}
               </p>
               <p

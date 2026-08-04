@@ -3804,8 +3804,10 @@ export const fr: Translation = {
       "Pas de point de départ : enregistre un domicile dans le profil ou autorise la localisation.",
     tooShort: (km: number) =>
       `En dessous de ${km} km, l'analyse du trajet n'apporte rien – l'alerte à l'arrivée suffit.`,
-    summary: (distance: string, minutes: number) =>
-      `${distance} à vol d'oiseau, environ ${Math.floor(minutes / 60)} h ${minutes % 60} min de route.`,
+    summary: (distance: string, minutes: number, estimated: boolean) =>
+      estimated
+        ? `${distance} à vol d'oiseau, environ ${Math.floor(minutes / 60)} h ${minutes % 60} min de route.`
+        : `${distance} par la route, ${Math.floor(minutes / 60)} h ${minutes % 60} min de trajet.`,
     allClear: "Rien de particulier sur tout le trajet aux heures estimées.",
     worstLine: {
       info: "Broutilles en route – rien qui concerne la conduite.",
@@ -3950,7 +3952,10 @@ export const fr: Translation = {
     departureLabel: "Départ",
     departureDayBefore: (days: number) =>
       days === 1 ? "Départ – la veille" : `Départ – ${days} jours avant`,
-    driveLine: (distance: string) => `Trajet (${distance} à vol d'oiseau)`,
+    driveLine: (distance: string, estimated: boolean) =>
+      estimated
+        ? `Trajet (${distance} à vol d'oiseau, estimé)`
+        : `Trajet (${distance} par la route)`,
     breaksLine: (count: number, each: number) =>
       count === 0
         ? "Aucune pause nécessaire"

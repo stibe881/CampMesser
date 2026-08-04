@@ -3694,8 +3694,10 @@ export const en: Translation = {
       "No starting point: save a home location in your profile or allow location access.",
     tooShort: (km: number) =>
       `Under ${km} km a route check adds nothing – the warning at the destination is enough.`,
-    summary: (distance: string, minutes: number) =>
-      `${distance} as the crow flies, roughly ${Math.floor(minutes / 60)} h ${minutes % 60} min of driving.`,
+    summary: (distance: string, minutes: number, estimated: boolean) =>
+      estimated
+        ? `${distance} as the crow flies, roughly ${Math.floor(minutes / 60)} h ${minutes % 60} min of driving.`
+        : `${distance} by road, ${Math.floor(minutes / 60)} h ${minutes % 60} min of driving.`,
     allClear:
       "Nothing notable anywhere along the route at the estimated times.",
     worstLine: {
@@ -3840,7 +3842,10 @@ export const en: Translation = {
     departureLabel: "Leave at",
     departureDayBefore: (days: number) =>
       days === 1 ? "Leave – the day before" : `Leave – ${days} days earlier`,
-    driveLine: (distance: string) => `Drive (${distance} as the crow flies)`,
+    driveLine: (distance: string, estimated: boolean) =>
+      estimated
+        ? `Drive (${distance} as the crow flies, estimated)`
+        : `Drive (${distance} by road)`,
     breaksLine: (count: number, each: number) =>
       count === 0
         ? "No break needed"

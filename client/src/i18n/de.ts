@@ -3806,8 +3806,10 @@ export const de = {
       "Kein Startpunkt: Hinterlege im Profil einen Heimatort oder erlaube den Standort.",
     tooShort: (km: number) =>
       `Unter ${km} km lohnt die Streckenprüfung nicht – da genügt die Warnung am Ziel.`,
-    summary: (distance: string, minutes: number) =>
-      `${distance} Luftlinie, geschätzt ${Math.floor(minutes / 60)} Std. ${minutes % 60} Min. Fahrt.`,
+    summary: (distance: string, minutes: number, estimated: boolean) =>
+      estimated
+        ? `${distance} Luftlinie, geschätzt ${Math.floor(minutes / 60)} Std. ${minutes % 60} Min. Fahrt.`
+        : `${distance} über die Strasse, ${Math.floor(minutes / 60)} Std. ${minutes % 60} Min. Fahrt.`,
     allClear:
       "Auf der ganzen Strecke ist zur geschätzten Zeit nichts Auffälliges.",
     worstLine: {
@@ -3953,7 +3955,10 @@ export const de = {
     departureLabel: "Losfahren",
     departureDayBefore: (days: number) =>
       days === 1 ? "Losfahren – am Vortag" : `Losfahren – ${days} Tage vorher`,
-    driveLine: (distance: string) => `Fahrt (${distance} Luftlinie)`,
+    driveLine: (distance: string, estimated: boolean) =>
+      estimated
+        ? `Fahrt (${distance} Luftlinie, geschätzt)`
+        : `Fahrt (${distance} über die Strasse)`,
     breaksLine: (count: number, each: number) =>
       count === 0
         ? "Keine Pause nötig"

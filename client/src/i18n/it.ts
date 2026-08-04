@@ -3776,8 +3776,10 @@ export const it: Translation = {
       "Nessun punto di partenza: registra un domicilio nel profilo o consenti la posizione.",
     tooShort: (km: number) =>
       `Sotto i ${km} km il controllo del percorso non serve – basta l'allerta all'arrivo.`,
-    summary: (distance: string, minutes: number) =>
-      `${distance} in linea d'aria, circa ${Math.floor(minutes / 60)} h ${minutes % 60} min di viaggio.`,
+    summary: (distance: string, minutes: number, estimated: boolean) =>
+      estimated
+        ? `${distance} in linea d'aria, circa ${Math.floor(minutes / 60)} h ${minutes % 60} min di viaggio.`
+        : `${distance} su strada, ${Math.floor(minutes / 60)} h ${minutes % 60} min di viaggio.`,
     allClear: "Su tutto il percorso, agli orari stimati, nulla di rilevante.",
     worstLine: {
       info: "Piccolezze lungo la strada – nulla che riguardi la guida.",
@@ -3923,7 +3925,10 @@ export const it: Translation = {
       days === 1
         ? "Partenza – il giorno prima"
         : `Partenza – ${days} giorni prima`,
-    driveLine: (distance: string) => `Viaggio (${distance} in linea d'aria)`,
+    driveLine: (distance: string, estimated: boolean) =>
+      estimated
+        ? `Viaggio (${distance} in linea d'aria, stimato)`
+        : `Viaggio (${distance} su strada)`,
     breaksLine: (count: number, each: number) =>
       count === 0
         ? "Nessuna pausa necessaria"
