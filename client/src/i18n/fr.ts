@@ -3914,6 +3914,36 @@ export const fr: Translation = {
       }.`,
     createFailed: "Le voyage n'a pas pu être créé.",
   },
+  departure: {
+    title: "Meilleure heure de départ",
+    intro: "Quand partir pour être là à l'heure d'arrivée – pauses comprises.",
+    openButton: "Calculer le départ",
+    loginNote: "Il faut être connecté pour cela.",
+    noHome: "Ton domicile manque pour le calcul.",
+    noHomeLink: "Le définir dans le profil",
+    arrivalLabel: "Arrivée / check-in",
+    profileLabel: "Qui voyage ?",
+    profiles: {
+      keine: "Sans pauses",
+      erwachsene: "Adultes (toutes les 3 h)",
+      kinder: "Avec enfants (toutes les 2 h)",
+      kleinkinder: "Avec tout-petits (toutes les 1,5 h)",
+    },
+    departureLabel: "Départ",
+    departureDayBefore: (days: number) =>
+      days === 1 ? "Départ – la veille" : `Départ – ${days} jours avant`,
+    driveLine: (distance: string) => `Trajet (${distance} à vol d'oiseau)`,
+    breaksLine: (count: number, each: number) =>
+      count === 0
+        ? "Aucune pause nécessaire"
+        : count === 1
+          ? `1 pause de ${each} min`
+          : `${count} pauses de ${each} min`,
+    bufferLine: "Marge pour la barrière et l'enregistrement",
+    totalLine: "Total en route",
+    stopsLine: (times: string) => `Pauses vers ${times}.`,
+    note: "Estimation à vol d'oiseau à 70 km/h de moyenne – ce n'est pas un calculateur d'itinéraire. Bouchons, chantiers et attentes à la frontière s'y ajoutent.",
+  },
   routePlan: {
     sectionAria: "Tracer un itinéraire à l'avance",
     title: "Tracer un itinéraire",

@@ -49,6 +49,7 @@ import NearbyExcursions from "@/components/NearbyExcursions";
 import NearbyFirepits from "@/components/NearbyFirepits";
 import PicnicStops from "@/components/PicnicStops";
 import RouteWeather from "@/components/RouteWeather";
+import DeparturePlanner from "@/components/DeparturePlanner";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
 import NearbyShops from "@/components/NearbyShops";
 import SpotRating from "@/components/SpotRating";
@@ -914,6 +915,14 @@ export default function SpotDetailPage() {
           shade: spot.ratingShade ?? null,
           kids: spot.ratingKids ?? null,
         }}
+        className="mb-4"
+      />
+
+      {/* Beste Abfahrtszeit (#285): von der Check-in-Zeit rückwärts,
+          Pausen eingerechnet */}
+      <DeparturePlanner
+        latitude={spot.latitude}
+        longitude={spot.longitude}
         className="mb-4"
       />
 

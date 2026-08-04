@@ -3916,6 +3916,37 @@ export const de = {
       }.`,
     createFailed: "Die Reise konnte nicht angelegt werden.",
   },
+  departure: {
+    title: "Beste Abfahrtszeit",
+    intro:
+      "Wann losfahren, um zur Check-in-Zeit da zu sein – Pausen eingerechnet.",
+    openButton: "Abfahrt berechnen",
+    loginNote: "Dafür musst du angemeldet sein.",
+    noHome: "Für die Rechnung fehlt dein Heim-Standort.",
+    noHomeLink: "Im Profil setzen",
+    arrivalLabel: "Ankunft / Check-in",
+    profileLabel: "Wer fährt mit?",
+    profiles: {
+      keine: "Ohne Pausen",
+      erwachsene: "Erwachsene (alle 3 h)",
+      kinder: "Mit Kindern (alle 2 h)",
+      kleinkinder: "Mit Kleinkindern (alle 1,5 h)",
+    },
+    departureLabel: "Losfahren",
+    departureDayBefore: (days: number) =>
+      days === 1 ? "Losfahren – am Vortag" : `Losfahren – ${days} Tage vorher`,
+    driveLine: (distance: string) => `Fahrt (${distance} Luftlinie)`,
+    breaksLine: (count: number, each: number) =>
+      count === 0
+        ? "Keine Pause nötig"
+        : count === 1
+          ? `1 Pause à ${each} min`
+          : `${count} Pausen à ${each} min`,
+    bufferLine: "Puffer für Schranke und Anmeldung",
+    totalLine: "Gesamt unterwegs",
+    stopsLine: (times: string) => `Pausen etwa um ${times}.`,
+    note: "Geschätzt über die Luftlinie mit 70 km/h Schnitt – kein Routenplaner. Stau, Baustellen und Grenzwartezeiten kommen dazu.",
+  },
   routePlan: {
     sectionAria: "Route vorher zeichnen",
     title: "Route zeichnen",

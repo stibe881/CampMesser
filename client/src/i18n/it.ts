@@ -3885,6 +3885,38 @@ export const it: Translation = {
       }.`,
     createFailed: "Il viaggio non è stato creato.",
   },
+  departure: {
+    title: "Orario di partenza migliore",
+    intro: "Quando partire per arrivare all'ora del check-in – pause incluse.",
+    openButton: "Calcola la partenza",
+    loginNote: "Per questo devi essere connesso.",
+    noHome: "Per il calcolo manca il tuo domicilio.",
+    noHomeLink: "Impostalo nel profilo",
+    arrivalLabel: "Arrivo / check-in",
+    profileLabel: "Chi viaggia?",
+    profiles: {
+      keine: "Senza pause",
+      erwachsene: "Adulti (ogni 3 h)",
+      kinder: "Con bambini (ogni 2 h)",
+      kleinkinder: "Con bimbi piccoli (ogni 1,5 h)",
+    },
+    departureLabel: "Partenza",
+    departureDayBefore: (days: number) =>
+      days === 1
+        ? "Partenza – il giorno prima"
+        : `Partenza – ${days} giorni prima`,
+    driveLine: (distance: string) => `Viaggio (${distance} in linea d'aria)`,
+    breaksLine: (count: number, each: number) =>
+      count === 0
+        ? "Nessuna pausa necessaria"
+        : count === 1
+          ? `1 pausa di ${each} min`
+          : `${count} pause di ${each} min`,
+    bufferLine: "Margine per sbarra e registrazione",
+    totalLine: "Totale in viaggio",
+    stopsLine: (times: string) => `Pause verso le ${times}.`,
+    note: "Stima in linea d'aria con una media di 70 km/h – non è un calcolatore di percorso. Code, cantieri e attese al confine si aggiungono.",
+  },
   routePlan: {
     sectionAria: "Disegnare il percorso in anticipo",
     title: "Disegnare il percorso",

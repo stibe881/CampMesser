@@ -3804,6 +3804,36 @@ export const en: Translation = {
       }.`,
     createFailed: "The trip could not be created.",
   },
+  departure: {
+    title: "Best departure time",
+    intro: "When to leave to arrive by check-in time – breaks included.",
+    openButton: "Work out departure",
+    loginNote: "You need to be signed in for this.",
+    noHome: "Your home location is missing for the calculation.",
+    noHomeLink: "Set it in your profile",
+    arrivalLabel: "Arrival / check-in",
+    profileLabel: "Who is travelling?",
+    profiles: {
+      keine: "No breaks",
+      erwachsene: "Adults (every 3 h)",
+      kinder: "With children (every 2 h)",
+      kleinkinder: "With toddlers (every 1.5 h)",
+    },
+    departureLabel: "Leave at",
+    departureDayBefore: (days: number) =>
+      days === 1 ? "Leave – the day before" : `Leave – ${days} days earlier`,
+    driveLine: (distance: string) => `Drive (${distance} as the crow flies)`,
+    breaksLine: (count: number, each: number) =>
+      count === 0
+        ? "No break needed"
+        : count === 1
+          ? `1 break of ${each} min`
+          : `${count} breaks of ${each} min`,
+    bufferLine: "Buffer for barrier and check-in",
+    totalLine: "Total on the road",
+    stopsLine: (times: string) => `Breaks at roughly ${times}.`,
+    note: "Estimated as the crow flies at an average of 70 km/h – not a route planner. Traffic, roadworks and border queues come on top.",
+  },
   routePlan: {
     sectionAria: "Plan a route in advance",
     title: "Draw a route",
