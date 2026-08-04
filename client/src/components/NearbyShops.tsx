@@ -35,6 +35,8 @@ import {
 } from "@/lib/overpass";
 import { useI18n } from "@/i18n";
 import { formatDistance } from "@shared/geo";
+import { applyRouteDistances } from "@shared/routing";
+import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import { hoursForDay, isOpenAt } from "@shared/openingHours";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +70,18 @@ export default function NearbyShops({
   const [radiusM, setRadiusM] = useState(SHOP_DEFAULT_RADIUS_M);
   const [status, setStatus] = useState<Status>("idle");
   const [shops, setShops] = useState<ShopDistance[]>([]);
+  // Wegstrecke statt Luftlinie (eine Tabellen-Abfrage für die ganze Liste):
+  // Der Laden am anderen Flussufer ist 500 m entfernt und 6 km weit weg
+  const routed = useRoutedDistances(
+    shops.length > 0 ? { lat: latitude, lon: longitude } : null,
+    shops.map(({ place }) => ({
+      id: place.id,
+      lat: place.lat,
+      lon: place.lon,
+    })),
+    "car"
+  );
+  const shopList = applyRouteDistances(shops, routed.byId);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => () => abortRef.current?.abort(), []);
@@ -197,7 +211,7 @@ export default function NearbyShops({
                 {tp.resultCount(shops.length)}
               </p>
               <ul className="mt-2 space-y-3">
-                {shops.map(({ place, distanceM }) => {
+                {shopList.map(({ place, distanceM, routed: byRoad }) => {
                   const kindLabel = tp.kind[place.kind];
                   const title = place.name ?? kindLabel;
                   const KindIcon = kindIcons[place.kind];
@@ -218,7 +232,11 @@ export default function NearbyShops({
                           {kindLabel}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {tp.distanceAway(formatDistance(distanceM, lang))}
+                          {byRoad
+                            ? t.common.distanceByRoad(
+                                formatDistance(distanceM, lang)
+                              )
+                            : tp.distanceAway(formatDistance(distanceM, lang))}
                         </span>
                       </div>
 

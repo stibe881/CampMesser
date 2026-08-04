@@ -13,9 +13,12 @@
  *    Umwegfaktor – als Schätzung gekennzeichnet, nie als Messung.
  */
 import {
+  MAX_TABLE_TARGETS,
   estimateRoadDistanceM,
   osrmRouteUrl,
+  osrmTableUrl,
   parseOsrmRoute,
+  parseOsrmTable,
   routeCacheKey,
   type RouteResult,
   type RoutingProfile,
@@ -162,4 +165,60 @@ export async function routeOrEstimate(
 ): Promise<RouteResult> {
   const route = await fetchRoute(points, profile, options);
   return route ?? estimatedRoute(points, fallbackSpeedKmh);
+}
+
+// ── Distanzen zu vielen Fundorten ─────────────────────────────────────────
+
+/** Zwischenspeicher der Tabellen-Abfragen (Sitzung, nicht localStorage). */
+const tableCache = new Map<string, Map<string, number>>();
+
+/**
+ * Wegstrecken vom Standort zu mehreren Fundorten – EINE Abfrage für die
+ * ganze Liste.
+ *
+ * Die Suche selbst (Overpass) arbeitet weiter mit einem Radius auf der
+ * Luftlinie; das ist die Frage «was ist in der Nähe». Was danach ANGEZEIGT
+ * und SORTIERT wird, ist die Wegstrecke: Am anderen Flussufer sind
+ * fünfhundert Meter Luftlinie sechs Kilometer über die Brücke.
+ *
+ * Liefert eine leere Map, wenn nichts zu holen war – die Ansicht bleibt
+ * dann bei der Luftlinie und sagt das.
+ */
+export async function fetchPlaceDistances(
+  origin: GeoPoint,
+  targets: { id: string; lat: number; lon: number }[],
+  profile: RoutingProfile,
+  options: { signal?: AbortSignal } = {}
+): Promise<Map<string, number>> {
+  const limited = targets.slice(0, MAX_TABLE_TARGETS);
+  if (limited.length === 0) return new Map();
+  const key = `${profile}:${origin.lat.toFixed(3)},${origin.lon.toFixed(3)}|${limited
+    .map(t => t.id)
+    .join(",")}`;
+  const cached = tableCache.get(key);
+  if (cached) return cached;
+
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const onAbort = () => controller.abort();
+  options.signal?.addEventListener("abort", onAbort);
+  try {
+    const response = await fetch(osrmTableUrl(profile, origin, limited), {
+      signal: controller.signal,
+    });
+    if (!response.ok) return new Map();
+    const values = parseOsrmTable(await response.json(), limited.length);
+    const result = new Map<string, number>();
+    limited.forEach((target, index) => {
+      const value = values[index];
+      if (value != null) result.set(target.id, value);
+    });
+    tableCache.set(key, result);
+    return result;
+  } catch {
+    return new Map();
+  } finally {
+    window.clearTimeout(timer);
+    options.signal?.removeEventListener("abort", onAbort);
+  }
 }

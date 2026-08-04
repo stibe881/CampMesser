@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   DETOUR_FACTOR,
+  applyRouteDistances,
+  osrmTableUrl,
+  parseOsrmTable,
   estimateRoadDistanceM,
   offsetOnRoute,
   osrmRouteUrl,
@@ -155,5 +158,70 @@ describe("Echte Wegstrecken (Routing)", () => {
   it("kommt mit einer leeren Route zurecht", () => {
     expect(offsetOnRoute(ZUERICH, [])).toBeNull();
     expect(pointsAlongRoute([], 5)).toEqual([]);
+  });
+});
+
+describe("Distanzen zu Fundorten über den Weg", () => {
+  it("fragt alle Ziele in EINER Tabellen-Anfrage ab", () => {
+    const url = osrmTableUrl("foot", ZUERICH, [BIEL, { lat: 47, lon: 8 }]);
+    expect(url).toContain("/routed-foot/table/v1/driving/");
+    // Standort zuerst, danach die Ziele – und nur der Standort ist Quelle
+    expect(url).toContain("8.54170,47.37690;7.44740,46.94800;8.00000,47.00000");
+    expect(url).toContain("sources=0");
+    expect(url).toContain("annotations=distance");
+  });
+
+  it("liest die Wegstrecken je Ziel aus der Antwort", () => {
+    const distances = parseOsrmTable(
+      { code: "Ok", distances: [[0, 983.7, 1392.7]] },
+      2
+    );
+    expect(distances).toEqual([983.7, 1392.7]);
+  });
+
+  it("macht aus unerreichbaren Zielen null statt einer Zahl", () => {
+    expect(
+      parseOsrmTable({ code: "Ok", distances: [[0, null, 500]] }, 2)
+    ).toEqual([null, 500]);
+    expect(parseOsrmTable({ code: "NoTable" }, 2)).toEqual([null, null]);
+    expect(parseOsrmTable(null, 3)).toEqual([null, null, null]);
+  });
+
+  it("sortiert die Liste nach der Wegstrecke neu", () => {
+    // Der Laden am anderen Flussufer: 500 m Luftlinie, 6 km über die Brücke
+    const list = [
+      { place: { id: "fluss" }, distanceM: 500 },
+      { place: { id: "dorf" }, distanceM: 1200 },
+    ];
+    const routed = applyRouteDistances(
+      list,
+      new Map([
+        ["fluss", 6000],
+        ["dorf", 1400],
+      ])
+    );
+    expect(routed[0].place.id).toBe("dorf");
+    expect(routed[0].distanceM).toBe(1400);
+    expect(routed[0].routed).toBe(true);
+    expect(routed[1].distanceM).toBe(6000);
+  });
+
+  it("behält die Luftlinie, wo keine Wegstrecke vorliegt", () => {
+    const routed = applyRouteDistances(
+      [
+        { place: { id: "a" }, distanceM: 800 },
+        { place: { id: "b" }, distanceM: 300 },
+      ],
+      new Map([["a", 900]])
+    );
+    const b = routed.find(r => r.place.id === "b")!;
+    expect(b.distanceM).toBe(300);
+    expect(b.routed).toBe(false);
+  });
+
+  it("lässt die Eingabeliste unangetastet", () => {
+    const list = [{ place: { id: "a" }, distanceM: 800 }];
+    applyRouteDistances(list, new Map([["a", 900]]));
+    expect(list[0].distanceM).toBe(800);
   });
 });

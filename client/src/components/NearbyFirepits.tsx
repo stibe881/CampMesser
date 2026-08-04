@@ -33,6 +33,8 @@ import {
 } from "@/lib/overpass";
 import { useI18n } from "@/i18n";
 import { formatDistance } from "@shared/geo";
+import { applyRouteDistances } from "@shared/routing";
+import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import { cn } from "@/lib/utils";
 
 /** So viele Stellen zeigt das Dossier – mehr wird zur Liste statt zum Tipp. */
@@ -57,6 +59,20 @@ export default function NearbyFirepits({
   const [radiusM, setRadiusM] = useState(FIREPIT_DEFAULT_RADIUS_M);
   const [status, setStatus] = useState<Status>("idle");
   const [places, setPlaces] = useState<FirepitDistance[]>([]);
+  // Wegstrecke zu Fuss statt Luftlinie – eine Abfrage für die ganze Liste
+  const routed = useRoutedDistances(
+    places.length > 0 ? { lat: latitude, lon: longitude } : null,
+    places.map(({ firepit }) => ({
+      id: firepit.id,
+      lat: firepit.lat,
+      lon: firepit.lon,
+    })),
+    "foot"
+  );
+  const placeList = applyRouteDistances(
+    places.map(({ firepit, distanceM }) => ({ place: firepit, distanceM })),
+    routed.byId
+  );
   const abortRef = useRef<AbortController | null>(null);
 
   // Beim Verlassen die laufende Overpass-Anfrage abbrechen
@@ -191,58 +207,66 @@ export default function NearbyFirepits({
                 {tf.resultCount(places.length)}
               </p>
               <ul className="mt-2 space-y-3">
-                {places.map(({ firepit, distanceM }) => {
-                  const kindLabel = tf.kind[firepit.kind];
-                  const title = firepit.name ?? kindLabel;
-                  const features = [
-                    firepit.covered === true ? tf.covered : null,
-                    firepit.firewood === true ? tf.firewood : null,
-                    firepit.drinkingWater === true ? tf.drinkingWater : null,
-                  ].filter((value): value is string => value !== null);
-                  return (
-                    <li
-                      key={firepit.id}
-                      className="rounded-lg border border-border/70 bg-background p-3"
-                    >
-                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                        <span className="font-medium">{title}</span>
-                        <span
-                          className="rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground"
-                          title={tf.kindHint[firepit.kind]}
-                        >
-                          {kindLabel}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {tf.distanceAway(formatDistance(distanceM, lang))}
-                        </span>
-                      </div>
-
-                      {features.length > 0 && (
-                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                          {features.map(feature => (
-                            <span
-                              key={feature}
-                              className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs"
-                            >
-                              {feature}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      <a
-                        href={directionsUrl(firepit.lat, firepit.lon)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={tf.navAria(title)}
-                        className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                {placeList.map(
+                  ({ place: firepit, distanceM, routed: onFoot }) => {
+                    const kindLabel = tf.kind[firepit.kind];
+                    const title = firepit.name ?? kindLabel;
+                    const features = [
+                      firepit.covered === true ? tf.covered : null,
+                      firepit.firewood === true ? tf.firewood : null,
+                      firepit.drinkingWater === true ? tf.drinkingWater : null,
+                    ].filter((value): value is string => value !== null);
+                    return (
+                      <li
+                        key={firepit.id}
+                        className="rounded-lg border border-border/70 bg-background p-3"
                       >
-                        <Navigation className="h-4 w-4" aria-hidden="true" />
-                        {tf.navButton}
-                      </a>
-                    </li>
-                  );
-                })}
+                        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                          <span className="font-medium">{title}</span>
+                          <span
+                            className="rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground"
+                            title={tf.kindHint[firepit.kind]}
+                          >
+                            {kindLabel}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {onFoot
+                              ? t.common.distanceOnPath(
+                                  formatDistance(distanceM, lang)
+                                )
+                              : tf.distanceAway(
+                                  formatDistance(distanceM, lang)
+                                )}
+                          </span>
+                        </div>
+
+                        {features.length > 0 && (
+                          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                            {features.map(feature => (
+                              <span
+                                key={feature}
+                                className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        <a
+                          href={directionsUrl(firepit.lat, firepit.lon)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={tf.navAria(title)}
+                          className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                        >
+                          <Navigation className="h-4 w-4" aria-hidden="true" />
+                          {tf.navButton}
+                        </a>
+                      </li>
+                    );
+                  }
+                )}
               </ul>
             </>
           )}

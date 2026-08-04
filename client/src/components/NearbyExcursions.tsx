@@ -36,6 +36,8 @@ import {
   nearestExcursions,
   type Excursion,
 } from "@shared/excursions";
+import { applyRouteDistances } from "@shared/routing";
+import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import { cn } from "@/lib/utils";
 
 /** So viele Ziele zeigt das Dossier – mehr wird zur Liste statt zum Tipp. */
@@ -60,9 +62,12 @@ function CostBadge({ level }: { level: number | null }) {
 function ExcursionItem({
   excursion,
   distanceM,
+  byRoad,
 }: {
   excursion: Excursion;
   distanceM: number;
+  /** Wegstrecke über die Strasse statt Luftlinie? */
+  byRoad: boolean;
 }) {
   const { lang, t } = useI18n();
   const te = t.excursions;
@@ -82,7 +87,11 @@ function ExcursionItem({
         <div className="min-w-0 flex-1">
           <p className="font-medium">{excursion.name}</p>
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-            <span>{te.distanceAway(formatDistance(distanceM, lang))}</span>
+            <span>
+              {byRoad
+                ? t.common.distanceByRoad(formatDistance(distanceM, lang))
+                : te.distanceAway(formatDistance(distanceM, lang))}
+            </span>
             {excursion.region && <span>· {excursion.region}</span>}
           </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
@@ -262,6 +271,26 @@ export default function NearbyExcursions({
     [data, latitude, longitude]
   );
 
+  // Ausflugsziele fährt man an: die angezeigte Strecke ist die Strasse,
+  // nicht die Luftlinie. Die Liste wird danach auch neu sortiert – das
+  // nächste Ziel ist das, zu dem man am wenigsten weit fährt.
+  const routed = useRoutedDistances(
+    nearest.length > 0 ? { lat: latitude, lon: longitude } : null,
+    nearest.map(({ excursion }) => ({
+      id: excursion.id,
+      lat: excursion.latitude,
+      lon: excursion.longitude,
+    })),
+    "car"
+  );
+  const excursionList = applyRouteDistances(
+    nearest.map(({ excursion, distanceM }) => ({
+      place: excursion,
+      distanceM,
+    })),
+    routed.byId
+  );
+
   // Nicht eingerichtet heisst: das Feature gibt es hier nicht – kein Kasten,
   // keine Fehlermeldung, keine leere Liste.
   if (!status?.configured) return null;
@@ -314,11 +343,12 @@ export default function NearbyExcursions({
                 {te.resultCount(nearest.length)}
               </p>
               <ul className="mt-2 space-y-3">
-                {nearest.map(entry => (
+                {excursionList.map(({ place, distanceM, routed: byRoad }) => (
                   <ExcursionItem
-                    key={entry.excursion.id}
-                    excursion={entry.excursion}
-                    distanceM={entry.distanceM}
+                    key={place.id}
+                    excursion={place}
+                    distanceM={distanceM}
+                    byRoad={byRoad}
                   />
                 ))}
               </ul>

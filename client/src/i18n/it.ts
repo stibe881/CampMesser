@@ -22,6 +22,8 @@ export const it: Translation = {
     saveFailed: "Salvataggio non riuscito",
     actionFailed: "Azione non riuscita",
     offlineBadge: "Offline",
+    distanceByRoad: (value: string) => `${value} su strada`,
+    distanceOnPath: (value: string) => `${value} lungo il sentiero`,
     screenAwake: "Lo schermo resta acceso",
   },
   password: {

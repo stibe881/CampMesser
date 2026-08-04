@@ -23,6 +23,8 @@ export const de = {
     saveFailed: "Speichern fehlgeschlagen",
     actionFailed: "Aktion fehlgeschlagen",
     offlineBadge: "Offline",
+    distanceByRoad: (value: string) => `${value} über die Strasse`,
+    distanceOnPath: (value: string) => `${value} über den Weg`,
     screenAwake: "Display bleibt an",
   },
   password: {

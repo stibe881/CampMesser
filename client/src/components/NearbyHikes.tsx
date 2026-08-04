@@ -34,6 +34,8 @@ import {
   type OsmHikingRoute,
 } from "@/lib/overpass";
 import { useI18n } from "@/i18n";
+import { applyRouteDistances } from "@shared/routing";
+import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import { formatDistance } from "@shared/geo";
 import {
   formatWalkingTime,
@@ -173,6 +175,36 @@ export default function NearbyHikes({
     [latitude, longitude]
   );
   const origin = propOrigin ?? gpsOrigin;
+
+  // Wegstrecke zum Einstieg statt Luftlinie: Auf der anderen Talseite sind
+  // achthundert Meter Luftlinie eine Stunde Fussmarsch
+  const routedDistances = useRoutedDistances(
+    routes.length > 0 ? origin : null,
+    routes.map(view => ({
+      id: view.route.id,
+      lat: view.entry.lat,
+      lon: view.entry.lon,
+    })),
+    "foot"
+  );
+  /** Liste in der Reihenfolge der Wegstrecke (sonst der Luftlinie). */
+  const routeList = useMemo(
+    () =>
+      applyRouteDistances(
+        routes.map(view => ({
+          // Der Schlüssel ist die Id des Wegs – applyRouteDistances erwartet
+          // ein Objekt mit `id`, der ganze View hängt daran
+          place: { id: view.route.id, view },
+          distanceM: view.distanceM,
+        })),
+        routedDistances.byId
+      ).map(entry => ({
+        view: entry.place.view,
+        distanceM: entry.distanceM,
+        onFoot: entry.routed,
+      })),
+    [routes, routedDistances.byId]
+  );
 
   // Beim Verlassen die laufende Overpass-Anfrage abbrechen
   useEffect(() => () => abortRef.current?.abort(), []);
@@ -319,7 +351,7 @@ export default function NearbyHikes({
             {tn.resultCount(routes.length)}
           </p>
           <ul className="mt-2 space-y-3">
-            {routes.map(view => {
+            {routeList.map(({ view, distanceM, onFoot }) => {
               const { route } = view;
               const title =
                 route.name ??
@@ -371,7 +403,11 @@ export default function NearbyHikes({
                         {tn.distanceLabel}
                       </dt>
                       <dd className="font-medium">
-                        {formatDistance(view.distanceM, lang)}
+                        {onFoot
+                          ? t.common.distanceOnPath(
+                              formatDistance(distanceM, lang)
+                            )
+                          : formatDistance(distanceM, lang)}
                       </dd>
                     </div>
                     <div>

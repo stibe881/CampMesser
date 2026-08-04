@@ -301,3 +301,94 @@ export function stopsAlongGeometry<T extends RoutePlaceLike>(
  * der Datenbank soll nicht ins Kraut schiessen.
  */
 export const MAX_ROUTE_PATH_POINTS = 400;
+
+// ── Distanzen zu vielen Fundorten in EINER Abfrage ────────────────────────
+
+/**
+ * Höchstzahl Ziele einer Tabellen-Abfrage. OSRM verkraftet mehr, aber die
+ * Listen in der App zeigen ohnehin nur eine Handvoll Treffer – und
+ * gegenüber einem freien Dienst ist die kleinere Abfrage die richtige.
+ */
+export const MAX_TABLE_TARGETS = 25;
+
+/**
+ * Anfrage-URL für den Tabellen-Dienst: EIN Aufruf liefert die Distanzen
+ * vom Standort zu allen Fundorten.
+ *
+ * Für jeden Laden eine eigene Route zu holen wäre der falsche Umgang mit
+ * einem kostenlosen Dienst – und langsam obendrein.
+ */
+export function osrmTableUrl(
+  profile: RoutingProfile,
+  origin: GeoPoint,
+  targets: GeoPoint[]
+): string {
+  const coords = [origin, ...targets].map(coordinate).join(";");
+  const params = new URLSearchParams({
+    sources: "0",
+    annotations: "distance,duration",
+  });
+  return `${OSRM_BASE_URL}/${ROUTING_PROFILES[profile].path}/table/v1/driving/${coords}?${params.toString()}`;
+}
+
+/**
+ * Antwort des Tabellen-Diensts lesen: Wegstrecke in Metern je Ziel, in der
+ * Reihenfolge der Anfrage. `null` steht für «nicht erreichbar» – eine
+ * Hütte ohne Weganschluss bekommt keine erfundene Zahl.
+ */
+export function parseOsrmTable(
+  json: unknown,
+  targetCount: number
+): (number | null)[] {
+  const empty = new Array<number | null>(targetCount).fill(null);
+  if (!json || typeof json !== "object") return empty;
+  const body = json as { code?: unknown; distances?: unknown };
+  if (body.code !== "Ok" || !Array.isArray(body.distances)) return empty;
+  const row = body.distances[0];
+  if (!Array.isArray(row)) return empty;
+  // Spalte 0 ist der Standort selbst; die Ziele folgen ab Spalte 1
+  return empty.map((_, i) => {
+    const value = row[i + 1];
+    return typeof value === "number" && Number.isFinite(value) ? value : null;
+  });
+}
+
+/** Ein Fundort mit seiner Distanz, wie ihn die Listen der App führen. */
+export interface DistancedPlace<T> {
+  place: T;
+  distanceM: number;
+}
+
+export interface RoutedPlace<T> extends DistancedPlace<T> {
+  /** true = Wegstrecke, false = Luftlinie (kein Routing möglich). */
+  routed: boolean;
+}
+
+/**
+ * Wegstrecken in eine Fundort-Liste einsetzen und neu sortieren.
+ *
+ * NEU SORTIERT WIRD BEWUSST: «Der nächste Laden» ist der, zu dem man am
+ * wenigsten weit fährt – nicht der, der auf der Karte am nächsten
+ * aussieht. Am anderen Flussufer sind fünfhundert Meter Luftlinie sechs
+ * Kilometer über die Brücke.
+ *
+ * Fundorte ohne Wegstrecke behalten ihre Luftlinie und sind als solche
+ * gekennzeichnet, statt aus der Liste zu fallen.
+ */
+export function applyRouteDistances<T extends { id: string }>(
+  list: readonly DistancedPlace<T>[],
+  routedById: ReadonlyMap<string, number>
+): RoutedPlace<T>[] {
+  return list
+    .map(entry => {
+      const routed = routedById.get(entry.place.id);
+      return routed != null && Number.isFinite(routed)
+        ? { place: entry.place, distanceM: routed, routed: true }
+        : { ...entry, routed: false };
+    })
+    .sort(
+      (a, b) =>
+        a.distanceM - b.distanceM ||
+        (a.place.id < b.place.id ? -1 : a.place.id > b.place.id ? 1 : 0)
+    );
+}

@@ -22,6 +22,8 @@ export const fr: Translation = {
     saveFailed: "Échec de l'enregistrement",
     actionFailed: "Échec de l'action",
     offlineBadge: "Hors ligne",
+    distanceByRoad: (value: string) => `${value} par la route`,
+    distanceOnPath: (value: string) => `${value} par le chemin`,
     screenAwake: "L'écran reste allumé",
   },
   password: {
