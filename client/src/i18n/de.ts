@@ -4010,6 +4010,37 @@ export const de = {
     allDone: "Alles geübt – in einem halben Jahr wieder.",
     note: "Gespeichert wird nur das Datum je Übung, auf diesem Gerät. Keine Namen, keine Nummern: Was ein Kind auswendig können muss, übt man mit ihm, statt es in einer App zu hinterlegen. Nach einem halben Jahr ist eine Übung wieder fällig – Kinder wachsen, und der Platz ist beim nächsten Mal ein anderer.",
   },
+  quickBar: {
+    title: "Schnellzugriff-Leiste",
+    intro:
+      "Die vier Plätze in der Mitte der unteren Leiste kannst du selbst belegen.",
+    slotAria: (slot: number) => `Modul für Platz ${slot}`,
+    fixed:
+      "«Start» und «SOS» bleiben an den Rändern: Start ist der Rückweg zu allem anderen, und den SOS-Knopf sucht man genau dann, wenn man nicht nachdenken kann.",
+    reset: "Auf die Vorgabe zurücksetzen",
+  },
+  today: {
+    title: "Heute",
+    noTrip:
+      "Gerade läuft keine Reise. Sobald eine beginnt, steht hier dein Tag.",
+    toModules: "Alle Module",
+    unnamedPlace: "Ohne Namen",
+    dayOf: (day: number, total: number) => `Tag ${day} von ${total}`,
+    nightsLeft: (nights: number) =>
+      nights === 1 ? "noch 1 Nacht" : `noch ${nights} Nächte`,
+    departureToday: "Heute ist Abreisetag",
+    weather: "Wetter",
+    menu: "Menüplan",
+    shopping: "Einkaufsliste",
+    mealsTitle: "Heute auf dem Teller",
+    mealsEmpty: "Für heute ist nichts eingetragen.",
+    mealUnknown: "Eingetragen",
+    tasksTitle: "Noch offen",
+    tasksEmpty: "Nichts offen. Geniess den Tag.",
+    journal: "Ins Journal schreiben",
+    startSetting: "Während einer Reise mit «Heute» starten",
+    note: "Der Sprung passiert einmal beim Öffnen der App – tippst du danach auf «Start», bekommst du die Kacheln, ohne wieder hierher geworfen zu werden.",
+  },
   tripHistory: {
     title: "Änderungsverlauf",
     toggleAria: (trip: string) => `Änderungsverlauf von ${trip} anzeigen`,

@@ -38,6 +38,10 @@ export const SYNCED_SETTING_KEYS = [
   "powerStorage",
   /** Eigene Solaranlage (Nennleistung, Aufstellung) für die Ertrags-Prognose */
   "solarPanel",
+  /** Frei belegte Plätze der Schnellzugriff-Leiste (#297) */
+  "quickBar",
+  /** Während einer laufenden Reise mit der «Heute»-Ansicht starten (#298) */
+  "todayStart",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];

@@ -2,11 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import {
   Home,
-  ListChecks,
-  Compass,
-  BookOpen,
   Siren,
-  CloudSunRain,
   Globe,
   LogIn,
   LogOut,
@@ -16,6 +12,19 @@ import {
   Sun,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { modules } from "@/data/modules";
+import { pick } from "@shared/i18n";
+import {
+  QUICK_BAR_SOS,
+  QUICK_BAR_START,
+  sanitizeQuickBar,
+} from "@shared/quickBar";
+import {
+  loadQuickBar,
+  quickBarChoices,
+  saveQuickBar,
+} from "@/lib/quickBarStore";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import {
@@ -44,31 +53,34 @@ import {
 
 /**
  * Gemeinsames App-Layout: Top-Bar mit Logo, Inhalt, Bottom-Navigation (mobil).
- * Die Bottom-Nav zeigt die fünf wichtigsten Bereiche; alle Module sind über die Startseite erreichbar.
+ *
+ * Die Leiste unten ist seit #297 frei belegbar: Start und SOS sitzen fest
+ * an den Rändern, dazwischen liegen vier Plätze, die im Profil gewählt
+ * werden. Warum die beiden festbleiben, steht in shared/quickBar.ts.
  */
-interface NavItem {
+interface FixedItem {
   path: string;
-  key: "start" | "pack" | "sun" | "weather" | "firstAid" | "sos";
+  key: "start" | "sos";
   icon: React.ComponentType<{
     className?: string;
     "aria-hidden"?: boolean | "true" | "false";
   }>;
-  activePaths?: string[];
 }
 
-const navItems: NavItem[] = [
-  { path: "/", key: "start", icon: Home },
-  { path: "/packlisten", key: "pack", icon: ListChecks },
-  { path: "/sonne", key: "sun", icon: Compass },
-  { path: "/wetter", key: "weather", icon: CloudSunRain },
-  {
-    path: "/erste-hilfe",
-    key: "firstAid",
-    icon: BookOpen,
-    activePaths: ["/erste-hilfe", "/knoten", "/natur", "/rezepte"],
-  },
-  { path: "/sos", key: "sos", icon: Siren },
-];
+const START_ITEM: FixedItem = {
+  path: QUICK_BAR_START,
+  key: "start",
+  icon: Home,
+};
+const SOS_ITEM: FixedItem = { path: QUICK_BAR_SOS, key: "sos", icon: Siren };
+
+/**
+ * Untermodule, die zur selben Kachel gehören – damit der Punkt in der
+ * Leiste auch auf einer Unterseite noch als aktiv gilt.
+ */
+const RELATED_PATHS: Record<string, string[]> = {
+  "/erste-hilfe": ["/erste-hilfe", "/knoten", "/natur", "/rezepte"],
+};
 
 /** Merkt sich die zuletzt genutzten Module für den Startseiten-Schnellzugriff. */
 const RECENT_KEY = "campmesser.recentModules";
@@ -152,6 +164,40 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, logout } = useAuth();
   const { preference, toggleTheme } = useTheme();
   const { lang, t, setLang } = useI18n();
+
+  // Schnellzugriff-Leiste (#297): lokal gespeichert, per Konto abgeglichen
+  const [quickBar, setQuickBar] = useState<string[]>(() => loadQuickBar());
+  useSyncedSetting<unknown>("quickBar", value => {
+    const clean = sanitizeQuickBar(value, quickBarChoices());
+    setQuickBar(clean);
+    saveQuickBar(clean);
+  });
+
+  /**
+   * Die Leiste zum Zeichnen: feste Ränder, dazwischen die gewählten
+   * Module mit ihrem Namen und Symbol aus dem Modul-Katalog.
+   */
+  const barItems = [
+    { ...START_ITEM, label: t.shell.nav.start, related: undefined },
+    ...quickBar.map(path => {
+      const module = modules.find(m => m.path === path);
+      return {
+        path,
+        icon: module?.icon ?? Home,
+        label: module ? pick(module.title, lang) : path,
+        related: RELATED_PATHS[path],
+      };
+    }),
+    { ...SOS_ITEM, label: t.shell.nav.sos, related: undefined },
+  ];
+
+  // Die Leiste wird im Profil geändert – dieses Ereignis holt sie hierher,
+  // ohne dass ein globaler Zustand nötig wäre.
+  useEffect(() => {
+    const reload = () => setQuickBar(loadQuickBar());
+    window.addEventListener("campmesser:quickbar", reload);
+    return () => window.removeEventListener("campmesser:quickbar", reload);
+  }, []);
 
   // Beim Seitenwechsel nach oben scrollen
   useEffect(() => {
@@ -339,10 +385,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         aria-label={t.shell.mainNav}
       >
         <div className="mx-auto flex max-w-md items-stretch justify-around px-2 pb-[env(safe-area-inset-bottom)]">
-          {navItems.map(item => {
-            const label = t.shell.nav[item.key];
-            const isActive = item.activePaths
-              ? item.activePaths.some(p => location.startsWith(p))
+          {barItems.map(item => {
+            const isActive = item.related
+              ? item.related.some(p => location.startsWith(p))
               : item.path === "/"
                 ? location === "/"
                 : location.startsWith(item.path);
@@ -357,17 +402,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 )}
-                aria-label={label}
+                aria-label={item.label}
                 aria-current={isActive ? "page" : undefined}
               >
                 <Icon
                   className={cn(
                     "h-5 w-5",
-                    item.key === "sos" && "text-destructive"
+                    item.path === QUICK_BAR_SOS && "text-destructive"
                   )}
                   aria-hidden="true"
                 />
-                {label}
+                <span className="w-full truncate text-center">
+                  {item.label}
+                </span>
               </Link>
             );
           })}

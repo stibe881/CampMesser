@@ -4007,6 +4007,37 @@ export const fr: Translation = {
     allDone: "Tout est exercé – à refaire dans six mois.",
     note: "Seule la date de chaque exercice est enregistrée, sur cet appareil. Ni noms ni numéros : ce qu'un enfant doit savoir par cœur, on l'exerce avec lui plutôt que de le stocker dans une app. Après six mois, un exercice est à refaire – les enfants grandissent et le camping sera un autre.",
   },
+  quickBar: {
+    title: "Barre d'accès rapide",
+    intro:
+      "Les quatre emplacements au centre de la barre du bas, c'est toi qui les choisis.",
+    slotAria: (slot: number) => `Module pour l'emplacement ${slot}`,
+    fixed:
+      "« Accueil » et « SOS » restent aux extrémités : l'accueil est le chemin de retour vers tout le reste, et le bouton SOS, on le cherche justement quand on ne peut plus réfléchir.",
+    reset: "Rétablir la valeur par défaut",
+  },
+  today: {
+    title: "Aujourd'hui",
+    noTrip:
+      "Aucun voyage en cours. Dès qu'un voyage commence, ta journée s'affiche ici.",
+    toModules: "Tous les modules",
+    unnamedPlace: "Sans nom",
+    dayOf: (day: number, total: number) => `Jour ${day} sur ${total}`,
+    nightsLeft: (nights: number) =>
+      nights === 1 ? "encore 1 nuit" : `encore ${nights} nuits`,
+    departureToday: "Départ aujourd'hui",
+    weather: "Météo",
+    menu: "Menu",
+    shopping: "Liste de courses",
+    mealsTitle: "Au menu aujourd'hui",
+    mealsEmpty: "Rien de prévu pour aujourd'hui.",
+    mealUnknown: "Prévu",
+    tasksTitle: "Encore à faire",
+    tasksEmpty: "Rien en attente. Profite de la journée.",
+    journal: "Écrire dans le journal",
+    startSetting: "Démarrer sur « Aujourd'hui » pendant un voyage",
+    note: "Le saut se fait une fois à l'ouverture de l'app – si tu touches ensuite « Accueil », tu obtiens les tuiles sans être renvoyé ici.",
+  },
   tripHistory: {
     title: "Historique des modifications",
     toggleAria: (trip: string) => `Afficher l'historique de ${trip}`,

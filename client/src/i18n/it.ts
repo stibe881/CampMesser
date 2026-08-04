@@ -3982,6 +3982,36 @@ export const it: Translation = {
     allDone: "Tutto esercitato – di nuovo fra sei mesi.",
     note: "Viene salvata solo la data di ogni esercitazione, su questo dispositivo. Nessun nome, nessun numero: ciò che un bambino deve sapere a memoria si esercita con lui, invece di depositarlo in un'app. Dopo sei mesi un'esercitazione va rifatta – i bambini crescono e il campeggio sarà un altro.",
   },
+  quickBar: {
+    title: "Barra di accesso rapido",
+    intro: "I quattro posti al centro della barra in basso li scegli tu.",
+    slotAria: (slot: number) => `Modulo per il posto ${slot}`,
+    fixed:
+      "«Home» e «SOS» restano ai bordi: la home è la via di ritorno a tutto il resto, e il tasto SOS lo si cerca proprio quando non si riesce a pensare.",
+    reset: "Ripristina l'impostazione predefinita",
+  },
+  today: {
+    title: "Oggi",
+    noTrip:
+      "Al momento non c'è nessun viaggio in corso. Appena ne inizia uno, qui c'è la tua giornata.",
+    toModules: "Tutti i moduli",
+    unnamedPlace: "Senza nome",
+    dayOf: (day: number, total: number) => `Giorno ${day} di ${total}`,
+    nightsLeft: (nights: number) =>
+      nights === 1 ? "ancora 1 notte" : `ancora ${nights} notti`,
+    departureToday: "Oggi si parte",
+    weather: "Meteo",
+    menu: "Menu",
+    shopping: "Lista della spesa",
+    mealsTitle: "Oggi nel piatto",
+    mealsEmpty: "Per oggi non c'è nulla di previsto.",
+    mealUnknown: "Previsto",
+    tasksTitle: "Ancora da fare",
+    tasksEmpty: "Niente in sospeso. Goditi la giornata.",
+    journal: "Scrivi nel diario",
+    startSetting: "Durante un viaggio parti da «Oggi»",
+    note: "Il salto avviene una volta all'apertura dell'app – se poi tocchi «Home» ottieni i riquadri, senza essere rispedito qui.",
+  },
   tripHistory: {
     title: "Cronologia delle modifiche",
     toggleAria: (trip: string) => `Mostra la cronologia di ${trip}`,
