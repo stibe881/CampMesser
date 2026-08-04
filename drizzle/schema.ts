@@ -427,6 +427,37 @@ export type TripMember = typeof tripMembers.$inferSelect;
 export type InsertTripMember = typeof tripMembers.$inferInsert;
 
 /**
+ * Gästebuch pro Reise (#254): Grüsse zur Reise – von Mitreisenden aus der
+ * App und von Bekannten über den Teil-Link. Der einzige Ort, an dem ohne
+ * Konto geschrieben werden darf; deshalb steht die Herkunft in `userId`
+ * (null = Gast) und nicht bloss im selbst gewählten Namen.
+ */
+export const tripGuestbook = mysqlTable(
+  "tripGuestbook",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    /** Zugehörige Reise (tripLogs.id) */
+    tripId: int("tripId").notNull(),
+    /** Konto der Verfasserin/des Verfassers; null = Gast über den Teil-Link */
+    userId: int("userId"),
+    /** Selbst gewählter Anzeigename – beweist nichts, siehe userId */
+    authorName: varchar("authorName", { length: 60 }).notNull(),
+    message: varchar("message", { length: 500 }).notNull(),
+    /**
+     * Angehängtes Foto aus der Reise-Galerie (tripPhotos.id); null = ohne.
+     * Bewusst eine Auswahl aus BESTEHENDEN Fotos statt eines eigenen
+     * Uploads – ein anonymer Upload-Pfad wäre eine offene Tür.
+     */
+    photoId: int("photoId"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("tripGuestbook_tripId").on(table.tripId)]
+);
+
+export type TripGuestbookEntry = typeof tripGuestbook.$inferSelect;
+export type InsertTripGuestbookEntry = typeof tripGuestbook.$inferInsert;
+
+/**
  * Termin-Finder (#253): Datums-Vorschläge zu einer Reise, über die die
  * Mitreisenden abstimmen. Bewusst an der bestehenden Reise und nicht als
  * eigenes Gebilde: Wer abstimmen darf, steht damit schon fest

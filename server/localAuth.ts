@@ -163,6 +163,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     tripLogs,
     tripDateOptions,
     tripDateVotes,
+    tripGuestbook,
     tripInvites,
     tripMembers,
     tripPhotos,
@@ -311,6 +312,12 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     await db
       .delete(tripDateOptions)
       .where(inArray(tripDateOptions.tripId, ownedTripIds));
+    // Gästebuch (#254) eigener Reisen komplett – auch die Grüsse von
+    // Gästen. Eigene Einträge in FREMDEN Reisen bleiben bewusst stehen
+    // (sie gehören zur Reise), wie bei Pinnwand und Reise-Einkaufsliste.
+    await db
+      .delete(tripGuestbook)
+      .where(inArray(tripGuestbook.tripId, ownedTripIds));
   }
   // Eigene Stimmen in FREMDEN Reisen: die Vorschläge dort gehören der
   // Reise und bleiben stehen, die eigene Antwort verschwindet mit dem Konto.

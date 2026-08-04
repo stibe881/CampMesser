@@ -103,6 +103,13 @@ import {
   VOTE_VALUES,
 } from "@shared/datePoll";
 import {
+  isValidGuestbookMessage,
+  MAX_GUEST_NAME_LENGTH,
+  MAX_GUESTBOOK_MESSAGE_LENGTH,
+  normalizeGuestbookMessage,
+  normalizeGuestName,
+} from "@shared/guestbook";
+import {
   MAX_TRACK_POINTS,
   serializeTrackPoints,
   TRACK_NAME_MAX_LENGTH,
@@ -4725,6 +4732,152 @@ export const appRouter = router({
         }),
     }),
     /**
+     * Gästebuch (#254): Grüsse zur Reise. Lesen und Schreiben dürfen alle
+     * Mitreisenden; über den Teil-Link kommen Gäste dazu (siehe
+     * `trips.sharedGuestbookAdd`). Löschen darf die Besitzerin/der Besitzer
+     * jeden Eintrag – bei einem offenen Gästebuch braucht es jemanden, der
+     * aufräumen kann –, alle anderen nur ihre eigenen.
+     */
+    guestbook: router({
+      list: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          const entries = await db.getTripGuestbook(input.tripId);
+          return {
+            entries,
+            isOwner: trip.userId === ctx.user.id,
+            myUserId: ctx.user.id,
+          };
+        }),
+      add: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            message: z.string().min(1).max(MAX_GUESTBOOK_MESSAGE_LENGTH),
+            photoId: z.number().int().positive().nullable().optional(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          const message = normalizeGuestbookMessage(input.message);
+          if (!isValidGuestbookMessage(message)) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Ohne Text kein Eintrag.",
+            });
+          }
+          // Das Foto muss zu DIESER Reise gehören – sonst liesse sich ein
+          // fremdes Bild in ein geteiltes Gästebuch holen.
+          if (input.photoId != null) {
+            const photos = await db.getTripPhotosForTrip(input.tripId);
+            if (!photos.some(photo => photo.id === input.photoId)) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Das Foto gehört nicht zu dieser Reise.",
+              });
+            }
+          }
+          const id = await db.createTripGuestbookEntry({
+            tripId: input.tripId,
+            userId: ctx.user.id,
+            authorName: normalizeGuestName(
+              ctx.user.name || ctx.user.email || ""
+            ),
+            message,
+            photoId: input.photoId ?? null,
+          });
+          return { id };
+        }),
+      remove: protectedProcedure
+        .input(z.object({ entryId: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const entry = await db.getTripGuestbookEntry(input.entryId);
+          if (!entry) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Eintrag nicht gefunden.",
+            });
+          }
+          const trip = await db.canAccessTrip(entry.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Eintrag nicht gefunden.",
+            });
+          }
+          const mayRemove =
+            trip.userId === ctx.user.id || entry.userId === ctx.user.id;
+          if (!mayRemove) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "Nur eigene Einträge lassen sich löschen.",
+            });
+          }
+          await db.deleteTripGuestbookEntry(input.entryId);
+          return { success: true } as const;
+        }),
+    }),
+    /**
+     * Gästebuch-Eintrag über den TEIL-LINK (#254) – der einzige Weg, auf dem
+     * jemand ohne Konto in CampMesser schreibt. Deshalb drei Bremsen: Der
+     * Token muss gültig und unverfallen sein, pro IP sind es höchstens fünf
+     * Einträge pro Stunde, und ein Foto kann ein Gast nicht anhängen (ein
+     * anonymer Upload-Pfad wäre eine offene Tür).
+     */
+    sharedGuestbookAdd: publicProcedure
+      .input(
+        z.object({
+          token: z.string().min(8).max(64),
+          authorName: z.string().max(MAX_GUEST_NAME_LENGTH).optional(),
+          message: z.string().min(1).max(MAX_GUESTBOOK_MESSAGE_LENGTH),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.getTripLogByShareToken(input.token);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Geteilte Reise nicht gefunden.",
+          });
+        }
+        const { allowAction } = await import("./rateLimit");
+        const limitKey = `guestbook|${trip.id}|${ctx.req.ip ?? "?"}`;
+        if (!allowAction(limitKey, 5, 60 * 60 * 1000)) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Zu viele Einträge – versuch es später nochmals.",
+          });
+        }
+        const message = normalizeGuestbookMessage(input.message);
+        if (!isValidGuestbookMessage(message)) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Ohne Text kein Eintrag.",
+          });
+        }
+        await db.createTripGuestbookEntry({
+          tripId: trip.id,
+          userId: null,
+          authorName: normalizeGuestName(input.authorName ?? ""),
+          message,
+          photoId: null,
+        });
+        return { success: true } as const;
+      }),
+    /**
      * Teil-Link für den Reise-Hub erzeugen (nur Besitzerin/Besitzer):
      * ein öffentlicher Read-only-Link, unabhängig von den Reise-Mitgliedern.
      * Hat die verknüpfte Packliste noch keinen Teil-Token, bekommt sie hier
@@ -4802,6 +4955,7 @@ export const appRouter = router({
             : undefined;
         const entries = await db.getMenuEntriesForTrip(trip.id);
         const dayNotes = await db.getMenuDayNotesForTrip(trip.id);
+        const guestbook = await db.getTripGuestbook(trip.id);
         const customNameById = new Map<number, string>();
         if (entries.some(e => e.customRecipeId != null)) {
           const own = await db.getCustomRecipes(trip.userId);
@@ -4859,6 +5013,16 @@ export const appRouter = router({
           })),
           menuDayNotes: dayNotes.map(n => ({ day: n.day, note: n.note })),
           packList,
+          // Gästebuch (#254): Ohne Konto-Bezug – ein Gast soll nicht sehen,
+          // welche Zeile zu welchem CampMesser-Konto gehört; ob der Eintrag
+          // von jemandem mit Konto stammt, reicht als Unterscheidung.
+          guestbook: guestbook.map(entry => ({
+            id: entry.id,
+            authorName: entry.authorName,
+            message: entry.message,
+            fromMember: entry.userId != null,
+            createdAt: entry.createdAt,
+          })),
         };
       }),
   }),

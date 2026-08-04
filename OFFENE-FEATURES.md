@@ -25,12 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 18 Punkte
+## Runde 27 – 17 Punkte
 
 ### Reise & Organisation
 
-- [ ] **Gästebuch pro Reise** (#254) – Mitreisende hinterlassen Einträge und
-      Fotos
 - [ ] **Morgen-Briefing** (#255) – Wetter, heutige Mahlzeiten, Aufgaben und
       Astro-Tipp gebündelt auf der Startseite
 

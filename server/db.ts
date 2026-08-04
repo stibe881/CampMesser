@@ -63,6 +63,8 @@ import {
   tripDateOptions,
   InsertTripDateOption,
   tripDateVotes,
+  tripGuestbook,
+  InsertTripGuestbookEntry,
   tripInvites,
   tripJournal,
   tripLogs,
@@ -1668,6 +1670,8 @@ export async function deleteTripLog(id: number, userId: number) {
   await db.delete(tripShoppingItems).where(eq(tripShoppingItems.tripId, id));
   // Termin-Finder (#253): Vorschläge samt Stimmen der Reise
   await deleteTripDateOptionsForTrip(id);
+  // Gästebuch (#254) hängt ohne userId an der Reise
+  await db.delete(tripGuestbook).where(eq(tripGuestbook.tripId, id));
 }
 
 // ── Reise-Mitglieder & Einladungen ──
@@ -1816,6 +1820,57 @@ export async function getMemberTripLogs(userId: number) {
     .leftJoin(campSpots, eq(campSpots.id, tripLogs.spotId))
     .where(eq(tripMembers.userId, userId))
     .orderBy(desc(tripLogs.startDate), desc(tripLogs.id));
+}
+
+/**
+ * Gästebuch (#254): Einträge einer Reise, neuste zuoberst. Die Reihenfolge
+ * steht schon hier fest, damit die geteilte Ansicht und die App dieselbe
+ * Liste sehen. Nur NACH einer Zugriffs-Prüfung im Router verwenden
+ * (canAccessTrip oder gültiger Teil-Token).
+ */
+export async function getTripGuestbook(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripGuestbook)
+    .where(eq(tripGuestbook.tripId, tripId))
+    .orderBy(desc(tripGuestbook.createdAt), desc(tripGuestbook.id));
+}
+
+/** Einzelnen Eintrag laden – für die Zugriffs-Prüfung über seine Reise. */
+export async function getTripGuestbookEntry(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripGuestbook)
+    .where(eq(tripGuestbook.id, id))
+    .limit(1);
+  return rows[0];
+}
+
+/** Eintrag anlegen – userId null bedeutet «Gast über den Teil-Link». */
+export async function createTripGuestbookEntry(data: InsertTripGuestbookEntry) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(tripGuestbook).values(data);
+  return result.insertId;
+}
+
+/** Eintrag löschen – nur NACH einer Berechtigungs-Prüfung im Router. */
+export async function deleteTripGuestbookEntry(id: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripGuestbook).where(eq(tripGuestbook.id, id));
+}
+
+/**
+ * Verweise auf ein gelöschtes Reise-Foto lösen: Der Gruss bleibt, das Bild
+ * verschwindet – ein Eintrag ist mehr als sein Foto.
+ */
+export async function clearGuestbookPhoto(photoId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripGuestbook)
+    .set({ photoId: null })
+    .where(eq(tripGuestbook.photoId, photoId));
 }
 
 /**
@@ -2028,6 +2083,8 @@ export async function getTripPhotoByFileNameAny(fileName: string) {
 /** Foto-Zeile löschen – nur NACH einer canAccessTrip-Prüfung im Router. */
 export async function deleteTripPhotoById(id: number) {
   const db = requireDb(await getDb());
+  // Gästebuch-Einträge (#254) verlieren nur das Bild, nicht den Text
+  await clearGuestbookPhoto(id);
   await db.delete(tripPhotos).where(eq(tripPhotos.id, id));
 }
 

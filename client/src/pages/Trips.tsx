@@ -144,6 +144,7 @@ import { drawYearReview } from "@/lib/yearReviewImage";
 import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import TripDatePoll from "@/components/TripDatePoll";
+import TripGuestbook from "@/components/TripGuestbook";
 
 /** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
 const FREE_LOCATION = "frei";
@@ -4327,6 +4328,13 @@ export default function TripsPage() {
                           tripName={trip.title || placeName(trip)}
                         />
                       )}
+                      {/* Gästebuch (#254): auch bei einer Reise ohne
+                          Mitreisende – über den Teil-Link können Bekannte
+                          einen Gruss hinterlassen */}
+                      <TripGuestbook
+                        tripId={trip.id}
+                        tripName={trip.title || placeName(trip)}
+                      />
                       <TripPhotos
                         tripId={trip.id}
                         tripName={trip.title || placeName(trip)}
@@ -4597,6 +4605,12 @@ export default function TripsPage() {
                             tripName={trip.title || placeName(trip)}
                           />
                         )}
+                        {/* Gästebuch (#254): gerade bei vergangenen Reisen
+                            die Erinnerungs-Seite – Grüsse bleiben stehen */}
+                        <TripGuestbook
+                          tripId={trip.id}
+                          tripName={trip.title || placeName(trip)}
+                        />
                         <TripPhotos
                           tripId={trip.id}
                           tripName={trip.title || placeName(trip)}
