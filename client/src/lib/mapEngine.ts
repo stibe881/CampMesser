@@ -216,19 +216,19 @@ export function loadGoogleMaps(config: MapConfig): Promise<boolean> {
     const timer = window.setTimeout(() => resolve(false), LOAD_TIMEOUT_MS);
     const script = document.createElement("script");
     script.id = SCRIPT_ID;
-    script.async = true;
+    const callbackName = "initCampMesserGoogleMaps";
+    (window as any)[callbackName] = () => {
+      window.clearTimeout(timer);
+      resolve(googleReady());
+    };
     script.src =
       "https://maps.googleapis.com/maps/api/js?" +
       new URLSearchParams({
         key,
         v: "weekly",
         libraries: "marker",
-        loading: "async",
+        callback: callbackName,
       }).toString();
-    script.onload = () => {
-      window.clearTimeout(timer);
-      resolve(googleReady());
-    };
     script.onerror = () => {
       window.clearTimeout(timer);
       resolve(false);
