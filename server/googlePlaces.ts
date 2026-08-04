@@ -81,6 +81,14 @@ function prune(now: number): void {
  * die Antwort unbrauchbar ist. NULL UND NICHT «LEERE LISTE», weil die
  * Ansicht die beiden unterscheiden muss: «Google kennt hier nichts» ist
  * eine Antwort, «Google hat nicht geantwortet» ein Grund, OSM zu fragen.
+ *
+ * EIN ABGELEHNTER AUFRUF WIRD PROTOKOLLIERT, samt Googles eigener
+ * Begründung. Ohne das ist der Rückfall auf OSM nicht von «alles in
+ * Ordnung» zu unterscheiden: Die Liste sieht gleich aus, egal ob der
+ * Schlüssel fehlt, die Places API im Projekt nicht freigeschaltet ist
+ * oder die Abrechnung klemmt. Genau das ist einmal passiert – der
+ * Schlüssel war gesetzt, der Aufruf lief trotzdem nie durch, und in den
+ * Protokollen stand nichts.
  */
 export async function fetchNearbyPlaces(
   lat: number,
@@ -111,12 +119,23 @@ export async function fetchNearbyPlaces(
       ),
       signal: controller.signal,
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      // Googles Fehlertext nennt den Grund im Klartext, etwa
+      // «Places API (New) has not been used in project … before or it is
+      // disabled» oder «API keys with referer restrictions cannot be used
+      // with this API». Ohne ihn tappt man im Dunkeln.
+      const detail = await response.text().catch(() => "");
+      console.error(
+        `[Places] Google antwortete ${response.status}: ${detail.slice(0, 500)}`
+      );
+      return null;
+    }
     const value = parseGooglePlaces(await response.json());
     prune(now);
     cache.set(key, { expiresAt: now + CACHE_TTL_MS, value });
     return value;
-  } catch {
+  } catch (error) {
+    console.error("[Places] Abruf fehlgeschlagen:", error);
     return null;
   } finally {
     clearTimeout(timer);

@@ -1144,7 +1144,7 @@ export default function SpotDetailPage() {
         latitude={spot.latitude}
         longitude={spot.longitude}
         placeName={spot.name}
-        className="mt-4"
+        className="mb-4"
       />
 
       {/* Unwetter auf der Fahrtstrecke (#275): Wetter dort, wo man unterwegs
