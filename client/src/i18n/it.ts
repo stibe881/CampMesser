@@ -3950,6 +3950,15 @@ export const it: Translation = {
     noteTraffic:
       "Distanza e tempo di percorrenza vengono dal calcolo del percorso di Google – con la previsione del traffico per quest'ora del giorno. Cantieri e attese alla frontiera si aggiungono ancora.",
   },
+  officialWarnings: {
+    sectionAria: "Allerte meteo ufficiali",
+    badge: "Ufficiale",
+    issuedFor: (issuer: string, area: string) =>
+      `${issuer} segnala un'allerta per ${area}.`,
+    until: (time: string) => `Valida fino alle ${time}`,
+    source: (issuer: string, source: string) =>
+      `Allerte ufficiali: ${issuer}, tramite ${source}.`,
+  },
   passport: {
     title: "Passaporto di viaggio",
     intro:

@@ -3977,6 +3977,15 @@ export const fr: Translation = {
     noteTraffic:
       "Distance et durée proviennent du calcul d'itinéraire de Google – avec la prévision de trafic pour cette heure de la journée. Chantiers et attentes à la frontière s'y ajoutent toujours.",
   },
+  officialWarnings: {
+    sectionAria: "Alertes météo officielles",
+    badge: "Officiel",
+    issuedFor: (issuer: string, area: string) =>
+      `${issuer} émet une alerte pour ${area}.`,
+    until: (time: string) => `Valable jusqu'à ${time}`,
+    source: (issuer: string, source: string) =>
+      `Alertes officielles : ${issuer}, via ${source}.`,
+  },
   passport: {
     title: "Passeport de voyage",
     intro:

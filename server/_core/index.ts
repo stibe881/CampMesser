@@ -166,9 +166,57 @@ async function startServer() {
         console.error("[Papierkorb] Aufräumen fehlgeschlagen:", error);
         return 0;
       });
-      res.json({ status: "ok", ...result, trashPurged: purged });
+      // WebSub-Abo bei MeteoAlarm erneuern. Der Hub kürzt die Laufzeit
+      // nach Gutdünken; ein zweites `subscribe` auf dieselbe Adresse
+      // verlängert bloss, es entsteht kein zweites Abo. Scheitert es,
+      // holt der Cronjob den Feed weiterhin selbst – der Hub ist die
+      // Abkürzung, nicht die Grundlage.
+      const { hubConfigured, subscribeToHub } = await import("../meteoAlarm");
+      const hub = hubConfigured()
+        ? await subscribeToHub().catch(() => "fehler" as const)
+        : ("nicht-konfiguriert" as const);
+      res.json({ status: "ok", ...result, trashPurged: purged, hub });
     } catch (error) {
       res.status(500).json({ status: "error", message: String(error) });
+    }
+  });
+
+  // ── WebSub: MeteoAlarm meldet neue amtliche Warnungen ────────────────────
+  //
+  // DER HUB LIEFERT NUR DAS SIGNAL, NIE DIE DATEN. Trifft eine Meldung
+  // ein, wird der Zwischenspeicher verworfen und der Feed NEU bei
+  // MeteoAlarm geholt. Damit ist es egal, ob jemand Fremdes an diesen
+  // Endpunkt POSTet: Es kostet höchstens einen zusätzlichen Abruf, und
+  // eine erfundene Warnung lässt sich so nicht in die App schieben.
+  //
+  // GET beantwortet die Prüfung des Hubs (er ruft uns mit einer
+  // Zufallszeichenkette auf, die wir zurückgeben müssen) – und zwar nur
+  // für UNSER Thema, sonst liesse sich der Endpunkt benutzen, um uns bei
+  // beliebigen Feeds anzumelden.
+  app.get("/api/warnings/hub", async (req, res) => {
+    const { verifyChallenge } = await import("../meteoAlarm");
+    const challenge = verifyChallenge(req.query);
+    if (!challenge) {
+      res.status(404).send("not found");
+      return;
+    }
+    res.type("text/plain").send(challenge);
+  });
+
+  app.post("/api/warnings/hub", async (_req, res) => {
+    // SOFORT ANTWORTEN, DANN ARBEITEN: Der Hub erwartet ein schnelles
+    // 2xx und stellt sonst irgendwann die Zustellung ein.
+    res.status(204).end();
+    try {
+      const { invalidateWarnings } = await import("../meteoAlarm");
+      invalidateWarnings();
+      const { checkAndNotify } = await import("../push");
+      await checkAndNotify();
+    } catch (error) {
+      console.error(
+        "[MeteoAlarm] Prüfung nach Hub-Meldung fehlgeschlagen:",
+        error
+      );
     }
   });
   // ── Fotos im Reise-Tagebuch ─────────────────────────────────────────────

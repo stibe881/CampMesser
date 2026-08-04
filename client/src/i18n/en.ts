@@ -3867,6 +3867,15 @@ export const en: Translation = {
     noteTraffic:
       "Distance and driving time come from Google's route calculation – with the traffic forecast for this time of day. Roadworks and border waits still come on top.",
   },
+  officialWarnings: {
+    sectionAria: "Official weather warnings",
+    badge: "Official",
+    issuedFor: (issuer: string, area: string) =>
+      `${issuer} has issued a warning for ${area}.`,
+    until: (time: string) => `Valid until ${time}`,
+    source: (issuer: string, source: string) =>
+      `Official warnings: ${issuer}, via ${source}.`,
+  },
   passport: {
     title: "Travel passport",
     intro:

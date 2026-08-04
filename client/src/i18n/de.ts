@@ -3980,6 +3980,14 @@ export const de = {
     noteTraffic:
       "Strecke und Fahrzeit stammen aus der Routenberechnung von Google – mit der Verkehrs-Prognose für diese Tageszeit. Baustellen und Grenzwartezeiten kommen weiterhin dazu.",
   },
+  officialWarnings: {
+    sectionAria: "Amtliche Unwetterwarnungen",
+    badge: "Amtlich",
+    issuedFor: (issuer: string, area: string) => `${issuer} warnt für ${area}.`,
+    until: (time: string) => `Gültig bis ${time}`,
+    source: (issuer: string, source: string) =>
+      `Amtliche Warnungen: ${issuer}, bezogen über ${source}.`,
+  },
   passport: {
     title: "Reisepass",
     intro:

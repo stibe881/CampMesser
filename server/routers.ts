@@ -6088,6 +6088,42 @@ export const appRouter = router({
   }),
 
   /**
+   * Amtliche Unwetterwarnungen (MeteoSchweiz über MeteoAlarm).
+   *
+   * ÖFFENTLICH: Eine amtliche Unwetterwarnung ist keine persönliche
+   * Angabe, und wer über einen geteilten Link eine Karte anschaut, soll
+   * sie ebenso sehen. Die Anfrage kostet nichts – der Feed liegt
+   * serverseitig im Zwischenspeicher und wird für alle einmal geholt.
+   */
+  warnings: router({
+    official: publicProcedure
+      .input(
+        z.object({
+          latitude: z.number().min(-90).max(90),
+          longitude: z.number().min(-180).max(180),
+        })
+      )
+      .query(async ({ input }) => {
+        const { getOfficialWarnings } = await import("./meteoAlarm");
+        const { warningsForPoint } = await import("@shared/meteoAlarm");
+        const now = Date.now();
+        const all = await getOfficialWarnings(now);
+        // Die Polygone bleiben auf dem Server: Der Feed ist rund ein
+        // Megabyte gross, und der Browser braucht nur die Treffer.
+        return warningsForPoint(all, input.latitude, input.longitude, now).map(
+          warning => ({
+            id: warning.id,
+            event: warning.event,
+            areaDesc: warning.areaDesc,
+            severity: warning.severity,
+            onset: warning.onset,
+            expires: warning.expires,
+          })
+        );
+      }),
+  }),
+
+  /**
    * Orte von Google (Nutzerwunsch 04.08.2026): «Einkaufen in der Nähe»
    * und «Rast unterwegs».
    *
