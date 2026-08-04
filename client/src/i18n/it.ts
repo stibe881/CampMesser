@@ -3893,6 +3893,16 @@ export const it: Translation = {
     noHome: "Per il calcolo manca il tuo domicilio.",
     noHomeLink: "Impostalo nel profilo",
     arrivalLabel: "Arrivo / check-in",
+    directionAria: "Scegli la direzione",
+    directionOut: "Andata",
+    directionBack: "Ritorno",
+    homeArrivalLabel: "Essere a casa alle",
+    checkoutLabel: "Check-out in piazzola",
+    departureAtCheckout: "Partenza – più tardi non si può",
+    checkoutNote: (checkout: string, arrival: string, daysLater: number) =>
+      `Il campeggio rivuole la piazzola alle ${checkout}. Se parti allora, sei a casa alle ${arrival}${
+        daysLater > 0 ? " il giorno dopo" : ""
+      } – prima del previsto.`,
     profileLabel: "Chi viaggia?",
     profiles: {
       keine: "Senza pause",

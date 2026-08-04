@@ -10,6 +10,7 @@ import {
   driveMinutes,
   formatTime,
   parseTime,
+  returnPlan,
 } from "@shared/departure";
 
 describe("Beste Abfahrtszeit (#285)", () => {
@@ -121,5 +122,94 @@ describe("Beste Abfahrtszeit (#285)", () => {
     expect(formatTime(0)).toBe("00:00");
     expect(formatTime(1440 + 90)).toBe("01:30");
     expect(formatTime(-30)).toBe("23:30");
+  });
+});
+
+describe("Rückreise-Planung (#286)", () => {
+  it("rechnet von der Wunsch-Ankunft daheim rückwärts", () => {
+    // 140 km = 2 h, keine Pause, 20 min Reserve → 15:40 losfahren
+    const result = returnPlan({
+      distanceKm: 140,
+      homeArrivalTime: "18:00",
+      checkoutTime: null,
+      profile: "kinder",
+    })!;
+    expect(result.plan.departureTime).toBe("15:40");
+    expect(result.afterCheckout).toBe(false);
+    expect(result.arrivalIfCheckout).toBeNull();
+  });
+
+  it("nimmt für die Rückreise weniger Puffer als für die Anreise", () => {
+    const hin = departurePlan({
+      distanceKm: 140,
+      arrivalTime: "18:00",
+      profile: "keine",
+    })!;
+    const zurueck = returnPlan({
+      distanceKm: 140,
+      homeArrivalTime: "18:00",
+      checkoutTime: null,
+      profile: "keine",
+    })!;
+    // Daheim wartet keine Rezeption, die um 18 Uhr schliesst
+    expect(zurueck.plan.bufferMinutes).toBeLessThan(hin.bufferMinutes);
+  });
+
+  it("meldet, wenn die Wunschzeit nach dem Check-out losfahren hiesse", () => {
+    // Kurze Fahrt, späte Wunsch-Ankunft: rein rechnerisch könnte man bis
+    // 15:40 bleiben – der Platz will die Wiese aber um 11 zurück
+    const result = returnPlan({
+      distanceKm: 140,
+      homeArrivalTime: "18:00",
+      checkoutTime: "11:00",
+      profile: "keine",
+    })!;
+    expect(result.afterCheckout).toBe(true);
+    // Dann zählt die ehrliche Zahl: um 11 los, um 13:20 daheim
+    expect(result.arrivalIfCheckout).toBe("13:20");
+  });
+
+  it("behandelt eine unhaltbare Wunschzeit wie «nach dem Check-out»", () => {
+    // 700 km und um 8 Uhr daheim sein: die Abfahrt läge am Vortag
+    const result = returnPlan({
+      distanceKm: 700,
+      homeArrivalTime: "08:00",
+      checkoutTime: "11:00",
+      profile: "kinder",
+    })!;
+    expect(result.plan.daysEarlier).toBeGreaterThan(0);
+    expect(result.afterCheckout).toBe(true);
+    expect(result.arrivalIfCheckout).not.toBeNull();
+  });
+
+  it("sagt nichts über den Check-out, wenn keiner angegeben ist", () => {
+    const result = returnPlan({
+      distanceKm: 700,
+      homeArrivalTime: "08:00",
+      checkoutTime: null,
+      profile: "kinder",
+    })!;
+    expect(result.afterCheckout).toBe(false);
+  });
+
+  it("erkennt eine Heimkehr nach Mitternacht", () => {
+    const result = returnPlan({
+      distanceKm: 900,
+      homeArrivalTime: "10:00",
+      checkoutTime: "11:00",
+      profile: "kinder",
+    })!;
+    expect(result.arrivalDaysLater).toBeGreaterThanOrEqual(0);
+    expect(result.arrivalIfCheckout).toMatch(/^\d{2}:\d{2}$/);
+  });
+
+  it("weist unbrauchbare Zeiten ab", () => {
+    expect(
+      returnPlan({
+        distanceKm: 100,
+        homeArrivalTime: "irgendwann",
+        profile: "keine",
+      })
+    ).toBeNull();
   });
 });

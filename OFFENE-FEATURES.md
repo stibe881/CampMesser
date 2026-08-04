@@ -25,12 +25,9 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 13 Punkte
+## Runde 29 – 12 Punkte
 
 ### Reise-Planung
-
-- [ ] **Rückreise-Planung** (#286) – wann losfahren, um zur Wunschzeit daheim zu
-      sein
 
 ### Küche & Vorrat
 

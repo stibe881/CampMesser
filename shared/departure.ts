@@ -192,3 +192,94 @@ export function breakSchedule(
   }
   return stops;
 }
+
+// ── Rückreise-Planung (#286) ──────────────────────────────────────────────
+
+/**
+ * Puffer für die Rückreise. Kleiner als bei der Anreise: Zu Hause wartet
+ * keine Schranke und keine Rezeption, die um 18 Uhr schliesst. Zwanzig
+ * Minuten sind Reserve für Stau, nicht für Formalitäten.
+ */
+export const RETURN_BUFFER_MINUTES = 20;
+
+/** Übliche Check-out-Zeit auf Campingplätzen. */
+export const DEFAULT_CHECKOUT_TIME = "11:00";
+
+export interface ReturnPlan {
+  /** Rückwärts gerechnet: Wann müsste man losfahren? */
+  plan: DeparturePlan;
+  /**
+   * Liegt die errechnete Abfahrt NACH dem Check-out? Dann kann man nicht
+   * so lange bleiben – der Platz will die Wiese zurück.
+   */
+  afterCheckout: boolean;
+  /**
+   * Wann ist man daheim, wenn man pünktlich zum Check-out losfährt?
+   * Nur gesetzt, wenn die Wunschzeit ohnehin nicht zu halten ist bzw.
+   * wenn man früher los muss – dann ist DIESE Zahl die brauchbare.
+   */
+  arrivalIfCheckout: string | null;
+  /** Tage nach dem Abreisetag, falls die Ankunft über Mitternacht geht. */
+  arrivalDaysLater: number;
+}
+
+/**
+ * Rückreise: Wann losfahren, um zur Wunschzeit daheim zu sein – und was
+ * die Check-out-Zeit daraus macht.
+ *
+ * DER EIGENTLICHE INHALT ist der Abgleich mit dem Check-out. Die reine
+ * Rückwärtsrechnung kann sagen «um 14:30 losfahren», und das nützt nichts,
+ * wenn der Platz um 11 Uhr geräumt sein will. In dem Fall gibt es die
+ * ehrliche Antwort: Du fährst um 11 los und bist entsprechend früher
+ * daheim.
+ */
+export function returnPlan(input: {
+  distanceKm: number;
+  /** Wunsch-Ankunft daheim als «HH:MM». */
+  homeArrivalTime: string;
+  /** Check-out-Zeit des Platzes als «HH:MM»; null = ohne Vorgabe. */
+  checkoutTime?: string | null;
+  profile: BreakProfile;
+  bufferMinutes?: number;
+  speedKmh?: number;
+}): ReturnPlan | null {
+  const buffer = input.bufferMinutes ?? RETURN_BUFFER_MINUTES;
+  const plan = departurePlan({
+    distanceKm: input.distanceKm,
+    arrivalTime: input.homeArrivalTime,
+    profile: input.profile,
+    bufferMinutes: buffer,
+    speedKmh: input.speedKmh,
+  });
+  if (!plan) return null;
+  const checkout =
+    input.checkoutTime == null ? null : parseTime(input.checkoutTime);
+  const departure = parseTime(plan.departureTime);
+  // Abfahrt am Vortag heisst hier: die Wunschzeit ist ohnehin nicht zu
+  // halten – das behandeln wir wie «nach dem Check-out».
+  const afterCheckout =
+    checkout !== null && departure !== null
+      ? plan.daysEarlier > 0 || departure > checkout
+      : false;
+  if (!afterCheckout || checkout === null) {
+    return {
+      plan,
+      afterCheckout: false,
+      arrivalIfCheckout: null,
+      arrivalDaysLater: 0,
+    };
+  }
+  const forward = arrivalPlan({
+    distanceKm: input.distanceKm,
+    departureTime: formatTime(checkout),
+    profile: input.profile,
+    bufferMinutes: buffer,
+    speedKmh: input.speedKmh,
+  });
+  return {
+    plan,
+    afterCheckout: true,
+    arrivalIfCheckout: forward?.arrivalTime ?? null,
+    arrivalDaysLater: forward?.daysLater ?? 0,
+  };
+}

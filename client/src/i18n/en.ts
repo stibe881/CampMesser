@@ -3812,6 +3812,16 @@ export const en: Translation = {
     noHome: "Your home location is missing for the calculation.",
     noHomeLink: "Set it in your profile",
     arrivalLabel: "Arrival / check-in",
+    directionAria: "Choose direction",
+    directionOut: "Outbound",
+    directionBack: "Return",
+    homeArrivalLabel: "Be home by",
+    checkoutLabel: "Check-out at the site",
+    departureAtCheckout: "Leave at – no later possible",
+    checkoutNote: (checkout: string, arrival: string, daysLater: number) =>
+      `The site wants the pitch back at ${checkout}. Leaving then puts you home at ${arrival}${
+        daysLater > 0 ? " the next day" : ""
+      } – earlier than planned.`,
     profileLabel: "Who is travelling?",
     profiles: {
       keine: "No breaks",

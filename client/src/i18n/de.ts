@@ -3925,6 +3925,16 @@ export const de = {
     noHome: "Für die Rechnung fehlt dein Heim-Standort.",
     noHomeLink: "Im Profil setzen",
     arrivalLabel: "Ankunft / Check-in",
+    directionAria: "Richtung wählen",
+    directionOut: "Hinfahrt",
+    directionBack: "Rückreise",
+    homeArrivalLabel: "Daheim sein um",
+    checkoutLabel: "Check-out auf dem Platz",
+    departureAtCheckout: "Losfahren – später geht nicht",
+    checkoutNote: (checkout: string, arrival: string, daysLater: number) =>
+      `Der Platz will die Wiese um ${checkout} zurück. Fährst du dann los, bist du um ${arrival}${
+        daysLater > 0 ? " am Folgetag" : ""
+      } daheim – früher als geplant.`,
     profileLabel: "Wer fährt mit?",
     profiles: {
       keine: "Ohne Pausen",
