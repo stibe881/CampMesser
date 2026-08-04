@@ -1,7 +1,19 @@
 /**
- * Unwetter auf der Fahrtstrecke (#275): nicht nur am Ziel nachschauen,
- * sondern dort, wo man unterwegs sein wird – und zu der Zeit, zu der man
- * dort sein wird.
+ * Wetter & Verkehr auf der Fahrt (#275, Verkehr auf Nutzerwunsch
+ * 04.08.2026): nicht nur am Ziel nachschauen, sondern dort, wo man
+ * unterwegs sein wird – und zu der Zeit, zu der man dort sein wird.
+ *
+ * ZWEI DINGE JE PRÜFPUNKT, und beide punktgenau:
+ *
+ * 1. DAS WETTER aus der Prognosestunde, in der man dort ist.
+ * 2. DER VERKEHR aus Googles Einstufung für genau diesen Abschnitt.
+ *    Eine Gesamtverspätung («+35 Minuten») sagt nicht, WO es steht – und
+ *    ob der Stau vor dem Gotthard liegt oder erst in der Agglomeration am
+ *    Ziel, entscheidet darüber, ob man früher losfährt oder eine Pause
+ *    vorzieht.
+ *
+ * «RUHIG» HEISST BEIDES RUHIG. Steht der Verkehr, sagt die Zeile das,
+ * auch wenn die Sonne scheint – sonst wäre «ruhig» eine halbe Wahrheit.
  *
  * Geprüft werden bis zu acht Punkte entlang der Luftlinie. Für jeden
  * schätzt die Ansicht die Ankunftszeit und liest genau diese
@@ -17,6 +29,7 @@ import {
   ChevronDown,
   CloudLightning,
   CloudRain,
+  Car,
   Route as RouteIcon,
   Snowflake,
   Wind,
@@ -45,6 +58,7 @@ import {
 } from "@shared/routeWeather";
 import type { HourlyWeather } from "@shared/weather";
 import { pointsAlongRoute } from "@shared/routing";
+import type { TrafficLevel } from "@shared/googleRoutes";
 import { routeOrEstimate } from "@/lib/routing";
 
 type Status =
@@ -61,6 +75,8 @@ interface Segment {
   risk: RouteRisk | null;
   gustsKmh: number;
   precipitationMm: number;
+  /** Verkehrslage an diesem Punkt; null = keine Auskunft. */
+  traffic: TrafficLevel | null;
 }
 
 const riskIcons: Record<RouteRiskKind, typeof Wind> = {
@@ -224,6 +240,23 @@ export default function RouteWeather({
       setWithTraffic(traffic);
       setTotalMinutes(totalMinutes);
 
+      // Verkehr JE PUNKT: eine Abfrage für die ganze Strecke. Der Server
+      // ordnet unsere Stützstellen Googles Abschnitten zu; hierher kommt
+      // nur die Einstufung, nie Googles Linie.
+      let trafficLevels: TrafficLevel[] = [];
+      try {
+        const result = await utils.routing.routeTraffic.fetch({
+          from: start,
+          to: end,
+          points: points.map(p => ({ lat: p.lat, lon: p.lon })),
+          departureAtMs: departureMs > Date.now() ? departureMs : null,
+        });
+        if (result?.configured) trafficLevels = result.levels;
+      } catch {
+        /* Kein Verkehrsdienst: dann eben nur das Wetter */
+      }
+      if (controller.signal.aborted) return;
+
       try {
         // Eine Abfrage für alle Punkte: Open-Meteo nimmt Listen entgegen
         const params = new URLSearchParams({
@@ -271,6 +304,7 @@ export default function RouteWeather({
             risk: hour ? hourRisk(hour) : null,
             gustsKmh: hour ? Math.round(hour.windGustsKmh) : 0,
             precipitationMm: hour ? hour.precipitationMm : 0,
+            traffic: trafficLevels[index] ?? null,
           };
         });
         setSegments(built);
@@ -290,6 +324,8 @@ export default function RouteWeather({
   };
 
   const worst = worstSeverity(segments.map(s => s.risk));
+  /** Wie viele Prüfpunkte stehen im Stau? Für die Zusammenfassung. */
+  const jams = segments.filter(s => s.traffic === "jam").length;
   const locale = LOCALE_TAGS[lang];
 
   return (
@@ -407,7 +443,11 @@ export default function RouteWeather({
                       : "border-primary/40 bg-primary/10 text-primary"
                 )}
               >
-                {worst === null ? tr.allClear : tr.worstLine[worst]}
+                {worst !== null
+                  ? tr.worstLine[worst]
+                  : jams > 0
+                    ? tr.allClearButJam(jams)
+                    : tr.allClear}
               </p>
 
               <ul className="mt-3 space-y-1.5">
@@ -422,7 +462,8 @@ export default function RouteWeather({
                         "flex items-center gap-3 rounded-lg border px-3 py-2 text-sm",
                         segment.risk?.severity === "gefahr"
                           ? "border-destructive/40 bg-destructive/5"
-                          : segment.risk?.severity === "warnung"
+                          : segment.risk?.severity === "warnung" ||
+                              segment.traffic === "jam"
                             ? "border-amber-600/30 bg-amber-500/5"
                             : "border-border bg-background"
                       )}
@@ -441,11 +482,26 @@ export default function RouteWeather({
                           />
                         )}
                         <span className="truncate">
+                          {/* «Ruhig» nur, wenn AUCH der Verkehr ruhig ist –
+                              sonst wäre es eine halbe Wahrheit */}
                           {segment.risk
                             ? tr.risk[segment.risk.kind]
-                            : tr.riskNone}
+                            : segment.traffic === "jam" ||
+                                segment.traffic === "slow"
+                              ? tr.traffic[segment.traffic]
+                              : tr.riskNone}
                         </span>
                       </span>
+                      {/* Steht beides an, kommt der Verkehr als Zusatz –
+                          das Wetter bleibt die Überschrift der Zeile */}
+                      {segment.risk &&
+                        (segment.traffic === "jam" ||
+                          segment.traffic === "slow") && (
+                          <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+                            <Car className="h-3.5 w-3.5" aria-hidden="true" />
+                            {tr.traffic[segment.traffic]}
+                          </span>
+                        )}
                       {segment.gustsKmh >= 40 && (
                         <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
                           {tr.gusts(segment.gustsKmh)}

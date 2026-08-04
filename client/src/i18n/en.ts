@@ -3684,7 +3684,7 @@ export const en: Translation = {
   /** Playgrounds and bathing spots from OpenStreetMap (#248). */
   routeWeather: {
     sectionAria: "Severe weather along the route",
-    title: "Weather on the way",
+    title: "Weather and traffic on the way",
     subtitle: "What awaits you en route – not just at the destination.",
     subtitleAtPlace: (place: string) =>
       `What awaits you on the way to ${place} – not just at the destination.`,
@@ -3718,6 +3718,15 @@ export const en: Translation = {
       regen: "Heavy rain",
       schnee: "Snow",
     },
+    traffic: {
+      normal: "Clear road",
+      slow: "Slow",
+      jam: "Jam",
+    },
+    allClearButJam: (count: number) =>
+      count === 1
+        ? "Calm weather-wise – but traffic is stuck at one point."
+        : `Calm weather-wise – but traffic is stuck at ${count} points.`,
     riskNone: "Calm",
     kmMark: (km: number) => `km ${km}`,
     gusts: (kmh: number) => `${kmh} km/h`,

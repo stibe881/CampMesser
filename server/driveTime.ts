@@ -14,13 +14,19 @@
 import { ENV } from "./_core/env";
 import {
   GOOGLE_ROUTES_FIELD_MASK,
+  GOOGLE_ROUTES_TRAFFIC_FIELD_MASK,
   GOOGLE_ROUTES_URL,
+  decodePolyline,
   driveTimeCacheKey,
   googleRouteBody,
+  googleTrafficBody,
   parseGoogleRoute,
+  parseSpeedIntervals,
+  trafficAtPoints,
   trafficUsableAt,
   type DriveTime,
   type LatLon,
+  type TrafficLevel,
 } from "@shared/googleRoutes";
 
 /**
@@ -42,6 +48,12 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>();
+
+/** Eigener Speicher für die Verkehrslage – andere Form, gleiche Frist. */
+const trafficCache = new Map<
+  string,
+  { expiresAt: number; value: TrafficLevel[] }
+>();
 
 /** Ist die Anbindung eingerichtet (Schlüssel in der `.env`)? */
 export function isDriveTimeConfigured(): boolean {
@@ -114,6 +126,77 @@ export async function fetchDriveTime(
     cache.set(key, { expiresAt: now + CACHE_TTL_MS, value });
     return value;
   } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ── Stau punktgenau (Nutzerwunsch 04.08.2026) ─────────────────────────
+
+/**
+ * Verkehrslage je Stützstelle holen.
+ *
+ * EINE ABFRAGE FÜR DIE GANZE STRECKE: Google liefert die Einstufung
+ * abschnittsweise mit; es braucht keine Anfrage pro Punkt.
+ *
+ * GOOGLES LINIE BLEIBT HIER. Sie wird nur benutzt, um unsere
+ * OSRM-Stützstellen einem Abschnitt zuzuordnen, und danach verworfen –
+ * hinaus geht eine Einstufung je Punkt, also Text. Begründung in
+ * shared/googleRoutes.ts.
+ *
+ * Liefert null, wenn die Anbindung fehlt oder der Dienst nicht antwortet;
+ * die Ansicht zeigt dann nur das Wetter, wie vor dieser Erweiterung.
+ */
+export async function fetchRouteTraffic(
+  from: LatLon,
+  to: LatLon,
+  points: readonly LatLon[],
+  departureAtMs: number | null = null
+): Promise<TrafficLevel[] | null> {
+  if (!isDriveTimeConfigured() || points.length === 0) return null;
+
+  const now = Date.now();
+  const departure = trafficUsableAt(departureAtMs, now) ? departureAtMs : null;
+  const key = `traffic|${driveTimeCacheKey(from, to, departure)}|${points.length}`;
+  const hit = trafficCache.get(key);
+  if (hit && hit.expiresAt > now) return hit.value;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(GOOGLE_ROUTES_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": ENV.googleMapsApiKey,
+        "X-Goog-FieldMask": GOOGLE_ROUTES_TRAFFIC_FIELD_MASK,
+      },
+      body: JSON.stringify(googleTrafficBody(from, to, departure)),
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      console.error(
+        `[Verkehr] Google antwortete ${response.status}: ${detail.slice(0, 500)}`
+      );
+      return null;
+    }
+    const json: unknown = await response.json();
+    const encoded = (
+      json as { routes?: { polyline?: { encodedPolyline?: unknown } }[] }
+    ).routes?.[0]?.polyline?.encodedPolyline;
+    if (typeof encoded !== "string" || !encoded) return null;
+    const value = trafficAtPoints(
+      points,
+      decodePolyline(encoded),
+      parseSpeedIntervals(json)
+    );
+    if (trafficCache.size > MAX_CACHE_ENTRIES) trafficCache.clear();
+    trafficCache.set(key, { expiresAt: now + CACHE_TTL_MS, value });
+    return value;
+  } catch (error) {
+    console.error("[Verkehr] Abruf fehlgeschlagen:", error);
     return null;
   } finally {
     clearTimeout(timer);

@@ -3796,7 +3796,7 @@ export const de = {
   /** Spiel- und Badeplätze aus OpenStreetMap (#248). */
   routeWeather: {
     sectionAria: "Unwetter auf der Fahrtstrecke",
-    title: "Wetter auf der Fahrt",
+    title: "Wetter & Verkehr auf der Fahrt",
     subtitle: "Was dich unterwegs erwartet – nicht nur am Ziel.",
     subtitleAtPlace: (place: string) =>
       `Was dich auf dem Weg nach ${place} erwartet – nicht nur am Ziel.`,
@@ -3830,6 +3830,15 @@ export const de = {
       regen: "Starkregen",
       schnee: "Schnee",
     },
+    traffic: {
+      normal: "Freie Fahrt",
+      slow: "Zäh",
+      jam: "Stau",
+    },
+    allClearButJam: (count: number) =>
+      count === 1
+        ? "Wettermässig ruhig – an einer Stelle steht der Verkehr."
+        : `Wettermässig ruhig – an ${count} Stellen steht der Verkehr.`,
     riskNone: "Ruhig",
     kmMark: (km: number) => `km ${km}`,
     gusts: (kmh: number) => `${kmh} km/h`,
