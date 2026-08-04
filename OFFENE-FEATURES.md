@@ -33,15 +33,13 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 7 Punkte
+## Runde 29 – 6 Punkte
 
 ### Reise-Planung
 
 ### Küche & Vorrat
 
 ### Familie
-
-- [ ] **Kinder-Reisepass** (#292) – Stempel sammeln für jeden besuchten Platz
 
 ### Natur
 

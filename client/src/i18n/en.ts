@@ -3857,6 +3857,25 @@ export const en: Translation = {
     noteTraffic:
       "The driving time comes from Google's traffic forecast for this time of day, the distance from the OpenStreetMap route calculation. Roadworks and border waits still come on top.",
   },
+  passport: {
+    title: "Travel passport",
+    intro:
+      "A stamp for every site you have visited. The stamps come from your trips – recorded is recorded.",
+    noRank: "No stamp yet",
+    summary: (places: number, nights: number) =>
+      `${places === 1 ? "1 site" : `${places} sites`} · ${nights === 1 ? "1 night" : `${nights} nights`}`,
+    toNext: (missing: number, title: string) =>
+      missing === 1
+        ? `1 more site to “${title}”`
+        : `${missing} more sites to “${title}”`,
+    nights: (count: number) => (count === 1 ? "1 night" : `${count} nights`),
+    stampAria: (place: string, visits: number) =>
+      `Stamp ${place}, visited ${visits} times`,
+    empty:
+      "No stamps yet. Record a trip with a site name – then it will show up here.",
+    print: "Print the passport",
+    note: "The stamps come from the trips in your journal; nothing is recorded twice. Each site gets the same shape, colour and tilt from its own name – identical on every device and after every reload.",
+  },
   drill: {
     title: "Emergency drill",
     intro:

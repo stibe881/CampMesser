@@ -3940,6 +3940,25 @@ export const it: Translation = {
     noteTraffic:
       "Il tempo di percorrenza viene dalla previsione del traffico di Google per quest'ora del giorno, la distanza dal calcolo del percorso su OpenStreetMap. Cantieri e attese alla frontiera si aggiungono ancora.",
   },
+  passport: {
+    title: "Passaporto di viaggio",
+    intro:
+      "Un timbro per ogni campeggio visitato. I timbri vengono dai tuoi viaggi – ciò che è registrato è registrato.",
+    noRank: "Ancora nessun timbro",
+    summary: (places: number, nights: number) =>
+      `${places === 1 ? "1 campeggio" : `${places} campeggi`} · ${nights === 1 ? "1 notte" : `${nights} notti`}`,
+    toNext: (missing: number, title: string) =>
+      missing === 1
+        ? `Ancora 1 campeggio fino a «${title}»`
+        : `Ancora ${missing} campeggi fino a «${title}»`,
+    nights: (count: number) => (count === 1 ? "1 notte" : `${count} notti`),
+    stampAria: (place: string, visits: number) =>
+      `Timbro ${place}, visitato ${visits} volte`,
+    empty:
+      "Ancora nessun timbro. Registra un viaggio col nome del campeggio – comparirà qui.",
+    print: "Stampa il passaporto",
+    note: "I timbri nascono dai viaggi del diario; nulla viene registrato due volte. Ogni campeggio riceve dal proprio nome la stessa forma, lo stesso colore e la stessa inclinazione – uguali su ogni dispositivo.",
+  },
   drill: {
     title: "Esercitazione d'emergenza",
     intro:

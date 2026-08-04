@@ -3970,6 +3970,25 @@ export const de = {
     noteTraffic:
       "Die Fahrzeit stammt aus der Verkehrs-Prognose von Google für diese Tageszeit, die Strecke aus der Routenberechnung über OpenStreetMap. Baustellen und Grenzwartezeiten kommen weiterhin dazu.",
   },
+  passport: {
+    title: "Reisepass",
+    intro:
+      "Für jeden besuchten Platz ein Stempel. Die Stempel kommen aus deinen Reisen – eingetragen ist eingetragen.",
+    noRank: "Noch kein Stempel",
+    summary: (places: number, nights: number) =>
+      `${places === 1 ? "1 Platz" : `${places} Plätze`} · ${nights === 1 ? "1 Nacht" : `${nights} Nächte`}`,
+    toNext: (missing: number, title: string) =>
+      missing === 1
+        ? `Noch 1 Platz bis «${title}»`
+        : `Noch ${missing} Plätze bis «${title}»`,
+    nights: (count: number) => (count === 1 ? "1 Nacht" : `${count} Nächte`),
+    stampAria: (place: string, visits: number) =>
+      `Stempel ${place}, ${visits}-mal besucht`,
+    empty:
+      "Noch keine Stempel. Trag eine Reise mit Platznamen ein – dann steht sie hier.",
+    print: "Pass drucken",
+    note: "Die Stempel entstehen aus den Reisen im Tagebuch; nichts wird doppelt erfasst. Jeder Platz bekommt aus seinem Namen dieselbe Form, Farbe und Schräglage – auf jedem Gerät und nach jedem Neuladen gleich.",
+  },
   drill: {
     title: "Notfall-Übung",
     intro:

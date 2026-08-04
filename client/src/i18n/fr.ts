@@ -3967,6 +3967,25 @@ export const fr: Translation = {
     noteTraffic:
       "La durée provient de la prévision de trafic de Google pour cette heure de la journée, la distance du calcul d'itinéraire sur OpenStreetMap. Chantiers et attentes à la frontière s'y ajoutent toujours.",
   },
+  passport: {
+    title: "Passeport de voyage",
+    intro:
+      "Un tampon pour chaque camping visité. Les tampons viennent de tes voyages – ce qui est saisi est saisi.",
+    noRank: "Pas encore de tampon",
+    summary: (places: number, nights: number) =>
+      `${places === 1 ? "1 camping" : `${places} campings`} · ${nights === 1 ? "1 nuit" : `${nights} nuits`}`,
+    toNext: (missing: number, title: string) =>
+      missing === 1
+        ? `Encore 1 camping jusqu'à « ${title} »`
+        : `Encore ${missing} campings jusqu'à « ${title} »`,
+    nights: (count: number) => (count === 1 ? "1 nuit" : `${count} nuits`),
+    stampAria: (place: string, visits: number) =>
+      `Tampon ${place}, visité ${visits} fois`,
+    empty:
+      "Pas encore de tampon. Saisis un voyage avec le nom du camping – il apparaîtra ici.",
+    print: "Imprimer le passeport",
+    note: "Les tampons proviennent des voyages du carnet ; rien n'est saisi deux fois. Chaque camping reçoit, à partir de son nom, la même forme, la même couleur et la même inclinaison – identiques sur chaque appareil.",
+  },
   drill: {
     title: "Exercice d'urgence",
     intro:

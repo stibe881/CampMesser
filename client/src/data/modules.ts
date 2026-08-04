@@ -41,6 +41,7 @@ import {
   ShieldQuestion,
   Siren,
   Sprout,
+  Stamp,
   Tent,
   TreePine,
   Truck,
@@ -666,6 +667,23 @@ export const modules: Module[] = [
     icon: ShieldQuestion,
     group: "familie",
     offline: true,
+  },
+  {
+    path: "/reisepass",
+    title: l4(
+      "Reisepass",
+      "Passeport de voyage",
+      "Passaporto di viaggio",
+      "Travel passport"
+    ),
+    description: l4(
+      "Für jeden besuchten Platz ein Stempel – zum Sammeln und Herzeigen",
+      "Un tampon pour chaque camping visité – à collectionner et à montrer",
+      "Un timbro per ogni campeggio visitato – da collezionare e mostrare",
+      "A stamp for every site you have visited – to collect and show off"
+    ),
+    icon: Stamp,
+    group: "familie",
   },
   {
     path: "/erzaehlwuerfel",
