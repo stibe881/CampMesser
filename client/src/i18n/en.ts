@@ -3857,6 +3857,27 @@ export const en: Translation = {
     noteTraffic:
       "The driving time comes from Google's traffic forecast for this time of day, the distance from the OpenStreetMap route calculation. Roadworks and border waits still come on top.",
   },
+  drill: {
+    title: "Emergency drill",
+    intro:
+      "When it counts, you remember what you have done once – not what you were told once.",
+    ageLabel: "Child's age",
+    ageYears: (years: number) => `${years} years`,
+    stepsTitle: "How it goes, in order",
+    mistakesTitle: "Not this",
+    practiceTitle: "How to practise it on site",
+    questionTitle: "Check question",
+    right: "Correct.",
+    wrong: "Not quite.",
+    markDone: "Practised",
+    answerFirst: "Answer the check question correctly first.",
+    lastPracticed: (date: string) => `last practised on ${date}`,
+    neverPracticed: "never practised",
+    openCount: (count: number) =>
+      count === 1 ? "1 drill is due" : `${count} drills are due`,
+    allDone: "All practised – again in six months.",
+    note: "Only the date of each drill is stored, on this device. No names, no numbers: what a child needs to know by heart is practised with them, not filed away in an app. After six months a drill is due again – children grow, and next time the site will be a different one.",
+  },
   rainyDay: {
     title: "Rainy-day ideas",
     intro:

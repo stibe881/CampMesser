@@ -38,6 +38,7 @@ import {
   Shirt,
   ShoppingCart,
   Signpost,
+  ShieldQuestion,
   Siren,
   Sprout,
   Tent,
@@ -645,6 +646,24 @@ export const modules: Module[] = [
       "Things to do in the tent and awning – filtered by age, time and space"
     ),
     icon: CloudRain,
+    group: "familie",
+    offline: true,
+  },
+  {
+    path: "/notfall-uebung",
+    title: l4(
+      "Notfall-Übung",
+      "Exercice d'urgence",
+      "Esercitazione d'emergenza",
+      "Emergency drill"
+    ),
+    description: l4(
+      "Mit den Kindern üben, was zu tun ist – bevor es darauf ankommt",
+      "S'exercer avec les enfants avant que ça compte vraiment",
+      "Esercitarsi con i bambini prima che serva davvero",
+      "Practise with the children before it matters"
+    ),
+    icon: ShieldQuestion,
     group: "familie",
     offline: true,
   },

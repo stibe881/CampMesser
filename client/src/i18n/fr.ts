@@ -3967,6 +3967,27 @@ export const fr: Translation = {
     noteTraffic:
       "La durée provient de la prévision de trafic de Google pour cette heure de la journée, la distance du calcul d'itinéraire sur OpenStreetMap. Chantiers et attentes à la frontière s'y ajoutent toujours.",
   },
+  drill: {
+    title: "Exercice d'urgence",
+    intro:
+      "En cas réel, on se rappelle ce qu'on a déjà fait – pas ce qu'on a entendu une fois.",
+    ageLabel: "Âge de l'enfant",
+    ageYears: (years: number) => `${years} ans`,
+    stepsTitle: "Voilà comment faire, dans l'ordre",
+    mistakesTitle: "À ne pas faire",
+    practiceTitle: "Comment s'exercer sur place",
+    questionTitle: "Question de contrôle",
+    right: "Juste.",
+    wrong: "Pas tout à fait.",
+    markDone: "Exercé",
+    answerFirst: "Réponds d'abord correctement à la question.",
+    lastPracticed: (date: string) => `dernier exercice le ${date}`,
+    neverPracticed: "jamais exercé",
+    openCount: (count: number) =>
+      count === 1 ? "1 exercice à refaire" : `${count} exercices à refaire`,
+    allDone: "Tout est exercé – à refaire dans six mois.",
+    note: "Seule la date de chaque exercice est enregistrée, sur cet appareil. Ni noms ni numéros : ce qu'un enfant doit savoir par cœur, on l'exerce avec lui plutôt que de le stocker dans une app. Après six mois, un exercice est à refaire – les enfants grandissent et le camping sera un autre.",
+  },
   rainyDay: {
     title: "Idées pour jour de pluie",
     intro:

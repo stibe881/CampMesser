@@ -3940,6 +3940,29 @@ export const it: Translation = {
     noteTraffic:
       "Il tempo di percorrenza viene dalla previsione del traffico di Google per quest'ora del giorno, la distanza dal calcolo del percorso su OpenStreetMap. Cantieri e attese alla frontiera si aggiungono ancora.",
   },
+  drill: {
+    title: "Esercitazione d'emergenza",
+    intro:
+      "Nel momento vero viene in mente ciò che si è già fatto – non ciò che si è sentito una volta.",
+    ageLabel: "Età del bambino",
+    ageYears: (years: number) => `${years} anni`,
+    stepsTitle: "Ecco come si fa, nell'ordine",
+    mistakesTitle: "Questo no",
+    practiceTitle: "Come esercitarsi in piazzola",
+    questionTitle: "Domanda di controllo",
+    right: "Giusto.",
+    wrong: "Non proprio.",
+    markDone: "Esercitato",
+    answerFirst: "Rispondi prima correttamente alla domanda.",
+    lastPracticed: (date: string) => `ultima volta il ${date}`,
+    neverPracticed: "mai esercitato",
+    openCount: (count: number) =>
+      count === 1
+        ? "1 esercitazione da rifare"
+        : `${count} esercitazioni da rifare`,
+    allDone: "Tutto esercitato – di nuovo fra sei mesi.",
+    note: "Viene salvata solo la data di ogni esercitazione, su questo dispositivo. Nessun nome, nessun numero: ciò che un bambino deve sapere a memoria si esercita con lui, invece di depositarlo in un'app. Dopo sei mesi un'esercitazione va rifatta – i bambini crescono e il campeggio sarà un altro.",
+  },
   rainyDay: {
     title: "Idee per giorni di pioggia",
     intro:

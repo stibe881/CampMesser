@@ -3970,6 +3970,27 @@ export const de = {
     noteTraffic:
       "Die Fahrzeit stammt aus der Verkehrs-Prognose von Google für diese Tageszeit, die Strecke aus der Routenberechnung über OpenStreetMap. Baustellen und Grenzwartezeiten kommen weiterhin dazu.",
   },
+  drill: {
+    title: "Notfall-Übung",
+    intro:
+      "Im Ernstfall fällt einem ein, was man schon einmal gemacht hat – nicht, was man einmal gehört hat.",
+    ageLabel: "Alter des Kindes",
+    ageYears: (years: number) => `${years} Jahre`,
+    stepsTitle: "So geht es, der Reihe nach",
+    mistakesTitle: "Das nicht",
+    practiceTitle: "So übt ihr es am Platz",
+    questionTitle: "Kontrollfrage",
+    right: "Richtig.",
+    wrong: "Nicht ganz.",
+    markDone: "Geübt",
+    answerFirst: "Beantworte zuerst die Kontrollfrage richtig.",
+    lastPracticed: (date: string) => `zuletzt geübt am ${date}`,
+    neverPracticed: "noch nie geübt",
+    openCount: (count: number) =>
+      count === 1 ? "1 Übung ist fällig" : `${count} Übungen sind fällig`,
+    allDone: "Alles geübt – in einem halben Jahr wieder.",
+    note: "Gespeichert wird nur das Datum je Übung, auf diesem Gerät. Keine Namen, keine Nummern: Was ein Kind auswendig können muss, übt man mit ihm, statt es in einer App zu hinterlegen. Nach einem halben Jahr ist eine Übung wieder fällig – Kinder wachsen, und der Platz ist beim nächsten Mal ein anderer.",
+  },
   rainyDay: {
     title: "Regentag-Ideen",
     intro:
