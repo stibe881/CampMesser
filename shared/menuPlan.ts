@@ -219,22 +219,3 @@ export function autofillMenuPlan(options: {
   });
   return assignments;
 }
-
-/**
- * Zutaten-Zeilen für die Einkaufsliste zusammenführen: trimmen, Leerzeilen
- * entfernen und Duplikate (gross-/kleinschreibungsunabhängig) zusammenfassen –
- * die zuerst gesehene Schreibweise gewinnt.
- */
-export function mergeIngredientLines(lines: string[]): string[] {
-  const seen = new Set<string>();
-  const merged: string[] = [];
-  lines.forEach(line => {
-    const trimmed = line.trim();
-    if (!trimmed) return;
-    const key = trimmed.toLowerCase();
-    if (seen.has(key)) return;
-    seen.add(key);
-    merged.push(trimmed);
-  });
-  return merged;
-}

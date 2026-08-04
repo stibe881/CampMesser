@@ -4745,6 +4745,8 @@ export const de = {
     addIngredients: "Zutaten der geplanten Rezepte auf die Einkaufsliste",
     noPlannedRecipes:
       "Noch keine Rezepte zugewiesen – wähle zuerst Rezepte in den Mahlzeiten-Slots.",
+    summedFrom: (count: number) =>
+      `aus ${count} Rezept-Zeilen zusammengerechnet`,
     printButton: "Drucken",
     autofillButton: "Automatisch füllen",
     autofillNothing: "Keine leeren Mahlzeiten-Slots zum Füllen gefunden.",

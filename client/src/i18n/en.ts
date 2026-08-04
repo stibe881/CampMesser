@@ -4617,6 +4617,7 @@ export const en: Translation = {
     addIngredients: "Add ingredients of planned recipes to the shopping list",
     noPlannedRecipes:
       "No recipes assigned yet – choose recipes in the meal slots first.",
+    summedFrom: (count: number) => `added up from ${count} ingredient lines`,
     printButton: "Print",
     autofillButton: "Fill automatically",
     autofillNothing: "No empty meal slots to fill.",

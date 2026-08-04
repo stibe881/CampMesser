@@ -4711,6 +4711,7 @@ export const it: Translation = {
       "Ingredienti delle ricette pianificate sulla lista della spesa",
     noPlannedRecipes:
       "Ancora nessuna ricetta assegnata – scegli prima le ricette negli slot dei pasti.",
+    summedFrom: (count: number) => `somma di ${count} righe di ingredienti`,
     printButton: "Stampa",
     autofillButton: "Riempi automaticamente",
     autofillNothing: "Nessuno slot dei pasti vuoto da riempire.",

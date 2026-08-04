@@ -33,14 +33,12 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 11 Punkte
+## Runde 29 – 10 Punkte
 
 ### Reise-Planung
 
 ### Küche & Vorrat
 
-- [ ] **Wocheneinkauf aus dem Menüplan** (#288) – Zutaten aller Tage
-      zusammengefasst und mengengerecht
 - [ ] **Znüni- & Lunchbox-Planer** (#289) – was kommt für den Ausflug in den
       Rucksack
 

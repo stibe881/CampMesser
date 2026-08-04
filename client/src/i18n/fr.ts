@@ -4746,6 +4746,7 @@ export const fr: Translation = {
     addIngredients: "Ingrédients des recettes prévues sur la liste de courses",
     noPlannedRecipes:
       "Aucune recette attribuée pour l'instant – choisis d'abord des recettes dans les créneaux de repas.",
+    summedFrom: (count: number) => `total de ${count} lignes d'ingrédients`,
     printButton: "Imprimer",
     autofillButton: "Remplir automatiquement",
     autofillNothing: "Aucun créneau de repas vide à remplir.",
