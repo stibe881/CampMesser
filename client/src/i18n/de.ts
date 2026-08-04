@@ -2931,6 +2931,21 @@ export const de = {
     reminderHint:
       "Wiederkehrende Arbeiten kannst du dir im Inventar als Pflege-Erinnerung eintragen – dann meldet sich die App, bevor es zu spät ist.",
   },
+  storyDice: {
+    title: "Erzählwürfel",
+    subtitle:
+      "Symbole würfeln und daraus gemeinsam eine Geschichte erfinden – ohne Netz, ohne Vorbereitung.",
+    howToTitle: "So geht's",
+    howToText:
+      "Würfeln, dann erzählt der Erste einen Satz, in dem ein Symbol vorkommt. Reihum weiter, bis alle Symbole verbraucht sind – wer will, hängt am Schluss ein Ende dran.",
+    countLabel: "Würfel:",
+    countAria: "Anzahl Würfel wählen",
+    rollButton: "Würfeln",
+    rerollAria: (word: string) => `${word} neu würfeln`,
+    rerollHint:
+      "Passt ein Symbol partout nicht? Tipp drauf – dann wird nur dieser Würfel neu geworfen.",
+    starterTitle: "Anfangssatz",
+  },
   treasure: {
     title: "GPS-Schatzsuche",
     subtitle:

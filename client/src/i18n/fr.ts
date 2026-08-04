@@ -2926,6 +2926,21 @@ export const fr: Translation = {
     reminderHint:
       "Tu peux inscrire les travaux récurrents dans l'inventaire comme rappel d'entretien – l'app se manifeste alors avant qu'il ne soit trop tard.",
   },
+  storyDice: {
+    title: "Dés à histoires",
+    subtitle:
+      "Lance les symboles et inventez ensemble une histoire – sans réseau, sans préparation.",
+    howToTitle: "Comment jouer",
+    howToText:
+      "Lancez, puis la première personne dit une phrase contenant un symbole. On continue à tour de rôle jusqu'à ce que tous les symboles soient utilisés – et qui veut ajoute une fin.",
+    countLabel: "Dés :",
+    countAria: "Choisir le nombre de dés",
+    rollButton: "Lancer",
+    rerollAria: (word: string) => `Relancer ${word}`,
+    rerollHint:
+      "Un symbole ne colle vraiment pas ? Touche-le – seul ce dé est relancé.",
+    starterTitle: "Phrase de départ",
+  },
   treasure: {
     title: "Chasse au trésor GPS",
     subtitle:

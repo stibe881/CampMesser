@@ -25,11 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 3 Punkte
+## Runde 27 – 2 Punkte
 
 ### Familie & Abend
 
-- [ ] **Erzählwürfel** (#268) – Bilder würfeln und daraus Geschichten erfinden
 - [ ] **Lagerfeuer-Liederbuch** (#269) – Texte und Akkorde, Rotlicht-tauglich
 - [ ] **Ämtli-Plan im Camp** (#270) – Aufgaben verteilen, Kinder sammeln Punkte
 

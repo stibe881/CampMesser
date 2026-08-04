@@ -13,6 +13,7 @@ import {
   Compass,
   CookingPot,
   Cross,
+  Dices,
   Droplets,
   Footprints,
   Gauge,
@@ -567,6 +568,24 @@ export const modules: Module[] = [
     ),
     icon: Gem,
     group: "Erste Hilfe",
+  },
+  {
+    path: "/erzaehlwuerfel",
+    title: l4(
+      "Erzählwürfel",
+      "Dés à histoires",
+      "Dadi delle storie",
+      "Story dice"
+    ),
+    description: l4(
+      "Symbole würfeln und daraus reihum eine Geschichte erfinden",
+      "Lance les symboles et inventez une histoire à tour de rôle",
+      "Tira i simboli e inventate a turno una storia",
+      "Roll symbols and make up a story together"
+    ),
+    icon: Dices,
+    group: "Erste Hilfe",
+    offline: true,
   },
   {
     path: "/familie",

@@ -2899,6 +2899,21 @@ export const it: Translation = {
     reminderHint:
       "I lavori ricorrenti puoi annotarli nell'inventario come promemoria di manutenzione – così l'app si fa viva prima che sia troppo tardi.",
   },
+  storyDice: {
+    title: "Dadi delle storie",
+    subtitle:
+      "Tira i simboli e inventate insieme una storia – senza rete, senza preparazione.",
+    howToTitle: "Come si gioca",
+    howToText:
+      "Tirate, poi il primo dice una frase che contiene un simbolo. Si continua a turno finché tutti i simboli sono usati – e chi vuole aggiunge un finale.",
+    countLabel: "Dadi:",
+    countAria: "Scegli il numero di dadi",
+    rollButton: "Tira",
+    rerollAria: (word: string) => `Ritira ${word}`,
+    rerollHint:
+      "Un simbolo proprio non ci sta? Toccalo – viene ritirato solo quel dado.",
+    starterTitle: "Frase iniziale",
+  },
   treasure: {
     title: "Caccia al tesoro GPS",
     subtitle:

@@ -2830,6 +2830,21 @@ export const en: Translation = {
     reminderHint:
       "You can add recurring jobs to your inventory as a care reminder – then the app speaks up before it is too late.",
   },
+  storyDice: {
+    title: "Story dice",
+    subtitle:
+      "Roll symbols and make up a story together – no signal, no preparation needed.",
+    howToTitle: "How to play",
+    howToText:
+      "Roll, then the first person says a sentence containing one of the symbols. Carry on in turn until every symbol has been used – and whoever wants to adds an ending.",
+    countLabel: "Dice:",
+    countAria: "Choose the number of dice",
+    rollButton: "Roll",
+    rerollAria: (word: string) => `Reroll ${word}`,
+    rerollHint:
+      "A symbol just will not fit? Tap it – only that die is rolled again.",
+    starterTitle: "Opening line",
+  },
   treasure: {
     title: "GPS treasure hunt",
     subtitle:
