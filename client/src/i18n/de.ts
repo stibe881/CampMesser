@@ -3303,6 +3303,41 @@ export const de = {
     turnRight: (deg: number) => `Noch ${deg}° nach rechts drehen.`,
     source: "Windwerte von Open-Meteo, Faustregeln fürs Aufstellen.",
   },
+  datePoll: {
+    title: "Termin-Finder",
+    toggleAria: (trip: string) => `Termin-Finder für ${trip} öffnen`,
+    hint: "Schlag Zeiträume vor und antwortet je Vorschlag mit Ja, Vielleicht oder Nein. Ein Termin ohne Absage gewinnt – auch mit weniger Ja.",
+    empty:
+      "Noch kein Vorschlag. Trag einen Zeitraum ein, dann können alle antworten.",
+    startLabel: "Anreise",
+    endLabel: "Abreise",
+    notePlaceholder: "Notiz, z. B. «Brückentag»",
+    noteAria: "Notiz zum Vorschlag",
+    addButton: "Vorschlagen",
+    added: "Vorschlag hinzugefügt",
+    addFailed: "Vorschlag konnte nicht gespeichert werden",
+    rangeInvalid: "Die Abreise muss nach der Anreise liegen.",
+    removed: "Vorschlag gelöscht",
+    removeFailed: "Vorschlag konnte nicht gelöscht werden",
+    removeAria: (range: string) => `Vorschlag ${range} löschen`,
+    voteFailed: "Antwort konnte nicht gespeichert werden",
+    voteGroupAria: "Deine Antwort zu diesem Zeitraum",
+    voteLabel: { yes: "Ja", maybe: "Vielleicht", no: "Nein" },
+    nights: (count: number) => (count === 1 ? "1 Nacht" : `${count} Nächte`),
+    unanimous: "Alle dafür",
+    leadingAria: "Führt zurzeit",
+    missing: (names: string) => `Fehlt noch: ${names}`,
+    progress: (answered: number, expected: number) =>
+      `${answered} von ${expected} Antworten`,
+    decided: (range: string) =>
+      `Alle haben geantwortet – ${range} liegt vorn und wäre der Termin.`,
+    applyButton: "Als Reisedatum übernehmen",
+    applied: "Reisedatum übernommen",
+    applyFailed: "Reisedatum konnte nicht übernommen werden",
+    currentDate: "Aktuelles Reisedatum",
+    maxReached: (max: number) =>
+      `Mehr als ${max} Vorschläge beantwortet niemand mehr – lösch einen, um Platz zu machen.`,
+  },
   boxes: {
     title: "Kisten",
     subtitle:

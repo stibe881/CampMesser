@@ -161,6 +161,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     homeLocations,
     spotPhotos,
     tripLogs,
+    tripDateOptions,
+    tripDateVotes,
     tripInvites,
     tripMembers,
     tripPhotos,
@@ -294,7 +296,25 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     await db
       .delete(tripShoppingItems)
       .where(inArray(tripShoppingItems.tripId, ownedTripIds));
+    // Termin-Finder (#253) eigener Reisen: erst die Stimmen, dann die
+    // Vorschläge – sonst bleiben Stimmen ohne Vorschlag zurück.
+    const ownedOptions = await db
+      .select({ id: tripDateOptions.id })
+      .from(tripDateOptions)
+      .where(inArray(tripDateOptions.tripId, ownedTripIds));
+    const ownedOptionIds = ownedOptions.map(o => o.id);
+    if (ownedOptionIds.length > 0) {
+      await db
+        .delete(tripDateVotes)
+        .where(inArray(tripDateVotes.optionId, ownedOptionIds));
+    }
+    await db
+      .delete(tripDateOptions)
+      .where(inArray(tripDateOptions.tripId, ownedTripIds));
   }
+  // Eigene Stimmen in FREMDEN Reisen: die Vorschläge dort gehören der
+  // Reise und bleiben stehen, die eigene Antwort verschwindet mit dem Konto.
+  await db.delete(tripDateVotes).where(eq(tripDateVotes.userId, userId));
   await db.delete(tripPhotos).where(eq(tripPhotos.userId, userId));
   await db.delete(menuEntries).where(eq(menuEntries.userId, userId));
   // Eigene Mitgliedschaften bei fremden Reisen ebenfalls aufräumen

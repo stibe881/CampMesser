@@ -60,6 +60,9 @@ import {
   InsertTripBoardNote,
   tripExpenses,
   InsertTripExpense,
+  tripDateOptions,
+  InsertTripDateOption,
+  tripDateVotes,
   tripInvites,
   tripJournal,
   tripLogs,
@@ -1663,6 +1666,8 @@ export async function deleteTripLog(id: number, userId: number) {
   await db.delete(tripInvites).where(eq(tripInvites.tripId, id));
   // Gemeinsame Reise-Einkaufsliste hängt an der Reise – ebenfalls weg
   await db.delete(tripShoppingItems).where(eq(tripShoppingItems.tripId, id));
+  // Termin-Finder (#253): Vorschläge samt Stimmen der Reise
+  await deleteTripDateOptionsForTrip(id);
 }
 
 // ── Reise-Mitglieder & Einladungen ──
@@ -1811,6 +1816,90 @@ export async function getMemberTripLogs(userId: number) {
     .leftJoin(campSpots, eq(campSpots.id, tripLogs.spotId))
     .where(eq(tripMembers.userId, userId))
     .orderBy(desc(tripLogs.startDate), desc(tripLogs.id));
+}
+
+/**
+ * Termin-Finder (#253): Vorschläge einer Reise, früheste zuerst. Sortiert
+ * wird hier nach Datum und nicht nach Zustimmung – die Rangliste rechnet
+ * `rankOptions` aus den Stimmen, die Datenbank kennt sie nicht.
+ * Nur NACH einer canAccessTrip-Prüfung im Router verwenden.
+ */
+export async function getTripDateOptions(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripDateOptions)
+    .where(eq(tripDateOptions.tripId, tripId))
+    .orderBy(asc(tripDateOptions.startDate), asc(tripDateOptions.id));
+}
+
+/** Einzelnen Vorschlag laden – für die Zugriffs-Prüfung über seine Reise. */
+export async function getTripDateOption(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripDateOptions)
+    .where(eq(tripDateOptions.id, id))
+    .limit(1);
+  return rows[0];
+}
+
+/** Vorschlag anlegen – nur NACH einer canAccessTrip-Prüfung im Router. */
+export async function createTripDateOption(data: InsertTripDateOption) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(tripDateOptions).values(data);
+  return result.insertId;
+}
+
+/**
+ * Vorschlag löschen – die Stimmen dazu gehen mit, sonst bliebe eine
+ * verwaiste Zeile pro Person zurück und der nächste Vorschlag mit
+ * derselben Id (nach einem Restore) erbte fremde Antworten.
+ */
+export async function deleteTripDateOption(id: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripDateVotes).where(eq(tripDateVotes.optionId, id));
+  await db.delete(tripDateOptions).where(eq(tripDateOptions.id, id));
+}
+
+/** Stimmen zu den Vorschlägen einer Reise. */
+export async function getTripDateVotes(optionIds: number[]) {
+  if (optionIds.length === 0) return [];
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripDateVotes)
+    .where(inArray(tripDateVotes.optionId, optionIds));
+}
+
+/**
+ * Abstimmen oder umstimmen: eine Zeile pro Vorschlag und Konto
+ * (unique optionId+userId), ein zweiter Aufruf ersetzt die Antwort.
+ */
+export async function setTripDateVote(
+  optionId: number,
+  userId: number,
+  vote: string
+) {
+  const db = requireDb(await getDb());
+  await db
+    .insert(tripDateVotes)
+    .values({ optionId, userId, vote })
+    .onDuplicateKeyUpdate({ set: { vote } });
+}
+
+/** Alle Vorschläge samt Stimmen einer Reise entfernen (Reise gelöscht). */
+export async function deleteTripDateOptionsForTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  const options = await db
+    .select({ id: tripDateOptions.id })
+    .from(tripDateOptions)
+    .where(eq(tripDateOptions.tripId, tripId));
+  const ids = options.map(option => option.id);
+  if (ids.length > 0) {
+    await db.delete(tripDateVotes).where(inArray(tripDateVotes.optionId, ids));
+  }
+  await db.delete(tripDateOptions).where(eq(tripDateOptions.tripId, tripId));
 }
 
 /** Aktiver Einladungs-Link einer Reise (undefined = keiner). */

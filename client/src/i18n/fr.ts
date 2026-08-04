@@ -3299,6 +3299,41 @@ export const fr: Translation = {
     turnRight: (deg: number) => `Tourne encore de ${deg}° vers la droite.`,
     source: "Valeurs de vent d'Open-Meteo, règles empiriques de montage.",
   },
+  datePoll: {
+    title: "Trouve-date",
+    toggleAria: (trip: string) => `Ouvrir le trouve-date pour ${trip}`,
+    hint: "Propose des périodes et répondez pour chacune par Oui, Peut-être ou Non. Une période sans refus l'emporte – même avec moins de Oui.",
+    empty:
+      "Aucune proposition pour l'instant. Saisis une période, puis tout le monde peut répondre.",
+    startLabel: "Arrivée",
+    endLabel: "Départ",
+    notePlaceholder: "Note, p. ex. « pont »",
+    noteAria: "Note sur la proposition",
+    addButton: "Proposer",
+    added: "Proposition ajoutée",
+    addFailed: "Impossible d'enregistrer la proposition",
+    rangeInvalid: "Le départ doit suivre l'arrivée.",
+    removed: "Proposition supprimée",
+    removeFailed: "Impossible de supprimer la proposition",
+    removeAria: (range: string) => `Supprimer la proposition ${range}`,
+    voteFailed: "Impossible d'enregistrer la réponse",
+    voteGroupAria: "Ta réponse pour cette période",
+    voteLabel: { yes: "Oui", maybe: "Peut-être", no: "Non" },
+    nights: (count: number) => (count === 1 ? "1 nuit" : `${count} nuits`),
+    unanimous: "Tous d'accord",
+    leadingAria: "En tête actuellement",
+    missing: (names: string) => `Manque encore : ${names}`,
+    progress: (answered: number, expected: number) =>
+      `${answered} réponses sur ${expected}`,
+    decided: (range: string) =>
+      `Tout le monde a répondu – ${range} est en tête et serait la date.`,
+    applyButton: "Reprendre comme date du voyage",
+    applied: "Date du voyage reprise",
+    applyFailed: "Impossible de reprendre la date",
+    currentDate: "Date actuelle du voyage",
+    maxReached: (max: number) =>
+      `Au-delà de ${max} propositions, plus personne ne répond – supprimes-en une pour faire de la place.`,
+  },
   boxes: {
     title: "Caisses",
     subtitle:

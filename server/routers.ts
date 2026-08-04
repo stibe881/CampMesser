@@ -96,6 +96,13 @@ import {
 } from "@shared/tripWeather";
 import { TRIP_JOURNAL_MAX_LENGTH } from "@shared/trips";
 import {
+  isDuplicateOption,
+  isValidOptionRange,
+  MAX_DATE_OPTIONS,
+  MAX_OPTION_NOTE_LENGTH,
+  VOTE_VALUES,
+} from "@shared/datePoll";
+import {
   MAX_TRACK_POINTS,
   serializeTrackPoints,
   TRACK_NAME_MAX_LENGTH,
@@ -4525,6 +4532,196 @@ export const appRouter = router({
           }
           await db.removeTripMember(input.tripId, targetUserId);
           return { success: true } as const;
+        }),
+    }),
+    /**
+     * Termin-Finder (#253): Datums-Vorschläge und Stimmen einer Reise.
+     * Vorschlagen und abstimmen darf jede/r Mitreisende – die Frage «wann
+     * können alle?» beantwortet man gemeinsam. Löschen eines fremden
+     * Vorschlags und das Übernehmen des Termins bleiben bei der
+     * Besitzerin/dem Besitzer, denn beides ändert die Reise für alle.
+     */
+    dates: router({
+      list: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          const [options, members, owner] = await Promise.all([
+            db.getTripDateOptions(input.tripId),
+            db.getTripMembersWithUsers(input.tripId),
+            db.getUserById(trip.userId),
+          ]);
+          const votes = await db.getTripDateVotes(options.map(o => o.id));
+          // Stimmberechtigt sind Besitzer:in plus Mitreisende – dieselbe
+          // Liste, die auch die «fehlt noch»-Anzeige speist. Der Name kommt
+          // gleich mit, damit die Ansicht nicht pro Person nachfragen muss.
+          const participants = [
+            {
+              userId: trip.userId,
+              name: owner?.name || owner?.email || `#${trip.userId}`,
+            },
+            ...members.map(member => ({
+              userId: member.userId,
+              name: member.name || member.email || `#${member.userId}`,
+            })),
+          ];
+          return {
+            options: options.map(option => ({
+              id: option.id,
+              startDate: option.startDate,
+              endDate: option.endDate,
+              note: option.note,
+              createdByUserId: option.createdByUserId,
+            })),
+            votes: votes.map(vote => ({
+              optionId: vote.optionId,
+              userId: vote.userId,
+              vote: vote.vote,
+            })),
+            participants,
+            isOwner: trip.userId === ctx.user.id,
+            tripStartDate: trip.startDate,
+            tripEndDate: trip.endDate,
+          };
+        }),
+      add: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            startDate: z.string().min(1),
+            endDate: z.string().min(1),
+            note: z.string().max(MAX_OPTION_NOTE_LENGTH).optional(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          if (!isValidOptionRange(input.startDate, input.endDate)) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Die Abreise muss nach der Anreise liegen.",
+            });
+          }
+          const existing = await db.getTripDateOptions(input.tripId);
+          if (existing.length >= MAX_DATE_OPTIONS) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Mehr als ${MAX_DATE_OPTIONS} Vorschläge beantwortet niemand mehr.`,
+            });
+          }
+          if (isDuplicateOption(existing, input.startDate, input.endDate)) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Dieser Zeitraum steht bereits zur Wahl.",
+            });
+          }
+          const id = await db.createTripDateOption({
+            tripId: input.tripId,
+            startDate: input.startDate,
+            endDate: input.endDate,
+            note: input.note?.trim() || null,
+            createdByUserId: ctx.user.id,
+          });
+          return { id };
+        }),
+      remove: protectedProcedure
+        .input(z.object({ optionId: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const option = await db.getTripDateOption(input.optionId);
+          if (!option) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Vorschlag nicht gefunden.",
+            });
+          }
+          const trip = await db.canAccessTrip(option.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Vorschlag nicht gefunden.",
+            });
+          }
+          const mayRemove =
+            trip.userId === ctx.user.id ||
+            option.createdByUserId === ctx.user.id;
+          if (!mayRemove) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message:
+                "Nur wer den Vorschlag eingebracht hat, darf ihn löschen.",
+            });
+          }
+          await db.deleteTripDateOption(input.optionId);
+          return { success: true } as const;
+        }),
+      vote: protectedProcedure
+        .input(
+          z.object({
+            optionId: z.number().int().positive(),
+            vote: z.enum(VOTE_VALUES),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const option = await db.getTripDateOption(input.optionId);
+          if (!option) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Vorschlag nicht gefunden.",
+            });
+          }
+          const trip = await db.canAccessTrip(option.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Vorschlag nicht gefunden.",
+            });
+          }
+          await db.setTripDateVote(input.optionId, ctx.user.id, input.vote);
+          return { success: true } as const;
+        }),
+      /**
+       * Gewählten Termin in die Reise übernehmen (nur Besitzerin/Besitzer):
+       * setzt startDate/endDate. Die Vorschläge bleiben stehen – wer sich
+       * umentscheidet, sieht die Alternativen noch, und die Abstimmung ist
+       * die Begründung für das Datum.
+       */
+      adopt: protectedProcedure
+        .input(z.object({ optionId: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const option = await db.getTripDateOption(input.optionId);
+          if (!option) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Vorschlag nicht gefunden.",
+            });
+          }
+          const trip = await db.getTripLog(option.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message:
+                "Nur die Besitzerin/der Besitzer darf den Termin übernehmen.",
+            });
+          }
+          await db.updateTripLog(option.tripId, ctx.user.id, {
+            startDate: option.startDate,
+            endDate: option.endDate,
+          });
+          return {
+            startDate: option.startDate,
+            endDate: option.endDate,
+          };
         }),
     }),
     /**

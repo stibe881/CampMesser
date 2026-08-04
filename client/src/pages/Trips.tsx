@@ -143,6 +143,7 @@ import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import { drawYearReview } from "@/lib/yearReviewImage";
 import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
+import TripDatePoll from "@/components/TripDatePoll";
 
 /** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
 const FREE_LOCATION = "frei";
@@ -4308,6 +4309,16 @@ export default function TripsPage() {
                         defaultDay={today > trip.endDate ? trip.endDate : today}
                         shared={trip.shared || trip.role === "member"}
                       />
+                      {/* Termin-Finder (#253): nur bei gemeinsamen Reisen und
+                          nur, solange die Reise noch bevorsteht – über einen
+                          bereits gelaufenen Aufenthalt stimmt niemand ab */}
+                      {(trip.shared || trip.role === "member") &&
+                        trip.startDate > today && (
+                          <TripDatePoll
+                            tripId={trip.id}
+                            tripName={trip.title || placeName(trip)}
+                          />
+                        )}
                       {/* Pinnwand (#245): nur bei gemeinsamen Reisen – allein
                           hätte man niemanden, dem man etwas anpinnen könnte */}
                       {(trip.shared || trip.role === "member") && (

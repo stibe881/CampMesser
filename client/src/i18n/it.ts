@@ -3273,6 +3273,41 @@ export const it: Translation = {
     turnRight: (deg: number) => `Ruota ancora di ${deg}° a destra.`,
     source: "Valori del vento da Open-Meteo, regole pratiche di montaggio.",
   },
+  datePoll: {
+    title: "Trova-data",
+    toggleAria: (trip: string) => `Aprire il trova-data per ${trip}`,
+    hint: "Proponi periodi e rispondete per ciascuno con Sì, Forse o No. Vince il periodo senza rifiuti – anche con meno Sì.",
+    empty:
+      "Ancora nessuna proposta. Inserisci un periodo, poi tutti possono rispondere.",
+    startLabel: "Arrivo",
+    endLabel: "Partenza",
+    notePlaceholder: "Nota, p. es. «ponte»",
+    noteAria: "Nota sulla proposta",
+    addButton: "Proporre",
+    added: "Proposta aggiunta",
+    addFailed: "Impossibile salvare la proposta",
+    rangeInvalid: "La partenza deve essere dopo l'arrivo.",
+    removed: "Proposta eliminata",
+    removeFailed: "Impossibile eliminare la proposta",
+    removeAria: (range: string) => `Eliminare la proposta ${range}`,
+    voteFailed: "Impossibile salvare la risposta",
+    voteGroupAria: "La tua risposta per questo periodo",
+    voteLabel: { yes: "Sì", maybe: "Forse", no: "No" },
+    nights: (count: number) => (count === 1 ? "1 notte" : `${count} notti`),
+    unanimous: "Tutti d'accordo",
+    leadingAria: "Attualmente in testa",
+    missing: (names: string) => `Manca ancora: ${names}`,
+    progress: (answered: number, expected: number) =>
+      `${answered} risposte su ${expected}`,
+    decided: (range: string) =>
+      `Hanno risposto tutti – ${range} è in testa e sarebbe la data.`,
+    applyButton: "Adottare come data del viaggio",
+    applied: "Data del viaggio adottata",
+    applyFailed: "Impossibile adottare la data",
+    currentDate: "Data attuale del viaggio",
+    maxReached: (max: number) =>
+      `Oltre ${max} proposte non risponde più nessuno – eliminane una per fare spazio.`,
+  },
   boxes: {
     title: "Casse",
     subtitle:

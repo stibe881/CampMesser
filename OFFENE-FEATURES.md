@@ -25,12 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 19 Punkte
+## Runde 27 – 18 Punkte
 
 ### Reise & Organisation
 
-- [ ] **Termin-Finder für gemeinsame Reisen** (#253) – Mitreisende stimmen über
-      mögliche Daten ab
 - [ ] **Gästebuch pro Reise** (#254) – Mitreisende hinterlassen Einträge und
       Fotos
 - [ ] **Morgen-Briefing** (#255) – Wetter, heutige Mahlzeiten, Aufgaben und
