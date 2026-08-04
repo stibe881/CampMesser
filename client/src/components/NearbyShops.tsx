@@ -1,16 +1,30 @@
 /**
  * Einkaufen in Platznähe (#273): Supermarkt, Bäckerei, Hofladen und
- * Metzgerei rund um einen Platz – aus OpenStreetMap über dieselbe
- * Overpass-Anbindung wie Feuerstellen (#247) und Spielplätze (#248).
+ * Metzgerei rund um einen Platz.
  *
- * Wie dort wird ERST BEIM AUFKLAPPEN geladen: Overpass ist ein freier,
- * rate-limitierter Dienst und wird nie automatisch gefragt.
+ * ZWEI QUELLEN, IN DIESER REIHENFOLGE (Nutzerwunsch 04.08.2026):
  *
- * ÖFFNUNGSZEITEN sind hier der heikle Teil. OSM speichert sie in einer
+ * 1. GOOGLE, wenn der Schlüssel in der Server-`.env` steht. Der Grund
+ *    sind die ÖFFNUNGSZEITEN: In OSM sind sie bei den meisten Läden
+ *    schlicht nicht erfasst – auf einem Bildschirm mit fünf Treffern
+ *    stand viermal «Öffnungszeiten nicht erfasst». Und «hat der Coop
+ *    jetzt noch offen» ist genau die Frage, für die man diese Liste
+ *    aufmacht.
+ * 2. OPENSTREETMAP über Overpass, wenn Google nicht eingerichtet ist
+ *    oder nicht antwortet. Kein blosser Notnagel: Hofläden sind in OSM
+ *    oft erfasst, und bei Google gibt es für sie gar keinen Typ.
+ *
+ * Wie bei Feuerstellen (#247) und Spielplätzen (#248) wird ERST BEIM
+ * AUFKLAPPEN geladen – Overpass ist ein freier, rate-limitierter Dienst,
+ * und eine Google-Abfrage kostet Geld.
+ *
+ * ÖFFNUNGSZEITEN AUS OSM sind der heikle Teil. OSM speichert sie in einer
  * eigenen kleinen Sprache; `shared/openingHours.ts` versteht davon nur
  * den einfachen Teil. Wo die Deutung nicht sicher ist, steht «Zeiten
  * prüfen» und die Rohangabe daneben – lieber ein Blick mehr als jemand,
- * der zehn Kilometer weit vor eine geschlossene Tür fährt.
+ * der zehn Kilometer weit vor eine geschlossene Tür fährt. Von Google
+ * kommt «offen/geschlossen» dagegen als fertige Auskunft; dann steht
+ * keine Vermutung da, sondern die Antwort.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -30,11 +44,13 @@ import {
   nearestShops,
   parseShops,
   shopsQuery,
-  type ShopDistance,
+  type OsmShop,
   type ShopKind,
 } from "@/lib/overpass";
 import { useI18n } from "@/i18n";
-import { formatDistance } from "@shared/geo";
+import { trpc } from "@/lib/trpc";
+import { distanceMeters, formatDistance } from "@shared/geo";
+import { GOOGLE_ATTRIBUTION, googleShopKind } from "@shared/googlePlaces";
 import { applyRouteDistances } from "@shared/routing";
 import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import { hoursForDay, isOpenAt } from "@shared/openingHours";
@@ -44,6 +60,21 @@ import { cn } from "@/lib/utils";
 const NEARBY_LIMIT = 8;
 
 type Status = "idle" | "loading" | "ready" | "failed";
+
+/**
+ * Ein Laden, wie ihn die Liste führt. `openNow`/`todayLine` sind die
+ * fertige Auskunft von Google; bei OSM bleiben sie leer, und dann greift
+ * die Deutung aus `shared/openingHours.ts`.
+ */
+type ShopEntry = OsmShop & {
+  openNow?: boolean | null;
+  todayLine?: string;
+};
+
+interface ShopRow {
+  place: ShopEntry;
+  distanceM: number;
+}
 
 const kindIcons: Record<ShopKind, typeof Store> = {
   supermarket: ShoppingCart,
@@ -69,7 +100,10 @@ export default function NearbyShops({
   const [open, setOpen] = useState(false);
   const [radiusM, setRadiusM] = useState(SHOP_DEFAULT_RADIUS_M);
   const [status, setStatus] = useState<Status>("idle");
-  const [shops, setShops] = useState<ShopDistance[]>([]);
+  const [shops, setShops] = useState<ShopRow[]>([]);
+  /** Woher die aktuelle Liste stammt – die Quellenangabe hängt daran. */
+  const [source, setSource] = useState<"osm" | "google">("osm");
+  const utils = trpc.useUtils();
   // Wegstrecke statt Luftlinie (eine Tabellen-Abfrage für die ganze Liste):
   // Der Laden am anderen Flussufer ist 500 m entfernt und 6 km weit weg
   const routed = useRoutedDistances(
@@ -86,13 +120,71 @@ export default function NearbyShops({
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  /** Overpass fragen – nur auf Klick, nie automatisch (Rate-Limit). */
+  /**
+   * Suchen – nur auf Klick, nie automatisch.
+   *
+   * Erst Google (falls eingerichtet), sonst Overpass. Antwortet Google
+   * nicht oder kennt es hier nichts, fällt die Suche auf OSM zurück
+   * statt eine leere Liste zu zeigen: «Google kennt hier keinen Laden»
+   * heisst nicht, dass keiner da ist.
+   */
   const search = useCallback(
     async (radius: number) => {
       setStatus("loading");
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
+
+      // Heute ist Montag = 0 in Googles Wochenliste, sonntags = 6
+      const weekday = (new Date().getDay() + 6) % 7;
+
+      try {
+        const google = await utils.places.nearby.fetch({
+          latitude,
+          longitude,
+          radiusM: radius,
+          kind: "shops",
+          language: lang,
+        });
+        if (controller.signal.aborted) return;
+        if (google.configured && google.places.length > 0) {
+          const rows: ShopRow[] = [];
+          google.places.forEach(place => {
+            const kind = googleShopKind(place.types);
+            if (!kind) return;
+            rows.push({
+              place: {
+                id: place.id,
+                lat: place.lat,
+                lon: place.lon,
+                kind,
+                name: place.name || undefined,
+                website: place.website ?? undefined,
+                phone: place.phone ?? undefined,
+                openNow: place.openNow,
+                todayLine: place.hours[weekday],
+              },
+              distanceM: distanceMeters(
+                latitude,
+                longitude,
+                place.lat,
+                place.lon
+              ),
+            });
+          });
+          if (rows.length > 0) {
+            rows.sort((a, b) => a.distanceM - b.distanceM);
+            setShops(rows.slice(0, NEARBY_LIMIT));
+            setSource("google");
+            setStatus("ready");
+            return;
+          }
+        }
+      } catch {
+        // Kein Google: Der Weg über OSM steht gleich darunter
+      }
+      if (controller.signal.aborted) return;
+
       try {
         const res = await fetchOverpass(
           `data=${encodeURIComponent(shopsQuery(latitude, longitude, radius))}`,
@@ -102,13 +194,14 @@ export default function NearbyShops({
         setShops(
           nearestShops(parseShops(json), latitude, longitude, NEARBY_LIMIT)
         );
+        setSource("osm");
         setStatus("ready");
       } catch {
         if (controller.signal.aborted) return;
         setStatus("failed");
       }
     },
-    [latitude, longitude]
+    [latitude, longitude, lang, utils]
   );
 
   const toggle = () => {
@@ -210,8 +303,16 @@ export default function NearbyShops({
                   const kindLabel = tp.kind[place.kind];
                   const title = place.name ?? kindLabel;
                   const KindIcon = kindIcons[place.kind];
-                  const openNow = isOpenAt(place.openingHours, now);
-                  const today = hoursForDay(place.openingHours, now);
+                  // Von Google kommt «offen/geschlossen» als Auskunft, aus
+                  // OSM nur als Vermutung aus der Rohangabe
+                  const openNow =
+                    place.openNow !== undefined
+                      ? place.openNow
+                      : isOpenAt(place.openingHours, now);
+                  const today =
+                    place.todayLine ?? hoursForDay(place.openingHours, now);
+                  const hasHours =
+                    place.todayLine != null || place.openingHours != null;
                   return (
                     <li
                       key={place.id}
@@ -247,7 +348,7 @@ export default function NearbyShops({
                             {tp.closedNow}
                           </span>
                         )}
-                        {openNow === null && place.openingHours && (
+                        {openNow === null && hasHours && (
                           <span className="rounded-full border border-amber-600/40 bg-amber-500/10 px-2 py-0.5 font-medium text-amber-800 dark:text-amber-300">
                             {tp.checkHours}
                           </span>
@@ -263,7 +364,7 @@ export default function NearbyShops({
                             </span>
                           )
                         )}
-                        {!place.openingHours && (
+                        {!hasHours && (
                           <span className="text-muted-foreground">
                             {tp.noHours}
                           </span>
@@ -311,7 +412,10 @@ export default function NearbyShops({
         </div>
       )}
 
-      <p className="mt-3 text-xs text-muted-foreground">{tp.source}</p>
+      {/* Quellenangabe: bei Google-Treffern verlangen es die Bedingungen */}
+      <p className="mt-3 text-xs text-muted-foreground">
+        {source === "google" ? GOOGLE_ATTRIBUTION : tp.source}
+      </p>
     </section>
   );
 }
