@@ -3735,6 +3735,41 @@ export const fr: Translation = {
   },
 
   /** Places de jeux et lieux de baignade depuis OpenStreetMap (#248). */
+  shops: {
+    sectionAria: "Faire les courses à proximité",
+    title: "Faire les courses à proximité",
+    subtitle: "Supermarché, boulangerie et vente à la ferme autour de toi.",
+    subtitleAtPlace: (place: string) =>
+      `Supermarché, boulangerie et vente à la ferme autour de ${place}.`,
+    radiusLabel: "Rayon",
+    radiusGroupAria: "Choisir le rayon de recherche",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Recherche des commerces …",
+    loadFailed: "Les commerces n'ont pas pu être chargés – réessaie plus tard.",
+    empty: (km: number) =>
+      `Dans un rayon de ${km} km, aucun commerce n'est répertorié dans OpenStreetMap.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 commerce trouvé" : `${n} commerces trouvés`,
+    distanceAway: (distance: string) => `${distance} à vol d'oiseau`,
+    kind: {
+      supermarket: "Supermarché",
+      convenience: "Épicerie",
+      bakery: "Boulangerie",
+      farm: "Vente à la ferme",
+      butcher: "Boucherie",
+    },
+    openNow: "Ouvert",
+    closedNow: "Fermé",
+    checkHours: "Vérifier les horaires",
+    todayHours: (hours: string) => `Aujourd'hui ${hours}`,
+    noHours: "Horaires non renseignés",
+    navButton: "Itinéraire",
+    navAria: (name: string) => `Itinéraire vers ${name}`,
+    website: "Site web",
+    hoursNote:
+      "Les horaires proviennent d'OpenStreetMap et peuvent être obsolètes. Quand l'indication est trop complexe (jours fériés, saison, pause de midi avec commentaire), on affiche « Vérifier les horaires » plutôt qu'une supposition – l'indication brute figure alors à côté.",
+    source: "Données : contributeurs OpenStreetMap (ODbL)",
+  },
   familyPlaces: {
     sectionAria: "Places de jeux et lieux de baignade à proximité",
     title: "Pour les familles à proximité",

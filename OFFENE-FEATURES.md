@@ -25,12 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 28 – 10 Punkte
+## Runde 28 – 9 Punkte
 
 ### Karte & Wetter
 
-- [ ] **Einkaufen in Platznähe** (#273) – Supermarkt, Bäckerei, Hofladen mit
-      Öffnungszeiten aus OSM
 - [ ] **Gewitter-Entfernung messen** (#274) – Blitz-Donner-Zähler mit Distanz
       und Trend «kommt näher»
 - [ ] **Unwetter auf der Fahrtstrecke** (#275) – Warnungen entlang der Anreise,

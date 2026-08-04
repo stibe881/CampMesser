@@ -49,6 +49,7 @@ import NearbyExcursions from "@/components/NearbyExcursions";
 import NearbyFirepits from "@/components/NearbyFirepits";
 import PicnicStops from "@/components/PicnicStops";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
+import NearbyShops from "@/components/NearbyShops";
 import NearbyTransit from "@/components/NearbyTransit";
 import TickRiskPanel from "@/components/TickRiskPanel";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
@@ -1235,6 +1236,15 @@ export default function SpotDetailPage() {
       {/* Spielplätze und Badeplätze aus OpenStreetMap (#248) – gemischt nach
           Distanz, lädt ebenfalls erst beim Aufklappen */}
       <NearbyFamilyPlaces
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mb-4"
+      />
+
+      {/* Einkaufen in Platznähe (#273): Supermarkt, Bäckerei, Hofladen mit
+          Öffnungszeiten – ebenfalls erst beim Aufklappen geholt */}
+      <NearbyShops
         latitude={spot.latitude}
         longitude={spot.longitude}
         placeName={spot.name}

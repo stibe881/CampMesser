@@ -3625,6 +3625,41 @@ export const en: Translation = {
   },
 
   /** Playgrounds and bathing spots from OpenStreetMap (#248). */
+  shops: {
+    sectionAria: "Shopping nearby",
+    title: "Shopping nearby",
+    subtitle: "Supermarket, bakery and farm shop around your location.",
+    subtitleAtPlace: (place: string) =>
+      `Supermarket, bakery and farm shop around ${place}.`,
+    radiusLabel: "Radius",
+    radiusGroupAria: "Choose the search radius",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Searching for shops …",
+    loadFailed:
+      "The shops could not be loaded right now – please try again later.",
+    empty: (km: number) =>
+      `Within ${km} km no shop is recorded in OpenStreetMap.`,
+    resultCount: (n: number) => (n === 1 ? "1 shop found" : `${n} shops found`),
+    distanceAway: (distance: string) => `${distance} as the crow flies`,
+    kind: {
+      supermarket: "Supermarket",
+      convenience: "Corner shop",
+      bakery: "Bakery",
+      farm: "Farm shop",
+      butcher: "Butcher",
+    },
+    openNow: "Open now",
+    closedNow: "Closed now",
+    checkHours: "Check the hours",
+    todayHours: (hours: string) => `Today ${hours}`,
+    noHours: "Opening hours not recorded",
+    navButton: "Directions",
+    navAria: (name: string) => `Directions to ${name}`,
+    website: "Website",
+    hoursNote:
+      "Opening hours come from OpenStreetMap and may be out of date. Where the entry is too involved (public holidays, seasons, a lunch break with a comment), it says “Check the hours” instead of guessing – the raw entry is shown alongside.",
+    source: "Data: OpenStreetMap contributors (ODbL)",
+  },
   familyPlaces: {
     sectionAria: "Playgrounds and bathing spots nearby",
     title: "For families nearby",

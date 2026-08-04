@@ -830,3 +830,119 @@ export function parsePicnicSites(json: unknown): OsmPicnicSite[] {
   }
   return result;
 }
+
+/* ------------------------------------------------------------------ */
+/* Einkaufen in Platznähe (#273)                                       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Die Ladenarten, die am Zeltplatz zählen. Bewusst getrennt und nicht als
+ * ein Topf «Geschäft»: Ein Hofladen hat andere Öffnungszeiten und ein
+ * anderes Sortiment als ein Supermarkt, und wer morgens Brot will, sucht
+ * die Bäckerei und nicht den nächsten Laden.
+ */
+export type ShopKind =
+  "supermarket" | "convenience" | "bakery" | "farm" | "butcher";
+
+export interface OsmShop {
+  id: string;
+  lat: number;
+  lon: number;
+  kind: ShopKind;
+  name?: string;
+  /** Rohangabe aus OSM (`opening_hours`) – die Deutung macht shared/openingHours.ts. */
+  openingHours?: string;
+  website?: string;
+  phone?: string;
+}
+
+/** Auswählbare Suchradien rund um den Platz in Metern. */
+export const SHOP_SEARCH_RADII_M = [2000, 5000, 10000];
+
+/** Voreingestellter Suchradius in Metern. */
+export const SHOP_DEFAULT_RADIUS_M = 5000;
+
+/** Höchstzahl der Läden je Abfrage. */
+export const OVERPASS_SHOP_MAX_RESULTS = 60;
+
+/** Die abgefragten Ladenarten mit demselben Ortsfilter. */
+function shopElements(filter: string): string {
+  const kinds = `["shop"~"^(supermarket|convenience|bakery|farm|butcher)$"]`;
+  return `node${kinds}${filter};way${kinds}${filter};`;
+}
+
+/** Overpass-QL für Einkaufsmöglichkeiten im Umkreis. */
+export function shopsQuery(lat: number, lon: number, radiusM: number): string {
+  const filter = `(around:${Math.round(radiusM)},${lat.toFixed(5)},${lon.toFixed(5)})`;
+  return (
+    `[out:json][timeout:20];` +
+    `(${shopElements(filter)});` +
+    `out center ${OVERPASS_SHOP_MAX_RESULTS};`
+  );
+}
+
+/** Overpass-Wert von `shop` auf unsere Arten abbilden. */
+function shopKind(tags: Record<string, unknown>): ShopKind | null {
+  const shop = cleanTag(tags.shop);
+  switch (shop) {
+    case "supermarket":
+    case "convenience":
+    case "bakery":
+    case "farm":
+    case "butcher":
+      return shop;
+    default:
+      return null;
+  }
+}
+
+/**
+ * Overpass-JSON in Läden übersetzen. Die Öffnungszeiten werden hier NICHT
+ * gedeutet, sondern roh übernommen – die Auswertung samt ihrer Grenzen
+ * steht in `shared/openingHours.ts`.
+ */
+export function parseShops(json: unknown): OsmShop[] {
+  const elements = readElements(json);
+  const seen = new Set<string>();
+  const result: OsmShop[] = [];
+  for (let i = 0; i < elements.length; i++) {
+    if (result.length >= OVERPASS_SHOP_MAX_RESULTS) break;
+    const point = readPointElement(elements[i]);
+    if (!point || seen.has(point.key)) continue;
+    const kind = shopKind(point.tags);
+    if (!kind) continue;
+    seen.add(point.key);
+    const tags = point.tags;
+    result.push({
+      id: point.key,
+      lat: point.lat,
+      lon: point.lon,
+      kind,
+      name: cleanTag(tags.name),
+      openingHours: cleanTag(tags.opening_hours),
+      website: cleanWebsite(tags.website),
+      phone: cleanTag(tags.phone),
+    });
+  }
+  return result;
+}
+
+/** Ein Laden mit der Luftlinie zum Bezugspunkt. */
+export interface ShopDistance {
+  place: OsmShop;
+  distanceM: number;
+}
+
+/**
+ * Die nächstgelegenen Läden – allein nach Distanz, ohne Vorrang für eine
+ * Ladenart: Wer Milch braucht, geht zum nächsten Laden, nicht zur
+ * Kategorie mit dem grösseren Sortiment.
+ */
+export function nearestShops(
+  list: readonly OsmShop[],
+  latitude: number,
+  longitude: number,
+  limit: number
+): ShopDistance[] {
+  return nearestPlaces(list, latitude, longitude, limit);
+}

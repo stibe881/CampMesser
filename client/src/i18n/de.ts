@@ -3737,6 +3737,42 @@ export const de = {
   },
 
   /** Spiel- und Badeplätze aus OpenStreetMap (#248). */
+  shops: {
+    sectionAria: "Einkaufen in der Nähe",
+    title: "Einkaufen in der Nähe",
+    subtitle: "Supermarkt, Bäckerei und Hofladen rund um deinen Standort.",
+    subtitleAtPlace: (place: string) =>
+      `Supermarkt, Bäckerei und Hofladen rund um ${place}.`,
+    radiusLabel: "Umkreis",
+    radiusGroupAria: "Suchradius wählen",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Läden werden gesucht …",
+    loadFailed:
+      "Die Läden konnten gerade nicht geladen werden – bitte später nochmals versuchen.",
+    empty: (km: number) =>
+      `Im Umkreis von ${km} km ist in OpenStreetMap kein Laden erfasst.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 Laden gefunden" : `${n} Läden gefunden`,
+    distanceAway: (distance: string) => `${distance} Luftlinie`,
+    kind: {
+      supermarket: "Supermarkt",
+      convenience: "Quartierladen",
+      bakery: "Bäckerei",
+      farm: "Hofladen",
+      butcher: "Metzgerei",
+    },
+    openNow: "Jetzt offen",
+    closedNow: "Jetzt geschlossen",
+    checkHours: "Zeiten prüfen",
+    todayHours: (hours: string) => `Heute ${hours}`,
+    noHours: "Öffnungszeiten nicht erfasst",
+    navButton: "Route",
+    navAria: (name: string) => `Route zu ${name}`,
+    website: "Website",
+    hoursNote:
+      "Die Öffnungszeiten kommen aus OpenStreetMap und können veraltet sein. Wo die Angabe zu verschachtelt ist (Feiertage, Saison, Mittagspause mit Kommentar), steht «Zeiten prüfen» statt einer Vermutung – dann gilt die Rohangabe daneben.",
+    source: "Daten: OpenStreetMap-Mitwirkende (ODbL)",
+  },
   familyPlaces: {
     sectionAria: "Spielplätze und Badeplätze in der Nähe",
     title: "Für Familien in der Nähe",

@@ -3707,6 +3707,41 @@ export const it: Translation = {
   },
 
   /** Parchi giochi e punti balneabili da OpenStreetMap (#248). */
+  shops: {
+    sectionAria: "Fare la spesa nei dintorni",
+    title: "Fare la spesa nei dintorni",
+    subtitle: "Supermercato, panetteria e vendita diretta attorno a te.",
+    subtitleAtPlace: (place: string) =>
+      `Supermercato, panetteria e vendita diretta attorno a ${place}.`,
+    radiusLabel: "Raggio",
+    radiusGroupAria: "Scegli il raggio di ricerca",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Ricerca dei negozi …",
+    loadFailed: "Non è stato possibile caricare i negozi – riprova più tardi.",
+    empty: (km: number) =>
+      `Entro ${km} km non risulta alcun negozio in OpenStreetMap.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 negozio trovato" : `${n} negozi trovati`,
+    distanceAway: (distance: string) => `${distance} in linea d'aria`,
+    kind: {
+      supermarket: "Supermercato",
+      convenience: "Negozio di quartiere",
+      bakery: "Panetteria",
+      farm: "Vendita diretta",
+      butcher: "Macelleria",
+    },
+    openNow: "Ora aperto",
+    closedNow: "Ora chiuso",
+    checkHours: "Verifica gli orari",
+    todayHours: (hours: string) => `Oggi ${hours}`,
+    noHours: "Orari non registrati",
+    navButton: "Percorso",
+    navAria: (name: string) => `Percorso verso ${name}`,
+    website: "Sito web",
+    hoursNote:
+      "Gli orari vengono da OpenStreetMap e possono essere superati. Dove l'indicazione è troppo complessa (festivi, stagione, pausa pranzo con commento) compare «Verifica gli orari» invece di una supposizione – accanto sta il dato grezzo.",
+    source: "Dati: contributori di OpenStreetMap (ODbL)",
+  },
   familyPlaces: {
     sectionAria: "Parchi giochi e punti balneabili nei dintorni",
     title: "Per le famiglie nei dintorni",
