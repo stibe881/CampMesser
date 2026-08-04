@@ -22,6 +22,7 @@ import {
   Moon,
   NotebookPen,
   Package,
+  PackageOpen,
   Refrigerator,
   Scale,
   Shirt,
@@ -84,6 +85,18 @@ export const modules: Module[] = [
       "Track your gear with weight and volume"
     ),
     icon: Package,
+    group: "reise",
+  },
+  {
+    path: "/kisten",
+    title: l4("Kisten", "Caisses", "Casse", "Boxes"),
+    description: l4(
+      "Was liegt in welcher Box? Etiketten mit QR-Code zum Ausdrucken",
+      "Qu'y a-t-il dans quelle caisse ? Étiquettes avec QR-code à imprimer",
+      "Cosa c'è in quale cassa? Etichette con codice QR da stampare",
+      "What is in which box? Printable labels with QR code"
+    ),
+    icon: PackageOpen,
     group: "reise",
   },
   {

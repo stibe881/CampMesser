@@ -2236,6 +2236,21 @@ export const en: Translation = {
     locationPlaceholder: "e.g. Camping Aareschlucht",
     packListLabel: "Packing list (optional)",
     noPackList: "Without packing list",
+    pitchSectionTitle: "Pitch details",
+    pitchSectionHint:
+      "What applies to this stay only – the number will differ next time.",
+    pitchNumberLabel: "Pitch number",
+    pitchNumberPlaceholder: "e.g. B14",
+    wifiNameLabel: "Wi-Fi name",
+    wifiNamePlaceholder: "e.g. Camping-Guest",
+    wifiPasswordLabel: "Wi-Fi password",
+    wifiPasswordPlaceholder: "from reception",
+    wifiPasswordShow: "Show password",
+    wifiPasswordHide: "Hide password",
+    wifiPasswordCopy: "Copy password",
+    pitchNotesLabel: "Notes about the pitch",
+    pitchNotesPlaceholder:
+      "e.g. power box behind the hedge, tap 20 steps to the right",
     arrivalTimeLabel: "Arrival time (optional)",
     departureTimeLabel: "Departure time (optional)",
     timesLine: (a: string | null, d: string | null) =>
@@ -3178,6 +3193,44 @@ export const en: Translation = {
     turnLeft: (deg: number) => `Turn ${deg}° further to the left.`,
     turnRight: (deg: number) => `Turn ${deg}° further to the right.`,
     source: "Wind readings from Open-Meteo, rules of thumb for pitching.",
+  },
+  boxes: {
+    title: "Boxes",
+    subtitle:
+      "Which gear sits in which box – with a printable label and QR code.",
+    loginFeature: "box management",
+    addBox: "New box",
+    editBox: "Edit box",
+    dialogHint:
+      "The code appears large on the label and inside the QR code. Keep it short – “K3” reads from two metres away.",
+    codeLabel: "Code",
+    nameLabel: "Name",
+    namePlaceholder: "e.g. Kitchen",
+    locationLabel: "Where it lives at home",
+    locationPlaceholder: "e.g. cellar, left shelf",
+    notesLabel: "Notes",
+    saved: "Box saved",
+    removed: "Box deleted – the gear is kept",
+    removeConfirm: (name: string) =>
+      `Really delete the box “${name}”? The gear inside is kept and will no longer belong to any box.`,
+    empty:
+      "No boxes yet. Create one, print the label and stick it on the crate.",
+    boxEmpty: "This box is still empty.",
+    summary: (count: number, weight: string) =>
+      count === 1 ? `1 item · ${weight}` : `${count} items · ${weight}`,
+    removeFromBox: "Take out",
+    looseTitle: "In no box yet",
+    looseHint: "Gear from your inventory that is not assigned to a box.",
+    assignPlaceholder: "Put into box …",
+    assignAria: (name: string) => `Assign ${name} to a box`,
+    labelButton: "Label",
+    labelTitle: "Print label",
+    labelHint:
+      "Four identical labels per sheet – stick them on, and a camera scan will show the contents.",
+    printButton: "Print",
+    qrAlt: (code: string) => `QR code for box ${code}`,
+    unknownCode: (code: string) =>
+      `No box matches the code “${code}”. It may have been deleted or belongs to another account.`,
   },
   picnicStops: {
     sectionAria: "Rest stops along the drive",

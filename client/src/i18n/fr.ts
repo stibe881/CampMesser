@@ -2313,6 +2313,21 @@ export const fr: Translation = {
     locationPlaceholder: "p. ex. Camping Aareschlucht",
     packListLabel: "Liste de bagages (facultatif)",
     noPackList: "Sans liste de bagages",
+    pitchSectionTitle: "Détails de l'emplacement",
+    pitchSectionHint:
+      "Ce qui ne vaut que pour ce séjour – le numéro changera la prochaine fois.",
+    pitchNumberLabel: "Numéro d'emplacement",
+    pitchNumberPlaceholder: "p. ex. B14",
+    wifiNameLabel: "Nom du wifi",
+    wifiNamePlaceholder: "p. ex. Camping-Invite",
+    wifiPasswordLabel: "Mot de passe wifi",
+    wifiPasswordPlaceholder: "donné à la réception",
+    wifiPasswordShow: "Afficher le mot de passe",
+    wifiPasswordHide: "Masquer le mot de passe",
+    wifiPasswordCopy: "Copier le mot de passe",
+    pitchNotesLabel: "Notes sur l'emplacement",
+    pitchNotesPlaceholder:
+      "p. ex. coffret électrique derrière la haie, robinet 20 pas à droite",
     arrivalTimeLabel: "Heure d'arrivée (facultatif)",
     departureTimeLabel: "Heure de départ (facultatif)",
     timesLine: (a: string | null, d: string | null) =>
@@ -3283,6 +3298,45 @@ export const fr: Translation = {
     turnLeft: (deg: number) => `Tourne encore de ${deg}° vers la gauche.`,
     turnRight: (deg: number) => `Tourne encore de ${deg}° vers la droite.`,
     source: "Valeurs de vent d'Open-Meteo, règles empiriques de montage.",
+  },
+  boxes: {
+    title: "Caisses",
+    subtitle:
+      "Quel équipement se trouve dans quelle caisse – avec étiquette et QR-code à imprimer.",
+    loginFeature: "la gestion des caisses",
+    addBox: "Nouvelle caisse",
+    editBox: "Modifier la caisse",
+    dialogHint:
+      "Le code figure en grand sur l'étiquette et dans le QR-code. Reste court – « K3 » se lit à deux mètres.",
+    codeLabel: "Code",
+    nameLabel: "Nom",
+    namePlaceholder: "p. ex. Cuisine",
+    locationLabel: "Rangement à la maison",
+    locationPlaceholder: "p. ex. cave, étagère de gauche",
+    notesLabel: "Notes",
+    saved: "Caisse enregistrée",
+    removed: "Caisse supprimée – l'équipement est conservé",
+    removeConfirm: (name: string) =>
+      `Supprimer vraiment la caisse « ${name} » ? L'équipement qu'elle contient est conservé et ne sera plus attribué à aucune caisse.`,
+    empty:
+      "Aucune caisse pour l'instant. Crée-en une, imprime l'étiquette et colle-la sur la boîte.",
+    boxEmpty: "Cette caisse est encore vide.",
+    summary: (count: number, weight: string) =>
+      count === 1 ? `1 pièce · ${weight}` : `${count} pièces · ${weight}`,
+    removeFromBox: "Sortir",
+    looseTitle: "Dans aucune caisse",
+    looseHint:
+      "Équipement de ton inventaire qui n'est attribué à aucune caisse.",
+    assignPlaceholder: "Ranger dans …",
+    assignAria: (name: string) => `Attribuer ${name} à une caisse`,
+    labelButton: "Étiquette",
+    labelTitle: "Imprimer l'étiquette",
+    labelHint:
+      "Quatre étiquettes identiques par feuille – colle-les, et un scan montrera le contenu.",
+    printButton: "Imprimer",
+    qrAlt: (code: string) => `QR-code de la caisse ${code}`,
+    unknownCode: (code: string) =>
+      `Aucune caisse ne correspond au code « ${code} ». Elle a peut-être été supprimée ou appartient à un autre compte.`,
   },
   picnicStops: {
     sectionAria: "Aires de pause le long du trajet",

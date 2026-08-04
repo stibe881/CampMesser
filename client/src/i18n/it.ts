@@ -2289,6 +2289,21 @@ export const it: Translation = {
     locationPlaceholder: "ad es. Camping Aareschlucht",
     packListLabel: "Lista bagagli (facoltativa)",
     noPackList: "Senza lista bagagli",
+    pitchSectionTitle: "Dettagli della piazzola",
+    pitchSectionHint:
+      "Ciò che vale solo per questo soggiorno – il numero cambierà la prossima volta.",
+    pitchNumberLabel: "Numero della piazzola",
+    pitchNumberPlaceholder: "p. es. B14",
+    wifiNameLabel: "Nome del wifi",
+    wifiNamePlaceholder: "p. es. Camping-Ospiti",
+    wifiPasswordLabel: "Password wifi",
+    wifiPasswordPlaceholder: "dalla reception",
+    wifiPasswordShow: "Mostra la password",
+    wifiPasswordHide: "Nascondi la password",
+    wifiPasswordCopy: "Copia la password",
+    pitchNotesLabel: "Note sulla piazzola",
+    pitchNotesPlaceholder:
+      "p. es. quadro elettrico dietro la siepe, rubinetto 20 passi a destra",
     arrivalTimeLabel: "Ora di arrivo (facoltativo)",
     departureTimeLabel: "Ora di partenza (facoltativo)",
     timesLine: (a: string | null, d: string | null) =>
@@ -3257,6 +3272,44 @@ export const it: Translation = {
     turnLeft: (deg: number) => `Ruota ancora di ${deg}° a sinistra.`,
     turnRight: (deg: number) => `Ruota ancora di ${deg}° a destra.`,
     source: "Valori del vento da Open-Meteo, regole pratiche di montaggio.",
+  },
+  boxes: {
+    title: "Casse",
+    subtitle:
+      "Quale attrezzatura sta in quale cassa – con etichetta e codice QR da stampare.",
+    loginFeature: "la gestione delle casse",
+    addBox: "Nuova cassa",
+    editBox: "Modifica la cassa",
+    dialogHint:
+      "La sigla compare grande sull'etichetta e nel codice QR. Tienila corta – «K3» si legge da due metri.",
+    codeLabel: "Sigla",
+    nameLabel: "Nome",
+    namePlaceholder: "p. es. Cucina",
+    locationLabel: "Dove sta a casa",
+    locationPlaceholder: "p. es. cantina, scaffale a sinistra",
+    notesLabel: "Note",
+    saved: "Cassa salvata",
+    removed: "Cassa eliminata – l'attrezzatura resta",
+    removeConfirm: (name: string) =>
+      `Eliminare davvero la cassa «${name}»? L'attrezzatura al suo interno resta e non sarà più assegnata a nessuna cassa.`,
+    empty:
+      "Nessuna cassa finora. Creane una, stampa l'etichetta e attaccala sulla scatola.",
+    boxEmpty: "Questa cassa è ancora vuota.",
+    summary: (count: number, weight: string) =>
+      count === 1 ? `1 pezzo · ${weight}` : `${count} pezzi · ${weight}`,
+    removeFromBox: "Togli",
+    looseTitle: "In nessuna cassa",
+    looseHint: "Attrezzatura del tuo inventario non assegnata a nessuna cassa.",
+    assignPlaceholder: "Metti nella cassa …",
+    assignAria: (name: string) => `Assegna ${name} a una cassa`,
+    labelButton: "Etichetta",
+    labelTitle: "Stampa l'etichetta",
+    labelHint:
+      "Quattro etichette uguali per foglio – attaccale e una scansione mostrerà il contenuto.",
+    printButton: "Stampa",
+    qrAlt: (code: string) => `Codice QR della cassa ${code}`,
+    unknownCode: (code: string) =>
+      `Nessuna cassa corrisponde alla sigla «${code}». Forse è stata eliminata o appartiene a un altro account.`,
   },
   picnicStops: {
     sectionAria: "Soste lungo il tragitto",

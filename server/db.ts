@@ -27,6 +27,7 @@ import {
   InsertFoodTemplate,
   InsertHomeLocation,
   InsertInventoryItem,
+  InsertStorageBox,
   locationShares,
   InsertPackItem,
   InsertPackList,
@@ -40,6 +41,7 @@ import {
   InsertTripShoppingItem,
   InsertUser,
   inventoryItems,
+  storageBoxes,
   menuDayNotes,
   menuEntries,
   natureSightings,
@@ -550,6 +552,66 @@ export async function addInventoryItem(data: InsertInventoryItem) {
   const db = requireDb(await getDb());
   const [result] = await db.insert(inventoryItems).values(data);
   return result.insertId;
+}
+
+/* ------------------------------------------------------------------ */
+/* Transportkisten (#276)                                              */
+/* ------------------------------------------------------------------ */
+
+/** Alle Kisten eines Kontos, neueste zuletzt (Reihenfolge des Anlegens). */
+export async function getStorageBoxes(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(storageBoxes)
+    .where(eq(storageBoxes.userId, userId))
+    .orderBy(storageBoxes.id);
+}
+
+/** Kiste über ihre Kennung finden – der Weg, den ein QR-Scan nimmt. */
+export async function getStorageBoxByCode(userId: number, code: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(storageBoxes)
+    .where(and(eq(storageBoxes.userId, userId), eq(storageBoxes.code, code)))
+    .limit(1);
+  return rows[0];
+}
+
+export async function createStorageBox(data: InsertStorageBox) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(storageBoxes).values(data);
+  return result.insertId;
+}
+
+export async function updateStorageBox(
+  id: number,
+  userId: number,
+  data: Partial<Pick<InsertStorageBox, "code" | "name" | "location" | "notes">>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(storageBoxes)
+    .set(data)
+    .where(and(eq(storageBoxes.id, id), eq(storageBoxes.userId, userId)));
+}
+
+/**
+ * Kiste löschen. Die Ausrüstung bleibt bestehen und wird nur ausgeräumt –
+ * eine Kiste wegzuwerfen heisst nicht, den Gaskocher wegzuwerfen.
+ */
+export async function deleteStorageBox(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .update(inventoryItems)
+    .set({ boxId: null })
+    .where(
+      and(eq(inventoryItems.boxId, id), eq(inventoryItems.userId, userId))
+    );
+  await db
+    .delete(storageBoxes)
+    .where(and(eq(storageBoxes.id, id), eq(storageBoxes.userId, userId)));
 }
 
 export async function updateInventoryItem(
@@ -1488,6 +1550,10 @@ export async function updateTripLog(
       | "rating"
       | "arrivalTime"
       | "departureTime"
+      | "pitchNumber"
+      | "wifiName"
+      | "wifiPassword"
+      | "pitchNotes"
       | "weatherJson"
     >
   >

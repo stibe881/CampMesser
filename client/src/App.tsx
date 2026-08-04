@@ -45,6 +45,7 @@ const pageLoaders = {
   TentFinder: () => import("./pages/TentFinder"),
   Hike: () => import("./pages/Hike"),
   Trips: () => import("./pages/Trips"),
+  Boxes: () => import("./pages/Boxes"),
   Stats: () => import("./pages/Stats"),
   TripPrint: () => import("./pages/TripPrint"),
   MenuPlan: () => import("./pages/MenuPlan"),
@@ -128,6 +129,7 @@ const SpotDetailPage = lazyWithRetry(pageLoaders.SpotDetail);
 const TentFinderPage = lazyWithRetry(pageLoaders.TentFinder);
 const HikePage = lazyWithRetry(pageLoaders.Hike);
 const TripsPage = lazyWithRetry(pageLoaders.Trips);
+const BoxesPage = lazyWithRetry(pageLoaders.Boxes);
 const StatsPage = lazyWithRetry(pageLoaders.Stats);
 const TripPrintPage = lazyWithRetry(pageLoaders.TripPrint);
 const MenuPlanPage = lazyWithRetry(pageLoaders.MenuPlan);
@@ -202,6 +204,8 @@ function Router() {
           <Route path={"/zeltfinder"} component={TentFinderPage} />
           <Route path={"/wanderung"} component={HikePage} />
           <Route path={"/tagebuch"} component={TripsPage} />
+          <Route path={"/kisten"} component={BoxesPage} />
+          <Route path={"/kisten/:code"} component={BoxesPage} />
           <Route path={"/statistik"} component={StatsPage} />
           {/* Druckroute VOR möglichen parametrisierten Tagebuch-Routen registrieren */}
           <Route path={"/tagebuch/:id/drucken"} component={TripPrintPage} />
