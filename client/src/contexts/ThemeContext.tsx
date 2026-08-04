@@ -67,6 +67,11 @@ export function ThemeProvider({
     } else {
       root.classList.remove("dark");
     }
+    if (typeof window !== "undefined" && "ReactNativeWebView" in window) {
+      (window as any).ReactNativeWebView.postMessage(
+        JSON.stringify({ type: "THEME_UPDATE", value: theme })
+      );
+    }
   }, [theme]);
 
   useEffect(() => {

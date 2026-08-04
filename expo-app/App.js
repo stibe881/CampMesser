@@ -50,6 +50,7 @@ async function registerForPushNotificationsAsync() {
 
 export default function App() {
   const webViewRef = useRef(null);
+  const [themeBg, setThemeBg] = React.useState('#09090b');
 
   // Basis-URL der Web-App
   const CAMP_URL = 'https://campmesser.ch';
@@ -57,6 +58,9 @@ export default function App() {
   const onMessage = async (event) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'THEME_UPDATE') {
+        setThemeBg(data.value === 'light' ? '#ffffff' : '#09090b');
+      }
       if (data.type === 'REQUEST_PUSH_TOKEN') {
         const token = await registerForPushNotificationsAsync();
         if (token && webViewRef.current) {
@@ -77,7 +81,7 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeBg }]}>
       <WebView
         ref={webViewRef}
         source={{ uri: CAMP_URL }}
