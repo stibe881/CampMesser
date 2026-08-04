@@ -647,11 +647,23 @@ export const modules: Module[] = [
   },
 ];
 
+/**
+ * Reihenfolge der Gruppen auf der Startseite.
+ *
+ * «Ausrüstung» steht bewusst NACH «Sicherheit» (Nutzerwunsch 04.08.2026):
+ * Oben gehört hin, was während der Reise zählt – planen, vor Ort, und
+ * wenn es darauf ankommt die Sicherheit. Inventar, Kisten und
+ * Zuladung braucht man beim Packen, also einmal pro Reise.
+ *
+ * Diese Reihenfolge betrifft nur die GRUPPEN. Die Reihenfolge der Kacheln
+ * INNERHALB einer Gruppe kann jede Person selbst festlegen (#6); die
+ * gespeicherte Sortierung ist pfad-basiert und bleibt davon unberührt.
+ */
 export const groups = [
   "reise",
-  "ausruestung",
   "vorOrt",
   "Sicherheit",
+  "ausruestung",
   "Energie & Wasser",
   "Erste Hilfe",
 ] as const;
