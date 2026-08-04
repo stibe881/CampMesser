@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "CampMesser",
+    "slug": "campmesser",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ch.campmesser.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Wird benötigt, um Fotos für das Reisetagebuch und das Inventar aufzunehmen.",
+        "NSLocationWhenInUseUsageDescription": "Wird benötigt, um Wetterdaten und Ausflugsziele in deiner Nähe anzuzeigen.",
+        "NSPhotoLibraryUsageDescription": "Wird benötigt, um bestehende Fotos für das Reisetagebuch auszuwählen."
+      }
+    },
+    "android": {
+      "package": "ch.campmesser.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff",
+        "foregroundImage": "./assets/icon.png"
+      },
+      "permissions": [
+        "CAMERA",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "react-native-webview"
+      ]
+    ]
+  }
+}
