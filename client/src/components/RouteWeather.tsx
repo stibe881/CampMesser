@@ -106,6 +106,9 @@ export default function RouteWeather({
   const [estimated, setEstimated] = useState(false);
   /** Fahrzeit der ganzen Strecke in Minuten (Routendienst bzw. Schätzung). */
   const [totalMinutes, setTotalMinutes] = useState(0);
+  /** Steckt in der Fahrzeit die Verkehrslage von Google? */
+  const [withTraffic, setWithTraffic] = useState(false);
+  const utils = trpc.useUtils();
   const abortRef = useRef<AbortController | null>(null);
 
   const homeQuery = trpc.home.get.useQuery(undefined, {
@@ -185,15 +188,37 @@ export default function RouteWeather({
         return;
       }
       // Fahrzeit des Routendienstes, sonst der Schnitt über die Strecke
-      const totalMinutes =
+      let totalMinutes =
         route.source === "route" ? route.durationS / 60 : routeMinutes(km);
-      setTotalMinutes(totalMinutes);
 
       const departureMs = new Date(departureLocal).getTime();
       if (Number.isNaN(departureMs)) {
         setStatus("failed");
         return;
       }
+
+      // Hier zählt die Fahrzeit doppelt: Sie bestimmt nicht nur, wie lange
+      // man unterwegs ist, sondern WANN man an welchem Punkt ist – und
+      // damit, welche Prognosestunde gelesen wird. Eine Stunde Stau
+      // verschiebt die Gewitterzelle über dem Pass um eine Stunde.
+      // Die Abfahrtszeit steht hier fest, also fragt Google nach dem
+      // Verkehr GENAU DANN – Freitagabend ist nicht Dienstagmorgen.
+      let traffic = false;
+      try {
+        const result = await utils.routing.driveTime.fetch({
+          from: start,
+          to: end,
+          departureAtMs: departureMs > Date.now() ? departureMs : null,
+        });
+        if (result?.driveTime) {
+          totalMinutes = result.driveTime.durationS / 60;
+          traffic = true;
+        }
+      } catch {
+        /* Kein Verkehrsdienst: die Fahrzeit von OSRM steht bereits */
+      }
+      setWithTraffic(traffic);
+      setTotalMinutes(totalMinutes);
 
       try {
         // Eine Abfrage für alle Punkte: Open-Meteo nimmt Listen entgegen
@@ -251,7 +276,7 @@ export default function RouteWeather({
         setStatus("failed");
       }
     },
-    [currentPosition, home, latitude, longitude]
+    [currentPosition, home, latitude, longitude, utils]
   );
 
   const toggle = () => {
@@ -429,7 +454,11 @@ export default function RouteWeather({
           )}
 
           <p className="mt-3 text-xs text-muted-foreground">
-            {estimated ? tr.methodNoteEstimate(ROUTE_SPEED_KMH) : tr.methodNote}
+            {estimated
+              ? tr.methodNoteEstimate(ROUTE_SPEED_KMH)
+              : withTraffic
+                ? tr.methodNoteTraffic
+                : tr.methodNote}
           </p>
         </div>
       )}

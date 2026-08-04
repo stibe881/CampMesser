@@ -31,6 +31,8 @@ import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { formatDistance } from "@shared/geo";
 import { routeOrEstimate } from "@/lib/routing";
+import { useDriveTime } from "@/hooks/useDriveTime";
+import { nextOccurrenceMs } from "@shared/googleRoutes";
 import type { RouteResult } from "@shared/routing";
 import {
   BREAK_PROFILES,
@@ -109,28 +111,58 @@ export default function DeparturePlanner({
   }, [open, home, latitude, longitude]);
 
   const distanceKm = route ? route.distanceM / 1000 : 0;
-  const routedMinutes = route ? Math.round(route.durationS / 60) : null;
-  const back =
-    home && direction === "zurueck"
-      ? returnPlan({
-          distanceKm,
-          homeArrivalTime,
-          checkoutTime: checkoutTime || null,
-          profile,
-          driveMinutes: routedMinutes,
-        })
-      : null;
-  const plan =
-    !home || !route
-      ? null
-      : direction === "hin"
-        ? departurePlan({
+  const osrmMinutes = route ? Math.round(route.durationS / 60) : null;
+
+  /** Die ganze Rechnung, einmal als Funktion – sie läuft zweimal (s. u.). */
+  const buildPlan = (driveMinutes: number | null) => {
+    const backPlan =
+      home && direction === "zurueck"
+        ? returnPlan({
             distanceKm,
-            arrivalTime,
+            homeArrivalTime,
+            checkoutTime: checkoutTime || null,
             profile,
-            driveMinutes: routedMinutes,
+            driveMinutes,
           })
-        : (back?.plan ?? null);
+        : null;
+    const forwardPlan =
+      !home || !route
+        ? null
+        : direction === "hin"
+          ? departurePlan({
+              distanceKm,
+              arrivalTime,
+              profile,
+              driveMinutes,
+            })
+          : (backPlan?.plan ?? null);
+    return { back: backPlan, plan: forwardPlan };
+  };
+
+  // ZWEI DURCHGÄNGE, und das aus einem handfesten Grund: Für die Frage nach
+  // dem Verkehr braucht Google einen Zeitpunkt – aber wann man losfährt,
+  // ist ja gerade das Ergebnis der Rechnung. Also einmal mit der
+  // OSRM-Fahrzeit rechnen, um die Abfahrts-UHRZEIT zu bekommen, damit den
+  // Verkehr erfragen und mit dieser Fahrzeit noch einmal rechnen.
+  const firstPass = buildPlan(osrmMinutes);
+  const firstDeparture =
+    firstPass.back?.afterCheckout && checkoutTime
+      ? checkoutTime
+      : (firstPass.plan?.departureTime ?? null);
+  const drive = useDriveTime(
+    home ? { lat: home.latitude, lon: home.longitude } : null,
+    { lat: latitude, lon: longitude },
+    {
+      enabled: open && route != null,
+      departureAtMs: firstDeparture
+        ? nextOccurrenceMs(firstDeparture, Date.now())
+        : null,
+    }
+  );
+  const trafficMinutes =
+    drive.durationS != null ? Math.round(drive.durationS / 60) : null;
+  const { back, plan } =
+    trafficMinutes != null ? buildPlan(trafficMinutes) : firstPass;
   // Bei der Rückreise zählt die Abfahrt, die man wirklich hinbekommt
   const effectiveDeparture =
     back?.afterCheckout && checkoutTime ? checkoutTime : plan?.departureTime;
@@ -314,7 +346,11 @@ export default function DeparturePlanner({
           )}
 
           <p className="text-xs text-muted-foreground">
-            {route?.source === "estimate" ? dp.noteEstimate : dp.note}
+            {route?.source === "estimate"
+              ? dp.noteEstimate
+              : trafficMinutes != null
+                ? dp.noteTraffic
+                : dp.note}
           </p>
         </div>
       )}

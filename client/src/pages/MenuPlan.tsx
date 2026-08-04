@@ -49,11 +49,11 @@ import {
 } from "@shared/customRecipes";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { clampServings, scaleIngredientsForServings } from "@shared/servings";
+import { summarizeIngredients } from "@shared/groceryList";
 import {
   autofillMenuPlan,
   MEALS,
   MEAL_LABELS,
-  mergeIngredientLines,
   tripDays,
   type AutofillRecipe,
   type Meal,
@@ -395,7 +395,7 @@ export default function MenuPlanPage() {
   /**
    * Alle Zutaten der zugewiesenen Rezepte, Duplikate zusammengefasst –
    * mit Rezept-Herkunft als Notiz («aus: Älplermagronen»; bei von
-   * mergeIngredientLines umgeschriebenen Zeilen entfällt die Herkunft).
+   * summarizeIngredients umgeschriebenen Zeilen entfällt die Herkunft).
    */
   const plannedIngredients = useMemo(() => {
     const lines: string[] = [];
@@ -437,11 +437,21 @@ export default function MenuPlanPage() {
         }
       }
     });
-    return mergeIngredientLines(lines).map(i => {
-      const origin = originByLine.get(i);
+    // Mengengerecht zusammenrechnen (#288): «2 dl Rahm» am Montag und
+    // «1 dl Rahm» am Donnerstag sind drei Deziliter und nicht zwei.
+    return summarizeIngredients(lines, lang).map(item => {
+      // Herkunft nur, wo die Zeile unverändert aus EINEM Rezept stammt –
+      // bei einer Summe aus mehreren Tagen wäre «aus: Älplermagronen»
+      // schlicht falsch
+      const origin = item.summed ? undefined : originByLine.get(item.line);
+      const note = item.summed
+        ? t.menuPlan.summedFrom(item.sources)
+        : origin
+          ? t.shopping.fromRecipe(origin)
+          : undefined;
       return {
-        name: i.slice(0, 160),
-        note: origin ? t.shopping.fromRecipe(origin).slice(0, 160) : undefined,
+        name: item.line.slice(0, 160),
+        note: note?.slice(0, 160),
       };
     });
   }, [entries, staticById, customById, lang, t, persons]);

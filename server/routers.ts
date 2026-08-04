@@ -189,6 +189,7 @@ import {
 } from "@shared/weather";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { ENV } from "./_core/env";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
@@ -5891,6 +5892,76 @@ export const appRouter = router({
       }
       return { configured: true as const, excursions: await fetchExcursions() };
     }),
+  }),
+
+  /**
+   * Fahrzeiten mit Verkehrslage (Nutzerwunsch 04.08.2026). Die AUFTEILUNG
+   * zwischen den beiden Routendiensten steht in `shared/googleRoutes.ts`
+   * ausführlich: Von Google kommt genau eine Zahl – die Fahrzeit mit
+   * Verkehr –, alle Wege, Strecken und Karten-Linien bleiben bei OSM/OSRM.
+   *
+   * Der Abruf läuft nur hier, damit der Schlüssel nie im Browser-Bundle
+   * landet. Ohne Schlüssel meldet `configured: false`, und die Ansichten
+   * rechnen mit der OSRM-Fahrzeit weiter.
+   */
+  routing: router({
+    /**
+     * Karten-Konfiguration für den Browser (Nutzerwunsch 04.08.2026).
+     *
+     * ÖFFENTLICH, weil geteilte Links (Standort, Wanderung) ohne Anmeldung
+     * eine Karte zeigen. Der Browser-Schlüssel ist kein Geheimnis – er muss
+     * ins HTML, sonst lädt keine Google-Karte. Geschützt wird er über die
+     * Herkunfts-Sperre in der Cloud Console, nicht über Verstecken.
+     *
+     * Fehlt eines der beiden Felder, bleibt die App bei OpenStreetMap.
+     */
+    mapConfig: publicProcedure.query(() => {
+      const key = ENV.googleMapsBrowserKey.trim();
+      const mapId = ENV.googleMapsMapId.trim();
+      return key.length > 0 && mapId.length > 0
+        ? { key, mapId }
+        : { key: null, mapId: null };
+    }),
+    /** Gibt es Verkehrs-Fahrzeiten auf diesem Server? */
+    status: protectedProcedure.query(async () => {
+      const { isDriveTimeConfigured } = await import("./driveTime");
+      return { configured: isDriveTimeConfigured() };
+    }),
+    /**
+     * Fahrzeit für eine Autofahrt. `departureAtMs` ist freiwillig: mit
+     * Zeitpunkt kommt die Verkehrs-Prognose für diese Tageszeit, ohne den
+     * Verkehr von jetzt. Ist nichts zu holen, kommt `driveTime: null` –
+     * ausdrücklich kein Fehler, denn die Ansicht hat bereits eine Zahl.
+     */
+    driveTime: protectedProcedure
+      .input(
+        z.object({
+          from: z.object({
+            lat: z.number().min(-90).max(90),
+            lon: z.number().min(-180).max(180),
+          }),
+          to: z.object({
+            lat: z.number().min(-90).max(90),
+            lon: z.number().min(-180).max(180),
+          }),
+          departureAtMs: z.number().int().positive().nullish(),
+        })
+      )
+      .query(async ({ input }) => {
+        const { fetchDriveTime, isDriveTimeConfigured } =
+          await import("./driveTime");
+        if (!isDriveTimeConfigured()) {
+          return { configured: false as const, driveTime: null };
+        }
+        return {
+          configured: true as const,
+          driveTime: await fetchDriveTime(
+            input.from,
+            input.to,
+            input.departureAtMs ?? null
+          ),
+        };
+      }),
   }),
 
   /**

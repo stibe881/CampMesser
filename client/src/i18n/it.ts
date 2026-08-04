@@ -3799,6 +3799,8 @@ export const it: Translation = {
       "Vengono controllati fino a otto punti lungo il percorso stradale calcolato, ciascuno per l'orario di arrivo in quel punto. Distanza e durata provengono dal calcolo del percorso (OpenStreetMap); code e cantieri si aggiungono.",
     methodNoteEstimate: (speed: number) =>
       `Senza rete niente calcolo del percorso: si controllano otto punti lungo la linea d'aria con ${speed} km/h – una stima approssimativa che in montagna può sbagliare di molto.`,
+    methodNoteTraffic:
+      "Il tempo di percorrenza viene dalla previsione del traffico di Google per il tuo orario di partenza; il tracciato e i punti di controllo vengono come prima dal calcolo del percorso su OpenStreetMap. Poiché il traffico sposta l'orario di arrivo a ogni punto, sposta anche quale ora di previsione conta.",
     source: "Dati: Open-Meteo",
   },
   packHistory: {
@@ -3935,6 +3937,8 @@ export const it: Translation = {
     note: "Distanza e durata provengono dal calcolo del percorso su strada (OpenStreetMap). Code, cantieri e attese al confine si aggiungono.",
     noteEstimate:
       "Senza rete niente calcolo del percorso: questi valori sono stimati in linea d'aria (con fattore di deviazione) e possono essere molto lontani dal vero – soprattutto in montagna.",
+    noteTraffic:
+      "Il tempo di percorrenza viene dalla previsione del traffico di Google per quest'ora del giorno, la distanza dal calcolo del percorso su OpenStreetMap. Cantieri e attese alla frontiera si aggiungono ancora.",
   },
   firewood: {
     title: "Fabbisogno di legna",
@@ -4707,6 +4711,7 @@ export const it: Translation = {
       "Ingredienti delle ricette pianificate sulla lista della spesa",
     noPlannedRecipes:
       "Ancora nessuna ricetta assegnata – scegli prima le ricette negli slot dei pasti.",
+    summedFrom: (count: number) => `somma di ${count} righe di ingredienti`,
     printButton: "Stampa",
     autofillButton: "Riempi automaticamente",
     autofillNothing: "Nessuno slot dei pasti vuoto da riempire.",

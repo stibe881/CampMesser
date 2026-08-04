@@ -51,11 +51,12 @@ export interface Module {
   icon: React.ComponentType<{ className?: string }>;
   group:
     | "reise"
-    | "ausruestung"
     | "vorOrt"
-    | "Sicherheit"
-    | "Erste Hilfe"
-    | "Energie & Wasser";
+    | "sicherheit"
+    | "kueche"
+    | "ausruestung"
+    | "wissen"
+    | "familie";
   offline?: boolean;
 }
 
@@ -88,65 +89,6 @@ export const modules: Module[] = [
     ),
     icon: ListChecks,
     group: "reise",
-  },
-  {
-    path: "/inventar",
-    title: l4("Inventar", "Inventaire", "Inventario", "Inventory"),
-    description: l4(
-      "Ausrüstung mit Gewicht und Volumen erfassen",
-      "Saisis ton équipement avec poids et volume",
-      "Registra l'attrezzatura con peso e volume",
-      "Track your gear with weight and volume"
-    ),
-    icon: Package,
-    group: "ausruestung",
-  },
-  {
-    path: "/kisten",
-    title: l4("Kisten", "Caisses", "Casse", "Boxes"),
-    description: l4(
-      "Was liegt in welcher Box? Etiketten mit QR-Code zum Ausdrucken",
-      "Qu'y a-t-il dans quelle caisse ? Étiquettes avec QR-code à imprimer",
-      "Cosa c'è in quale cassa? Etichette con codice QR da stampare",
-      "What is in which box? Printable labels with QR code"
-    ),
-    icon: PackageOpen,
-    group: "ausruestung",
-  },
-  {
-    path: "/packen",
-    title: l4(
-      "Pack-Optimierung",
-      "Optimisation des bagages",
-      "Ottimizzazione bagagli",
-      "Packing optimiser"
-    ),
-    description: l4(
-      "Gewicht und Packmass im Griff behalten",
-      "Garde le poids et le volume sous contrôle",
-      "Tieni sotto controllo peso e ingombro",
-      "Keep weight and packed size under control"
-    ),
-    icon: Scale,
-    group: "ausruestung",
-  },
-  {
-    path: "/zuladung",
-    title: l4(
-      "Zuladungs-Rechner",
-      "Calculateur de charge utile",
-      "Calcolatore del carico",
-      "Payload calculator"
-    ),
-    description: l4(
-      "Ist das Gespann überladen? Gesamtgewicht, Anhängelast, Stützlast",
-      "L'attelage est-il surchargé ? Poids total, charge tractable, charge sur la boule",
-      "Il traino è sovraccarico? Peso totale, massa rimorchiabile, carico sul gancio",
-      "Is the rig overloaded? Gross weight, towing capacity, nose weight"
-    ),
-    icon: Truck,
-    group: "ausruestung",
-    offline: true,
   },
   {
     path: "/laenderregeln",
@@ -208,6 +150,19 @@ export const modules: Module[] = [
     group: "vorOrt",
   },
   {
+    path: "/zeltfinder",
+    title: l4("Zelt-Finder", "Retrouve-tente", "Trova-tenda", "Tent finder"),
+    description: l4(
+      "Kompass-Pfeil und Distanz zurück zum Zelt",
+      "Flèche boussole et distance pour retrouver la tente",
+      "Freccia bussola e distanza per ritrovare la tenda",
+      "Compass arrow and distance back to your tent"
+    ),
+    icon: LocateFixed,
+    group: "vorOrt",
+    offline: true,
+  },
+  {
     path: "/wasserwaage",
     title: l4("Wasserwaage", "Niveau à bulle", "Livella", "Spirit level"),
     description: l4(
@@ -238,19 +193,6 @@ export const modules: Module[] = [
     group: "vorOrt",
   },
   {
-    path: "/zeltfinder",
-    title: l4("Zelt-Finder", "Retrouve-tente", "Trova-tenda", "Tent finder"),
-    description: l4(
-      "Kompass-Pfeil und Distanz zurück zum Zelt",
-      "Flèche boussole et distance pour retrouver la tente",
-      "Freccia bussola e distanza per ritrovare la tenda",
-      "Compass arrow and distance back to your tent"
-    ),
-    icon: LocateFixed,
-    group: "vorOrt",
-    offline: true,
-  },
-  {
     path: "/wanderung",
     title: l4(
       "Wanderung aufzeichnen",
@@ -265,6 +207,23 @@ export const modules: Module[] = [
       "GPS track with distance, duration, pace and elevation"
     ),
     icon: Footprints,
+    group: "vorOrt",
+  },
+  {
+    path: "/energie",
+    title: l4(
+      "Energie-Budget",
+      "Budget énergie",
+      "Budget energia",
+      "Energy budget"
+    ),
+    description: l4(
+      "Reichweite, Verbrauch und Solarertrag-Prognose",
+      "Autonomie, consommation et prévision solaire",
+      "Autonomia, consumo e previsione solare",
+      "Runtime, consumption and solar yield forecast"
+    ),
+    icon: BatteryCharging,
     group: "vorOrt",
   },
   {
@@ -312,7 +271,7 @@ export const modules: Module[] = [
       "Hyperlocal forecast and severe weather warnings"
     ),
     icon: CloudSunRain,
-    group: "Sicherheit",
+    group: "sicherheit",
   },
   {
     path: "/gewitter",
@@ -329,7 +288,7 @@ export const modules: Module[] = [
       "Count lightning and thunder: how far away is it, and is it coming closer?"
     ),
     icon: CloudLightning,
-    group: "Sicherheit",
+    group: "sicherheit",
     offline: true,
   },
   {
@@ -347,7 +306,7 @@ export const modules: Module[] = [
       "GPS coordinates and emergency numbers"
     ),
     icon: Siren,
-    group: "Sicherheit",
+    group: "sicherheit",
   },
   {
     path: "/erste-hilfe",
@@ -359,7 +318,7 @@ export const modules: Module[] = [
       "Offline guide for outdoor injuries"
     ),
     icon: Cross,
-    group: "Sicherheit",
+    group: "sicherheit",
     offline: true,
   },
   {
@@ -377,41 +336,7 @@ export const modules: Module[] = [
       "Keep an eye on noise during quiet hours"
     ),
     icon: Moon,
-    group: "Sicherheit",
-  },
-  {
-    path: "/energie",
-    title: l4(
-      "Energie-Budget",
-      "Budget énergie",
-      "Budget energia",
-      "Energy budget"
-    ),
-    description: l4(
-      "Reichweite, Verbrauch und Solarertrag-Prognose",
-      "Autonomie, consommation et prévision solaire",
-      "Autonomia, consumo e previsione solare",
-      "Runtime, consumption and solar yield forecast"
-    ),
-    icon: BatteryCharging,
-    group: "Energie & Wasser",
-  },
-  {
-    path: "/wasser",
-    title: l4(
-      "Trinkwasser-Rechner",
-      "Calculateur d'eau potable",
-      "Calcolatore acqua potabile",
-      "Drinking water calculator"
-    ),
-    description: l4(
-      "Wasserbedarf für Personen, Tage und Hitze",
-      "Besoins en eau selon personnes, jours et chaleur",
-      "Fabbisogno d'acqua per persone, giorni e caldo",
-      "Water needs for people, days and heat"
-    ),
-    icon: Droplets,
-    group: "Energie & Wasser",
+    group: "sicherheit",
   },
   {
     path: "/rezepte",
@@ -428,7 +353,7 @@ export const modules: Module[] = [
       "Cooking on a gas stove and open fire"
     ),
     icon: CookingPot,
-    group: "Erste Hilfe",
+    group: "kueche",
     offline: true,
   },
   {
@@ -446,7 +371,7 @@ export const modules: Module[] = [
       "Track supplies and find matching recipes"
     ),
     icon: Refrigerator,
-    group: "Erste Hilfe",
+    group: "kueche",
   },
   {
     path: "/einkauf",
@@ -463,60 +388,82 @@ export const modules: Module[] = [
       "Tick off while shopping, take ingredients from the recipe book"
     ),
     icon: ShoppingCart,
-    group: "Erste Hilfe",
+    group: "kueche",
   },
   {
-    path: "/knoten",
+    path: "/wasser",
     title: l4(
-      "Knoten-Bibliothek",
-      "Bibliothèque de nœuds",
-      "Biblioteca dei nodi",
-      "Knot library"
+      "Trinkwasser-Rechner",
+      "Calculateur d'eau potable",
+      "Calcolatore acqua potabile",
+      "Drinking water calculator"
     ),
     description: l4(
-      "Die wichtigsten Outdoor-Knoten, Schritt für Schritt",
-      "Les nœuds outdoor essentiels, pas à pas",
-      "I nodi outdoor più importanti, passo dopo passo",
-      "The key outdoor knots, step by step"
+      "Wasserbedarf für Personen, Tage und Hitze",
+      "Besoins en eau selon personnes, jours et chaleur",
+      "Fabbisogno d'acqua per persone, giorni e caldo",
+      "Water needs for people, days and heat"
     ),
-    icon: Cable,
-    group: "Erste Hilfe",
-    offline: true,
+    icon: Droplets,
+    group: "kueche",
   },
   {
-    path: "/natur",
-    title: l4(
-      "Natur-Entdecker",
-      "Explorateur nature",
-      "Esploratore della natura",
-      "Nature explorer"
-    ),
+    path: "/inventar",
+    title: l4("Inventar", "Inventaire", "Inventario", "Inventory"),
     description: l4(
-      "Tierspuren, Sternbilder, Bäume, Pilze, Beeren – und dein Fangbuch",
-      "Traces d'animaux, constellations, arbres, champignons, baies – et ton carnet de pêche",
-      "Tracce di animali, costellazioni, alberi, funghi, bacche – e il tuo libretto delle catture",
-      "Animal tracks, constellations, trees, mushrooms, berries – and your catch log"
+      "Ausrüstung mit Gewicht und Volumen erfassen",
+      "Saisis ton équipement avec poids et volume",
+      "Registra l'attrezzatura con peso e volume",
+      "Track your gear with weight and volume"
     ),
-    icon: TreePine,
-    group: "Erste Hilfe",
-    offline: true,
+    icon: Package,
+    group: "ausruestung",
   },
   {
-    path: "/wolken",
+    path: "/kisten",
+    title: l4("Kisten", "Caisses", "Casse", "Boxes"),
+    description: l4(
+      "Was liegt in welcher Box? Etiketten mit QR-Code zum Ausdrucken",
+      "Qu'y a-t-il dans quelle caisse ? Étiquettes avec QR-code à imprimer",
+      "Cosa c'è in quale cassa? Etichette con codice QR da stampare",
+      "What is in which box? Printable labels with QR code"
+    ),
+    icon: PackageOpen,
+    group: "ausruestung",
+  },
+  {
+    path: "/packen",
     title: l4(
-      "Wolken-Lexikon",
-      "Lexique des nuages",
-      "Lessico delle nuvole",
-      "Cloud lexicon"
+      "Pack-Optimierung",
+      "Optimisation des bagages",
+      "Ottimizzazione bagagli",
+      "Packing optimiser"
     ),
     description: l4(
-      "Wolkenart erkennen und wissen, welches Wetter folgt",
-      "Reconnais le type de nuage et sais quel temps arrive",
-      "Riconosci il tipo di nuvola e sai che tempo arriva",
-      "Recognise the cloud type and know what weather follows"
+      "Gewicht und Packmass im Griff behalten",
+      "Garde le poids et le volume sous contrôle",
+      "Tieni sotto controllo peso e ingombro",
+      "Keep weight and packed size under control"
     ),
-    icon: Cloudy,
-    group: "Erste Hilfe",
+    icon: Scale,
+    group: "ausruestung",
+  },
+  {
+    path: "/zuladung",
+    title: l4(
+      "Zuladungs-Rechner",
+      "Calculateur de charge utile",
+      "Calcolatore del carico",
+      "Payload calculator"
+    ),
+    description: l4(
+      "Ist das Gespann überladen? Gesamtgewicht, Anhängelast, Stützlast",
+      "L'attelage est-il surchargé ? Poids total, charge tractable, charge sur la boule",
+      "Il traino è sovraccarico? Peso totale, massa rimorchiabile, carico sul gancio",
+      "Is the rig overloaded? Gross weight, towing capacity, nose weight"
+    ),
+    icon: Truck,
+    group: "ausruestung",
     offline: true,
   },
   {
@@ -534,7 +481,7 @@ export const modules: Module[] = [
       "Waterproofing, patching, zips, mould – step by step"
     ),
     icon: Wrench,
-    group: "Erste Hilfe",
+    group: "ausruestung",
     offline: true,
   },
   {
@@ -552,7 +499,61 @@ export const modules: Module[] = [
       "Patch the mat, splint a pole, service the stove – on site and at home"
     ),
     icon: Hammer,
-    group: "Erste Hilfe",
+    group: "ausruestung",
+    offline: true,
+  },
+  {
+    path: "/knoten",
+    title: l4(
+      "Knoten-Bibliothek",
+      "Bibliothèque de nœuds",
+      "Biblioteca dei nodi",
+      "Knot library"
+    ),
+    description: l4(
+      "Die wichtigsten Outdoor-Knoten, Schritt für Schritt",
+      "Les nœuds outdoor essentiels, pas à pas",
+      "I nodi outdoor più importanti, passo dopo passo",
+      "The key outdoor knots, step by step"
+    ),
+    icon: Cable,
+    group: "wissen",
+    offline: true,
+  },
+  {
+    path: "/natur",
+    title: l4(
+      "Natur-Entdecker",
+      "Explorateur nature",
+      "Esploratore della natura",
+      "Nature explorer"
+    ),
+    description: l4(
+      "Tierspuren, Sternbilder, Bäume, Pilze, Beeren – und dein Fangbuch",
+      "Traces d'animaux, constellations, arbres, champignons, baies – et ton carnet de pêche",
+      "Tracce di animali, costellazioni, alberi, funghi, bacche – e il tuo libretto delle catture",
+      "Animal tracks, constellations, trees, mushrooms, berries – and your catch log"
+    ),
+    icon: TreePine,
+    group: "wissen",
+    offline: true,
+  },
+  {
+    path: "/wolken",
+    title: l4(
+      "Wolken-Lexikon",
+      "Lexique des nuages",
+      "Lessico delle nuvole",
+      "Cloud lexicon"
+    ),
+    description: l4(
+      "Wolkenart erkennen und wissen, welches Wetter folgt",
+      "Reconnais le type de nuage et sais quel temps arrive",
+      "Riconosci il tipo di nuvola e sai che tempo arriva",
+      "Recognise the cloud type and know what weather follows"
+    ),
+    icon: Cloudy,
+    group: "wissen",
     offline: true,
   },
   {
@@ -570,8 +571,25 @@ export const modules: Module[] = [
       "Camping phrases in four languages, to show and to hear"
     ),
     icon: Languages,
-    group: "Erste Hilfe",
+    group: "wissen",
     offline: true,
+  },
+  {
+    path: "/familie",
+    title: l4(
+      "Familien-Modus",
+      "Mode famille",
+      "Modalità famiglia",
+      "Family mode"
+    ),
+    description: l4(
+      "Schnitzeljagden, Quiz, Abzeichen und GPS-Schatzsuche",
+      "Chasses au trésor, quiz, badges et chasse au trésor GPS",
+      "Cacce al tesoro, quiz, distintivi e caccia al tesoro GPS",
+      "Scavenger hunts, quizzes, badges and GPS treasure hunt"
+    ),
+    icon: Users,
+    group: "familie",
   },
   {
     path: "/erzaehlwuerfel",
@@ -588,7 +606,7 @@ export const modules: Module[] = [
       "Roll symbols and make up a story together"
     ),
     icon: Dices,
-    group: "Erste Hilfe",
+    group: "familie",
     offline: true,
   },
   {
@@ -606,7 +624,7 @@ export const modules: Module[] = [
       "Lyrics and chords, transposable, with a red-light mode"
     ),
     icon: Music,
-    group: "Erste Hilfe",
+    group: "familie",
     offline: true,
   },
   {
@@ -624,51 +642,21 @@ export const modules: Module[] = [
       "Share out chores in rotation, tick them off and collect points"
     ),
     icon: ClipboardList,
-    group: "Erste Hilfe",
-  },
-  {
-    path: "/familie",
-    title: l4(
-      "Familien-Modus",
-      "Mode famille",
-      "Modalità famiglia",
-      "Family mode"
-    ),
-    description: l4(
-      "Schnitzeljagden, Quiz, Abzeichen und GPS-Schatzsuche",
-      "Chasses au trésor, quiz, badges et chasse au trésor GPS",
-      "Cacce al tesoro, quiz, distintivi e caccia al tesoro GPS",
-      "Scavenger hunts, quizzes, badges and GPS treasure hunt"
-    ),
-    icon: Users,
-    // Inhaltlich Wissen & Freizeit – der Gruppen-Schlüssel «Erste Hilfe»
-    // bleibt aus historischen Gründen stabil (Anzeige-Label siehe groupLabels)
-    group: "Erste Hilfe",
+    group: "familie",
   },
 ];
 
-/**
- * Reihenfolge der Gruppen auf der Startseite.
- *
- * «Ausrüstung» steht bewusst NACH «Sicherheit» (Nutzerwunsch 04.08.2026):
- * Oben gehört hin, was während der Reise zählt – planen, vor Ort, und
- * wenn es darauf ankommt die Sicherheit. Inventar, Kisten und
- * Zuladung braucht man beim Packen, also einmal pro Reise.
- *
- * Diese Reihenfolge betrifft nur die GRUPPEN. Die Reihenfolge der Kacheln
- * INNERHALB einer Gruppe kann jede Person selbst festlegen (#6); die
- * gespeicherte Sortierung ist pfad-basiert und bleibt davon unberührt.
- */
 export const groups = [
   "reise",
   "vorOrt",
-  "Sicherheit",
+  "sicherheit",
+  "kueche",
   "ausruestung",
-  "Energie & Wasser",
-  "Erste Hilfe",
+  "wissen",
+  "familie",
 ] as const;
 
-/** Anzeige-Namen der Gruppen (die Gruppen-Schlüssel selbst bleiben stabil). */
+/** Anzeige-Namen der Gruppen. */
 export const groupLabels: Record<(typeof groups)[number], L4> = {
   reise: l4(
     "Reise planen",
@@ -676,23 +664,25 @@ export const groupLabels: Record<(typeof groups)[number], L4> = {
     "Pianificare il viaggio",
     "Plan your trip"
   ),
-  ausruestung: l4("Ausrüstung", "Équipement", "Attrezzatura", "Gear"),
   vorOrt: l4("Vor Ort", "Sur place", "Sul posto", "On site"),
-  Sicherheit: l4("Sicherheit", "Sécurité", "Sicurezza", "Safety"),
-  // Historischer Schlüssel «Erste Hilfe»: die Gruppe enthält längst Knoten,
-  // Natur, Rezepte, Kühlbox, Einkauf und den Familien-Modus – der Schlüssel
-  // bleibt stabil (gespeicherte Sortierungen sind pfad-basiert), nur das
-  // Anzeige-Label ist verallgemeinert.
-  "Erste Hilfe": l4(
-    "Wissen & Familie",
-    "Savoir & famille",
-    "Sapere & famiglia",
-    "Knowledge & family"
+  sicherheit: l4("Sicherheit", "Sécurité", "Sicurezza", "Safety"),
+  kueche: l4(
+    "Küche & Vorrat",
+    "Cuisine & provisions",
+    "Cucina e provviste",
+    "Kitchen & supplies"
   ),
-  "Energie & Wasser": l4(
-    "Energie & Wasser",
-    "Énergie & eau",
-    "Energia e acqua",
-    "Energy & water"
+  ausruestung: l4("Ausrüstung", "Équipement", "Attrezzatura", "Gear"),
+  wissen: l4(
+    "Wissen & Natur",
+    "Savoir & nature",
+    "Sapere e natura",
+    "Know-how & nature"
+  ),
+  familie: l4(
+    "Familie & Camp",
+    "Famille & camp",
+    "Famiglia e campo",
+    "Family & camp"
   ),
 };

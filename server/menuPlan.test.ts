@@ -4,7 +4,6 @@ import {
   MAX_MENU_DAYS,
   MEALS,
   MEAL_LABELS,
-  mergeIngredientLines,
   remapMenuDays,
   tripDays,
   type AutofillRecipe,
@@ -48,28 +47,6 @@ describe("tripDays", () => {
     const days = tripDays("2026-01-01", "2027-12-31");
     expect(days).toHaveLength(MAX_MENU_DAYS);
     expect(days[0]).toBe("2026-01-01");
-  });
-});
-
-describe("mergeIngredientLines", () => {
-  it("trimmt Zeilen und entfernt leere Einträge", () => {
-    expect(mergeIngredientLines(["  2 Zwiebeln ", "", "   "])).toEqual([
-      "2 Zwiebeln",
-    ]);
-  });
-
-  it("fasst Duplikate unabhängig von der Schreibweise zusammen", () => {
-    expect(
-      mergeIngredientLines(["400 g Magronen", "400 G MAGRONEN", "2 Zwiebeln"])
-    ).toEqual(["400 g Magronen", "2 Zwiebeln"]);
-  });
-
-  it("behält die Reihenfolge des ersten Vorkommens", () => {
-    expect(mergeIngredientLines(["Salz", "Pfeffer", "salz", "Öl"])).toEqual([
-      "Salz",
-      "Pfeffer",
-      "Öl",
-    ]);
   });
 });
 

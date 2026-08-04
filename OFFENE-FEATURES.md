@@ -18,6 +18,14 @@ Stand: 4. August 2026
       `DEPLOYMENT-HETZNER.md`.
 - [ ] **Supabase-Werte in die Server-`.env`**, damit die Ausflüge aus der
       Ausflugfinder-App erscheinen – siehe `EINRICHTUNG-OFFEN.md`, Punkt 6.
+- [ ] **Google-Maps-Schlüssel in die Server-`.env`**, damit die Fahrzeiten die
+      Verkehrslage kennen – siehe `EINRICHTUNG-OFFEN.md`, Punkt 7. Ohne
+      Schlüssel rechnet die App weiter mit der Fahrzeit von OpenStreetMap;
+      es fehlt nur der Stau.
+- [ ] **Google-Maps-Karte: zweiter Schlüssel + Karten-Id** in die
+      Server-`.env` – siehe `EINRICHTUNG-OFFEN.md`, Punkt 7b. NICHT
+      derselbe Schlüssel wie für die Fahrzeiten: Dieser hier geht in den
+      Browser und muss auf die Website eingeschränkt werden.
 - [ ] **12 Rezeptbilder.** Für die 12 später ergänzten Rezepte fehlt ein Foto.
       Die Prompts liegen bereit (im Chat geschickt); erzeugte Bilder in
       beliebigem Format schicken, sie werden auf 800×600 WebP gebracht und
@@ -25,14 +33,12 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 11 Punkte
+## Runde 29 – 10 Punkte
 
 ### Reise-Planung
 
 ### Küche & Vorrat
 
-- [ ] **Wocheneinkauf aus dem Menüplan** (#288) – Zutaten aller Tage
-      zusammengefasst und mengengerecht
 - [ ] **Znüni- & Lunchbox-Planer** (#289) – was kommt für den Ausflug in den
       Rucksack
 

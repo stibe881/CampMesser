@@ -3830,6 +3830,8 @@ export const de = {
       "Geprüft werden bis zu acht Punkte entlang der berechneten Strassenroute, jeweils für die Ankunftszeit an diesem Punkt. Strecke und Fahrzeit kommen aus der Routenberechnung (OpenStreetMap); Stau und Baustellen kommen dazu.",
     methodNoteEstimate: (speed: number) =>
       `Ohne Netz keine Routenberechnung: Geprüft werden acht Punkte entlang der Luftlinie mit ${speed} km/h – eine grobe Schätzung, die im Gebirge deutlich danebenliegen kann.`,
+    methodNoteTraffic:
+      "Die Fahrzeit stammt aus der Verkehrs-Prognose von Google für deine Abfahrtszeit; die Strecke und die Prüfpunkte kommen wie bisher aus der Routenberechnung über OpenStreetMap. Weil der Verkehr die Ankunftszeit je Punkt verschiebt, verschiebt er auch, welche Prognosestunde zählt.",
     source: "Daten: Open-Meteo",
   },
   packHistory: {
@@ -3965,6 +3967,8 @@ export const de = {
     note: "Strecke und Fahrzeit stammen aus der Routenberechnung über die Strasse (OpenStreetMap). Stau, Baustellen und Grenzwartezeiten kommen dazu.",
     noteEstimate:
       "Ohne Netz keine Routenberechnung: Diese Zahlen sind aus der Luftlinie geschätzt (mit Umwegfaktor) und können deutlich danebenliegen – besonders im Gebirge.",
+    noteTraffic:
+      "Die Fahrzeit stammt aus der Verkehrs-Prognose von Google für diese Tageszeit, die Strecke aus der Routenberechnung über OpenStreetMap. Baustellen und Grenzwartezeiten kommen weiterhin dazu.",
   },
   firewood: {
     title: "Feuerholz-Bedarf",
@@ -4741,6 +4745,8 @@ export const de = {
     addIngredients: "Zutaten der geplanten Rezepte auf die Einkaufsliste",
     noPlannedRecipes:
       "Noch keine Rezepte zugewiesen – wähle zuerst Rezepte in den Mahlzeiten-Slots.",
+    summedFrom: (count: number) =>
+      `aus ${count} Rezept-Zeilen zusammengerechnet`,
     printButton: "Drucken",
     autofillButton: "Automatisch füllen",
     autofillNothing: "Keine leeren Mahlzeiten-Slots zum Füllen gefunden.",
