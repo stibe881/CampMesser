@@ -2899,6 +2899,42 @@ export const it: Translation = {
     reminderHint:
       "I lavori ricorrenti puoi annotarli nell'inventario come promemoria di manutenzione – così l'app si fa viva prima che sia troppo tardi.",
   },
+  thunder: {
+    title: "Distanza del temporale",
+    subtitle:
+      "Tocca al lampo, tocca al tuono – l'app calcola la distanza e dice se il temporale si avvicina.",
+    tapLightning: "Lampo visto",
+    tapThunder: "Tuono sentito",
+    tapLightningAria: "Avvia il conteggio al lampo",
+    tapThunderAria: "Ferma il conteggio al tuono",
+    tapLightningHint: "Tocca appena vedi il lampo.",
+    tapThunderHint: "Tocca appena senti il tuono.",
+    lastStrike: "Ultimo lampo",
+    distanceKm: (km: string) => `a ${km} km`,
+    secondsCounted: (seconds: string) => `${seconds} secondi contati`,
+    trendCloser: "Il temporale si avvicina.",
+    trendFurther: "Il temporale si allontana.",
+    trendSame: "La distanza resta più o meno uguale.",
+    advice: {
+      gefahr:
+        "Proprio sopra di te. Subito in auto o in un edificio solido – una tenda non protegge dai fulmini.",
+      warnung:
+        "Abbastanza vicino: mettiti al riparo ora, non al prossimo lampo. Lontano da alberi isolati, pali e acqua.",
+      beobachten:
+        "Ancora lontano, ma tieni d'occhio – ritira la vela ombreggiante e fissa le cose sciolte.",
+    },
+    allClearIn: (minutes: number) =>
+      `Cessato allarme tra ${minutes} min se non arrivano altri tuoni.`,
+    allClearReached: (minutes: number) =>
+      `Nessun tuono da ${minutes} minuti – puoi uscire di nuovo.`,
+    historyTitle: "Lampi contati",
+    reset: "Azzera",
+    ruleTitle: "La regola 30-30",
+    ruleText:
+      "Se tra lampo e tuono passano meno di 30 secondi (circa 10 km), mettiti al riparo. E esci solo 30 minuti dopo l'ultimo tuono – gli ultimi fulmini di un temporale cadono spesso già a cielo sereno.",
+    methodNote: (max: number) =>
+      `Si calcola con la velocità del suono, circa tre secondi al chilometro. Oltre ${max} secondi non si conta più nulla – a quella distanza il tuono non si sente comunque.`,
+  },
   chores: {
     title: "Piano dei compiti",
     subtitle:

@@ -2830,6 +2830,42 @@ export const en: Translation = {
     reminderHint:
       "You can add recurring jobs to your inventory as a care reminder – then the app speaks up before it is too late.",
   },
+  thunder: {
+    title: "Storm distance",
+    subtitle:
+      "Tap on the lightning, tap on the thunder – the app works out the distance and says whether the storm is closing in.",
+    tapLightning: "Saw the lightning",
+    tapThunder: "Heard the thunder",
+    tapLightningAria: "Start counting at the lightning",
+    tapThunderAria: "Stop counting at the thunder",
+    tapLightningHint: "Tap as soon as you see the flash.",
+    tapThunderHint: "Tap as soon as you hear the thunder.",
+    lastStrike: "Last strike",
+    distanceKm: (km: string) => `${km} km away`,
+    secondsCounted: (seconds: string) => `${seconds} seconds counted`,
+    trendCloser: "The storm is coming closer.",
+    trendFurther: "The storm is moving away.",
+    trendSame: "The distance is staying about the same.",
+    advice: {
+      gefahr:
+        "Right overhead. Get into the car or a solid building now – a tent is no protection from lightning.",
+      warnung:
+        "Close enough: take shelter now, not at the next flash. Away from lone trees, poles and water.",
+      beobachten:
+        "Still far off, but keep an eye on it – take in the sun sail and secure loose gear.",
+    },
+    allClearIn: (minutes: number) =>
+      `All clear in ${minutes} min if no more thunder follows.`,
+    allClearReached: (minutes: number) =>
+      `No thunder for ${minutes} minutes – you can go back out.`,
+    historyTitle: "Strikes counted",
+    reset: "Reset",
+    ruleTitle: "The 30-30 rule",
+    ruleText:
+      "If there are fewer than 30 seconds between flash and thunder (about 10 km), take shelter. And only go back out 30 minutes after the last thunder – the final strikes of a storm often fall under a blue sky.",
+    methodNote: (max: number) =>
+      `The maths uses the speed of sound, roughly three seconds per kilometre. Beyond ${max} seconds nothing is counted – at that distance you would not hear the thunder anyway.`,
+  },
   chores: {
     title: "Chore plan",
     subtitle:

@@ -25,12 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 28 – 9 Punkte
+## Runde 28 – 8 Punkte
 
 ### Karte & Wetter
 
-- [ ] **Gewitter-Entfernung messen** (#274) – Blitz-Donner-Zähler mit Distanz
-      und Trend «kommt näher»
 - [ ] **Unwetter auf der Fahrtstrecke** (#275) – Warnungen entlang der Anreise,
       nicht nur am Ziel
 

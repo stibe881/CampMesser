@@ -8,6 +8,7 @@ import {
   BatteryCharging,
   BookOpen,
   Cable,
+  CloudLightning,
   CloudSunRain,
   Cloudy,
   ClipboardList,
@@ -312,6 +313,24 @@ export const modules: Module[] = [
     ),
     icon: CloudSunRain,
     group: "Sicherheit",
+  },
+  {
+    path: "/gewitter",
+    title: l4(
+      "Gewitter-Entfernung",
+      "Distance de l'orage",
+      "Distanza del temporale",
+      "Storm distance"
+    ),
+    description: l4(
+      "Blitz und Donner zählen: Wie weit weg ist es, und kommt es näher?",
+      "Compte l'éclair et le tonnerre : à quelle distance, et est-ce que ça approche ?",
+      "Conta lampo e tuono: quanto è lontano e si sta avvicinando?",
+      "Count lightning and thunder: how far away is it, and is it coming closer?"
+    ),
+    icon: CloudLightning,
+    group: "Sicherheit",
+    offline: true,
   },
   {
     path: "/sos",

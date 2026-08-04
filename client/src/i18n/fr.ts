@@ -2926,6 +2926,42 @@ export const fr: Translation = {
     reminderHint:
       "Tu peux inscrire les travaux récurrents dans l'inventaire comme rappel d'entretien – l'app se manifeste alors avant qu'il ne soit trop tard.",
   },
+  thunder: {
+    title: "Distance de l'orage",
+    subtitle:
+      "Touche à l'éclair, touche au tonnerre – l'app calcule la distance et dit si l'orage approche.",
+    tapLightning: "Éclair vu",
+    tapThunder: "Tonnerre entendu",
+    tapLightningAria: "Démarrer le comptage à l'éclair",
+    tapThunderAria: "Arrêter le comptage au tonnerre",
+    tapLightningHint: "Touche dès que tu vois l'éclair.",
+    tapThunderHint: "Touche dès que tu entends le tonnerre.",
+    lastStrike: "Dernier éclair",
+    distanceKm: (km: string) => `à ${km} km`,
+    secondsCounted: (seconds: string) => `${seconds} secondes comptées`,
+    trendCloser: "L'orage se rapproche.",
+    trendFurther: "L'orage s'éloigne.",
+    trendSame: "La distance reste à peu près la même.",
+    advice: {
+      gefahr:
+        "Juste au-dessus de toi. Va tout de suite dans la voiture ou un bâtiment en dur – une tente ne protège pas de la foudre.",
+      warnung:
+        "Assez proche : mets-toi à l'abri maintenant, pas au prochain éclair. Loin des arbres isolés, des mâts et de l'eau.",
+      beobachten:
+        "Encore loin, mais garde un œil – rentre la voile d'ombrage et sécurise ce qui traîne.",
+    },
+    allClearIn: (minutes: number) =>
+      `Fin d'alerte dans ${minutes} min s'il n'y a plus de tonnerre.`,
+    allClearReached: (minutes: number) =>
+      `Plus de tonnerre depuis ${minutes} minutes – tu peux ressortir.`,
+    historyTitle: "Éclairs comptés",
+    reset: "Réinitialiser",
+    ruleTitle: "La règle des 30-30",
+    ruleText:
+      "S'il y a moins de 30 secondes entre l'éclair et le tonnerre (environ 10 km), mets-toi à l'abri. Et ne ressors que 30 minutes après le dernier coup de tonnerre – les derniers éclairs d'un orage tombent souvent déjà sous un ciel bleu.",
+    methodNote: (max: number) =>
+      `Le calcul utilise la vitesse du son, environ trois secondes par kilomètre. Au-delà de ${max} secondes, plus rien n'est compté – à cette distance, on n'entend de toute façon plus le tonnerre.`,
+  },
   chores: {
     title: "Plan des tâches",
     subtitle:

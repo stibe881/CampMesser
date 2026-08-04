@@ -2931,6 +2931,42 @@ export const de = {
     reminderHint:
       "Wiederkehrende Arbeiten kannst du dir im Inventar als Pflege-Erinnerung eintragen – dann meldet sich die App, bevor es zu spät ist.",
   },
+  thunder: {
+    title: "Gewitter-Entfernung",
+    subtitle:
+      "Blitz antippen, Donner antippen – die App rechnet die Distanz und sagt, ob das Gewitter näher zieht.",
+    tapLightning: "Blitz gesehen",
+    tapThunder: "Donner gehört",
+    tapLightningAria: "Zählung beim Blitz starten",
+    tapThunderAria: "Zählung beim Donner stoppen",
+    tapLightningHint: "Antippen, sobald du den Blitz siehst.",
+    tapThunderHint: "Antippen, sobald du den Donner hörst.",
+    lastStrike: "Letzter Blitz",
+    distanceKm: (km: string) => `${km} km entfernt`,
+    secondsCounted: (seconds: string) => `${seconds} Sekunden gezählt`,
+    trendCloser: "Das Gewitter kommt näher.",
+    trendFurther: "Das Gewitter zieht ab.",
+    trendSame: "Die Entfernung bleibt etwa gleich.",
+    advice: {
+      gefahr:
+        "Direkt über dir. Sofort ins Auto oder in ein festes Gebäude – ein Zelt schützt nicht vor Blitz.",
+      warnung:
+        "Nah genug: Jetzt Schutz aufsuchen, nicht erst beim nächsten Blitz. Weg von einzelnen Bäumen, Masten und Wasser.",
+      beobachten:
+        "Noch weit weg, aber im Auge behalten – zieh das Sonnensegel ein und sichere loses Zeug.",
+    },
+    allClearIn: (minutes: number) =>
+      `Entwarnung in ${minutes} Min., falls kein weiterer Donner kommt.`,
+    allClearReached: (minutes: number) =>
+      `Seit ${minutes} Minuten kein Donner mehr – du kannst wieder raus.`,
+    historyTitle: "Gezählte Blitze",
+    reset: "Zurücksetzen",
+    ruleTitle: "Die 30-30-Regel",
+    ruleText:
+      "Sind es zwischen Blitz und Donner weniger als 30 Sekunden (rund 10 km), such Schutz auf. Und geh erst 30 Minuten nach dem letzten Donner wieder raus – die letzten Blitze eines Gewitters treffen oft schon bei blauem Himmel.",
+    methodNote: (max: number) =>
+      `Gerechnet wird mit der Schallgeschwindigkeit, rund drei Sekunden pro Kilometer. Über ${max} Sekunden wird nichts mehr gezählt – so weit weg hört man den Donner ohnehin nicht mehr.`,
+  },
   chores: {
     title: "Ämtli-Plan",
     subtitle:
