@@ -3890,6 +3890,30 @@ export const fr: Translation = {
     forgetAria: "Supprimer l'emplacement de la voiture",
     forgotten: "Emplacement de la voiture supprimé.",
   },
+  tripTemplates: {
+    button: "Depuis un modèle",
+    title: "Voyage depuis un modèle",
+    description:
+      "Durée, liste de bagages et menu en une étape. Tout reste modifiable ensuite.",
+    nights: (n: number) => (n === 1 ? "1 nuit" : `${n} nuits`),
+    startLabel: "Arrivée",
+    endLine: (end: string) => `Départ : ${end}`,
+    spotLabel: "Emplacement",
+    spotFree: "Saisir le lieu librement",
+    locationLabel: "Lieu",
+    locationPlaceholder: "p. ex. Camping Waldheim",
+    placeMissing: "Choisis un emplacement ou saisis un lieu.",
+    withPackList: "Créer la liste de bagages",
+    withMenu: "Préremplir le menu",
+    menuNote:
+      "Sont préremplis les repas du soir de chaque nuit et le petit-déjeuner dès le deuxième jour. Les repas de midi restent libres – en voyage, on mange à midi ce que la journée offre.",
+    create: "Créer le voyage",
+    created: (end: string, meals: number, list: boolean) =>
+      `Voyage créé jusqu'au ${end}${list ? ", liste de bagages créée" : ""}${
+        meals > 0 ? `, ${meals} repas ajoutés` : ""
+      }.`,
+    createFailed: "Le voyage n'a pas pu être créé.",
+  },
   routePlan: {
     sectionAria: "Tracer un itinéraire à l'avance",
     title: "Tracer un itinéraire",

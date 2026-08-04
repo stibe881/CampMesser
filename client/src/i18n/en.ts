@@ -3780,6 +3780,30 @@ export const en: Translation = {
     forgetAria: "Delete car location",
     forgotten: "Car location deleted.",
   },
+  tripTemplates: {
+    button: "From template",
+    title: "Trip from a template",
+    description:
+      "Duration, packing list and menu plan in one step. Everything stays editable afterwards.",
+    nights: (n: number) => (n === 1 ? "1 night" : `${n} nights`),
+    startLabel: "Arrival",
+    endLine: (end: string) => `Departure: ${end}`,
+    spotLabel: "Pitch",
+    spotFree: "Enter a place freely",
+    locationLabel: "Place",
+    locationPlaceholder: "e.g. Camping Waldheim",
+    placeMissing: "Please pick a pitch or enter a place.",
+    withPackList: "Create packing list",
+    withMenu: "Pre-fill menu plan",
+    menuNote:
+      "Pre-filled are dinners for every night and breakfast from the second day on. Lunches stay empty – on the road you eat whatever the day offers.",
+    create: "Create trip",
+    created: (end: string, meals: number, list: boolean) =>
+      `Trip created through ${end}${list ? ", packing list created" : ""}${
+        meals > 0 ? `, ${meals} meals added` : ""
+      }.`,
+    createFailed: "The trip could not be created.",
+  },
   routePlan: {
     sectionAria: "Plan a route in advance",
     title: "Draw a route",

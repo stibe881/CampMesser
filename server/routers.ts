@@ -132,6 +132,12 @@ import {
   type RouteWaypoint,
 } from "@shared/routePlan";
 import {
+  templateEndDate,
+  templateListName,
+  templateMenuPlan,
+  tripTemplateById,
+} from "@shared/tripTemplates";
+import {
   MAX_TICK_BODY_PART_LENGTH,
   MAX_TICK_NOTE_LENGTH,
 } from "@shared/tickBites";
@@ -4024,6 +4030,113 @@ export const appRouter = router({
           departureTime: input.departureTime ?? null,
         });
         return { id };
+      }),
+    /**
+     * Reise aus einer Vorlage anlegen (#284): Zeitraum, Packliste und
+     * Menüplan in EINEM Schritt.
+     *
+     * Gerechnet wird alles serverseitig aus der Vorlage – der Client
+     * schickt nur, WELCHE Vorlage, ab WANN und WOHIN. So kann kein Gerät
+     * einen Menüplan schreiben, der nicht zum Zeitraum passt.
+     *
+     * Packliste und Menüplan sind einzeln abwählbar: Wer schon eine Liste
+     * hat, will keine zweite, und wer unterwegs entscheidet, was es gibt,
+     * will keinen vorgefüllten Plan.
+     */
+    createFromTemplate: protectedProcedure
+      .input(
+        z
+          .object({
+            templateId: z.string().min(1).max(40),
+            startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            spotId: z.number().int().positive().nullish(),
+            location: z.string().max(140).nullish(),
+            title: z.string().max(140).nullish(),
+            withPackList: z.boolean().default(true),
+            withMenu: z.boolean().default(true),
+            // Vorlagen-Inhalte werden in der UI-Sprache gespeichert
+            lang: z.enum(["de", "fr", "it", "en"]).default("de"),
+          })
+          .refine(
+            v => v.spotId != null || (v.location ?? "").trim().length > 0,
+            {
+              message: "Bitte einen Zeltplatz wählen oder einen Ort eintragen.",
+            }
+          )
+      )
+      .mutation(async ({ ctx, input }) => {
+        const template = tripTemplateById(input.templateId);
+        if (!template) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Vorlage nicht gefunden.",
+          });
+        }
+        if (input.spotId != null) {
+          const spots = await db.getCampSpots(ctx.user.id);
+          if (!spots.some(s => s.id === input.spotId)) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Zeltplatz nicht gefunden.",
+            });
+          }
+        }
+        const endDate = templateEndDate(input.startDate, template.nights);
+        const title = pick(template.title, input.lang);
+
+        // 1. Packliste aus dem Szenario der Vorlage
+        let packListId: number | null = null;
+        if (input.withPackList) {
+          const scenario = packScenarios.find(
+            s => s.id === template.packScenario
+          );
+          packListId = await db.createPackList({
+            userId: ctx.user.id,
+            name: templateListName(title, input.startDate),
+            scenario: template.packScenario,
+            personsJson: serializePersons([]),
+          });
+          if (scenario && scenario.items.length > 0) {
+            await db.addPackItems(
+              scenario.items.map((item, idx) => ({
+                listId: packListId as number,
+                name: pick(item.name, input.lang),
+                category: pick(item.category, input.lang),
+                quantity: item.quantity ?? 1,
+                sortOrder: idx,
+              }))
+            );
+          }
+        }
+
+        // 2. Die Reise selbst
+        const tripId = await db.addTripLog({
+          userId: ctx.user.id,
+          spotId: input.spotId ?? null,
+          packListId,
+          location: input.location?.trim() || null,
+          title: input.title?.trim() || title,
+          startDate: input.startDate,
+          endDate,
+        });
+
+        // 3. Menüplan – Abendessen je Nacht, Frühstück ab dem zweiten Tag
+        let menuEntries = 0;
+        if (input.withMenu) {
+          const plan = templateMenuPlan(template, input.startDate);
+          for (const entry of plan) {
+            await db.upsertMenuEntry({
+              userId: ctx.user.id,
+              tripId,
+              day: entry.day,
+              meal: entry.meal,
+              recipeId: entry.recipeId,
+              updatedByUserId: ctx.user.id,
+            });
+          }
+          menuEntries = plan.length;
+        }
+        return { id: tripId, endDate, packListId, menuEntries };
       }),
     /**
      * Eintrag nachträglich bearbeiten (Validierung wie add). Ändern sich

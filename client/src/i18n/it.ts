@@ -3861,6 +3861,30 @@ export const it: Translation = {
     forgetAria: "Elimina la posizione dell'auto",
     forgotten: "Posizione dell'auto eliminata.",
   },
+  tripTemplates: {
+    button: "Da modello",
+    title: "Viaggio da modello",
+    description:
+      "Durata, lista bagagli e menu in un passo solo. Dopo si può cambiare tutto.",
+    nights: (n: number) => (n === 1 ? "1 notte" : `${n} notti`),
+    startLabel: "Arrivo",
+    endLine: (end: string) => `Partenza: ${end}`,
+    spotLabel: "Piazzola",
+    spotFree: "Inserire il luogo liberamente",
+    locationLabel: "Luogo",
+    locationPlaceholder: "p. es. Camping Waldheim",
+    placeMissing: "Scegli una piazzola o inserisci un luogo.",
+    withPackList: "Creare la lista bagagli",
+    withMenu: "Precompilare il menu",
+    menuNote:
+      "Vengono precompilate le cene di ogni notte e la colazione dal secondo giorno. I pranzi restano liberi – in viaggio a mezzogiorno si mangia quello che capita.",
+    create: "Crea il viaggio",
+    created: (end: string, meals: number, list: boolean) =>
+      `Viaggio creato fino al ${end}${list ? ", lista bagagli creata" : ""}${
+        meals > 0 ? `, ${meals} pasti inseriti` : ""
+      }.`,
+    createFailed: "Il viaggio non è stato creato.",
+  },
   routePlan: {
     sectionAria: "Disegnare il percorso in anticipo",
     title: "Disegnare il percorso",

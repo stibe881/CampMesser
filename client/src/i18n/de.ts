@@ -3892,6 +3892,30 @@ export const de = {
     forgetAria: "Auto-Standort löschen",
     forgotten: "Auto-Standort gelöscht.",
   },
+  tripTemplates: {
+    button: "Aus Vorlage",
+    title: "Reise aus Vorlage",
+    description:
+      "Dauer, Packliste und Menüplan in einem Schritt. Danach ist alles ganz normal änderbar.",
+    nights: (n: number) => (n === 1 ? "1 Nacht" : `${n} Nächte`),
+    startLabel: "Anreise",
+    endLine: (end: string) => `Abreise: ${end}`,
+    spotLabel: "Zeltplatz",
+    spotFree: "Ort frei eintragen",
+    locationLabel: "Ort",
+    locationPlaceholder: "z. B. Camping Waldheim",
+    placeMissing: "Bitte einen Zeltplatz wählen oder einen Ort eintragen.",
+    withPackList: "Packliste anlegen",
+    withMenu: "Menüplan vorfüllen",
+    menuNote:
+      "Vorgefüllt werden Abendessen für jede Nacht und Frühstück ab dem zweiten Tag. Mittagessen bleiben frei – unterwegs isst man mittags, was der Tag hergibt.",
+    create: "Reise anlegen",
+    created: (end: string, meals: number, list: boolean) =>
+      `Reise bis ${end} angelegt${list ? ", Packliste erstellt" : ""}${
+        meals > 0 ? `, ${meals} Mahlzeiten eingetragen` : ""
+      }.`,
+    createFailed: "Die Reise konnte nicht angelegt werden.",
+  },
   routePlan: {
     sectionAria: "Route vorher zeichnen",
     title: "Route zeichnen",

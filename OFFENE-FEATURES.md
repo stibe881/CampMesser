@@ -25,12 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 15 Punkte
+## Runde 29 – 14 Punkte
 
 ### Reise-Planung
 
-- [ ] **Reise-Vorlagen** (#284) – «Wochenende», «Sommerferien» als Muster mit
-      Packliste, Menüplan und Dauer
 - [ ] **Beste Abfahrtszeit** (#285) – aus Check-in-Zeit und Fahrzeit rückwärts,
       mit Pausen für Kinder
 - [ ] **Rückreise-Planung** (#286) – wann losfahren, um zur Wunschzeit daheim zu

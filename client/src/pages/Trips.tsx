@@ -155,6 +155,7 @@ import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import TripDatePoll from "@/components/TripDatePoll";
 import TripGuestbook from "@/components/TripGuestbook";
 import TripReservation from "@/components/TripReservation";
+import TripTemplatePicker from "@/components/TripTemplatePicker";
 
 /** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
 const FREE_LOCATION = "frei";
@@ -3682,12 +3683,18 @@ export default function TripsPage() {
     <div className="container max-w-3xl py-6">
       <PageHeader title={t.trips.title} subtitle={t.trips.subtitle} />
 
-      {/* «Neue Reise»: öffnet den Erfassungs-Dialog */}
-      <div className="mb-6">
+      {/* «Neue Reise» von Hand oder aus einer Vorlage (#284) */}
+      <div className="mb-6 flex flex-wrap gap-2">
         <Button size="lg" onClick={openNewTripDialog}>
           <Plus className="mr-1.5 h-5 w-5" aria-hidden="true" />
           {t.trips.newTripButton}
         </Button>
+        <TripTemplatePicker
+          spots={(spotsQuery.data ?? []).map(spot => ({
+            id: spot.id,
+            name: spot.name,
+          }))}
+        />
       </div>
 
       {/* Statistik */}
