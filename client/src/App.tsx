@@ -32,6 +32,7 @@ const pageLoaders = {
   GearRepair: () => import("./pages/GearRepair"),
   Treasure: () => import("./pages/Treasure"),
   StoryDice: () => import("./pages/StoryDice"),
+  Songbook: () => import("./pages/Songbook"),
   Phrasebook: () => import("./pages/Phrasebook"),
   Recipes: () => import("./pages/Recipes"),
   Energy: () => import("./pages/Energy"),
@@ -121,6 +122,7 @@ const TentCarePage = lazyWithRetry(pageLoaders.TentCare);
 const GearRepairPage = lazyWithRetry(pageLoaders.GearRepair);
 const TreasurePage = lazyWithRetry(pageLoaders.Treasure);
 const StoryDicePage = lazyWithRetry(pageLoaders.StoryDice);
+const SongbookPage = lazyWithRetry(pageLoaders.Songbook);
 const PhrasebookPage = lazyWithRetry(pageLoaders.Phrasebook);
 const RecipesPage = lazyWithRetry(pageLoaders.Recipes);
 const EnergyPage = lazyWithRetry(pageLoaders.Energy);
@@ -201,6 +203,7 @@ function Router() {
           <Route path={"/reparatur"} component={GearRepairPage} />
           <Route path={"/schatzsuche"} component={TreasurePage} />
           <Route path={"/erzaehlwuerfel"} component={StoryDicePage} />
+          <Route path={"/liederbuch"} component={SongbookPage} />
           <Route path={"/sprachhilfe"} component={PhrasebookPage} />
           <Route path={"/rezepte"} component={RecipesPage} />
           <Route path={"/energie"} component={EnergyPage} />

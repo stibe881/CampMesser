@@ -25,11 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 2 Punkte
+## Runde 27 – 1 Punkt
 
 ### Familie & Abend
 
-- [ ] **Lagerfeuer-Liederbuch** (#269) – Texte und Akkorde, Rotlicht-tauglich
 - [ ] **Ämtli-Plan im Camp** (#270) – Aufgaben verteilen, Kinder sammeln Punkte
 
 ---

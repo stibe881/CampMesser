@@ -2931,6 +2931,20 @@ export const de = {
     reminderHint:
       "Wiederkehrende Arbeiten kannst du dir im Inventar als Pflege-Erinnerung eintragen – dann meldet sich die App, bevor es zu spät ist.",
   },
+  songbook: {
+    title: "Lagerfeuer-Liederbuch",
+    subtitle:
+      "Texte mit Akkorden – transponierbar, mit Rotlicht fürs Dunkel und ohne Netz nutzbar.",
+    offlineNote:
+      "Alle Lieder sind in der App gespeichert und funktionieren ohne Internetverbindung.",
+    redLight: "Rotlicht",
+    transposeAria: "Tonart verschieben",
+    transposeLabel: (value: string) => `Kapo ${value}`,
+    transposeUpAria: "Einen Halbton höher",
+    transposeDownAria: "Einen Halbton tiefer",
+    copyrightNote:
+      "Hier stehen nur gemeinfreie Lieder – Volkslieder und Stücke, deren Urheber seit über 70 Jahren verstorben sind. Bei jedem Lied steht die Herkunft dabei. Moderne Lagerfeuer-Klassiker fehlen deshalb, sie dürften nicht abgedruckt werden.",
+  },
   storyDice: {
     title: "Erzählwürfel",
     subtitle:

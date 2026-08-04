@@ -2830,6 +2830,20 @@ export const en: Translation = {
     reminderHint:
       "You can add recurring jobs to your inventory as a care reminder – then the app speaks up before it is too late.",
   },
+  songbook: {
+    title: "Campfire songbook",
+    subtitle:
+      "Lyrics with chords – transposable, with a red-light mode and usable without a signal.",
+    offlineNote:
+      "All songs are stored in the app and work without an internet connection.",
+    redLight: "Red light",
+    transposeAria: "Change the key",
+    transposeLabel: (value: string) => `Capo ${value}`,
+    transposeUpAria: "One semitone up",
+    transposeDownAria: "One semitone down",
+    copyrightNote:
+      "Only public-domain songs are printed here – folk songs and works whose authors died more than 70 years ago. The origin is given for every song. Modern campfire classics are therefore missing: they could not legally be reproduced.",
+  },
   storyDice: {
     title: "Story dice",
     subtitle:

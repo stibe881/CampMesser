@@ -2899,6 +2899,20 @@ export const it: Translation = {
     reminderHint:
       "I lavori ricorrenti puoi annotarli nell'inventario come promemoria di manutenzione – così l'app si fa viva prima che sia troppo tardi.",
   },
+  songbook: {
+    title: "Canzoniere del falò",
+    subtitle:
+      "Testi con accordi – trasponibili, con modalità luce rossa e utilizzabili senza rete.",
+    offlineNote:
+      "Tutte le canzoni sono salvate nell'app e funzionano senza connessione a Internet.",
+    redLight: "Luce rossa",
+    transposeAria: "Cambia tonalità",
+    transposeLabel: (value: string) => `Capo ${value}`,
+    transposeUpAria: "Un semitono più alto",
+    transposeDownAria: "Un semitono più basso",
+    copyrightNote:
+      "Qui ci sono solo canzoni di dominio pubblico – canti popolari e opere i cui autori sono morti da oltre 70 anni. Per ogni brano è indicata l'origine. I classici moderni da falò mancano quindi: non potrebbero essere riprodotti.",
+  },
   storyDice: {
     title: "Dadi delle storie",
     subtitle:

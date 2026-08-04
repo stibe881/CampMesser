@@ -2926,6 +2926,20 @@ export const fr: Translation = {
     reminderHint:
       "Tu peux inscrire les travaux récurrents dans l'inventaire comme rappel d'entretien – l'app se manifeste alors avant qu'il ne soit trop tard.",
   },
+  songbook: {
+    title: "Chansonnier du feu de camp",
+    subtitle:
+      "Textes avec accords – transposables, avec mode lumière rouge et utilisables sans réseau.",
+    offlineNote:
+      "Toutes les chansons sont enregistrées dans l'app et fonctionnent sans connexion Internet.",
+    redLight: "Lumière rouge",
+    transposeAria: "Changer de tonalité",
+    transposeLabel: (value: string) => `Capo ${value}`,
+    transposeUpAria: "Un demi-ton plus haut",
+    transposeDownAria: "Un demi-ton plus bas",
+    copyrightNote:
+      "Seules des chansons du domaine public figurent ici – chansons populaires et œuvres dont les auteurs sont décédés depuis plus de 70 ans. L'origine est indiquée pour chaque titre. Les classiques modernes du feu de camp manquent donc : ils ne pourraient pas être reproduits.",
+  },
   storyDice: {
     title: "Dés à histoires",
     subtitle:

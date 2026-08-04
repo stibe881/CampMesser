@@ -24,6 +24,7 @@ import {
   LocateFixed,
   Map as MapIcon,
   Moon,
+  Music,
   NotebookPen,
   Package,
   PackageOpen,
@@ -584,6 +585,24 @@ export const modules: Module[] = [
       "Roll symbols and make up a story together"
     ),
     icon: Dices,
+    group: "Erste Hilfe",
+    offline: true,
+  },
+  {
+    path: "/liederbuch",
+    title: l4(
+      "Lagerfeuer-Liederbuch",
+      "Chansonnier du feu de camp",
+      "Canzoniere del falò",
+      "Campfire songbook"
+    ),
+    description: l4(
+      "Texte und Akkorde, transponierbar und mit Rotlicht fürs Dunkel",
+      "Textes et accords, transposables, avec mode lumière rouge",
+      "Testi e accordi, trasponibili, con modalità luce rossa",
+      "Lyrics and chords, transposable, with a red-light mode"
+    ),
+    icon: Music,
     group: "Erste Hilfe",
     offline: true,
   },
