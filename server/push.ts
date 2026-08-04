@@ -1172,6 +1172,37 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     payload: string
   ): Promise<"sent" | "gone" | "error"> {
     try {
+      if (sub.endpoint.startsWith("ExponentPushToken[")) {
+        const data = JSON.parse(payload);
+        const expoPayload = {
+          to: sub.endpoint,
+          title: data.title,
+          body: data.body,
+          data: { url: data.url },
+        };
+        const res = await fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Accept-Encoding": "gzip, deflate",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(expoPayload),
+        });
+        const resData = await res.json();
+        if (
+          resData.data?.status === "error" &&
+          resData.data?.details?.error === "DeviceNotRegistered"
+        ) {
+          await db!
+            .delete(pushSubscriptions)
+            .where(eq(pushSubscriptions.id, sub.id));
+          result.removed += 1;
+          return "gone";
+        }
+        return "sent";
+      }
+
       await webpush.sendNotification(
         {
           endpoint: sub.endpoint,

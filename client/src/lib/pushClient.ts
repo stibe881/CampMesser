@@ -21,8 +21,11 @@ const ERRORS = {
 };
 
 export function pushSupported(): boolean {
+  if (typeof window === "undefined") return false;
+  // Nativer Expo WebView-Wrapper unterstützt Push via Bridge
+  if ("ReactNativeWebView" in window) return true;
+  
   return (
-    typeof window !== "undefined" &&
     "serviceWorker" in navigator &&
     "PushManager" in window &&
     "Notification" in window
@@ -50,6 +53,13 @@ export interface BrowserSubscription {
 /** Bestehendes Push-Abo dieses Browsers lesen (null = keines). */
 export async function getExistingSubscription(): Promise<BrowserSubscription | null> {
   if (!pushSupported()) return null;
+  
+  if ("ReactNativeWebView" in window) {
+    const token = localStorage.getItem("expoPushToken");
+    if (token) return { endpoint: token, p256dh: "expo", auth: "expo" };
+    return null;
+  }
+  
   const registration = await navigator.serviceWorker.ready;
   const sub = await registration.pushManager.getSubscription();
   if (!sub) return null;
@@ -67,6 +77,29 @@ export async function subscribeBrowser(
   vapidPublicKey: string,
   lang: Language = "de"
 ): Promise<BrowserSubscription> {
+  if ("ReactNativeWebView" in window) {
+    return new Promise((resolve, reject) => {
+      const handler = (e: any) => {
+        window.removeEventListener("ExpoPushToken", handler);
+        window.removeEventListener("ExpoPushTokenError", errorHandler);
+        const token = e.detail;
+        localStorage.setItem("expoPushToken", token);
+        resolve({ endpoint: token, p256dh: "expo", auth: "expo" });
+      };
+      const errorHandler = () => {
+        window.removeEventListener("ExpoPushToken", handler);
+        window.removeEventListener("ExpoPushTokenError", errorHandler);
+        reject(new Error(pick(ERRORS.notAllowed, lang)));
+      };
+      window.addEventListener("ExpoPushToken", handler);
+      window.addEventListener("ExpoPushTokenError", errorHandler);
+      
+      (window as any).ReactNativeWebView.postMessage(
+        JSON.stringify({ type: "REQUEST_PUSH_TOKEN" })
+      );
+    });
+  }
+
   const permission = await Notification.requestPermission();
   if (permission !== "granted") {
     throw new Error(pick(ERRORS.notAllowed, lang));
@@ -91,6 +124,12 @@ export async function subscribeBrowser(
 
 /** Push-Abo im Browser lösen (gibt den Endpoint des gelösten Abos zurück). */
 export async function unsubscribeBrowser(): Promise<string | null> {
+  if ("ReactNativeWebView" in window) {
+    const token = localStorage.getItem("expoPushToken");
+    localStorage.removeItem("expoPushToken");
+    return token;
+  }
+
   const registration = await navigator.serviceWorker.ready;
   const sub = await registration.pushManager.getSubscription();
   if (!sub) return null;
