@@ -16,6 +16,7 @@ import {
   Droplets,
   Footprints,
   Gauge,
+  Hammer,
   Languages,
   ListChecks,
   LocateFixed,
@@ -510,6 +511,24 @@ export const modules: Module[] = [
       "Waterproofing, patching, zips, mould – step by step"
     ),
     icon: Wrench,
+    group: "Erste Hilfe",
+    offline: true,
+  },
+  {
+    path: "/reparatur",
+    title: l4(
+      "Reparatur-Ratgeber",
+      "Guide de réparation",
+      "Guida alle riparazioni",
+      "Repair guide"
+    ),
+    description: l4(
+      "Matte flicken, Gestänge schienen, Kocher warten – am Platz und daheim",
+      "Réparer le matelas, attelle sur un arceau, entretenir le réchaud – sur place et chez soi",
+      "Riparare il materassino, steccare la bacchetta, curare il fornello – sul posto e a casa",
+      "Patch the mat, splint a pole, service the stove – on site and at home"
+    ),
+    icon: Hammer,
     group: "Erste Hilfe",
     offline: true,
   },

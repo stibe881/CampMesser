@@ -25,12 +25,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 6 Punkte
-
-### Wissen
-
-- [ ] **Reparatur-Ratgeber Ausrüstung** (#266) – Matte flicken, Gestänge
-      schienen, Kocher warten
+## Runde 27 – 4 Punkte
 
 ### Familie & Abend
 

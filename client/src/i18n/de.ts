@@ -2931,6 +2931,11 @@ export const de = {
     reminderHint:
       "Wiederkehrende Arbeiten kannst du dir im Inventar als Pflege-Erinnerung eintragen – dann meldet sich die App, bevor es zu spät ist.",
   },
+  gearRepair: {
+    title: "Reparatur-Ratgeber",
+    subtitle:
+      "Sieben Reparaturen, die eine Reise retten – von der Isomatte bis zur Rucksack-Schnalle.",
+  },
   tentCare: {
     title: "Zeltpflege",
     subtitle:

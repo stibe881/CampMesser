@@ -2830,6 +2830,11 @@ export const en: Translation = {
     reminderHint:
       "You can add recurring jobs to your inventory as a care reminder – then the app speaks up before it is too late.",
   },
+  gearRepair: {
+    title: "Repair guide",
+    subtitle:
+      "Seven repairs that save a trip – from the sleeping mat to the rucksack buckle.",
+  },
   tentCare: {
     title: "Tent care",
     subtitle:

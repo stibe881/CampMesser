@@ -2926,6 +2926,11 @@ export const fr: Translation = {
     reminderHint:
       "Tu peux inscrire les travaux récurrents dans l'inventaire comme rappel d'entretien – l'app se manifeste alors avant qu'il ne soit trop tard.",
   },
+  gearRepair: {
+    title: "Guide de réparation",
+    subtitle:
+      "Sept réparations qui sauvent un voyage – du matelas à la boucle du sac à dos.",
+  },
   tentCare: {
     title: "Entretien de la tente",
     subtitle:

@@ -2899,6 +2899,11 @@ export const it: Translation = {
     reminderHint:
       "I lavori ricorrenti puoi annotarli nell'inventario come promemoria di manutenzione – così l'app si fa viva prima che sia troppo tardi.",
   },
+  gearRepair: {
+    title: "Guida alle riparazioni",
+    subtitle:
+      "Sette riparazioni che salvano un viaggio – dal materassino alla fibbia dello zaino.",
+  },
   tentCare: {
     title: "Cura della tenda",
     subtitle:

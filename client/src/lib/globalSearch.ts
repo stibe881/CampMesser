@@ -8,6 +8,7 @@
 import { firstAidTopics } from "@/data/firstAid";
 import { cloudBandLabels, cloudEntries } from "@/data/clouds";
 import { knotCategoryLabels, knots } from "@/data/knots";
+import { gearRepairGuides } from "@/data/gearRepair";
 import { tentCareGuides } from "@/data/tentCare";
 import { groupLabels, modules } from "@/data/modules";
 import { natureEntries } from "@/data/nature";
@@ -140,14 +141,19 @@ function buildIndex(lang: Language): IndexEntry[] {
   }
   // Pflege-Anleitungen: gesucht wird meist nach dem Problem («Schimmel»,
   // «Reissverschluss»), deshalb stehen Anlass und Fehler mit im Suchtext
-  for (const g of tentCareGuides) {
-    add(`tentcare-${g.id}`, p(g.title), "care", "/zeltpflege", p(g.summary), [
-      p(g.summary),
-      p(g.when),
-      ...g.materials.map(m => p(m)),
-      ...g.steps.map(s => `${p(s.title)} ${p(s.text)}`),
-      p(g.mistake),
-    ]);
+  for (const [prefix, path, guides] of [
+    ["tentcare", "/zeltpflege", tentCareGuides],
+    ["gearrepair", "/reparatur", gearRepairGuides],
+  ] as const) {
+    for (const g of guides) {
+      add(`${prefix}-${g.id}`, p(g.title), "care", path, p(g.summary), [
+        p(g.summary),
+        p(g.when),
+        ...g.materials.map(m => p(m)),
+        ...g.steps.map(s => `${p(s.title)} ${p(s.text)}`),
+        p(g.mistake),
+      ]);
+    }
   }
   for (const r of recipes) {
     add(
