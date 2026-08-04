@@ -97,7 +97,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#09090b',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   webview: {
