@@ -31,6 +31,7 @@ import {
 } from "../shared/astro";
 import { expiryInfo } from "../shared/food";
 import { gearTaskDue, type GearTaskLike } from "../shared/gearTasks";
+import { heatAdvice } from "../shared/heatCare";
 import { pick } from "../shared/i18n";
 import { getMoonInfo } from "../shared/moon";
 import { daysUntilTrip } from "../shared/trips";
@@ -82,7 +83,7 @@ export async function deleteSubscription(userId: number, endpoint: string) {
 }
 
 /** Mitteilungs-Arten, die pro Abo (Gerät) einzeln abschaltbar sind. */
-export type PushKind = "weather" | "food" | "trip" | "astro" | "gear";
+export type PushKind = "weather" | "food" | "trip" | "astro" | "gear" | "heat";
 
 /**
  * Arten im Benachrichtigungs-Verlauf (#201): wie PushKind, aber mit den beiden
@@ -168,6 +169,8 @@ export interface PushPrefs {
   wantsTrips: boolean;
   wantsAstro: boolean;
   wantsGear: boolean;
+  /** Sonnencreme- und Trink-Erinnerung an heissen Tagen (#260/#261) */
+  wantsHeat: boolean;
   /** Böenspitze in km/h ab «Gefahr» (null = Standard 90) */
   windThresholdKmh: number | null;
   /** Regenmenge in mm/h ab «Gefahr» (null = Standard 15) */
@@ -205,6 +208,8 @@ export function subscriptionWants(prefs: PushPrefs, kind: PushKind): boolean {
       return prefs.wantsAstro;
     case "gear":
       return prefs.wantsGear;
+    case "heat":
+      return prefs.wantsHeat;
   }
 }
 
@@ -222,6 +227,7 @@ export async function getSubscriptionPrefs(
       wantsTrips: pushSubscriptions.wantsTrips,
       wantsAstro: pushSubscriptions.wantsAstro,
       wantsGear: pushSubscriptions.wantsGear,
+      wantsHeat: pushSubscriptions.wantsHeat,
       windThresholdKmh: pushSubscriptions.windThresholdKmh,
       rainThresholdMm: pushSubscriptions.rainThresholdMm,
     })
@@ -286,7 +292,7 @@ async function hourlyFor(lat: number, lon: number): Promise<HourlyWeather[]> {
     timezone: "auto",
     forecast_days: "2",
     hourly:
-      "temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,weather_code,cape,cloud_cover",
+      "temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,weather_code,cape,cloud_cover,uv_index",
   });
   const res = await fetch(
     `https://api.open-meteo.com/v1/forecast?${params.toString()}`
@@ -308,6 +314,7 @@ async function hourlyFor(lat: number, lon: number): Promise<HourlyWeather[]> {
     weatherCode: Number(json.hourly.weather_code[i] ?? 0),
     cape: Number(json.hourly.cape?.[i] ?? 0),
     cloudCover: Number(json.hourly.cloud_cover?.[i] ?? 0),
+    uvIndex: Number(json.hourly.uv_index?.[i] ?? 0),
   }));
   return hourly;
 }
@@ -328,6 +335,8 @@ export interface PushCheckResult {
   astroSent: number;
   /** Verschickte Pflege-Erinnerungen (fällige Ausrüstungs-Aufgaben) */
   gearSent: number;
+  /** Verschickte Sonnencreme-/Trink-Erinnerungen (heisse, sonnige Tage) */
+  heatSent: number;
   removed: number;
 }
 
@@ -418,6 +427,62 @@ export function buildGearAlert(
     title: "🛠️ Ausrüstung: Pflege fällig",
     body,
     key: `gear:${today.slice(0, 7)}`,
+  };
+}
+
+/**
+ * Sonnencreme- und Trink-Erinnerung (#260/#261).
+ *
+ * BEWUSST EINE Meldung für beides: Es ist derselbe Tag und dieselbe
+ * Prognose. Zwei Mitteilungen am selben Sommermorgen wären Lärm – und wer
+ * nach der zweiten die Erinnerungen abschaltet, bekommt auch die erste nie
+ * wieder.
+ */
+export interface HeatAlert {
+  title: string;
+  body: string;
+  /** Dedup-Schlüssel «heat:YYYY-MM-DD» – höchstens eine Erinnerung pro Tag */
+  key: string;
+}
+
+/** Ab dieser vollen Stunde (Europe/Zurich) wird morgens erinnert. */
+export const HEAT_SEND_HOUR_FROM = 7;
+/** Bis zu dieser vollen Stunde – danach ist der Tag halb vorbei. */
+export const HEAT_SEND_HOUR_TO = 10;
+
+/**
+ * Meldung bauen, wenn der Tag heiss und/oder sonnig genug ist. `null`, wenn
+ * weder UV noch Temperatur einen Hinweis rechtfertigen – dann bleibt es
+ * still.
+ */
+export function buildHeatAlert(input: {
+  date: string;
+  uvIndexMax: number;
+  maxTempC: number;
+  placeName: string;
+}): HeatAlert | null {
+  const advice = heatAdvice(input.uvIndexMax, input.maxTempC);
+  if (!advice) return null;
+  const parts: string[] = [];
+  if (advice.sunscreen) {
+    parts.push(
+      `UV ${Math.round(advice.uvIndex)}: eincremen, alle ${advice.reapplyMinutes} Minuten nachlegen (ungeschützt rot nach ~${advice.burnMinutes} Min.)`
+    );
+  }
+  if (advice.hydration) {
+    parts.push(
+      `${Math.round(advice.maxTempC)} °C: rund ${advice.litersPerAdult.toFixed(1).replace(".", ",")} l Wasser pro Erwachsener einplanen`
+    );
+  }
+  const title = advice.sunscreen
+    ? advice.hydration
+      ? `☀️ ${input.placeName}: Sonne und Hitze`
+      : `☀️ ${input.placeName}: hoher UV-Index`
+    : `💧 ${input.placeName}: Hitzetag`;
+  return {
+    title,
+    body: parts.join(" · "),
+    key: `heat:${input.date}`,
   };
 }
 
@@ -780,6 +845,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     evePackSent: 0,
     astroSent: 0,
     gearSent: 0,
+    heatSent: 0,
     removed: 0,
   };
   if (!pushConfigured()) return result;
@@ -1070,6 +1136,36 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     }
   }
 
+  // Sonnencreme & Trinken (#260/#261): morgens einmal, am Ort des laufenden
+  // Aufenthalts bzw. am Heim-Standort. Die Werte kommen aus derselben
+  // Stundenprognose wie die Unwetter-Warnung – kein zusätzlicher Abruf.
+  const heatAlertByUser = new Map<number, HeatAlert>();
+  if (hour >= HEAT_SEND_HOUR_FROM && hour <= HEAT_SEND_HOUR_TO) {
+    const heatDate = zurichIsoDate();
+    for (const point of weatherPoints) {
+      // Ein Konto bekommt höchstens eine Erinnerung – der erste Ort gewinnt,
+      // und das ist der Zeltplatz (die Plätze stehen vor dem Heim-Ort).
+      if (heatAlertByUser.has(point.userId)) continue;
+      const todayHours = point.hourly.filter(h => h.time.startsWith(heatDate));
+      if (todayHours.length === 0) continue;
+      const uvIndexMax = todayHours.reduce(
+        (max, h) => Math.max(max, h.uvIndex ?? 0),
+        0
+      );
+      const maxTempC = todayHours.reduce(
+        (max, h) => Math.max(max, h.temperatureC),
+        -Infinity
+      );
+      const alert = buildHeatAlert({
+        date: heatDate,
+        uvIndexMax,
+        maxTempC,
+        placeName: point.name,
+      });
+      if (alert) heatAlertByUser.set(point.userId, alert);
+    }
+  }
+
   /** Push an ein Abo senden; bei widerrufenem Abo (404/410) das Abo löschen. */
   async function sendTo(
     sub: (typeof subs)[number],
@@ -1308,6 +1404,38 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         await db
           .update(pushSubscriptions)
           .set({ lastDryKey: dryAlert.key, lastNotifiedAt: new Date() })
+          .where(eq(pushSubscriptions.id, sub.id));
+      } else if (outcome === "gone") {
+        continue;
+      }
+    }
+
+    // ── Sonnencreme & Trinken: heisser/sonniger Tag (max. eine pro Tag) ──
+    const heatAlert = subscriptionWants(sub, "heat")
+      ? heatAlertByUser.get(sub.userId)
+      : undefined;
+    if (heatAlert && heatAlert.key !== sub.lastHeatKey) {
+      const heatPayload = JSON.stringify({
+        title: heatAlert.title,
+        body: heatAlert.body,
+        url: "/wetter",
+        // Eigener Tag, damit die Erinnerung andere Meldungen nicht ersetzt
+        tag: "campmesser-heat-care",
+      });
+      const outcome = await sendTo(sub, heatPayload);
+      if (outcome === "sent") {
+        result.heatSent += 1;
+        await logPushOnce(
+          sub.userId,
+          "heat",
+          heatAlert.key,
+          heatAlert.title,
+          heatAlert.body,
+          "/wetter"
+        );
+        await db
+          .update(pushSubscriptions)
+          .set({ lastHeatKey: heatAlert.key, lastNotifiedAt: new Date() })
           .where(eq(pushSubscriptions.id, sub.id));
       } else if (outcome === "gone") {
         continue;

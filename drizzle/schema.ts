@@ -631,6 +631,8 @@ export const pushSubscriptions = mysqlTable(
     wantsAstro: boolean("wantsAstro").notNull().default(true),
     /** Mitteilungs-Einstellung dieses Geräts: Erinnerung an fällige Ausrüstungs-Pflege */
     wantsGear: boolean("wantsGear").notNull().default(true),
+    /** Mitteilungs-Einstellung dieses Geräts: Sonnencreme & Trinken an heissen Tagen (#260/#261) */
+    wantsHeat: boolean("wantsHeat").notNull().default(true),
     /** Eigene Wind-Schwelle für den Unwetter-Push in km/h (null = Standard 90) */
     windThresholdKmh: int("windThresholdKmh"),
     /** Eigene Regen-Schwelle für den Unwetter-Push in mm/h (null = Standard 15) */
@@ -649,6 +651,8 @@ export const pushSubscriptions = mysqlTable(
     lastGearKey: varchar("lastGearKey", { length: 64 }),
     /** Schlüssel des letzten Vorabend-Checks («evepack:<tripId>»): max. 1 pro Reise */
     lastEvePackKey: varchar("lastEvePackKey", { length: 64 }),
+    /** Schlüssel der letzten Hitze-Erinnerung («heat:YYYY-MM-DD»): max. 1 pro Tag */
+    lastHeatKey: varchar("lastHeatKey", { length: 64 }),
     lastNotifiedAt: timestamp("lastNotifiedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
@@ -1520,3 +1524,51 @@ export const userNotes = mysqlTable(
 
 export type UserNote = typeof userNotes.$inferSelect;
 export type InsertUserNote = typeof userNotes.$inferInsert;
+
+/**
+ * GPS-Schatzsuche (#267): Wegpunkte, die Erwachsene am Platz verstecken
+ * und Kinder mit dem Handy suchen.
+ *
+ * Die Koordinaten stehen am Wegpunkt und nicht an einem Zeltplatz-Favoriten:
+ * Eine Schatzsuche wird dort angelegt, wo man gerade steht – das kann der
+ * Campingplatz sein, muss aber nicht.
+ *
+ * `foundAt` ist der ganze Spielstand. Damit lässt sich eine Suche für die
+ * nächste Kindergruppe zurücksetzen, ohne die Verstecke neu einzumessen –
+ * genau das ist der Unterschied zu einer Wanderung, die man einmal geht.
+ */
+export const treasureHunts = mysqlTable(
+  "treasureHunts",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 60 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("treasureHunts_userId").on(table.userId)]
+);
+
+export const treasurePoints = mysqlTable(
+  "treasurePoints",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    huntId: int("huntId").notNull(),
+    name: varchar("name", { length: 60 }).notNull(),
+    /** Hinweis, der zu diesem Versteck führt; null = ohne Hinweis. */
+    hint: varchar("hint", { length: 200 }),
+    latitude: double("latitude").notNull(),
+    longitude: double("longitude").notNull(),
+    /** Spielreihenfolge – die Stationen werden streng nacheinander gesucht. */
+    sortIndex: int("sortIndex").notNull().default(0),
+    /** Wann der Punkt gefunden wurde; null = noch versteckt. */
+    foundAt: timestamp("foundAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("treasurePoints_huntId").on(table.huntId)]
+);
+
+export type TreasureHunt = typeof treasureHunts.$inferSelect;
+export type InsertTreasureHunt = typeof treasureHunts.$inferInsert;
+export type TreasurePoint = typeof treasurePoints.$inferSelect;
+export type InsertTreasurePoint = typeof treasurePoints.$inferInsert;

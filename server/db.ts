@@ -28,6 +28,8 @@ import {
   InsertHomeLocation,
   InsertInventoryItem,
   InsertStorageBox,
+  InsertTreasureHunt,
+  InsertTreasurePoint,
   locationShares,
   InsertPackItem,
   InsertPackList,
@@ -42,6 +44,8 @@ import {
   InsertUser,
   inventoryItems,
   storageBoxes,
+  treasureHunts,
+  treasurePoints,
   menuDayNotes,
   menuEntries,
   natureSightings,
@@ -3074,4 +3078,86 @@ export async function deleteUserNote(id: number, userId: number) {
   await db
     .delete(userNotes)
     .where(and(eq(userNotes.id, id), eq(userNotes.userId, userId)));
+}
+
+// ── GPS-Schatzsuche (#267) ──────────────────────────────────────────────
+
+export async function getTreasureHunts(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(treasureHunts)
+    .where(eq(treasureHunts.userId, userId))
+    .orderBy(desc(treasureHunts.id));
+}
+
+/** Eine Schatzsuche nur zurückgeben, wenn sie dem Konto gehört. */
+export async function getTreasureHunt(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(treasureHunts)
+    .where(and(eq(treasureHunts.id, id), eq(treasureHunts.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+export async function getTreasurePoints(huntId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(treasurePoints)
+    .where(eq(treasurePoints.huntId, huntId))
+    .orderBy(treasurePoints.sortIndex, treasurePoints.id);
+}
+
+export async function createTreasureHunt(data: InsertTreasureHunt) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(treasureHunts).values(data);
+  return result.insertId;
+}
+
+export async function createTreasurePoint(data: InsertTreasurePoint) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(treasurePoints).values(data);
+  return result.insertId;
+}
+
+/** Punkt als gefunden markieren oder wieder verstecken. */
+export async function setTreasurePointFound(
+  id: number,
+  huntId: number,
+  foundAt: Date | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(treasurePoints)
+    .set({ foundAt })
+    .where(and(eq(treasurePoints.id, id), eq(treasurePoints.huntId, huntId)));
+}
+
+/** Ganze Suche zurücksetzen – die Verstecke bleiben, der Spielstand geht. */
+export async function resetTreasureHunt(huntId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .update(treasurePoints)
+    .set({ foundAt: null })
+    .where(eq(treasurePoints.huntId, huntId));
+}
+
+export async function deleteTreasurePoint(id: number, huntId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(treasurePoints)
+    .where(and(eq(treasurePoints.id, id), eq(treasurePoints.huntId, huntId)));
+}
+
+export async function deleteTreasureHunt(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const hunt = await getTreasureHunt(id, userId);
+  if (!hunt) return;
+  await db.delete(treasurePoints).where(eq(treasurePoints.huntId, id));
+  await db
+    .delete(treasureHunts)
+    .where(and(eq(treasureHunts.id, id), eq(treasureHunts.userId, userId)));
 }

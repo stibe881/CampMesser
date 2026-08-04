@@ -25,29 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 12 Punkte
-
-### Gesundheit & Sicherheit
-
-- [ ] **Sonnencreme-Erinnerung** (#260) – Push zum Nachcremen nach UV-Index
-- [ ] **Trink-Erinnerung an Hitzetagen** (#261) – aus Wetter und
-      Trinkwasser-Rechner
-- [ ] **Stechmücken-Index** (#262) – wetterbasiert: Wärme, Feuchte, Windstille
-- [ ] **Feuerverbots-Übersicht nach Kanton** (#263) – Ergänzung zur
-      Waldbrandgefahr
-
-### Wissen
-
-- [ ] **Wolken-Lexikon mit Wetterdeutung** (#264) – Wolkenart erkennen und
-      wissen, was kommt
-- [ ] **Zeltpflege-Ratgeber** (#265) – imprägnieren, flicken, Reissverschluss,
-      Schimmel
-- [ ] **Reparatur-Ratgeber Ausrüstung** (#266) – Matte flicken, Gestänge
-      schienen, Kocher warten
+## Runde 27 – 3 Punkte
 
 ### Familie & Abend
 
-- [ ] **GPS-Schatzsuche** (#267) – Wegpunkte verstecken und suchen
 - [ ] **Erzählwürfel** (#268) – Bilder würfeln und daraus Geschichten erfinden
 - [ ] **Lagerfeuer-Liederbuch** (#269) – Texte und Akkorde, Rotlicht-tauglich
 - [ ] **Ämtli-Plan im Camp** (#270) – Aufgaben verteilen, Kinder sammeln Punkte

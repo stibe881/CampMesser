@@ -150,6 +150,8 @@ export const de = {
       knots: "Knoten",
       recipes: "Rezepte",
       nature: "Natur",
+      care: "Pflege",
+      clouds: "Wolken",
       own: "Meine Inhalte",
     },
     recentTitle: "Zuletzt genutzt",
@@ -248,6 +250,9 @@ export const de = {
       "Der Bestätigungs-Link ist ungültig oder abgelaufen. Fordere im Profil einen neuen an.",
   },
   profile: {
+    prefHeat: "Sonne & Hitze",
+    prefHeatDesc:
+      "Morgens eine Erinnerung ans Eincremen und ans Trinken, wenn der Tag hohen UV-Index oder über 28 °C bringt.",
     title: "Profil",
     manageSubtitle: "Verwalte dein Konto und deine Einstellungen.",
     loginFeature: "dein Profil",
@@ -343,6 +348,7 @@ export const de = {
       "Noch keine Mitteilungen verschickt. Sobald etwas ansteht, findest du es hier.",
     historyOpenAria: (title: string) => `«${title}» öffnen`,
     historyKind: {
+      heat: "Sonne & Hitze",
       weather: "Unwetter",
       food: "Kühlbox",
       trip: "Reise",
@@ -881,7 +887,37 @@ export const de = {
       `Pflege-Aufgabe «${title}» wirklich löschen?`,
     gearRemoved: "Pflege-Aufgabe gelöscht",
   },
+  fireBans: {
+    title: "Feuerverbote nach Kanton",
+    sectionAria: "Waldbrand-Gefahrenstufen aller Kantone",
+    intro:
+      "Amtliche Gefahrenstufe am Hauptort jedes Kantons, höchste zuerst. Ein Kanton kann mehrere Warnregionen umfassen – im Gebirge gilt oft eine andere Stufe als im Tal.",
+    loading: "Stufen werden geladen …",
+    loadFailed:
+      "Die Gefahrenstufen sind gerade nicht abrufbar. Ohne Netz oder wenn der Dienst des Bundes klemmt, bleibt die Liste leer.",
+    retry: "Nochmals versuchen",
+    unknown: "keine Angabe",
+    banLikely: "Verbot wahrscheinlich",
+    disclaimer:
+      "Die Stufe ist eine Einschätzung des Bundes. Das Feuerverbot verfügt der Kanton oder die Gemeinde – vor dem Anzünden dort nachsehen.",
+    portalLink: "Offizielle Übersicht der Kantone",
+  },
   weather: {
+    mosquitoTitle: "Stechmücken heute Abend",
+    mosquitoAria: "Stechmücken-Index für den Abend",
+    mosquitoBarAria: (score: number) => `Stechmücken-Index ${score} von 100`,
+    mosquitoLimiting: {
+      kalt: "Zu kühl für rege Mückenflüge.",
+      trocken: "Trockene Luft hält sie unten.",
+      wind: "Der Wind hält sie weg – der beste Mückenschutz überhaupt.",
+    },
+    mosquitoHint:
+      "Geschätzt aus Wärme, Feuchte, Wind und dem Regen der letzten Tage. Ein Weiher neben dem Zelt schlägt jede Formel.",
+    cloudLexiconHint:
+      "Der Himmel weiss oft mehr als die Prognose: Wolkenart nachschlagen und sehen, was folgt.",
+    heatSunscreen: (minutes: number, burn: number) =>
+      `Eincremen, alle ${minutes} Min. nachlegen (ungeschützt rot nach ~${burn} Min.)`,
+    heatDrink: (liters: string) => `Rund ${liters} l Wasser pro Erwachsener`,
     title: "Camp-Wetter",
     subtitle:
       "Hyperlokale Vorhersage und Unwetterwarnungen für deinen Zeltplatz.",
@@ -2850,6 +2886,109 @@ export const de = {
     speakAria: (text: string) => `«${text}» vorlesen`,
     stopAria: "Vorlesen stoppen",
     countLine: (n: number) => `${n} Sätze`,
+  },
+  clouds: {
+    title: "Wolken-Lexikon",
+    subtitle:
+      "Wolkenart erkennen und wissen, welches Wetter folgt – offline verfügbar.",
+    offlineNote:
+      "Alle Wolken sind in der App gespeichert und funktionieren ohne Internetverbindung.",
+    howToTitle: "So liest du den Himmel",
+    howToText:
+      "Zuerst schauen, in welchem Stockwerk die Wolke hängt: hoch und fedrig, mittelhoch mit Schattenseiten oder tief und grau. Dann das Aussehen vergleichen – und zuletzt lesen, was daraus folgt.",
+    filterAria: "Nach Stockwerk filtern",
+    filterAll: "Alle",
+    urgencyGood: "Gutes Zeichen",
+    urgencyWatch: "Beobachten",
+    urgencyWarning: "Warnung",
+    appearanceTitle: "Woran du sie erkennst",
+    meaningTitle: "Was daraus folgt",
+    campTipTitle: "Am Platz",
+    leadNone: "Kündigt nichts an",
+    leadNow: (to: number) => `Jetzt bis in ${to} Std.`,
+    leadRange: (from: number, to: number) => `In ${from}–${to} Std.`,
+    leadDisclaimer:
+      "Die Zeitangabe ist eine Faustregel für mitteleuropäische Fronten, kein Countdown. Bei Gewittergefahr gilt immer die aktuelle Warnung im Wetter-Modul.",
+    openAria: (name: string) => `Wolke ${name} öffnen`,
+    countLine: (n: number) => `${n} Wolkenarten im Lexikon`,
+  },
+  care: {
+    offlineNote:
+      "Alle Anleitungen sind in der App gespeichert und funktionieren ohne Internetverbindung.",
+    openAria: (name: string) => `Anleitung «${name}» öffnen`,
+    whenTitle: "Wann es fällig ist",
+    materialsTitle: "Das brauchst du",
+    stepsTitle: "Schritt für Schritt",
+    mistakeTitle: "Häufigster Fehler",
+    minutes: (n: number) => `${n} Min. Arbeit`,
+    intervalMonths: (n: number) =>
+      n === 12
+        ? "jährlich"
+        : n % 12 === 0
+          ? `alle ${n / 12} Jahre`
+          : `alle ${n} Monate`,
+    intervalNone: "bei Bedarf",
+    reminderHint:
+      "Wiederkehrende Arbeiten kannst du dir im Inventar als Pflege-Erinnerung eintragen – dann meldet sich die App, bevor es zu spät ist.",
+  },
+  treasure: {
+    title: "GPS-Schatzsuche",
+    subtitle:
+      "Verstecke am Platz anlegen – die Kinder suchen mit «warm und kalt» und einem Pfeil.",
+    loginFeature: "die GPS-Schatzsuche",
+    defaultName: "Schatzsuche",
+    newHunt: "Neue Suche",
+    removeHunt: "Diese Suche löschen",
+    empty:
+      "Noch keine Schatzsuche. Leg eine an, dann kannst du an Ort und Stelle Verstecke setzen.",
+    modeAria: "Modus wählen",
+    modeHide: "Verstecken",
+    modeSeek: "Suchen",
+    hideAria: "Verstecke anlegen",
+    seekAria: "Suche läuft",
+    progressLine: (found: number, total: number) =>
+      `${found} von ${total} gefunden`,
+    progressAria: "Fortschritt der Schatzsuche",
+    addPointHere: "Versteck hier anlegen",
+    addPointTitle: "Versteck anlegen",
+    addPointDescription:
+      "Der Punkt wird an deinem aktuellen Standort gespeichert. Versteck den Gegenstand zuerst und speichere dann.",
+    pointName: "Name der Station",
+    pointNamePlaceholder: "z. B. Station 1",
+    pointHint: "Hinweis (freiwillig)",
+    pointHintPlaceholder: "z. B. «Wo das Wasser plätschert»",
+    savePoint: "Versteck speichern",
+    accuracyLine: (meters: number) => `Ortungsgenauigkeit: ±${meters} m`,
+    maxPoints: (max: number) =>
+      `Mehr als ${max} Verstecke pro Suche sind nicht vorgesehen.`,
+    hideTip:
+      "Verstecke gut sichtbar am Boden oder in Astgabeln – nicht vergraben. Das Handy zeigt den Ort auf 10 bis 15 Meter genau, den Rest machen die Augen.",
+    noPoints: "Diese Suche hat noch keine Verstecke.",
+    waitingForFix: "Standort wird gesucht …",
+    geoError:
+      "Kein Standort verfügbar. Ohne Ortung lässt sich weder verstecken noch suchen – bitte den Zugriff erlauben.",
+    weakSignal:
+      "Das Signal ist gerade schwach – die Entfernung kann um einige Meter danebenliegen.",
+    stationLine: (index: number, total: number) =>
+      `Station ${index} von ${total}`,
+    arrowAria: "Pfeil zum nächsten Versteck",
+    markFound: "Gefunden!",
+    tooFarAway: "Noch zu weit weg",
+    hiddenName: "Nächstes Versteck",
+    allFound: "Alle Verstecke gefunden!",
+    reset: "Nochmals spielen",
+    hideAgainAria: (name: string) => `${name} wieder verstecken`,
+    removePointAria: (name: string) => `${name} löschen`,
+  },
+  gearRepair: {
+    title: "Reparatur-Ratgeber",
+    subtitle:
+      "Sieben Reparaturen, die eine Reise retten – von der Isomatte bis zur Rucksack-Schnalle.",
+  },
+  tentCare: {
+    title: "Zeltpflege",
+    subtitle:
+      "Sieben Arbeiten, die ein Zelt über Jahre dicht halten – von der Imprägnierung bis zum Schimmel.",
   },
   nature: {
     title: "Natur-Entdecker",

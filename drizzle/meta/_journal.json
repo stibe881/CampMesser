@@ -575,6 +575,20 @@
       "when": 1785833677368,
       "tag": "0081_chubby_mongu",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "5",
+      "when": 1785836167602,
+      "tag": "0082_clean_bullseye",
+      "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "5",
+      "when": 1785840243420,
+      "tag": "0083_military_moira_mactaggert",
+      "breakpoints": true
     }
   ]
 }

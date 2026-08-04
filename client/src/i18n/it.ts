@@ -144,6 +144,8 @@ export const it: Translation = {
       knots: "Nodi",
       recipes: "Ricette",
       nature: "Natura",
+      care: "Manutenzione",
+      clouds: "Nuvole",
       own: "I miei contenuti",
     },
     recentTitle: "Usati di recente",
@@ -240,6 +242,9 @@ export const it: Translation = {
       "Il link di conferma non è valido o è scaduto. Richiedine uno nuovo nel tuo profilo.",
   },
   profile: {
+    prefHeat: "Sole e caldo",
+    prefHeatDesc:
+      "Al mattino un promemoria per la crema solare e per bere, quando la giornata porta UV alto o più di 28 °C.",
     title: "Profilo",
     manageSubtitle: "Gestisci il tuo account e le tue impostazioni.",
     loginFeature: "il tuo profilo",
@@ -336,6 +341,7 @@ export const it: Translation = {
       "Nessuna notifica inviata finora. Appena ci sarà qualcosa, la trovi qui.",
     historyOpenAria: (title: string) => `Apri «${title}»`,
     historyKind: {
+      heat: "Sole e caldo",
       weather: "Maltempo",
       food: "Frigo box",
       trip: "Viaggio",
@@ -868,7 +874,37 @@ export const it: Translation = {
       `Eliminare davvero l'attività di manutenzione «${title}»?`,
     gearRemoved: "Attività di manutenzione eliminata",
   },
+  fireBans: {
+    title: "Divieti di fuoco per cantone",
+    sectionAria: "Livelli di pericolo d'incendio boschivo di tutti i cantoni",
+    intro:
+      "Livello di pericolo ufficiale nel capoluogo di ogni cantone, il più alto per primo. Un cantone può comprendere più regioni d'allerta – in montagna vale spesso un livello diverso che a valle.",
+    loading: "Caricamento dei livelli …",
+    loadFailed:
+      "I livelli di pericolo al momento non sono disponibili. Senza rete o se il servizio della Confederazione non risponde, l'elenco resta vuoto.",
+    retry: "Riprovare",
+    unknown: "nessun dato",
+    banLikely: "Divieto probabile",
+    disclaimer:
+      "Il livello è una valutazione della Confederazione. Il divieto di fuoco lo dispone il cantone o il comune – da verificare prima di accendere.",
+    portalLink: "Panoramica ufficiale dei cantoni",
+  },
   weather: {
+    mosquitoTitle: "Zanzare stasera",
+    mosquitoAria: "Indice zanzare per la sera",
+    mosquitoBarAria: (score: number) => `Indice zanzare ${score} su 100`,
+    mosquitoLimiting: {
+      kalt: "Troppo fresco per un volo attivo.",
+      trocken: "L'aria secca le tiene giù.",
+      wind: "Il vento le allontana – la miglior protezione che ci sia.",
+    },
+    mosquitoHint:
+      "Stimato da calore, umidità, vento e pioggia degli ultimi giorni. Uno stagno accanto alla tenda batte qualsiasi formula.",
+    cloudLexiconHint:
+      "Il cielo spesso ne sa più della previsione: cerca il tipo di nuvola e scopri che cosa arriva.",
+    heatSunscreen: (minutes: number, burn: number) =>
+      `Crema solare, da riapplicare ogni ${minutes} min (pelle scoperta rossa dopo ~${burn} min)`,
+    heatDrink: (liters: string) => `Circa ${liters} l d'acqua per adulto`,
     title: "Meteo del campo",
     subtitle: "Previsioni iperlocali e allerte maltempo per la tua piazzola.",
     locationGroupAria: "Scegli il luogo per le previsioni meteo",
@@ -2818,6 +2854,109 @@ export const it: Translation = {
     speakAria: (text: string) => `Leggi «${text}» ad alta voce`,
     stopAria: "Interrompi la lettura",
     countLine: (n: number) => `${n} frasi`,
+  },
+  clouds: {
+    title: "Lessico delle nuvole",
+    subtitle:
+      "Riconosci il tipo di nuvola e sai che tempo arriva – disponibile offline.",
+    offlineNote:
+      "Tutte le nuvole sono salvate nell'app e funzionano senza connessione a Internet.",
+    howToTitle: "Come leggere il cielo",
+    howToText:
+      "Guarda prima a che piano si trova la nuvola: alta e filamentosa, media con lati in ombra oppure bassa e grigia. Poi confronta l'aspetto – e infine leggi che cosa ne consegue.",
+    filterAria: "Filtra per piano",
+    filterAll: "Tutte",
+    urgencyGood: "Buon segno",
+    urgencyWatch: "Da osservare",
+    urgencyWarning: "Allerta",
+    appearanceTitle: "Come riconoscerla",
+    meaningTitle: "Che cosa ne consegue",
+    campTipTitle: "Sul posto",
+    leadNone: "Non annuncia nulla",
+    leadNow: (to: number) => `Ora fino a ${to} ore`,
+    leadRange: (from: number, to: number) => `Tra ${from}–${to} ore`,
+    leadDisclaimer:
+      "L'indicazione temporale è una regola empirica per i fronti dell'Europa centrale, non un conto alla rovescia. In caso di rischio temporali vale sempre l'allerta attuale nel modulo meteo.",
+    openAria: (name: string) => `Apri la nuvola ${name}`,
+    countLine: (n: number) => `${n} tipi di nuvole nel lessico`,
+  },
+  care: {
+    offlineNote:
+      "Tutte le istruzioni sono salvate nell'app e funzionano senza connessione a Internet.",
+    openAria: (name: string) => `Apri le istruzioni «${name}»`,
+    whenTitle: "Quando serve",
+    materialsTitle: "Che cosa ti serve",
+    stepsTitle: "Passo dopo passo",
+    mistakeTitle: "Errore più frequente",
+    minutes: (n: number) => `${n} min di lavoro`,
+    intervalMonths: (n: number) =>
+      n === 12
+        ? "ogni anno"
+        : n % 12 === 0
+          ? `ogni ${n / 12} anni`
+          : `ogni ${n} mesi`,
+    intervalNone: "all'occorrenza",
+    reminderHint:
+      "I lavori ricorrenti puoi annotarli nell'inventario come promemoria di manutenzione – così l'app si fa viva prima che sia troppo tardi.",
+  },
+  treasure: {
+    title: "Caccia al tesoro GPS",
+    subtitle:
+      "Nascondi tesori sul posto – i bambini cercano con «caldo e freddo» e una freccia.",
+    loginFeature: "la caccia al tesoro GPS",
+    defaultName: "Caccia al tesoro",
+    newHunt: "Nuova caccia",
+    removeHunt: "Elimina questa caccia",
+    empty:
+      "Ancora nessuna caccia al tesoro. Creane una, poi posiziona i nascondigli sul posto.",
+    modeAria: "Scegli la modalità",
+    modeHide: "Nascondere",
+    modeSeek: "Cercare",
+    hideAria: "Posizionare i nascondigli",
+    seekAria: "Caccia in corso",
+    progressLine: (found: number, total: number) =>
+      `${found} di ${total} trovati`,
+    progressAria: "Avanzamento della caccia al tesoro",
+    addPointHere: "Metti un nascondiglio qui",
+    addPointTitle: "Nuovo nascondiglio",
+    addPointDescription:
+      "Il punto viene salvato alla tua posizione attuale. Prima nascondi l'oggetto, poi salva.",
+    pointName: "Nome della tappa",
+    pointNamePlaceholder: "ad es. Tappa 1",
+    pointHint: "Indizio (facoltativo)",
+    pointHintPlaceholder: "ad es. «Dove l'acqua gorgoglia»",
+    savePoint: "Salva il nascondiglio",
+    accuracyLine: (meters: number) =>
+      `Precisione della posizione: ±${meters} m`,
+    maxPoints: (max: number) =>
+      `Più di ${max} nascondigli per caccia non sono previsti.`,
+    hideTip:
+      "Nascondi bene in vista a terra o tra i rami – non sotterrare. Il telefono individua il punto con 10-15 metri di scarto, il resto lo fanno gli occhi.",
+    noPoints: "Questa caccia non ha ancora nascondigli.",
+    waitingForFix: "Ricerca della posizione …",
+    geoError:
+      "Nessuna posizione disponibile. Senza localizzazione non si può né nascondere né cercare – concedi l'accesso.",
+    weakSignal:
+      "Il segnale è debole in questo momento – la distanza può sbagliare di alcuni metri.",
+    stationLine: (index: number, total: number) => `Tappa ${index} di ${total}`,
+    arrowAria: "Freccia verso il prossimo nascondiglio",
+    markFound: "Trovato!",
+    tooFarAway: "Ancora troppo lontano",
+    hiddenName: "Prossimo nascondiglio",
+    allFound: "Tutti i nascondigli trovati!",
+    reset: "Gioca di nuovo",
+    hideAgainAria: (name: string) => `Nascondi di nuovo ${name}`,
+    removePointAria: (name: string) => `Elimina ${name}`,
+  },
+  gearRepair: {
+    title: "Guida alle riparazioni",
+    subtitle:
+      "Sette riparazioni che salvano un viaggio – dal materassino alla fibbia dello zaino.",
+  },
+  tentCare: {
+    title: "Cura della tenda",
+    subtitle:
+      "Sette lavori che tengono una tenda impermeabile per anni – dall'impregnazione alla muffa.",
   },
   nature: {
     title: "Esploratore della natura",

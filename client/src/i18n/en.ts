@@ -143,6 +143,8 @@ export const en: Translation = {
       knots: "Knots",
       recipes: "Recipes",
       nature: "Nature",
+      care: "Care",
+      clouds: "Clouds",
       own: "My content",
     },
     recentTitle: "Recently used",
@@ -238,6 +240,9 @@ export const en: Translation = {
       "The confirmation link is invalid or has expired. Request a new one in your profile.",
   },
   profile: {
+    prefHeat: "Sun & heat",
+    prefHeatDesc:
+      "A morning reminder to put on sunscreen and to drink when the day brings a high UV index or more than 28 °C.",
     title: "Profile",
     manageSubtitle: "Manage your account and your settings.",
     loginFeature: "your profile",
@@ -330,6 +335,7 @@ export const en: Translation = {
       "No notifications sent yet. As soon as something comes up, you will find it here.",
     historyOpenAria: (title: string) => `Open “${title}”`,
     historyKind: {
+      heat: "Sun & heat",
       weather: "Severe weather",
       food: "Cool box",
       trip: "Trip",
@@ -846,7 +852,37 @@ export const en: Translation = {
     gearRemoveConfirm: (title: string) => `Really delete care task “${title}”?`,
     gearRemoved: "Care task deleted",
   },
+  fireBans: {
+    title: "Fire bans by canton",
+    sectionAria: "Forest fire danger levels for all cantons",
+    intro:
+      "Official danger level at each canton's capital, highest first. A canton can span several warning regions – in the mountains the level often differs from the valley.",
+    loading: "Loading levels …",
+    loadFailed:
+      "The danger levels are unavailable right now. Without a connection, or if the federal service is down, the list stays empty.",
+    retry: "Try again",
+    unknown: "no data",
+    banLikely: "Ban likely",
+    disclaimer:
+      "The level is a federal assessment. The fire ban itself is issued by the canton or municipality – check there before lighting anything.",
+    portalLink: "Official overview of the cantons",
+  },
   weather: {
+    mosquitoTitle: "Mosquitoes tonight",
+    mosquitoAria: "Mosquito index for the evening",
+    mosquitoBarAria: (score: number) => `Mosquito index ${score} out of 100`,
+    mosquitoLimiting: {
+      kalt: "Too cool for active flying.",
+      trocken: "Dry air keeps them down.",
+      wind: "The wind keeps them away – the best protection there is.",
+    },
+    mosquitoHint:
+      "Estimated from warmth, humidity, wind and the rain of the past few days. A pond next to the tent beats any formula.",
+    cloudLexiconHint:
+      "The sky often knows more than the forecast: look up the cloud type and see what follows.",
+    heatSunscreen: (minutes: number, burn: number) =>
+      `Sunscreen, reapply every ${minutes} min (bare skin burns after ~${burn} min)`,
+    heatDrink: (liters: string) => `About ${liters} l of water per adult`,
     title: "Camp weather",
     subtitle: "Hyperlocal forecast and severe weather alerts for your pitch.",
     locationGroupAria: "Choose the location for the weather forecast",
@@ -2749,6 +2785,109 @@ export const en: Translation = {
     speakAria: (text: string) => `Read “${text}” aloud`,
     stopAria: "Stop reading aloud",
     countLine: (n: number) => `${n} phrases`,
+  },
+  clouds: {
+    title: "Cloud lexicon",
+    subtitle:
+      "Recognise the cloud type and know what weather follows – available offline.",
+    offlineNote:
+      "All clouds are stored in the app and work without an internet connection.",
+    howToTitle: "How to read the sky",
+    howToText:
+      "First look at which level the cloud sits: high and wispy, mid-level with shaded sides, or low and grey. Then compare the appearance – and finally read what follows from it.",
+    filterAria: "Filter by level",
+    filterAll: "All",
+    urgencyGood: "Good sign",
+    urgencyWatch: "Keep watching",
+    urgencyWarning: "Warning",
+    appearanceTitle: "How to spot it",
+    meaningTitle: "What follows",
+    campTipTitle: "At the pitch",
+    leadNone: "Announces nothing",
+    leadNow: (to: number) => `Now to ${to} h`,
+    leadRange: (from: number, to: number) => `In ${from}–${to} h`,
+    leadDisclaimer:
+      "The timing is a rule of thumb for central European fronts, not a countdown. When thunderstorms threaten, the current warning in the weather module always takes precedence.",
+    openAria: (name: string) => `Open cloud ${name}`,
+    countLine: (n: number) => `${n} cloud types in the lexicon`,
+  },
+  care: {
+    offlineNote:
+      "All instructions are stored in the app and work without an internet connection.",
+    openAria: (name: string) => `Open the “${name}” instructions`,
+    whenTitle: "When it is due",
+    materialsTitle: "What you need",
+    stepsTitle: "Step by step",
+    mistakeTitle: "Most common mistake",
+    minutes: (n: number) => `${n} min of work`,
+    intervalMonths: (n: number) =>
+      n === 12
+        ? "yearly"
+        : n % 12 === 0
+          ? `every ${n / 12} years`
+          : `every ${n} months`,
+    intervalNone: "as needed",
+    reminderHint:
+      "You can add recurring jobs to your inventory as a care reminder – then the app speaks up before it is too late.",
+  },
+  treasure: {
+    title: "GPS treasure hunt",
+    subtitle:
+      "Hide caches on site – the kids search by “hot and cold” with an arrow.",
+    loginFeature: "the GPS treasure hunt",
+    defaultName: "Treasure hunt",
+    newHunt: "New hunt",
+    removeHunt: "Delete this hunt",
+    empty:
+      "No treasure hunt yet. Create one, then place the caches right where you stand.",
+    modeAria: "Choose mode",
+    modeHide: "Hide",
+    modeSeek: "Seek",
+    hideAria: "Place caches",
+    seekAria: "Hunt in progress",
+    progressLine: (found: number, total: number) =>
+      `${found} of ${total} found`,
+    progressAria: "Treasure hunt progress",
+    addPointHere: "Place a cache here",
+    addPointTitle: "Place a cache",
+    addPointDescription:
+      "The point is saved at your current position. Hide the item first, then save.",
+    pointName: "Station name",
+    pointNamePlaceholder: "e.g. Station 1",
+    pointHint: "Clue (optional)",
+    pointHintPlaceholder: "e.g. “Where the water babbles”",
+    savePoint: "Save the cache",
+    accuracyLine: (meters: number) => `Location accuracy: ±${meters} m`,
+    maxPoints: (max: number) =>
+      `More than ${max} caches per hunt is not supported.`,
+    hideTip:
+      "Hide things in plain sight on the ground or in branch forks – do not bury them. The phone locates the spot to within 10 to 15 metres, your eyes do the rest.",
+    noPoints: "This hunt has no caches yet.",
+    waitingForFix: "Looking for your position …",
+    geoError:
+      "No position available. Without location you can neither hide nor seek – please allow access.",
+    weakSignal:
+      "The signal is weak right now – the distance may be off by several metres.",
+    stationLine: (index: number, total: number) =>
+      `Station ${index} of ${total}`,
+    arrowAria: "Arrow to the next cache",
+    markFound: "Found!",
+    tooFarAway: "Still too far away",
+    hiddenName: "Next cache",
+    allFound: "All caches found!",
+    reset: "Play again",
+    hideAgainAria: (name: string) => `Hide ${name} again`,
+    removePointAria: (name: string) => `Delete ${name}`,
+  },
+  gearRepair: {
+    title: "Repair guide",
+    subtitle:
+      "Seven repairs that save a trip – from the sleeping mat to the rucksack buckle.",
+  },
+  tentCare: {
+    title: "Tent care",
+    subtitle:
+      "Seven jobs that keep a tent watertight for years – from waterproofing to mould.",
   },
   nature: {
     title: "Nature Explorer",

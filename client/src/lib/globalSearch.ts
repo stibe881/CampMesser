@@ -6,7 +6,10 @@
  * als auch künftige L4-Felder korrekt in der aktiven Sprache landen.
  */
 import { firstAidTopics } from "@/data/firstAid";
+import { cloudBandLabels, cloudEntries } from "@/data/clouds";
 import { knotCategoryLabels, knots } from "@/data/knots";
+import { gearRepairGuides } from "@/data/gearRepair";
+import { tentCareGuides } from "@/data/tentCare";
 import { groupLabels, modules } from "@/data/modules";
 import { natureEntries } from "@/data/nature";
 import { recipes } from "@/data/recipes";
@@ -22,7 +25,14 @@ export { fuzzyWordMatch, levenshtein };
 
 /** Kategorie-Schlüssel eines Treffers – das Anzeige-Label liefert das Wörterbuch. */
 export type SearchCategory =
-  "module" | "firstAid" | "knots" | "recipes" | "nature" | "own";
+  | "module"
+  | "firstAid"
+  | "knots"
+  | "recipes"
+  | "nature"
+  | "clouds"
+  | "care"
+  | "own";
 
 export interface SearchResult {
   id: string;
@@ -117,6 +127,33 @@ function buildIndex(lang: Language): IndexEntry[] {
       ...k.steps.map(s => p(s)),
       p(k.proTip),
     ]);
+  }
+  // Wolken: der lateinische Name ist bewusst im Suchtext, damit auch «Cirrus»
+  // oder «Cumulonimbus» aus einer anderen Wetter-App hier landen
+  for (const c of cloudEntries) {
+    add(`cloud-${c.id}`, p(c.name), "clouds", "/wolken", p(c.meaning), [
+      c.latin,
+      p(cloudBandLabels[c.band]),
+      p(c.appearance),
+      p(c.meaning),
+      p(c.campTip),
+    ]);
+  }
+  // Pflege-Anleitungen: gesucht wird meist nach dem Problem («Schimmel»,
+  // «Reissverschluss»), deshalb stehen Anlass und Fehler mit im Suchtext
+  for (const [prefix, path, guides] of [
+    ["tentcare", "/zeltpflege", tentCareGuides],
+    ["gearrepair", "/reparatur", gearRepairGuides],
+  ] as const) {
+    for (const g of guides) {
+      add(`${prefix}-${g.id}`, p(g.title), "care", path, p(g.summary), [
+        p(g.summary),
+        p(g.when),
+        ...g.materials.map(m => p(m)),
+        ...g.steps.map(s => `${p(s.title)} ${p(s.text)}`),
+        p(g.mistake),
+      ]);
+    }
   }
   for (const r of recipes) {
     add(

@@ -9,12 +9,15 @@ import {
   BookOpen,
   Cable,
   CloudSunRain,
+  Cloudy,
   Compass,
   CookingPot,
   Cross,
   Droplets,
   Footprints,
   Gauge,
+  Gem,
+  Hammer,
   Languages,
   ListChecks,
   LocateFixed,
@@ -34,6 +37,7 @@ import {
   TreePine,
   Truck,
   Users,
+  Wrench,
 } from "lucide-react";
 
 export interface Module {
@@ -476,6 +480,60 @@ export const modules: Module[] = [
     offline: true,
   },
   {
+    path: "/wolken",
+    title: l4(
+      "Wolken-Lexikon",
+      "Lexique des nuages",
+      "Lessico delle nuvole",
+      "Cloud lexicon"
+    ),
+    description: l4(
+      "Wolkenart erkennen und wissen, welches Wetter folgt",
+      "Reconnais le type de nuage et sais quel temps arrive",
+      "Riconosci il tipo di nuvola e sai che tempo arriva",
+      "Recognise the cloud type and know what weather follows"
+    ),
+    icon: Cloudy,
+    group: "Erste Hilfe",
+    offline: true,
+  },
+  {
+    path: "/zeltpflege",
+    title: l4(
+      "Zeltpflege",
+      "Entretien de la tente",
+      "Cura della tenda",
+      "Tent care"
+    ),
+    description: l4(
+      "Imprägnieren, flicken, Reissverschluss, Schimmel – Schritt für Schritt",
+      "Imperméabiliser, réparer, fermeture éclair, moisissure – pas à pas",
+      "Impermeabilizzare, riparare, cerniera, muffa – passo dopo passo",
+      "Waterproofing, patching, zips, mould – step by step"
+    ),
+    icon: Wrench,
+    group: "Erste Hilfe",
+    offline: true,
+  },
+  {
+    path: "/reparatur",
+    title: l4(
+      "Reparatur-Ratgeber",
+      "Guide de réparation",
+      "Guida alle riparazioni",
+      "Repair guide"
+    ),
+    description: l4(
+      "Matte flicken, Gestänge schienen, Kocher warten – am Platz und daheim",
+      "Réparer le matelas, attelle sur un arceau, entretenir le réchaud – sur place et chez soi",
+      "Riparare il materassino, steccare la bacchetta, curare il fornello – sul posto e a casa",
+      "Patch the mat, splint a pole, service the stove – on site and at home"
+    ),
+    icon: Hammer,
+    group: "Erste Hilfe",
+    offline: true,
+  },
+  {
     path: "/sprachhilfe",
     title: l4(
       "Sprachhilfe",
@@ -492,6 +550,23 @@ export const modules: Module[] = [
     icon: Languages,
     group: "Erste Hilfe",
     offline: true,
+  },
+  {
+    path: "/schatzsuche",
+    title: l4(
+      "GPS-Schatzsuche",
+      "Chasse au trésor GPS",
+      "Caccia al tesoro GPS",
+      "GPS treasure hunt"
+    ),
+    description: l4(
+      "Verstecke am Platz anlegen, Kinder suchen mit warm und kalt",
+      "Cache des trésors sur place, les enfants cherchent au chaud-froid",
+      "Nascondi tesori sul posto, i bambini cercano con caldo e freddo",
+      "Hide caches on site, kids search by hot and cold"
+    ),
+    icon: Gem,
+    group: "Erste Hilfe",
   },
   {
     path: "/familie",
