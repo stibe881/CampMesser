@@ -3008,6 +3008,9 @@ export const it: Translation = {
     subtitle:
       "Nascondi tesori sul posto – i bambini cercano con «caldo e freddo» e una freccia.",
     loginFeature: "la caccia al tesoro GPS",
+    openSection: "Apri la caccia al tesoro",
+    openSectionHint:
+      "Posizione e bussola si avviano solo quando apri la caccia al tesoro – altrimenti consumerebbero batteria inutilmente.",
     defaultName: "Caccia al tesoro",
     newHunt: "Nuova caccia",
     removeHunt: "Elimina questa caccia",

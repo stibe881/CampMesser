@@ -3036,6 +3036,9 @@ export const fr: Translation = {
     subtitle:
       "Cache des trésors sur place – les enfants cherchent au « chaud-froid » avec une flèche.",
     loginFeature: "la chasse au trésor GPS",
+    openSection: "Ouvrir la chasse au trésor",
+    openSectionHint:
+      "La localisation et la boussole ne démarrent qu'à l'ouverture de la chasse au trésor – sinon elles consommeraient inutilement de la batterie.",
     defaultName: "Chasse au trésor",
     newHunt: "Nouvelle chasse",
     removeHunt: "Supprimer cette chasse",

@@ -3041,6 +3041,9 @@ export const de = {
     subtitle:
       "Verstecke am Platz anlegen – die Kinder suchen mit «warm und kalt» und einem Pfeil.",
     loginFeature: "die GPS-Schatzsuche",
+    openSection: "Schatzsuche öffnen",
+    openSectionHint:
+      "Standort und Kompass laufen erst, wenn du die Schatzsuche öffnest – sonst brauchen sie hier unnötig Strom.",
     defaultName: "Schatzsuche",
     newHunt: "Neue Suche",
     removeHunt: "Diese Suche löschen",

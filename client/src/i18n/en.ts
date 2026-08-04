@@ -2939,6 +2939,9 @@ export const en: Translation = {
     subtitle:
       "Hide caches on site – the kids search by “hot and cold” with an arrow.",
     loginFeature: "the GPS treasure hunt",
+    openSection: "Open the treasure hunt",
+    openSectionHint:
+      "Location and compass only start once you open the treasure hunt – otherwise they would drain the battery for nothing.",
     defaultName: "Treasure hunt",
     newHunt: "New hunt",
     removeHunt: "Delete this hunt",
