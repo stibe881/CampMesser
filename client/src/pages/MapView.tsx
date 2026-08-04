@@ -773,9 +773,9 @@ function SpotsMap({
       });
       // Popup-Inhalt per DOM aufbauen: Platzname ist Nutzertext (kein innerHTML)
       const popup = document.createElement("div");
-      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
+      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
       const name = document.createElement("p");
-      name.className = "font-semibold";
+      name.className = "text-[15px] font-bold leading-tight text-slate-800";
       name.textContent = spot.name;
       popup.appendChild(name);
       const nights = nightsBySpotId.get(spot.id) ?? 0;
@@ -788,7 +788,7 @@ function SpotsMap({
       const link = document.createElement("a");
       link.href = `/zeltplaetze/${spot.id}`;
       link.textContent = t.mapView.toDossier;
-      link.className = "block text-sm font-medium underline";
+      link.className = "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
       link.addEventListener("click", event => {
         event.preventDefault();
         navigate(`/zeltplaetze/${spot.id}`);
@@ -800,7 +800,7 @@ function SpotsMap({
       route.target = "_blank";
       route.rel = "noopener noreferrer";
       route.textContent = t.mapView.routeLink;
-      route.className = "block text-sm font-medium underline";
+      route.className = "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
       popup.appendChild(route);
       marker.bindPopup(popup);
       return marker;
@@ -814,9 +814,9 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
+      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
       const name = document.createElement("p");
-      name.className = "font-semibold";
+      name.className = "text-[15px] font-bold leading-tight text-slate-800";
       name.textContent = tgt.name;
       popup.appendChild(name);
       const kind = document.createElement("p");
@@ -846,9 +846,9 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
+      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
       const name = document.createElement("p");
-      name.className = "font-semibold";
+      name.className = "text-[15px] font-bold leading-tight text-slate-800";
       name.textContent = sighting.title;
       popup.appendChild(name);
       const kind = document.createElement("p");
@@ -868,9 +868,9 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
+      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
       const name = document.createElement("p");
-      name.className = "font-semibold";
+      name.className = "text-[15px] font-bold leading-tight text-slate-800";
       name.textContent = displayName;
       popup.appendChild(name);
       if (site.website) {
@@ -932,10 +932,10 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
+      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
 
       const name = document.createElement("p");
-      name.className = "font-semibold";
+      name.className = "text-[15px] font-bold leading-tight text-slate-800";
       name.textContent = displayName;
       popup.appendChild(name);
 
@@ -962,7 +962,7 @@ function SpotsMap({
       route.rel = "noopener noreferrer";
       route.textContent = tf.navButton;
       route.setAttribute("aria-label", tf.navAria(displayName));
-      route.className = "block text-sm font-medium underline";
+      route.className = "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
       popup.appendChild(route);
 
       const fireDanger = document.createElement("a");
@@ -998,10 +998,10 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
+      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
 
       const name = document.createElement("p");
-      name.className = "font-semibold";
+      name.className = "text-[15px] font-bold leading-tight text-slate-800";
       name.textContent = displayName;
       popup.appendChild(name);
 
@@ -1036,7 +1036,7 @@ function SpotsMap({
       route.rel = "noopener noreferrer";
       route.textContent = tp.navButton;
       route.setAttribute("aria-label", tp.navAria(displayName));
-      route.className = "block text-sm font-medium underline";
+      route.className = "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
       popup.appendChild(route);
 
       if (place.kind === "bathing") {
@@ -1067,7 +1067,7 @@ function SpotsMap({
       });
       const te = t.excursions;
       const popup = document.createElement("div");
-      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
+      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
       popup.style.maxWidth = "230px";
 
       if (excursion.photoUrl) {
@@ -1075,12 +1075,12 @@ function SpotsMap({
         image.src = excursion.photoUrl;
         image.alt = te.photoAlt(excursion.name);
         image.loading = "lazy";
-        image.className = "mb-1 h-24 w-full rounded-md object-cover";
+        image.className = "mb-2 h-28 w-full rounded-lg object-cover shadow-sm";
         popup.appendChild(image);
       }
 
       const name = document.createElement("p");
-      name.className = "font-semibold";
+      name.className = "text-[15px] font-bold leading-tight text-slate-800";
       name.textContent = excursion.name;
       popup.appendChild(name);
 
@@ -1090,7 +1090,7 @@ function SpotsMap({
       ].filter((value): value is string => Boolean(value));
       if (facts.length > 0) {
         const meta = document.createElement("p");
-        meta.className = "text-xs";
+        meta.className = "text-[13px] font-medium text-slate-500 leading-snug";
         meta.textContent = facts.join(" · ");
         popup.appendChild(meta);
       }
@@ -1127,7 +1127,7 @@ function SpotsMap({
         site.target = "_blank";
         site.rel = "noopener noreferrer";
         site.textContent = te.websiteLink;
-        site.className = "block font-medium underline";
+        site.className = "mt-1 flex w-full items-center justify-center rounded-md bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground shadow-sm hover:bg-secondary/80 transition-colors no-underline";
         details.appendChild(site);
       }
 
@@ -1137,7 +1137,7 @@ function SpotsMap({
         toggle.type = "button";
         toggle.textContent = te.detailsShow;
         toggle.setAttribute("aria-expanded", "false");
-        toggle.className = "block text-sm font-medium underline";
+        toggle.className = "mt-1 text-[13px] font-semibold text-primary hover:underline transition-colors text-left";
         toggle.addEventListener("click", () => {
           details.hidden = !details.hidden;
           toggle.textContent = details.hidden ? te.detailsShow : te.detailsHide;
@@ -1155,7 +1155,7 @@ function SpotsMap({
       route.rel = "noopener noreferrer";
       route.textContent = te.navButton;
       route.setAttribute("aria-label", te.navAria(excursion.name));
-      route.className = "block text-sm font-medium underline";
+      route.className = "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
       popup.appendChild(route);
 
       const source = document.createElement("p");
