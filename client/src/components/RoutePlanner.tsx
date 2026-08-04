@@ -27,7 +27,6 @@
  * leer, und ein Satz sagt das.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
-import type * as Leaflet from "leaflet";
 import { Loader2, Mountain, Route, Save, Trash2, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { fetchElevations } from "@/lib/elevation";
-import { createBaseLayer, loadMapLayer } from "@/lib/mapLayers";
+import { loadMapLayer } from "@/lib/mapLayers";
+import {
+  createMap,
+  latLngBounds,
+  type LatLngTuple,
+  type LayerGroupObject,
+  type MapEngine,
+} from "@/lib/mapEngine";
+import { useMapConfig } from "@/hooks/useMapConfig";
 import { formatDistance } from "@shared/geo";
 import {
   MAX_ROUTE_PATH_POINTS,
@@ -60,7 +67,7 @@ import {
 import { cn } from "@/lib/utils";
 
 /** Startausschnitt, wenn weder Route noch Standort bekannt sind: Schweiz. */
-const DEFAULT_CENTER: Leaflet.LatLngTuple = [46.8, 8.23];
+const DEFAULT_CENTER: LatLngTuple = [46.8, 8.23];
 
 /** Gehzeit lesbar: «2 h 15 min» bzw. «45 min». */
 function formatMinutes(minutes: number): string {
@@ -81,10 +88,11 @@ export default function RoutePlanner({
   const rp = t.routePlan;
   const utils = trpc.useUtils();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<Leaflet.Map | null>(null);
-  const layerRef = useRef<Leaflet.LayerGroup | null>(null);
-  const [leaflet, setLeaflet] = useState<typeof Leaflet | null>(null);
+  const engineRef = useRef<MapEngine | null>(null);
+  const layerRef = useRef<LayerGroupObject | null>(null);
+  const [mapReady, setMapReady] = useState(false);
   const [libFailed, setLibFailed] = useState(false);
+  const maps = useMapConfig();
 
   const [waypoints, setWaypoints] = useState<RouteWaypoint[]>([]);
   const [sampleElevations, setSampleElevations] = useState<(number | null)[]>(
@@ -113,68 +121,71 @@ export default function RoutePlanner({
     onError: () => toast.error(rp.removeFailed),
   });
 
+  // Karte einmal aufbauen; Klicks hängen einen Wegpunkt hinten an
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container || engineRef.current || !maps.ready) return;
     let cancelled = false;
-    Promise.all([import("leaflet"), import("leaflet/dist/leaflet.css")])
-      .then(([mod]) => {
-        if (!cancelled) setLeaflet(mod.default);
+    void createMap(container, {
+      center: DEFAULT_CENTER,
+      zoom: 8,
+      baseKind: loadMapLayer(),
+      config: maps.config,
+      minimal: true,
+    })
+      .then(engine => {
+        if (cancelled) {
+          engine.destroy();
+          return;
+        }
+        engineRef.current = engine;
+        layerRef.current = engine.layerGroup();
+        engine.onClick(event => {
+          const { lat, lng } = event.latlng;
+          setWaypoints(current => {
+            if (current.length >= MAX_ROUTE_WAYPOINTS) return current;
+            return [...current, { lat, lon: lng, ele: null }];
+          });
+          // Neue Punkte machen die alten Höhen ungültig
+          setSampleElevations([]);
+        });
+        setMapReady(true);
       })
       .catch(() => {
         if (!cancelled) setLibFailed(true);
       });
     return () => {
       cancelled = true;
-    };
-  }, []);
-
-  // Karte einmal aufbauen; Klicks hängen einen Wegpunkt hinten an
-  useEffect(() => {
-    const L = leaflet;
-    const container = containerRef.current;
-    if (!L || !container || mapRef.current) return;
-    const map = L.map(container, { scrollWheelZoom: false }).setView(
-      DEFAULT_CENTER,
-      8
-    );
-    createBaseLayer(L, loadMapLayer()).addTo(map);
-    layerRef.current = L.layerGroup().addTo(map);
-    map.on("click", event => {
-      const { lat, lng } = event.latlng;
-      setWaypoints(current => {
-        if (current.length >= MAX_ROUTE_WAYPOINTS) return current;
-        return [...current, { lat, lon: lng, ele: null }];
-      });
-      // Neue Punkte machen die alten Höhen ungültig
-      setSampleElevations([]);
-    });
-    mapRef.current = map;
-    return () => {
-      map.remove();
-      mapRef.current = null;
+      engineRef.current?.destroy();
+      engineRef.current = null;
       layerRef.current = null;
+      setMapReady(false);
     };
-  }, [leaflet]);
+  }, [maps.ready, maps.config]);
 
   // Linie und Punkte neu zeichnen, wenn sich die Route ändert
   useEffect(() => {
-    const L = leaflet;
+    const engine = engineRef.current;
     const layer = layerRef.current;
-    if (!L || !layer) return;
-    layer.clearLayers();
+    if (!engine || !layer || !mapReady) return;
+    layer.clear();
     if (waypoints.length === 0) return;
-    const latlngs: Leaflet.LatLngTuple[] = waypoints.map(w => [w.lat, w.lon]);
+    const latlngs: LatLngTuple[] = waypoints.map(w => [w.lat, w.lon]);
     // Die Linie folgt dem berechneten Weg, die Punkte bleiben die gesetzten
-    const line: Leaflet.LatLngTuple[] =
-      pathPoints.length >= 2 ? pathPoints.map(p => [p.lat, p.lon]) : latlngs;
+    const line: LatLngTuple[] =
+      pathPoints.length >= 2
+        ? pathPoints.map(p => [p.lat, p.lon] as LatLngTuple)
+        : latlngs;
     if (line.length > 1) {
-      L.polyline(line, {
+      engine.polyline(line, {
         color: "#2563eb",
         weight: 4,
         opacity: 0.9,
-      }).addTo(layer);
+        layer,
+      });
     }
     latlngs.forEach((latlng, index) => {
-      L.circleMarker(latlng, {
+      engine.circleMarker(latlng, {
         radius: index === 0 || index === latlngs.length - 1 ? 7 : 5,
         color: "#ffffff",
         weight: 2,
@@ -185,9 +196,10 @@ export default function RoutePlanner({
               ? "#dc2626"
               : "#2563eb",
         fillOpacity: 1,
-      }).addTo(layer);
+        layer,
+      });
     });
-  }, [leaflet, waypoints, pathPoints]);
+  }, [mapReady, waypoints, pathPoints]);
 
   // Wegpunkte auf echte Wege legen (Fussgänger-Profil). Bei jeder Änderung
   // neu – der Zwischenspeicher fängt das Meiste ab.
@@ -320,14 +332,10 @@ export default function RoutePlanner({
       route.pace in ROUTE_PACE_FACTORS ? (route.pace as RoutePace) : "normal"
     );
     setEditingId(route.id);
-    const map = mapRef.current;
-    const L = leaflet;
-    if (map && L) {
-      map.fitBounds(
-        L.latLngBounds(points.map(p => [p.lat, p.lon] as Leaflet.LatLngTuple)),
-        { padding: [20, 20], maxZoom: 15 }
-      );
-    }
+    engineRef.current?.fitBounds(
+      latLngBounds(points.map(p => [p.lat, p.lon] as LatLngTuple)),
+      { padding: 20, maxZoom: 15 }
+    );
   };
 
   const routes = routesQuery.data ?? [];
@@ -344,7 +352,7 @@ export default function RoutePlanner({
 
       {libFailed ? (
         <p className="text-sm text-muted-foreground">{rp.mapFailed}</p>
-      ) : !leaflet ? (
+      ) : !maps.ready ? (
         <Skeleton className="h-72 w-full rounded-lg" />
       ) : (
         <div

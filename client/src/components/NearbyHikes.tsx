@@ -20,11 +20,17 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Footprints, Loader2, Map as MapIcon, Navigation } from "lucide-react";
-import type * as Leaflet from "leaflet";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { directionsUrl } from "@/lib/directions";
-import { createBaseLayer, loadMapLayer } from "@/lib/mapLayers";
+import { loadMapLayer } from "@/lib/mapLayers";
+import {
+  createMap,
+  latLngBounds,
+  type LatLngTuple,
+  type MapEngine,
+} from "@/lib/mapEngine";
+import { useMapConfig } from "@/hooks/useMapConfig";
 import {
   hikingRoutesQuery,
   HIKING_DEFAULT_RADIUS_M,
@@ -78,56 +84,58 @@ function RouteMap({
 }) {
   const { t } = useI18n();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<Leaflet.Map | null>(null);
-  const [leaflet, setLeaflet] = useState<typeof Leaflet | null>(null);
+  const engineRef = useRef<MapEngine | null>(null);
   const [libFailed, setLibFailed] = useState(false);
+  const maps = useMapConfig();
 
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container || engineRef.current || segments.length === 0 || !maps.ready)
+      return;
+    const all: LatLngTuple[] = [];
+    segments.forEach(points =>
+      points.forEach(p => all.push([p.lat, p.lon] as LatLngTuple))
+    );
+    const here: LatLngTuple = [origin.lat, origin.lon];
+    all.push(here);
     let cancelled = false;
-    Promise.all([import("leaflet"), import("leaflet/dist/leaflet.css")])
-      .then(([mod]) => {
-        if (!cancelled) setLeaflet(mod.default);
+    void createMap(container, {
+      center: here,
+      zoom: 14,
+      baseKind: loadMapLayer(),
+      config: maps.config,
+      minimal: true,
+    })
+      .then(engine => {
+        if (cancelled) {
+          engine.destroy();
+          return;
+        }
+        engineRef.current = engine;
+        segments.forEach(points => {
+          engine.polyline(
+            points.map(p => [p.lat, p.lon] as LatLngTuple),
+            { color: "#b45309", weight: 4, opacity: 0.9 }
+          );
+        });
+        engine.circleMarker(here, {
+          radius: 6,
+          color: "#ffffff",
+          weight: 2,
+          fillColor: "#16a34a",
+          fillOpacity: 1,
+        });
+        engine.fitBounds(latLngBounds(all), { padding: 20, maxZoom: 15 });
       })
       .catch(() => {
         if (!cancelled) setLibFailed(true);
       });
     return () => {
       cancelled = true;
+      engineRef.current?.destroy();
+      engineRef.current = null;
     };
-  }, []);
-
-  useEffect(() => {
-    const L = leaflet;
-    const container = containerRef.current;
-    if (!L || !container || mapRef.current || segments.length === 0) return;
-    const map = L.map(container, { scrollWheelZoom: false });
-    createBaseLayer(L, loadMapLayer()).addTo(map);
-    const all: Leaflet.LatLngTuple[] = [];
-    segments.forEach(points => {
-      const latlngs: Leaflet.LatLngTuple[] = points.map(p => [p.lat, p.lon]);
-      L.polyline(latlngs, {
-        color: "#b45309",
-        weight: 4,
-        opacity: 0.9,
-      }).addTo(map);
-      latlngs.forEach(ll => all.push(ll));
-    });
-    const here: Leaflet.LatLngTuple = [origin.lat, origin.lon];
-    L.circleMarker(here, {
-      radius: 6,
-      color: "#ffffff",
-      weight: 2,
-      fillColor: "#16a34a",
-      fillOpacity: 1,
-    }).addTo(map);
-    all.push(here);
-    map.fitBounds(L.latLngBounds(all), { padding: [20, 20], maxZoom: 15 });
-    mapRef.current = map;
-    return () => {
-      map.remove();
-      mapRef.current = null;
-    };
-  }, [leaflet, segments, origin]);
+  }, [maps.ready, maps.config, segments, origin]);
 
   if (libFailed) {
     return (
@@ -136,7 +144,7 @@ function RouteMap({
       </p>
     );
   }
-  if (!leaflet) return <Skeleton className="mt-3 h-56 w-full rounded-lg" />;
+  if (!maps.ready) return <Skeleton className="mt-3 h-56 w-full rounded-lg" />;
   return (
     <div
       ref={containerRef}
