@@ -66,6 +66,7 @@ import {
   type WeatherPlace,
 } from "@/lib/weatherPlaces";
 import { cn } from "@/lib/utils";
+import FireBanOverview from "@/components/FireBanOverview";
 import { heatAdvice } from "@shared/heatCare";
 import {
   eveningMosquitoIndex,
@@ -1833,6 +1834,9 @@ export default function WeatherPage() {
               </div>
             </section>
           )}
+
+          {/* Feuerverbote nach Kanton (#263) – Ergänzung zur Stufe oben */}
+          <FireBanOverview />
 
           {/* UV-Index: heutiges Maximum mit WHO-Stufe und Schutzhinweis ab «hoch» */}
           {uvInfo && uvToday !== null && (

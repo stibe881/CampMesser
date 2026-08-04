@@ -850,6 +850,21 @@ export const en: Translation = {
     gearRemoveConfirm: (title: string) => `Really delete care task “${title}”?`,
     gearRemoved: "Care task deleted",
   },
+  fireBans: {
+    title: "Fire bans by canton",
+    sectionAria: "Forest fire danger levels for all cantons",
+    intro:
+      "Official danger level at each canton's capital, highest first. A canton can span several warning regions – in the mountains the level often differs from the valley.",
+    loading: "Loading levels …",
+    loadFailed:
+      "The danger levels are unavailable right now. Without a connection, or if the federal service is down, the list stays empty.",
+    retry: "Try again",
+    unknown: "no data",
+    banLikely: "Ban likely",
+    disclaimer:
+      "The level is a federal assessment. The fire ban itself is issued by the canton or municipality – check there before lighting anything.",
+    portalLink: "Official overview of the cantons",
+  },
   weather: {
     mosquitoTitle: "Mosquitoes tonight",
     mosquitoAria: "Mosquito index for the evening",

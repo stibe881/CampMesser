@@ -872,6 +872,21 @@ export const it: Translation = {
       `Eliminare davvero l'attività di manutenzione «${title}»?`,
     gearRemoved: "Attività di manutenzione eliminata",
   },
+  fireBans: {
+    title: "Divieti di fuoco per cantone",
+    sectionAria: "Livelli di pericolo d'incendio boschivo di tutti i cantoni",
+    intro:
+      "Livello di pericolo ufficiale nel capoluogo di ogni cantone, il più alto per primo. Un cantone può comprendere più regioni d'allerta – in montagna vale spesso un livello diverso che a valle.",
+    loading: "Caricamento dei livelli …",
+    loadFailed:
+      "I livelli di pericolo al momento non sono disponibili. Senza rete o se il servizio della Confederazione non risponde, l'elenco resta vuoto.",
+    retry: "Riprovare",
+    unknown: "nessun dato",
+    banLikely: "Divieto probabile",
+    disclaimer:
+      "Il livello è una valutazione della Confederazione. Il divieto di fuoco lo dispone il cantone o il comune – da verificare prima di accendere.",
+    portalLink: "Panoramica ufficiale dei cantoni",
+  },
   weather: {
     mosquitoTitle: "Zanzare stasera",
     mosquitoAria: "Indice zanzare per la sera",

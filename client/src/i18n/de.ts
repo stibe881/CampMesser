@@ -885,6 +885,21 @@ export const de = {
       `Pflege-Aufgabe «${title}» wirklich löschen?`,
     gearRemoved: "Pflege-Aufgabe gelöscht",
   },
+  fireBans: {
+    title: "Feuerverbote nach Kanton",
+    sectionAria: "Waldbrand-Gefahrenstufen aller Kantone",
+    intro:
+      "Amtliche Gefahrenstufe am Hauptort jedes Kantons, höchste zuerst. Ein Kanton kann mehrere Warnregionen umfassen – im Gebirge gilt oft eine andere Stufe als im Tal.",
+    loading: "Stufen werden geladen …",
+    loadFailed:
+      "Die Gefahrenstufen sind gerade nicht abrufbar. Ohne Netz oder wenn der Dienst des Bundes klemmt, bleibt die Liste leer.",
+    retry: "Nochmals versuchen",
+    unknown: "keine Angabe",
+    banLikely: "Verbot wahrscheinlich",
+    disclaimer:
+      "Die Stufe ist eine Einschätzung des Bundes. Das Feuerverbot verfügt der Kanton oder die Gemeinde – vor dem Anzünden dort nachsehen.",
+    portalLink: "Offizielle Übersicht der Kantone",
+  },
   weather: {
     mosquitoTitle: "Stechmücken heute Abend",
     mosquitoAria: "Stechmücken-Index für den Abend",

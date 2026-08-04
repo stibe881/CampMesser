@@ -888,6 +888,21 @@ export const fr: Translation = {
       `Vraiment supprimer la tâche d'entretien «${title}» ?`,
     gearRemoved: "Tâche d'entretien supprimée",
   },
+  fireBans: {
+    title: "Interdictions de feu par canton",
+    sectionAria: "Niveaux de danger d'incendie de forêt de tous les cantons",
+    intro:
+      "Niveau de danger officiel au chef-lieu de chaque canton, le plus élevé en premier. Un canton peut couvrir plusieurs régions d'alerte – en montagne, le niveau diffère souvent de celui de la vallée.",
+    loading: "Chargement des niveaux …",
+    loadFailed:
+      "Les niveaux de danger ne sont pas disponibles pour le moment. Sans réseau ou si le service fédéral est en panne, la liste reste vide.",
+    retry: "Réessayer",
+    unknown: "sans indication",
+    banLikely: "Interdiction probable",
+    disclaimer:
+      "Le niveau est une appréciation de la Confédération. L'interdiction de feu est décidée par le canton ou la commune – à vérifier avant d'allumer.",
+    portalLink: "Aperçu officiel des cantons",
+  },
   weather: {
     mosquitoTitle: "Moustiques ce soir",
     mosquitoAria: "Indice moustiques pour la soirée",
