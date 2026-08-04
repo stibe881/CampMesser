@@ -3857,6 +3857,30 @@ export const en: Translation = {
     noteTraffic:
       "The driving time comes from Google's traffic forecast for this time of day, the distance from the OpenStreetMap route calculation. Roadworks and border waits still come on top.",
   },
+  rainyDay: {
+    title: "Rainy-day ideas",
+    intro:
+      "Raining since breakfast? Say the age, the time and the space – the rest is below.",
+    spaceLabel: "How much space",
+    ageLabel: "Age",
+    ageAny: "any",
+    ageYears: (years: number) => `${years} years`,
+    ageIgnore: "Ignore age",
+    ageUse: "Take age into account",
+    ageRange: (from: number, to: number) =>
+      to >= 99 ? `from ${from} years` : `${from}–${to} years`,
+    minutesLabel: "Time to fill",
+    minutesValue: (minutes: number) => `${minutes} min`,
+    quietLabel: "Quiet things only (someone is asleep)",
+    quietBadge: "quiet",
+    togetherLabel: "More than one person here",
+    needsLabel: "You need",
+    resultCount: (count: number) =>
+      count === 1 ? "1 idea fits" : `${count} ideas fit`,
+    empty: "Nothing found. Allow more time, more space – or drop the age.",
+    materialsTitle: "What you need for these",
+    note: "Space is a strict filter: something needing a table is no use in the inner tent. On duration there is some leeway – you can always stop.",
+  },
   lunchbox: {
     title: "Snacks & lunchbox",
     intro:

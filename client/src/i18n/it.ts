@@ -3940,6 +3940,31 @@ export const it: Translation = {
     noteTraffic:
       "Il tempo di percorrenza viene dalla previsione del traffico di Google per quest'ora del giorno, la distanza dal calcolo del percorso su OpenStreetMap. Cantieri e attese alla frontiera si aggiungono ancora.",
   },
+  rainyDay: {
+    title: "Idee per giorni di pioggia",
+    intro:
+      "Piove dalla colazione? Indica età, durata e spazio – il resto compare qui sotto.",
+    spaceLabel: "Quanto spazio",
+    ageLabel: "Età",
+    ageAny: "indifferente",
+    ageYears: (years: number) => `${years} anni`,
+    ageIgnore: "Non considerare l'età",
+    ageUse: "Considerare l'età",
+    ageRange: (from: number, to: number) =>
+      to >= 99 ? `da ${from} anni` : `${from}–${to} anni`,
+    minutesLabel: "Tempo da riempire",
+    minutesValue: (minutes: number) => `${minutes} min`,
+    quietLabel: "Solo cose tranquille (qualcuno dorme)",
+    quietBadge: "tranquillo",
+    togetherLabel: "Più persone presenti",
+    needsLabel: "Serve",
+    resultCount: (count: number) =>
+      count === 1 ? "1 idea adatta" : `${count} idee adatte`,
+    empty:
+      "Niente trovato. Prendi più tempo, più spazio – o lascia perdere l'età.",
+    materialsTitle: "Cosa ti serve",
+    note: "Lo spazio è un filtro rigido: ciò che richiede un tavolo non serve nella tenda interna. Sulla durata c'è un margine – si può sempre smettere.",
+  },
   lunchbox: {
     title: "Merenda e pranzo al sacco",
     intro: "Cosa mettere nello zaino per la gita – e quanto portare da bere.",

@@ -3970,6 +3970,31 @@ export const de = {
     noteTraffic:
       "Die Fahrzeit stammt aus der Verkehrs-Prognose von Google für diese Tageszeit, die Strecke aus der Routenberechnung über OpenStreetMap. Baustellen und Grenzwartezeiten kommen weiterhin dazu.",
   },
+  rainyDay: {
+    title: "Regentag-Ideen",
+    intro:
+      "Es regnet seit dem Frühstück? Sag, wie alt, wie lange und wie viel Platz – der Rest steht unten.",
+    spaceLabel: "Wie viel Platz",
+    ageLabel: "Alter",
+    ageAny: "egal",
+    ageYears: (years: number) => `${years} Jahre`,
+    ageIgnore: "Alter nicht berücksichtigen",
+    ageUse: "Alter berücksichtigen",
+    ageRange: (from: number, to: number) =>
+      to >= 99 ? `ab ${from} Jahren` : `${from}–${to} Jahre`,
+    minutesLabel: "Zu überbrücken",
+    minutesValue: (minutes: number) => `${minutes} min`,
+    quietLabel: "Nur Leises (jemand schläft)",
+    quietBadge: "leise",
+    togetherLabel: "Mehrere Personen dabei",
+    needsLabel: "Dafür nötig",
+    resultCount: (count: number) =>
+      count === 1 ? "1 Idee passt" : `${count} Ideen passen`,
+    empty:
+      "Nichts gefunden. Nimm mehr Zeit, mehr Platz – oder lass das Alter weg.",
+    materialsTitle: "Was du dafür brauchst",
+    note: "Der Platz ist ein harter Filter: Was einen Tisch braucht, nützt im Innenzelt nichts. Bei der Dauer gibt es etwas Spielraum – aufhören kann man immer.",
+  },
   lunchbox: {
     title: "Znüni & Lunchbox",
     intro:

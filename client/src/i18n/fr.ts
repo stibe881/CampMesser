@@ -3967,6 +3967,31 @@ export const fr: Translation = {
     noteTraffic:
       "La durée provient de la prévision de trafic de Google pour cette heure de la journée, la distance du calcul d'itinéraire sur OpenStreetMap. Chantiers et attentes à la frontière s'y ajoutent toujours.",
   },
+  rainyDay: {
+    title: "Idées pour jour de pluie",
+    intro:
+      "Il pleut depuis le petit-déjeuner ? Indique l'âge, la durée et la place – le reste s'affiche ci-dessous.",
+    spaceLabel: "Combien de place",
+    ageLabel: "Âge",
+    ageAny: "peu importe",
+    ageYears: (years: number) => `${years} ans`,
+    ageIgnore: "Ne pas tenir compte de l'âge",
+    ageUse: "Tenir compte de l'âge",
+    ageRange: (from: number, to: number) =>
+      to >= 99 ? `dès ${from} ans` : `${from}–${to} ans`,
+    minutesLabel: "Temps à occuper",
+    minutesValue: (minutes: number) => `${minutes} min`,
+    quietLabel: "Seulement du calme (quelqu'un dort)",
+    quietBadge: "calme",
+    togetherLabel: "Plusieurs personnes présentes",
+    needsLabel: "Nécessaire",
+    resultCount: (count: number) =>
+      count === 1 ? "1 idée convient" : `${count} idées conviennent`,
+    empty:
+      "Rien trouvé. Prends plus de temps, plus de place – ou laisse tomber l'âge.",
+    materialsTitle: "Ce qu'il te faut",
+    note: "La place est un filtre strict : ce qui exige une table ne sert à rien dans la tente intérieure. Pour la durée, il y a une marge – on peut toujours s'arrêter.",
+  },
   lunchbox: {
     title: "Goûter & pique-nique",
     intro:

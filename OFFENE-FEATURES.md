@@ -33,7 +33,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 9 Punkte
+## Runde 29 – 8 Punkte
 
 ### Reise-Planung
 
@@ -41,8 +41,6 @@ Stand: 4. August 2026
 
 ### Familie
 
-- [ ] **Regentag-Ideen** (#290) – Beschäftigungen fürs Zelt und Vorzelt, nach
-      Alter und Dauer
 - [ ] **Notfall-Übung für Kinder** (#291) – spielerisch üben: was tun, wenn ich
       den Platz nicht mehr finde
 - [ ] **Kinder-Reisepass** (#292) – Stempel sammeln für jeden besuchten Platz

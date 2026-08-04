@@ -9,6 +9,7 @@ import {
   BookOpen,
   Cable,
   CloudLightning,
+  CloudRain,
   CloudSunRain,
   Cloudy,
   ClipboardList,
@@ -628,6 +629,24 @@ export const modules: Module[] = [
     ),
     icon: Users,
     group: "familie",
+  },
+  {
+    path: "/regentag",
+    title: l4(
+      "Regentag-Ideen",
+      "Idées pour jour de pluie",
+      "Idee per giorni di pioggia",
+      "Rainy-day ideas"
+    ),
+    description: l4(
+      "Beschäftigung fürs Zelt und Vorzelt – nach Alter, Zeit und Platz gefiltert",
+      "De quoi s'occuper sous la tente et l'auvent – filtré par âge, temps et place",
+      "Come passare il tempo in tenda e sotto la veranda – filtrato per età, tempo e spazio",
+      "Things to do in the tent and awning – filtered by age, time and space"
+    ),
+    icon: CloudRain,
+    group: "familie",
+    offline: true,
   },
   {
     path: "/erzaehlwuerfel",
