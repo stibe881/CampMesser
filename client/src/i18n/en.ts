@@ -3897,6 +3897,35 @@ export const en: Translation = {
     allDone: "All practised – again in six months.",
     note: "Only the date of each drill is stored, on this device. No names, no numbers: what a child needs to know by heart is practised with them, not filed away in an app. After six months a drill is due again – children grow, and next time the site will be a different one.",
   },
+  meteorLog: {
+    title: "Meteor log",
+    intro:
+      "Count a night: for every meteor, tap the direction it came from – time and direction are recorded with it.",
+    startHint:
+      "Lie down, let your eyes adapt to the dark for twenty minutes, then start counting.",
+    start: "Start the night",
+    tonight: (names: string) => `Active tonight: ${names}`,
+    observed: (duration: string) => `${duration} observed`,
+    rate: (perHour: number) => `${perHour} per hour`,
+    rateTooEarly: "Too early for an hourly rate",
+    mostlyFrom: (direction: string) =>
+      `Noticeably many came from the ${direction}`,
+    tapHint: "Saw one? Tap the direction it came from.",
+    directionUnknown: "not sure",
+    pause: "Pause",
+    resume: "Resume",
+    undo: "Undo",
+    showerLabel: "Which shower?",
+    showerUnknown: "Undetermined",
+    distribution: "Which direction they came from",
+    redLight: "Red light",
+    finish: "End the night",
+    pastNights: "Your nights",
+    nightOf: (date: string) => `Night of ${date}`,
+    clear: "Clear the log",
+    clearConfirm: "Delete all recorded nights?",
+    note: "Only the time you actually spend watching is counted – that is what the pause button is for. Below a quarter of an hour there is no hourly rate: turning one meteor in two minutes into thirty an hour would be playing with numbers. And your figure will always be below the rate in the calendar: that one assumes a perfectly dark sky with the radiant right overhead. The nights stay on this device and do not travel to a second one.",
+  },
   treeKey: {
     title: "Identify a tree",
     intro:

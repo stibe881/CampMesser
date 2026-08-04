@@ -3982,6 +3982,35 @@ export const it: Translation = {
     allDone: "Tutto esercitato – di nuovo fra sei mesi.",
     note: "Viene salvata solo la data di ogni esercitazione, su questo dispositivo. Nessun nome, nessun numero: ciò che un bambino deve sapere a memoria si esercita con lui, invece di depositarlo in un'app. Dopo sei mesi un'esercitazione va rifatta – i bambini crescono e il campeggio sarà un altro.",
   },
+  meteorLog: {
+    title: "Diario delle stelle cadenti",
+    intro:
+      "Conta una notte: a ogni stella cadente tocca la direzione da cui è arrivata – ora e direzione sono registrate.",
+    startHint:
+      "Sdraiati, lascia che gli occhi si abituino al buio per venti minuti, poi avvia il conteggio.",
+    start: "Avvia la notte",
+    tonight: (names: string) => `Attivi questa notte: ${names}`,
+    observed: (duration: string) => `${duration} di osservazione`,
+    rate: (perHour: number) => `${perHour} all'ora`,
+    rateTooEarly: "Troppo presto per un tasso orario",
+    mostlyFrom: (direction: string) =>
+      `Molte venivano chiaramente da ${direction}`,
+    tapHint: "Vista? Tocca la direzione da cui è arrivata.",
+    directionUnknown: "incerta",
+    pause: "Pausa",
+    resume: "Riprendi",
+    undo: "Annulla",
+    showerLabel: "Quale sciame?",
+    showerUnknown: "Indeterminato",
+    distribution: "Da quale direzione",
+    redLight: "Luce rossa",
+    finish: "Termina la notte",
+    pastNights: "Le tue notti",
+    nightOf: (date: string) => `Notte del ${date}`,
+    clear: "Cancella il diario",
+    clearConfirm: "Cancellare tutte le notti registrate?",
+    note: "Si conta solo il tempo in cui guardi davvero – per questo c'è il tasto pausa. Sotto il quarto d'ora non c'è tasso orario: trasformare una stella cadente in due minuti in trenta all'ora sarebbe un gioco di numeri. E il tuo numero resta sempre sotto il tasso del calendario: quello vale per un cielo perfettamente buio con il punto d'origine esattamente sopra di te. Le notti restano su questo dispositivo e non passano a un secondo.",
+  },
   treeKey: {
     title: "Riconosci l'albero",
     intro:

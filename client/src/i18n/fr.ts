@@ -4007,6 +4007,35 @@ export const fr: Translation = {
     allDone: "Tout est exercé – à refaire dans six mois.",
     note: "Seule la date de chaque exercice est enregistrée, sur cet appareil. Ni noms ni numéros : ce qu'un enfant doit savoir par cœur, on l'exerce avec lui plutôt que de le stocker dans une app. Après six mois, un exercice est à refaire – les enfants grandissent et le camping sera un autre.",
   },
+  meteorLog: {
+    title: "Carnet d'étoiles filantes",
+    intro:
+      "Compter une nuit : à chaque étoile filante, touche la direction d'où elle venait – l'heure et la direction sont notées.",
+    startHint:
+      "Allonge-toi, laisse tes yeux s'habituer au noir pendant vingt minutes, puis lance le comptage.",
+    start: "Démarrer la nuit",
+    tonight: (names: string) => `Actifs cette nuit : ${names}`,
+    observed: (duration: string) => `${duration} d'observation`,
+    rate: (perHour: number) => `${perHour} par heure`,
+    rateTooEarly: "Trop tôt pour un taux horaire",
+    mostlyFrom: (direction: string) =>
+      `Beaucoup venaient nettement du ${direction}`,
+    tapHint: "Vue ? Touche la direction d'où elle venait.",
+    directionUnknown: "incertain",
+    pause: "Pause",
+    resume: "Reprendre",
+    undo: "Annuler",
+    showerLabel: "Quel essaim ?",
+    showerUnknown: "Indéterminé",
+    distribution: "De quelle direction",
+    redLight: "Lumière rouge",
+    finish: "Terminer la nuit",
+    pastNights: "Tes nuits",
+    nightOf: (date: string) => `Nuit du ${date}`,
+    clear: "Effacer le carnet",
+    clearConfirm: "Effacer toutes les nuits enregistrées ?",
+    note: "Seul le temps où tu regardes vraiment est compté – d'où le bouton pause. En dessous d'un quart d'heure, pas de taux horaire : transformer une étoile filante en deux minutes en trente par heure serait un jeu de chiffres. Et ton chiffre reste toujours en dessous du taux du calendrier : celui-ci vaut pour un ciel parfaitement noir avec le point d'origine juste au-dessus de toi. Les nuits restent sur cet appareil et ne passent pas sur un second.",
+  },
   treeKey: {
     title: "Identifier un arbre",
     intro:

@@ -33,7 +33,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 5 Punkte
+## Runde 29 – 4 Punkte
 
 ### Reise-Planung
 
@@ -42,9 +42,6 @@ Stand: 4. August 2026
 ### Familie
 
 ### Natur
-
-- [ ] **Sternschnuppen-Protokoll** (#294) – Beobachtungsnacht mitzählen, Zeit
-      und Richtung festhalten
 
 ### Konto & Daten
 

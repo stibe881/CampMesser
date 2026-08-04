@@ -41,6 +41,7 @@ import {
   Signpost,
   ShieldQuestion,
   Siren,
+  Sparkles,
   Sprout,
   Stamp,
   Tent,
@@ -595,6 +596,24 @@ export const modules: Module[] = [
       "Question by question to the species – based on what you see"
     ),
     icon: Leaf,
+    group: "wissen",
+    offline: true,
+  },
+  {
+    path: "/sternschnuppen",
+    title: l4(
+      "Sternschnuppen-Protokoll",
+      "Carnet d'étoiles filantes",
+      "Diario delle stelle cadenti",
+      "Meteor log"
+    ),
+    description: l4(
+      "Eine Nacht mitzählen – Zeit und Richtung mit einem Tipp",
+      "Compter une nuit – heure et direction d'un seul geste",
+      "Contare una notte – ora e direzione con un tocco",
+      "Count a night – time and direction in one tap"
+    ),
+    icon: Sparkles,
     group: "wissen",
     offline: true,
   },
