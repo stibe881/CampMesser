@@ -3892,6 +3892,105 @@ export const de = {
     forgetAria: "Auto-Standort löschen",
     forgotten: "Auto-Standort gelöscht.",
   },
+  tripTemplates: {
+    button: "Aus Vorlage",
+    title: "Reise aus Vorlage",
+    description:
+      "Dauer, Packliste und Menüplan in einem Schritt. Danach ist alles ganz normal änderbar.",
+    nights: (n: number) => (n === 1 ? "1 Nacht" : `${n} Nächte`),
+    startLabel: "Anreise",
+    endLine: (end: string) => `Abreise: ${end}`,
+    spotLabel: "Zeltplatz",
+    spotFree: "Ort frei eintragen",
+    locationLabel: "Ort",
+    locationPlaceholder: "z. B. Camping Waldheim",
+    placeMissing: "Bitte einen Zeltplatz wählen oder einen Ort eintragen.",
+    withPackList: "Packliste anlegen",
+    withMenu: "Menüplan vorfüllen",
+    menuNote:
+      "Vorgefüllt werden Abendessen für jede Nacht und Frühstück ab dem zweiten Tag. Mittagessen bleiben frei – unterwegs isst man mittags, was der Tag hergibt.",
+    create: "Reise anlegen",
+    created: (end: string, meals: number, list: boolean) =>
+      `Reise bis ${end} angelegt${list ? ", Packliste erstellt" : ""}${
+        meals > 0 ? `, ${meals} Mahlzeiten eingetragen` : ""
+      }.`,
+    createFailed: "Die Reise konnte nicht angelegt werden.",
+  },
+  departure: {
+    title: "Beste Abfahrtszeit",
+    intro:
+      "Wann losfahren, um zur Check-in-Zeit da zu sein – Pausen eingerechnet.",
+    openButton: "Abfahrt berechnen",
+    loginNote: "Dafür musst du angemeldet sein.",
+    noHome: "Für die Rechnung fehlt dein Heim-Standort.",
+    noHomeLink: "Im Profil setzen",
+    arrivalLabel: "Ankunft / Check-in",
+    directionAria: "Richtung wählen",
+    directionOut: "Hinfahrt",
+    directionBack: "Rückreise",
+    homeArrivalLabel: "Daheim sein um",
+    checkoutLabel: "Check-out auf dem Platz",
+    departureAtCheckout: "Losfahren – später geht nicht",
+    checkoutNote: (checkout: string, arrival: string, daysLater: number) =>
+      `Der Platz will die Wiese um ${checkout} zurück. Fährst du dann los, bist du um ${arrival}${
+        daysLater > 0 ? " am Folgetag" : ""
+      } daheim – früher als geplant.`,
+    profileLabel: "Wer fährt mit?",
+    profiles: {
+      keine: "Ohne Pausen",
+      erwachsene: "Erwachsene (alle 3 h)",
+      kinder: "Mit Kindern (alle 2 h)",
+      kleinkinder: "Mit Kleinkindern (alle 1,5 h)",
+    },
+    departureLabel: "Losfahren",
+    departureDayBefore: (days: number) =>
+      days === 1 ? "Losfahren – am Vortag" : `Losfahren – ${days} Tage vorher`,
+    driveLine: (distance: string) => `Fahrt (${distance} Luftlinie)`,
+    breaksLine: (count: number, each: number) =>
+      count === 0
+        ? "Keine Pause nötig"
+        : count === 1
+          ? `1 Pause à ${each} min`
+          : `${count} Pausen à ${each} min`,
+    bufferLine: "Puffer für Schranke und Anmeldung",
+    totalLine: "Gesamt unterwegs",
+    stopsLine: (times: string) => `Pausen etwa um ${times}.`,
+    note: "Geschätzt über die Luftlinie mit 70 km/h Schnitt – kein Routenplaner. Stau, Baustellen und Grenzwartezeiten kommen dazu.",
+  },
+  firewood: {
+    title: "Feuerholz-Bedarf",
+    intro:
+      "Wie viele Netze ins Auto – Holz kauft man besser vorher als am Platz.",
+    eveningsLabel: "Abende mit Feuer",
+    hoursLabel: "Stunden pro Abend",
+    kindLabel: "Feuerart",
+    kinds: {
+      kochfeuer: "Kochfeuer (klein)",
+      feuerschale: "Feuerschale",
+      lagerfeuer: "Lagerfeuer",
+      waermefeuer: "Wärmefeuer (gross)",
+    },
+    woodLabel: "Holzart",
+    woods: {
+      hart: "Hartholz (Buche, Eiche)",
+      gemischt: "Gemischt",
+      weich: "Weichholz (Fichte, Tanne)",
+    },
+    netsLabel: "Netze à 10 kg",
+    totalLabel: "Gesamt",
+    perEveningLabel: "pro Abend",
+    kindlingLine: (kg: number) =>
+      `Darin enthalten: ${kg} kg Anzündholz – ohne Späne und dünne Scheite steht man mit trockenem Buchenholz und ohne Glut da.`,
+    stockLabel: "Vorrat prüfen (kg)",
+    stockPlaceholder: "z. B. 20",
+    stockLine: (evenings: number) =>
+      evenings === 0
+        ? "Das reicht für keinen ganzen Abend mehr."
+        : evenings === 1
+          ? "Das reicht noch für einen Abend."
+          : `Das reicht noch für ${evenings} Abende.`,
+    note: "Faustwerte aus der Praxis: Wind, feuchtes Holz und wer das Feuer hütet, machen leicht die Hälfte aus. Aufgerundet wird immer – ein Netz zu viel steht nächstes Mal noch da.",
+  },
   routePlan: {
     sectionAria: "Route vorher zeichnen",
     title: "Route zeichnen",

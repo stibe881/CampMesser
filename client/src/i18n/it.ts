@@ -3861,6 +3861,106 @@ export const it: Translation = {
     forgetAria: "Elimina la posizione dell'auto",
     forgotten: "Posizione dell'auto eliminata.",
   },
+  tripTemplates: {
+    button: "Da modello",
+    title: "Viaggio da modello",
+    description:
+      "Durata, lista bagagli e menu in un passo solo. Dopo si può cambiare tutto.",
+    nights: (n: number) => (n === 1 ? "1 notte" : `${n} notti`),
+    startLabel: "Arrivo",
+    endLine: (end: string) => `Partenza: ${end}`,
+    spotLabel: "Piazzola",
+    spotFree: "Inserire il luogo liberamente",
+    locationLabel: "Luogo",
+    locationPlaceholder: "p. es. Camping Waldheim",
+    placeMissing: "Scegli una piazzola o inserisci un luogo.",
+    withPackList: "Creare la lista bagagli",
+    withMenu: "Precompilare il menu",
+    menuNote:
+      "Vengono precompilate le cene di ogni notte e la colazione dal secondo giorno. I pranzi restano liberi – in viaggio a mezzogiorno si mangia quello che capita.",
+    create: "Crea il viaggio",
+    created: (end: string, meals: number, list: boolean) =>
+      `Viaggio creato fino al ${end}${list ? ", lista bagagli creata" : ""}${
+        meals > 0 ? `, ${meals} pasti inseriti` : ""
+      }.`,
+    createFailed: "Il viaggio non è stato creato.",
+  },
+  departure: {
+    title: "Orario di partenza migliore",
+    intro: "Quando partire per arrivare all'ora del check-in – pause incluse.",
+    openButton: "Calcola la partenza",
+    loginNote: "Per questo devi essere connesso.",
+    noHome: "Per il calcolo manca il tuo domicilio.",
+    noHomeLink: "Impostalo nel profilo",
+    arrivalLabel: "Arrivo / check-in",
+    directionAria: "Scegli la direzione",
+    directionOut: "Andata",
+    directionBack: "Ritorno",
+    homeArrivalLabel: "Essere a casa alle",
+    checkoutLabel: "Check-out in piazzola",
+    departureAtCheckout: "Partenza – più tardi non si può",
+    checkoutNote: (checkout: string, arrival: string, daysLater: number) =>
+      `Il campeggio rivuole la piazzola alle ${checkout}. Se parti allora, sei a casa alle ${arrival}${
+        daysLater > 0 ? " il giorno dopo" : ""
+      } – prima del previsto.`,
+    profileLabel: "Chi viaggia?",
+    profiles: {
+      keine: "Senza pause",
+      erwachsene: "Adulti (ogni 3 h)",
+      kinder: "Con bambini (ogni 2 h)",
+      kleinkinder: "Con bimbi piccoli (ogni 1,5 h)",
+    },
+    departureLabel: "Partenza",
+    departureDayBefore: (days: number) =>
+      days === 1
+        ? "Partenza – il giorno prima"
+        : `Partenza – ${days} giorni prima`,
+    driveLine: (distance: string) => `Viaggio (${distance} in linea d'aria)`,
+    breaksLine: (count: number, each: number) =>
+      count === 0
+        ? "Nessuna pausa necessaria"
+        : count === 1
+          ? `1 pausa di ${each} min`
+          : `${count} pause di ${each} min`,
+    bufferLine: "Margine per sbarra e registrazione",
+    totalLine: "Totale in viaggio",
+    stopsLine: (times: string) => `Pause verso le ${times}.`,
+    note: "Stima in linea d'aria con una media di 70 km/h – non è un calcolatore di percorso. Code, cantieri e attese al confine si aggiungono.",
+  },
+  firewood: {
+    title: "Fabbisogno di legna",
+    intro:
+      "Quante reti caricare in auto – la legna conviene comprarla prima, non in piazzola.",
+    eveningsLabel: "Sere con il fuoco",
+    hoursLabel: "Ore per sera",
+    kindLabel: "Tipo di fuoco",
+    kinds: {
+      kochfeuer: "Fuoco da cucina (piccolo)",
+      feuerschale: "Braciere",
+      lagerfeuer: "Fuoco da campo",
+      waermefeuer: "Fuoco per scaldarsi (grande)",
+    },
+    woodLabel: "Tipo di legna",
+    woods: {
+      hart: "Legna dura (faggio, quercia)",
+      gemischt: "Mista",
+      weich: "Legna tenera (abete)",
+    },
+    netsLabel: "Reti da 10 kg",
+    totalLabel: "Totale",
+    perEveningLabel: "per sera",
+    kindlingLine: (kg: number) =>
+      `Inclusi ${kg} kg di legna d'accensione – senza trucioli e legnetti resti con faggio secco e senza brace.`,
+    stockLabel: "Verifica la scorta (kg)",
+    stockPlaceholder: "p. es. 20",
+    stockLine: (evenings: number) =>
+      evenings === 0
+        ? "Non basta più per una sera intera."
+        : evenings === 1
+          ? "Basta ancora per una sera."
+          : `Basta ancora per ${evenings} sere.`,
+    note: "Valori pratici indicativi: vento, legna umida e chi cura il fuoco cambiano facilmente le cose della metà. Si arrotonda sempre per eccesso – una rete in più ci sarà ancora la prossima volta.",
+  },
   routePlan: {
     sectionAria: "Disegnare il percorso in anticipo",
     title: "Disegnare il percorso",

@@ -3890,6 +3890,104 @@ export const fr: Translation = {
     forgetAria: "Supprimer l'emplacement de la voiture",
     forgotten: "Emplacement de la voiture supprimé.",
   },
+  tripTemplates: {
+    button: "Depuis un modèle",
+    title: "Voyage depuis un modèle",
+    description:
+      "Durée, liste de bagages et menu en une étape. Tout reste modifiable ensuite.",
+    nights: (n: number) => (n === 1 ? "1 nuit" : `${n} nuits`),
+    startLabel: "Arrivée",
+    endLine: (end: string) => `Départ : ${end}`,
+    spotLabel: "Emplacement",
+    spotFree: "Saisir le lieu librement",
+    locationLabel: "Lieu",
+    locationPlaceholder: "p. ex. Camping Waldheim",
+    placeMissing: "Choisis un emplacement ou saisis un lieu.",
+    withPackList: "Créer la liste de bagages",
+    withMenu: "Préremplir le menu",
+    menuNote:
+      "Sont préremplis les repas du soir de chaque nuit et le petit-déjeuner dès le deuxième jour. Les repas de midi restent libres – en voyage, on mange à midi ce que la journée offre.",
+    create: "Créer le voyage",
+    created: (end: string, meals: number, list: boolean) =>
+      `Voyage créé jusqu'au ${end}${list ? ", liste de bagages créée" : ""}${
+        meals > 0 ? `, ${meals} repas ajoutés` : ""
+      }.`,
+    createFailed: "Le voyage n'a pas pu être créé.",
+  },
+  departure: {
+    title: "Meilleure heure de départ",
+    intro: "Quand partir pour être là à l'heure d'arrivée – pauses comprises.",
+    openButton: "Calculer le départ",
+    loginNote: "Il faut être connecté pour cela.",
+    noHome: "Ton domicile manque pour le calcul.",
+    noHomeLink: "Le définir dans le profil",
+    arrivalLabel: "Arrivée / check-in",
+    directionAria: "Choisir le sens",
+    directionOut: "Aller",
+    directionBack: "Retour",
+    homeArrivalLabel: "Être à la maison à",
+    checkoutLabel: "Check-out sur place",
+    departureAtCheckout: "Départ – impossible plus tard",
+    checkoutNote: (checkout: string, arrival: string, daysLater: number) =>
+      `Le camping veut la place à ${checkout}. Si tu pars à ce moment-là, tu seras à la maison à ${arrival}${
+        daysLater > 0 ? " le lendemain" : ""
+      } – plus tôt que prévu.`,
+    profileLabel: "Qui voyage ?",
+    profiles: {
+      keine: "Sans pauses",
+      erwachsene: "Adultes (toutes les 3 h)",
+      kinder: "Avec enfants (toutes les 2 h)",
+      kleinkinder: "Avec tout-petits (toutes les 1,5 h)",
+    },
+    departureLabel: "Départ",
+    departureDayBefore: (days: number) =>
+      days === 1 ? "Départ – la veille" : `Départ – ${days} jours avant`,
+    driveLine: (distance: string) => `Trajet (${distance} à vol d'oiseau)`,
+    breaksLine: (count: number, each: number) =>
+      count === 0
+        ? "Aucune pause nécessaire"
+        : count === 1
+          ? `1 pause de ${each} min`
+          : `${count} pauses de ${each} min`,
+    bufferLine: "Marge pour la barrière et l'enregistrement",
+    totalLine: "Total en route",
+    stopsLine: (times: string) => `Pauses vers ${times}.`,
+    note: "Estimation à vol d'oiseau à 70 km/h de moyenne – ce n'est pas un calculateur d'itinéraire. Bouchons, chantiers et attentes à la frontière s'y ajoutent.",
+  },
+  firewood: {
+    title: "Besoin en bois de feu",
+    intro:
+      "Combien de filets dans la voiture – mieux vaut acheter le bois avant d'arriver.",
+    eveningsLabel: "Soirées avec feu",
+    hoursLabel: "Heures par soirée",
+    kindLabel: "Type de feu",
+    kinds: {
+      kochfeuer: "Feu de cuisson (petit)",
+      feuerschale: "Brasero",
+      lagerfeuer: "Feu de camp",
+      waermefeuer: "Feu de chauffe (grand)",
+    },
+    woodLabel: "Type de bois",
+    woods: {
+      hart: "Bois dur (hêtre, chêne)",
+      gemischt: "Mélangé",
+      weich: "Bois tendre (épicéa, sapin)",
+    },
+    netsLabel: "Filets de 10 kg",
+    totalLabel: "Total",
+    perEveningLabel: "par soirée",
+    kindlingLine: (kg: number) =>
+      `Y compris ${kg} kg de petit bois – sans copeaux ni bûchettes, tu restes avec du hêtre sec et sans braises.`,
+    stockLabel: "Vérifier le stock (kg)",
+    stockPlaceholder: "p. ex. 20",
+    stockLine: (evenings: number) =>
+      evenings === 0
+        ? "Cela ne suffit plus pour une soirée entière."
+        : evenings === 1
+          ? "Cela suffit encore pour une soirée."
+          : `Cela suffit encore pour ${evenings} soirées.`,
+    note: "Valeurs empiriques : le vent, le bois humide et la personne qui surveille le feu font facilement varier du simple au double. On arrondit toujours vers le haut – un filet en trop sera encore là la prochaine fois.",
+  },
   routePlan: {
     sectionAria: "Tracer un itinéraire à l'avance",
     title: "Tracer un itinéraire",

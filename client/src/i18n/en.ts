@@ -3780,6 +3780,103 @@ export const en: Translation = {
     forgetAria: "Delete car location",
     forgotten: "Car location deleted.",
   },
+  tripTemplates: {
+    button: "From template",
+    title: "Trip from a template",
+    description:
+      "Duration, packing list and menu plan in one step. Everything stays editable afterwards.",
+    nights: (n: number) => (n === 1 ? "1 night" : `${n} nights`),
+    startLabel: "Arrival",
+    endLine: (end: string) => `Departure: ${end}`,
+    spotLabel: "Pitch",
+    spotFree: "Enter a place freely",
+    locationLabel: "Place",
+    locationPlaceholder: "e.g. Camping Waldheim",
+    placeMissing: "Please pick a pitch or enter a place.",
+    withPackList: "Create packing list",
+    withMenu: "Pre-fill menu plan",
+    menuNote:
+      "Pre-filled are dinners for every night and breakfast from the second day on. Lunches stay empty – on the road you eat whatever the day offers.",
+    create: "Create trip",
+    created: (end: string, meals: number, list: boolean) =>
+      `Trip created through ${end}${list ? ", packing list created" : ""}${
+        meals > 0 ? `, ${meals} meals added` : ""
+      }.`,
+    createFailed: "The trip could not be created.",
+  },
+  departure: {
+    title: "Best departure time",
+    intro: "When to leave to arrive by check-in time – breaks included.",
+    openButton: "Work out departure",
+    loginNote: "You need to be signed in for this.",
+    noHome: "Your home location is missing for the calculation.",
+    noHomeLink: "Set it in your profile",
+    arrivalLabel: "Arrival / check-in",
+    directionAria: "Choose direction",
+    directionOut: "Outbound",
+    directionBack: "Return",
+    homeArrivalLabel: "Be home by",
+    checkoutLabel: "Check-out at the site",
+    departureAtCheckout: "Leave at – no later possible",
+    checkoutNote: (checkout: string, arrival: string, daysLater: number) =>
+      `The site wants the pitch back at ${checkout}. Leaving then puts you home at ${arrival}${
+        daysLater > 0 ? " the next day" : ""
+      } – earlier than planned.`,
+    profileLabel: "Who is travelling?",
+    profiles: {
+      keine: "No breaks",
+      erwachsene: "Adults (every 3 h)",
+      kinder: "With children (every 2 h)",
+      kleinkinder: "With toddlers (every 1.5 h)",
+    },
+    departureLabel: "Leave at",
+    departureDayBefore: (days: number) =>
+      days === 1 ? "Leave – the day before" : `Leave – ${days} days earlier`,
+    driveLine: (distance: string) => `Drive (${distance} as the crow flies)`,
+    breaksLine: (count: number, each: number) =>
+      count === 0
+        ? "No break needed"
+        : count === 1
+          ? `1 break of ${each} min`
+          : `${count} breaks of ${each} min`,
+    bufferLine: "Buffer for barrier and check-in",
+    totalLine: "Total on the road",
+    stopsLine: (times: string) => `Breaks at roughly ${times}.`,
+    note: "Estimated as the crow flies at an average of 70 km/h – not a route planner. Traffic, roadworks and border queues come on top.",
+  },
+  firewood: {
+    title: "Firewood needed",
+    intro: "How many nets to load – wood is better bought before you arrive.",
+    eveningsLabel: "Evenings with a fire",
+    hoursLabel: "Hours per evening",
+    kindLabel: "Type of fire",
+    kinds: {
+      kochfeuer: "Cooking fire (small)",
+      feuerschale: "Fire bowl",
+      lagerfeuer: "Campfire",
+      waermefeuer: "Warming fire (large)",
+    },
+    woodLabel: "Type of wood",
+    woods: {
+      hart: "Hardwood (beech, oak)",
+      gemischt: "Mixed",
+      weich: "Softwood (spruce, fir)",
+    },
+    netsLabel: "Nets of 10 kg",
+    totalLabel: "Total",
+    perEveningLabel: "per evening",
+    kindlingLine: (kg: number) =>
+      `Includes ${kg} kg of kindling – without shavings and thin sticks you are left with dry beech and no embers.`,
+    stockLabel: "Check your stock (kg)",
+    stockPlaceholder: "e.g. 20",
+    stockLine: (evenings: number) =>
+      evenings === 0
+        ? "That is no longer enough for a whole evening."
+        : evenings === 1
+          ? "That is enough for one more evening."
+          : `That is enough for ${evenings} more evenings.`,
+    note: "Rules of thumb: wind, damp wood and whoever tends the fire easily account for half the difference. Always rounded up – one net too many will still be there next time.",
+  },
   routePlan: {
     sectionAria: "Plan a route in advance",
     title: "Draw a route",
