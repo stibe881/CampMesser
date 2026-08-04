@@ -3811,6 +3811,19 @@ export const fr: Translation = {
       `Jusqu'à huit points le long de la ligne droite sont vérifiés, chacun pour son heure d'arrivée estimée. Le calcul se fait à ${speed} km/h à vol d'oiseau – c'est une estimation grossière, pas un calculateur d'itinéraire.`,
     source: "Données : Open-Meteo",
   },
+  packHistory: {
+    sectionAria: "Suggestions d'après les voyages passés",
+    title: "Emporté la dernière fois",
+    subtitle: (trips: number) =>
+      trips === 1
+        ? "D'après ton dernier séjour à cet endroit – pas encore sur cette liste."
+        : `D'après tes ${trips} derniers séjours à cet endroit – pas encore sur cette liste.`,
+    everyTime: "à chaque fois",
+    tripCount: (n: number, of: number) => `${n} sur ${of}`,
+    addAria: (name: string) => `Ajouter ${name} à la liste`,
+    addAll: (n: number) => `Tout reprendre (${n})`,
+    note: "Ne sont proposés que des objets qui figuraient réellement sur des listes précédentes de cet endroit – pas une liste type, mais ta propre expérience.",
+  },
   shops: {
     sectionAria: "Faire les courses à proximité",
     title: "Faire les courses à proximité",

@@ -3783,6 +3783,19 @@ export const it: Translation = {
       `Vengono controllati fino a otto punti lungo la linea d'aria, ciascuno per l'orario di arrivo stimato. Si calcola con ${speed} km/h sulla linea d'aria – è una stima approssimativa, non un navigatore.`,
     source: "Dati: Open-Meteo",
   },
+  packHistory: {
+    sectionAria: "Suggerimenti dai viaggi passati",
+    title: "Portato l'ultima volta",
+    subtitle: (trips: number) =>
+      trips === 1
+        ? "Dal tuo ultimo soggiorno in questo posto – non ancora in questa lista."
+        : `Dai tuoi ultimi ${trips} soggiorni in questo posto – non ancora in questa lista.`,
+    everyTime: "ogni volta",
+    tripCount: (n: number, of: number) => `${n} su ${of}`,
+    addAria: (name: string) => `Aggiungi ${name} alla lista`,
+    addAll: (n: number) => `Aggiungi tutti (${n})`,
+    note: "Vengono proposte solo cose che c'erano davvero nelle liste precedenti di questo posto – non una lista standard, ma la tua esperienza.",
+  },
   shops: {
     sectionAria: "Fare la spesa nei dintorni",
     title: "Fare la spesa nei dintorni",

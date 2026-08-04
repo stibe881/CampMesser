@@ -147,6 +147,7 @@ import {
   MAX_CHORE_TITLE_LENGTH,
   rotateAssignments,
 } from "@shared/chores";
+import { MAX_PACK_SUGGESTIONS, packSuggestions } from "@shared/packHistory";
 import {
   parseSpotAttributes,
   SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
@@ -921,6 +922,71 @@ export const appRouter = router({
       }),
   }),
 
+  /**
+   * Packvorschlag aus vergangenen Reisen (#277): «Das hattest du letztes
+   * Mal am selben Platz dabei.» Ausgewertet werden nur EIGENE frühere
+   * Reisen an DEMSELBEN Zeltplatz, deren Packliste noch existiert.
+   */
+  packHistory: router({
+    forList: protectedProcedure
+      .input(z.object({ listId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const list = await db.getPackList(input.listId, ctx.user.id);
+        if (!list) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Packliste nicht gefunden.",
+          });
+        }
+        const trips = await db.getTripLogs(ctx.user.id);
+        // Die Reise, an der diese Liste hängt – sie liefert den Platz
+        const current = trips.find(trip => trip.packListId === input.listId);
+        const spotId = current?.spotId ?? null;
+        if (!current || spotId === null) {
+          return { spotId: null, tripCount: 0, suggestions: [] } as const;
+        }
+
+        // Frühere Reisen am selben Platz, mit Packliste, ohne die aktuelle
+        const past = trips.filter(
+          trip =>
+            trip.spotId === spotId &&
+            trip.id !== current.id &&
+            trip.packListId !== null &&
+            trip.packListId !== input.listId &&
+            trip.startDate < current.startDate
+        );
+        if (past.length === 0) {
+          return { spotId, tripCount: 0, suggestions: [] } as const;
+        }
+
+        const history = past.map(trip => ({
+          tripId: trip.id,
+          packListId: trip.packListId as number,
+          startDate: trip.startDate,
+        }));
+        const itemLists = await Promise.all(
+          history.map(async entry => {
+            const items = await db.getPackItems(entry.packListId);
+            return items.map(item => ({
+              listId: entry.packListId,
+              name: item.name,
+              category: item.category,
+            }));
+          })
+        );
+        const currentItems = await db.getPackItems(input.listId);
+        return {
+          spotId,
+          tripCount: history.length,
+          suggestions: packSuggestions(
+            history,
+            itemLists.flat(),
+            currentItems,
+            MAX_PACK_SUGGESTIONS
+          ),
+        } as const;
+      }),
+  }),
   packing: router({
     lists: protectedProcedure.query(({ ctx }) => db.getPackLists(ctx.user.id)),
     createList: protectedProcedure

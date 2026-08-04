@@ -25,14 +25,9 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 28 – 7 Punkte
+## Runde 28 – 6 Punkte
 
 ### Karte & Wetter
-
-### Ordnung
-
-- [ ] **Packvorschlag aus vergangenen Reisen** (#277) – «letztes Mal am selben
-      Platz dabei gehabt»
 
 ### Platz-Wissen
 

@@ -3702,6 +3702,19 @@ export const en: Translation = {
       `Up to eight points along the straight line are checked, each for its estimated arrival time. The maths uses ${speed} km/h along the straight line – a rough estimate, not a route planner.`,
     source: "Data: Open-Meteo",
   },
+  packHistory: {
+    sectionAria: "Packing suggestions from past trips",
+    title: "Taken along last time",
+    subtitle: (trips: number) =>
+      trips === 1
+        ? "From your last stay at this place – not on this list yet."
+        : `From your last ${trips} stays at this place – not on this list yet.`,
+    everyTime: "every time",
+    tripCount: (n: number, of: number) => `${n} of ${of}`,
+    addAria: (name: string) => `Add ${name} to the list`,
+    addAll: (n: number) => `Add all ${n}`,
+    note: "Only things that really were on earlier lists for this place are suggested – not a standard list, but your own experience.",
+  },
   shops: {
     sectionAria: "Shopping nearby",
     title: "Shopping nearby",

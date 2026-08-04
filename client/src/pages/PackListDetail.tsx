@@ -24,6 +24,7 @@ import {
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import PackHistorySuggestions from "@/components/PackHistorySuggestions";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -754,6 +755,10 @@ export default function PackListDetailPage() {
         backHref="/packlisten"
         backLabel={t.packListDetail.backLabel}
       />
+
+      {/* Packvorschlag aus vergangenen Reisen (#277) – erscheint nur, wenn
+          es am selben Platz schon frühere Listen gab */}
+      <PackHistorySuggestions listId={listId} className="mb-4" />
 
       <div className="mb-2">
         <Progress

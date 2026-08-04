@@ -3814,6 +3814,19 @@ export const de = {
       `Geprüft werden bis zu acht Punkte entlang der Luftlinie, jeweils für die geschätzte Ankunftszeit. Gerechnet wird mit ${speed} km/h über die Luftlinie – das ist eine grobe Schätzung und kein Routenplaner.`,
     source: "Daten: Open-Meteo",
   },
+  packHistory: {
+    sectionAria: "Packvorschlag aus vergangenen Reisen",
+    title: "Letztes Mal dabei gehabt",
+    subtitle: (trips: number) =>
+      trips === 1
+        ? "Aus deiner letzten Reise an diesem Platz – noch nicht auf dieser Liste."
+        : `Aus deinen letzten ${trips} Reisen an diesem Platz – noch nicht auf dieser Liste.`,
+    everyTime: "jedes Mal",
+    tripCount: (n: number, of: number) => `${n} von ${of}`,
+    addAria: (name: string) => `${name} zur Liste hinzufügen`,
+    addAll: (n: number) => `Alle ${n} übernehmen`,
+    note: "Vorgeschlagen wird nur, was auf früheren Listen dieses Platzes wirklich stand – keine Standardliste, sondern deine eigene Erfahrung.",
+  },
   shops: {
     sectionAria: "Einkaufen in der Nähe",
     title: "Einkaufen in der Nähe",
