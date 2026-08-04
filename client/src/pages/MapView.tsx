@@ -439,6 +439,13 @@ function SpotsMap({
   // (map.project ist unabhängig vom Ausschnitt), darum reicht zoomend.
   const [clusterZoom, setClusterZoom] = useState(FALLBACK_ZOOM);
 
+  // Die Wahl «Karte/Satellit» muss beim Aufbau schon feststehen
+  const layerKindRef = useRef<MapLayerKind>(layerKind);
+  layerKindRef.current = layerKind;
+
+  const locateLayerRef = useRef<LayerGroupObject | null>(null);
+  const [locating, setLocating] = useState(false);
+
   /** Karte auf die aktuelle Position zentrieren (blauer Punkt + Genauigkeit). */
   const locateMe = useCallback((silent = false) => {
     const map = engineRef.current;
