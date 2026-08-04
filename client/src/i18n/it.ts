@@ -3211,6 +3211,51 @@ export const it: Translation = {
   },
 
   /** Focolari e griglie da OpenStreetMap (#247). */
+  picnicStops: {
+    sectionAria: "Soste lungo il tragitto",
+    title: "Sosta lungo la strada",
+    subtitle: "Aree picnic e tavoli sulla strada verso la piazzola.",
+    subtitleAtPlace: (place: string) =>
+      `Aree picnic e tavoli sulla strada verso ${place}.`,
+    startLabel: "Partenza",
+    startGroupAria: "Scegli il punto di partenza",
+    startHome: "Casa",
+    startCurrent: "Posizione attuale",
+    radiusLabel: "Corridoio",
+    radiusGroupAria: "Scegli la larghezza del corridoio",
+    radiusOption: (km: number) => `${km} km`,
+    searchButton: "Cerca una sosta",
+    lineHint:
+      "La ricerca segue la linea d'aria, non la strada – in montagna il percorso reale può discostarsi parecchio.",
+    locating: "Rilevamento della posizione …",
+    loading: "Ricerca delle aree di sosta …",
+    noHome:
+      "Serve un indirizzo di casa nel profilo – oppure scegli «Posizione attuale».",
+    noPosition:
+      "Non è stato possibile rilevare la tua posizione. Consenti l'accesso oppure scegli casa come partenza.",
+    loadFailed:
+      "Le aree di sosta non si sono caricate. Overpass è un servizio gratuito che limita le richieste – riprova tra qualche minuto.",
+    empty: (km: number) =>
+      `In un corridoio di ${km} km lungo il tragitto non risulta nessuna area in OpenStreetMap. Prova con un corridoio più largo.`,
+    resultCount: (n: number, km: number) =>
+      n === 1 ? `1 area su ${km} km` : `${n} aree su ${km} km`,
+    kmMark: (along: number, total: number) => `km ${along} di ${total}`,
+    offsetHint: (value: string) => `${value} a lato del tragitto`,
+    kind: {
+      site: "Area picnic",
+      table: "Tavolo da picnic",
+    },
+    kindHint: {
+      site: "area attrezzata",
+      table: "tavolo singolo lungo la via",
+    },
+    covered: "coperto",
+    fireplace: "focolare",
+    drinkingWater: "acqua potabile",
+    navButton: "Naviga",
+    navAria: (name: string) => `Navigazione verso ${name}`,
+    source: "Dati da OpenStreetMap, curati da volontari.",
+  },
   firepits: {
     sectionAria: "Focolari e griglie ufficiali nei dintorni",
     title: "Focolari nei dintorni",

@@ -16,6 +16,10 @@
  *
  * Vierter Nutzer: Spiel- und Badeplätze für die Ebene «Familie» (#248,
  * `familyPlacesQuery`/`familyPlacesBboxQuery`/`parseFamilyPlaces`).
+ *
+ * Fünfter Nutzer: Picknickplätze entlang der Anfahrt (#250,
+ * `picnicSitesQuery`/`parsePicnicSites`) – als einziger nicht im Umkreis eines
+ * Punktes, sondern in einem Korridor entlang einer Strecke.
  */
 import { distanceMeters } from "@shared/geo";
 import {
@@ -702,4 +706,127 @@ export function nearestFamilyPlaces(
   limit: number
 ): FamilyPlaceDistance[] {
   return nearestPlaces(list, latitude, longitude, limit);
+}
+
+/* ------------------------------------------------------------------ */
+/* Picknickplätze entlang der Anfahrt (#250)                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Zwei Dinge, die OSM getrennt führt und die wir deshalb auch getrennt
+ * kennzeichnen: `tourism=picnic_site` ist der eingerichtete Rastplatz (Wiese
+ * oder Waldstück mit Tischen, oft mit Feuerstelle), `leisure=picnic_table` der
+ * einzelne Tisch am Wegrand. Für eine Mittagspause auf der Fahrt ist das ein
+ * Unterschied, den man vorher wissen will.
+ */
+export type PicnicKind = "site" | "table";
+
+/** Ein Picknickplatz oder Picknicktisch aus OSM. */
+export interface OsmPicnicSite {
+  /** Eindeutig über Element-Typen hinweg, z. B. "node/123". */
+  id: string;
+  lat: number;
+  lon: number;
+  kind: PicnicKind;
+  name?: string;
+  /** `covered=yes/no` – überdacht (Unterstand, Pavillon). */
+  covered?: boolean;
+  /** `fireplace=yes/no` – Feuerstelle am Rastplatz. */
+  fireplace?: boolean;
+  /** `drinking_water=yes/no` – Trinkwasser vor Ort. */
+  drinkingWater?: boolean;
+}
+
+/** Höchstzahl der Raststellen je Abfrage – ein Korridor ist gross. */
+export const OVERPASS_PICNIC_MAX_RESULTS = 80;
+
+/**
+ * Die vier abgefragten Element-Arten mit demselben Ortsfilter. Ein Rastplatz
+ * ist oft eine Fläche, ein Tisch immer ein Punkt – abgefragt wird trotzdem
+ * beides als node UND way, weil OSM beides erlaubt.
+ */
+function picnicElements(filter: string): string {
+  return (
+    `node["tourism"="picnic_site"]${filter};` +
+    `way["tourism"="picnic_site"]${filter};` +
+    `node["leisure"="picnic_table"]${filter};` +
+    `way["leisure"="picnic_table"]${filter};`
+  );
+}
+
+/**
+ * Overpass-QL für Raststellen in einem Korridor entlang einer Strecke.
+ *
+ * Die Stützpunkte gehen als KETTE in EINEN `around`-Filter
+ * (`around:<radius>,lat1,lon1,lat2,lon2,…`). Overpass legt den Radius damit um
+ * die ganze Linie und nicht nur um einzelne Scheiben – die Lücken zwischen den
+ * Stützpunkten sind also mit abgedeckt, und die Abfrage bleibt bei vier
+ * Anweisungen statt bei vier je Stützpunkt.
+ *
+ * Ohne Stützpunkte gibt es nichts zu suchen: dann kommt eine Abfrage zurück,
+ * die garantiert leer antwortet, statt versehentlich die halbe Welt zu fragen.
+ */
+export function picnicSitesQuery(
+  points: readonly GeoPoint[],
+  radiusM: number
+): string {
+  const chain = points
+    .filter(
+      point =>
+        Number.isFinite(point.lat) &&
+        Number.isFinite(point.lon) &&
+        Math.abs(point.lat) <= 90 &&
+        Math.abs(point.lon) <= 180
+    )
+    .map(point => `${point.lat.toFixed(5)},${point.lon.toFixed(5)}`)
+    .join(",");
+  if (chain.length === 0) return `[out:json][timeout:25];out count;`;
+  const filter = `(around:${Math.round(radiusM)},${chain})`;
+  return (
+    `[out:json][timeout:25];` +
+    `(${picnicElements(filter)});` +
+    `out center ${OVERPASS_PICNIC_MAX_RESULTS};`
+  );
+}
+
+/** Rastplatz, Tisch – oder nichts davon? */
+function picnicKind(tags: Record<string, unknown>): PicnicKind | null {
+  if (cleanTag(tags.tourism) === "picnic_site") return "site";
+  if (cleanTag(tags.leisure) === "picnic_table") return "table";
+  return null;
+}
+
+/**
+ * Overpass-JSON in Raststellen übersetzen. Ausgewertet werden genau die drei
+ * Tags, die für eine Pause etwas bedeuten und in OSM auch gepflegt sind:
+ * `covered`, `fireplace`, `drinking_water`. Über Toiletten sagt CampMesser
+ * bewusst NICHTS – ein Rastplatz ohne Tag hat vielleicht welche, vielleicht
+ * nicht, und «vielleicht» hilft niemandem mit Kindern im Auto.
+ *
+ * Elemente ohne passenden Typ-Tag fliegen raus, Duplikate werden entfernt, das
+ * Ergebnis hart begrenzt. Fehlende Tags bleiben `undefined`.
+ */
+export function parsePicnicSites(json: unknown): OsmPicnicSite[] {
+  const elements = readElements(json);
+  const seen = new Set<string>();
+  const result: OsmPicnicSite[] = [];
+  for (let i = 0; i < elements.length; i++) {
+    if (result.length >= OVERPASS_PICNIC_MAX_RESULTS) break;
+    const point = readPointElement(elements[i]);
+    if (!point || seen.has(point.key)) continue;
+    const kind = picnicKind(point.tags);
+    if (!kind) continue;
+    seen.add(point.key);
+    result.push({
+      id: point.key,
+      lat: point.lat,
+      lon: point.lon,
+      kind,
+      name: cleanTag(point.tags.name),
+      covered: parseOsmYesNo(point.tags.covered),
+      fireplace: parseOsmYesNo(point.tags.fireplace),
+      drinkingWater: parseOsmYesNo(point.tags.drinking_water),
+    });
+  }
+  return result;
 }

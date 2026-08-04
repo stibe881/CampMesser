@@ -13,11 +13,14 @@ import {
   OVERPASS_FIREPIT_MAX_RESULTS,
   OVERPASS_HIKING_MAX_RESULTS,
   OVERPASS_MAX_RESULTS,
+  OVERPASS_PICNIC_MAX_RESULTS,
   overpassQuery,
   parseCampsites,
   parseFamilyPlaces,
   parseFirepits,
   parseHikingRoutes,
+  parsePicnicSites,
+  picnicSitesQuery,
   parseOsmAgeYears,
   parseOsmYesNo,
 } from "../client/src/lib/overpass";
@@ -755,5 +758,133 @@ describe("nearestFamilyPlaces", () => {
     expect(
       nearestFamilyPlaces([place(1, 46.81, "bathing")], 46.8, 8.2, 0)
     ).toEqual([]);
+  });
+});
+
+describe("picnicSitesQuery", () => {
+  const points = [
+    { lat: 46.948, lon: 7.4474 },
+    { lat: 46.5, lon: 8.2 },
+    { lat: 46.0037, lon: 8.9511 },
+  ];
+
+  it("hängt alle Stützpunkte in EINEN around-Filter", () => {
+    const query = picnicSitesQuery(points, 5000);
+    expect(query).toContain(
+      "around:5000,46.94800,7.44740,46.50000,8.20000,46.00370,8.95110"
+    );
+    // ein Filter je Element-Art, nicht einer je Stützpunkt
+    expect(query.match(/around:/g)?.length).toBe(4);
+  });
+
+  it("fragt Rastplätze und Tische als node und way ab", () => {
+    const query = picnicSitesQuery(points, 2000);
+    expect(query).toContain('node["tourism"="picnic_site"]');
+    expect(query).toContain('way["tourism"="picnic_site"]');
+    expect(query).toContain('node["leisure"="picnic_table"]');
+    expect(query).toContain('way["leisure"="picnic_table"]');
+    expect(query).toContain(`out center ${OVERPASS_PICNIC_MAX_RESULTS};`);
+  });
+
+  it("fragt ohne brauchbare Punkte gar nichts ab", () => {
+    expect(picnicSitesQuery([], 5000)).not.toContain("around");
+    expect(picnicSitesQuery([{ lat: NaN, lon: 8 }], 5000)).not.toContain(
+      "around"
+    );
+  });
+
+  it("rundet den Radius auf ganze Meter", () => {
+    expect(picnicSitesQuery(points, 4999.6)).toContain("around:5000,");
+  });
+});
+
+describe("parsePicnicSites", () => {
+  it("unterscheidet Rastplatz und Tisch", () => {
+    const list = parsePicnicSites({
+      elements: [
+        {
+          type: "node",
+          id: 1,
+          lat: 46.9,
+          lon: 7.4,
+          tags: { tourism: "picnic_site", name: "Waldrast" },
+        },
+        {
+          type: "node",
+          id: 2,
+          lat: 46.8,
+          lon: 7.5,
+          tags: { leisure: "picnic_table" },
+        },
+      ],
+    });
+    expect(list.map(entry => entry.kind)).toEqual(["site", "table"]);
+    expect(list[0].name).toBe("Waldrast");
+    expect(list[1].name).toBeUndefined();
+  });
+
+  it("liest gedeckt, Feuerstelle und Trinkwasser nur bei klaren Tags", () => {
+    const [site] = parsePicnicSites({
+      elements: [
+        {
+          type: "way",
+          id: 7,
+          center: { lat: 46.5, lon: 8.1 },
+          tags: {
+            tourism: "picnic_site",
+            covered: "yes",
+            fireplace: "no",
+            drinking_water: "vielleicht",
+          },
+        },
+      ],
+    });
+    expect(site.covered).toBe(true);
+    expect(site.fireplace).toBe(false);
+    expect(site.drinkingWater).toBeUndefined();
+  });
+
+  it("wirft Elemente ohne passenden Typ weg", () => {
+    expect(
+      parsePicnicSites({
+        elements: [
+          {
+            type: "node",
+            id: 3,
+            lat: 46.1,
+            lon: 8.1,
+            tags: { amenity: "bbq" },
+          },
+        ],
+      })
+    ).toEqual([]);
+  });
+
+  it("entfernt Duplikate und begrenzt die Menge", () => {
+    const doppelt = {
+      type: "node",
+      id: 5,
+      lat: 46.2,
+      lon: 8.3,
+      tags: { tourism: "picnic_site" },
+    };
+    expect(parsePicnicSites({ elements: [doppelt, doppelt] }).length).toBe(1);
+
+    const viele = Array.from({ length: 200 }, (_, i) => ({
+      type: "node",
+      id: 1000 + i,
+      lat: 46 + i / 1000,
+      lon: 8,
+      tags: { leisure: "picnic_table" },
+    }));
+    expect(parsePicnicSites({ elements: viele }).length).toBe(
+      OVERPASS_PICNIC_MAX_RESULTS
+    );
+  });
+
+  it("liefert bei unbrauchbarer Antwort eine leere Liste", () => {
+    expect(parsePicnicSites(null)).toEqual([]);
+    expect(parsePicnicSites("html-fehlerseite")).toEqual([]);
+    expect(parsePicnicSites({ elements: 42 })).toEqual([]);
   });
 });

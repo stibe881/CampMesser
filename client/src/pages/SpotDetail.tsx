@@ -47,6 +47,7 @@ import DarkSkyPanel from "@/components/DarkSkyPanel";
 import NearbyHikes from "@/components/NearbyHikes";
 import NearbyExcursions from "@/components/NearbyExcursions";
 import NearbyFirepits from "@/components/NearbyFirepits";
+import PicnicStops from "@/components/PicnicStops";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
 import NearbyTransit from "@/components/NearbyTransit";
 import TickRiskPanel from "@/components/TickRiskPanel";
@@ -898,6 +899,14 @@ export default function SpotDetailPage() {
           </a>
         </Button>
       </div>
+
+      {/* Rast unterwegs: Picknickplätze im Korridor der Anfahrt (#250) */}
+      <PicnicStops
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mt-4"
+      />
 
       {/* Platz-Eigenschaften: Schatten, Sanitär, Lärm, WLAN … */}
       <Card className="mb-4 mt-4">

@@ -4001,14 +4001,14 @@ export default function TripsPage() {
                           holidays={holidays}
                         />
                       )}
-                      {trip.packListId != null && (
-                        <PackProgress listId={trip.packListId} />
-                      )}
                       <TripReadinessCard
                         trip={trip}
                         tripName={trip.title || placeName(trip)}
                         onEdit={() => startEdit(trip)}
                       />
+                      {trip.packListId != null && (
+                        <PackProgress listId={trip.packListId} />
+                      )}
                       {trip.packListId != null && suggestionSpot && (
                         <TripPackSuggestions
                           listId={trip.packListId}
