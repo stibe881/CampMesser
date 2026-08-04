@@ -25,31 +25,9 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 3 Punkte
-
-### Familie & Abend
-
-- [ ] **Erzählwürfel** (#268) – Bilder würfeln und daraus Geschichten erfinden
-- [ ] **Lagerfeuer-Liederbuch** (#269) – Texte und Akkorde, Rotlicht-tauglich
-- [ ] **Ämtli-Plan im Camp** (#270) – Aufgaben verteilen, Kinder sammeln Punkte
-
----
-
-## Runde 28 – 10 Punkte
+## Runde 28 – 6 Punkte
 
 ### Karte & Wetter
-
-- [ ] **Einkaufen in Platznähe** (#273) – Supermarkt, Bäckerei, Hofladen mit
-      Öffnungszeiten aus OSM
-- [ ] **Gewitter-Entfernung messen** (#274) – Blitz-Donner-Zähler mit Distanz
-      und Trend «kommt näher»
-- [ ] **Unwetter auf der Fahrtstrecke** (#275) – Warnungen entlang der Anreise,
-      nicht nur am Ziel
-
-### Ordnung
-
-- [ ] **Packvorschlag aus vergangenen Reisen** (#277) – «letztes Mal am selben
-      Platz dabei gehabt»
 
 ### Platz-Wissen
 

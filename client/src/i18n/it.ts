@@ -2899,6 +2899,101 @@ export const it: Translation = {
     reminderHint:
       "I lavori ricorrenti puoi annotarli nell'inventario come promemoria di manutenzione – così l'app si fa viva prima che sia troppo tardi.",
   },
+  thunder: {
+    title: "Distanza del temporale",
+    subtitle:
+      "Tocca al lampo, tocca al tuono – l'app calcola la distanza e dice se il temporale si avvicina.",
+    tapLightning: "Lampo visto",
+    tapThunder: "Tuono sentito",
+    tapLightningAria: "Avvia il conteggio al lampo",
+    tapThunderAria: "Ferma il conteggio al tuono",
+    tapLightningHint: "Tocca appena vedi il lampo.",
+    tapThunderHint: "Tocca appena senti il tuono.",
+    lastStrike: "Ultimo lampo",
+    distanceKm: (km: string) => `a ${km} km`,
+    secondsCounted: (seconds: string) => `${seconds} secondi contati`,
+    trendCloser: "Il temporale si avvicina.",
+    trendFurther: "Il temporale si allontana.",
+    trendSame: "La distanza resta più o meno uguale.",
+    advice: {
+      gefahr:
+        "Proprio sopra di te. Subito in auto o in un edificio solido – una tenda non protegge dai fulmini.",
+      warnung:
+        "Abbastanza vicino: mettiti al riparo ora, non al prossimo lampo. Lontano da alberi isolati, pali e acqua.",
+      beobachten:
+        "Ancora lontano, ma tieni d'occhio – ritira la vela ombreggiante e fissa le cose sciolte.",
+    },
+    allClearIn: (minutes: number) =>
+      `Cessato allarme tra ${minutes} min se non arrivano altri tuoni.`,
+    allClearReached: (minutes: number) =>
+      `Nessun tuono da ${minutes} minuti – puoi uscire di nuovo.`,
+    historyTitle: "Lampi contati",
+    reset: "Azzera",
+    ruleTitle: "La regola 30-30",
+    ruleText:
+      "Se tra lampo e tuono passano meno di 30 secondi (circa 10 km), mettiti al riparo. E esci solo 30 minuti dopo l'ultimo tuono – gli ultimi fulmini di un temporale cadono spesso già a cielo sereno.",
+    methodNote: (max: number) =>
+      `Si calcola con la velocità del suono, circa tre secondi al chilometro. Oltre ${max} secondi non si conta più nulla – a quella distanza il tuono non si sente comunque.`,
+  },
+  chores: {
+    title: "Piano dei compiti",
+    subtitle:
+      "Distribuire i compiti a turno, spuntare e raccogliere punti – senza litigi su chi lava di nuovo i piatti.",
+    loginFeature: "il piano dei compiti",
+    noChildren:
+      "Nessun bambino registrato. Inseriscili nella modalità famiglia – poi si può distribuire.",
+    dayLabel: "Giorno",
+    distribute: "Distribuisci a turno",
+    dayPlanTitle: "Compiti del giorno",
+    progressLine: (done: number, total: number) => `${done} di ${total} fatti`,
+    progressAria: "Avanzamento della giornata",
+    toggleAria: (title: string) => `Spunta ${title}`,
+    assignAria: (title: string) => `Assegna ${title}`,
+    unassigned: "Da assegnare",
+    pointsLine: (points: number) =>
+      points === 1 ? "1 punto" : `${points} punti`,
+    scoreTitle: "Classifica",
+    scoreLine: (points: number, done: number) => `${points} p. · ${done}×`,
+    scoreHint:
+      "I punti arrivano solo con la spunta – essere assegnati non è ancora un merito.",
+    choresTitle: "Compiti",
+    newChore: "Nuovo compito",
+    newChorePlaceholder: "ad es. lavare i piatti",
+    pointsLabel: "Punti",
+    addChore: "Aggiungi",
+    removeAria: (title: string) => `Elimina ${title}`,
+    rotationHint:
+      "Si distribuisce a turno e non a caso: chi oggi lava i piatti domani porta la legna. Il giorno sposta l'ordine di uno – così ogni bambino può verificare che sia giusto.",
+  },
+  songbook: {
+    title: "Canzoniere del falò",
+    subtitle:
+      "Testi con accordi – trasponibili, con modalità luce rossa e utilizzabili senza rete.",
+    offlineNote:
+      "Tutte le canzoni sono salvate nell'app e funzionano senza connessione a Internet.",
+    redLight: "Luce rossa",
+    transposeAria: "Cambia tonalità",
+    transposeLabel: (value: string) => `Capo ${value}`,
+    transposeUpAria: "Un semitono più alto",
+    transposeDownAria: "Un semitono più basso",
+    copyrightNote:
+      "Qui ci sono solo canzoni di dominio pubblico – canti popolari e opere i cui autori sono morti da oltre 70 anni. Per ogni brano è indicata l'origine. I classici moderni da falò mancano quindi: non potrebbero essere riprodotti.",
+  },
+  storyDice: {
+    title: "Dadi delle storie",
+    subtitle:
+      "Tira i simboli e inventate insieme una storia – senza rete, senza preparazione.",
+    howToTitle: "Come si gioca",
+    howToText:
+      "Tirate, poi il primo dice una frase che contiene un simbolo. Si continua a turno finché tutti i simboli sono usati – e chi vuole aggiunge un finale.",
+    countLabel: "Dadi:",
+    countAria: "Scegli il numero di dadi",
+    rollButton: "Tira",
+    rerollAria: (word: string) => `Ritira ${word}`,
+    rerollHint:
+      "Un simbolo proprio non ci sta? Toccalo – viene ritirato solo quel dado.",
+    starterTitle: "Frase iniziale",
+  },
   treasure: {
     title: "Caccia al tesoro GPS",
     subtitle:
@@ -3648,6 +3743,94 @@ export const it: Translation = {
   },
 
   /** Parchi giochi e punti balneabili da OpenStreetMap (#248). */
+  routeWeather: {
+    sectionAria: "Maltempo sul percorso",
+    title: "Meteo lungo il tragitto",
+    subtitle: "Che cosa ti aspetta per strada – non solo all'arrivo.",
+    subtitleAtPlace: (place: string) =>
+      `Che cosa ti aspetta sulla strada per ${place} – non solo all'arrivo.`,
+    startGroupAria: "Scegli il punto di partenza",
+    startHome: "Da casa",
+    startCurrent: "Dalla mia posizione",
+    departureLabel: "Partenza",
+    loading: "Recupero del meteo lungo il percorso …",
+    loadFailed:
+      "Non è stato possibile caricare il meteo lungo il percorso – riprova più tardi.",
+    noStart:
+      "Nessun punto di partenza: registra un domicilio nel profilo o consenti la posizione.",
+    tooShort: (km: number) =>
+      `Sotto i ${km} km il controllo del percorso non serve – basta l'allerta all'arrivo.`,
+    summary: (distance: string, minutes: number) =>
+      `${distance} in linea d'aria, circa ${Math.floor(minutes / 60)} h ${minutes % 60} min di viaggio.`,
+    allClear: "Su tutto il percorso, agli orari stimati, nulla di rilevante.",
+    worstLine: {
+      info: "Piccolezze lungo la strada – nulla che riguardi la guida.",
+      warnung:
+        "Lungo la strada è previsto brutto tempo. Sposta la partenza o prevedi una sosta.",
+      gefahr:
+        "Sul percorso minaccia maltempo. Se puoi parti più tardi – sotto il temporale con rimorchio o caravan non ci guadagna nessuno.",
+    },
+    risk: {
+      gewitter: "Temporale",
+      sturm: "Raffiche di tempesta",
+      regen: "Pioggia intensa",
+      schnee: "Neve",
+    },
+    riskNone: "Tranquillo",
+    kmMark: (km: number) => `km ${km}`,
+    gusts: (kmh: number) => `${kmh} km/h`,
+    methodNote: (speed: number) =>
+      `Vengono controllati fino a otto punti lungo la linea d'aria, ciascuno per l'orario di arrivo stimato. Si calcola con ${speed} km/h sulla linea d'aria – è una stima approssimativa, non un navigatore.`,
+    source: "Dati: Open-Meteo",
+  },
+  packHistory: {
+    sectionAria: "Suggerimenti dai viaggi passati",
+    title: "Portato l'ultima volta",
+    subtitle: (trips: number) =>
+      trips === 1
+        ? "Dal tuo ultimo soggiorno in questo posto – non ancora in questa lista."
+        : `Dai tuoi ultimi ${trips} soggiorni in questo posto – non ancora in questa lista.`,
+    everyTime: "ogni volta",
+    tripCount: (n: number, of: number) => `${n} su ${of}`,
+    addAria: (name: string) => `Aggiungi ${name} alla lista`,
+    addAll: (n: number) => `Aggiungi tutti (${n})`,
+    note: "Vengono proposte solo cose che c'erano davvero nelle liste precedenti di questo posto – non una lista standard, ma la tua esperienza.",
+  },
+  shops: {
+    sectionAria: "Fare la spesa nei dintorni",
+    title: "Fare la spesa nei dintorni",
+    subtitle: "Supermercato, panetteria e vendita diretta attorno a te.",
+    subtitleAtPlace: (place: string) =>
+      `Supermercato, panetteria e vendita diretta attorno a ${place}.`,
+    radiusLabel: "Raggio",
+    radiusGroupAria: "Scegli il raggio di ricerca",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Ricerca dei negozi …",
+    loadFailed: "Non è stato possibile caricare i negozi – riprova più tardi.",
+    empty: (km: number) =>
+      `Entro ${km} km non risulta alcun negozio in OpenStreetMap.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 negozio trovato" : `${n} negozi trovati`,
+    distanceAway: (distance: string) => `${distance} in linea d'aria`,
+    kind: {
+      supermarket: "Supermercato",
+      convenience: "Negozio di quartiere",
+      bakery: "Panetteria",
+      farm: "Vendita diretta",
+      butcher: "Macelleria",
+    },
+    openNow: "Ora aperto",
+    closedNow: "Ora chiuso",
+    checkHours: "Verifica gli orari",
+    todayHours: (hours: string) => `Oggi ${hours}`,
+    noHours: "Orari non registrati",
+    navButton: "Percorso",
+    navAria: (name: string) => `Percorso verso ${name}`,
+    website: "Sito web",
+    hoursNote:
+      "Gli orari vengono da OpenStreetMap e possono essere superati. Dove l'indicazione è troppo complessa (festivi, stagione, pausa pranzo con commento) compare «Verifica gli orari» invece di una supposizione – accanto sta il dato grezzo.",
+    source: "Dati: contributori di OpenStreetMap (ODbL)",
+  },
   familyPlaces: {
     sectionAria: "Parchi giochi e punti balneabili nei dintorni",
     title: "Per le famiglie nei dintorni",

@@ -48,7 +48,9 @@ import NearbyHikes from "@/components/NearbyHikes";
 import NearbyExcursions from "@/components/NearbyExcursions";
 import NearbyFirepits from "@/components/NearbyFirepits";
 import PicnicStops from "@/components/PicnicStops";
+import RouteWeather from "@/components/RouteWeather";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
+import NearbyShops from "@/components/NearbyShops";
 import NearbyTransit from "@/components/NearbyTransit";
 import TickRiskPanel from "@/components/TickRiskPanel";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
@@ -901,6 +903,15 @@ export default function SpotDetailPage() {
       </div>
 
       {/* Rast unterwegs: Picknickplätze im Korridor der Anfahrt (#250) */}
+      {/* Unwetter auf der Fahrtstrecke (#275): Wetter dort, wo man unterwegs
+          sein wird – und zu der Zeit, zu der man dort sein wird */}
+      <RouteWeather
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mb-4"
+      />
+
       <PicnicStops
         latitude={spot.latitude}
         longitude={spot.longitude}
@@ -1235,6 +1246,15 @@ export default function SpotDetailPage() {
       {/* Spielplätze und Badeplätze aus OpenStreetMap (#248) – gemischt nach
           Distanz, lädt ebenfalls erst beim Aufklappen */}
       <NearbyFamilyPlaces
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mb-4"
+      />
+
+      {/* Einkaufen in Platznähe (#273): Supermarkt, Bäckerei, Hofladen mit
+          Öffnungszeiten – ebenfalls erst beim Aufklappen geholt */}
+      <NearbyShops
         latitude={spot.latitude}
         longitude={spot.longitude}
         placeName={spot.name}

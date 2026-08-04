@@ -2926,6 +2926,102 @@ export const fr: Translation = {
     reminderHint:
       "Tu peux inscrire les travaux récurrents dans l'inventaire comme rappel d'entretien – l'app se manifeste alors avant qu'il ne soit trop tard.",
   },
+  thunder: {
+    title: "Distance de l'orage",
+    subtitle:
+      "Touche à l'éclair, touche au tonnerre – l'app calcule la distance et dit si l'orage approche.",
+    tapLightning: "Éclair vu",
+    tapThunder: "Tonnerre entendu",
+    tapLightningAria: "Démarrer le comptage à l'éclair",
+    tapThunderAria: "Arrêter le comptage au tonnerre",
+    tapLightningHint: "Touche dès que tu vois l'éclair.",
+    tapThunderHint: "Touche dès que tu entends le tonnerre.",
+    lastStrike: "Dernier éclair",
+    distanceKm: (km: string) => `à ${km} km`,
+    secondsCounted: (seconds: string) => `${seconds} secondes comptées`,
+    trendCloser: "L'orage se rapproche.",
+    trendFurther: "L'orage s'éloigne.",
+    trendSame: "La distance reste à peu près la même.",
+    advice: {
+      gefahr:
+        "Juste au-dessus de toi. Va tout de suite dans la voiture ou un bâtiment en dur – une tente ne protège pas de la foudre.",
+      warnung:
+        "Assez proche : mets-toi à l'abri maintenant, pas au prochain éclair. Loin des arbres isolés, des mâts et de l'eau.",
+      beobachten:
+        "Encore loin, mais garde un œil – rentre la voile d'ombrage et sécurise ce qui traîne.",
+    },
+    allClearIn: (minutes: number) =>
+      `Fin d'alerte dans ${minutes} min s'il n'y a plus de tonnerre.`,
+    allClearReached: (minutes: number) =>
+      `Plus de tonnerre depuis ${minutes} minutes – tu peux ressortir.`,
+    historyTitle: "Éclairs comptés",
+    reset: "Réinitialiser",
+    ruleTitle: "La règle des 30-30",
+    ruleText:
+      "S'il y a moins de 30 secondes entre l'éclair et le tonnerre (environ 10 km), mets-toi à l'abri. Et ne ressors que 30 minutes après le dernier coup de tonnerre – les derniers éclairs d'un orage tombent souvent déjà sous un ciel bleu.",
+    methodNote: (max: number) =>
+      `Le calcul utilise la vitesse du son, environ trois secondes par kilomètre. Au-delà de ${max} secondes, plus rien n'est compté – à cette distance, on n'entend de toute façon plus le tonnerre.`,
+  },
+  chores: {
+    title: "Plan des tâches",
+    subtitle:
+      "Répartir les tâches à tour de rôle, cocher et gagner des points – sans dispute sur qui fait encore la vaisselle.",
+    loginFeature: "le plan des tâches",
+    noChildren:
+      "Aucun enfant enregistré. Ajoute-les dans le mode famille – la répartition sera alors possible.",
+    dayLabel: "Jour",
+    distribute: "Répartir à tour de rôle",
+    dayPlanTitle: "Tâches du jour",
+    progressLine: (done: number, total: number) =>
+      `${done} sur ${total} faites`,
+    progressAria: "Progression du jour",
+    toggleAria: (title: string) => `Cocher ${title}`,
+    assignAria: (title: string) => `Attribuer ${title}`,
+    unassigned: "À attribuer",
+    pointsLine: (points: number) =>
+      points === 1 ? "1 point" : `${points} points`,
+    scoreTitle: "Classement",
+    scoreLine: (points: number, done: number) => `${points} pts · ${done}×`,
+    scoreHint:
+      "Les points ne comptent qu'une fois la tâche cochée – être désigné n'est pas encore un mérite.",
+    choresTitle: "Tâches",
+    newChore: "Nouvelle tâche",
+    newChorePlaceholder: "p. ex. faire la vaisselle",
+    pointsLabel: "Points",
+    addChore: "Ajouter",
+    removeAria: (title: string) => `Supprimer ${title}`,
+    rotationHint:
+      "La répartition se fait à tour de rôle et non au hasard : qui fait la vaisselle aujourd'hui ira chercher le bois demain. Le jour décale l'ordre d'un cran – chaque enfant peut ainsi vérifier que c'est équitable.",
+  },
+  songbook: {
+    title: "Chansonnier du feu de camp",
+    subtitle:
+      "Textes avec accords – transposables, avec mode lumière rouge et utilisables sans réseau.",
+    offlineNote:
+      "Toutes les chansons sont enregistrées dans l'app et fonctionnent sans connexion Internet.",
+    redLight: "Lumière rouge",
+    transposeAria: "Changer de tonalité",
+    transposeLabel: (value: string) => `Capo ${value}`,
+    transposeUpAria: "Un demi-ton plus haut",
+    transposeDownAria: "Un demi-ton plus bas",
+    copyrightNote:
+      "Seules des chansons du domaine public figurent ici – chansons populaires et œuvres dont les auteurs sont décédés depuis plus de 70 ans. L'origine est indiquée pour chaque titre. Les classiques modernes du feu de camp manquent donc : ils ne pourraient pas être reproduits.",
+  },
+  storyDice: {
+    title: "Dés à histoires",
+    subtitle:
+      "Lance les symboles et inventez ensemble une histoire – sans réseau, sans préparation.",
+    howToTitle: "Comment jouer",
+    howToText:
+      "Lancez, puis la première personne dit une phrase contenant un symbole. On continue à tour de rôle jusqu'à ce que tous les symboles soient utilisés – et qui veut ajoute une fin.",
+    countLabel: "Dés :",
+    countAria: "Choisir le nombre de dés",
+    rollButton: "Lancer",
+    rerollAria: (word: string) => `Relancer ${word}`,
+    rerollHint:
+      "Un symbole ne colle vraiment pas ? Touche-le – seul ce dé est relancé.",
+    starterTitle: "Phrase de départ",
+  },
   treasure: {
     title: "Chasse au trésor GPS",
     subtitle:
@@ -3675,6 +3771,94 @@ export const fr: Translation = {
   },
 
   /** Places de jeux et lieux de baignade depuis OpenStreetMap (#248). */
+  routeWeather: {
+    sectionAria: "Intempéries sur le trajet",
+    title: "Météo sur le trajet",
+    subtitle: "Ce qui t'attend en route – pas seulement à l'arrivée.",
+    subtitleAtPlace: (place: string) =>
+      `Ce qui t'attend sur la route vers ${place} – pas seulement à l'arrivée.`,
+    startGroupAria: "Choisir le point de départ",
+    startHome: "Depuis le domicile",
+    startCurrent: "Depuis ma position",
+    departureLabel: "Départ",
+    loading: "Récupération de la météo le long du trajet …",
+    loadFailed:
+      "La météo le long du trajet n'a pas pu être chargée – réessaie plus tard.",
+    noStart:
+      "Pas de point de départ : enregistre un domicile dans le profil ou autorise la localisation.",
+    tooShort: (km: number) =>
+      `En dessous de ${km} km, l'analyse du trajet n'apporte rien – l'alerte à l'arrivée suffit.`,
+    summary: (distance: string, minutes: number) =>
+      `${distance} à vol d'oiseau, environ ${Math.floor(minutes / 60)} h ${minutes % 60} min de route.`,
+    allClear: "Rien de particulier sur tout le trajet aux heures estimées.",
+    worstLine: {
+      info: "Broutilles en route – rien qui concerne la conduite.",
+      warnung:
+        "Du mauvais temps est à prévoir en chemin. Décale le départ ou prévois une pause.",
+      gefahr:
+        "Des intempéries menacent sur le trajet. Pars plus tard si possible – personne n'a rien à gagner sous l'orage avec une remorque ou une caravane.",
+    },
+    risk: {
+      gewitter: "Orage",
+      sturm: "Rafales tempétueuses",
+      regen: "Fortes pluies",
+      schnee: "Neige",
+    },
+    riskNone: "Calme",
+    kmMark: (km: number) => `km ${km}`,
+    gusts: (kmh: number) => `${kmh} km/h`,
+    methodNote: (speed: number) =>
+      `Jusqu'à huit points le long de la ligne droite sont vérifiés, chacun pour son heure d'arrivée estimée. Le calcul se fait à ${speed} km/h à vol d'oiseau – c'est une estimation grossière, pas un calculateur d'itinéraire.`,
+    source: "Données : Open-Meteo",
+  },
+  packHistory: {
+    sectionAria: "Suggestions d'après les voyages passés",
+    title: "Emporté la dernière fois",
+    subtitle: (trips: number) =>
+      trips === 1
+        ? "D'après ton dernier séjour à cet endroit – pas encore sur cette liste."
+        : `D'après tes ${trips} derniers séjours à cet endroit – pas encore sur cette liste.`,
+    everyTime: "à chaque fois",
+    tripCount: (n: number, of: number) => `${n} sur ${of}`,
+    addAria: (name: string) => `Ajouter ${name} à la liste`,
+    addAll: (n: number) => `Tout reprendre (${n})`,
+    note: "Ne sont proposés que des objets qui figuraient réellement sur des listes précédentes de cet endroit – pas une liste type, mais ta propre expérience.",
+  },
+  shops: {
+    sectionAria: "Faire les courses à proximité",
+    title: "Faire les courses à proximité",
+    subtitle: "Supermarché, boulangerie et vente à la ferme autour de toi.",
+    subtitleAtPlace: (place: string) =>
+      `Supermarché, boulangerie et vente à la ferme autour de ${place}.`,
+    radiusLabel: "Rayon",
+    radiusGroupAria: "Choisir le rayon de recherche",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Recherche des commerces …",
+    loadFailed: "Les commerces n'ont pas pu être chargés – réessaie plus tard.",
+    empty: (km: number) =>
+      `Dans un rayon de ${km} km, aucun commerce n'est répertorié dans OpenStreetMap.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 commerce trouvé" : `${n} commerces trouvés`,
+    distanceAway: (distance: string) => `${distance} à vol d'oiseau`,
+    kind: {
+      supermarket: "Supermarché",
+      convenience: "Épicerie",
+      bakery: "Boulangerie",
+      farm: "Vente à la ferme",
+      butcher: "Boucherie",
+    },
+    openNow: "Ouvert",
+    closedNow: "Fermé",
+    checkHours: "Vérifier les horaires",
+    todayHours: (hours: string) => `Aujourd'hui ${hours}`,
+    noHours: "Horaires non renseignés",
+    navButton: "Itinéraire",
+    navAria: (name: string) => `Itinéraire vers ${name}`,
+    website: "Site web",
+    hoursNote:
+      "Les horaires proviennent d'OpenStreetMap et peuvent être obsolètes. Quand l'indication est trop complexe (jours fériés, saison, pause de midi avec commentaire), on affiche « Vérifier les horaires » plutôt qu'une supposition – l'indication brute figure alors à côté.",
+    source: "Données : contributeurs OpenStreetMap (ODbL)",
+  },
   familyPlaces: {
     sectionAria: "Places de jeux et lieux de baignade à proximité",
     title: "Pour les familles à proximité",

@@ -2931,6 +2931,102 @@ export const de = {
     reminderHint:
       "Wiederkehrende Arbeiten kannst du dir im Inventar als Pflege-Erinnerung eintragen – dann meldet sich die App, bevor es zu spät ist.",
   },
+  thunder: {
+    title: "Gewitter-Entfernung",
+    subtitle:
+      "Blitz antippen, Donner antippen – die App rechnet die Distanz und sagt, ob das Gewitter näher zieht.",
+    tapLightning: "Blitz gesehen",
+    tapThunder: "Donner gehört",
+    tapLightningAria: "Zählung beim Blitz starten",
+    tapThunderAria: "Zählung beim Donner stoppen",
+    tapLightningHint: "Antippen, sobald du den Blitz siehst.",
+    tapThunderHint: "Antippen, sobald du den Donner hörst.",
+    lastStrike: "Letzter Blitz",
+    distanceKm: (km: string) => `${km} km entfernt`,
+    secondsCounted: (seconds: string) => `${seconds} Sekunden gezählt`,
+    trendCloser: "Das Gewitter kommt näher.",
+    trendFurther: "Das Gewitter zieht ab.",
+    trendSame: "Die Entfernung bleibt etwa gleich.",
+    advice: {
+      gefahr:
+        "Direkt über dir. Sofort ins Auto oder in ein festes Gebäude – ein Zelt schützt nicht vor Blitz.",
+      warnung:
+        "Nah genug: Jetzt Schutz aufsuchen, nicht erst beim nächsten Blitz. Weg von einzelnen Bäumen, Masten und Wasser.",
+      beobachten:
+        "Noch weit weg, aber im Auge behalten – zieh das Sonnensegel ein und sichere loses Zeug.",
+    },
+    allClearIn: (minutes: number) =>
+      `Entwarnung in ${minutes} Min., falls kein weiterer Donner kommt.`,
+    allClearReached: (minutes: number) =>
+      `Seit ${minutes} Minuten kein Donner mehr – du kannst wieder raus.`,
+    historyTitle: "Gezählte Blitze",
+    reset: "Zurücksetzen",
+    ruleTitle: "Die 30-30-Regel",
+    ruleText:
+      "Sind es zwischen Blitz und Donner weniger als 30 Sekunden (rund 10 km), such Schutz auf. Und geh erst 30 Minuten nach dem letzten Donner wieder raus – die letzten Blitze eines Gewitters treffen oft schon bei blauem Himmel.",
+    methodNote: (max: number) =>
+      `Gerechnet wird mit der Schallgeschwindigkeit, rund drei Sekunden pro Kilometer. Über ${max} Sekunden wird nichts mehr gezählt – so weit weg hört man den Donner ohnehin nicht mehr.`,
+  },
+  chores: {
+    title: "Ämtli-Plan",
+    subtitle:
+      "Aufgaben reihum verteilen, abhaken und Punkte sammeln – ohne Streit, wer schon wieder abwäscht.",
+    loginFeature: "den Ämtli-Plan",
+    noChildren:
+      "Noch keine Kinder angelegt. Im Familien-Modus trägst du sie ein – dann kann verteilt werden.",
+    dayLabel: "Tag",
+    distribute: "Reihum verteilen",
+    dayPlanTitle: "Ämtli des Tages",
+    progressLine: (done: number, total: number) =>
+      `${done} von ${total} erledigt`,
+    progressAria: "Fortschritt des Tages",
+    toggleAria: (title: string) => `${title} abhaken`,
+    assignAria: (title: string) => `${title} zuteilen`,
+    unassigned: "Noch offen",
+    pointsLine: (points: number) =>
+      points === 1 ? "1 Punkt" : `${points} Punkte`,
+    scoreTitle: "Punktestand",
+    scoreLine: (points: number, done: number) => `${points} P. · ${done}×`,
+    scoreHint:
+      "Punkte gibt es erst beim Abhaken – eine zugeteilte Aufgabe ist noch kein Verdienst.",
+    choresTitle: "Ämtli",
+    newChore: "Neues Ämtli",
+    newChorePlaceholder: "z. B. Abwaschen",
+    pointsLabel: "Punkte",
+    addChore: "Hinzufügen",
+    removeAria: (title: string) => `${title} löschen`,
+    rotationHint:
+      "Verteilt wird reihum und nicht zufällig: Wer heute abwäscht, holt morgen Holz. Der Tag verschiebt die Reihenfolge um eins – so kann jedes Kind nachrechnen, dass es fair zugeht.",
+  },
+  songbook: {
+    title: "Lagerfeuer-Liederbuch",
+    subtitle:
+      "Texte mit Akkorden – transponierbar, mit Rotlicht fürs Dunkel und ohne Netz nutzbar.",
+    offlineNote:
+      "Alle Lieder sind in der App gespeichert und funktionieren ohne Internetverbindung.",
+    redLight: "Rotlicht",
+    transposeAria: "Tonart verschieben",
+    transposeLabel: (value: string) => `Kapo ${value}`,
+    transposeUpAria: "Einen Halbton höher",
+    transposeDownAria: "Einen Halbton tiefer",
+    copyrightNote:
+      "Hier stehen nur gemeinfreie Lieder – Volkslieder und Stücke, deren Urheber seit über 70 Jahren verstorben sind. Bei jedem Lied steht die Herkunft dabei. Moderne Lagerfeuer-Klassiker fehlen deshalb, sie dürften nicht abgedruckt werden.",
+  },
+  storyDice: {
+    title: "Erzählwürfel",
+    subtitle:
+      "Symbole würfeln und daraus gemeinsam eine Geschichte erfinden – ohne Netz, ohne Vorbereitung.",
+    howToTitle: "So geht's",
+    howToText:
+      "Würfeln, dann erzählt der Erste einen Satz, in dem ein Symbol vorkommt. Reihum weiter, bis alle Symbole verbraucht sind – wer will, hängt am Schluss ein Ende dran.",
+    countLabel: "Würfel:",
+    countAria: "Anzahl Würfel wählen",
+    rollButton: "Würfeln",
+    rerollAria: (word: string) => `${word} neu würfeln`,
+    rerollHint:
+      "Passt ein Symbol partout nicht? Tipp drauf – dann wird nur dieser Würfel neu geworfen.",
+    starterTitle: "Anfangssatz",
+  },
   treasure: {
     title: "GPS-Schatzsuche",
     subtitle:
@@ -3677,6 +3773,96 @@ export const de = {
   },
 
   /** Spiel- und Badeplätze aus OpenStreetMap (#248). */
+  routeWeather: {
+    sectionAria: "Unwetter auf der Fahrtstrecke",
+    title: "Wetter auf der Fahrt",
+    subtitle: "Was dich unterwegs erwartet – nicht nur am Ziel.",
+    subtitleAtPlace: (place: string) =>
+      `Was dich auf dem Weg nach ${place} erwartet – nicht nur am Ziel.`,
+    startGroupAria: "Startpunkt wählen",
+    startHome: "Ab Heimatort",
+    startCurrent: "Ab Standort",
+    departureLabel: "Abfahrt",
+    loading: "Wetter entlang der Strecke wird geholt …",
+    loadFailed:
+      "Das Wetter entlang der Strecke konnte nicht geladen werden – bitte später nochmals versuchen.",
+    noStart:
+      "Kein Startpunkt: Hinterlege im Profil einen Heimatort oder erlaube den Standort.",
+    tooShort: (km: number) =>
+      `Unter ${km} km lohnt die Streckenprüfung nicht – da genügt die Warnung am Ziel.`,
+    summary: (distance: string, minutes: number) =>
+      `${distance} Luftlinie, geschätzt ${Math.floor(minutes / 60)} Std. ${minutes % 60} Min. Fahrt.`,
+    allClear:
+      "Auf der ganzen Strecke ist zur geschätzten Zeit nichts Auffälliges.",
+    worstLine: {
+      info: "Kleinigkeiten unterwegs – nichts, was die Fahrt betrifft.",
+      warnung:
+        "Unterwegs ist mit ungemütlichem Wetter zu rechnen. Zeitpunkt verschieben oder Pause einplanen.",
+      gefahr:
+        "Auf der Strecke droht Unwetter. Wenn möglich später losfahren – im Gewitter mit Anhänger oder Wohnwagen hat niemand etwas gewonnen.",
+    },
+    risk: {
+      gewitter: "Gewitter",
+      sturm: "Sturmböen",
+      regen: "Starkregen",
+      schnee: "Schnee",
+    },
+    riskNone: "Ruhig",
+    kmMark: (km: number) => `km ${km}`,
+    gusts: (kmh: number) => `${kmh} km/h`,
+    methodNote: (speed: number) =>
+      `Geprüft werden bis zu acht Punkte entlang der Luftlinie, jeweils für die geschätzte Ankunftszeit. Gerechnet wird mit ${speed} km/h über die Luftlinie – das ist eine grobe Schätzung und kein Routenplaner.`,
+    source: "Daten: Open-Meteo",
+  },
+  packHistory: {
+    sectionAria: "Packvorschlag aus vergangenen Reisen",
+    title: "Letztes Mal dabei gehabt",
+    subtitle: (trips: number) =>
+      trips === 1
+        ? "Aus deiner letzten Reise an diesem Platz – noch nicht auf dieser Liste."
+        : `Aus deinen letzten ${trips} Reisen an diesem Platz – noch nicht auf dieser Liste.`,
+    everyTime: "jedes Mal",
+    tripCount: (n: number, of: number) => `${n} von ${of}`,
+    addAria: (name: string) => `${name} zur Liste hinzufügen`,
+    addAll: (n: number) => `Alle ${n} übernehmen`,
+    note: "Vorgeschlagen wird nur, was auf früheren Listen dieses Platzes wirklich stand – keine Standardliste, sondern deine eigene Erfahrung.",
+  },
+  shops: {
+    sectionAria: "Einkaufen in der Nähe",
+    title: "Einkaufen in der Nähe",
+    subtitle: "Supermarkt, Bäckerei und Hofladen rund um deinen Standort.",
+    subtitleAtPlace: (place: string) =>
+      `Supermarkt, Bäckerei und Hofladen rund um ${place}.`,
+    radiusLabel: "Umkreis",
+    radiusGroupAria: "Suchradius wählen",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Läden werden gesucht …",
+    loadFailed:
+      "Die Läden konnten gerade nicht geladen werden – bitte später nochmals versuchen.",
+    empty: (km: number) =>
+      `Im Umkreis von ${km} km ist in OpenStreetMap kein Laden erfasst.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 Laden gefunden" : `${n} Läden gefunden`,
+    distanceAway: (distance: string) => `${distance} Luftlinie`,
+    kind: {
+      supermarket: "Supermarkt",
+      convenience: "Quartierladen",
+      bakery: "Bäckerei",
+      farm: "Hofladen",
+      butcher: "Metzgerei",
+    },
+    openNow: "Jetzt offen",
+    closedNow: "Jetzt geschlossen",
+    checkHours: "Zeiten prüfen",
+    todayHours: (hours: string) => `Heute ${hours}`,
+    noHours: "Öffnungszeiten nicht erfasst",
+    navButton: "Route",
+    navAria: (name: string) => `Route zu ${name}`,
+    website: "Website",
+    hoursNote:
+      "Die Öffnungszeiten kommen aus OpenStreetMap und können veraltet sein. Wo die Angabe zu verschachtelt ist (Feiertage, Saison, Mittagspause mit Kommentar), steht «Zeiten prüfen» statt einer Vermutung – dann gilt die Rohangabe daneben.",
+    source: "Daten: OpenStreetMap-Mitwirkende (ODbL)",
+  },
   familyPlaces: {
     sectionAria: "Spielplätze und Badeplätze in der Nähe",
     title: "Für Familien in der Nähe",

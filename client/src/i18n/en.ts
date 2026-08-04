@@ -2830,6 +2830,101 @@ export const en: Translation = {
     reminderHint:
       "You can add recurring jobs to your inventory as a care reminder – then the app speaks up before it is too late.",
   },
+  thunder: {
+    title: "Storm distance",
+    subtitle:
+      "Tap on the lightning, tap on the thunder – the app works out the distance and says whether the storm is closing in.",
+    tapLightning: "Saw the lightning",
+    tapThunder: "Heard the thunder",
+    tapLightningAria: "Start counting at the lightning",
+    tapThunderAria: "Stop counting at the thunder",
+    tapLightningHint: "Tap as soon as you see the flash.",
+    tapThunderHint: "Tap as soon as you hear the thunder.",
+    lastStrike: "Last strike",
+    distanceKm: (km: string) => `${km} km away`,
+    secondsCounted: (seconds: string) => `${seconds} seconds counted`,
+    trendCloser: "The storm is coming closer.",
+    trendFurther: "The storm is moving away.",
+    trendSame: "The distance is staying about the same.",
+    advice: {
+      gefahr:
+        "Right overhead. Get into the car or a solid building now – a tent is no protection from lightning.",
+      warnung:
+        "Close enough: take shelter now, not at the next flash. Away from lone trees, poles and water.",
+      beobachten:
+        "Still far off, but keep an eye on it – take in the sun sail and secure loose gear.",
+    },
+    allClearIn: (minutes: number) =>
+      `All clear in ${minutes} min if no more thunder follows.`,
+    allClearReached: (minutes: number) =>
+      `No thunder for ${minutes} minutes – you can go back out.`,
+    historyTitle: "Strikes counted",
+    reset: "Reset",
+    ruleTitle: "The 30-30 rule",
+    ruleText:
+      "If there are fewer than 30 seconds between flash and thunder (about 10 km), take shelter. And only go back out 30 minutes after the last thunder – the final strikes of a storm often fall under a blue sky.",
+    methodNote: (max: number) =>
+      `The maths uses the speed of sound, roughly three seconds per kilometre. Beyond ${max} seconds nothing is counted – at that distance you would not hear the thunder anyway.`,
+  },
+  chores: {
+    title: "Chore plan",
+    subtitle:
+      "Share out chores in rotation, tick them off and collect points – without arguing over who does the dishes again.",
+    loginFeature: "the chore plan",
+    noChildren:
+      "No children added yet. Enter them in family mode – then chores can be shared out.",
+    dayLabel: "Day",
+    distribute: "Share out in rotation",
+    dayPlanTitle: "Today's chores",
+    progressLine: (done: number, total: number) => `${done} of ${total} done`,
+    progressAria: "Progress for the day",
+    toggleAria: (title: string) => `Tick off ${title}`,
+    assignAria: (title: string) => `Assign ${title}`,
+    unassigned: "Unassigned",
+    pointsLine: (points: number) =>
+      points === 1 ? "1 point" : `${points} points`,
+    scoreTitle: "Scoreboard",
+    scoreLine: (points: number, done: number) => `${points} pts · ${done}×`,
+    scoreHint:
+      "Points only count once a chore is ticked off – being assigned is not an achievement yet.",
+    choresTitle: "Chores",
+    newChore: "New chore",
+    newChorePlaceholder: "e.g. wash up",
+    pointsLabel: "Points",
+    addChore: "Add",
+    removeAria: (title: string) => `Delete ${title}`,
+    rotationHint:
+      "Chores are shared out in rotation, not at random: whoever washes up today fetches firewood tomorrow. Each day shifts the order by one – so every child can check for themselves that it is fair.",
+  },
+  songbook: {
+    title: "Campfire songbook",
+    subtitle:
+      "Lyrics with chords – transposable, with a red-light mode and usable without a signal.",
+    offlineNote:
+      "All songs are stored in the app and work without an internet connection.",
+    redLight: "Red light",
+    transposeAria: "Change the key",
+    transposeLabel: (value: string) => `Capo ${value}`,
+    transposeUpAria: "One semitone up",
+    transposeDownAria: "One semitone down",
+    copyrightNote:
+      "Only public-domain songs are printed here – folk songs and works whose authors died more than 70 years ago. The origin is given for every song. Modern campfire classics are therefore missing: they could not legally be reproduced.",
+  },
+  storyDice: {
+    title: "Story dice",
+    subtitle:
+      "Roll symbols and make up a story together – no signal, no preparation needed.",
+    howToTitle: "How to play",
+    howToText:
+      "Roll, then the first person says a sentence containing one of the symbols. Carry on in turn until every symbol has been used – and whoever wants to adds an ending.",
+    countLabel: "Dice:",
+    countAria: "Choose the number of dice",
+    rollButton: "Roll",
+    rerollAria: (word: string) => `Reroll ${word}`,
+    rerollHint:
+      "A symbol just will not fit? Tap it – only that die is rolled again.",
+    starterTitle: "Opening line",
+  },
   treasure: {
     title: "GPS treasure hunt",
     subtitle:
@@ -3566,6 +3661,95 @@ export const en: Translation = {
   },
 
   /** Playgrounds and bathing spots from OpenStreetMap (#248). */
+  routeWeather: {
+    sectionAria: "Severe weather along the route",
+    title: "Weather on the way",
+    subtitle: "What awaits you en route – not just at the destination.",
+    subtitleAtPlace: (place: string) =>
+      `What awaits you on the way to ${place} – not just at the destination.`,
+    startGroupAria: "Choose the starting point",
+    startHome: "From home",
+    startCurrent: "From my location",
+    departureLabel: "Departure",
+    loading: "Fetching the weather along the route …",
+    loadFailed:
+      "The weather along the route could not be loaded – please try again later.",
+    noStart:
+      "No starting point: save a home location in your profile or allow location access.",
+    tooShort: (km: number) =>
+      `Under ${km} km a route check adds nothing – the warning at the destination is enough.`,
+    summary: (distance: string, minutes: number) =>
+      `${distance} as the crow flies, roughly ${Math.floor(minutes / 60)} h ${minutes % 60} min of driving.`,
+    allClear:
+      "Nothing notable anywhere along the route at the estimated times.",
+    worstLine: {
+      info: "Minor stuff en route – nothing that affects the drive.",
+      warnung:
+        "Rough weather is likely on the way. Shift your departure or plan a break.",
+      gefahr:
+        "Severe weather threatens along the route. Leave later if you can – nobody gains anything from a thunderstorm with a trailer or caravan.",
+    },
+    risk: {
+      gewitter: "Thunderstorm",
+      sturm: "Storm gusts",
+      regen: "Heavy rain",
+      schnee: "Snow",
+    },
+    riskNone: "Calm",
+    kmMark: (km: number) => `km ${km}`,
+    gusts: (kmh: number) => `${kmh} km/h`,
+    methodNote: (speed: number) =>
+      `Up to eight points along the straight line are checked, each for its estimated arrival time. The maths uses ${speed} km/h along the straight line – a rough estimate, not a route planner.`,
+    source: "Data: Open-Meteo",
+  },
+  packHistory: {
+    sectionAria: "Packing suggestions from past trips",
+    title: "Taken along last time",
+    subtitle: (trips: number) =>
+      trips === 1
+        ? "From your last stay at this place – not on this list yet."
+        : `From your last ${trips} stays at this place – not on this list yet.`,
+    everyTime: "every time",
+    tripCount: (n: number, of: number) => `${n} of ${of}`,
+    addAria: (name: string) => `Add ${name} to the list`,
+    addAll: (n: number) => `Add all ${n}`,
+    note: "Only things that really were on earlier lists for this place are suggested – not a standard list, but your own experience.",
+  },
+  shops: {
+    sectionAria: "Shopping nearby",
+    title: "Shopping nearby",
+    subtitle: "Supermarket, bakery and farm shop around your location.",
+    subtitleAtPlace: (place: string) =>
+      `Supermarket, bakery and farm shop around ${place}.`,
+    radiusLabel: "Radius",
+    radiusGroupAria: "Choose the search radius",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Searching for shops …",
+    loadFailed:
+      "The shops could not be loaded right now – please try again later.",
+    empty: (km: number) =>
+      `Within ${km} km no shop is recorded in OpenStreetMap.`,
+    resultCount: (n: number) => (n === 1 ? "1 shop found" : `${n} shops found`),
+    distanceAway: (distance: string) => `${distance} as the crow flies`,
+    kind: {
+      supermarket: "Supermarket",
+      convenience: "Corner shop",
+      bakery: "Bakery",
+      farm: "Farm shop",
+      butcher: "Butcher",
+    },
+    openNow: "Open now",
+    closedNow: "Closed now",
+    checkHours: "Check the hours",
+    todayHours: (hours: string) => `Today ${hours}`,
+    noHours: "Opening hours not recorded",
+    navButton: "Directions",
+    navAria: (name: string) => `Directions to ${name}`,
+    website: "Website",
+    hoursNote:
+      "Opening hours come from OpenStreetMap and may be out of date. Where the entry is too involved (public holidays, seasons, a lunch break with a comment), it says “Check the hours” instead of guessing – the raw entry is shown alongside.",
+    source: "Data: OpenStreetMap contributors (ODbL)",
+  },
   familyPlaces: {
     sectionAria: "Playgrounds and bathing spots nearby",
     title: "For families nearby",

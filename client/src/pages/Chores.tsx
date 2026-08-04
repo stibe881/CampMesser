@@ -1,0 +1,337 @@
+/**
+ * Ämtli-Plan im Camp (#270): Aufgaben verteilen, Kinder sammeln Punkte.
+ *
+ * Verteilt wird per Rotation und nicht per Zufall – wer heute abwäscht,
+ * holt morgen Holz. Das ist für Kinder nachrechenbar, und genau darum
+ * geht es beim Ämtli-Streit.
+ *
+ * Die Kinder kommen aus dem Familien-Modus; ein zweites Namensverzeichnis
+ * wollte niemand pflegen.
+ */
+import { useMemo, useState } from "react";
+import {
+  Check,
+  ClipboardList,
+  Plus,
+  Shuffle,
+  Trash2,
+  Trophy,
+} from "lucide-react";
+import { toast } from "sonner";
+import PageHeader from "@/components/PageHeader";
+import LoginPrompt from "@/components/LoginPrompt";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { useI18n } from "@/i18n";
+import { trpc } from "@/lib/trpc";
+import { cn } from "@/lib/utils";
+import {
+  DEFAULT_CHORE_POINTS,
+  MAX_CHORE_POINTS,
+  MAX_CHORE_TITLE_LENGTH,
+  MIN_CHORE_POINTS,
+  dayProgress,
+  scoreboard,
+} from "@shared/chores";
+
+/** Heutiges Datum als ISO-Tag in der Zeitzone des Geräts. */
+function todayIso(): string {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+export default function ChoresPage() {
+  const { t } = useI18n();
+  const tc = t.chores;
+  const { isAuthenticated, loading } = useAuth();
+  const utils = trpc.useUtils();
+
+  const [day, setDay] = useState(todayIso);
+  const [form, setForm] = useState({
+    title: "",
+    points: String(DEFAULT_CHORE_POINTS),
+  });
+
+  const choresQuery = trpc.chores.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const childrenQuery = trpc.family.children.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const dayQuery = trpc.chores.assignments.useQuery(
+    { day },
+    { enabled: isAuthenticated }
+  );
+  // Für den Punktestand zählen alle Tage, nicht nur der gewählte
+  const allQuery = trpc.chores.assignments.useQuery(
+    {},
+    { enabled: isAuthenticated }
+  );
+
+  const chores = useMemo(() => choresQuery.data ?? [], [choresQuery.data]);
+  const children = useMemo(
+    () => childrenQuery.data ?? [],
+    [childrenQuery.data]
+  );
+  const dayAssignments = useMemo(() => dayQuery.data ?? [], [dayQuery.data]);
+  const allAssignments = useMemo(() => allQuery.data ?? [], [allQuery.data]);
+
+  const refresh = () => {
+    void utils.chores.list.invalidate();
+    void utils.chores.assignments.invalidate();
+  };
+  const addChore = trpc.chores.add.useMutation({
+    onSuccess: () => {
+      setForm({ title: "", points: String(DEFAULT_CHORE_POINTS) });
+      refresh();
+    },
+    onError: e => toast.error(e.message),
+  });
+  const removeChore = trpc.chores.remove.useMutation({
+    onSuccess: refresh,
+    onError: e => toast.error(e.message),
+  });
+  const autoAssign = trpc.chores.autoAssign.useMutation({
+    onSuccess: refresh,
+    onError: e => toast.error(e.message),
+  });
+  const assign = trpc.chores.assign.useMutation({
+    onSuccess: refresh,
+    onError: e => toast.error(e.message),
+  });
+  const setDone = trpc.chores.setDone.useMutation({
+    onSuccess: refresh,
+    onError: e => toast.error(e.message),
+  });
+
+  const progress = dayProgress(dayAssignments);
+  const scores = scoreboard(children, chores, allAssignments);
+
+  if (loading) return null;
+  if (!isAuthenticated) {
+    return (
+      <div className="container max-w-3xl py-6">
+        <PageHeader title={tc.title} subtitle={tc.subtitle} />
+        <LoginPrompt feature={tc.loginFeature} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container max-w-3xl py-6">
+      <PageHeader title={tc.title} subtitle={tc.subtitle} />
+
+      {children.length === 0 && (
+        <p className="mb-4 rounded-lg border border-amber-600/40 bg-amber-500/10 p-3 text-sm">
+          {tc.noChildren}
+        </p>
+      )}
+
+      {/* Tag wählen und verteilen */}
+      <div className="mb-5 flex flex-wrap items-end gap-2">
+        <div>
+          <Label htmlFor="chore-day">{tc.dayLabel}</Label>
+          <Input
+            id="chore-day"
+            type="date"
+            value={day}
+            onChange={e => setDay(e.target.value)}
+            className="w-44"
+          />
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => autoAssign.mutate({ day })}
+          disabled={
+            autoAssign.isPending || chores.length === 0 || children.length === 0
+          }
+        >
+          <Shuffle className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          {tc.distribute}
+        </Button>
+      </div>
+
+      {dayAssignments.length > 0 && (
+        <div className="mb-4">
+          <div className="mb-1 flex items-center justify-between text-sm">
+            <span className="font-semibold">{tc.dayPlanTitle}</span>
+            <span className="text-muted-foreground">
+              {tc.progressLine(progress.done, progress.total)}
+            </span>
+          </div>
+          <Progress value={progress.percent} aria-label={tc.progressAria} />
+        </div>
+      )}
+
+      <ul className="mb-6 space-y-2">
+        {dayAssignments.map(assignment => {
+          const chore = chores.find(c => c.id === assignment.choreId);
+          if (!chore) return null;
+          const done = assignment.doneAt !== null;
+          return (
+            <li
+              key={assignment.id}
+              className={cn(
+                "flex flex-wrap items-center gap-3 rounded-lg border p-3",
+                done
+                  ? "border-primary/50 bg-accent/40"
+                  : "border-border bg-card"
+              )}
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  setDone.mutate({ id: assignment.id, done: !done })
+                }
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                  done
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border"
+                )}
+                aria-pressed={done}
+                aria-label={tc.toggleAria(chore.title)}
+              >
+                {done && <Check className="h-4 w-4" aria-hidden="true" />}
+              </button>
+              <span className="min-w-0 flex-1">
+                <span
+                  className={cn(
+                    "block text-sm font-medium",
+                    done && "line-through opacity-70"
+                  )}
+                >
+                  {chore.title}
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  {tc.pointsLine(chore.points)}
+                </span>
+              </span>
+              <select
+                value={assignment.childId ?? ""}
+                onChange={e =>
+                  assign.mutate({
+                    id: assignment.id,
+                    childId: e.target.value ? Number(e.target.value) : null,
+                  })
+                }
+                className="rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+                aria-label={tc.assignAria(chore.title)}
+              >
+                <option value="">{tc.unassigned}</option>
+                {children.map(child => (
+                  <option key={child.id} value={child.id}>
+                    {child.name}
+                  </option>
+                ))}
+              </select>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Punktestand */}
+      {scores.length > 0 && (
+        <Card className="mb-6">
+          <CardContent className="pt-5">
+            <p className="mb-3 flex items-center gap-2 font-serif text-lg font-bold">
+              <Trophy className="h-5 w-5 text-chart-1" aria-hidden="true" />
+              {tc.scoreTitle}
+            </p>
+            <ul className="space-y-1.5">
+              {scores.map((row, index) => (
+                <li
+                  key={row.childId}
+                  className="flex items-center gap-3 text-sm"
+                >
+                  <span className="w-5 text-muted-foreground">
+                    {index + 1}.
+                  </span>
+                  <span className="flex-1 font-medium">{row.name}</span>
+                  <span className="tabular-nums">
+                    {tc.scoreLine(row.points, row.done)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs text-muted-foreground">{tc.scoreHint}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Ämtli-Katalog */}
+      <h2 className="mb-2 font-serif text-lg font-bold">{tc.choresTitle}</h2>
+      <ul className="mb-3 space-y-2">
+        {chores.map(chore => (
+          <li
+            key={chore.id}
+            className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"
+          >
+            <ClipboardList
+              className="h-4 w-4 shrink-0 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <span className="min-w-0 flex-1 text-sm">{chore.title}</span>
+            <span className="text-xs text-muted-foreground">
+              {tc.pointsLine(chore.points)}
+            </span>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => removeChore.mutate({ id: chore.id })}
+              aria-label={tc.removeAria(chore.title)}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
+            </Button>
+          </li>
+        ))}
+      </ul>
+
+      <div className="flex flex-wrap items-end gap-2">
+        <div className="min-w-40 flex-1">
+          <Label htmlFor="chore-title">{tc.newChore}</Label>
+          <Input
+            id="chore-title"
+            value={form.title}
+            maxLength={MAX_CHORE_TITLE_LENGTH}
+            placeholder={tc.newChorePlaceholder}
+            onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+          />
+        </div>
+        <div className="w-24">
+          <Label htmlFor="chore-points">{tc.pointsLabel}</Label>
+          <Input
+            id="chore-points"
+            type="number"
+            inputMode="numeric"
+            min={MIN_CHORE_POINTS}
+            max={MAX_CHORE_POINTS}
+            value={form.points}
+            onChange={e => setForm(f => ({ ...f, points: e.target.value }))}
+          />
+        </div>
+        <Button
+          onClick={() =>
+            addChore.mutate({
+              title: form.title.trim(),
+              points: Number(form.points) || DEFAULT_CHORE_POINTS,
+            })
+          }
+          disabled={!form.title.trim() || addChore.isPending}
+        >
+          <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          {tc.addChore}
+        </Button>
+      </div>
+
+      <p className="mt-6 rounded-lg border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
+        {tc.rotationHint}
+      </p>
+    </div>
+  );
+}

@@ -8,11 +8,14 @@ import {
   BatteryCharging,
   BookOpen,
   Cable,
+  CloudLightning,
   CloudSunRain,
   Cloudy,
+  ClipboardList,
   Compass,
   CookingPot,
   Cross,
+  Dices,
   Droplets,
   Footprints,
   Gauge,
@@ -23,6 +26,7 @@ import {
   LocateFixed,
   Map as MapIcon,
   Moon,
+  Music,
   NotebookPen,
   Package,
   PackageOpen,
@@ -311,6 +315,24 @@ export const modules: Module[] = [
     group: "Sicherheit",
   },
   {
+    path: "/gewitter",
+    title: l4(
+      "Gewitter-Entfernung",
+      "Distance de l'orage",
+      "Distanza del temporale",
+      "Storm distance"
+    ),
+    description: l4(
+      "Blitz und Donner zählen: Wie weit weg ist es, und kommt es näher?",
+      "Compte l'éclair et le tonnerre : à quelle distance, et est-ce que ça approche ?",
+      "Conta lampo e tuono: quanto è lontano e si sta avvicinando?",
+      "Count lightning and thunder: how far away is it, and is it coming closer?"
+    ),
+    icon: CloudLightning,
+    group: "Sicherheit",
+    offline: true,
+  },
+  {
     path: "/sos",
     title: l4(
       "SOS & Notfall",
@@ -566,6 +588,59 @@ export const modules: Module[] = [
       "Hide caches on site, kids search by hot and cold"
     ),
     icon: Gem,
+    group: "Erste Hilfe",
+  },
+  {
+    path: "/erzaehlwuerfel",
+    title: l4(
+      "Erzählwürfel",
+      "Dés à histoires",
+      "Dadi delle storie",
+      "Story dice"
+    ),
+    description: l4(
+      "Symbole würfeln und daraus reihum eine Geschichte erfinden",
+      "Lance les symboles et inventez une histoire à tour de rôle",
+      "Tira i simboli e inventate a turno una storia",
+      "Roll symbols and make up a story together"
+    ),
+    icon: Dices,
+    group: "Erste Hilfe",
+    offline: true,
+  },
+  {
+    path: "/liederbuch",
+    title: l4(
+      "Lagerfeuer-Liederbuch",
+      "Chansonnier du feu de camp",
+      "Canzoniere del falò",
+      "Campfire songbook"
+    ),
+    description: l4(
+      "Texte und Akkorde, transponierbar und mit Rotlicht fürs Dunkel",
+      "Textes et accords, transposables, avec mode lumière rouge",
+      "Testi e accordi, trasponibili, con modalità luce rossa",
+      "Lyrics and chords, transposable, with a red-light mode"
+    ),
+    icon: Music,
+    group: "Erste Hilfe",
+    offline: true,
+  },
+  {
+    path: "/aemtli",
+    title: l4(
+      "Ämtli-Plan",
+      "Plan des tâches",
+      "Piano dei compiti",
+      "Chore plan"
+    ),
+    description: l4(
+      "Aufgaben reihum verteilen, abhaken und Punkte sammeln",
+      "Répartir les tâches à tour de rôle, cocher et gagner des points",
+      "Distribuire i compiti a turno, spuntare e raccogliere punti",
+      "Share out chores in rotation, tick them off and collect points"
+    ),
+    icon: ClipboardList,
     group: "Erste Hilfe",
   },
   {
