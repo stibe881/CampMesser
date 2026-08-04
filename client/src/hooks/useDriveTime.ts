@@ -6,9 +6,17 @@
  * antwortet nicht), meldet der Haken `durationS: null`, und die Ansicht
  * rechnet mit der OSRM-Fahrzeit weiter, die sie ohnehin schon hat.
  *
- * WICHTIG für alle Aufrufer: Von Google kommt NUR diese Zahl. Strecke,
- * Verlauf und alles, was auf der Karte gezeichnet wird, stammt weiterhin
- * aus OSRM – siehe `shared/googleRoutes.ts`.
+ * WAS VON GOOGLE KOMMT: Fahrzeit UND Streckenlänge – aber beides nur als
+ * Zahl im Text. Die beiden gehören zusammen: Es ist DIE Route, die Google
+ * gerechnet hat, und eine Fahrzeit von Google mit einer Streckenlänge von
+ * OSRM danebenzustellen ergibt ein Tempo, das keiner der beiden Dienste je
+ * behauptet hat.
+ *
+ * WAS NICHT VON GOOGLE KOMMT: der VERLAUF der Route. Alles, was auf der
+ * Karte gezeichnet oder als Stützstelle abgetastet wird, stammt weiterhin
+ * aus OSRM – die Nutzungsbedingungen von Google untersagen es, ihre
+ * Geometrie auf einer fremden Karte zu zeigen (siehe
+ * `shared/googleRoutes.ts`).
  */
 import { trpc } from "@/lib/trpc";
 import type { GeoPoint } from "@shared/hiking";
@@ -16,6 +24,8 @@ import type { GeoPoint } from "@shared/hiking";
 export interface DriveTimeResult {
   /** Fahrzeit in Sekunden mit Verkehr, oder null. */
   durationS: number | null;
+  /** Länge DERSELBEN Route in Metern, oder null. */
+  distanceM: number | null;
   /** Steckt in dieser Zahl die Verkehrslage? Gehört sichtbar dazugeschrieben. */
   withTraffic: boolean;
   /** Läuft die Abfrage gerade? */
@@ -45,6 +55,7 @@ export function useDriveTime(
   const durationS = query.data?.driveTime?.durationS ?? null;
   return {
     durationS,
+    distanceM: query.data?.driveTime?.distanceM ?? null,
     withTraffic: durationS != null,
     loading: enabled && query.isLoading,
   };

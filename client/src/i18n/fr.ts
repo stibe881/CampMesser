@@ -3835,7 +3835,7 @@ export const fr: Translation = {
     methodNoteEstimate: (speed: number) =>
       `Sans réseau, pas de calcul d'itinéraire : huit points le long de la ligne droite sont vérifiés à ${speed} km/h – une estimation grossière qui peut être très fausse en montagne.`,
     methodNoteTraffic:
-      "La durée provient de la prévision de trafic de Google pour ton heure de départ ; le tracé et les points de contrôle viennent toujours du calcul d'itinéraire sur OpenStreetMap. Comme le trafic décale l'heure d'arrivée à chaque point, il décale aussi l'heure de prévision qui compte.",
+      "Distance et durée proviennent du calcul d'itinéraire de Google – avec la prévision de trafic pour ton heure de départ. Les points de contrôle sont, comme avant, placés sur l'itinéraire d'OpenStreetMap. Comme le trafic décale l'heure d'arrivée à chaque point, il décale aussi l'heure de prévision qui compte.",
     source: "Données : Open-Meteo",
   },
   packHistory: {
@@ -3975,7 +3975,7 @@ export const fr: Translation = {
     noteEstimate:
       "Sans réseau, pas de calcul d'itinéraire : ces chiffres sont estimés à vol d'oiseau (avec un facteur de détour) et peuvent être nettement à côté – surtout en montagne.",
     noteTraffic:
-      "La durée provient de la prévision de trafic de Google pour cette heure de la journée, la distance du calcul d'itinéraire sur OpenStreetMap. Chantiers et attentes à la frontière s'y ajoutent toujours.",
+      "Distance et durée proviennent du calcul d'itinéraire de Google – avec la prévision de trafic pour cette heure de la journée. Chantiers et attentes à la frontière s'y ajoutent toujours.",
   },
   passport: {
     title: "Passeport de voyage",

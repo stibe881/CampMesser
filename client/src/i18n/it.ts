@@ -3807,7 +3807,7 @@ export const it: Translation = {
     methodNoteEstimate: (speed: number) =>
       `Senza rete niente calcolo del percorso: si controllano otto punti lungo la linea d'aria con ${speed} km/h – una stima approssimativa che in montagna può sbagliare di molto.`,
     methodNoteTraffic:
-      "Il tempo di percorrenza viene dalla previsione del traffico di Google per il tuo orario di partenza; il tracciato e i punti di controllo vengono come prima dal calcolo del percorso su OpenStreetMap. Poiché il traffico sposta l'orario di arrivo a ogni punto, sposta anche quale ora di previsione conta.",
+      "Distanza e tempo di percorrenza vengono dal calcolo del percorso di Google – con la previsione del traffico per il tuo orario di partenza. I punti di controllo restano sul percorso di OpenStreetMap. Poiché il traffico sposta l'orario di arrivo a ogni punto, sposta anche quale ora di previsione conta.",
     source: "Dati: Open-Meteo",
   },
   packHistory: {
@@ -3948,7 +3948,7 @@ export const it: Translation = {
     noteEstimate:
       "Senza rete niente calcolo del percorso: questi valori sono stimati in linea d'aria (con fattore di deviazione) e possono essere molto lontani dal vero – soprattutto in montagna.",
     noteTraffic:
-      "Il tempo di percorrenza viene dalla previsione del traffico di Google per quest'ora del giorno, la distanza dal calcolo del percorso su OpenStreetMap. Cantieri e attese alla frontiera si aggiungono ancora.",
+      "Distanza e tempo di percorrenza vengono dal calcolo del percorso di Google – con la previsione del traffico per quest'ora del giorno. Cantieri e attese alla frontiera si aggiungono ancora.",
   },
   passport: {
     title: "Passaporto di viaggio",

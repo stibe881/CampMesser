@@ -3726,7 +3726,7 @@ export const en: Translation = {
     methodNoteEstimate: (speed: number) =>
       `No network, no route calculation: eight points along the straight line are checked at ${speed} km/h – a rough estimate that can be well off in the mountains.`,
     methodNoteTraffic:
-      "The driving time comes from Google's traffic forecast for your departure time; the route and the check points still come from the OpenStreetMap route calculation. Because traffic shifts the arrival time at each point, it also shifts which forecast hour counts.",
+      "Distance and driving time come from Google's route calculation – with the traffic forecast for your departure time. The check points still sit on the OpenStreetMap route. Because traffic shifts the arrival time at each point, it also shifts which forecast hour counts.",
     source: "Data: Open-Meteo",
   },
   packHistory: {
@@ -3865,7 +3865,7 @@ export const en: Translation = {
     noteEstimate:
       "No network, no route calculation: these figures are estimated from the straight-line distance (with a detour factor) and can be well off – especially in the mountains.",
     noteTraffic:
-      "The driving time comes from Google's traffic forecast for this time of day, the distance from the OpenStreetMap route calculation. Roadworks and border waits still come on top.",
+      "Distance and driving time come from Google's route calculation – with the traffic forecast for this time of day. Roadworks and border waits still come on top.",
   },
   passport: {
     title: "Travel passport",

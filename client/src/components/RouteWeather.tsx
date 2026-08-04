@@ -211,7 +211,11 @@ export default function RouteWeather({
           departureAtMs: departureMs > Date.now() ? departureMs : null,
         });
         if (result?.driveTime) {
+          // Länge UND Fahrzeit derselben Route: Googles Zeit neben OSRMs
+          // Strecke ergäbe ein Tempo, das keiner der beiden je gerechnet hat
           totalMinutes = result.driveTime.durationS / 60;
+          setTotalKm(result.driveTime.distanceM / 1000);
+          setEstimated(false);
           traffic = true;
         }
       } catch {
