@@ -2498,6 +2498,19 @@ export const en: Translation = {
     removeFailed: "The note could not be removed",
   },
   tripExpenses: {
+    budgetTitle: "Budget",
+    budgetLabel: "Budget (CHF)",
+    budgetSet: "Set a budget",
+    budgetEdit: "Change budget",
+    budgetRemove: "Remove budget",
+    budgetSaved: "Budget saved",
+    budgetSaveFailed: "Could not save the budget",
+    budgetInvalid: "Please enter an amount greater than zero.",
+    budgetBarAria: (percent: number) => `${percent} % of the budget used`,
+    budgetLeft: (amount: string, percent: number) =>
+      `${amount} left (${percent} % used).`,
+    budgetOver: (amount: string, percent: number) =>
+      `${amount} over budget (${percent} % used).`,
     title: "Trip kitty",
     toggleAria: (name: string) => `Expand or collapse the kitty for ${name}`,
     hint: "Record what the trip costs – in the end you see who owes what to whom.",

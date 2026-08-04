@@ -184,3 +184,62 @@ export function settleUp(payments: readonly Payment[]): Settlement[] {
   }
   return settlements;
 }
+
+// ── Reise-Budget (#256) ─────────────────────────────────────────────────
+
+/** Ab diesem Anteil des Budgets wird gewarnt, bevor es reisst. */
+export const BUDGET_TIGHT_RATIO = 0.8;
+
+/** Grösstes erfassbares Budget: 1 Mio. CHF – fängt Tippfehler ab. */
+export const BUDGET_MAX_RAPPEN = 100_000_000;
+
+export type BudgetLevel = "ok" | "tight" | "over";
+
+export interface BudgetStatus {
+  budgetRappen: number;
+  spentRappen: number;
+  /** Was noch übrig ist; negativ, wenn das Budget gesprengt wurde. */
+  remainingRappen: number;
+  /** Verbrauchter Anteil in Prozent, gerundet – über 100 möglich. */
+  percent: number;
+  level: BudgetLevel;
+}
+
+/**
+ * Stand der Reisekasse gegenüber dem Budget.
+ *
+ * Bewusst wird der VERBRAUCH über 100 % hinaus weitergezählt statt bei
+ * 100 gekappt: «142 % verbraucht» sagt mehr als ein voller Balken, und
+ * genau in dem Moment will man wissen, wie weit man drüber ist.
+ *
+ * Ohne Budget (null oder ≤ 0) gibt es keinen Stand – dann zeigt die
+ * Ansicht gar nichts an, statt eine Null-Grenze zu behaupten.
+ */
+export function budgetStatus(
+  spentRappen: number,
+  budgetRappen: number | null | undefined
+): BudgetStatus | null {
+  const budget = cleanRappen(budgetRappen ?? 0);
+  if (budget <= 0) return null;
+  const spent = cleanRappen(spentRappen);
+  const ratio = spent / budget;
+  return {
+    budgetRappen: budget,
+    spentRappen: spent,
+    remainingRappen: budget - spent,
+    percent: Math.round(ratio * 100),
+    level: ratio > 1 ? "over" : ratio >= BUDGET_TIGHT_RATIO ? "tight" : "ok",
+  };
+}
+
+/**
+ * Budget pro Nacht – die ehrlichere Zahl beim Vergleich zweier Reisen.
+ * Ohne Nächte (Tagesausflug) gibt es keine, dann kommt null zurück.
+ */
+export function perNightRappen(
+  totalRappen: number,
+  nights: number
+): number | null {
+  if (!Number.isFinite(nights) || nights <= 0) return null;
+  return Math.round(cleanRappen(totalRappen) / nights);
+}

@@ -1555,6 +1555,7 @@ export async function updateTripLog(
       | "rating"
       | "arrivalTime"
       | "departureTime"
+      | "budgetRappen"
       | "pitchNumber"
       | "wifiName"
       | "wifiPassword"
@@ -1579,6 +1580,23 @@ export async function getTripLog(id: number, userId: number) {
     .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)))
     .limit(1);
   return rows[0];
+}
+
+/**
+ * Reise-Budget (#256) setzen oder mit null entfernen. Bewusst OHNE
+ * Besitz-Filter: Die Reisekasse gehört allen Mitreisenden, also darf auch
+ * die Grenze davon gemeinsam gepflegt werden. Die Berechtigung prüft der
+ * Router mit canAccessTrip.
+ */
+export async function setTripBudget(
+  tripId: number,
+  budgetRappen: number | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripLogs)
+    .set({ budgetRappen })
+    .where(eq(tripLogs.id, tripId));
 }
 
 /** Sterne-Bewertung (1–5) setzen oder mit null entfernen (nur eigener Eintrag). */

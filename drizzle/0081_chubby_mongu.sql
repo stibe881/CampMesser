@@ -1,0 +1,1 @@
+ALTER TABLE `tripLogs` ADD `budgetRappen` int;

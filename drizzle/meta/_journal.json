@@ -568,6 +568,13 @@
       "when": 1785832572981,
       "tag": "0080_awesome_gladiator",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "5",
+      "when": 1785833677368,
+      "tag": "0081_chubby_mongu",
+      "breakpoints": true
     }
   ]
 }

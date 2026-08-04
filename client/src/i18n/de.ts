@@ -2590,6 +2590,19 @@ export const de = {
     removeFailed: "Zettel konnte nicht entfernt werden",
   },
   tripExpenses: {
+    budgetTitle: "Budget",
+    budgetLabel: "Budget (CHF)",
+    budgetSet: "Budget setzen",
+    budgetEdit: "Budget ändern",
+    budgetRemove: "Budget entfernen",
+    budgetSaved: "Budget gespeichert",
+    budgetSaveFailed: "Budget konnte nicht gespeichert werden",
+    budgetInvalid: "Bitte einen Betrag grösser als null eintragen.",
+    budgetBarAria: (percent: number) => `${percent} % des Budgets verbraucht`,
+    budgetLeft: (amount: string, percent: number) =>
+      `Noch ${amount} übrig (${percent} % verbraucht).`,
+    budgetOver: (amount: string, percent: number) =>
+      `${amount} über dem Budget (${percent} % verbraucht).`,
     title: "Reisekasse",
     toggleAria: (name: string) => `Reisekasse von ${name} auf- oder zuklappen`,
     hint: "Halte fest, was die Reise kostet – am Schluss siehst du, wer wem was schuldet.",

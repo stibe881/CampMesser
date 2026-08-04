@@ -378,6 +378,12 @@ export const tripLogs = mysqlTable(
      * Stromkasten steht. Bewusst an der Reise und nicht am Zeltplatz-Favoriten:
      * die Nummer wechselt bei jedem Besuch, das Passwort ändert die Rezeption.
      */
+    /**
+     * Reise-Budget in Rappen (#256); null = kein Budget gesetzt. Bewusst an
+     * der Reise und nicht als globale Einstellung: Ein Wochenende und drei
+     * Wochen Frankreich haben nichts miteinander zu tun.
+     */
+    budgetRappen: int("budgetRappen"),
     pitchNumber: varchar("pitchNumber", { length: 40 }),
     wifiName: varchar("wifiName", { length: 80 }),
     wifiPassword: varchar("wifiPassword", { length: 80 }),

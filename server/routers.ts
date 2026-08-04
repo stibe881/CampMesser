@@ -57,6 +57,7 @@ import {
   type FoodStorage,
 } from "@shared/food";
 import {
+  BUDGET_MAX_RAPPEN,
   EXPENSE_CATEGORIES,
   EXPENSE_DESCRIPTION_MAX_LENGTH,
   EXPENSE_MAX_RAPPEN,
@@ -4126,6 +4127,34 @@ export const appRouter = router({
      * Beträge kommen und gehen ausschliesslich als Rappen-Ganzzahlen.
      */
     expenses: router({
+      /**
+       * Reise-Budget (#256) setzen oder mit null wieder entfernen.
+       * Erlaubt für alle Mitreisenden – die Reisekasse gehört allen, also
+       * auch ihre Grenze.
+       */
+      setBudget: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            budgetRappen: z
+              .number()
+              .int()
+              .min(1)
+              .max(BUDGET_MAX_RAPPEN)
+              .nullable(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          await db.setTripBudget(input.tripId, input.budgetRappen);
+          return { success: true } as const;
+        }),
       list: protectedProcedure
         .input(z.object({ tripId: z.number().int().positive() }))
         .query(async ({ ctx, input }) => {

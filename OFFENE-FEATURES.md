@@ -25,12 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 16 Punkte
+## Runde 27 – 15 Punkte
 
 ### Geld
 
-- [ ] **Reise-Budget mit Limite** (#256) – Warnung, wenn die Reisekasse das
-      Budget sprengt
 - [ ] **Ausgaben-Statistik über alle Reisen** (#257) – Kosten pro Jahr,
       Ø pro Nacht, teuerste Kategorie
 - [ ] **Reisekasse als CSV exportieren** (#258) – für die Abrechnung daheim

@@ -2561,6 +2561,19 @@ export const it: Translation = {
     removeFailed: "Impossibile togliere il biglietto",
   },
   tripExpenses: {
+    budgetTitle: "Budget",
+    budgetLabel: "Budget (CHF)",
+    budgetSet: "Impostare un budget",
+    budgetEdit: "Modificare il budget",
+    budgetRemove: "Rimuovere il budget",
+    budgetSaved: "Budget salvato",
+    budgetSaveFailed: "Impossibile salvare il budget",
+    budgetInvalid: "Inserisci un importo maggiore di zero.",
+    budgetBarAria: (percent: number) => `${percent} % del budget utilizzato`,
+    budgetLeft: (amount: string, percent: number) =>
+      `Restano ${amount} (${percent} % utilizzato).`,
+    budgetOver: (amount: string, percent: number) =>
+      `${amount} oltre il budget (${percent} % utilizzato).`,
     title: "Cassa del viaggio",
     toggleAria: (name: string) => `Apri o chiudi la cassa del viaggio ${name}`,
     hint: "Annota quanto costa il viaggio – alla fine vedi chi deve cosa a chi.",

@@ -91,6 +91,8 @@ import {
   EXPENSE_MAX_RAPPEN,
   EXPENSE_PAID_BY_MAX_LENGTH,
   expensesByCategory,
+  budgetStatus,
+  BUDGET_MAX_RAPPEN,
   expensesTotalRappen,
   normalizeExpenseCategory,
   settleUp,
@@ -1408,12 +1410,15 @@ function TripExpenses({
   tripName,
   defaultDay,
   shared,
+  budgetRappen,
 }: {
   tripId: number;
   tripName: string;
   /** Vorschlag fürs Datumsfeld: heute, sonst der Reisebeginn. */
   defaultDay: string;
   shared: boolean;
+  /** Reise-Budget in Rappen (#256); null = keins gesetzt. */
+  budgetRappen: number | null;
 }) {
   const { lang, t } = useI18n();
   const { user } = useAuth();
@@ -1426,6 +1431,9 @@ function TripExpenses({
   const [description, setDescription] = useState("");
   const [day, setDay] = useState(defaultDay);
   const [paidBy, setPaidBy] = useState("");
+  /** Budget-Feld (#256): offen = Eingabe sichtbar. */
+  const [editingBudget, setEditingBudget] = useState(false);
+  const [budgetInput, setBudgetInput] = useState("");
 
   const query = trpc.trips.expenses.list.useQuery(
     { tripId },
@@ -1467,6 +1475,15 @@ function TripExpenses({
 
   const total = useMemo(() => expensesTotalRappen(expenses), [expenses]);
   const byCategory = useMemo(() => expensesByCategory(expenses), [expenses]);
+  const budget = budgetStatus(total, budgetRappen);
+  const budgetMutation = trpc.trips.expenses.setBudget.useMutation({
+    onSuccess: () => {
+      utils.trips.list.invalidate();
+      setEditingBudget(false);
+      toast.success(t.tripExpenses.budgetSaved);
+    },
+    onError: e => toast.error(e.message || t.tripExpenses.budgetSaveFailed),
+  });
   const settlements = useMemo(
     () =>
       settleUp(expenses.map(e => ({ who: e.paidBy, rappen: e.amountRappen }))),
@@ -1568,6 +1585,135 @@ function TripExpenses({
       {open && (
         <div className="space-y-3 border-t border-border px-3 py-2.5">
           <p className="text-xs text-muted-foreground">{t.tripExpenses.hint}</p>
+          {/* Budget (#256): steht ÜBER den Ausgaben und auch dann, wenn
+              noch keine erfasst ist – ein Budget setzt man vorher. */}
+          <div className="rounded-lg border border-border bg-muted/20 px-3 py-2">
+            {editingBudget ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <label
+                  className="text-xs text-muted-foreground"
+                  htmlFor={`budget-${tripId}`}
+                >
+                  {t.tripExpenses.budgetLabel}
+                </label>
+                <Input
+                  id={`budget-${tripId}`}
+                  inputMode="decimal"
+                  className="w-28"
+                  value={budgetInput}
+                  placeholder="0.00"
+                  onChange={e => setBudgetInput(e.target.value)}
+                />
+                <Button
+                  size="sm"
+                  disabled={budgetMutation.isPending}
+                  onClick={() => {
+                    const rappen = parseChfInput(budgetInput);
+                    if (rappen === null || rappen < 1) {
+                      toast.error(t.tripExpenses.budgetInvalid);
+                      return;
+                    }
+                    budgetMutation.mutate({
+                      tripId,
+                      budgetRappen: Math.min(rappen, BUDGET_MAX_RAPPEN),
+                    });
+                  }}
+                >
+                  {t.common.save}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setEditingBudget(false)}
+                >
+                  {t.common.cancel}
+                </Button>
+                {budgetRappen != null && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-muted-foreground"
+                    disabled={budgetMutation.isPending}
+                    onClick={() =>
+                      budgetMutation.mutate({ tripId, budgetRappen: null })
+                    }
+                  >
+                    {t.tripExpenses.budgetRemove}
+                  </Button>
+                )}
+              </div>
+            ) : budget ? (
+              <>
+                <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t.tripExpenses.budgetTitle}
+                  </span>
+                  <span className="font-mono text-sm tabular-nums">
+                    {money(budget.spentRappen)} / {money(budget.budgetRappen)}
+                  </span>
+                </div>
+                <div
+                  className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted"
+                  role="img"
+                  aria-label={t.tripExpenses.budgetBarAria(budget.percent)}
+                >
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all",
+                      budget.level === "over"
+                        ? "bg-destructive"
+                        : budget.level === "tight"
+                          ? "bg-amber-500"
+                          : "bg-primary"
+                    )}
+                    // Der Balken wird bei 100 % gekappt, die ZAHL nicht –
+                    // «142 %» sagt mehr als ein voller Balken.
+                    style={{ width: `${Math.min(100, budget.percent)}%` }}
+                  />
+                </div>
+                <p
+                  className={cn(
+                    "mt-1 text-xs",
+                    budget.level === "over"
+                      ? "font-medium text-destructive"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {budget.level === "over"
+                    ? t.tripExpenses.budgetOver(
+                        money(-budget.remainingRappen),
+                        budget.percent
+                      )
+                    : t.tripExpenses.budgetLeft(
+                        money(budget.remainingRappen),
+                        budget.percent
+                      )}
+                </p>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="mt-1 h-7 px-2 text-xs text-muted-foreground"
+                  onClick={() => {
+                    setBudgetInput(rappenToInput(budget.budgetRappen));
+                    setEditingBudget(true);
+                  }}
+                >
+                  {t.tripExpenses.budgetEdit}
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setBudgetInput("");
+                  setEditingBudget(true);
+                }}
+              >
+                {t.tripExpenses.budgetSet}
+              </Button>
+            )}
+          </div>
           {query.isLoading ? (
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -4309,6 +4455,7 @@ export default function TripsPage() {
                         tripName={trip.title || placeName(trip)}
                         defaultDay={today > trip.endDate ? trip.endDate : today}
                         shared={trip.shared || trip.role === "member"}
+                        budgetRappen={trip.budgetRappen}
                       />
                       {/* Termin-Finder (#253): nur bei gemeinsamen Reisen und
                           nur, solange die Reise noch bevorsteht – über einen
@@ -4597,6 +4744,7 @@ export default function TripsPage() {
                             today > trip.endDate ? trip.endDate : today
                           }
                           shared={trip.shared || trip.role === "member"}
+                          budgetRappen={trip.budgetRappen}
                         />
                         {/* Pinnwand (#245): nur bei gemeinsamen Reisen */}
                         {(trip.shared || trip.role === "member") && (

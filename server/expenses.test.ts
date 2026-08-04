@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  budgetStatus,
+  BUDGET_TIGHT_RATIO,
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_LABELS,
   expensesByCategory,
   expensesTotalRappen,
   normalizeExpenseCategory,
+  perNightRappen,
   settleUp,
   type Payment,
 } from "@shared/expenses";
@@ -214,5 +217,50 @@ describe("settleUp", () => {
       { from: "Dario", to: "Beat", rappen: 2250 },
     ]);
     expect(transferSum(result)).toBe(7500);
+  });
+});
+
+describe("budgetStatus", () => {
+  it("rechnet Rest und Anteil aus", () => {
+    const status = budgetStatus(30_000, 100_000);
+    expect(status?.remainingRappen).toBe(70_000);
+    expect(status?.percent).toBe(30);
+    expect(status?.level).toBe("ok");
+  });
+
+  it("warnt, bevor das Budget reisst", () => {
+    const status = budgetStatus(
+      Math.round(100_000 * BUDGET_TIGHT_RATIO),
+      100_000
+    );
+    expect(status?.level).toBe("tight");
+  });
+
+  it("zählt über 100 % weiter, statt zu kappen", () => {
+    const status = budgetStatus(142_000, 100_000);
+    expect(status?.percent).toBe(142);
+    expect(status?.remainingRappen).toBe(-42_000);
+    expect(status?.level).toBe("over");
+  });
+
+  it("gibt ohne Budget nichts zurück", () => {
+    expect(budgetStatus(5000, null)).toBeNull();
+    expect(budgetStatus(5000, 0)).toBeNull();
+    expect(budgetStatus(5000, -100)).toBeNull();
+  });
+
+  it("verträgt kaputte Ausgaben-Summen", () => {
+    expect(budgetStatus(Number.NaN, 100_000)?.spentRappen).toBe(0);
+  });
+});
+
+describe("perNightRappen", () => {
+  it("teilt durch die Nächte und rundet", () => {
+    expect(perNightRappen(10_000, 3)).toBe(3333);
+  });
+
+  it("gibt es ohne Nächte nicht", () => {
+    expect(perNightRappen(10_000, 0)).toBeNull();
+    expect(perNightRappen(10_000, -2)).toBeNull();
   });
 });
