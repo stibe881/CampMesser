@@ -3747,6 +3747,21 @@ export const en: Translation = {
     climbLine: (up: number, down: number) => `↑${up} m ↓${down} m`,
     note: "Elevation is plotted against distance, not time – otherwise every break would look like flat ground. The final part-kilometre is marked “Rest”.",
   },
+  reservation: {
+    title: "Reservation",
+    empty: "No booking confirmation stored yet.",
+    add: "Add confirmation",
+    replace: "Replace",
+    openImage: "View confirmation",
+    openPdf: "Open PDF",
+    removeAria: "Delete the booking confirmation",
+    uploaded: "Confirmation saved.",
+    uploadFailed: "The confirmation could not be saved.",
+    removeFailed: "The confirmation could not be deleted.",
+    tooLarge: "The file is too large (10 MB max).",
+    offlineNote:
+      "Photo or PDF. Once opened, the confirmation stays available without a signal – handy at the barrier at 10 pm.",
+  },
   shops: {
     sectionAria: "Shopping nearby",
     title: "Shopping nearby",

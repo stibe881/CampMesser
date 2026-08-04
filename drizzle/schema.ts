@@ -365,6 +365,11 @@ export const tripLogs = mysqlTable(
     /** Anreise (erster Abend) */
     /** Verknüpfte Packliste (optional) – für den Pack-Fortschritt geplanter Trips */
     packListId: int("packListId"),
+    /**
+     * Buchungsbestätigung als Foto oder PDF (#279); Datei liegt unter
+     * uploads/reservations/<fileName>. null = keine hinterlegt.
+     */
+    reservationFileName: varchar("reservationFileName", { length: 64 }),
     startDate: date("startDate", { mode: "string" }).notNull(),
     /** Abreise – Nächte ergeben sich aus der Differenz der beiden Daten */
     endDate: date("endDate", { mode: "string" }).notNull(),

@@ -3828,6 +3828,21 @@ export const it: Translation = {
     climbLine: (up: number, down: number) => `↑${up} m ↓${down} m`,
     note: "L'altitudine è riportata sulla distanza e non sul tempo – altrimenti ogni pausa sembrerebbe un tratto piano. L'ultimo chilometro iniziato è segnato come «Resto».",
   },
+  reservation: {
+    title: "Prenotazione",
+    empty: "Nessuna conferma di prenotazione salvata.",
+    add: "Aggiungi la conferma",
+    replace: "Sostituisci",
+    openImage: "Vedi la conferma",
+    openPdf: "Apri il PDF",
+    removeAria: "Elimina la conferma di prenotazione",
+    uploaded: "Conferma salvata.",
+    uploadFailed: "Non è stato possibile salvare la conferma.",
+    removeFailed: "Non è stato possibile eliminare la conferma.",
+    tooLarge: "Il file è troppo grande (max 10 MB).",
+    offlineNote:
+      "Foto o PDF. Una volta aperta, la conferma resta consultabile anche senza rete – comodo alla sbarra alle 22.",
+  },
   shops: {
     sectionAria: "Fare la spesa nei dintorni",
     title: "Fare la spesa nei dintorni",

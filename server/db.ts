@@ -1559,6 +1559,7 @@ export async function updateTripLog(
       InsertTripLog,
       | "spotId"
       | "packListId"
+      | "reservationFileName"
       | "location"
       | "title"
       | "notes"
@@ -3246,4 +3247,26 @@ export async function deleteChoreAssignmentsForDay(
     .where(
       and(eq(choreAssignments.userId, userId), eq(choreAssignments.day, day))
     );
+}
+
+/**
+ * Reise über den Dateinamen ihrer Buchungsbestätigung finden (#279) –
+ * die Auslieferung prüft damit, dass die Datei wirklich dem Konto gehört.
+ */
+export async function getTripLogByReservationFileName(
+  fileName: string,
+  userId: number
+) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripLogs)
+    .where(
+      and(
+        eq(tripLogs.reservationFileName, fileName),
+        eq(tripLogs.userId, userId)
+      )
+    )
+    .limit(1);
+  return rows[0];
 }

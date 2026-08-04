@@ -3856,6 +3856,21 @@ export const fr: Translation = {
     climbLine: (up: number, down: number) => `↑${up} m ↓${down} m`,
     note: "L'altitude est portée sur la distance et non sur le temps – sinon, chaque pause ressemblerait à un plat. Le dernier kilomètre entamé est marqué « Reste ».",
   },
+  reservation: {
+    title: "Réservation",
+    empty: "Aucune confirmation de réservation enregistrée.",
+    add: "Ajouter la confirmation",
+    replace: "Remplacer",
+    openImage: "Voir la confirmation",
+    openPdf: "Ouvrir le PDF",
+    removeAria: "Supprimer la confirmation de réservation",
+    uploaded: "Confirmation enregistrée.",
+    uploadFailed: "La confirmation n'a pas pu être enregistrée.",
+    removeFailed: "La confirmation n'a pas pu être supprimée.",
+    tooLarge: "Le fichier est trop volumineux (10 Mo max.).",
+    offlineNote:
+      "Photo ou PDF. Une fois ouverte, la confirmation reste consultable sans réseau – pratique à la barrière à 22 h.",
+  },
   shops: {
     sectionAria: "Faire les courses à proximité",
     title: "Faire les courses à proximité",

@@ -3859,6 +3859,21 @@ export const de = {
     climbLine: (up: number, down: number) => `↑${up} m ↓${down} m`,
     note: "Die Höhe steht über der Strecke und nicht über der Zeit – sonst sähe jede Pause wie eine Ebene aus. Der letzte, angebrochene Kilometer ist als «Rest» gekennzeichnet.",
   },
+  reservation: {
+    title: "Reservation",
+    empty: "Noch keine Buchungsbestätigung hinterlegt.",
+    add: "Bestätigung hinzufügen",
+    replace: "Ersetzen",
+    openImage: "Bestätigung ansehen",
+    openPdf: "PDF öffnen",
+    removeAria: "Buchungsbestätigung löschen",
+    uploaded: "Bestätigung gespeichert.",
+    uploadFailed: "Die Bestätigung konnte nicht gespeichert werden.",
+    removeFailed: "Die Bestätigung konnte nicht gelöscht werden.",
+    tooLarge: "Die Datei ist zu gross (max. 10 MB).",
+    offlineNote:
+      "Foto oder PDF. Einmal geöffnet, bleibt die Bestätigung auch ohne Empfang abrufbar – praktisch an der Schranke um 22 Uhr.",
+  },
   shops: {
     sectionAria: "Einkaufen in der Nähe",
     title: "Einkaufen in der Nähe",

@@ -3891,6 +3891,26 @@ export const appRouter = router({
   }),
 
   trips: router({
+    /** Buchungsbestätigung entfernen (#279) – Datei und Verweis. */
+    removeReservation: protectedProcedure
+      .input(z.object({ tripId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.getTripLog(input.tripId, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Reise nicht gefunden.",
+          });
+        }
+        if (trip.reservationFileName) {
+          await db.updateTripLog(input.tripId, ctx.user.id, {
+            reservationFileName: null,
+          });
+          const { reservationStorage } = await import("./photoStorage");
+          await reservationStorage.deleteFiles([trip.reservationFileName]);
+        }
+        return { success: true } as const;
+      }),
     /**
      * Eigene Reisen plus Reisen, bei denen man eingeladenes Mitglied ist –
      * Mitglieds-Trips tragen role "member" und den Namen der Besitzerin/des

@@ -25,14 +25,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 28 – 4 Punkte
-
-### Karte & Wetter
-
-### Platz-Wissen
-
-- [ ] **Reservation ablegen** (#279) – Buchungsbestätigung als Foto oder PDF an
-      der Reise, offline abrufbar
+## Runde 28 – 3 Punkte
 
 ### Wandern
 

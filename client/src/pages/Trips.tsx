@@ -154,6 +154,7 @@ import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import TripDatePoll from "@/components/TripDatePoll";
 import TripGuestbook from "@/components/TripGuestbook";
+import TripReservation from "@/components/TripReservation";
 
 /** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
 const FREE_LOCATION = "frei";
@@ -4664,6 +4665,16 @@ export default function TripsPage() {
                         tripId={trip.id}
                         tripName={trip.title || placeName(trip)}
                       />
+                      {/* Buchungsbestätigung (#279): nur bei eigenen Reisen –
+                          die Datei liegt am Konto der Besitzerin/des
+                          Besitzers, Mitglieder sehen sie nicht */}
+                      {trip.role !== "member" && (
+                        <TripReservation
+                          tripId={trip.id}
+                          fileName={trip.reservationFileName ?? null}
+                          className="mt-2"
+                        />
+                      )}
                       <TripPhotos
                         tripId={trip.id}
                         tripName={trip.title || placeName(trip)}
@@ -4941,6 +4952,15 @@ export default function TripsPage() {
                           tripId={trip.id}
                           tripName={trip.title || placeName(trip)}
                         />
+                        {/* Buchungsbestätigung (#279) – auch bei vergangenen
+                            Reisen: die Rechnung will man später noch finden */}
+                        {trip.role !== "member" && (
+                          <TripReservation
+                            tripId={trip.id}
+                            fileName={trip.reservationFileName ?? null}
+                            className="mt-2"
+                          />
+                        )}
                         <TripPhotos
                           tripId={trip.id}
                           tripName={trip.title || placeName(trip)}
