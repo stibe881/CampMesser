@@ -1302,6 +1302,7 @@ function SpotsMap({
     nightsBySpotId,
     clusterZoom,
     layerVisibility,
+    mapReady,
     t,
     navigate,
     utils,
