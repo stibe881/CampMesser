@@ -69,6 +69,28 @@ export const MAX_TRACK_POINTS = 20_000;
 export const TRACK_NAME_MAX_LENGTH = 80;
 
 /**
+ * Höchstzahl Punkte in der ÖFFENTLICHEN Ansicht einer geteilten Wanderung
+ * (#282). Eine Tageswanderung hat schnell zehntausend Punkte; die über das
+ * Mobilnetz zu schicken, damit jemand eine Linie und ein Höhenprofil
+ * anschaut, wäre Verschwendung – sichtbar ist der Unterschied nicht.
+ */
+export const SHARED_TRACK_MAX_POINTS = 2000;
+
+/**
+ * Punktreihe gleichmässig ausdünnen (#282). Der letzte Punkt bleibt IMMER
+ * erhalten: Ohne ihn endete die Linie irgendwo kurz vor dem Ziel, und genau
+ * das Ende schaut man sich an. Kürzere Reihen kommen unverändert zurück.
+ */
+export function thinTrackPoints(
+  points: TrackPoint[],
+  maxPoints = SHARED_TRACK_MAX_POINTS
+): TrackPoint[] {
+  if (maxPoints < 2 || points.length <= maxPoints) return points;
+  const step = Math.ceil(points.length / maxPoints);
+  return points.filter((_, i) => i % step === 0 || i === points.length - 1);
+}
+
+/**
  * Urteil über einen neuen Messpunkt.
  * - `ok`: aufnehmen
  * - `invalid`: unbrauchbare Koordinaten/Zeit

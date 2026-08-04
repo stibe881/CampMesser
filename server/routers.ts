@@ -113,7 +113,9 @@ import {
 } from "@shared/guestbook";
 import {
   MAX_TRACK_POINTS,
+  parseTrackPoints,
   serializeTrackPoints,
+  thinTrackPoints,
   TRACK_NAME_MAX_LENGTH,
   trackStats,
   type TrackPoint,
@@ -5874,6 +5876,72 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         await db.deleteHikeTrack(input.id, ctx.user.id);
         return { success: true } as const;
+      }),
+    /** Wanderung per Link teilen (#282) – gleiches Muster wie Rezepte/Plätze. */
+    share: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          expiresInDays: shareExpiryInput,
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const track = await db.getHikeTrack(input.id, ctx.user.id);
+        if (!track) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Wanderung nicht gefunden.",
+          });
+        }
+        const expiresAt = shareExpiryFor(
+          input.expiresInDays,
+          track.shareExpiresAt
+        );
+        const token = track.shareToken ?? nanoid(16);
+        await db.setHikeTrackShareToken(
+          input.id,
+          ctx.user.id,
+          token,
+          expiresAt
+        );
+        return { token, expiresAt };
+      }),
+    unshare: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.setHikeTrackShareToken(input.id, ctx.user.id, null);
+        return { success: true } as const;
+      }),
+    /**
+     * Geteilte Wanderung öffentlich abrufen (kein Login nötig): Name,
+     * Eckdaten und Punktreihe für Karte und Höhenprofil.
+     *
+     * Die Punkte werden auf SHARED_TRACK_MAX_POINTS ausgedünnt – eine
+     * Tageswanderung hat schnell zehntausend Punkte, und niemand lädt
+     * dafür ein Megabyte über das Mobilnetz. Für Karte und Profil ist der
+     * Unterschied nicht sichtbar.
+     *
+     * Bewusst NICHT dabei: der Name der wandernden Person und die
+     * Reise-Zuordnung – geteilt wird die Wanderung, nicht das Konto.
+     */
+    sharedGet: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .query(async ({ input }) => {
+        const track = await db.getHikeTrackByToken(input.token);
+        if (!track) return { track: null };
+        const points = thinTrackPoints(parseTrackPoints(track.pointsJson));
+        return {
+          track: {
+            name: track.name,
+            startedAt: track.startedAt,
+            endedAt: track.endedAt,
+            distanceM: track.distanceM,
+            durationS: track.durationS,
+            ascentM: track.ascentM,
+            descentM: track.descentM,
+            points,
+          },
+        };
       }),
   }),
 

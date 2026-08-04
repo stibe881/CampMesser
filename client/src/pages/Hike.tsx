@@ -19,11 +19,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Download,
   Footprints,
+  Link2,
   Loader2,
   MapPin,
   Pause,
   Pencil,
   Play,
+  Share2,
   Square,
   Trash2,
   TrendingDown,
@@ -36,6 +38,8 @@ import TrackProfile from "@/components/TrackProfile";
 import LoginPrompt from "@/components/LoginPrompt";
 import NearbyHikes from "@/components/NearbyHikes";
 import RoutePlanner from "@/components/RoutePlanner";
+import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
+import type { ShareExpiryDays } from "@shared/sharing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -236,6 +240,56 @@ export default function HikePage() {
   const addMutation = trpc.tracks.add.useMutation();
   const updateMutation = trpc.tracks.update.useMutation();
   const removeMutation = trpc.tracks.remove.useMutation();
+
+  // ── Wanderung per Link teilen (#282) ──
+  /** Offener Teilen-Dialog samt erzeugtem Link. */
+  const [share, setShare] = useState<{
+    id: number;
+    name: string;
+    url: string;
+    expiresAt: Date | null;
+  } | null>(null);
+  const [shareExpiresIn, setShareExpiresIn] = useState<ShareExpiryDays | null>(
+    null
+  );
+  const shareMutation = trpc.tracks.share.useMutation({
+    onError: () => toast.error(t.hike.shareFailed),
+  });
+  const unshareMutation = trpc.tracks.unshare.useMutation({
+    onSuccess: () => {
+      void utils.tracks.list.invalidate();
+      setShare(null);
+      toast.success(t.hike.unshared);
+    },
+    onError: () => toast.error(t.hike.unshareFailed),
+  });
+
+  /**
+   * Teil-Link erzeugen (idempotent: ein bestehender Token bleibt derselbe),
+   * Dialog öffnen und den Link gleich in die Zwischenablage legen.
+   */
+  const openShare = (
+    track: { id: number; name: string },
+    // undefined = Gültigkeit unverändert lassen (Dialog nur öffnen)
+    expiresInDays?: ShareExpiryDays | null
+  ) => {
+    shareMutation.mutate(
+      { id: track.id, expiresInDays },
+      {
+        onSuccess: async ({ token, expiresAt }) => {
+          const url = `${window.location.origin}/wanderung/${token}`;
+          setShare({ id: track.id, name: track.name, url, expiresAt });
+          void utils.tracks.list.invalidate();
+          try {
+            await navigator.clipboard.writeText(url);
+            toast.success(t.hike.shareCopied);
+          } catch {
+            // Zwischenablage blockiert – der Link steht im Dialog
+          }
+        },
+      }
+    );
+  };
 
   const trips = tripsQuery.data ?? [];
   const tripName = (id: number | null) => {
@@ -623,6 +677,24 @@ export default function HikePage() {
                       >
                         <Pencil className="h-4 w-4" aria-hidden="true" />
                       </Button>
+                      {/* Wanderung per Link teilen (#282) */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t.hike.shareAria(track.name)}
+                        onClick={() =>
+                          openShare({ id: track.id, name: track.name })
+                        }
+                        disabled={shareMutation.isPending}
+                      >
+                        <Share2
+                          className={cn(
+                            "h-4 w-4",
+                            track.shareToken ? "text-primary" : undefined
+                          )}
+                          aria-hidden="true"
+                        />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -800,6 +872,67 @@ export default function HikePage() {
               </Button>
             )}
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Teil-Link zur Wanderung (#282) */}
+      <Dialog
+        open={share !== null}
+        onOpenChange={open => {
+          if (!open) setShare(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif">
+              {t.hike.shareTitle}
+            </DialogTitle>
+            <DialogDescription>{t.hike.shareDesc}</DialogDescription>
+          </DialogHeader>
+          {share && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+                <Link2
+                  className="h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                <code className="min-w-0 flex-1 truncate text-xs">
+                  {share.url}
+                </code>
+                <button
+                  type="button"
+                  className="shrink-0 text-xs font-medium text-primary hover:underline"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(share.url);
+                      toast.success(t.common.linkCopied);
+                    } catch {
+                      toast.error(t.common.copyFailed);
+                    }
+                  }}
+                >
+                  {t.common.copy}
+                </button>
+              </div>
+              <div className="space-y-1">
+                <ShareExpirySelect
+                  value={shareExpiresIn}
+                  onChange={days => {
+                    setShareExpiresIn(days);
+                    openShare(share, days);
+                  }}
+                />
+                <ShareExpiryNote expiresAt={share.expiresAt} />
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => unshareMutation.mutate({ id: share.id })}
+                disabled={unshareMutation.isPending}
+              >
+                {t.hike.unshare}
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

@@ -25,12 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 28 – 2 Punkte
+## Runde 28 – 1 Punkt
 
 ### Wandern
 
-- [ ] **Wanderung per Link teilen** (#282) – Track für Mitreisende, im
-      bestehenden Teil-Muster
 - [ ] **Auto-Standort merken** (#283) – wo steht das Fahrzeug, mit
       Kompass-Peilung zurück
 

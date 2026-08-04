@@ -1376,6 +1376,14 @@ export const hikeTracks = mysqlTable(
     descentM: int("descentM").notNull().default(0),
     /** Punktreihe als kompaktes Tupel-JSON (shared/track.ts) */
     pointsJson: mediumtext("pointsJson").notNull(),
+    /**
+     * Öffentlicher Teil-Token (#282): Wer den Link kennt, sieht Karte,
+     * Eckdaten und Höhenprofil der Wanderung – ohne Konto und ohne Namen
+     * der wandernden Person. null = nicht geteilt.
+     */
+    shareToken: varchar("shareToken", { length: 64 }).unique(),
+    /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
+    shareExpiresAt: timestamp("shareExpiresAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },

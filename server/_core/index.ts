@@ -965,6 +965,7 @@ async function startServer() {
       "/quiz/:token",
       "/rezept/:token",
       "/standort/:token",
+      "/wanderung/:token",
     ],
     async (req, res, next) => {
       try {

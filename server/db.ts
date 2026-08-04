@@ -2477,6 +2477,9 @@ export async function getHikeTracks(userId: number) {
       durationS: hikeTracks.durationS,
       ascentM: hikeTracks.ascentM,
       descentM: hikeTracks.descentM,
+      // Teil-Status (#282): die Liste zeigt, ob ein Link im Umlauf ist
+      shareToken: hikeTracks.shareToken,
+      shareExpiresAt: hikeTracks.shareExpiresAt,
       createdAt: hikeTracks.createdAt,
     })
     .from(hikeTracks)
@@ -2533,6 +2536,34 @@ export async function detachHikeTracksFromTrip(tripId: number) {
     .update(hikeTracks)
     .set({ tripId: null })
     .where(eq(hikeTracks.tripId, tripId));
+}
+
+/** Teil-Token einer Wanderung setzen oder entfernen (#282). */
+export async function setHikeTrackShareToken(
+  id: number,
+  userId: number,
+  token: string | null,
+  expiresAt: Date | null = null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(hikeTracks)
+    // Ohne Token gibt es auch keinen Ablauf mehr
+    .set({ shareToken: token, shareExpiresAt: token ? expiresAt : null })
+    .where(and(eq(hikeTracks.id, id), eq(hikeTracks.userId, userId)));
+}
+
+/** Geteilte Wanderung anhand des Tokens laden (öffentlich, ohne Login). */
+export async function getHikeTrackByToken(token: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(hikeTracks)
+    .where(eq(hikeTracks.shareToken, token))
+    .limit(1);
+  const row = rows[0];
+  // Abgelaufene Teil-Links verhalten sich wie unbekannte Tokens
+  return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
 }
 
 // ── Vorher gezeichnete Routen (#281) ──
