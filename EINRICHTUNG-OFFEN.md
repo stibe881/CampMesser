@@ -135,6 +135,50 @@ Google berechnete Linie gehörte dort nicht hin. Für Wanderwege ist OSM ohnehin
 die bessere Quelle: Das Schweizer Wanderwegnetz ist dort samt SAC-Skala
 erfasst, während Google viele dieser Pfade gar nicht kennt.
 
+## 7b. Google-Maps-Karte (zweiter Schlüssel!)
+
+Die Karten der App sollen Google Maps zeigen. Dafür braucht es **einen
+zweiten Schlüssel** – nicht denselben wie für die Fahrzeiten. Der Grund ist
+wichtig: Der Fahrzeiten-Schlüssel (Punkt 7) wird nur vom Server benutzt und
+verlässt ihn nie. Der Karten-Schlüssel MUSS dagegen in den Browser, sonst
+lädt keine Google-Karte. Er ist deshalb kein Geheimnis, sondern wird über
+die **Herkunfts-Sperre** geschützt.
+
+**Was du tun musst:**
+
+1. In der Google Cloud Console (dasselbe Projekt wie in Punkt 7) unter
+   **APIs & Services → Library** die **Maps JavaScript API** aktivieren.
+2. Unter **Credentials** einen **zweiten** API-Schlüssel erzeugen. Diesen
+   einschränken auf:
+   - **Application restrictions → Websites**: `https://campmesser.ch/*`
+     (und, falls du lokal entwickelst, `http://localhost:*/*`)
+   - **API restrictions**: nur **Maps JavaScript API**
+3. Unter **Google Maps Platform → Map Management** eine **Karten-Id**
+   (Map ID) anlegen, Kartentyp «JavaScript». Ohne sie gibt es keine
+   HTML-Pins, und die App bleibt bei OpenStreetMap.
+4. Beides in die Server-`.env`:
+
+```
+GOOGLE_MAPS_BROWSER_KEY=<zweiter Schlüssel, auf die Website eingeschränkt>
+GOOGLE_MAPS_MAP_ID=<Karten-Id aus Map Management>
+```
+
+5. Passenger neu starten (`touch ~/campmesser/tmp/restart.txt`).
+
+**Kosten:** Die Maps JavaScript API rechnet pro **Kartenaufruf** ab – jedes
+Öffnen einer Karte zählt. Bei deiner Nutzung sollte das im kostenlosen
+Monatskontingent bleiben; ein Ausgabenlimit ist trotzdem sinnvoll.
+
+**Was mit OpenStreetMap bleibt, und warum:**
+
+- **Offline-Pakete (#217).** Sie speichern Kartenkacheln für einen Platz.
+  Google-Kacheln darf man nicht speichern – ohne Netz zeichnet deshalb
+  weiterhin OpenStreetMap.
+- **Das Regenradar.** Es blendet zehn Radarbilder überblendend ineinander;
+  das geht mit Kachel-Ebenen, wie Leaflet sie bietet, und mit Googles
+  Auflagen nicht gleich gut. Die Karte darunter ist dort nur Hintergrund.
+- **Kein Schlüssel eingerichtet.** Dann bleibt alles, wie es ist.
+
 ## 8. Merge nach `main`
 
 Der Feature-Branch `claude/projekt-laden-eb1rox` enthält alle neuen Runden

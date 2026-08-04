@@ -22,6 +22,10 @@ Stand: 4. August 2026
       Verkehrslage kennen – siehe `EINRICHTUNG-OFFEN.md`, Punkt 7. Ohne
       Schlüssel rechnet die App weiter mit der Fahrzeit von OpenStreetMap;
       es fehlt nur der Stau.
+- [ ] **Google-Maps-Karte: zweiter Schlüssel + Karten-Id** in die
+      Server-`.env` – siehe `EINRICHTUNG-OFFEN.md`, Punkt 7b. NICHT
+      derselbe Schlüssel wie für die Fahrzeiten: Dieser hier geht in den
+      Browser und muss auf die Website eingeschränkt werden.
 - [ ] **12 Rezeptbilder.** Für die 12 später ergänzten Rezepte fehlt ein Foto.
       Die Prompts liegen bereit (im Chat geschickt); erzeugte Bilder in
       beliebigem Format schicken, sie werden auf 800×600 WebP gebracht und
