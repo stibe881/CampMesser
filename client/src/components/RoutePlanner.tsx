@@ -13,6 +13,16 @@
  * einen Sattel – und genau der macht die Gehzeit aus. Abgefragt wird
  * bewusst erst auf Knopfdruck, nicht bei jedem Klick.
  *
+ * DIE STRECKE FOLGT DEN WEGEN: Zwischen den gesetzten Punkten wird eine
+ * echte Fussgänger-Route berechnet (OSRM, siehe client/src/lib/routing.ts)
+ * und die gezeichnete Linie folgt ihr. Der Unterschied ist gross – wer im
+ * Gebirge zwei Punkte setzt, hat Luftlinie zwei Kilometer und über den
+ * Wanderweg mit seinen Kehren fünf. Auch die Höhen-Stützstellen liegen
+ * dann auf dem WEG und nicht quer über den Grat.
+ *
+ * Ohne Netz bleibt es bei den geraden Verbindungen; die Ansicht sagt das,
+ * statt eine Weglänge zu behaupten, die niemand gemessen hat.
+ *
  * Leaflet wird wie überall dynamisch geladen; ohne Netz bleibt die Karte
  * leer, und ein Satz sagt das.
  */
@@ -29,6 +39,12 @@ import { trpc } from "@/lib/trpc";
 import { fetchElevations } from "@/lib/elevation";
 import { createBaseLayer, loadMapLayer } from "@/lib/mapLayers";
 import { formatDistance } from "@shared/geo";
+import {
+  MAX_ROUTE_PATH_POINTS,
+  pointsAlongRoute,
+  routeLengthM,
+} from "@shared/routing";
+import { fetchRoute } from "@/lib/routing";
 import {
   MAX_ROUTE_WAYPOINTS,
   ROUTE_NAME_MAX_LENGTH,
@@ -79,6 +95,10 @@ export default function RoutePlanner({
   const [tripId, setTripId] = useState<number | null>(null);
   const [pace, setPace] = useState<RoutePace>("normal");
   const [editingId, setEditingId] = useState<number | null>(null);
+  /** Verlauf entlang echter Wege; leer = nur die geraden Verbindungen. */
+  const [pathPoints, setPathPoints] = useState<RouteWaypoint[]>([]);
+  const [snapping, setSnapping] = useState(false);
+  const routeAbortRef = useRef<AbortController | null>(null);
 
   const routesQuery = trpc.routes.list.useQuery();
   const saveMutation = trpc.routes.save.useMutation({
@@ -143,8 +163,11 @@ export default function RoutePlanner({
     layer.clearLayers();
     if (waypoints.length === 0) return;
     const latlngs: Leaflet.LatLngTuple[] = waypoints.map(w => [w.lat, w.lon]);
-    if (latlngs.length > 1) {
-      L.polyline(latlngs, {
+    // Die Linie folgt dem berechneten Weg, die Punkte bleiben die gesetzten
+    const line: Leaflet.LatLngTuple[] =
+      pathPoints.length >= 2 ? pathPoints.map(p => [p.lat, p.lon]) : latlngs;
+    if (line.length > 1) {
+      L.polyline(line, {
         color: "#2563eb",
         weight: 4,
         opacity: 0.9,
@@ -164,10 +187,47 @@ export default function RoutePlanner({
         fillOpacity: 1,
       }).addTo(layer);
     });
-  }, [leaflet, waypoints]);
+  }, [leaflet, waypoints, pathPoints]);
 
-  const distanceM = useMemo(() => routeDistanceM(waypoints), [waypoints]);
-  const samples = useMemo(() => routeSamples(waypoints), [waypoints]);
+  // Wegpunkte auf echte Wege legen (Fussgänger-Profil). Bei jeder Änderung
+  // neu – der Zwischenspeicher fängt das Meiste ab.
+  useEffect(() => {
+    routeAbortRef.current?.abort();
+    setPathPoints([]);
+    if (waypoints.length < 2) return;
+    const controller = new AbortController();
+    routeAbortRef.current = controller;
+    setSnapping(true);
+    void fetchRoute(
+      waypoints.map(w => ({ lat: w.lat, lon: w.lon })),
+      "foot",
+      { signal: controller.signal }
+    )
+      .then(route => {
+        if (controller.signal.aborted) return;
+        setPathPoints(
+          route && route.points.length >= 2
+            ? route.points.map(p => ({ lat: p.lat, lon: p.lon, ele: null }))
+            : []
+        );
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setSnapping(false);
+      });
+    return () => controller.abort();
+  }, [waypoints]);
+
+  /** Für Länge, Höhen und Linie zählt der Weg, sonst die gerade Verbindung. */
+  const routed = pathPoints.length >= 2;
+  const pathForMeasuring = routed ? pathPoints : waypoints;
+  const distanceM = useMemo(
+    () => (routed ? routeLengthM(pathPoints) : routeDistanceM(waypoints)),
+    [routed, pathPoints, waypoints]
+  );
+  const samples = useMemo(
+    () => routeSamples(pathForMeasuring),
+    [pathForMeasuring]
+  );
   const elevation = useMemo(() => {
     if (sampleElevations.length === 0) return null;
     return routeElevation(
@@ -226,6 +286,16 @@ export default function RoutePlanner({
         waypoints: waypoints.map(w => ({ lat: w.lat, lon: w.lon })),
         ...(sampleElevations.length > 0
           ? { sampleElevations: sampleElevations }
+          : {}),
+        // Den berechneten Weg mitschicken, damit der Server dieselbe
+        // Länge und dieselben Stützstellen sieht wie die Ansicht
+        ...(routed
+          ? {
+              pathPoints: pointsAlongRoute(
+                pathPoints.map(p => ({ lat: p.lat, lon: p.lon })),
+                MAX_ROUTE_PATH_POINTS
+              ),
+            }
           : {}),
       },
       { onSuccess: () => reset() }
@@ -364,6 +434,13 @@ export default function RoutePlanner({
               </Button>
             ))}
           </div>
+
+          {snapping && (
+            <p className="text-xs text-muted-foreground">{rp.snapping}</p>
+          )}
+          {!snapping && !routed && (
+            <p className="text-xs text-muted-foreground">{rp.notRouted}</p>
+          )}
 
           {!elevation && (
             <p className="mt-2 text-xs text-muted-foreground">

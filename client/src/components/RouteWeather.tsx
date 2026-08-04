@@ -32,9 +32,9 @@ import { corridorPoints } from "@shared/corridor";
 import { distanceMeters, formatDistance } from "@shared/geo";
 import { LOCALE_TAGS } from "@shared/i18n";
 import {
+  MAX_ROUTE_WEATHER_POINTS,
   MIN_ROUTE_KM,
   ROUTE_SPEED_KMH,
-  etaAt,
   hourIndexFor,
   hourRisk,
   routeMinutes,
@@ -44,6 +44,8 @@ import {
   type RouteRiskKind,
 } from "@shared/routeWeather";
 import type { HourlyWeather } from "@shared/weather";
+import { pointsAlongRoute } from "@shared/routing";
+import { routeOrEstimate } from "@/lib/routing";
 
 type Status =
   "idle" | "locating" | "loading" | "ready" | "failed" | "noStart" | "tooShort";
@@ -100,6 +102,10 @@ export default function RouteWeather({
   const [status, setStatus] = useState<Status>("idle");
   const [segments, setSegments] = useState<Segment[]>([]);
   const [totalKm, setTotalKm] = useState(0);
+  /** Kam die Strecke aus der Routenberechnung oder aus der Luftlinie? */
+  const [estimated, setEstimated] = useState(false);
+  /** Fahrzeit der ganzen Strecke in Minuten (Routendienst bzw. Schätzung). */
+  const [totalMinutes, setTotalMinutes] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
 
   const homeQuery = trpc.home.get.useQuery(undefined, {
@@ -142,20 +148,46 @@ export default function RouteWeather({
       }
 
       const end = { lat: latitude, lon: longitude };
-      const km = distanceMeters(start.lat, start.lon, end.lat, end.lon) / 1000;
-      setTotalKm(km);
-      if (km < MIN_ROUTE_KM) {
+      if (
+        distanceMeters(start.lat, start.lon, end.lat, end.lon) / 1000 <
+        MIN_ROUTE_KM
+      ) {
         setSegments([]);
+        setTotalKm(0);
         setStatus("tooShort");
         return;
       }
 
-      const points = sampleRoutePoints(corridorPoints(start, end));
+      // Echte Strassenroute holen: Die Stützstellen sollen dort liegen, wo
+      // man wirklich fährt – im Gebirge holt die Strasse weit aus, und ein
+      // Korridor auf der Luftlinie prüft dann das Wetter über dem Grat
+      // statt über dem Tunnel.
+      setStatus("loading");
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      const route = await routeOrEstimate(
+        [start, end],
+        "car",
+        ROUTE_SPEED_KMH,
+        { signal: controller.signal }
+      );
+      const km = route.distanceM / 1000;
+      setTotalKm(km);
+      setEstimated(route.source === "estimate");
+      const points =
+        route.source === "route" && route.points.length >= 2
+          ? pointsAlongRoute(route.points, MAX_ROUTE_WEATHER_POINTS)
+          : sampleRoutePoints(corridorPoints(start, end));
       if (points.length < 2) {
         setSegments([]);
         setStatus("noStart");
         return;
       }
+      // Fahrzeit des Routendienstes, sonst der Schnitt über die Strecke
+      const totalMinutes =
+        route.source === "route" ? route.durationS / 60 : routeMinutes(km);
+      setTotalMinutes(totalMinutes);
 
       const departureMs = new Date(departureLocal).getTime();
       if (Number.isNaN(departureMs)) {
@@ -163,10 +195,6 @@ export default function RouteWeather({
         return;
       }
 
-      setStatus("loading");
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
       try {
         // Eine Abfrage für alle Punkte: Open-Meteo nimmt Listen entgegen
         const params = new URLSearchParams({
@@ -188,7 +216,7 @@ export default function RouteWeather({
 
         const built: Segment[] = points.map((point, index) => {
           const fraction = index / (points.length - 1);
-          const etaMs = etaAt(departureMs, km, fraction);
+          const etaMs = departureMs + fraction * totalMinutes * 60_000;
           const entry = list[index] as
             { hourly?: Record<string, unknown[]> } | undefined;
           const times = (entry?.hourly?.time ?? []) as string[];
@@ -336,7 +364,7 @@ export default function RouteWeather({
               <p className="mt-3 text-sm font-medium">
                 {tr.summary(
                   formatDistance(totalKm * 1000, lang),
-                  routeMinutes(totalKm)
+                  Math.round(totalMinutes)
                 )}
               </p>
               <p
@@ -401,7 +429,7 @@ export default function RouteWeather({
           )}
 
           <p className="mt-3 text-xs text-muted-foreground">
-            {tr.methodNote(ROUTE_SPEED_KMH)}
+            {estimated ? tr.methodNoteEstimate(ROUTE_SPEED_KMH) : tr.methodNote}
           </p>
         </div>
       )}

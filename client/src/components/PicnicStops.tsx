@@ -11,8 +11,12 @@
  * 2. Sortiert wird nach der REIHENFOLGE DER FAHRT, nicht nach der Distanz
  *    zum Ziel: Wer unterwegs rasten will, will wissen, was zuerst kommt.
  *
- * EHRLICH BLEIBT: Die Strecke ist die Luftlinie, nicht die Strasse – der
- * Hinweis steht sichtbar im Abschnitt, statt Genauigkeit vorzutäuschen.
+ * DIE STRECKE ist die BERECHNETE STRASSENROUTE (OSRM, siehe
+ * client/src/lib/routing.ts): Eine Raststelle am Talausgang liegt
+ * Luftlinie neben der Linie, auf der Strasse aber dreissig Kilometer
+ * weiter vorne – und genau die Reihenfolge der Fahrt will man sehen.
+ * Ohne Netz bleibt der alte Korridor auf der Luftlinie, dann sagt der
+ * Hinweis unter der Liste das auch.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -33,9 +37,12 @@ import {
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
-import { distanceMeters, formatDistance } from "@shared/geo";
+import { formatDistance } from "@shared/geo";
+import { pointsAlongRoute, stopsAlongGeometry } from "@shared/routing";
+import { routeOrEstimate } from "@/lib/routing";
 import {
   CORRIDOR_DEFAULT_RADIUS_M,
+  CORRIDOR_MAX_POINTS,
   CORRIDOR_RADII_M,
   corridorPoints,
   stopsAlongRoute,
@@ -70,6 +77,8 @@ export default function PicnicStops({
   const [radiusM, setRadiusM] = useState(CORRIDOR_DEFAULT_RADIUS_M);
   const [status, setStatus] = useState<Status>("idle");
   const [stops, setStops] = useState<RouteStop<OsmPicnicSite>[]>([]);
+  /** Kam der Korridor aus der Routenberechnung oder aus der Luftlinie? */
+  const [estimated, setEstimated] = useState(false);
   const [totalM, setTotalM] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -116,17 +125,28 @@ export default function PicnicStops({
       }
 
       const end = { lat: latitude, lon: longitude };
-      const points = corridorPoints(start, end);
+
+      // Der Korridor folgt der ECHTEN Strassenroute: Eine Raststelle am
+      // Talausgang liegt Luftlinie neben der Linie, auf der Strasse aber
+      // dreissig Kilometer weiter vorne.
+      setStatus("loading");
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      const route = await routeOrEstimate([start, end], "car", 70, {
+        signal: controller.signal,
+      });
+      const routed = route.source === "route" && route.points.length >= 2;
+      setEstimated(!routed);
+      const points = routed
+        ? pointsAlongRoute(route.points, CORRIDOR_MAX_POINTS)
+        : corridorPoints(start, end);
       if (points.length === 0) {
         setStops([]);
         setStatus("noStart");
         return;
       }
 
-      setStatus("loading");
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
       try {
         const res = await fetch(OVERPASS_URL, {
           method: "POST",
@@ -136,14 +156,12 @@ export default function PicnicStops({
         });
         if (!res.ok) throw new Error(`overpass ${res.status}`);
         const json: unknown = await res.json();
-        const found = stopsAlongRoute(
-          parsePicnicSites(json),
-          start,
-          end,
-          STOPS_LIMIT
-        );
+        const sites = parsePicnicSites(json);
+        const found = routed
+          ? stopsAlongGeometry(sites, route.points, STOPS_LIMIT)
+          : stopsAlongRoute(sites, start, end, STOPS_LIMIT);
         setStops(found);
-        setTotalM(distanceMeters(start.lat, start.lon, end.lat, end.lon));
+        setTotalM(route.distanceM);
         setStatus("ready");
       } catch {
         if (controller.signal.aborted) return;
@@ -260,7 +278,9 @@ export default function PicnicStops({
             {tp.searchButton}
           </button>
 
-          <p className="mt-2 text-xs text-muted-foreground">{tp.lineHint}</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {estimated ? tp.lineHintEstimate : tp.lineHint}
+          </p>
 
           {(status === "loading" || status === "locating") && (
             <div

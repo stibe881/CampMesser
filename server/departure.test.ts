@@ -213,3 +213,59 @@ describe("Rückreise-Planung (#286)", () => {
     ).toBeNull();
   });
 });
+
+describe("Fahrzeit aus einer echten Route", () => {
+  it("nimmt die Fahrzeit des Routendienstes, wenn sie vorliegt", () => {
+    // Zürich–Biel: Luftlinie 87 km, Strasse 122 km und 91 Minuten
+    const geschaetzt = departurePlan({
+      distanceKm: 87,
+      arrivalTime: "16:00",
+      profile: "keine",
+    })!;
+    const geroutet = departurePlan({
+      distanceKm: 122,
+      arrivalTime: "16:00",
+      profile: "keine",
+      driveMinutes: 91,
+    })!;
+    expect(geschaetzt.driveMinutes).toBe(75);
+    expect(geroutet.driveMinutes).toBe(91);
+    // Wer mit der Luftlinie plant, fährt eine Viertelstunde zu spät los
+    expect(parseTime(geroutet.departureTime)!).toBeLessThan(
+      parseTime(geschaetzt.departureTime)!
+    );
+  });
+
+  it("rechnet die Pausen auf der echten Fahrzeit", () => {
+    // 130 Minuten Fahrt: mit Kindern eine Pause – über die Luftlinie
+    // (110 Minuten) wäre es keine
+    const plan = departurePlan({
+      distanceKm: 128,
+      arrivalTime: "16:00",
+      profile: "kinder",
+      driveMinutes: 130,
+    })!;
+    expect(plan.breaks).toBe(1);
+  });
+
+  it("fällt ohne Fahrzeit auf die Streckenlänge zurück", () => {
+    const plan = departurePlan({
+      distanceKm: 140,
+      arrivalTime: "16:00",
+      profile: "keine",
+      driveMinutes: null,
+    })!;
+    expect(plan.driveMinutes).toBe(120);
+  });
+
+  it("gibt die Fahrzeit auch an die Rückreise weiter", () => {
+    const result = returnPlan({
+      distanceKm: 122,
+      homeArrivalTime: "18:00",
+      checkoutTime: null,
+      profile: "keine",
+      driveMinutes: 91,
+    })!;
+    expect(result.plan.driveMinutes).toBe(91);
+  });
+});

@@ -3688,7 +3688,9 @@ export const it: Translation = {
     radiusOption: (km: number) => `${km} km`,
     searchButton: "Cerca una sosta",
     lineHint:
-      "La ricerca segue la linea d'aria, non la strada – in montagna il percorso reale può discostarsi parecchio.",
+      "La ricerca segue il percorso stradale calcolato; i riferimenti chilometrici contano dalla partenza, lungo la strada.",
+    lineHintEstimate:
+      "Senza rete niente calcolo del percorso: la ricerca segue la linea d'aria – in montagna il percorso reale può discostarsi parecchio.",
     locating: "Rilevamento della posizione …",
     loading: "Ricerca delle aree di sosta …",
     noHome:
@@ -3791,8 +3793,10 @@ export const it: Translation = {
     riskNone: "Tranquillo",
     kmMark: (km: number) => `km ${km}`,
     gusts: (kmh: number) => `${kmh} km/h`,
-    methodNote: (speed: number) =>
-      `Vengono controllati fino a otto punti lungo la linea d'aria, ciascuno per l'orario di arrivo stimato. Si calcola con ${speed} km/h sulla linea d'aria – è una stima approssimativa, non un navigatore.`,
+    methodNote:
+      "Vengono controllati fino a otto punti lungo il percorso stradale calcolato, ciascuno per l'orario di arrivo in quel punto. Distanza e durata provengono dal calcolo del percorso (OpenStreetMap); code e cantieri si aggiungono.",
+    methodNoteEstimate: (speed: number) =>
+      `Senza rete niente calcolo del percorso: si controllano otto punti lungo la linea d'aria con ${speed} km/h – una stima approssimativa che in montagna può sbagliare di molto.`,
     source: "Dati: Open-Meteo",
   },
   packHistory: {
@@ -3925,7 +3929,10 @@ export const it: Translation = {
     bufferLine: "Margine per sbarra e registrazione",
     totalLine: "Totale in viaggio",
     stopsLine: (times: string) => `Pause verso le ${times}.`,
-    note: "Stima in linea d'aria con una media di 70 km/h – non è un calcolatore di percorso. Code, cantieri e attese al confine si aggiungono.",
+    routing: "Calcolo del percorso …",
+    note: "Distanza e durata provengono dal calcolo del percorso su strada (OpenStreetMap). Code, cantieri e attese al confine si aggiungono.",
+    noteEstimate:
+      "Senza rete niente calcolo del percorso: questi valori sono stimati in linea d'aria (con fattore di deviazione) e possono essere molto lontani dal vero – soprattutto in montagna.",
   },
   firewood: {
     title: "Fabbisogno di legna",
@@ -3980,6 +3987,9 @@ export const it: Translation = {
     walkingTime: "Tempo di cammino",
     pace: "Andatura:",
     paceLabels: { slow: "Tranquilla", normal: "Normale", fast: "Sostenuta" },
+    snapping: "Calcolo del tracciato …",
+    notRouted:
+      "Nessun tracciato disponibile (niente rete o nessun sentiero trovato): si calcola con i tratti dritti fra i tuoi punti – in montagna decisamente troppo corto.",
     note: "Stima secondo il metodo usuale (4 km/h, 300 m di salita, 500 m di discesa all'ora), senza pause. Il calcolo segue i tratti in linea d'aria fra i tuoi punti, non il sentiero.",
     nameLabel: "Nome",
     namePlaceholder: "p. es. giro del lago",
