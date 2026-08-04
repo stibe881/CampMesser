@@ -4378,7 +4378,7 @@ export const de = {
       autumn: "Herbst",
       winter: "Winter",
     },
-    source: "Aus deiner Ausflugfinder-App",
+    source: "Aus der AusflugFinder-App",
   },
 
   recipes: {

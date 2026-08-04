@@ -729,10 +729,10 @@ function SpotsMap({
     discoverOn || layerVisibility.firepits || layerVisibility.family;
   useEffect(() => {
     const map = engineRef.current;
-    if (!map || !overpassLayersOn || !mapReady) return;
-    const off = map.onMove(() => setMoved(true));
+    if (!map) return;
+    const off = map.onMove(() => searchHere());
     return off;
-  }, [overpassLayersOn, mapReady]);
+  }, [searchHere, mapReady]);
 
   // Verlinkter Ausflug: hinfahren, sobald die Ziele geladen sind. Der
   // Zoom-Wechsel gruppiert neu, danach steht der Pin einzeln da und der
