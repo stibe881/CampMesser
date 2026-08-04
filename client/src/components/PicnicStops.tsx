@@ -17,6 +17,17 @@
  * weiter vorne – und genau die Reihenfolge der Fahrt will man sehen.
  * Ohne Netz bleibt der alte Korridor auf der Luftlinie, dann sagt der
  * Hinweis unter der Liste das auch.
+ *
+ * GOOGLE ZUERST, WENN EINGERICHTET (Nutzerwunsch 04.08.2026) – aber mit
+ * einer Einschränkung, die man kennen muss: Googles Umkreissuche ist ein
+ * KREIS, kein Korridor. Eine Strecke abzudecken heisst deshalb, an
+ * mehreren Punkten zu fragen, und jede Frage wird abgerechnet. Deshalb
+ * die harte Obergrenze von `GOOGLE_PROBE_POINTS` Abfragen je Suche,
+ * gleichmässig über die Strecke verteilt. Zwischen den Kreisen bleiben
+ * Lücken; wer die ganze Strecke lückenlos will, ist mit OSM besser
+ * bedient – dort ist `leisure=picnic_table` in der Schweiz dicht
+ * erfasst, während Google für Picknickplätze dünn aufgestellt ist.
+ * Findet Google nichts, übernimmt darum OSM.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -38,6 +49,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { formatDistance } from "@shared/geo";
+import { GOOGLE_ATTRIBUTION, googlePicnicKind } from "@shared/googlePlaces";
 import { pointsAlongRoute, stopsAlongGeometry } from "@shared/routing";
 import { routeOrEstimate } from "@/lib/routing";
 import {
@@ -52,6 +64,15 @@ import { cn } from "@/lib/utils";
 
 /** So viele Raststellen zeigt das Dossier – mehr wird unübersichtlich. */
 const STOPS_LIMIT = 12;
+
+/**
+ * So viele Kreise fragt Google je Suche ab. HARTE OBERGRENZE, weil jede
+ * Abfrage abgerechnet wird: Googles Umkreissuche kennt keinen Korridor,
+ * eine Strecke deckt man nur mit mehreren Kreisen ab. Fünf Punkte über
+ * die ganze Strecke lassen Lücken – dafür kostet eine Suche fünf und
+ * nicht fünfzig Abfragen.
+ */
+const GOOGLE_PROBE_POINTS = 5;
 
 type Status = "idle" | "locating" | "loading" | "ready" | "failed" | "noStart";
 
@@ -80,6 +101,9 @@ export default function PicnicStops({
   /** Kam der Korridor aus der Routenberechnung oder aus der Luftlinie? */
   const [estimated, setEstimated] = useState(false);
   const [totalM, setTotalM] = useState(0);
+  /** Woher die aktuelle Liste stammt – die Quellenangabe hängt daran. */
+  const [source, setSource] = useState<"osm" | "google">("osm");
+  const utils = trpc.useUtils();
   const abortRef = useRef<AbortController | null>(null);
 
   const homeQuery = trpc.home.get.useQuery(undefined, {
@@ -147,25 +171,75 @@ export default function PicnicStops({
         return;
       }
 
+      /** Treffer in die Reihenfolge der Fahrt bringen. */
+      const order = (sites: OsmPicnicSite[]) =>
+        routed
+          ? stopsAlongGeometry(sites, route.points, STOPS_LIMIT)
+          : stopsAlongRoute(sites, start, end, STOPS_LIMIT);
+
+      // Google zuerst – aber nur an wenigen Punkten, siehe
+      // GOOGLE_PROBE_POINTS oben
+      try {
+        const probes = pointsAlongRoute(points, GOOGLE_PROBE_POINTS);
+        const answers = await Promise.all(
+          probes.map(point =>
+            utils.places.nearby.fetch({
+              latitude: point.lat,
+              longitude: point.lon,
+              radiusM: radius,
+              kind: "picnic",
+              language: lang,
+            })
+          )
+        );
+        if (controller.signal.aborted) return;
+        const seen = new Set<string>();
+        const sites: OsmPicnicSite[] = [];
+        answers.forEach(answer => {
+          if (!answer.configured) return;
+          answer.places.forEach(place => {
+            const kind = googlePicnicKind(place.types);
+            // Dieselbe Raststelle taucht in zwei Kreisen auf, wenn sie
+            // dazwischen liegt – die Place-Id hält sie auseinander
+            if (!kind || seen.has(place.id)) return;
+            seen.add(place.id);
+            sites.push({
+              id: place.id,
+              lat: place.lat,
+              lon: place.lon,
+              kind,
+              name: place.name || undefined,
+            });
+          });
+        });
+        if (sites.length > 0) {
+          setStops(order(sites));
+          setTotalM(route.distanceM);
+          setSource("google");
+          setStatus("ready");
+          return;
+        }
+      } catch {
+        // Kein Google: Der Weg über OSM steht gleich darunter
+      }
+      if (controller.signal.aborted) return;
+
       try {
         const res = await fetchOverpass(
           `data=${encodeURIComponent(picnicSitesQuery(points, radius))}`,
           controller.signal
         );
         const json: unknown = await res.json();
-        const sites = parsePicnicSites(json);
-        const found = routed
-          ? stopsAlongGeometry(sites, route.points, STOPS_LIMIT)
-          : stopsAlongRoute(sites, start, end, STOPS_LIMIT);
-        setStops(found);
+        setStops(order(parsePicnicSites(json)));
         setTotalM(route.distanceM);
+        setSource("osm");
         setStatus("ready");
       } catch {
         if (controller.signal.aborted) return;
         setStatus("failed");
       }
     },
-    [currentPosition, home, latitude, longitude]
+    [currentPosition, home, latitude, longitude, lang, utils]
   );
 
   /** Aufklappen zeigt nur die Auswahl – gesucht wird erst auf Knopfdruck. */
@@ -367,7 +441,10 @@ export default function PicnicStops({
                   );
                 })}
               </ul>
-              <p className="mt-3 text-xs text-muted-foreground">{tp.source}</p>
+              {/* Quellenangabe: bei Google verlangen es die Bedingungen */}
+              <p className="mt-3 text-xs text-muted-foreground">
+                {source === "google" ? GOOGLE_ATTRIBUTION : tp.source}
+              </p>
             </>
           )}
         </div>

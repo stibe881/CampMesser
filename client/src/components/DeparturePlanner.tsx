@@ -7,12 +7,19 @@
  * zwei Pausen und den Puffer an der Schranke weg; genau deshalb steht man
  * vor einer geschlossenen Rezeption.
  *
- * DIE STRECKE ist eine ECHTE Route über die Strasse (OSRM, siehe
- * client/src/lib/routing.ts) – samt der Fahrzeit des Dienstes, die Pässe,
- * Ortsdurchfahrten und Tempolimiten kennt. Nur wenn kein Netz da ist,
- * wird aus der Luftlinie mit Umwegfaktor geschätzt, und dann steht das
- * auch so da. Ohne gespeicherten Heim-Standort erscheint statt einer
- * erfundenen Zahl der Hinweis, wo man ihn setzt.
+ * DIE STRECKE ist eine ECHTE Route über die Strasse. Antwortet Google,
+ * gelten SEINE Zahlen – Länge und Fahrzeit derselben Route, mit dem
+ * Verkehr zur eingegebenen Uhrzeit. Antwortet Google nicht, bleibt es bei
+ * OSRM (siehe client/src/lib/routing.ts), das Pässe, Ortsdurchfahrten und
+ * Tempolimiten kennt, aber keinen Stau. Erst wenn auch das ausfällt, wird
+ * aus der Luftlinie mit Umwegfaktor geschätzt, und dann steht das auch so
+ * da. Ohne gespeicherten Heim-Standort erscheint statt einer erfundenen
+ * Zahl der Hinweis, wo man ihn setzt.
+ *
+ * LÄNGE UND ZEIT KOMMEN IMMER AUS DERSELBEN QUELLE. Eine Fahrzeit von
+ * Google neben einer Streckenlänge von OSRM ergäbe ein Tempo, das keiner
+ * der beiden Dienste je behauptet hat – und die Pausen hängen an der
+ * Strecke.
  *
  * DIE RÜCKREISE ist dieselbe Rechnung mit einem zusätzlichen Abgleich:
  * Die reine Rückwärtsrechnung kann «um 15:40 losfahren» sagen, und das
@@ -110,11 +117,17 @@ export default function DeparturePlanner({
     return () => controller.abort();
   }, [open, home, latitude, longitude]);
 
-  const distanceKm = route ? route.distanceM / 1000 : 0;
+  const osrmKm = route ? route.distanceM / 1000 : 0;
   const osrmMinutes = route ? Math.round(route.durationS / 60) : null;
 
-  /** Die ganze Rechnung, einmal als Funktion – sie läuft zweimal (s. u.). */
-  const buildPlan = (driveMinutes: number | null) => {
+  /**
+   * Die ganze Rechnung, einmal als Funktion – sie läuft zweimal (s. u.).
+   *
+   * Strecke UND Fahrzeit kommen als Paar herein, und das mit Absicht: Eine
+   * Fahrzeit von Google neben einer Streckenlänge von OSRM ergäbe ein
+   * Tempo, das keiner der beiden Dienste je behauptet hat.
+   */
+  const buildPlan = (driveMinutes: number | null, distanceKm: number) => {
     const backPlan =
       home && direction === "zurueck"
         ? returnPlan({
@@ -144,7 +157,7 @@ export default function DeparturePlanner({
   // ist ja gerade das Ergebnis der Rechnung. Also einmal mit der
   // OSRM-Fahrzeit rechnen, um die Abfahrts-UHRZEIT zu bekommen, damit den
   // Verkehr erfragen und mit dieser Fahrzeit noch einmal rechnen.
-  const firstPass = buildPlan(osrmMinutes);
+  const firstPass = buildPlan(osrmMinutes, osrmKm);
   const firstDeparture =
     firstPass.back?.afterCheckout && checkoutTime
       ? checkoutTime
@@ -161,8 +174,10 @@ export default function DeparturePlanner({
   );
   const trafficMinutes =
     drive.durationS != null ? Math.round(drive.durationS / 60) : null;
+  // Antwortet Google, gilt SEINE Route – Länge und Fahrzeit gehören zusammen
+  const distanceKm = drive.distanceM != null ? drive.distanceM / 1000 : osrmKm;
   const { back, plan } =
-    trafficMinutes != null ? buildPlan(trafficMinutes) : firstPass;
+    trafficMinutes != null ? buildPlan(trafficMinutes, distanceKm) : firstPass;
   // Bei der Rückreise zählt die Abfahrt, die man wirklich hinbekommt
   const effectiveDeparture =
     back?.afterCheckout && checkoutTime ? checkoutTime : plan?.departureTime;
@@ -309,7 +324,7 @@ export default function DeparturePlanner({
                     <Car className="h-4 w-4" aria-hidden="true" />
                     {dp.driveLine(
                       formatDistance(distanceKm * 1000, lang),
-                      route?.source === "estimate"
+                      route?.source === "estimate" && drive.distanceM == null
                     )}
                   </span>
                   <span className="tabular-nums">
@@ -349,10 +364,10 @@ export default function DeparturePlanner({
           )}
 
           <p className="text-xs text-muted-foreground">
-            {route?.source === "estimate"
-              ? dp.noteEstimate
-              : trafficMinutes != null
-                ? dp.noteTraffic
+            {trafficMinutes != null
+              ? dp.noteTraffic
+              : route?.source === "estimate"
+                ? dp.noteEstimate
                 : dp.note}
           </p>
         </div>

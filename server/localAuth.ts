@@ -184,6 +184,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     familyChildren,
     childBadges,
     childStats,
+    passportAbsences,
     shoppingItems,
     shoppingLists,
     shoppingShares,
@@ -372,6 +373,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   // Kinder-Profile samt Abzeichen und Zählern (referenzieren Kinder)
   await db.delete(childBadges).where(eq(childBadges.userId, userId));
   await db.delete(childStats).where(eq(childStats.userId, userId));
+  await db.delete(passportAbsences).where(eq(passportAbsences.userId, userId));
   await db.delete(familyChildren).where(eq(familyChildren.userId, userId));
   await db.delete(shoppingItems).where(eq(shoppingItems.userId, userId));
   await db.delete(shoppingShares).where(eq(shoppingShares.userId, userId));

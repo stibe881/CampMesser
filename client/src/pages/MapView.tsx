@@ -408,7 +408,7 @@ function SpotsMap({
   }, []);
 
   // Entdecker-Layer: Zustand der Overpass-Suche (Standard AUS)
-  
+
   const [campsites, setCampsites] = useState<OsmCampsite[]>([]);
   const [discoverLoading, setDiscoverLoading] = useState(false);
   const [discoverError, setDiscoverError] = useState(false);
@@ -444,49 +444,52 @@ function SpotsMap({
   layerKindRef.current = layerKind;
 
   /** Karte auf die aktuelle Position zentrieren (blauer Punkt + Genauigkeit). */
-  const locateMe = useCallback((silent = false) => {
-    const map = engineRef.current;
-    if (!map || !navigator.geolocation) {
-      if (!silent) toast.error(t.mapView.locateFailed);
-      return;
-    }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        setLocating(false);
-        const { latitude, longitude, accuracy } = pos.coords;
-        const m = engineRef.current;
-        if (!m) return;
-        if (!locateLayerRef.current) {
-          locateLayerRef.current = m.layerGroup();
-        }
-        const locateLayer = locateLayerRef.current;
-        locateLayer.clear();
-        m.circle([latitude, longitude], {
-          radius: Math.min(accuracy || 30, 500),
-          color: "#3b82f6",
-          weight: 1,
-          fillColor: "#3b82f6",
-          fillOpacity: 0.15,
-          layer: locateLayer,
-        });
-        m.circleMarker([latitude, longitude], {
-          radius: 6,
-          color: "#fff",
-          weight: 2,
-          fillColor: "#2563eb",
-          fillOpacity: 1,
-          layer: locateLayer,
-        });
-        m.setView([latitude, longitude], Math.max(m.getZoom(), 14));
-      },
-      () => {
-        setLocating(false);
+  const locateMe = useCallback(
+    (silent = false) => {
+      const map = engineRef.current;
+      if (!map || !navigator.geolocation) {
         if (!silent) toast.error(t.mapView.locateFailed);
-      },
-      { enableHighAccuracy: true, timeout: 5000 }
-    );
-  }, [t.mapView.locateFailed]);
+        return;
+      }
+      setLocating(true);
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          setLocating(false);
+          const { latitude, longitude, accuracy } = pos.coords;
+          const m = engineRef.current;
+          if (!m) return;
+          if (!locateLayerRef.current) {
+            locateLayerRef.current = m.layerGroup();
+          }
+          const locateLayer = locateLayerRef.current;
+          locateLayer.clear();
+          m.circle([latitude, longitude], {
+            radius: Math.min(accuracy || 30, 500),
+            color: "#3b82f6",
+            weight: 1,
+            fillColor: "#3b82f6",
+            fillOpacity: 0.15,
+            layer: locateLayer,
+          });
+          m.circleMarker([latitude, longitude], {
+            radius: 6,
+            color: "#fff",
+            weight: 2,
+            fillColor: "#2563eb",
+            fillOpacity: 1,
+            layer: locateLayer,
+          });
+          m.setView([latitude, longitude], Math.max(m.getZoom(), 14));
+        },
+        () => {
+          setLocating(false);
+          if (!silent) toast.error(t.mapView.locateFailed);
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    },
+    [t.mapView.locateFailed]
+  );
 
   // Karte einmalig aufbauen und beim Verlassen sauber abbauen. Gebaut wird
   // erst, wenn feststeht, welcher Kartendienst zeichnet – sonst würde die
@@ -722,7 +725,9 @@ function SpotsMap({
 
   // Kartenbewegung merken: statt automatisch neu zu laden, zeigen wir den Such-Button
   const overpassLayersOn =
-    layerVisibility.campsites || layerVisibility.firepits || layerVisibility.family;
+    layerVisibility.campsites ||
+    layerVisibility.firepits ||
+    layerVisibility.family;
   useEffect(() => {
     const map = engineRef.current;
     if (!map) return;
@@ -769,7 +774,8 @@ function SpotsMap({
       });
       // Popup-Inhalt per DOM aufbauen: Platzname ist Nutzertext (kein innerHTML)
       const popup = document.createElement("div");
-      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
+      popup.className =
+        "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
       const name = document.createElement("p");
       name.className = "text-[15px] font-bold leading-tight text-slate-800";
       name.textContent = spot.name;
@@ -784,7 +790,8 @@ function SpotsMap({
       const link = document.createElement("a");
       link.href = `/zeltplaetze/${spot.id}`;
       link.textContent = t.mapView.toDossier;
-      link.className = "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
+      link.className =
+        "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
       link.addEventListener("click", event => {
         event.preventDefault();
         navigate(`/zeltplaetze/${spot.id}`);
@@ -796,7 +803,8 @@ function SpotsMap({
       route.target = "_blank";
       route.rel = "noopener noreferrer";
       route.textContent = t.mapView.routeLink;
-      route.className = "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
+      route.className =
+        "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
       popup.appendChild(route);
       marker.bindPopup(popup);
       return marker;
@@ -810,7 +818,8 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
+      popup.className =
+        "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
       const name = document.createElement("p");
       name.className = "text-[15px] font-bold leading-tight text-slate-800";
       name.textContent = tgt.name;
@@ -842,7 +851,8 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
+      popup.className =
+        "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
       const name = document.createElement("p");
       name.className = "text-[15px] font-bold leading-tight text-slate-800";
       name.textContent = sighting.title;
@@ -864,7 +874,8 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
+      popup.className =
+        "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
       const name = document.createElement("p");
       name.className = "text-[15px] font-bold leading-tight text-slate-800";
       name.textContent = displayName;
@@ -928,7 +939,8 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
+      popup.className =
+        "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
 
       const name = document.createElement("p");
       name.className = "text-[15px] font-bold leading-tight text-slate-800";
@@ -958,7 +970,8 @@ function SpotsMap({
       route.rel = "noopener noreferrer";
       route.textContent = tf.navButton;
       route.setAttribute("aria-label", tf.navAria(displayName));
-      route.className = "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
+      route.className =
+        "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
       popup.appendChild(route);
 
       const fireDanger = document.createElement("a");
@@ -994,7 +1007,8 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
+      popup.className =
+        "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
 
       const name = document.createElement("p");
       name.className = "text-[15px] font-bold leading-tight text-slate-800";
@@ -1032,7 +1046,8 @@ function SpotsMap({
       route.rel = "noopener noreferrer";
       route.textContent = tp.navButton;
       route.setAttribute("aria-label", tp.navAria(displayName));
-      route.className = "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
+      route.className =
+        "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
       popup.appendChild(route);
 
       if (place.kind === "bathing") {
@@ -1063,7 +1078,8 @@ function SpotsMap({
       });
       const te = t.excursions;
       const popup = document.createElement("div");
-      popup.className = "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
+      popup.className =
+        "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
       popup.style.maxWidth = "230px";
 
       if (excursion.photoUrl) {
@@ -1123,7 +1139,8 @@ function SpotsMap({
         site.target = "_blank";
         site.rel = "noopener noreferrer";
         site.textContent = te.websiteLink;
-        site.className = "mt-1 flex w-full items-center justify-center rounded-md bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground shadow-sm hover:bg-secondary/80 transition-colors no-underline";
+        site.className =
+          "mt-1 flex w-full items-center justify-center rounded-md bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground shadow-sm hover:bg-secondary/80 transition-colors no-underline";
         details.appendChild(site);
       }
 
@@ -1133,7 +1150,8 @@ function SpotsMap({
         toggle.type = "button";
         toggle.textContent = te.detailsShow;
         toggle.setAttribute("aria-expanded", "false");
-        toggle.className = "mt-1 text-[13px] font-semibold text-primary hover:underline transition-colors text-left";
+        toggle.className =
+          "mt-1 text-[13px] font-semibold text-primary hover:underline transition-colors text-left";
         toggle.addEventListener("click", () => {
           details.hidden = !details.hidden;
           toggle.textContent = details.hidden ? te.detailsShow : te.detailsHide;
@@ -1151,7 +1169,8 @@ function SpotsMap({
       route.rel = "noopener noreferrer";
       route.textContent = te.navButton;
       route.setAttribute("aria-label", te.navAria(excursion.name));
-      route.className = "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
+      route.className =
+        "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
       popup.appendChild(route);
 
       const source = document.createElement("p");
@@ -1339,8 +1358,6 @@ function SpotsMap({
       longitude: Number(proposed.lon.toFixed(5)),
     });
   };
-
-
 
   const clearMeasure = () => {
     measurePointsRef.current = [];

@@ -6,6 +6,12 @@
  * damit verdient. Alles andere hiesse, dasselbe zweimal zu erfassen, und
  * genau das lässt man beim Camping bleiben.
  *
+ * EIN PASS JE PERSON: Die Personen sind dieselben wie im Familien-Modus
+ * (`familyChildren`) – wer sie dort schon angelegt hat, legt sie nicht
+ * ein zweites Mal an. Wer auf welcher Reise dabei war, steht als
+ * ABWESENHEIT in der Datenbank; die Begründung dazu bei
+ * `PassportAbsence` weiter unten.
+ *
  * WARUM EIN STEMPEL UND KEINE ZEILE: Weil ein Pass mit Stempeln etwas
  * ist, das man herzeigt. Deshalb bekommt jeder Platz ein eigenes
  * Aussehen – Form, Farbe und eine leichte Schräglage, wie von Hand
@@ -129,6 +135,78 @@ export function buildPassport(trips: readonly TripLike[]): PassportStamp[] {
           ? 1
           : 0) || (a.place < b.place ? -1 : 1)
   );
+}
+
+// ── Ein Pass je Person ────────────────────────────────────────────────
+
+/**
+ * Eine Reise, wie sie der Pass braucht: die Felder von `TripLike` plus
+ * die Id, denn ohne sie lässt sich nicht festhalten, wer dabei war.
+ */
+export interface PassportTrip extends TripLike {
+  id: number;
+}
+
+/**
+ * «War nicht dabei»: eine Person, eine Reise.
+ *
+ * GESPEICHERT WIRD DIE ABWESENHEIT, NICHT DIE ANWESENHEIT – und das ist
+ * die wichtigste Entscheidung an diesem Feature. Eine Familie fährt
+ * zusammen weg; «alle waren dabei» ist der Normalfall und braucht keinen
+ * Eintrag. Andersherum müsste jede neue Reise für jede Person eine Zeile
+ * anlegen, sonst stünde am nächsten Morgen ein leerer Pass da. Und ein
+ * Kind, das später dazukommt, bekommt seinen Pass mit einem Durchgang
+ * durch die Liste richtig – statt mit einem Haken pro Reise.
+ */
+export interface PassportAbsence {
+  childId: number;
+  tripId: number;
+}
+
+/** Schlüssel für die Nachschlage-Menge. */
+export function absenceKey(childId: number, tripId: number): string {
+  return `${childId}:${tripId}`;
+}
+
+/** Alle Abwesenheiten in eine Menge, die sich schnell fragen lässt. */
+export function absenceLookup(
+  absences: readonly PassportAbsence[]
+): Set<string> {
+  const set = new Set<string>();
+  absences.forEach(a => set.add(absenceKey(a.childId, a.tripId)));
+  return set;
+}
+
+/** War diese Person auf dieser Reise dabei? Ohne Eintrag: ja. */
+export function wasAlong(
+  lookup: ReadonlySet<string>,
+  childId: number,
+  tripId: number
+): boolean {
+  return !lookup.has(absenceKey(childId, tripId));
+}
+
+/**
+ * Die Reisen einer Person. `childId === null` steht für den Familienpass:
+ * dort zählt alles, ohne Abzug.
+ */
+export function tripsForTraveller(
+  trips: readonly PassportTrip[],
+  absences: readonly PassportAbsence[],
+  childId: number | null
+): PassportTrip[] {
+  if (childId == null) return trips.slice();
+  const lookup = absenceLookup(absences);
+  return trips.filter(trip => wasAlong(lookup, childId, trip.id));
+}
+
+/** Auf wie vielen Reisen war die Person dabei? Für die Personen-Auswahl. */
+export function tripCountForTraveller(
+  trips: readonly PassportTrip[],
+  absences: readonly PassportAbsence[],
+  childId: number | null
+): number {
+  return tripsForTraveller(trips, absences, childId).length;
 }
 
 export interface PassportRank {

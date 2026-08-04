@@ -44,6 +44,7 @@ import {
 } from "recharts";
 import { Link } from "wouter";
 import PageHeader from "@/components/PageHeader";
+import OfficialWarnings from "@/components/OfficialWarnings";
 import RainRadar from "@/components/RainRadar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -1754,6 +1755,12 @@ export default function WeatherPage() {
             aria-label={t.weather.alertsAria}
             className="mb-6 scroll-mt-20 space-y-2.5"
           >
+            {/* Amtliche Warnungen zuoberst: Wenn MeteoSchweiz etwas
+                ausgibt, ist das die Nachricht – der selbst gerechnete
+                Windwert daneben ist die Ergänzung. */}
+            {coords && (
+              <OfficialWarnings latitude={coords.lat} longitude={coords.lon} />
+            )}
             {alerts.length === 0 ? (
               <div className="flex items-center gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
                 <Info

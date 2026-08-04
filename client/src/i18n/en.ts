@@ -1958,6 +1958,11 @@ export const en: Translation = {
     attributeUnset: "Not specified",
     attributeGroupAria: (name: string) => `Choose a value for ${name}`,
     attributesSaved: "Attributes saved",
+    sectionPlace: "The pitch",
+    sectionArrival: "Getting there",
+    sectionWeather: "Weather and sky",
+    sectionAround: "Around here",
+    sectionOwn: "Yours",
     routeButton: "Directions",
     routeAria: "Open directions to this pitch in your maps app",
     contactTitle: "Contact & check-in",
@@ -3721,7 +3726,7 @@ export const en: Translation = {
     methodNoteEstimate: (speed: number) =>
       `No network, no route calculation: eight points along the straight line are checked at ${speed} km/h – a rough estimate that can be well off in the mountains.`,
     methodNoteTraffic:
-      "The driving time comes from Google's traffic forecast for your departure time; the route and the check points still come from the OpenStreetMap route calculation. Because traffic shifts the arrival time at each point, it also shifts which forecast hour counts.",
+      "Distance and driving time come from Google's route calculation – with the traffic forecast for your departure time. The check points still sit on the OpenStreetMap route. Because traffic shifts the arrival time at each point, it also shifts which forecast hour counts.",
     source: "Data: Open-Meteo",
   },
   packHistory: {
@@ -3860,7 +3865,16 @@ export const en: Translation = {
     noteEstimate:
       "No network, no route calculation: these figures are estimated from the straight-line distance (with a detour factor) and can be well off – especially in the mountains.",
     noteTraffic:
-      "The driving time comes from Google's traffic forecast for this time of day, the distance from the OpenStreetMap route calculation. Roadworks and border waits still come on top.",
+      "Distance and driving time come from Google's route calculation – with the traffic forecast for this time of day. Roadworks and border waits still come on top.",
+  },
+  officialWarnings: {
+    sectionAria: "Official weather warnings",
+    badge: "Official",
+    issuedFor: (issuer: string, area: string) =>
+      `${issuer} has issued a warning for ${area}.`,
+    until: (time: string) => `Valid until ${time}`,
+    source: (issuer: string, source: string) =>
+      `Official warnings: ${issuer}, via ${source}.`,
   },
   passport: {
     title: "Travel passport",
@@ -3878,6 +3892,23 @@ export const en: Translation = {
       `Stamp ${place}, visited ${visits} times`,
     empty:
       "No stamps yet. Record a trip with a site name – then it will show up here.",
+    family: "Family",
+    personLabel: "Passport of",
+    personGroupAria: "Choose person",
+    addPerson: "Add person",
+    addPersonPlaceholder: "Name",
+    addPersonSave: "Create",
+    addPersonHint:
+      "These are the same people as in family mode – anyone already there shows up here too.",
+    whoWasThere: "Who came along?",
+    whoWasThereHint:
+      "Unchanged, every trip counts for everyone. Untick where someone was not there – for instance before a child was born.",
+    tripUnnamed: "No place name",
+    presenceAria: (place: string, person: string) =>
+      `${person} came along to “${place}”`,
+    noTrips: "No trips recorded yet.",
+    personEmpty: (person: string) =>
+      `${person} has not been on a trip yet. Tick the boxes below.`,
     print: "Print the passport",
     note: "The stamps come from the trips in your journal; nothing is recorded twice. Each site gets the same shape, colour and tilt from its own name – identical on every device and after every reload.",
   },
@@ -4163,6 +4194,12 @@ export const en: Translation = {
     replace: "Replace",
     openImage: "View confirmation",
     openPdf: "Open PDF",
+    viewerTitle: "Booking confirmation",
+    viewerClose: "Close",
+    viewerDownload: "Download",
+    viewerNewWindow: "Open in a new window",
+    viewerPdfFallback:
+      "This device cannot show PDFs inside the app. Download the file or open it in a new window.",
     removeAria: "Delete the booking confirmation",
     uploaded: "Confirmation saved.",
     uploadFailed: "The confirmation could not be saved.",

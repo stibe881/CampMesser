@@ -1,7 +1,7 @@
-import fs from 'fs';
+import fs from "fs";
 
-const file = 'client/src/pages/MapView.tsx';
-let code = fs.readFileSync(file, 'utf-8');
+const file = "client/src/pages/MapView.tsx";
+let code = fs.readFileSync(file, "utf-8");
 
 // Container
 code = code.replaceAll(
@@ -42,27 +42,29 @@ code = code.replaceAll(
 );
 
 // Primary buttons
-const primaryButtonClass = '"mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline"';
+const primaryButtonClass =
+  '"mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline"';
 
 code = code.replaceAll(
   'link.className = "block text-sm font-medium underline";',
-  'link.className = ' + primaryButtonClass + ';'
+  "link.className = " + primaryButtonClass + ";"
 );
 code = code.replaceAll(
   'route.className = "block text-sm font-medium underline";',
-  'route.className = ' + primaryButtonClass + ';'
+  "route.className = " + primaryButtonClass + ";"
 );
 code = code.replaceAll(
   'button.className = "block text-sm font-medium text-primary hover:underline";',
-  'button.className = ' + primaryButtonClass + ';'
+  "button.className = " + primaryButtonClass + ";"
 );
 code = code.replaceAll(
   'button.className = "block w-full text-left text-sm font-medium text-primary hover:underline";',
-  'button.className = ' + primaryButtonClass + ';'
+  "button.className = " + primaryButtonClass + ";"
 );
 
 // Secondary buttons (Waldbrandgefahr, Dossier anlegen)
-const secondaryButtonClass = '"mt-1 flex w-full items-center justify-center rounded-md bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground shadow-sm hover:bg-secondary/80 transition-colors no-underline"';
+const secondaryButtonClass =
+  '"mt-1 flex w-full items-center justify-center rounded-md bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground shadow-sm hover:bg-secondary/80 transition-colors no-underline"';
 
 code = code.replaceAll(
   'danger.className = "block text-sm font-medium text-red-600 underline";',
@@ -70,11 +72,11 @@ code = code.replaceAll(
 );
 code = code.replaceAll(
   'create.className = "block text-sm font-medium text-primary hover:underline";',
-  'create.className = ' + secondaryButtonClass + ';'
+  "create.className = " + secondaryButtonClass + ";"
 );
 code = code.replaceAll(
   'site.className = "block font-medium underline";',
-  'site.className = ' + secondaryButtonClass + ';'
+  "site.className = " + secondaryButtonClass + ";"
 );
 
 // Toggle (Details)
@@ -84,4 +86,4 @@ code = code.replaceAll(
 );
 
 fs.writeFileSync(file, code);
-console.log('Done refactoring map popups.');
+console.log("Done refactoring map popups.");

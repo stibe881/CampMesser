@@ -2020,6 +2020,11 @@ export const fr: Translation = {
     attributeUnset: "Sans indication",
     attributeGroupAria: name => `Choisir la valeur pour ${name}`,
     attributesSaved: "Caractéristiques enregistrées",
+    sectionPlace: "L'emplacement",
+    sectionArrival: "Le trajet",
+    sectionWeather: "Météo et ciel",
+    sectionAround: "Aux alentours",
+    sectionOwn: "Personnel",
     routeButton: "Itinéraire",
     routeAria: "Ouvrir l'itinéraire vers cet emplacement dans l'app de cartes",
     contactTitle: "Contact & check-in",
@@ -3830,7 +3835,7 @@ export const fr: Translation = {
     methodNoteEstimate: (speed: number) =>
       `Sans réseau, pas de calcul d'itinéraire : huit points le long de la ligne droite sont vérifiés à ${speed} km/h – une estimation grossière qui peut être très fausse en montagne.`,
     methodNoteTraffic:
-      "La durée provient de la prévision de trafic de Google pour ton heure de départ ; le tracé et les points de contrôle viennent toujours du calcul d'itinéraire sur OpenStreetMap. Comme le trafic décale l'heure d'arrivée à chaque point, il décale aussi l'heure de prévision qui compte.",
+      "Distance et durée proviennent du calcul d'itinéraire de Google – avec la prévision de trafic pour ton heure de départ. Les points de contrôle sont, comme avant, placés sur l'itinéraire d'OpenStreetMap. Comme le trafic décale l'heure d'arrivée à chaque point, il décale aussi l'heure de prévision qui compte.",
     source: "Données : Open-Meteo",
   },
   packHistory: {
@@ -3970,7 +3975,16 @@ export const fr: Translation = {
     noteEstimate:
       "Sans réseau, pas de calcul d'itinéraire : ces chiffres sont estimés à vol d'oiseau (avec un facteur de détour) et peuvent être nettement à côté – surtout en montagne.",
     noteTraffic:
-      "La durée provient de la prévision de trafic de Google pour cette heure de la journée, la distance du calcul d'itinéraire sur OpenStreetMap. Chantiers et attentes à la frontière s'y ajoutent toujours.",
+      "Distance et durée proviennent du calcul d'itinéraire de Google – avec la prévision de trafic pour cette heure de la journée. Chantiers et attentes à la frontière s'y ajoutent toujours.",
+  },
+  officialWarnings: {
+    sectionAria: "Alertes météo officielles",
+    badge: "Officiel",
+    issuedFor: (issuer: string, area: string) =>
+      `${issuer} émet une alerte pour ${area}.`,
+    until: (time: string) => `Valable jusqu'à ${time}`,
+    source: (issuer: string, source: string) =>
+      `Alertes officielles : ${issuer}, via ${source}.`,
   },
   passport: {
     title: "Passeport de voyage",
@@ -3988,6 +4002,23 @@ export const fr: Translation = {
       `Tampon ${place}, visité ${visits} fois`,
     empty:
       "Pas encore de tampon. Saisis un voyage avec le nom du camping – il apparaîtra ici.",
+    family: "Famille",
+    personLabel: "Passeport de",
+    personGroupAria: "Choisir la personne",
+    addPerson: "Ajouter une personne",
+    addPersonPlaceholder: "Prénom",
+    addPersonSave: "Créer",
+    addPersonHint:
+      "Ce sont les mêmes personnes que dans le mode famille – celles qui y figurent apparaissent ici.",
+    whoWasThere: "Qui était du voyage ?",
+    whoWasThereHint:
+      "Sans modification, chaque voyage compte pour tout le monde. Décoche là où quelqu'un n'était pas là – par exemple avant la naissance d'un enfant.",
+    tripUnnamed: "Sans nom de lieu",
+    presenceAria: (place: string, person: string) =>
+      `${person} était du voyage à « ${place} »`,
+    noTrips: "Aucun voyage enregistré pour l'instant.",
+    personEmpty: (person: string) =>
+      `${person} n'a encore participé à aucun voyage. Coche ci-dessous.`,
     print: "Imprimer le passeport",
     note: "Les tampons proviennent des voyages du carnet ; rien n'est saisi deux fois. Chaque camping reçoit, à partir de son nom, la même forme, la même couleur et la même inclinaison – identiques sur chaque appareil.",
   },
@@ -4277,6 +4308,12 @@ export const fr: Translation = {
     replace: "Remplacer",
     openImage: "Voir la confirmation",
     openPdf: "Ouvrir le PDF",
+    viewerTitle: "Confirmation de réservation",
+    viewerClose: "Fermer",
+    viewerDownload: "Télécharger",
+    viewerNewWindow: "Ouvrir dans une nouvelle fenêtre",
+    viewerPdfFallback:
+      "Cet appareil n'affiche pas les PDF directement dans l'app. Télécharge le fichier ou ouvre-le dans une nouvelle fenêtre.",
     removeAria: "Supprimer la confirmation de réservation",
     uploaded: "Confirmation enregistrée.",
     uploadFailed: "La confirmation n'a pas pu être enregistrée.",

@@ -36,6 +36,14 @@ import { pick } from "../shared/i18n";
 import { getMoonInfo } from "../shared/moon";
 import { daysUntilTrip } from "../shared/trips";
 import {
+  ATTRIBUTION,
+  eventLabel,
+  isPushWorthy,
+  warningKey,
+  warningsForPoint,
+} from "@shared/meteoAlarm";
+import { getOfficialWarnings } from "./meteoAlarm";
+import {
   detectAlerts,
   nightCloudCover,
   type AlertThresholds,
@@ -1087,6 +1095,9 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     name: string;
     keyPrefix: string;
     hourly: HourlyWeather[];
+    /** Für die amtlichen Warnungen: Liegt der Ort im Warngebiet? */
+    latitude: number;
+    longitude: number;
   }[] = [];
   for (const spot of spots) {
     const hourly = await cachedHourly(spot.latitude, spot.longitude);
@@ -1096,6 +1107,8 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       name: spot.name,
       keyPrefix: String(spot.id),
       hourly,
+      latitude: spot.latitude,
+      longitude: spot.longitude,
     });
   }
   for (const home of homes) {
@@ -1106,8 +1119,21 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       name: home.name,
       keyPrefix: "home",
       hourly,
+      latitude: home.latitude,
+      longitude: home.longitude,
     });
   }
+
+  /**
+   * Amtliche Unwetterwarnungen von MeteoSchweiz (über MeteoAlarm).
+   *
+   * EINMAL JE LAUF GEHOLT, nicht je Ort: Der Feed ist derselbe für die
+   * ganze Schweiz und rund ein Megabyte gross. Ist er nicht erreichbar,
+   * kommt eine leere Liste zurück und die eigenen Warnungen gehen
+   * trotzdem raus – lieber eine Quelle weniger als gar kein Push.
+   */
+  const officialWarnings = await getOfficialWarnings();
+  const warningNow = Date.now();
 
   // Sternschnuppen: klarer Abendhimmel am Heim-Ort während eines aktiven
   // Strom-Maximums – nur abends (17–21 Uhr Europe/Zurich) geprüft, damit der
@@ -1252,18 +1278,49 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     // ── Unwetter an gespeicherten Plätzen ──
     // Warnungen pro Abo ableiten: die Warn-Schwellen hängen am Gerät.
     const thresholds = subscriptionThresholds(sub);
-    const dangers = weatherPoints
-      .filter(point => point.userId === sub.userId)
-      .flatMap(point =>
-        detectAlerts(point.hourly, "de", thresholds)
-          .filter(a => a.severity === "gefahr")
-          .map(alert => ({
-            spotName: point.name,
-            title: alert.title,
-            description: alert.description,
-            key: `${point.keyPrefix}:${alert.id}:${alert.startTime.slice(0, 13)}`,
-          }))
-      );
+    const ownPoints = weatherPoints.filter(
+      point => point.userId === sub.userId
+    );
+    const dangers = ownPoints.flatMap(point =>
+      detectAlerts(point.hourly, "de", thresholds)
+        .filter(a => a.severity === "gefahr")
+        .map(alert => ({
+          spotName: point.name,
+          title: alert.title,
+          description: alert.description,
+          key: `${point.keyPrefix}:${alert.id}:${alert.startTime.slice(0, 13)}`,
+          official: false,
+        }))
+    );
+    /**
+     * Amtliche Warnungen für dieselben Orte.
+     *
+     * ZUSÄTZLICH UND NICHT STATT: Die eigenen Schwellen decken ab, wofür
+     * es keine amtliche Warnung gibt – MeteoSchweiz warnt nicht, weil das
+     * Vorzelt bei 60 km/h Mühe hat. Umgekehrt sieht die Prognose ein
+     * Gewitter nicht so scharf wie ein Meteorologe mit dem Radar.
+     *
+     * SIE STEHEN ZUOBERST, weil sie im Push den Ton angeben sollen: Wenn
+     * MeteoSchweiz eine orange Warnung ausgibt, ist das die Nachricht und
+     * nicht der selbst gerechnete Windwert daneben.
+     */
+    const official = ownPoints.flatMap(point =>
+      warningsForPoint(
+        officialWarnings,
+        point.latitude,
+        point.longitude,
+        warningNow
+      )
+        .filter(isPushWorthy)
+        .map(warning => ({
+          spotName: point.name,
+          title: eventLabel(warning.event, "de"),
+          description: `${ATTRIBUTION.issuer} für ${warning.areaDesc}`,
+          key: `${point.keyPrefix}:${warningKey(warning)}`,
+          official: true,
+        }))
+    );
+    dangers.unshift(...official);
     const alertKey = dangers
       .map(d => d.key)
       .sort()
@@ -1282,7 +1339,12 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       alertKey !== sub.lastAlertKey
     ) {
       const first = dangers[0];
-      const weatherTitle = `⚠️ ${first.title} – ${first.spotName}`;
+      // Amtliche Warnungen bekommen eine eigene, deutlichere Stufe: Wer
+      // nachts aufwacht, soll am ersten Zeichen sehen, ob das der eigene
+      // Schwellwert war oder MeteoSchweiz.
+      const weatherTitle = first.official
+        ? `🚨 Amtliche Warnung: ${first.title} – ${first.spotName}`
+        : `⚠️ ${first.title} – ${first.spotName}`;
       const weatherBody =
         dangers.length > 1
           ? `${first.description} (+${dangers.length - 1} weitere Warnungen an deinen Plätzen)`

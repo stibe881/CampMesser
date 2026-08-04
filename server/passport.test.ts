@@ -9,7 +9,12 @@ import {
   passportRank,
   passportSummary,
   stampLook,
+  tripCountForTraveller,
+  tripsForTraveller,
+  wasAlong,
+  absenceLookup,
 } from "@shared/passport";
+import type { PassportTrip } from "@shared/passport";
 import type { TripLike } from "@shared/trips";
 
 const trip = (
@@ -154,6 +159,72 @@ describe("Kinder-Reisepass", () => {
           String(rank.places)
         ).toBeGreaterThan(0)
       );
+    });
+  });
+
+  describe("Ein Pass je Person", () => {
+    const reise = (id: number, place: string, year: string): PassportTrip => ({
+      id,
+      placeName: place,
+      startDate: `${year}-07-01`,
+      endDate: `${year}-07-08`,
+    });
+    const reisen = [
+      reise(1, "Sarnen", "2023"),
+      reise(2, "Lugano", "2024"),
+      reise(3, "Chur", "2025"),
+    ];
+
+    it("zählt ohne Eintrag jede Reise – alle waren dabei", () => {
+      // Der Normalfall braucht keine Zeile: Die Familie fährt zusammen weg
+      expect(tripsForTraveller(reisen, [], 7)).toHaveLength(3);
+      expect(tripCountForTraveller(reisen, [], 7)).toBe(3);
+    });
+
+    it("lässt weg, wo die Person nicht dabei war", () => {
+      const ohne = tripsForTraveller(reisen, [{ childId: 7, tripId: 2 }], 7);
+      expect(ohne.map(t => t.id)).toEqual([1, 3]);
+    });
+
+    it("trennt die Personen sauber", () => {
+      // Die Abwesenheit des einen Kindes darf dem anderen nichts wegnehmen
+      const absences = [{ childId: 7, tripId: 1 }];
+      expect(tripsForTraveller(reisen, absences, 7)).toHaveLength(2);
+      expect(tripsForTraveller(reisen, absences, 8)).toHaveLength(3);
+    });
+
+    it("nimmt für den Familienpass alles", () => {
+      const alles = tripsForTraveller(
+        reisen,
+        [
+          { childId: 7, tripId: 1 },
+          { childId: 8, tripId: 2 },
+        ],
+        null
+      );
+      expect(alles).toHaveLength(3);
+    });
+
+    it("beantwortet «war dabei» einzeln", () => {
+      const lookup = absenceLookup([{ childId: 7, tripId: 2 }]);
+      expect(wasAlong(lookup, 7, 1)).toBe(true);
+      expect(wasAlong(lookup, 7, 2)).toBe(false);
+      expect(wasAlong(lookup, 8, 2)).toBe(true);
+    });
+
+    it("gibt der Person nur ihre eigenen Stempel", () => {
+      // Das Kind, das 2024 bei den Grosseltern blieb, hat keinen
+      // Lugano-Stempel – und damit auch einen anderen Rang
+      const eigene = tripsForTraveller(reisen, [{ childId: 7, tripId: 2 }], 7);
+      const summary = passportSummary(eigene);
+      expect(summary.places).toBe(2);
+      expect(summary.stamps.map(s => s.place)).toEqual(["Sarnen", "Chur"]);
+    });
+
+    it("lässt die Eingabeliste unangetastet", () => {
+      const kopie = reisen.slice();
+      tripsForTraveller(reisen, [{ childId: 7, tripId: 1 }], 7);
+      expect(reisen).toEqual(kopie);
     });
   });
 });

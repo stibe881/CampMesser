@@ -24,7 +24,7 @@ export function pushSupported(): boolean {
   if (typeof window === "undefined") return false;
   // Nativer Expo WebView-Wrapper unterstützt Push via Bridge
   if ("ReactNativeWebView" in window) return true;
-  
+
   return (
     "serviceWorker" in navigator &&
     "PushManager" in window &&
@@ -53,13 +53,14 @@ export interface BrowserSubscription {
 /** Bestehendes Push-Abo dieses Browsers lesen (null = keines). */
 export async function getExistingSubscription(): Promise<BrowserSubscription | null> {
   if (!pushSupported()) return null;
-  
+
   if ("ReactNativeWebView" in window) {
     const token = localStorage.getItem("expoPushToken");
-    if (token) return { endpoint: token, p256dh: "expo-push-token", auth: "expo-auth" };
+    if (token)
+      return { endpoint: token, p256dh: "expo-push-token", auth: "expo-auth" };
     return null;
   }
-  
+
   const registration = await navigator.serviceWorker.ready;
   const sub = await registration.pushManager.getSubscription();
   if (!sub) return null;
@@ -84,7 +85,11 @@ export async function subscribeBrowser(
         window.removeEventListener("ExpoPushTokenError", errorHandler);
         const token = e.detail;
         localStorage.setItem("expoPushToken", token);
-        resolve({ endpoint: token, p256dh: "expo-push-token", auth: "expo-auth" });
+        resolve({
+          endpoint: token,
+          p256dh: "expo-push-token",
+          auth: "expo-auth",
+        });
       };
       const errorHandler = () => {
         window.removeEventListener("ExpoPushToken", handler);
@@ -93,7 +98,7 @@ export async function subscribeBrowser(
       };
       window.addEventListener("ExpoPushToken", handler);
       window.addEventListener("ExpoPushTokenError", errorHandler);
-      
+
       (window as any).ReactNativeWebView.postMessage(
         JSON.stringify({ type: "REQUEST_PUSH_TOKEN" })
       );

@@ -2016,6 +2016,11 @@ export const de = {
     attributeUnset: "Keine Angabe",
     attributeGroupAria: (name: string) => `Wert für ${name} wählen`,
     attributesSaved: "Eigenschaften gespeichert",
+    sectionPlace: "Der Platz",
+    sectionArrival: "Anreise",
+    sectionWeather: "Wetter & Himmel",
+    sectionAround: "In der Umgebung",
+    sectionOwn: "Eigenes",
     routeButton: "Route",
     routeAria: "Route zu diesem Platz in der Karten-App öffnen",
     contactTitle: "Kontakt & Check-in",
@@ -3833,7 +3838,7 @@ export const de = {
     methodNoteEstimate: (speed: number) =>
       `Ohne Netz keine Routenberechnung: Geprüft werden acht Punkte entlang der Luftlinie mit ${speed} km/h – eine grobe Schätzung, die im Gebirge deutlich danebenliegen kann.`,
     methodNoteTraffic:
-      "Die Fahrzeit stammt aus der Verkehrs-Prognose von Google für deine Abfahrtszeit; die Strecke und die Prüfpunkte kommen wie bisher aus der Routenberechnung über OpenStreetMap. Weil der Verkehr die Ankunftszeit je Punkt verschiebt, verschiebt er auch, welche Prognosestunde zählt.",
+      "Strecke und Fahrzeit stammen aus der Routenberechnung von Google – mit der Verkehrs-Prognose für deine Abfahrtszeit. Die Prüfpunkte liegen wie bisher auf der Route von OpenStreetMap. Weil der Verkehr die Ankunftszeit je Punkt verschiebt, verschiebt er auch, welche Prognosestunde zählt.",
     source: "Daten: Open-Meteo",
   },
   packHistory: {
@@ -3973,7 +3978,15 @@ export const de = {
     noteEstimate:
       "Ohne Netz keine Routenberechnung: Diese Zahlen sind aus der Luftlinie geschätzt (mit Umwegfaktor) und können deutlich danebenliegen – besonders im Gebirge.",
     noteTraffic:
-      "Die Fahrzeit stammt aus der Verkehrs-Prognose von Google für diese Tageszeit, die Strecke aus der Routenberechnung über OpenStreetMap. Baustellen und Grenzwartezeiten kommen weiterhin dazu.",
+      "Strecke und Fahrzeit stammen aus der Routenberechnung von Google – mit der Verkehrs-Prognose für diese Tageszeit. Baustellen und Grenzwartezeiten kommen weiterhin dazu.",
+  },
+  officialWarnings: {
+    sectionAria: "Amtliche Unwetterwarnungen",
+    badge: "Amtlich",
+    issuedFor: (issuer: string, area: string) => `${issuer} warnt für ${area}.`,
+    until: (time: string) => `Gültig bis ${time}`,
+    source: (issuer: string, source: string) =>
+      `Amtliche Warnungen: ${issuer}, bezogen über ${source}.`,
   },
   passport: {
     title: "Reisepass",
@@ -3991,6 +4004,23 @@ export const de = {
       `Stempel ${place}, ${visits}-mal besucht`,
     empty:
       "Noch keine Stempel. Trag eine Reise mit Platznamen ein – dann steht sie hier.",
+    family: "Familie",
+    personLabel: "Pass von",
+    personGroupAria: "Person wählen",
+    addPerson: "Person hinzufügen",
+    addPersonPlaceholder: "Name",
+    addPersonSave: "Anlegen",
+    addPersonHint:
+      "Die Personen sind dieselben wie im Familien-Modus – wer dort schon angelegt ist, steht hier auch.",
+    whoWasThere: "Wer war dabei?",
+    whoWasThereHint:
+      "Ohne Änderung zählt jede Reise für alle. Nimm den Haken weg, wo jemand nicht dabei war – zum Beispiel bevor ein Kind auf der Welt war.",
+    tripUnnamed: "Ohne Platzname",
+    presenceAria: (place: string, person: string) =>
+      `${person} war bei «${place}» dabei`,
+    noTrips: "Noch keine Reisen eingetragen.",
+    personEmpty: (person: string) =>
+      `${person} war noch auf keiner Reise dabei. Setz unten die Haken.`,
     print: "Pass drucken",
     note: "Die Stempel entstehen aus den Reisen im Tagebuch; nichts wird doppelt erfasst. Jeder Platz bekommt aus seinem Namen dieselbe Form, Farbe und Schräglage – auf jedem Gerät und nach jedem Neuladen gleich.",
   },
@@ -4280,6 +4310,12 @@ export const de = {
     replace: "Ersetzen",
     openImage: "Bestätigung ansehen",
     openPdf: "PDF öffnen",
+    viewerTitle: "Buchungsbestätigung",
+    viewerClose: "Schliessen",
+    viewerDownload: "Herunterladen",
+    viewerNewWindow: "In neuem Fenster öffnen",
+    viewerPdfFallback:
+      "Dieses Gerät zeigt PDF nicht direkt in der App an. Lade die Datei herunter oder öffne sie in einem neuen Fenster.",
     removeAria: "Buchungsbestätigung löschen",
     uploaded: "Bestätigung gespeichert.",
     uploadFailed: "Die Bestätigung konnte nicht gespeichert werden.",

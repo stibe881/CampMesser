@@ -1996,6 +1996,11 @@ export const it: Translation = {
     attributeUnset: "Nessuna indicazione",
     attributeGroupAria: (name: string) => `Scegli il valore per ${name}`,
     attributesSaved: "Caratteristiche salvate",
+    sectionPlace: "La piazzola",
+    sectionArrival: "Il viaggio",
+    sectionWeather: "Meteo e cielo",
+    sectionAround: "Nei dintorni",
+    sectionOwn: "Personale",
     routeButton: "Percorso",
     routeAria: "Apri il percorso verso questa piazzola nell'app di mappe",
     contactTitle: "Contatto & check-in",
@@ -3802,7 +3807,7 @@ export const it: Translation = {
     methodNoteEstimate: (speed: number) =>
       `Senza rete niente calcolo del percorso: si controllano otto punti lungo la linea d'aria con ${speed} km/h – una stima approssimativa che in montagna può sbagliare di molto.`,
     methodNoteTraffic:
-      "Il tempo di percorrenza viene dalla previsione del traffico di Google per il tuo orario di partenza; il tracciato e i punti di controllo vengono come prima dal calcolo del percorso su OpenStreetMap. Poiché il traffico sposta l'orario di arrivo a ogni punto, sposta anche quale ora di previsione conta.",
+      "Distanza e tempo di percorrenza vengono dal calcolo del percorso di Google – con la previsione del traffico per il tuo orario di partenza. I punti di controllo restano sul percorso di OpenStreetMap. Poiché il traffico sposta l'orario di arrivo a ogni punto, sposta anche quale ora di previsione conta.",
     source: "Dati: Open-Meteo",
   },
   packHistory: {
@@ -3943,7 +3948,16 @@ export const it: Translation = {
     noteEstimate:
       "Senza rete niente calcolo del percorso: questi valori sono stimati in linea d'aria (con fattore di deviazione) e possono essere molto lontani dal vero – soprattutto in montagna.",
     noteTraffic:
-      "Il tempo di percorrenza viene dalla previsione del traffico di Google per quest'ora del giorno, la distanza dal calcolo del percorso su OpenStreetMap. Cantieri e attese alla frontiera si aggiungono ancora.",
+      "Distanza e tempo di percorrenza vengono dal calcolo del percorso di Google – con la previsione del traffico per quest'ora del giorno. Cantieri e attese alla frontiera si aggiungono ancora.",
+  },
+  officialWarnings: {
+    sectionAria: "Allerte meteo ufficiali",
+    badge: "Ufficiale",
+    issuedFor: (issuer: string, area: string) =>
+      `${issuer} segnala un'allerta per ${area}.`,
+    until: (time: string) => `Valida fino alle ${time}`,
+    source: (issuer: string, source: string) =>
+      `Allerte ufficiali: ${issuer}, tramite ${source}.`,
   },
   passport: {
     title: "Passaporto di viaggio",
@@ -3961,6 +3975,23 @@ export const it: Translation = {
       `Timbro ${place}, visitato ${visits} volte`,
     empty:
       "Ancora nessun timbro. Registra un viaggio col nome del campeggio – comparirà qui.",
+    family: "Famiglia",
+    personLabel: "Passaporto di",
+    personGroupAria: "Scegli la persona",
+    addPerson: "Aggiungi persona",
+    addPersonPlaceholder: "Nome",
+    addPersonSave: "Crea",
+    addPersonHint:
+      "Sono le stesse persone della modalità famiglia – chi è già registrato lì compare anche qui.",
+    whoWasThere: "Chi c'era?",
+    whoWasThereHint:
+      "Senza modifiche ogni viaggio vale per tutti. Togli il segno dove qualcuno non c'era – per esempio prima che un bambino nascesse.",
+    tripUnnamed: "Senza nome del luogo",
+    presenceAria: (place: string, person: string) =>
+      `${person} era presente a «${place}»`,
+    noTrips: "Nessun viaggio registrato finora.",
+    personEmpty: (person: string) =>
+      `${person} non ha ancora partecipato a nessun viaggio. Metti i segni qui sotto.`,
     print: "Stampa il passaporto",
     note: "I timbri nascono dai viaggi del diario; nulla viene registrato due volte. Ogni campeggio riceve dal proprio nome la stessa forma, lo stesso colore e la stessa inclinazione – uguali su ogni dispositivo.",
   },
@@ -4251,6 +4282,12 @@ export const it: Translation = {
     replace: "Sostituisci",
     openImage: "Vedi la conferma",
     openPdf: "Apri il PDF",
+    viewerTitle: "Conferma di prenotazione",
+    viewerClose: "Chiudi",
+    viewerDownload: "Scarica",
+    viewerNewWindow: "Apri in una nuova finestra",
+    viewerPdfFallback:
+      "Questo dispositivo non mostra i PDF direttamente nell'app. Scarica il file oppure aprilo in una nuova finestra.",
     removeAria: "Elimina la conferma di prenotazione",
     uploaded: "Conferma salvata.",
     uploadFailed: "Non è stato possibile salvare la conferma.",

@@ -1,9 +1,9 @@
-import React, { useRef } from 'react';
-import { StyleSheet, SafeAreaView, Platform, StatusBar } from 'react-native';
-import { WebView } from 'react-native-webview';
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
-import Constants from 'expo-constants';
+import React, { useRef } from "react";
+import { StyleSheet, SafeAreaView, Platform, StatusBar } from "react-native";
+import { WebView } from "react-native-webview";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import Constants from "expo-constants";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -16,28 +16,30 @@ Notifications.setNotificationHandler({
 async function registerForPushNotificationsAsync() {
   let token;
 
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "default",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
+      lightColor: "#FF231F7C",
     });
   }
 
   if (Device.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
-    if (existingStatus !== 'granted') {
+    if (existingStatus !== "granted") {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    if (finalStatus !== 'granted') {
+    if (finalStatus !== "granted") {
       return null;
     }
     // Wichtig für EAS Build
     const projectId =
-      Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+      Constants?.expoConfig?.extra?.eas?.projectId ??
+      Constants?.easConfig?.projectId;
     token = (
       await Notifications.getExpoPushTokenAsync({
         projectId,
@@ -50,18 +52,18 @@ async function registerForPushNotificationsAsync() {
 
 export default function App() {
   const webViewRef = useRef(null);
-  const [themeBg, setThemeBg] = React.useState('#09090b');
+  const [themeBg, setThemeBg] = React.useState("#09090b");
 
   // Basis-URL der Web-App
-  const CAMP_URL = 'https://campmesser.ch';
+  const CAMP_URL = "https://campmesser.ch";
 
-  const onMessage = async (event) => {
+  const onMessage = async event => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === 'THEME_UPDATE') {
-        setThemeBg(data.value === 'light' ? '#ffffff' : '#09090b');
+      if (data.type === "THEME_UPDATE") {
+        setThemeBg(data.value === "light" ? "#ffffff" : "#09090b");
       }
-      if (data.type === 'REQUEST_PUSH_TOKEN') {
+      if (data.type === "REQUEST_PUSH_TOKEN") {
         const token = await registerForPushNotificationsAsync();
         if (token && webViewRef.current) {
           // Send the token back to the web view
@@ -76,7 +78,7 @@ export default function App() {
         }
       }
     } catch (e) {
-      console.log('Error parsing message from webview', e);
+      console.log("Error parsing message from webview", e);
     }
   };
 
@@ -101,8 +103,8 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#09090b',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    backgroundColor: "#09090b",
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   webview: {
     flex: 1,

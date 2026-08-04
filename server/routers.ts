@@ -21,7 +21,7 @@ import {
   parsePersons,
   serializePersons,
 } from "@shared/packPersons";
-import { l4, pick, type Language } from "@shared/i18n";
+import { LANGUAGES, l4, pick, type Language } from "@shared/i18n";
 import {
   SETTING_VALUE_MAX_LENGTH,
   SYNCED_SETTING_KEYS,
@@ -3862,12 +3862,60 @@ export const appRouter = router({
           await db.renameFamilyChild(input.id, ctx.user.id, input.name.trim());
           return { success: true } as const;
         }),
-      /** Kind entfernen – seine Abzeichen und Zähler gehen mit. */
+      /**
+       * Kind entfernen – Abzeichen, Zähler und Reisepass-Einträge gehen
+       * mit.
+       */
       remove: protectedProcedure
         .input(z.object({ id: z.number().int().positive() }))
         .mutation(({ ctx, input }) =>
           db.deleteFamilyChild(input.id, ctx.user.id)
         ),
+    }),
+    /**
+     * Reisepass (#292): wer war auf welcher Reise dabei.
+     *
+     * Gespeichert wird die ABWESENHEIT – ohne Eintrag war die Person
+     * dabei. Begründung in shared/passport.ts.
+     */
+    passport: router({
+      absences: protectedProcedure.query(({ ctx }) =>
+        db.getPassportAbsences(ctx.user.id)
+      ),
+      setPresence: protectedProcedure
+        .input(
+          z.object({
+            childId: z.number().int().positive(),
+            tripId: z.number().int().positive(),
+            present: z.boolean(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          // Beide Seiten prüfen: Ohne das könnte man über eine fremde
+          // childId oder tripId Zeilen im eigenen Konto anlegen, die auf
+          // fremde Daten zeigen.
+          const child = await db.getFamilyChild(input.childId, ctx.user.id);
+          if (!child) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Person nicht gefunden.",
+            });
+          }
+          const trip = await db.getTripLog(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Reise nicht gefunden.",
+            });
+          }
+          await db.setPassportPresence(
+            ctx.user.id,
+            input.childId,
+            input.tripId,
+            input.present
+          );
+          return { success: true } as const;
+        }),
     }),
     badges: router({
       /** Abzeichen eines eigenen Kindes (leere Liste bei fremder childId). */
@@ -6037,6 +6085,91 @@ export const appRouter = router({
       }
       return { configured: true as const, excursions: await fetchExcursions() };
     }),
+  }),
+
+  /**
+   * Amtliche Unwetterwarnungen (MeteoSchweiz über MeteoAlarm).
+   *
+   * ÖFFENTLICH: Eine amtliche Unwetterwarnung ist keine persönliche
+   * Angabe, und wer über einen geteilten Link eine Karte anschaut, soll
+   * sie ebenso sehen. Die Anfrage kostet nichts – der Feed liegt
+   * serverseitig im Zwischenspeicher und wird für alle einmal geholt.
+   */
+  warnings: router({
+    official: publicProcedure
+      .input(
+        z.object({
+          latitude: z.number().min(-90).max(90),
+          longitude: z.number().min(-180).max(180),
+        })
+      )
+      .query(async ({ input }) => {
+        const { getOfficialWarnings } = await import("./meteoAlarm");
+        const { warningsForPoint } = await import("@shared/meteoAlarm");
+        const now = Date.now();
+        const all = await getOfficialWarnings(now);
+        // Die Polygone bleiben auf dem Server: Der Feed ist rund ein
+        // Megabyte gross, und der Browser braucht nur die Treffer.
+        return warningsForPoint(all, input.latitude, input.longitude, now).map(
+          warning => ({
+            id: warning.id,
+            event: warning.event,
+            areaDesc: warning.areaDesc,
+            severity: warning.severity,
+            onset: warning.onset,
+            expires: warning.expires,
+          })
+        );
+      }),
+  }),
+
+  /**
+   * Orte von Google (Nutzerwunsch 04.08.2026): «Einkaufen in der Nähe»
+   * und «Rast unterwegs».
+   *
+   * WARUM ÜBERHAUPT: OSM kennt die Läden, aber meistens nicht ihre
+   * Öffnungszeiten – und «hat der Coop jetzt noch offen» ist genau die
+   * Frage am Zeltplatz. Die Begründung samt Grenzen steht ausführlich in
+   * `shared/googlePlaces.ts`.
+   *
+   * Der Abruf läuft nur hier, damit der Schlüssel nie im Browser-Bundle
+   * landet. Ohne Schlüssel kommt `configured: false`, und die Ansichten
+   * holen ihre Treffer weiter aus OpenStreetMap.
+   */
+  places: router({
+    nearby: protectedProcedure
+      .input(
+        z.object({
+          latitude: z.number().min(-90).max(90),
+          longitude: z.number().min(-180).max(180),
+          radiusM: z.number().int().min(100).max(50000),
+          /** Was gesucht wird – die Typenliste steht im Server, nicht im Client. */
+          kind: z.enum(["shops", "picnic"]),
+          language: z.enum(LANGUAGES).default("de"),
+        })
+      )
+      .query(async ({ input }) => {
+        const { fetchNearbyPlaces, isPlacesConfigured } =
+          await import("./googlePlaces");
+        if (!isPlacesConfigured()) {
+          return { configured: false as const, places: [] };
+        }
+        const { GOOGLE_PICNIC_TYPES, GOOGLE_SHOP_TYPES } =
+          await import("@shared/googlePlaces");
+        const types =
+          input.kind === "shops" ? GOOGLE_SHOP_TYPES : GOOGLE_PICNIC_TYPES;
+        const places = await fetchNearbyPlaces(
+          input.latitude,
+          input.longitude,
+          input.radiusM,
+          types,
+          input.language
+        );
+        // null = Google hat nicht geantwortet. Für die Ansicht ist das
+        // dasselbe wie «nicht eingerichtet»: Sie fragt dann OSM.
+        if (!places) return { configured: false as const, places: [] };
+        return { configured: true as const, places };
+      }),
   }),
 
   /**
