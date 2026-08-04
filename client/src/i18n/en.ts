@@ -3732,6 +3732,21 @@ export const en: Translation = {
     compareEmpty: "No pitch rated yet.",
     unrated: "–",
   },
+  trackProfile: {
+    sectionAria: "Elevation profile and splits",
+    title: "Elevation profile",
+    rangeLine: (min: number, max: number) => `${min}–${max} m above sea level`,
+    chartAria: "Elevation along the route",
+    noElevation:
+      "This device recorded no elevations – so the chart is missing.",
+    tooltipElevation: "Elevation",
+    tooltipDistance: (km: string) => `at ${km} km`,
+    splitsTitle: "Splits",
+    kmLabel: (km: number) => `km ${km}`,
+    kmPartial: "Rest",
+    climbLine: (up: number, down: number) => `↑${up} m ↓${down} m`,
+    note: "Elevation is plotted against distance, not time – otherwise every break would look like flat ground. The final part-kilometre is marked “Rest”.",
+  },
   shops: {
     sectionAria: "Shopping nearby",
     title: "Shopping nearby",

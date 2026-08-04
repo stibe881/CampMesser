@@ -32,6 +32,7 @@ import {
 import { toast } from "sonner";
 import type * as Leaflet from "leaflet";
 import PageHeader from "@/components/PageHeader";
+import TrackProfile from "@/components/TrackProfile";
 import LoginPrompt from "@/components/LoginPrompt";
 import NearbyHikes from "@/components/NearbyHikes";
 import { Button } from "@/components/ui/button";
@@ -192,12 +193,16 @@ function TrackMap({ trackId }: { trackId: number }) {
     );
   }
   return (
-    <div
-      ref={containerRef}
-      className="mt-3 h-64 w-full overflow-hidden rounded-lg border border-border"
-      role="img"
-      aria-label={t.hike.mapAria}
-    />
+    <>
+      <div
+        ref={containerRef}
+        className="mt-3 h-64 w-full overflow-hidden rounded-lg border border-border"
+        role="img"
+        aria-label={t.hike.mapAria}
+      />
+      {/* Höhenprofil und Zwischenzeiten (#280) */}
+      <TrackProfile points={points} />
+    </>
   );
 }
 

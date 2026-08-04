@@ -3844,6 +3844,21 @@ export const de = {
     compareEmpty: "Noch kein Platz bewertet.",
     unrated: "–",
   },
+  trackProfile: {
+    sectionAria: "Höhenprofil und Zwischenzeiten",
+    title: "Höhenprofil",
+    rangeLine: (min: number, max: number) => `${min}–${max} m ü. M.`,
+    chartAria: "Höhenverlauf über die Strecke",
+    noElevation:
+      "Dieses Gerät hat zur Aufzeichnung keine Höhen geliefert – das Diagramm fehlt deshalb.",
+    tooltipElevation: "Höhe",
+    tooltipDistance: (km: string) => `bei ${km} km`,
+    splitsTitle: "Zwischenzeiten",
+    kmLabel: (km: number) => `km ${km}`,
+    kmPartial: "Rest",
+    climbLine: (up: number, down: number) => `↑${up} m ↓${down} m`,
+    note: "Die Höhe steht über der Strecke und nicht über der Zeit – sonst sähe jede Pause wie eine Ebene aus. Der letzte, angebrochene Kilometer ist als «Rest» gekennzeichnet.",
+  },
   shops: {
     sectionAria: "Einkaufen in der Nähe",
     title: "Einkaufen in der Nähe",

@@ -3813,6 +3813,21 @@ export const it: Translation = {
     compareEmpty: "Nessuna piazzola valutata finora.",
     unrated: "–",
   },
+  trackProfile: {
+    sectionAria: "Profilo altimetrico e tempi intermedi",
+    title: "Profilo altimetrico",
+    rangeLine: (min: number, max: number) => `${min}–${max} m s.l.m.`,
+    chartAria: "Andamento dell'altitudine lungo il percorso",
+    noElevation:
+      "Questo dispositivo non ha fornito altitudini durante la registrazione – il grafico quindi manca.",
+    tooltipElevation: "Altitudine",
+    tooltipDistance: (km: string) => `a ${km} km`,
+    splitsTitle: "Tempi intermedi",
+    kmLabel: (km: number) => `km ${km}`,
+    kmPartial: "Resto",
+    climbLine: (up: number, down: number) => `↑${up} m ↓${down} m`,
+    note: "L'altitudine è riportata sulla distanza e non sul tempo – altrimenti ogni pausa sembrerebbe un tratto piano. L'ultimo chilometro iniziato è segnato come «Resto».",
+  },
   shops: {
     sectionAria: "Fare la spesa nei dintorni",
     title: "Fare la spesa nei dintorni",

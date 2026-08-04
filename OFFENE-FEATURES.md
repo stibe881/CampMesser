@@ -25,7 +25,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 28 – 5 Punkte
+## Runde 28 – 4 Punkte
 
 ### Karte & Wetter
 
@@ -36,8 +36,6 @@ Stand: 4. August 2026
 
 ### Wandern
 
-- [ ] **Höhenprofil im Track-Detail** (#280) – Diagramm zur aufgezeichneten
-      Wanderung mit Zwischenzeiten
 - [ ] **Route vorher zeichnen** (#281) – Wegpunkte setzen, Länge, Höhenmeter
       und Gehzeit schätzen
 - [ ] **Wanderung per Link teilen** (#282) – Track für Mitreisende, im

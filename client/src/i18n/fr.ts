@@ -3841,6 +3841,21 @@ export const fr: Translation = {
     compareEmpty: "Aucun emplacement évalué pour l'instant.",
     unrated: "–",
   },
+  trackProfile: {
+    sectionAria: "Profil altimétrique et temps intermédiaires",
+    title: "Profil altimétrique",
+    rangeLine: (min: number, max: number) => `${min}–${max} m d'altitude`,
+    chartAria: "Profil d'altitude le long du parcours",
+    noElevation:
+      "Cet appareil n'a pas fourni d'altitudes pendant l'enregistrement – le graphique manque donc.",
+    tooltipElevation: "Altitude",
+    tooltipDistance: (km: string) => `à ${km} km`,
+    splitsTitle: "Temps intermédiaires",
+    kmLabel: (km: number) => `km ${km}`,
+    kmPartial: "Reste",
+    climbLine: (up: number, down: number) => `↑${up} m ↓${down} m`,
+    note: "L'altitude est portée sur la distance et non sur le temps – sinon, chaque pause ressemblerait à un plat. Le dernier kilomètre entamé est marqué « Reste ».",
+  },
   shops: {
     sectionAria: "Faire les courses à proximité",
     title: "Faire les courses à proximité",
