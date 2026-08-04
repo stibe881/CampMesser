@@ -25,12 +25,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 13 Punkte
-
-### Geld
-
-- [ ] **Ausgaben-Statistik über alle Reisen** (#257) – Kosten pro Jahr,
-      Ø pro Nacht, teuerste Kategorie
+## Runde 27 – 12 Punkte
 
 ### Gesundheit & Sicherheit
 

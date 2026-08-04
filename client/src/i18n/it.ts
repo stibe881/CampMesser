@@ -4672,6 +4672,15 @@ export const it: Translation = {
     deleteAria: (title: string) => `Elimina la nota ${title}`,
   },
   stats: {
+    expensesTitle: "Spese di tutti i viaggi",
+    expensesLink: "Ai viaggi",
+    expensesTotal: "Totale",
+    expensesPerNight: "Ø a notte",
+    expensesTopCategory: "Categoria più cara",
+    expensesYearDetail: (trips: number, nights: number, perNight: string) =>
+      `${trips === 1 ? "1 viaggio" : `${trips} viaggi`} · ${nights === 1 ? "1 notte" : `${nights} notti`} · ${perNight}/notte`,
+    expensesHint:
+      "Vengono contate le casse dei tuoi viaggi. Una spesa conta per l'anno del viaggio – un viaggio di Capodanno sta interamente nell'anno della partenza.",
     title: "Statistiche",
     subtitle:
       "Tutte le tue analisi in un colpo d'occhio – viaggi, fortuna meteo, traguardi, nodi, specie e famiglia.",

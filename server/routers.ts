@@ -58,6 +58,7 @@ import {
 } from "@shared/food";
 import {
   BUDGET_MAX_RAPPEN,
+  expenseStats,
   EXPENSE_CATEGORIES,
   EXPENSE_DESCRIPTION_MAX_LENGTH,
   EXPENSE_MAX_RAPPEN,
@@ -4127,6 +4128,24 @@ export const appRouter = router({
      * Beträge kommen und gehen ausschliesslich als Rappen-Ganzzahlen.
      */
     expenses: router({
+      /**
+       * Ausgaben über ALLE eigenen Reisen (#257): Kosten pro Jahr,
+       * Ø pro Nacht und teuerste Kategorie. Bewusst nur eigene Reisen –
+       * in fremden Reisekassen hat die eigene Statistik nichts verloren,
+       * und die Zahl wäre auch nicht vergleichbar.
+       */
+      stats: protectedProcedure.query(async ({ ctx }) => {
+        const trips = await db.getTripLogs(ctx.user.id);
+        const expenses = await db.getExpensesForTrips(trips.map(t => t.id));
+        return expenseStats(
+          trips.map(trip => ({
+            id: trip.id,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+          })),
+          expenses
+        );
+      }),
       /**
        * Reise-Budget (#256) setzen oder mit null wieder entfernen.
        * Erlaubt für alle Mitreisenden – die Reisekasse gehört allen, also

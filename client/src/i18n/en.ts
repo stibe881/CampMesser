@@ -4569,6 +4569,15 @@ export const en: Translation = {
     deleteAria: (title: string) => `Delete note ${title}`,
   },
   stats: {
+    expensesTitle: "Spending across all trips",
+    expensesLink: "To the trips",
+    expensesTotal: "Total",
+    expensesPerNight: "Avg. per night",
+    expensesTopCategory: "Priciest category",
+    expensesYearDetail: (trips: number, nights: number, perNight: string) =>
+      `${trips === 1 ? "1 trip" : `${trips} trips`} · ${nights === 1 ? "1 night" : `${nights} nights`} · ${perNight}/night`,
+    expensesHint:
+      "Counted is what sits in the kitties of your own trips. An expense counts towards the year of the trip – a New Year's trip sits entirely in the year it started.",
     title: "Statistics",
     subtitle:
       "All your figures at a glance – trips, weather luck, milestones, knots, species and family.",

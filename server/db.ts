@@ -2328,6 +2328,24 @@ export async function getTripExpenses(tripId: number) {
     .orderBy(desc(tripExpenses.day), desc(tripExpenses.id));
 }
 
+/**
+ * Ausgaben mehrerer Reisen in EINER Abfrage (#257) – für die Statistik
+ * über alle Reisen. Ohne Ids gibt es nichts zu holen; der Router
+ * übergibt ausschliesslich Ids EIGENER Reisen.
+ */
+export async function getExpensesForTrips(tripIds: number[]) {
+  if (tripIds.length === 0) return [];
+  const db = requireDb(await getDb());
+  return db
+    .select({
+      tripId: tripExpenses.tripId,
+      amountRappen: tripExpenses.amountRappen,
+      category: tripExpenses.category,
+    })
+    .from(tripExpenses)
+    .where(inArray(tripExpenses.tripId, tripIds));
+}
+
 /** Einzelne Ausgabe laden (für die Zugriffsprüfung über ihre tripId). */
 export async function getTripExpenseById(id: number) {
   const db = requireDb(await getDb());

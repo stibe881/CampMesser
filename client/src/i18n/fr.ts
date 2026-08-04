@@ -4708,6 +4708,15 @@ export const fr: Translation = {
     deleteAria: (title: string) => `Supprimer la note ${title}`,
   },
   stats: {
+    expensesTitle: "Dépenses de tous les voyages",
+    expensesLink: "Vers les voyages",
+    expensesTotal: "Total",
+    expensesPerNight: "Ø par nuit",
+    expensesTopCategory: "Catégorie la plus chère",
+    expensesYearDetail: (trips: number, nights: number, perNight: string) =>
+      `${trips === 1 ? "1 voyage" : `${trips} voyages`} · ${nights === 1 ? "1 nuit" : `${nights} nuits`} · ${perNight}/nuit`,
+    expensesHint:
+      "Sont comptées les caisses de tes propres voyages. Une dépense compte pour l'année du voyage – un voyage à cheval sur le Nouvel An figure entièrement dans l'année de son départ.",
     title: "Statistiques",
     subtitle:
       "Toutes tes analyses en un coup d'œil – voyages, chance météo, jalons, nœuds, espèces et famille.",

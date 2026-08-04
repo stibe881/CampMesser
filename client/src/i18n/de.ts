@@ -4706,6 +4706,15 @@ export const de = {
     deleteAria: (title: string) => `Notiz ${title} löschen`,
   },
   stats: {
+    expensesTitle: "Ausgaben über alle Reisen",
+    expensesLink: "Zu den Reisen",
+    expensesTotal: "Gesamt",
+    expensesPerNight: "Ø pro Nacht",
+    expensesTopCategory: "Teuerste Kategorie",
+    expensesYearDetail: (trips: number, nights: number, perNight: string) =>
+      `${trips === 1 ? "1 Reise" : `${trips} Reisen`} · ${nights === 1 ? "1 Nacht" : `${nights} Nächte`} · ${perNight}/Nacht`,
+    expensesHint:
+      "Gezählt wird, was in den Reisekassen deiner eigenen Reisen steht. Eine Ausgabe zählt zum Jahr der Reise – eine Silvester-Reise steht komplett im Jahr ihrer Anreise.",
     title: "Statistik",
     subtitle:
       "Alle Auswertungen auf einen Blick – Reisen, Wetter-Glück, Meilensteine, Knoten, Arten und Familie.",
