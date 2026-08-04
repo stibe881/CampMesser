@@ -2590,6 +2590,18 @@ export const de = {
     removeFailed: "Zettel konnte nicht entfernt werden",
   },
   tripExpenses: {
+    fuelTitle: "Fahrtkosten berechnen",
+    fuelHint:
+      "Kilometer × Verbrauch × Spritpreis. Gerechnet wird mit dem Durchschnittsverbrauch – wer es genauer will, tippt den Betrag von Hand ein.",
+    fuelKmLabel: "Strecke (km)",
+    fuelConsumptionLabel: "Verbrauch (l/100 km)",
+    fuelPriceLabel: "Preis (CHF/l)",
+    fuelRoundTrip: "Hin- und Rückfahrt",
+    fuelResult: (km: number, liters: string, amount: string) =>
+      `${km} km · ${liters} l · ${amount}`,
+    fuelApply: "In die Reisekasse übernehmen",
+    fuelInvalid: "Bitte Strecke, Verbrauch und Preis eintragen.",
+    fuelDescription: (km: number) => `Fahrt ${km} km`,
     csvButton: "Als CSV exportieren",
     csvAria: (trip: string) => `Reisekasse von ${trip} als CSV herunterladen`,
     csvHeaders: ["Datum", "Kategorie", "Beschreibung", "Bezahlt von", "Betrag"],

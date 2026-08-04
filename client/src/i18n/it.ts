@@ -2561,6 +2561,18 @@ export const it: Translation = {
     removeFailed: "Impossibile togliere il biglietto",
   },
   tripExpenses: {
+    fuelTitle: "Calcolare i costi di viaggio",
+    fuelHint:
+      "Chilometri × consumo × prezzo del carburante. Si calcola con il consumo medio – chi vuole più precisione inserisce l'importo a mano.",
+    fuelKmLabel: "Distanza (km)",
+    fuelConsumptionLabel: "Consumo (l/100 km)",
+    fuelPriceLabel: "Prezzo (CHF/l)",
+    fuelRoundTrip: "Andata e ritorno",
+    fuelResult: (km: number, liters: string, amount: string) =>
+      `${km} km · ${liters} l · ${amount}`,
+    fuelApply: "Riprendere nella cassa",
+    fuelInvalid: "Inserisci distanza, consumo e prezzo.",
+    fuelDescription: (km: number) => `Tragitto ${km} km`,
     csvButton: "Esportare come CSV",
     csvAria: (trip: string) => `Scaricare la cassa di ${trip} come CSV`,
     csvHeaders: ["Data", "Categoria", "Descrizione", "Pagato da", "Importo"],

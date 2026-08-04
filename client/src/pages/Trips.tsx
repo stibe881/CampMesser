@@ -16,6 +16,7 @@ import {
   EyeOff,
   CopyPlus,
   Download,
+  Fuel,
   Gauge,
   GraduationCap,
   LayoutGrid,
@@ -99,6 +100,11 @@ import {
   type ExpenseCategory,
 } from "@shared/expenses";
 import { csvFileName, expensesToCsv } from "@shared/expensesCsv";
+import {
+  DEFAULT_CONSUMPTION_L100,
+  DEFAULT_FUEL_PRICE_RAPPEN,
+  fuelCost,
+} from "@shared/fuelCost";
 import {
   computeTripStats,
   computeYearReview,
@@ -1435,6 +1441,16 @@ function TripExpenses({
   /** Budget-Feld (#256): offen = Eingabe sichtbar. */
   const [editingBudget, setEditingBudget] = useState(false);
   const [budgetInput, setBudgetInput] = useState("");
+  /** Fahrtkosten-Rechner (#259). */
+  const [fuelOpen, setFuelOpen] = useState(false);
+  const [fuelKm, setFuelKm] = useState("");
+  const [fuelConsumption, setFuelConsumption] = useState(
+    String(DEFAULT_CONSUMPTION_L100)
+  );
+  const [fuelPrice, setFuelPrice] = useState(
+    rappenToInput(DEFAULT_FUEL_PRICE_RAPPEN)
+  );
+  const [fuelRoundTrip, setFuelRoundTrip] = useState(true);
 
   const query = trpc.trips.expenses.list.useQuery(
     { tripId },
@@ -1556,6 +1572,37 @@ function TripExpenses({
   };
 
   const busy = addMutation.isPending || updateMutation.isPending;
+
+  /** Zwischenstand des Fahrtkosten-Rechners (#259). */
+  const fuelResult = fuelCost({
+    distanceKm: Number(fuelKm.replace(",", ".")) || 0,
+    consumptionL100: Number(fuelConsumption.replace(",", ".")) || 0,
+    pricePerLiterRappen: parseChfInput(fuelPrice) ?? 0,
+    roundTrip: fuelRoundTrip,
+  });
+
+  /**
+   * Ergebnis in die Reisekasse übernehmen: Das Formular wird VORAUSGEFÜLLT
+   * statt sofort gespeichert – der Betrag ist eine Schätzung, und wer sie
+   * nicht will, soll sie nicht erst wieder löschen müssen.
+   */
+  const applyFuelResult = () => {
+    if (fuelResult.rappen < 1) {
+      toast.error(t.tripExpenses.fuelInvalid);
+      return;
+    }
+    setEditing("neu");
+    setAmount(rappenToInput(fuelResult.rappen));
+    setCategory("sprit");
+    setDescription(
+      t.tripExpenses.fuelDescription(Math.round(fuelResult.totalKm))
+    );
+    setDay(defaultDay);
+    setPaidBy(
+      knownPayers[0] ?? user?.name ?? user?.email ?? t.tripExpenses.meFallback
+    );
+    setFuelOpen(false);
+  };
 
   /**
    * CSV herunterladen (#258): Die Datei entsteht im Browser aus den
@@ -1858,6 +1905,105 @@ function TripExpenses({
                     <Download className="mr-1.5 h-4 w-4" aria-hidden="true" />
                     {t.tripExpenses.csvButton}
                   </Button>
+
+                  {/* Fahrtkosten-Rechner (#259): der einzige Posten ohne
+                      Beleg – man weiss nur, wie weit man gefahren ist */}
+                  <div className="rounded-lg border border-border bg-muted/20 px-3 py-2">
+                    <button
+                      type="button"
+                      onClick={() => setFuelOpen(o => !o)}
+                      aria-expanded={fuelOpen}
+                      className="flex w-full items-center gap-2 text-left text-sm font-medium"
+                    >
+                      <Fuel
+                        className="h-4 w-4 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                      <span className="flex-1">{t.tripExpenses.fuelTitle}</span>
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                          fuelOpen && "rotate-180"
+                        )}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    {fuelOpen && (
+                      <div className="mt-2 space-y-2">
+                        <p className="text-xs text-muted-foreground">
+                          {t.tripExpenses.fuelHint}
+                        </p>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                          <div>
+                            <label
+                              className="text-xs text-muted-foreground"
+                              htmlFor={`fuel-km-${tripId}`}
+                            >
+                              {t.tripExpenses.fuelKmLabel}
+                            </label>
+                            <Input
+                              id={`fuel-km-${tripId}`}
+                              inputMode="decimal"
+                              value={fuelKm}
+                              placeholder="0"
+                              onChange={e => setFuelKm(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label
+                              className="text-xs text-muted-foreground"
+                              htmlFor={`fuel-l-${tripId}`}
+                            >
+                              {t.tripExpenses.fuelConsumptionLabel}
+                            </label>
+                            <Input
+                              id={`fuel-l-${tripId}`}
+                              inputMode="decimal"
+                              value={fuelConsumption}
+                              onChange={e => setFuelConsumption(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label
+                              className="text-xs text-muted-foreground"
+                              htmlFor={`fuel-p-${tripId}`}
+                            >
+                              {t.tripExpenses.fuelPriceLabel}
+                            </label>
+                            <Input
+                              id={`fuel-p-${tripId}`}
+                              inputMode="decimal"
+                              value={fuelPrice}
+                              onChange={e => setFuelPrice(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <label className="flex items-center gap-2 text-sm">
+                          <Checkbox
+                            checked={fuelRoundTrip}
+                            onCheckedChange={value =>
+                              setFuelRoundTrip(value === true)
+                            }
+                          />
+                          {t.tripExpenses.fuelRoundTrip}
+                        </label>
+                        <p className="text-sm">
+                          {t.tripExpenses.fuelResult(
+                            Math.round(fuelResult.totalKm),
+                            fuelResult.liters.toFixed(1),
+                            money(fuelResult.rappen)
+                          )}
+                        </p>
+                        <Button
+                          size="sm"
+                          onClick={applyFuelResult}
+                          disabled={fuelResult.rappen < 1}
+                        >
+                          {t.tripExpenses.fuelApply}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Einzelne Ausgaben */}
                   <ul className="space-y-1">

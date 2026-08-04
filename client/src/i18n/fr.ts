@@ -2587,6 +2587,18 @@ export const fr: Translation = {
     removeFailed: "La note n'a pas pu être retirée",
   },
   tripExpenses: {
+    fuelTitle: "Calculer les frais de route",
+    fuelHint:
+      "Kilomètres × consommation × prix du carburant. Le calcul utilise la consommation moyenne – pour plus de précision, saisis le montant à la main.",
+    fuelKmLabel: "Distance (km)",
+    fuelConsumptionLabel: "Consommation (l/100 km)",
+    fuelPriceLabel: "Prix (CHF/l)",
+    fuelRoundTrip: "Aller et retour",
+    fuelResult: (km: number, liters: string, amount: string) =>
+      `${km} km · ${liters} l · ${amount}`,
+    fuelApply: "Reprendre dans la caisse",
+    fuelInvalid: "Merci d'indiquer distance, consommation et prix.",
+    fuelDescription: (km: number) => `Trajet ${km} km`,
     csvButton: "Exporter en CSV",
     csvAria: (trip: string) => `Télécharger la caisse de ${trip} au format CSV`,
     csvHeaders: ["Date", "Catégorie", "Description", "Payé par", "Montant"],

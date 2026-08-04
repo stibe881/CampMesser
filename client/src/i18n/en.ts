@@ -2498,6 +2498,18 @@ export const en: Translation = {
     removeFailed: "The note could not be removed",
   },
   tripExpenses: {
+    fuelTitle: "Work out fuel costs",
+    fuelHint:
+      "Kilometres × consumption × fuel price. The maths uses your average consumption – if you want it exact, type the amount in by hand.",
+    fuelKmLabel: "Distance (km)",
+    fuelConsumptionLabel: "Consumption (l/100 km)",
+    fuelPriceLabel: "Price (CHF/l)",
+    fuelRoundTrip: "There and back",
+    fuelResult: (km: number, liters: string, amount: string) =>
+      `${km} km · ${liters} l · ${amount}`,
+    fuelApply: "Add to the kitty",
+    fuelInvalid: "Please enter distance, consumption and price.",
+    fuelDescription: (km: number) => `Drive ${km} km`,
     csvButton: "Export as CSV",
     csvAria: (trip: string) => `Download the kitty for ${trip} as CSV`,
     csvHeaders: ["Date", "Category", "Description", "Paid by", "Amount"],
