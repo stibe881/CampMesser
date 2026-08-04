@@ -17,6 +17,7 @@ import {
   Cross,
   Dices,
   Droplets,
+  Flame,
   Footprints,
   Gauge,
   Gem,
@@ -406,6 +407,24 @@ export const modules: Module[] = [
     ),
     icon: Droplets,
     group: "kueche",
+  },
+  {
+    path: "/feuerholz",
+    title: l4(
+      "Feuerholz-Bedarf",
+      "Besoin en bois de feu",
+      "Fabbisogno di legna",
+      "Firewood needed"
+    ),
+    description: l4(
+      "Wie viele Netze ins Auto – Holz kauft man besser vorher als am Platz",
+      "Combien de filets emporter – mieux vaut acheter le bois avant d'arriver",
+      "Quante reti caricare – la legna conviene comprarla prima di arrivare",
+      "How many nets to pack – buy wood before you arrive, not on site"
+    ),
+    icon: Flame,
+    group: "kueche",
+    offline: true,
   },
   {
     path: "/inventar",

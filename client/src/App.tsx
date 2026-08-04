@@ -38,6 +38,7 @@ const pageLoaders = {
   Recipes: () => import("./pages/Recipes"),
   Energy: () => import("./pages/Energy"),
   Water: () => import("./pages/Water"),
+  Firewood: () => import("./pages/Firewood"),
   PackOptimizer: () => import("./pages/PackOptimizer"),
   Family: () => import("./pages/Family"),
   Food: () => import("./pages/Food"),
@@ -130,6 +131,7 @@ const PhrasebookPage = lazyWithRetry(pageLoaders.Phrasebook);
 const RecipesPage = lazyWithRetry(pageLoaders.Recipes);
 const EnergyPage = lazyWithRetry(pageLoaders.Energy);
 const WaterPage = lazyWithRetry(pageLoaders.Water);
+const FirewoodPage = lazyWithRetry(pageLoaders.Firewood);
 const PackOptimizerPage = lazyWithRetry(pageLoaders.PackOptimizer);
 const FamilyPage = lazyWithRetry(pageLoaders.Family);
 const FoodPage = lazyWithRetry(pageLoaders.Food);
@@ -219,6 +221,7 @@ function Router() {
           <Route path={"/rezepte"} component={RecipesPage} />
           <Route path={"/energie"} component={EnergyPage} />
           <Route path={"/wasser"} component={WaterPage} />
+          <Route path={"/feuerholz"} component={FirewoodPage} />
           <Route path={"/packen"} component={PackOptimizerPage} />
           <Route path={"/familie"} component={FamilyPage} />
           <Route path={"/kuehlbox"} component={FoodPage} />
