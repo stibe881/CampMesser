@@ -56,7 +56,7 @@ export async function getExistingSubscription(): Promise<BrowserSubscription | n
   
   if ("ReactNativeWebView" in window) {
     const token = localStorage.getItem("expoPushToken");
-    if (token) return { endpoint: token, p256dh: "expo", auth: "expo" };
+    if (token) return { endpoint: token, p256dh: "expo-push-token", auth: "expo-auth" };
     return null;
   }
   
@@ -84,7 +84,7 @@ export async function subscribeBrowser(
         window.removeEventListener("ExpoPushTokenError", errorHandler);
         const token = e.detail;
         localStorage.setItem("expoPushToken", token);
-        resolve({ endpoint: token, p256dh: "expo", auth: "expo" });
+        resolve({ endpoint: token, p256dh: "expo-push-token", auth: "expo-auth" });
       };
       const errorHandler = () => {
         window.removeEventListener("ExpoPushToken", handler);
