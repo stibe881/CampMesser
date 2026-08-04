@@ -1,7 +1,7 @@
 /**
  * OpenGraph-Vorschau für geteilte Links (/liste/:token, /platz/:token,
  * /vorlage/:token, /einkaufsliste/:token, /reise/:token, /quiz/:token,
- * /rezept/:token, /standort/:token).
+ * /rezept/:token, /standort/:token, /wanderung/:token).
  * Messenger und soziale Netzwerke laden das SPA-HTML ohne JavaScript –
  * deshalb injiziert der Server für bekannte Teil-Token OG-Meta-Tags in den
  * <head>, bevor das HTML ausgeliefert wird. Unbekannte Token bekommen das
@@ -79,7 +79,7 @@ export async function ogMetaForShareRequest(
   origin: string
 ): Promise<OgMeta | null> {
   const match =
-    /^\/(liste|platz|vorlage|einkaufsliste|reise|quiz|rezept|standort)\/([^/]+)$/.exec(
+    /^\/(liste|platz|vorlage|einkaufsliste|reise|quiz|rezept|standort|wanderung)\/([^/]+)$/.exec(
       path
     );
   if (!match) return null;
@@ -169,6 +169,18 @@ export async function ogMetaForShareRequest(
       title: who ? `Standort von ${who} – CampMesser` : "Standort – CampMesser",
       description:
         "Geteilter Standort mit Karte, Koordinaten und Navigation – der Link läuft nach kurzer Zeit ab.",
+      url,
+      image,
+    };
+  }
+
+  if (kind === "wanderung") {
+    const track = await db.getHikeTrackByToken(token);
+    if (!track) return null;
+    const km = (track.distanceM / 1000).toFixed(1).replace(".", ",");
+    return {
+      title: `${track.name} – CampMesser`,
+      description: `Geteilte Wanderung: ${km} km, ${track.ascentM} Höhenmeter im Aufstieg – mit Karte und Höhenprofil.`,
       url,
       image,
     };

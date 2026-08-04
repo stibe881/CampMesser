@@ -169,6 +169,8 @@ async function startServer() {
     MAX_PHOTOS_PER_SPOT,
     PHOTO_MIME_EXTENSIONS,
   } = await import("@shared/tripPhotos");
+  const { MAX_RESERVATION_BYTES, isReservationFileName, reservationExtension } =
+    await import("@shared/reservations");
   /** Session prüfen; bei ungültiger Session wird 401 gesendet und null geliefert. */
   const authenticatePhotoRequest = async (
     req: express.Request,
@@ -566,6 +568,98 @@ async function startServer() {
       if (!res.headersSent) res.status(500).json({ error: "serverError" });
     }
   });
+  // ── Buchungsbestätigung zur Reise (#279) ────────────────────────────────
+  // Als einzige Ablage sind hier auch PDF erlaubt: Bestätigungen kommen als
+  // PDF, und jemanden zum Abfotografieren seines eigenen PDFs zu zwingen
+  // wäre albern. Genau EINE Datei pro Reise – ein neuer Upload ersetzt sie.
+  app.post(
+    "/api/trips/:tripId/reservation",
+    express.raw({
+      type: ["image/*", "application/pdf"],
+      limit: MAX_RESERVATION_BYTES,
+    }),
+    async (req, res) => {
+      try {
+        const user = await authenticatePhotoRequest(req, res);
+        if (!user) return;
+        const tripId = Number(req.params.tripId);
+        if (!Number.isInteger(tripId) || tripId <= 0) {
+          res.status(400).json({ error: "badRequest" });
+          return;
+        }
+        const db = await import("../db");
+        const trip = await db.getTripLog(tripId, user.id);
+        if (!trip) {
+          res.status(404).json({ error: "notFound" });
+          return;
+        }
+        const extension = reservationExtension(
+          String(req.headers["content-type"] ?? "")
+        );
+        if (!extension) {
+          res.status(415).json({ error: "unsupportedType" });
+          return;
+        }
+        const body = req.body as unknown;
+        if (!Buffer.isBuffer(body) || body.length === 0) {
+          res.status(400).json({ error: "emptyBody" });
+          return;
+        }
+        if (body.length > MAX_RESERVATION_BYTES) {
+          res.status(413).json({ error: "tooLarge" });
+          return;
+        }
+        const { nanoid } = await import("nanoid");
+        const fileName = `${nanoid(16)}${extension}`;
+        const { reservationStorage } = await import("../photoStorage");
+        await reservationStorage.saveFile(fileName, body);
+        await db.updateTripLog(tripId, user.id, {
+          reservationFileName: fileName,
+        });
+        // Alte Datei erst nach erfolgreichem DB-Update entfernen
+        if (trip.reservationFileName) {
+          await reservationStorage.deleteFiles([trip.reservationFileName]);
+        }
+        res.json({ fileName });
+      } catch (error) {
+        console.error("[Reservations] Upload fehlgeschlagen:", error);
+        if (!res.headersSent) res.status(500).json({ error: "serverError" });
+      }
+    }
+  );
+  // Auslieferung: nur die Besitzerin/der Besitzer der Reise sieht die Datei.
+  // Der Service Worker legt genau diese Antworten in einen eigenen Cache,
+  // damit die Bestätigung an der Schranke auch ohne Empfang da ist.
+  app.get("/api/trips/reservations/:fileName", async (req, res) => {
+    try {
+      const user = await authenticatePhotoRequest(req, res);
+      if (!user) return;
+      const fileName = req.params.fileName;
+      if (!isReservationFileName(fileName)) {
+        res.status(400).json({ error: "badRequest" });
+        return;
+      }
+      const db = await import("../db");
+      const trip = await db.getTripLogByReservationFileName(fileName, user.id);
+      if (!trip) {
+        res.status(404).json({ error: "notFound" });
+        return;
+      }
+      const { reservationStorage } = await import("../photoStorage");
+      res.sendFile(
+        reservationStorage.photoPath(fileName),
+        { headers: { "Cache-Control": "private, max-age=3600" } },
+        error => {
+          if (error && !res.headersSent) {
+            res.status(404).json({ error: "notFound" });
+          }
+        }
+      );
+    } catch (error) {
+      console.error("[Reservations] Auslieferung fehlgeschlagen:", error);
+      if (!res.headersSent) res.status(500).json({ error: "serverError" });
+    }
+  });
   // ── Foto für Natur-Beobachtungen ────────────────────────────────────────
   // Gleiche Technik wie das Inventar-Foto (Raw-Body, Client-Resize, Ablage
   // unter uploads/sightings/), genau EIN Foto pro Beobachtung: ein neuer
@@ -871,6 +965,7 @@ async function startServer() {
       "/quiz/:token",
       "/rezept/:token",
       "/standort/:token",
+      "/wanderung/:token",
     ],
     async (req, res, next) => {
       try {

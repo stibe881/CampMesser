@@ -157,6 +157,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     choreAssignments,
     storageBoxes,
     treasureHunts,
+    hikeTracks,
+    plannedRoutes,
     treasurePoints,
     powerConsumers,
     foodItems,
@@ -201,7 +203,12 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   // Eigene Reisen zuerst ermitteln: deren Mitglieder, Einladungs-Links und
   // von Mitreisenden beigesteuerte Fotos/Menüplan-Einträge fallen mit.
   const ownedTrips = await db
-    .select({ id: tripLogs.id })
+    .select({
+      id: tripLogs.id,
+      // Buchungsbestätigung (#279): Dateiname sichern, solange die Zeile
+      // noch da ist – gelöscht wird die Datei ganz zum Schluss
+      reservationFileName: tripLogs.reservationFileName,
+    })
     .from(tripLogs)
     .where(eq(tripLogs.userId, userId));
   const ownedTripIds = ownedTrips.map(t => t.id);
@@ -257,6 +264,9 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     .where(eq(packTemplatesCustom.userId, userId));
   await db.delete(inventoryItems).where(eq(inventoryItems.userId, userId));
   await db.delete(storageBoxes).where(eq(storageBoxes.userId, userId));
+  // Aufgezeichnete Wanderungen (#220) und gezeichnete Routen (#281)
+  await db.delete(hikeTracks).where(eq(hikeTracks.userId, userId));
+  await db.delete(plannedRoutes).where(eq(plannedRoutes.userId, userId));
   // Ämtli-Plan samt Zuteilungen (#270)
   await db.delete(choreAssignments).where(eq(choreAssignments.userId, userId));
   await db.delete(campChores).where(eq(campChores.userId, userId));
@@ -390,6 +400,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     receiptPhotoStorage,
     sightingPhotoStorage,
     catchPhotoStorage,
+    reservationStorage,
   } = await import("./photoStorage");
   await tripPhotoStorage.deleteFiles(photoRows.map(p => p.fileName));
   await recipePhotoStorage.deleteFiles(
@@ -416,6 +427,11 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await catchPhotoStorage.deleteFiles(
     catchRows
       .map(r => r.fileName)
+      .filter((name): name is string => Boolean(name))
+  );
+  await reservationStorage.deleteFiles(
+    ownedTrips
+      .map(t => t.reservationFileName)
       .filter((name): name is string => Boolean(name))
   );
 }

@@ -20,8 +20,10 @@ import {
   gearTasks,
   hikeTracks,
   homeLocations,
+  plannedRoutes,
   InsertGearTask,
   InsertHikeTrack,
+  InsertPlannedRoute,
   InsertCampSpot,
   InsertFoodItem,
   InsertFoodTemplate,
@@ -1477,6 +1479,10 @@ export async function updateCampSpot(
       | "pricePerNightRappen"
       | "extraPerNightRappen"
       | "elevationM"
+      | "ratingSanitary"
+      | "ratingQuiet"
+      | "ratingShade"
+      | "ratingKids"
     >
   >
 ) {
@@ -1555,6 +1561,7 @@ export async function updateTripLog(
       InsertTripLog,
       | "spotId"
       | "packListId"
+      | "reservationFileName"
       | "location"
       | "title"
       | "notes"
@@ -2470,6 +2477,9 @@ export async function getHikeTracks(userId: number) {
       durationS: hikeTracks.durationS,
       ascentM: hikeTracks.ascentM,
       descentM: hikeTracks.descentM,
+      // Teil-Status (#282): die Liste zeigt, ob ein Link im Umlauf ist
+      shareToken: hikeTracks.shareToken,
+      shareExpiresAt: hikeTracks.shareExpiresAt,
       createdAt: hikeTracks.createdAt,
     })
     .from(hikeTracks)
@@ -2526,6 +2536,98 @@ export async function detachHikeTracksFromTrip(tripId: number) {
     .update(hikeTracks)
     .set({ tripId: null })
     .where(eq(hikeTracks.tripId, tripId));
+}
+
+/** Teil-Token einer Wanderung setzen oder entfernen (#282). */
+export async function setHikeTrackShareToken(
+  id: number,
+  userId: number,
+  token: string | null,
+  expiresAt: Date | null = null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(hikeTracks)
+    // Ohne Token gibt es auch keinen Ablauf mehr
+    .set({ shareToken: token, shareExpiresAt: token ? expiresAt : null })
+    .where(and(eq(hikeTracks.id, id), eq(hikeTracks.userId, userId)));
+}
+
+/** Geteilte Wanderung anhand des Tokens laden (öffentlich, ohne Login). */
+export async function getHikeTrackByToken(token: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(hikeTracks)
+    .where(eq(hikeTracks.shareToken, token))
+    .limit(1);
+  const row = rows[0];
+  // Abgelaufene Teil-Links verhalten sich wie unbekannte Tokens
+  return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
+}
+
+// ── Vorher gezeichnete Routen (#281) ──
+
+/**
+ * Geplante Routen eines Kontos, neuste zuoberst. Die Wegpunkte kommen mit –
+ * anders als bei den aufgezeichneten Tracks sind es höchstens vierzig
+ * Tupel pro Route, und die Liste zeigt jede Route auf einer Mini-Karte.
+ */
+export async function getPlannedRoutes(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(plannedRoutes)
+    .where(eq(plannedRoutes.userId, userId))
+    .orderBy(desc(plannedRoutes.createdAt), desc(plannedRoutes.id));
+}
+
+/** Einzelne Route laden (nur eigene). */
+export async function getPlannedRoute(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(plannedRoutes)
+    .where(and(eq(plannedRoutes.id, id), eq(plannedRoutes.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/** Route speichern. */
+export async function addPlannedRoute(data: InsertPlannedRoute) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(plannedRoutes).values(data);
+  return result.insertId;
+}
+
+/** Route ändern (nur eigene). */
+export async function updatePlannedRoute(
+  id: number,
+  userId: number,
+  data: Partial<InsertPlannedRoute>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(plannedRoutes)
+    .set(data)
+    .where(and(eq(plannedRoutes.id, id), eq(plannedRoutes.userId, userId)));
+}
+
+/** Route löschen (nur eigene). */
+export async function deletePlannedRoute(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(plannedRoutes)
+    .where(and(eq(plannedRoutes.id, id), eq(plannedRoutes.userId, userId)));
+}
+
+/** Beim Löschen einer Reise: Route behalten, nur die Zuordnung lösen. */
+export async function detachPlannedRoutesFromTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .update(plannedRoutes)
+    .set({ tripId: null })
+    .where(eq(plannedRoutes.tripId, tripId));
 }
 
 // ── «Hier bin ich»-Standort-Links (#221) ──
@@ -3242,4 +3344,26 @@ export async function deleteChoreAssignmentsForDay(
     .where(
       and(eq(choreAssignments.userId, userId), eq(choreAssignments.day, day))
     );
+}
+
+/**
+ * Reise über den Dateinamen ihrer Buchungsbestätigung finden (#279) –
+ * die Auslieferung prüft damit, dass die Datei wirklich dem Konto gehört.
+ */
+export async function getTripLogByReservationFileName(
+  fileName: string,
+  userId: number
+) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripLogs)
+    .where(
+      and(
+        eq(tripLogs.reservationFileName, fileName),
+        eq(tripLogs.userId, userId)
+      )
+    )
+    .limit(1);
+  return rows[0];
 }

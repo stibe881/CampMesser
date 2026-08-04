@@ -38,6 +38,38 @@ export async function fetchElevation(
   }
 }
 
+/**
+ * Höhen zu mehreren Koordinaten in EINER Abfrage (#281): Open-Meteo nimmt
+ * kommagetrennte Listen entgegen und beantwortet bis zu 100 Punkte auf
+ * einmal – hundert Einzelabrufe für eine Route wären weder höflich noch
+ * schnell. Punkte ohne Antwort werden zu null, nicht zu 0: Ein Loch im
+ * Höhenmodell ist etwas anderes als Meereshöhe.
+ */
+export async function fetchElevations(
+  points: { lat: number; lon: number }[]
+): Promise<(number | null)[]> {
+  if (points.length === 0) return [];
+  try {
+    const params = new URLSearchParams({
+      latitude: points.map(p => p.lat.toFixed(5)).join(","),
+      longitude: points.map(p => p.lon.toFixed(5)).join(","),
+    });
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/elevation?${params.toString()}`
+    );
+    if (!res.ok) return points.map(() => null);
+    const json = await res.json();
+    const values: unknown = json?.elevation;
+    if (!Array.isArray(values)) return points.map(() => null);
+    return points.map((_, i) => {
+      const raw = values[i];
+      return typeof raw === "number" && Number.isFinite(raw) ? raw : null;
+    });
+  } catch {
+    return points.map(() => null);
+  }
+}
+
 /** Höhenangabe in der Zahlenschreibweise der App-Sprache (z. B. 1'240). */
 export function formatElevation(elevationM: number, lang: Language): string {
   return new Intl.NumberFormat(LOCALE_TAGS[lang]).format(

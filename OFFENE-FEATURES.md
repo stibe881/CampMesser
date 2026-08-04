@@ -25,25 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 28 – 6 Punkte
-
-### Karte & Wetter
-
-### Platz-Wissen
-
-- [ ] **Eigene Platz-Bewertung** (#278) – Sanitär, Ruhe, Schatten,
-      Kinderfreundlichkeit einzeln bewerten und vergleichen
-- [ ] **Reservation ablegen** (#279) – Buchungsbestätigung als Foto oder PDF an
-      der Reise, offline abrufbar
+## Runde 28 – 1 Punkt
 
 ### Wandern
 
-- [ ] **Höhenprofil im Track-Detail** (#280) – Diagramm zur aufgezeichneten
-      Wanderung mit Zwischenzeiten
-- [ ] **Route vorher zeichnen** (#281) – Wegpunkte setzen, Länge, Höhenmeter
-      und Gehzeit schätzen
-- [ ] **Wanderung per Link teilen** (#282) – Track für Mitreisende, im
-      bestehenden Teil-Muster
 - [ ] **Auto-Standort merken** (#283) – wo steht das Fahrzeug, mit
       Kompass-Peilung zurück
 

@@ -70,3 +70,10 @@ export const sightingPhotoStorage = createPhotoStorage("sightings");
 
 /** Fotos zu Fängen im Fangbuch: uploads/catches/<fileName> */
 export const catchPhotoStorage = createPhotoStorage("catches");
+
+/**
+ * Buchungsbestätigungen zu Reisen (#279): uploads/reservations/<fileName>.
+ * Als einzige Ablage sind hier auch PDF erlaubt – die Prüfung von Typ und
+ * Dateiname steht in shared/reservations.ts.
+ */
+export const reservationStorage = createPhotoStorage("reservations");

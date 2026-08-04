@@ -113,11 +113,24 @@ import {
 } from "@shared/guestbook";
 import {
   MAX_TRACK_POINTS,
+  parseTrackPoints,
   serializeTrackPoints,
+  thinTrackPoints,
   TRACK_NAME_MAX_LENGTH,
   trackStats,
   type TrackPoint,
 } from "@shared/track";
+import {
+  MAX_ROUTE_SAMPLES,
+  MAX_ROUTE_WAYPOINTS,
+  ROUTE_NAME_MAX_LENGTH,
+  hikingMinutes,
+  routeDistanceM,
+  routeElevation,
+  routeSamples,
+  serializeWaypoints,
+  type RouteWaypoint,
+} from "@shared/routePlan";
 import {
   MAX_TICK_BODY_PART_LENGTH,
   MAX_TICK_NOTE_LENGTH,
@@ -148,6 +161,7 @@ import {
   rotateAssignments,
 } from "@shared/chores";
 import { MAX_PACK_SUGGESTIONS, packSuggestions } from "@shared/packHistory";
+import { MAX_STARS, clampStars } from "@shared/spotRatings";
 import {
   parseSpotAttributes,
   SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
@@ -3890,6 +3904,26 @@ export const appRouter = router({
   }),
 
   trips: router({
+    /** Buchungsbestätigung entfernen (#279) – Datei und Verweis. */
+    removeReservation: protectedProcedure
+      .input(z.object({ tripId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.getTripLog(input.tripId, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Reise nicht gefunden.",
+          });
+        }
+        if (trip.reservationFileName) {
+          await db.updateTripLog(input.tripId, ctx.user.id, {
+            reservationFileName: null,
+          });
+          const { reservationStorage } = await import("./photoStorage");
+          await reservationStorage.deleteFiles([trip.reservationFileName]);
+        }
+        return { success: true } as const;
+      }),
     /**
      * Eigene Reisen plus Reisen, bei denen man eingeladenes Mitglied ist –
      * Mitglieds-Trips tragen role "member" und den Namen der Besitzerin/des
@@ -4319,6 +4353,8 @@ export const appRouter = router({
         // Aufgezeichnete Wanderungen (#220) bleiben bestehen und verlieren
         // nur ihre Reise-Zuordnung – sie gehören der Person, nicht der Reise.
         await db.detachHikeTracksFromTrip(input.id);
+        // Gezeichnete Routen (#281) ebenso – die Planung überlebt die Reise
+        await db.detachPlannedRoutesFromTrip(input.id);
         if (photos.length > 0) {
           const { tripPhotoStorage } = await import("./photoStorage");
           await tripPhotoStorage.deleteFiles(photos.map(p => p.fileName));
@@ -5841,6 +5877,176 @@ export const appRouter = router({
         await db.deleteHikeTrack(input.id, ctx.user.id);
         return { success: true } as const;
       }),
+    /** Wanderung per Link teilen (#282) – gleiches Muster wie Rezepte/Plätze. */
+    share: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          expiresInDays: shareExpiryInput,
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const track = await db.getHikeTrack(input.id, ctx.user.id);
+        if (!track) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Wanderung nicht gefunden.",
+          });
+        }
+        const expiresAt = shareExpiryFor(
+          input.expiresInDays,
+          track.shareExpiresAt
+        );
+        const token = track.shareToken ?? nanoid(16);
+        await db.setHikeTrackShareToken(
+          input.id,
+          ctx.user.id,
+          token,
+          expiresAt
+        );
+        return { token, expiresAt };
+      }),
+    unshare: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.setHikeTrackShareToken(input.id, ctx.user.id, null);
+        return { success: true } as const;
+      }),
+    /**
+     * Geteilte Wanderung öffentlich abrufen (kein Login nötig): Name,
+     * Eckdaten und Punktreihe für Karte und Höhenprofil.
+     *
+     * Die Punkte werden auf SHARED_TRACK_MAX_POINTS ausgedünnt – eine
+     * Tageswanderung hat schnell zehntausend Punkte, und niemand lädt
+     * dafür ein Megabyte über das Mobilnetz. Für Karte und Profil ist der
+     * Unterschied nicht sichtbar.
+     *
+     * Bewusst NICHT dabei: der Name der wandernden Person und die
+     * Reise-Zuordnung – geteilt wird die Wanderung, nicht das Konto.
+     */
+    sharedGet: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .query(async ({ input }) => {
+        const track = await db.getHikeTrackByToken(input.token);
+        if (!track) return { track: null };
+        const points = thinTrackPoints(parseTrackPoints(track.pointsJson));
+        return {
+          track: {
+            name: track.name,
+            startedAt: track.startedAt,
+            endedAt: track.endedAt,
+            distanceM: track.distanceM,
+            durationS: track.durationS,
+            ascentM: track.ascentM,
+            descentM: track.descentM,
+            points,
+          },
+        };
+      }),
+  }),
+
+  /**
+   * Vorher gezeichnete Routen (#281). Länge, Höhenmeter und Gehzeit
+   * werden IMMER hier gerechnet und nie vom Client übernommen: Die Zahl
+   * ist der ganze Zweck der Route, und sie soll auf jedem Gerät dieselbe
+   * sein. Die Höhen der Wegpunkte kommen dagegen vom Client – sie stammen
+   * aus dem Höhenmodell und lassen sich serverseitig nicht besser wissen.
+   */
+  routes: router({
+    list: protectedProcedure.query(({ ctx }) =>
+      db.getPlannedRoutes(ctx.user.id)
+    ),
+    save: protectedProcedure
+      .input(
+        z.object({
+          /** Vorhandene Route ändern; fehlt sie, entsteht eine neue. */
+          id: z.number().int().positive().optional(),
+          name: z.string().trim().min(1).max(ROUTE_NAME_MAX_LENGTH),
+          tripId: z.number().int().positive().nullish(),
+          pace: z.enum(["slow", "normal", "fast"]).default("normal"),
+          waypoints: z
+            .array(
+              z.object({
+                lat: z.number().min(-90).max(90),
+                lon: z.number().min(-180).max(180),
+                ele: z.number().min(-500).max(9000).nullish(),
+              })
+            )
+            .min(2)
+            .max(MAX_ROUTE_WAYPOINTS),
+          /**
+           * Höhen der Stützstellen zwischen den Wegpunkten. Ohne sie käme
+           * die Bilanz nur aus den geklickten Punkten – ein Sattel
+           * dazwischen fiele unter den Tisch.
+           */
+          sampleElevations: z
+            .array(z.number().min(-500).max(9000).nullable())
+            .max(MAX_ROUTE_SAMPLES)
+            .optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        if (input.tripId != null) {
+          await requireTripAccess(input.tripId, ctx.user.id);
+        }
+        const waypoints: RouteWaypoint[] = input.waypoints.map(w => ({
+          lat: w.lat,
+          lon: w.lon,
+          ele: w.ele ?? null,
+        }));
+        const distanceM = Math.round(routeDistanceM(waypoints));
+        // Für die Höhenbilanz die Stützstellen nehmen, wenn sie vorliegen,
+        // sonst die Wegpunkte selbst
+        const samples = routeSamples(waypoints);
+        const heights =
+          input.sampleElevations && input.sampleElevations.length > 0
+            ? samples.map((s, i) => ({
+                ...s,
+                ele: input.sampleElevations?.[i] ?? null,
+              }))
+            : waypoints;
+        const elevation = routeElevation(heights);
+        const ascentM = elevation?.ascentM ?? 0;
+        const descentM = elevation?.descentM ?? 0;
+        const minutes = hikingMinutes({
+          distanceM,
+          ascentM,
+          descentM,
+          pace: input.pace,
+        });
+        const values = {
+          name: input.name.trim(),
+          tripId: input.tripId ?? null,
+          pace: input.pace,
+          waypointsJson: serializeWaypoints(waypoints),
+          distanceM,
+          ascentM,
+          descentM,
+          minutes,
+        };
+        if (input.id != null) {
+          const existing = await db.getPlannedRoute(input.id, ctx.user.id);
+          if (!existing) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Route nicht gefunden.",
+            });
+          }
+          await db.updatePlannedRoute(input.id, ctx.user.id, values);
+          return { id: input.id, distanceM, ascentM, descentM, minutes };
+        }
+        const id = await db.addPlannedRoute({
+          userId: ctx.user.id,
+          ...values,
+        });
+        return { id, distanceM, ascentM, descentM, minutes };
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deletePlannedRoute(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
   }),
 
   /**
@@ -5938,6 +6144,36 @@ export const appRouter = router({
 
   spots: router({
     list: protectedProcedure.query(({ ctx }) => db.getCampSpots(ctx.user.id)),
+    /**
+     * Eigene Bewertung nach Kriterien (#278). Jedes Kriterium darf null
+     * sein – «nicht bewertet» ist ein gültiger Zustand und keine Null.
+     */
+    rate: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          sanitary: z.number().int().min(0).max(MAX_STARS).nullish(),
+          quiet: z.number().int().min(0).max(MAX_STARS).nullish(),
+          shade: z.number().int().min(0).max(MAX_STARS).nullish(),
+          kids: z.number().int().min(0).max(MAX_STARS).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const spot = await db.getCampSpot(input.id, ctx.user.id);
+        if (!spot) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Zeltplatz nicht gefunden.",
+          });
+        }
+        await db.updateCampSpot(input.id, ctx.user.id, {
+          ratingSanitary: clampStars(input.sanitary ?? null),
+          ratingQuiet: clampStars(input.quiet ?? null),
+          ratingShade: clampStars(input.shade ?? null),
+          ratingKids: clampStars(input.kids ?? null),
+        });
+        return { success: true } as const;
+      }),
     add: protectedProcedure
       .input(
         z.object({

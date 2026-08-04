@@ -77,6 +77,16 @@ export const campSpots = mysqlTable(
      * den Wert einmalig bei der Open-Meteo-Elevation-API und speichert ihn.
      */
     elevationM: int("elevationM"),
+    /**
+     * Eigene Bewertung nach Kriterien (#278), je 1–5 Sterne; null = nicht
+     * bewertet. Bewusst vier Spalten statt einer Tabelle: Es gibt genau
+     * eine Bewertung pro Platz (Plätze gehören ohnehin einem Konto), und
+     * ein leeres Kriterium ist ein gültiger Zustand, kein fehlender Satz.
+     */
+    ratingSanitary: tinyint("ratingSanitary"),
+    ratingQuiet: tinyint("ratingQuiet"),
+    ratingShade: tinyint("ratingShade"),
+    ratingKids: tinyint("ratingKids"),
     /** Öffentlicher Teil-Token: Wer den Link kennt, sieht das Platz-Dossier (nur lesend). */
     shareToken: varchar("shareToken", { length: 32 }),
     /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
@@ -355,6 +365,11 @@ export const tripLogs = mysqlTable(
     /** Anreise (erster Abend) */
     /** Verknüpfte Packliste (optional) – für den Pack-Fortschritt geplanter Trips */
     packListId: int("packListId"),
+    /**
+     * Buchungsbestätigung als Foto oder PDF (#279); Datei liegt unter
+     * uploads/reservations/<fileName>. null = keine hinterlegt.
+     */
+    reservationFileName: varchar("reservationFileName", { length: 64 }),
     startDate: date("startDate", { mode: "string" }).notNull(),
     /** Abreise – Nächte ergeben sich aus der Differenz der beiden Daten */
     endDate: date("endDate", { mode: "string" }).notNull(),
@@ -1361,6 +1376,14 @@ export const hikeTracks = mysqlTable(
     descentM: int("descentM").notNull().default(0),
     /** Punktreihe als kompaktes Tupel-JSON (shared/track.ts) */
     pointsJson: mediumtext("pointsJson").notNull(),
+    /**
+     * Öffentlicher Teil-Token (#282): Wer den Link kennt, sieht Karte,
+     * Eckdaten und Höhenprofil der Wanderung – ohne Konto und ohne Namen
+     * der wandernden Person. null = nicht geteilt.
+     */
+    shareToken: varchar("shareToken", { length: 64 }).unique(),
+    /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
+    shareExpiresAt: timestamp("shareExpiresAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
@@ -1372,6 +1395,51 @@ export const hikeTracks = mysqlTable(
 
 export type HikeTrack = typeof hikeTracks.$inferSelect;
 export type InsertHikeTrack = typeof hikeTracks.$inferInsert;
+
+/**
+ * Vorher gezeichnete Routen (#281): eine Zeile pro geplanter Wanderung.
+ *
+ * Bewusst NEBEN `hikeTracks` und nicht darin: Eine Planung hat keine Zeit
+ * und keine Aufzeichnung, dafür eine geschätzte Gehzeit – sie in dieselbe
+ * Tabelle zu pressen hiesse, `startedAt`/`endedAt` mit erfundenen Werten
+ * zu füllen und in jeder Abfrage «echt oder geplant?» mitzuführen.
+ *
+ * `waypointsJson` hält NUR die gesetzten Wegpunkte (`[[lat, lon, ele|null],
+ * …]`, Format in shared/routePlan.ts) – die Stützstellen zwischendrin
+ * werden beim Anzeigen neu gerechnet, sie sind reine Ableitung. Deshalb
+ * genügt hier `text`.
+ *
+ * Länge, Höhenmeter und Gehzeit stehen als Spalte daneben, damit die Liste
+ * nicht für jede Route rechnen muss; berechnet werden sie serverseitig.
+ */
+export const plannedRoutes = mysqlTable(
+  "plannedRoutes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Zugeordnete Reise (tripLogs.id); null = ohne Reise */
+    tripId: int("tripId"),
+    name: varchar("name", { length: 80 }).notNull(),
+    /** Wegpunkte als kompaktes Tupel-JSON (shared/routePlan.ts) */
+    waypointsJson: text("waypointsJson").notNull(),
+    distanceM: int("distanceM").notNull().default(0),
+    ascentM: int("ascentM").notNull().default(0),
+    descentM: int("descentM").notNull().default(0),
+    /** Geschätzte Gehzeit ohne Pausen, in Minuten */
+    minutes: int("minutes").notNull().default(0),
+    /** Gewähltes Tempo: slow | normal | fast */
+    pace: varchar("pace", { length: 10 }).notNull().default("normal"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    index("plannedRoutes_userId").on(table.userId),
+    index("plannedRoutes_tripId").on(table.tripId),
+  ]
+);
+
+export type PlannedRoute = typeof plannedRoutes.$inferSelect;
+export type InsertPlannedRoute = typeof plannedRoutes.$inferInsert;
 
 /**
  * «Hier bin ich»-Standort-Links (#221): höchstens EIN aktiver Link pro Konto

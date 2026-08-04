@@ -8,9 +8,12 @@
  * - Karten-Kacheln (OSM/Esri): cache-first aus dem Offline-Paket, sonst Netz.
  *   Gespeichert wird NUR, was das Platz-Dossier bewusst vorlädt.
  * - API-Aufrufe (/api/) und übrige externe Dienste (Open-Meteo): immer Netz,
- *   kein Caching – Live-Daten sollen nicht veralten.
+ *   kein Caching – Live-Daten sollen nicht veralten. EINE Ausnahme: die
+ *   Buchungsbestätigung einer Reise (#279) wird network-first geholt und
+ *   zusätzlich abgelegt. Sie ändert sich nie und wird genau dann gebraucht,
+ *   wenn kein Empfang ist – an der Schranke um 22 Uhr.
  */
-const CACHE_VERSION = "campmesser-v6";
+const CACHE_VERSION = "campmesser-v7";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 // Zwischenablage für per Share Target geteilte Fotos – bewusst OHNE
@@ -21,6 +24,10 @@ const SHARE_CACHE = "campmesser-share";
 // OHNE Versions-Präfix, damit ein App-Update die mühsam geladenen Kacheln
 // nicht wegräumt. Verwaltet wird der Cache allein im Platz-Dossier.
 const MAP_TILE_CACHE = "campmesser-map-tiles";
+// Buchungsbestätigungen (#279) – OHNE Versions-Präfix, damit ein App-Update
+// die Datei nicht wegräumt, die man unterwegs braucht.
+const RESERVATION_CACHE = "campmesser-reservations";
+const RESERVATION_PATH = "/api/trips/reservations/";
 const MAP_TILE_HOSTS = ["tile.openstreetmap.org", "server.arcgisonline.com"];
 
 // Routen der Wissens-Module, die offline funktionieren sollen (SPA: alle laden dieselbe Shell)
@@ -173,6 +180,26 @@ self.addEventListener("fetch", event => {
   // Karten-Kacheln: vorgeladenes Offline-Paket schlägt das Netz
   if (MAP_TILE_HOSTS.indexOf(url.hostname) !== -1) {
     event.respondWith(serveMapTile(request));
+    return;
+  }
+
+  // Buchungsbestätigung: erst Netz, dann Cache – und jede erfolgreiche
+  // Antwort wird abgelegt. Die Datei ändert sich nie, und ohne Empfang ist
+  // sie sonst nicht erreichbar.
+  if (url.pathname.startsWith(RESERVATION_PATH)) {
+    event.respondWith(
+      caches.open(RESERVATION_CACHE).then(async cache => {
+        try {
+          const response = await fetch(request);
+          if (response.ok) await cache.put(request, response.clone());
+          return response;
+        } catch (error) {
+          const cached = await cache.match(request);
+          if (cached) return cached;
+          throw error;
+        }
+      })
+    );
     return;
   }
 
