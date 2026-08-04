@@ -246,6 +246,9 @@ export const fr: Translation = {
       "Le lien de confirmation est invalide ou expiré. Demandes-en un nouveau dans ton profil.",
   },
   profile: {
+    prefHeat: "Soleil & chaleur",
+    prefHeatDesc:
+      "Le matin, un rappel de te protéger et de boire quand la journée annonce un UV élevé ou plus de 28 °C.",
     title: "Profil",
     manageSubtitle: "Gère ton compte et tes réglages.",
     loginFeature: "ton profil",
@@ -344,6 +347,7 @@ export const fr: Translation = {
       "Aucune notification envoyée pour l'instant. Dès qu'il y aura du nouveau, tu le trouveras ici.",
     historyOpenAria: (title: string) => `Ouvrir « ${title} »`,
     historyKind: {
+      heat: "Soleil & chaleur",
       weather: "Intempéries",
       food: "Glacière",
       trip: "Voyage",
@@ -885,6 +889,9 @@ export const fr: Translation = {
     gearRemoved: "Tâche d'entretien supprimée",
   },
   weather: {
+    heatSunscreen: (minutes: number, burn: number) =>
+      `Crème solaire, à renouveler toutes les ${minutes} min (peau nue rouge après ~${burn} min)`,
+    heatDrink: (liters: string) => `Environ ${liters} l d'eau par adulte`,
     title: "Météo du camp",
     subtitle:
       "Prévisions hyperlocales et alertes d'intempéries pour ton emplacement.",

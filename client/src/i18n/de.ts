@@ -248,6 +248,9 @@ export const de = {
       "Der Bestätigungs-Link ist ungültig oder abgelaufen. Fordere im Profil einen neuen an.",
   },
   profile: {
+    prefHeat: "Sonne & Hitze",
+    prefHeatDesc:
+      "Morgens eine Erinnerung ans Eincremen und ans Trinken, wenn der Tag hohen UV-Index oder über 28 °C bringt.",
     title: "Profil",
     manageSubtitle: "Verwalte dein Konto und deine Einstellungen.",
     loginFeature: "dein Profil",
@@ -343,6 +346,7 @@ export const de = {
       "Noch keine Mitteilungen verschickt. Sobald etwas ansteht, findest du es hier.",
     historyOpenAria: (title: string) => `«${title}» öffnen`,
     historyKind: {
+      heat: "Sonne & Hitze",
       weather: "Unwetter",
       food: "Kühlbox",
       trip: "Reise",
@@ -882,6 +886,9 @@ export const de = {
     gearRemoved: "Pflege-Aufgabe gelöscht",
   },
   weather: {
+    heatSunscreen: (minutes: number, burn: number) =>
+      `Eincremen, alle ${minutes} Min. nachlegen (ungeschützt rot nach ~${burn} Min.)`,
+    heatDrink: (liters: string) => `Rund ${liters} l Wasser pro Erwachsener`,
     title: "Camp-Wetter",
     subtitle:
       "Hyperlokale Vorhersage und Unwetterwarnungen für deinen Zeltplatz.",

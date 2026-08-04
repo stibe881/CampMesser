@@ -20,6 +20,7 @@ import {
   Fingerprint,
   Plus,
   Sparkles,
+  SunMedium,
   MailWarning,
   Backpack,
   ChevronDown,
@@ -79,7 +80,12 @@ import {
 } from "@shared/weather";
 
 type PushFlag =
-  "wantsWeather" | "wantsFood" | "wantsTrips" | "wantsAstro" | "wantsGear";
+  | "wantsWeather"
+  | "wantsFood"
+  | "wantsTrips"
+  | "wantsAstro"
+  | "wantsGear"
+  | "wantsHeat";
 
 /** Symbol je Mitteilungs-Art im Verlauf (unbekannte Arten: Glocke). */
 const PUSH_KIND_ICONS: Record<string, LucideIcon> = {
@@ -90,6 +96,7 @@ const PUSH_KIND_ICONS: Record<string, LucideIcon> = {
   astro: Sparkles,
   gear: Wrench,
   evepack: Backpack,
+  heat: SunMedium,
 };
 
 /**
@@ -283,7 +290,9 @@ function NotificationsCard() {
             ? { wantsTrips: value }
             : flag === "wantsAstro"
               ? { wantsAstro: value }
-              : { wantsGear: value };
+              : flag === "wantsGear"
+                ? { wantsGear: value }
+                : { wantsHeat: value };
     setPrefsMutation.mutate({ endpoint: push.endpoint, ...patch });
   };
 
@@ -312,6 +321,11 @@ function NotificationsCard() {
       flag: "wantsGear",
       label: t.profile.prefGear,
       desc: t.profile.prefGearDesc,
+    },
+    {
+      flag: "wantsHeat",
+      label: t.profile.prefHeat,
+      desc: t.profile.prefHeatDesc,
     },
   ];
 

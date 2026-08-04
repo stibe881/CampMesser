@@ -631,6 +631,8 @@ export const pushSubscriptions = mysqlTable(
     wantsAstro: boolean("wantsAstro").notNull().default(true),
     /** Mitteilungs-Einstellung dieses Geräts: Erinnerung an fällige Ausrüstungs-Pflege */
     wantsGear: boolean("wantsGear").notNull().default(true),
+    /** Mitteilungs-Einstellung dieses Geräts: Sonnencreme & Trinken an heissen Tagen (#260/#261) */
+    wantsHeat: boolean("wantsHeat").notNull().default(true),
     /** Eigene Wind-Schwelle für den Unwetter-Push in km/h (null = Standard 90) */
     windThresholdKmh: int("windThresholdKmh"),
     /** Eigene Regen-Schwelle für den Unwetter-Push in mm/h (null = Standard 15) */
@@ -649,6 +651,8 @@ export const pushSubscriptions = mysqlTable(
     lastGearKey: varchar("lastGearKey", { length: 64 }),
     /** Schlüssel des letzten Vorabend-Checks («evepack:<tripId>»): max. 1 pro Reise */
     lastEvePackKey: varchar("lastEvePackKey", { length: 64 }),
+    /** Schlüssel der letzten Hitze-Erinnerung («heat:YYYY-MM-DD»): max. 1 pro Tag */
+    lastHeatKey: varchar("lastHeatKey", { length: 64 }),
     lastNotifiedAt: timestamp("lastNotifiedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },

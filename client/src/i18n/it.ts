@@ -240,6 +240,9 @@ export const it: Translation = {
       "Il link di conferma non è valido o è scaduto. Richiedine uno nuovo nel tuo profilo.",
   },
   profile: {
+    prefHeat: "Sole e caldo",
+    prefHeatDesc:
+      "Al mattino un promemoria per la crema solare e per bere, quando la giornata porta UV alto o più di 28 °C.",
     title: "Profilo",
     manageSubtitle: "Gestisci il tuo account e le tue impostazioni.",
     loginFeature: "il tuo profilo",
@@ -336,6 +339,7 @@ export const it: Translation = {
       "Nessuna notifica inviata finora. Appena ci sarà qualcosa, la trovi qui.",
     historyOpenAria: (title: string) => `Apri «${title}»`,
     historyKind: {
+      heat: "Sole e caldo",
       weather: "Maltempo",
       food: "Frigo box",
       trip: "Viaggio",
@@ -869,6 +873,9 @@ export const it: Translation = {
     gearRemoved: "Attività di manutenzione eliminata",
   },
   weather: {
+    heatSunscreen: (minutes: number, burn: number) =>
+      `Crema solare, da riapplicare ogni ${minutes} min (pelle scoperta rossa dopo ~${burn} min)`,
+    heatDrink: (liters: string) => `Circa ${liters} l d'acqua per adulto`,
     title: "Meteo del campo",
     subtitle: "Previsioni iperlocali e allerte maltempo per la tua piazzola.",
     locationGroupAria: "Scegli il luogo per le previsioni meteo",

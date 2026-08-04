@@ -65,6 +65,7 @@ import {
   type WeatherPlace,
 } from "@/lib/weatherPlaces";
 import { cn } from "@/lib/utils";
+import { heatAdvice } from "@shared/heatCare";
 import { LOCALE_TAGS } from "@shared/i18n";
 import {
   describeUvIndex,
@@ -1432,6 +1433,11 @@ export default function WeatherPage() {
   // Heutiger Max-UV (WHO-Skala) – Wert kommt aus demselben Forecast-Abruf
   const uvToday = data?.daily[0]?.uvIndexMax ?? null;
   const uvInfo = uvToday !== null ? describeUvIndex(uvToday, lang) : null;
+  // Sonnencreme & Trinken (#260/#261): dieselbe Rechnung wie in der
+  // Push-Erinnerung, damit Anzeige und Mitteilung nie auseinanderlaufen.
+  const heatToday = heatAdvice(uvToday ?? 0, data?.daily[0]?.tempMaxC ?? 0);
+  /** Dezimaltrennzeichen der aktiven Sprache («3.5 l» bzw. «3,5 l»). */
+  const decimalSeparator = (1.1).toLocaleString(LOCALE_TAGS[lang]).slice(1, 2);
   // Regen-Grafik: 48 h mit Menge und Wahrscheinlichkeit
   const rainData = useMemo(
     () =>
@@ -1817,6 +1823,24 @@ export default function WeatherPage() {
                 </p>
                 {uvInfo.advice && (
                   <p className="mt-1.5 text-xs opacity-90">{uvInfo.advice}</p>
+                )}
+                {/* Sonnencreme & Trinken (#260/#261): konkrete Zahlen zum
+                    heutigen Tag – dieselbe Rechnung wie in der Erinnerung */}
+                {heatToday && (
+                  <p className="mt-1.5 text-xs font-medium">
+                    {heatToday.sunscreen &&
+                      t.weather.heatSunscreen(
+                        heatToday.reapplyMinutes,
+                        heatToday.burnMinutes
+                      )}
+                    {heatToday.sunscreen && heatToday.hydration && " · "}
+                    {heatToday.hydration &&
+                      t.weather.heatDrink(
+                        heatToday.litersPerAdult
+                          .toFixed(1)
+                          .replace(".", decimalSeparator)
+                      )}
+                  </p>
                 )}
               </div>
             </section>

@@ -24,6 +24,11 @@ export interface HourlyWeather {
    */
   windDirectionDeg?: number;
   /**
+   * UV-Index dieser Stunde. Optional: nur der Push-Lauf ruft `uv_index`
+   * stündlich ab (die Wetter-Seite nimmt den Tageswert `uv_index_max`).
+   */
+  uvIndex?: number;
+  /**
    * Luftdruck auf Meereshöhe in hPa. Optional: nur das Wetter-Modul ruft
    * `pressure_msl` ab.
    */

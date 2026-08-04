@@ -25,13 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 12 Punkte
+## Runde 27 – 10 Punkte
 
 ### Gesundheit & Sicherheit
 
-- [ ] **Sonnencreme-Erinnerung** (#260) – Push zum Nachcremen nach UV-Index
-- [ ] **Trink-Erinnerung an Hitzetagen** (#261) – aus Wetter und
-      Trinkwasser-Rechner
 - [ ] **Stechmücken-Index** (#262) – wetterbasiert: Wärme, Feuchte, Windstille
 - [ ] **Feuerverbots-Übersicht nach Kanton** (#263) – Ergänzung zur
       Waldbrandgefahr

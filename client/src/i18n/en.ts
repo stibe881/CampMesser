@@ -238,6 +238,9 @@ export const en: Translation = {
       "The confirmation link is invalid or has expired. Request a new one in your profile.",
   },
   profile: {
+    prefHeat: "Sun & heat",
+    prefHeatDesc:
+      "A morning reminder to put on sunscreen and to drink when the day brings a high UV index or more than 28 °C.",
     title: "Profile",
     manageSubtitle: "Manage your account and your settings.",
     loginFeature: "your profile",
@@ -330,6 +333,7 @@ export const en: Translation = {
       "No notifications sent yet. As soon as something comes up, you will find it here.",
     historyOpenAria: (title: string) => `Open “${title}”`,
     historyKind: {
+      heat: "Sun & heat",
       weather: "Severe weather",
       food: "Cool box",
       trip: "Trip",
@@ -847,6 +851,9 @@ export const en: Translation = {
     gearRemoved: "Care task deleted",
   },
   weather: {
+    heatSunscreen: (minutes: number, burn: number) =>
+      `Sunscreen, reapply every ${minutes} min (bare skin burns after ~${burn} min)`,
+    heatDrink: (liters: string) => `About ${liters} l of water per adult`,
     title: "Camp weather",
     subtitle: "Hyperlocal forecast and severe weather alerts for your pitch.",
     locationGroupAria: "Choose the location for the weather forecast",

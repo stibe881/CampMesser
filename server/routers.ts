@@ -3077,6 +3077,7 @@ export const appRouter = router({
           wantsTrips: z.boolean().optional(),
           wantsAstro: z.boolean().optional(),
           wantsGear: z.boolean().optional(),
+          wantsHeat: z.boolean().optional(),
           windThresholdKmh: z
             .number()
             .int()
