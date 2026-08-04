@@ -12,6 +12,8 @@ import {
   ChevronDown,
   CloudSun,
   Copy,
+  Eye,
+  EyeOff,
   CopyPlus,
   Download,
   Gauge,
@@ -22,6 +24,7 @@ import {
   Loader2,
   LogOut,
   MapPin,
+  MapPinned,
   MessageSquare,
   Moon,
   Pencil,
@@ -291,6 +294,102 @@ function StarRating({
           </button>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * Stellplatz-Details eines Aufenthalts (#252): Parzellennummer, WLAN und
+ * Notizen zum Platz. Erscheint nur, wenn etwas erfasst ist – ein leerer
+ * Kasten an jeder Reise wäre reines Rauschen.
+ *
+ * Das WLAN-Passwort steht standardmässig verdeckt: Man liest es am Platz
+ * auch mal, während jemand über die Schulter schaut. Ein Knopf zeigt es,
+ * ein zweiter kopiert es.
+ */
+function TripPitchDetails({
+  trip,
+}: {
+  trip: {
+    pitchNumber: string | null;
+    wifiName: string | null;
+    wifiPassword: string | null;
+    pitchNotes: string | null;
+  };
+}) {
+  const t = useT();
+  const [showPassword, setShowPassword] = useState(false);
+  const has =
+    trip.pitchNumber || trip.wifiName || trip.wifiPassword || trip.pitchNotes;
+  if (!has) return null;
+  return (
+    <div className="mt-2 rounded-lg border border-border bg-muted/30 px-3 py-2.5 text-sm">
+      <p className="flex items-center gap-1.5 font-medium">
+        <MapPinned className="h-4 w-4 text-primary" aria-hidden="true" />
+        {t.trips.pitchSectionTitle}
+      </p>
+      <dl className="mt-1.5 space-y-1">
+        {trip.pitchNumber && (
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="text-muted-foreground">
+              {t.trips.pitchNumberLabel}
+            </dt>
+            <dd className="font-medium">{trip.pitchNumber}</dd>
+          </div>
+        )}
+        {trip.wifiName && (
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="text-muted-foreground">{t.trips.wifiNameLabel}</dt>
+            <dd className="font-medium">{trip.wifiName}</dd>
+          </div>
+        )}
+        {trip.wifiPassword && (
+          <div className="flex flex-wrap items-center gap-x-2">
+            <dt className="text-muted-foreground">
+              {t.trips.wifiPasswordLabel}
+            </dt>
+            <dd className="font-mono font-medium">
+              {showPassword ? trip.wifiPassword : "••••••••"}
+            </dd>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => setShowPassword(v => !v)}
+              aria-label={
+                showPassword
+                  ? t.trips.wifiPasswordHide
+                  : t.trips.wifiPasswordShow
+              }
+            >
+              {showPassword ? (
+                <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />
+              ) : (
+                <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => {
+                navigator.clipboard
+                  ?.writeText(trip.wifiPassword ?? "")
+                  .then(() => toast.success(t.common.linkCopied))
+                  .catch(() => toast.error(t.common.copyFailed));
+              }}
+              aria-label={t.trips.wifiPasswordCopy}
+            >
+              <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+            </Button>
+          </div>
+        )}
+      </dl>
+      {trip.pitchNotes && (
+        <p className="mt-1.5 whitespace-pre-wrap text-muted-foreground">
+          {trip.pitchNotes}
+        </p>
+      )}
     </div>
   );
 }
@@ -2698,6 +2797,10 @@ export default function TripsPage() {
     endDate: today,
     arrivalTime: "",
     departureTime: "",
+    pitchNumber: "",
+    wifiName: "",
+    wifiPassword: "",
+    pitchNotes: "",
   });
   /** Sterne-Bewertung des neuen Eintrags (null = ohne Bewertung). */
   const [formRating, setFormRating] = useState<number | null>(null);
@@ -2719,6 +2822,10 @@ export default function TripsPage() {
       endDate: today,
       arrivalTime: "",
       departureTime: "",
+      pitchNumber: "",
+      wifiName: "",
+      wifiPassword: "",
+      pitchNotes: "",
     });
     setFormRating(null);
   };
@@ -2918,6 +3025,10 @@ export default function TripsPage() {
       endDate: trip.endDate,
       arrivalTime: trip.arrivalTime ?? "",
       departureTime: trip.departureTime ?? "",
+      pitchNumber: trip.pitchNumber ?? "",
+      wifiName: trip.wifiName ?? "",
+      wifiPassword: trip.wifiPassword ?? "",
+      pitchNotes: trip.pitchNotes ?? "",
     });
     setFormRating(trip.rating ?? null);
     setFormOpen(true);
@@ -3611,6 +3722,10 @@ export default function TripsPage() {
                   rating: formRating,
                   arrivalTime: form.arrivalTime || null,
                   departureTime: form.departureTime || null,
+                  pitchNumber: form.pitchNumber.trim() || null,
+                  wifiName: form.wifiName.trim() || null,
+                  wifiPassword: form.wifiPassword.trim() || null,
+                  pitchNotes: form.pitchNotes.trim() || null,
                 });
                 return;
               }
@@ -3632,6 +3747,10 @@ export default function TripsPage() {
                 rating: formRating,
                 arrivalTime: form.arrivalTime || null,
                 departureTime: form.departureTime || null,
+                pitchNumber: form.pitchNumber.trim() || null,
+                wifiName: form.wifiName.trim() || null,
+                wifiPassword: form.wifiPassword.trim() || null,
+                pitchNotes: form.pitchNotes.trim() || null,
               };
               if (editingId !== null) {
                 updateMutation.mutate({ id: editingId, ...payload });
@@ -3777,6 +3896,75 @@ export default function TripsPage() {
                   value={form.departureTime}
                   onChange={e =>
                     setForm(f => ({ ...f, departureTime: e.target.value }))
+                  }
+                />
+              </div>
+            </div>
+            {/* Stellplatz-Details (#252): gelten für diesen Aufenthalt */}
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <p className="text-sm font-medium">{t.trips.pitchSectionTitle}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {t.trips.pitchSectionHint}
+              </p>
+              <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="trip-pitch-number">
+                    {t.trips.pitchNumberLabel}
+                  </Label>
+                  <Input
+                    id="trip-pitch-number"
+                    className="mt-1.5"
+                    maxLength={40}
+                    placeholder={t.trips.pitchNumberPlaceholder}
+                    value={form.pitchNumber}
+                    onChange={e =>
+                      setForm(f => ({ ...f, pitchNumber: e.target.value }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="trip-wifi-name">
+                    {t.trips.wifiNameLabel}
+                  </Label>
+                  <Input
+                    id="trip-wifi-name"
+                    className="mt-1.5"
+                    maxLength={80}
+                    placeholder={t.trips.wifiNamePlaceholder}
+                    value={form.wifiName}
+                    onChange={e =>
+                      setForm(f => ({ ...f, wifiName: e.target.value }))
+                    }
+                  />
+                </div>
+              </div>
+              <div className="mt-3">
+                <Label htmlFor="trip-wifi-password">
+                  {t.trips.wifiPasswordLabel}
+                </Label>
+                <Input
+                  id="trip-wifi-password"
+                  className="mt-1.5"
+                  maxLength={80}
+                  placeholder={t.trips.wifiPasswordPlaceholder}
+                  value={form.wifiPassword}
+                  onChange={e =>
+                    setForm(f => ({ ...f, wifiPassword: e.target.value }))
+                  }
+                />
+              </div>
+              <div className="mt-3">
+                <Label htmlFor="trip-pitch-notes">
+                  {t.trips.pitchNotesLabel}
+                </Label>
+                <Textarea
+                  id="trip-pitch-notes"
+                  className="mt-1.5"
+                  rows={2}
+                  placeholder={t.trips.pitchNotesPlaceholder}
+                  value={form.pitchNotes}
+                  onChange={e =>
+                    setForm(f => ({ ...f, pitchNotes: e.target.value }))
                   }
                 />
               </div>
@@ -4001,6 +4189,7 @@ export default function TripsPage() {
                           holidays={holidays}
                         />
                       )}
+                      <TripPitchDetails trip={trip} />
                       <TripReadinessCard
                         trip={trip}
                         tripName={trip.title || placeName(trip)}

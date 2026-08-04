@@ -29,8 +29,6 @@ Stand: 4. August 2026
 
 ### Reise & Organisation
 
-- [ ] **Stellplatz-Details pro Aufenthalt** (#252) – Platznummer,
-      WLAN-Passwort, Foto vom Stromkasten, Notizen
 - [ ] **Termin-Finder für gemeinsame Reisen** (#253) – Mitreisende stimmen über
       mögliche Daten ab
 - [ ] **Gästebuch pro Reise** (#254) – Mitreisende hinterlassen Einträge und

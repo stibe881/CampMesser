@@ -2312,6 +2312,21 @@ export const de = {
     locationPlaceholder: "z. B. Camping Aareschlucht",
     packListLabel: "Packliste (optional)",
     noPackList: "Ohne Packliste",
+    pitchSectionTitle: "Stellplatz-Details",
+    pitchSectionHint:
+      "Was nur für diesen Aufenthalt gilt – die Nummer wechselt beim nächsten Mal.",
+    pitchNumberLabel: "Platznummer",
+    pitchNumberPlaceholder: "z. B. B14",
+    wifiNameLabel: "WLAN-Name",
+    wifiNamePlaceholder: "z. B. Camping-Gast",
+    wifiPasswordLabel: "WLAN-Passwort",
+    wifiPasswordPlaceholder: "vom Empfang",
+    wifiPasswordShow: "Passwort anzeigen",
+    wifiPasswordHide: "Passwort verbergen",
+    wifiPasswordCopy: "Passwort kopieren",
+    pitchNotesLabel: "Notizen zum Platz",
+    pitchNotesPlaceholder:
+      "z. B. Stromkasten hinter der Hecke, Wasserhahn 20 Schritte rechts",
     arrivalTimeLabel: "Ankunftszeit (optional)",
     departureTimeLabel: "Abreisezeit (optional)",
     timesLine: (a: string | null, d: string | null) =>

@@ -330,6 +330,16 @@ export const tripLogs = mysqlTable(
     /** Titelbild des Eintrags (tripPhotos.id); null = kein Titelbild */
     coverPhotoId: int("coverPhotoId"),
     /**
+     * Stellplatz-Details des Aufenthalts (#252): Was am Platz nur für DIESEN
+     * Aufenthalt gilt – die Parzellennummer, das WLAN-Passwort, wo der
+     * Stromkasten steht. Bewusst an der Reise und nicht am Zeltplatz-Favoriten:
+     * die Nummer wechselt bei jedem Besuch, das Passwort ändert die Rezeption.
+     */
+    pitchNumber: varchar("pitchNumber", { length: 40 }),
+    wifiName: varchar("wifiName", { length: 80 }),
+    wifiPassword: varchar("wifiPassword", { length: 80 }),
+    pitchNotes: text("pitchNotes"),
+    /**
      * Öffentlicher Teil-Token des Reise-Hubs: Wer den Link kennt, sieht die
      * Reise samt Platz-Basisdaten, Menüplan und Packliste (ohne Fotos).
      * Unabhängig von den Reise-Mitgliedern (tripMembers); null = nicht geteilt.

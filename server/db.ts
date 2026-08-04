@@ -1488,6 +1488,10 @@ export async function updateTripLog(
       | "rating"
       | "arrivalTime"
       | "departureTime"
+      | "pitchNumber"
+      | "wifiName"
+      | "wifiPassword"
+      | "pitchNotes"
       | "weatherJson"
     >
   >

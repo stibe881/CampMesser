@@ -2289,6 +2289,21 @@ export const it: Translation = {
     locationPlaceholder: "ad es. Camping Aareschlucht",
     packListLabel: "Lista bagagli (facoltativa)",
     noPackList: "Senza lista bagagli",
+    pitchSectionTitle: "Dettagli della piazzola",
+    pitchSectionHint:
+      "Ciò che vale solo per questo soggiorno – il numero cambierà la prossima volta.",
+    pitchNumberLabel: "Numero della piazzola",
+    pitchNumberPlaceholder: "p. es. B14",
+    wifiNameLabel: "Nome del wifi",
+    wifiNamePlaceholder: "p. es. Camping-Ospiti",
+    wifiPasswordLabel: "Password wifi",
+    wifiPasswordPlaceholder: "dalla reception",
+    wifiPasswordShow: "Mostra la password",
+    wifiPasswordHide: "Nascondi la password",
+    wifiPasswordCopy: "Copia la password",
+    pitchNotesLabel: "Note sulla piazzola",
+    pitchNotesPlaceholder:
+      "p. es. quadro elettrico dietro la siepe, rubinetto 20 passi a destra",
     arrivalTimeLabel: "Ora di arrivo (facoltativo)",
     departureTimeLabel: "Ora di partenza (facoltativo)",
     timesLine: (a: string | null, d: string | null) =>

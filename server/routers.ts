@@ -3570,6 +3570,11 @@ export const appRouter = router({
               .string()
               .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
               .nullish(),
+            // Stellplatz-Details (#252) – gelten für DIESEN Aufenthalt
+            pitchNumber: z.string().max(40).nullish(),
+            wifiName: z.string().max(80).nullish(),
+            wifiPassword: z.string().max(80).nullish(),
+            pitchNotes: z.string().max(2000).nullish(),
           })
           .refine(v => v.endDate >= v.startDate, {
             message: "Die Abreise darf nicht vor der Anreise liegen.",
@@ -3643,6 +3648,10 @@ export const appRouter = router({
           rating: input.rating ?? null,
           arrivalTime: input.arrivalTime ?? null,
           departureTime: input.departureTime ?? null,
+          pitchNumber: input.pitchNumber?.trim() || null,
+          wifiName: input.wifiName?.trim() || null,
+          wifiPassword: input.wifiPassword?.trim() || null,
+          pitchNotes: input.pitchNotes?.trim() || null,
           ...(weatherStale ? { weatherJson: null } : {}),
         });
         return { success: true } as const;
