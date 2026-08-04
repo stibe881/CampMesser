@@ -177,3 +177,184 @@ export function driveTimeCacheKey(
     quarter,
   ].join(",");
 }
+
+// ── Stau punktgenau (Nutzerwunsch 04.08.2026) ─────────────────────────
+
+/**
+ * Verkehrslage ABSCHNITTSWEISE statt nur als Gesamtzeit.
+ *
+ * WARUM NICHT EINFACH «+35 MINUTEN»: Eine Gesamtverspätung sagt nicht,
+ * WO es steht. Für die Fahrt zählt aber genau das – ob der Stau vor dem
+ * Gotthard liegt oder erst in der Agglomeration am Ziel, entscheidet, ob
+ * man früher losfährt oder eine Pause vorzieht.
+ *
+ * Google liefert dazu `speedReadingIntervals`: Abschnitte des Streckenzugs
+ * mit einer Einstufung. Die Abschnitte zeigen auf INDIZES im Streckenzug,
+ * deshalb braucht es beides – Linie und Abschnitte.
+ *
+ * DIE LINIE VON GOOGLE VERLÄSST DEN SERVER NIE. Sie dient dort nur als
+ * Nachschlagewerk: «welcher Punkt meiner OSRM-Stützstellen liegt in
+ * welchem Abschnitt». In den Browser geht eine Einstufung je Stützstelle,
+ * also Text. Damit bleibt es bei der Linie aus dem Kopf dieser Datei:
+ * Zahlen und Wörter von Google ja, Geometrie auf fremder Karte nein.
+ */
+export const TRAFFIC_LEVELS = ["normal", "slow", "jam"] as const;
+export type TrafficLevel = (typeof TRAFFIC_LEVELS)[number];
+
+/** Feldmaske für die Anfrage MIT Verkehr auf der Linie. */
+export const GOOGLE_ROUTES_TRAFFIC_FIELD_MASK = [
+  "routes.duration",
+  "routes.staticDuration",
+  "routes.distanceMeters",
+  "routes.polyline.encodedPolyline",
+  "routes.travelAdvisory.speedReadingIntervals",
+].join(",");
+
+/**
+ * Anfrage-Körper für die Verkehrslage entlang der Strecke.
+ *
+ * `OVERVIEW` und nicht `HIGH_QUALITY`: Wir tasten acht Stützstellen ab,
+ * kein Navigationsgerät. Die grobe Linie genügt und ist ein Bruchteil der
+ * Datenmenge.
+ */
+export function googleTrafficBody(
+  from: LatLon,
+  to: LatLon,
+  departureAtMs?: number | null
+): Record<string, unknown> {
+  return {
+    ...googleRouteBody(from, to, departureAtMs),
+    extraComputations: ["TRAFFIC_ON_POLYLINE"],
+    polylineQuality: "OVERVIEW",
+  };
+}
+
+/**
+ * Googles Streckenzug entschlüsseln (Encoded Polyline Algorithm).
+ *
+ * Kein Paket dafür: Das Verfahren sind zwanzig Zeilen, und eine
+ * Abhängigkeit, die im Bundle landet, wäre für zwanzig Zeilen zu viel.
+ */
+export function decodePolyline(encoded: string): LatLon[] {
+  const points: LatLon[] = [];
+  let index = 0;
+  let lat = 0;
+  let lon = 0;
+  while (index < encoded.length) {
+    let result = 0;
+    let shift = 0;
+    let byte = 0;
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20 && index < encoded.length);
+    lat += result & 1 ? ~(result >> 1) : result >> 1;
+
+    result = 0;
+    shift = 0;
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20 && index < encoded.length);
+    lon += result & 1 ? ~(result >> 1) : result >> 1;
+
+    points.push({ lat: lat / 1e5, lon: lon / 1e5 });
+  }
+  return points;
+}
+
+export interface SpeedInterval {
+  start: number;
+  end: number;
+  level: TrafficLevel;
+}
+
+/** Googles Einstufung in unsere drei Stufen. */
+function speedLevel(value: unknown): TrafficLevel | null {
+  if (value === "TRAFFIC_JAM") return "jam";
+  if (value === "SLOW") return "slow";
+  if (value === "NORMAL") return "normal";
+  return null;
+}
+
+/** Die Abschnitte aus der Antwort lesen; Unbrauchbares fällt weg. */
+export function parseSpeedIntervals(json: unknown): SpeedInterval[] {
+  if (!json || typeof json !== "object") return [];
+  const routes = (json as { routes?: unknown }).routes;
+  if (!Array.isArray(routes) || routes.length === 0) return [];
+  const raw = (
+    routes[0] as {
+      travelAdvisory?: { speedReadingIntervals?: unknown };
+    }
+  ).travelAdvisory?.speedReadingIntervals;
+  if (!Array.isArray(raw)) return [];
+  const result: SpeedInterval[] = [];
+  raw.forEach(entry => {
+    if (!entry || typeof entry !== "object") return;
+    const item = entry as {
+      startPolylinePointIndex?: unknown;
+      endPolylinePointIndex?: unknown;
+      speed?: unknown;
+    };
+    const level = speedLevel(item.speed);
+    if (!level) return;
+    // Fehlt der Startindex, ist er 0 – so steht es in Googles Antwort,
+    // die den Wert bei 0 weglässt
+    const start =
+      typeof item.startPolylinePointIndex === "number"
+        ? item.startPolylinePointIndex
+        : 0;
+    const end =
+      typeof item.endPolylinePointIndex === "number"
+        ? item.endPolylinePointIndex
+        : start;
+    result.push({ start, end, level });
+  });
+  return result;
+}
+
+/** Die Einstufung an einem Index; ohne Treffer «normal». */
+export function levelAtIndex(
+  intervals: readonly SpeedInterval[],
+  index: number
+): TrafficLevel {
+  let found: TrafficLevel = "normal";
+  intervals.forEach(interval => {
+    if (index >= interval.start && index <= interval.end)
+      found = interval.level;
+  });
+  return found;
+}
+
+/**
+ * Für jeden unserer Punkte die Verkehrslage.
+ *
+ * Zugeordnet wird über den NÄCHSTGELEGENEN Punkt des Streckenzugs. Beide
+ * Linien beschreiben dieselbe Fahrt, laufen aber nicht Punkt für Punkt
+ * gleich – Google und OSRM setzen ihre Stützstellen unterschiedlich.
+ * Gerechnet wird flach in Grad: Für «welcher von tausend Punkten ist am
+ * nächsten» spielt die Erdkrümmung keine Rolle.
+ */
+export function trafficAtPoints(
+  points: readonly LatLon[],
+  polyline: readonly LatLon[],
+  intervals: readonly SpeedInterval[]
+): TrafficLevel[] {
+  if (polyline.length === 0) return points.map(() => "normal");
+  return points.map(point => {
+    let bestIndex = 0;
+    let bestDistance = Number.POSITIVE_INFINITY;
+    for (let i = 0; i < polyline.length; i++) {
+      const dLat = polyline[i].lat - point.lat;
+      const dLon = polyline[i].lon - point.lon;
+      const distance = dLat * dLat + dLon * dLon;
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestIndex = i;
+      }
+    }
+    return levelAtIndex(intervals, bestIndex);
+  });
+}

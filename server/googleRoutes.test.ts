@@ -7,6 +7,12 @@ import {
   nextOccurrenceMs,
   parseGoogleDuration,
   parseGoogleRoute,
+  decodePolyline,
+  googleTrafficBody,
+  levelAtIndex,
+  parseSpeedIntervals,
+  trafficAtPoints,
+  GOOGLE_ROUTES_TRAFFIC_FIELD_MASK,
   trafficUsableAt,
   type LatLon,
 } from "@shared/googleRoutes";
@@ -114,5 +120,126 @@ describe("Fahrzeiten von Google", () => {
     expect(driveTimeCacheKey(HOME, SPOT, at + 60 * 60 * 1000)).not.toBe(a);
     // Ohne Abfahrtszeit ist es eine andere Frage als mit
     expect(driveTimeCacheKey(HOME, SPOT, null)).not.toBe(a);
+  });
+
+  describe("Stau punktgenau", () => {
+    it("fragt die Verkehrslage auf der Linie mit an", () => {
+      const body = googleTrafficBody(
+        { lat: 47.4, lon: 8.5 },
+        { lat: 46.0, lon: 8.9 }
+      );
+      expect(body.extraComputations).toEqual(["TRAFFIC_ON_POLYLINE"]);
+      // Ohne TRAFFIC_AWARE liefert Google gar keine Einstufung
+      expect(body.routingPreference).toBe("TRAFFIC_AWARE");
+      // Grobe Linie genügt: Wir tasten acht Punkte ab, kein Navi
+      expect(body.polylineQuality).toBe("OVERVIEW");
+    });
+
+    it("verlangt Linie und Abschnitte in der Feldmaske", () => {
+      // Die Abschnitte zeigen auf Indizes IN der Linie – eines ohne das
+      // andere ist wertlos
+      expect(GOOGLE_ROUTES_TRAFFIC_FIELD_MASK).toContain(
+        "routes.polyline.encodedPolyline"
+      );
+      expect(GOOGLE_ROUTES_TRAFFIC_FIELD_MASK).toContain(
+        "routes.travelAdvisory.speedReadingIntervals"
+      );
+    });
+
+    it("entschlüsselt Googles Streckenzug", () => {
+      // Beispiel aus Googles eigener Beschreibung des Verfahrens
+      const points = decodePolyline("_p~iF~ps|U_ulLnnqC_mqNvxq`@");
+      expect(points).toHaveLength(3);
+      expect(points[0].lat).toBeCloseTo(38.5, 4);
+      expect(points[0].lon).toBeCloseTo(-120.2, 4);
+      expect(points[1].lat).toBeCloseTo(40.7, 4);
+      expect(points[1].lon).toBeCloseTo(-120.95, 4);
+      expect(points[2].lat).toBeCloseTo(43.252, 4);
+      expect(points[2].lon).toBeCloseTo(-126.453, 4);
+    });
+
+    it("kommt mit einer leeren Linie zurecht", () => {
+      expect(decodePolyline("")).toEqual([]);
+    });
+
+    it("liest die Abschnitte", () => {
+      const intervals = parseSpeedIntervals({
+        routes: [
+          {
+            travelAdvisory: {
+              speedReadingIntervals: [
+                { endPolylinePointIndex: 3, speed: "NORMAL" },
+                {
+                  startPolylinePointIndex: 3,
+                  endPolylinePointIndex: 6,
+                  speed: "TRAFFIC_JAM",
+                },
+              ],
+            },
+          },
+        ],
+      });
+      expect(intervals).toHaveLength(2);
+      // Google lässt den Startindex bei 0 weg – das darf nicht NaN geben
+      expect(intervals[0].start).toBe(0);
+      expect(intervals[1].level).toBe("jam");
+    });
+
+    it("lässt unbekannte Einstufungen weg", () => {
+      const intervals = parseSpeedIntervals({
+        routes: [
+          {
+            travelAdvisory: {
+              speedReadingIntervals: [{ speed: "SPEED_UNSPECIFIED" }],
+            },
+          },
+        ],
+      });
+      expect(intervals).toEqual([]);
+    });
+
+    it("kommt mit einer Antwort ohne Verkehrsangaben zurecht", () => {
+      expect(parseSpeedIntervals(null)).toEqual([]);
+      expect(parseSpeedIntervals({ routes: [] })).toEqual([]);
+      expect(parseSpeedIntervals({ routes: [{}] })).toEqual([]);
+    });
+
+    it("findet die Einstufung an einem Index", () => {
+      const intervals = [
+        { start: 0, end: 2, level: "normal" as const },
+        { start: 2, end: 5, level: "jam" as const },
+      ];
+      expect(levelAtIndex(intervals, 1)).toBe("normal");
+      expect(levelAtIndex(intervals, 4)).toBe("jam");
+      // Ausserhalb aller Abschnitte gilt «normal» – keine Angabe ist kein Stau
+      expect(levelAtIndex(intervals, 99)).toBe("normal");
+      expect(levelAtIndex([], 0)).toBe("normal");
+    });
+
+    it("ordnet unsere Punkte dem nächstgelegenen Linien-Punkt zu", () => {
+      // Unsere Stützstellen liegen auf der OSRM-Route, Googles Linie setzt
+      // ihre Punkte anders – zugeordnet wird über die Nähe
+      const polyline = [
+        { lat: 47.0, lon: 8.0 },
+        { lat: 46.5, lon: 8.2 },
+        { lat: 46.0, lon: 8.4 },
+      ];
+      const intervals = [{ start: 1, end: 2, level: "jam" as const }];
+      const levels = trafficAtPoints(
+        [
+          { lat: 46.99, lon: 8.01 },
+          { lat: 46.02, lon: 8.39 },
+        ],
+        polyline,
+        intervals
+      );
+      expect(levels).toEqual(["normal", "jam"]);
+    });
+
+    it("meldet «normal», wenn keine Linie da ist", () => {
+      expect(trafficAtPoints([{ lat: 47, lon: 8 }], [], [])).toEqual([
+        "normal",
+      ]);
+    });
   });
 });

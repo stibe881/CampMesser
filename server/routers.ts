@@ -6211,6 +6211,53 @@ export const appRouter = router({
      * Verkehr von jetzt. Ist nichts zu holen, kommt `driveTime: null` –
      * ausdrücklich kein Fehler, denn die Ansicht hat bereits eine Zahl.
      */
+    /**
+     * Verkehrslage je Stützstelle (Nutzerwunsch 04.08.2026).
+     *
+     * Der Client schickt SEINE Punkte – die liegen auf der OSRM-Route.
+     * Der Server holt bei Google die Strecke mit Verkehr, ordnet jeden
+     * Punkt einem Abschnitt zu und schickt nur die Einstufung zurück.
+     * GOOGLES LINIE VERLÄSST DEN SERVER NIE; sie ist hier nur das
+     * Nachschlagewerk. Begründung in `shared/googleRoutes.ts`.
+     */
+    routeTraffic: protectedProcedure
+      .input(
+        z.object({
+          from: z.object({
+            lat: z.number().min(-90).max(90),
+            lon: z.number().min(-180).max(180),
+          }),
+          to: z.object({
+            lat: z.number().min(-90).max(90),
+            lon: z.number().min(-180).max(180),
+          }),
+          points: z
+            .array(
+              z.object({
+                lat: z.number().min(-90).max(90),
+                lon: z.number().min(-180).max(180),
+              })
+            )
+            .min(1)
+            .max(16),
+          departureAtMs: z.number().int().positive().nullable().default(null),
+        })
+      )
+      .query(async ({ input }) => {
+        const { fetchRouteTraffic, isDriveTimeConfigured } =
+          await import("./driveTime");
+        if (!isDriveTimeConfigured()) {
+          return { configured: false as const, levels: [] };
+        }
+        const levels = await fetchRouteTraffic(
+          input.from,
+          input.to,
+          input.points,
+          input.departureAtMs
+        );
+        if (!levels) return { configured: false as const, levels: [] };
+        return { configured: true as const, levels };
+      }),
     driveTime: protectedProcedure
       .input(
         z.object({

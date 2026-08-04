@@ -2405,6 +2405,7 @@ export const it: Translation = {
     menuPlanAria: (name: string) => `Apri il piano dei pasti di ${name}`,
     deletePlannedAria: name => `Elimina il soggiorno pianificato ${name}`,
     deleteEntryAria: name => `Elimina la voce ${name}`,
+    dossierAria: (name: string) => `Apri il dossier di ${name}`,
     entriesTitle: "I tuoi soggiorni",
     empty:
       "Ancora nessuna voce – annota il tuo primo soggiorno in campeggio con «Nuovo viaggio».",
@@ -3766,7 +3767,7 @@ export const it: Translation = {
   /** Parchi giochi e punti balneabili da OpenStreetMap (#248). */
   routeWeather: {
     sectionAria: "Maltempo sul percorso",
-    title: "Meteo lungo il tragitto",
+    title: "Meteo e traffico lungo il tragitto",
     subtitle: "Che cosa ti aspetta per strada – non solo all'arrivo.",
     subtitleAtPlace: (place: string) =>
       `Che cosa ti aspetta sulla strada per ${place} – non solo all'arrivo.`,
@@ -3799,6 +3800,15 @@ export const it: Translation = {
       regen: "Pioggia intensa",
       schnee: "Neve",
     },
+    traffic: {
+      normal: "Scorrevole",
+      slow: "Rallentato",
+      jam: "Coda",
+    },
+    allClearButJam: (count: number) =>
+      count === 1
+        ? "Meteo tranquillo – ma in un punto il traffico è fermo."
+        : `Meteo tranquillo – ma in ${count} punti il traffico è fermo.`,
     riskNone: "Tranquillo",
     kmMark: (km: number) => `km ${km}`,
     gusts: (kmh: number) => `${kmh} km/h`,

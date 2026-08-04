@@ -408,7 +408,12 @@ export default function NearbyShops({
             </>
           )}
 
-          <p className="mt-3 text-xs text-muted-foreground">{tp.hoursNote}</p>
+          {/* Der Hinweis erklärt die Deutung der OSM-Rohangabe. Bei
+              Google-Treffern gibt es nichts zu deuten – dort wäre er nur
+              eine Warnung vor einem Problem, das gerade nicht besteht. */}
+          {source === "osm" && (
+            <p className="mt-3 text-xs text-muted-foreground">{tp.hoursNote}</p>
+          )}
         </div>
       )}
 

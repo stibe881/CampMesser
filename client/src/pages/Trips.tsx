@@ -3277,6 +3277,20 @@ export default function TripsPage() {
   };
 
   /**
+   * Id des Zeltplatz-Dossiers zu einem Aufenthalt – oder null.
+   *
+   * NUR EIGENE PLÄTZE: Bei einer geteilten Reise gehört der Zeltplatz der
+   * Besitzerin oder dem Besitzer, und `/zeltplaetze/:id` führte dort ins
+   * Leere. Lieber kein Link als einer, der eine Fehlermeldung öffnet.
+   * Deshalb wird gegen die eigene Favoriten-Liste geprüft und nicht bloss
+   * gegen `spotId != null`.
+   */
+  const spotDossierId = (trip: (typeof trips)[number]): number | null =>
+    trip.spotId != null && spots.some(s => s.id === trip.spotId)
+      ? trip.spotId
+      : null;
+
+  /**
    * Zielland einer Reise (#228): geraten aus Titel, Ortsname und dem Namen des
    * verknüpften Zeltplatzes. Aus den Koordinaten allein liesse sich das Land
    * ohne Grenzdaten nicht verlässlich bestimmen – ohne Treffer bleibt es null
@@ -4452,6 +4466,7 @@ export default function TripsPage() {
             {plannedTrips.map(trip => {
               const days = daysUntilTrip(trip.startDate, today);
               const nights = tripNights(trip.startDate, trip.endDate);
+              const dossierId = spotDossierId(trip);
               // Wetter-Packvorschläge nur kurz vor der Anreise und nur mit
               // verknüpfter Packliste UND Zeltplatz-Koordinaten (sonst still weglassen)
               const suggestionSpot =
@@ -4494,12 +4509,25 @@ export default function TripsPage() {
                             {t.trips.sharedWith(trip.ownerName)}
                           </span>
                         )}
-                        {trip.title && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" aria-hidden="true" />
-                            {placeName(trip)}
-                          </span>
-                        )}
+                        {/* Ort als Weg ins Dossier: Wer den Aufenthalt
+                            anschaut, will von dort zum Platz – bisher
+                            musste man über die Zeltplatz-Liste suchen */}
+                        {(trip.title || dossierId != null) &&
+                          (dossierId != null ? (
+                            <Link
+                              href={`/zeltplaetze/${dossierId}`}
+                              className="flex items-center gap-1 font-medium text-primary hover:underline"
+                              aria-label={t.trips.dossierAria(placeName(trip))}
+                            >
+                              <MapPin className="h-3 w-3" aria-hidden="true" />
+                              {placeName(trip)}
+                            </Link>
+                          ) : (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" aria-hidden="true" />
+                              {placeName(trip)}
+                            </span>
+                          ))}
                         <span className="flex items-center gap-1">
                           <CalendarDays
                             className="h-3 w-3"
@@ -4843,6 +4871,7 @@ export default function TripsPage() {
             <ul className="space-y-3">
               {trips.map(trip => {
                 const nights = tripNights(trip.startDate, trip.endDate);
+                const dossierId = spotDossierId(trip);
                 // Wetterarchiv nur mit Koordinaten eines verknüpften Favoriten
                 const weatherSpot =
                   trip.spotId != null
@@ -4883,12 +4912,32 @@ export default function TripsPage() {
                               {t.trips.sharedWith(trip.ownerName)}
                             </span>
                           )}
-                          {trip.title && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" aria-hidden="true" />
-                              {placeName(trip)}
-                            </span>
-                          )}
+                          {/* Ort als Weg ins Dossier: Wer den Aufenthalt
+                              anschaut, will von dort zum Platz */}
+                          {(trip.title || dossierId != null) &&
+                            (dossierId != null ? (
+                              <Link
+                                href={`/zeltplaetze/${dossierId}`}
+                                className="flex items-center gap-1 font-medium text-primary hover:underline"
+                                aria-label={t.trips.dossierAria(
+                                  placeName(trip)
+                                )}
+                              >
+                                <MapPin
+                                  className="h-3 w-3"
+                                  aria-hidden="true"
+                                />
+                                {placeName(trip)}
+                              </Link>
+                            ) : (
+                              <span className="flex items-center gap-1">
+                                <MapPin
+                                  className="h-3 w-3"
+                                  aria-hidden="true"
+                                />
+                                {placeName(trip)}
+                              </span>
+                            ))}
                           <span className="flex items-center gap-1">
                             <CalendarDays
                               className="h-3 w-3"

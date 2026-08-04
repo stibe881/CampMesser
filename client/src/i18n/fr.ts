@@ -2429,6 +2429,7 @@ export const fr: Translation = {
     menuPlanAria: (name: string) => `Ouvrir le plan des repas de ${name}`,
     deletePlannedAria: name => `Supprimer le séjour prévu ${name}`,
     deleteEntryAria: name => `Supprimer l'entrée ${name}`,
+    dossierAria: (name: string) => `Ouvrir le dossier de ${name}`,
     entriesTitle: "Tes séjours",
     empty:
       "Pas encore d'entrées – note ton premier séjour en camping avec «Nouveau voyage».",
@@ -3794,7 +3795,7 @@ export const fr: Translation = {
   /** Places de jeux et lieux de baignade depuis OpenStreetMap (#248). */
   routeWeather: {
     sectionAria: "Intempéries sur le trajet",
-    title: "Météo sur le trajet",
+    title: "Météo et trafic sur le trajet",
     subtitle: "Ce qui t'attend en route – pas seulement à l'arrivée.",
     subtitleAtPlace: (place: string) =>
       `Ce qui t'attend sur la route vers ${place} – pas seulement à l'arrivée.`,
@@ -3827,6 +3828,15 @@ export const fr: Translation = {
       regen: "Fortes pluies",
       schnee: "Neige",
     },
+    traffic: {
+      normal: "Fluide",
+      slow: "Ralenti",
+      jam: "Bouchon",
+    },
+    allClearButJam: (count: number) =>
+      count === 1
+        ? "Rien côté météo – mais un bouchon sur le parcours."
+        : `Rien côté météo – mais des bouchons à ${count} endroits.`,
     riskNone: "Calme",
     kmMark: (km: number) => `km ${km}`,
     gusts: (kmh: number) => `${kmh} km/h`,
