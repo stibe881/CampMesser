@@ -610,6 +610,13 @@
       "when": 1785845144291,
       "tag": "0086_oval_fat_cobra",
       "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "5",
+      "when": 1785845930882,
+      "tag": "0087_thick_malcolm_colcord",
+      "breakpoints": true
     }
   ]
 }

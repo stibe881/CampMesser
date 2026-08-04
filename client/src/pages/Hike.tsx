@@ -35,6 +35,7 @@ import PageHeader from "@/components/PageHeader";
 import TrackProfile from "@/components/TrackProfile";
 import LoginPrompt from "@/components/LoginPrompt";
 import NearbyHikes from "@/components/NearbyHikes";
+import RoutePlanner from "@/components/RoutePlanner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -548,6 +549,19 @@ export default function HikePage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Route vorher zeichnen (#281): das Gegenstück zur Aufzeichnung –
+          erst planen, dann laufen. Nur angemeldet, weil die Route
+          gespeichert wird. */}
+      {isAuthenticated && (
+        <RoutePlanner
+          className="mt-6"
+          trips={trips.map(trip => ({
+            id: trip.id,
+            label: trip.title || trip.location || t.hike.tripFallback,
+          }))}
+        />
+      )}
 
       {/* Wanderwege in der Nähe: OSM-Routen rund um den aktuellen Standort */}
       <NearbyHikes className="mt-6" />

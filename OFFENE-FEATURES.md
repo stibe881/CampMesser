@@ -25,12 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 28 – 3 Punkte
+## Runde 28 – 2 Punkte
 
 ### Wandern
 
-- [ ] **Route vorher zeichnen** (#281) – Wegpunkte setzen, Länge, Höhenmeter
-      und Gehzeit schätzen
 - [ ] **Wanderung per Link teilen** (#282) – Track für Mitreisende, im
       bestehenden Teil-Muster
 - [ ] **Auto-Standort merken** (#283) – wo steht das Fahrzeug, mit

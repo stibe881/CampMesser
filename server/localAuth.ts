@@ -157,6 +157,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     choreAssignments,
     storageBoxes,
     treasureHunts,
+    hikeTracks,
+    plannedRoutes,
     treasurePoints,
     powerConsumers,
     foodItems,
@@ -262,6 +264,9 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     .where(eq(packTemplatesCustom.userId, userId));
   await db.delete(inventoryItems).where(eq(inventoryItems.userId, userId));
   await db.delete(storageBoxes).where(eq(storageBoxes.userId, userId));
+  // Aufgezeichnete Wanderungen (#220) und gezeichnete Routen (#281)
+  await db.delete(hikeTracks).where(eq(hikeTracks.userId, userId));
+  await db.delete(plannedRoutes).where(eq(plannedRoutes.userId, userId));
   // Ämtli-Plan samt Zuteilungen (#270)
   await db.delete(choreAssignments).where(eq(choreAssignments.userId, userId));
   await db.delete(campChores).where(eq(campChores.userId, userId));

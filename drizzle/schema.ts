@@ -1389,6 +1389,51 @@ export type HikeTrack = typeof hikeTracks.$inferSelect;
 export type InsertHikeTrack = typeof hikeTracks.$inferInsert;
 
 /**
+ * Vorher gezeichnete Routen (#281): eine Zeile pro geplanter Wanderung.
+ *
+ * Bewusst NEBEN `hikeTracks` und nicht darin: Eine Planung hat keine Zeit
+ * und keine Aufzeichnung, dafür eine geschätzte Gehzeit – sie in dieselbe
+ * Tabelle zu pressen hiesse, `startedAt`/`endedAt` mit erfundenen Werten
+ * zu füllen und in jeder Abfrage «echt oder geplant?» mitzuführen.
+ *
+ * `waypointsJson` hält NUR die gesetzten Wegpunkte (`[[lat, lon, ele|null],
+ * …]`, Format in shared/routePlan.ts) – die Stützstellen zwischendrin
+ * werden beim Anzeigen neu gerechnet, sie sind reine Ableitung. Deshalb
+ * genügt hier `text`.
+ *
+ * Länge, Höhenmeter und Gehzeit stehen als Spalte daneben, damit die Liste
+ * nicht für jede Route rechnen muss; berechnet werden sie serverseitig.
+ */
+export const plannedRoutes = mysqlTable(
+  "plannedRoutes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Zugeordnete Reise (tripLogs.id); null = ohne Reise */
+    tripId: int("tripId"),
+    name: varchar("name", { length: 80 }).notNull(),
+    /** Wegpunkte als kompaktes Tupel-JSON (shared/routePlan.ts) */
+    waypointsJson: text("waypointsJson").notNull(),
+    distanceM: int("distanceM").notNull().default(0),
+    ascentM: int("ascentM").notNull().default(0),
+    descentM: int("descentM").notNull().default(0),
+    /** Geschätzte Gehzeit ohne Pausen, in Minuten */
+    minutes: int("minutes").notNull().default(0),
+    /** Gewähltes Tempo: slow | normal | fast */
+    pace: varchar("pace", { length: 10 }).notNull().default("normal"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    index("plannedRoutes_userId").on(table.userId),
+    index("plannedRoutes_tripId").on(table.tripId),
+  ]
+);
+
+export type PlannedRoute = typeof plannedRoutes.$inferSelect;
+export type InsertPlannedRoute = typeof plannedRoutes.$inferInsert;
+
+/**
  * «Hier bin ich»-Standort-Links (#221): höchstens EIN aktiver Link pro Konto
  * (uniqueIndex auf userId). Dadurch bleibt derselbe Link gültig, während der
  * Standort nachgeführt wird – Mitreisende müssen nichts Neues öffnen –, und

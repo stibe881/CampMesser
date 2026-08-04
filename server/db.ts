@@ -20,8 +20,10 @@ import {
   gearTasks,
   hikeTracks,
   homeLocations,
+  plannedRoutes,
   InsertGearTask,
   InsertHikeTrack,
+  InsertPlannedRoute,
   InsertCampSpot,
   InsertFoodItem,
   InsertFoodTemplate,
@@ -2531,6 +2533,70 @@ export async function detachHikeTracksFromTrip(tripId: number) {
     .update(hikeTracks)
     .set({ tripId: null })
     .where(eq(hikeTracks.tripId, tripId));
+}
+
+// ── Vorher gezeichnete Routen (#281) ──
+
+/**
+ * Geplante Routen eines Kontos, neuste zuoberst. Die Wegpunkte kommen mit –
+ * anders als bei den aufgezeichneten Tracks sind es höchstens vierzig
+ * Tupel pro Route, und die Liste zeigt jede Route auf einer Mini-Karte.
+ */
+export async function getPlannedRoutes(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(plannedRoutes)
+    .where(eq(plannedRoutes.userId, userId))
+    .orderBy(desc(plannedRoutes.createdAt), desc(plannedRoutes.id));
+}
+
+/** Einzelne Route laden (nur eigene). */
+export async function getPlannedRoute(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(plannedRoutes)
+    .where(and(eq(plannedRoutes.id, id), eq(plannedRoutes.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/** Route speichern. */
+export async function addPlannedRoute(data: InsertPlannedRoute) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(plannedRoutes).values(data);
+  return result.insertId;
+}
+
+/** Route ändern (nur eigene). */
+export async function updatePlannedRoute(
+  id: number,
+  userId: number,
+  data: Partial<InsertPlannedRoute>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(plannedRoutes)
+    .set(data)
+    .where(and(eq(plannedRoutes.id, id), eq(plannedRoutes.userId, userId)));
+}
+
+/** Route löschen (nur eigene). */
+export async function deletePlannedRoute(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(plannedRoutes)
+    .where(and(eq(plannedRoutes.id, id), eq(plannedRoutes.userId, userId)));
+}
+
+/** Beim Löschen einer Reise: Route behalten, nur die Zuordnung lösen. */
+export async function detachPlannedRoutesFromTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .update(plannedRoutes)
+    .set({ tripId: null })
+    .where(eq(plannedRoutes.tripId, tripId));
 }
 
 // ── «Hier bin ich»-Standort-Links (#221) ──
