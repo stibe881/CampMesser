@@ -3940,6 +3940,150 @@ export const it: Translation = {
     noteTraffic:
       "Il tempo di percorrenza viene dalla previsione del traffico di Google per quest'ora del giorno, la distanza dal calcolo del percorso su OpenStreetMap. Cantieri e attese alla frontiera si aggiungono ancora.",
   },
+  passport: {
+    title: "Passaporto di viaggio",
+    intro:
+      "Un timbro per ogni campeggio visitato. I timbri vengono dai tuoi viaggi – ciò che è registrato è registrato.",
+    noRank: "Ancora nessun timbro",
+    summary: (places: number, nights: number) =>
+      `${places === 1 ? "1 campeggio" : `${places} campeggi`} · ${nights === 1 ? "1 notte" : `${nights} notti`}`,
+    toNext: (missing: number, title: string) =>
+      missing === 1
+        ? `Ancora 1 campeggio fino a «${title}»`
+        : `Ancora ${missing} campeggi fino a «${title}»`,
+    nights: (count: number) => (count === 1 ? "1 notte" : `${count} notti`),
+    stampAria: (place: string, visits: number) =>
+      `Timbro ${place}, visitato ${visits} volte`,
+    empty:
+      "Ancora nessun timbro. Registra un viaggio col nome del campeggio – comparirà qui.",
+    print: "Stampa il passaporto",
+    note: "I timbri nascono dai viaggi del diario; nulla viene registrato due volte. Ogni campeggio riceve dal proprio nome la stessa forma, lo stesso colore e la stessa inclinazione – uguali su ogni dispositivo.",
+  },
+  drill: {
+    title: "Esercitazione d'emergenza",
+    intro:
+      "Nel momento vero viene in mente ciò che si è già fatto – non ciò che si è sentito una volta.",
+    ageLabel: "Età del bambino",
+    ageYears: (years: number) => `${years} anni`,
+    stepsTitle: "Ecco come si fa, nell'ordine",
+    mistakesTitle: "Questo no",
+    practiceTitle: "Come esercitarsi in piazzola",
+    questionTitle: "Domanda di controllo",
+    right: "Giusto.",
+    wrong: "Non proprio.",
+    markDone: "Esercitato",
+    answerFirst: "Rispondi prima correttamente alla domanda.",
+    lastPracticed: (date: string) => `ultima volta il ${date}`,
+    neverPracticed: "mai esercitato",
+    openCount: (count: number) =>
+      count === 1
+        ? "1 esercitazione da rifare"
+        : `${count} esercitazioni da rifare`,
+    allDone: "Tutto esercitato – di nuovo fra sei mesi.",
+    note: "Viene salvata solo la data di ogni esercitazione, su questo dispositivo. Nessun nome, nessun numero: ciò che un bambino deve sapere a memoria si esercita con lui, invece di depositarlo in un'app. Dopo sei mesi un'esercitazione va rifatta – i bambini crescono e il campeggio sarà un altro.",
+  },
+  meteorLog: {
+    title: "Diario delle stelle cadenti",
+    intro:
+      "Conta una notte: a ogni stella cadente tocca la direzione da cui è arrivata – ora e direzione sono registrate.",
+    startHint:
+      "Sdraiati, lascia che gli occhi si abituino al buio per venti minuti, poi avvia il conteggio.",
+    start: "Avvia la notte",
+    tonight: (names: string) => `Attivi questa notte: ${names}`,
+    observed: (duration: string) => `${duration} di osservazione`,
+    rate: (perHour: number) => `${perHour} all'ora`,
+    rateTooEarly: "Troppo presto per un tasso orario",
+    mostlyFrom: (direction: string) =>
+      `Molte venivano chiaramente da ${direction}`,
+    tapHint: "Vista? Tocca la direzione da cui è arrivata.",
+    directionUnknown: "incerta",
+    pause: "Pausa",
+    resume: "Riprendi",
+    undo: "Annulla",
+    showerLabel: "Quale sciame?",
+    showerUnknown: "Indeterminato",
+    distribution: "Da quale direzione",
+    redLight: "Luce rossa",
+    finish: "Termina la notte",
+    pastNights: "Le tue notti",
+    nightOf: (date: string) => `Notte del ${date}`,
+    clear: "Cancella il diario",
+    clearConfirm: "Cancellare tutte le notti registrate?",
+    note: "Si conta solo il tempo in cui guardi davvero – per questo c'è il tasto pausa. Sotto il quarto d'ora non c'è tasso orario: trasformare una stella cadente in due minuti in trenta all'ora sarebbe un gioco di numeri. E il tuo numero resta sempre sotto il tasso del calendario: quello vale per un cielo perfettamente buio con il punto d'origine esattamente sopra di te. Le notti restano su questo dispositivo e non passano a un secondo.",
+  },
+  treeKey: {
+    title: "Riconosci l'albero",
+    intro:
+      "Sei davanti a un albero e non sai quale sia? Rispondi a ciò che vedi – dopo tre o quattro domande hai la specie.",
+    step: (number: number) => `Domanda ${number}`,
+    resultLabel: "Probabilmente è questo",
+    markLabel: "Da cosa lo riconosci",
+    checkLabel: "Controprova",
+    confusionLabel: "Si confonde con",
+    toLexicon: "Leggi nel lessico della natura",
+    back: "Domanda precedente",
+    restart: "Ricomincia",
+    note: "La chiave porta ai nove alberi più diffusi dei nostri boschi – non a ogni specie. Se la controprova non torna, è un altro albero: meglio continuare a cercare che decidere in fretta.",
+  },
+  rainyDay: {
+    title: "Idee per giorni di pioggia",
+    intro:
+      "Piove dalla colazione? Indica età, durata e spazio – il resto compare qui sotto.",
+    spaceLabel: "Quanto spazio",
+    ageLabel: "Età",
+    ageAny: "indifferente",
+    ageYears: (years: number) => `${years} anni`,
+    ageIgnore: "Non considerare l'età",
+    ageUse: "Considerare l'età",
+    ageRange: (from: number, to: number) =>
+      to >= 99 ? `da ${from} anni` : `${from}–${to} anni`,
+    minutesLabel: "Tempo da riempire",
+    minutesValue: (minutes: number) => `${minutes} min`,
+    quietLabel: "Solo cose tranquille (qualcuno dorme)",
+    quietBadge: "tranquillo",
+    togetherLabel: "Più persone presenti",
+    needsLabel: "Serve",
+    resultCount: (count: number) =>
+      count === 1 ? "1 idea adatta" : `${count} idee adatte`,
+    empty:
+      "Niente trovato. Prendi più tempo, più spazio – o lascia perdere l'età.",
+    materialsTitle: "Cosa ti serve",
+    note: "Lo spazio è un filtro rigido: ciò che richiede un tavolo non serve nella tenda interna. Sulla durata c'è un margine – si può sempre smettere.",
+  },
+  lunchbox: {
+    title: "Merenda e pranzo al sacco",
+    intro: "Cosa mettere nello zaino per la gita – e quanto portare da bere.",
+    adultsLabel: "Adulti",
+    childrenLabel: "Bambini",
+    lengthLabel: "Durata della gita",
+    length: {
+      halbtag: "Mezza giornata",
+      ganztag: "Giornata intera",
+      langertag: "Fino a sera",
+    },
+    effortLabel: "Impegno",
+    effort: {
+      gemuetlich: "Tranquilla",
+      wandern: "Escursione",
+      anstrengend: "Impegnativa",
+    },
+    temperatureLabel: "Temperatura massima (°C)",
+    coolPackLabel: "Siberino incluso",
+    bottles: (count: number) =>
+      count === 1 ? "1 borraccia" : `${count} borracce`,
+    waterHint: (liters: number, bottleMl: number) =>
+      `${liters} l per tutti insieme, arrotondato a borracce da ${bottleMl} ml.`,
+    znueniTitle: "Per la merenda",
+    mittagTitle: "Per il pranzo",
+    remindersTitle: "Non dimenticare",
+    portions: (count: number) =>
+      count === 1 ? "1 porzione" : `${count} porzioni`,
+    addToList: "Nella lista della spesa",
+    addedToList: "Aggiunto alla lista della spesa",
+    nothingToAdd: "Nessuna proposta – inserisci prima le persone.",
+    fromPlanner: "dal pianificatore del pranzo al sacco",
+    note: "Suggerimenti, non prescrizioni: valori indicativi per persona e pasto. Senza siberino sparisce tutto ciò che va refrigerato – non è una questione di gusto. E il cioccolato nei giorni caldi resta a casa.",
+  },
   firewood: {
     title: "Fabbisogno di legna",
     intro:

@@ -3970,6 +3970,148 @@ export const de = {
     noteTraffic:
       "Die Fahrzeit stammt aus der Verkehrs-Prognose von Google für diese Tageszeit, die Strecke aus der Routenberechnung über OpenStreetMap. Baustellen und Grenzwartezeiten kommen weiterhin dazu.",
   },
+  passport: {
+    title: "Reisepass",
+    intro:
+      "Für jeden besuchten Platz ein Stempel. Die Stempel kommen aus deinen Reisen – eingetragen ist eingetragen.",
+    noRank: "Noch kein Stempel",
+    summary: (places: number, nights: number) =>
+      `${places === 1 ? "1 Platz" : `${places} Plätze`} · ${nights === 1 ? "1 Nacht" : `${nights} Nächte`}`,
+    toNext: (missing: number, title: string) =>
+      missing === 1
+        ? `Noch 1 Platz bis «${title}»`
+        : `Noch ${missing} Plätze bis «${title}»`,
+    nights: (count: number) => (count === 1 ? "1 Nacht" : `${count} Nächte`),
+    stampAria: (place: string, visits: number) =>
+      `Stempel ${place}, ${visits}-mal besucht`,
+    empty:
+      "Noch keine Stempel. Trag eine Reise mit Platznamen ein – dann steht sie hier.",
+    print: "Pass drucken",
+    note: "Die Stempel entstehen aus den Reisen im Tagebuch; nichts wird doppelt erfasst. Jeder Platz bekommt aus seinem Namen dieselbe Form, Farbe und Schräglage – auf jedem Gerät und nach jedem Neuladen gleich.",
+  },
+  drill: {
+    title: "Notfall-Übung",
+    intro:
+      "Im Ernstfall fällt einem ein, was man schon einmal gemacht hat – nicht, was man einmal gehört hat.",
+    ageLabel: "Alter des Kindes",
+    ageYears: (years: number) => `${years} Jahre`,
+    stepsTitle: "So geht es, der Reihe nach",
+    mistakesTitle: "Das nicht",
+    practiceTitle: "So übt ihr es am Platz",
+    questionTitle: "Kontrollfrage",
+    right: "Richtig.",
+    wrong: "Nicht ganz.",
+    markDone: "Geübt",
+    answerFirst: "Beantworte zuerst die Kontrollfrage richtig.",
+    lastPracticed: (date: string) => `zuletzt geübt am ${date}`,
+    neverPracticed: "noch nie geübt",
+    openCount: (count: number) =>
+      count === 1 ? "1 Übung ist fällig" : `${count} Übungen sind fällig`,
+    allDone: "Alles geübt – in einem halben Jahr wieder.",
+    note: "Gespeichert wird nur das Datum je Übung, auf diesem Gerät. Keine Namen, keine Nummern: Was ein Kind auswendig können muss, übt man mit ihm, statt es in einer App zu hinterlegen. Nach einem halben Jahr ist eine Übung wieder fällig – Kinder wachsen, und der Platz ist beim nächsten Mal ein anderer.",
+  },
+  meteorLog: {
+    title: "Sternschnuppen-Protokoll",
+    intro:
+      "Eine Nacht mitzählen: Tipp bei jeder Sternschnuppe dorthin, wo sie hergekommen ist – Zeit und Richtung stehen damit fest.",
+    startHint:
+      "Leg dich hin, lass die Augen zwanzig Minuten dunkel werden und starte dann die Zählung.",
+    start: "Nacht starten",
+    tonight: (names: string) => `Heute Nacht aktiv: ${names}`,
+    observed: (duration: string) => `${duration} beobachtet`,
+    rate: (perHour: number) => `${perHour} pro Stunde`,
+    rateTooEarly: "Für eine Stundenrate ist es noch zu früh",
+    mostlyFrom: (direction: string) => `Auffällig viele aus ${direction}`,
+    tapHint: "Gesehen? Tipp die Richtung an, aus der sie kam.",
+    directionUnknown: "unklar",
+    pause: "Pause",
+    resume: "Weiter",
+    undo: "Zurücknehmen",
+    showerLabel: "Welcher Strom?",
+    showerUnknown: "Unbestimmt",
+    distribution: "Aus welcher Richtung",
+    redLight: "Rotlicht",
+    finish: "Nacht beenden",
+    pastNights: "Deine Nächte",
+    nightOf: (date: string) => `Nacht vom ${date}`,
+    clear: "Protokoll löschen",
+    clearConfirm: "Alle aufgezeichneten Nächte löschen?",
+    note: "Gezählt wird die Zeit, in der du wirklich schaust – deshalb die Pause-Taste. Unter einer Viertelstunde gibt es keine Stundenrate, denn aus einer Sternschnuppe in zwei Minuten dreissig pro Stunde zu machen, wäre Zahlenspielerei. Und deine Zahl liegt immer unter der Rate, die im Kalender steht: Die gilt für einen perfekt dunklen Himmel mit dem Ausgangspunkt genau über dir. Die Nächte bleiben auf diesem Gerät und wandern nicht auf ein zweites.",
+  },
+  treeKey: {
+    title: "Baum bestimmen",
+    intro:
+      "Du stehst vor einem Baum und weisst nicht, welcher es ist? Beantworte, was du siehst – nach drei, vier Fragen steht die Art.",
+    step: (number: number) => `Frage ${number}`,
+    resultLabel: "Das ist er wahrscheinlich",
+    markLabel: "Daran erkennst du ihn",
+    checkLabel: "Gegenprobe",
+    confusionLabel: "Verwechselbar mit",
+    toLexicon: "Im Natur-Lexikon nachlesen",
+    back: "Eine Frage zurück",
+    restart: "Von vorne",
+    note: "Der Schlüssel führt zu den neun häufigsten Bäumen unserer Wälder – nicht zu jeder Art. Passt die Gegenprobe nicht, ist es ein anderer Baum: dann lieber weitersuchen als sich festlegen.",
+  },
+  rainyDay: {
+    title: "Regentag-Ideen",
+    intro:
+      "Es regnet seit dem Frühstück? Sag, wie alt, wie lange und wie viel Platz – der Rest steht unten.",
+    spaceLabel: "Wie viel Platz",
+    ageLabel: "Alter",
+    ageAny: "egal",
+    ageYears: (years: number) => `${years} Jahre`,
+    ageIgnore: "Alter nicht berücksichtigen",
+    ageUse: "Alter berücksichtigen",
+    ageRange: (from: number, to: number) =>
+      to >= 99 ? `ab ${from} Jahren` : `${from}–${to} Jahre`,
+    minutesLabel: "Zu überbrücken",
+    minutesValue: (minutes: number) => `${minutes} min`,
+    quietLabel: "Nur Leises (jemand schläft)",
+    quietBadge: "leise",
+    togetherLabel: "Mehrere Personen dabei",
+    needsLabel: "Dafür nötig",
+    resultCount: (count: number) =>
+      count === 1 ? "1 Idee passt" : `${count} Ideen passen`,
+    empty:
+      "Nichts gefunden. Nimm mehr Zeit, mehr Platz – oder lass das Alter weg.",
+    materialsTitle: "Was du dafür brauchst",
+    note: "Der Platz ist ein harter Filter: Was einen Tisch braucht, nützt im Innenzelt nichts. Bei der Dauer gibt es etwas Spielraum – aufhören kann man immer.",
+  },
+  lunchbox: {
+    title: "Znüni & Lunchbox",
+    intro:
+      "Was für den Ausflug in den Rucksack – und wie viel zu trinken mit muss.",
+    adultsLabel: "Erwachsene",
+    childrenLabel: "Kinder",
+    lengthLabel: "Wie lange unterwegs",
+    length: {
+      halbtag: "Halber Tag",
+      ganztag: "Ganzer Tag",
+      langertag: "Bis in den Abend",
+    },
+    effortLabel: "Wie anstrengend",
+    effort: {
+      gemuetlich: "Gemütlich",
+      wandern: "Wandern",
+      anstrengend: "Anstrengend",
+    },
+    temperatureLabel: "Höchsttemperatur (°C)",
+    coolPackLabel: "Kühlakku kommt mit",
+    bottles: (count: number) =>
+      count === 1 ? "1 Flasche" : `${count} Flaschen`,
+    waterHint: (liters: number, bottleMl: number) =>
+      `${liters} l für alle zusammen, aufgerundet auf Flaschen à ${bottleMl} ml.`,
+    znueniTitle: "Fürs Znüni",
+    mittagTitle: "Fürs Mittagessen",
+    remindersTitle: "Nicht vergessen",
+    portions: (count: number) =>
+      count === 1 ? "1 Portion" : `${count} Portionen`,
+    addToList: "Auf die Einkaufsliste",
+    addedToList: "Auf die Einkaufsliste gesetzt",
+    nothingToAdd: "Nichts vorgeschlagen – trag zuerst Personen ein.",
+    fromPlanner: "aus dem Lunchbox-Planer",
+    note: "Vorschläge, keine Vorschriften: Faustwerte pro Person und Mahlzeit. Ohne Kühlakku fällt alles weg, was gekühlt gehört – das ist keine Geschmacksfrage. Und Schokolade bleibt an heissen Tagen daheim.",
+  },
   firewood: {
     title: "Feuerholz-Bedarf",
     intro:

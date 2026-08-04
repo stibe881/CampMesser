@@ -38,6 +38,13 @@ const pageLoaders = {
   Recipes: () => import("./pages/Recipes"),
   Energy: () => import("./pages/Energy"),
   Water: () => import("./pages/Water"),
+  Firewood: () => import("./pages/Firewood"),
+  Lunchbox: () => import("./pages/Lunchbox"),
+  RainyDay: () => import("./pages/RainyDay"),
+  EmergencyDrill: () => import("./pages/EmergencyDrill"),
+  Passport: () => import("./pages/Passport"),
+  TreeKey: () => import("./pages/TreeKey"),
+  MeteorLog: () => import("./pages/MeteorLog"),
   PackOptimizer: () => import("./pages/PackOptimizer"),
   Family: () => import("./pages/Family"),
   Food: () => import("./pages/Food"),
@@ -130,6 +137,13 @@ const PhrasebookPage = lazyWithRetry(pageLoaders.Phrasebook);
 const RecipesPage = lazyWithRetry(pageLoaders.Recipes);
 const EnergyPage = lazyWithRetry(pageLoaders.Energy);
 const WaterPage = lazyWithRetry(pageLoaders.Water);
+const FirewoodPage = lazyWithRetry(pageLoaders.Firewood);
+const LunchboxPage = lazyWithRetry(pageLoaders.Lunchbox);
+const RainyDayPage = lazyWithRetry(pageLoaders.RainyDay);
+const EmergencyDrillPage = lazyWithRetry(pageLoaders.EmergencyDrill);
+const PassportPage = lazyWithRetry(pageLoaders.Passport);
+const TreeKeyPage = lazyWithRetry(pageLoaders.TreeKey);
+const MeteorLogPage = lazyWithRetry(pageLoaders.MeteorLog);
 const PackOptimizerPage = lazyWithRetry(pageLoaders.PackOptimizer);
 const FamilyPage = lazyWithRetry(pageLoaders.Family);
 const FoodPage = lazyWithRetry(pageLoaders.Food);
@@ -219,6 +233,13 @@ function Router() {
           <Route path={"/rezepte"} component={RecipesPage} />
           <Route path={"/energie"} component={EnergyPage} />
           <Route path={"/wasser"} component={WaterPage} />
+          <Route path={"/feuerholz"} component={FirewoodPage} />
+          <Route path={"/lunchbox"} component={LunchboxPage} />
+          <Route path={"/regentag"} component={RainyDayPage} />
+          <Route path={"/notfall-uebung"} component={EmergencyDrillPage} />
+          <Route path={"/reisepass"} component={PassportPage} />
+          <Route path={"/baum-bestimmen"} component={TreeKeyPage} />
+          <Route path={"/sternschnuppen"} component={MeteorLogPage} />
           <Route path={"/packen"} component={PackOptimizerPage} />
           <Route path={"/familie"} component={FamilyPage} />
           <Route path={"/kuehlbox"} component={FoodPage} />

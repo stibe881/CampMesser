@@ -19,6 +19,7 @@
  */
 import type {
   BoundsSpec,
+  MapBounds,
   CreateMapOptions,
   IconSpec,
   LatLng,
@@ -54,6 +55,7 @@ interface GMap {
   setZoom(zoom: number): void;
   getZoom(): number | undefined;
   getCenter(): GLatLng | undefined;
+  getBounds(): GLatLngBounds | undefined;
   setMapTypeId(id: string): void;
   fitBounds(bounds: GLatLngBounds, padding?: number): void;
   addListener(event: string, handler: (e: GMapMouseEvent) => void): unknown;
@@ -63,6 +65,8 @@ interface GMap {
 interface GLatLngBounds {
   extend(point: GLatLngLiteral): GLatLngBounds;
   isEmpty(): boolean;
+  getSouthWest(): GLatLng;
+  getNorthEast(): GLatLng;
 }
 
 interface GMarker {
@@ -78,7 +82,7 @@ interface GPath {
 }
 
 interface GInfoWindow {
-  setContent(content: string): void;
+  setContent(content: string | HTMLElement): void;
   open(options: { map: GMap; anchor: GMarker }): void;
   close(): void;
 }
@@ -94,7 +98,10 @@ interface GoogleMapsApi {
   marker?: {
     AdvancedMarkerElement: new (options: Record<string, unknown>) => GMarker;
   };
-  event: { clearInstanceListeners(instance: unknown): void };
+  event: {
+    clearInstanceListeners(instance: unknown): void;
+    removeListener(listener: unknown): void;
+  };
 }
 
 function api(): GoogleMapsApi | null {
@@ -200,7 +207,7 @@ export function createGoogleEngine(
   };
 
   const markerObject = (marker: GMarker): MarkerObject => {
-    let popupHtml: string | null = null;
+    let popupContent: string | HTMLElement | null = null;
     const object: MarkerObject = {
       remove: () => {
         if (openMarker === marker) {
@@ -210,21 +217,24 @@ export function createGoogleEngine(
         maps.event.clearInstanceListeners(marker);
         marker.map = null;
       },
-      bindPopup: (html: string) => {
-        popupHtml = html;
+      bindPopup: (content: string | HTMLElement) => {
+        popupContent = content;
         marker.addListener("click", () => {
-          if (popupHtml == null) return;
-          infoWindow.setContent(popupHtml);
+          if (popupContent == null) return;
+          infoWindow.setContent(popupContent);
           infoWindow.open({ map, anchor: marker });
           openMarker = marker;
         });
         return object;
       },
       openPopup: () => {
-        if (popupHtml == null) return;
-        infoWindow.setContent(popupHtml);
+        if (popupContent == null) return;
+        infoWindow.setContent(popupContent);
         infoWindow.open({ map, anchor: marker });
         openMarker = marker;
+      },
+      updatePopup: () => {
+        // Das Fenster misst seinen Inhalt selbst nach – nichts zu tun
       },
       onClick: (handler: () => void) => {
         marker.addListener("click", handler);
@@ -342,6 +352,23 @@ export function createGoogleEngine(
 
     getZoom: () => map.getZoom() ?? options.zoom,
 
+    getBounds: (): MapBounds => {
+      const b = map.getBounds();
+      if (!b) {
+        // Vor dem ersten Zeichnen kennt Google den Ausschnitt noch nicht
+        const [lat, lng] = options.center;
+        return { south: lat, west: lng, north: lat, east: lng };
+      }
+      const sw = b.getSouthWest();
+      const ne = b.getNorthEast();
+      return {
+        south: sw.lat(),
+        west: sw.lng(),
+        north: ne.lat(),
+        east: ne.lng(),
+      };
+    },
+
     getCenter: (): LatLng => {
       const center = map.getCenter();
       return center
@@ -364,8 +391,18 @@ export function createGoogleEngine(
       );
     },
 
+    onMove: (handler: () => void) => {
+      const listener = map.addListener("idle", handler);
+      return () => maps.event.removeListener(listener);
+    },
+
     setBaseKind: (kind: MapLayerKind) => {
       map.setMapTypeId(mapTypeFor(kind));
+    },
+
+    closePopup: () => {
+      infoWindow.close();
+      openMarker = null;
     },
 
     refresh: () => {

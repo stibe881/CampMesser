@@ -10,7 +10,6 @@
  * Nachkommastelle Genauigkeit vorzutäuschen.
  */
 import { useState } from "react";
-import { Flame } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n";
@@ -57,12 +56,6 @@ export default function FirewoodCalculator({
 
   return (
     <section className={cn("", className)} aria-label={fw.title}>
-      <h2 className="mb-1 flex items-center gap-2 font-serif text-base font-semibold">
-        <Flame className="h-4 w-4 text-primary" aria-hidden="true" />
-        {fw.title}
-      </h2>
-      <p className="mb-3 text-sm text-muted-foreground">{fw.intro}</p>
-
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <Label htmlFor="firewood-evenings">{fw.eveningsLabel}</Label>

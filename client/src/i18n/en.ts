@@ -3857,6 +3857,147 @@ export const en: Translation = {
     noteTraffic:
       "The driving time comes from Google's traffic forecast for this time of day, the distance from the OpenStreetMap route calculation. Roadworks and border waits still come on top.",
   },
+  passport: {
+    title: "Travel passport",
+    intro:
+      "A stamp for every site you have visited. The stamps come from your trips – recorded is recorded.",
+    noRank: "No stamp yet",
+    summary: (places: number, nights: number) =>
+      `${places === 1 ? "1 site" : `${places} sites`} · ${nights === 1 ? "1 night" : `${nights} nights`}`,
+    toNext: (missing: number, title: string) =>
+      missing === 1
+        ? `1 more site to “${title}”`
+        : `${missing} more sites to “${title}”`,
+    nights: (count: number) => (count === 1 ? "1 night" : `${count} nights`),
+    stampAria: (place: string, visits: number) =>
+      `Stamp ${place}, visited ${visits} times`,
+    empty:
+      "No stamps yet. Record a trip with a site name – then it will show up here.",
+    print: "Print the passport",
+    note: "The stamps come from the trips in your journal; nothing is recorded twice. Each site gets the same shape, colour and tilt from its own name – identical on every device and after every reload.",
+  },
+  drill: {
+    title: "Emergency drill",
+    intro:
+      "When it counts, you remember what you have done once – not what you were told once.",
+    ageLabel: "Child's age",
+    ageYears: (years: number) => `${years} years`,
+    stepsTitle: "How it goes, in order",
+    mistakesTitle: "Not this",
+    practiceTitle: "How to practise it on site",
+    questionTitle: "Check question",
+    right: "Correct.",
+    wrong: "Not quite.",
+    markDone: "Practised",
+    answerFirst: "Answer the check question correctly first.",
+    lastPracticed: (date: string) => `last practised on ${date}`,
+    neverPracticed: "never practised",
+    openCount: (count: number) =>
+      count === 1 ? "1 drill is due" : `${count} drills are due`,
+    allDone: "All practised – again in six months.",
+    note: "Only the date of each drill is stored, on this device. No names, no numbers: what a child needs to know by heart is practised with them, not filed away in an app. After six months a drill is due again – children grow, and next time the site will be a different one.",
+  },
+  meteorLog: {
+    title: "Meteor log",
+    intro:
+      "Count a night: for every meteor, tap the direction it came from – time and direction are recorded with it.",
+    startHint:
+      "Lie down, let your eyes adapt to the dark for twenty minutes, then start counting.",
+    start: "Start the night",
+    tonight: (names: string) => `Active tonight: ${names}`,
+    observed: (duration: string) => `${duration} observed`,
+    rate: (perHour: number) => `${perHour} per hour`,
+    rateTooEarly: "Too early for an hourly rate",
+    mostlyFrom: (direction: string) =>
+      `Noticeably many came from the ${direction}`,
+    tapHint: "Saw one? Tap the direction it came from.",
+    directionUnknown: "not sure",
+    pause: "Pause",
+    resume: "Resume",
+    undo: "Undo",
+    showerLabel: "Which shower?",
+    showerUnknown: "Undetermined",
+    distribution: "Which direction they came from",
+    redLight: "Red light",
+    finish: "End the night",
+    pastNights: "Your nights",
+    nightOf: (date: string) => `Night of ${date}`,
+    clear: "Clear the log",
+    clearConfirm: "Delete all recorded nights?",
+    note: "Only the time you actually spend watching is counted – that is what the pause button is for. Below a quarter of an hour there is no hourly rate: turning one meteor in two minutes into thirty an hour would be playing with numbers. And your figure will always be below the rate in the calendar: that one assumes a perfectly dark sky with the radiant right overhead. The nights stay on this device and do not travel to a second one.",
+  },
+  treeKey: {
+    title: "Identify a tree",
+    intro:
+      "Standing in front of a tree and not sure which one? Answer what you see – three or four questions and you have the species.",
+    step: (number: number) => `Question ${number}`,
+    resultLabel: "This is most likely it",
+    markLabel: "How you recognise it",
+    checkLabel: "Cross-check",
+    confusionLabel: "Easily confused with",
+    toLexicon: "Read up in the nature guide",
+    back: "One question back",
+    restart: "Start over",
+    note: "The key leads to the nine most common trees of our forests – not to every species. If the cross-check does not fit, it is a different tree: better keep looking than commit.",
+  },
+  rainyDay: {
+    title: "Rainy-day ideas",
+    intro:
+      "Raining since breakfast? Say the age, the time and the space – the rest is below.",
+    spaceLabel: "How much space",
+    ageLabel: "Age",
+    ageAny: "any",
+    ageYears: (years: number) => `${years} years`,
+    ageIgnore: "Ignore age",
+    ageUse: "Take age into account",
+    ageRange: (from: number, to: number) =>
+      to >= 99 ? `from ${from} years` : `${from}–${to} years`,
+    minutesLabel: "Time to fill",
+    minutesValue: (minutes: number) => `${minutes} min`,
+    quietLabel: "Quiet things only (someone is asleep)",
+    quietBadge: "quiet",
+    togetherLabel: "More than one person here",
+    needsLabel: "You need",
+    resultCount: (count: number) =>
+      count === 1 ? "1 idea fits" : `${count} ideas fit`,
+    empty: "Nothing found. Allow more time, more space – or drop the age.",
+    materialsTitle: "What you need for these",
+    note: "Space is a strict filter: something needing a table is no use in the inner tent. On duration there is some leeway – you can always stop.",
+  },
+  lunchbox: {
+    title: "Snacks & lunchbox",
+    intro:
+      "What goes in the backpack for a day out – and how much to take to drink.",
+    adultsLabel: "Adults",
+    childrenLabel: "Children",
+    lengthLabel: "How long you are out",
+    length: {
+      halbtag: "Half a day",
+      ganztag: "Full day",
+      langertag: "Until the evening",
+    },
+    effortLabel: "How strenuous",
+    effort: {
+      gemuetlich: "Easy",
+      wandern: "Hiking",
+      anstrengend: "Strenuous",
+    },
+    temperatureLabel: "Peak temperature (°C)",
+    coolPackLabel: "Cool pack comes along",
+    bottles: (count: number) => (count === 1 ? "1 bottle" : `${count} bottles`),
+    waterHint: (liters: number, bottleMl: number) =>
+      `${liters} l for everyone together, rounded up to ${bottleMl} ml bottles.`,
+    znueniTitle: "For the snack",
+    mittagTitle: "For lunch",
+    remindersTitle: "Do not forget",
+    portions: (count: number) =>
+      count === 1 ? "1 portion" : `${count} portions`,
+    addToList: "Add to shopping list",
+    addedToList: "Added to the shopping list",
+    nothingToAdd: "Nothing suggested – enter the people first.",
+    fromPlanner: "from the lunchbox planner",
+    note: "Suggestions, not rules: rules of thumb per person and meal. Without a cool pack, everything that needs refrigerating drops out – that is not a matter of taste. And chocolate stays at home on hot days.",
+  },
   firewood: {
     title: "Firewood needed",
     intro: "How many nets to load – wood is better bought before you arrive.",

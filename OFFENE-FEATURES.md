@@ -33,28 +33,15 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 10 Punkte
+## Runde 29 – 4 Punkte
 
 ### Reise-Planung
 
 ### Küche & Vorrat
 
-- [ ] **Znüni- & Lunchbox-Planer** (#289) – was kommt für den Ausflug in den
-      Rucksack
-
 ### Familie
 
-- [ ] **Regentag-Ideen** (#290) – Beschäftigungen fürs Zelt und Vorzelt, nach
-      Alter und Dauer
-- [ ] **Notfall-Übung für Kinder** (#291) – spielerisch üben: was tun, wenn ich
-      den Platz nicht mehr finde
-- [ ] **Kinder-Reisepass** (#292) – Stempel sammeln für jeden besuchten Platz
-
 ### Natur
-
-- [ ] **Bestimmungsschlüssel für Bäume** (#293) – Frage für Frage zur Art
-- [ ] **Sternschnuppen-Protokoll** (#294) – Beobachtungsnacht mitzählen, Zeit
-      und Richtung festhalten
 
 ### Konto & Daten
 

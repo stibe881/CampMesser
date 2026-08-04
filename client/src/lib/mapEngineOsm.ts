@@ -13,6 +13,7 @@ import "leaflet/dist/leaflet.css";
 import { createBaseLayer, type MapLayerKind } from "./mapLayers";
 import type {
   BoundsSpec,
+  MapBounds,
   CreateMapOptions,
   IconSpec,
   LatLng,
@@ -74,9 +75,12 @@ export function createOsmEngine(
       remove: () => {
         marker.remove();
       },
-      bindPopup: (html: string) => {
-        marker.bindPopup(html);
+      bindPopup: (content: string | HTMLElement) => {
+        marker.bindPopup(content);
         return object;
+      },
+      updatePopup: () => {
+        marker.getPopup()?.update();
       },
       openPopup: () => {
         marker.openPopup();
@@ -167,6 +171,16 @@ export function createOsmEngine(
 
     getZoom: () => map.getZoom(),
 
+    getBounds: () => {
+      const b = map.getBounds();
+      return {
+        south: b.getSouth(),
+        west: b.getWest(),
+        north: b.getNorth(),
+        east: b.getEast(),
+      };
+    },
+
     getCenter: (): LatLng => {
       const center = map.getCenter();
       return { lat: center.lat, lng: center.lng };
@@ -182,12 +196,25 @@ export function createOsmEngine(
       map.on("zoomend", () => handler(map.getZoom()));
     },
 
+    onMove: (handler: () => void) => {
+      map.on("moveend", handler);
+      map.on("zoomend", handler);
+      return () => {
+        map.off("moveend", handler);
+        map.off("zoomend", handler);
+      };
+    },
+
     setBaseKind: (kind: MapLayerKind) => {
       // Erst den neuen Layer hinzufügen, dann den alten entfernen – sonst
       // blitzt die Karte kurz leer auf.
       const next = createBaseLayer(L, kind).addTo(map);
       baseLayer.remove();
       baseLayer = next;
+    },
+
+    closePopup: () => {
+      map.closePopup();
     },
 
     refresh: () => {

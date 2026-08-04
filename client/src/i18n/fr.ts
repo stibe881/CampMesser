@@ -3967,6 +3967,148 @@ export const fr: Translation = {
     noteTraffic:
       "La durée provient de la prévision de trafic de Google pour cette heure de la journée, la distance du calcul d'itinéraire sur OpenStreetMap. Chantiers et attentes à la frontière s'y ajoutent toujours.",
   },
+  passport: {
+    title: "Passeport de voyage",
+    intro:
+      "Un tampon pour chaque camping visité. Les tampons viennent de tes voyages – ce qui est saisi est saisi.",
+    noRank: "Pas encore de tampon",
+    summary: (places: number, nights: number) =>
+      `${places === 1 ? "1 camping" : `${places} campings`} · ${nights === 1 ? "1 nuit" : `${nights} nuits`}`,
+    toNext: (missing: number, title: string) =>
+      missing === 1
+        ? `Encore 1 camping jusqu'à « ${title} »`
+        : `Encore ${missing} campings jusqu'à « ${title} »`,
+    nights: (count: number) => (count === 1 ? "1 nuit" : `${count} nuits`),
+    stampAria: (place: string, visits: number) =>
+      `Tampon ${place}, visité ${visits} fois`,
+    empty:
+      "Pas encore de tampon. Saisis un voyage avec le nom du camping – il apparaîtra ici.",
+    print: "Imprimer le passeport",
+    note: "Les tampons proviennent des voyages du carnet ; rien n'est saisi deux fois. Chaque camping reçoit, à partir de son nom, la même forme, la même couleur et la même inclinaison – identiques sur chaque appareil.",
+  },
+  drill: {
+    title: "Exercice d'urgence",
+    intro:
+      "En cas réel, on se rappelle ce qu'on a déjà fait – pas ce qu'on a entendu une fois.",
+    ageLabel: "Âge de l'enfant",
+    ageYears: (years: number) => `${years} ans`,
+    stepsTitle: "Voilà comment faire, dans l'ordre",
+    mistakesTitle: "À ne pas faire",
+    practiceTitle: "Comment s'exercer sur place",
+    questionTitle: "Question de contrôle",
+    right: "Juste.",
+    wrong: "Pas tout à fait.",
+    markDone: "Exercé",
+    answerFirst: "Réponds d'abord correctement à la question.",
+    lastPracticed: (date: string) => `dernier exercice le ${date}`,
+    neverPracticed: "jamais exercé",
+    openCount: (count: number) =>
+      count === 1 ? "1 exercice à refaire" : `${count} exercices à refaire`,
+    allDone: "Tout est exercé – à refaire dans six mois.",
+    note: "Seule la date de chaque exercice est enregistrée, sur cet appareil. Ni noms ni numéros : ce qu'un enfant doit savoir par cœur, on l'exerce avec lui plutôt que de le stocker dans une app. Après six mois, un exercice est à refaire – les enfants grandissent et le camping sera un autre.",
+  },
+  meteorLog: {
+    title: "Carnet d'étoiles filantes",
+    intro:
+      "Compter une nuit : à chaque étoile filante, touche la direction d'où elle venait – l'heure et la direction sont notées.",
+    startHint:
+      "Allonge-toi, laisse tes yeux s'habituer au noir pendant vingt minutes, puis lance le comptage.",
+    start: "Démarrer la nuit",
+    tonight: (names: string) => `Actifs cette nuit : ${names}`,
+    observed: (duration: string) => `${duration} d'observation`,
+    rate: (perHour: number) => `${perHour} par heure`,
+    rateTooEarly: "Trop tôt pour un taux horaire",
+    mostlyFrom: (direction: string) =>
+      `Beaucoup venaient nettement du ${direction}`,
+    tapHint: "Vue ? Touche la direction d'où elle venait.",
+    directionUnknown: "incertain",
+    pause: "Pause",
+    resume: "Reprendre",
+    undo: "Annuler",
+    showerLabel: "Quel essaim ?",
+    showerUnknown: "Indéterminé",
+    distribution: "De quelle direction",
+    redLight: "Lumière rouge",
+    finish: "Terminer la nuit",
+    pastNights: "Tes nuits",
+    nightOf: (date: string) => `Nuit du ${date}`,
+    clear: "Effacer le carnet",
+    clearConfirm: "Effacer toutes les nuits enregistrées ?",
+    note: "Seul le temps où tu regardes vraiment est compté – d'où le bouton pause. En dessous d'un quart d'heure, pas de taux horaire : transformer une étoile filante en deux minutes en trente par heure serait un jeu de chiffres. Et ton chiffre reste toujours en dessous du taux du calendrier : celui-ci vaut pour un ciel parfaitement noir avec le point d'origine juste au-dessus de toi. Les nuits restent sur cet appareil et ne passent pas sur un second.",
+  },
+  treeKey: {
+    title: "Identifier un arbre",
+    intro:
+      "Tu es devant un arbre sans savoir lequel ? Réponds à ce que tu vois – en trois ou quatre questions, l'espèce est trouvée.",
+    step: (number: number) => `Question ${number}`,
+    resultLabel: "C'est probablement lui",
+    markLabel: "Ce qui le trahit",
+    checkLabel: "Contre-épreuve",
+    confusionLabel: "À ne pas confondre avec",
+    toLexicon: "Lire dans le lexique nature",
+    back: "Question précédente",
+    restart: "Recommencer",
+    note: "La clé mène aux neuf arbres les plus fréquents de nos forêts – pas à toutes les espèces. Si la contre-épreuve ne colle pas, c'est un autre arbre : mieux vaut chercher encore que trancher.",
+  },
+  rainyDay: {
+    title: "Idées pour jour de pluie",
+    intro:
+      "Il pleut depuis le petit-déjeuner ? Indique l'âge, la durée et la place – le reste s'affiche ci-dessous.",
+    spaceLabel: "Combien de place",
+    ageLabel: "Âge",
+    ageAny: "peu importe",
+    ageYears: (years: number) => `${years} ans`,
+    ageIgnore: "Ne pas tenir compte de l'âge",
+    ageUse: "Tenir compte de l'âge",
+    ageRange: (from: number, to: number) =>
+      to >= 99 ? `dès ${from} ans` : `${from}–${to} ans`,
+    minutesLabel: "Temps à occuper",
+    minutesValue: (minutes: number) => `${minutes} min`,
+    quietLabel: "Seulement du calme (quelqu'un dort)",
+    quietBadge: "calme",
+    togetherLabel: "Plusieurs personnes présentes",
+    needsLabel: "Nécessaire",
+    resultCount: (count: number) =>
+      count === 1 ? "1 idée convient" : `${count} idées conviennent`,
+    empty:
+      "Rien trouvé. Prends plus de temps, plus de place – ou laisse tomber l'âge.",
+    materialsTitle: "Ce qu'il te faut",
+    note: "La place est un filtre strict : ce qui exige une table ne sert à rien dans la tente intérieure. Pour la durée, il y a une marge – on peut toujours s'arrêter.",
+  },
+  lunchbox: {
+    title: "Goûter & pique-nique",
+    intro:
+      "Ce qu'il faut mettre dans le sac pour la sortie – et combien emporter à boire.",
+    adultsLabel: "Adultes",
+    childrenLabel: "Enfants",
+    lengthLabel: "Durée de la sortie",
+    length: {
+      halbtag: "Demi-journée",
+      ganztag: "Journée entière",
+      langertag: "Jusqu'au soir",
+    },
+    effortLabel: "Intensité",
+    effort: {
+      gemuetlich: "Tranquille",
+      wandern: "Randonnée",
+      anstrengend: "Exigeant",
+    },
+    temperatureLabel: "Température maximale (°C)",
+    coolPackLabel: "Pain de glace emporté",
+    bottles: (count: number) => (count === 1 ? "1 gourde" : `${count} gourdes`),
+    waterHint: (liters: number, bottleMl: number) =>
+      `${liters} l pour tout le monde, arrondi à des gourdes de ${bottleMl} ml.`,
+    znueniTitle: "Pour le goûter",
+    mittagTitle: "Pour le repas de midi",
+    remindersTitle: "Ne pas oublier",
+    portions: (count: number) =>
+      count === 1 ? "1 portion" : `${count} portions`,
+    addToList: "Vers la liste de courses",
+    addedToList: "Ajouté à la liste de courses",
+    nothingToAdd: "Aucune proposition – saisis d'abord les personnes.",
+    fromPlanner: "du planificateur de pique-nique",
+    note: "Des suggestions, pas des règles : valeurs indicatives par personne et par repas. Sans pain de glace, tout ce qui doit être réfrigéré disparaît – ce n'est pas une question de goût. Et le chocolat reste à la maison les jours de chaleur.",
+  },
   firewood: {
     title: "Besoin en bois de feu",
     intro:

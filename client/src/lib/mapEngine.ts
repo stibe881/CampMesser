@@ -52,6 +52,12 @@ export function divIcon(spec: {
   className?: string;
   iconSize?: [number, number];
   iconAnchor?: [number, number];
+  /**
+   * Wird angenommen und ignoriert: Wo das Popup am Symbol hängt, regelt
+   * jeder Kartendienst selbst. Der Wert steht in den Ansichten noch aus
+   * Leaflet-Zeiten – ihn zu verbieten hiesse, sie alle anzufassen.
+   */
+  popupAnchor?: [number, number];
 }): IconSpec {
   const size = spec.iconSize ?? [28, 28];
   return {
@@ -60,6 +66,14 @@ export function divIcon(spec: {
     size,
     anchor: spec.iconAnchor ?? [size[0] / 2, size[1] / 2],
   };
+}
+
+/** Der sichtbare Ausschnitt in Grad – für Umkreis-Abfragen (Overpass). */
+export interface MapBounds {
+  south: number;
+  west: number;
+  north: number;
+  east: number;
 }
 
 /** Ein Ausschnitt als reine Punktliste – wer ihn braucht, rechnet ihn um. */
@@ -88,9 +102,19 @@ export interface MapObject {
 }
 
 export interface MarkerObject extends MapObject {
-  /** Popup-Inhalt als HTML – wie bisher, die Ansichten bauen ihn selbst. */
-  bindPopup(html: string): MarkerObject;
+  /**
+   * Popup-Inhalt. Ein DOM-Element ist ausdrücklich erlaubt und der
+   * Normalfall: Die Popups der grossen Karte tragen Knöpfe mit
+   * Klick-Handlern («Platz übernehmen», «Details»), und Nutzertext gehört
+   * über textContent gesetzt statt über innerHTML.
+   */
+  bindPopup(content: string | HTMLElement): MarkerObject;
   openPopup(): void;
+  /**
+   * Popup-Grösse neu rechnen, wenn sich sein Inhalt geändert hat.
+   * Leaflet braucht das auf Zuruf, Google macht es selbst.
+   */
+  updatePopup(): void;
   onClick(handler: () => void): MarkerObject;
   setLatLng(position: LatLngTuple): void;
 }
@@ -134,10 +158,20 @@ export interface MapEngine {
   ): void;
   getZoom(): number;
   getCenter(): LatLng;
+  /** Sichtbarer Ausschnitt – die Grundlage der Umkreis-Abfragen. */
+  getBounds(): MapBounds;
   onClick(handler: (event: MapClickEvent) => void): void;
   onZoom(handler: (zoom: number) => void): void;
+  /**
+   * Karte wurde verschoben oder gezoomt. Liefert eine Funktion zum
+   * Abmelden zurück – anders als bei den übrigen Ereignissen, weil dieses
+   * je nach eingeblendeten Ebenen an- und abgemeldet wird.
+   */
+  onMove(handler: () => void): () => void;
   /** «Karte» oder «Satellit» – bei Google der Kartentyp, sonst der Kachel-Layer. */
   setBaseKind(kind: MapLayerKind): void;
+  /** Offenes Popup schliessen (z. B. nachdem sein Knopf gewirkt hat). */
+  closePopup(): void;
   /** Nach Grössenänderung des Behälters (aufklappende Abschnitte). */
   refresh(): void;
   destroy(): void;

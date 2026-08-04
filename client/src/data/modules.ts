@@ -9,6 +9,7 @@ import {
   BookOpen,
   Cable,
   CloudLightning,
+  CloudRain,
   CloudSunRain,
   Cloudy,
   ClipboardList,
@@ -17,12 +18,15 @@ import {
   Cross,
   Dices,
   Droplets,
+  Flame,
   Footprints,
   Gauge,
   Gem,
   Hammer,
   Languages,
+  Leaf,
   ListChecks,
+  Sandwich,
   LocateFixed,
   Map as MapIcon,
   Moon,
@@ -35,8 +39,11 @@ import {
   Shirt,
   ShoppingCart,
   Signpost,
+  ShieldQuestion,
   Siren,
+  Sparkles,
   Sprout,
+  Stamp,
   Tent,
   TreePine,
   Truck,
@@ -391,6 +398,24 @@ export const modules: Module[] = [
     group: "kueche",
   },
   {
+    path: "/lunchbox",
+    title: l4(
+      "Znüni & Lunchbox",
+      "Goûter & pique-nique",
+      "Merenda e pranzo al sacco",
+      "Snacks & lunchbox"
+    ),
+    description: l4(
+      "Was für den Ausflug in den Rucksack – samt Trinkmenge für den Tag",
+      "Ce qu'il faut mettre dans le sac – avec la quantité à boire pour la journée",
+      "Cosa mettere nello zaino per la gita – con quanto bere durante il giorno",
+      "What goes in the backpack for a day out – including how much to drink"
+    ),
+    icon: Sandwich,
+    group: "kueche",
+    offline: true,
+  },
+  {
     path: "/wasser",
     title: l4(
       "Trinkwasser-Rechner",
@@ -406,6 +431,24 @@ export const modules: Module[] = [
     ),
     icon: Droplets,
     group: "kueche",
+  },
+  {
+    path: "/feuerholz",
+    title: l4(
+      "Feuerholz-Bedarf",
+      "Besoin en bois de feu",
+      "Fabbisogno di legna",
+      "Firewood needed"
+    ),
+    description: l4(
+      "Wie viele Netze ins Auto – Holz kauft man besser vorher als am Platz",
+      "Combien de filets emporter – mieux vaut acheter le bois avant d'arriver",
+      "Quante reti caricare – la legna conviene comprarla prima di arrivare",
+      "How many nets to pack – buy wood before you arrive, not on site"
+    ),
+    icon: Flame,
+    group: "kueche",
+    offline: true,
   },
   {
     path: "/inventar",
@@ -539,6 +582,42 @@ export const modules: Module[] = [
     offline: true,
   },
   {
+    path: "/baum-bestimmen",
+    title: l4(
+      "Baum bestimmen",
+      "Identifier un arbre",
+      "Riconosci l'albero",
+      "Identify a tree"
+    ),
+    description: l4(
+      "Frage für Frage zur Baumart – nach dem, was du siehst",
+      "Question après question jusqu'à l'espèce – d'après ce que tu vois",
+      "Domanda dopo domanda fino alla specie – in base a ciò che vedi",
+      "Question by question to the species – based on what you see"
+    ),
+    icon: Leaf,
+    group: "wissen",
+    offline: true,
+  },
+  {
+    path: "/sternschnuppen",
+    title: l4(
+      "Sternschnuppen-Protokoll",
+      "Carnet d'étoiles filantes",
+      "Diario delle stelle cadenti",
+      "Meteor log"
+    ),
+    description: l4(
+      "Eine Nacht mitzählen – Zeit und Richtung mit einem Tipp",
+      "Compter une nuit – heure et direction d'un seul geste",
+      "Contare una notte – ora e direzione con un tocco",
+      "Count a night – time and direction in one tap"
+    ),
+    icon: Sparkles,
+    group: "wissen",
+    offline: true,
+  },
+  {
     path: "/wolken",
     title: l4(
       "Wolken-Lexikon",
@@ -589,6 +668,59 @@ export const modules: Module[] = [
       "Scavenger hunts, quizzes, badges and GPS treasure hunt"
     ),
     icon: Users,
+    group: "familie",
+  },
+  {
+    path: "/regentag",
+    title: l4(
+      "Regentag-Ideen",
+      "Idées pour jour de pluie",
+      "Idee per giorni di pioggia",
+      "Rainy-day ideas"
+    ),
+    description: l4(
+      "Beschäftigung fürs Zelt und Vorzelt – nach Alter, Zeit und Platz gefiltert",
+      "De quoi s'occuper sous la tente et l'auvent – filtré par âge, temps et place",
+      "Come passare il tempo in tenda e sotto la veranda – filtrato per età, tempo e spazio",
+      "Things to do in the tent and awning – filtered by age, time and space"
+    ),
+    icon: CloudRain,
+    group: "familie",
+    offline: true,
+  },
+  {
+    path: "/notfall-uebung",
+    title: l4(
+      "Notfall-Übung",
+      "Exercice d'urgence",
+      "Esercitazione d'emergenza",
+      "Emergency drill"
+    ),
+    description: l4(
+      "Mit den Kindern üben, was zu tun ist – bevor es darauf ankommt",
+      "S'exercer avec les enfants avant que ça compte vraiment",
+      "Esercitarsi con i bambini prima che serva davvero",
+      "Practise with the children before it matters"
+    ),
+    icon: ShieldQuestion,
+    group: "familie",
+    offline: true,
+  },
+  {
+    path: "/reisepass",
+    title: l4(
+      "Reisepass",
+      "Passeport de voyage",
+      "Passaporto di viaggio",
+      "Travel passport"
+    ),
+    description: l4(
+      "Für jeden besuchten Platz ein Stempel – zum Sammeln und Herzeigen",
+      "Un tampon pour chaque camping visité – à collectionner et à montrer",
+      "Un timbro per ogni campeggio visitato – da collezionare e mostrare",
+      "A stamp for every site you have visited – to collect and show off"
+    ),
+    icon: Stamp,
     group: "familie",
   },
   {

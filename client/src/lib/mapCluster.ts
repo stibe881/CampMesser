@@ -90,3 +90,26 @@ export function clusterPoints<T extends ClusterPoint>(
     lon,
   }));
 }
+
+/**
+ * Koordinate in Pixel der gewünschten Zoomstufe umrechnen (Web-Mercator,
+ * 256er-Kacheln – die Rechnung, die jede Slippy-Map benutzt).
+ *
+ * Früher kam das von `map.project()` aus Leaflet. Seit die Karte auch
+ * Google sein kann, rechnet die Gruppierung selbst: Das Ergebnis ist
+ * ohnehin unabhängig vom Ausschnitt und vom Kartendienst, und so bleibt
+ * die Gruppierung dieselbe, egal wer zeichnet.
+ */
+export function projectToPixels(
+  lat: number,
+  lon: number,
+  zoom: number
+): ProjectedPoint {
+  const scale = 256 * Math.pow(2, zoom);
+  const x = ((lon + 180) / 360) * scale;
+  // Nahe den Polen läuft die Mercator-Formel gegen unendlich – begrenzen
+  const clamped = Math.max(-85.05112878, Math.min(85.05112878, lat));
+  const sin = Math.sin((clamped * Math.PI) / 180);
+  const y = (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * scale;
+  return { x, y };
+}
