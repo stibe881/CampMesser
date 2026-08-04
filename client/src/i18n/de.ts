@@ -2427,6 +2427,7 @@ export const de = {
     menuPlanAria: (name: string) => `Menüplan für ${name} öffnen`,
     deletePlannedAria: (name: string) => `Geplanten Aufenthalt ${name} löschen`,
     deleteEntryAria: (name: string) => `Eintrag ${name} löschen`,
+    dossierAria: (name: string) => `Dossier von ${name} öffnen`,
     entriesTitle: "Deine Aufenthalte",
     empty:
       "Noch keine Einträge – halte mit «Neue Reise» deinen ersten Camping-Aufenthalt fest.",

@@ -2429,6 +2429,7 @@ export const fr: Translation = {
     menuPlanAria: (name: string) => `Ouvrir le plan des repas de ${name}`,
     deletePlannedAria: name => `Supprimer le séjour prévu ${name}`,
     deleteEntryAria: name => `Supprimer l'entrée ${name}`,
+    dossierAria: (name: string) => `Ouvrir le dossier de ${name}`,
     entriesTitle: "Tes séjours",
     empty:
       "Pas encore d'entrées – note ton premier séjour en camping avec «Nouveau voyage».",

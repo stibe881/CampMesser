@@ -2351,6 +2351,7 @@ export const en: Translation = {
     menuPlanAria: (name: string) => `Open the meal plan for ${name}`,
     deletePlannedAria: name => `Delete planned stay ${name}`,
     deleteEntryAria: name => `Delete entry ${name}`,
+    dossierAria: (name: string) => `Open the dossier for ${name}`,
     entriesTitle: "Your stays",
     empty: "No entries yet – record your first camping stay with “New trip”.",
     addPhotos: "Add photos",

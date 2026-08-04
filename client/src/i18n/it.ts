@@ -2405,6 +2405,7 @@ export const it: Translation = {
     menuPlanAria: (name: string) => `Apri il piano dei pasti di ${name}`,
     deletePlannedAria: name => `Elimina il soggiorno pianificato ${name}`,
     deleteEntryAria: name => `Elimina la voce ${name}`,
+    dossierAria: (name: string) => `Apri il dossier di ${name}`,
     entriesTitle: "I tuoi soggiorni",
     empty:
       "Ancora nessuna voce – annota il tuo primo soggiorno in campeggio con «Nuovo viaggio».",
