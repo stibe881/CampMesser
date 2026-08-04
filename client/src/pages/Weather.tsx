@@ -11,6 +11,7 @@ import {
   CloudRain,
   Bug,
   CloudSun,
+  Cloudy,
   Droplets,
   Flame,
   Flower2,
@@ -41,6 +42,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Link } from "wouter";
 import PageHeader from "@/components/PageHeader";
 import RainRadar from "@/components/RainRadar";
 import { Button } from "@/components/ui/button";
@@ -1927,6 +1929,24 @@ export default function WeatherPage() {
               </div>
             </section>
           )}
+
+          {/* Wolken-Lexikon (#264): Der Blick nach oben ergänzt die Prognose */}
+          <Link
+            href="/wolken"
+            className="mb-6 flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-all hover:border-primary/40 hover:shadow-md"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+              <Cloudy className="h-4.5 w-4.5" aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold">
+                {t.clouds.title}
+              </span>
+              <span className="block text-xs text-muted-foreground">
+                {t.weather.cloudLexiconHint}
+              </span>
+            </span>
+          </Link>
 
           {/* Pollenflug: aktuelle Belastung pro Art (eigener Ladezustand) */}
           {pollen.status !== "idle" && (

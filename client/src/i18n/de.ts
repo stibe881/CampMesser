@@ -150,6 +150,7 @@ export const de = {
       knots: "Knoten",
       recipes: "Rezepte",
       nature: "Natur",
+      clouds: "Wolken",
       own: "Meine Inhalte",
     },
     recentTitle: "Zuletzt genutzt",
@@ -911,6 +912,8 @@ export const de = {
     },
     mosquitoHint:
       "Geschätzt aus Wärme, Feuchte, Wind und dem Regen der letzten Tage. Ein Weiher neben dem Zelt schlägt jede Formel.",
+    cloudLexiconHint:
+      "Der Himmel weiss oft mehr als die Prognose: Wolkenart nachschlagen und sehen, was folgt.",
     heatSunscreen: (minutes: number, burn: number) =>
       `Eincremen, alle ${minutes} Min. nachlegen (ungeschützt rot nach ~${burn} Min.)`,
     heatDrink: (liters: string) => `Rund ${liters} l Wasser pro Erwachsener`,
@@ -2882,6 +2885,31 @@ export const de = {
     speakAria: (text: string) => `«${text}» vorlesen`,
     stopAria: "Vorlesen stoppen",
     countLine: (n: number) => `${n} Sätze`,
+  },
+  clouds: {
+    title: "Wolken-Lexikon",
+    subtitle:
+      "Wolkenart erkennen und wissen, welches Wetter folgt – offline verfügbar.",
+    offlineNote:
+      "Alle Wolken sind in der App gespeichert und funktionieren ohne Internetverbindung.",
+    howToTitle: "So liest du den Himmel",
+    howToText:
+      "Zuerst schauen, in welchem Stockwerk die Wolke hängt: hoch und fedrig, mittelhoch mit Schattenseiten oder tief und grau. Dann das Aussehen vergleichen – und zuletzt lesen, was daraus folgt.",
+    filterAria: "Nach Stockwerk filtern",
+    filterAll: "Alle",
+    urgencyGood: "Gutes Zeichen",
+    urgencyWatch: "Beobachten",
+    urgencyWarning: "Warnung",
+    appearanceTitle: "Woran du sie erkennst",
+    meaningTitle: "Was daraus folgt",
+    campTipTitle: "Am Platz",
+    leadNone: "Kündigt nichts an",
+    leadNow: (to: number) => `Jetzt bis in ${to} Std.`,
+    leadRange: (from: number, to: number) => `In ${from}–${to} Std.`,
+    leadDisclaimer:
+      "Die Zeitangabe ist eine Faustregel für mitteleuropäische Fronten, kein Countdown. Bei Gewittergefahr gilt immer die aktuelle Warnung im Wetter-Modul.",
+    openAria: (name: string) => `Wolke ${name} öffnen`,
+    countLine: (n: number) => `${n} Wolkenarten im Lexikon`,
   },
   nature: {
     title: "Natur-Entdecker",

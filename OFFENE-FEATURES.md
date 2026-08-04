@@ -25,12 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 8 Punkte
+## Runde 27 – 7 Punkte
 
 ### Wissen
 
-- [ ] **Wolken-Lexikon mit Wetterdeutung** (#264) – Wolkenart erkennen und
-      wissen, was kommt
 - [ ] **Zeltpflege-Ratgeber** (#265) – imprägnieren, flicken, Reissverschluss,
       Schimmel
 - [ ] **Reparatur-Ratgeber Ausrüstung** (#266) – Matte flicken, Gestänge

@@ -144,6 +144,7 @@ export const it: Translation = {
       knots: "Nodi",
       recipes: "Ricette",
       nature: "Natura",
+      clouds: "Nuvole",
       own: "I miei contenuti",
     },
     recentTitle: "Usati di recente",
@@ -898,6 +899,8 @@ export const it: Translation = {
     },
     mosquitoHint:
       "Stimato da calore, umidità, vento e pioggia degli ultimi giorni. Uno stagno accanto alla tenda batte qualsiasi formula.",
+    cloudLexiconHint:
+      "Il cielo spesso ne sa più della previsione: cerca il tipo di nuvola e scopri che cosa arriva.",
     heatSunscreen: (minutes: number, burn: number) =>
       `Crema solare, da riapplicare ogni ${minutes} min (pelle scoperta rossa dopo ~${burn} min)`,
     heatDrink: (liters: string) => `Circa ${liters} l d'acqua per adulto`,
@@ -2850,6 +2853,31 @@ export const it: Translation = {
     speakAria: (text: string) => `Leggi «${text}» ad alta voce`,
     stopAria: "Interrompi la lettura",
     countLine: (n: number) => `${n} frasi`,
+  },
+  clouds: {
+    title: "Lessico delle nuvole",
+    subtitle:
+      "Riconosci il tipo di nuvola e sai che tempo arriva – disponibile offline.",
+    offlineNote:
+      "Tutte le nuvole sono salvate nell'app e funzionano senza connessione a Internet.",
+    howToTitle: "Come leggere il cielo",
+    howToText:
+      "Guarda prima a che piano si trova la nuvola: alta e filamentosa, media con lati in ombra oppure bassa e grigia. Poi confronta l'aspetto – e infine leggi che cosa ne consegue.",
+    filterAria: "Filtra per piano",
+    filterAll: "Tutte",
+    urgencyGood: "Buon segno",
+    urgencyWatch: "Da osservare",
+    urgencyWarning: "Allerta",
+    appearanceTitle: "Come riconoscerla",
+    meaningTitle: "Che cosa ne consegue",
+    campTipTitle: "Sul posto",
+    leadNone: "Non annuncia nulla",
+    leadNow: (to: number) => `Ora fino a ${to} ore`,
+    leadRange: (from: number, to: number) => `Tra ${from}–${to} ore`,
+    leadDisclaimer:
+      "L'indicazione temporale è una regola empirica per i fronti dell'Europa centrale, non un conto alla rovescia. In caso di rischio temporali vale sempre l'allerta attuale nel modulo meteo.",
+    openAria: (name: string) => `Apri la nuvola ${name}`,
+    countLine: (n: number) => `${n} tipi di nuvole nel lessico`,
   },
   nature: {
     title: "Esploratore della natura",

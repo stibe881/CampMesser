@@ -9,6 +9,7 @@ import {
   BookOpen,
   Cable,
   CloudSunRain,
+  Cloudy,
   Compass,
   CookingPot,
   Cross,
@@ -472,6 +473,24 @@ export const modules: Module[] = [
       "Animal tracks, constellations, trees, mushrooms, berries – and your catch log"
     ),
     icon: TreePine,
+    group: "Erste Hilfe",
+    offline: true,
+  },
+  {
+    path: "/wolken",
+    title: l4(
+      "Wolken-Lexikon",
+      "Lexique des nuages",
+      "Lessico delle nuvole",
+      "Cloud lexicon"
+    ),
+    description: l4(
+      "Wolkenart erkennen und wissen, welches Wetter folgt",
+      "Reconnais le type de nuage et sais quel temps arrive",
+      "Riconosci il tipo di nuvola e sai che tempo arriva",
+      "Recognise the cloud type and know what weather follows"
+    ),
+    icon: Cloudy,
     group: "Erste Hilfe",
     offline: true,
   },

@@ -148,6 +148,7 @@ export const fr: Translation = {
       knots: "Nœuds",
       recipes: "Recettes",
       nature: "Nature",
+      clouds: "Nuages",
       own: "Mes contenus",
     },
     recentTitle: "Utilisés récemment",
@@ -914,6 +915,8 @@ export const fr: Translation = {
     },
     mosquitoHint:
       "Estimé à partir de la chaleur, de l'humidité, du vent et de la pluie des derniers jours. Un étang à côté de la tente bat n'importe quelle formule.",
+    cloudLexiconHint:
+      "Le ciel en sait souvent plus que la prévision : cherche le type de nuage et vois ce qui arrive.",
     heatSunscreen: (minutes: number, burn: number) =>
       `Crème solaire, à renouveler toutes les ${minutes} min (peau nue rouge après ~${burn} min)`,
     heatDrink: (liters: string) => `Environ ${liters} l d'eau par adulte`,
@@ -2877,6 +2880,31 @@ export const fr: Translation = {
     speakAria: (text: string) => `Lire « ${text} » à voix haute`,
     stopAria: "Arrêter la lecture",
     countLine: (n: number) => `${n} phrases`,
+  },
+  clouds: {
+    title: "Lexique des nuages",
+    subtitle:
+      "Reconnais le type de nuage et sais quel temps arrive – disponible hors ligne.",
+    offlineNote:
+      "Tous les nuages sont enregistrés dans l'app et fonctionnent sans connexion Internet.",
+    howToTitle: "Comment lire le ciel",
+    howToText:
+      "Regarde d'abord à quel étage se trouve le nuage : haut et fibreux, moyen avec des faces ombrées ou bas et gris. Compare ensuite l'aspect – et lis enfin ce qui en découle.",
+    filterAria: "Filtrer par étage",
+    filterAll: "Tous",
+    urgencyGood: "Bon signe",
+    urgencyWatch: "À surveiller",
+    urgencyWarning: "Alerte",
+    appearanceTitle: "Comment le reconnaître",
+    meaningTitle: "Ce qui en découle",
+    campTipTitle: "Sur place",
+    leadNone: "N'annonce rien",
+    leadNow: (to: number) => `Maintenant à ${to} h`,
+    leadRange: (from: number, to: number) => `Dans ${from}–${to} h`,
+    leadDisclaimer:
+      "L'indication de temps est une règle empirique pour les fronts d'Europe centrale, pas un compte à rebours. En cas de risque d'orage, l'alerte actuelle du module météo prime toujours.",
+    openAria: (name: string) => `Ouvrir le nuage ${name}`,
+    countLine: (n: number) => `${n} types de nuages dans le lexique`,
   },
   nature: {
     title: "Explorateur nature",

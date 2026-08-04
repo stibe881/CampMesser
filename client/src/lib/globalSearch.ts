@@ -6,6 +6,7 @@
  * als auch künftige L4-Felder korrekt in der aktiven Sprache landen.
  */
 import { firstAidTopics } from "@/data/firstAid";
+import { cloudBandLabels, cloudEntries } from "@/data/clouds";
 import { knotCategoryLabels, knots } from "@/data/knots";
 import { groupLabels, modules } from "@/data/modules";
 import { natureEntries } from "@/data/nature";
@@ -22,7 +23,7 @@ export { fuzzyWordMatch, levenshtein };
 
 /** Kategorie-Schlüssel eines Treffers – das Anzeige-Label liefert das Wörterbuch. */
 export type SearchCategory =
-  "module" | "firstAid" | "knots" | "recipes" | "nature" | "own";
+  "module" | "firstAid" | "knots" | "recipes" | "nature" | "clouds" | "own";
 
 export interface SearchResult {
   id: string;
@@ -116,6 +117,17 @@ function buildIndex(lang: Language): IndexEntry[] {
       p(k.campingUse),
       ...k.steps.map(s => p(s)),
       p(k.proTip),
+    ]);
+  }
+  // Wolken: der lateinische Name ist bewusst im Suchtext, damit auch «Cirrus»
+  // oder «Cumulonimbus» aus einer anderen Wetter-App hier landen
+  for (const c of cloudEntries) {
+    add(`cloud-${c.id}`, p(c.name), "clouds", "/wolken", p(c.meaning), [
+      c.latin,
+      p(cloudBandLabels[c.band]),
+      p(c.appearance),
+      p(c.meaning),
+      p(c.campTip),
     ]);
   }
   for (const r of recipes) {

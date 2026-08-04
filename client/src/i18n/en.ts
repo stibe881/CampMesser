@@ -143,6 +143,7 @@ export const en: Translation = {
       knots: "Knots",
       recipes: "Recipes",
       nature: "Nature",
+      clouds: "Clouds",
       own: "My content",
     },
     recentTitle: "Recently used",
@@ -876,6 +877,8 @@ export const en: Translation = {
     },
     mosquitoHint:
       "Estimated from warmth, humidity, wind and the rain of the past few days. A pond next to the tent beats any formula.",
+    cloudLexiconHint:
+      "The sky often knows more than the forecast: look up the cloud type and see what follows.",
     heatSunscreen: (minutes: number, burn: number) =>
       `Sunscreen, reapply every ${minutes} min (bare skin burns after ~${burn} min)`,
     heatDrink: (liters: string) => `About ${liters} l of water per adult`,
@@ -2781,6 +2784,31 @@ export const en: Translation = {
     speakAria: (text: string) => `Read “${text}” aloud`,
     stopAria: "Stop reading aloud",
     countLine: (n: number) => `${n} phrases`,
+  },
+  clouds: {
+    title: "Cloud lexicon",
+    subtitle:
+      "Recognise the cloud type and know what weather follows – available offline.",
+    offlineNote:
+      "All clouds are stored in the app and work without an internet connection.",
+    howToTitle: "How to read the sky",
+    howToText:
+      "First look at which level the cloud sits: high and wispy, mid-level with shaded sides, or low and grey. Then compare the appearance – and finally read what follows from it.",
+    filterAria: "Filter by level",
+    filterAll: "All",
+    urgencyGood: "Good sign",
+    urgencyWatch: "Keep watching",
+    urgencyWarning: "Warning",
+    appearanceTitle: "How to spot it",
+    meaningTitle: "What follows",
+    campTipTitle: "At the pitch",
+    leadNone: "Announces nothing",
+    leadNow: (to: number) => `Now to ${to} h`,
+    leadRange: (from: number, to: number) => `In ${from}–${to} h`,
+    leadDisclaimer:
+      "The timing is a rule of thumb for central European fronts, not a countdown. When thunderstorms threaten, the current warning in the weather module always takes precedence.",
+    openAria: (name: string) => `Open cloud ${name}`,
+    countLine: (n: number) => `${n} cloud types in the lexicon`,
   },
   nature: {
     title: "Nature Explorer",
