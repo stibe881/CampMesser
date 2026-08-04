@@ -163,6 +163,7 @@ export const fr: Translation = {
       "Choisis les zones qui apparaissent au-dessus des tuiles. Le message d'accueil, la recherche et les tuiles elles-mêmes restent toujours visibles. Une fois connecté·e, ton choix s'applique à tous tes appareils.",
     widgetNames: {
       onboarding: "Premiers pas",
+      briefing: "Briefing du matin",
       trip: "Séjour en cours / prochain",
       anniversary: "Il y a un an",
       weather: "Météo",
@@ -3298,6 +3299,14 @@ export const fr: Translation = {
     turnLeft: (deg: number) => `Tourne encore de ${deg}° vers la gauche.`,
     turnRight: (deg: number) => `Tourne encore de ${deg}° vers la droite.`,
     source: "Valeurs de vent d'Open-Meteo, règles empiriques de montage.",
+  },
+  briefing: {
+    title: "Briefing du matin",
+    sectionAria: "Briefing du matin pour le séjour en cours",
+    astroLine: (phase: string, percent: number) =>
+      `${phase} – la lune est éclairée à ${percent} %.`,
+    moreTasks: (count: number) =>
+      count === 1 ? "et 1 autre tâche" : `et ${count} autres tâches`,
   },
   guestbook: {
     title: "Livre d'or",

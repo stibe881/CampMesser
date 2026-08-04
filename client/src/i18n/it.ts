@@ -159,6 +159,7 @@ export const it: Translation = {
       "Scegli quali sezioni compaiono sopra le schede. Il saluto, la ricerca e le schede stesse restano sempre visibili. Da connesso la scelta vale su tutti i tuoi dispositivi.",
     widgetNames: {
       onboarding: "Primi passi",
+      briefing: "Briefing del mattino",
       trip: "Soggiorno in corso / prossimo",
       anniversary: "Un anno fa",
       weather: "Meteo",
@@ -3272,6 +3273,14 @@ export const it: Translation = {
     turnLeft: (deg: number) => `Ruota ancora di ${deg}° a sinistra.`,
     turnRight: (deg: number) => `Ruota ancora di ${deg}° a destra.`,
     source: "Valori del vento da Open-Meteo, regole pratiche di montaggio.",
+  },
+  briefing: {
+    title: "Briefing del mattino",
+    sectionAria: "Briefing del mattino per il soggiorno in corso",
+    astroLine: (phase: string, percent: number) =>
+      `${phase} – la luna è illuminata al ${percent} %.`,
+    moreTasks: (count: number) =>
+      count === 1 ? "e 1 altro compito" : `e altri ${count} compiti`,
   },
   guestbook: {
     title: "Libro degli ospiti",

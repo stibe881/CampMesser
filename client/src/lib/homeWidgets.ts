@@ -17,6 +17,7 @@ export const HIDDEN_WIDGETS_KEY = "campmesser.hiddenWidgets";
  */
 export const OPTIONAL_WIDGETS = [
   "onboarding",
+  "briefing",
   "trip",
   "anniversary",
   "weather",

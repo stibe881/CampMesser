@@ -25,12 +25,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 17 Punkte
-
-### Reise & Organisation
-
-- [ ] **Morgen-Briefing** (#255) – Wetter, heutige Mahlzeiten, Aufgaben und
-      Astro-Tipp gebündelt auf der Startseite
+## Runde 27 – 16 Punkte
 
 ### Geld
 

@@ -55,6 +55,7 @@ import { gearTaskDue } from "@shared/gearTasks";
 import { tickObservationStatus } from "@shared/tickBites";
 import { useEffect, useMemo, useState } from "react";
 import { getRecentModules } from "@/components/AppShell";
+import MorningBriefing from "@/components/MorningBriefing";
 import {
   ONBOARDING_DISMISSED_KEY,
   onboardingComplete,
@@ -367,6 +368,42 @@ function OnboardingCard() {
  * vor Ort und Schnellzugriffen (Menüplan, Platz-Dossier, Einkaufsliste) –
  * sonst wie bisher den Countdown zum nächsten geplanten Trip.
  */
+/**
+ * Morgen-Briefing (#255): sucht den laufenden eigenen Aufenthalt und den
+ * zugehörigen Zeltplatz und übergibt beides an die Karte. Läuft keine
+ * Reise, wird gar nichts geladen – die Karte fragt sonst Menüplan und
+ * Pinnwand einer Reise ab, die es nicht gibt.
+ */
+function BriefingWidget() {
+  const { isAuthenticated } = useAuth();
+  const tripsQuery = trpc.trips.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+  const spotsQuery = trpc.spots.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+  const today = new Date().toISOString().slice(0, 10);
+  const current = (tripsQuery.data ?? [])
+    .filter(trip => trip.role === "owner")
+    .filter(trip => currentTripDay(trip, today) !== null)
+    .sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
+  if (!current) return null;
+  const spot =
+    current.spotId != null
+      ? spotsQuery.data?.find(s => s.id === current.spotId)
+      : undefined;
+  return (
+    <MorningBriefing
+      tripId={current.id}
+      latitude={spot?.latitude ?? null}
+      longitude={spot?.longitude ?? null}
+      today={today}
+    />
+  );
+}
+
 function NextTripWidget() {
   const { lang, t } = useI18n();
   const { isAuthenticated } = useAuth();
@@ -1441,6 +1478,7 @@ export default function Home() {
       {/* Modul-Grid */}
       <section className="container py-8 md:py-12">
         {isWidgetVisible(hiddenWidgets, "onboarding") && <OnboardingCard />}
+        {isWidgetVisible(hiddenWidgets, "briefing") && <BriefingWidget />}
         {isWidgetVisible(hiddenWidgets, "trip") && <NextTripWidget />}
         {isWidgetVisible(hiddenWidgets, "anniversary") && <AnniversaryCard />}
         {isWidgetVisible(hiddenWidgets, "weather") && (

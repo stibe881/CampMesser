@@ -158,6 +158,7 @@ export const en: Translation = {
       "Choose which sections appear above the tiles. The greeting, the search and the tiles themselves always stay visible. When signed in, your choice applies on all your devices.",
     widgetNames: {
       onboarding: "First steps",
+      briefing: "Morning briefing",
       trip: "Current/next trip",
       anniversary: "One year ago",
       weather: "Weather",
@@ -3193,6 +3194,14 @@ export const en: Translation = {
     turnLeft: (deg: number) => `Turn ${deg}° further to the left.`,
     turnRight: (deg: number) => `Turn ${deg}° further to the right.`,
     source: "Wind readings from Open-Meteo, rules of thumb for pitching.",
+  },
+  briefing: {
+    title: "Morning briefing",
+    sectionAria: "Morning briefing for the current stay",
+    astroLine: (phase: string, percent: number) =>
+      `${phase} – the moon is ${percent} % lit.`,
+    moreTasks: (count: number) =>
+      count === 1 ? "and 1 more task" : `and ${count} more tasks`,
   },
   guestbook: {
     title: "Guestbook",

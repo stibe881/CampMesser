@@ -165,6 +165,7 @@ export const de = {
       "Wähle, welche Bereiche über den Kacheln erscheinen. Begrüssung, Suche und die Kacheln selbst bleiben immer sichtbar. Angemeldet gilt die Auswahl auf allen deinen Geräten.",
     widgetNames: {
       onboarding: "Erste Schritte",
+      briefing: "Morgen-Briefing",
       trip: "Laufende/nächste Reise",
       anniversary: "Vor einem Jahr",
       weather: "Wetter",
@@ -3302,6 +3303,14 @@ export const de = {
     turnLeft: (deg: number) => `Noch ${deg}° nach links drehen.`,
     turnRight: (deg: number) => `Noch ${deg}° nach rechts drehen.`,
     source: "Windwerte von Open-Meteo, Faustregeln fürs Aufstellen.",
+  },
+  briefing: {
+    title: "Morgen-Briefing",
+    sectionAria: "Morgen-Briefing zum laufenden Aufenthalt",
+    astroLine: (phase: string, percent: number) =>
+      `${phase} – der Mond ist zu ${percent} % beleuchtet.`,
+    moreTasks: (count: number) =>
+      count === 1 ? "und 1 weitere Aufgabe" : `und ${count} weitere Aufgaben`,
   },
   guestbook: {
     title: "Gästebuch",
