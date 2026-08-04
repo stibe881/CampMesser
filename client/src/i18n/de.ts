@@ -1882,7 +1882,7 @@ export const de = {
     layerFavorites: "Favoriten",
     layerTargets: "Ziele",
     layerSightings: "Beobachtungen",
-    layerCampsites: "Campingplätze (OSM)",
+    layerCampsites: "Campingplätze",
     layerExcursions: "Ausflüge",
     excursionLegend: (n: number) =>
       n === 1 ? "1 Ausflugsziel" : `${n} Ausflugsziele`,
