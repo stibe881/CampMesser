@@ -11,7 +11,6 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "wouter";
-import type * as Leaflet from "leaflet";
 import { Download, Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import TrackProfile from "@/components/TrackProfile";
@@ -20,7 +19,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
-import { createBaseLayer, loadMapLayer } from "@/lib/mapLayers";
+import { loadMapLayer } from "@/lib/mapLayers";
+import {
+  createMap,
+  latLngBounds,
+  type LatLngTuple,
+  type MapEngine,
+} from "@/lib/mapEngine";
+import { useMapConfig } from "@/hooks/useMapConfig";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { formatDistance } from "@shared/geo";
 import {
@@ -34,60 +40,64 @@ import {
 function SharedTrackMap({ points }: { points: TrackPoint[] }) {
   const { t } = useI18n();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<Leaflet.Map | null>(null);
-  const [leaflet, setLeaflet] = useState<typeof Leaflet | null>(null);
+  const engineRef = useRef<MapEngine | null>(null);
   const [libFailed, setLibFailed] = useState(false);
+  const maps = useMapConfig();
 
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container || engineRef.current || points.length === 0 || !maps.ready)
+      return;
+    const latlngs: LatLngTuple[] = points.map(p => [p.lat, p.lon]);
     let cancelled = false;
-    Promise.all([import("leaflet"), import("leaflet/dist/leaflet.css")])
-      .then(([mod]) => {
-        if (!cancelled) setLeaflet(mod.default);
+    void createMap(container, {
+      center: latlngs[0],
+      zoom: 14,
+      baseKind: loadMapLayer(),
+      config: maps.config,
+      minimal: true,
+    })
+      .then(engine => {
+        if (cancelled) {
+          engine.destroy();
+          return;
+        }
+        engineRef.current = engine;
+        engine.polyline(latlngs, {
+          color: "#16a34a",
+          weight: 4,
+          opacity: 0.9,
+        });
+        engine.circleMarker(latlngs[0], {
+          radius: 6,
+          color: "#ffffff",
+          weight: 2,
+          fillColor: "#16a34a",
+          fillOpacity: 1,
+        });
+        engine.circleMarker(latlngs[latlngs.length - 1], {
+          radius: 6,
+          color: "#ffffff",
+          weight: 2,
+          fillColor: "#dc2626",
+          fillOpacity: 1,
+        });
+        engine.fitBounds(latLngBounds(latlngs), { padding: 20, maxZoom: 17 });
       })
       .catch(() => {
         if (!cancelled) setLibFailed(true);
       });
     return () => {
       cancelled = true;
+      engineRef.current?.destroy();
+      engineRef.current = null;
     };
-  }, []);
-
-  useEffect(() => {
-    const L = leaflet;
-    const container = containerRef.current;
-    if (!L || !container || mapRef.current || points.length === 0) return;
-    const latlngs: Leaflet.LatLngTuple[] = points.map(p => [p.lat, p.lon]);
-    const map = L.map(container, { scrollWheelZoom: false });
-    createBaseLayer(L, loadMapLayer()).addTo(map);
-    L.polyline(latlngs, { color: "#16a34a", weight: 4, opacity: 0.9 }).addTo(
-      map
-    );
-    L.circleMarker(latlngs[0], {
-      radius: 6,
-      color: "#ffffff",
-      weight: 2,
-      fillColor: "#16a34a",
-      fillOpacity: 1,
-    }).addTo(map);
-    L.circleMarker(latlngs[latlngs.length - 1], {
-      radius: 6,
-      color: "#ffffff",
-      weight: 2,
-      fillColor: "#dc2626",
-      fillOpacity: 1,
-    }).addTo(map);
-    map.fitBounds(L.latLngBounds(latlngs), { padding: [20, 20], maxZoom: 17 });
-    mapRef.current = map;
-    return () => {
-      map.remove();
-      mapRef.current = null;
-    };
-  }, [leaflet, points]);
+  }, [maps.ready, maps.config, points]);
 
   if (libFailed) {
     return <p className="text-sm text-muted-foreground">{t.hike.mapFailed}</p>;
   }
-  if (!leaflet) return <Skeleton className="h-64 w-full rounded-lg" />;
+  if (!maps.ready) return <Skeleton className="h-64 w-full rounded-lg" />;
   return (
     <div
       ref={containerRef}

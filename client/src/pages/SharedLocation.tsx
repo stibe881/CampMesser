@@ -16,13 +16,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "wouter";
 import { Copy, Loader2, MapPin, Navigation } from "lucide-react";
 import { toast } from "sonner";
-import type * as Leaflet from "leaflet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
 import { directionsUrl } from "@/lib/directions";
-import { createBaseLayer, loadMapLayer } from "@/lib/mapLayers";
+import { loadMapLayer } from "@/lib/mapLayers";
+import {
+  createMap,
+  type MapEngine,
+  type MarkerObject,
+  type PathObject,
+} from "@/lib/mapEngine";
+import { useMapConfig } from "@/hooks/useMapConfig";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { relativeAge } from "@shared/sharing";
@@ -39,80 +45,78 @@ function LocationMap({
 }) {
   const { t } = useI18n();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<Leaflet.Map | null>(null);
-  const markerRef = useRef<Leaflet.CircleMarker | null>(null);
-  const haloRef = useRef<Leaflet.Circle | null>(null);
-  const [leaflet, setLeaflet] = useState<typeof Leaflet | null>(null);
+  const engineRef = useRef<MapEngine | null>(null);
+  const markerRef = useRef<MarkerObject | null>(null);
+  const haloRef = useRef<PathObject | null>(null);
+  const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  const maps = useMapConfig();
 
+  // Karte einmalig aufbauen – erst, wenn feststeht, welcher Kartendienst
+  // es wird (Google, sonst OpenStreetMap)
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container || engineRef.current || !maps.ready) return;
     let cancelled = false;
-    Promise.all([import("leaflet"), import("leaflet/dist/leaflet.css")])
-      .then(([mod]) => {
-        if (!cancelled) setLeaflet(mod.default);
+    void createMap(container, {
+      center: [lat, lon],
+      zoom: 16,
+      baseKind: loadMapLayer(),
+      config: maps.config,
+      minimal: true,
+    })
+      .then(engine => {
+        if (cancelled) {
+          engine.destroy();
+          return;
+        }
+        engineRef.current = engine;
+        setReady(true);
       })
       .catch(() => {
         if (!cancelled) setFailed(true);
       });
     return () => {
       cancelled = true;
-    };
-  }, []);
-
-  // Karte einmalig aufbauen
-  useEffect(() => {
-    const L = leaflet;
-    const container = containerRef.current;
-    if (!L || !container || mapRef.current) return;
-    const map = L.map(container, {
-      center: [lat, lon],
-      zoom: 16,
-      scrollWheelZoom: false,
-    });
-    createBaseLayer(L, loadMapLayer()).addTo(map);
-    mapRef.current = map;
-    return () => {
-      map.remove();
-      mapRef.current = null;
+      engineRef.current?.destroy();
+      engineRef.current = null;
       markerRef.current = null;
       haloRef.current = null;
+      setReady(false);
     };
     // Nur beim ersten Aufbau – spätere Positionen zieht der Effect darunter nach
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [leaflet]);
+  }, [maps.ready]);
 
   // Position nachführen, wenn der Standort aktualisiert wurde
   useEffect(() => {
-    const L = leaflet;
-    const map = mapRef.current;
-    if (!L || !map) return;
+    const engine = engineRef.current;
+    if (!engine || !ready) return;
     if (markerRef.current) {
       markerRef.current.setLatLng([lat, lon]);
     } else {
-      markerRef.current = L.circleMarker([lat, lon], {
+      markerRef.current = engine.circleMarker([lat, lon], {
         radius: 8,
         color: "#ffffff",
         weight: 2,
         fillColor: "#2563eb",
         fillOpacity: 1,
-      }).addTo(map);
+      });
     }
     // Genauigkeits-Kreis: zeigt ehrlich, wie scharf die Position ist
-    if (haloRef.current) {
-      haloRef.current.remove();
-      haloRef.current = null;
-    }
+    haloRef.current?.remove();
+    haloRef.current = null;
     if (accuracyM !== null && accuracyM > 0) {
-      haloRef.current = L.circle([lat, lon], {
+      haloRef.current = engine.circle([lat, lon], {
         radius: accuracyM,
         color: "#2563eb",
         weight: 1,
         fillColor: "#2563eb",
         fillOpacity: 0.12,
-      }).addTo(map);
+      });
     }
-    map.setView([lat, lon], map.getZoom());
-  }, [leaflet, lat, lon, accuracyM]);
+    engine.setView([lat, lon], engine.getZoom());
+  }, [ready, lat, lon, accuracyM]);
 
   if (failed) {
     return (
@@ -121,7 +125,7 @@ function LocationMap({
       </p>
     );
   }
-  if (!leaflet) return <Skeleton className="h-72 w-full rounded-lg" />;
+  if (!maps.ready) return <Skeleton className="h-72 w-full rounded-lg" />;
   return (
     <div
       ref={containerRef}

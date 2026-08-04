@@ -189,6 +189,7 @@ import {
 } from "@shared/weather";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { ENV } from "./_core/env";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
@@ -5904,6 +5905,23 @@ export const appRouter = router({
    * rechnen mit der OSRM-Fahrzeit weiter.
    */
   routing: router({
+    /**
+     * Karten-Konfiguration für den Browser (Nutzerwunsch 04.08.2026).
+     *
+     * ÖFFENTLICH, weil geteilte Links (Standort, Wanderung) ohne Anmeldung
+     * eine Karte zeigen. Der Browser-Schlüssel ist kein Geheimnis – er muss
+     * ins HTML, sonst lädt keine Google-Karte. Geschützt wird er über die
+     * Herkunfts-Sperre in der Cloud Console, nicht über Verstecken.
+     *
+     * Fehlt eines der beiden Felder, bleibt die App bei OpenStreetMap.
+     */
+    mapConfig: publicProcedure.query(() => {
+      const key = ENV.googleMapsBrowserKey.trim();
+      const mapId = ENV.googleMapsMapId.trim();
+      return key.length > 0 && mapId.length > 0
+        ? { key, mapId }
+        : { key: null, mapId: null };
+    }),
     /** Gibt es Verkehrs-Fahrzeiten auf diesem Server? */
     status: protectedProcedure.query(async () => {
       const { isDriveTimeConfigured } = await import("./driveTime");
