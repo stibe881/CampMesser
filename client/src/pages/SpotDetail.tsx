@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
 import { Link, useParams } from "wouter";
@@ -132,6 +132,27 @@ type ClimateState =
       fromYear: number;
       toYear: number;
     };
+
+/**
+ * Überschrift über einem Abschnitt des Dossiers.
+ *
+ * WOZU: Die Seite trägt zwei Dutzend Karten. Ohne Gliederung sucht man das
+ * Zeckenrisiko zwischen Badestelle und Wanderwegen und die Reisekosten
+ * irgendwo zwischen Kontaktdaten und Sonnenlauf. Die fünf Abschnitte
+ * folgen der Reihenfolge, in der man die Fragen stellt: Was ist das für
+ * ein Platz – wie komme ich hin – was für Wetter erwartet mich – was gibt
+ * es rundherum – und was habe ich selbst dort abgelegt.
+ *
+ * Ein `<h2>`, kein optisch gestylter Absatz: Wer die Seite mit einer
+ * Vorlesehilfe durchgeht, springt damit von Abschnitt zu Abschnitt.
+ */
+function SectionHeading({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="mb-2 mt-6 font-serif text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      {children}
+    </h2>
+  );
+}
 
 /**
  * «Offline-Karte»: lädt die Karten-Kacheln rund um den Platz vorab in den
@@ -889,58 +910,7 @@ export default function SpotDetailPage() {
         <p className="mb-4 text-sm text-muted-foreground">{spot.note}</p>
       )}
 
-      {/* Anreise-Route zum Platz */}
-      <div className="mt-1 flex flex-wrap gap-2">
-        <Button asChild variant="outline" size="sm">
-          <a
-            href={directionsUrl(spot.latitude, spot.longitude)}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={t.spotDetail.routeAria}
-          >
-            <Navigation className="mr-1.5 h-4 w-4" aria-hidden="true" />
-            {t.spotDetail.routeButton}
-          </a>
-        </Button>
-      </div>
-
-      {/* Rast unterwegs: Picknickplätze im Korridor der Anfahrt (#250) */}
-      {/* Eigene Bewertung nach Kriterien (#278) – Sanitär, Ruhe, Schatten,
-          Kinderfreundlichkeit einzeln */}
-      <SpotRating
-        spotId={spot.id}
-        ratings={{
-          sanitary: spot.ratingSanitary ?? null,
-          quiet: spot.ratingQuiet ?? null,
-          shade: spot.ratingShade ?? null,
-          kids: spot.ratingKids ?? null,
-        }}
-        className="mb-4"
-      />
-
-      {/* Beste Abfahrtszeit (#285): von der Check-in-Zeit rückwärts,
-          Pausen eingerechnet */}
-      <DeparturePlanner
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        className="mb-4"
-      />
-
-      {/* Unwetter auf der Fahrtstrecke (#275): Wetter dort, wo man unterwegs
-          sein wird – und zu der Zeit, zu der man dort sein wird */}
-      <RouteWeather
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
-
-      <PicnicStops
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mt-4"
-      />
+      <SectionHeading>{t.spotDetail.sectionPlace}</SectionHeading>
 
       {/* Platz-Eigenschaften: Schatten, Sanitär, Lärm, WLAN … */}
       <Card className="mb-4 mt-4">
@@ -1101,59 +1071,92 @@ export default function SpotDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Sonne heute */}
+      {/* Eigene Bewertung nach Kriterien (#278) – Sanitär, Ruhe, Schatten,
+          Kinderfreundlichkeit einzeln */}
+      <SpotRating
+        spotId={spot.id}
+        ratings={{
+          sanitary: spot.ratingSanitary ?? null,
+          quiet: spot.ratingQuiet ?? null,
+          shade: spot.ratingShade ?? null,
+          kids: spot.ratingKids ?? null,
+        }}
+        className="mb-4"
+      />
+
+      {/* Hindernis-Profil */}
       <Card className="mb-4">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Sunrise className="h-4 w-4 text-chart-4" aria-hidden="true" />
-            {t.spotDetail.sunTitle}
+            <Mountain className="h-4 w-4 text-primary" aria-hidden="true" />
+            {t.spotDetail.obstacleTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="rounded-lg bg-accent/50 py-2.5">
-              <p className="font-mono text-lg font-bold">
-                {fmtTime(sun?.sunrise ?? null)}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t.spotDetail.sunrise}
-              </p>
-            </div>
-            <div className="rounded-lg bg-accent/50 py-2.5">
-              <p className="font-mono text-lg font-bold">
-                {fmtTime(sun?.solarNoon ?? null)}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t.spotDetail.noon}
-              </p>
-            </div>
-            <div className="rounded-lg bg-accent/50 py-2.5">
-              <p className="font-mono text-lg font-bold">
-                {fmtTime(sun?.sunset ?? null)}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t.spotDetail.sunset}
-              </p>
-            </div>
-          </div>
+          {obstacles.length > 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {t.spotDetail.obstaclesRecorded(obstacles.length)}
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {t.spotDetail.obstacleEmpty}
+            </p>
+          )}
           <Link
             href={`/sonne?lat=${spot.latitude}&lon=${spot.longitude}&name=${encodeURIComponent(spot.name)}&spot=${spot.id}`}
-            className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
           >
             <Compass className="h-4 w-4" aria-hidden="true" />
-            {t.spotDetail.sunCompassLink}
+            {obstacles.length > 0
+              ? t.spotDetail.obstacleEdit
+              : t.spotDetail.obstacleCreate}
           </Link>
         </CardContent>
       </Card>
 
-      {/* Dunkler Himmel: geschätzte Bortle-Klasse plus «heute Nacht» */}
-      <DarkSkyPanel
+      <SectionHeading>{t.spotDetail.sectionArrival}</SectionHeading>
+
+      {/* Anreise-Route zum Platz */}
+      <div className="mt-1 flex flex-wrap gap-2">
+        <Button asChild variant="outline" size="sm">
+          <a
+            href={directionsUrl(spot.latitude, spot.longitude)}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t.spotDetail.routeAria}
+          >
+            <Navigation className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.spotDetail.routeButton}
+          </a>
+        </Button>
+      </div>
+
+      {/* Beste Abfahrtszeit (#285): von der Check-in-Zeit rückwärts,
+          Pausen eingerechnet */}
+      <DeparturePlanner
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        className="mb-4"
+      />
+
+      {/* Rast unterwegs: Picknickplätze im Korridor der Anfahrt (#250) */}
+      <PicnicStops
         latitude={spot.latitude}
         longitude={spot.longitude}
         placeName={spot.name}
-        astroLink
+        className="mt-4"
+      />
+
+      {/* Unwetter auf der Fahrtstrecke (#275): Wetter dort, wo man unterwegs
+          sein wird – und zu der Zeit, zu der man dort sein wird */}
+      <RouteWeather
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
         className="mb-4"
       />
+
+      <SectionHeading>{t.spotDetail.sectionWeather}</SectionHeading>
 
       {/* Wetter */}
       <Card className="mb-4">
@@ -1238,67 +1241,57 @@ export default function SpotDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Badestellen-Info: Wassertemperatur, Abfluss und Pegel am Platz */}
-      <BathingWaterCard latitude={spot.latitude} longitude={spot.longitude} />
+      {/* Sonne heute */}
+      <Card className="mb-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Sunrise className="h-4 w-4 text-chart-4" aria-hidden="true" />
+            {t.spotDetail.sunTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="rounded-lg bg-accent/50 py-2.5">
+              <p className="font-mono text-lg font-bold">
+                {fmtTime(sun?.sunrise ?? null)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t.spotDetail.sunrise}
+              </p>
+            </div>
+            <div className="rounded-lg bg-accent/50 py-2.5">
+              <p className="font-mono text-lg font-bold">
+                {fmtTime(sun?.solarNoon ?? null)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t.spotDetail.noon}
+              </p>
+            </div>
+            <div className="rounded-lg bg-accent/50 py-2.5">
+              <p className="font-mono text-lg font-bold">
+                {fmtTime(sun?.sunset ?? null)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t.spotDetail.sunset}
+              </p>
+            </div>
+          </div>
+          <Link
+            href={`/sonne?lat=${spot.latitude}&lon=${spot.longitude}&name=${encodeURIComponent(spot.name)}&spot=${spot.id}`}
+            className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+          >
+            <Compass className="h-4 w-4" aria-hidden="true" />
+            {t.spotDetail.sunCompassLink}
+          </Link>
+        </CardContent>
+      </Card>
 
-      {/* Zeckenrisiko: FSME-Einstufung der Region plus Saison und Höhenlage */}
-      <TickRiskPanel
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        elevationM={spot.elevationM}
-        className="mb-4"
-      />
-
-      {/* Wandern in der Umgebung: markierte OSM-Routen rund um den Platz */}
-      <NearbyHikes
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
-
-      {/* Feuer- und Grillstellen aus OpenStreetMap (#247) – lädt erst beim
-          Aufklappen, Overpass wird nie automatisch gefragt */}
-      <NearbyFirepits
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
-
-      {/* Spielplätze und Badeplätze aus OpenStreetMap (#248) – gemischt nach
-          Distanz, lädt ebenfalls erst beim Aufklappen */}
-      <NearbyFamilyPlaces
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
-
-      {/* Einkaufen in Platznähe (#273): Supermarkt, Bäckerei, Hofladen mit
-          Öffnungszeiten – ebenfalls erst beim Aufklappen geholt */}
-      <NearbyShops
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
-
-      {/* ÖV ab Platz (#249): Haltestellen mit Distanz, auf Antippen die
-          Abfahrtstafel – beides erst beim Aufklappen geholt */}
-      <NearbyTransit
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
-
-      {/* Ausflüge in der Nähe aus der eigenen Ausflugfinder-App (#271) –
-          lädt erst beim Aufklappen, damit das Dossier nicht darauf wartet */}
-      <NearbyExcursions
+      {/* Dunkler Himmel: geschätzte Bortle-Klasse plus «heute Nacht» */}
+      <DarkSkyPanel
         latitude={spot.latitude}
         longitude={spot.longitude}
         placeName={spot.name}
+        astroLink
         className="mb-4"
       />
 
@@ -1442,35 +1435,73 @@ export default function SpotDetailPage() {
         )}
       </Card>
 
-      {/* Hindernis-Profil */}
-      <Card className="mb-4">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Mountain className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t.spotDetail.obstacleTitle}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {obstacles.length > 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {t.spotDetail.obstaclesRecorded(obstacles.length)}
-            </p>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {t.spotDetail.obstacleEmpty}
-            </p>
-          )}
-          <Link
-            href={`/sonne?lat=${spot.latitude}&lon=${spot.longitude}&name=${encodeURIComponent(spot.name)}&spot=${spot.id}`}
-            className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-          >
-            <Compass className="h-4 w-4" aria-hidden="true" />
-            {obstacles.length > 0
-              ? t.spotDetail.obstacleEdit
-              : t.spotDetail.obstacleCreate}
-          </Link>
-        </CardContent>
-      </Card>
+      {/* Badestellen-Info: Wassertemperatur, Abfluss und Pegel am Platz */}
+      <BathingWaterCard latitude={spot.latitude} longitude={spot.longitude} />
+
+      {/* Zeckenrisiko: FSME-Einstufung der Region plus Saison und Höhenlage */}
+      <TickRiskPanel
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        elevationM={spot.elevationM}
+        className="mb-4"
+      />
+
+      <SectionHeading>{t.spotDetail.sectionAround}</SectionHeading>
+
+      {/* Wandern in der Umgebung: markierte OSM-Routen rund um den Platz */}
+      <NearbyHikes
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mb-4"
+      />
+
+      {/* Feuer- und Grillstellen aus OpenStreetMap (#247) – lädt erst beim
+          Aufklappen, Overpass wird nie automatisch gefragt */}
+      <NearbyFirepits
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mb-4"
+      />
+
+      {/* Spielplätze und Badeplätze aus OpenStreetMap (#248) – gemischt nach
+          Distanz, lädt ebenfalls erst beim Aufklappen */}
+      <NearbyFamilyPlaces
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mb-4"
+      />
+
+      {/* Einkaufen in Platznähe (#273): Supermarkt, Bäckerei, Hofladen mit
+          Öffnungszeiten – ebenfalls erst beim Aufklappen geholt */}
+      <NearbyShops
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mb-4"
+      />
+
+      {/* ÖV ab Platz (#249): Haltestellen mit Distanz, auf Antippen die
+          Abfahrtstafel – beides erst beim Aufklappen geholt */}
+      <NearbyTransit
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mb-4"
+      />
+
+      {/* Ausflüge in der Nähe aus der eigenen Ausflugfinder-App (#271) –
+          lädt erst beim Aufklappen, damit das Dossier nicht darauf wartet */}
+      <NearbyExcursions
+        latitude={spot.latitude}
+        longitude={spot.longitude}
+        placeName={spot.name}
+        className="mb-4"
+      />
+
+      <SectionHeading>{t.spotDetail.sectionOwn}</SectionHeading>
 
       {/* Aufenthalte */}
       <Card>
