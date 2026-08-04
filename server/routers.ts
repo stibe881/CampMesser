@@ -131,6 +131,7 @@ import {
   serializeWaypoints,
   type RouteWaypoint,
 } from "@shared/routePlan";
+import { MAX_ROUTE_PATH_POINTS, routeLengthM } from "@shared/routing";
 import {
   templateEndDate,
   templateListName,
@@ -6096,6 +6097,22 @@ export const appRouter = router({
             .array(z.number().min(-500).max(9000).nullable())
             .max(MAX_ROUTE_SAMPLES)
             .optional(),
+          /**
+           * Verlauf entlang der echten Wege (aus der Routenberechnung).
+           * Liegt er vor, wird die Länge DARAUS gerechnet: Zwei Punkte im
+           * Gebirge sind Luftlinie zwei Kilometer und über den Wanderweg
+           * fünf. Fehlt er (kein Netz), bleibt es bei den geraden
+           * Verbindungen zwischen den Wegpunkten.
+           */
+          pathPoints: z
+            .array(
+              z.object({
+                lat: z.number().min(-90).max(90),
+                lon: z.number().min(-180).max(180),
+              })
+            )
+            .max(MAX_ROUTE_PATH_POINTS)
+            .optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -6107,10 +6124,14 @@ export const appRouter = router({
           lon: w.lon,
           ele: w.ele ?? null,
         }));
-        const distanceM = Math.round(routeDistanceM(waypoints));
-        // Für die Höhenbilanz die Stützstellen nehmen, wenn sie vorliegen,
-        // sonst die Wegpunkte selbst
-        const samples = routeSamples(waypoints);
+        // Gemessen wird auf dem Weg, wenn er vorliegt – sonst auf den
+        // geraden Verbindungen zwischen den Wegpunkten
+        const path: RouteWaypoint[] =
+          input.pathPoints && input.pathPoints.length >= 2
+            ? input.pathPoints.map(p => ({ lat: p.lat, lon: p.lon, ele: null }))
+            : waypoints;
+        const distanceM = Math.round(routeLengthM(path));
+        const samples = routeSamples(path);
         const heights =
           input.sampleElevations && input.sampleElevations.length > 0
             ? samples.map((s, i) => ({

@@ -7,18 +7,20 @@
  * zwei Pausen und den Puffer an der Schranke weg; genau deshalb steht man
  * vor einer geschlossenen Rezeption.
  *
- * Die Strecke kommt aus der Luftlinie zwischen Heim-Standort und Platz.
- * Ein Routenplaner ist das nicht, und die Ansicht sagt das auch. Ohne
- * gespeicherten Heim-Standort erscheint statt einer erfundenen Zahl der
- * Hinweis, wo man ihn setzt.
+ * DIE STRECKE ist eine ECHTE Route über die Strasse (OSRM, siehe
+ * client/src/lib/routing.ts) – samt der Fahrzeit des Dienstes, die Pässe,
+ * Ortsdurchfahrten und Tempolimiten kennt. Nur wenn kein Netz da ist,
+ * wird aus der Luftlinie mit Umwegfaktor geschätzt, und dann steht das
+ * auch so da. Ohne gespeicherten Heim-Standort erscheint statt einer
+ * erfundenen Zahl der Hinweis, wo man ihn setzt.
  *
  * DIE RÜCKREISE ist dieselbe Rechnung mit einem zusätzlichen Abgleich:
  * Die reine Rückwärtsrechnung kann «um 15:40 losfahren» sagen, und das
  * nützt nichts, wenn der Platz um 11 Uhr geräumt sein will. Dann steht
  * da, wann man WIRKLICH losfährt und wann man entsprechend daheim ist.
  */
-import { useState } from "react";
-import { Clock, Coffee, Car } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Clock, Coffee, Car, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,10 +29,13 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { distanceMeters, formatDistance } from "@shared/geo";
+import { formatDistance } from "@shared/geo";
+import { routeOrEstimate } from "@/lib/routing";
+import type { RouteResult } from "@shared/routing";
 import {
   BREAK_PROFILES,
   DEFAULT_CHECKOUT_TIME,
+  DRIVE_SPEED_KMH,
   breakSchedule,
   departurePlan,
   returnPlan,
@@ -77,9 +82,34 @@ export default function DeparturePlanner({
   });
   const home = homeQuery.data ?? null;
 
-  const distanceKm = home
-    ? distanceMeters(home.latitude, home.longitude, latitude, longitude) / 1000
-    : 0;
+  /** Gefahrene Route Heim → Platz; null, solange sie geholt wird. */
+  const [route, setRoute] = useState<RouteResult | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Route erst holen, wenn der Abschnitt offen ist und ein Heim-Standort
+  // existiert – und pro Platz nur einmal (der Zwischenspeicher hilft dabei)
+  useEffect(() => {
+    if (!open || !home) return;
+    const controller = new AbortController();
+    abortRef.current?.abort();
+    abortRef.current = controller;
+    setRoute(null);
+    void routeOrEstimate(
+      [
+        { lat: home.latitude, lon: home.longitude },
+        { lat: latitude, lon: longitude },
+      ],
+      "car",
+      DRIVE_SPEED_KMH,
+      { signal: controller.signal }
+    ).then(result => {
+      if (!controller.signal.aborted) setRoute(result);
+    });
+    return () => controller.abort();
+  }, [open, home, latitude, longitude]);
+
+  const distanceKm = route ? route.distanceM / 1000 : 0;
+  const routedMinutes = route ? Math.round(route.durationS / 60) : null;
   const back =
     home && direction === "zurueck"
       ? returnPlan({
@@ -87,13 +117,20 @@ export default function DeparturePlanner({
           homeArrivalTime,
           checkoutTime: checkoutTime || null,
           profile,
+          driveMinutes: routedMinutes,
         })
       : null;
-  const plan = !home
-    ? null
-    : direction === "hin"
-      ? departurePlan({ distanceKm, arrivalTime, profile })
-      : (back?.plan ?? null);
+  const plan =
+    !home || !route
+      ? null
+      : direction === "hin"
+        ? departurePlan({
+            distanceKm,
+            arrivalTime,
+            profile,
+            driveMinutes: routedMinutes,
+          })
+        : (back?.plan ?? null);
   // Bei der Rückreise zählt die Abfahrt, die man wirklich hinbekommt
   const effectiveDeparture =
     back?.afterCheckout && checkoutTime ? checkoutTime : plan?.departureTime;
@@ -201,6 +238,13 @@ export default function DeparturePlanner({
             )}
           </div>
 
+          {!route && (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              {dp.routing}
+            </p>
+          )}
+
           {plan && (
             <>
               <div className="rounded-lg bg-accent/50 p-3 text-center">
@@ -269,7 +313,9 @@ export default function DeparturePlanner({
             </>
           )}
 
-          <p className="text-xs text-muted-foreground">{dp.note}</p>
+          <p className="text-xs text-muted-foreground">
+            {route?.source === "estimate" ? dp.noteEstimate : dp.note}
+          </p>
         </div>
       )}
     </section>

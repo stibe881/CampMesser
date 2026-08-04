@@ -23,6 +23,8 @@ export const de = {
     saveFailed: "Speichern fehlgeschlagen",
     actionFailed: "Aktion fehlgeschlagen",
     offlineBadge: "Offline",
+    distanceByRoad: (value: string) => `${value} über die Strasse`,
+    distanceOnPath: (value: string) => `${value} über den Weg`,
     screenAwake: "Display bleibt an",
   },
   password: {
@@ -3718,7 +3720,9 @@ export const de = {
     radiusOption: (km: number) => `${km} km`,
     searchButton: "Rast suchen",
     lineHint:
-      "Gesucht wird entlang der Luftlinie, nicht entlang der Strasse – im Gebirge kann die Fahrt weiter ausholen.",
+      "Gesucht wird entlang der berechneten Strassenroute; die Kilometermarken zählen ab Start über die Strasse.",
+    lineHintEstimate:
+      "Ohne Netz keine Routenberechnung: Gesucht wird entlang der Luftlinie – im Gebirge kann die Fahrt weit ausholen.",
     locating: "Standort wird bestimmt …",
     loading: "Raststellen werden gesucht …",
     noHome:
@@ -3822,8 +3826,10 @@ export const de = {
     riskNone: "Ruhig",
     kmMark: (km: number) => `km ${km}`,
     gusts: (kmh: number) => `${kmh} km/h`,
-    methodNote: (speed: number) =>
-      `Geprüft werden bis zu acht Punkte entlang der Luftlinie, jeweils für die geschätzte Ankunftszeit. Gerechnet wird mit ${speed} km/h über die Luftlinie – das ist eine grobe Schätzung und kein Routenplaner.`,
+    methodNote:
+      "Geprüft werden bis zu acht Punkte entlang der berechneten Strassenroute, jeweils für die Ankunftszeit an diesem Punkt. Strecke und Fahrzeit kommen aus der Routenberechnung (OpenStreetMap); Stau und Baustellen kommen dazu.",
+    methodNoteEstimate: (speed: number) =>
+      `Ohne Netz keine Routenberechnung: Geprüft werden acht Punkte entlang der Luftlinie mit ${speed} km/h – eine grobe Schätzung, die im Gebirge deutlich danebenliegen kann.`,
     source: "Daten: Open-Meteo",
   },
   packHistory: {
@@ -3955,7 +3961,10 @@ export const de = {
     bufferLine: "Puffer für Schranke und Anmeldung",
     totalLine: "Gesamt unterwegs",
     stopsLine: (times: string) => `Pausen etwa um ${times}.`,
-    note: "Geschätzt über die Luftlinie mit 70 km/h Schnitt – kein Routenplaner. Stau, Baustellen und Grenzwartezeiten kommen dazu.",
+    routing: "Route wird berechnet …",
+    note: "Strecke und Fahrzeit stammen aus der Routenberechnung über die Strasse (OpenStreetMap). Stau, Baustellen und Grenzwartezeiten kommen dazu.",
+    noteEstimate:
+      "Ohne Netz keine Routenberechnung: Diese Zahlen sind aus der Luftlinie geschätzt (mit Umwegfaktor) und können deutlich danebenliegen – besonders im Gebirge.",
   },
   firewood: {
     title: "Feuerholz-Bedarf",
@@ -4010,6 +4019,9 @@ export const de = {
     walkingTime: "Gehzeit",
     pace: "Tempo:",
     paceLabels: { slow: "Gemütlich", normal: "Normal", fast: "Zügig" },
+    snapping: "Wegverlauf wird berechnet …",
+    notRouted:
+      "Kein Wegverlauf verfügbar (kein Netz oder keine Wege gefunden): Gerechnet wird mit den geraden Verbindungen zwischen deinen Punkten – im Gebirge deutlich zu kurz.",
     note: "Geschätzt nach dem üblichen Wanderzeit-Verfahren (4 km/h, 300 Hm Aufstieg, 500 Hm Abstieg pro Stunde), ohne Pausen. Gerechnet wird der Luftlinien-Verlauf zwischen deinen Punkten, nicht der Weg.",
     nameLabel: "Name",
     namePlaceholder: "z. B. Runde um den See",

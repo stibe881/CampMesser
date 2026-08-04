@@ -22,6 +22,8 @@ export const fr: Translation = {
     saveFailed: "Échec de l'enregistrement",
     actionFailed: "Échec de l'action",
     offlineBadge: "Hors ligne",
+    distanceByRoad: (value: string) => `${value} par la route`,
+    distanceOnPath: (value: string) => `${value} par le chemin`,
     screenAwake: "L'écran reste allumé",
   },
   password: {
@@ -3716,7 +3718,9 @@ export const fr: Translation = {
     radiusOption: (km: number) => `${km} km`,
     searchButton: "Chercher une pause",
     lineHint:
-      "La recherche suit la ligne droite, pas la route – en montagne, le trajet réel peut s'écarter nettement.",
+      "La recherche suit l'itinéraire routier calculé ; les repères kilométriques comptent depuis le départ, par la route.",
+    lineHintEstimate:
+      "Sans réseau, pas de calcul d'itinéraire : la recherche suit la ligne droite – en montagne, le trajet réel peut s'écarter nettement.",
     locating: "Localisation en cours …",
     loading: "Recherche des aires de pause …",
     noHome:
@@ -3819,8 +3823,10 @@ export const fr: Translation = {
     riskNone: "Calme",
     kmMark: (km: number) => `km ${km}`,
     gusts: (kmh: number) => `${kmh} km/h`,
-    methodNote: (speed: number) =>
-      `Jusqu'à huit points le long de la ligne droite sont vérifiés, chacun pour son heure d'arrivée estimée. Le calcul se fait à ${speed} km/h à vol d'oiseau – c'est une estimation grossière, pas un calculateur d'itinéraire.`,
+    methodNote:
+      "Jusqu'à huit points le long de l'itinéraire routier calculé sont vérifiés, chacun pour l'heure d'arrivée à ce point. Distance et durée proviennent du calcul d'itinéraire (OpenStreetMap) ; bouchons et chantiers s'y ajoutent.",
+    methodNoteEstimate: (speed: number) =>
+      `Sans réseau, pas de calcul d'itinéraire : huit points le long de la ligne droite sont vérifiés à ${speed} km/h – une estimation grossière qui peut être très fausse en montagne.`,
     source: "Données : Open-Meteo",
   },
   packHistory: {
@@ -3952,7 +3958,10 @@ export const fr: Translation = {
     bufferLine: "Marge pour la barrière et l'enregistrement",
     totalLine: "Total en route",
     stopsLine: (times: string) => `Pauses vers ${times}.`,
-    note: "Estimation à vol d'oiseau à 70 km/h de moyenne – ce n'est pas un calculateur d'itinéraire. Bouchons, chantiers et attentes à la frontière s'y ajoutent.",
+    routing: "Calcul de l'itinéraire …",
+    note: "La distance et la durée proviennent du calcul d'itinéraire par la route (OpenStreetMap). Bouchons, chantiers et attentes à la frontière s'y ajoutent.",
+    noteEstimate:
+      "Sans réseau, pas de calcul d'itinéraire : ces chiffres sont estimés à vol d'oiseau (avec un facteur de détour) et peuvent être nettement à côté – surtout en montagne.",
   },
   firewood: {
     title: "Besoin en bois de feu",
@@ -4007,6 +4016,9 @@ export const fr: Translation = {
     walkingTime: "Temps de marche",
     pace: "Allure :",
     paceLabels: { slow: "Tranquille", normal: "Normale", fast: "Soutenue" },
+    snapping: "Calcul du tracé …",
+    notRouted:
+      "Aucun tracé disponible (pas de réseau ou pas de chemin trouvé) : le calcul utilise les segments droits entre tes points – nettement trop court en montagne.",
     note: "Estimation selon la méthode habituelle (4 km/h, 300 m de montée, 500 m de descente par heure), sans les pauses. Le calcul suit les segments droits entre tes points, pas le chemin.",
     nameLabel: "Nom",
     namePlaceholder: "p. ex. tour du lac",

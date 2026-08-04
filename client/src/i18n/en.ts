@@ -22,6 +22,8 @@ export const en: Translation = {
     saveFailed: "Saving failed",
     actionFailed: "Action failed",
     offlineBadge: "Offline",
+    distanceByRoad: (value: string) => `${value} by road`,
+    distanceOnPath: (value: string) => `${value} on foot`,
     screenAwake: "Screen stays on",
   },
   password: {
@@ -3607,7 +3609,9 @@ export const en: Translation = {
     radiusOption: (km: number) => `${km} km`,
     searchButton: "Find a stop",
     lineHint:
-      "The search follows the straight line, not the road – in the mountains the actual drive can wander far from it.",
+      "The search follows the calculated road route; the kilometre marks count from the start along the road.",
+    lineHintEstimate:
+      "No network, no route calculation: the search follows the straight line – in the mountains the actual drive can wander far from it.",
     locating: "Getting your location …",
     loading: "Looking for rest stops …",
     noHome:
@@ -3710,8 +3714,10 @@ export const en: Translation = {
     riskNone: "Calm",
     kmMark: (km: number) => `km ${km}`,
     gusts: (kmh: number) => `${kmh} km/h`,
-    methodNote: (speed: number) =>
-      `Up to eight points along the straight line are checked, each for its estimated arrival time. The maths uses ${speed} km/h along the straight line – a rough estimate, not a route planner.`,
+    methodNote:
+      "Up to eight points along the calculated road route are checked, each for the arrival time at that point. Distance and driving time come from the route calculation (OpenStreetMap); traffic and roadworks come on top.",
+    methodNoteEstimate: (speed: number) =>
+      `No network, no route calculation: eight points along the straight line are checked at ${speed} km/h – a rough estimate that can be well off in the mountains.`,
     source: "Data: Open-Meteo",
   },
   packHistory: {
@@ -3842,7 +3848,10 @@ export const en: Translation = {
     bufferLine: "Buffer for barrier and check-in",
     totalLine: "Total on the road",
     stopsLine: (times: string) => `Breaks at roughly ${times}.`,
-    note: "Estimated as the crow flies at an average of 70 km/h – not a route planner. Traffic, roadworks and border queues come on top.",
+    routing: "Working out the route …",
+    note: "Distance and driving time come from a road route calculation (OpenStreetMap). Traffic, roadworks and border queues come on top.",
+    noteEstimate:
+      "No network, no route calculation: these figures are estimated from the straight-line distance (with a detour factor) and can be well off – especially in the mountains.",
   },
   firewood: {
     title: "Firewood needed",
@@ -3896,6 +3905,9 @@ export const en: Translation = {
     walkingTime: "Walking time",
     pace: "Pace:",
     paceLabels: { slow: "Leisurely", normal: "Normal", fast: "Brisk" },
+    snapping: "Working out the path …",
+    notRouted:
+      "No path available (no network or no trails found): the calculation uses the straight legs between your points – clearly too short in the mountains.",
     note: "Estimated with the usual hiking-time method (4 km/h, 300 m of ascent, 500 m of descent per hour), breaks not included. It follows the straight legs between your points, not the path.",
     nameLabel: "Name",
     namePlaceholder: "e.g. loop around the lake",

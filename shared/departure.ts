@@ -12,10 +12,12 @@
  * Plans, sie SIND der Plan – wer sie nicht einrechnet, plant eine Fahrt,
  * die es so nicht gibt.
  *
- * FAHRZEIT: Gerechnet wird mit der Luftlinie und einem Schnitt von
- * 70 km/h. Die Strasse ist kurviger als die Luftlinie, dafür fährt man
- * auf der Autobahn schneller als 70 – die beiden Fehler heben sich
- * grob auf. Ein Routenplaner ist das nicht, und die Ansicht sagt das.
+ * FAHRZEIT: Bevorzugt kommt sie aus einer ECHTEN Route (OSRM, siehe
+ * shared/routing.ts) – Strecke und Fahrzeit über die Strasse. Nur wenn
+ * kein Routing möglich ist (kein Netz), wird aus der Luftlinie geschätzt;
+ * das ist dann als Schätzung gekennzeichnet. Vom Wallis ins Tessin sind
+ * es Luftlinie achtzig Kilometer und über die Strasse zweihundert – wer
+ * danach seine Abfahrt plant, steht drei Stunden zu spät da.
  */
 
 /** Pausen-Muster. Der Unterschied zwischen «Erwachsene» und
@@ -29,7 +31,10 @@ export const BREAK_PROFILES = {
 
 export type BreakProfile = keyof typeof BREAK_PROFILES;
 
-/** Durchschnitts-Tempo über die Luftlinie in km/h. */
+/**
+ * Rückfall-Tempo, wenn keine Route zu holen ist: Schnitt über die
+ * geschätzte STRASSENstrecke (Luftlinie × Umwegfaktor).
+ */
 export const DRIVE_SPEED_KMH = 70;
 
 /**
@@ -39,7 +44,7 @@ export const DRIVE_SPEED_KMH = 70;
  */
 export const DEFAULT_BUFFER_MINUTES = 30;
 
-/** Reine Fahrzeit in Minuten aus der Luftlinie. */
+/** Reine Fahrzeit in Minuten aus einer Strecke. */
 export function driveMinutes(
   distanceKm: number,
   speedKmh = DRIVE_SPEED_KMH
@@ -106,17 +111,26 @@ export function formatTime(minutes: number): string {
  * als eine Abfahrtszeit erfinden.
  */
 export function departurePlan(input: {
-  /** Luftlinie in Kilometern. */
+  /** Streckenlänge in Kilometern (Strasse, sonst geschätzt). */
   distanceKm: number;
   /** Gewünschte Ankunft als «HH:MM» (z. B. die Check-in-Zeit). */
   arrivalTime: string;
   profile: BreakProfile;
   bufferMinutes?: number;
   speedKmh?: number;
+  /**
+   * Fahrzeit des Routing-Dienstes in Minuten. Liegt sie vor, gilt SIE –
+   * ein Routenplaner kennt Pässe, Ortsdurchfahrten und Tempolimiten
+   * besser als jeder Schnitt über die Streckenlänge.
+   */
+  driveMinutes?: number | null;
 }): DeparturePlan | null {
   const arrival = parseTime(input.arrivalTime);
   if (arrival === null) return null;
-  const drive = driveMinutes(input.distanceKm, input.speedKmh);
+  const drive =
+    input.driveMinutes != null && Number.isFinite(input.driveMinutes)
+      ? Math.max(0, Math.round(input.driveMinutes))
+      : driveMinutes(input.distanceKm, input.speedKmh);
   const breaks = breakCount(drive, input.profile);
   const pause = breakMinutes(drive, input.profile);
   const buffer = Math.max(
@@ -146,10 +160,14 @@ export function arrivalPlan(input: {
   profile: BreakProfile;
   bufferMinutes?: number;
   speedKmh?: number;
+  driveMinutes?: number | null;
 }): (DeparturePlan & { arrivalTime: string; daysLater: number }) | null {
   const departure = parseTime(input.departureTime);
   if (departure === null) return null;
-  const drive = driveMinutes(input.distanceKm, input.speedKmh);
+  const drive =
+    input.driveMinutes != null && Number.isFinite(input.driveMinutes)
+      ? Math.max(0, Math.round(input.driveMinutes))
+      : driveMinutes(input.distanceKm, input.speedKmh);
   const breaks = breakCount(drive, input.profile);
   const pause = breakMinutes(drive, input.profile);
   const buffer = Math.max(
@@ -242,6 +260,7 @@ export function returnPlan(input: {
   profile: BreakProfile;
   bufferMinutes?: number;
   speedKmh?: number;
+  driveMinutes?: number | null;
 }): ReturnPlan | null {
   const buffer = input.bufferMinutes ?? RETURN_BUFFER_MINUTES;
   const plan = departurePlan({
@@ -250,6 +269,7 @@ export function returnPlan(input: {
     profile: input.profile,
     bufferMinutes: buffer,
     speedKmh: input.speedKmh,
+    driveMinutes: input.driveMinutes,
   });
   if (!plan) return null;
   const checkout =
@@ -275,6 +295,7 @@ export function returnPlan(input: {
     profile: input.profile,
     bufferMinutes: buffer,
     speedKmh: input.speedKmh,
+    driveMinutes: input.driveMinutes,
   });
   return {
     plan,

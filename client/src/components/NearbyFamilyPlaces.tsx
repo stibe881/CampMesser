@@ -34,6 +34,8 @@ import {
 } from "@/lib/overpass";
 import { useI18n } from "@/i18n";
 import { formatDistance } from "@shared/geo";
+import { applyRouteDistances } from "@shared/routing";
+import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import { cn } from "@/lib/utils";
 
 /** So viele Orte zeigt das Dossier – mehr wird zur Liste statt zum Tipp. */
@@ -58,6 +60,17 @@ export default function NearbyFamilyPlaces({
   const [radiusM, setRadiusM] = useState(FAMILY_DEFAULT_RADIUS_M);
   const [status, setStatus] = useState<Status>("idle");
   const [places, setPlaces] = useState<FamilyPlaceDistance[]>([]);
+  // Wegstrecke zu Fuss statt Luftlinie – mit Kindern zählt der Weg
+  const routed = useRoutedDistances(
+    places.length > 0 ? { lat: latitude, lon: longitude } : null,
+    places.map(({ place }) => ({
+      id: place.id,
+      lat: place.lat,
+      lon: place.lon,
+    })),
+    "foot"
+  );
+  const placeList = applyRouteDistances(places, routed.byId);
   const abortRef = useRef<AbortController | null>(null);
 
   // Beim Verlassen die laufende Overpass-Anfrage abbrechen
@@ -212,7 +225,7 @@ export default function NearbyFamilyPlaces({
                 {tp.resultCount(places.length)}
               </p>
               <ul className="mt-2 space-y-3">
-                {places.map(({ place, distanceM }) => {
+                {placeList.map(({ place, distanceM, routed: onFoot }) => {
                   const kindLabel = tp.kind[place.kind];
                   const title = place.name ?? kindLabel;
                   const features = featuresOf(place);
@@ -232,7 +245,11 @@ export default function NearbyFamilyPlaces({
                           {kindLabel}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {tp.distanceAway(formatDistance(distanceM, lang))}
+                          {onFoot
+                            ? t.common.distanceOnPath(
+                                formatDistance(distanceM, lang)
+                              )
+                            : tp.distanceAway(formatDistance(distanceM, lang))}
                         </span>
                       </div>
 

@@ -37,6 +37,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { formatDistance } from "@shared/geo";
+import { applyRouteDistances } from "@shared/routing";
+import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import {
   nearbyStationsUrl,
   nearestTransitStations,
@@ -87,6 +89,17 @@ export default function NearbyTransit({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [boardStatus, setBoardStatus] = useState<Status>("idle");
   const [departures, setDepartures] = useState<TransitDeparture[]>([]);
+  // Zur Haltestelle geht man zu Fuss – über die Strasse und nicht über die
+  // Wiese; die API liefert nur die Luftlinie
+  const routed = useRoutedDistances(
+    stations.length > 0 ? { lat: latitude, lon: longitude } : null,
+    stations.map(stop => ({ id: stop.id, lat: stop.lat, lon: stop.lon })),
+    "foot"
+  );
+  const stationList = applyRouteDistances(
+    stations.map(stop => ({ place: stop, distanceM: stop.distanceM })),
+    routed.byId
+  );
   const stationsAbort = useRef<AbortController | null>(null);
   const boardAbort = useRef<AbortController | null>(null);
 
@@ -228,7 +241,7 @@ export default function NearbyTransit({
 
           {status === "ready" && stations.length > 0 && (
             <ul className="mt-3 space-y-2">
-              {stations.map(stop => {
+              {stationList.map(({ place: stop, distanceM, routed: onFoot }) => {
                 const Icon = KIND_ICONS[stop.kind];
                 const active = activeId === stop.id;
                 return (
@@ -253,9 +266,11 @@ export default function NearbyTransit({
                         </span>
                         <span className="block text-xs text-muted-foreground">
                           {tt.kind[stop.kind]} ·{" "}
-                          {tt.distanceAway(
-                            formatDistance(stop.distanceM, lang)
-                          )}
+                          {onFoot
+                            ? t.common.distanceOnPath(
+                                formatDistance(distanceM, lang)
+                              )
+                            : tt.distanceAway(formatDistance(distanceM, lang))}
                         </span>
                       </span>
                       <ChevronDown

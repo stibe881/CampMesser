@@ -91,7 +91,12 @@ export const ROUTE_PACE_FACTORS = {
 
 export type RoutePace = keyof typeof ROUTE_PACE_FACTORS;
 
-/** Länge der Route in Metern (Luftlinie von Wegpunkt zu Wegpunkt). */
+/**
+ * Länge der geraden Verbindungen zwischen den Wegpunkten. Nur noch der
+ * RÜCKFALL: Wenn eine Wegführung vorliegt (shared/routing.ts), wird auf
+ * ihr gemessen – über den Wanderweg mit seinen Kehren sind es leicht das
+ * Doppelte.
+ */
 export function routeDistanceM(waypoints: RouteWaypoint[]): number {
   let total = 0;
   for (let i = 1; i < waypoints.length; i++) {
