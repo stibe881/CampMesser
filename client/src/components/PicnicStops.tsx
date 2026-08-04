@@ -29,7 +29,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { directionsUrl } from "@/lib/directions";
 import {
-  OVERPASS_URL,
+  fetchOverpass,
   parsePicnicSites,
   picnicSitesQuery,
   type OsmPicnicSite,
@@ -148,13 +148,10 @@ export default function PicnicStops({
       }
 
       try {
-        const res = await fetch(OVERPASS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `data=${encodeURIComponent(picnicSitesQuery(points, radius))}`,
-          signal: controller.signal,
-        });
-        if (!res.ok) throw new Error(`overpass ${res.status}`);
+        const res = await fetchOverpass(
+          `data=${encodeURIComponent(picnicSitesQuery(points, radius))}`,
+          controller.signal
+        );
         const json: unknown = await res.json();
         const sites = parsePicnicSites(json);
         const found = routed

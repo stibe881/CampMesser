@@ -35,7 +35,7 @@ import {
   hikingRoutesQuery,
   HIKING_DEFAULT_RADIUS_M,
   HIKING_SEARCH_RADII_M,
-  OVERPASS_URL,
+  fetchOverpass,
   parseHikingRoutes,
   type OsmHikingRoute,
 } from "@/lib/overpass";
@@ -247,15 +247,10 @@ export default function NearbyHikes({
     const controller = new AbortController();
     abortRef.current = controller;
     try {
-      const res = await fetch(OVERPASS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `data=${encodeURIComponent(
-          hikingRoutesQuery(point.lat, point.lon, radiusM)
-        )}`,
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`overpass ${res.status}`);
+      const res = await fetchOverpass(
+        `data=${encodeURIComponent(hikingRoutesQuery(point.lat, point.lon, radiusM))}`,
+        controller.signal
+      );
       const json: unknown = await res.json();
       const views: RouteView[] = [];
       parseHikingRoutes(json).forEach(route => {

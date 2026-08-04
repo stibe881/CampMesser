@@ -25,7 +25,7 @@ import { directionsUrl } from "@/lib/directions";
 import {
   FIREPIT_DEFAULT_RADIUS_M,
   FIREPIT_SEARCH_RADII_M,
-  OVERPASS_URL,
+  fetchOverpass,
   firepitsQuery,
   nearestFirepits,
   parseFirepits,
@@ -86,15 +86,10 @@ export default function NearbyFirepits({
       const controller = new AbortController();
       abortRef.current = controller;
       try {
-        const res = await fetch(OVERPASS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `data=${encodeURIComponent(
-            firepitsQuery(latitude, longitude, radius)
-          )}`,
-          signal: controller.signal,
-        });
-        if (!res.ok) throw new Error(`overpass ${res.status}`);
+        const res = await fetchOverpass(
+          `data=${encodeURIComponent(firepitsQuery(latitude, longitude, radius))}`,
+          controller.signal
+        );
         const json: unknown = await res.json();
         setPlaces(
           nearestFirepits(

@@ -24,7 +24,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { directionsUrl } from "@/lib/directions";
 import {
-  OVERPASS_URL,
+  fetchOverpass,
   SHOP_DEFAULT_RADIUS_M,
   SHOP_SEARCH_RADII_M,
   nearestShops,
@@ -94,15 +94,10 @@ export default function NearbyShops({
       const controller = new AbortController();
       abortRef.current = controller;
       try {
-        const res = await fetch(OVERPASS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `data=${encodeURIComponent(
-            shopsQuery(latitude, longitude, radius)
-          )}`,
-          signal: controller.signal,
-        });
-        if (!res.ok) throw new Error(`overpass ${res.status}`);
+        const res = await fetchOverpass(
+          `data=${encodeURIComponent(shopsQuery(latitude, longitude, radius))}`,
+          controller.signal
+        );
         const json: unknown = await res.json();
         setShops(
           nearestShops(parseShops(json), latitude, longitude, NEARBY_LIMIT)

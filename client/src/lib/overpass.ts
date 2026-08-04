@@ -40,7 +40,38 @@ export interface OsmCampsite {
   phone?: string;
 }
 
-export const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
+export const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://lz4.overpass-api.de/api/interpreter",
+  "https://z.overpass-api.de/api/interpreter",
+];
+
+/**
+ * Holt Daten von Overpass und probiert bei Rate-Limits (429) oder
+ * Serverfehlern (5xx) automatisch den nächsten Spiegel-Server.
+ */
+export async function fetchOverpass(query: string, signal?: AbortSignal): Promise<Response> {
+  let lastError: Error | undefined;
+  for (const url of OVERPASS_ENDPOINTS) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        body: query,
+        signal,
+      });
+      if (res.ok) return res;
+      // Bei 429 oder 5xx (Timeouts etc.) versuchen wir den nächsten Server
+      if (res.status !== 429 && res.status < 500) return res;
+    } catch (e) {
+      lastError = e as Error;
+      if (e instanceof DOMException && e.name === "AbortError") {
+        throw e; // Abbrüche durch React sofort weitergeben
+      }
+    }
+  }
+  throw lastError ?? new Error("Alle Overpass-Server sind überlastet");
+}
 
 /** Overpass ist rate-limitiert – wir fragen nie mehr als 100 Elemente ab. */
 export const OVERPASS_MAX_RESULTS = 100;

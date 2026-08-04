@@ -25,7 +25,7 @@ import { directionsUrl } from "@/lib/directions";
 import {
   FAMILY_DEFAULT_RADIUS_M,
   FAMILY_SEARCH_RADII_M,
-  OVERPASS_URL,
+  fetchOverpass,
   familyPlacesQuery,
   nearestFamilyPlaces,
   parseFamilyPlaces,
@@ -84,15 +84,10 @@ export default function NearbyFamilyPlaces({
       const controller = new AbortController();
       abortRef.current = controller;
       try {
-        const res = await fetch(OVERPASS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `data=${encodeURIComponent(
-            familyPlacesQuery(latitude, longitude, radius)
-          )}`,
-          signal: controller.signal,
-        });
-        if (!res.ok) throw new Error(`overpass ${res.status}`);
+        const res = await fetchOverpass(
+          `data=${encodeURIComponent(familyPlacesQuery(latitude, longitude, radius))}`,
+          controller.signal
+        );
         const json: unknown = await res.json();
         setPlaces(
           nearestFamilyPlaces(

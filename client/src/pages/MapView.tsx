@@ -106,7 +106,7 @@ import { directionsUrl } from "@/lib/directions";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import {
   OVERPASS_MIN_ZOOM,
-  OVERPASS_URL,
+  fetchOverpass,
   familyPlacesBboxQuery,
   firepitsBboxQuery,
   overpassQuery,
