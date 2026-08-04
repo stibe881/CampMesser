@@ -3773,6 +3773,47 @@ export const de = {
   },
 
   /** Spiel- und Badeplätze aus OpenStreetMap (#248). */
+  routeWeather: {
+    sectionAria: "Unwetter auf der Fahrtstrecke",
+    title: "Wetter auf der Fahrt",
+    subtitle: "Was dich unterwegs erwartet – nicht nur am Ziel.",
+    subtitleAtPlace: (place: string) =>
+      `Was dich auf dem Weg nach ${place} erwartet – nicht nur am Ziel.`,
+    startGroupAria: "Startpunkt wählen",
+    startHome: "Ab Heimatort",
+    startCurrent: "Ab Standort",
+    departureLabel: "Abfahrt",
+    loading: "Wetter entlang der Strecke wird geholt …",
+    loadFailed:
+      "Das Wetter entlang der Strecke konnte nicht geladen werden – bitte später nochmals versuchen.",
+    noStart:
+      "Kein Startpunkt: Hinterlege im Profil einen Heimatort oder erlaube den Standort.",
+    tooShort: (km: number) =>
+      `Unter ${km} km lohnt die Streckenprüfung nicht – da genügt die Warnung am Ziel.`,
+    summary: (distance: string, minutes: number) =>
+      `${distance} Luftlinie, geschätzt ${Math.floor(minutes / 60)} Std. ${minutes % 60} Min. Fahrt.`,
+    allClear:
+      "Auf der ganzen Strecke ist zur geschätzten Zeit nichts Auffälliges.",
+    worstLine: {
+      info: "Kleinigkeiten unterwegs – nichts, was die Fahrt betrifft.",
+      warnung:
+        "Unterwegs ist mit ungemütlichem Wetter zu rechnen. Zeitpunkt verschieben oder Pause einplanen.",
+      gefahr:
+        "Auf der Strecke droht Unwetter. Wenn möglich später losfahren – im Gewitter mit Anhänger oder Wohnwagen hat niemand etwas gewonnen.",
+    },
+    risk: {
+      gewitter: "Gewitter",
+      sturm: "Sturmböen",
+      regen: "Starkregen",
+      schnee: "Schnee",
+    },
+    riskNone: "Ruhig",
+    kmMark: (km: number) => `km ${km}`,
+    gusts: (kmh: number) => `${kmh} km/h`,
+    methodNote: (speed: number) =>
+      `Geprüft werden bis zu acht Punkte entlang der Luftlinie, jeweils für die geschätzte Ankunftszeit. Gerechnet wird mit ${speed} km/h über die Luftlinie – das ist eine grobe Schätzung und kein Routenplaner.`,
+    source: "Daten: Open-Meteo",
+  },
   shops: {
     sectionAria: "Einkaufen in der Nähe",
     title: "Einkaufen in der Nähe",

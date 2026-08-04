@@ -3743,6 +3743,46 @@ export const it: Translation = {
   },
 
   /** Parchi giochi e punti balneabili da OpenStreetMap (#248). */
+  routeWeather: {
+    sectionAria: "Maltempo sul percorso",
+    title: "Meteo lungo il tragitto",
+    subtitle: "Che cosa ti aspetta per strada – non solo all'arrivo.",
+    subtitleAtPlace: (place: string) =>
+      `Che cosa ti aspetta sulla strada per ${place} – non solo all'arrivo.`,
+    startGroupAria: "Scegli il punto di partenza",
+    startHome: "Da casa",
+    startCurrent: "Dalla mia posizione",
+    departureLabel: "Partenza",
+    loading: "Recupero del meteo lungo il percorso …",
+    loadFailed:
+      "Non è stato possibile caricare il meteo lungo il percorso – riprova più tardi.",
+    noStart:
+      "Nessun punto di partenza: registra un domicilio nel profilo o consenti la posizione.",
+    tooShort: (km: number) =>
+      `Sotto i ${km} km il controllo del percorso non serve – basta l'allerta all'arrivo.`,
+    summary: (distance: string, minutes: number) =>
+      `${distance} in linea d'aria, circa ${Math.floor(minutes / 60)} h ${minutes % 60} min di viaggio.`,
+    allClear: "Su tutto il percorso, agli orari stimati, nulla di rilevante.",
+    worstLine: {
+      info: "Piccolezze lungo la strada – nulla che riguardi la guida.",
+      warnung:
+        "Lungo la strada è previsto brutto tempo. Sposta la partenza o prevedi una sosta.",
+      gefahr:
+        "Sul percorso minaccia maltempo. Se puoi parti più tardi – sotto il temporale con rimorchio o caravan non ci guadagna nessuno.",
+    },
+    risk: {
+      gewitter: "Temporale",
+      sturm: "Raffiche di tempesta",
+      regen: "Pioggia intensa",
+      schnee: "Neve",
+    },
+    riskNone: "Tranquillo",
+    kmMark: (km: number) => `km ${km}`,
+    gusts: (kmh: number) => `${kmh} km/h`,
+    methodNote: (speed: number) =>
+      `Vengono controllati fino a otto punti lungo la linea d'aria, ciascuno per l'orario di arrivo stimato. Si calcola con ${speed} km/h sulla linea d'aria – è una stima approssimativa, non un navigatore.`,
+    source: "Dati: Open-Meteo",
+  },
   shops: {
     sectionAria: "Fare la spesa nei dintorni",
     title: "Fare la spesa nei dintorni",

@@ -25,12 +25,9 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 28 – 8 Punkte
+## Runde 28 – 7 Punkte
 
 ### Karte & Wetter
-
-- [ ] **Unwetter auf der Fahrtstrecke** (#275) – Warnungen entlang der Anreise,
-      nicht nur am Ziel
 
 ### Ordnung
 

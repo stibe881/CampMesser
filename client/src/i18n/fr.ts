@@ -3771,6 +3771,46 @@ export const fr: Translation = {
   },
 
   /** Places de jeux et lieux de baignade depuis OpenStreetMap (#248). */
+  routeWeather: {
+    sectionAria: "Intempéries sur le trajet",
+    title: "Météo sur le trajet",
+    subtitle: "Ce qui t'attend en route – pas seulement à l'arrivée.",
+    subtitleAtPlace: (place: string) =>
+      `Ce qui t'attend sur la route vers ${place} – pas seulement à l'arrivée.`,
+    startGroupAria: "Choisir le point de départ",
+    startHome: "Depuis le domicile",
+    startCurrent: "Depuis ma position",
+    departureLabel: "Départ",
+    loading: "Récupération de la météo le long du trajet …",
+    loadFailed:
+      "La météo le long du trajet n'a pas pu être chargée – réessaie plus tard.",
+    noStart:
+      "Pas de point de départ : enregistre un domicile dans le profil ou autorise la localisation.",
+    tooShort: (km: number) =>
+      `En dessous de ${km} km, l'analyse du trajet n'apporte rien – l'alerte à l'arrivée suffit.`,
+    summary: (distance: string, minutes: number) =>
+      `${distance} à vol d'oiseau, environ ${Math.floor(minutes / 60)} h ${minutes % 60} min de route.`,
+    allClear: "Rien de particulier sur tout le trajet aux heures estimées.",
+    worstLine: {
+      info: "Broutilles en route – rien qui concerne la conduite.",
+      warnung:
+        "Du mauvais temps est à prévoir en chemin. Décale le départ ou prévois une pause.",
+      gefahr:
+        "Des intempéries menacent sur le trajet. Pars plus tard si possible – personne n'a rien à gagner sous l'orage avec une remorque ou une caravane.",
+    },
+    risk: {
+      gewitter: "Orage",
+      sturm: "Rafales tempétueuses",
+      regen: "Fortes pluies",
+      schnee: "Neige",
+    },
+    riskNone: "Calme",
+    kmMark: (km: number) => `km ${km}`,
+    gusts: (kmh: number) => `${kmh} km/h`,
+    methodNote: (speed: number) =>
+      `Jusqu'à huit points le long de la ligne droite sont vérifiés, chacun pour son heure d'arrivée estimée. Le calcul se fait à ${speed} km/h à vol d'oiseau – c'est une estimation grossière, pas un calculateur d'itinéraire.`,
+    source: "Données : Open-Meteo",
+  },
   shops: {
     sectionAria: "Faire les courses à proximité",
     title: "Faire les courses à proximité",

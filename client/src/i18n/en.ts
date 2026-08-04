@@ -3661,6 +3661,47 @@ export const en: Translation = {
   },
 
   /** Playgrounds and bathing spots from OpenStreetMap (#248). */
+  routeWeather: {
+    sectionAria: "Severe weather along the route",
+    title: "Weather on the way",
+    subtitle: "What awaits you en route – not just at the destination.",
+    subtitleAtPlace: (place: string) =>
+      `What awaits you on the way to ${place} – not just at the destination.`,
+    startGroupAria: "Choose the starting point",
+    startHome: "From home",
+    startCurrent: "From my location",
+    departureLabel: "Departure",
+    loading: "Fetching the weather along the route …",
+    loadFailed:
+      "The weather along the route could not be loaded – please try again later.",
+    noStart:
+      "No starting point: save a home location in your profile or allow location access.",
+    tooShort: (km: number) =>
+      `Under ${km} km a route check adds nothing – the warning at the destination is enough.`,
+    summary: (distance: string, minutes: number) =>
+      `${distance} as the crow flies, roughly ${Math.floor(minutes / 60)} h ${minutes % 60} min of driving.`,
+    allClear:
+      "Nothing notable anywhere along the route at the estimated times.",
+    worstLine: {
+      info: "Minor stuff en route – nothing that affects the drive.",
+      warnung:
+        "Rough weather is likely on the way. Shift your departure or plan a break.",
+      gefahr:
+        "Severe weather threatens along the route. Leave later if you can – nobody gains anything from a thunderstorm with a trailer or caravan.",
+    },
+    risk: {
+      gewitter: "Thunderstorm",
+      sturm: "Storm gusts",
+      regen: "Heavy rain",
+      schnee: "Snow",
+    },
+    riskNone: "Calm",
+    kmMark: (km: number) => `km ${km}`,
+    gusts: (kmh: number) => `${kmh} km/h`,
+    methodNote: (speed: number) =>
+      `Up to eight points along the straight line are checked, each for its estimated arrival time. The maths uses ${speed} km/h along the straight line – a rough estimate, not a route planner.`,
+    source: "Data: Open-Meteo",
+  },
   shops: {
     sectionAria: "Shopping nearby",
     title: "Shopping nearby",
