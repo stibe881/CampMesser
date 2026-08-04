@@ -16,6 +16,7 @@ import {
   EyeOff,
   CopyPlus,
   Download,
+  Fuel,
   Gauge,
   GraduationCap,
   LayoutGrid,
@@ -91,11 +92,19 @@ import {
   EXPENSE_MAX_RAPPEN,
   EXPENSE_PAID_BY_MAX_LENGTH,
   expensesByCategory,
+  budgetStatus,
+  BUDGET_MAX_RAPPEN,
   expensesTotalRappen,
   normalizeExpenseCategory,
   settleUp,
   type ExpenseCategory,
 } from "@shared/expenses";
+import { csvFileName, expensesToCsv } from "@shared/expensesCsv";
+import {
+  DEFAULT_CONSUMPTION_L100,
+  DEFAULT_FUEL_PRICE_RAPPEN,
+  fuelCost,
+} from "@shared/fuelCost";
 import {
   computeTripStats,
   computeYearReview,
@@ -143,6 +152,8 @@ import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import { drawYearReview } from "@/lib/yearReviewImage";
 import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
+import TripDatePoll from "@/components/TripDatePoll";
+import TripGuestbook from "@/components/TripGuestbook";
 
 /** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
 const FREE_LOCATION = "frei";
@@ -1406,12 +1417,15 @@ function TripExpenses({
   tripName,
   defaultDay,
   shared,
+  budgetRappen,
 }: {
   tripId: number;
   tripName: string;
   /** Vorschlag fürs Datumsfeld: heute, sonst der Reisebeginn. */
   defaultDay: string;
   shared: boolean;
+  /** Reise-Budget in Rappen (#256); null = keins gesetzt. */
+  budgetRappen: number | null;
 }) {
   const { lang, t } = useI18n();
   const { user } = useAuth();
@@ -1424,6 +1438,19 @@ function TripExpenses({
   const [description, setDescription] = useState("");
   const [day, setDay] = useState(defaultDay);
   const [paidBy, setPaidBy] = useState("");
+  /** Budget-Feld (#256): offen = Eingabe sichtbar. */
+  const [editingBudget, setEditingBudget] = useState(false);
+  const [budgetInput, setBudgetInput] = useState("");
+  /** Fahrtkosten-Rechner (#259). */
+  const [fuelOpen, setFuelOpen] = useState(false);
+  const [fuelKm, setFuelKm] = useState("");
+  const [fuelConsumption, setFuelConsumption] = useState(
+    String(DEFAULT_CONSUMPTION_L100)
+  );
+  const [fuelPrice, setFuelPrice] = useState(
+    rappenToInput(DEFAULT_FUEL_PRICE_RAPPEN)
+  );
+  const [fuelRoundTrip, setFuelRoundTrip] = useState(true);
 
   const query = trpc.trips.expenses.list.useQuery(
     { tripId },
@@ -1465,6 +1492,15 @@ function TripExpenses({
 
   const total = useMemo(() => expensesTotalRappen(expenses), [expenses]);
   const byCategory = useMemo(() => expensesByCategory(expenses), [expenses]);
+  const budget = budgetStatus(total, budgetRappen);
+  const budgetMutation = trpc.trips.expenses.setBudget.useMutation({
+    onSuccess: () => {
+      utils.trips.list.invalidate();
+      setEditingBudget(false);
+      toast.success(t.tripExpenses.budgetSaved);
+    },
+    onError: e => toast.error(e.message || t.tripExpenses.budgetSaveFailed),
+  });
   const settlements = useMemo(
     () =>
       settleUp(expenses.map(e => ({ who: e.paidBy, rappen: e.amountRappen }))),
@@ -1537,6 +1573,61 @@ function TripExpenses({
 
   const busy = addMutation.isPending || updateMutation.isPending;
 
+  /** Zwischenstand des Fahrtkosten-Rechners (#259). */
+  const fuelResult = fuelCost({
+    distanceKm: Number(fuelKm.replace(",", ".")) || 0,
+    consumptionL100: Number(fuelConsumption.replace(",", ".")) || 0,
+    pricePerLiterRappen: parseChfInput(fuelPrice) ?? 0,
+    roundTrip: fuelRoundTrip,
+  });
+
+  /**
+   * Ergebnis in die Reisekasse übernehmen: Das Formular wird VORAUSGEFÜLLT
+   * statt sofort gespeichert – der Betrag ist eine Schätzung, und wer sie
+   * nicht will, soll sie nicht erst wieder löschen müssen.
+   */
+  const applyFuelResult = () => {
+    if (fuelResult.rappen < 1) {
+      toast.error(t.tripExpenses.fuelInvalid);
+      return;
+    }
+    setEditing("neu");
+    setAmount(rappenToInput(fuelResult.rappen));
+    setCategory("sprit");
+    setDescription(
+      t.tripExpenses.fuelDescription(Math.round(fuelResult.totalKm))
+    );
+    setDay(defaultDay);
+    setPaidBy(
+      knownPayers[0] ?? user?.name ?? user?.email ?? t.tripExpenses.meFallback
+    );
+    setFuelOpen(false);
+  };
+
+  /**
+   * CSV herunterladen (#258): Die Datei entsteht im Browser aus den
+   * bereits geladenen Zeilen – kein zweiter Abruf, und die Ausgaben
+   * verlassen das Gerät nicht noch einmal.
+   */
+  const downloadCsv = () => {
+    const csv = expensesToCsv(expenses, {
+      headers: t.tripExpenses.csvHeaders,
+      categoryLabel: category =>
+        pick(EXPENSE_CATEGORY_LABELS[normalizeExpenseCategory(category)], lang),
+      totalLabel: t.tripExpenses.total,
+    });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = csvFileName(
+      tripName,
+      new Date().toISOString().slice(0, 10)
+    );
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="mt-2 rounded-lg border border-border bg-card">
       <button
@@ -1566,6 +1657,135 @@ function TripExpenses({
       {open && (
         <div className="space-y-3 border-t border-border px-3 py-2.5">
           <p className="text-xs text-muted-foreground">{t.tripExpenses.hint}</p>
+          {/* Budget (#256): steht ÜBER den Ausgaben und auch dann, wenn
+              noch keine erfasst ist – ein Budget setzt man vorher. */}
+          <div className="rounded-lg border border-border bg-muted/20 px-3 py-2">
+            {editingBudget ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <label
+                  className="text-xs text-muted-foreground"
+                  htmlFor={`budget-${tripId}`}
+                >
+                  {t.tripExpenses.budgetLabel}
+                </label>
+                <Input
+                  id={`budget-${tripId}`}
+                  inputMode="decimal"
+                  className="w-28"
+                  value={budgetInput}
+                  placeholder="0.00"
+                  onChange={e => setBudgetInput(e.target.value)}
+                />
+                <Button
+                  size="sm"
+                  disabled={budgetMutation.isPending}
+                  onClick={() => {
+                    const rappen = parseChfInput(budgetInput);
+                    if (rappen === null || rappen < 1) {
+                      toast.error(t.tripExpenses.budgetInvalid);
+                      return;
+                    }
+                    budgetMutation.mutate({
+                      tripId,
+                      budgetRappen: Math.min(rappen, BUDGET_MAX_RAPPEN),
+                    });
+                  }}
+                >
+                  {t.common.save}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setEditingBudget(false)}
+                >
+                  {t.common.cancel}
+                </Button>
+                {budgetRappen != null && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-muted-foreground"
+                    disabled={budgetMutation.isPending}
+                    onClick={() =>
+                      budgetMutation.mutate({ tripId, budgetRappen: null })
+                    }
+                  >
+                    {t.tripExpenses.budgetRemove}
+                  </Button>
+                )}
+              </div>
+            ) : budget ? (
+              <>
+                <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t.tripExpenses.budgetTitle}
+                  </span>
+                  <span className="font-mono text-sm tabular-nums">
+                    {money(budget.spentRappen)} / {money(budget.budgetRappen)}
+                  </span>
+                </div>
+                <div
+                  className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted"
+                  role="img"
+                  aria-label={t.tripExpenses.budgetBarAria(budget.percent)}
+                >
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all",
+                      budget.level === "over"
+                        ? "bg-destructive"
+                        : budget.level === "tight"
+                          ? "bg-amber-500"
+                          : "bg-primary"
+                    )}
+                    // Der Balken wird bei 100 % gekappt, die ZAHL nicht –
+                    // «142 %» sagt mehr als ein voller Balken.
+                    style={{ width: `${Math.min(100, budget.percent)}%` }}
+                  />
+                </div>
+                <p
+                  className={cn(
+                    "mt-1 text-xs",
+                    budget.level === "over"
+                      ? "font-medium text-destructive"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {budget.level === "over"
+                    ? t.tripExpenses.budgetOver(
+                        money(-budget.remainingRappen),
+                        budget.percent
+                      )
+                    : t.tripExpenses.budgetLeft(
+                        money(budget.remainingRappen),
+                        budget.percent
+                      )}
+                </p>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="mt-1 h-7 px-2 text-xs text-muted-foreground"
+                  onClick={() => {
+                    setBudgetInput(rappenToInput(budget.budgetRappen));
+                    setEditingBudget(true);
+                  }}
+                >
+                  {t.tripExpenses.budgetEdit}
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setBudgetInput("");
+                  setEditingBudget(true);
+                }}
+              >
+                {t.tripExpenses.budgetSet}
+              </Button>
+            )}
+          </div>
           {query.isLoading ? (
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -1673,6 +1893,116 @@ function TripExpenses({
                     <p className="mt-1 text-xs text-muted-foreground">
                       {t.tripExpenses.settleHint}
                     </p>
+                  </div>
+
+                  {/* CSV-Export (#258) – für die Abrechnung daheim */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={downloadCsv}
+                    aria-label={t.tripExpenses.csvAria(tripName)}
+                  >
+                    <Download className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    {t.tripExpenses.csvButton}
+                  </Button>
+
+                  {/* Fahrtkosten-Rechner (#259): der einzige Posten ohne
+                      Beleg – man weiss nur, wie weit man gefahren ist */}
+                  <div className="rounded-lg border border-border bg-muted/20 px-3 py-2">
+                    <button
+                      type="button"
+                      onClick={() => setFuelOpen(o => !o)}
+                      aria-expanded={fuelOpen}
+                      className="flex w-full items-center gap-2 text-left text-sm font-medium"
+                    >
+                      <Fuel
+                        className="h-4 w-4 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                      <span className="flex-1">{t.tripExpenses.fuelTitle}</span>
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                          fuelOpen && "rotate-180"
+                        )}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    {fuelOpen && (
+                      <div className="mt-2 space-y-2">
+                        <p className="text-xs text-muted-foreground">
+                          {t.tripExpenses.fuelHint}
+                        </p>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                          <div>
+                            <label
+                              className="text-xs text-muted-foreground"
+                              htmlFor={`fuel-km-${tripId}`}
+                            >
+                              {t.tripExpenses.fuelKmLabel}
+                            </label>
+                            <Input
+                              id={`fuel-km-${tripId}`}
+                              inputMode="decimal"
+                              value={fuelKm}
+                              placeholder="0"
+                              onChange={e => setFuelKm(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label
+                              className="text-xs text-muted-foreground"
+                              htmlFor={`fuel-l-${tripId}`}
+                            >
+                              {t.tripExpenses.fuelConsumptionLabel}
+                            </label>
+                            <Input
+                              id={`fuel-l-${tripId}`}
+                              inputMode="decimal"
+                              value={fuelConsumption}
+                              onChange={e => setFuelConsumption(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label
+                              className="text-xs text-muted-foreground"
+                              htmlFor={`fuel-p-${tripId}`}
+                            >
+                              {t.tripExpenses.fuelPriceLabel}
+                            </label>
+                            <Input
+                              id={`fuel-p-${tripId}`}
+                              inputMode="decimal"
+                              value={fuelPrice}
+                              onChange={e => setFuelPrice(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <label className="flex items-center gap-2 text-sm">
+                          <Checkbox
+                            checked={fuelRoundTrip}
+                            onCheckedChange={value =>
+                              setFuelRoundTrip(value === true)
+                            }
+                          />
+                          {t.tripExpenses.fuelRoundTrip}
+                        </label>
+                        <p className="text-sm">
+                          {t.tripExpenses.fuelResult(
+                            Math.round(fuelResult.totalKm),
+                            fuelResult.liters.toFixed(1),
+                            money(fuelResult.rappen)
+                          )}
+                        </p>
+                        <Button
+                          size="sm"
+                          onClick={applyFuelResult}
+                          disabled={fuelResult.rappen < 1}
+                        >
+                          {t.tripExpenses.fuelApply}
+                        </Button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Einzelne Ausgaben */}
@@ -4307,7 +4637,18 @@ export default function TripsPage() {
                         tripName={trip.title || placeName(trip)}
                         defaultDay={today > trip.endDate ? trip.endDate : today}
                         shared={trip.shared || trip.role === "member"}
+                        budgetRappen={trip.budgetRappen}
                       />
+                      {/* Termin-Finder (#253): nur bei gemeinsamen Reisen und
+                          nur, solange die Reise noch bevorsteht – über einen
+                          bereits gelaufenen Aufenthalt stimmt niemand ab */}
+                      {(trip.shared || trip.role === "member") &&
+                        trip.startDate > today && (
+                          <TripDatePoll
+                            tripId={trip.id}
+                            tripName={trip.title || placeName(trip)}
+                          />
+                        )}
                       {/* Pinnwand (#245): nur bei gemeinsamen Reisen – allein
                           hätte man niemanden, dem man etwas anpinnen könnte */}
                       {(trip.shared || trip.role === "member") && (
@@ -4316,6 +4657,13 @@ export default function TripsPage() {
                           tripName={trip.title || placeName(trip)}
                         />
                       )}
+                      {/* Gästebuch (#254): auch bei einer Reise ohne
+                          Mitreisende – über den Teil-Link können Bekannte
+                          einen Gruss hinterlassen */}
+                      <TripGuestbook
+                        tripId={trip.id}
+                        tripName={trip.title || placeName(trip)}
+                      />
                       <TripPhotos
                         tripId={trip.id}
                         tripName={trip.title || placeName(trip)}
@@ -4578,6 +4926,7 @@ export default function TripsPage() {
                             today > trip.endDate ? trip.endDate : today
                           }
                           shared={trip.shared || trip.role === "member"}
+                          budgetRappen={trip.budgetRappen}
                         />
                         {/* Pinnwand (#245): nur bei gemeinsamen Reisen */}
                         {(trip.shared || trip.role === "member") && (
@@ -4586,6 +4935,12 @@ export default function TripsPage() {
                             tripName={trip.title || placeName(trip)}
                           />
                         )}
+                        {/* Gästebuch (#254): gerade bei vergangenen Reisen
+                            die Erinnerungs-Seite – Grüsse bleiben stehen */}
+                        <TripGuestbook
+                          tripId={trip.id}
+                          tripName={trip.title || placeName(trip)}
+                        />
                         <TripPhotos
                           tripId={trip.id}
                           tripName={trip.title || placeName(trip)}

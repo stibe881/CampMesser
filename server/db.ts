@@ -60,6 +60,11 @@ import {
   InsertTripBoardNote,
   tripExpenses,
   InsertTripExpense,
+  tripDateOptions,
+  InsertTripDateOption,
+  tripDateVotes,
+  tripGuestbook,
+  InsertTripGuestbookEntry,
   tripInvites,
   tripJournal,
   tripLogs,
@@ -1550,6 +1555,7 @@ export async function updateTripLog(
       | "rating"
       | "arrivalTime"
       | "departureTime"
+      | "budgetRappen"
       | "pitchNumber"
       | "wifiName"
       | "wifiPassword"
@@ -1574,6 +1580,23 @@ export async function getTripLog(id: number, userId: number) {
     .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)))
     .limit(1);
   return rows[0];
+}
+
+/**
+ * Reise-Budget (#256) setzen oder mit null entfernen. Bewusst OHNE
+ * Besitz-Filter: Die Reisekasse gehört allen Mitreisenden, also darf auch
+ * die Grenze davon gemeinsam gepflegt werden. Die Berechtigung prüft der
+ * Router mit canAccessTrip.
+ */
+export async function setTripBudget(
+  tripId: number,
+  budgetRappen: number | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripLogs)
+    .set({ budgetRappen })
+    .where(eq(tripLogs.id, tripId));
 }
 
 /** Sterne-Bewertung (1–5) setzen oder mit null entfernen (nur eigener Eintrag). */
@@ -1663,6 +1686,10 @@ export async function deleteTripLog(id: number, userId: number) {
   await db.delete(tripInvites).where(eq(tripInvites.tripId, id));
   // Gemeinsame Reise-Einkaufsliste hängt an der Reise – ebenfalls weg
   await db.delete(tripShoppingItems).where(eq(tripShoppingItems.tripId, id));
+  // Termin-Finder (#253): Vorschläge samt Stimmen der Reise
+  await deleteTripDateOptionsForTrip(id);
+  // Gästebuch (#254) hängt ohne userId an der Reise
+  await db.delete(tripGuestbook).where(eq(tripGuestbook.tripId, id));
 }
 
 // ── Reise-Mitglieder & Einladungen ──
@@ -1813,6 +1840,141 @@ export async function getMemberTripLogs(userId: number) {
     .orderBy(desc(tripLogs.startDate), desc(tripLogs.id));
 }
 
+/**
+ * Gästebuch (#254): Einträge einer Reise, neuste zuoberst. Die Reihenfolge
+ * steht schon hier fest, damit die geteilte Ansicht und die App dieselbe
+ * Liste sehen. Nur NACH einer Zugriffs-Prüfung im Router verwenden
+ * (canAccessTrip oder gültiger Teil-Token).
+ */
+export async function getTripGuestbook(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripGuestbook)
+    .where(eq(tripGuestbook.tripId, tripId))
+    .orderBy(desc(tripGuestbook.createdAt), desc(tripGuestbook.id));
+}
+
+/** Einzelnen Eintrag laden – für die Zugriffs-Prüfung über seine Reise. */
+export async function getTripGuestbookEntry(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripGuestbook)
+    .where(eq(tripGuestbook.id, id))
+    .limit(1);
+  return rows[0];
+}
+
+/** Eintrag anlegen – userId null bedeutet «Gast über den Teil-Link». */
+export async function createTripGuestbookEntry(data: InsertTripGuestbookEntry) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(tripGuestbook).values(data);
+  return result.insertId;
+}
+
+/** Eintrag löschen – nur NACH einer Berechtigungs-Prüfung im Router. */
+export async function deleteTripGuestbookEntry(id: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripGuestbook).where(eq(tripGuestbook.id, id));
+}
+
+/**
+ * Verweise auf ein gelöschtes Reise-Foto lösen: Der Gruss bleibt, das Bild
+ * verschwindet – ein Eintrag ist mehr als sein Foto.
+ */
+export async function clearGuestbookPhoto(photoId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripGuestbook)
+    .set({ photoId: null })
+    .where(eq(tripGuestbook.photoId, photoId));
+}
+
+/**
+ * Termin-Finder (#253): Vorschläge einer Reise, früheste zuerst. Sortiert
+ * wird hier nach Datum und nicht nach Zustimmung – die Rangliste rechnet
+ * `rankOptions` aus den Stimmen, die Datenbank kennt sie nicht.
+ * Nur NACH einer canAccessTrip-Prüfung im Router verwenden.
+ */
+export async function getTripDateOptions(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripDateOptions)
+    .where(eq(tripDateOptions.tripId, tripId))
+    .orderBy(asc(tripDateOptions.startDate), asc(tripDateOptions.id));
+}
+
+/** Einzelnen Vorschlag laden – für die Zugriffs-Prüfung über seine Reise. */
+export async function getTripDateOption(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripDateOptions)
+    .where(eq(tripDateOptions.id, id))
+    .limit(1);
+  return rows[0];
+}
+
+/** Vorschlag anlegen – nur NACH einer canAccessTrip-Prüfung im Router. */
+export async function createTripDateOption(data: InsertTripDateOption) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(tripDateOptions).values(data);
+  return result.insertId;
+}
+
+/**
+ * Vorschlag löschen – die Stimmen dazu gehen mit, sonst bliebe eine
+ * verwaiste Zeile pro Person zurück und der nächste Vorschlag mit
+ * derselben Id (nach einem Restore) erbte fremde Antworten.
+ */
+export async function deleteTripDateOption(id: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripDateVotes).where(eq(tripDateVotes.optionId, id));
+  await db.delete(tripDateOptions).where(eq(tripDateOptions.id, id));
+}
+
+/** Stimmen zu den Vorschlägen einer Reise. */
+export async function getTripDateVotes(optionIds: number[]) {
+  if (optionIds.length === 0) return [];
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripDateVotes)
+    .where(inArray(tripDateVotes.optionId, optionIds));
+}
+
+/**
+ * Abstimmen oder umstimmen: eine Zeile pro Vorschlag und Konto
+ * (unique optionId+userId), ein zweiter Aufruf ersetzt die Antwort.
+ */
+export async function setTripDateVote(
+  optionId: number,
+  userId: number,
+  vote: string
+) {
+  const db = requireDb(await getDb());
+  await db
+    .insert(tripDateVotes)
+    .values({ optionId, userId, vote })
+    .onDuplicateKeyUpdate({ set: { vote } });
+}
+
+/** Alle Vorschläge samt Stimmen einer Reise entfernen (Reise gelöscht). */
+export async function deleteTripDateOptionsForTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  const options = await db
+    .select({ id: tripDateOptions.id })
+    .from(tripDateOptions)
+    .where(eq(tripDateOptions.tripId, tripId));
+  const ids = options.map(option => option.id);
+  if (ids.length > 0) {
+    await db.delete(tripDateVotes).where(inArray(tripDateVotes.optionId, ids));
+  }
+  await db.delete(tripDateOptions).where(eq(tripDateOptions.tripId, tripId));
+}
+
 /** Aktiver Einladungs-Link einer Reise (undefined = keiner). */
 export async function getTripInvite(tripId: number) {
   const db = requireDb(await getDb());
@@ -1939,6 +2101,8 @@ export async function getTripPhotoByFileNameAny(fileName: string) {
 /** Foto-Zeile löschen – nur NACH einer canAccessTrip-Prüfung im Router. */
 export async function deleteTripPhotoById(id: number) {
   const db = requireDb(await getDb());
+  // Gästebuch-Einträge (#254) verlieren nur das Bild, nicht den Text
+  await clearGuestbookPhoto(id);
   await db.delete(tripPhotos).where(eq(tripPhotos.id, id));
 }
 
@@ -2162,6 +2326,24 @@ export async function getTripExpenses(tripId: number) {
     .from(tripExpenses)
     .where(eq(tripExpenses.tripId, tripId))
     .orderBy(desc(tripExpenses.day), desc(tripExpenses.id));
+}
+
+/**
+ * Ausgaben mehrerer Reisen in EINER Abfrage (#257) – für die Statistik
+ * über alle Reisen. Ohne Ids gibt es nichts zu holen; der Router
+ * übergibt ausschliesslich Ids EIGENER Reisen.
+ */
+export async function getExpensesForTrips(tripIds: number[]) {
+  if (tripIds.length === 0) return [];
+  const db = requireDb(await getDb());
+  return db
+    .select({
+      tripId: tripExpenses.tripId,
+      amountRappen: tripExpenses.amountRappen,
+      category: tripExpenses.category,
+    })
+    .from(tripExpenses)
+    .where(inArray(tripExpenses.tripId, tripIds));
 }
 
 /** Einzelne Ausgabe laden (für die Zugriffsprüfung über ihre tripId). */

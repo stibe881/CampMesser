@@ -41,7 +41,13 @@ export interface Module {
   title: L4;
   description: L4;
   icon: React.ComponentType<{ className?: string }>;
-  group: "reise" | "vorOrt" | "Sicherheit" | "Erste Hilfe" | "Energie & Wasser";
+  group:
+    | "reise"
+    | "ausruestung"
+    | "vorOrt"
+    | "Sicherheit"
+    | "Erste Hilfe"
+    | "Energie & Wasser";
   offline?: boolean;
 }
 
@@ -85,7 +91,7 @@ export const modules: Module[] = [
       "Track your gear with weight and volume"
     ),
     icon: Package,
-    group: "reise",
+    group: "ausruestung",
   },
   {
     path: "/kisten",
@@ -97,7 +103,7 @@ export const modules: Module[] = [
       "What is in which box? Printable labels with QR code"
     ),
     icon: PackageOpen,
-    group: "reise",
+    group: "ausruestung",
   },
   {
     path: "/packen",
@@ -114,7 +120,7 @@ export const modules: Module[] = [
       "Keep weight and packed size under control"
     ),
     icon: Scale,
-    group: "reise",
+    group: "ausruestung",
   },
   {
     path: "/zuladung",
@@ -131,7 +137,7 @@ export const modules: Module[] = [
       "Is the rig overloaded? Gross weight, towing capacity, nose weight"
     ),
     icon: Truck,
-    group: "reise",
+    group: "ausruestung",
     offline: true,
   },
   {
@@ -510,6 +516,7 @@ export const modules: Module[] = [
 
 export const groups = [
   "reise",
+  "ausruestung",
   "vorOrt",
   "Sicherheit",
   "Energie & Wasser",
@@ -524,6 +531,7 @@ export const groupLabels: Record<(typeof groups)[number], L4> = {
     "Pianificare il viaggio",
     "Plan your trip"
   ),
+  ausruestung: l4("Ausrüstung", "Équipement", "Attrezzatura", "Gear"),
   vorOrt: l4("Vor Ort", "Sur place", "Sul posto", "On site"),
   Sicherheit: l4("Sicherheit", "Sécurité", "Sicurezza", "Safety"),
   // Historischer Schlüssel «Erste Hilfe»: die Gruppe enthält längst Knoten,

@@ -18,9 +18,10 @@ import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { LOCALE_TAGS } from "@shared/i18n";
+import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { computeTripStats, nightsPerYear } from "@shared/trips";
 import { estimatedTotalRappen, spotCostComparison } from "@shared/spotCosts";
+import { EXPENSE_CATEGORY_LABELS } from "@shared/expenses";
 import { formatChf } from "@/lib/money";
 import { milestones } from "@shared/milestones";
 import { weatherLuck } from "@shared/tripWeather";
@@ -143,6 +144,11 @@ export default function Stats() {
   });
   const spotsQuery = trpc.spots.list.useQuery(undefined, {
     enabled,
+    staleTime: 60_000,
+  });
+  // Ausgaben über alle Reisen (#257) – eine Abfrage, serverseitig gerechnet
+  const expenseStatsQuery = trpc.trips.expenses.stats.useQuery(undefined, {
+    enabled: isAuthenticated,
     staleTime: 60_000,
   });
   const sightingsQuery = trpc.sightings.list.useQuery(undefined, {
@@ -338,6 +344,70 @@ export default function Stats() {
           )}
         </CardContent>
       </Card>
+
+      {/* Ausgaben über alle Reisen (#257) – erst ab der ersten Ausgabe */}
+      {expenseStatsQuery.data && expenseStatsQuery.data.totalRappen > 0 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <SectionHeader
+              icon={Wallet}
+              title={ts.expensesTitle}
+              href="/reisen"
+              linkLabel={ts.expensesLink}
+            />
+            <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <Stat
+                label={ts.expensesTotal}
+                value={fmtChf(expenseStatsQuery.data.totalRappen)}
+              />
+              {expenseStatsQuery.data.perNightRappen !== null && (
+                <Stat
+                  label={ts.expensesPerNight}
+                  value={fmtChf(expenseStatsQuery.data.perNightRappen)}
+                />
+              )}
+              {expenseStatsQuery.data.topCategory && (
+                <Stat
+                  label={ts.expensesTopCategory}
+                  value={pick(
+                    EXPENSE_CATEGORY_LABELS[
+                      expenseStatsQuery.data.topCategory.category
+                    ],
+                    lang
+                  )}
+                />
+              )}
+            </div>
+            <ul className="space-y-2">
+              {expenseStatsQuery.data.years.map(year => (
+                <li
+                  key={year.year}
+                  className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-border/60 pb-2 last:border-0 last:pb-0"
+                >
+                  <span className="text-sm font-medium">{year.year}</span>
+                  <span className="flex items-baseline gap-2">
+                    <span className="text-sm font-semibold tabular-nums">
+                      {fmtChf(year.rappen)}
+                    </span>
+                    {year.perNightRappen !== null && (
+                      <span className="text-xs text-muted-foreground">
+                        {ts.expensesYearDetail(
+                          year.trips,
+                          year.nights,
+                          fmtChf(year.perNightRappen)
+                        )}
+                      </span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {ts.expensesHint}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Platz-Vergleich (#243): nur mit mindestens einem erfassten Preis */}
       {spotCosts.length > 0 && (

@@ -6,6 +6,11 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
+  "id": "/",
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "background_color": "#faf6ef",
   "theme_color": "#1d4230",
   "lang": "de-CH",

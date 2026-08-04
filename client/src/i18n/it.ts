@@ -159,6 +159,7 @@ export const it: Translation = {
       "Scegli quali sezioni compaiono sopra le schede. Il saluto, la ricerca e le schede stesse restano sempre visibili. Da connesso la scelta vale su tutti i tuoi dispositivi.",
     widgetNames: {
       onboarding: "Primi passi",
+      briefing: "Briefing del mattino",
       trip: "Soggiorno in corso / prossimo",
       anniversary: "Un anno fa",
       weather: "Meteo",
@@ -704,6 +705,16 @@ export const it: Translation = {
     emptySuffix: "con peso e volume.",
   },
   inventory: {
+    boxButton: "Riporre",
+    boxAria: (name: string) => `Riporre ${name} in una cassa`,
+    boxDialogTitle: "Riporre in una cassa",
+    boxDialogDescription:
+      "Scegli la cassa in cui si trova questo oggetto. Comparirà nel suo contenuto – anche dopo aver inquadrato l'etichetta.",
+    boxAssigned: "Assegnazione salvata",
+    boxRemove: "Togliere dalla cassa",
+    boxNoBoxes:
+      "Ancora nessuna cassa. Creane prima una, poi potrai riporre da qui.",
+    boxManageLink: "Gestire le casse",
     title: "Inventario",
     subtitleLoggedOut:
       "Registra il tuo materiale da campeggio con peso e volume.",
@@ -2560,6 +2571,34 @@ export const it: Translation = {
     removeFailed: "Impossibile togliere il biglietto",
   },
   tripExpenses: {
+    fuelTitle: "Calcolare i costi di viaggio",
+    fuelHint:
+      "Chilometri × consumo × prezzo del carburante. Si calcola con il consumo medio – chi vuole più precisione inserisce l'importo a mano.",
+    fuelKmLabel: "Distanza (km)",
+    fuelConsumptionLabel: "Consumo (l/100 km)",
+    fuelPriceLabel: "Prezzo (CHF/l)",
+    fuelRoundTrip: "Andata e ritorno",
+    fuelResult: (km: number, liters: string, amount: string) =>
+      `${km} km · ${liters} l · ${amount}`,
+    fuelApply: "Riprendere nella cassa",
+    fuelInvalid: "Inserisci distanza, consumo e prezzo.",
+    fuelDescription: (km: number) => `Tragitto ${km} km`,
+    csvButton: "Esportare come CSV",
+    csvAria: (trip: string) => `Scaricare la cassa di ${trip} come CSV`,
+    csvHeaders: ["Data", "Categoria", "Descrizione", "Pagato da", "Importo"],
+    budgetTitle: "Budget",
+    budgetLabel: "Budget (CHF)",
+    budgetSet: "Impostare un budget",
+    budgetEdit: "Modificare il budget",
+    budgetRemove: "Rimuovere il budget",
+    budgetSaved: "Budget salvato",
+    budgetSaveFailed: "Impossibile salvare il budget",
+    budgetInvalid: "Inserisci un importo maggiore di zero.",
+    budgetBarAria: (percent: number) => `${percent} % del budget utilizzato`,
+    budgetLeft: (amount: string, percent: number) =>
+      `Restano ${amount} (${percent} % utilizzato).`,
+    budgetOver: (amount: string, percent: number) =>
+      `${amount} oltre il budget (${percent} % utilizzato).`,
     title: "Cassa del viaggio",
     toggleAria: (name: string) => `Apri o chiudi la cassa del viaggio ${name}`,
     hint: "Annota quanto costa il viaggio – alla fine vedi chi deve cosa a chi.",
@@ -3273,7 +3312,84 @@ export const it: Translation = {
     turnRight: (deg: number) => `Ruota ancora di ${deg}° a destra.`,
     source: "Valori del vento da Open-Meteo, regole pratiche di montaggio.",
   },
+  briefing: {
+    title: "Briefing del mattino",
+    sectionAria: "Briefing del mattino per il soggiorno in corso",
+    astroLine: (phase: string, percent: number) =>
+      `${phase} – la luna è illuminata al ${percent} %.`,
+    moreTasks: (count: number) =>
+      count === 1 ? "e 1 altro compito" : `e altri ${count} compiti`,
+  },
+  guestbook: {
+    title: "Libro degli ospiti",
+    toggleAria: (trip: string) => `Aprire il libro degli ospiti di ${trip}`,
+    hint: "Saluti e ricordi del viaggio – dai compagni di viaggio e da tutti quelli che hanno il link condiviso.",
+    empty: "Ancora nessun messaggio. Scrivi il primo saluto.",
+    count: (total: number) =>
+      total === 1 ? "1 messaggio" : `${total} messaggi`,
+    messagePlaceholder: "Il tuo saluto …",
+    messageAria: "Messaggio del libro degli ospiti",
+    messageRequired: "Senza testo niente messaggio.",
+    addButton: "Pubblicare",
+    added: "Messaggio salvato",
+    addFailed: "Impossibile salvare il messaggio",
+    removed: "Messaggio eliminato",
+    removeFailed: "Impossibile eliminare il messaggio",
+    removeAria: (author: string) => `Eliminare il messaggio di ${author}`,
+    guestFallback: "Ospite",
+    viaLink: "tramite il link condiviso",
+    noPhoto: "Senza immagine",
+    photoOption: (index: number) => `Foto ${index}`,
+    photoSelectAria: "Allegare una foto dalla galleria del viaggio",
+    photoAlt: (author: string) => `Foto del messaggio di ${author}`,
+    photoGone: "La foto allegata è stata eliminata.",
+    nameLabel: "Il tuo nome",
+    namePlaceholder: "p. es. nonna Vreni",
+    guestHint:
+      "Non sei registrato – il tuo messaggio comparirà come ospite. Qui non puoi allegare un'immagine.",
+    guestAdded: "Grazie per il tuo saluto!",
+  },
+  datePoll: {
+    title: "Trova-data",
+    toggleAria: (trip: string) => `Aprire il trova-data per ${trip}`,
+    hint: "Proponi periodi e rispondete per ciascuno con Sì, Forse o No. Vince il periodo senza rifiuti – anche con meno Sì.",
+    empty:
+      "Ancora nessuna proposta. Inserisci un periodo, poi tutti possono rispondere.",
+    startLabel: "Arrivo",
+    endLabel: "Partenza",
+    notePlaceholder: "Nota, p. es. «ponte»",
+    noteAria: "Nota sulla proposta",
+    addButton: "Proporre",
+    added: "Proposta aggiunta",
+    addFailed: "Impossibile salvare la proposta",
+    rangeInvalid: "La partenza deve essere dopo l'arrivo.",
+    removed: "Proposta eliminata",
+    removeFailed: "Impossibile eliminare la proposta",
+    removeAria: (range: string) => `Eliminare la proposta ${range}`,
+    voteFailed: "Impossibile salvare la risposta",
+    voteGroupAria: "La tua risposta per questo periodo",
+    voteLabel: { yes: "Sì", maybe: "Forse", no: "No" },
+    nights: (count: number) => (count === 1 ? "1 notte" : `${count} notti`),
+    unanimous: "Tutti d'accordo",
+    leadingAria: "Attualmente in testa",
+    missing: (names: string) => `Manca ancora: ${names}`,
+    progress: (answered: number, expected: number) =>
+      `${answered} risposte su ${expected}`,
+    decided: (range: string) =>
+      `Hanno risposto tutti – ${range} è in testa e sarebbe la data.`,
+    applyButton: "Adottare come data del viaggio",
+    applied: "Data del viaggio adottata",
+    applyFailed: "Impossibile adottare la data",
+    currentDate: "Data attuale del viaggio",
+    maxReached: (max: number) =>
+      `Oltre ${max} proposte non risponde più nessuno – eliminane una per fare spazio.`,
+  },
   boxes: {
+    saveImageButton: "Salvare come immagine",
+    saveImageDone: "Etichetta salvata come immagine",
+    saveImageFailed: "Impossibile creare l'immagine",
+    printFallbackHint:
+      "Su iPhone un'app installata non stampa direttamente – scegli «Salvare come immagine» e stampa o condividi da Foto.",
     title: "Casse",
     subtitle:
       "Quale attrezzatura sta in quale cassa – con etichetta e codice QR da stampare.",
@@ -4571,6 +4687,15 @@ export const it: Translation = {
     deleteAria: (title: string) => `Elimina la nota ${title}`,
   },
   stats: {
+    expensesTitle: "Spese di tutti i viaggi",
+    expensesLink: "Ai viaggi",
+    expensesTotal: "Totale",
+    expensesPerNight: "Ø a notte",
+    expensesTopCategory: "Categoria più cara",
+    expensesYearDetail: (trips: number, nights: number, perNight: string) =>
+      `${trips === 1 ? "1 viaggio" : `${trips} viaggi`} · ${nights === 1 ? "1 notte" : `${nights} notti`} · ${perNight}/notte`,
+    expensesHint:
+      "Vengono contate le casse dei tuoi viaggi. Una spesa conta per l'anno del viaggio – un viaggio di Capodanno sta interamente nell'anno della partenza.",
     title: "Statistiche",
     subtitle:
       "Tutte le tue analisi in un colpo d'occhio – viaggi, fortuna meteo, traguardi, nodi, specie e famiglia.",

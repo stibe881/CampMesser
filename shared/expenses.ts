@@ -184,3 +184,201 @@ export function settleUp(payments: readonly Payment[]): Settlement[] {
   }
   return settlements;
 }
+
+// ── Reise-Budget (#256) ─────────────────────────────────────────────────
+
+/** Ab diesem Anteil des Budgets wird gewarnt, bevor es reisst. */
+export const BUDGET_TIGHT_RATIO = 0.8;
+
+/** Grösstes erfassbares Budget: 1 Mio. CHF – fängt Tippfehler ab. */
+export const BUDGET_MAX_RAPPEN = 100_000_000;
+
+export type BudgetLevel = "ok" | "tight" | "over";
+
+export interface BudgetStatus {
+  budgetRappen: number;
+  spentRappen: number;
+  /** Was noch übrig ist; negativ, wenn das Budget gesprengt wurde. */
+  remainingRappen: number;
+  /** Verbrauchter Anteil in Prozent, gerundet – über 100 möglich. */
+  percent: number;
+  level: BudgetLevel;
+}
+
+/**
+ * Stand der Reisekasse gegenüber dem Budget.
+ *
+ * Bewusst wird der VERBRAUCH über 100 % hinaus weitergezählt statt bei
+ * 100 gekappt: «142 % verbraucht» sagt mehr als ein voller Balken, und
+ * genau in dem Moment will man wissen, wie weit man drüber ist.
+ *
+ * Ohne Budget (null oder ≤ 0) gibt es keinen Stand – dann zeigt die
+ * Ansicht gar nichts an, statt eine Null-Grenze zu behaupten.
+ */
+export function budgetStatus(
+  spentRappen: number,
+  budgetRappen: number | null | undefined
+): BudgetStatus | null {
+  const budget = cleanRappen(budgetRappen ?? 0);
+  if (budget <= 0) return null;
+  const spent = cleanRappen(spentRappen);
+  const ratio = spent / budget;
+  return {
+    budgetRappen: budget,
+    spentRappen: spent,
+    remainingRappen: budget - spent,
+    percent: Math.round(ratio * 100),
+    level: ratio > 1 ? "over" : ratio >= BUDGET_TIGHT_RATIO ? "tight" : "ok",
+  };
+}
+
+/**
+ * Budget pro Nacht – die ehrlichere Zahl beim Vergleich zweier Reisen.
+ * Ohne Nächte (Tagesausflug) gibt es keine, dann kommt null zurück.
+ */
+export function perNightRappen(
+  totalRappen: number,
+  nights: number
+): number | null {
+  if (!Number.isFinite(nights) || nights <= 0) return null;
+  return Math.round(cleanRappen(totalRappen) / nights);
+}
+
+// ── Ausgaben über alle Reisen (#257) ────────────────────────────────────
+
+/** Eine Reise, so weit die Jahres-Auswertung sie braucht. */
+export interface ExpenseTripLike {
+  id: number;
+  startDate: string;
+  endDate: string;
+}
+
+/** Eine Ausgabe mit Reise-Bezug. */
+export interface TripExpenseLike extends ExpenseLike {
+  tripId: number;
+}
+
+export interface ExpenseYear {
+  year: number;
+  rappen: number;
+  nights: number;
+  /** Ausgaben pro Nacht; null, wenn im Jahr keine Nacht erfasst ist. */
+  perNightRappen: number | null;
+  trips: number;
+}
+
+export interface ExpenseStats {
+  totalRappen: number;
+  totalNights: number;
+  /** Ø über alle Jahre; null ohne Nächte. */
+  perNightRappen: number | null;
+  /** Jahre absteigend – das neuste zuoberst, wie im Reise-Tagebuch. */
+  years: ExpenseYear[];
+  /** Kategorie mit der grössten Summe; null, wenn nichts erfasst ist. */
+  topCategory: { category: ExpenseCategory; rappen: number } | null;
+  byCategory: { category: ExpenseCategory; rappen: number }[];
+}
+
+/**
+ * Ausgaben über alle Reisen auswerten.
+ *
+ * ENTSCHEIDUNG zur Jahres-Zuordnung: Eine Ausgabe zählt zum Jahr ihrer
+ * REISE (genauer: des Reisebeginns), nicht zum Datum der Ausgabe. Wer am
+ * 30. Dezember losfährt und am 2. Januar tankt, hat trotzdem EINE Reise
+ * gemacht; sonst stünde dieselbe Reise mit zwei Beträgen in zwei Jahren
+ * und keine der beiden Zahlen wäre zu gebrauchen.
+ *
+ * Reisen ohne Ausgaben erscheinen nicht als leere Jahreszeile – sie
+ * bringen aber ihre Nächte mit, sobald das Jahr ohnehin vorkommt, damit
+ * «Ø pro Nacht» nicht zu hoch ausfällt.
+ */
+export function expenseStats(
+  trips: readonly ExpenseTripLike[],
+  expenses: readonly TripExpenseLike[]
+): ExpenseStats {
+  const tripById = new Map<number, ExpenseTripLike>();
+  trips.forEach(trip => tripById.set(trip.id, trip));
+
+  const perYear = new Map<
+    number,
+    { rappen: number; nights: number; tripIds: Set<number> }
+  >();
+  const ensureYear = (year: number) => {
+    let entry = perYear.get(year);
+    if (!entry) {
+      entry = { rappen: 0, nights: 0, tripIds: new Set<number>() };
+      perYear.set(year, entry);
+    }
+    return entry;
+  };
+
+  let totalRappen = 0;
+  const usedTrips = new Set<number>();
+  expenses.forEach(expense => {
+    const trip = tripById.get(expense.tripId);
+    if (!trip) return;
+    const year = Number(trip.startDate.slice(0, 4));
+    if (!Number.isFinite(year)) return;
+    const amount = cleanRappen(expense.amountRappen);
+    totalRappen += amount;
+    const entry = ensureYear(year);
+    entry.rappen += amount;
+    entry.tripIds.add(trip.id);
+    usedTrips.add(trip.id);
+  });
+
+  // Nächte NUR der Reisen mit Ausgaben – sonst würde ein Wochenende ohne
+  // erfasste Kosten den Schnitt pro Nacht künstlich drücken.
+  let totalNights = 0;
+  usedTrips.forEach(tripId => {
+    const trip = tripById.get(tripId);
+    if (!trip) return;
+    const nights = nightsBetween(trip.startDate, trip.endDate);
+    totalNights += nights;
+    const year = Number(trip.startDate.slice(0, 4));
+    if (Number.isFinite(year)) ensureYear(year).nights += nights;
+  });
+
+  const years = Array.from(perYear.keys())
+    .sort((a, b) => b - a)
+    .map(year => {
+      const entry = perYear.get(year)!;
+      return {
+        year,
+        rappen: entry.rappen,
+        nights: entry.nights,
+        perNightRappen: perNightRappen(entry.rappen, entry.nights),
+        trips: entry.tripIds.size,
+      };
+    });
+
+  const known = new Set(trips.map(trip => trip.id));
+  const byCategory = expensesByCategory(
+    expenses.filter(expense => known.has(expense.tripId))
+  );
+  const top = byCategory.reduce<{
+    category: ExpenseCategory;
+    rappen: number;
+  } | null>(
+    (best, entry) =>
+      entry.rappen > 0 && (!best || entry.rappen > best.rappen) ? entry : best,
+    null
+  );
+
+  return {
+    totalRappen,
+    totalNights,
+    perNightRappen: perNightRappen(totalRappen, totalNights),
+    years,
+    topCategory: top,
+    byCategory,
+  };
+}
+
+/** Nächte zwischen zwei ISO-Tagen (gleicher Tag = 0, ungültig = 0). */
+function nightsBetween(startDate: string, endDate: string): number {
+  const start = Date.parse(`${startDate}T00:00:00Z`);
+  const end = Date.parse(`${endDate}T00:00:00Z`);
+  if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return 0;
+  return Math.round((end - start) / 86400000);
+}

@@ -57,6 +57,8 @@ import {
   type FoodStorage,
 } from "@shared/food";
 import {
+  BUDGET_MAX_RAPPEN,
+  expenseStats,
   EXPENSE_CATEGORIES,
   EXPENSE_DESCRIPTION_MAX_LENGTH,
   EXPENSE_MAX_RAPPEN,
@@ -95,6 +97,20 @@ import {
   TRIP_WEATHER_TEMP_MIN,
 } from "@shared/tripWeather";
 import { TRIP_JOURNAL_MAX_LENGTH } from "@shared/trips";
+import {
+  isDuplicateOption,
+  isValidOptionRange,
+  MAX_DATE_OPTIONS,
+  MAX_OPTION_NOTE_LENGTH,
+  VOTE_VALUES,
+} from "@shared/datePoll";
+import {
+  isValidGuestbookMessage,
+  MAX_GUEST_NAME_LENGTH,
+  MAX_GUESTBOOK_MESSAGE_LENGTH,
+  normalizeGuestbookMessage,
+  normalizeGuestName,
+} from "@shared/guestbook";
 import {
   MAX_TRACK_POINTS,
   serializeTrackPoints,
@@ -4112,6 +4128,52 @@ export const appRouter = router({
      * Beträge kommen und gehen ausschliesslich als Rappen-Ganzzahlen.
      */
     expenses: router({
+      /**
+       * Ausgaben über ALLE eigenen Reisen (#257): Kosten pro Jahr,
+       * Ø pro Nacht und teuerste Kategorie. Bewusst nur eigene Reisen –
+       * in fremden Reisekassen hat die eigene Statistik nichts verloren,
+       * und die Zahl wäre auch nicht vergleichbar.
+       */
+      stats: protectedProcedure.query(async ({ ctx }) => {
+        const trips = await db.getTripLogs(ctx.user.id);
+        const expenses = await db.getExpensesForTrips(trips.map(t => t.id));
+        return expenseStats(
+          trips.map(trip => ({
+            id: trip.id,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+          })),
+          expenses
+        );
+      }),
+      /**
+       * Reise-Budget (#256) setzen oder mit null wieder entfernen.
+       * Erlaubt für alle Mitreisenden – die Reisekasse gehört allen, also
+       * auch ihre Grenze.
+       */
+      setBudget: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            budgetRappen: z
+              .number()
+              .int()
+              .min(1)
+              .max(BUDGET_MAX_RAPPEN)
+              .nullable(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          await db.setTripBudget(input.tripId, input.budgetRappen);
+          return { success: true } as const;
+        }),
       list: protectedProcedure
         .input(z.object({ tripId: z.number().int().positive() }))
         .query(async ({ ctx, input }) => {
@@ -4528,6 +4590,342 @@ export const appRouter = router({
         }),
     }),
     /**
+     * Termin-Finder (#253): Datums-Vorschläge und Stimmen einer Reise.
+     * Vorschlagen und abstimmen darf jede/r Mitreisende – die Frage «wann
+     * können alle?» beantwortet man gemeinsam. Löschen eines fremden
+     * Vorschlags und das Übernehmen des Termins bleiben bei der
+     * Besitzerin/dem Besitzer, denn beides ändert die Reise für alle.
+     */
+    dates: router({
+      list: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          const [options, members, owner] = await Promise.all([
+            db.getTripDateOptions(input.tripId),
+            db.getTripMembersWithUsers(input.tripId),
+            db.getUserById(trip.userId),
+          ]);
+          const votes = await db.getTripDateVotes(options.map(o => o.id));
+          // Stimmberechtigt sind Besitzer:in plus Mitreisende – dieselbe
+          // Liste, die auch die «fehlt noch»-Anzeige speist. Der Name kommt
+          // gleich mit, damit die Ansicht nicht pro Person nachfragen muss.
+          const participants = [
+            {
+              userId: trip.userId,
+              name: owner?.name || owner?.email || `#${trip.userId}`,
+            },
+            ...members.map(member => ({
+              userId: member.userId,
+              name: member.name || member.email || `#${member.userId}`,
+            })),
+          ];
+          return {
+            options: options.map(option => ({
+              id: option.id,
+              startDate: option.startDate,
+              endDate: option.endDate,
+              note: option.note,
+              createdByUserId: option.createdByUserId,
+            })),
+            votes: votes.map(vote => ({
+              optionId: vote.optionId,
+              userId: vote.userId,
+              vote: vote.vote,
+            })),
+            participants,
+            isOwner: trip.userId === ctx.user.id,
+            tripStartDate: trip.startDate,
+            tripEndDate: trip.endDate,
+          };
+        }),
+      add: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            startDate: z.string().min(1),
+            endDate: z.string().min(1),
+            note: z.string().max(MAX_OPTION_NOTE_LENGTH).optional(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          if (!isValidOptionRange(input.startDate, input.endDate)) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Die Abreise muss nach der Anreise liegen.",
+            });
+          }
+          const existing = await db.getTripDateOptions(input.tripId);
+          if (existing.length >= MAX_DATE_OPTIONS) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Mehr als ${MAX_DATE_OPTIONS} Vorschläge beantwortet niemand mehr.`,
+            });
+          }
+          if (isDuplicateOption(existing, input.startDate, input.endDate)) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Dieser Zeitraum steht bereits zur Wahl.",
+            });
+          }
+          const id = await db.createTripDateOption({
+            tripId: input.tripId,
+            startDate: input.startDate,
+            endDate: input.endDate,
+            note: input.note?.trim() || null,
+            createdByUserId: ctx.user.id,
+          });
+          return { id };
+        }),
+      remove: protectedProcedure
+        .input(z.object({ optionId: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const option = await db.getTripDateOption(input.optionId);
+          if (!option) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Vorschlag nicht gefunden.",
+            });
+          }
+          const trip = await db.canAccessTrip(option.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Vorschlag nicht gefunden.",
+            });
+          }
+          const mayRemove =
+            trip.userId === ctx.user.id ||
+            option.createdByUserId === ctx.user.id;
+          if (!mayRemove) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message:
+                "Nur wer den Vorschlag eingebracht hat, darf ihn löschen.",
+            });
+          }
+          await db.deleteTripDateOption(input.optionId);
+          return { success: true } as const;
+        }),
+      vote: protectedProcedure
+        .input(
+          z.object({
+            optionId: z.number().int().positive(),
+            vote: z.enum(VOTE_VALUES),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const option = await db.getTripDateOption(input.optionId);
+          if (!option) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Vorschlag nicht gefunden.",
+            });
+          }
+          const trip = await db.canAccessTrip(option.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Vorschlag nicht gefunden.",
+            });
+          }
+          await db.setTripDateVote(input.optionId, ctx.user.id, input.vote);
+          return { success: true } as const;
+        }),
+      /**
+       * Gewählten Termin in die Reise übernehmen (nur Besitzerin/Besitzer):
+       * setzt startDate/endDate. Die Vorschläge bleiben stehen – wer sich
+       * umentscheidet, sieht die Alternativen noch, und die Abstimmung ist
+       * die Begründung für das Datum.
+       */
+      adopt: protectedProcedure
+        .input(z.object({ optionId: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const option = await db.getTripDateOption(input.optionId);
+          if (!option) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Vorschlag nicht gefunden.",
+            });
+          }
+          const trip = await db.getTripLog(option.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message:
+                "Nur die Besitzerin/der Besitzer darf den Termin übernehmen.",
+            });
+          }
+          await db.updateTripLog(option.tripId, ctx.user.id, {
+            startDate: option.startDate,
+            endDate: option.endDate,
+          });
+          return {
+            startDate: option.startDate,
+            endDate: option.endDate,
+          };
+        }),
+    }),
+    /**
+     * Gästebuch (#254): Grüsse zur Reise. Lesen und Schreiben dürfen alle
+     * Mitreisenden; über den Teil-Link kommen Gäste dazu (siehe
+     * `trips.sharedGuestbookAdd`). Löschen darf die Besitzerin/der Besitzer
+     * jeden Eintrag – bei einem offenen Gästebuch braucht es jemanden, der
+     * aufräumen kann –, alle anderen nur ihre eigenen.
+     */
+    guestbook: router({
+      list: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          const entries = await db.getTripGuestbook(input.tripId);
+          return {
+            entries,
+            isOwner: trip.userId === ctx.user.id,
+            myUserId: ctx.user.id,
+          };
+        }),
+      add: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            message: z.string().min(1).max(MAX_GUESTBOOK_MESSAGE_LENGTH),
+            photoId: z.number().int().positive().nullable().optional(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          const message = normalizeGuestbookMessage(input.message);
+          if (!isValidGuestbookMessage(message)) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Ohne Text kein Eintrag.",
+            });
+          }
+          // Das Foto muss zu DIESER Reise gehören – sonst liesse sich ein
+          // fremdes Bild in ein geteiltes Gästebuch holen.
+          if (input.photoId != null) {
+            const photos = await db.getTripPhotosForTrip(input.tripId);
+            if (!photos.some(photo => photo.id === input.photoId)) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Das Foto gehört nicht zu dieser Reise.",
+              });
+            }
+          }
+          const id = await db.createTripGuestbookEntry({
+            tripId: input.tripId,
+            userId: ctx.user.id,
+            authorName: normalizeGuestName(
+              ctx.user.name || ctx.user.email || ""
+            ),
+            message,
+            photoId: input.photoId ?? null,
+          });
+          return { id };
+        }),
+      remove: protectedProcedure
+        .input(z.object({ entryId: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const entry = await db.getTripGuestbookEntry(input.entryId);
+          if (!entry) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Eintrag nicht gefunden.",
+            });
+          }
+          const trip = await db.canAccessTrip(entry.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Eintrag nicht gefunden.",
+            });
+          }
+          const mayRemove =
+            trip.userId === ctx.user.id || entry.userId === ctx.user.id;
+          if (!mayRemove) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "Nur eigene Einträge lassen sich löschen.",
+            });
+          }
+          await db.deleteTripGuestbookEntry(input.entryId);
+          return { success: true } as const;
+        }),
+    }),
+    /**
+     * Gästebuch-Eintrag über den TEIL-LINK (#254) – der einzige Weg, auf dem
+     * jemand ohne Konto in CampMesser schreibt. Deshalb drei Bremsen: Der
+     * Token muss gültig und unverfallen sein, pro IP sind es höchstens fünf
+     * Einträge pro Stunde, und ein Foto kann ein Gast nicht anhängen (ein
+     * anonymer Upload-Pfad wäre eine offene Tür).
+     */
+    sharedGuestbookAdd: publicProcedure
+      .input(
+        z.object({
+          token: z.string().min(8).max(64),
+          authorName: z.string().max(MAX_GUEST_NAME_LENGTH).optional(),
+          message: z.string().min(1).max(MAX_GUESTBOOK_MESSAGE_LENGTH),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.getTripLogByShareToken(input.token);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Geteilte Reise nicht gefunden.",
+          });
+        }
+        const { allowAction } = await import("./rateLimit");
+        const limitKey = `guestbook|${trip.id}|${ctx.req.ip ?? "?"}`;
+        if (!allowAction(limitKey, 5, 60 * 60 * 1000)) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Zu viele Einträge – versuch es später nochmals.",
+          });
+        }
+        const message = normalizeGuestbookMessage(input.message);
+        if (!isValidGuestbookMessage(message)) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Ohne Text kein Eintrag.",
+          });
+        }
+        await db.createTripGuestbookEntry({
+          tripId: trip.id,
+          userId: null,
+          authorName: normalizeGuestName(input.authorName ?? ""),
+          message,
+          photoId: null,
+        });
+        return { success: true } as const;
+      }),
+    /**
      * Teil-Link für den Reise-Hub erzeugen (nur Besitzerin/Besitzer):
      * ein öffentlicher Read-only-Link, unabhängig von den Reise-Mitgliedern.
      * Hat die verknüpfte Packliste noch keinen Teil-Token, bekommt sie hier
@@ -4605,6 +5003,7 @@ export const appRouter = router({
             : undefined;
         const entries = await db.getMenuEntriesForTrip(trip.id);
         const dayNotes = await db.getMenuDayNotesForTrip(trip.id);
+        const guestbook = await db.getTripGuestbook(trip.id);
         const customNameById = new Map<number, string>();
         if (entries.some(e => e.customRecipeId != null)) {
           const own = await db.getCustomRecipes(trip.userId);
@@ -4662,6 +5061,16 @@ export const appRouter = router({
           })),
           menuDayNotes: dayNotes.map(n => ({ day: n.day, note: n.note })),
           packList,
+          // Gästebuch (#254): Ohne Konto-Bezug – ein Gast soll nicht sehen,
+          // welche Zeile zu welchem CampMesser-Konto gehört; ob der Eintrag
+          // von jemandem mit Konto stammt, reicht als Unterscheidung.
+          guestbook: guestbook.map(entry => ({
+            id: entry.id,
+            authorName: entry.authorName,
+            message: entry.message,
+            fromMember: entry.userId != null,
+            createdAt: entry.createdAt,
+          })),
         };
       }),
   }),

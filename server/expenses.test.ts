@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
+  budgetStatus,
+  BUDGET_TIGHT_RATIO,
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_LABELS,
   expensesByCategory,
   expensesTotalRappen,
   normalizeExpenseCategory,
+  expenseStats,
+  perNightRappen,
   settleUp,
   type Payment,
 } from "@shared/expenses";
@@ -214,5 +218,119 @@ describe("settleUp", () => {
       { from: "Dario", to: "Beat", rappen: 2250 },
     ]);
     expect(transferSum(result)).toBe(7500);
+  });
+});
+
+describe("budgetStatus", () => {
+  it("rechnet Rest und Anteil aus", () => {
+    const status = budgetStatus(30_000, 100_000);
+    expect(status?.remainingRappen).toBe(70_000);
+    expect(status?.percent).toBe(30);
+    expect(status?.level).toBe("ok");
+  });
+
+  it("warnt, bevor das Budget reisst", () => {
+    const status = budgetStatus(
+      Math.round(100_000 * BUDGET_TIGHT_RATIO),
+      100_000
+    );
+    expect(status?.level).toBe("tight");
+  });
+
+  it("zählt über 100 % weiter, statt zu kappen", () => {
+    const status = budgetStatus(142_000, 100_000);
+    expect(status?.percent).toBe(142);
+    expect(status?.remainingRappen).toBe(-42_000);
+    expect(status?.level).toBe("over");
+  });
+
+  it("gibt ohne Budget nichts zurück", () => {
+    expect(budgetStatus(5000, null)).toBeNull();
+    expect(budgetStatus(5000, 0)).toBeNull();
+    expect(budgetStatus(5000, -100)).toBeNull();
+  });
+
+  it("verträgt kaputte Ausgaben-Summen", () => {
+    expect(budgetStatus(Number.NaN, 100_000)?.spentRappen).toBe(0);
+  });
+});
+
+describe("perNightRappen", () => {
+  it("teilt durch die Nächte und rundet", () => {
+    expect(perNightRappen(10_000, 3)).toBe(3333);
+  });
+
+  it("gibt es ohne Nächte nicht", () => {
+    expect(perNightRappen(10_000, 0)).toBeNull();
+    expect(perNightRappen(10_000, -2)).toBeNull();
+  });
+});
+
+describe("expenseStats", () => {
+  const trips = [
+    { id: 1, startDate: "2025-07-10", endDate: "2025-07-14" }, // 4 Nächte
+    { id: 2, startDate: "2026-05-01", endDate: "2026-05-03" }, // 2 Nächte
+    // Silvester-Reise: beginnt 2025, endet 2026
+    { id: 3, startDate: "2025-12-30", endDate: "2026-01-02" }, // 3 Nächte
+    { id: 4, startDate: "2026-06-01", endDate: "2026-06-03" }, // ohne Ausgaben
+  ];
+  const expenses = [
+    { tripId: 1, amountRappen: 20_000, category: "camping" },
+    { tripId: 1, amountRappen: 10_000, category: "essen" },
+    { tripId: 2, amountRappen: 6_000, category: "essen" },
+    { tripId: 3, amountRappen: 9_000, category: "sprit" },
+  ];
+
+  it("summiert alle Ausgaben", () => {
+    expect(expenseStats(trips, expenses).totalRappen).toBe(45_000);
+  });
+
+  it("ordnet eine Ausgabe dem Jahr der REISE zu, nicht dem der Ausgabe", () => {
+    // Die Silvester-Reise beginnt 2025 – ihre Kosten stehen dort komplett
+    const stats = expenseStats(trips, expenses);
+    const y2025 = stats.years.find(y => y.year === 2025);
+    expect(y2025?.rappen).toBe(39_000);
+    expect(stats.years.find(y => y.year === 2026)?.rappen).toBe(6_000);
+  });
+
+  it("sortiert die Jahre absteigend", () => {
+    expect(expenseStats(trips, expenses).years.map(y => y.year)).toEqual([
+      2026, 2025,
+    ]);
+  });
+
+  it("zählt nur die Nächte von Reisen MIT Ausgaben", () => {
+    // Reise 4 (2 Nächte, keine Ausgaben) darf den Schnitt nicht drücken
+    const stats = expenseStats(trips, expenses);
+    expect(stats.totalNights).toBe(4 + 2 + 3);
+    expect(stats.perNightRappen).toBe(Math.round(45_000 / 9));
+  });
+
+  it("nennt die teuerste Kategorie", () => {
+    expect(expenseStats(trips, expenses).topCategory).toEqual({
+      category: "camping",
+      rappen: 20_000,
+    });
+  });
+
+  it("zählt die Reisen pro Jahr", () => {
+    const stats = expenseStats(trips, expenses);
+    expect(stats.years.find(y => y.year === 2025)?.trips).toBe(2);
+  });
+
+  it("ignoriert Ausgaben ohne bekannte Reise", () => {
+    const stats = expenseStats(trips, [
+      ...expenses,
+      { tripId: 99, amountRappen: 100_000, category: "essen" },
+    ]);
+    expect(stats.totalRappen).toBe(45_000);
+  });
+
+  it("kommt ohne Ausgaben klar", () => {
+    const stats = expenseStats(trips, []);
+    expect(stats.totalRappen).toBe(0);
+    expect(stats.years).toEqual([]);
+    expect(stats.topCategory).toBeNull();
+    expect(stats.perNightRappen).toBeNull();
   });
 });

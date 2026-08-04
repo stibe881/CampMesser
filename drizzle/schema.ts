@@ -378,6 +378,12 @@ export const tripLogs = mysqlTable(
      * Stromkasten steht. Bewusst an der Reise und nicht am Zeltplatz-Favoriten:
      * die Nummer wechselt bei jedem Besuch, das Passwort ändert die Rezeption.
      */
+    /**
+     * Reise-Budget in Rappen (#256); null = kein Budget gesetzt. Bewusst an
+     * der Reise und nicht als globale Einstellung: Ein Wochenende und drei
+     * Wochen Frankreich haben nichts miteinander zu tun.
+     */
+    budgetRappen: int("budgetRappen"),
     pitchNumber: varchar("pitchNumber", { length: 40 }),
     wifiName: varchar("wifiName", { length: 80 }),
     wifiPassword: varchar("wifiPassword", { length: 80 }),
@@ -425,6 +431,91 @@ export const tripMembers = mysqlTable(
 
 export type TripMember = typeof tripMembers.$inferSelect;
 export type InsertTripMember = typeof tripMembers.$inferInsert;
+
+/**
+ * Gästebuch pro Reise (#254): Grüsse zur Reise – von Mitreisenden aus der
+ * App und von Bekannten über den Teil-Link. Der einzige Ort, an dem ohne
+ * Konto geschrieben werden darf; deshalb steht die Herkunft in `userId`
+ * (null = Gast) und nicht bloss im selbst gewählten Namen.
+ */
+export const tripGuestbook = mysqlTable(
+  "tripGuestbook",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    /** Zugehörige Reise (tripLogs.id) */
+    tripId: int("tripId").notNull(),
+    /** Konto der Verfasserin/des Verfassers; null = Gast über den Teil-Link */
+    userId: int("userId"),
+    /** Selbst gewählter Anzeigename – beweist nichts, siehe userId */
+    authorName: varchar("authorName", { length: 60 }).notNull(),
+    message: varchar("message", { length: 500 }).notNull(),
+    /**
+     * Angehängtes Foto aus der Reise-Galerie (tripPhotos.id); null = ohne.
+     * Bewusst eine Auswahl aus BESTEHENDEN Fotos statt eines eigenen
+     * Uploads – ein anonymer Upload-Pfad wäre eine offene Tür.
+     */
+    photoId: int("photoId"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("tripGuestbook_tripId").on(table.tripId)]
+);
+
+export type TripGuestbookEntry = typeof tripGuestbook.$inferSelect;
+export type InsertTripGuestbookEntry = typeof tripGuestbook.$inferInsert;
+
+/**
+ * Termin-Finder (#253): Datums-Vorschläge zu einer Reise, über die die
+ * Mitreisenden abstimmen. Bewusst an der bestehenden Reise und nicht als
+ * eigenes Gebilde: Wer abstimmen darf, steht damit schon fest
+ * (tripMembers), und der gewählte Termin wandert per Knopfdruck in
+ * startDate/endDate derselben Reise.
+ */
+export const tripDateOptions = mysqlTable(
+  "tripDateOptions",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    /** Zugehörige Reise (tripLogs.id) */
+    tripId: int("tripId").notNull(),
+    startDate: date("startDate", { mode: "string" }).notNull(),
+    endDate: date("endDate", { mode: "string" }).notNull(),
+    /** Freitext zum Vorschlag, z. B. «Brückentag, Zelt ist frei» */
+    note: varchar("note", { length: 140 }),
+    /** Wer den Vorschlag eingebracht hat (users.id) */
+    createdByUserId: int("createdByUserId").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("tripDateOptions_tripId").on(table.tripId)]
+);
+
+export type TripDateOption = typeof tripDateOptions.$inferSelect;
+export type InsertTripDateOption = typeof tripDateOptions.$inferInsert;
+
+/**
+ * Stimmen zum Termin-Finder: eine Zeile je Vorschlag und Konto
+ * («yes» | «maybe» | «no»). Umstimmen ersetzt die Zeile, statt eine
+ * zweite anzulegen – der unique-Index erzwingt das.
+ */
+export const tripDateVotes = mysqlTable(
+  "tripDateVotes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    /** Zugehöriger Vorschlag (tripDateOptions.id) */
+    optionId: int("optionId").notNull(),
+    /** Abstimmendes Konto (users.id) */
+    userId: int("userId").notNull(),
+    vote: varchar("vote", { length: 10 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    uniqueIndex("tripDateVotes_option_user").on(table.optionId, table.userId),
+    index("tripDateVotes_optionId").on(table.optionId),
+    index("tripDateVotes_userId").on(table.userId),
+  ]
+);
+
+export type TripDateVote = typeof tripDateVotes.$inferSelect;
+export type InsertTripDateVote = typeof tripDateVotes.$inferInsert;
 
 /**
  * Einladungs-Links für Reisen: EIN aktiver Link pro Trip (unique tripId) –

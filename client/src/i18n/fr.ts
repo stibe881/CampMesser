@@ -163,6 +163,7 @@ export const fr: Translation = {
       "Choisis les zones qui apparaissent au-dessus des tuiles. Le message d'accueil, la recherche et les tuiles elles-mêmes restent toujours visibles. Une fois connecté·e, ton choix s'applique à tous tes appareils.",
     widgetNames: {
       onboarding: "Premiers pas",
+      briefing: "Briefing du matin",
       trip: "Séjour en cours / prochain",
       anniversary: "Il y a un an",
       weather: "Météo",
@@ -719,6 +720,16 @@ export const fr: Translation = {
     emptySuffix: "avec poids et volume.",
   },
   inventory: {
+    boxButton: "Ranger",
+    boxAria: (name: string) => `Ranger ${name} dans une caisse`,
+    boxDialogTitle: "Ranger dans une caisse",
+    boxDialogDescription:
+      "Choisis la caisse où se trouve cet objet. Il apparaîtra alors dans son contenu – y compris après avoir scanné l'étiquette.",
+    boxAssigned: "Rangement enregistré",
+    boxRemove: "Sortir de la caisse",
+    boxNoBoxes:
+      "Aucune caisse pour l'instant. Crées-en une d'abord, puis tu pourras ranger ici.",
+    boxManageLink: "Gérer les caisses",
     title: "Inventaire",
     subtitleLoggedOut: "Saisis ton matériel de camping avec poids et volume.",
     loginFeature: "ton inventaire",
@@ -2586,6 +2597,34 @@ export const fr: Translation = {
     removeFailed: "La note n'a pas pu être retirée",
   },
   tripExpenses: {
+    fuelTitle: "Calculer les frais de route",
+    fuelHint:
+      "Kilomètres × consommation × prix du carburant. Le calcul utilise la consommation moyenne – pour plus de précision, saisis le montant à la main.",
+    fuelKmLabel: "Distance (km)",
+    fuelConsumptionLabel: "Consommation (l/100 km)",
+    fuelPriceLabel: "Prix (CHF/l)",
+    fuelRoundTrip: "Aller et retour",
+    fuelResult: (km: number, liters: string, amount: string) =>
+      `${km} km · ${liters} l · ${amount}`,
+    fuelApply: "Reprendre dans la caisse",
+    fuelInvalid: "Merci d'indiquer distance, consommation et prix.",
+    fuelDescription: (km: number) => `Trajet ${km} km`,
+    csvButton: "Exporter en CSV",
+    csvAria: (trip: string) => `Télécharger la caisse de ${trip} au format CSV`,
+    csvHeaders: ["Date", "Catégorie", "Description", "Payé par", "Montant"],
+    budgetTitle: "Budget",
+    budgetLabel: "Budget (CHF)",
+    budgetSet: "Définir un budget",
+    budgetEdit: "Modifier le budget",
+    budgetRemove: "Supprimer le budget",
+    budgetSaved: "Budget enregistré",
+    budgetSaveFailed: "Impossible d'enregistrer le budget",
+    budgetInvalid: "Merci d'indiquer un montant supérieur à zéro.",
+    budgetBarAria: (percent: number) => `${percent} % du budget utilisé`,
+    budgetLeft: (amount: string, percent: number) =>
+      `Il reste ${amount} (${percent} % utilisé).`,
+    budgetOver: (amount: string, percent: number) =>
+      `${amount} au-dessus du budget (${percent} % utilisé).`,
     title: "Caisse du voyage",
     toggleAria: (name: string) =>
       `Ouvrir ou fermer la caisse du voyage ${name}`,
@@ -3299,7 +3338,83 @@ export const fr: Translation = {
     turnRight: (deg: number) => `Tourne encore de ${deg}° vers la droite.`,
     source: "Valeurs de vent d'Open-Meteo, règles empiriques de montage.",
   },
+  briefing: {
+    title: "Briefing du matin",
+    sectionAria: "Briefing du matin pour le séjour en cours",
+    astroLine: (phase: string, percent: number) =>
+      `${phase} – la lune est éclairée à ${percent} %.`,
+    moreTasks: (count: number) =>
+      count === 1 ? "et 1 autre tâche" : `et ${count} autres tâches`,
+  },
+  guestbook: {
+    title: "Livre d'or",
+    toggleAria: (trip: string) => `Ouvrir le livre d'or de ${trip}`,
+    hint: "Messages et souvenirs du voyage – des participants et de tous ceux qui ont le lien partagé.",
+    empty: "Aucun message pour l'instant. Écris le premier.",
+    count: (total: number) => (total === 1 ? "1 message" : `${total} messages`),
+    messagePlaceholder: "Ton message …",
+    messageAria: "Message du livre d'or",
+    messageRequired: "Pas de message sans texte.",
+    addButton: "Publier",
+    added: "Message enregistré",
+    addFailed: "Impossible d'enregistrer le message",
+    removed: "Message supprimé",
+    removeFailed: "Impossible de supprimer le message",
+    removeAria: (author: string) => `Supprimer le message de ${author}`,
+    guestFallback: "Invité·e",
+    viaLink: "via le lien partagé",
+    noPhoto: "Sans image",
+    photoOption: (index: number) => `Photo ${index}`,
+    photoSelectAria: "Joindre une photo de la galerie du voyage",
+    photoAlt: (author: string) => `Photo du message de ${author}`,
+    photoGone: "La photo jointe a été supprimée.",
+    nameLabel: "Ton nom",
+    namePlaceholder: "p. ex. Mamie Vreni",
+    guestHint:
+      "Tu n'es pas connecté·e – ton message apparaîtra comme invité·e. Impossible de joindre une image ici.",
+    guestAdded: "Merci pour ton message !",
+  },
+  datePoll: {
+    title: "Trouve-date",
+    toggleAria: (trip: string) => `Ouvrir le trouve-date pour ${trip}`,
+    hint: "Propose des périodes et répondez pour chacune par Oui, Peut-être ou Non. Une période sans refus l'emporte – même avec moins de Oui.",
+    empty:
+      "Aucune proposition pour l'instant. Saisis une période, puis tout le monde peut répondre.",
+    startLabel: "Arrivée",
+    endLabel: "Départ",
+    notePlaceholder: "Note, p. ex. « pont »",
+    noteAria: "Note sur la proposition",
+    addButton: "Proposer",
+    added: "Proposition ajoutée",
+    addFailed: "Impossible d'enregistrer la proposition",
+    rangeInvalid: "Le départ doit suivre l'arrivée.",
+    removed: "Proposition supprimée",
+    removeFailed: "Impossible de supprimer la proposition",
+    removeAria: (range: string) => `Supprimer la proposition ${range}`,
+    voteFailed: "Impossible d'enregistrer la réponse",
+    voteGroupAria: "Ta réponse pour cette période",
+    voteLabel: { yes: "Oui", maybe: "Peut-être", no: "Non" },
+    nights: (count: number) => (count === 1 ? "1 nuit" : `${count} nuits`),
+    unanimous: "Tous d'accord",
+    leadingAria: "En tête actuellement",
+    missing: (names: string) => `Manque encore : ${names}`,
+    progress: (answered: number, expected: number) =>
+      `${answered} réponses sur ${expected}`,
+    decided: (range: string) =>
+      `Tout le monde a répondu – ${range} est en tête et serait la date.`,
+    applyButton: "Reprendre comme date du voyage",
+    applied: "Date du voyage reprise",
+    applyFailed: "Impossible de reprendre la date",
+    currentDate: "Date actuelle du voyage",
+    maxReached: (max: number) =>
+      `Au-delà de ${max} propositions, plus personne ne répond – supprimes-en une pour faire de la place.`,
+  },
   boxes: {
+    saveImageButton: "Enregistrer comme image",
+    saveImageDone: "Étiquette enregistrée comme image",
+    saveImageFailed: "Impossible de créer l'image",
+    printFallbackHint:
+      "Sur iPhone, une app installée n'imprime pas directement – choisis « Enregistrer comme image » puis imprime ou partage depuis Photos.",
     title: "Caisses",
     subtitle:
       "Quel équipement se trouve dans quelle caisse – avec étiquette et QR-code à imprimer.",
@@ -4608,6 +4723,15 @@ export const fr: Translation = {
     deleteAria: (title: string) => `Supprimer la note ${title}`,
   },
   stats: {
+    expensesTitle: "Dépenses de tous les voyages",
+    expensesLink: "Vers les voyages",
+    expensesTotal: "Total",
+    expensesPerNight: "Ø par nuit",
+    expensesTopCategory: "Catégorie la plus chère",
+    expensesYearDetail: (trips: number, nights: number, perNight: string) =>
+      `${trips === 1 ? "1 voyage" : `${trips} voyages`} · ${nights === 1 ? "1 nuit" : `${nights} nuits`} · ${perNight}/nuit`,
+    expensesHint:
+      "Sont comptées les caisses de tes propres voyages. Une dépense compte pour l'année du voyage – un voyage à cheval sur le Nouvel An figure entièrement dans l'année de son départ.",
     title: "Statistiques",
     subtitle:
       "Toutes tes analyses en un coup d'œil – voyages, chance météo, jalons, nœuds, espèces et famille.",

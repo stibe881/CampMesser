@@ -25,26 +25,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 19 Punkte
-
-### Reise & Organisation
-
-- [ ] **Termin-Finder für gemeinsame Reisen** (#253) – Mitreisende stimmen über
-      mögliche Daten ab
-- [ ] **Gästebuch pro Reise** (#254) – Mitreisende hinterlassen Einträge und
-      Fotos
-- [ ] **Morgen-Briefing** (#255) – Wetter, heutige Mahlzeiten, Aufgaben und
-      Astro-Tipp gebündelt auf der Startseite
-
-### Geld
-
-- [ ] **Reise-Budget mit Limite** (#256) – Warnung, wenn die Reisekasse das
-      Budget sprengt
-- [ ] **Ausgaben-Statistik über alle Reisen** (#257) – Kosten pro Jahr,
-      Ø pro Nacht, teuerste Kategorie
-- [ ] **Reisekasse als CSV exportieren** (#258) – für die Abrechnung daheim
-- [ ] **Fahrtkosten automatisch** (#259) – Kilometer × Verbrauch × Spritpreis
-      als Reisekasse-Eintrag
+## Runde 27 – 12 Punkte
 
 ### Gesundheit & Sicherheit
 

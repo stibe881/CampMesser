@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "wouter";
 import {
+  BookHeart,
   CalendarDays,
   CloudSun,
   ListChecks,
@@ -15,8 +16,18 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  guestbookAuthorLabel,
+  isValidGuestbookMessage,
+  MAX_GUEST_NAME_LENGTH,
+  MAX_GUESTBOOK_MESSAGE_LENGTH,
+  sortGuestbookEntries,
+} from "@shared/guestbook";
 import { Progress } from "@/components/ui/progress";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
 import { parseSpotAttributes } from "@shared/spotAttributes";
@@ -28,6 +39,127 @@ import { MEALS, MEAL_LABELS, tripDays } from "@shared/menuPlan";
 import { tripNights } from "@shared/trips";
 import { parseTripWeather } from "@shared/tripWeather";
 import { cn } from "@/lib/utils";
+
+/**
+ * Gästebuch auf der geteilten Seite (#254): Wer den Link hat, darf einen
+ * Gruss hinterlassen – ohne Konto, ohne Bild. Der Name ist frei wählbar und
+ * beweist nichts; die Einträge sind darum als «über den Teil-Link»
+ * gekennzeichnet, sobald sie in der App erscheinen.
+ */
+function SharedGuestbook({
+  token,
+  entries,
+}: {
+  token: string;
+  entries: {
+    id: number;
+    authorName: string;
+    message: string;
+    fromMember: boolean;
+    createdAt: Date | string;
+  }[];
+}) {
+  const { lang, t } = useI18n();
+  const gb = t.guestbook;
+  const utils = trpc.useUtils();
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+
+  const addMutation = trpc.trips.sharedGuestbookAdd.useMutation({
+    onSuccess: () => {
+      utils.trips.sharedGet.invalidate({ token });
+      setMessage("");
+      toast.success(gb.guestAdded);
+    },
+    onError: e => toast.error(e.message || gb.addFailed),
+  });
+
+  const sorted = sortGuestbookEntries(entries);
+  const formatDate = (value: Date | string) =>
+    new Intl.DateTimeFormat(LOCALE_TAGS[lang], {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(value instanceof Date ? value : new Date(value));
+
+  return (
+    <Card className="mt-4">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <BookHeart className="h-4 w-4 text-primary" aria-hidden="true" />
+          {gb.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="mb-3 text-xs text-muted-foreground">{gb.guestHint}</p>
+        <Input
+          value={name}
+          maxLength={MAX_GUEST_NAME_LENGTH}
+          placeholder={gb.namePlaceholder}
+          aria-label={gb.nameLabel}
+          onChange={e => setName(e.target.value)}
+        />
+        <Textarea
+          className="mt-2"
+          rows={3}
+          value={message}
+          maxLength={MAX_GUESTBOOK_MESSAGE_LENGTH}
+          placeholder={gb.messagePlaceholder}
+          aria-label={gb.messageAria}
+          onChange={e => setMessage(e.target.value)}
+        />
+        <Button
+          size="sm"
+          className="mt-2"
+          disabled={addMutation.isPending}
+          onClick={() => {
+            if (!isValidGuestbookMessage(message)) {
+              toast.error(gb.messageRequired);
+              return;
+            }
+            addMutation.mutate({
+              token,
+              authorName: name || undefined,
+              message,
+            });
+          }}
+        >
+          {gb.addButton}
+        </Button>
+
+        {sorted.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">{gb.empty}</p>
+        ) : (
+          <ul className="mt-4 space-y-2">
+            {sorted.map(entry => (
+              <li
+                key={entry.id}
+                className="rounded-lg border border-border bg-muted/20 px-3 py-2"
+              >
+                <div className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="text-sm font-medium">
+                    {guestbookAuthorLabel(entry, gb.guestFallback)}
+                  </span>
+                  {!entry.fromMember && (
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[0.7rem] text-muted-foreground">
+                      {gb.viaLink}
+                    </span>
+                  )}
+                  <span className="text-xs text-muted-foreground">
+                    {formatDate(entry.createdAt)}
+                  </span>
+                </div>
+                <p className="mt-1 whitespace-pre-wrap text-sm">
+                  {entry.message}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 /**
  * Öffentlicher Reise-Hub (/reise/:token): bündelt Reise-Infos, die
@@ -490,6 +622,11 @@ export default function SharedTripPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Gästebuch (#254): Der einzige Ort, an dem jemand ohne Konto in
+          CampMesser schreibt – darum ohne Foto-Feld und serverseitig auf
+          fünf Einträge pro Stunde und IP begrenzt. */}
+      <SharedGuestbook token={token} entries={data.guestbook} />
 
       <p className="mt-5 text-center text-xs text-muted-foreground">
         {t.sharedTrip.footer}
