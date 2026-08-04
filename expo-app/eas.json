@@ -17,12 +17,10 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "your-apple-id@example.com",
-        "ascAppId": "1234567890",
-        "appleTeamId": "YOUR_TEAM_ID"
+        "appleId": "stefan.gross@gross-ict.ch",
+        "appleTeamId": "QF59FHQ44R"
       },
       "android": {
-        "serviceAccountKeyPath": "./google-api-key.json",
         "track": "internal"
       }
     }
