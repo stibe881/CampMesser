@@ -25,13 +25,12 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 15 Punkte
+## Runde 27 – 14 Punkte
 
 ### Geld
 
 - [ ] **Ausgaben-Statistik über alle Reisen** (#257) – Kosten pro Jahr,
       Ø pro Nacht, teuerste Kategorie
-- [ ] **Reisekasse als CSV exportieren** (#258) – für die Abrechnung daheim
 - [ ] **Fahrtkosten automatisch** (#259) – Kilometer × Verbrauch × Spritpreis
       als Reisekasse-Eintrag
 

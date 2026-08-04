@@ -2590,6 +2590,9 @@ export const de = {
     removeFailed: "Zettel konnte nicht entfernt werden",
   },
   tripExpenses: {
+    csvButton: "Als CSV exportieren",
+    csvAria: (trip: string) => `Reisekasse von ${trip} als CSV herunterladen`,
+    csvHeaders: ["Datum", "Kategorie", "Beschreibung", "Bezahlt von", "Betrag"],
     budgetTitle: "Budget",
     budgetLabel: "Budget (CHF)",
     budgetSet: "Budget setzen",

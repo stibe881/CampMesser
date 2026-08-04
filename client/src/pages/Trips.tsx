@@ -98,6 +98,7 @@ import {
   settleUp,
   type ExpenseCategory,
 } from "@shared/expenses";
+import { csvFileName, expensesToCsv } from "@shared/expensesCsv";
 import {
   computeTripStats,
   computeYearReview,
@@ -1556,6 +1557,30 @@ function TripExpenses({
 
   const busy = addMutation.isPending || updateMutation.isPending;
 
+  /**
+   * CSV herunterladen (#258): Die Datei entsteht im Browser aus den
+   * bereits geladenen Zeilen – kein zweiter Abruf, und die Ausgaben
+   * verlassen das Gerät nicht noch einmal.
+   */
+  const downloadCsv = () => {
+    const csv = expensesToCsv(expenses, {
+      headers: t.tripExpenses.csvHeaders,
+      categoryLabel: category =>
+        pick(EXPENSE_CATEGORY_LABELS[normalizeExpenseCategory(category)], lang),
+      totalLabel: t.tripExpenses.total,
+    });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = csvFileName(
+      tripName,
+      new Date().toISOString().slice(0, 10)
+    );
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="mt-2 rounded-lg border border-border bg-card">
       <button
@@ -1822,6 +1847,17 @@ function TripExpenses({
                       {t.tripExpenses.settleHint}
                     </p>
                   </div>
+
+                  {/* CSV-Export (#258) – für die Abrechnung daheim */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={downloadCsv}
+                    aria-label={t.tripExpenses.csvAria(tripName)}
+                  >
+                    <Download className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    {t.tripExpenses.csvButton}
+                  </Button>
 
                   {/* Einzelne Ausgaben */}
                   <ul className="space-y-1">

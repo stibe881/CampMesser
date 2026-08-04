@@ -2561,6 +2561,9 @@ export const it: Translation = {
     removeFailed: "Impossibile togliere il biglietto",
   },
   tripExpenses: {
+    csvButton: "Esportare come CSV",
+    csvAria: (trip: string) => `Scaricare la cassa di ${trip} come CSV`,
+    csvHeaders: ["Data", "Categoria", "Descrizione", "Pagato da", "Importo"],
     budgetTitle: "Budget",
     budgetLabel: "Budget (CHF)",
     budgetSet: "Impostare un budget",

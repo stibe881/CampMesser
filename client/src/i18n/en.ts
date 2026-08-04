@@ -2498,6 +2498,9 @@ export const en: Translation = {
     removeFailed: "The note could not be removed",
   },
   tripExpenses: {
+    csvButton: "Export as CSV",
+    csvAria: (trip: string) => `Download the kitty for ${trip} as CSV`,
+    csvHeaders: ["Date", "Category", "Description", "Paid by", "Amount"],
     budgetTitle: "Budget",
     budgetLabel: "Budget (CHF)",
     budgetSet: "Set a budget",
