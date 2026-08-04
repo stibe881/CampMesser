@@ -5894,6 +5894,59 @@ export const appRouter = router({
   }),
 
   /**
+   * Fahrzeiten mit Verkehrslage (Nutzerwunsch 04.08.2026). Die AUFTEILUNG
+   * zwischen den beiden Routendiensten steht in `shared/googleRoutes.ts`
+   * ausführlich: Von Google kommt genau eine Zahl – die Fahrzeit mit
+   * Verkehr –, alle Wege, Strecken und Karten-Linien bleiben bei OSM/OSRM.
+   *
+   * Der Abruf läuft nur hier, damit der Schlüssel nie im Browser-Bundle
+   * landet. Ohne Schlüssel meldet `configured: false`, und die Ansichten
+   * rechnen mit der OSRM-Fahrzeit weiter.
+   */
+  routing: router({
+    /** Gibt es Verkehrs-Fahrzeiten auf diesem Server? */
+    status: protectedProcedure.query(async () => {
+      const { isDriveTimeConfigured } = await import("./driveTime");
+      return { configured: isDriveTimeConfigured() };
+    }),
+    /**
+     * Fahrzeit für eine Autofahrt. `departureAtMs` ist freiwillig: mit
+     * Zeitpunkt kommt die Verkehrs-Prognose für diese Tageszeit, ohne den
+     * Verkehr von jetzt. Ist nichts zu holen, kommt `driveTime: null` –
+     * ausdrücklich kein Fehler, denn die Ansicht hat bereits eine Zahl.
+     */
+    driveTime: protectedProcedure
+      .input(
+        z.object({
+          from: z.object({
+            lat: z.number().min(-90).max(90),
+            lon: z.number().min(-180).max(180),
+          }),
+          to: z.object({
+            lat: z.number().min(-90).max(90),
+            lon: z.number().min(-180).max(180),
+          }),
+          departureAtMs: z.number().int().positive().nullish(),
+        })
+      )
+      .query(async ({ input }) => {
+        const { fetchDriveTime, isDriveTimeConfigured } =
+          await import("./driveTime");
+        if (!isDriveTimeConfigured()) {
+          return { configured: false as const, driveTime: null };
+        }
+        return {
+          configured: true as const,
+          driveTime: await fetchDriveTime(
+            input.from,
+            input.to,
+            input.departureAtMs ?? null
+          ),
+        };
+      }),
+  }),
+
+  /**
    * Aufgezeichnete Wanderungen (#220). Die Punktreihe kommt vom Client (dort
    * wird sie beim Aufzeichnen bereits gefiltert), die STATISTIK rechnet immer
    * der Server mit `trackStats()` – so steht in der Datenbank nie eine Zahl,

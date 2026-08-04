@@ -14,4 +14,11 @@ export const ENV = {
    */
   excursionsUrl: process.env.AUSFLUGFINDER_SUPABASE_URL ?? "",
   excursionsAnonKey: process.env.AUSFLUGFINDER_SUPABASE_ANON_KEY ?? "",
+  /**
+   * Fahrzeiten mit Verkehrslage (Google Routes API). Fehlt der Schlüssel,
+   * rechnen alle Ansichten weiter mit der Fahrzeit von OSRM – das Feature
+   * ist dann einfach nicht eingerichtet, nicht kaputt. Der Schlüssel gehört
+   * in die Server-`.env` und NIE ins Repository oder ins Browser-Bundle.
+   */
+  googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? "",
 };

@@ -86,7 +86,56 @@ rundherum.
 Für die lokale Entwicklung dieselben zwei Zeilen in eine `.env` im
 Projektverzeichnis legen (`dotenv` liest sie beim Start).
 
-## 7. Merge nach `main`
+## 7. Fahrzeiten mit Verkehr (Google Maps)
+
+Fahrzeiten kommen neu aus der **Google Routes API** – dort, und nur dort, ist
+die Verkehrslage der Mehrwert gegenüber OpenStreetMap. Alle Wege, Strecken und
+Karten-Linien bleiben bei OSM/OSRM (siehe unten, «Warum nur die Zeit»).
+
+**Was du tun musst:**
+
+1. In der [Google Cloud Console](https://console.cloud.google.com/) ein
+   Projekt anlegen (oder ein bestehendes nehmen) und ein
+   **Abrechnungskonto** hinterlegen – ohne das antwortet die API nicht,
+   auch nicht im kostenlosen Kontingent.
+2. Unter **APIs & Services → Library** die **Routes API** aktivieren.
+   NICHT die alte Directions API – die ist abgelöst.
+3. Unter **Credentials** einen API-Schlüssel erzeugen und ihn einschränken:
+   unter «API restrictions» auf die **Routes API** begrenzen. Eine
+   Referrer-Sperre ist NICHT nötig und hier auch falsch – der Schlüssel wird
+   ausschliesslich vom Server benutzt, nie vom Browser. Wenn du magst, eine
+   IP-Beschränkung auf die Hetzner-Adresse setzen.
+4. Den Schlüssel in die Server-`.env` legen:
+
+```
+GOOGLE_MAPS_API_KEY=<API-Schlüssel aus der Google Cloud Console>
+```
+
+5. Passenger neu starten (`touch ~/campmesser/tmp/restart.txt`).
+
+Der Schlüssel steht **nirgends im Repository** und kommt auch nicht ins
+Browser-Bundle – der Abruf läuft nur serverseitig (`server/driveTime.ts`).
+Die `.env` weiterhin mit `chmod 600` schützen.
+
+**Zur Kontrolle:** Im Platz-Dossier unter «Beste Abfahrtszeit» steht in der
+Fussnote neu «Verkehrs-Prognose von Google». Ohne Schlüssel steht dort wie
+bisher «Routenberechnung über die Strasse (OpenStreetMap)» – kein
+Fehlerzustand, nur die Fahrzeit ohne Verkehr.
+
+**Kosten:** Pro Aufruf wird eine Route abgerechnet. Der Abruf erfolgt nur auf
+Anforderung (Abschnitt aufklappen), wird zehn Minuten zwischengespeichert und
+holt bewusst nur zwei Felder (Dauer und Strecke). Bei deiner Nutzung sollte
+das im kostenlosen Monatskontingent bleiben; ein Ausgabenlimit in der Cloud
+Console ist trotzdem eine gute Idee.
+
+**Warum nur die Zeit und nicht auch die Karte:** Die Nutzungsbedingungen von
+Google untersagen es, ihre Inhalte zusammen mit einer fremden Karte zu
+zeigen. CampMesser zeichnet auf Leaflet mit OpenStreetMap-Kacheln – eine von
+Google berechnete Linie gehörte dort nicht hin. Für Wanderwege ist OSM ohnehin
+die bessere Quelle: Das Schweizer Wanderwegnetz ist dort samt SAC-Skala
+erfasst, während Google viele dieser Pfade gar nicht kennt.
+
+## 8. Merge nach `main`
 
 Der Feature-Branch `claude/projekt-laden-eb1rox` enthält alle neuen Runden
 (Mehrsprachigkeit, Runde 9 + 10) und ist getestet. Sobald du bereit bist,

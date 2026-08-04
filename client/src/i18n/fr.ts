@@ -3827,6 +3827,8 @@ export const fr: Translation = {
       "Jusqu'à huit points le long de l'itinéraire routier calculé sont vérifiés, chacun pour l'heure d'arrivée à ce point. Distance et durée proviennent du calcul d'itinéraire (OpenStreetMap) ; bouchons et chantiers s'y ajoutent.",
     methodNoteEstimate: (speed: number) =>
       `Sans réseau, pas de calcul d'itinéraire : huit points le long de la ligne droite sont vérifiés à ${speed} km/h – une estimation grossière qui peut être très fausse en montagne.`,
+    methodNoteTraffic:
+      "La durée provient de la prévision de trafic de Google pour ton heure de départ ; le tracé et les points de contrôle viennent toujours du calcul d'itinéraire sur OpenStreetMap. Comme le trafic décale l'heure d'arrivée à chaque point, il décale aussi l'heure de prévision qui compte.",
     source: "Données : Open-Meteo",
   },
   packHistory: {
@@ -3962,6 +3964,8 @@ export const fr: Translation = {
     note: "La distance et la durée proviennent du calcul d'itinéraire par la route (OpenStreetMap). Bouchons, chantiers et attentes à la frontière s'y ajoutent.",
     noteEstimate:
       "Sans réseau, pas de calcul d'itinéraire : ces chiffres sont estimés à vol d'oiseau (avec un facteur de détour) et peuvent être nettement à côté – surtout en montagne.",
+    noteTraffic:
+      "La durée provient de la prévision de trafic de Google pour cette heure de la journée, la distance du calcul d'itinéraire sur OpenStreetMap. Chantiers et attentes à la frontière s'y ajoutent toujours.",
   },
   firewood: {
     title: "Besoin en bois de feu",
