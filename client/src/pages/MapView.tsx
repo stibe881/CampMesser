@@ -439,10 +439,50 @@ function SpotsMap({
   // (map.project ist unabhängig vom Ausschnitt), darum reicht zoomend.
   const [clusterZoom, setClusterZoom] = useState(FALLBACK_ZOOM);
 
-  // Die Wahl «Karte/Satellit» muss beim Aufbau schon feststehen – der
-  // Effect darunter läuft erst danach. Deshalb eine Ref daneben.
-  const layerKindRef = useRef<MapLayerKind>(layerKind);
-  layerKindRef.current = layerKind;
+  /** Karte auf die aktuelle Position zentrieren (blauer Punkt + Genauigkeit). */
+  const locateMe = useCallback((silent = false) => {
+    const map = engineRef.current;
+    if (!map || !navigator.geolocation) {
+      if (!silent) toast.error(t.mapView.locateFailed);
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setLocating(false);
+        const { latitude, longitude, accuracy } = pos.coords;
+        const m = engineRef.current;
+        if (!m) return;
+        if (!locateLayerRef.current) {
+          locateLayerRef.current = m.layerGroup();
+        }
+        const locateLayer = locateLayerRef.current;
+        locateLayer.clear();
+        m.circle([latitude, longitude], {
+          radius: Math.min(accuracy || 30, 500),
+          color: "#3b82f6",
+          weight: 1,
+          fillColor: "#3b82f6",
+          fillOpacity: 0.15,
+          layer: locateLayer,
+        });
+        m.circleMarker([latitude, longitude], {
+          radius: 6,
+          color: "#fff",
+          weight: 2,
+          fillColor: "#2563eb",
+          fillOpacity: 1,
+          layer: locateLayer,
+        });
+        m.setView([latitude, longitude], Math.max(m.getZoom(), 14));
+      },
+      () => {
+        setLocating(false);
+        if (!silent) toast.error(t.mapView.locateFailed);
+      },
+      { enableHighAccuracy: true, timeout: 5000 }
+    );
+  }, [t.mapView.locateFailed]);
 
   // Karte einmalig aufbauen und beim Verlassen sauber abbauen. Gebaut wird
   // erst, wenn feststeht, welcher Kartendienst zeichnet – sonst würde die
@@ -520,15 +560,10 @@ function SpotsMap({
     abortRef.current = controller;
     const b = map.getBounds();
     try {
-      const res = await fetch(OVERPASS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `data=${encodeURIComponent(
-          overpassQuery(b.south, b.west, b.north, b.east)
-        )}`,
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`overpass ${res.status}`);
+      const res = await fetchOverpass(
+        `data=${encodeURIComponent(overpassQuery(b.south, b.west, b.north, b.east))}`,
+        controller.signal
+      );
       const json: unknown = await res.json();
       setCampsites(parseCampsites(json));
       setSearched(true);
@@ -558,15 +593,10 @@ function SpotsMap({
     firepitAbortRef.current = controller;
     const b = map.getBounds();
     try {
-      const res = await fetch(OVERPASS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `data=${encodeURIComponent(
-          firepitsBboxQuery(b.south, b.west, b.north, b.east)
-        )}`,
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`overpass ${res.status}`);
+      const res = await fetchOverpass(
+        `data=${encodeURIComponent(firepitsBboxQuery(b.south, b.west, b.north, b.east))}`,
+        controller.signal
+      );
       const json: unknown = await res.json();
       setFirepits(parseFirepits(json));
       setFirepitSearched(true);
@@ -596,15 +626,10 @@ function SpotsMap({
     familyAbortRef.current = controller;
     const b = map.getBounds();
     try {
-      const res = await fetch(OVERPASS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `data=${encodeURIComponent(
-          familyPlacesBboxQuery(b.south, b.west, b.north, b.east)
-        )}`,
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`overpass ${res.status}`);
+      const res = await fetchOverpass(
+        `data=${encodeURIComponent(familyPlacesBboxQuery(b.south, b.west, b.north, b.east))}`,
+        controller.signal
+      );
       const json: unknown = await res.json();
       setFamilyPlaces(parseFamilyPlaces(json));
       setFamilySearched(true);
@@ -1254,19 +1279,12 @@ function SpotsMap({
         });
     });
 
-    // Nur beim ersten Aufbau einpassen – spätere Refetches (z. B. nach dem
-    // Übernehmen eines OSM-Platzes) sollen den Ausschnitt nicht verspringen.
     if (!didFitRef.current) {
       didFitRef.current = true;
-      const points: LatLngTuple[] = [
-        ...spots.map(s => [s.latitude, s.longitude] as LatLngTuple),
-        ...targets.map(tgt => [tgt.lat, tgt.lon] as LatLngTuple),
-      ];
-      if (points.length > 0) {
-        engine.fitBounds(latLngBounds(points), { padding: 40, maxZoom: 13 });
-      } else {
-        engine.setView(FALLBACK_CENTER, FALLBACK_ZOOM);
-      }
+      // Statt Pins einzupassen, zentrieren wir auf den eigenen Standort (silent).
+      // Zuerst Fallback für den Fall, dass Standort nicht klappt:
+      engine.setView(FALLBACK_CENTER, FALLBACK_ZOOM);
+      locateMe(true);
     }
   }, [
     spots,
@@ -1321,50 +1339,7 @@ function SpotsMap({
     });
   };
 
-  /** Karte auf die aktuelle Position zentrieren (blauer Punkt + Genauigkeit). */
-  const locateMe = () => {
-    const map = engineRef.current;
-    if (!map || !navigator.geolocation) {
-      toast.error(t.mapView.locateFailed);
-      return;
-    }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        setLocating(false);
-        const { latitude, longitude, accuracy } = pos.coords;
-        const m = engineRef.current;
-        if (!m) return;
-        if (!locateLayerRef.current) {
-          locateLayerRef.current = m.layerGroup();
-        }
-        const locateLayer = locateLayerRef.current;
-        locateLayer.clear();
-        m.circle([latitude, longitude], {
-          radius: Math.min(accuracy || 30, 500),
-          color: "#3b82f6",
-          weight: 1,
-          fillColor: "#3b82f6",
-          fillOpacity: 0.15,
-          layer: locateLayer,
-        });
-        m.circleMarker([latitude, longitude], {
-          radius: 6,
-          color: "#ffffff",
-          weight: 2,
-          fillColor: "#3b82f6",
-          fillOpacity: 1,
-          layer: locateLayer,
-        });
-        m.setView([latitude, longitude], Math.max(m.getZoom(), 14));
-      },
-      () => {
-        setLocating(false);
-        toast.error(t.mapView.locateFailed);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
+
 
   const clearMeasure = () => {
     measurePointsRef.current = [];

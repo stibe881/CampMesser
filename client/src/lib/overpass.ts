@@ -57,12 +57,15 @@ export async function fetchOverpass(query: string, signal?: AbortSignal): Promis
     try {
       const res = await fetch(url, {
         method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: query,
         signal,
       });
       if (res.ok) return res;
       // Bei 429 oder 5xx (Timeouts etc.) versuchen wir den nächsten Server
-      if (res.status !== 429 && res.status < 500) return res;
+      if (res.status !== 429 && res.status < 500) {
+        throw new Error(`overpass HTTP ${res.status}`);
+      }
     } catch (e) {
       lastError = e as Error;
       if (e instanceof DOMException && e.name === "AbortError") {

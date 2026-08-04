@@ -274,3 +274,15 @@
     flex: 0 0 auto;
   }
 }
+
+/* 
+ * Google Maps InfoWindow erzwingt immer einen weissen Hintergrund, erbt aber die 
+ * Textfarbe (z. B. weiss im Darkmode). Das macht den Text unsichtbar. 
+ * Hier erzwingen wir dunklen Text, unabhängig vom Theme.
+ */
+.gm-style .gm-style-iw {
+  color: #0f172a;
+}
+.gm-style .gm-style-iw a {
+  color: #2563eb;
+}
