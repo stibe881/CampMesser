@@ -886,6 +886,16 @@ export const de = {
     gearRemoved: "Pflege-Aufgabe gelöscht",
   },
   weather: {
+    mosquitoTitle: "Stechmücken heute Abend",
+    mosquitoAria: "Stechmücken-Index für den Abend",
+    mosquitoBarAria: (score: number) => `Stechmücken-Index ${score} von 100`,
+    mosquitoLimiting: {
+      kalt: "Zu kühl für rege Mückenflüge.",
+      trocken: "Trockene Luft hält sie unten.",
+      wind: "Der Wind hält sie weg – der beste Mückenschutz überhaupt.",
+    },
+    mosquitoHint:
+      "Geschätzt aus Wärme, Feuchte, Wind und dem Regen der letzten Tage. Ein Weiher neben dem Zelt schlägt jede Formel.",
     heatSunscreen: (minutes: number, burn: number) =>
       `Eincremen, alle ${minutes} Min. nachlegen (ungeschützt rot nach ~${burn} Min.)`,
     heatDrink: (liters: string) => `Rund ${liters} l Wasser pro Erwachsener`,

@@ -9,6 +9,7 @@ import {
   CloudFog,
   CloudLightning,
   CloudRain,
+  Bug,
   CloudSun,
   Droplets,
   Flame,
@@ -66,6 +67,11 @@ import {
 } from "@/lib/weatherPlaces";
 import { cn } from "@/lib/utils";
 import { heatAdvice } from "@shared/heatCare";
+import {
+  eveningMosquitoIndex,
+  mosquitoAdvice,
+  mosquitoLevelLabel,
+} from "@shared/mosquito";
 import { LOCALE_TAGS } from "@shared/i18n";
 import {
   describeUvIndex,
@@ -267,7 +273,7 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
     forecast_minutely_15: "16",
     current: "temperature_2m,apparent_temperature,weather_code,wind_speed_10m",
     hourly:
-      "temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,wind_direction_10m,pressure_msl,weather_code,cape,cloud_cover",
+      "temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,wind_direction_10m,pressure_msl,weather_code,cape,cloud_cover",
     daily:
       "temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_gusts_10m_max,weather_code,sunrise,sunset,uv_index_max",
   });
@@ -295,6 +301,7 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
       weatherCode: json.hourly.weather_code[i],
       cape: json.hourly.cape?.[i] ?? 0,
       cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
+      humidityPercent: json.hourly.relative_humidity_2m?.[i] ?? undefined,
     }))
     .filter(h => h.time.slice(0, 10) <= lastDetailDate);
 
@@ -1436,6 +1443,31 @@ export default function WeatherPage() {
   // Sonnencreme & Trinken (#260/#261): dieselbe Rechnung wie in der
   // Push-Erinnerung, damit Anzeige und Mitteilung nie auseinanderlaufen.
   const heatToday = heatAdvice(uvToday ?? 0, data?.daily[0]?.tempMaxC ?? 0);
+  /**
+   * Stechmücken-Index (#262) für den kommenden Abend: die schlechteste
+   * Stunde zwischen 18 und 23 Uhr, weil die Dämmerung die Hauptflugzeit
+   * ist. Der Regen der letzten Tage steckt als Brut-Faktor drin – hier
+   * ersatzweise die Summe der vergangenen 48 Prognose-Stunden, weil das
+   * Wetter-Modul keine Vergangenheit lädt.
+   */
+  const mosquitoTonight = useMemo(() => {
+    if (!data) return null;
+    const rain48 = data.hourly
+      .slice(0, 48)
+      .reduce((sum, h) => sum + (h.precipitationMm || 0), 0);
+    const hours = data.hourly
+      .slice(0, 24)
+      .filter(h => h.humidityPercent !== undefined)
+      .map(h => ({
+        hour: new Date(h.time).getHours(),
+        temperatureC: h.temperatureC,
+        humidityPercent: h.humidityPercent ?? 0,
+        windKmh: h.windSpeedKmh,
+        recentRainMm: rain48,
+      }));
+    return eveningMosquitoIndex(hours);
+  }, [data]);
+
   /** Dezimaltrennzeichen der aktiven Sprache («3.5 l» bzw. «3,5 l»). */
   const decimalSeparator = (1.1).toLocaleString(LOCALE_TAGS[lang]).slice(1, 2);
   // Regen-Grafik: 48 h mit Menge und Wahrscheinlichkeit
@@ -1842,6 +1874,52 @@ export default function WeatherPage() {
                       )}
                   </p>
                 )}
+              </div>
+            </section>
+          )}
+
+          {/* Stechmücken-Index (#262): Abendwerte am gewählten Ort */}
+          {mosquitoTonight && (
+            <section aria-label={t.weather.mosquitoAria} className="mb-6">
+              <div className="rounded-xl border border-border bg-card px-4 py-3">
+                <p className="flex items-center gap-2 text-sm font-semibold">
+                  <Bug
+                    className="h-4 w-4 shrink-0 text-primary"
+                    aria-hidden="true"
+                  />
+                  {t.weather.mosquitoTitle}
+                  <span className="ml-auto rounded-full bg-accent px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent-foreground">
+                    {mosquitoLevelLabel(mosquitoTonight.level, lang)}
+                  </span>
+                </p>
+                <div
+                  className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted"
+                  role="img"
+                  aria-label={t.weather.mosquitoBarAria(mosquitoTonight.score)}
+                >
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all",
+                      mosquitoTonight.score >= 78
+                        ? "bg-destructive"
+                        : mosquitoTonight.score >= 55
+                          ? "bg-amber-500"
+                          : "bg-primary"
+                    )}
+                    style={{ width: `${mosquitoTonight.score}%` }}
+                  />
+                </div>
+                <p className="mt-1.5 text-sm">
+                  {mosquitoAdvice(mosquitoTonight.level, lang)}
+                </p>
+                {mosquitoTonight.limitingFactor && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {t.weather.mosquitoLimiting[mosquitoTonight.limitingFactor]}
+                  </p>
+                )}
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  {t.weather.mosquitoHint}
+                </p>
               </div>
             </section>
           )}

@@ -25,11 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 10 Punkte
+## Runde 27 – 9 Punkte
 
 ### Gesundheit & Sicherheit
 
-- [ ] **Stechmücken-Index** (#262) – wetterbasiert: Wärme, Feuchte, Windstille
 - [ ] **Feuerverbots-Übersicht nach Kanton** (#263) – Ergänzung zur
       Waldbrandgefahr
 

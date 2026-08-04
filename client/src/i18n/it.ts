@@ -873,6 +873,16 @@ export const it: Translation = {
     gearRemoved: "Attività di manutenzione eliminata",
   },
   weather: {
+    mosquitoTitle: "Zanzare stasera",
+    mosquitoAria: "Indice zanzare per la sera",
+    mosquitoBarAria: (score: number) => `Indice zanzare ${score} su 100`,
+    mosquitoLimiting: {
+      kalt: "Troppo fresco per un volo attivo.",
+      trocken: "L'aria secca le tiene giù.",
+      wind: "Il vento le allontana – la miglior protezione che ci sia.",
+    },
+    mosquitoHint:
+      "Stimato da calore, umidità, vento e pioggia degli ultimi giorni. Uno stagno accanto alla tenda batte qualsiasi formula.",
     heatSunscreen: (minutes: number, burn: number) =>
       `Crema solare, da riapplicare ogni ${minutes} min (pelle scoperta rossa dopo ~${burn} min)`,
     heatDrink: (liters: string) => `Circa ${liters} l d'acqua per adulto`,

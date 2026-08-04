@@ -851,6 +851,16 @@ export const en: Translation = {
     gearRemoved: "Care task deleted",
   },
   weather: {
+    mosquitoTitle: "Mosquitoes tonight",
+    mosquitoAria: "Mosquito index for the evening",
+    mosquitoBarAria: (score: number) => `Mosquito index ${score} out of 100`,
+    mosquitoLimiting: {
+      kalt: "Too cool for active flying.",
+      trocken: "Dry air keeps them down.",
+      wind: "The wind keeps them away – the best protection there is.",
+    },
+    mosquitoHint:
+      "Estimated from warmth, humidity, wind and the rain of the past few days. A pond next to the tent beats any formula.",
     heatSunscreen: (minutes: number, burn: number) =>
       `Sunscreen, reapply every ${minutes} min (bare skin burns after ~${burn} min)`,
     heatDrink: (liters: string) => `About ${liters} l of water per adult`,

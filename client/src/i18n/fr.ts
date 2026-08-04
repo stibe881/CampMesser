@@ -889,6 +889,16 @@ export const fr: Translation = {
     gearRemoved: "Tâche d'entretien supprimée",
   },
   weather: {
+    mosquitoTitle: "Moustiques ce soir",
+    mosquitoAria: "Indice moustiques pour la soirée",
+    mosquitoBarAria: (score: number) => `Indice moustiques ${score} sur 100`,
+    mosquitoLimiting: {
+      kalt: "Trop frais pour un vol actif.",
+      trocken: "L'air sec les tient à distance.",
+      wind: "Le vent les éloigne – la meilleure protection qui soit.",
+    },
+    mosquitoHint:
+      "Estimé à partir de la chaleur, de l'humidité, du vent et de la pluie des derniers jours. Un étang à côté de la tente bat n'importe quelle formule.",
     heatSunscreen: (minutes: number, burn: number) =>
       `Crème solaire, à renouveler toutes les ${minutes} min (peau nue rouge après ~${burn} min)`,
     heatDrink: (liters: string) => `Environ ${liters} l d'eau par adulte`,
