@@ -3857,6 +3857,40 @@ export const en: Translation = {
     noteTraffic:
       "The driving time comes from Google's traffic forecast for this time of day, the distance from the OpenStreetMap route calculation. Roadworks and border waits still come on top.",
   },
+  lunchbox: {
+    title: "Snacks & lunchbox",
+    intro:
+      "What goes in the backpack for a day out – and how much to take to drink.",
+    adultsLabel: "Adults",
+    childrenLabel: "Children",
+    lengthLabel: "How long you are out",
+    length: {
+      halbtag: "Half a day",
+      ganztag: "Full day",
+      langertag: "Until the evening",
+    },
+    effortLabel: "How strenuous",
+    effort: {
+      gemuetlich: "Easy",
+      wandern: "Hiking",
+      anstrengend: "Strenuous",
+    },
+    temperatureLabel: "Peak temperature (°C)",
+    coolPackLabel: "Cool pack comes along",
+    bottles: (count: number) => (count === 1 ? "1 bottle" : `${count} bottles`),
+    waterHint: (liters: number, bottleMl: number) =>
+      `${liters} l for everyone together, rounded up to ${bottleMl} ml bottles.`,
+    znueniTitle: "For the snack",
+    mittagTitle: "For lunch",
+    remindersTitle: "Do not forget",
+    portions: (count: number) =>
+      count === 1 ? "1 portion" : `${count} portions`,
+    addToList: "Add to shopping list",
+    addedToList: "Added to the shopping list",
+    nothingToAdd: "Nothing suggested – enter the people first.",
+    fromPlanner: "from the lunchbox planner",
+    note: "Suggestions, not rules: rules of thumb per person and meal. Without a cool pack, everything that needs refrigerating drops out – that is not a matter of taste. And chocolate stays at home on hot days.",
+  },
   firewood: {
     title: "Firewood needed",
     intro: "How many nets to load – wood is better bought before you arrive.",

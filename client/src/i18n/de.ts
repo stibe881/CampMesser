@@ -3970,6 +3970,41 @@ export const de = {
     noteTraffic:
       "Die Fahrzeit stammt aus der Verkehrs-Prognose von Google für diese Tageszeit, die Strecke aus der Routenberechnung über OpenStreetMap. Baustellen und Grenzwartezeiten kommen weiterhin dazu.",
   },
+  lunchbox: {
+    title: "Znüni & Lunchbox",
+    intro:
+      "Was für den Ausflug in den Rucksack – und wie viel zu trinken mit muss.",
+    adultsLabel: "Erwachsene",
+    childrenLabel: "Kinder",
+    lengthLabel: "Wie lange unterwegs",
+    length: {
+      halbtag: "Halber Tag",
+      ganztag: "Ganzer Tag",
+      langertag: "Bis in den Abend",
+    },
+    effortLabel: "Wie anstrengend",
+    effort: {
+      gemuetlich: "Gemütlich",
+      wandern: "Wandern",
+      anstrengend: "Anstrengend",
+    },
+    temperatureLabel: "Höchsttemperatur (°C)",
+    coolPackLabel: "Kühlakku kommt mit",
+    bottles: (count: number) =>
+      count === 1 ? "1 Flasche" : `${count} Flaschen`,
+    waterHint: (liters: number, bottleMl: number) =>
+      `${liters} l für alle zusammen, aufgerundet auf Flaschen à ${bottleMl} ml.`,
+    znueniTitle: "Fürs Znüni",
+    mittagTitle: "Fürs Mittagessen",
+    remindersTitle: "Nicht vergessen",
+    portions: (count: number) =>
+      count === 1 ? "1 Portion" : `${count} Portionen`,
+    addToList: "Auf die Einkaufsliste",
+    addedToList: "Auf die Einkaufsliste gesetzt",
+    nothingToAdd: "Nichts vorgeschlagen – trag zuerst Personen ein.",
+    fromPlanner: "aus dem Lunchbox-Planer",
+    note: "Vorschläge, keine Vorschriften: Faustwerte pro Person und Mahlzeit. Ohne Kühlakku fällt alles weg, was gekühlt gehört – das ist keine Geschmacksfrage. Und Schokolade bleibt an heissen Tagen daheim.",
+  },
   firewood: {
     title: "Feuerholz-Bedarf",
     intro:

@@ -3967,6 +3967,40 @@ export const fr: Translation = {
     noteTraffic:
       "La durée provient de la prévision de trafic de Google pour cette heure de la journée, la distance du calcul d'itinéraire sur OpenStreetMap. Chantiers et attentes à la frontière s'y ajoutent toujours.",
   },
+  lunchbox: {
+    title: "Goûter & pique-nique",
+    intro:
+      "Ce qu'il faut mettre dans le sac pour la sortie – et combien emporter à boire.",
+    adultsLabel: "Adultes",
+    childrenLabel: "Enfants",
+    lengthLabel: "Durée de la sortie",
+    length: {
+      halbtag: "Demi-journée",
+      ganztag: "Journée entière",
+      langertag: "Jusqu'au soir",
+    },
+    effortLabel: "Intensité",
+    effort: {
+      gemuetlich: "Tranquille",
+      wandern: "Randonnée",
+      anstrengend: "Exigeant",
+    },
+    temperatureLabel: "Température maximale (°C)",
+    coolPackLabel: "Pain de glace emporté",
+    bottles: (count: number) => (count === 1 ? "1 gourde" : `${count} gourdes`),
+    waterHint: (liters: number, bottleMl: number) =>
+      `${liters} l pour tout le monde, arrondi à des gourdes de ${bottleMl} ml.`,
+    znueniTitle: "Pour le goûter",
+    mittagTitle: "Pour le repas de midi",
+    remindersTitle: "Ne pas oublier",
+    portions: (count: number) =>
+      count === 1 ? "1 portion" : `${count} portions`,
+    addToList: "Vers la liste de courses",
+    addedToList: "Ajouté à la liste de courses",
+    nothingToAdd: "Aucune proposition – saisis d'abord les personnes.",
+    fromPlanner: "du planificateur de pique-nique",
+    note: "Des suggestions, pas des règles : valeurs indicatives par personne et par repas. Sans pain de glace, tout ce qui doit être réfrigéré disparaît – ce n'est pas une question de goût. Et le chocolat reste à la maison les jours de chaleur.",
+  },
   firewood: {
     title: "Besoin en bois de feu",
     intro:

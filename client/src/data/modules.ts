@@ -24,6 +24,7 @@ import {
   Hammer,
   Languages,
   ListChecks,
+  Sandwich,
   LocateFixed,
   Map as MapIcon,
   Moon,
@@ -390,6 +391,24 @@ export const modules: Module[] = [
     ),
     icon: ShoppingCart,
     group: "kueche",
+  },
+  {
+    path: "/lunchbox",
+    title: l4(
+      "Znüni & Lunchbox",
+      "Goûter & pique-nique",
+      "Merenda e pranzo al sacco",
+      "Snacks & lunchbox"
+    ),
+    description: l4(
+      "Was für den Ausflug in den Rucksack – samt Trinkmenge für den Tag",
+      "Ce qu'il faut mettre dans le sac – avec la quantité à boire pour la journée",
+      "Cosa mettere nello zaino per la gita – con quanto bere durante il giorno",
+      "What goes in the backpack for a day out – including how much to drink"
+    ),
+    icon: Sandwich,
+    group: "kueche",
+    offline: true,
   },
   {
     path: "/wasser",

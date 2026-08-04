@@ -3940,6 +3940,40 @@ export const it: Translation = {
     noteTraffic:
       "Il tempo di percorrenza viene dalla previsione del traffico di Google per quest'ora del giorno, la distanza dal calcolo del percorso su OpenStreetMap. Cantieri e attese alla frontiera si aggiungono ancora.",
   },
+  lunchbox: {
+    title: "Merenda e pranzo al sacco",
+    intro: "Cosa mettere nello zaino per la gita – e quanto portare da bere.",
+    adultsLabel: "Adulti",
+    childrenLabel: "Bambini",
+    lengthLabel: "Durata della gita",
+    length: {
+      halbtag: "Mezza giornata",
+      ganztag: "Giornata intera",
+      langertag: "Fino a sera",
+    },
+    effortLabel: "Impegno",
+    effort: {
+      gemuetlich: "Tranquilla",
+      wandern: "Escursione",
+      anstrengend: "Impegnativa",
+    },
+    temperatureLabel: "Temperatura massima (°C)",
+    coolPackLabel: "Siberino incluso",
+    bottles: (count: number) =>
+      count === 1 ? "1 borraccia" : `${count} borracce`,
+    waterHint: (liters: number, bottleMl: number) =>
+      `${liters} l per tutti insieme, arrotondato a borracce da ${bottleMl} ml.`,
+    znueniTitle: "Per la merenda",
+    mittagTitle: "Per il pranzo",
+    remindersTitle: "Non dimenticare",
+    portions: (count: number) =>
+      count === 1 ? "1 porzione" : `${count} porzioni`,
+    addToList: "Nella lista della spesa",
+    addedToList: "Aggiunto alla lista della spesa",
+    nothingToAdd: "Nessuna proposta – inserisci prima le persone.",
+    fromPlanner: "dal pianificatore del pranzo al sacco",
+    note: "Suggerimenti, non prescrizioni: valori indicativi per persona e pasto. Senza siberino sparisce tutto ciò che va refrigerato – non è una questione di gusto. E il cioccolato nei giorni caldi resta a casa.",
+  },
   firewood: {
     title: "Fabbisogno di legna",
     intro:
