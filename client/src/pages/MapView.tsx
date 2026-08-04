@@ -1,6 +1,6 @@
 /**
  * Karte der Plätze & Reisen: alle gespeicherten Zeltplatz-Favoriten als Pins
- * auf einer OpenStreetMap-Karte (Leaflet, ohne react-leaflet). Im Popup steht
+ * auf der Karte (über die Karten-Maschine, siehe lib/mapEngine). Im Popup steht
  * neben dem Dossier-Link, wie viele Übernachtungen laut Reise-Tagebuch an
  * diesem Platz stattfanden (Verknüpfung über spotId oder Orts-Namen,
  * case-insensitiv – gleiche Idee wie computeTripStats).
@@ -84,8 +84,6 @@ import {
   Search,
   Tent,
 } from "lucide-react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -121,7 +119,6 @@ import {
   type OsmFirepit,
 } from "@/lib/overpass";
 import {
-  createBaseLayer,
   loadLayerVisibility,
   loadMapLayer,
   storeLayerVisibility,
@@ -129,7 +126,22 @@ import {
   type MapLayerKind,
   type MapLayerVisibility,
 } from "@/lib/mapLayers";
-import { CLUSTER_THRESHOLD_PX, clusterPoints } from "@/lib/mapCluster";
+import {
+  CLUSTER_THRESHOLD_PX,
+  clusterPoints,
+  projectToPixels,
+} from "@/lib/mapCluster";
+import {
+  createMap,
+  divIcon,
+  latLngBounds,
+  type IconSpec,
+  type LatLngTuple,
+  type LayerGroupObject,
+  type MapEngine,
+  type MarkerObject,
+} from "@/lib/mapEngine";
+import { useMapConfig } from "@/hooks/useMapConfig";
 import {
   LEGACY_TARGET_KEY,
   TARGETS_KEY,
@@ -163,11 +175,11 @@ interface SightingPin {
 }
 
 /** Schweiz als Ausgangs-Ausschnitt, solange keine Pins vorhanden sind. */
-const FALLBACK_CENTER: L.LatLngTuple = [46.8, 8.2];
+const FALLBACK_CENTER: LatLngTuple = [46.8, 8.2];
 const FALLBACK_ZOOM = 8;
 
 /** Runder Zelt-Marker als divIcon – keine Bild-Assets nötig (Bundler-sicher). */
-const spotIcon = L.divIcon({
+const spotIcon = divIcon({
   className: "",
   html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#2f6b4f" stroke="#ffffff" stroke-width="2.5"/><path d="M14 8.5 20 19h-4.2L14 15.8 12.2 19H8Z" fill="#ffffff"/></svg>`,
   iconSize: [28, 28],
@@ -180,8 +192,8 @@ const spotIcon = L.divIcon({
  * im Kreis steht der SVG-Glyph des gewählten Symbols, ohne Wahl das
  * Fadenkreuz wie bisher.
  */
-function targetIconFor(icon: TargetIcon | undefined): L.DivIcon {
-  return L.divIcon({
+function targetIconFor(icon: TargetIcon | undefined): IconSpec {
+  return divIcon({
     className: "",
     html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#b45309" stroke="#ffffff" stroke-width="2.5"/>${targetIconGlyph(icon)}</svg>`,
     iconSize: [28, 28],
@@ -191,7 +203,7 @@ function targetIconFor(icon: TargetIcon | undefined): L.DivIcon {
 }
 
 /** Entdeckter OSM-Campingplatz: blauer Kreis mit Zelt-Umriss (dritte Farbe). */
-const campsiteIcon = L.divIcon({
+const campsiteIcon = divIcon({
   className: "",
   html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#0369a1" stroke="#ffffff" stroke-width="2.5"/><path d="M14 8.5 20 19h-4.2L14 15.8 12.2 19H8Z" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
   iconSize: [28, 28],
@@ -200,7 +212,7 @@ const campsiteIcon = L.divIcon({
 });
 
 /** Natur-Beobachtung: violetter Kreis mit Pfoten-Punkten (vierte Farbe). */
-const sightingIcon = L.divIcon({
+const sightingIcon = divIcon({
   className: "",
   html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#7c3aed" stroke="#ffffff" stroke-width="2.5"/><ellipse cx="14" cy="16.5" rx="3.4" ry="2.9" fill="#ffffff"/><circle cx="9.6" cy="12.4" r="1.7" fill="#ffffff"/><circle cx="13" cy="10.4" r="1.7" fill="#ffffff"/><circle cx="16.8" cy="10.9" r="1.7" fill="#ffffff"/><circle cx="19.4" cy="13.7" r="1.6" fill="#ffffff"/></svg>`,
   iconSize: [28, 28],
@@ -213,7 +225,7 @@ const sightingIcon = L.divIcon({
  * Riesenrad-Stern – fünfte Farbe, klar unterscheidbar von Plätzen (grün),
  * Zielen (bernstein), Beobachtungen (violett) und OSM-Funden (blau).
  */
-const excursionIcon = L.divIcon({
+const excursionIcon = divIcon({
   className: "",
   html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#be123c" stroke="#ffffff" stroke-width="2.5"/><circle cx="14" cy="14" r="5.4" fill="none" stroke="#ffffff" stroke-width="1.6"/><path d="M14 6.6v3M14 18.4v3M6.6 14h3M18.4 14h3M9 9l2.1 2.1M16.9 16.9 19 19M19 9l-2.1 2.1M11.1 16.9 9 19" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/></svg>`,
   iconSize: [28, 28],
@@ -226,7 +238,7 @@ const excursionIcon = L.divIcon({
  * sechste Farbe, deutlich heller und satter als das Bernstein der Ziele und
  * das dunkle Karminrot der Ausflüge, dazu ein unverwechselbarer Umriss.
  */
-const firepitIcon = L.divIcon({
+const firepitIcon = divIcon({
   className: "",
   html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#dc2626" stroke="#ffffff" stroke-width="2.5"/><path d="M14.4 6.6c2.5 2.9 4.3 5 4.3 7.8a4.7 4.7 0 0 1-9.4 0c0-1.8.8-3.2 2-4.6.2 1.2.8 2 1.7 2.3.6-2.1.3-3.8-.9-5.7 1 .1 1.7.2 2.3.2Z" fill="#ffffff"/></svg>`,
   iconSize: [28, 28],
@@ -245,8 +257,8 @@ const FAMILY_GLYPHS: Record<FamilyPlaceKind, string> = {
   bathing: `<circle cx="11" cy="10.4" r="2" fill="#ffffff"/><path d="M7.4 15.4c1.3-1.5 2.6-1.5 3.9 0s2.6 1.5 3.9 0 2.6-1.5 3.9 0M7.4 18.8c1.3-1.5 2.6-1.5 3.9 0s2.6 1.5 3.9 0 2.6-1.5 3.9 0" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" fill="none"/>`,
 };
 
-function familyIconFor(kind: FamilyPlaceKind): L.DivIcon {
-  return L.divIcon({
+function familyIconFor(kind: FamilyPlaceKind): IconSpec {
+  return divIcon({
     className: "",
     html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#0d9488" stroke="#ffffff" stroke-width="2.5"/>${FAMILY_GLYPHS[kind]}</svg>`,
     iconSize: [28, 28],
@@ -298,9 +310,20 @@ function clusterColor(kinds: readonly PinKind[]): string {
 }
 
 /** Zahlen-Kreis für gruppierte Pins – Grösse wächst leicht mit der Anzahl. */
-function clusterIcon(count: number, color: string, label: string): L.DivIcon {
+/** Beschriftung der Messstrecke – ein Pin statt eines Tooltips. */
+function measureLabelIcon(label: string): IconSpec {
+  const width = Math.max(44, label.length * 8 + 16);
+  return divIcon({
+    className: "",
+    html: `<div style="background:#0ea5e9;color:#fff;border-radius:9999px;padding:2px 8px;font-size:11px;font-weight:600;white-space:nowrap;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.3)">${label}</div>`,
+    iconSize: [width, 20],
+    iconAnchor: [width / 2, 10],
+  });
+}
+
+function clusterIcon(count: number, color: string, label: string): IconSpec {
   const size = count < 10 ? 34 : count < 100 ? 40 : 46;
-  return L.divIcon({
+  return divIcon({
     className: "",
     html: `<div role="img" aria-label="${label}" style="width:${size}px;height:${size}px;border-radius:9999px;background:${color};color:#ffffff;border:2.5px solid #ffffff;box-shadow:0 1px 4px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;">${count}</div>`,
     iconSize: [size, size],
@@ -340,9 +363,10 @@ function SpotsMap({
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const baseLayerRef = useRef<L.TileLayer | null>(null);
-  const markersRef = useRef<L.LayerGroup | null>(null);
+  const engineRef = useRef<MapEngine | null>(null);
+  const [mapReady, setMapReady] = useState(false);
+  const maps = useMapConfig();
+  const markersRef = useRef<LayerGroupObject | null>(null);
   const didFitRef = useRef(false);
   // Aus dem Platz-Dossier angesteuerter Ausflug: einmal anfahren, dann öffnet
   // der Marker-Aufbau sein Popup. Die Ref merkt sich die bereits erledigte Id,
@@ -351,14 +375,14 @@ function SpotsMap({
   const abortRef = useRef<AbortController | null>(null);
   const popupJustClosedRef = useRef(0);
   // «Mein Standort»: blauer Punkt + Genauigkeitskreis, bei jedem Klick ersetzt
-  const locateLayerRef = useRef<L.LayerGroup | null>(null);
+  const locateLayerRef = useRef<LayerGroupObject | null>(null);
   const [locating, setLocating] = useState(false);
   // Mess-Modus: zwei Punkte antippen → Luftlinie mit Distanz-Label
   const [measureOn, setMeasureOn] = useState(false);
   const measureOnRef = useRef(false);
-  const measurePointsRef = useRef<L.LatLng[]>([]);
-  const measureLayerRef = useRef<L.LayerGroup | null>(null);
-  const measureClickRef = useRef<(latlng: L.LatLng) => void>(() => {});
+  const measurePointsRef = useRef<LatLngTuple[]>([]);
+  const measureLayerRef = useRef<LayerGroupObject | null>(null);
+  const measureClickRef = useRef<(point: LatLngTuple) => void>(() => {});
 
   // Karten-Klick auf freie Stelle: Vorschlag für einen neuen Favoriten
   const [proposed, setProposed] = useState<{ lat: number; lon: number } | null>(
@@ -415,56 +439,62 @@ function SpotsMap({
   // (map.project ist unabhängig vom Ausschnitt), darum reicht zoomend.
   const [clusterZoom, setClusterZoom] = useState(FALLBACK_ZOOM);
 
-  // Karte einmalig initialisieren und beim Verlassen sauber abbauen
+  // Die Wahl «Karte/Satellit» muss beim Aufbau schon feststehen – der
+  // Effect darunter läuft erst danach. Deshalb eine Ref daneben.
+  const layerKindRef = useRef<MapLayerKind>(layerKind);
+  layerKindRef.current = layerKind;
+
+  // Karte einmalig aufbauen und beim Verlassen sauber abbauen. Gebaut wird
+  // erst, wenn feststeht, welcher Kartendienst zeichnet – sonst würde die
+  // Karte gleich wieder weggeworfen.
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-    const map = L.map(containerRef.current, {
+    if (!containerRef.current || engineRef.current || !maps.ready) return;
+    let cancelled = false;
+    void createMap(containerRef.current, {
       center: FALLBACK_CENTER,
       zoom: FALLBACK_ZOOM,
-      scrollWheelZoom: true,
-    });
-    // Der Basis-Layer (Karte/Satellit) kommt aus dem eigenen Effect darunter –
-    // so lässt er sich später tauschen, ohne die Karte neu aufzubauen.
-    markersRef.current = L.layerGroup().addTo(map);
-    // Zoomstufe für die Pin-Gruppierung nachführen (löst den Neuaufbau aus)
-    map.on("zoomend", () => setClusterZoom(map.getZoom()));
-    // Klick auf freie Kartenstelle → Dialog «Favorit hier anlegen?».
-    // Marker/Popups schlucken ihre Klicks selbst, Panning feuert kein click.
-    // Ein Klick, der gerade erst ein Popup geschlossen hat, soll aber nur
-    // schliessen – deshalb der kurze Zeit-Abstand zu popupclose.
-    map.on("popupclose", () => {
-      popupJustClosedRef.current = Date.now();
-    });
-    map.on("click", (event: L.LeafletMouseEvent) => {
-      if (Date.now() - popupJustClosedRef.current < 200) return;
-      // Im Mess-Modus sammeln Klicks Messpunkte statt Favoriten vorzuschlagen
-      if (measureOnRef.current) {
-        measureClickRef.current(event.latlng);
+      baseKind: layerKindRef.current,
+      config: maps.config,
+    }).then(engine => {
+      if (cancelled) {
+        engine.destroy();
         return;
       }
-      setProposed({ lat: event.latlng.lat, lon: event.latlng.lng });
+      engineRef.current = engine;
+      markersRef.current = engine.layerGroup();
+      // Zoomstufe für die Pin-Gruppierung nachführen (löst den Neuaufbau aus)
+      engine.onZoom(zoom => setClusterZoom(zoom));
+      // Klick auf freie Kartenstelle → Dialog «Favorit hier anlegen?».
+      // Marker schlucken ihre Klicks selbst.
+      engine.onClick(event => {
+        const point: LatLngTuple = [event.latlng.lat, event.latlng.lng];
+        // Im Mess-Modus sammeln Klicks Messpunkte statt Favoriten vorzuschlagen
+        if (measureOnRef.current) {
+          measureClickRef.current(point);
+          return;
+        }
+        setProposed({ lat: event.latlng.lat, lon: event.latlng.lng });
+      });
+      setMapReady(true);
     });
-    mapRef.current = map;
     return () => {
+      cancelled = true;
       abortRef.current?.abort();
       firepitAbortRef.current?.abort();
       familyAbortRef.current?.abort();
-      map.remove();
-      mapRef.current = null;
-      baseLayerRef.current = null;
+      engineRef.current?.destroy();
+      engineRef.current = null;
       markersRef.current = null;
+      setMapReady(false);
     };
-  }, []);
+  }, [maps.ready, maps.config]);
 
-  // Basis-Layer (Karte/Satellit) setzen bzw. tauschen – erst hinzufügen,
-  // dann den alten entfernen, damit die Karte nie «leer» aufblitzt.
+  // Darstellung umschalten. Bei Google ist das der Kartentyp, bei
+  // OpenStreetMap ein anderer Kachel-Layer – die Maschine weiss, welcher.
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    const next = createBaseLayer(L, layerKind).addTo(map);
-    baseLayerRef.current?.remove();
-    baseLayerRef.current = next;
-  }, [layerKind]);
+    if (!mapReady) return;
+    engineRef.current?.setBaseKind(layerKind);
+  }, [layerKind, mapReady]);
 
   /** Umschalter «Karte / Satellit»: Wahl merken und Layer tauschen. */
   const switchLayer = useCallback((kind: MapLayerKind) => {
@@ -474,7 +504,7 @@ function SpotsMap({
 
   /** Campingplätze für den aktuellen Ausschnitt abfragen (nie automatisch beim Verschieben). */
   const searchCampsites = useCallback(async () => {
-    const map = mapRef.current;
+    const map = engineRef.current;
     if (!map) return;
     setMoved(false);
     if (map.getZoom() < OVERPASS_MIN_ZOOM) {
@@ -494,7 +524,7 @@ function SpotsMap({
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `data=${encodeURIComponent(
-          overpassQuery(b.getSouth(), b.getWest(), b.getNorth(), b.getEast())
+          overpassQuery(b.south, b.west, b.north, b.east)
         )}`,
         signal: controller.signal,
       });
@@ -512,7 +542,7 @@ function SpotsMap({
 
   /** Feuer- und Grillstellen für den aktuellen Ausschnitt abfragen. */
   const searchFirepits = useCallback(async () => {
-    const map = mapRef.current;
+    const map = engineRef.current;
     if (!map) return;
     setMoved(false);
     if (map.getZoom() < OVERPASS_MIN_ZOOM) {
@@ -532,12 +562,7 @@ function SpotsMap({
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `data=${encodeURIComponent(
-          firepitsBboxQuery(
-            b.getSouth(),
-            b.getWest(),
-            b.getNorth(),
-            b.getEast()
-          )
+          firepitsBboxQuery(b.south, b.west, b.north, b.east)
         )}`,
         signal: controller.signal,
       });
@@ -555,7 +580,7 @@ function SpotsMap({
 
   /** Spiel- und Badeplätze für den aktuellen Ausschnitt abfragen. */
   const searchFamilyPlaces = useCallback(async () => {
-    const map = mapRef.current;
+    const map = engineRef.current;
     if (!map) return;
     setMoved(false);
     if (map.getZoom() < OVERPASS_MIN_ZOOM) {
@@ -575,12 +600,7 @@ function SpotsMap({
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `data=${encodeURIComponent(
-          familyPlacesBboxQuery(
-            b.getSouth(),
-            b.getWest(),
-            b.getNorth(),
-            b.getEast()
-          )
+          familyPlacesBboxQuery(b.south, b.west, b.north, b.east)
         )}`,
         signal: controller.signal,
       });
@@ -679,22 +699,17 @@ function SpotsMap({
   const overpassLayersOn =
     discoverOn || layerVisibility.firepits || layerVisibility.family;
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !overpassLayersOn) return;
-    const onMove = () => setMoved(true);
-    map.on("moveend", onMove);
-    map.on("zoomend", onMove);
-    return () => {
-      map.off("moveend", onMove);
-      map.off("zoomend", onMove);
-    };
-  }, [overpassLayersOn]);
+    const map = engineRef.current;
+    if (!map || !overpassLayersOn || !mapReady) return;
+    const off = map.onMove(() => setMoved(true));
+    return off;
+  }, [overpassLayersOn, mapReady]);
 
   // Verlinkter Ausflug: hinfahren, sobald die Ziele geladen sind. Der
   // Zoom-Wechsel gruppiert neu, danach steht der Pin einzeln da und der
   // Marker-Aufbau unten öffnet sein Popup.
   useEffect(() => {
-    const map = mapRef.current;
+    const map = engineRef.current;
     if (!map || !focusExcursionId || didFocusRef.current === focusExcursionId) {
       return;
     }
@@ -716,15 +731,16 @@ function SpotsMap({
   // pro Zoomstufe gruppieren: nahe Pins werden zu einem Zahlen-Kreis
   // zusammengefasst, Klick darauf zoomt auf die enthaltenen Pins.
   useEffect(() => {
-    const map = mapRef.current;
+    const engine = engineRef.current;
     const layer = markersRef.current;
-    if (!map || !layer) return;
-    layer.clearLayers();
+    if (!engine || !layer || !mapReady) return;
+    layer.clear();
 
-    const createSpotMarker = (spot: SpotPin): L.Marker => {
-      const marker = L.marker([spot.latitude, spot.longitude], {
+    const createSpotMarker = (spot: SpotPin): MarkerObject => {
+      const marker = engine.marker([spot.latitude, spot.longitude], {
         icon: spotIcon,
-        alt: spot.name,
+        title: spot.name,
+        layer,
       });
       // Popup-Inhalt per DOM aufbauen: Platzname ist Nutzertext (kein innerHTML)
       const popup = document.createElement("div");
@@ -762,10 +778,11 @@ function SpotsMap({
     };
 
     // Zelt-Finder-Ziele als eigene Pins – Popup mit «Anpeilen»-Link
-    const createTargetMarker = (tgt: TentFinderTarget): L.Marker => {
-      const marker = L.marker([tgt.lat, tgt.lon], {
+    const createTargetMarker = (tgt: TentFinderTarget): MarkerObject => {
+      const marker = engine.marker([tgt.lat, tgt.lon], {
         icon: targetIconFor(tgt.icon),
-        alt: tgt.name,
+        title: tgt.name,
+        layer,
       });
       const popup = document.createElement("div");
       popup.className = "space-y-1";
@@ -793,10 +810,11 @@ function SpotsMap({
 
     // Natur-Beobachtungen mit Koordinaten als eigene (violette) Pins –
     // Popup mit Titel und Beobachtungs-Datum.
-    const createSightingMarker = (sighting: SightingPin): L.Marker => {
-      const marker = L.marker([sighting.lat, sighting.lon], {
+    const createSightingMarker = (sighting: SightingPin): MarkerObject => {
+      const marker = engine.marker([sighting.lat, sighting.lon], {
         icon: sightingIcon,
-        alt: sighting.title,
+        title: sighting.title,
+        layer,
       });
       const popup = document.createElement("div");
       popup.className = "space-y-1";
@@ -813,11 +831,12 @@ function SpotsMap({
     };
 
     // Entdeckte OSM-Campingplätze als eigene (blaue) Pins
-    const createCampsiteMarker = (site: OsmCampsite): L.Marker => {
+    const createCampsiteMarker = (site: OsmCampsite): MarkerObject => {
       const displayName = site.name ?? t.mapView.osmFallbackName;
-      const marker = L.marker([site.lat, site.lon], {
+      const marker = engine.marker([site.lat, site.lon], {
         icon: campsiteIcon,
-        alt: displayName,
+        title: displayName,
+        layer,
       });
       const popup = document.createElement("div");
       popup.className = "space-y-1";
@@ -854,7 +873,7 @@ function SpotsMap({
           });
           toast.success(t.mapView.adopted(displayName));
           void utils.spots.list.invalidate();
-          map.closePopup();
+          engineRef.current?.closePopup();
         } catch {
           toast.error(t.common.saveFailed);
           adopt.disabled = false;
@@ -874,13 +893,14 @@ function SpotsMap({
     // Navigation; ob heute überhaupt gefeuert werden darf, sagt die
     // Waldbrandgefahr-Anzeige im Wetter – dorthin geht der letzte Link,
     // statt den Hinweis hier zu doppeln.
-    const createFirepitMarker = (firepit: OsmFirepit): L.Marker => {
+    const createFirepitMarker = (firepit: OsmFirepit): MarkerObject => {
       const tf = t.firepits;
       const kindLabel = tf.kind[firepit.kind];
       const displayName = firepit.name ?? kindLabel;
-      const marker = L.marker([firepit.lat, firepit.lon], {
+      const marker = engine.marker([firepit.lat, firepit.lon], {
         icon: firepitIcon,
-        alt: displayName,
+        title: displayName,
+        layer,
       });
       const popup = document.createElement("div");
       popup.className = "space-y-1";
@@ -939,13 +959,14 @@ function SpotsMap({
     // Kategorien teilen sich Ebene und Farbe, tragen aber je einen eigenen
     // Umriss und ihre eigenen Angaben. Beim Baden steht zusätzlich der kurze
     // Eigenverantwortungs-Hinweis – die Wassertemperatur liefert das Dossier.
-    const createFamilyMarker = (place: OsmFamilyPlace): L.Marker => {
+    const createFamilyMarker = (place: OsmFamilyPlace): MarkerObject => {
       const tp = t.familyPlaces;
       const kindLabel = tp.kind[place.kind];
       const displayName = place.name ?? kindLabel;
-      const marker = L.marker([place.lat, place.lon], {
+      const marker = engine.marker([place.lat, place.lon], {
         icon: familyIconFor(place.kind),
-        alt: displayName,
+        title: displayName,
+        layer,
       });
       const popup = document.createElement("div");
       popup.className = "space-y-1";
@@ -1009,10 +1030,11 @@ function SpotsMap({
     // Das Popup zeigt Titelbild, Name, Kategorien, Kostenstufe und Region;
     // «Details» klappt Beschreibung, Hinweise, Öffnungszeiten und Website auf.
     // Alles per DOM aufgebaut – die Inhalte sind Nutzertexte (kein innerHTML).
-    const createExcursionMarker = (excursion: Excursion): L.Marker => {
-      const marker = L.marker([excursion.latitude, excursion.longitude], {
+    const createExcursionMarker = (excursion: Excursion): MarkerObject => {
+      const marker = engine.marker([excursion.latitude, excursion.longitude], {
         icon: excursionIcon,
-        alt: excursion.name,
+        title: excursion.name,
+        layer,
       });
       const te = t.excursions;
       const popup = document.createElement("div");
@@ -1092,7 +1114,7 @@ function SpotsMap({
           toggle.textContent = details.hidden ? te.detailsShow : te.detailsHide;
           toggle.setAttribute("aria-expanded", String(!details.hidden));
           // Leaflet rechnet die Popup-Grösse nur auf Zuruf neu
-          marker.getPopup()?.update();
+          marker.updatePopup();
         });
         popup.appendChild(toggle);
         popup.appendChild(details);
@@ -1123,7 +1145,7 @@ function SpotsMap({
       lat: number;
       lon: number;
       kind: PinKind;
-      createMarker: () => L.Marker;
+      createMarker: () => MarkerObject;
       /** Nur bei Ausflügen gesetzt – für den Sprung aus dem Platz-Dossier. */
       excursionId?: string;
     }
@@ -1190,14 +1212,14 @@ function SpotsMap({
 
     const clusters = clusterPoints(
       pins,
-      (lat, lon) => map.project([lat, lon], clusterZoom),
+      (lat, lon) => projectToPixels(lat, lon, clusterZoom),
       CLUSTER_THRESHOLD_PX
     );
 
     clusters.forEach(cluster => {
       if (cluster.points.length === 1) {
         const single = cluster.points[0];
-        const marker = single.createMarker().addTo(layer);
+        const marker = single.createMarker();
         // Aus dem Dossier verlinkter Ausflug: sein Popup gleich aufmachen
         if (
           single.excursionId &&
@@ -1210,42 +1232,40 @@ function SpotsMap({
         return;
       }
       const label = t.mapView.clusterAria(cluster.points.length);
-      const marker = L.marker([cluster.lat, cluster.lon], {
-        icon: clusterIcon(
-          cluster.points.length,
-          clusterColor(cluster.points.map(p => p.kind)),
-          label
-        ),
-        alt: label,
-      });
       // Klick auf den Zahlen-Kreis: auf die enthaltenen Pins zoomen –
       // maxZoom verhindert Endlos-Zoom bei praktisch identischen Punkten.
-      marker.on("click", () => {
-        map.fitBounds(
-          L.latLngBounds(
-            cluster.points.map(p => [p.lat, p.lon] as L.LatLngTuple)
+      engine
+        .marker([cluster.lat, cluster.lon], {
+          icon: clusterIcon(
+            cluster.points.length,
+            clusterColor(cluster.points.map(p => p.kind)),
+            label
           ),
-          { padding: [40, 40], maxZoom: 18 }
-        );
-      });
-      marker.addTo(layer);
+          title: label,
+          layer,
+        })
+        .onClick(() => {
+          engine.fitBounds(
+            latLngBounds(
+              cluster.points.map(p => [p.lat, p.lon] as LatLngTuple)
+            ),
+            { padding: 40, maxZoom: 18 }
+          );
+        });
     });
 
     // Nur beim ersten Aufbau einpassen – spätere Refetches (z. B. nach dem
     // Übernehmen eines OSM-Platzes) sollen den Ausschnitt nicht verspringen.
     if (!didFitRef.current) {
       didFitRef.current = true;
-      const points: L.LatLngTuple[] = [
-        ...spots.map(s => [s.latitude, s.longitude] as L.LatLngTuple),
-        ...targets.map(tgt => [tgt.lat, tgt.lon] as L.LatLngTuple),
+      const points: LatLngTuple[] = [
+        ...spots.map(s => [s.latitude, s.longitude] as LatLngTuple),
+        ...targets.map(tgt => [tgt.lat, tgt.lon] as LatLngTuple),
       ];
       if (points.length > 0) {
-        map.fitBounds(L.latLngBounds(points), {
-          padding: [40, 40],
-          maxZoom: 13,
-        });
+        engine.fitBounds(latLngBounds(points), { padding: 40, maxZoom: 13 });
       } else {
-        map.setView(FALLBACK_CENTER, FALLBACK_ZOOM);
+        engine.setView(FALLBACK_CENTER, FALLBACK_ZOOM);
       }
     }
   }, [
@@ -1303,7 +1323,7 @@ function SpotsMap({
 
   /** Karte auf die aktuelle Position zentrieren (blauer Punkt + Genauigkeit). */
   const locateMe = () => {
-    const map = mapRef.current;
+    const map = engineRef.current;
     if (!map || !navigator.geolocation) {
       toast.error(t.mapView.locateFailed);
       return;
@@ -1313,26 +1333,29 @@ function SpotsMap({
       pos => {
         setLocating(false);
         const { latitude, longitude, accuracy } = pos.coords;
-        const m = mapRef.current;
+        const m = engineRef.current;
         if (!m) return;
         if (!locateLayerRef.current) {
-          locateLayerRef.current = L.layerGroup().addTo(m);
+          locateLayerRef.current = m.layerGroup();
         }
-        locateLayerRef.current.clearLayers();
-        L.circle([latitude, longitude], {
+        const locateLayer = locateLayerRef.current;
+        locateLayer.clear();
+        m.circle([latitude, longitude], {
           radius: Math.min(accuracy || 30, 500),
           color: "#3b82f6",
           weight: 1,
           fillColor: "#3b82f6",
           fillOpacity: 0.15,
-        }).addTo(locateLayerRef.current);
-        L.circleMarker([latitude, longitude], {
+          layer: locateLayer,
+        });
+        m.circleMarker([latitude, longitude], {
           radius: 6,
           color: "#ffffff",
           weight: 2,
           fillColor: "#3b82f6",
           fillOpacity: 1,
-        }).addTo(locateLayerRef.current);
+          layer: locateLayer,
+        });
         m.setView([latitude, longitude], Math.max(m.getZoom(), 14));
       },
       () => {
@@ -1345,7 +1368,7 @@ function SpotsMap({
 
   const clearMeasure = () => {
     measurePointsRef.current = [];
-    measureLayerRef.current?.clearLayers();
+    measureLayerRef.current?.clear();
   };
 
   /** Mess-Modus an/aus; Ausschalten räumt Punkte und Linie weg. */
@@ -1358,39 +1381,46 @@ function SpotsMap({
 
   // Aktuelle Fassung des Mess-Klicks (der Init-Effect ruft sie über die Ref auf,
   // damit lang/Übersetzungen nicht in einer veralteten Closure hängen bleiben)
-  measureClickRef.current = (latlng: L.LatLng) => {
-    const map = mapRef.current;
+  measureClickRef.current = (point: LatLngTuple) => {
+    const map = engineRef.current;
     if (!map) return;
     if (!measureLayerRef.current) {
-      measureLayerRef.current = L.layerGroup().addTo(map);
+      measureLayerRef.current = map.layerGroup();
     }
     if (measurePointsRef.current.length >= 2) clearMeasure();
-    measurePointsRef.current.push(latlng);
+    measurePointsRef.current.push(point);
     const layer = measureLayerRef.current;
-    L.circleMarker(latlng, {
+    map.circleMarker(point, {
       radius: 5,
       color: "#ffffff",
       weight: 2,
       fillColor: "#0ea5e9",
       fillOpacity: 1,
-    }).addTo(layer);
+      layer,
+    });
     if (measurePointsRef.current.length === 2) {
       const [a, b] = measurePointsRef.current;
-      const dist = distanceMeters(a.lat, a.lng, b.lat, b.lng);
+      const dist = distanceMeters(a[0], a[1], b[0], b[1]);
       const label =
         dist < 1000
           ? `${Math.round(dist)} m`
           : `${(dist / 1000).toLocaleString(LOCALE_TAGS[lang], {
               maximumFractionDigits: 1,
             })} km`;
-      L.polyline([a, b], {
+      map.polyline([a, b], {
         color: "#0ea5e9",
         weight: 2,
         dashArray: "6 4",
-      })
-        .bindTooltip(label, { permanent: true, direction: "center" })
-        .addTo(layer)
-        .openTooltip();
+        layer,
+      });
+      // Das Mass steht als eigener Pin in der Mitte der Strecke. Ein
+      // dauerhaftes Tooltip wäre der Leaflet-Weg – ein Pin funktioniert
+      // auf beiden Karten gleich.
+      map.marker([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], {
+        icon: measureLabelIcon(label),
+        title: label,
+        layer,
+      });
     }
   };
 

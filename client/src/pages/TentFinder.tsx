@@ -17,7 +17,6 @@ import {
   Trash2,
   type LucideIcon,
 } from "lucide-react";
-import type * as Leaflet from "leaflet";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import TentWindHelper from "@/components/TentWindHelper";
@@ -48,7 +47,18 @@ import {
   type TargetIcon,
   type TentFinderTarget,
 } from "@/lib/tentFinderTargets";
-import { createBaseLayer, loadMapLayer } from "@/lib/mapLayers";
+import { loadMapLayer } from "@/lib/mapLayers";
+import {
+  createMap,
+  divIcon,
+  latLngBounds,
+  type IconSpec,
+  type LatLngTuple,
+  type LayerGroupObject,
+  type MapEngine,
+  type MarkerObject,
+} from "@/lib/mapEngine";
+import { useMapConfig } from "@/hooks/useMapConfig";
 import { bearingDegrees, distanceMeters, formatDistance } from "@shared/geo";
 import { compassDirection } from "@shared/solar";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
@@ -74,7 +84,7 @@ function storeTargets(targets: TentFinderTarget[]) {
 const MAP_OPEN_KEY = "campmesser.tentFinderMap";
 
 /** Schweiz als Ausgangs-Ausschnitt, solange weder Position noch Ziele da sind. */
-const MAP_FALLBACK_CENTER: Leaflet.LatLngTuple = [46.8, 8.2];
+const MAP_FALLBACK_CENTER: LatLngTuple = [46.8, 8.2];
 const MAP_FALLBACK_ZOOM = 8;
 
 /** Lucide-Symbol je Ziel-Schlüssel (Chips, Ziel-Liste, Kompass-Kopf). */
@@ -96,13 +106,12 @@ const TARGET_ICON_COMPONENTS: Record<TargetIcon, LucideIcon> = {
  * SVG-Glyph des gewählten Symbols (ohne Wahl das Fadenkreuz).
  */
 function targetPinIcon(
-  L: typeof Leaflet,
   active: boolean,
   icon: TargetIcon | undefined
-): Leaflet.DivIcon {
+): IconSpec {
   const size = active ? 32 : 26;
   const fill = active ? "#2f6b4f" : "#b45309";
-  return L.divIcon({
+  return divIcon({
     className: "",
     html: `<svg viewBox="0 0 28 28" width="${size}" height="${size}" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="${fill}" stroke="#ffffff" stroke-width="2.5"/>${targetIconGlyph(icon)}</svg>`,
     iconSize: [size, size],
@@ -110,7 +119,7 @@ function targetPinIcon(
   });
 }
 
-/** Ladezustand der lazy geladenen Leaflet-Bibliothek. */
+/** Ladezustand der Mini-Karte. */
 type MiniMapState = "idle" | "loading" | "error" | "ready";
 
 interface GeoState {
@@ -375,7 +384,7 @@ export default function TentFinderPage() {
   const distanceLabel =
     distance !== null ? formatDistance(distance, lang) : null;
 
-  // ---- Mini-Karte (aufklappbar, Leaflet lazy – Muster RainRadar) ----
+  // ---- Mini-Karte (aufklappbar, erst beim Öffnen gebaut) ----
   const [mapOpen, setMapOpen] = useState<boolean>(() => {
     try {
       return localStorage.getItem(MAP_OPEN_KEY) === "1";
@@ -386,10 +395,10 @@ export default function TentFinderPage() {
   const [mapState, setMapState] = useState<MiniMapState>("idle");
   const [online, setOnline] = useState<boolean>(() => navigator.onLine);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<Leaflet.Map | null>(null);
-  const leafletRef = useRef<typeof Leaflet | null>(null);
-  const targetLayerRef = useRef<Leaflet.LayerGroup | null>(null);
-  const positionMarkerRef = useRef<Leaflet.CircleMarker | null>(null);
+  const engineRef = useRef<MapEngine | null>(null);
+  const targetLayerRef = useRef<LayerGroupObject | null>(null);
+  const positionMarkerRef = useRef<MarkerObject | null>(null);
+  const maps = useMapConfig();
   /** Einmalig einpassen; kommt die GPS-Position später an, EINMAL nachziehen. */
   const fitDoneRef = useRef(false);
   const fitWithFixDoneRef = useRef(false);
@@ -418,15 +427,32 @@ export default function TentFinderPage() {
     };
   }, []);
 
-  // Leaflet erst beim ersten Aufklappen laden – der Zelt-Finder-Chunk bleibt klein
+  // Karte erst beim ersten Aufklappen bauen – der Zelt-Finder-Chunk bleibt
+  // klein, und ohne geöffneten Abschnitt wird kein Kartenaufruf verbraucht
   useEffect(() => {
-    if (!mapOpen || mapState !== "idle") return;
+    if (!mapOpen || mapState !== "idle" || !maps.ready) return;
+    const container = mapContainerRef.current;
+    if (!container || engineRef.current) return;
     let cancelled = false;
     setMapState("loading");
-    Promise.all([import("leaflet"), import("leaflet/dist/leaflet.css")])
-      .then(([leafletModule]) => {
-        if (cancelled) return;
-        leafletRef.current = leafletModule.default;
+    void createMap(container, {
+      center: MAP_FALLBACK_CENTER,
+      zoom: MAP_FALLBACK_ZOOM,
+      config: maps.config,
+      // Gleiche Darstellung wie auf der grossen Karte (Karte/Satellit
+      // wird über localStorage geteilt)
+      baseKind: loadMapLayer(),
+      minimal: true,
+    })
+      .then(engine => {
+        if (cancelled) {
+          engine.destroy();
+          return;
+        }
+        engineRef.current = engine;
+        targetLayerRef.current = engine.layerGroup();
+        fitDoneRef.current = false;
+        fitWithFixDoneRef.current = false;
         setMapState("ready");
       })
       .catch(() => {
@@ -435,90 +461,67 @@ export default function TentFinderPage() {
     return () => {
       cancelled = true;
     };
-  }, [mapOpen, mapState]);
+  }, [mapOpen, mapState, maps.ready, maps.config]);
 
-  // Karte aufbauen, sobald Leaflet bereit und der Abschnitt offen ist;
-  // beim Einklappen/Verlassen sauber abbauen (Bibliothek bleibt geladen)
+  // Beim Einklappen abbauen – die nächste Öffnung baut neu auf
   useEffect(() => {
-    const L = leafletRef.current;
-    if (!mapOpen || mapState !== "ready" || !L) return;
-    const container = mapContainerRef.current;
-    if (!container || mapRef.current) return;
-
-    const map = L.map(container, {
-      center: MAP_FALLBACK_CENTER,
-      zoom: MAP_FALLBACK_ZOOM,
-      scrollWheelZoom: false,
-    });
-    // Gleicher Basis-Layer wie auf der grossen Karte (dort gewählte
-    // Karte/Satellit-Darstellung wird über localStorage übernommen)
-    createBaseLayer(L, loadMapLayer()).addTo(map);
-    targetLayerRef.current = L.layerGroup().addTo(map);
-    mapRef.current = map;
-    fitDoneRef.current = false;
-    fitWithFixDoneRef.current = false;
-    return () => {
-      map.remove();
-      mapRef.current = null;
-      targetLayerRef.current = null;
-      positionMarkerRef.current = null;
-    };
-  }, [mapOpen, mapState]);
+    if (mapOpen) return;
+    engineRef.current?.destroy();
+    engineRef.current = null;
+    targetLayerRef.current = null;
+    positionMarkerRef.current = null;
+    setMapState("idle");
+  }, [mapOpen]);
 
   // Ziel-Pins nachführen (aktives Ziel hervorgehoben; Klick wählt das Ziel)
   useEffect(() => {
-    const L = leafletRef.current;
+    const engine = engineRef.current;
     const layer = targetLayerRef.current;
-    if (!mapOpen || mapState !== "ready" || !L || !layer) return;
-    layer.clearLayers();
+    if (!mapOpen || mapState !== "ready" || !engine || !layer) return;
+    layer.clear();
     targets.forEach(tgt => {
       const active = effectiveSelection === `target:${tgt.id}`;
-      const marker = L.marker([tgt.lat, tgt.lon], {
-        icon: targetPinIcon(L, active, tgt.icon),
-        alt: tgt.name,
-        title: tgt.name,
-      });
-      marker.on("click", () => setSelection(`target:${tgt.id}`));
-      marker.addTo(layer);
+      engine
+        .marker([tgt.lat, tgt.lon], {
+          icon: targetPinIcon(active, tgt.icon),
+          title: tgt.name,
+          layer,
+        })
+        .onClick(() => setSelection(`target:${tgt.id}`));
     });
   }, [mapOpen, mapState, targets, effectiveSelection]);
 
   // Eigene Position als blauer Punkt – folgt der laufenden watchPosition
   useEffect(() => {
-    const L = leafletRef.current;
-    const map = mapRef.current;
-    if (!mapOpen || mapState !== "ready" || !L || !map || !fix) return;
+    const engine = engineRef.current;
+    if (!mapOpen || mapState !== "ready" || !engine || !fix) return;
     if (positionMarkerRef.current) {
       positionMarkerRef.current.setLatLng([fix.lat, fix.lon]);
     } else {
-      positionMarkerRef.current = L.circleMarker([fix.lat, fix.lon], {
+      positionMarkerRef.current = engine.circleMarker([fix.lat, fix.lon], {
         radius: 7,
         color: "#ffffff",
         weight: 2,
         fillColor: "#2563eb",
         fillOpacity: 1,
-      }).addTo(map);
+      });
     }
   }, [mapOpen, mapState, fix]);
 
   // Initial über Position + Ziele einpassen (Position darf einmal nachziehen)
   useEffect(() => {
-    const L = leafletRef.current;
-    const map = mapRef.current;
-    if (!mapOpen || mapState !== "ready" || !L || !map) return;
+    const engine = engineRef.current;
+    if (!mapOpen || mapState !== "ready" || !engine) return;
     if (fitDoneRef.current && (!fix || fitWithFixDoneRef.current)) return;
-    const points: Leaflet.LatLngTuple[] = targets.map(tgt => [
-      tgt.lat,
-      tgt.lon,
-    ]);
+    const points: LatLngTuple[] = targets.map(tgt => [tgt.lat, tgt.lon]);
     if (fix) points.push([fix.lat, fix.lon]);
     if (points.length === 0) return;
     fitDoneRef.current = true;
     if (fix) fitWithFixDoneRef.current = true;
     if (points.length === 1) {
-      map.setView(points[0], 16);
+      engine.setView(points[0], 16);
     } else {
-      map.fitBounds(L.latLngBounds(points), { padding: [24, 24], maxZoom: 17 });
+      engine.fitBounds(latLngBounds(points), { padding: 24, maxZoom: 17 });
     }
   }, [mapOpen, mapState, targets, fix]);
 
