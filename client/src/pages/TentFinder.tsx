@@ -21,6 +21,7 @@ import type * as Leaflet from "leaflet";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import TentWindHelper from "@/components/TentWindHelper";
+import ParkedCar from "@/components/ParkedCar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDeviceHeading } from "@/hooks/useDeviceHeading";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import {
+  CAR_TARGET_ID,
   DEFAULT_TARGET_ICON,
   LEGACY_TARGET_KEY,
   MAX_NAME_LENGTH,
@@ -35,8 +37,11 @@ import {
   TARGETS_KEY,
   TARGET_ICONS,
   migrateTargets,
+  findCarTarget,
   newTargetId,
+  parkCar,
   renameTarget,
+  updateParking,
   sanitizeTargetIcon,
   sanitizeTargets,
   targetIconGlyph,
@@ -260,6 +265,50 @@ export default function TentFinderPage() {
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
+  };
+
+  // ── Auto-Standort merken (#283) ──
+  const car = findCarTarget(targets);
+
+  /**
+   * Ein Tipp = Standort merken. Bewusst ohne Formular und ohne Namen: Man
+   * steigt aus und geht; ein neuer Tipp überschreibt den alten Standort.
+   */
+  const parkHere = () => {
+    if (!navigator.geolocation) {
+      toast.error(t.tentFinder.geoUnsupported);
+      return;
+    }
+    setSaving(true);
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const next = parkCar(targets, {
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+          savedAt: Date.now(),
+          name: t.parking.targetName,
+        });
+        saveTargets(next);
+        setSelection(`target:${CAR_TARGET_ID}`);
+        setSaving(false);
+        toast.success(t.parking.parkedToast);
+      },
+      () => {
+        setSaving(false);
+        toast.error(t.tentFinder.rememberFailed);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  };
+
+  const changeParking = (changes: {
+    note?: string;
+    parkingLimitMinutes?: number | null;
+  }) => saveTargets(updateParking(targets, changes));
+
+  const forgetCar = () => {
+    saveTargets(targets.filter(x => x.id !== CAR_TARGET_ID));
+    if (selection === `target:${CAR_TARGET_ID}`) setSelection(null);
   };
 
   const deleteTarget = (doomed: TentFinderTarget) => {
@@ -575,6 +624,18 @@ export default function TentFinderPage() {
               {t.tentFinder.targetTitle}
             </span>
           </div>
+
+          {/* Auto-Standort (#283): eigener Kasten, weil ein Auto anders
+              funktioniert als ein Zelt – ein Knopf, Parkuhr, Notiz. Die
+              Peilung selbst macht derselbe Kompass wie für jedes Ziel. */}
+          <ParkedCar
+            car={car}
+            saving={saving}
+            onPark={parkHere}
+            onChange={changeParking}
+            onForget={forgetCar}
+            onSelect={() => setSelection(`target:${CAR_TARGET_ID}`)}
+          />
 
           {targets.length === 0 && (
             <p className="text-sm text-muted-foreground">

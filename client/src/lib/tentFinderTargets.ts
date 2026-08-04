@@ -3,6 +3,7 @@
  * Reine Logik – Validierung unbekannter Daten (localStorage/Server-Sync) und
  * Migration des alten Einzel-Ziels. Ohne DOM-Abhängigkeiten, damit testbar.
  */
+import { sanitizeParkingLimit, sanitizeParkingNote } from "@shared/parking";
 
 /** localStorage-Schlüssel der benannten Ziel-Liste. */
 export const TARGETS_KEY = "campmesser.tentFinderTargets";
@@ -46,6 +47,13 @@ export interface TentFinderTarget {
   savedAt: number;
   /** Symbol für Liste, Kompass-Kopf und Karten-Pin (optional – Alt-Ziele). */
   icon?: TargetIcon;
+  /**
+   * Freie Notiz zum Ziel (#283): «Ebene 3, Reihe C». Im Parkhaus ist GPS
+   * wertlos, und die Ebene weiss nur die Person, die ausgestiegen ist.
+   */
+  note?: string;
+  /** Parkzeit-Limite in Minuten (#283); fehlt = ohne Limit. */
+  parkingLimitMinutes?: number;
 }
 
 /**
@@ -135,6 +143,18 @@ export function sanitizeTargets(value: unknown): TentFinderTarget[] {
       ...(entry.icon === undefined || entry.icon === null
         ? {}
         : { icon: sanitizeTargetIcon(entry.icon) }),
+      // Notiz und Parkzeit (#283) nur übernehmen, wenn sie brauchbar sind –
+      // ein leerer String wäre eine Notiz, die es nicht gibt
+      ...(sanitizeParkingNote(entry.note)
+        ? { note: sanitizeParkingNote(entry.note) }
+        : {}),
+      ...(sanitizeParkingLimit(entry.parkingLimitMinutes) !== null
+        ? {
+            parkingLimitMinutes: sanitizeParkingLimit(
+              entry.parkingLimitMinutes
+            ) as number,
+          }
+        : {}),
     });
   }
   return result;
@@ -223,4 +243,79 @@ export function newTargetId(): string {
   const c = globalThis.crypto as Crypto | undefined;
   if (c && typeof c.randomUUID === "function") return c.randomUUID();
   return `t-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+// ── Auto-Standort merken (#283) ───────────────────────────────────────────
+
+/**
+ * Feste id des Auto-Ziels. Bewusst KEINE zufällige id: Es gibt genau ein
+ * Auto, ein neuer Tipp auf «hier parkiert» überschreibt den alten Standort.
+ * Ein Dutzend Ziele namens «Auto (3)» will niemand aufräumen.
+ */
+export const CAR_TARGET_ID = "car-parked";
+
+/** Das gemerkte Auto aus der Ziel-Liste (undefined = nirgends parkiert). */
+export function findCarTarget(
+  targets: TentFinderTarget[]
+): TentFinderTarget | undefined {
+  return targets.find(t => t.id === CAR_TARGET_ID);
+}
+
+/**
+ * Auto-Standort setzen oder ersetzen. Notiz und Parkzeit werden vom
+ * bisherigen Eintrag NICHT übernommen: Wer neu parkiert, steht woanders,
+ * und «Ebene 3, Reihe C» von gestern wäre dort schlicht falsch.
+ */
+export function parkCar(
+  targets: TentFinderTarget[],
+  position: {
+    lat: number;
+    lon: number;
+    savedAt: number;
+    name: string;
+    note?: string;
+    parkingLimitMinutes?: number | null;
+  }
+): TentFinderTarget[] {
+  const note = sanitizeParkingNote(position.note);
+  const limit = sanitizeParkingLimit(position.parkingLimitMinutes);
+  const car: TentFinderTarget = {
+    id: CAR_TARGET_ID,
+    name: position.name.trim().slice(0, MAX_NAME_LENGTH) || "Auto",
+    lat: position.lat,
+    lon: position.lon,
+    savedAt: position.savedAt,
+    icon: "car",
+    ...(note ? { note } : {}),
+    ...(limit !== null ? { parkingLimitMinutes: limit } : {}),
+  };
+  const others = targets.filter(t => t.id !== CAR_TARGET_ID);
+  return [...others, car];
+}
+
+/**
+ * Notiz und Parkzeit am gemerkten Auto ändern, ohne den Standort und den
+ * Zeitpunkt anzufassen – man tippt die Ebene erst ein, wenn man schon
+ * ausgestiegen ist. Ohne gemerktes Auto bleibt die Liste unverändert.
+ */
+export function updateParking(
+  targets: TentFinderTarget[],
+  changes: { note?: string; parkingLimitMinutes?: number | null }
+): TentFinderTarget[] {
+  if (!findCarTarget(targets)) return targets;
+  return targets.map(t => {
+    if (t.id !== CAR_TARGET_ID) return t;
+    const next: TentFinderTarget = { ...t };
+    if (changes.note !== undefined) {
+      const note = sanitizeParkingNote(changes.note);
+      if (note) next.note = note;
+      else delete next.note;
+    }
+    if (changes.parkingLimitMinutes !== undefined) {
+      const limit = sanitizeParkingLimit(changes.parkingLimitMinutes);
+      if (limit !== null) next.parkingLimitMinutes = limit;
+      else delete next.parkingLimitMinutes;
+    }
+    return next;
+  });
 }

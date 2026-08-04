@@ -3863,6 +3863,30 @@ export const fr: Translation = {
     download: "Télécharger en GPX",
     note: "Vue partagée – la carte et le profil proviennent de l'enregistrement. La série de points a été allégée pour l'aperçu.",
   },
+  parking: {
+    title: "Voiture",
+    targetName: "Voiture",
+    empty:
+      "Aucun emplacement mémorisé. Une pression en descendant de voiture suffit.",
+    park: "Garée ici",
+    reparked: "Garée ailleurs",
+    parkedToast: "Emplacement de la voiture mémorisé.",
+    parkedSince: (time: string, duration: string) =>
+      `Ici depuis ${time} – ${duration}.`,
+    durationHours: (h: number, m: number) => `${h} h ${m} min`,
+    durationMinutes: (m: number) => `${m} min`,
+    limit: "Durée de stationnement :",
+    limitNone: "sans",
+    limitLabel: (minutes: number) =>
+      minutes < 60 ? `${minutes} min` : `${minutes / 60} h`,
+    remaining: (duration: string) => `Encore ${duration} de stationnement.`,
+    expired: "Durée de stationnement dépassée.",
+    noteLabel: "Note sur l'emplacement",
+    notePlaceholder: "p. ex. niveau 3, rangée C",
+    navigate: "Retour à la voiture",
+    forgetAria: "Supprimer l'emplacement de la voiture",
+    forgotten: "Emplacement de la voiture supprimé.",
+  },
   routePlan: {
     sectionAria: "Tracer un itinéraire à l'avance",
     title: "Tracer un itinéraire",
