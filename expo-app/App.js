@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { StyleSheet, BackHandler, SafeAreaView, Platform, StatusBar } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { useFocusEffect } from '@react-navigation/native'; // We won't use navigation yet, just basic WebView
+
 
 export default function App() {
   const webViewRef = useRef(null);
