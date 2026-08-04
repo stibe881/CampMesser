@@ -81,6 +81,23 @@ export const modules: Module[] = [
     group: "reise",
   },
   {
+    path: "/zeltplaetze",
+    title: l4(
+      "Zeltplatz-Favoriten",
+      "Emplacements favoris",
+      "Piazzole preferite",
+      "Favourite pitches"
+    ),
+    description: l4(
+      "Orte speichern, Wetter und Sonne im Voraus prüfen",
+      "Enregistre des lieux, vérifie météo et soleil à l'avance",
+      "Salva i luoghi e controlla in anticipo meteo e sole",
+      "Save places, check weather and sun in advance"
+    ),
+    icon: Tent,
+    group: "reise",
+  },
+  {
     path: "/packlisten",
     title: l4(
       "Packlisten",
@@ -137,23 +154,6 @@ export const modules: Module[] = [
       "All saved pitches with overnight stays on the map"
     ),
     icon: MapIcon,
-    group: "vorOrt",
-  },
-  {
-    path: "/zeltplaetze",
-    title: l4(
-      "Zeltplatz-Favoriten",
-      "Emplacements favoris",
-      "Piazzole preferite",
-      "Favourite pitches"
-    ),
-    description: l4(
-      "Orte speichern, Wetter und Sonne im Voraus prüfen",
-      "Enregistre des lieux, vérifie météo et soleil à l'avance",
-      "Salva i luoghi e controlla in anticipo meteo e sole",
-      "Save places, check weather and sun in advance"
-    ),
-    icon: Tent,
     group: "vorOrt",
   },
   {
