@@ -3241,6 +3241,53 @@ export const de = {
   },
 
   /** Feuer- und Grillstellen aus OpenStreetMap (#247). */
+  tentWind: {
+    sectionAria: "Zelt oder Tarp nach dem Wind ausrichten",
+    title: "Ausrichtung nach dem Wind",
+    subtitle:
+      "Wie du Zelt oder Tarp hinstellst, damit der Wind nicht dagegen drückt.",
+    refreshAria: "Windwerte neu laden",
+    shapeGroupAria: "Bauart wählen",
+    shape: {
+      tunnel: "Tunnel- oder Firstzelt",
+      dome: "Kuppelzelt",
+      tarp: "Tarp",
+    },
+    shapeHint: {
+      tunnel:
+        "Das schmale Ende zeigt in den Wind – so streicht er über die lange Seite ab.",
+      dome: "Der Eingang liegt windabgewandt, sonst bläht sich das Zelt beim Öffnen auf.",
+      tarp: "Die tiefe Kante zeigt in den Wind, die offene Seite weg davon.",
+    },
+    loading: "Windwerte werden geladen …",
+    loadFailed:
+      "Die Windwerte waren gerade nicht abrufbar. Versuch es gleich nochmals.",
+    roseAria: (from: string, point: string) =>
+      `Wind aus ${from}, Zeltspitze nach ${point} ausrichten`,
+    windFromLabel: "Wind aus",
+    speedLabel: "Stärke",
+    speedValue: (speed: number, gust: number) =>
+      `${speed} km/h, Böen ${gust} km/h`,
+    pointLabel: "Spitze nach",
+    levelHint: {
+      calm: "Wenig Wind – die Ausrichtung ist Feinschliff.",
+      breezy:
+        "Spürbarer Wind: Abspannleinen straff ziehen, Heringe tief setzen.",
+      windy:
+        "Kräftige Böen: alle Abspannungen setzen, lose Sachen sichern, Vorzelt lieber einpacken.",
+      storm:
+        "Sturmböen: Wenn möglich einen geschützten Platz suchen. Ein Zelt hält solche Böen selten aus.",
+    },
+    startCompass: "Kompass starten",
+    noCompass:
+      "Ohne Kompass zeigt dieses Gerät nur die Himmelsrichtung – die Empfehlung gilt trotzdem.",
+    compassDenied:
+      "Der Zugriff auf den Kompass ist gesperrt. Die Empfehlung als Himmelsrichtung gilt weiterhin.",
+    alignedNow: "Passt – so steht das Zelt richtig zum Wind.",
+    turnLeft: (deg: number) => `Noch ${deg}° nach links drehen.`,
+    turnRight: (deg: number) => `Noch ${deg}° nach rechts drehen.`,
+    source: "Windwerte von Open-Meteo, Faustregeln fürs Aufstellen.",
+  },
   picnicStops: {
     sectionAria: "Rastmöglichkeiten entlang der Anfahrt",
     title: "Rast unterwegs",

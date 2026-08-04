@@ -20,6 +20,7 @@ import {
 import type * as Leaflet from "leaflet";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import TentWindHelper from "@/components/TentWindHelper";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -895,6 +896,13 @@ export default function TentFinderPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Windrichtungs-Assistent (#251): Zelt/Tarp nach dem Wind stellen */}
+      <TentWindHelper
+        latitude={geo.status === "ok" ? (geo.lat ?? null) : null}
+        longitude={geo.status === "ok" ? (geo.lon ?? null) : null}
+        className="mt-4"
+      />
     </div>
   );
 }

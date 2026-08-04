@@ -3238,6 +3238,52 @@ export const fr: Translation = {
   },
 
   /** Foyers et grils depuis OpenStreetMap (#247). */
+  tentWind: {
+    sectionAria: "Orienter la tente ou le tarp selon le vent",
+    title: "Orientation face au vent",
+    subtitle:
+      "Comment placer ta tente ou ton tarp pour que le vent ne pousse pas dessus.",
+    refreshAria: "Recharger les valeurs de vent",
+    shapeGroupAria: "Choisir le type",
+    shape: {
+      tunnel: "Tente tunnel ou canadienne",
+      dome: "Tente dôme",
+      tarp: "Tarp",
+    },
+    shapeHint: {
+      tunnel:
+        "Le côté étroit face au vent – il glisse ainsi le long du grand côté.",
+      dome: "L'entrée à l'abri du vent, sinon la tente se gonfle à l'ouverture.",
+      tarp: "Le bord bas face au vent, le côté ouvert à l'opposé.",
+    },
+    loading: "Chargement des valeurs de vent …",
+    loadFailed:
+      "Les valeurs de vent n'étaient pas disponibles. Réessaie dans un instant.",
+    roseAria: (from: string, point: string) =>
+      `Vent de ${from}, orienter la pointe vers ${point}`,
+    windFromLabel: "Vent de",
+    speedLabel: "Force",
+    speedValue: (speed: number, gust: number) =>
+      `${speed} km/h, rafales ${gust} km/h`,
+    pointLabel: "Pointe vers",
+    levelHint: {
+      calm: "Peu de vent – l'orientation est un détail de confort.",
+      breezy: "Vent sensible : tends bien les haubans et enfonce les sardines.",
+      windy:
+        "Fortes rafales : tous les haubans en place, range ce qui traîne, replie l'auvent.",
+      storm:
+        "Rafales de tempête : cherche si possible un emplacement abrité. Une tente y résiste rarement.",
+    },
+    startCompass: "Activer la boussole",
+    noCompass:
+      "Sans boussole, cet appareil n'indique que la direction – la recommandation reste valable.",
+    compassDenied:
+      "L'accès à la boussole est refusé. La recommandation par direction reste valable.",
+    alignedNow: "C'est bon – la tente est bien placée face au vent.",
+    turnLeft: (deg: number) => `Tourne encore de ${deg}° vers la gauche.`,
+    turnRight: (deg: number) => `Tourne encore de ${deg}° vers la droite.`,
+    source: "Valeurs de vent d'Open-Meteo, règles empiriques de montage.",
+  },
   picnicStops: {
     sectionAria: "Aires de pause le long du trajet",
     title: "Pause en route",

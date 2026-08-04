@@ -3211,6 +3211,53 @@ export const it: Translation = {
   },
 
   /** Focolari e griglie da OpenStreetMap (#247). */
+  tentWind: {
+    sectionAria: "Orientare tenda o telo secondo il vento",
+    title: "Orientamento al vento",
+    subtitle:
+      "Come mettere tenda o telo perché il vento non prema contro la parete.",
+    refreshAria: "Ricarica i valori del vento",
+    shapeGroupAria: "Scegli il tipo",
+    shape: {
+      tunnel: "Tenda a tunnel o canadese",
+      dome: "Tenda a igloo",
+      tarp: "Telo",
+    },
+    shapeHint: {
+      tunnel:
+        "Il lato stretto verso il vento – così scorre lungo il lato lungo.",
+      dome: "L'ingresso al riparo dal vento, altrimenti la tenda si gonfia all'apertura.",
+      tarp: "Il bordo basso verso il vento, il lato aperto dalla parte opposta.",
+    },
+    loading: "Caricamento dei valori del vento …",
+    loadFailed:
+      "I valori del vento non erano disponibili. Riprova tra un istante.",
+    roseAria: (from: string, point: string) =>
+      `Vento da ${from}, orienta la punta verso ${point}`,
+    windFromLabel: "Vento da",
+    speedLabel: "Intensità",
+    speedValue: (speed: number, gust: number) =>
+      `${speed} km/h, raffiche ${gust} km/h`,
+    pointLabel: "Punta verso",
+    levelHint: {
+      calm: "Poco vento – l'orientamento è una rifinitura.",
+      breezy:
+        "Vento percepibile: tira bene i tiranti e pianta a fondo i picchetti.",
+      windy:
+        "Raffiche forti: tutti i tiranti in tensione, fissa ciò che è sciolto, ritira la veranda.",
+      storm:
+        "Raffiche di tempesta: se puoi, cerca una piazzola riparata. Una tenda raramente regge.",
+    },
+    startCompass: "Avvia la bussola",
+    noCompass:
+      "Senza bussola questo dispositivo mostra solo la direzione – il consiglio vale comunque.",
+    compassDenied:
+      "L'accesso alla bussola è negato. Il consiglio per direzione resta valido.",
+    alignedNow: "Va bene – la tenda è messa giusta rispetto al vento.",
+    turnLeft: (deg: number) => `Ruota ancora di ${deg}° a sinistra.`,
+    turnRight: (deg: number) => `Ruota ancora di ${deg}° a destra.`,
+    source: "Valori del vento da Open-Meteo, regole pratiche di montaggio.",
+  },
   picnicStops: {
     sectionAria: "Soste lungo il tragitto",
     title: "Sosta lungo la strada",
