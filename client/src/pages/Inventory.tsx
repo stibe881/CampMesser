@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "wouter";
 import {
   Check,
   HandHelping,
   ImagePlus,
   Loader2,
   Package,
+  PackageOpen,
   Pencil,
   Plus,
   Receipt,
@@ -431,6 +433,29 @@ export default function InventoryPage() {
   const removeMutation = trpc.inventory.remove.useMutation({
     onSuccess: () => utils.inventory.list.invalidate(),
   });
+  /**
+   * Versorgen (#276): In welche Kiste gehört der Gegenstand? Die Zuordnung
+   * gibt es auch auf der Kisten-Seite; hier steht sie beim Gegenstand
+   * selbst, weil man beim Einräumen vom Ding ausgeht und nicht von der Box.
+   */
+  const boxesQuery = trpc.boxes.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const boxes = boxesQuery.data ?? [];
+  const [boxDialogItem, setBoxDialogItem] = useState<{
+    id: number;
+    name: string;
+    boxId: number | null;
+  } | null>(null);
+  const assignBoxMutation = trpc.boxes.assign.useMutation({
+    onSuccess: () => {
+      void utils.inventory.list.invalidate();
+      setBoxDialogItem(null);
+      toast.success(t.inventory.boxAssigned);
+    },
+    onError: e => toast.error(e.message),
+  });
+
   const setLentMutation = trpc.inventory.setLent.useMutation({
     onSuccess: () => utils.inventory.list.invalidate(),
     onError: () => toast.error(t.common.saveFailed),
@@ -1355,6 +1380,12 @@ export default function InventoryPage() {
                               )}
                             </span>
                           )}
+                          {item.boxId != null &&
+                            boxes.some(box => box.id === item.boxId) && (
+                              <span className="ml-1.5 rounded-full bg-accent px-2 py-0.5 font-mono text-xs font-medium text-accent-foreground">
+                                {boxes.find(box => box.id === item.boxId)?.code}
+                              </span>
+                            )}
                           <span className="block text-xs text-muted-foreground sm:hidden">
                             {item.category}
                           </span>
@@ -1405,6 +1436,25 @@ export default function InventoryPage() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-muted-foreground"
+                          onClick={() =>
+                            setBoxDialogItem({
+                              id: item.id,
+                              name: item.name,
+                              boxId: item.boxId,
+                            })
+                          }
+                          aria-label={t.inventory.boxAria(item.name)}
+                          title={t.inventory.boxButton}
+                        >
+                          <PackageOpen
+                            className="h-3.5 w-3.5"
+                            aria-hidden="true"
+                          />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground"
                           onClick={() => openEdit(item)}
                           aria-label={t.inventory.editAria(item.name)}
                         >
@@ -1445,6 +1495,73 @@ export default function InventoryPage() {
       )}
 
       <GearCareSection />
+
+      {/* Versorgen-Dialog (#276): in welche Kiste gehört der Gegenstand? */}
+      <Dialog
+        open={boxDialogItem !== null}
+        onOpenChange={open => {
+          if (!open) setBoxDialogItem(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.inventory.boxDialogTitle}</DialogTitle>
+            <DialogDescription>
+              {t.inventory.boxDialogDescription}
+            </DialogDescription>
+          </DialogHeader>
+          <p className="text-sm font-medium">{boxDialogItem?.name}</p>
+          {boxes.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {t.inventory.boxNoBoxes}
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {boxes.map(box => (
+                <Button
+                  key={box.id}
+                  variant={
+                    boxDialogItem?.boxId === box.id ? "default" : "outline"
+                  }
+                  className="w-full justify-start"
+                  disabled={assignBoxMutation.isPending}
+                  onClick={() =>
+                    boxDialogItem &&
+                    assignBoxMutation.mutate({
+                      itemId: boxDialogItem.id,
+                      boxId: box.id,
+                    })
+                  }
+                >
+                  <span className="mr-2 font-mono font-semibold">
+                    {box.code}
+                  </span>
+                  <span className="min-w-0 truncate">{box.name}</span>
+                </Button>
+              ))}
+              {boxDialogItem?.boxId != null && (
+                <Button
+                  variant="ghost"
+                  className="w-full text-muted-foreground"
+                  disabled={assignBoxMutation.isPending}
+                  onClick={() =>
+                    boxDialogItem &&
+                    assignBoxMutation.mutate({
+                      itemId: boxDialogItem.id,
+                      boxId: null,
+                    })
+                  }
+                >
+                  {t.inventory.boxRemove}
+                </Button>
+              )}
+            </div>
+          )}
+          <Button asChild variant="outline" size="sm">
+            <Link href="/kisten">{t.inventory.boxManageLink}</Link>
+          </Button>
+        </DialogContent>
+      </Dialog>
 
       {/* Ausleih-Dialog: an wen und seit wann */}
       <Dialog

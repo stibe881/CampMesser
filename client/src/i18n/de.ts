@@ -722,6 +722,16 @@ export const de = {
     emptySuffix: "mit Gewicht und Volumen.",
   },
   inventory: {
+    boxButton: "Versorgen",
+    boxAria: (name: string) => `${name} in eine Kiste versorgen`,
+    boxDialogTitle: "In eine Kiste versorgen",
+    boxDialogDescription:
+      "Wähle die Kiste, in der dieser Gegenstand liegt. Er erscheint dann im Inhalt der Kiste – auch nach dem Scannen des Etiketts.",
+    boxAssigned: "Zuordnung gespeichert",
+    boxRemove: "Aus der Kiste nehmen",
+    boxNoBoxes:
+      "Noch keine Kiste angelegt. Leg zuerst eine an, dann kannst du hier versorgen.",
+    boxManageLink: "Kisten verwalten",
     title: "Inventar",
     subtitleLoggedOut: "Erfasse dein Campingmaterial mit Gewicht und Volumen.",
     loginFeature: "dein Inventar",
@@ -3404,6 +3414,11 @@ export const de = {
       `Mehr als ${max} Vorschläge beantwortet niemand mehr – lösch einen, um Platz zu machen.`,
   },
   boxes: {
+    saveImageButton: "Als Bild sichern",
+    saveImageDone: "Etikett als Bild gespeichert",
+    saveImageFailed: "Bild konnte nicht erzeugt werden",
+    printFallbackHint:
+      "Auf dem iPhone druckt eine installierte App nicht direkt – dort «Als Bild sichern» wählen und aus der Fotos-App drucken oder teilen.",
     title: "Kisten",
     subtitle:
       "Welche Ausrüstung liegt in welcher Box – mit Etikett und QR-Code zum Ausdrucken.",

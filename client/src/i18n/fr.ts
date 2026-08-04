@@ -720,6 +720,16 @@ export const fr: Translation = {
     emptySuffix: "avec poids et volume.",
   },
   inventory: {
+    boxButton: "Ranger",
+    boxAria: (name: string) => `Ranger ${name} dans une caisse`,
+    boxDialogTitle: "Ranger dans une caisse",
+    boxDialogDescription:
+      "Choisis la caisse où se trouve cet objet. Il apparaîtra alors dans son contenu – y compris après avoir scanné l'étiquette.",
+    boxAssigned: "Rangement enregistré",
+    boxRemove: "Sortir de la caisse",
+    boxNoBoxes:
+      "Aucune caisse pour l'instant. Crées-en une d'abord, puis tu pourras ranger ici.",
+    boxManageLink: "Gérer les caisses",
     title: "Inventaire",
     subtitleLoggedOut: "Saisis ton matériel de camping avec poids et volume.",
     loginFeature: "ton inventaire",
@@ -3400,6 +3410,11 @@ export const fr: Translation = {
       `Au-delà de ${max} propositions, plus personne ne répond – supprimes-en une pour faire de la place.`,
   },
   boxes: {
+    saveImageButton: "Enregistrer comme image",
+    saveImageDone: "Étiquette enregistrée comme image",
+    saveImageFailed: "Impossible de créer l'image",
+    printFallbackHint:
+      "Sur iPhone, une app installée n'imprime pas directement – choisis « Enregistrer comme image » puis imprime ou partage depuis Photos.",
     title: "Caisses",
     subtitle:
       "Quel équipement se trouve dans quelle caisse – avec étiquette et QR-code à imprimer.",

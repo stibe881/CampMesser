@@ -10,7 +10,7 @@
  * - API-Aufrufe (/api/) und übrige externe Dienste (Open-Meteo): immer Netz,
  *   kein Caching – Live-Daten sollen nicht veralten.
  */
-const CACHE_VERSION = "campmesser-v5";
+const CACHE_VERSION = "campmesser-v6";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 // Zwischenablage für per Share Target geteilte Fotos – bewusst OHNE

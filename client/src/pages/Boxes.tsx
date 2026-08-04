@@ -14,9 +14,11 @@
  * Kiste (Kennung gross, Name, Standort, QR-Code). Kein PDF-Paket nötig.
  */
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useParams } from "wouter";
 import {
   Boxes as BoxesIcon,
+  ImageDown,
   Package,
   Pencil,
   Plus,
@@ -167,6 +169,87 @@ export default function BoxesPage() {
       notes: box.notes ?? "",
     });
     setDialogOpen(true);
+  };
+
+  /**
+   * Drucken. `window.print()` blockiert die Seite, solange der Dialog des
+   * Browsers offen ist – deshalb erst im nächsten Frame aufrufen, damit
+   * der Druck-Bogen sicher im DOM steht.
+   */
+  const printLabels = () => {
+    requestAnimationFrame(() => window.print());
+  };
+
+  /**
+   * Etikett als Bild sichern. Auf dem iPhone tut `window.print()` in einer
+   * installierten Web-App schlicht nichts – dort ist der Weg über «Bild
+   * sichern» und die Fotos-App bzw. das Teilen-Menü der einzige, der
+   * wirklich zu einem Ausdruck führt. Gezeichnet wird auf eine Leinwand,
+   * damit das Bild dieselben vier Etiketten zeigt wie der Druck.
+   */
+  const saveLabelImage = () => {
+    const box = boxes.find(b => b.id === labelBoxId);
+    if (!box || !labelQr) return;
+    // A4 hochkant bei 150 dpi – gross genug zum Ausdrucken, klein genug
+    // fürs Teilen-Menü.
+    const width = 1240;
+    const height = 1754;
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      toast.error(tb.saveImageFailed);
+      return;
+    }
+    const qr = new Image();
+    qr.onload = () => {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+      const margin = 60;
+      const gap = 40;
+      const labelHeight = (height - 2 * margin - 3 * gap) / 4;
+      for (let i = 0; i < 4; i++) {
+        const top = margin + i * (labelHeight + gap);
+        ctx.strokeStyle = "#111111";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(margin, top, width - 2 * margin, labelHeight);
+        const qrSize = labelHeight - 48;
+        ctx.drawImage(
+          qr,
+          width - margin - qrSize - 24,
+          top + 24,
+          qrSize,
+          qrSize
+        );
+        ctx.fillStyle = "#111111";
+        ctx.font = "bold 96px monospace";
+        ctx.textBaseline = "top";
+        ctx.fillText(box.code, margin + 32, top + 32);
+        ctx.font = "bold 44px sans-serif";
+        ctx.fillText(box.name, margin + 32, top + 150);
+        ctx.fillStyle = "#555555";
+        ctx.font = "32px sans-serif";
+        if (box.location) ctx.fillText(box.location, margin + 32, top + 206);
+        ctx.font = "24px sans-serif";
+        ctx.fillText("campmesser.ch", margin + 32, top + labelHeight - 48);
+      }
+      canvas.toBlob(blob => {
+        if (!blob) {
+          toast.error(tb.saveImageFailed);
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `etikett-${box.code.toLowerCase()}.png`;
+        link.click();
+        URL.revokeObjectURL(url);
+        toast.success(tb.saveImageDone);
+      }, "image/png");
+    };
+    qr.onerror = () => toast.error(tb.saveImageFailed);
+    qr.src = labelQr;
   };
 
   if (loading) return null;
@@ -464,59 +547,85 @@ export default function BoxesPage() {
         open={labelBoxId !== null}
         onOpenChange={open => !open && setLabelBoxId(null)}
       >
-        <DialogContent className="print:max-w-none print:border-0 print:shadow-none">
-          <DialogHeader className="print:hidden">
+        <DialogContent>
+          <DialogHeader>
             <DialogTitle>{tb.labelTitle}</DialogTitle>
             <DialogDescription>{tb.labelHint}</DialogDescription>
           </DialogHeader>
           {labelBox && (
             <>
-              <div className="grid grid-cols-1 gap-3 print:grid-cols-2">
-                {[0, 1, 2, 3].map(index => (
-                  <div
-                    key={index}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg border-2 border-foreground/80 p-3",
-                      index > 0 && "hidden print:flex"
-                    )}
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="font-mono text-3xl font-bold leading-none">
-                        {labelBox.code}
-                      </p>
-                      <p className="mt-1 truncate font-semibold">
-                        {labelBox.name}
-                      </p>
-                      {labelBox.location && (
-                        <p className="truncate text-xs text-muted-foreground">
-                          {labelBox.location}
-                        </p>
-                      )}
-                      <p className="mt-1 text-[0.6rem] text-muted-foreground">
-                        campmesser.ch
-                      </p>
-                    </div>
-                    {labelQr && (
-                      <img
-                        src={labelQr}
-                        alt={tb.qrAlt(labelBox.code)}
-                        className="h-24 w-24 shrink-0"
-                      />
-                    )}
-                  </div>
-                ))}
+              <div className="flex items-center gap-3 rounded-lg border-2 border-foreground/80 p-3">
+                <div className="min-w-0 flex-1">
+                  <p className="font-mono text-3xl font-bold leading-none">
+                    {labelBox.code}
+                  </p>
+                  <p className="mt-1 truncate font-semibold">{labelBox.name}</p>
+                  {labelBox.location && (
+                    <p className="truncate text-xs text-muted-foreground">
+                      {labelBox.location}
+                    </p>
+                  )}
+                  <p className="mt-1 text-[0.6rem] text-muted-foreground">
+                    campmesser.ch
+                  </p>
+                </div>
+                {labelQr && (
+                  <img
+                    src={labelQr}
+                    alt={tb.qrAlt(labelBox.code)}
+                    className="h-24 w-24 shrink-0"
+                  />
+                )}
               </div>
-              <Button
-                className="w-full print:hidden"
-                onClick={() => window.print()}
-              >
-                <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                {tb.printButton}
-              </Button>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button className="flex-1" onClick={printLabels}>
+                  <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {tb.printButton}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={saveLabelImage}
+                >
+                  <ImageDown className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {tb.saveImageButton}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {tb.printFallbackHint}
+              </p>
             </>
           )}
         </DialogContent>
       </Dialog>
+
+      {/*
+        Druck-Bogen (#276): bewusst AUSSERHALB des Dialogs, direkt an
+        <body>. Im Dialog-Portal liegt über dem Inhalt eine Overlay-Ebene,
+        und Radix sperrt beim Öffnen den Body – gedruckt kam so eine leere
+        oder schwarze Seite heraus. Der Bogen hängt immer im DOM, ist am
+        Bildschirm unsichtbar und wird im Druck als EINZIGES angezeigt
+        (siehe `.print-labels` in index.css).
+      */}
+      {labelBox &&
+        createPortal(
+          <div className="print-labels" aria-hidden="true">
+            {[0, 1, 2, 3].map(index => (
+              <div key={index} className="print-label">
+                <div className="print-label-text">
+                  <p className="print-label-code">{labelBox.code}</p>
+                  <p className="print-label-name">{labelBox.name}</p>
+                  {labelBox.location && (
+                    <p className="print-label-place">{labelBox.location}</p>
+                  )}
+                  <p className="print-label-brand">campmesser.ch</p>
+                </div>
+                {labelQr && <img src={labelQr} alt="" />}
+              </div>
+            ))}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

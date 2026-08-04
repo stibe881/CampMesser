@@ -705,6 +705,16 @@ export const it: Translation = {
     emptySuffix: "con peso e volume.",
   },
   inventory: {
+    boxButton: "Riporre",
+    boxAria: (name: string) => `Riporre ${name} in una cassa`,
+    boxDialogTitle: "Riporre in una cassa",
+    boxDialogDescription:
+      "Scegli la cassa in cui si trova questo oggetto. Comparirà nel suo contenuto – anche dopo aver inquadrato l'etichetta.",
+    boxAssigned: "Assegnazione salvata",
+    boxRemove: "Togliere dalla cassa",
+    boxNoBoxes:
+      "Ancora nessuna cassa. Creane prima una, poi potrai riporre da qui.",
+    boxManageLink: "Gestire le casse",
     title: "Inventario",
     subtitleLoggedOut:
       "Registra il tuo materiale da campeggio con peso e volume.",
@@ -3375,6 +3385,11 @@ export const it: Translation = {
       `Oltre ${max} proposte non risponde più nessuno – eliminane una per fare spazio.`,
   },
   boxes: {
+    saveImageButton: "Salvare come immagine",
+    saveImageDone: "Etichetta salvata come immagine",
+    saveImageFailed: "Impossibile creare l'immagine",
+    printFallbackHint:
+      "Su iPhone un'app installata non stampa direttamente – scegli «Salvare come immagine» e stampa o condividi da Foto.",
     title: "Casse",
     subtitle:
       "Quale attrezzatura sta in quale cassa – con etichetta e codice QR da stampare.",

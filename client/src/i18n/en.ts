@@ -694,6 +694,16 @@ export const en: Translation = {
     emptySuffix: "with weight and volume.",
   },
   inventory: {
+    boxButton: "Put away",
+    boxAria: (name: string) => `Put ${name} away in a box`,
+    boxDialogTitle: "Put away in a box",
+    boxDialogDescription:
+      "Pick the box this item lives in. It will then show up in that box's contents – including after scanning the label.",
+    boxAssigned: "Assignment saved",
+    boxRemove: "Take out of the box",
+    boxNoBoxes:
+      "No box yet. Create one first, then you can put things away here.",
+    boxManageLink: "Manage boxes",
     title: "Inventory",
     subtitleLoggedOut: "Record your camping gear with weight and volume.",
     loginFeature: "your inventory",
@@ -3294,6 +3304,11 @@ export const en: Translation = {
       `Beyond ${max} proposals nobody answers any more – delete one to make room.`,
   },
   boxes: {
+    saveImageButton: "Save as image",
+    saveImageDone: "Label saved as an image",
+    saveImageFailed: "Could not create the image",
+    printFallbackHint:
+      "On iPhone an installed app cannot print directly – choose “Save as image” and print or share it from Photos.",
     title: "Boxes",
     subtitle:
       "Which gear sits in which box – with a printable label and QR code.",
