@@ -307,7 +307,10 @@ export default function DeparturePlanner({
                 <li className="flex items-center justify-between gap-3">
                   <span className="flex items-center gap-1.5 text-muted-foreground">
                     <Car className="h-4 w-4" aria-hidden="true" />
-                    {dp.driveLine(formatDistance(distanceKm * 1000, lang))}
+                    {dp.driveLine(
+                      formatDistance(distanceKm * 1000, lang),
+                      route?.source === "estimate"
+                    )}
                   </span>
                   <span className="tabular-nums">
                     {formatMinutes(plan.driveMinutes)}

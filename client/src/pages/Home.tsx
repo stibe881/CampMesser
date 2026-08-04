@@ -54,6 +54,13 @@ import {
 import { gearTaskDue } from "@shared/gearTasks";
 import { tickObservationStatus } from "@shared/tickBites";
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "wouter";
+import { pickRunningTrip, shouldOpenToday } from "@shared/todayView";
+import {
+  hasJumpedToday,
+  loadTodayStart,
+  markJumpedToday,
+} from "@/lib/todayStart";
 import { getRecentModules } from "@/components/AppShell";
 import MorningBriefing from "@/components/MorningBriefing";
 import {
@@ -1303,9 +1310,41 @@ function RecentModules({ hidden }: { hidden: string[] }) {
   );
 }
 
+/**
+ * «Heute»-Ansicht beim App-Start (#298).
+ *
+ * Läuft heute eine Reise und ist die Einstellung an, springt der erste
+ * Aufruf der Startseite nach /heute. NUR EINMAL PRO SITZUNG: Wer danach
+ * «Start» antippt, will die Kacheln sehen – eine App, die einen von dort
+ * jedes Mal zurückwirft, ist kaputt.
+ */
+function useTodayStartJump() {
+  const [, navigate] = useLocation();
+  const { isAuthenticated } = useAuth();
+  const tripsQuery = trpc.trips.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+  const trips = tripsQuery.data;
+
+  useEffect(() => {
+    if (!trips) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const jump = shouldOpenToday({
+      enabled: loadTodayStart(),
+      hasRunningTrip: pickRunningTrip(trips, today) !== null,
+      hasJumped: hasJumpedToday(),
+    });
+    if (!jump) return;
+    markJumpedToday();
+    navigate("/heute");
+  }, [trips, navigate]);
+}
+
 export default function Home() {
   const { lang, t } = useI18n();
   const { user } = useAuth();
+  useTodayStartJump();
   // Persönliche Begrüssung nach Tageszeit; ohne Namen bleibt der Hero-Kicker
   const greetFirstName = firstNameOf(user?.name);
   const greeting = greetFirstName

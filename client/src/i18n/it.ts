@@ -3776,8 +3776,10 @@ export const it: Translation = {
       "Nessun punto di partenza: registra un domicilio nel profilo o consenti la posizione.",
     tooShort: (km: number) =>
       `Sotto i ${km} km il controllo del percorso non serve – basta l'allerta all'arrivo.`,
-    summary: (distance: string, minutes: number) =>
-      `${distance} in linea d'aria, circa ${Math.floor(minutes / 60)} h ${minutes % 60} min di viaggio.`,
+    summary: (distance: string, minutes: number, estimated: boolean) =>
+      estimated
+        ? `${distance} in linea d'aria, circa ${Math.floor(minutes / 60)} h ${minutes % 60} min di viaggio.`
+        : `${distance} su strada, ${Math.floor(minutes / 60)} h ${minutes % 60} min di viaggio.`,
     allClear: "Su tutto il percorso, agli orari stimati, nulla di rilevante.",
     worstLine: {
       info: "Piccolezze lungo la strada – nulla che riguardi la guida.",
@@ -3923,7 +3925,10 @@ export const it: Translation = {
       days === 1
         ? "Partenza – il giorno prima"
         : `Partenza – ${days} giorni prima`,
-    driveLine: (distance: string) => `Viaggio (${distance} in linea d'aria)`,
+    driveLine: (distance: string, estimated: boolean) =>
+      estimated
+        ? `Viaggio (${distance} in linea d'aria, stimato)`
+        : `Viaggio (${distance} su strada)`,
     breaksLine: (count: number, each: number) =>
       count === 0
         ? "Nessuna pausa necessaria"
@@ -3981,6 +3986,74 @@ export const it: Translation = {
         : `${count} esercitazioni da rifare`,
     allDone: "Tutto esercitato – di nuovo fra sei mesi.",
     note: "Viene salvata solo la data di ogni esercitazione, su questo dispositivo. Nessun nome, nessun numero: ciò che un bambino deve sapere a memoria si esercita con lui, invece di depositarlo in un'app. Dopo sei mesi un'esercitazione va rifatta – i bambini crescono e il campeggio sarà un altro.",
+  },
+  quickBar: {
+    title: "Barra di accesso rapido",
+    intro: "I quattro posti al centro della barra in basso li scegli tu.",
+    slotAria: (slot: number) => `Modulo per il posto ${slot}`,
+    fixed:
+      "«Home» e «SOS» restano ai bordi: la home è la via di ritorno a tutto il resto, e il tasto SOS lo si cerca proprio quando non si riesce a pensare.",
+    reset: "Ripristina l'impostazione predefinita",
+  },
+  today: {
+    title: "Oggi",
+    noTrip:
+      "Al momento non c'è nessun viaggio in corso. Appena ne inizia uno, qui c'è la tua giornata.",
+    toModules: "Tutti i moduli",
+    unnamedPlace: "Senza nome",
+    dayOf: (day: number, total: number) => `Giorno ${day} di ${total}`,
+    nightsLeft: (nights: number) =>
+      nights === 1 ? "ancora 1 notte" : `ancora ${nights} notti`,
+    departureToday: "Oggi si parte",
+    weather: "Meteo",
+    menu: "Menu",
+    shopping: "Lista della spesa",
+    mealsTitle: "Oggi nel piatto",
+    mealsEmpty: "Per oggi non c'è nulla di previsto.",
+    mealUnknown: "Previsto",
+    tasksTitle: "Ancora da fare",
+    tasksEmpty: "Niente in sospeso. Goditi la giornata.",
+    journal: "Scrivi nel diario",
+    startSetting: "Durante un viaggio parti da «Oggi»",
+    note: "Il salto avviene una volta all'apertura dell'app – se poi tocchi «Home» ottieni i riquadri, senza essere rispedito qui.",
+  },
+  tripHistory: {
+    title: "Cronologia delle modifiche",
+    toggleAria: (trip: string) => `Mostra la cronologia di ${trip}`,
+    count: (count: number) => (count === 1 ? "1 voce" : `${count} voci`),
+    empty: "Qui non è ancora successo nulla.",
+    someone: "Qualcuno",
+    line: (who: string, area: string, action: string, count: number) =>
+      count > 1
+        ? `${who} ha ${action} ${count}× qualcosa in «${area}»`
+        : `${who} ha ${action} «${area}»`,
+    andMore: (count: number) => `e altri ${count}`,
+    note: "Si registra CHI ha cambiato COSA e QUANDO, in quale ambito – non il vecchio e il nuovo valore. Ciò che qualcuno fa in rapida successione sta su una riga con il numero: dodici voci sulla lista della spesa non devono seppellire tutto il resto.",
+  },
+  trash: {
+    title: "Cestino",
+    intro: (days: number) =>
+      `Ciò che elimini resta ${days} giorni. Fino ad allora basta un clic per riaverlo.`,
+    empty: "Niente di eliminato. Meglio così.",
+    restore: "Ripristina",
+    restored: "Ripristinato",
+    restoreFailed: "Non ha funzionato. Ricarica la pagina.",
+    itemCount: (count: number) =>
+      count === 1 ? "1 voce collegata" : `${count} voci collegate`,
+    deletedOn: (date: string) => `eliminato il ${date}`,
+    daysLeft: (days: number) =>
+      days === 1 ? "ancora 1 giorno" : `ancora ${days} giorni`,
+    removeAria: (label: string) => `Elimina definitivamente ${label}`,
+    removeConfirm: (label: string) =>
+      `Eliminare «${label}» definitivamente? Dopo è perso.`,
+    emptyAll: "Svuota il cestino",
+    emptyConfirm: (count: number) =>
+      count === 1
+        ? "Eliminare definitivamente questa voce?"
+        : `Eliminare definitivamente tutte le ${count} voci?`,
+    note: (days: number) =>
+      `Il ripristino riusa lo stesso numero di prima – i link condivisi e i codici QR tornano a funzionare. Le foto restano sul server finché resta la voce; ripristinare un viaggio senza le sue immagini non sarebbe un ripristino. Dopo ${days} giorni si cancella tutto definitivamente, file compresi.`,
+    profileLink: "Apri il cestino",
   },
   meteorLog: {
     title: "Diario delle stelle cadenti",

@@ -3694,8 +3694,10 @@ export const en: Translation = {
       "No starting point: save a home location in your profile or allow location access.",
     tooShort: (km: number) =>
       `Under ${km} km a route check adds nothing – the warning at the destination is enough.`,
-    summary: (distance: string, minutes: number) =>
-      `${distance} as the crow flies, roughly ${Math.floor(minutes / 60)} h ${minutes % 60} min of driving.`,
+    summary: (distance: string, minutes: number, estimated: boolean) =>
+      estimated
+        ? `${distance} as the crow flies, roughly ${Math.floor(minutes / 60)} h ${minutes % 60} min of driving.`
+        : `${distance} by road, ${Math.floor(minutes / 60)} h ${minutes % 60} min of driving.`,
     allClear:
       "Nothing notable anywhere along the route at the estimated times.",
     worstLine: {
@@ -3840,7 +3842,10 @@ export const en: Translation = {
     departureLabel: "Leave at",
     departureDayBefore: (days: number) =>
       days === 1 ? "Leave – the day before" : `Leave – ${days} days earlier`,
-    driveLine: (distance: string) => `Drive (${distance} as the crow flies)`,
+    driveLine: (distance: string, estimated: boolean) =>
+      estimated
+        ? `Drive (${distance} as the crow flies, estimated)`
+        : `Drive (${distance} by road)`,
     breaksLine: (count: number, each: number) =>
       count === 0
         ? "No break needed"
@@ -3896,6 +3901,73 @@ export const en: Translation = {
       count === 1 ? "1 drill is due" : `${count} drills are due`,
     allDone: "All practised – again in six months.",
     note: "Only the date of each drill is stored, on this device. No names, no numbers: what a child needs to know by heart is practised with them, not filed away in an app. After six months a drill is due again – children grow, and next time the site will be a different one.",
+  },
+  quickBar: {
+    title: "Quick access bar",
+    intro: "The four middle slots of the bottom bar are yours to choose.",
+    slotAria: (slot: number) => `Module for slot ${slot}`,
+    fixed:
+      "“Home” and “SOS” stay at the edges: home is the way back to everything else, and the SOS button is one you look for precisely when you cannot think.",
+    reset: "Reset to the default",
+  },
+  today: {
+    title: "Today",
+    noTrip: "No trip is running right now. Once one starts, your day is here.",
+    toModules: "All modules",
+    unnamedPlace: "Unnamed",
+    dayOf: (day: number, total: number) => `Day ${day} of ${total}`,
+    nightsLeft: (nights: number) =>
+      nights === 1 ? "1 night left" : `${nights} nights left`,
+    departureToday: "Departure day",
+    weather: "Weather",
+    menu: "Meal plan",
+    shopping: "Shopping list",
+    mealsTitle: "On the plate today",
+    mealsEmpty: "Nothing planned for today.",
+    mealUnknown: "Planned",
+    tasksTitle: "Still open",
+    tasksEmpty: "Nothing open. Enjoy the day.",
+    journal: "Write in the journal",
+    startSetting: "Start with “Today” during a trip",
+    note: "The jump happens once when you open the app – tap “Home” afterwards and you get the tiles without being thrown back here.",
+  },
+  tripHistory: {
+    title: "Change history",
+    toggleAria: (trip: string) => `Show the change history of ${trip}`,
+    count: (count: number) => (count === 1 ? "1 entry" : `${count} entries`),
+    empty: "Nothing has happened here yet.",
+    someone: "Someone",
+    line: (who: string, area: string, action: string, count: number) =>
+      count > 1
+        ? `${who} ${action} ${count} things in “${area}”`
+        : `${who} ${action} “${area}”`,
+    andMore: (count: number) => `and ${count} more`,
+    note: "What is recorded is WHO changed WHAT and WHEN, in which area – not the old and the new value. Things done in quick succession appear as one line with a count: twelve items on the shopping list should not bury everything else.",
+  },
+  trash: {
+    title: "Trash",
+    intro: (days: number) =>
+      `Deleted things stay for ${days} days. Until then one click brings them back.`,
+    empty: "Nothing deleted. That is how it should be.",
+    restore: "Restore",
+    restored: "Restored",
+    restoreFailed: "That did not work. Reload the page.",
+    itemCount: (count: number) =>
+      count === 1 ? "1 attached entry" : `${count} attached entries`,
+    deletedOn: (date: string) => `deleted on ${date}`,
+    daysLeft: (days: number) =>
+      days === 1 ? "1 day left" : `${days} days left`,
+    removeAria: (label: string) => `Delete ${label} permanently`,
+    removeConfirm: (label: string) =>
+      `Delete “${label}” permanently? After this it is gone.`,
+    emptyAll: "Empty the trash",
+    emptyConfirm: (count: number) =>
+      count === 1
+        ? "Delete this one entry permanently?"
+        : `Delete all ${count} entries permanently?`,
+    note: (days: number) =>
+      `Restoring reuses the same number as before – shared links and QR codes work again afterwards. Photos stay on the server as long as the entry does; restoring a trip without its pictures would not be a restore. After ${days} days everything is cleared for good, files included.`,
+    profileLink: "Open the trash",
   },
   meteorLog: {
     title: "Meteor log",

@@ -804,6 +804,95 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     // limit begrenzt die Ausgabe zusätzlich
     expect((await authed.push.log({ limit: 5 })).length).toBe(5);
 
+    // ── Änderungsverlauf (#296) ──
+    // Der Verlauf entsteht als Nebenwirkung der normalen Mutationen –
+    // nur gegen eine echte Datenbank zeigt sich, ob er wirklich mitläuft.
+    const historyTripId = tripId;
+    await authed.trips.board.add({
+      tripId: historyTripId,
+      kind: "task",
+      text: "CI-Verlauf-Zettel",
+    });
+    const history = await authed.trips.history({ tripId: historyTripId });
+    const boardGroup = history.groups.find(g => g.area === "board");
+    expect(boardGroup).toBeDefined();
+    expect(boardGroup?.action).toBe("add");
+    expect(boardGroup?.labels).toContain("CI-Verlauf-Zettel");
+    // Der Name kommt beim Lesen dazu, nicht aus der Zeile
+    expect(history.names[String(uid)]).toBeTruthy();
+
+    // ── Papierkorb (#295): löschen, wiederherstellen, endgültig löschen ──
+    // Der Weg über die echte Datenbank ist der Punkt: Der Schnappschuss
+    // geht durch JSON, und dabei werden aus Zeitstempeln Strings. Nur
+    // hier zeigt sich, ob sie als Date zurückkommen – und ob die alte Id
+    // erhalten bleibt.
+    const trashNote = await authed.notes.add({
+      title: "CI-Papierkorb",
+      text: "Diese Notiz wird gelöscht und zurückgeholt.",
+      tags: "ci",
+    });
+    const trashListId = (
+      await authed.packing.createList({
+        name: "CI-Papierkorb-Liste",
+        scenario: "custom",
+      })
+    ).listId;
+    await authed.packing.addItems({
+      listId: trashListId,
+      items: [{ name: "Zelthering", category: "Ausrüstung", quantity: 1 }],
+    });
+
+    await authed.notes.remove({ id: trashNote.id });
+    await authed.packing.deleteList({ id: trashListId });
+    expect((await authed.notes.list()).some(n => n.id === trashNote.id)).toBe(
+      false
+    );
+    expect((await authed.packing.lists()).some(l => l.id === trashListId)).toBe(
+      false
+    );
+
+    const trashEntries = await authed.trash.list();
+    const noteEntry = trashEntries.find(
+      e => e.kind === "note" && e.label === "CI-Papierkorb"
+    );
+    const listEntry = trashEntries.find(
+      e => e.kind === "packList" && e.label === "CI-Papierkorb-Liste"
+    );
+    expect(noteEntry).toBeDefined();
+    expect(listEntry).toBeDefined();
+    // Der Eintrag zählt, was mit gelöscht wurde – hier der eine Packposten
+    expect(listEntry?.itemCount).toBe(1);
+
+    await authed.trash.restore({ id: noteEntry!.id });
+    await authed.trash.restore({ id: listEntry!.id });
+
+    // MIT DERSELBEN ID zurück, sonst wären geteilte Links tot
+    const restoredNote = (await authed.notes.list()).find(
+      n => n.id === trashNote.id
+    );
+    expect(restoredNote?.title).toBe("CI-Papierkorb");
+    // Zeitstempel müssen als Date zurückkommen, nicht als String
+    expect(restoredNote?.createdAt).toBeInstanceOf(Date);
+    const restoredList = (await authed.packing.lists()).find(
+      l => l.id === trashListId
+    );
+    expect(restoredList?.name).toBe("CI-Papierkorb-Liste");
+    // Die Kinder kommen mit
+    expect(
+      (await authed.packing.items({ listId: trashListId })).map(i => i.name)
+    ).toEqual(["Zelthering"]);
+    // Nach dem Wiederherstellen ist der Papierkorb wieder leer
+    expect(await authed.trash.list()).toHaveLength(0);
+
+    // Endgültig löschen räumt den Eintrag weg, ohne etwas anzulegen
+    await authed.notes.remove({ id: trashNote.id });
+    const pendingId = (await authed.trash.list())[0].id;
+    await authed.trash.remove({ id: pendingId });
+    expect(await authed.trash.list()).toHaveLength(0);
+    expect((await authed.notes.list()).some(n => n.id === trashNote.id)).toBe(
+      false
+    );
+
     // Aufräumen: Konto löschen entfernt auch die angelegten Daten
     const deleted = await authed.auth.deleteAccount({ password });
     expect(deleted.success).toBe(true);
@@ -811,6 +900,17 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
 
     // Lösch-Kaskade: keine Tabelle darf noch Zeilen des Kontos enthalten
     const remaining = await Promise.all([
+      // Papierkorb (#295): Wer sein Konto löscht, will auch das los sein,
+      // was noch auf seine Wiederherstellung wartet
+      dbc
+        .select()
+        .from(schema.deletedItems)
+        .where(eq(schema.deletedItems.userId, uid)),
+      // Änderungsverlauf (#296): eigene Spuren verschwinden mit dem Konto
+      dbc
+        .select()
+        .from(schema.tripChanges)
+        .where(eq(schema.tripChanges.userId, uid)),
       dbc
         .select()
         .from(schema.packLists)

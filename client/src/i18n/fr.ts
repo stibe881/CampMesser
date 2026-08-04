@@ -3804,8 +3804,10 @@ export const fr: Translation = {
       "Pas de point de départ : enregistre un domicile dans le profil ou autorise la localisation.",
     tooShort: (km: number) =>
       `En dessous de ${km} km, l'analyse du trajet n'apporte rien – l'alerte à l'arrivée suffit.`,
-    summary: (distance: string, minutes: number) =>
-      `${distance} à vol d'oiseau, environ ${Math.floor(minutes / 60)} h ${minutes % 60} min de route.`,
+    summary: (distance: string, minutes: number, estimated: boolean) =>
+      estimated
+        ? `${distance} à vol d'oiseau, environ ${Math.floor(minutes / 60)} h ${minutes % 60} min de route.`
+        : `${distance} par la route, ${Math.floor(minutes / 60)} h ${minutes % 60} min de trajet.`,
     allClear: "Rien de particulier sur tout le trajet aux heures estimées.",
     worstLine: {
       info: "Broutilles en route – rien qui concerne la conduite.",
@@ -3950,7 +3952,10 @@ export const fr: Translation = {
     departureLabel: "Départ",
     departureDayBefore: (days: number) =>
       days === 1 ? "Départ – la veille" : `Départ – ${days} jours avant`,
-    driveLine: (distance: string) => `Trajet (${distance} à vol d'oiseau)`,
+    driveLine: (distance: string, estimated: boolean) =>
+      estimated
+        ? `Trajet (${distance} à vol d'oiseau, estimé)`
+        : `Trajet (${distance} par la route)`,
     breaksLine: (count: number, each: number) =>
       count === 0
         ? "Aucune pause nécessaire"
@@ -4006,6 +4011,75 @@ export const fr: Translation = {
       count === 1 ? "1 exercice à refaire" : `${count} exercices à refaire`,
     allDone: "Tout est exercé – à refaire dans six mois.",
     note: "Seule la date de chaque exercice est enregistrée, sur cet appareil. Ni noms ni numéros : ce qu'un enfant doit savoir par cœur, on l'exerce avec lui plutôt que de le stocker dans une app. Après six mois, un exercice est à refaire – les enfants grandissent et le camping sera un autre.",
+  },
+  quickBar: {
+    title: "Barre d'accès rapide",
+    intro:
+      "Les quatre emplacements au centre de la barre du bas, c'est toi qui les choisis.",
+    slotAria: (slot: number) => `Module pour l'emplacement ${slot}`,
+    fixed:
+      "« Accueil » et « SOS » restent aux extrémités : l'accueil est le chemin de retour vers tout le reste, et le bouton SOS, on le cherche justement quand on ne peut plus réfléchir.",
+    reset: "Rétablir la valeur par défaut",
+  },
+  today: {
+    title: "Aujourd'hui",
+    noTrip:
+      "Aucun voyage en cours. Dès qu'un voyage commence, ta journée s'affiche ici.",
+    toModules: "Tous les modules",
+    unnamedPlace: "Sans nom",
+    dayOf: (day: number, total: number) => `Jour ${day} sur ${total}`,
+    nightsLeft: (nights: number) =>
+      nights === 1 ? "encore 1 nuit" : `encore ${nights} nuits`,
+    departureToday: "Départ aujourd'hui",
+    weather: "Météo",
+    menu: "Menu",
+    shopping: "Liste de courses",
+    mealsTitle: "Au menu aujourd'hui",
+    mealsEmpty: "Rien de prévu pour aujourd'hui.",
+    mealUnknown: "Prévu",
+    tasksTitle: "Encore à faire",
+    tasksEmpty: "Rien en attente. Profite de la journée.",
+    journal: "Écrire dans le journal",
+    startSetting: "Démarrer sur « Aujourd'hui » pendant un voyage",
+    note: "Le saut se fait une fois à l'ouverture de l'app – si tu touches ensuite « Accueil », tu obtiens les tuiles sans être renvoyé ici.",
+  },
+  tripHistory: {
+    title: "Historique des modifications",
+    toggleAria: (trip: string) => `Afficher l'historique de ${trip}`,
+    count: (count: number) => (count === 1 ? "1 entrée" : `${count} entrées`),
+    empty: "Il ne s'est encore rien passé ici.",
+    someone: "Quelqu'un",
+    line: (who: string, area: string, action: string, count: number) =>
+      count > 1
+        ? `${who} a ${action} ${count}× quelque chose dans «${area}»`
+        : `${who} a ${action} «${area}»`,
+    andMore: (count: number) => `et ${count} de plus`,
+    note: "On note QUI a modifié QUOI et QUAND, dans quel domaine – pas l'ancienne et la nouvelle valeur. Ce que quelqu'un fait coup sur coup tient sur une ligne avec le nombre : douze articles sur la liste de courses ne doivent pas enterrer tout le reste.",
+  },
+  trash: {
+    title: "Corbeille",
+    intro: (days: number) =>
+      `Ce que tu supprimes reste ${days} jours. D'ici là, un clic suffit pour le récupérer.`,
+    empty: "Rien de supprimé. C'est très bien ainsi.",
+    restore: "Restaurer",
+    restored: "Restauré",
+    restoreFailed: "Cela n'a pas fonctionné. Recharge la page.",
+    itemCount: (count: number) =>
+      count === 1 ? "1 élément lié" : `${count} éléments liés`,
+    deletedOn: (date: string) => `supprimé le ${date}`,
+    daysLeft: (days: number) =>
+      days === 1 ? "encore 1 jour" : `encore ${days} jours`,
+    removeAria: (label: string) => `Supprimer définitivement ${label}`,
+    removeConfirm: (label: string) =>
+      `Supprimer «${label}» définitivement ? Après, c'est perdu.`,
+    emptyAll: "Vider la corbeille",
+    emptyConfirm: (count: number) =>
+      count === 1
+        ? "Supprimer définitivement cet élément ?"
+        : `Supprimer définitivement les ${count} éléments ?`,
+    note: (days: number) =>
+      `La restauration réutilise le même numéro qu'avant – les liens partagés et les QR codes refonctionnent ensuite. Les photos restent sur le serveur aussi longtemps que l'élément lui-même ; restaurer un voyage sans ses images ne serait pas une restauration. Après ${days} jours, tout est effacé définitivement, fichiers compris.`,
+    profileLink: "Ouvrir la corbeille",
   },
   meteorLog: {
     title: "Carnet d'étoiles filantes",

@@ -154,6 +154,7 @@ import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import TripDatePoll from "@/components/TripDatePoll";
 import TripGuestbook from "@/components/TripGuestbook";
+import TripHistory from "@/components/TripHistory";
 import TripReservation from "@/components/TripReservation";
 import TripTemplatePicker from "@/components/TripTemplatePicker";
 
@@ -4665,6 +4666,15 @@ export default function TripsPage() {
                           tripName={trip.title || placeName(trip)}
                         />
                       )}
+                      {/* Änderungsverlauf (#296): nur bei gemeinsamen
+                          Reisen – allein ist «wer war das» schon
+                          beantwortet */}
+                      {(trip.shared || trip.role === "member") && (
+                        <TripHistory
+                          tripId={trip.id}
+                          tripName={trip.title || placeName(trip)}
+                        />
+                      )}
                       {/* Gästebuch (#254): auch bei einer Reise ohne
                           Mitreisende – über den Teil-Link können Bekannte
                           einen Gruss hinterlassen */}
@@ -4949,6 +4959,14 @@ export default function TripsPage() {
                         {/* Pinnwand (#245): nur bei gemeinsamen Reisen */}
                         {(trip.shared || trip.role === "member") && (
                           <TripBoard
+                            tripId={trip.id}
+                            tripName={trip.title || placeName(trip)}
+                          />
+                        )}
+                        {/* Änderungsverlauf (#296) auch rückblickend:
+                            «wer hat das damals eingetragen» */}
+                        {(trip.shared || trip.role === "member") && (
+                          <TripHistory
                             tripId={trip.id}
                             tripName={trip.title || placeName(trip)}
                           />

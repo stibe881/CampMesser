@@ -33,28 +33,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 4 Punkte
+## Runde 29 – alle Punkte erledigt
 
-### Reise-Planung
-
-### Küche & Vorrat
-
-### Familie
-
-### Natur
-
-### Konto & Daten
-
-- [ ] **Papierkorb** (#295) – Gelöschtes 30 Tage lang wiederherstellen
-- [ ] **Änderungsverlauf pro Reise** (#296) – wer hat wann was geändert, bei
-      gemeinsamen Reisen
-
-### Bedienung
-
-- [ ] **Schnellzugriff-Leiste frei belegen** (#297) – die Knöpfe unten selbst
-      bestimmen
-- [ ] **«Heute»-Ansicht** (#298) – während einer laufenden Reise startet die App
-      mit Wetter, Mahlzeiten und Aufgaben statt mit den Kacheln
+Runde 29 ist abgearbeitet (#293 bis #298). Die nächste Runde beginnt
+leer – Vorschläge kommen, wenn du sie willst.
 
 ---
 

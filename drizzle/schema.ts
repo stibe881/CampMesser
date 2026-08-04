@@ -1687,3 +1687,91 @@ export type CampChore = typeof campChores.$inferSelect;
 export type InsertCampChore = typeof campChores.$inferInsert;
 export type ChoreAssignment = typeof choreAssignments.$inferSelect;
 export type InsertChoreAssignment = typeof choreAssignments.$inferInsert;
+
+/**
+ * Papierkorb (#295): Schnappschuss einer gelöschten Sache samt ihrer
+ * Kinder, 30 Tage lang wiederherstellbar.
+ *
+ * KEINE «deletedAt»-SPALTE IN DEN FACHTABELLEN. Der übliche Weg wäre,
+ * jeder Tabelle so eine Spalte zu geben und jede Abfrage zu filtern –
+ * und genau daran gehen Papierkörbe kaputt: EINE vergessene Bedingung,
+ * und eine gelöschte Reise steht wieder in der Liste. Deshalb bleibt das
+ * Löschen ein echtes DELETE, und was verschwindet, liegt vorher hier als
+ * JSON. Alle bestehenden Abfragen bleiben unverändert.
+ *
+ * `payload` enthält die Zeilen nach Tabellen gruppiert, `files` die
+ * Namen der zugehörigen Dateien auf dem Webspace – die bleiben liegen,
+ * bis der Eintrag abläuft. Eine Reise ohne ihre Fotos
+ * wiederherzustellen wäre keine Wiederherstellung.
+ */
+export const deletedItems = mysqlTable(
+  "deletedItems",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Art der gelöschten Sache (shared/trash.ts: TRASH_KINDS). */
+    kind: varchar("kind", { length: 20 }).notNull(),
+    /** Was in der Liste steht – Name der Reise, Titel der Notiz usw. */
+    label: varchar("label", { length: 200 }).notNull(),
+    /**
+     * Zweite Zeile, SPRACHNEUTRAL (ISO-Datum, Ortsname) – null, wenn es
+     * nichts gibt. Übersetzbare Wörter dürfen hier nicht stehen: Was auf
+     * Deutsch gelöscht wurde, kann auf Französisch wiederhergestellt
+     * werden.
+     */
+    detail: varchar("detail", { length: 200 }),
+    /** Anzahl mitgelöschter Zeilen (ohne die Hauptzeile) – die UI übersetzt. */
+    itemCount: int("itemCount").notNull().default(0),
+    /** Zeilen nach Tabellennamen gruppiert, als JSON. */
+    payload: mediumtext("payload").notNull(),
+    /** Dateien auf dem Webspace: [{storage, fileName}], als JSON. */
+    files: text("files").notNull().default("[]"),
+    deletedAt: timestamp("deletedAt").defaultNow().notNull(),
+  },
+  table => [
+    index("deletedItems_userId").on(table.userId),
+    index("deletedItems_deletedAt").on(table.deletedAt),
+  ]
+);
+
+export type DeletedItem = typeof deletedItems.$inferSelect;
+export type InsertDeletedItem = typeof deletedItems.$inferInsert;
+
+/**
+ * Änderungsverlauf pro Reise (#296): wer hat wann was geändert.
+ *
+ * EREIGNISSE, KEIN FELD-DIFF. Festgehalten wird die ART der Änderung –
+ * Bereich, Aktion und woran –, nicht der alte und der neue Wert jedes
+ * Feldes. Ein vollständiger Diff über zehn Tabellen wäre ein Vielfaches
+ * an Daten und liest sich für niemanden.
+ *
+ * DER NAME STEHT NICHT HIER. Gespeichert wird die userId; den Namen holt
+ * die Ansicht beim Lesen. Wer sich umbenennt, steht sonst mit zwei Namen
+ * in derselben Liste.
+ *
+ * `label` ist NUTZERTEXT (Titel einer Ausgabe, Tag im Journal) und bleibt
+ * bewusst unübersetzt – übersetzt wird nur, was die App selbst benennt.
+ */
+export const tripChanges = mysqlTable(
+  "tripChanges",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tripId: int("tripId").notNull(),
+    /** Wer die Änderung gemacht hat (users.id). */
+    userId: int("userId").notNull(),
+    /** Bereich – shared/tripHistory.ts: CHANGE_AREAS. */
+    area: varchar("area", { length: 20 }).notNull(),
+    /** add | edit | remove – shared/tripHistory.ts: CHANGE_ACTIONS. */
+    action: varchar("action", { length: 10 }).notNull(),
+    /** Woran genau; null, wenn es nichts Benennbares gibt. */
+    label: varchar("label", { length: 160 }),
+    at: timestamp("at").defaultNow().notNull(),
+  },
+  table => [
+    index("tripChanges_tripId").on(table.tripId),
+    index("tripChanges_tripId_at").on(table.tripId, table.at),
+  ]
+);
+
+export type TripChange = typeof tripChanges.$inferSelect;
+export type InsertTripChange = typeof tripChanges.$inferInsert;

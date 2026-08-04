@@ -3806,8 +3806,10 @@ export const de = {
       "Kein Startpunkt: Hinterlege im Profil einen Heimatort oder erlaube den Standort.",
     tooShort: (km: number) =>
       `Unter ${km} km lohnt die Streckenprüfung nicht – da genügt die Warnung am Ziel.`,
-    summary: (distance: string, minutes: number) =>
-      `${distance} Luftlinie, geschätzt ${Math.floor(minutes / 60)} Std. ${minutes % 60} Min. Fahrt.`,
+    summary: (distance: string, minutes: number, estimated: boolean) =>
+      estimated
+        ? `${distance} Luftlinie, geschätzt ${Math.floor(minutes / 60)} Std. ${minutes % 60} Min. Fahrt.`
+        : `${distance} über die Strasse, ${Math.floor(minutes / 60)} Std. ${minutes % 60} Min. Fahrt.`,
     allClear:
       "Auf der ganzen Strecke ist zur geschätzten Zeit nichts Auffälliges.",
     worstLine: {
@@ -3953,7 +3955,10 @@ export const de = {
     departureLabel: "Losfahren",
     departureDayBefore: (days: number) =>
       days === 1 ? "Losfahren – am Vortag" : `Losfahren – ${days} Tage vorher`,
-    driveLine: (distance: string) => `Fahrt (${distance} Luftlinie)`,
+    driveLine: (distance: string, estimated: boolean) =>
+      estimated
+        ? `Fahrt (${distance} Luftlinie, geschätzt)`
+        : `Fahrt (${distance} über die Strasse)`,
     breaksLine: (count: number, each: number) =>
       count === 0
         ? "Keine Pause nötig"
@@ -4009,6 +4014,75 @@ export const de = {
       count === 1 ? "1 Übung ist fällig" : `${count} Übungen sind fällig`,
     allDone: "Alles geübt – in einem halben Jahr wieder.",
     note: "Gespeichert wird nur das Datum je Übung, auf diesem Gerät. Keine Namen, keine Nummern: Was ein Kind auswendig können muss, übt man mit ihm, statt es in einer App zu hinterlegen. Nach einem halben Jahr ist eine Übung wieder fällig – Kinder wachsen, und der Platz ist beim nächsten Mal ein anderer.",
+  },
+  quickBar: {
+    title: "Schnellzugriff-Leiste",
+    intro:
+      "Die vier Plätze in der Mitte der unteren Leiste kannst du selbst belegen.",
+    slotAria: (slot: number) => `Modul für Platz ${slot}`,
+    fixed:
+      "«Start» und «SOS» bleiben an den Rändern: Start ist der Rückweg zu allem anderen, und den SOS-Knopf sucht man genau dann, wenn man nicht nachdenken kann.",
+    reset: "Auf die Vorgabe zurücksetzen",
+  },
+  today: {
+    title: "Heute",
+    noTrip:
+      "Gerade läuft keine Reise. Sobald eine beginnt, steht hier dein Tag.",
+    toModules: "Alle Module",
+    unnamedPlace: "Ohne Namen",
+    dayOf: (day: number, total: number) => `Tag ${day} von ${total}`,
+    nightsLeft: (nights: number) =>
+      nights === 1 ? "noch 1 Nacht" : `noch ${nights} Nächte`,
+    departureToday: "Heute ist Abreisetag",
+    weather: "Wetter",
+    menu: "Menüplan",
+    shopping: "Einkaufsliste",
+    mealsTitle: "Heute auf dem Teller",
+    mealsEmpty: "Für heute ist nichts eingetragen.",
+    mealUnknown: "Eingetragen",
+    tasksTitle: "Noch offen",
+    tasksEmpty: "Nichts offen. Geniess den Tag.",
+    journal: "Ins Journal schreiben",
+    startSetting: "Während einer Reise mit «Heute» starten",
+    note: "Der Sprung passiert einmal beim Öffnen der App – tippst du danach auf «Start», bekommst du die Kacheln, ohne wieder hierher geworfen zu werden.",
+  },
+  tripHistory: {
+    title: "Änderungsverlauf",
+    toggleAria: (trip: string) => `Änderungsverlauf von ${trip} anzeigen`,
+    count: (count: number) => (count === 1 ? "1 Eintrag" : `${count} Einträge`),
+    empty: "Hier ist noch nichts passiert.",
+    someone: "Jemand",
+    line: (who: string, area: string, action: string, count: number) =>
+      count > 1
+        ? `${who} hat ${count}× etwas in «${area}» ${action}`
+        : `${who} hat «${area}» ${action}`,
+    andMore: (count: number) => `und ${count} weitere`,
+    note: "Festgehalten wird, WER WANN in welchem Bereich etwas geändert hat – nicht der alte und der neue Wert. Was jemand kurz nacheinander macht, steht als eine Zeile mit Anzahl: Zwölf Posten auf der Einkaufsliste sollen nicht alles andere begraben.",
+  },
+  trash: {
+    title: "Papierkorb",
+    intro: (days: number) =>
+      `Gelöschtes bleibt ${days} Tage liegen. Bis dahin holst du es mit einem Klick zurück.`,
+    empty: "Nichts gelöscht. So soll es sein.",
+    restore: "Zurückholen",
+    restored: "Wiederhergestellt",
+    restoreFailed: "Das hat nicht geklappt. Lade die Seite neu.",
+    itemCount: (count: number) =>
+      count === 1 ? "1 Eintrag dazu" : `${count} Einträge dazu`,
+    deletedOn: (date: string) => `gelöscht am ${date}`,
+    daysLeft: (days: number) =>
+      days === 1 ? "noch 1 Tag" : `noch ${days} Tage`,
+    removeAria: (label: string) => `${label} endgültig löschen`,
+    removeConfirm: (label: string) =>
+      `«${label}» endgültig löschen? Danach ist es weg.`,
+    emptyAll: "Papierkorb leeren",
+    emptyConfirm: (count: number) =>
+      count === 1
+        ? "Den einen Eintrag endgültig löschen?"
+        : `Alle ${count} Einträge endgültig löschen?`,
+    note: (days: number) =>
+      `Zurückgeholt wird mit derselben Nummer wie vorher – geteilte Links und QR-Codes funktionieren danach wieder. Fotos bleiben so lange auf dem Server liegen wie der Eintrag selbst; eine Reise ohne ihre Bilder zurückzuholen wäre keine Wiederherstellung. Nach ${days} Tagen wird endgültig aufgeräumt, samt Dateien.`,
+    profileLink: "Papierkorb öffnen",
   },
   meteorLog: {
     title: "Sternschnuppen-Protokoll",

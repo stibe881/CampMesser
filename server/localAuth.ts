@@ -198,6 +198,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     fishCatches,
     tickBites,
     userNotes,
+    tripChanges,
   } = await import("../drizzle/schema");
   const { inArray, or } = await import("drizzle-orm");
   // Eigene Reisen zuerst ermitteln: deren Mitglieder, Einladungs-Links und
@@ -348,7 +349,15 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     await db
       .delete(tripGuestbook)
       .where(inArray(tripGuestbook.tripId, ownedTripIds));
+    // Änderungsverlauf (#296) eigener Reisen – auch die Einträge von
+    // Mitreisenden, denn der Verlauf gehört zur Reise
+    await db
+      .delete(tripChanges)
+      .where(inArray(tripChanges.tripId, ownedTripIds));
   }
+  // Eigene Spuren in FREMDEN Reisen: die Änderung bleibt sichtbar, aber
+  // nicht mehr mit einem Konto verknüpft – deshalb fällt die Zeile weg.
+  await db.delete(tripChanges).where(eq(tripChanges.userId, userId));
   // Eigene Stimmen in FREMDEN Reisen: die Vorschläge dort gehören der
   // Reise und bleiben stehen, die eigene Antwort verschwindet mit dem Konto.
   await db.delete(tripDateVotes).where(eq(tripDateVotes.userId, userId));
@@ -433,6 +442,13 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     ownedTrips
       .map(t => t.reservationFileName)
       .filter((name): name is string => Boolean(name))
+  );
+  // Papierkorb (#295) zum Schluss: Wer sein Konto löscht, will auch das
+  // los sein, was noch auf seine Wiederherstellung wartet – samt der
+  // Dateien, die dafür liegen geblieben sind.
+  const { purgeAll } = await import("./trash");
+  await purgeAll(userId).catch(error =>
+    console.error("[Konto] Papierkorb aufräumen fehlgeschlagen:", error)
   );
 }
 

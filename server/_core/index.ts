@@ -154,7 +154,19 @@ async function startServer() {
     try {
       const { checkAndNotify } = await import("../push");
       const result = await checkAndNotify();
-      res.json({ status: "ok", ...result });
+      // Papierkorb (#295) am selben Cronjob aufräumen: ein zweiter
+      // Cronjob wäre eine zweite Sache, die eingerichtet werden muss und
+      // vergessen werden kann. Ein Fehler beim Aufräumen darf den
+      // Push-Check nicht scheitern lassen.
+      const { RETENTION_DAYS } = await import("@shared/trash");
+      const { purgeExpired } = await import("../trash");
+      const purged = await purgeExpired(
+        new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000)
+      ).catch(error => {
+        console.error("[Papierkorb] Aufräumen fehlgeschlagen:", error);
+        return 0;
+      });
+      res.json({ status: "ok", ...result, trashPurged: purged });
     } catch (error) {
       res.status(500).json({ status: "error", message: String(error) });
     }
@@ -238,6 +250,19 @@ async function startServer() {
         const { tripPhotoStorage } = await import("../photoStorage");
         await tripPhotoStorage.saveFile(fileName, body);
         const id = await db.addTripPhoto({ userId: user.id, tripId, fileName });
+        // Änderungsverlauf (#296): Fotos landen hier und nicht über tRPC –
+        // ein Upload ist trotzdem eine Änderung an der Reise. Ein Fehler
+        // beim Protokollieren darf den Upload nicht scheitern lassen.
+        await db
+          .recordTripChange({
+            tripId,
+            userId: user.id,
+            area: "photo",
+            action: "add",
+          })
+          .catch(error =>
+            console.error("[Reise-Verlauf] Foto-Eintrag fehlgeschlagen:", error)
+          );
         res.json({ id, fileName });
       } catch (error) {
         console.error("[TripPhotos] Upload fehlgeschlagen:", error);

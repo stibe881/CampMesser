@@ -1,9 +1,12 @@
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { isShareExpired } from "@shared/sharing";
+import { HISTORY_LIMIT } from "@shared/tripHistory";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   campSpots,
   childBadges,
+  deletedItems,
+  tripChanges,
   childStats,
   familyChildren,
   fishCatches,
@@ -1705,6 +1708,8 @@ export async function deleteTripLog(id: number, userId: number) {
   await deleteTripDateOptionsForTrip(id);
   // Gästebuch (#254) hängt ohne userId an der Reise
   await db.delete(tripGuestbook).where(eq(tripGuestbook.tripId, id));
+  // Änderungsverlauf (#296) gehört zur Reise und geht mit ihr
+  await db.delete(tripChanges).where(eq(tripChanges.tripId, id));
 }
 
 // ── Reise-Mitglieder & Einladungen ──
@@ -3366,4 +3371,85 @@ export async function getTripLogByReservationFileName(
     )
     .limit(1);
   return rows[0];
+}
+
+// ── Papierkorb (#295) ───────────────────────────────────────────────────
+
+/**
+ * Einträge im Papierkorb eines Kontos – OHNE den Schnappschuss.
+ *
+ * Der Payload einer Reise mit vielen Fotos wird schnell gross; die Liste
+ * braucht ihn nicht, und ihn trotzdem an den Browser zu schicken wäre
+ * verschwendete Bandbreite auf dem Campingplatz.
+ */
+export async function getTrashEntries(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select({
+      id: deletedItems.id,
+      kind: deletedItems.kind,
+      label: deletedItems.label,
+      detail: deletedItems.detail,
+      itemCount: deletedItems.itemCount,
+      deletedAt: deletedItems.deletedAt,
+    })
+    .from(deletedItems)
+    .where(eq(deletedItems.userId, userId))
+    .orderBy(desc(deletedItems.deletedAt));
+}
+
+// ── Änderungsverlauf pro Reise (#296) ───────────────────────────────────
+
+/**
+ * Eine Änderung festhalten und den Verlauf der Reise kürzen.
+ *
+ * DARF NIE DIE ÄNDERUNG SELBST VERHINDERN: Wenn das Protokollieren
+ * scheitert, ist das ärgerlich – dass deshalb die Ausgabe nicht
+ * gespeichert wird, wäre schlimmer. Deshalb schluckt der Aufrufer den
+ * Fehler; hier wird nur sauber gearbeitet.
+ */
+export async function recordTripChange(entry: {
+  tripId: number;
+  userId: number;
+  area: string;
+  action: string;
+  label?: string | null;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const label = entry.label?.trim().replace(/\s+/g, " ") ?? null;
+  await db.insert(tripChanges).values({
+    tripId: entry.tripId,
+    userId: entry.userId,
+    area: entry.area,
+    action: entry.action,
+    label: label ? label.slice(0, 160) : null,
+  });
+  // Älteste kappen – wie beim Benachrichtigungs-Verlauf (#201)
+  const stale = await db
+    .select({ id: tripChanges.id })
+    .from(tripChanges)
+    .where(eq(tripChanges.tripId, entry.tripId))
+    .orderBy(desc(tripChanges.at), desc(tripChanges.id))
+    .limit(200)
+    .offset(HISTORY_LIMIT);
+  if (stale.length > 0) {
+    await db.delete(tripChanges).where(
+      inArray(
+        tripChanges.id,
+        stale.map(row => row.id)
+      )
+    );
+  }
+}
+
+/** Der Verlauf einer Reise, jüngstes zuerst. */
+export async function getTripChanges(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripChanges)
+    .where(eq(tripChanges.tripId, tripId))
+    .orderBy(desc(tripChanges.at), desc(tripChanges.id))
+    .limit(HISTORY_LIMIT);
 }

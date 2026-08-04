@@ -7,6 +7,7 @@ import {
   KeyRound,
   Mail,
   Trash2,
+  LayoutGrid,
   Palette,
   Sun,
   Moon,
@@ -70,6 +71,30 @@ import {
 } from "@/lib/themePreference";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
+import { RETENTION_DAYS } from "@shared/trash";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { modules } from "@/data/modules";
+import { pick } from "@shared/i18n";
+import {
+  DEFAULT_QUICK_BAR,
+  QUICK_BAR_SOS,
+  QUICK_BAR_START,
+  isDefaultQuickBar,
+  sanitizeQuickBar,
+  setQuickBarSlot,
+} from "@shared/quickBar";
+import {
+  loadQuickBar,
+  quickBarChoices,
+  saveQuickBar,
+} from "@/lib/quickBarStore";
 import {
   RAIN_DANGER_MM,
   RAIN_THRESHOLD_MAX_MM,
@@ -869,6 +894,88 @@ function PasskeysCard() {
 }
 
 /** Profil-Seite: Konto verwalten und App-Einstellungen. */
+/**
+ * Schnellzugriff-Leiste frei belegen (#297).
+ *
+ * Vier Auswahlfelder für die vier freien Plätze; Start und SOS stehen
+ * als unveränderliche Enden daneben, damit man sieht, WARUM es nur vier
+ * sind. Die Begründung dazu steht in shared/quickBar.ts.
+ */
+function QuickBarCard() {
+  const { lang, t } = useI18n();
+  const qb = t.quickBar;
+  const [custom, setCustom] = useState<string[]>(() => loadQuickBar());
+  const sync = useSyncedSetting<unknown>("quickBar", value => {
+    setCustom(sanitizeQuickBar(value, quickBarChoices()));
+  });
+
+  const apply = (next: string[]) => {
+    setCustom(next);
+    saveQuickBar(next);
+    sync.push(next);
+    // Die Leiste steckt im AppShell und liest beim Laden aus dem
+    // localStorage – ein Ereignis erspart einen globalen Zustand.
+    window.dispatchEvent(new Event("campmesser:quickbar"));
+  };
+
+  const choices = modules
+    .filter(module => module.path !== QUICK_BAR_START)
+    .filter(module => module.path !== QUICK_BAR_SOS)
+    .slice()
+    .sort((a, b) => pick(a.title, lang).localeCompare(pick(b.title, lang)));
+
+  return (
+    <Card className="mb-5">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <LayoutGrid className="h-4 w-4 text-primary" aria-hidden="true" />
+          {qb.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">{qb.intro}</p>
+        <div className="mt-3 space-y-2">
+          {custom.map((path, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <span className="w-6 shrink-0 text-xs text-muted-foreground">
+                {index + 1}.
+              </span>
+              <Select
+                value={path}
+                onValueChange={value =>
+                  apply(setQuickBarSlot(custom, index, value))
+                }
+              >
+                <SelectTrigger aria-label={qb.slotAria(index + 1)}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {choices.map(module => (
+                    <SelectItem key={module.path} value={module.path}>
+                      {pick(module.title, lang)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">{qb.fixed}</p>
+        {!isDefaultQuickBar(custom) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mt-2 text-muted-foreground"
+            onClick={() => apply([...DEFAULT_QUICK_BAR])}
+          >
+            {qb.reset}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function ProfilePage() {
   const { lang, t } = useI18n();
   const { user, isAuthenticated, loading, logout, refresh } = useAuth();
@@ -1065,6 +1172,30 @@ export default function ProfilePage() {
           <Button asChild variant="outline" className="shrink-0">
             <Link href="/statistik">
               {t.stats.title}
+              <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Schnellzugriff-Leiste (#297) */}
+      <QuickBarCard />
+
+      {/* Papierkorb (#295): gehört zum Konto, nicht auf die Startseite */}
+      <Card className="mb-5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Trash2 className="h-4 w-4 text-primary" aria-hidden="true" />
+            {t.trash.title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            {t.trash.intro(RETENTION_DAYS)}
+          </p>
+          <Button asChild variant="outline" className="shrink-0">
+            <Link href="/papierkorb">
+              {t.trash.profileLink}
               <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>
