@@ -144,6 +144,7 @@ export const it: Translation = {
       knots: "Nodi",
       recipes: "Ricette",
       nature: "Natura",
+      care: "Manutenzione",
       clouds: "Nuvole",
       own: "I miei contenuti",
     },
@@ -2878,6 +2879,30 @@ export const it: Translation = {
       "L'indicazione temporale è una regola empirica per i fronti dell'Europa centrale, non un conto alla rovescia. In caso di rischio temporali vale sempre l'allerta attuale nel modulo meteo.",
     openAria: (name: string) => `Apri la nuvola ${name}`,
     countLine: (n: number) => `${n} tipi di nuvole nel lessico`,
+  },
+  care: {
+    offlineNote:
+      "Tutte le istruzioni sono salvate nell'app e funzionano senza connessione a Internet.",
+    openAria: (name: string) => `Apri le istruzioni «${name}»`,
+    whenTitle: "Quando serve",
+    materialsTitle: "Che cosa ti serve",
+    stepsTitle: "Passo dopo passo",
+    mistakeTitle: "Errore più frequente",
+    minutes: (n: number) => `${n} min di lavoro`,
+    intervalMonths: (n: number) =>
+      n === 12
+        ? "ogni anno"
+        : n % 12 === 0
+          ? `ogni ${n / 12} anni`
+          : `ogni ${n} mesi`,
+    intervalNone: "all'occorrenza",
+    reminderHint:
+      "I lavori ricorrenti puoi annotarli nell'inventario come promemoria di manutenzione – così l'app si fa viva prima che sia troppo tardi.",
+  },
+  tentCare: {
+    title: "Cura della tenda",
+    subtitle:
+      "Sette lavori che tengono una tenda impermeabile per anni – dall'impregnazione alla muffa.",
   },
   nature: {
     title: "Esploratore della natura",

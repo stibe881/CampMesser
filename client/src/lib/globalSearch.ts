@@ -8,6 +8,7 @@
 import { firstAidTopics } from "@/data/firstAid";
 import { cloudBandLabels, cloudEntries } from "@/data/clouds";
 import { knotCategoryLabels, knots } from "@/data/knots";
+import { tentCareGuides } from "@/data/tentCare";
 import { groupLabels, modules } from "@/data/modules";
 import { natureEntries } from "@/data/nature";
 import { recipes } from "@/data/recipes";
@@ -23,7 +24,14 @@ export { fuzzyWordMatch, levenshtein };
 
 /** Kategorie-Schlüssel eines Treffers – das Anzeige-Label liefert das Wörterbuch. */
 export type SearchCategory =
-  "module" | "firstAid" | "knots" | "recipes" | "nature" | "clouds" | "own";
+  | "module"
+  | "firstAid"
+  | "knots"
+  | "recipes"
+  | "nature"
+  | "clouds"
+  | "care"
+  | "own";
 
 export interface SearchResult {
   id: string;
@@ -128,6 +136,17 @@ function buildIndex(lang: Language): IndexEntry[] {
       p(c.appearance),
       p(c.meaning),
       p(c.campTip),
+    ]);
+  }
+  // Pflege-Anleitungen: gesucht wird meist nach dem Problem («Schimmel»,
+  // «Reissverschluss»), deshalb stehen Anlass und Fehler mit im Suchtext
+  for (const g of tentCareGuides) {
+    add(`tentcare-${g.id}`, p(g.title), "care", "/zeltpflege", p(g.summary), [
+      p(g.summary),
+      p(g.when),
+      ...g.materials.map(m => p(m)),
+      ...g.steps.map(s => `${p(s.title)} ${p(s.text)}`),
+      p(g.mistake),
     ]);
   }
   for (const r of recipes) {

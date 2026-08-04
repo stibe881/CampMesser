@@ -28,6 +28,7 @@ const pageLoaders = {
   Knots: () => import("./pages/Knots"),
   Nature: () => import("./pages/Nature"),
   Clouds: () => import("./pages/Clouds"),
+  TentCare: () => import("./pages/TentCare"),
   Phrasebook: () => import("./pages/Phrasebook"),
   Recipes: () => import("./pages/Recipes"),
   Energy: () => import("./pages/Energy"),
@@ -113,6 +114,7 @@ const FirstAidPage = lazyWithRetry(pageLoaders.FirstAid);
 const KnotsPage = lazyWithRetry(pageLoaders.Knots);
 const NaturePage = lazyWithRetry(pageLoaders.Nature);
 const CloudsPage = lazyWithRetry(pageLoaders.Clouds);
+const TentCarePage = lazyWithRetry(pageLoaders.TentCare);
 const PhrasebookPage = lazyWithRetry(pageLoaders.Phrasebook);
 const RecipesPage = lazyWithRetry(pageLoaders.Recipes);
 const EnergyPage = lazyWithRetry(pageLoaders.Energy);
@@ -189,6 +191,7 @@ function Router() {
           <Route path={"/knoten"} component={KnotsPage} />
           <Route path={"/natur"} component={NaturePage} />
           <Route path={"/wolken"} component={CloudsPage} />
+          <Route path={"/zeltpflege"} component={TentCarePage} />
           <Route path={"/sprachhilfe"} component={PhrasebookPage} />
           <Route path={"/rezepte"} component={RecipesPage} />
           <Route path={"/energie"} component={EnergyPage} />

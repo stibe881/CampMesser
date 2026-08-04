@@ -143,6 +143,7 @@ export const en: Translation = {
       knots: "Knots",
       recipes: "Recipes",
       nature: "Nature",
+      care: "Care",
       clouds: "Clouds",
       own: "My content",
     },
@@ -2809,6 +2810,30 @@ export const en: Translation = {
       "The timing is a rule of thumb for central European fronts, not a countdown. When thunderstorms threaten, the current warning in the weather module always takes precedence.",
     openAria: (name: string) => `Open cloud ${name}`,
     countLine: (n: number) => `${n} cloud types in the lexicon`,
+  },
+  care: {
+    offlineNote:
+      "All instructions are stored in the app and work without an internet connection.",
+    openAria: (name: string) => `Open the “${name}” instructions`,
+    whenTitle: "When it is due",
+    materialsTitle: "What you need",
+    stepsTitle: "Step by step",
+    mistakeTitle: "Most common mistake",
+    minutes: (n: number) => `${n} min of work`,
+    intervalMonths: (n: number) =>
+      n === 12
+        ? "yearly"
+        : n % 12 === 0
+          ? `every ${n / 12} years`
+          : `every ${n} months`,
+    intervalNone: "as needed",
+    reminderHint:
+      "You can add recurring jobs to your inventory as a care reminder – then the app speaks up before it is too late.",
+  },
+  tentCare: {
+    title: "Tent care",
+    subtitle:
+      "Seven jobs that keep a tent watertight for years – from waterproofing to mould.",
   },
   nature: {
     title: "Nature Explorer",

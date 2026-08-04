@@ -148,6 +148,7 @@ export const fr: Translation = {
       knots: "Nœuds",
       recipes: "Recettes",
       nature: "Nature",
+      care: "Entretien",
       clouds: "Nuages",
       own: "Mes contenus",
     },
@@ -2905,6 +2906,30 @@ export const fr: Translation = {
       "L'indication de temps est une règle empirique pour les fronts d'Europe centrale, pas un compte à rebours. En cas de risque d'orage, l'alerte actuelle du module météo prime toujours.",
     openAria: (name: string) => `Ouvrir le nuage ${name}`,
     countLine: (n: number) => `${n} types de nuages dans le lexique`,
+  },
+  care: {
+    offlineNote:
+      "Toutes les instructions sont enregistrées dans l'app et fonctionnent sans connexion Internet.",
+    openAria: (name: string) => `Ouvrir les instructions « ${name} »`,
+    whenTitle: "Quand c'est nécessaire",
+    materialsTitle: "Ce qu'il te faut",
+    stepsTitle: "Pas à pas",
+    mistakeTitle: "Erreur la plus fréquente",
+    minutes: (n: number) => `${n} min de travail`,
+    intervalMonths: (n: number) =>
+      n === 12
+        ? "chaque année"
+        : n % 12 === 0
+          ? `tous les ${n / 12} ans`
+          : `tous les ${n} mois`,
+    intervalNone: "au besoin",
+    reminderHint:
+      "Tu peux inscrire les travaux récurrents dans l'inventaire comme rappel d'entretien – l'app se manifeste alors avant qu'il ne soit trop tard.",
+  },
+  tentCare: {
+    title: "Entretien de la tente",
+    subtitle:
+      "Sept gestes qui gardent une tente étanche pendant des années – de l'imperméabilisation à la moisissure.",
   },
   nature: {
     title: "Explorateur nature",

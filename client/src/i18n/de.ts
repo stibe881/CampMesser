@@ -150,6 +150,7 @@ export const de = {
       knots: "Knoten",
       recipes: "Rezepte",
       nature: "Natur",
+      care: "Pflege",
       clouds: "Wolken",
       own: "Meine Inhalte",
     },
@@ -2910,6 +2911,30 @@ export const de = {
       "Die Zeitangabe ist eine Faustregel für mitteleuropäische Fronten, kein Countdown. Bei Gewittergefahr gilt immer die aktuelle Warnung im Wetter-Modul.",
     openAria: (name: string) => `Wolke ${name} öffnen`,
     countLine: (n: number) => `${n} Wolkenarten im Lexikon`,
+  },
+  care: {
+    offlineNote:
+      "Alle Anleitungen sind in der App gespeichert und funktionieren ohne Internetverbindung.",
+    openAria: (name: string) => `Anleitung «${name}» öffnen`,
+    whenTitle: "Wann es fällig ist",
+    materialsTitle: "Das brauchst du",
+    stepsTitle: "Schritt für Schritt",
+    mistakeTitle: "Häufigster Fehler",
+    minutes: (n: number) => `${n} Min. Arbeit`,
+    intervalMonths: (n: number) =>
+      n === 12
+        ? "jährlich"
+        : n % 12 === 0
+          ? `alle ${n / 12} Jahre`
+          : `alle ${n} Monate`,
+    intervalNone: "bei Bedarf",
+    reminderHint:
+      "Wiederkehrende Arbeiten kannst du dir im Inventar als Pflege-Erinnerung eintragen – dann meldet sich die App, bevor es zu spät ist.",
+  },
+  tentCare: {
+    title: "Zeltpflege",
+    subtitle:
+      "Sieben Arbeiten, die ein Zelt über Jahre dicht halten – von der Imprägnierung bis zum Schimmel.",
   },
   nature: {
     title: "Natur-Entdecker",

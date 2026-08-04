@@ -35,6 +35,7 @@ import {
   TreePine,
   Truck,
   Users,
+  Wrench,
 } from "lucide-react";
 
 export interface Module {
@@ -491,6 +492,24 @@ export const modules: Module[] = [
       "Recognise the cloud type and know what weather follows"
     ),
     icon: Cloudy,
+    group: "Erste Hilfe",
+    offline: true,
+  },
+  {
+    path: "/zeltpflege",
+    title: l4(
+      "Zeltpflege",
+      "Entretien de la tente",
+      "Cura della tenda",
+      "Tent care"
+    ),
+    description: l4(
+      "Imprägnieren, flicken, Reissverschluss, Schimmel – Schritt für Schritt",
+      "Imperméabiliser, réparer, fermeture éclair, moisissure – pas à pas",
+      "Impermeabilizzare, riparare, cerniera, muffa – passo dopo passo",
+      "Waterproofing, patching, zips, mould – step by step"
+    ),
+    icon: Wrench,
     group: "Erste Hilfe",
     offline: true,
   },

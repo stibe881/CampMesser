@@ -25,12 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 7 Punkte
+## Runde 27 – 6 Punkte
 
 ### Wissen
 
-- [ ] **Zeltpflege-Ratgeber** (#265) – imprägnieren, flicken, Reissverschluss,
-      Schimmel
 - [ ] **Reparatur-Ratgeber Ausrüstung** (#266) – Matte flicken, Gestänge
       schienen, Kocher warten
 
