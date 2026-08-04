@@ -31,6 +31,7 @@ import {
   packLists,
   spotPhotos,
   tripBoardNotes,
+  tripChanges,
   tripDateOptions,
   tripDateVotes,
   tripExpenses,
@@ -74,6 +75,7 @@ const TABLES: Record<string, MySqlTable> = {
   tripPhotos,
   tripExpenses,
   tripBoardNotes,
+  tripChanges,
   tripJournal,
   tripMembers,
   tripInvites,
@@ -206,6 +208,12 @@ async function snapshotTrip(
       .select()
       .from(tripGuestbook)
       .where(eq(tripGuestbook.tripId, id)),
+    // Der Verlauf gehört zur Reise: Eine wiederhergestellte Reise ohne
+    // ihre Vorgeschichte hätte eine Lücke genau dort, wo man nachschaut.
+    tripChanges: await db
+      .select()
+      .from(tripChanges)
+      .where(eq(tripChanges.tripId, id)),
     menuEntries: await db
       .select()
       .from(menuEntries)

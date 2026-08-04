@@ -82,6 +82,11 @@ import {
   sortNotes,
 } from "@shared/notes";
 import { RETENTION_DAYS, visibleTrash } from "@shared/trash";
+import {
+  bundleChanges,
+  type ChangeAction,
+  type ChangeArea,
+} from "@shared/tripHistory";
 import { MEALS, remapMenuDays } from "@shared/menuPlan";
 import {
   MAX_GEAR_INTERVAL_MONTHS,
@@ -423,6 +428,28 @@ async function requireShoppingList(
     });
   }
   return list;
+}
+
+/**
+ * Eine Änderung an einer Reise im Verlauf festhalten (#296).
+ *
+ * DARF DIE ÄNDERUNG SELBST NIE VERHINDERN: Wenn das Protokollieren
+ * scheitert, ist das ärgerlich – dass deshalb die Ausgabe nicht
+ * gespeichert wird, wäre schlimmer. Deshalb wird der Fehler hier
+ * geschluckt und nur notiert.
+ */
+async function noteTripChange(
+  tripId: number,
+  userId: number,
+  area: ChangeArea,
+  action: ChangeAction,
+  label?: string | null
+): Promise<void> {
+  try {
+    await db.recordTripChange({ tripId, userId, area, action, label });
+  } catch (error) {
+    console.error("[Reise-Verlauf] Eintrag fehlgeschlagen:", error);
+  }
 }
 
 export const appRouter = router({
@@ -2906,6 +2933,13 @@ export const appRouter = router({
             note: input.note?.trim() || null,
           },
         ]);
+        await noteTripChange(
+          input.tripId,
+          ctx.user.id,
+          "shopping",
+          "add",
+          name
+        );
         return { success: true, added: true } as const;
       }),
     /** Mehrere Einträge auf einmal (z. B. Zutaten des Menüplans). */
@@ -2948,6 +2982,19 @@ export const appRouter = router({
             };
           })
         );
+        // Ein Eintrag pro Posten: Der Verlauf bündelt sie beim Anzeigen zu
+        // einer Zeile mit Anzahl (shared/tripHistory.ts) – hier einzeln
+        // festhalten, damit die Namen erhalten bleiben.
+        for (const entry of input.names) {
+          const name = typeof entry === "string" ? entry : entry.name;
+          await noteTripChange(
+            input.tripId,
+            ctx.user.id,
+            "shopping",
+            "add",
+            name.trim()
+          );
+        }
         return { added: input.names.length };
       }),
     /** Menge, Notiz und/oder Preis eines Eintrags setzen (null/"" entfernt). */
@@ -3086,6 +3133,7 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         await requireTripAccess(input.tripId, ctx.user.id);
         await db.deleteTripShoppingItem(input.id, input.tripId);
+        await noteTripChange(input.tripId, ctx.user.id, "shopping", "remove");
         return { success: true } as const;
       }),
     /** Alle abgehakten Einträge der Reise-Liste entfernen. */
@@ -4257,6 +4305,7 @@ export const appRouter = router({
           pitchNotes: input.pitchNotes?.trim() || null,
           ...(weatherStale ? { weatherJson: null } : {}),
         });
+        await noteTripChange(input.id, ctx.user.id, "trip", "edit");
         return { success: true } as const;
       }),
     /** Sterne-Bewertung nachträglich setzen oder mit null wieder entfernen. */
@@ -4575,6 +4624,13 @@ export const appRouter = router({
           } else {
             await db.deleteTripJournalEntry(input.tripId, input.day);
           }
+          await noteTripChange(
+            input.tripId,
+            ctx.user.id,
+            "journal",
+            text ? "edit" : "remove",
+            input.day
+          );
           return { success: true } as const;
         }),
     }),
@@ -4676,6 +4732,13 @@ export const appRouter = router({
             day: input.day,
             paidBy: input.paidBy.trim(),
           });
+          await noteTripChange(
+            input.tripId,
+            ctx.user.id,
+            "expense",
+            "add",
+            input.description?.trim() || input.category
+          );
           return { id };
         }),
       update: protectedProcedure
@@ -4746,6 +4809,13 @@ export const appRouter = router({
             });
           }
           await db.deleteTripExpense(input.id);
+          await noteTripChange(
+            expense.tripId,
+            ctx.user.id,
+            "expense",
+            "remove",
+            expense.description || expense.category
+          );
           return { success: true } as const;
         }),
     }),
@@ -4825,6 +4895,7 @@ export const appRouter = router({
             kind: input.kind,
             text,
           });
+          await noteTripChange(input.tripId, ctx.user.id, "board", "add", text);
           return { id };
         }),
       /** Aufgabe abhaken oder wieder öffnen – Nachrichten haben keinen Haken. */
@@ -4879,6 +4950,13 @@ export const appRouter = router({
             });
           }
           await db.deleteTripBoardNote(input.id);
+          await noteTripChange(
+            note.tripId,
+            ctx.user.id,
+            "board",
+            "remove",
+            note.text
+          );
           return { success: true } as const;
         }),
     }),
@@ -4961,6 +5039,7 @@ export const appRouter = router({
             return { tripId: trip.id, alreadyOwner: true } as const;
           }
           await db.addTripMember(trip.id, ctx.user.id);
+          await noteTripChange(trip.id, ctx.user.id, "member", "add");
           return { tripId: trip.id, alreadyOwner: false } as const;
         }),
     }),
@@ -5042,6 +5121,7 @@ export const appRouter = router({
             });
           }
           await db.removeTripMember(input.tripId, targetUserId);
+          await noteTripChange(input.tripId, ctx.user.id, "member", "remove");
           return { success: true } as const;
         }),
     }),
@@ -5236,6 +5316,32 @@ export const appRouter = router({
         }),
     }),
     /**
+     * Änderungsverlauf einer Reise (#296): wer hat wann was geändert.
+     *
+     * Sichtbar für alle Mitreisenden – es geht ja gerade um das, was
+     * gemeinsam bearbeitet wird. Gebündelt und nach Tagen gruppiert wird
+     * erst in der Ansicht; hier kommen die Rohdaten samt Namen.
+     */
+    history: protectedProcedure
+      .input(z.object({ tripId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        const rows = await db.getTripChanges(input.tripId);
+        // Der Name steht nicht in der Zeile, sondern wird hier geholt:
+        // Wer sich umbenennt, stünde sonst mit zwei Namen in der Liste.
+        const names = await db.getUserDisplayNames(rows.map(row => row.userId));
+        return {
+          groups: bundleChanges(rows),
+          names: Object.fromEntries(names),
+        };
+      }),
+    /**
      * Gästebuch (#254): Grüsse zur Reise. Lesen und Schreiben dürfen alle
      * Mitreisenden; über den Teil-Link kommen Gäste dazu (siehe
      * `trips.sharedGuestbookAdd`). Löschen darf die Besitzerin/der Besitzer
@@ -5303,6 +5409,13 @@ export const appRouter = router({
             message,
             photoId: input.photoId ?? null,
           });
+          await noteTripChange(
+            input.tripId,
+            ctx.user.id,
+            "guestbook",
+            "add",
+            message
+          );
           return { id };
         }),
       remove: protectedProcedure
@@ -5331,6 +5444,13 @@ export const appRouter = router({
             });
           }
           await db.deleteTripGuestbookEntry(input.entryId);
+          await noteTripChange(
+            entry.tripId,
+            ctx.user.id,
+            "guestbook",
+            "remove",
+            entry.message
+          );
           return { success: true } as const;
         }),
     }),
@@ -5629,6 +5749,13 @@ export const appRouter = router({
           freeText: input.freeText?.trim() || null,
           updatedByUserId: ctx.user.id,
         });
+        await noteTripChange(
+          input.tripId,
+          ctx.user.id,
+          "menu",
+          "edit",
+          input.day
+        );
         return { success: true } as const;
       }),
     /** Slot leeren. */
@@ -5649,6 +5776,13 @@ export const appRouter = router({
           });
         }
         await db.deleteMenuEntrySlot(input.tripId, input.day, input.meal);
+        await noteTripChange(
+          input.tripId,
+          ctx.user.id,
+          "menu",
+          "remove",
+          input.day
+        );
         return { success: true } as const;
       }),
     /**
@@ -5684,6 +5818,13 @@ export const appRouter = router({
         } else {
           await db.deleteMenuDayNote(input.tripId, input.day);
         }
+        await noteTripChange(
+          input.tripId,
+          ctx.user.id,
+          "menu",
+          note ? "edit" : "remove",
+          input.day
+        );
         return { success: true } as const;
       }),
   }),

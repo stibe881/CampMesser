@@ -4007,6 +4007,19 @@ export const fr: Translation = {
     allDone: "Tout est exercé – à refaire dans six mois.",
     note: "Seule la date de chaque exercice est enregistrée, sur cet appareil. Ni noms ni numéros : ce qu'un enfant doit savoir par cœur, on l'exerce avec lui plutôt que de le stocker dans une app. Après six mois, un exercice est à refaire – les enfants grandissent et le camping sera un autre.",
   },
+  tripHistory: {
+    title: "Historique des modifications",
+    toggleAria: (trip: string) => `Afficher l'historique de ${trip}`,
+    count: (count: number) => (count === 1 ? "1 entrée" : `${count} entrées`),
+    empty: "Il ne s'est encore rien passé ici.",
+    someone: "Quelqu'un",
+    line: (who: string, area: string, action: string, count: number) =>
+      count > 1
+        ? `${who} a ${action} ${count}× quelque chose dans «${area}»`
+        : `${who} a ${action} «${area}»`,
+    andMore: (count: number) => `et ${count} de plus`,
+    note: "On note QUI a modifié QUOI et QUAND, dans quel domaine – pas l'ancienne et la nouvelle valeur. Ce que quelqu'un fait coup sur coup tient sur une ligne avec le nombre : douze articles sur la liste de courses ne doivent pas enterrer tout le reste.",
+  },
   trash: {
     title: "Corbeille",
     intro: (days: number) =>

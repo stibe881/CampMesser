@@ -804,6 +804,23 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     // limit begrenzt die Ausgabe zusätzlich
     expect((await authed.push.log({ limit: 5 })).length).toBe(5);
 
+    // ── Änderungsverlauf (#296) ──
+    // Der Verlauf entsteht als Nebenwirkung der normalen Mutationen –
+    // nur gegen eine echte Datenbank zeigt sich, ob er wirklich mitläuft.
+    const historyTripId = tripId;
+    await authed.trips.board.add({
+      tripId: historyTripId,
+      kind: "task",
+      text: "CI-Verlauf-Zettel",
+    });
+    const history = await authed.trips.history({ tripId: historyTripId });
+    const boardGroup = history.groups.find(g => g.area === "board");
+    expect(boardGroup).toBeDefined();
+    expect(boardGroup?.action).toBe("add");
+    expect(boardGroup?.labels).toContain("CI-Verlauf-Zettel");
+    // Der Name kommt beim Lesen dazu, nicht aus der Zeile
+    expect(history.names[String(uid)]).toBeTruthy();
+
     // ── Papierkorb (#295): löschen, wiederherstellen, endgültig löschen ──
     // Der Weg über die echte Datenbank ist der Punkt: Der Schnappschuss
     // geht durch JSON, und dabei werden aus Zeitstempeln Strings. Nur
@@ -889,6 +906,11 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.deletedItems)
         .where(eq(schema.deletedItems.userId, uid)),
+      // Änderungsverlauf (#296): eigene Spuren verschwinden mit dem Konto
+      dbc
+        .select()
+        .from(schema.tripChanges)
+        .where(eq(schema.tripChanges.userId, uid)),
       dbc
         .select()
         .from(schema.packLists)

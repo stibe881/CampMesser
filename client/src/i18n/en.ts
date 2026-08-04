@@ -3897,6 +3897,19 @@ export const en: Translation = {
     allDone: "All practised – again in six months.",
     note: "Only the date of each drill is stored, on this device. No names, no numbers: what a child needs to know by heart is practised with them, not filed away in an app. After six months a drill is due again – children grow, and next time the site will be a different one.",
   },
+  tripHistory: {
+    title: "Change history",
+    toggleAria: (trip: string) => `Show the change history of ${trip}`,
+    count: (count: number) => (count === 1 ? "1 entry" : `${count} entries`),
+    empty: "Nothing has happened here yet.",
+    someone: "Someone",
+    line: (who: string, area: string, action: string, count: number) =>
+      count > 1
+        ? `${who} ${action} ${count} things in “${area}”`
+        : `${who} ${action} “${area}”`,
+    andMore: (count: number) => `and ${count} more`,
+    note: "What is recorded is WHO changed WHAT and WHEN, in which area – not the old and the new value. Things done in quick succession appear as one line with a count: twelve items on the shopping list should not bury everything else.",
+  },
   trash: {
     title: "Trash",
     intro: (days: number) =>

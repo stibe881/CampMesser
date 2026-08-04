@@ -4010,6 +4010,19 @@ export const de = {
     allDone: "Alles geübt – in einem halben Jahr wieder.",
     note: "Gespeichert wird nur das Datum je Übung, auf diesem Gerät. Keine Namen, keine Nummern: Was ein Kind auswendig können muss, übt man mit ihm, statt es in einer App zu hinterlegen. Nach einem halben Jahr ist eine Übung wieder fällig – Kinder wachsen, und der Platz ist beim nächsten Mal ein anderer.",
   },
+  tripHistory: {
+    title: "Änderungsverlauf",
+    toggleAria: (trip: string) => `Änderungsverlauf von ${trip} anzeigen`,
+    count: (count: number) => (count === 1 ? "1 Eintrag" : `${count} Einträge`),
+    empty: "Hier ist noch nichts passiert.",
+    someone: "Jemand",
+    line: (who: string, area: string, action: string, count: number) =>
+      count > 1
+        ? `${who} hat ${count}× etwas in «${area}» ${action}`
+        : `${who} hat «${area}» ${action}`,
+    andMore: (count: number) => `und ${count} weitere`,
+    note: "Festgehalten wird, WER WANN in welchem Bereich etwas geändert hat – nicht der alte und der neue Wert. Was jemand kurz nacheinander macht, steht als eine Zeile mit Anzahl: Zwölf Posten auf der Einkaufsliste sollen nicht alles andere begraben.",
+  },
   trash: {
     title: "Papierkorb",
     intro: (days: number) =>

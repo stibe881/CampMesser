@@ -33,7 +33,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 3 Punkte
+## Runde 29 – 2 Punkte
 
 ### Reise-Planung
 
@@ -44,9 +44,6 @@ Stand: 4. August 2026
 ### Natur
 
 ### Konto & Daten
-
-- [ ] **Änderungsverlauf pro Reise** (#296) – wer hat wann was geändert, bei
-      gemeinsamen Reisen
 
 ### Bedienung
 

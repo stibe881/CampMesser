@@ -250,6 +250,19 @@ async function startServer() {
         const { tripPhotoStorage } = await import("../photoStorage");
         await tripPhotoStorage.saveFile(fileName, body);
         const id = await db.addTripPhoto({ userId: user.id, tripId, fileName });
+        // Änderungsverlauf (#296): Fotos landen hier und nicht über tRPC –
+        // ein Upload ist trotzdem eine Änderung an der Reise. Ein Fehler
+        // beim Protokollieren darf den Upload nicht scheitern lassen.
+        await db
+          .recordTripChange({
+            tripId,
+            userId: user.id,
+            area: "photo",
+            action: "add",
+          })
+          .catch(error =>
+            console.error("[Reise-Verlauf] Foto-Eintrag fehlgeschlagen:", error)
+          );
         res.json({ id, fileName });
       } catch (error) {
         console.error("[TripPhotos] Upload fehlgeschlagen:", error);

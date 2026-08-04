@@ -3982,6 +3982,19 @@ export const it: Translation = {
     allDone: "Tutto esercitato – di nuovo fra sei mesi.",
     note: "Viene salvata solo la data di ogni esercitazione, su questo dispositivo. Nessun nome, nessun numero: ciò che un bambino deve sapere a memoria si esercita con lui, invece di depositarlo in un'app. Dopo sei mesi un'esercitazione va rifatta – i bambini crescono e il campeggio sarà un altro.",
   },
+  tripHistory: {
+    title: "Cronologia delle modifiche",
+    toggleAria: (trip: string) => `Mostra la cronologia di ${trip}`,
+    count: (count: number) => (count === 1 ? "1 voce" : `${count} voci`),
+    empty: "Qui non è ancora successo nulla.",
+    someone: "Qualcuno",
+    line: (who: string, area: string, action: string, count: number) =>
+      count > 1
+        ? `${who} ha ${action} ${count}× qualcosa in «${area}»`
+        : `${who} ha ${action} «${area}»`,
+    andMore: (count: number) => `e altri ${count}`,
+    note: "Si registra CHI ha cambiato COSA e QUANDO, in quale ambito – non il vecchio e il nuovo valore. Ciò che qualcuno fa in rapida successione sta su una riga con il numero: dodici voci sulla lista della spesa non devono seppellire tutto il resto.",
+  },
   trash: {
     title: "Cestino",
     intro: (days: number) =>
