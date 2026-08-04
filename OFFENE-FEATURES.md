@@ -33,7 +33,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 4 Punkte
+## Runde 29 – 3 Punkte
 
 ### Reise-Planung
 
@@ -45,7 +45,6 @@ Stand: 4. August 2026
 
 ### Konto & Daten
 
-- [ ] **Papierkorb** (#295) – Gelöschtes 30 Tage lang wiederherstellen
 - [ ] **Änderungsverlauf pro Reise** (#296) – wer hat wann was geändert, bei
       gemeinsamen Reisen
 

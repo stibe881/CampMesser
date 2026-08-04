@@ -3897,6 +3897,31 @@ export const en: Translation = {
     allDone: "All practised – again in six months.",
     note: "Only the date of each drill is stored, on this device. No names, no numbers: what a child needs to know by heart is practised with them, not filed away in an app. After six months a drill is due again – children grow, and next time the site will be a different one.",
   },
+  trash: {
+    title: "Trash",
+    intro: (days: number) =>
+      `Deleted things stay for ${days} days. Until then one click brings them back.`,
+    empty: "Nothing deleted. That is how it should be.",
+    restore: "Restore",
+    restored: "Restored",
+    restoreFailed: "That did not work. Reload the page.",
+    itemCount: (count: number) =>
+      count === 1 ? "1 attached entry" : `${count} attached entries`,
+    deletedOn: (date: string) => `deleted on ${date}`,
+    daysLeft: (days: number) =>
+      days === 1 ? "1 day left" : `${days} days left`,
+    removeAria: (label: string) => `Delete ${label} permanently`,
+    removeConfirm: (label: string) =>
+      `Delete “${label}” permanently? After this it is gone.`,
+    emptyAll: "Empty the trash",
+    emptyConfirm: (count: number) =>
+      count === 1
+        ? "Delete this one entry permanently?"
+        : `Delete all ${count} entries permanently?`,
+    note: (days: number) =>
+      `Restoring reuses the same number as before – shared links and QR codes work again afterwards. Photos stay on the server as long as the entry does; restoring a trip without its pictures would not be a restore. After ${days} days everything is cleared for good, files included.`,
+    profileLink: "Open the trash",
+  },
   meteorLog: {
     title: "Meteor log",
     intro:

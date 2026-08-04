@@ -45,6 +45,7 @@ const pageLoaders = {
   Passport: () => import("./pages/Passport"),
   TreeKey: () => import("./pages/TreeKey"),
   MeteorLog: () => import("./pages/MeteorLog"),
+  Trash: () => import("./pages/Trash"),
   PackOptimizer: () => import("./pages/PackOptimizer"),
   Family: () => import("./pages/Family"),
   Food: () => import("./pages/Food"),
@@ -144,6 +145,7 @@ const EmergencyDrillPage = lazyWithRetry(pageLoaders.EmergencyDrill);
 const PassportPage = lazyWithRetry(pageLoaders.Passport);
 const TreeKeyPage = lazyWithRetry(pageLoaders.TreeKey);
 const MeteorLogPage = lazyWithRetry(pageLoaders.MeteorLog);
+const TrashPage = lazyWithRetry(pageLoaders.Trash);
 const PackOptimizerPage = lazyWithRetry(pageLoaders.PackOptimizer);
 const FamilyPage = lazyWithRetry(pageLoaders.Family);
 const FoodPage = lazyWithRetry(pageLoaders.Food);
@@ -240,6 +242,7 @@ function Router() {
           <Route path={"/reisepass"} component={PassportPage} />
           <Route path={"/baum-bestimmen"} component={TreeKeyPage} />
           <Route path={"/sternschnuppen"} component={MeteorLogPage} />
+          <Route path={"/papierkorb"} component={TrashPage} />
           <Route path={"/packen"} component={PackOptimizerPage} />
           <Route path={"/familie"} component={FamilyPage} />
           <Route path={"/kuehlbox"} component={FoodPage} />

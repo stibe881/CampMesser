@@ -4007,6 +4007,31 @@ export const fr: Translation = {
     allDone: "Tout est exercé – à refaire dans six mois.",
     note: "Seule la date de chaque exercice est enregistrée, sur cet appareil. Ni noms ni numéros : ce qu'un enfant doit savoir par cœur, on l'exerce avec lui plutôt que de le stocker dans une app. Après six mois, un exercice est à refaire – les enfants grandissent et le camping sera un autre.",
   },
+  trash: {
+    title: "Corbeille",
+    intro: (days: number) =>
+      `Ce que tu supprimes reste ${days} jours. D'ici là, un clic suffit pour le récupérer.`,
+    empty: "Rien de supprimé. C'est très bien ainsi.",
+    restore: "Restaurer",
+    restored: "Restauré",
+    restoreFailed: "Cela n'a pas fonctionné. Recharge la page.",
+    itemCount: (count: number) =>
+      count === 1 ? "1 élément lié" : `${count} éléments liés`,
+    deletedOn: (date: string) => `supprimé le ${date}`,
+    daysLeft: (days: number) =>
+      days === 1 ? "encore 1 jour" : `encore ${days} jours`,
+    removeAria: (label: string) => `Supprimer définitivement ${label}`,
+    removeConfirm: (label: string) =>
+      `Supprimer «${label}» définitivement ? Après, c'est perdu.`,
+    emptyAll: "Vider la corbeille",
+    emptyConfirm: (count: number) =>
+      count === 1
+        ? "Supprimer définitivement cet élément ?"
+        : `Supprimer définitivement les ${count} éléments ?`,
+    note: (days: number) =>
+      `La restauration réutilise le même numéro qu'avant – les liens partagés et les QR codes refonctionnent ensuite. Les photos restent sur le serveur aussi longtemps que l'élément lui-même ; restaurer un voyage sans ses images ne serait pas une restauration. Après ${days} jours, tout est effacé définitivement, fichiers compris.`,
+    profileLink: "Ouvrir la corbeille",
+  },
   meteorLog: {
     title: "Carnet d'étoiles filantes",
     intro:

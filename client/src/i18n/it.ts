@@ -3982,6 +3982,31 @@ export const it: Translation = {
     allDone: "Tutto esercitato – di nuovo fra sei mesi.",
     note: "Viene salvata solo la data di ogni esercitazione, su questo dispositivo. Nessun nome, nessun numero: ciò che un bambino deve sapere a memoria si esercita con lui, invece di depositarlo in un'app. Dopo sei mesi un'esercitazione va rifatta – i bambini crescono e il campeggio sarà un altro.",
   },
+  trash: {
+    title: "Cestino",
+    intro: (days: number) =>
+      `Ciò che elimini resta ${days} giorni. Fino ad allora basta un clic per riaverlo.`,
+    empty: "Niente di eliminato. Meglio così.",
+    restore: "Ripristina",
+    restored: "Ripristinato",
+    restoreFailed: "Non ha funzionato. Ricarica la pagina.",
+    itemCount: (count: number) =>
+      count === 1 ? "1 voce collegata" : `${count} voci collegate`,
+    deletedOn: (date: string) => `eliminato il ${date}`,
+    daysLeft: (days: number) =>
+      days === 1 ? "ancora 1 giorno" : `ancora ${days} giorni`,
+    removeAria: (label: string) => `Elimina definitivamente ${label}`,
+    removeConfirm: (label: string) =>
+      `Eliminare «${label}» definitivamente? Dopo è perso.`,
+    emptyAll: "Svuota il cestino",
+    emptyConfirm: (count: number) =>
+      count === 1
+        ? "Eliminare definitivamente questa voce?"
+        : `Eliminare definitivamente tutte le ${count} voci?`,
+    note: (days: number) =>
+      `Il ripristino riusa lo stesso numero di prima – i link condivisi e i codici QR tornano a funzionare. Le foto restano sul server finché resta la voce; ripristinare un viaggio senza le sue immagini non sarebbe un ripristino. Dopo ${days} giorni si cancella tutto definitivamente, file compresi.`,
+    profileLink: "Apri il cestino",
+  },
   meteorLog: {
     title: "Diario delle stelle cadenti",
     intro:

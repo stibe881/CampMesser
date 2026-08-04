@@ -4010,6 +4010,31 @@ export const de = {
     allDone: "Alles geübt – in einem halben Jahr wieder.",
     note: "Gespeichert wird nur das Datum je Übung, auf diesem Gerät. Keine Namen, keine Nummern: Was ein Kind auswendig können muss, übt man mit ihm, statt es in einer App zu hinterlegen. Nach einem halben Jahr ist eine Übung wieder fällig – Kinder wachsen, und der Platz ist beim nächsten Mal ein anderer.",
   },
+  trash: {
+    title: "Papierkorb",
+    intro: (days: number) =>
+      `Gelöschtes bleibt ${days} Tage liegen. Bis dahin holst du es mit einem Klick zurück.`,
+    empty: "Nichts gelöscht. So soll es sein.",
+    restore: "Zurückholen",
+    restored: "Wiederhergestellt",
+    restoreFailed: "Das hat nicht geklappt. Lade die Seite neu.",
+    itemCount: (count: number) =>
+      count === 1 ? "1 Eintrag dazu" : `${count} Einträge dazu`,
+    deletedOn: (date: string) => `gelöscht am ${date}`,
+    daysLeft: (days: number) =>
+      days === 1 ? "noch 1 Tag" : `noch ${days} Tage`,
+    removeAria: (label: string) => `${label} endgültig löschen`,
+    removeConfirm: (label: string) =>
+      `«${label}» endgültig löschen? Danach ist es weg.`,
+    emptyAll: "Papierkorb leeren",
+    emptyConfirm: (count: number) =>
+      count === 1
+        ? "Den einen Eintrag endgültig löschen?"
+        : `Alle ${count} Einträge endgültig löschen?`,
+    note: (days: number) =>
+      `Zurückgeholt wird mit derselben Nummer wie vorher – geteilte Links und QR-Codes funktionieren danach wieder. Fotos bleiben so lange auf dem Server liegen wie der Eintrag selbst; eine Reise ohne ihre Bilder zurückzuholen wäre keine Wiederherstellung. Nach ${days} Tagen wird endgültig aufgeräumt, samt Dateien.`,
+    profileLink: "Papierkorb öffnen",
+  },
   meteorLog: {
     title: "Sternschnuppen-Protokoll",
     intro:

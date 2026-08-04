@@ -81,6 +81,7 @@ import {
   serializeNoteTags,
   sortNotes,
 } from "@shared/notes";
+import { RETENTION_DAYS, visibleTrash } from "@shared/trash";
 import { MEALS, remapMenuDays } from "@shared/menuPlan";
 import {
   MAX_GEAR_INTERVAL_MONTHS,
@@ -1049,7 +1050,13 @@ export const appRouter = router({
       }),
     deleteList: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(({ ctx, input }) => db.deletePackList(input.id, ctx.user.id)),
+      .mutation(async ({ ctx, input }) => {
+        // Papierkorb (#295): Schnappschuss der Liste samt ihrer Einträge,
+        // bevor gelöscht wird.
+        const { capture } = await import("./trash");
+        await capture("packList", input.id, ctx.user.id);
+        await db.deletePackList(input.id, ctx.user.id);
+      }),
     /**
      * Liste archivieren oder wieder hervorholen (#194): archivierte Listen
      * bleiben samt Einträgen erhalten, verschwinden in der Übersicht aber
@@ -3486,14 +3493,13 @@ export const appRouter = router({
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        // Foto-Datei mitputzen: erst Dateinamen sichern, dann DB-Zeile
-        // löschen und zuletzt die Datei auf dem Webspace entfernen.
-        const recipe = await db.getCustomRecipe(input.id, ctx.user.id);
+        // Papierkorb (#295): erst der Schnappschuss, dann das Löschen.
+        // Das Foto BLEIBT auf dem Webspace liegen – ein Rezept ohne sein
+        // Bild wiederherzustellen wäre keine Wiederherstellung. Entfernt
+        // wird die Datei, wenn der Papierkorb-Eintrag abläuft.
+        const { capture } = await import("./trash");
+        await capture("recipe", input.id, ctx.user.id);
         await db.deleteCustomRecipe(input.id, ctx.user.id);
-        if (recipe?.imageFileName) {
-          const { recipePhotoStorage } = await import("./photoStorage");
-          await recipePhotoStorage.deleteFiles([recipe.imageFileName]);
-        }
       }),
     /** Foto eines eigenen Rezepts entfernen (Feld + Datei auf dem Webspace). */
     removePhoto: protectedProcedure
@@ -4455,10 +4461,12 @@ export const appRouter = router({
             message: "Aufenthalt nicht gefunden.",
           });
         }
-        // Zugehörige Fotos mitlöschen (auch die von Mitreisenden): erst
-        // Dateinamen sichern, dann DB-Zeilen und zuletzt die Dateien auf
-        // dem Webspace entfernen.
-        const photos = await db.getTripPhotosForTrip(input.id);
+        // Papierkorb (#295): Der Schnappschuss nimmt die Reise mit allem,
+        // was an ihr hängt – Fotos, Reisekasse, Pinnwand, Journal,
+        // Menüplan, Mitglieder, Termine, Gästebuch. Die Bilddateien
+        // bleiben liegen, bis der Eintrag abläuft.
+        const { capture } = await import("./trash");
+        await capture("trip", input.id, ctx.user.id);
         await db.deleteTripLog(input.id, ctx.user.id);
         await db.deleteAllTripPhotosForTrip(input.id);
         // Reisekasse gehört zur Reise und wird mitgelöscht (#219)
@@ -4470,10 +4478,6 @@ export const appRouter = router({
         await db.detachHikeTracksFromTrip(input.id);
         // Gezeichnete Routen (#281) ebenso – die Planung überlebt die Reise
         await db.detachPlannedRoutesFromTrip(input.id);
-        if (photos.length > 0) {
-          const { tripPhotoStorage } = await import("./photoStorage");
-          await tripPhotoStorage.deleteFiles(photos.map(p => p.fileName));
-        }
       }),
     photos: router({
       /** Fotos eines zugänglichen Trips (leer, wenn kein Zugriff besteht). */
@@ -6059,6 +6063,8 @@ export const appRouter = router({
     remove: protectedProcedure
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(async ({ ctx, input }) => {
+        const { capture } = await import("./trash");
+        await capture("track", input.id, ctx.user.id);
         await db.deleteHikeTrack(input.id, ctx.user.id);
         return { success: true } as const;
       }),
@@ -6342,6 +6348,8 @@ export const appRouter = router({
     remove: protectedProcedure
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(async ({ ctx, input }) => {
+        const { capture } = await import("./trash");
+        await capture("note", input.id, ctx.user.id);
         await db.deleteUserNote(input.id, ctx.user.id);
         return { success: true } as const;
       }),
@@ -6469,15 +6477,12 @@ export const appRouter = router({
     remove: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        // Zugehörige Fotos mitlöschen: erst Dateinamen sichern, dann
-        // DB-Zeilen und zuletzt die Dateien auf dem Webspace entfernen.
-        const photos = await db.getSpotPhotos(input.id, ctx.user.id);
+        // Papierkorb (#295): Schnappschuss samt Foto-Zeilen; die Dateien
+        // auf dem Webspace bleiben liegen, bis der Eintrag abläuft.
+        const { capture } = await import("./trash");
+        await capture("spot", input.id, ctx.user.id);
         await db.deleteCampSpot(input.id, ctx.user.id);
         await db.deleteSpotPhotosForSpot(input.id, ctx.user.id);
-        if (photos.length > 0) {
-          const { spotPhotoStorage } = await import("./photoStorage");
-          await spotPhotoStorage.deleteFiles(photos.map(p => p.fileName));
-        }
       }),
     photos: router({
       /** Fotos eines eigenen Platzes (leere Liste, wenn der Platz nicht dir gehört). */
@@ -6553,6 +6558,52 @@ export const appRouter = router({
           parcelNumber: spot.parcelNumber,
         };
       }),
+  }),
+  /**
+   * Papierkorb (#295): Gelöschtes 30 Tage lang wiederherstellen.
+   *
+   * Die Einträge entstehen in den `remove`-Prozeduren der jeweiligen
+   * Module – dort wird VOR dem Löschen ein Schnappschuss genommen.
+   */
+  trash: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      // Beim Öffnen aufräumen: Der Cronjob räumt den Speicher auf, dieser
+      // Aufruf sorgt dafür, dass die Liste auch dann stimmt, wenn der
+      // Cronjob ausfällt – und auf einem Webhosting fällt er aus.
+      const { purgeExpired } = await import("./trash");
+      await purgeExpired(
+        new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000)
+      ).catch(() => 0);
+      const entries = await db.getTrashEntries(ctx.user.id);
+      return visibleTrash(entries, Date.now());
+    }),
+    restore: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const { restore } = await import("./trash");
+        const result = await restore(input.id, ctx.user.id);
+        if (!result) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Der Eintrag ist nicht mehr im Papierkorb.",
+          });
+        }
+        return { success: true, restored: result.restored } as const;
+      }),
+    /** Einen Eintrag endgültig löschen – samt seiner Dateien. */
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const { purgeOne } = await import("./trash");
+        await purgeOne(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+    /** Papierkorb leeren. */
+    empty: protectedProcedure.mutation(async ({ ctx }) => {
+      const { purgeAll } = await import("./trash");
+      const removed = await purgeAll(ctx.user.id);
+      return { success: true, removed } as const;
+    }),
   }),
 });
 

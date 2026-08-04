@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import {
   campSpots,
   childBadges,
+  deletedItems,
   childStats,
   familyChildren,
   fishCatches,
@@ -3366,4 +3367,29 @@ export async function getTripLogByReservationFileName(
     )
     .limit(1);
   return rows[0];
+}
+
+// ── Papierkorb (#295) ───────────────────────────────────────────────────
+
+/**
+ * Einträge im Papierkorb eines Kontos – OHNE den Schnappschuss.
+ *
+ * Der Payload einer Reise mit vielen Fotos wird schnell gross; die Liste
+ * braucht ihn nicht, und ihn trotzdem an den Browser zu schicken wäre
+ * verschwendete Bandbreite auf dem Campingplatz.
+ */
+export async function getTrashEntries(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select({
+      id: deletedItems.id,
+      kind: deletedItems.kind,
+      label: deletedItems.label,
+      detail: deletedItems.detail,
+      itemCount: deletedItems.itemCount,
+      deletedAt: deletedItems.deletedAt,
+    })
+    .from(deletedItems)
+    .where(eq(deletedItems.userId, userId))
+    .orderBy(desc(deletedItems.deletedAt));
 }

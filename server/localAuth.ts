@@ -434,6 +434,13 @@ export async function deleteUserAccount(userId: number): Promise<void> {
       .map(t => t.reservationFileName)
       .filter((name): name is string => Boolean(name))
   );
+  // Papierkorb (#295) zum Schluss: Wer sein Konto löscht, will auch das
+  // los sein, was noch auf seine Wiederherstellung wartet – samt der
+  // Dateien, die dafür liegen geblieben sind.
+  const { purgeAll } = await import("./trash");
+  await purgeAll(userId).catch(error =>
+    console.error("[Konto] Papierkorb aufräumen fehlgeschlagen:", error)
+  );
 }
 
 /** Konto anhand der numerischen Id nachschlagen (z. B. für den Passwort-Reset). */

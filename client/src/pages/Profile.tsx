@@ -70,6 +70,7 @@ import {
 } from "@/lib/themePreference";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
+import { RETENTION_DAYS } from "@shared/trash";
 import {
   RAIN_DANGER_MM,
   RAIN_THRESHOLD_MAX_MM,
@@ -1065,6 +1066,27 @@ export default function ProfilePage() {
           <Button asChild variant="outline" className="shrink-0">
             <Link href="/statistik">
               {t.stats.title}
+              <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Papierkorb (#295): gehört zum Konto, nicht auf die Startseite */}
+      <Card className="mb-5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Trash2 className="h-4 w-4 text-primary" aria-hidden="true" />
+            {t.trash.title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            {t.trash.intro(RETENTION_DAYS)}
+          </p>
+          <Button asChild variant="outline" className="shrink-0">
+            <Link href="/papierkorb">
+              {t.trash.profileLink}
               <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>
