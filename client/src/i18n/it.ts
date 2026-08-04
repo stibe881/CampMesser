@@ -2899,6 +2899,36 @@ export const it: Translation = {
     reminderHint:
       "I lavori ricorrenti puoi annotarli nell'inventario come promemoria di manutenzione – così l'app si fa viva prima che sia troppo tardi.",
   },
+  chores: {
+    title: "Piano dei compiti",
+    subtitle:
+      "Distribuire i compiti a turno, spuntare e raccogliere punti – senza litigi su chi lava di nuovo i piatti.",
+    loginFeature: "il piano dei compiti",
+    noChildren:
+      "Nessun bambino registrato. Inseriscili nella modalità famiglia – poi si può distribuire.",
+    dayLabel: "Giorno",
+    distribute: "Distribuisci a turno",
+    dayPlanTitle: "Compiti del giorno",
+    progressLine: (done: number, total: number) => `${done} di ${total} fatti`,
+    progressAria: "Avanzamento della giornata",
+    toggleAria: (title: string) => `Spunta ${title}`,
+    assignAria: (title: string) => `Assegna ${title}`,
+    unassigned: "Da assegnare",
+    pointsLine: (points: number) =>
+      points === 1 ? "1 punto" : `${points} punti`,
+    scoreTitle: "Classifica",
+    scoreLine: (points: number, done: number) => `${points} p. · ${done}×`,
+    scoreHint:
+      "I punti arrivano solo con la spunta – essere assegnati non è ancora un merito.",
+    choresTitle: "Compiti",
+    newChore: "Nuovo compito",
+    newChorePlaceholder: "ad es. lavare i piatti",
+    pointsLabel: "Punti",
+    addChore: "Aggiungi",
+    removeAria: (title: string) => `Elimina ${title}`,
+    rotationHint:
+      "Si distribuisce a turno e non a caso: chi oggi lava i piatti domani porta la legna. Il giorno sposta l'ordine di uno – così ogni bambino può verificare che sia giusto.",
+  },
   songbook: {
     title: "Canzoniere del falò",
     subtitle:

@@ -2926,6 +2926,37 @@ export const fr: Translation = {
     reminderHint:
       "Tu peux inscrire les travaux récurrents dans l'inventaire comme rappel d'entretien – l'app se manifeste alors avant qu'il ne soit trop tard.",
   },
+  chores: {
+    title: "Plan des tâches",
+    subtitle:
+      "Répartir les tâches à tour de rôle, cocher et gagner des points – sans dispute sur qui fait encore la vaisselle.",
+    loginFeature: "le plan des tâches",
+    noChildren:
+      "Aucun enfant enregistré. Ajoute-les dans le mode famille – la répartition sera alors possible.",
+    dayLabel: "Jour",
+    distribute: "Répartir à tour de rôle",
+    dayPlanTitle: "Tâches du jour",
+    progressLine: (done: number, total: number) =>
+      `${done} sur ${total} faites`,
+    progressAria: "Progression du jour",
+    toggleAria: (title: string) => `Cocher ${title}`,
+    assignAria: (title: string) => `Attribuer ${title}`,
+    unassigned: "À attribuer",
+    pointsLine: (points: number) =>
+      points === 1 ? "1 point" : `${points} points`,
+    scoreTitle: "Classement",
+    scoreLine: (points: number, done: number) => `${points} pts · ${done}×`,
+    scoreHint:
+      "Les points ne comptent qu'une fois la tâche cochée – être désigné n'est pas encore un mérite.",
+    choresTitle: "Tâches",
+    newChore: "Nouvelle tâche",
+    newChorePlaceholder: "p. ex. faire la vaisselle",
+    pointsLabel: "Points",
+    addChore: "Ajouter",
+    removeAria: (title: string) => `Supprimer ${title}`,
+    rotationHint:
+      "La répartition se fait à tour de rôle et non au hasard : qui fait la vaisselle aujourd'hui ira chercher le bois demain. Le jour décale l'ordre d'un cran – chaque enfant peut ainsi vérifier que c'est équitable.",
+  },
   songbook: {
     title: "Chansonnier du feu de camp",
     subtitle:

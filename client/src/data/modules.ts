@@ -10,6 +10,7 @@ import {
   Cable,
   CloudSunRain,
   Cloudy,
+  ClipboardList,
   Compass,
   CookingPot,
   Cross,
@@ -605,6 +606,23 @@ export const modules: Module[] = [
     icon: Music,
     group: "Erste Hilfe",
     offline: true,
+  },
+  {
+    path: "/aemtli",
+    title: l4(
+      "Ämtli-Plan",
+      "Plan des tâches",
+      "Piano dei compiti",
+      "Chore plan"
+    ),
+    description: l4(
+      "Aufgaben reihum verteilen, abhaken und Punkte sammeln",
+      "Répartir les tâches à tour de rôle, cocher et gagner des points",
+      "Distribuire i compiti a turno, spuntare e raccogliere punti",
+      "Share out chores in rotation, tick them off and collect points"
+    ),
+    icon: ClipboardList,
+    group: "Erste Hilfe",
   },
   {
     path: "/familie",

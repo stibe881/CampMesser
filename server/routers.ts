@@ -142,6 +142,12 @@ import {
   normalizeHuntName,
 } from "@shared/treasureHunt";
 import {
+  clampPoints,
+  MAX_CHORES,
+  MAX_CHORE_TITLE_LENGTH,
+  rotateAssignments,
+} from "@shared/chores";
+import {
   parseSpotAttributes,
   SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
 } from "@shared/spotAttributes";
@@ -1804,6 +1810,104 @@ export const appRouter = router({
           });
         }
         await db.resetTreasureHunt(input.huntId);
+        return { success: true } as const;
+      }),
+  }),
+  /** Ämtli-Plan im Camp (#270): Aufgaben, Zuteilung pro Tag, Punkte. */
+  chores: router({
+    list: protectedProcedure.query(({ ctx }) => db.getCampChores(ctx.user.id)),
+    /** Zuteilungen eines Tages; ohne Tag alle (für den Punktestand). */
+    assignments: protectedProcedure
+      .input(
+        z.object({
+          day: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/)
+            .optional(),
+        })
+      )
+      .query(({ ctx, input }) =>
+        db.getChoreAssignments(ctx.user.id, input.day)
+      ),
+    add: protectedProcedure
+      .input(
+        z.object({
+          title: z.string().trim().min(1).max(MAX_CHORE_TITLE_LENGTH),
+          points: z.number().int(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const existing = await db.getCampChores(ctx.user.id);
+        if (existing.length >= MAX_CHORES) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Mehr als ${MAX_CHORES} Ämtli sind nicht vorgesehen.`,
+          });
+        }
+        const id = await db.createCampChore({
+          userId: ctx.user.id,
+          title: input.title.trim(),
+          points: clampPoints(input.points),
+        });
+        return { id } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteCampChore(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+    /**
+     * Ämtli des Tages reihum verteilen. Bestehende Zuteilungen des Tages
+     * werden ersetzt – «neu verteilen» heisst neu verteilen, nicht
+     * dazulegen.
+     */
+    autoAssign: protectedProcedure
+      .input(z.object({ day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }))
+      .mutation(async ({ ctx, input }) => {
+        const [chores, children] = await Promise.all([
+          db.getCampChores(ctx.user.id),
+          db.getFamilyChildren(ctx.user.id),
+        ]);
+        if (children.length === 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Lege zuerst im Familien-Modus Kinder an.",
+          });
+        }
+        await db.deleteChoreAssignmentsForDay(ctx.user.id, input.day);
+        const planned = rotateAssignments(chores, children, input.day);
+        for (const entry of planned) {
+          await db.createChoreAssignment({
+            userId: ctx.user.id,
+            choreId: entry.choreId,
+            childId: entry.childId,
+            day: input.day,
+          });
+        }
+        return { assigned: planned.length } as const;
+      }),
+    /** Ein einzelnes Ämtli einem Kind zuteilen (null = wieder offen). */
+    assign: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          childId: z.number().int().positive().nullable(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.updateChoreAssignment(input.id, ctx.user.id, {
+          childId: input.childId,
+        });
+        return { success: true } as const;
+      }),
+    /** Abhaken – erst jetzt gibt es Punkte. */
+    setDone: protectedProcedure
+      .input(z.object({ id: z.number().int().positive(), done: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.updateChoreAssignment(input.id, ctx.user.id, {
+          doneAt: input.done ? new Date() : null,
+        });
         return { success: true } as const;
       }),
   }),

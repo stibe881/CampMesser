@@ -25,14 +25,6 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 1 Punkt
-
-### Familie & Abend
-
-- [ ] **Ämtli-Plan im Camp** (#270) – Aufgaben verteilen, Kinder sammeln Punkte
-
----
-
 ## Runde 28 – 10 Punkte
 
 ### Karte & Wetter

@@ -589,6 +589,13 @@
       "when": 1785840243420,
       "tag": "0083_military_moira_mactaggert",
       "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "5",
+      "when": 1785841737183,
+      "tag": "0084_living_carlie_cooper",
+      "breakpoints": true
     }
   ]
 }

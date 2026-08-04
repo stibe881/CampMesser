@@ -2830,6 +2830,36 @@ export const en: Translation = {
     reminderHint:
       "You can add recurring jobs to your inventory as a care reminder – then the app speaks up before it is too late.",
   },
+  chores: {
+    title: "Chore plan",
+    subtitle:
+      "Share out chores in rotation, tick them off and collect points – without arguing over who does the dishes again.",
+    loginFeature: "the chore plan",
+    noChildren:
+      "No children added yet. Enter them in family mode – then chores can be shared out.",
+    dayLabel: "Day",
+    distribute: "Share out in rotation",
+    dayPlanTitle: "Today's chores",
+    progressLine: (done: number, total: number) => `${done} of ${total} done`,
+    progressAria: "Progress for the day",
+    toggleAria: (title: string) => `Tick off ${title}`,
+    assignAria: (title: string) => `Assign ${title}`,
+    unassigned: "Unassigned",
+    pointsLine: (points: number) =>
+      points === 1 ? "1 point" : `${points} points`,
+    scoreTitle: "Scoreboard",
+    scoreLine: (points: number, done: number) => `${points} pts · ${done}×`,
+    scoreHint:
+      "Points only count once a chore is ticked off – being assigned is not an achievement yet.",
+    choresTitle: "Chores",
+    newChore: "New chore",
+    newChorePlaceholder: "e.g. wash up",
+    pointsLabel: "Points",
+    addChore: "Add",
+    removeAria: (title: string) => `Delete ${title}`,
+    rotationHint:
+      "Chores are shared out in rotation, not at random: whoever washes up today fetches firewood tomorrow. Each day shifts the order by one – so every child can check for themselves that it is fair.",
+  },
   songbook: {
     title: "Campfire songbook",
     subtitle:

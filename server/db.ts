@@ -27,6 +27,8 @@ import {
   InsertFoodTemplate,
   InsertHomeLocation,
   InsertInventoryItem,
+  InsertCampChore,
+  InsertChoreAssignment,
   InsertStorageBox,
   InsertTreasureHunt,
   InsertTreasurePoint,
@@ -43,6 +45,8 @@ import {
   InsertTripShoppingItem,
   InsertUser,
   inventoryItems,
+  campChores,
+  choreAssignments,
   storageBoxes,
   treasureHunts,
   treasurePoints,
@@ -3160,4 +3164,82 @@ export async function deleteTreasureHunt(id: number, userId: number) {
   await db
     .delete(treasureHunts)
     .where(and(eq(treasureHunts.id, id), eq(treasureHunts.userId, userId)));
+}
+
+// ── Ämtli-Plan (#270) ───────────────────────────────────────────────────
+
+export async function getCampChores(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(campChores)
+    .where(eq(campChores.userId, userId))
+    .orderBy(asc(campChores.id));
+}
+
+export async function createCampChore(data: InsertCampChore) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(campChores).values(data);
+  return result.insertId;
+}
+
+/**
+ * Ämtli löschen – samt seiner Zuteilungen. Ein Punktestand, der auf ein
+ * nicht mehr existierendes Ämtli zeigt, wäre nicht nachvollziehbar.
+ */
+export async function deleteCampChore(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(choreAssignments)
+    .where(
+      and(eq(choreAssignments.choreId, id), eq(choreAssignments.userId, userId))
+    );
+  await db
+    .delete(campChores)
+    .where(and(eq(campChores.id, id), eq(campChores.userId, userId)));
+}
+
+export async function getChoreAssignments(userId: number, day?: string) {
+  const db = requireDb(await getDb());
+  const where = day
+    ? and(eq(choreAssignments.userId, userId), eq(choreAssignments.day, day))
+    : eq(choreAssignments.userId, userId);
+  return db
+    .select()
+    .from(choreAssignments)
+    .where(where)
+    .orderBy(asc(choreAssignments.id));
+}
+
+export async function createChoreAssignment(data: InsertChoreAssignment) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(choreAssignments).values(data);
+  return result.insertId;
+}
+
+export async function updateChoreAssignment(
+  id: number,
+  userId: number,
+  data: Partial<Pick<InsertChoreAssignment, "childId" | "doneAt">>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(choreAssignments)
+    .set(data)
+    .where(
+      and(eq(choreAssignments.id, id), eq(choreAssignments.userId, userId))
+    );
+}
+
+/** Alle Zuteilungen eines Tages löschen – Grundlage fürs Neuverteilen. */
+export async function deleteChoreAssignmentsForDay(
+  userId: number,
+  day: string
+) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(choreAssignments)
+    .where(
+      and(eq(choreAssignments.userId, userId), eq(choreAssignments.day, day))
+    );
 }

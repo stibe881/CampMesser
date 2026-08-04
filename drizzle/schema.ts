@@ -1572,3 +1572,50 @@ export type TreasureHunt = typeof treasureHunts.$inferSelect;
 export type InsertTreasureHunt = typeof treasureHunts.$inferInsert;
 export type TreasurePoint = typeof treasurePoints.$inferSelect;
 export type InsertTreasurePoint = typeof treasurePoints.$inferInsert;
+
+/**
+ * Ämtli-Plan im Camp (#270): Aufgaben mit Punkten und ihre Zuteilung pro
+ * Tag. Die Kinder kommen aus dem Familien-Modus (`familyChildren`) – ein
+ * zweites Namensverzeichnis wollte niemand pflegen.
+ *
+ * Die Zuteilung hängt am TAG und nicht an der Reise: Ämtli fallen auch
+ * zu Hause im Garten an, und eine Reise ist beim Abwasch keine
+ * notwendige Bedingung.
+ */
+export const campChores = mysqlTable(
+  "campChores",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    title: varchar("title", { length: 60 }).notNull(),
+    /** Punkte, die das erledigte Ämtli einbringt (1–10). */
+    points: int("points").notNull().default(1),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("campChores_userId").on(table.userId)]
+);
+
+export const choreAssignments = mysqlTable(
+  "choreAssignments",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    choreId: int("choreId").notNull(),
+    /** Zugeteiltes Kind (familyChildren.id); null = noch offen. */
+    childId: int("childId"),
+    /** Tag als ISO-Datum (YYYY-MM-DD). */
+    day: varchar("day", { length: 10 }).notNull(),
+    /** Wann abgehakt wurde; null = noch offen. Erst dann gibt es Punkte. */
+    doneAt: timestamp("doneAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    index("choreAssignments_userId").on(table.userId),
+    index("choreAssignments_userId_day").on(table.userId, table.day),
+  ]
+);
+
+export type CampChore = typeof campChores.$inferSelect;
+export type InsertCampChore = typeof campChores.$inferInsert;
+export type ChoreAssignment = typeof choreAssignments.$inferSelect;
+export type InsertChoreAssignment = typeof choreAssignments.$inferInsert;

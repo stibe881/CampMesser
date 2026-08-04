@@ -153,6 +153,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     packItems,
     packTemplatesCustom,
     inventoryItems,
+    campChores,
+    choreAssignments,
     storageBoxes,
     treasureHunts,
     treasurePoints,
@@ -255,6 +257,9 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     .where(eq(packTemplatesCustom.userId, userId));
   await db.delete(inventoryItems).where(eq(inventoryItems.userId, userId));
   await db.delete(storageBoxes).where(eq(storageBoxes.userId, userId));
+  // Ämtli-Plan samt Zuteilungen (#270)
+  await db.delete(choreAssignments).where(eq(choreAssignments.userId, userId));
+  await db.delete(campChores).where(eq(campChores.userId, userId));
   // Schatzsuchen samt Wegpunkten (#267): die Punkte hängen an der Suche
   // und nicht am Konto, deshalb zuerst über die eigenen Suchen einsammeln
   const hunts = await db

@@ -33,6 +33,7 @@ const pageLoaders = {
   Treasure: () => import("./pages/Treasure"),
   StoryDice: () => import("./pages/StoryDice"),
   Songbook: () => import("./pages/Songbook"),
+  Chores: () => import("./pages/Chores"),
   Phrasebook: () => import("./pages/Phrasebook"),
   Recipes: () => import("./pages/Recipes"),
   Energy: () => import("./pages/Energy"),
@@ -123,6 +124,7 @@ const GearRepairPage = lazyWithRetry(pageLoaders.GearRepair);
 const TreasurePage = lazyWithRetry(pageLoaders.Treasure);
 const StoryDicePage = lazyWithRetry(pageLoaders.StoryDice);
 const SongbookPage = lazyWithRetry(pageLoaders.Songbook);
+const ChoresPage = lazyWithRetry(pageLoaders.Chores);
 const PhrasebookPage = lazyWithRetry(pageLoaders.Phrasebook);
 const RecipesPage = lazyWithRetry(pageLoaders.Recipes);
 const EnergyPage = lazyWithRetry(pageLoaders.Energy);
@@ -204,6 +206,7 @@ function Router() {
           <Route path={"/schatzsuche"} component={TreasurePage} />
           <Route path={"/erzaehlwuerfel"} component={StoryDicePage} />
           <Route path={"/liederbuch"} component={SongbookPage} />
+          <Route path={"/aemtli"} component={ChoresPage} />
           <Route path={"/sprachhilfe"} component={PhrasebookPage} />
           <Route path={"/rezepte"} component={RecipesPage} />
           <Route path={"/energie"} component={EnergyPage} />

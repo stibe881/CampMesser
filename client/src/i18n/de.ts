@@ -2931,6 +2931,37 @@ export const de = {
     reminderHint:
       "Wiederkehrende Arbeiten kannst du dir im Inventar als Pflege-Erinnerung eintragen – dann meldet sich die App, bevor es zu spät ist.",
   },
+  chores: {
+    title: "Ämtli-Plan",
+    subtitle:
+      "Aufgaben reihum verteilen, abhaken und Punkte sammeln – ohne Streit, wer schon wieder abwäscht.",
+    loginFeature: "den Ämtli-Plan",
+    noChildren:
+      "Noch keine Kinder angelegt. Im Familien-Modus trägst du sie ein – dann kann verteilt werden.",
+    dayLabel: "Tag",
+    distribute: "Reihum verteilen",
+    dayPlanTitle: "Ämtli des Tages",
+    progressLine: (done: number, total: number) =>
+      `${done} von ${total} erledigt`,
+    progressAria: "Fortschritt des Tages",
+    toggleAria: (title: string) => `${title} abhaken`,
+    assignAria: (title: string) => `${title} zuteilen`,
+    unassigned: "Noch offen",
+    pointsLine: (points: number) =>
+      points === 1 ? "1 Punkt" : `${points} Punkte`,
+    scoreTitle: "Punktestand",
+    scoreLine: (points: number, done: number) => `${points} P. · ${done}×`,
+    scoreHint:
+      "Punkte gibt es erst beim Abhaken – eine zugeteilte Aufgabe ist noch kein Verdienst.",
+    choresTitle: "Ämtli",
+    newChore: "Neues Ämtli",
+    newChorePlaceholder: "z. B. Abwaschen",
+    pointsLabel: "Punkte",
+    addChore: "Hinzufügen",
+    removeAria: (title: string) => `${title} löschen`,
+    rotationHint:
+      "Verteilt wird reihum und nicht zufällig: Wer heute abwäscht, holt morgen Holz. Der Tag verschiebt die Reihenfolge um eins – so kann jedes Kind nachrechnen, dass es fair zugeht.",
+  },
   songbook: {
     title: "Lagerfeuer-Liederbuch",
     subtitle:
