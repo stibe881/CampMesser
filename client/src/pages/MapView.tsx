@@ -408,7 +408,7 @@ function SpotsMap({
   }, []);
 
   // Entdecker-Layer: Zustand der Overpass-Suche (Standard AUS)
-  const [discoverOn, setDiscoverOn] = useState(false);
+  
   const [campsites, setCampsites] = useState<OsmCampsite[]>([]);
   const [discoverLoading, setDiscoverLoading] = useState(false);
   const [discoverError, setDiscoverError] = useState(false);
@@ -647,12 +647,12 @@ function SpotsMap({
 
   /** «In diesem Ausschnitt suchen»: alle eingeschalteten Overpass-Ebenen neu laden. */
   const searchHere = useCallback(() => {
-    if (discoverOn) void searchCampsites();
+    if (layerVisibility.campsites) void searchCampsites();
     if (layerVisibility.firepits) void searchFirepits();
     if (layerVisibility.family) void searchFamilyPlaces();
     setMoved(false);
   }, [
-    discoverOn,
+    layerVisibility.campsites,
     layerVisibility.firepits,
     layerVisibility.family,
     searchCampsites,
@@ -660,24 +660,15 @@ function SpotsMap({
     searchFamilyPlaces,
   ]);
 
-  /** Toggle-Chip: Einschalten sucht sofort, Ausschalten räumt alles weg. */
-  const toggleDiscover = useCallback(() => {
-    setDiscoverOn(prev => {
-      const next = !prev;
-      if (next) {
-        void searchCampsites();
-      } else {
-        abortRef.current?.abort();
-        setCampsites([]);
-        setDiscoverLoading(false);
-        setDiscoverError(false);
-        setNeedsZoom(false);
-        setSearched(false);
-        setMoved(false);
-      }
-      return next;
-    });
-  }, [searchCampsites]);
+  const clearCampsites = useCallback(() => {
+    abortRef.current?.abort();
+    setCampsites([]);
+    setDiscoverLoading(false);
+    setDiscoverError(false);
+    setNeedsZoom(false);
+    setSearched(false);
+    setMoved(false);
+  }, []);
 
   const clearFirepits = useCallback(() => {
     firepitAbortRef.current?.abort();
@@ -712,12 +703,17 @@ function SpotsMap({
       } else if (key === "family") {
         if (willBeOn) void searchFamilyPlaces();
         else clearFamilyPlaces();
+      } else if (key === "campsites") {
+        if (willBeOn) void searchCampsites();
+        else clearCampsites();
       }
     },
     [
+      clearCampsites,
       clearFamilyPlaces,
       clearFirepits,
       layerVisibility,
+      searchCampsites,
       searchFamilyPlaces,
       searchFirepits,
       toggleLayer,
@@ -726,7 +722,7 @@ function SpotsMap({
 
   // Kartenbewegung merken: statt automatisch neu zu laden, zeigen wir den Such-Button
   const overpassLayersOn =
-    discoverOn || layerVisibility.firepits || layerVisibility.family;
+    layerVisibility.campsites || layerVisibility.firepits || layerVisibility.family;
   useEffect(() => {
     const map = engineRef.current;
     if (!map) return;
@@ -1441,20 +1437,7 @@ function SpotsMap({
             {t.mapView.layerSatellite}
           </button>
         </div>
-        <button
-          type="button"
-          onClick={toggleDiscover}
-          aria-pressed={discoverOn}
-          className={cn(
-            "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-            discoverOn
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Compass className="h-3.5 w-3.5" aria-hidden="true" />
-          {t.mapView.discoverToggle}
-        </button>
+
         <button
           type="button"
           onClick={locateMe}
@@ -1483,7 +1466,7 @@ function SpotsMap({
             {t.mapView.measureHint}
           </span>
         )}
-        {discoverOn && (
+        {layerVisibility.campsites && (
           <span className="text-xs text-muted-foreground" role="status">
             {discoverLoading
               ? t.mapView.discoverLoading
@@ -1672,7 +1655,7 @@ function SpotsMap({
           </span>
         )}
         {layerVisibility.campsites &&
-          discoverOn &&
+          layerVisibility.campsites &&
           visibleCampsites.length > 0 && (
             <span className="flex items-center gap-1.5">
               <Compass
