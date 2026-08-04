@@ -3862,12 +3862,60 @@ export const appRouter = router({
           await db.renameFamilyChild(input.id, ctx.user.id, input.name.trim());
           return { success: true } as const;
         }),
-      /** Kind entfernen – seine Abzeichen und Zähler gehen mit. */
+      /**
+       * Kind entfernen – Abzeichen, Zähler und Reisepass-Einträge gehen
+       * mit.
+       */
       remove: protectedProcedure
         .input(z.object({ id: z.number().int().positive() }))
         .mutation(({ ctx, input }) =>
           db.deleteFamilyChild(input.id, ctx.user.id)
         ),
+    }),
+    /**
+     * Reisepass (#292): wer war auf welcher Reise dabei.
+     *
+     * Gespeichert wird die ABWESENHEIT – ohne Eintrag war die Person
+     * dabei. Begründung in shared/passport.ts.
+     */
+    passport: router({
+      absences: protectedProcedure.query(({ ctx }) =>
+        db.getPassportAbsences(ctx.user.id)
+      ),
+      setPresence: protectedProcedure
+        .input(
+          z.object({
+            childId: z.number().int().positive(),
+            tripId: z.number().int().positive(),
+            present: z.boolean(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          // Beide Seiten prüfen: Ohne das könnte man über eine fremde
+          // childId oder tripId Zeilen im eigenen Konto anlegen, die auf
+          // fremde Daten zeigen.
+          const child = await db.getFamilyChild(input.childId, ctx.user.id);
+          if (!child) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Person nicht gefunden.",
+            });
+          }
+          const trip = await db.getTripLog(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Reise nicht gefunden.",
+            });
+          }
+          await db.setPassportPresence(
+            ctx.user.id,
+            input.childId,
+            input.tripId,
+            input.present
+          );
+          return { success: true } as const;
+        }),
     }),
     badges: router({
       /** Abzeichen eines eigenen Kindes (leere Liste bei fremder childId). */

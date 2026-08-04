@@ -3996,6 +3996,23 @@ export const de = {
       `Stempel ${place}, ${visits}-mal besucht`,
     empty:
       "Noch keine Stempel. Trag eine Reise mit Platznamen ein – dann steht sie hier.",
+    family: "Familie",
+    personLabel: "Pass von",
+    personGroupAria: "Person wählen",
+    addPerson: "Person hinzufügen",
+    addPersonPlaceholder: "Name",
+    addPersonSave: "Anlegen",
+    addPersonHint:
+      "Die Personen sind dieselben wie im Familien-Modus – wer dort schon angelegt ist, steht hier auch.",
+    whoWasThere: "Wer war dabei?",
+    whoWasThereHint:
+      "Ohne Änderung zählt jede Reise für alle. Nimm den Haken weg, wo jemand nicht dabei war – zum Beispiel bevor ein Kind auf der Welt war.",
+    tripUnnamed: "Ohne Platzname",
+    presenceAria: (place: string, person: string) =>
+      `${person} war bei «${place}» dabei`,
+    noTrips: "Noch keine Reisen eingetragen.",
+    personEmpty: (person: string) =>
+      `${person} war noch auf keiner Reise dabei. Setz unten die Haken.`,
     print: "Pass drucken",
     note: "Die Stempel entstehen aus den Reisen im Tagebuch; nichts wird doppelt erfasst. Jeder Platz bekommt aus seinem Namen dieselbe Form, Farbe und Schräglage – auf jedem Gerät und nach jedem Neuladen gleich.",
   },

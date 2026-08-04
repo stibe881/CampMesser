@@ -3966,6 +3966,23 @@ export const it: Translation = {
       `Timbro ${place}, visitato ${visits} volte`,
     empty:
       "Ancora nessun timbro. Registra un viaggio col nome del campeggio – comparirà qui.",
+    family: "Famiglia",
+    personLabel: "Passaporto di",
+    personGroupAria: "Scegli la persona",
+    addPerson: "Aggiungi persona",
+    addPersonPlaceholder: "Nome",
+    addPersonSave: "Crea",
+    addPersonHint:
+      "Sono le stesse persone della modalità famiglia – chi è già registrato lì compare anche qui.",
+    whoWasThere: "Chi c'era?",
+    whoWasThereHint:
+      "Senza modifiche ogni viaggio vale per tutti. Togli il segno dove qualcuno non c'era – per esempio prima che un bambino nascesse.",
+    tripUnnamed: "Senza nome del luogo",
+    presenceAria: (place: string, person: string) =>
+      `${person} era presente a «${place}»`,
+    noTrips: "Nessun viaggio registrato finora.",
+    personEmpty: (person: string) =>
+      `${person} non ha ancora partecipato a nessun viaggio. Metti i segni qui sotto.`,
     print: "Stampa il passaporto",
     note: "I timbri nascono dai viaggi del diario; nulla viene registrato due volte. Ogni campeggio riceve dal proprio nome la stessa forma, lo stesso colore e la stessa inclinazione – uguali su ogni dispositivo.",
   },

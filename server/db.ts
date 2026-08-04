@@ -9,6 +9,7 @@ import {
   tripChanges,
   childStats,
   familyChildren,
+  passportAbsences,
   fishCatches,
   InsertFishCatch,
   InsertFamilyChild,
@@ -1710,6 +1711,12 @@ export async function deleteTripLog(id: number, userId: number) {
   await db.delete(tripGuestbook).where(eq(tripGuestbook.tripId, id));
   // Änderungsverlauf (#296) gehört zur Reise und geht mit ihr
   await db.delete(tripChanges).where(eq(tripChanges.tripId, id));
+  // Reisepass: «war nicht dabei» ohne Reise ist gegenstandslos
+  await db
+    .delete(passportAbsences)
+    .where(
+      and(eq(passportAbsences.userId, userId), eq(passportAbsences.tripId, id))
+    );
 }
 
 // ── Reise-Mitglieder & Einladungen ──
@@ -3042,7 +3049,10 @@ export async function renameFamilyChild(
     .where(and(eq(familyChildren.id, id), eq(familyChildren.userId, userId)));
 }
 
-/** Kind löschen – Abzeichen und Zähler gehen mit (kein DB-FK, daher manuell). */
+/**
+ * Kind löschen – Abzeichen, Zähler und Reisepass-Abwesenheiten gehen mit
+ * (kein DB-FK, daher manuell).
+ */
 export async function deleteFamilyChild(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db
@@ -3051,6 +3061,11 @@ export async function deleteFamilyChild(id: number, userId: number) {
   await db
     .delete(childStats)
     .where(and(eq(childStats.childId, id), eq(childStats.userId, userId)));
+  await db
+    .delete(passportAbsences)
+    .where(
+      and(eq(passportAbsences.childId, id), eq(passportAbsences.userId, userId))
+    );
   await db
     .delete(familyChildren)
     .where(and(eq(familyChildren.id, id), eq(familyChildren.userId, userId)));
@@ -3452,4 +3467,52 @@ export async function getTripChanges(tripId: number) {
     .where(eq(tripChanges.tripId, tripId))
     .orderBy(desc(tripChanges.at), desc(tripChanges.id))
     .limit(HISTORY_LIMIT);
+}
+
+// ── Reisepass: wer war auf welcher Reise dabei ────────────────────────
+
+/** Alle Abwesenheiten des Kontos – eine Abfrage für die ganze Seite. */
+export async function getPassportAbsences(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select({
+      childId: passportAbsences.childId,
+      tripId: passportAbsences.tripId,
+    })
+    .from(passportAbsences)
+    .where(eq(passportAbsences.userId, userId));
+}
+
+/**
+ * «War dabei» setzen oder aufheben.
+ *
+ * `present = true` löscht die Abwesenheit (der Normalfall braucht keine
+ * Zeile), `present = false` legt sie an. Der eindeutige Index über
+ * childId+tripId sorgt dafür, dass zweimaliges Antippen keine zweite
+ * Zeile erzeugt – deshalb `ignore()` statt einer Vorab-Prüfung, die sich
+ * zwei Geräte gegenseitig wegschnappen könnten.
+ */
+export async function setPassportPresence(
+  userId: number,
+  childId: number,
+  tripId: number,
+  present: boolean
+) {
+  const db = requireDb(await getDb());
+  if (present) {
+    await db
+      .delete(passportAbsences)
+      .where(
+        and(
+          eq(passportAbsences.userId, userId),
+          eq(passportAbsences.childId, childId),
+          eq(passportAbsences.tripId, tripId)
+        )
+      );
+    return;
+  }
+  await db
+    .insert(passportAbsences)
+    .ignore()
+    .values({ userId, childId, tripId });
 }

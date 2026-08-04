@@ -29,6 +29,7 @@ import {
   menuEntries,
   packItems,
   packLists,
+  passportAbsences,
   spotPhotos,
   tripBoardNotes,
   tripChanges,
@@ -77,6 +78,7 @@ const TABLES: Record<string, MySqlTable> = {
   tripBoardNotes,
   tripChanges,
   tripJournal,
+  passportAbsences,
   tripMembers,
   tripInvites,
   tripShoppingItems,
@@ -214,6 +216,13 @@ async function snapshotTrip(
       .select()
       .from(tripChanges)
       .where(eq(tripChanges.tripId, id)),
+    // Wer NICHT dabei war (#292): Ohne diese Zeilen bekäme nach einer
+    // Wiederherstellung jedes Kind den Stempel, auch das, das damals bei
+    // den Grosseltern geblieben ist.
+    passportAbsences: await db
+      .select()
+      .from(passportAbsences)
+      .where(eq(passportAbsences.tripId, id)),
     menuEntries: await db
       .select()
       .from(menuEntries)

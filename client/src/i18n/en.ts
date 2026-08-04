@@ -3883,6 +3883,23 @@ export const en: Translation = {
       `Stamp ${place}, visited ${visits} times`,
     empty:
       "No stamps yet. Record a trip with a site name – then it will show up here.",
+    family: "Family",
+    personLabel: "Passport of",
+    personGroupAria: "Choose person",
+    addPerson: "Add person",
+    addPersonPlaceholder: "Name",
+    addPersonSave: "Create",
+    addPersonHint:
+      "These are the same people as in family mode – anyone already there shows up here too.",
+    whoWasThere: "Who came along?",
+    whoWasThereHint:
+      "Unchanged, every trip counts for everyone. Untick where someone was not there – for instance before a child was born.",
+    tripUnnamed: "No place name",
+    presenceAria: (place: string, person: string) =>
+      `${person} came along to “${place}”`,
+    noTrips: "No trips recorded yet.",
+    personEmpty: (person: string) =>
+      `${person} has not been on a trip yet. Tick the boxes below.`,
     print: "Print the passport",
     note: "The stamps come from the trips in your journal; nothing is recorded twice. Each site gets the same shape, colour and tilt from its own name – identical on every device and after every reload.",
   },

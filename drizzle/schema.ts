@@ -1211,6 +1211,35 @@ export type ChildStats = typeof childStats.$inferSelect;
 export type InsertChildStats = typeof childStats.$inferInsert;
 
 /**
+ * Reisepass: «diese Person war auf dieser Reise NICHT dabei».
+ *
+ * GESPEICHERT WIRD DIE ABWESENHEIT, NICHT DIE ANWESENHEIT. Eine Familie
+ * fährt zusammen weg – «alle waren dabei» ist der Normalfall und braucht
+ * keine Zeile. Andersherum müsste jede neue Reise für jede Person eine
+ * Zeile anlegen, sonst stünde am nächsten Morgen ein leerer Pass da.
+ * Begründung ausführlich in shared/passport.ts.
+ */
+export const passportAbsences = mysqlTable(
+  "passportAbsences",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Person (familyChildren.id) */
+    childId: int("childId").notNull(),
+    /** Reise (trips.id) */
+    tripId: int("tripId").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    index("passportAbsences_userId").on(table.userId),
+    uniqueIndex("passportAbsences_child_trip").on(table.childId, table.tripId),
+  ]
+);
+
+export type PassportAbsenceRow = typeof passportAbsences.$inferSelect;
+export type InsertPassportAbsence = typeof passportAbsences.$inferInsert;
+
+/**
  * Ausrüstungs-Pflege-Aufgaben: wiederkehrende Wartung (z. B. Zelt
  * imprägnieren) mit Intervall in Monaten. lastDoneAt = zuletzt erledigt
  * (null = noch nie; dann zählt das Anlage-Datum als Basis) – die

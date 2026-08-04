@@ -1,24 +1,46 @@
 /**
- * Kinder-Reisepass (#292): für jeden besuchten Platz ein Stempel.
+ * Reisepass (#292): für jeden besuchten Platz ein Stempel – je Person
+ * ein eigener Pass (Nutzerwunsch 04.08.2026).
  *
  * Die Stempel entstehen aus den eingetragenen Reisen – nichts wird
  * doppelt erfasst. Jeder Platz bekommt ein Aussehen, das aus seinem
  * NAMEN gerechnet ist: dieselbe Form, dieselbe Farbe, dieselbe
  * Schräglage, auf jedem Gerät und nach jedem Neuladen.
  *
+ * DIE PERSONEN SIND DIE AUS DEM FAMILIEN-MODUS. Wer dort schon
+ * Kinder-Profile angelegt hat, legt sie nicht ein zweites Mal an; wer
+ * noch keine hat, kann sie hier anlegen und findet sie dann auch bei den
+ * Abzeichen wieder. Zwei Personenlisten in derselben App wären eine zu
+ * viel.
+ *
+ * WER WAR DABEI: Ohne Eintrag zählt jede Reise für alle – eine Familie
+ * fährt zusammen weg. Wer nicht dabei war, wird abgehakt; gespeichert
+ * wird also die Abwesenheit (Begründung in shared/passport.ts). Das
+ * Verzeichnis dafür steht am Fuss der Seite und ist nur sichtbar, wenn
+ * eine Person gewählt ist.
+ *
  * Der Pass ist zum Herzeigen gedacht, deshalb ist er auch druckbar.
  */
-import { useMemo } from "react";
-import { Printer, Stamp } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Check, Plus, Printer, Stamp, Users } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
+import { cn } from "@/lib/utils";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
-import { passportSummary, type PassportStamp } from "@shared/passport";
+import {
+  absenceLookup,
+  passportSummary,
+  tripsForTraveller,
+  wasAlong,
+  type PassportStamp,
+  type PassportTrip,
+} from "@shared/passport";
 
 /** Ein Stempel als SVG – Form und Farbe kommen aus dem Platznamen. */
 function StampMark({ stamp, label }: { stamp: PassportStamp; label: string }) {
@@ -99,14 +121,71 @@ export default function PassportPage() {
   const { lang, t } = useI18n();
   const pp = t.passport;
   const { isAuthenticated, loading } = useAuth();
+  /** null = Familienpass (alle Reisen). */
+  const [personId, setPersonId] = useState<number | null>(null);
+  const [newName, setNewName] = useState("");
+  const [adding, setAdding] = useState(false);
+
+  const utils = trpc.useUtils();
   const tripsQuery = trpc.trips.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  const peopleQuery = trpc.family.children.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const absencesQuery = trpc.family.passport.absences.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
-  const summary = useMemo(
-    () => passportSummary(tripsQuery.data ?? []),
+  const addPerson = trpc.family.children.add.useMutation({
+    onSuccess: () => {
+      setNewName("");
+      setAdding(false);
+      void utils.family.children.list.invalidate();
+    },
+  });
+  const setPresence = trpc.family.passport.setPresence.useMutation({
+    onSuccess: () => void utils.family.passport.absences.invalidate(),
+  });
+
+  const people = peopleQuery.data ?? [];
+  const absences = useMemo(
+    () => absencesQuery.data ?? [],
+    [absencesQuery.data]
+  );
+
+  /**
+   * Die Reisen mit Id und Platzname.
+   *
+   * DER PLATZNAME MUSS HIER GEBILDET WERDEN: Die Reise-Liste liefert
+   * `spotName` (verknüpfter Favorit) und `location` (Freitext), aber kein
+   * fertiges `placeName`. Ohne diese Zeile bekommt `buildPassport` nur
+   * leere Namen – und wirft dann jede Reise weg, weil ein Stempel ohne
+   * Ort keiner ist. Genau das war bisher der Fall: Der Pass blieb leer,
+   * egal wie viele Reisen eingetragen waren.
+   *
+   * Reihenfolge nach dem, was auf einem Stempel stehen soll: der Platz
+   * vor dem Ort vor dem Reisetitel.
+   */
+  const trips: PassportTrip[] = useMemo(
+    () =>
+      (tripsQuery.data ?? []).map(trip => ({
+        id: trip.id,
+        placeName: trip.spotName || trip.location || trip.title || null,
+        startDate: trip.startDate,
+        endDate: trip.endDate,
+      })),
     [tripsQuery.data]
   );
+
+  const summary = useMemo(
+    () => passportSummary(tripsForTraveller(trips, absences, personId)),
+    [trips, absences, personId]
+  );
+
+  const lookup = useMemo(() => absenceLookup(absences), [absences]);
+  const person = people.find(p => p.id === personId) ?? null;
+  const personName = person ? person.name : pp.family;
 
   if (loading) {
     return (
@@ -121,12 +200,98 @@ export default function PassportPage() {
     <div className="container max-w-2xl py-6">
       <PageHeader title={pp.title} subtitle={pp.intro} />
 
-      {/* Deckblatt: Titel, Plätze, Nächte */}
-      <div className="rounded-xl border-2 border-primary/40 bg-accent/30 p-4 text-center print:border-black">
+      {/* Personen-Auswahl: «Familie» plus je ein Pass pro Person */}
+      <div className="print:hidden">
+        <p className="text-xs font-medium text-muted-foreground">
+          {pp.personLabel}
+        </p>
+        <div
+          className="mt-1.5 flex flex-wrap gap-2"
+          role="group"
+          aria-label={pp.personGroupAria}
+        >
+          <button
+            type="button"
+            onClick={() => setPersonId(null)}
+            aria-pressed={personId === null}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors",
+              personId === null
+                ? "border-primary bg-accent text-accent-foreground"
+                : "border-border text-muted-foreground hover:border-primary/40"
+            )}
+          >
+            <Users className="h-3.5 w-3.5" aria-hidden="true" />
+            {pp.family}
+          </button>
+          {people.map(entry => (
+            <button
+              key={entry.id}
+              type="button"
+              onClick={() => setPersonId(entry.id)}
+              aria-pressed={personId === entry.id}
+              className={cn(
+                "rounded-full border px-3 py-1 text-sm transition-colors",
+                personId === entry.id
+                  ? "border-primary bg-accent text-accent-foreground"
+                  : "border-border text-muted-foreground hover:border-primary/40"
+              )}
+            >
+              {entry.name}
+            </button>
+          ))}
+          {adding ? (
+            <form
+              className="flex items-center gap-1.5"
+              onSubmit={e => {
+                e.preventDefault();
+                const name = newName.trim();
+                if (name) addPerson.mutate({ name });
+              }}
+            >
+              <Input
+                autoFocus
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+                placeholder={pp.addPersonPlaceholder}
+                maxLength={60}
+                className="h-8 w-32"
+                aria-label={pp.addPersonPlaceholder}
+              />
+              <Button
+                type="submit"
+                size="sm"
+                disabled={!newName.trim() || addPerson.isPending}
+              >
+                <Check className="h-4 w-4" aria-hidden="true" />
+                <span className="sr-only">{pp.addPersonSave}</span>
+              </Button>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAdding(true)}
+              className="flex items-center gap-1 rounded-full border border-dashed border-border px-3 py-1 text-sm text-muted-foreground hover:border-primary/40"
+            >
+              <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+              {pp.addPerson}
+            </button>
+          )}
+        </div>
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          {pp.addPersonHint}
+        </p>
+      </div>
+
+      {/* Deckblatt: Name, Titel, Plätze, Nächte */}
+      <div className="mt-4 rounded-xl border-2 border-primary/40 bg-accent/30 p-4 text-center print:border-black">
         <Stamp
           className="mx-auto mb-2 h-8 w-8 text-primary"
           aria-hidden="true"
         />
+        <p className="text-sm font-medium text-muted-foreground">
+          {personName}
+        </p>
         <p className="font-serif text-2xl font-bold text-primary">
           {summary.rank ? pick(summary.rank.title, lang) : pp.noRank}
         </p>
@@ -147,7 +312,7 @@ export default function PassportPage() {
         <Skeleton className="mt-6 h-40 w-full rounded-lg" />
       ) : summary.stamps.length === 0 ? (
         <p className="mt-6 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          {pp.empty}
+          {person && trips.length > 0 ? pp.personEmpty(person.name) : pp.empty}
         </p>
       ) : (
         <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -183,6 +348,51 @@ export default function PassportPage() {
           <Printer className="mr-2 h-4 w-4" aria-hidden="true" />
           {pp.print}
         </Button>
+      )}
+
+      {/* «Wer war dabei» – nur für eine Person, beim Familienpass sinnlos */}
+      {person && (
+        <section className="mt-8 print:hidden" aria-label={pp.whoWasThere}>
+          <h2 className="font-serif text-lg font-semibold">{pp.whoWasThere}</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {pp.whoWasThereHint}
+          </p>
+          {trips.length === 0 ? (
+            <p className="mt-3 text-sm text-muted-foreground">{pp.noTrips}</p>
+          ) : (
+            <ul className="mt-3 space-y-1.5">
+              {trips.map(trip => {
+                const along = wasAlong(lookup, person.id, trip.id);
+                const place = trip.placeName?.trim() || pp.tripUnnamed;
+                return (
+                  <li key={trip.id}>
+                    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/70 bg-background px-3 py-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={along}
+                        onChange={() =>
+                          setPresence.mutate({
+                            childId: person.id,
+                            tripId: trip.id,
+                            present: !along,
+                          })
+                        }
+                        className="h-4 w-4 shrink-0 accent-primary"
+                        aria-label={pp.presenceAria(place, person.name)}
+                      />
+                      <span className="min-w-0 flex-1 truncate">{place}</span>
+                      <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                        {new Date(trip.startDate).toLocaleDateString(
+                          LOCALE_TAGS[lang]
+                        )}
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
       )}
 
       <p className="mt-6 text-xs text-muted-foreground print:hidden">

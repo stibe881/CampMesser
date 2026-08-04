@@ -3993,6 +3993,23 @@ export const fr: Translation = {
       `Tampon ${place}, visité ${visits} fois`,
     empty:
       "Pas encore de tampon. Saisis un voyage avec le nom du camping – il apparaîtra ici.",
+    family: "Famille",
+    personLabel: "Passeport de",
+    personGroupAria: "Choisir la personne",
+    addPerson: "Ajouter une personne",
+    addPersonPlaceholder: "Prénom",
+    addPersonSave: "Créer",
+    addPersonHint:
+      "Ce sont les mêmes personnes que dans le mode famille – celles qui y figurent apparaissent ici.",
+    whoWasThere: "Qui était du voyage ?",
+    whoWasThereHint:
+      "Sans modification, chaque voyage compte pour tout le monde. Décoche là où quelqu'un n'était pas là – par exemple avant la naissance d'un enfant.",
+    tripUnnamed: "Sans nom de lieu",
+    presenceAria: (place: string, person: string) =>
+      `${person} était du voyage à « ${place} »`,
+    noTrips: "Aucun voyage enregistré pour l'instant.",
+    personEmpty: (person: string) =>
+      `${person} n'a encore participé à aucun voyage. Coche ci-dessous.`,
     print: "Imprimer le passeport",
     note: "Les tampons proviennent des voyages du carnet ; rien n'est saisi deux fois. Chaque camping reçoit, à partir de son nom, la même forme, la même couleur et la même inclinaison – identiques sur chaque appareil.",
   },
