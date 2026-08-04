@@ -547,6 +547,13 @@
       "when": 1785830249759,
       "tag": "0077_typical_blade",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "5",
+      "when": 1785830661274,
+      "tag": "0078_shocking_ultron",
+      "breakpoints": true
     }
   ]
 }

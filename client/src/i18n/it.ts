@@ -3273,6 +3273,44 @@ export const it: Translation = {
     turnRight: (deg: number) => `Ruota ancora di ${deg}° a destra.`,
     source: "Valori del vento da Open-Meteo, regole pratiche di montaggio.",
   },
+  boxes: {
+    title: "Casse",
+    subtitle:
+      "Quale attrezzatura sta in quale cassa – con etichetta e codice QR da stampare.",
+    loginFeature: "la gestione delle casse",
+    addBox: "Nuova cassa",
+    editBox: "Modifica la cassa",
+    dialogHint:
+      "La sigla compare grande sull'etichetta e nel codice QR. Tienila corta – «K3» si legge da due metri.",
+    codeLabel: "Sigla",
+    nameLabel: "Nome",
+    namePlaceholder: "p. es. Cucina",
+    locationLabel: "Dove sta a casa",
+    locationPlaceholder: "p. es. cantina, scaffale a sinistra",
+    notesLabel: "Note",
+    saved: "Cassa salvata",
+    removed: "Cassa eliminata – l'attrezzatura resta",
+    removeConfirm: (name: string) =>
+      `Eliminare davvero la cassa «${name}»? L'attrezzatura al suo interno resta e non sarà più assegnata a nessuna cassa.`,
+    empty:
+      "Nessuna cassa finora. Creane una, stampa l'etichetta e attaccala sulla scatola.",
+    boxEmpty: "Questa cassa è ancora vuota.",
+    summary: (count: number, weight: string) =>
+      count === 1 ? `1 pezzo · ${weight}` : `${count} pezzi · ${weight}`,
+    removeFromBox: "Togli",
+    looseTitle: "In nessuna cassa",
+    looseHint: "Attrezzatura del tuo inventario non assegnata a nessuna cassa.",
+    assignPlaceholder: "Metti nella cassa …",
+    assignAria: (name: string) => `Assegna ${name} a una cassa`,
+    labelButton: "Etichetta",
+    labelTitle: "Stampa l'etichetta",
+    labelHint:
+      "Quattro etichette uguali per foglio – attaccale e una scansione mostrerà il contenuto.",
+    printButton: "Stampa",
+    qrAlt: (code: string) => `Codice QR della cassa ${code}`,
+    unknownCode: (code: string) =>
+      `Nessuna cassa corrisponde alla sigla «${code}». Forse è stata eliminata o appartiene a un altro account.`,
+  },
   picnicStops: {
     sectionAria: "Soste lungo il tragitto",
     title: "Sosta lungo la strada",

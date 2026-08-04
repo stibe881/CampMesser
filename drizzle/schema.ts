@@ -212,6 +212,13 @@ export const inventoryItems = mysqlTable(
     lentAt: date("lentAt", { mode: "string" }),
     /** Dateiname des Belegs unter uploads/receipts/ (genau EIN Beleg pro Gegenstand). */
     receiptFileName: varchar("receiptFileName", { length: 64 }),
+    /**
+     * In welcher Kiste der Gegenstand liegt (storageBoxes.id, #276);
+     * null = nicht eingeräumt. Bewusst EINE Kiste je Gegenstand: Ein Topf
+     * liegt in genau einer Box, und «teilweise in zwei Kisten» hilft beim
+     * Suchen niemandem.
+     */
+    boxId: int("boxId"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
@@ -223,6 +230,42 @@ export const inventoryItems = mysqlTable(
 
 export type InventoryItem = typeof inventoryItems.$inferSelect;
 export type InsertInventoryItem = typeof inventoryItems.$inferInsert;
+
+/**
+ * Transportkisten und Taschen (#276): «In welcher Box ist der Gaskocher?»
+ *
+ * Jede Kiste bekommt eine kurze, sprechende Kennung (`code`, z. B. «K3»),
+ * die auf dem gedruckten Etikett gross steht und im QR-Code steckt. Der
+ * QR-Code führt auf /kisten/<code> – gescannt mit der Handy-Kamera landet
+ * man also direkt auf dem Inhalt dieser Kiste, ohne Suchen in der App.
+ *
+ * Der Code ist je Konto eindeutig, nicht global: Zwei Haushalte dürfen
+ * beide eine «K1» haben. Deshalb hängt das Nachschlagen am angemeldeten
+ * Konto und nicht an einem Zufalls-Token – ein Etikett auf einer Kiste
+ * ist kein Geheimnis, aber der Inhalt gehört trotzdem nur dir.
+ */
+export const storageBoxes = mysqlTable(
+  "storageBoxes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Kurze Kennung auf dem Etikett, je Konto eindeutig (z. B. "K3"). */
+    code: varchar("code", { length: 12 }).notNull(),
+    name: varchar("name", { length: 80 }).notNull(),
+    /** Wo die Kiste zuhause steht – Keller, Estrich, Garage … */
+    location: varchar("location", { length: 80 }),
+    notes: text("notes"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    index("storageBoxes_userId").on(table.userId),
+    uniqueIndex("storageBoxes_userId_code").on(table.userId, table.code),
+  ]
+);
+
+export type StorageBox = typeof storageBoxes.$inferSelect;
+export type InsertStorageBox = typeof storageBoxes.$inferInsert;
 
 /** Energie-Verbraucher für den Energie-Budget-Rechner. */
 export const powerConsumers = mysqlTable(

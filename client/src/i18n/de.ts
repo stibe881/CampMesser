@@ -3303,6 +3303,44 @@ export const de = {
     turnRight: (deg: number) => `Noch ${deg}° nach rechts drehen.`,
     source: "Windwerte von Open-Meteo, Faustregeln fürs Aufstellen.",
   },
+  boxes: {
+    title: "Kisten",
+    subtitle:
+      "Welche Ausrüstung liegt in welcher Box – mit Etikett und QR-Code zum Ausdrucken.",
+    loginFeature: "die Kisten-Verwaltung",
+    addBox: "Neue Kiste",
+    editBox: "Kiste bearbeiten",
+    dialogHint:
+      "Die Kennung steht gross auf dem Etikett und im QR-Code. Kurz halten – «K3» liest sich aus zwei Metern.",
+    codeLabel: "Kennung",
+    nameLabel: "Name",
+    namePlaceholder: "z. B. Küche",
+    locationLabel: "Standort zuhause",
+    locationPlaceholder: "z. B. Keller, Regal links",
+    notesLabel: "Notizen",
+    saved: "Kiste gespeichert",
+    removed: "Kiste gelöscht – die Ausrüstung bleibt erhalten",
+    removeConfirm: (name: string) =>
+      `Kiste «${name}» wirklich löschen? Die Ausrüstung darin bleibt bestehen und ist danach keiner Kiste zugeordnet.`,
+    empty:
+      "Noch keine Kiste angelegt. Leg eine an, druck das Etikett auf und kleb es auf die Box.",
+    boxEmpty: "Diese Kiste ist noch leer.",
+    summary: (count: number, weight: string) =>
+      count === 1 ? `1 Stück · ${weight}` : `${count} Stück · ${weight}`,
+    removeFromBox: "Ausräumen",
+    looseTitle: "Noch in keiner Kiste",
+    looseHint: "Ausrüstung aus deinem Inventar, die keiner Box zugeordnet ist.",
+    assignPlaceholder: "In Kiste legen …",
+    assignAria: (name: string) => `${name} einer Kiste zuordnen`,
+    labelButton: "Etikett",
+    labelTitle: "Etikett drucken",
+    labelHint:
+      "Vier gleiche Etiketten pro Blatt – aufkleben, und ein Kamera-Scan zeigt später den Inhalt.",
+    printButton: "Drucken",
+    qrAlt: (code: string) => `QR-Code für Kiste ${code}`,
+    unknownCode: (code: string) =>
+      `Zur Kennung «${code}» gibt es keine Kiste. Vielleicht wurde sie gelöscht oder gehört zu einem anderen Konto.`,
+  },
   picnicStops: {
     sectionAria: "Rastmöglichkeiten entlang der Anfahrt",
     title: "Rast unterwegs",

@@ -73,7 +73,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 28 – 11 Punkte
+## Runde 28 – 10 Punkte
 
 ### Karte & Wetter
 
@@ -86,8 +86,6 @@ Stand: 4. August 2026
 
 ### Ordnung
 
-- [ ] **Kisten-Verwaltung mit QR-Etiketten** (#276) – Etikett drucken, scannen
-      zeigt den Inhalt der Box
 - [ ] **Packvorschlag aus vergangenen Reisen** (#277) – «letztes Mal am selben
       Platz dabei gehabt»
 

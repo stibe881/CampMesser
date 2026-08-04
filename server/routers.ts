@@ -113,6 +113,11 @@ import {
   MAX_SHOPPING_LIST_NAME_LENGTH,
 } from "@shared/shopping";
 import {
+  MAX_BOX_CODE_LENGTH,
+  MAX_BOX_NAME_LENGTH,
+  normalizeBoxCode,
+} from "@shared/boxes";
+import {
   parseSpotAttributes,
   SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
 } from "@shared/spotAttributes";
@@ -1647,6 +1652,132 @@ export const appRouter = router({
           const { receiptPhotoStorage } = await import("./photoStorage");
           await receiptPhotoStorage.deleteFiles([item.receiptFileName]);
         }
+        return { success: true } as const;
+      }),
+  }),
+
+  /**
+   * Transportkisten (#276): Wo liegt was, wenn die Ausrüstung im Keller
+   * steht? Jede Kiste hat eine kurze Kennung, die auf dem Etikett steht und
+   * im QR-Code steckt.
+   */
+  boxes: router({
+    list: protectedProcedure.query(({ ctx }) =>
+      db.getStorageBoxes(ctx.user.id)
+    ),
+    /** Kiste über die Kennung – der Weg, den ein QR-Scan nimmt. */
+    byCode: protectedProcedure
+      .input(z.object({ code: z.string().min(1).max(MAX_BOX_CODE_LENGTH) }))
+      .query(async ({ ctx, input }) => {
+        const box = await db.getStorageBoxByCode(
+          ctx.user.id,
+          normalizeBoxCode(input.code)
+        );
+        return box ?? null;
+      }),
+    add: protectedProcedure
+      .input(
+        z.object({
+          code: z.string().min(1).max(MAX_BOX_CODE_LENGTH),
+          name: z.string().trim().min(1).max(MAX_BOX_NAME_LENGTH),
+          location: z.string().trim().max(80).nullish(),
+          notes: z.string().trim().max(2000).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const code = normalizeBoxCode(input.code);
+        if (!code) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Bitte eine Kennung angeben.",
+          });
+        }
+        // Kennungen sind je Konto eindeutig – zwei «K1» wären beim Scannen
+        // nicht auseinanderzuhalten
+        const existing = await db.getStorageBoxByCode(ctx.user.id, code);
+        if (existing) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Diese Kennung gibt es schon.",
+          });
+        }
+        const id = await db.createStorageBox({
+          userId: ctx.user.id,
+          code,
+          name: input.name.trim(),
+          location: input.location?.trim() || null,
+          notes: input.notes?.trim() || null,
+        });
+        return { id } as const;
+      }),
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          code: z.string().min(1).max(MAX_BOX_CODE_LENGTH),
+          name: z.string().trim().min(1).max(MAX_BOX_NAME_LENGTH),
+          location: z.string().trim().max(80).nullish(),
+          notes: z.string().trim().max(2000).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const code = normalizeBoxCode(input.code);
+        if (!code) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Bitte eine Kennung angeben.",
+          });
+        }
+        const clash = await db.getStorageBoxByCode(ctx.user.id, code);
+        if (clash && clash.id !== input.id) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Diese Kennung gibt es schon.",
+          });
+        }
+        await db.updateStorageBox(input.id, ctx.user.id, {
+          code,
+          name: input.name.trim(),
+          location: input.location?.trim() || null,
+          notes: input.notes?.trim() || null,
+        });
+        return { success: true } as const;
+      }),
+    /** Kiste löschen – die Ausrüstung bleibt und wird nur ausgeräumt. */
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteStorageBox(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+    /** Gegenstand einer Kiste zuordnen (null = ausräumen). */
+    assign: protectedProcedure
+      .input(
+        z.object({
+          itemId: z.number().int().positive(),
+          boxId: z.number().int().positive().nullable(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const item = await db.getInventoryItem(input.itemId, ctx.user.id);
+        if (!item) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Gegenstand nicht gefunden.",
+          });
+        }
+        if (input.boxId !== null) {
+          const boxes = await db.getStorageBoxes(ctx.user.id);
+          if (!boxes.some(box => box.id === input.boxId)) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Kiste nicht gefunden.",
+            });
+          }
+        }
+        await db.updateInventoryItem(input.itemId, ctx.user.id, {
+          boxId: input.boxId,
+        });
         return { success: true } as const;
       }),
   }),
