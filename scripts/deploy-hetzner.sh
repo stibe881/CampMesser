@@ -16,6 +16,13 @@ if [ -f .env ]; then
   echo "==> Umgebungsvariablen aus .env geladen"
 fi
 
+# Bei nicht-interaktiven SSH-Sitzungen (GitHub Actions) fehlt das npm-
+# Globalverzeichnis im PATH – hier ergänzen, damit `pnpm` gefunden wird.
+NPM_GLOBAL_BIN="$(npm config get prefix 2>/dev/null)/bin"
+if [ -d "$NPM_GLOBAL_BIN" ]; then
+  export PATH="$NPM_GLOBAL_BIN:$PATH"
+fi
+
 if command -v pnpm >/dev/null 2>&1; then
   PKG="pnpm"
 else
