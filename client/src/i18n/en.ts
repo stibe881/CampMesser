@@ -3134,6 +3134,51 @@ export const en: Translation = {
   },
 
   /** Fire pits and barbecues from OpenStreetMap (#247). */
+  tentWind: {
+    sectionAria: "Align your tent or tarp with the wind",
+    title: "Aligning with the wind",
+    subtitle:
+      "How to place your tent or tarp so the wind does not push against it.",
+    refreshAria: "Reload wind readings",
+    shapeGroupAria: "Choose the shape",
+    shape: {
+      tunnel: "Tunnel or ridge tent",
+      dome: "Dome tent",
+      tarp: "Tarp",
+    },
+    shapeHint: {
+      tunnel:
+        "The narrow end faces the wind – it then slides along the long side.",
+      dome: "Keep the door away from the wind, or the tent balloons when you open it.",
+      tarp: "The low edge faces the wind, the open side away from it.",
+    },
+    loading: "Loading wind readings …",
+    loadFailed: "The wind readings were unavailable. Try again in a moment.",
+    roseAria: (from: string, point: string) =>
+      `Wind from ${from}, point the tent towards ${point}`,
+    windFromLabel: "Wind from",
+    speedLabel: "Strength",
+    speedValue: (speed: number, gust: number) =>
+      `${speed} km/h, gusts ${gust} km/h`,
+    pointLabel: "Point towards",
+    levelHint: {
+      calm: "Little wind – alignment is a nicety here.",
+      breezy: "Noticeable wind: tension the guy lines and drive pegs in deep.",
+      windy:
+        "Strong gusts: use every guy line, secure loose items, take the awning down.",
+      storm:
+        "Storm gusts: find a sheltered pitch if you can. A tent rarely takes gusts like these.",
+    },
+    startCompass: "Start compass",
+    noCompass:
+      "Without a compass this device only shows the direction – the advice still holds.",
+    compassDenied:
+      "Compass access is blocked. The advice by compass direction still holds.",
+    alignedNow: "That's it – the tent sits right in the wind.",
+    turnLeft: (deg: number) => `Turn ${deg}° further to the left.`,
+    turnRight: (deg: number) => `Turn ${deg}° further to the right.`,
+    source: "Wind readings from Open-Meteo, rules of thumb for pitching.",
+  },
   picnicStops: {
     sectionAria: "Rest stops along the drive",
     title: "Rest on the way",
