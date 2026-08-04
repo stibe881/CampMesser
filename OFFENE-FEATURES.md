@@ -25,7 +25,7 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 29 – 12 Punkte
+## Runde 29 – 11 Punkte
 
 ### Reise-Planung
 
@@ -35,8 +35,6 @@ Stand: 4. August 2026
       zusammengefasst und mengengerecht
 - [ ] **Znüni- & Lunchbox-Planer** (#289) – was kommt für den Ausflug in den
       Rucksack
-- [ ] **Feuerholz-Bedarf schätzen** (#287) – wie viel für wie viele Abende, je
-      nach Feuerart
 
 ### Familie
 

@@ -3957,6 +3957,40 @@ export const de = {
     stopsLine: (times: string) => `Pausen etwa um ${times}.`,
     note: "Geschätzt über die Luftlinie mit 70 km/h Schnitt – kein Routenplaner. Stau, Baustellen und Grenzwartezeiten kommen dazu.",
   },
+  firewood: {
+    title: "Feuerholz-Bedarf",
+    intro:
+      "Wie viele Netze ins Auto – Holz kauft man besser vorher als am Platz.",
+    eveningsLabel: "Abende mit Feuer",
+    hoursLabel: "Stunden pro Abend",
+    kindLabel: "Feuerart",
+    kinds: {
+      kochfeuer: "Kochfeuer (klein)",
+      feuerschale: "Feuerschale",
+      lagerfeuer: "Lagerfeuer",
+      waermefeuer: "Wärmefeuer (gross)",
+    },
+    woodLabel: "Holzart",
+    woods: {
+      hart: "Hartholz (Buche, Eiche)",
+      gemischt: "Gemischt",
+      weich: "Weichholz (Fichte, Tanne)",
+    },
+    netsLabel: "Netze à 10 kg",
+    totalLabel: "Gesamt",
+    perEveningLabel: "pro Abend",
+    kindlingLine: (kg: number) =>
+      `Darin enthalten: ${kg} kg Anzündholz – ohne Späne und dünne Scheite steht man mit trockenem Buchenholz und ohne Glut da.`,
+    stockLabel: "Vorrat prüfen (kg)",
+    stockPlaceholder: "z. B. 20",
+    stockLine: (evenings: number) =>
+      evenings === 0
+        ? "Das reicht für keinen ganzen Abend mehr."
+        : evenings === 1
+          ? "Das reicht noch für einen Abend."
+          : `Das reicht noch für ${evenings} Abende.`,
+    note: "Faustwerte aus der Praxis: Wind, feuchtes Holz und wer das Feuer hütet, machen leicht die Hälfte aus. Aufgerundet wird immer – ein Netz zu viel steht nächstes Mal noch da.",
+  },
   routePlan: {
     sectionAria: "Route vorher zeichnen",
     title: "Route zeichnen",

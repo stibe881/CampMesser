@@ -3844,6 +3844,39 @@ export const en: Translation = {
     stopsLine: (times: string) => `Breaks at roughly ${times}.`,
     note: "Estimated as the crow flies at an average of 70 km/h – not a route planner. Traffic, roadworks and border queues come on top.",
   },
+  firewood: {
+    title: "Firewood needed",
+    intro: "How many nets to load – wood is better bought before you arrive.",
+    eveningsLabel: "Evenings with a fire",
+    hoursLabel: "Hours per evening",
+    kindLabel: "Type of fire",
+    kinds: {
+      kochfeuer: "Cooking fire (small)",
+      feuerschale: "Fire bowl",
+      lagerfeuer: "Campfire",
+      waermefeuer: "Warming fire (large)",
+    },
+    woodLabel: "Type of wood",
+    woods: {
+      hart: "Hardwood (beech, oak)",
+      gemischt: "Mixed",
+      weich: "Softwood (spruce, fir)",
+    },
+    netsLabel: "Nets of 10 kg",
+    totalLabel: "Total",
+    perEveningLabel: "per evening",
+    kindlingLine: (kg: number) =>
+      `Includes ${kg} kg of kindling – without shavings and thin sticks you are left with dry beech and no embers.`,
+    stockLabel: "Check your stock (kg)",
+    stockPlaceholder: "e.g. 20",
+    stockLine: (evenings: number) =>
+      evenings === 0
+        ? "That is no longer enough for a whole evening."
+        : evenings === 1
+          ? "That is enough for one more evening."
+          : `That is enough for ${evenings} more evenings.`,
+    note: "Rules of thumb: wind, damp wood and whoever tends the fire easily account for half the difference. Always rounded up – one net too many will still be there next time.",
+  },
   routePlan: {
     sectionAria: "Plan a route in advance",
     title: "Draw a route",

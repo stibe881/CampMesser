@@ -3927,6 +3927,40 @@ export const it: Translation = {
     stopsLine: (times: string) => `Pause verso le ${times}.`,
     note: "Stima in linea d'aria con una media di 70 km/h – non è un calcolatore di percorso. Code, cantieri e attese al confine si aggiungono.",
   },
+  firewood: {
+    title: "Fabbisogno di legna",
+    intro:
+      "Quante reti caricare in auto – la legna conviene comprarla prima, non in piazzola.",
+    eveningsLabel: "Sere con il fuoco",
+    hoursLabel: "Ore per sera",
+    kindLabel: "Tipo di fuoco",
+    kinds: {
+      kochfeuer: "Fuoco da cucina (piccolo)",
+      feuerschale: "Braciere",
+      lagerfeuer: "Fuoco da campo",
+      waermefeuer: "Fuoco per scaldarsi (grande)",
+    },
+    woodLabel: "Tipo di legna",
+    woods: {
+      hart: "Legna dura (faggio, quercia)",
+      gemischt: "Mista",
+      weich: "Legna tenera (abete)",
+    },
+    netsLabel: "Reti da 10 kg",
+    totalLabel: "Totale",
+    perEveningLabel: "per sera",
+    kindlingLine: (kg: number) =>
+      `Inclusi ${kg} kg di legna d'accensione – senza trucioli e legnetti resti con faggio secco e senza brace.`,
+    stockLabel: "Verifica la scorta (kg)",
+    stockPlaceholder: "p. es. 20",
+    stockLine: (evenings: number) =>
+      evenings === 0
+        ? "Non basta più per una sera intera."
+        : evenings === 1
+          ? "Basta ancora per una sera."
+          : `Basta ancora per ${evenings} sere.`,
+    note: "Valori pratici indicativi: vento, legna umida e chi cura il fuoco cambiano facilmente le cose della metà. Si arrotonda sempre per eccesso – una rete in più ci sarà ancora la prossima volta.",
+  },
   routePlan: {
     sectionAria: "Disegnare il percorso in anticipo",
     title: "Disegnare il percorso",

@@ -3954,6 +3954,40 @@ export const fr: Translation = {
     stopsLine: (times: string) => `Pauses vers ${times}.`,
     note: "Estimation à vol d'oiseau à 70 km/h de moyenne – ce n'est pas un calculateur d'itinéraire. Bouchons, chantiers et attentes à la frontière s'y ajoutent.",
   },
+  firewood: {
+    title: "Besoin en bois de feu",
+    intro:
+      "Combien de filets dans la voiture – mieux vaut acheter le bois avant d'arriver.",
+    eveningsLabel: "Soirées avec feu",
+    hoursLabel: "Heures par soirée",
+    kindLabel: "Type de feu",
+    kinds: {
+      kochfeuer: "Feu de cuisson (petit)",
+      feuerschale: "Brasero",
+      lagerfeuer: "Feu de camp",
+      waermefeuer: "Feu de chauffe (grand)",
+    },
+    woodLabel: "Type de bois",
+    woods: {
+      hart: "Bois dur (hêtre, chêne)",
+      gemischt: "Mélangé",
+      weich: "Bois tendre (épicéa, sapin)",
+    },
+    netsLabel: "Filets de 10 kg",
+    totalLabel: "Total",
+    perEveningLabel: "par soirée",
+    kindlingLine: (kg: number) =>
+      `Y compris ${kg} kg de petit bois – sans copeaux ni bûchettes, tu restes avec du hêtre sec et sans braises.`,
+    stockLabel: "Vérifier le stock (kg)",
+    stockPlaceholder: "p. ex. 20",
+    stockLine: (evenings: number) =>
+      evenings === 0
+        ? "Cela ne suffit plus pour une soirée entière."
+        : evenings === 1
+          ? "Cela suffit encore pour une soirée."
+          : `Cela suffit encore pour ${evenings} soirées.`,
+    note: "Valeurs empiriques : le vent, le bois humide et la personne qui surveille le feu font facilement varier du simple au double. On arrondit toujours vers le haut – un filet en trop sera encore là la prochaine fois.",
+  },
   routePlan: {
     sectionAria: "Tracer un itinéraire à l'avance",
     title: "Tracer un itinéraire",

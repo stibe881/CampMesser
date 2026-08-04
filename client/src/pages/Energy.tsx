@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import FirewoodCalculator from "@/components/FirewoodCalculator";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -1217,6 +1218,14 @@ export default function EnergyPage() {
           {t.energy.empty}
         </p>
       )}
+
+      {/* Feuerholz-Bedarf (#287): auch Energie, nur ohne Kabel – und die
+          Frage stellt sich beim Packen, nicht am Feuer */}
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <FirewoodCalculator />
+        </CardContent>
+      </Card>
     </div>
   );
 }
