@@ -443,9 +443,6 @@ function SpotsMap({
   const layerKindRef = useRef<MapLayerKind>(layerKind);
   layerKindRef.current = layerKind;
 
-  const locateLayerRef = useRef<LayerGroupObject | null>(null);
-  const [locating, setLocating] = useState(false);
-
   /** Karte auf die aktuelle Position zentrieren (blauer Punkt + Genauigkeit). */
   const locateMe = useCallback((silent = false) => {
     const map = engineRef.current;
