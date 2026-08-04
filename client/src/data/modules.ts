@@ -16,6 +16,7 @@ import {
   Droplets,
   Footprints,
   Gauge,
+  Gem,
   Hammer,
   Languages,
   ListChecks,
@@ -549,6 +550,23 @@ export const modules: Module[] = [
     icon: Languages,
     group: "Erste Hilfe",
     offline: true,
+  },
+  {
+    path: "/schatzsuche",
+    title: l4(
+      "GPS-Schatzsuche",
+      "Chasse au trésor GPS",
+      "Caccia al tesoro GPS",
+      "GPS treasure hunt"
+    ),
+    description: l4(
+      "Verstecke am Platz anlegen, Kinder suchen mit warm und kalt",
+      "Cache des trésors sur place, les enfants cherchent au chaud-froid",
+      "Nascondi tesori sul posto, i bambini cercano con caldo e freddo",
+      "Hide caches on site, kids search by hot and cold"
+    ),
+    icon: Gem,
+    group: "Erste Hilfe",
   },
   {
     path: "/familie",

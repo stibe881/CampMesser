@@ -134,6 +134,14 @@ import {
   normalizeBoxCode,
 } from "@shared/boxes";
 import {
+  MAX_HUNT_NAME_LENGTH,
+  MAX_POINT_HINT_LENGTH,
+  MAX_POINT_NAME_LENGTH,
+  MAX_TREASURE_POINTS,
+  nextSortIndex,
+  normalizeHuntName,
+} from "@shared/treasureHunt";
+import {
   parseSpotAttributes,
   SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
 } from "@shared/spotAttributes";
@@ -1677,6 +1685,128 @@ export const appRouter = router({
    * steht? Jede Kiste hat eine kurze Kennung, die auf dem Etikett steht und
    * im QR-Code steckt.
    */
+  /** GPS-Schatzsuche (#267): Verstecke anlegen und den Spielstand führen. */
+  treasure: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const hunts = await db.getTreasureHunts(ctx.user.id);
+      // Die Punkte gehören zum Spielstand und werden mitgeliefert – eine
+      // Schatzsuche ohne ihre Stationen ist keine Information wert
+      return Promise.all(
+        hunts.map(async hunt => ({
+          ...hunt,
+          points: await db.getTreasurePoints(hunt.id),
+        }))
+      );
+    }),
+    create: protectedProcedure
+      .input(z.object({ name: z.string().trim().max(MAX_HUNT_NAME_LENGTH) }))
+      .mutation(async ({ ctx, input }) => {
+        const name = normalizeHuntName(input.name);
+        const id = await db.createTreasureHunt({
+          userId: ctx.user.id,
+          name: name || "Schatzsuche",
+        });
+        return { id } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteTreasureHunt(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+    /** Versteck am aktuellen Standort anlegen. */
+    addPoint: protectedProcedure
+      .input(
+        z.object({
+          huntId: z.number().int().positive(),
+          name: z.string().trim().min(1).max(MAX_POINT_NAME_LENGTH),
+          hint: z.string().trim().max(MAX_POINT_HINT_LENGTH).nullish(),
+          latitude: z.number().min(-90).max(90),
+          longitude: z.number().min(-180).max(180),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const hunt = await db.getTreasureHunt(input.huntId, ctx.user.id);
+        if (!hunt) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Schatzsuche nicht gefunden.",
+          });
+        }
+        const points = await db.getTreasurePoints(input.huntId);
+        if (points.length >= MAX_TREASURE_POINTS) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Mehr als ${MAX_TREASURE_POINTS} Verstecke pro Suche sind nicht vorgesehen.`,
+          });
+        }
+        const id = await db.createTreasurePoint({
+          huntId: input.huntId,
+          name: input.name.trim(),
+          hint: input.hint?.trim() || null,
+          latitude: input.latitude,
+          longitude: input.longitude,
+          sortIndex: nextSortIndex(points),
+        });
+        return { id } as const;
+      }),
+    removePoint: protectedProcedure
+      .input(
+        z.object({
+          huntId: z.number().int().positive(),
+          pointId: z.number().int().positive(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const hunt = await db.getTreasureHunt(input.huntId, ctx.user.id);
+        if (!hunt) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Schatzsuche nicht gefunden.",
+          });
+        }
+        await db.deleteTreasurePoint(input.pointId, input.huntId);
+        return { success: true } as const;
+      }),
+    /** Punkt als gefunden melden oder wieder verstecken. */
+    setFound: protectedProcedure
+      .input(
+        z.object({
+          huntId: z.number().int().positive(),
+          pointId: z.number().int().positive(),
+          found: z.boolean(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const hunt = await db.getTreasureHunt(input.huntId, ctx.user.id);
+        if (!hunt) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Schatzsuche nicht gefunden.",
+          });
+        }
+        await db.setTreasurePointFound(
+          input.pointId,
+          input.huntId,
+          input.found ? new Date() : null
+        );
+        return { success: true } as const;
+      }),
+    /** Spielstand zurücksetzen – die Verstecke bleiben, wo sie sind. */
+    reset: protectedProcedure
+      .input(z.object({ huntId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const hunt = await db.getTreasureHunt(input.huntId, ctx.user.id);
+        if (!hunt) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Schatzsuche nicht gefunden.",
+          });
+        }
+        await db.resetTreasureHunt(input.huntId);
+        return { success: true } as const;
+      }),
+  }),
   boxes: router({
     list: protectedProcedure.query(({ ctx }) =>
       db.getStorageBoxes(ctx.user.id)

@@ -2830,6 +2830,55 @@ export const en: Translation = {
     reminderHint:
       "You can add recurring jobs to your inventory as a care reminder – then the app speaks up before it is too late.",
   },
+  treasure: {
+    title: "GPS treasure hunt",
+    subtitle:
+      "Hide caches on site – the kids search by “hot and cold” with an arrow.",
+    loginFeature: "the GPS treasure hunt",
+    defaultName: "Treasure hunt",
+    newHunt: "New hunt",
+    removeHunt: "Delete this hunt",
+    empty:
+      "No treasure hunt yet. Create one, then place the caches right where you stand.",
+    modeAria: "Choose mode",
+    modeHide: "Hide",
+    modeSeek: "Seek",
+    hideAria: "Place caches",
+    seekAria: "Hunt in progress",
+    progressLine: (found: number, total: number) =>
+      `${found} of ${total} found`,
+    progressAria: "Treasure hunt progress",
+    addPointHere: "Place a cache here",
+    addPointTitle: "Place a cache",
+    addPointDescription:
+      "The point is saved at your current position. Hide the item first, then save.",
+    pointName: "Station name",
+    pointNamePlaceholder: "e.g. Station 1",
+    pointHint: "Clue (optional)",
+    pointHintPlaceholder: "e.g. “Where the water babbles”",
+    savePoint: "Save the cache",
+    accuracyLine: (meters: number) => `Location accuracy: ±${meters} m`,
+    maxPoints: (max: number) =>
+      `More than ${max} caches per hunt is not supported.`,
+    hideTip:
+      "Hide things in plain sight on the ground or in branch forks – do not bury them. The phone locates the spot to within 10 to 15 metres, your eyes do the rest.",
+    noPoints: "This hunt has no caches yet.",
+    waitingForFix: "Looking for your position …",
+    geoError:
+      "No position available. Without location you can neither hide nor seek – please allow access.",
+    weakSignal:
+      "The signal is weak right now – the distance may be off by several metres.",
+    stationLine: (index: number, total: number) =>
+      `Station ${index} of ${total}`,
+    arrowAria: "Arrow to the next cache",
+    markFound: "Found!",
+    tooFarAway: "Still too far away",
+    hiddenName: "Next cache",
+    allFound: "All caches found!",
+    reset: "Play again",
+    hideAgainAria: (name: string) => `Hide ${name} again`,
+    removePointAria: (name: string) => `Delete ${name}`,
+  },
   gearRepair: {
     title: "Repair guide",
     subtitle:

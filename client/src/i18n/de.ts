@@ -2931,6 +2931,55 @@ export const de = {
     reminderHint:
       "Wiederkehrende Arbeiten kannst du dir im Inventar als Pflege-Erinnerung eintragen – dann meldet sich die App, bevor es zu spät ist.",
   },
+  treasure: {
+    title: "GPS-Schatzsuche",
+    subtitle:
+      "Verstecke am Platz anlegen – die Kinder suchen mit «warm und kalt» und einem Pfeil.",
+    loginFeature: "die GPS-Schatzsuche",
+    defaultName: "Schatzsuche",
+    newHunt: "Neue Suche",
+    removeHunt: "Diese Suche löschen",
+    empty:
+      "Noch keine Schatzsuche. Leg eine an, dann kannst du an Ort und Stelle Verstecke setzen.",
+    modeAria: "Modus wählen",
+    modeHide: "Verstecken",
+    modeSeek: "Suchen",
+    hideAria: "Verstecke anlegen",
+    seekAria: "Suche läuft",
+    progressLine: (found: number, total: number) =>
+      `${found} von ${total} gefunden`,
+    progressAria: "Fortschritt der Schatzsuche",
+    addPointHere: "Versteck hier anlegen",
+    addPointTitle: "Versteck anlegen",
+    addPointDescription:
+      "Der Punkt wird an deinem aktuellen Standort gespeichert. Versteck den Gegenstand zuerst und speichere dann.",
+    pointName: "Name der Station",
+    pointNamePlaceholder: "z. B. Station 1",
+    pointHint: "Hinweis (freiwillig)",
+    pointHintPlaceholder: "z. B. «Wo das Wasser plätschert»",
+    savePoint: "Versteck speichern",
+    accuracyLine: (meters: number) => `Ortungsgenauigkeit: ±${meters} m`,
+    maxPoints: (max: number) =>
+      `Mehr als ${max} Verstecke pro Suche sind nicht vorgesehen.`,
+    hideTip:
+      "Verstecke gut sichtbar am Boden oder in Astgabeln – nicht vergraben. Das Handy zeigt den Ort auf 10 bis 15 Meter genau, den Rest machen die Augen.",
+    noPoints: "Diese Suche hat noch keine Verstecke.",
+    waitingForFix: "Standort wird gesucht …",
+    geoError:
+      "Kein Standort verfügbar. Ohne Ortung lässt sich weder verstecken noch suchen – bitte den Zugriff erlauben.",
+    weakSignal:
+      "Das Signal ist gerade schwach – die Entfernung kann um einige Meter danebenliegen.",
+    stationLine: (index: number, total: number) =>
+      `Station ${index} von ${total}`,
+    arrowAria: "Pfeil zum nächsten Versteck",
+    markFound: "Gefunden!",
+    tooFarAway: "Noch zu weit weg",
+    hiddenName: "Nächstes Versteck",
+    allFound: "Alle Verstecke gefunden!",
+    reset: "Nochmals spielen",
+    hideAgainAria: (name: string) => `${name} wieder verstecken`,
+    removePointAria: (name: string) => `${name} löschen`,
+  },
   gearRepair: {
     title: "Reparatur-Ratgeber",
     subtitle:

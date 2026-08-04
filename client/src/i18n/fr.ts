@@ -2926,6 +2926,56 @@ export const fr: Translation = {
     reminderHint:
       "Tu peux inscrire les travaux récurrents dans l'inventaire comme rappel d'entretien – l'app se manifeste alors avant qu'il ne soit trop tard.",
   },
+  treasure: {
+    title: "Chasse au trésor GPS",
+    subtitle:
+      "Cache des trésors sur place – les enfants cherchent au « chaud-froid » avec une flèche.",
+    loginFeature: "la chasse au trésor GPS",
+    defaultName: "Chasse au trésor",
+    newHunt: "Nouvelle chasse",
+    removeHunt: "Supprimer cette chasse",
+    empty:
+      "Pas encore de chasse au trésor. Crées-en une, puis pose les caches sur place.",
+    modeAria: "Choisir le mode",
+    modeHide: "Cacher",
+    modeSeek: "Chercher",
+    hideAria: "Poser les caches",
+    seekAria: "Chasse en cours",
+    progressLine: (found: number, total: number) =>
+      `${found} sur ${total} trouvés`,
+    progressAria: "Progression de la chasse au trésor",
+    addPointHere: "Poser une cache ici",
+    addPointTitle: "Poser une cache",
+    addPointDescription:
+      "Le point est enregistré à ta position actuelle. Cache d'abord l'objet, puis enregistre.",
+    pointName: "Nom de la station",
+    pointNamePlaceholder: "p. ex. Station 1",
+    pointHint: "Indice (facultatif)",
+    pointHintPlaceholder: "p. ex. « Là où l'eau clapote »",
+    savePoint: "Enregistrer la cache",
+    accuracyLine: (meters: number) =>
+      `Précision de localisation : ±${meters} m`,
+    maxPoints: (max: number) =>
+      `Plus de ${max} caches par chasse ne sont pas prévues.`,
+    hideTip:
+      "Cache bien en vue au sol ou dans une fourche – ne pas enterrer. Le téléphone situe le point à 10-15 mètres près, les yeux font le reste.",
+    noPoints: "Cette chasse n'a encore aucune cache.",
+    waitingForFix: "Recherche de la position …",
+    geoError:
+      "Aucune position disponible. Sans localisation, impossible de cacher ou de chercher – autorise l'accès.",
+    weakSignal:
+      "Le signal est faible en ce moment – la distance peut être fausse de quelques mètres.",
+    stationLine: (index: number, total: number) =>
+      `Station ${index} sur ${total}`,
+    arrowAria: "Flèche vers la prochaine cache",
+    markFound: "Trouvé !",
+    tooFarAway: "Encore trop loin",
+    hiddenName: "Prochaine cache",
+    allFound: "Toutes les caches trouvées !",
+    reset: "Rejouer",
+    hideAgainAria: (name: string) => `Cacher à nouveau ${name}`,
+    removePointAria: (name: string) => `Supprimer ${name}`,
+  },
   gearRepair: {
     title: "Guide de réparation",
     subtitle:

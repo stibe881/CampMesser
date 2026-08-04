@@ -2899,6 +2899,55 @@ export const it: Translation = {
     reminderHint:
       "I lavori ricorrenti puoi annotarli nell'inventario come promemoria di manutenzione – così l'app si fa viva prima che sia troppo tardi.",
   },
+  treasure: {
+    title: "Caccia al tesoro GPS",
+    subtitle:
+      "Nascondi tesori sul posto – i bambini cercano con «caldo e freddo» e una freccia.",
+    loginFeature: "la caccia al tesoro GPS",
+    defaultName: "Caccia al tesoro",
+    newHunt: "Nuova caccia",
+    removeHunt: "Elimina questa caccia",
+    empty:
+      "Ancora nessuna caccia al tesoro. Creane una, poi posiziona i nascondigli sul posto.",
+    modeAria: "Scegli la modalità",
+    modeHide: "Nascondere",
+    modeSeek: "Cercare",
+    hideAria: "Posizionare i nascondigli",
+    seekAria: "Caccia in corso",
+    progressLine: (found: number, total: number) =>
+      `${found} di ${total} trovati`,
+    progressAria: "Avanzamento della caccia al tesoro",
+    addPointHere: "Metti un nascondiglio qui",
+    addPointTitle: "Nuovo nascondiglio",
+    addPointDescription:
+      "Il punto viene salvato alla tua posizione attuale. Prima nascondi l'oggetto, poi salva.",
+    pointName: "Nome della tappa",
+    pointNamePlaceholder: "ad es. Tappa 1",
+    pointHint: "Indizio (facoltativo)",
+    pointHintPlaceholder: "ad es. «Dove l'acqua gorgoglia»",
+    savePoint: "Salva il nascondiglio",
+    accuracyLine: (meters: number) =>
+      `Precisione della posizione: ±${meters} m`,
+    maxPoints: (max: number) =>
+      `Più di ${max} nascondigli per caccia non sono previsti.`,
+    hideTip:
+      "Nascondi bene in vista a terra o tra i rami – non sotterrare. Il telefono individua il punto con 10-15 metri di scarto, il resto lo fanno gli occhi.",
+    noPoints: "Questa caccia non ha ancora nascondigli.",
+    waitingForFix: "Ricerca della posizione …",
+    geoError:
+      "Nessuna posizione disponibile. Senza localizzazione non si può né nascondere né cercare – concedi l'accesso.",
+    weakSignal:
+      "Il segnale è debole in questo momento – la distanza può sbagliare di alcuni metri.",
+    stationLine: (index: number, total: number) => `Tappa ${index} di ${total}`,
+    arrowAria: "Freccia verso il prossimo nascondiglio",
+    markFound: "Trovato!",
+    tooFarAway: "Ancora troppo lontano",
+    hiddenName: "Prossimo nascondiglio",
+    allFound: "Tutti i nascondigli trovati!",
+    reset: "Gioca di nuovo",
+    hideAgainAria: (name: string) => `Nascondi di nuovo ${name}`,
+    removePointAria: (name: string) => `Elimina ${name}`,
+  },
   gearRepair: {
     title: "Guida alle riparazioni",
     subtitle:

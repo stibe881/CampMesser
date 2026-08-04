@@ -25,11 +25,10 @@ Stand: 4. August 2026
 
 ---
 
-## Runde 27 – 4 Punkte
+## Runde 27 – 3 Punkte
 
 ### Familie & Abend
 
-- [ ] **GPS-Schatzsuche** (#267) – Wegpunkte verstecken und suchen
 - [ ] **Erzählwürfel** (#268) – Bilder würfeln und daraus Geschichten erfinden
 - [ ] **Lagerfeuer-Liederbuch** (#269) – Texte und Akkorde, Rotlicht-tauglich
 - [ ] **Ämtli-Plan im Camp** (#270) – Aufgaben verteilen, Kinder sammeln Punkte
