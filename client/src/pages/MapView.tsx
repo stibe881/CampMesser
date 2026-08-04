@@ -773,7 +773,7 @@ function SpotsMap({
       });
       // Popup-Inhalt per DOM aufbauen: Platzname ist Nutzertext (kein innerHTML)
       const popup = document.createElement("div");
-      popup.className = "space-y-1";
+      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
       const name = document.createElement("p");
       name.className = "font-semibold";
       name.textContent = spot.name;
@@ -814,7 +814,7 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "space-y-1";
+      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
       const name = document.createElement("p");
       name.className = "font-semibold";
       name.textContent = tgt.name;
@@ -846,7 +846,7 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "space-y-1";
+      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
       const name = document.createElement("p");
       name.className = "font-semibold";
       name.textContent = sighting.title;
@@ -868,7 +868,7 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "space-y-1";
+      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
       const name = document.createElement("p");
       name.className = "font-semibold";
       name.textContent = displayName;
@@ -932,7 +932,7 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "space-y-1";
+      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
 
       const name = document.createElement("p");
       name.className = "font-semibold";
@@ -998,7 +998,7 @@ function SpotsMap({
         layer,
       });
       const popup = document.createElement("div");
-      popup.className = "space-y-1";
+      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
 
       const name = document.createElement("p");
       name.className = "font-semibold";
@@ -1067,7 +1067,7 @@ function SpotsMap({
       });
       const te = t.excursions;
       const popup = document.createElement("div");
-      popup.className = "space-y-1";
+      popup.className = "space-y-1 overflow-y-auto max-h-[50vh] pr-1";
       popup.style.maxWidth = "230px";
 
       if (excursion.photoUrl) {
