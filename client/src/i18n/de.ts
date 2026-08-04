@@ -3241,6 +3241,51 @@ export const de = {
   },
 
   /** Feuer- und Grillstellen aus OpenStreetMap (#247). */
+  picnicStops: {
+    sectionAria: "Rastmöglichkeiten entlang der Anfahrt",
+    title: "Rast unterwegs",
+    subtitle: "Picknickplätze und Tische auf dem Weg zum Platz.",
+    subtitleAtPlace: (place: string) =>
+      `Picknickplätze und Tische auf dem Weg nach ${place}.`,
+    startLabel: "Start",
+    startGroupAria: "Startpunkt der Fahrt wählen",
+    startHome: "Heim-Standort",
+    startCurrent: "Aktueller Standort",
+    radiusLabel: "Korridor",
+    radiusGroupAria: "Breite des Korridors wählen",
+    radiusOption: (km: number) => `${km} km`,
+    searchButton: "Rast suchen",
+    lineHint:
+      "Gesucht wird entlang der Luftlinie, nicht entlang der Strasse – im Gebirge kann die Fahrt weiter ausholen.",
+    locating: "Standort wird bestimmt …",
+    loading: "Raststellen werden gesucht …",
+    noHome:
+      "Für den Start brauchst du einen Heim-Standort im Profil – oder du wählst «Aktueller Standort».",
+    noPosition:
+      "Dein Standort war nicht zu ermitteln. Erlaube den Zugriff oder wähle den Heim-Standort als Start.",
+    loadFailed:
+      "Die Raststellen konnten gerade nicht geladen werden. Overpass ist ein freier Dienst und bremst bei zu vielen Anfragen – versuch es in ein paar Minuten nochmals.",
+    empty: (km: number) =>
+      `Im Korridor von ${km} km entlang der Strecke ist in OpenStreetMap keine Raststelle eingetragen. Versuch es mit einem breiteren Korridor.`,
+    resultCount: (n: number, km: number) =>
+      n === 1 ? `1 Raststelle auf ${km} km` : `${n} Raststellen auf ${km} km`,
+    kmMark: (along: number, total: number) => `km ${along} von ${total}`,
+    offsetHint: (value: string) => `${value} neben der Strecke`,
+    kind: {
+      site: "Picknickplatz",
+      table: "Picknicktisch",
+    },
+    kindHint: {
+      site: "eingerichteter Rastplatz",
+      table: "einzelner Tisch am Wegrand",
+    },
+    covered: "gedeckt",
+    fireplace: "Feuerstelle",
+    drinkingWater: "Trinkwasser",
+    navButton: "Hinnavigieren",
+    navAria: (name: string) => `Navigation zu ${name}`,
+    source: "Daten aus OpenStreetMap, gepflegt von Freiwilligen.",
+  },
   firepits: {
     sectionAria: "Offizielle Feuer- und Grillstellen in der Nähe",
     title: "Feuerstellen in der Nähe",

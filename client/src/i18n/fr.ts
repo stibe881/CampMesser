@@ -3238,6 +3238,51 @@ export const fr: Translation = {
   },
 
   /** Foyers et grils depuis OpenStreetMap (#247). */
+  picnicStops: {
+    sectionAria: "Aires de pause le long du trajet",
+    title: "Pause en route",
+    subtitle: "Aires de pique-nique et tables sur le chemin de l'emplacement.",
+    subtitleAtPlace: (place: string) =>
+      `Aires de pique-nique et tables sur le chemin de ${place}.`,
+    startLabel: "Départ",
+    startGroupAria: "Choisir le point de départ",
+    startHome: "Domicile",
+    startCurrent: "Position actuelle",
+    radiusLabel: "Couloir",
+    radiusGroupAria: "Choisir la largeur du couloir",
+    radiusOption: (km: number) => `${km} km`,
+    searchButton: "Chercher une pause",
+    lineHint:
+      "La recherche suit la ligne droite, pas la route – en montagne, le trajet réel peut s'écarter nettement.",
+    locating: "Localisation en cours …",
+    loading: "Recherche des aires de pause …",
+    noHome:
+      "Il te faut un domicile enregistré dans ton profil – ou choisis « Position actuelle ».",
+    noPosition:
+      "Ta position n'a pas pu être déterminée. Autorise l'accès ou choisis le domicile comme départ.",
+    loadFailed:
+      "Les aires de pause n'ont pas pu être chargées. Overpass est un service gratuit qui limite les requêtes – réessaie dans quelques minutes.",
+    empty: (km: number) =>
+      `Dans un couloir de ${km} km le long du trajet, aucune aire n'est enregistrée dans OpenStreetMap. Essaie avec un couloir plus large.`,
+    resultCount: (n: number, km: number) =>
+      n === 1 ? `1 aire sur ${km} km` : `${n} aires sur ${km} km`,
+    kmMark: (along: number, total: number) => `km ${along} sur ${total}`,
+    offsetHint: (value: string) => `${value} à l'écart du trajet`,
+    kind: {
+      site: "Aire de pique-nique",
+      table: "Table de pique-nique",
+    },
+    kindHint: {
+      site: "aire aménagée",
+      table: "table isolée au bord du chemin",
+    },
+    covered: "couvert",
+    fireplace: "foyer",
+    drinkingWater: "eau potable",
+    navButton: "Y aller",
+    navAria: (name: string) => `Navigation vers ${name}`,
+    source: "Données OpenStreetMap, tenues à jour par des bénévoles.",
+  },
   firepits: {
     sectionAria: "Foyers et grils officiels à proximité",
     title: "Foyers à proximité",

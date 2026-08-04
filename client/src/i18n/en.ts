@@ -3134,6 +3134,51 @@ export const en: Translation = {
   },
 
   /** Fire pits and barbecues from OpenStreetMap (#247). */
+  picnicStops: {
+    sectionAria: "Rest stops along the drive",
+    title: "Rest on the way",
+    subtitle: "Picnic sites and tables on the way to your pitch.",
+    subtitleAtPlace: (place: string) =>
+      `Picnic sites and tables on the way to ${place}.`,
+    startLabel: "Start",
+    startGroupAria: "Choose the starting point",
+    startHome: "Home location",
+    startCurrent: "Current location",
+    radiusLabel: "Corridor",
+    radiusGroupAria: "Choose the corridor width",
+    radiusOption: (km: number) => `${km} km`,
+    searchButton: "Find a stop",
+    lineHint:
+      "The search follows the straight line, not the road – in the mountains the actual drive can wander far from it.",
+    locating: "Getting your location …",
+    loading: "Looking for rest stops …",
+    noHome:
+      "You need a home location in your profile – or pick “Current location”.",
+    noPosition:
+      "Your location could not be determined. Allow access or pick your home location as the start.",
+    loadFailed:
+      "The rest stops could not be loaded. Overpass is a free service that throttles heavy use – try again in a few minutes.",
+    empty: (km: number) =>
+      `No rest stop is mapped in OpenStreetMap within ${km} km of the route. Try a wider corridor.`,
+    resultCount: (n: number, km: number) =>
+      n === 1 ? `1 stop over ${km} km` : `${n} stops over ${km} km`,
+    kmMark: (along: number, total: number) => `km ${along} of ${total}`,
+    offsetHint: (value: string) => `${value} off the route`,
+    kind: {
+      site: "Picnic site",
+      table: "Picnic table",
+    },
+    kindHint: {
+      site: "equipped rest area",
+      table: "single table by the road",
+    },
+    covered: "covered",
+    fireplace: "fireplace",
+    drinkingWater: "drinking water",
+    navButton: "Navigate",
+    navAria: (name: string) => `Navigate to ${name}`,
+    source: "Data from OpenStreetMap, maintained by volunteers.",
+  },
   firepits: {
     sectionAria: "Official fire pits and barbecues nearby",
     title: "Fire pits nearby",
