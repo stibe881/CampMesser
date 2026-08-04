@@ -4299,6 +4299,12 @@ export const fr: Translation = {
     replace: "Remplacer",
     openImage: "Voir la confirmation",
     openPdf: "Ouvrir le PDF",
+    viewerTitle: "Confirmation de réservation",
+    viewerClose: "Fermer",
+    viewerDownload: "Télécharger",
+    viewerNewWindow: "Ouvrir dans une nouvelle fenêtre",
+    viewerPdfFallback:
+      "Cet appareil n'affiche pas les PDF directement dans l'app. Télécharge le fichier ou ouvre-le dans une nouvelle fenêtre.",
     removeAria: "Supprimer la confirmation de réservation",
     uploaded: "Confirmation enregistrée.",
     uploadFailed: "La confirmation n'a pas pu être enregistrée.",

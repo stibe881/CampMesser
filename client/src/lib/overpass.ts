@@ -53,7 +53,10 @@ export const OVERPASS_ENDPOINTS = [
  * Bei extremer Überlastung eines Servers erzwingt ein Timeout (8s) den
  * Wechsel auf den nächsten Server, anstatt auf einen 504 Gateway Timeout zu warten.
  */
-export async function fetchOverpass(query: string, signal?: AbortSignal): Promise<Response> {
+export async function fetchOverpass(
+  query: string,
+  signal?: AbortSignal
+): Promise<Response> {
   let lastError: Error | undefined;
 
   for (const url of OVERPASS_ENDPOINTS) {
@@ -81,9 +84,9 @@ export async function fetchOverpass(query: string, signal?: AbortSignal): Promis
           signal: controller.signal,
         });
         clearTimeout(timeoutId);
-        
+
         if (res.ok) return res;
-        
+
         // Bei 429 oder 5xx versuchen wir den nächsten Server
         if (res.status !== 429 && res.status < 500) {
           throw new Error(`overpass HTTP ${res.status}`);
@@ -99,11 +102,13 @@ export async function fetchOverpass(query: string, signal?: AbortSignal): Promis
           throw e; // Der Nutzer hat wirklich abgebrochen (weggescrollt)
         }
         // Sonst war es unser eigener 8s-Timeout -> weiter zum nächsten Server!
-        lastError = new Error("Timeout nach 8 Sekunden, versuche nächsten Server...");
+        lastError = new Error(
+          "Timeout nach 8 Sekunden, versuche nächsten Server..."
+        );
       }
     }
   }
-  
+
   throw lastError ?? new Error("Alle Overpass-Server sind überlastet");
 }
 

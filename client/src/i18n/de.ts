@@ -4302,6 +4302,12 @@ export const de = {
     replace: "Ersetzen",
     openImage: "Bestätigung ansehen",
     openPdf: "PDF öffnen",
+    viewerTitle: "Buchungsbestätigung",
+    viewerClose: "Schliessen",
+    viewerDownload: "Herunterladen",
+    viewerNewWindow: "In neuem Fenster öffnen",
+    viewerPdfFallback:
+      "Dieses Gerät zeigt PDF nicht direkt in der App an. Lade die Datei herunter oder öffne sie in einem neuen Fenster.",
     removeAria: "Buchungsbestätigung löschen",
     uploaded: "Bestätigung gespeichert.",
     uploadFailed: "Die Bestätigung konnte nicht gespeichert werden.",

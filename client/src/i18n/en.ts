@@ -4185,6 +4185,12 @@ export const en: Translation = {
     replace: "Replace",
     openImage: "View confirmation",
     openPdf: "Open PDF",
+    viewerTitle: "Booking confirmation",
+    viewerClose: "Close",
+    viewerDownload: "Download",
+    viewerNewWindow: "Open in a new window",
+    viewerPdfFallback:
+      "This device cannot show PDFs inside the app. Download the file or open it in a new window.",
     removeAria: "Delete the booking confirmation",
     uploaded: "Confirmation saved.",
     uploadFailed: "The confirmation could not be saved.",

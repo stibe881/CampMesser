@@ -4273,6 +4273,12 @@ export const it: Translation = {
     replace: "Sostituisci",
     openImage: "Vedi la conferma",
     openPdf: "Apri il PDF",
+    viewerTitle: "Conferma di prenotazione",
+    viewerClose: "Chiudi",
+    viewerDownload: "Scarica",
+    viewerNewWindow: "Apri in una nuova finestra",
+    viewerPdfFallback:
+      "Questo dispositivo non mostra i PDF direttamente nell'app. Scarica il file oppure aprilo in una nuova finestra.",
     removeAria: "Elimina la conferma di prenotazione",
     uploaded: "Conferma salvata.",
     uploadFailed: "Non è stato possibile salvare la conferma.",
