@@ -148,6 +148,11 @@ export const en: Translation = {
     searchNoResults:
       "Nothing found – try a different term (e.g. “burn” or “knot”).",
     searchPreparing: "Preparing the knowledge modules …",
+    travelModeLabel: "View:",
+    travelModeOnSite: "On site",
+    travelModePlanning: "Planning",
+    travelModeAuto: "automatic",
+    travelModeAria: "Home page view",
     searchCategories: {
       module: "Module",
       firstAid: "First aid",
@@ -1972,6 +1977,7 @@ export const en: Translation = {
     sectionWeather: "Weather and sky",
     sectionAround: "Around here",
     sectionOwn: "Yours",
+    sectionNavAria: "Dossier sections",
     routeButton: "Directions",
     routeAria: "Open directions to this pitch in your maps app",
     contactTitle: "Contact & check-in",

@@ -157,6 +157,11 @@ export const de = {
     searchNoResults:
       "Nichts gefunden – probiere einen anderen Begriff (z. B. «Verbrennung» oder «Knoten»).",
     searchPreparing: "Wissensmodule werden vorbereitet …",
+    travelModeLabel: "Ansicht:",
+    travelModeOnSite: "Unterwegs",
+    travelModePlanning: "Planen",
+    travelModeAuto: "automatisch",
+    travelModeAria: "Ansicht der Startseite",
     searchCategories: {
       module: "Modul",
       firstAid: "Erste Hilfe",
@@ -2032,6 +2037,7 @@ export const de = {
     sectionWeather: "Wetter & Himmel",
     sectionAround: "In der Umgebung",
     sectionOwn: "Eigenes",
+    sectionNavAria: "Abschnitte des Dossiers",
     routeButton: "Route",
     routeAria: "Route zu diesem Platz in der Karten-App öffnen",
     contactTitle: "Kontakt & Check-in",

@@ -155,6 +155,11 @@ export const fr: Translation = {
     searchNoResults:
       "Rien trouvé – essaie un autre terme (p. ex. «brûlure» ou «nœud»).",
     searchPreparing: "Préparation des modules de savoir …",
+    travelModeLabel: "Affichage :",
+    travelModeOnSite: "Sur place",
+    travelModePlanning: "Planifier",
+    travelModeAuto: "automatique",
+    travelModeAria: "Affichage de la page d'accueil",
     searchCategories: {
       module: "Module",
       firstAid: "Premiers secours",
@@ -2036,6 +2041,7 @@ export const fr: Translation = {
     sectionWeather: "Météo et ciel",
     sectionAround: "Aux alentours",
     sectionOwn: "Personnel",
+    sectionNavAria: "Sections du dossier",
     routeButton: "Itinéraire",
     routeAria: "Ouvrir l'itinéraire vers cet emplacement dans l'app de cartes",
     contactTitle: "Contact & check-in",

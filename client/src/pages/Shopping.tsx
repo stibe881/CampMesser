@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import QRCode from "qrcode";
 import PageHeader from "@/components/PageHeader";
 import DataAge from "@/components/DataAge";
+import ListSkeleton from "@/components/ListSkeleton";
 import { enqueueToggle } from "@/lib/offlineQueue";
 import LoginPrompt from "@/components/LoginPrompt";
 import ShoppingItemDetailsPopover from "@/components/ShoppingItemDetailsPopover";
@@ -602,12 +603,7 @@ export default function ShoppingPage() {
       )}
 
       {query.isLoading || activeListId === null ? (
-        <div className="flex justify-center py-10">
-          <Loader2
-            className="h-6 w-6 animate-spin text-muted-foreground"
-            aria-label={t.common.loading}
-          />
-        </div>
+        <ListSkeleton rows={4} height={56} />
       ) : items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border p-10 text-center">
           <ShoppingCart

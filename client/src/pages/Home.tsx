@@ -18,6 +18,13 @@ import {
   X,
 } from "lucide-react";
 import { groupLabels, groups, modules } from "@/data/modules";
+import {
+  isOnSite,
+  loadTravelMode,
+  orderGroups,
+  saveTravelMode,
+  type TravelMode,
+} from "@/lib/travelMode";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { MEAL_LABELS, MEALS } from "@shared/menuPlan";
 import { useI18n } from "@/i18n";
@@ -1384,6 +1391,29 @@ export default function Home() {
     sunset: Date;
   } | null>(null);
   const [sortMode, setSortMode] = useState(false);
+  /**
+   * Unterwegs-Modus (lib/travelMode.ts): «auto» folgt dem laufenden
+   * Aufenthalt, eine getroffene Wahl gewinnt darüber.
+   */
+  const [travelMode, setTravelMode] = useState<TravelMode>(() =>
+    loadTravelMode()
+  );
+  const { isAuthenticated: signedIn } = useAuth();
+  // Dieselbe Abfrage nutzen schon die Startseiten-Widgets – React Query
+  // fasst sie zusammen, es entsteht also keine zusätzliche Anfrage.
+  const homeTripsQuery = trpc.trips.list.useQuery(undefined, {
+    enabled: signedIn,
+    staleTime: 60_000,
+  });
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const tripRunning = (homeTripsQuery.data ?? []).some(
+    trip => currentTripDay(trip, todayIso) !== null
+  );
+  const onSite = isOnSite(travelMode, tripRunning);
+  const chooseTravelMode = (mode: TravelMode) => {
+    setTravelMode(mode);
+    saveTravelMode(mode);
+  };
   const [order, setOrder] = useState<string[]>(() => loadModuleOrder());
   const [hidden, setHidden] = useState<string[]>(() => loadHiddenModules());
   const [hiddenWidgets, setHiddenWidgets] = useState<OptionalWidgetId[]>(() =>
@@ -1647,7 +1677,55 @@ export default function Home() {
             </ul>
           </section>
         )}
-        {groups.map(group => {
+        {/* Unterwegs-Modus: Läuft ein Aufenthalt, stehen die Vor-Ort-
+            Werkzeuge zuoberst und die Planung zuunterst. Der Umschalter
+            erscheint nur, wenn er etwas zu tun hat – also während eines
+            Aufenthalts oder solange eine Wahl von Hand gilt. */}
+        {(tripRunning || travelMode !== "auto") && !sortMode && (
+          <div
+            className="mb-6 flex flex-wrap items-center gap-2"
+            role="group"
+            aria-label={t.home.travelModeAria}
+          >
+            <span className="text-xs text-muted-foreground">
+              {t.home.travelModeLabel}
+            </span>
+            {(
+              [
+                ["onSite", t.home.travelModeOnSite],
+                ["planning", t.home.travelModePlanning],
+              ] as [TravelMode, string][]
+            ).map(([mode, label]) => {
+              const active = onSite === (mode === "onSite");
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => chooseTravelMode(active ? "auto" : mode)}
+                  aria-pressed={active}
+                  className={
+                    "rounded-full border px-3 py-1 text-xs font-medium transition-colors " +
+                    (active
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card text-muted-foreground hover:text-foreground")
+                  }
+                >
+                  {label}
+                </button>
+              );
+            })}
+            {travelMode !== "auto" && (
+              <button
+                type="button"
+                onClick={() => chooseTravelMode("auto")}
+                className="rounded-full px-2 py-1 text-xs text-muted-foreground/70 underline-offset-2 hover:underline"
+              >
+                {t.home.travelModeAuto}
+              </button>
+            )}
+          </div>
+        )}
+        {orderGroups(groups, onSite).map(group => {
           // Im Normal-Modus verschwinden ausgeblendete Kacheln (und leere Gruppen),
           // im Sortier-Modus bleiben sie gedimmt sichtbar, damit man sie zurückholen kann.
           const groupModules = orderedModules(group).filter(

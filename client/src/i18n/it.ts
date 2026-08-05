@@ -149,6 +149,11 @@ export const it: Translation = {
     searchNoResults:
       "Nessun risultato – prova un altro termine (ad es. «ustione» o «nodo»).",
     searchPreparing: "Preparazione dei moduli di conoscenza …",
+    travelModeLabel: "Vista:",
+    travelModeOnSite: "In viaggio",
+    travelModePlanning: "Pianificare",
+    travelModeAuto: "automatico",
+    travelModeAria: "Vista della pagina iniziale",
     searchCategories: {
       module: "Modulo",
       firstAid: "Primo soccorso",
@@ -2010,6 +2015,7 @@ export const it: Translation = {
     sectionWeather: "Meteo e cielo",
     sectionAround: "Nei dintorni",
     sectionOwn: "Personale",
+    sectionNavAria: "Sezioni del dossier",
     routeButton: "Percorso",
     routeAria: "Apri il percorso verso questa piazzola nell'app di mappe",
     contactTitle: "Contatto & check-in",

@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import DataAge from "@/components/DataAge";
+import ListSkeleton from "@/components/ListSkeleton";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import {
@@ -708,11 +709,8 @@ export default function InventoryPage() {
 
   if (loading) {
     return (
-      <div className="container flex justify-center py-16">
-        <Loader2
-          className="h-6 w-6 animate-spin text-muted-foreground"
-          aria-label={t.common.loading}
-        />
+      <div className="container max-w-2xl py-6">
+        <ListSkeleton rows={4} height={72} />
       </div>
     );
   }
