@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
 import { Link, useSearch } from "wouter";
@@ -61,6 +62,7 @@ const scenarioIcons: Record<
 };
 
 export default function PackListsPage() {
+  const ask = useConfirm();
   const { isAuthenticated, loading } = useAuth();
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
@@ -378,8 +380,8 @@ export default function PackListsPage() {
           variant="ghost"
           size="icon"
           className="relative z-10 text-muted-foreground hover:text-destructive"
-          onClick={() => {
-            if (confirm(t.packLists.deleteConfirm(list.name))) {
+          onClick={async () => {
+            if (await ask({ title: t.packLists.deleteConfirm(list.name) })) {
               deleteMutation.mutate({ id: list.id });
             }
           }}
@@ -495,11 +497,13 @@ export default function PackListsPage() {
                         size="icon"
                         className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
                         disabled={deleteTemplateMutation.isPending}
-                        onClick={() => {
+                        onClick={async () => {
                           if (
-                            confirm(
-                              t.packLists.templateDeleteConfirm(template.name)
-                            )
+                            await ask({
+                              title: t.packLists.templateDeleteConfirm(
+                                template.name
+                              ),
+                            })
                           ) {
                             if (templateChoice === template.id) {
                               setTemplateChoice(null);

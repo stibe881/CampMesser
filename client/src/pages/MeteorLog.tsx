@@ -16,6 +16,8 @@
  * Zählen ausgeht, kostet die Nacht.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { fmtPlain } from "@/lib/dateFormat";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { Moon, Pause, Play, Star, Trash2, Undo2 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import RedLightMode from "@/components/RedLightMode";
@@ -80,6 +82,7 @@ function formatDuration(ms: number): string {
 }
 
 export default function MeteorLogPage() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const ml = t.meteorLog;
   const [sessions, setSessions] = useState<MeteorSession[]>(load);
@@ -346,9 +349,7 @@ export default function MeteorLogPage() {
                 <div>
                   <p className="text-sm font-medium">
                     {ml.nightOf(
-                      new Date(`${night.night}T12:00:00`).toLocaleDateString(
-                        LOCALE_TAGS[lang]
-                      )
+                      fmtPlain(new Date(`${night.night}T12:00:00`), lang)
                     )}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -369,8 +370,14 @@ export default function MeteorLogPage() {
             variant="ghost"
             size="sm"
             className="mt-2 text-muted-foreground"
-            onClick={() => {
-              if (!window.confirm(ml.clearConfirm)) return;
+            onClick={async () => {
+              if (
+                !(await ask({
+                  title: ml.clearConfirm,
+                  confirmLabel: t.common.confirmEmpty,
+                }))
+              )
+                return;
               setSessions([]);
               setActiveId(null);
             }}

@@ -15,6 +15,7 @@ import {
   Wallet,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import QueryError from "@/components/QueryError";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -291,6 +292,24 @@ export default function Stats() {
   return (
     <div className="container max-w-3xl py-6">
       <PageHeader title={ts.title} subtitle={ts.subtitle} />
+
+      {/* Eine Statistik lügt beim Fehler besonders überzeugend (#319):
+          Ohne Daten stehen überall Nullen, und «0 Übernachtungen» sieht
+          nicht nach einer Störung aus, sondern nach einer Auskunft. Bei
+          einem Fehler steht deshalb der Hinweis ganz oben, VOR den
+          Kacheln – nicht statt ihnen, denn ein Teil der Zahlen (Knoten,
+          Abzeichen) kommt vom Gerät und stimmt weiterhin. */}
+      {(tripsQuery.isError || spotsQuery.isError) && (
+        <div className="mb-6">
+          <QueryError
+            onRetry={() => {
+              void tripsQuery.refetch();
+              void spotsQuery.refetch();
+            }}
+            retrying={tripsQuery.isFetching || spotsQuery.isFetching}
+          />
+        </div>
+      )}
 
       {/* Reise-Statistik: dieselben Kennzahlen wie in «Meine Reisen» */}
       <Card className="mb-6">

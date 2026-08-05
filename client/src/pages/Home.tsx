@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { fmtLong } from "@/lib/dateFormat";
 import heroImage from "@/assets/hero-camping.webp";
 import {
   AlertTriangle,
@@ -719,10 +720,7 @@ function AnniversaryCard() {
     hit.yearsAgo === 1
       ? t.home.anniversaryTitleOne
       : t.home.anniversaryTitleMany(hit.yearsAgo);
-  const started = new Date(`${trip.startDate}T00:00:00`).toLocaleDateString(
-    LOCALE_TAGS[lang],
-    { day: "numeric", month: "long", year: "numeric" }
-  );
+  const started = fmtLong(new Date(`${trip.startDate}T00:00:00`), lang);
 
   return (
     <section

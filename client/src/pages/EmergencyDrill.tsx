@@ -11,6 +11,7 @@
  * statt es in einer App zu hinterlegen.
  */
 import { useEffect, useMemo, useState } from "react";
+import { fmtPlain } from "@/lib/dateFormat";
 import {
   AlertTriangle,
   Check,
@@ -105,9 +106,7 @@ function Scenario({
           </span>
           <span className="block text-xs text-muted-foreground">
             {lastAt
-              ? ed.lastPracticed(
-                  new Date(lastAt).toLocaleDateString(LOCALE_TAGS[lang])
-                )
+              ? ed.lastPracticed(fmtPlain(new Date(lastAt), lang))
               : ed.neverPracticed}
           </span>
         </span>

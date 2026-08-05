@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
 import {
@@ -93,6 +94,7 @@ import { isBooked, shoppingPriceTotals } from "@shared/shoppingPrices";
  * beziehen sich immer auf die aktive Liste.
  */
 export default function ShoppingPage() {
+  const ask = useConfirm();
   const { isAuthenticated, loading } = useAuth();
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
@@ -967,8 +969,13 @@ export default function ShoppingPage() {
                   size="sm"
                   className="text-muted-foreground hover:text-destructive"
                   disabled={clearMutation.isPending}
-                  onClick={() => {
-                    if (confirm(t.shopping.clearConfirm)) {
+                  onClick={async () => {
+                    if (
+                      await ask({
+                        title: t.shopping.clearConfirm,
+                        confirmLabel: t.common.confirmEmpty,
+                      })
+                    ) {
                       clearMutation.mutate({
                         listId: activeListId ?? undefined,
                       });
@@ -1092,8 +1099,12 @@ export default function ShoppingPage() {
                     target.lists.length <= 1 || deleteListMutation.isPending
                   }
                   aria-label={t.shopping.listDeleteAria(list.name)}
-                  onClick={() => {
-                    if (confirm(t.shopping.listDeleteConfirm(list.name))) {
+                  onClick={async () => {
+                    if (
+                      await ask({
+                        title: t.shopping.listDeleteConfirm(list.name),
+                      })
+                    ) {
                       deleteListMutation.mutate({ id: list.id });
                     }
                   }}

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useConfirm } from "@/components/ConfirmDialog";
 import {
   Archive,
   BookmarkPlus,
@@ -102,6 +103,7 @@ const storageIcons: Record<FoodStorage, typeof Refrigerator> = {
 };
 
 export default function FoodPage() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
@@ -723,8 +725,12 @@ export default function FoodPage() {
                     className="text-muted-foreground hover:text-destructive"
                     aria-label={t.food.templateDeleteAria(template.name)}
                     disabled={removeTemplateMutation.isPending}
-                    onClick={() => {
-                      if (confirm(t.food.templateDeleteConfirm(template.name)))
+                    onClick={async () => {
+                      if (
+                        await ask({
+                          title: t.food.templateDeleteConfirm(template.name),
+                        })
+                      )
                         removeTemplateMutation.mutate({ id: template.id });
                     }}
                   >

@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { fmtDate, fmtLong } from "@/lib/dateFormat";
+import { useConfirm } from "@/components/ConfirmDialog";
 import {
   AlertTriangle,
   Baby,
@@ -231,6 +233,7 @@ export default function FirstAidPage() {
  * immer sichtbar über der Liste.
  */
 function TickBiteSection() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const { isAuthenticated } = useAuth();
   const utils = trpc.useUtils();
@@ -272,12 +275,7 @@ function TickBiteSection() {
   const open = bites.filter(b => !tickObservationStatus(b, today).done);
   const done = bites.filter(b => tickObservationStatus(b, today).done);
 
-  const fmtDate = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+  const fmtDate = (iso: string) => fmtLong(new Date(`${iso}T00:00:00`), lang);
 
   return (
     <section className="mt-10">
@@ -418,8 +416,10 @@ function TickBiteSection() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
-                        onClick={() => {
-                          if (confirm(t.firstAid.tickDeleteConfirm)) {
+                        onClick={async () => {
+                          if (
+                            await ask({ title: t.firstAid.tickDeleteConfirm })
+                          ) {
                             removeMutation.mutate({ id: bite.id });
                           }
                         }}
@@ -499,8 +499,12 @@ function TickBiteSection() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
-                            onClick={() => {
-                              if (confirm(t.firstAid.tickDeleteConfirm)) {
+                            onClick={async () => {
+                              if (
+                                await ask({
+                                  title: t.firstAid.tickDeleteConfirm,
+                                })
+                              ) {
                                 removeMutation.mutate({ id: bite.id });
                               }
                             }}

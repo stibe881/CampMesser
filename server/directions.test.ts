@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 // Routen-Link liegt im Client-Code, ist aber reine Logik ohne DOM.
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   defaultProvider,
+  directionsAppUrl,
   directionsUrl,
   MAPS_PROVIDERS,
 } from "../client/src/lib/directions";
@@ -57,5 +60,61 @@ describe("directionsUrl", () => {
         directionsUrl(47, 8, provider)
       );
     }
+  });
+});
+
+describe("directionsAppUrl – die App statt der Webseite (#326)", () => {
+  it("spricht Google Maps über sein eigenes Schema an", () => {
+    // `https://www.google.com/maps/…` landete im WebView der nativen App
+    // in der WEB-Ansicht von Google Maps: ohne gespeicherte Orte, ohne
+    // Sprachnavigation, ohne Weg zurück.
+    expect(directionsAppUrl(46.8182, 8.2275, "google")).toBe(
+      "comgooglemaps://?daddr=46.8182,8.2275&directionsmode=driving"
+    );
+  });
+
+  it("spricht Apple Karten über sein eigenes Schema an", () => {
+    expect(directionsAppUrl(46.8182, 8.2275, "apple")).toBe(
+      "maps://?daddr=46.8182,8.2275&dirflg=d"
+    );
+  });
+
+  it("gibt die Fahrt als Verkehrsmittel vor", () => {
+    // Ohne Angabe nimmt Google die zuletzt benutzte Art – nach einer
+    // Wanderung stünde die Anreise dann auf «zu Fuss».
+    expect(directionsAppUrl(47, 8, "google")).toContain(
+      "directionsmode=driving"
+    );
+    expect(directionsAppUrl(47, 8, "apple")).toContain("dirflg=d");
+  });
+
+  it("negative Koordinaten gehen unverändert durch", () => {
+    expect(directionsAppUrl(-33.9, 151.2, "google")).toContain(
+      "daddr=-33.9,151.2"
+    );
+  });
+
+  it("zu jeder Web-Adresse gibt es eine App-Adresse", () => {
+    for (const provider of MAPS_PROVIDERS) {
+      expect(directionsAppUrl(47, 8, provider)).not.toContain("http");
+      expect(directionsUrl(47, 8, provider)).toContain("https://");
+    }
+  });
+});
+
+describe("Die native App darf die Schemata überhaupt abfragen", () => {
+  it("comgooglemaps und maps stehen in LSApplicationQueriesSchemes", () => {
+    // OHNE DIESEN EINTRAG liefert `canOpenURL` auf iOS für fremde
+    // Schemata IMMER false – die App-Adresse wäre totes Gewicht, und man
+    // landete stillschweigend wieder im Web.
+    const appJson = JSON.parse(
+      readFileSync(
+        join(import.meta.dirname, "..", "expo-app", "app.json"),
+        "utf8"
+      )
+    ) as { expo: { ios: { infoPlist: Record<string, string[]> } } };
+    const schemes = appJson.expo.ios.infoPlist.LSApplicationQueriesSchemes;
+    expect(schemes).toContain("comgooglemaps");
+    expect(schemes).toContain("maps");
   });
 });

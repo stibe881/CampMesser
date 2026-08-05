@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { fmtDayMonth, fmtMedium, fmtNumeric } from "@/lib/dateFormat";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { Link } from "wouter";
 import {
   Check,
@@ -107,6 +109,7 @@ export const inventoryCategories: L4[] = [
  * Hinzufügen aus Katalog-Vorschlägen (shared/gearTasks.ts) oder frei.
  */
 function GearCareSection() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
   const query = trpc.gear.list.useQuery();
@@ -139,11 +142,7 @@ function GearCareSection() {
   });
 
   const formatDay = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+    fmtMedium(new Date(`${iso}T00:00:00`), lang);
 
   const submit = () => {
     const trimmed = title.trim();
@@ -237,8 +236,12 @@ function GearCareSection() {
                     size="icon"
                     className="h-8 w-8 text-muted-foreground hover:text-destructive"
                     disabled={removeMutation.isPending}
-                    onClick={() => {
-                      if (confirm(t.inventory.gearRemoveConfirm(task.title))) {
+                    onClick={async () => {
+                      if (
+                        await ask({
+                          title: t.inventory.gearRemoveConfirm(task.title),
+                        })
+                      ) {
                         removeMutation.mutate({ id: task.id });
                       }
                     }}
@@ -350,6 +353,7 @@ interface FormState {
 }
 
 export default function InventoryPage() {
+  const ask = useConfirm();
   const { isAuthenticated, loading } = useAuth();
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
@@ -743,17 +747,10 @@ export default function InventoryPage() {
   };
   /** Datum kurz und in der App-Sprache (z. B. 03.08.2026). */
   const formatDay = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+    fmtNumeric(new Date(`${iso}T00:00:00`), lang);
   /** Datum ohne Jahr (z. B. 03.08.) – fürs «verliehen seit»-Badge. */
   const formatDayShort = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-      day: "2-digit",
-      month: "2-digit",
-    });
+    fmtDayMonth(new Date(`${iso}T00:00:00`), lang);
 
   /** Ausleih-Dialog mit Vorgaben öffnen (Datum = heute). */
   const openLentDialog = (item: { id: number; name: string }) => {
@@ -1465,8 +1462,12 @@ export default function InventoryPage() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          onClick={() => {
-                            if (confirm(t.inventory.deleteConfirm(item.name))) {
+                          onClick={async () => {
+                            if (
+                              await ask({
+                                title: t.inventory.deleteConfirm(item.name),
+                              })
+                            ) {
                               removeMutation.mutate({ id: item.id });
                             }
                           }}

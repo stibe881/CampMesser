@@ -30,6 +30,7 @@ export default function OfflineSync() {
   const utils = trpc.useUtils();
   const packToggle = trpc.packing.toggleItem.useMutation();
   const shopToggle = trpc.shopping.toggle.useMutation();
+  const choreToggle = trpc.chores.setDone.useMutation();
   /** Verhindert, dass zwei Durchläufe gleichzeitig senden. */
   const running = useRef(false);
 
@@ -42,7 +43,14 @@ export default function OfflineSync() {
     const send = async (entry: QueuedToggle) => {
       const input = { id: entry.itemId, checked: entry.checked };
       if (entry.kind === "packing") await packToggle.mutateAsync(input);
-      else await shopToggle.mutateAsync(input);
+      else if (entry.kind === "chore") {
+        // Der Ämtli-Plan nennt das Feld `done` statt `checked` – gemeint
+        // ist dasselbe (#320).
+        await choreToggle.mutateAsync({
+          id: entry.itemId,
+          done: entry.checked,
+        });
+      } else await shopToggle.mutateAsync(input);
     };
 
     void (async () => {
@@ -66,6 +74,7 @@ export default function OfflineSync() {
           utils.packing.items.invalidate(),
           utils.packing.progress.invalidate(),
           utils.shopping.list.invalidate(),
+          utils.chores.assignments.invalidate(),
         ]);
         toast.success(t.offline.synced(sent));
       }

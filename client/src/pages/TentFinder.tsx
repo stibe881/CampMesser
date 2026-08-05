@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useConfirm } from "@/components/ConfirmDialog";
 import {
   Bath,
   Car,
@@ -133,6 +134,7 @@ interface GeoState {
 }
 
 export default function TentFinderPage() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
 
   // Benannte Ziele laden; altes Einzel-Ziel wird einmalig als «Zelt» übernommen
@@ -320,8 +322,9 @@ export default function TentFinderPage() {
     if (selection === `target:${CAR_TARGET_ID}`) setSelection(null);
   };
 
-  const deleteTarget = (doomed: TentFinderTarget) => {
-    if (!confirm(t.tentFinder.deleteConfirm(doomed.name))) return;
+  const deleteTarget = async (doomed: TentFinderTarget) => {
+    if (!(await ask({ title: t.tentFinder.deleteConfirm(doomed.name) })))
+      return;
     saveTargets(targets.filter(x => x.id !== doomed.id));
     if (selection === `target:${doomed.id}`) setSelection(null);
     toast.success(t.tentFinder.deletedToast(doomed.name));

@@ -14,6 +14,7 @@ import {
 import { Link, useParams } from "wouter";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import QueryError from "@/components/QueryError";
 import LoginPrompt from "@/components/LoginPrompt";
 import ShoppingBookingDialog from "@/components/ShoppingBookingDialog";
 import ShoppingItemDetailsPopover from "@/components/ShoppingItemDetailsPopover";
@@ -338,22 +339,31 @@ export default function TripShoppingPage() {
           title={t.tripShopping.title}
           subtitle={t.tripShopping.subtitle}
         />
-        <div className="rounded-xl border border-dashed border-border p-10 text-center">
-          <UtensilsCrossed
-            className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
-            aria-hidden="true"
+        {/* Fehler ist nicht «Reise nicht gefunden» (#319). */}
+        {query.isError && (
+          <QueryError
+            onRetry={() => void query.refetch()}
+            retrying={query.isFetching}
           />
-          <p className="font-medium">{t.menuPlan.notFoundTitle}</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t.menuPlan.notFoundText}
-          </p>
-          <Button asChild variant="outline" className="mt-4">
-            <Link href="/tagebuch">
-              <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              {t.menuPlan.backToTrips}
-            </Link>
-          </Button>
-        </div>
+        )}
+        {!query.isError && (
+          <div className="rounded-xl border border-dashed border-border p-10 text-center">
+            <UtensilsCrossed
+              className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
+              aria-hidden="true"
+            />
+            <p className="font-medium">{t.menuPlan.notFoundTitle}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t.menuPlan.notFoundText}
+            </p>
+            <Button asChild variant="outline" className="mt-4">
+              <Link href="/tagebuch">
+                <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {t.menuPlan.backToTrips}
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
     );
   }

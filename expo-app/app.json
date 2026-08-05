@@ -13,7 +13,12 @@
         "NSCameraUsageDescription": "Wird benötigt, um Fotos für das Reisetagebuch und das Inventar aufzunehmen.",
         "NSLocationWhenInUseUsageDescription": "Wird benötigt, um Wetterdaten und Ausflugsziele in deiner Nähe anzuzeigen.",
         "NSPhotoLibraryUsageDescription": "Wird benötigt, um bestehende Fotos für das Reisetagebuch auszuwählen.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["comgooglemaps", "maps", "waze"]
+      },
+      "appleTeamId": "QF59FHQ44R",
+      "entitlements": {
+        "com.apple.security.application-groups": ["group.ch.campmesser.app"]
       }
     },
     "android": {
@@ -48,32 +53,42 @@
               "title": "SOS",
               "subtitle": "Standort und Notfallnummern",
               "icon": "symbol:cross.case.fill",
-              "params": { "url": "/sos" }
+              "params": {
+                "url": "/sos"
+              }
             },
             {
               "id": "weather",
               "title": "Wetter",
               "subtitle": "Vorhersage und Warnungen",
               "icon": "symbol:cloud.sun.fill",
-              "params": { "url": "/wetter" }
+              "params": {
+                "url": "/wetter"
+              }
             },
             {
               "id": "shopping",
               "title": "Einkauf",
               "subtitle": "Offene Einkäufe abhaken",
               "icon": "symbol:cart.fill",
-              "params": { "url": "/einkauf" }
+              "params": {
+                "url": "/einkauf"
+              }
             },
             {
               "id": "level",
               "title": "Wasserwaage",
               "subtitle": "Wohnwagen ausrichten",
               "icon": "symbol:ruler.fill",
-              "params": { "url": "/wasserwaage" }
+              "params": {
+                "url": "/wasserwaage"
+              }
             }
           ]
         }
-      ]
-    ]
+      ],
+      "@bacons/apple-targets"
+    ],
+    "scheme": "campmesser"
   }
 }

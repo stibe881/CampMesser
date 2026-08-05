@@ -10,12 +10,18 @@
  * frische Antwort vom Server ihn stillschweigend wieder entfernt. Genau
  * dieser stille Verlust ist schlimmer als eine Fehlermeldung.
  *
- * WAS HIER LIEGT: Nur Häkchen von Pack- und Einkaufsliste. Das sind die
- * Handgriffe, die man tatsächlich ohne Empfang macht, und sie sind
- * IDEMPOTENT – nachgeschickt wird «Eintrag 42 ist abgehakt», nicht «schalte
- * um». Doppelt ausgeführt schadet also nichts, und der letzte Stand
- * gewinnt. Neue Einträge, Löschungen oder Umsortierungen bleiben bewusst
- * draussen: Dort bräuchte es echte Konfliktauflösung.
+ * WAS HIER LIEGT: Häkchen von Packliste, Einkaufsliste und Ämtli-Plan.
+ * Das sind die Handgriffe, die man tatsächlich ohne Empfang macht, und sie
+ * sind IDEMPOTENT – nachgeschickt wird «Eintrag 42 ist abgehakt», nicht
+ * «schalte um». Doppelt ausgeführt schadet also nichts, und der letzte
+ * Stand gewinnt. Neue Einträge, Löschungen oder Umsortierungen bleiben
+ * bewusst draussen: Dort bräuchte es echte Konfliktauflösung.
+ *
+ * DER ÄMTLI-PLAN KAM MIT #320 DAZU, und zwar aus demselben Grund wie die
+ * anderen beiden: Abgehakt wird er auf dem Platz – also genau dort, wo es
+ * keinen Empfang gibt. Dass ein Haken auf der Packliste überlebte und
+ * einer auf «Abwasch erledigt» verschwand, war ein Unterschied, den
+ * niemand erklären kann.
  *
  * SPEICHERORT localStorage (nicht IndexedDB wie der Abfrage-Speicher): Die
  * Warteschlange ist winzig, und beim Schliessen der Seite muss sie sicher
@@ -23,7 +29,7 @@
  */
 
 /** Welche Liste ein Häkchen betrifft. */
-export type ToggleKind = "packing" | "shopping";
+export type ToggleKind = "packing" | "shopping" | "chore";
 
 export interface QueuedToggle {
   /** Eindeutig pro Eintrag: mehrfaches Umschalten ersetzt sich selbst. */
@@ -38,6 +44,22 @@ export interface QueuedToggle {
 }
 
 const STORAGE_KEY = "campmesser.offlineQueue";
+
+/**
+ * Gültige Art? Als Funktion statt als Aufzählung im Filter: Beim Lesen
+ * liegen auch Einträge im Speicher, die eine ÄLTERE Fassung der App
+ * geschrieben hat – oder eine neuere, falls jemand zwei Geräte
+ * unterschiedlich aktuell hat. Unbekannte Arten fliegen still raus,
+ * statt beim Senden in einen Zweig zu laufen, den es nicht gibt.
+ */
+const TOGGLE_KINDS: readonly ToggleKind[] = ["packing", "shopping", "chore"];
+
+export function isToggleKind(value: unknown): value is ToggleKind {
+  return (
+    typeof value === "string" &&
+    (TOGGLE_KINDS as readonly string[]).includes(value)
+  );
+}
 
 /** Mehr als das wird nicht gesammelt – dann stimmt etwas anderes nicht. */
 export const QUEUE_LIMIT = 500;
@@ -83,8 +105,7 @@ export function loadQueue(): QueuedToggle[] {
         typeof (item as QueuedToggle).id === "string" &&
         typeof (item as QueuedToggle).itemId === "number" &&
         typeof (item as QueuedToggle).checked === "boolean" &&
-        ((item as QueuedToggle).kind === "packing" ||
-          (item as QueuedToggle).kind === "shopping")
+        isToggleKind((item as QueuedToggle).kind)
     );
   } catch {
     return [];

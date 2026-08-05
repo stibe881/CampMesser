@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { fmtWeekdayDay } from "@/lib/dateFormat";
 import { useParams } from "wouter";
 import {
   AlertTriangle,
@@ -248,13 +249,7 @@ export default function SharedSpotPage() {
                     <span className="w-16 font-medium">
                       {i === 0
                         ? t.common.today
-                        : new Date(d.date).toLocaleDateString(
-                            LOCALE_TAGS[lang],
-                            {
-                              weekday: "short",
-                              day: "numeric",
-                            }
-                          )}
+                        : fmtWeekdayDay(new Date(d.date), lang)}
                     </span>
                     <span className="flex-1 text-muted-foreground">
                       {describeWeatherCode(d.weatherCode, lang).label}

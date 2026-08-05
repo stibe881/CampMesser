@@ -11,6 +11,8 @@
  * sind die kantonale Fischereiverordnung und das Patent.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
+import { fmtMedium } from "@/lib/dateFormat";
+import { useConfirm } from "@/components/ConfirmDialog";
 import {
   AlertTriangle,
   BadgeInfo,
@@ -92,16 +94,13 @@ function todayIso(): string {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
-function fmtDate(iso: string, lang: Language): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+/** ISO-Tag ohne Zeitzonen-Versatz: «2026-08-07» → «7. Aug. 2026». */
+function fmtIsoDay(iso: string, lang: Language): string {
+  return fmtMedium(new Date(`${iso}T00:00:00`), lang);
 }
 
 /** Tag und Monat ohne Jahr, z. B. «1. Oktober» – für die Schonzeit-Fenster. */
-function fmtDayMonth(month: number, day: number, lang: Language): string {
+function fmtMonthDay(month: number, day: number, lang: Language): string {
   return new Date(Date.UTC(2000, month - 1, day)).toLocaleDateString(
     LOCALE_TAGS[lang],
     { day: "numeric", month: "long", timeZone: "UTC" }
@@ -110,8 +109,8 @@ function fmtDayMonth(month: number, day: number, lang: Language): string {
 
 function fmtWindow(window: DayWindow, lang: Language): [string, string] {
   return [
-    fmtDayMonth(window.fromMonth, window.fromDay, lang),
-    fmtDayMonth(window.toMonth, window.toDay, lang),
+    fmtMonthDay(window.fromMonth, window.fromDay, lang),
+    fmtMonthDay(window.toMonth, window.toDay, lang),
   ];
 }
 
@@ -147,6 +146,7 @@ const HINT_STYLES: Record<CatchHint["level"], string> = {
 };
 
 export default function FishingLog() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const tf = t.fishing;
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -413,7 +413,10 @@ export default function FishingLog() {
           <p className="font-semibold">{tf.legalTitle}</p>
           <p className="mt-1">{tf.legalText}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            {tf.legalSource(VBGF_VERSION, fmtDate(FISHING_DATA_UPDATED, lang))}
+            {tf.legalSource(
+              VBGF_VERSION,
+              fmtIsoDay(FISHING_DATA_UPDATED, lang)
+            )}
           </p>
         </div>
       </div>
@@ -506,7 +509,7 @@ export default function FishingLog() {
                     )}
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-muted-foreground">
-                        {fmtDate(entry.caughtAt, lang)}
+                        {fmtIsoDay(entry.caughtAt, lang)}
                         {entry.caughtTime ? ` · ${entry.caughtTime}` : ""}
                         {` · ${entry.water}`}
                       </p>
@@ -559,8 +562,8 @@ export default function FishingLog() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => {
-                          if (confirm(tf.deleteConfirm(name))) {
+                        onClick={async () => {
+                          if (await ask({ title: tf.deleteConfirm(name) })) {
                             removeMutation.mutate({ id: entry.id });
                           }
                         }}
@@ -606,7 +609,7 @@ export default function FishingLog() {
                   </span>
                   {record.bestOn && (
                     <span className="text-xs text-muted-foreground">
-                      {fmtDate(record.bestOn, lang)}
+                      {fmtIsoDay(record.bestOn, lang)}
                     </span>
                   )}
                   <span className="ml-auto text-xs text-muted-foreground">

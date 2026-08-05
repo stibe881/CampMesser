@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { fmtMedium, fmtNumeric, fmtWeekdayDay } from "@/lib/dateFormat";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
 import { Link, useParams } from "wouter";
@@ -41,6 +42,7 @@ import {
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import QueryError from "@/components/QueryError";
 import LazySection from "@/components/LazySection";
 import LoginPrompt from "@/components/LoginPrompt";
 import PhotoGallery from "@/components/PhotoGallery";
@@ -488,10 +490,7 @@ function OfflineMapSection({
                 )}
                 {pack.savedAt
                   ? ` · ${t.spotDetail.offlineMapSavedAt(
-                      new Date(pack.savedAt).toLocaleDateString(
-                        LOCALE_TAGS[lang],
-                        { day: "2-digit", month: "2-digit", year: "numeric" }
-                      )
+                      fmtNumeric(new Date(pack.savedAt), lang)
                     )}`
                   : ""}
               </p>
@@ -838,10 +837,24 @@ export default function SpotDetailPage() {
     return (
       <div className="container py-6">
         <PageHeader
-          title={t.spotDetail.notFoundTitle}
+          title={
+            // «Nicht gefunden» ist eine Aussage über den Platz – die darf
+            // nur fallen, wenn die Liste tatsächlich geladen wurde (#319).
+            // Antwortet der Server nicht, wäre sie schlicht falsch: Der
+            // Platz existiert, wir wissen es nur gerade nicht.
+            spotsQuery.isError
+              ? t.spotDetail.fallbackTitle
+              : t.spotDetail.notFoundTitle
+          }
           backHref="/zeltplaetze"
           backLabel={t.spotDetail.backLabel}
         />
+        {spotsQuery.isError && (
+          <QueryError
+            onRetry={() => void spotsQuery.refetch()}
+            retrying={spotsQuery.isFetching}
+          />
+        )}
       </div>
     );
   }
@@ -1295,13 +1308,7 @@ export default function SpotDetailPage() {
                     <span className="w-16 font-medium">
                       {i === 0
                         ? t.common.today
-                        : new Date(d.date).toLocaleDateString(
-                            LOCALE_TAGS[lang],
-                            {
-                              weekday: "short",
-                              day: "numeric",
-                            }
-                          )}
+                        : fmtWeekdayDay(new Date(d.date), lang)}
                     </span>
                     <span className="flex-1 text-muted-foreground">
                       {describeWeatherCode(d.weatherCode, lang).label}
@@ -1649,15 +1656,8 @@ export default function SpotDetailPage() {
                       className="h-3.5 w-3.5 shrink-0"
                       aria-hidden="true"
                     />
-                    {new Date(`${trip.startDate}T00:00:00`).toLocaleDateString(
-                      LOCALE_TAGS[lang],
-                      {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      }
-                    )}{" "}
-                    · {tripNights(trip.startDate, trip.endDate)}{" "}
+                    {fmtMedium(new Date(`${trip.startDate}T00:00:00`), lang)} ·{" "}
+                    {tripNights(trip.startDate, trip.endDate)}{" "}
                     {tripNights(trip.startDate, trip.endDate) === 1
                       ? t.common.night
                       : t.common.nights}

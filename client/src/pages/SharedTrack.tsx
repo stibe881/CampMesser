@@ -10,6 +10,7 @@
  * Reise-Zuordnung. Geteilt wird die Wanderung, nicht das Konto.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
+import { fmtLong } from "@/lib/dateFormat";
 import { useParams } from "wouter";
 import { Download, Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
@@ -173,11 +174,7 @@ export default function SharedTrackPage() {
     <div className="container max-w-3xl py-6">
       <PageHeader
         title={track.name}
-        subtitle={startedAt.toLocaleDateString(LOCALE_TAGS[lang], {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        })}
+        subtitle={fmtLong(startedAt, lang)}
         backHref="/"
         backLabel={st.backHome}
       />

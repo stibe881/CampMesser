@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { fmtLong } from "@/lib/dateFormat";
 import { ArrowLeft, Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -126,13 +127,7 @@ export default function ShoppingPrintPage() {
           <p className="mt-1 text-sm">
             {t.shoppingPrint.meta(openItems.length, grouped.length)}
             {" · "}
-            {t.shoppingPrint.printedOn(
-              new Date().toLocaleDateString(LOCALE_TAGS[lang], {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })
-            )}
+            {t.shoppingPrint.printedOn(fmtLong(new Date(), lang))}
           </p>
         </header>
 

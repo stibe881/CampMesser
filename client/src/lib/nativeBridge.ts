@@ -34,6 +34,14 @@ export const NATIVE_MESSAGES = {
   setBadge: "SET_BADGE",
   /** Kurzbefehle fürs lange Drücken setzen (`items: Action[]`). */
   setQuickActions: "SET_QUICK_ACTIONS",
+  /** Daten für die Home-Bildschirm-Widgets (`payload: WidgetPayload`). */
+  setWidgetData: "SET_WIDGET_DATA",
+  /**
+   * Route in der Karten-App öffnen (`appUrl`, `webUrl`). Zwei Adressen,
+   * weil die App-Adresse nur wirkt, wenn die App installiert ist – der
+   * native Rahmen prüft das und nimmt sonst die Web-Adresse.
+   */
+  openDirections: "OPEN_DIRECTIONS",
 } as const;
 
 /** Ereignis nativ → Web: die App möchte, dass wir zu `detail` navigieren. */

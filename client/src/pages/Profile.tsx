@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { fmtMedium } from "@/lib/dateFormat";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 import {
   ArrowRight,
@@ -823,6 +825,7 @@ function HomeLocationCard() {
  * die Anmeldung mit Passwort bleibt daneben immer möglich.
  */
 function PasskeysCard() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
   const supported = useMemo(() => browserSupportsWebAuthn(), []);
@@ -896,10 +899,7 @@ function PasskeysCard() {
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {t.profile.passkeyAddedOn(
-                      new Date(passkey.createdAt).toLocaleDateString(
-                        LOCALE_TAGS[lang],
-                        { day: "numeric", month: "short", year: "numeric" }
-                      )
+                      fmtMedium(new Date(passkey.createdAt), lang)
                     )}
                   </span>
                 </p>
@@ -909,8 +909,12 @@ function PasskeysCard() {
                   size="sm"
                   className="shrink-0 text-muted-foreground hover:text-destructive"
                   disabled={removeMutation.isPending}
-                  onClick={() => {
-                    if (confirm(t.profile.passkeyRemoveConfirm(passkey.name))) {
+                  onClick={async () => {
+                    if (
+                      await ask({
+                        title: t.profile.passkeyRemoveConfirm(passkey.name),
+                      })
+                    ) {
                       removeMutation.mutate({ id: passkey.id });
                     }
                   }}
@@ -1598,13 +1602,7 @@ export default function ProfilePage() {
       <p className="mt-2 text-center text-xs text-muted-foreground/70">
         {t.profile.versionLine(__APP_VERSION__)}
         {__APP_VERSION__ !== "dev" &&
-          t.profile.buildDate(
-            new Date(__APP_BUILT_AT__).toLocaleDateString(LOCALE_TAGS[lang], {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })
-          )}
+          t.profile.buildDate(fmtMedium(new Date(__APP_BUILT_AT__), lang))}
       </p>
     </div>
   );

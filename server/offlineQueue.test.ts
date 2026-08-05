@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  isToggleKind,
   mergeToggle,
   toggleId,
   QUEUE_LIMIT,
@@ -59,5 +60,49 @@ describe("mergeToggle", () => {
     expect(queue).toHaveLength(QUEUE_LIMIT);
     // Die zuletzt eingereihten bleiben – die sind am ehesten noch gewollt.
     expect(queue[queue.length - 1].itemId).toBe(QUEUE_LIMIT + 9);
+  });
+});
+
+describe("Arten der Warteschlange (#320)", () => {
+  it("kennt Packliste, Einkauf und Ämtli", () => {
+    expect(isToggleKind("packing")).toBe(true);
+    expect(isToggleKind("shopping")).toBe(true);
+    expect(isToggleKind("chore")).toBe(true);
+  });
+
+  it("weist Unbekanntes ab", () => {
+    // Einträge aus einer anderen App-Fassung dürfen nicht in einen
+    // Sende-Zweig laufen, den es hier nicht gibt.
+    expect(isToggleKind("menu")).toBe(false);
+    expect(isToggleKind(42)).toBe(false);
+    expect(isToggleKind(undefined)).toBe(false);
+  });
+
+  it("die Schlüssel der drei Arten kollidieren nicht", () => {
+    // Gleiche Id in zwei Listen ist der Normalfall – ohne das Präfix
+    // würde ein Ämtli das Häkchen einer Packliste überschreiben.
+    expect(toggleId("packing", 7)).not.toBe(toggleId("chore", 7));
+    expect(
+      mergeToggle(
+        [
+          {
+            id: toggleId("packing", 7),
+            kind: "packing",
+            itemId: 7,
+            checked: true,
+            at: 1,
+            tries: 0,
+          },
+        ],
+        {
+          id: toggleId("chore", 7),
+          kind: "chore",
+          itemId: 7,
+          checked: false,
+          at: 2,
+          tries: 0,
+        }
+      )
+    ).toHaveLength(2);
   });
 });

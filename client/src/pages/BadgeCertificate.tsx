@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { fmtLong } from "@/lib/dateFormat";
 import { useParams } from "wouter";
 import { ArrowLeft, Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,14 +18,6 @@ import { isStandaloneApp } from "@/lib/standalone";
  * Doppelrahmen – bewusst schwarz-weiss-tauglich, das PDF entsteht über den
  * Browser-Druckdialog (Muster HuntPrint inkl. Standalone-Fallback).
  */
-
-function fmtDate(value: Date | string, lang: Language): string {
-  return new Date(value).toLocaleDateString(LOCALE_TAGS[lang], {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
 
 export default function BadgeCertificatePage() {
   const { lang, t } = useI18n();
@@ -161,7 +154,9 @@ export default function BadgeCertificatePage() {
                       {pick(def.title, lang)}
                     </span>
                     <span className="mt-0.5 block text-xs">
-                      {tc.earnedOn(fmtDate(earnedAtById[def.id], lang))}
+                      {tc.earnedOn(
+                        fmtLong(new Date(earnedAtById[def.id]), lang)
+                      )}
                     </span>
                   </li>
                 ))}
@@ -176,7 +171,7 @@ export default function BadgeCertificatePage() {
             aria-hidden="true"
           />
           <p className="mt-4 text-sm">
-            {tc.issuedOn(fmtDate(new Date(), lang))}
+            {tc.issuedOn(fmtLong(new Date(), lang))}
           </p>
           <p className="mt-6 text-xs">{tc.footer}</p>
         </div>

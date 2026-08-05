@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { fmtWeekdayShort } from "@/lib/dateFormat";
 import {
   AlertTriangle,
   BatteryCharging,
@@ -416,13 +417,7 @@ export default function EnergyPage() {
 
   /** Prognosetag als kurzes Datum (Mittag, damit die Zeitzone nichts verschiebt). */
   const formatForecastDay = (date: string) =>
-    date
-      ? new Date(`${date}T12:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-          weekday: "short",
-          day: "numeric",
-          month: "short",
-        })
-      : "";
+    date ? fmtWeekdayShort(new Date(`${date}T12:00:00`), lang) : "";
 
   const timeFormat: Intl.DateTimeFormatOptions = {
     hour: "2-digit",
