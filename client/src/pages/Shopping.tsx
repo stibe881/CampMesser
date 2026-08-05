@@ -22,6 +22,8 @@ import { Link } from "wouter";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import PageHeader from "@/components/PageHeader";
+import DataAge from "@/components/DataAge";
+import { enqueueToggle } from "@/lib/offlineQueue";
 import LoginPrompt from "@/components/LoginPrompt";
 import ShoppingItemDetailsPopover from "@/components/ShoppingItemDetailsPopover";
 import ShoppingBookingDialog from "@/components/ShoppingBookingDialog";
@@ -224,9 +226,31 @@ export default function ShoppingPage() {
     onError: () => toast.error(t.shopping.detailsFailed),
   });
   const toggleMutation = trpc.shopping.toggle.useMutation({
-    onMutate: () => hapticTick(),
+    /**
+     * Optimistisch abhaken: Im Laden will man nicht auf die Antwort warten,
+     * und ohne Empfang käme sie gar nicht. Ohne Verbindung wandert das
+     * Häkchen zusätzlich in die Warteschlange (lib/offlineQueue.ts) – eine
+     * bloss angehaltene Mutation überlebt den nächsten App-Start nicht.
+     */
+    onMutate: async input => {
+      hapticTick();
+      if (!navigator.onLine) {
+        enqueueToggle("shopping", input.id, input.checked);
+      }
+      await utils.shopping.list.cancel(listInput);
+      const prev = utils.shopping.list.getData(listInput);
+      utils.shopping.list.setData(listInput, old =>
+        old?.map(item =>
+          item.id === input.id ? { ...item, checked: input.checked } : item
+        )
+      );
+      return { prev };
+    },
     onSuccess: invalidate,
-    onError: () => toast.error(t.common.actionFailed),
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) utils.shopping.list.setData(listInput, ctx.prev);
+      toast.error(t.common.actionFailed);
+    },
   });
   const removeMutation = trpc.shopping.remove.useMutation({
     onSuccess: invalidate,
@@ -462,6 +486,7 @@ export default function ShoppingPage() {
   return (
     <div className="container max-w-2xl py-6">
       <PageHeader title={t.shopping.title} subtitle={t.shopping.subtitle} />
+      <DataAge updatedAt={query.dataUpdatedAt} />
 
       {/* Listen-Umschalter (#215): Chips mit Anzahl offener Einträge */}
       {target.lists.length > 0 && (

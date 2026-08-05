@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import DataAge from "@/components/DataAge";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import {
@@ -801,6 +802,7 @@ export default function InventoryPage() {
   return (
     <div className="container py-6">
       <PageHeader title={t.inventory.title} subtitle={t.inventory.subtitle} />
+      <DataAge updatedAt={query.dataUpdatedAt} />
 
       {/* Übersicht */}
       <div className="mb-6 grid grid-cols-3 gap-3">

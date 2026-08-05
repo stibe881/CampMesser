@@ -48,6 +48,7 @@ import { Link, useSearch } from "wouter";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import PageHeader from "@/components/PageHeader";
+import DataAge from "@/components/DataAge";
 import LoginPrompt from "@/components/LoginPrompt";
 import PhotoGallery from "@/components/PhotoGallery";
 import { Button } from "@/components/ui/button";
@@ -3697,6 +3698,7 @@ export default function TripsPage() {
   return (
     <div className="container max-w-3xl py-6">
       <PageHeader title={t.trips.title} subtitle={t.trips.subtitle} />
+      <DataAge updatedAt={tripsQuery.dataUpdatedAt} />
 
       {/* «Neue Reise» von Hand oder aus einer Vorlage (#284) */}
       <div className="mb-6 flex flex-wrap gap-2">

@@ -24,6 +24,8 @@ import {
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import DataAge from "@/components/DataAge";
+import { enqueueToggle } from "@/lib/offlineQueue";
 import PackHistorySuggestions from "@/components/PackHistorySuggestions";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
@@ -309,6 +311,13 @@ export default function PackListDetailPage() {
   const toggleMutation = trpc.packing.toggleItem.useMutation({
     onMutate: async input => {
       hapticTick();
+      // Ohne Verbindung wird die Mutation nur angehalten und ginge beim
+      // nächsten App-Start verloren – deshalb zusätzlich in die
+      // Warteschlange (lib/offlineQueue.ts). Doppelt gesendet schadet
+      // nicht: «Eintrag X ist abgehakt» ist idempotent.
+      if (!navigator.onLine) {
+        enqueueToggle("packing", input.id, input.checked);
+      }
       await utils.packing.items.cancel({ listId });
       const prev = utils.packing.items.getData({ listId });
       utils.packing.items.setData({ listId }, old =>
@@ -755,6 +764,7 @@ export default function PackListDetailPage() {
         backHref="/packlisten"
         backLabel={t.packListDetail.backLabel}
       />
+      <DataAge updatedAt={query.dataUpdatedAt} />
 
       {/* Packvorschlag aus vergangenen Reisen (#277) – erscheint nur, wenn
           es am selben Platz schon frühere Listen gab */}

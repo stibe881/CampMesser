@@ -46,6 +46,7 @@ export const de = {
   },
   shell: {
     toHome: "Zur Startseite",
+    skipToContent: "Zum Inhalt springen",
     themeLight: "Helles Design aktivieren",
     themeDark: "Dunkles Design aktivieren",
     themeAuto: "Automatisches Design (System) aktivieren",
@@ -65,6 +66,15 @@ export const de = {
       firstAid: "Erste Hilfe",
       sos: "SOS",
     },
+  },
+  /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  offline: {
+    banner: "Keine Verbindung – du siehst gespeicherte Daten.",
+    dataAge: (time: string) => `Stand von ${time}`,
+    synced: (count: number) =>
+      count === 1
+        ? "1 Änderung nachgeschickt."
+        : `${count} Änderungen nachgeschickt.`,
   },
   home: {
     heroImageAlt:

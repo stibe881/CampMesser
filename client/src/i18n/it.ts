@@ -45,6 +45,7 @@ export const it: Translation = {
   },
   shell: {
     toHome: "Alla pagina iniziale",
+    skipToContent: "Vai al contenuto",
     themeLight: "Attiva il tema chiaro",
     themeDark: "Attiva il tema scuro",
     themeAuto: "Attiva il tema automatico (sistema)",
@@ -64,6 +65,13 @@ export const it: Translation = {
       firstAid: "Primo soccorso",
       sos: "SOS",
     },
+  },
+  /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  offline: {
+    banner: "Nessuna connessione – vedi dati salvati.",
+    dataAge: (time: string) => `Aggiornato alle ${time}`,
+    synced: (count: number) =>
+      count === 1 ? "1 modifica inviata." : `${count} modifiche inviate.`,
   },
   home: {
     recentSearches: "Ricerche recenti:",

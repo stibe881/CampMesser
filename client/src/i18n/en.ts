@@ -45,6 +45,7 @@ export const en: Translation = {
   },
   shell: {
     toHome: "Go to home page",
+    skipToContent: "Skip to content",
     themeLight: "Switch to light theme",
     themeDark: "Switch to dark theme",
     themeAuto: "Switch to automatic theme (system)",
@@ -64,6 +65,13 @@ export const en: Translation = {
       firstAid: "First aid",
       sos: "SOS",
     },
+  },
+  /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  offline: {
+    banner: "No connection – you are seeing stored data.",
+    dataAge: (time: string) => `As of ${time}`,
+    synced: (count: number) =>
+      count === 1 ? "1 change sent." : `${count} changes sent.`,
   },
   home: {
     heroImageAlt:

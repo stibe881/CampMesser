@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
 import PageHeader from "@/components/PageHeader";
+import DataAge from "@/components/DataAge";
 import ShoppingTargetSelect, {
   useShoppingTarget,
 } from "@/components/ShoppingTargetSelect";
@@ -469,6 +470,7 @@ export default function FoodPage() {
           storage === "dry" ? t.food.subtitleDry : t.food.subtitleCooled
         }
       />
+      <DataAge updatedAt={query.dataUpdatedAt} />
 
       {/* Lager-Umschalter (#233): Kühlbox oder Trockenvorrat-Schrank */}
       <div
