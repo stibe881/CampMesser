@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
 import { Link, useParams } from "wouter";
@@ -228,6 +229,7 @@ function SectionAddForm({
 }
 
 export default function PackListDetailPage() {
+  const ask = useConfirm();
   const params = useParams<{ id: string }>();
   const listId = Number(params.id);
   const { user, isAuthenticated, loading } = useAuth();
@@ -940,8 +942,14 @@ export default function PackListDetailPage() {
               variant="outline"
               size="sm"
               disabled={uncheckAllMutation.isPending}
-              onClick={() => {
-                if (confirm(t.packListDetail.uncheckAllConfirm(checkedCount))) {
+              onClick={async () => {
+                if (
+                  await ask({
+                    title: t.packListDetail.uncheckAllConfirm(checkedCount),
+                    confirmLabel: t.common.confirmReset,
+                    destructive: false,
+                  })
+                ) {
                   uncheckAllMutation.mutate({ listId });
                 }
               }}
@@ -1540,8 +1548,12 @@ export default function PackListDetailPage() {
                   size="icon"
                   className="h-7 w-7 text-muted-foreground hover:text-destructive"
                   disabled={setPersonsMutation.isPending}
-                  onClick={() => {
-                    if (confirm(t.packListDetail.removePersonConfirm(person))) {
+                  onClick={async () => {
+                    if (
+                      await ask({
+                        title: t.packListDetail.removePersonConfirm(person),
+                      })
+                    ) {
                       setPersonsMutation.mutate({
                         listId,
                         persons: persons.filter(p => p !== person),

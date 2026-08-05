@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useConfirm } from "@/components/ConfirmDialog";
 import {
   AlertTriangle,
   Binoculars,
@@ -296,6 +297,7 @@ function SightingsSection({
 }: {
   onOpenEntry: (entry: NatureEntry) => void;
 }) {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const ts = t.nature.sightings;
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -598,8 +600,10 @@ function SightingsSection({
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={() => {
-                      if (confirm(ts.deleteConfirm(sighting.title))) {
+                    onClick={async () => {
+                      if (
+                        await ask({ title: ts.deleteConfirm(sighting.title) })
+                      ) {
                         removeMutation.mutate({ id: sighting.id });
                       }
                     }}

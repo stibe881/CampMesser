@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
 import {
@@ -38,6 +39,7 @@ import { useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import KitchenConverterDialog from "@/components/KitchenConverter";
 import PageHeader from "@/components/PageHeader";
+import QueryError from "@/components/QueryError";
 import ServingsStepper from "@/components/ServingsStepper";
 import ShoppingTargetSelect, {
   useShoppingTarget,
@@ -873,6 +875,7 @@ const methodFilters = ["alle", "Gaskocher", "Offenes Feuer"] as const;
 const timeFilters = ["alle", "20", "45"] as const;
 
 export default function RecipesPage() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const [method, setMethod] = useState<(typeof methodFilters)[number]>("alle");
   const [maxTime, setMaxTime] = useState<string>("alle");
@@ -1400,6 +1403,18 @@ export default function RecipesPage() {
         ))}
       </div>
 
+      {/* Die mitgelieferten Rezepte stehen immer da – die EIGENEN kommen
+          vom Server (#319). Fallen sie aus, fehlen sie kommentarlos
+          mitten in der Liste, und es sieht aus, als seien sie weg. */}
+      {customQuery.isError && (
+        <div className="mb-4">
+          <QueryError
+            onRetry={() => void customQuery.refetch()}
+            retrying={customQuery.isFetching}
+          />
+        </div>
+      )}
+
       {filtered.length === 0 && (
         <p className="py-10 text-center text-muted-foreground">
           {favoritesOnly && favorites.length === 0
@@ -1687,13 +1702,15 @@ export default function RecipesPage() {
                       variant="outline"
                       size="sm"
                       className="flex-1 text-destructive hover:text-destructive"
-                      onClick={() => {
+                      onClick={async () => {
                         const row = customRowFor(selected);
                         if (
                           row &&
-                          confirm(
-                            t.recipes.deleteConfirm(pick(selected.name, lang))
-                          )
+                          (await ask({
+                            title: t.recipes.deleteConfirm(
+                              pick(selected.name, lang)
+                            ),
+                          }))
                         ) {
                           removeMutation.mutate({ id: row.id });
                           // Gelöschte eigene Rezepte auch aus den Favoriten räumen

@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { fmtLong, fmtWeekdayShort } from "@/lib/dateFormat";
 import { useParams } from "wouter";
 import { ArrowLeft, Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -92,11 +93,7 @@ export default function MenuPlanPrintPage() {
   };
 
   const formatDay = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-    });
+    fmtWeekdayShort(new Date(`${iso}T00:00:00`), lang);
 
   if (loading || (isAuthenticated && menuQuery.isLoading)) {
     return (
@@ -176,13 +173,7 @@ export default function MenuPlanPrintPage() {
             {" · "}
             {t.menuPlan.daysCount(days.length)}
             {" · "}
-            {t.menuPlanPrint.printedOn(
-              new Date().toLocaleDateString(LOCALE_TAGS[lang], {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })
-            )}
+            {t.menuPlanPrint.printedOn(fmtLong(new Date(), lang))}
           </p>
         </header>
 

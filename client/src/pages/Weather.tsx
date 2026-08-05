@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { fmtWeekdayDay } from "@/lib/dateFormat";
 import {
   AlertTriangle,
   ArrowLeftRight,
@@ -894,10 +895,7 @@ function CompareSection({
                           >
                             {i === 0
                               ? t.common.today
-                              : new Date(d.date).toLocaleDateString(
-                                  LOCALE_TAGS[lang],
-                                  { weekday: "short", day: "numeric" }
-                                )}
+                              : fmtWeekdayDay(new Date(d.date), lang)}
                           </th>
                           <td className="py-2.5 pr-3">
                             <CompareDayCell day={d} />
@@ -2197,10 +2195,7 @@ export default function WeatherPage() {
                 const dayLabel =
                   i === 0
                     ? t.common.today
-                    : new Date(d.date).toLocaleDateString(LOCALE_TAGS[lang], {
-                        weekday: "short",
-                        day: "numeric",
-                      });
+                    : fmtWeekdayDay(new Date(d.date), lang);
                 const isOpen = openDay === d.date;
                 return (
                   <div key={d.date}>
@@ -2374,10 +2369,7 @@ export default function WeatherPage() {
                   {data.daily.slice(7).map(d => (
                     <div key={d.date} className="flex items-center gap-3 py-2">
                       <p className="w-16 text-sm font-medium">
-                        {new Date(d.date).toLocaleDateString(
-                          LOCALE_TAGS[lang],
-                          { weekday: "short", day: "numeric" }
-                        )}
+                        {fmtWeekdayDay(new Date(d.date), lang)}
                       </p>
                       <WeatherIcon
                         code={d.weatherCode}

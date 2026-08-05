@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { fmtShort } from "@/lib/dateFormat";
 import { Loader2, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -141,11 +142,7 @@ export default function ShoppingBookingDialog({
     trip.location?.trim() ||
     trip.spotName ||
     t.shopping.bookTripFallback;
-  const fmtDay = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-      day: "numeric",
-      month: "short",
-    });
+  const fmtDay = (iso: string) => fmtShort(new Date(`${iso}T00:00:00`), lang);
 
   const submit = async () => {
     const trip = Number(tripId);

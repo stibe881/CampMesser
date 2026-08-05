@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { fmtLong } from "@/lib/dateFormat";
 import { Sparkles } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
@@ -67,11 +68,7 @@ export function WhatsNewDialog({
           {blocks.map(block => (
             <section key={block.id}>
               <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {new Date(block.date).toLocaleDateString(LOCALE_TAGS[lang], {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
+                {fmtLong(new Date(block.date), lang)}
               </h3>
               <ul className="mt-1.5 grid gap-1.5">
                 {block.entries.map((entry, index) => (

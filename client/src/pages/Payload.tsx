@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { Link } from "wouter";
 import {
   AlertTriangle,
@@ -81,6 +82,7 @@ function StatusIcon({ status }: { status: PayloadStatus }) {
 }
 
 export default function PayloadPage() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const { isAuthenticated } = useAuth();
 
@@ -183,8 +185,9 @@ export default function PayloadPage() {
     setEditorOpen(true);
   };
 
-  const removeVehicle = (vehicle: VehicleProfile) => {
-    if (!confirm(t.payload.deleteVehicleConfirm(vehicle.name))) return;
+  const removeVehicle = async (vehicle: VehicleProfile) => {
+    if (!(await ask({ title: t.payload.deleteVehicleConfirm(vehicle.name) })))
+      return;
     writeVehicles(vehicles.filter(v => v.id !== vehicle.id));
     // Gelöschte Fahrzeuge dürfen nicht als Auswahl stehen bleiben
     const patch: Partial<PayloadPlan> = {};

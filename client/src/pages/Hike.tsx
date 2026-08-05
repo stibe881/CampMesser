@@ -16,6 +16,8 @@
  * holt sich den Standort auf Klick selbst.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
+import { fmtDayMonth, fmtNumeric } from "@/lib/dateFormat";
+import { useConfirm } from "@/components/ConfirmDialog";
 import {
   Download,
   Footprints,
@@ -223,6 +225,7 @@ function TrackMap({ trackId }: { trackId: number }) {
 }
 
 export default function HikePage() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const { recording, geoError, now } = useHikeRecording();
@@ -350,14 +353,7 @@ export default function HikePage() {
     }
     setFinished(done);
     setTripId(done.tripId);
-    setName(
-      t.hike.defaultName(
-        new Date(done.startedAt).toLocaleDateString(LOCALE_TAGS[lang], {
-          day: "2-digit",
-          month: "2-digit",
-        })
-      )
-    );
+    setName(t.hike.defaultName(fmtDayMonth(new Date(done.startedAt), lang)));
   };
 
   /** GPX-Datei erzeugen und herunterladen (rein im Browser, offline). */
@@ -553,8 +549,14 @@ export default function HikePage() {
                 <Button
                   variant="ghost"
                   className="text-muted-foreground hover:text-destructive"
-                  onClick={() => {
-                    if (!window.confirm(t.hike.discardConfirm)) return;
+                  onClick={async () => {
+                    if (
+                      !(await ask({
+                        title: t.hike.discardConfirm,
+                        confirmLabel: t.common.confirmDiscard,
+                      }))
+                    )
+                      return;
                     discardHikeRecording();
                   }}
                 >
@@ -661,10 +663,7 @@ export default function HikePage() {
                     <div className="min-w-0">
                       <p className="font-semibold">{track.name}</p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
-                        {new Date(track.startedAt).toLocaleDateString(
-                          LOCALE_TAGS[lang],
-                          { day: "2-digit", month: "2-digit", year: "numeric" }
-                        )}
+                        {fmtNumeric(new Date(track.startedAt), lang)}
                         {" · "}
                         {new Date(track.startedAt).toLocaleTimeString(
                           LOCALE_TAGS[lang],
@@ -718,8 +717,9 @@ export default function HikePage() {
                         variant="ghost"
                         size="icon"
                         aria-label={t.hike.deleteAria(track.name)}
-                        onClick={() => {
-                          if (!window.confirm(t.hike.deleteConfirm)) return;
+                        onClick={async () => {
+                          if (!(await ask({ title: t.hike.deleteConfirm })))
+                            return;
                           removeMutation.mutate(
                             { id: track.id },
                             {

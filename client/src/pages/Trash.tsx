@@ -7,6 +7,8 @@
  * dem nichts mehr zu retten ist.
  */
 import { useMemo } from "react";
+import { fmtPlain } from "@/lib/dateFormat";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { RotateCcw, Trash2, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
@@ -25,6 +27,7 @@ import {
 } from "@shared/trash";
 
 export default function TrashPage() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const tr = t.trash;
   const { isAuthenticated, loading } = useAuth();
@@ -105,11 +108,7 @@ export default function TrashPage() {
                         : ""}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      {tr.deletedOn(
-                        new Date(entry.deletedAt).toLocaleDateString(
-                          LOCALE_TAGS[lang]
-                        )
-                      )}{" "}
+                      {tr.deletedOn(fmtPlain(new Date(entry.deletedAt), lang))}{" "}
                       · {tr.daysLeft(left)}
                     </p>
                   </div>
@@ -127,8 +126,10 @@ export default function TrashPage() {
                       size="icon"
                       variant="ghost"
                       aria-label={tr.removeAria(entry.label)}
-                      onClick={() => {
-                        if (!window.confirm(tr.removeConfirm(entry.label))) {
+                      onClick={async () => {
+                        if (
+                          !(await ask({ title: tr.removeConfirm(entry.label) }))
+                        ) {
                           return;
                         }
                         remove.mutate({ id: entry.id });
@@ -148,8 +149,14 @@ export default function TrashPage() {
         <Button
           variant="outline"
           className="mt-4 w-full"
-          onClick={() => {
-            if (!window.confirm(tr.emptyConfirm(entries.length))) return;
+          onClick={async () => {
+            if (
+              !(await ask({
+                title: tr.emptyConfirm(entries.length),
+                confirmLabel: t.common.confirmEmpty,
+              }))
+            )
+              return;
             empty.mutate();
           }}
         >

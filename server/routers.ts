@@ -1723,6 +1723,10 @@ export const appRouter = router({
         // Foto- und Beleg-Datei mitputzen: erst Dateinamen sichern, dann
         // DB-Zeile löschen und zuletzt die Dateien auf dem Webspace entfernen.
         const item = await db.getInventoryItem(input.id, ctx.user.id);
+        // Papierkorb (#318): Foto und Beleg bleiben liegen, bis der
+        // Eintrag abläuft – sonst käme der Gegenstand ohne sie zurück.
+        const { capture } = await import("./trash");
+        await capture("gear", input.id, ctx.user.id);
         await db.deleteInventoryItem(input.id, ctx.user.id);
         if (item?.imageFileName || item?.receiptFileName) {
           const { inventoryPhotoStorage, receiptPhotoStorage } =
@@ -2119,6 +2123,11 @@ export const appRouter = router({
     remove: protectedProcedure
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(async ({ ctx, input }) => {
+        // Papierkorb (#318): Die Kiste selbst plus die Ids ihres
+        // Inhalts – deleteStorageBox löscht die Gegenstände nicht, es
+        // setzt bei ihnen nur boxId auf null.
+        const { capture } = await import("./trash");
+        await capture("box", input.id, ctx.user.id);
         await db.deleteStorageBox(input.id, ctx.user.id);
         return { success: true } as const;
       }),
@@ -2519,6 +2528,9 @@ export const appRouter = router({
             message: "Die letzte Einkaufsliste lässt sich nicht löschen.",
           });
         }
+        // Papierkorb (#318): Liste samt Einträgen und Teil-Link.
+        const { capture } = await import("./trash");
+        await capture("shoppingList", input.id, ctx.user.id);
         await db.deleteShoppingList(input.id, ctx.user.id);
         return { success: true } as const;
       }),

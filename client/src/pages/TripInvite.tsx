@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { fmtDate, fmtMedium } from "@/lib/dateFormat";
 import { useLocation, useParams } from "wouter";
 import {
   CalendarDays,
@@ -49,12 +50,7 @@ export default function TripInvitePage() {
     onError: () => toast.error(t.tripInvite.acceptFailed),
   });
 
-  const fmtDate = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+  const fmtDate = (iso: string) => fmtMedium(new Date(`${iso}T00:00:00`), lang);
 
   if (inviteQuery.isLoading || loading) {
     return (

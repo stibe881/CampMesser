@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { fmtLong } from "@/lib/dateFormat";
 import { useParams } from "wouter";
 import { ArrowLeft, Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -165,13 +166,7 @@ export default function PackListPrintPage() {
           <p className="mt-1 text-sm">
             {t.packListPrint.meta(items.length, categoryCount)}
             {" · "}
-            {t.packListPrint.printedOn(
-              new Date().toLocaleDateString(LOCALE_TAGS[lang], {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })
-            )}
+            {t.packListPrint.printedOn(fmtLong(new Date(), lang))}
           </p>
           {personFilter && (
             <p className="mt-1 text-sm font-semibold">

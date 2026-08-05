@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useConfirm } from "@/components/ConfirmDialog";
 import {
   Phone,
   MapPin,
@@ -63,6 +64,7 @@ function currentPosition(): Promise<GeolocationPosition> {
  * zu erzeugen, und «Link deaktivieren» beendet ihn sofort.
  */
 function LocationShareCard() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const utils = trpc.useUtils();
@@ -261,8 +263,14 @@ function LocationShareCard() {
                 size="sm"
                 className="text-muted-foreground hover:text-destructive"
                 disabled={stopMutation.isPending}
-                onClick={() => {
-                  if (!window.confirm(t.locationShare.stopConfirm)) return;
+                onClick={async () => {
+                  if (
+                    !(await ask({
+                      title: t.locationShare.stopConfirm,
+                      confirmLabel: t.common.confirmStop,
+                    }))
+                  )
+                    return;
                   stopMutation.mutate(undefined, {
                     onSuccess: async () => {
                       await utils.location.current.invalidate();

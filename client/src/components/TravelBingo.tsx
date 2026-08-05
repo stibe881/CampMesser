@@ -12,6 +12,7 @@
  * bekommt jede Karte einen eigenen Seed und einen eigenen Namen.
  */
 import { useEffect, useRef, useState } from "react";
+import { useConfirm } from "@/components/ConfirmDialog";
 import {
   Grid3x3,
   PartyPopper,
@@ -49,6 +50,7 @@ import { cn } from "@/lib/utils";
 const CONFETTI = ["🎉", "⭐", "🚗", "🎊", "🏁"];
 
 export default function TravelBingo() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const tb = t.travelBingo;
   const [cards, setCards] = useState<BingoCard[]>(() => loadBingoCards());
@@ -144,8 +146,8 @@ export default function TravelBingo() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (confirm(tb.removeConfirm(name))) {
+                  onClick={async () => {
+                    if (await ask({ title: tb.removeConfirm(name) })) {
                       delete lineCountRef.current[card.id];
                       setCards(prev => prev.filter(c => c.id !== card.id));
                     }

@@ -12,6 +12,7 @@
  * dann das Essen, weil das die nächste Frage ist; dann die Aufgaben.
  */
 import { useMemo } from "react";
+import { fmtWeekdayLong } from "@/lib/dateFormat";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -136,11 +137,7 @@ export default function TodayPage() {
     <div className="container max-w-2xl py-6">
       <PageHeader
         title={td.title}
-        subtitle={new Date().toLocaleDateString(LOCALE_TAGS[lang], {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-        })}
+        subtitle={fmtWeekdayLong(new Date(), lang)}
       />
 
       {tripsQuery.isLoading ? (

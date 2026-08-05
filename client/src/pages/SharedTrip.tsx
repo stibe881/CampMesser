@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { fmtMedium, fmtWeekdayShort } from "@/lib/dateFormat";
 import { useParams } from "wouter";
 import {
   BookHeart,
@@ -252,18 +253,9 @@ export default function SharedTripPage() {
   const title = trip.title || placeName;
   const nights = tripNights(trip.startDate, trip.endDate);
   const fmtDay = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-    });
+    fmtWeekdayShort(new Date(`${iso}T00:00:00`), lang);
   const formatRange = (startDate: string, endDate: string): string => {
-    const fmt = (iso: string) =>
-      new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
+    const fmt = (iso: string) => fmtMedium(new Date(`${iso}T00:00:00`), lang);
     if (startDate === endDate) return fmt(startDate);
     return `${fmt(startDate)} – ${fmt(endDate)}`;
   };

@@ -22,6 +22,7 @@
  * Der Pass ist zum Herzeigen gedacht, deshalb ist er auch druckbar.
  */
 import { useMemo, useState } from "react";
+import { fmtPlain } from "@/lib/dateFormat";
 import { Check, Plus, Printer, Stamp, Users } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -327,9 +328,7 @@ export default function PassportPage() {
               />
               <span className="mt-1 text-sm font-medium">{stamp.place}</span>
               <span className="text-xs text-muted-foreground">
-                {new Date(stamp.firstVisit).toLocaleDateString(
-                  LOCALE_TAGS[lang]
-                )}
+                {fmtPlain(new Date(stamp.firstVisit), lang)}
               </span>
               <span className="text-xs text-muted-foreground">
                 {pp.nights(stamp.nights)}
@@ -382,9 +381,7 @@ export default function PassportPage() {
                       />
                       <span className="min-w-0 flex-1 truncate">{place}</span>
                       <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                        {new Date(trip.startDate).toLocaleDateString(
-                          LOCALE_TAGS[lang]
-                        )}
+                        {fmtPlain(new Date(trip.startDate), lang)}
                       </span>
                     </label>
                   </li>

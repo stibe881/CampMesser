@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { fmtLong, fmtWeekdayLong, fmtWeekdayShort } from "@/lib/dateFormat";
 import { useParams } from "wouter";
 import { ArrowLeft, Loader2, Printer, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -123,24 +124,11 @@ export default function TripPrintPage() {
   };
 
   const fmtDay = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-    });
+    fmtWeekdayShort(new Date(`${iso}T00:00:00`), lang);
   const fmtJournalDay = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    });
+    fmtWeekdayLong(new Date(`${iso}T00:00:00`), lang);
   const formatRange = (startDate: string, endDate: string): string => {
-    const fmt = (iso: string) =>
-      new Date(`${iso}T00:00:00`).toLocaleDateString(LOCALE_TAGS[lang], {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
+    const fmt = (iso: string) => fmtLong(new Date(`${iso}T00:00:00`), lang);
     if (startDate === endDate) return fmt(startDate);
     return `${fmt(startDate)} – ${fmt(endDate)}`;
   };
@@ -243,13 +231,7 @@ export default function TripPrintPage() {
             {" · "}
             {t.trips.nightsCount(nights)}
             {" · "}
-            {t.tripPrint.printedOn(
-              new Date().toLocaleDateString(LOCALE_TAGS[lang], {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })
-            )}
+            {t.tripPrint.printedOn(fmtLong(new Date(), lang))}
           </p>
           {trip.rating != null && (
             <p

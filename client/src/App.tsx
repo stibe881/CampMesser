@@ -8,6 +8,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import OfflinePrecache from "./components/OfflinePrecache";
 import AppShell from "./components/AppShell";
 import NativeNavigation from "./components/NativeNavigation";
+import { ConfirmProvider } from "./components/ConfirmDialog";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider, useT } from "./i18n";
 import Home from "./pages/Home";
@@ -352,7 +353,11 @@ function App() {
           <Toaster />
           <OfflinePrecache />
           <LanguageProvider>
-            <Router />
+            {/* Bestätigungen im App-Stil (#317) – innerhalb von
+                LanguageProvider, weil die Knöpfe übersetzt sind */}
+            <ConfirmProvider>
+              <Router />
+            </ConfirmProvider>
           </LanguageProvider>
         </TooltipProvider>
       </ThemeProvider>

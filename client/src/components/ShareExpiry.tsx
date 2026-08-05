@@ -6,6 +6,7 @@
  * Wortwahl und Bedienung überall gleich sind.
  */
 import { SHARE_EXPIRY_DAYS, type ShareExpiryDays } from "@shared/sharing";
+import { fmtNumeric } from "@/lib/dateFormat";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -70,13 +71,7 @@ export function ShareExpiryNote({
   if (Number.isNaN(date.getTime())) return null;
   return (
     <p className={cn("text-xs text-muted-foreground", className)}>
-      {t.sharing.expiresOn(
-        date.toLocaleDateString(LOCALE_TAGS[lang], {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })
-      )}
+      {t.sharing.expiresOn(fmtNumeric(date, lang))}
     </p>
   );
 }

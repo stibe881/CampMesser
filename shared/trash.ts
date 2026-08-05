@@ -35,6 +35,14 @@ export const TRASH_KINDS = [
   "note",
   "recipe",
   "track",
+  // Ab #318. WARUM SIE NACHKOMMEN MUSSTEN: Der Papierkorb kannte sechs
+  // Arten, gelöscht werden konnte viel mehr. Eine Kiste mit vierzig
+  // Gegenständen war unwiderruflich weg – und das ist heikler als GAR
+  // kein Papierkorb: Wer einmal etwas zurückgeholt hat, nimmt an, dass
+  // das immer geht, und klickt beim nächsten Mal schneller.
+  "box",
+  "gear",
+  "shoppingList",
 ] as const;
 export type TrashKind = (typeof TRASH_KINDS)[number];
 
@@ -55,6 +63,14 @@ export const TRASH_KIND_LABELS: Record<TrashKind, L4> = {
   note: l4("Notiz", "Note", "Nota", "Note"),
   recipe: l4("Rezept", "Recette", "Ricetta", "Recipe"),
   track: l4("Wanderung", "Randonnée", "Escursione", "Hike"),
+  box: l4("Kiste", "Caisse", "Cassa", "Box"),
+  gear: l4("Gegenstand", "Objet", "Oggetto", "Item"),
+  shoppingList: l4(
+    "Einkaufsliste",
+    "Liste de courses",
+    "Lista della spesa",
+    "Shopping list"
+  ),
 };
 
 export function isTrashKind(value: string): value is TrashKind {

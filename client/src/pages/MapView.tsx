@@ -69,6 +69,7 @@
  * sein Popup.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fmtLong } from "@/lib/dateFormat";
 import { Link, useLocation, useSearch } from "wouter";
 import {
   Baby,
@@ -1918,10 +1919,7 @@ export default function MapViewPage() {
         .map(s => ({
           id: s.id,
           title: s.title,
-          dateLabel: new Date(`${s.sightedAt}T00:00:00`).toLocaleDateString(
-            LOCALE_TAGS[lang],
-            { day: "numeric", month: "long", year: "numeric" }
-          ),
+          dateLabel: fmtLong(new Date(`${s.sightedAt}T00:00:00`), lang),
           lat: s.lat as number,
           lon: s.lon as number,
         })),

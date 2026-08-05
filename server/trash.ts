@@ -16,7 +16,7 @@
  * stehen im Eintrag; gelöscht werden sie erst beim endgültigen
  * Aufräumen.
  */
-import { and, eq, inArray, lte } from "drizzle-orm";
+import { and, eq, inArray, isNull, lte } from "drizzle-orm";
 import { getTableColumns } from "drizzle-orm";
 import type { MySqlTable } from "drizzle-orm/mysql-core";
 import type { MySql2Database } from "drizzle-orm/mysql2";
@@ -25,12 +25,17 @@ import {
   customRecipes,
   deletedItems,
   hikeTracks,
+  inventoryItems,
   menuDayNotes,
   menuEntries,
   packItems,
   packLists,
   passportAbsences,
+  shoppingItems,
+  shoppingLists,
+  shoppingShares,
   spotPhotos,
+  storageBoxes,
   tripBoardNotes,
   tripChanges,
   tripDateOptions,
@@ -94,6 +99,11 @@ const TABLES: Record<string, MySqlTable> = {
   userNotes,
   customRecipes,
   hikeTracks,
+  storageBoxes,
+  inventoryItems,
+  shoppingLists,
+  shoppingItems,
+  shoppingShares,
 };
 
 /** Vollständiger ISO-Zeitstempel, wie ihn JSON.stringify aus einem Date macht. */
@@ -355,6 +365,107 @@ async function snapshotTrack(
   };
 }
 
+/**
+ * Kiste (#318).
+ *
+ * BESONDERHEIT: `deleteStorageBox` löscht die Gegenstände NICHT mit,
+ * sondern setzt bei ihnen `boxId = null` – sie bleiben also bestehen und
+ * liegen nur nirgends mehr. Ein Schnappschuss der Gegenstände würde beim
+ * Wiederherstellen an der bereits vergebenen Id scheitern (und der
+ * Fehler würde still geschluckt). Gesichert werden deshalb nur ihre Ids;
+ * `reassignBoxItems` hängt sie nach dem Einfügen der Kiste wieder ein.
+ * Ohne das käme die Kiste leer zurück – und «wiederhergestellt» wäre
+ * eine grosszügige Beschreibung dafür.
+ */
+const BOX_ITEMS_KEY = "__boxItemIds";
+
+async function snapshotBox(
+  db: Db,
+  id: number,
+  userId: number
+): Promise<Snapshot | null> {
+  const boxes = await db
+    .select()
+    .from(storageBoxes)
+    .where(and(eq(storageBoxes.id, id), eq(storageBoxes.userId, userId)));
+  if (boxes.length === 0) return null;
+  const box = boxes[0];
+  const items = await db
+    .select({ id: inventoryItems.id })
+    .from(inventoryItems)
+    .where(
+      and(eq(inventoryItems.boxId, id), eq(inventoryItems.userId, userId))
+    );
+  return {
+    payload: { storageBoxes: boxes, [BOX_ITEMS_KEY]: items },
+    files: [],
+    label: trimLabel(`${box.code} · ${box.name}`, String(id)),
+    // Die Anzahl steht bereits als itemCount in der Zeile – `childCount`
+    // zählt die Ids aus BOX_ITEMS_KEY mit. Ein zweites Mal wäre doppelt.
+    detail: box.location,
+  };
+}
+
+/** Ausrüstungs-Gegenstand mit Foto und Beleg. */
+async function snapshotGear(
+  db: Db,
+  id: number,
+  userId: number
+): Promise<Snapshot | null> {
+  const items = await db
+    .select()
+    .from(inventoryItems)
+    .where(and(eq(inventoryItems.id, id), eq(inventoryItems.userId, userId)));
+  if (items.length === 0) return null;
+  const item = items[0];
+  const files: TrashFile[] = [];
+  if (item.imageFileName)
+    files.push({ storage: "inventory", fileName: item.imageFileName });
+  if (item.receiptFileName)
+    files.push({ storage: "receipts", fileName: item.receiptFileName });
+  return {
+    payload: { inventoryItems: items },
+    files,
+    label: trimLabel(item.name, String(id)),
+    detail: item.category || null,
+  };
+}
+
+/** Einkaufsliste samt Einträgen und Teil-Links. */
+async function snapshotShoppingList(
+  db: Db,
+  id: number,
+  userId: number
+): Promise<Snapshot | null> {
+  const lists = await db
+    .select()
+    .from(shoppingLists)
+    .where(and(eq(shoppingLists.id, id), eq(shoppingLists.userId, userId)));
+  if (lists.length === 0) return null;
+  return {
+    payload: {
+      shoppingLists: lists,
+      shoppingItems: await db
+        .select()
+        .from(shoppingItems)
+        .where(
+          and(eq(shoppingItems.listId, id), eq(shoppingItems.userId, userId))
+        ),
+      // Der Teil-Link gehört dazu: Wer eine Liste zurückholt, will nicht,
+      // dass der bereits verschickte Link ins Leere zeigt.
+      shoppingShares: await db
+        .select()
+        .from(shoppingShares)
+        .where(
+          and(eq(shoppingShares.listId, id), eq(shoppingShares.userId, userId))
+        ),
+    },
+    files: [],
+    label: trimLabel(lists[0].name, String(id)),
+    detail: null,
+  };
+}
+
 /** Welche Tabelle die Hauptzeile hält – für die Zählung der Kinder. */
 const MAIN_TABLE: Record<TrashKind, string> = {
   trip: "tripLogs",
@@ -363,6 +474,9 @@ const MAIN_TABLE: Record<TrashKind, string> = {
   note: "userNotes",
   recipe: "customRecipes",
   track: "hikeTracks",
+  box: "storageBoxes",
+  gear: "inventoryItems",
+  shoppingList: "shoppingLists",
 };
 
 const SNAPSHOTS: Record<
@@ -375,6 +489,9 @@ const SNAPSHOTS: Record<
   note: snapshotNote,
   recipe: snapshotRecipe,
   track: snapshotTrack,
+  box: snapshotBox,
+  gear: snapshotGear,
+  shoppingList: snapshotShoppingList,
 };
 
 /**
@@ -479,8 +596,48 @@ export async function restore(
     }
   }
 
+  // Nachbehandlung je Art (#318): siehe reassignBoxItems.
+  if (rows[0].kind === "box") {
+    restored += await reassignBoxItems(db, payload, userId);
+  }
+
   await db.delete(deletedItems).where(eq(deletedItems.id, trashId));
   return { restored };
+}
+
+/**
+ * Nach dem Zurückholen einer Kiste die Gegenstände wieder einräumen.
+ *
+ * NUR WAS NOCH HERRENLOS IST: Gesetzt wird `boxId` ausschliesslich bei
+ * Gegenständen, die aktuell in KEINER Kiste liegen. Wer einen Topf nach
+ * dem Löschen der Kiste in eine andere gelegt hat, soll ihn dort behalten
+ * – die Wiederherstellung darf nichts wegnehmen, was seither entschieden
+ * wurde.
+ */
+async function reassignBoxItems(
+  db: Db,
+  payload: TrashPayload,
+  userId: number
+): Promise<number> {
+  const boxRow = payload.storageBoxes?.[0] as { id?: number } | undefined;
+  const boxId = boxRow?.id;
+  const ids = (payload[BOX_ITEMS_KEY] ?? [])
+    .map(row => (row as { id?: number }).id)
+    .filter((id): id is number => typeof id === "number");
+  if (typeof boxId !== "number" || ids.length === 0) return 0;
+  const result = await db
+    .update(inventoryItems)
+    .set({ boxId })
+    .where(
+      and(
+        inArray(inventoryItems.id, ids),
+        eq(inventoryItems.userId, userId),
+        isNull(inventoryItems.boxId)
+      )
+    );
+  const affected = (result as unknown as { affectedRows?: number })
+    .affectedRows;
+  return typeof affected === "number" ? affected : 0;
 }
 
 // ── Endgültig löschen ─────────────────────────────────────────────────
@@ -494,6 +651,9 @@ async function removeFiles(files: readonly TrashFile[]): Promise<void> {
     spots: [],
     recipes: [],
     reservations: [],
+    // Ab #318: Foto und Beleg eines Ausrüstungs-Gegenstands.
+    inventory: [],
+    receipts: [],
   };
   files.forEach(file => {
     if (byStorage[file.storage]) byStorage[file.storage].push(file.fileName);
@@ -504,6 +664,8 @@ async function removeFiles(files: readonly TrashFile[]): Promise<void> {
       [byStorage.spots, storages.spotPhotoStorage],
       [byStorage.recipes, storages.recipePhotoStorage],
       [byStorage.reservations, storages.reservationStorage],
+      [byStorage.inventory, storages.inventoryPhotoStorage],
+      [byStorage.receipts, storages.receiptPhotoStorage],
     ];
   for (const [names, storage] of targets) {
     if (names.length > 0) await storage.deleteFiles(names);

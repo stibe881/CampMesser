@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { fmtDate, fmtLong } from "@/lib/dateFormat";
+import { useConfirm } from "@/components/ConfirmDialog";
 import {
   Loader2,
   NotebookPen,
@@ -59,6 +61,7 @@ const EMPTY_DRAFT: NoteDraft = { id: null, title: "", text: "", tags: "" };
  * Sortieren und Suchen stecken in shared/notes.ts.
  */
 export default function NotesPage() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const utils = trpc.useUtils();
@@ -144,12 +147,7 @@ export default function NotesPage() {
     }
   };
 
-  const fmtDate = (value: Date | string) =>
-    new Date(value).toLocaleDateString(LOCALE_TAGS[lang], {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+  const fmtDate = (value: Date | string) => fmtLong(new Date(value), lang);
 
   const saving = addMutation.isPending || updateMutation.isPending;
 
@@ -300,8 +298,9 @@ export default function NotesPage() {
                           size="icon"
                           className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
                           disabled={removeMutation.isPending}
-                          onClick={() => {
-                            if (!confirm(t.notes.deleteConfirm)) return;
+                          onClick={async () => {
+                            if (!(await ask({ title: t.notes.deleteConfirm })))
+                              return;
                             removeMutation.mutate({ id: note.id });
                           }}
                           aria-label={t.notes.deleteAria(

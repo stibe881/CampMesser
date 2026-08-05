@@ -5,6 +5,7 @@
  * (SpotDetail.tsx) – Endpoints und Texte kommen von der jeweiligen Seite.
  */
 import { useRef, useState } from "react";
+import { useConfirm } from "@/components/ConfirmDialog";
 import {
   ChevronLeft,
   ChevronRight,
@@ -103,13 +104,14 @@ export default function PhotoGallery({
   /** Optional: Titelbild markieren/setzen (siehe GalleryCover) */
   cover?: GalleryCover;
 }) {
+  const ask = useConfirm();
   const [uploadingCount, setUploadingCount] = useState(0);
   const [deletePending, setDeletePending] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const removePhoto = async (photoId: number) => {
-    if (!window.confirm(texts.photoDeleteConfirm)) return;
+    if (!(await ask({ title: texts.photoDeleteConfirm }))) return;
     setDeletePending(true);
     try {
       await deletePhoto(photoId);

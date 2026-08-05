@@ -28,6 +28,8 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
+import { enqueueToggle } from "@/lib/offlineQueue";
+import { hapticTick } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import {
   DEFAULT_CHORE_POINTS,
@@ -104,9 +106,35 @@ export default function ChoresPage() {
     onSuccess: refresh,
     onError: e => toast.error(e.message),
   });
+  /**
+   * Ämtli abhaken – optimistisch und offline gepuffert (#320).
+   *
+   * Abgehakt wird auf dem Platz, also dort, wo kein Empfang ist. Vorher
+   * wartete der Haken auf die Antwort des Servers und war beim nächsten
+   * App-Start wieder weg; jetzt steht er sofort und wird nachgeschickt,
+   * sobald wieder Verbindung besteht (components/OfflineSync.tsx).
+   */
   const setDone = trpc.chores.setDone.useMutation({
+    onMutate: async input => {
+      hapticTick();
+      if (!navigator.onLine) enqueueToggle("chore", input.id, input.done);
+      await utils.chores.assignments.cancel();
+      const stamp = input.done ? new Date() : null;
+      // BEIDE Abfragen anpassen: die des Tages und die für den
+      // Punktestand. Sonst springt der Zähler unten erst nach dem
+      // nächsten Laden – und sieht dann aus wie ein Fehler.
+      const patch = (rows: typeof dayAssignments | undefined) =>
+        rows?.map(row =>
+          row.id === input.id ? { ...row, doneAt: stamp } : row
+        );
+      utils.chores.assignments.setData({ day }, patch);
+      utils.chores.assignments.setData({}, patch);
+    },
     onSuccess: refresh,
-    onError: e => toast.error(e.message),
+    onError: e => {
+      toast.error(e.message);
+      refresh();
+    },
   });
 
   const progress = dayProgress(dayAssignments);

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { fmtDate, fmtMedium } from "@/lib/dateFormat";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
 import { Link } from "wouter";
@@ -31,6 +33,7 @@ import {
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import QueryError from "@/components/QueryError";
 import TreasureHunt from "@/components/TreasureHunt";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -1445,12 +1448,7 @@ function ChildBadgeGallery({ childId }: { childId: number }) {
     earnedAtById[b.badgeId] = b.earnedAt;
   });
   const earnedCount = Object.keys(earnedAtById).length;
-  const fmtDate = (value: Date | string) =>
-    new Date(value).toLocaleDateString(LOCALE_TAGS[lang], {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+  const fmtDate = (value: Date | string) => fmtMedium(new Date(value), lang);
   return (
     <div>
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -1511,6 +1509,7 @@ function ChildrenSection({
 }: {
   children: { id: number; name: string }[];
 }) {
+  const ask = useConfirm();
   const t = useT();
   const utils = trpc.useUtils();
   const [newName, setNewName] = useState("");
@@ -1605,8 +1604,12 @@ function ChildrenSection({
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (confirm(t.family.deleteChildConfirm(child.name))) {
+                    onClick={async () => {
+                      if (
+                        await ask({
+                          title: t.family.deleteChildConfirm(child.name),
+                        })
+                      ) {
                         removeMutation.mutate({ id: child.id });
                       }
                     }}
@@ -1653,6 +1656,7 @@ function ChildrenSection({
 }
 
 export default function FamilyPage() {
+  const ask = useConfirm();
   const { lang, t } = useI18n();
   const [activeHunt, setActiveHunt] = useState<ScavengerHunt | null>(null);
   const [activeQuiz, setActiveQuiz] = useState<NatureQuiz | null>(null);
@@ -1916,9 +1920,19 @@ export default function FamilyPage() {
       </div>
 
       {/* Kinder-Profile & Abzeichen */}
-      {isAuthenticated && !childrenQuery.isLoading && (
-        <ChildrenSection children={children} />
+      {/* Bei einem Serverfehler ist die Liste leer wie bei «noch keine
+          Kinder angelegt» (#319) – nur dass hier welche existieren. */}
+      {isAuthenticated && childrenQuery.isError && (
+        <div className="mb-6">
+          <QueryError
+            onRetry={() => void childrenQuery.refetch()}
+            retrying={childrenQuery.isFetching}
+          />
+        </div>
       )}
+      {isAuthenticated &&
+        !childrenQuery.isLoading &&
+        !childrenQuery.isError && <ChildrenSection children={children} />}
 
       {/* Schnitzeljagden */}
       <h2 className="mb-1 font-serif text-xl font-semibold">
@@ -2053,8 +2067,12 @@ export default function FamilyPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        if (confirm(t.family.deleteConfirm(row.title))) {
+                      onClick={async () => {
+                        if (
+                          await ask({
+                            title: t.family.deleteConfirm(row.title),
+                          })
+                        ) {
                           removeHuntMutation.mutate({ id: row.id });
                         }
                       }}
@@ -2203,8 +2221,12 @@ export default function FamilyPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (confirm(t.family.quizDeleteConfirm(row.title))) {
+                    onClick={async () => {
+                      if (
+                        await ask({
+                          title: t.family.quizDeleteConfirm(row.title),
+                        })
+                      ) {
                         removeQuizMutation.mutate({ id: row.id });
                       }
                     }}

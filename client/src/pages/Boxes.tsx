@@ -14,6 +14,7 @@
  * Kiste (Kennung gross, Name, Standort, QR-Code). Kein PDF-Paket nötig.
  */
 import { useEffect, useMemo, useState } from "react";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { createPortal } from "react-dom";
 import { useParams } from "wouter";
 import {
@@ -29,6 +30,7 @@ import {
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import QueryError from "@/components/QueryError";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -69,6 +71,7 @@ import { cn } from "@/lib/utils";
 const NO_BOX = "__none__";
 
 export default function BoxesPage() {
+  const ask = useConfirm();
   const params = useParams<{ code?: string }>();
   const scannedCode = params.code ?? null;
   const { lang, t } = useI18n();
@@ -283,7 +286,17 @@ export default function BoxesPage() {
         </Button>
       </div>
 
-      {contents.length === 0 && (
+      {/* Fehler ist NICHT dasselbe wie leer (#319): Ohne diesen Zweig
+          behauptete die Seite, es gebe keine Kisten – und lud dazu ein,
+          sie neu anzulegen. */}
+      {boxesQuery.isError && (
+        <QueryError
+          onRetry={() => void boxesQuery.refetch()}
+          retrying={boxesQuery.isFetching}
+        />
+      )}
+
+      {!boxesQuery.isError && contents.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
             <BoxesIcon
@@ -389,8 +402,8 @@ export default function BoxesPage() {
                   variant="ghost"
                   size="sm"
                   className="text-muted-foreground hover:text-destructive"
-                  onClick={() => {
-                    if (window.confirm(tb.removeConfirm(box.name))) {
+                  onClick={async () => {
+                    if (await ask({ title: tb.removeConfirm(box.name) })) {
                       removeMutation.mutate({ id: box.id });
                     }
                   }}
