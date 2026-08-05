@@ -114,22 +114,26 @@ denselben Weg wie eine angetippte Mitteilung.
 
 ```sh
 cd expo-app
-npm install
-npx expo install expo-quick-actions expo-linking
-npm install @bacons/apple-targets
-npx expo prebuild -p ios --clean      # legt das Widget-Ziel im Xcode-Projekt an
 npx eas-cli@latest build --platform ios --profile production
 ```
 
-`npx expo prebuild` ist neu nötig: Das Widget ist ein zweites Ziel im
-Xcode-Projekt, und das entsteht erst beim Prebuild aus
-`targets/widgets/expo-target.config.js`.
+**Kein macOS nötig.** `/ios` ist gitignored – das Projekt läuft im
+Managed-Workflow mit Continuous Native Generation. EAS Build führt
+`expo prebuild` auf seiner eigenen macOS-Maschine aus, samt aller
+Config-Plugins; das Widget-Ziel entsteht dort aus
+`targets/widgets/expo-target.config.js`. Ein lokales `expo prebuild`
+ist nicht nötig und auf einem Linux-Rechner ohnehin unvollständig
+(CocoaPods fehlt).
 
-**Voraussetzungen für die Widgets:** macOS mit Xcode 16, CocoaPods
-≥ 1.16.2 und eine App-Gruppe im Apple-Developer-Konto
-(`group.ch.campmesser.app`, unter Identifiers → App Groups anlegen und
-sowohl der App-ID als auch der Widget-ID zuordnen). Ohne die
-registrierte App-Gruppe scheitert die Signierung.
+Die Abhängigkeiten stehen samt Lockfile im Repo; EAS installiert sie
+selbst. Ein lokales `npm install` braucht es nur, wenn eine
+Abhängigkeit dazukommt.
+
+**Beim ERSTEN Build mit dem Widget fragt EAS nach:** Das Widget ist ein
+zweites Ziel mit eigener Bundle-Id, es braucht also ein neues
+Provisioning-Profil, und die App-Gruppe `group.ch.campmesser.app` muss
+im Apple-Developer-Konto existieren. EAS legt beides an, wenn man es
+lässt – deshalb den ersten Lauf NICHT mit `--non-interactive` starten.
 
 `npx expo install` statt `npm install <paket>`: Expo wählt damit die
 Version, die zur installierten SDK gehört, und schreibt sie in
