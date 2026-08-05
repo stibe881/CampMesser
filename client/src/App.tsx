@@ -8,6 +8,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import OfflinePrecache from "./components/OfflinePrecache";
 import AppShell from "./components/AppShell";
 import NativeNavigation from "./components/NativeNavigation";
+import WidgetSync from "./components/WidgetSync";
 import { ConfirmProvider } from "./components/ConfirmDialog";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider, useT } from "./i18n";
@@ -210,6 +211,8 @@ function Router() {
     <AppShell>
       {/* Mitteilungs-Tipp und Icon-Kurzbefehl der nativen App (#315/#316) */}
       <NativeNavigation />
+      {/* Daten für die Home-Bildschirm-Widgets (#324) */}
+      <WidgetSync />
       <Suspense fallback={<RouteFallback />}>
         <Switch>
           <Route path={"/"} component={Home} />

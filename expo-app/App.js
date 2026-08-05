@@ -4,14 +4,17 @@ import { WebView } from "react-native-webview";
 import * as Notifications from "expo-notifications";
 import * as QuickActions from "expo-quick-actions";
 import * as Device from "expo-device";
+import * as Linking from "expo-linking";
 import Constants from "expo-constants";
+import { ExtensionStorage } from "@bacons/apple-targets";
 
 /**
  * Der native Rahmen um die Web-App.
  *
  * Alles Sichtbare kommt aus dem WebView. Hier steht nur, was der Browser im
  * WebView nicht kann: echte Push-Mitteilungen von Apple, die Zahl am
- * App-Icon und die Kurzbefehle beim langen Drücken auf das Icon.
+ * App-Icon, die Kurzbefehle beim langen Drücken auf das Icon und die
+ * Widgets für den Home-Bildschirm.
  *
  * Die Nachrichten-Namen unten müssen zu `client/src/lib/nativeBridge.ts`
  * passen – wer einen ändert, muss beide Dateien anfassen.
@@ -19,6 +22,19 @@ import Constants from "expo-constants";
 
 // Basis-URL der Web-App
 const CAMP_URL = "https://campmesser.ch";
+
+/**
+ * Der gemeinsame Ordner mit der Widget-Erweiterung (#325).
+ *
+ * MUSS zu `app.json` (`ios.entitlements`) und zu `WidgetStore.appGroup`
+ * in `targets/widgets/WidgetData.swift` passen. Stimmen die drei nicht
+ * überein, schreibt die App in einen Ordner, den das Widget nicht liest –
+ * ohne Fehlermeldung. Das Widget zeigt dann ewig seinen Platzhalter, und
+ * man sucht an der falschen Stelle.
+ */
+const APP_GROUP = "group.ch.campmesser.app";
+const WIDGET_KEY = "campmesserWidget";
+const widgetStorage = new ExtensionStorage(APP_GROUP);
 
 /**
  * WIE EINE MITTEILUNG AUSSIEHT, WÄHREND DIE APP OFFEN IST.
@@ -167,6 +183,28 @@ export default function App() {
     return () => sub.remove();
   }, [navigateWebView]);
 
+  /**
+   * Antippen eines Widgets (#325).
+   *
+   * Das Widget öffnet `campmesser://open?path=/tagebuch/7`. Der Pfad
+   * geht denselben Weg wie eine angetippte Mitteilung – über
+   * `navigateWebView`, das ihn prüft und nur eigene Pfade zulässt.
+   * `getInitialURL` deckt den Start aus dem geschlossenen Zustand ab,
+   * der Listener das Antippen bei laufender App.
+   */
+  useEffect(() => {
+    const handle = url => {
+      if (!url) return;
+      const parsed = Linking.parse(url);
+      navigateWebView(parsed.queryParams?.path);
+    };
+    Linking.getInitialURL()
+      .then(handle)
+      .catch(() => {});
+    const sub = Linking.addEventListener("url", ({ url }) => handle(url));
+    return () => sub.remove();
+  }, [navigateWebView]);
+
   const onMessage = async event => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
@@ -184,6 +222,13 @@ export default function App() {
       }
       if (data.type === "SET_QUICK_ACTIONS" && Array.isArray(data.items)) {
         await QuickActions.setItems(data.items).catch(() => {});
+      }
+      if (data.type === "SET_WIDGET_DATA" && data.payload) {
+        // Als Zeichenkette ablegen und erst DANACH neu zeichnen lassen –
+        // umgekehrt läse das Widget noch den alten Stand und zeigte ihn
+        // bis zur nächsten Änderung.
+        widgetStorage.set(WIDGET_KEY, JSON.stringify(data.payload));
+        ExtensionStorage.reloadWidget();
       }
       if (data.type === "REQUEST_PUSH_TOKEN") {
         const token = await registerForPushNotificationsAsync();

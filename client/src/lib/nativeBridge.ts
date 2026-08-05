@@ -34,6 +34,8 @@ export const NATIVE_MESSAGES = {
   setBadge: "SET_BADGE",
   /** Kurzbefehle fürs lange Drücken setzen (`items: Action[]`). */
   setQuickActions: "SET_QUICK_ACTIONS",
+  /** Daten für die Home-Bildschirm-Widgets (`payload: WidgetPayload`). */
+  setWidgetData: "SET_WIDGET_DATA",
 } as const;
 
 /** Ereignis nativ → Web: die App möchte, dass wir zu `detail` navigieren. */
