@@ -13,7 +13,8 @@
         "NSCameraUsageDescription": "Wird benötigt, um Fotos für das Reisetagebuch und das Inventar aufzunehmen.",
         "NSLocationWhenInUseUsageDescription": "Wird benötigt, um Wetterdaten und Ausflugsziele in deiner Nähe anzuzeigen.",
         "NSPhotoLibraryUsageDescription": "Wird benötigt, um bestehende Fotos für das Reisetagebuch auszuwählen.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["comgooglemaps", "maps", "waze"]
       },
       "appleTeamId": "QF59FHQ44R",
       "entitlements": {

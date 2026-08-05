@@ -15,6 +15,7 @@
  * jede Stelle einen eigenen Dialog mitschleppt. Ändern lässt sich die Wahl
  * jederzeit im Profil.
  */
+import { isNativeApp, NATIVE_MESSAGES, postToNative } from "./nativeBridge";
 
 /** Karten-Apps, die wir ansteuern können. */
 export const MAPS_PROVIDERS = ["apple", "google"] as const;
@@ -46,7 +47,7 @@ export function defaultProvider(
   return /iPhone|iPad|iPod/i.test(userAgent) ? "apple" : "google";
 }
 
-/** Route zu einem Punkt in der gewählten App. */
+/** Route zu einem Punkt in der gewählten App – als Web-Adresse. */
 export function directionsUrl(
   lat: number,
   lon: number,
@@ -56,6 +57,35 @@ export function directionsUrl(
   return provider === "apple"
     ? `https://maps.apple.com/?daddr=${destination}`
     : `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
+}
+
+/**
+ * Dieselbe Route als APP-Adresse (#326).
+ *
+ * WARUM ES DIE ZWEITE FASSUNG BRAUCHT: Im Browser ist eine `https`-Adresse
+ * richtig – das Betriebssystem entscheidet dann selbst, ob es die Karten-App
+ * öffnet oder die Webseite. Im WebView der nativen App gilt das NICHT: Dort
+ * landet `https://www.google.com/maps/…` in der App selbst oder bestenfalls
+ * in Safari, und man steht in der Web-Ansicht von Google Maps – ohne
+ * gespeicherte Orte, ohne Sprachnavigation, und ohne Weg zurück.
+ *
+ * Die App-Schemata umgehen das: Sie sprechen die installierte App direkt an.
+ * Ist sie nicht installiert, lässt `Linking.canOpenURL` das erkennen, und der
+ * native Rahmen fällt auf die Web-Adresse oben zurück.
+ *
+ * `directionsmode=driving` bei Google ist Absicht: Der Knopf heisst
+ * «Anreise», und angereist wird mit dem Fahrzeug. Ohne Angabe nimmt Google
+ * die zuletzt benutzte Art – nach einer Wanderung wäre das zu Fuss.
+ */
+export function directionsAppUrl(
+  lat: number,
+  lon: number,
+  provider: MapsProvider
+): string {
+  const destination = `${lat},${lon}`;
+  return provider === "apple"
+    ? `maps://?daddr=${destination}&dirflg=d`
+    : `comgooglemaps://?daddr=${destination}&directionsmode=driving`;
 }
 
 /** Gespeicherte Wahl lesen (Standard: fragen). */
@@ -79,12 +109,29 @@ export function saveMapsPreference(preference: MapsPreference): void {
   }
 }
 
-/** Karten-App öffnen – ohne Rückverweis auf uns (noopener). */
+/**
+ * Karten-App öffnen.
+ *
+ * IM BROWSER: eine Web-Adresse in einem neuen Tab, ohne Rückverweis auf uns.
+ * Das Betriebssystem darf selbst entscheiden, ob daraus die Karten-App wird.
+ *
+ * IN DER NATIVEN APP: über die Brücke, damit der native Rahmen zuerst die
+ * echte App versucht (#326). `window.open` würde dort die Web-Ansicht von
+ * Google Maps im WebView öffnen – der Grund, warum es sich vorher nicht wie
+ * eine App anfühlte.
+ */
 export function openInMaps(
   lat: number,
   lon: number,
   provider: MapsProvider
 ): void {
+  if (isNativeApp()) {
+    postToNative(NATIVE_MESSAGES.openDirections, {
+      appUrl: directionsAppUrl(lat, lon, provider),
+      webUrl: directionsUrl(lat, lon, provider),
+    });
+    return;
+  }
   window.open(directionsUrl(lat, lon, provider), "_blank", "noopener");
 }
 

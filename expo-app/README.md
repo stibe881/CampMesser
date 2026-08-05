@@ -51,6 +51,28 @@ der eingestellten Sprache. iOS zeigt höchstens vier.
 Wer die Liste ändert, ändert **beide** Stellen: `shared/shortcuts.ts` und
 den `iosActions`-Block in `app.json`.
 
+## Externe Links und Karten
+
+Ein WebView lädt **alles**, was man antippt – auch einen Link auf
+OpenStreetMap oder eine fremde Seite. Ohne Weiche landet man in einer
+fremden Webseite _innerhalb_ von CampMesser, ohne Adresszeile und ohne
+Zurück-Knopf. `onShouldStartLoadWithRequest` in `App.js` gibt deshalb
+alles, was nicht auf `campmesser.ch` liegt, an das System weiter.
+
+Die **Route** ist ein Sonderfall, weil sie nicht nur nach draussen soll,
+sondern in eine _bestimmte_ App. Dafür gibt es zwei Adressen:
+
+| Anbieter     | App-Adresse                                       | Rückfall                            |
+| ------------ | ------------------------------------------------- | ----------------------------------- |
+| Google Maps  | `comgooglemaps://?daddr=…&directionsmode=driving` | `https://www.google.com/maps/dir/…` |
+| Apple Karten | `maps://?daddr=…&dirflg=d`                        | `https://maps.apple.com/…`          |
+
+`App.js` prüft mit `Linking.canOpenURL`, ob die App installiert ist, und
+nimmt sonst die Web-Adresse. **Wichtig:** `canOpenURL` liefert auf iOS
+für fremde Schemata immer `false`, solange sie nicht unter
+`LSApplicationQueriesSchemes` in `app.json` stehen. Fehlt der Eintrag,
+landet man stillschweigend immer im Rückfall.
+
 ## Widgets
 
 Zwei Widgets, je eine Frage: **Nächste Reise** (Countdown, während des
