@@ -168,7 +168,22 @@ bash ~/campmesser/scripts/deploy-hetzner.sh
 
 ## Automatisches Deployment (GitHub Actions)
 
-Jeder Push auf `main` kann die Live-Seite automatisch aktualisieren: Der Workflow `.github/workflows/deploy.yml` prüft erst TypeScript, Tests und Build und führt dann per SSH das Deploy-Skript auf dem Server aus. Das Skript berührt am Ende `tmp/restart.txt`, worauf Passenger die Anwendung neu lädt – der manuelle konsoleH-Neustart entfällt.
+Jeder Push auf `main` kann die Live-Seite automatisch aktualisieren: Der Workflow `.github/workflows/deploy.yml` prüft erst TypeScript, Tests und Build und führt dann per SSH das Deploy-Skript auf dem Server aus. Das Skript beendet am Ende den laufenden Node-Prozess dieser Anwendung, ruft anschliessend `/api/health` auf und zeigt die dort gemeldete Version an – der manuelle konsoleH-Neustart entfällt.
+
+### Wie der Neustart wirklich funktioniert
+
+Wichtig zu wissen: CampMesser läuft **nicht** unter Phusion Passenger, sondern als Node.js-Dienst von konsoleH über `app.js` (siehe Schritt 5). Ein `touch tmp/restart.txt` bewirkt darum nichts – frühere Fassungen des Deploy-Skripts taten genau das, weshalb nach einem Deployment weiterhin der alte Build ausgeliefert wurde, obwohl Code, Migrationen und `dist/` bereits aktuell waren.
+
+Der Neustart geschieht stattdessen, indem der laufende Prozess beendet wird; konsoleH startet ihn beim nächsten HTTP-Aufruf automatisch wieder. Das Skript sucht dafür gezielt Node-Prozesse, deren Arbeitsverzeichnis das App-Verzeichnis ist und deren Kommandozeile auf `app.js` oder `dist/index.js` zeigt – Node-Prozesse anderer Domains auf demselben Account bleiben unangetastet. Von Hand:
+
+```bash
+cd ~/campmesser
+for pid in $(pgrep -u "$(id -u)" node); do
+  [ "$(readlink /proc/$pid/cwd)" = "$PWD" ] && echo "$pid $(tr '\0' ' ' </proc/$pid/cmdline)"
+done
+```
+
+Nur die so gefundenen PIDs beenden (`kill <pid>`), danach `curl -s https://campmesser.ch/api/health` aufrufen. Antwortet der Endpoint mit dem erwarteten `version`-Wert und kleiner `uptimeSeconds`, ist der Neustart erfolgt. Meldet er bei mehreren Aufrufen abwechselnd unterschiedliche `uptimeSeconds`, laufen noch veraltete Prozesse parallel – dann bleibt der alte Build sichtbar, obwohl `dist/version.json` bereits stimmt.
 
 Einmalige Einrichtung:
 
@@ -192,7 +207,7 @@ Die App kann Push-Benachrichtigungen senden, wenn an einem gespeicherten Zeltpla
 
 1. VAPID-Schlüsselpaar erzeugen: `pnpm exec web-push generate-vapid-keys` (auf dem Server im App-Verzeichnis oder lokal). Die beiden Werte als `VAPID_PUBLIC_KEY` und `VAPID_PRIVATE_KEY` in die `.env` eintragen, dazu `VAPID_SUBJECT` (deine Kontakt-Mailadresse) und ein zufälliges `CRON_SECRET`.
 2. Anwendung neu starten. In der App erscheint dann unter **Zeltplatz-Favoriten** der Schalter «Unwetter-Warnungen» – jede Nutzerin aktiviert ihn pro Gerät selbst.
-3. Den Warn-Check regelmässig auslösen (Passenger legt den Node-Prozess schlafen, deshalb per Cronjob): in konsoleH unter **Services → Cronjobs** z. B. stündlich anlegen:
+3. Den Warn-Check regelmässig auslösen (konsoleH legt den Node-Prozess bei Ruhe schlafen, deshalb per Cronjob): in konsoleH unter **Services → Cronjobs** z. B. stündlich anlegen:
 
 ```
 curl -fsS "https://campmesser.ch/api/push/check?secret=DEIN_CRON_SECRET" > /dev/null
