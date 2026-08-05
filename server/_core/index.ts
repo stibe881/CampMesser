@@ -82,6 +82,14 @@ async function startServer() {
         versionInfo = { version: "dev", builtAt: null };
       }
     }
+    // Letzter erfolgreicher Cron-Lauf (#314): Ein Überwachungsdienst,
+    // der ohnehin schon /api/health abfragt, kann damit auch den
+    // stillschweigend ausgefallenen Cronjob bemerken.
+    let lastPushCheckAt: string | null = null;
+    if (dbOk) {
+      const { getState } = await import("../systemState");
+      lastPushCheckAt = await getState("lastPushCheck");
+    }
     res.status(dbOk ? 200 : 503).json({
       status: dbOk ? "ok" : "degraded",
       db: dbOk ? "ok" : "down",
@@ -89,6 +97,7 @@ async function startServer() {
       builtAt: versionInfo.builtAt,
       uptimeSeconds: Math.round(process.uptime()),
       latencyMs: Date.now() - startedAt,
+      lastPushCheckAt,
     });
   });
   // Client-Fehlerprotokoll: der ErrorBoundary meldet Abstürze hierher.
@@ -175,6 +184,11 @@ async function startServer() {
       const hub = hubConfigured()
         ? await subscribeToHub().catch(() => "fehler" as const)
         : ("nicht-konfiguriert" as const);
+      // Zeitstempel des erfolgreichen Laufs festhalten (#314). Erst hier,
+      // nach getaner Arbeit – ein Eintrag am Anfang würde auch dann
+      // «läuft» melden, wenn der Check gleich darauf scheitert.
+      const { setState } = await import("../systemState");
+      await setState("lastPushCheck", new Date().toISOString());
       res.json({ status: "ok", ...result, trashPurged: purged, hub });
     } catch (error) {
       res.status(500).json({ status: "error", message: String(error) });

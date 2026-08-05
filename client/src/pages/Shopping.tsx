@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import QRCode from "qrcode";
 import PageHeader from "@/components/PageHeader";
 import DataAge from "@/components/DataAge";
+import QueryError from "@/components/QueryError";
 import ListSkeleton from "@/components/ListSkeleton";
 import { enqueueToggle } from "@/lib/offlineQueue";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -650,7 +651,12 @@ export default function ShoppingPage() {
         </div>
       )}
 
-      {query.isLoading || activeListId === null ? (
+      {query.isError ? (
+        <QueryError
+          onRetry={() => void query.refetch()}
+          retrying={query.isFetching}
+        />
+      ) : query.isLoading || activeListId === null ? (
         <ListSkeleton rows={4} height={56} />
       ) : items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border p-10 text-center">

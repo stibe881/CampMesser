@@ -26,8 +26,10 @@ import {
   Navigation,
   Backpack,
   ChevronDown,
+  Clock,
   CloudLightning,
   History,
+  TriangleAlert,
   Refrigerator,
   Tent,
   Wind,
@@ -78,6 +80,7 @@ import {
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { RETENTION_DAYS } from "@shared/trash";
+import { PUSH_CHECK_STALE_HOURS, pushCheckHealth } from "@shared/pushHealth";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import {
   Select,
@@ -522,12 +525,73 @@ function NotificationsCard() {
                 </div>
               </div>
             )}
+            <LastCheckLine enabled={push.enabled === true} />
           </>
         )}
         <PushHistory />
       </CardContent>
     </Card>
   );
+}
+
+/**
+ * «Letzte Prüfung: vor 42 Minuten» (#314).
+ *
+ * WARUM DAS HIER STEHT: Die Mitteilungen entstehen nicht im Browser,
+ * sondern in einem stündlichen Cronjob auf dem Server. Fällt der aus,
+ * bleibt alles still – und Stille ist von «es gab nichts zu melden»
+ * nicht zu unterscheiden. Man merkt es erst, wenn eine Erinnerung
+ * gefehlt hat, die man gebraucht hätte.
+ *
+ * Die Zeile steht dort, wo man Mitteilungen ohnehin ein- und ausschaltet,
+ * und bleibt unauffällig, solange alles läuft. Erst wenn seit Stunden
+ * nichts mehr geprüft wurde, wird sie deutlich.
+ */
+function LastCheckLine({ enabled }: { enabled: boolean }) {
+  const { lang, t } = useI18n();
+  const query = trpc.push.lastCheck.useQuery(undefined, { enabled });
+  if (!enabled || query.data === undefined) return null;
+  const health = pushCheckHealth(query.data.at, Date.now());
+  const warn = health.state !== "ok";
+  const text =
+    health.state === "never"
+      ? t.profile.lastCheckNever
+      : t.profile.lastCheckAgo(
+          formatMinutesAgo(health.minutesAgo, LOCALE_TAGS[lang])
+        );
+  return (
+    <p
+      className={`mt-4 flex items-start gap-1.5 border-t border-border pt-3 text-xs ${
+        warn ? "text-destructive" : "text-muted-foreground"
+      }`}
+    >
+      {warn ? (
+        <TriangleAlert
+          className="mt-px h-3.5 w-3.5 shrink-0"
+          aria-hidden="true"
+        />
+      ) : (
+        <Clock className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+      )}
+      <span>
+        {text}
+        {warn && ` ${t.profile.lastCheckStale(PUSH_CHECK_STALE_HOURS)}`}
+      </span>
+    </p>
+  );
+}
+
+/**
+ * «vor 42 Minuten» / «vor 3 Stunden» in der eingestellten Sprache.
+ * Intl beugt und übersetzt selbst – eine eigene Tabelle wäre viermal
+ * dieselbe Regel, nur handgeschrieben.
+ */
+function formatMinutesAgo(minutes: number, locale: string): string {
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  if (minutes < 60) return rtf.format(-minutes, "minute");
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return rtf.format(-hours, "hour");
+  return rtf.format(-Math.round(hours / 24), "day");
 }
 
 /**

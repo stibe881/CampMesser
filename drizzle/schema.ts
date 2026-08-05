@@ -254,6 +254,27 @@ export type InsertInventoryItem = typeof inventoryItems.$inferInsert;
  * Konto und nicht an einem Zufalls-Token – ein Etikett auf einer Kiste
  * ist kein Geheimnis, aber der Inhalt gehört trotzdem nur dir.
  */
+/**
+ * Kleiner Schlüssel-Wert-Speicher für Zustände des Servers selbst – nicht
+ * für Nutzerdaten.
+ *
+ * Erster und bislang einziger Zweck (#314): der Zeitpunkt des letzten
+ * erfolgreichen Cron-Laufs. Am Cronjob hängen Unwetter-Warnungen,
+ * MHD-Erinnerungen, Trip-Countdown, Papierkorb-Aufräumen und die
+ * Erneuerung des MeteoAlarm-Abos. Fiel er aus – gelöscht, falsches
+ * Geheimnis, Hoster verschluckt sich –, hörte das alles LAUTLOS auf, und
+ * gemerkt hätte man es erst, wenn eine erwartete Sturmwarnung ausbleibt.
+ * Ein Zeitstempel genügt, um daraus einen sichtbaren Zustand zu machen.
+ */
+export const systemState = mysqlTable("systemState", {
+  /** Schlüssel, z. B. "lastPushCheck". */
+  stateKey: varchar("stateKey", { length: 64 }).primaryKey(),
+  value: varchar("value", { length: 255 }).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SystemState = typeof systemState.$inferSelect;
+
 export const storageBoxes = mysqlTable(
   "storageBoxes",
   {
@@ -648,6 +669,13 @@ export const pushSubscriptions = mysqlTable(
     wantsGear: boolean("wantsGear").notNull().default(true),
     /** Mitteilungs-Einstellung dieses Geräts: Sonnencreme & Trinken an heissen Tagen (#260/#261) */
     wantsHeat: boolean("wantsHeat").notNull().default(true),
+    /**
+     * Sprache dieses Geräts für die Mitteilungs-Texte (#313). Pro ABO und
+     * nicht pro Konto: Wer das Handy auf Französisch und das Tablet auf
+     * Deutsch nutzt, bekommt jede Meldung passend zum Gerät. Alte Abos
+     * bleiben auf «de», bis sich das Gerät neu anmeldet.
+     */
+    lang: varchar("lang", { length: 2 }).notNull().default("de"),
     /** Eigene Wind-Schwelle für den Unwetter-Push in km/h (null = Standard 90) */
     windThresholdKmh: int("windThresholdKmh"),
     /** Eigene Regen-Schwelle für den Unwetter-Push in mm/h (null = Standard 15) */

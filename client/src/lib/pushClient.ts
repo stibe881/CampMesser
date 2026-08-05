@@ -3,6 +3,7 @@
  * Reine Browser-Helfer – die Server-Seite verwaltet der push-Router.
  */
 import { l4, pick, type Language } from "@shared/i18n";
+import { isNativeApp, NATIVE_MESSAGES, postToNative } from "./nativeBridge";
 
 // Fehlertexte landen via error.message direkt im Toast – deshalb L4.
 const ERRORS = {
@@ -23,7 +24,7 @@ const ERRORS = {
 export function pushSupported(): boolean {
   if (typeof window === "undefined") return false;
   // Nativer Expo WebView-Wrapper unterstützt Push via Bridge
-  if ("ReactNativeWebView" in window) return true;
+  if (isNativeApp()) return true;
 
   return (
     "serviceWorker" in navigator &&
@@ -54,7 +55,7 @@ export interface BrowserSubscription {
 export async function getExistingSubscription(): Promise<BrowserSubscription | null> {
   if (!pushSupported()) return null;
 
-  if ("ReactNativeWebView" in window) {
+  if (isNativeApp()) {
     const token = localStorage.getItem("expoPushToken");
     if (token)
       return { endpoint: token, p256dh: "expo-push-token", auth: "expo-auth" };
@@ -78,7 +79,7 @@ export async function subscribeBrowser(
   vapidPublicKey: string,
   lang: Language = "de"
 ): Promise<BrowserSubscription> {
-  if ("ReactNativeWebView" in window) {
+  if (isNativeApp()) {
     return new Promise((resolve, reject) => {
       const handler = (e: any) => {
         window.removeEventListener("ExpoPushToken", handler);
@@ -99,9 +100,7 @@ export async function subscribeBrowser(
       window.addEventListener("ExpoPushToken", handler);
       window.addEventListener("ExpoPushTokenError", errorHandler);
 
-      (window as any).ReactNativeWebView.postMessage(
-        JSON.stringify({ type: "REQUEST_PUSH_TOKEN" })
-      );
+      postToNative(NATIVE_MESSAGES.requestPushToken);
     });
   }
 
@@ -129,7 +128,7 @@ export async function subscribeBrowser(
 
 /** Push-Abo im Browser lösen (gibt den Endpoint des gelösten Abos zurück). */
 export async function unsubscribeBrowser(): Promise<string | null> {
-  if ("ReactNativeWebView" in window) {
+  if (isNativeApp()) {
     const token = localStorage.getItem("expoPushToken");
     localStorage.removeItem("expoPushToken");
     return token;

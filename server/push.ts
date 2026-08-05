@@ -14,6 +14,18 @@
  */
 import { and, desc, eq, inArray } from "drizzle-orm";
 import webpush from "web-push";
+import { LANGUAGES, type Language } from "@shared/i18n";
+import {
+  dryingAlertText,
+  evePackAlertText,
+  foodAlertText,
+  gearAlertText,
+  heatAlertText,
+  meteorAlertText,
+  nameList,
+  tripAlertText,
+  weatherAlertText,
+} from "@shared/pushTexts";
 import {
   campSpots,
   foodItems,
@@ -67,14 +79,18 @@ export async function saveSubscription(
   userId: number,
   endpoint: string,
   p256dh: string,
-  auth: string
+  auth: string,
+  // Sprache des Geräts (#313): Sie wird bei JEDER Anmeldung mitgeschrieben,
+  // auch bei einer bestehenden – so zieht ein Sprachwechsel in der App die
+  // Mitteilungen mit, ohne dass man das Abo von Hand erneuern müsste.
+  lang: Language = "de"
 ) {
   const db = await getDb();
   if (!db) throw new Error("Datenbank nicht verfügbar");
   await db
     .insert(pushSubscriptions)
-    .values({ userId, endpoint, p256dh, auth })
-    .onDuplicateKeyUpdate({ set: { userId, p256dh, auth } });
+    .values({ userId, endpoint, p256dh, auth, lang })
+    .onDuplicateKeyUpdate({ set: { userId, p256dh, auth, lang } });
 }
 
 export async function deleteSubscription(userId: number, endpoint: string) {
@@ -366,7 +382,8 @@ const FOOD_ALERT_MAX_NAMES = 3;
  */
 export function buildFoodAlert(
   items: { name: string; expiryDate: string | null }[],
-  today: string
+  today: string,
+  lang: Language = "de"
 ): FoodAlert | null {
   const expiring = items
     .map(item => ({
@@ -385,16 +402,12 @@ export function buildFoodAlert(
 
   const names = expiring.slice(0, FOOD_ALERT_MAX_NAMES).map(x => x.name);
   const rest = expiring.length - names.length;
-  const nameList = names.join(", ") + (rest > 0 ? ` und ${rest} weitere` : "");
-  const body =
-    expiring.length === 1
-      ? `1 Lebensmittel läuft bald ab: ${nameList}`
-      : `${expiring.length} Lebensmittel laufen bald ab: ${nameList}`;
-  return {
-    title: "🧊 Kühlbox: MHD-Erinnerung",
-    body,
-    key: `food:${today}`,
-  };
+  const text = foodAlertText(
+    expiring.length,
+    nameList(names, rest, lang),
+    lang
+  );
+  return { ...text, key: `food:${today}` };
 }
 
 export interface GearAlert {
@@ -417,7 +430,8 @@ const GEAR_ALERT_MAX_NAMES = 3;
  */
 export function buildGearAlert(
   tasks: (GearTaskLike & { title: string })[],
-  today: string
+  today: string,
+  lang: Language = "de"
 ): GearAlert | null {
   const due = tasks
     .filter(task => gearTaskDue(task, today).due)
@@ -426,16 +440,8 @@ export function buildGearAlert(
 
   const names = due.slice(0, GEAR_ALERT_MAX_NAMES).map(t => t.title);
   const rest = due.length - names.length;
-  const nameList = names.join(", ") + (rest > 0 ? ` und ${rest} weitere` : "");
-  const body =
-    due.length === 1
-      ? `1 Pflege-Aufgabe ist fällig: ${nameList}`
-      : `${due.length} Pflege-Aufgaben sind fällig: ${nameList}`;
-  return {
-    title: "🛠️ Ausrüstung: Pflege fällig",
-    body,
-    key: `gear:${today.slice(0, 7)}`,
-  };
+  const text = gearAlertText(due.length, nameList(names, rest, lang), lang);
+  return { ...text, key: `gear:${today.slice(0, 7)}` };
 }
 
 /**
@@ -463,35 +469,34 @@ export const HEAT_SEND_HOUR_TO = 10;
  * weder UV noch Temperatur einen Hinweis rechtfertigen – dann bleibt es
  * still.
  */
-export function buildHeatAlert(input: {
-  date: string;
-  uvIndexMax: number;
-  maxTempC: number;
-  placeName: string;
-}): HeatAlert | null {
+export function buildHeatAlert(
+  input: {
+    date: string;
+    uvIndexMax: number;
+    maxTempC: number;
+    placeName: string;
+  },
+  lang: Language = "de"
+): HeatAlert | null {
   const advice = heatAdvice(input.uvIndexMax, input.maxTempC);
   if (!advice) return null;
-  const parts: string[] = [];
-  if (advice.sunscreen) {
-    parts.push(
-      `UV ${Math.round(advice.uvIndex)}: eincremen, alle ${advice.reapplyMinutes} Minuten nachlegen (ungeschützt rot nach ~${advice.burnMinutes} Min.)`
-    );
-  }
-  if (advice.hydration) {
-    parts.push(
-      `${Math.round(advice.maxTempC)} °C: rund ${advice.litersPerAdult.toFixed(1).replace(".", ",")} l Wasser pro Erwachsener einplanen`
-    );
-  }
-  const title = advice.sunscreen
-    ? advice.hydration
-      ? `☀️ ${input.placeName}: Sonne und Hitze`
-      : `☀️ ${input.placeName}: hoher UV-Index`
-    : `💧 ${input.placeName}: Hitzetag`;
-  return {
-    title,
-    body: parts.join(" · "),
-    key: `heat:${input.date}`,
-  };
+  // Komma als Dezimaltrennzeichen nur dort, wo es üblich ist – im
+  // Englischen wäre «1,5 l» schlicht falsch gelesen.
+  const liters = advice.litersPerAdult.toFixed(1);
+  const text = heatAlertText(
+    {
+      placeName: input.placeName,
+      sunscreen: advice.sunscreen,
+      hydration: advice.hydration,
+      uvIndex: advice.uvIndex,
+      reapplyMinutes: advice.reapplyMinutes,
+      burnMinutes: advice.burnMinutes,
+      maxTempC: advice.maxTempC,
+      liters: lang === "en" ? liters : liters.replace(".", ","),
+    },
+    lang
+  );
+  return { ...text, key: `heat:${input.date}` };
 }
 
 export interface TripAlert {
@@ -532,7 +537,8 @@ const TRIP_ALERT_MAX_DAYS = 3;
 export function buildTripAlert(
   trips: TripForAlert[],
   progressByList: Map<number, PackProgressLike>,
-  today: string
+  today: string,
+  lang: Language = "de"
 ): TripAlert | null {
   const upcoming = trips
     .map(trip => ({ trip, days: daysUntilTrip(trip.startDate, today) }))
@@ -547,17 +553,17 @@ export function buildTripAlert(
   if (!next) return null;
 
   const { trip, days } = next;
-  const title = `⛺ In ${days === 1 ? "1 Tag" : `${days} Tagen`}: ${trip.name}`;
   const progress =
     trip.packListId !== null ? progressByList.get(trip.packListId) : undefined;
   const pct =
     progress && progress.total > 0
       ? Math.round((progress.checked / progress.total) * 100)
       : 0;
-  const body = progress
-    ? `Packliste zu ${pct} % erledigt`
-    : "Dein Aufenthalt beginnt bald – denk ans Packen.";
-  return { title, body, key: `trip:${trip.id}` };
+  const text = tripAlertText(
+    { days, name: trip.name, pct: progress ? pct : null },
+    lang
+  );
+  return { ...text, key: `trip:${trip.id}` };
 }
 
 export interface EvePackAlert {
@@ -583,7 +589,8 @@ export const EVE_PACK_SEND_HOUR_TO = 21;
 export function buildEvePackAlert(
   trips: TripForAlert[],
   progressByList: Map<number, PackProgressLike>,
-  today: string
+  today: string,
+  lang: Language = "de"
 ): EvePackAlert | null {
   const candidates = trips
     .filter(trip => daysUntilTrip(trip.startDate, today) === 1)
@@ -607,11 +614,11 @@ export function buildEvePackAlert(
     .sort((a, b) => a.pct - b.pct || a.trip.id - b.trip.id);
   const first = candidates[0];
   if (!first) return null;
-  return {
-    title: `⛺ Morgen geht's los: ${first.trip.name}`,
-    body: `Packliste zu ${first.pct} % erledigt – schnapp dir den Rest noch heute Abend.`,
-    key: `evepack:${first.trip.id}`,
-  };
+  const text = evePackAlertText(
+    { name: first.trip.name, pct: first.pct },
+    lang
+  );
+  return { ...text, key: `evepack:${first.trip.id}` };
 }
 
 export interface DryingAlert {
@@ -655,7 +662,8 @@ function isoYesterday(today: string): string | null {
 export function buildDryingAlert(
   trips: TripForDrying[],
   rainByTripId: Map<number, number>,
-  today: string
+  today: string,
+  lang: Language = "de"
 ): DryingAlert | null {
   const yesterday = isoYesterday(today);
   if (!yesterday) return null;
@@ -668,18 +676,8 @@ export function buildDryingAlert(
   if (!first) return null;
 
   const { trip, rain } = first;
-  if (rain !== undefined) {
-    return {
-      title: "⛺ Zelt trocknen nicht vergessen",
-      body: `Während «${trip.name}» sind rund ${Math.round(rain)} mm Regen gefallen – häng das Zelt zum Trocknen auf, bevor es ins Lager kommt.`,
-      key: `dry:${trip.id}`,
-    };
-  }
-  return {
-    title: "⛺ Zelt auslüften nicht vergessen",
-    body: `Willkommen zurück von «${trip.name}» – lüfte das Zelt gut aus, bevor es ins Lager kommt.`,
-    key: `dry:${trip.id}`,
-  };
+  const text = dryingAlertText({ name: trip.name, rainMm: rain ?? null }, lang);
+  return { ...text, key: `dry:${trip.id}` };
 }
 
 export interface AstroAlert {
@@ -749,17 +747,20 @@ export { nightCloudCover };
  * `date` als ISO-Datum YYYY-MM-DD der Beobachtungsnacht.
  * Texte deutsch, weil der Server die Sprache der Nutzer*innen nicht kennt.
  */
-export function buildMeteorAlert(input: {
-  date: string;
-  /** Mittlere Nacht-Bewölkung in % (null = unbekannt → kein Tipp) */
-  cloudCoverNight: number | null;
-  /** Mond-Beleuchtung 0–1 */
-  moonIllumination: number;
-  /** Aktiver Strom in Peak-Nähe (null = keiner) */
-  activeShower: { name: string; zhr: number } | null;
-  /** Anzeigename des geprüften Orts (Heim-Standort) */
-  placeName: string;
-}): AstroAlert | null {
+export function buildMeteorAlert(
+  input: {
+    date: string;
+    /** Mittlere Nacht-Bewölkung in % (null = unbekannt → kein Tipp) */
+    cloudCoverNight: number | null;
+    /** Mond-Beleuchtung 0–1 */
+    moonIllumination: number;
+    /** Aktiver Strom in Peak-Nähe (null = keiner) */
+    activeShower: { name: string; zhr: number } | null;
+    /** Anzeigename des geprüften Orts (Heim-Standort) */
+    placeName: string;
+  },
+  lang: Language = "de"
+): AstroAlert | null {
   if (!input.activeShower) return null;
   if (
     input.cloudCoverNight === null ||
@@ -768,11 +769,15 @@ export function buildMeteorAlert(input: {
     return null;
   }
   if (input.moonIllumination >= ASTRO_MOON_MAX_ILLUMINATION) return null;
-  return {
-    title: `🌠 Heute Nacht: ${input.activeShower.name}`,
-    body: `Klarer Himmel am Ort «${input.placeName}» – bis zu ${input.activeShower.zhr} Sternschnuppen pro Stunde.`,
-    key: `astro:${input.date}`,
-  };
+  const text = meteorAlertText(
+    {
+      shower: input.activeShower.name,
+      zhr: input.activeShower.zhr,
+      placeName: input.placeName,
+    },
+    lang
+  );
+  return { ...text, key: `astro:${input.date}` };
 }
 
 /** Stunde (0–23) in Europe/Zurich – der Server könnte in UTC laufen. */
@@ -866,6 +871,30 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
   if (subs.length === 0) return result;
 
   const userIds = Array.from(new Set(subs.map(s => s.userId)));
+
+  /**
+   * Meldungen werden je Konto UND Sprache gebaut (#313).
+   *
+   * Warum nicht einmal pro Konto: Die Sprache hängt am Gerät, nicht am
+   * Konto – Handy auf Französisch, Tablet auf Deutsch ist ein normaler
+   * Fall. Gebaut wird nur, was tatsächlich gebraucht wird: Bei einer
+   * einzigen Sprache im Konto ist es genau ein Durchgang wie bisher.
+   */
+  const subLang = (value: string): Language =>
+    (LANGUAGES as readonly string[]).includes(value)
+      ? (value as Language)
+      : "de";
+  const langsByUser = new Map<number, Language[]>();
+  for (const sub of subs) {
+    const lang = subLang(sub.lang);
+    const list = langsByUser.get(sub.userId) ?? [];
+    if (!list.includes(lang)) list.push(lang);
+    langsByUser.set(sub.userId, list);
+  }
+  const langsOf = (userId: number): Language[] =>
+    langsByUser.get(userId) ?? ["de"];
+  /** Schlüssel der Meldungs-Landkarten: Konto plus Sprache. */
+  const alertFor = (userId: number, lang: string) => `${userId}:${lang}`;
   const spots = await db
     .select()
     .from(campSpots)
@@ -882,15 +911,15 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     .select()
     .from(foodItems)
     .where(inArray(foodItems.userId, userIds));
-  const foodAlertByUser = new Map<number, FoodAlert>();
+  const foodAlertByUser = new Map<string, FoodAlert>();
   for (const userId of userIds) {
-    const alert = buildFoodAlert(
-      food
-        .filter(f => f.userId === userId)
-        .map(f => ({ name: f.name, expiryDate: f.expiryDate })),
-      today
-    );
-    if (alert) foodAlertByUser.set(userId, alert);
+    const items = food
+      .filter(f => f.userId === userId)
+      .map(f => ({ name: f.name, expiryDate: f.expiryDate }));
+    for (const lang of langsOf(userId)) {
+      const alert = buildFoodAlert(items, today, lang);
+      if (alert) foodAlertByUser.set(alertFor(userId, lang), alert);
+    }
   }
 
   // Ausrüstung: fällige Pflege-Aufgaben pro Nutzer*in vorbereiten
@@ -898,13 +927,13 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     .select()
     .from(gearTasks)
     .where(inArray(gearTasks.userId, userIds));
-  const gearAlertByUser = new Map<number, GearAlert>();
+  const gearAlertByUser = new Map<string, GearAlert>();
   for (const userId of userIds) {
-    const alert = buildGearAlert(
-      allGearTasks.filter(task => task.userId === userId),
-      today
-    );
-    if (alert) gearAlertByUser.set(userId, alert);
+    const tasks = allGearTasks.filter(task => task.userId === userId);
+    for (const lang of langsOf(userId)) {
+      const alert = buildGearAlert(tasks, today, lang);
+      if (alert) gearAlertByUser.set(alertFor(userId, lang), alert);
+    }
   }
 
   // Meine Reisen: Trip-Countdowns pro Nutzer*in vorbereiten
@@ -941,25 +970,24 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     }
   }
   const spotNameById = new Map(spots.map(s => [s.id, s.name]));
-  const tripAlertByUser = new Map<number, TripAlert>();
+  const tripAlertByUser = new Map<string, TripAlert>();
   for (const userId of userIds) {
-    const alert = buildTripAlert(
-      upcomingTrips
-        .filter(trip => trip.userId === userId)
-        .map(trip => ({
-          id: trip.id,
-          name:
-            trip.title ||
-            (trip.spotId !== null ? spotNameById.get(trip.spotId) : null) ||
-            trip.location ||
-            "Camping-Aufenthalt",
-          startDate: trip.startDate,
-          packListId: trip.packListId,
-        })),
-      progressByList,
-      today
-    );
-    if (alert) tripAlertByUser.set(userId, alert);
+    const own = upcomingTrips
+      .filter(trip => trip.userId === userId)
+      .map(trip => ({
+        id: trip.id,
+        name:
+          trip.title ||
+          (trip.spotId !== null ? spotNameById.get(trip.spotId) : null) ||
+          trip.location ||
+          "Camping-Aufenthalt",
+        startDate: trip.startDate,
+        packListId: trip.packListId,
+      }));
+    for (const lang of langsOf(userId)) {
+      const alert = buildTripAlert(own, progressByList, today, lang);
+      if (alert) tripAlertByUser.set(alertFor(userId, lang), alert);
+    }
   }
 
   /** Anzeigename einer Reise (Titel, sonst Platz-Name bzw. Freitext-Ort). */
@@ -972,26 +1000,25 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
   // Vorabend-Check: Abend vor der Anreise, nur mit unfertiger Packliste –
   // wie beim Sternschnuppen-Push nur zwischen 17 und 21 Uhr (Europe/Zurich),
   // damit der stündliche Cron nicht mitten in der Nacht erinnert.
-  const evePackAlertByUser = new Map<number, EvePackAlert>();
+  const evePackAlertByUser = new Map<string, EvePackAlert>();
   const eveningHour = zurichHour();
   if (
     eveningHour >= EVE_PACK_SEND_HOUR_FROM &&
     eveningHour <= EVE_PACK_SEND_HOUR_TO
   ) {
     for (const userId of userIds) {
-      const alert = buildEvePackAlert(
-        upcomingTrips
-          .filter(trip => trip.userId === userId)
-          .map(trip => ({
-            id: trip.id,
-            name: tripDisplayName(trip),
-            startDate: trip.startDate,
-            packListId: trip.packListId,
-          })),
-        progressByList,
-        today
-      );
-      if (alert) evePackAlertByUser.set(userId, alert);
+      const own = upcomingTrips
+        .filter(trip => trip.userId === userId)
+        .map(trip => ({
+          id: trip.id,
+          name: tripDisplayName(trip),
+          startDate: trip.startDate,
+          packListId: trip.packListId,
+        }));
+      for (const lang of langsOf(userId)) {
+        const alert = buildEvePackAlert(own, progressByList, today, lang);
+        if (alert) evePackAlertByUser.set(alertFor(userId, lang), alert);
+      }
     }
   }
 
@@ -1044,24 +1071,23 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       rainByTripId.set(trip.id, sum);
     }
   }
-  const dryAlertByUser = new Map<number, DryingAlert>();
+  const dryAlertByUser = new Map<string, DryingAlert>();
   for (const userId of userIds) {
-    const alert = buildDryingAlert(
-      endedYesterday
-        .filter(trip => trip.userId === userId)
-        .map(trip => ({
-          id: trip.id,
-          name:
-            trip.title ||
-            (trip.spotId !== null ? spotNameById.get(trip.spotId) : null) ||
-            trip.location ||
-            "Camping-Aufenthalt",
-          endDate: trip.endDate,
-        })),
-      rainByTripId,
-      today
-    );
-    if (alert) dryAlertByUser.set(userId, alert);
+    const own = endedYesterday
+      .filter(trip => trip.userId === userId)
+      .map(trip => ({
+        id: trip.id,
+        name:
+          trip.title ||
+          (trip.spotId !== null ? spotNameById.get(trip.spotId) : null) ||
+          trip.location ||
+          "Camping-Aufenthalt",
+        endDate: trip.endDate,
+      }));
+    for (const lang of langsOf(userId)) {
+      const alert = buildDryingAlert(own, rainByTripId, today, lang);
+      if (alert) dryAlertByUser.set(alertFor(userId, lang), alert);
+    }
   }
 
   // Wetter pro gerundeter Koordinate nur einmal abrufen
@@ -1138,7 +1164,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
   // Sternschnuppen: klarer Abendhimmel am Heim-Ort während eines aktiven
   // Strom-Maximums – nur abends (17–21 Uhr Europe/Zurich) geprüft, damit der
   // Tipp zur kommenden Nacht passt und der stündliche Cron nicht öfter feuert.
-  const astroAlertByUser = new Map<number, AstroAlert>();
+  const astroAlertByUser = new Map<string, AstroAlert>();
   const hour = zurichHour();
   if (hour >= ASTRO_SEND_HOUR_FROM && hour <= ASTRO_SEND_HOUR_TO) {
     const astroDate = zurichIsoDate();
@@ -1150,14 +1176,24 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       for (const home of homes) {
         const hourly = await cachedHourly(home.latitude, home.longitude);
         if (!hourly) continue;
-        const alert = buildMeteorAlert({
-          date: astroDate,
-          cloudCoverNight: nightCloudCover(hourly, astroDate),
-          moonIllumination,
-          activeShower: { name: pick(shower.name, "de"), zhr: shower.zhr },
-          placeName: home.name,
-        });
-        if (alert) astroAlertByUser.set(home.userId, alert);
+        // Auch der Name des Stroms ist übersetzt – «Perséides» statt
+        // «Perseiden», wenn das Gerät auf Französisch läuft.
+        for (const lang of langsOf(home.userId)) {
+          const alert = buildMeteorAlert(
+            {
+              date: astroDate,
+              cloudCoverNight: nightCloudCover(hourly, astroDate),
+              moonIllumination,
+              activeShower: {
+                name: pick(shower.name, lang),
+                zhr: shower.zhr,
+              },
+              placeName: home.name,
+            },
+            lang
+          );
+          if (alert) astroAlertByUser.set(alertFor(home.userId, lang), alert);
+        }
       }
     }
   }
@@ -1165,13 +1201,16 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
   // Sonnencreme & Trinken (#260/#261): morgens einmal, am Ort des laufenden
   // Aufenthalts bzw. am Heim-Standort. Die Werte kommen aus derselben
   // Stundenprognose wie die Unwetter-Warnung – kein zusätzlicher Abruf.
-  const heatAlertByUser = new Map<number, HeatAlert>();
+  const heatAlertByUser = new Map<string, HeatAlert>();
   if (hour >= HEAT_SEND_HOUR_FROM && hour <= HEAT_SEND_HOUR_TO) {
     const heatDate = zurichIsoDate();
     for (const point of weatherPoints) {
       // Ein Konto bekommt höchstens eine Erinnerung – der erste Ort gewinnt,
       // und das ist der Zeltplatz (die Plätze stehen vor dem Heim-Ort).
-      if (heatAlertByUser.has(point.userId)) continue;
+      // Ein Konto bekommt höchstens eine Erinnerung – geprüft wird über
+      // die erste Sprache, denn die Meldungen entstehen immer im Satz.
+      if (heatAlertByUser.has(alertFor(point.userId, langsOf(point.userId)[0])))
+        continue;
       const todayHours = point.hourly.filter(h => h.time.startsWith(heatDate));
       if (todayHours.length === 0) continue;
       const uvIndexMax = todayHours.reduce(
@@ -1182,13 +1221,18 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         (max, h) => Math.max(max, h.temperatureC),
         -Infinity
       );
-      const alert = buildHeatAlert({
-        date: heatDate,
-        uvIndexMax,
-        maxTempC,
-        placeName: point.name,
-      });
-      if (alert) heatAlertByUser.set(point.userId, alert);
+      for (const lang of langsOf(point.userId)) {
+        const alert = buildHeatAlert(
+          {
+            date: heatDate,
+            uvIndexMax,
+            maxTempC,
+            placeName: point.name,
+          },
+          lang
+        );
+        if (alert) heatAlertByUser.set(alertFor(point.userId, lang), alert);
+      }
     }
   }
 
@@ -1281,8 +1325,9 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     const ownPoints = weatherPoints.filter(
       point => point.userId === sub.userId
     );
+    const lang = subLang(sub.lang);
     const dangers = ownPoints.flatMap(point =>
-      detectAlerts(point.hourly, "de", thresholds)
+      detectAlerts(point.hourly, lang, thresholds)
         .filter(a => a.severity === "gefahr")
         .map(alert => ({
           spotName: point.name,
@@ -1314,8 +1359,8 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         .filter(isPushWorthy)
         .map(warning => ({
           spotName: point.name,
-          title: eventLabel(warning.event, "de"),
-          description: `${ATTRIBUTION.issuer} für ${warning.areaDesc}`,
+          title: eventLabel(warning.event, lang),
+          description: `${ATTRIBUTION.issuer} · ${warning.areaDesc}`,
           key: `${point.keyPrefix}:${warningKey(warning)}`,
           official: true,
         }))
@@ -1342,16 +1387,19 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       // Amtliche Warnungen bekommen eine eigene, deutlichere Stufe: Wer
       // nachts aufwacht, soll am ersten Zeichen sehen, ob das der eigene
       // Schwellwert war oder MeteoSchweiz.
-      const weatherTitle = first.official
-        ? `🚨 Amtliche Warnung: ${first.title} – ${first.spotName}`
-        : `⚠️ ${first.title} – ${first.spotName}`;
-      const weatherBody =
-        dangers.length > 1
-          ? `${first.description} (+${dangers.length - 1} weitere Warnungen an deinen Plätzen)`
-          : first.description;
+      const weather = weatherAlertText(
+        {
+          official: first.official,
+          title: first.title,
+          spotName: first.spotName,
+          description: first.description,
+          more: dangers.length - 1,
+        },
+        lang
+      );
       const payload = JSON.stringify({
-        title: weatherTitle,
-        body: weatherBody,
+        title: weather.title,
+        body: weather.body,
         url: "/wetter",
       });
       const outcome = await sendTo(sub, payload);
@@ -1361,8 +1409,8 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
           sub.userId,
           "weather",
           alertKey,
-          weatherTitle,
-          weatherBody,
+          weather.title,
+          weather.body,
           "/wetter"
         );
         await db
@@ -1377,7 +1425,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
 
     // ── Kühlbox: MHD-Erinnerung (max. eine pro Tag und Abo) ──
     const foodAlert = subscriptionWants(sub, "food")
-      ? foodAlertByUser.get(sub.userId)
+      ? foodAlertByUser.get(alertFor(sub.userId, subLang(sub.lang)))
       : undefined;
     if (foodAlert && foodAlert.key !== sub.lastFoodKey) {
       const foodPayload = JSON.stringify({
@@ -1409,7 +1457,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
 
     // ── Meine Reisen: Trip-Countdown (max. eine Nachricht pro Trip) ──
     const tripAlert = subscriptionWants(sub, "trip")
-      ? tripAlertByUser.get(sub.userId)
+      ? tripAlertByUser.get(alertFor(sub.userId, subLang(sub.lang)))
       : undefined;
     if (tripAlert && tripAlert.key !== sub.lastTripKey) {
       const tripPayload = JSON.stringify({
@@ -1441,7 +1489,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
 
     // ── Vorabend-Check: Abend vor der Anreise (Flag wantsTrips) ──
     const evePackAlert = subscriptionWants(sub, "trip")
-      ? evePackAlertByUser.get(sub.userId)
+      ? evePackAlertByUser.get(alertFor(sub.userId, subLang(sub.lang)))
       : undefined;
     if (evePackAlert && evePackAlert.key !== sub.lastEvePackKey) {
       const evePackPayload = JSON.stringify({
@@ -1473,7 +1521,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
 
     // ── Zelt-Trocknung: Erinnerung am Tag nach der Heimkehr (Flag wantsTrips) ──
     const dryAlert = subscriptionWants(sub, "trip")
-      ? dryAlertByUser.get(sub.userId)
+      ? dryAlertByUser.get(alertFor(sub.userId, subLang(sub.lang)))
       : undefined;
     if (dryAlert && dryAlert.key !== sub.lastDryKey) {
       const dryPayload = JSON.stringify({
@@ -1505,7 +1553,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
 
     // ── Sonnencreme & Trinken: heisser/sonniger Tag (max. eine pro Tag) ──
     const heatAlert = subscriptionWants(sub, "heat")
-      ? heatAlertByUser.get(sub.userId)
+      ? heatAlertByUser.get(alertFor(sub.userId, subLang(sub.lang)))
       : undefined;
     if (heatAlert && heatAlert.key !== sub.lastHeatKey) {
       const heatPayload = JSON.stringify({
@@ -1537,7 +1585,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
 
     // ── Ausrüstung: Pflege-Erinnerung (max. eine pro Monat und Abo) ──
     const gearAlert = subscriptionWants(sub, "gear")
-      ? gearAlertByUser.get(sub.userId)
+      ? gearAlertByUser.get(alertFor(sub.userId, subLang(sub.lang)))
       : undefined;
     if (gearAlert && gearAlert.key !== sub.lastGearKey) {
       const gearPayload = JSON.stringify({
@@ -1569,13 +1617,15 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
 
     // ── Sternschnuppen: Tipp bei klarer Nacht am Heim-Ort (max. 1 pro Nacht) ──
     const astroAlert = subscriptionWants(sub, "astro")
-      ? astroAlertByUser.get(sub.userId)
+      ? astroAlertByUser.get(alertFor(sub.userId, subLang(sub.lang)))
       : undefined;
     if (astroAlert && astroAlert.key !== sub.lastAstroKey) {
       const astroPayload = JSON.stringify({
         title: astroAlert.title,
         body: astroAlert.body,
-        url: "/natur",
+        // Seit #308 liegt der Sternschnuppen-Kalender auf «Himmel», nicht
+        // mehr im Natur-Lexikon – die Mitteilung führte sonst ins Leere.
+        url: "/himmel",
         // Eigener Tag, damit der Tipp andere Meldungen nicht ersetzt
         tag: "campmesser-astro",
       });

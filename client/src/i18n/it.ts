@@ -89,6 +89,15 @@ export const it: Translation = {
     moduleDescription:
       "Vale la pena stanotte? Fase lunare, oscurità, stelle cadenti e passaggi",
   },
+  /** «Konnte nicht geladen werden» – der dritte Zustand neben Laden und Leer. */
+  queryError: {
+    title: "Impossibile caricare",
+    text: "Il server non ha risposto come previsto. I tuoi dati non sono persi – riprova subito.",
+    offlineTitle: "Non caricabile senza connessione",
+    offlineText:
+      "Questa parte non è mai stata caricata e quindi non è sul dispositivo. Ci sarà appena tornerai in rete.",
+    retry: "Riprova",
+  },
   offline: {
     banner: "Nessuna connessione – vedi dati salvati.",
     dataAge: (time: string) => `Aggiornato alle ${time}`,
@@ -346,6 +355,10 @@ export const it: Translation = {
     pushOn: "Notifiche push attivate",
     pushOff: "Notifiche push disattivate",
     prefsIntro: "Scegli quali notifiche riceve questo dispositivo:",
+    lastCheckAgo: (ago: string) => `Ultimo controllo: ${ago}`,
+    lastCheckNever: "Il controllo non è mai stato eseguito.",
+    lastCheckStale: (hours: number) =>
+      `Nessun controllo da oltre ${hours} ore – probabilmente al momento non arriva nessuna notifica.`,
     prefWeather: "Allerte maltempo",
     prefWeatherDesc:
       "Tempesta, temporale o piogge intense sulle tue piazzole salvate.",

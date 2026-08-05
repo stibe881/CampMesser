@@ -645,6 +645,20 @@
       "when": 1785880181169,
       "tag": "0091_serious_white_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 92,
+      "version": "5",
+      "when": 1785962756307,
+      "tag": "0092_known_nightshade",
+      "breakpoints": true
+    },
+    {
+      "idx": 93,
+      "version": "5",
+      "when": 1785963089715,
+      "tag": "0093_clear_radioactive_man",
+      "breakpoints": true
     }
   ]
 }

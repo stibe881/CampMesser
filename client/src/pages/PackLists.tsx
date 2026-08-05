@@ -26,6 +26,7 @@ import {
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import QueryError from "@/components/QueryError";
 import ListSkeleton from "@/components/ListSkeleton";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
@@ -646,7 +647,12 @@ export default function PackListsPage() {
         </DialogContent>
       </Dialog>
 
-      {listsQuery.isLoading ? (
+      {listsQuery.isError ? (
+        <QueryError
+          onRetry={() => void listsQuery.refetch()}
+          retrying={listsQuery.isFetching}
+        />
+      ) : listsQuery.isLoading ? (
         <div className="flex justify-center py-10">
           <Loader2
             className="h-6 w-6 animate-spin text-muted-foreground"

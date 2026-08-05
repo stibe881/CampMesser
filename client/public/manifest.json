@@ -107,6 +107,19 @@
           "type": "image/png"
         }
       ]
+    },
+    {
+      "name": "Himmel",
+      "short_name": "Himmel",
+      "description": "Mond, Sternschnuppen und Dunkelheit heute Nacht",
+      "url": "/himmel",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ],
   "icons": [

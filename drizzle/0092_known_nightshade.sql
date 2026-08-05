@@ -1,0 +1,1 @@
+ALTER TABLE `pushSubscriptions` ADD `lang` varchar(2) DEFAULT 'de' NOT NULL;

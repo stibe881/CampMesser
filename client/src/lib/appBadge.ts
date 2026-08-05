@@ -7,6 +7,7 @@
  */
 import { expiryInfo } from "@shared/food";
 import { gearTaskDue, type GearTaskLike } from "@shared/gearTasks";
+import { isNativeApp, NATIVE_MESSAGES, postToNative } from "./nativeBridge";
 
 /** Kühlbox-Eintrag, soweit für den Zähler relevant. */
 export interface BadgeFoodItem {
@@ -14,8 +15,18 @@ export interface BadgeFoodItem {
   expiryDate?: string | null;
 }
 
-/** Unterstützt der Browser die Badging API? */
+/**
+ * Kann diese Umgebung überhaupt eine Zahl ans App-Icon hängen?
+ *
+ * Zwei Wege führen dahin: die Badging API der installierten PWA – und in
+ * der nativen App der Rahmen drumherum (#315). Im WebView gibt es
+ * `navigator.setAppBadge` NICHT; ohne die zweite Zeile blieb das Icon der
+ * nativen App also dauerhaft ohne Zahl, während dieselbe Seite als PWA eine
+ * hatte. Genau die Art Unterschied, die man dem eigenen Gerät als Fehler
+ * auslegt.
+ */
 export function isAppBadgeSupported(): boolean {
+  if (isNativeApp()) return true;
   return typeof navigator !== "undefined" && "setAppBadge" in navigator;
 }
 
@@ -42,6 +53,10 @@ export function computeBadgeCount(input: {
 
 /** Zahl am App-Icon setzen; 0 räumt das Badge weg. Ohne Support ein No-op. */
 export function updateAppBadge(count: number): void {
+  if (isNativeApp()) {
+    postToNative(NATIVE_MESSAGES.setBadge, { count });
+    return;
+  }
   if (!isAppBadgeSupported()) return;
   const promise =
     count > 0 ? navigator.setAppBadge(count) : navigator.clearAppBadge();

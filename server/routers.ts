@@ -3405,6 +3405,8 @@ export const appRouter = router({
           endpoint: z.string().min(10).max(500),
           p256dh: z.string().min(10).max(255),
           auth: z.string().min(5).max(255),
+          /** Sprache des Geräts für die Mitteilungs-Texte (#313) */
+          lang: z.enum(LANGUAGES).default("de"),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -3413,7 +3415,8 @@ export const appRouter = router({
           ctx.user.id,
           input.endpoint,
           input.p256dh,
-          input.auth
+          input.auth,
+          input.lang
         );
         return { success: true } as const;
       }),
@@ -3488,6 +3491,19 @@ export const appRouter = router({
         const { getPushLog, PUSH_LOG_LIMIT } = await import("./push");
         return getPushLog(ctx.user.id, input.limit ?? PUSH_LOG_LIMIT);
       }),
+    /**
+     * Wann die Prüfung zuletzt gelaufen ist (#314).
+     *
+     * Die Prüfung hängt an einem externen Cronjob. Fällt der aus, bleibt
+     * alles still – und Stille sieht genau aus wie «es gab nichts zu
+     * melden». Dieser Zeitstempel macht den Unterschied sichtbar, an der
+     * Stelle, an der man Mitteilungen ohnehin verwaltet.
+     */
+    lastCheck: protectedProcedure.query(async () => {
+      const { getState } = await import("./systemState");
+      const at = await getState("lastPushCheck");
+      return { at };
+    }),
   }),
 
   recipes: router({
