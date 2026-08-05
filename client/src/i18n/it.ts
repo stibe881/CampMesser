@@ -67,6 +67,28 @@ export const it: Translation = {
     },
   },
   /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  /** Karten-App-Wahl beim Öffnen einer Route. */
+  directions: {
+    title: "Con cosa navighiamo?",
+    description: "Il percorso può aprirsi in Mappe di Apple o in Google Maps.",
+    apple: "Mappe (Apple)",
+    google: "Google Maps",
+    remember: "Ricorda la scelta e non chiedere più",
+    changeHint: "Puoi cambiarlo in qualsiasi momento nel profilo.",
+    settingLabel: "App di mappe per i percorsi",
+    settingAsk: "Chiedi ogni volta",
+    settingHint:
+      "Determina con cosa si aprono «Percorso» e «Andare». «Chiedi ogni volta» ripropone la domanda.",
+  },
+  /** Himmel-Seite: Mond, Sternschnuppen, ISS, Sternbilder, Rotlicht. */
+  sky: {
+    title: "Cielo",
+    subtitle: "Luna, stelle cadenti, ISS e costellazioni per stanotte",
+    fromNatureHint:
+      "Luna, oscurità, stelle cadenti, ISS e costellazioni – ora su una pagina propria",
+    moduleDescription:
+      "Vale la pena stanotte? Fase lunare, oscurità, stelle cadenti e passaggi",
+  },
   offline: {
     banner: "Nessuna connessione – vedi dati salvati.",
     dataAge: (time: string) => `Aggiornato alle ${time}`,
@@ -2308,6 +2330,11 @@ export const it: Translation = {
       "Condiviso con CampMesser – il coltellino svizzero per il campeggio in tenda.",
   },
   trips: {
+    detailSubtitle: "Un soggiorno in dettaglio",
+    backToList: "Tutti i soggiorni",
+    openDetailAria: (name: string) => `Apri il soggiorno ${name}`,
+    detailNotFound:
+      "Questo soggiorno non esiste più – forse è stato eliminato.",
     title: "I miei viaggi",
     subtitle: "Annota i tuoi soggiorni in campeggio: luoghi, notti e ricordi.",
     loginFeature: "i tuoi viaggi",
@@ -4896,6 +4923,8 @@ export const it: Translation = {
     putAwayFailed:
       "Sistemazione non riuscita – le voci non ancora riprese restano sulla lista",
     listsAria: "Scegli la lista della spesa",
+    tripListsLabel: "Liste dei viaggi:",
+    tripListsAria: "Liste della spesa dei viaggi",
     listCounts: (open: number, done: number) =>
       `${open} da comprare · ${done} fatti`,
     manageListsButton: "Liste",
@@ -5027,6 +5056,7 @@ export const it: Translation = {
     openButton: "Lista spesa del viaggio",
     openAria: (name: string) => `Apri la lista della spesa del viaggio ${name}`,
     backToMenuPlan: "Al piano dei pasti",
+    toPersonalLists: "Liste personali",
     emptyTitle: "Ancora nessuna voce",
     emptyText:
       "Aggiungi voci qui sopra – oppure riprendi gli ingredienti delle ricette pianificate dal piano dei pasti.",

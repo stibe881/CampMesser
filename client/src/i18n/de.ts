@@ -68,6 +68,29 @@ export const de = {
     },
   },
   /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  /** Karten-App-Wahl beim Öffnen einer Route. */
+  directions: {
+    title: "Womit navigieren?",
+    description:
+      "Die Route lässt sich in Apple Karten oder in Google Maps öffnen.",
+    apple: "Apple Karten",
+    google: "Google Maps",
+    remember: "Wahl merken und nicht mehr fragen",
+    changeHint: "Ändern kannst du das jederzeit im Profil.",
+    settingLabel: "Karten-App für Routen",
+    settingAsk: "Jedes Mal fragen",
+    settingHint:
+      "Bestimmt, womit sich «Route» und «Hinfahren» öffnen. «Jedes Mal fragen» stellt die Frage wieder.",
+  },
+  /** Himmel-Seite: Mond, Sternschnuppen, ISS, Sternbilder, Rotlicht. */
+  sky: {
+    title: "Himmel",
+    subtitle: "Mond, Sternschnuppen, ISS und Sternbilder für heute Nacht",
+    fromNatureHint:
+      "Mond, Dunkelheit, Sternschnuppen, ISS und Sternbilder – jetzt auf einer eigenen Seite",
+    moduleDescription:
+      "Lohnt sich die Nacht? Mondphase, Dunkelheit, Sternschnuppen und Überflüge",
+  },
   offline: {
     banner: "Keine Verbindung – du siehst gespeicherte Daten.",
     dataAge: (time: string) => `Stand von ${time}`,
@@ -2331,6 +2354,11 @@ export const de = {
       "Geteilt mit CampMesser – dem Schweizer Taschenmesser fürs Zelt-Camping.",
   },
   trips: {
+    detailSubtitle: "Ein Aufenthalt im Detail",
+    backToList: "Alle Aufenthalte",
+    openDetailAria: (name: string) => `Aufenthalt ${name} öffnen`,
+    detailNotFound:
+      "Diesen Aufenthalt gibt es nicht mehr – vielleicht wurde er gelöscht.",
     title: "Meine Reisen",
     subtitle:
       "Deine Camping-Aufenthalte festhalten: Orte, Nächte und Erinnerungen.",
@@ -4931,6 +4959,8 @@ export const de = {
     putAwayFailed:
       "Einräumen fehlgeschlagen – noch nicht übernommene Einträge bleiben auf der Liste",
     listsAria: "Einkaufsliste wählen",
+    tripListsLabel: "Reiselisten:",
+    tripListsAria: "Einkaufslisten von Reisen",
     listCounts: (open: number, done: number) =>
       `${open} offen · ${done} erledigt`,
     manageListsButton: "Listen",
@@ -5063,6 +5093,7 @@ export const de = {
     openButton: "Reise-Einkaufsliste",
     openAria: (name: string) => `Reise-Einkaufsliste für ${name} öffnen`,
     backToMenuPlan: "Zum Menüplan",
+    toPersonalLists: "Eigene Listen",
     emptyTitle: "Noch keine Einträge",
     emptyText:
       "Füge oben Einträge hinzu – oder übernimm die Zutaten der geplanten Rezepte aus dem Menüplan.",

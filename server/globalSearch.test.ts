@@ -159,6 +159,81 @@ describe("searchKnowledge", () => {
   });
 });
 
+describe("searchOwnContent: Ausrüstung, Kisten, Vorräte, Aufenthalte", () => {
+  it("findet einen Gegenstand und nennt die Kiste im Snippet", () => {
+    // Der eigentliche Zweck: «Wo ist die Stirnlampe?» soll die Kiste nennen,
+    // ohne dass man den Treffer erst öffnen muss.
+    const results = searchOwnContent("stirnlampe", {
+      inventory: [
+        {
+          id: 4,
+          name: "Stirnlampe",
+          category: "licht",
+          boxCode: "K3",
+          boxName: "Küchenkiste",
+        },
+      ],
+    });
+    expect(results).toHaveLength(1);
+    expect(results[0].path).toBe("/inventar");
+    expect(results[0].snippet).toContain("K3");
+    expect(results[0].snippet).toContain("Küchenkiste");
+  });
+
+  it("findet den Gegenstand auch über den Namen der Kiste", () => {
+    const results = searchOwnContent("küchenkiste", {
+      inventory: [
+        { id: 4, name: "Stirnlampe", boxCode: "K3", boxName: "Küchenkiste" },
+      ],
+    });
+    expect(results).toHaveLength(1);
+    expect(results[0].title).toBe("Stirnlampe");
+  });
+
+  it("findet Kisten über Kennung, Name und Standort", () => {
+    const boxes = [
+      { id: 1, code: "K3", name: "Küchenkiste", location: "Keller" },
+    ];
+    expect(searchOwnContent("k3", { boxes })).toHaveLength(1);
+    expect(searchOwnContent("keller", { boxes })).toHaveLength(1);
+    expect(searchOwnContent("k3", { boxes })[0].path).toBe("/kisten/K3");
+  });
+
+  it("unterscheidet Kühlbox und Trockenvorrat im Snippet", () => {
+    const cooled = searchOwnContent("butter", {
+      food: [{ id: 1, name: "Butter", storage: "cooled" }],
+    });
+    const dry = searchOwnContent("reis", {
+      food: [{ id: 2, name: "Reis", storage: "dry" }],
+    });
+    expect(cooled[0].snippet).toContain("Kühlbox");
+    expect(dry[0].snippet).toContain("Trockenvorrat");
+  });
+
+  it("findet Aufenthalte über Titel und über den Ort", () => {
+    const trips = [
+      {
+        id: 7,
+        title: "Herbstferien",
+        location: "Bern",
+        spotName: "Seeblick",
+        startDate: "2026-10-05",
+      },
+    ];
+    expect(searchOwnContent("herbstferien", { trips })[0].path).toBe(
+      "/tagebuch/7"
+    );
+    expect(searchOwnContent("seeblick", { trips })).toHaveLength(1);
+  });
+
+  it("überspringt Aufenthalte ganz ohne Namen", () => {
+    // Ein Treffer ohne Beschriftung wäre eine leere Zeile in der Liste.
+    expect(
+      searchOwnContent("2026", { trips: [{ id: 8, startDate: "2026-10-05" }] })
+    ).toEqual([]);
+  });
+});
+
 describe("searchOwnContent", () => {
   const own: OwnContent = {
     packLists: [

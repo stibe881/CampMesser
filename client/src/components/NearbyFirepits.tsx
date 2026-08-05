@@ -21,7 +21,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { ChevronDown, Flame, Navigation } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { directionsUrl } from "@/lib/directions";
+import {
+  defaultProvider,
+  directionsUrl,
+  openDirections,
+} from "@/lib/directions";
 import {
   FIREPIT_DEFAULT_RADIUS_M,
   FIREPIT_SEARCH_RADII_M,
@@ -249,7 +253,15 @@ export default function NearbyFirepits({
                         )}
 
                         <a
-                          href={directionsUrl(firepit.lat, firepit.lon)}
+                          href={directionsUrl(
+                            firepit.lat,
+                            firepit.lon,
+                            defaultProvider()
+                          )}
+                          onClick={event => {
+                            event.preventDefault();
+                            openDirections(firepit.lat, firepit.lon);
+                          }}
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={tf.navAria(title)}

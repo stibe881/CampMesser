@@ -174,6 +174,42 @@ export interface OwnContent {
     text: string;
     tags?: string | null;
   }[];
+  /**
+   * Ausrüstung. «Wo ist die Stirnlampe?» war bis dahin die eine Frage, die
+   * die Suche NICHT beantwortete – obwohl Inventar und Kisten genau dafür
+   * gebaut sind. Die Kiste steht im Snippet, denn sie ist die Antwort.
+   */
+  inventory?: {
+    id: number;
+    name: string;
+    category?: string | null;
+    notes?: string | null;
+    boxName?: string | null;
+    boxCode?: string | null;
+  }[];
+  /** Kisten selbst – gesucht wird nach Name, Kennung und Standort. */
+  boxes?: {
+    id: number;
+    code: string;
+    name: string;
+    location?: string | null;
+    notes?: string | null;
+  }[];
+  /** Kühlbox und Trockenvorrat. */
+  food?: {
+    id: number;
+    name: string;
+    storage?: string | null;
+    category?: string | null;
+  }[];
+  /** Reisen: gesucht wird über Titel und Ort. */
+  trips?: {
+    id: number;
+    title?: string | null;
+    location?: string | null;
+    spotName?: string | null;
+    startDate?: string | null;
+  }[];
 }
 
 /** Typ-Labels für die Snippet-Zeile eigener Treffer. */
@@ -205,6 +241,11 @@ const OWN_KIND_LABELS = {
     "Tent finder target"
   ),
   note: l4("Notiz", "Note", "Nota", "Note"),
+  gear: l4("Ausrüstung", "Équipement", "Attrezzatura", "Gear"),
+  box: l4("Kiste", "Caisse", "Cassa", "Box"),
+  foodCooled: l4("Kühlbox", "Glacière", "Frigo", "Cool box"),
+  foodDry: l4("Trockenvorrat", "Réserve sèche", "Dispensa", "Dry store"),
+  trip: l4("Aufenthalt", "Séjour", "Soggiorno", "Stay"),
 };
 
 /** Notiz ohne Titel: die Überschrift kommt dann aus dem Text. */
@@ -293,6 +334,56 @@ export function searchOwnContent(
       p(target.name),
       `/zeltfinder?target=${encodeURIComponent(target.id)}`,
       p(OWN_KIND_LABELS.tentTarget)
+    );
+  }
+  // Ausrüstung (#307): Der Gegenstand steht im Titel, die Kiste im Snippet –
+  // «wo ist die Stirnlampe» wird mit «in K3 · Keller» beantwortet, ohne dass
+  // man den Treffer erst öffnen muss.
+  for (const item of own.inventory ?? []) {
+    const kind = p(OWN_KIND_LABELS.gear);
+    const place = [item.boxCode, item.boxName].filter(Boolean).join(" · ");
+    add(
+      `own-gear-${item.id}`,
+      p(item.name),
+      "/inventar",
+      place ? `${kind} · ${place}` : kind,
+      [item.category ?? undefined, item.notes ?? undefined, place || undefined]
+    );
+  }
+  for (const box of own.boxes ?? []) {
+    const kind = p(OWN_KIND_LABELS.box);
+    const place = box.location?.trim();
+    add(
+      `own-box-${box.id}`,
+      `${box.code} · ${p(box.name)}`,
+      `/kisten/${encodeURIComponent(box.code)}`,
+      place ? `${kind} · ${place}` : kind,
+      [box.name, place, box.notes ?? undefined]
+    );
+  }
+  for (const item of own.food ?? []) {
+    const kind =
+      item.storage === "dry"
+        ? p(OWN_KIND_LABELS.foodDry)
+        : p(OWN_KIND_LABELS.foodCooled);
+    add(`own-food-${item.id}`, p(item.name), "/kuehlbox", kind, [
+      item.category ?? undefined,
+    ]);
+  }
+  // Aufenthalte: Titel ODER Ort führen zum Ziel – man erinnert sich mal an
+  // das eine, mal an das andere.
+  for (const trip of own.trips ?? []) {
+    const name = trip.title?.trim() || trip.spotName || trip.location;
+    if (!name) continue;
+    const kind = p(OWN_KIND_LABELS.trip);
+    const place = trip.spotName || trip.location || "";
+    const detail = [place, trip.startDate ?? ""].filter(Boolean).join(" · ");
+    add(
+      `own-trip-${trip.id}`,
+      p(name),
+      `/tagebuch/${trip.id}`,
+      detail ? `${kind} · ${detail}` : kind,
+      [place || undefined, trip.title ?? undefined]
     );
   }
   // Freie Notizen (#246): gesucht wird über Titel, Text UND Stichwörter.

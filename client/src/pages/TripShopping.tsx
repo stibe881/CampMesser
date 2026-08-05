@@ -6,6 +6,7 @@ import {
   Plus,
   Refrigerator,
   ShoppingBasket,
+  ShoppingCart,
   Trash2,
   UtensilsCrossed,
   Wallet,
@@ -381,6 +382,15 @@ export default function TripShoppingPage() {
           <Link href={`/menueplan/${tripId}`}>
             <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
             {t.tripShopping.backToMenuPlan}
+          </Link>
+        </Button>
+        {/* Weg zu den persönlichen Listen (#309): Der Umschalter dort führt
+            hierher, also muss es auch zurückgehen – sonst ist diese Seite
+            eine Sackgasse für alle, die «die andere Liste» suchen. */}
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/einkauf">
+            <ShoppingCart className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.tripShopping.toPersonalLists}
           </Link>
         </Button>
       </div>

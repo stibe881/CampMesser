@@ -27,7 +27,11 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
-import { directionsUrl } from "@/lib/directions";
+import {
+  defaultProvider,
+  directionsUrl,
+  openDirections,
+} from "@/lib/directions";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { formatDistance } from "@shared/geo";
@@ -119,7 +123,15 @@ function ExcursionItem({
           {open ? te.detailsHide : te.detailsShow}
         </button>
         <a
-          href={directionsUrl(excursion.latitude, excursion.longitude)}
+          href={directionsUrl(
+            excursion.latitude,
+            excursion.longitude,
+            defaultProvider()
+          )}
+          onClick={event => {
+            event.preventDefault();
+            openDirections(excursion.latitude, excursion.longitude);
+          }}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={te.navAria(excursion.name)}

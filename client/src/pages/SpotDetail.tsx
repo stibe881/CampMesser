@@ -79,7 +79,11 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { directionsUrl } from "@/lib/directions";
+import {
+  defaultProvider,
+  directionsUrl,
+  openDirections,
+} from "@/lib/directions";
 import { formatElevation, useAutoElevation } from "@/lib/elevation";
 import type { MapLayerKind } from "@/lib/mapLayers";
 import {
@@ -1186,7 +1190,15 @@ export default function SpotDetailPage() {
       <div className="mt-1 flex flex-wrap gap-2">
         <Button asChild variant="outline" size="sm">
           <a
-            href={directionsUrl(spot.latitude, spot.longitude)}
+            href={directionsUrl(
+              spot.latitude,
+              spot.longitude,
+              defaultProvider()
+            )}
+            onClick={event => {
+              event.preventDefault();
+              openDirections(spot.latitude, spot.longitude);
+            }}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={t.spotDetail.routeAria}

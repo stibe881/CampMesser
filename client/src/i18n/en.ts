@@ -67,6 +67,28 @@ export const en: Translation = {
     },
   },
   /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  /** Karten-App-Wahl beim Öffnen einer Route. */
+  directions: {
+    title: "Navigate with which app?",
+    description: "The route can open in Apple Maps or in Google Maps.",
+    apple: "Apple Maps",
+    google: "Google Maps",
+    remember: "Remember my choice and stop asking",
+    changeHint: "You can change this any time in your profile.",
+    settingLabel: "Maps app for routes",
+    settingAsk: "Ask every time",
+    settingHint:
+      "Decides what “Route” and “Get there” open. “Ask every time” brings the question back.",
+  },
+  /** Himmel-Seite: Mond, Sternschnuppen, ISS, Sternbilder, Rotlicht. */
+  sky: {
+    title: "Sky",
+    subtitle: "Moon, meteors, ISS and constellations for tonight",
+    fromNatureHint:
+      "Moon, darkness, meteors, ISS and constellations – now on a page of their own",
+    moduleDescription:
+      "Is tonight worth it? Moon phase, darkness, meteor showers and flyovers",
+  },
   offline: {
     banner: "No connection – you are seeing stored data.",
     dataAge: (time: string) => `As of ${time}`,
@@ -2255,6 +2277,10 @@ export const en: Translation = {
     footer: "Shared with CampMesser – the Swiss army knife for tent camping.",
   },
   trips: {
+    detailSubtitle: "A single stay in detail",
+    backToList: "All stays",
+    openDetailAria: (name: string) => `Open the stay ${name}`,
+    detailNotFound: "This stay no longer exists – it may have been deleted.",
     title: "My trips",
     subtitle: "Record your camping stays: places, nights and memories.",
     loginFeature: "your trips",
@@ -4799,6 +4825,8 @@ export const en: Translation = {
     putAwayFailed:
       "Putting away failed – items not yet transferred stay on the list",
     listsAria: "Choose shopping list",
+    tripListsLabel: "Trip lists:",
+    tripListsAria: "Shopping lists of trips",
     listCounts: (open: number, done: number) => `${open} open · ${done} done`,
     manageListsButton: "Lists",
     manageListsAria: "Manage shopping lists",
@@ -4929,6 +4957,7 @@ export const en: Translation = {
     openButton: "Trip shopping list",
     openAria: (name: string) => `Open the trip shopping list for ${name}`,
     backToMenuPlan: "To the meal plan",
+    toPersonalLists: "My lists",
     emptyTitle: "No entries yet",
     emptyText:
       "Add entries above – or take over the ingredients of the planned recipes from the meal plan.",

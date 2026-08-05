@@ -68,6 +68,29 @@ export const fr: Translation = {
     },
   },
   /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  /** Karten-App-Wahl beim Öffnen einer Route. */
+  directions: {
+    title: "Naviguer avec quoi ?",
+    description:
+      "L\u2019itinéraire peut s\u2019ouvrir dans Plans d\u2019Apple ou dans Google Maps.",
+    apple: "Plans (Apple)",
+    google: "Google Maps",
+    remember: "Retenir le choix et ne plus demander",
+    changeHint: "Tu peux le changer à tout moment dans le profil.",
+    settingLabel: "Application de cartes pour les itinéraires",
+    settingAsk: "Demander à chaque fois",
+    settingHint:
+      "Détermine avec quoi s\u2019ouvrent « Itinéraire » et « S\u2019y rendre ». « Demander à chaque fois » repose la question.",
+  },
+  /** Himmel-Seite: Mond, Sternschnuppen, ISS, Sternbilder, Rotlicht. */
+  sky: {
+    title: "Ciel",
+    subtitle: "Lune, étoiles filantes, ISS et constellations pour cette nuit",
+    fromNatureHint:
+      "Lune, obscurité, étoiles filantes, ISS et constellations – désormais sur une page à part",
+    moduleDescription:
+      "La nuit vaut-elle la peine ? Phase lunaire, obscurité, étoiles filantes et passages",
+  },
   offline: {
     banner: "Pas de connexion – tu vois des données enregistrées.",
     dataAge: (time: string) => `État du ${time}`,
@@ -2332,6 +2355,10 @@ export const fr: Translation = {
       "Partagé avec CampMesser – le couteau suisse du camping sous tente.",
   },
   trips: {
+    detailSubtitle: "Un séjour en détail",
+    backToList: "Tous les séjours",
+    openDetailAria: (name: string) => `Ouvrir le séjour ${name}`,
+    detailNotFound: "Ce séjour n'existe plus – il a peut-être été supprimé.",
     title: "Mes voyages",
     subtitle:
       "Garde une trace de tes séjours en camping : lieux, nuits et souvenirs.",
@@ -4933,6 +4960,8 @@ export const fr: Translation = {
     putAwayFailed:
       "Le rangement a échoué – les articles pas encore repris restent sur la liste",
     listsAria: "Choisir la liste de courses",
+    tripListsLabel: "Listes de voyage :",
+    tripListsAria: "Listes de courses des voyages",
     listCounts: (open: number, done: number) =>
       `${open} à acheter · ${done} faits`,
     manageListsButton: "Listes",
@@ -5064,6 +5093,7 @@ export const fr: Translation = {
     openButton: "Liste de courses du séjour",
     openAria: (name: string) => `Ouvrir la liste de courses du séjour ${name}`,
     backToMenuPlan: "Vers le plan des repas",
+    toPersonalLists: "Mes listes",
     emptyTitle: "Pas encore d'entrées",
     emptyText:
       "Ajoute des entrées ci-dessus – ou reprends les ingrédients des recettes prévues depuis le plan des repas.",

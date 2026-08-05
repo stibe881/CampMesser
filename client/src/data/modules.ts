@@ -524,7 +524,7 @@ export const modules: Module[] = [
       "Waterproofing, patching, zips, mould – step by step"
     ),
     icon: Wrench,
-    group: "ausruestung",
+    group: "wissen",
     offline: true,
   },
   {
@@ -542,7 +542,7 @@ export const modules: Module[] = [
       "Patch the mat, splint a pole, service the stove – on site and at home"
     ),
     icon: Hammer,
-    group: "ausruestung",
+    group: "wissen",
     offline: true,
   },
   {
@@ -598,6 +598,18 @@ export const modules: Module[] = [
     icon: Leaf,
     group: "wissen",
     offline: true,
+  },
+  {
+    path: "/himmel",
+    title: l4("Himmel", "Ciel", "Cielo", "Sky"),
+    description: l4(
+      "Mond, Dunkelheit, Sternschnuppen, ISS und Sternbilder für heute Nacht",
+      "Lune, obscurité, étoiles filantes, ISS et constellations pour cette nuit",
+      "Luna, oscurità, stelle cadenti, ISS e costellazioni per stanotte",
+      "Moon, darkness, meteors, ISS and constellations for tonight"
+    ),
+    icon: Moon,
+    group: "wissen",
   },
   {
     path: "/sternschnuppen",
@@ -806,10 +818,10 @@ export const groupLabels: Record<(typeof groups)[number], L4> = {
   ),
   ausruestung: l4("Ausrüstung", "Équipement", "Attrezzatura", "Gear"),
   wissen: l4(
-    "Wissen & Natur",
-    "Savoir & nature",
-    "Sapere e natura",
-    "Know-how & nature"
+    "Nachschlagen & Lernen",
+    "Consulter & apprendre",
+    "Consultare e imparare",
+    "Look up & learn"
   ),
   familie: l4(
     "Familie & Camp",
