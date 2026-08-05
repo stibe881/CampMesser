@@ -31,6 +31,43 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-quick-actions",
+        {
+          "iosActions": [
+            {
+              "id": "sos",
+              "title": "SOS",
+              "subtitle": "Standort und Notfallnummern",
+              "icon": "symbol:cross.case.fill",
+              "params": { "url": "/sos" }
+            },
+            {
+              "id": "weather",
+              "title": "Wetter",
+              "subtitle": "Vorhersage und Warnungen",
+              "icon": "symbol:cloud.sun.fill",
+              "params": { "url": "/wetter" }
+            },
+            {
+              "id": "shopping",
+              "title": "Einkauf",
+              "subtitle": "Offene Einkäufe abhaken",
+              "icon": "symbol:cart.fill",
+              "params": { "url": "/einkauf" }
+            },
+            {
+              "id": "level",
+              "title": "Wasserwaage",
+              "subtitle": "Wohnwagen ausrichten",
+              "icon": "symbol:ruler.fill",
+              "params": { "url": "/wasserwaage" }
+            }
+          ]
+        }
+      ]
+    ]
   }
 }

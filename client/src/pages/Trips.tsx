@@ -49,6 +49,7 @@ import { toast } from "sonner";
 import QRCode from "qrcode";
 import PageHeader from "@/components/PageHeader";
 import DataAge from "@/components/DataAge";
+import QueryError from "@/components/QueryError";
 import ListSkeleton from "@/components/ListSkeleton";
 import LoginPrompt from "@/components/LoginPrompt";
 import PhotoGallery from "@/components/PhotoGallery";
@@ -3745,6 +3746,15 @@ export default function TripsPage() {
         <PageHeader title={t.trips.title} subtitle={t.trips.subtitle} />
       )}
       <DataAge updatedAt={tripsQuery.dataUpdatedAt} />
+
+      {/* Antwortet der Server nicht, stand hier bisher «noch keine
+          Aufenthalte erfasst» – über Reisen, die es sehr wohl gibt. */}
+      {tripsQuery.isError && (
+        <QueryError
+          onRetry={() => void tripsQuery.refetch()}
+          retrying={tripsQuery.isFetching}
+        />
+      )}
 
       {/* Adresse einer Reise, die es nicht (mehr) gibt – etwa ein alter
           Lesezeichen-Link oder eine gelöschte Reise. Lieber ein Satz mit

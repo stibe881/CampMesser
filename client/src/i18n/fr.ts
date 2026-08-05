@@ -91,6 +91,15 @@ export const fr: Translation = {
     moduleDescription:
       "La nuit vaut-elle la peine ? Phase lunaire, obscurité, étoiles filantes et passages",
   },
+  /** «Konnte nicht geladen werden» – der dritte Zustand neben Laden und Leer. */
+  queryError: {
+    title: "Chargement impossible",
+    text: "Le serveur n\u2019a pas répondu comme prévu. Tes données ne sont pas perdues – réessaie tout de suite.",
+    offlineTitle: "Impossible à charger hors ligne",
+    offlineText:
+      "Cette partie n\u2019a encore jamais été chargée et n\u2019est donc pas sur l\u2019appareil. Elle sera là dès que tu auras du réseau.",
+    retry: "Réessayer",
+  },
   offline: {
     banner: "Pas de connexion – tu vois des données enregistrées.",
     dataAge: (time: string) => `État du ${time}`,
@@ -356,6 +365,10 @@ export const fr: Translation = {
     pushOn: "Notifications push activées",
     pushOff: "Notifications push désactivées",
     prefsIntro: "Choisis quelles notifications cet appareil reçoit :",
+    lastCheckAgo: (ago: string) => `Dernière vérification : ${ago}`,
+    lastCheckNever: "La vérification n’a encore jamais eu lieu.",
+    lastCheckStale: (hours: number) =>
+      `Aucune vérification depuis plus de ${hours} heures – aucune notification n’arrive probablement en ce moment.`,
     prefWeather: "Alertes intempéries",
     prefWeatherDesc:
       "Tempête, orage ou fortes pluies sur tes emplacements enregistrés.",

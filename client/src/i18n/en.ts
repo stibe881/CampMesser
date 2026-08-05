@@ -89,6 +89,15 @@ export const en: Translation = {
     moduleDescription:
       "Is tonight worth it? Moon phase, darkness, meteor showers and flyovers",
   },
+  /** «Konnte nicht geladen werden» – der dritte Zustand neben Laden und Leer. */
+  queryError: {
+    title: "Could not be loaded",
+    text: "The server did not answer as expected. Your data is not gone – try again in a moment.",
+    offlineTitle: "Not loadable while offline",
+    offlineText:
+      "This part has never been loaded, so it is not on the device. It will be there as soon as you are back online.",
+    retry: "Try again",
+  },
   offline: {
     banner: "No connection – you are seeing stored data.",
     dataAge: (time: string) => `As of ${time}`,
@@ -342,6 +351,10 @@ export const en: Translation = {
     pushOn: "Push notifications enabled",
     pushOff: "Push notifications disabled",
     prefsIntro: "Choose which notifications this device receives:",
+    lastCheckAgo: (ago: string) => `Last check: ${ago}`,
+    lastCheckNever: "The check has never run yet.",
+    lastCheckStale: (hours: number) =>
+      `Nothing checked for over ${hours} hours – no notifications are likely arriving right now.`,
     prefWeather: "Storm alerts",
     prefWeatherDesc: "Storm, thunderstorm or heavy rain at your saved pitches.",
     prefFood: "Best-before reminders",

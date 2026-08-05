@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import QueryError from "@/components/QueryError";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -230,7 +231,12 @@ export default function NotesPage() {
             </div>
           )}
 
-          {notesQuery.isLoading ? (
+          {notesQuery.isError ? (
+            <QueryError
+              onRetry={() => void notesQuery.refetch()}
+              retrying={notesQuery.isFetching}
+            />
+          ) : notesQuery.isLoading ? (
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               {t.common.loading}

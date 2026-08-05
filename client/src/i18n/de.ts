@@ -91,6 +91,15 @@ export const de = {
     moduleDescription:
       "Lohnt sich die Nacht? Mondphase, Dunkelheit, Sternschnuppen und Überflüge",
   },
+  /** «Konnte nicht geladen werden» – der dritte Zustand neben Laden und Leer. */
+  queryError: {
+    title: "Konnte nicht geladen werden",
+    text: "Der Server hat nicht wie erwartet geantwortet. Deine Daten sind nicht weg – versuch es gleich nochmal.",
+    offlineTitle: "Ohne Verbindung nicht ladbar",
+    offlineText:
+      "Dieser Teil war noch nie geladen und liegt darum nicht auf dem Gerät. Sobald du wieder Empfang hast, ist er da.",
+    retry: "Nochmal versuchen",
+  },
   offline: {
     banner: "Keine Verbindung – du siehst gespeicherte Daten.",
     dataAge: (time: string) => `Stand von ${time}`,
@@ -357,6 +366,10 @@ export const de = {
     pushOn: "Push-Mitteilungen aktiviert",
     pushOff: "Push-Mitteilungen deaktiviert",
     prefsIntro: "Wähle, welche Mitteilungen dieses Gerät erhält:",
+    lastCheckAgo: (ago: string) => `Letzte Prüfung: ${ago}`,
+    lastCheckNever: "Die Prüfung ist noch nie gelaufen.",
+    lastCheckStale: (hours: number) =>
+      `Seit über ${hours} Stunden nichts geprüft – es kommen gerade vermutlich keine Mitteilungen an.`,
     prefWeather: "Unwetter-Warnungen",
     prefWeatherDesc:
       "Sturm, Gewitter oder Starkregen an deinen gespeicherten Plätzen.",

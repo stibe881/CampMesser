@@ -25,6 +25,7 @@ import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import DataAge from "@/components/DataAge";
+import QueryError from "@/components/QueryError";
 import { enqueueToggle } from "@/lib/offlineQueue";
 import PackHistorySuggestions from "@/components/PackHistorySuggestions";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -725,6 +726,25 @@ export default function PackListDetailPage() {
           backLabel={t.packListDetail.backLabel}
         />
         <LoginPrompt feature={t.packListDetail.loginFeature} />
+      </div>
+    );
+  }
+
+  // Fehler zuerst: Sonst behauptete die Seite «Liste nicht gefunden», wenn
+  // bloss der Server nicht geantwortet hat – und man legt die Liste im
+  // schlimmsten Fall ein zweites Mal an.
+  if (query.isError) {
+    return (
+      <div className="container max-w-3xl py-6">
+        <PageHeader
+          title={t.packListDetail.backLabel}
+          backHref="/packlisten"
+          backLabel={t.packListDetail.backLabel}
+        />
+        <QueryError
+          onRetry={() => void query.refetch()}
+          retrying={query.isFetching}
+        />
       </div>
     );
   }

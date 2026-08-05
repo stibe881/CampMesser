@@ -7,6 +7,7 @@ import { Redirect, Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import OfflinePrecache from "./components/OfflinePrecache";
 import AppShell from "./components/AppShell";
+import NativeNavigation from "./components/NativeNavigation";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider, useT } from "./i18n";
 import Home from "./pages/Home";
@@ -206,6 +207,8 @@ function RouteFallback() {
 function Router() {
   return (
     <AppShell>
+      {/* Mitteilungs-Tipp und Icon-Kurzbefehl der nativen App (#315/#316) */}
+      <NativeNavigation />
       <Suspense fallback={<RouteFallback />}>
         <Switch>
           <Route path={"/"} component={Home} />

@@ -1,13 +1,44 @@
-import React, { useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, SafeAreaView, Platform, StatusBar } from "react-native";
 import { WebView } from "react-native-webview";
 import * as Notifications from "expo-notifications";
+import * as QuickActions from "expo-quick-actions";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
 
+/**
+ * Der native Rahmen um die Web-App.
+ *
+ * Alles Sichtbare kommt aus dem WebView. Hier steht nur, was der Browser im
+ * WebView nicht kann: echte Push-Mitteilungen von Apple, die Zahl am
+ * App-Icon und die Kurzbefehle beim langen Drücken auf das Icon.
+ *
+ * Die Nachrichten-Namen unten müssen zu `client/src/lib/nativeBridge.ts`
+ * passen – wer einen ändert, muss beide Dateien anfassen.
+ */
+
+// Basis-URL der Web-App
+const CAMP_URL = "https://campmesser.ch";
+
+/**
+ * WIE EINE MITTEILUNG AUSSIEHT, WÄHREND DIE APP OFFEN IST.
+ *
+ * `shouldShowAlert` ist seit SDK 53 abgelöst und wird ignoriert – es hiess
+ * hier also «zeig sie an», und angezeigt wurde trotzdem nichts. Wer die App
+ * gerade offen hatte, bekam von der Warnung schlicht nichts mit. Die
+ * Nachfolger sind zwei getrennte Schalter: das Band oben am Bildschirm
+ * (`shouldShowBanner`) und der Eintrag in der Mitteilungszentrale
+ * (`shouldShowList`), damit eine Meldung nicht spurlos verschwindet, wenn
+ * man das Band wegwischt.
+ *
+ * `shouldSetBadge: false` bleibt Absicht: Die Zahl am Icon zählt fällige
+ * Sachen (ablaufende Lebensmittel, anstehende Pflege) und wird von der
+ * Web-App gesetzt – nicht die Zahl ungelesener Mitteilungen.
+ */
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
   }),
@@ -50,12 +81,91 @@ async function registerForPushNotificationsAsync() {
   return token;
 }
 
+/**
+ * Nur eigene Pfade zulassen. Das Ziel kommt aus einer Mitteilung oder einem
+ * Kurzbefehl; beides ist unsere eigene Quelle, aber der WebView soll auch
+ * bei einem Fehler nie irgendwohin geschickt werden können.
+ */
+function safePath(value) {
+  if (typeof value !== "string") return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+}
+
 export default function App() {
   const webViewRef = useRef(null);
-  const [themeBg, setThemeBg] = React.useState("#09090b");
+  const [themeBg, setThemeBg] = useState("#09090b");
+  // Ein Ziel, das eintraf, BEVOR die Seite fertig geladen war. Genau das
+  // passiert beim Antippen einer Mitteilung aus dem geschlossenen Zustand:
+  // Die App startet, das Ereignis kommt sofort – und der WebView zeigt noch
+  // gar nichts. Ohne diesen Merker landet man auf der Startseite und die
+  // Mitteilung führt ins Leere.
+  const pendingPath = useRef(null);
+  const initialActionDone = useRef(false);
+  const [webReady, setWebReady] = useState(false);
 
-  // Basis-URL der Web-App
-  const CAMP_URL = "https://campmesser.ch";
+  /** Im WebView zu einem Pfad springen (ohne Neuladen, über den Router). */
+  const navigateWebView = useCallback(
+    path => {
+      const target = safePath(path);
+      if (!target) return;
+      if (!webReady || !webViewRef.current) {
+        pendingPath.current = target;
+        return;
+      }
+      webViewRef.current.injectJavaScript(
+        `window.dispatchEvent(new CustomEvent(${JSON.stringify(
+          "campmesser:native-navigate"
+        )}, { detail: ${JSON.stringify(target)} })); true;`
+      );
+    },
+    [webReady]
+  );
+
+  // Sobald die Seite steht: ein gemerktes Ziel nachholen.
+  useEffect(() => {
+    if (webReady && pendingPath.current) {
+      const target = pendingPath.current;
+      pendingPath.current = null;
+      navigateWebView(target);
+    }
+  }, [webReady, navigateWebView]);
+
+  /**
+   * ANTIPPEN EINER MITTEILUNG. Der Server legt zu jeder Meldung die
+   * passende Adresse bei (`data.url`) – bisher wurde sie nie gelesen. Eine
+   * Warnung für einen bestimmten Platz führte also auf die Startseite, und
+   * man musste den Platz von Hand suchen. Das ist der halbe Zweck einer
+   * Mitteilung.
+   */
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener(
+      response => {
+        const url = response?.notification?.request?.content?.data?.url;
+        navigateWebView(url);
+      }
+    );
+    return () => sub.remove();
+  }, [navigateWebView]);
+
+  /**
+   * KURZBEFEHLE beim langen Drücken auf das App-Icon. Die feste Liste in
+   * `app.json` gilt bis zum ersten Start; danach schickt die Web-App sie in
+   * der eingestellten Sprache. Beim Antippen steht das Ziel in `params.url`.
+   */
+  useEffect(() => {
+    // Nur beim allerersten Durchlauf: `initial` bleibt stehen, der Effekt
+    // läuft aber erneut, sobald die Seite geladen ist – sonst spränge die
+    // App ein zweites Mal dorthin, während man schon woanders liest.
+    if (QuickActions.initial && !initialActionDone.current) {
+      initialActionDone.current = true;
+      navigateWebView(QuickActions.initial.params?.url);
+    }
+    const sub = QuickActions.addListener(action => {
+      navigateWebView(action.params?.url);
+    });
+    return () => sub.remove();
+  }, [navigateWebView]);
 
   const onMessage = async event => {
     try {
@@ -63,14 +173,28 @@ export default function App() {
       if (data.type === "THEME_UPDATE") {
         setThemeBg(data.value === "light" ? "#ffffff" : "#09090b");
       }
+      if (data.type === "SET_BADGE") {
+        // Die Badging API des Browsers gibt es im WebView nicht – ohne
+        // diese Zeile hätte die native App als einzige Variante nie eine
+        // Zahl am Icon.
+        const count = Number(data.count);
+        await Notifications.setBadgeCountAsync(
+          Number.isFinite(count) && count > 0 ? Math.floor(count) : 0
+        ).catch(() => {});
+      }
+      if (data.type === "SET_QUICK_ACTIONS" && Array.isArray(data.items)) {
+        await QuickActions.setItems(data.items).catch(() => {});
+      }
       if (data.type === "REQUEST_PUSH_TOKEN") {
         const token = await registerForPushNotificationsAsync();
         if (token && webViewRef.current) {
           // Send the token back to the web view
           webViewRef.current.injectJavaScript(
-            `window.dispatchEvent(new CustomEvent("ExpoPushToken", { detail: "${token}" })); true;`
+            `window.dispatchEvent(new CustomEvent("ExpoPushToken", { detail: ${JSON.stringify(
+              token
+            )} })); true;`
           );
-        } else {
+        } else if (webViewRef.current) {
           // Error or denied
           webViewRef.current.injectJavaScript(
             `window.dispatchEvent(new CustomEvent("ExpoPushTokenError")); true;`
@@ -95,6 +219,7 @@ export default function App() {
         startInLoadingState={true}
         scalesPageToFit={true}
         onMessage={onMessage}
+        onLoadEnd={() => setWebReady(true)}
       />
     </SafeAreaView>
   );

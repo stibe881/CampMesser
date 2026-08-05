@@ -5,6 +5,7 @@ import {
   type ResolvedTheme,
   type ThemePreference,
 } from "@/lib/themePreference";
+import { NATIVE_MESSAGES, postToNative } from "@/lib/nativeBridge";
 
 interface ThemeContextType {
   /** Tatsächlich angewendetes Design (bei "auto" aufgelöst). */
@@ -67,11 +68,8 @@ export function ThemeProvider({
     } else {
       root.classList.remove("dark");
     }
-    if (typeof window !== "undefined" && "ReactNativeWebView" in window) {
-      (window as any).ReactNativeWebView.postMessage(
-        JSON.stringify({ type: "THEME_UPDATE", value: theme })
-      );
-    }
+    // Die native App färbt den Rand um den WebView mit (#315).
+    postToNative(NATIVE_MESSAGES.theme, { value: theme });
   }, [theme]);
 
   useEffect(() => {

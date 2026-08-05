@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import DataAge from "@/components/DataAge";
+import QueryError from "@/components/QueryError";
 import ListSkeleton from "@/components/ListSkeleton";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
@@ -1233,13 +1234,13 @@ export default function InventoryPage() {
         </div>
       )}
 
-      {query.isLoading ? (
-        <div className="flex justify-center py-10">
-          <Loader2
-            className="h-6 w-6 animate-spin text-muted-foreground"
-            aria-label={t.common.loading}
-          />
-        </div>
+      {query.isError ? (
+        <QueryError
+          onRetry={() => void query.refetch()}
+          retrying={query.isFetching}
+        />
+      ) : query.isLoading ? (
+        <ListSkeleton rows={3} height={72} />
       ) : allItems.length > 0 && items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border p-10 text-center">
           <Search

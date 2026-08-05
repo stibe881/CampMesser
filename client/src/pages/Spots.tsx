@@ -18,6 +18,7 @@ import { usePushSubscription } from "@/lib/usePushSubscription";
 import { toast } from "sonner";
 import { Link } from "wouter";
 import PageHeader from "@/components/PageHeader";
+import QueryError from "@/components/QueryError";
 import SpotRatingCompare from "@/components/SpotRatingCompare";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
@@ -410,9 +411,11 @@ export default function SpotsPage() {
   const t = useT();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const utils = trpc.useUtils();
-  const { data: spots, isLoading } = trpc.spots.list.useQuery(undefined, {
+  const spotsQuery = trpc.spots.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  const spots = spotsQuery.data;
+  const isLoading = spotsQuery.isLoading;
 
   // Eigenschafts-Filter: alle aktiven Chips müssen zutreffen (UND-Verknüpfung)
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
@@ -609,7 +612,16 @@ export default function SpotsPage() {
             </div>
           )}
 
-          {!isLoading && (spots?.length ?? 0) === 0 && (
+          {/* Fehler ist NICHT dasselbe wie leer: Ohne diesen Zweig
+              behauptete die Seite, es gebe keine gespeicherten Plätze. */}
+          {!isLoading && spotsQuery.isError && (
+            <QueryError
+              onRetry={() => void spotsQuery.refetch()}
+              retrying={spotsQuery.isFetching}
+            />
+          )}
+
+          {!isLoading && !spotsQuery.isError && (spots?.length ?? 0) === 0 && (
             <Card>
               <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
                 <MapPin

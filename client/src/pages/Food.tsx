@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
 import PageHeader from "@/components/PageHeader";
 import DataAge from "@/components/DataAge";
+import QueryError from "@/components/QueryError";
 import ListSkeleton from "@/components/ListSkeleton";
 import ShoppingTargetSelect, {
   useShoppingTarget,
@@ -469,6 +470,14 @@ export default function FoodPage() {
         }
       />
       <DataAge updatedAt={query.dataUpdatedAt} />
+
+      {/* Fehler vom Server ist nicht dasselbe wie «Vorrat leer» */}
+      {query.isError && (
+        <QueryError
+          onRetry={() => void query.refetch()}
+          retrying={query.isFetching}
+        />
+      )}
 
       {/* Lager-Umschalter (#233): Kühlbox oder Trockenvorrat-Schrank */}
       <div

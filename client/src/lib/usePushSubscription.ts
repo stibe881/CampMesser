@@ -55,7 +55,9 @@ export function usePushSubscription() {
     try {
       if (next) {
         const sub = await subscribeBrowser(vapidQuery.data!.publicKey!, lang);
-        await subscribeMutation.mutateAsync(sub);
+        // Sprache mitschicken (#313): Sie hängt am Abo, damit die Meldung
+        // in der Sprache ankommt, in der das Gerät bedient wird.
+        await subscribeMutation.mutateAsync({ ...sub, lang });
         setEnabled(true);
         setEndpoint(sub.endpoint);
         toast.success(messages.enabled);
