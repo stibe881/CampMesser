@@ -144,6 +144,7 @@ export const fr: Translation = {
     searchAria: "Rechercher dans les modules de savoir",
     searchNoResults:
       "Rien trouvé – essaie un autre terme (p. ex. «brûlure» ou «nœud»).",
+    searchPreparing: "Préparation des modules de savoir …",
     searchCategories: {
       module: "Module",
       firstAid: "Premiers secours",

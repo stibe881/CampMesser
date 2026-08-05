@@ -1,4 +1,5 @@
-import { l4, type L4 } from "@shared/i18n";
+import { l4 } from "@shared/i18n";
+import type { ChangelogBlock } from "./changelogMeta";
 
 /**
  * «Was ist neu»: nutzersichtbare Änderungen der App, gruppiert nach
@@ -9,17 +10,16 @@ import { l4, type L4 } from "@shared/i18n";
  * Pflegepflicht: Jeder Feature-Batch ergänzt seine nutzersichtbaren Features
  * als je EINE kurze L4-Zeile (Du-Form) im obersten Block – neuer Block, falls
  * von heute noch keiner existiert. Reine Fixes/Interna gehören NICHT hierher.
- * Kein Vollständigkeitsanspruch: die wichtigsten Neuerungen zuerst.
+ * Kein Vollständigkeitsanspruch: die wichtigsten Neuerungen zuerst. Dazu
+ * gehört ein zweiter Handgriff: Die Id des obersten Blocks steht in
+ * `changelogMeta.ts` und muss mitgezogen werden (Test wacht darüber).
+ *
+ * DIESE DATEI WIRD NUR DYNAMISCH GELADEN (283 kB in vier Sprachen). Sie darf
+ * nirgends statisch importiert werden – wer Blöcke anzeigen will, holt sie
+ * per `await import("@/data/changelog")`. Den Typ liefert `changelogMeta.ts`.
  */
 
-export interface ChangelogBlock {
-  /** Aufsteigend vergleichbare Id: ISO-Datum + ".n" (z. B. "2026-08-03.1"). */
-  id: string;
-  /** Veröffentlichungs-Datum als ISO-String (YYYY-MM-DD). */
-  date: string;
-  /** Kurze, nutzersichtbare Neuerungen – die wichtigsten zuerst. */
-  entries: L4[];
-}
+export type { ChangelogBlock };
 
 export const changelog: ChangelogBlock[] = [
   {

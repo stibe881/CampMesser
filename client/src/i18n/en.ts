@@ -139,6 +139,7 @@ export const en: Translation = {
     searchAria: "Search the knowledge modules",
     searchNoResults:
       "Nothing found – try a different term (e.g. “burn” or “knot”).",
+    searchPreparing: "Preparing the knowledge modules …",
     searchCategories: {
       module: "Module",
       firstAid: "First aid",

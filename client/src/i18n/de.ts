@@ -146,6 +146,7 @@ export const de = {
     searchAria: "Wissensmodule durchsuchen",
     searchNoResults:
       "Nichts gefunden – probiere einen anderen Begriff (z. B. «Verbrennung» oder «Knoten»).",
+    searchPreparing: "Wissensmodule werden vorbereitet …",
     searchCategories: {
       module: "Modul",
       firstAid: "Erste Hilfe",

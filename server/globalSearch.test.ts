@@ -1,12 +1,21 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 // Suchindex liegt im Client-Code, ist aber reine Logik ohne DOM.
 import {
+  ensureKnowledgeIndex,
   fuzzyWordMatch,
+  isKnowledgeIndexReady,
   levenshtein,
   searchKnowledge,
   searchOwnContent,
   type OwnContent,
 } from "../client/src/lib/globalSearch";
+
+// Die Wissensdaten hängen seit dem Bundle-Umbau an einem dynamischen Import
+// und müssen vor den Suchtests einmal geholt werden – genau so, wie es die
+// Oberfläche beim ersten Fokus aufs Suchfeld tut.
+beforeAll(async () => {
+  await ensureKnowledgeIndex("de");
+});
 
 describe("levenshtein", () => {
   it("misst die Editier-Distanz korrekt", () => {
@@ -38,6 +47,31 @@ describe("fuzzyWordMatch", () => {
     expect(fuzzyWordMatch("zek", "zeh")).toBe(false);
     // Distanz 2 bei nur 7 Zeichen → kein Treffer
     expect(fuzzyWordMatch("pilstik", "palstek")).toBe(false);
+  });
+});
+
+describe("Wissens-Index nachladen", () => {
+  it("liefert ohne geladenen Index nichts statt zu blockieren", async () => {
+    // Frische Modul-Instanz: der Index-Cache ist darin noch leer.
+    vi.resetModules();
+    const fresh = await import("../client/src/lib/globalSearch");
+    expect(fresh.isKnowledgeIndexReady("de")).toBe(false);
+    expect(fresh.searchKnowledge("zecke")).toEqual([]);
+    // Eigene Inhalte sind davon unberührt und sofort durchsuchbar.
+    expect(
+      fresh.searchOwnContent("seeblick", {
+        spots: [{ id: 1, name: "Seeblick" }],
+      }).length
+    ).toBe(1);
+    await fresh.ensureKnowledgeIndex("de");
+    expect(fresh.isKnowledgeIndexReady("de")).toBe(true);
+    expect(fresh.searchKnowledge("zecke").length).toBeGreaterThan(0);
+  });
+
+  it("baut den Index pro Sprache getrennt auf", async () => {
+    await ensureKnowledgeIndex("fr");
+    expect(isKnowledgeIndexReady("fr")).toBe(true);
+    expect(searchKnowledge("tique", 5, "fr").length).toBeGreaterThan(0);
   });
 });
 

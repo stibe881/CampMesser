@@ -81,7 +81,12 @@ import {
 } from "@/lib/homeWidgets";
 import { usePointerDrag } from "@/lib/usePointerDrag";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
-import { searchKnowledge, searchOwnContent } from "@/lib/globalSearch";
+import {
+  ensureKnowledgeIndex,
+  isKnowledgeIndexReady,
+  searchKnowledge,
+  searchOwnContent,
+} from "@/lib/globalSearch";
 import {
   TARGETS_KEY,
   sanitizeTargets,
@@ -1114,6 +1119,14 @@ function KnowledgeSearch() {
   const [tentTargets, setTentTargets] = useState<TentFinderTarget[]>([]);
   const [focused, setFocused] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
+  /**
+   * Steht der Wissens-Index bereit? Er wird erst beim ersten Fokus geholt
+   * (gegen 500 kB Text in vier Sprachen, siehe lib/globalSearch.ts) – bis
+   * dahin erscheinen nur eigene Treffer, mit Hinweis statt «nichts gefunden».
+   */
+  const [indexReady, setIndexReady] = useState(() =>
+    isKnowledgeIndexReady(lang)
+  );
 
   /** Suchbegriff beim Klick auf ein Resultat in den Verlauf aufnehmen. */
   const rememberSearch = () => {
@@ -1130,6 +1143,14 @@ function KnowledgeSearch() {
       /* egal */
     }
   };
+
+  // Sprachwechsel bei offenem Suchfeld: Der Index gilt pro Sprache, der
+  // neue muss also erst gebaut werden.
+  useEffect(() => {
+    setIndexReady(isKnowledgeIndexReady(lang));
+    if (!activated) return;
+    void ensureKnowledgeIndex(lang).then(() => setIndexReady(true));
+  }, [lang, activated]);
 
   const clearRecent = () => {
     setRecent([]);
@@ -1149,8 +1170,13 @@ function KnowledgeSearch() {
   const quizzesQuery = trpc.quizzes.list.useQuery(undefined, queryOpts);
   const notesQuery = trpc.notes.list.useQuery(undefined, queryOpts);
 
-  /** Beim ersten Fokus/Tippen: tRPC-Queries freischalten, lokale Ziele lesen. */
+  /**
+   * Beim ersten Fokus/Tippen: Wissens-Index nachladen, tRPC-Queries
+   * freischalten, lokale Ziele lesen. Der Index kommt bewusst hier und
+   * nicht beim Seitenaufbau – siehe lib/globalSearch.ts.
+   */
   const activate = () => {
+    void ensureKnowledgeIndex(lang).then(() => setIndexReady(true));
     if (activated) return;
     setActivated(true);
     setRecent(loadRecentSearches());
@@ -1240,7 +1266,9 @@ function KnowledgeSearch() {
         <div className="mt-2 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           {combined.length === 0 ? (
             <p className="px-4 py-3 text-sm text-muted-foreground">
-              {t.home.searchNoResults}
+              {/* Ohne Index wäre «nichts gefunden» schlicht gelogen – die
+                  Wissensmodule sind dann noch gar nicht durchsucht. */}
+              {indexReady ? t.home.searchNoResults : t.home.searchPreparing}
             </p>
           ) : (
             <ul className="divide-y divide-border/60">

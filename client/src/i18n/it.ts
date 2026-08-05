@@ -140,6 +140,7 @@ export const it: Translation = {
     searchAria: "Cerca nei moduli di conoscenza",
     searchNoResults:
       "Nessun risultato – prova un altro termine (ad es. «ustione» o «nodo»).",
+    searchPreparing: "Preparazione dei moduli di conoscenza …",
     searchCategories: {
       module: "Modulo",
       firstAid: "Primo soccorso",

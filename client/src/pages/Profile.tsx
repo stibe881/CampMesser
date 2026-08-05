@@ -42,7 +42,7 @@ import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 import { WhatsNewDialog } from "@/components/WhatsNewDialog";
-import { changelog } from "@/data/changelog";
+import type { ChangelogBlock } from "@/data/changelogMeta";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -994,6 +994,22 @@ export default function ProfilePage() {
   );
   // «Was ist neu»: Dialog mit ALLEN Changelog-Blöcken (unabhängig vom Marker)
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+  /**
+   * Alle Changelog-Blöcke – erst beim Klick geholt. Die Datei ist mit vier
+   * Sprachen gegen 280 kB gross und gehört darum nicht ins Haupt-Bundle
+   * (siehe data/changelog.ts).
+   */
+  const [changelogBlocks, setChangelogBlocks] = useState<ChangelogBlock[]>([]);
+  const openWhatsNew = () => {
+    void import("@/data/changelog")
+      .then(({ changelog }) => {
+        setChangelogBlocks(changelog);
+        setWhatsNewOpen(true);
+      })
+      .catch(() => {
+        /* Offline und nicht im Cache: der Eintrag bleibt einfach wirkungslos */
+      });
+  };
 
   useEffect(() => {
     if (user?.name) setName(user.name);
@@ -1447,7 +1463,7 @@ export default function ProfilePage() {
           variant="ghost"
           size="sm"
           className="text-muted-foreground"
-          onClick={() => setWhatsNewOpen(true)}
+          onClick={openWhatsNew}
         >
           <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />
           {t.whatsNew.title}
@@ -1456,7 +1472,7 @@ export default function ProfilePage() {
       <WhatsNewDialog
         open={whatsNewOpen}
         onOpenChange={setWhatsNewOpen}
-        blocks={changelog}
+        blocks={changelogBlocks}
         intro={t.whatsNew.allIntro}
       />
 
