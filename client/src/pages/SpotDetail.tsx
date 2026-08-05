@@ -41,6 +41,7 @@ import {
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import LazySection from "@/components/LazySection";
 import LoginPrompt from "@/components/LoginPrompt";
 import PhotoGallery from "@/components/PhotoGallery";
 import DarkSkyPanel from "@/components/DarkSkyPanel";
@@ -146,11 +147,61 @@ type ClimateState =
  * Ein `<h2>`, kein optisch gestylter Absatz: Wer die Seite mit einer
  * Vorlesehilfe durchgeht, springt damit von Abschnitt zu Abschnitt.
  */
-function SectionHeading({ children }: { children: ReactNode }) {
+function SectionHeading({ id, children }: { id: string; children: ReactNode }) {
   return (
-    <h2 className="mb-2 mt-6 font-serif text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+    <h2
+      id={id}
+      // scroll-mt: Beim Sprung aus der Leiste soll die Überschrift nicht
+      // unter der Kopfzeile verschwinden.
+      className="mb-2 mt-6 scroll-mt-20 font-serif text-sm font-semibold uppercase tracking-wide text-muted-foreground"
+    >
       {children}
     </h2>
+  );
+}
+
+/** Die fünf Abschnitte des Dossiers – Reihenfolge wie auf der Seite. */
+const SECTION_IDS = {
+  place: "abschnitt-platz",
+  arrival: "abschnitt-anreise",
+  weather: "abschnitt-wetter",
+  around: "abschnitt-umgebung",
+  own: "abschnitt-eigenes",
+} as const;
+
+/**
+ * Sprungleiste über die fünf Abschnitte.
+ *
+ * Das Dossier ist lang – wer unterwegs die Öffnungszeiten des Ladens sucht,
+ * scrollt sonst an Wetter, Sonne und Anreise vorbei. Bewusst normale
+ * Sprungmarken (`<a href="#…">`): Das funktioniert ohne JavaScript, die
+ * Tastatur kann es, und der Zurück-Knopf bleibt unbelastet.
+ */
+function SectionNav({
+  labels,
+  ariaLabel,
+}: {
+  labels: [string, string][];
+  ariaLabel: string;
+}) {
+  return (
+    <nav
+      aria-label={ariaLabel}
+      className="mb-4 -mx-4 overflow-x-auto px-4 md:mx-0 md:px-0"
+    >
+      <ul className="flex w-max gap-1.5">
+        {labels.map(([id, label]) => (
+          <li key={id}>
+            <a
+              href={`#${id}`}
+              className="inline-block rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }
 
@@ -910,7 +961,20 @@ export default function SpotDetailPage() {
         <p className="mb-4 text-sm text-muted-foreground">{spot.note}</p>
       )}
 
-      <SectionHeading>{t.spotDetail.sectionPlace}</SectionHeading>
+      <SectionNav
+        ariaLabel={t.spotDetail.sectionNavAria}
+        labels={[
+          [SECTION_IDS.place, t.spotDetail.sectionPlace],
+          [SECTION_IDS.arrival, t.spotDetail.sectionArrival],
+          [SECTION_IDS.weather, t.spotDetail.sectionWeather],
+          [SECTION_IDS.around, t.spotDetail.sectionAround],
+          [SECTION_IDS.own, t.spotDetail.sectionOwn],
+        ]}
+      />
+
+      <SectionHeading id={SECTION_IDS.place}>
+        {t.spotDetail.sectionPlace}
+      </SectionHeading>
 
       {/* Platz-Eigenschaften: Schatten, Sanitär, Lärm, WLAN … */}
       <Card className="mb-4 mt-4">
@@ -1114,7 +1178,9 @@ export default function SpotDetailPage() {
         </CardContent>
       </Card>
 
-      <SectionHeading>{t.spotDetail.sectionArrival}</SectionHeading>
+      <SectionHeading id={SECTION_IDS.arrival}>
+        {t.spotDetail.sectionArrival}
+      </SectionHeading>
 
       {/* Anreise-Route zum Platz */}
       <div className="mt-1 flex flex-wrap gap-2">
@@ -1133,30 +1199,38 @@ export default function SpotDetailPage() {
 
       {/* Beste Abfahrtszeit (#285): von der Check-in-Zeit rückwärts,
           Pausen eingerechnet */}
-      <DeparturePlanner
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        className="mb-4"
-      />
+      <LazySection minHeight={200}>
+        <DeparturePlanner
+          latitude={spot.latitude}
+          longitude={spot.longitude}
+          className="mb-4"
+        />
+      </LazySection>
 
       {/* Rast unterwegs: Picknickplätze im Korridor der Anfahrt (#250) */}
-      <PicnicStops
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
+      <LazySection minHeight={200}>
+        <PicnicStops
+          latitude={spot.latitude}
+          longitude={spot.longitude}
+          placeName={spot.name}
+          className="mb-4"
+        />
+      </LazySection>
 
       {/* Unwetter auf der Fahrtstrecke (#275): Wetter dort, wo man unterwegs
           sein wird – und zu der Zeit, zu der man dort sein wird */}
-      <RouteWeather
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
+      <LazySection minHeight={200}>
+        <RouteWeather
+          latitude={spot.latitude}
+          longitude={spot.longitude}
+          placeName={spot.name}
+          className="mb-4"
+        />
+      </LazySection>
 
-      <SectionHeading>{t.spotDetail.sectionWeather}</SectionHeading>
+      <SectionHeading id={SECTION_IDS.weather}>
+        {t.spotDetail.sectionWeather}
+      </SectionHeading>
 
       {/* Wetter */}
       <Card className="mb-4">
@@ -1287,13 +1361,15 @@ export default function SpotDetailPage() {
       </Card>
 
       {/* Dunkler Himmel: geschätzte Bortle-Klasse plus «heute Nacht» */}
-      <DarkSkyPanel
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        astroLink
-        className="mb-4"
-      />
+      <LazySection minHeight={200}>
+        <DarkSkyPanel
+          latitude={spot.latitude}
+          longitude={spot.longitude}
+          placeName={spot.name}
+          astroLink
+          className="mb-4"
+        />
+      </LazySection>
 
       {/* Beste Reisezeit: historisches Wetter, lädt erst beim Aufklappen */}
       <Card className="mb-4">
@@ -1436,7 +1512,9 @@ export default function SpotDetailPage() {
       </Card>
 
       {/* Badestellen-Info: Wassertemperatur, Abfluss und Pegel am Platz */}
-      <BathingWaterCard latitude={spot.latitude} longitude={spot.longitude} />
+      <LazySection minHeight={160}>
+        <BathingWaterCard latitude={spot.latitude} longitude={spot.longitude} />
+      </LazySection>
 
       {/* Zeckenrisiko: FSME-Einstufung der Region plus Saison und Höhenlage */}
       <TickRiskPanel
@@ -1446,62 +1524,78 @@ export default function SpotDetailPage() {
         className="mb-4"
       />
 
-      <SectionHeading>{t.spotDetail.sectionAround}</SectionHeading>
+      <SectionHeading id={SECTION_IDS.around}>
+        {t.spotDetail.sectionAround}
+      </SectionHeading>
 
       {/* Wandern in der Umgebung: markierte OSM-Routen rund um den Platz */}
-      <NearbyHikes
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
+      <LazySection minHeight={90}>
+        <NearbyHikes
+          latitude={spot.latitude}
+          longitude={spot.longitude}
+          placeName={spot.name}
+          className="mb-4"
+        />
+      </LazySection>
 
       {/* Feuer- und Grillstellen aus OpenStreetMap (#247) – lädt erst beim
           Aufklappen, Overpass wird nie automatisch gefragt */}
-      <NearbyFirepits
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
+      <LazySection minHeight={90}>
+        <NearbyFirepits
+          latitude={spot.latitude}
+          longitude={spot.longitude}
+          placeName={spot.name}
+          className="mb-4"
+        />
+      </LazySection>
 
       {/* Spielplätze und Badeplätze aus OpenStreetMap (#248) – gemischt nach
           Distanz, lädt ebenfalls erst beim Aufklappen */}
-      <NearbyFamilyPlaces
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
+      <LazySection minHeight={90}>
+        <NearbyFamilyPlaces
+          latitude={spot.latitude}
+          longitude={spot.longitude}
+          placeName={spot.name}
+          className="mb-4"
+        />
+      </LazySection>
 
       {/* Einkaufen in Platznähe (#273): Supermarkt, Bäckerei, Hofladen mit
           Öffnungszeiten – ebenfalls erst beim Aufklappen geholt */}
-      <NearbyShops
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
+      <LazySection minHeight={90}>
+        <NearbyShops
+          latitude={spot.latitude}
+          longitude={spot.longitude}
+          placeName={spot.name}
+          className="mb-4"
+        />
+      </LazySection>
 
       {/* ÖV ab Platz (#249): Haltestellen mit Distanz, auf Antippen die
           Abfahrtstafel – beides erst beim Aufklappen geholt */}
-      <NearbyTransit
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
+      <LazySection minHeight={90}>
+        <NearbyTransit
+          latitude={spot.latitude}
+          longitude={spot.longitude}
+          placeName={spot.name}
+          className="mb-4"
+        />
+      </LazySection>
 
       {/* Ausflüge in der Nähe aus der eigenen Ausflugfinder-App (#271) –
           lädt erst beim Aufklappen, damit das Dossier nicht darauf wartet */}
-      <NearbyExcursions
-        latitude={spot.latitude}
-        longitude={spot.longitude}
-        placeName={spot.name}
-        className="mb-4"
-      />
+      <LazySection minHeight={90}>
+        <NearbyExcursions
+          latitude={spot.latitude}
+          longitude={spot.longitude}
+          placeName={spot.name}
+          className="mb-4"
+        />
+      </LazySection>
 
-      <SectionHeading>{t.spotDetail.sectionOwn}</SectionHeading>
+      <SectionHeading id={SECTION_IDS.own}>
+        {t.spotDetail.sectionOwn}
+      </SectionHeading>
 
       {/* Aufenthalte */}
       <Card>
@@ -1627,7 +1721,9 @@ export default function SpotDetailPage() {
       </Card>
 
       {/* Offline-Karte: Kacheln rund um den Platz vorab laden */}
-      <OfflineMapSection spot={spot} />
+      <LazySection minHeight={120}>
+        <OfflineMapSection spot={spot} />
+      </LazySection>
 
       {/* Dossier teilen */}
       <Card className="mt-4">

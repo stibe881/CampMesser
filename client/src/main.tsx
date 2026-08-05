@@ -1,4 +1,8 @@
 import { trpc } from "@/lib/trpc";
+import {
+  restoreQueryCache,
+  startQueryPersistence,
+} from "@/lib/queryPersistence";
 import { COOKIE_NAME, UNAUTHED_ERR_MSG } from "@shared/const";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
@@ -20,7 +24,16 @@ import "@fontsource/jetbrains-mono/500.css";
 import "@fontsource/jetbrains-mono/600.css";
 import "./index.css";
 
-const queryClient = new QueryClient();
+/**
+ * gcTime deutlich über dem Standard (5 Minuten): Der Zwischenspeicher wird
+ * neu nach IndexedDB gesichert (lib/queryPersistence.ts), damit die eigenen
+ * Listen ohne Empfang da sind. Würden ungenutzte Abfragen nach fünf Minuten
+ * verworfen, verschwänden sie beim nächsten Sichern gleich wieder aus dem
+ * Speicher – genau die Daten, die man am Abend im Funkloch braucht.
+ */
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { gcTime: 7 * 24 * 60 * 60 * 1000 } },
+});
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
@@ -83,6 +96,12 @@ const trpcClient = trpc.createClient({
     }),
   ],
 });
+
+// Offline-Speicher: erst laufend sichern, dann den letzten Stand einlesen.
+// Das Einlesen läuft bewusst neben dem Rendern – `hydrate` überschreibt keine
+// frischeren Daten, und niemand soll auf die Datenbank warten müssen.
+startQueryPersistence(queryClient);
+void restoreQueryCache(queryClient);
 
 createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>

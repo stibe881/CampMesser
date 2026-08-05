@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
-import { changelog, type ChangelogBlock } from "@/data/changelog";
+import { LATEST_CHANGELOG_ID, type ChangelogBlock } from "@/data/changelogMeta";
 import {
   blocksToShowOnStartup,
   hasExistingAppData,
-  latestBlockId,
   loadLastSeenId,
   loadStorageKeys,
   storeLastSeenId,
@@ -109,6 +108,11 @@ export function WhatsNewDialog({
  * dem Update, das diese Funktion mitbringt) sehen den neuesten Block. Sonst
  * erscheinen die ungesehenen Blöcke kurz verzögert – ausser auf ruhigen
  * Druck-/Teil-Routen (Ausblendeliste der Schnellaktionen).
+ *
+ * Die Changelog-Texte werden dabei ERST GEHOLT, wenn wirklich etwas zu zeigen
+ * ist: Ob es etwas Neues gibt, beantwortet der Vergleich mit der Id aus
+ * `changelogMeta.ts` – im Normalfall (nichts Neues) bleiben die 283 kB
+ * ungeladen.
  */
 export default function WhatsNewStartup() {
   const { t } = useI18n();
@@ -116,25 +120,36 @@ export default function WhatsNewStartup() {
   const [blocks, setBlocks] = useState<ChangelogBlock[]>([]);
 
   useEffect(() => {
-    const latest = latestBlockId(changelog);
-    if (!latest) return;
     const lastSeen = loadLastSeenId();
+    if (lastSeen === LATEST_CHANGELOG_ID) return; // nichts Neues
     const existing = hasExistingAppData(loadStorageKeys());
-    const unseen = blocksToShowOnStartup(changelog, lastSeen, existing);
-    if (unseen.length === 0) {
+    if (lastSeen === null && !existing) {
       // Echter Erstbesuch: nur den Marker setzen, damit die Historie beim
       // nächsten Start nicht nachträglich auftaucht.
-      if (lastSeen === null) storeLastSeenId(latest);
+      storeLastSeenId(LATEST_CHANGELOG_ID);
       return;
     }
+    let cancelled = false;
     const timer = window.setTimeout(() => {
       // Ruhige Lese-Ansichten (Druck/Teil-Links) nicht unterbrechen –
       // der Marker bleibt, der Hinweis kommt beim nächsten Start wieder.
       if (isQuietRoute(window.location.pathname)) return;
-      setBlocks(unseen);
-      setOpen(true);
+      void import("@/data/changelog")
+        .then(({ changelog }) => {
+          if (cancelled) return;
+          const unseen = blocksToShowOnStartup(changelog, lastSeen, existing);
+          if (unseen.length === 0) return;
+          setBlocks(unseen);
+          setOpen(true);
+        })
+        .catch(() => {
+          /* Offline und noch nicht im Cache: dann eben beim nächsten Start */
+        });
     }, STARTUP_DELAY_MS);
-    return () => window.clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, []);
 
   const handleOpenChange = (next: boolean) => {
@@ -142,8 +157,7 @@ export default function WhatsNewStartup() {
     if (!next) {
       // Jedes Schliessen (Verstanden, X, Escape) gilt als gesehen –
       // niemand soll denselben Hinweis zweimal wegklicken müssen.
-      const latest = latestBlockId(changelog);
-      if (latest) storeLastSeenId(latest);
+      storeLastSeenId(LATEST_CHANGELOG_ID);
     }
   };
 

@@ -1,4 +1,5 @@
 import { trpc } from "@/lib/trpc";
+import { clearPersistedQueryCache } from "@/lib/queryPersistence";
 import { TRPCClientError } from "@trpc/client";
 import { useCallback, useEffect, useMemo } from "react";
 
@@ -44,6 +45,9 @@ export function useAuth(options?: UseAuthOptions) {
       try {
         sessionStorage.removeItem("manus-cookie");
       } catch {}
+      // Offline-Speicher leeren: Auf einem geteilten Gerät sollen nach dem
+      // Abmelden keine fremden Listen im Zwischenspeicher zurückbleiben.
+      await clearPersistedQueryCache();
       utils.auth.me.setData(undefined, null);
       await utils.auth.me.invalidate();
     }

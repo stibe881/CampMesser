@@ -46,6 +46,7 @@ export const fr: Translation = {
   },
   shell: {
     toHome: "Vers la page d'accueil",
+    skipToContent: "Aller au contenu",
     themeLight: "Activer le thème clair",
     themeDark: "Activer le thème sombre",
     themeAuto: "Activer le thème automatique (système)",
@@ -65,6 +66,15 @@ export const fr: Translation = {
       firstAid: "Premiers secours",
       sos: "SOS",
     },
+  },
+  /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  offline: {
+    banner: "Pas de connexion – tu vois des données enregistrées.",
+    dataAge: (time: string) => `État du ${time}`,
+    synced: (count: number) =>
+      count === 1
+        ? "1 modification envoyée."
+        : `${count} modifications envoyées.`,
   },
   home: {
     recentSearches: "Recherches récentes :",
@@ -144,6 +154,12 @@ export const fr: Translation = {
     searchAria: "Rechercher dans les modules de savoir",
     searchNoResults:
       "Rien trouvé – essaie un autre terme (p. ex. «brûlure» ou «nœud»).",
+    searchPreparing: "Préparation des modules de savoir …",
+    travelModeLabel: "Affichage :",
+    travelModeOnSite: "Sur place",
+    travelModePlanning: "Planifier",
+    travelModeAuto: "automatique",
+    travelModeAria: "Affichage de la page d'accueil",
     searchCategories: {
       module: "Module",
       firstAid: "Premiers secours",
@@ -2025,6 +2041,7 @@ export const fr: Translation = {
     sectionWeather: "Météo et ciel",
     sectionAround: "Aux alentours",
     sectionOwn: "Personnel",
+    sectionNavAria: "Sections du dossier",
     routeButton: "Itinéraire",
     routeAria: "Ouvrir l'itinéraire vers cet emplacement dans l'app de cartes",
     contactTitle: "Contact & check-in",

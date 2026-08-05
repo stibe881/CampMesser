@@ -45,6 +45,7 @@ export const it: Translation = {
   },
   shell: {
     toHome: "Alla pagina iniziale",
+    skipToContent: "Vai al contenuto",
     themeLight: "Attiva il tema chiaro",
     themeDark: "Attiva il tema scuro",
     themeAuto: "Attiva il tema automatico (sistema)",
@@ -64,6 +65,13 @@ export const it: Translation = {
       firstAid: "Primo soccorso",
       sos: "SOS",
     },
+  },
+  /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  offline: {
+    banner: "Nessuna connessione – vedi dati salvati.",
+    dataAge: (time: string) => `Aggiornato alle ${time}`,
+    synced: (count: number) =>
+      count === 1 ? "1 modifica inviata." : `${count} modifiche inviate.`,
   },
   home: {
     recentSearches: "Ricerche recenti:",
@@ -140,6 +148,12 @@ export const it: Translation = {
     searchAria: "Cerca nei moduli di conoscenza",
     searchNoResults:
       "Nessun risultato – prova un altro termine (ad es. «ustione» o «nodo»).",
+    searchPreparing: "Preparazione dei moduli di conoscenza …",
+    travelModeLabel: "Vista:",
+    travelModeOnSite: "In viaggio",
+    travelModePlanning: "Pianificare",
+    travelModeAuto: "automatico",
+    travelModeAria: "Vista della pagina iniziale",
     searchCategories: {
       module: "Modulo",
       firstAid: "Primo soccorso",
@@ -2001,6 +2015,7 @@ export const it: Translation = {
     sectionWeather: "Meteo e cielo",
     sectionAround: "Nei dintorni",
     sectionOwn: "Personale",
+    sectionNavAria: "Sezioni del dossier",
     routeButton: "Percorso",
     routeAria: "Apri il percorso verso questa piazzola nell'app di mappe",
     contactTitle: "Contatto & check-in",

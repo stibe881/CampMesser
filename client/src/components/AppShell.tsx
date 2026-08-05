@@ -38,6 +38,8 @@ import { useI18n } from "@/i18n";
 import { LANGUAGES, LANGUAGE_LABELS } from "@shared/i18n";
 import BrandLogo from "@/components/BrandLogo";
 import InstallPrompt from "@/components/InstallPrompt";
+import OfflineBanner from "@/components/OfflineBanner";
+import OfflineSync from "@/components/OfflineSync";
 import UpdatePrompt from "@/components/UpdatePrompt";
 import QuickActions from "@/components/QuickActions";
 import CookTimerBar from "@/components/CookTimerBar";
@@ -220,6 +222,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Sprungmarke: Mit der Tastatur (und im Screenreader) beginnt sonst
+          jede Seite wieder bei Logo, Sprachwahl, Design und SOS. Sichtbar
+          wird der Link erst, wenn er den Fokus bekommt. */}
+      <a
+        href="#inhalt"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground"
+      >
+        {t.shell.skipToContent}
+      </a>
       {/* Top-Bar */}
       <header
         className={cn(
@@ -336,6 +347,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
         </div>
+        {/* Hinweis, solange keine Verbindung besteht – sitzt bewusst IM
+            Header, damit er beim Scrollen mitwandert und nicht übersehen
+            wird, sobald man weiter unten in einer Liste arbeitet. */}
+        <OfflineBanner />
       </header>
 
       {/* Schwebender SOS-Button, wenn der Header ausgeblendet ist */}
@@ -357,7 +372,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </Link>
 
       {/* Inhalt */}
-      <main className="flex-1 pb-24 md:pb-10">{children}</main>
+      <main id="inhalt" className="flex-1 pb-24 md:pb-10">
+        {children}
+      </main>
+
+      {/* Offline gesetzte Häkchen nachschicken (ohne eigene Darstellung) */}
+      <OfflineSync />
 
       {/* PWA-Install-Hinweis (dezent, abweisbar, über der Bottom-Nav) */}
       <InstallPrompt />

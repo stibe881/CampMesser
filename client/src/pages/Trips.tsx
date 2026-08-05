@@ -48,6 +48,8 @@ import { Link, useSearch } from "wouter";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import PageHeader from "@/components/PageHeader";
+import DataAge from "@/components/DataAge";
+import ListSkeleton from "@/components/ListSkeleton";
 import LoginPrompt from "@/components/LoginPrompt";
 import PhotoGallery from "@/components/PhotoGallery";
 import { Button } from "@/components/ui/button";
@@ -3676,11 +3678,9 @@ export default function TripsPage() {
 
   if (loading || (isAuthenticated && tripsQuery.isLoading)) {
     return (
-      <div className="container flex justify-center py-16">
-        <Loader2
-          className="h-6 w-6 animate-spin text-muted-foreground"
-          aria-label={t.common.loading}
-        />
+      <div className="container max-w-3xl py-6">
+        <PageHeader title={t.trips.title} subtitle={t.trips.subtitle} />
+        <ListSkeleton rows={3} height={120} />
       </div>
     );
   }
@@ -3697,6 +3697,7 @@ export default function TripsPage() {
   return (
     <div className="container max-w-3xl py-6">
       <PageHeader title={t.trips.title} subtitle={t.trips.subtitle} />
+      <DataAge updatedAt={tripsQuery.dataUpdatedAt} />
 
       {/* «Neue Reise» von Hand oder aus einer Vorlage (#284) */}
       <div className="mb-6 flex flex-wrap gap-2">

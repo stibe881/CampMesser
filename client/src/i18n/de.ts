@@ -46,6 +46,7 @@ export const de = {
   },
   shell: {
     toHome: "Zur Startseite",
+    skipToContent: "Zum Inhalt springen",
     themeLight: "Helles Design aktivieren",
     themeDark: "Dunkles Design aktivieren",
     themeAuto: "Automatisches Design (System) aktivieren",
@@ -65,6 +66,15 @@ export const de = {
       firstAid: "Erste Hilfe",
       sos: "SOS",
     },
+  },
+  /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  offline: {
+    banner: "Keine Verbindung – du siehst gespeicherte Daten.",
+    dataAge: (time: string) => `Stand von ${time}`,
+    synced: (count: number) =>
+      count === 1
+        ? "1 Änderung nachgeschickt."
+        : `${count} Änderungen nachgeschickt.`,
   },
   home: {
     heroImageAlt:
@@ -146,6 +156,12 @@ export const de = {
     searchAria: "Wissensmodule durchsuchen",
     searchNoResults:
       "Nichts gefunden – probiere einen anderen Begriff (z. B. «Verbrennung» oder «Knoten»).",
+    searchPreparing: "Wissensmodule werden vorbereitet …",
+    travelModeLabel: "Ansicht:",
+    travelModeOnSite: "Unterwegs",
+    travelModePlanning: "Planen",
+    travelModeAuto: "automatisch",
+    travelModeAria: "Ansicht der Startseite",
     searchCategories: {
       module: "Modul",
       firstAid: "Erste Hilfe",
@@ -2021,6 +2037,7 @@ export const de = {
     sectionWeather: "Wetter & Himmel",
     sectionAround: "In der Umgebung",
     sectionOwn: "Eigenes",
+    sectionNavAria: "Abschnitte des Dossiers",
     routeButton: "Route",
     routeAria: "Route zu diesem Platz in der Karten-App öffnen",
     contactTitle: "Kontakt & Check-in",

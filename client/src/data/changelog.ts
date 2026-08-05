@@ -1,4 +1,5 @@
-import { l4, type L4 } from "@shared/i18n";
+import { l4 } from "@shared/i18n";
+import type { ChangelogBlock } from "./changelogMeta";
 
 /**
  * «Was ist neu»: nutzersichtbare Änderungen der App, gruppiert nach
@@ -9,19 +10,54 @@ import { l4, type L4 } from "@shared/i18n";
  * Pflegepflicht: Jeder Feature-Batch ergänzt seine nutzersichtbaren Features
  * als je EINE kurze L4-Zeile (Du-Form) im obersten Block – neuer Block, falls
  * von heute noch keiner existiert. Reine Fixes/Interna gehören NICHT hierher.
- * Kein Vollständigkeitsanspruch: die wichtigsten Neuerungen zuerst.
+ * Kein Vollständigkeitsanspruch: die wichtigsten Neuerungen zuerst. Dazu
+ * gehört ein zweiter Handgriff: Die Id des obersten Blocks steht in
+ * `changelogMeta.ts` und muss mitgezogen werden (Test wacht darüber).
+ *
+ * DIESE DATEI WIRD NUR DYNAMISCH GELADEN (283 kB in vier Sprachen). Sie darf
+ * nirgends statisch importiert werden – wer Blöcke anzeigen will, holt sie
+ * per `await import("@/data/changelog")`. Den Typ liefert `changelogMeta.ts`.
  */
 
-export interface ChangelogBlock {
-  /** Aufsteigend vergleichbare Id: ISO-Datum + ".n" (z. B. "2026-08-03.1"). */
-  id: string;
-  /** Veröffentlichungs-Datum als ISO-String (YYYY-MM-DD). */
-  date: string;
-  /** Kurze, nutzersichtbare Neuerungen – die wichtigsten zuerst. */
-  entries: L4[];
-}
+export type { ChangelogBlock };
 
 export const changelog: ChangelogBlock[] = [
+  {
+    id: "2026-08-05.1",
+    date: "2026-08-05",
+    entries: [
+      l4(
+        "Deine Listen sind jetzt auch ohne Empfang da. Bisher startete die App zwar offline, aber Packliste, Menüplan, Einkaufsliste, Kühlbox und Aufenthalte waren leer – ausgerechnet das, was man auf dem Platz braucht. Neu merkt sich CampMesser den zuletzt geladenen Stand auf dem Gerät und zeigt ihn, wenn nichts zu holen ist. Damit du weisst, woran du bist, erscheint oben ein Band «Keine Verbindung» und über den Listen steht, von wann die Angaben sind. Sobald wieder Empfang da ist, wird alles frisch geholt.",
+        "Tes listes sont désormais là même sans réseau. Jusqu\u2019ici l\u2019app démarrait hors ligne, mais la liste de bagages, le menu, la liste de courses, la glacière et les séjours restaient vides – précisément ce dont on a besoin sur place. CampMesser retient maintenant le dernier état chargé sur l\u2019appareil et l\u2019affiche quand rien n\u2019est joignable. Un bandeau « Pas de connexion » apparaît en haut et, au-dessus des listes, la date des données. Dès que le réseau revient, tout est rechargé.",
+        "I tuoi elenchi ci sono ora anche senza campo. Finora l\u2019app si avviava offline, ma lista bagagli, menu, lista della spesa, frigo e soggiorni restavano vuoti – proprio ciò che serve in piazzola. Ora CampMesser conserva sul dispositivo l\u2019ultimo stato caricato e lo mostra quando non c\u2019è nulla da recuperare. In alto compare una fascia «Nessuna connessione» e sopra gli elenchi la data dei dati. Appena torna il campo, tutto viene ricaricato.",
+        "Your lists are now there without reception too. Until now the app started offline, but the packing list, menu plan, shopping list, cool box and stays were empty – exactly what you need on the pitch. CampMesser now keeps the last loaded state on the device and shows it when nothing can be fetched. A banner “No connection” appears at the top, and above the lists you see how old the data is. As soon as you are back online, everything is refreshed."
+      ),
+      l4(
+        "Häkchen im Funkloch gehen nicht mehr verloren. Wer ohne Empfang die Packliste abhakte, sah den Haken zwar – geschickt wurde er aber nur, solange die App offen blieb. Schloss man sie, verschwand er beim nächsten Laden stillschweigend wieder. Neu werden Häkchen von Pack- und Einkaufsliste gemerkt und nachgeschickt, sobald wieder Verbindung besteht, egal auf welcher Seite du gerade bist. Eine kurze Meldung sagt dir, wie viele Änderungen durchgekommen sind.",
+        "Les cases cochées hors réseau ne se perdent plus. Sans connexion, la coche s\u2019affichait mais n\u2019était envoyée que tant que l\u2019app restait ouverte ; en la fermant, elle disparaissait sans bruit. Désormais les coches de la liste de bagages et de la liste de courses sont mémorisées et envoyées dès le retour du réseau, quelle que soit la page ouverte. Un bref message indique combien de modifications sont passées.",
+        "Le spunte nel buco di rete non si perdono più. Senza campo la spunta si vedeva, ma veniva inviata solo finché l\u2019app restava aperta; chiudendola spariva in silenzio. Ora le spunte di lista bagagli e lista della spesa vengono memorizzate e inviate appena torna la connessione, qualunque pagina tu stia guardando. Un breve messaggio dice quante modifiche sono passate.",
+        "Ticks made without reception no longer vanish. Offline the tick showed up, but it was only sent while the app stayed open – close it and it quietly disappeared. Packing and shopping list ticks are now remembered and sent as soon as you are back online, no matter which page you are on. A short message tells you how many changes went through."
+      ),
+      l4(
+        "Der erste Aufruf lädt spürbar weniger. Beim Start wurden bisher auch die vier Sprachfassungen aller Wissens-Inhalte und die ganze «Was ist neu»-Historie geladen – für eine Startseite, auf der niemand danach sucht. Beides kommt jetzt erst, wenn du es brauchst: die Wissensdaten beim Antippen des Suchfelds, die Historie beim Öffnen. Das Paket beim ersten Aufruf ist damit rund ein Drittel kleiner, was vor allem bei magerem Empfang zählt.",
+        "Le premier chargement est nettement plus léger. Jusqu\u2019ici, les quatre versions linguistiques de tous les contenus de savoir et tout l\u2019historique « Quoi de neuf » étaient chargés au démarrage – pour une page d\u2019accueil où personne ne cherche cela. Les deux n\u2019arrivent plus qu\u2019au besoin : le savoir quand tu touches le champ de recherche, l\u2019historique à l\u2019ouverture. Le paquet initial est ainsi environ un tiers plus petit.",
+        "Il primo avvio carica sensibilmente meno. Finora venivano caricate anche le quattro versioni linguistiche di tutti i contenuti di conoscenza e l\u2019intera cronologia «Cosa c\u2019è di nuovo» – per una pagina iniziale in cui nessuno le cerca. Ora arrivano solo quando servono: i dati di conoscenza toccando il campo di ricerca, la cronologia all\u2019apertura. Il pacchetto iniziale è così circa un terzo più piccolo.",
+        "The first load is noticeably lighter. Until now the four language versions of all knowledge content and the entire “What’s new” history were loaded at startup – for a home screen where nobody searches for them. Both now arrive only when needed: the knowledge data when you tap the search field, the history when you open it. The initial download is about a third smaller, which matters most on a weak connection."
+      ),
+      l4(
+        "Das Platz-Dossier hat eine Sprungleiste bekommen und lädt sparsamer. Ganz oben stehen jetzt die fünf Abschnitte zum Antippen – wer unterwegs die Öffnungszeiten des Ladens sucht, springt direkt hin, statt an Wetter, Sonne und Anreise vorbeizuscrollen. Ausserdem werden die unteren Abschnitte erst geladen, wenn sie in Sicht kommen: Wer bloss kurz die Telefonnummer nachschaut, löst nicht mehr die Abfragen der ganzen Seite aus.",
+        "Le dossier de l\u2019emplacement a une barre de navigation et charge plus sobrement. Les cinq sections sont désormais tout en haut – si tu cherches les horaires du magasin, tu y sautes directement au lieu de faire défiler météo, soleil et trajet. De plus, les sections du bas ne se chargent qu\u2019une fois en vue : consulter vite un numéro de téléphone ne déclenche plus les requêtes de toute la page.",
+        "Il dossier della piazzola ha una barra di salto e carica in modo più parsimonioso. Le cinque sezioni sono ora in cima – se cerchi gli orari del negozio ci salti subito, invece di scorrere oltre meteo, sole e viaggio. Inoltre le sezioni in basso si caricano solo quando entrano in vista: guardare al volo un numero di telefono non avvia più le richieste dell\u2019intera pagina.",
+        "The pitch dossier now has a jump bar and loads more frugally. The five sections sit right at the top – looking for the shop’s opening hours, you jump straight there instead of scrolling past weather, sun and the drive. The lower sections also load only once they come into view: a quick look at the phone number no longer triggers the whole page’s requests."
+      ),
+      l4(
+        "Während eines Aufenthalts ordnet sich die Startseite um. Läuft gerade eine Reise, stehen die Werkzeuge für vor Ort zuoberst – Wasserwaage, Zelt-Finder, Ämtli, Kühlbox – und die Reiseplanung rutscht nach unten. Weggenommen wird nichts, nur die Reihenfolge ändert sich, und über den Kacheln kannst du jederzeit zwischen «Unterwegs» und «Planen» umschalten.",
+        "Pendant un séjour, la page d\u2019accueil se réorganise. Si un voyage est en cours, les outils de terrain passent en haut – niveau à bulle, localisateur de tente, tâches, glacière – et la planification descend. Rien n\u2019est retiré, seul l\u2019ordre change, et au-dessus des tuiles tu peux basculer à tout moment entre « Sur place » et « Planifier ».",
+        "Durante un soggiorno la pagina iniziale si riordina. Se un viaggio è in corso, gli strumenti da usare sul posto vanno in cima – livella, trova-tenda, turni, frigo – e la pianificazione scende. Non viene tolto nulla, cambia solo l\u2019ordine, e sopra le piastrelle puoi passare quando vuoi tra «In viaggio» e «Pianificare».",
+        "During a stay the home screen rearranges itself. While a trip is running, the on-site tools move to the top – spirit level, tent finder, camp chores, cool box – and trip planning drops down. Nothing is taken away, only the order changes, and above the tiles you can switch between “On site” and “Planning” at any time."
+      ),
+    ],
+  },
   {
     id: "2026-08-04.1",
     date: "2026-08-04",

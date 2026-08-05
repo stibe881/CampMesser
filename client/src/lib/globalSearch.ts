@@ -1,38 +1,35 @@
 /**
  * Globale Suche über alle Offline-Wissensmodule: Erste Hilfe, Knoten,
- * Rezepte und Natur-Lexikon. Der Index wird pro Sprache einmal aus den
- * statischen Bundle-Daten aufgebaut – funktioniert komplett offline.
- * Alle Textfelder laufen durch `pick()`, damit sowohl heutige string-
- * als auch künftige L4-Felder korrekt in der aktiven Sprache landen.
+ * Rezepte und Natur-Lexikon. Der Index wird pro Sprache einmal aufgebaut
+ * und danach behalten – funktioniert komplett offline. Alle Textfelder
+ * laufen durch `pick()`, damit sowohl heutige string- als auch künftige
+ * L4-Felder korrekt in der aktiven Sprache landen.
+ *
+ * WICHTIG: Die Wissensdaten selbst liegen in `knowledgeIndex.ts` und werden
+ * NUR per `await import()` geholt (`ensureKnowledgeIndex`). Grund: Es sind
+ * gegen 500 kB Text in vier Sprachen; statisch importiert hingen sie am
+ * Haupt-Bundle und verzögerten jeden Erstaufruf der App – auch für alle,
+ * die gar nie ins Suchfeld tippen. Deshalb liefert `searchKnowledge` eine
+ * leere Liste, solange der Index noch nicht geladen ist; die Oberfläche
+ * stösst das Laden beim ersten Fokus aufs Suchfeld an und zeigt so lange
+ * einen Hinweis. Eigene Inhalte (`searchOwnContent`) sind davon nicht
+ * betroffen und stehen sofort zur Verfügung.
  */
-import { firstAidTopics } from "@/data/firstAid";
-import { cloudBandLabels, cloudEntries } from "@/data/clouds";
-import { knotCategoryLabels, knots } from "@/data/knots";
-import { gearRepairGuides } from "@/data/gearRepair";
-import { tentCareGuides } from "@/data/tentCare";
-import { groupLabels, modules } from "@/data/modules";
-import { natureEntries } from "@/data/nature";
-import { recipes } from "@/data/recipes";
-import { RECIPE_METHOD_LABELS } from "@shared/customRecipes";
 import { LOCALE_TAGS, l4, pick, type L4, type Language } from "@shared/i18n";
 import { fuzzyWordMatch, levenshtein, normalizeText } from "@shared/textMatch";
 import { parseNoteTags } from "@shared/notes";
+import {
+  shorten,
+  type IndexEntry,
+  type SearchCategory,
+} from "@/lib/searchIndexEntry";
+// Für bestehende Aufrufer bleibt die Kategorie hier abrufbar.
+export type { SearchCategory } from "@/lib/searchIndexEntry";
 
 // Die fehlertoleranten Grundfunktionen liegen neu in shared/textMatch.ts,
 // damit auch der Resteverwertungs-Abgleich (#235) sie nutzt. Für bestehende
 // Aufrufer bleiben sie hier abrufbar.
 export { fuzzyWordMatch, levenshtein };
-
-/** Kategorie-Schlüssel eines Treffers – das Anzeige-Label liefert das Wörterbuch. */
-export type SearchCategory =
-  | "module"
-  | "firstAid"
-  | "knots"
-  | "recipes"
-  | "nature"
-  | "clouds"
-  | "care"
-  | "own";
 
 export interface SearchResult {
   id: string;
@@ -46,142 +43,40 @@ export interface SearchResult {
   score: number;
 }
 
-interface IndexEntry {
-  id: string;
-  title: string;
-  module: SearchCategory;
-  path: string;
-  snippet: string;
-  /** Normalisierter Titel */
-  normTitle: string;
-  /** Normalisierter Gesamttext (Titel + Inhalt) */
-  normBody: string;
-}
-
-function shorten(s: string, max = 110): string {
-  return s.length <= max ? s : `${s.slice(0, max - 1).trimEnd()}…`;
-}
-
-const MIN_ABBR = l4("Min.", "min", "min", "min");
-const INGREDIENTS_LABEL = l4(
-  "Zutaten",
-  "Ingrédients",
-  "Ingredienti",
-  "Ingredients"
-);
-
 const indexCache: Partial<Record<Language, IndexEntry[]>> = {};
 
-function buildIndex(lang: Language): IndexEntry[] {
-  /** Textfeld in der aktiven Sprache lesen (strings laufen unverändert durch). */
-  const p = (x: L4 | string) => pick(x, lang);
-  const entries: IndexEntry[] = [];
-  const add = (
-    id: string,
-    title: string,
-    module: SearchCategory,
-    path: string,
-    snippet: string,
-    bodyParts: (string | undefined)[]
-  ) => {
-    const body = [title, ...bodyParts.filter(Boolean)].join(" ");
-    entries.push({
-      id,
-      title,
-      module,
-      path,
-      snippet: shorten(snippet),
-      normTitle: normalizeText(title),
-      normBody: normalizeText(body),
-    });
-  };
+/** Läuft gerade ein Ladevorgang? Mehrfach-Aufrufe teilen sich dasselbe Versprechen. */
+const pending: Partial<Record<Language, Promise<void>>> = {};
 
-  // Werkzeuge selbst sind auch findbar: «wasserwaage» führt direkt zur Kachel
-  for (const m of modules) {
-    add(`module-${m.path}`, p(m.title), "module", m.path, p(m.description), [
-      p(m.description),
-      p(groupLabels[m.group]),
-    ]);
-  }
-  for (const t of firstAidTopics) {
-    add(
-      `firstaid-${t.id}`,
-      p(t.title),
-      "firstAid",
-      "/erste-hilfe",
-      p(t.summary),
-      [
-        p(t.summary),
-        ...t.symptoms.map(s => p(s)),
-        ...t.steps.map(s => `${p(s.title)} ${p(s.text)}`),
-        p(t.warning),
-      ]
-    );
-  }
-  for (const k of knots) {
-    add(`knot-${k.id}`, p(k.name), "knots", "/knoten", p(k.useCase), [
-      k.altName ? p(k.altName) : undefined,
-      p(knotCategoryLabels[k.category]),
-      p(k.useCase),
-      p(k.campingUse),
-      ...k.steps.map(s => p(s)),
-      p(k.proTip),
-    ]);
-  }
-  // Wolken: der lateinische Name ist bewusst im Suchtext, damit auch «Cirrus»
-  // oder «Cumulonimbus» aus einer anderen Wetter-App hier landen
-  for (const c of cloudEntries) {
-    add(`cloud-${c.id}`, p(c.name), "clouds", "/wolken", p(c.meaning), [
-      c.latin,
-      p(cloudBandLabels[c.band]),
-      p(c.appearance),
-      p(c.meaning),
-      p(c.campTip),
-    ]);
-  }
-  // Pflege-Anleitungen: gesucht wird meist nach dem Problem («Schimmel»,
-  // «Reissverschluss»), deshalb stehen Anlass und Fehler mit im Suchtext
-  for (const [prefix, path, guides] of [
-    ["tentcare", "/zeltpflege", tentCareGuides],
-    ["gearrepair", "/reparatur", gearRepairGuides],
-  ] as const) {
-    for (const g of guides) {
-      add(`${prefix}-${g.id}`, p(g.title), "care", path, p(g.summary), [
-        p(g.summary),
-        p(g.when),
-        ...g.materials.map(m => p(m)),
-        ...g.steps.map(s => `${p(s.title)} ${p(s.text)}`),
-        p(g.mistake),
-      ]);
-    }
-  }
-  for (const r of recipes) {
-    add(
-      `recipe-${r.id}`,
-      p(r.name),
-      "recipes",
-      "/rezepte",
-      `${p(RECIPE_METHOD_LABELS[r.method])} · ${r.timeMinutes} ${p(MIN_ABBR)} · ${p(INGREDIENTS_LABEL)}: ${r.ingredients
-        .slice(0, 5)
-        .map(i => p(i))
-        .join(", ")}`,
-      [
-        p(RECIPE_METHOD_LABELS[r.method]),
-        ...r.ingredients.map(i => p(i)),
-        ...r.steps.map(s => p(s)),
-        r.tip ? p(r.tip) : undefined,
-      ]
-    );
-  }
-  for (const n of natureEntries) {
-    add(`nature-${n.id}`, p(n.name), "nature", "/natur", p(n.description), [
-      n.latinOrExtra ? p(n.latinOrExtra) : undefined,
-      p(n.description),
-      p(n.funFact),
-      ...n.features.map(f => p(f)),
-    ]);
-  }
-  return entries;
+/**
+ * Wissensdaten holen und den Index für diese Sprache aufbauen.
+ *
+ * Mehrfach aufrufbar: Ist der Index da, kehrt der Aufruf sofort zurück;
+ * läuft schon ein Ladevorgang, hängt er sich an. Scheitert der Import
+ * (offline, Chunk weg), bleibt der Index leer und der nächste Aufruf
+ * versucht es erneut – die Suche zeigt dann nur eigene Inhalte.
+ */
+export function ensureKnowledgeIndex(lang: Language): Promise<void> {
+  if (indexCache[lang]) return Promise.resolve();
+  const running = pending[lang];
+  if (running) return running;
+  const task = import("@/lib/knowledgeIndex")
+    .then(({ buildIndex }) => {
+      indexCache[lang] = buildIndex(lang);
+    })
+    .catch(() => {
+      /* Ohne Wissensdaten bleiben die eigenen Treffer – beim nächsten Mal neu */
+    })
+    .finally(() => {
+      delete pending[lang];
+    });
+  pending[lang] = task;
+  return task;
+}
+
+/** Steht der Wissens-Index für diese Sprache bereit? */
+export function isKnowledgeIndexReady(lang: Language): boolean {
+  return indexCache[lang] !== undefined;
 }
 
 /** Suchwörter einer Anfrage (normalisiert, min. 2 Zeichen). */
@@ -244,6 +139,10 @@ function rankEntries(
 /**
  * Wissensmodule durchsuchen. Alle Suchwörter müssen vorkommen;
  * Titel-Treffer werden höher gewichtet als Text-Treffer.
+ *
+ * Bewusst synchron, damit die Trefferliste beim Tippen ohne Flackern
+ * mitläuft: Wer sucht, hat den Index über `ensureKnowledgeIndex` bereits
+ * angestossen. Fehlt er noch, bleibt die Liste leer statt zu blockieren.
  */
 export function searchKnowledge(
   query: string,
@@ -252,7 +151,8 @@ export function searchKnowledge(
 ): SearchResult[] {
   const words = queryWords(query);
   if (words.length === 0) return [];
-  const index = (indexCache[lang] ??= buildIndex(lang));
+  const index = indexCache[lang];
+  if (!index) return [];
   return rankEntries(index, words, limit, lang);
 }
 

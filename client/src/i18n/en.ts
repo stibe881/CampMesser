@@ -45,6 +45,7 @@ export const en: Translation = {
   },
   shell: {
     toHome: "Go to home page",
+    skipToContent: "Skip to content",
     themeLight: "Switch to light theme",
     themeDark: "Switch to dark theme",
     themeAuto: "Switch to automatic theme (system)",
@@ -64,6 +65,13 @@ export const en: Translation = {
       firstAid: "First aid",
       sos: "SOS",
     },
+  },
+  /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  offline: {
+    banner: "No connection – you are seeing stored data.",
+    dataAge: (time: string) => `As of ${time}`,
+    synced: (count: number) =>
+      count === 1 ? "1 change sent." : `${count} changes sent.`,
   },
   home: {
     heroImageAlt:
@@ -139,6 +147,12 @@ export const en: Translation = {
     searchAria: "Search the knowledge modules",
     searchNoResults:
       "Nothing found – try a different term (e.g. “burn” or “knot”).",
+    searchPreparing: "Preparing the knowledge modules …",
+    travelModeLabel: "View:",
+    travelModeOnSite: "On site",
+    travelModePlanning: "Planning",
+    travelModeAuto: "automatic",
+    travelModeAria: "Home page view",
     searchCategories: {
       module: "Module",
       firstAid: "First aid",
@@ -1963,6 +1977,7 @@ export const en: Translation = {
     sectionWeather: "Weather and sky",
     sectionAround: "Around here",
     sectionOwn: "Yours",
+    sectionNavAria: "Dossier sections",
     routeButton: "Directions",
     routeAria: "Open directions to this pitch in your maps app",
     contactTitle: "Contact & check-in",
