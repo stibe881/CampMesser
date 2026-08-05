@@ -103,6 +103,26 @@ export default function ShoppingPage() {
     enabled: isAuthenticated && activeListId !== null,
   });
   /** Verwalten-Dialog offen? */
+  /**
+   * Laufende und die nächsten bevorstehenden Reisen – mehr wäre eine
+   * Aufzählung alter Reisen, in der die aktuelle untergeht.
+   */
+  const tripsQuery = trpc.trips.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+  const tripLists = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    return (tripsQuery.data ?? [])
+      .filter(trip => (trip.endDate ?? trip.startDate) >= today)
+      .sort((a, b) => a.startDate.localeCompare(b.startDate))
+      .slice(0, 3)
+      .map(trip => ({
+        id: trip.id,
+        label: trip.title || trip.spotName || trip.location || trip.startDate,
+      }));
+  }, [tripsQuery.data]);
+
   const [manageOpen, setManageOpen] = useState(false);
   const [newListName, setNewListName] = useState("");
   /** Zwischenstand der Namensfelder im Verwalten-Dialog (Id → Name). */
@@ -525,6 +545,34 @@ export default function ShoppingPage() {
             <ListChecks className="mr-1.5 h-4 w-4" aria-hidden="true" />
             {t.shopping.manageListsButton}
           </Button>
+        </div>
+      )}
+
+      {/* Reise-Einkaufslisten (#309): Sie liegen bewusst NICHT in dieser
+          Ansicht – eine Reiseliste gehört allen Mitreisenden und wird über
+          die Reise geteilt, eine persönliche Liste gehört dir. Was aber
+          fehlte, war der Weg dorthin: Im Laden stand man vor der falschen
+          Liste, weil die Reiseliste nur über den Menüplan erreichbar war.
+          Diese Zeile zeigt die Listen laufender und bevorstehender Reisen
+          und führt direkt hin. */}
+      {tripLists.length > 0 && (
+        <div
+          className="mb-4 flex flex-wrap items-center gap-2"
+          role="group"
+          aria-label={t.shopping.tripListsAria}
+        >
+          <span className="text-xs text-muted-foreground">
+            {t.shopping.tripListsLabel}
+          </span>
+          {tripLists.map(trip => (
+            <Link
+              key={trip.id}
+              href={`/menueplan/${trip.id}/einkauf`}
+              className="rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {trip.label}
+            </Link>
+          ))}
         </div>
       )}
 

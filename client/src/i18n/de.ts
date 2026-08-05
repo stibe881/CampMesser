@@ -4954,6 +4954,8 @@ export const de = {
     putAwayFailed:
       "Einräumen fehlgeschlagen – noch nicht übernommene Einträge bleiben auf der Liste",
     listsAria: "Einkaufsliste wählen",
+    tripListsLabel: "Reiselisten:",
+    tripListsAria: "Einkaufslisten von Reisen",
     listCounts: (open: number, done: number) =>
       `${open} offen · ${done} erledigt`,
     manageListsButton: "Listen",
@@ -5086,6 +5088,7 @@ export const de = {
     openButton: "Reise-Einkaufsliste",
     openAria: (name: string) => `Reise-Einkaufsliste für ${name} öffnen`,
     backToMenuPlan: "Zum Menüplan",
+    toPersonalLists: "Eigene Listen",
     emptyTitle: "Noch keine Einträge",
     emptyText:
       "Füge oben Einträge hinzu – oder übernimm die Zutaten der geplanten Rezepte aus dem Menüplan.",

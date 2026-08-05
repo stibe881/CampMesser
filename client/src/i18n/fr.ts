@@ -4956,6 +4956,8 @@ export const fr: Translation = {
     putAwayFailed:
       "Le rangement a échoué – les articles pas encore repris restent sur la liste",
     listsAria: "Choisir la liste de courses",
+    tripListsLabel: "Listes de voyage :",
+    tripListsAria: "Listes de courses des voyages",
     listCounts: (open: number, done: number) =>
       `${open} à acheter · ${done} faits`,
     manageListsButton: "Listes",
@@ -5087,6 +5089,7 @@ export const fr: Translation = {
     openButton: "Liste de courses du séjour",
     openAria: (name: string) => `Ouvrir la liste de courses du séjour ${name}`,
     backToMenuPlan: "Vers le plan des repas",
+    toPersonalLists: "Mes listes",
     emptyTitle: "Pas encore d'entrées",
     emptyText:
       "Ajoute des entrées ci-dessus – ou reprends les ingrédients des recettes prévues depuis le plan des repas.",

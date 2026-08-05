@@ -4918,6 +4918,8 @@ export const it: Translation = {
     putAwayFailed:
       "Sistemazione non riuscita – le voci non ancora riprese restano sulla lista",
     listsAria: "Scegli la lista della spesa",
+    tripListsLabel: "Liste dei viaggi:",
+    tripListsAria: "Liste della spesa dei viaggi",
     listCounts: (open: number, done: number) =>
       `${open} da comprare · ${done} fatti`,
     manageListsButton: "Liste",
@@ -5049,6 +5051,7 @@ export const it: Translation = {
     openButton: "Lista spesa del viaggio",
     openAria: (name: string) => `Apri la lista della spesa del viaggio ${name}`,
     backToMenuPlan: "Al piano dei pasti",
+    toPersonalLists: "Liste personali",
     emptyTitle: "Ancora nessuna voce",
     emptyText:
       "Aggiungi voci qui sopra – oppure riprendi gli ingredienti delle ricette pianificate dal piano dei pasti.",

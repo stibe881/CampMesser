@@ -4821,6 +4821,8 @@ export const en: Translation = {
     putAwayFailed:
       "Putting away failed – items not yet transferred stay on the list",
     listsAria: "Choose shopping list",
+    tripListsLabel: "Trip lists:",
+    tripListsAria: "Shopping lists of trips",
     listCounts: (open: number, done: number) => `${open} open · ${done} done`,
     manageListsButton: "Lists",
     manageListsAria: "Manage shopping lists",
@@ -4951,6 +4953,7 @@ export const en: Translation = {
     openButton: "Trip shopping list",
     openAria: (name: string) => `Open the trip shopping list for ${name}`,
     backToMenuPlan: "To the meal plan",
+    toPersonalLists: "My lists",
     emptyTitle: "No entries yet",
     emptyText:
       "Add entries above – or take over the ingredients of the planned recipes from the meal plan.",
