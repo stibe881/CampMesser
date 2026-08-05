@@ -1176,6 +1176,14 @@ function KnowledgeSearch() {
   const huntsQuery = trpc.hunts.list.useQuery(undefined, queryOpts);
   const quizzesQuery = trpc.quizzes.list.useQuery(undefined, queryOpts);
   const notesQuery = trpc.notes.list.useQuery(undefined, queryOpts);
+  // Ausrüstung, Kisten, Vorräte und Aufenthalte (#307): Genau danach fragt
+  // man unterwegs («wo ist die Stirnlampe», «in welcher Kiste ist der
+  // Kocher»), und genau das fand die Suche bisher nicht. Geladen wird erst
+  // beim Antippen des Suchfelds – wie alle anderen Listen hier auch.
+  const gearQuery = trpc.inventory.list.useQuery(undefined, queryOpts);
+  const boxesQuery = trpc.boxes.list.useQuery(undefined, queryOpts);
+  const foodQuery = trpc.food.list.useQuery(undefined, queryOpts);
+  const searchTripsQuery = trpc.trips.list.useQuery(undefined, queryOpts);
 
   /**
    * Beim ersten Fokus/Tippen: Wissens-Index nachladen, tRPC-Queries
@@ -1209,6 +1217,28 @@ function KnowledgeSearch() {
             quizzes: quizzesQuery.data,
             tentTargets,
             notes: notesQuery.data,
+            inventory: gearQuery.data?.map(item => {
+              // Die Kiste steht am Gegenstand nur als Id – der Name kommt
+              // aus der Kisten-Liste, die ohnehin schon geladen ist.
+              const box = boxesQuery.data?.find(b => b.id === item.boxId);
+              return {
+                id: item.id,
+                name: item.name,
+                category: item.category,
+                notes: item.notes,
+                boxName: box?.name ?? null,
+                boxCode: box?.code ?? null,
+              };
+            }),
+            boxes: boxesQuery.data,
+            food: foodQuery.data,
+            trips: searchTripsQuery.data?.map(trip => ({
+              id: trip.id,
+              title: trip.title,
+              location: trip.location,
+              spotName: trip.spotName,
+              startDate: trip.startDate,
+            })),
           },
           6,
           lang
