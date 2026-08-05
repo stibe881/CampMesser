@@ -20,7 +20,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
-import { directionsUrl } from "@/lib/directions";
+import {
+  defaultProvider,
+  directionsUrl,
+  openDirections,
+} from "@/lib/directions";
 import { loadMapLayer } from "@/lib/mapLayers";
 import {
   createMap,
@@ -252,7 +256,15 @@ export default function SharedLocationPage() {
 
           <Button asChild className="mt-4 w-full">
             <a
-              href={directionsUrl(share.latitude, share.longitude)}
+              href={directionsUrl(
+                share.latitude,
+                share.longitude,
+                defaultProvider()
+              )}
+              onClick={event => {
+                event.preventDefault();
+                openDirections(share.latitude, share.longitude);
+              }}
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -23,6 +23,7 @@ import {
   Sparkles,
   SunMedium,
   MailWarning,
+  Navigation,
   Backpack,
   ChevronDown,
   CloudLightning,
@@ -43,6 +44,11 @@ import LoginPrompt from "@/components/LoginPrompt";
 import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 import { WhatsNewDialog } from "@/components/WhatsNewDialog";
 import type { ChangelogBlock } from "@/data/changelogMeta";
+import {
+  loadMapsPreference,
+  saveMapsPreference,
+  type MapsPreference,
+} from "@/lib/directions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1062,6 +1068,15 @@ export default function ProfilePage() {
     onError: e => toast.error(e.message),
   });
 
+  /** Karten-App für Routen (lib/directions.ts): «ask» fragt wieder. */
+  const [mapsPref, setMapsPref] = useState<MapsPreference>(() =>
+    loadMapsPreference()
+  );
+  const chooseMapsApp = (value: MapsPreference) => {
+    setMapsPref(value);
+    saveMapsPreference(value);
+  };
+
   /** Design-Präferenz speichern und sofort anwenden. */
   const chooseTheme = (pref: ThemePreference) => {
     saveThemePreference(pref);
@@ -1169,6 +1184,45 @@ export default function ProfilePage() {
               />{" "}
               {t.profile.themeAuto}
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Karten-App für Routen: Die Frage beim ersten Routen-Klick lässt
+          sich hier nachträglich beantworten oder zurücksetzen. */}
+      <Card className="mb-5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Navigation className="h-4 w-4 text-primary" aria-hidden="true" />
+            {t.directions.settingLabel}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-3 text-sm text-muted-foreground">
+            {t.directions.settingHint}
+          </p>
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label={t.directions.settingLabel}
+          >
+            {(
+              [
+                ["ask", t.directions.settingAsk],
+                ["apple", t.directions.apple],
+                ["google", t.directions.google],
+              ] as [MapsPreference, string][]
+            ).map(([value, label]) => (
+              <Button
+                key={value}
+                type="button"
+                variant={mapsPref === value ? "default" : "outline"}
+                className="flex-1"
+                onClick={() => chooseMapsApp(value)}
+              >
+                {label}
+              </Button>
+            ))}
           </div>
         </CardContent>
       </Card>

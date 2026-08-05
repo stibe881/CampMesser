@@ -38,7 +38,11 @@ import {
   Trees,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { directionsUrl } from "@/lib/directions";
+import {
+  defaultProvider,
+  directionsUrl,
+  openDirections,
+} from "@/lib/directions";
 import {
   fetchOverpass,
   parsePicnicSites,
@@ -428,7 +432,15 @@ export default function PicnicStops({
                       )}
 
                       <a
-                        href={directionsUrl(place.lat, place.lon)}
+                        href={directionsUrl(
+                          place.lat,
+                          place.lon,
+                          defaultProvider()
+                        )}
+                        onClick={event => {
+                          event.preventDefault();
+                          openDirections(place.lat, place.lon);
+                        }}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={tp.navAria(title)}

@@ -22,7 +22,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Footprints, Loader2, Map as MapIcon, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { directionsUrl } from "@/lib/directions";
+import {
+  defaultProvider,
+  directionsUrl,
+  openDirections,
+} from "@/lib/directions";
 import { loadMapLayer } from "@/lib/mapLayers";
 import {
   createMap,
@@ -467,7 +471,15 @@ export default function NearbyHikes({
                       {open ? tn.hideMap : tn.showMap}
                     </button>
                     <a
-                      href={directionsUrl(view.entry.lat, view.entry.lon)}
+                      href={directionsUrl(
+                        view.entry.lat,
+                        view.entry.lon,
+                        defaultProvider()
+                      )}
+                      onClick={event => {
+                        event.preventDefault();
+                        openDirections(view.entry.lat, view.entry.lon);
+                      }}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={tn.navAria(title)}

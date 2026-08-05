@@ -102,7 +102,11 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { directionsUrl } from "@/lib/directions";
+import {
+  defaultProvider,
+  directionsUrl,
+  openDirections,
+} from "@/lib/directions";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import {
   OVERPASS_MIN_ZOOM,
@@ -799,7 +803,18 @@ function SpotsMap({
       popup.appendChild(link);
       // Anreise-Route: externer Karten-Link (Apple/Google je nach Gerät)
       const route = document.createElement("a");
-      route.href = directionsUrl(spot.latitude, spot.longitude);
+      route.href = directionsUrl(
+        spot.latitude,
+        spot.longitude,
+        defaultProvider()
+      );
+      // Klick geht über den Dialog: Er fragt beim ersten Mal nach der
+      // Karten-App. Das href bleibt als Rückfall stehen, damit
+      // «Link kopieren» und Mittelklick weiter funktionieren.
+      route.addEventListener("click", event => {
+        event.preventDefault();
+        openDirections(spot.latitude, spot.longitude);
+      });
       route.target = "_blank";
       route.rel = "noopener noreferrer";
       route.textContent = t.mapView.routeLink;
@@ -965,7 +980,14 @@ function SpotsMap({
       }
 
       const route = document.createElement("a");
-      route.href = directionsUrl(firepit.lat, firepit.lon);
+      route.href = directionsUrl(firepit.lat, firepit.lon, defaultProvider());
+      // Klick geht über den Dialog: Er fragt beim ersten Mal nach der
+      // Karten-App. Das href bleibt als Rückfall stehen, damit
+      // «Link kopieren» und Mittelklick weiter funktionieren.
+      route.addEventListener("click", event => {
+        event.preventDefault();
+        openDirections(firepit.lat, firepit.lon);
+      });
       route.target = "_blank";
       route.rel = "noopener noreferrer";
       route.textContent = tf.navButton;
@@ -1041,7 +1063,14 @@ function SpotsMap({
       }
 
       const route = document.createElement("a");
-      route.href = directionsUrl(place.lat, place.lon);
+      route.href = directionsUrl(place.lat, place.lon, defaultProvider());
+      // Klick geht über den Dialog: Er fragt beim ersten Mal nach der
+      // Karten-App. Das href bleibt als Rückfall stehen, damit
+      // «Link kopieren» und Mittelklick weiter funktionieren.
+      route.addEventListener("click", event => {
+        event.preventDefault();
+        openDirections(place.lat, place.lon);
+      });
       route.target = "_blank";
       route.rel = "noopener noreferrer";
       route.textContent = tp.navButton;
@@ -1164,7 +1193,18 @@ function SpotsMap({
       }
 
       const route = document.createElement("a");
-      route.href = directionsUrl(excursion.latitude, excursion.longitude);
+      route.href = directionsUrl(
+        excursion.latitude,
+        excursion.longitude,
+        defaultProvider()
+      );
+      // Klick geht über den Dialog: Er fragt beim ersten Mal nach der
+      // Karten-App. Das href bleibt als Rückfall stehen, damit
+      // «Link kopieren» und Mittelklick weiter funktionieren.
+      route.addEventListener("click", event => {
+        event.preventDefault();
+        openDirections(excursion.latitude, excursion.longitude);
+      });
       route.target = "_blank";
       route.rel = "noopener noreferrer";
       route.textContent = te.navButton;

@@ -21,7 +21,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Baby, ChevronDown, Navigation, Waves } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { directionsUrl } from "@/lib/directions";
+import {
+  defaultProvider,
+  directionsUrl,
+  openDirections,
+} from "@/lib/directions";
 import {
   FAMILY_DEFAULT_RADIUS_M,
   FAMILY_SEARCH_RADII_M,
@@ -262,7 +266,15 @@ export default function NearbyFamilyPlaces({
                       )}
 
                       <a
-                        href={directionsUrl(place.lat, place.lon)}
+                        href={directionsUrl(
+                          place.lat,
+                          place.lon,
+                          defaultProvider()
+                        )}
+                        onClick={event => {
+                          event.preventDefault();
+                          openDirections(place.lat, place.lon);
+                        }}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={tp.navAria(title)}

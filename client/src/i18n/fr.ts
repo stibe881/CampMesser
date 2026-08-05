@@ -68,6 +68,20 @@ export const fr: Translation = {
     },
   },
   /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  /** Karten-App-Wahl beim Öffnen einer Route. */
+  directions: {
+    title: "Naviguer avec quoi ?",
+    description:
+      "L\u2019itinéraire peut s\u2019ouvrir dans Plans d\u2019Apple ou dans Google Maps.",
+    apple: "Plans (Apple)",
+    google: "Google Maps",
+    remember: "Retenir le choix et ne plus demander",
+    changeHint: "Tu peux le changer à tout moment dans le profil.",
+    settingLabel: "Application de cartes pour les itinéraires",
+    settingAsk: "Demander à chaque fois",
+    settingHint:
+      "Détermine avec quoi s\u2019ouvrent « Itinéraire » et « S\u2019y rendre ». « Demander à chaque fois » repose la question.",
+  },
   offline: {
     banner: "Pas de connexion – tu vois des données enregistrées.",
     dataAge: (time: string) => `État du ${time}`,

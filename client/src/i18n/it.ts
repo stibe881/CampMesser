@@ -67,6 +67,19 @@ export const it: Translation = {
     },
   },
   /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  /** Karten-App-Wahl beim Öffnen einer Route. */
+  directions: {
+    title: "Con cosa navighiamo?",
+    description: "Il percorso può aprirsi in Mappe di Apple o in Google Maps.",
+    apple: "Mappe (Apple)",
+    google: "Google Maps",
+    remember: "Ricorda la scelta e non chiedere più",
+    changeHint: "Puoi cambiarlo in qualsiasi momento nel profilo.",
+    settingLabel: "App di mappe per i percorsi",
+    settingAsk: "Chiedi ogni volta",
+    settingHint:
+      "Determina con cosa si aprono «Percorso» e «Andare». «Chiedi ogni volta» ripropone la domanda.",
+  },
   offline: {
     banner: "Nessuna connessione – vedi dati salvati.",
     dataAge: (time: string) => `Aggiornato alle ${time}`,

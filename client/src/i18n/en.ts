@@ -67,6 +67,19 @@ export const en: Translation = {
     },
   },
   /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  /** Karten-App-Wahl beim Öffnen einer Route. */
+  directions: {
+    title: "Navigate with which app?",
+    description: "The route can open in Apple Maps or in Google Maps.",
+    apple: "Apple Maps",
+    google: "Google Maps",
+    remember: "Remember my choice and stop asking",
+    changeHint: "You can change this any time in your profile.",
+    settingLabel: "Maps app for routes",
+    settingAsk: "Ask every time",
+    settingHint:
+      "Decides what “Route” and “Get there” open. “Ask every time” brings the question back.",
+  },
   offline: {
     banner: "No connection – you are seeing stored data.",
     dataAge: (time: string) => `As of ${time}`,

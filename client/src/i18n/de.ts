@@ -68,6 +68,20 @@ export const de = {
     },
   },
   /** Offline-Hinweise: Band in der Kopfzeile und Stand der Daten. */
+  /** Karten-App-Wahl beim Öffnen einer Route. */
+  directions: {
+    title: "Womit navigieren?",
+    description:
+      "Die Route lässt sich in Apple Karten oder in Google Maps öffnen.",
+    apple: "Apple Karten",
+    google: "Google Maps",
+    remember: "Wahl merken und nicht mehr fragen",
+    changeHint: "Ändern kannst du das jederzeit im Profil.",
+    settingLabel: "Karten-App für Routen",
+    settingAsk: "Jedes Mal fragen",
+    settingHint:
+      "Bestimmt, womit sich «Route» und «Hinfahren» öffnen. «Jedes Mal fragen» stellt die Frage wieder.",
+  },
   offline: {
     banner: "Keine Verbindung – du siehst gespeicherte Daten.",
     dataAge: (time: string) => `Stand von ${time}`,

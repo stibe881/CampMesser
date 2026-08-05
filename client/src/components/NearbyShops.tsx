@@ -36,7 +36,11 @@ import {
   Store,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { directionsUrl } from "@/lib/directions";
+import {
+  defaultProvider,
+  directionsUrl,
+  openDirections,
+} from "@/lib/directions";
 import {
   fetchOverpass,
   SHOP_DEFAULT_RADIUS_M,
@@ -373,7 +377,15 @@ export default function NearbyShops({
 
                       <div className="mt-2 flex flex-wrap items-center gap-3">
                         <a
-                          href={directionsUrl(place.lat, place.lon)}
+                          href={directionsUrl(
+                            place.lat,
+                            place.lon,
+                            defaultProvider()
+                          )}
+                          onClick={event => {
+                            event.preventDefault();
+                            openDirections(place.lat, place.lon);
+                          }}
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={tp.navAria(title)}

@@ -40,6 +40,7 @@ import BrandLogo from "@/components/BrandLogo";
 import InstallPrompt from "@/components/InstallPrompt";
 import OfflineBanner from "@/components/OfflineBanner";
 import OfflineSync from "@/components/OfflineSync";
+import DirectionsPrompt from "@/components/DirectionsPrompt";
 import UpdatePrompt from "@/components/UpdatePrompt";
 import QuickActions from "@/components/QuickActions";
 import CookTimerBar from "@/components/CookTimerBar";
@@ -378,6 +379,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Offline gesetzte Häkchen nachschicken (ohne eigene Darstellung) */}
       <OfflineSync />
+
+      {/* «Womit navigieren?» – fragt beim ersten Routen-Klick nach der
+          Karten-App und merkt sich die Antwort auf Wunsch. */}
+      <DirectionsPrompt />
 
       {/* PWA-Install-Hinweis (dezent, abweisbar, über der Bottom-Nav) */}
       <InstallPrompt />
