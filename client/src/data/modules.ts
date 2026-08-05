@@ -600,6 +600,18 @@ export const modules: Module[] = [
     offline: true,
   },
   {
+    path: "/himmel",
+    title: l4("Himmel", "Ciel", "Cielo", "Sky"),
+    description: l4(
+      "Mond, Dunkelheit, Sternschnuppen, ISS und Sternbilder für heute Nacht",
+      "Lune, obscurité, étoiles filantes, ISS et constellations pour cette nuit",
+      "Luna, oscurità, stelle cadenti, ISS e costellazioni per stanotte",
+      "Moon, darkness, meteors, ISS and constellations for tonight"
+    ),
+    icon: Moon,
+    group: "wissen",
+  },
+  {
     path: "/sternschnuppen",
     title: l4(
       "Sternschnuppen-Protokoll",

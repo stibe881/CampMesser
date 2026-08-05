@@ -27,6 +27,7 @@ const pageLoaders = {
   FirstAid: () => import("./pages/FirstAid"),
   Knots: () => import("./pages/Knots"),
   Nature: () => import("./pages/Nature"),
+  Sky: () => import("./pages/Sky"),
   Clouds: () => import("./pages/Clouds"),
   TentCare: () => import("./pages/TentCare"),
   GearRepair: () => import("./pages/GearRepair"),
@@ -128,6 +129,7 @@ const InventoryPage = lazyWithRetry(pageLoaders.Inventory);
 const FirstAidPage = lazyWithRetry(pageLoaders.FirstAid);
 const KnotsPage = lazyWithRetry(pageLoaders.Knots);
 const NaturePage = lazyWithRetry(pageLoaders.Nature);
+const SkyPage = lazyWithRetry(pageLoaders.Sky);
 const CloudsPage = lazyWithRetry(pageLoaders.Clouds);
 const TentCarePage = lazyWithRetry(pageLoaders.TentCare);
 const GearRepairPage = lazyWithRetry(pageLoaders.GearRepair);
@@ -220,6 +222,7 @@ function Router() {
           <Route path={"/erste-hilfe"} component={FirstAidPage} />
           <Route path={"/knoten"} component={KnotsPage} />
           <Route path={"/natur"} component={NaturePage} />
+          <Route path={"/himmel"} component={SkyPage} />
           <Route path={"/wolken"} component={CloudsPage} />
           <Route path={"/zeltpflege"} component={TentCarePage} />
           <Route path={"/reparatur"} component={GearRepairPage} />

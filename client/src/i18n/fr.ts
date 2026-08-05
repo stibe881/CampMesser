@@ -82,6 +82,15 @@ export const fr: Translation = {
     settingHint:
       "Détermine avec quoi s\u2019ouvrent « Itinéraire » et « S\u2019y rendre ». « Demander à chaque fois » repose la question.",
   },
+  /** Himmel-Seite: Mond, Sternschnuppen, ISS, Sternbilder, Rotlicht. */
+  sky: {
+    title: "Ciel",
+    subtitle: "Lune, étoiles filantes, ISS et constellations pour cette nuit",
+    fromNatureHint:
+      "Lune, obscurité, étoiles filantes, ISS et constellations – désormais sur une page à part",
+    moduleDescription:
+      "La nuit vaut-elle la peine ? Phase lunaire, obscurité, étoiles filantes et passages",
+  },
   offline: {
     banner: "Pas de connexion – tu vois des données enregistrées.",
     dataAge: (time: string) => `État du ${time}`,

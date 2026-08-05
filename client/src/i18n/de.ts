@@ -82,6 +82,15 @@ export const de = {
     settingHint:
       "Bestimmt, womit sich «Route» und «Hinfahren» öffnen. «Jedes Mal fragen» stellt die Frage wieder.",
   },
+  /** Himmel-Seite: Mond, Sternschnuppen, ISS, Sternbilder, Rotlicht. */
+  sky: {
+    title: "Himmel",
+    subtitle: "Mond, Sternschnuppen, ISS und Sternbilder für heute Nacht",
+    fromNatureHint:
+      "Mond, Dunkelheit, Sternschnuppen, ISS und Sternbilder – jetzt auf einer eigenen Seite",
+    moduleDescription:
+      "Lohnt sich die Nacht? Mondphase, Dunkelheit, Sternschnuppen und Überflüge",
+  },
   offline: {
     banner: "Keine Verbindung – du siehst gespeicherte Daten.",
     dataAge: (time: string) => `Stand von ${time}`,

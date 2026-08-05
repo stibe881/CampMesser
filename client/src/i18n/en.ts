@@ -80,6 +80,15 @@ export const en: Translation = {
     settingHint:
       "Decides what “Route” and “Get there” open. “Ask every time” brings the question back.",
   },
+  /** Himmel-Seite: Mond, Sternschnuppen, ISS, Sternbilder, Rotlicht. */
+  sky: {
+    title: "Sky",
+    subtitle: "Moon, meteors, ISS and constellations for tonight",
+    fromNatureHint:
+      "Moon, darkness, meteors, ISS and constellations – now on a page of their own",
+    moduleDescription:
+      "Is tonight worth it? Moon phase, darkness, meteor showers and flyovers",
+  },
   offline: {
     banner: "No connection – you are seeing stored data.",
     dataAge: (time: string) => `As of ${time}`,

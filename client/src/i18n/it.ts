@@ -80,6 +80,15 @@ export const it: Translation = {
     settingHint:
       "Determina con cosa si aprono «Percorso» e «Andare». «Chiedi ogni volta» ripropone la domanda.",
   },
+  /** Himmel-Seite: Mond, Sternschnuppen, ISS, Sternbilder, Rotlicht. */
+  sky: {
+    title: "Cielo",
+    subtitle: "Luna, stelle cadenti, ISS e costellazioni per stanotte",
+    fromNatureHint:
+      "Luna, oscurità, stelle cadenti, ISS e costellazioni – ora su una pagina propria",
+    moduleDescription:
+      "Vale la pena stanotte? Fase lunare, oscurità, stelle cadenti e passaggi",
+  },
   offline: {
     banner: "Nessuna connessione – vedi dati salvati.",
     dataAge: (time: string) => `Aggiornato alle ${time}`,
