@@ -263,11 +263,14 @@ function Router() {
           <Route path={"/zeltfinder"} component={TentFinderPage} />
           <Route path={"/wanderung"} component={HikePage} />
           <Route path={"/tagebuch"} component={TripsPage} />
+          {/* Eine Reise als eigene Adresse (#310) – die Druckansicht
+              steht weiter unten und ist genauer, deshalb greift sie zuerst. */}
           <Route path={"/kisten"} component={BoxesPage} />
           <Route path={"/kisten/:code"} component={BoxesPage} />
           <Route path={"/statistik"} component={StatsPage} />
           {/* Druckroute VOR möglichen parametrisierten Tagebuch-Routen registrieren */}
           <Route path={"/tagebuch/:id/drucken"} component={TripPrintPage} />
+          <Route path={"/tagebuch/:id"} component={TripsPage} />
           {/* Druckroute VOR der Basis-Route, sonst fängt :tripId auch «drucken» ab */}
           <Route
             path={"/menueplan/:tripId/drucken"}

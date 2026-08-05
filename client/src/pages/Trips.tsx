@@ -44,7 +44,7 @@ import {
   UtensilsCrossed,
   Wallet,
 } from "lucide-react";
-import { Link, useSearch } from "wouter";
+import { Link, useRoute, useSearch } from "wouter";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import PageHeader from "@/components/PageHeader";
@@ -3244,6 +3244,19 @@ export default function TripsPage() {
   const spots = spotsQuery.data ?? [];
   const allTrips = useMemo(() => tripsQuery.data ?? [], [tripsQuery.data]);
   // Geplante Aufenthalte (Anreise heute oder später) separat oben anzeigen
+  /**
+   * Einzelne Reise als eigene Adresse (#310): /tagebuch/17 zeigt genau
+   * diesen Aufenthalt, aufgeklappt und ohne die Statistik darüber.
+   *
+   * WARUM: Bisher war eine Reise nur ein Akkordeon in einer Liste – es gab
+   * keine Adresse dafür. Man konnte sie nicht als Lesezeichen setzen, ein
+   * Treffer aus der Suche konnte nicht hinführen, und aus dem Menüplan kam
+   * man nur zur Liste zurück und musste sie wieder aufklappen.
+   */
+  const [detailMatch, detailParams] = useRoute("/tagebuch/:id");
+  const focusId =
+    detailMatch && detailParams?.id ? Number(detailParams.id) : null;
+
   const plannedTrips = useMemo(
     () =>
       allTrips
@@ -3255,6 +3268,26 @@ export default function TripsPage() {
     () => allTrips.filter(t => !isUpcomingTrip(t.startDate, today)),
     [allTrips, today]
   );
+
+  /**
+   * Die Listen für die Anzeige. Ohne Fokus alles wie bisher; mit Fokus
+   * genau die eine Reise – egal, ob sie vergangen oder geplant ist, sie
+   * erscheint an ihrer gewohnten Stelle und ist damit gleich aufgebaut.
+   */
+  const shownTrips = useMemo(
+    () => (focusId === null ? trips : trips.filter(t => t.id === focusId)),
+    [trips, focusId]
+  );
+  const shownPlanned = useMemo(
+    () =>
+      focusId === null
+        ? plannedTrips
+        : plannedTrips.filter(t => t.id === focusId),
+    [plannedTrips, focusId]
+  );
+  /** Fokussierte Reise – für Titel, Rückweg und die «nicht gefunden»-Zeile. */
+  const focusTrip =
+    focusId === null ? null : (allTrips.find(t => t.id === focusId) ?? null);
 
   /** Gerade bearbeiteter Eintrag – für Mitglieds-Trips gelten Einschränkungen. */
   const editingTrip =
@@ -3696,342 +3729,391 @@ export default function TripsPage() {
 
   return (
     <div className="container max-w-3xl py-6">
-      <PageHeader title={t.trips.title} subtitle={t.trips.subtitle} />
+      {focusTrip ? (
+        <PageHeader
+          title={
+            focusTrip.title ||
+            focusTrip.spotName ||
+            focusTrip.location ||
+            t.trips.title
+          }
+          subtitle={t.trips.detailSubtitle}
+          backHref="/tagebuch"
+          backLabel={t.trips.backToList}
+        />
+      ) : (
+        <PageHeader title={t.trips.title} subtitle={t.trips.subtitle} />
+      )}
       <DataAge updatedAt={tripsQuery.dataUpdatedAt} />
 
-      {/* «Neue Reise» von Hand oder aus einer Vorlage (#284) */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        <Button size="lg" onClick={openNewTripDialog}>
-          <Plus className="mr-1.5 h-5 w-5" aria-hidden="true" />
-          {t.trips.newTripButton}
-        </Button>
-        <TripTemplatePicker
-          spots={(spotsQuery.data ?? []).map(spot => ({
-            id: spot.id,
-            name: spot.name,
-          }))}
-        />
-      </div>
-
-      {/* Statistik */}
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
-            <div className="text-center">
-              <p className="font-serif text-2xl font-bold text-primary">
-                {stats.nightsByYear[currentYear] ?? 0}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t.trips.nightsInYear(currentYear)}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold">{stats.totalNights}</p>
-              <p className="text-xs text-muted-foreground">
-                {t.trips.nightsTotal}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold">{stats.totalTrips}</p>
-              <p className="text-xs text-muted-foreground">
-                {t.trips.staysLabel}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
-                <Trophy
-                  className="h-4 w-4 shrink-0 text-chart-1"
-                  aria-hidden="true"
-                />
-                <span className="truncate">
-                  {stats.topPlaces[0]?.name ?? "–"}
-                </span>
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t.trips.favoriteLabel}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="flex items-center justify-center gap-1 text-2xl font-bold">
-                <Star
-                  className="h-4 w-4 shrink-0 fill-chart-1 text-chart-1"
-                  aria-hidden="true"
-                />
-                {stats.avgRating !== null ? fmtRating(stats.avgRating) : "–"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t.trips.avgRatingLabel}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Wetter-Glück: nur wenn mindestens ein Trip ein Wetterarchiv hat */}
-      {luck && (
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <h2 className="mb-2 flex items-center gap-2 font-serif text-base font-semibold">
-              <CloudSun className="h-4 w-4 text-primary" aria-hidden="true" />
-              {t.trips.weatherLuckTitle}
-            </h2>
-            <p className="text-sm">
-              {t.trips.weatherLuckDry(Math.round(luck.dryShare * 100))}
-              {" · "}
-              {t.trips.weatherLuckAvgMax(Math.round(luck.avgTMax))}
-              {luck.warmest?.place && (
-                <>
-                  {" · "}
-                  {t.trips.weatherLuckWarmest(
-                    luck.warmest.place,
-                    Math.round(luck.warmest.tMax)
-                  )}
-                </>
-              )}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {t.trips.weatherLuckHint(luck.trips)}
-            </p>
-          </CardContent>
-        </Card>
+      {/* Adresse einer Reise, die es nicht (mehr) gibt – etwa ein alter
+          Lesezeichen-Link oder eine gelöschte Reise. Lieber ein Satz mit
+          Rückweg als eine leere Seite. */}
+      {focusId !== null && !focusTrip && !tripsQuery.isLoading && (
+        <div className="rounded-xl border border-dashed border-border p-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            {t.trips.detailNotFound}
+          </p>
+          <Button asChild className="mt-4" variant="outline">
+            <Link href="/tagebuch">{t.trips.backToList}</Link>
+          </Button>
+        </div>
       )}
 
-      {/* Jahres-Vergleich: Übernachtungen pro Jahr als schlichte CSS-Balken
-          (bewusst ohne Chart-Bibliothek – hält den Reisen-Chunk klein) */}
-      {yearNights.length >= 2 && (
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <h2 className="mb-3 flex items-center gap-2 font-serif text-base font-semibold">
-              <CalendarDays
-                className="h-4 w-4 text-primary"
-                aria-hidden="true"
-              />
-              {t.trips.yearCompareTitle}
-            </h2>
-            <ul className="space-y-1.5">
-              {yearNights.map(({ year, nights }) => {
-                const max = yearNights.reduce(
-                  (m, y) => Math.max(m, y.nights),
-                  1
-                );
-                const current = year === new Date().getFullYear();
-                return (
-                  <li key={year} className="flex items-center gap-2 text-sm">
-                    <span
-                      className={cn(
-                        "w-12 tabular-nums",
-                        current && "font-semibold text-primary"
-                      )}
-                    >
-                      {year}
+      {/* Übersicht und Auswertungen gelten für ALLE Reisen – auf der
+          Detailseite einer einzelnen Reise wären sie fehl am Platz und
+          würden den Aufenthalt nach unten drücken. */}
+      {focusId === null && (
+        <>
+          {/* «Neue Reise» von Hand oder aus einer Vorlage (#284) */}
+          <div className="mb-6 flex flex-wrap gap-2">
+            <Button size="lg" onClick={openNewTripDialog}>
+              <Plus className="mr-1.5 h-5 w-5" aria-hidden="true" />
+              {t.trips.newTripButton}
+            </Button>
+            <TripTemplatePicker
+              spots={(spotsQuery.data ?? []).map(spot => ({
+                id: spot.id,
+                name: spot.name,
+              }))}
+            />
+          </div>
+
+          {/* Statistik */}
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+                <div className="text-center">
+                  <p className="font-serif text-2xl font-bold text-primary">
+                    {stats.nightsByYear[currentYear] ?? 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t.trips.nightsInYear(currentYear)}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold">{stats.totalNights}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t.trips.nightsTotal}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold">{stats.totalTrips}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t.trips.staysLabel}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
+                    <Trophy
+                      className="h-4 w-4 shrink-0 text-chart-1"
+                      aria-hidden="true"
+                    />
+                    <span className="truncate">
+                      {stats.topPlaces[0]?.name ?? "–"}
                     </span>
-                    <span className="h-3 flex-1 overflow-hidden rounded-full bg-muted">
-                      <span
-                        className={cn(
-                          "block h-full rounded-full",
-                          current ? "bg-primary" : "bg-primary/50"
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t.trips.favoriteLabel}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="flex items-center justify-center gap-1 text-2xl font-bold">
+                    <Star
+                      className="h-4 w-4 shrink-0 fill-chart-1 text-chart-1"
+                      aria-hidden="true"
+                    />
+                    {stats.avgRating !== null
+                      ? fmtRating(stats.avgRating)
+                      : "–"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t.trips.avgRatingLabel}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Wetter-Glück: nur wenn mindestens ein Trip ein Wetterarchiv hat */}
+          {luck && (
+            <Card className="mb-6">
+              <CardContent className="pt-6">
+                <h2 className="mb-2 flex items-center gap-2 font-serif text-base font-semibold">
+                  <CloudSun
+                    className="h-4 w-4 text-primary"
+                    aria-hidden="true"
+                  />
+                  {t.trips.weatherLuckTitle}
+                </h2>
+                <p className="text-sm">
+                  {t.trips.weatherLuckDry(Math.round(luck.dryShare * 100))}
+                  {" · "}
+                  {t.trips.weatherLuckAvgMax(Math.round(luck.avgTMax))}
+                  {luck.warmest?.place && (
+                    <>
+                      {" · "}
+                      {t.trips.weatherLuckWarmest(
+                        luck.warmest.place,
+                        Math.round(luck.warmest.tMax)
+                      )}
+                    </>
+                  )}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t.trips.weatherLuckHint(luck.trips)}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Jahres-Vergleich: Übernachtungen pro Jahr als schlichte CSS-Balken
+          (bewusst ohne Chart-Bibliothek – hält den Reisen-Chunk klein) */}
+          {yearNights.length >= 2 && (
+            <Card className="mb-6">
+              <CardContent className="pt-6">
+                <h2 className="mb-3 flex items-center gap-2 font-serif text-base font-semibold">
+                  <CalendarDays
+                    className="h-4 w-4 text-primary"
+                    aria-hidden="true"
+                  />
+                  {t.trips.yearCompareTitle}
+                </h2>
+                <ul className="space-y-1.5">
+                  {yearNights.map(({ year, nights }) => {
+                    const max = yearNights.reduce(
+                      (m, y) => Math.max(m, y.nights),
+                      1
+                    );
+                    const current = year === new Date().getFullYear();
+                    return (
+                      <li
+                        key={year}
+                        className="flex items-center gap-2 text-sm"
+                      >
+                        <span
+                          className={cn(
+                            "w-12 tabular-nums",
+                            current && "font-semibold text-primary"
+                          )}
+                        >
+                          {year}
+                        </span>
+                        <span className="h-3 flex-1 overflow-hidden rounded-full bg-muted">
+                          <span
+                            className={cn(
+                              "block h-full rounded-full",
+                              current ? "bg-primary" : "bg-primary/50"
+                            )}
+                            style={{
+                              width: `${Math.max(4, (nights / max) * 100)}%`,
+                            }}
+                            aria-hidden="true"
+                          />
+                        </span>
+                        <span className="w-24 text-right text-xs text-muted-foreground">
+                          {t.trips.nightsCount(nights)}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Meilensteine: erreichte farbig, die nächsten offenen mit Fortschritt */}
+          {trips.length > 0 && (
+            <Card className="mb-6">
+              <CardContent className="pt-6">
+                <h2 className="mb-3 flex items-center gap-2 font-serif text-base font-semibold">
+                  <Award className="h-4 w-4 text-primary" aria-hidden="true" />
+                  {t.trips.milestonesTitle}
+                </h2>
+                {achievedMilestones.length > 0 && (
+                  <ul className="flex flex-wrap gap-1.5">
+                    {achievedMilestones.map(m => (
+                      <li
+                        key={m.id}
+                        className="flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-medium text-primary"
+                      >
+                        <Award
+                          className="h-3 w-3 shrink-0"
+                          aria-hidden="true"
+                        />
+                        {m.label}
+                        {m.achievedOn && (
+                          <span className="font-normal text-primary/80">
+                            ·{" "}
+                            {t.trips.milestonesAchievedOn(
+                              fmtMilestoneDate(m.achievedOn)
+                            )}
+                          </span>
                         )}
-                        style={{
-                          width: `${Math.max(4, (nights / max) * 100)}%`,
-                        }}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {nextMilestones.length > 0 && (
+                  <div className={achievedMilestones.length > 0 ? "mt-4" : ""}>
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {t.trips.milestonesNextTitle}
+                    </h3>
+                    <ul className="space-y-2.5">
+                      {nextMilestones.map(m => (
+                        <li key={m.id}>
+                          <div className="mb-1 flex items-center justify-between gap-2 text-sm">
+                            <span>{m.label}</span>
+                            <span className="font-mono text-xs text-muted-foreground">
+                              {t.trips.milestonesProgress(m.current, m.target)}
+                            </span>
+                          </div>
+                          <Progress
+                            value={(m.current / m.target) * 100}
+                            aria-label={`${m.label}: ${t.trips.milestonesProgress(m.current, m.target)}`}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Jahresrückblick: nur wenn mindestens ein vergangener Trip existiert */}
+          {yearReview && (
+            <Card className="mb-6">
+              <CardContent className="pt-6">
+                <div className="mb-4 flex items-center justify-between gap-2">
+                  <h2 className="flex items-center gap-2 font-serif text-base font-semibold">
+                    <Sparkles
+                      className="h-4 w-4 text-primary"
+                      aria-hidden="true"
+                    />
+                    {t.trips.yearReviewTitle}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={String(yearReview.year)}
+                      onValueChange={setReviewYearChoice}
+                    >
+                      <SelectTrigger
+                        className="w-28"
+                        aria-label={t.trips.yearReviewYearAria}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {reviewYears.map(year => (
+                          <SelectItem key={year} value={String(year)}>
+                            {year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void shareYearReview()}
+                      aria-label={t.trips.yearReviewShareAria(yearReview.year)}
+                    >
+                      <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                      {t.trips.yearReviewShare}
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                  <div className="text-center">
+                    <p className="font-serif text-2xl font-bold text-primary">
+                      {yearReview.trips}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.trips.staysLabel}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{yearReview.nights}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.trips.nightsTotal}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{yearReview.places}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.trips.yearReviewPlaces}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
+                      <Trophy
+                        className="h-4 w-4 shrink-0 text-chart-1"
                         aria-hidden="true"
                       />
-                    </span>
-                    <span className="w-24 text-right text-xs text-muted-foreground">
-                      {t.trips.nightsCount(nights)}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Meilensteine: erreichte farbig, die nächsten offenen mit Fortschritt */}
-      {trips.length > 0 && (
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <h2 className="mb-3 flex items-center gap-2 font-serif text-base font-semibold">
-              <Award className="h-4 w-4 text-primary" aria-hidden="true" />
-              {t.trips.milestonesTitle}
-            </h2>
-            {achievedMilestones.length > 0 && (
-              <ul className="flex flex-wrap gap-1.5">
-                {achievedMilestones.map(m => (
-                  <li
-                    key={m.id}
-                    className="flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-medium text-primary"
-                  >
-                    <Award className="h-3 w-3 shrink-0" aria-hidden="true" />
-                    {m.label}
-                    {m.achievedOn && (
-                      <span className="font-normal text-primary/80">
-                        ·{" "}
-                        {t.trips.milestonesAchievedOn(
-                          fmtMilestoneDate(m.achievedOn)
-                        )}
+                      <span className="truncate">
+                        {yearReview.topPlace?.name ?? "–"}
                       </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {nextMilestones.length > 0 && (
-              <div className={achievedMilestones.length > 0 ? "mt-4" : ""}>
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {t.trips.milestonesNextTitle}
-                </h3>
-                <ul className="space-y-2.5">
-                  {nextMilestones.map(m => (
-                    <li key={m.id}>
-                      <div className="mb-1 flex items-center justify-between gap-2 text-sm">
-                        <span>{m.label}</span>
-                        <span className="font-mono text-xs text-muted-foreground">
-                          {t.trips.milestonesProgress(m.current, m.target)}
-                        </span>
-                      </div>
-                      <Progress
-                        value={(m.current / m.target) * 100}
-                        aria-label={`${m.label}: ${t.trips.milestonesProgress(m.current, m.target)}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.trips.yearReviewTopPlace}
+                      {yearReview.topPlace
+                        ? ` · ${t.trips.nightsCount(yearReview.topPlace.nights)}`
+                        : ""}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
+                      <Moon
+                        className="h-4 w-4 shrink-0 text-primary"
+                        aria-hidden="true"
                       />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Jahresrückblick: nur wenn mindestens ein vergangener Trip existiert */}
-      {yearReview && (
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="mb-4 flex items-center justify-between gap-2">
-              <h2 className="flex items-center gap-2 font-serif text-base font-semibold">
-                <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
-                {t.trips.yearReviewTitle}
-              </h2>
-              <div className="flex items-center gap-2">
-                <Select
-                  value={String(yearReview.year)}
-                  onValueChange={setReviewYearChoice}
-                >
-                  <SelectTrigger
-                    className="w-28"
-                    aria-label={t.trips.yearReviewYearAria}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {reviewYears.map(year => (
-                      <SelectItem key={year} value={String(year)}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => void shareYearReview()}
-                  aria-label={t.trips.yearReviewShareAria(yearReview.year)}
-                >
-                  <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                  {t.trips.yearReviewShare}
-                </Button>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              <div className="text-center">
-                <p className="font-serif text-2xl font-bold text-primary">
-                  {yearReview.trips}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t.trips.staysLabel}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold">{yearReview.nights}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t.trips.nightsTotal}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold">{yearReview.places}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t.trips.yearReviewPlaces}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
-                  <Trophy
-                    className="h-4 w-4 shrink-0 text-chart-1"
-                    aria-hidden="true"
-                  />
-                  <span className="truncate">
-                    {yearReview.topPlace?.name ?? "–"}
-                  </span>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t.trips.yearReviewTopPlace}
-                  {yearReview.topPlace
-                    ? ` · ${t.trips.nightsCount(yearReview.topPlace.nights)}`
-                    : ""}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
-                  <Moon
-                    className="h-4 w-4 shrink-0 text-primary"
-                    aria-hidden="true"
-                  />
-                  <span className="truncate">
-                    {yearReview.longestStay?.name ?? "–"}
-                  </span>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t.trips.yearReviewLongest}
-                  {yearReview.longestStay
-                    ? ` · ${t.trips.nightsCount(yearReview.longestStay.nights)}`
-                    : ""}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
-                  <Star
-                    className="h-4 w-4 shrink-0 fill-chart-1 text-chart-1"
-                    aria-hidden="true"
-                  />
-                  <span className="truncate">
-                    {yearReview.bestRated?.name ?? "–"}
-                  </span>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t.trips.bestRatedLabel}
-                  {yearReview.bestRated
-                    ? ` · ${t.trips.starsAvg(fmtRating(yearReview.bestRated.rating))}`
-                    : ""}
-                </p>
-              </div>
-            </div>
-            {/* Wetter-Glück des Jahres (nur mit Wetterarchiv-Daten) */}
-            {yearLuck && (
-              <p className="mt-4 flex items-center gap-1.5 border-t border-border/60 pt-3 text-xs text-muted-foreground">
-                <CloudSun
-                  className="h-3.5 w-3.5 shrink-0 text-primary"
-                  aria-hidden="true"
-                />
-                {t.trips.weatherLuckYear(
-                  Math.round(yearLuck.dryShare * 100),
-                  Math.round(yearLuck.avgTMax)
+                      <span className="truncate">
+                        {yearReview.longestStay?.name ?? "–"}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.trips.yearReviewLongest}
+                      {yearReview.longestStay
+                        ? ` · ${t.trips.nightsCount(yearReview.longestStay.nights)}`
+                        : ""}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
+                      <Star
+                        className="h-4 w-4 shrink-0 fill-chart-1 text-chart-1"
+                        aria-hidden="true"
+                      />
+                      <span className="truncate">
+                        {yearReview.bestRated?.name ?? "–"}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.trips.bestRatedLabel}
+                      {yearReview.bestRated
+                        ? ` · ${t.trips.starsAvg(fmtRating(yearReview.bestRated.rating))}`
+                        : ""}
+                    </p>
+                  </div>
+                </div>
+                {/* Wetter-Glück des Jahres (nur mit Wetterarchiv-Daten) */}
+                {yearLuck && (
+                  <p className="mt-4 flex items-center gap-1.5 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+                    <CloudSun
+                      className="h-3.5 w-3.5 shrink-0 text-primary"
+                      aria-hidden="true"
+                    />
+                    {t.trips.weatherLuckYear(
+                      Math.round(yearLuck.dryShare * 100),
+                      Math.round(yearLuck.avgTMax)
+                    )}
+                  </p>
                 )}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
 
       {/* Dialog «Neue Reise» / «Reise bearbeiten»: gemeinsames Erfassungs-Formular */}
@@ -4383,53 +4465,59 @@ export default function TripsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Umschalter Liste/Kalender – die Wahl bleibt gespeichert */}
-      <div
-        role="group"
-        aria-label={t.trips.viewToggleAria}
-        className="mb-4 flex gap-1.5"
-      >
-        <Button
-          type="button"
-          variant={tripsView === "list" ? "default" : "outline"}
-          size="sm"
-          aria-pressed={tripsView === "list"}
-          onClick={() => selectTripsView("list")}
-        >
-          <List className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          {t.trips.viewList}
-        </Button>
-        <Button
-          type="button"
-          variant={tripsView === "calendar" ? "default" : "outline"}
-          size="sm"
-          aria-pressed={tripsView === "calendar"}
-          onClick={() => selectTripsView("calendar")}
-        >
-          <CalendarDays className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          {t.trips.viewCalendar}
-        </Button>
-      </div>
+      {/* Umschalten und Kalender betreffen die ganze Liste – bei einer
+          einzelnen Reise gibt es nichts umzuschalten. */}
+      {focusId === null && (
+        <>
+          {/* Umschalter Liste/Kalender – die Wahl bleibt gespeichert */}
+          <div
+            role="group"
+            aria-label={t.trips.viewToggleAria}
+            className="mb-4 flex gap-1.5"
+          >
+            <Button
+              type="button"
+              variant={tripsView === "list" ? "default" : "outline"}
+              size="sm"
+              aria-pressed={tripsView === "list"}
+              onClick={() => selectTripsView("list")}
+            >
+              <List className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.trips.viewList}
+            </Button>
+            <Button
+              type="button"
+              variant={tripsView === "calendar" ? "default" : "outline"}
+              size="sm"
+              aria-pressed={tripsView === "calendar"}
+              onClick={() => selectTripsView("calendar")}
+            >
+              <CalendarDays className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.trips.viewCalendar}
+            </Button>
+          </div>
 
-      {/* Kalender-Ansicht: Monats-Gitter mit Aufenthalten und Ferien */}
-      {tripsView === "calendar" && (
-        <div className="mb-8">
-          {holidayCantonPicker}
-          {holidays && (
-            <p className="mb-3 text-xs text-muted-foreground">
-              {t.trips.holidaySource}
-            </p>
+          {/* Kalender-Ansicht: Monats-Gitter mit Aufenthalten und Ferien */}
+          {tripsView === "calendar" && (
+            <div className="mb-8">
+              {holidayCantonPicker}
+              {holidays && (
+                <p className="mb-3 text-xs text-muted-foreground">
+                  {t.trips.holidaySource}
+                </p>
+              )}
+              <TripCalendar
+                trips={calendarTrips}
+                holidays={holidays}
+                onTripClick={openTripFromCalendar}
+              />
+            </div>
           )}
-          <TripCalendar
-            trips={calendarTrips}
-            holidays={holidays}
-            onTripClick={openTripFromCalendar}
-          />
-        </div>
+        </>
       )}
 
       {/* Geplante Aufenthalte: Trips mit Anreise heute oder später */}
-      {tripsView === "list" && plannedTrips.length > 0 && (
+      {tripsView === "list" && shownPlanned.length > 0 && (
         <>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h2 className="flex items-center gap-2 font-serif text-lg font-semibold">
@@ -4464,7 +4552,7 @@ export default function TripsPage() {
             </p>
           )}
           <ul className="mb-8 space-y-3">
-            {plannedTrips.map(trip => {
+            {shownPlanned.map(trip => {
               const days = daysUntilTrip(trip.startDate, today);
               const nights = tripNights(trip.startDate, trip.endDate);
               const dossierId = spotDossierId(trip);
@@ -4492,7 +4580,21 @@ export default function TripsPage() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="flex flex-wrap items-center gap-2 font-semibold">
-                        {trip.title || placeName(trip)}
+                        {/* Wie bei den vergangenen Aufenthalten: Der Titel
+                            führt zur eigenen Adresse der Reise (#310). */}
+                        {focusId === null ? (
+                          <Link
+                            href={`/tagebuch/${trip.id}`}
+                            className="hover:underline"
+                            aria-label={t.trips.openDetailAria(
+                              trip.title || placeName(trip)
+                            )}
+                          >
+                            {trip.title || placeName(trip)}
+                          </Link>
+                        ) : (
+                          trip.title || placeName(trip)
+                        )}
                         <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">
                           {t.trips.countdown(days)}
                         </span>
@@ -4854,12 +4956,12 @@ export default function TripsPage() {
       )}
 
       {/* Einträge (nur Listen-Ansicht – der Kalender zeigt alle Aufenthalte) */}
-      {tripsView === "list" && (
+      {tripsView === "list" && (focusId === null || shownTrips.length > 0) && (
         <>
           <h2 className="mb-3 font-serif text-lg font-semibold">
             {t.trips.entriesTitle}
           </h2>
-          {trips.length === 0 ? (
+          {shownTrips.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-6 text-center">
               <p className="text-sm text-muted-foreground">{t.trips.empty}</p>
               {/* Zentraler Einstieg, solange noch nichts erfasst ist */}
@@ -4870,7 +4972,7 @@ export default function TripsPage() {
             </div>
           ) : (
             <ul className="space-y-3">
-              {trips.map(trip => {
+              {shownTrips.map(trip => {
                 const nights = tripNights(trip.startDate, trip.endDate);
                 const dossierId = spotDossierId(trip);
                 // Wetterarchiv nur mit Koordinaten eines verknüpften Favoriten
@@ -4898,7 +5000,24 @@ export default function TripsPage() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="flex flex-wrap items-center gap-2 font-semibold">
-                          {trip.title || placeName(trip)}
+                          {/* Titel führt zur eigenen Adresse der Reise (#310)
+                              – von dort aus kann man sie verlinken, als
+                              Lesezeichen setzen und ohne die Statistik
+                              darüber lesen. Auf der Detailseite selbst wäre
+                              der Link ein Verweis auf sich selbst. */}
+                          {focusId === null ? (
+                            <Link
+                              href={`/tagebuch/${trip.id}`}
+                              className="hover:underline"
+                              aria-label={t.trips.openDetailAria(
+                                trip.title || placeName(trip)
+                              )}
+                            >
+                              {trip.title || placeName(trip)}
+                            </Link>
+                          ) : (
+                            trip.title || placeName(trip)
+                          )}
                           {trip.role === "member" && (
                             <span className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
                               <Users className="h-3 w-3" aria-hidden="true" />

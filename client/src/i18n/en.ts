@@ -2277,6 +2277,10 @@ export const en: Translation = {
     footer: "Shared with CampMesser – the Swiss army knife for tent camping.",
   },
   trips: {
+    detailSubtitle: "A single stay in detail",
+    backToList: "All stays",
+    openDetailAria: (name: string) => `Open the stay ${name}`,
+    detailNotFound: "This stay no longer exists – it may have been deleted.",
     title: "My trips",
     subtitle: "Record your camping stays: places, nights and memories.",
     loginFeature: "your trips",

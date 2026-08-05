@@ -2354,6 +2354,11 @@ export const de = {
       "Geteilt mit CampMesser – dem Schweizer Taschenmesser fürs Zelt-Camping.",
   },
   trips: {
+    detailSubtitle: "Ein Aufenthalt im Detail",
+    backToList: "Alle Aufenthalte",
+    openDetailAria: (name: string) => `Aufenthalt ${name} öffnen`,
+    detailNotFound:
+      "Diesen Aufenthalt gibt es nicht mehr – vielleicht wurde er gelöscht.",
     title: "Meine Reisen",
     subtitle:
       "Deine Camping-Aufenthalte festhalten: Orte, Nächte und Erinnerungen.",

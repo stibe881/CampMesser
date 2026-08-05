@@ -2330,6 +2330,11 @@ export const it: Translation = {
       "Condiviso con CampMesser – il coltellino svizzero per il campeggio in tenda.",
   },
   trips: {
+    detailSubtitle: "Un soggiorno in dettaglio",
+    backToList: "Tutti i soggiorni",
+    openDetailAria: (name: string) => `Apri il soggiorno ${name}`,
+    detailNotFound:
+      "Questo soggiorno non esiste più – forse è stato eliminato.",
     title: "I miei viaggi",
     subtitle: "Annota i tuoi soggiorni in campeggio: luoghi, notti e ricordi.",
     loginFeature: "i tuoi viaggi",

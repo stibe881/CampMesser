@@ -2355,6 +2355,10 @@ export const fr: Translation = {
       "Partagé avec CampMesser – le couteau suisse du camping sous tente.",
   },
   trips: {
+    detailSubtitle: "Un séjour en détail",
+    backToList: "Tous les séjours",
+    openDetailAria: (name: string) => `Ouvrir le séjour ${name}`,
+    detailNotFound: "Ce séjour n'existe plus – il a peut-être été supprimé.",
     title: "Mes voyages",
     subtitle:
       "Garde une trace de tes séjours en camping : lieux, nuits et souvenirs.",
