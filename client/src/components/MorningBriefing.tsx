@@ -31,7 +31,7 @@ import { pick } from "@shared/i18n";
 import { getMoonInfo } from "@shared/moon";
 import { MEALS, MEAL_LABELS } from "@shared/menuPlan";
 import { normalizeTripBoardKind } from "@shared/tripBoard";
-import { recipes } from "@/data/recipes";
+import { useRecipes } from "@/hooks/useRecipes";
 import { useDayWeather } from "@/lib/useDayWeather";
 import {
   briefingItems,
@@ -61,6 +61,8 @@ export default function MorningBriefing({
 }) {
   const { lang, t } = useI18n();
   const tb = t.briefing;
+  // Nachgeladen (#342) – das Rezeptbuch hing sonst am Haupt-Bündel.
+  const recipes = useRecipes();
   // Die Uhrzeit wird beim Rendern EINMAL gelesen: Die Startseite lebt
   // ohnehin nicht stundenlang offen, und ein Timer, der um Punkt zwölf die
   // Karte wegnimmt, wäre Aufwand für einen Moment, den niemand sieht.
@@ -93,7 +95,7 @@ export default function MorningBriefing({
     freeText: string | null;
   }): string | null => {
     if (entry.recipeId) {
-      const recipe = recipes.find(r => r.id === entry.recipeId);
+      const recipe = recipes?.find(r => r.id === entry.recipeId);
       return recipe ? pick(recipe.name, lang) : entry.recipeId;
     }
     if (entry.customRecipeId != null) {

@@ -43,7 +43,7 @@ import {
 } from "@shared/dailyTips";
 import { getMoonInfo, stargazingQuality } from "@shared/moon";
 import { isShowerActive, meteorShowers } from "@shared/astro";
-import { recipes } from "@/data/recipes";
+import { useRecipes } from "@/hooks/useRecipes";
 import {
   Bug,
   Cable,
@@ -463,6 +463,7 @@ function NextTripWidget() {
   const todayEntries = (menuQuery.data?.entries ?? []).filter(
     e => e.day === today
   );
+  const recipes = useRecipes();
   const customRecipesQuery = trpc.recipes.list.useQuery(undefined, {
     enabled:
       Boolean(current) && todayEntries.some(e => e.customRecipeId != null),
@@ -472,7 +473,9 @@ function NextTripWidget() {
   /** Anzeigetitel eines Menüplan-Eintrags in der aktiven Sprache. */
   const mealTitle = (entry: (typeof todayEntries)[number]): string | null => {
     if (entry.recipeId) {
-      const recipe = recipes.find(r => r.id === entry.recipeId);
+      // Das Rezeptbuch wird nachgeladen (#342); bis dahin steht die Kennung
+      // da – besser als eine leere Zeile, die gleich wieder springt.
+      const recipe = recipes?.find(r => r.id === entry.recipeId);
       return recipe ? pick(recipe.name, lang) : entry.recipeId;
     }
     if (entry.customRecipeId != null) {
@@ -976,6 +979,7 @@ function TipOfDayWidget({
   tomorrow?: DayWeather;
 }) {
   const { lang, t } = useI18n();
+  const recipes = useRecipes();
   const tip = useMemo(() => {
     const now = new Date();
     const moon = getMoonInfo(now, lang);
@@ -990,11 +994,13 @@ function TipOfDayWidget({
         activeMeteorShower: active ? pick(active.name, lang) : undefined,
         month: now.getMonth() + 1,
         dayOfYear: doy,
-        recipeOfDay: pick(recipes[doy % recipes.length].name, lang),
+        recipeOfDay: recipes
+          ? pick(recipes[doy % recipes.length].name, lang)
+          : undefined,
       },
       lang
     );
-  }, [today, tomorrow, lang]);
+  }, [today, tomorrow, lang, recipes]);
   const Icon = TIP_ICONS[tip.icon];
   return (
     <Link
