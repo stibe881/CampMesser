@@ -14,6 +14,7 @@ import { addMonths, monthGrid } from "@shared/calendar";
 import { holidayDisplayName, overlappingHolidays } from "@shared/holidays";
 import type { CantonHolidays } from "@/lib/holidays";
 import { cn } from "@/lib/utils";
+import { todayIso } from "@shared/localDate";
 
 /** Ein Aufenthalt, wie ihn der Kalender braucht (Auszug aus trips.list). */
 export interface CalendarTrip {
@@ -36,7 +37,7 @@ export default function TripCalendar({
 }) {
   const { lang, t } = useI18n();
   const today = new Date();
-  const todayIso = today.toISOString().slice(0, 10);
+  const todayDay = todayIso();
   const [view, setView] = useState<{ year: number; month: number }>({
     year: today.getFullYear(),
     month: today.getMonth() + 1,
@@ -154,7 +155,7 @@ export default function TripCalendar({
                       )
                     )
                   : [];
-                const isToday = day.iso === todayIso;
+                const isToday = day.iso === todayDay;
                 const ariaParts = [fmtDayLong(day.iso)];
                 if (dayTrips.length > 0)
                   ariaParts.push(t.trips.calDayTrips(dayTrips.length));

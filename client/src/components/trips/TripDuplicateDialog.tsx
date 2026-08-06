@@ -99,6 +99,7 @@ import {
 } from "@shared/packSuggestions";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
+import { todayIso } from "@shared/localDate";
 
 const DUPLICATE_OFFSET_DAYS = 30;
 const DAY_MS = 86400000;
@@ -139,7 +140,7 @@ export default function TripDuplicateDialog({
   // Beim Öffnen: gleiche Dauer wie das Original, Anreise heute + 30 Tage
   useEffect(() => {
     if (!trip) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIso();
     const start = addDaysIso(today, DUPLICATE_OFFSET_DAYS);
     setStartDate(start);
     setEndDate(

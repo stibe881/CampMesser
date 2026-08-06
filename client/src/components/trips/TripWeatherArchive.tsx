@@ -54,6 +54,7 @@ import {
   tripNights,
 } from "@shared/trips";
 import { climateRequestUrl } from "@shared/climate";
+import { todayIso } from "@shared/localDate";
 import {
   parseTripWeather,
   summarizeTripWeather,
@@ -90,7 +91,7 @@ export default function TripWeatherArchive({
 
   useEffect(() => {
     if (stored || attemptedRef.current) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIso();
     // Nur abgeschlossene Aufenthalte haben ein vollständiges Archiv
     if (endDate >= today) return;
     attemptedRef.current = true;

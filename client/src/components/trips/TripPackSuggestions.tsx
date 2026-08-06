@@ -100,6 +100,7 @@ import {
 } from "@shared/packSuggestions";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
+import { todayIso } from "@shared/localDate";
 
 export default function TripPackSuggestions({
   listId,
@@ -122,7 +123,7 @@ export default function TripPackSuggestions({
 
   useEffect(() => {
     let cancelled = false;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIso();
     // Nur so viele Tage abrufen, wie bis zur Abreise nötig (max. Open-Meteo-Horizont)
     const horizon = Math.min(
       MAX_FORECAST_DAYS,

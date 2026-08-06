@@ -5,6 +5,7 @@
  * ISO-Strings (YYYY-MM-DD) bzw. Date aus der gearTasks-Tabelle.
  */
 import { l4, type L4 } from "./i18n";
+import { localDay } from "./localDate";
 
 export const MAX_GEAR_TASK_TITLE_LENGTH = 120;
 export const MIN_GEAR_INTERVAL_MONTHS = 1;
@@ -39,9 +40,9 @@ const DAY_MS = 86400000;
 /** ISO-Datum (YYYY-MM-DD) aus einem Date/String – null bei kaputten Werten. */
 function toIsoDay(value: Date | string): string | null {
   if (value instanceof Date) {
-    return Number.isNaN(value.getTime())
-      ? null
-      : value.toISOString().slice(0, 10);
+    // Lokaler Tag, nicht UTC: «heute erledigt» um 00:30 wäre sonst
+    // gestern erledigt – und die Pflege gälte einen Tag zu früh.
+    return Number.isNaN(value.getTime()) ? null : localDay(value);
   }
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
   return m ? `${m[1]}-${m[2]}-${m[3]}` : null;

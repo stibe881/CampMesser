@@ -110,6 +110,7 @@ import {
 import { firstNameOf, greetingKey } from "@shared/greeting";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { todayIso } from "@shared/localDate";
 import {
   CalendarClock,
   ListChecks,
@@ -404,7 +405,7 @@ function BriefingWidget() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const current = (tripsQuery.data ?? [])
     .filter(trip => trip.role === "owner")
     .filter(trip => currentTripDay(trip, today) !== null)
@@ -435,7 +436,7 @@ function NextTripWidget() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   // Bewusst nur EIGENE Reisen im Widget (Mitglieds-Trips bleiben im Tagebuch)
   const ownTrips = (tripsQuery.data ?? []).filter(
     trip => trip.role === "owner"
@@ -673,7 +674,7 @@ function AnniversaryThumb({
 function AnniversaryCard() {
   const { lang, t } = useI18n();
   const { isAuthenticated } = useAuth();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const [dismissed, setDismissed] = useState<boolean>(() => {
     try {
       return sessionStorage.getItem(ANNIVERSARY_DISMISSED_KEY) === today;
@@ -1031,7 +1032,7 @@ function GearCareHint() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const dueCount = useMemo(
     () =>
       (query.data ?? []).filter(task => gearTaskDue(task, today).due).length,
@@ -1068,7 +1069,7 @@ function TickBiteHint() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const openCount = useMemo(
     () =>
       (query.data ?? []).filter(
@@ -1392,7 +1393,7 @@ function useTodayStartJump() {
 
   useEffect(() => {
     if (!trips) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIso();
     const jump = shouldOpenToday({
       enabled: loadTodayStart(),
       hasRunningTrip: pickRunningTrip(trips, today) !== null,
@@ -1433,9 +1434,9 @@ export default function Home() {
     enabled: signedIn,
     staleTime: 60_000,
   });
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const tripRunning = (homeTripsQuery.data ?? []).some(
-    trip => currentTripDay(trip, todayIso) !== null
+    trip => currentTripDay(trip, today) !== null
   );
   const onSite = isOnSite(travelMode, tripRunning);
   const chooseTravelMode = (mode: TravelMode) => {

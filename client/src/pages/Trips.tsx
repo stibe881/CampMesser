@@ -193,6 +193,7 @@ import TripGuestbook from "@/components/TripGuestbook";
 import TripHistory from "@/components/TripHistory";
 import TripReservation from "@/components/TripReservation";
 import TripTemplatePicker from "@/components/TripTemplatePicker";
+import { todayIso } from "@shared/localDate";
 
 /** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
 const FREE_LOCATION = "frei";
@@ -462,7 +463,7 @@ export default function TripsPage() {
   const fmtRating = (value: number): string =>
     value.toLocaleString(LOCALE_TAGS[lang], { maximumFractionDigits: 1 });
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const [spotChoice, setSpotChoice] = useState<string>(FREE_LOCATION);
   // "keine" = ohne Packliste, sonst Listen-ID
   const [packListChoice, setPackListChoice] = useState<string>("keine");

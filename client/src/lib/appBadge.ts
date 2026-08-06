@@ -5,7 +5,7 @@
  * Browser-API, damit sie ohne DOM testbar bleibt; ohne Badging-Unterstützung
  * sind alle Aufrufe No-ops.
  */
-import { expiryInfo } from "@shared/food";
+import { expiryInfo, isUrgentExpiry } from "@shared/food";
 import { gearTaskDue, type GearTaskLike } from "@shared/gearTasks";
 import { isNativeApp, NATIVE_MESSAGES, postToNative } from "./nativeBridge";
 
@@ -41,10 +41,9 @@ export function computeBadgeCount(input: {
   today: string;
 }): number {
   const { foodItems, gearTasks, today } = input;
-  const expiringFood = foodItems.filter(item => {
-    const info = expiryInfo(item.expiryDate, today);
-    return info !== null && info.daysLeft >= 0 && info.daysLeft <= 1;
-  }).length;
+  const expiringFood = foodItems.filter(item =>
+    isUrgentExpiry(item.expiryDate, today)
+  ).length;
   const dueTasks = gearTasks.filter(
     task => gearTaskDue(task, today).due
   ).length;

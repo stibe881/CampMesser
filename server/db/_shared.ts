@@ -1,0 +1,229 @@
+/**
+ * Der gemeinsame Unterbau aller Datenbank-Module (#336).
+ *
+ * WARUM ES DIESE DATEI GIBT: `server/db.ts` war 3518 Zeilen lang und
+ * enthielt 271 exportierte Funktionen – dasselbe Muster wie
+ * `routers.ts` (#331) und `Trips.tsx` (#322), und dieselbe Lösung:
+ * aufteilen, ohne am Verhalten etwas zu ändern.
+ *
+ * WAS HIER STEHT: die Verbindung (`getDb`, `requireDb`), die
+ * Drizzle-Operatoren, das Schema und die Typen. Alles, was MEHRERE
+ * Module brauchen – und nichts, was nur eines braucht.
+ *
+ * Der Inhalt ist unverändert übernommen; die relativen Pfade sind eine
+ * Ebene tiefer gerückt.
+ */
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { isShareExpired } from "@shared/sharing";
+import { HISTORY_LIMIT } from "@shared/tripHistory";
+import { drizzle } from "drizzle-orm/mysql2";
+import {
+  campSpots,
+  childBadges,
+  deletedItems,
+  tripChanges,
+  childStats,
+  familyChildren,
+  passportAbsences,
+  fishCatches,
+  InsertFishCatch,
+  InsertFamilyChild,
+  customHunts,
+  customQuizzes,
+  customRecipes,
+  InsertCustomHunt,
+  InsertCustomQuiz,
+  InsertCustomRecipe,
+  foodItems,
+  foodTemplates,
+  gearTasks,
+  hikeTracks,
+  homeLocations,
+  plannedRoutes,
+  InsertGearTask,
+  InsertHikeTrack,
+  InsertPlannedRoute,
+  InsertCampSpot,
+  InsertFoodItem,
+  InsertFoodTemplate,
+  InsertHomeLocation,
+  InsertInventoryItem,
+  InsertCampChore,
+  InsertChoreAssignment,
+  InsertStorageBox,
+  InsertTreasureHunt,
+  InsertTreasurePoint,
+  locationShares,
+  InsertPackItem,
+  InsertPackList,
+  InsertPackTemplateCustom,
+  InsertMenuEntry,
+  InsertPowerConsumer,
+  InsertShoppingItem,
+  InsertNatureSighting,
+  InsertTripLog,
+  InsertTripPhoto,
+  InsertTripShoppingItem,
+  InsertUser,
+  inventoryItems,
+  campChores,
+  choreAssignments,
+  storageBoxes,
+  treasureHunts,
+  treasurePoints,
+  menuDayNotes,
+  menuEntries,
+  natureSightings,
+  packItems,
+  packLists,
+  packTemplatesCustom,
+  powerConsumers,
+  shoppingItems,
+  shoppingLists,
+  shoppingShares,
+  spotPhotos,
+  InsertSpotPhoto,
+  tickBites,
+  InsertTickBite,
+  tripBoardNotes,
+  InsertTripBoardNote,
+  tripExpenses,
+  InsertTripExpense,
+  tripDateOptions,
+  InsertTripDateOption,
+  tripDateVotes,
+  tripGuestbook,
+  InsertTripGuestbookEntry,
+  tripInvites,
+  tripJournal,
+  tripLogs,
+  tripMembers,
+  tripPhotos,
+  tripShoppingItems,
+  users,
+  userNotes,
+  InsertUserNote,
+  userSettings,
+} from "../../drizzle/schema";
+import { ENV } from "../_core/env";
+
+export let _db: ReturnType<typeof drizzle> | null = null;
+
+// Lazily create the drizzle instance so local tooling can run without a DB.
+export async function getDb() {
+  if (!_db && process.env.DATABASE_URL) {
+    try {
+      _db = drizzle(process.env.DATABASE_URL);
+    } catch (error) {
+      console.warn("[Database] Failed to connect:", error);
+      _db = null;
+    }
+  }
+  return _db;
+}
+
+export function requireDb<T>(db: T | null): T {
+  if (!db) throw new Error("Datenbank nicht verfügbar");
+  return db;
+}
+
+/** Weitergereicht, damit die Module nur EINE Quelle brauchen. */
+export {
+  ENV,
+  HISTORY_LIMIT,
+  InsertCampChore,
+  InsertCampSpot,
+  InsertChoreAssignment,
+  InsertCustomHunt,
+  InsertCustomQuiz,
+  InsertCustomRecipe,
+  InsertFamilyChild,
+  InsertFishCatch,
+  InsertFoodItem,
+  InsertFoodTemplate,
+  InsertGearTask,
+  InsertHikeTrack,
+  InsertHomeLocation,
+  InsertInventoryItem,
+  InsertMenuEntry,
+  InsertNatureSighting,
+  InsertPackItem,
+  InsertPackList,
+  InsertPackTemplateCustom,
+  InsertPlannedRoute,
+  InsertPowerConsumer,
+  InsertShoppingItem,
+  InsertSpotPhoto,
+  InsertStorageBox,
+  InsertTickBite,
+  InsertTreasureHunt,
+  InsertTreasurePoint,
+  InsertTripBoardNote,
+  InsertTripDateOption,
+  InsertTripExpense,
+  InsertTripGuestbookEntry,
+  InsertTripLog,
+  InsertTripPhoto,
+  InsertTripShoppingItem,
+  InsertUser,
+  InsertUserNote,
+  and,
+  asc,
+  campChores,
+  campSpots,
+  childBadges,
+  childStats,
+  choreAssignments,
+  customHunts,
+  customQuizzes,
+  customRecipes,
+  deletedItems,
+  desc,
+  drizzle,
+  eq,
+  familyChildren,
+  fishCatches,
+  foodItems,
+  foodTemplates,
+  gearTasks,
+  hikeTracks,
+  homeLocations,
+  inArray,
+  inventoryItems,
+  isNull,
+  isShareExpired,
+  locationShares,
+  menuDayNotes,
+  menuEntries,
+  natureSightings,
+  packItems,
+  packLists,
+  packTemplatesCustom,
+  passportAbsences,
+  plannedRoutes,
+  powerConsumers,
+  shoppingItems,
+  shoppingLists,
+  shoppingShares,
+  spotPhotos,
+  sql,
+  storageBoxes,
+  tickBites,
+  treasureHunts,
+  treasurePoints,
+  tripBoardNotes,
+  tripChanges,
+  tripDateOptions,
+  tripDateVotes,
+  tripExpenses,
+  tripGuestbook,
+  tripInvites,
+  tripJournal,
+  tripLogs,
+  tripMembers,
+  tripPhotos,
+  tripShoppingItems,
+  userNotes,
+  userSettings,
+  users,
+};

@@ -1,13 +1,21 @@
 import { useEffect } from "react";
-import { natureEntries } from "@/data/nature";
-import { knots } from "@/data/knots";
-import { recipes } from "@/data/recipes";
 
 /**
  * Lädt alle Bilder der Wissens-Module (Natur, Knoten, Rezepte) im Hintergrund,
  * sobald der Service Worker aktiv ist. Der SW legt sie im Bild-Cache ab –
  * so sind die Module inklusive Bilder offline verfügbar, ohne dass jede
  * Seite vorher einzeln besucht werden muss.
+ *
+ * DIE DATEN WERDEN NACHGELADEN, NICHT MITGEBRACHT (#335): Diese Komponente
+ * hängt in `App.tsx` und lag damit im Haupt-Bündel – zusammen mit den drei
+ * grössten Datendateien des Projekts (Natur 2219 Zeilen, Knoten 738,
+ * Rezepte 2065, alle in vier Sprachen). Gebraucht wird davon EIN Feld pro
+ * Eintrag: die Bildadresse.
+ *
+ * Dass sie erst vier Sekunden nach dem Start etwas tut, machte es
+ * schlimmer: Der Erstaufruf trug die Last, ohne dass sie in dieser Zeit
+ * irgendjemandem nützte. `await import()` im Rumpf verschiebt sie dorthin,
+ * wo sie gebraucht wird.
  */
 export default function OfflinePrecache() {
   useEffect(() => {
@@ -21,6 +29,14 @@ export default function OfflinePrecache() {
         const conn = (navigator as { connection?: { saveData?: boolean } })
           .connection;
         if (conn?.saveData) return;
+
+        // Erst hier laden: Vorher hing das Haupt-Bündel daran.
+        const [{ natureEntries }, { knots }, { recipes }] = await Promise.all([
+          import("@/data/nature"),
+          import("@/data/knots"),
+          import("@/data/recipes"),
+        ]);
+        if (cancelled) return;
 
         const urls = [
           ...natureEntries.map(e => e.image),

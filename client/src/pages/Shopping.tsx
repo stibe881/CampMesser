@@ -79,6 +79,7 @@ import {
   shoppingCategoryLabel,
 } from "@shared/shopping";
 import { isBooked, shoppingPriceTotals } from "@shared/shoppingPrices";
+import { todayIso } from "@shared/localDate";
 
 /**
  * Einkaufsliste: schnelles Erfassen, Abhaken und Aufräumen. Offene Einträge
@@ -115,7 +116,7 @@ export default function ShoppingPage() {
     staleTime: 60_000,
   });
   const tripLists = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIso();
     return (tripsQuery.data ?? [])
       .filter(trip => (trip.endDate ?? trip.startDate) >= today)
       .sort((a, b) => a.startDate.localeCompare(b.startDate))

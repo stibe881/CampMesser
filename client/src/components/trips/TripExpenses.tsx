@@ -108,6 +108,7 @@ import {
 } from "@shared/packSuggestions";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
+import { todayIso } from "@shared/localDate";
 
 const EXPENSE_CATEGORY_BARS: Record<ExpenseCategory, string> = {
   camping: "bg-chart-1",
@@ -328,10 +329,7 @@ export default function TripExpenses({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = csvFileName(
-      tripName,
-      new Date().toISOString().slice(0, 10)
-    );
+    link.download = csvFileName(tripName, todayIso());
     link.click();
     URL.revokeObjectURL(url);
   };

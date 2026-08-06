@@ -1,6 +1,6 @@
 import { l4, pick, type Language } from "./i18n";
 import { daysUntilTrip, currentTripDay } from "./trips";
-import { expiryInfo } from "./food";
+import { expiryInfo, isUrgentExpiry } from "./food";
 import { gearTaskDue, type GearTaskLike } from "./gearTasks";
 import type { WidgetTask } from "./widgetActions";
 import { tripDisplayName } from "./tripName";
@@ -259,10 +259,9 @@ export function countSupplies(input: {
   gearTasks: readonly GearTaskLike[];
   today: string;
 }): { expiring: number; due: number } {
-  const expiring = input.foodItems.filter(item => {
-    const info = expiryInfo(item.expiryDate, input.today);
-    return info !== null && info.daysLeft >= 0 && info.daysLeft <= 1;
-  }).length;
+  const expiring = input.foodItems.filter(item =>
+    isUrgentExpiry(item.expiryDate, input.today)
+  ).length;
   const due = input.gearTasks.filter(
     task => gearTaskDue(task, input.today).due
   ).length;

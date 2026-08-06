@@ -25,6 +25,7 @@ import { tripDisplayName } from "@shared/tripName";
 import { formatChf } from "@/lib/money";
 import { trpc } from "@/lib/trpc";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
+import { todayIso } from "@shared/localDate";
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_LABELS,
@@ -79,7 +80,7 @@ export default function ShoppingBookingDialog({
 }) {
   const { lang, t } = useI18n();
   const { user } = useAuth();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
 
   const bookable = useMemo(() => shoppingBooking(items).itemIds, [items]);
   const bookableItems = useMemo(
