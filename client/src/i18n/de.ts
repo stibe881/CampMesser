@@ -2467,6 +2467,8 @@ export const de = {
     notesPlaceholder:
       "Schönster Stellplatz, bestes Rezept, was beim nächsten Mal anders …",
     submit: "Eintrag speichern",
+    moreSections: "Mehr zur Reise",
+    statsLink: "Statistik & Meilensteine ansehen",
     plannedTitle: "Geplante Aufenthalte",
     holidaySectionLabel: "Schulferien & Feiertage",
     holidayCantonAria: "Kanton für Ferien- und Feiertags-Hinweise wählen",

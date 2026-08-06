@@ -24,12 +24,7 @@ import TripPitchDetails from "@/components/trips/TripPitchDetails";
 import TripReadinessCard from "@/components/trips/TripReadinessCard";
 import TripShareDialog from "@/components/trips/TripShareDialog";
 import TripWeatherArchive from "@/components/trips/TripWeatherArchive";
-import {
-  fmtDayMonth,
-  fmtMedium,
-  fmtShort,
-  fmtWeekdayLong,
-} from "@/lib/dateFormat";
+import { fmtDayMonth, fmtShort, fmtWeekdayLong } from "@/lib/dateFormat";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import { relativeAge, type ShareExpiryDays } from "@shared/sharing";
@@ -47,6 +42,7 @@ import {
   Copy,
   Eye,
   EyeOff,
+  ChartColumn,
   CopyPlus,
   Download,
   Fuel,
@@ -111,7 +107,7 @@ import { MAX_PHOTOS_PER_TRIP } from "@shared/tripPhotos";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useI18n, useT } from "@/i18n";
-import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
+import { pick, type Language } from "@shared/i18n";
 import { findCountryRules, guessCountryCode } from "@/data/roadRules";
 import {
   COLLAGE_LAYOUTS,
@@ -141,11 +137,9 @@ import {
   fuelCost,
 } from "@shared/fuelCost";
 import {
-  computeTripStats,
   currentTripDay,
   daysUntilTrip,
   isUpcomingTrip,
-  nightsPerYear,
   TRIP_JOURNAL_MAX_LENGTH,
   tripNights,
 } from "@shared/trips";
@@ -165,7 +159,6 @@ import {
   tripReadiness,
   type ReadinessKey,
 } from "@shared/tripReadiness";
-import { milestones } from "@shared/milestones";
 import {
   packingSuggestions,
   type ForecastDay,
@@ -176,7 +169,6 @@ import {
   parseTripWeather,
   summarizeTripWeather,
   TRIP_WEATHER_ARCHIVE_MIN_AGE_DAYS,
-  weatherLuck,
 } from "@shared/tripWeather";
 import {
   CANTONS,
@@ -187,6 +179,7 @@ import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import LazySection from "@/components/LazySection";
+import TripMoreSections from "@/components/trips/TripMoreSections";
 import TripYearReview from "@/components/trips/TripYearReview";
 import TripDatePoll from "@/components/TripDatePoll";
 import TripGuestbook from "@/components/TripGuestbook";
@@ -488,10 +481,6 @@ export default function TripsPage() {
 
   const formatRange = (startDate: string, endDate: string): string =>
     formatTripRange(startDate, endDate, lang);
-
-  /** Ø-Bewertung mit maximal einer Nachkommastelle in der aktiven Sprache. */
-  const fmtRating = (value: number): string =>
-    value.toLocaleString(LOCALE_TAGS[lang], { maximumFractionDigits: 1 });
 
   const today = todayIso();
   const [spotChoice, setSpotChoice] = useState<string>(FREE_LOCATION);
@@ -806,41 +795,6 @@ export default function TripsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [trips, spots]
   );
-  const stats = useMemo(
-    () => computeTripStats(pastTripLikes, lang),
-    [pastTripLikes, lang]
-  );
-  const currentYear = new Date().getFullYear();
-
-  // Wetter-Glück über alle Aufenthalte mit gespeichertem Wetterarchiv
-  const luck = useMemo(() => weatherLuck(pastTripLikes), [pastTripLikes]);
-
-  // Übernachtungen pro Jahr für den Jahres-Vergleich (Startjahr zählt)
-  const yearNights = useMemo(
-    () => nightsPerYear(pastTripLikes),
-    [pastTripLikes]
-  );
-
-  // Meilensteine über die abgeschlossenen Aufenthalte: erreichte als farbige
-  // Chips, dazu die nächsten offenen (höchster Fortschritt zuerst, max. 3)
-  const milestoneItems = useMemo(
-    () => milestones(pastTripLikes, today, lang),
-    [pastTripLikes, today, lang]
-  );
-  const achievedMilestones = useMemo(
-    () => milestoneItems.filter(m => m.achieved),
-    [milestoneItems]
-  );
-  const nextMilestones = useMemo(
-    () =>
-      milestoneItems
-        .filter(m => !m.achieved)
-        .sort((a, b) => b.current / b.target - a.current / a.target)
-        .slice(0, 3),
-    [milestoneItems]
-  );
-  const fmtMilestoneDate = (iso: string): string =>
-    fmtMedium(new Date(`${iso}T00:00:00`), lang);
 
   // Ansicht der Aufenthalte: Liste (Standard) oder Monats-Kalender –
   // die Wahl bleibt über localStorage erhalten.
@@ -1020,207 +974,24 @@ export default function TripsPage() {
             />
           </div>
 
-          {/* Statistik */}
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
-                <div className="text-center">
-                  <p className="font-serif text-2xl font-bold text-primary">
-                    {stats.nightsByYear[currentYear] ?? 0}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {t.trips.nightsInYear(currentYear)}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{stats.totalNights}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t.trips.nightsTotal}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{stats.totalTrips}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t.trips.staysLabel}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="flex items-center justify-center gap-1 text-sm font-semibold leading-8">
-                    <Trophy
-                      className="h-4 w-4 shrink-0 text-chart-1"
-                      aria-hidden="true"
-                    />
-                    <span className="truncate">
-                      {stats.topPlaces[0]?.name ?? "–"}
-                    </span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {t.trips.favoriteLabel}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="flex items-center justify-center gap-1 text-2xl font-bold">
-                    <Star
-                      className="h-4 w-4 shrink-0 fill-chart-1 text-chart-1"
-                      aria-hidden="true"
-                    />
-                    {stats.avgRating !== null
-                      ? fmtRating(stats.avgRating)
-                      : "–"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {t.trips.avgRatingLabel}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* AUSWERTUNGEN LIEGEN AUF DER STATISTIK-SEITE (#357).
 
-          {/* Wetter-Glück: nur wenn mindestens ein Trip ein Wetterarchiv hat */}
-          {luck && (
-            <Card className="mb-6">
-              <CardContent className="pt-6">
-                <h2 className="mb-2 flex items-center gap-2 font-serif text-base font-semibold">
-                  <CloudSun
-                    className="h-4 w-4 text-primary"
-                    aria-hidden="true"
-                  />
-                  {t.trips.weatherLuckTitle}
-                </h2>
-                <p className="text-sm">
-                  {t.trips.weatherLuckDry(Math.round(luck.dryShare * 100))}
-                  {" · "}
-                  {t.trips.weatherLuckAvgMax(Math.round(luck.avgTMax))}
-                  {luck.warmest?.place && (
-                    <>
-                      {" · "}
-                      {t.trips.weatherLuckWarmest(
-                        luck.warmest.place,
-                        Math.round(luck.warmest.tMax)
-                      )}
-                    </>
-                  )}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {t.trips.weatherLuckHint(luck.trips)}
-                </p>
-              </CardContent>
-            </Card>
-          )}
+              Hier standen Kennzahlen, Wetter-Glück, Jahres-Vergleich und
+              Meilensteine – dieselben vier Auswertungen, die /statistik
+              seit #191 zeigt, aus denselben reinen Funktionen. Wer seine
+              Reisen suchte, scrollte an zweihundert Zeilen Statistik
+              vorbei, die es einen Fingertipp weiter ohnehin gibt.
 
-          {/* Jahres-Vergleich: Übernachtungen pro Jahr als schlichte CSS-Balken
-          (bewusst ohne Chart-Bibliothek – hält den Reisen-Chunk klein) */}
-          {yearNights.length >= 2 && (
-            <Card className="mb-6">
-              <CardContent className="pt-6">
-                <h2 className="mb-3 flex items-center gap-2 font-serif text-base font-semibold">
-                  <CalendarDays
-                    className="h-4 w-4 text-primary"
-                    aria-hidden="true"
-                  />
-                  {t.trips.yearCompareTitle}
-                </h2>
-                <ul className="space-y-1.5">
-                  {yearNights.map(({ year, nights }) => {
-                    const max = yearNights.reduce(
-                      (m, y) => Math.max(m, y.nights),
-                      1
-                    );
-                    const current = year === new Date().getFullYear();
-                    return (
-                      <li
-                        key={year}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <span
-                          className={cn(
-                            "w-12 tabular-nums",
-                            current && "font-semibold text-primary"
-                          )}
-                        >
-                          {year}
-                        </span>
-                        <span className="h-3 flex-1 overflow-hidden rounded-full bg-muted">
-                          <span
-                            className={cn(
-                              "block h-full rounded-full",
-                              current ? "bg-primary" : "bg-primary/50"
-                            )}
-                            style={{
-                              width: `${Math.max(4, (nights / max) * 100)}%`,
-                            }}
-                            aria-hidden="true"
-                          />
-                        </span>
-                        <span className="w-24 text-right text-xs text-muted-foreground">
-                          {t.trips.nightsCount(nights)}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Meilensteine: erreichte farbig, die nächsten offenen mit Fortschritt */}
-          {trips.length > 0 && (
-            <Card className="mb-6">
-              <CardContent className="pt-6">
-                <h2 className="mb-3 flex items-center gap-2 font-serif text-base font-semibold">
-                  <Award className="h-4 w-4 text-primary" aria-hidden="true" />
-                  {t.trips.milestonesTitle}
-                </h2>
-                {achievedMilestones.length > 0 && (
-                  <ul className="flex flex-wrap gap-1.5">
-                    {achievedMilestones.map(m => (
-                      <li
-                        key={m.id}
-                        className="flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-medium text-primary"
-                      >
-                        <Award
-                          className="h-3 w-3 shrink-0"
-                          aria-hidden="true"
-                        />
-                        {m.label}
-                        {m.achievedOn && (
-                          <span className="font-normal text-primary/80">
-                            ·{" "}
-                            {t.trips.milestonesAchievedOn(
-                              fmtMilestoneDate(m.achievedOn)
-                            )}
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {nextMilestones.length > 0 && (
-                  <div className={achievedMilestones.length > 0 ? "mt-4" : ""}>
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      {t.trips.milestonesNextTitle}
-                    </h3>
-                    <ul className="space-y-2.5">
-                      {nextMilestones.map(m => (
-                        <li key={m.id}>
-                          <div className="mb-1 flex items-center justify-between gap-2 text-sm">
-                            <span>{m.label}</span>
-                            <span className="font-mono text-xs text-muted-foreground">
-                              {t.trips.milestonesProgress(m.current, m.target)}
-                            </span>
-                          </div>
-                          <Progress
-                            value={(m.current / m.target) * 100}
-                            aria-label={`${m.label}: ${t.trips.milestonesProgress(m.current, m.target)}`}
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+              Der Jahresrückblick bleibt: Den gibt es NUR hier, und er ist
+              zum Teilen gedacht, nicht zum Nachschlagen. */}
+          <div className="mb-6">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/statistik">
+                <ChartColumn className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {t.trips.statsLink}
+              </Link>
+            </Button>
+          </div>
 
           {/* Jahresrückblick (#62) – herausgelöst in #350 */}
           <TripYearReview trips={trips} tripLikes={pastTripLikes} />
@@ -1914,32 +1685,6 @@ export default function TripsPage() {
                           tripName={label(trip)}
                           shared={trip.shared || trip.role === "member"}
                         />
-                        {/* Änderungsverlauf (#296): nur bei gemeinsamen
-                            Reisen – allein ist «wer war das» schon
-                            beantwortet */}
-                        {(trip.shared || trip.role === "member") && (
-                          <TripHistory
-                            tripId={trip.id}
-                            tripName={label(trip)}
-                          />
-                        )}
-                        {/* Gästebuch (#254): auch bei einer Reise ohne
-                            Mitreisende – über den Teil-Link können Bekannte
-                            einen Gruss hinterlassen */}
-                        <TripGuestbook
-                          tripId={trip.id}
-                          tripName={label(trip)}
-                        />
-                        {/* Buchungsbestätigung (#279): nur bei eigenen Reisen –
-                            die Datei liegt am Konto der Besitzerin/des
-                            Besitzers, Mitglieder sehen sie nicht */}
-                        {trip.role !== "member" && (
-                          <TripReservation
-                            tripId={trip.id}
-                            fileName={trip.reservationFileName ?? null}
-                            className="mt-2"
-                          />
-                        )}
                         <TripPhotos
                           tripId={trip.id}
                           tripName={label(trip)}
@@ -1954,6 +1699,37 @@ export default function TripsPage() {
                             endDate={trip.endDate}
                           />
                         </Suspense>
+                        {/* SELTENES HINTER EINEN SCHALTER (#357): Verlauf, Gästebuch
+                            und Reservation braucht man selten – als eigene graue
+                            Balken machten sie den Stapel unlesbar. */}
+                        <TripMoreSections count={3}>
+                          {/* Änderungsverlauf (#296): nur bei gemeinsamen
+                              Reisen – allein ist «wer war das» schon
+                              beantwortet */}
+                          {(trip.shared || trip.role === "member") && (
+                            <TripHistory
+                              tripId={trip.id}
+                              tripName={label(trip)}
+                            />
+                          )}
+                          {/* Gästebuch (#254): auch bei einer Reise ohne
+                              Mitreisende – über den Teil-Link können Bekannte
+                              einen Gruss hinterlassen */}
+                          <TripGuestbook
+                            tripId={trip.id}
+                            tripName={label(trip)}
+                          />
+                          {/* Buchungsbestätigung (#279): nur bei eigenen Reisen –
+                              die Datei liegt am Konto der Besitzerin/des
+                              Besitzers, Mitglieder sehen sie nicht */}
+                          {trip.role !== "member" && (
+                            <TripReservation
+                              tripId={trip.id}
+                              fileName={trip.reservationFileName ?? null}
+                              className="mt-2"
+                            />
+                          )}
+                        </TripMoreSections>
                       </LazySection>
                     </div>
                     <div className="flex shrink-0 flex-col gap-1">
@@ -2249,29 +2025,6 @@ export default function TripsPage() {
                             tripName={label(trip)}
                             shared={trip.shared || trip.role === "member"}
                           />
-                          {/* Änderungsverlauf (#296) auch rückblickend:
-                              «wer hat das damals eingetragen» */}
-                          {(trip.shared || trip.role === "member") && (
-                            <TripHistory
-                              tripId={trip.id}
-                              tripName={label(trip)}
-                            />
-                          )}
-                          {/* Gästebuch (#254): gerade bei vergangenen Reisen
-                              die Erinnerungs-Seite – Grüsse bleiben stehen */}
-                          <TripGuestbook
-                            tripId={trip.id}
-                            tripName={label(trip)}
-                          />
-                          {/* Buchungsbestätigung (#279) – auch bei vergangenen
-                              Reisen: die Rechnung will man später noch finden */}
-                          {trip.role !== "member" && (
-                            <TripReservation
-                              tripId={trip.id}
-                              fileName={trip.reservationFileName ?? null}
-                              className="mt-2"
-                            />
-                          )}
                           <TripPhotos
                             tripId={trip.id}
                             tripName={label(trip)}
@@ -2284,6 +2037,32 @@ export default function TripsPage() {
                             startDate={trip.startDate}
                             endDate={trip.endDate}
                           />
+                          {/* Seltenes hinter einen Schalter (#357) */}
+                          <TripMoreSections count={3}>
+                            {/* Änderungsverlauf (#296) auch rückblickend:
+                                «wer hat das damals eingetragen» */}
+                            {(trip.shared || trip.role === "member") && (
+                              <TripHistory
+                                tripId={trip.id}
+                                tripName={label(trip)}
+                              />
+                            )}
+                            {/* Gästebuch (#254): gerade bei vergangenen Reisen
+                                die Erinnerungs-Seite – Grüsse bleiben stehen */}
+                            <TripGuestbook
+                              tripId={trip.id}
+                              tripName={label(trip)}
+                            />
+                            {/* Buchungsbestätigung (#279) – auch bei vergangenen
+                                Reisen: die Rechnung will man später noch finden */}
+                            {trip.role !== "member" && (
+                              <TripReservation
+                                tripId={trip.id}
+                                fileName={trip.reservationFileName ?? null}
+                                className="mt-2"
+                              />
+                            )}
+                          </TripMoreSections>
                         </LazySection>
                       </div>
                       <div className="flex shrink-0 flex-col gap-1">

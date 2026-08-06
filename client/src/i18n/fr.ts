@@ -2467,6 +2467,8 @@ export const fr: Translation = {
     notesPlaceholder:
       "Le plus bel emplacement, la meilleure recette, quoi changer la prochaine fois …",
     submit: "Enregistrer l'entrée",
+    moreSections: "Plus sur le voyage",
+    statsLink: "Voir les statistiques et jalons",
     plannedTitle: "Séjours prévus",
     holidaySectionLabel: "Vacances scolaires & jours fériés",
     holidayCantonAria:

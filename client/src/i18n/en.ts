@@ -2387,6 +2387,8 @@ export const en: Translation = {
     notesPlaceholder:
       "Nicest spot, best recipe, what to do differently next time …",
     submit: "Save entry",
+    moreSections: "More about the trip",
+    statsLink: "View statistics and milestones",
     plannedTitle: "Planned stays",
     holidaySectionLabel: "School & public holidays",
     holidayCantonAria: "Choose the canton for holiday hints",

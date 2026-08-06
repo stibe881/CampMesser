@@ -2441,6 +2441,8 @@ export const it: Translation = {
     notesPlaceholder:
       "La piazzola più bella, la ricetta migliore, cosa cambiare la prossima volta …",
     submit: "Salva voce",
+    moreSections: "Altro sul viaggio",
+    statsLink: "Vedi statistiche e traguardi",
     plannedTitle: "Soggiorni pianificati",
     holidaySectionLabel: "Vacanze scolastiche & giorni festivi",
     holidayCantonAria:

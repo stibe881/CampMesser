@@ -22,6 +22,13 @@
 - [ ] OFFEN, gleiche Sorte: Die Pinnwand zeigt «3 offene Aufgaben» ebenfalls nur aufgeklappt, aus demselben Grund. Nicht mitgemacht, weil dafür ein zweiter Summen-Endpunkt nötig wäre und der Nutzer nach dem Betrag gefragt hat.
 - [x] `useHashSection()` (#344): Das Auf-und-Hinscrollen war in #343 in TripBoard einkopiert; mit dem Journal wären es zwei Kopien derselben zwei Feinheiten gewesen (Hash nur beim Aufbau lesen, zwei Bilder warten, weil die App-Hülle nach dem Kind-Effekt nach oben scrollt). Jetzt ein Haken für beide.
 
+## «Meine Reisen» aufgeräumt (Nutzerwunsch 06.08.2026, Runde 36)
+
+- [x] Doppelte Auswertungen raus (#357): Über den Reisen standen Kennzahlen, Wetter-Glück, Jahres-Vergleich und Meilensteine – 200 Zeilen, die /statistik seit #191 aus DENSELBEN reinen Funktionen zeigt (`computeTripStats`, `weatherLuck`, `nightsPerYear`, `milestones`). Ersetzt durch einen Knopf dorthin. Der Jahresrückblick bleibt: den gibt es nur hier und er ist zum Teilen gedacht, nicht zum Nachschlagen. Trips.tsx 2466 → 2236 Zeilen.
+- [x] Seltenes hinter einen Schalter (#357): Änderungsverlauf, Gästebuch und Reservation liegen neu hinter «Mehr zur Reise (3)»; Tagebuch, Reisekasse, Pinnwand, Fotos und Collage bleiben direkt sichtbar. Neun gleich aussehende Balken werden sechs. Zugeklappt wird auch nichts geladen – die Fotogalerie etwa fragt sonst ungefragt.
+- WARUM HÄUFIG/SELTEN statt nach Reisephase sortiert: «Wann brauche ich das» lässt sich nicht am Datum festmachen – Fotos sortiert man auch drei Wochen später, die Reservation sucht man auch mitten im Aufenthalt. Häufig gegen selten zu trennen ist ehrlicher als geraten.
+- [ ] NICHT ANGESCHAUT, ehrlich: Wie das Ergebnis am Bildschirm wirkt. Geprüft sind Typen, Tests und Build; ob sechs Balken statt neun wirklich übersichtlich WIRKEN, siehst du beim Deploy in zehn Sekunden.
+
 ## Startseiten-Karte führt zur Reise (Nutzerwunsch 06.08.2026, Runde 35)
 
 - [x] «Du bist in …» ist antippbar (#356, Bildschirmfoto): Die Karte zeigte Ort, Reisetag, Wetter und Mahlzeiten – und tat auf Antippen nichts, obwohl Journal, Reisekasse und Pinnwand genau in dieser Reise liegen. Der Link sitzt am TITEL und überzieht die Karte mit einem `after`: vorgelesen heisst er «Du bist in …», also das Ziel, statt eines nichtssagenden «Karte». Die drei Knöpfe (Menüplan, Platz-Dossier, Einkaufsliste) liegen mit `z-10` darüber und bleiben einzeln antippbar – dasselbe Muster wie bei den Ämtli-Häkchen in #343.
