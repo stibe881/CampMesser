@@ -1,7 +1,25 @@
 /**
  * Sprach-Infrastruktur: Provider mit localStorage-Persistenz und Geräte-Sync.
- * Deutsch ist im Haupt-Bundle, die übrigen Wörterbücher laden als eigene
- * Chunks nach (und bleiben dank Service Worker offline verfügbar).
+ *
+ * ALLE VIER WÖRTERBÜCHER LADEN NACH (#332). Vorher war Deutsch fest im
+ * Haupt-Bundle und nur die anderen drei waren eigene Chunks. Das hiess:
+ * Wer die App auf Französisch benutzt, lud BEIDES – das deutsche
+ * Wörterbuch im Haupt-Bundle (rund 230 kB unkomprimiert, ein Fünftel
+ * davon) und danach das französische. Ein Wörterbuch, das nie jemand
+ * liest, ist die teuerste Art von totem Gewicht: Es wird nicht nur
+ * übertragen, sondern auch geparst.
+ *
+ * WAS DAS KOSTET, offen gesagt: Deutschsprachige Nutzer zahlen jetzt
+ * einen zusätzlichen Rundlauf, den sie vorher nicht hatten. Der Abruf
+ * startet deshalb beim LADEN dieses Moduls und nicht erst in einem
+ * Effekt – so überlappt er mit allem, was der Haupt-Chunk sonst noch
+ * aufsetzt. Beim zweiten Besuch liegt der Chunk ohnehin im Service
+ * Worker.
+ *
+ * BIS DAS WÖRTERBUCH DA IST, zeigt der Provider nichts. Das ist derselbe
+ * leere Zustand wie vor dem Start von React – es blitzt also nichts
+ * Falsches auf, sondern der bestehende Moment dauert etwas länger. Ein
+ * halb übersetztes Gerüst wäre die schlechtere Wahl.
  */
 import {
   createContext,
@@ -13,14 +31,17 @@ import {
 } from "react";
 import { LANGUAGES, detectLanguage, type Language } from "@shared/i18n";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
-import { de, type Translation } from "./de";
+import type { Translation } from "./de";
+
+export type { Translation };
 
 const STORAGE_KEY = "campmesser.language";
 
-const cache: Partial<Record<Language, Translation>> = { de };
+const cache: Partial<Record<Language, Translation>> = {};
 
 async function loadDictionary(lang: Language): Promise<Translation> {
-  if (cache[lang]) return cache[lang]!;
+  const cached = cache[lang];
+  if (cached) return cached;
   let dict: Translation;
   switch (lang) {
     case "fr":
@@ -33,7 +54,7 @@ async function loadDictionary(lang: Language): Promise<Translation> {
       dict = (await import("./en")).en;
       break;
     default:
-      dict = de;
+      dict = (await import("./de")).de;
   }
   cache[lang] = dict;
   return dict;
@@ -63,22 +84,40 @@ export function getStoredLanguage(): Language {
   }
 }
 
+/**
+ * Der Abruf beginnt HIER, beim Auswerten des Moduls – nicht im Effekt des
+ * Providers. Sonst startete er erst nach dem ersten Rendern und läge damit
+ * hinter allem anderen, was der Haupt-Chunk aufsetzt, statt daneben.
+ */
+const bootLanguage = getStoredLanguage();
+const bootPromise = loadDictionary(bootLanguage).catch(
+  () =>
+    // Ohne Netz und ohne Chunk gibt es nichts anzuzeigen; der Provider
+    // versucht es beim nächsten Start erneut.
+    null
+);
+
 interface I18nContextValue {
   lang: Language;
   t: Translation;
   setLang: (lang: Language) => void;
 }
 
+/**
+ * Der Standardwert wird nie benutzt: Der Provider zeigt seine Kinder erst,
+ * wenn ein Wörterbuch da ist. Er existiert nur, weil `createContext` einen
+ * verlangt – deshalb ein leeres Objekt statt eines zweiten Wörterbuchs.
+ */
 const I18nContext = createContext<I18nContextValue>({
   lang: "de",
-  t: de,
+  t: {} as Translation,
   setLang: () => {},
 });
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Language>(() => getStoredLanguage());
-  const [t, setT] = useState<Translation>(
-    () => cache[getStoredLanguage()] ?? de
+  const [lang, setLangState] = useState<Language>(bootLanguage);
+  const [t, setT] = useState<Translation | null>(
+    () => cache[bootLanguage] ?? null
   );
 
   const applyLang = useCallback(async (next: Language) => {
@@ -92,8 +131,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     try {
       setT(await loadDictionary(next));
     } catch {
-      // Chunk offline nicht ladbar: Deutsch als Fallback anzeigen
-      setT(de);
+      // Chunk offline nicht ladbar: beim bisherigen Wörterbuch bleiben.
+      // Vorher stand hier «Deutsch als Rückfall» – das riss einer
+      // französischen Nutzerin die Oberfläche unter den Füssen weg, bloss
+      // weil ein Chunk fehlte.
+      setT(current => current);
     }
   }, []);
 
@@ -102,9 +144,24 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if ((LANGUAGES as readonly string[]).includes(value)) void applyLang(value);
   });
 
+  // Das beim Modul-Laden gestartete Wörterbuch übernehmen, sobald es da
+  // ist. `applyLang` würde denselben Chunk ein zweites Mal anfordern.
   useEffect(() => {
-    void applyLang(getStoredLanguage());
-  }, [applyLang]);
+    let cancelled = false;
+    void bootPromise.then(dict => {
+      if (!cancelled && dict) setT(current => current ?? dict);
+    });
+    document.documentElement.lang =
+      bootLanguage === "de" ? "de-CH" : bootLanguage;
+    try {
+      localStorage.setItem(STORAGE_KEY, bootLanguage);
+    } catch {
+      /* Sitzung reicht */
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const setLang = useCallback(
     (next: Language) => {
@@ -115,6 +172,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [applyLang]
   );
+
+  // Ohne Wörterbuch gibt es nichts zu zeigen – siehe Kopf der Datei.
+  if (!t) return null;
 
   return (
     <I18nContext.Provider value={{ lang, t, setLang }}>
