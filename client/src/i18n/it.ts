@@ -2569,6 +2569,8 @@ export const it: Translation = {
     weatherLuckYear: (pct, temp) =>
       `Fortuna meteo: ${pct} % di giorni asciutti · massima giornaliera media ${temp}°`,
     sharedBadge: "Condiviso",
+    runningBadge: (day: number, total: number) =>
+      `In corso · giorno ${day} di ${total}`,
     sharedWith: name => `Viaggio di ${name}`,
     membersButton: "Compagni di viaggio",
     membersAria: name => `Gestisci i compagni di viaggio di ${name}`,

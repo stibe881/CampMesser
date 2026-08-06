@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { fmtLong } from "@/lib/dateFormat";
+import { fmtLong, fmtShort } from "@/lib/dateFormat";
 import heroImage from "@/assets/hero-camping.webp";
 import {
   AlertTriangle,
@@ -110,6 +110,7 @@ import {
 import { firstNameOf, greetingKey } from "@shared/greeting";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { tripDisplayName } from "@shared/tripName";
 import { todayIso } from "@shared/localDate";
 import {
   CalendarClock,
@@ -1189,6 +1190,53 @@ function KnowledgeSearch() {
   const boxesQuery = trpc.boxes.list.useQuery(undefined, queryOpts);
   const foodQuery = trpc.food.list.useQuery(undefined, queryOpts);
   const searchTripsQuery = trpc.trips.list.useQuery(undefined, queryOpts);
+  // Der geschriebene Inhalt der Reisen (#349): Journal, Pinnwand,
+  // Gästebuch. Wie alle Listen hier erst beim Antippen des Suchfelds –
+  // es sind alle Journal-Texte auf einmal, und wer nie sucht, holt nichts.
+  const tripTextsQuery = trpc.trips.texts.useQuery(undefined, queryOpts);
+
+  /**
+   * Journal-, Pinnwand- und Gästebuch-Einträge in eine Liste für die Suche
+   * (#349). Der REISENAME kommt hier dazu, weil ihn `tripDisplayName` an
+   * einer Stelle bildet (#329) – ein Treffer ohne «zu welcher Reise
+   * gehört das» wäre die halbe Antwort.
+   */
+  const tripTexts = useMemo(() => {
+    const raw = tripTextsQuery.data;
+    if (!raw) return undefined;
+    const names = new Map(
+      (searchTripsQuery.data ?? []).map(trip => [
+        trip.id,
+        tripDisplayName(trip, lang),
+      ])
+    );
+    const nameOf = (tripId: number) => names.get(tripId) ?? "";
+    return [
+      ...raw.journal.map(entry => ({
+        id: `journal-${entry.id}`,
+        tripId: entry.tripId,
+        tripName: nameOf(entry.tripId),
+        kind: "journal" as const,
+        text: entry.text,
+        detail: fmtShort(entry.day, lang),
+      })),
+      ...raw.board.map(entry => ({
+        id: `board-${entry.id}`,
+        tripId: entry.tripId,
+        tripName: nameOf(entry.tripId),
+        kind: "board" as const,
+        text: entry.text,
+      })),
+      ...raw.guestbook.map(entry => ({
+        id: `guestbook-${entry.id}`,
+        tripId: entry.tripId,
+        tripName: nameOf(entry.tripId),
+        kind: "guestbook" as const,
+        text: entry.text,
+        detail: entry.authorName,
+      })),
+    ];
+  }, [tripTextsQuery.data, searchTripsQuery.data, lang]);
 
   /**
    * Beim ersten Fokus/Tippen: Wissens-Index nachladen, tRPC-Queries
@@ -1244,6 +1292,7 @@ function KnowledgeSearch() {
               spotName: trip.spotName,
               startDate: trip.startDate,
             })),
+            tripTexts: tripTexts,
           },
           6,
           lang

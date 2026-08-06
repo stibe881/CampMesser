@@ -831,6 +831,112 @@ export async function getExpenseTotalsForTrips(tripIds: number[]) {
     totalRappen: Number(row.totalRappen ?? 0),
   }));
 }
+/**
+ * Zähler für die ZUGEKLAPPTEN Abschnitte einer Reise (#346).
+ *
+ * Eine Reise stapelt ein Dutzend zugeklappter Balken, und keiner verriet,
+ * ob etwas drin ist – man klappte der Reihe nach auf. Die Zahlen dafür
+ * gibt es nur, wenn sie jemand liefert, ohne dass der Abschnitt offen
+ * ist.
+ *
+ * VIER ABFRAGEN, NICHT VIER PRO REISE: alles über `inArray` + `groupBy`.
+ *
+ * Die Pinnwand ist der Sonderfall: «offen» heisst «Aufgabe UND nicht
+ * abgehakt», und was als Aufgabe gilt, entscheidet `normalizeTripBoardKind`
+ * in shared/tripBoard.ts. Diese Regel in SQL nachzubauen hiesse, sie an
+ * zwei Orten zu pflegen – deshalb kommen hier die rohen Zeilen (nur Art
+ * und Haken, kein Text) und der Router zählt mit derselben Funktion wie
+ * die Oberfläche.
+ */
+export async function getTripSectionCounts(tripIds: number[]) {
+  if (tripIds.length === 0) {
+    return { boardNotes: [], journal: [], guestbook: [], changes: [] };
+  }
+  const db = requireDb(await getDb());
+  const countBy = async (table: typeof tripJournal | typeof tripGuestbook) => {
+    const rows = await db
+      .select({
+        tripId: table.tripId,
+        count: sql<string>`count(*)`,
+      })
+      .from(table)
+      .where(inArray(table.tripId, tripIds))
+      .groupBy(table.tripId);
+    return rows.map(row => ({
+      tripId: row.tripId,
+      count: Number(row.count ?? 0),
+    }));
+  };
+  const [boardNotes, journal, guestbook, changes] = await Promise.all([
+    db
+      .select({
+        tripId: tripBoardNotes.tripId,
+        kind: tripBoardNotes.kind,
+        done: tripBoardNotes.done,
+      })
+      .from(tripBoardNotes)
+      .where(inArray(tripBoardNotes.tripId, tripIds)),
+    countBy(tripJournal),
+    countBy(tripGuestbook),
+    db
+      .select({
+        tripId: tripChanges.tripId,
+        count: sql<string>`count(*)`,
+      })
+      .from(tripChanges)
+      .where(inArray(tripChanges.tripId, tripIds))
+      .groupBy(tripChanges.tripId)
+      .then(rows =>
+        rows.map(row => ({ tripId: row.tripId, count: Number(row.count ?? 0) }))
+      ),
+  ]);
+  return { boardNotes, journal, guestbook, changes };
+}
+/**
+ * Der geschriebene Inhalt einer Reise – für die globale Suche (#349).
+ *
+ * Die Suche kannte Packlisten, Plätze, Inventar, Kisten, Kühlbox, Reisen
+ * und freie Notizen, aber nicht den Text IN einer Reise: Tages-Journal,
+ * Pinnwand, Gästebuch. «Wo habe ich notiert, dass der Platz keinen Strom
+ * hat?» blieb unbeantwortet, obwohl es dasteht.
+ *
+ * Drei Abfragen für alle Reisen zusammen. Geholt wird nur, was gesucht
+ * und angezeigt wird – kein `select *`.
+ */
+export async function getTripTexts(tripIds: number[]) {
+  if (tripIds.length === 0) return { journal: [], board: [], guestbook: [] };
+  const db = requireDb(await getDb());
+  const [journal, board, guestbook] = await Promise.all([
+    db
+      .select({
+        id: tripJournal.id,
+        tripId: tripJournal.tripId,
+        day: tripJournal.day,
+        text: tripJournal.text,
+      })
+      .from(tripJournal)
+      .where(inArray(tripJournal.tripId, tripIds)),
+    db
+      .select({
+        id: tripBoardNotes.id,
+        tripId: tripBoardNotes.tripId,
+        text: tripBoardNotes.text,
+        done: tripBoardNotes.done,
+      })
+      .from(tripBoardNotes)
+      .where(inArray(tripBoardNotes.tripId, tripIds)),
+    db
+      .select({
+        id: tripGuestbook.id,
+        tripId: tripGuestbook.tripId,
+        authorName: tripGuestbook.authorName,
+        text: tripGuestbook.message,
+      })
+      .from(tripGuestbook)
+      .where(inArray(tripGuestbook.tripId, tripIds)),
+  ]);
+  return { journal, board, guestbook };
+}
 /** Einzelne Ausgabe laden (für die Zugriffsprüfung über ihre tripId). */
 export async function getTripExpenseById(id: number) {
   const db = requireDb(await getDb());

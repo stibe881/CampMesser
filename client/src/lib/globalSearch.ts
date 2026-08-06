@@ -162,6 +162,24 @@ export function searchKnowledge(
  * Nutzertexte sind einsprachige Strings, laufen aber defensiv durch pick().
  */
 export interface OwnContent {
+  /**
+   * Der geschriebene Inhalt der Reisen (#349): Tages-Journal, Pinnwand,
+   * Gästebuch. Bis dahin kannte die Suche zwar die Reise, aber nicht,
+   * was darin steht – «wo habe ich notiert, dass der Platz keinen Strom
+   * hat?» blieb unbeantwortet.
+   *
+   * `tripName` kommt vom Aufrufer, weil der Reisename an einer Stelle
+   * gebildet wird (shared/tripName.ts) und hier nicht noch einmal.
+   */
+  tripTexts?: {
+    id: string;
+    tripId: number;
+    tripName: string;
+    kind: "journal" | "board" | "guestbook";
+    text: string;
+    /** Tag beim Journal, Verfasser beim Gästebuch – sonst leer. */
+    detail?: string;
+  }[];
   packLists?: { id: number; name: string }[];
   spots?: { id: number; name: string; note?: string | null }[];
   recipes?: { id: number; name: string }[];
@@ -246,6 +264,14 @@ const OWN_KIND_LABELS = {
   foodCooled: l4("Kühlbox", "Glacière", "Frigo", "Cool box"),
   foodDry: l4("Trockenvorrat", "Réserve sèche", "Dispensa", "Dry store"),
   trip: l4("Aufenthalt", "Séjour", "Soggiorno", "Stay"),
+  journal: l4(
+    "Reise-Journal",
+    "Journal du séjour",
+    "Diario del viaggio",
+    "Trip journal"
+  ),
+  board: l4("Pinnwand", "Tableau", "Bacheca", "Pinboard"),
+  guestbook: l4("Gästebuch", "Livre d'or", "Libro degli ospiti", "Guest book"),
 };
 
 /** Notiz ohne Titel: die Überschrift kommt dann aus dem Text. */
@@ -389,6 +415,37 @@ export function searchOwnContent(
   // Freie Notizen (#246): gesucht wird über Titel, Text UND Stichwörter.
   // Ohne Titel trägt die erste Textzeile die Überschrift – eine Notiz ganz
   // ohne Titel soll im Treffer trotzdem wiedererkennbar sein.
+  /**
+   * Der geschriebene Inhalt einer Reise (#349). Der TEXT ist hier die
+   * Überschrift – man sucht ja nach dem, was man geschrieben hat, nicht
+   * nach «Journal». Der Reisename steht daneben, damit man weiss, welcher
+   * Aufenthalt gemeint ist.
+   *
+   * Das Ziel ist die Reise-Seite mit dem passenden Abschnitt AUFGEKLAPPT
+   * (#344): Ohne den Hash landete man auf einer Seite voller zugeklappter
+   * Balken und müsste den Treffer noch einmal suchen.
+   */
+  const TRIP_TEXT_HASH = {
+    journal: "#journal",
+    board: "#pinnwand",
+    guestbook: "#gaestebuch",
+  } as const;
+  for (const entry of own.tripTexts ?? []) {
+    const firstLine = entry.text.split("\n")[0]?.trim() ?? "";
+    const title = firstLine || entry.text.trim();
+    if (!title) continue;
+    const kind = p(OWN_KIND_LABELS[entry.kind]);
+    const detail = [entry.tripName, entry.detail].filter(Boolean).join(" · ");
+    add(
+      `own-triptext-${entry.id}`,
+      title,
+      `/tagebuch/${entry.tripId}${TRIP_TEXT_HASH[entry.kind]}`,
+      detail ? `${kind} · ${detail}` : kind,
+      // Der ganze Text in den Suchkörper, nicht nur die erste Zeile:
+      // Gesucht wird oft nach einem Wort mitten im Eintrag.
+      [entry.text, entry.tripName]
+    );
+  }
   for (const note of own.notes ?? []) {
     const tags = parseNoteTags(note.tags);
     const firstLine = note.text.split("\n")[0]?.trim() ?? "";

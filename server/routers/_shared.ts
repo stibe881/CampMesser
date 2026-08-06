@@ -89,6 +89,7 @@ import {
   normalizeTripBoardText,
   sortTripBoardEntries,
 } from "@shared/tripBoard";
+export { buildTripSectionCounts } from "@shared/tripSectionCounts";
 import {
   NOTE_TAG_MAX_LENGTH,
   NOTE_TEXT_MAX_LENGTH,
