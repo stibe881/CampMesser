@@ -65,6 +65,15 @@ jobs:
         run: pnpm exec drizzle-kit migrate
       - name: Auth-Flow-Integrationstest
         run: pnpm vitest run server/dbIntegration.test.ts
+      # Sicherung und Rückspielung an der echten MySQL proben (#353):
+      # Ein Dump, den nie jemand eingelesen hat, ist eine Vermutung.
+      # Geprüft wird die KETTE – dumpen, zurücklesen, Tabellen zählen –,
+      # nicht bloss, ob das Skript ohne Fehler durchläuft.
+      - name: Sicherung erstellen und zurückspielen
+        run: |
+          echo "DATABASE_URL=$DATABASE_URL" > .env
+          BACKUP_DIR="$RUNNER_TEMP/backups" bash scripts/backup-db.sh
+          BACKUP_DIR="$RUNNER_TEMP/backups" bash scripts/restore-db.sh --check
 
   smoke:
     runs-on: ubuntu-latest

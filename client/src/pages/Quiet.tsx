@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, lazy, Suspense } from "react";
+
+// Diagramm erst nach dem ersten Bild (#354): recharts ist 384 kB.
+const QuietChart = lazy(() => import("@/components/charts/QuietChart"));
 import {
   BellOff,
   LineChart,
@@ -8,16 +11,6 @@ import {
   Trash2,
   Volume2,
 } from "lucide-react";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ReferenceLine,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -340,46 +333,17 @@ export default function QuietPage() {
           </CardHeader>
           <CardContent>
             <div className="h-44 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={history}
-                  margin={{ top: 4, right: 4, bottom: 0, left: -22 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    className="stroke-border/60"
-                  />
-                  <XAxis
-                    dataKey="time"
-                    tick={{ fontSize: 10 }}
-                    interval="preserveStartEnd"
-                    minTickGap={40}
-                  />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
-                  <Tooltip
-                    formatter={(value: number) => [
-                      t.quiet.tooltipValue(value),
-                      t.quiet.tooltipName,
-                    ]}
-                    labelFormatter={(label: string) =>
-                      t.quiet.tooltipLabel(label)
-                    }
-                  />
-                  <ReferenceLine
-                    y={settings.threshold}
-                    stroke="var(--destructive)"
-                    strokeDasharray="4 4"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="max"
-                    stroke="var(--primary)"
-                    fill="var(--primary)"
-                    fillOpacity={0.25}
-                    isAnimationActive={false}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <Suspense fallback={null}>
+                <QuietChart
+                  history={history}
+                  threshold={settings.threshold}
+                  labels={{
+                    value: t.quiet.tooltipValue,
+                    name: t.quiet.tooltipName,
+                    time: t.quiet.tooltipLabel,
+                  }}
+                />
+              </Suspense>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
               {t.quiet.protocolNote(history.length)}

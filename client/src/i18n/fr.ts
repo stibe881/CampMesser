@@ -2467,6 +2467,8 @@ export const fr: Translation = {
     notesPlaceholder:
       "Le plus bel emplacement, la meilleure recette, quoi changer la prochaine fois …",
     submit: "Enregistrer l'entrée",
+    moreSections: "Plus sur le voyage",
+    statsLink: "Voir les statistiques et jalons",
     plannedTitle: "Séjours prévus",
     holidaySectionLabel: "Vacances scolaires & jours fériés",
     holidayCantonAria:
@@ -2685,6 +2687,15 @@ export const fr: Translation = {
     journalDeleted: "Entrée du journal supprimée",
     journalSaveFailed: "Impossible d'enregistrer l'entrée du journal",
     journalBy: (name: string) => `par ${name}`,
+  },
+  clientErrors: {
+    title: "Rapports de plantage",
+    toggleAria: "Déplier ou replier les rapports de plantage",
+    hint: "Ce que le navigateur a signalé lorsque l’interface a planté – les plus récents d’abord. Visible seulement pour toi en tant qu’exploitant.",
+    empty:
+      "Aucun plantage signalé pour l’instant. C’est ainsi que ça doit être.",
+    loadFailed: "Le journal n’a pas pu être lu.",
+    count: (n: number) => (n === 1 ? "1 rapport" : `${n} rapports`),
   },
   tripBoard: {
     title: "Panneau d'affichage",

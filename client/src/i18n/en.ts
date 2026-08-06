@@ -2387,6 +2387,8 @@ export const en: Translation = {
     notesPlaceholder:
       "Nicest spot, best recipe, what to do differently next time …",
     submit: "Save entry",
+    moreSections: "More about the trip",
+    statsLink: "View statistics and milestones",
     plannedTitle: "Planned stays",
     holidaySectionLabel: "School & public holidays",
     holidayCantonAria: "Choose the canton for holiday hints",
@@ -2595,6 +2597,14 @@ export const en: Translation = {
     journalDeleted: "Journal entry deleted",
     journalSaveFailed: "Journal entry could not be saved",
     journalBy: (name: string) => `by ${name}`,
+  },
+  clientErrors: {
+    title: "Crash reports",
+    toggleAria: "Expand or collapse crash reports",
+    hint: "What the browser reported when the interface crashed – newest first. Visible only to you as the operator.",
+    empty: "No crash reported yet. That is how it should be.",
+    loadFailed: "The log could not be read.",
+    count: (n: number) => (n === 1 ? "1 report" : `${n} reports`),
   },
   tripBoard: {
     title: "Pinboard",

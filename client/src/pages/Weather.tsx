@@ -1,4 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
+
+// Diagramme erst nach dem ersten Bild (#354): recharts ist 384 kB.
+const RainChart = lazy(() => import("@/components/charts/RainChart"));
+const DayHoursChart = lazy(() => import("@/components/charts/DayHoursChart"));
 import { fmtWeekdayDay } from "@/lib/dateFormat";
 import {
   AlertTriangle,
@@ -33,16 +37,6 @@ import {
   Wind,
   X,
 } from "lucide-react";
-import {
-  Bar,
-  CartesianGrid,
-  ComposedChart,
-  Line,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { Link } from "wouter";
 import PageHeader from "@/components/PageHeader";
 import OfficialWarnings from "@/components/OfficialWarnings";
@@ -2113,62 +2107,16 @@ export default function WeatherPage() {
           <Card className="mb-6">
             <CardContent className="pt-5">
               <div className="h-44 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart
+                <Suspense fallback={null}>
+                  <RainChart
                     data={rainData}
-                    margin={{ top: 4, right: -18, bottom: 0, left: -18 }}
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      className="stroke-border/60"
-                    />
-                    <XAxis
-                      dataKey="label"
-                      tick={{ fontSize: 10 }}
-                      interval="preserveStartEnd"
-                      minTickGap={36}
-                    />
-                    <YAxis
-                      yAxisId="mm"
-                      domain={[0, (max: number) => Math.max(2, Math.ceil(max))]}
-                      tick={{ fontSize: 10 }}
-                    />
-                    <YAxis
-                      yAxisId="prob"
-                      orientation="right"
-                      domain={[0, 100]}
-                      tick={{ fontSize: 10 }}
-                    />
-                    <Tooltip
-                      formatter={(value: number, name: string) =>
-                        name === t.weather.chartRain
-                          ? [`${value.toFixed(1)} mm/h`, t.weather.chartRain]
-                          : [`${Math.round(value)} %`, t.weather.chartProb]
-                      }
-                      labelFormatter={(label: string) =>
-                        t.weather.chartTooltipHour(label)
-                      }
-                    />
-                    <Bar
-                      yAxisId="mm"
-                      dataKey="mm"
-                      name={t.weather.chartRain}
-                      fill="var(--chart-2)"
-                      fillOpacity={0.75}
-                      isAnimationActive={false}
-                    />
-                    <Line
-                      yAxisId="prob"
-                      type="monotone"
-                      dataKey="prob"
-                      name={t.weather.chartProb}
-                      stroke="var(--chart-4)"
-                      strokeWidth={2}
-                      dot={false}
-                      isAnimationActive={false}
-                    />
-                  </ComposedChart>
-                </ResponsiveContainer>
+                    labels={{
+                      rain: t.weather.chartRain,
+                      prob: t.weather.chartProb,
+                      hour: t.weather.chartTooltipHour,
+                    }}
+                  />
+                </Suspense>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 {t.weather.chartLegend}
@@ -2245,73 +2193,15 @@ export default function WeatherPage() {
                         {openDayHours.length > 0 ? (
                           <>
                             <div className="h-40 w-full">
-                              <ResponsiveContainer width="100%" height="100%">
-                                <ComposedChart
+                              <Suspense fallback={null}>
+                                <DayHoursChart
                                   data={openDayHours}
-                                  margin={{
-                                    top: 4,
-                                    right: -18,
-                                    bottom: 0,
-                                    left: -18,
+                                  labels={{
+                                    rain: t.weather.chartRain,
+                                    temp: t.weather.chartTemp,
                                   }}
-                                >
-                                  <CartesianGrid
-                                    strokeDasharray="3 3"
-                                    className="stroke-border/60"
-                                  />
-                                  <XAxis
-                                    dataKey="label"
-                                    tick={{ fontSize: 10 }}
-                                    interval="preserveStartEnd"
-                                    minTickGap={28}
-                                  />
-                                  <YAxis
-                                    yAxisId="temp"
-                                    tick={{ fontSize: 10 }}
-                                  />
-                                  <YAxis
-                                    yAxisId="mm"
-                                    orientation="right"
-                                    domain={[
-                                      0,
-                                      (max: number) =>
-                                        Math.max(2, Math.ceil(max)),
-                                    ]}
-                                    tick={{ fontSize: 10 }}
-                                  />
-                                  <Tooltip
-                                    formatter={(value: number, name: string) =>
-                                      name === t.weather.chartRain
-                                        ? [
-                                            `${value.toFixed(1)} mm/h`,
-                                            t.weather.chartRain,
-                                          ]
-                                        : [
-                                            `${Math.round(value)} °C`,
-                                            t.weather.chartTemp,
-                                          ]
-                                    }
-                                  />
-                                  <Bar
-                                    yAxisId="mm"
-                                    dataKey="mm"
-                                    name={t.weather.chartRain}
-                                    fill="var(--chart-2)"
-                                    fillOpacity={0.75}
-                                    isAnimationActive={false}
-                                  />
-                                  <Line
-                                    yAxisId="temp"
-                                    type="monotone"
-                                    dataKey="temp"
-                                    name={t.weather.chartTemp}
-                                    stroke="var(--chart-1)"
-                                    strokeWidth={2}
-                                    dot={false}
-                                    isAnimationActive={false}
-                                  />
-                                </ComposedChart>
-                              </ResponsiveContainer>
+                                />
+                              </Suspense>
                             </div>
                             <p className="mt-1.5 text-xs text-muted-foreground">
                               {t.weather.hourlyLegend}

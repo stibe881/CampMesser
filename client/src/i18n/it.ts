@@ -2441,6 +2441,8 @@ export const it: Translation = {
     notesPlaceholder:
       "La piazzola più bella, la ricetta migliore, cosa cambiare la prossima volta …",
     submit: "Salva voce",
+    moreSections: "Altro sul viaggio",
+    statsLink: "Vedi statistiche e traguardi",
     plannedTitle: "Soggiorni pianificati",
     holidaySectionLabel: "Vacanze scolastiche & giorni festivi",
     holidayCantonAria:
@@ -2658,6 +2660,14 @@ export const it: Translation = {
     journalDeleted: "Voce del diario eliminata",
     journalSaveFailed: "Impossibile salvare la voce del diario",
     journalBy: (name: string) => `di ${name}`,
+  },
+  clientErrors: {
+    title: "Segnalazioni di crash",
+    toggleAria: "Apri o chiudi le segnalazioni di crash",
+    hint: "Ciò che il browser ha segnalato quando l’interfaccia è andata in crash – prima le più recenti. Visibile solo a te come gestore.",
+    empty: "Nessun crash segnalato finora. È così che deve essere.",
+    loadFailed: "Non è stato possibile leggere il registro.",
+    count: (n: number) => (n === 1 ? "1 segnalazione" : `${n} segnalazioni`),
   },
   tripBoard: {
     title: "Bacheca",
