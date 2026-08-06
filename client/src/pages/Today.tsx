@@ -1,5 +1,5 @@
 /**
- * «Heute»-Ansicht während der Reise (#298).
+ * «Heute»-Ansicht während der Reise (#298, ausgebaut in #330).
  *
  * Auf dem Platz braucht niemand ein Menü aus vierzig Kacheln. Man will
  * wissen: welcher Tag ist das, wie wird das Wetter, was gibt es zu essen,
@@ -9,7 +9,17 @@
  * Kacheln. Eine «Heute»-Ansicht im November hätte nichts zu sagen.
  *
  * Die Reihenfolge ist bewusst: Wetter zuerst, weil es den Tag bestimmt;
- * dann das Essen, weil das die nächste Frage ist; dann die Aufgaben.
+ * dann das Essen, weil das die nächste Frage ist; dann die Handgriffe.
+ *
+ * WAS #330 DAZUGEBRACHT HAT, und warum: Die Seite ist WÄHREND der Reise
+ * der Hauptbildschirm, zeigte aber zwei leere Kästen und drei Knöpfe, die
+ * woanders hinführen. Neu stehen die Ämtli des Tages hier – mit Häkchen,
+ * nicht als Verweis, denn ein Ämtli hakt man im Vorbeigehen ab und öffnet
+ * dafür keine zweite Seite. Dazu, was in der Kühlbox heute oder morgen
+ * abläuft: Das ist die einzige Information des Tages, die verdirbt.
+ *
+ * KEINE NEUEN ABFRAGEN OHNE REISE: Alles hängt an `enabled: Boolean(trip)`.
+ * Wer die Seite im Winter öffnet, holt nichts.
  */
 import { useMemo } from "react";
 import { fmtWeekdayLong } from "@/lib/dateFormat";
@@ -17,15 +27,19 @@ import { Link } from "wouter";
 import {
   ArrowRight,
   CalendarDays,
+  Check,
   ClipboardList,
   CloudSunRain,
+  ListChecks,
   NotebookPen,
+  Refrigerator,
   ShoppingCart,
   Tent,
   UtensilsCrossed,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
+import QueryError from "@/components/QueryError";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
@@ -37,6 +51,7 @@ import { trpc } from "@/lib/trpc";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { MEAL_LABELS } from "@shared/menuPlan";
 import { currentTripDay } from "@shared/trips";
+import { expiryInfo } from "@shared/food";
 import {
   nightsLeft,
   openTasks,
@@ -46,12 +61,18 @@ import {
 import { recipes } from "@/data/recipes";
 import { loadTodayStart, saveTodayStart } from "@/lib/todayStart";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
+import { useDayWeather } from "@/lib/useDayWeather";
+import { enqueueToggle } from "@/lib/offlineQueue";
+import { hapticTick } from "@/lib/haptics";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { useState } from "react";
 
 export default function TodayPage() {
   const { lang, t } = useI18n();
   const td = t.today;
   const { isAuthenticated, loading } = useAuth();
+  const utils = trpc.useUtils();
 
   const tripsQuery = trpc.trips.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -76,6 +97,32 @@ export default function TodayPage() {
     staleTime: 5 * 60_000,
   });
 
+  // Der Zeltplatz liefert die Koordinaten fürs Wetter. Bei einer geteilten
+  // Reise gehört der Platz jemand anderem – dann fehlen die Koordinaten,
+  // und die Wetter-Zeile bleibt weg statt falsch zu sein.
+  const spotsQuery = trpc.spots.list.useQuery(undefined, {
+    enabled: Boolean(trip),
+    staleTime: 5 * 60_000,
+  });
+  const spot =
+    trip?.spotId != null
+      ? (spotsQuery.data ?? []).find(s => s.id === trip.spotId)
+      : undefined;
+  const weather = useDayWeather(spot?.latitude, spot?.longitude, lang);
+
+  const choresQuery = trpc.chores.assignments.useQuery(
+    { day: today },
+    { enabled: Boolean(trip) }
+  );
+  const choreListQuery = trpc.chores.list.useQuery(undefined, {
+    enabled: Boolean(trip),
+    staleTime: 5 * 60_000,
+  });
+  const foodQuery = trpc.food.list.useQuery(undefined, {
+    enabled: Boolean(trip),
+    staleTime: 60_000,
+  });
+
   // Einstellung «mit Heute starten» – hier, wo man sie braucht
   const [startWithToday, setStartWithToday] = useState(() => loadTodayStart());
   const startSync = useSyncedSetting<unknown>("todayStart", value => {
@@ -97,6 +144,61 @@ export default function TodayPage() {
     () => openTasks(boardQuery.data ?? []),
     [boardQuery.data]
   );
+
+  /** Die Ämtli des Tages, mit ihrem Namen aus der Ämtli-Liste. */
+  const chores = useMemo(() => {
+    const names = new Map(
+      (choreListQuery.data ?? []).map(chore => [chore.id, chore.title])
+    );
+    return (choresQuery.data ?? []).flatMap(row => {
+      const title = names.get(row.choreId);
+      return title ? [{ id: row.id, title, done: row.doneAt !== null }] : [];
+    });
+  }, [choresQuery.data, choreListQuery.data]);
+
+  /**
+   * Was heute oder morgen abläuft – mehr nicht.
+   *
+   * Dieselbe Schwelle wie beim App-Icon-Zähler (#132) und im Widget: Was
+   * in fünf Tagen abläuft, ist keine Sache für heute, und eine Liste, die
+   * jeden Tag dasselbe zeigt, liest bald niemand mehr.
+   */
+  const expiring = useMemo(
+    () =>
+      (foodQuery.data ?? []).flatMap(item => {
+        const info = expiryInfo(item.expiryDate, today, lang);
+        return info && info.daysLeft >= 0 && info.daysLeft <= 1
+          ? [{ id: item.id, name: item.name, label: info.label }]
+          : [];
+      }),
+    [foodQuery.data, today, lang]
+  );
+
+  /**
+   * Ämtli abhaken – derselbe Weg wie auf der Ämtli-Seite (#320):
+   * optimistisch und offline gepuffert. Abgehakt wird auf dem Platz, also
+   * dort, wo kein Empfang ist.
+   */
+  const setDone = trpc.chores.setDone.useMutation({
+    onMutate: async input => {
+      hapticTick();
+      if (!navigator.onLine) enqueueToggle("chore", input.id, input.done);
+      await utils.chores.assignments.cancel();
+      const stamp = input.done ? new Date() : null;
+      utils.chores.assignments.setData({ day: today }, rows =>
+        rows?.map(row =>
+          row.id === input.id ? { ...row, doneAt: stamp } : row
+        )
+      );
+    },
+    onSuccess: () => {
+      void utils.chores.assignments.invalidate();
+    },
+    onError: e => {
+      toast.error(e.message);
+      void utils.chores.assignments.invalidate();
+    },
+  });
 
   /** Was auf dem Teller steht – Rezeptname oder Freitext. */
   const mealText = (entry: {
@@ -141,6 +243,14 @@ export default function TodayPage() {
 
       {tripsQuery.isLoading ? (
         <Skeleton className="h-40 w-full rounded-lg" />
+      ) : tripsQuery.isError ? (
+        // Ohne diesen Zweig behauptete die Seite «Gerade läuft keine
+        // Reise», wenn bloss der Server nicht antwortete – eine falsche
+        // Aussage über die eigenen Daten, mitten in der Reise.
+        <QueryError
+          onRetry={() => void tripsQuery.refetch()}
+          retrying={tripsQuery.isFetching}
+        />
       ) : !trip ? (
         // Ohne laufende Reise ehrlich leer statt künstlich gefüllt
         <div className="rounded-xl border border-dashed border-border p-6 text-center">
@@ -166,6 +276,22 @@ export default function TodayPage() {
             {nights !== null && (
               <p className="mt-1 text-sm text-muted-foreground">
                 {nights === 0 ? td.departureToday : td.nightsLeft(nights)}
+              </p>
+            )}
+            {/* Das Wetter bestimmt den Tag – es gehört in die Kopfzeile,
+                nicht hinter einen Knopf. Ohne Koordinaten oder ohne Netz
+                bleibt die Zeile weg statt zu behaupten, es sei nichts. */}
+            {weather && (
+              <p className="mt-1 flex items-center gap-1.5 text-sm font-medium">
+                <CloudSunRain
+                  className="h-4 w-4 text-primary"
+                  aria-hidden="true"
+                />
+                {td.weatherLine(
+                  Math.round(weather.minC),
+                  Math.round(weather.maxC),
+                  weather.label
+                )}
               </p>
             )}
             <div className="mt-3 flex flex-wrap gap-2">
@@ -204,6 +330,13 @@ export default function TodayPage() {
             </h3>
             {menuQuery.isLoading ? (
               <Skeleton className="mt-2 h-16 w-full rounded" />
+            ) : menuQuery.isError ? (
+              <div className="mt-2">
+                <QueryError
+                  onRetry={() => void menuQuery.refetch()}
+                  retrying={menuQuery.isFetching}
+                />
+              </div>
             ) : meals.length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">
                 {td.mealsEmpty}
@@ -224,6 +357,101 @@ export default function TodayPage() {
             )}
           </section>
 
+          {/* Ämtli: der Handgriff, den man hier auch TUT.
+              Ein Verweis auf die Ämtli-Seite wäre ein Zwischenschritt für
+              zwei Häkchen – deshalb steht die Liste hier zum Abhaken, und
+              nur der Weg zum Verteilen führt weiter. */}
+          <section className="mt-4 rounded-xl border border-border bg-card p-4">
+            <h3 className="flex items-center gap-2 text-sm font-semibold">
+              <ListChecks className="h-4 w-4 text-primary" aria-hidden="true" />
+              {td.choresTitle}
+            </h3>
+            {choresQuery.isLoading || choreListQuery.isLoading ? (
+              <Skeleton className="mt-2 h-16 w-full rounded" />
+            ) : choresQuery.isError ? (
+              <div className="mt-2">
+                <QueryError
+                  onRetry={() => void choresQuery.refetch()}
+                  retrying={choresQuery.isFetching}
+                />
+              </div>
+            ) : chores.length === 0 ? (
+              <p className="mt-2 text-sm text-muted-foreground">
+                {td.choresEmpty}
+              </p>
+            ) : (
+              <ul className="mt-2 space-y-1.5">
+                {chores.map(chore => (
+                  <li key={chore.id} className="flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setDone.mutate({ id: chore.id, done: !chore.done })
+                      }
+                      className={cn(
+                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                        chore.done
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border"
+                      )}
+                      aria-pressed={chore.done}
+                      aria-label={td.choresToggleAria(chore.title)}
+                    >
+                      {chore.done && (
+                        <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                      )}
+                    </button>
+                    <span
+                      className={cn(
+                        "min-w-0 text-sm",
+                        chore.done && "line-through opacity-70"
+                      )}
+                    >
+                      {chore.title}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link
+              href="/aemtli"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              {td.choresAll}
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          </section>
+
+          {/* Kühlbox: die einzige Information des Tages, die VERDIRBT.
+              Ohne etwas Ablaufendes fehlt der Kasten ganz – «nichts läuft
+              ab» ist keine Nachricht, sondern Platzverbrauch. */}
+          {expiring.length > 0 && (
+            <section className="mt-4 rounded-xl border border-border bg-card p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold">
+                <Refrigerator
+                  className="h-4 w-4 text-primary"
+                  aria-hidden="true"
+                />
+                {td.expiryTitle}
+              </h3>
+              <ul className="mt-2 space-y-1.5">
+                {expiring.map(item => (
+                  <li key={item.id} className="flex gap-2 text-sm">
+                    <span className="min-w-0 font-medium">{item.name}</span>
+                    <span className="text-muted-foreground">{item.label}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/kuehlbox"
+                className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+              >
+                {td.expiryLink}
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </Link>
+            </section>
+          )}
+
           {/* Aufgaben: was noch offen ist */}
           <section className="mt-4 rounded-xl border border-border bg-card p-4">
             <h3 className="flex items-center gap-2 text-sm font-semibold">
@@ -235,6 +463,16 @@ export default function TodayPage() {
             </h3>
             {boardQuery.isLoading ? (
               <Skeleton className="mt-2 h-16 w-full rounded" />
+            ) : boardQuery.isError ? (
+              // «Nichts offen. Geniess den Tag.» ist eine Auskunft, nach
+              // der man handelt – die darf nicht aus einem Serverfehler
+              // entstehen.
+              <div className="mt-2">
+                <QueryError
+                  onRetry={() => void boardQuery.refetch()}
+                  retrying={boardQuery.isFetching}
+                />
+              </div>
             ) : tasks.length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">
                 {td.tasksEmpty}
