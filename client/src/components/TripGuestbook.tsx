@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
 import { useTripSectionCounts } from "@/hooks/useTripSectionCounts";
+import { useHashSection } from "@/hooks/useHashSection";
 import { toast } from "sonner";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
@@ -52,7 +53,9 @@ export default function TripGuestbook({
   const { lang, t } = useI18n();
   const gb = t.guestbook;
   const utils = trpc.useUtils();
-  const [open, setOpen] = useState(false);
+  // Tiefer Link aus der Suche (#349): /tagebuch/12#gaestebuch
+  const { matched: deepLinked, ref: cardRef } = useHashSection("#gaestebuch");
+  const [open, setOpen] = useState(deepLinked);
   const [message, setMessage] = useState("");
   const [photoValue, setPhotoValue] = useState<string>(NO_PHOTO);
 
@@ -120,7 +123,7 @@ export default function TripGuestbook({
   };
 
   return (
-    <div className="mt-2 rounded-lg border border-border bg-card">
+    <div ref={cardRef} className="mt-2 rounded-lg border border-border bg-card">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}

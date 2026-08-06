@@ -892,6 +892,51 @@ export async function getTripSectionCounts(tripIds: number[]) {
   ]);
   return { boardNotes, journal, guestbook, changes };
 }
+/**
+ * Der geschriebene Inhalt einer Reise – für die globale Suche (#349).
+ *
+ * Die Suche kannte Packlisten, Plätze, Inventar, Kisten, Kühlbox, Reisen
+ * und freie Notizen, aber nicht den Text IN einer Reise: Tages-Journal,
+ * Pinnwand, Gästebuch. «Wo habe ich notiert, dass der Platz keinen Strom
+ * hat?» blieb unbeantwortet, obwohl es dasteht.
+ *
+ * Drei Abfragen für alle Reisen zusammen. Geholt wird nur, was gesucht
+ * und angezeigt wird – kein `select *`.
+ */
+export async function getTripTexts(tripIds: number[]) {
+  if (tripIds.length === 0) return { journal: [], board: [], guestbook: [] };
+  const db = requireDb(await getDb());
+  const [journal, board, guestbook] = await Promise.all([
+    db
+      .select({
+        id: tripJournal.id,
+        tripId: tripJournal.tripId,
+        day: tripJournal.day,
+        text: tripJournal.text,
+      })
+      .from(tripJournal)
+      .where(inArray(tripJournal.tripId, tripIds)),
+    db
+      .select({
+        id: tripBoardNotes.id,
+        tripId: tripBoardNotes.tripId,
+        text: tripBoardNotes.text,
+        done: tripBoardNotes.done,
+      })
+      .from(tripBoardNotes)
+      .where(inArray(tripBoardNotes.tripId, tripIds)),
+    db
+      .select({
+        id: tripGuestbook.id,
+        tripId: tripGuestbook.tripId,
+        authorName: tripGuestbook.authorName,
+        text: tripGuestbook.message,
+      })
+      .from(tripGuestbook)
+      .where(inArray(tripGuestbook.tripId, tripIds)),
+  ]);
+  return { journal, board, guestbook };
+}
 /** Einzelne Ausgabe laden (für die Zugriffsprüfung über ihre tripId). */
 export async function getTripExpenseById(id: number) {
   const db = requireDb(await getDb());

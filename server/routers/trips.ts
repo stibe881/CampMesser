@@ -1470,6 +1470,30 @@ export const tripsRouters = {
       const raw = await db.getTripSectionCounts(ids);
       return buildTripSectionCounts(ids, raw);
     }),
+    /**
+     * Der geschriebene Inhalt aller Reisen – für die globale Suche (#349).
+     *
+     * WARUM EIN EIGENER ENDPUNKT: Die Suche baut ihren Index im Browser
+     * aus dem, was sie hat. Journal, Pinnwand und Gästebuch hatte sie
+     * nicht, weil jeder Abschnitt seine Einträge erst beim Aufklappen
+     * holt – also fand sie den Text nicht, der dort steht.
+     *
+     * DER PREIS, ehrlich: Das sind alle Journal-Texte aller Reisen auf
+     * einmal. Getragen wird er nur von denen, die suchen: Die Startseite
+     * ruft ihn erst beim ANTIPPEN des Suchfelds ab, wie alle anderen
+     * Listen der Suche auch (#307). Wer nie sucht, holt nichts.
+     */
+    texts: protectedProcedure.query(async ({ ctx }) => {
+      const [own, member] = await Promise.all([
+        db.getTripLogs(ctx.user.id),
+        db.getMemberTripLogs(ctx.user.id),
+      ]);
+      const ids = [
+        ...own.map(trip => trip.id),
+        ...member.map(({ trip }) => trip.id),
+      ];
+      return db.getTripTexts(ids);
+    }),
     history: protectedProcedure
       .input(z.object({ tripId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
