@@ -3667,6 +3667,7 @@ export const de = {
       `${phase} – der Mond ist zu ${percent} % beleuchtet.`,
     moreTasks: (count: number) =>
       count === 1 ? "und 1 weitere Aufgabe" : `und ${count} weitere Aufgaben`,
+    openToday: "Zur Heute-Ansicht",
   },
   guestbook: {
     title: "Gästebuch",

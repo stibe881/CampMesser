@@ -17,7 +17,9 @@
  * `shared/briefing.ts` – dort steht auch, warum Leerzeilen wegfallen.
  */
 import { useEffect, useState } from "react";
+import { Link } from "wouter";
 import {
+  ArrowRight,
   CloudSunRain,
   ListTodo,
   Moon as MoonIcon,
@@ -189,7 +191,7 @@ export default function MorningBriefing({
 
   return (
     <section
-      className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm"
+      className="relative mb-6 rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary/40"
       aria-label={tb.sectionAria}
     >
       <h2 className="flex items-center gap-2 font-serif text-lg font-semibold">
@@ -218,6 +220,19 @@ export default function MorningBriefing({
           {tb.moreTasks(remaining)}
         </p>
       )}
+      {/* Das Briefing ist die Kurzfassung, «Heute» die Langfassung – wer
+          hier liest, will meistens dorthin. Der Link trägt deshalb ein
+          `after`, das die GANZE Karte überdeckt: Antippen wirkt überall,
+          aber vorgelesen wird nach wie vor das Briefing und danach ein
+          Link mit eigenem Text. Ein `aria-label` auf einer Karte-als-Link
+          hätte den Inhalt für Screenreader verschluckt. */}
+      <Link
+        href="/heute"
+        className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary after:absolute after:inset-0 after:rounded-xl hover:underline"
+      >
+        {tb.openToday}
+        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+      </Link>
     </section>
   );
 }

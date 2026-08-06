@@ -3633,6 +3633,7 @@ export const it: Translation = {
       `${phase} – la luna è illuminata al ${percent} %.`,
     moreTasks: (count: number) =>
       count === 1 ? "e 1 altro compito" : `e altri ${count} compiti`,
+    openToday: "Vai alla vista Oggi",
   },
   guestbook: {
     title: "Libro degli ospiti",
