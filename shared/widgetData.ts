@@ -2,6 +2,7 @@ import { l4, pick, type Language } from "./i18n";
 import { daysUntilTrip, currentTripDay } from "./trips";
 import { expiryInfo } from "./food";
 import { gearTaskDue, type GearTaskLike } from "./gearTasks";
+import type { WidgetTask } from "./widgetActions";
 
 /**
  * Die Nutzlast für die iPhone-Widgets (#323).
@@ -27,6 +28,13 @@ import { gearTaskDue, type GearTaskLike } from "./gearTasks";
  * WAS DRIN STEHT, ist bewusst knapp: Ein Widget wird im Vorbeigehen
  * angeschaut. Zwei Fragen beantwortet es, mehr nicht – «wann geht es los
  * und bin ich bereit» und «muss ich etwas aufbrauchen oder pflegen».
+ *
+ * DAZU EINE LISTE ZUM ABHAKEN (#327): Seit iOS 17 kann ein Widget etwas
+ * TUN. Was dort steht, hängt davon ab, wo man gerade steht – vor der
+ * Reise die nächsten offenen Punkte der Packliste, während der Reise die
+ * heutigen Ämtli. Beides sind Handgriffe, die man im Vorbeigehen macht,
+ * und beide sind idempotent: «Eintrag 42 ist abgehakt» schadet doppelt
+ * geschickt nicht.
  */
 
 /** Ein Widget-Feld: grosse Zahl, Titel, Zeile darunter. */
@@ -49,14 +57,28 @@ export interface WidgetProgress {
 
 export interface WidgetPayload {
   /** Fassung der Nutzlast; das Swift-Teil prüft sie, bevor es zeichnet. */
-  version: 1;
+  version: 2;
   /** Wann gebaut (ISO) – das Widget zeigt es nicht, aber es hilft beim Suchen. */
   builtAt: string;
   trip: WidgetPanel;
   /** Packstand der kommenden Reise; null = keine Liste verknüpft. */
   packing: WidgetProgress | null;
   supplies: WidgetPanel;
+  /** Überschrift über der Liste zum Abhaken. */
+  tasksTitle: string;
+  /** Text, wenn nichts offen ist. */
+  tasksEmpty: string;
+  /** Ziel beim Antippen NEBEN den Häkchen – die zugehörige Liste. */
+  tasksUrl: string;
+  /** Die Einträge selbst – höchstens MAX_WIDGET_TASKS. */
+  tasks: WidgetTask[];
 }
+
+/**
+ * Wie viele Zeilen ins mittlere Widget passen, ohne dass es zur Liste
+ * wird. Mehr als vier liest im Vorbeigehen ohnehin niemand.
+ */
+export const MAX_WIDGET_TASKS = 4;
 
 export interface WidgetTripLike {
   id: number;
@@ -73,12 +95,30 @@ export interface WidgetFoodLike {
   expiryDate?: string | null;
 }
 
+/** Ein Packlisten-Eintrag, soweit fürs Widget nötig. */
+export interface WidgetPackItemLike {
+  id: number;
+  name: string;
+  checked: boolean;
+}
+
+/** Eine Ämtli-Zuteilung von heute. */
+export interface WidgetChoreLike {
+  id: number;
+  title: string;
+  doneAt: Date | string | null;
+}
+
 export interface WidgetInput {
   trips: readonly WidgetTripLike[];
   foodItems: readonly WidgetFoodLike[];
   gearTasks: readonly GearTaskLike[];
   /** Packstand der nächsten Reise, falls eine Liste verknüpft ist. */
   packing: { total: number; checked: number } | null;
+  /** Einträge der verknüpften Packliste (vor der Reise). */
+  packItems?: readonly WidgetPackItemLike[];
+  /** Heutige Ämtli (während der Reise). */
+  chores?: readonly WidgetChoreLike[];
   /** Heutiges Datum als ISO-Tag (YYYY-MM-DD). */
   today: string;
   lang: Language;
@@ -303,14 +343,107 @@ function suppliesPanel(input: WidgetInput): WidgetPanel {
   };
 }
 
+/**
+ * Was im Widget zum Abhaken steht (#327).
+ *
+ * DIE REGEL FOLGT DEM ORT, AN DEM MAN STEHT: Vor der Reise sind es die
+ * nächsten offenen Punkte der verknüpften Packliste – da steht man vor
+ * dem Schrank. Während der Reise die heutigen Ämtli – da steht man auf
+ * dem Platz. Nach der Reise nichts; dort gibt es keinen Handgriff, den
+ * ein Widget abnehmen könnte.
+ *
+ * OFFENE ZUERST, ERLEDIGTE DAHINTER: Ein Widget mit vier abgehakten
+ * Zeilen ist nutzlos. Erledigte bleiben trotzdem sichtbar, solange Platz
+ * ist – sonst verschwindet die Zeile im selben Moment, in dem man sie
+ * antippt, und man weiss nicht, ob der Tipp angekommen ist.
+ */
+export function selectWidgetTasks(input: WidgetInput): {
+  title: string;
+  empty: string;
+  url: string;
+  tasks: WidgetTask[];
+} {
+  const { lang } = input;
+  const found = selectWidgetTrip(input.trips, input.today);
+
+  if (found?.running) {
+    const chores = (input.chores ?? []).map(row => ({
+      id: row.id,
+      kind: "chore" as const,
+      title: row.title,
+      checked: row.doneAt !== null,
+    }));
+    return {
+      title: pick(
+        l4(
+          "Heute im Camp",
+          "Aujourd’hui au camp",
+          "Oggi al campo",
+          "Today at camp"
+        ),
+        lang
+      ),
+      empty: pick(
+        l4(
+          "Keine Ämtli für heute",
+          "Aucune tâche aujourd’hui",
+          "Nessun turno per oggi",
+          "No chores today"
+        ),
+        lang
+      ),
+      url: "/aemtli",
+      tasks: orderTasks(chores),
+    };
+  }
+
+  const items = (input.packItems ?? []).map(row => ({
+    id: row.id,
+    kind: "packing" as const,
+    title: row.name,
+    checked: row.checked,
+  }));
+  return {
+    title: pick(
+      l4(
+        "Noch zu packen",
+        "Encore à préparer",
+        "Ancora da preparare",
+        "Still to pack"
+      ),
+      lang
+    ),
+    empty: pick(
+      l4("Alles gepackt", "Tout est prêt", "Tutto pronto", "All packed"),
+      lang
+    ),
+    url: found?.trip.packListId
+      ? `/packlisten/${found.trip.packListId}`
+      : "/packlisten",
+    tasks: orderTasks(items),
+  };
+}
+
+/** Offene zuerst, dann erledigte; abgeschnitten auf MAX_WIDGET_TASKS. */
+function orderTasks(tasks: readonly WidgetTask[]): WidgetTask[] {
+  const open = tasks.filter(task => !task.checked);
+  const done = tasks.filter(task => task.checked);
+  return [...open, ...done].slice(0, MAX_WIDGET_TASKS);
+}
+
 /** Die vollständige Nutzlast bauen. */
 export function buildWidgetPayload(input: WidgetInput): WidgetPayload {
+  const tasks = selectWidgetTasks(input);
   return {
-    version: 1,
+    version: 2,
     builtAt: `${input.today}T00:00:00Z`,
     trip: tripPanel(input),
     packing: packingProgress(input),
     supplies: suppliesPanel(input),
+    tasksTitle: tasks.title,
+    tasksEmpty: tasks.empty,
+    tasksUrl: tasks.url,
+    tasks: tasks.tasks,
   };
 }
 

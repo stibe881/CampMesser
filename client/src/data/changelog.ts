@@ -23,6 +23,24 @@ export type { ChangelogBlock };
 
 export const changelog: ChangelogBlock[] = [
   {
+    id: "2026-08-06.1",
+    date: "2026-08-06",
+    entries: [
+      l4(
+        "Im iPhone-Widget kannst du jetzt direkt abhaken. Das neue Widget «Zum Abhaken» zeigt vor der Reise die nächsten offenen Punkte deiner Packliste und während des Aufenthalts die Ämtli von heute – und ein Tipp auf den Kreis setzt das Häkchen sofort, ohne dass sich die App öffnet. Du stehst vor dem Schrank, hakst ab, fertig. Erledigtes bleibt durchgestrichen stehen, damit du siehst, dass es angekommen ist. Weil das Widget selbst keine Verbindung zum Server hat, wird das Häkchen gemerkt und beim nächsten Öffnen der App nachgeschickt – auf einem zweiten Gerät taucht es also erst dann auf. Dafür brauchst du eine neue Version der App aus dem Store.",
+        "Dans le widget iPhone, tu peux désormais cocher directement. Le nouveau widget « À cocher » montre avant le voyage les prochains points ouverts de ta liste de bagages et, pendant le séjour, les tâches du jour – un appui sur le cercle coche aussitôt, sans ouvrir l’app. Tu es devant l’armoire, tu coches, c’est fait. Ce qui est fait reste affiché barré, pour que tu voies que c’est passé. Comme le widget n’a pas de connexion au serveur, la coche est mémorisée et transmise à la prochaine ouverture de l’app – sur un deuxième appareil elle n’apparaît donc qu’à ce moment-là. Cela nécessite une nouvelle version de l’app.",
+        "Nel widget per iPhone ora puoi spuntare direttamente. Il nuovo widget «Da spuntare» mostra prima del viaggio i prossimi punti aperti della lista bagagli e durante il soggiorno i turni di oggi – un tocco sul cerchio mette la spunta subito, senza aprire l’app. Sei davanti all’armadio, spunti, fatto. Ciò che è fatto resta visibile barrato, così vedi che è arrivato. Poiché il widget non ha una connessione al server, la spunta viene memorizzata e inviata alla prossima apertura dell’app – su un secondo dispositivo compare quindi solo allora. Serve una nuova versione dell’app.",
+        "In the iPhone widget you can now tick things off directly. The new “To tick off” widget shows the next open items of your packing list before the trip and today’s chores during the stay – tapping the circle sets the tick right away, without opening the app. You stand in front of the cupboard, tick, done. Finished items stay visible with a line through them so you can see it arrived. Because the widget has no connection to the server, the tick is remembered and sent on the next time you open the app – so on a second device it appears only then. This needs a new version of the app from the store."
+      ),
+      l4(
+        "Das Morgen-Briefing führt jetzt zur Heute-Ansicht, und der Route-Knopf im Platz-Dossier ist nicht mehr zu übersehen. Das Briefing ist die Kurzfassung des Tages – bisher endete es dort, obwohl die Langfassung eine Seite weiter liegt; ein Tipp auf die Karte bringt dich nun hin. Und die Route zum Platz war ein kleiner grauer Umriss zwischen lauter Erklärkästen, obwohl sie die eine Handlung des Abschnitts «Anreise» ist.",
+        "Le briefing du matin mène désormais à la vue Aujourd’hui, et le bouton d’itinéraire dans le dossier de l’emplacement ne passe plus inaperçu. Le briefing est le résumé de la journée – il s’arrêtait là alors que la version complète est à une page ; un appui sur la carte t’y emmène. Et l’itinéraire vers l’emplacement n’était qu’un petit contour gris parmi des encadrés explicatifs, alors qu’il est l’action de la section « Arrivée ».",
+        "Il briefing del mattino porta ora alla vista Oggi e il pulsante del percorso nel dossier della piazzola non passa più inosservato. Il briefing è il riassunto della giornata – finiva lì, benché la versione completa sia a una pagina di distanza; un tocco sulla scheda ti ci porta. E il percorso verso la piazzola era un piccolo contorno grigio tra riquadri esplicativi, pur essendo l’azione della sezione «Arrivo».",
+        "The morning briefing now leads to the Today view, and the route button in the pitch dossier is no longer easy to miss. The briefing is the short version of the day – it used to end there even though the long version is one page away; tapping the card now takes you there. And the route to the pitch was a small grey outline among explanatory boxes, although it is the one action of the “Arrival” section."
+      ),
+    ],
+  },
+  {
     id: "2026-08-05.1",
     date: "2026-08-05",
     entries: [

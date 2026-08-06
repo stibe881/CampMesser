@@ -48,6 +48,14 @@ export const NATIVE_MESSAGES = {
 export const NATIVE_NAVIGATE_EVENT = "campmesser:native-navigate";
 
 /**
+ * Ereignis nativ → Web: im Widget gesetzte Häkchen (`detail` ist eine
+ * Liste von `PendingAction`). Die Widget-Erweiterung kann den Server
+ * nicht erreichen; sie merkt sie im gemeinsamen Ordner, und die App
+ * reicht sie beim Start herüber (#327).
+ */
+export const WIDGET_ACTIONS_EVENT = "campmesser:widget-actions";
+
+/**
  * Nachricht an den nativen Rahmen schicken. Im normalen Browser passiert
  * nichts – die Aufrufer müssen also nicht selbst prüfen, wo sie laufen.
  */

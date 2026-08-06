@@ -26,17 +26,48 @@ struct WidgetProgress: Codable {
   let label: String
 }
 
+/// Eine Zeile der Liste zum Abhaken (#327).
+///
+/// `kind` unterscheidet Packliste und Ämtli. Beide zählen ihre Nummern
+/// getrennt – ohne die Unterscheidung würde ein Häkchen auf Packlisten-
+/// Eintrag 7 unterwegs zum Ämtli 7 werden.
+struct WidgetTask: Codable, Identifiable {
+  let id: Int
+  let kind: String
+  let title: String
+  let checked: Bool
+}
+
 struct WidgetPayload: Codable {
   let version: Int
   let builtAt: String
   let trip: WidgetPanel
   let packing: WidgetProgress?
   let supplies: WidgetPanel
+  let tasksTitle: String
+  let tasksEmpty: String
+  let tasksUrl: String
+  let tasks: [WidgetTask]
+}
+
+/// Ein im Widget gesetztes Häkchen, das noch nicht beim Server ist (#327).
+///
+/// Die Erweiterung hat die Sitzung der App nicht und kann den Server
+/// weder fragen noch ihm etwas sagen. Sie legt das Häkchen deshalb im
+/// gemeinsamen Ordner ab; die App liest es beim nächsten Start aus und
+/// schiebt es in ihre bestehende Warteschlange. Die Gegenstelle steht in
+/// `shared/widgetActions.ts` – wer hier ein Feld ändert, muss dort hin.
+struct PendingAction: Codable {
+  let kind: String
+  let itemId: Int
+  let checked: Bool
+  /// Millisekunden seit 1970 – entscheidet, welcher Wert gewinnt.
+  let at: Double
 }
 
 extension WidgetPayload {
   /// Fassung, die dieser Widget-Stand versteht.
-  static let supportedVersion = 1
+  static let supportedVersion = 2
 
   /// Was angezeigt wird, solange die App noch nie gelaufen ist.
   ///
@@ -62,7 +93,11 @@ extension WidgetPayload {
       title: "Vorräte",
       subtitle: "App öffnen für aktuelle Daten",
       url: "/kuehlbox"
-    )
+    ),
+    tasksTitle: "Zum Abhaken",
+    tasksEmpty: "App öffnen für aktuelle Daten",
+    tasksUrl: "/packlisten",
+    tasks: []
   )
 }
 
@@ -75,6 +110,15 @@ extension WidgetPayload {
 enum WidgetStore {
   static let appGroup = "group.ch.campmesser.app"
   static let key = "campmesserWidget"
+  /// Zweiter Schlüssel: die im Widget gesetzten Häkchen (#327). Er muss
+  /// zu `WIDGET_ACTIONS_KEY` in `expo-app/App.js` passen.
+  static let actionsKey = "campmesserWidgetActions"
+  /// Wie `PENDING_LIMIT` in `shared/widgetActions.ts`.
+  static let pendingLimit = 100
+
+  private static var defaults: UserDefaults? {
+    UserDefaults(suiteName: appGroup)
+  }
 
   /// Die zuletzt geschriebene Nutzlast lesen.
   ///
@@ -82,17 +126,103 @@ enum WidgetStore {
   /// Fassung aus der Zukunft – kommt der Platzhalter zurück. Ein Widget
   /// darf nie abstürzen: Es läuft im Auftrag des Systems, und ein
   /// Absturz kostet das Aktualisierungs-Budget der ganzen App.
+  ///
+  /// ÜBER DEN STAND AUS DER APP LEGT SICH, WAS IM WIDGET GETIPPT WURDE:
+  /// Die App weiss davon erst beim nächsten Start. Ohne diese Überlagerung
+  /// spränge der Schalter zurück, sobald das Widget neu zeichnet – und
+  /// nichts wirkt kaputter als ein Schalter, der nicht bleibt.
   static func load() -> WidgetPayload {
     guard
-      let defaults = UserDefaults(suiteName: appGroup),
-      let raw = defaults.string(forKey: key),
+      let raw = defaults?.string(forKey: key),
       let data = raw.data(using: .utf8),
       let payload = try? JSONDecoder().decode(WidgetPayload.self, from: data),
       payload.version == WidgetPayload.supportedVersion
     else {
       return .placeholder
     }
-    return payload
+    return payload.withTasks(merge(payload.tasks, pending()))
+  }
+
+  /// Die vorgemerkten Häkchen lesen (Unsinn zählt als leer).
+  static func pending() -> [PendingAction] {
+    guard
+      let raw = defaults?.string(forKey: actionsKey),
+      let data = raw.data(using: .utf8),
+      let queue = try? JSONDecoder().decode([PendingAction].self, from: data)
+    else {
+      return []
+    }
+    return queue
+  }
+
+  /// Ein im Widget gesetztes Häkchen vormerken.
+  ///
+  /// Mehrfaches Umschalten desselben Eintrags ergibt EINEN Eintrag mit dem
+  /// zuletzt gewählten Wert – genau wie `addPending` in
+  /// `shared/widgetActions.ts`.
+  static func remember(kind: String, itemId: Int, checked: Bool) {
+    let target = pendingKey(kind, itemId)
+    var queue = pending().filter { pendingKey($0.kind, $0.itemId) != target }
+    queue.append(
+      PendingAction(
+        kind: kind,
+        itemId: itemId,
+        checked: checked,
+        at: Date().timeIntervalSince1970 * 1000
+      )
+    )
+    if queue.count > pendingLimit {
+      queue.removeFirst(queue.count - pendingLimit)
+    }
+    guard
+      let data = try? JSONEncoder().encode(queue),
+      let text = String(data: data, encoding: .utf8)
+    else { return }
+    defaults?.set(text, forKey: actionsKey)
+  }
+
+  /// Gegenstelle zu `mergePending`: Bei mehreren Einträgen zum selben Ziel
+  /// gewinnt der jüngste – deshalb nach `at` sortiert und nicht nach
+  /// Reihenfolge im Speicher.
+  static func merge(_ tasks: [WidgetTask], _ pending: [PendingAction])
+    -> [WidgetTask]
+  {
+    guard !pending.isEmpty else { return tasks }
+    var latest: [String: PendingAction] = [:]
+    for entry in pending.sorted(by: { $0.at < $1.at }) {
+      latest[pendingKey(entry.kind, entry.itemId)] = entry
+    }
+    return tasks.map { task in
+      guard let hit = latest[pendingKey(task.kind, task.id)] else { return task }
+      return WidgetTask(
+        id: task.id,
+        kind: task.kind,
+        title: task.title,
+        checked: hit.checked
+      )
+    }
+  }
+
+  /// Eine Zeile pro Listeneintrag – Packliste und Ämtli zählen getrennt.
+  private static func pendingKey(_ kind: String, _ itemId: Int) -> String {
+    "\(kind):\(itemId)"
+  }
+}
+
+extension WidgetPayload {
+  /// Dieselbe Nutzlast mit ausgetauschter Liste.
+  func withTasks(_ replacement: [WidgetTask]) -> WidgetPayload {
+    WidgetPayload(
+      version: version,
+      builtAt: builtAt,
+      trip: trip,
+      packing: packing,
+      supplies: supplies,
+      tasksTitle: tasksTitle,
+      tasksEmpty: tasksEmpty,
+      tasksUrl: tasksUrl,
+      tasks: replacement
+    )
   }
 }
 

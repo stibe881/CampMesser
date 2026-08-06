@@ -1199,9 +1199,13 @@ export default function SpotDetailPage() {
         {t.spotDetail.sectionArrival}
       </SectionHeading>
 
-      {/* Anreise-Route zum Platz */}
-      <div className="mt-1 flex flex-wrap gap-2">
-        <Button asChild variant="outline" size="sm">
+      {/* Anreise-Route zum Platz.
+          HERVORGEHOBEN, nicht als Umriss-Knopf: Das ist die eine Handlung
+          des ganzen Abschnitts – alles andere darunter (Abfahrtszeit,
+          Rast, Streckenwetter) sind Karten mit Erklärtext. Ein kleiner
+          grauer Knopf davor las sich wie eine Beschriftung. */}
+      <div className="mt-1">
+        <Button asChild size="lg" className="w-full sm:w-auto">
           <a
             href={directionsUrl(
               spot.latitude,
@@ -1216,7 +1220,7 @@ export default function SpotDetailPage() {
             rel="noopener noreferrer"
             aria-label={t.spotDetail.routeAria}
           >
-            <Navigation className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            <Navigation className="mr-1.5 h-5 w-5" aria-hidden="true" />
             {t.spotDetail.routeButton}
           </a>
         </Button>

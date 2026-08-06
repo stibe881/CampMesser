@@ -76,8 +76,42 @@ describe("App-Gruppe der Widgets", () => {
       "trip",
       "packing",
       "supplies",
+      "tasksTitle",
+      "tasksEmpty",
+      "tasksUrl",
+      "tasks",
     ]) {
       expect(swift).toContain(`let ${field}`);
     }
+  });
+
+  it("der Schlüssel für die vorgemerkten Häkchen ist auf beiden Seiten gleich", () => {
+    // Das zweite Fach im gemeinsamen Ordner (#327): Die Erweiterung
+    // schreibt hinein, die App leert es. Passt der Schlüssel nicht,
+    // verschwinden die im Widget gesetzten Häkchen spurlos.
+    const key = "campmesserWidgetActions";
+    expect(read("expo-app", "App.js")).toContain(`"${key}"`);
+    expect(
+      read("expo-app", "targets", "widgets", "WidgetData.swift")
+    ).toContain(`"${key}"`);
+  });
+
+  it("das Ereignis für die Häkchen heisst überall gleich", () => {
+    const name = "campmesser:widget-actions";
+    expect(read("client", "src", "lib", "nativeBridge.ts")).toContain(
+      `"${name}"`
+    );
+    expect(read("expo-app", "App.js")).toContain(`"${name}"`);
+  });
+
+  it("die Obergrenze der Warteschlange ist auf beiden Seiten dieselbe", () => {
+    // Läuft eine Seite über, während die andere weitersammelt, gehen
+    // Häkchen verloren – und zwar still.
+    const ts = read("shared", "widgetActions.ts");
+    const swift = read("expo-app", "targets", "widgets", "WidgetData.swift");
+    const tsLimit = /PENDING_LIMIT\s*=\s*(\d+)/.exec(ts)?.[1];
+    const swiftLimit = /pendingLimit\s*=\s*(\d+)/.exec(swift)?.[1];
+    expect(tsLimit).toBeDefined();
+    expect(swiftLimit).toBe(tsLimit);
   });
 });
