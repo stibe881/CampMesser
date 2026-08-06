@@ -22,6 +22,11 @@
 - [ ] OFFEN, gleiche Sorte: Die Pinnwand zeigt «3 offene Aufgaben» ebenfalls nur aufgeklappt, aus demselben Grund. Nicht mitgemacht, weil dafür ein zweiter Summen-Endpunkt nötig wäre und der Nutzer nach dem Betrag gefragt hat.
 - [x] `useHashSection()` (#344): Das Auf-und-Hinscrollen war in #343 in TripBoard einkopiert; mit dem Journal wären es zwei Kopien derselben zwei Feinheiten gewesen (Hash nur beim Aufbau lesen, zwei Bilder warten, weil die App-Hülle nach dem Kind-Effekt nach oben scrollt). Jetzt ein Haken für beide.
 
+## Startseiten-Karte führt zur Reise (Nutzerwunsch 06.08.2026, Runde 35)
+
+- [x] «Du bist in …» ist antippbar (#356, Bildschirmfoto): Die Karte zeigte Ort, Reisetag, Wetter und Mahlzeiten – und tat auf Antippen nichts, obwohl Journal, Reisekasse und Pinnwand genau in dieser Reise liegen. Der Link sitzt am TITEL und überzieht die Karte mit einem `after`: vorgelesen heisst er «Du bist in …», also das Ziel, statt eines nichtssagenden «Karte». Die drei Knöpfe (Menüplan, Platz-Dossier, Einkaufsliste) liegen mit `z-10` darüber und bleiben einzeln antippbar – dasselbe Muster wie bei den Ämtli-Häkchen in #343.
+- Nebenbei beantwortet: Das Reise-Budget steht in der Reisekasse der Reise («Budget setzen»), und «Meine Reisen» ist während eines Aufenthalts nicht verschwunden, sondern durch den Unterwegs-Modus (#305) ans Ende gerutscht – umschaltbar über «Ansicht: Unterwegs | Planen».
+
 ## Aufräumen und Absichern quer durchs Projekt (Nutzerwunsch 06.08.2026, Runde 34)
 
 - [x] Totes Gerüst der Projektvorlage entfernt (#351): `llm.ts` (456 Zeilen), `voiceTranscription.ts` (288), `map.ts` (315), `heartbeat.ts` (215), `imageGeneration.ts` (161), `dataApi.ts` (69), `storage.ts` (zeigte auf die «Forge»-API der Vorlage, die es auf dem eigenen Server nicht gibt), `storageProxy.ts` (bediente `/manus-storage/*`, worauf nichts verlinkte), `notification.ts` samt `system.notifyOwner` (brauchte BUILT_IN_FORGE_API_*, konnte also nur `false` liefern) und `ComponentShowcase.tsx` (1440 Zeilen, in keiner Route). Zusammen rund 3200 Zeilen ohne einen einzigen Aufrufer. Dazu drei npm-Pakete ohne Import (framer-motion, @aws-sdk/client-s3, @aws-sdk/s3-request-presigner) und die zwei Forge-Schlüssel aus `env.ts`. NICHT ANGERÜHRT: `oauth.ts`/`sdk.ts` – `sdk.createSessionToken` trägt die eigene Anmeldung, das ist kein totes Gerüst.

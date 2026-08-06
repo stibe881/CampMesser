@@ -86,6 +86,12 @@ export const changelog: ChangelogBlock[] = [
         "Meteo, dossier della piazzola, timer del silenzio e profilo altimetrico si aprono più in fretta. La libreria dei grafici pesa 384 kB – il secondo blocco più grande dell’app – e doveva essere caricata PRIMA che comparisse qualsiasi cosa, per grafici che non sono il motivo per cui si apre il meteo. Ora numeri, avvisi ed elenco dei giorni appaiono subito e il grafico si disegna un attimo dopo. Onestamente: si scarica lo stesso, solo non più per primo.",
         "Weather, pitch dossier, quiet timer and elevation profile open faster. The charting library behind them is 384 kB – the app’s second-largest chunk – and had to finish loading BEFORE anything appeared at all, for graphs nobody opens the weather page for. Now numbers, warnings and the daily list show immediately and the chart draws itself a moment later. Honestly: the same amount is downloaded, it is just no longer first in line."
       ),
+      l4(
+        "Die Karte «Du bist in …» auf der Startseite führt jetzt zur laufenden Reise. Bisher war sie eine Anzeige mit drei Knöpfen daneben – tippte man auf die Karte selbst, passierte nichts, obwohl Journal, Reisekasse und Pinnwand genau dort liegen. Neu ist die ganze Karte antippbar; die drei Knöpfe für Menüplan, Platz-Dossier und Einkaufsliste funktionieren unverändert einzeln.",
+        "L’encadré « Tu es à … » sur l’écran d’accueil mène désormais au voyage en cours. Jusqu’ici c’était un affichage avec trois boutons à côté – appuyer sur l’encadré lui-même ne faisait rien, alors que le journal, la caisse et le tableau s’y trouvent. Tout l’encadré est maintenant cliquable ; les trois boutons du menu, du dossier et de la liste de courses fonctionnent toujours séparément.",
+        "La scheda «Sei a …» nella schermata iniziale porta ora al viaggio in corso. Finora era solo una visualizzazione con tre pulsanti accanto – toccando la scheda stessa non succedeva nulla, benché diario, cassa e bacheca si trovino proprio lì. Ora tutta la scheda è toccabile; i tre pulsanti per menu, dossier e lista della spesa funzionano come prima singolarmente.",
+        "The “You are at …” card on the home screen now leads to the running trip. Until now it was a display with three buttons beside it – tapping the card itself did nothing, although the journal, trip fund and pinboard all live there. The whole card is tappable now; the three buttons for menu plan, pitch dossier and shopping list still work on their own."
+      ),
     ],
   },
   {

@@ -512,11 +512,13 @@ function NextTripWidget() {
       current.spotId != null
         ? spotsQuery.data?.find(s => s.id === current.spotId)
         : undefined;
+    // `relative z-10`: Die ganze Karte ist seit #356 ein Link zur Reise;
+    // ohne das lägen diese drei Knöpfe unter dessen Klickfläche.
     const linkClass =
-      "inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium shadow-sm transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.98]";
+      "relative z-10 inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium shadow-sm transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.98]";
     return (
       <div
-        className="mb-6 rounded-xl border border-primary/40 bg-accent/30 p-4 shadow-sm"
+        className="relative mb-6 rounded-xl border border-primary/40 bg-accent/30 p-4 shadow-sm transition-colors hover:border-primary/70"
         aria-label={t.home.currentTripAria(place)}
       >
         <div className="flex items-center gap-4">
@@ -525,9 +527,19 @@ function NextTripWidget() {
           </span>
           <span className="min-w-0 flex-1">
             <span className="flex flex-wrap items-baseline gap-x-2">
-              <span className="font-semibold">
+              {/* DIE GANZE KARTE FÜHRT ZUR REISE (#356): Wer hier liest,
+                  steckt gerade in diesem Aufenthalt – Journal, Reisekasse
+                  und Pinnwand liegen alle dort. Der Link sitzt bewusst am
+                  TITEL und überzieht die Karte mit einem `after`: So heisst
+                  er vorgelesen «Du bist in …», also genau das Ziel, statt
+                  eines nichtssagenden «Karte». Die drei Knöpfe unten liegen
+                  mit `z-10` darüber und bleiben einzeln antippbar. */}
+              <Link
+                href={`/tagebuch/${current.id}`}
+                className="font-semibold after:absolute after:inset-0 after:rounded-xl hover:underline"
+              >
                 {t.home.currentTripTitle(place)}
-              </span>
+              </Link>
               {day && (
                 <span className="text-sm font-semibold text-primary">
                   {t.home.currentTripDay(day.day, day.total)}
