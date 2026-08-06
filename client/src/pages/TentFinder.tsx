@@ -924,10 +924,7 @@ export default function TentFinderPage() {
           </button>
           {mapOpen && (
             <div id="tent-finder-map" className="mt-3 space-y-2">
-              {mapState === "loading" && (
-                <Skeleton className="h-[200px] w-full rounded-xl" />
-              )}
-              {mapState === "error" && (
+              {mapState === "error" ? (
                 <p className="text-sm text-muted-foreground">
                   {t.tentFinder.mapLoadFailed}{" "}
                   <button
@@ -938,24 +935,42 @@ export default function TentFinderPage() {
                     {t.tentFinder.mapRetry}
                   </button>
                 </p>
-              )}
-              {mapState === "ready" && (
+              ) : (
                 <>
-                  <div
-                    ref={mapContainerRef}
-                    role="region"
-                    aria-label={t.tentFinder.mapAria}
-                    className="h-[200px] w-full rounded-xl border border-border"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {targets.length > 0
-                      ? t.tentFinder.mapHint
-                      : t.tentFinder.mapNoTargets}
-                  </p>
-                  {!online && (
-                    <p className="text-xs text-muted-foreground" role="status">
-                      {t.tentFinder.mapOffline}
-                    </p>
+                  {/* Der Kasten steht IMMER, sobald aufgeklappt ist – Leaflet
+                      baut in ein vorhandenes Element, und der Effekt oben
+                      findet nur etwas, was schon im Dokument hängt. Wurde er
+                      erst bei «ready» gerendert, wartete der Effekt auf eine
+                      Karte, die auf den Kasten wartete: der Abschnitt blieb
+                      leer. Das Ladeskelett legt sich deshalb DARÜBER, statt
+                      an seiner Stelle zu stehen. */}
+                  <div className="relative h-[200px] w-full">
+                    <div
+                      ref={mapContainerRef}
+                      role="region"
+                      aria-label={t.tentFinder.mapAria}
+                      className="h-full w-full rounded-xl border border-border"
+                    />
+                    {mapState !== "ready" && (
+                      <Skeleton className="absolute inset-0 rounded-xl" />
+                    )}
+                  </div>
+                  {mapState === "ready" && (
+                    <>
+                      <p className="text-xs text-muted-foreground">
+                        {targets.length > 0
+                          ? t.tentFinder.mapHint
+                          : t.tentFinder.mapNoTargets}
+                      </p>
+                      {!online && (
+                        <p
+                          className="text-xs text-muted-foreground"
+                          role="status"
+                        >
+                          {t.tentFinder.mapOffline}
+                        </p>
+                      )}
+                    </>
                   )}
                 </>
               )}

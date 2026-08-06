@@ -14,17 +14,42 @@
  * Die Rechnerei liegt vollständig in `shared/tentWind.ts` und ist getestet;
  * hier steht nur Bedienung und Darstellung.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Compass, RotateCw, Wind } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useDeviceHeading } from "@/hooks/useDeviceHeading";
+import { usePersistFn } from "@/hooks/usePersistFn";
 import { useI18n } from "@/i18n";
+import { distanceMeters } from "@shared/geo";
 import { compassDirection } from "@shared/solar";
 import { TENT_SHAPES, tentWindAdvice, type TentShape } from "@shared/tentWind";
 import { cn } from "@/lib/utils";
 
 type Status = "idle" | "loading" | "ready" | "failed";
+
+/**
+ * Ab dieser Entfernung zum letzten Abruf lohnt sich ein neuer (#358).
+ *
+ * WARUM ES ÜBERHAUPT EINE SCHWELLE BRAUCHT: Der Zelt-Finder verfolgt die
+ * Position fortlaufend mit `watchPosition` und hoher Genauigkeit – jeder
+ * Fix wackelt um ein paar Meter, und es kommt sekündlich einer. Hing
+ * dieser Abschnitt an den rohen Koordinaten, lud er bei JEDEM Fix neu.
+ * Das kostete nicht nur eine Anfrage pro Sekunde beim Wetterdienst; die
+ * fertige Kompassrose wurde dabei jedes Mal wieder zum Ladeskelett. Weil
+ * der Abschnitt zuunterst auf der Seite steht, schrumpfte die Seite so um
+ * mehrere hundert Pixel – und wer ganz unten stand, wurde vom Browser ein
+ * Stück nach oben geschoben. Genau das hat der Nutzer gemeldet.
+ *
+ * WARUM ENTFERNUNG UND NICHT GERUNDETE KOORDINATEN: Runden hat Kanten.
+ * Wer zufällig genau auf einer Rasterlinie steht, springt beim Wackeln
+ * zwischen zwei Werten hin und her – und lädt wieder im Sekundentakt.
+ * «Weiter als zwei Kilometer vom letzten Abruf» kennt diese Kanten nicht.
+ *
+ * Zwei Kilometer sind dabei keine Sparsamkeit, sondern die Auflösung der
+ * Sache: Open-Meteo rechnet auf einem Gitter von rund elf Kilometern.
+ */
+const RELOAD_DISTANCE_M = 2000;
 
 interface WindNow {
   fromDeg: number;
@@ -73,15 +98,30 @@ export default function TentWindHelper({
   const tw = t.tentWind;
   const [shape, setShape] = useState<TentShape>("tunnel");
   const [status, setStatus] = useState<Status>("idle");
+  const [busy, setBusy] = useState(false);
   const [wind, setWind] = useState<WindNow | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const { heading, active, permission, start } = useDeviceHeading();
 
+  /** Wo zuletzt abgerufen wurde – Grundlage für `RELOAD_DISTANCE_M`. */
+  const loadedAtRef = useRef<{ lat: number; lon: number } | null>(null);
+
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  const load = useCallback(async () => {
+  // `usePersistFn` statt `useCallback`: Die Funktion braucht die aktuellen
+  // Koordinaten, darf aber ihre Identität nicht bei jedem Fix ändern –
+  // sonst löst der Effekt unten wieder im Sekundentakt aus.
+  const load = usePersistFn(async () => {
     if (latitude === null || longitude === null) return;
-    setStatus("loading");
+    // Vor dem Abruf merken, nicht danach: Ein Fehlschlag soll nicht bei
+    // jedem folgenden Fix erneut den Wetterdienst behelligen. Zum
+    // Wiederholen gibt es den Knopf.
+    loadedAtRef.current = { lat: latitude, lon: longitude };
+    // Beim Nachladen bleibt eine fertige Rose STEHEN. Sie durch das
+    // Ladeskelett zu ersetzen, würde die Seite unter dem Finger
+    // zusammenziehen; das Skelett gehört nur an den Anfang.
+    setStatus(prev => (prev === "ready" ? prev : "loading"));
+    setBusy(true);
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -90,13 +130,26 @@ export default function TentWindHelper({
       setStatus("ready");
     } catch {
       if (controller.signal.aborted) return;
-      setStatus("failed");
+      // Ein misslungener Nachschlag wirft nicht weg, was schon dasteht.
+      setStatus(prev => (prev === "ready" ? prev : "failed"));
+    } finally {
+      // Nur der zuletzt gestartete Abruf schaltet den Knopf wieder frei
+      if (abortRef.current === controller) setBusy(false);
     }
-  }, [latitude, longitude]);
+  });
 
-  // Sobald ein Standort da ist, einmal laden – ein Abruf, kein Dauerpolling
+  // Einmal beim ersten Standort – danach erst wieder, wenn man wirklich
+  // weitergezogen ist. Kein Dauerpolling.
   useEffect(() => {
-    if (latitude !== null && longitude !== null) void load();
+    if (latitude === null || longitude === null) return;
+    const at = loadedAtRef.current;
+    if (
+      at &&
+      distanceMeters(at.lat, at.lon, latitude, longitude) < RELOAD_DISTANCE_M
+    ) {
+      return;
+    }
+    void load();
   }, [latitude, longitude, load]);
 
   if (latitude === null || longitude === null) return null;
@@ -121,7 +174,7 @@ export default function TentWindHelper({
           size="icon"
           className="ml-auto h-8 w-8"
           onClick={() => void load()}
-          disabled={status === "loading"}
+          disabled={busy}
           aria-label={tw.refreshAria}
         >
           <RotateCw className="h-4 w-4" aria-hidden="true" />
