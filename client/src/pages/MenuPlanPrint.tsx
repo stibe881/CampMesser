@@ -11,6 +11,7 @@ import { isStandaloneApp } from "@/lib/standalone";
 import { recipes } from "@/data/recipes";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { MEALS, MEAL_LABELS, tripDays, type Meal } from "@shared/menuPlan";
+import { tripDisplayName } from "@shared/tripName";
 
 /**
  * Druckfreundliche Ansicht des Menüplans eines Trips: Tage × Mahlzeiten als
@@ -48,9 +49,7 @@ export default function MenuPlanPrintPage() {
     trip?.spotId != null
       ? (spotsQuery.data ?? []).find(s => s.id === trip.spotId)?.name
       : undefined;
-  const tripName = trip
-    ? trip.title || spotName || trip.location || t.trips.unknownPlace
-    : null;
+  const tripName = trip ? tripDisplayName(trip, lang, spotName) : null;
 
   useEffect(() => {
     document.title = tripName

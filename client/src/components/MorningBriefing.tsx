@@ -16,7 +16,6 @@
  * Welche Zeilen erscheinen und in welcher Reihenfolge, entscheidet
  * `shared/briefing.ts` – dort steht auch, warum Leerzeilen wegfallen.
  */
-import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -33,7 +32,7 @@ import { getMoonInfo } from "@shared/moon";
 import { MEALS, MEAL_LABELS } from "@shared/menuPlan";
 import { normalizeTripBoardKind } from "@shared/tripBoard";
 import { recipes } from "@/data/recipes";
-import { describeWeatherCode } from "@shared/weather";
+import { useDayWeather } from "@/lib/useDayWeather";
 import {
   briefingItems,
   briefingTasks,
@@ -48,56 +47,6 @@ const ICONS: Record<BriefingKind, typeof CloudSunRain> = {
   tasks: ListTodo,
   astro: MoonIcon,
 };
-
-interface DayWeather {
-  maxC: number;
-  minC: number;
-  label: string;
-}
-
-/** Tagesprognose am Platz – ein Abruf, ohne Schlüssel, wie im Wetter-Modul. */
-function useDayWeather(
-  latitude: number | null,
-  longitude: number | null,
-  lang: ReturnType<typeof useI18n>["lang"]
-): DayWeather | null {
-  const [weather, setWeather] = useState<DayWeather | null>(null);
-  useEffect(() => {
-    if (latitude === null || longitude === null) return;
-    let cancelled = false;
-    const params = new URLSearchParams({
-      latitude: latitude.toFixed(4),
-      longitude: longitude.toFixed(4),
-      timezone: "auto",
-      forecast_days: "1",
-      daily: "temperature_2m_max,temperature_2m_min,weather_code",
-    });
-    fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`)
-      .then(res => (res.ok ? res.json() : Promise.reject(new Error("no"))))
-      .then(json => {
-        if (cancelled) return;
-        const max = json?.daily?.temperature_2m_max?.[0];
-        const min = json?.daily?.temperature_2m_min?.[0];
-        const code = json?.daily?.weather_code?.[0];
-        if (typeof max !== "number" || typeof min !== "number") return;
-        setWeather({
-          maxC: max,
-          minC: min,
-          label:
-            typeof code === "number"
-              ? describeWeatherCode(code, lang).label
-              : "",
-        });
-      })
-      .catch(() => {
-        // Ohne Netz bleibt die Wetter-Zeile einfach weg
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [latitude, longitude, lang]);
-  return weather;
-}
 
 export default function MorningBriefing({
   tripId,

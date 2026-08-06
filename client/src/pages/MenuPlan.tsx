@@ -51,6 +51,7 @@ import {
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { clampServings, scaleIngredientsForServings } from "@shared/servings";
 import { summarizeIngredients } from "@shared/groceryList";
+import { tripDisplayName } from "@shared/tripName";
 import {
   autofillMenuPlan,
   MEALS,
@@ -629,8 +630,7 @@ export default function MenuPlanPage() {
     trip.spotId != null
       ? (spotsQuery.data ?? []).find(s => s.id === trip.spotId)?.name
       : undefined;
-  const tripName =
-    trip.title || spotName || trip.location || t.trips.unknownPlace;
+  const tripName = tripDisplayName(trip, lang, spotName);
 
   return (
     <div className="container max-w-3xl py-6">

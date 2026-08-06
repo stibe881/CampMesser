@@ -2273,7 +2273,6 @@ export const de = {
     saved: "Wanderung gespeichert",
     tripLabel: "Reise (optional)",
     tripNone: "Ohne Reise",
-    tripFallback: "Reise",
     tripBadge: (name: string) => `Reise: ${name}`,
     listTitle: "Meine Wanderungen",
     listEmpty: "Noch keine Wanderung aufgezeichnet",
@@ -4133,7 +4132,6 @@ export const de = {
     noTrip:
       "Gerade läuft keine Reise. Sobald eine beginnt, steht hier dein Tag.",
     toModules: "Alle Module",
-    unnamedPlace: "Ohne Namen",
     dayOf: (day: number, total: number) => `Tag ${day} von ${total}`,
     nightsLeft: (nights: number) =>
       nights === 1 ? "noch 1 Nacht" : `noch ${nights} Nächte`,
@@ -4146,6 +4144,14 @@ export const de = {
     mealUnknown: "Eingetragen",
     tasksTitle: "Noch offen",
     tasksEmpty: "Nichts offen. Geniess den Tag.",
+    weatherLine: (min: number, max: number, label: string) =>
+      label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
+    choresTitle: "Ämtli heute",
+    choresEmpty: "Für heute ist nichts verteilt.",
+    choresToggleAria: (title: string) => `${title} abhaken`,
+    choresAll: "Alle Ämtli",
+    expiryTitle: "Läuft bald ab",
+    expiryLink: "Zur Kühlbox",
     journal: "Ins Journal schreiben",
     startSetting: "Während einer Reise mit «Heute» starten",
     note: "Der Sprung passiert einmal beim Öffnen der App – tippst du danach auf «Start», bekommst du die Kacheln, ohne wieder hierher geworfen zu werden.",
@@ -4900,7 +4906,6 @@ export const de = {
     bookSumLabel: (n: number) =>
       n === 1 ? "1 Eintrag – Summe" : `${n} Einträge – Summe`,
     bookTripLabel: "Reise",
-    bookTripFallback: "Aufenthalt",
     bookNoTrips:
       "Du hast noch keine Reise im Tagebuch – leg zuerst eine an, dann gibt es auch eine Reisekasse.",
     bookCategoryLabel: "Kategorie",
@@ -5560,7 +5565,6 @@ export const de = {
     readFailed: "Ein geteiltes Bild konnte nicht gelesen werden.",
     tripLabel: "Zu welcher Reise?",
     tripAria: "Reise wählen",
-    tripFallback: "Reise",
     noTrips:
       "Noch keine Reise vorhanden – lege zuerst in «Meine Reisen» einen Eintrag an.",
     toTrips: "Zu «Meine Reisen»",

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import LoginPrompt from "@/components/LoginPrompt";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
+import { tripDisplayName, tripPlaceName } from "@shared/tripName";
 import { trpc } from "@/lib/trpc";
 import { isStandaloneApp } from "@/lib/standalone";
 import { recipes } from "@/data/recipes";
@@ -61,9 +62,8 @@ export default function TripPrintPage() {
     trip?.spotId != null
       ? ((spotsQuery.data ?? []).find(s => s.id === trip.spotId) ?? null)
       : null;
-  const placeName =
-    spot?.name ?? trip?.spotName ?? trip?.location ?? t.trips.unknownPlace;
-  const tripName = trip ? trip.title || placeName : null;
+  const placeName = tripPlaceName(trip ?? {}, lang, spot?.name);
+  const tripName = trip ? tripDisplayName(trip, lang, spot?.name) : null;
 
   const photos = photosQuery.data ?? [];
   const cover =

@@ -2276,7 +2276,6 @@ export const fr: Translation = {
     saved: "Randonnée enregistrée",
     tripLabel: "Voyage (facultatif)",
     tripNone: "Sans voyage",
-    tripFallback: "Voyage",
     tripBadge: (name: string) => `Voyage : ${name}`,
     listTitle: "Mes randonnées",
     listEmpty: "Aucune randonnée enregistrée pour l'instant",
@@ -4130,7 +4129,6 @@ export const fr: Translation = {
     noTrip:
       "Aucun voyage en cours. Dès qu'un voyage commence, ta journée s'affiche ici.",
     toModules: "Tous les modules",
-    unnamedPlace: "Sans nom",
     dayOf: (day: number, total: number) => `Jour ${day} sur ${total}`,
     nightsLeft: (nights: number) =>
       nights === 1 ? "encore 1 nuit" : `encore ${nights} nuits`,
@@ -4143,6 +4141,14 @@ export const fr: Translation = {
     mealUnknown: "Prévu",
     tasksTitle: "Encore à faire",
     tasksEmpty: "Rien en attente. Profite de la journée.",
+    weatherLine: (min: number, max: number, label: string) =>
+      label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
+    choresTitle: "Tâches du jour",
+    choresEmpty: "Rien n’est réparti pour aujourd’hui.",
+    choresToggleAria: (title: string) => `Cocher ${title}`,
+    choresAll: "Toutes les tâches",
+    expiryTitle: "Bientôt périmé",
+    expiryLink: "Vers la glacière",
     journal: "Écrire dans le journal",
     startSetting: "Démarrer sur « Aujourd'hui » pendant un voyage",
     note: "Le saut se fait une fois à l'ouverture de l'app – si tu touches ensuite « Accueil », tu obtiens les tuiles sans être renvoyé ici.",
@@ -4900,7 +4906,6 @@ export const fr: Translation = {
     bookSumLabel: (n: number) =>
       n === 1 ? "1 entrée – total" : `${n} entrées – total`,
     bookTripLabel: "Voyage",
-    bookTripFallback: "Séjour",
     bookNoTrips:
       "Tu n'as encore aucun voyage dans le journal – crées-en un d'abord, la caisse de voyage suivra.",
     bookCategoryLabel: "Catégorie",
@@ -5561,7 +5566,6 @@ export const fr: Translation = {
     readFailed: "Une image partagée n'a pas pu être lue.",
     tripLabel: "Vers quel voyage ?",
     tripAria: "Choisir un voyage",
-    tripFallback: "Voyage",
     noTrips:
       "Pas encore de voyage – crée d'abord une entrée dans «Mes voyages».",
     toTrips: "Vers «Mes voyages»",

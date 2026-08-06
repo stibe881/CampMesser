@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
+import { tripDisplayName } from "@shared/tripName";
 import { formatChf } from "@/lib/money";
 import { trpc } from "@/lib/trpc";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
@@ -138,10 +139,7 @@ export default function ShoppingBookingDialog({
     `${t.tripExpenses.currency} ${formatChf(rappen, lang)}`;
 
   const tripLabel = (trip: (typeof trips)[number]) =>
-    trip.title?.trim() ||
-    trip.location?.trim() ||
-    trip.spotName ||
-    t.shopping.bookTripFallback;
+    tripDisplayName(trip, lang);
   const fmtDay = (iso: string) => fmtShort(new Date(`${iso}T00:00:00`), lang);
 
   const submit = async () => {

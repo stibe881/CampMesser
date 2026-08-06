@@ -2248,7 +2248,6 @@ export const it: Translation = {
     saved: "Escursione salvata",
     tripLabel: "Viaggio (facoltativo)",
     tripNone: "Senza viaggio",
-    tripFallback: "Viaggio",
     tripBadge: (name: string) => `Viaggio: ${name}`,
     listTitle: "Le mie escursioni",
     listEmpty: "Nessuna escursione registrata finora",
@@ -4102,7 +4101,6 @@ export const it: Translation = {
     noTrip:
       "Al momento non c'è nessun viaggio in corso. Appena ne inizia uno, qui c'è la tua giornata.",
     toModules: "Tutti i moduli",
-    unnamedPlace: "Senza nome",
     dayOf: (day: number, total: number) => `Giorno ${day} di ${total}`,
     nightsLeft: (nights: number) =>
       nights === 1 ? "ancora 1 notte" : `ancora ${nights} notti`,
@@ -4115,6 +4113,14 @@ export const it: Translation = {
     mealUnknown: "Previsto",
     tasksTitle: "Ancora da fare",
     tasksEmpty: "Niente in sospeso. Goditi la giornata.",
+    weatherLine: (min: number, max: number, label: string) =>
+      label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
+    choresTitle: "Turni di oggi",
+    choresEmpty: "Per oggi non è assegnato nulla.",
+    choresToggleAria: (title: string) => `Spunta ${title}`,
+    choresAll: "Tutti i turni",
+    expiryTitle: "In scadenza",
+    expiryLink: "Vai al frigo",
     journal: "Scrivi nel diario",
     startSetting: "Durante un viaggio parti da «Oggi»",
     note: "Il salto avviene una volta all'apertura dell'app – se poi tocchi «Home» ottieni i riquadri, senza essere rispedito qui.",
@@ -4864,7 +4870,6 @@ export const it: Translation = {
     bookSumLabel: (n: number) =>
       n === 1 ? "1 voce – totale" : `${n} voci – totale`,
     bookTripLabel: "Viaggio",
-    bookTripFallback: "Soggiorno",
     bookNoTrips:
       "Non hai ancora nessun viaggio nel diario – creane uno prima, poi ci sarà anche la cassa di viaggio.",
     bookCategoryLabel: "Categoria",
@@ -5524,7 +5529,6 @@ export const it: Translation = {
     readFailed: "Un'immagine condivisa non è stata letta.",
     tripLabel: "A quale viaggio?",
     tripAria: "Scegli un viaggio",
-    tripFallback: "Viaggio",
     noTrips: "Ancora nessun viaggio – crea prima una voce in «I miei viaggi».",
     toTrips: "A «I miei viaggi»",
     upload: "Carica le foto nel viaggio",
