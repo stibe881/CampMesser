@@ -4,7 +4,6 @@ import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
-import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { MAX_JSON_BODY } from "@shared/tripPhotos";
@@ -57,7 +56,6 @@ async function startServer() {
    */
   app.use(express.json({ limit: MAX_JSON_BODY }));
   app.use(express.urlencoded({ limit: MAX_JSON_BODY, extended: true }));
-  registerStorageProxy(app);
   registerOAuthRoutes(app);
   // Health-Check für die Uptime-Überwachung: prüft Prozess und DB-Verbindung.
   // 200 = alles ok, 503 = Datenbank nicht erreichbar.

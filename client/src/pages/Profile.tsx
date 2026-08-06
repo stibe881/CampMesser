@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { fmtMedium } from "@/lib/dateFormat";
+import ClientErrorLog from "@/components/ClientErrorLog";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 import {
@@ -1597,6 +1598,9 @@ export default function ProfilePage() {
         blocks={changelogBlocks}
         intro={t.whatsNew.allIntro}
       />
+
+      {/* Absturzmeldungen (#352) – nur für Admin-Konten sichtbar */}
+      <ClientErrorLog />
 
       {/* Versions-Anzeige: welcher Build läuft gerade? */}
       <p className="mt-2 text-center text-xs text-muted-foreground/70">

@@ -2691,6 +2691,14 @@ export const de = {
     journalSaveFailed: "Tagebuch-Eintrag konnte nicht gespeichert werden",
     journalBy: (name: string) => `von ${name}`,
   },
+  clientErrors: {
+    title: "Absturzmeldungen",
+    toggleAria: "Absturzmeldungen auf- oder zuklappen",
+    hint: "Was der Browser gemeldet hat, wenn die Oberfläche abgestürzt ist – neueste zuerst. Nur für dich als Betreiber sichtbar.",
+    empty: "Noch kein Absturz gemeldet. So soll es sein.",
+    loadFailed: "Das Protokoll liess sich nicht lesen.",
+    count: (n: number) => (n === 1 ? "1 Meldung" : `${n} Meldungen`),
+  },
   tripBoard: {
     title: "Pinnwand",
     toggleAria: (name: string) => `Pinnwand von ${name} auf- oder zuklappen`,

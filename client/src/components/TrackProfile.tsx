@@ -1,3 +1,9 @@
+import { lazy, Suspense } from "react";
+
+// Diagramm erst nach dem ersten Bild (#354): recharts ist 384 kB.
+const TrackProfileChart = lazy(
+  () => import("@/components/charts/TrackProfileChart")
+);
 /**
  * Höhenprofil und Zwischenzeiten zu einer aufgezeichneten Wanderung
  * (#280).
@@ -10,15 +16,6 @@
  * das Diagramm nicht, sondern ein Satz, der das sagt. Die
  * Zwischenzeiten bleiben trotzdem – die gibt es auch ohne Höhe.
  */
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { Mountain } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -70,50 +67,16 @@ export default function TrackProfile({
         <p className="text-sm text-muted-foreground">{tp.noElevation}</p>
       ) : (
         <div className="h-44 w-full" role="img" aria-label={tp.chartAria}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
+          <Suspense fallback={null}>
+            <TrackProfileChart
               data={chartData}
-              margin={{ top: 4, right: 8, bottom: 0, left: -12 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-              <XAxis
-                dataKey="km"
-                type="number"
-                domain={["dataMin", "dataMax"]}
-                tickFormatter={value =>
-                  `${value.toFixed(1).replace(".", decimalSeparator)}`
-                }
-                tick={{ fontSize: 11 }}
-                unit=" km"
-              />
-              <YAxis
-                domain={["dataMin - 20", "dataMax + 20"]}
-                tick={{ fontSize: 11 }}
-                tickFormatter={value => `${Math.round(Number(value))}`}
-                width={44}
-              />
-              <Tooltip
-                formatter={(value: number) => [
-                  `${Math.round(value)} m`,
-                  tp.tooltipElevation,
-                ]}
-                labelFormatter={(value: number) =>
-                  tp.tooltipDistance(
-                    value.toFixed(1).replace(".", decimalSeparator)
-                  )
-                }
-              />
-              <Area
-                type="monotone"
-                dataKey="ele"
-                stroke="var(--chart-2)"
-                fill="var(--chart-2)"
-                fillOpacity={0.25}
-                strokeWidth={2}
-                isAnimationActive={false}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+              decimalSeparator={decimalSeparator}
+              labels={{
+                elevation: tp.tooltipElevation,
+                distance: tp.tooltipDistance,
+              }}
+            />
+          </Suspense>
         </div>
       )}
 

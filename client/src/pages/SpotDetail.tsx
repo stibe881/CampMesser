@@ -1,4 +1,15 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  lazy,
+  Suspense,
+} from "react";
+
+// Diagramm erst nach dem ersten Bild (#354): recharts ist 384 kB.
+const ClimateChart = lazy(() => import("@/components/charts/ClimateChart"));
 import { fmtMedium, fmtNumeric, fmtWeekdayDay } from "@/lib/dateFormat";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
@@ -29,16 +40,6 @@ import {
   Waves,
   WifiOff,
 } from "lucide-react";
-import {
-  Bar,
-  CartesianGrid,
-  ComposedChart,
-  Line,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
@@ -1464,63 +1465,17 @@ export default function SpotDetailPage() {
                   </p>
                 )}
                 <div className="h-52 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart
+                  <Suspense fallback={null}>
+                    <ClimateChart
                       data={climateChartData}
-                      margin={{ top: 4, right: -18, bottom: 0, left: -18 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        className="stroke-border/60"
-                      />
-                      <XAxis dataKey="label" tick={{ fontSize: 10 }} />
-                      <YAxis yAxisId="temp" tick={{ fontSize: 10 }} />
-                      <YAxis
-                        yAxisId="rain"
-                        orientation="right"
-                        domain={[
-                          0,
-                          (max: number) => Math.max(10, Math.ceil(max)),
-                        ]}
-                        tick={{ fontSize: 10 }}
-                      />
-                      <Tooltip
-                        formatter={(value: number, name: string) =>
-                          name === t.spotDetail.climateChartRain
-                            ? [`${value} ${t.spotDetail.climateDaysUnit}`, name]
-                            : [`${value} °C`, name]
-                        }
-                      />
-                      <Bar
-                        yAxisId="rain"
-                        dataKey="rain"
-                        name={t.spotDetail.climateChartRain}
-                        fill="var(--chart-2)"
-                        fillOpacity={0.55}
-                        isAnimationActive={false}
-                      />
-                      <Line
-                        yAxisId="temp"
-                        type="monotone"
-                        dataKey="max"
-                        name={t.spotDetail.climateChartMax}
-                        stroke="var(--chart-1)"
-                        strokeWidth={2}
-                        dot={false}
-                        isAnimationActive={false}
-                      />
-                      <Line
-                        yAxisId="temp"
-                        type="monotone"
-                        dataKey="min"
-                        name={t.spotDetail.climateChartMin}
-                        stroke="var(--chart-4)"
-                        strokeWidth={2}
-                        dot={false}
-                        isAnimationActive={false}
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
+                      labels={{
+                        max: t.spotDetail.climateChartMax,
+                        min: t.spotDetail.climateChartMin,
+                        rain: t.spotDetail.climateChartRain,
+                        daysUnit: t.spotDetail.climateDaysUnit,
+                      }}
+                    />
+                  </Suspense>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
                   {t.spotDetail.climateLegend}
