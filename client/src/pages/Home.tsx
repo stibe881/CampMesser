@@ -116,6 +116,7 @@ import {
   CalendarClock,
   ListChecks,
   MapPin,
+  Refrigerator,
   ShoppingCart,
   Tent,
   UtensilsCrossed,
@@ -592,6 +593,35 @@ function NextTripWidget() {
               aria-hidden="true"
             />
             {t.home.currentTripShoppingLink}
+          </Link>
+          {/* DREI WEITERE WEGE AUS DEM AUFENTHALT (#366, Nutzerwunsch mit
+              Bildschirmfoto): Rechts neben den drei Knöpfen war eine halbe
+              Zeile leer, und genau die drei Module, die man auf dem Platz
+              am häufigsten braucht, fehlten – was ist in der Kühlbox, wie
+              wird das Wetter, wer ist heute mit dem Abwasch dran. Alle drei
+              gehören zum Aufenthalt, hängen aber nicht an der Reise-Id:
+              Kühlbox und Ämtli-Plan gibt es je einmal, das Wetter richtet
+              sich nach dem Standort. */}
+          <Link href="/kuehlbox" className={linkClass}>
+            <Refrigerator
+              className="h-3.5 w-3.5 text-primary"
+              aria-hidden="true"
+            />
+            {t.home.currentTripFoodLink}
+          </Link>
+          <Link href="/wetter" className={linkClass}>
+            <CloudSunRain
+              className="h-3.5 w-3.5 text-primary"
+              aria-hidden="true"
+            />
+            {t.home.currentTripWeatherLink}
+          </Link>
+          <Link href="/aemtli" className={linkClass}>
+            <ListChecks
+              className="h-3.5 w-3.5 text-primary"
+              aria-hidden="true"
+            />
+            {t.home.currentTripChoresLink}
           </Link>
         </div>
       </div>

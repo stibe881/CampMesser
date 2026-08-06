@@ -10,6 +10,7 @@
 - EHRLICH ZUM DESIGN-WECHSEL: Auf einem neuen Gerät startet die App mit dem lokalen Stand und schaltet um, sobald die Server-Antwort da ist – einmal, kurz nach dem Anmelden. Der Preis dafür, dass der Start ohne Netz sofort richtig aussieht.
 - [x] Abstand zwischen «Route» und «Beste Abfahrtszeit» (#364, Nutzermeldung): Alle Abschnitte des Anreise-Bereichs tragen nur einen UNTEREN Abstand (`mb-4`); der Route-Knopf hatte gar keinen und klebte an der Karte darunter.
 - [x] Kühlbox & Trockenvorrat direkt aus der Reise (#365, Nutzerwunsch): Der Vorrat ist nicht an eine Reise gebunden – es gibt EINE Kühlbox –, aber angeschaut wird er beim Aufenthalt. Bei geplanten Reisen steht der Knopf in der Knopfzeile neben dem Menüplan; bei den Einträgen nur beim LAUFENDEN Aufenthalt, denn neben einer Reise von 2019 wäre er sinnlos.
+- [x] Drei weitere Wege aus dem laufenden Aufenthalt (#366, Nutzerwunsch mit Bildschirmfoto): Rechts neben «Menüplan · Platz-Dossier · Einkaufsliste» war eine halbe Zeile leer – und genau die drei Module fehlten, die man auf dem Platz am häufigsten braucht: Kühlbox, Camp-Wetter, Ämtli-Plan. Alle drei gehören zum Aufenthalt, hängen aber nicht an der Reise-Id: Kühlbox und Ämtli-Plan gibt es je einmal, das Wetter richtet sich nach dem Standort.
 - [ ] NICHT ANGESCHAUT, ehrlich: wie die aufgeräumte Liste am Bildschirm wirkt. Geprüft sind Typen, 2560 Tests und der Build.
 
 ## Zelt-Finder: leere Mini-Karte und die hüpfende Seite (Nutzermeldung 06.08.2026, Runde 37)

@@ -146,6 +146,10 @@ export const de = {
     currentTripSpotLink: "Platz-Dossier",
     currentTripSpotAria: (place: string) => `Platz-Dossier zu ${place} öffnen`,
     currentTripShoppingLink: "Einkaufsliste",
+    /** Drei weitere Wege aus der laufenden Reise heraus (#366) */
+    currentTripFoodLink: "Kühlbox",
+    currentTripWeatherLink: "Camp-Wetter",
+    currentTripChoresLink: "Ämtli-Plan",
     currentTripMealsSr: "Heutige Mahlzeiten:",
     anniversaryTitleOne: "Vor einem Jahr",
     anniversaryTitleMany: (years: number) => `Vor ${years} Jahren`,
