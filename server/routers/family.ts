@@ -462,6 +462,32 @@ export const familyRouters = {
           return { success: true } as const;
         }),
       /**
+       * Punkte-Schalter (#370): Ämtli machen alle, in der Rangliste
+       * stehen nur die, die im Wettbewerb sind.
+       */
+      setEarnsPoints: protectedProcedure
+        .input(
+          z.object({
+            id: z.number().int().positive(),
+            earnsPoints: z.boolean(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const child = await db.getFamilyChild(input.id, ctx.user.id);
+          if (!child) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Person nicht gefunden.",
+            });
+          }
+          await db.setFamilyChildEarnsPoints(
+            input.id,
+            ctx.user.id,
+            input.earnsPoints
+          );
+          return { success: true } as const;
+        }),
+      /**
        * Kind entfernen – Abzeichen, Zähler und Reisepass-Einträge gehen
        * mit.
        */

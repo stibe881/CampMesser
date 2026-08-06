@@ -659,6 +659,13 @@
       "when": 1785963089715,
       "tag": "0093_clear_radioactive_man",
       "breakpoints": true
+    },
+    {
+      "idx": 94,
+      "version": "5",
+      "when": 1786053822530,
+      "tag": "0094_empty_captain_stacy",
+      "breakpoints": true
     }
   ]
 }

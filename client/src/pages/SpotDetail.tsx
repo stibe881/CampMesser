@@ -53,6 +53,7 @@ import NearbyExcursions from "@/components/NearbyExcursions";
 import NearbyFirepits from "@/components/NearbyFirepits";
 import PicnicStops from "@/components/PicnicStops";
 import RouteWeather from "@/components/RouteWeather";
+import SpotTariffs from "@/components/spots/SpotTariffs";
 import DeparturePlanner from "@/components/DeparturePlanner";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
 import NearbyShops from "@/components/NearbyShops";
@@ -1150,6 +1151,11 @@ export default function SpotDetailPage() {
           >
             {t.spotDetail.costEditButton}
           </Button>
+          {/* Mehrere Tarife (#369): So steht es auf der Tafel an der
+              Rezeption – Nebensaison/Hauptsaison, darunter Erwachsene,
+              Kind, Stellplatz. Der Preis oben bleibt der eine Wert für
+              den Platz-Vergleich in der Statistik. */}
+          <SpotTariffs spotId={spot.id} tariffsJson={spot.tariffsJson} />
         </CardContent>
       </Card>
 

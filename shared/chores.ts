@@ -39,6 +39,20 @@ export interface AssignmentLike {
 export interface ChildLike {
   id: number;
   name: string;
+  /**
+   * Sammelt diese Person Punkte? (#370)
+   *
+   * Ämtli machen alle – der Punktestand ist der Wettbewerb der Kinder.
+   * Wer mitverteilt wird, ohne mitzuzählen, steht hier auf `false`.
+   * `undefined` gilt als `true`: Profile aus der Zeit vor der Spalte
+   * sollen zählen wie bisher.
+   */
+  earnsPoints?: boolean;
+}
+
+/** Zählt diese Person in der Rangliste mit? */
+export function countsForPoints(child: ChildLike): boolean {
+  return child.earnsPoints !== false;
 }
 
 /** Punkte auf den erlaubten Bereich bringen. */
@@ -101,6 +115,12 @@ export interface ScoreRow {
  * Punktestand: gezählt wird nur, was auch abgehakt ist. Sortiert nach
  * Punkten, bei Gleichstand nach Name – NICHT nach Kind-Id, sonst hängt
  * die Reihenfolge davon ab, wer zuerst angelegt wurde.
+ *
+ * WER NICHT MITZÄHLT, STEHT NICHT DRIN (#370): Die Erwachsenen machen
+ * Ämtli, aber sie stehen nicht im Wettbewerb der Kinder – ein Vater mit
+ * 40 Punkten an der Spitze macht die Rangliste sinnlos. Verteilt wird
+ * trotzdem an alle; das entscheidet `rotateAssignments`, nicht diese
+ * Funktion.
  */
 export function scoreboard(
   children: readonly ChildLike[],
@@ -110,7 +130,7 @@ export function scoreboard(
   const pointsById = new Map<number, number>();
   for (const chore of chores) pointsById.set(chore.id, chore.points);
 
-  const rows = children.map(child => {
+  const rows = children.filter(countsForPoints).map(child => {
     const mine = assignments.filter(
       a => a.childId === child.id && a.doneAt !== null
     );

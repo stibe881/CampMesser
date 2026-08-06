@@ -2105,6 +2105,22 @@ export const de = {
     costEmpty:
       "Noch kein Preis erfasst – halte fest, was eine Nacht hier kostet, dann kannst du die Plätze in der Statistik vergleichen.",
     costEditButton: "Kosten bearbeiten",
+    /** Mehrere Tarife pro Platz (#369) */
+    tariffsTitle: "Weitere Tarife",
+    tariffsEmpty: "Noch keine Tarife erfasst.",
+    tariffRowsEmpty: "Noch keine Zeilen.",
+    tariffsHint:
+      "Für den Platz-Vergleich in der Statistik zählt weiterhin der Preis pro Nacht oben – ein Vergleich über mehrere Tarife wäre keiner mehr.",
+    tariffsEditButton: "Tarife bearbeiten",
+    tariffsSaved: "Tarife gespeichert",
+    tariffAdd: "Tarif hinzufügen",
+    tariffRowAdd: "Zeile hinzufügen",
+    tariffNamePlaceholder: "z. B. Hauptsaison",
+    tariffRowLabelPlaceholder: "z. B. Erwachsene",
+    tariffRowPriceAria: "Preis pro Nacht",
+    tariffTotal: (amount: string) => `Zusammen ${amount}`,
+    tariffRemoveAria: (name: string) => `Tarif ${name} entfernen`,
+    tariffRowRemoveAria: (label: string) => `Zeile ${label} entfernen`,
     costPriceLabel: "Platz pro Nacht",
     costExtraLabel: "Kurtaxe & Nebenkosten",
     costNightlyLabel: "Total pro Nacht",
@@ -3098,6 +3114,18 @@ export const de = {
     pointsLabel: "Punkte",
     addChore: "Hinzufügen",
     removeAria: (title: string) => `${title} löschen`,
+    /** Personen im Ämtli-Plan (#370) */
+    personsTitle: "Personen",
+    personsHint:
+      "Ämtli werden an alle verteilt. Punkte sammelt nur, wer den Schalter an hat – so machen die Erwachsenen mit, ohne die Rangliste der Kinder zu kippen.",
+    addPersonPlaceholder: "Name",
+    addPerson: "Person hinzufügen",
+    earnsPointsLabel: "Punkte",
+    earnsPointsAria: (name: string) => `Sammelt ${name} Punkte?`,
+    removePersonAria: (name: string) => `${name} entfernen`,
+    removePersonConfirm: (name: string) =>
+      `${name} entfernen? Abzeichen, Punkte und Reisepass-Einträge dieser Person gehen mit.`,
+    personAdded: "Person hinzugefügt",
     rotationHint:
       "Verteilt wird reihum und nicht zufällig: Wer heute abwäscht, holt morgen Holz. Der Tag verschiebt die Reihenfolge um eins – so kann jedes Kind nachrechnen, dass es fair zugeht.",
   },
@@ -3888,6 +3916,11 @@ export const de = {
     subtitle: "Was dich unterwegs erwartet – nicht nur am Ziel.",
     subtitleAtPlace: (place: string) =>
       `Was dich auf dem Weg nach ${place} erwartet – nicht nur am Ziel.`,
+    /** Hin- oder Rückfahrt (#368) */
+    directionGroupAria: "Hin- oder Rückfahrt wählen",
+    directionThere: "Hinfahrt",
+    directionBack: "Rückfahrt",
+    directionBackHint: "Zurück nach Hause – Abfahrt vom Platz.",
     startGroupAria: "Startpunkt wählen",
     startHome: "Ab Heimatort",
     startCurrent: "Ab Standort",

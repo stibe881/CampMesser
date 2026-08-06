@@ -73,6 +73,21 @@ export const campSpots = mysqlTable(
      */
     extraPerNightRappen: int("extraPerNightRappen"),
     /**
+     * Weitere Tarife als JSON (#369): eine Liste benannter Tarife mit je
+     * eigenen Zeilen – «Nebensaison» mit Erwachsen/Kind, «Hauptsaison» mit
+     * eigenen Sätzen. null = keine erfasst.
+     *
+     * WARUM JSON UND KEINE TABELLE: Die Tarife gehören ausschliesslich zu
+     * ihrem Platz, werden nur als Ganzes gelesen und nie einzeln gesucht
+     * oder verknüpft – dasselbe Muster wie `spotAttributesJson` daneben.
+     * Zwei Tabellen mit Fremdschlüsseln würden hier nichts kaufen.
+     *
+     * Die Felder `pricePerNightRappen`/`extraPerNightRappen` bleiben, was
+     * sie sind: der EINE Preis, mit dem die Statistik die Plätze
+     * vergleicht. Ein Vergleich über sechs Tarife wäre keiner mehr.
+     */
+    tariffsJson: text("tariffsJson"),
+    /**
      * Höhe über Meer in Metern; null = noch nicht ermittelt. Der Client holt
      * den Wert einmalig bei der Open-Meteo-Elevation-API und speichert ihn.
      */
@@ -1177,6 +1192,15 @@ export const familyChildren = mysqlTable(
     id: int("id").autoincrement().primaryKey(),
     userId: int("userId").notNull(),
     name: varchar("name", { length: 60 }).notNull(),
+    /**
+     * Sammelt diese Person Punkte im Ämtli-Plan? (#370)
+     *
+     * Ämtli machen auch die Erwachsenen – der Punktestand ist aber der
+     * Wettbewerb der Kinder. Wer mitverteilt wird, ohne mitzuzählen,
+     * steht hier auf `false` und taucht in der Rangliste nicht auf.
+     * Standard `true`, damit bestehende Profile bleiben, wie sie sind.
+     */
+    earnsPoints: boolean("earnsPoints").notNull().default(true),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("familyChildren_userId").on(table.userId)]

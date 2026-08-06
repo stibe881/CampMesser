@@ -2042,6 +2042,21 @@ export const en: Translation = {
     costEmpty:
       "No price recorded yet – note down what a night here costs, then you can compare pitches in the statistics.",
     costEditButton: "Edit costs",
+    tariffsTitle: "Further rates",
+    tariffsEmpty: "No rates recorded yet.",
+    tariffRowsEmpty: "No rows yet.",
+    tariffsHint:
+      "The pitch comparison in the statistics still uses the price per night above – a comparison across several rates would not be one.",
+    tariffsEditButton: "Edit rates",
+    tariffsSaved: "Rates saved",
+    tariffAdd: "Add rate",
+    tariffRowAdd: "Add row",
+    tariffNamePlaceholder: "e.g. high season",
+    tariffRowLabelPlaceholder: "e.g. adults",
+    tariffRowPriceAria: "Price per night",
+    tariffTotal: (amount: string) => `Together ${amount}`,
+    tariffRemoveAria: (name: string) => `Remove rate ${name}`,
+    tariffRowRemoveAria: (label: string) => `Remove row ${label}`,
     costPriceLabel: "Pitch per night",
     costExtraLabel: "Tourist tax & extras",
     costNightlyLabel: "Total per night",
@@ -2989,6 +3004,17 @@ export const en: Translation = {
     pointsLabel: "Points",
     addChore: "Add",
     removeAria: (title: string) => `Delete ${title}`,
+    personsTitle: "People",
+    personsHint:
+      "Chores are shared out among everyone. Only those with the switch on collect points – so the adults join in without upsetting the children’s ranking.",
+    addPersonPlaceholder: "Name",
+    addPerson: "Add person",
+    earnsPointsLabel: "Points",
+    earnsPointsAria: (name: string) => `Does ${name} collect points?`,
+    removePersonAria: (name: string) => `Remove ${name}`,
+    removePersonConfirm: (name: string) =>
+      `Remove ${name}? Their badges, points and passport entries go with them.`,
+    personAdded: "Person added",
     rotationHint:
       "Chores are shared out in rotation, not at random: whoever washes up today fetches firewood tomorrow. Each day shifts the order by one – so every child can check for themselves that it is fair.",
   },
@@ -3769,6 +3795,11 @@ export const en: Translation = {
     subtitle: "What awaits you en route – not just at the destination.",
     subtitleAtPlace: (place: string) =>
       `What awaits you on the way to ${place} – not just at the destination.`,
+    /** Hin- oder Rückfahrt (#368) */
+    directionGroupAria: "Choose outbound or return",
+    directionThere: "Outbound",
+    directionBack: "Return",
+    directionBackHint: "Back home – departing from the pitch.",
     startGroupAria: "Choose the starting point",
     startHome: "From home",
     startCurrent: "From my location",

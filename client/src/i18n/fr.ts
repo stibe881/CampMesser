@@ -2108,6 +2108,21 @@ export const fr: Translation = {
     costEmpty:
       "Aucun prix saisi pour l'instant – note ce que coûte une nuit ici, tu pourras ensuite comparer les emplacements dans les statistiques.",
     costEditButton: "Modifier les coûts",
+    tariffsTitle: "Autres tarifs",
+    tariffsEmpty: "Aucun tarif saisi.",
+    tariffRowsEmpty: "Aucune ligne.",
+    tariffsHint:
+      "Pour la comparaison des emplacements dans les statistiques, c’est toujours le prix par nuit ci-dessus qui compte – comparer plusieurs tarifs ne serait plus une comparaison.",
+    tariffsEditButton: "Modifier les tarifs",
+    tariffsSaved: "Tarifs enregistrés",
+    tariffAdd: "Ajouter un tarif",
+    tariffRowAdd: "Ajouter une ligne",
+    tariffNamePlaceholder: "p. ex. haute saison",
+    tariffRowLabelPlaceholder: "p. ex. adultes",
+    tariffRowPriceAria: "Prix par nuit",
+    tariffTotal: (amount: string) => `Ensemble ${amount}`,
+    tariffRemoveAria: (name: string) => `Supprimer le tarif ${name}`,
+    tariffRowRemoveAria: (label: string) => `Supprimer la ligne ${label}`,
     costPriceLabel: "Emplacement par nuit",
     costExtraLabel: "Taxe de séjour et frais annexes",
     costNightlyLabel: "Total par nuit",
@@ -3091,6 +3106,17 @@ export const fr: Translation = {
     pointsLabel: "Points",
     addChore: "Ajouter",
     removeAria: (title: string) => `Supprimer ${title}`,
+    personsTitle: "Personnes",
+    personsHint:
+      "Les tâches sont réparties entre toutes les personnes. Seules celles dont l’interrupteur est activé marquent des points – les adultes participent sans fausser le classement des enfants.",
+    addPersonPlaceholder: "Nom",
+    addPerson: "Ajouter une personne",
+    earnsPointsLabel: "Points",
+    earnsPointsAria: (name: string) => `${name} marque-t-elle des points ?`,
+    removePersonAria: (name: string) => `Retirer ${name}`,
+    removePersonConfirm: (name: string) =>
+      `Retirer ${name} ? Ses badges, points et entrées de passeport disparaissent avec.`,
+    personAdded: "Personne ajoutée",
     rotationHint:
       "La répartition se fait à tour de rôle et non au hasard : qui fait la vaisselle aujourd'hui ira chercher le bois demain. Le jour décale l'ordre d'un cran – chaque enfant peut ainsi vérifier que c'est équitable.",
   },
@@ -3884,6 +3910,11 @@ export const fr: Translation = {
     subtitle: "Ce qui t'attend en route – pas seulement à l'arrivée.",
     subtitleAtPlace: (place: string) =>
       `Ce qui t'attend sur la route vers ${place} – pas seulement à l'arrivée.`,
+    /** Hin- oder Rückfahrt (#368) */
+    directionGroupAria: "Choisir aller ou retour",
+    directionThere: "Aller",
+    directionBack: "Retour",
+    directionBackHint: "Retour à la maison – départ de l’emplacement.",
     startGroupAria: "Choisir le point de départ",
     startHome: "Depuis le domicile",
     startCurrent: "Depuis ma position",

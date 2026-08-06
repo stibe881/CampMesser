@@ -16,15 +16,18 @@ import {
   Shuffle,
   Trash2,
   Trophy,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
@@ -42,12 +45,14 @@ import {
 } from "@shared/chores";
 
 export default function ChoresPage() {
+  const ask = useConfirm();
   const { t } = useI18n();
   const tc = t.chores;
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
 
   const [day, setDay] = useState(todayIso);
+  const [newPerson, setNewPerson] = useState("");
   const [form, setForm] = useState({
     title: "",
     points: String(DEFAULT_CHORE_POINTS),
@@ -81,6 +86,33 @@ export default function ChoresPage() {
     void utils.chores.list.invalidate();
     void utils.chores.assignments.invalidate();
   };
+  /**
+   * PERSONEN DIREKT HIER PFLEGEN (#370, Nutzerwunsch): Bisher stand nur
+   * «Im Familien-Modus trägst du sie ein» da – ein Verweis auf eine
+   * andere Seite, mitten in der Arbeit. Es ist dieselbe Liste (die
+   * Kinder-Profile), sie lässt sich jetzt bloss auch von hier aus
+   * ergänzen.
+   */
+  const refreshPersons = () => void utils.family.children.list.invalidate();
+  const addPerson = trpc.family.children.add.useMutation({
+    onSuccess: () => {
+      setNewPerson("");
+      toast.success(tc.personAdded);
+      refreshPersons();
+    },
+    onError: e => toast.error(e.message),
+  });
+  const setEarnsPoints = trpc.family.children.setEarnsPoints.useMutation({
+    onSuccess: refreshPersons,
+    onError: e => toast.error(e.message),
+  });
+  const removePerson = trpc.family.children.remove.useMutation({
+    onSuccess: () => {
+      refreshPersons();
+      refresh();
+    },
+    onError: e => toast.error(e.message),
+  });
   const addChore = trpc.chores.add.useMutation({
     onSuccess: () => {
       setForm({ title: "", points: String(DEFAULT_CHORE_POINTS) });
@@ -148,11 +180,93 @@ export default function ChoresPage() {
     <div className="container max-w-3xl py-6">
       <PageHeader title={tc.title} subtitle={tc.subtitle} />
 
-      {children.length === 0 && (
-        <p className="mb-4 rounded-lg border border-amber-600/40 bg-amber-500/10 p-3 text-sm">
-          {tc.noChildren}
-        </p>
-      )}
+      {/* Personen (#370): dieselbe Liste wie im Familien-Modus, hier
+          ergänzbar – und mit dem Schalter, der über die Punkte entscheidet. */}
+      <Card className="mb-5">
+        <CardContent className="pt-5">
+          <p className="mb-1 flex items-center gap-2 font-serif text-lg font-bold">
+            <Users className="h-5 w-5 text-primary" aria-hidden="true" />
+            {tc.personsTitle}
+          </p>
+          <p className="mb-3 text-xs text-muted-foreground">{tc.personsHint}</p>
+          {children.length === 0 ? (
+            <p className="mb-3 rounded-lg border border-amber-600/40 bg-amber-500/10 p-3 text-sm">
+              {tc.noChildren}
+            </p>
+          ) : (
+            <ul className="mb-3 space-y-2">
+              {children.map(child => (
+                <li
+                  key={child.id}
+                  className="flex items-center gap-3 rounded-lg border border-border bg-background p-2.5"
+                >
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                    {child.name}
+                  </span>
+                  <Label
+                    htmlFor={`earns-${child.id}`}
+                    className="text-xs text-muted-foreground"
+                  >
+                    {tc.earnsPointsLabel}
+                  </Label>
+                  <Switch
+                    id={`earns-${child.id}`}
+                    checked={child.earnsPoints !== false}
+                    disabled={setEarnsPoints.isPending}
+                    onCheckedChange={value =>
+                      setEarnsPoints.mutate({
+                        id: child.id,
+                        earnsPoints: value,
+                      })
+                    }
+                    aria-label={tc.earnsPointsAria(child.name)}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 shrink-0 text-muted-foreground/60 hover:text-destructive"
+                    disabled={removePerson.isPending}
+                    onClick={async () => {
+                      if (
+                        await ask({
+                          title: tc.removePersonConfirm(child.name),
+                          confirmLabel: t.common.delete,
+                        })
+                      ) {
+                        removePerson.mutate({ id: child.id });
+                      }
+                    }}
+                    aria-label={tc.removePersonAria(child.name)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex gap-2">
+            <Input
+              value={newPerson}
+              onChange={e => setNewPerson(e.target.value)}
+              placeholder={tc.addPersonPlaceholder}
+              maxLength={60}
+              aria-label={tc.addPerson}
+              onKeyDown={e => {
+                if (e.key === "Enter" && newPerson.trim()) {
+                  addPerson.mutate({ name: newPerson.trim() });
+                }
+              }}
+            />
+            <Button
+              onClick={() => addPerson.mutate({ name: newPerson.trim() })}
+              disabled={!newPerson.trim() || addPerson.isPending}
+            >
+              <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {tc.addPerson}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Tag wählen und verteilen */}
       <div className="mb-5 flex flex-wrap items-end gap-2">

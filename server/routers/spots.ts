@@ -20,6 +20,9 @@ import {
   normalizeNoteText,
   normalizeNoteTitle,
   normalizeSpotAttributesJson,
+  parseSpotTariffs,
+  serializeSpotTariffs,
+  TARIFFS_JSON_MAX_LENGTH,
   protectedProcedure,
   publicProcedure,
   router,
@@ -114,6 +117,8 @@ export const spotsRouters = {
           parcelNumber: z.string().max(40).nullish(),
           pricePerNightRappen: SPOT_PRICE_INPUT,
           extraPerNightRappen: SPOT_PRICE_INPUT,
+          /** Weitere Tarife als JSON (#369); null löscht sie. */
+          tariffsJson: z.string().max(TARIFFS_JSON_MAX_LENGTH).nullish(),
           elevationM: SPOT_ELEVATION_INPUT,
         })
       )
@@ -125,6 +130,7 @@ export const spotsRouters = {
           parcelNumber,
           pricePerNightRappen,
           extraPerNightRappen,
+          tariffsJson,
           ...data
         } = input;
         return db.updateCampSpot(id, ctx.user.id, {
@@ -147,6 +153,15 @@ export const spotsRouters = {
             : {}),
           ...(extraPerNightRappen !== undefined
             ? { extraPerNightRappen: extraPerNightRappen || null }
+            : {}),
+          // Tarife (#369) laufen durch DENSELBEN Parser wie die Anzeige –
+          // was hier hereinkommt, ist Nutzer-Eingabe, kein Vertrauensbeweis.
+          ...(tariffsJson !== undefined
+            ? {
+                tariffsJson: serializeSpotTariffs(
+                  parseSpotTariffs(tariffsJson ?? null)
+                ),
+              }
             : {}),
         });
       }),
