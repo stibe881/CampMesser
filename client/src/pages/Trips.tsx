@@ -63,6 +63,7 @@ import {
   Printer,
   Share2,
   ShoppingBasket,
+  Refrigerator,
   Signpost,
   Star,
   Tent,
@@ -1632,6 +1633,24 @@ export default function TripsPage() {
                             {t.trips.menuPlanButton}
                           </Link>
                         </Button>
+                        {/* Kühlbox & Trockenvorrat (#365, Nutzerwunsch):
+                            Der Vorrat ist zwar nicht an eine Reise
+                            gebunden – es gibt EINE Kühlbox –, aber
+                            angeschaut wird er beim Aufenthalt. Wer den
+                            Menüplan macht, will als Nächstes wissen, was
+                            schon drin ist. */}
+                        <Button asChild variant="outline" size="sm">
+                          <Link
+                            href="/kuehlbox"
+                            aria-label={t.trips.foodAria(label(trip))}
+                          >
+                            <Refrigerator
+                              className="mr-1.5 h-4 w-4"
+                              aria-hidden="true"
+                            />
+                            {t.trips.foodButton}
+                          </Link>
+                        </Button>
                         {/* Reise-Einkaufsliste nur bei geteilten Reisen –
                             private Reisen nutzen die persönliche Liste */}
                         {trip.shared && (
@@ -2066,22 +2085,43 @@ export default function TripsPage() {
                             {trip.notes}
                           </p>
                         )}
-                        {/* Der Weg zu allem Übrigen (#359) – siehe oben bei
-                            den geplanten Aufenthalten. */}
-                        {focusId === null && (
-                          <Button asChild size="sm" className="mt-2">
-                            <Link
-                              href={`/tagebuch/${trip.id}`}
-                              aria-label={t.trips.openDetailAria(label(trip))}
-                            >
-                              <Tent
-                                className="mr-1.5 h-4 w-4"
-                                aria-hidden="true"
-                              />
-                              {t.trips.openTrip}
-                            </Link>
-                          </Button>
-                        )}
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {/* Der Weg zu allem Übrigen (#359) – siehe oben
+                              bei den geplanten Aufenthalten. */}
+                          {focusId === null && (
+                            <Button asChild size="sm">
+                              <Link
+                                href={`/tagebuch/${trip.id}`}
+                                aria-label={t.trips.openDetailAria(label(trip))}
+                              >
+                                <Tent
+                                  className="mr-1.5 h-4 w-4"
+                                  aria-hidden="true"
+                                />
+                                {t.trips.openTrip}
+                              </Link>
+                            </Button>
+                          )}
+                          {/* Kühlbox nur beim LAUFENDEN Aufenthalt (#365):
+                              Neben einer Reise von 2019 wäre der Knopf
+                              sinnlos – der Vorrat von damals ist längst
+                              gegessen. Während der Reise ist er dagegen
+                              das, was man am häufigsten aufmacht. */}
+                          {currentTripDay(trip, today) && (
+                            <Button asChild variant="outline" size="sm">
+                              <Link
+                                href="/kuehlbox"
+                                aria-label={t.trips.foodAria(label(trip))}
+                              >
+                                <Refrigerator
+                                  className="mr-1.5 h-4 w-4"
+                                  aria-hidden="true"
+                                />
+                                {t.trips.foodButton}
+                              </Link>
+                            </Button>
+                          )}
+                        </div>
                         {/* ABSCHNITTE ERST BEIM SCROLLEN (#347): Ein Aufenthalt
                           stapelt hier ein Dutzend Abschnitte, und mehrere
                           holen sofort Daten – die Fotogalerie zum Beispiel

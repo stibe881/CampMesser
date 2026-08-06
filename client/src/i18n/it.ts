@@ -2351,6 +2351,8 @@ export const it: Translation = {
     backToList: "Tutti i soggiorni",
     openDetailAria: (name: string) => `Apri il soggiorno ${name}`,
     openTrip: "Apri il viaggio",
+    foodButton: "Frigo box e scorte",
+    foodAria: (name: string) => `Apri frigo box e dispensa per ${name}`,
     detailNotFound:
       "Questo soggiorno non esiste più – forse è stato eliminato.",
     title: "I miei viaggi",

@@ -2376,6 +2376,9 @@ export const de = {
     openDetailAria: (name: string) => `Aufenthalt ${name} öffnen`,
     /** Knopf in der Liste: führt zur Detailseite mit allen Abschnitten (#359) */
     openTrip: "Reise öffnen",
+    /** Knopf zur Kühlbox – der Vorrat gehört zum Aufenthalt (#365) */
+    foodButton: "Kühlbox & Vorrat",
+    foodAria: (name: string) => `Kühlbox und Trockenvorrat für ${name} öffnen`,
     detailNotFound:
       "Diesen Aufenthalt gibt es nicht mehr – vielleicht wurde er gelöscht.",
     title: "Meine Reisen",

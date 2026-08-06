@@ -2376,6 +2376,9 @@ export const fr: Translation = {
     backToList: "Tous les séjours",
     openDetailAria: (name: string) => `Ouvrir le séjour ${name}`,
     openTrip: "Ouvrir le voyage",
+    foodButton: "Glacière & provisions",
+    foodAria: (name: string) =>
+      `Ouvrir la glacière et les provisions pour ${name}`,
     detailNotFound: "Ce séjour n'existe plus – il a peut-être été supprimé.",
     title: "Mes voyages",
     subtitle:

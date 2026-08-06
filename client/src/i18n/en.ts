@@ -2298,6 +2298,8 @@ export const en: Translation = {
     backToList: "All stays",
     openDetailAria: (name: string) => `Open the stay ${name}`,
     openTrip: "Open trip",
+    foodButton: "Cool box & store",
+    foodAria: (name: string) => `Open cool box and dry store for ${name}`,
     detailNotFound: "This stay no longer exists – it may have been deleted.",
     title: "My trips",
     subtitle: "Record your camping stays: places, nights and memories.",
