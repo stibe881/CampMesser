@@ -24,6 +24,7 @@ import {
   menuEntries,
   passportAbsences,
   requireDb,
+  sql,
   tripBoardNotes,
   tripChanges,
   tripDateOptions,
@@ -800,6 +801,35 @@ export async function getExpensesForTrips(tripIds: number[]) {
     })
     .from(tripExpenses)
     .where(inArray(tripExpenses.tripId, tripIds));
+}
+/**
+ * Nur die SUMME je Reise (#345) – für das Zeichen am zugeklappten
+ * Reisekassen-Abschnitt.
+ *
+ * WARUM NICHT `getExpensesForTrips` UND IM CLIENT ADDIEREN: Der Betrag
+ * steht an jeder Reise der Liste, auch an zwanzig vergangenen. Dafür alle
+ * Einzelposten über die Leitung zu schicken, um sie wegzuwerfen, wäre
+ * Verschwendung – die Datenbank kann summieren.
+ *
+ * `sum()` liefert in MySQL DECIMAL, das der Treiber als Zeichenkette
+ * zurückgibt; deshalb der Umweg über `Number`. Reisen ohne Ausgaben
+ * kommen gar nicht vor – der Aufrufer liest fehlende Ids als 0.
+ */
+export async function getExpenseTotalsForTrips(tripIds: number[]) {
+  if (tripIds.length === 0) return [];
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select({
+      tripId: tripExpenses.tripId,
+      totalRappen: sql<string>`sum(${tripExpenses.amountRappen})`,
+    })
+    .from(tripExpenses)
+    .where(inArray(tripExpenses.tripId, tripIds))
+    .groupBy(tripExpenses.tripId);
+  return rows.map(row => ({
+    tripId: row.tripId,
+    totalRappen: Number(row.totalRappen ?? 0),
+  }));
 }
 /** Einzelne Ausgabe laden (für die Zugriffsprüfung über ihre tripId). */
 export async function getTripExpenseById(id: number) {

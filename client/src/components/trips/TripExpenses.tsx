@@ -171,13 +171,33 @@ export default function TripExpenses({
   );
   const expenses = useMemo(() => query.data ?? [], [query.data]);
 
+  /**
+   * Der Betrag am ZUGEKLAPPTEN Abschnitt (#345).
+   *
+   * Die Einzelposten kommen erst beim Aufklappen – zugeklappt gäbe es
+   * also nichts zu summieren, und genau deshalb fehlte die Zahl bisher
+   * dort, wo sie am meisten wert ist. Die Summen holt darum eine eigene,
+   * kleine Abfrage über ALLE Reisen. Sie ist für jeden Abschnitt
+   * dieselbe, TanStack Query macht daraus eine einzige Anfrage.
+   */
+  const totalsQuery = trpc.trips.expenses.totals.useQuery(undefined, {
+    staleTime: 60_000,
+  });
+  const storedTotal =
+    totalsQuery.data?.find(row => row.tripId === tripId)?.totalRappen ?? 0;
+
   const closeForm = () => {
     setEditing(null);
     setAmount("");
     setDescription("");
   };
 
-  const invalidate = () => utils.trips.expenses.list.invalidate({ tripId });
+  const invalidate = () => {
+    utils.trips.expenses.list.invalidate({ tripId });
+    // Auch die Summen (#345), sonst zeigte das Zeichen am zugeklappten
+    // Abschnitt bis zum nächsten Seitenaufbau den alten Betrag.
+    utils.trips.expenses.totals.invalidate();
+  };
 
   const addMutation = trpc.trips.expenses.add.useMutation({
     onSuccess: () => {
@@ -204,6 +224,9 @@ export default function TripExpenses({
   });
 
   const total = useMemo(() => expensesTotalRappen(expenses), [expenses]);
+  // Offen zählt die geladene Liste – sie ist nach dem Erfassen sofort
+  // aktuell, während die Summen-Abfrage erst nachzieht.
+  const badgeTotal = open && !query.isLoading ? total : storedTotal;
   const byCategory = useMemo(() => expensesByCategory(expenses), [expenses]);
   const budget = budgetStatus(total, budgetRappen);
   const budgetMutation = trpc.trips.expenses.setBudget.useMutation({
@@ -347,9 +370,11 @@ export default function TripExpenses({
         <span className="min-w-0 flex-1 truncate text-left font-medium">
           {t.tripExpenses.title}
         </span>
-        {open && !query.isLoading && expenses.length > 0 && (
+        {/* Der Betrag steht auch ZUGEKLAPPT da (#345) – dort ist er der
+            einzige Grund, den Abschnitt überhaupt anzusehen. */}
+        {badgeTotal > 0 && (
           <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
-            {money(total)}
+            {money(badgeTotal)}
           </span>
         )}
         <ChevronDown

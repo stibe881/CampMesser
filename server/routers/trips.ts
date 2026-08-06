@@ -749,6 +749,34 @@ export const tripsRouters = {
         );
       }),
       /**
+       * Nur die Summe je Reise (#345) – für das Zeichen am ZUGEKLAPPTEN
+       * Reisekassen-Abschnitt.
+       *
+       * Bis jetzt stand der Betrag nur da, wenn der Abschnitt offen war,
+       * weil die Einzelposten erst dann geholt werden (`enabled: open`).
+       * Genau dann sieht man ihn aber ohnehin – zugeklappt war die Zahl
+       * weg, obwohl sie dort am meisten wert ist.
+       *
+       * EINE Abfrage für ALLE Reisen, nicht eine pro Abschnitt: Auf der
+       * Reise-Seite stehen schnell zwanzig davon. Der Client fragt aus
+       * jedem Abschnitt heraus dasselbe ab, TanStack Query bündelt das zu
+       * einer einzigen Anfrage.
+       *
+       * Anders als `stats` auch MITGLIEDS-Reisen: Der Abschnitt erscheint
+       * dort genauso, also braucht er dort auch seine Summe.
+       */
+      totals: protectedProcedure.query(async ({ ctx }) => {
+        const [own, member] = await Promise.all([
+          db.getTripLogs(ctx.user.id),
+          db.getMemberTripLogs(ctx.user.id),
+        ]);
+        const ids = [
+          ...own.map(trip => trip.id),
+          ...member.map(({ trip }) => trip.id),
+        ];
+        return db.getExpenseTotalsForTrips(ids);
+      }),
+      /**
        * Reise-Budget (#256) setzen oder mit null wieder entfernen.
        * Erlaubt für alle Mitreisenden – die Reisekasse gehört allen, also
        * auch ihre Grenze.
