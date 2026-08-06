@@ -111,7 +111,31 @@ export default function TripBoard({
   const ask = useConfirm();
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
-  const [open, setOpen] = useState(false);
+  /**
+   * Tiefer Link aus der «Heute»-Ansicht (#343): `/tagebuch/12#pinnwand`
+   * klappt die Pinnwand auf und scrollt hin. Ohne das landete man zwar auf
+   * der richtigen Seite, die Pinnwand läge aber zugeklappt unter einem
+   * Dutzend anderer Abschnitte – gefunden hätte man sie durch Suchen.
+   *
+   * Der Hash wird EINMAL beim Aufbau gelesen und nicht überwacht: Wer die
+   * Pinnwand danach von Hand zuklappt, soll sie zubleiben sehen.
+   */
+  const deepLinked =
+    typeof window !== "undefined" && window.location.hash === "#pinnwand";
+  const [open, setOpen] = useState(deepLinked);
+  const cardRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!deepLinked) return;
+    // Zwei Bilder warten: Die Hülle scrollt bei jedem Seitenwechsel nach
+    // oben, und ihr Effekt läuft NACH diesem hier (Kind vor Eltern).
+    // Ohne das Warten wäre unser Scrollen sofort wieder überschrieben.
+    const frame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [deepLinked]);
   const [kind, setKind] = useState<TripBoardKind>("message");
   const [draft, setDraft] = useState("");
   const query = trpc.trips.board.list.useQuery(
@@ -159,7 +183,7 @@ export default function TripBoard({
   };
 
   return (
-    <div className="mt-2 rounded-lg border border-border bg-card">
+    <div ref={cardRef} className="mt-2 rounded-lg border border-border bg-card">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}

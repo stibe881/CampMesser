@@ -236,6 +236,23 @@ export default function TodayPage() {
   const place = trip ? tripDisplayName(trip, lang) : "";
   const nights = trip ? nightsLeft(trip, today) : null;
 
+  /**
+   * Wohin die Pinnwand-Karte führt – oder gar nicht (#343).
+   *
+   * Die Pinnwand gibt es nur bei GEMEINSAMEN Reisen; allein hat man
+   * niemanden, dem man etwas anpinnt. Ein Link wäre dort eine Sackgasse:
+   * Er landete auf der Reise-Seite, auf der es keine Pinnwand gibt. Bei
+   * einer Reise allein bleibt die Karte deshalb wie bisher unverlinkt –
+   * sie ist dann ohnehin immer leer.
+   *
+   * Das `#pinnwand` klappt sie drüben auf und scrollt hin; ohne das läge
+   * sie zugeklappt irgendwo unter zehn anderen Abschnitten.
+   */
+  const boardHref =
+    trip && (trip.shared || trip.role === "member")
+      ? `/tagebuch/${trip.id}#pinnwand`
+      : null;
+
   return (
     <div className="container max-w-2xl py-6">
       <PageHeader
@@ -321,8 +338,13 @@ export default function TodayPage() {
             </div>
           </div>
 
-          {/* Essen: die zweite Frage des Tages */}
-          <section className="mt-4 rounded-xl border border-border bg-card p-4">
+          {/* Essen: die zweite Frage des Tages.
+              GANZE KARTE ANTIPPBAR (#343): Wer hier «nichts eingetragen»
+              liest, will genau eines – es eintragen. Der Link trägt dafür
+              ein `after`, das die Karte überdeckt; vorgelesen wird
+              trotzdem erst der Inhalt und dann ein Link mit eigenem Text.
+              Ein `aria-label` auf der Karte hätte den Inhalt verschluckt. */}
+          <section className="relative mt-4 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40">
             <h3 className="flex items-center gap-2 text-sm font-semibold">
               <UtensilsCrossed
                 className="h-4 w-4 text-primary"
@@ -333,7 +355,9 @@ export default function TodayPage() {
             {menuQuery.isLoading ? (
               <Skeleton className="mt-2 h-16 w-full rounded" />
             ) : menuQuery.isError ? (
-              <div className="mt-2">
+              // `z-10`, sonst läge der Wiederholen-Knopf unter der
+              // Klickfläche der Karte und liesse sich nicht drücken.
+              <div className="relative z-10 mt-2">
                 <QueryError
                   onRetry={() => void menuQuery.refetch()}
                   retrying={menuQuery.isFetching}
@@ -357,13 +381,22 @@ export default function TodayPage() {
                 ))}
               </ul>
             )}
+            <Link
+              href={`/menueplan/${trip.id}`}
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary after:absolute after:inset-0 after:rounded-xl hover:underline"
+            >
+              {td.mealsLink}
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
           </section>
 
           {/* Ämtli: der Handgriff, den man hier auch TUT.
               Ein Verweis auf die Ämtli-Seite wäre ein Zwischenschritt für
               zwei Häkchen – deshalb steht die Liste hier zum Abhaken, und
-              nur der Weg zum Verteilen führt weiter. */}
-          <section className="mt-4 rounded-xl border border-border bg-card p-4">
+              nur der Weg zum Verteilen führt weiter. Die Karte ist ganz
+              antippbar (#343); die Häkchen liegen mit `z-10` DARÜBER,
+              sonst hätte die Klickfläche sie geschluckt. */}
+          <section className="relative mt-4 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40">
             <h3 className="flex items-center gap-2 text-sm font-semibold">
               <ListChecks className="h-4 w-4 text-primary" aria-hidden="true" />
               {td.choresTitle}
@@ -371,7 +404,7 @@ export default function TodayPage() {
             {choresQuery.isLoading || choreListQuery.isLoading ? (
               <Skeleton className="mt-2 h-16 w-full rounded" />
             ) : choresQuery.isError ? (
-              <div className="mt-2">
+              <div className="relative z-10 mt-2">
                 <QueryError
                   onRetry={() => void choresQuery.refetch()}
                   retrying={choresQuery.isFetching}
@@ -391,7 +424,7 @@ export default function TodayPage() {
                         setDone.mutate({ id: chore.id, done: !chore.done })
                       }
                       className={cn(
-                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                        "relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
                         chore.done
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border"
@@ -417,7 +450,7 @@ export default function TodayPage() {
             )}
             <Link
               href="/aemtli"
-              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary after:absolute after:inset-0 after:rounded-xl hover:underline"
             >
               {td.choresAll}
               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -428,7 +461,7 @@ export default function TodayPage() {
               Ohne etwas Ablaufendes fehlt der Kasten ganz – «nichts läuft
               ab» ist keine Nachricht, sondern Platzverbrauch. */}
           {expiring.length > 0 && (
-            <section className="mt-4 rounded-xl border border-border bg-card p-4">
+            <section className="relative mt-4 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40">
               <h3 className="flex items-center gap-2 text-sm font-semibold">
                 <Refrigerator
                   className="h-4 w-4 text-primary"
@@ -446,7 +479,7 @@ export default function TodayPage() {
               </ul>
               <Link
                 href="/kuehlbox"
-                className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary after:absolute after:inset-0 after:rounded-xl hover:underline"
               >
                 {td.expiryLink}
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -454,8 +487,13 @@ export default function TodayPage() {
             </section>
           )}
 
-          {/* Aufgaben: was noch offen ist */}
-          <section className="mt-4 rounded-xl border border-border bg-card p-4">
+          {/* Aufgaben: was noch offen ist – und wo man sie einträgt */}
+          <section
+            className={cn(
+              "mt-4 rounded-xl border border-border bg-card p-4",
+              boardHref && "relative transition-colors hover:border-primary/40"
+            )}
+          >
             <h3 className="flex items-center gap-2 text-sm font-semibold">
               <ClipboardList
                 className="h-4 w-4 text-primary"
@@ -469,7 +507,7 @@ export default function TodayPage() {
               // «Nichts offen. Geniess den Tag.» ist eine Auskunft, nach
               // der man handelt – die darf nicht aus einem Serverfehler
               // entstehen.
-              <div className="mt-2">
+              <div className="relative z-10 mt-2">
                 <QueryError
                   onRetry={() => void boardQuery.refetch()}
                   retrying={boardQuery.isFetching}
@@ -488,6 +526,15 @@ export default function TodayPage() {
                   </li>
                 ))}
               </ul>
+            )}
+            {boardHref && (
+              <Link
+                href={boardHref}
+                className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary after:absolute after:inset-0 after:rounded-xl hover:underline"
+              >
+                {td.tasksLink}
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </Link>
             )}
           </section>
 

@@ -4110,9 +4110,11 @@ export const it: Translation = {
     shopping: "Lista della spesa",
     mealsTitle: "Oggi nel piatto",
     mealsEmpty: "Per oggi non c'è nulla di previsto.",
+    mealsLink: "Apri il menu",
     mealUnknown: "Previsto",
     tasksTitle: "Ancora da fare",
     tasksEmpty: "Niente in sospeso. Goditi la giornata.",
+    tasksLink: "Vai alla bacheca",
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     choresTitle: "Turni di oggi",

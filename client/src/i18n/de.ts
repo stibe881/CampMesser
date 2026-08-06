@@ -4141,9 +4141,11 @@ export const de = {
     shopping: "Einkaufsliste",
     mealsTitle: "Heute auf dem Teller",
     mealsEmpty: "Für heute ist nichts eingetragen.",
+    mealsLink: "Menüplan öffnen",
     mealUnknown: "Eingetragen",
     tasksTitle: "Noch offen",
     tasksEmpty: "Nichts offen. Geniess den Tag.",
+    tasksLink: "Zur Pinnwand",
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     choresTitle: "Ämtli heute",
