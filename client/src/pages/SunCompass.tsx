@@ -48,7 +48,13 @@ import { useDeviceHeading } from "@/hooks/useDeviceHeading";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { useWakeLock } from "@/lib/useWakeLock";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { fetchHorizonReadings } from "@/lib/elevation";
+import {
+  buildTerrainObstacles,
+  mergeTerrainObstacles,
+} from "@shared/terrainHorizon";
 import { cn } from "@/lib/utils";
 
 interface GeoState {
@@ -688,6 +694,7 @@ export default function SunCompassPage() {
   const [profiles, setProfiles] = useState<ObstacleProfiles>(() =>
     loadObstacleProfiles()
   );
+  const [terrainBusy, setTerrainBusy] = useState(false);
   const [activeSpotId, setActiveSpotId] = useState<number | null>(
     () => urlSpot?.spotId ?? null
   );
@@ -718,6 +725,56 @@ export default function SunCompassPage() {
     setProfiles(nextProfiles);
     saveObstacleProfiles(nextProfiles);
     obstaclesSync.push(nextProfiles);
+  };
+
+  /**
+   * BERGE AUS DEM HÖHENMODELL (#372, Nutzerwunsch): Einen Baum zeichnet
+   * man in zehn Sekunden; einen Alpenkamm nach Augenmass in Azimut und
+   * Höhenwinkel zu übersetzen ist Raterei. Der Strahlenkranz holt 192
+   * Geländehöhen rund um den Punkt und rechnet daraus den Horizont –
+   * gerechnet wird in `shared/terrainHorizon.ts`, hier steht nur die
+   * Bedienung.
+   *
+   * VON HAND GEZEICHNETES BLEIBT: `mergeTerrainObstacles` wirft nur die
+   * alten Terrain-Sektoren weg. Der Baum vor dem Zelt überlebt jeden
+   * weiteren Durchgang.
+   */
+  const detectTerrain = async () => {
+    const activeSpot =
+      activeSpotId === null
+        ? undefined
+        : spots?.find(spot => spot.id === activeSpotId);
+    // Das gewählte Platz-Profil hat Vorrang; ohne Platz zählt der
+    // aktuelle Standort – sonst rechnet man den Horizont von daheim.
+    const lat = activeSpot?.latitude ?? geo.lat;
+    const lon = activeSpot?.longitude ?? geo.lng;
+    if (lat == null || lon == null) {
+      toast.error(t.sunCompass.terrainNoLocation);
+      return;
+    }
+    setTerrainBusy(true);
+    try {
+      const readings = await fetchHorizonReadings(lat, lon);
+      // Die eigene Höhe steht mit im Kranz nicht drin – der nächste
+      // Stützpunkt (250 m) ist die beste verfügbare Näherung, wenn der
+      // Platz keine gespeicherte Höhe hat.
+      const own =
+        activeSpot?.elevationM ??
+        readings.find(r => r.distanceM === 250 && r.elevationM !== null)
+          ?.elevationM ??
+        null;
+      if (own === null) {
+        toast.error(t.sunCompass.terrainFailed);
+        return;
+      }
+      const terrain = buildTerrainObstacles(own, readings);
+      saveObstacles(mergeTerrainObstacles(obstacles, terrain));
+      toast.success(t.sunCompass.terrainDone(terrain.length));
+    } catch {
+      toast.error(t.sunCompass.terrainFailed);
+    } finally {
+      setTerrainBusy(false);
+    }
   };
 
   const addObstacle = () => {
@@ -1317,6 +1374,23 @@ export default function SunCompassPage() {
                   })}
                 </div>
               )}
+
+              <div className="mb-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void detectTerrain()}
+                  disabled={terrainBusy}
+                >
+                  <Mountain className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {terrainBusy
+                    ? t.sunCompass.terrainBusy
+                    : t.sunCompass.terrainButton}
+                </Button>
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  {t.sunCompass.terrainHint}
+                </p>
+              </div>
 
               {obstacles.length > 0 && (
                 <ul className="mb-4 space-y-2">

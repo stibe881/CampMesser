@@ -1199,6 +1199,16 @@ export const en: Translation = {
     obstaclesTitle: "Obstacles on the horizon",
     obstaclesIntro:
       "Record trees, mountains or buildings around your pitch. The compass shows them in the diagram and calculates when they hide the sun – important for tent and solar panels.",
+    /** Berge automatisch aus dem Höhenmodell (#372) */
+    terrainButton: "Detect mountains",
+    terrainBusy: "Detecting mountains …",
+    terrainHint:
+      "From the elevation model around this point: 24 directions up to 30 km. Trees and houses are in no elevation model – you still draw those yourself.",
+    terrainNoLocation:
+      "No location – without coordinates there is nothing to compute.",
+    terrainFailed: "The elevation model is not answering.",
+    terrainDone: (count: number) =>
+      `${count} directions taken from the terrain`,
     profileGroupAria: "Choose obstacle profile",
     profileGeneral: "General",
     obstacleLine: (

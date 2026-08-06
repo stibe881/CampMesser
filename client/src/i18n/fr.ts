@@ -1248,6 +1248,14 @@ export const fr: Translation = {
     obstaclesTitle: "Obstacles à l'horizon",
     obstaclesIntro:
       "Saisis les arbres, montagnes ou bâtiments autour de ton emplacement. La boussole les affiche dans le diagramme et calcule quand ils cachent le soleil – important pour la tente et les panneaux solaires.",
+    /** Berge automatisch aus dem Höhenmodell (#372) */
+    terrainButton: "Détecter les montagnes",
+    terrainBusy: "Détection en cours …",
+    terrainHint:
+      "À partir du modèle d’élévation autour de ce point : 24 directions jusqu’à 30 km. Les arbres et les maisons ne figurent dans aucun modèle – ceux-là, tu les dessines toi-même.",
+    terrainNoLocation: "Pas de position – sans coordonnée, rien à calculer.",
+    terrainFailed: "Le modèle d’élévation ne répond pas.",
+    terrainDone: (count: number) => `${count} directions reprises du terrain`,
     profileGroupAria: "Choisir le profil d'obstacles",
     profileGeneral: "Général",
     obstacleLine: (

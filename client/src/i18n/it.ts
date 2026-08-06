@@ -1227,6 +1227,15 @@ export const it: Translation = {
     obstaclesTitle: "Ostacoli all'orizzonte",
     obstaclesIntro:
       "Registra alberi, montagne o edifici attorno alla tua piazzola. La bussola li mostra nel diagramma e calcola quando coprono il sole – importante per tenda e pannelli solari.",
+    /** Berge automatisch aus dem Höhenmodell (#372) */
+    terrainButton: "Rileva le montagne",
+    terrainBusy: "Rilevamento in corso …",
+    terrainHint:
+      "Dal modello altimetrico attorno a questo punto: 24 direzioni fino a 30 km. Alberi e case non figurano in nessun modello – quelli li disegni tu.",
+    terrainNoLocation:
+      "Nessuna posizione – senza coordinate non c’è nulla da calcolare.",
+    terrainFailed: "Il modello altimetrico non risponde.",
+    terrainDone: (count: number) => `${count} direzioni riprese dal terreno`,
     profileGroupAria: "Scegli il profilo degli ostacoli",
     profileGeneral: "Generale",
     obstacleLine: (

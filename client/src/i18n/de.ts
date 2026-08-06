@@ -1245,6 +1245,16 @@ export const de = {
     obstaclesTitle: "Hindernisse am Horizont",
     obstaclesIntro:
       "Trage Bäume, Berge oder Gebäude rund um deinen Platz ein. Der Kompass zeigt sie im Diagramm und berechnet, wann sie die Sonne verdecken – wichtig für Zelt und Solarpanels.",
+    /** Berge automatisch aus dem Höhenmodell (#372) */
+    terrainButton: "Berge automatisch ermitteln",
+    terrainBusy: "Berge werden ermittelt …",
+    terrainHint:
+      "Aus dem Höhenmodell rund um diesen Punkt: 24 Richtungen bis 30 km weit. Bäume und Häuser stehen in keinem Höhenmodell – die zeichnest du weiterhin selbst.",
+    terrainNoLocation:
+      "Kein Standort – ohne Koordinate gibt es nichts zu berechnen.",
+    terrainFailed: "Das Höhenmodell antwortet nicht.",
+    terrainDone: (count: number) =>
+      `${count} Richtungen aus dem Gelände übernommen`,
     profileGroupAria: "Hindernis-Profil wählen",
     profileGeneral: "Allgemein",
     obstacleLine: (
