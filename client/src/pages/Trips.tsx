@@ -33,6 +33,7 @@ import {
 import { useConfirm } from "@/components/ConfirmDialog";
 import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import { relativeAge, type ShareExpiryDays } from "@shared/sharing";
+import { tripDisplayName, tripPlaceName } from "@shared/tripName";
 import {
   ArrowRight,
   Award,
@@ -639,18 +640,26 @@ export default function TripsPage() {
   const editingShared = editingTrip?.role === "member";
 
   /**
-   * Anzeigename eines Eintrags: verknüpfter Favorit, sonst Freitext-Ort.
-   * Bei Mitglieds-Trips gehört der Zeltplatz der Besitzerin/dem Besitzer –
-   * dafür liefert der Server den Namen als spotName mit.
+   * Der frische Name des verknüpften Favoriten – oder null.
+   *
+   * Wird ein Zeltplatz umbenannt, steht in der Reise noch der alte Name
+   * (`spotName` kommt vom Server und wird beim Speichern eingefroren).
+   * Bei Mitglieds-Trips gehört der Platz der Besitzerin oder dem
+   * Besitzer; dann findet die eigene Liste ihn nicht, und `spotName`
+   * übernimmt.
    */
-  const placeName = (trip: (typeof trips)[number]): string => {
-    if (trip.spotId != null) {
-      const spot = spots.find(s => s.id === trip.spotId);
-      if (spot) return spot.name;
-      if (trip.spotName) return trip.spotName;
-    }
-    return trip.location ?? t.trips.unknownPlace;
-  };
+  const freshSpotName = (trip: (typeof trips)[number]): string | null =>
+    trip.spotId != null
+      ? (spots.find(s => s.id === trip.spotId)?.name ?? null)
+      : null;
+
+  /** WO die Reise stattfindet (ohne Titel – siehe `shared/tripName.ts`). */
+  const placeName = (trip: (typeof trips)[number]): string =>
+    tripPlaceName(trip, lang, freshSpotName(trip));
+
+  /** WIE die Reise heisst: Titel, sonst der Ort. */
+  const label = (trip: (typeof trips)[number]): string =>
+    tripDisplayName(trip, lang, freshSpotName(trip));
 
   /**
    * Id des Zeltplatz-Dossiers zu einem Aufenthalt – oder null.
@@ -687,7 +696,7 @@ export default function TripsPage() {
       trip.spotId != null ? spots.find(s => s.id === trip.spotId) : null;
     return {
       id: trip.id,
-      title: trip.title || placeName(trip),
+      title: label(trip),
       startDate: trip.startDate,
       endDate: trip.endDate,
       arrivalTime: trip.arrivalTime,
@@ -727,10 +736,7 @@ export default function TripsPage() {
 
   /** Eine einzelne Reise als .ics herunterladen. */
   const downloadTripIcs = (trip: (typeof allTrips)[number]) => {
-    downloadIcs(
-      [trip],
-      icsFileName(trip.title || placeName(trip), trip.startDate)
-    );
+    downloadIcs([trip], icsFileName(label(trip), trip.startDate));
   };
 
   /** Eintrag ins Formular laden und den Dialog im Bearbeiten-Modus öffnen. */
@@ -964,7 +970,7 @@ export default function TripsPage() {
     () =>
       allTrips.map(trip => ({
         id: trip.id,
-        name: trip.title || placeName(trip),
+        name: label(trip),
         startDate: trip.startDate,
         endDate: trip.endDate,
         shared: trip.role === "member" || trip.shared,
@@ -1918,7 +1924,7 @@ export default function TripsPage() {
                   <TripCoverBanner
                     tripId={trip.id}
                     coverPhotoId={trip.coverPhotoId}
-                    tripName={trip.title || placeName(trip)}
+                    tripName={label(trip)}
                   />
                   <div className="flex items-start gap-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -1932,14 +1938,12 @@ export default function TripsPage() {
                           <Link
                             href={`/tagebuch/${trip.id}`}
                             className="hover:underline"
-                            aria-label={t.trips.openDetailAria(
-                              trip.title || placeName(trip)
-                            )}
+                            aria-label={t.trips.openDetailAria(label(trip))}
                           >
-                            {trip.title || placeName(trip)}
+                            {label(trip)}
                           </Link>
                         ) : (
-                          trip.title || placeName(trip)
+                          label(trip)
                         )}
                         <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">
                           {t.trips.countdown(days)}
@@ -2008,7 +2012,7 @@ export default function TripsPage() {
                       <TripPitchDetails trip={trip} />
                       <TripReadinessCard
                         trip={trip}
-                        tripName={trip.title || placeName(trip)}
+                        tripName={label(trip)}
                         onEdit={() => startEdit(trip)}
                       />
                       {trip.packListId != null && (
@@ -2027,9 +2031,7 @@ export default function TripsPage() {
                         <Button asChild variant="outline" size="sm">
                           <Link
                             href={`/menueplan/${trip.id}`}
-                            aria-label={t.trips.menuPlanAria(
-                              trip.title || placeName(trip)
-                            )}
+                            aria-label={t.trips.menuPlanAria(label(trip))}
                           >
                             <UtensilsCrossed
                               className="mr-1.5 h-4 w-4"
@@ -2044,9 +2046,7 @@ export default function TripsPage() {
                           <Button asChild variant="outline" size="sm">
                             <Link
                               href={`/menueplan/${trip.id}/einkauf`}
-                              aria-label={t.tripShopping.openAria(
-                                trip.title || placeName(trip)
-                              )}
+                              aria-label={t.tripShopping.openAria(label(trip))}
                             >
                               <ShoppingBasket
                                 className="mr-1.5 h-4 w-4"
@@ -2066,9 +2066,7 @@ export default function TripsPage() {
                                 ? `/laenderregeln?land=${tripCountry(trip)}`
                                 : "/laenderregeln"
                             }
-                            aria-label={t.trips.roadRulesAria(
-                              trip.title || placeName(trip)
-                            )}
+                            aria-label={t.trips.roadRulesAria(label(trip))}
                           >
                             <Signpost
                               className="mr-1.5 h-4 w-4"
@@ -2089,9 +2087,7 @@ export default function TripsPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => downloadTripIcs(trip)}
-                          aria-label={t.trips.icsAria(
-                            trip.title || placeName(trip)
-                          )}
+                          aria-label={t.trips.icsAria(label(trip))}
                         >
                           <CalendarPlus
                             className="mr-1.5 h-4 w-4"
@@ -2110,7 +2106,7 @@ export default function TripsPage() {
                       {trip.startDate <= today && (
                         <TripJournal
                           tripId={trip.id}
-                          tripName={trip.title || placeName(trip)}
+                          tripName={label(trip)}
                           startDate={trip.startDate}
                           endDate={trip.endDate}
                           shared={trip.shared || trip.role === "member"}
@@ -2121,7 +2117,7 @@ export default function TripsPage() {
                       <Suspense fallback={null}>
                         <TripExpenses
                           tripId={trip.id}
-                          tripName={trip.title || placeName(trip)}
+                          tripName={label(trip)}
                           defaultDay={
                             today > trip.endDate ? trip.endDate : today
                           }
@@ -2136,33 +2132,24 @@ export default function TripsPage() {
                         trip.startDate > today && (
                           <TripDatePoll
                             tripId={trip.id}
-                            tripName={trip.title || placeName(trip)}
+                            tripName={label(trip)}
                           />
                         )}
                       {/* Pinnwand (#245): nur bei gemeinsamen Reisen – allein
                           hätte man niemanden, dem man etwas anpinnen könnte */}
                       {(trip.shared || trip.role === "member") && (
-                        <TripBoard
-                          tripId={trip.id}
-                          tripName={trip.title || placeName(trip)}
-                        />
+                        <TripBoard tripId={trip.id} tripName={label(trip)} />
                       )}
                       {/* Änderungsverlauf (#296): nur bei gemeinsamen
                           Reisen – allein ist «wer war das» schon
                           beantwortet */}
                       {(trip.shared || trip.role === "member") && (
-                        <TripHistory
-                          tripId={trip.id}
-                          tripName={trip.title || placeName(trip)}
-                        />
+                        <TripHistory tripId={trip.id} tripName={label(trip)} />
                       )}
                       {/* Gästebuch (#254): auch bei einer Reise ohne
                           Mitreisende – über den Teil-Link können Bekannte
                           einen Gruss hinterlassen */}
-                      <TripGuestbook
-                        tripId={trip.id}
-                        tripName={trip.title || placeName(trip)}
-                      />
+                      <TripGuestbook tripId={trip.id} tripName={label(trip)} />
                       {/* Buchungsbestätigung (#279): nur bei eigenen Reisen –
                           die Datei liegt am Konto der Besitzerin/des
                           Besitzers, Mitglieder sehen sie nicht */}
@@ -2175,14 +2162,14 @@ export default function TripsPage() {
                       )}
                       <TripPhotos
                         tripId={trip.id}
-                        tripName={trip.title || placeName(trip)}
+                        tripName={label(trip)}
                         coverPhotoId={trip.coverPhotoId}
                       />
                       {/* Foto-Collage (#226) */}
                       <Suspense fallback={null}>
                         <TripCollage
                           tripId={trip.id}
-                          tripName={trip.title || placeName(trip)}
+                          tripName={label(trip)}
                           startDate={trip.startDate}
                           endDate={trip.endDate}
                         />
@@ -2194,9 +2181,7 @@ export default function TripsPage() {
                         size="icon"
                         className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
                         onClick={() => startEdit(trip)}
-                        aria-label={t.trips.editEntryAria(
-                          trip.title || placeName(trip)
-                        )}
+                        aria-label={t.trips.editEntryAria(label(trip))}
                       >
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                       </Button>
@@ -2207,14 +2192,12 @@ export default function TripsPage() {
                         onClick={() =>
                           setDuplicateTrip({
                             id: trip.id,
-                            name: trip.title || placeName(trip),
+                            name: label(trip),
                             startDate: trip.startDate,
                             endDate: trip.endDate,
                           })
                         }
-                        aria-label={t.trips.duplicateAria(
-                          trip.title || placeName(trip)
-                        )}
+                        aria-label={t.trips.duplicateAria(label(trip))}
                         title={t.trips.duplicateDialogTitle}
                       >
                         <CopyPlus className="h-3.5 w-3.5" aria-hidden="true" />
@@ -2228,12 +2211,10 @@ export default function TripsPage() {
                             onClick={() =>
                               setMembersTrip({
                                 id: trip.id,
-                                name: trip.title || placeName(trip),
+                                name: label(trip),
                               })
                             }
-                            aria-label={t.trips.membersAria(
-                              trip.title || placeName(trip)
-                            )}
+                            aria-label={t.trips.membersAria(label(trip))}
                           >
                             <Users className="h-3.5 w-3.5" aria-hidden="true" />
                           </Button>
@@ -2244,12 +2225,10 @@ export default function TripsPage() {
                             onClick={() =>
                               setHubTrip({
                                 id: trip.id,
-                                name: trip.title || placeName(trip),
+                                name: label(trip),
                               })
                             }
-                            aria-label={t.trips.hubShareAria(
-                              trip.title || placeName(trip)
-                            )}
+                            aria-label={t.trips.hubShareAria(label(trip))}
                           >
                             <Share2
                               className="h-3.5 w-3.5"
@@ -2263,9 +2242,7 @@ export default function TripsPage() {
                             onClick={() =>
                               removeMutation.mutate({ id: trip.id })
                             }
-                            aria-label={t.trips.deletePlannedAria(
-                              trip.title || placeName(trip)
-                            )}
+                            aria-label={t.trips.deletePlannedAria(label(trip))}
                           >
                             <Trash2
                               className="h-3.5 w-3.5"
@@ -2282,18 +2259,14 @@ export default function TripsPage() {
                           onClick={async () => {
                             if (
                               await ask({
-                                title: t.trips.leaveConfirm(
-                                  trip.title || placeName(trip)
-                                ),
+                                title: t.trips.leaveConfirm(label(trip)),
                                 confirmLabel: t.common.confirmLeave,
                               })
                             ) {
                               leaveMutation.mutate({ tripId: trip.id });
                             }
                           }}
-                          aria-label={t.trips.leaveTripAria(
-                            trip.title || placeName(trip)
-                          )}
+                          aria-label={t.trips.leaveTripAria(label(trip))}
                           title={t.trips.leaveTrip}
                         >
                           <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
@@ -2341,7 +2314,7 @@ export default function TripsPage() {
                     <TripCoverBanner
                       tripId={trip.id}
                       coverPhotoId={trip.coverPhotoId}
-                      tripName={trip.title || placeName(trip)}
+                      tripName={label(trip)}
                     />
                     <div className="flex items-start gap-3">
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
@@ -2362,14 +2335,12 @@ export default function TripsPage() {
                             <Link
                               href={`/tagebuch/${trip.id}`}
                               className="hover:underline"
-                              aria-label={t.trips.openDetailAria(
-                                trip.title || placeName(trip)
-                              )}
+                              aria-label={t.trips.openDetailAria(label(trip))}
                             >
-                              {trip.title || placeName(trip)}
+                              {label(trip)}
                             </Link>
                           ) : (
-                            trip.title || placeName(trip)
+                            label(trip)
                           )}
                           {trip.role === "member" && (
                             <span className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
@@ -2450,9 +2421,7 @@ export default function TripsPage() {
                             onChange={rating =>
                               setRatingMutation.mutate({ id: trip.id, rating })
                             }
-                            groupLabel={t.trips.ratingGroupAria(
-                              trip.title || placeName(trip)
-                            )}
+                            groupLabel={t.trips.ratingGroupAria(label(trip))}
                           />
                         </div>
                         {trip.notes && (
@@ -2463,7 +2432,7 @@ export default function TripsPage() {
                         {/* Reise-Tagebuch (#192): vergangene und laufende Reisen */}
                         <TripJournal
                           tripId={trip.id}
-                          tripName={trip.title || placeName(trip)}
+                          tripName={label(trip)}
                           startDate={trip.startDate}
                           endDate={trip.endDate}
                           shared={trip.shared || trip.role === "member"}
@@ -2471,7 +2440,7 @@ export default function TripsPage() {
                         {/* Reisekasse (#219) */}
                         <TripExpenses
                           tripId={trip.id}
-                          tripName={trip.title || placeName(trip)}
+                          tripName={label(trip)}
                           defaultDay={
                             today > trip.endDate ? trip.endDate : today
                           }
@@ -2480,24 +2449,21 @@ export default function TripsPage() {
                         />
                         {/* Pinnwand (#245): nur bei gemeinsamen Reisen */}
                         {(trip.shared || trip.role === "member") && (
-                          <TripBoard
-                            tripId={trip.id}
-                            tripName={trip.title || placeName(trip)}
-                          />
+                          <TripBoard tripId={trip.id} tripName={label(trip)} />
                         )}
                         {/* Änderungsverlauf (#296) auch rückblickend:
                             «wer hat das damals eingetragen» */}
                         {(trip.shared || trip.role === "member") && (
                           <TripHistory
                             tripId={trip.id}
-                            tripName={trip.title || placeName(trip)}
+                            tripName={label(trip)}
                           />
                         )}
                         {/* Gästebuch (#254): gerade bei vergangenen Reisen
                             die Erinnerungs-Seite – Grüsse bleiben stehen */}
                         <TripGuestbook
                           tripId={trip.id}
-                          tripName={trip.title || placeName(trip)}
+                          tripName={label(trip)}
                         />
                         {/* Buchungsbestätigung (#279) – auch bei vergangenen
                             Reisen: die Rechnung will man später noch finden */}
@@ -2510,13 +2476,13 @@ export default function TripsPage() {
                         )}
                         <TripPhotos
                           tripId={trip.id}
-                          tripName={trip.title || placeName(trip)}
+                          tripName={label(trip)}
                           coverPhotoId={trip.coverPhotoId}
                         />
                         {/* Foto-Collage (#226) */}
                         <TripCollage
                           tripId={trip.id}
-                          tripName={trip.title || placeName(trip)}
+                          tripName={label(trip)}
                           startDate={trip.startDate}
                           endDate={trip.endDate}
                         />
@@ -2527,9 +2493,7 @@ export default function TripsPage() {
                           size="icon"
                           className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
                           onClick={() => startEdit(trip)}
-                          aria-label={t.trips.editEntryAria(
-                            trip.title || placeName(trip)
-                          )}
+                          aria-label={t.trips.editEntryAria(label(trip))}
                         >
                           <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                         </Button>
@@ -2541,9 +2505,7 @@ export default function TripsPage() {
                         >
                           <Link
                             href={`/tagebuch/${trip.id}/drucken`}
-                            aria-label={t.trips.printEntryAria(
-                              trip.title || placeName(trip)
-                            )}
+                            aria-label={t.trips.printEntryAria(label(trip))}
                           >
                             <Printer
                               className="h-3.5 w-3.5"
@@ -2557,9 +2519,7 @@ export default function TripsPage() {
                           size="icon"
                           className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
                           onClick={() => downloadTripIcs(trip)}
-                          aria-label={t.trips.icsAria(
-                            trip.title || placeName(trip)
-                          )}
+                          aria-label={t.trips.icsAria(label(trip))}
                           title={t.trips.icsButton}
                         >
                           <CalendarPlus
@@ -2574,14 +2534,12 @@ export default function TripsPage() {
                           onClick={() =>
                             setDuplicateTrip({
                               id: trip.id,
-                              name: trip.title || placeName(trip),
+                              name: label(trip),
                               startDate: trip.startDate,
                               endDate: trip.endDate,
                             })
                           }
-                          aria-label={t.trips.duplicateAria(
-                            trip.title || placeName(trip)
-                          )}
+                          aria-label={t.trips.duplicateAria(label(trip))}
                           title={t.trips.duplicateDialogTitle}
                         >
                           <CopyPlus
@@ -2598,12 +2556,10 @@ export default function TripsPage() {
                               onClick={() =>
                                 setMembersTrip({
                                   id: trip.id,
-                                  name: trip.title || placeName(trip),
+                                  name: label(trip),
                                 })
                               }
-                              aria-label={t.trips.membersAria(
-                                trip.title || placeName(trip)
-                              )}
+                              aria-label={t.trips.membersAria(label(trip))}
                             >
                               <Users
                                 className="h-3.5 w-3.5"
@@ -2617,12 +2573,10 @@ export default function TripsPage() {
                               onClick={() =>
                                 setHubTrip({
                                   id: trip.id,
-                                  name: trip.title || placeName(trip),
+                                  name: label(trip),
                                 })
                               }
-                              aria-label={t.trips.hubShareAria(
-                                trip.title || placeName(trip)
-                              )}
+                              aria-label={t.trips.hubShareAria(label(trip))}
                             >
                               <Share2
                                 className="h-3.5 w-3.5"
@@ -2636,9 +2590,7 @@ export default function TripsPage() {
                               onClick={() =>
                                 removeMutation.mutate({ id: trip.id })
                               }
-                              aria-label={t.trips.deleteEntryAria(
-                                trip.title || placeName(trip)
-                              )}
+                              aria-label={t.trips.deleteEntryAria(label(trip))}
                             >
                               <Trash2
                                 className="h-3.5 w-3.5"
@@ -2655,18 +2607,14 @@ export default function TripsPage() {
                             onClick={async () => {
                               if (
                                 await ask({
-                                  title: t.trips.leaveConfirm(
-                                    trip.title || placeName(trip)
-                                  ),
+                                  title: t.trips.leaveConfirm(label(trip)),
                                   confirmLabel: t.common.confirmLeave,
                                 })
                               ) {
                                 leaveMutation.mutate({ tripId: trip.id });
                               }
                             }}
-                            aria-label={t.trips.leaveTripAria(
-                              trip.title || placeName(trip)
-                            )}
+                            aria-label={t.trips.leaveTripAria(label(trip))}
                             title={t.trips.leaveTrip}
                           >
                             <LogOut

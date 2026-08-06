@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
+import { tripDisplayName } from "@shared/tripName";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { resizeImageForUpload } from "@/lib/imageResize";
 import { trpc } from "@/lib/trpc";
@@ -133,10 +134,7 @@ export default function ShareTargetPage() {
   };
 
   const tripLabel = (trip: (typeof trips)[number]) =>
-    trip.title?.trim() ||
-    trip.location?.trim() ||
-    trip.spotName ||
-    ts.tripFallback;
+    tripDisplayName(trip, lang);
 
   const removePhoto = (id: number) => {
     setPhotos(prev => {

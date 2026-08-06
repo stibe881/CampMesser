@@ -32,6 +32,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
+import { tripDisplayName } from "@shared/tripName";
 import { trpc } from "@/lib/trpc";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { MEAL_LABELS } from "@shared/menuPlan";
@@ -128,9 +129,7 @@ export default function TodayPage() {
 
   const progress = trip ? currentTripDay(trip, today) : null;
   // Ortsname wie auf der Startseite: Titel, sonst Platz-Name, sonst Freitext
-  const place = trip
-    ? trip.title || trip.spotName || trip.location || td.unnamedPlace
-    : "";
+  const place = trip ? tripDisplayName(trip, lang) : "";
   const nights = trip ? nightsLeft(trip, today) : null;
 
   return (

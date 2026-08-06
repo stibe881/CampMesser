@@ -2273,7 +2273,6 @@ export const de = {
     saved: "Wanderung gespeichert",
     tripLabel: "Reise (optional)",
     tripNone: "Ohne Reise",
-    tripFallback: "Reise",
     tripBadge: (name: string) => `Reise: ${name}`,
     listTitle: "Meine Wanderungen",
     listEmpty: "Noch keine Wanderung aufgezeichnet",
@@ -4133,7 +4132,6 @@ export const de = {
     noTrip:
       "Gerade läuft keine Reise. Sobald eine beginnt, steht hier dein Tag.",
     toModules: "Alle Module",
-    unnamedPlace: "Ohne Namen",
     dayOf: (day: number, total: number) => `Tag ${day} von ${total}`,
     nightsLeft: (nights: number) =>
       nights === 1 ? "noch 1 Nacht" : `noch ${nights} Nächte`,
@@ -4900,7 +4898,6 @@ export const de = {
     bookSumLabel: (n: number) =>
       n === 1 ? "1 Eintrag – Summe" : `${n} Einträge – Summe`,
     bookTripLabel: "Reise",
-    bookTripFallback: "Aufenthalt",
     bookNoTrips:
       "Du hast noch keine Reise im Tagebuch – leg zuerst eine an, dann gibt es auch eine Reisekasse.",
     bookCategoryLabel: "Kategorie",
@@ -5560,7 +5557,6 @@ export const de = {
     readFailed: "Ein geteiltes Bild konnte nicht gelesen werden.",
     tripLabel: "Zu welcher Reise?",
     tripAria: "Reise wählen",
-    tripFallback: "Reise",
     noTrips:
       "Noch keine Reise vorhanden – lege zuerst in «Meine Reisen» einen Eintrag an.",
     toTrips: "Zu «Meine Reisen»",

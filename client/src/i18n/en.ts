@@ -2199,7 +2199,6 @@ export const en: Translation = {
     saved: "Hike saved",
     tripLabel: "Trip (optional)",
     tripNone: "No trip",
-    tripFallback: "Trip",
     tripBadge: (name: string) => `Trip: ${name}`,
     listTitle: "My hikes",
     listEmpty: "No hike recorded yet",
@@ -4015,7 +4014,6 @@ export const en: Translation = {
     title: "Today",
     noTrip: "No trip is running right now. Once one starts, your day is here.",
     toModules: "All modules",
-    unnamedPlace: "Unnamed",
     dayOf: (day: number, total: number) => `Day ${day} of ${total}`,
     nightsLeft: (nights: number) =>
       nights === 1 ? "1 night left" : `${nights} nights left`,
@@ -4767,7 +4765,6 @@ export const en: Translation = {
     bookSumLabel: (n: number) =>
       n === 1 ? "1 item – total" : `${n} items – total`,
     bookTripLabel: "Trip",
-    bookTripFallback: "Stay",
     bookNoTrips:
       "You do not have a trip in the journal yet – create one first and the trip fund follows.",
     bookCategoryLabel: "Category",
@@ -5414,7 +5411,6 @@ export const en: Translation = {
     readFailed: "A shared image could not be read.",
     tripLabel: "Which trip?",
     tripAria: "Choose a trip",
-    tripFallback: "Trip",
     noTrips: "No trips yet – first create an entry in “My trips”.",
     toTrips: "Go to “My trips”",
     upload: "Upload photos to the trip",

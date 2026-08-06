@@ -3,6 +3,7 @@ import { daysUntilTrip, currentTripDay } from "./trips";
 import { expiryInfo } from "./food";
 import { gearTaskDue, type GearTaskLike } from "./gearTasks";
 import type { WidgetTask } from "./widgetActions";
+import { tripDisplayName } from "./tripName";
 
 /**
  * Die Nutzlast für die iPhone-Widgets (#323).
@@ -124,12 +125,14 @@ export interface WidgetInput {
   lang: Language;
 }
 
-/** Name eines Aufenthalts, so wie ihn auch die Startseite bildet. */
-function tripName(trip: WidgetTripLike, lang: Language): string {
-  const name = trip.title || trip.spotName || trip.location;
-  if (name && name.trim()) return name.trim();
-  return pick(l4("Aufenthalt", "Séjour", "Soggiorno", "Stay"), lang);
-}
+/**
+ * Name eines Aufenthalts – aus derselben Quelle wie überall sonst (#329).
+ *
+ * Vorher stand die Regel hier ein zweites Mal. Das Widget hätte damit
+ * einen anderen Namen zeigen können als die App daneben, ohne dass es
+ * jemandem auffällt.
+ */
+const tripName = tripDisplayName;
 
 /**
  * Der laufende oder nächste Aufenthalt.

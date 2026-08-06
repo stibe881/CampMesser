@@ -35,6 +35,7 @@ import { parseSpotAttributes } from "@shared/spotAttributes";
 import { recipes } from "@/data/recipes";
 import { trpc } from "@/lib/trpc";
 import { useI18n } from "@/i18n";
+import { tripDisplayName, tripPlaceName } from "@shared/tripName";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { MEALS, MEAL_LABELS, tripDays } from "@shared/menuPlan";
 import { tripNights } from "@shared/trips";
@@ -249,8 +250,8 @@ export default function SharedTripPage() {
   }
 
   const { trip, spot, menu, menuDayNotes, packList } = data;
-  const placeName = spot?.name ?? trip.location ?? t.trips.unknownPlace;
-  const title = trip.title || placeName;
+  const placeName = tripPlaceName(trip, lang, spot?.name);
+  const title = tripDisplayName(trip, lang, spot?.name);
   const nights = tripNights(trip.startDate, trip.endDate);
   const fmtDay = (iso: string) =>
     fmtWeekdayShort(new Date(`${iso}T00:00:00`), lang);

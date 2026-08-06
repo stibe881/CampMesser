@@ -58,6 +58,7 @@ import {
   shoppingCategoryLabel,
 } from "@shared/shopping";
 import { isBooked, shoppingPriceTotals } from "@shared/shoppingPrices";
+import { tripDisplayName } from "@shared/tripName";
 
 /**
  * Gemeinsame Einkaufsliste einer Reise: Owner und Mitreisende teilen sich
@@ -372,8 +373,7 @@ export default function TripShoppingPage() {
     trip.spotId != null
       ? (spotsQuery.data ?? []).find(s => s.id === trip.spotId)?.name
       : undefined;
-  const tripName =
-    trip.title || spotName || trip.location || t.trips.unknownPlace;
+  const tripName = tripDisplayName(trip, lang, spotName);
 
   return (
     <div className="container max-w-2xl py-6">

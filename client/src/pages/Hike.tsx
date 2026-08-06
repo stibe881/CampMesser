@@ -77,6 +77,7 @@ import {
 } from "@/lib/hikeTracking";
 import { useWakeLock } from "@/lib/useWakeLock";
 import { useI18n } from "@/i18n";
+import { tripDisplayName } from "@shared/tripName";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
 import {
   buildGpx,
@@ -310,7 +311,7 @@ export default function HikePage() {
     if (id === null) return null;
     const trip = trips.find(tr => tr.id === id);
     if (!trip) return null;
-    return trip.title || trip.location || t.hike.tripFallback;
+    return tripDisplayName(trip, lang);
   };
 
   // Live-Statistik – neu gerechnet, sobald ein Punkt dazukommt
@@ -586,7 +587,7 @@ export default function HikePage() {
                     <option value="">{t.hike.tripNone}</option>
                     {trips.map(trip => (
                       <option key={trip.id} value={trip.id}>
-                        {trip.title || trip.location || t.hike.tripFallback}
+                        {tripDisplayName(trip, lang)}
                       </option>
                     ))}
                   </select>
@@ -625,7 +626,7 @@ export default function HikePage() {
           className="mt-6"
           trips={trips.map(trip => ({
             id: trip.id,
-            label: trip.title || trip.location || t.hike.tripFallback,
+            label: tripDisplayName(trip, lang),
           }))}
         />
       )}
@@ -849,7 +850,7 @@ export default function HikePage() {
                     <option value="">{t.hike.tripNone}</option>
                     {trips.map(trip => (
                       <option key={trip.id} value={trip.id}>
-                        {trip.title || trip.location || t.hike.tripFallback}
+                        {tripDisplayName(trip, lang)}
                       </option>
                     ))}
                   </select>
@@ -990,7 +991,7 @@ export default function HikePage() {
                     <option value="">{t.hike.tripNone}</option>
                     {trips.map(trip => (
                       <option key={trip.id} value={trip.id}>
-                        {trip.title || trip.location || t.hike.tripFallback}
+                        {tripDisplayName(trip, lang)}
                       </option>
                     ))}
                   </select>
