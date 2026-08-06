@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { relativeAge, type ShareExpiryDays } from "@shared/sharing";
 import {
@@ -99,43 +99,29 @@ import {
   type PackSuggestion,
 } from "@shared/packSuggestions";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
+import { useHashSection } from "@/hooks/useHashSection";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 
 export default function TripBoard({
   tripId,
   tripName,
+  shared,
 }: {
   tripId: number;
   tripName: string;
+  /**
+   * Gemeinsame Reise? Ändert NUR den Hinweistext (#344). Die Pinnwand gibt
+   * es seit #344 bei jeder Reise – siehe den Hinweis am Aufrufer –, aber
+   * «Zurufe für alle Mitreisenden» wäre allein eine seltsame Ansage.
+   */
+  shared: boolean;
 }) {
   const ask = useConfirm();
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
-  /**
-   * Tiefer Link aus der «Heute»-Ansicht (#343): `/tagebuch/12#pinnwand`
-   * klappt die Pinnwand auf und scrollt hin. Ohne das landete man zwar auf
-   * der richtigen Seite, die Pinnwand läge aber zugeklappt unter einem
-   * Dutzend anderer Abschnitte – gefunden hätte man sie durch Suchen.
-   *
-   * Der Hash wird EINMAL beim Aufbau gelesen und nicht überwacht: Wer die
-   * Pinnwand danach von Hand zuklappt, soll sie zubleiben sehen.
-   */
-  const deepLinked =
-    typeof window !== "undefined" && window.location.hash === "#pinnwand";
+  // Tiefer Link aus der «Heute»-Ansicht (#343/#344)
+  const { matched: deepLinked, ref: cardRef } = useHashSection("#pinnwand");
   const [open, setOpen] = useState(deepLinked);
-  const cardRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!deepLinked) return;
-    // Zwei Bilder warten: Die Hülle scrollt bei jedem Seitenwechsel nach
-    // oben, und ihr Effekt läuft NACH diesem hier (Kind vor Eltern).
-    // Ohne das Warten wäre unser Scrollen sofort wieder überschrieben.
-    const frame = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [deepLinked]);
   const [kind, setKind] = useState<TripBoardKind>("message");
   const [draft, setDraft] = useState("");
   const query = trpc.trips.board.list.useQuery(
@@ -211,7 +197,7 @@ export default function TripBoard({
       {open && (
         <div className="border-t border-border px-3 py-2.5">
           <p className="mb-2 text-xs text-muted-foreground">
-            {t.tripBoard.hint}
+            {shared ? t.tripBoard.hint : t.tripBoard.hintSolo}
           </p>
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start">
             <Select

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   fmtDayMonth,
   fmtMedium,
@@ -106,6 +106,7 @@ import {
   type PackSuggestion,
 } from "@shared/packSuggestions";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
+import { useHashSection } from "@/hooks/useHashSection";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 
 export default function TripJournal({
@@ -123,7 +124,9 @@ export default function TripJournal({
 }) {
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
-  const [open, setOpen] = useState(false);
+  // Tiefer Link vom Knopf «Ins Journal schreiben» der «Heute»-Ansicht (#344)
+  const { matched: deepLinked, ref: cardRef } = useHashSection("#journal");
+  const [open, setOpen] = useState(deepLinked);
   /** Tag, dessen Textfeld gerade offen ist (null = keines). */
   const [editingDay, setEditingDay] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -153,7 +156,7 @@ export default function TripJournal({
     fmtWeekdayLong(new Date(`${iso}T00:00:00`), lang);
 
   return (
-    <div className="mt-2 rounded-lg border border-border bg-card">
+    <div ref={cardRef} className="mt-2 rounded-lg border border-border bg-card">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}

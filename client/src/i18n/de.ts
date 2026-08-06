@@ -2693,6 +2693,8 @@ export const de = {
     title: "Pinnwand",
     toggleAria: (name: string) => `Pinnwand von ${name} auf- oder zuklappen`,
     hint: "Kurze Zurufe und Aufgaben für alle Mitreisenden – die Pinnwand frischt sich von selbst auf.",
+    hintSolo:
+      "Notizen und Aufgaben für diesen Aufenthalt – was offen ist, steht auch in der Heute-Ansicht.",
     kindAria: "Art des Zettels wählen",
     textAria: "Text des Zettels",
     messagePlaceholder: "z. B. Treffen um 18 Uhr beim Spielplatz",

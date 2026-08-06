@@ -236,23 +236,6 @@ export default function TodayPage() {
   const place = trip ? tripDisplayName(trip, lang) : "";
   const nights = trip ? nightsLeft(trip, today) : null;
 
-  /**
-   * Wohin die Pinnwand-Karte führt – oder gar nicht (#343).
-   *
-   * Die Pinnwand gibt es nur bei GEMEINSAMEN Reisen; allein hat man
-   * niemanden, dem man etwas anpinnt. Ein Link wäre dort eine Sackgasse:
-   * Er landete auf der Reise-Seite, auf der es keine Pinnwand gibt. Bei
-   * einer Reise allein bleibt die Karte deshalb wie bisher unverlinkt –
-   * sie ist dann ohnehin immer leer.
-   *
-   * Das `#pinnwand` klappt sie drüben auf und scrollt hin; ohne das läge
-   * sie zugeklappt irgendwo unter zehn anderen Abschnitten.
-   */
-  const boardHref =
-    trip && (trip.shared || trip.role === "member")
-      ? `/tagebuch/${trip.id}#pinnwand`
-      : null;
-
   return (
     <div className="container max-w-2xl py-6">
       <PageHeader
@@ -488,12 +471,7 @@ export default function TodayPage() {
           )}
 
           {/* Aufgaben: was noch offen ist – und wo man sie einträgt */}
-          <section
-            className={cn(
-              "mt-4 rounded-xl border border-border bg-card p-4",
-              boardHref && "relative transition-colors hover:border-primary/40"
-            )}
-          >
+          <section className="relative mt-4 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40">
             <h3 className="flex items-center gap-2 text-sm font-semibold">
               <ClipboardList
                 className="h-4 w-4 text-primary"
@@ -527,20 +505,23 @@ export default function TodayPage() {
                 ))}
               </ul>
             )}
-            {boardHref && (
-              <Link
-                href={boardHref}
-                className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary after:absolute after:inset-0 after:rounded-xl hover:underline"
-              >
-                {td.tasksLink}
-                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </Link>
-            )}
+            <Link
+              href={`/tagebuch/${trip.id}#pinnwand`}
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary after:absolute after:inset-0 after:rounded-xl hover:underline"
+            >
+              {td.tasksLink}
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
           </section>
 
           <div className="mt-4 flex flex-wrap gap-2">
+            {/* «Ins Journal schreiben» führte auf die Liste ALLER Reisen
+                (#344): Statistik, Jahresrückblick, Kalender – überall dort
+                schreibt man nichts. Das Tages-Journal steckt in der einen
+                laufenden Reise, also führt der Knopf jetzt dorthin und
+                klappt es auf. */}
             <Button asChild variant="outline" className="flex-1">
-              <Link href="/tagebuch">
+              <Link href={`/tagebuch/${trip.id}#journal`}>
                 <NotebookPen className="mr-2 h-4 w-4" aria-hidden="true" />
                 {td.journal}
               </Link>

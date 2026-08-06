@@ -2598,6 +2598,8 @@ export const en: Translation = {
     title: "Pinboard",
     toggleAria: (name: string) => `Expand or collapse the pinboard of ${name}`,
     hint: "Short notes and tasks for everyone on the trip – the pinboard refreshes on its own.",
+    hintSolo:
+      "Notes and tasks for this stay – whatever is open also shows in the Today view.",
     kindAria: "Choose the type of note",
     textAria: "Text of the note",
     messagePlaceholder: "e.g. meeting at 6 pm by the playground",

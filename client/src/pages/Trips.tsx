@@ -2136,11 +2136,18 @@ export default function TripsPage() {
                             tripName={label(trip)}
                           />
                         )}
-                      {/* Pinnwand (#245): nur bei gemeinsamen Reisen – allein
-                          hätte man niemanden, dem man etwas anpinnen könnte */}
-                      {(trip.shared || trip.role === "member") && (
-                        <TripBoard tripId={trip.id} tripName={label(trip)} />
-                      )}
+                      {/* Pinnwand (#245, geöffnet in #344): früher nur bei
+                          gemeinsamen Reisen – «allein hat man niemanden, dem
+                          man etwas anpinnt». Nur zeigt die «Heute»-Ansicht
+                          die offenen Aufgaben JEDER Reise an, und wer dort
+                          «Nichts offen» las, hatte allein keine Möglichkeit,
+                          etwas einzutragen. Aufgaben braucht man auch für
+                          sich; nur der Hinweistext ist ein anderer. */}
+                      <TripBoard
+                        tripId={trip.id}
+                        tripName={label(trip)}
+                        shared={trip.shared || trip.role === "member"}
+                      />
                       {/* Änderungsverlauf (#296): nur bei gemeinsamen
                           Reisen – allein ist «wer war das» schon
                           beantwortet */}
@@ -2448,10 +2455,12 @@ export default function TripsPage() {
                           shared={trip.shared || trip.role === "member"}
                           budgetRappen={trip.budgetRappen}
                         />
-                        {/* Pinnwand (#245): nur bei gemeinsamen Reisen */}
-                        {(trip.shared || trip.role === "member") && (
-                          <TripBoard tripId={trip.id} tripName={label(trip)} />
-                        )}
+                        {/* Pinnwand (#245, für jede Reise seit #344) */}
+                        <TripBoard
+                          tripId={trip.id}
+                          tripName={label(trip)}
+                          shared={trip.shared || trip.role === "member"}
+                        />
                         {/* Änderungsverlauf (#296) auch rückblickend:
                             «wer hat das damals eingetragen» */}
                         {(trip.shared || trip.role === "member") && (
