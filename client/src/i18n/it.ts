@@ -2661,6 +2661,8 @@ export const it: Translation = {
     title: "Bacheca",
     toggleAria: (name: string) => `Apri o chiudi la bacheca di ${name}`,
     hint: "Messaggi brevi e compiti per tutti i compagni di viaggio – la bacheca si aggiorna da sola.",
+    hintSolo:
+      "Note e compiti per questo soggiorno – ciò che resta in sospeso compare anche nella vista Oggi.",
     kindAria: "Scegli il tipo di biglietto",
     textAria: "Testo del biglietto",
     messagePlaceholder: "p. es. ritrovo alle 18 al parco giochi",

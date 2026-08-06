@@ -2689,6 +2689,8 @@ export const fr: Translation = {
     toggleAria: (name: string) =>
       `Ouvrir ou fermer le panneau d'affichage de ${name}`,
     hint: "Petits messages et tâches pour tous les compagnons de voyage – le panneau se met à jour tout seul.",
+    hintSolo:
+      "Notes et tâches pour ce séjour – ce qui reste en attente apparaît aussi dans la vue Aujourd’hui.",
     kindAria: "Choisir le type de note",
     textAria: "Texte de la note",
     messagePlaceholder: "p. ex. rendez-vous à 18 h à la place de jeux",
