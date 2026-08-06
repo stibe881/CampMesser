@@ -4023,9 +4023,11 @@ export const en: Translation = {
     shopping: "Shopping list",
     mealsTitle: "On the plate today",
     mealsEmpty: "Nothing planned for today.",
+    mealsLink: "Open menu plan",
     mealUnknown: "Planned",
     tasksTitle: "Still open",
     tasksEmpty: "Nothing open. Enjoy the day.",
+    tasksLink: "To the pinboard",
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     choresTitle: "Chores today",
