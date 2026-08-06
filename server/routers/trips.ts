@@ -26,6 +26,7 @@ import {
   buildTripReadinessCounts,
   buildTripSectionCounts,
   ISO_DAY,
+  boardAlertText,
   bundleChanges,
   canRemoveTripBoardEntry,
   db,
@@ -38,6 +39,7 @@ import {
   normalizeGuestbookMessage,
   normalizeTripBoardKind,
   normalizeTripBoardText,
+  notifyUsers,
   noteTripChange,
   packScenarios,
   parsePersons,
@@ -45,6 +47,7 @@ import {
   protectedProcedure,
   publicProcedure,
   remapMenuDays,
+  tripDisplayName,
   router,
   serializePersons,
   shareExpiryFor,
@@ -1017,6 +1020,44 @@ export const tripsRouters = {
             text,
           });
           await noteTripChange(input.tripId, ctx.user.id, "board", "add", text);
+          /**
+           * MITREISENDE SOFORT BENACHRICHTIGEN (#367, Nutzerwunsch).
+           *
+           * Die Pinnwand ist der Ort für «Brot ist alle» und «bin am See».
+           * Ohne Meldung sieht das nur, wer zufällig nachschaut – dann kann
+           * man es auch gleich mündlich sagen. Der Push geht an alle
+           * Mitreisenden AUSSER an die Person, die geschrieben hat.
+           *
+           * `await` mit `catch`: Der Zettel ist gespeichert, bevor hier
+           * irgendetwas passiert. Ein Push-Dienst, der nicht antwortet,
+           * darf die Mutation nicht scheitern lassen.
+           */
+          const members = await db.getTripMembersWithUsers(input.tripId);
+          const audience = [
+            trip.userId,
+            ...members.map(member => member.userId),
+          ].filter(id => id !== ctx.user.id);
+          const authorName =
+            (await db.getUserDisplayNames([ctx.user.id])).get(ctx.user.id) ??
+            "?";
+          await notifyUsers(
+            Array.from(new Set(audience)),
+            "trip",
+            "board",
+            `/tagebuch/${input.tripId}#pinnwand`,
+            lang =>
+              boardAlertText(
+                {
+                  author: authorName,
+                  // Der Reisename wird JE SPRACHE gebildet – ohne Titel
+                  // greift ein übersetzter Ersatztext.
+                  tripName: tripDisplayName(trip, lang),
+                  text,
+                  isTask: input.kind === "task",
+                },
+                lang
+              )
+          ).catch(() => 0);
           return { id };
         }),
       /** Aufgabe abhaken oder wieder öffnen – Nachrichten haben keinen Haken. */

@@ -402,6 +402,7 @@ export const en: Translation = {
       astro: "Meteor shower",
       gear: "Gear",
       evepack: "Evening check",
+      board: "Pinboard",
     },
     homeTitle: "Home location",
     homeIntro:

@@ -419,6 +419,7 @@ export const de = {
       astro: "Sternschnuppen",
       gear: "Ausrüstung",
       evepack: "Vorabend-Check",
+      board: "Pinnwand",
     },
     homeTitle: "Heim-Standort",
     homeIntro:

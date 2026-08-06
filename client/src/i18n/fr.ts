@@ -419,6 +419,7 @@ export const fr: Translation = {
       astro: "Étoiles filantes",
       gear: "Équipement",
       evepack: "Contrôle de la veille",
+      board: "Tableau",
     },
     homeTitle: "Lieu de domicile",
     homeIntro:

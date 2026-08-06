@@ -408,6 +408,7 @@ export const it: Translation = {
       astro: "Stelle cadenti",
       gear: "Attrezzatura",
       evepack: "Controllo della vigilia",
+      board: "Bacheca",
     },
     homeTitle: "Località di casa",
     homeIntro:

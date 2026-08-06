@@ -353,3 +353,34 @@ export function weatherAlertText(
   );
   return { title, body: `${input.description} ${more}` };
 }
+
+/**
+ * Neuer Zettel an der Pinnwand einer Reise (#367).
+ *
+ * WARUM DER TEXT MITGESCHICKT WIRD: Eine Meldung «Neuer Eintrag an der
+ * Pinnwand» zwingt zum Nachschauen. Wer am Feuer sitzt, soll am
+ * Sperrbildschirm schon lesen können, worum es geht – gekürzt, damit die
+ * Meldung nicht zur Wand wird.
+ */
+export function boardAlertText(
+  input: { author: string; tripName: string; text: string; isTask: boolean },
+  lang: Language
+) {
+  const title = input.isTask
+    ? l4(
+        `📌 ${input.author}: neue Aufgabe`,
+        `📌 ${input.author} : nouvelle tâche`,
+        `📌 ${input.author}: nuovo compito`,
+        `📌 ${input.author}: new task`
+      )
+    : l4(
+        `📌 ${input.author} an der Pinnwand`,
+        `📌 ${input.author} sur le tableau`,
+        `📌 ${input.author} sulla bacheca`,
+        `📌 ${input.author} on the pinboard`
+      );
+  return {
+    title: pick(title, lang),
+    body: `${input.tripName} · ${input.text}`,
+  };
+}

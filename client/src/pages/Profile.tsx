@@ -33,6 +33,7 @@ import {
   CloudLightning,
   History,
   TriangleAlert,
+  Pin,
   Refrigerator,
   Tent,
   Wind,
@@ -134,6 +135,7 @@ const PUSH_KIND_ICONS: Record<string, LucideIcon> = {
   gear: Wrench,
   evepack: Backpack,
   heat: SunMedium,
+  board: Pin,
 };
 
 /**
