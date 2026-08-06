@@ -1137,6 +1137,18 @@ export default function ProfilePage() {
     onError: e => toast.error(e.message),
   });
 
+  /**
+   * Design und Karten-App gehen neu auch ans Konto (#360). Hier wird nur
+   * GESENDET – empfangen tut `SettingsSync` app-weit, damit das Design auf
+   * einem zweiten Gerät stimmt, ohne dass man erst das Profil öffnet.
+   */
+  const themeSync = useSyncedSetting<ThemePreference>("theme", () => {}, {
+    receive: false,
+  });
+  const mapsSync = useSyncedSetting<MapsPreference>("mapsApp", () => {}, {
+    receive: false,
+  });
+
   /** Karten-App für Routen (lib/directions.ts): «ask» fragt wieder. */
   const [mapsPref, setMapsPref] = useState<MapsPreference>(() =>
     loadMapsPreference()
@@ -1144,6 +1156,7 @@ export default function ProfilePage() {
   const chooseMapsApp = (value: MapsPreference) => {
     setMapsPref(value);
     saveMapsPreference(value);
+    mapsSync.push(value);
   };
 
   /** Design-Präferenz speichern und sofort anwenden. */
@@ -1151,6 +1164,7 @@ export default function ProfilePage() {
     saveThemePreference(pref);
     setThemePref(pref);
     setPreference?.(pref);
+    themeSync.push(pref);
     toast.success(
       pref === "dark"
         ? t.profile.themeSavedDark

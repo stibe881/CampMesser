@@ -90,6 +90,7 @@ import {
   sortTripBoardEntries,
 } from "@shared/tripBoard";
 export { buildTripSectionCounts } from "@shared/tripSectionCounts";
+export { buildTripReadinessCounts } from "@shared/tripReadinessCounts";
 import {
   NOTE_TAG_MAX_LENGTH,
   NOTE_TEXT_MAX_LENGTH,

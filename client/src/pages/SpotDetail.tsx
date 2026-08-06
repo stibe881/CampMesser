@@ -1205,7 +1205,10 @@ export default function SpotDetailPage() {
           des ganzen Abschnitts – alles andere darunter (Abfahrtszeit,
           Rast, Streckenwetter) sind Karten mit Erklärtext. Ein kleiner
           grauer Knopf davor las sich wie eine Beschriftung. */}
-      <div className="mt-1">
+      {/* `mb-4` gehört hierher, nicht nur an die Karte darunter (#364):
+          Der Route-Knopf klebte an «Beste Abfahrtszeit», weil alle
+          folgenden Abschnitte nur einen UNTEREN Abstand haben. */}
+      <div className="mb-4 mt-1">
         <Button asChild size="lg" className="w-full sm:w-auto">
           <a
             href={directionsUrl(

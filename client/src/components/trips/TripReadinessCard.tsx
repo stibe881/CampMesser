@@ -89,6 +89,7 @@ import {
   type ForecastDay,
   type PackSuggestion,
 } from "@shared/packSuggestions";
+import { useTripReadinessCounts } from "@/hooks/useTripReadinessCounts";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 
@@ -145,29 +146,50 @@ export default function TripReadinessCard({
     [trip.startDate, trip.endDate]
   );
 
+  /**
+   * Der Stand aus der gebündelten Abfrage – er trägt die Zahl am
+   * ZUGEKLAPPTEN Schalter (#362). Aufgeklappt gewinnen die eigenen
+   * Abfragen: Sie stimmen sofort nach dem Abhaken, während die gebündelte
+   * noch eine Minute lang die alte Antwort hält (`staleTime`).
+   */
+  const bundled = useTripReadinessCounts(trip.id);
+
+  const loading =
+    menuQuery.isLoading ||
+    shoppingQuery.isLoading ||
+    (trip.packListId != null && packQuery.isLoading);
+
+  /** Sind die eigenen Abfragen da? Nur dann sind sie die bessere Quelle. */
+  const liveReady = open && !loading && menuQuery.data && shoppingQuery.data;
+
   const readiness = useMemo(
     () =>
       tripReadiness({
         hasSpot: trip.spotId != null,
         hasArrivalTime: Boolean(trip.arrivalTime),
-        packList:
-          trip.packListId == null
+        packList: liveReady
+          ? trip.packListId == null
             ? null
             : packQuery.data
               ? {
                   checked: packQuery.data.checked,
                   total: packQuery.data.total,
                 }
-              : { checked: 0, total: 0 },
-        menu: menuQuery.data
-          ? countMainSlots(days, menuQuery.data.entries)
-          : null,
-        shopping: shoppingQuery.data
-          ? {
-              open: shoppingQuery.data.items.filter(i => !i.checked).length,
-              total: shoppingQuery.data.items.length,
-            }
-          : null,
+              : { checked: 0, total: 0 }
+          : (bundled?.packList ?? null),
+        menu: liveReady
+          ? menuQuery.data
+            ? countMainSlots(days, menuQuery.data.entries)
+            : null
+          : (bundled?.menu ?? null),
+        shopping: liveReady
+          ? shoppingQuery.data
+            ? {
+                open: shoppingQuery.data.items.filter(i => !i.checked).length,
+                total: shoppingQuery.data.items.length,
+              }
+            : null
+          : (bundled?.shopping ?? null),
         sharedTrip: trip.shared === true,
       }),
     [
@@ -175,6 +197,8 @@ export default function TripReadinessCard({
       trip.arrivalTime,
       trip.packListId,
       trip.shared,
+      liveReady,
+      bundled,
       packQuery.data,
       menuQuery.data,
       shoppingQuery.data,
@@ -182,10 +206,13 @@ export default function TripReadinessCard({
     ]
   );
 
-  const loading =
-    menuQuery.isLoading ||
-    shoppingQuery.isLoading ||
-    (trip.packListId != null && packQuery.isLoading);
+  /**
+   * Die Zahl steht neu AUCH zugeklappt da – genau dort ist sie am meisten
+   * wert, weil man sonst jede Reise einzeln aufklappen muss (#362, wie der
+   * Reisekassen-Betrag in #345). Solange nichts geladen ist, bleibt sie
+   * weg, statt kurz eine erfundene Null zu zeigen.
+   */
+  const showCount = liveReady || bundled !== undefined;
 
   /** Beschriftung und Ziel einer Zeile – Texte bleiben hier im Client. */
   const rowText = (row: (typeof readiness.rows)[number]) => {
@@ -257,7 +284,7 @@ export default function TripReadinessCard({
         <span className="min-w-0 flex-1 truncate text-left font-medium">
           {t.trips.readinessTitle}
         </span>
-        {open && !loading && (
+        {showCount && (
           <span
             className={cn(
               "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",

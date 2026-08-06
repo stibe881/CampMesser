@@ -2297,6 +2297,7 @@ export const en: Translation = {
     detailSubtitle: "A single stay in detail",
     backToList: "All stays",
     openDetailAria: (name: string) => `Open the stay ${name}`,
+    openTrip: "Open trip",
     detailNotFound: "This stay no longer exists – it may have been deleted.",
     title: "My trips",
     subtitle: "Record your camping stays: places, nights and memories.",

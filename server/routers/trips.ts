@@ -23,7 +23,9 @@ import {
   TRIP_WEATHER_TEMP_MIN,
   TRPCError,
   VOTE_VALUES,
+  buildTripReadinessCounts,
   buildTripSectionCounts,
+  ISO_DAY,
   bundleChanges,
   canRemoveTripBoardEntry,
   db,
@@ -1470,6 +1472,39 @@ export const tripsRouters = {
       const raw = await db.getTripSectionCounts(ids);
       return buildTripSectionCounts(ids, raw);
     }),
+    /**
+     * Die Bereitschafts-Zahlen aller noch offenen Reisen (#362).
+     *
+     * KORREKTUR ZU #346: Ein paar Zeilen weiter oben steht, die
+     * Bereitschaft bleibe bewusst draussen, weil ihr Stand an Packliste,
+     * Menüplan und Einkaufsliste hängt. Der Befund stimmte, der Schluss
+     * nicht: Der Server rechnet nichts vor, er ZÄHLT nur – bewertet wird
+     * weiterhin im Browser mit `tripReadiness()`, derselben Funktion wie
+     * beim aufgeklappten Abschnitt.
+     *
+     * NUR REISEN, DIE NOCH NICHT VORBEI SIND: Die Bereitschafts-Karte gibt
+     * es bei vergangenen Aufenthalten gar nicht, und «zwanzig Reisen auf
+     * Vorrat» war genau der Einwand von damals. `today` kommt vom Client,
+     * weil es der Tag am Zeltplatz ist und nicht der des Servers (#333).
+     */
+    readiness: protectedProcedure
+      .input(z.object({ today: z.string().regex(ISO_DAY) }))
+      .query(async ({ ctx, input }) => {
+        const [own, member] = await Promise.all([
+          db.getTripLogs(ctx.user.id),
+          db.getMemberTripLogs(ctx.user.id),
+        ]);
+        const trips = [...own, ...member.map(({ trip }) => trip)]
+          .filter(trip => trip.endDate >= input.today)
+          .map(trip => ({
+            id: trip.id,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            packListId: trip.packListId,
+          }));
+        const raw = await db.getTripReadinessRaw(trips);
+        return buildTripReadinessCounts(trips, raw);
+      }),
     /**
      * Der geschriebene Inhalt aller Reisen – für die globale Suche (#349).
      *

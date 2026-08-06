@@ -28,6 +28,18 @@ export function resolveTheme(
   return pref;
 }
 
+/**
+ * Nächste Stufe des Umschalters: hell → dunkel → automatisch → hell.
+ *
+ * Steht hier und nicht im ThemeContext, weil der Knopf in der Kopfzeile
+ * seit #360 auch mitteilen muss, WAS er gleich einstellt (damit die Wahl
+ * ans Konto geht) – zwei Stellen mit derselben Reihenfolge im Kopf sind
+ * eine Stelle zu viel.
+ */
+export function nextThemePreference(current: ThemePreference): ThemePreference {
+  return current === "light" ? "dark" : current === "dark" ? "auto" : "light";
+}
+
 /** Gespeicherte Design-Präferenz lesen ("light" | "dark" | "auto" | null). */
 export function getThemePreference(): ThemePreference | null {
   try {

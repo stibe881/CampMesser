@@ -2374,6 +2374,8 @@ export const de = {
     detailSubtitle: "Ein Aufenthalt im Detail",
     backToList: "Alle Aufenthalte",
     openDetailAria: (name: string) => `Aufenthalt ${name} öffnen`,
+    /** Knopf in der Liste: führt zur Detailseite mit allen Abschnitten (#359) */
+    openTrip: "Reise öffnen",
     detailNotFound:
       "Diesen Aufenthalt gibt es nicht mehr – vielleicht wurde er gelöscht.",
     title: "Meine Reisen",

@@ -22,6 +22,7 @@ import {
   isShareExpired,
   menuDayNotes,
   menuEntries,
+  packItems,
   passportAbsences,
   requireDb,
   sql,
@@ -891,6 +892,78 @@ export async function getTripSectionCounts(tripIds: number[]) {
       ),
   ]);
   return { boardNotes, journal, guestbook, changes };
+}
+/**
+ * Die Rohzahlen für die Bereitschafts-Karten (#362).
+ *
+ * Drei Abfragen für ALLE noch nicht abgeschlossenen Reisen statt drei je
+ * Reise. Gezählt wird in SQL, bewertet wird im Browser
+ * (`buildTripReadinessCounts` + `tripReadiness`) – dieselben Funktionen
+ * wie beim aufgeklappten Abschnitt, damit zugeklappt und aufgeklappt
+ * nicht auseinanderlaufen können.
+ *
+ * Die Packlisten werden über ihre LISTEN-Id gezählt, nicht über die
+ * Reise: Zwei Reisen dürfen dieselbe Liste verwenden, und die Zeile in
+ * `packItems` weiss nichts von einer Reise.
+ */
+export async function getTripReadinessRaw(
+  trips: { id: number; packListId: number | null }[]
+) {
+  const tripIds = trips.map(trip => trip.id);
+  const listIds = Array.from(
+    new Set(
+      trips
+        .map(trip => trip.packListId)
+        .filter((id): id is number => id !== null)
+    )
+  );
+  if (tripIds.length === 0) {
+    return { packLists: [], menuSlots: [], shopping: [] };
+  }
+  const db = requireDb(await getDb());
+  const [packRows, menuSlots, shoppingRows] = await Promise.all([
+    listIds.length === 0
+      ? Promise.resolve([])
+      : db
+          .select({
+            listId: packItems.listId,
+            total: sql<string>`count(*)`,
+            checked: sql<string>`sum(case when ${packItems.checked} then 1 else 0 end)`,
+          })
+          .from(packItems)
+          .where(inArray(packItems.listId, listIds))
+          .groupBy(packItems.listId),
+    db
+      .select({
+        tripId: menuEntries.tripId,
+        day: menuEntries.day,
+        meal: menuEntries.meal,
+      })
+      .from(menuEntries)
+      .where(inArray(menuEntries.tripId, tripIds)),
+    db
+      .select({
+        tripId: tripShoppingItems.tripId,
+        total: sql<string>`count(*)`,
+        open: sql<string>`sum(case when ${tripShoppingItems.checked} then 0 else 1 end)`,
+      })
+      .from(tripShoppingItems)
+      .where(inArray(tripShoppingItems.tripId, tripIds))
+      .groupBy(tripShoppingItems.tripId),
+  ]);
+  return {
+    packLists: packRows.map(row => ({
+      listId: row.listId,
+      checked: Number(row.checked ?? 0),
+      total: Number(row.total ?? 0),
+    })),
+    menuSlots,
+    shopping: shoppingRows.map(row => ({
+      tripId: row.tripId,
+      open: Number(row.open ?? 0),
+      total: Number(row.total ?? 0),
+    })),
+  };
 }
 /**
  * Der geschriebene Inhalt einer Reise – für die globale Suche (#349).

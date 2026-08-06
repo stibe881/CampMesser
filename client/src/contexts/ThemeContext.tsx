@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
   isThemePreference,
+  nextThemePreference,
   resolveTheme,
   type ResolvedTheme,
   type ThemePreference,
@@ -80,9 +81,7 @@ export function ThemeProvider({
 
   const toggleTheme = switchable
     ? () => {
-        setPreferenceState(prev =>
-          prev === "light" ? "dark" : prev === "dark" ? "auto" : "light"
-        );
+        setPreferenceState(nextThemePreference);
       }
     : undefined;
 

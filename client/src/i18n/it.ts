@@ -2350,6 +2350,7 @@ export const it: Translation = {
     detailSubtitle: "Un soggiorno in dettaglio",
     backToList: "Tutti i soggiorni",
     openDetailAria: (name: string) => `Apri il soggiorno ${name}`,
+    openTrip: "Apri il viaggio",
     detailNotFound:
       "Questo soggiorno non esiste più – forse è stato eliminato.",
     title: "I miei viaggi",
