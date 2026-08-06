@@ -11,6 +11,7 @@ import { useMemo, useState } from "react";
 import { ChevronDown, History } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
+import { useTripSectionCounts } from "@/hooks/useTripSectionCounts";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import {
@@ -43,6 +44,18 @@ export default function TripHistory({
   );
   const names = query.data?.names ?? {};
   const total = query.data?.groups.length ?? 0;
+  /**
+   * Zugeklappt kommt die Zahl aus dem gemeinsamen Zähler (#346).
+   *
+   * EHRLICHE UNSCHÄRFE: Der Verlauf wächst durch Änderungen ANDERSWO –
+   * eine neue Ausgabe, ein Häkchen auf der Packliste. Diese Stellen
+   * erneuern den Zähler nicht; die Zahl kann also bis zum nächsten
+   * Seitenaufbau eine zu tief stehen. Für «ist da was passiert?» genügt
+   * das, und jede Mutation der App darauf zu verpflichten wäre eine
+   * Fessel für eine Nebensache.
+   */
+  const stored = useTripSectionCounts(tripId);
+  const badgeTotal = open && !query.isLoading ? total : (stored?.changes ?? 0);
 
   const timeOf = (at: number) =>
     new Intl.DateTimeFormat(LOCALE_TAGS[lang], {
@@ -82,9 +95,9 @@ export default function TripHistory({
         <span className="min-w-0 flex-1 truncate text-left font-medium">
           {th.title}
         </span>
-        {open && !query.isLoading && total > 0 && (
+        {badgeTotal > 0 && (
           <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
-            {th.count(total)}
+            {th.count(badgeTotal)}
           </span>
         )}
         <ChevronDown

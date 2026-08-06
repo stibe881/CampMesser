@@ -2507,6 +2507,8 @@ export const en: Translation = {
     weatherLuckYear: (pct, temp) =>
       `Weather luck: ${pct}% dry days · avg daily high ${temp}°`,
     sharedBadge: "Shared",
+    runningBadge: (day: number, total: number) =>
+      `Running · day ${day} of ${total}`,
     sharedWith: name => `Trip by ${name}`,
     membersButton: "Travel companions",
     membersAria: name => `Manage travel companions of ${name}`,

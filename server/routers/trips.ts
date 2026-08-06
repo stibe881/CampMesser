@@ -23,6 +23,7 @@ import {
   TRIP_WEATHER_TEMP_MIN,
   TRPCError,
   VOTE_VALUES,
+  buildTripSectionCounts,
   bundleChanges,
   canRemoveTripBoardEntry,
   db,
@@ -1440,6 +1441,35 @@ export const tripsRouters = {
      * gemeinsam bearbeitet wird. Gebündelt und nach Tagen gruppiert wird
      * erst in der Ansicht; hier kommen die Rohdaten samt Namen.
      */
+    /**
+     * Die Zahlen für die ZUGEKLAPPTEN Abschnitte (#346).
+     *
+     * Eine Reise stapelt ein Dutzend gleich aussehender Balken – Tagebuch,
+     * Reisekasse, Pinnwand, Verlauf, Gästebuch. Ob einer davon etwas
+     * enthält, erfuhr man erst beim Aufklappen, weil jeder Abschnitt seine
+     * Daten an `enabled: open` hängt. Also klappte man der Reihe nach auf.
+     *
+     * EINE Abfrage für ALLE Reisen, wie bei den Reisekassen-Summen (#345):
+     * Jeder Balken fragt aus sich heraus dasselbe ab, TanStack Query
+     * bündelt es zu einer einzigen Anfrage.
+     *
+     * Die Bereitschafts-Karte fehlt hier bewusst: Ihr Stand hängt an
+     * Packliste, Menüplan und Einkaufsliste. Das vorzurechnen wäre kein
+     * Zählen mehr, sondern das halbe Cockpit – und für zwanzig Reisen auf
+     * Vorrat schon gar nicht.
+     */
+    counts: protectedProcedure.query(async ({ ctx }) => {
+      const [own, member] = await Promise.all([
+        db.getTripLogs(ctx.user.id),
+        db.getMemberTripLogs(ctx.user.id),
+      ]);
+      const ids = [
+        ...own.map(trip => trip.id),
+        ...member.map(({ trip }) => trip.id),
+      ];
+      const raw = await db.getTripSectionCounts(ids);
+      return buildTripSectionCounts(ids, raw);
+    }),
     history: protectedProcedure
       .input(z.object({ tripId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {

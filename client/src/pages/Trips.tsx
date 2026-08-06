@@ -144,6 +144,7 @@ import {
 import {
   computeTripStats,
   computeYearReview,
+  currentTripDay,
   daysUntilTrip,
   isUpcomingTrip,
   nightsPerYear,
@@ -188,6 +189,7 @@ import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import { drawYearReview } from "@/lib/yearReviewImage";
 import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
+import LazySection from "@/components/LazySection";
 import TripDatePoll from "@/components/TripDatePoll";
 import TripGuestbook from "@/components/TripGuestbook";
 import TripHistory from "@/components/TripHistory";
@@ -359,6 +361,36 @@ function TripCoverBanner({
  * (Upload, Thumbnails, Vollbild-Dialog) mit den Trip-Endpoints und -Texten;
  * zusätzlich lässt sich hier ein Foto als Titelbild markieren.
  */
+/**
+ * «Läuft gerade · Tag 2 von 3» am Reise-Titel (#348).
+ *
+ * `isUpcomingTrip` ist `startDate >= today` – eine Reise, die gestern
+ * begonnen hat, gilt also nicht mehr als geplant und rutscht in die Liste
+ * «Deine Aufenthalte». Dort stand sie ohne jedes Zeichen zwischen den
+ * abgeschlossenen. Dass man gerade auf dem Platz ist, wussten die
+ * Startseite und die «Heute»-Ansicht, nur die Reiseliste nicht.
+ *
+ * Gibt `null` zurück, sobald der Aufenthalt vorbei oder noch nicht
+ * begonnen ist – dafür ist `currentTripDay` schon zuständig.
+ */
+function RunningBadge({
+  trip,
+  today,
+}: {
+  trip: { startDate: string; endDate: string };
+  today: string;
+}) {
+  const t = useT();
+  const progress = currentTripDay(trip, today);
+  if (!progress) return null;
+  return (
+    <span className="flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
+      <Tent className="h-3 w-3" aria-hidden="true" />
+      {t.trips.runningBadge(progress.day, progress.total)}
+    </span>
+  );
+}
+
 function TripPhotos({
   tripId,
   tripName,
@@ -2102,86 +2134,101 @@ export default function TripsPage() {
                           {trip.notes}
                         </p>
                       )}
-                      {/* Reise-Tagebuch (#192): auch bei einer geplanten
-                          Reise, sobald sie heute begonnen hat */}
-                      {trip.startDate <= today && (
-                        <TripJournal
+                      {/* ABSCHNITTE ERST BEIM SCROLLEN (#347): Ein Aufenthalt
+                          stapelt hier ein Dutzend Abschnitte, und mehrere
+                          holen sofort Daten – die Fotogalerie zum Beispiel
+                          fragt ohne Aufklappen. Bei zwanzig Reisen sind das
+                          zwanzig Galerie-Abfragen für drei sichtbare Karten.
+                          `LazySection` gibt es seit #304 fürs Platz-Dossier,
+                          das genau dasselbe Problem hatte. */}
+                      <LazySection minHeight={320}>
+                        {/* Reise-Tagebuch (#192): auch bei einer geplanten
+                            Reise, sobald sie heute begonnen hat */}
+                        {trip.startDate <= today && (
+                          <TripJournal
+                            tripId={trip.id}
+                            tripName={label(trip)}
+                            startDate={trip.startDate}
+                            endDate={trip.endDate}
+                            shared={trip.shared || trip.role === "member"}
+                          />
+                        )}
+                        {/* Reisekasse (#219): auch schon vor der Anreise –
+                            Platzmiete und Sprit fallen oft vorher an */}
+                        <Suspense fallback={null}>
+                          <TripExpenses
+                            tripId={trip.id}
+                            tripName={label(trip)}
+                            defaultDay={
+                              today > trip.endDate ? trip.endDate : today
+                            }
+                            shared={trip.shared || trip.role === "member"}
+                            budgetRappen={trip.budgetRappen}
+                          />
+                        </Suspense>
+                        {/* Termin-Finder (#253): nur bei gemeinsamen Reisen und
+                            nur, solange die Reise noch bevorsteht – über einen
+                            bereits gelaufenen Aufenthalt stimmt niemand ab */}
+                        {(trip.shared || trip.role === "member") &&
+                          trip.startDate > today && (
+                            <TripDatePoll
+                              tripId={trip.id}
+                              tripName={label(trip)}
+                            />
+                          )}
+                        {/* Pinnwand (#245, geöffnet in #344): früher nur bei
+                            gemeinsamen Reisen – «allein hat man niemanden, dem
+                            man etwas anpinnt». Nur zeigt die «Heute»-Ansicht
+                            die offenen Aufgaben JEDER Reise an, und wer dort
+                            «Nichts offen» las, hatte allein keine Möglichkeit,
+                            etwas einzutragen. Aufgaben braucht man auch für
+                            sich; nur der Hinweistext ist ein anderer. */}
+                        <TripBoard
                           tripId={trip.id}
                           tripName={label(trip)}
-                          startDate={trip.startDate}
-                          endDate={trip.endDate}
                           shared={trip.shared || trip.role === "member"}
                         />
-                      )}
-                      {/* Reisekasse (#219): auch schon vor der Anreise –
-                          Platzmiete und Sprit fallen oft vorher an */}
-                      <Suspense fallback={null}>
-                        <TripExpenses
-                          tripId={trip.id}
-                          tripName={label(trip)}
-                          defaultDay={
-                            today > trip.endDate ? trip.endDate : today
-                          }
-                          shared={trip.shared || trip.role === "member"}
-                          budgetRappen={trip.budgetRappen}
-                        />
-                      </Suspense>
-                      {/* Termin-Finder (#253): nur bei gemeinsamen Reisen und
-                          nur, solange die Reise noch bevorsteht – über einen
-                          bereits gelaufenen Aufenthalt stimmt niemand ab */}
-                      {(trip.shared || trip.role === "member") &&
-                        trip.startDate > today && (
-                          <TripDatePoll
+                        {/* Änderungsverlauf (#296): nur bei gemeinsamen
+                            Reisen – allein ist «wer war das» schon
+                            beantwortet */}
+                        {(trip.shared || trip.role === "member") && (
+                          <TripHistory
                             tripId={trip.id}
                             tripName={label(trip)}
                           />
                         )}
-                      {/* Pinnwand (#245, geöffnet in #344): früher nur bei
-                          gemeinsamen Reisen – «allein hat man niemanden, dem
-                          man etwas anpinnt». Nur zeigt die «Heute»-Ansicht
-                          die offenen Aufgaben JEDER Reise an, und wer dort
-                          «Nichts offen» las, hatte allein keine Möglichkeit,
-                          etwas einzutragen. Aufgaben braucht man auch für
-                          sich; nur der Hinweistext ist ein anderer. */}
-                      <TripBoard
-                        tripId={trip.id}
-                        tripName={label(trip)}
-                        shared={trip.shared || trip.role === "member"}
-                      />
-                      {/* Änderungsverlauf (#296): nur bei gemeinsamen
-                          Reisen – allein ist «wer war das» schon
-                          beantwortet */}
-                      {(trip.shared || trip.role === "member") && (
-                        <TripHistory tripId={trip.id} tripName={label(trip)} />
-                      )}
-                      {/* Gästebuch (#254): auch bei einer Reise ohne
-                          Mitreisende – über den Teil-Link können Bekannte
-                          einen Gruss hinterlassen */}
-                      <TripGuestbook tripId={trip.id} tripName={label(trip)} />
-                      {/* Buchungsbestätigung (#279): nur bei eigenen Reisen –
-                          die Datei liegt am Konto der Besitzerin/des
-                          Besitzers, Mitglieder sehen sie nicht */}
-                      {trip.role !== "member" && (
-                        <TripReservation
-                          tripId={trip.id}
-                          fileName={trip.reservationFileName ?? null}
-                          className="mt-2"
-                        />
-                      )}
-                      <TripPhotos
-                        tripId={trip.id}
-                        tripName={label(trip)}
-                        coverPhotoId={trip.coverPhotoId}
-                      />
-                      {/* Foto-Collage (#226) */}
-                      <Suspense fallback={null}>
-                        <TripCollage
+                        {/* Gästebuch (#254): auch bei einer Reise ohne
+                            Mitreisende – über den Teil-Link können Bekannte
+                            einen Gruss hinterlassen */}
+                        <TripGuestbook
                           tripId={trip.id}
                           tripName={label(trip)}
-                          startDate={trip.startDate}
-                          endDate={trip.endDate}
                         />
-                      </Suspense>
+                        {/* Buchungsbestätigung (#279): nur bei eigenen Reisen –
+                            die Datei liegt am Konto der Besitzerin/des
+                            Besitzers, Mitglieder sehen sie nicht */}
+                        {trip.role !== "member" && (
+                          <TripReservation
+                            tripId={trip.id}
+                            fileName={trip.reservationFileName ?? null}
+                            className="mt-2"
+                          />
+                        )}
+                        <TripPhotos
+                          tripId={trip.id}
+                          tripName={label(trip)}
+                          coverPhotoId={trip.coverPhotoId}
+                        />
+                        {/* Foto-Collage (#226) */}
+                        <Suspense fallback={null}>
+                          <TripCollage
+                            tripId={trip.id}
+                            tripName={label(trip)}
+                            startDate={trip.startDate}
+                            endDate={trip.endDate}
+                          />
+                        </Suspense>
+                      </LazySection>
                     </div>
                     <div className="flex shrink-0 flex-col gap-1">
                       <Button
@@ -2356,6 +2403,13 @@ export default function TripsPage() {
                               {t.trips.sharedBadge}
                             </span>
                           )}
+                          {/* LAUFENDER AUFENTHALT (#348): «Geplant» ist alles
+                              ab heute – sobald eine Reise begonnen hat, fällt
+                              sie in diese Liste und stand dort ohne jedes
+                              Zeichen zwischen den abgeschlossenen. Dass man
+                              gerade auf dem Platz ist, wussten Startseite und
+                              «Heute», nur die Reiseliste nicht. */}
+                          <RunningBadge trip={trip} today={today} />
                         </p>
                         <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                           {trip.role === "member" && trip.ownerName && (
@@ -2437,65 +2491,74 @@ export default function TripsPage() {
                             {trip.notes}
                           </p>
                         )}
-                        {/* Reise-Tagebuch (#192): vergangene und laufende Reisen */}
-                        <TripJournal
-                          tripId={trip.id}
-                          tripName={label(trip)}
-                          startDate={trip.startDate}
-                          endDate={trip.endDate}
-                          shared={trip.shared || trip.role === "member"}
-                        />
-                        {/* Reisekasse (#219) */}
-                        <TripExpenses
-                          tripId={trip.id}
-                          tripName={label(trip)}
-                          defaultDay={
-                            today > trip.endDate ? trip.endDate : today
-                          }
-                          shared={trip.shared || trip.role === "member"}
-                          budgetRappen={trip.budgetRappen}
-                        />
-                        {/* Pinnwand (#245, für jede Reise seit #344) */}
-                        <TripBoard
-                          tripId={trip.id}
-                          tripName={label(trip)}
-                          shared={trip.shared || trip.role === "member"}
-                        />
-                        {/* Änderungsverlauf (#296) auch rückblickend:
-                            «wer hat das damals eingetragen» */}
-                        {(trip.shared || trip.role === "member") && (
-                          <TripHistory
+                        {/* ABSCHNITTE ERST BEIM SCROLLEN (#347): Ein Aufenthalt
+                          stapelt hier ein Dutzend Abschnitte, und mehrere
+                          holen sofort Daten – die Fotogalerie zum Beispiel
+                          fragt ohne Aufklappen. Bei zwanzig Reisen sind das
+                          zwanzig Galerie-Abfragen für drei sichtbare Karten.
+                          `LazySection` gibt es seit #304 fürs Platz-Dossier,
+                          das genau dasselbe Problem hatte. */}
+                        <LazySection minHeight={320}>
+                          {/* Reise-Tagebuch (#192): vergangene und laufende Reisen */}
+                          <TripJournal
+                            tripId={trip.id}
+                            tripName={label(trip)}
+                            startDate={trip.startDate}
+                            endDate={trip.endDate}
+                            shared={trip.shared || trip.role === "member"}
+                          />
+                          {/* Reisekasse (#219) */}
+                          <TripExpenses
+                            tripId={trip.id}
+                            tripName={label(trip)}
+                            defaultDay={
+                              today > trip.endDate ? trip.endDate : today
+                            }
+                            shared={trip.shared || trip.role === "member"}
+                            budgetRappen={trip.budgetRappen}
+                          />
+                          {/* Pinnwand (#245, für jede Reise seit #344) */}
+                          <TripBoard
+                            tripId={trip.id}
+                            tripName={label(trip)}
+                            shared={trip.shared || trip.role === "member"}
+                          />
+                          {/* Änderungsverlauf (#296) auch rückblickend:
+                              «wer hat das damals eingetragen» */}
+                          {(trip.shared || trip.role === "member") && (
+                            <TripHistory
+                              tripId={trip.id}
+                              tripName={label(trip)}
+                            />
+                          )}
+                          {/* Gästebuch (#254): gerade bei vergangenen Reisen
+                              die Erinnerungs-Seite – Grüsse bleiben stehen */}
+                          <TripGuestbook
                             tripId={trip.id}
                             tripName={label(trip)}
                           />
-                        )}
-                        {/* Gästebuch (#254): gerade bei vergangenen Reisen
-                            die Erinnerungs-Seite – Grüsse bleiben stehen */}
-                        <TripGuestbook
-                          tripId={trip.id}
-                          tripName={label(trip)}
-                        />
-                        {/* Buchungsbestätigung (#279) – auch bei vergangenen
-                            Reisen: die Rechnung will man später noch finden */}
-                        {trip.role !== "member" && (
-                          <TripReservation
+                          {/* Buchungsbestätigung (#279) – auch bei vergangenen
+                              Reisen: die Rechnung will man später noch finden */}
+                          {trip.role !== "member" && (
+                            <TripReservation
+                              tripId={trip.id}
+                              fileName={trip.reservationFileName ?? null}
+                              className="mt-2"
+                            />
+                          )}
+                          <TripPhotos
                             tripId={trip.id}
-                            fileName={trip.reservationFileName ?? null}
-                            className="mt-2"
+                            tripName={label(trip)}
+                            coverPhotoId={trip.coverPhotoId}
                           />
-                        )}
-                        <TripPhotos
-                          tripId={trip.id}
-                          tripName={label(trip)}
-                          coverPhotoId={trip.coverPhotoId}
-                        />
-                        {/* Foto-Collage (#226) */}
-                        <TripCollage
-                          tripId={trip.id}
-                          tripName={label(trip)}
-                          startDate={trip.startDate}
-                          endDate={trip.endDate}
-                        />
+                          {/* Foto-Collage (#226) */}
+                          <TripCollage
+                            tripId={trip.id}
+                            tripName={label(trip)}
+                            startDate={trip.startDate}
+                            endDate={trip.endDate}
+                          />
+                        </LazySection>
                       </div>
                       <div className="flex shrink-0 flex-col gap-1">
                         <Button

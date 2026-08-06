@@ -107,6 +107,7 @@ import {
 } from "@shared/packSuggestions";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import { useHashSection } from "@/hooks/useHashSection";
+import { useTripSectionCounts } from "@/hooks/useTripSectionCounts";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 
 export default function TripJournal({
@@ -126,14 +127,22 @@ export default function TripJournal({
   const utils = trpc.useUtils();
   // Tiefer Link vom Knopf «Ins Journal schreiben» der «Heute»-Ansicht (#344)
   const { matched: deepLinked, ref: cardRef } = useHashSection("#journal");
+  // Zugeklappt liefert der gemeinsame Zähler die Zahl (#346) – bis dahin
+  // `null`, damit nicht kurz eine 0 aufblitzt, die nichts bedeutet.
+  const stored = useTripSectionCounts(tripId);
   const [open, setOpen] = useState(deepLinked);
   /** Tag, dessen Textfeld gerade offen ist (null = keines). */
   const [editingDay, setEditingDay] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const query = trpc.trips.journal.list.useQuery({ tripId }, { enabled: open });
+  const badgeCount =
+    open && !query.isLoading
+      ? (query.data?.length ?? 0)
+      : (stored?.journal ?? null);
   const setMutation = trpc.trips.journal.set.useMutation({
     onSuccess: (_data, vars) => {
       utils.trips.journal.list.invalidate({ tripId });
+      utils.trips.counts.invalidate();
       setEditingDay(null);
       toast.success(
         vars.text?.trim() ? t.trips.journalSaved : t.trips.journalDeleted
@@ -171,9 +180,9 @@ export default function TripJournal({
         <span className="min-w-0 flex-1 truncate text-left font-medium">
           {t.trips.journalTitle}
         </span>
-        {open && !query.isLoading && (
+        {badgeCount !== null && (
           <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
-            {t.trips.journalCount(query.data?.length ?? 0)}
+            {t.trips.journalCount(badgeCount)}
           </span>
         )}
         <ChevronDown

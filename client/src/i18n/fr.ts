@@ -2593,6 +2593,8 @@ export const fr: Translation = {
     weatherLuckYear: (pct, temp) =>
       `Chance météo : ${pct} % de jours secs · max. journalier moyen ${temp}°`,
     sharedBadge: "Partagé",
+    runningBadge: (day: number, total: number) =>
+      `En cours · jour ${day} sur ${total}`,
     sharedWith: name => `Voyage de ${name}`,
     membersButton: "Compagnons de voyage",
     membersAria: name => `Gérer les compagnons de voyage de ${name}`,

@@ -86,7 +86,15 @@ export function isTripBoardDone(entry: TripBoardEntryLike): boolean {
 }
 
 /** Zählwerk für die Kopfzeile: Nachrichten, offene und erledigte Aufgaben. */
-export function tripBoardCounts(entries: readonly TripBoardEntryLike[]): {
+/**
+ * Gezählt werden nur Art und Haken – deshalb genügt der Funktion genau
+ * das (#346). Der Zähler-Endpunkt holt für die zugeklappten Abschnitte
+ * bewusst NUR diese zwei Spalten und käme mit `TripBoardEntryLike` (samt
+ * Id und Zeitstempel) nicht durch.
+ */
+export function tripBoardCounts(
+  entries: readonly Pick<TripBoardEntryLike, "kind" | "done">[]
+): {
   messages: number;
   openTasks: number;
   doneTasks: number;

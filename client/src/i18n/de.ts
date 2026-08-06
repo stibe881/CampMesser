@@ -2598,6 +2598,8 @@ export const de = {
     weatherLuckYear: (pct: number, temp: number) =>
       `Wetter-Glück: ${pct} % trockene Tage · Ø Tagesmaximum ${temp}°`,
     sharedBadge: "Gemeinsam",
+    runningBadge: (day: number, total: number) =>
+      `Läuft gerade · Tag ${day} von ${total}`,
     sharedWith: (name: string) => `Reise von ${name}`,
     membersButton: "Mitreisende",
     membersAria: (name: string) => `Mitreisende von ${name} verwalten`,

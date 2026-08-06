@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
+import { useTripSectionCounts } from "@/hooks/useTripSectionCounts";
 import { toast } from "sonner";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
@@ -68,6 +69,7 @@ export default function TripGuestbook({
   const addMutation = trpc.trips.guestbook.add.useMutation({
     onSuccess: () => {
       utils.trips.guestbook.list.invalidate({ tripId });
+      utils.trips.counts.invalidate();
       setMessage("");
       setPhotoValue(NO_PHOTO);
       toast.success(gb.added);
@@ -77,6 +79,7 @@ export default function TripGuestbook({
   const removeMutation = trpc.trips.guestbook.remove.useMutation({
     onSuccess: () => {
       utils.trips.guestbook.list.invalidate({ tripId });
+      utils.trips.counts.invalidate();
       toast.success(gb.removed);
     },
     onError: e => toast.error(e.message || gb.removeFailed),
@@ -87,6 +90,10 @@ export default function TripGuestbook({
     [query.data]
   );
   const summary = guestbookSummary(entries);
+  // Zugeklappt kommt die Zahl aus dem gemeinsamen Zähler (#346)
+  const stored = useTripSectionCounts(tripId);
+  const badgeTotal =
+    open && !query.isLoading ? summary.total : (stored?.guestbook ?? 0);
   const photos = photosQuery.data ?? [];
   const photoUrl = (photoId: number) => {
     const photo = photos.find(p => p.id === photoId);
@@ -128,9 +135,9 @@ export default function TripGuestbook({
         <span className="min-w-0 flex-1 truncate text-left font-medium">
           {gb.title}
         </span>
-        {open && !query.isLoading && summary.total > 0 && (
+        {badgeTotal > 0 && (
           <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
-            {gb.count(summary.total)}
+            {gb.count(badgeTotal)}
           </span>
         )}
         <ChevronDown

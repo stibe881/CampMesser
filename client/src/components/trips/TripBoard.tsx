@@ -100,6 +100,7 @@ import {
 } from "@shared/packSuggestions";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import { useHashSection } from "@/hooks/useHashSection";
+import { useTripSectionCounts } from "@/hooks/useTripSectionCounts";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 
 export default function TripBoard({
@@ -132,18 +133,23 @@ export default function TripBoard({
   const addMutation = trpc.trips.board.add.useMutation({
     onSuccess: () => {
       utils.trips.board.list.invalidate({ tripId });
+      utils.trips.counts.invalidate();
       setDraft("");
       toast.success(t.tripBoard.added);
     },
     onError: e => toast.error(e.message || t.tripBoard.addFailed),
   });
   const doneMutation = trpc.trips.board.setDone.useMutation({
-    onSuccess: () => utils.trips.board.list.invalidate({ tripId }),
+    onSuccess: () => {
+      utils.trips.board.list.invalidate({ tripId });
+      utils.trips.counts.invalidate();
+    },
     onError: e => toast.error(e.message || t.tripBoard.doneFailed),
   });
   const removeMutation = trpc.trips.board.remove.useMutation({
     onSuccess: () => {
       utils.trips.board.list.invalidate({ tripId });
+      utils.trips.counts.invalidate();
       toast.success(t.tripBoard.removed);
     },
     onError: e => toast.error(e.message || t.tripBoard.removeFailed),
@@ -151,6 +157,11 @@ export default function TripBoard({
 
   const notes = query.data ?? [];
   const counts = useMemo(() => tripBoardCounts(notes), [notes]);
+  // Zugeklappt kommt die Zahl aus dem gemeinsamen Zähler (#346); offen
+  // zählt die geladene Liste, weil sie nach dem Abhaken sofort stimmt.
+  const stored = useTripSectionCounts(tripId);
+  const badgeOpenTasks =
+    open && !query.isLoading ? counts.openTasks : (stored?.openTasks ?? 0);
 
   /** «vor 5 Minuten» in der aktiven Sprache (Muster SharedLocation/Sos). */
   const ago = (timestamp: Date | string) => {
@@ -181,9 +192,9 @@ export default function TripBoard({
         <span className="min-w-0 flex-1 truncate text-left font-medium">
           {t.tripBoard.title}
         </span>
-        {open && !query.isLoading && counts.openTasks > 0 && (
+        {badgeOpenTasks > 0 && (
           <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
-            {t.tripBoard.openTasks(counts.openTasks)}
+            {t.tripBoard.openTasks(badgeOpenTasks)}
           </span>
         )}
         <ChevronDown
