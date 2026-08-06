@@ -17,7 +17,9 @@ module.exports = {
     // Die Akzentfarbe der App (siehe client/src/index.css, --primary)
     $accent: { color: "#2F6F4E", darkColor: "#7FC79B" },
   },
-  frameworks: ["SwiftUI", "WidgetKit"],
+  // AppIntents braucht es für das Abhaken direkt im Widget (#327) –
+  // ohne das Framework findet der Compiler `SetValueIntent` nicht.
+  frameworks: ["SwiftUI", "WidgetKit", "AppIntents"],
   // iOS 17 ist die Untergrenze für `containerBackground`, das seit
   // iOS 17 für jedes Widget verlangt wird.
   deploymentTarget: "17.0",

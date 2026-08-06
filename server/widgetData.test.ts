@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildWidgetPayload,
   countSupplies,
+  MAX_WIDGET_TASKS,
   selectWidgetTrip,
   widgetPayloadChanged,
   type WidgetInput,
@@ -208,5 +209,108 @@ describe("Nutzlast", () => {
     });
     expect(widgetPayloadChanged(a, b)).toBe(true);
     expect(widgetPayloadChanged(null, a)).toBe(true);
+  });
+});
+
+describe("Liste zum Abhaken (#327)", () => {
+  const packItems = [
+    { id: 1, name: "Zelt", checked: true },
+    { id: 2, name: "Schlafsack", checked: false },
+    { id: 3, name: "Kocher", checked: false },
+    { id: 4, name: "Stirnlampe", checked: false },
+    { id: 5, name: "Regenjacke", checked: false },
+  ];
+  const chores = [
+    { id: 10, title: "Abwasch", doneAt: null },
+    { id: 11, title: "Wasser holen", doneAt: "2026-08-05T09:00:00Z" },
+  ];
+
+  it("vor der Reise steht die Packliste", () => {
+    const p = buildWidgetPayload({
+      ...base,
+      trips: [trip(1, "2026-08-08", "2026-08-12")],
+      packItems,
+      chores,
+    });
+    expect(p.tasksTitle).toBe("Noch zu packen");
+    expect(p.tasks.every(t => t.kind === "packing")).toBe(true);
+  });
+
+  it("während der Reise stehen die Ämtli", () => {
+    // Auf dem Platz nützt die Packliste nichts mehr.
+    const p = buildWidgetPayload({
+      ...base,
+      trips: [trip(1, "2026-08-03", "2026-08-09")],
+      packItems,
+      chores,
+    });
+    expect(p.tasksTitle).toBe("Heute im Camp");
+    expect(p.tasks.map(t => t.id)).toEqual([10, 11]);
+    expect(p.tasks[0].checked).toBe(false);
+    expect(p.tasks[1].checked).toBe(true);
+  });
+
+  it("offene zuerst, erledigte dahinter", () => {
+    const p = buildWidgetPayload({
+      ...base,
+      trips: [trip(1, "2026-08-08", "2026-08-12")],
+      packItems,
+    });
+    // «Zelt» ist erledigt und rutscht ans Ende – aber es verschwindet
+    // nicht, sonst wäre nach dem Antippen unklar, ob es ankam.
+    expect(p.tasks.map(t => t.title)).toEqual([
+      "Schlafsack",
+      "Kocher",
+      "Stirnlampe",
+      "Regenjacke",
+    ]);
+  });
+
+  it("höchstens vier Zeilen", () => {
+    const p = buildWidgetPayload({
+      ...base,
+      trips: [trip(1, "2026-08-08", "2026-08-12")],
+      packItems: Array.from({ length: 20 }, (_, i) => ({
+        id: i + 1,
+        name: `Sache ${i + 1}`,
+        checked: false,
+      })),
+    });
+    expect(p.tasks).toHaveLength(MAX_WIDGET_TASKS);
+  });
+
+  it("ohne Reise bleibt die Liste leer, mit passendem Text", () => {
+    const p = buildWidgetPayload(base);
+    expect(p.tasks).toEqual([]);
+    expect(p.tasksEmpty).toBe("Alles gepackt");
+  });
+
+  it("in jeder Sprache beschriftet", () => {
+    for (const lang of LANGUAGES) {
+      const p = buildWidgetPayload({ ...base, lang });
+      expect(p.tasksTitle.length).toBeGreaterThan(0);
+      expect(p.tasksEmpty.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("das Ziel neben den Häkchen führt in die passende Liste", () => {
+    // Wer neben ein Häkchen tippt, will die ganze Liste sehen – und zwar
+    // die, die im Widget steht.
+    const running = buildWidgetPayload({
+      ...base,
+      trips: [trip(1, "2026-08-03", "2026-08-09")],
+      chores,
+    });
+    expect(running.tasksUrl).toBe("/aemtli");
+
+    const upcoming = buildWidgetPayload({
+      ...base,
+      trips: [{ ...trip(1, "2026-08-08", "2026-08-12"), packListId: 42 }],
+      packItems,
+    });
+    expect(upcoming.tasksUrl).toBe("/packlisten/42");
+
+    // Ohne verknüpfte Liste bleibt die Übersicht.
+    expect(buildWidgetPayload(base).tasksUrl).toBe("/packlisten");
   });
 });

@@ -1,17 +1,23 @@
+import AppIntents
 import SwiftUI
 import WidgetKit
 
-/// Die Widgets von CampMesser (#325).
+/// Die Widgets von CampMesser (#325, #327).
 ///
-/// ZWEI STÜCK, NICHT SECHS: Ein Widget wird im Vorbeigehen angeschaut,
-/// nicht gelesen. Es beantwortet je eine Frage – «wann geht es los und
-/// bin ich bereit» und «muss ich etwas aufbrauchen oder pflegen». Alles
-/// Weitere gehört in die App, wo Platz dafür ist.
+/// DREI STÜCK, NICHT ZEHN: Ein Widget wird im Vorbeigehen angeschaut,
+/// nicht gelesen. Jedes beantwortet eine Frage oder nimmt einen Handgriff
+/// ab – «wann geht es los und bin ich bereit», «muss ich etwas
+/// aufbrauchen oder pflegen» und «was ist noch offen». Alles Weitere
+/// gehört in die App, wo Platz dafür ist.
 ///
-/// KEIN NETZWERK: Beide zeichnen aus dem gemeinsamen Ordner, den die App
-/// beschreibt. Eine Widget-Erweiterung hat die Sitzung der App nicht und
-/// müsste sich sonst selbst anmelden – ein zweiter Weg, der kaputtgehen
-/// kann, für zwei Zahlen.
+/// DAS DRITTE TUT ETWAS, statt nur die App zu öffnen: Seit iOS 17 darf ein
+/// Widget einen `AppIntent` ausführen. Man hakt direkt im Widget ab, ohne
+/// Umweg über die App – siehe `TaskIntent.swift`.
+///
+/// KEIN NETZWERK: Alle drei zeichnen aus dem gemeinsamen Ordner, den die
+/// App beschreibt. Eine Widget-Erweiterung hat die Sitzung der App nicht
+/// und müsste sich sonst selbst anmelden – ein zweiter Weg, der
+/// kaputtgehen kann, für zwei Zahlen.
 
 // MARK: - Zeitplan
 
@@ -213,6 +219,85 @@ struct SupplyWidget: Widget {
   }
 }
 
+// MARK: - Liste zum Abhaken
+
+/// Ein Häkchen statt eines Schiebeschalters.
+///
+/// Der voreingestellte `Toggle` zeichnet einen Schalter, wie man ihn aus
+/// den Einstellungen kennt. Der frisst die halbe Breite eines mittleren
+/// Widgets und liest sich wie «Funktion ein/aus», nicht wie «erledigt».
+/// Angetippt wird trotzdem die ganze Zeile – das übernimmt SwiftUI.
+private struct CheckToggleStyle: ToggleStyle {
+  func makeBody(configuration: Configuration) -> some View {
+    HStack(spacing: 8) {
+      Image(systemName: configuration.isOn ? "checkmark.circle.fill" : "circle")
+        .imageScale(.large)
+        .foregroundStyle(
+          configuration.isOn ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary)
+        )
+      configuration.label
+      Spacer(minLength: 0)
+    }
+  }
+}
+
+struct TaskWidgetView: View {
+  let entry: Entry
+
+  var body: some View {
+    let payload = entry.payload
+    VStack(alignment: .leading, spacing: 7) {
+      Text(payload.tasksTitle)
+        .font(.headline)
+        .lineLimit(1)
+
+      if payload.tasks.isEmpty {
+        Spacer(minLength: 0)
+        Text(payload.tasksEmpty)
+          .font(.subheadline)
+          .foregroundStyle(.secondary)
+          .lineLimit(2)
+        Spacer(minLength: 0)
+      } else {
+        ForEach(payload.tasks) { task in
+          Toggle(
+            isOn: task.checked,
+            intent: ToggleTaskIntent(kind: task.kind, itemId: task.id)
+          ) {
+            Text(task.title)
+              .font(.subheadline)
+              .lineLimit(1)
+              // Erledigte verschwinden nicht sofort: Sonst wäre die Zeile
+              // im selben Moment weg, in dem man sie antippt, und man
+              // wüsste nicht, ob der Tipp angekommen ist.
+              .strikethrough(task.checked)
+              .foregroundStyle(task.checked ? .secondary : .primary)
+          }
+          .toggleStyle(CheckToggleStyle())
+        }
+        Spacer(minLength: 0)
+      }
+    }
+  }
+}
+
+struct TaskWidget: Widget {
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: "campmesser.tasks", provider: Provider()) { entry in
+      TaskWidgetView(entry: entry)
+        .containerBackground(.fill.tertiary, for: .widget)
+        // Antippen NEBEN den Häkchen führt in die zugehörige Liste; die
+        // Häkchen selbst fangen ihren Tipp vorher ab.
+        .widgetURL(widgetURL(entry.payload.tasksUrl))
+    }
+    .configurationDisplayName("Zum Abhaken")
+    .description(
+      "Vor der Reise die Packliste, während der Reise die Ämtli – direkt im Widget abhaken."
+    )
+    .supportedFamilies([.systemMedium, .systemLarge])
+  }
+}
+
 // MARK: - Bündel
 
 @main
@@ -220,5 +305,6 @@ struct CampMesserWidgets: WidgetBundle {
   var body: some Widget {
     TripWidget()
     SupplyWidget()
+    TaskWidget()
   }
 }

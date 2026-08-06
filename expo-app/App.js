@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { StyleSheet, SafeAreaView, Platform, StatusBar } from "react-native";
+import {
+  AppState,
+  StyleSheet,
+  SafeAreaView,
+  Platform,
+  StatusBar,
+} from "react-native";
 import { WebView } from "react-native-webview";
 import * as Notifications from "expo-notifications";
 import * as QuickActions from "expo-quick-actions";
@@ -34,6 +40,12 @@ const CAMP_URL = "https://campmesser.ch";
  */
 const APP_GROUP = "group.ch.campmesser.app";
 const WIDGET_KEY = "campmesserWidget";
+/**
+ * Zweiter Schlüssel: die Häkchen, die IM WIDGET gesetzt wurden (#327).
+ * Muss zu `WidgetStore.actionsKey` in `targets/widgets/WidgetData.swift`
+ * passen. Geschrieben wird er von der Erweiterung, geleert von hier.
+ */
+const WIDGET_ACTIONS_KEY = "campmesserWidgetActions";
 const widgetStorage = new ExtensionStorage(APP_GROUP);
 
 /**
@@ -247,6 +259,51 @@ export default function App() {
     const sub = Linking.addEventListener("url", ({ url }) => handle(url));
     return () => sub.remove();
   }, [navigateWebView]);
+
+  /**
+   * Die im WIDGET gesetzten Häkchen abholen (#327).
+   *
+   * Die Widget-Erweiterung hat die Sitzung der App nicht und erreicht den
+   * Server nicht. Sie legt jedes Häkchen im gemeinsamen Ordner ab; hier
+   * wird die Sammlung an die Web-App gereicht, die sie in ihre bestehende
+   * Warteschlange schiebt (`client/src/lib/offlineQueue.ts`).
+   *
+   * WANN: sobald die Seite steht und jedes Mal, wenn die App wieder nach
+   * vorne kommt. Ein Tipp im Widget startet die App NICHT – ohne den
+   * Blick beim Zurückkehren bliebe das Häkchen liegen, bis die App aus
+   * einem anderen Grund geöffnet wird.
+   */
+  const flushWidgetActions = useCallback(() => {
+    if (!webReady || !webViewRef.current) return;
+    let actions;
+    try {
+      const raw = widgetStorage.get(WIDGET_ACTIONS_KEY);
+      if (!raw) return;
+      actions = JSON.parse(raw);
+    } catch {
+      // Halb geschriebenes JSON: wegwerfen statt daran hängenbleiben.
+      widgetStorage.remove(WIDGET_ACTIONS_KEY);
+      return;
+    }
+    if (!Array.isArray(actions) || actions.length === 0) return;
+    // Erst leeren, dann schicken – käme die App zwischendurch ein zweites
+    // Mal nach vorne, landete sonst dasselbe Häkchen zweimal in der
+    // Warteschlange.
+    widgetStorage.remove(WIDGET_ACTIONS_KEY);
+    webViewRef.current.injectJavaScript(
+      `window.dispatchEvent(new CustomEvent(${JSON.stringify(
+        "campmesser:widget-actions"
+      )}, { detail: ${JSON.stringify(actions)} })); true;`
+    );
+  }, [webReady]);
+
+  useEffect(() => {
+    flushWidgetActions();
+    const sub = AppState.addEventListener("change", state => {
+      if (state === "active") flushWidgetActions();
+    });
+    return () => sub.remove();
+  }, [flushWidgetActions]);
 
   const onMessage = async event => {
     try {

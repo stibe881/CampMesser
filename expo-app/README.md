@@ -27,6 +27,7 @@ JSON-Objekt `{ type, ... }`. Die Namen stehen in
 | `SET_BADGE`          | `count: number`          | Zahl am App-Icon (0 = weg)         |
 | `SET_QUICK_ACTIONS`  | `items: Action[]`        | Kurzbefehle in der App-Sprache     |
 | `SET_WIDGET_DATA`    | `payload: WidgetPayload` | Widget-Daten + Neuzeichnen         |
+| `OPEN_DIRECTIONS`    | `appUrl`, `webUrl`       | Route in der Karten-App öffnen     |
 
 Nativ → Web läuft über `injectJavaScript` und ein `CustomEvent`:
 
@@ -35,6 +36,7 @@ Nativ → Web läuft über `injectJavaScript` und ein `CustomEvent`:
 | `ExpoPushToken`              | Token als `detail` | Antwort auf `REQUEST_PUSH_TOKEN`     |
 | `ExpoPushTokenError`         | –                  | Berechtigung verweigert / kein Gerät |
 | `campmesser:native-navigate` | Pfad als `detail`  | Mitteilung angetippt, Kurzbefehl     |
+| `campmesser:widget-actions`  | `PendingAction[]`  | Im Widget gesetzte Häkchen           |
 
 Der Sprung geht bewusst über ein Ereignis und nicht über `location.href`:
 Der Router der Web-App ist damit sofort da, und der Zwischenspeicher (samt
@@ -75,10 +77,11 @@ landet man stillschweigend immer im Rückfall.
 
 ## Widgets
 
-Zwei Widgets, je eine Frage: **Nächste Reise** (Countdown, während des
-Aufenthalts der Tag, dazu der Packstand als Ring) und **Vorrat & Pflege**
-(was bald abläuft, was fällig ist). Beide gibt es klein und mittel, das
-Reise-Widget zusätzlich für den Sperrbildschirm.
+Drei Widgets: **Nächste Reise** (Countdown, während des Aufenthalts der
+Tag, dazu der Packstand als Ring), **Vorrat & Pflege** (was bald abläuft,
+was fällig ist) und **Zum Abhaken** (siehe unten). Die ersten beiden gibt
+es klein und mittel, das Reise-Widget zusätzlich für den Sperrbildschirm;
+das dritte mittel und gross.
 
 **Das Widget bekommt Text, keine Daten.** Eine Widget-Erweiterung ist ein
 eigener Prozess ohne Zugriff auf die Übersetzungen der Web-App, ohne
@@ -109,6 +112,40 @@ die drei Dateien deshalb als Text.
 
 **Antippen** öffnet `campmesser://open?path=/tagebuch/7`. Der Pfad geht
 denselben Weg wie eine angetippte Mitteilung.
+
+## Abhaken IM Widget
+
+Seit iOS 17 kann ein Widget etwas tun, statt nur die App zu öffnen: Ein
+`AppIntent` hinter einem Schalter läuft in der Erweiterung, ohne dass die
+App startet (`targets/widgets/TaskIntent.swift`). Das Widget **Zum
+Abhaken** zeigt vor der Reise die offenen Punkte der verknüpften
+Packliste, während der Reise die heutigen Ämtli.
+
+**Die Erweiterung erreicht den Server nicht.** Sie hat die Sitzung der App
+nicht, und Zugangsdaten in die App-Gruppe zu legen wäre ein zweiter
+Anmeldeweg, den niemand sieht und den man beim Abmelden vergisst. Der Weg
+ist deshalb derselbe wie im Funkloch (#303): merken und nachschicken.
+
+| Schritt | Wo                            | Was                                                         |
+| ------- | ----------------------------- | ----------------------------------------------------------- |
+| 1       | `TaskIntent.swift`            | `WidgetStore.remember(…)` legt das Häkchen in die Gruppe    |
+| 2       | `WidgetData.swift` `load()`   | legt Gemerktes über den Stand aus der App (`merge`)         |
+| 3       | `App.js` `flushWidgetActions` | liest die Sammlung beim Start/Zurückkehren, leert sie       |
+| 4       | `WidgetSync.tsx`              | schiebt sie in `offlineQueue`, von dort geht sie zum Server |
+
+Schritt 2 ist der unscheinbare, aber wichtige: Ohne ihn spränge der
+Schalter zurück, sobald das Widget neu zeichnet – und nichts wirkt
+kaputter als ein Schalter, der nicht bleibt.
+
+**Der Preis, offen gesagt:** Zwischen dem Häkchen im Widget und dem
+Häkchen auf dem Server liegt die Zeit bis zum nächsten App-Start. Auf
+einem zweiten Gerät taucht es erst dann auf. Für Packlisten und Ämtli ist
+das verkraftbar – beides erledigt man alleine.
+
+**Ein zweiter Schlüssel** in derselben App-Gruppe
+(`campmesserWidgetActions`) und die Obergrenze der Warteschlange müssen
+auf beiden Seiten gleich sein; `server/widgetBridge.test.ts` prüft auch
+das als Text.
 
 ## Bauen
 
