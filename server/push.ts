@@ -834,13 +834,15 @@ async function dailyRainFor(
   return { time: json.daily.time, precipitation: json.daily.precipitation_sum };
 }
 
-/** Heutiges Datum als ISO-String in der lokalen Serverzeit (nicht UTC). */
-function localIsoDate(now = new Date()): string {
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+/**
+ * ENTFALLEN (#338): `localIsoDate()` gab den Tag in der Zeitzone des
+ * SERVERS. Läuft der in UTC – und das tut ein Webhosting im Zweifel –,
+ * war das zwischen Mitternacht und zwei Uhr ein anderer Tag als der bei
+ * den Nutzenden. Aufgefallen wäre es nicht, weil die Jobs tagsüber
+ * laufen; eine zweite Definition von «heute», die nur unter bestimmten
+ * Umständen falsch ist, ist aber genau die Art Fehler, die man nicht
+ * findet. Es gilt jetzt überall `zurichIsoDate()`.
+ */
 
 /**
  * Alle Abos prüfen: für jeden Zeltplatz der abonnierten Nutzer*innen die
@@ -908,7 +910,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     .where(inArray(homeLocations.userId, userIds));
 
   // Kühlbox: MHD-Erinnerungen pro Nutzer*in vorbereiten
-  const today = localIsoDate();
+  const today = zurichIsoDate();
   const food = await db
     .select()
     .from(foodItems)

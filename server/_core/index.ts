@@ -1,5 +1,4 @@
 import "dotenv/config";
-console.log("DEBUG NODE_ENV IS:", process.env.NODE_ENV);
 import express from "express";
 import { createServer } from "http";
 import net from "net";
@@ -8,6 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
+import { MAX_JSON_BODY } from "@shared/tripPhotos";
 import { loadDevHtml, loadProdHtml, serveStatic, setupVite } from "./vite";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -36,9 +36,27 @@ async function startServer() {
   // und Secure-Cookies korrekt gesetzt werden.
   app.set("trust proxy", 1);
   const server = createServer(app);
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  /**
+   * Obergrenze für JSON-Rümpfe (#337).
+   *
+   * HIER STANDEN 50 MB, mit dem Kommentar «larger size limit for file
+   * uploads». Nur laufen Uploads gar nicht hierüber: Sie kommen als
+   * Rohdaten mit Bild-MIME und haben unter `/api/trips/:id/photos` ihre
+   * eigene, engere Grenze (`express.raw` mit `MAX_PHOTO_BYTES`).
+   *
+   * WARUM DAS NICHT BLOSS UNORDENTLICH WAR: Der Rumpf wird geparst,
+   * BEVOR irgendeine Prüfung stattfindet – vor der Anmeldung, vor tRPC.
+   * Wer 50 MB JSON schickt, belegt so viel Speicher im Prozess, ohne ein
+   * Konto zu haben. Auf einem Webhosting mit knappem Arbeitsspeicher
+   * genügen wenige gleichzeitige Anfragen.
+   *
+   * WARUM 3 MB UND NICHT WENIGER: Der grösste ehrliche Rumpf ist eine
+   * aufgezeichnete Wanderung mit `MAX_TRACK_POINTS` (20 000) Punkten –
+   * rund 2 MB JSON. Kein tRPC-Eingang nimmt einen Text über 2000 Zeichen,
+   * und base64-Bilder gibt es nirgends.
+   */
+  app.use(express.json({ limit: MAX_JSON_BODY }));
+  app.use(express.urlencoded({ limit: MAX_JSON_BODY, extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   // Health-Check für die Uptime-Überwachung: prüft Prozess und DB-Verbindung.
