@@ -45,6 +45,7 @@ import UpdatePrompt from "@/components/UpdatePrompt";
 import QuickActions from "@/components/QuickActions";
 import CookTimerBar from "@/components/CookTimerBar";
 import WhatsNewStartup from "@/components/WhatsNewDialog";
+import { todayIso } from "@shared/localDate";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -153,7 +154,7 @@ function AppBadgeUpdater() {
       computeBadgeCount({
         foodItems: foodQuery.data ?? [],
         gearTasks: gearQuery.data ?? [],
-        today: new Date().toISOString().slice(0, 10),
+        today: todayIso(),
       })
     );
   }, [supported, isAuthenticated, foodQuery.data, gearQuery.data]);

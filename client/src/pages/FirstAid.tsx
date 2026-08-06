@@ -47,6 +47,7 @@ import { trpc } from "@/lib/trpc";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
+import { todayIso } from "@shared/localDate";
 import {
   MAX_TICK_BODY_PART_LENGTH,
   MAX_TICK_NOTE_LENGTH,
@@ -237,7 +238,7 @@ function TickBiteSection() {
   const { lang, t } = useI18n();
   const { isAuthenticated } = useAuth();
   const utils = trpc.useUtils();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const query = trpc.tickBites.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });

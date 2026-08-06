@@ -1,7 +1,6 @@
 /**
- * Overpass-API-Anbindung für «Campingplätze entdecken» auf der Karte:
- * baut die Abfrage für einen Kartenausschnitt (tourism=camp_site als node
- * oder way) und parst die Antwort defensiv – Overpass liefert je nach
+ * Overpass-API-Anbindung für die Karte und die Umkreis-Suchen: baut die
+ * Abfragen und parst die Antwort defensiv – Overpass liefert je nach
  * Spiegel/Server auch unvollständige Elemente, die wir still überspringen.
  * Reine Logik ohne DOM, damit sie in vitest (server/overpass.test.ts)
  * testbar bleibt.
@@ -12,16 +11,17 @@
  * automatisch – Overpass ist rate-limitiert.
  *
  * Dritter Nutzer: die offiziellen Feuer- und Grillstellen (#247,
- * `firepitsQuery`/`firepitsBboxQuery`/`parseFirepits`).
+ * `firepitsQuery`/`parseFirepits`).
  *
  * Vierter Nutzer: Spiel- und Badeplätze für die Ebene «Familie» (#248,
- * `familyPlacesQuery`/`familyPlacesBboxQuery`/`parseFamilyPlaces`).
+ * `familyPlacesQuery`/`parseFamilyPlaces`).
  *
  * Fünfter Nutzer: Picknickplätze entlang der Anfahrt (#250,
  * `picnicSitesQuery`/`parsePicnicSites`) – als einziger nicht im Umkreis eines
  * Punktes, sondern in einem Korridor entlang einer Strecke.
  */
 import { distanceMeters } from "@shared/geo";
+import { orderEndpoints } from "@shared/overpassCache";
 import {
   parseOsmDistanceMeters,
   parseOsmElevationMeters,
@@ -48,10 +48,37 @@ export const OVERPASS_ENDPOINTS = [
 ];
 
 /**
+ * Der zuletzt erfolgreiche Spiegel (#339).
+ *
+ * Ohne dieses Gedächtnis wurde die Liste IMMER von vorn durchprobiert.
+ * Ist der erste Server an diesem Tag lahm, zahlte jede einzelne Suche
+ * seine acht Sekunden, bevor der zweite drankam. Das Merken kostet einen
+ * `localStorage`-Eintrag und spart im schlechten Fall Sekunden pro Suche.
+ */
+const MIRROR_KEY = "campmesser.overpassMirror";
+
+function rememberedMirror(): string | null {
+  try {
+    return localStorage.getItem(MIRROR_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function rememberMirror(url: string): void {
+  try {
+    localStorage.setItem(MIRROR_KEY, url);
+  } catch {
+    /* Ohne Speicher bleibt die Standard-Reihenfolge – kein Beinbruch. */
+  }
+}
+
+/**
  * Holt Daten von Overpass und probiert bei Rate-Limits (429) oder
  * Serverfehlern (5xx) automatisch den nächsten Spiegel-Server.
- * Bei extremer Überlastung eines Servers erzwingt ein Timeout (8s) den
- * Wechsel auf den nächsten Server, anstatt auf einen 504 Gateway Timeout zu warten.
+ * Bei extremer Überlastung eines Servers erzwingt ein Timeout den Wechsel
+ * auf den nächsten Server, anstatt auf einen 504 Gateway Timeout zu warten.
+ * Probiert wird ab dem zuletzt erfolgreichen Spiegel (#339).
  */
 export async function fetchOverpass(
   query: string,
@@ -59,7 +86,8 @@ export async function fetchOverpass(
 ): Promise<Response> {
   let lastError: Error | undefined;
 
-  for (const url of OVERPASS_ENDPOINTS) {
+  // Zuletzt erfolgreicher Spiegel zuerst (#339).
+  for (const url of orderEndpoints(OVERPASS_ENDPOINTS, rememberedMirror())) {
     try {
       const controller = new AbortController();
       let abortedByReact = false;
@@ -73,8 +101,12 @@ export async function fetchOverpass(
         signal.addEventListener("abort", onReactAbort);
       }
 
-      // Harter Timeout nach 8 Sekunden (Server ist zu langsam / überlastet)
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      // Harter Timeout, etwas über dem Zeit-Budget der Abfrage selbst
+      // (`[out:json][timeout:10]`): So darf der Server ordentlich aufgeben
+      // und uns eine Antwort schicken, statt dass wir ihn mitten in der
+      // Rechnung abschneiden und derselbe Aufwand beim nächsten Spiegel
+      // von vorn beginnt.
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
 
       try {
         const res = await fetch(url, {
@@ -85,7 +117,10 @@ export async function fetchOverpass(
         });
         clearTimeout(timeoutId);
 
-        if (res.ok) return res;
+        if (res.ok) {
+          rememberMirror(url);
+          return res;
+        }
 
         // Bei 429 oder 5xx versuchen wir den nächsten Server
         if (res.status !== 429 && res.status < 500) {
@@ -101,9 +136,9 @@ export async function fetchOverpass(
         if (signal?.aborted) {
           throw e; // Der Nutzer hat wirklich abgebrochen (weggescrollt)
         }
-        // Sonst war es unser eigener 8s-Timeout -> weiter zum nächsten Server!
+        // Sonst war es unser eigener Timeout -> weiter zum nächsten Server!
         lastError = new Error(
-          "Timeout nach 8 Sekunden, versuche nächsten Server..."
+          "Zeitüberschreitung, versuche nächsten Server..."
         );
       }
     }
@@ -117,22 +152,6 @@ export const OVERPASS_MAX_RESULTS = 100;
 
 /** Unterhalb dieses Zoom-Levels wäre der Ausschnitt zu gross für Overpass. */
 export const OVERPASS_MIN_ZOOM = 9;
-
-/** Overpass-QL für Campingplätze im Rechteck Süd/West/Nord/Ost. */
-export function overpassQuery(
-  south: number,
-  west: number,
-  north: number,
-  east: number
-): string {
-  const bbox = [south, west, north, east].map(v => v.toFixed(5)).join(",");
-  return (
-    `[out:json][timeout:15];` +
-    `(node["tourism"="camp_site"](${bbox});` +
-    `way["tourism"="camp_site"](${bbox}););` +
-    `out center ${OVERPASS_MAX_RESULTS};`
-  );
-}
 
 /** Nur nicht-leere Strings übernehmen (Overpass-Tags sind Freitext). */
 function cleanTag(value: unknown): string | undefined {
@@ -475,21 +494,6 @@ export function firepitsQuery(
   );
 }
 
-/** Overpass-QL für Feuer- und Grillstellen im Kartenausschnitt (Karten-Ebene). */
-export function firepitsBboxQuery(
-  south: number,
-  west: number,
-  north: number,
-  east: number
-): string {
-  const bbox = [south, west, north, east].map(v => v.toFixed(5)).join(",");
-  return (
-    `[out:json][timeout:20];` +
-    `(${firepitElements(`(${bbox})`)});` +
-    `out center ${OVERPASS_FIREPIT_MAX_RESULTS};`
-  );
-}
-
 /**
  * OSM-Ja/Nein-Tag lesen. Alles Uneindeutige (`limited`, `seasonal`, Freitext)
  * bleibt `undefined` – die Oberfläche behauptet dann nichts, statt zu raten.
@@ -673,19 +677,57 @@ export function familyPlacesQuery(
   );
 }
 
-/** Overpass-QL für Spiel- und Badeplätze im Kartenausschnitt (Karten-Ebene). */
-export function familyPlacesBboxQuery(
+/* ────────────────────────────────────────────────────────────────────── */
+/* Alle Karten-Ebenen in EINER Abfrage (#339)                            */
+/* ────────────────────────────────────────────────────────────────────── */
+
+/** Die Ebenen der Karte, die aus Overpass kommen. */
+export type OverpassLayer = "campsites" | "firepits" | "family";
+
+/**
+ * Eine Abfrage für mehrere Ebenen.
+ *
+ * WARUM NICHT DREI ABFRAGEN: Genau das war der Grund, warum die
+ * Feuerstellen so lange brauchten. Drei gleichzeitige Anfragen an
+ * denselben Spiegel laufen bei einem rate-limitierten Dienst ins 429;
+ * zwei davon warteten dann den Timeout ab und begannen beim nächsten
+ * Spiegel von vorn. Aus einer Suche wurden bis zu neun Anfragen.
+ *
+ * Overpass beantwortet stattdessen alles auf einmal: Die Element-Listen
+ * werden schlicht aneinandergehängt, und `out center` liefert eine
+ * gemeinsame Antwort. Die drei `parse…`-Funktionen picken sich daraus
+ * heraus, was sie kennen – sie überspringen Unbekanntes ohnehin schon.
+ *
+ * DAS ZEIT-BUDGET (`timeout`) gilt für die ganze Abfrage und ist bewusst
+ * kleiner als die Geduld des Clients: Gibt der Server nach 10 Sekunden
+ * auf, bekommen wir eine Antwort und können den nächsten Spiegel fragen.
+ * Stünde es höher, rechnete er weiter, während wir längst abgebrochen
+ * haben – Arbeit, die niemandem nützt, bei einem freien Dienst.
+ */
+export function combinedBboxQuery(
+  layers: readonly OverpassLayer[],
   south: number,
   west: number,
   north: number,
   east: number
 ): string {
-  const bbox = [south, west, north, east].map(v => v.toFixed(5)).join(",");
-  return (
-    `[out:json][timeout:20];` +
-    `(${familyElements(`(${bbox})`)});` +
-    `out center ${OVERPASS_FAMILY_MAX_RESULTS};`
-  );
+  const bbox = `(${[south, west, north, east].map(v => v.toFixed(5)).join(",")})`;
+  const parts: string[] = [];
+  if (layers.includes("campsites")) {
+    parts.push(
+      `node["tourism"="camp_site"]${bbox};way["tourism"="camp_site"]${bbox};`
+    );
+  }
+  if (layers.includes("firepits")) parts.push(firepitElements(bbox));
+  if (layers.includes("family")) parts.push(familyElements(bbox));
+  // Die Obergrenze ist die Summe: Sonst schnitte eine dichte Ebene den
+  // anderen die Treffer weg, und auf der Karte fehlten Stellen, ohne
+  // dass irgendwo ein Hinweis stünde.
+  const limit =
+    (layers.includes("campsites") ? OVERPASS_MAX_RESULTS : 0) +
+    (layers.includes("firepits") ? OVERPASS_FIREPIT_MAX_RESULTS : 0) +
+    (layers.includes("family") ? OVERPASS_FAMILY_MAX_RESULTS : 0);
+  return `[out:json][timeout:10];(${parts.join("")});out center ${limit};`;
 }
 
 /**

@@ -25,6 +25,42 @@ const DAY_MS = 86400000;
 /** Ab so vielen Resttagen (einschliesslich) gilt ein Lebensmittel als «bald ablaufend». */
 export const SOON_THRESHOLD_DAYS = 3;
 
+/**
+ * Ab so vielen Resttagen zählt ein Lebensmittel als DRINGEND (#334).
+ *
+ * ZWEI SCHWELLEN, WEIL ES ZWEI FRAGEN SIND: In der Kühlbox darf «bald»
+ * grosszügig sein – man liest die Liste sowieso durch, und drei Tage
+ * Vorwarnung sind nützlich. Wer dagegen ungefragt gestört wird, will nur
+ * das Dringende: Die Zahl am App-Icon, die Liste im Widget und die
+ * Heute-Ansicht nehmen deshalb heute und morgen.
+ *
+ * DAS PROBLEM, DAS DAS BEHEBT, war nicht der Unterschied – der ist
+ * gewollt –, sondern dass die engere Schwelle an drei Stellen
+ * ausgeschrieben stand (`daysLeft >= 0 && daysLeft <= 1`), ohne Namen und
+ * ohne Verbindung zu dieser Datei. Wer sie an einer Stelle anfasst,
+ * ändert sie nur dort, und dann zählt das Icon anders als das Widget.
+ */
+export const URGENT_THRESHOLD_DAYS = 1;
+
+/**
+ * Läuft dieses Lebensmittel heute oder morgen ab?
+ *
+ * Abgelaufenes zählt NICHT mit: Es ist kein Grund mehr, heute etwas zu
+ * kochen – es ist ein Grund, es wegzuwerfen, und dafür gibt es die
+ * Kühlbox-Liste.
+ */
+export function isUrgentExpiry(
+  expiryDate: string | null | undefined,
+  today: string
+): boolean {
+  const info = expiryInfo(expiryDate, today);
+  return (
+    info !== null &&
+    info.daysLeft >= 0 &&
+    info.daysLeft <= URGENT_THRESHOLD_DAYS
+  );
+}
+
 /** Anzeigetexte in allen vier Sprachen. */
 const LABELS = {
   expiredYesterday: l4(

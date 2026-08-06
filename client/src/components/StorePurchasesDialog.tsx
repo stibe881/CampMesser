@@ -22,6 +22,7 @@ import {
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { pick } from "@shared/i18n";
+import { todayIso } from "@shared/localDate";
 import {
   normalizeFoodStorage,
   DEFAULT_FOOD_STORAGE,
@@ -65,7 +66,7 @@ export default function StorePurchasesDialog({
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
   const [, navigate] = useLocation();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
 
   // Schnappschuss beim Öffnen: die Liste schrumpft während der Übernahme,
   // der Dialog soll aber stabil bleiben.

@@ -43,7 +43,7 @@ import {
 } from "@shared/dailyTips";
 import { getMoonInfo, stargazingQuality } from "@shared/moon";
 import { isShowerActive, meteorShowers } from "@shared/astro";
-import { recipes } from "@/data/recipes";
+import { useRecipes } from "@/hooks/useRecipes";
 import {
   Bug,
   Cable,
@@ -110,6 +110,7 @@ import {
 import { firstNameOf, greetingKey } from "@shared/greeting";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { todayIso } from "@shared/localDate";
 import {
   CalendarClock,
   ListChecks,
@@ -404,7 +405,7 @@ function BriefingWidget() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const current = (tripsQuery.data ?? [])
     .filter(trip => trip.role === "owner")
     .filter(trip => currentTripDay(trip, today) !== null)
@@ -435,7 +436,7 @@ function NextTripWidget() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   // Bewusst nur EIGENE Reisen im Widget (Mitglieds-Trips bleiben im Tagebuch)
   const ownTrips = (tripsQuery.data ?? []).filter(
     trip => trip.role === "owner"
@@ -462,6 +463,7 @@ function NextTripWidget() {
   const todayEntries = (menuQuery.data?.entries ?? []).filter(
     e => e.day === today
   );
+  const recipes = useRecipes();
   const customRecipesQuery = trpc.recipes.list.useQuery(undefined, {
     enabled:
       Boolean(current) && todayEntries.some(e => e.customRecipeId != null),
@@ -471,7 +473,9 @@ function NextTripWidget() {
   /** Anzeigetitel eines Menüplan-Eintrags in der aktiven Sprache. */
   const mealTitle = (entry: (typeof todayEntries)[number]): string | null => {
     if (entry.recipeId) {
-      const recipe = recipes.find(r => r.id === entry.recipeId);
+      // Das Rezeptbuch wird nachgeladen (#342); bis dahin steht die Kennung
+      // da – besser als eine leere Zeile, die gleich wieder springt.
+      const recipe = recipes?.find(r => r.id === entry.recipeId);
       return recipe ? pick(recipe.name, lang) : entry.recipeId;
     }
     if (entry.customRecipeId != null) {
@@ -673,7 +677,7 @@ function AnniversaryThumb({
 function AnniversaryCard() {
   const { lang, t } = useI18n();
   const { isAuthenticated } = useAuth();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const [dismissed, setDismissed] = useState<boolean>(() => {
     try {
       return sessionStorage.getItem(ANNIVERSARY_DISMISSED_KEY) === today;
@@ -975,6 +979,7 @@ function TipOfDayWidget({
   tomorrow?: DayWeather;
 }) {
   const { lang, t } = useI18n();
+  const recipes = useRecipes();
   const tip = useMemo(() => {
     const now = new Date();
     const moon = getMoonInfo(now, lang);
@@ -989,11 +994,13 @@ function TipOfDayWidget({
         activeMeteorShower: active ? pick(active.name, lang) : undefined,
         month: now.getMonth() + 1,
         dayOfYear: doy,
-        recipeOfDay: pick(recipes[doy % recipes.length].name, lang),
+        recipeOfDay: recipes
+          ? pick(recipes[doy % recipes.length].name, lang)
+          : undefined,
       },
       lang
     );
-  }, [today, tomorrow, lang]);
+  }, [today, tomorrow, lang, recipes]);
   const Icon = TIP_ICONS[tip.icon];
   return (
     <Link
@@ -1031,7 +1038,7 @@ function GearCareHint() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const dueCount = useMemo(
     () =>
       (query.data ?? []).filter(task => gearTaskDue(task, today).due).length,
@@ -1068,7 +1075,7 @@ function TickBiteHint() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const openCount = useMemo(
     () =>
       (query.data ?? []).filter(
@@ -1392,7 +1399,7 @@ function useTodayStartJump() {
 
   useEffect(() => {
     if (!trips) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIso();
     const jump = shouldOpenToday({
       enabled: loadTodayStart(),
       hasRunningTrip: pickRunningTrip(trips, today) !== null,
@@ -1433,9 +1440,9 @@ export default function Home() {
     enabled: signedIn,
     staleTime: 60_000,
   });
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const tripRunning = (homeTripsQuery.data ?? []).some(
-    trip => currentTripDay(trip, todayIso) !== null
+    trip => currentTripDay(trip, today) !== null
   );
   const onSite = isOnSite(travelMode, tripRunning);
   const chooseTravelMode = (mode: TravelMode) => {

@@ -24,6 +24,7 @@
  */
 
 import { distanceMeters } from "./geo";
+import { localDay } from "./localDate";
 
 /** Ein aufgezeichneter Punkt: Position, Höhe (m ü. M., null = unbekannt), Zeit (ms seit Epoch). */
 export interface TrackPoint {
@@ -384,8 +385,8 @@ export function gpxFileName(name: string, startedAt: Date): string {
       .replace(/^-+|-+$/g, "")
       .slice(0, 40) || "wanderung";
   const date = new Date(startedAt);
-  const iso = Number.isFinite(date.getTime())
-    ? date.toISOString().slice(0, 10)
-    : "0000-00-00";
+  // Lokaler Tag: Eine Wanderung, die um 00:30 startet, gehört in die
+  // Datei des NEUEN Tages – über UTC hiesse sie nach gestern.
+  const iso = Number.isFinite(date.getTime()) ? localDay(date) : "0000-00-00";
   return `${iso}-${slug}.gpx`;
 }

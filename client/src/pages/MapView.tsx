@@ -109,12 +109,12 @@ import {
   openDirections,
 } from "@/lib/directions";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
+import { readOverpassCache, writeOverpassCache } from "@/lib/overpassStore";
 import {
   OVERPASS_MIN_ZOOM,
   fetchOverpass,
-  familyPlacesBboxQuery,
-  firepitsBboxQuery,
-  overpassQuery,
+  combinedBboxQuery,
+  type OverpassLayer,
   parseCampsites,
   parseFamilyPlaces,
   parseFirepits,
@@ -377,7 +377,6 @@ function SpotsMap({
   // der Marker-Aufbau sein Popup. Die Ref merkt sich die bereits erledigte Id,
   // damit ein späteres Neu-Gruppieren nicht wieder hinspringt.
   const didFocusRef = useRef<string | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
   const popupJustClosedRef = useRef(0);
   // «Mein Standort»: blauer Punkt + Genauigkeitskreis, bei jedem Klick ersetzt
   const locateLayerRef = useRef<LayerGroupObject | null>(null);
@@ -429,7 +428,8 @@ function SpotsMap({
   const [firepitError, setFirepitError] = useState(false);
   const [firepitNeedsZoom, setFirepitNeedsZoom] = useState(false);
   const [firepitSearched, setFirepitSearched] = useState(false);
-  const firepitAbortRef = useRef<AbortController | null>(null);
+  /** Eine Abfrage, ein Abbruch (#339). */
+  const overpassAbortRef = useRef<AbortController | null>(null);
 
   // Ebene «Familie» (#248): Spiel- und Badeplätze, gleiches Muster wie oben.
   const [familyPlaces, setFamilyPlaces] = useState<OsmFamilyPlace[]>([]);
@@ -437,7 +437,6 @@ function SpotsMap({
   const [familyError, setFamilyError] = useState(false);
   const [familyNeedsZoom, setFamilyNeedsZoom] = useState(false);
   const [familySearched, setFamilySearched] = useState(false);
-  const familyAbortRef = useRef<AbortController | null>(null);
 
   // Aktuelle Zoomstufe für die Pin-Gruppierung: nach jedem Zoom werden die
   // Cluster neu berechnet. Verschieben ändert die Pixel-Abstände nicht
@@ -531,9 +530,9 @@ function SpotsMap({
     });
     return () => {
       cancelled = true;
-      abortRef.current?.abort();
-      firepitAbortRef.current?.abort();
-      familyAbortRef.current?.abort();
+      overpassAbortRef.current?.abort();
+      overpassAbortRef.current?.abort();
+      overpassAbortRef.current?.abort();
       engineRef.current?.destroy();
       engineRef.current = null;
       markersRef.current = null;
@@ -554,122 +553,148 @@ function SpotsMap({
     storeMapLayer(kind);
   }, []);
 
-  /** Campingplätze für den aktuellen Ausschnitt abfragen (nie automatisch beim Verschieben). */
-  const searchCampsites = useCallback(async () => {
+  /**
+   * EINE Abfrage für alle gewünschten Ebenen (#339).
+   *
+   * VORHER WAREN ES DREI, gleichzeitig an denselben Spiegel: Zeltplätze,
+   * Feuerstellen und Familien-Orte. Overpass begrenzt pro IP – zwei davon
+   * liefen ins Rate-Limit, warteten den Timeout ab und begannen beim
+   * nächsten Spiegel von vorn. Aus einer Suche wurden bis zu neun
+   * Anfragen, und die Feuerstellen kamen als Letzte.
+   *
+   * DAZU EIN ZWISCHENSPEICHER: Wer den Ausschnitt verschiebt und
+   * zurückkommt, bekommt die Antwort sofort statt sie neu zu holen. Der
+   * Ausschnitt wird dafür auf ein Raster gerundet (`shared/overpassCache.ts`),
+   * sonst wäre jeder Kartenschubs ein neuer Schlüssel.
+   */
+  const searchLayers = useCallback(async (layers: OverpassLayer[]) => {
     const map = engineRef.current;
-    if (!map) return;
+    if (!map || layers.length === 0) return;
     setMoved(false);
+    const want = {
+      campsites: layers.includes("campsites"),
+      firepits: layers.includes("firepits"),
+      family: layers.includes("family"),
+    };
+
     if (map.getZoom() < OVERPASS_MIN_ZOOM) {
-      setNeedsZoom(true);
+      if (want.campsites) {
+        setNeedsZoom(true);
+        setDiscoverError(false);
+      }
+      if (want.firepits) {
+        setFirepitNeedsZoom(true);
+        setFirepitError(false);
+      }
+      if (want.family) {
+        setFamilyNeedsZoom(true);
+        setFamilyError(false);
+      }
+      return;
+    }
+
+    if (want.campsites) {
+      setNeedsZoom(false);
       setDiscoverError(false);
-      return;
+      setDiscoverLoading(true);
     }
-    setNeedsZoom(false);
-    setDiscoverError(false);
-    setDiscoverLoading(true);
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-    const b = map.getBounds();
-    try {
-      const res = await fetchOverpass(
-        `data=${encodeURIComponent(overpassQuery(b.south, b.west, b.north, b.east))}`,
-        controller.signal
-      );
-      const json: unknown = await res.json();
-      setCampsites(parseCampsites(json));
-      setSearched(true);
-      setDiscoverLoading(false);
-    } catch {
-      if (controller.signal.aborted) return;
-      setDiscoverLoading(false);
-      setDiscoverError(true);
-    }
-  }, []);
-
-  /** Feuer- und Grillstellen für den aktuellen Ausschnitt abfragen. */
-  const searchFirepits = useCallback(async () => {
-    const map = engineRef.current;
-    if (!map) return;
-    setMoved(false);
-    if (map.getZoom() < OVERPASS_MIN_ZOOM) {
-      setFirepitNeedsZoom(true);
+    if (want.firepits) {
+      setFirepitNeedsZoom(false);
       setFirepitError(false);
+      setFirepitLoading(true);
+    }
+    if (want.family) {
+      setFamilyNeedsZoom(false);
+      setFamilyError(false);
+      setFamilyLoading(true);
+    }
+
+    /** Die Antwort auf die eingeschalteten Ebenen verteilen. */
+    const apply = (json: unknown) => {
+      if (want.campsites) {
+        setCampsites(parseCampsites(json));
+        setSearched(true);
+        setDiscoverLoading(false);
+      }
+      if (want.firepits) {
+        setFirepits(parseFirepits(json));
+        setFirepitSearched(true);
+        setFirepitLoading(false);
+      }
+      if (want.family) {
+        setFamilyPlaces(parseFamilyPlaces(json));
+        setFamilySearched(true);
+        setFamilyLoading(false);
+      }
+    };
+
+    const b = map.getBounds();
+    const cached = readOverpassCache(b, layers);
+    if (cached) {
+      apply(cached);
       return;
     }
-    setFirepitNeedsZoom(false);
-    setFirepitError(false);
-    setFirepitLoading(true);
-    firepitAbortRef.current?.abort();
+
+    overpassAbortRef.current?.abort();
     const controller = new AbortController();
-    firepitAbortRef.current = controller;
-    const b = map.getBounds();
+    overpassAbortRef.current = controller;
     try {
       const res = await fetchOverpass(
-        `data=${encodeURIComponent(firepitsBboxQuery(b.south, b.west, b.north, b.east))}`,
+        `data=${encodeURIComponent(
+          combinedBboxQuery(layers, b.south, b.west, b.north, b.east)
+        )}`,
         controller.signal
       );
       const json: unknown = await res.json();
-      setFirepits(parseFirepits(json));
-      setFirepitSearched(true);
-      setFirepitLoading(false);
+      writeOverpassCache(b, layers, json);
+      apply(json);
     } catch {
       if (controller.signal.aborted) return;
-      setFirepitLoading(false);
-      setFirepitError(true);
+      if (want.campsites) {
+        setDiscoverLoading(false);
+        setDiscoverError(true);
+      }
+      if (want.firepits) {
+        setFirepitLoading(false);
+        setFirepitError(true);
+      }
+      if (want.family) {
+        setFamilyLoading(false);
+        setFamilyError(true);
+      }
     }
   }, []);
 
-  /** Spiel- und Badeplätze für den aktuellen Ausschnitt abfragen. */
-  const searchFamilyPlaces = useCallback(async () => {
-    const map = engineRef.current;
-    if (!map) return;
-    setMoved(false);
-    if (map.getZoom() < OVERPASS_MIN_ZOOM) {
-      setFamilyNeedsZoom(true);
-      setFamilyError(false);
-      return;
-    }
-    setFamilyNeedsZoom(false);
-    setFamilyError(false);
-    setFamilyLoading(true);
-    familyAbortRef.current?.abort();
-    const controller = new AbortController();
-    familyAbortRef.current = controller;
-    const b = map.getBounds();
-    try {
-      const res = await fetchOverpass(
-        `data=${encodeURIComponent(familyPlacesBboxQuery(b.south, b.west, b.north, b.east))}`,
-        controller.signal
-      );
-      const json: unknown = await res.json();
-      setFamilyPlaces(parseFamilyPlaces(json));
-      setFamilySearched(true);
-      setFamilyLoading(false);
-    } catch {
-      if (controller.signal.aborted) return;
-      setFamilyLoading(false);
-      setFamilyError(true);
-    }
-  }, []);
+  const searchCampsites = useCallback(
+    () => searchLayers(["campsites"]),
+    [searchLayers]
+  );
+  const searchFirepits = useCallback(
+    () => searchLayers(["firepits"]),
+    [searchLayers]
+  );
+  const searchFamilyPlaces = useCallback(
+    () => searchLayers(["family"]),
+    [searchLayers]
+  );
 
   /** «In diesem Ausschnitt suchen»: alle eingeschalteten Overpass-Ebenen neu laden. */
   const searchHere = useCallback(() => {
-    if (layerVisibility.campsites) void searchCampsites();
-    if (layerVisibility.firepits) void searchFirepits();
-    if (layerVisibility.family) void searchFamilyPlaces();
+    const layers: OverpassLayer[] = [];
+    if (layerVisibility.campsites) layers.push("campsites");
+    if (layerVisibility.firepits) layers.push("firepits");
+    if (layerVisibility.family) layers.push("family");
+    void searchLayers(layers);
     setMoved(false);
   }, [
     layerVisibility.campsites,
     layerVisibility.firepits,
     layerVisibility.family,
-    searchCampsites,
-    searchFirepits,
-    searchFamilyPlaces,
+    searchLayers,
   ]);
 
   const clearCampsites = useCallback(() => {
-    abortRef.current?.abort();
+    overpassAbortRef.current?.abort();
     setCampsites([]);
     setDiscoverLoading(false);
     setDiscoverError(false);
@@ -679,7 +704,7 @@ function SpotsMap({
   }, []);
 
   const clearFirepits = useCallback(() => {
-    firepitAbortRef.current?.abort();
+    overpassAbortRef.current?.abort();
     setFirepits([]);
     setFirepitLoading(false);
     setFirepitError(false);
@@ -688,7 +713,7 @@ function SpotsMap({
   }, []);
 
   const clearFamilyPlaces = useCallback(() => {
-    familyAbortRef.current?.abort();
+    overpassAbortRef.current?.abort();
     setFamilyPlaces([]);
     setFamilyLoading(false);
     setFamilyError(false);

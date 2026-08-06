@@ -62,6 +62,7 @@ import {
   type HourlyWeather,
 } from "../shared/weather";
 import { getDb } from "./db";
+import { shiftIsoDay } from "@shared/localDate";
 
 export function pushConfigured(): boolean {
   return Boolean(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
@@ -643,9 +644,10 @@ const DAY_MS = 86400000;
 
 /** ISO-Datum des Vortags (null bei ungültigem Datum). */
 function isoYesterday(today: string): string | null {
-  const t = Date.parse(`${today}T00:00:00Z`);
-  if (Number.isNaN(t)) return null;
-  return new Date(t - DAY_MS).toISOString().slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(today)) return null;
+  // Über die Kalenderfelder und nicht über Millisekunden: An den beiden
+  // Umstellungstagen hat ein Tag 23 bzw. 25 Stunden.
+  return shiftIsoDay(today, -1);
 }
 
 /**
@@ -832,13 +834,15 @@ async function dailyRainFor(
   return { time: json.daily.time, precipitation: json.daily.precipitation_sum };
 }
 
-/** Heutiges Datum als ISO-String in der lokalen Serverzeit (nicht UTC). */
-function localIsoDate(now = new Date()): string {
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+/**
+ * ENTFALLEN (#338): `localIsoDate()` gab den Tag in der Zeitzone des
+ * SERVERS. Läuft der in UTC – und das tut ein Webhosting im Zweifel –,
+ * war das zwischen Mitternacht und zwei Uhr ein anderer Tag als der bei
+ * den Nutzenden. Aufgefallen wäre es nicht, weil die Jobs tagsüber
+ * laufen; eine zweite Definition von «heute», die nur unter bestimmten
+ * Umständen falsch ist, ist aber genau die Art Fehler, die man nicht
+ * findet. Es gilt jetzt überall `zurichIsoDate()`.
+ */
 
 /**
  * Alle Abos prüfen: für jeden Zeltplatz der abonnierten Nutzer*innen die
@@ -906,7 +910,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     .where(inArray(homeLocations.userId, userIds));
 
   // Kühlbox: MHD-Erinnerungen pro Nutzer*in vorbereiten
-  const today = localIsoDate();
+  const today = zurichIsoDate();
   const food = await db
     .select()
     .from(foodItems)

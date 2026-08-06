@@ -31,6 +31,7 @@ import { trpc } from "@/lib/trpc";
 import { enqueueToggle } from "@/lib/offlineQueue";
 import { hapticTick } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
+import { todayIso } from "@shared/localDate";
 import {
   DEFAULT_CHORE_POINTS,
   MAX_CHORE_POINTS,
@@ -39,13 +40,6 @@ import {
   dayProgress,
   scoreboard,
 } from "@shared/chores";
-
-/** Heutiges Datum als ISO-Tag in der Zeitzone des Geräts. */
-function todayIso(): string {
-  const now = new Date();
-  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 10);
-}
 
 export default function ChoresPage() {
   const { t } = useI18n();

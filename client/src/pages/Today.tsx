@@ -51,7 +51,7 @@ import { trpc } from "@/lib/trpc";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { MEAL_LABELS } from "@shared/menuPlan";
 import { currentTripDay } from "@shared/trips";
-import { expiryInfo } from "@shared/food";
+import { expiryInfo, isUrgentExpiry } from "@shared/food";
 import {
   nightsLeft,
   openTasks,
@@ -67,6 +67,7 @@ import { hapticTick } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useState } from "react";
+import { todayIso } from "@shared/localDate";
 
 export default function TodayPage() {
   const { lang, t } = useI18n();
@@ -78,7 +79,7 @@ export default function TodayPage() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const trip = useMemo(
     () => pickRunningTrip(tripsQuery.data ?? [], today),
     [tripsQuery.data, today]
@@ -166,8 +167,9 @@ export default function TodayPage() {
   const expiring = useMemo(
     () =>
       (foodQuery.data ?? []).flatMap(item => {
+        if (!isUrgentExpiry(item.expiryDate, today)) return [];
         const info = expiryInfo(item.expiryDate, today, lang);
-        return info && info.daysLeft >= 0 && info.daysLeft <= 1
+        return info
           ? [{ id: item.id, name: item.name, label: info.label }]
           : [];
       }),

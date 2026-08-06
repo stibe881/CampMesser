@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 // Overpass-Parser liegt im Client-Code, ist aber reine Logik ohne DOM.
 import {
+  combinedBboxQuery,
   boundingBoxAround,
-  familyPlacesBboxQuery,
   familyPlacesQuery,
-  firepitsBboxQuery,
   firepitsQuery,
   hikingRoutesQuery,
   nearestFamilyPlaces,
@@ -14,7 +13,6 @@ import {
   OVERPASS_HIKING_MAX_RESULTS,
   OVERPASS_MAX_RESULTS,
   OVERPASS_PICNIC_MAX_RESULTS,
-  overpassQuery,
   parseCampsites,
   parseFamilyPlaces,
   parseFirepits,
@@ -24,20 +22,6 @@ import {
   parseOsmAgeYears,
   parseOsmYesNo,
 } from "../client/src/lib/overpass";
-
-describe("overpassQuery", () => {
-  it("baut die Abfrage mit gerundeter Bounding-Box und Limit 100", () => {
-    const q = overpassQuery(46.712345678, 7.1, 46.9, 7.3);
-    expect(q).toContain("[out:json][timeout:15];");
-    expect(q).toContain(
-      'node["tourism"="camp_site"](46.71235,7.10000,46.90000,7.30000)'
-    );
-    expect(q).toContain(
-      'way["tourism"="camp_site"](46.71235,7.10000,46.90000,7.30000)'
-    );
-    expect(q).toContain("out center 100;");
-  });
-});
 
 describe("parseCampsites", () => {
   it("übersetzt nodes direkt und ways über center", () => {
@@ -342,7 +326,7 @@ describe("parseHikingRoutes", () => {
   });
 });
 
-describe("firepitsQuery / firepitsBboxQuery", () => {
+describe("firepitsQuery", () => {
   it("fragt Feuerstellen und Grills als node und way im Umkreis ab", () => {
     const q = firepitsQuery(46.8, 8.2, 5000);
     expect(q).toContain("[out:json][timeout:20];");
@@ -354,17 +338,6 @@ describe("firepitsQuery / firepitsBboxQuery", () => {
     );
     expect(q).toContain('node["amenity"="bbq"](around:5000,46.80000,8.20000)');
     expect(q).toContain('way["amenity"="bbq"](around:5000,46.80000,8.20000)');
-    expect(q).toContain(`out center ${OVERPASS_FIREPIT_MAX_RESULTS};`);
-  });
-
-  it("nutzt für die Karte dieselben Typen mit gerundeter Bounding-Box", () => {
-    const q = firepitsBboxQuery(46.712345678, 7.1, 46.9, 7.3);
-    expect(q).toContain(
-      'node["leisure"="firepit"](46.71235,7.10000,46.90000,7.30000)'
-    );
-    expect(q).toContain(
-      'way["amenity"="bbq"](46.71235,7.10000,46.90000,7.30000)'
-    );
     expect(q).toContain(`out center ${OVERPASS_FIREPIT_MAX_RESULTS};`);
   });
 });
@@ -552,7 +525,7 @@ describe("nearestFirepits", () => {
   });
 });
 
-describe("familyPlacesQuery / familyPlacesBboxQuery", () => {
+describe("familyPlacesQuery", () => {
   it("fragt Spielplätze und Badestellen als node und way im Umkreis ab", () => {
     const q = familyPlacesQuery(46.8, 8.2, 5000);
     expect(q).toContain("[out:json][timeout:20];");
@@ -565,16 +538,6 @@ describe("familyPlacesQuery / familyPlacesBboxQuery", () => {
     expect(q).toContain('node["leisure"~"^(bathing_place|beach_resort)$"]');
     expect(q).toContain('way["leisure"~"^(bathing_place|beach_resort)$"]');
     expect(q).toContain(`out center ${OVERPASS_FAMILY_MAX_RESULTS};`);
-  });
-
-  it("schliesst private und gesperrte Strände schon in der Abfrage aus", () => {
-    const q = familyPlacesBboxQuery(46.712345678, 7.1, 46.9, 7.3);
-    expect(q).toContain(
-      'node["natural"="beach"]["access"!~"^(private|no)$"](46.71235,7.10000,46.90000,7.30000)'
-    );
-    expect(q).toContain(
-      'way["natural"="beach"]["access"!~"^(private|no)$"](46.71235,7.10000,46.90000,7.30000)'
-    );
   });
 });
 
@@ -886,5 +849,60 @@ describe("parsePicnicSites", () => {
     expect(parsePicnicSites(null)).toEqual([]);
     expect(parsePicnicSites("html-fehlerseite")).toEqual([]);
     expect(parsePicnicSites({ elements: 42 })).toEqual([]);
+  });
+});
+
+describe("Kombinierte Abfrage für die Karte (#339)", () => {
+  it("eine Abfrage deckt alle gewünschten Ebenen ab", () => {
+    // Vorher waren es drei gleichzeitige Anfragen an denselben
+    // rate-limitierten Spiegel – der Grund, warum die Feuerstellen so
+    // lange brauchten.
+    const q = combinedBboxQuery(
+      ["campsites", "firepits", "family"],
+      46.7,
+      7.1,
+      46.9,
+      7.3
+    );
+    expect(q).toContain('tourism"="camp_site"');
+    expect(q).toContain('leisure"="firepit"');
+    expect(q).toContain('amenity"="bbq"');
+    expect(q).toContain('leisure"="playground"');
+  });
+
+  it("ausgeschaltete Ebenen kommen nicht vor", () => {
+    const q = combinedBboxQuery(["firepits"], 46.7, 7.1, 46.9, 7.3);
+    expect(q).toContain('leisure"="firepit"');
+    expect(q).not.toContain("camp_site");
+    expect(q).not.toContain("playground");
+  });
+
+  it("die Obergrenze ist die Summe der Ebenen", () => {
+    // Sonst schnitte eine dichte Ebene den anderen die Treffer weg, und
+    // auf der Karte fehlten Stellen, ohne dass irgendwo ein Hinweis stünde.
+    const one = combinedBboxQuery(["firepits"], 46.7, 7.1, 46.9, 7.3);
+    const all = combinedBboxQuery(
+      ["campsites", "firepits", "family"],
+      46.7,
+      7.1,
+      46.9,
+      7.3
+    );
+    const limitOf = (q: string) => Number(/out center (\d+);/.exec(q)?.[1]);
+    expect(limitOf(all)).toBeGreaterThan(limitOf(one));
+  });
+
+  it("das Zeit-Budget bleibt unter der Geduld des Clients", () => {
+    // 10 s Server gegen 12 s Client: So darf Overpass ordentlich aufgeben
+    // und uns antworten, statt mitten in der Rechnung abgeschnitten zu
+    // werden – sonst beginnt derselbe Aufwand beim nächsten Spiegel neu.
+    const q = combinedBboxQuery(["firepits"], 46.7, 7.1, 46.9, 7.3);
+    expect(q).toContain("[out:json][timeout:10]");
+  });
+
+  it("die Koordinaten werden gekürzt, nicht in voller Länge geschickt", () => {
+    const q = combinedBboxQuery(["firepits"], 46.712345678, 7.1, 46.9, 7.3);
+    expect(q).toContain("46.71235");
+    expect(q).not.toContain("46.712345678");
   });
 });
