@@ -87,6 +87,14 @@ export async function getPackItem(id: number) {
  * Liste archivieren (archivedAt = jetzt) oder wieder aktivieren (null) –
  * die Einträge bleiben unangetastet erhalten (#194).
  */
+/** Liste umbenennen (#406, Nutzermeldung): nur die eigene. */
+export async function renamePackList(id: number, userId: number, name: string) {
+  const db = requireDb(await getDb());
+  await db
+    .update(packLists)
+    .set({ name })
+    .where(and(eq(packLists.id, id), eq(packLists.userId, userId)));
+}
 export async function setPackListArchived(
   id: number,
   userId: number,

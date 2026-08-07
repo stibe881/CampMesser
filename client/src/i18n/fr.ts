@@ -509,6 +509,11 @@ export const fr: Translation = {
     duplicateFailed: "Échec de la copie",
     openAria: name => `Ouvrir la liste de bagages ${name}`,
     duplicateAria: name => `Dupliquer la liste de bagages ${name}`,
+    renameAria: (name: string) => `Renommer la liste de bagages ${name}`,
+    renameTitle: "Renommer la liste",
+    renameSaved: "Nom enregistré.",
+    saveTemplateAria: (name: string) =>
+      `Enregistrer la liste ${name} comme modèle`,
     deleteAria: name => `Supprimer la liste de bagages ${name}`,
     deleteConfirm: name => `Vraiment supprimer la liste «${name}» ?`,
     emptyTitle: "Pas encore de liste de bagages",

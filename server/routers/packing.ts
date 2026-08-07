@@ -165,6 +165,24 @@ export const packingRouters = {
         await db.setPackListArchived(input.listId, ctx.user.id, input.archived);
         return { success: true } as const;
       }),
+    /** Liste umbenennen (#406, Nutzermeldung 07.08.2026). */
+    rename: protectedProcedure
+      .input(
+        z.object({
+          listId: z.number().int().positive(),
+          name: z.string().trim().min(1).max(100),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const list = await db.getPackList(input.listId, ctx.user.id);
+        if (!list)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Liste nicht gefunden",
+          });
+        await db.renamePackList(input.listId, ctx.user.id, input.name.trim());
+        return { success: true } as const;
+      }),
     /**
      * Leichter Pack-Fortschritt einer Liste (für den Trip-Planer) – auch für
      * Mitreisende einer Reise mit verknüpfter Liste.

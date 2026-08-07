@@ -4,6 +4,8 @@ import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
 import { Link, useSearch } from "wouter";
 import {
+  Pencil,
+  BookmarkPlus,
   Archive,
   ArchiveRestore,
   Baby,
@@ -36,6 +38,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -190,6 +193,27 @@ export default function PackListsPage() {
     onError: () => toast.error(t.packLists.templateDeleteFailed),
   });
 
+  /** Umbenennen (#406): Ziel-Liste des offenen Dialogs; null = zu. */
+  const [renameTarget, setRenameTarget] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const renameMutation = trpc.packing.rename.useMutation({
+    onSuccess: () => {
+      void utils.packing.lists.invalidate();
+      setRenameTarget(null);
+      toast.success(t.packLists.renameSaved);
+    },
+    onError: () => toast.error(t.common.saveFailed),
+  });
+  /** Als Vorlage (#78/#407): direkt aus der Übersicht, Name = Listenname. */
+  const templateMutation = trpc.packing.saveAsTemplate.useMutation({
+    onSuccess: () => {
+      void utils.packing.listTemplates.invalidate();
+      toast.success(t.packListDetail.templateSaved);
+    },
+    onError: e => toast.error(e.message || t.common.saveFailed),
+  });
   const duplicateMutation = trpc.packing.duplicateList.useMutation({
     onSuccess: () => {
       utils.packing.lists.invalidate();
@@ -345,16 +369,43 @@ export default function PackListsPage() {
           </div>
         </div>
         {!archived && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative z-10 text-muted-foreground hover:text-primary"
-            disabled={duplicateMutation.isPending}
-            onClick={() => duplicateMutation.mutate({ id: list.id, lang })}
-            aria-label={t.packLists.duplicateAria(list.name)}
-          >
-            <Copy className="h-4 w-4" aria-hidden="true" />
-          </Button>
+          <>
+            {/* Umbenennen (#406, Nutzermeldung): Der Name war nach dem
+                Anlegen in Stein gemeisselt. */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative z-10 text-muted-foreground hover:text-primary"
+              onClick={() => setRenameTarget({ id: list.id, name: list.name })}
+              aria-label={t.packLists.renameAria(list.name)}
+            >
+              <Pencil className="h-4 w-4" aria-hidden="true" />
+            </Button>
+            {/* Als Vorlage einfrieren (#78) – der Knopf steckte nur auf
+                der Detailseite, hier sucht man ihn (#407). */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative z-10 text-muted-foreground hover:text-primary"
+              disabled={templateMutation.isPending}
+              onClick={() =>
+                templateMutation.mutate({ listId: list.id, name: list.name })
+              }
+              aria-label={t.packLists.saveTemplateAria(list.name)}
+            >
+              <BookmarkPlus className="h-4 w-4" aria-hidden="true" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative z-10 text-muted-foreground hover:text-primary"
+              disabled={duplicateMutation.isPending}
+              onClick={() => duplicateMutation.mutate({ id: list.id, lang })}
+              aria-label={t.packLists.duplicateAria(list.name)}
+            >
+              <Copy className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          </>
         )}
         <Button
           variant="ghost"
@@ -396,6 +447,60 @@ export default function PackListsPage() {
   return (
     <div className="container py-6">
       <PageHeader title={t.packLists.title} subtitle={t.packLists.subtitle} />
+
+      {/* Umbenennen (#406): kleiner Dialog statt Inline-Feld – die Zeile
+          ist schon voll, und ein halb editierter Name in der Liste sähe
+          aus wie ein Fehler. */}
+      <Dialog
+        open={renameTarget !== null}
+        onOpenChange={open => {
+          if (!open) setRenameTarget(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.packLists.renameTitle}</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-3"
+            onSubmit={e => {
+              e.preventDefault();
+              if (!renameTarget) return;
+              const name = renameTarget.name.trim();
+              if (!name) return;
+              renameMutation.mutate({ listId: renameTarget.id, name });
+            }}
+          >
+            <Input
+              value={renameTarget?.name ?? ""}
+              maxLength={100}
+              aria-label={t.packLists.renameTitle}
+              onChange={e =>
+                setRenameTarget(target =>
+                  target ? { ...target, name: e.target.value } : target
+                )
+              }
+            />
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setRenameTarget(null)}
+              >
+                {t.common.cancel}
+              </Button>
+              <Button
+                type="submit"
+                disabled={
+                  renameMutation.isPending || !renameTarget?.name.trim()
+                }
+              >
+                {t.common.save}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>

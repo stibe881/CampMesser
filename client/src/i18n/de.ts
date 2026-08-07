@@ -510,6 +510,11 @@ export const de = {
     duplicateFailed: "Kopieren fehlgeschlagen",
     openAria: (name: string) => `Packliste ${name} öffnen`,
     duplicateAria: (name: string) => `Packliste ${name} duplizieren`,
+    renameAria: (name: string) => `Packliste ${name} umbenennen`,
+    renameTitle: "Packliste umbenennen",
+    renameSaved: "Name gespeichert.",
+    saveTemplateAria: (name: string) =>
+      `Packliste ${name} als Vorlage speichern`,
     deleteAria: (name: string) => `Packliste ${name} löschen`,
     deleteConfirm: (name: string) => `Liste «${name}» wirklich löschen?`,
     emptyTitle: "Noch keine Packlisten",
