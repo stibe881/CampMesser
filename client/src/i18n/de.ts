@@ -129,7 +129,7 @@ export const de = {
     heroTitle1: "Alles fürs Camp.",
     heroTitle2: "In einer App.",
     heroSubtitle:
-      "Planung, Sicherheit, Energie und Naturerlebnis – 16 smarte Werkzeuge für dein nächstes Abenteuer.",
+      "Planung, Sicherheit, Energie und Naturerlebnis – über 40 smarte Werkzeuge für dein nächstes Abenteuer.",
     sunInfo: (sunrise: string, sunset: string) =>
       `Heute: Sonnenaufgang ${sunrise} · Sonnenuntergang ${sunset}`,
     nextTripFallback: "Nächster Trip",
@@ -1141,7 +1141,7 @@ export const de = {
     placesNoAlert: "Keine Warnung",
     placesCheckFailed: "Prüfung fehlgeschlagen",
     placesEmpty:
-      "Noch keine Plätze gespeichert – lege Zeltplatz-Favoriten an oder setze deinen Heim-Standort im Profil.",
+      "Noch keine Plätze gespeichert – lege Campingplätze an oder setze deinen Heim-Standort im Profil.",
     placesSelectAria: (name: string) =>
       `Wetter für ${name} in der Hauptansicht anzeigen`,
   },
@@ -1637,7 +1637,7 @@ export const de = {
     forecastOk: (avg: number, days: number, source: string) =>
       `Übernommen: Ø ${avg} h Sonnenschein pro Tag (Prognose für die nächsten ${days} Tage – Quelle: ${source}).`,
     forecastError:
-      "Automatische Prognose nicht verfügbar – erlaube den Standortzugriff, speichere einen Zeltplatz-Favoriten oder setze den Wert manuell.",
+      "Automatische Prognose nicht verfügbar – erlaube den Standortzugriff, speichere einen Campingplatz oder setze den Wert manuell.",
     guidelinePrefix:
       "Richtwerte Schweiz: Sommer sonnig 5–6 h, wechselhaft 3–4 h, bedeckt 1–2 h. Verschattung durch Bäume oder Berge reduziert den Wert deutlich – prüfe den Sonnenverlauf im ",
     sunCompassLink: "Sonnenstand-Kompass",
@@ -1856,10 +1856,10 @@ export const de = {
       "Bei über 30 °C in praller Sonne leidet der Rasen unter dem Zeltboden schon nach einem Tag.",
   },
   spots: {
-    title: "Zeltplatz-Favoriten",
+    title: "Campingplätze",
     subtitle:
       "Speichere geplante Zeltplätze und rufe Wetter und Sonnenstand im Voraus ab.",
-    loginFeature: "deine Zeltplatz-Favoriten",
+    loginFeature: "deine Campingplätze",
     addSpot: "Zeltplatz hinzufügen",
     empty:
       "Noch keine Favoriten. Speichere deinen ersten geplanten Zeltplatz – per Koordinaten oder direkt mit deinem aktuellen Standort.",
@@ -1920,8 +1920,8 @@ export const de = {
     loginFeature: "deine Zeltplatz-Karte",
     mapAria: "Karte mit deinen gespeicherten Zeltplätzen",
     empty:
-      "Noch keine Plätze auf der Karte. Speichere zuerst einen Zeltplatz-Favoriten, dann erscheint er hier als Pin.",
-    emptyCta: "Zu den Zeltplatz-Favoriten",
+      "Noch keine Plätze auf der Karte. Speichere zuerst einen Campingplatz, dann erscheint er hier als Pin.",
+    emptyCta: "Zu den Campingplätzen",
     nightsHere: (n: number) =>
       n === 1
         ? "1 Übernachtung laut «Meine Reisen»"

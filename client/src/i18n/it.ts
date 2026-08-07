@@ -127,7 +127,7 @@ export const it: Translation = {
     heroTitle1: "Tutto per il campo.",
     heroTitle2: "In una sola app.",
     heroSubtitle:
-      "Pianificazione, sicurezza, energia e natura – 16 strumenti smart per la tua prossima avventura.",
+      "Pianificazione, sicurezza, energia e natura – oltre 40 strumenti smart per la tua prossima avventura.",
     sunInfo: (sunrise, sunset) => `Oggi: alba ${sunrise} · tramonto ${sunset}`,
     nextTripFallback: "Prossimo trip",
     nextTripAria: place => `Prossimo soggiorno pianificato: ${place}`,
@@ -1832,10 +1832,10 @@ export const it: Translation = {
       "Sopra i 30 °C in pieno sole il prato sotto il pavimento della tenda soffre già dopo un giorno.",
   },
   spots: {
-    title: "Piazzole preferite",
+    title: "Campeggi",
     subtitle:
       "Salva le piazzole pianificate e consulta in anticipo meteo e posizione del sole.",
-    loginFeature: "le tue piazzole preferite",
+    loginFeature: "i tuoi campeggi",
     addSpot: "Aggiungi piazzola",
     empty:
       "Ancora nessun preferito. Salva la tua prima piazzola pianificata – con le coordinate o direttamente con la tua posizione attuale.",

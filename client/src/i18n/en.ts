@@ -125,7 +125,7 @@ export const en: Translation = {
     heroTitle1: "Everything for camp.",
     heroTitle2: "In one app.",
     heroSubtitle:
-      "Planning, safety, energy and nature – 16 smart tools for your next adventure.",
+      "Planning, safety, energy and nature – over 40 smart tools for your next adventure.",
     sunInfo: (sunrise, sunset) =>
       `Today: sunrise ${sunrise} · sunset ${sunset}`,
     nextTripFallback: "Next trip",
@@ -1801,10 +1801,10 @@ export const en: Translation = {
       "Above 30 °C in full sun, the lawn under the tent floor suffers after just one day.",
   },
   spots: {
-    title: "Favourite pitches",
+    title: "Campsites",
     subtitle:
       "Save planned pitches and check weather and sun position in advance.",
-    loginFeature: "your favourite pitches",
+    loginFeature: "your campsites",
     addSpot: "Add pitch",
     empty:
       "No favourites yet. Save your first planned pitch – by coordinates or directly with your current location.",

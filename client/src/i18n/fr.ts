@@ -131,7 +131,7 @@ export const fr: Translation = {
     heroTitle1: "Tout pour le camp.",
     heroTitle2: "Dans une seule app.",
     heroSubtitle:
-      "Planification, sécurité, énergie et nature – 16 outils malins pour ta prochaine aventure.",
+      "Planification, sécurité, énergie et nature – plus de 40 outils malins pour ta prochaine aventure.",
     sunInfo: (sunrise, sunset) =>
       `Aujourd'hui : lever du soleil ${sunrise} · coucher du soleil ${sunset}`,
     nextTripFallback: "Prochain trip",
@@ -1857,10 +1857,10 @@ export const fr: Translation = {
       "Au-dessus de 30 °C en plein soleil, le gazon souffre sous le sol de tente dès le premier jour.",
   },
   spots: {
-    title: "Emplacements favoris",
+    title: "Campings",
     subtitle:
       "Enregistre tes emplacements prévus et consulte la météo et la position du soleil à l'avance.",
-    loginFeature: "tes emplacements favoris",
+    loginFeature: "tes campings",
     addSpot: "Ajouter un emplacement",
     empty:
       "Pas encore de favoris. Enregistre ton premier emplacement prévu – par coordonnées ou directement avec ta position actuelle.",

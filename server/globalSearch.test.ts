@@ -124,7 +124,9 @@ describe("searchKnowledge", () => {
     expect(results[0].module).toBe("knots");
   });
 
-  it("toleriert Tippfehler: «Zeltplaz» findet die Zeltplatz-Favoriten", () => {
+  // Seit #403 heisst die Kachel «Campingplätze» – der alte Suchbegriff
+  // «Zeltplatz» muss trotzdem hinführen (steht dafür in der Beschreibung).
+  it("toleriert Tippfehler: «Zeltplaz» findet die Campingplätze", () => {
     const results = searchKnowledge("Zeltplaz");
     expect(results.some(r => r.path === "/zeltplaetze")).toBe(true);
   });

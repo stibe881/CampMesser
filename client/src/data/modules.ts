@@ -82,14 +82,11 @@ export const modules: Module[] = [
   },
   {
     path: "/zeltplaetze",
-    title: l4(
-      "Zeltplatz-Favoriten",
-      "Emplacements favoris",
-      "Piazzole preferite",
-      "Favourite pitches"
-    ),
+    title: l4("Campingplätze", "Campings", "Campeggi", "Campsites"),
+    // «Zeltplätze» bleibt bewusst im Text: Wer nach dem alten Namen sucht
+    // (#403 hat die Kachel umbenannt), soll das Modul weiterhin finden.
     description: l4(
-      "Orte speichern, Wetter und Sonne im Voraus prüfen",
+      "Zeltplätze und Orte speichern, Wetter und Sonne im Voraus prüfen",
       "Enregistre des lieux, vérifie météo et soleil à l'avance",
       "Salva i luoghi e controlla in anticipo meteo e sole",
       "Save places, check weather and sun in advance"
