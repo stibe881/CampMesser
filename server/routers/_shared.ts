@@ -210,7 +210,14 @@ import {
   MAX_CHORES,
   MAX_CHORE_TITLE_LENGTH,
   rotateAssignments,
+  scoreboard,
 } from "@shared/chores";
+import {
+  MAX_REWARDS,
+  REWARD_TITLE_MAX_LENGTH,
+  availablePoints,
+  clampRewardPoints,
+} from "@shared/rewards";
 import { MAX_PACK_SUGGESTIONS, packSuggestions } from "@shared/packHistory";
 import { MAX_STARS, clampStars } from "@shared/spotRatings";
 import {
@@ -518,6 +525,8 @@ export {
   MAX_CHORES,
   MAX_CHORE_TITLE_LENGTH,
   MAX_DATE_OPTIONS,
+  MAX_REWARDS,
+  REWARD_TITLE_MAX_LENGTH,
   MAX_EXPIRY_DAYS,
   MAX_FOOD_ITEM_NAME_LENGTH,
   MAX_FOOD_ITEM_QUANTITY_LENGTH,
@@ -625,6 +634,9 @@ export {
   publicProcedure,
   remapMenuDays,
   rotateAssignments,
+  scoreboard,
+  availablePoints,
+  clampRewardPoints,
   routeDistanceM,
   routeElevation,
   routeLengthM,

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import RewardGoals from "@/components/family/RewardGoals";
 import LoginPrompt from "@/components/LoginPrompt";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
@@ -399,6 +400,10 @@ export default function ChoresPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Belohnungs-Ziele (#399): Die Punkte direkt unter der Rangliste
+          einlösbar machen – ohne Ziel ist die Tabelle nur eine Tabelle. */}
+      <RewardGoals scores={scores} className="mb-6" />
 
       {/* Ämtli-Katalog */}
       <h2 className="mb-2 font-serif text-lg font-bold">{tc.choresTitle}</h2>

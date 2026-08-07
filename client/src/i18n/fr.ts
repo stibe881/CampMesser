@@ -4287,6 +4287,27 @@ export const fr: Translation = {
     addAria: (name: string) => `Ajouter « ${name} » à la liste`,
     added: (name: string) => `« ${name} » ajouté.`,
   },
+  rewards: {
+    title: "Objectifs de récompense",
+    hint: "Échanger les points de corvées : fixe le prix d’un objectif – la barre montre le chemin restant.",
+    availableLine: (name: string, points: number) =>
+      `${name} a ${points} point${points === 1 ? "" : "s"} à échanger.`,
+    empty:
+      "Pas encore d’objectifs. Crée le premier – par exemple « glace au kiosque ».",
+    pointsLine: (points: number) => `${points} pts`,
+    redeem: "Échanger",
+    redeemed: "Échangé !",
+    removeAria: (title: string) => `Supprimer l’objectif « ${title} »`,
+    progressAria: (name: string, title: string, percent: number) =>
+      `${name} est à ${percent} % de « ${title} »`,
+    titlePlaceholder: "p. ex. glace au kiosque",
+    pointsPlaceholder: "Points",
+    addAria: "Ajouter un objectif",
+    formError: "Indique un titre et des points supérieurs à zéro.",
+    historyTitle: "Échangé",
+    historyLine: (name: string, title: string, points: number, date: string) =>
+      `${name} : « ${title} » pour ${points} pts le ${date}`,
+  },
   nextTime: {
     title: "La prochaine fois",
     empty:

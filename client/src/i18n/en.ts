@@ -4170,6 +4170,27 @@ export const en: Translation = {
     addAria: (name: string) => `Add “${name}” to the list`,
     added: (name: string) => `“${name}” added.`,
   },
+  rewards: {
+    title: "Reward goals",
+    hint: "Redeem chore points: set what a goal costs – the bar shows how far to go.",
+    availableLine: (name: string, points: number) =>
+      `${name} has ${points} point${points === 1 ? "" : "s"} to redeem.`,
+    empty:
+      "No goals yet. Create the first one – for example “ice cream at the kiosk”.",
+    pointsLine: (points: number) => `${points} pts`,
+    redeem: "Redeem",
+    redeemed: "Redeemed!",
+    removeAria: (title: string) => `Delete goal “${title}”`,
+    progressAria: (name: string, title: string, percent: number) =>
+      `${name} is at ${percent}% of “${title}”`,
+    titlePlaceholder: "e.g. ice cream at the kiosk",
+    pointsPlaceholder: "Points",
+    addAria: "Add goal",
+    formError: "Please enter a title and points greater than zero.",
+    historyTitle: "Redeemed",
+    historyLine: (name: string, title: string, points: number, date: string) =>
+      `${name}: “${title}” for ${points} pts on ${date}`,
+  },
   nextTime: {
     title: "Next time",
     empty: "Nothing noted yet. What should be different on the next visit?",

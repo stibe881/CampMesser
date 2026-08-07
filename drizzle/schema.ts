@@ -1243,6 +1243,52 @@ export type FamilyChild = typeof familyChildren.$inferSelect;
 export type InsertFamilyChild = typeof familyChildren.$inferInsert;
 
 /**
+ * Belohnungs-Ziele im Familien-Modus (#399): «Glacé am Kiosk – 20 Punkte».
+ * Die Punkte kommen aus dem Ämtli-Plan (#270); hier steht, was man damit
+ * MACHEN kann. Ohne Ziel ist die Rangliste nur eine Tabelle.
+ */
+export const familyRewards = mysqlTable(
+  "familyRewards",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    title: varchar("title", { length: 80 }).notNull(),
+    /** Preis in Ämtli-Punkten. */
+    points: int("points").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("familyRewards_userId").on(table.userId)]
+);
+
+export type FamilyReward = typeof familyRewards.$inferSelect;
+export type InsertFamilyReward = typeof familyRewards.$inferInsert;
+
+/**
+ * Eingelöste Belohnungen (#399): Titel und Punkte als SCHNAPPSCHUSS, denn
+ * das Ziel darf später gelöscht oder teurer werden, ohne dass sich die
+ * Geschichte umschreibt – eingelöst ist eingelöst.
+ */
+export const familyRedemptions = mysqlTable(
+  "familyRedemptions",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Kind, das eingelöst hat (familyChildren.id). */
+    childId: int("childId").notNull(),
+    title: varchar("title", { length: 80 }).notNull(),
+    points: int("points").notNull(),
+    redeemedAt: timestamp("redeemedAt").defaultNow().notNull(),
+  },
+  table => [
+    index("familyRedemptions_userId").on(table.userId),
+    index("familyRedemptions_childId").on(table.childId),
+  ]
+);
+
+export type FamilyRedemption = typeof familyRedemptions.$inferSelect;
+export type InsertFamilyRedemption = typeof familyRedemptions.$inferInsert;
+
+/**
  * Verdiente Abzeichen pro Kind: badgeId verweist auf den Katalog in
  * shared/badges.ts. Einmal verdient bleibt verdient (unique childId+badgeId,
  * Vergabe idempotent).

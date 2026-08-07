@@ -4296,6 +4296,27 @@ export const de = {
     addAria: (name: string) => `«${name}» auf die Liste setzen`,
     added: (name: string) => `«${name}» hinzugefügt.`,
   },
+  rewards: {
+    title: "Belohnungs-Ziele",
+    hint: "Ämtli-Punkte einlösen: Lege fest, was ein Ziel kostet – der Balken zeigt, wie weit es noch ist.",
+    availableLine: (name: string, points: number) =>
+      `${name} hat ${points} ${points === 1 ? "Punkt" : "Punkte"} zum Einlösen.`,
+    empty:
+      "Noch keine Ziele. Leg das erste fest – zum Beispiel «Glacé am Kiosk».",
+    pointsLine: (points: number) => `${points} P.`,
+    redeem: "Einlösen",
+    redeemed: "Eingelöst!",
+    removeAria: (title: string) => `Ziel «${title}» löschen`,
+    progressAria: (name: string, title: string, percent: number) =>
+      `${name} ist bei ${percent} % von «${title}»`,
+    titlePlaceholder: "z. B. Glacé am Kiosk",
+    pointsPlaceholder: "Punkte",
+    addAria: "Ziel hinzufügen",
+    formError: "Bitte Titel und Punkte grösser als null angeben.",
+    historyTitle: "Eingelöst",
+    historyLine: (name: string, title: string, points: number, date: string) =>
+      `${name}: «${title}» für ${points} P. am ${date}`,
+  },
   nextTime: {
     title: "Beim nächsten Mal",
     empty: "Noch nichts notiert. Was soll beim nächsten Besuch anders sein?",

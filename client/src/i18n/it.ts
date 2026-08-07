@@ -4259,6 +4259,27 @@ export const it: Translation = {
     addAria: (name: string) => `Aggiungi «${name}» alla lista`,
     added: (name: string) => `«${name}» aggiunto.`,
   },
+  rewards: {
+    title: "Obiettivi premio",
+    hint: "Riscatta i punti dei compiti: stabilisci quanto costa un obiettivo – la barra mostra quanto manca.",
+    availableLine: (name: string, points: number) =>
+      `${name} ha ${points} punt${points === 1 ? "o" : "i"} da riscattare.`,
+    empty:
+      "Ancora nessun obiettivo. Crea il primo – per esempio «gelato al chiosco».",
+    pointsLine: (points: number) => `${points} p.`,
+    redeem: "Riscatta",
+    redeemed: "Riscattato!",
+    removeAria: (title: string) => `Elimina l’obiettivo «${title}»`,
+    progressAria: (name: string, title: string, percent: number) =>
+      `${name} è al ${percent} % di «${title}»`,
+    titlePlaceholder: "es. gelato al chiosco",
+    pointsPlaceholder: "Punti",
+    addAria: "Aggiungi obiettivo",
+    formError: "Indica un titolo e punti maggiori di zero.",
+    historyTitle: "Riscattato",
+    historyLine: (name: string, title: string, points: number, date: string) =>
+      `${name}: «${title}» per ${points} p. il ${date}`,
+  },
   nextTime: {
     title: "La prossima volta",
     empty:
