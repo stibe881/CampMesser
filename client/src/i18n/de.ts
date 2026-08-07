@@ -1585,6 +1585,17 @@ export const de = {
     consumerShare: (p: number) => `${p} % des Tagesverbrauchs`,
     templatesHint:
       "Die Vorlagen sind Anhaltspunkte aus der Praxis – bei Kompressorgeräten ist die Laufzeit gemeint, nicht die Standzeit. Was auf dem Typenschild steht, gilt vor der Vorlage.",
+    coolingBadge: (hours: number, temp: number) =>
+      `Kühlgerät: rund ${hours} h Laufzeit bei ${temp} °C aus der Prognose`,
+    coolingBadgeNoWeather:
+      "Kühlgerät – die Laufzeit kommt aus dem Wetter, sobald eine Prognose geladen ist",
+    inverterBadge: "230 V über Wechselrichter (+18 % gerechnet)",
+    formInverter: "230-V-Gerät (Wechselrichter, +18 %)",
+    formCooling: "Kühlgerät – Laufzeit nach Wetter",
+    coolingToggleAria: (name: string) =>
+      `${name}: Laufzeit nach Wetter ein- oder ausschalten`,
+    inverterToggleAria: (name: string) =>
+      `${name}: Wechselrichter-Aufschlag ein- oder ausschalten`,
     solarLabel: "Solarpanels (W gesamt)",
     solarHint: "z. B. 2 × 200-W-Panels = 400",
     mountLabel: "Aufstellung",

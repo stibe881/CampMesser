@@ -356,6 +356,10 @@ export const powerConsumers = mysqlTable(
     watts: float("watts").notNull().default(0),
     hoursPerDay: float("hoursPerDay").notNull().default(0),
     enabled: boolean("enabled").notNull().default(true),
+    /** 230-V-Gerät am Wechselrichter – kostet den Umwandlungsverlust (#405). */
+    inverter: boolean("inverter").notNull().default(false),
+    /** Kühlgerät: Laufzeit kommt aus der Wetterprognose (#405). */
+    cooling: boolean("cooling").notNull().default(false),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("powerConsumers_userId").on(table.userId)]

@@ -1586,6 +1586,17 @@ export const fr: Translation = {
     consumerShare: (p: number) => `${p} % de la consommation journalière`,
     templatesHint:
       "Les modèles sont des ordres de grandeur tirés de la pratique – pour les appareils à compresseur, il s'agit du temps de fonctionnement, pas du temps de présence. Ce qui figure sur la plaque signalétique prime.",
+    coolingBadge: (hours: number, temp: number) =>
+      `Appareil frigorifique : env. ${hours} h de marche à ${temp} °C selon la prévision`,
+    coolingBadgeNoWeather:
+      "Appareil frigorifique – la durée de marche viendra de la météo dès qu’une prévision est chargée",
+    inverterBadge: "230 V via onduleur (+18 % comptés)",
+    formInverter: "Appareil 230 V (onduleur, +18 %)",
+    formCooling: "Appareil frigorifique – durée selon la météo",
+    coolingToggleAria: (name: string) =>
+      `${name} : activer ou désactiver la durée selon la météo`,
+    inverterToggleAria: (name: string) =>
+      `${name} : activer ou désactiver le supplément onduleur`,
     solarLabel: "Panneaux solaires (W au total)",
     solarHint: "p. ex. 2 panneaux de 200 W = 400",
     mountLabel: "Installation",

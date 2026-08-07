@@ -1564,6 +1564,17 @@ export const it: Translation = {
     consumerShare: (p: number) => `${p} % del consumo giornaliero`,
     templatesHint:
       "I modelli sono valori indicativi presi dalla pratica – per gli apparecchi a compressore si intende il tempo di funzionamento, non quello di presenza. Vale quanto sta scritto sulla targhetta.",
+    coolingBadge: (hours: number, temp: number) =>
+      `Apparecchio frigorifero: circa ${hours} h di funzionamento a ${temp} °C secondo la previsione`,
+    coolingBadgeNoWeather:
+      "Apparecchio frigorifero – la durata arriverà dal meteo appena è caricata una previsione",
+    inverterBadge: "230 V tramite inverter (+18 % calcolati)",
+    formInverter: "Apparecchio 230 V (inverter, +18 %)",
+    formCooling: "Apparecchio frigorifero – durata secondo il meteo",
+    coolingToggleAria: (name: string) =>
+      `${name}: attiva o disattiva la durata secondo il meteo`,
+    inverterToggleAria: (name: string) =>
+      `${name}: attiva o disattiva il supplemento inverter`,
     solarLabel: "Pannelli solari (W totali)",
     solarHint: "ad es. 2 pannelli da 200 W = 400",
     mountLabel: "Installazione",

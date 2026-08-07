@@ -1536,6 +1536,17 @@ export const en: Translation = {
     consumerShare: (p: number) => `${p} % of the daily consumption`,
     templatesHint:
       "The templates are practical ballpark figures – for compressor appliances the running time is meant, not the standing time. Whatever the rating plate says wins.",
+    coolingBadge: (hours: number, temp: number) =>
+      `Cooling appliance: about ${hours} h runtime at ${temp} °C from the forecast`,
+    coolingBadgeNoWeather:
+      "Cooling appliance – runtime will come from the weather once a forecast is loaded",
+    inverterBadge: "230 V via inverter (+18% counted)",
+    formInverter: "230 V appliance (inverter, +18%)",
+    formCooling: "Cooling appliance – runtime from weather",
+    coolingToggleAria: (name: string) =>
+      `${name}: toggle weather-based runtime`,
+    inverterToggleAria: (name: string) =>
+      `${name}: toggle the inverter surcharge`,
     solarLabel: "Solar panels (W total)",
     solarHint: "e.g. 2 × 200 W panels = 400",
     mountLabel: "Installation",

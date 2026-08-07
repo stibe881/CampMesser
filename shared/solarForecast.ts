@@ -128,7 +128,9 @@ export function solarForecastUrl(
     longitude: lon.toFixed(4),
     timezone: "auto",
     forecast_days: String(Math.max(1, Math.min(16, Math.round(days)))),
-    daily: "sunshine_duration,shortwave_radiation_sum",
+    // Die Höchsttemperatur fährt für die Kühlgeräte-Laufzeit mit (#405) –
+    // derselbe Abruf, ein Feld mehr.
+    daily: "sunshine_duration,shortwave_radiation_sum,temperature_2m_max",
   });
   if (orientation) {
     params.set("hourly", "global_tilted_irradiance");
@@ -149,6 +151,8 @@ export interface RadiationDay {
   irradiationKwhPerM2: number;
   /** Sonnenschein-Dauer in Stunden; null = nicht geliefert. */
   sunshineHours: number | null;
+  /** Tageshöchsttemperatur in °C; null = nicht geliefert (#405). */
+  tempMaxC: number | null;
   /** true = Wert gilt für die geneigte Fläche, false = horizontal. */
   tilted: boolean;
 }
@@ -195,6 +199,7 @@ export function parseSolarForecast(json: unknown): RadiationDay[] {
     if (typeof date !== "string") continue;
     const sunshineSeconds = numberAt(root.daily?.sunshine_duration, i);
     const shortwaveMj = numberAt(root.daily?.shortwave_radiation_sum, i);
+    const tempMaxC = numberAt(root.daily?.temperature_2m_max, i);
     const tiltedWh = tiltedWhPerDay[date];
     const tilted = typeof tiltedWh === "number";
     const irradiation = tilted
@@ -209,6 +214,7 @@ export function parseSolarForecast(json: unknown): RadiationDay[] {
         sunshineSeconds === null
           ? null
           : Math.round((Math.max(0, sunshineSeconds) / 3600) * 10) / 10,
+      tempMaxC,
       tilted,
     });
   }

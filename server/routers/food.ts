@@ -1301,6 +1301,10 @@ export const foodRouters = {
           name: z.string().min(1).max(160),
           watts: z.number().min(0).max(10000),
           hoursPerDay: z.number().min(0).max(24),
+          /** 230-V-Gerät am Wechselrichter (#405). */
+          inverter: z.boolean().optional(),
+          /** Kühlgerät – Laufzeit nach Wetter (#405). */
+          cooling: z.boolean().optional(),
         })
       )
       .mutation(({ ctx, input }) =>
@@ -1313,6 +1317,8 @@ export const foodRouters = {
           watts: z.number().min(0).max(10000).optional(),
           hoursPerDay: z.number().min(0).max(24).optional(),
           enabled: z.boolean().optional(),
+          inverter: z.boolean().optional(),
+          cooling: z.boolean().optional(),
         })
       )
       .mutation(({ ctx, input }) => {

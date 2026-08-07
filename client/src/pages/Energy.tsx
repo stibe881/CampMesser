@@ -8,6 +8,8 @@ import {
   Plus,
   Sun,
   Trash2,
+  Plug,
+  Snowflake,
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -30,7 +32,10 @@ import {
   CONSUMER_TEMPLATES,
   DEFAULT_USABLE_PERCENT,
   MIN_USABLE_PERCENT,
+  applyWeatherToConsumers,
   consumerBreakdown,
+  consumerDailyWh,
+  coolingHoursPerDay,
   evaluatePowerBudget,
   formatWh,
   runtimeDisplay,
@@ -137,7 +142,13 @@ export default function EnergyPage() {
   const [sunHoursAuto, setSunHoursAuto] = useState(true);
   const sunHoursAutoRef = useRef(true);
   sunHoursAutoRef.current = sunHoursAuto;
-  const [form, setForm] = useState({ name: "", watts: "", hoursPerDay: "" });
+  const [form, setForm] = useState({
+    name: "",
+    watts: "",
+    hoursPerDay: "",
+    inverter: false,
+    cooling: false,
+  });
   const [forecastState, setForecastState] = useState<
     | { status: "idle" | "loading" | "error" }
     | {
@@ -273,7 +284,13 @@ export default function EnergyPage() {
   const addMutation = trpc.energy.add.useMutation({
     onSuccess: () => {
       utils.energy.consumers.invalidate();
-      setForm({ name: "", watts: "", hoursPerDay: "" });
+      setForm({
+        name: "",
+        watts: "",
+        hoursPerDay: "",
+        inverter: false,
+        cooling: false,
+      });
     },
     onError: () => toast.error(t.energy.saveFailed),
   });
@@ -303,6 +320,8 @@ export default function EnergyPage() {
         watts: c.watts,
         hoursPerDay: c.hoursPerDay,
         enabled: c.enabled,
+        inverter: c.inverter,
+        cooling: c.cooling,
       })),
     [consumers]
   );
@@ -332,18 +351,36 @@ export default function EnergyPage() {
     ? (forecastYieldPerDay ?? 0)
     : yieldFromSunHours(panelWatts, sunHours);
 
+  // Kühlgeräte rechnen mit dem WETTER (#405): Die Kompressor-Laufzeit ist
+  // die grösste Unbekannte der ganzen Rechnung, und sie steht in derselben
+  // Prognose, die der Solarertrag ohnehin holt.
+  const avgTempMaxC = useMemo(() => {
+    const temps = radiationDays.flatMap(day =>
+      day.tempMaxC === null ? [] : [day.tempMaxC]
+    );
+    if (temps.length === 0) return null;
+    return (
+      Math.round((temps.reduce((sum, t) => sum + t, 0) / temps.length) * 10) /
+      10
+    );
+  }, [radiationDays]);
+  const weatherConsumers = useMemo(
+    () => applyWeatherToConsumers(budgetConsumers, avgTempMaxC),
+    [budgetConsumers, avgTempMaxC]
+  );
+
   const result = useMemo(
     () =>
       evaluatePowerBudget({
         storage,
-        consumers: budgetConsumers,
+        consumers: weatherConsumers,
         rechargeWhPerDay: solarWhPerDay,
       }),
-    [storage, budgetConsumers, solarWhPerDay]
+    [storage, weatherConsumers, solarWhPerDay]
   );
   const shares = useMemo(
-    () => consumerBreakdown(budgetConsumers),
-    [budgetConsumers]
+    () => consumerBreakdown(weatherConsumers),
+    [weatherConsumers]
   );
   const sharePercent = (name: string) =>
     shares.find(s => s.name === name)?.percent ?? null;
@@ -1084,7 +1121,13 @@ export default function EnergyPage() {
             toast.error(t.energy.formError);
             return;
           }
-          addMutation.mutate({ name, watts, hoursPerDay: Math.min(24, hours) });
+          addMutation.mutate({
+            name,
+            watts,
+            hoursPerDay: Math.min(24, hours),
+            inverter: form.inverter,
+            cooling: form.cooling,
+          });
         }}
       >
         <Input
@@ -1118,6 +1161,32 @@ export default function EnergyPage() {
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
         </Button>
+        {/* Zwei Häkchen statt Kopfrechnen (#405): Wechselrichter-Verlust
+            und Wetter-Laufzeit übernimmt die Rechnung selbst. */}
+        <div className="col-span-4 flex flex-wrap gap-x-4 gap-y-1">
+          <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={form.inverter}
+              onChange={e =>
+                setForm(f => ({ ...f, inverter: e.target.checked }))
+              }
+              className="h-3.5 w-3.5 accent-primary"
+            />
+            {t.energy.formInverter}
+          </label>
+          <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={form.cooling}
+              onChange={e =>
+                setForm(f => ({ ...f, cooling: e.target.checked }))
+              }
+              className="h-3.5 w-3.5 accent-primary"
+            />
+            {t.energy.formCooling}
+          </label>
+        </div>
       </form>
 
       {/* Vorlagen: Anhaltspunkte aus der Praxis, keine Herstellerangaben */}
@@ -1133,6 +1202,8 @@ export default function EnergyPage() {
                 name: t.energy.presets[p.key],
                 watts: p.watts,
                 hoursPerDay: p.hoursPerDay,
+                inverter: p.inverter ?? false,
+                cooling: p.cooling ?? false,
               })
             }
             className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
@@ -1156,7 +1227,17 @@ export default function EnergyPage() {
       ) : consumers.length > 0 ? (
         <ul className="space-y-2">
           {consumers.map(c => {
-            const dailyWh = c.watts * c.hoursPerDay;
+            // Kühlgeräte: Laufzeit aus dem Wetter (#405); der Wechselrichter-
+            // Aufschlag steckt in consumerDailyWh.
+            const effectiveHours =
+              c.cooling && avgTempMaxC !== null
+                ? coolingHoursPerDay(avgTempMaxC)
+                : c.hoursPerDay;
+            const dailyWh = consumerDailyWh({
+              watts: c.watts,
+              hoursPerDay: effectiveHours,
+              inverter: c.inverter,
+            });
             const share = c.enabled ? sharePercent(c.name) : null;
             return (
               <li
@@ -1175,14 +1256,58 @@ export default function EnergyPage() {
                   <p className="text-xs text-muted-foreground">
                     {t.energy.consumerLine(
                       c.watts,
-                      c.hoursPerDay,
+                      effectiveHours,
                       Math.round(dailyWh)
                     )}
                     {share !== null && share > 0 && (
                       <> · {t.energy.consumerShare(share)}</>
                     )}
                   </p>
+                  {(c.cooling || c.inverter) && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {c.cooling &&
+                        (avgTempMaxC !== null
+                          ? t.energy.coolingBadge(effectiveHours, avgTempMaxC)
+                          : t.energy.coolingBadgeNoWeather)}
+                      {c.cooling && c.inverter && " · "}
+                      {c.inverter && t.energy.inverterBadge}
+                    </p>
+                  )}
                 </div>
+                {/* Kühl- und 230-V-Kennzeichen umschaltbar – auch für
+                    Geräte, die es vor #405 schon gab. */}
+                <button
+                  type="button"
+                  aria-pressed={c.cooling}
+                  aria-label={t.energy.coolingToggleAria(c.name)}
+                  onClick={() =>
+                    updateMutation.mutate({ id: c.id, cooling: !c.cooling })
+                  }
+                  className={cn(
+                    "rounded-md p-1.5 transition-colors",
+                    c.cooling
+                      ? "bg-accent text-primary"
+                      : "text-muted-foreground/50 hover:text-foreground"
+                  )}
+                >
+                  <Snowflake className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={c.inverter}
+                  aria-label={t.energy.inverterToggleAria(c.name)}
+                  onClick={() =>
+                    updateMutation.mutate({ id: c.id, inverter: !c.inverter })
+                  }
+                  className={cn(
+                    "rounded-md p-1.5 transition-colors",
+                    c.inverter
+                      ? "bg-accent text-primary"
+                      : "text-muted-foreground/50 hover:text-foreground"
+                  )}
+                >
+                  <Plug className="h-4 w-4" aria-hidden="true" />
+                </button>
                 <Switch
                   checked={c.enabled}
                   onCheckedChange={enabled =>
