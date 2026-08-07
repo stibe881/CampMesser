@@ -551,6 +551,7 @@ export const it: Translation = {
     archivedBadge: "archiviata",
   },
   packListDetail: {
+    boxBadgeAria: "Si trova nella cassa",
     backLabel: "Liste bagagli",
     fallbackTitle: "Lista bagagli",
     loginFeature: "le tue liste bagagli",
@@ -1997,6 +1998,19 @@ export const it: Translation = {
     familySearchHint: "Tocca «Cerca in questa zona».",
   },
   spotDetail: {
+    tariffCurrencyAria: "Valuta",
+    tariffUnitPlaceholder: "ad es. al giorno",
+    tariffPeriodAdd: "Aggiungi periodo",
+    tariffPeriodFromAria: "Valido dal (GG.MM.)",
+    tariffPeriodToAria: "Valido fino al (GG.MM.)",
+    tariffPeriodRemoveAria: "Rimuovi periodo",
+    tariffActiveNow: "in vigore",
+    tariffCopySuffix: "(copia)",
+    tariffDuplicateAria: (name: string) => `Duplica la tariffa ${name}`,
+    tariffRowLabelMissing:
+      "Una riga della tariffa ha un prezzo ma nessuna descrizione.",
+    tariffRowPriceInvalid: (label: string) =>
+      `Il prezzo per «${label}» manca o non è leggibile.`,
     fallbackTitle: "Piazzola",
     backLabel: "Piazzole",
     notFoundTitle: "Piazzola non trovata",
@@ -2385,6 +2399,7 @@ export const it: Translation = {
     footer: "Condiviso con CampMesser",
   },
   sharedSpot: {
+    tariffsTitle: "Tariffe",
     invalid: "Questo link di condivisione è scaduto o non è più valido.",
     invalidHint:
       "È scaduto oppure la proprietaria o il proprietario ha terminato la condivisione.",
@@ -4236,6 +4251,28 @@ export const it: Translation = {
     addAria: (name: string) => `Aggiungi «${name}» alla lista`,
     added: (name: string) => `«${name}» aggiunto.`,
   },
+  reviewPrompt: {
+    title: (trip: string) => `Di ritorno da «${trip}»?`,
+    body: "Due domande finché te lo ricordi: cosa non hai usato, cosa è mancato? Migliora la prossima lista bagagli.",
+    open: "Compila il bilancio",
+    dismissAria: "Nascondi il promemoria per questo soggiorno",
+  },
+  campfire: {
+    stateOk: "Fuoco da campo: nulla in contrario.",
+    stateCaution: "Fuoco da campo: solo con prudenza.",
+    stateNo: "Fuoco da campo: oggi meglio di no.",
+    reasonBan: (title: string) =>
+      `Livello ufficiale «${title}» – un divieto di fuoco è probabile.`,
+    reasonDanger: (title: string) => `Livello ufficiale «${title}».`,
+    reasonStrongWind: (kmh: number) =>
+      `Raffiche fino a ${kmh} km/h – un fuoco aperto non è una buona idea.`,
+    reasonSparkWind: (kmh: number) =>
+      `Raffiche fino a ${kmh} km/h – le scintille volano nel secco accanto.`,
+    reasonNoDanger:
+      "Fuori dalla Svizzera non esiste un livello di pericolo ufficiale – questo giudizio conosce solo il vento.",
+    note: "Il regolamento del campeggio ha l'ultima parola. Fa fede:",
+    portal: "waldbrandgefahr.ch",
+  },
   tripOffline: {
     title: "Preparare per il viaggio",
     intro:
@@ -4271,6 +4308,8 @@ export const it: Translation = {
     sourceNightly: "dal prezzo per notte",
     nothingYet: "Ancora niente da calcolare: inserisci il numero.",
     addToExpenses: "Nella cassa",
+    foreignCurrency: (currency: string) =>
+      `La cassa di viaggio è tenuta in CHF – inserisci a mano gli importi in ${currency}.`,
     added: "Costo della piazzola registrato.",
     expenseLabel: (nights: number) =>
       nights === 1 ? "Piazzola, 1 notte" : `Piazzola, ${nights} notti`,
@@ -4371,6 +4410,11 @@ export const it: Translation = {
     note: "Una volta inutilizzato non dice nulla: la crema solare di un luglio piovoso riparte l'anno prossimo. Solo dalla seconda volta diventa un'indicazione. Ciò che è mancato viene proposto subito.",
   },
   turnaround: {
+    stormForecast: (clock: string) => `Temporale annunciato dalle ${clock}.`,
+    stormPropensity: (clock: string) =>
+      `Aria instabile dalle ${clock} – possibili temporali locali.`,
+    stormBeatsSunset:
+      "Allora la scadenza è la nuvola, non il sole – pianifica il ritorno prima.",
     title: "Ora di rientro",
     shapeLabel: "Tipo di percorso",
     outAndBack: "Andata e ritorno",

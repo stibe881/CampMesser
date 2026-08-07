@@ -542,6 +542,7 @@ export const en: Translation = {
     archivedBadge: "archived",
   },
   packListDetail: {
+    boxBadgeAria: "Stored in box",
     backLabel: "Packing lists",
     fallbackTitle: "Packing list",
     loginFeature: "your packing lists",
@@ -1961,6 +1962,18 @@ export const en: Translation = {
     familySearchHint: "Tap “Search this area”.",
   },
   spotDetail: {
+    tariffCurrencyAria: "Currency",
+    tariffUnitPlaceholder: "e.g. per day",
+    tariffPeriodAdd: "Add period",
+    tariffPeriodFromAria: "Valid from (DD.MM.)",
+    tariffPeriodToAria: "Valid until (DD.MM.)",
+    tariffPeriodRemoveAria: "Remove period",
+    tariffActiveNow: "applies now",
+    tariffCopySuffix: "(copy)",
+    tariffDuplicateAria: (name: string) => `Duplicate tariff ${name}`,
+    tariffRowLabelMissing: "A tariff row has a price but no label.",
+    tariffRowPriceInvalid: (label: string) =>
+      `The price for “${label}” is missing or unreadable.`,
     fallbackTitle: "Pitch",
     backLabel: "Pitches",
     notFoundTitle: "Pitch not found",
@@ -2334,6 +2347,7 @@ export const en: Translation = {
     footer: "Shared with CampMesser",
   },
   sharedSpot: {
+    tariffsTitle: "Tariffs",
     invalid: "This share link has expired or is no longer valid.",
     invalidHint: "It has expired or the owner has stopped sharing.",
     badge: "Shared pitch",
@@ -4149,6 +4163,28 @@ export const en: Translation = {
     addAria: (name: string) => `Add “${name}” to the list`,
     added: (name: string) => `“${name}” added.`,
   },
+  reviewPrompt: {
+    title: (trip: string) => `Back from "${trip}"?`,
+    body: "Two questions while you still remember: what went unused, what was missing? It improves the next packing list.",
+    open: "Fill in the review",
+    dismissAria: "Hide the reminder for this trip",
+  },
+  campfire: {
+    stateOk: "Campfire: nothing speaks against it.",
+    stateCaution: "Campfire: only with care.",
+    stateNo: "Campfire: better not today.",
+    reasonBan: (title: string) =>
+      `Official level "${title}" – a fire ban is likely.`,
+    reasonDanger: (title: string) => `Official level "${title}".`,
+    reasonStrongWind: (kmh: number) =>
+      `Gusts up to ${kmh} km/h – an open fire is not a good idea.`,
+    reasonSparkWind: (kmh: number) =>
+      `Gusts up to ${kmh} km/h – sparks carry into the dry next door.`,
+    reasonNoDanger:
+      "Outside Switzerland there is no official danger level – this verdict only knows the wind.",
+    note: "The campsite rules have the last word. Authoritative:",
+    portal: "waldbrandgefahr.ch",
+  },
   tripOffline: {
     title: "Prepare for the road",
     intro:
@@ -4183,6 +4219,8 @@ export const en: Translation = {
     sourceNightly: "from the price per night",
     nothingYet: "Nothing to work out yet: enter the numbers.",
     addToExpenses: "Add to the kitty",
+    foreignCurrency: (currency: string) =>
+      `The travel kitty is kept in CHF – please add amounts in ${currency} by hand.`,
     added: "Pitch cost added.",
     expenseLabel: (nights: number) =>
       nights === 1 ? "Pitch, 1 night" : `Pitch, ${nights} nights`,
@@ -4282,6 +4320,11 @@ export const en: Translation = {
     note: "Unused once means nothing – the sunscreen from a rainy July comes along again next year. Only from the second time does it become a hint. Anything that was missing is suggested right away.",
   },
   turnaround: {
+    stormForecast: (clock: string) => `Thunderstorm forecast from ${clock}.`,
+    stormPropensity: (clock: string) =>
+      `Unstable air from ${clock} – local thunderstorms possible.`,
+    stormBeatsSunset:
+      "Then the cloud is the deadline, not the sun – plan to be back before it.",
     title: "Turnaround time",
     shapeLabel: "Route shape",
     outAndBack: "Out and back",

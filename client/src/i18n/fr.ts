@@ -562,6 +562,7 @@ export const fr: Translation = {
     archivedBadge: "archivée",
   },
   packListDetail: {
+    boxBadgeAria: "Se trouve dans la caisse",
     backLabel: "Listes de bagages",
     fallbackTitle: "Liste de bagages",
     loginFeature: "tes listes de bagages",
@@ -2023,6 +2024,18 @@ export const fr: Translation = {
     familySearchHint: "Touche « Chercher dans cette zone ».",
   },
   spotDetail: {
+    tariffCurrencyAria: "Monnaie",
+    tariffUnitPlaceholder: "p. ex. par jour",
+    tariffPeriodAdd: "Ajouter une période",
+    tariffPeriodFromAria: "Valable dès (JJ.MM.)",
+    tariffPeriodToAria: "Valable jusqu'au (JJ.MM.)",
+    tariffPeriodRemoveAria: "Supprimer la période",
+    tariffActiveNow: "en vigueur",
+    tariffCopySuffix: "(copie)",
+    tariffDuplicateAria: (name: string) => `Dupliquer le tarif ${name}`,
+    tariffRowLabelMissing: "Une ligne de tarif a un prix mais pas de libellé.",
+    tariffRowPriceInvalid: (label: string) =>
+      `Le prix pour «${label}» manque ou est illisible.`,
     fallbackTitle: "Emplacement",
     backLabel: "Emplacements",
     notFoundTitle: "Emplacement introuvable",
@@ -2410,6 +2423,7 @@ export const fr: Translation = {
     footer: "Partagé avec CampMesser",
   },
   sharedSpot: {
+    tariffsTitle: "Tarifs",
     invalid: "Ce lien de partage a expiré ou n'est plus valable.",
     invalidHint: "Il a expiré ou la ou le propriétaire a mis fin au partage.",
     badge: "Emplacement partagé",
@@ -4265,6 +4279,28 @@ export const fr: Translation = {
     addAria: (name: string) => `Ajouter « ${name} » à la liste`,
     added: (name: string) => `« ${name} » ajouté.`,
   },
+  reviewPrompt: {
+    title: (trip: string) => `De retour de « ${trip} » ?`,
+    body: "Deux questions tant que tu t'en souviens : qu'est-ce qui n'a pas servi, qu'est-ce qui a manqué ? Cela améliore la prochaine liste de bagages.",
+    open: "Remplir le bilan",
+    dismissAria: "Masquer le rappel pour ce séjour",
+  },
+  campfire: {
+    stateOk: "Feu de camp : rien ne s'y oppose.",
+    stateCaution: "Feu de camp : seulement avec prudence.",
+    stateNo: "Feu de camp : mieux vaut pas aujourd'hui.",
+    reasonBan: (title: string) =>
+      `Niveau officiel « ${title} » – une interdiction de feu est probable.`,
+    reasonDanger: (title: string) => `Niveau officiel « ${title} ».`,
+    reasonStrongWind: (kmh: number) =>
+      `Rafales jusqu'à ${kmh} km/h – un feu ouvert n'est pas une bonne idée.`,
+    reasonSparkWind: (kmh: number) =>
+      `Rafales jusqu'à ${kmh} km/h – les étincelles volent dans le sec d'à côté.`,
+    reasonNoDanger:
+      "Hors de Suisse, il n'y a pas de niveau de danger officiel – ce verdict ne connaît que le vent.",
+    note: "Le règlement du camping a le dernier mot. Fait foi :",
+    portal: "waldbrandgefahr.ch",
+  },
   tripOffline: {
     title: "Préparer pour la route",
     intro:
@@ -4300,6 +4336,8 @@ export const fr: Translation = {
     sourceNightly: "d'après le prix par nuit",
     nothingYet: "Rien à calculer encore : indique le nombre.",
     addToExpenses: "Dans la caisse",
+    foreignCurrency: (currency: string) =>
+      `La caisse de voyage est tenue en CHF – merci de saisir les montants en ${currency} à la main.`,
     added: "Coût de l'emplacement enregistré.",
     expenseLabel: (nights: number) =>
       nights === 1 ? "Emplacement, 1 nuit" : `Emplacement, ${nights} nuits`,
@@ -4401,6 +4439,11 @@ export const fr: Translation = {
     note: "Une fois inutilisé ne veut rien dire – la crème solaire d'un juillet pluvieux repart l'an prochain. Ce n'est qu'à partir de la deuxième fois que cela devient un indice. Ce qui a manqué est proposé tout de suite.",
   },
   turnaround: {
+    stormForecast: (clock: string) => `Orage annoncé dès ${clock}.`,
+    stormPropensity: (clock: string) =>
+      `Air instable dès ${clock} – orages locaux possibles.`,
+    stormBeatsSunset:
+      "Alors la limite, c'est le nuage, pas le soleil – prévois le retour avant.",
     title: "Heure de demi-tour",
     shapeLabel: "Forme du parcours",
     outAndBack: "Aller-retour",

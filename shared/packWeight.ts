@@ -29,10 +29,19 @@ export interface PackWeightSummary {
   unmatchedCount: number;
 }
 
-/** Namens-Normalisierung für den Abgleich (Gross-/Kleinschreibung, Leerraum). */
-function normalizeName(s: string): string {
+/**
+ * Namens-Normalisierung für den Abgleich (Gross-/Kleinschreibung, Leerraum).
+ *
+ * Exportiert, weil die Kisten-Zuordnung (#388) über DENSELBEN Abgleich
+ * läuft: Was für das Gewicht als derselbe Gegenstand gilt, gilt es auch
+ * für die Frage, in welcher Kiste er liegt. Zwei verschiedene Regeln
+ * hiessen, dass ein Eintrag ein Gewicht hat, aber keine Kiste – und das
+ * versteht niemand.
+ */
+export function normalizePackName(s: string): string {
   return s.trim().toLowerCase().replace(/\s+/g, " ");
 }
+const normalizeName = normalizePackName;
 
 /** Bilanz einer Packliste berechnen: Einträge werden per Name dem Inventar zugeordnet. */
 export function computePackWeight(

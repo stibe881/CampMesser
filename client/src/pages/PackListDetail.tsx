@@ -65,6 +65,7 @@ import {
   formatGrams,
   weightBudgetStatus,
 } from "@shared/packWeight";
+import { boxForItem, buildBoxLookup } from "@shared/packBoxes";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { cn } from "@/lib/utils";
 
@@ -242,6 +243,15 @@ export default function PackListDetailPage() {
   const inventoryQuery = trpc.inventory.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  // «Wo liegt das?» (#388): Die Kisten kennen den Lagerort längst – nur
+  // die Packliste wusste nichts davon. Beim Packen steht man aber hier.
+  const boxesQuery = trpc.boxes.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const boxLookup = useMemo(
+    () => buildBoxLookup(inventoryQuery.data ?? [], boxesQuery.data ?? []),
+    [inventoryQuery.data, boxesQuery.data]
+  );
 
   /** Aktiver Bereichs-Tab (SECTION_GENERAL oder Personen-Name). */
   const [activeSection, setActiveSection] = useState<string>(SECTION_GENERAL);
@@ -1258,6 +1268,21 @@ export default function PackListDetailPage() {
                         {item.quantity > 1 && (
                           <span className="ml-1.5 text-xs text-muted-foreground">
                             × {item.quantity}
+                          </span>
+                        )}
+                        {/* Kisten-Etikett (#388): nur bei eindeutigem
+                            Namens-Treffer – eine falsche Kiste wäre
+                            schlimmer als keine. */}
+                        {boxForItem(item.name, boxLookup) && (
+                          <span className="ml-1.5 inline-flex items-center gap-0.5 rounded bg-accent px-1 py-0.5 align-middle text-[10px] font-medium text-muted-foreground">
+                            <Package
+                              className="h-2.5 w-2.5"
+                              aria-hidden="true"
+                            />
+                            <span className="sr-only">
+                              {t.packListDetail.boxBadgeAria}
+                            </span>
+                            {boxForItem(item.name, boxLookup)}
                           </span>
                         )}
                         {editorLabel(item) && (
