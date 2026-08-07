@@ -55,7 +55,12 @@ export const fr: Translation = {
     themeLight: "Activer le thème clair",
     themeDark: "Activer le thème sombre",
     themeAuto: "Activer le thème automatique (système)",
-    languageMenu: "Choisir la langue",
+    notificationsMenu: "Afficher les notifications",
+    notificationsUnread: (count: number) =>
+      count === 1
+        ? "Afficher les notifications – 1 nouvelle"
+        : `Afficher les notifications – ${count} nouvelles`,
+    notificationsTitle: "Notifications",
     accountMenu: "Ouvrir le menu du compte",
     loggedIn: "Connecté·e",
     profile: "Profil",
@@ -309,6 +314,9 @@ export const fr: Translation = {
     prefHeat: "Soleil & chaleur",
     prefHeatDesc:
       "Le matin, un rappel de te protéger et de boire quand la journée annonce un UV élevé ou plus de 28 °C.",
+    languageTitle: "Langue",
+    languageIntro:
+      "Dans quelle langue l'app doit-elle fonctionner ? Le choix vaut sur tous tes appareils – aussi pour les notifications que cet appareil reçoit.",
     appBadgeTitle: "Nombre sur l'icône de l'app",
     appBadgeDesc:
       "Affiche sur l'icône combien d'articles de la glacière expirent aujourd'hui ou demain et combien de tâches d'entretien sont dues. Ce n'est pas une notification non lue – une tâche d'entretien ouverte reste affichée jusqu'à ce que tu la coches.",
@@ -407,8 +415,6 @@ export const fr: Translation = {
     thresholdRainHint: (standard: number, min: number, max: number) =>
       `Standard ${standard} · possible ${min}–${max}`,
     thresholdReset: "Standard",
-    historyTitle: "Historique",
-    historyToggleAria: "Ouvrir ou fermer l'historique des notifications",
     historyHint:
       "Les dernières notifications envoyées à ton compte – les plus récentes en premier.",
     historyEmpty:

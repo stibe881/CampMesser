@@ -54,7 +54,12 @@ export const it: Translation = {
     themeLight: "Attiva il tema chiaro",
     themeDark: "Attiva il tema scuro",
     themeAuto: "Attiva il tema automatico (sistema)",
-    languageMenu: "Scegli la lingua",
+    notificationsMenu: "Mostra le notifiche",
+    notificationsUnread: (count: number) =>
+      count === 1
+        ? "Mostra le notifiche – 1 nuova"
+        : `Mostra le notifiche – ${count} nuove`,
+    notificationsTitle: "Notifiche",
     accountMenu: "Apri il menu dell'account",
     loggedIn: "Connesso/a",
     profile: "Profilo",
@@ -300,6 +305,9 @@ export const it: Translation = {
     prefHeat: "Sole e caldo",
     prefHeatDesc:
       "Al mattino un promemoria per la crema solare e per bere, quando la giornata porta UV alto o più di 28 °C.",
+    languageTitle: "Lingua",
+    languageIntro:
+      "In quale lingua deve funzionare l'app? La scelta vale su tutti i tuoi dispositivi, anche per le notifiche che riceve questo dispositivo.",
     appBadgeTitle: "Numero sull'icona dell'app",
     appBadgeDesc:
       "Mostra sull'icona quanti alimenti della ghiacciaia scadono oggi o domani e quante attività di manutenzione sono in scadenza. Non è una notifica non letta: un'attività aperta resta finché non la spunti.",
@@ -396,8 +404,6 @@ export const it: Translation = {
     thresholdRainHint: (standard: number, min: number, max: number) =>
       `Standard ${standard} · possibile ${min}–${max}`,
     thresholdReset: "Standard",
-    historyTitle: "Cronologia",
-    historyToggleAria: "Aprire o chiudere la cronologia delle notifiche",
     historyHint:
       "Le ultime notifiche inviate al tuo account – le più recenti per prime.",
     historyEmpty:

@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   Home,
   Siren,
-  Globe,
   LogIn,
   LogOut,
   UserRound,
@@ -46,7 +45,6 @@ import {
   type ThemePreference,
 } from "@/lib/themePreference";
 import { useI18n } from "@/i18n";
-import { LANGUAGES, LANGUAGE_LABELS } from "@shared/i18n";
 import BrandLogo from "@/components/BrandLogo";
 import InstallPrompt from "@/components/InstallPrompt";
 import OfflineBanner from "@/components/OfflineBanner";
@@ -57,6 +55,7 @@ import UpdatePrompt from "@/components/UpdatePrompt";
 import QuickActions from "@/components/QuickActions";
 import CookTimerBar from "@/components/CookTimerBar";
 import WhatsNewStartup from "@/components/WhatsNewDialog";
+import NotificationBell from "@/components/NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -247,7 +246,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     themeSync.push(next);
     toggleTheme?.();
   };
-  const { lang, t, setLang } = useI18n();
+  const { lang, t } = useI18n();
 
   // Schnellzugriff-Leiste (#297): lokal gespeichert, per Konto abgeglichen
   const [quickBar, setQuickBar] = useState<string[]>(() => loadQuickBar());
@@ -335,29 +334,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </span>
           </Link>
           <div className="flex items-center gap-2">
-            {/* Sprachwahl */}
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className="inline-flex h-8 items-center justify-center gap-1 rounded-full border border-border bg-card px-2.5 text-xs font-semibold uppercase text-muted-foreground transition-colors hover:text-foreground"
-                aria-label={t.shell.languageMenu}
-              >
-                <Globe className="h-3.5 w-3.5" aria-hidden="true" />
-                {lang}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {LANGUAGES.map(code => (
-                  <DropdownMenuItem
-                    key={code}
-                    onClick={() => setLang(code)}
-                    className={cn(
-                      code === lang && "font-semibold text-primary"
-                    )}
-                  >
-                    {LANGUAGE_LABELS[code]}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Benachrichtigungs-Glocke (#374) – an der Stelle, an der bis
+                jetzt die Sprachwahl sass. Die Sprache wechselt man einmal,
+                Mitteilungen kommen täglich; sie steht darum im Profil. */}
+            <NotificationBell />
             <button
               type="button"
               onClick={cycleTheme}
