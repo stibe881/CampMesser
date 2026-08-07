@@ -396,6 +396,8 @@ export default function TentFinderPage() {
     }
   });
   const [mapState, setMapState] = useState<MiniMapState>("idle");
+  /** Zählt die Bau-Versuche – «Erneut versuchen» erhöht ihn. */
+  const [mapAttempt, setMapAttempt] = useState(0);
   const [online, setOnline] = useState<boolean>(() => navigator.onLine);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const engineRef = useRef<MapEngine | null>(null);
@@ -431,9 +433,17 @@ export default function TentFinderPage() {
   }, []);
 
   // Karte erst beim ersten Aufklappen bauen – der Zelt-Finder-Chunk bleibt
-  // klein, und ohne geöffneten Abschnitt wird kein Kartenaufruf verbraucht
+  // klein, und ohne geöffneten Abschnitt wird kein Kartenaufruf verbraucht.
+  //
+  // `mapState` DARF HIER NICHT IN DEN ABHÄNGIGKEITEN STEHEN (Nutzermeldung
+  // 07.08.2026, «lädt nur und zeigt nichts an»): Der Effekt setzt gleich
+  // unten selbst `loading` – stünde der Zustand in den Abhängigkeiten,
+  // liefe sofort das eigene Aufräumen (`cancelled = true`), und die fertig
+  // gebaute Karte würde beim Eintreffen wortlos wieder weggeworfen. Der
+  // Abschnitt bliebe für immer beim Ladeskelett. Neu bauen löst darum ein
+  // VERSUCHS-ZÄHLER aus, nicht der Zustand.
   useEffect(() => {
-    if (!mapOpen || mapState !== "idle" || !maps.ready) return;
+    if (!mapOpen || !maps.ready) return;
     const container = mapContainerRef.current;
     if (!container || engineRef.current) return;
     let cancelled = false;
@@ -464,7 +474,7 @@ export default function TentFinderPage() {
     return () => {
       cancelled = true;
     };
-  }, [mapOpen, mapState, maps.ready, maps.config]);
+  }, [mapOpen, mapAttempt, maps.ready, maps.config]);
 
   // Beim Einklappen abbauen – die nächste Öffnung baut neu auf
   useEffect(() => {
@@ -929,7 +939,10 @@ export default function TentFinderPage() {
                   {t.tentFinder.mapLoadFailed}{" "}
                   <button
                     type="button"
-                    onClick={() => setMapState("idle")}
+                    onClick={() => {
+                      setMapState("idle");
+                      setMapAttempt(n => n + 1);
+                    }}
                     className="font-medium text-primary underline"
                   >
                     {t.tentFinder.mapRetry}
