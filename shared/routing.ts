@@ -335,16 +335,23 @@ export function osrmTableUrl(
  * Antwort des Tabellen-Diensts lesen: Wegstrecke in Metern je Ziel, in der
  * Reihenfolge der Anfrage. `null` steht für «nicht erreichbar» – eine
  * Hütte ohne Weganschluss bekommt keine erfundene Zahl.
+ *
+ * `field` wählt die Spalte: Meter («distances», der Normalfall) oder
+ * Sekunden («durations»). Beide kommen in DERSELBEN Antwort – die
+ * Abfrage oben verlangt sie ohnehin zusammen, und «Wohin am
+ * Wochenende?» (#383) fragt nach der Fahrzeit, nicht nach Kilometern.
  */
 export function parseOsrmTable(
   json: unknown,
-  targetCount: number
+  targetCount: number,
+  field: "distances" | "durations" = "distances"
 ): (number | null)[] {
   const empty = new Array<number | null>(targetCount).fill(null);
   if (!json || typeof json !== "object") return empty;
-  const body = json as { code?: unknown; distances?: unknown };
-  if (body.code !== "Ok" || !Array.isArray(body.distances)) return empty;
-  const row = body.distances[0];
+  const body = json as { code?: unknown } & Record<string, unknown>;
+  const table = body[field];
+  if (body.code !== "Ok" || !Array.isArray(table)) return empty;
+  const row = table[0];
   if (!Array.isArray(row)) return empty;
   // Spalte 0 ist der Standort selbst; die Ziele folgen ab Spalte 1
   return empty.map((_, i) => {

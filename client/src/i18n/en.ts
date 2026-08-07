@@ -4149,6 +4149,88 @@ export const en: Translation = {
     addAria: (name: string) => `Add “${name}” to the list`,
     added: (name: string) => `“${name}” added.`,
   },
+  tripOffline: {
+    title: "Prepare for the road",
+    intro:
+      "Fetches everything for this trip onto this device: pitch, packing list, menu plan with recipes and maps around the site.",
+    start: "Prepare now",
+    again: "Fetch again",
+    running: "Fetching …",
+    stepTrip: "Trip, pitch and companions",
+    stepPacking: "Packing list",
+    stepMenu: "Menu plan and recipes",
+    stepMap: "Maps around the pitch",
+    stepFailed: "Did not work – without a signal this part will be missing.",
+    noList: "No packing list linked.",
+    noSpot: "No pitch linked.",
+    noTileCache: "This device cannot store maps.",
+    tileProgress: (done: number, total: number) => `${done} of ${total} tiles`,
+    tilesStored: (count: number) => `${count} tiles stored`,
+    note: "What it says here is honest: a red step really will be missing offline. And the browser decides for itself what to discard when space runs short – before a long trip a second run is worth it.",
+  },
+  pitchCost: {
+    title: "Estimate pitch cost",
+    hint: (nights: number) =>
+      nights === 1
+        ? "1 night. Enter how many of you there are."
+        : `${nights} nights. Enter how many of you there are.`,
+    tariffGroupAria: "Choose tariff",
+    countAria: (label: string) => `Number of ${label}`,
+    nightlyOnly:
+      "No tariffs recorded for this pitch – the price per night is used instead.",
+    breakdown: (perNight: string, nights: number) =>
+      `${perNight} per night × ${nights}`,
+    sourceNightly: "from the price per night",
+    nothingYet: "Nothing to work out yet: enter the numbers.",
+    addToExpenses: "Add to the kitty",
+    added: "Pitch cost added.",
+    expenseLabel: (nights: number) =>
+      nights === 1 ? "Pitch, 1 night" : `Pitch, ${nights} nights`,
+    meFallback: "Me",
+    note: "An estimate, not a bill: reception often counts tourist tax, dog and electricity differently. Nothing is entered unless you press the button.",
+  },
+  altitudeCooking: {
+    headline: (m: number, boiling: number) =>
+      `At ${m} m water boils at ${boiling} °C.`,
+    estimate: (base: number, adjusted: number) =>
+      `Reckon on about ${adjusted} minutes instead of ${base} – a guide value, not a measurement.`,
+    pressureCooker:
+      "At this altitude a pressure cooker pays off for anything that simmers long.",
+    source: (spot: string) => `Elevation of ${spot}, your current stay.`,
+    guide: "Applies to anything cooked in water – not to pan or oven.",
+  },
+  dryWindow: {
+    title: "Dry window",
+    lengthGroupAria: "How long do you need to pitch or strike?",
+    hours: (count: number) => (count === 1 ? "1 hour" : `${count} hours`),
+    tooShort: "The forecast does not reach far enough for this window yet.",
+    verdictGood: "Fine: dry and calm enough to pitch and strike.",
+    verdictUsable: "Workable – but expect some wet or wind.",
+    verdictPoor: "No good window. The best of a bad lot is still bad.",
+    rainLabel: "Rain in the window",
+    rainNone: "no rain forecast",
+    rainAmount: (mm: number) => `${mm} mm`,
+    gustsLabel: "Strongest gust",
+    gusts: (kmh: number) => `${kmh} km/h`,
+    gustWarning:
+      "You do not pitch a tent alone in gusts like these – wait, or find shelter from the wind.",
+    note: "It looks for the best continuous window in the next 48 hours; on a tie the earlier one wins. Wind counts through the GUSTS, not the average – a tent blows away in the gust.",
+  },
+  weekendPicker: {
+    title: "Where to this weekend?",
+    show: "Compare",
+    range: (from: string, to: string) => `Saturday ${from} to Sunday ${to}`,
+    sortWeather: "By weather",
+    sortTravel: "By driving time",
+    dry: (score: number) => `dry ${score}`,
+    warmth: (score: number) => `warm ${score}`,
+    wind: (score: number) => `calm ${score}`,
+    noForecast: "No forecast available.",
+    failed: "The weather service is not responding right now.",
+    capped: (shown: number, total: number) =>
+      `Comparing the first ${shown} of ${total} pitches.`,
+    note: "The score weights rain at 55 %, temperature at 30 % and wind at 15 % – rain decides whether you go at all. Driving time is NOT part of it; it sits alongside, because only you know what an hour on the road is worth to you. And all of this is a forecast, not a promise.",
+  },
   pitchSketch: {
     title: "Pitch sketch",
     empty:

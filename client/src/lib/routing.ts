@@ -190,9 +190,39 @@ export async function fetchPlaceDistances(
   profile: RoutingProfile,
   options: { signal?: AbortSignal } = {}
 ): Promise<Map<string, number>> {
+  return fetchTable(origin, targets, profile, "distances", options);
+}
+
+/**
+ * Dasselbe, nur in SEKUNDEN: die Fahrzeit vom Zuhause zu jedem Platz
+ * («Wohin am Wochenende?», #383).
+ *
+ * Kilometer beantworten die Frage dort nicht. Vierzig Kilometer über den
+ * Pass sind eine Stunde, vierzig über die Autobahn zwanzig Minuten – und
+ * entschieden wird nach der Uhr.
+ *
+ * Dieselbe Antwort trägt beide Zahlen (die Abfrage verlangt ohnehin
+ * `distance,duration`), nur der Zwischenspeicher wird getrennt gehalten.
+ */
+export async function fetchPlaceDurations(
+  origin: GeoPoint,
+  targets: { id: string; lat: number; lon: number }[],
+  profile: RoutingProfile,
+  options: { signal?: AbortSignal } = {}
+): Promise<Map<string, number>> {
+  return fetchTable(origin, targets, profile, "durations", options);
+}
+
+async function fetchTable(
+  origin: GeoPoint,
+  targets: { id: string; lat: number; lon: number }[],
+  profile: RoutingProfile,
+  field: "distances" | "durations",
+  options: { signal?: AbortSignal } = {}
+): Promise<Map<string, number>> {
   const limited = targets.slice(0, MAX_TABLE_TARGETS);
   if (limited.length === 0) return new Map();
-  const key = `${profile}:${origin.lat.toFixed(3)},${origin.lon.toFixed(3)}|${limited
+  const key = `${field}:${profile}:${origin.lat.toFixed(3)},${origin.lon.toFixed(3)}|${limited
     .map(t => t.id)
     .join(",")}`;
   const cached = tableCache.get(key);
@@ -207,7 +237,7 @@ export async function fetchPlaceDistances(
       signal: controller.signal,
     });
     if (!response.ok) return new Map();
-    const values = parseOsrmTable(await response.json(), limited.length);
+    const values = parseOsrmTable(await response.json(), limited.length, field);
     const result = new Map<string, number>();
     limited.forEach((target, index) => {
       const value = values[index];

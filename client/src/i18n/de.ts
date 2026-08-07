@@ -4273,6 +4273,90 @@ export const de = {
     addAria: (name: string) => `«${name}» auf die Liste setzen`,
     added: (name: string) => `«${name}» hinzugefügt.`,
   },
+  tripOffline: {
+    title: "Für unterwegs vorbereiten",
+    intro:
+      "Holt alles für diese Reise auf dieses Gerät: Platz, Packliste, Menüplan samt Rezepten und Karten rund um den Platz.",
+    start: "Jetzt vorbereiten",
+    again: "Nochmals holen",
+    running: "Wird geholt …",
+    stepTrip: "Reise, Platz und Mitreisende",
+    stepPacking: "Packliste",
+    stepMenu: "Menüplan und Rezepte",
+    stepMap: "Karten rund um den Platz",
+    stepFailed: "Hat nicht geklappt – ohne Netz fehlt dieser Teil.",
+    noList: "Keine Packliste verknüpft.",
+    noSpot: "Kein Zeltplatz verknüpft.",
+    noTileCache: "Dieses Gerät kann keine Karten speichern.",
+    tileProgress: (done: number, total: number) =>
+      `${done} von ${total} Kacheln`,
+    tilesStored: (count: number) => `${count} Kacheln gespeichert`,
+    note: "Was hier steht, ist ehrlich: Ein roter Schritt fehlt offline wirklich. Und der Browser entscheidet selbst, was er wieder wegwirft, wenn der Speicher knapp wird – vor einer langen Reise lohnt sich ein zweiter Durchgang.",
+  },
+  pitchCost: {
+    title: "Platzkosten schätzen",
+    hint: (nights: number) =>
+      nights === 1
+        ? "1 Nacht. Trage ein, wie viele ihr seid."
+        : `${nights} Nächte. Trage ein, wie viele ihr seid.`,
+    tariffGroupAria: "Tarif wählen",
+    countAria: (label: string) => `Anzahl ${label}`,
+    nightlyOnly:
+      "Für diesen Platz sind keine Tarife erfasst – gerechnet wird mit dem Preis pro Nacht.",
+    breakdown: (perNight: string, nights: number) =>
+      `${perNight} pro Nacht × ${nights}`,
+    sourceNightly: "aus dem Preis pro Nacht",
+    nothingYet: "Noch nichts zu rechnen: Anzahl eintragen.",
+    addToExpenses: "In die Reisekasse",
+    added: "Platzkosten eingetragen.",
+    expenseLabel: (nights: number) =>
+      nights === 1 ? "Stellplatz, 1 Nacht" : `Stellplatz, ${nights} Nächte`,
+    meFallback: "Ich",
+    note: "Eine Schätzung, kein Beleg: Die Rezeption rechnet Kurtaxe, Hund und Strom oft anders. Eingetragen wird nur, was du hier drückst.",
+  },
+  altitudeCooking: {
+    headline: (m: number, boiling: number) =>
+      `Auf ${m} m siedet Wasser bei ${boiling} °C.`,
+    estimate: (base: number, adjusted: number) =>
+      `Rechne mit rund ${adjusted} statt ${base} Minuten – Richtwert, kein Messwert.`,
+    pressureCooker:
+      "Auf dieser Höhe lohnt sich der Dampfkochtopf für alles, was lange köchelt.",
+    source: (spot: string) => `Höhe von ${spot}, deinem laufenden Aufenthalt.`,
+    guide: "Gilt für alles, was im Wasser gart – nicht für Pfanne und Ofen.",
+  },
+  dryWindow: {
+    title: "Trockenes Zeitfenster",
+    lengthGroupAria: "Wie lange brauchst du zum Auf- oder Abbauen?",
+    hours: (count: number) => (count === 1 ? "1 Stunde" : `${count} Stunden`),
+    tooShort: "Die Prognose reicht für dieses Fenster noch nicht.",
+    verdictGood: "Passt: trocken und ruhig genug zum Auf- und Abbauen.",
+    verdictUsable: "Geht – aber rechne mit etwas Nässe oder Wind.",
+    verdictPoor:
+      "Kein gutes Fenster. Das beste von lauter schlechten bleibt schlecht.",
+    rainLabel: "Regen im Fenster",
+    rainNone: "kein Regen gemeldet",
+    rainAmount: (mm: number) => `${mm} mm`,
+    gustsLabel: "Stärkste Böe",
+    gusts: (kmh: number) => `${kmh} km/h`,
+    gustWarning:
+      "Bei solchen Böen stellt man ein Zelt nicht allein auf – warte lieber oder such dir Windschatten.",
+    note: "Gesucht wird das beste zusammenhängende Fenster in den nächsten 48 Stunden; bei Gleichstand gewinnt das frühere. Der Wind zählt über die BÖEN, nicht über das Mittel – weggeflogen ist ein Zelt in der Böe.",
+  },
+  weekendPicker: {
+    title: "Wohin am Wochenende?",
+    show: "Vergleichen",
+    range: (from: string, to: string) => `Samstag ${from} bis Sonntag ${to}`,
+    sortWeather: "Nach Wetter",
+    sortTravel: "Nach Fahrzeit",
+    dry: (score: number) => `trocken ${score}`,
+    warmth: (score: number) => `warm ${score}`,
+    wind: (score: number) => `windstill ${score}`,
+    noForecast: "Keine Prognose verfügbar.",
+    failed: "Der Wetterdienst antwortet gerade nicht.",
+    capped: (shown: number, total: number) =>
+      `Verglichen werden die ersten ${shown} von ${total} Plätzen.`,
+    note: "Die Note gewichtet Regen mit 55 %, Temperatur mit 30 % und Wind mit 15 % – Regen entscheidet, ob man fährt. Die Fahrzeit ist NICHT eingerechnet; sie steht daneben, weil nur du weisst, was dir eine Stunde Fahrt wert ist. Und alles hier ist eine Prognose, keine Zusage.",
+  },
   pitchSketch: {
     title: "Stellplatz-Skizze",
     empty:

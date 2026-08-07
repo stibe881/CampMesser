@@ -4265,6 +4265,91 @@ export const fr: Translation = {
     addAria: (name: string) => `Ajouter « ${name} » à la liste`,
     added: (name: string) => `« ${name} » ajouté.`,
   },
+  tripOffline: {
+    title: "Préparer pour la route",
+    intro:
+      "Charge tout pour ce séjour sur cet appareil : emplacement, liste de bagages, menus avec recettes et cartes autour du camping.",
+    start: "Préparer maintenant",
+    again: "Recharger",
+    running: "Chargement …",
+    stepTrip: "Séjour, emplacement et compagnons",
+    stepPacking: "Liste de bagages",
+    stepMenu: "Menus et recettes",
+    stepMap: "Cartes autour de l'emplacement",
+    stepFailed: "Échec – sans réseau, cette partie manquera.",
+    noList: "Aucune liste de bagages liée.",
+    noSpot: "Aucun emplacement lié.",
+    noTileCache: "Cet appareil ne peut pas stocker de cartes.",
+    tileProgress: (done: number, total: number) =>
+      `${done} sur ${total} tuiles`,
+    tilesStored: (count: number) => `${count} tuiles enregistrées`,
+    note: "Ce qui est écrit ici est honnête : une étape rouge manquera vraiment hors ligne. Et le navigateur décide seul de ce qu'il jette quand la place manque – avant un long voyage, un second passage vaut la peine.",
+  },
+  pitchCost: {
+    title: "Estimer le coût de l'emplacement",
+    hint: (nights: number) =>
+      nights === 1
+        ? "1 nuit. Indique combien vous êtes."
+        : `${nights} nuits. Indique combien vous êtes.`,
+    tariffGroupAria: "Choisir le tarif",
+    countAria: (label: string) => `Nombre de ${label}`,
+    nightlyOnly:
+      "Aucun tarif saisi pour cet emplacement – le calcul utilise le prix par nuit.",
+    breakdown: (perNight: string, nights: number) =>
+      `${perNight} par nuit × ${nights}`,
+    sourceNightly: "d'après le prix par nuit",
+    nothingYet: "Rien à calculer encore : indique le nombre.",
+    addToExpenses: "Dans la caisse",
+    added: "Coût de l'emplacement enregistré.",
+    expenseLabel: (nights: number) =>
+      nights === 1 ? "Emplacement, 1 nuit" : `Emplacement, ${nights} nuits`,
+    meFallback: "Moi",
+    note: "Une estimation, pas une facture : la réception compte souvent la taxe de séjour, le chien et l'électricité autrement. Rien n'est enregistré sans que tu appuies.",
+  },
+  altitudeCooking: {
+    headline: (m: number, boiling: number) =>
+      `À ${m} m, l'eau bout à ${boiling} °C.`,
+    estimate: (base: number, adjusted: number) =>
+      `Compte environ ${adjusted} minutes au lieu de ${base} – valeur indicative, pas mesurée.`,
+    pressureCooker:
+      "À cette altitude, l'autocuiseur vaut la peine pour tout ce qui mijote longtemps.",
+    source: (spot: string) => `Altitude de ${spot}, ton séjour en cours.`,
+    guide:
+      "Vaut pour tout ce qui cuit dans l'eau – pas pour la poêle ni le four.",
+  },
+  dryWindow: {
+    title: "Créneau au sec",
+    lengthGroupAria: "Combien de temps te faut-il pour monter ou démonter ?",
+    hours: (count: number) => (count === 1 ? "1 heure" : `${count} heures`),
+    tooShort: "Les prévisions ne suffisent pas encore pour ce créneau.",
+    verdictGood: "Ça va : assez sec et calme pour monter et démonter.",
+    verdictUsable: "Possible – mais compte avec un peu d'humidité ou de vent.",
+    verdictPoor:
+      "Pas de bon créneau. Le meilleur parmi des mauvais reste mauvais.",
+    rainLabel: "Pluie dans le créneau",
+    rainNone: "aucune pluie annoncée",
+    rainAmount: (mm: number) => `${mm} mm`,
+    gustsLabel: "Rafale la plus forte",
+    gusts: (kmh: number) => `${kmh} km/h`,
+    gustWarning:
+      "Avec de telles rafales, on ne monte pas une tente seul – attends ou cherche un abri du vent.",
+    note: "On cherche le meilleur créneau continu dans les 48 prochaines heures ; à égalité, le plus tôt l'emporte. Le vent compte par les RAFALES, pas par la moyenne – une tente s'envole dans la rafale.",
+  },
+  weekendPicker: {
+    title: "Où aller ce week-end ?",
+    show: "Comparer",
+    range: (from: string, to: string) => `Samedi ${from} à dimanche ${to}`,
+    sortWeather: "Par météo",
+    sortTravel: "Par temps de trajet",
+    dry: (score: number) => `sec ${score}`,
+    warmth: (score: number) => `chaud ${score}`,
+    wind: (score: number) => `calme ${score}`,
+    noForecast: "Aucune prévision disponible.",
+    failed: "Le service météo ne répond pas pour le moment.",
+    capped: (shown: number, total: number) =>
+      `Comparaison des ${shown} premiers emplacements sur ${total}.`,
+    note: "La note pondère la pluie à 55 %, la température à 30 % et le vent à 15 % – la pluie décide si l'on part. Le temps de trajet n'est PAS inclus ; il figure à côté, car toi seul sais ce que vaut une heure de route. Et tout ceci est une prévision, pas une promesse.",
+  },
   pitchSketch: {
     title: "Croquis de l'emplacement",
     empty:

@@ -187,6 +187,26 @@ describe("Distanzen zu Fundorten über den Weg", () => {
     expect(parseOsrmTable(null, 3)).toEqual([null, null, null]);
   });
 
+  it("liest auf Wunsch die FAHRZEIT statt der Strecke (#383)", () => {
+    // Vierzig Kilometer über den Pass sind eine Stunde, vierzig über die
+    // Autobahn zwanzig Minuten – «Wohin am Wochenende?» entscheidet nach
+    // der Uhr, nicht nach Kilometern. Beide Zahlen stehen in derselben
+    // Antwort.
+    const answer = {
+      code: "Ok",
+      distances: [[0, 40000, 40000]],
+      durations: [[0, 3600, 1200]],
+    };
+    expect(parseOsrmTable(answer, 2, "durations")).toEqual([3600, 1200]);
+    expect(parseOsrmTable(answer, 2)).toEqual([40000, 40000]);
+  });
+
+  it("gibt ohne Fahrzeit-Spalte null zurück statt Meter zu verwechseln", () => {
+    expect(
+      parseOsrmTable({ code: "Ok", distances: [[0, 500]] }, 1, "durations")
+    ).toEqual([null]);
+  });
+
   it("sortiert die Liste nach der Wegstrecke neu", () => {
     // Der Laden am anderen Flussufer: 500 m Luftlinie, 6 km über die Brücke
     const list = [

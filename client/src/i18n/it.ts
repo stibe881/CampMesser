@@ -4236,6 +4236,90 @@ export const it: Translation = {
     addAria: (name: string) => `Aggiungi «${name}» alla lista`,
     added: (name: string) => `«${name}» aggiunto.`,
   },
+  tripOffline: {
+    title: "Preparare per il viaggio",
+    intro:
+      "Scarica tutto per questo soggiorno su questo dispositivo: piazzola, lista bagagli, menu con ricette e mappe attorno al campeggio.",
+    start: "Prepara ora",
+    again: "Scarica di nuovo",
+    running: "In corso …",
+    stepTrip: "Soggiorno, piazzola e compagni",
+    stepPacking: "Lista bagagli",
+    stepMenu: "Menu e ricette",
+    stepMap: "Mappe attorno alla piazzola",
+    stepFailed: "Non è riuscito – senza rete questa parte mancherà.",
+    noList: "Nessuna lista bagagli collegata.",
+    noSpot: "Nessuna piazzola collegata.",
+    noTileCache: "Questo dispositivo non può salvare mappe.",
+    tileProgress: (done: number, total: number) =>
+      `${done} di ${total} tasselli`,
+    tilesStored: (count: number) => `${count} tasselli salvati`,
+    note: "Qui si dice la verità: un passo rosso mancherà davvero offline. E il browser decide da solo cosa buttare quando lo spazio scarseggia – prima di un lungo viaggio conviene un secondo giro.",
+  },
+  pitchCost: {
+    title: "Stimare il costo della piazzola",
+    hint: (nights: number) =>
+      nights === 1
+        ? "1 notte. Indica in quanti siete."
+        : `${nights} notti. Indica in quanti siete.`,
+    tariffGroupAria: "Scegli la tariffa",
+    countAria: (label: string) => `Numero di ${label}`,
+    nightlyOnly:
+      "Per questa piazzola non ci sono tariffe – si calcola con il prezzo per notte.",
+    breakdown: (perNight: string, nights: number) =>
+      `${perNight} a notte × ${nights}`,
+    sourceNightly: "dal prezzo per notte",
+    nothingYet: "Ancora niente da calcolare: inserisci il numero.",
+    addToExpenses: "Nella cassa",
+    added: "Costo della piazzola registrato.",
+    expenseLabel: (nights: number) =>
+      nights === 1 ? "Piazzola, 1 notte" : `Piazzola, ${nights} notti`,
+    meFallback: "Io",
+    note: "Una stima, non una fattura: alla reception tassa di soggiorno, cane e corrente si contano spesso in altro modo. Si registra solo ciò che premi tu.",
+  },
+  altitudeCooking: {
+    headline: (m: number, boiling: number) =>
+      `A ${m} m l'acqua bolle a ${boiling} °C.`,
+    estimate: (base: number, adjusted: number) =>
+      `Conta circa ${adjusted} minuti invece di ${base} – valore indicativo, non misurato.`,
+    pressureCooker:
+      "A questa quota la pentola a pressione conviene per tutto ciò che sobbolle a lungo.",
+    source: (spot: string) => `Quota di ${spot}, il tuo soggiorno in corso.`,
+    guide: "Vale per tutto ciò che cuoce in acqua – non per padella e forno.",
+  },
+  dryWindow: {
+    title: "Finestra asciutta",
+    lengthGroupAria: "Quanto tempo ti serve per montare o smontare?",
+    hours: (count: number) => (count === 1 ? "1 ora" : `${count} ore`),
+    tooShort: "Le previsioni non bastano ancora per questa finestra.",
+    verdictGood: "Va bene: abbastanza asciutto e calmo per montare e smontare.",
+    verdictUsable: "Si può – ma metti in conto un po' di umido o di vento.",
+    verdictPoor:
+      "Nessuna buona finestra. La migliore fra tante cattive resta cattiva.",
+    rainLabel: "Pioggia nella finestra",
+    rainNone: "nessuna pioggia prevista",
+    rainAmount: (mm: number) => `${mm} mm`,
+    gustsLabel: "Raffica più forte",
+    gusts: (kmh: number) => `${kmh} km/h`,
+    gustWarning:
+      "Con raffiche così non si monta una tenda da soli – aspetta o cerca riparo dal vento.",
+    note: "Si cerca la migliore finestra continua nelle prossime 48 ore; a parità vince la più precoce. Il vento conta sulle RAFFICHE, non sulla media – una tenda vola nella raffica.",
+  },
+  weekendPicker: {
+    title: "Dove andare nel fine settimana?",
+    show: "Confronta",
+    range: (from: string, to: string) => `Sabato ${from} a domenica ${to}`,
+    sortWeather: "Per meteo",
+    sortTravel: "Per tempo di viaggio",
+    dry: (score: number) => `asciutto ${score}`,
+    warmth: (score: number) => `caldo ${score}`,
+    wind: (score: number) => `calmo ${score}`,
+    noForecast: "Nessuna previsione disponibile.",
+    failed: "Il servizio meteo non risponde al momento.",
+    capped: (shown: number, total: number) =>
+      `Vengono confrontate le prime ${shown} piazzole su ${total}.`,
+    note: "Il voto pesa la pioggia al 55 %, la temperatura al 30 % e il vento al 15 % – la pioggia decide se si parte. Il tempo di viaggio NON è incluso; sta accanto, perché solo tu sai quanto vale un'ora di strada. E tutto questo è una previsione, non una promessa.",
+  },
   pitchSketch: {
     title: "Schizzo della piazzola",
     empty:
