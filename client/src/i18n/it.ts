@@ -306,6 +306,20 @@ export const it: Translation = {
     languageTitle: "Lingua",
     languageIntro:
       "In quale lingua deve funzionare l'app? La scelta vale su tutti i tuoi dispositivi, anche per le notifiche che riceve questo dispositivo.",
+    calendarTitle: "Abbonamento al calendario",
+    calendarIntro:
+      "I tuoi viaggi sempre aggiornati nel calendario del telefono o del computer: a differenza del file scaricato, un abbonamento si aggiorna da solo quando sposti un viaggio.",
+    calendarSubscribe: "Abbonati al calendario",
+    calendarCopy: "Copia l'indirizzo",
+    calendarCopied: "Indirizzo copiato.",
+    calendarCopyFailed:
+      "La copia non ha funzionato: seleziona l'indirizzo a mano.",
+    calendarSecretHint:
+      "Chi ha questo indirizzo vede luogo e periodo dei tuoi viaggi. L'hai dato via? Generane uno nuovo: il vecchio smette subito di funzionare.",
+    calendarResetButton: "Rigenera",
+    calendarResetConfirm:
+      "Generare un nuovo indirizzo? Gli abbonamenti con il vecchio smettono di aggiornarsi.",
+    calendarReset: "Nuovo indirizzo generato.",
     appBadgeTitle: "Numero sull'icona dell'app",
     appBadgeDesc:
       "Mostra sull'icona quanti alimenti della ghiacciaia scadono oggi o domani e quante attività di manutenzione sono in scadenza. Non è una notifica non letta: un'attività aperta resta finché non la spunti.",

@@ -1091,3 +1091,58 @@ export async function deleteAllTripBoardNotesForTrip(tripId: number) {
   const db = requireDb(await getDb());
   await db.delete(tripBoardNotes).where(eq(tripBoardNotes.tripId, tripId));
 }
+
+/**
+ * Kalender-Abo (#377): Schlüssel des Kontos holen bzw. erzeugen.
+ *
+ * ER ENTSTEHT ERST BEI BEDARF – wer das Abo nie benutzt, hat auch keinen
+ * Schlüssel, den jemand erraten könnte.
+ */
+export async function getOrCreateCalendarToken(
+  userId: number,
+  makeToken: () => string
+): Promise<string> {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select({ token: users.calendarToken })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  const existing = rows[0]?.token;
+  if (existing) return existing;
+  const token = makeToken();
+  await db
+    .update(users)
+    .set({ calendarToken: token })
+    .where(eq(users.id, userId));
+  return token;
+}
+
+/**
+ * Neuen Schlüssel setzen – macht jeden weitergegebenen Link sofort
+ * wertlos. Das ist der einzige Weg zurück, wenn eine Adresse in falsche
+ * Hände geraten ist.
+ */
+export async function resetCalendarToken(
+  userId: number,
+  makeToken: () => string
+): Promise<string> {
+  const db = requireDb(await getDb());
+  const token = makeToken();
+  await db
+    .update(users)
+    .set({ calendarToken: token })
+    .where(eq(users.id, userId));
+  return token;
+}
+
+/** Konto zu einem Kalender-Schlüssel (null = kein solches Abo). */
+export async function getUserByCalendarToken(token: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.calendarToken, token))
+    .limit(1);
+  return rows[0] ?? null;
+}

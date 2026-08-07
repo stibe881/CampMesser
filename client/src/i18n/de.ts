@@ -318,6 +318,20 @@ export const de = {
     languageTitle: "Sprache",
     languageIntro:
       "In welcher Sprache soll die App laufen? Die Wahl gilt auf allen deinen Geräten – auch für die Mitteilungen, die dieses Gerät bekommt.",
+    calendarTitle: "Kalender-Abo",
+    calendarIntro:
+      "Deine Reisen laufend im Handy- oder Computer-Kalender – anders als die heruntergeladene Datei aktualisiert sich ein Abo von selbst, wenn du eine Reise verschiebst.",
+    calendarSubscribe: "Kalender abonnieren",
+    calendarCopy: "Adresse kopieren",
+    calendarCopied: "Adresse kopiert.",
+    calendarCopyFailed:
+      "Kopieren hat nicht geklappt – markier die Adresse von Hand.",
+    calendarSecretHint:
+      "Wer diese Adresse hat, sieht Ort und Zeitraum deiner Reisen. Weitergegeben? Neu erzeugen – der alte Link wird sofort ungültig.",
+    calendarResetButton: "Neu erzeugen",
+    calendarResetConfirm:
+      "Neue Adresse erzeugen? Abos mit der alten hören auf zu aktualisieren.",
+    calendarReset: "Neue Adresse erzeugt.",
     appBadgeTitle: "Zahl am App-Icon",
     appBadgeDesc:
       "Zeigt am Icon, wie viele Kühlbox-Einträge heute oder morgen ablaufen und wie viele Pflege-Aufgaben fällig sind. Das ist keine ungelesene Mitteilung – eine offene Pflege-Aufgabe bleibt stehen, bis du sie abhakst.",

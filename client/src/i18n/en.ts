@@ -304,6 +304,19 @@ export const en: Translation = {
     languageTitle: "Language",
     languageIntro:
       "Which language should the app run in? The choice applies on all your devices – including the notifications this device receives.",
+    calendarTitle: "Calendar subscription",
+    calendarIntro:
+      "Your trips kept up to date in your phone or computer calendar – unlike the downloaded file, a subscription updates itself when you move a trip.",
+    calendarSubscribe: "Subscribe to calendar",
+    calendarCopy: "Copy address",
+    calendarCopied: "Address copied.",
+    calendarCopyFailed: "Copying failed – select the address by hand.",
+    calendarSecretHint:
+      "Anyone with this address can see the place and dates of your trips. Shared it by mistake? Generate a new one – the old link stops working at once.",
+    calendarResetButton: "Generate new",
+    calendarResetConfirm:
+      "Generate a new address? Subscriptions using the old one stop updating.",
+    calendarReset: "New address generated.",
     appBadgeTitle: "Number on the app icon",
     appBadgeDesc:
       "Shows on the icon how many cool box items expire today or tomorrow and how many care tasks are due. It is not an unread notification – an open care task stays until you tick it off.",

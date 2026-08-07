@@ -315,6 +315,20 @@ export const fr: Translation = {
     languageTitle: "Langue",
     languageIntro:
       "Dans quelle langue l'app doit-elle fonctionner ? Le choix vaut sur tous tes appareils – aussi pour les notifications que cet appareil reçoit.",
+    calendarTitle: "Abonnement au calendrier",
+    calendarIntro:
+      "Tes voyages en continu dans le calendrier du téléphone ou de l'ordinateur – contrairement au fichier téléchargé, un abonnement se met à jour tout seul quand tu déplaces un voyage.",
+    calendarSubscribe: "S'abonner au calendrier",
+    calendarCopy: "Copier l'adresse",
+    calendarCopied: "Adresse copiée.",
+    calendarCopyFailed:
+      "La copie n'a pas fonctionné – sélectionne l'adresse à la main.",
+    calendarSecretHint:
+      "Qui a cette adresse voit le lieu et les dates de tes voyages. Transmise par erreur ? Génère-en une nouvelle – l'ancienne devient aussitôt invalide.",
+    calendarResetButton: "Régénérer",
+    calendarResetConfirm:
+      "Générer une nouvelle adresse ? Les abonnements avec l'ancienne cessent de se mettre à jour.",
+    calendarReset: "Nouvelle adresse générée.",
     appBadgeTitle: "Nombre sur l'icône de l'app",
     appBadgeDesc:
       "Affiche sur l'icône combien d'articles de la glacière expirent aujourd'hui ou demain et combien de tâches d'entretien sont dues. Ce n'est pas une notification non lue – une tâche d'entretien ouverte reste affichée jusqu'à ce que tu la coches.",

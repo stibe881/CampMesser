@@ -348,6 +348,75 @@ async function startServer() {
       }
     }
   );
+  // ── Kalender-Abo (#377) ──────────────────────────────────────────────────
+  //
+  // KEIN LOGIN, UND DAS MUSS SO SEIN: Kalender-Programme kennen weder
+  // Konto noch Sitzung – sie holen in regelmässigen Abständen eine
+  // Adresse. Die Berechtigung steckt deshalb im Schlüssel darin, wie
+  // beim geteilten Platz-Dossier (#45). Wer ihn neu erzeugt (Profil),
+  // macht jeden weitergegebenen Link sofort wertlos.
+  //
+  // Was ausgeliefert wird, ist bewusst wenig: Ort, Zeitraum, Ankunfts-
+  // und Abreisezeit. Keine Notizen, keine Fotos, keine Mitreisenden.
+  //
+  // DIE ENDUNG WIRD SELBST ABGESCHNITTEN und steht nicht als `:token.ics`
+  // im Pfad: Wie Express einen Punkt in einem Platzhalter behandelt, hat
+  // sich zwischen den Hauptversionen schon geändert. Ein Platzhalter ohne
+  // Sonderzeichen und ein `endsWith` daneben tun dasselbe und überleben
+  // das nächste Update.
+  app.get("/api/kalender/:file", async (req, res) => {
+    const { isCalendarToken } = await import("@shared/calendarFeed");
+    // Form ZUERST prüfen, dann erst die Datenbank fragen – ein offener
+    // Endpunkt soll nicht bei jedem Unsinn in der Adresszeile eine
+    // Abfrage auslösen.
+    const file = req.params.file ?? "";
+    const token = file.endsWith(".ics") ? file.slice(0, -4) : "";
+    if (!isCalendarToken(token)) {
+      res.status(404).type("text/plain").send("not found");
+      return;
+    }
+    try {
+      const db = await import("../db/trips");
+      const owner = await db.getUserByCalendarToken(token);
+      if (!owner) {
+        res.status(404).type("text/plain").send("not found");
+        return;
+      }
+      const [trips, spots] = await Promise.all([
+        db.getTripLogs(owner.id),
+        (await import("../db/spots")).getCampSpots(owner.id),
+      ]);
+      const spotById = new Map(spots.map(spot => [spot.id, spot]));
+      const { buildTripIcs } = await import("@shared/ics");
+      const { tripDisplayName } = await import("@shared/tripName");
+      const ics = buildTripIcs(
+        trips.map(trip => {
+          const spot = trip.spotId != null ? spotById.get(trip.spotId) : null;
+          return {
+            id: trip.id,
+            title: tripDisplayName(trip, "de"),
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            arrivalTime: trip.arrivalTime,
+            departureTime: trip.departureTime,
+            placeName: spot?.name ?? trip.location ?? null,
+            latitude: spot?.latitude ?? null,
+            longitude: spot?.longitude ?? null,
+          };
+        }),
+        { dtstamp: new Date() }
+      );
+      // Eine halbe Stunde: Kalender fragen von sich aus meist stündlich
+      // bis täglich – häufiger zu erlauben bringt nichts, seltener macht
+      // eine verschobene Reise unnötig lange falsch.
+      res.setHeader("Cache-Control", "private, max-age=1800");
+      res.type("text/calendar; charset=utf-8").send(ics);
+    } catch (error) {
+      console.error("[Kalender-Abo] Abruf fehlgeschlagen:", error);
+      res.status(500).type("text/plain").send("error");
+    }
+  });
+
   // Auslieferung: Fotos sind privat – nur wer Zugriff auf die Reise hat
   // (Besitzerin/Besitzer oder eingeladenes Mitglied) sieht die Datei.
   app.get("/api/trips/photos/:fileName", async (req, res) => {

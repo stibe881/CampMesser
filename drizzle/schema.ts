@@ -36,6 +36,16 @@ export const users = mysqlTable("users", {
   /** Zeitpunkt der E-Mail-Bestätigung; null = Adresse (noch) unbestätigt */
   emailVerifiedAt: timestamp("emailVerifiedAt"),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  /**
+   * Zufalls-Schlüssel für das Kalender-Abo (#377). null = noch nie
+   * abonniert; er entsteht erst, wenn jemand den Link holt.
+   *
+   * DER SCHLÜSSEL IST DAS PASSWORT. Kalender-Programme können sich nicht
+   * anmelden – sie holen eine Adresse, sonst nichts. Deshalb steht er
+   * unique in einer eigenen Spalte und lässt sich im Profil neu
+   * erzeugen: Damit ist ein einmal weitergegebener Link sofort wertlos.
+   */
+  calendarToken: varchar("calendarToken", { length: 32 }).unique(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
