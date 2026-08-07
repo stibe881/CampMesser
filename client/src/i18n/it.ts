@@ -2800,6 +2800,11 @@ export const it: Translation = {
       `Restano ${amount} (${percent} % utilizzato).`,
     budgetOver: (amount: string, percent: number) =>
       `${amount} oltre il budget (${percent} % utilizzato).`,
+    forecastLine: (amount: string, day: number, total: number) =>
+      `Di questo passo circa ${amount} entro la fine (giorno ${day} di ${total}).`,
+    forecastOver: "Supera il limite.",
+    forecastNote:
+      "Campeggio e carburante contano una volta nella proiezione, non ogni giorno.",
     title: "Cassa del viaggio",
     toggleAria: (name: string) => `Apri o chiudi la cassa del viaggio ${name}`,
     hint: "Annota quanto costa il viaggio – alla fine vedi chi deve cosa a chi.",

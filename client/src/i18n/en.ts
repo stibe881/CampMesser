@@ -2735,6 +2735,10 @@ export const en: Translation = {
       `${amount} left (${percent} % used).`,
     budgetOver: (amount: string, percent: number) =>
       `${amount} over budget (${percent} % used).`,
+    forecastLine: (amount: string, day: number, total: number) =>
+      `At this pace, about ${amount} by the end (day ${day} of ${total}).`,
+    forecastOver: "That exceeds the limit.",
+    forecastNote: "Camping and fuel count once in the projection, not daily.",
     title: "Trip kitty",
     toggleAria: (name: string) => `Expand or collapse the kitty for ${name}`,
     hint: "Record what the trip costs – in the end you see who owes what to whom.",

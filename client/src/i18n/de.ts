@@ -2837,6 +2837,11 @@ export const de = {
       `Noch ${amount} übrig (${percent} % verbraucht).`,
     budgetOver: (amount: string, percent: number) =>
       `${amount} über dem Budget (${percent} % verbraucht).`,
+    forecastLine: (amount: string, day: number, total: number) =>
+      `Bei diesem Tempo bis zum Ende rund ${amount} (Tag ${day} von ${total}).`,
+    forecastOver: "Das übersteigt die Limite.",
+    forecastNote:
+      "Platz und Sprit zählen in der Hochrechnung einmal, nicht täglich.",
     title: "Reisekasse",
     toggleAria: (name: string) => `Reisekasse von ${name} auf- oder zuklappen`,
     hint: "Halte fest, was die Reise kostet – am Schluss siehst du, wer wem was schuldet.",

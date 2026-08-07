@@ -2828,6 +2828,11 @@ export const fr: Translation = {
       `Il reste ${amount} (${percent} % utilisé).`,
     budgetOver: (amount: string, percent: number) =>
       `${amount} au-dessus du budget (${percent} % utilisé).`,
+    forecastLine: (amount: string, day: number, total: number) =>
+      `À ce rythme, environ ${amount} d’ici la fin (jour ${day} sur ${total}).`,
+    forecastOver: "Cela dépasse la limite.",
+    forecastNote:
+      "Le camping et le carburant comptent une fois dans la projection, pas chaque jour.",
     title: "Caisse du voyage",
     toggleAria: (name: string) =>
       `Ouvrir ou fermer la caisse du voyage ${name}`,
