@@ -30,6 +30,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Mountain, Route, Save, Trash2, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import TurnaroundCard from "@/components/TurnaroundCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -428,6 +429,18 @@ export default function RoutePlanner({
               <p className="text-xs text-muted-foreground">{rp.walkingTime}</p>
             </div>
           </div>
+
+          {/* Umkehrzeit (#379): Sonnenuntergang am STARTPUNKT plus die
+              eben gerechnete Gehzeit. Erst ab zwei Wegpunkten – vorher
+              gibt es weder Route noch Ort. */}
+          {waypoints.length >= 2 && (
+            <TurnaroundCard
+              latitude={waypoints[0].lat}
+              longitude={waypoints[0].lon}
+              totalMinutes={minutes}
+              className="mt-3"
+            />
+          )}
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="text-sm text-muted-foreground">{rp.pace}</span>

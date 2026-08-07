@@ -4220,6 +4220,21 @@ export const it: Translation = {
     andMore: (count: number) => `e altri ${count}`,
     note: "Si registra CHI ha cambiato COSA e QUANDO, in quale ambito – non il vecchio e il nuovo valore. Ciò che qualcuno fa in rapida successione sta su una riga con il numero: dodici voci sulla lista della spesa non devono seppellire tutto il resto.",
   },
+  turnaround: {
+    title: "Ora di rientro",
+    shapeLabel: "Tipo di percorso",
+    outAndBack: "Andata e ritorno",
+    loop: "Anello",
+    turnaroundLabel: "Torna indietro entro",
+    latestStartLabel: "Partenza entro",
+    left: (duration: string) => `ancora ${duration}`,
+    overdue: "Torna indietro ora",
+    tooLong: (duration: string) =>
+      `La giornata non basta più per l'intero percorso (${duration}).`,
+    bufferLabel: "Margine prima del tramonto (minuti)",
+    sunsetAt: (time: string) => `Tramonto ${time}`,
+    note: "Calcolato dal tramonto al punto di partenza. Nel bosco e in valle fa buio molto prima: il margine serve a questo.",
+  },
   trash: {
     title: "Cestino",
     intro: (days: number) =>

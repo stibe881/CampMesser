@@ -4133,6 +4133,21 @@ export const en: Translation = {
     andMore: (count: number) => `and ${count} more`,
     note: "What is recorded is WHO changed WHAT and WHEN, in which area – not the old and the new value. Things done in quick succession appear as one line with a count: twelve items on the shopping list should not bury everything else.",
   },
+  turnaround: {
+    title: "Turnaround time",
+    shapeLabel: "Route shape",
+    outAndBack: "Out and back",
+    loop: "Loop",
+    turnaroundLabel: "Turn around by",
+    latestStartLabel: "Latest start",
+    left: (duration: string) => `${duration} left`,
+    overdue: "Turn around now",
+    tooLong: (duration: string) =>
+      `There is no longer enough daylight for the whole route (${duration}).`,
+    bufferLabel: "Margin before sunset (minutes)",
+    sunsetAt: (time: string) => `Sunset ${time}`,
+    note: "Calculated from sunset at the starting point. In forest and in valleys it gets dark much earlier – that is what the margin is for.",
+  },
   trash: {
     title: "Trash",
     intro: (days: number) =>

@@ -4249,6 +4249,21 @@ export const fr: Translation = {
     andMore: (count: number) => `et ${count} de plus`,
     note: "On note QUI a modifié QUOI et QUAND, dans quel domaine – pas l'ancienne et la nouvelle valeur. Ce que quelqu'un fait coup sur coup tient sur une ligne avec le nombre : douze articles sur la liste de courses ne doivent pas enterrer tout le reste.",
   },
+  turnaround: {
+    title: "Heure de demi-tour",
+    shapeLabel: "Forme du parcours",
+    outAndBack: "Aller-retour",
+    loop: "Boucle",
+    turnaroundLabel: "Faire demi-tour au plus tard",
+    latestStartLabel: "Départ au plus tard",
+    left: (duration: string) => `encore ${duration}`,
+    overdue: "Fais demi-tour",
+    tooLong: (duration: string) =>
+      `La journée ne suffit plus pour tout le parcours (${duration}).`,
+    bufferLabel: "Marge avant le coucher du soleil (minutes)",
+    sunsetAt: (time: string) => `Coucher du soleil ${time}`,
+    note: "Calculé depuis le coucher du soleil au point de départ. En forêt et dans la vallée, il fait nuit bien plus tôt – c'est à cela que sert la marge.",
+  },
   trash: {
     title: "Corbeille",
     intro: (days: number) =>

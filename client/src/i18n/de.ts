@@ -4257,6 +4257,21 @@ export const de = {
     andMore: (count: number) => `und ${count} weitere`,
     note: "Festgehalten wird, WER WANN in welchem Bereich etwas geändert hat – nicht der alte und der neue Wert. Was jemand kurz nacheinander macht, steht als eine Zeile mit Anzahl: Zwölf Posten auf der Einkaufsliste sollen nicht alles andere begraben.",
   },
+  turnaround: {
+    title: "Umkehrzeit",
+    shapeLabel: "Wegform",
+    outAndBack: "Hin und zurück",
+    loop: "Rundweg",
+    turnaroundLabel: "Spätestens umkehren",
+    latestStartLabel: "Spätester Start",
+    left: (duration: string) => `noch ${duration}`,
+    overdue: "Jetzt umkehren",
+    tooLong: (duration: string) =>
+      `Für die ganze Tour (${duration}) reicht der Tag nicht mehr.`,
+    bufferLabel: "Reserve vor Sonnenuntergang (Minuten)",
+    sunsetAt: (time: string) => `Sonnenuntergang ${time}`,
+    note: "Gerechnet vom Sonnenuntergang am Startpunkt. Im Wald und im Tal wird es deutlich früher dunkel – dafür ist die Reserve da.",
+  },
   trash: {
     title: "Papierkorb",
     intro: (days: number) =>
