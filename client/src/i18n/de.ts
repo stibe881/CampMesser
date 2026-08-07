@@ -4296,6 +4296,14 @@ export const de = {
     addAria: (name: string) => `«${name}» auf die Liste setzen`,
     added: (name: string) => `«${name}» hinzugefügt.`,
   },
+  legal: {
+    imprintTitle: "Impressum",
+    privacyTitle: "Datenschutzerklärung",
+    cookieText:
+      "CampMesser verwendet nur technisch notwendige Cookies und lokale Speicherung – kein Tracking, keine Werbung. Details:",
+    cookieOk: "Verstanden",
+    cookieAria: "Hinweis zu Cookies",
+  },
   rewards: {
     title: "Belohnungs-Ziele",
     hint: "Ämtli-Punkte einlösen: Lege fest, was ein Ziel kostet – der Balken zeigt, wie weit es noch ist.",

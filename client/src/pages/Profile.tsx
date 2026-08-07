@@ -1694,6 +1694,16 @@ export default function ProfilePage() {
         {__APP_VERSION__ !== "dev" &&
           t.profile.buildDate(fmtMedium(new Date(__APP_BUILT_AT__), lang))}
       </p>
+      {/* Rechtliches (#409): unaufdringlich, aber auffindbar. */}
+      <p className="mt-1 text-center text-xs text-muted-foreground/70">
+        <Link href="/impressum" className="hover:underline">
+          {t.legal.imprintTitle}
+        </Link>
+        {" · "}
+        <Link href="/datenschutz" className="hover:underline">
+          {t.legal.privacyTitle}
+        </Link>
+      </p>
     </div>
   );
 }

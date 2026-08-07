@@ -4259,6 +4259,14 @@ export const it: Translation = {
     addAria: (name: string) => `Aggiungi «${name}» alla lista`,
     added: (name: string) => `«${name}» aggiunto.`,
   },
+  legal: {
+    imprintTitle: "Impressum",
+    privacyTitle: "Dichiarazione sulla protezione dei dati",
+    cookieText:
+      "CampMesser usa solo cookie tecnicamente necessari e la memoria locale – nessun tracciamento, nessuna pubblicità. Dettagli:",
+    cookieOk: "Capito",
+    cookieAria: "Informazione sui cookie",
+  },
   rewards: {
     title: "Obiettivi premio",
     hint: "Riscatta i punti dei compiti: stabilisci quanto costa un obiettivo – la barra mostra quanto manca.",
