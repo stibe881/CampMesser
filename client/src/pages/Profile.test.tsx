@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { renderWithI18n } from "@/test/render";
 import { expectNoA11yViolations } from "@/test/a11y";
 
@@ -56,8 +57,13 @@ async function renderProfile() {
 }
 
 describe("Profil", () => {
+  // Seit #408 sind alle Karten standardmässig eingeklappt – die Tests
+  // klappen die gesuchte Karte deshalb zuerst über ihren Titel auf.
   it("bietet die Sprachwahl an – seit #374 lebt sie hier", async () => {
     await renderProfile();
+    await userEvent.click(
+      await screen.findByRole("button", { name: /Language/ })
+    );
     // Die Sprachnamen stehen in ihrer eigenen Sprache und ändern sich
     // deshalb nicht mit der Anzeigesprache des Tests.
     expect(
@@ -70,6 +76,9 @@ describe("Profil", () => {
 
   it("zeigt die Adresse des Kalender-Abos zum Kopieren", async () => {
     await renderProfile();
+    await userEvent.click(
+      await screen.findByRole("button", { name: /Calendar subscription/ })
+    );
     // Ohne sichtbare Adresse ist das Abo (#377) unbrauchbar: Wer nicht
     // auf «abonnieren» tippen kann, braucht sie zum Einfügen.
     expect(
@@ -79,7 +88,13 @@ describe("Profil", () => {
 
   it("ist barrierefrei", async () => {
     const { container } = await renderProfile();
-    await screen.findByRole("button", { name: "Deutsch" });
+    await screen.findByRole("button", { name: /Language/ });
+    // Erst zugeklappt prüfen, dann ALLE Karten öffnen und nochmals –
+    // sonst testete axe nur die Titelzeilen statt der Inhalte.
+    await expectNoA11yViolations(container);
+    for (const toggle of screen.getAllByRole("button", { expanded: false })) {
+      await userEvent.click(toggle);
+    }
     await expectNoA11yViolations(container);
   });
 });

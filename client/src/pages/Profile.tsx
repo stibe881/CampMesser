@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { fmtMedium } from "@/lib/dateFormat";
 import ClientErrorLog from "@/components/ClientErrorLog";
+import CollapsibleCard from "@/components/CollapsibleCard";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 import {
@@ -252,173 +253,165 @@ function NotificationsCard() {
   ];
 
   return (
-    <Card className="mb-5">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <BellRing className="h-4 w-4 text-primary" aria-hidden="true" />
-          {t.profile.notificationsTitle}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {!push.supported ? (
-          <p className="text-sm text-muted-foreground">
-            {t.profile.pushUnsupported}
-          </p>
-        ) : push.configLoaded && !push.configured ? (
-          <p className="text-sm text-muted-foreground">
-            {t.profile.pushNotConfigured}
-          </p>
-        ) : (
-          <>
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
+    <CollapsibleCard
+      className="mb-5"
+      icon={<BellRing className="h-4 w-4 text-primary" aria-hidden="true" />}
+      title={t.profile.notificationsTitle}
+    >
+      {!push.supported ? (
+        <p className="text-sm text-muted-foreground">
+          {t.profile.pushUnsupported}
+        </p>
+      ) : push.configLoaded && !push.configured ? (
+        <p className="text-sm text-muted-foreground">
+          {t.profile.pushNotConfigured}
+        </p>
+      ) : (
+        <>
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">{t.profile.pushDeviceTitle}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {t.profile.pushDeviceDesc}
+              </p>
+            </div>
+            <Switch
+              checked={push.enabled ?? false}
+              disabled={push.busy || push.enabled === null || !push.configured}
+              onCheckedChange={next =>
+                push.toggle(next, {
+                  enabled: t.profile.pushOn,
+                  disabled: t.profile.pushOff,
+                })
+              }
+              aria-label={t.profile.pushDeviceAria}
+            />
+          </div>
+          {push.enabled && prefs && (
+            <div className="mt-4 space-y-3 border-t border-border pt-4">
+              <p className="text-xs text-muted-foreground">
+                {t.profile.prefsIntro}
+              </p>
+              {rows.map(row => (
+                <div
+                  key={row.flag}
+                  className="flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{row.label}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {row.desc}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={prefs[row.flag]}
+                    disabled={setPrefsMutation.isPending}
+                    onCheckedChange={value => setFlag(row.flag, value)}
+                    aria-label={t.profile.prefToggleAria(row.label)}
+                  />
+                </div>
+              ))}
+              <div className="border-t border-border pt-3">
                 <p className="text-sm font-medium">
-                  {t.profile.pushDeviceTitle}
+                  {t.profile.thresholdsTitle}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {t.profile.pushDeviceDesc}
+                  {t.profile.thresholdsIntro}
                 </p>
-              </div>
-              <Switch
-                checked={push.enabled ?? false}
-                disabled={
-                  push.busy || push.enabled === null || !push.configured
-                }
-                onCheckedChange={next =>
-                  push.toggle(next, {
-                    enabled: t.profile.pushOn,
-                    disabled: t.profile.pushOff,
-                  })
-                }
-                aria-label={t.profile.pushDeviceAria}
-              />
-            </div>
-            {push.enabled && prefs && (
-              <div className="mt-4 space-y-3 border-t border-border pt-4">
-                <p className="text-xs text-muted-foreground">
-                  {t.profile.prefsIntro}
-                </p>
-                {rows.map(row => (
-                  <div
-                    key={row.flag}
-                    className="flex items-center justify-between gap-3"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium">{row.label}</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        {row.desc}
-                      </p>
-                    </div>
-                    <Switch
-                      checked={prefs[row.flag]}
+                <div className="mt-2.5 space-y-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Label
+                      htmlFor="wind-threshold"
+                      className="min-w-32 flex-1 text-sm font-normal"
+                    >
+                      {t.profile.thresholdWind}
+                      <span className="block text-xs font-normal text-muted-foreground">
+                        {t.profile.thresholdWindHint(
+                          WIND_DANGER_KMH,
+                          WIND_THRESHOLD_MIN_KMH,
+                          WIND_THRESHOLD_MAX_KMH
+                        )}
+                      </span>
+                    </Label>
+                    <Input
+                      id="wind-threshold"
+                      type="number"
+                      inputMode="numeric"
+                      className="w-20"
+                      min={WIND_THRESHOLD_MIN_KMH}
+                      max={WIND_THRESHOLD_MAX_KMH}
+                      placeholder={String(WIND_DANGER_KMH)}
+                      value={windInput}
                       disabled={setPrefsMutation.isPending}
-                      onCheckedChange={value => setFlag(row.flag, value)}
-                      aria-label={t.profile.prefToggleAria(row.label)}
+                      onChange={e => setWindInput(e.target.value)}
+                      onBlur={e => saveWindThreshold(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter") e.currentTarget.blur();
+                      }}
                     />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={
+                        windThreshold === null || setPrefsMutation.isPending
+                      }
+                      onClick={() => saveWindThreshold("")}
+                    >
+                      {t.profile.thresholdReset}
+                    </Button>
                   </div>
-                ))}
-                <div className="border-t border-border pt-3">
-                  <p className="text-sm font-medium">
-                    {t.profile.thresholdsTitle}
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {t.profile.thresholdsIntro}
-                  </p>
-                  <div className="mt-2.5 space-y-2.5">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Label
-                        htmlFor="wind-threshold"
-                        className="min-w-32 flex-1 text-sm font-normal"
-                      >
-                        {t.profile.thresholdWind}
-                        <span className="block text-xs font-normal text-muted-foreground">
-                          {t.profile.thresholdWindHint(
-                            WIND_DANGER_KMH,
-                            WIND_THRESHOLD_MIN_KMH,
-                            WIND_THRESHOLD_MAX_KMH
-                          )}
-                        </span>
-                      </Label>
-                      <Input
-                        id="wind-threshold"
-                        type="number"
-                        inputMode="numeric"
-                        className="w-20"
-                        min={WIND_THRESHOLD_MIN_KMH}
-                        max={WIND_THRESHOLD_MAX_KMH}
-                        placeholder={String(WIND_DANGER_KMH)}
-                        value={windInput}
-                        disabled={setPrefsMutation.isPending}
-                        onChange={e => setWindInput(e.target.value)}
-                        onBlur={e => saveWindThreshold(e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === "Enter") e.currentTarget.blur();
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        disabled={
-                          windThreshold === null || setPrefsMutation.isPending
-                        }
-                        onClick={() => saveWindThreshold("")}
-                      >
-                        {t.profile.thresholdReset}
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Label
-                        htmlFor="rain-threshold"
-                        className="min-w-32 flex-1 text-sm font-normal"
-                      >
-                        {t.profile.thresholdRain}
-                        <span className="block text-xs font-normal text-muted-foreground">
-                          {t.profile.thresholdRainHint(
-                            RAIN_DANGER_MM,
-                            RAIN_THRESHOLD_MIN_MM,
-                            RAIN_THRESHOLD_MAX_MM
-                          )}
-                        </span>
-                      </Label>
-                      <Input
-                        id="rain-threshold"
-                        type="number"
-                        inputMode="numeric"
-                        className="w-20"
-                        min={RAIN_THRESHOLD_MIN_MM}
-                        max={RAIN_THRESHOLD_MAX_MM}
-                        placeholder={String(RAIN_DANGER_MM)}
-                        value={rainInput}
-                        disabled={setPrefsMutation.isPending}
-                        onChange={e => setRainInput(e.target.value)}
-                        onBlur={e => saveRainThreshold(e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === "Enter") e.currentTarget.blur();
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        disabled={
-                          rainThreshold === null || setPrefsMutation.isPending
-                        }
-                        onClick={() => saveRainThreshold("")}
-                      >
-                        {t.profile.thresholdReset}
-                      </Button>
-                    </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Label
+                      htmlFor="rain-threshold"
+                      className="min-w-32 flex-1 text-sm font-normal"
+                    >
+                      {t.profile.thresholdRain}
+                      <span className="block text-xs font-normal text-muted-foreground">
+                        {t.profile.thresholdRainHint(
+                          RAIN_DANGER_MM,
+                          RAIN_THRESHOLD_MIN_MM,
+                          RAIN_THRESHOLD_MAX_MM
+                        )}
+                      </span>
+                    </Label>
+                    <Input
+                      id="rain-threshold"
+                      type="number"
+                      inputMode="numeric"
+                      className="w-20"
+                      min={RAIN_THRESHOLD_MIN_MM}
+                      max={RAIN_THRESHOLD_MAX_MM}
+                      placeholder={String(RAIN_DANGER_MM)}
+                      value={rainInput}
+                      disabled={setPrefsMutation.isPending}
+                      onChange={e => setRainInput(e.target.value)}
+                      onBlur={e => saveRainThreshold(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter") e.currentTarget.blur();
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={
+                        rainThreshold === null || setPrefsMutation.isPending
+                      }
+                      onClick={() => saveRainThreshold("")}
+                    >
+                      {t.profile.thresholdReset}
+                    </Button>
                   </div>
                 </div>
               </div>
-            )}
-            <LastCheckLine enabled={push.enabled === true} />
-          </>
-        )}
-        <AppBadgeRow />
-      </CardContent>
-    </Card>
+            </div>
+          )}
+          <LastCheckLine enabled={push.enabled === true} />
+        </>
+      )}
+      <AppBadgeRow />
+    </CollapsibleCard>
   );
 }
 
@@ -615,143 +608,139 @@ function HomeLocationCard() {
   const busy = setMutation.isPending || removeMutation.isPending;
 
   return (
-    <Card className="mb-5">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <House className="h-4 w-4 text-primary" aria-hidden="true" />
-          {t.profile.homeTitle}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="mb-3 text-sm text-muted-foreground">
-          {t.profile.homeIntro}
-        </p>
-        {home ? (
-          <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2">
-            <p className="flex min-w-0 items-center gap-1.5 text-sm">
-              <MapPin
-                className="h-4 w-4 shrink-0 text-primary"
-                aria-hidden="true"
-              />
-              <span className="truncate font-medium">{home.name}</span>
-              <span className="shrink-0 text-xs text-muted-foreground">
-                {home.latitude.toFixed(3)}, {home.longitude.toFixed(3)}
-              </span>
-            </p>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={busy}
-              onClick={() => removeMutation.mutate()}
-              aria-label={t.profile.homeRemoveAria}
-            >
-              <Trash2 className="h-4 w-4" aria-hidden="true" />
-            </Button>
-          </div>
-        ) : (
-          <p className="mb-3 text-sm text-muted-foreground">
-            {t.profile.homeNotSet}
+    <CollapsibleCard
+      className="mb-5"
+      icon={<House className="h-4 w-4 text-primary" aria-hidden="true" />}
+      title={t.profile.homeTitle}
+    >
+      <p className="mb-3 text-sm text-muted-foreground">
+        {t.profile.homeIntro}
+      </p>
+      {home ? (
+        <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2">
+          <p className="flex min-w-0 items-center gap-1.5 text-sm">
+            <MapPin
+              className="h-4 w-4 shrink-0 text-primary"
+              aria-hidden="true"
+            />
+            <span className="truncate font-medium">{home.name}</span>
+            <span className="shrink-0 text-xs text-muted-foreground">
+              {home.latitude.toFixed(3)}, {home.longitude.toFixed(3)}
+            </span>
           </p>
-        )}
-        <div className="space-y-3">
-          <div>
-            <Label htmlFor="home-name" className="mb-1.5 block text-xs">
-              {t.profile.homeNameLabel}
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="home-name"
-                value={name}
-                maxLength={80}
-                onChange={e => setName(e.target.value)}
-                placeholder={t.profile.homeDefaultName}
-              />
-              {home && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={busy || effectiveName() === home.name}
-                  onClick={() => saveAt(home.latitude, home.longitude)}
-                >
-                  {t.common.save}
-                </Button>
-              )}
-            </div>
-          </div>
           <Button
             type="button"
-            variant="outline"
-            className="w-full sm:w-auto"
-            disabled={busy || locating}
-            onClick={useCurrentLocation}
+            variant="ghost"
+            size="sm"
+            disabled={busy}
+            onClick={() => removeMutation.mutate()}
+            aria-label={t.profile.homeRemoveAria}
           >
-            <LocateFixed className="mr-1.5 h-4 w-4" aria-hidden="true" />
-            {locating ? t.profile.homeLocating : t.profile.homeUseLocation}
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              void runSearch();
-            }}
-          >
-            <Label htmlFor="home-search" className="mb-1.5 block text-xs">
-              {t.profile.homeSearchLabel}
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="home-search"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder={t.profile.homeSearchPlaceholder}
-                autoComplete="off"
-              />
-              <Button
-                type="submit"
-                variant="outline"
-                disabled={searching || query.trim().length < 2}
-              >
-                <Search className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                {t.profile.homeSearchButton}
-              </Button>
-            </div>
-          </form>
-          {searchFailed && (
-            <p className="text-sm text-muted-foreground">
-              {t.profile.homeSearchFailed}
-            </p>
-          )}
-          {results && results.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              {t.profile.homeSearchEmpty}
-            </p>
-          )}
-          {results && results.length > 0 && (
-            <ul className="space-y-1.5">
-              {results.map(place => (
-                <li key={place.id}>
-                  <button
-                    type="button"
-                    className="w-full rounded-lg border border-border px-3 py-2 text-left text-sm transition-colors hover:bg-accent disabled:opacity-50"
-                    disabled={busy}
-                    onClick={() => saveAt(place.latitude, place.longitude)}
-                    aria-label={t.profile.homeSelectAria(place.name)}
-                  >
-                    <span className="font-medium">{place.name}</span>
-                    {place.region && (
-                      <span className="text-muted-foreground">
-                        {" "}
-                        · {place.region}
-                      </span>
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
-      </CardContent>
-    </Card>
+      ) : (
+        <p className="mb-3 text-sm text-muted-foreground">
+          {t.profile.homeNotSet}
+        </p>
+      )}
+      <div className="space-y-3">
+        <div>
+          <Label htmlFor="home-name" className="mb-1.5 block text-xs">
+            {t.profile.homeNameLabel}
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              id="home-name"
+              value={name}
+              maxLength={80}
+              onChange={e => setName(e.target.value)}
+              placeholder={t.profile.homeDefaultName}
+            />
+            {home && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy || effectiveName() === home.name}
+                onClick={() => saveAt(home.latitude, home.longitude)}
+              >
+                {t.common.save}
+              </Button>
+            )}
+          </div>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full sm:w-auto"
+          disabled={busy || locating}
+          onClick={useCurrentLocation}
+        >
+          <LocateFixed className="mr-1.5 h-4 w-4" aria-hidden="true" />
+          {locating ? t.profile.homeLocating : t.profile.homeUseLocation}
+        </Button>
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            void runSearch();
+          }}
+        >
+          <Label htmlFor="home-search" className="mb-1.5 block text-xs">
+            {t.profile.homeSearchLabel}
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              id="home-search"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder={t.profile.homeSearchPlaceholder}
+              autoComplete="off"
+            />
+            <Button
+              type="submit"
+              variant="outline"
+              disabled={searching || query.trim().length < 2}
+            >
+              <Search className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {t.profile.homeSearchButton}
+            </Button>
+          </div>
+        </form>
+        {searchFailed && (
+          <p className="text-sm text-muted-foreground">
+            {t.profile.homeSearchFailed}
+          </p>
+        )}
+        {results && results.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            {t.profile.homeSearchEmpty}
+          </p>
+        )}
+        {results && results.length > 0 && (
+          <ul className="space-y-1.5">
+            {results.map(place => (
+              <li key={place.id}>
+                <button
+                  type="button"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-left text-sm transition-colors hover:bg-accent disabled:opacity-50"
+                  disabled={busy}
+                  onClick={() => saveAt(place.latitude, place.longitude)}
+                  aria-label={t.profile.homeSelectAria(place.name)}
+                >
+                  <span className="font-medium">{place.name}</span>
+                  {place.region && (
+                    <span className="text-muted-foreground">
+                      {" "}
+                      · {place.region}
+                    </span>
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </CollapsibleCard>
   );
 }
 
@@ -811,95 +800,91 @@ function PasskeysCard() {
   const passkeys = listQuery.data ?? [];
 
   return (
-    <Card className="mb-5">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Fingerprint className="h-4 w-4 text-primary" aria-hidden="true" />
-          {t.profile.passkeysTitle}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="mb-3 text-sm text-muted-foreground">
-          {t.profile.passkeysIntro}
-        </p>
-        {passkeys.length > 0 ? (
-          <ul className="mb-4 space-y-2">
-            {passkeys.map(passkey => (
-              <li
-                key={passkey.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2"
-              >
-                <p className="min-w-0 text-sm">
-                  <span className="block truncate font-medium">
-                    {passkey.name}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {t.profile.passkeyAddedOn(
-                      fmtMedium(new Date(passkey.createdAt), lang)
-                    )}
-                  </span>
-                </p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="shrink-0 text-muted-foreground hover:text-destructive"
-                  disabled={removeMutation.isPending}
-                  onClick={async () => {
-                    if (
-                      await ask({
-                        title: t.profile.passkeyRemoveConfirm(passkey.name),
-                      })
-                    ) {
-                      removeMutation.mutate({ id: passkey.id });
-                    }
-                  }}
-                  aria-label={t.profile.passkeyRemoveAria(passkey.name)}
-                >
-                  <Trash2 className="h-4 w-4" aria-hidden="true" />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mb-4 text-sm text-muted-foreground">
-            {t.profile.passkeysEmpty}
-          </p>
-        )}
-        {supported ? (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="passkey-name" className="mb-1.5 block text-xs">
-                {t.profile.passkeyNameLabel}
-              </Label>
-              <Input
-                id="passkey-name"
-                value={name}
-                maxLength={80}
-                onChange={e => setName(e.target.value)}
-                placeholder={t.profile.passkeyNamePlaceholder}
-              />
-            </div>
-            <div className="flex items-end">
+    <CollapsibleCard
+      className="mb-5"
+      icon={<Fingerprint className="h-4 w-4 text-primary" aria-hidden="true" />}
+      title={t.profile.passkeysTitle}
+    >
+      <p className="mb-3 text-sm text-muted-foreground">
+        {t.profile.passkeysIntro}
+      </p>
+      {passkeys.length > 0 ? (
+        <ul className="mb-4 space-y-2">
+          {passkeys.map(passkey => (
+            <li
+              key={passkey.id}
+              className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2"
+            >
+              <p className="min-w-0 text-sm">
+                <span className="block truncate font-medium">
+                  {passkey.name}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {t.profile.passkeyAddedOn(
+                    fmtMedium(new Date(passkey.createdAt), lang)
+                  )}
+                </span>
+              </p>
               <Button
                 type="button"
-                variant="outline"
-                className="w-full"
-                disabled={adding}
-                onClick={() => void addPasskey()}
+                variant="ghost"
+                size="sm"
+                className="shrink-0 text-muted-foreground hover:text-destructive"
+                disabled={removeMutation.isPending}
+                onClick={async () => {
+                  if (
+                    await ask({
+                      title: t.profile.passkeyRemoveConfirm(passkey.name),
+                    })
+                  ) {
+                    removeMutation.mutate({ id: passkey.id });
+                  }
+                }}
+                aria-label={t.profile.passkeyRemoveAria(passkey.name)}
               >
-                <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                {adding ? t.profile.passkeyAdding : t.profile.passkeyAddButton}
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
               </Button>
-            </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mb-4 text-sm text-muted-foreground">
+          {t.profile.passkeysEmpty}
+        </p>
+      )}
+      {supported ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <Label htmlFor="passkey-name" className="mb-1.5 block text-xs">
+              {t.profile.passkeyNameLabel}
+            </Label>
+            <Input
+              id="passkey-name"
+              value={name}
+              maxLength={80}
+              onChange={e => setName(e.target.value)}
+              placeholder={t.profile.passkeyNamePlaceholder}
+            />
           </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            {t.profile.passkeysUnsupported}
-          </p>
-        )}
-      </CardContent>
-    </Card>
+          <div className="flex items-end">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={adding}
+              onClick={() => void addPasskey()}
+            >
+              <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {adding ? t.profile.passkeyAdding : t.profile.passkeyAddButton}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          {t.profile.passkeysUnsupported}
+        </p>
+      )}
+    </CollapsibleCard>
   );
 }
 
@@ -935,54 +920,50 @@ function QuickBarCard() {
     .sort((a, b) => pick(a.title, lang).localeCompare(pick(b.title, lang)));
 
   return (
-    <Card className="mb-5">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <LayoutGrid className="h-4 w-4 text-primary" aria-hidden="true" />
-          {qb.title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">{qb.intro}</p>
-        <div className="mt-3 space-y-2">
-          {custom.map((path, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <span className="w-6 shrink-0 text-xs text-muted-foreground">
-                {index + 1}.
-              </span>
-              <Select
-                value={path}
-                onValueChange={value =>
-                  apply(setQuickBarSlot(custom, index, value))
-                }
-              >
-                <SelectTrigger aria-label={qb.slotAria(index + 1)}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {choices.map(module => (
-                    <SelectItem key={module.path} value={module.path}>
-                      {pick(module.title, lang)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
-        </div>
-        <p className="mt-3 text-xs text-muted-foreground">{qb.fixed}</p>
-        {!isDefaultQuickBar(custom) && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="mt-2 text-muted-foreground"
-            onClick={() => apply([...DEFAULT_QUICK_BAR])}
-          >
-            {qb.reset}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+    <CollapsibleCard
+      className="mb-5"
+      icon={<LayoutGrid className="h-4 w-4 text-primary" aria-hidden="true" />}
+      title={qb.title}
+    >
+      <p className="text-sm text-muted-foreground">{qb.intro}</p>
+      <div className="mt-3 space-y-2">
+        {custom.map((path, index) => (
+          <div key={index} className="flex items-center gap-2">
+            <span className="w-6 shrink-0 text-xs text-muted-foreground">
+              {index + 1}.
+            </span>
+            <Select
+              value={path}
+              onValueChange={value =>
+                apply(setQuickBarSlot(custom, index, value))
+              }
+            >
+              <SelectTrigger aria-label={qb.slotAria(index + 1)}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {choices.map(module => (
+                  <SelectItem key={module.path} value={module.path}>
+                    {pick(module.title, lang)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-xs text-muted-foreground">{qb.fixed}</p>
+      {!isDefaultQuickBar(custom) && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-2 text-muted-foreground"
+          onClick={() => apply([...DEFAULT_QUICK_BAR])}
+        >
+          {qb.reset}
+        </Button>
+      )}
+    </CollapsibleCard>
   );
 }
 
@@ -1030,60 +1011,58 @@ function CalendarFeedCard() {
   };
 
   return (
-    <Card className="mb-5">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <CalendarDays className="h-4 w-4 text-primary" aria-hidden="true" />
-          {t.profile.calendarTitle}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="mb-3 text-sm text-muted-foreground">
-          {t.profile.calendarIntro}
-        </p>
-        {token === null ? (
-          <p className="text-xs text-muted-foreground">{t.common.loading} …</p>
-        ) : (
-          <>
-            <div className="flex flex-wrap gap-2">
-              <Button asChild className="flex-1">
-                <a href={webcalUrl}>{t.profile.calendarSubscribe}</a>
-              </Button>
-              <Button type="button" variant="outline" onClick={copy}>
-                {t.profile.calendarCopy}
-              </Button>
-            </div>
-            <p className="mt-2 break-all rounded-md border border-border bg-muted/40 p-2 text-[11px] text-muted-foreground">
-              {httpsUrl}
+    <CollapsibleCard
+      className="mb-5"
+      icon={
+        <CalendarDays className="h-4 w-4 text-primary" aria-hidden="true" />
+      }
+      title={t.profile.calendarTitle}
+    >
+      <p className="mb-3 text-sm text-muted-foreground">
+        {t.profile.calendarIntro}
+      </p>
+      {token === null ? (
+        <p className="text-xs text-muted-foreground">{t.common.loading} …</p>
+      ) : (
+        <>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild className="flex-1">
+              <a href={webcalUrl}>{t.profile.calendarSubscribe}</a>
+            </Button>
+            <Button type="button" variant="outline" onClick={copy}>
+              {t.profile.calendarCopy}
+            </Button>
+          </div>
+          <p className="mt-2 break-all rounded-md border border-border bg-muted/40 p-2 text-[11px] text-muted-foreground">
+            {httpsUrl}
+          </p>
+          <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
+            <p className="text-xs text-muted-foreground">
+              {t.profile.calendarSecretHint}
             </p>
-            <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
-              <p className="text-xs text-muted-foreground">
-                {t.profile.calendarSecretHint}
-              </p>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="shrink-0"
-                disabled={resetMutation.isPending}
-                onClick={async () => {
-                  if (
-                    await ask({
-                      title: t.profile.calendarResetConfirm,
-                      confirmLabel: t.profile.calendarResetButton,
-                    })
-                  ) {
-                    resetMutation.mutate();
-                  }
-                }}
-              >
-                {t.profile.calendarResetButton}
-              </Button>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="shrink-0"
+              disabled={resetMutation.isPending}
+              onClick={async () => {
+                if (
+                  await ask({
+                    title: t.profile.calendarResetConfirm,
+                    confirmLabel: t.profile.calendarResetButton,
+                  })
+                ) {
+                  resetMutation.mutate();
+                }
+              }}
+            >
+              {t.profile.calendarResetButton}
+            </Button>
+          </div>
+        </>
+      )}
+    </CollapsibleCard>
   );
 }
 
@@ -1257,142 +1236,296 @@ export default function ProfilePage() {
         </Card>
       )}
 
+      {/* NEU GEORDNET (#408, Nutzerwunsch): zuerst das KONTO
+          (Name, E-Mail, Passwort, Passkeys), dann DARSTELLUNG
+          (Sprache, Design, Karten-App), dann MITTEILUNGEN,
+          dann STARTSEITE & DATEN, zuletzt die Gefahrenzone.
+          Alle Karten ein-/ausklappbar, Standard zu – die Seite
+          liest sich als Inhaltsverzeichnis. */}
+      <CollapsibleCard
+        className="mb-5"
+        icon={<UserRound className="h-4 w-4 text-primary" aria-hidden="true" />}
+        title={t.profile.nameTitle}
+      >
+        <form
+          className="flex gap-2"
+          onSubmit={e => {
+            e.preventDefault();
+            if (name.trim()) nameMutation.mutate({ name: name.trim() });
+          }}
+        >
+          <Input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            maxLength={100}
+            aria-label={t.profile.nameAria}
+            placeholder={t.profile.namePlaceholder}
+          />
+          <Button
+            type="submit"
+            disabled={nameMutation.isPending || !name.trim()}
+          >
+            {t.common.save}
+          </Button>
+        </form>
+      </CollapsibleCard>
+
+      <CollapsibleCard
+        className="mb-5"
+        icon={<Mail className="h-4 w-4 text-primary" aria-hidden="true" />}
+        title={t.profile.emailTitle}
+      >
+        <p className="mb-3 text-sm text-muted-foreground">
+          {t.profile.emailCurrentPrefix}{" "}
+          <span className="font-medium text-foreground">
+            {user?.email ?? "–"}
+          </span>
+          {t.profile.emailCurrentSuffix}
+        </p>
+        <form
+          className="space-y-3"
+          onSubmit={e => {
+            e.preventDefault();
+            emailMutation.mutate({
+              newEmail: newEmail.trim(),
+              currentPassword: emailPw,
+              // Sprache für die neue Bestätigungs-Mail (falls SMTP aktiv)
+              lang,
+            });
+          }}
+        >
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="email-new" className="mb-1.5 block text-xs">
+                {t.profile.newEmailLabel}
+              </Label>
+              <Input
+                id="email-new"
+                type="email"
+                autoComplete="email"
+                value={newEmail}
+                onChange={e => setNewEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="email-pw" className="mb-1.5 block text-xs">
+                {t.profile.confirmWithPasswordLabel}
+              </Label>
+              <Input
+                id="email-pw"
+                type="password"
+                autoComplete="current-password"
+                value={emailPw}
+                onChange={e => setEmailPw(e.target.value)}
+              />
+            </div>
+          </div>
+          <Button
+            type="submit"
+            disabled={emailMutation.isPending || !newEmail.trim() || !emailPw}
+            className="w-full sm:w-auto"
+          >
+            {t.profile.changeEmail}
+          </Button>
+        </form>
+      </CollapsibleCard>
+
+      <CollapsibleCard
+        className="mb-5"
+        icon={<KeyRound className="h-4 w-4 text-primary" aria-hidden="true" />}
+        title={t.profile.passwordTitle}
+      >
+        <form
+          className="space-y-3"
+          onSubmit={e => {
+            e.preventDefault();
+            if (newPw !== newPw2) {
+              toast.error(t.profile.newPasswordsMismatch);
+              return;
+            }
+            pwMutation.mutate({
+              currentPassword: currentPw,
+              newPassword: newPw,
+            });
+          }}
+        >
+          <div>
+            <Label htmlFor="pw-current" className="mb-1.5 block text-xs">
+              {t.profile.currentPasswordLabel}
+            </Label>
+            <Input
+              id="pw-current"
+              type="password"
+              autoComplete="current-password"
+              value={currentPw}
+              onChange={e => setCurrentPw(e.target.value)}
+            />
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="pw-new" className="mb-1.5 block text-xs">
+                {t.profile.newPasswordLabel}
+              </Label>
+              <Input
+                id="pw-new"
+                type="password"
+                autoComplete="new-password"
+                value={newPw}
+                onChange={e => setNewPw(e.target.value)}
+              />
+              <PasswordStrengthMeter password={newPw} />
+            </div>
+            <div>
+              <Label htmlFor="pw-new2" className="mb-1.5 block text-xs">
+                {t.profile.repeatPasswordLabel}
+              </Label>
+              <Input
+                id="pw-new2"
+                type="password"
+                autoComplete="new-password"
+                value={newPw2}
+                onChange={e => setNewPw2(e.target.value)}
+              />
+            </div>
+          </div>
+          <Button
+            type="submit"
+            disabled={pwMutation.isPending || !currentPw || !newPw || !newPw2}
+            className="w-full sm:w-auto"
+          >
+            {t.profile.changePassword}
+          </Button>
+        </form>
+      </CollapsibleCard>
+
+      <PasskeysCard />
+
       {/* Sprache (#374): Sie sass bis jetzt in der Kopfzeile, wo nun die
           Benachrichtigungs-Glocke steht. Eine Sprache stellt man einmal
           ein – das ist eine Einstellung und gehört ins Profil. */}
-      <Card className="mb-5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Globe className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t.profile.languageTitle}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-3 text-sm text-muted-foreground">
-            {t.profile.languageIntro}
-          </p>
-          <div
-            className="flex flex-wrap gap-2"
-            role="group"
-            aria-label={t.profile.languageTitle}
-          >
-            {LANGUAGES.map(code => (
-              <Button
-                key={code}
-                type="button"
-                variant={code === lang ? "default" : "outline"}
-                className="flex-1"
-                onClick={() => setLang(code)}
-              >
-                {LANGUAGE_LABELS[code]}
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <CollapsibleCard
+        className="mb-5"
+        icon={<Globe className="h-4 w-4 text-primary" aria-hidden="true" />}
+        title={t.profile.languageTitle}
+      >
+        <p className="mb-3 text-sm text-muted-foreground">
+          {t.profile.languageIntro}
+        </p>
+        <div
+          className="flex flex-wrap gap-2"
+          role="group"
+          aria-label={t.profile.languageTitle}
+        >
+          {LANGUAGES.map(code => (
+            <Button
+              key={code}
+              type="button"
+              variant={code === lang ? "default" : "outline"}
+              className="flex-1"
+              onClick={() => setLang(code)}
+            >
+              {LANGUAGE_LABELS[code]}
+            </Button>
+          ))}
+        </div>
+      </CollapsibleCard>
 
-      <Card className="mb-5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Palette className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t.profile.themeTitle}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-3 text-sm text-muted-foreground">
-            {t.profile.themeIntro}
-          </p>
-          <div
-            className="flex gap-2"
-            role="group"
-            aria-label={t.profile.themeGroupAria}
+      <CollapsibleCard
+        className="mb-5"
+        icon={<Palette className="h-4 w-4 text-primary" aria-hidden="true" />}
+        title={t.profile.themeTitle}
+      >
+        <p className="mb-3 text-sm text-muted-foreground">
+          {t.profile.themeIntro}
+        </p>
+        <div
+          className="flex gap-2"
+          role="group"
+          aria-label={t.profile.themeGroupAria}
+        >
+          <Button
+            type="button"
+            variant={themePref === "light" ? "default" : "outline"}
+            className="flex-1"
+            onClick={() => chooseTheme("light")}
           >
-            <Button
-              type="button"
-              variant={themePref === "light" ? "default" : "outline"}
-              className="flex-1"
-              onClick={() => chooseTheme("light")}
-            >
-              <Sun className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
-              {t.profile.themeLight}
-            </Button>
-            <Button
-              type="button"
-              variant={themePref === "dark" ? "default" : "outline"}
-              className="flex-1"
-              onClick={() => chooseTheme("dark")}
-            >
-              <Moon className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
-              {t.profile.themeDark}
-            </Button>
-            <Button
-              type="button"
-              variant={themePref === "auto" ? "default" : "outline"}
-              className="flex-1"
-              onClick={() => chooseTheme("auto")}
-            >
-              <MonitorSmartphone
-                className="mr-1.5 h-4 w-4"
-                aria-hidden="true"
-              />{" "}
-              {t.profile.themeAuto}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            <Sun className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
+            {t.profile.themeLight}
+          </Button>
+          <Button
+            type="button"
+            variant={themePref === "dark" ? "default" : "outline"}
+            className="flex-1"
+            onClick={() => chooseTheme("dark")}
+          >
+            <Moon className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
+            {t.profile.themeDark}
+          </Button>
+          <Button
+            type="button"
+            variant={themePref === "auto" ? "default" : "outline"}
+            className="flex-1"
+            onClick={() => chooseTheme("auto")}
+          >
+            <MonitorSmartphone className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
+            {t.profile.themeAuto}
+          </Button>
+        </div>
+      </CollapsibleCard>
 
       {/* Karten-App für Routen: Die Frage beim ersten Routen-Klick lässt
           sich hier nachträglich beantworten oder zurücksetzen. */}
-      <Card className="mb-5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Navigation className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t.directions.settingLabel}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-3 text-sm text-muted-foreground">
-            {t.directions.settingHint}
-          </p>
-          <div
-            className="flex flex-wrap gap-2"
-            role="group"
-            aria-label={t.directions.settingLabel}
-          >
-            {(
-              [
-                ["ask", t.directions.settingAsk],
-                ["apple", t.directions.apple],
-                ["google", t.directions.google],
-              ] as [MapsPreference, string][]
-            ).map(([value, label]) => (
-              <Button
-                key={value}
-                type="button"
-                variant={mapsPref === value ? "default" : "outline"}
-                className="flex-1"
-                onClick={() => chooseMapsApp(value)}
-              >
-                {label}
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <CollapsibleCard
+        className="mb-5"
+        icon={
+          <Navigation className="h-4 w-4 text-primary" aria-hidden="true" />
+        }
+        title={t.directions.settingLabel}
+      >
+        <p className="mb-3 text-sm text-muted-foreground">
+          {t.directions.settingHint}
+        </p>
+        <div
+          className="flex flex-wrap gap-2"
+          role="group"
+          aria-label={t.directions.settingLabel}
+        >
+          {(
+            [
+              ["ask", t.directions.settingAsk],
+              ["apple", t.directions.apple],
+              ["google", t.directions.google],
+            ] as [MapsPreference, string][]
+          ).map(([value, label]) => (
+            <Button
+              key={value}
+              type="button"
+              variant={mapsPref === value ? "default" : "outline"}
+              className="flex-1"
+              onClick={() => chooseMapsApp(value)}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+      </CollapsibleCard>
 
       <NotificationsCard />
+
+      <HomeLocationCard />
+
+      {/* Schnellzugriff-Leiste (#297) */}
+      <QuickBarCard />
 
       <CalendarFeedCard />
 
       {/* Statistik: auf Nutzerwunsch im Profil statt als Startseiten-Kachel */}
-      <Card className="mb-5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <BarChart3 className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t.stats.title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <CollapsibleCard
+        className="mb-5"
+        icon={<BarChart3 className="h-4 w-4 text-primary" aria-hidden="true" />}
+        title={t.stats.title}
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">{t.stats.subtitle}</p>
           <Button asChild variant="outline" className="shrink-0">
             <Link href="/statistik">
@@ -1400,21 +1533,16 @@ export default function ProfilePage() {
               <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>
-        </CardContent>
-      </Card>
-
-      {/* Schnellzugriff-Leiste (#297) */}
-      <QuickBarCard />
+        </div>
+      </CollapsibleCard>
 
       {/* Papierkorb (#295): gehört zum Konto, nicht auf die Startseite */}
-      <Card className="mb-5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Trash2 className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t.trash.title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <CollapsibleCard
+        className="mb-5"
+        icon={<Trash2 className="h-4 w-4 text-primary" aria-hidden="true" />}
+        title={t.trash.title}
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
             {t.trash.intro(RETENTION_DAYS)}
           </p>
@@ -1424,234 +1552,59 @@ export default function ProfilePage() {
               <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleCard>
 
-      <HomeLocationCard />
-
-      <Card className="mb-5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <UserRound className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t.profile.nameTitle}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="flex gap-2"
-            onSubmit={e => {
-              e.preventDefault();
-              if (name.trim()) nameMutation.mutate({ name: name.trim() });
-            }}
-          >
-            <Input
-              value={name}
-              onChange={e => setName(e.target.value)}
-              maxLength={100}
-              aria-label={t.profile.nameAria}
-              placeholder={t.profile.namePlaceholder}
-            />
-            <Button
-              type="submit"
-              disabled={nameMutation.isPending || !name.trim()}
-            >
-              {t.common.save}
+      <CollapsibleCard
+        className="border-destructive/40"
+        titleClassName="text-destructive"
+        icon={<Trash2 className="h-4 w-4" aria-hidden="true" />}
+        title={t.profile.deleteTitle}
+      >
+        <p className="mb-3 text-sm text-muted-foreground">
+          {t.profile.deleteIntro}
+        </p>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button type="button" variant="destructive">
+              <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
+              {t.profile.deleteButton}
             </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card className="mb-5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t.profile.emailTitle}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-3 text-sm text-muted-foreground">
-            {t.profile.emailCurrentPrefix}{" "}
-            <span className="font-medium text-foreground">
-              {user?.email ?? "–"}
-            </span>
-            {t.profile.emailCurrentSuffix}
-          </p>
-          <form
-            className="space-y-3"
-            onSubmit={e => {
-              e.preventDefault();
-              emailMutation.mutate({
-                newEmail: newEmail.trim(),
-                currentPassword: emailPw,
-                // Sprache für die neue Bestätigungs-Mail (falls SMTP aktiv)
-                lang,
-              });
-            }}
-          >
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="email-new" className="mb-1.5 block text-xs">
-                  {t.profile.newEmailLabel}
-                </Label>
-                <Input
-                  id="email-new"
-                  type="email"
-                  autoComplete="email"
-                  value={newEmail}
-                  onChange={e => setNewEmail(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="email-pw" className="mb-1.5 block text-xs">
-                  {t.profile.confirmWithPasswordLabel}
-                </Label>
-                <Input
-                  id="email-pw"
-                  type="password"
-                  autoComplete="current-password"
-                  value={emailPw}
-                  onChange={e => setEmailPw(e.target.value)}
-                />
-              </div>
-            </div>
-            <Button
-              type="submit"
-              disabled={emailMutation.isPending || !newEmail.trim() || !emailPw}
-              className="w-full sm:w-auto"
-            >
-              {t.profile.changeEmail}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card className="mb-5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <KeyRound className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t.profile.passwordTitle}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="space-y-3"
-            onSubmit={e => {
-              e.preventDefault();
-              if (newPw !== newPw2) {
-                toast.error(t.profile.newPasswordsMismatch);
-                return;
-              }
-              pwMutation.mutate({
-                currentPassword: currentPw,
-                newPassword: newPw,
-              });
-            }}
-          >
-            <div>
-              <Label htmlFor="pw-current" className="mb-1.5 block text-xs">
-                {t.profile.currentPasswordLabel}
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {t.profile.deleteConfirmTitle}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {t.profile.deleteConfirmDescription}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="py-1">
+              <Label htmlFor="pw-delete" className="mb-1.5 block text-xs">
+                {t.profile.passwordLabel}
               </Label>
               <Input
-                id="pw-current"
+                id="pw-delete"
                 type="password"
                 autoComplete="current-password"
-                value={currentPw}
-                onChange={e => setCurrentPw(e.target.value)}
+                value={deletePw}
+                onChange={e => setDeletePw(e.target.value)}
               />
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="pw-new" className="mb-1.5 block text-xs">
-                  {t.profile.newPasswordLabel}
-                </Label>
-                <Input
-                  id="pw-new"
-                  type="password"
-                  autoComplete="new-password"
-                  value={newPw}
-                  onChange={e => setNewPw(e.target.value)}
-                />
-                <PasswordStrengthMeter password={newPw} />
-              </div>
-              <div>
-                <Label htmlFor="pw-new2" className="mb-1.5 block text-xs">
-                  {t.profile.repeatPasswordLabel}
-                </Label>
-                <Input
-                  id="pw-new2"
-                  type="password"
-                  autoComplete="new-password"
-                  value={newPw2}
-                  onChange={e => setNewPw2(e.target.value)}
-                />
-              </div>
-            </div>
-            <Button
-              type="submit"
-              disabled={pwMutation.isPending || !currentPw || !newPw || !newPw2}
-              className="w-full sm:w-auto"
-            >
-              {t.profile.changePassword}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <PasskeysCard />
-
-      <Card className="border-destructive/40">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base text-destructive">
-            <Trash2 className="h-4 w-4" aria-hidden="true" />
-            {t.profile.deleteTitle}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-3 text-sm text-muted-foreground">
-            {t.profile.deleteIntro}
-          </p>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button type="button" variant="destructive">
-                <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
-                {t.profile.deleteButton}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {t.profile.deleteConfirmTitle}
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t.profile.deleteConfirmDescription}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <div className="py-1">
-                <Label htmlFor="pw-delete" className="mb-1.5 block text-xs">
-                  {t.profile.passwordLabel}
-                </Label>
-                <Input
-                  id="pw-delete"
-                  type="password"
-                  autoComplete="current-password"
-                  value={deletePw}
-                  onChange={e => setDeletePw(e.target.value)}
-                />
-              </div>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  disabled={!deletePw || deleteMutation.isPending}
-                  onClick={() => deleteMutation.mutate({ password: deletePw })}
-                >
-                  {t.profile.deleteFinal}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </CardContent>
-      </Card>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                disabled={!deletePw || deleteMutation.isPending}
+                onClick={() => deleteMutation.mutate({ password: deletePw })}
+              >
+                {t.profile.deleteFinal}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </CollapsibleCard>
 
       <div className="mt-5">
         <Button
