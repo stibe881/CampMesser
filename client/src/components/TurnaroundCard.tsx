@@ -14,8 +14,8 @@
  *
  * Gerechnet wird in `shared/turnaround.ts`; hier steht nur die Anzeige.
  */
-import { useMemo, useState } from "react";
-import { Sunset, TriangleAlert } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CloudLightning, Sunset, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +31,8 @@ import {
   turnaroundTime,
   type RouteShape,
 } from "@shared/turnaround";
+import { firstStormRisk, stormClock, type StormHour } from "@shared/hikeStorm";
+import { useTodayIso } from "@/lib/useTodayIso";
 
 export default function TurnaroundCard({
   latitude,
@@ -71,6 +73,49 @@ export default function TurnaroundCard({
     totalMinutes,
     shape,
   });
+
+  /**
+   * Gewitterrisiko heute (#391): In den Bergen ist das Nachmittags-
+   * gewitter das zweite, oft frühere Ende des Tages – dann ist nicht der
+   * Sonnenuntergang die Deadline, sondern die Wolke. Dieselben Schwellen
+   * wie die Unwetter-Erkennung; stilles Scheitern, denn ohne Netz ist
+   * die Umkehrzeit trotzdem etwas wert.
+   */
+  const today = useTodayIso();
+  const [stormHours, setStormHours] = useState<StormHour[] | null>(null);
+  useEffect(() => {
+    setStormHours(null);
+    let cancelled = false;
+    const params = new URLSearchParams({
+      latitude: latitude.toFixed(4),
+      longitude: longitude.toFixed(4),
+      timezone: "auto",
+      forecast_days: "1",
+      hourly: "weather_code,cape",
+    });
+    fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`)
+      .then(res => (res.ok ? res.json() : null))
+      .then(json => {
+        if (cancelled || !json?.hourly?.time) return;
+        setStormHours(
+          (json.hourly.time as string[]).map((time: string, i: number) => ({
+            time,
+            weatherCode: json.hourly.weather_code?.[i] ?? 0,
+            cape: json.hourly.cape?.[i] ?? 0,
+          }))
+        );
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [latitude, longitude]);
+  const storm = useMemo(
+    () => (stormHours ? firstStormRisk(stormHours, today, nowMinutes) : null),
+    // Nur zur vollen Stunde neu rechnen – wie beim Sonnenuntergang oben.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [stormHours, today, Math.floor(nowMinutes / 60)]
+  );
 
   if (sunsetMinutes === null) return null;
 
@@ -138,6 +183,23 @@ export default function TurnaroundCard({
       {!result.fits && !result.overdue && (
         <p className="mt-2 text-xs font-medium text-destructive">
           {ta.tooLong(formatDuration(totalMinutes))}
+        </p>
+      )}
+
+      {/* Gewitterrisiko (#391): erscheint nur, wenn heute wirklich etwas
+          in der Prognose steht – ein Dauerhinweis wäre Lärm. */}
+      {storm && (
+        <p className="mt-2 flex items-start gap-1.5 text-xs font-medium text-destructive">
+          <CloudLightning
+            className="mt-0.5 h-3.5 w-3.5 shrink-0"
+            aria-hidden="true"
+          />
+          <span>
+            {storm.kind === "forecast"
+              ? ta.stormForecast(stormClock(storm.minutes))
+              : ta.stormPropensity(stormClock(storm.minutes))}{" "}
+            {storm.minutes < sunsetMinutes - buffer && ta.stormBeatsSunset}
+          </span>
         </p>
       )}
 
