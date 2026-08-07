@@ -1279,6 +1279,14 @@ export const it: Translation = {
     addNumeric: "Inserisci con i numeri",
     fistTip:
       "Suggerimento per l'altezza: allunga il braccio – un pugno corrisponde a circa 10°. Un albero che finisce a due pugni e mezzo sopra l'orizzonte è quindi a circa 25°.",
+    horizonTitle: "Sole sopra la cresta",
+    horizonShaded: "All'ombra tutto il giorno: qui il sole non arriva.",
+    horizonNone: "Oggi il sole non supera l'orizzonte.",
+    horizonSunny: (duration: string) => `${duration} al sole`,
+    horizonDelay: (duration: string) =>
+      `${duration} più tardi che all'orizzonte libero`,
+    horizonNote:
+      "Calcolato dal profilo degli ostacoli di questa piazzola. All'orizzonte piatto il sole sorgerebbe prima: in valle passa la cresta, ed è quell'ora che conta.",
     shadowTitle: "Orari d'ombra oggi",
     shadowNone:
       "I tuoi ostacoli oggi non coprono mai il sole – vista libera tutto il giorno.",

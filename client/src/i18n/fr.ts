@@ -1299,6 +1299,14 @@ export const fr: Translation = {
     addNumeric: "Saisir avec des chiffres",
     fistTip:
       "Astuce pour la hauteur : tends le bras – un poing correspond à environ 10°. Un arbre qui se termine à deux poings et demi au-dessus de l'horizon fait donc environ 25°.",
+    horizonTitle: "Soleil au-dessus de la crête",
+    horizonShaded: "À l'ombre toute la journée – ici, aucun soleil ne passe.",
+    horizonNone: "Aujourd'hui, le soleil ne dépasse pas l'horizon.",
+    horizonSunny: (duration: string) => `${duration} au soleil`,
+    horizonDelay: (duration: string) =>
+      `${duration} plus tard qu'à l'horizon dégagé`,
+    horizonNote:
+      "Calculé à partir du profil d'obstacles de cet emplacement. À l'horizon plat, le soleil se lèverait plus tôt – dans la vallée, il passe la crête, et c'est cette heure-là qui compte.",
     shadowTitle: "Heures d'ombre aujourd'hui",
     shadowNone:
       "Tes obstacles ne cachent jamais le soleil aujourd'hui – vue dégagée toute la journée.",

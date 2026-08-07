@@ -1298,6 +1298,14 @@ export const de = {
     addNumeric: "Mit Zahlen eintragen",
     fistTip:
       "Tipp zur Höhe: Strecke den Arm aus – eine Faust entspricht etwa 10°. Ein Baum, der zweieinhalb Fäuste über dem Horizont endet, hat also rund 25°.",
+    horizonTitle: "Sonne über dem Grat",
+    horizonShaded: "Den ganzen Tag im Schatten – hier kommt keine Sonne durch.",
+    horizonNone: "Heute steht die Sonne nicht über dem Horizont.",
+    horizonSunny: (duration: string) => `${duration} besonnt`,
+    horizonDelay: (duration: string) =>
+      `${duration} später als am freien Horizont`,
+    horizonNote:
+      "Gerechnet aus dem Hindernis-Profil dieses Platzes. Am flachen Horizont ginge die Sonne früher auf – im Tal kommt sie über den Grat, und das ist die Zeit, die zählt.",
     shadowTitle: "Schattenzeiten heute",
     shadowNone:
       "Deine Hindernisse verdecken die Sonne heute nie – freie Sicht den ganzen Tag.",

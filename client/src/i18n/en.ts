@@ -1251,6 +1251,14 @@ export const en: Translation = {
     addNumeric: "Enter with numbers",
     fistTip:
       "Tip for the height: stretch out your arm – one fist is about 10°. A tree that ends two and a half fists above the horizon is therefore around 25°.",
+    horizonTitle: "Sun above the ridge",
+    horizonShaded: "In shade all day – no sun gets through here.",
+    horizonNone: "The sun does not rise above the horizon today.",
+    horizonSunny: (duration: string) => `${duration} of sun`,
+    horizonDelay: (duration: string) =>
+      `${duration} later than on an open horizon`,
+    horizonNote:
+      "Calculated from this pitch's obstacle profile. On a flat horizon the sun would rise earlier – in a valley it clears the ridge, and that is the time that counts.",
     shadowTitle: "Shadow times today",
     shadowNone:
       "Your obstacles never hide the sun today – clear view all day long.",
