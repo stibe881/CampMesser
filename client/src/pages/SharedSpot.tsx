@@ -4,6 +4,7 @@ import { useParams } from "wouter";
 import {
   AlertTriangle,
   Droplets,
+  Grid2x2,
   Loader2,
   MapPin,
   Phone,
@@ -13,7 +14,16 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
+import PitchSketchView, {
+  PitchSketchLegend,
+} from "@/components/spots/PitchSketchView";
 import { parseSpotAttributes } from "@shared/spotAttributes";
+import {
+  formatMeters,
+  parsePitchSketch,
+  pitchAreaM2,
+  usedAreaM2,
+} from "@shared/pitchSketch";
 import { trpc } from "@/lib/trpc";
 import { getSunTimes } from "@/lib/sun";
 import { describeWeatherCode } from "@shared/weather";
@@ -56,6 +66,10 @@ export default function SharedSpotPage() {
     () =>
       spot ? getSunTimes(new Date(), spot.latitude, spot.longitude) : null,
     [spot]
+  );
+  const sketch = useMemo(
+    () => parsePitchSketch(spot?.pitchSketchJson ?? null),
+    [spot?.pitchSketchJson]
   );
   const fmtTime = (d: Date | null) =>
     d
@@ -156,6 +170,31 @@ export default function SharedSpotPage() {
                 </div>
               )}
             </dl>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Stellplatz-Skizze (#382) – nur lesend. Sie ist genau das, was man
+          Mitreisenden schickt: «So haben wir letztes Jahr gestanden.» */}
+      {sketch && (
+        <Card className="mt-5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Grid2x2 className="h-4 w-4 text-primary" aria-hidden="true" />
+              {t.pitchSketch.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PitchSketchView sketch={sketch} />
+            <PitchSketchLegend sketch={sketch} />
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t.pitchSketch.areaLine(
+                formatMeters(sketch.widthM),
+                formatMeters(sketch.depthM),
+                usedAreaM2(sketch),
+                pitchAreaM2(sketch)
+              )}
+            </p>
           </CardContent>
         </Card>
       )}

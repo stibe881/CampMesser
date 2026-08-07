@@ -24,6 +24,7 @@ import {
   Compass,
   Download,
   Droplets,
+  Grid2x2,
   Images,
   Loader2,
   MapPin,
@@ -61,6 +62,7 @@ import {
   type SpotSectionKey,
 } from "@shared/spotSections";
 import SpotTariffs from "@/components/spots/SpotTariffs";
+import PitchSketchCard from "@/components/spots/PitchSketchCard";
 import DeparturePlanner from "@/components/DeparturePlanner";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
 import NearbyShops from "@/components/NearbyShops";
@@ -1198,6 +1200,25 @@ export default function SpotDetailPage() {
                 ? t.spotDetail.obstacleEdit
                 : t.spotDetail.obstacleCreate}
             </Link>
+          </CardContent>
+        </Card>
+
+        {/* Stellplatz-Skizze (#382): Wie es beim letzten Mal gepasst hat.
+            Die Parzellennummer und das WLAN wechseln bei jedem Besuch und
+            stehen deshalb an der Reise (#252); die Skizze nützt genau
+            dann, wenn man wiederkommt, und gehört darum zum Platz. */}
+        <Card className="mb-4">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Grid2x2 className="h-4 w-4 text-primary" aria-hidden="true" />
+              {t.pitchSketch.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PitchSketchCard
+              spotId={spot.id}
+              pitchSketchJson={spot.pitchSketchJson}
+            />
           </CardContent>
         </Card>
       </>

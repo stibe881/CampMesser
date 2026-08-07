@@ -4273,6 +4273,41 @@ export const de = {
     addAria: (name: string) => `«${name}» auf die Liste setzen`,
     added: (name: string) => `«${name}» hinzugefügt.`,
   },
+  pitchSketch: {
+    title: "Stellplatz-Skizze",
+    empty:
+      "Noch keine Skizze. Beim zweiten Besuch weiss man damit wieder, wie es gepasst hat.",
+    create: "Skizze anlegen",
+    edit: "Bearbeiten",
+    hint: "Gegenstand wählen, dann auf die Zielstelle tippen. Alles rastet auf einen halben Meter.",
+    addTitle: "Hinzufügen",
+    full: (max: number) =>
+      `Mehr als ${max} Gegenstände sind keine Skizze mehr.`,
+    itemWidth: "Breite (m)",
+    itemDepth: "Tiefe (m)",
+    pitchWidth: "Platz-Breite (m)",
+    pitchDepth: "Platz-Tiefe (m)",
+    rotate: "Drehen",
+    remove: "Entfernen",
+    moveLeft: "← links",
+    moveRight: "rechts →",
+    moveUp: "↑ vorne",
+    moveDown: "hinten ↓",
+    edgeLeft: "Abstand links",
+    edgeRight: "Abstand rechts",
+    edgeTop: "Abstand vorne",
+    edgeBottom: "Abstand hinten",
+    nearest: "Nächster Gegenstand",
+    alone: "steht allein",
+    overlap: (a: string, b: string) => `${a} und ${b} überlappen sich.`,
+    areaLine: (width: string, depth: string, used: number, total: number) =>
+      `Platz ${width} × ${depth} – belegt ${used} von ${total} m².`,
+    sketchAria: (width: string, depth: string, count: number) =>
+      `Stellplatz-Skizze, ${width} mal ${depth}, ${count} Gegenstände`,
+    itemAria: (name: string, width: string, depth: string) =>
+      `${name}, ${width} mal ${depth}`,
+    saved: "Skizze gespeichert.",
+  },
   tripReview: {
     title: "Rückblick",
     toggleAria: (trip: string) => `Rückblick zu ${trip} öffnen`,

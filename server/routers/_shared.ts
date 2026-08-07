@@ -100,6 +100,11 @@ export {
   serializeSpotTariffs,
   TARIFFS_JSON_MAX_LENGTH,
 } from "@shared/spotTariffs";
+export {
+  parsePitchSketch,
+  serializePitchSketch,
+  PITCH_SKETCH_JSON_MAX_LENGTH,
+} from "@shared/pitchSketch";
 import {
   NOTE_TAG_MAX_LENGTH,
   NOTE_TEXT_MAX_LENGTH,

@@ -50,6 +50,7 @@ export async function updateCampSpot(
       | "pricePerNightRappen"
       | "extraPerNightRappen"
       | "tariffsJson"
+      | "pitchSketchJson"
       | "elevationM"
       | "ratingSanitary"
       | "ratingQuiet"

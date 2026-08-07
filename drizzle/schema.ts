@@ -112,6 +112,22 @@ export const campSpots = mysqlTable(
     ratingQuiet: tinyint("ratingQuiet"),
     ratingShade: tinyint("ratingShade"),
     ratingKids: tinyint("ratingKids"),
+    /**
+     * Stellplatz-Skizze als JSON (#382): Platzmass und Rechtecke für Zelt,
+     * Vordach, Auto, Tisch, Strom-Säule und Baum – Format in
+     * shared/pitchSketch.ts. null = keine Skizze erfasst.
+     *
+     * BEWUSST AM PLATZ, nicht an der Reise: Die Parzellennummer und das
+     * WLAN-Passwort wechseln bei jedem Besuch und stehen deshalb an der
+     * Reise (#252). Die Skizze ist das Gegenteil – sie nützt genau dann,
+     * wenn man WIEDERKOMMT, und wer sie an der Reise vom vorletzten
+     * Sommer suchen müsste, findet sie nie.
+     *
+     * JSON und keine Tabelle aus demselben Grund wie bei tariffsJson
+     * daneben: Die Rechtecke gehören ausschliesslich zu ihrem Platz,
+     * werden nur als Ganzes gelesen und nie einzeln gesucht.
+     */
+    pitchSketchJson: text("pitchSketchJson"),
     /** Öffentlicher Teil-Token: Wer den Link kennt, sieht das Platz-Dossier (nur lesend). */
     shareToken: varchar("shareToken", { length: 32 }),
     /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */

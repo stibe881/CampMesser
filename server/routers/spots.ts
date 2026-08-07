@@ -20,8 +20,11 @@ import {
   normalizeNoteText,
   normalizeNoteTitle,
   normalizeSpotAttributesJson,
+  parsePitchSketch,
   parseSpotTariffs,
+  serializePitchSketch,
   serializeSpotTariffs,
+  PITCH_SKETCH_JSON_MAX_LENGTH,
   TARIFFS_JSON_MAX_LENGTH,
   protectedProcedure,
   publicProcedure,
@@ -119,6 +122,11 @@ export const spotsRouters = {
           extraPerNightRappen: SPOT_PRICE_INPUT,
           /** Weitere Tarife als JSON (#369); null löscht sie. */
           tariffsJson: z.string().max(TARIFFS_JSON_MAX_LENGTH).nullish(),
+          /** Stellplatz-Skizze als JSON (#382); null löscht sie. */
+          pitchSketchJson: z
+            .string()
+            .max(PITCH_SKETCH_JSON_MAX_LENGTH)
+            .nullish(),
           elevationM: SPOT_ELEVATION_INPUT,
         })
       )
@@ -131,6 +139,7 @@ export const spotsRouters = {
           pricePerNightRappen,
           extraPerNightRappen,
           tariffsJson,
+          pitchSketchJson,
           ...data
         } = input;
         return db.updateCampSpot(id, ctx.user.id, {
@@ -160,6 +169,15 @@ export const spotsRouters = {
             ? {
                 tariffsJson: serializeSpotTariffs(
                   parseSpotTariffs(tariffsJson ?? null)
+                ),
+              }
+            : {}),
+          // Skizze (#382) ebenso: durch DENSELBEN Parser wie die Anzeige.
+          // Was hier hereinkommt, ist Nutzer-Eingabe, kein Vertrauensbeweis.
+          ...(pitchSketchJson !== undefined
+            ? {
+                pitchSketchJson: serializePitchSketch(
+                  parsePitchSketch(pitchSketchJson ?? null)
                 ),
               }
             : {}),
@@ -247,6 +265,10 @@ export const spotsRouters = {
           receptionPhone: spot.receptionPhone,
           checkinInfo: spot.checkinInfo,
           parcelNumber: spot.parcelNumber,
+          // Die Skizze (#382) ist genau das, was man Mitreisenden schickt:
+          // «So haben wir letztes Jahr gestanden.» Sie enthält Rechtecke
+          // und Meter, sonst nichts – nichts Persönliches.
+          pitchSketchJson: spot.pitchSketchJson,
         };
       }),
   }),
