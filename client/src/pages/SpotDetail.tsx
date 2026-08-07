@@ -63,6 +63,7 @@ import {
 } from "@shared/spotSections";
 import SpotTariffs from "@/components/spots/SpotTariffs";
 import PitchSketchCard from "@/components/spots/PitchSketchCard";
+import CampfireLight from "@/components/CampfireLight";
 import DeparturePlanner from "@/components/DeparturePlanner";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
 import NearbyShops from "@/components/NearbyShops";
@@ -1339,6 +1340,14 @@ export default function SpotDetailPage() {
                     {t.spotDetail.noAlerts}
                   </p>
                 )}
+                {/* Lagerfeuer-Ampel (#389): Gefahrenstufe, Verbots-Schwelle
+                    und Böen in EINER Antwort statt in drei Modulen. */}
+                <CampfireLight
+                  latitude={spot.latitude}
+                  longitude={spot.longitude}
+                  gustsMaxKmh={weather.maxGusts24hKmh}
+                  className="mb-3"
+                />
                 <div className="divide-y divide-border/60">
                   {weather.daily.map((d, i) => (
                     <div

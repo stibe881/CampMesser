@@ -68,6 +68,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useTodayIso } from "@/lib/useTodayIso";
+import CampfireLight from "@/components/CampfireLight";
 
 export default function TodayPage() {
   const { lang, t } = useI18n();
@@ -295,6 +296,17 @@ export default function TodayPage() {
                   weather.label
                 )}
               </p>
+            )}
+            {/* Lagerfeuer-Ampel (#389): Die Frage stellt sich am Abend
+                genau hier. Ohne Platz-Koordinaten oder Prognose bleibt
+                sie weg – ein Urteil ohne Quellen wäre ein Orakel. */}
+            {spot && weather && (
+              <CampfireLight
+                latitude={spot.latitude}
+                longitude={spot.longitude}
+                gustsMaxKmh={weather.gustsMaxKmh}
+                className="mt-2"
+              />
             )}
             <div className="mt-3 flex flex-wrap gap-2">
               <Button asChild size="sm" variant="outline">

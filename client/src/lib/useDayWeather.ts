@@ -22,6 +22,12 @@ export interface DayWeather {
   minC: number;
   /** «Leicht bewölkt» – leer, wenn der Code fehlt. */
   label: string;
+  /**
+   * Höchste Böe des Tages in km/h; null, wenn der Dienst sie nicht
+   * liefert. Für die Lagerfeuer-Ampel (#389) – der Funke fliegt in der
+   * Böe, nicht im Mittelwert.
+   */
+  gustsMaxKmh: number | null;
 }
 
 export function useDayWeather(
@@ -41,7 +47,8 @@ export function useDayWeather(
       longitude: longitude.toFixed(4),
       timezone: "auto",
       forecast_days: "1",
-      daily: "temperature_2m_max,temperature_2m_min,weather_code",
+      daily:
+        "temperature_2m_max,temperature_2m_min,weather_code,wind_gusts_10m_max",
     });
     fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`)
       .then(res => (res.ok ? res.json() : Promise.reject(new Error("no"))))
@@ -50,6 +57,7 @@ export function useDayWeather(
         const max = json?.daily?.temperature_2m_max?.[0];
         const min = json?.daily?.temperature_2m_min?.[0];
         const code = json?.daily?.weather_code?.[0];
+        const gusts = json?.daily?.wind_gusts_10m_max?.[0];
         if (typeof max !== "number" || typeof min !== "number") return;
         setWeather({
           maxC: max,
@@ -58,6 +66,7 @@ export function useDayWeather(
             typeof code === "number"
               ? describeWeatherCode(code, lang).label
               : "",
+          gustsMaxKmh: typeof gusts === "number" ? Math.round(gusts) : null,
         });
       })
       .catch(() => {
