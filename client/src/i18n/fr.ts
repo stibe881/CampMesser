@@ -4287,6 +4287,22 @@ export const fr: Translation = {
     addAria: (name: string) => `Ajouter « ${name} » à la liste`,
     added: (name: string) => `« ${name} » ajouté.`,
   },
+  sitePlan: {
+    title: "Plan du camping",
+    empty:
+      "Pas encore de plan. Photographie le plan à la réception – la prochaine fois, tu sauras où tout se trouve.",
+    add: "Téléverser le plan",
+    replace: "Remplacer le plan",
+    remove: "Supprimer",
+    uploading: "Envoi en cours …",
+    uploaded: "Plan enregistré.",
+    uploadFailed: "Échec de l’envoi. Réessaie.",
+    readFailed: "Impossible de lire l’image.",
+    deleteConfirm: "Vraiment supprimer le plan ?",
+    deleted: "Plan supprimé.",
+    alt: (name: string) => `Plan du camping ${name}`,
+    openAria: (name: string) => `Afficher le plan du camping ${name} en grand`,
+  },
   legal: {
     imprintTitle: "Mentions légales",
     privacyTitle: "Déclaration de confidentialité",

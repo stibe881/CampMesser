@@ -4170,6 +4170,22 @@ export const en: Translation = {
     addAria: (name: string) => `Add “${name}” to the list`,
     added: (name: string) => `“${name}” added.`,
   },
+  sitePlan: {
+    title: "Site map",
+    empty:
+      "No site map yet. Photograph the map at reception – next time you will know where everything is.",
+    add: "Upload map",
+    replace: "Replace map",
+    remove: "Remove",
+    uploading: "Uploading …",
+    uploaded: "Site map saved.",
+    uploadFailed: "Upload failed. Please try again.",
+    readFailed: "Could not read the image.",
+    deleteConfirm: "Really remove the site map?",
+    deleted: "Site map removed.",
+    alt: (name: string) => `Site map of ${name}`,
+    openAria: (name: string) => `Show the site map of ${name} enlarged`,
+  },
   legal: {
     imprintTitle: "Legal notice",
     privacyTitle: "Privacy policy",

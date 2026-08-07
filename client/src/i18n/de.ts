@@ -4296,6 +4296,22 @@ export const de = {
     addAria: (name: string) => `«${name}» auf die Liste setzen`,
     added: (name: string) => `«${name}» hinzugefügt.`,
   },
+  sitePlan: {
+    title: "Platzplan",
+    empty:
+      "Noch kein Plan hinterlegt. Fotografiere die Platzkarte an der Rezeption – dann weisst du beim nächsten Mal, wo alles liegt.",
+    add: "Plan hochladen",
+    replace: "Plan ersetzen",
+    remove: "Entfernen",
+    uploading: "Lädt hoch …",
+    uploaded: "Platzplan gespeichert.",
+    uploadFailed: "Hochladen fehlgeschlagen. Versuch es noch einmal.",
+    readFailed: "Bild konnte nicht gelesen werden.",
+    deleteConfirm: "Platzplan wirklich entfernen?",
+    deleted: "Platzplan entfernt.",
+    alt: (name: string) => `Platzplan von ${name}`,
+    openAria: (name: string) => `Platzplan von ${name} gross anzeigen`,
+  },
   legal: {
     imprintTitle: "Impressum",
     privacyTitle: "Datenschutzerklärung",

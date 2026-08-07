@@ -4259,6 +4259,23 @@ export const it: Translation = {
     addAria: (name: string) => `Aggiungi «${name}» alla lista`,
     added: (name: string) => `«${name}» aggiunto.`,
   },
+  sitePlan: {
+    title: "Piantina del campeggio",
+    empty:
+      "Nessuna piantina ancora. Fotografa la piantina alla reception – la prossima volta saprai dove si trova tutto.",
+    add: "Carica piantina",
+    replace: "Sostituisci piantina",
+    remove: "Rimuovi",
+    uploading: "Caricamento …",
+    uploaded: "Piantina salvata.",
+    uploadFailed: "Caricamento non riuscito. Riprova.",
+    readFailed: "Impossibile leggere l’immagine.",
+    deleteConfirm: "Rimuovere davvero la piantina?",
+    deleted: "Piantina rimossa.",
+    alt: (name: string) => `Piantina del campeggio ${name}`,
+    openAria: (name: string) =>
+      `Mostra la piantina del campeggio ${name} ingrandita`,
+  },
   legal: {
     imprintTitle: "Impressum",
     privacyTitle: "Dichiarazione sulla protezione dei dati",

@@ -662,6 +662,14 @@ export const spotPhotos = mysqlTable(
     spotId: int("spotId").notNull(),
     /** Serverseitig generierter Dateiname (nanoid + .jpg/.png/.webp) */
     fileName: varchar("fileName", { length: 64 }).notNull(),
+    /**
+     * «foto» = Galerie-Bild (#82), «plan» = der Campingplatz-Plan (#401).
+     * Vom Plan gibt es höchstens EINEN pro Platz – ein neuer ersetzt den
+     * alten. Eine eigene Tabelle für ein einzelnes Bild wäre Overhead;
+     * Ablage und Aufräumen (Konto-Löschung, Papierkorb) laufen so über
+     * dieselben Wege wie die Galerie.
+     */
+    kind: varchar("kind", { length: 12 }).notNull().default("foto"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [
