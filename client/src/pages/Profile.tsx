@@ -61,6 +61,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { usePushSubscription } from "@/lib/usePushSubscription";
+import { clearAppBadge, isAppBadgeSupported } from "@/lib/appBadge";
+import {
+  loadAppBadgeEnabled,
+  saveAppBadgeEnabled,
+} from "@/lib/appBadgeSetting";
 import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
 import {
   AlertDialog,
@@ -533,9 +538,60 @@ function NotificationsCard() {
             <LastCheckLine enabled={push.enabled === true} />
           </>
         )}
+        <AppBadgeRow />
         <PushHistory />
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * «Zahl am App-Icon» (#373).
+ *
+ * WARUM DIESER SCHALTER HIER STEHT: Die Zahl am Icon sieht aus wie eine
+ * ungelesene Mitteilung, ist aber keine – sie zählt heute und morgen
+ * ablaufende Kühlbox-Einträge und fällige Pflege-Aufgaben. Eine
+ * Pflege-Aufgabe bleibt fällig, bis man sie abhakt, notfalls monatelang.
+ * Am Icon steht dann eine «1», die man nirgends wegtippen kann, weil in
+ * der App nichts Ungelesenes liegt.
+ *
+ * Er steht bewusst AUSSERHALB der Push-Bedingungen darüber: Die Zahl hat
+ * mit Mitteilungen nichts zu tun und funktioniert auch ohne Push-Abo.
+ * Angezeigt wird er nur dort, wo es das App-Icon überhaupt gibt – im
+ * Browser-Tab wäre er ohne Wirkung.
+ */
+function AppBadgeRow() {
+  const { t } = useI18n();
+  const [enabled, setEnabled] = useState(() => loadAppBadgeEnabled());
+  // Nur SENDEN – empfangen tut der Zähler selbst in AppShell (#360-Muster).
+  const sync = useSyncedSetting<boolean>("appBadge", () => {}, {
+    receive: false,
+  });
+  if (!isAppBadgeSupported()) return null;
+
+  const change = (next: boolean) => {
+    setEnabled(next);
+    saveAppBadgeEnabled(next);
+    sync.push(next);
+    // Sofort weg, nicht erst beim nächsten Rechnen – genau das ist der
+    // Grund, warum jemand diesen Schalter sucht.
+    if (!next) clearAppBadge();
+  };
+
+  return (
+    <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
+      <div className="min-w-0">
+        <p className="text-sm font-medium">{t.profile.appBadgeTitle}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {t.profile.appBadgeDesc}
+        </p>
+      </div>
+      <Switch
+        checked={enabled}
+        onCheckedChange={change}
+        aria-label={t.profile.appBadgeAria}
+      />
+    </div>
   );
 }
 

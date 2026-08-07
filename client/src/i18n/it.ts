@@ -300,6 +300,10 @@ export const it: Translation = {
     prefHeat: "Sole e caldo",
     prefHeatDesc:
       "Al mattino un promemoria per la crema solare e per bere, quando la giornata porta UV alto o più di 28 °C.",
+    appBadgeTitle: "Numero sull'icona dell'app",
+    appBadgeDesc:
+      "Mostra sull'icona quanti alimenti della ghiacciaia scadono oggi o domani e quante attività di manutenzione sono in scadenza. Non è una notifica non letta: un'attività aperta resta finché non la spunti.",
+    appBadgeAria: "Mostrare il numero sull'icona dell'app",
     title: "Profilo",
     manageSubtitle: "Gestisci il tuo account e le tue impostazioni.",
     loginFeature: "il tuo profilo",

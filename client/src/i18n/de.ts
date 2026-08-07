@@ -312,6 +312,10 @@ export const de = {
     prefHeat: "Sonne & Hitze",
     prefHeatDesc:
       "Morgens eine Erinnerung ans Eincremen und ans Trinken, wenn der Tag hohen UV-Index oder über 28 °C bringt.",
+    appBadgeTitle: "Zahl am App-Icon",
+    appBadgeDesc:
+      "Zeigt am Icon, wie viele Kühlbox-Einträge heute oder morgen ablaufen und wie viele Pflege-Aufgaben fällig sind. Das ist keine ungelesene Mitteilung – eine offene Pflege-Aufgabe bleibt stehen, bis du sie abhakst.",
+    appBadgeAria: "Zahl am App-Icon anzeigen",
     title: "Profil",
     manageSubtitle: "Verwalte dein Konto und deine Einstellungen.",
     loginFeature: "dein Profil",

@@ -298,6 +298,10 @@ export const en: Translation = {
     prefHeat: "Sun & heat",
     prefHeatDesc:
       "A morning reminder to put on sunscreen and to drink when the day brings a high UV index or more than 28 °C.",
+    appBadgeTitle: "Number on the app icon",
+    appBadgeDesc:
+      "Shows on the icon how many cool box items expire today or tomorrow and how many care tasks are due. It is not an unread notification – an open care task stays until you tick it off.",
+    appBadgeAria: "Show the number on the app icon",
     title: "Profile",
     manageSubtitle: "Manage your account and your settings.",
     loginFeature: "your profile",

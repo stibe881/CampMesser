@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { localDay, shiftIsoDay, todayIso } from "@shared/localDate";
+import {
+  localDay,
+  msUntilNextLocalDay,
+  shiftIsoDay,
+  todayIso,
+} from "@shared/localDate";
 
 /**
  * Diese Tests laufen mit der Zeitzone der Testumgebung. Damit sie den
@@ -56,5 +61,47 @@ describe("Tage verschieben", () => {
 
   it("Unsinn bleibt unverändert, statt NaN zu erzeugen", () => {
     expect(shiftIsoDay("kaputt", 1)).toBe("kaputt");
+  });
+});
+
+/**
+ * Der Wecker auf den Tageswechsel (#373). Gerechnet wird über die
+ * Kalenderfelder – ein fester Abstand von 24 Stunden wäre an den
+ * Umstellungstagen der Sommerzeit um eine Stunde daneben.
+ */
+describe("msUntilNextLocalDay", () => {
+  const MINUTE = 60_000;
+  const HOUR = 60 * MINUTE;
+
+  it("morgens früh bleibt fast der ganze Tag", () => {
+    expect(msUntilNextLocalDay(new Date(2026, 7, 7, 0, 30))).toBe(
+      23 * HOUR + 30 * MINUTE
+    );
+  });
+
+  it("kurz vor Mitternacht bleiben Minuten", () => {
+    expect(msUntilNextLocalDay(new Date(2026, 7, 7, 23, 50))).toBe(10 * MINUTE);
+  });
+
+  it("landet wirklich auf dem nächsten lokalen Tag", () => {
+    const at = new Date(2026, 7, 7, 17, 12, 34, 567);
+    const next = new Date(at.getTime() + msUntilNextLocalDay(at));
+    expect(localDay(next)).toBe("2026-08-08");
+    expect(next.getHours()).toBe(0);
+    expect(next.getMinutes()).toBe(0);
+  });
+
+  it("über den Monats- und Jahreswechsel hinweg", () => {
+    const silvester = new Date(2026, 11, 31, 22, 0);
+    const next = new Date(silvester.getTime() + msUntilNextLocalDay(silvester));
+    expect(localDay(next)).toBe("2027-01-01");
+  });
+
+  it("wartet mindestens eine Sekunde, statt sich im Kreis zu drehen", () => {
+    // Punkt Mitternacht: ohne Untergrenze käme hier ein Wecker auf 0 ms
+    // heraus, der sich sofort wieder selbst stellt.
+    expect(
+      msUntilNextLocalDay(new Date(2026, 7, 7, 0, 0, 0, 0))
+    ).toBeGreaterThanOrEqual(1000);
   });
 });
