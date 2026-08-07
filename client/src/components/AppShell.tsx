@@ -1,9 +1,8 @@
 import { Link, useLocation } from "wouter";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Home,
   Siren,
-  Globe,
   LogIn,
   LogOut,
   UserRound,
@@ -33,6 +32,12 @@ import {
   isAppBadgeSupported,
   updateAppBadge,
 } from "@/lib/appBadge";
+import {
+  loadAppBadgeEnabled,
+  onAppBadgeEnabledChange,
+  saveAppBadgeEnabled,
+} from "@/lib/appBadgeSetting";
+import { useTodayIso } from "@/lib/useTodayIso";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   nextThemePreference,
@@ -40,7 +45,6 @@ import {
   type ThemePreference,
 } from "@/lib/themePreference";
 import { useI18n } from "@/i18n";
-import { LANGUAGES, LANGUAGE_LABELS } from "@shared/i18n";
 import BrandLogo from "@/components/BrandLogo";
 import InstallPrompt from "@/components/InstallPrompt";
 import OfflineBanner from "@/components/OfflineBanner";
@@ -51,7 +55,7 @@ import UpdatePrompt from "@/components/UpdatePrompt";
 import QuickActions from "@/components/QuickActions";
 import CookTimerBar from "@/components/CookTimerBar";
 import WhatsNewStartup from "@/components/WhatsNewDialog";
-import { todayIso } from "@shared/localDate";
+import NotificationBell from "@/components/NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -134,12 +138,49 @@ export function getRecentModules(): string[] {
  * Kühlbox-Einträge plus fällige Pflege-Aufgaben. Ohne Badging-Unterstützung
  * werden die Queries gar nicht erst geladen; beim Logout wird das Badge
  * geräumt. Keine sichtbare UI.
+ *
+ * DER TAG WAR EINGEFROREN (#373). Bis jetzt lief hier `todayIso()` INNEN im
+ * Effekt, und der Effekt hing allein an den Daten der beiden Abfragen. Das
+ * sah harmlos aus, war es aber nicht:
+ *
+ *   – TanStack Query teilt Ergebnisse strukturell («structural sharing»).
+ *     Kommt beim erneuten Abruf dasselbe zurück, bleibt es DASSELBE Objekt.
+ *     Der Effekt läuft dann nicht noch einmal.
+ *   – In der nativen App wird der WebView beim Weglegen des Handys nicht
+ *     entladen. Die Seite von Montag lebt am Donnerstag weiter.
+ *
+ * Beides zusammen heisst: Der Zähler wurde einmal gerechnet und blieb dann
+ * stehen. Ein Joghurt, das «morgen» abläuft, ist übermorgen abgelaufen und
+ * zählt nicht mehr – am Icon stand die alte Zahl trotzdem weiter. Genau
+ * das ist «der Badge geht nicht mehr weg».
+ *
+ * Jetzt kommt der Tag aus `useTodayIso()` und dreht sich um Mitternacht
+ * und bei jeder Rückkehr in die App weiter; beim Tageswechsel werden die
+ * beiden Listen zusätzlich neu geholt (auf einem zweiten Gerät kann
+ * inzwischen abgehakt worden sein).
  */
 function AppBadgeUpdater() {
   const { isAuthenticated } = useAuth();
   const supported = isAppBadgeSupported();
+  const utils = trpc.useUtils();
+  const today = useTodayIso();
+
+  /**
+   * Der Schalter aus dem Profil (#373). HIER wird der Server-Stand
+   * übernommen, weil diese Stelle app-weit hängt – das Profil schickt nur
+   * (Muster aus #360).
+   */
+  const [wanted, setWanted] = useState(() => loadAppBadgeEnabled());
+  useSyncedSetting<boolean>("appBadge", value => {
+    if (typeof value !== "boolean") return;
+    setWanted(value);
+    saveAppBadgeEnabled(value);
+  });
+  // Umlegen im Profil wirkt sofort, nicht erst beim nächsten Laden.
+  useEffect(() => onAppBadgeEnabledChange(setWanted), []);
+
   // Support VOR dem Laden prüfen: ohne Badging keine unnötigen Abrufe
-  const enabled = supported && isAuthenticated;
+  const enabled = supported && isAuthenticated && wanted;
   const foodQuery = trpc.food.list.useQuery(undefined, {
     enabled,
     staleTime: 10 * 60_000,
@@ -149,9 +190,20 @@ function AppBadgeUpdater() {
     staleTime: 10 * 60_000,
   });
 
+  // Tageswechsel: die Listen sind jetzt anders zu lesen – und vielleicht
+  // auch anders befüllt. Einmal frisch holen, nicht öfter.
+  const lastDayRef = useRef(today);
+  useEffect(() => {
+    if (lastDayRef.current === today) return;
+    lastDayRef.current = today;
+    if (!enabled) return;
+    void utils.food.list.invalidate();
+    void utils.gear.list.invalidate();
+  }, [today, enabled, utils]);
+
   useEffect(() => {
     if (!supported) return;
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !wanted) {
       clearAppBadge();
       return;
     }
@@ -160,10 +212,17 @@ function AppBadgeUpdater() {
       computeBadgeCount({
         foodItems: foodQuery.data ?? [],
         gearTasks: gearQuery.data ?? [],
-        today: todayIso(),
+        today,
       })
     );
-  }, [supported, isAuthenticated, foodQuery.data, gearQuery.data]);
+  }, [
+    supported,
+    isAuthenticated,
+    wanted,
+    foodQuery.data,
+    gearQuery.data,
+    today,
+  ]);
 
   return null;
 }
@@ -187,7 +246,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     themeSync.push(next);
     toggleTheme?.();
   };
-  const { lang, t, setLang } = useI18n();
+  const { lang, t } = useI18n();
 
   // Schnellzugriff-Leiste (#297): lokal gespeichert, per Konto abgeglichen
   const [quickBar, setQuickBar] = useState<string[]>(() => loadQuickBar());
@@ -275,29 +334,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </span>
           </Link>
           <div className="flex items-center gap-2">
-            {/* Sprachwahl */}
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className="inline-flex h-8 items-center justify-center gap-1 rounded-full border border-border bg-card px-2.5 text-xs font-semibold uppercase text-muted-foreground transition-colors hover:text-foreground"
-                aria-label={t.shell.languageMenu}
-              >
-                <Globe className="h-3.5 w-3.5" aria-hidden="true" />
-                {lang}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {LANGUAGES.map(code => (
-                  <DropdownMenuItem
-                    key={code}
-                    onClick={() => setLang(code)}
-                    className={cn(
-                      code === lang && "font-semibold text-primary"
-                    )}
-                  >
-                    {LANGUAGE_LABELS[code]}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Benachrichtigungs-Glocke (#374) – an der Stelle, an der bis
+                jetzt die Sprachwahl sass. Die Sprache wechselt man einmal,
+                Mitteilungen kommen täglich; sie steht darum im Profil. */}
+            <NotificationBell />
             <button
               type="button"
               onClick={cycleTheme}

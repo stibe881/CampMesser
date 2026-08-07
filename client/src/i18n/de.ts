@@ -55,7 +55,12 @@ export const de = {
     themeLight: "Helles Design aktivieren",
     themeDark: "Dunkles Design aktivieren",
     themeAuto: "Automatisches Design (System) aktivieren",
-    languageMenu: "Sprache wählen",
+    notificationsMenu: "Mitteilungen anzeigen",
+    notificationsUnread: (count: number) =>
+      count === 1
+        ? "Mitteilungen anzeigen – 1 neue"
+        : `Mitteilungen anzeigen – ${count} neue`,
+    notificationsTitle: "Mitteilungen",
     accountMenu: "Konto-Menü öffnen",
     loggedIn: "Angemeldet",
     profile: "Profil",
@@ -312,6 +317,13 @@ export const de = {
     prefHeat: "Sonne & Hitze",
     prefHeatDesc:
       "Morgens eine Erinnerung ans Eincremen und ans Trinken, wenn der Tag hohen UV-Index oder über 28 °C bringt.",
+    languageTitle: "Sprache",
+    languageIntro:
+      "In welcher Sprache soll die App laufen? Die Wahl gilt auf allen deinen Geräten – auch für die Mitteilungen, die dieses Gerät bekommt.",
+    appBadgeTitle: "Zahl am App-Icon",
+    appBadgeDesc:
+      "Zeigt am Icon, wie viele Kühlbox-Einträge heute oder morgen ablaufen und wie viele Pflege-Aufgaben fällig sind. Das ist keine ungelesene Mitteilung – eine offene Pflege-Aufgabe bleibt stehen, bis du sie abhakst.",
+    appBadgeAria: "Zahl am App-Icon anzeigen",
     title: "Profil",
     manageSubtitle: "Verwalte dein Konto und deine Einstellungen.",
     loginFeature: "dein Profil",
@@ -404,8 +416,6 @@ export const de = {
     thresholdRainHint: (standard: number, min: number, max: number) =>
       `Standard ${standard} · möglich ${min}–${max}`,
     thresholdReset: "Standard",
-    historyTitle: "Verlauf",
-    historyToggleAria: "Benachrichtigungs-Verlauf ein- oder ausklappen",
     historyHint: "Die letzten Mitteilungen an dein Konto – neueste zuerst.",
     historyEmpty:
       "Noch keine Mitteilungen verschickt. Sobald etwas ansteht, findest du es hier.",

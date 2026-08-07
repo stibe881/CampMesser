@@ -12,6 +12,7 @@ import {
   Trash2,
   LayoutGrid,
   Palette,
+  Globe,
   Sun,
   Moon,
   MonitorSmartphone,
@@ -24,23 +25,12 @@ import {
   Fingerprint,
   Plus,
   Sparkles,
-  SunMedium,
   MailWarning,
   Navigation,
-  Backpack,
-  ChevronDown,
   Clock,
-  CloudLightning,
-  History,
   TriangleAlert,
-  Pin,
-  Refrigerator,
-  Tent,
-  Wind,
-  Wrench,
-  type LucideIcon,
 } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import {
   browserSupportsWebAuthn,
   startRegistration,
@@ -61,6 +51,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { usePushSubscription } from "@/lib/usePushSubscription";
+import { clearAppBadge, isAppBadgeSupported } from "@/lib/appBadge";
+import {
+  loadAppBadgeEnabled,
+  saveAppBadgeEnabled,
+} from "@/lib/appBadgeSetting";
 import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
 import {
   AlertDialog,
@@ -82,7 +77,7 @@ import {
   type ThemePreference,
 } from "@/lib/themePreference";
 import { useI18n } from "@/i18n";
-import { LOCALE_TAGS } from "@shared/i18n";
+import { LANGUAGE_LABELS, LANGUAGES, LOCALE_TAGS } from "@shared/i18n";
 import { RETENTION_DAYS } from "@shared/trash";
 import { PUSH_CHECK_STALE_HOURS, pushCheckHealth } from "@shared/pushHealth";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
@@ -125,129 +120,15 @@ type PushFlag =
   | "wantsGear"
   | "wantsHeat";
 
-/** Symbol je Mitteilungs-Art im Verlauf (unbekannte Arten: Glocke). */
-const PUSH_KIND_ICONS: Record<string, LucideIcon> = {
-  weather: CloudLightning,
-  food: Refrigerator,
-  trip: Tent,
-  drying: Wind,
-  astro: Sparkles,
-  gear: Wrench,
-  evepack: Backpack,
-  heat: SunMedium,
-  board: Pin,
-};
-
 /**
- * Benachrichtigungs-Verlauf (#201): aufklappbare Liste der letzten Meldungen
- * des KONTOS (nicht des Geräts) – Symbol je Art, Titel, Text und Zeitpunkt;
- * ein Klick öffnet die hinterlegte Route. Geladen wird erst beim Aufklappen.
- */
-function PushHistory() {
-  const { lang, t } = useI18n();
-  const [, navigate] = useLocation();
-  const [open, setOpen] = useState(false);
-  const logQuery = trpc.push.log.useQuery({}, { enabled: open });
-  const entries = logQuery.data ?? [];
-
-  /** Art-Bezeichnung, mit Rückfall auf den rohen Schlüssel. */
-  const kindLabel = (kind: string) =>
-    t.profile.historyKind[kind as keyof typeof t.profile.historyKind] ?? kind;
-
-  return (
-    <div className="mt-4 border-t border-border pt-4">
-      <button
-        type="button"
-        className="flex w-full items-center justify-between gap-2 text-left"
-        aria-expanded={open}
-        aria-label={t.profile.historyToggleAria}
-        onClick={() => setOpen(value => !value)}
-      >
-        <span className="flex items-center gap-2 text-sm font-medium">
-          <History className="h-4 w-4 text-primary" aria-hidden="true" />
-          {t.profile.historyTitle}
-        </span>
-        <ChevronDown
-          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
-          aria-hidden="true"
-        />
-      </button>
-      {open && (
-        <div className="mt-3">
-          {logQuery.isPending ? (
-            <p className="text-xs text-muted-foreground">
-              {t.common.loading} …
-            </p>
-          ) : entries.length === 0 ? (
-            <p className="text-xs text-muted-foreground">
-              {t.profile.historyEmpty}
-            </p>
-          ) : (
-            <>
-              <p className="mb-2 text-xs text-muted-foreground">
-                {t.profile.historyHint}
-              </p>
-              <ul className="space-y-1.5">
-                {entries.map(entry => {
-                  const Icon = PUSH_KIND_ICONS[entry.kind] ?? BellRing;
-                  const url = entry.url;
-                  const content = (
-                    <>
-                      <Icon
-                        className="mt-0.5 h-4 w-4 shrink-0 text-primary"
-                        aria-hidden="true"
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-medium">
-                          {entry.title}
-                        </span>
-                        <span className="mt-0.5 block text-xs text-muted-foreground">
-                          {entry.body}
-                        </span>
-                        <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                          {kindLabel(entry.kind)} ·{" "}
-                          {new Date(entry.sentAt).toLocaleString(
-                            LOCALE_TAGS[lang],
-                            { dateStyle: "short", timeStyle: "short" }
-                          )}
-                        </span>
-                      </span>
-                    </>
-                  );
-                  return (
-                    <li key={entry.id}>
-                      {url ? (
-                        <button
-                          type="button"
-                          className="flex w-full gap-2 rounded-md border border-border p-2 text-left hover:bg-accent"
-                          aria-label={t.profile.historyOpenAria(entry.title)}
-                          onClick={() => navigate(url)}
-                        >
-                          {content}
-                        </button>
-                      ) : (
-                        <div className="flex w-full gap-2 rounded-md border border-border p-2">
-                          {content}
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/**
- * Abschnitt «Mitteilungen»: Push-Abo dieses Geräts (an/aus) plus
- * Feineinstellungen, welche Mitteilungs-Arten das Gerät erhalten soll,
- * und darunter der aufklappbare Benachrichtigungs-Verlauf des Kontos.
+ * Abschnitt «Mitteilungen»: Push-Abo dieses Geräts (an/aus), welche
+ * Mitteilungs-Arten es erhalten soll, und die Zahl am App-Icon.
+ *
+ * DER VERLAUF IST HIER WEG (#374): Er stand unten in dieser Karte hinter
+ * einem Aufklapper. Ins Profil geht man aber, um Einstellungen zu ändern
+ * – wer NACHSCHAUEN will, was gemeldet wurde, sucht nicht hier. Er hängt
+ * jetzt an der Glocke in der Kopfzeile (`NotificationBell`), samt Punkt
+ * für alles, was seit dem letzten Blick dazukam.
  */
 function NotificationsCard() {
   const { t } = useI18n();
@@ -533,9 +414,59 @@ function NotificationsCard() {
             <LastCheckLine enabled={push.enabled === true} />
           </>
         )}
-        <PushHistory />
+        <AppBadgeRow />
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * «Zahl am App-Icon» (#373).
+ *
+ * WARUM DIESER SCHALTER HIER STEHT: Die Zahl am Icon sieht aus wie eine
+ * ungelesene Mitteilung, ist aber keine – sie zählt heute und morgen
+ * ablaufende Kühlbox-Einträge und fällige Pflege-Aufgaben. Eine
+ * Pflege-Aufgabe bleibt fällig, bis man sie abhakt, notfalls monatelang.
+ * Am Icon steht dann eine «1», die man nirgends wegtippen kann, weil in
+ * der App nichts Ungelesenes liegt.
+ *
+ * Er steht bewusst AUSSERHALB der Push-Bedingungen darüber: Die Zahl hat
+ * mit Mitteilungen nichts zu tun und funktioniert auch ohne Push-Abo.
+ * Angezeigt wird er nur dort, wo es das App-Icon überhaupt gibt – im
+ * Browser-Tab wäre er ohne Wirkung.
+ */
+function AppBadgeRow() {
+  const { t } = useI18n();
+  const [enabled, setEnabled] = useState(() => loadAppBadgeEnabled());
+  // Nur SENDEN – empfangen tut der Zähler selbst in AppShell (#360-Muster).
+  const sync = useSyncedSetting<boolean>("appBadge", () => {}, {
+    receive: false,
+  });
+  if (!isAppBadgeSupported()) return null;
+
+  const change = (next: boolean) => {
+    setEnabled(next);
+    saveAppBadgeEnabled(next);
+    sync.push(next);
+    // Sofort weg, nicht erst beim nächsten Rechnen – genau das ist der
+    // Grund, warum jemand diesen Schalter sucht.
+    if (!next) clearAppBadge();
+  };
+
+  return (
+    <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
+      <div className="min-w-0">
+        <p className="text-sm font-medium">{t.profile.appBadgeTitle}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {t.profile.appBadgeDesc}
+        </p>
+      </div>
+      <Switch
+        checked={enabled}
+        onCheckedChange={change}
+        aria-label={t.profile.appBadgeAria}
+      />
+    </div>
   );
 }
 
@@ -1054,7 +985,7 @@ function QuickBarCard() {
 }
 
 export default function ProfilePage() {
-  const { lang, t } = useI18n();
+  const { lang, t, setLang } = useI18n();
   const { user, isAuthenticated, loading, logout, refresh } = useAuth();
   const { setPreference } = useTheme();
   const utils = trpc.useUtils();
@@ -1222,6 +1153,40 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Sprache (#374): Sie sass bis jetzt in der Kopfzeile, wo nun die
+          Benachrichtigungs-Glocke steht. Eine Sprache stellt man einmal
+          ein – das ist eine Einstellung und gehört ins Profil. */}
+      <Card className="mb-5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Globe className="h-4 w-4 text-primary" aria-hidden="true" />
+            {t.profile.languageTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-3 text-sm text-muted-foreground">
+            {t.profile.languageIntro}
+          </p>
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label={t.profile.languageTitle}
+          >
+            {LANGUAGES.map(code => (
+              <Button
+                key={code}
+                type="button"
+                variant={code === lang ? "default" : "outline"}
+                className="flex-1"
+                onClick={() => setLang(code)}
+              >
+                {LANGUAGE_LABELS[code]}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="mb-5">
         <CardHeader className="pb-3">

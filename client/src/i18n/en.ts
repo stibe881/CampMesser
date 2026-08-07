@@ -54,7 +54,12 @@ export const en: Translation = {
     themeLight: "Switch to light theme",
     themeDark: "Switch to dark theme",
     themeAuto: "Switch to automatic theme (system)",
-    languageMenu: "Choose language",
+    notificationsMenu: "Show notifications",
+    notificationsUnread: (count: number) =>
+      count === 1
+        ? "Show notifications – 1 new"
+        : `Show notifications – ${count} new`,
+    notificationsTitle: "Notifications",
     accountMenu: "Open account menu",
     loggedIn: "Signed in",
     profile: "Profile",
@@ -298,6 +303,13 @@ export const en: Translation = {
     prefHeat: "Sun & heat",
     prefHeatDesc:
       "A morning reminder to put on sunscreen and to drink when the day brings a high UV index or more than 28 °C.",
+    languageTitle: "Language",
+    languageIntro:
+      "Which language should the app run in? The choice applies on all your devices – including the notifications this device receives.",
+    appBadgeTitle: "Number on the app icon",
+    appBadgeDesc:
+      "Shows on the icon how many cool box items expire today or tomorrow and how many care tasks are due. It is not an unread notification – an open care task stays until you tick it off.",
+    appBadgeAria: "Show the number on the app icon",
     title: "Profile",
     manageSubtitle: "Manage your account and your settings.",
     loginFeature: "your profile",
@@ -386,8 +398,6 @@ export const en: Translation = {
     thresholdRainHint: (standard: number, min: number, max: number) =>
       `Standard ${standard} · possible ${min}–${max}`,
     thresholdReset: "Standard",
-    historyTitle: "History",
-    historyToggleAria: "Expand or collapse the notification history",
     historyHint:
       "The latest notifications sent to your account – newest first.",
     historyEmpty:

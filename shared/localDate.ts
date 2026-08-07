@@ -55,3 +55,30 @@ export function shiftIsoDay(day: string, days: number): string {
   if (!year || !month || !date) return day;
   return localDay(new Date(year, month - 1, date + days));
 }
+
+/**
+ * Millisekunden bis zur nächsten lokalen Mitternacht (#373).
+ *
+ * WOFÜR: Eine Seite, die lange offen bleibt, rechnet sonst ewig mit dem
+ * Tag, an dem sie geladen wurde. In der nativen App ist das der Normalfall
+ * – der WebView wird tagelang nicht neu geladen. Wer darauf einen Wecker
+ * stellen will, braucht die Zeit bis zum Tageswechsel.
+ *
+ * Über die Kalenderfelder gerechnet, nicht über 24 Stunden: An den
+ * Umstellungstagen der Sommerzeit hat ein Tag 23 bzw. 25 Stunden.
+ *
+ * Mindestens eine Sekunde – ein Wecker auf 0 ms würde sich in der Sekunde
+ * um Mitternacht selbst im Kreis herum neu stellen.
+ */
+export function msUntilNextLocalDay(at: Date = new Date()): number {
+  const next = new Date(
+    at.getFullYear(),
+    at.getMonth(),
+    at.getDate() + 1,
+    0,
+    0,
+    0,
+    0
+  );
+  return Math.max(1000, next.getTime() - at.getTime());
+}

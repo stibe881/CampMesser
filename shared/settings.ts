@@ -53,6 +53,8 @@ export const SYNCED_SETTING_KEYS = [
   "theme",
   /** Karten-App für Routen: «apple», «google» oder «ask» (#360) */
   "mapsApp",
+  /** Zahl am App-Icon anzeigen (#373) */
+  "appBadge",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];
