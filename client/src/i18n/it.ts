@@ -4165,6 +4165,9 @@ export const it: Translation = {
     noTrips: "Nessun viaggio registrato finora.",
     personEmpty: (person: string) =>
       `${person} non ha ancora partecipato a nessun viaggio. Metti i segni qui sotto.`,
+    noPlaceEmpty:
+      "I viaggi contano, ma manca il nome del posto – un timbro ha bisogno di un luogo. Aggiungi un campeggio o un luogo al viaggio e il timbro apparirà.",
+    tripNoStamp: "Nessun timbro – al viaggio manca il campeggio o il luogo.",
     print: "Stampa il passaporto",
     note: "I timbri nascono dai viaggi del diario; nulla viene registrato due volte. Ogni campeggio riceve dal proprio nome la stessa forma, lo stesso colore e la stessa inclinazione – uguali su ogni dispositivo.",
   },

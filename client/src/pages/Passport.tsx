@@ -179,9 +179,13 @@ export default function PassportPage() {
     [tripsQuery.data]
   );
 
-  const summary = useMemo(
-    () => passportSummary(tripsForTraveller(trips, absences, personId)),
+  const travellerTrips = useMemo(
+    () => tripsForTraveller(trips, absences, personId),
     [trips, absences, personId]
+  );
+  const summary = useMemo(
+    () => passportSummary(travellerTrips),
+    [travellerTrips]
   );
 
   const lookup = useMemo(() => absenceLookup(absences), [absences]);
@@ -312,8 +316,17 @@ export default function PassportPage() {
       {tripsQuery.isLoading ? (
         <Skeleton className="mt-6 h-40 w-full rounded-lg" />
       ) : summary.stamps.length === 0 ? (
+        /* DREI GRÜNDE für einen leeren Pass, drei Sätze (Nutzermeldung
+           07.08.2026): Es gibt gar keine Reisen; die Person ist nirgends
+           angehakt; oder die Reisen haben keinen PLATZNAMEN – dann half
+           der alte Rat «setz unten die Haken» nicht, denn die Haken
+           waren längst gesetzt. */
         <p className="mt-6 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          {person && trips.length > 0 ? pp.personEmpty(person.name) : pp.empty}
+          {trips.length === 0
+            ? pp.empty
+            : person && travellerTrips.length === 0
+              ? pp.personEmpty(person.name)
+              : pp.noPlaceEmpty}
         </p>
       ) : (
         <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -379,7 +392,14 @@ export default function PassportPage() {
                         className="h-4 w-4 shrink-0 accent-primary"
                         aria-label={pp.presenceAria(place, person.name)}
                       />
-                      <span className="min-w-0 flex-1 truncate">{place}</span>
+                      <span className="min-w-0 flex-1 truncate">
+                        {place}
+                        {!trip.placeName?.trim() && (
+                          <span className="block truncate text-xs text-muted-foreground">
+                            {pp.tripNoStamp}
+                          </span>
+                        )}
+                      </span>
                       <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
                         {fmtPlain(new Date(trip.startDate), lang)}
                       </span>

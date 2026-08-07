@@ -4194,6 +4194,9 @@ export const fr: Translation = {
     noTrips: "Aucun voyage enregistré pour l'instant.",
     personEmpty: (person: string) =>
       `${person} n'a encore participé à aucun voyage. Coche ci-dessous.`,
+    noPlaceEmpty:
+      "Les voyages comptent, mais il leur manque le nom du lieu – un tampon a besoin d’un lieu. Ajoute un camping ou un lieu au voyage et le tampon apparaîtra.",
+    tripNoStamp: "Pas de tampon – il manque le camping ou le lieu.",
     print: "Imprimer le passeport",
     note: "Les tampons proviennent des voyages du carnet ; rien n'est saisi deux fois. Chaque camping reçoit, à partir de son nom, la même forme, la même couleur et la même inclinaison – identiques sur chaque appareil.",
   },

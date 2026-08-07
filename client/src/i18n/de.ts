@@ -4203,6 +4203,9 @@ export const de = {
     noTrips: "Noch keine Reisen eingetragen.",
     personEmpty: (person: string) =>
       `${person} war noch auf keiner Reise dabei. Setz unten die Haken.`,
+    noPlaceEmpty:
+      "Die Reisen zählen, aber ihnen fehlt der Platzname – ein Stempel braucht einen Ort. Trag bei der Reise einen Zeltplatz oder Ort ein, dann erscheint der Stempel.",
+    tripNoStamp: "Gibt keinen Stempel – der Reise fehlt Platz oder Ort.",
     print: "Pass drucken",
     note: "Die Stempel entstehen aus den Reisen im Tagebuch; nichts wird doppelt erfasst. Jeder Platz bekommt aus seinem Namen dieselbe Form, Farbe und Schräglage – auf jedem Gerät und nach jedem Neuladen gleich.",
   },

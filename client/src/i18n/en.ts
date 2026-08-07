@@ -4080,6 +4080,9 @@ export const en: Translation = {
     noTrips: "No trips recorded yet.",
     personEmpty: (person: string) =>
       `${person} has not been on a trip yet. Tick the boxes below.`,
+    noPlaceEmpty:
+      "The trips count, but they have no place name – a stamp needs a place. Add a campsite or location to the trip and the stamp will appear.",
+    tripNoStamp: "No stamp – the trip has no campsite or location.",
     print: "Print the passport",
     note: "The stamps come from the trips in your journal; nothing is recorded twice. Each site gets the same shape, colour and tilt from its own name – identical on every device and after every reload.",
   },
