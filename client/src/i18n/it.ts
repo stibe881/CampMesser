@@ -4259,6 +4259,16 @@ export const it: Translation = {
     addAria: (name: string) => `Aggiungi «${name}» alla lista`,
     added: (name: string) => `«${name}» aggiunto.`,
   },
+  condensation: {
+    title: "Rugiada nella notte",
+    high: (time: string) =>
+      `Notte serena e calma: verso le ${time} l’aria raggiunge il punto di rugiada – la tenda sarà probabilmente bagnata.`,
+    possible: (time: string) =>
+      `L’aria si avvicina al punto di rugiada (verso le ${time}) – è possibile rugiada sulla tenda.`,
+    advice:
+      "Prima di smontare al mattino, lascia asciugare – la finestra asciutta qui sotto aiuta a pianificare.",
+    note: "Stima da temperatura, umidità, nuvole e vento. Avvallamenti, prati e vicinanza ai ruscelli sono più umidi di quanto sappia la previsione.",
+  },
   reviewPrompt: {
     title: (trip: string) => `Di ritorno da «${trip}»?`,
     body: "Due domande finché te lo ricordi: cosa non hai usato, cosa è mancato? Migliora la prossima lista bagagli.",

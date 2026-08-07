@@ -4170,6 +4170,16 @@ export const en: Translation = {
     addAria: (name: string) => `Add “${name}” to the list`,
     added: (name: string) => `“${name}” added.`,
   },
+  condensation: {
+    title: "Dew tonight",
+    high: (time: string) =>
+      `Clear, calm night: around ${time} the air reaches the dew point – the tent will likely get wet.`,
+    possible: (time: string) =>
+      `The air gets close to the dew point (around ${time}) – dew on the tent is possible.`,
+    advice:
+      "Before packing up in the morning, let it dry first – the dry window below helps with planning.",
+    note: "Estimate from temperature, humidity, clouds and wind. Hollows, meadows and creek banks are damper than the forecast knows.",
+  },
   reviewPrompt: {
     title: (trip: string) => `Back from "${trip}"?`,
     body: "Two questions while you still remember: what went unused, what was missing? It improves the next packing list.",

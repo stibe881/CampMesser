@@ -4296,6 +4296,16 @@ export const de = {
     addAria: (name: string) => `«${name}» auf die Liste setzen`,
     added: (name: string) => `«${name}» hinzugefügt.`,
   },
+  condensation: {
+    title: "Tau in der Nacht",
+    high: (time: string) =>
+      `Klare, ruhige Nacht: Gegen ${time} Uhr erreicht die Luft den Taupunkt – das Zelt wird wahrscheinlich nass.`,
+    possible: (time: string) =>
+      `Die Luft kommt dem Taupunkt nahe (gegen ${time} Uhr) – Tau auf dem Zelt ist möglich.`,
+    advice:
+      "Fürs Einpacken am Morgen zuerst abtrocknen lassen – das Trockenfenster unten hilft beim Planen.",
+    note: "Abschätzung aus Temperatur, Feuchte, Wolken und Wind. Senken, Wiesen und Bachnähe sind feuchter, als die Prognose weiss.",
+  },
   reviewPrompt: {
     title: (trip: string) => `Zurück von «${trip}»?`,
     body: "Zwei Fragen, solange du es noch weisst: Was hast du nicht gebraucht, was hat gefehlt? Das verbessert die nächste Packliste.",

@@ -4287,6 +4287,16 @@ export const fr: Translation = {
     addAria: (name: string) => `Ajouter « ${name} » à la liste`,
     added: (name: string) => `« ${name} » ajouté.`,
   },
+  condensation: {
+    title: "Rosée pendant la nuit",
+    high: (time: string) =>
+      `Nuit claire et calme : vers ${time}, l’air atteint le point de rosée – la tente sera probablement mouillée.`,
+    possible: (time: string) =>
+      `L’air s’approche du point de rosée (vers ${time}) – de la rosée sur la tente est possible.`,
+    advice:
+      "Avant de plier le matin, laisse d’abord sécher – la fenêtre sèche ci-dessous aide à planifier.",
+    note: "Estimation à partir de la température, de l’humidité, des nuages et du vent. Les creux, prairies et abords de ruisseaux sont plus humides que ne le sait la prévision.",
+  },
   reviewPrompt: {
     title: (trip: string) => `De retour de « ${trip} » ?`,
     body: "Deux questions tant que tu t'en souviens : qu'est-ce qui n'a pas servi, qu'est-ce qui a manqué ? Cela améliore la prochaine liste de bagages.",
