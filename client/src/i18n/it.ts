@@ -96,8 +96,6 @@ export const it: Translation = {
     subtitle: "Luna, stelle cadenti, ISS e costellazioni per stanotte",
     fromNatureHint:
       "Luna, oscurità, stelle cadenti, ISS e costellazioni – ora su una pagina propria",
-    moduleDescription:
-      "Vale la pena stanotte? Fase lunare, oscurità, stelle cadenti e passaggi",
   },
   /** «Konnte nicht geladen werden» – der dritte Zustand neben Laden und Leer. */
   queryError: {
@@ -1891,7 +1889,6 @@ export const it: Translation = {
         ? "1 meta del Trova-tenda sulla mappa"
         : `${n} mete del Trova-tenda sulla mappa`,
     routeLink: "Percorso →",
-    discoverToggle: "Scopri i campeggi",
     locateButton: "La mia posizione",
     locateFailed: "Impossibile determinare la posizione.",
     measureButton: "Misura",
@@ -2663,7 +2660,6 @@ export const it: Translation = {
         : `File di calendario con ${n} viaggi creato – aprilo per aggiungerli`,
     icsFailed: "Impossibile creare il file di calendario",
     milestonesTitle: "Traguardi",
-    milestonesAchievedOn: date => `raggiunto il ${date}`,
     milestonesNextTitle: "Prossimi obiettivi",
     milestonesProgress: (current, target) => `${current} di ${target}`,
     viewToggleAria: "Scegli la vista dei soggiorni",
@@ -2833,7 +2829,6 @@ export const it: Translation = {
     invalid: "Questo link di condivisione è scaduto o non è più valido.",
     invalidHint:
       "È scaduto oppure la proprietaria o il proprietario ha terminato la condivisione.",
-    infoTitle: "Info del viaggio",
     notesTitle: "Note",
     ratingAria: n => `Valutazione: ${n} stelle su 5`,
     spotTitle: "Piazzola",
@@ -3978,7 +3973,6 @@ export const it: Translation = {
     note: "Un criterio può restare vuoto. Chi sotto la pioggia non è mai stato fuori non può giudicare l'ombra – un tre inventato vale meno di un vuoto onesto.",
     compareTitle: "Confronta per criterio",
     compareAll: "Totale",
-    compareEmpty: "Nessuna piazzola valutata finora.",
     unrated: "–",
   },
   sharedTrack: {
@@ -4564,8 +4558,6 @@ export const it: Translation = {
     subtitle: "Che cosa puoi fare nei dintorni?",
     subtitleAtPlace: (place: string) =>
       `Che cosa puoi fare attorno a ${place}?`,
-    toggleOpen: "Mostra le gite",
-    toggleClose: "Nascondi le gite",
     loading: "Caricamento delle gite …",
     loadFailed: "Le gite non si sono potute caricare. Riprova più tardi.",
     empty:
@@ -5599,7 +5591,6 @@ export const it: Translation = {
       n === 1 ? "1 foto pronta" : `${n} foto pronte`,
     photoAlt: (n: number) => `Foto condivisa ${n}`,
     removePhotoAria: (n: number) => `Rimuovi la foto condivisa ${n}`,
-    readFailed: "Un'immagine condivisa non è stata letta.",
     tripLabel: "A quale viaggio?",
     tripAria: "Scegli un viaggio",
     noTrips: "Ancora nessun viaggio – crea prima una voce in «I miei viaggi».",

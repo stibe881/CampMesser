@@ -96,8 +96,6 @@ export const en: Translation = {
     subtitle: "Moon, meteors, ISS and constellations for tonight",
     fromNatureHint:
       "Moon, darkness, meteors, ISS and constellations – now on a page of their own",
-    moduleDescription:
-      "Is tonight worth it? Moon phase, darkness, meteor showers and flyovers",
   },
   /** «Konnte nicht geladen werden» – der dritte Zustand neben Laden und Leer. */
   queryError: {
@@ -1858,7 +1856,6 @@ export const en: Translation = {
         ? "1 tent finder target on the map"
         : `${n} tent finder targets on the map`,
     routeLink: "Directions →",
-    discoverToggle: "Discover campsites",
     locateButton: "My location",
     locateFailed: "Could not determine your location.",
     measureButton: "Measure",
@@ -2601,7 +2598,6 @@ export const en: Translation = {
         : `Calendar file with ${n} trips created – open it to add them`,
     icsFailed: "The calendar file could not be created",
     milestonesTitle: "Milestones",
-    milestonesAchievedOn: date => `achieved on ${date}`,
     milestonesNextTitle: "Next goals",
     milestonesProgress: (current, target) => `${current} of ${target}`,
     viewToggleAria: "Choose how to display your stays",
@@ -2768,7 +2764,6 @@ export const en: Translation = {
     badge: "Shared trip",
     invalid: "This share link has expired or is no longer valid.",
     invalidHint: "It has expired or the owner has stopped sharing.",
-    infoTitle: "Trip info",
     notesTitle: "Notes",
     ratingAria: n => `Rating: ${n} of 5 stars`,
     spotTitle: "Pitch",
@@ -3897,7 +3892,6 @@ export const en: Translation = {
     note: "A criterion may stay empty. If you never sat outside in the rain you cannot judge the shade – an invented three is worse than an honest gap.",
     compareTitle: "Compare by criterion",
     compareAll: "Overall",
-    compareEmpty: "No pitch rated yet.",
     unrated: "–",
   },
   sharedTrack: {
@@ -4473,8 +4467,6 @@ export const en: Translation = {
     title: "Excursions nearby",
     subtitle: "What is there to do in the area?",
     subtitleAtPlace: (place: string) => `What is there to do around ${place}?`,
-    toggleOpen: "Show excursions",
-    toggleClose: "Hide excursions",
     loading: "Loading excursions …",
     loadFailed: "The excursions could not be loaded. Please try again later.",
     empty:
@@ -5490,7 +5482,6 @@ export const en: Translation = {
       n === 1 ? "1 photo ready" : `${n} photos ready`,
     photoAlt: (n: number) => `Shared photo ${n}`,
     removePhotoAria: (n: number) => `Remove shared photo ${n}`,
-    readFailed: "A shared image could not be read.",
     tripLabel: "Which trip?",
     tripAria: "Choose a trip",
     noTrips: "No trips yet – first create an entry in “My trips”.",

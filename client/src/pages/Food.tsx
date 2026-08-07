@@ -84,7 +84,7 @@ import type { FoodTemplateItem } from "@shared/foodTemplates";
 import { pick } from "@shared/i18n";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
-import { todayIso } from "@shared/localDate";
+import { useTodayIso } from "@/lib/useTodayIso";
 
 /** Chip-Stile je Haltbarkeits-Zustand. */
 const expiryStyles: Record<ExpiryState, string> = {
@@ -116,7 +116,7 @@ export default function FoodPage() {
   const [unit, setUnit] = useState<string>(NONE);
   const [category, setCategory] = useState<string>(NONE);
   const [expiryDate, setExpiryDate] = useState("");
-  const today = todayIso();
+  const today = useTodayIso();
 
   // Lager-Wahl «Kühlbox / Trockenvorrat» (#233) – wird pro Gerät gemerkt
   const [storage, setStorage] = useState<FoodStorage>(() => loadFoodStorage());

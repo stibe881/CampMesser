@@ -54,7 +54,7 @@ import NearbyExcursions from "@/components/NearbyExcursions";
 import NearbyFirepits from "@/components/NearbyFirepits";
 import PicnicStops from "@/components/PicnicStops";
 import RouteWeather from "@/components/RouteWeather";
-import { todayIso } from "@shared/localDate";
+import { useTodayIso } from "@/lib/useTodayIso";
 import {
   spotPhase,
   spotSectionOrder,
@@ -659,6 +659,7 @@ function BathingWaterCard({
 
 export default function SpotDetailPage() {
   const { lang, t } = useI18n();
+  const today = useTodayIso();
   const params = useParams<{ id: string }>();
   const spotId = Number(params.id);
   const { isAuthenticated, loading } = useAuth();
@@ -978,7 +979,7 @@ export default function SpotDetailPage() {
    * Läuft hier gerade eine Reise, ist eine geplant, oder keins von beidem?
    * Danach richtet sich die Reihenfolge der Abschnitte (#371).
    */
-  const sectionOrder = spotSectionOrder(spotPhase(spotTrips, todayIso()));
+  const sectionOrder = spotSectionOrder(spotPhase(spotTrips, today));
 
   /**
    * DIE ABSCHNITTE ALS BAUSTEINE (#371): Die Reihenfolge unten hängt

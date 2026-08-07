@@ -191,7 +191,7 @@ import TripGuestbook from "@/components/TripGuestbook";
 import TripHistory from "@/components/TripHistory";
 import TripReservation from "@/components/TripReservation";
 import TripTemplatePicker from "@/components/TripTemplatePicker";
-import { todayIso } from "@shared/localDate";
+import { useTodayIso } from "@/lib/useTodayIso";
 
 /** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
 const FREE_LOCATION = "frei";
@@ -488,7 +488,7 @@ export default function TripsPage() {
   const formatRange = (startDate: string, endDate: string): string =>
     formatTripRange(startDate, endDate, lang);
 
-  const today = todayIso();
+  const today = useTodayIso();
   /**
    * Die Uhrzeit für «hat die Reise begonnen» (#361). Einmal pro Render
    * gelesen und nicht per Timer nachgeführt: In der Minute, in der die

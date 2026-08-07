@@ -12,7 +12,7 @@ import {
 import { enqueueToggle } from "@/lib/offlineQueue";
 import { parsePending } from "@shared/widgetActions";
 import { WIDGET_ACTIONS_EVENT } from "@/lib/nativeBridge";
-import { todayIso } from "@shared/localDate";
+import { useTodayIso } from "@/lib/useTodayIso";
 
 /**
  * Die Daten für die iPhone-Widgets an den nativen Rahmen schicken (#324).
@@ -51,7 +51,7 @@ export default function WidgetSync() {
     staleTime: 5 * 60_000,
   });
 
-  const today = todayIso();
+  const today = useTodayIso();
   const trips = tripsQuery.data ?? [];
   // Der Packstand gehört zur Reise, die auch im Widget steht – sonst
   // stünde dort der Fortschritt einer anderen Liste.

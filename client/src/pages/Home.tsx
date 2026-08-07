@@ -112,6 +112,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { tripDisplayName } from "@shared/tripName";
 import { todayIso } from "@shared/localDate";
+import { useTodayIso } from "@/lib/useTodayIso";
 import {
   CalendarClock,
   ListChecks,
@@ -407,7 +408,7 @@ function BriefingWidget() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = todayIso();
+  const today = useTodayIso();
   const current = (tripsQuery.data ?? [])
     .filter(trip => trip.role === "owner")
     .filter(trip => currentTripDay(trip, today) !== null)
@@ -438,7 +439,7 @@ function NextTripWidget() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = todayIso();
+  const today = useTodayIso();
   // Bewusst nur EIGENE Reisen im Widget (Mitglieds-Trips bleiben im Tagebuch)
   const ownTrips = (tripsQuery.data ?? []).filter(
     trip => trip.role === "owner"
@@ -720,7 +721,7 @@ function AnniversaryThumb({
 function AnniversaryCard() {
   const { lang, t } = useI18n();
   const { isAuthenticated } = useAuth();
-  const today = todayIso();
+  const today = useTodayIso();
   const [dismissed, setDismissed] = useState<boolean>(() => {
     try {
       return sessionStorage.getItem(ANNIVERSARY_DISMISSED_KEY) === today;
@@ -1081,7 +1082,7 @@ function GearCareHint() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = todayIso();
+  const today = useTodayIso();
   const dueCount = useMemo(
     () =>
       (query.data ?? []).filter(task => gearTaskDue(task, today).due).length,
@@ -1118,7 +1119,7 @@ function TickBiteHint() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = todayIso();
+  const today = useTodayIso();
   const openCount = useMemo(
     () =>
       (query.data ?? []).filter(
@@ -1531,7 +1532,7 @@ export default function Home() {
     enabled: signedIn,
     staleTime: 60_000,
   });
-  const today = todayIso();
+  const today = useTodayIso();
   const tripRunning = (homeTripsQuery.data ?? []).some(
     trip => currentTripDay(trip, today) !== null
   );

@@ -98,8 +98,6 @@ export const fr: Translation = {
     subtitle: "Lune, étoiles filantes, ISS et constellations pour cette nuit",
     fromNatureHint:
       "Lune, obscurité, étoiles filantes, ISS et constellations – désormais sur une page à part",
-    moduleDescription:
-      "La nuit vaut-elle la peine ? Phase lunaire, obscurité, étoiles filantes et passages",
   },
   /** «Konnte nicht geladen werden» – der dritte Zustand neben Laden und Leer. */
   queryError: {
@@ -1918,7 +1916,6 @@ export const fr: Translation = {
         ? "1 cible du Retrouve-tente sur la carte"
         : `${n} cibles du Retrouve-tente sur la carte`,
     routeLink: "Itinéraire →",
-    discoverToggle: "Découvrir des campings",
     locateButton: "Ma position",
     locateFailed: "Impossible de déterminer la position.",
     measureButton: "Mesurer",
@@ -2690,7 +2687,6 @@ export const fr: Translation = {
         : `Fichier d'agenda avec ${n} séjours créé – ouvre-le pour les ajouter`,
     icsFailed: "Impossible de créer le fichier d'agenda",
     milestonesTitle: "Jalons",
-    milestonesAchievedOn: date => `atteint le ${date}`,
     milestonesNextTitle: "Prochains objectifs",
     milestonesProgress: (current, target) => `${current} sur ${target}`,
     viewToggleAria: "Choisir l'affichage des séjours",
@@ -2863,7 +2859,6 @@ export const fr: Translation = {
     badge: "Voyage partagé",
     invalid: "Ce lien de partage a expiré ou n'est plus valable.",
     invalidHint: "Il a expiré ou la ou le propriétaire a arrêté le partage.",
-    infoTitle: "Infos du voyage",
     notesTitle: "Notes",
     ratingAria: (n: number) => `Évaluation : ${n} étoiles sur 5`,
     spotTitle: "Emplacement",
@@ -4009,7 +4004,6 @@ export const fr: Translation = {
     note: "Un critère peut rester vide. Qui n'est jamais resté dehors sous la pluie ne peut pas juger l'ombre – un trois inventé vaut moins qu'un vide honnête.",
     compareTitle: "Comparer par critère",
     compareAll: "Global",
-    compareEmpty: "Aucun emplacement évalué pour l'instant.",
     unrated: "–",
   },
   sharedTrack: {
@@ -4594,8 +4588,6 @@ export const fr: Translation = {
     subtitle: "Que peux-tu entreprendre dans les environs ?",
     subtitleAtPlace: (place: string) =>
       `Que peux-tu entreprendre autour de ${place} ?`,
-    toggleOpen: "Afficher les excursions",
-    toggleClose: "Masquer les excursions",
     loading: "Chargement des excursions …",
     loadFailed:
       "Les excursions n'ont pas pu être chargées. Réessaie plus tard.",
@@ -5637,7 +5629,6 @@ export const fr: Translation = {
       n === 1 ? "1 photo prête" : `${n} photos prêtes`,
     photoAlt: (n: number) => `Photo partagée ${n}`,
     removePhotoAria: (n: number) => `Supprimer la photo partagée ${n}`,
-    readFailed: "Une image partagée n'a pas pu être lue.",
     tripLabel: "Vers quel voyage ?",
     tripAria: "Choisir un voyage",
     noTrips:

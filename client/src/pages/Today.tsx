@@ -67,7 +67,7 @@ import { hapticTick } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useState } from "react";
-import { todayIso } from "@shared/localDate";
+import { useTodayIso } from "@/lib/useTodayIso";
 
 export default function TodayPage() {
   const { lang, t } = useI18n();
@@ -79,7 +79,7 @@ export default function TodayPage() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
-  const today = todayIso();
+  const today = useTodayIso();
   const trip = useMemo(
     () => pickRunningTrip(tripsQuery.data ?? [], today),
     [tripsQuery.data, today]

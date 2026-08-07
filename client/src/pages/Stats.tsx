@@ -42,7 +42,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { todayIso } from "@shared/localDate";
+import { useTodayIso } from "@/lib/useTodayIso";
 
 /**
  * Statistik-Dashboard: bündelt die bereits vorhandenen Auswertungen der App
@@ -173,7 +173,7 @@ export default function Stats() {
     storeKnotProgress(clean);
   });
 
-  const today = todayIso();
+  const today = useTodayIso();
   const currentYear = new Date().getFullYear();
   const trips = useMemo(() => tripsQuery.data ?? [], [tripsQuery.data]);
   const spots = useMemo(() => spotsQuery.data ?? [], [spotsQuery.data]);
