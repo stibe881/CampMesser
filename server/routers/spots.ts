@@ -269,6 +269,11 @@ export const spotsRouters = {
           // «So haben wir letztes Jahr gestanden.» Sie enthält Rechtecke
           // und Meter, sonst nichts – nichts Persönliches.
           pitchSketchJson: spot.pitchSketchJson,
+          // Die Preistafel (#369, #392): Für Mitreisende mindestens so
+          // nützlich wie die Skizze – «nimm Bargeld mit, der Platz kostet
+          // 24.– plus 8.– pro Kind». Öffentliche Information von der
+          // Tafel an der Rezeption, nichts Persönliches.
+          tariffsJson: spot.tariffsJson,
         };
       }),
   }),
