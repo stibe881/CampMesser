@@ -417,6 +417,7 @@ export const it: Translation = {
       gear: "Attrezzatura",
       evepack: "Controllo della vigilia",
       board: "Bacheca",
+      join: "Compagni di viaggio",
     },
     homeTitle: "Località di casa",
     homeIntro:

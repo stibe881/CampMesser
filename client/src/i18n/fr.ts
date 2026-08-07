@@ -428,6 +428,7 @@ export const fr: Translation = {
       gear: "Équipement",
       evepack: "Contrôle de la veille",
       board: "Tableau",
+      join: "Compagnons de voyage",
     },
     homeTitle: "Lieu de domicile",
     homeIntro:

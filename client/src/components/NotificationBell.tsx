@@ -30,6 +30,7 @@ import {
   Sparkles,
   SunMedium,
   Tent,
+  Users,
   Wind,
   Wrench,
   type LucideIcon,
@@ -61,6 +62,7 @@ const PUSH_KIND_ICONS: Record<string, LucideIcon> = {
   evepack: Backpack,
   heat: SunMedium,
   board: Pin,
+  join: Users,
 };
 
 export default function NotificationBell() {

@@ -40,6 +40,7 @@ import {
   normalizeTripBoardKind,
   normalizeTripBoardText,
   notifyUsers,
+  tripJoinAlertText,
   noteTripChange,
   packScenarios,
   parsePersons,
@@ -1202,6 +1203,43 @@ export const tripsRouters = {
           }
           await db.addTripMember(trip.id, ctx.user.id);
           await noteTripChange(trip.id, ctx.user.id, "member", "add");
+
+          /**
+           * Wer eingeladen hat, erfährt es (#376).
+           *
+           * Die Einladung geht als LINK raus – ob sie angenommen wurde,
+           * sah bis jetzt nur, wer von sich aus den Mitreisenden-Dialog
+           * öffnete. Dabei wartet man genau darauf: Solange nicht klar
+           * ist, wer mitkommt, kann man weder Betten noch Essen
+           * einteilen.
+           *
+           * AN ALLE SCHON BETEILIGTEN, nicht nur an die Besitzerin: Wer
+           * gemeinsam plant, plant gemeinsam. Die beitretende Person
+           * bekommt nichts – sie weiss es.
+           *
+           * Fehler werden geschluckt wie bei der Pinnwand (#367): Die
+           * Mitgliedschaft steht, bevor hier irgendetwas passiert.
+           */
+          const joined = await db.getTripMembersWithUsers(trip.id);
+          const audience = [
+            trip.userId,
+            ...joined.map(member => member.userId),
+          ].filter(id => id !== ctx.user.id);
+          const personName =
+            (await db.getUserDisplayNames([ctx.user.id])).get(ctx.user.id) ??
+            "?";
+          await notifyUsers(
+            Array.from(new Set(audience)),
+            "trip",
+            "join",
+            `/tagebuch/${trip.id}`,
+            lang =>
+              tripJoinAlertText(
+                { person: personName, tripName: tripDisplayName(trip, lang) },
+                lang
+              )
+          ).catch(() => 0);
+
           return { tripId: trip.id, alreadyOwner: false } as const;
         }),
     }),

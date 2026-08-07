@@ -428,6 +428,7 @@ export const de = {
       gear: "Ausrüstung",
       evepack: "Vorabend-Check",
       board: "Pinnwand",
+      join: "Mitreisende",
     },
     homeTitle: "Heim-Standort",
     homeIntro:

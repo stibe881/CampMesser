@@ -411,6 +411,7 @@ export const en: Translation = {
       gear: "Gear",
       evepack: "Evening check",
       board: "Pinboard",
+      join: "Travel companions",
     },
     homeTitle: "Home location",
     homeIntro:
