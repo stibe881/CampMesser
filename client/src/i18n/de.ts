@@ -4296,6 +4296,17 @@ export const de = {
     addAria: (name: string) => `«${name}» auf die Liste setzen`,
     added: (name: string) => `«${name}» hinzugefügt.`,
   },
+  nextTime: {
+    title: "Beim nächsten Mal",
+    empty: "Noch nichts notiert. Was soll beim nächsten Besuch anders sein?",
+    placeholder: "z. B. Kabeltrommel 25 m",
+    add: "Notieren",
+    removeAria: (note: string) => `Notiz «${note}» löschen`,
+    hint: "Der Zettel taucht von selbst wieder auf, sobald du die nächste Reise an diesen Platz planst. Erledigtes löschst du einfach.",
+    reminderTitle: (place: string) =>
+      `Beim nächsten Mal am ${place} – deine Notizen vom letzten Besuch:`,
+    reminderLink: "Zum Platz-Dossier",
+  },
   condensation: {
     title: "Tau in der Nacht",
     high: (time: string) =>

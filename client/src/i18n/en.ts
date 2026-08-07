@@ -4170,6 +4170,17 @@ export const en: Translation = {
     addAria: (name: string) => `Add “${name}” to the list`,
     added: (name: string) => `“${name}” added.`,
   },
+  nextTime: {
+    title: "Next time",
+    empty: "Nothing noted yet. What should be different on the next visit?",
+    placeholder: "e.g. 25 m extension cord",
+    add: "Note it",
+    removeAria: (note: string) => `Delete note “${note}”`,
+    hint: "The note reappears by itself once you plan the next trip to this campsite. Delete what is done.",
+    reminderTitle: (place: string) =>
+      `Next time at ${place} – your notes from the last visit:`,
+    reminderLink: "To the campsite dossier",
+  },
   condensation: {
     title: "Dew tonight",
     high: (time: string) =>

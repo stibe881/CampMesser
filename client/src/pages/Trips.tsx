@@ -188,6 +188,7 @@ import LazySection from "@/components/LazySection";
 import TripMoreSections from "@/components/trips/TripMoreSections";
 import TripReview from "@/components/trips/TripReview";
 import TripOfflinePrep from "@/components/trips/TripOfflinePrep";
+import NextTimeReminder from "@/components/trips/NextTimeReminder";
 import TripYearReview from "@/components/trips/TripYearReview";
 import TripDatePoll from "@/components/TripDatePoll";
 import TripGuestbook from "@/components/TripGuestbook";
@@ -1804,6 +1805,13 @@ export default function TripsPage() {
                           {/* SELTENES HINTER EINEN SCHALTER (#357): Verlauf, Gästebuch
                             und Reservation braucht man selten – als eigene graue
                             Balken machten sie den Stapel unlesbar. */}
+                          {/* «Beim nächsten Mal» (#396): Die Notiz vom
+                            letzten Aufenthalt gehört GENAU hierher – beim
+                            Planen der nächsten Reise an denselben Platz,
+                            nicht versteckt im Dossier. */}
+                          {trip.spotId != null && (
+                            <NextTimeReminder spotId={trip.spotId} />
+                          )}
                           <TripMoreSections count={4}>
                             {/* Für unterwegs vorbereiten (#387): Offline gab
                               es bisher stückweise, und man musste an

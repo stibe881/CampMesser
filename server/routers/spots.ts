@@ -20,10 +20,13 @@ import {
   normalizeNoteText,
   normalizeNoteTitle,
   normalizeSpotAttributesJson,
+  parseNextTimeNotes,
   parsePitchSketch,
   parseSpotTariffs,
+  serializeNextTimeNotes,
   serializePitchSketch,
   serializeSpotTariffs,
+  NEXT_TIME_JSON_MAX_LENGTH,
   PITCH_SKETCH_JSON_MAX_LENGTH,
   TARIFFS_JSON_MAX_LENGTH,
   protectedProcedure,
@@ -127,6 +130,8 @@ export const spotsRouters = {
             .string()
             .max(PITCH_SKETCH_JSON_MAX_LENGTH)
             .nullish(),
+          /** «Beim nächsten Mal»-Zettel als JSON (#396); null löscht ihn. */
+          nextTimeJson: z.string().max(NEXT_TIME_JSON_MAX_LENGTH).nullish(),
           elevationM: SPOT_ELEVATION_INPUT,
         })
       )
@@ -140,6 +145,7 @@ export const spotsRouters = {
           extraPerNightRappen,
           tariffsJson,
           pitchSketchJson,
+          nextTimeJson,
           ...data
         } = input;
         return db.updateCampSpot(id, ctx.user.id, {
@@ -178,6 +184,16 @@ export const spotsRouters = {
             ? {
                 pitchSketchJson: serializePitchSketch(
                   parsePitchSketch(pitchSketchJson ?? null)
+                ),
+              }
+            : {}),
+          // «Beim nächsten Mal»-Zettel (#396): derselbe Parser wie die
+          // Anzeige. Bleibt bewusst AUS dem geteilten Dossier draussen –
+          // «Parzelle 12 meiden» ist eine private Notiz, kein Steckbrief.
+          ...(nextTimeJson !== undefined
+            ? {
+                nextTimeJson: serializeNextTimeNotes(
+                  parseNextTimeNotes(nextTimeJson ?? null)
                 ),
               }
             : {}),

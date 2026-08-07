@@ -105,6 +105,11 @@ export {
   serializePitchSketch,
   PITCH_SKETCH_JSON_MAX_LENGTH,
 } from "@shared/pitchSketch";
+export {
+  parseNextTimeNotes,
+  serializeNextTimeNotes,
+  NEXT_TIME_JSON_MAX_LENGTH,
+} from "@shared/nextTime";
 import {
   NOTE_TAG_MAX_LENGTH,
   NOTE_TEXT_MAX_LENGTH,

@@ -128,6 +128,13 @@ export const campSpots = mysqlTable(
      * werden nur als Ganzes gelesen und nie einzeln gesucht.
      */
     pitchSketchJson: text("pitchSketchJson"),
+    /**
+     * «Beim nächsten Mal»-Merker als JSON-Liste kurzer Zeilen (#396):
+     * «Kabeltrommel 25 m», «Parzelle 12 meiden». Format und Begründung in
+     * shared/nextTime.ts; JSON statt Tabelle aus demselben Grund wie bei
+     * tariffsJson. null = kein Zettel.
+     */
+    nextTimeJson: text("nextTimeJson"),
     /** Öffentlicher Teil-Token: Wer den Link kennt, sieht das Platz-Dossier (nur lesend). */
     shareToken: varchar("shareToken", { length: 32 }),
     /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
