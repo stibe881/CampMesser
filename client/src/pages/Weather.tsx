@@ -41,6 +41,7 @@ import { Link } from "wouter";
 import PageHeader from "@/components/PageHeader";
 import OfficialWarnings from "@/components/OfficialWarnings";
 import RainRadar from "@/components/RainRadar";
+import DryWindowCard from "@/components/DryWindowCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -2123,6 +2124,11 @@ export default function WeatherPage() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Trockenes Zeitfenster (#384): Die Stundendaten liegen ohnehin
+              vor; hier beantworten sie die Frage «wann baue ich ab?»
+              statt nur eine Tabelle zu füllen. */}
+          <DryWindowCard hours={data.hourly} className="mb-4" />
 
           {/* Regenradar: Leaflet-Karte mit RainViewer-Animation, lädt erst beim Aufklappen */}
           {coords && (
