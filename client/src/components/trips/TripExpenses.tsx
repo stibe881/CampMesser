@@ -56,6 +56,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/_core/hooks/useAuth";
+import PitchCostEstimator from "./PitchCostEstimator";
 import { trpc } from "@/lib/trpc";
 import { useI18n, useT } from "@/i18n";
 import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
@@ -130,6 +131,9 @@ export default function TripExpenses({
   defaultDay,
   shared,
   budgetRappen,
+  spotId,
+  startDate,
+  endDate,
 }: {
   tripId: number;
   tripName: string;
@@ -138,6 +142,10 @@ export default function TripExpenses({
   shared: boolean;
   /** Reise-Budget in Rappen (#256); null = keins gesetzt. */
   budgetRappen: number | null;
+  /** Verknüpfter Zeltplatz – Quelle der Tarife für die Schätzung (#386). */
+  spotId: number | null;
+  startDate: string;
+  endDate: string;
 }) {
   const ask = useConfirm();
   const { lang, t } = useI18n();
@@ -636,6 +644,17 @@ export default function TripExpenses({
                     <Download className="mr-1.5 h-4 w-4" aria-hidden="true" />
                     {t.tripExpenses.csvButton}
                   </Button>
+
+                  {/* Platzkosten schätzen (#386): Tarife (#369) × Nächte ×
+                      Personen. Trägt nichts von selbst ein – die Rezeption
+                      rechnet am Ende doch anders. */}
+                  <PitchCostEstimator
+                    tripId={tripId}
+                    spotId={spotId}
+                    startDate={startDate}
+                    endDate={endDate}
+                    onAdded={invalidate}
+                  />
 
                   {/* Fahrtkosten-Rechner (#259): der einzige Posten ohne
                       Beleg – man weiss nur, wie weit man gefahren ist */}
