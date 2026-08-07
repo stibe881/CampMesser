@@ -71,6 +71,7 @@ import {
 } from "@/lib/todayStart";
 import { getRecentModules } from "@/components/AppShell";
 import MorningBriefing from "@/components/MorningBriefing";
+import ReviewPromptCard from "@/components/ReviewPromptCard";
 import {
   ONBOARDING_DISMISSED_KEY,
   onboardingComplete,
@@ -1705,6 +1706,11 @@ export default function Home() {
         {isWidgetVisible(hiddenWidgets, "briefing") && <BriefingWidget />}
         {isWidgetVisible(hiddenWidgets, "trip") && <NextTripWidget />}
         {isWidgetVisible(hiddenWidgets, "anniversary") && <AnniversaryCard />}
+        {/* Rückblick-Erinnerung (#390): in den ersten Tagen nach der
+            Heimkehr, bis der Rückblick ausgefüllt oder weggeklickt ist.
+            Bewusst KEIN Push – die Trocknungs-Erinnerung (#89) kommt
+            schon, eine zweite Meldung wäre Lärm. */}
+        <ReviewPromptCard />
         {isWidgetVisible(hiddenWidgets, "weather") && (
           <WeatherWidget weather={homeWeather.weather} />
         )}
