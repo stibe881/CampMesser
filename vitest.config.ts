@@ -24,6 +24,18 @@ const templateRoot = path.resolve(import.meta.dirname);
  */
 export default defineConfig({
   root: templateRoot,
+  /**
+   * Dieselben Bau-Konstanten wie in `vite.config.ts` (#378).
+   *
+   * Das Profil zeigt die Version an (#27); im Bündel setzt Vite die
+   * Werte beim Bauen ein. Ohne sie stirbt ein Seiten-Test an
+   * «__APP_VERSION__ is not defined» – an einer Zeile, die mit dem
+   * Geprüften nichts zu tun hat.
+   */
+  define: {
+    __APP_VERSION__: JSON.stringify("test"),
+    __APP_BUILT_AT__: JSON.stringify("2026-01-01T00:00:00.000Z"),
+  },
   plugins: [react()],
   resolve: {
     alias: {

@@ -55,7 +55,7 @@ import {
 } from "@/lib/arrivalTracking";
 import { hapticCelebrate } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
-import { todayIso } from "@shared/localDate";
+import { useTodayIso } from "@/lib/useTodayIso";
 
 export default function ArrivalProgress() {
   const { lang, t } = useI18n();
@@ -76,7 +76,7 @@ export default function ArrivalProgress() {
   const spots = spotsQuery.data ?? [];
 
   // Vorschlag: der Platz der laufenden Reise, sonst der der nächsten
-  const today = todayIso();
+  const today = useTodayIso();
   const ownTrips = (tripsQuery.data ?? []).filter(row => row.role === "owner");
   const suggestedTrip =
     ownTrips

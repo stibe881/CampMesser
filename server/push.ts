@@ -114,7 +114,7 @@ export type PushKind = "weather" | "food" | "trip" | "astro" | "gear" | "heat";
  * Arten im Benachrichtigungs-Verlauf (#201): wie PushKind, aber mit den beiden
  * Sonderfällen, die am Flag «trip» hängen und trotzdem eigene Meldungen sind.
  */
-export type PushLogKind = PushKind | "drying" | "evepack" | "board";
+export type PushLogKind = PushKind | "drying" | "evepack" | "board" | "join";
 
 /** So viele Einträge behält der Verlauf pro Konto (ältere fallen weg). */
 export const PUSH_LOG_LIMIT = 50;

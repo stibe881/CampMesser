@@ -62,7 +62,7 @@ import {
 } from "@/lib/money";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { todayIso } from "@shared/localDate";
+import { useTodayIso } from "@/lib/useTodayIso";
 
 /** Private Foto-URL eines Inventar-Gegenstands (Auth über Session-Cookie). */
 function inventoryPhotoUrl(fileName: string): string {
@@ -117,7 +117,7 @@ function GearCareSection() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [months, setMonths] = useState("12");
-  const today = todayIso();
+  const today = useTodayIso();
 
   const addMutation = trpc.gear.add.useMutation({
     onSuccess: () => {
@@ -369,7 +369,7 @@ export default function InventoryPage() {
   const [warrantyFilter, setWarrantyFilter] = useState(false);
   // Filter-Chip «Verliehen (N)»: nur aktuell verliehene Gegenstände zeigen
   const [lentFilter, setLentFilter] = useState(false);
-  const today = todayIso();
+  const today = useTodayIso();
   // Ausleih-Dialog: Gegenstand, an wen und seit wann
   const [lentDialog, setLentDialog] = useState<{
     id: number;

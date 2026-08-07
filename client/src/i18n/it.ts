@@ -96,8 +96,6 @@ export const it: Translation = {
     subtitle: "Luna, stelle cadenti, ISS e costellazioni per stanotte",
     fromNatureHint:
       "Luna, oscurità, stelle cadenti, ISS e costellazioni – ora su una pagina propria",
-    moduleDescription:
-      "Vale la pena stanotte? Fase lunare, oscurità, stelle cadenti e passaggi",
   },
   /** «Konnte nicht geladen werden» – der dritte Zustand neben Laden und Leer. */
   queryError: {
@@ -308,6 +306,20 @@ export const it: Translation = {
     languageTitle: "Lingua",
     languageIntro:
       "In quale lingua deve funzionare l'app? La scelta vale su tutti i tuoi dispositivi, anche per le notifiche che riceve questo dispositivo.",
+    calendarTitle: "Abbonamento al calendario",
+    calendarIntro:
+      "I tuoi viaggi sempre aggiornati nel calendario del telefono o del computer: a differenza del file scaricato, un abbonamento si aggiorna da solo quando sposti un viaggio.",
+    calendarSubscribe: "Abbonati al calendario",
+    calendarCopy: "Copia l'indirizzo",
+    calendarCopied: "Indirizzo copiato.",
+    calendarCopyFailed:
+      "La copia non ha funzionato: seleziona l'indirizzo a mano.",
+    calendarSecretHint:
+      "Chi ha questo indirizzo vede luogo e periodo dei tuoi viaggi. L'hai dato via? Generane uno nuovo: il vecchio smette subito di funzionare.",
+    calendarResetButton: "Rigenera",
+    calendarResetConfirm:
+      "Generare un nuovo indirizzo? Gli abbonamenti con il vecchio smettono di aggiornarsi.",
+    calendarReset: "Nuovo indirizzo generato.",
     appBadgeTitle: "Numero sull'icona dell'app",
     appBadgeDesc:
       "Mostra sull'icona quanti alimenti della ghiacciaia scadono oggi o domani e quante attività di manutenzione sono in scadenza. Non è una notifica non letta: un'attività aperta resta finché non la spunti.",
@@ -419,6 +431,7 @@ export const it: Translation = {
       gear: "Attrezzatura",
       evepack: "Controllo della vigilia",
       board: "Bacheca",
+      join: "Compagni di viaggio",
     },
     homeTitle: "Località di casa",
     homeIntro:
@@ -1891,7 +1904,6 @@ export const it: Translation = {
         ? "1 meta del Trova-tenda sulla mappa"
         : `${n} mete del Trova-tenda sulla mappa`,
     routeLink: "Percorso →",
-    discoverToggle: "Scopri i campeggi",
     locateButton: "La mia posizione",
     locateFailed: "Impossibile determinare la posizione.",
     measureButton: "Misura",
@@ -2663,7 +2675,6 @@ export const it: Translation = {
         : `File di calendario con ${n} viaggi creato – aprilo per aggiungerli`,
     icsFailed: "Impossibile creare il file di calendario",
     milestonesTitle: "Traguardi",
-    milestonesAchievedOn: date => `raggiunto il ${date}`,
     milestonesNextTitle: "Prossimi obiettivi",
     milestonesProgress: (current, target) => `${current} di ${target}`,
     viewToggleAria: "Scegli la vista dei soggiorni",
@@ -2833,7 +2844,6 @@ export const it: Translation = {
     invalid: "Questo link di condivisione è scaduto o non è più valido.",
     invalidHint:
       "È scaduto oppure la proprietaria o il proprietario ha terminato la condivisione.",
-    infoTitle: "Info del viaggio",
     notesTitle: "Note",
     ratingAria: n => `Valutazione: ${n} stelle su 5`,
     spotTitle: "Piazzola",
@@ -3978,7 +3988,6 @@ export const it: Translation = {
     note: "Un criterio può restare vuoto. Chi sotto la pioggia non è mai stato fuori non può giudicare l'ombra – un tre inventato vale meno di un vuoto onesto.",
     compareTitle: "Confronta per criterio",
     compareAll: "Totale",
-    compareEmpty: "Nessuna piazzola valutata finora.",
     unrated: "–",
   },
   sharedTrack: {
@@ -4564,8 +4573,6 @@ export const it: Translation = {
     subtitle: "Che cosa puoi fare nei dintorni?",
     subtitleAtPlace: (place: string) =>
       `Che cosa puoi fare attorno a ${place}?`,
-    toggleOpen: "Mostra le gite",
-    toggleClose: "Nascondi le gite",
     loading: "Caricamento delle gite …",
     loadFailed: "Le gite non si sono potute caricare. Riprova più tardi.",
     empty:
@@ -5599,7 +5606,6 @@ export const it: Translation = {
       n === 1 ? "1 foto pronta" : `${n} foto pronte`,
     photoAlt: (n: number) => `Foto condivisa ${n}`,
     removePhotoAria: (n: number) => `Rimuovi la foto condivisa ${n}`,
-    readFailed: "Un'immagine condivisa non è stata letta.",
     tripLabel: "A quale viaggio?",
     tripAria: "Scegli un viaggio",
     noTrips: "Ancora nessun viaggio – crea prima una voce in «I miei viaggi».",

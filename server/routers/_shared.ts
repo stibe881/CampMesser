@@ -91,7 +91,7 @@ import {
 } from "@shared/tripBoard";
 export { buildTripSectionCounts } from "@shared/tripSectionCounts";
 export { buildTripReadinessCounts } from "@shared/tripReadinessCounts";
-export { boardAlertText } from "@shared/pushTexts";
+export { boardAlertText, tripJoinAlertText } from "@shared/pushTexts";
 export { tripDisplayName } from "@shared/tripName";
 export { notifyUsers } from "../push";
 export {

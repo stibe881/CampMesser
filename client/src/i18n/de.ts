@@ -98,8 +98,6 @@ export const de = {
     subtitle: "Mond, Sternschnuppen, ISS und Sternbilder für heute Nacht",
     fromNatureHint:
       "Mond, Dunkelheit, Sternschnuppen, ISS und Sternbilder – jetzt auf einer eigenen Seite",
-    moduleDescription:
-      "Lohnt sich die Nacht? Mondphase, Dunkelheit, Sternschnuppen und Überflüge",
   },
   /** «Konnte nicht geladen werden» – der dritte Zustand neben Laden und Leer. */
   queryError: {
@@ -320,6 +318,20 @@ export const de = {
     languageTitle: "Sprache",
     languageIntro:
       "In welcher Sprache soll die App laufen? Die Wahl gilt auf allen deinen Geräten – auch für die Mitteilungen, die dieses Gerät bekommt.",
+    calendarTitle: "Kalender-Abo",
+    calendarIntro:
+      "Deine Reisen laufend im Handy- oder Computer-Kalender – anders als die heruntergeladene Datei aktualisiert sich ein Abo von selbst, wenn du eine Reise verschiebst.",
+    calendarSubscribe: "Kalender abonnieren",
+    calendarCopy: "Adresse kopieren",
+    calendarCopied: "Adresse kopiert.",
+    calendarCopyFailed:
+      "Kopieren hat nicht geklappt – markier die Adresse von Hand.",
+    calendarSecretHint:
+      "Wer diese Adresse hat, sieht Ort und Zeitraum deiner Reisen. Weitergegeben? Neu erzeugen – der alte Link wird sofort ungültig.",
+    calendarResetButton: "Neu erzeugen",
+    calendarResetConfirm:
+      "Neue Adresse erzeugen? Abos mit der alten hören auf zu aktualisieren.",
+    calendarReset: "Neue Adresse erzeugt.",
     appBadgeTitle: "Zahl am App-Icon",
     appBadgeDesc:
       "Zeigt am Icon, wie viele Kühlbox-Einträge heute oder morgen ablaufen und wie viele Pflege-Aufgaben fällig sind. Das ist keine ungelesene Mitteilung – eine offene Pflege-Aufgabe bleibt stehen, bis du sie abhakst.",
@@ -430,6 +442,7 @@ export const de = {
       gear: "Ausrüstung",
       evepack: "Vorabend-Check",
       board: "Pinnwand",
+      join: "Mitreisende",
     },
     homeTitle: "Heim-Standort",
     homeIntro:
@@ -1916,7 +1929,6 @@ export const de = {
         ? "1 Zelt-Finder-Ziel auf der Karte"
         : `${n} Zelt-Finder-Ziele auf der Karte`,
     routeLink: "Route →",
-    discoverToggle: "Campingplätze entdecken",
     locateButton: "Mein Standort",
     locateFailed: "Standort konnte nicht ermittelt werden.",
     measureButton: "Messen",
@@ -2699,7 +2711,6 @@ export const de = {
         : `Kalender-Datei mit ${n} Reisen erstellt – öffne sie, um sie einzutragen`,
     icsFailed: "Kalender-Datei konnte nicht erstellt werden",
     milestonesTitle: "Meilensteine",
-    milestonesAchievedOn: (date: string) => `erreicht am ${date}`,
     milestonesNextTitle: "Nächste Ziele",
     milestonesProgress: (current: number, target: number) =>
       `${current} von ${target}`,
@@ -2871,7 +2882,6 @@ export const de = {
     invalid: "Dieser Teil-Link ist abgelaufen oder nicht mehr gültig.",
     invalidHint:
       "Er ist abgelaufen oder die Besitzerin bzw. der Besitzer hat das Teilen beendet.",
-    infoTitle: "Reise-Infos",
     notesTitle: "Notizen",
     ratingAria: (n: number) => `Bewertung: ${n} von 5 Sternen`,
     spotTitle: "Zeltplatz",
@@ -4018,7 +4028,6 @@ export const de = {
     note: "Ein Kriterium darf leer bleiben. Wer im Regen nie draussen sass, kann den Schatten nicht beurteilen – eine erfundene Drei ist schlechter als eine ehrliche Lücke.",
     compareTitle: "Nach Kriterium vergleichen",
     compareAll: "Gesamt",
-    compareEmpty: "Noch kein Platz bewertet.",
     unrated: "–",
   },
   sharedTrack: {
@@ -4607,8 +4616,6 @@ export const de = {
     subtitle: "Was kannst du in der Umgebung unternehmen?",
     subtitleAtPlace: (place: string) =>
       `Was kannst du rund um ${place} unternehmen?`,
-    toggleOpen: "Ausflüge anzeigen",
-    toggleClose: "Ausflüge ausblenden",
     loading: "Ausflüge werden geladen …",
     loadFailed:
       "Die Ausflüge konnten gerade nicht geladen werden. Versuch es später nochmals.",
@@ -5641,7 +5648,6 @@ export const de = {
       n === 1 ? "1 Foto bereit" : `${n} Fotos bereit`,
     photoAlt: (n: number) => `Geteiltes Foto ${n}`,
     removePhotoAria: (n: number) => `Geteiltes Foto ${n} entfernen`,
-    readFailed: "Ein geteiltes Bild konnte nicht gelesen werden.",
     tripLabel: "Zu welcher Reise?",
     tripAria: "Reise wählen",
     noTrips:

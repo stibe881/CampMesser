@@ -384,3 +384,35 @@ export function boardAlertText(
     body: `${input.tripName} · ${input.text}`,
   };
 }
+
+/**
+ * Jemand ist einer gemeinsamen Reise beigetreten (#376).
+ *
+ * WARUM AUSGERECHNET DAS EINE MELDUNG WERT IST: Eine Einladung geht als
+ * Link raus – per Nachricht, mündlich, wie auch immer. Ob sie angenommen
+ * wurde, sah bis jetzt nur, wer von sich aus den Mitreisenden-Dialog
+ * öffnete. Wer plant, wartet aber darauf: Solange nicht klar ist, wer
+ * mitkommt, kann man weder Betten noch Essen einteilen.
+ *
+ * EINMAL PRO PERSON, nie mehr: Beitreten passiert genau einmal. Das ist
+ * das Gegenteil von Lärm – und der Grund, warum es hier keine
+ * Zusammenfassung wie bei den Kühlbox-Meldungen braucht.
+ */
+export function tripJoinAlertText(
+  input: { person: string; tripName: string },
+  lang: Language
+) {
+  const title = l4(
+    `🎒 ${input.person} ist dabei`,
+    `🎒 ${input.person} est de la partie`,
+    `🎒 ${input.person} è dei nostri`,
+    `🎒 ${input.person} is coming along`
+  );
+  const body = l4(
+    `${input.person} ist deiner Reise «${input.tripName}» beigetreten.`,
+    `${input.person} a rejoint ton voyage « ${input.tripName} ».`,
+    `${input.person} si è aggiunto al tuo viaggio «${input.tripName}».`,
+    `${input.person} joined your trip “${input.tripName}”.`
+  );
+  return { title: pick(title, lang), body: pick(body, lang) };
+}

@@ -4,6 +4,8 @@
  * Aus `server/routers.ts` herausgelöst, Verhalten unverändert. Der
  * gemeinsame Unterbau steht in `_shared.ts`.
  */
+import { nanoid } from "nanoid";
+import { CALENDAR_TOKEN_LENGTH } from "@shared/calendarFeed";
 import {
   LANGUAGES,
   RAIN_THRESHOLD_MAX_MM,
@@ -23,6 +25,32 @@ import {
 } from "./_shared";
 
 export const accountRouters = {
+  /**
+   * Kalender-Abo (#377): eine Adresse, die der Kalender selbst abholt.
+   *
+   * Warum ein Abo und nicht die Datei aus #244 – und warum der Schlüssel
+   * in der Adresse steckt, steht in `shared/calendarFeed.ts`.
+   */
+  calendar: router({
+    /** Schlüssel des Kontos; entsteht beim ersten Abruf. */
+    feed: protectedProcedure.query(async ({ ctx }) => {
+      const token = await db.getOrCreateCalendarToken(ctx.user.id, () =>
+        nanoid(CALENDAR_TOKEN_LENGTH)
+      );
+      return { token };
+    }),
+    /**
+     * Neuen Schlüssel erzeugen. Danach zeigt der alte Link ins Leere –
+     * das ist der Sinn: Er ist das einzige Mittel gegen eine Adresse,
+     * die man versehentlich weitergegeben hat.
+     */
+    reset: protectedProcedure.mutation(async ({ ctx }) => {
+      const token = await db.resetCalendarToken(ctx.user.id, () =>
+        nanoid(CALENDAR_TOKEN_LENGTH)
+      );
+      return { token };
+    }),
+  }),
   home: router({
     /** Heim-Standort der Nutzer*in (null = keiner gesetzt). */
     get: protectedProcedure.query(async ({ ctx }) => {
