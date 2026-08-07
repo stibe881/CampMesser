@@ -192,6 +192,66 @@ export default defineConfig(({ command }) => ({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        /**
+         * Fremdcode in drei feste Brocken (#375).
+         *
+         * ZUERST GEMESSEN, dann geschraubt. Im Startpaket lagen 754 kB,
+         * und die Frage war, was davon weg kann. Antwort: fast nichts.
+         * Leaflet (150 kB) und Recharts (265 kB) werden längst
+         * nachgeladen (#8/#301); was bleibt, ist zu einem Viertel React
+         * selbst, dazu Radix, TanStack Query, tRPC und der eigene Code.
+         * Da ist nichts mehr wegzunehmen, ohne Funktionen wegzunehmen –
+         * wer hier «zu gross» liest, sucht sonst ewig weiter.
+         *
+         * WAS DIESE AUFTEILUNG KOSTET UND BRINGT, in Zahlen:
+         *
+         *   Erster Aufruf   754 kB → 775 kB   (+21 kB Brocken-Ränder)
+         *   Nach einer Auslieferung  754 kB → 263 kB neu zu laden
+         *
+         * Bis jetzt änderte JEDE Auslieferung dieselbe eine Datei von
+         * 754 kB – auch wenn nur eine Zeile in einer Karte anders war.
+         * Wer die App auf dem Campingplatz mit einem Balken Empfang
+         * öffnet, lud dann alles neu, React inklusive. Getrennt bleibt
+         * der Fremdcode im Zwischenspeicher stehen; neu kommt nur der
+         * eigene Teil. Bei einer App, die mehrmals pro Woche neu
+         * ausgeliefert wird, sind die 21 kB einmalig und die 490 kB
+         * jedes Mal.
+         *
+         * DREI GRUPPEN UND NICHT VIERZIG: Ein Brocken pro Paket wäre die
+         * feinste Aufteilung und die schlechteste – sechzig Anfragen
+         * kosten auf einer langsamen Leitung mehr, als die feinere
+         * Zwischenspeicherung einbringt.
+         *
+         * LUCIDE BLEIBT ABSICHTLICH DRAUSSEN: Ein eigener Icon-Brocken
+         * sah verlockend aus und war ein Rückschritt – er zwingt ALLE
+         * 514 benutzten Symbole in eine Datei, auch die, die nur eine
+         * nachgeladene Seite braucht. Gemessen: +112 kB im Startpaket.
+         * Verteilt auf die Seiten, die sie benutzen, sind es weniger.
+         */
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          // pnpm legt die Pakete unter .pnpm/<paket>@<version>/node_modules/<paket> ab
+          const segments = id.split("node_modules/");
+          const rest = segments[segments.length - 1];
+          if (/^(react|react-dom|scheduler)\//.test(rest)) return "react";
+          if (
+            /^(@radix-ui|@floating-ui|cmdk|sonner|next-themes|react-remove-scroll|aria-hidden|use-sidecar|react-style-singleton|tailwind-merge|clsx|class-variance-authority)/.test(
+              rest
+            )
+          ) {
+            return "ui";
+          }
+          if (/^(@tanstack|@trpc|superjson|copy-anything|is-what)/.test(rest)) {
+            return "data";
+          }
+          // Alles Übrige bleibt, wo es hingehört: bei der Seite, die es
+          // braucht. Nur so bleiben Leaflet und Recharts nachgeladen.
+          return undefined;
+        },
+      },
+    },
   },
   server: {
     host: true,
