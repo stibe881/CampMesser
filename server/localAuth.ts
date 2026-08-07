@@ -183,6 +183,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     customQuizzes,
     familyChildren,
     childBadges,
+    packFeedback,
     childStats,
     passportAbsences,
     shoppingItems,
@@ -367,6 +368,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   // Eigene Mitgliedschaften bei fremden Reisen ebenfalls aufräumen
   await db.delete(tripMembers).where(eq(tripMembers.userId, userId));
   await db.delete(tripLogs).where(eq(tripLogs.userId, userId));
+  // Rückblick nach der Reise (#381) – hängt am Konto, nicht an der Liste
+  await db.delete(packFeedback).where(eq(packFeedback.userId, userId));
   await db.delete(customRecipes).where(eq(customRecipes.userId, userId));
   await db.delete(customHunts).where(eq(customHunts.userId, userId));
   await db.delete(customQuizzes).where(eq(customQuizzes.userId, userId));

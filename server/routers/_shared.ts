@@ -92,6 +92,7 @@ import {
 export { buildTripSectionCounts } from "@shared/tripSectionCounts";
 export { buildTripReadinessCounts } from "@shared/tripReadinessCounts";
 export { boardAlertText, tripJoinAlertText } from "@shared/pushTexts";
+export { cleanFeedbackName, MAX_MISSING_PER_TRIP } from "@shared/packFeedback";
 export { tripDisplayName } from "@shared/tripName";
 export { notifyUsers } from "../push";
 export {

@@ -15,6 +15,7 @@ import {
   getDb,
   inArray,
   isShareExpired,
+  packFeedback,
   packItems,
   packLists,
   packTemplatesCustom,
@@ -319,4 +320,48 @@ export async function getPackListByToken(token: string) {
   const row = result[0];
   // Abgelaufene Teil-Links verhalten sich wie unbekannte Tokens
   return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
+}
+
+/**
+ * Rückblick nach der Reise (#381): alle Rückmeldungen eines Kontos.
+ *
+ * Alle auf einmal, nicht je Reise: Die Auswertung braucht die GESCHICHTE
+ * – «zweimal nicht gebraucht» lässt sich aus einer einzelnen Reise nicht
+ * ablesen. Die Zeilen sind klein und je Reise eine Handvoll.
+ */
+export async function getPackFeedback(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select({
+      tripId: packFeedback.tripId,
+      kind: packFeedback.kind,
+      name: packFeedback.name,
+    })
+    .from(packFeedback)
+    .where(eq(packFeedback.userId, userId))
+    .orderBy(asc(packFeedback.createdAt), asc(packFeedback.id));
+}
+
+/**
+ * Den Rückblick EINER Reise ersetzen.
+ *
+ * Ersetzen und nicht ergänzen: Der Rückblick ist ein Formular, das man
+ * auch korrigiert – wer ein Häkchen wieder wegnimmt, meint das auch so.
+ * Andere Reisen bleiben unberührt.
+ */
+export async function savePackFeedback(
+  userId: number,
+  tripId: number,
+  entries: { kind: "unused" | "missing"; name: string }[]
+) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(packFeedback)
+    .where(
+      and(eq(packFeedback.userId, userId), eq(packFeedback.tripId, tripId))
+    );
+  if (entries.length === 0) return;
+  await db
+    .insert(packFeedback)
+    .values(entries.map(entry => ({ userId, tripId, ...entry })));
 }

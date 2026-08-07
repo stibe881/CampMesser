@@ -1843,6 +1843,39 @@ export type InsertDeletedItem = typeof deletedItems.$inferInsert;
  * `label` ist NUTZERTEXT (Titel einer Ausgabe, Tag im Journal) und bleibt
  * bewusst unübersetzt – übersetzt wird nur, was die App selbst benennt.
  */
+/**
+ * Rückmeldung nach der Reise (#381): Was war nicht nötig, was hat
+ * gefehlt?
+ *
+ * EINE ZEILE JE MELDUNG, nicht je Gegenstand: Dieselbe Regenhose kann
+ * über Jahre mehrfach auffallen, und genau das Zählen macht aus einer
+ * Beobachtung einen Hinweis. Zusammengefasst wird beim Lesen
+ * (`shared/packFeedback.ts`), nicht beim Schreiben.
+ *
+ * Der Name steht als TEXT drin und nicht als Verweis auf `packItems`:
+ * Die Liste einer vergangenen Reise wird gelöscht, archiviert oder
+ * umgeschrieben – die Erfahrung soll das überleben.
+ */
+export const packFeedback = mysqlTable(
+  "packFeedback",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    tripId: int("tripId").notNull(),
+    /** «unused» = war nicht nötig, «missing» = hat gefehlt */
+    kind: mysqlEnum("kind", ["unused", "missing"]).notNull(),
+    name: varchar("name", { length: 160 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    index("packFeedback_userId").on(table.userId),
+    index("packFeedback_tripId").on(table.tripId),
+  ]
+);
+
+export type PackFeedback = typeof packFeedback.$inferSelect;
+export type InsertPackFeedback = typeof packFeedback.$inferInsert;
+
 export const tripChanges = mysqlTable(
   "tripChanges",
   {

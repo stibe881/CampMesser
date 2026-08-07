@@ -20,6 +20,7 @@ import TripHolidayHints from "@/components/trips/TripHolidayHints";
 import TripJournal from "@/components/trips/TripJournal";
 import TripMembersDialog from "@/components/trips/TripMembersDialog";
 import TripPackSuggestions from "@/components/trips/TripPackSuggestions";
+import PackExperienceHints from "@/components/trips/PackExperienceHints";
 import TripPitchDetails from "@/components/trips/TripPitchDetails";
 import TripReadinessCard from "@/components/trips/TripReadinessCard";
 import TripShareDialog from "@/components/trips/TripShareDialog";
@@ -185,6 +186,7 @@ import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import LazySection from "@/components/LazySection";
 import TripMoreSections from "@/components/trips/TripMoreSections";
+import TripReview from "@/components/trips/TripReview";
 import TripYearReview from "@/components/trips/TripYearReview";
 import TripDatePoll from "@/components/TripDatePoll";
 import TripGuestbook from "@/components/TripGuestbook";
@@ -1600,6 +1602,11 @@ export default function TripsPage() {
                           endDate={trip.endDate}
                         />
                       )}
+                      {/* Was frühere Reisen über diese Liste sagen (#381) –
+                          nur solange Packen noch ein Thema ist. */}
+                      {packingMatters && trip.packListId != null && (
+                        <PackExperienceHints listId={trip.packListId} />
+                      )}
                       <div className="mt-2 flex flex-wrap gap-2">
                         {/* Der Weg zu allem Übrigen (#359): In der Liste
                             stehen nur noch Titelzeile, Bereitschaft und
@@ -2177,7 +2184,16 @@ export default function TripsPage() {
                               endDate={trip.endDate}
                             />
                             {/* Seltenes hinter einen Schalter (#357) */}
-                            <TripMoreSections count={3}>
+                            <TripMoreSections count={4}>
+                              {/* Rückblick (#381): Erst nach der Reise
+                                weiss man, was nicht nötig war und was
+                                gefehlt hat – und nur dann verbessert es
+                                die nächste Liste. */}
+                              <TripReview
+                                tripId={trip.id}
+                                packListId={trip.packListId}
+                                tripName={label(trip)}
+                              />
                               {/* Änderungsverlauf (#296) auch rückblickend:
                                 «wer hat das damals eingetragen» */}
                               {(trip.shared || trip.role === "member") && (
