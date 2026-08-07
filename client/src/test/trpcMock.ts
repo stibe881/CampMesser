@@ -85,8 +85,16 @@ function utilsProxy(): unknown {
  * Ein Pfad ohne Eintrag liefert `undefined` als Daten. Das ist Absicht:
  * Seiten schreiben `query.data ?? []`, und genau dieser Zweig soll im
  * Test mitgeprüft werden.
+ *
+ * `mutations` bildet Pfade auf `mutate`-Spione ab, für Tests, die prüfen
+ * wollen, WAS eine Seite speichert (oder dass sie es eben nicht tut):
+ *
+ *     trpcMock({}, { "spots.update": updateSpy })
  */
-export function trpcMock(data: Record<string, unknown> = {}) {
+export function trpcMock(
+  data: Record<string, unknown> = {},
+  mutations: Record<string, (input: unknown) => void> = {}
+) {
   const build = (path: string[]): unknown =>
     new Proxy(() => {}, {
       get(_target, prop) {
@@ -97,7 +105,13 @@ export function trpcMock(data: Record<string, unknown> = {}) {
         if (prop === "useInfiniteQuery") {
           return () => queryResult(data[path.join(".")]);
         }
-        if (prop === "useMutation") return () => mutationResult();
+        if (prop === "useMutation") {
+          const key = path.join(".");
+          return () =>
+            key in mutations
+              ? { ...mutationResult(), mutate: mutations[key] }
+              : mutationResult();
+        }
         if (prop === "useUtils" || prop === "useContext") {
           return () => utilsProxy();
         }

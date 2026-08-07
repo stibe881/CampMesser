@@ -19,7 +19,7 @@
  * ERSCHEINT NUR, wenn der Aufenthalt einen Platz hat und der Platz
  * Preise kennt. Ohne Zahlen gäbe es nichts zu rechnen.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,12 @@ import { Input } from "@/components/ui/input";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { formatRappen, parseSpotTariffs } from "@shared/spotTariffs";
+import {
+  DEFAULT_TARIFF_CURRENCY,
+  formatRappen,
+  parseSpotTariffs,
+  tariffActiveOn,
+} from "@shared/spotTariffs";
 import {
   cleanCount,
   emptyCounts,
@@ -84,6 +89,15 @@ export default function PitchCostEstimator({
     onError: e => toast.error(e.message || t.common.saveFailed),
   });
 
+  // Der Tarif, der zum REISEBEGINN gilt (#394), ist vorgewählt – wer im
+  // Juli plant, meint die Hauptsaison. Nur solange noch nichts getippt
+  // ist; eine Wahl von Hand wird nie übersteuert.
+  useEffect(() => {
+    if (counts !== null) return;
+    const active = tariffs.findIndex(entry => tariffActiveOn(entry, startDate));
+    if (active > 0) setTariffIndex(active);
+  }, [tariffs, counts, startDate]);
+
   const tariff = tariffs[tariffIndex];
   const rows = counts ?? (tariff ? emptyCounts(tariff) : []);
   const nightly =
@@ -93,6 +107,12 @@ export default function PitchCostEstimator({
     rows,
     nightlyRappen: nightly,
   });
+  // Der Grundpreis (#243) ist immer CHF; nur die Tarif-Rechnung trägt
+  // seit #395 eine eigene Währung.
+  const currency =
+    estimate?.source === "tariff"
+      ? (tariff?.currency ?? DEFAULT_TARIFF_CURRENCY)
+      : DEFAULT_TARIFF_CURRENCY;
 
   // Ohne Platz oder ohne jede Preisangabe gibt es nichts zu rechnen.
   if (spotId === null) return null;
@@ -158,7 +178,11 @@ export default function PitchCostEstimator({
                   <span className="min-w-0 flex-1 truncate text-sm">
                     {row.label}
                     <span className="ml-1.5 text-xs text-muted-foreground">
-                      {formatRappen(row.priceRappen, lang)}
+                      {formatRappen(
+                        row.priceRappen,
+                        lang,
+                        tariff?.currency ?? DEFAULT_TARIFF_CURRENCY
+                      )}
                     </span>
                   </span>
                   <Input
@@ -188,32 +212,42 @@ export default function PitchCostEstimator({
           {estimate ? (
             <>
               <p className="font-serif text-xl font-bold">
-                {formatRappen(estimate.totalRappen, lang)}
+                {formatRappen(estimate.totalRappen, lang, currency)}
               </p>
               <p className="text-xs text-muted-foreground">
                 {pc.breakdown(
-                  formatRappen(estimate.perNightRappen, lang),
+                  formatRappen(estimate.perNightRappen, lang, currency),
                   estimate.nights
                 )}
                 {estimate.source === "nightly" && ` · ${pc.sourceNightly}`}
               </p>
-              <Button
-                type="button"
-                size="sm"
-                disabled={addMutation.isPending}
-                onClick={() =>
-                  addMutation.mutate({
-                    tripId,
-                    amountRappen: estimate.totalRappen,
-                    category: "camping",
-                    description: pc.expenseLabel(estimate.nights),
-                    day: startDate,
-                    paidBy,
-                  })
-                }
-              >
-                {pc.addToExpenses}
-              </Button>
+              {/* Die Reisekasse wird in CHF geführt (#219). Einen
+                  EUR-Betrag als CHF einzutragen wäre eine falsche Zahl
+                  mit einem Knopfdruck – dann lieber kein Knopf und ein
+                  ehrlicher Satz. */}
+              {currency === "CHF" ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={addMutation.isPending}
+                  onClick={() =>
+                    addMutation.mutate({
+                      tripId,
+                      amountRappen: estimate.totalRappen,
+                      category: "camping",
+                      description: pc.expenseLabel(estimate.nights),
+                      day: startDate,
+                      paidBy,
+                    })
+                  }
+                >
+                  {pc.addToExpenses}
+                </Button>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {pc.foreignCurrency(currency)}
+                </p>
+              )}
             </>
           ) : (
             <p className="text-xs text-muted-foreground">{pc.nothingYet}</p>
