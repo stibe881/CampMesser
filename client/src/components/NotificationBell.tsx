@@ -50,6 +50,7 @@ import {
   unreadPushCount,
 } from "@shared/pushInbox";
 import { loadPushSeenAt, savePushSeenAt } from "@/lib/pushSeen";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 
 /** Symbol je Mitteilungs-Art (unbekannte Arten: Glocke). */
 const PUSH_KIND_ICONS: Record<string, LucideIcon> = {
@@ -72,6 +73,22 @@ export default function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [seenAt, setSeenAt] = useState<string | null>(() => loadPushSeenAt());
 
+  /**
+   * Gesehen ist gesehen – auf ALLEN Geräten (#393, Nutzerwunsch).
+   *
+   * Beim Abgleich gewinnt der JÜNGERE Zeitpunkt: Ein Gerät kann den
+   * Stand nur vorwärts schieben, nie etwas «ungesehen» machen. Die
+   * ISO-Zeitstempel aus `newestSentAt` sind darum direkt vergleichbar.
+   */
+  const seenSync = useSyncedSetting<string>("pushSeenAt", value => {
+    if (typeof value !== "string" || !value) return;
+    setSeenAt(prev => {
+      if (prev && value <= prev) return prev;
+      savePushSeenAt(value);
+      return value;
+    });
+  });
+
   const logQuery = trpc.push.log.useQuery(
     {},
     { enabled: isAuthenticated, staleTime: 5 * 60_000 }
@@ -90,6 +107,9 @@ export default function NotificationBell() {
     if (!newest || newest === seenAt) return;
     setSeenAt(newest);
     savePushSeenAt(newest);
+    // Ans Konto melden, damit das Tablet daneben den Punkt auch verliert.
+    seenSync.push(newest);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, entries, seenAt]);
 
   // Abgemeldet gibt es keinen Verlauf – und nichts, was eine Glocke

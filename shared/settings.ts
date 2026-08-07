@@ -55,6 +55,16 @@ export const SYNCED_SETTING_KEYS = [
   "mapsApp",
   /** Zahl am App-Icon anzeigen (#373) */
   "appBadge",
+  /**
+   * Bis wann die Glocke gesehen ist (#393, Nutzerwunsch 07.08.2026).
+   *
+   * Stand seit #374 bewusst NUR im localStorage – «gesehen hat man die
+   * Meldung auf diesem Gerät». Der Alltag hat anders entschieden: Wer
+   * die Meldungen am Telefon gelesen hat, will den Punkt am Tablet
+   * nicht noch einmal wegdrücken. Beim Abgleich gewinnt der JÜNGERE
+   * Zeitpunkt – kein Gerät kann etwas «ungesehen» machen.
+   */
+  "pushSeenAt",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];
