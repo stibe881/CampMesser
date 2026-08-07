@@ -143,6 +143,9 @@ export const it: Translation = {
     currentTripSpotLink: "Dossier della piazzola",
     currentTripSpotAria: place => `Apri il dossier della piazzola ${place}`,
     currentTripShoppingLink: "Lista della spesa",
+    currentTripFoodLink: "Frigo box",
+    currentTripWeatherLink: "Meteo del campo",
+    currentTripChoresLink: "Piano dei turni",
     currentTripMealsSr: "Pasti di oggi:",
     anniversaryTitleOne: "Un anno fa",
     anniversaryTitleMany: years => `${years} anni fa`,
@@ -405,6 +408,7 @@ export const it: Translation = {
       astro: "Stelle cadenti",
       gear: "Attrezzatura",
       evepack: "Controllo della vigilia",
+      board: "Bacheca",
     },
     homeTitle: "Località di casa",
     homeIntro:
@@ -1223,6 +1227,15 @@ export const it: Translation = {
     obstaclesTitle: "Ostacoli all'orizzonte",
     obstaclesIntro:
       "Registra alberi, montagne o edifici attorno alla tua piazzola. La bussola li mostra nel diagramma e calcola quando coprono il sole – importante per tenda e pannelli solari.",
+    /** Berge automatisch aus dem Höhenmodell (#372) */
+    terrainButton: "Rileva le montagne",
+    terrainBusy: "Rilevamento in corso …",
+    terrainHint:
+      "Dal modello altimetrico attorno a questo punto: 24 direzioni fino a 30 km. Alberi e case non figurano in nessun modello – quelli li disegni tu.",
+    terrainNoLocation:
+      "Nessuna posizione – senza coordinate non c’è nulla da calcolare.",
+    terrainFailed: "Il modello altimetrico non risponde.",
+    terrainDone: (count: number) => `${count} direzioni riprese dal terreno`,
     profileGroupAria: "Scegli il profilo degli ostacoli",
     profileGeneral: "Generale",
     obstacleLine: (
@@ -2077,6 +2090,21 @@ export const it: Translation = {
     costEmpty:
       "Nessun prezzo registrato – annota quanto costa una notte qui, così potrai confrontare le piazzole nelle statistiche.",
     costEditButton: "Modifica i costi",
+    tariffsTitle: "Altre tariffe",
+    tariffsEmpty: "Nessuna tariffa registrata.",
+    tariffRowsEmpty: "Nessuna riga.",
+    tariffsHint:
+      "Per il confronto delle piazzole nelle statistiche vale sempre il prezzo per notte qui sopra – un confronto su più tariffe non sarebbe più un confronto.",
+    tariffsEditButton: "Modifica tariffe",
+    tariffsSaved: "Tariffe salvate",
+    tariffAdd: "Aggiungi tariffa",
+    tariffRowAdd: "Aggiungi riga",
+    tariffNamePlaceholder: "p. es. alta stagione",
+    tariffRowLabelPlaceholder: "p. es. adulti",
+    tariffRowPriceAria: "Prezzo per notte",
+    tariffTotal: (amount: string) => `In tutto ${amount}`,
+    tariffRemoveAria: (name: string) => `Rimuovi la tariffa ${name}`,
+    tariffRowRemoveAria: (label: string) => `Rimuovi la riga ${label}`,
     costPriceLabel: "Piazzola per notte",
     costExtraLabel: "Tassa di soggiorno e spese accessorie",
     costNightlyLabel: "Totale per notte",
@@ -2350,6 +2378,9 @@ export const it: Translation = {
     detailSubtitle: "Un soggiorno in dettaglio",
     backToList: "Tutti i soggiorni",
     openDetailAria: (name: string) => `Apri il soggiorno ${name}`,
+    openTrip: "Apri il viaggio",
+    foodButton: "Frigo box e scorte",
+    foodAria: (name: string) => `Apri frigo box e dispensa per ${name}`,
     detailNotFound:
       "Questo soggiorno non esiste più – forse è stato eliminato.",
     title: "I miei viaggi",
@@ -3052,6 +3083,17 @@ export const it: Translation = {
     pointsLabel: "Punti",
     addChore: "Aggiungi",
     removeAria: (title: string) => `Elimina ${title}`,
+    personsTitle: "Persone",
+    personsHint:
+      "I turni vengono distribuiti a tutti. Fa punti solo chi ha l’interruttore attivo – così gli adulti partecipano senza falsare la classifica dei bambini.",
+    addPersonPlaceholder: "Nome",
+    addPerson: "Aggiungi persona",
+    earnsPointsLabel: "Punti",
+    earnsPointsAria: (name: string) => `${name} fa punti?`,
+    removePersonAria: (name: string) => `Rimuovi ${name}`,
+    removePersonConfirm: (name: string) =>
+      `Rimuovere ${name}? Distintivi, punti e voci del passaporto spariscono con lei.`,
+    personAdded: "Persona aggiunta",
     rotationHint:
       "Si distribuisce a turno e non a caso: chi oggi lava i piatti domani porta la legna. Il giorno sposta l'ordine di uno – così ogni bambino può verificare che sia giusto.",
   },
@@ -3845,6 +3887,11 @@ export const it: Translation = {
     subtitle: "Che cosa ti aspetta per strada – non solo all'arrivo.",
     subtitleAtPlace: (place: string) =>
       `Che cosa ti aspetta sulla strada per ${place} – non solo all'arrivo.`,
+    /** Hin- oder Rückfahrt (#368) */
+    directionGroupAria: "Scegli andata o ritorno",
+    directionThere: "Andata",
+    directionBack: "Ritorno",
+    directionBackHint: "Ritorno a casa – partenza dalla piazzola.",
     startGroupAria: "Scegli il punto di partenza",
     startHome: "Da casa",
     startCurrent: "Dalla mia posizione",

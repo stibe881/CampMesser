@@ -114,7 +114,7 @@ export type PushKind = "weather" | "food" | "trip" | "astro" | "gear" | "heat";
  * Arten im Benachrichtigungs-Verlauf (#201): wie PushKind, aber mit den beiden
  * Sonderfällen, die am Flag «trip» hängen und trotzdem eigene Meldungen sind.
  */
-export type PushLogKind = PushKind | "drying" | "evepack";
+export type PushLogKind = PushKind | "drying" | "evepack" | "board";
 
 /** So viele Einträge behält der Verlauf pro Konto (ältere fallen weg). */
 export const PUSH_LOG_LIMIT = 50;
@@ -843,6 +843,127 @@ async function dailyRainFor(
  * Umständen falsch ist, ist aber genau die Art Fehler, die man nicht
  * findet. Es gilt jetzt überall `zurichIsoDate()`.
  */
+
+/**
+ * EINEN Push an EIN Abo ausliefern – ohne Cron-Lauf drumherum (#367).
+ *
+ * WARUM ALS EIGENE FUNKTION: Bis jetzt gab es Mitteilungen nur aus
+ * `checkAndNotify`, also aus dem stündlichen Lauf. Ein Zettel an der
+ * Pinnwand ist aber ein EREIGNIS: Wer ihn eine Stunde später bekommt,
+ * hätte ihn genauso gut selbst nachschauen können. Die Zustellung –
+ * Expo-Token für die native App, sonst Web-Push, und bei widerrufenem Abo
+ * (404/410) das Abo löschen – ist dieselbe; sie steht darum hier und wird
+ * von beiden Wegen benutzt.
+ *
+ * Rückgabe «gone» heisst: Das Abo war weg und ist jetzt auch aus der
+ * Tabelle raus.
+ */
+async function deliverPush(
+  sub: { id: number; endpoint: string; p256dh: string; auth: string },
+  payload: string
+): Promise<"sent" | "gone" | "error"> {
+  const db = await getDb();
+  if (!db) return "error";
+  const drop = async () => {
+    await db.delete(pushSubscriptions).where(eq(pushSubscriptions.id, sub.id));
+  };
+  try {
+    if (sub.endpoint.startsWith("ExponentPushToken[")) {
+      const data = JSON.parse(payload);
+      const res = await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Accept-Encoding": "gzip, deflate",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: sub.endpoint,
+          title: data.title,
+          body: data.body,
+          data: { url: data.url },
+        }),
+      });
+      const resData = await res.json();
+      if (
+        resData.data?.status === "error" &&
+        resData.data?.details?.error === "DeviceNotRegistered"
+      ) {
+        await drop();
+        return "gone";
+      }
+      return "sent";
+    }
+    await webpush.sendNotification(
+      {
+        endpoint: sub.endpoint,
+        keys: { p256dh: sub.p256dh, auth: sub.auth },
+      },
+      payload
+    );
+    return "sent";
+  } catch (error) {
+    const status = (error as { statusCode?: number }).statusCode;
+    if (status === 404 || status === 410) {
+      await drop();
+      return "gone";
+    }
+    return "error";
+  }
+}
+
+/**
+ * Eine Meldung sofort an mehrere Konten schicken (#367).
+ *
+ * Die Sprache hängt am GERÄT (#313), darum bekommt `build` sie übergeben
+ * und wird je Abo aufgerufen. Wer die Art abbestellt hat, bekommt nichts –
+ * dieselbe Prüfung wie im Cron-Lauf.
+ *
+ * FEHLER WERDEN GESCHLUCKT: Aufgerufen wird das aus einer Mutation
+ * heraus. Ein Zettel, der gespeichert ist, darf nicht daran scheitern,
+ * dass ein Push-Dienst gerade nicht antwortet.
+ */
+export async function notifyUsers(
+  userIds: number[],
+  kind: PushKind,
+  logKind: PushLogKind,
+  url: string,
+  build: (lang: Language) => { title: string; body: string }
+): Promise<number> {
+  if (userIds.length === 0 || !pushConfigured()) return 0;
+  const db = await getDb();
+  if (!db) return 0;
+  configureWebPush();
+  const subs = await db
+    .select()
+    .from(pushSubscriptions)
+    .where(inArray(pushSubscriptions.userId, userIds));
+  const logged = new Set<number>();
+  let sent = 0;
+  for (const sub of subs) {
+    if (!subscriptionWants(sub, kind)) continue;
+    const lang = (LANGUAGES as readonly string[]).includes(sub.lang)
+      ? (sub.lang as Language)
+      : "de";
+    const text = build(lang);
+    const payload = JSON.stringify({ ...text, url });
+    const status = await deliverPush(sub, payload);
+    if (status !== "sent") continue;
+    sent += 1;
+    // Der Verlauf hängt am KONTO, nicht am Gerät – bei zwei Handys steht
+    // die Meldung trotzdem nur einmal drin.
+    if (logged.has(sub.userId)) continue;
+    logged.add(sub.userId);
+    await recordPushLog({
+      userId: sub.userId,
+      kind: logKind,
+      title: text.title,
+      body: text.body,
+      url,
+    });
+  }
+  return sent;
+}
 
 /**
  * Alle Abos prüfen: für jeden Zeltplatz der abonnierten Nutzer*innen die

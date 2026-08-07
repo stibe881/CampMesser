@@ -49,6 +49,7 @@ export async function updateCampSpot(
       | "parcelNumber"
       | "pricePerNightRappen"
       | "extraPerNightRappen"
+      | "tariffsJson"
       | "elevationM"
       | "ratingSanitary"
       | "ratingQuiet"

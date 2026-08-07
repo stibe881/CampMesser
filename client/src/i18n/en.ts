@@ -142,6 +142,9 @@ export const en: Translation = {
     currentTripSpotLink: "Pitch dossier",
     currentTripSpotAria: place => `Open the pitch dossier for ${place}`,
     currentTripShoppingLink: "Shopping list",
+    currentTripFoodLink: "Cool box",
+    currentTripWeatherLink: "Camp weather",
+    currentTripChoresLink: "Chore plan",
     currentTripMealsSr: "Today's meals:",
     anniversaryTitleOne: "One year ago",
     anniversaryTitleMany: years => `${years} years ago`,
@@ -399,6 +402,7 @@ export const en: Translation = {
       astro: "Meteor shower",
       gear: "Gear",
       evepack: "Evening check",
+      board: "Pinboard",
     },
     homeTitle: "Home location",
     homeIntro:
@@ -1195,6 +1199,16 @@ export const en: Translation = {
     obstaclesTitle: "Obstacles on the horizon",
     obstaclesIntro:
       "Record trees, mountains or buildings around your pitch. The compass shows them in the diagram and calculates when they hide the sun – important for tent and solar panels.",
+    /** Berge automatisch aus dem Höhenmodell (#372) */
+    terrainButton: "Detect mountains",
+    terrainBusy: "Detecting mountains …",
+    terrainHint:
+      "From the elevation model around this point: 24 directions up to 30 km. Trees and houses are in no elevation model – you still draw those yourself.",
+    terrainNoLocation:
+      "No location – without coordinates there is nothing to compute.",
+    terrainFailed: "The elevation model is not answering.",
+    terrainDone: (count: number) =>
+      `${count} directions taken from the terrain`,
     profileGroupAria: "Choose obstacle profile",
     profileGeneral: "General",
     obstacleLine: (
@@ -2038,6 +2052,21 @@ export const en: Translation = {
     costEmpty:
       "No price recorded yet – note down what a night here costs, then you can compare pitches in the statistics.",
     costEditButton: "Edit costs",
+    tariffsTitle: "Further rates",
+    tariffsEmpty: "No rates recorded yet.",
+    tariffRowsEmpty: "No rows yet.",
+    tariffsHint:
+      "The pitch comparison in the statistics still uses the price per night above – a comparison across several rates would not be one.",
+    tariffsEditButton: "Edit rates",
+    tariffsSaved: "Rates saved",
+    tariffAdd: "Add rate",
+    tariffRowAdd: "Add row",
+    tariffNamePlaceholder: "e.g. high season",
+    tariffRowLabelPlaceholder: "e.g. adults",
+    tariffRowPriceAria: "Price per night",
+    tariffTotal: (amount: string) => `Together ${amount}`,
+    tariffRemoveAria: (name: string) => `Remove rate ${name}`,
+    tariffRowRemoveAria: (label: string) => `Remove row ${label}`,
     costPriceLabel: "Pitch per night",
     costExtraLabel: "Tourist tax & extras",
     costNightlyLabel: "Total per night",
@@ -2297,6 +2326,9 @@ export const en: Translation = {
     detailSubtitle: "A single stay in detail",
     backToList: "All stays",
     openDetailAria: (name: string) => `Open the stay ${name}`,
+    openTrip: "Open trip",
+    foodButton: "Cool box & store",
+    foodAria: (name: string) => `Open cool box and dry store for ${name}`,
     detailNotFound: "This stay no longer exists – it may have been deleted.",
     title: "My trips",
     subtitle: "Record your camping stays: places, nights and memories.",
@@ -2982,6 +3014,17 @@ export const en: Translation = {
     pointsLabel: "Points",
     addChore: "Add",
     removeAria: (title: string) => `Delete ${title}`,
+    personsTitle: "People",
+    personsHint:
+      "Chores are shared out among everyone. Only those with the switch on collect points – so the adults join in without upsetting the children’s ranking.",
+    addPersonPlaceholder: "Name",
+    addPerson: "Add person",
+    earnsPointsLabel: "Points",
+    earnsPointsAria: (name: string) => `Does ${name} collect points?`,
+    removePersonAria: (name: string) => `Remove ${name}`,
+    removePersonConfirm: (name: string) =>
+      `Remove ${name}? Their badges, points and passport entries go with them.`,
+    personAdded: "Person added",
     rotationHint:
       "Chores are shared out in rotation, not at random: whoever washes up today fetches firewood tomorrow. Each day shifts the order by one – so every child can check for themselves that it is fair.",
   },
@@ -3762,6 +3805,11 @@ export const en: Translation = {
     subtitle: "What awaits you en route – not just at the destination.",
     subtitleAtPlace: (place: string) =>
       `What awaits you on the way to ${place} – not just at the destination.`,
+    /** Hin- oder Rückfahrt (#368) */
+    directionGroupAria: "Choose outbound or return",
+    directionThere: "Outbound",
+    directionBack: "Return",
+    directionBackHint: "Back home – departing from the pitch.",
     startGroupAria: "Choose the starting point",
     startHome: "From home",
     startCurrent: "From my location",

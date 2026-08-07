@@ -66,6 +66,17 @@ type Status =
 
 type StartMode = "home" | "current";
 
+/**
+ * Hin- oder Rückfahrt (#368, Nutzerwunsch).
+ *
+ * Die Ansicht rechnete immer von daheim zum Platz. Die Rückfahrt ist aber
+ * die andere Hälfte der Reise, und sie ist nicht dasselbe: Man fährt an
+ * einem anderen Tag, zu einer anderen Zeit, und die Gewitterzelle steht
+ * dann woanders. Gedreht wird nur die Richtung – Prüfpunkte, Wetterstunde
+ * und Verkehrslage bleiben dieselbe Rechnung.
+ */
+type Direction = "there" | "back";
+
 interface Segment {
   lat: number;
   lon: number;
@@ -110,6 +121,7 @@ export default function RouteWeather({
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const [startMode, setStartMode] = useState<StartMode>("home");
+  const [direction, setDirection] = useState<Direction>("there");
   const [departure, setDeparture] = useState(() => {
     const now = new Date();
     const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
@@ -152,21 +164,25 @@ export default function RouteWeather({
   );
 
   const search = useCallback(
-    async (mode: StartMode, departureLocal: string) => {
-      let start: { lat: number; lon: number } | null = null;
+    async (mode: StartMode, departureLocal: string, dir: Direction) => {
+      let base: { lat: number; lon: number } | null = null;
       if (mode === "home") {
-        start = home ? { lat: home.latitude, lon: home.longitude } : null;
+        base = home ? { lat: home.latitude, lon: home.longitude } : null;
       } else {
         setStatus("locating");
-        start = await currentPosition();
+        base = await currentPosition();
       }
-      if (!start) {
+      if (!base) {
         setSegments([]);
         setStatus("noStart");
         return;
       }
 
-      const end = { lat: latitude, lon: longitude };
+      // Auf der Rückfahrt sind Start und Ziel getauscht – sonst ändert
+      // sich nichts an der Rechnung.
+      const away = { lat: latitude, lon: longitude };
+      const start = dir === "there" ? base : away;
+      const end = dir === "there" ? away : base;
       if (
         distanceMeters(start.lat, start.lon, end.lat, end.lon) / 1000 <
         MIN_ROUTE_KM
@@ -320,7 +336,7 @@ export default function RouteWeather({
   const toggle = () => {
     const next = !open;
     setOpen(next);
-    if (next && status === "idle") void search(startMode, departure);
+    if (next && status === "idle") void search(startMode, departure, direction);
   };
 
   const worst = worstSeverity(segments.map(s => s.risk));
@@ -360,6 +376,32 @@ export default function RouteWeather({
             <div
               className="flex flex-wrap items-center gap-2"
               role="group"
+              aria-label={tr.directionGroupAria}
+            >
+              {(["there", "back"] as const).map(dir => (
+                <button
+                  key={dir}
+                  type="button"
+                  onClick={() => {
+                    setDirection(dir);
+                    void search(startMode, departure, dir);
+                  }}
+                  aria-pressed={direction === dir}
+                  disabled={status === "loading" || status === "locating"}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-sm transition-colors disabled:opacity-60",
+                    direction === dir
+                      ? "border-primary bg-accent text-accent-foreground"
+                      : "border-border text-muted-foreground hover:border-primary/40"
+                  )}
+                >
+                  {dir === "there" ? tr.directionThere : tr.directionBack}
+                </button>
+              ))}
+            </div>
+            <div
+              className="flex flex-wrap items-center gap-2"
+              role="group"
               aria-label={tr.startGroupAria}
             >
               {(["home", "current"] as const).map(mode => (
@@ -368,7 +410,7 @@ export default function RouteWeather({
                   type="button"
                   onClick={() => {
                     setStartMode(mode);
-                    void search(mode, departure);
+                    void search(mode, departure, direction);
                   }}
                   aria-pressed={startMode === mode}
                   disabled={status === "loading" || status === "locating"}
@@ -393,12 +435,17 @@ export default function RouteWeather({
                 value={departure}
                 onChange={e => {
                   setDeparture(e.target.value);
-                  void search(startMode, e.target.value);
+                  void search(startMode, e.target.value, direction);
                 }}
                 className="w-52"
               />
             </div>
           </div>
+          {direction === "back" && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {tr.directionBackHint}
+            </p>
+          )}
 
           {(status === "loading" || status === "locating") && (
             <div

@@ -42,6 +42,17 @@ export const SYNCED_SETTING_KEYS = [
   "quickBar",
   /** Während einer laufenden Reise mit der «Heute»-Ansicht starten (#298) */
   "todayStart",
+  /**
+   * Design: hell, dunkel oder dem System folgen (#360).
+   *
+   * Stand bis jetzt NUR im localStorage – wer im Profil auf «Dunkel»
+   * stellte, hatte am zweiten Gerät wieder Hell. Dass die Wahl im Profil
+   * getroffen wird, macht sie zu einer Kontoeinstellung; alles andere im
+   * Profil (Push, Zuhause, Name) hing längst am Konto.
+   */
+  "theme",
+  /** Karten-App für Routen: «apple», «google» oder «ask» (#360) */
+  "mapsApp",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];

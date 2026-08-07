@@ -146,6 +146,10 @@ export const de = {
     currentTripSpotLink: "Platz-Dossier",
     currentTripSpotAria: (place: string) => `Platz-Dossier zu ${place} öffnen`,
     currentTripShoppingLink: "Einkaufsliste",
+    /** Drei weitere Wege aus der laufenden Reise heraus (#366) */
+    currentTripFoodLink: "Kühlbox",
+    currentTripWeatherLink: "Camp-Wetter",
+    currentTripChoresLink: "Ämtli-Plan",
     currentTripMealsSr: "Heutige Mahlzeiten:",
     anniversaryTitleOne: "Vor einem Jahr",
     anniversaryTitleMany: (years: number) => `Vor ${years} Jahren`,
@@ -415,6 +419,7 @@ export const de = {
       astro: "Sternschnuppen",
       gear: "Ausrüstung",
       evepack: "Vorabend-Check",
+      board: "Pinnwand",
     },
     homeTitle: "Heim-Standort",
     homeIntro:
@@ -1240,6 +1245,16 @@ export const de = {
     obstaclesTitle: "Hindernisse am Horizont",
     obstaclesIntro:
       "Trage Bäume, Berge oder Gebäude rund um deinen Platz ein. Der Kompass zeigt sie im Diagramm und berechnet, wann sie die Sonne verdecken – wichtig für Zelt und Solarpanels.",
+    /** Berge automatisch aus dem Höhenmodell (#372) */
+    terrainButton: "Berge automatisch ermitteln",
+    terrainBusy: "Berge werden ermittelt …",
+    terrainHint:
+      "Aus dem Höhenmodell rund um diesen Punkt: 24 Richtungen bis 30 km weit. Bäume und Häuser stehen in keinem Höhenmodell – die zeichnest du weiterhin selbst.",
+    terrainNoLocation:
+      "Kein Standort – ohne Koordinate gibt es nichts zu berechnen.",
+    terrainFailed: "Das Höhenmodell antwortet nicht.",
+    terrainDone: (count: number) =>
+      `${count} Richtungen aus dem Gelände übernommen`,
     profileGroupAria: "Hindernis-Profil wählen",
     profileGeneral: "Allgemein",
     obstacleLine: (
@@ -2100,6 +2115,22 @@ export const de = {
     costEmpty:
       "Noch kein Preis erfasst – halte fest, was eine Nacht hier kostet, dann kannst du die Plätze in der Statistik vergleichen.",
     costEditButton: "Kosten bearbeiten",
+    /** Mehrere Tarife pro Platz (#369) */
+    tariffsTitle: "Weitere Tarife",
+    tariffsEmpty: "Noch keine Tarife erfasst.",
+    tariffRowsEmpty: "Noch keine Zeilen.",
+    tariffsHint:
+      "Für den Platz-Vergleich in der Statistik zählt weiterhin der Preis pro Nacht oben – ein Vergleich über mehrere Tarife wäre keiner mehr.",
+    tariffsEditButton: "Tarife bearbeiten",
+    tariffsSaved: "Tarife gespeichert",
+    tariffAdd: "Tarif hinzufügen",
+    tariffRowAdd: "Zeile hinzufügen",
+    tariffNamePlaceholder: "z. B. Hauptsaison",
+    tariffRowLabelPlaceholder: "z. B. Erwachsene",
+    tariffRowPriceAria: "Preis pro Nacht",
+    tariffTotal: (amount: string) => `Zusammen ${amount}`,
+    tariffRemoveAria: (name: string) => `Tarif ${name} entfernen`,
+    tariffRowRemoveAria: (label: string) => `Zeile ${label} entfernen`,
     costPriceLabel: "Platz pro Nacht",
     costExtraLabel: "Kurtaxe & Nebenkosten",
     costNightlyLabel: "Total pro Nacht",
@@ -2374,6 +2405,11 @@ export const de = {
     detailSubtitle: "Ein Aufenthalt im Detail",
     backToList: "Alle Aufenthalte",
     openDetailAria: (name: string) => `Aufenthalt ${name} öffnen`,
+    /** Knopf in der Liste: führt zur Detailseite mit allen Abschnitten (#359) */
+    openTrip: "Reise öffnen",
+    /** Knopf zur Kühlbox – der Vorrat gehört zum Aufenthalt (#365) */
+    foodButton: "Kühlbox & Vorrat",
+    foodAria: (name: string) => `Kühlbox und Trockenvorrat für ${name} öffnen`,
     detailNotFound:
       "Diesen Aufenthalt gibt es nicht mehr – vielleicht wurde er gelöscht.",
     title: "Meine Reisen",
@@ -3088,6 +3124,18 @@ export const de = {
     pointsLabel: "Punkte",
     addChore: "Hinzufügen",
     removeAria: (title: string) => `${title} löschen`,
+    /** Personen im Ämtli-Plan (#370) */
+    personsTitle: "Personen",
+    personsHint:
+      "Ämtli werden an alle verteilt. Punkte sammelt nur, wer den Schalter an hat – so machen die Erwachsenen mit, ohne die Rangliste der Kinder zu kippen.",
+    addPersonPlaceholder: "Name",
+    addPerson: "Person hinzufügen",
+    earnsPointsLabel: "Punkte",
+    earnsPointsAria: (name: string) => `Sammelt ${name} Punkte?`,
+    removePersonAria: (name: string) => `${name} entfernen`,
+    removePersonConfirm: (name: string) =>
+      `${name} entfernen? Abzeichen, Punkte und Reisepass-Einträge dieser Person gehen mit.`,
+    personAdded: "Person hinzugefügt",
     rotationHint:
       "Verteilt wird reihum und nicht zufällig: Wer heute abwäscht, holt morgen Holz. Der Tag verschiebt die Reihenfolge um eins – so kann jedes Kind nachrechnen, dass es fair zugeht.",
   },
@@ -3878,6 +3926,11 @@ export const de = {
     subtitle: "Was dich unterwegs erwartet – nicht nur am Ziel.",
     subtitleAtPlace: (place: string) =>
       `Was dich auf dem Weg nach ${place} erwartet – nicht nur am Ziel.`,
+    /** Hin- oder Rückfahrt (#368) */
+    directionGroupAria: "Hin- oder Rückfahrt wählen",
+    directionThere: "Hinfahrt",
+    directionBack: "Rückfahrt",
+    directionBackHint: "Zurück nach Hause – Abfahrt vom Platz.",
     startGroupAria: "Startpunkt wählen",
     startHome: "Ab Heimatort",
     startCurrent: "Ab Standort",

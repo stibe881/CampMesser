@@ -90,6 +90,15 @@ import {
   sortTripBoardEntries,
 } from "@shared/tripBoard";
 export { buildTripSectionCounts } from "@shared/tripSectionCounts";
+export { buildTripReadinessCounts } from "@shared/tripReadinessCounts";
+export { boardAlertText } from "@shared/pushTexts";
+export { tripDisplayName } from "@shared/tripName";
+export { notifyUsers } from "../push";
+export {
+  parseSpotTariffs,
+  serializeSpotTariffs,
+  TARIFFS_JSON_MAX_LENGTH,
+} from "@shared/spotTariffs";
 import {
   NOTE_TAG_MAX_LENGTH,
   NOTE_TEXT_MAX_LENGTH,

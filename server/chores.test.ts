@@ -112,3 +112,63 @@ describe("Ämtli-Plan (#270)", () => {
     expect(dayProgress([assignments[0]]).allDone).toBe(true);
   });
 });
+
+/**
+ * Punkte-Schalter je Person (#370).
+ *
+ * Ämtli machen alle – die Rangliste ist der Wettbewerb der Kinder. Ein
+ * Vater mit 40 Punkten an der Spitze macht sie sinnlos.
+ */
+describe("Punkte-Schalter", () => {
+  const chores = [{ id: 1, title: "Abwaschen", points: 3 }];
+  const assignments = [
+    {
+      id: 1,
+      choreId: 1,
+      childId: 1,
+      day: "2026-08-06",
+      doneAt: "2026-08-06T18:00:00Z",
+    },
+    {
+      id: 2,
+      choreId: 1,
+      childId: 2,
+      day: "2026-08-07",
+      doneAt: "2026-08-07T18:00:00Z",
+    },
+  ];
+
+  it("wer nicht mitzählt, steht nicht in der Rangliste", () => {
+    const rows = scoreboard(
+      [
+        { id: 1, name: "Mia" },
+        { id: 2, name: "Papa", earnsPoints: false },
+      ],
+      chores,
+      assignments
+    );
+    expect(rows.map(r => r.name)).toEqual(["Mia"]);
+  });
+
+  it("ohne Angabe zählt eine Person mit", () => {
+    // Profile aus der Zeit vor der Spalte sollen bleiben, wie sie waren.
+    const rows = scoreboard([{ id: 1, name: "Mia" }], chores, assignments);
+    expect(rows[0].points).toBe(3);
+  });
+
+  it("verteilt wird trotzdem an alle", () => {
+    // Der Schalter entscheidet über die PUNKTE, nicht über die Arbeit.
+    const result = rotateAssignments(
+      [
+        { id: 1, title: "Abwaschen", points: 1 },
+        { id: 2, title: "Holz holen", points: 1 },
+      ],
+      [
+        { id: 1, name: "Mia" },
+        { id: 2, name: "Papa", earnsPoints: false },
+      ],
+      "2026-08-06"
+    );
+    expect(new Set(result.map(r => r.childId))).toEqual(new Set([1, 2]));
+  });
+});

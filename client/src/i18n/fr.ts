@@ -148,6 +148,9 @@ export const fr: Translation = {
     currentTripSpotLink: "Dossier de l'emplacement",
     currentTripSpotAria: place => `Ouvrir le dossier de l'emplacement ${place}`,
     currentTripShoppingLink: "Liste de courses",
+    currentTripFoodLink: "Glacière",
+    currentTripWeatherLink: "Météo du camp",
+    currentTripChoresLink: "Plan des tâches",
     currentTripMealsSr: "Repas d'aujourd'hui :",
     anniversaryTitleOne: "Il y a un an",
     anniversaryTitleMany: years => `Il y a ${years} ans`,
@@ -416,6 +419,7 @@ export const fr: Translation = {
       astro: "Étoiles filantes",
       gear: "Équipement",
       evepack: "Contrôle de la veille",
+      board: "Tableau",
     },
     homeTitle: "Lieu de domicile",
     homeIntro:
@@ -1244,6 +1248,14 @@ export const fr: Translation = {
     obstaclesTitle: "Obstacles à l'horizon",
     obstaclesIntro:
       "Saisis les arbres, montagnes ou bâtiments autour de ton emplacement. La boussole les affiche dans le diagramme et calcule quand ils cachent le soleil – important pour la tente et les panneaux solaires.",
+    /** Berge automatisch aus dem Höhenmodell (#372) */
+    terrainButton: "Détecter les montagnes",
+    terrainBusy: "Détection en cours …",
+    terrainHint:
+      "À partir du modèle d’élévation autour de ce point : 24 directions jusqu’à 30 km. Les arbres et les maisons ne figurent dans aucun modèle – ceux-là, tu les dessines toi-même.",
+    terrainNoLocation: "Pas de position – sans coordonnée, rien à calculer.",
+    terrainFailed: "Le modèle d’élévation ne répond pas.",
+    terrainDone: (count: number) => `${count} directions reprises du terrain`,
     profileGroupAria: "Choisir le profil d'obstacles",
     profileGeneral: "Général",
     obstacleLine: (
@@ -2104,6 +2116,21 @@ export const fr: Translation = {
     costEmpty:
       "Aucun prix saisi pour l'instant – note ce que coûte une nuit ici, tu pourras ensuite comparer les emplacements dans les statistiques.",
     costEditButton: "Modifier les coûts",
+    tariffsTitle: "Autres tarifs",
+    tariffsEmpty: "Aucun tarif saisi.",
+    tariffRowsEmpty: "Aucune ligne.",
+    tariffsHint:
+      "Pour la comparaison des emplacements dans les statistiques, c’est toujours le prix par nuit ci-dessus qui compte – comparer plusieurs tarifs ne serait plus une comparaison.",
+    tariffsEditButton: "Modifier les tarifs",
+    tariffsSaved: "Tarifs enregistrés",
+    tariffAdd: "Ajouter un tarif",
+    tariffRowAdd: "Ajouter une ligne",
+    tariffNamePlaceholder: "p. ex. haute saison",
+    tariffRowLabelPlaceholder: "p. ex. adultes",
+    tariffRowPriceAria: "Prix par nuit",
+    tariffTotal: (amount: string) => `Ensemble ${amount}`,
+    tariffRemoveAria: (name: string) => `Supprimer le tarif ${name}`,
+    tariffRowRemoveAria: (label: string) => `Supprimer la ligne ${label}`,
     costPriceLabel: "Emplacement par nuit",
     costExtraLabel: "Taxe de séjour et frais annexes",
     costNightlyLabel: "Total par nuit",
@@ -2375,6 +2402,10 @@ export const fr: Translation = {
     detailSubtitle: "Un séjour en détail",
     backToList: "Tous les séjours",
     openDetailAria: (name: string) => `Ouvrir le séjour ${name}`,
+    openTrip: "Ouvrir le voyage",
+    foodButton: "Glacière & provisions",
+    foodAria: (name: string) =>
+      `Ouvrir la glacière et les provisions pour ${name}`,
     detailNotFound: "Ce séjour n'existe plus – il a peut-être été supprimé.",
     title: "Mes voyages",
     subtitle:
@@ -3083,6 +3114,17 @@ export const fr: Translation = {
     pointsLabel: "Points",
     addChore: "Ajouter",
     removeAria: (title: string) => `Supprimer ${title}`,
+    personsTitle: "Personnes",
+    personsHint:
+      "Les tâches sont réparties entre toutes les personnes. Seules celles dont l’interrupteur est activé marquent des points – les adultes participent sans fausser le classement des enfants.",
+    addPersonPlaceholder: "Nom",
+    addPerson: "Ajouter une personne",
+    earnsPointsLabel: "Points",
+    earnsPointsAria: (name: string) => `${name} marque-t-elle des points ?`,
+    removePersonAria: (name: string) => `Retirer ${name}`,
+    removePersonConfirm: (name: string) =>
+      `Retirer ${name} ? Ses badges, points et entrées de passeport disparaissent avec.`,
+    personAdded: "Personne ajoutée",
     rotationHint:
       "La répartition se fait à tour de rôle et non au hasard : qui fait la vaisselle aujourd'hui ira chercher le bois demain. Le jour décale l'ordre d'un cran – chaque enfant peut ainsi vérifier que c'est équitable.",
   },
@@ -3876,6 +3918,11 @@ export const fr: Translation = {
     subtitle: "Ce qui t'attend en route – pas seulement à l'arrivée.",
     subtitleAtPlace: (place: string) =>
       `Ce qui t'attend sur la route vers ${place} – pas seulement à l'arrivée.`,
+    /** Hin- oder Rückfahrt (#368) */
+    directionGroupAria: "Choisir aller ou retour",
+    directionThere: "Aller",
+    directionBack: "Retour",
+    directionBackHint: "Retour à la maison – départ de l’emplacement.",
     startGroupAria: "Choisir le point de départ",
     startHome: "Depuis le domicile",
     startCurrent: "Depuis ma position",

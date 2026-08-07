@@ -51,6 +51,21 @@ export async function addFamilyChild(data: InsertFamilyChild) {
   const [result] = await db.insert(familyChildren).values(data);
   return result.insertId;
 }
+/**
+ * Punkte-Schalter einer Person setzen (#370): Wer mitverteilt wird, aber
+ * nicht in der Rangliste stehen soll, steht auf `false`.
+ */
+export async function setFamilyChildEarnsPoints(
+  id: number,
+  userId: number,
+  earnsPoints: boolean
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(familyChildren)
+    .set({ earnsPoints })
+    .where(and(eq(familyChildren.id, id), eq(familyChildren.userId, userId)));
+}
 export async function renameFamilyChild(
   id: number,
   userId: number,

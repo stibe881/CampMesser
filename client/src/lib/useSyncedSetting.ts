@@ -11,11 +11,25 @@ import type { SyncedSettingKey } from "@shared/settings";
 
 export function useSyncedSetting<T>(
   key: SyncedSettingKey,
-  onServerValue: (value: T) => void
+  onServerValue: (value: T) => void,
+  options: {
+    /**
+     * Den Server-Stand übernehmen? Standard ja.
+     *
+     * `false` braucht, wer nur SENDEN will, weil eine andere Stelle schon
+     * empfängt (#360): Design und Karten-App werden app-weit in
+     * `SettingsSync` übernommen – auf einem zweiten Gerät soll das Design
+     * stimmen, ohne dass man erst ins Profil geht. Die Profil-Seite
+     * schickt nur noch, was man dort umstellt. Zwei Empfänger für
+     * denselben Schlüssel wären kein Fehler, aber eine Einladung dazu.
+     */
+    receive?: boolean;
+  } = {}
 ): { push: (value: T) => void } {
+  const receive = options.receive !== false;
   const { isAuthenticated } = useAuth();
   const query = trpc.settings.all.useQuery(undefined, {
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && receive,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
@@ -27,7 +41,7 @@ export function useSyncedSetting<T>(
   callbackRef.current = onServerValue;
 
   useEffect(() => {
-    if (applied.current || !query.data) return;
+    if (!receive || applied.current || !query.data) return;
     applied.current = true;
     const raw = query.data[key];
     if (raw === undefined) return;

@@ -34,12 +34,18 @@ import {
   updateAppBadge,
 } from "@/lib/appBadge";
 import { useTheme } from "@/contexts/ThemeContext";
+import {
+  nextThemePreference,
+  saveThemePreference,
+  type ThemePreference,
+} from "@/lib/themePreference";
 import { useI18n } from "@/i18n";
 import { LANGUAGES, LANGUAGE_LABELS } from "@shared/i18n";
 import BrandLogo from "@/components/BrandLogo";
 import InstallPrompt from "@/components/InstallPrompt";
 import OfflineBanner from "@/components/OfflineBanner";
 import OfflineSync from "@/components/OfflineSync";
+import SettingsSync from "@/components/SettingsSync";
 import DirectionsPrompt from "@/components/DirectionsPrompt";
 import UpdatePrompt from "@/components/UpdatePrompt";
 import QuickActions from "@/components/QuickActions";
@@ -167,6 +173,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [headerHidden, setHeaderHidden] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const { preference, toggleTheme } = useTheme();
+
+  /**
+   * Der Design-Knopf in der Kopfzeile schreibt die Wahl neu auch ans Konto
+   * (#360) – nur SENDEN, empfangen tut `SettingsSync` app-weit.
+   */
+  const themeSync = useSyncedSetting<ThemePreference>("theme", () => {}, {
+    receive: false,
+  });
+  const cycleTheme = () => {
+    const next = nextThemePreference(preference);
+    saveThemePreference(next);
+    themeSync.push(next);
+    toggleTheme?.();
+  };
   const { lang, t, setLang } = useI18n();
 
   // Schnellzugriff-Leiste (#297): lokal gespeichert, per Konto abgeglichen
@@ -280,7 +300,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </DropdownMenu>
             <button
               type="button"
-              onClick={() => toggleTheme?.()}
+              onClick={cycleTheme}
               className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
               aria-label={
                 preference === "light"
@@ -380,6 +400,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Offline gesetzte Häkchen nachschicken (ohne eigene Darstellung) */}
       <OfflineSync />
+
+      {/* Design und Karten-App vom Konto übernehmen (#360, ohne Darstellung) */}
+      <SettingsSync />
 
       {/* «Womit navigieren?» – fragt beim ersten Routen-Klick nach der
           Karten-App und merkt sich die Antwort auf Wunsch. */}

@@ -1,6 +1,10 @@
 import { useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
+import {
+  horizonSamplePoints,
+  type HorizonReading,
+} from "@shared/terrainHorizon";
 
 /**
  * Höhe über Meer eines Zeltplatzes: Die Open-Meteo-Elevation-API liefert zu
@@ -135,4 +139,37 @@ export function useAutoElevation(spot: ElevationSpot | null | undefined): void {
       cancelled = true;
     };
   }, [id, latitude, longitude, known]);
+}
+
+/**
+ * Den Horizont eines Ortes aus dem Höhenmodell holen (#372).
+ *
+ * 24 Richtungen × 8 Entfernungen sind 192 Punkte; Open-Meteo beantwortet
+ * höchstens 100 auf einmal, also läuft es in Blöcken. Gerechnet wird
+ * nicht hier, sondern in `shared/terrainHorizon.ts` – das ist geprüft.
+ *
+ * Löcher im Höhenmodell bleiben `null` und fallen bei der Auswertung
+ * weg, statt als Meereshöhe einen Abgrund vorzutäuschen.
+ */
+export async function fetchHorizonReadings(
+  latitude: number,
+  longitude: number
+): Promise<HorizonReading[]> {
+  const samples = horizonSamplePoints(latitude, longitude);
+  const readings: HorizonReading[] = [];
+  const BATCH = 100;
+  for (let i = 0; i < samples.length; i += BATCH) {
+    const slice = samples.slice(i, i + BATCH);
+    const values = await fetchElevations(
+      slice.map(s => ({ lat: s.latitude, lon: s.longitude }))
+    );
+    slice.forEach((sample, index) => {
+      readings.push({
+        azimuth: sample.azimuth,
+        distanceM: sample.distanceM,
+        elevationM: values[index] ?? null,
+      });
+    });
+  }
+  return readings;
 }
