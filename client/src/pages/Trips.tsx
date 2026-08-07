@@ -187,6 +187,7 @@ import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import LazySection from "@/components/LazySection";
 import TripMoreSections from "@/components/trips/TripMoreSections";
 import TripReview from "@/components/trips/TripReview";
+import TripOfflinePrep from "@/components/trips/TripOfflinePrep";
 import TripYearReview from "@/components/trips/TripYearReview";
 import TripDatePoll from "@/components/TripDatePoll";
 import TripGuestbook from "@/components/TripGuestbook";
@@ -1759,6 +1760,9 @@ export default function TripsPage() {
                               }
                               shared={trip.shared || trip.role === "member"}
                               budgetRappen={trip.budgetRappen}
+                              spotId={trip.spotId}
+                              startDate={trip.startDate}
+                              endDate={trip.endDate}
                             />
                           </Suspense>
                           {/* Termin-Finder (#253): nur bei gemeinsamen Reisen und
@@ -1800,7 +1804,17 @@ export default function TripsPage() {
                           {/* SELTENES HINTER EINEN SCHALTER (#357): Verlauf, Gästebuch
                             und Reservation braucht man selten – als eigene graue
                             Balken machten sie den Stapel unlesbar. */}
-                          <TripMoreSections count={3}>
+                          <TripMoreSections count={4}>
+                            {/* Für unterwegs vorbereiten (#387): Offline gab
+                              es bisher stückweise, und man musste an
+                              mehrere Dinge einzeln denken. Ein Knopf für
+                              diese Reise – vor der Abfahrt, nicht im
+                              Funkloch. */}
+                            <TripOfflinePrep
+                              tripId={trip.id}
+                              spotId={trip.spotId}
+                              packListId={trip.packListId}
+                            />
                             {/* Änderungsverlauf (#296): nur bei gemeinsamen
                               Reisen – allein ist «wer war das» schon
                               beantwortet */}
@@ -2164,6 +2178,9 @@ export default function TripsPage() {
                               }
                               shared={trip.shared || trip.role === "member"}
                               budgetRappen={trip.budgetRappen}
+                              spotId={trip.spotId}
+                              startDate={trip.startDate}
+                              endDate={trip.endDate}
                             />
                             {/* Pinnwand (#245, für jede Reise seit #344) */}
                             <TripBoard
