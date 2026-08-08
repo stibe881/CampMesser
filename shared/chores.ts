@@ -24,6 +24,11 @@ export interface ChoreLike {
   id: number;
   title: string;
   points: number;
+  /**
+   * Wochentage (#447) als JSON-Liste von ISO-Wochentagen (1 = Montag …
+   * 7 = Sonntag); null/undefined = jeden Tag.
+   */
+  weekdaysJson?: string | null;
 }
 
 export interface AssignmentLike {
@@ -78,6 +83,60 @@ export function dayIndex(iso: string): number {
     Number(match[3])
   );
   return Math.floor(time / 86400000);
+}
+
+/**
+ * Ämtli nur an bestimmten Wochentagen (#447): «Abfall rausbringen» fällt
+ * nur dienstags an, Abwasch täglich. Gespeichert als JSON-Liste von
+ * ISO-Wochentagen; alles Unlesbare wird verworfen. null heisst «jeden
+ * Tag» – auch eine Liste mit allen sieben Tagen wird dazu normalisiert,
+ * damit «alle angekreuzt» und «nichts eingeschränkt» dasselbe sind.
+ */
+export function parseChoreWeekdays(
+  json: string | null | undefined
+): number[] | null {
+  if (!json) return null;
+  try {
+    const parsed = JSON.parse(json);
+    if (!Array.isArray(parsed)) return null;
+    const days = Array.from(
+      new Set(
+        parsed.filter(
+          (d): d is number => Number.isInteger(d) && d >= 1 && d <= 7
+        )
+      )
+    ).sort((a, b) => a - b);
+    if (days.length === 0 || days.length === 7) return null;
+    return days;
+  } catch {
+    return null;
+  }
+}
+
+/** ISO-Wochentag (1 = Montag … 7 = Sonntag) eines ISO-Datums; 0 = ungültig. */
+export function isoWeekday(iso: string): number {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!match) return 0;
+  const day = new Date(
+    Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+  ).getUTCDay();
+  return day === 0 ? 7 : day;
+}
+
+/**
+ * Die an einem Tag anfallenden Ämtli. Ein ungültiges Datum lässt alle
+ * gelten – lieber ein Ämtli zu viel verteilt als eines verschluckt.
+ */
+export function choresForDay<T extends ChoreLike>(
+  chores: readonly T[],
+  day: string
+): T[] {
+  const weekday = isoWeekday(day);
+  if (weekday === 0) return chores.slice();
+  return chores.filter(chore => {
+    const days = parseChoreWeekdays(chore.weekdaysJson);
+    return days === null || days.includes(weekday);
+  });
 }
 
 /**

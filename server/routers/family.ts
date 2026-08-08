@@ -23,6 +23,7 @@ import {
   parseQuizQuestions,
   protectedProcedure,
   publicProcedure,
+  choresForDay,
   rotateAssignments,
   scoreboard,
   availablePoints,
@@ -210,6 +211,25 @@ export const familyRouters = {
         return { success: true } as const;
       }),
     /**
+     * Wochentage eines Ämtli setzen (#447): «Abfall rausbringen» fällt
+     * nur dienstags an. Leer oder alle sieben Tage heisst «täglich» und
+     * wird als null gespeichert.
+     */
+    setWeekdays: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          weekdays: z.array(z.number().int().min(1).max(7)).max(7),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const days = Array.from(new Set(input.weekdays)).sort((a, b) => a - b);
+        const json =
+          days.length === 0 || days.length === 7 ? null : JSON.stringify(days);
+        await db.setCampChoreWeekdays(input.id, ctx.user.id, json);
+        return { success: true } as const;
+      }),
+    /**
      * Ämtli des Tages reihum verteilen. Bestehende Zuteilungen des Tages
      * werden ersetzt – «neu verteilen» heisst neu verteilen, nicht
      * dazulegen.
@@ -228,7 +248,12 @@ export const familyRouters = {
           });
         }
         await db.deleteChoreAssignmentsForDay(ctx.user.id, input.day);
-        const planned = rotateAssignments(chores, children, input.day);
+        // Wochentage (#447): nur die an diesem Tag anfallenden Ämtli verteilen
+        const planned = rotateAssignments(
+          choresForDay(chores, input.day),
+          children,
+          input.day
+        );
         for (const entry of planned) {
           await db.createChoreAssignment({
             userId: ctx.user.id,

@@ -3251,6 +3251,9 @@ export const de = {
     removePersonConfirm: (name: string) =>
       `${name} entfernen? Abzeichen, Punkte und Reisepass-Einträge dieser Person gehen mit.`,
     personAdded: "Person hinzugefügt",
+    weekdaysAria: (title: string) => `Wochentage für ${title}`,
+    weekdaysHint:
+      "Tippe die Wochentage an, an denen ein Ämtli anfällt – «Abfall rausbringen» gibt es nur dienstags. Alle oder keine Tage gewählt heisst: jeden Tag. Verteilung und Druckplan halten sich daran.",
     rotationHint:
       "Verteilt wird reihum und nicht zufällig: Wer heute abwäscht, holt morgen Holz. Der Tag verschiebt die Reihenfolge um eins – so kann jedes Kind nachrechnen, dass es fair zugeht.",
   },

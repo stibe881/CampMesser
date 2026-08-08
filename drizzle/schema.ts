@@ -1910,6 +1910,12 @@ export const campChores = mysqlTable(
     title: varchar("title", { length: 60 }).notNull(),
     /** Punkte, die das erledigte Ämtli einbringt (1–10). */
     points: int("points").notNull().default(1),
+    /**
+     * Wochentage, an denen das Ämtli anfällt (#447): JSON-Liste von
+     * ISO-Wochentagen (1 = Montag … 7 = Sonntag). null = jeden Tag –
+     * der Zustand aller Ämtli aus der Zeit vor der Spalte.
+     */
+    weekdaysJson: text("weekdaysJson"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("campChores_userId").on(table.userId)]

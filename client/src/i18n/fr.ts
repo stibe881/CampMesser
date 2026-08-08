@@ -3239,6 +3239,9 @@ export const fr: Translation = {
     removePersonConfirm: (name: string) =>
       `Retirer ${name} ? Ses badges, points et entrées de passeport disparaissent avec.`,
     personAdded: "Personne ajoutée",
+    weekdaysAria: (title: string) => `Jours de la semaine pour ${title}`,
+    weekdaysHint:
+      "Touche les jours où la tâche a lieu – « sortir les poubelles », c'est le mardi seulement. Tous les jours ou aucun sélectionné = tous les jours. La répartition et le plan imprimé en tiennent compte.",
     rotationHint:
       "La répartition se fait à tour de rôle et non au hasard : qui fait la vaisselle aujourd'hui ira chercher le bois demain. Le jour décale l'ordre d'un cran – chaque enfant peut ainsi vérifier que c'est équitable.",
   },

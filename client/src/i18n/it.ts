@@ -3208,6 +3208,9 @@ export const it: Translation = {
     removePersonConfirm: (name: string) =>
       `Rimuovere ${name}? Distintivi, punti e voci del passaporto spariscono con lei.`,
     personAdded: "Persona aggiunta",
+    weekdaysAria: (title: string) => `Giorni della settimana per ${title}`,
+    weekdaysHint:
+      "Tocca i giorni in cui il compito si presenta – «portare fuori la spazzatura» è solo il martedì. Tutti o nessun giorno selezionato = ogni giorno. Distribuzione e piano stampato ne tengono conto.",
     rotationHint:
       "Si distribuisce a turno e non a caso: chi oggi lava i piatti domani porta la legna. Il giorno sposta l'ordine di uno – così ogni bambino può verificare che sia giusto.",
   },

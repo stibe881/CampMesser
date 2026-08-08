@@ -1,0 +1,1 @@
+ALTER TABLE `campChores` ADD `weekdaysJson` text;

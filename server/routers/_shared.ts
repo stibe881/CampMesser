@@ -206,6 +206,7 @@ import {
   normalizeHuntName,
 } from "@shared/treasureHunt";
 import {
+  choresForDay,
   clampPoints,
   MAX_CHORES,
   MAX_CHORE_TITLE_LENGTH,
@@ -633,6 +634,7 @@ export {
   protectedProcedure,
   publicProcedure,
   remapMenuDays,
+  choresForDay,
   rotateAssignments,
   scoreboard,
   availablePoints,

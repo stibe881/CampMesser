@@ -15,7 +15,7 @@ import { trpc } from "@/lib/trpc";
 import { fmtLong, fmtWeekdayDay } from "@/lib/dateFormat";
 import { isStandaloneApp } from "@/lib/standalone";
 import { useTodayIso } from "@/lib/useTodayIso";
-import { rotateAssignments } from "@shared/chores";
+import { choresForDay, rotateAssignments } from "@shared/chores";
 
 /** ISO-Tag + n Tage über die Kalenderfelder (#333). */
 function shiftIso(iso: string, days: number): string {
@@ -139,23 +139,37 @@ export default function ChoresPrintPage() {
                     {chore.title}
                   </td>
                   {days.map(day => {
-                    const planned = rotateAssignments(
-                      chores,
-                      children,
-                      day
-                    ).find(entry => entry.choreId === chore.id);
+                    // Wochentage (#447): Rotation läuft nur über die an
+                    // diesem Tag anfallenden Ämtli – wie autoAssign im Server
+                    const active = choresForDay(chores, day);
+                    const planned = active.some(c => c.id === chore.id)
+                      ? rotateAssignments(active, children, day).find(
+                          entry => entry.choreId === chore.id
+                        )
+                      : undefined;
                     return (
                       <td
                         key={day}
                         className="border-b border-foreground/30 py-2 text-center"
                       >
-                        <span className="block text-xs">
-                          {planned ? childName(planned.childId) : ""}
-                        </span>
-                        <span
-                          className="mx-auto mt-1 block h-4 w-4 rounded border border-foreground"
-                          aria-hidden="true"
-                        />
+                        {planned ? (
+                          <>
+                            <span className="block text-xs">
+                              {childName(planned.childId)}
+                            </span>
+                            <span
+                              className="mx-auto mt-1 block h-4 w-4 rounded border border-foreground"
+                              aria-hidden="true"
+                            />
+                          </>
+                        ) : (
+                          <span
+                            className="text-xs text-muted-foreground"
+                            aria-hidden="true"
+                          >
+                            –
+                          </span>
+                        )}
                       </td>
                     );
                   })}

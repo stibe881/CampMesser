@@ -3135,6 +3135,9 @@ export const en: Translation = {
     removePersonConfirm: (name: string) =>
       `Remove ${name}? Their badges, points and passport entries go with them.`,
     personAdded: "Person added",
+    weekdaysAria: (title: string) => `Weekdays for ${title}`,
+    weekdaysHint:
+      "Tap the weekdays a chore comes up – taking out the rubbish is Tuesdays only. All days or none selected means: every day. Assignment and the printed plan respect this.",
     rotationHint:
       "Chores are shared out in rotation, not at random: whoever washes up today fetches firewood tomorrow. Each day shifts the order by one – so every child can check for themselves that it is fair.",
   },
