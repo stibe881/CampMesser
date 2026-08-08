@@ -289,6 +289,9 @@ export const fr: Translation = {
     tabRegister: "S'inscrire",
     emailLabel: "E-mail",
     passwordLabel: "Mot de passe",
+    totpLabel: "Code de confirmation",
+    totpHint:
+      "La double authentification est active : saisis le code de ton app d'authentification – ou un code de récupération.",
     loggingIn: "Connexion …",
     loginButton: "Se connecter",
     forgotPassword: "Mot de passe oublié ?",
@@ -4135,6 +4138,29 @@ export const fr: Translation = {
     compareTitle: "Comparer par critère",
     compareAll: "Global",
     unrated: "–",
+  },
+  twoFactor: {
+    title: "Connexion à deux facteurs (TOTP)",
+    intro:
+      "Un deuxième facteur pour la connexion par mot de passe : une app d'authentification (Google Authenticator, Aegis, 1Password …) génère un code à usage unique toutes les 30 secondes. Les passkeys sont liées à l'appareil et n'ont pas besoin de code supplémentaire.",
+    statusOn: "La double authentification est activée.",
+    enableButton: "Configurer la double authentification",
+    scanHint:
+      "Scanne le code QR avec ton app d'authentification et confirme avec le premier code.",
+    qrAlt: "Code QR pour l'app d'authentification",
+    secretLine: "Ou à saisir à la main :",
+    codeLabel: "Code de l'app",
+    confirmButton: "Confirmer",
+    enabled: "La double authentification est maintenant active.",
+    recoveryTitle: "Codes de récupération",
+    recoveryHint:
+      "Conserve ces codes en lieu sûr (pas sur le téléphone). Chacun vaut une seule fois – c'est la seule porte d'entrée si tu perds le téléphone. Ils ne s'affichent que MAINTENANT.",
+    recoveryCopy: "Copier les codes",
+    recoveryCopied: "Codes copiés",
+    disableLabel: "Pour désactiver : code de l'app (ou code de récupération)",
+    disableButton: "Désactiver",
+    disableHint: "Après désactivation, le mot de passe suffit à nouveau.",
+    disabled: "La double authentification est désactivée.",
   },
   spotCompare: {
     title: "Comparer deux emplacements",

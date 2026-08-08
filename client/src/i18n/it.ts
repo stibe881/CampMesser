@@ -280,6 +280,9 @@ export const it: Translation = {
     tabRegister: "Registrati",
     emailLabel: "E-mail",
     passwordLabel: "Password",
+    totpLabel: "Codice di conferma",
+    totpHint:
+      "I due fattori sono attivi: inserisci il codice della tua app di autenticazione – o un codice di recupero.",
     loggingIn: "Accesso in corso …",
     loginButton: "Accedi",
     forgotPassword: "Password dimenticata?",
@@ -4104,6 +4107,29 @@ export const it: Translation = {
     compareTitle: "Confronta per criterio",
     compareAll: "Totale",
     unrated: "–",
+  },
+  twoFactor: {
+    title: "Accesso a due fattori (TOTP)",
+    intro:
+      "Un secondo fattore per l'accesso con password: un'app di autenticazione (Google Authenticator, Aegis, 1Password …) genera un codice usa e getta ogni 30 secondi. Le passkey sono legate al dispositivo e non richiedono un codice aggiuntivo.",
+    statusOn: "L'autenticazione a due fattori è attiva.",
+    enableButton: "Configura i due fattori",
+    scanHint:
+      "Scansiona il codice QR con la tua app di autenticazione e conferma con il primo codice.",
+    qrAlt: "Codice QR per l'app di autenticazione",
+    secretLine: "Oppure da digitare a mano:",
+    codeLabel: "Codice dall'app",
+    confirmButton: "Conferma",
+    enabled: "L'autenticazione a due fattori è ora attiva.",
+    recoveryTitle: "Codici di recupero",
+    recoveryHint:
+      "Conserva questi codici al sicuro (non sul telefono). Ognuno vale una sola volta – sono l'unica via d'accesso se perdi il telefono. Vengono mostrati solo ADESSO.",
+    recoveryCopy: "Copia i codici",
+    recoveryCopied: "Codici copiati",
+    disableLabel: "Per disattivare: codice dall'app (o codice di recupero)",
+    disableButton: "Disattiva",
+    disableHint: "Dopo la disattivazione basta di nuovo la sola password.",
+    disabled: "L'autenticazione a due fattori è disattivata.",
   },
   spotCompare: {
     title: "Confronta due piazzole",

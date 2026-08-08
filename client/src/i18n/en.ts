@@ -278,6 +278,9 @@ export const en: Translation = {
     tabRegister: "Register",
     emailLabel: "Email",
     passwordLabel: "Password",
+    totpLabel: "Verification code",
+    totpHint:
+      "Two-factor is active: enter the code from your authenticator app – or a recovery code.",
     loggingIn: "Signing in …",
     loginButton: "Sign in",
     forgotPassword: "Forgot password?",
@@ -4019,6 +4022,29 @@ export const en: Translation = {
     compareTitle: "Compare by criterion",
     compareAll: "Overall",
     unrated: "–",
+  },
+  twoFactor: {
+    title: "Two-factor sign-in (TOTP)",
+    intro:
+      "A second factor for password sign-in: an authenticator app (Google Authenticator, Aegis, 1Password …) generates a one-time code every 30 seconds. Passkeys are device-bound and need no extra code.",
+    statusOn: "Two-factor is switched on.",
+    enableButton: "Set up two-factor",
+    scanHint:
+      "Scan the QR code with your authenticator app and confirm with the first code.",
+    qrAlt: "QR code for the authenticator app",
+    secretLine: "Or type it in manually:",
+    codeLabel: "Code from the app",
+    confirmButton: "Confirm",
+    enabled: "Two-factor is now active.",
+    recoveryTitle: "Recovery codes",
+    recoveryHint:
+      "Store these codes somewhere safe (not on your phone). Each works exactly once – they are the only way in if you lose your phone. They are shown only NOW.",
+    recoveryCopy: "Copy codes",
+    recoveryCopied: "Codes copied",
+    disableLabel: "To switch off: code from the app (or a recovery code)",
+    disableButton: "Switch off",
+    disableHint: "After switching off, the password alone is enough again.",
+    disabled: "Two-factor is switched off.",
   },
   spotCompare: {
     title: "Compare two sites",

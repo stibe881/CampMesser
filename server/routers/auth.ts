@@ -20,8 +20,13 @@ export const authRouters = {
   auth: router({
     me: publicProcedure.query(async opts => {
       if (!opts.ctx.user) return null;
-      // passwordHash niemals an den Client schicken
-      const { passwordHash: _ph, ...safeUser } = opts.ctx.user;
+      // passwordHash und TOTP-Geheimnis (#453) niemals an den Client schicken
+      const {
+        passwordHash: _ph,
+        totpSecret: _ts,
+        totpRecoveryJson: _tr,
+        ...safeUser
+      } = opts.ctx.user;
       const { mailConfigured } = await import("../mailer");
       return {
         ...safeUser,
@@ -112,6 +117,8 @@ export const authRouters = {
         z.object({
           email: z.string().min(3).max(320),
           password: z.string().min(1).max(200),
+          /** Einmalcode oder Wiederherstellungs-Code, wenn 2FA (#453) an ist. */
+          totpCode: z.string().max(20).optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -120,6 +127,7 @@ export const authRouters = {
           verifyPassword,
           createLocalSessionToken,
           normalizeEmail,
+          setUserTotpRecovery,
         } = await import("../localAuth");
         const {
           isRateLimited,
@@ -146,6 +154,33 @@ export const authRouters = {
         if (!user || !user.passwordHash) throw invalid();
         const ok = await verifyPassword(input.password, user.passwordHash);
         if (!ok) throw invalid();
+        // Zwei-Faktor (#453): erst nach korrektem Passwort geprüft, damit
+        // die Rückmeldung «Code fehlt» nichts über das Passwort verrät.
+        if (user.totpSecret) {
+          const { verifyTotp, consumeRecoveryCode, normalizeRecoveryCode } =
+            await import("../totp");
+          const code = input.totpCode?.trim() ?? "";
+          if (!code) {
+            // Kein Fehlversuch: der Client fragt jetzt nach dem Code
+            return { success: false, totpRequired: true } as const;
+          }
+          const totpOk = verifyTotp(user.totpSecret, code, Date.now());
+          if (!totpOk) {
+            // Wiederherstellungs-Code? Gilt genau einmal.
+            const recovery = consumeRecoveryCode(
+              user.totpRecoveryJson,
+              normalizeRecoveryCode(code)
+            );
+            if (!recovery.ok) {
+              registerFailure(limitKey);
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "Der Bestätigungscode ist falsch.",
+              });
+            }
+            await setUserTotpRecovery(user.id, recovery.nextJson);
+          }
+        }
         clearFailures(limitKey);
         const token = await createLocalSessionToken(
           user,
@@ -156,8 +191,99 @@ export const authRouters = {
           ...cookieOptions,
           maxAge: ONE_YEAR_MS,
         });
-        return { success: true, name: user.name } as const;
+        return { success: true, totpRequired: false, name: user.name } as const;
       }),
+    /**
+     * Zwei-Faktor per TOTP (#453): einrichten, bestätigen, abschalten.
+     * Das Geheimnis entsteht serverseitig und wird erst beim BESTÄTIGEN
+     * gespeichert – wer den Dialog abbricht, hinterlässt nichts.
+     */
+    twoFactor: router({
+      status: protectedProcedure.query(({ ctx }) => ({
+        enabled: !!ctx.user.totpSecret,
+      })),
+      /** Neues Geheimnis samt otpauth-URL für den QR-Code. */
+      beginSetup: protectedProcedure.mutation(async ({ ctx }) => {
+        if (ctx.user.totpSecret) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Zwei-Faktor ist bereits eingerichtet.",
+          });
+        }
+        const { generateTotpSecret, otpauthUrl } = await import("../totp");
+        const secret = generateTotpSecret();
+        return {
+          secret,
+          url: otpauthUrl(
+            ctx.user.email ?? ctx.user.name ?? "CampMesser",
+            secret
+          ),
+        };
+      }),
+      /** Mit dem ersten App-Code bestätigen; liefert die Einmal-Codes. */
+      enable: protectedProcedure
+        .input(
+          z.object({
+            secret: z.string().regex(/^[A-Z2-7]{32}$/),
+            code: z.string().min(6).max(10),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          if (ctx.user.totpSecret) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Zwei-Faktor ist bereits eingerichtet.",
+            });
+          }
+          const { verifyTotp, generateRecoveryCodes, serializeRecoveryHashes } =
+            await import("../totp");
+          if (!verifyTotp(input.secret, input.code, Date.now())) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message:
+                "Der Code stimmt nicht. Prüfe die Uhrzeit deines Geräts und versuche es erneut.",
+            });
+          }
+          const recoveryCodes = generateRecoveryCodes();
+          const { setUserTotp } = await import("../localAuth");
+          await setUserTotp(
+            ctx.user.id,
+            input.secret,
+            serializeRecoveryHashes(recoveryCodes)
+          );
+          // Die Klartext-Codes gibt es genau EINMAL – gespeichert sind Hashes
+          return { recoveryCodes } as const;
+        }),
+      /** Abschalten – mit App-Code oder Wiederherstellungs-Code. */
+      disable: protectedProcedure
+        .input(z.object({ code: z.string().min(6).max(20) }))
+        .mutation(async ({ ctx, input }) => {
+          if (!ctx.user.totpSecret) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Zwei-Faktor ist nicht eingerichtet.",
+            });
+          }
+          const { verifyTotp, consumeRecoveryCode, normalizeRecoveryCode } =
+            await import("../totp");
+          const code = input.code.trim();
+          const ok =
+            verifyTotp(ctx.user.totpSecret, code, Date.now()) ||
+            consumeRecoveryCode(
+              ctx.user.totpRecoveryJson,
+              normalizeRecoveryCode(code)
+            ).ok;
+          if (!ok) {
+            throw new TRPCError({
+              code: "UNAUTHORIZED",
+              message: "Der Bestätigungscode ist falsch.",
+            });
+          }
+          const { setUserTotp } = await import("../localAuth");
+          await setUserTotp(ctx.user.id, null, null);
+          return { success: true } as const;
+        }),
+    }),
     updateName: protectedProcedure
       .input(
         z.object({

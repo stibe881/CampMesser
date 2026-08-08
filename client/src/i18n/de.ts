@@ -292,6 +292,9 @@ export const de = {
     tabRegister: "Registrieren",
     emailLabel: "E-Mail",
     passwordLabel: "Passwort",
+    totpLabel: "Bestätigungscode",
+    totpHint:
+      "Zwei-Faktor ist aktiv: Gib den Code aus deiner Authenticator-App ein – oder einen Wiederherstellungs-Code.",
     loggingIn: "Wird angemeldet …",
     loginButton: "Anmelden",
     forgotPassword: "Passwort vergessen?",
@@ -4145,6 +4148,30 @@ export const de = {
     compareTitle: "Nach Kriterium vergleichen",
     compareAll: "Gesamt",
     unrated: "–",
+  },
+  twoFactor: {
+    title: "Zwei-Faktor-Anmeldung (TOTP)",
+    intro:
+      "Ein zweiter Faktor für die Passwort-Anmeldung: Eine Authenticator-App (z. B. Google Authenticator, Aegis, 1Password) erzeugt alle 30 Sekunden einen Einmalcode. Passkeys sind gerätgebunden und brauchen keinen Zusatzcode.",
+    statusOn: "Zwei-Faktor ist eingeschaltet.",
+    enableButton: "Zwei-Faktor einrichten",
+    scanHint:
+      "Scanne den QR-Code mit deiner Authenticator-App und bestätige mit dem ersten Code.",
+    qrAlt: "QR-Code für die Authenticator-App",
+    secretLine: "Oder von Hand eintippen:",
+    codeLabel: "Code aus der App",
+    confirmButton: "Bestätigen",
+    enabled: "Zwei-Faktor ist jetzt aktiv.",
+    recoveryTitle: "Wiederherstellungs-Codes",
+    recoveryHint:
+      "Bewahre diese Codes sicher auf (nicht auf dem Handy). Jeder gilt genau einmal – sie sind der einzige Weg ins Konto, wenn das Handy weg ist. Sie werden nur JETZT angezeigt.",
+    recoveryCopy: "Codes kopieren",
+    recoveryCopied: "Codes kopiert",
+    disableLabel:
+      "Zum Abschalten: Code aus der App (oder Wiederherstellungs-Code)",
+    disableButton: "Abschalten",
+    disableHint: "Nach dem Abschalten genügt wieder das Passwort allein.",
+    disabled: "Zwei-Faktor ist ausgeschaltet.",
   },
   spotCompare: {
     title: "Zwei Plätze vergleichen",

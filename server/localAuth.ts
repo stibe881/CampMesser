@@ -159,6 +159,33 @@ export async function updateUserPassword(
   await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
 }
 
+/**
+ * Zwei-Faktor per TOTP setzen oder entfernen (#453): Geheimnis plus
+ * Hash-Liste der Wiederherstellungs-Codes; beides null = 2FA aus.
+ */
+export async function setUserTotp(
+  userId: number,
+  totpSecret: string | null,
+  totpRecoveryJson: string | null
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Datenbank nicht verfügbar");
+  await db
+    .update(users)
+    .set({ totpSecret, totpRecoveryJson })
+    .where(eq(users.id, userId));
+}
+
+/** Nach eingelöstem Wiederherstellungs-Code die Rest-Liste speichern. */
+export async function setUserTotpRecovery(
+  userId: number,
+  totpRecoveryJson: string
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Datenbank nicht verfügbar");
+  await db.update(users).set({ totpRecoveryJson }).where(eq(users.id, userId));
+}
+
 /** Konto und alle zugehörigen Daten unwiderruflich löschen. */
 export async function deleteUserAccount(userId: number): Promise<void> {
   const db = await getDb();

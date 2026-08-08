@@ -64,8 +64,18 @@ export default function LoginPage() {
     navigate(consumeLoginReturn());
   };
 
+  // Zwei-Faktor (#453): meldet der Server totpRequired, fragt das
+  // Formular nach dem Einmalcode und schickt denselben Login nochmals.
+  const [totpNeeded, setTotpNeeded] = useState(false);
+  const [totpCode, setTotpCode] = useState("");
   const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: data => void afterAuth(data.name),
+    onSuccess: data => {
+      if (data.success) {
+        void afterAuth(data.name);
+        return;
+      }
+      setTotpNeeded(true);
+    },
     onError: err => toast.error(err.message),
   });
   const registerMutation = trpc.auth.register.useMutation({
@@ -117,7 +127,11 @@ export default function LoginPage() {
 
   const submitLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    loginMutation.mutate({ email: loginEmail, password: loginPassword });
+    loginMutation.mutate({
+      email: loginEmail,
+      password: loginPassword,
+      totpCode: totpNeeded && totpCode.trim() ? totpCode.trim() : undefined,
+    });
   };
 
   // Passkey-Anmeldung: nur anbieten, wenn der Browser WebAuthn kann.
@@ -350,6 +364,28 @@ export default function LoginPage() {
                       placeholder="••••••••"
                     />
                   </div>
+                  {/* Zwei-Faktor (#453): Code-Feld erst, wenn der Server
+                      danach fragt */}
+                  {totpNeeded && (
+                    <div>
+                      <Label htmlFor="login-totp" className="mb-1.5 block">
+                        {t.login.totpLabel}
+                      </Label>
+                      <Input
+                        id="login-totp"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        autoFocus
+                        required
+                        value={totpCode}
+                        onChange={e => setTotpCode(e.target.value)}
+                        placeholder="123456"
+                      />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {t.login.totpHint}
+                      </p>
+                    </div>
+                  )}
                   <Button
                     type="submit"
                     className="w-full"

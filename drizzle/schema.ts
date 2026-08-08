@@ -46,6 +46,14 @@ export const users = mysqlTable("users", {
    * erzeugen: Damit ist ein einmal weitergegebener Link sofort wertlos.
    */
   calendarToken: varchar("calendarToken", { length: 32 }).unique(),
+  /**
+   * Zwei-Faktor per TOTP (#453): Base32-Geheimnis der Authenticator-App;
+   * null = 2FA aus. Schützt die PASSWORT-Anmeldung – Passkeys (#122)
+   * sind bereits gerätgebunden und bleiben unberührt.
+   */
+  totpSecret: varchar("totpSecret", { length: 64 }),
+  /** SHA-256-Hashes der übrigen Wiederherstellungs-Codes als JSON-Liste. */
+  totpRecoveryJson: text("totpRecoveryJson"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
