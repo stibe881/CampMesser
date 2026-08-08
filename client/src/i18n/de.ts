@@ -4431,6 +4431,7 @@ export const de = {
     intro: "Drei Handgriffe, solange du es noch weisst:",
     stepTent: "Zelt & Planen trocknen",
     stepTentAria: "Zelt trocknen abhaken",
+    dryingDay: (day: string) => `Bestes Trocknungs-Wetter daheim: ${day}.`,
     stepReview: "Rückblick ausfüllen: Was fehlte, was war zu viel?",
     stepNextTime: "«Beim nächsten Mal» am Platz notieren",
     notePlaceholder: "z. B. Kabeltrommel 25 m",

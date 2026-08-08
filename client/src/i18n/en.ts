@@ -4304,6 +4304,7 @@ export const en: Translation = {
     intro: "Three quick things while you still remember:",
     stepTent: "Dry the tent & tarps",
     stepTentAria: "Mark tent drying as done",
+    dryingDay: (day: string) => `Best drying weather at home: ${day}.`,
     stepReview: "Fill in the review: what was missing, what was too much?",
     stepNextTime: "Note “next time” reminders at the campsite",
     notePlaceholder: "e.g. 25 m extension cord",

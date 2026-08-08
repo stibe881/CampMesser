@@ -24,6 +24,8 @@ import { useI18n } from "@/i18n";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useTodayIso } from "@/lib/useTodayIso";
+import { useDryingDay } from "@/lib/useDryingDay";
+import { fmtWeekdayShort } from "@/lib/dateFormat";
 import { homecomingDone, homecomingSteps } from "@shared/homecoming";
 import {
   NEXT_TIME_NOTE_MAX_LENGTH,
@@ -98,6 +100,19 @@ export default function HomecomingCard() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
+  // Bester Trocknungs-Tag daheim (#437): nur laden, solange der
+  // Zelt-Schritt offen ist – danach ist die Frage beantwortet.
+  const homeQuery = trpc.home.get.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 5 * 60_000,
+  });
+
+  const home = homeQuery.data ?? null;
+  const dryingDay = useDryingDay(
+    home?.latitude,
+    home?.longitude,
+    home !== null
+  );
 
   const reviewed = useMemo(
     () => new Set((feedbackQuery.data ?? []).map(row => row.tripId)),
@@ -183,6 +198,13 @@ export default function HomecomingCard() {
               {stepIcon(tentDoneIds.has(candidate.id))}
               {hc.stepTent}
             </button>
+            {/* Wann lohnt sich Aufhängen? (#437) Nur solange der Schritt
+                offen ist – danach ist die Frage beantwortet. */}
+            {!tentDoneIds.has(candidate.id) && dryingDay && (
+              <p className="mt-0.5 pl-6 text-xs text-muted-foreground">
+                {hc.dryingDay(fmtWeekdayShort(dryingDay.date, lang))}
+              </p>
+            )}
           </li>
           <li>
             <Link

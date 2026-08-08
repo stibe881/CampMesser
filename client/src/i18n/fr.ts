@@ -4425,6 +4425,8 @@ export const fr: Translation = {
     intro: "Trois gestes tant que tu t'en souviens :",
     stepTent: "Faire sécher la tente et les bâches",
     stepTentAria: "Cocher le séchage de la tente",
+    dryingDay: (day: string) =>
+      `Meilleur temps de séchage à la maison : ${day}.`,
     stepReview:
       "Remplir le bilan : qu'est-ce qui a manqué, qu'est-ce qui était en trop ?",
     stepNextTime: "Noter « la prochaine fois » sur le camping",
