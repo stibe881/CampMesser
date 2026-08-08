@@ -4253,11 +4253,14 @@ export const en: Translation = {
       "Before packing up in the morning, let it dry first – the dry window below helps with planning.",
     note: "Estimate from temperature, humidity, clouds and wind. Hollows, meadows and creek banks are damper than the forecast knows.",
   },
-  reviewPrompt: {
+  homecoming: {
     title: (trip: string) => `Back from "${trip}"?`,
-    body: "Two questions while you still remember: what went unused, what was missing? It improves the next packing list.",
-    open: "Fill in the review",
-    dismissAria: "Hide the reminder for this trip",
+    intro: "Three quick things while you still remember:",
+    stepTent: "Dry the tent & tarps",
+    stepTentAria: "Mark tent drying as done",
+    stepReview: "Fill in the review: what was missing, what was too much?",
+    stepNextTime: "Note “next time” reminders at the campsite",
+    dismissAria: "Hide the homecoming reminder for this trip",
   },
   campfire: {
     stateOk: "Campfire: nothing speaks against it.",

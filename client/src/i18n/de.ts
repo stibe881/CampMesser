@@ -4380,11 +4380,14 @@ export const de = {
       "Fürs Einpacken am Morgen zuerst abtrocknen lassen – das Trockenfenster unten hilft beim Planen.",
     note: "Abschätzung aus Temperatur, Feuchte, Wolken und Wind. Senken, Wiesen und Bachnähe sind feuchter, als die Prognose weiss.",
   },
-  reviewPrompt: {
+  homecoming: {
     title: (trip: string) => `Zurück von «${trip}»?`,
-    body: "Zwei Fragen, solange du es noch weisst: Was hast du nicht gebraucht, was hat gefehlt? Das verbessert die nächste Packliste.",
-    open: "Rückblick ausfüllen",
-    dismissAria: "Erinnerung zu dieser Reise ausblenden",
+    intro: "Drei Handgriffe, solange du es noch weisst:",
+    stepTent: "Zelt & Planen trocknen",
+    stepTentAria: "Zelt trocknen abhaken",
+    stepReview: "Rückblick ausfüllen: Was fehlte, was war zu viel?",
+    stepNextTime: "«Beim nächsten Mal» am Platz notieren",
+    dismissAria: "Heimkehr-Erinnerung zu dieser Reise ausblenden",
   },
   campfire: {
     stateOk: "Lagerfeuer: Spricht nichts dagegen.",

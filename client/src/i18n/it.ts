@@ -4344,11 +4344,14 @@ export const it: Translation = {
       "Prima di smontare al mattino, lascia asciugare – la finestra asciutta qui sotto aiuta a pianificare.",
     note: "Stima da temperatura, umidità, nuvole e vento. Avvallamenti, prati e vicinanza ai ruscelli sono più umidi di quanto sappia la previsione.",
   },
-  reviewPrompt: {
+  homecoming: {
     title: (trip: string) => `Di ritorno da «${trip}»?`,
-    body: "Due domande finché te lo ricordi: cosa non hai usato, cosa è mancato? Migliora la prossima lista bagagli.",
-    open: "Compila il bilancio",
-    dismissAria: "Nascondi il promemoria per questo soggiorno",
+    intro: "Tre gesti finché te lo ricordi:",
+    stepTent: "Asciugare tenda e teloni",
+    stepTentAria: "Spunta l'asciugatura della tenda",
+    stepReview: "Compila il bilancio: cosa è mancato, cosa era di troppo?",
+    stepNextTime: "Annota «la prossima volta» sul campeggio",
+    dismissAria: "Nascondi il promemoria di rientro per questo soggiorno",
   },
   campfire: {
     stateOk: "Fuoco da campo: nulla in contrario.",

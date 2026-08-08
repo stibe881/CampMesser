@@ -4372,11 +4372,15 @@ export const fr: Translation = {
       "Avant de plier le matin, laisse d’abord sécher – la fenêtre sèche ci-dessous aide à planifier.",
     note: "Estimation à partir de la température, de l’humidité, des nuages et du vent. Les creux, prairies et abords de ruisseaux sont plus humides que ne le sait la prévision.",
   },
-  reviewPrompt: {
+  homecoming: {
     title: (trip: string) => `De retour de « ${trip} » ?`,
-    body: "Deux questions tant que tu t'en souviens : qu'est-ce qui n'a pas servi, qu'est-ce qui a manqué ? Cela améliore la prochaine liste de bagages.",
-    open: "Remplir le bilan",
-    dismissAria: "Masquer le rappel pour ce séjour",
+    intro: "Trois gestes tant que tu t'en souviens :",
+    stepTent: "Faire sécher la tente et les bâches",
+    stepTentAria: "Cocher le séchage de la tente",
+    stepReview:
+      "Remplir le bilan : qu'est-ce qui a manqué, qu'est-ce qui était en trop ?",
+    stepNextTime: "Noter « la prochaine fois » sur le camping",
+    dismissAria: "Masquer le rappel de retour pour ce séjour",
   },
   campfire: {
     stateOk: "Feu de camp : rien ne s'y oppose.",
