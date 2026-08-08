@@ -122,6 +122,8 @@ export default function DocumentsPage() {
             type="file"
             accept="image/*"
             className="hidden"
+            tabIndex={-1}
+            aria-hidden="true"
             onChange={e => void uploadPhoto(e.target.files)}
           />
 
