@@ -1,5 +1,41 @@
 # CampMesser – Projekt TODO
 
+## Dreissig Vorschläge (08.08.2026, Runde 52)
+
+- [x] Heute-Ansicht bei Städtereise/Hotel mit Sehenswürdigkeiten (#486): Die OSM-Liste (#479) an den Reise-Koordinaten (#465) – vier neue Preset-Flags (sights/beaches/transit/excursions) in shared/tripKind.ts steuern, was die Heute-Ansicht pro Art zeigt.
+- [x] Strände in der Nähe bei Strandferien (#487): natural=beach/beach_resort über eine neue GENERISCHE Nähe-Karte (NearbyPoints) – dieselbe Karte trägt auch Trinkwasser, Ladesäulen und Defis. Geteilte Overpass-Bausteine (poiQuery/parsePois/nearestPois), 3 Tests.
+- [x] ÖV-Abfahrten in der Heute-Ansicht (#488): Die Abfahrtstafel (#249) bei Städtereise, Hotel und Tagesausflug an den Reise-Koordinaten; ausserhalb der CH-Fahrplan-Abdeckung ehrlich leer.
+- [x] Ausflugfinder in der Heute-Ansicht beim Tagesausflug (#489): Die kuratierten Ausflüge (#271) direkt im Hauptbildschirm des Tages.
+- [x] Lawinen-Warnstufe auch für Tirol/Südtirol/Trentino (#490): Euregio-Lawinenreport (avalanche.report) als zweite Quelle neben dem SLF – latest-Datum → CAAML pro Region → EAWS-Mikro-Region-Polygone; Ergebnis-Cache pro Koordinate wie beim SLF, Quellzeile nennt das richtige Bulletin. Endpunkte gegen die echten Dienste geprüft. 4 Tests.
+- [x] ÖV-Verbindungssuche für die Anreise (#491): Neuer Dossier-Kasten «ÖV zur Anreise» – Verbindungen vom Heim-Standort zum Platz (transport.opendata.ch/connections) mit Abfahrt/Ankunft, Reisezeit, Umstiegen, Verkehrsmitteln. 3 Tests.
+- [x] Trinkwasser-Stellen in der Nähe (#492): amenity=drinking_water im Platz-Dossier, Fussweg-Radien 500 m–2 km.
+- [x] E-Ladesäulen in der Nähe (#493): amenity=charging_station im Dossier, mit Betreiber und Plätzen soweit getaggt.
+- [x] Defibrillatoren im SOS (#494): emergency=defibrillator um den aktuellen Standort, mit Standort-Hinweis («Eingang Gemeindehaus») und dem klaren Zusatz, zuerst 144 anzurufen.
+- [x] Touren nach Länge filtern (#495): Chips «bis 5 km / 5–15 km / über 15 km» in der Wander-/Velorouten-Liste; Routen ohne gepflegte Länge nur unter «alle» (routeLengthClass, 2 Tests).
+- [x] Besuchs-Verlauf im Dossier (#496): EHRLICH – die «Aufenthalte»-Karte existierte; neu sind «alle zeigen», die Sterne-Bewertung pro Besuch und der Sprung in die Reise.
+- [x] Budget-Warnung in Worten (#497): EHRLICH – Balken-Färbung ab 80 % und Über-Budget-Text existierten (#256/#398); neu sagt es die Textzeile bei «knapp» auch («Das Budget wird knapp.») und färbt sich mit.
+- [x] EXISTIERTE BEREITS (#498): Kalender-Abo per ICS-Feed-URL – Route /api/kalender/:token.ics, users.calendarToken und die CalendarFeedCard im Profil waren schon da. Nichts doppelt gebaut.
+- [x] Ausweis-Fotos offline (#499): Service Worker cached /api/documents/photos/ nach dem Reservations-Muster (Netz zuerst, Cache als Rückfall). NEBENBEFUND behoben: Der Reservations-Cache fehlte in der Aufräum-Ausnahmeliste – ein App-Update hätte die Buchungsbestätigung weggeräumt.
+- [x] PDF für Karten & Ausweise (#500): Die Foto-Fabrik (#457) akzeptiert pro Ablage optional application/pdf (nur Ausweise), PDF-Kachel statt Vorschaubild, Öffnen im neuen Tab, Offline-Cache gilt mit.
+- [x] Rezept aus Web-Link (#501): Server holt die Seite (CORS) und liest schema.org/Recipe aus dem JSON-LD (auch @graph/HowToStep); SSRF-Wache testbar in shared/recipeJsonLd.ts, 1.5-MB/10-s-Limiten, Text-Import (#444) bleibt der Ausweg. 4 Tests.
+- [x] Grill & Garzeiten (#502): Neues Wissensmodul /grillieren – Kerntemperaturen (Geflügel/Hack immer durch) und sechs Faustregeln, vierspachig, offline.
+- [x] Tankbuch pro Fahrzeug (#503): fuelLogs.vehicle (Migration 0115), Auswahl aus den Fahrzeug-Profilen (#200/#481), Filter-Chips für Durchschnitt/Abschnitte/CSV, Fahrzeug-Spalte in der CSV. Alte Einträge ehrlich «Ohne Fahrzeug».
+- [x] Verbrauchs-Grafik im Tankbuch (#504): l/100 km je Abschnitt als Linie über den Kilometerstand (recharts, nur plausible Abschnitte, ab zwei Punkten).
+- [x] EXISTIERTE BEREITS (#505): Zelt-Kondensations-Hinweis – shared/condensation.ts (#397) rechnet den Taupunkt per Magnus-Formel samt CondensationCard. Nichts doppelt gebaut.
+- [x] Traglast pro Person (#506): «Wer packt was» (#67) × Inventar-Gewichte (#30) – unter der Gewichts-Bilanz steht, wie viel Kilo jede Person trägt (personWeights, 2 Tests).
+- [x] Feuer-Ratgeber (#507): Neues Wissensmodul /feuer – acht Schritte von «Ist Feuer erlaubt?» über Pyramide/Blockhaus bis zum richtigen Löschen, verlinkt auf Feuerverbot (Wetter) und Feuerholz-Rechner.
+- [x] Camping-Knigge (#508): Neues Wissensmodul /knigge – zehn Regeln des Zusammenlebens (Ruhezeiten, Grauwasser, Chemie-WC, Hunde, leises Ankommen …).
+- [x] EXISTIERTE BEREITS (#509): Sprachhilfe vorlesen – der Vorlese-Knopf pro Satz mit Zielsprachen-Stimme (useSpeech/pickVoiceIndex) war schon da. Nichts doppelt gebaut.
+- [x] Besuchte Länder in der Statistik (#510): Land aus Ort/Titel/Platzname über die Länder-Aliasse der Länderregeln (#228), mit Flagge, Reisen, Nächten; Orte ohne Länder-Nennung ehrlich «ohne Angabe». 2 Tests.
+- [x] Inventar-Wert in der Statistik (#511): Kaufpreise (#178) × Stückzahl je Kategorie als Untergrenze fürs Versicherungs-Gespräch, mit Hinweis auf Gegenstände ohne Preis. 2 Tests.
+- [x] Feedback-Funktion im Profil (#512): Nachricht per bestehendem SMTP (#56) ans Betreiber-Postfach (FEEDBACK_EMAIL, sonst SMTP_FROM), 5/Stunde, ohne SMTP ehrliche Absage.
+- [x] Globale Suche findet die Sprachhilfe (#513): Alle vier Sprachfassungen jedes Satzes im Suchindex – «Stromanschluss» findet den Satz, «grazie» auch. Neue Suchkategorie ×4, 1 Test.
+- [x] Trips.tsx: Reise-Bausteine herausgelöst (#514): PackProgress/TripCoverBanner/RunningBadge/TripPhotos nach components/trips/TripWidgets.tsx – 2110 → 1933 Zeilen. EHRLICH: «unter 1500» weiter verfehlt; der Rest sind die beiden Listen-JSX-Blöcke, deren Auslagerung einen eigenen Anlauf verdient.
+- [x] UI-Tests für Runde 51 (#515): Reise-Erfassungs-Dialog (Chips + Formular-nach-Art), Lawinengefahr-Zeile (Euregio-Quelle, kein Abruf ausserhalb) und Sammel-Test über die fünf statischen Wissensseiten – 10 Tests, je mit axe.
+- Migration dieser Runde: 0115 (fuelLogs.vehicle) – auf dem Server stehen damit 0095–0115 aus.
+- MARKE: Der Nutzer wünscht Namens-/Logo-/Favicon-Vorschläge, weil die App nicht mehr nur Camping ist – Vorschläge geliefert, Entscheid und Umsetzung stehen aus (Logo folgt dem Namen).
+- [ ] NICHT ANGESCHAUT, ehrlich: nichts davon am Bildschirm – insbesondere die Euregio-Kette nicht gegen ein AKTIVES Winter-Bulletin (im August keins; geprüft gegen echte Endpunkte + konstruierte Daten), der Rezept-Link-Import nicht gegen echte Rezeptseiten, der Feedback-Versand nicht mit echtem SMTP. Geprüft sind Typen, alle Tests und der Build.
+
 ## Zwanzig Vorschläge (08.08.2026, Runde 51)
 
 - [x] Ortssuche für freie Reiseziele (#465): Wer den Ort als Freitext erfasst (Hotel, Strand, Städtereise …), kann ihn über die bestehende Ortssuche nachschlagen – die Reise bekommt Koordinaten (tripLogs.latitude/longitude, Migration 0113) und damit Wetter, Heute-Ansicht und Karte auch OHNE Zeltplatz-Favorit.
