@@ -1917,6 +1917,8 @@ export const de = {
     noteLabel: "Notiz (optional)",
     notePlaceholder: "z. B. Platz am Bach, schattig am Morgen",
     attrFilterAria: "Nach Eigenschaften filtern",
+    sortByDistance: "Nach Distanz",
+    distanceFromHome: (km: string) => `${km} von zuhause`,
     attrFilterShade: "Viel Schatten",
     attrFilterQuiet: "Ruhig",
     attrFilterWifi: "WLAN",

@@ -1891,6 +1891,8 @@ export const it: Translation = {
     noteLabel: "Nota (facoltativa)",
     notePlaceholder: "ad es. posto vicino al ruscello, ombreggiato al mattino",
     attrFilterAria: "Filtra per caratteristiche",
+    sortByDistance: "Per distanza",
+    distanceFromHome: (km: string) => `${km} da casa`,
     attrFilterShade: "Molta ombra",
     attrFilterQuiet: "Tranquillo",
     attrFilterWifi: "Wi-Fi",

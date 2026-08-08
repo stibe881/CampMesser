@@ -1919,6 +1919,8 @@ export const fr: Translation = {
     noteLabel: "Note (facultatif)",
     notePlaceholder: "p. ex. place au bord du ruisseau, ombragée le matin",
     attrFilterAria: "Filtrer par caractéristiques",
+    sortByDistance: "Par distance",
+    distanceFromHome: (km: string) => `${km} de la maison`,
     attrFilterShade: "Beaucoup d'ombre",
     attrFilterQuiet: "Calme",
     attrFilterWifi: "Wi-Fi",

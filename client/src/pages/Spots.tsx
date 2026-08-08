@@ -52,6 +52,7 @@ import {
 import { getSunTimes } from "@/lib/sun";
 import { useI18n, useT } from "@/i18n";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
+import { distanceMeters } from "@shared/geo";
 import { cn } from "@/lib/utils";
 import {
   parseSpotAttributes,
@@ -442,6 +443,28 @@ export default function SpotsPage() {
       ),
     [spots, activeFilters, attrsById]
   );
+  // Nach Distanz sortieren (#425): vom Heim-Standort (#100) aus – die
+  // Liste war bisher nur in Erfassungs-Reihenfolge. Ohne Heim-Standort
+  // gibt es den Knopf nicht; eine Sortierung ohne Bezugspunkt wäre Zufall.
+  const homeQuery = trpc.home.get.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 5 * 60_000,
+  });
+  const home = homeQuery.data ?? null;
+  const [sortByDistance, setSortByDistance] = useState(false);
+  const sortedSpots = useMemo(() => {
+    if (!sortByDistance || !home) return visibleSpots;
+    return [...visibleSpots].sort(
+      (a, b) =>
+        distanceMeters(home.latitude, home.longitude, a.latitude, a.longitude) -
+        distanceMeters(home.latitude, home.longitude, b.latitude, b.longitude)
+    );
+  }, [visibleSpots, sortByDistance, home]);
+  const distanceLabel = (spot: { latitude: number; longitude: number }) =>
+    home
+      ? `${Math.round(distanceMeters(home.latitude, home.longitude, spot.latitude, spot.longitude) / 1000)} km`
+      : null;
+
   const filterLabels: Record<string, string> = {
     shade: t.spots.attrFilterShade,
     quiet: t.spots.attrFilterQuiet,
@@ -578,6 +601,21 @@ export default function SpotsPage() {
             }))}
           />
 
+          {home && (spots?.length ?? 0) > 1 && (
+            <button
+              type="button"
+              aria-pressed={sortByDistance}
+              onClick={() => setSortByDistance(v => !v)}
+              className={cn(
+                "mb-3 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                sortByDistance
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border text-muted-foreground hover:border-primary/50"
+              )}
+            >
+              {t.spots.sortByDistance}
+            </button>
+          )}
           {hasAnyAttributes && (
             <div
               className="mb-4 flex flex-wrap gap-2"
@@ -649,12 +687,18 @@ export default function SpotsPage() {
             )}
 
           <div className="space-y-3">
-            {visibleSpots.map(spot => (
-              <SpotCard
-                key={spot.id}
-                spot={spot}
-                onDelete={() => removeMutation.mutate({ id: spot.id })}
-              />
+            {sortedSpots.map(spot => (
+              <div key={spot.id}>
+                {sortByDistance && home && (
+                  <p className="mb-1 text-xs font-medium text-muted-foreground">
+                    {t.spots.distanceFromHome(distanceLabel(spot) ?? "")}
+                  </p>
+                )}
+                <SpotCard
+                  spot={spot}
+                  onDelete={() => removeMutation.mutate({ id: spot.id })}
+                />
+              </div>
             ))}
           </div>
         </>

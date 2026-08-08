@@ -1860,6 +1860,8 @@ export const en: Translation = {
     noteLabel: "Note (optional)",
     notePlaceholder: "e.g. spot by the stream, shady in the morning",
     attrFilterAria: "Filter by attributes",
+    sortByDistance: "By distance",
+    distanceFromHome: (km: string) => `${km} from home`,
     attrFilterShade: "Plenty of shade",
     attrFilterQuiet: "Quiet",
     attrFilterWifi: "Wi-Fi",
