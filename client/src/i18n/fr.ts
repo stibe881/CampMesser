@@ -4603,6 +4603,8 @@ export const fr: Translation = {
     line: (level: number, label: string) =>
       `Danger d'avalanche : degré ${level} (${label})`,
     note: "Source : bulletin d'avalanches du SLF – Suisse uniquement, sans garantie.",
+    noteEuregio:
+      "Source : bulletin d'avalanches Euregio (avalanche.report) – valable pour le Tyrol, le Haut-Adige et le Trentin, sans garantie.",
   },
   winterKnowledge: {
     title: "Pistes & avalanches",

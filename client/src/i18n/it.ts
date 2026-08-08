@@ -4576,6 +4576,8 @@ export const it: Translation = {
     line: (level: number, label: string) =>
       `Pericolo di valanghe: grado ${level} (${label})`,
     note: "Fonte: bollettino valanghe SLF – solo Svizzera, senza garanzia.",
+    noteEuregio:
+      "Fonte: bollettino valanghe Euregio (avalanche.report) – vale per Tirolo, Alto Adige e Trentino, senza garanzia.",
   },
   winterKnowledge: {
     title: "Piste & valanghe",

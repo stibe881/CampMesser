@@ -4483,6 +4483,8 @@ export const en: Translation = {
     line: (level: number, label: string) =>
       `Avalanche danger: level ${level} (${label})`,
     note: "Source: SLF avalanche bulletin – Switzerland only, no guarantee.",
+    noteEuregio:
+      "Source: Euregio avalanche report (avalanche.report) – covers Tyrol, South Tyrol and Trentino, no guarantee.",
   },
   winterKnowledge: {
     title: "Slopes & avalanches",

@@ -4613,6 +4613,8 @@ export const de = {
     line: (level: number, label: string) =>
       `Lawinengefahr: Stufe ${level} (${label})`,
     note: "Quelle: SLF-Lawinenbulletin – gilt nur für die Schweiz, ohne Gewähr.",
+    noteEuregio:
+      "Quelle: Euregio-Lawinenreport (avalanche.report) – gilt für Tirol, Südtirol und Trentino, ohne Gewähr.",
   },
   winterKnowledge: {
     title: "Pisten & Lawinen",
