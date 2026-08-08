@@ -6136,6 +6136,26 @@ export const de = {
       location: "Standort",
     },
   },
+  devices: {
+    title: "Angemeldete Geräte",
+    intro:
+      "Jede Anmeldung an diesem Konto, mit «zuletzt aktiv». Ein abgemeldetes Gerät ist sofort draussen – auch wenn es das Handy ist, das im Zug liegen geblieben ist.",
+    empty: "Keine erfassten Anmeldungen.",
+    unknownDevice: "Unbekanntes Gerät",
+    currentBadge: "Dieses Gerät",
+    lastSeen: (date: string) => `Zuletzt aktiv: ${date}`,
+    signedInAt: (date: string) => `Angemeldet: ${date}`,
+    revokeButton: "Abmelden",
+    revokeConfirm: "Dieses Gerät abmelden?",
+    revoked: "Gerät abgemeldet",
+    revokeOthersButton: "Alle anderen Geräte abmelden",
+    revokeOthersConfirm:
+      "Alle anderen Geräte abmelden? Dieses Gerät bleibt angemeldet.",
+    othersRevoked: (n: number) =>
+      n === 1 ? "1 Gerät abgemeldet" : `${n} Geräte abgemeldet`,
+    legacyHint:
+      "Anmeldungen von vor dieser Übersicht erscheinen erst nach der nächsten Anmeldung des jeweiligen Geräts.",
+  },
   stats: {
     expensesTitle: "Ausgaben über alle Reisen",
     expensesLink: "Zu den Reisen",

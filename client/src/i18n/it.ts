@@ -6092,6 +6092,26 @@ export const it: Translation = {
       location: "Posizione",
     },
   },
+  devices: {
+    title: "Dispositivi connessi",
+    intro:
+      "Ogni accesso a questo account, con l'ultima attività. Un dispositivo disconnesso è fuori subito – anche se è il telefono dimenticato sul treno.",
+    empty: "Nessun accesso registrato.",
+    unknownDevice: "Dispositivo sconosciuto",
+    currentBadge: "Questo dispositivo",
+    lastSeen: (date: string) => `Ultima attività: ${date}`,
+    signedInAt: (date: string) => `Accesso: ${date}`,
+    revokeButton: "Disconnetti",
+    revokeConfirm: "Disconnettere questo dispositivo?",
+    revoked: "Dispositivo disconnesso",
+    revokeOthersButton: "Disconnetti tutti gli altri dispositivi",
+    revokeOthersConfirm:
+      "Disconnettere tutti gli altri dispositivi? Questo dispositivo resta connesso.",
+    othersRevoked: (n: number) =>
+      n === 1 ? "1 dispositivo disconnesso" : `${n} dispositivi disconnessi`,
+    legacyHint:
+      "Gli accessi precedenti a questa panoramica compaiono solo dopo il prossimo accesso del dispositivo.",
+  },
   stats: {
     expensesTitle: "Spese di tutti i viaggi",
     expensesLink: "Ai viaggi",

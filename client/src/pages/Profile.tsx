@@ -121,6 +121,7 @@ import PasskeysCard from "@/components/profile/PasskeysCard";
 import QuickBarCard from "@/components/profile/QuickBarCard";
 import CalendarFeedCard from "@/components/profile/CalendarFeedCard";
 import ShareLinksCard from "@/components/profile/ShareLinksCard";
+import DevicesCard from "@/components/profile/DevicesCard";
 
 export default function ProfilePage() {
   const { lang, t, setLang } = useI18n();
@@ -577,6 +578,9 @@ export default function ProfilePage() {
 
       {/* Teil-Link-Übersicht (#422) */}
       <ShareLinksCard />
+
+      {/* Angemeldete Geräte (#423) */}
+      <DevicesCard />
 
       {/* Statistik: auf Nutzerwunsch im Profil statt als Startseiten-Kachel */}
       <CollapsibleCard

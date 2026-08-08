@@ -6134,6 +6134,26 @@ export const fr: Translation = {
       location: "Position",
     },
   },
+  devices: {
+    title: "Appareils connectés",
+    intro:
+      "Chaque connexion à ce compte, avec la dernière activité. Un appareil déconnecté est exclu immédiatement – même si c'est le téléphone oublié dans le train.",
+    empty: "Aucune connexion enregistrée.",
+    unknownDevice: "Appareil inconnu",
+    currentBadge: "Cet appareil",
+    lastSeen: (date: string) => `Dernière activité : ${date}`,
+    signedInAt: (date: string) => `Connecté : ${date}`,
+    revokeButton: "Déconnecter",
+    revokeConfirm: "Déconnecter cet appareil ?",
+    revoked: "Appareil déconnecté",
+    revokeOthersButton: "Déconnecter tous les autres appareils",
+    revokeOthersConfirm:
+      "Déconnecter tous les autres appareils ? Cet appareil reste connecté.",
+    othersRevoked: (n: number) =>
+      n === 1 ? "1 appareil déconnecté" : `${n} appareils déconnectés`,
+    legacyHint:
+      "Les connexions antérieures à cet aperçu n'apparaissent qu'après la prochaine connexion de l'appareil concerné.",
+  },
   stats: {
     expensesTitle: "Dépenses de tous les voyages",
     expensesLink: "Vers les voyages",

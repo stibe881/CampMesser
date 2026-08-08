@@ -29,6 +29,7 @@ import {
   tripChanges,
   tripLogs,
   userNotes,
+  userSessions,
   userSettings,
   users,
 } from "./_shared";
@@ -182,6 +183,84 @@ export async function deleteUserNote(id: number, userId: number) {
     .delete(userNotes)
     .where(and(eq(userNotes.id, id), eq(userNotes.userId, userId)));
 }
+// ── Angemeldete Geräte (#423) ──
+
+/** Neue Anmeldung festhalten – die tokenId wandert als `sid` ins JWT. */
+export async function createUserSession(data: {
+  userId: number;
+  tokenId: string;
+  userAgent: string | null;
+}) {
+  const db = requireDb(await getDb());
+  await db.insert(userSessions).values(data);
+}
+
+/** Anmeldung zur sid der Anfrage (undefined = beendet oder nie erfasst). */
+export async function getUserSessionByTokenId(tokenId: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(userSessions)
+    .where(eq(userSessions.tokenId, tokenId))
+    .limit(1);
+  return rows[0];
+}
+
+/** «Zuletzt aktiv» nachführen – der Aufrufer drosselt die Frequenz. */
+export async function touchUserSession(tokenId: string) {
+  const db = requireDb(await getDb());
+  await db
+    .update(userSessions)
+    .set({ lastSeenAt: new Date() })
+    .where(eq(userSessions.tokenId, tokenId));
+}
+
+/** Alle Anmeldungen eines Kontos, jüngste Aktivität zuoberst. */
+export async function listUserSessions(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(userSessions)
+    .where(eq(userSessions.userId, userId))
+    .orderBy(desc(userSessions.lastSeenAt), desc(userSessions.id));
+}
+
+/** Eine Anmeldung beenden – das zugehörige Cookie ist danach wertlos. */
+export async function deleteUserSession(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(userSessions)
+    .where(and(eq(userSessions.id, id), eq(userSessions.userId, userId)));
+}
+
+/** Beim Logout die eigene Zeile aufräumen. */
+export async function deleteUserSessionByTokenId(tokenId: string) {
+  const db = requireDb(await getDb());
+  await db.delete(userSessions).where(eq(userSessions.tokenId, tokenId));
+}
+
+/**
+ * Alle Anmeldungen eines Kontos beenden (Konto-Löschung, Passwort-Wechsel).
+ * `exceptTokenId` lässt die aktuelle bestehen («überall sonst abmelden»).
+ */
+export async function deleteUserSessions(
+  userId: number,
+  exceptTokenId?: string | null
+) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select({ id: userSessions.id, tokenId: userSessions.tokenId })
+    .from(userSessions)
+    .where(eq(userSessions.userId, userId));
+  const ids = rows
+    .filter(row => !exceptTokenId || row.tokenId !== exceptTokenId)
+    .map(row => row.id);
+  if (ids.length > 0) {
+    await db.delete(userSessions).where(inArray(userSessions.id, ids));
+  }
+  return ids.length;
+}
+
 /**
  * Alle aktiven Teil-Links eines Kontos (#422): neun Tabellen, ein Bild.
  * Abgelaufene filtert der Aufrufer über shared/shareLinks.ts – die

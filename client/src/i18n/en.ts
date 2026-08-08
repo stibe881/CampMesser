@@ -5972,6 +5972,26 @@ export const en: Translation = {
       location: "Location",
     },
   },
+  devices: {
+    title: "Signed-in devices",
+    intro:
+      "Every sign-in to this account, with last activity. A signed-out device is locked out immediately – even if it's the phone left on the train.",
+    empty: "No recorded sign-ins.",
+    unknownDevice: "Unknown device",
+    currentBadge: "This device",
+    lastSeen: (date: string) => `Last active: ${date}`,
+    signedInAt: (date: string) => `Signed in: ${date}`,
+    revokeButton: "Sign out",
+    revokeConfirm: "Sign out this device?",
+    revoked: "Device signed out",
+    revokeOthersButton: "Sign out all other devices",
+    revokeOthersConfirm:
+      "Sign out all other devices? This device stays signed in.",
+    othersRevoked: (n: number) =>
+      n === 1 ? "1 device signed out" : `${n} devices signed out`,
+    legacyHint:
+      "Sign-ins from before this overview only appear after that device's next sign-in.",
+  },
   stats: {
     expensesTitle: "Spending across all trips",
     expensesLink: "To the trips",

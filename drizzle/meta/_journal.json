@@ -729,6 +729,13 @@
       "when": 1786199781433,
       "tag": "0103_slim_hellfire_club",
       "breakpoints": true
+    },
+    {
+      "idx": 104,
+      "version": "5",
+      "when": 1786200461335,
+      "tag": "0104_optimal_squadron_supreme",
+      "breakpoints": true
     }
   ]
 }

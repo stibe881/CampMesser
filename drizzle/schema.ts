@@ -51,6 +51,36 @@ export const users = mysqlTable("users", {
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
 
+/**
+ * Angemeldete Geräte (#423): eine Zeile pro Anmeldung. Bisher war die
+ * Session NUR ein JWT im Cookie – ein Jahr gültig und durch nichts zu
+ * widerrufen ausser dem Ablauf. Neue Logins tragen die tokenId der Zeile
+ * als `sid` im JWT; fehlt die Zeile, ist die Anmeldung beendet. Alte
+ * Cookies ohne `sid` bleiben gültig (sanfter Übergang), erscheinen aber
+ * nicht in der Geräte-Liste – erst die nächste Anmeldung tut es.
+ */
+export const userSessions = mysqlTable(
+  "userSessions",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Zufalls-Id der Anmeldung – steht als `sid` im JWT, nie im Client-Code. */
+    tokenId: varchar("tokenId", { length: 32 }).notNull(),
+    /** User-Agent beim Login – fürs Wiedererkennen («iPhone», «Firefox») */
+    userAgent: varchar("userAgent", { length: 255 }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    /** Grob nachgeführt (höchstens stündlich) – reicht für «zuletzt aktiv». */
+    lastSeenAt: timestamp("lastSeenAt").defaultNow().notNull(),
+  },
+  table => [
+    index("userSessions_userId").on(table.userId),
+    uniqueIndex("userSessions_tokenId").on(table.tokenId),
+  ]
+);
+
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertUserSession = typeof userSessions.$inferInsert;
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 

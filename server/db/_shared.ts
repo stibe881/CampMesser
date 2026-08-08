@@ -107,6 +107,7 @@ import {
   tripShoppingItems,
   users,
   userNotes,
+  userSessions,
   InsertUserNote,
   userSettings,
 } from "../../drizzle/schema";
@@ -234,6 +235,7 @@ export {
   tripPhotos,
   tripShoppingItems,
   userNotes,
+  userSessions,
   userSettings,
   users,
 };
