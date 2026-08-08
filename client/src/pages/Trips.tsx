@@ -33,7 +33,6 @@ import { tripDisplayName, tripPlaceName } from "@shared/tripName";
 import {
   TRIP_KINDS,
   normalizeTripKind,
-  tripKindForm,
   tripKindLabel,
   type TripKind,
 } from "@shared/tripKind";
@@ -72,18 +71,14 @@ import {
   Share2,
   ShoppingBasket,
   Refrigerator,
-  Search,
   Signpost,
-  Star,
   Tent,
   Trash2,
   Trophy,
   Users,
   UtensilsCrossed,
   Wallet,
-  X,
 } from "lucide-react";
-import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
 import { Link, useRoute, useSearch } from "wouter";
 import { toast } from "sonner";
 import QRCode from "qrcode";
@@ -99,7 +94,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -111,7 +105,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -211,10 +204,8 @@ import TripGuestbook from "@/components/TripGuestbook";
 import TripHistory from "@/components/TripHistory";
 import TripReservation from "@/components/TripReservation";
 import TripTemplatePicker from "@/components/TripTemplatePicker";
+import TripFormDialog, { StarRating } from "@/components/trips/TripFormDialog";
 import { useTodayIso } from "@/lib/useTodayIso";
-
-/** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
-const FREE_LOCATION = "frei";
 
 /** So viele Tage vor der Anreise erscheinen die Wetter-Packvorschläge. */
 const PACK_SUGGESTION_DAYS_BEFORE = 7;
@@ -253,63 +244,6 @@ function loadStoredTripsView(): TripsView {
     // Speicher blockiert – mit der Listen-Ansicht starten
   }
   return "list";
-}
-
-/**
- * Ferien-/Feiertags-Hinweise eines geplanten Aufenthalts: Badges nur, wenn
- * der Zeitraum Schulferien oder Feiertage des gewählten Kantons überlappt.
- */
-function StarRating({
-  value,
-  onChange,
-  groupLabel,
-  disabled,
-  size = "md",
-}: {
-  value: number | null;
-  onChange: (rating: number | null) => void;
-  groupLabel: string;
-  disabled?: boolean;
-  size?: "sm" | "md";
-}) {
-  const t = useT();
-  const starClass = size === "sm" ? "h-4 w-4" : "h-6 w-6";
-  return (
-    <div
-      role="radiogroup"
-      aria-label={groupLabel}
-      className="flex items-center gap-0.5"
-    >
-      {[1, 2, 3, 4, 5].map(n => {
-        const active = value !== null && n <= value;
-        const selected = value === n;
-        return (
-          <button
-            key={n}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            disabled={disabled}
-            aria-label={
-              selected ? t.trips.removeRatingAria : t.trips.rateStarAria(n)
-            }
-            onClick={() => onChange(selected ? null : n)}
-            className="rounded p-0.5 transition-transform hover:scale-110 disabled:opacity-50"
-          >
-            <Star
-              className={cn(
-                starClass,
-                active
-                  ? "fill-chart-1 text-chart-1"
-                  : "text-muted-foreground/40"
-              )}
-              aria-hidden="true"
-            />
-          </button>
-        );
-      })}
-    </div>
-  );
 }
 
 /**
@@ -522,77 +456,21 @@ export default function TripsPage() {
    * beim nächsten Öffnen stimmt es.
    */
   const nowMinutes = localMinutes();
-  const [spotChoice, setSpotChoice] = useState<string>(FREE_LOCATION);
-  // "keine" = ohne Packliste, sonst Listen-ID
-  const [packListChoice, setPackListChoice] = useState<string>("keine");
-  const [form, setForm] = useState({
-    location: "",
-    title: "",
-    notes: "",
-    startDate: today,
-    endDate: today,
-    arrivalTime: "",
-    departureTime: "",
-    pitchNumber: "",
-    wifiName: "",
-    wifiPassword: "",
-    pitchNotes: "",
-  });
-  /** Sterne-Bewertung des neuen Eintrags (null = ohne Bewertung). */
-  const [formRating, setFormRating] = useState<number | null>(null);
-  /** Reise-Art (#460) – Camping ist der Normalfall dieser App. */
-  const [formKind, setFormKind] = useState<TripKind>("camping");
-  /**
-   * Koordinaten des Freitext-Orts aus der Ortssuche (#465); null = keine
-   * bestimmt. Wer den Ortstext von Hand ändert, verliert sie wieder – die
-   * Koordinaten gehören zum GEWÄHLTEN Ort, nicht zum getippten Text.
-   */
-  const [formCoords, setFormCoords] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
-  /** Treffer der Ortssuche; null = (noch) nicht gesucht. */
-  const [placeResults, setPlaceResults] = useState<PlaceResult[] | null>(null);
-  const [placeSearching, setPlaceSearching] = useState(false);
   /** Eintrag, der gerade im Formular bearbeitet wird (null = neuer Eintrag). */
   const [editingId, setEditingId] = useState<number | null>(null);
   /** Erfassungs-Dialog «Neue Reise» / «Reise bearbeiten» offen? */
   const [formOpen, setFormOpen] = useState(false);
 
-  /** Formular leeren und in den Neu-Modus zurückkehren. */
-  const resetForm = () => {
-    setEditingId(null);
-    setSpotChoice(FREE_LOCATION);
-    setPackListChoice("keine");
-    setForm({
-      location: "",
-      title: "",
-      notes: "",
-      startDate: today,
-      endDate: today,
-      arrivalTime: "",
-      departureTime: "",
-      pitchNumber: "",
-      wifiName: "",
-      wifiPassword: "",
-      pitchNotes: "",
-    });
-    setFormRating(null);
-    setFormKind("camping");
-    setFormCoords(null);
-    setPlaceResults(null);
-  };
-
-  /** Dialog im Neu-Modus öffnen (Formular frisch). */
+  /** Dialog im Neu-Modus öffnen. */
   const openNewTripDialog = () => {
-    resetForm();
+    setEditingId(null);
     setFormOpen(true);
   };
 
-  /** Dialog schliessen und das Formular zurücksetzen. */
+  /** Dialog schliessen. */
   const closeForm = () => {
     setFormOpen(false);
-    resetForm();
+    setEditingId(null);
   };
 
   // Schnellaktion «Neuer Tagebuch-Eintrag» (?neu=1): den Reise-Dialog öffnen
@@ -602,24 +480,6 @@ export default function TripsPage() {
     if (new URLSearchParams(search).get("neu") === "1") openNewTripDialog();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, isAuthenticated]);
-
-  const addMutation = trpc.trips.add.useMutation({
-    onSuccess: () => {
-      utils.trips.list.invalidate();
-      closeForm();
-      toast.success(t.trips.entrySaved);
-    },
-    onError: e => toast.error(e.message || t.trips.entrySaveFailed),
-  });
-
-  const updateMutation = trpc.trips.update.useMutation({
-    onSuccess: () => {
-      utils.trips.list.invalidate();
-      closeForm();
-      toast.success(t.trips.entryUpdated);
-    },
-    onError: e => toast.error(e.message || t.trips.entryUpdateFailed),
-  });
 
   const removeMutation = trpc.trips.remove.useMutation({
     onSuccess: () => utils.trips.list.invalidate(),
@@ -662,9 +522,6 @@ export default function TripsPage() {
   const spots = spotsQuery.data ?? [];
   const allTrips = useMemo(() => tripsQuery.data ?? [], [tripsQuery.data]);
 
-  /** Welche Felder das Formular für die gewählte Art zeigt (#485). */
-  const kindForm = tripKindForm(formKind);
-
   /** Reiseliste nach Art filtern (#466); "alle" = kein Filter. */
   const [kindFilter, setKindFilter] = useState<TripKind | "alle">("alle");
   /**
@@ -679,27 +536,6 @@ export default function TripsPage() {
     [allTrips]
   );
 
-  /**
-   * Art im Formular wechseln (#485): Felder, die es für die neue Art
-   * nicht gibt, werden aufgeräumt statt unsichtbar mitgeschleppt – ein
-   * verknüpfter Zeltplatz wird zum sichtbaren Freitext-Ort (nichts geht
-   * verloren), beim Tagesausflug rückt die Abreise auf die Anreise.
-   */
-  const selectKind = (kind: TripKind) => {
-    setFormKind(kind);
-    const next = tripKindForm(kind);
-    if (!next.spotSelect && spotChoice !== FREE_LOCATION) {
-      const spotName = spots.find(s => String(s.id) === spotChoice)?.name ?? "";
-      setSpotChoice(FREE_LOCATION);
-      setForm(f => ({
-        ...f,
-        location: f.location.trim() ? f.location : spotName,
-      }));
-    }
-    if (next.singleDay) {
-      setForm(f => ({ ...f, endDate: f.startDate }));
-    }
-  };
   // Geplante Aufenthalte (Anreise heute oder später) separat oben anzeigen
   /**
    * Einzelne Reise als eigene Adresse (#310): /tagebuch/17 zeigt genau
@@ -878,63 +714,10 @@ export default function TripsPage() {
     downloadIcs([trip], icsFileName(label(trip), trip.startDate));
   };
 
-  /** Eintrag ins Formular laden und den Dialog im Bearbeiten-Modus öffnen. */
+  /** Eintrag im Dialog zum Bearbeiten öffnen – den Rest macht der Dialog. */
   const startEdit = (trip: (typeof allTrips)[number]) => {
     setEditingId(trip.id);
-    // Hat die Art keine Zeltplatz-Auswahl (#485), hängt aber (aus alter
-    // Zeit) ein Platz an der Reise, wird er zum sichtbaren Freitext-Ort –
-    // sonst gäbe es im Formular gar kein Orts-Feld.
-    const editKind = tripKindForm(normalizeTripKind(trip.kind));
-    const keepSpot = trip.spotId != null && editKind.spotSelect;
-    setSpotChoice(keepSpot ? String(trip.spotId) : FREE_LOCATION);
-    setPackListChoice(
-      trip.packListId != null ? String(trip.packListId) : "keine"
-    );
-    setForm({
-      location:
-        trip.location ??
-        (trip.spotId != null && !keepSpot ? (freshSpotName(trip) ?? "") : ""),
-      title: trip.title ?? "",
-      notes: trip.notes ?? "",
-      startDate: trip.startDate,
-      endDate: trip.endDate,
-      arrivalTime: trip.arrivalTime ?? "",
-      departureTime: trip.departureTime ?? "",
-      pitchNumber: trip.pitchNumber ?? "",
-      wifiName: trip.wifiName ?? "",
-      wifiPassword: trip.wifiPassword ?? "",
-      pitchNotes: trip.pitchNotes ?? "",
-    });
-    setFormRating(trip.rating ?? null);
-    setFormKind(normalizeTripKind(trip.kind));
-    setFormCoords(
-      trip.latitude != null && trip.longitude != null
-        ? { lat: trip.latitude, lng: trip.longitude }
-        : null
-    );
-    setPlaceResults(null);
     setFormOpen(true);
-  };
-
-  /** Ortssuche (#465): Treffer zur getippten Eingabe holen. */
-  const runPlaceSearch = async () => {
-    const query = form.location.trim();
-    if (!query) return;
-    setPlaceSearching(true);
-    try {
-      setPlaceResults(await searchPlaces(query, lang));
-    } catch {
-      toast.error(t.trips.locationSearchFailed);
-    } finally {
-      setPlaceSearching(false);
-    }
-  };
-
-  /** Treffer übernehmen: Name wird zum Ort, Koordinaten bleiben daran. */
-  const pickPlace = (place: PlaceResult) => {
-    setForm(f => ({ ...f, location: place.name }));
-    setFormCoords({ lat: place.latitude, lng: place.longitude });
-    setPlaceResults(null);
   };
 
   const pastTripLikes = useMemo(
@@ -1211,473 +994,14 @@ export default function TripsPage() {
         </>
       )}
 
-      {/* Dialog «Neue Reise» / «Reise bearbeiten»: gemeinsames Erfassungs-Formular */}
-      <Dialog
+      {/* Erfassungs-Formular (#483): eigener Baustein mit eigenem Zustand */}
+      <TripFormDialog
         open={formOpen}
-        onOpenChange={o => {
-          if (!o) closeForm();
-        }}
-      >
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-serif">
-              {editingId !== null
-                ? t.trips.editEntryTitle
-                : t.trips.newTripButton}
-            </DialogTitle>
-            <DialogDescription>{t.trips.tripFormDialogDesc}</DialogDescription>
-          </DialogHeader>
-          <form
-            className="grid gap-3"
-            onSubmit={e => {
-              e.preventDefault();
-              if (editingShared && editingTrip) {
-                // Mitglieds-Trip: Zeltplatz-/Packlisten-Verknüpfung bleibt
-                // unverändert (gehört der Besitzerin/dem Besitzer)
-                if (editingTrip.spotId === null && !form.location.trim()) {
-                  toast.error(t.trips.choosePlaceError);
-                  return;
-                }
-                updateMutation.mutate({
-                  id: editingTrip.id,
-                  spotId: editingTrip.spotId,
-                  packListId: editingTrip.packListId,
-                  location:
-                    editingTrip.spotId === null
-                      ? form.location.trim()
-                      : editingTrip.location,
-                  latitude: formCoords?.lat ?? null,
-                  longitude: formCoords?.lng ?? null,
-                  kind: formKind,
-                  title: form.title.trim() || null,
-                  notes: form.notes.trim() || null,
-                  startDate: form.startDate,
-                  endDate: form.endDate,
-                  rating: formRating,
-                  arrivalTime: form.arrivalTime || null,
-                  departureTime: form.departureTime || null,
-                  pitchNumber: form.pitchNumber.trim() || null,
-                  wifiName: form.wifiName.trim() || null,
-                  wifiPassword: form.wifiPassword.trim() || null,
-                  pitchNotes: form.pitchNotes.trim() || null,
-                });
-                return;
-              }
-              // Ohne Zeltplatz-Auswahl für diese Art (#485) zählt nur der Ort
-              const spotId =
-                !kindForm.spotSelect || spotChoice === FREE_LOCATION
-                  ? null
-                  : Number(spotChoice);
-              if (spotId === null && !form.location.trim()) {
-                toast.error(t.trips.choosePlaceError);
-                return;
-              }
-              const payload = {
-                spotId,
-                packListId:
-                  packListChoice === "keine" ? null : Number(packListChoice),
-                location: spotId === null ? form.location.trim() : null,
-                latitude: spotId === null ? (formCoords?.lat ?? null) : null,
-                longitude: spotId === null ? (formCoords?.lng ?? null) : null,
-                kind: formKind,
-                title: form.title.trim() || null,
-                notes: form.notes.trim() || null,
-                startDate: form.startDate,
-                endDate: form.endDate,
-                rating: formRating,
-                arrivalTime: form.arrivalTime || null,
-                departureTime: form.departureTime || null,
-                pitchNumber: form.pitchNumber.trim() || null,
-                wifiName: form.wifiName.trim() || null,
-                wifiPassword: form.wifiPassword.trim() || null,
-                pitchNotes: form.pitchNotes.trim() || null,
-              };
-              if (editingId !== null) {
-                updateMutation.mutate({ id: editingId, ...payload });
-              } else {
-                addMutation.mutate(payload);
-              }
-            }}
-          >
-            <div className="grid gap-3 sm:grid-cols-2">
-              {/* Zeltplatz/Packliste gehören der Besitzerin/dem Besitzer –
-                  beim Bearbeiten eines Mitglieds-Trips ausgeblendet.
-                  Die Zeltplatz-Auswahl gibt es nur für Arten, die dort
-                  schlafen (#485) – bei Hotelferien zählt der Ort. */}
-              {!editingShared && kindForm.spotSelect && (
-                <div>
-                  <Label htmlFor="trip-spot">{t.trips.placeLabel}</Label>
-                  <Select value={spotChoice} onValueChange={setSpotChoice}>
-                    <SelectTrigger id="trip-spot" className="mt-1.5 w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={FREE_LOCATION}>
-                        {t.trips.freeLocationOption}
-                      </SelectItem>
-                      {spots.map(s => (
-                        <SelectItem key={s.id} value={String(s.id)}>
-                          {s.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              {(editingShared
-                ? editingTrip?.spotId === null
-                : spotChoice === FREE_LOCATION) && (
-                <div>
-                  <Label htmlFor="trip-location">
-                    {t.trips.locationNameLabel}
-                  </Label>
-                  <Input
-                    id="trip-location"
-                    className="mt-1.5"
-                    placeholder={t.trips.locationPlaceholder}
-                    value={form.location}
-                    onChange={e => {
-                      // Von Hand geändert → die Koordinaten des vorher
-                      // gewählten Orts gelten nicht mehr (#465)
-                      setFormCoords(null);
-                      setForm(f => ({ ...f, location: e.target.value }));
-                    }}
-                  />
-                  {/* Ortssuche (#465): macht aus dem Freitext einen Ort
-                      MIT Koordinaten – damit Hotel-, Strand- und
-                      Städtereisen Wetter und Heute-Ansicht bekommen. */}
-                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={!form.location.trim() || placeSearching}
-                      onClick={() => void runPlaceSearch()}
-                    >
-                      <Search
-                        className="mr-1.5 h-3.5 w-3.5"
-                        aria-hidden="true"
-                      />
-                      {t.trips.locationSearchButton}
-                    </Button>
-                    {formCoords && (
-                      <span className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-accent-foreground">
-                        <MapPin className="h-3 w-3" aria-hidden="true" />
-                        {t.trips.locationCoordsSet}
-                        <button
-                          type="button"
-                          onClick={() => setFormCoords(null)}
-                          aria-label={t.trips.locationCoordsClearAria}
-                          className="ml-0.5 text-muted-foreground hover:text-destructive"
-                        >
-                          <X className="h-3 w-3" aria-hidden="true" />
-                        </button>
-                      </span>
-                    )}
-                  </div>
-                  {placeResults !== null &&
-                    (placeResults.length === 0 ? (
-                      <p className="mt-1.5 text-xs text-muted-foreground">
-                        {t.trips.locationSearchNoResults}
-                      </p>
-                    ) : (
-                      <div className="mt-1.5 flex flex-wrap gap-1.5">
-                        {placeResults.map(place => (
-                          <button
-                            key={place.id}
-                            type="button"
-                            onClick={() => pickPlace(place)}
-                            className="rounded-full bg-muted px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                          >
-                            {place.name}
-                            {place.region && (
-                              <span className="text-xs"> · {place.region}</span>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    ))}
-                </div>
-              )}
-              {!editingShared && (
-                <div>
-                  <Label htmlFor="trip-packlist">{t.trips.packListLabel}</Label>
-                  <Select
-                    value={packListChoice}
-                    onValueChange={setPackListChoice}
-                  >
-                    <SelectTrigger id="trip-packlist" className="mt-1.5 w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="keine">
-                        {t.trips.noPackList}
-                      </SelectItem>
-                      {/* Archivierte Packlisten (#194) tauchen in der
-                          Auswahl nicht auf – bereits verknüpfte bleiben
-                          aber wählbar, damit nichts stillschweigend abfällt */}
-                      {(listsQuery.data ?? [])
-                        .filter(
-                          l =>
-                            l.archivedAt == null ||
-                            String(l.id) === packListChoice
-                        )
-                        .map(l => (
-                          <SelectItem key={l.id} value={String(l.id)}>
-                            {l.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-            {/* Reise-Art (#460): steuert, was die Heute-Ansicht während
-                der Reise in den Vordergrund stellt – sortieren und
-                vorschlagen, nie sperren. */}
-            <div>
-              <p className="text-sm font-medium">{t.trips.kindLabel}</p>
-              <div
-                className="mt-1.5 flex flex-wrap gap-1.5"
-                role="group"
-                aria-label={t.trips.kindLabel}
-              >
-                {TRIP_KINDS.map(kind => (
-                  <button
-                    key={kind}
-                    type="button"
-                    onClick={() => selectKind(kind)}
-                    className={cn(
-                      "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-                      formKind === kind
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:text-foreground"
-                    )}
-                    aria-pressed={formKind === kind}
-                  >
-                    {tripKindLabel(kind, lang)}
-                  </button>
-                ))}
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {t.trips.kindHint}
-              </p>
-            </div>
-            <div
-              className={cn("grid gap-3", !kindForm.singleDay && "grid-cols-2")}
-            >
-              <div>
-                <Label htmlFor="trip-start">
-                  {/* Tagesausflug (#485): EIN Tag, also «Datum» statt
-                      «Anreise» – eine getrennte Abreise wäre eine
-                      Fangfrage. */}
-                  {kindForm.singleDay ? t.trips.dayLabel : t.trips.arrivalLabel}
-                </Label>
-                <Input
-                  id="trip-start"
-                  className="mt-1.5"
-                  type="date"
-                  value={form.startDate}
-                  max={kindForm.singleDay ? undefined : form.endDate}
-                  onChange={e =>
-                    setForm(f => ({
-                      ...f,
-                      startDate: e.target.value,
-                      // Abreise nachziehen: beim Tagesausflug immer gleich,
-                      // sonst nur, wenn sie vor der Anreise läge
-                      endDate: kindForm.singleDay
-                        ? e.target.value
-                        : f.endDate < e.target.value
-                          ? e.target.value
-                          : f.endDate,
-                    }))
-                  }
-                  required
-                />
-              </div>
-              {!kindForm.singleDay && (
-                <div>
-                  <Label htmlFor="trip-end">{t.trips.departureLabel}</Label>
-                  <Input
-                    id="trip-end"
-                    className="mt-1.5"
-                    type="date"
-                    value={form.endDate}
-                    min={form.startDate}
-                    onChange={e =>
-                      setForm(f => ({ ...f, endDate: e.target.value }))
-                    }
-                    required
-                  />
-                </div>
-              )}
-            </div>
-            {/* Optionale Uhrzeiten – passend zu den Check-in-Zeiten des Platzes */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="trip-start-time">
-                  {t.trips.arrivalTimeLabel}
-                </Label>
-                <Input
-                  id="trip-start-time"
-                  className="mt-1.5"
-                  type="time"
-                  value={form.arrivalTime}
-                  onChange={e =>
-                    setForm(f => ({ ...f, arrivalTime: e.target.value }))
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="trip-end-time">
-                  {t.trips.departureTimeLabel}
-                </Label>
-                <Input
-                  id="trip-end-time"
-                  className="mt-1.5"
-                  type="time"
-                  value={form.departureTime}
-                  onChange={e =>
-                    setForm(f => ({ ...f, departureTime: e.target.value }))
-                  }
-                />
-              </div>
-            </div>
-            {/* Stellplatz-Details (#252): gelten für diesen Aufenthalt.
-                Nur für Arten mit Platz (#485) – im Hotel gibt es keine
-                Parzellennummer. Gespeicherte Werte bleiben beim Umschalten
-                erhalten, die Felder sind nur ausgeblendet. */}
-            {kindForm.pitchDetails && (
-              <div className="rounded-lg border border-border bg-muted/30 p-3">
-                <p className="text-sm font-medium">
-                  {t.trips.pitchSectionTitle}
-                </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {t.trips.pitchSectionHint}
-                </p>
-                <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <Label htmlFor="trip-pitch-number">
-                      {t.trips.pitchNumberLabel}
-                    </Label>
-                    <Input
-                      id="trip-pitch-number"
-                      className="mt-1.5"
-                      maxLength={40}
-                      placeholder={t.trips.pitchNumberPlaceholder}
-                      value={form.pitchNumber}
-                      onChange={e =>
-                        setForm(f => ({ ...f, pitchNumber: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="trip-wifi-name">
-                      {t.trips.wifiNameLabel}
-                    </Label>
-                    <Input
-                      id="trip-wifi-name"
-                      className="mt-1.5"
-                      maxLength={80}
-                      placeholder={t.trips.wifiNamePlaceholder}
-                      value={form.wifiName}
-                      onChange={e =>
-                        setForm(f => ({ ...f, wifiName: e.target.value }))
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <Label htmlFor="trip-wifi-password">
-                    {t.trips.wifiPasswordLabel}
-                  </Label>
-                  <Input
-                    id="trip-wifi-password"
-                    className="mt-1.5"
-                    maxLength={80}
-                    placeholder={t.trips.wifiPasswordPlaceholder}
-                    value={form.wifiPassword}
-                    onChange={e =>
-                      setForm(f => ({ ...f, wifiPassword: e.target.value }))
-                    }
-                  />
-                </div>
-                <div className="mt-3">
-                  <Label htmlFor="trip-pitch-notes">
-                    {t.trips.pitchNotesLabel}
-                  </Label>
-                  <Textarea
-                    id="trip-pitch-notes"
-                    className="mt-1.5"
-                    rows={2}
-                    placeholder={t.trips.pitchNotesPlaceholder}
-                    value={form.pitchNotes}
-                    onChange={e =>
-                      setForm(f => ({ ...f, pitchNotes: e.target.value }))
-                    }
-                  />
-                </div>
-              </div>
-            )}
-            <div>
-              <Label htmlFor="trip-title">{t.trips.titleLabel}</Label>
-              <Input
-                id="trip-title"
-                className="mt-1.5"
-                placeholder={t.trips.titlePlaceholder}
-                value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="trip-notes">{t.trips.notesLabel}</Label>
-              <Textarea
-                id="trip-notes"
-                className="mt-1.5"
-                rows={3}
-                placeholder={t.trips.notesPlaceholder}
-                value={form.notes}
-                onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label>{t.trips.ratingLabel}</Label>
-              <div className="mt-1.5">
-                <StarRating
-                  value={formRating}
-                  onChange={setFormRating}
-                  groupLabel={t.trips.ratingFormAria}
-                />
-              </div>
-            </div>
-            <DialogFooter className="pt-1">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={closeForm}
-                disabled={addMutation.isPending || updateMutation.isPending}
-              >
-                {t.common.cancel}
-              </Button>
-              <Button
-                type="submit"
-                disabled={addMutation.isPending || updateMutation.isPending}
-              >
-                {editingId !== null ? (
-                  <Pencil className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                ) : (
-                  <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                )}
-                {addMutation.isPending || updateMutation.isPending
-                  ? t.common.saving
-                  : editingId !== null
-                    ? t.trips.saveChanges
-                    : t.trips.submit}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+        editing={editingTrip}
+        spots={spots}
+        packLists={listsQuery.data ?? []}
+        onClose={closeForm}
+      />
 
       {/* Umschalten und Kalender betreffen die ganze Liste – bei einer
           einzelnen Reise gibt es nichts umzuschalten. */}
