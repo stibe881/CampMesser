@@ -4,7 +4,9 @@ import {
   evaluateTrackPoint,
   formatTrackDuration,
   gpxFileName,
+  guessTrackActivity,
   MAX_TRACK_POINTS,
+  normalizeTrackActivity,
   parseTrackPoints,
   serializeTrackPoints,
   shouldAppendPoint,
@@ -339,5 +341,24 @@ describe("gpxFileName", () => {
     expect(gpxFileName("!!!", new Date("2026-08-03T10:00:00Z"))).toBe(
       "2026-08-03-wanderung.gpx"
     );
+  });
+});
+
+describe("Aktivitätstyp (#449)", () => {
+  it("normalisiert unbekannte Werte zu «hike»", () => {
+    expect(normalizeTrackActivity("bike")).toBe("bike");
+    expect(normalizeTrackActivity("hike")).toBe("hike");
+    expect(normalizeTrackActivity("sup")).toBe("hike");
+    expect(normalizeTrackActivity(null)).toBe("hike");
+  });
+
+  it("rät die Aktivität aus dem Bewegungs-Schnitt", () => {
+    // 5 km in 1 h = 5 km/h → Wandern
+    expect(guessTrackActivity(5000, 3600)).toBe("hike");
+    // 12 km in 1 h = 12 km/h → Velo
+    expect(guessTrackActivity(12000, 3600)).toBe("bike");
+    // Ohne Bewegungszeit bleibt es eine Wanderung
+    expect(guessTrackActivity(5000, 0)).toBe("hike");
+    expect(guessTrackActivity(0, 3600)).toBe("hike");
   });
 });

@@ -2369,6 +2369,9 @@ export const fr: Translation = {
     saveNeedsLogin:
       "Il te faut un compte pour l'enregistrer – l'export GPX fonctionne aussi sans.",
     nameLabel: "Nom",
+    activityLabel: "Activité",
+    activityHike: "Randonnée",
+    activityBike: "Vélo",
     namePlaceholder: "p. ex. Tour du lac",
     nameRequired: "Merci d'indiquer un nom",
     defaultName: (date: string) => `Randonnée du ${date}`,

@@ -2371,6 +2371,9 @@ export const de = {
     saveNeedsLogin:
       "Zum Speichern brauchst du ein Konto – der GPX-Export geht auch ohne.",
     nameLabel: "Name",
+    activityLabel: "Aktivität",
+    activityHike: "Wandern",
+    activityBike: "Velo",
     namePlaceholder: "z. B. Runde um den See",
     nameRequired: "Bitte einen Namen eingeben",
     defaultName: (date: string) => `Wanderung vom ${date}`,

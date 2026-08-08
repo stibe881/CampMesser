@@ -1584,6 +1584,12 @@ export const hikeTracks = mysqlTable(
     /** Zugeordnete Reise (tripLogs.id); null = ohne Reise */
     tripId: int("tripId"),
     name: varchar("name", { length: 80 }).notNull(),
+    /**
+     * Aktivitätstyp (#449): "hike" oder "bike" (shared/track.ts). Beim
+     * Speichern wählbar; ohne Angabe rät der Server aus dem Schnitt-Tempo.
+     * Bestehende Tracks aus der Zeit vor der Spalte gelten als Wanderung.
+     */
+    activity: varchar("activity", { length: 10 }).notNull().default("hike"),
     /** Zeitpunkt des ersten und des letzten Punkts */
     startedAt: timestamp("startedAt").notNull(),
     endedAt: timestamp("endedAt").notNull(),

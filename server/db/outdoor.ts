@@ -35,6 +35,7 @@ export async function getHikeTracks(userId: number) {
       userId: hikeTracks.userId,
       tripId: hikeTracks.tripId,
       name: hikeTracks.name,
+      activity: hikeTracks.activity,
       startedAt: hikeTracks.startedAt,
       endedAt: hikeTracks.endedAt,
       distanceM: hikeTracks.distanceM,

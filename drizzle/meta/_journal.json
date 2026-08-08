@@ -757,6 +757,13 @@
       "when": 1786204963785,
       "tag": "0107_ordinary_leper_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 108,
+      "version": "5",
+      "when": 1786205452391,
+      "tag": "0108_majestic_mathemanic",
+      "breakpoints": true
     }
   ]
 }
