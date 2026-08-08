@@ -4644,6 +4644,22 @@ export const fr: Translation = {
     sourceNote:
       "Règles de baignade reformulées d'après la SSS (slrg.ch) ; drapeaux selon la pratique internationale de sauvetage (ILS). La signalisation sur la plage prime toujours.",
   },
+  connections: {
+    title: "TP pour le trajet",
+    subtitle:
+      "Les prochaines correspondances depuis chez toi jusqu'ici – de l'horaire suisse ouvert.",
+    subtitleAtPlace: (place: string) =>
+      `Les prochaines correspondances depuis chez toi vers ${place} – de l'horaire suisse ouvert.`,
+    noHome: "Il manque ton domicile pour la recherche.",
+    noHomeLink: "Le définir dans le profil",
+    empty:
+      "Aucune correspondance trouvée – l'horaire couvre la Suisse et le trafic frontalier.",
+    durationLine: (min: number) =>
+      min >= 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min} min`,
+    transfersLine: (n: number) =>
+      n === 0 ? "direct" : n === 1 ? "1 changement" : `${n} changements`,
+    source: "Source : transport.opendata.ch – sans garantie.",
+  },
   poi: {
     radiusLabel: "Rayon :",
     radiusGroupAria: "Choisir le rayon de recherche",

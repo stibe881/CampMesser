@@ -339,3 +339,93 @@ export function upcomingDepartures(
     )
     .slice(0, limit);
 }
+
+/* ------------------------------------------------------------------ */
+/* Verbindungssuche für die Anreise (#491)                             */
+/* ------------------------------------------------------------------ */
+
+/** So viele Verbindungen zeigt der Abschnitt höchstens an. */
+export const TRANSPORT_CONNECTION_LIMIT = 4;
+
+/** Verbindungs-Abfrage von Koordinate zu Koordinate (Fahrplan CH). */
+export function connectionsUrl(
+  from: { lat: number; lon: number },
+  to: { lat: number; lon: number },
+  limit: number = TRANSPORT_CONNECTION_LIMIT
+): string {
+  const point = (p: { lat: number; lon: number }) =>
+    `${p.lat.toFixed(5)},${p.lon.toFixed(5)}`;
+  return (
+    `${TRANSPORT_API_BASE}/connections` +
+    `?from=${encodeURIComponent(point(from))}` +
+    `&to=${encodeURIComponent(point(to))}` +
+    `&limit=${limit}`
+  );
+}
+
+/** Eine Verbindung von daheim zum Reiseziel. */
+export interface TransitConnection {
+  /** Stabil innerhalb einer Antwort: Abfahrt + Ankunft. */
+  key: string;
+  departureSec: number;
+  arrivalSec: number;
+  /** Reisezeit in Minuten, aus dem Dauer-Text der API. */
+  durationMin: number | null;
+  transfers: number;
+  /** Fahrende Züge/Busse («IR 15», «B 311») – wie geliefert. */
+  products: string[];
+  fromName?: string;
+  toName?: string;
+}
+
+/** «00d01:23:00» → 83 Minuten; Unlesbares ergibt null. */
+export function connectionDurationMinutes(value: unknown): number | null {
+  if (typeof value !== "string") return null;
+  const match = /^(\d+)d(\d{2}):(\d{2}):\d{2}$/.exec(value.trim());
+  if (!match) return null;
+  return Number(match[1]) * 24 * 60 + Number(match[2]) * 60 + Number(match[3]);
+}
+
+/** Antwort der connections-API defensiv lesen; Löchriges fliegt raus. */
+export function parseConnections(json: unknown): TransitConnection[] {
+  if (!json || typeof json !== "object") return [];
+  const list = (json as { connections?: unknown }).connections;
+  if (!Array.isArray(list)) return [];
+  const result: TransitConnection[] = [];
+  for (const entry of list) {
+    if (!entry || typeof entry !== "object") continue;
+    const record = entry as Record<string, unknown>;
+    const from = record.from as Record<string, unknown> | undefined;
+    const to = record.to as Record<string, unknown> | undefined;
+    const departureSec = Number(from?.departureTimestamp);
+    const arrivalSec = Number(to?.arrivalTimestamp);
+    if (!Number.isFinite(departureSec) || !Number.isFinite(arrivalSec)) {
+      continue;
+    }
+    const stationName = (value: unknown): string | undefined => {
+      if (!value || typeof value !== "object") return undefined;
+      const name = (value as { name?: unknown }).name;
+      return typeof name === "string" && name ? name : undefined;
+    };
+    const products = Array.isArray(record.products)
+      ? record.products.filter(
+          (p): p is string => typeof p === "string" && p.trim() !== ""
+        )
+      : [];
+    result.push({
+      key: `${departureSec}-${arrivalSec}`,
+      departureSec,
+      arrivalSec,
+      durationMin: connectionDurationMinutes(record.duration),
+      transfers:
+        typeof record.transfers === "number" &&
+        Number.isFinite(record.transfers)
+          ? record.transfers
+          : 0,
+      products,
+      fromName: stationName(from?.station),
+      toName: stationName(to?.station),
+    });
+  }
+  return result;
+}

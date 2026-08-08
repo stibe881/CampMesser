@@ -13,6 +13,9 @@ import {
   upcomingDepartures,
   type TransitDeparture,
   type TransitStation,
+  connectionsUrl,
+  connectionDurationMinutes,
+  parseConnections,
 } from "@shared/transport";
 
 /** Kurzform für eine Haltestelle in den Sortier-Tests. */
@@ -445,5 +448,53 @@ describe("upcomingDepartures", () => {
     ]);
     expect(upcomingDepartures(input, now, 0)).toEqual([]);
     expect(input.map(d => d.id)).toEqual(["c", "a", "b"]);
+  });
+});
+
+describe("Verbindungssuche (#491)", () => {
+  it("baut die connections-URL aus zwei Koordinaten", () => {
+    const url = connectionsUrl(
+      { lat: 46.94809, lon: 7.44744 },
+      { lat: 46.68, lon: 7.85 }
+    );
+    expect(url).toContain("/connections?");
+    expect(url).toContain("from=46.94809%2C7.44744");
+    expect(url).toContain("to=46.68000%2C7.85000");
+    expect(url).toContain("limit=4");
+  });
+
+  it("liest die Dauer «00d01:23:00» als Minuten", () => {
+    expect(connectionDurationMinutes("00d01:23:00")).toBe(83);
+    expect(connectionDurationMinutes("01d00:05:00")).toBe(1445);
+    expect(connectionDurationMinutes("kaputt")).toBeNull();
+    expect(connectionDurationMinutes(42)).toBeNull();
+  });
+
+  it("parst Verbindungen defensiv und überspringt Löchriges", () => {
+    const parsed = parseConnections({
+      connections: [
+        {
+          from: {
+            departureTimestamp: 1754660000,
+            station: { name: "Bern" },
+          },
+          to: { arrivalTimestamp: 1754665000, station: { name: "Spiez" } },
+          duration: "00d01:23:00",
+          transfers: 1,
+          products: ["IC 61", "B 61"],
+        },
+        // Ohne Zeitstempel keine Verbindung
+        { from: {}, to: {}, duration: "00d00:30:00" },
+      ],
+    });
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0]).toMatchObject({
+      durationMin: 83,
+      transfers: 1,
+      products: ["IC 61", "B 61"],
+      fromName: "Bern",
+      toName: "Spiez",
+    });
+    expect(parseConnections(null)).toEqual([]);
   });
 });

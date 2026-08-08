@@ -4524,6 +4524,22 @@ export const en: Translation = {
     sourceNote:
       "Bathing rules paraphrased from the SLRG (slrg.ch); flags follow international lifesaving practice (ILS). The signage on the beach always takes precedence.",
   },
+  connections: {
+    title: "Public transport to get there",
+    subtitle:
+      "The next connections from your home to here – from the open Swiss timetable.",
+    subtitleAtPlace: (place: string) =>
+      `The next connections from your home to ${place} – from the open Swiss timetable.`,
+    noHome: "Your home location is missing for the search.",
+    noHomeLink: "Set it in your profile",
+    empty:
+      "No connection found – the timetable covers Switzerland and cross-border traffic.",
+    durationLine: (min: number) =>
+      min >= 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min} min`,
+    transfersLine: (n: number) =>
+      n === 0 ? "direct" : n === 1 ? "1 change" : `${n} changes`,
+    source: "Source: transport.opendata.ch – no guarantee.",
+  },
   poi: {
     radiusLabel: "Radius:",
     radiusGroupAria: "Choose search radius",

@@ -44,6 +44,7 @@ import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
 import NearbyShops from "@/components/NearbyShops";
 import NearbySights from "@/components/NearbySights";
 import NearbyPoints from "@/components/NearbyPoints";
+import TransitConnections from "@/components/TransitConnections";
 import {
   chargersQuery,
   drinkingWaterQuery,
@@ -384,6 +385,17 @@ export default function SpotDetailPage() {
           <DeparturePlanner
             latitude={spot.latitude}
             longitude={spot.longitude}
+            className="mb-4"
+          />
+        </LazySection>
+
+        {/* ÖV-Verbindung zur Anreise (#491): von daheim hierher – die
+            Anreise-Navigation (#103) kennt nur das Auto */}
+        <LazySection minHeight={90}>
+          <TransitConnections
+            latitude={spot.latitude}
+            longitude={spot.longitude}
+            placeName={spot.name}
             className="mb-4"
           />
         </LazySection>

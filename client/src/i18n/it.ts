@@ -4617,6 +4617,22 @@ export const it: Translation = {
     sourceNote:
       "Regole di balneazione riassunte secondo la SSS (slrg.ch); bandiere secondo la prassi internazionale di salvataggio (ILS). Fa sempre fede la segnaletica in spiaggia.",
   },
+  connections: {
+    title: "TP per il viaggio",
+    subtitle:
+      "I prossimi collegamenti da casa tua fin qui – dall'orario svizzero aperto.",
+    subtitleAtPlace: (place: string) =>
+      `I prossimi collegamenti da casa tua verso ${place} – dall'orario svizzero aperto.`,
+    noHome: "Per la ricerca manca la tua posizione di casa.",
+    noHomeLink: "Impostala nel profilo",
+    empty:
+      "Nessun collegamento trovato – l'orario copre la Svizzera e il traffico di confine.",
+    durationLine: (min: number) =>
+      min >= 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min} min`,
+    transfersLine: (n: number) =>
+      n === 0 ? "diretto" : n === 1 ? "1 cambio" : `${n} cambi`,
+    source: "Fonte: transport.opendata.ch – senza garanzia.",
+  },
   poi: {
     radiusLabel: "Raggio:",
     radiusGroupAria: "Scegli il raggio di ricerca",

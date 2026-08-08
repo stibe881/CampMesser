@@ -4654,6 +4654,22 @@ export const de = {
     sourceNote:
       "Baderegeln sinngemäss nach SLRG (slrg.ch); Flaggen nach der Praxis der internationalen Rettungsdienste (ILS). Massgeblich ist immer die Beschilderung am Strand.",
   },
+  connections: {
+    title: "ÖV zur Anreise",
+    subtitle:
+      "Die nächsten Verbindungen von deinem Zuhause hierher – aus dem offenen Schweizer Fahrplan.",
+    subtitleAtPlace: (place: string) =>
+      `Die nächsten Verbindungen von deinem Zuhause nach ${place} – aus dem offenen Schweizer Fahrplan.`,
+    noHome: "Für die Suche fehlt dein Heim-Standort.",
+    noHomeLink: "Im Profil hinterlegen",
+    empty:
+      "Keine Verbindung gefunden – der Fahrplan deckt die Schweiz samt Grenzverkehr ab.",
+    durationLine: (min: number) =>
+      min >= 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min} min`,
+    transfersLine: (n: number) =>
+      n === 0 ? "direkt" : n === 1 ? "1× umsteigen" : `${n}× umsteigen`,
+    source: "Quelle: transport.opendata.ch – ohne Gewähr.",
+  },
   poi: {
     radiusLabel: "Umkreis:",
     radiusGroupAria: "Suchradius wählen",
