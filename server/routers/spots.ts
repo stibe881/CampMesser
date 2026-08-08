@@ -431,9 +431,29 @@ export const spotsRouters = {
     remove: protectedProcedure
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(async ({ ctx, input }) => {
+        // Das Foto bleibt auf dem Webspace liegen – der Papierkorb kennt
+        // es (#433) und räumt es erst beim endgültigen Löschen weg.
         const { capture } = await import("../trash");
         await capture("note", input.id, ctx.user.id);
         await db.deleteUserNote(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+    /** Foto einer Notiz entfernen (Feld + Datei auf dem Webspace, #433). */
+    removePhoto: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const note = await db.getUserNote(input.id, ctx.user.id);
+        if (!note) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Notiz nicht gefunden.",
+          });
+        }
+        if (note.fileName) {
+          await db.updateUserNote(input.id, ctx.user.id, { fileName: null });
+          const { notePhotoStorage } = await import("../photoStorage");
+          await notePhotoStorage.deleteFiles([note.fileName]);
+        }
         return { success: true } as const;
       }),
   }),

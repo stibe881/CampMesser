@@ -6096,6 +6096,22 @@ export const de = {
     deleteConfirm: "Diese Notiz wirklich löschen?",
     editAria: (title: string) => `Notiz ${title} bearbeiten`,
     deleteAria: (title: string) => `Notiz ${title} löschen`,
+    photoLabel: "Foto (optional)",
+    photoChoose: "Foto auswählen",
+    photoChange: "Foto ändern",
+    photoRemove: "Foto entfernen",
+    photoPreviewAlt: "Vorschau des Notiz-Fotos",
+    photoHint:
+      "JPEG, PNG oder WebP – wird vor dem Hochladen automatisch verkleinert.",
+    photoUploading: "Foto wird hochgeladen …",
+    photoUploadFailed:
+      "Gespeichert, aber das Foto konnte nicht hochgeladen werden.",
+    photoTooLarge: "Das Foto ist zu gross (max. 5 MB).",
+    photoHeic:
+      "HEIC/HEIF kann der Browser nicht lesen – bitte als JPEG exportieren.",
+    photoReadFailed: "Das Bild konnte nicht gelesen werden.",
+    photoRemoveFailed: "Das Foto konnte nicht entfernt werden.",
+    photoAlt: (title: string) => `Foto zur Notiz ${title}`,
   },
   stats: {
     expensesTitle: "Ausgaben über alle Reisen",

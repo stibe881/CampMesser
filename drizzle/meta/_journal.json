@@ -722,6 +722,13 @@
       "when": 1786198809821,
       "tag": "0102_happy_firebird",
       "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "5",
+      "when": 1786199781433,
+      "tag": "0103_slim_hellfire_club",
+      "breakpoints": true
     }
   ]
 }

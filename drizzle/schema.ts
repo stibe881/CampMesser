@@ -1758,6 +1758,12 @@ export const userNotes = mysqlTable(
     text: text("text").notNull(),
     /** Stichwörter, kommagetrennt und normalisiert (shared/notes.ts) */
     tags: varchar("tags", { length: 300 }).notNull().default(""),
+    /**
+     * Foto zur Notiz (#433): genau EIN Bild, Ablage unter uploads/notes/
+     * wie bei Beobachtungen und Fängen – der Zettel mit der Skizze, das
+     * Schild mit den Platzregeln. null = ohne Foto.
+     */
+    fileName: varchar("fileName", { length: 64 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },

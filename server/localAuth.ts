@@ -252,6 +252,10 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     .select({ fileName: fishCatches.fileName })
     .from(fishCatches)
     .where(eq(fishCatches.userId, userId));
+  const noteRows = await db
+    .select({ fileName: userNotes.fileName })
+    .from(userNotes)
+    .where(eq(userNotes.userId, userId));
   // Packlisten-Positionen zuerst (referenzieren Listen)
   const lists = await db
     .select({ id: packLists.id })
@@ -414,6 +418,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     receiptPhotoStorage,
     sightingPhotoStorage,
     catchPhotoStorage,
+    notePhotoStorage,
     reservationStorage,
   } = await import("./photoStorage");
   await tripPhotoStorage.deleteFiles(photoRows.map(p => p.fileName));
@@ -440,6 +445,11 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   );
   await catchPhotoStorage.deleteFiles(
     catchRows
+      .map(r => r.fileName)
+      .filter((name): name is string => Boolean(name))
+  );
+  await notePhotoStorage.deleteFiles(
+    noteRows
       .map(r => r.fileName)
       .filter((name): name is string => Boolean(name))
   );

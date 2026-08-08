@@ -153,6 +153,19 @@ export async function updateUserNote(
     .set(data)
     .where(and(eq(userNotes.id, id), eq(userNotes.userId, userId)));
 }
+/**
+ * Notiz über den Dateinamen ihres Fotos finden (#433) – die Auslieferung
+ * prüft damit, dass die Datei wirklich dem Konto gehört.
+ */
+export async function getUserNoteByFileName(fileName: string, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(userNotes)
+    .where(and(eq(userNotes.fileName, fileName), eq(userNotes.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
 export async function deleteUserNote(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db
