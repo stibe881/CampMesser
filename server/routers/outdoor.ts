@@ -611,6 +611,8 @@ export const outdoorRouters = {
             // Wellen fürs Meer (#451)
             waveHeightM: marine.waveHeightM,
             waveDirectionDeg: marine.waveDirectionDeg,
+            // Gezeiten (#462): leer ohne nennenswerten Tidenhub
+            tides: marine.tides,
           },
         };
       }),

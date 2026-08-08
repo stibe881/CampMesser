@@ -506,11 +506,89 @@ export function marineWaterUrl(latitude: number, longitude: number): string {
     longitude: longitude.toFixed(4),
     // Wellen (#451) gleich mitholen – ein zweiter Abruf wäre Verschwendung
     current: "sea_surface_temperature,wave_height,wave_direction",
-    hourly: "sea_surface_temperature",
+    // Meeresspiegel stündlich für die Gezeiten (#462); zwei Prognosetage,
+    // damit auch spätabends noch das nächste Hoch- UND Niedrigwasser im
+    // Fenster liegt
+    hourly: "sea_surface_temperature,sea_level_height_msl",
     past_days: "1",
-    forecast_days: "1",
+    forecast_days: "2",
   });
   return `https://marine-api.open-meteo.com/v1/marine?${params.toString()}`;
+}
+
+/**
+ * Gezeiten (#462): nächste Hoch-/Niedrigwasser aus dem stündlichen
+ * Meeresspiegel der Marine-API (sea_level_height_msl, enthält die Tide).
+ *
+ * BEWUSST NUR STUNDENGENAU: Die Reihe ist stündlich, ein «14:23» wäre
+ * eine Scheingenauigkeit. Fürs Baden und den Strandspaziergang reicht
+ * die volle Stunde.
+ */
+export interface TideExtreme {
+  kind: "high" | "low";
+  /** Zeitpunkt (UTC, ms seit Epoch) – Anzeige formatiert in Ortszeit. */
+  timeMs: number;
+  /** Meeresspiegel in Metern (Modell-Referenz MSL). */
+  heightM: number;
+}
+
+/**
+ * Unter diesem Tidenhub (Meter, über das ganze Fenster) gibt es keine
+ * Gezeiten-Zeile: Im Mittelmeer liegt der Hub oft bei 20–30 cm – dort ist
+ * «Hochwasser um 14 Uhr» keine Information, sondern Rauschen.
+ */
+export const TIDE_MIN_RANGE_M = 0.4;
+
+/** So viele kommende Extreme werden gemeldet (das nächste Hoch und Tief). */
+export const TIDE_MAX_EXTREMES = 2;
+
+/**
+ * Lokale Maxima/Minima der Meeresspiegel-Reihe NACH `nowMs`.
+ * Plateaus (zwei gleiche Stunden am Scheitel) zählen einmal, am
+ * Reihenrand wird kein Extrem behauptet – dort weiss man es nicht.
+ */
+export function tideExtremes(
+  times: readonly unknown[],
+  heights: readonly unknown[],
+  nowMs: number,
+  maxCount: number = TIDE_MAX_EXTREMES
+): TideExtreme[] {
+  // Reihe säubern: nur Paare mit gültiger Zeit UND Zahl
+  const points: { ms: number; h: number }[] = [];
+  for (let i = 0; i < times.length && i < heights.length; i++) {
+    const time = times[i];
+    const value = heights[i];
+    if (typeof time !== "string") continue;
+    if (typeof value !== "number" || !Number.isFinite(value)) continue;
+    const ms = Date.parse(`${time}Z`);
+    if (Number.isNaN(ms)) continue;
+    points.push({ ms, h: value });
+  }
+  if (points.length < 3) return [];
+
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+  for (const p of points) {
+    if (p.h < min) min = p.h;
+    if (p.h > max) max = p.h;
+  }
+  if (max - min < TIDE_MIN_RANGE_M) return [];
+
+  const result: TideExtreme[] = [];
+  for (let i = 1; i < points.length - 1 && result.length < maxCount; i++) {
+    const prev = points[i - 1].h;
+    const here = points[i].h;
+    const next = points[i + 1].h;
+    if (points[i].ms <= nowMs) continue;
+    // Plateau am Scheitel: der Nachbar rechts darf gleich sein, gezählt
+    // wird das ERSTE Feld – strikt auf einer Seite verhindert Doppelte.
+    if (here > prev && here >= next) {
+      result.push({ kind: "high", timeMs: points[i].ms, heightM: here });
+    } else if (here < prev && here <= next) {
+      result.push({ kind: "low", timeMs: points[i].ms, heightM: here });
+    }
+  }
+  return result;
 }
 
 /** Wassertemperatur am Meer: aktueller Wert plus die Stunde davor als Trend. */
@@ -523,6 +601,11 @@ export interface MarineWater {
   waveHeightM: number | null;
   /** Richtung, AUS der die Wellen kommen (Grad); null = nicht vorhanden */
   waveDirectionDeg: number | null;
+  /**
+   * Nächste Gezeiten-Extreme (#462), leere Liste ohne nennenswerten
+   * Tidenhub (Mittelmeer) oder ohne Meeresspiegel-Daten.
+   */
+  tides: TideExtreme[];
 }
 
 /**
@@ -538,7 +621,11 @@ export function parseMarineWater(json: unknown): MarineWater | null {
       wave_height?: unknown;
       wave_direction?: unknown;
     };
-    hourly?: { time?: unknown; sea_surface_temperature?: unknown };
+    hourly?: {
+      time?: unknown;
+      sea_surface_temperature?: unknown;
+      sea_level_height_msl?: unknown;
+    };
   };
   const current = data.current;
   if (!current) return null;
@@ -584,12 +671,22 @@ export function parseMarineWater(json: unknown): MarineWater | null {
       ? ((rawDirection % 360) + 360) % 360
       : null;
 
+  // Gezeiten (#462): «jetzt» ist der Zeitpunkt des aktuellen Messwerts –
+  // deterministisch und damit testbar, ohne eigene Uhr.
+  const levelTimes = data.hourly?.time;
+  const levels = data.hourly?.sea_level_height_msl;
+  const tides =
+    Array.isArray(levelTimes) && Array.isArray(levels)
+      ? tideExtremes(levelTimes, levels, measuredAtMs)
+      : [];
+
   return {
     temperatureC,
     measuredAtMs,
     previousC,
     waveHeightM,
     waveDirectionDeg,
+    tides,
   };
 }
 

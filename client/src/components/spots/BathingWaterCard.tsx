@@ -114,6 +114,27 @@ export default function BathingWaterCard({
           </div>
         )}
 
+        {/* Gezeiten (#462): nächstes Hoch-/Niedrigwasser aus dem
+            stündlichen Meeresspiegel – ohne nennenswerten Tidenhub
+            (Mittelmeer) bleibt die Zeile weg, «Hochwasser um 14 Uhr»
+            wäre dort keine Information. Stundengenau, mehr gibt die
+            Reihe nicht her. */}
+        {data.source === "marine" && (data.marine?.tides.length ?? 0) > 0 && (
+          <p className="mt-2 text-sm">
+            <span className="font-medium">{tw.tideTitle}</span>{" "}
+            {(data.marine?.tides ?? [])
+              .map(tide =>
+                (tide.kind === "high" ? tw.tideHigh : tw.tideLow)(
+                  new Date(tide.timeMs).toLocaleTimeString(LOCALE_TAGS[lang], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                )
+              )
+              .join(" · ")}
+          </p>
+        )}
+
         {data.source === "station" &&
           (data.reading.flowM3s !== null ||
             data.reading.levelMasl !== null) && (

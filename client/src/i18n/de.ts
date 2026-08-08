@@ -3670,6 +3670,9 @@ export const de = {
     stationLine: (waterBody: string, station: string, distance: string) =>
       `${waterBody} · Messstelle ${station}, ${distance} entfernt`,
     marineLine: "Meerwasser-Temperatur an deinem Platz",
+    tideTitle: "Gezeiten:",
+    tideHigh: (time: string) => `Hochwasser ${time}`,
+    tideLow: (time: string) => `Niedrigwasser ${time}`,
     waveHeight: (m: string) => `Wellen ${m} m`,
     waveFrom: (dir: string) => `aus ${dir}`,
     waveLevels: {

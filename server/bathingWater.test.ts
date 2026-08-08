@@ -7,6 +7,8 @@ import {
   nearestWaterStation,
   parseHydroLatest,
   parseMarineWater,
+  tideExtremes,
+  TIDE_MIN_RANGE_M,
   waveLevel,
   TREND_THRESHOLD_C,
   waterStations,
@@ -270,5 +272,70 @@ describe("Wellen (#451)", () => {
     expect(waveLevel(0.2)).toBe("calm");
     expect(waveLevel(0.8)).toBe("moderate");
     expect(waveLevel(1.6)).toBe("rough");
+  });
+});
+
+describe("tideExtremes (#462)", () => {
+  /** Stunden-Reihe ab 00:00 UTC am 8.8.2026 mit gegebenen Höhen. */
+  const series = (heights: number[]) => ({
+    times: heights.map((_, i) => `2026-08-08T${String(i).padStart(2, "0")}:00`),
+    heights,
+  });
+  const atHour = (h: number) =>
+    Date.parse(`2026-08-08T${String(h).padStart(2, "0")}:00Z`);
+
+  it("findet das nächste Hoch- und Niedrigwasser nach «jetzt»", () => {
+    // Flut bei Stunde 4, Ebbe bei Stunde 10, wieder Flut bei 16
+    const { times, heights } = series([
+      0.2, 0.6, 1.0, 1.3, 1.5, 1.3, 1.0, 0.6, 0.3, 0.1, 0.0, 0.2, 0.5, 0.9, 1.2,
+      1.4, 1.5, 1.3, 1.0,
+    ]);
+    const extremes = tideExtremes(times, heights, atHour(5));
+    expect(extremes).toHaveLength(2);
+    expect(extremes[0]).toEqual({
+      kind: "low",
+      timeMs: atHour(10),
+      heightM: 0.0,
+    });
+    expect(extremes[1].kind).toBe("high");
+    expect(extremes[1].timeMs).toBe(atHour(16));
+  });
+
+  it("meldet nichts bei winzigem Tidenhub (Mittelmeer)", () => {
+    const { times, heights } = series([
+      0.1, 0.15, 0.2, 0.15, 0.1, 0.05, 0.0, 0.05, 0.1, 0.15, 0.2, 0.15,
+    ]);
+    // Hub 0.2 m liegt unter der Schwelle
+    expect(0.2).toBeLessThan(TIDE_MIN_RANGE_M);
+    expect(tideExtremes(times, heights, atHour(1))).toEqual([]);
+  });
+
+  it("zählt ein Plateau am Scheitel nur einmal und ignoriert Kaputtes", () => {
+    const { times, heights } = series([
+      0.0, 0.8, 1.5, 1.5, 0.8, 0.0, 0.8, 1.5, 0.8,
+    ]);
+    const extremes = tideExtremes(times, heights, atHour(0), 5);
+    expect(extremes.map(e => e.kind)).toEqual(["high", "low", "high"]);
+    expect(extremes[0].timeMs).toBe(atHour(2));
+    // Unbrauchbare Reihen bleiben leer statt zu raten
+    expect(tideExtremes(["kaputt"], [1], atHour(0))).toEqual([]);
+    expect(tideExtremes([], [], atHour(0))).toEqual([]);
+  });
+
+  it("hängt die Gezeiten an parseMarineWater an", () => {
+    const heights = [
+      0.2, 0.6, 1.0, 1.3, 1.5, 1.3, 1.0, 0.6, 0.3, 0.1, 0.0, 0.2, 0.5,
+    ];
+    const marine = parseMarineWater({
+      current: { time: "2026-08-08T05:00", sea_surface_temperature: 21.4 },
+      hourly: {
+        time: heights.map(
+          (_, i) => `2026-08-08T${String(i).padStart(2, "0")}:00`
+        ),
+        sea_level_height_msl: heights,
+      },
+    });
+    expect(marine?.tides).toHaveLength(1);
+    expect(marine?.tides[0].kind).toBe("low");
   });
 });
