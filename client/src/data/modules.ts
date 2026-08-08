@@ -25,6 +25,7 @@ import {
   Hammer,
   Languages,
   Leaf,
+  LifeBuoy,
   ListChecks,
   Sandwich,
   LocateFixed,
@@ -558,6 +559,24 @@ export const modules: Module[] = [
       "Waterproofing, patching, zips, mould – step by step"
     ),
     icon: Wrench,
+    group: "wissen",
+    offline: true,
+  },
+  {
+    path: "/baderegeln",
+    title: l4(
+      "Baderegeln & Flaggen",
+      "Règles de baignade & drapeaux",
+      "Regole di balneazione & bandiere",
+      "Bathing rules & flags"
+    ),
+    description: l4(
+      "Die 6 SLRG-Baderegeln und was die Strandflaggen bedeuten",
+      "Les 6 règles de baignade SLRG et la signification des drapeaux de plage",
+      "Le 6 regole di balneazione SSS e il significato delle bandiere",
+      "The 6 SLRG bathing rules and what the beach flags mean"
+    ),
+    icon: LifeBuoy,
     group: "wissen",
     offline: true,
   },

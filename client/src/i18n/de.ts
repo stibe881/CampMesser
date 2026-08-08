@@ -3712,6 +3712,7 @@ export const de = {
     sourceMarine: "Quelle: Open-Meteo Marine",
     safetyNote:
       "Die Werte sind Messwerte der nächstgelegenen Stelle, nicht deiner Badestelle. Zu Strömung, Wasserqualität und Baderegeln sagen sie nichts – schau vor Ort auf die Beschilderung.",
+    rulesLink: "Baderegeln & Flaggen",
   },
 
   /** ISS-Überflüge im Astro-Bereich (#222). */
@@ -4585,6 +4586,21 @@ export const de = {
       "Ordnet die Begriffe fürs Gelände neben der Piste – und ersetzt bewusst keinen Lawinenkurs.",
     sourceNote:
       "FIS-Regeln sinngemäss nach fis-ski.com; Lawinen-Wissen nach den Grundlagen des SLF (whiterisk.ch). Wer regelmässig abseits der Piste unterwegs ist, gehört in einen Lawinenkurs – keine App ersetzt ihn.",
+  },
+  waterSafety: {
+    title: "Baderegeln & Flaggen",
+    subtitle:
+      "Die sechs SLRG-Baderegeln und was die Strandflaggen bedeuten – zum Nachschlagen, auch offline.",
+    offlineNote:
+      "Alle Inhalte sind offline verfügbar – auch am Strand ohne Netz.",
+    rulesTitle: "Die 6 Baderegeln",
+    rulesIntro:
+      "Sinngemäss nach den Baderegeln der Schweizerischen Lebensrettungs-Gesellschaft SLRG.",
+    flagsTitle: "Strandflaggen",
+    flagsIntro:
+      "So signalisieren Rettungsdienste am Meer – einzelne Länder weichen ab, im Zweifel gilt der Aushang vor Ort.",
+    sourceNote:
+      "Baderegeln sinngemäss nach SLRG (slrg.ch); Flaggen nach der Praxis der internationalen Rettungsdienste (ILS). Massgeblich ist immer die Beschilderung am Strand.",
   },
   winter: {
     title: "Frost & Schnee",

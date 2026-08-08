@@ -3701,6 +3701,7 @@ export const fr: Translation = {
     sourceMarine: "Source : Open-Meteo Marine",
     safetyNote:
       "Ce sont les mesures de la station la plus proche, pas de ton lieu de baignade. Elles ne disent rien du courant, de la qualité de l'eau ni des règles de baignade – fie-toi à la signalisation sur place.",
+    rulesLink: "Règles de baignade & drapeaux",
   },
 
   /** Passages de l'ISS dans la partie astro (#222). */
@@ -4574,6 +4575,21 @@ export const fr: Translation = {
       "Met de l'ordre dans les notions pour le terrain à côté des pistes – et ne remplace volontairement aucun cours d'avalanche.",
     sourceNote:
       "Règles FIS reformulées d'après fis-ski.com ; connaissances avalanches selon les bases du SLF (whiterisk.ch). Qui sort régulièrement des pistes a sa place dans un cours d'avalanche – aucune app ne le remplace.",
+  },
+  waterSafety: {
+    title: "Règles de baignade & drapeaux",
+    subtitle:
+      "Les six règles de baignade SLRG et la signification des drapeaux de plage – à consulter, aussi hors ligne.",
+    offlineNote:
+      "Tout le contenu est disponible hors ligne – même sur une plage sans réseau.",
+    rulesTitle: "Les 6 règles de baignade",
+    rulesIntro:
+      "Reformulées d'après les règles de baignade de la Société Suisse de Sauvetage SSS.",
+    flagsTitle: "Drapeaux de plage",
+    flagsIntro:
+      "Comment les services de sauvetage signalent en bord de mer – certains pays diffèrent ; dans le doute, l'affichage sur place fait foi.",
+    sourceNote:
+      "Règles de baignade reformulées d'après la SSS (slrg.ch) ; drapeaux selon la pratique internationale de sauvetage (ILS). La signalisation sur la plage prime toujours.",
   },
   winter: {
     title: "Gel et neige",

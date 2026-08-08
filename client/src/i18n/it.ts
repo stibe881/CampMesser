@@ -3670,6 +3670,7 @@ export const it: Translation = {
     sourceMarine: "Fonte: Open-Meteo Marine",
     safetyNote:
       "Sono i valori della stazione più vicina, non del tuo punto di balneazione. Non dicono nulla su corrente, qualità dell'acqua e regole di balneazione – guarda la segnaletica sul posto.",
+    rulesLink: "Regole di balneazione & bandiere",
   },
 
   /** Passaggi della ISS nella parte astro (#222). */
@@ -4546,6 +4547,21 @@ export const it: Translation = {
       "Mette ordine nei concetti per il terreno accanto alle piste – e volutamente non sostituisce nessun corso valanghe.",
     sourceNote:
       "Regole FIS riassunte da fis-ski.com; nozioni sulle valanghe secondo le basi dell'SLF (whiterisk.ch). Chi va regolarmente fuori pista deve frequentare un corso valanghe – nessuna app lo sostituisce.",
+  },
+  waterSafety: {
+    title: "Regole di balneazione & bandiere",
+    subtitle:
+      "Le sei regole di balneazione della SSS e il significato delle bandiere in spiaggia – da consultare, anche offline.",
+    offlineNote:
+      "Tutti i contenuti sono disponibili offline – anche in spiaggia senza rete.",
+    rulesTitle: "Le 6 regole di balneazione",
+    rulesIntro:
+      "Riassunte secondo le regole di balneazione della Società Svizzera di Salvataggio SSS.",
+    flagsTitle: "Bandiere in spiaggia",
+    flagsIntro:
+      "Così segnalano i servizi di salvataggio al mare – alcuni Paesi differiscono; nel dubbio vale la segnaletica sul posto.",
+    sourceNote:
+      "Regole di balneazione riassunte secondo la SSS (slrg.ch); bandiere secondo la prassi internazionale di salvataggio (ILS). Fa sempre fede la segnaletica in spiaggia.",
   },
   winter: {
     title: "Gelo e neve",

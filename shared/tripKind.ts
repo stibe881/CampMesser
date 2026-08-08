@@ -119,7 +119,8 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     winter: false,
   },
   strand: {
-    quickModules: ["/wasser", "/packen"],
+    // Baderegeln & Flaggen (#473) gehören an den Strand-Schnellzugriff
+    quickModules: ["/wasser", "/baderegeln", "/packen"],
     campfire: false,
     bathing: true,
     // Strandferien als EIGENE Art heisst: nicht im Zelt (sonst Camping)

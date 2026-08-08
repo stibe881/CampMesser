@@ -3590,6 +3590,7 @@ export const en: Translation = {
     sourceMarine: "Source: Open-Meteo Marine",
     safetyNote:
       "These are readings from the nearest station, not from your swimming spot. They say nothing about currents, water quality or bathing rules – check the signs on site.",
+    rulesLink: "Bathing rules & flags",
   },
 
   /** ISS passes in the astro section (#222). */
@@ -4455,6 +4456,21 @@ export const en: Translation = {
       "Sorts out the terms for terrain beside the slopes – and deliberately replaces no avalanche course.",
     sourceNote:
       "FIS rules paraphrased from fis-ski.com; avalanche knowledge based on the SLF fundamentals (whiterisk.ch). Anyone regularly off-piste belongs in an avalanche course – no app replaces one.",
+  },
+  waterSafety: {
+    title: "Bathing rules & flags",
+    subtitle:
+      "The six SLRG bathing rules and what the beach flags mean – for looking up, offline too.",
+    offlineNote:
+      "All content is available offline – even on a beach without signal.",
+    rulesTitle: "The 6 bathing rules",
+    rulesIntro:
+      "Paraphrased from the bathing rules of the Swiss Lifesaving Society SLRG.",
+    flagsTitle: "Beach flags",
+    flagsIntro:
+      "How lifeguard services signal at the sea – some countries differ; when in doubt, the signs on site apply.",
+    sourceNote:
+      "Bathing rules paraphrased from the SLRG (slrg.ch); flags follow international lifesaving practice (ILS). The signage on the beach always takes precedence.",
   },
   winter: {
     title: "Frost & snow",
