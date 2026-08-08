@@ -4409,6 +4409,9 @@ export const de = {
     start: "Jetzt vorbereiten",
     again: "Nochmals holen",
     running: "Wird geholt …",
+    lastRun: (when: string) => `Daten-Stand: ${when}.`,
+    autoNote:
+      "Kurz vor der Reise frischt die App die Daten beim Öffnen selbst auf – die Karten bleiben, wie geladen.",
     stepTrip: "Reise, Platz und Mitreisende",
     stepPacking: "Packliste",
     stepMenu: "Menüplan und Rezepte",

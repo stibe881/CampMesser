@@ -4282,6 +4282,9 @@ export const en: Translation = {
     start: "Prepare now",
     again: "Fetch again",
     running: "Fetching …",
+    lastRun: (when: string) => `Data as of ${when}.`,
+    autoNote:
+      "Shortly before the trip, the app refreshes the data by itself when opened – the maps stay as downloaded.",
     stepTrip: "Trip, pitch and companions",
     stepPacking: "Packing list",
     stepMenu: "Menu plan and recipes",

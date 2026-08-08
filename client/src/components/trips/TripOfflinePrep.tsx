@@ -20,14 +20,25 @@
  * aus seinem Zwischenspeicher wirft, wenn der Platz knapp wird. Das
  * steht als Satz darunter und nicht nur in diesem Kommentar.
  *
- * KEIN AUTOMATISMUS. Das Paket sind einige Megabyte; wer im Ausland mit
- * Roaming unterwegs ist, entscheidet das selbst.
+ * DER ERSTE DOWNLOAD IST KEIN AUTOMATISMUS. Das Paket sind einige
+ * Megabyte; wer im Ausland mit Roaming unterwegs ist, entscheidet das
+ * selbst. Einmal geholt, frischt die App die DATEN-Schritte kurz vor
+ * der Reise beim Öffnen aber selbst auf (#411, OfflineRefresh.tsx) –
+ * die Kartenkacheln nicht, die veralten nicht.
  */
 import { useState } from "react";
 import { CheckCircle2, CloudDownload, Loader2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useT } from "@/i18n";
+import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
+import {
+  loadPrepRecords,
+  prefetchMenu,
+  prefetchPackList,
+  prefetchTripCore,
+  rememberPrepRun,
+} from "@/lib/offlinePrep";
+import { LOCALE_TAGS } from "@shared/i18n";
 import {
   currentTileLayer,
   downloadTiles,
@@ -61,11 +72,16 @@ export default function TripOfflinePrep({
   spotId: number | null;
   packListId: number | null;
 }) {
-  const t = useT();
+  const { lang, t } = useI18n();
   const to = t.tripOffline;
   const utils = trpc.useUtils();
   const [steps, setSteps] = useState<Step[] | null>(null);
   const [busy, setBusy] = useState(false);
+  // Der Daten-Stand dieses Geräts (#411) – auch das stille Auffrischen
+  // beim App-Start schreibt ihn, hier wird er sichtbar.
+  const [savedAt, setSavedAt] = useState<number | null>(
+    () => loadPrepRecords()[tripId] ?? null
+  );
 
   const patch = (key: string, changes: Partial<Step>) =>
     setSteps(list =>
@@ -80,13 +96,18 @@ export default function TripOfflinePrep({
    * Ein Fehler bricht NICHT ab: Ohne Menüplan ist die Karte trotzdem
    * etwas wert. Was scheiterte, bleibt sichtbar.
    */
-  const run = async (key: string, task: () => Promise<unknown>) => {
+  const run = async (
+    key: string,
+    task: () => Promise<unknown>
+  ): Promise<boolean> => {
     patch(key, { state: "running" });
     try {
       await task();
       patch(key, { state: "done" });
+      return true;
     } catch {
       patch(key, { state: "failed" });
+      return false;
     }
   };
 
@@ -99,31 +120,29 @@ export default function TripOfflinePrep({
       { key: "map", label: to.stepMap, state: "idle" },
     ]);
 
-    // Reise, Plätze, Mitreisende, Fotos des Platzes
-    await run("trip", async () => {
-      await utils.trips.list.prefetch();
-      await utils.spots.list.prefetch();
-      await utils.trips.members.list.prefetch({ tripId });
-      if (spotId !== null) {
-        await utils.spots.photos.list.prefetch({ spotId });
-      }
-    });
+    // Reise, Plätze, Mitreisende, Fotos des Platzes – dieselben
+    // Ladungen wie beim stillen Auffrischen (lib/offlinePrep.ts)
+    const tripOk = await run("trip", () =>
+      prefetchTripCore(utils, tripId, spotId)
+    );
 
     // Packliste: ohne Verknüpfung gibt es nichts zu holen
+    let packOk = true;
     if (packListId === null) {
       patch("pack", { state: "skipped", detail: to.noList });
     } else {
-      await run("pack", async () => {
-        await utils.packing.items.prefetch({ listId: packListId });
-        await utils.packing.progress.prefetch({ listId: packListId });
-      });
+      packOk = await run("pack", () => prefetchPackList(utils, packListId));
     }
 
     // Menüplan samt Rezeptbuch – die Rezepte sind der eigentliche Grund
-    await run("menu", async () => {
-      await utils.menu.listByTrip.prefetch({ tripId });
-      await utils.recipes.list.prefetch();
-    });
+    const menuOk = await run("menu", () => prefetchMenu(utils, tripId));
+
+    // Der Daten-Stempel hängt NUR an den Daten-Schritten: Eine
+    // gescheiterte Kartenkachel macht den Menüplan nicht alt.
+    if (tripOk && packOk && menuOk) {
+      rememberPrepRun(tripId);
+      setSavedAt(Date.now());
+    }
 
     // Kartenkacheln um den Platz
     if (spotId === null) {
@@ -186,6 +205,17 @@ export default function TripOfflinePrep({
         {to.title}
       </p>
       <p className="mt-1 text-xs text-muted-foreground">{to.intro}</p>
+      {savedAt !== null && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          {to.lastRun(
+            new Intl.DateTimeFormat(LOCALE_TAGS[lang], {
+              dateStyle: "medium",
+              timeStyle: "short",
+            }).format(new Date(savedAt))
+          )}{" "}
+          {to.autoNote}
+        </p>
+      )}
 
       <Button
         type="button"

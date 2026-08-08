@@ -4373,6 +4373,9 @@ export const it: Translation = {
     start: "Prepara ora",
     again: "Scarica di nuovo",
     running: "In corso …",
+    lastRun: (when: string) => `Dati al ${when}.`,
+    autoNote:
+      "Poco prima del viaggio l’app aggiorna da sola i dati all’apertura – le mappe restano come scaricate.",
     stepTrip: "Soggiorno, piazzola e compagni",
     stepPacking: "Lista bagagli",
     stepMenu: "Menu e ricette",

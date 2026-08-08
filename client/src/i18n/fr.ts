@@ -4401,6 +4401,9 @@ export const fr: Translation = {
     start: "Préparer maintenant",
     again: "Recharger",
     running: "Chargement …",
+    lastRun: (when: string) => `Données au ${when}.`,
+    autoNote:
+      "Peu avant le voyage, l’app actualise elle-même les données à l’ouverture – les cartes restent telles quelles.",
     stepTrip: "Séjour, emplacement et compagnons",
     stepPacking: "Liste de bagages",
     stepMenu: "Menus et recettes",
