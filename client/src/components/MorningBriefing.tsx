@@ -16,10 +16,12 @@
  * Welche Zeilen erscheinen und in welcher Reihenfolge, entscheidet
  * `shared/briefing.ts` – dort steht auch, warum Leerzeilen wegfallen.
  */
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import {
   ArrowRight,
   CloudSunRain,
+  Flower2,
   ListTodo,
   Moon as MoonIcon,
   Sunrise,
@@ -33,6 +35,15 @@ import { MEALS, MEAL_LABELS } from "@shared/menuPlan";
 import { normalizeTripBoardKind } from "@shared/tripBoard";
 import { useRecipes } from "@/hooks/useRecipes";
 import { useDayWeather } from "@/lib/useDayWeather";
+import { loadPollenProfile } from "@/lib/pollenProfile";
+import {
+  describePollenLevel,
+  parsePollenResponse,
+  pollenRequestUrl,
+  pollenTypeName,
+  relevantPollenForBriefing,
+  type PollenReading,
+} from "@shared/pollen";
 import {
   briefingItems,
   briefingTasks,
@@ -43,6 +54,7 @@ import {
 /** Symbol je Zeilen-Art. */
 const ICONS: Record<BriefingKind, typeof CloudSunRain> = {
   weather: CloudSunRain,
+  pollen: Flower2,
   meals: UtensilsCrossed,
   tasks: ListTodo,
   astro: MoonIcon,
@@ -69,6 +81,31 @@ export default function MorningBriefing({
   const morning = isBriefingTime(new Date().getHours());
 
   const weather = useDayWeather(morning ? latitude : null, longitude, lang);
+
+  // Pollen (#456): NUR die eigenen Allergene (#208). Das Profil kommt aus
+  // localStorage – dorthin schreibt die Wetter-Seite auch den Server-Stand
+  // des Geräte-Syncs; ein zweiter Empfänger für denselben Schlüssel wäre
+  // hier nur Doppelspurigkeit. Ohne Profil wird gar nicht erst abgerufen.
+  const [pollenProfile] = useState(loadPollenProfile);
+  const [pollenReadings, setPollenReadings] = useState<PollenReading[] | null>(
+    null
+  );
+  useEffect(() => {
+    if (!morning || latitude == null || longitude == null) return;
+    if (pollenProfile.length === 0) return;
+    let cancelled = false;
+    fetch(pollenRequestUrl(latitude, longitude))
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error("no"))))
+      .then(json => {
+        if (!cancelled) setPollenReadings(parsePollenResponse(json));
+      })
+      .catch(() => {
+        // Ohne Netz bleibt die Zeile einfach weg.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [morning, latitude, longitude, pollenProfile]);
   const menuQuery = trpc.menu.listByTrip.useQuery(
     { tripId },
     { enabled: morning, staleTime: 60_000 }
@@ -126,6 +163,24 @@ export default function MorningBriefing({
     .map(note => note.text);
   const { remaining } = briefingTasks(openTasks);
 
+  // Nur fliegende eigene Allergene, stärkste zuerst – ohne Belastung
+  // fällt die Zeile weg (shared/pollen.ts erklärt warum).
+  const relevantPollen = relevantPollenForBriefing(
+    pollenReadings,
+    pollenProfile
+  );
+  const pollenLine =
+    relevantPollen.length > 0
+      ? tb.pollenLine(
+          relevantPollen
+            .map(
+              r =>
+                `${pollenTypeName(r.type, lang)} ${describePollenLevel(r.level, lang)}`
+            )
+            .join(" · ")
+        )
+      : null;
+
   const moon = getMoonInfo(new Date(), lang);
   const items = briefingItems({
     weather: weather
@@ -133,6 +188,7 @@ export default function MorningBriefing({
           weather.label ? `, ${weather.label}` : ""
         }`
       : null,
+    pollen: pollenLine,
     meals: mealsLine,
     tasks: openTasks,
     astro: tb.astroLine(moon.phaseLabel, Math.round(moon.illumination * 100)),

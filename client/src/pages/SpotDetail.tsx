@@ -1,28 +1,11 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-  lazy,
-  Suspense,
-  Fragment,
-} from "react";
-
-// Diagramm erst nach dem ersten Bild (#354): recharts ist 384 kB.
-const ClimateChart = lazy(() => import("@/components/charts/ClimateChart"));
-import { fmtMedium, fmtNumeric, fmtWeekdayDay } from "@/lib/dateFormat";
-import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
-import type { ShareExpiryDays } from "@shared/sharing";
+import { useEffect, useMemo, useState, type ReactNode, Fragment } from "react";
+import { fmtMedium, fmtWeekdayDay } from "@/lib/dateFormat";
 import { Link, useParams } from "wouter";
 import {
   AlertTriangle,
   BookOpen,
   CalendarDays,
-  CalendarRange,
-  ChevronDown,
   Compass,
-  Download,
   Droplets,
   Grid2x2,
   Images,
@@ -32,19 +15,9 @@ import {
   Mountain,
   MountainSnow,
   Navigation,
-  Phone,
-  QrCode,
   Printer,
-  Share2,
-  SlidersHorizontal,
   Sunrise,
-  Trash2,
-  Wallet,
-  Waves,
-  WifiOff,
 } from "lucide-react";
-import QRCode from "qrcode";
-import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import QueryError from "@/components/QueryError";
 import LazySection from "@/components/LazySection";
@@ -62,7 +35,6 @@ import {
   spotSectionOrder,
   type SpotSectionKey,
 } from "@shared/spotSections";
-import SpotTariffs from "@/components/spots/SpotTariffs";
 import PitchSketchCard from "@/components/spots/PitchSketchCard";
 import NextTimeNotes from "@/components/spots/NextTimeNotes";
 import SitePlanCard from "@/components/spots/SitePlanCard";
@@ -73,26 +45,9 @@ import NearbyShops from "@/components/NearbyShops";
 import SpotRating from "@/components/SpotRating";
 import NearbyTransit from "@/components/NearbyTransit";
 import TickRiskPanel from "@/components/TickRiskPanel";
-import SpotAttributeChips from "@/components/SpotAttributeChips";
 import { MAX_PHOTOS_PER_SPOT } from "@shared/tripPhotos";
-import {
-  parseSpotAttributes,
-  SPOT_ATTRIBUTES,
-  type SpotAttributes,
-} from "@shared/spotAttributes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -102,41 +57,14 @@ import {
   openDirections,
 } from "@/lib/directions";
 import { formatElevation, useAutoElevation } from "@/lib/elevation";
-import type { MapLayerKind } from "@/lib/mapLayers";
-import {
-  currentTileLayer,
-  deleteTiles,
-  downloadTiles,
-  forgetOfflineMap,
-  loadOfflineMaps,
-  MAX_OFFLINE_TILES,
-  OFFLINE_MAX_ZOOMS,
-  OFFLINE_RADII_KM,
-  rememberOfflineMap,
-  tileCacheSupported,
-  tilesForArea,
-  zoomLevelsUpTo,
-  type OfflineMapPack,
-} from "@/lib/mapTiles";
-import { nightlyRappen } from "@shared/spotCosts";
-import { formatChf, parseChfInput, rappenToInput } from "@/lib/money";
 import { altitudeHint } from "@shared/altitude";
-import { bathingComfort } from "@shared/bathingWater";
-import { formatDistance } from "@shared/geo";
 import { getSunTimes } from "@/lib/sun";
 import { loadObstacleProfiles } from "@/lib/obstacleStore";
 import { computeTripStats, tripNights } from "@shared/trips";
-import {
-  aggregateMonthlyClimate,
-  bestTravelMonths,
-  climateRequestUrl,
-  climateYearRange,
-  type MonthlyClimate,
-} from "@shared/climate";
 import { describeWeatherCode } from "@shared/weather";
 import { fetchDossierWeather, type DossierWeather } from "@/lib/dossierWeather";
 import { useI18n } from "@/i18n";
-import { LOCALE_TAGS, pick } from "@shared/i18n";
+import { LOCALE_TAGS } from "@shared/i18n";
 import { cn } from "@/lib/utils";
 
 // Wetter-Abruf ausgelagert: teilt sich das Dossier mit der öffentlichen
@@ -149,19 +77,13 @@ import {
 } from "@/components/spots/SpotSections";
 import OfflineMapSection from "@/components/spots/OfflineMapSection";
 import BathingWaterCard from "@/components/spots/BathingWaterCard";
-
-/** Ladezustand «Beste Reisezeit»: die Archiv-API wird erst auf Klick befragt. */
-type ClimateState =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "error" }
-  | {
-      status: "ready";
-      months: MonthlyClimate[];
-      best: number[];
-      fromYear: number;
-      toYear: number;
-    };
+// Karte-und-Dialog-Bausteine des Dossiers, herausgelöst in #458 – die
+// Seite reicht nur noch die Platz-Felder hinein.
+import SpotContactCard from "@/components/spots/SpotContactCard";
+import SpotAttributesCard from "@/components/spots/SpotAttributesCard";
+import SpotCostCard from "@/components/spots/SpotCostCard";
+import SpotClimateCard from "@/components/spots/SpotClimateCard";
+import SpotShareCard from "@/components/spots/SpotShareCard";
 
 export default function SpotDetailPage() {
   const { lang, t } = useI18n();
@@ -177,29 +99,6 @@ export default function SpotDetailPage() {
   });
   const [weather, setWeather] = useState<DossierWeather | null>(null);
   const [weatherFailed, setWeatherFailed] = useState(false);
-  const [climateOpen, setClimateOpen] = useState(false);
-  const [climate, setClimate] = useState<ClimateState>({ status: "idle" });
-  const [shareUrl, setShareUrl] = useState<string | null>(null);
-  const [shareExpiresIn, setShareExpiresIn] = useState<ShareExpiryDays | null>(
-    null
-  );
-  const [shareExpiresAt, setShareExpiresAt] = useState<Date | null>(null);
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  const shareMutation = trpc.spots.share.useMutation();
-  const unshareMutation = trpc.spots.unshare.useMutation();
-  const updateMutation = trpc.spots.update.useMutation();
-  const [attrDialogOpen, setAttrDialogOpen] = useState(false);
-  const [attrDraft, setAttrDraft] = useState<SpotAttributes>({});
-  const [contactDialogOpen, setContactDialogOpen] = useState(false);
-  const [contactDraft, setContactDraft] = useState({
-    phone: "",
-    checkin: "",
-    parcel: "",
-  });
-  // Platzkosten (#243): beide Beträge als Franken-Text im Formular,
-  // gespeichert wird in Rappen (Muster Reisekasse/Inventar).
-  const [costDialogOpen, setCostDialogOpen] = useState(false);
-  const [costDraft, setCostDraft] = useState({ price: "", extra: "" });
   const utils = trpc.useUtils();
   const photosQuery = trpc.spots.photos.list.useQuery(
     { spotId },
@@ -211,21 +110,6 @@ export default function SpotDetailPage() {
   const galleryPhotos = (photosQuery.data ?? []).filter(p => p.kind !== "plan");
   const planPhoto =
     (photosQuery.data ?? []).find(p => p.kind === "plan") ?? null;
-
-  // QR-Code zum Teil-Link erzeugen: am Platz einfach abscannen lassen statt Link verschicken
-  useEffect(() => {
-    if (!shareUrl) {
-      setQrDataUrl(null);
-      return;
-    }
-    QRCode.toDataURL(shareUrl, {
-      width: 480,
-      margin: 1,
-      errorCorrectionLevel: "M",
-    })
-      .then(setQrDataUrl)
-      .catch(() => setQrDataUrl(null));
-  }, [shareUrl]);
 
   const spot = spotsQuery.data?.find(s => s.id === spotId);
 
@@ -248,64 +132,6 @@ export default function SpotDetailPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spot?.id, lang]);
-
-  // Klima-Abschnitt beim Platzwechsel zurücksetzen (Daten gehören zum Ort)
-  useEffect(() => {
-    setClimateOpen(false);
-    setClimate({ status: "idle" });
-  }, [spotId]);
-
-  // Historisches Wetter (letzte 5 volle Jahre) laden – bewusst erst auf Klick,
-  // die Archive-API ist deutlich träger als die Vorhersage-API.
-  const loadClimate = async (lat: number, lon: number) => {
-    setClimate({ status: "loading" });
-    try {
-      const range = climateYearRange(new Date());
-      const res = await fetch(
-        climateRequestUrl(lat, lon, range.startDate, range.endDate)
-      );
-      if (!res.ok) throw new Error(`climate service error ${res.status}`);
-      const json = await res.json();
-      const months = aggregateMonthlyClimate(json.daily);
-      setClimate({
-        status: "ready",
-        months,
-        best: bestTravelMonths(months),
-        fromYear: range.fromYear,
-        toYear: range.toYear,
-      });
-    } catch {
-      setClimate({ status: "error" });
-    }
-  };
-
-  const toggleClimate = () => {
-    const next = !climateOpen;
-    setClimateOpen(next);
-    if (next && climate.status === "idle" && spot) {
-      void loadClimate(spot.latitude, spot.longitude);
-    }
-  };
-
-  // Monatsnamen in der aktiven Sprache (Jahr egal – nur der Monat zählt)
-  const monthLabel = (month: number, style: "short" | "long") =>
-    new Date(2000, month - 1, 1).toLocaleDateString(LOCALE_TAGS[lang], {
-      month: style,
-    });
-
-  const climateChartData = useMemo(
-    () =>
-      climate.status === "ready"
-        ? climate.months.map(m => ({
-            label: monthLabel(m.month, "short"),
-            max: m.avgTempMaxC,
-            min: m.avgTempMinC,
-            rain: m.rainDays,
-          }))
-        : [],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [climate, lang]
-  );
 
   const sun = useMemo(
     () =>
@@ -340,10 +166,6 @@ export default function SpotDetailPage() {
           minute: "2-digit",
         })
       : "–";
-
-  /** Rappen als «CHF 45.50» – gleiche Schreibweise wie in der Reisekasse. */
-  const fmtChf = (rappen: number) =>
-    `${t.tripExpenses.currency} ${formatChf(rappen, lang)}`;
 
   if (loading || (isAuthenticated && spotsQuery.isLoading)) {
     return (
@@ -395,97 +217,6 @@ export default function SpotDetailPage() {
     );
   }
 
-  const attributes = parseSpotAttributes(spot.attributesJson);
-
-  const openAttrDialog = () => {
-    setAttrDraft(attributes);
-    setAttrDialogOpen(true);
-  };
-
-  const openContactDialog = () => {
-    setContactDraft({
-      phone: spot.receptionPhone ?? "",
-      checkin: spot.checkinInfo ?? "",
-      parcel: spot.parcelNumber ?? "",
-    });
-    setContactDialogOpen(true);
-  };
-
-  const saveContact = () => {
-    updateMutation.mutate(
-      {
-        id: spot.id,
-        receptionPhone: contactDraft.phone,
-        checkinInfo: contactDraft.checkin,
-        parcelNumber: contactDraft.parcel,
-      },
-      {
-        onSuccess: () => {
-          utils.spots.list.invalidate();
-          setContactDialogOpen(false);
-          toast.success(t.spotDetail.contactSaved);
-        },
-        onError: () => toast.error(t.common.saveFailed),
-      }
-    );
-  };
-
-  /** Etwas zum Anzeigen? Sonst zeigt die Karte den Leer-Hinweis. */
-  const hasContact = Boolean(
-    spot.receptionPhone || spot.checkinInfo || spot.parcelNumber
-  );
-
-  const openCostDialog = () => {
-    setCostDraft({
-      price: rappenToInput(spot.pricePerNightRappen),
-      extra: rappenToInput(spot.extraPerNightRappen),
-    });
-    setCostDialogOpen(true);
-  };
-
-  const saveCosts = () => {
-    updateMutation.mutate(
-      {
-        id: spot.id,
-        // Leeres Feld → 0 → der Server löscht den Wert (null)
-        pricePerNightRappen: parseChfInput(costDraft.price) ?? 0,
-        extraPerNightRappen: parseChfInput(costDraft.extra) ?? 0,
-      },
-      {
-        onSuccess: () => {
-          utils.spots.list.invalidate();
-          setCostDialogOpen(false);
-          toast.success(t.spotDetail.costSaved);
-        },
-        onError: () => toast.error(t.common.saveFailed),
-      }
-    );
-  };
-
-  /** Preis pro Nacht inkl. Nebenkosten in Rappen; null = nichts erfasst. */
-  const spotNightly = nightlyRappen(spot);
-  /** Grobe Kosten-Schätzung für alle bisherigen Nächte an diesem Platz. */
-  const costEstimateRappen =
-    spotNightly !== null && tripStats.totalNights > 0
-      ? spotNightly * tripStats.totalNights
-      : null;
-
-  const saveAttributes = () => {
-    const json =
-      Object.keys(attrDraft).length > 0 ? JSON.stringify(attrDraft) : null;
-    updateMutation.mutate(
-      { id: spot.id, attributesJson: json },
-      {
-        onSuccess: () => {
-          utils.spots.list.invalidate();
-          setAttrDialogOpen(false);
-          toast.success(t.spotDetail.attributesSaved);
-        },
-        onError: () => toast.error(t.common.saveFailed),
-      }
-    );
-  };
-
   /**
    * Läuft hier gerade eine Reise, ist eine geplant, oder keins von beidem?
    * Danach richtet sich die Reihenfolge der Abschnitte (#371).
@@ -510,64 +241,7 @@ export default function SpotDetailPage() {
             Beschreibung (Eigenschaften, Kosten), zuletzt das eigene
             Urteil und das Spezialwerkzeug fürs Sonnen-Modul. */}
         {/* Kontakt & Check-in: Rezeptions-Telefon, Zeiten, Parzellen-Nummer */}
-        <Card className="mb-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
-              {t.spotDetail.contactTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {hasContact ? (
-              <dl className="space-y-2 text-sm">
-                {spot.receptionPhone && (
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                    <dt className="w-36 shrink-0 text-muted-foreground">
-                      {t.spotDetail.contactPhoneLabel}
-                    </dt>
-                    <dd>
-                      <a
-                        href={`tel:${spot.receptionPhone.replace(/[^+\d]/g, "")}`}
-                        className="font-medium text-primary hover:underline"
-                        aria-label={t.spotDetail.contactPhoneAria(spot.name)}
-                      >
-                        {spot.receptionPhone}
-                      </a>
-                    </dd>
-                  </div>
-                )}
-                {spot.checkinInfo && (
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                    <dt className="w-36 shrink-0 text-muted-foreground">
-                      {t.spotDetail.contactCheckinLabel}
-                    </dt>
-                    <dd>{spot.checkinInfo}</dd>
-                  </div>
-                )}
-                {spot.parcelNumber && (
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                    <dt className="w-36 shrink-0 text-muted-foreground">
-                      {t.spotDetail.contactParcelLabel}
-                    </dt>
-                    <dd>{spot.parcelNumber}</dd>
-                  </div>
-                )}
-              </dl>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                {t.spotDetail.contactEmpty}
-              </p>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-3"
-              onClick={openContactDialog}
-            >
-              {t.spotDetail.contactEditButton}
-            </Button>
-          </CardContent>
-        </Card>
+        <SpotContactCard spot={spot} className="mb-4" />
 
         {/* Campingplatz-Plan (#401): das Blatt von der Rezeption –
             wo die Parzelle liegt, wo Duschen und Abwasch sind. Direkt
@@ -601,108 +275,18 @@ export default function SpotDetailPage() {
           </CardContent>
         </Card>
         {/* Platz-Eigenschaften: Schatten, Sanitär, Lärm, WLAN … */}
-        <Card className="mb-4 mt-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <SlidersHorizontal
-                className="h-4 w-4 text-primary"
-                aria-hidden="true"
-              />
-              {t.spotDetail.attributesTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {Object.keys(attributes).length > 0 ? (
-              <SpotAttributeChips attributes={attributes} lang={lang} />
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                {t.spotDetail.attributesEmpty}
-              </p>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-3"
-              onClick={openAttrDialog}
-            >
-              {t.spotDetail.attributesEditButton}
-            </Button>
-          </CardContent>
-        </Card>
+        <SpotAttributesCard
+          spotId={spot.id}
+          attributesJson={spot.attributesJson}
+          className="mb-4 mt-4"
+        />
 
         {/* Platzkosten (#243): Preis pro Nacht und Nebenkosten pro Nacht */}
-        <Card className="mb-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Wallet className="h-4 w-4 text-primary" aria-hidden="true" />
-              {t.spotDetail.costTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {spotNightly !== null ? (
-              <>
-                <dl className="space-y-2 text-sm">
-                  {spot.pricePerNightRappen ? (
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                      <dt className="w-36 shrink-0 text-muted-foreground">
-                        {t.spotDetail.costPriceLabel}
-                      </dt>
-                      <dd className="font-medium">
-                        {fmtChf(spot.pricePerNightRappen)}
-                      </dd>
-                    </div>
-                  ) : null}
-                  {spot.extraPerNightRappen ? (
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                      <dt className="w-36 shrink-0 text-muted-foreground">
-                        {t.spotDetail.costExtraLabel}
-                      </dt>
-                      <dd className="font-medium">
-                        {fmtChf(spot.extraPerNightRappen)}
-                      </dd>
-                    </div>
-                  ) : null}
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                    <dt className="w-36 shrink-0 text-muted-foreground">
-                      {t.spotDetail.costNightlyLabel}
-                    </dt>
-                    <dd className="font-serif text-lg font-bold text-primary">
-                      {fmtChf(spotNightly)}
-                    </dd>
-                  </div>
-                </dl>
-                {costEstimateRappen !== null && (
-                  <p className="mt-3 rounded-lg bg-accent/50 px-3 py-2 text-xs text-accent-foreground">
-                    {t.spotDetail.costEstimate(
-                      tripStats.totalNights,
-                      fmtChf(costEstimateRappen)
-                    )}
-                  </p>
-                )}
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {t.spotDetail.costHint}
-                </p>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                {t.spotDetail.costEmpty}
-              </p>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-3"
-              onClick={openCostDialog}
-            >
-              {t.spotDetail.costEditButton}
-            </Button>
-            {/* Mehrere Tarife (#369): So steht es auf der Tafel an der
-                Rezeption – Nebensaison/Hauptsaison, darunter Erwachsene,
-                Kind, Stellplatz. Der Preis oben bleibt der eine Wert für
-                den Platz-Vergleich in der Statistik. */}
-            <SpotTariffs spotId={spot.id} tariffsJson={spot.tariffsJson} />
-          </CardContent>
-        </Card>
+        <SpotCostCard
+          spot={spot}
+          totalNights={tripStats.totalNights}
+          className="mb-4"
+        />
 
         {/* Eigene Bewertung nach Kriterien (#278) – Sanitär, Ruhe, Schatten,
             Kinderfreundlichkeit einzeln */}
@@ -964,101 +548,11 @@ export default function SpotDetailPage() {
         </LazySection>
 
         {/* Beste Reisezeit: historisches Wetter, lädt erst beim Aufklappen */}
-        <Card className="mb-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">
-              <button
-                type="button"
-                onClick={toggleClimate}
-                aria-expanded={climateOpen}
-                aria-controls="climate-section"
-                className="flex w-full items-center gap-2 text-left"
-              >
-                <CalendarRange
-                  className="h-4 w-4 text-primary"
-                  aria-hidden="true"
-                />
-                {t.spotDetail.climateTitle}
-                <ChevronDown
-                  className={cn(
-                    "ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform",
-                    climateOpen && "rotate-180"
-                  )}
-                  aria-hidden="true"
-                />
-              </button>
-            </CardTitle>
-          </CardHeader>
-          {climateOpen && (
-            <CardContent id="climate-section">
-              <p className="mb-3 text-sm text-muted-foreground">
-                {t.spotDetail.climateIntro}
-              </p>
-              {climate.status === "loading" && (
-                <div
-                  aria-busy="true"
-                  aria-label={t.spotDetail.climateLoadingAria}
-                >
-                  <Skeleton className="h-48 w-full rounded-lg" />
-                </div>
-              )}
-              {climate.status === "error" && (
-                <p className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-                  <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-                  {t.spotDetail.climateFailed}
-                  <button
-                    type="button"
-                    onClick={() => loadClimate(spot.latitude, spot.longitude)}
-                    className="font-medium text-primary underline"
-                  >
-                    {t.spotDetail.climateRetry}
-                  </button>
-                </p>
-              )}
-              {climate.status === "ready" && (
-                <>
-                  {climate.best.length > 0 && (
-                    <p className="mb-3 flex flex-wrap items-center gap-1.5 text-sm">
-                      <span className="font-medium">
-                        {t.spotDetail.climateBestTitle}
-                      </span>
-                      {climate.best.map(month => (
-                        <span
-                          key={month}
-                          className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-xs font-medium"
-                        >
-                          {monthLabel(month, "long")}
-                        </span>
-                      ))}
-                    </p>
-                  )}
-                  <div className="h-52 w-full">
-                    <Suspense fallback={null}>
-                      <ClimateChart
-                        data={climateChartData}
-                        labels={{
-                          max: t.spotDetail.climateChartMax,
-                          min: t.spotDetail.climateChartMin,
-                          rain: t.spotDetail.climateChartRain,
-                          daysUnit: t.spotDetail.climateDaysUnit,
-                        }}
-                      />
-                    </Suspense>
-                  </div>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {t.spotDetail.climateLegend}
-                  </p>
-                  <p className="mt-1.5 text-xs text-muted-foreground">
-                    {t.spotDetail.climateSource(
-                      climate.fromYear,
-                      climate.toYear
-                    )}
-                  </p>
-                </>
-              )}
-            </CardContent>
-          )}
-        </Card>
+        <SpotClimateCard
+          latitude={spot.latitude}
+          longitude={spot.longitude}
+          className="mb-4"
+        />
 
         {/* Badestellen-Info: Wassertemperatur, Abfluss und Pegel am Platz */}
         <LazySection minHeight={160}>
@@ -1296,363 +790,7 @@ export default function SpotDetailPage() {
         </Button>
 
         {/* Dossier teilen */}
-        <Card className="mt-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Share2 className="h-4 w-4 text-primary" aria-hidden="true" />
-              {t.spotDetail.shareTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-3 text-sm text-muted-foreground">
-              {t.spotDetail.shareDesc}
-            </p>
-            {shareUrl ? (
-              <div>
-                <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
-                  <code className="min-w-0 flex-1 truncate text-xs">
-                    {shareUrl}
-                  </code>
-                  <button
-                    type="button"
-                    className="shrink-0 text-xs font-medium text-primary hover:underline"
-                    onClick={async () => {
-                      try {
-                        await navigator.clipboard.writeText(shareUrl);
-                        toast.success(t.common.linkCopied);
-                      } catch {
-                        toast.error(t.common.copyFailed);
-                      }
-                    }}
-                  >
-                    {t.common.copy}
-                  </button>
-                  <button
-                    type="button"
-                    className="shrink-0 text-xs font-medium text-muted-foreground hover:text-destructive"
-                    onClick={() =>
-                      unshareMutation.mutate(
-                        { id: spot.id },
-                        {
-                          onSuccess: () => {
-                            setShareUrl(null);
-                            toast.success(t.spotDetail.stopShared);
-                          },
-                        }
-                      )
-                    }
-                  >
-                    {t.spotDetail.stopShare}
-                  </button>
-                </div>
-                <div className="mt-2 space-y-1">
-                  <ShareExpirySelect
-                    value={shareExpiresIn}
-                    onChange={days => {
-                      setShareExpiresIn(days);
-                      shareMutation.mutate(
-                        { id: spot.id, expiresInDays: days },
-                        {
-                          onSuccess: ({ expiresAt }) =>
-                            setShareExpiresAt(expiresAt),
-                          onError: () => toast.error(t.spotDetail.shareFailed),
-                        }
-                      );
-                    }}
-                  />
-                  <ShareExpiryNote expiresAt={shareExpiresAt} />
-                </div>
-                {qrDataUrl && (
-                  <div className="mt-3 flex items-center gap-4 rounded-lg border border-border bg-card p-4">
-                    {/* Weisser Rahmen, damit der Code auch im Dark Mode zuverlässig scannbar bleibt */}
-                    <div className="shrink-0 rounded-md bg-white p-2 shadow-sm">
-                      <img
-                        src={qrDataUrl}
-                        alt={t.spotDetail.qrAlt(spot.name)}
-                        className="h-36 w-36"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="flex items-center gap-1.5 text-sm font-semibold">
-                        <QrCode
-                          className="h-4 w-4 text-primary"
-                          aria-hidden="true"
-                        />
-                        {t.spotDetail.qrTitle}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {t.spotDetail.qrText}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <ShareExpirySelect
-                  value={shareExpiresIn}
-                  onChange={setShareExpiresIn}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={shareMutation.isPending}
-                  onClick={() =>
-                    shareMutation.mutate(
-                      { id: spot.id, expiresInDays: shareExpiresIn },
-                      {
-                        onSuccess: async ({ token, expiresAt }) => {
-                          const url = `${window.location.origin}/platz/${token}`;
-                          setShareUrl(url);
-                          setShareExpiresAt(expiresAt);
-                          try {
-                            await navigator.clipboard.writeText(url);
-                            toast.success(t.spotDetail.shareLinkCopied);
-                          } catch {
-                            toast.success(t.spotDetail.shareLinkCreated);
-                          }
-                        },
-                        onError: () => toast.error(t.spotDetail.shareFailed),
-                      }
-                    )
-                  }
-                >
-                  <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                  {t.spotDetail.shareButton}
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Eigenschaften bearbeiten */}
-        <Dialog open={attrDialogOpen} onOpenChange={setAttrDialogOpen}>
-          <DialogContent className="max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="font-serif">
-                {t.spotDetail.attributesDialogTitle}
-              </DialogTitle>
-              <DialogDescription>
-                {t.spotDetail.attributesDialogDesc}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              {SPOT_ATTRIBUTES.map(def => {
-                const current = attrDraft[def.key];
-                return (
-                  <div key={def.key}>
-                    <p className="mb-1.5 text-sm font-medium">
-                      {pick(def.label, lang)}
-                    </p>
-                    <div
-                      className="flex flex-wrap gap-1.5"
-                      role="group"
-                      aria-label={t.spotDetail.attributeGroupAria(
-                        pick(def.label, lang)
-                      )}
-                    >
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setAttrDraft(prev => {
-                            const next = { ...prev };
-                            delete next[def.key];
-                            return next;
-                          })
-                        }
-                        className={cn(
-                          "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-                          current === undefined
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground hover:text-foreground"
-                        )}
-                        aria-pressed={current === undefined}
-                      >
-                        {t.spotDetail.attributeUnset}
-                      </button>
-                      {def.values.map(value => (
-                        <button
-                          key={value.value}
-                          type="button"
-                          onClick={() =>
-                            setAttrDraft(prev => ({
-                              ...prev,
-                              [def.key]: value.value,
-                            }))
-                          }
-                          className={cn(
-                            "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-                            current === value.value
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted text-muted-foreground hover:text-foreground"
-                          )}
-                          aria-pressed={current === value.value}
-                        >
-                          {pick(value.label, lang)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setAttrDialogOpen(false)}
-              >
-                {t.common.cancel}
-              </Button>
-              <Button
-                onClick={saveAttributes}
-                disabled={updateMutation.isPending}
-              >
-                {updateMutation.isPending ? t.common.saving : t.common.save}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Kontakt & Check-in bearbeiten (Muster Eigenschaften-Dialog) */}
-        <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="font-serif">
-                {t.spotDetail.contactDialogTitle}
-              </DialogTitle>
-              <DialogDescription>
-                {t.spotDetail.contactDialogDesc}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="contact-phone">
-                  {t.spotDetail.contactPhoneLabel}
-                </Label>
-                <Input
-                  id="contact-phone"
-                  type="tel"
-                  maxLength={40}
-                  value={contactDraft.phone}
-                  onChange={e =>
-                    setContactDraft(prev => ({
-                      ...prev,
-                      phone: e.target.value,
-                    }))
-                  }
-                  placeholder={t.spotDetail.contactPhonePlaceholder}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="contact-checkin">
-                  {t.spotDetail.contactCheckinLabel}
-                </Label>
-                <Input
-                  id="contact-checkin"
-                  maxLength={120}
-                  value={contactDraft.checkin}
-                  onChange={e =>
-                    setContactDraft(prev => ({
-                      ...prev,
-                      checkin: e.target.value,
-                    }))
-                  }
-                  placeholder={t.spotDetail.contactCheckinPlaceholder}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="contact-parcel">
-                  {t.spotDetail.contactParcelLabel}
-                </Label>
-                <Input
-                  id="contact-parcel"
-                  maxLength={40}
-                  value={contactDraft.parcel}
-                  onChange={e =>
-                    setContactDraft(prev => ({
-                      ...prev,
-                      parcel: e.target.value,
-                    }))
-                  }
-                  placeholder={t.spotDetail.contactParcelPlaceholder}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setContactDialogOpen(false)}
-              >
-                {t.common.cancel}
-              </Button>
-              <Button onClick={saveContact} disabled={updateMutation.isPending}>
-                {updateMutation.isPending ? t.common.saving : t.common.save}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Platzkosten bearbeiten (#243) */}
-        <Dialog open={costDialogOpen} onOpenChange={setCostDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="font-serif">
-                {t.spotDetail.costDialogTitle}
-              </DialogTitle>
-              <DialogDescription>
-                {t.spotDetail.costDialogDesc}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="cost-price">
-                  {t.spotDetail.costPriceInputLabel}
-                </Label>
-                <Input
-                  id="cost-price"
-                  type="text"
-                  inputMode="decimal"
-                  maxLength={10}
-                  value={costDraft.price}
-                  onChange={e =>
-                    setCostDraft(prev => ({ ...prev, price: e.target.value }))
-                  }
-                  placeholder={t.spotDetail.costPricePlaceholder}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="cost-extra">
-                  {t.spotDetail.costExtraInputLabel}
-                </Label>
-                <Input
-                  id="cost-extra"
-                  type="text"
-                  inputMode="decimal"
-                  maxLength={10}
-                  value={costDraft.extra}
-                  onChange={e =>
-                    setCostDraft(prev => ({ ...prev, extra: e.target.value }))
-                  }
-                  placeholder={t.spotDetail.costExtraPlaceholder}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t.spotDetail.costExtraHelp}
-                </p>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setCostDialogOpen(false)}
-              >
-                {t.common.cancel}
-              </Button>
-              <Button onClick={saveCosts} disabled={updateMutation.isPending}>
-                {updateMutation.isPending ? t.common.saving : t.common.save}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <SpotShareCard spotId={spot.id} spotName={spot.name} className="mt-4" />
       </>
     ),
   };

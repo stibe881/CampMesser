@@ -30,6 +30,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { getSunPosition, getSunTimes } from "@/lib/sun";
 import { isBlocked } from "@shared/obstacles";
+import { shadeTimeline, type ShadeSample } from "@shared/shadeTimeline";
 import {
   delayVersusOpen,
   sunWindow,
@@ -118,6 +119,13 @@ function computeShadowWindows(
       to: new Date(dayStart.getTime() + 1440 * 60000),
     });
   return windows;
+}
+
+/** Minute des Tages als Uhrzeit des gewählten Datums (#452). */
+function minutesToDate(date: Date, minutes: number): Date {
+  const dayStart = new Date(date);
+  dayStart.setHours(0, 0, 0, 0);
+  return new Date(dayStart.getTime() + minutes * 60000);
 }
 
 function fmtTime(d: Date | null, lang: Language) {
@@ -919,6 +927,29 @@ export default function SunCompassPage() {
   );
 
   /**
+   * Schattenverlauf (#452): der Tag als Balken von Auf- bis Untergang
+   * plus Sonnen-/Schatten-Summen. Dieselben 5-Minuten-Proben wie die
+   * Schattenzeiten-Liste; ausgewertet in shared/shadeTimeline.ts.
+   */
+  const shade = useMemo(() => {
+    if (geo.status !== "ok" || obstacles.length === 0) return null;
+    const dayStart = new Date(selectedDate);
+    dayStart.setHours(0, 0, 0, 0);
+    const samples: ShadeSample[] = [];
+    for (let m = 0; m <= 1440; m += 5) {
+      const time = new Date(dayStart.getTime() + m * 60000);
+      const pos = getSunPosition(time, geo.lat!, geo.lng!);
+      const up = pos.altitude > 0;
+      samples.push({
+        minutes: m,
+        up,
+        shaded: up && isBlocked(pos.azimuth, pos.altitude, obstacles),
+      });
+    }
+    return shadeTimeline(samples);
+  }, [geo, selectedDate, obstacles]);
+
+  /**
    * Wann kommt die Sonne über den Grat, wann ist sie wieder weg (#380)?
    *
    * DER SONNENAUFGANG AUS DER WETTER-APP GILT AM MEER. Im Bergtal ist
@@ -1608,6 +1639,60 @@ export default function SunCompassPage() {
                   <p className="mb-1.5 text-sm font-semibold">
                     {t.sunCompass.shadowTitle}
                   </p>
+                  {/* Schattenverlauf (#452): der Tag als Balken samt Summen */}
+                  {shade &&
+                    shade.dayStartMinutes !== null &&
+                    shade.dayEndMinutes !== null && (
+                      <div className="mb-2">
+                        <div
+                          className="flex h-3 w-full overflow-hidden rounded-full"
+                          role="img"
+                          aria-label={t.sunCompass.shadeBarAria}
+                        >
+                          {shade.segments.map(segment => (
+                            <div
+                              key={segment.startMinutes}
+                              className={
+                                segment.shaded
+                                  ? "bg-muted-foreground/40"
+                                  : "bg-chart-1"
+                              }
+                              style={{
+                                width: `${
+                                  ((segment.endMinutes - segment.startMinutes) /
+                                    (shade.dayEndMinutes! -
+                                      shade.dayStartMinutes!)) *
+                                  100
+                                }%`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                        <div className="mt-1 flex justify-between text-[11px] text-muted-foreground">
+                          <span>
+                            {fmtTime(
+                              minutesToDate(
+                                selectedDate,
+                                shade.dayStartMinutes
+                              ),
+                              lang
+                            )}
+                          </span>
+                          <span>
+                            {t.sunCompass.shadeTotals(
+                              formatDuration(shade.sunMinutes),
+                              formatDuration(shade.shadeMinutes)
+                            )}
+                          </span>
+                          <span>
+                            {fmtTime(
+                              minutesToDate(selectedDate, shade.dayEndMinutes),
+                              lang
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   {shadowWindows.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                       {t.sunCompass.shadowNone}

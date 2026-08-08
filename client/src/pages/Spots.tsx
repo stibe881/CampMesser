@@ -20,6 +20,7 @@ import { Link } from "wouter";
 import PageHeader from "@/components/PageHeader";
 import QueryError from "@/components/QueryError";
 import SpotRatingCompare from "@/components/SpotRatingCompare";
+import SpotCompare from "@/components/spots/SpotCompare";
 import WeekendPicker from "@/components/spots/WeekendPicker";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
@@ -600,6 +601,11 @@ export default function SpotsPage() {
               },
             }))}
           />
+
+          {/* Zwei Plätze Kopf an Kopf (#440) – die Entscheidungshilfe
+              «Thun oder Interlaken?»; den Kosten-Vergleich ALLER Plätze
+              gibt es in der Statistik (#243) */}
+          <SpotCompare className="mb-4" spots={spots ?? []} home={home} />
 
           {home && (spots?.length ?? 0) > 1 && (
             <button

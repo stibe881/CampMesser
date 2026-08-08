@@ -57,10 +57,12 @@ describe("briefingItems", () => {
       astro: "Vollmond",
       tasks: ["Kohle kaufen"],
       meals: "Abend: Chili",
+      pollen: "Pollenflug: Gräser hoch",
       weather: "18–26 °C",
     });
     expect(items.map(i => i.kind)).toEqual([
       "weather",
+      "pollen",
       "meals",
       "tasks",
       "astro",

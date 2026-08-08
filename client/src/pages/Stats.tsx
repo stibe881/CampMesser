@@ -7,6 +7,7 @@ import {
   Binoculars,
   CalendarDays,
   CloudSun,
+  Footprints,
   Link2,
   Loader2,
   Star,
@@ -21,6 +22,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { computeTripStats, nightsPerYear } from "@shared/trips";
+import { trackYearRows } from "@shared/trackYears";
 import { estimatedTotalRappen, spotCostComparison } from "@shared/spotCosts";
 import { EXPENSE_CATEGORY_LABELS } from "@shared/expenses";
 import { formatChf } from "@/lib/money";
@@ -157,6 +159,11 @@ export default function Stats() {
     enabled,
     staleTime: 60_000,
   });
+  // Wander-Jahresbilanz (#450): aus den gespeicherten Tracks (#220)
+  const tracksQuery = trpc.tracks.list.useQuery(undefined, {
+    enabled,
+    staleTime: 60_000,
+  });
   const childrenQuery = trpc.family.children.list.useQuery(undefined, {
     enabled,
     staleTime: 60_000,
@@ -223,6 +230,11 @@ export default function Stats() {
         knots.map(k => k.id)
       ),
     [knotStats]
+  );
+
+  const trackYears = useMemo(
+    () => trackYearRows(tracksQuery.data ?? []),
+    [tracksQuery.data]
   );
 
   const sightings = useMemo(
@@ -516,6 +528,48 @@ export default function Stats() {
             <p className="mt-1 text-xs text-muted-foreground">
               {ts.weatherLuckHint(luck.trips)}
             </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Wander-Jahresbilanz (#450): Touren, km und Höhenmeter pro Jahr;
+          Velo-Touren (#449) zählen mit, stehen aber getrennt dabei */}
+      {trackYears.length > 0 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <SectionHeader
+              icon={Footprints}
+              title={ts.hikeYearsTitle}
+              href="/wanderung"
+              linkLabel={ts.hikeYearsLink}
+            />
+            <ul className="space-y-2">
+              {trackYears.map(row => (
+                <li
+                  key={row.year}
+                  className="border-b border-border/60 pb-2 last:border-0 last:pb-0"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                    <span className="text-sm font-semibold">{row.year}</span>
+                    <span className="text-sm tabular-nums">
+                      {ts.hikeYearsLine(
+                        row.tours,
+                        (row.distanceM / 1000).toLocaleString(
+                          LOCALE_TAGS[lang],
+                          { maximumFractionDigits: 1 }
+                        ),
+                        row.ascentM.toLocaleString(LOCALE_TAGS[lang])
+                      )}
+                    </span>
+                  </div>
+                  {row.bikeTours > 0 && (
+                    <p className="mt-0.5 text-right text-xs text-muted-foreground">
+                      {ts.hikeYearsBike(row.bikeTours)}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
           </CardContent>
         </Card>
       )}

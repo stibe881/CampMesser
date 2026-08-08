@@ -124,3 +124,27 @@ describe("packingSuggestions", () => {
     expect(en.map(s => s.name)).toContain("Warm sleeping bag");
   });
 });
+
+describe("Zelt-Zeilen nach Reise-Art (#464)", () => {
+  // Regen, Kälte und Wind zugleich – alle Zelt-Regeln feuern
+  const wildDays = [{ tMax: 12, tMin: 3, precipProb: 80, windMax: 55 }];
+
+  it("lässt ohne Zelt (Hotel, Städtereise) die Zelt-Zeilen weg", () => {
+    const names = packingSuggestions(wildDays, "de", { tentGear: false }).map(
+      s => s.name
+    );
+    expect(names).toContain("Regenjacke");
+    expect(names).toContain("Mütze");
+    expect(names).not.toContain("Zusätzliche Heringe");
+    expect(names).not.toContain("Zeltunterlage/Plane");
+    expect(names).not.toContain("Sturmleinen");
+    expect(names).not.toContain("Warmer Schlafsack");
+    expect(names).not.toContain("Isolierende Isomatte");
+  });
+
+  it("schlägt sie ohne Angabe weiterhin vor (bestehende Aufrufer)", () => {
+    const names = packingSuggestions(wildDays, "de").map(s => s.name);
+    expect(names).toContain("Zusätzliche Heringe");
+    expect(names).toContain("Sturmleinen");
+  });
+});

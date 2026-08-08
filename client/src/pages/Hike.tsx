@@ -19,6 +19,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { fmtDayMonth, fmtNumeric } from "@/lib/dateFormat";
 import { useConfirm } from "@/components/ConfirmDialog";
 import {
+  Bike,
   Download,
   Footprints,
   Link2,
@@ -84,10 +85,14 @@ import {
   buildGpx,
   formatTrackDuration,
   gpxFileName,
+  guessTrackActivity,
+  normalizeTrackActivity,
   parseTrackPoints,
   trackStats,
+  TRACK_ACTIVITIES,
   TRACK_NAME_MAX_LENGTH,
   TRACK_PAUSE_GAP_MS,
+  type TrackActivity,
   type TrackPoint,
 } from "@shared/track";
 import { GPX_IMPORT_MAX_BYTES, parseGpx } from "@shared/gpxImport";
@@ -240,11 +245,14 @@ export default function HikePage() {
   const [finished, setFinished] = useState<HikeRecording | null>(null);
   const [name, setName] = useState("");
   const [tripId, setTripId] = useState<number | null>(null);
+  // Aktivität (#449): beim Stoppen aus dem Tempo vorgeraten, umstellbar
+  const [activity, setActivity] = useState<TrackActivity>("hike");
   const [openMapId, setOpenMapId] = useState<number | null>(null);
   const [editing, setEditing] = useState<{
     id: number;
     name: string;
     tripId: number | null;
+    activity: TrackActivity;
   } | null>(null);
 
   const utils = trpc.useUtils();
@@ -359,6 +367,8 @@ export default function HikePage() {
     setFinished(done);
     setTripId(done.tripId);
     setName(t.hike.defaultName(fmtDayMonth(new Date(done.startedAt), lang)));
+    const doneStats = trackStats(done.points);
+    setActivity(guessTrackActivity(doneStats.distanceM, doneStats.durationS));
   };
 
   /** GPX-Datei erzeugen und herunterladen (rein im Browser, offline). */
@@ -443,6 +453,7 @@ export default function HikePage() {
       {
         name: trimmed.slice(0, TRACK_NAME_MAX_LENGTH),
         tripId,
+        activity,
         points: finished.points.map(p => ({
           lat: p.lat,
           lon: p.lon,
@@ -723,7 +734,17 @@ export default function HikePage() {
                 <CardContent className="pt-6">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="font-semibold">{track.name}</p>
+                      <p className="flex items-center gap-1.5 font-semibold">
+                        {/* Aktivität (#449): Velo sichtbar machen; Wandern
+                            bleibt ohne Icon der Normalfall */}
+                        {normalizeTrackActivity(track.activity) === "bike" && (
+                          <Bike
+                            className="h-4 w-4 shrink-0 text-primary"
+                            aria-label={t.hike.activityBike}
+                          />
+                        )}
+                        {track.name}
+                      </p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         {fmtNumeric(new Date(track.startedAt), lang)}
                         {" · "}
@@ -744,6 +765,7 @@ export default function HikePage() {
                             id: track.id,
                             name: track.name,
                             tripId: track.tripId,
+                            activity: normalizeTrackActivity(track.activity),
                           })
                         }
                       >
@@ -897,6 +919,42 @@ export default function HikePage() {
                   className="mt-1"
                 />
               </div>
+              {/* Aktivität (#449): aus dem Tempo vorgeraten, umstellbar */}
+              <div>
+                <Label className="mb-1.5 block">{t.hike.activityLabel}</Label>
+                <div
+                  className="flex gap-1.5"
+                  role="group"
+                  aria-label={t.hike.activityLabel}
+                >
+                  {TRACK_ACTIVITIES.map(kind => (
+                    <button
+                      key={kind}
+                      type="button"
+                      onClick={() => setActivity(kind)}
+                      aria-pressed={activity === kind}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                        activity === kind
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {kind === "bike" ? (
+                        <Bike className="h-3.5 w-3.5" aria-hidden="true" />
+                      ) : (
+                        <Footprints
+                          className="h-3.5 w-3.5"
+                          aria-hidden="true"
+                        />
+                      )}
+                      {kind === "bike"
+                        ? t.hike.activityBike
+                        : t.hike.activityHike}
+                    </button>
+                  ))}
+                </div>
+              </div>
               {isAuthenticated && trips.length > 0 && (
                 <div>
                   <Label htmlFor="hike-trip">{t.hike.tripLabel}</Label>
@@ -1035,6 +1093,41 @@ export default function HikePage() {
                   className="mt-1"
                 />
               </div>
+              <div>
+                <Label className="mb-1.5 block">{t.hike.activityLabel}</Label>
+                <div
+                  className="flex gap-1.5"
+                  role="group"
+                  aria-label={t.hike.activityLabel}
+                >
+                  {TRACK_ACTIVITIES.map(kind => (
+                    <button
+                      key={kind}
+                      type="button"
+                      onClick={() => setEditing({ ...editing, activity: kind })}
+                      aria-pressed={editing.activity === kind}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                        editing.activity === kind
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {kind === "bike" ? (
+                        <Bike className="h-3.5 w-3.5" aria-hidden="true" />
+                      ) : (
+                        <Footprints
+                          className="h-3.5 w-3.5"
+                          aria-hidden="true"
+                        />
+                      )}
+                      {kind === "bike"
+                        ? t.hike.activityBike
+                        : t.hike.activityHike}
+                    </button>
+                  ))}
+                </div>
+              </div>
               {trips.length > 0 && (
                 <div>
                   <Label htmlFor="hike-edit-trip">{t.hike.tripLabel}</Label>
@@ -1074,7 +1167,12 @@ export default function HikePage() {
                   return;
                 }
                 updateMutation.mutate(
-                  { id: editing.id, name: trimmed, tripId: editing.tripId },
+                  {
+                    id: editing.id,
+                    name: trimmed,
+                    tripId: editing.tripId,
+                    activity: editing.activity,
+                  },
                   {
                     onSuccess: () => {
                       setEditing(null);

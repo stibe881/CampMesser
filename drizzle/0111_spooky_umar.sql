@@ -1,0 +1,1 @@
+ALTER TABLE `userNotes` ADD `pinned` boolean DEFAULT false NOT NULL;

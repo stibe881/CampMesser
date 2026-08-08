@@ -1,0 +1,1 @@
+ALTER TABLE `hikeTracks` ADD `activity` varchar(10) DEFAULT 'hike' NOT NULL;

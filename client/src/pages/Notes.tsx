@@ -6,6 +6,8 @@ import {
   Loader2,
   NotebookPen,
   Pencil,
+  Pin,
+  PinOff,
   Plus,
   Search,
   Trash2,
@@ -118,6 +120,11 @@ export default function NotesPage() {
   const addMutation = trpc.notes.add.useMutation();
   const updateMutation = trpc.notes.update.useMutation();
   const removePhotoMutation = trpc.notes.removePhoto.useMutation();
+  // Anpinnen (#455)
+  const pinMutation = trpc.notes.setPinned.useMutation({
+    onSuccess: () => utils.notes.list.invalidate(),
+    onError: () => toast.error(t.common.actionFailed),
+  });
   const removeMutation = trpc.notes.remove.useMutation({
     onSuccess: () => {
       utils.notes.list.invalidate();
@@ -379,6 +386,41 @@ export default function NotesPage() {
                         </p>
                       </div>
                       <div className="flex shrink-0 flex-col gap-1">
+                        {/* Anpinnen (#455): Wichtiges bleibt oben */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={cn(
+                            "h-8 w-8",
+                            note.pinned
+                              ? "text-primary"
+                              : "text-muted-foreground/60 hover:text-foreground"
+                          )}
+                          disabled={pinMutation.isPending}
+                          onClick={() =>
+                            pinMutation.mutate({
+                              id: note.id,
+                              pinned: !note.pinned,
+                            })
+                          }
+                          aria-pressed={note.pinned}
+                          aria-label={
+                            note.pinned
+                              ? t.notes.unpinAria(
+                                  note.title || t.notes.untitled
+                                )
+                              : t.notes.pinAria(note.title || t.notes.untitled)
+                          }
+                        >
+                          {note.pinned ? (
+                            <PinOff
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <Pin className="h-3.5 w-3.5" aria-hidden="true" />
+                          )}
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"

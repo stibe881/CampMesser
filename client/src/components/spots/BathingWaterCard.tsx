@@ -7,8 +7,9 @@ import { Waves } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
-import { bathingComfort } from "@shared/bathingWater";
+import { bathingComfort, waveLevel } from "@shared/bathingWater";
 import { formatDistance } from "@shared/geo";
+import { compassDirection } from "@shared/solar";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
 
@@ -93,6 +94,45 @@ export default function BathingWaterCard({
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">{tw.noTemperature}</p>
+        )}
+
+        {/* Wellen fürs Meer (#451) – nur an der Küste vorhanden */}
+        {data.source === "marine" && data.marine?.waveHeightM != null && (
+          <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <p className="text-sm">
+              <span className="font-semibold">
+                {tw.waveHeight(data.marine.waveHeightM.toFixed(1))}
+              </span>
+              {data.marine.waveDirectionDeg != null &&
+                ` · ${tw.waveFrom(
+                  compassDirection(data.marine.waveDirectionDeg, lang)
+                )}`}
+            </p>
+            <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-accent-foreground">
+              {tw.waveLevels[waveLevel(data.marine.waveHeightM)]}
+            </span>
+          </div>
+        )}
+
+        {/* Gezeiten (#462): nächstes Hoch-/Niedrigwasser aus dem
+            stündlichen Meeresspiegel – ohne nennenswerten Tidenhub
+            (Mittelmeer) bleibt die Zeile weg, «Hochwasser um 14 Uhr»
+            wäre dort keine Information. Stundengenau, mehr gibt die
+            Reihe nicht her. */}
+        {data.source === "marine" && (data.marine?.tides.length ?? 0) > 0 && (
+          <p className="mt-2 text-sm">
+            <span className="font-medium">{tw.tideTitle}</span>{" "}
+            {(data.marine?.tides ?? [])
+              .map(tide =>
+                (tide.kind === "high" ? tw.tideHigh : tw.tideLow)(
+                  new Date(tide.timeMs).toLocaleTimeString(LOCALE_TAGS[lang], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                )
+              )
+              .join(" · ")}
+          </p>
         )}
 
         {data.source === "station" &&

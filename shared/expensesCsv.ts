@@ -58,6 +58,8 @@ export interface CsvExpenseLike {
   description?: string | null;
   paidBy: string;
   amountRappen: number;
+  /** "CHF" | "EUR"; fehlt bei Alt-Zeilen und gilt dann als CHF (#441). */
+  currency?: string;
 }
 
 /**
@@ -73,29 +75,41 @@ export interface CsvExpenseLike {
 export function expensesToCsv(
   expenses: readonly CsvExpenseLike[],
   options: {
-    /** Spaltentitel: Datum, Kategorie, Beschreibung, Bezahlt von, Betrag */
+    /** Spaltentitel: Datum, Kategorie, Beschreibung, Bezahlt von, Währung, Betrag */
     headers: readonly string[];
     categoryLabel: (category: string) => string;
     totalLabel: string;
   }
 ): string {
   const lines: string[] = [csvRow(options.headers)];
-  let total = 0;
+  // Summen pro Währung (#441) – CHF und EUR in einer Zahl wären Unsinn.
+  const totals = new Map<string, number>();
   expenses.forEach(expense => {
-    total += Number.isFinite(expense.amountRappen)
+    const currency = expense.currency === "EUR" ? "EUR" : "CHF";
+    const amount = Number.isFinite(expense.amountRappen)
       ? Math.round(expense.amountRappen)
       : 0;
+    totals.set(currency, (totals.get(currency) ?? 0) + amount);
     lines.push(
       csvRow([
         expense.day,
         options.categoryLabel(expense.category),
         expense.description ?? "",
         expense.paidBy,
+        currency,
         csvAmount(expense.amountRappen),
       ])
     );
   });
-  lines.push(csvRow(["", "", "", options.totalLabel, csvAmount(total)]));
+  // Eine Summenzeile je vorhandener Währung, CHF zuerst
+  for (const currency of ["CHF", "EUR"]) {
+    const total = totals.get(currency);
+    if (total === undefined && !(currency === "CHF" && totals.size === 0))
+      continue;
+    lines.push(
+      csvRow(["", "", "", options.totalLabel, currency, csvAmount(total ?? 0)])
+    );
+  }
   // \r\n, weil Excel auf Windows sonst alles in eine Zeile legt
   return CSV_BOM + lines.join("\r\n") + "\r\n";
 }

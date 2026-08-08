@@ -12,6 +12,8 @@ import {
   MAX_ROUTE_WAYPOINTS,
   MAX_TRACK_POINTS,
   ROUTE_NAME_MAX_LENGTH,
+  TRACK_ACTIVITIES,
+  guessTrackActivity,
   RouteWaypoint,
   TRACK_NAME_MAX_LENGTH,
   TRPCError,
@@ -70,6 +72,8 @@ export const outdoorRouters = {
         z.object({
           name: z.string().trim().min(1).max(TRACK_NAME_MAX_LENGTH),
           tripId: z.number().int().positive().nullish(),
+          /** Aktivität (#449); ohne Angabe rät der Server aus dem Tempo. */
+          activity: z.enum(TRACK_ACTIVITIES).optional(),
           points: z
             .array(
               z.object({
@@ -97,6 +101,9 @@ export const outdoorRouters = {
           userId: ctx.user.id,
           tripId: input.tripId ?? null,
           name: input.name.trim(),
+          activity:
+            input.activity ??
+            guessTrackActivity(stats.distanceM, stats.durationS),
           startedAt: new Date(points[0].t),
           endedAt: new Date(points[points.length - 1].t),
           distanceM: stats.distanceM,
@@ -114,6 +121,7 @@ export const outdoorRouters = {
           id: z.number().int().positive(),
           name: z.string().trim().min(1).max(TRACK_NAME_MAX_LENGTH).optional(),
           tripId: z.number().int().positive().nullish(),
+          activity: z.enum(TRACK_ACTIVITIES).optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -132,6 +140,7 @@ export const outdoorRouters = {
           ...(input.tripId !== undefined
             ? { tripId: input.tripId ?? null }
             : {}),
+          ...(input.activity !== undefined ? { activity: input.activity } : {}),
         });
         return { success: true } as const;
       }),
@@ -599,6 +608,11 @@ export const outdoorRouters = {
             temperatureC: marine.temperatureC,
             measuredAtMs: marine.measuredAtMs,
             trend: waterTrend(marine.temperatureC, marine.previousC),
+            // Wellen fürs Meer (#451)
+            waveHeightM: marine.waveHeightM,
+            waveDirectionDeg: marine.waveDirectionDeg,
+            // Gezeiten (#462): leer ohne nennenswerten Tidenhub
+            tides: marine.tides,
           },
         };
       }),

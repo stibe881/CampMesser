@@ -72,6 +72,10 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { useTodayIso } from "@/lib/useTodayIso";
 import CampfireLight from "@/components/CampfireLight";
+import LazySection from "@/components/LazySection";
+import BathingWaterCard from "@/components/spots/BathingWaterCard";
+import { modules } from "@/data/modules";
+import { tripKindPreset } from "@shared/tripKind";
 
 export default function TodayPage() {
   const { lang, t } = useI18n();
@@ -239,6 +243,15 @@ export default function TodayPage() {
   // Ortsname wie auf der Startseite: Titel, sonst Platz-Name, sonst Freitext
   const place = trip ? tripDisplayName(trip, lang) : "";
   const nights = trip ? nightsLeft(trip, today) : null;
+  // Reise-Art (#460): Was diese Ansicht hervorhebt, entscheidet die Art
+  // der laufenden Reise – Strandferien fragen nicht nach der
+  // Lagerfeuer-Ampel, Camping nicht nach der Badewasser-Karte.
+  const preset = tripKindPreset(trip?.kind);
+  /** Zusätzliche Schnellzugriffe der Art, gegen den Kachel-Katalog gelöst. */
+  const quickModules = preset.quickModules.flatMap(path => {
+    const mod = modules.find(m => m.path === path);
+    return mod ? [mod] : [];
+  });
 
   return (
     <div className="container max-w-2xl py-6">
@@ -331,8 +344,10 @@ export default function TodayPage() {
             )}
             {/* Lagerfeuer-Ampel (#389): Die Frage stellt sich am Abend
                 genau hier. Ohne Platz-Koordinaten oder Prognose bleibt
-                sie weg – ein Urteil ohne Quellen wäre ein Orakel. */}
-            {spot && weather && (
+                sie weg – ein Urteil ohne Quellen wäre ein Orakel. Bei
+                Hotel-, Strand- oder Städte-Reisen (#460) stellt sie
+                niemand, dann fehlt sie ebenfalls. */}
+            {preset.campfire && spot && weather && (
               <CampfireLight
                 latitude={spot.latitude}
                 longitude={spot.longitude}
@@ -362,8 +377,37 @@ export default function TodayPage() {
                   {td.shopping}
                 </Link>
               </Button>
+              {/* Schnellzugriffe der Reise-Art (#460): Wandern zeigt die
+                  Tour-Aufzeichnung, Städtereisen die Ausweise – zusätzlich
+                  zu den drei Standard-Knöpfen, nie an deren Stelle. */}
+              {quickModules.map(mod => {
+                const Icon = mod.icon;
+                return (
+                  <Button asChild size="sm" variant="outline" key={mod.path}>
+                    <Link href={mod.path}>
+                      <Icon className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                      {pick(mod.title, lang)}
+                    </Link>
+                  </Button>
+                );
+              })}
             </div>
           </div>
+
+          {/* Badewasser (#460): Bei Strandferien ist das Wasser der Kern
+              des Tages – Temperatur, Wellen und Gezeiten stehen darum
+              gleich unter der Kopfzeile statt nur im Platz-Dossier.
+              Ohne Platz-Koordinaten bleibt die Karte weg. */}
+          {preset.bathing && spot && (
+            <LazySection minHeight={160}>
+              <div className="mt-4">
+                <BathingWaterCard
+                  latitude={spot.latitude}
+                  longitude={spot.longitude}
+                />
+              </div>
+            </LazySection>
+          )}
 
           {/* Essen: die zweite Frage des Tages.
               GANZE KARTE ANTIPPBAR (#343): Wer hier «nichts eingetragen»

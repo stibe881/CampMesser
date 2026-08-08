@@ -6,6 +6,7 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  ArrowRightLeft,
   GripVertical,
   Link2,
   ListChecks,
@@ -290,6 +291,17 @@ export default function ShoppingPage() {
   const clearMutation = trpc.shopping.clear.useMutation({
     onSuccess: invalidate,
     onError: () => toast.error(t.common.deleteFailed),
+  });
+  // Offene Einkäufe in eine andere Liste verschieben (#446)
+  const moveOpenMutation = trpc.shopping.moveOpen.useMutation({
+    onSuccess: (result, variables) => {
+      utils.shopping.lists.invalidate();
+      utils.shopping.list.invalidate();
+      const listName =
+        target.lists.find(l => l.id === variables.toListId)?.name ?? "";
+      toast.success(t.shopping.movedToList(result.moved, listName));
+    },
+    onError: e => toast.error(e.message || t.common.actionFailed),
   });
   // Übernahme in die Reisekasse (#234): eine Ausgabe je Einkauf
   const bookMutation = trpc.shopping.bookToTrip.useMutation({
@@ -896,6 +908,35 @@ export default function ShoppingPage() {
                     </div>
                   );
                 })}
+              </div>
+            )}
+            {/* Offene in eine andere Liste verschieben (#446) – erst ab
+                zwei Listen; Abgehaktes bleibt als erledigter Einkauf hier */}
+            {openItems.length > 0 && target.lists.length > 1 && (
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <ArrowRightLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                  {t.shopping.moveOpenLabel}
+                </span>
+                {target.lists
+                  .filter(list => list.id !== activeListId)
+                  .map(list => (
+                    <button
+                      key={list.id}
+                      type="button"
+                      disabled={moveOpenMutation.isPending}
+                      onClick={() =>
+                        moveOpenMutation.mutate({
+                          fromListId: activeListId ?? undefined,
+                          toListId: list.id,
+                        })
+                      }
+                      aria-label={t.shopping.moveOpenAria(list.name)}
+                      className="rounded-full border border-border px-2.5 py-1 font-medium transition-colors hover:border-primary/50 hover:text-foreground disabled:opacity-50"
+                    >
+                      {list.name}
+                    </button>
+                  ))}
               </div>
             )}
           </section>

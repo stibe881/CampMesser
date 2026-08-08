@@ -46,6 +46,14 @@ export const users = mysqlTable("users", {
    * erzeugen: Damit ist ein einmal weitergegebener Link sofort wertlos.
    */
   calendarToken: varchar("calendarToken", { length: 32 }).unique(),
+  /**
+   * Zwei-Faktor per TOTP (#453): Base32-Geheimnis der Authenticator-App;
+   * null = 2FA aus. Schützt die PASSWORT-Anmeldung – Passkeys (#122)
+   * sind bereits gerätgebunden und bleiben unberührt.
+   */
+  totpSecret: varchar("totpSecret", { length: 64 }),
+  /** SHA-256-Hashes der übrigen Wiederherstellungs-Codes als JSON-Liste. */
+  totpRecoveryJson: text("totpRecoveryJson"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -463,6 +471,13 @@ export const tripLogs = mysqlTable(
     spotId: int("spotId"),
     /** Freitext-Ort, falls kein Favorit verknüpft ist */
     location: varchar("location", { length: 140 }),
+    /**
+     * Reise-Art (#460, shared/tripKind.ts): camping, strand, hotel,
+     * staedte, wandern, velo, wintersport oder tagesausflug. Steuert,
+     * was die Heute-Ansicht in den Vordergrund stellt; Zeilen von vor
+     * der Spalte gelten als Camping.
+     */
+    kind: varchar("kind", { length: 16 }).notNull().default("camping"),
     title: varchar("title", { length: 140 }),
     notes: text("notes"),
     /** Anreise (erster Abend) */
@@ -502,6 +517,13 @@ export const tripLogs = mysqlTable(
      * Wochen Frankreich haben nichts miteinander zu tun.
      */
     budgetRappen: int("budgetRappen"),
+    /**
+     * Euro-Kurs der Reisekasse (#441): CHF pro EUR × 10 000 (0.94 → 9400).
+     * null = kein Kurs gesetzt; Euro-Beträge bleiben dann unverrechnet.
+     * Am Aufenthalt und nicht global: Der Kurs gehört zur Reise, wie man
+     * ihn damals getauscht hat.
+     */
+    eurRateX10000: int("eurRateX10000"),
     pitchNumber: varchar("pitchNumber", { length: 40 }),
     wifiName: varchar("wifiName", { length: 80 }),
     wifiPassword: varchar("wifiPassword", { length: 80 }),
@@ -1014,6 +1036,13 @@ export const tripExpenses = mysqlTable(
     category: varchar("category", { length: 20 }).notNull(),
     /** Kurze Beschreibung («Znacht Migros»); leer erlaubt */
     description: varchar("description", { length: 160 }),
+    /**
+     * Währung des Betrags (#441): "CHF" oder "EUR". Der Betrag bleibt in
+     * der ERFASSTEN Währung stehen – umgerechnet wird erst beim Anzeigen,
+     * über den Kurs an der Reise (tripLogs.eurRateX10000). So bleibt der
+     * Beleg-Betrag exakt, auch wenn der Kurs später angepasst wird.
+     */
+    currency: varchar("currency", { length: 3 }).notNull().default("CHF"),
     /** Tag der Ausgabe */
     day: date("day", { mode: "string" }).notNull(),
     /** Wer bezahlt hat – freier Name, Grundlage für «wer schuldet wem» */
@@ -1570,6 +1599,12 @@ export const hikeTracks = mysqlTable(
     /** Zugeordnete Reise (tripLogs.id); null = ohne Reise */
     tripId: int("tripId"),
     name: varchar("name", { length: 80 }).notNull(),
+    /**
+     * Aktivitätstyp (#449): "hike" oder "bike" (shared/track.ts). Beim
+     * Speichern wählbar; ohne Angabe rät der Server aus dem Schnitt-Tempo.
+     * Bestehende Tracks aus der Zeit vor der Spalte gelten als Wanderung.
+     */
+    activity: varchar("activity", { length: 10 }).notNull().default("hike"),
     /** Zeitpunkt des ersten und des letzten Punkts */
     startedAt: timestamp("startedAt").notNull(),
     endedAt: timestamp("endedAt").notNull(),
@@ -1794,6 +1829,12 @@ export const userNotes = mysqlTable(
      * Schild mit den Platzregeln. null = ohne Foto.
      */
     fileName: varchar("fileName", { length: 64 }),
+    /**
+     * Angepinnt (#455): Wichtiges (Gasflaschen-Typ, WLAN-Passwort) bleibt
+     * oben, statt unter neuen Notizen zu verschwinden. Innerhalb der
+     * angepinnten gilt weiterhin «zuletzt geändert zuerst».
+     */
+    pinned: boolean("pinned").notNull().default(false),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
@@ -1802,6 +1843,58 @@ export const userNotes = mysqlTable(
 
 export type UserNote = typeof userNotes.$inferSelect;
 export type InsertUserNote = typeof userNotes.$inferInsert;
+
+/**
+ * Karten & Ausweise (#454): ACSI-Card, TCS-Mitgliedschaft, Camping Key –
+ * die Plastikkarten, die man an der Rezeption zeigt und nie dabei hat.
+ * Eine Zeile pro Karte mit genau EINEM Foto (Ablage unter
+ * uploads/documents/, gleiche Technik wie die Reservation #279). Bewusst
+ * kein Ablaufdatum und keine Nummern-Spalte: Das Foto zeigt beides.
+ */
+export const documentCards = mysqlTable(
+  "documentCards",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Bezeichnung, z. B. «ACSI-Card 2026» */
+    title: varchar("title", { length: 80 }).notNull(),
+    /** Foto der Karte; null = noch keines hochgeladen */
+    fileName: varchar("fileName", { length: 64 }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("documentCards_userId").on(table.userId)]
+);
+
+export type DocumentCard = typeof documentCards.$inferSelect;
+export type InsertDocumentCard = typeof documentCards.$inferInsert;
+
+/**
+ * Tankbuch (#443): eine Zeile pro Tankfüllung. Aus zwei aufeinander-
+ * folgenden VOLLEN Füllungen ergibt sich der echte Verbrauch – die
+ * getankten Liter der zweiten Füllung geteilt durch die gefahrenen
+ * Kilometer. Liter als Zehntel-Ganzzahl, wie überall kein Fliesskomma
+ * in der Datenbank.
+ */
+export const fuelLogs = mysqlTable(
+  "fuelLogs",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Tag der Tankfüllung */
+    day: date("day", { mode: "string" }).notNull(),
+    /** Kilometerstand beim Tanken */
+    odometerKm: int("odometerKm").notNull(),
+    /** Getankte Menge in Deziliter-Auflösung (Liter × 10) */
+    liters10: int("liters10").notNull(),
+    /** Bezahlter Gesamtbetrag in Rappen; null = nicht erfasst */
+    priceRappen: int("priceRappen"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("fuelLogs_userId").on(table.userId)]
+);
+
+export type FuelLog = typeof fuelLogs.$inferSelect;
+export type InsertFuelLog = typeof fuelLogs.$inferInsert;
 
 /**
  * GPS-Schatzsuche (#267): Wegpunkte, die Erwachsene am Platz verstecken
@@ -1868,6 +1961,12 @@ export const campChores = mysqlTable(
     title: varchar("title", { length: 60 }).notNull(),
     /** Punkte, die das erledigte Ämtli einbringt (1–10). */
     points: int("points").notNull().default(1),
+    /**
+     * Wochentage, an denen das Ämtli anfällt (#447): JSON-Liste von
+     * ISO-Wochentagen (1 = Montag … 7 = Sonntag). null = jeden Tag –
+     * der Zustand aller Ämtli aus der Zeit vor der Spalte.
+     */
+    weekdaysJson: text("weekdaysJson"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("campChores_userId").on(table.userId)]

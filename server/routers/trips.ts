@@ -5,6 +5,13 @@
  * gemeinsame Unterbau steht in `_shared.ts`.
  */
 import {
+  EXPENSE_CURRENCIES,
+  EUR_RATE_MAX,
+  EUR_RATE_MIN,
+  toChfExpenses,
+} from "@shared/expenses";
+import { TRIP_KINDS, normalizeTripKind } from "@shared/tripKind";
+import {
   BUDGET_MAX_RAPPEN,
   EXPENSE_CATEGORIES,
   EXPENSE_DESCRIPTION_MAX_LENGTH,
@@ -124,6 +131,8 @@ export const tripsRouters = {
             spotId: z.number().int().positive().nullish(),
             packListId: z.number().int().positive().nullish(),
             location: z.string().max(140).nullish(),
+            // Reise-Art (#460); fehlt sie (alte Clients), gilt Camping
+            kind: z.enum(TRIP_KINDS).optional(),
             title: z.string().max(140).nullish(),
             notes: z.string().max(2000).nullish(),
             startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -174,6 +183,7 @@ export const tripsRouters = {
           spotId: input.spotId ?? null,
           packListId: input.packListId ?? null,
           location: input.location?.trim() || null,
+          kind: normalizeTripKind(input.kind),
           title: input.title?.trim() || null,
           notes: input.notes?.trim() || null,
           startDate: input.startDate,
@@ -262,12 +272,13 @@ export const tripsRouters = {
           }
         }
 
-        // 2. Die Reise selbst
+        // 2. Die Reise selbst – die Vorlage bringt ihre Art mit (#463)
         const tripId = await db.addTripLog({
           userId: ctx.user.id,
           spotId: input.spotId ?? null,
           packListId,
           location: input.location?.trim() || null,
+          kind: normalizeTripKind(template.kind),
           title: input.title?.trim() || title,
           startDate: input.startDate,
           endDate,
@@ -305,6 +316,8 @@ export const tripsRouters = {
             spotId: z.number().int().positive().nullish(),
             packListId: z.number().int().positive().nullish(),
             location: z.string().max(140).nullish(),
+            // Reise-Art (#460); fehlt sie (alte Clients), bleibt sie stehen
+            kind: z.enum(TRIP_KINDS).optional(),
             title: z.string().max(140).nullish(),
             notes: z.string().max(2000).nullish(),
             startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -389,6 +402,10 @@ export const tripsRouters = {
           spotId,
           packListId: input.packListId ?? null,
           location,
+          // Ohne Angabe bleibt die gespeicherte Art unangetastet
+          ...(input.kind !== undefined
+            ? { kind: normalizeTripKind(input.kind) }
+            : {}),
           title: input.title?.trim() || null,
           notes: input.notes?.trim() || null,
           startDate: input.startDate,
@@ -468,6 +485,8 @@ export const tripsRouters = {
           spotId: isOwner ? trip.spotId : null,
           packListId: isOwner ? trip.packListId : null,
           location,
+          // Die Kopie ist dieselbe Art von Reise (#460)
+          kind: normalizeTripKind(trip.kind),
           title: trip.title,
           notes: null,
           startDate: input.startDate,
@@ -746,13 +765,31 @@ export const tripsRouters = {
       stats: protectedProcedure.query(async ({ ctx }) => {
         const trips = await db.getTripLogs(ctx.user.id);
         const expenses = await db.getExpensesForTrips(trips.map(t => t.id));
+        // Euro-Beträge (#441) zählen zum Kurs ihrer Reise; ohne Kurs
+        // fallen sie ehrlich raus, statt still 1:1 gezählt zu werden.
+        const rateByTrip = new Map(
+          trips.map(trip => [trip.id, trip.eurRateX10000 ?? null])
+        );
+        const { converted } = expenses.reduce<{
+          converted: typeof expenses;
+        }>(
+          (acc, expense) => {
+            const result = toChfExpenses(
+              [expense],
+              rateByTrip.get(expense.tripId) ?? null
+            );
+            acc.converted.push(...result.converted);
+            return acc;
+          },
+          { converted: [] }
+        );
         return expenseStats(
           trips.map(trip => ({
             id: trip.id,
             startDate: trip.startDate,
             endDate: trip.endDate,
           })),
-          expenses
+          converted
         );
       }),
       /**
@@ -777,11 +814,41 @@ export const tripsRouters = {
           db.getTripLogs(ctx.user.id),
           db.getMemberTripLogs(ctx.user.id),
         ]);
-        const ids = [
-          ...own.map(trip => trip.id),
-          ...member.map(({ trip }) => trip.id),
-        ];
-        return db.getExpenseTotalsForTrips(ids);
+        const trips = [...own, ...member.map(({ trip }) => trip)];
+        const rows = await db.getExpenseTotalsForTrips(
+          trips.map(trip => trip.id)
+        );
+        // Euro (#441): zum Reise-Kurs eingerechnet; ohne Kurs bleibt der
+        // Euro-Anteil als eigener Wert stehen, damit das Zeichen am
+        // zugeklappten Abschnitt nichts still verschluckt.
+        const rateByTrip = new Map(
+          trips.map(trip => [trip.id, trip.eurRateX10000 ?? null])
+        );
+        const byTrip = new Map<
+          number,
+          { totalRappen: number; eurOpenRappen: number }
+        >();
+        for (const row of rows) {
+          const entry = byTrip.get(row.tripId) ?? {
+            totalRappen: 0,
+            eurOpenRappen: 0,
+          };
+          if (row.currency === "EUR") {
+            const rate = rateByTrip.get(row.tripId) ?? null;
+            if (rate === null) entry.eurOpenRappen += row.totalRappen;
+            else
+              entry.totalRappen += Math.round(
+                (row.totalRappen * rate) / 10_000
+              );
+          } else {
+            entry.totalRappen += row.totalRappen;
+          }
+          byTrip.set(row.tripId, entry);
+        }
+        return Array.from(byTrip, ([tripId, entry]) => ({
+          tripId,
+          ...entry,
+        }));
       }),
       /**
        * Reise-Budget (#256) setzen oder mit null wieder entfernen.
@@ -811,6 +878,33 @@ export const tripsRouters = {
           await db.setTripBudget(input.tripId, input.budgetRappen);
           return { success: true } as const;
         }),
+      /**
+       * Euro-Kurs der Reise (#441) setzen oder mit null entfernen –
+       * wie das Budget für alle Mitreisenden, die Kasse gehört allen.
+       */
+      setEurRate: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            eurRateX10000: z
+              .number()
+              .int()
+              .min(EUR_RATE_MIN)
+              .max(EUR_RATE_MAX)
+              .nullable(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          await db.setTripEurRate(input.tripId, input.eurRateX10000);
+          return { success: true } as const;
+        }),
       list: protectedProcedure
         .input(z.object({ tripId: z.number().int().positive() }))
         .query(async ({ ctx, input }) => {
@@ -831,6 +925,7 @@ export const tripsRouters = {
           z.object({
             tripId: z.number().int().positive(),
             amountRappen: z.number().int().min(1).max(EXPENSE_MAX_RAPPEN),
+            currency: z.enum(EXPENSE_CURRENCIES).default("CHF"),
             category: z.enum(EXPENSE_CATEGORIES),
             description: z
               .string()
@@ -852,6 +947,7 @@ export const tripsRouters = {
             tripId: input.tripId,
             userId: ctx.user.id,
             amountRappen: input.amountRappen,
+            currency: input.currency,
             category: input.category,
             description: input.description?.trim() || null,
             day: input.day,
@@ -876,6 +972,7 @@ export const tripsRouters = {
               .min(1)
               .max(EXPENSE_MAX_RAPPEN)
               .optional(),
+            currency: z.enum(EXPENSE_CURRENCIES).optional(),
             category: z.enum(EXPENSE_CATEGORIES).optional(),
             description: z
               .string()
@@ -906,6 +1003,9 @@ export const tripsRouters = {
           await db.updateTripExpense(input.id, {
             ...(input.amountRappen !== undefined
               ? { amountRappen: input.amountRappen }
+              : {}),
+            ...(input.currency !== undefined
+              ? { currency: input.currency }
               : {}),
             ...(input.category !== undefined
               ? { category: input.category }

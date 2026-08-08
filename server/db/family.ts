@@ -247,6 +247,18 @@ export async function createCampChore(data: InsertCampChore) {
   const [result] = await db.insert(campChores).values(data);
   return result.insertId;
 }
+/** Wochentage eines Ämtli setzen (#447); null = jeden Tag. */
+export async function setCampChoreWeekdays(
+  id: number,
+  userId: number,
+  weekdaysJson: string | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(campChores)
+    .set({ weekdaysJson })
+    .where(and(eq(campChores.id, id), eq(campChores.userId, userId)));
+}
 /**
  * Ämtli löschen – samt seiner Zuteilungen. Ein Punktestand, der auf ein
  * nicht mehr existierendes Ämtli zeigt, wäre nicht nachvollziehbar.

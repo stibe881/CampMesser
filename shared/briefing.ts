@@ -35,8 +35,8 @@ export function isBriefingTime(hour: number): boolean {
   );
 }
 
-/** Die vier Zeilen des Briefings, in fester Reihenfolge. */
-export type BriefingKind = "weather" | "meals" | "tasks" | "astro";
+/** Die Zeilen des Briefings, in fester Reihenfolge. */
+export type BriefingKind = "weather" | "pollen" | "meals" | "tasks" | "astro";
 
 export interface BriefingItem {
   kind: BriefingKind;
@@ -46,6 +46,8 @@ export interface BriefingItem {
 export interface BriefingInput {
   /** Wetter-Zeile, z. B. «18–26 °C, sonnig» */
   weather?: string | null;
+  /** Pollen-Zeile (#456) für die eigenen Allergene, z. B. «Gräser hoch» */
+  pollen?: string | null;
   /** Mahlzeiten-Zeile, z. B. «Frühstück: Zopf · Abend: Chili» */
   meals?: string | null;
   /** Offene Aufgaben der Pinnwand, wichtigste zuerst */
@@ -92,6 +94,8 @@ export function briefingItems(input: BriefingInput): BriefingItem[] {
   const items: BriefingItem[] = [];
   const weather = clean(input.weather);
   if (weather) items.push({ kind: "weather", text: weather });
+  const pollen = clean(input.pollen);
+  if (pollen) items.push({ kind: "pollen", text: pollen });
   const meals = clean(input.meals);
   if (meals) items.push({ kind: "meals", text: meals });
   const { shown } = briefingTasks(input.tasks);

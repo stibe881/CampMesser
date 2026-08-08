@@ -7,6 +7,8 @@
 import {
   ENV,
   HISTORY_LIMIT,
+  InsertDocumentCard,
+  InsertFuelLog,
   InsertUser,
   InsertUserNote,
   and,
@@ -15,7 +17,9 @@ import {
   customRecipes,
   deletedItems,
   desc,
+  documentCards,
   eq,
+  fuelLogs,
   getDb,
   hikeTracks,
   inArray,
@@ -183,6 +187,97 @@ export async function deleteUserNote(id: number, userId: number) {
     .delete(userNotes)
     .where(and(eq(userNotes.id, id), eq(userNotes.userId, userId)));
 }
+// ── Tankbuch (#443) ──
+
+/** Tankfüllungen eines Kontos, jüngster Kilometerstand zuoberst. */
+export async function getFuelLogs(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(fuelLogs)
+    .where(eq(fuelLogs.userId, userId))
+    .orderBy(desc(fuelLogs.odometerKm), desc(fuelLogs.id));
+}
+
+export async function addFuelLog(data: InsertFuelLog) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(fuelLogs).values(data);
+  return result.insertId;
+}
+
+export async function deleteFuelLog(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(fuelLogs)
+    .where(and(eq(fuelLogs.id, id), eq(fuelLogs.userId, userId)));
+}
+
+// ── Karten & Ausweise (#454) ──
+
+/** Karten eines Kontos, neuste zuoberst. */
+export async function getDocumentCards(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(documentCards)
+    .where(eq(documentCards.userId, userId))
+    .orderBy(desc(documentCards.id));
+}
+
+export async function getDocumentCard(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(documentCards)
+    .where(and(eq(documentCards.id, id), eq(documentCards.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+/** Karte über den Foto-Dateinamen finden (nur eigene, für die Auslieferung). */
+export async function getDocumentCardByFileName(
+  fileName: string,
+  userId: number
+) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(documentCards)
+    .where(
+      and(
+        eq(documentCards.fileName, fileName),
+        eq(documentCards.userId, userId)
+      )
+    )
+    .limit(1);
+  return rows[0];
+}
+
+export async function addDocumentCard(data: InsertDocumentCard) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(documentCards).values(data);
+  return result.insertId;
+}
+
+export async function updateDocumentCard(
+  id: number,
+  userId: number,
+  data: Partial<InsertDocumentCard>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(documentCards)
+    .set(data)
+    .where(and(eq(documentCards.id, id), eq(documentCards.userId, userId)));
+}
+
+export async function deleteDocumentCard(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(documentCards)
+    .where(and(eq(documentCards.id, id), eq(documentCards.userId, userId)));
+}
+
 // ── Angemeldete Geräte (#423) ──
 
 /** Neue Anmeldung festhalten – die tokenId wandert als `sid` ins JWT. */

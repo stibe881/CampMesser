@@ -31,6 +31,12 @@ import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import { relativeAge, type ShareExpiryDays } from "@shared/sharing";
 import { tripDisplayName, tripPlaceName } from "@shared/tripName";
 import {
+  TRIP_KINDS,
+  normalizeTripKind,
+  tripKindLabel,
+  type TripKind,
+} from "@shared/tripKind";
+import {
   ArrowRight,
   Award,
   BookOpen,
@@ -518,6 +524,8 @@ export default function TripsPage() {
   });
   /** Sterne-Bewertung des neuen Eintrags (null = ohne Bewertung). */
   const [formRating, setFormRating] = useState<number | null>(null);
+  /** Reise-Art (#460) – Camping ist der Normalfall dieser App. */
+  const [formKind, setFormKind] = useState<TripKind>("camping");
   /** Eintrag, der gerade im Formular bearbeitet wird (null = neuer Eintrag). */
   const [editingId, setEditingId] = useState<number | null>(null);
   /** Erfassungs-Dialog «Neue Reise» / «Reise bearbeiten» offen? */
@@ -542,6 +550,7 @@ export default function TripsPage() {
       pitchNotes: "",
     });
     setFormRating(null);
+    setFormKind("camping");
   };
 
   /** Dialog im Neu-Modus öffnen (Formular frisch). */
@@ -812,6 +821,7 @@ export default function TripsPage() {
       pitchNotes: trip.pitchNotes ?? "",
     });
     setFormRating(trip.rating ?? null);
+    setFormKind(normalizeTripKind(trip.kind));
     setFormOpen(true);
   };
 
@@ -1065,6 +1075,7 @@ export default function TripsPage() {
                     editingTrip.spotId === null
                       ? form.location.trim()
                       : editingTrip.location,
+                  kind: formKind,
                   title: form.title.trim() || null,
                   notes: form.notes.trim() || null,
                   startDate: form.startDate,
@@ -1090,6 +1101,7 @@ export default function TripsPage() {
                 packListId:
                   packListChoice === "keine" ? null : Number(packListChoice),
                 location: spotId === null ? form.location.trim() : null,
+                kind: formKind,
                 title: form.title.trim() || null,
                 notes: form.notes.trim() || null,
                 startDate: form.startDate,
@@ -1182,6 +1194,37 @@ export default function TripsPage() {
                   </Select>
                 </div>
               )}
+            </div>
+            {/* Reise-Art (#460): steuert, was die Heute-Ansicht während
+                der Reise in den Vordergrund stellt – sortieren und
+                vorschlagen, nie sperren. */}
+            <div>
+              <p className="text-sm font-medium">{t.trips.kindLabel}</p>
+              <div
+                className="mt-1.5 flex flex-wrap gap-1.5"
+                role="group"
+                aria-label={t.trips.kindLabel}
+              >
+                {TRIP_KINDS.map(kind => (
+                  <button
+                    key={kind}
+                    type="button"
+                    onClick={() => setFormKind(kind)}
+                    className={cn(
+                      "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                      formKind === kind
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:text-foreground"
+                    )}
+                    aria-pressed={formKind === kind}
+                  >
+                    {tripKindLabel(kind, lang)}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t.trips.kindHint}
+              </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -1525,6 +1568,13 @@ export default function TripsPage() {
                         <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">
                           {t.trips.countdown(days)}
                         </span>
+                        {/* Reise-Art (#460) – Camping ist der Normalfall
+                            und braucht kein Etikett */}
+                        {normalizeTripKind(trip.kind) !== "camping" && (
+                          <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-accent-foreground">
+                            {tripKindLabel(normalizeTripKind(trip.kind), lang)}
+                          </span>
+                        )}
                         {trip.role === "member" && (
                           <span className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
                             <Users className="h-3 w-3" aria-hidden="true" />
@@ -1602,6 +1652,7 @@ export default function TripsPage() {
                           longitude={suggestionSpot.longitude}
                           startDate={trip.startDate}
                           endDate={trip.endDate}
+                          kind={trip.kind}
                         />
                       )}
                       {/* Was frühere Reisen über diese Liste sagen (#381) –
@@ -1761,6 +1812,7 @@ export default function TripsPage() {
                               }
                               shared={trip.shared || trip.role === "member"}
                               budgetRappen={trip.budgetRappen}
+                              eurRateX10000={trip.eurRateX10000}
                               spotId={trip.spotId}
                               startDate={trip.startDate}
                               endDate={trip.endDate}
@@ -2020,6 +2072,15 @@ export default function TripsPage() {
                           ) : (
                             label(trip)
                           )}
+                          {/* Reise-Art (#460) – nur abseits des Normalfalls */}
+                          {normalizeTripKind(trip.kind) !== "camping" && (
+                            <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-accent-foreground">
+                              {tripKindLabel(
+                                normalizeTripKind(trip.kind),
+                                lang
+                              )}
+                            </span>
+                          )}
                           {trip.role === "member" && (
                             <span className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
                               <Users className="h-3 w-3" aria-hidden="true" />
@@ -2186,6 +2247,7 @@ export default function TripsPage() {
                               }
                               shared={trip.shared || trip.role === "member"}
                               budgetRappen={trip.budgetRappen}
+                              eurRateX10000={trip.eurRateX10000}
                               spotId={trip.spotId}
                               startDate={trip.startDate}
                               endDate={trip.endDate}

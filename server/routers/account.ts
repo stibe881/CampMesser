@@ -7,6 +7,7 @@
 import { nanoid } from "nanoid";
 import { CALENDAR_TOKEN_LENGTH } from "@shared/calendarFeed";
 import { SHARE_LINK_KINDS } from "@shared/shareLinks";
+import { FUEL_MAX_LITERS10, FUEL_MAX_ODOMETER_KM } from "@shared/fuelLog";
 import {
   LANGUAGES,
   RAIN_THRESHOLD_MAX_MM,
@@ -51,6 +52,81 @@ export const accountRouters = {
       );
       return { token };
     }),
+  }),
+  /**
+   * Tankbuch (#443): schlichtes CRUD auf eigenen Tankfüllungen. Die
+   * Verbrauchs-Rechnung steckt in shared/fuelLog.ts und läuft im Client.
+   */
+  fuelLog: router({
+    list: protectedProcedure.query(({ ctx }) => db.getFuelLogs(ctx.user.id)),
+    add: protectedProcedure
+      .input(
+        z.object({
+          day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          odometerKm: z.number().int().min(0).max(FUEL_MAX_ODOMETER_KM),
+          liters10: z.number().int().min(1).max(FUEL_MAX_LITERS10),
+          priceRappen: z.number().int().min(1).max(1_000_000).nullish(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const id = await db.addFuelLog({
+          userId: ctx.user.id,
+          day: input.day,
+          odometerKm: input.odometerKm,
+          liters10: input.liters10,
+          priceRappen: input.priceRappen ?? null,
+        });
+        return { id };
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteFuelLog(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+  }),
+  /**
+   * Karten & Ausweise (#454): ACSI-Card, TCS & Co. als Foto in der Tasche.
+   * Karte anlegen, Foto über die Ein-Foto-Fabrik (#457) hochladen
+   * (/api/documents/:id/photo), beim Löschen fällt das Foto mit.
+   */
+  documents: router({
+    list: protectedProcedure.query(({ ctx }) =>
+      db.getDocumentCards(ctx.user.id)
+    ),
+    add: protectedProcedure
+      .input(z.object({ title: z.string().trim().min(1).max(80) }))
+      .mutation(async ({ ctx, input }) => {
+        const id = await db.addDocumentCard({
+          userId: ctx.user.id,
+          title: input.title.trim(),
+        });
+        return { id };
+      }),
+    rename: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          title: z.string().trim().min(1).max(80),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.updateDocumentCard(input.id, ctx.user.id, {
+          title: input.title.trim(),
+        });
+        return { success: true } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const card = await db.getDocumentCard(input.id, ctx.user.id);
+        if (card?.fileName) {
+          const { documentPhotoStorage } = await import("../photoStorage");
+          await documentPhotoStorage.deleteFiles([card.fileName]);
+        }
+        await db.deleteDocumentCard(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
   }),
   /**
    * Angemeldete Geräte (#423): jede Anmeldung seit der Geräte-Verwaltung

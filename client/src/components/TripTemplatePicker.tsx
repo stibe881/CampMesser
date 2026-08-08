@@ -14,10 +14,13 @@
 import { useState } from "react";
 import {
   Backpack,
+  Building2,
   CalendarDays,
   CalendarRange,
+  Footprints,
   LayoutTemplate,
   Sun,
+  Umbrella,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -38,6 +41,7 @@ import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { templateEndDate, tripTemplates } from "@shared/tripTemplates";
+import { tripKindLabel } from "@shared/tripKind";
 
 /** Symbol je Vorlage – der Name steht als String in den Daten. */
 const TEMPLATE_ICONS: Record<string, LucideIcon> = {
@@ -45,6 +49,9 @@ const TEMPLATE_ICONS: Record<string, LucideIcon> = {
   CalendarRange,
   Backpack,
   Sun,
+  Building2,
+  Umbrella,
+  Footprints,
 };
 
 /** Heute als ISO-Tag (lokale Zeitzone, nicht UTC). */
@@ -154,12 +161,19 @@ export default function TripTemplatePicker({
                         : "border-border bg-card hover:border-primary/40"
                     )}
                   >
-                    <span className="flex items-center gap-2 font-semibold">
+                    <span className="flex flex-wrap items-center gap-2 font-semibold">
                       <Icon
                         className="h-4 w-4 text-primary"
                         aria-hidden="true"
                       />
                       {pick(entry.title, lang)}
+                      {/* Reise-Art der Vorlage (#463) – Camping ist der
+                          Normalfall und braucht kein Etikett */}
+                      {entry.kind !== "camping" && (
+                        <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
+                          {tripKindLabel(entry.kind, lang)}
+                        </span>
+                      )}
                     </span>
                     <span className="mt-0.5 block text-xs font-medium text-muted-foreground">
                       {tt.nights(entry.nights)}

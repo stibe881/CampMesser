@@ -278,6 +278,9 @@ export const en: Translation = {
     tabRegister: "Register",
     emailLabel: "Email",
     passwordLabel: "Password",
+    totpLabel: "Verification code",
+    totpHint:
+      "Two-factor is active: enter the code from your authenticator app – or a recovery code.",
     loggingIn: "Signing in …",
     loginButton: "Sign in",
     forgotPassword: "Forgot password?",
@@ -1265,6 +1268,9 @@ export const en: Translation = {
     horizonNote:
       "Calculated from this pitch's obstacle profile. On a flat horizon the sun would rise earlier – in a valley it clears the ridge, and that is the time that counts.",
     shadowTitle: "Shadow times today",
+    shadeBarAria: "Shade over the day",
+    shadeTotals: (sun: string, shadeTime: string) =>
+      `${sun} sun · ${shadeTime} shade`,
     shadowNone:
       "Your obstacles never hide the sun today – clear view all day long.",
     shadowRange: (from: string, to: string) => `${from}–${to}`,
@@ -1455,6 +1461,11 @@ export const en: Translation = {
       "Location access denied. Please allow it in your browser settings.",
     geoFailed: "Could not determine your location. Please try again.",
     coordsCopied: "Coordinates copied",
+    phraseTitle: "Sentence to read out",
+    phraseHint:
+      "For emergency calls abroad: read the sentence in the dispatcher's language – the coordinates are already in it.",
+    phraseCopyAria: (language: string) =>
+      `Copy the emergency sentence in ${language}`,
     copyFailed: "Copying not possible",
     locationTitle: "Your location",
     refresh: "Refresh",
@@ -2287,6 +2298,9 @@ export const en: Translation = {
     saveNeedsLogin:
       "You need an account to save it – the GPX export works without one.",
     nameLabel: "Name",
+    activityLabel: "Activity",
+    activityHike: "Hiking",
+    activityBike: "Cycling",
     namePlaceholder: "e.g. Loop around the lake",
     nameRequired: "Please enter a name",
     defaultName: (date: string) => `Hike on ${date}`,
@@ -2484,6 +2498,9 @@ export const en: Translation = {
         .filter(Boolean)
         .join(" · "),
     yearCompareTitle: "Nights per year",
+    kindLabel: "Trip type",
+    kindHint:
+      "Controls what the Today view highlights during the trip – every module stays available.",
     arrivalLabel: "Arrival",
     departureLabel: "Departure",
     titleLabel: "Title (optional)",
@@ -2749,9 +2766,41 @@ export const en: Translation = {
     fuelApply: "Add to the kitty",
     fuelInvalid: "Please enter distance, consumption and price.",
     fuelDescription: (km: number) => `Drive ${km} km`,
+    fuelFromLog: (l100: string) => `Use the fuel-log average: ${l100} l/100 km`,
+    powerTitle: "Pitch electricity meter",
+    powerHint:
+      "Reading on arrival and departure; the price per kWh is posted on the hook-up box. Entries stay saved per trip.",
+    powerStartLabel: "Arrival reading (kWh)",
+    powerEndLabel: "Departure reading (kWh)",
+    powerPriceLabel: "Price per kWh (CHF)",
+    powerResult: (kwh: string, amount: string) => `${kwh} kWh ≈ ${amount}`,
+    powerApply: "Add to the kitty",
+    powerInvalid: "Please enter both readings and the price.",
+    powerDescription: (kwh: number) => `Electricity ${kwh} kWh`,
     csvButton: "Export as CSV",
     csvAria: (trip: string) => `Download the kitty for ${trip} as CSV`,
-    csvHeaders: ["Date", "Category", "Description", "Paid by", "Amount"],
+    csvHeaders: [
+      "Date",
+      "Category",
+      "Description",
+      "Paid by",
+      "Currency",
+      "Amount",
+    ],
+    currencyAria: "Currency of the amount",
+    eurRateSaved: "Euro rate saved",
+    eurRateInvalid: "Invalid rate – allowed is 0.5 to 2.0 CHF per euro.",
+    eurRateLine: (rate: string) => `Euro rate: 1 € = ${rate} CHF`,
+    eurRateMissing: "Euro expenses recorded, but no rate set yet.",
+    eurRateSet: "Set rate",
+    eurRateEdit: "Change rate",
+    eurRateRemove: "Remove rate",
+    eurRateHint:
+      "Applies to this trip's total, budget and “who owes whom”. Receipts stay stored in euros.",
+    eurConvertedNote: (eur: string, rate: string) =>
+      `of which ${eur}, converted at rate ${rate}`,
+    eurUnconvertedNote: (eur: string) =>
+      `${eur} without a rate – not included in total, budget and settlement`,
     budgetTitle: "Budget",
     budgetLabel: "Budget (CHF)",
     budgetSet: "Set a budget",
@@ -3103,6 +3152,9 @@ export const en: Translation = {
     removePersonConfirm: (name: string) =>
       `Remove ${name}? Their badges, points and passport entries go with them.`,
     personAdded: "Person added",
+    weekdaysAria: (title: string) => `Weekdays for ${title}`,
+    weekdaysHint:
+      "Tap the weekdays a chore comes up – taking out the rubbish is Tuesdays only. All days or none selected means: every day. Assignment and the printed plan respect this.",
     rotationHint:
       "Chores are shared out in rotation, not at random: whoever washes up today fetches firewood tomorrow. Each day shifts the order by one – so every child can check for themselves that it is fair.",
   },
@@ -3496,6 +3548,16 @@ export const en: Translation = {
     stationLine: (waterBody: string, station: string, distance: string) =>
       `${waterBody} · ${station} gauging station, ${distance} away`,
     marineLine: "Sea water temperature at your pitch",
+    tideTitle: "Tides:",
+    tideHigh: (time: string) => `high tide ${time}`,
+    tideLow: (time: string) => `low tide ${time}`,
+    waveHeight: (m: string) => `Waves ${m} m`,
+    waveFrom: (dir: string) => `from ${dir}`,
+    waveLevels: {
+      calm: "calm",
+      moderate: "moderate",
+      rough: "rough – take care when swimming",
+    },
     noTemperature:
       "This station does not measure water temperature – only level and discharge.",
     comfort: {
@@ -3683,6 +3745,7 @@ export const en: Translation = {
   briefing: {
     title: "Morning briefing",
     sectionAria: "Morning briefing for the current stay",
+    pollenLine: (parts: string) => `Pollen count: ${parts}`,
     astroLine: (phase: string, percent: number) =>
       `${phase} – the moon is ${percent} % lit.`,
     moreTasks: (count: number) =>
@@ -3966,6 +4029,70 @@ export const en: Translation = {
     compareTitle: "Compare by criterion",
     compareAll: "Overall",
     unrated: "–",
+  },
+  documents: {
+    title: "Cards & IDs",
+    subtitle:
+      "ACSI card, TCS membership, Camping Key – as photos in the app instead of plastic cards left at home.",
+    loginFeature: "your cards and IDs",
+    addLabel: "New card",
+    addPlaceholder: "e.g. ACSI card 2026",
+    addButton: "Create",
+    hint: "Create the card, then upload its photo. Photos are private and only visible in your account.",
+    added: "Card created",
+    empty:
+      "No cards yet. Create the first one above – the ACSI card or your TCS membership, for example.",
+    deleteConfirm: "Delete the card including its photo?",
+    deleteAria: (title: string) => `Delete ${title}`,
+    photoAdd: "Add photo",
+    photoReplace: "Replace photo",
+    photoUploading: "Uploading …",
+    photoSaved: "Photo saved",
+    photoFailed: "The photo could not be uploaded.",
+    photoTooLarge: "The photo is too large.",
+    viewAria: (title: string) => `Show ${title} full size`,
+    viewerHint: "To show at the reception desk.",
+  },
+  twoFactor: {
+    title: "Two-factor sign-in (TOTP)",
+    intro:
+      "A second factor for password sign-in: an authenticator app (Google Authenticator, Aegis, 1Password …) generates a one-time code every 30 seconds. Passkeys are device-bound and need no extra code.",
+    statusOn: "Two-factor is switched on.",
+    enableButton: "Set up two-factor",
+    scanHint:
+      "Scan the QR code with your authenticator app and confirm with the first code.",
+    qrAlt: "QR code for the authenticator app",
+    secretLine: "Or type it in manually:",
+    codeLabel: "Code from the app",
+    confirmButton: "Confirm",
+    enabled: "Two-factor is now active.",
+    recoveryTitle: "Recovery codes",
+    recoveryHint:
+      "Store these codes somewhere safe (not on your phone). Each works exactly once – they are the only way in if you lose your phone. They are shown only NOW.",
+    recoveryCopy: "Copy codes",
+    recoveryCopied: "Codes copied",
+    disableLabel: "To switch off: code from the app (or a recovery code)",
+    disableButton: "Switch off",
+    disableHint: "After switching off, the password alone is enough again.",
+    disabled: "Two-factor is switched off.",
+  },
+  spotCompare: {
+    title: "Compare two sites",
+    hint: "The decision aid before you book – price, distance, elevation, features and your rating side by side. The cost comparison across all sites lives in the statistics.",
+    spotA: "Site A",
+    spotB: "Site B",
+    choose: "Choose …",
+    pickBoth: "Pick a site on each side and the comparison appears.",
+    rowHeader: "Aspect",
+    price: "Price per night",
+    distance: "Distance from home",
+    elevation: "Elevation",
+    rating: "Your rating",
+    ratingValue: (value: string, rated: number) =>
+      rated === 1
+        ? `${value} ★ (1 criterion)`
+        : `${value} ★ (${rated} criteria)`,
+    none: "–",
   },
   sharedTrack: {
     loading: "Loading hike …",
@@ -4979,6 +5106,16 @@ export const en: Translation = {
         "Your recipe appears in the recipe book and is taken into account in the cool-box suggestions.",
       nameLabel: "Name",
       namePlaceholder: "e.g. Granny's Älplermagronen",
+      importButton: "Paste from text",
+      importHint:
+        "Paste the recipe text (copied from a website or a message). CampMesser guesses the name, ingredients and steps – everything stays editable before saving.",
+      importPlaceholder:
+        "Älplermagronen\n\nIngredients:\n250 g macaroni\n…\n\nInstructions:\n1. …",
+      importApply: "Fill the fields",
+      importNothing:
+        "No recipe could be recognised in that text. Check that ingredients or steps are on separate lines.",
+      importApplied: (ing: number, steps: number) =>
+        `Applied: ${ing} ingredients, ${steps} steps – please double-check.`,
       methodLabel: "Cooking method",
       difficultyLabel: "Difficulty",
       timeLabel: "Time (minutes)",
@@ -5246,6 +5383,10 @@ export const en: Translation = {
     detailsFailed: "Quantity/note could not be saved",
     openTitle: "Still to buy",
     doneTitle: "Done",
+    moveOpenLabel: "Move open items to:",
+    moveOpenAria: (name: string) => `Move all open items to the ${name} list`,
+    movedToList: (n: number, name: string) =>
+      n === 1 ? `1 item moved to “${name}”` : `${n} items moved to “${name}”`,
     itemCheckAria: (name: string) => `Tick off ${name}`,
     itemUncheckAria: (name: string) => `Reopen ${name}`,
     removeAria: (name: string) => `Remove ${name} from the list`,
@@ -5935,6 +6076,8 @@ export const en: Translation = {
     deleteConfirm: "Really delete this note?",
     editAria: (title: string) => `Edit note ${title}`,
     deleteAria: (title: string) => `Delete note ${title}`,
+    pinAria: (title: string) => `Pin ${title}`,
+    unpinAria: (title: string) => `Unpin ${title}`,
     photoLabel: "Photo (optional)",
     photoChoose: "Choose photo",
     photoChange: "Change photo",
@@ -5992,6 +6135,33 @@ export const en: Translation = {
     legacyHint:
       "Sign-ins from before this overview only appear after that device's next sign-in.",
   },
+  fuelLog: {
+    title: "Fuel log",
+    subtitle: "Fill-ups with odometer reading – for your real consumption.",
+    loginFeature: "the fuel log",
+    averageTitle: "Average consumption",
+    averageHint:
+      "Weighted across all plausible segments. The trip cost calculator in the kitty can adopt this value.",
+    addTitle: "Record a fill-up",
+    addHint:
+      "Always fill the tank completely – only then the maths between two fill-ups works. Price is optional.",
+    dayLabel: "Date",
+    odometerLabel: "Odometer",
+    litersLabel: "Litres",
+    priceLabel: "Paid (CHF, optional)",
+    addButton: "Record",
+    saved: "Fill-up recorded",
+    odometerInvalid: "Please enter a valid odometer reading.",
+    litersInvalid: "Please enter the litres (max. 200).",
+    priceInvalid: "The amount is invalid.",
+    empty:
+      "No fill-ups yet. From the second one, the log calculates consumption.",
+    segmentLine: (km: number, l100: string) =>
+      `${km} km since last fill-up · ${l100} l/100 km`,
+    segmentImplausible: "(implausible, excluded from the average)",
+    deleteConfirm: "Delete this fill-up?",
+    deleteAria: (km: number) => `Delete the fill-up at ${km} km`,
+  },
   stats: {
     expensesTitle: "Spending across all trips",
     expensesLink: "To the trips",
@@ -6014,6 +6184,14 @@ export const en: Translation = {
     staysLabel: "Stays",
     favoriteLabel: "Favourite pitch",
     avgRatingLabel: "Avg. rating",
+    hikeYearsTitle: "Hiking year totals",
+    hikeYearsLink: "To your hikes",
+    hikeYearsLine: (tours: number, km: string, ascent: string) =>
+      tours === 1
+        ? `1 tour · ${km} km · ${ascent} m up`
+        : `${tours} tours · ${km} km · ${ascent} m up`,
+    hikeYearsBike: (n: number) =>
+      n === 1 ? "including 1 bike ride" : `including ${n} bike rides`,
     weatherLuckTitle: "Weather luck",
     weatherLuckDry: pct => `${pct}% of your camping days were dry`,
     weatherLuckAvgMax: temp => `avg daily high ${temp}°`,

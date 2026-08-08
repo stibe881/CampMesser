@@ -1,0 +1,1 @@
+ALTER TABLE `tripLogs` ADD `kind` varchar(16) DEFAULT 'camping' NOT NULL;

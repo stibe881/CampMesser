@@ -5,7 +5,9 @@ import {
   pollenLevel,
   pollenRequestUrl,
   pollenTypeName,
+  relevantPollenForBriefing,
   POLLEN_TYPES,
+  type PollenReading,
 } from "../shared/pollen";
 
 describe("pollenLevel", () => {
@@ -125,5 +127,50 @@ describe("parsePollenResponse", () => {
       "olive",
       "ragweed",
     ]);
+  });
+});
+
+describe("relevantPollenForBriefing (#456)", () => {
+  const reading = (
+    type: PollenReading["type"],
+    level: PollenReading["level"]
+  ): PollenReading => ({ type, value: 1, level });
+
+  it("filtert auf die eigenen Allergene und wirft «keine» raus", () => {
+    const readings = [
+      reading("alder", "hoch"),
+      reading("birch", "keine"),
+      reading("grass", "gering"),
+      reading("ragweed", "sehrHoch"),
+    ];
+    const result = relevantPollenForBriefing(readings, ["birch", "grass"]);
+    expect(result.map(r => r.type)).toEqual(["grass"]);
+  });
+
+  it("sortiert nach Belastung, stärkste zuerst", () => {
+    const readings = [
+      reading("alder", "gering"),
+      reading("birch", "sehrHoch"),
+      reading("grass", "maessig"),
+    ];
+    const result = relevantPollenForBriefing(readings, [
+      "alder",
+      "birch",
+      "grass",
+    ]);
+    expect(result.map(r => r.type)).toEqual(["birch", "grass", "alder"]);
+  });
+
+  it("bleibt leer ohne Profil oder ohne Messwerte", () => {
+    expect(relevantPollenForBriefing(null, ["grass"])).toEqual([]);
+    expect(relevantPollenForBriefing([reading("grass", "hoch")], [])).toEqual(
+      []
+    );
+  });
+
+  it("verändert die Eingabeliste nicht", () => {
+    const readings = [reading("grass", "gering"), reading("birch", "hoch")];
+    relevantPollenForBriefing(readings, ["grass", "birch"]);
+    expect(readings.map(r => r.type)).toEqual(["grass", "birch"]);
   });
 });

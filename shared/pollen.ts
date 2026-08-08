@@ -83,6 +83,33 @@ export interface PollenReading {
   level: PollenLevel;
 }
 
+/** Belastungs-Rangfolge für Sortierung und Filter (stärkste zuerst). */
+const LEVEL_SEVERITY: Record<PollenLevel, number> = {
+  sehrHoch: 4,
+  hoch: 3,
+  maessig: 2,
+  gering: 1,
+  keine: 0,
+};
+
+/**
+ * Pollen fürs Morgen-Briefing (#456): nur die EIGENEN Allergene (#208)
+ * und nur, wenn sie heute überhaupt fliegen – stärkste Belastung zuerst.
+ * Ohne Profil oder ohne Belastung bleibt die Zeile weg; ein Briefing
+ * voller «keine Belastung» wäre Tapete.
+ */
+export function relevantPollenForBriefing(
+  readings: readonly PollenReading[] | null,
+  profile: readonly PollenType[]
+): PollenReading[] {
+  if (!readings || profile.length === 0) return [];
+  return readings
+    .filter(
+      reading => profile.includes(reading.type) && reading.level !== "keine"
+    )
+    .sort((a, b) => LEVEL_SEVERITY[b.level] - LEVEL_SEVERITY[a.level]);
+}
+
 /** Request-URL der Open-Meteo Air-Quality-API für die sechs Pollenarten. */
 export function pollenRequestUrl(lat: number, lon: number): string {
   const params = new URLSearchParams({

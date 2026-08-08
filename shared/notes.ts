@@ -100,6 +100,8 @@ export interface NoteLike {
   text: string;
   tags?: string | null;
   updatedAt?: Date | string | number;
+  /** Angepinnt (#455)? undefined gilt als false (Zeilen vor der Spalte). */
+  pinned?: boolean | null;
 }
 
 /** Zeitstempel als Zahl; unbrauchbare Werte gelten als «uralt». */
@@ -138,6 +140,9 @@ export function noteMatchesQuery(note: NoteLike, query: string): boolean {
  */
 export function sortNotes<T extends NoteLike>(notes: readonly T[]): T[] {
   return notes.slice().sort((a, b) => {
+    // Angepinnte (#455) zuerst; innerhalb gilt «zuletzt geändert zuerst»
+    const pinDiff = Number(b.pinned ?? false) - Number(a.pinned ?? false);
+    if (pinDiff !== 0) return pinDiff;
     const diff = updatedMs(b.updatedAt) - updatedMs(a.updatedAt);
     return diff !== 0 ? diff : b.id - a.id;
   });

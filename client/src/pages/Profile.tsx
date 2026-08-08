@@ -118,6 +118,7 @@ import {
 import NotificationsCard from "@/components/profile/NotificationsCard";
 import HomeLocationCard from "@/components/profile/HomeLocationCard";
 import PasskeysCard from "@/components/profile/PasskeysCard";
+import TwoFactorCard from "@/components/profile/TwoFactorCard";
 import QuickBarCard from "@/components/profile/QuickBarCard";
 import CalendarFeedCard from "@/components/profile/CalendarFeedCard";
 import ShareLinksCard from "@/components/profile/ShareLinksCard";
@@ -456,6 +457,9 @@ export default function ProfilePage() {
       </CollapsibleCard>
 
       <PasskeysCard />
+
+      {/* Zwei-Faktor per TOTP (#453) */}
+      <TwoFactorCard />
 
       {/* Sprache (#374): Sie sass bis jetzt in der Kopfzeile, wo nun die
           Benachrichtigungs-Glocke steht. Eine Sprache stellt man einmal

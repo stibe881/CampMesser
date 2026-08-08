@@ -157,9 +157,11 @@ import {
 } from "@shared/guestbook";
 import {
   MAX_TRACK_POINTS,
+  guessTrackActivity,
   parseTrackPoints,
   serializeTrackPoints,
   thinTrackPoints,
+  TRACK_ACTIVITIES,
   TRACK_NAME_MAX_LENGTH,
   trackStats,
   type TrackPoint,
@@ -206,6 +208,7 @@ import {
   normalizeHuntName,
 } from "@shared/treasureHunt";
 import {
+  choresForDay,
   clampPoints,
   MAX_CHORES,
   MAX_CHORE_TITLE_LENGTH,
@@ -577,6 +580,8 @@ export {
   SPOT_ATTRIBUTES_JSON_MAX_LENGTH,
   SPOT_PRICE_MAX_RAPPEN,
   SYNCED_SETTING_KEYS,
+  TRACK_ACTIVITIES,
+  guessTrackActivity,
   TRACK_NAME_MAX_LENGTH,
   TRIP_BOARD_KINDS,
   TRIP_BOARD_TEXT_MAX_LENGTH,
@@ -633,6 +638,7 @@ export {
   protectedProcedure,
   publicProcedure,
   remapMenuDays,
+  choresForDay,
   rotateAssignments,
   scoreboard,
   availablePoints,

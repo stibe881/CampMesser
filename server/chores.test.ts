@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
+  choresForDay,
   clampPoints,
   dayIndex,
   dayProgress,
   DEFAULT_CHORE_POINTS,
   MAX_CHORE_POINTS,
   MIN_CHORE_POINTS,
+  isoWeekday,
+  parseChoreWeekdays,
   rotateAssignments,
   scoreboard,
 } from "@shared/chores";
@@ -170,5 +173,45 @@ describe("Punkte-Schalter", () => {
       "2026-08-06"
     );
     expect(new Set(result.map(r => r.childId))).toEqual(new Set([1, 2]));
+  });
+});
+
+describe("Ämtli-Wochentage (#447)", () => {
+  it("parst gültige Listen und verwirft Unsinn", () => {
+    expect(parseChoreWeekdays(JSON.stringify([2, 5]))).toEqual([2, 5]);
+    expect(parseChoreWeekdays(JSON.stringify([5, 2, 2, 9, 0, "x"]))).toEqual([
+      2, 5,
+    ]);
+    expect(parseChoreWeekdays(null)).toBeNull();
+    expect(parseChoreWeekdays("kaputt")).toBeNull();
+    // Alle sieben Tage = keine Einschränkung
+    expect(
+      parseChoreWeekdays(JSON.stringify([1, 2, 3, 4, 5, 6, 7]))
+    ).toBeNull();
+    expect(parseChoreWeekdays("[]")).toBeNull();
+  });
+
+  it("kennt den ISO-Wochentag", () => {
+    expect(isoWeekday("2024-01-01")).toBe(1); // Montag
+    expect(isoWeekday("2026-08-09")).toBe(7); // Sonntag
+    expect(isoWeekday("Quatsch")).toBe(0);
+  });
+
+  it("filtert die Ämtli eines Tages", () => {
+    const chores = [
+      { id: 1, title: "Abwaschen", points: 1 },
+      {
+        id: 2,
+        title: "Abfall",
+        points: 1,
+        weekdaysJson: JSON.stringify([2]),
+      },
+    ];
+    // 2026-08-04 ist ein Dienstag: beide fallen an
+    expect(choresForDay(chores, "2026-08-04").map(c => c.id)).toEqual([1, 2]);
+    // Mittwoch: nur das tägliche Ämtli
+    expect(choresForDay(chores, "2026-08-05").map(c => c.id)).toEqual([1]);
+    // Ungültiges Datum: lieber alle als keines
+    expect(choresForDay(chores, "nix").map(c => c.id)).toEqual([1, 2]);
   });
 });

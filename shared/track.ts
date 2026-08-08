@@ -70,6 +70,44 @@ export const MAX_TRACK_POINTS = 20_000;
 export const TRACK_NAME_MAX_LENGTH = 80;
 
 /**
+ * Aktivitätstyp pro Track (#449): Wandern oder Velo. Mehr Arten gäbe es
+ * immer («Trailrunning», «SUP» …) – aber beim Camping sind es diese zwei,
+ * und jede weitere verwässert die Jahresbilanz (#450).
+ */
+export const TRACK_ACTIVITIES = ["hike", "bike"] as const;
+export type TrackActivity = (typeof TRACK_ACTIVITIES)[number];
+
+/** Unbekannte Werte (alte Zeilen, kaputte Daten) gelten als Wanderung. */
+export function normalizeTrackActivity(
+  value: string | null | undefined
+): TrackActivity {
+  return (TRACK_ACTIVITIES as readonly string[]).includes(value ?? "")
+    ? (value as TrackActivity)
+    : "hike";
+}
+
+/**
+ * Ab diesem Bewegungs-Schnitt ist es kein Wandern mehr: zügige Wanderer
+ * schaffen 6 km/h, gemütliche Velofahrten beginnen darüber.
+ */
+export const TRACK_BIKE_GUESS_KMH = 8;
+
+/**
+ * Aktivität aus dem Schnitt-Tempo raten – für Tracks, die ohne Angabe
+ * gespeichert werden (z. B. GPX-Import mit echten Zeitstempeln). Ohne
+ * Bewegungszeit bleibt es eine Wanderung; wer es besser weiss, stellt
+ * es beim Track um.
+ */
+export function guessTrackActivity(
+  distanceM: number,
+  durationS: number
+): TrackActivity {
+  if (durationS <= 0 || distanceM <= 0) return "hike";
+  const kmh = (distanceM / durationS) * 3.6;
+  return kmh >= TRACK_BIKE_GUESS_KMH ? "bike" : "hike";
+}
+
+/**
  * Höchstzahl Punkte in der ÖFFENTLICHEN Ansicht einer geteilten Wanderung
  * (#282). Eine Tageswanderung hat schnell zehntausend Punkte; die über das
  * Mobilnetz zu schicken, damit jemand eine Linie und ein Höhenprofil

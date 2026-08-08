@@ -47,6 +47,8 @@ import {
   Tent,
   TreePine,
   Truck,
+  Fuel,
+  IdCard,
   Users,
   Wrench,
 } from "lucide-react";
@@ -505,6 +507,40 @@ export const modules: Module[] = [
     icon: Truck,
     group: "ausruestung",
     offline: true,
+  },
+  {
+    path: "/tankbuch",
+    title: l4(
+      "Tankbuch",
+      "Carnet de carburant",
+      "Libretto carburante",
+      "Fuel log"
+    ),
+    description: l4(
+      "Tankfüllungen erfassen und den echten Verbrauch kennen",
+      "Note les pleins et connais ta consommation réelle",
+      "Registra i pieni e conosci il consumo reale",
+      "Record fill-ups and know your real consumption"
+    ),
+    icon: Fuel,
+    group: "ausruestung",
+  },
+  {
+    path: "/ausweise",
+    title: l4(
+      "Karten & Ausweise",
+      "Cartes & documents",
+      "Tessere e documenti",
+      "Cards & IDs"
+    ),
+    description: l4(
+      "ACSI, TCS & Co. als Foto dabei – zum Vorzeigen an der Rezeption",
+      "ACSI, TCS & Cie en photo – à montrer à la réception",
+      "ACSI, TCS e simili in foto – da mostrare alla reception",
+      "ACSI, TCS and co. as photos – ready to show at reception"
+    ),
+    icon: IdCard,
+    group: "reise",
   },
   {
     path: "/zeltpflege",

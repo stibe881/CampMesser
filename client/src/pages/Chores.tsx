@@ -46,8 +46,10 @@ import {
   MAX_CHORE_TITLE_LENGTH,
   MIN_CHORE_POINTS,
   dayProgress,
+  parseChoreWeekdays,
   scoreboard,
 } from "@shared/chores";
+import { LOCALE_TAGS } from "@shared/i18n";
 import { newlyReachableRewards } from "@shared/rewards";
 
 export default function ChoresPage() {
@@ -138,6 +140,21 @@ export default function ChoresPage() {
     onSuccess: refresh,
     onError: e => toast.error(e.message),
   });
+  // Ämtli nur an bestimmten Wochentagen (#447)
+  const setWeekdays = trpc.chores.setWeekdays.useMutation({
+    onSuccess: refresh,
+    onError: e => toast.error(e.message),
+  });
+  /** Kurz-Labels Mo–So in der aktiven Sprache; der 1.1.2024 war ein Montag. */
+  const weekdayLabels = useMemo(() => {
+    const format = new Intl.DateTimeFormat(LOCALE_TAGS[lang], {
+      weekday: "short",
+      timeZone: "UTC",
+    });
+    return Array.from({ length: 7 }, (_, i) =>
+      format.format(new Date(Date.UTC(2024, 0, 1 + i)))
+    );
+  }, [lang]);
   const autoAssign = trpc.chores.autoAssign.useMutation({
     onSuccess: refresh,
     onError: e => toast.error(e.message),
@@ -516,30 +533,76 @@ export default function ChoresPage() {
       {/* Ämtli-Katalog */}
       <h2 className="mb-2 font-serif text-lg font-bold">{tc.choresTitle}</h2>
       <ul className="mb-3 space-y-2">
-        {chores.map(chore => (
-          <li
-            key={chore.id}
-            className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"
-          >
-            <ClipboardList
-              className="h-4 w-4 shrink-0 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <span className="min-w-0 flex-1 text-sm">{chore.title}</span>
-            <span className="text-xs text-muted-foreground">
-              {tc.pointsLine(chore.points)}
-            </span>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => removeChore.mutate({ id: chore.id })}
-              aria-label={tc.removeAria(chore.title)}
+        {chores.map(chore => {
+          // Wochentage (#447): null = jeden Tag – dann sind alle Chips aktiv
+          const choreDays = parseChoreWeekdays(chore.weekdaysJson);
+          const selected = choreDays ?? [1, 2, 3, 4, 5, 6, 7];
+          return (
+            <li
+              key={chore.id}
+              className="rounded-lg border border-border bg-card p-3"
             >
-              <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
-            </Button>
-          </li>
-        ))}
+              <div className="flex items-center gap-3">
+                <ClipboardList
+                  className="h-4 w-4 shrink-0 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <span className="min-w-0 flex-1 text-sm">{chore.title}</span>
+                <span className="text-xs text-muted-foreground">
+                  {tc.pointsLine(chore.points)}
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => removeChore.mutate({ id: chore.id })}
+                  aria-label={tc.removeAria(chore.title)}
+                >
+                  <Trash2
+                    className="h-4 w-4 text-destructive"
+                    aria-hidden="true"
+                  />
+                </Button>
+              </div>
+              <div
+                className="mt-2 flex flex-wrap gap-1"
+                role="group"
+                aria-label={tc.weekdaysAria(chore.title)}
+              >
+                {[1, 2, 3, 4, 5, 6, 7].map(weekday => {
+                  const active = selected.includes(weekday);
+                  return (
+                    <button
+                      key={weekday}
+                      type="button"
+                      disabled={setWeekdays.isPending}
+                      aria-pressed={active}
+                      onClick={() =>
+                        setWeekdays.mutate({
+                          id: chore.id,
+                          weekdays: active
+                            ? selected.filter(d => d !== weekday)
+                            : [...selected, weekday],
+                        })
+                      }
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-xs font-medium transition-colors",
+                        active
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {weekdayLabels[weekday - 1]}
+                    </button>
+                  );
+                })}
+              </div>
+            </li>
+          );
+        })}
       </ul>
+      {chores.length > 0 && (
+        <p className="mb-3 text-xs text-muted-foreground">{tc.weekdaysHint}</p>
+      )}
 
       <div className="flex flex-wrap items-end gap-2">
         <div className="min-w-40 flex-1">

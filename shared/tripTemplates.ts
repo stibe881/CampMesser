@@ -22,11 +22,17 @@
  */
 import { l4, type L4 } from "./i18n";
 import { addDaysIso } from "./ics";
+import type { TripKind } from "./tripKind";
 
 export interface TripTemplate {
   id: string;
   title: L4;
   description: L4;
+  /**
+   * Reise-Art (#463): Die Vorlage setzt sie an der neuen Reise – damit
+   * stellt sich die Heute-Ansicht (#461) von selbst richtig ein.
+   */
+  kind: TripKind;
   /** Nächte, nicht Tage: «Wochenende» sind zwei Nächte und drei Tage. */
   nights: number;
   /** Vorgeschlagenes Packlisten-Szenario (id aus shared/packTemplates.ts). */
@@ -40,13 +46,15 @@ export interface TripTemplate {
 }
 
 /**
- * Vier Muster decken ab, was in der Praxis vorkommt. Mehr Vorlagen hiessen
- * mehr Auswahl und nicht mehr Hilfe – wer ein eigenes Muster braucht, legt
- * eine Reise an und dupliziert sie später (#141).
+ * Sieben Muster decken ab, was in der Praxis vorkommt – vier fürs Camping,
+ * drei für die anderen Reise-Arten (#463). Mehr Vorlagen hiessen mehr
+ * Auswahl und nicht mehr Hilfe – wer ein eigenes Muster braucht, legt eine
+ * Reise an und dupliziert sie später (#141).
  */
 export const tripTemplates: TripTemplate[] = [
   {
     id: "wochenende",
+    kind: "camping",
     title: l4("Wochenende", "Week-end", "Fine settimana", "Weekend"),
     description: l4(
       "Zwei Nächte, Freitag bis Sonntag – Packliste für die Familie und zwei Abendessen.",
@@ -62,6 +70,7 @@ export const tripTemplates: TripTemplate[] = [
   },
   {
     id: "kurztrip-solo",
+    kind: "camping",
     title: l4(
       "Kurztrip allein",
       "Escapade en solo",
@@ -82,6 +91,7 @@ export const tripTemplates: TripTemplate[] = [
   },
   {
     id: "woche",
+    kind: "camping",
     title: l4("Eine Woche", "Une semaine", "Una settimana", "One week"),
     description: l4(
       "Sieben Nächte am selben Platz – Menüplan mit abwechselnden Abendessen.",
@@ -110,6 +120,7 @@ export const tripTemplates: TripTemplate[] = [
   },
   {
     id: "sommerferien",
+    kind: "camping",
     title: l4(
       "Sommerferien",
       "Vacances d'été",
@@ -149,6 +160,72 @@ export const tripTemplates: TripTemplate[] = [
       "eier-broetli",
     ],
     icon: "Sun",
+  },
+  {
+    id: "staedtetrip",
+    title: l4("Städtetrip", "City trip", "Viaggio in città", "City break"),
+    description: l4(
+      "Drei Nächte Stadt – leichtes Gepäck, bewusst ohne Menüplan: dort isst man auswärts.",
+      "Trois nuits en ville – bagage léger, sans menu : on y mange au restaurant.",
+      "Tre notti in città – bagaglio leggero, senza menu: lì si mangia fuori.",
+      "Three nights in the city – light luggage, deliberately no menu plan: you eat out."
+    ),
+    kind: "staedte",
+    nights: 3,
+    packScenario: "solo",
+    dinners: [],
+    breakfasts: [],
+    icon: "Building2",
+  },
+  {
+    id: "strandwoche",
+    title: l4(
+      "Strandwoche",
+      "Semaine à la plage",
+      "Settimana al mare",
+      "Beach week"
+    ),
+    description: l4(
+      "Sieben Nächte am Wasser – Familienliste und leichte Sommerküche.",
+      "Sept nuits au bord de l'eau – liste famille et cuisine d'été légère.",
+      "Sette notti in riva al mare – lista famiglia e cucina estiva leggera.",
+      "Seven nights by the water – family list and light summer cooking."
+    ),
+    kind: "strand",
+    nights: 7,
+    packScenario: "familie",
+    dinners: [
+      "one-pot-pasta",
+      "grill-ananas",
+      "curry-kokos",
+      "chili-sin-carne",
+      "pfannen-pizza",
+      "linsen-dal",
+      "camp-minestrone",
+    ],
+    breakfasts: ["porridge", "birchermuesli-overnight", "camping-pancakes"],
+    icon: "Umbrella",
+  },
+  {
+    id: "wandertour",
+    title: l4(
+      "Wandertour",
+      "Tour de randonnée",
+      "Trekking di più giorni",
+      "Hiking tour"
+    ),
+    description: l4(
+      "Zwei Nächte unterwegs – nur, was du selber trägst, und einfache Eintopf-Küche.",
+      "Deux nuits en chemin – seulement ce que tu portes, et une cuisine simple.",
+      "Due notti in cammino – solo ciò che porti tu, e cucina semplice.",
+      "Two nights on the trail – only what you carry, and simple one-pot meals."
+    ),
+    kind: "wandern",
+    nights: 2,
+    packScenario: "solo",
+    dinners: ["linsen-dal", "gemuese-couscous"],
+    breakfasts: ["porridge", "birchermuesli-overnight"],
+    icon: "Footprints",
   },
 ];
 

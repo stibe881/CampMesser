@@ -292,6 +292,9 @@ export const de = {
     tabRegister: "Registrieren",
     emailLabel: "E-Mail",
     passwordLabel: "Passwort",
+    totpLabel: "Bestätigungscode",
+    totpHint:
+      "Zwei-Faktor ist aktiv: Gib den Code aus deiner Authenticator-App ein – oder einen Wiederherstellungs-Code.",
     loggingIn: "Wird angemeldet …",
     loginButton: "Anmelden",
     forgotPassword: "Passwort vergessen?",
@@ -1313,6 +1316,9 @@ export const de = {
     horizonNote:
       "Gerechnet aus dem Hindernis-Profil dieses Platzes. Am flachen Horizont ginge die Sonne früher auf – im Tal kommt sie über den Grat, und das ist die Zeit, die zählt.",
     shadowTitle: "Schattenzeiten heute",
+    shadeBarAria: "Schattenverlauf des Tages",
+    shadeTotals: (sun: string, shadeTime: string) =>
+      `${sun} Sonne · ${shadeTime} Schatten`,
     shadowNone:
       "Deine Hindernisse verdecken die Sonne heute nie – freie Sicht den ganzen Tag.",
     shadowRange: (from: string, to: string) => `${from}–${to} Uhr`,
@@ -1505,6 +1511,11 @@ export const de = {
     geoFailed:
       "Standort konnte nicht ermittelt werden. Bitte erneut versuchen.",
     coordsCopied: "Koordinaten kopiert",
+    phraseTitle: "Satz zum Vorlesen",
+    phraseHint:
+      "Für den Notruf im Ausland: den Satz in der Sprache der Zentrale vorlesen – die Koordinaten stehen schon drin.",
+    phraseCopyAria: (language: string) =>
+      `Notruf-Satz auf ${language} kopieren`,
     copyFailed: "Kopieren nicht möglich",
     locationTitle: "Dein Standort",
     refresh: "Aktualisieren",
@@ -2366,6 +2377,9 @@ export const de = {
     saveNeedsLogin:
       "Zum Speichern brauchst du ein Konto – der GPX-Export geht auch ohne.",
     nameLabel: "Name",
+    activityLabel: "Aktivität",
+    activityHike: "Wandern",
+    activityBike: "Velo",
     namePlaceholder: "z. B. Runde um den See",
     nameRequired: "Bitte einen Namen eingeben",
     defaultName: (date: string) => `Wanderung vom ${date}`,
@@ -2571,6 +2585,9 @@ export const de = {
         .filter(Boolean)
         .join(" · "),
     yearCompareTitle: "Übernachtungen pro Jahr",
+    kindLabel: "Art der Reise",
+    kindHint:
+      "Steuert, was die Heute-Ansicht während der Reise hervorhebt – alle Module bleiben trotzdem erreichbar.",
     arrivalLabel: "Anreise",
     departureLabel: "Abreise",
     titleLabel: "Titel (optional)",
@@ -2852,9 +2869,42 @@ export const de = {
     fuelApply: "In die Reisekasse übernehmen",
     fuelInvalid: "Bitte Strecke, Verbrauch und Preis eintragen.",
     fuelDescription: (km: number) => `Fahrt ${km} km`,
+    fuelFromLog: (l100: string) =>
+      `Ø aus dem Tankbuch übernehmen: ${l100} l/100 km`,
+    powerTitle: "Stromzähler am Stellplatz",
+    powerHint:
+      "Zählerstand bei Ankunft und Abreise, Preis pro kWh steht am Stromkasten. Die Eingaben bleiben pro Reise gemerkt.",
+    powerStartLabel: "Stand Ankunft (kWh)",
+    powerEndLabel: "Stand Abreise (kWh)",
+    powerPriceLabel: "Preis pro kWh (CHF)",
+    powerResult: (kwh: string, amount: string) => `${kwh} kWh ≈ ${amount}`,
+    powerApply: "In die Reisekasse übernehmen",
+    powerInvalid: "Bitte beide Zählerstände und den Preis eintragen.",
+    powerDescription: (kwh: number) => `Strom ${kwh} kWh`,
     csvButton: "Als CSV exportieren",
     csvAria: (trip: string) => `Reisekasse von ${trip} als CSV herunterladen`,
-    csvHeaders: ["Datum", "Kategorie", "Beschreibung", "Bezahlt von", "Betrag"],
+    csvHeaders: [
+      "Datum",
+      "Kategorie",
+      "Beschreibung",
+      "Bezahlt von",
+      "Währung",
+      "Betrag",
+    ],
+    currencyAria: "Währung des Betrags",
+    eurRateSaved: "Euro-Kurs gespeichert",
+    eurRateInvalid: "Kurs ungültig – erlaubt ist 0.5 bis 2.0 CHF pro Euro.",
+    eurRateLine: (rate: string) => `Euro-Kurs: 1 € = ${rate} CHF`,
+    eurRateMissing: "Euro-Ausgaben erfasst, aber noch kein Kurs gesetzt.",
+    eurRateSet: "Kurs setzen",
+    eurRateEdit: "Kurs ändern",
+    eurRateRemove: "Kurs entfernen",
+    eurRateHint:
+      "Gilt für Summe, Budget und «Wer schuldet wem» dieser Reise. Die Belege bleiben in Euro gespeichert.",
+    eurConvertedNote: (eur: string, rate: string) =>
+      `davon ${eur}, umgerechnet zum Kurs ${rate}`,
+    eurUnconvertedNote: (eur: string) =>
+      `${eur} ohne Kurs – nicht in Summe, Budget und Ausgleich enthalten`,
     budgetTitle: "Budget",
     budgetLabel: "Budget (CHF)",
     budgetSet: "Budget setzen",
@@ -3218,6 +3268,9 @@ export const de = {
     removePersonConfirm: (name: string) =>
       `${name} entfernen? Abzeichen, Punkte und Reisepass-Einträge dieser Person gehen mit.`,
     personAdded: "Person hinzugefügt",
+    weekdaysAria: (title: string) => `Wochentage für ${title}`,
+    weekdaysHint:
+      "Tippe die Wochentage an, an denen ein Ämtli anfällt – «Abfall rausbringen» gibt es nur dienstags. Alle oder keine Tage gewählt heisst: jeden Tag. Verteilung und Druckplan halten sich daran.",
     rotationHint:
       "Verteilt wird reihum und nicht zufällig: Wer heute abwäscht, holt morgen Holz. Der Tag verschiebt die Reihenfolge um eins – so kann jedes Kind nachrechnen, dass es fair zugeht.",
   },
@@ -3617,6 +3670,16 @@ export const de = {
     stationLine: (waterBody: string, station: string, distance: string) =>
       `${waterBody} · Messstelle ${station}, ${distance} entfernt`,
     marineLine: "Meerwasser-Temperatur an deinem Platz",
+    tideTitle: "Gezeiten:",
+    tideHigh: (time: string) => `Hochwasser ${time}`,
+    tideLow: (time: string) => `Niedrigwasser ${time}`,
+    waveHeight: (m: string) => `Wellen ${m} m`,
+    waveFrom: (dir: string) => `aus ${dir}`,
+    waveLevels: {
+      calm: "ruhig",
+      moderate: "mässig",
+      rough: "kräftig – Vorsicht beim Baden",
+    },
     noTemperature:
       "Diese Messstelle misst keine Wassertemperatur – es gibt nur Pegel und Abfluss.",
     comfort: {
@@ -3806,6 +3869,7 @@ export const de = {
   briefing: {
     title: "Morgen-Briefing",
     sectionAria: "Morgen-Briefing zum laufenden Aufenthalt",
+    pollenLine: (parts: string) => `Pollenflug: ${parts}`,
     astroLine: (phase: string, percent: number) =>
       `${phase} – der Mond ist zu ${percent} % beleuchtet.`,
     moreTasks: (count: number) =>
@@ -4091,6 +4155,72 @@ export const de = {
     compareTitle: "Nach Kriterium vergleichen",
     compareAll: "Gesamt",
     unrated: "–",
+  },
+  documents: {
+    title: "Karten & Ausweise",
+    subtitle:
+      "ACSI-Card, TCS-Mitgliedschaft, Camping Key – als Foto in der App statt als Karte, die zuhause liegt.",
+    loginFeature: "deine Karten und Ausweise",
+    addLabel: "Neue Karte",
+    addPlaceholder: "z. B. ACSI-Card 2026",
+    addButton: "Anlegen",
+    hint: "Karte anlegen, dann das Foto dazu hochladen. Die Fotos sind privat und nur in deinem Konto sichtbar.",
+    added: "Karte angelegt",
+    empty:
+      "Noch keine Karten. Lege oben die erste an – zum Beispiel die ACSI-Card oder den TCS-Ausweis.",
+    deleteConfirm: "Karte samt Foto löschen?",
+    deleteAria: (title: string) => `${title} löschen`,
+    photoAdd: "Foto hinzufügen",
+    photoReplace: "Foto ersetzen",
+    photoUploading: "Wird hochgeladen …",
+    photoSaved: "Foto gespeichert",
+    photoFailed: "Das Foto konnte nicht hochgeladen werden.",
+    photoTooLarge: "Das Foto ist zu gross.",
+    viewAria: (title: string) => `${title} gross anzeigen`,
+    viewerHint: "Zum Vorzeigen an der Rezeption.",
+  },
+  twoFactor: {
+    title: "Zwei-Faktor-Anmeldung (TOTP)",
+    intro:
+      "Ein zweiter Faktor für die Passwort-Anmeldung: Eine Authenticator-App (z. B. Google Authenticator, Aegis, 1Password) erzeugt alle 30 Sekunden einen Einmalcode. Passkeys sind gerätgebunden und brauchen keinen Zusatzcode.",
+    statusOn: "Zwei-Faktor ist eingeschaltet.",
+    enableButton: "Zwei-Faktor einrichten",
+    scanHint:
+      "Scanne den QR-Code mit deiner Authenticator-App und bestätige mit dem ersten Code.",
+    qrAlt: "QR-Code für die Authenticator-App",
+    secretLine: "Oder von Hand eintippen:",
+    codeLabel: "Code aus der App",
+    confirmButton: "Bestätigen",
+    enabled: "Zwei-Faktor ist jetzt aktiv.",
+    recoveryTitle: "Wiederherstellungs-Codes",
+    recoveryHint:
+      "Bewahre diese Codes sicher auf (nicht auf dem Handy). Jeder gilt genau einmal – sie sind der einzige Weg ins Konto, wenn das Handy weg ist. Sie werden nur JETZT angezeigt.",
+    recoveryCopy: "Codes kopieren",
+    recoveryCopied: "Codes kopiert",
+    disableLabel:
+      "Zum Abschalten: Code aus der App (oder Wiederherstellungs-Code)",
+    disableButton: "Abschalten",
+    disableHint: "Nach dem Abschalten genügt wieder das Passwort allein.",
+    disabled: "Zwei-Faktor ist ausgeschaltet.",
+  },
+  spotCompare: {
+    title: "Zwei Plätze vergleichen",
+    hint: "Die Entscheidungshilfe vor dem Buchen – Preis, Distanz, Höhe, Eigenschaften und deine Bewertung nebeneinander. Den Kosten-Vergleich aller Plätze findest du in der Statistik.",
+    spotA: "Platz A",
+    spotB: "Platz B",
+    choose: "Wählen …",
+    pickBoth:
+      "Wähle links und rechts je einen Platz, dann erscheint der Vergleich.",
+    rowHeader: "Merkmal",
+    price: "Preis pro Nacht",
+    distance: "Distanz von zuhause",
+    elevation: "Höhe über Meer",
+    rating: "Deine Bewertung",
+    ratingValue: (value: string, rated: number) =>
+      rated === 1
+        ? `${value} ★ (1 Kriterium)`
+        : `${value} ★ (${rated} Kriterien)`,
+    none: "–",
   },
   sharedTrack: {
     loading: "Wanderung wird geladen …",
@@ -5122,6 +5252,16 @@ export const de = {
         "Dein Rezept erscheint im Rezeptbuch und wird bei den Kühlbox-Vorschlägen berücksichtigt.",
       nameLabel: "Name",
       namePlaceholder: "z. B. Grosis Älplermagronen",
+      importButton: "Aus Text übernehmen",
+      importHint:
+        "Rezept-Text einfügen (kopiert von einer Website oder aus einer Nachricht). CampMesser rät Name, Zutaten und Schritte – alles bleibt vor dem Speichern korrigierbar.",
+      importPlaceholder:
+        "Älplermagronen\n\nZutaten:\n250 g Magronen\n…\n\nZubereitung:\n1. …",
+      importApply: "Felder füllen",
+      importNothing:
+        "Im Text liess sich kein Rezept erkennen. Prüfe, ob Zutaten oder Schritte zeilenweise dastehen.",
+      importApplied: (ing: number, steps: number) =>
+        `Übernommen: ${ing} Zutaten, ${steps} Schritte – bitte kurz prüfen.`,
       methodLabel: "Zubereitung",
       difficultyLabel: "Schwierigkeit",
       timeLabel: "Zeit (Minuten)",
@@ -5392,6 +5532,13 @@ export const de = {
     detailsFailed: "Menge/Notiz konnte nicht gespeichert werden",
     openTitle: "Noch zu kaufen",
     doneTitle: "Erledigt",
+    moveOpenLabel: "Offene verschieben nach:",
+    moveOpenAria: (name: string) =>
+      `Alle offenen Einträge in die Liste ${name} verschieben`,
+    movedToList: (n: number, name: string) =>
+      n === 1
+        ? `1 Eintrag nach «${name}» verschoben`
+        : `${n} Einträge nach «${name}» verschoben`,
     itemCheckAria: (name: string) => `${name} abhaken`,
     itemUncheckAria: (name: string) => `${name} wieder öffnen`,
     removeAria: (name: string) => `${name} von der Liste entfernen`,
@@ -6096,6 +6243,8 @@ export const de = {
     deleteConfirm: "Diese Notiz wirklich löschen?",
     editAria: (title: string) => `Notiz ${title} bearbeiten`,
     deleteAria: (title: string) => `Notiz ${title} löschen`,
+    pinAria: (title: string) => `${title} anpinnen`,
+    unpinAria: (title: string) => `${title} lösen`,
     photoLabel: "Foto (optional)",
     photoChoose: "Foto auswählen",
     photoChange: "Foto ändern",
@@ -6156,6 +6305,33 @@ export const de = {
     legacyHint:
       "Anmeldungen von vor dieser Übersicht erscheinen erst nach der nächsten Anmeldung des jeweiligen Geräts.",
   },
+  fuelLog: {
+    title: "Tankbuch",
+    subtitle: "Tankfüllungen mit Kilometerstand – daraus der echte Verbrauch.",
+    loginFeature: "das Tankbuch",
+    averageTitle: "Durchschnittsverbrauch",
+    averageHint:
+      "Gewichtet über alle plausiblen Abschnitte. Der Fahrtkosten-Rechner in der Reisekasse kann diesen Wert übernehmen.",
+    addTitle: "Tankfüllung erfassen",
+    addHint:
+      "Immer volltanken – nur dann stimmt die Rechnung zwischen zwei Füllungen. Preis ist optional.",
+    dayLabel: "Datum",
+    odometerLabel: "Kilometerstand",
+    litersLabel: "Getankte Liter",
+    priceLabel: "Bezahlt (CHF, optional)",
+    addButton: "Erfassen",
+    saved: "Tankfüllung erfasst",
+    odometerInvalid: "Bitte einen gültigen Kilometerstand eintragen.",
+    litersInvalid: "Bitte die getankten Liter eintragen (max. 200).",
+    priceInvalid: "Der Betrag ist ungültig.",
+    empty:
+      "Noch keine Tankfüllungen. Ab der zweiten Füllung rechnet das Tankbuch den Verbrauch.",
+    segmentLine: (km: number, l100: string) =>
+      `${km} km seit letzter Füllung · ${l100} l/100 km`,
+    segmentImplausible: "(unplausibel, zählt nicht zum Durchschnitt)",
+    deleteConfirm: "Diese Tankfüllung löschen?",
+    deleteAria: (km: number) => `Tankfüllung bei ${km} km löschen`,
+  },
   stats: {
     expensesTitle: "Ausgaben über alle Reisen",
     expensesLink: "Zu den Reisen",
@@ -6178,6 +6354,14 @@ export const de = {
     staysLabel: "Aufenthalte",
     favoriteLabel: "Lieblingsplatz",
     avgRatingLabel: "Ø Bewertung",
+    hikeYearsTitle: "Wander-Jahresbilanz",
+    hikeYearsLink: "Zu den Wanderungen",
+    hikeYearsLine: (tours: number, km: string, ascent: string) =>
+      tours === 1
+        ? `1 Tour · ${km} km · ${ascent} Hm`
+        : `${tours} Touren · ${km} km · ${ascent} Hm`,
+    hikeYearsBike: (n: number) =>
+      n === 1 ? "davon 1 Velotour" : `davon ${n} Velotouren`,
     weatherLuckTitle: "Wetter-Glück",
     weatherLuckDry: (pct: number) =>
       `${pct} % deiner Campingtage waren trocken`,
