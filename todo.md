@@ -1,5 +1,9 @@
 # CampMesser – Projekt TODO
 
+## Reise-Formular nach Art (Nutzerwunsch 08.08.2026)
+
+- [x] Formular fragt nur Passendes (#485): Zeltplatz-Auswahl und Stellplatz-Block (Parzelle, WLAN, Notizen) nur bei Camping/Wandern/Velotour; Hotel, Strand, Städtereise, Wintersport erfassen den Ort als Freitext; Tagesausflug fragt EIN «Datum» (Abreise = Anreise). Umschalten löscht nichts: verknüpfter Platz wird zum sichtbaren Freitext-Ort, versteckte Werte bleiben erhalten; alte Reisen mit Platz und «platzloser» Art bekommen beim Bearbeiten den Platznamen als Ort. Auch der Vorlagen-Picker blendet die Platz-Auswahl passend aus. Katalog TRIP_KIND_FORMS in shared/tripKind.ts, 4 Tests.
+
 ## Reise-Arten (Nutzerwunsch 08.08.2026, Runde 50)
 
 - [x] Reise-Art pro Reise (#460): Camping (Normalfall), Strandferien, Hotelferien, Städtereise, Wandern, Velotour, Wintersport, Tagesausflug – als Chips im Reise-Formular (Neu und Bearbeiten), gespeichert in tripLogs.kind (Migration 0112, alte Zeilen gelten als Camping). Duplizieren übernimmt die Art; die Listen zeigen sie als Etikett, nur abseits des Normalfalls. Bewusst PRO REISE statt als globaler App-Schalter: Die App weiss über Start/Ende, welche Reise läuft – niemand muss umschalten. Katalog/Labels/Presets in shared/tripKind.ts, 5 Tests. Die Art sortiert und schlägt vor, sie sperrt nie ein Modul.
