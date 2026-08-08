@@ -2379,6 +2379,12 @@ export const fr: Translation = {
     mapEmpty: "Aucun point enregistré pour cette randonnée.",
     gpxExport: "Télécharger le GPX",
     gpxDone: "Fichier GPX créé",
+    gpxImport: "Importer un GPX",
+    gpxImporting: "Importation …",
+    gpxImported: "Randonnée importée.",
+    gpxImportedEstimated:
+      "Randonnée importée. Le fichier ne contenait pas d'horodatage – durée et allure sont déduites de 4 km/h.",
+    gpxImportFailed: "Le fichier n'a pas pu être lu comme GPX.",
     gpxFailed: "Export GPX impossible",
     gpxFallbackName: "Randonnée",
     gpxAria: (name: string) => `Télécharger ${name} en GPX`,

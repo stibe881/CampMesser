@@ -2352,6 +2352,12 @@ export const it: Translation = {
     mapEmpty: "Per questa escursione non sono salvati punti.",
     gpxExport: "Scarica il GPX",
     gpxDone: "File GPX creato",
+    gpxImport: "Importa GPX",
+    gpxImporting: "Importazione …",
+    gpxImported: "Escursione importata.",
+    gpxImportedEstimated:
+      "Escursione importata. Il file non aveva orari – durata e passo sono dedotti da 4 km/h.",
+    gpxImportFailed: "Impossibile leggere il file come GPX.",
     gpxFailed: "Esportazione GPX non possibile",
     gpxFallbackName: "Escursione",
     gpxAria: (name: string) => `Scarica ${name} in GPX`,

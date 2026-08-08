@@ -32,6 +32,7 @@ import {
   Trash2,
   TrendingDown,
   TrendingUp,
+  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
@@ -89,6 +90,7 @@ import {
   TRACK_PAUSE_GAP_MS,
   type TrackPoint,
 } from "@shared/track";
+import { GPX_IMPORT_MAX_BYTES, parseGpx } from "@shared/gpxImport";
 import { cn } from "@/lib/utils";
 
 /** Strecke lesbar machen: unter 1 km in Metern, darüber in Kilometern. */
@@ -253,6 +255,8 @@ export default function HikePage() {
     enabled: isAuthenticated,
   });
   const addMutation = trpc.tracks.add.useMutation();
+  const gpxInputRef = useRef<HTMLInputElement | null>(null);
+  const [importing, setImporting] = useState(false);
   const updateMutation = trpc.tracks.update.useMutation();
   const removeMutation = trpc.tracks.remove.useMutation();
 
@@ -392,6 +396,39 @@ export default function HikePage() {
       );
     } catch {
       toast.error(t.hike.gpxFailed);
+    }
+  };
+
+  /** GPX-Datei einlesen und als Wanderung speichern (#426). */
+  const importGpx = async (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > GPX_IMPORT_MAX_BYTES) {
+      toast.error(t.hike.gpxImportFailed);
+      return;
+    }
+    setImporting(true);
+    try {
+      const parsed = parseGpx(await file.text(), Date.now());
+      if (!parsed) {
+        toast.error(t.hike.gpxImportFailed);
+        return;
+      }
+      await addMutation.mutateAsync({
+        name: (parsed.name ?? file.name.replace(/\.gpx$/i, "")).slice(
+          0,
+          TRACK_NAME_MAX_LENGTH
+        ),
+        points: parsed.points,
+      });
+      await utils.tracks.list.invalidate();
+      toast.success(
+        parsed.timesEstimated ? t.hike.gpxImportedEstimated : t.hike.gpxImported
+      );
+    } catch {
+      toast.error(t.hike.gpxImportFailed);
+    } finally {
+      setImporting(false);
+      if (gpxInputRef.current) gpxInputRef.current.value = "";
     }
   };
 
@@ -635,9 +672,33 @@ export default function HikePage() {
       <NearbyHikes className="mt-6" />
 
       {/* Gespeicherte Wanderungen */}
-      <h2 className="mb-3 mt-6 font-serif text-lg font-semibold">
-        {t.hike.listTitle}
-      </h2>
+      <div className="mb-3 mt-6 flex items-center justify-between gap-2">
+        <h2 className="font-serif text-lg font-semibold">{t.hike.listTitle}</h2>
+        {/* GPX-Import (#426): Komoot- und Garmin-Dateien als Wanderung
+            übernehmen – die Gegenrichtung zum Export. */}
+        {isAuthenticated && (
+          <>
+            <input
+              ref={gpxInputRef}
+              type="file"
+              accept=".gpx,application/gpx+xml"
+              className="hidden"
+              tabIndex={-1}
+              aria-hidden="true"
+              onChange={e => void importGpx(e.target.files?.[0])}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={importing}
+              onClick={() => gpxInputRef.current?.click()}
+            >
+              <Upload className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {importing ? t.hike.gpxImporting : t.hike.gpxImport}
+            </Button>
+          </>
+        )}
+      </div>
       {!authLoading && !isAuthenticated ? (
         <LoginPrompt feature={t.hike.loginFeature} />
       ) : tracksQuery.isLoading ? (

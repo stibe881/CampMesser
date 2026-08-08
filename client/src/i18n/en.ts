@@ -2302,6 +2302,12 @@ export const en: Translation = {
     mapEmpty: "No points are stored for this hike.",
     gpxExport: "Download GPX",
     gpxDone: "GPX file created",
+    gpxImport: "Import GPX",
+    gpxImporting: "Importing …",
+    gpxImported: "Hike imported.",
+    gpxImportedEstimated:
+      "Hike imported. The file had no timestamps – duration and pace are derived from 4 km/h.",
+    gpxImportFailed: "The file could not be read as GPX.",
     gpxFailed: "GPX export not possible",
     gpxFallbackName: "Hike",
     gpxAria: (name: string) => `Download ${name} as GPX`,

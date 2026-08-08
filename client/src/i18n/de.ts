@@ -2381,6 +2381,12 @@ export const de = {
     mapEmpty: "Zu dieser Wanderung sind keine Punkte gespeichert.",
     gpxExport: "GPX herunterladen",
     gpxDone: "GPX-Datei erstellt",
+    gpxImport: "GPX importieren",
+    gpxImporting: "Importiert …",
+    gpxImported: "Wanderung importiert.",
+    gpxImportedEstimated:
+      "Wanderung importiert. Die Datei trug keine Zeiten – Dauer und Tempo sind aus 4 km/h hergeleitet.",
+    gpxImportFailed: "Datei konnte nicht als GPX gelesen werden.",
     gpxFailed: "GPX-Export nicht möglich",
     gpxFallbackName: "Wanderung",
     gpxAria: (name: string) => `${name} als GPX herunterladen`,
