@@ -63,6 +63,7 @@ const pageLoaders = {
   Spots: () => import("./pages/Spots"),
   MapView: () => import("./pages/MapView"),
   SpotDetail: () => import("./pages/SpotDetail"),
+  SpotPrint: () => import("./pages/SpotPrint"),
   Impressum: () => import("./pages/Impressum"),
   Datenschutz: () => import("./pages/Datenschutz"),
   TentFinder: () => import("./pages/TentFinder"),
@@ -167,6 +168,7 @@ const QuietPage = lazyWithRetry(pageLoaders.Quiet);
 const SpotsPage = lazyWithRetry(pageLoaders.Spots);
 const MapViewPage = lazyWithRetry(pageLoaders.MapView);
 const SpotDetailPage = lazyWithRetry(pageLoaders.SpotDetail);
+const SpotPrintPage = lazyWithRetry(pageLoaders.SpotPrint);
 const TentFinderPage = lazyWithRetry(pageLoaders.TentFinder);
 const HikePage = lazyWithRetry(pageLoaders.Hike);
 const TripsPage = lazyWithRetry(pageLoaders.Trips);
@@ -271,6 +273,8 @@ function Router() {
           <Route path={"/nachtruhe"} component={QuietPage} />
           <Route path={"/zeltplaetze"} component={SpotsPage} />
           <Route path={"/karte"} component={MapViewPage} />
+          {/* Druckroute VOR der Detail-Route, sonst fängt :id auch «drucken» ab */}
+          <Route path={"/zeltplaetze/:id/drucken"} component={SpotPrintPage} />
           <Route path={"/zeltplaetze/:id"} component={SpotDetailPage} />
           <Route path={"/zeltfinder"} component={TentFinderPage} />
           <Route path={"/wanderung"} component={HikePage} />

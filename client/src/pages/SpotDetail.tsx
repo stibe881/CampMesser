@@ -34,6 +34,7 @@ import {
   Navigation,
   Phone,
   QrCode,
+  Printer,
   Share2,
   SlidersHorizontal,
   Sunrise,
@@ -1784,6 +1785,15 @@ export default function SpotDetailPage() {
         <LazySection minHeight={120}>
           <OfflineMapSection spot={spot} />
         </LazySection>
+
+        {/* Dossier drucken (#416): das Blatt fürs Handschuhfach – auch
+            zum Weitergeben an Mitreisende ohne App. */}
+        <Button asChild variant="outline" size="sm" className="mt-4">
+          <Link href={`/zeltplaetze/${spot.id}/drucken`}>
+            <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.spotPrint.openButton}
+          </Link>
+        </Button>
 
         {/* Dossier teilen */}
         <Card className="mt-4">
