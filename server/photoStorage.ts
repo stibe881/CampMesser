@@ -74,6 +74,9 @@ export const catchPhotoStorage = createPhotoStorage("catches");
 /** Fotos zu freien Notizen (#433): uploads/notes/<fileName> */
 export const notePhotoStorage = createPhotoStorage("notes");
 
+/** Karten & Ausweise (#454): ein Foto pro Karte unter uploads/documents/. */
+export const documentPhotoStorage = createPhotoStorage("documents");
+
 /**
  * Buchungsbestätigungen zu Reisen (#279): uploads/reservations/<fileName>.
  * Als einzige Ablage sind hier auch PDF erlaubt – die Prüfung von Typ und

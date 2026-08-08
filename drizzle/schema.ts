@@ -1832,6 +1832,30 @@ export type UserNote = typeof userNotes.$inferSelect;
 export type InsertUserNote = typeof userNotes.$inferInsert;
 
 /**
+ * Karten & Ausweise (#454): ACSI-Card, TCS-Mitgliedschaft, Camping Key –
+ * die Plastikkarten, die man an der Rezeption zeigt und nie dabei hat.
+ * Eine Zeile pro Karte mit genau EINEM Foto (Ablage unter
+ * uploads/documents/, gleiche Technik wie die Reservation #279). Bewusst
+ * kein Ablaufdatum und keine Nummern-Spalte: Das Foto zeigt beides.
+ */
+export const documentCards = mysqlTable(
+  "documentCards",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Bezeichnung, z. B. «ACSI-Card 2026» */
+    title: varchar("title", { length: 80 }).notNull(),
+    /** Foto der Karte; null = noch keines hochgeladen */
+    fileName: varchar("fileName", { length: 64 }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("documentCards_userId").on(table.userId)]
+);
+
+export type DocumentCard = typeof documentCards.$inferSelect;
+export type InsertDocumentCard = typeof documentCards.$inferInsert;
+
+/**
  * Tankbuch (#443): eine Zeile pro Tankfüllung. Aus zwei aufeinander-
  * folgenden VOLLEN Füllungen ergibt sich der echte Verbrauch – die
  * getankten Liter der zweiten Füllung geteilt durch die gefahrenen

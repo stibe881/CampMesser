@@ -4139,6 +4139,29 @@ export const fr: Translation = {
     compareAll: "Global",
     unrated: "–",
   },
+  documents: {
+    title: "Cartes & documents",
+    subtitle:
+      "Carte ACSI, sociétariat TCS, Camping Key – en photo dans l'app plutôt qu'en carte restée à la maison.",
+    loginFeature: "tes cartes et documents",
+    addLabel: "Nouvelle carte",
+    addPlaceholder: "p. ex. Carte ACSI 2026",
+    addButton: "Créer",
+    hint: "Crée la carte, puis téléverse sa photo. Les photos sont privées et visibles uniquement dans ton compte.",
+    added: "Carte créée",
+    empty:
+      "Aucune carte pour l'instant. Crée la première ci-dessus – par exemple la carte ACSI ou celle du TCS.",
+    deleteConfirm: "Supprimer la carte et sa photo ?",
+    deleteAria: (title: string) => `Supprimer ${title}`,
+    photoAdd: "Ajouter une photo",
+    photoReplace: "Remplacer la photo",
+    photoUploading: "Téléversement …",
+    photoSaved: "Photo enregistrée",
+    photoFailed: "La photo n'a pas pu être téléversée.",
+    photoTooLarge: "La photo est trop grande.",
+    viewAria: (title: string) => `Afficher ${title} en grand`,
+    viewerHint: "À montrer à la réception.",
+  },
   twoFactor: {
     title: "Connexion à deux facteurs (TOTP)",
     intro:

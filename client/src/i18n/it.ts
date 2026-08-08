@@ -4108,6 +4108,29 @@ export const it: Translation = {
     compareAll: "Totale",
     unrated: "–",
   },
+  documents: {
+    title: "Tessere e documenti",
+    subtitle:
+      "ACSI-Card, tessera TCS, Camping Key – in foto nell'app invece che come tessera rimasta a casa.",
+    loginFeature: "le tue tessere e i tuoi documenti",
+    addLabel: "Nuova tessera",
+    addPlaceholder: "es. ACSI-Card 2026",
+    addButton: "Crea",
+    hint: "Crea la tessera, poi carica la sua foto. Le foto sono private e visibili solo nel tuo account.",
+    added: "Tessera creata",
+    empty:
+      "Ancora nessuna tessera. Crea la prima qui sopra – ad esempio la ACSI-Card o la tessera TCS.",
+    deleteConfirm: "Eliminare la tessera con la foto?",
+    deleteAria: (title: string) => `Elimina ${title}`,
+    photoAdd: "Aggiungi foto",
+    photoReplace: "Sostituisci foto",
+    photoUploading: "Caricamento …",
+    photoSaved: "Foto salvata",
+    photoFailed: "Impossibile caricare la foto.",
+    photoTooLarge: "La foto è troppo grande.",
+    viewAria: (title: string) => `Mostra ${title} a grandezza intera`,
+    viewerHint: "Da mostrare alla reception.",
+  },
   twoFactor: {
     title: "Accesso a due fattori (TOTP)",
     intro:

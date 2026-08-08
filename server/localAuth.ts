@@ -244,6 +244,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     userNotes,
     userSessions,
     fuelLogs,
+    documentCards,
     tripChanges,
   } = await import("../drizzle/schema");
   const { inArray, or } = await import("drizzle-orm");
@@ -455,6 +456,12 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(userSessions).where(eq(userSessions.userId, userId));
   // Tankbuch (#443)
   await db.delete(fuelLogs).where(eq(fuelLogs.userId, userId));
+  // Karten & Ausweise (#454): Dateinamen vor dem Löschen sichern
+  const documentRows = await db
+    .select({ fileName: documentCards.fileName })
+    .from(documentCards)
+    .where(eq(documentCards.userId, userId));
+  await db.delete(documentCards).where(eq(documentCards.userId, userId));
   await db.delete(users).where(eq(users.id, userId));
   // Zuletzt die Upload-Dateien vom Webspace entfernen – fehlende Dateien
   // blockieren nie, und verwaiste Dateien sind schlimmstenfalls harmlos.
@@ -467,6 +474,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     sightingPhotoStorage,
     catchPhotoStorage,
     notePhotoStorage,
+    documentPhotoStorage,
     reservationStorage,
   } = await import("./photoStorage");
   await tripPhotoStorage.deleteFiles(photoRows.map(p => p.fileName));
@@ -498,6 +506,11 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   );
   await notePhotoStorage.deleteFiles(
     noteRows
+      .map(r => r.fileName)
+      .filter((name): name is string => Boolean(name))
+  );
+  await documentPhotoStorage.deleteFiles(
+    documentRows
       .map(r => r.fileName)
       .filter((name): name is string => Boolean(name))
   );

@@ -572,6 +572,25 @@ async function startServer() {
       return db.getUserNoteByFileName(fileName, userId);
     },
   });
+  registerSinglePhotoRoutes(app, authenticatePhotoRequest, {
+    uploadPath: "/api/documents/:id/photo",
+    servePath: "/api/documents/photos/:fileName",
+    logTag: "DocumentPhotos",
+    storage: async () => (await import("../photoStorage")).documentPhotoStorage,
+    load: async (id, userId) => {
+      const db = await import("../db");
+      const card = await db.getDocumentCard(id, userId);
+      return card ? { current: card.fileName ?? null } : null;
+    },
+    save: async (id, userId, fileName) => {
+      const db = await import("../db");
+      await db.updateDocumentCard(id, userId, { fileName });
+    },
+    findOwnedByFileName: async (fileName, userId) => {
+      const db = await import("../db");
+      return db.getDocumentCardByFileName(fileName, userId);
+    },
+  });
   // ── Buchungsbestätigung zur Reise (#279) ────────────────────────────────
   // Als einzige Ablage sind hier auch PDF erlaubt: Bestätigungen kommen als
   // PDF, und jemanden zum Abfotografieren seines eigenen PDFs zu zwingen

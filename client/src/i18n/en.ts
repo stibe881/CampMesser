@@ -4023,6 +4023,29 @@ export const en: Translation = {
     compareAll: "Overall",
     unrated: "–",
   },
+  documents: {
+    title: "Cards & IDs",
+    subtitle:
+      "ACSI card, TCS membership, Camping Key – as photos in the app instead of plastic cards left at home.",
+    loginFeature: "your cards and IDs",
+    addLabel: "New card",
+    addPlaceholder: "e.g. ACSI card 2026",
+    addButton: "Create",
+    hint: "Create the card, then upload its photo. Photos are private and only visible in your account.",
+    added: "Card created",
+    empty:
+      "No cards yet. Create the first one above – the ACSI card or your TCS membership, for example.",
+    deleteConfirm: "Delete the card including its photo?",
+    deleteAria: (title: string) => `Delete ${title}`,
+    photoAdd: "Add photo",
+    photoReplace: "Replace photo",
+    photoUploading: "Uploading …",
+    photoSaved: "Photo saved",
+    photoFailed: "The photo could not be uploaded.",
+    photoTooLarge: "The photo is too large.",
+    viewAria: (title: string) => `Show ${title} full size`,
+    viewerHint: "To show at the reception desk.",
+  },
   twoFactor: {
     title: "Two-factor sign-in (TOTP)",
     intro:

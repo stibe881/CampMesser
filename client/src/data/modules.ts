@@ -48,6 +48,7 @@ import {
   TreePine,
   Truck,
   Fuel,
+  IdCard,
   Users,
   Wrench,
 } from "lucide-react";
@@ -523,6 +524,23 @@ export const modules: Module[] = [
     ),
     icon: Fuel,
     group: "ausruestung",
+  },
+  {
+    path: "/ausweise",
+    title: l4(
+      "Karten & Ausweise",
+      "Cartes & documents",
+      "Tessere e documenti",
+      "Cards & IDs"
+    ),
+    description: l4(
+      "ACSI, TCS & Co. als Foto dabei – zum Vorzeigen an der Rezeption",
+      "ACSI, TCS & Cie en photo – à montrer à la réception",
+      "ACSI, TCS e simili in foto – da mostrare alla reception",
+      "ACSI, TCS and co. as photos – ready to show at reception"
+    ),
+    icon: IdCard,
+    group: "reise",
   },
   {
     path: "/zeltpflege",

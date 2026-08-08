@@ -86,6 +86,49 @@ export const accountRouters = {
       }),
   }),
   /**
+   * Karten & Ausweise (#454): ACSI-Card, TCS & Co. als Foto in der Tasche.
+   * Karte anlegen, Foto über die Ein-Foto-Fabrik (#457) hochladen
+   * (/api/documents/:id/photo), beim Löschen fällt das Foto mit.
+   */
+  documents: router({
+    list: protectedProcedure.query(({ ctx }) =>
+      db.getDocumentCards(ctx.user.id)
+    ),
+    add: protectedProcedure
+      .input(z.object({ title: z.string().trim().min(1).max(80) }))
+      .mutation(async ({ ctx, input }) => {
+        const id = await db.addDocumentCard({
+          userId: ctx.user.id,
+          title: input.title.trim(),
+        });
+        return { id };
+      }),
+    rename: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          title: z.string().trim().min(1).max(80),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.updateDocumentCard(input.id, ctx.user.id, {
+          title: input.title.trim(),
+        });
+        return { success: true } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const card = await db.getDocumentCard(input.id, ctx.user.id);
+        if (card?.fileName) {
+          const { documentPhotoStorage } = await import("../photoStorage");
+          await documentPhotoStorage.deleteFiles([card.fileName]);
+        }
+        await db.deleteDocumentCard(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+  }),
+  /**
    * Angemeldete Geräte (#423): jede Anmeldung seit der Geräte-Verwaltung
    * ist eine userSessions-Zeile; «abmelden» löscht sie und macht das
    * zugehörige Cookie sofort wertlos. Ältere Anmeldungen (JWT ohne sid)

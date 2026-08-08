@@ -4149,6 +4149,29 @@ export const de = {
     compareAll: "Gesamt",
     unrated: "–",
   },
+  documents: {
+    title: "Karten & Ausweise",
+    subtitle:
+      "ACSI-Card, TCS-Mitgliedschaft, Camping Key – als Foto in der App statt als Karte, die zuhause liegt.",
+    loginFeature: "deine Karten und Ausweise",
+    addLabel: "Neue Karte",
+    addPlaceholder: "z. B. ACSI-Card 2026",
+    addButton: "Anlegen",
+    hint: "Karte anlegen, dann das Foto dazu hochladen. Die Fotos sind privat und nur in deinem Konto sichtbar.",
+    added: "Karte angelegt",
+    empty:
+      "Noch keine Karten. Lege oben die erste an – zum Beispiel die ACSI-Card oder den TCS-Ausweis.",
+    deleteConfirm: "Karte samt Foto löschen?",
+    deleteAria: (title: string) => `${title} löschen`,
+    photoAdd: "Foto hinzufügen",
+    photoReplace: "Foto ersetzen",
+    photoUploading: "Wird hochgeladen …",
+    photoSaved: "Foto gespeichert",
+    photoFailed: "Das Foto konnte nicht hochgeladen werden.",
+    photoTooLarge: "Das Foto ist zu gross.",
+    viewAria: (title: string) => `${title} gross anzeigen`,
+    viewerHint: "Zum Vorzeigen an der Rezeption.",
+  },
   twoFactor: {
     title: "Zwei-Faktor-Anmeldung (TOTP)",
     intro:
