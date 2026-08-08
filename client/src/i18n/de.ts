@@ -3863,6 +3863,7 @@ export const de = {
   briefing: {
     title: "Morgen-Briefing",
     sectionAria: "Morgen-Briefing zum laufenden Aufenthalt",
+    pollenLine: (parts: string) => `Pollenflug: ${parts}`,
     astroLine: (phase: string, percent: number) =>
       `${phase} – der Mond ist zu ${percent} % beleuchtet.`,
     moreTasks: (count: number) =>

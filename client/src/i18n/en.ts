@@ -3739,6 +3739,7 @@ export const en: Translation = {
   briefing: {
     title: "Morning briefing",
     sectionAria: "Morning briefing for the current stay",
+    pollenLine: (parts: string) => `Pollen count: ${parts}`,
     astroLine: (phase: string, percent: number) =>
       `${phase} – the moon is ${percent} % lit.`,
     moreTasks: (count: number) =>

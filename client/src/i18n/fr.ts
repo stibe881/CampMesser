@@ -3853,6 +3853,7 @@ export const fr: Translation = {
   briefing: {
     title: "Briefing du matin",
     sectionAria: "Briefing du matin pour le séjour en cours",
+    pollenLine: (parts: string) => `Pollens : ${parts}`,
     astroLine: (phase: string, percent: number) =>
       `${phase} – la lune est éclairée à ${percent} %.`,
     moreTasks: (count: number) =>
