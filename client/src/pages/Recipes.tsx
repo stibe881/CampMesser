@@ -140,6 +140,10 @@ function RecipeEditorDialog({
   // Felder zerlegen – das Ergebnis bleibt vor dem Speichern korrigierbar.
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState("");
+  // Aus Web-Link (#501): der Server holt die Seite und liest das
+  // schema.org/Recipe – sauberer als jede Heuristik, wo es eins gibt.
+  const [importUrl, setImportUrl] = useState("");
+  const importUrlMutation = trpc.recipes.importFromUrl.useMutation();
   // Foto: neu ausgewählt (bereits verkleinert), Vorschau-URL und
   // «bestehendes Foto entfernen»-Wunsch – ausgeführt wird alles beim Speichern.
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
@@ -199,6 +203,33 @@ function RecipeEditorDialog({
         parsed.steps.length
       )
     );
+  };
+
+  /** Aus Web-Link (#501): gleiche Füll-Regeln wie der Text-Import. */
+  const applyUrlImport = async () => {
+    try {
+      const parsed = await importUrlMutation.mutateAsync({
+        url: importUrl.trim(),
+      });
+      if (parsed.name && !name.trim()) setName(parsed.name);
+      if (parsed.ingredients.length > 0) {
+        setIngredients(parsed.ingredients.join("\n"));
+      }
+      if (parsed.steps.length > 0) setSteps(parsed.steps.join("\n"));
+      setImportOpen(false);
+      setImportUrl("");
+      setImportText("");
+      toast.success(
+        t.recipes.editor.importApplied(
+          parsed.ingredients.length,
+          parsed.steps.length
+        )
+      );
+    } catch {
+      // Kein Rezept im JSON-LD oder Seite nicht erreichbar – der
+      // Text-Import darunter bleibt als Ausweg.
+      toast.error(t.recipes.editor.importUrlFailed);
+    }
   };
 
   const handlePhotoSelected = async (fileList: FileList | null) => {
@@ -303,7 +334,35 @@ function RecipeEditorDialog({
           </Button>
         ) : (
           <div className="rounded-lg border border-border p-3">
-            <Label htmlFor="recipe-import">
+            {/* Aus Web-Link (#501): zuerst der bequeme Weg – Link
+                einfügen, der Server liest das schema.org-Rezept. */}
+            <Label htmlFor="recipe-import-url">
+              {t.recipes.editor.importUrlLabel}
+            </Label>
+            <div className="mt-1.5 flex gap-2">
+              <Input
+                id="recipe-import-url"
+                type="url"
+                inputMode="url"
+                placeholder="https://…"
+                value={importUrl}
+                onChange={e => setImportUrl(e.target.value)}
+              />
+              <Button
+                type="button"
+                size="sm"
+                disabled={
+                  !importUrl.trim().startsWith("http") ||
+                  importUrlMutation.isPending
+                }
+                onClick={() => void applyUrlImport()}
+              >
+                {importUrlMutation.isPending
+                  ? t.common.loading
+                  : t.recipes.editor.importUrlButton}
+              </Button>
+            </div>
+            <Label htmlFor="recipe-import" className="mt-3 block">
               {t.recipes.editor.importButton}
             </Label>
             <p className="mt-1 text-xs text-muted-foreground">

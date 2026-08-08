@@ -5400,6 +5400,10 @@ export const it: Translation = {
       nameLabel: "Nome",
       namePlaceholder: "ad es. Gli Älplermagronen della nonna",
       importButton: "Riprendi da un testo",
+      importUrlLabel: "Importa da un link web",
+      importUrlButton: "Recupera",
+      importUrlFailed:
+        "Questa pagina non contiene una ricetta leggibile – copia il testo e usa il campo qui sotto.",
       importHint:
         "Incolla il testo della ricetta (copiato da un sito o da un messaggio). CampMesser indovina nome, ingredienti e passaggi – tutto resta modificabile prima di salvare.",
       importPlaceholder:

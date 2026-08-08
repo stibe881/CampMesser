@@ -5293,6 +5293,10 @@ export const en: Translation = {
       nameLabel: "Name",
       namePlaceholder: "e.g. Granny's Älplermagronen",
       importButton: "Paste from text",
+      importUrlLabel: "Import from a web link",
+      importUrlButton: "Fetch",
+      importUrlFailed:
+        "This page has no readable recipe – copy the text and use the field below.",
       importHint:
         "Paste the recipe text (copied from a website or a message). CampMesser guesses the name, ingredients and steps – everything stays editable before saving.",
       importPlaceholder:

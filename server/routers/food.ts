@@ -988,6 +988,39 @@ export const foodRouters = {
     list: protectedProcedure.query(({ ctx }) =>
       db.getCustomRecipes(ctx.user.id)
     ),
+    /**
+     * Rezept aus einem Web-Link (#501): Der SERVER holt die Seite (im
+     * Browser scheitert das an CORS) und liest das schema.org/Recipe aus
+     * dem JSON-LD. Die URL-Prüfung (kein localhost, keine privaten
+     * Adressen) steht testbar in shared/recipeJsonLd.ts; gelesen wird
+     * höchstens 1.5 MB, länger als 10 s wird nicht gewartet.
+     */
+    importFromUrl: protectedProcedure
+      .input(z.object({ url: z.string().min(8).max(500) }))
+      .mutation(async ({ input }) => {
+        const { isAllowedImportUrl, parseRecipeFromHtml } =
+          await import("@shared/recipeJsonLd");
+        if (!isAllowedImportUrl(input.url)) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "invalidUrl" });
+        }
+        let html: string;
+        try {
+          const res = await fetch(input.url, {
+            signal: AbortSignal.timeout(10_000),
+            headers: { accept: "text/html,application/xhtml+xml" },
+            redirect: "follow",
+          });
+          if (!res.ok) throw new Error(`status ${res.status}`);
+          html = (await res.text()).slice(0, 1_500_000);
+        } catch {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "fetchFailed" });
+        }
+        const recipe = parseRecipeFromHtml(html);
+        if (!recipe) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "noRecipe" });
+        }
+        return recipe;
+      }),
     save: protectedProcedure
       .input(
         z.object({

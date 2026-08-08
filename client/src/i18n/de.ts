@@ -5442,6 +5442,10 @@ export const de = {
       nameLabel: "Name",
       namePlaceholder: "z. B. Grosis Älplermagronen",
       importButton: "Aus Text übernehmen",
+      importUrlLabel: "Aus Web-Link übernehmen",
+      importUrlButton: "Holen",
+      importUrlFailed:
+        "Auf dieser Seite steht kein lesbares Rezept – kopiere den Text und nutze das Feld darunter.",
       importHint:
         "Rezept-Text einfügen (kopiert von einer Website oder aus einer Nachricht). CampMesser rät Name, Zutaten und Schritte – alles bleibt vor dem Speichern korrigierbar.",
       importPlaceholder:

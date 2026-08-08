@@ -5432,6 +5432,10 @@ export const fr: Translation = {
       nameLabel: "Nom",
       namePlaceholder: "p. ex. Les Älplermagronen de grand-maman",
       importButton: "Reprendre depuis un texte",
+      importUrlLabel: "Importer depuis un lien web",
+      importUrlButton: "Récupérer",
+      importUrlFailed:
+        "Cette page ne contient pas de recette lisible – copie le texte et utilise le champ ci-dessous.",
       importHint:
         "Colle le texte de la recette (copié d'un site ou d'un message). CampMesser devine le nom, les ingrédients et les étapes – tout reste modifiable avant d'enregistrer.",
       importPlaceholder:
