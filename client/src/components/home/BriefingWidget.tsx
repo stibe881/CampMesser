@@ -43,6 +43,8 @@ export default function BriefingWidget() {
       latitude={spot?.latitude ?? current.latitude ?? null}
       longitude={spot?.longitude ?? current.longitude ?? null}
       today={today}
+      // Reise-Art (#475): Strandferien bekommen die Badewasser-Zeile
+      tripKind={current.kind}
     />
   );
 }

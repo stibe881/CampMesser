@@ -3757,6 +3757,9 @@ export const en: Translation = {
     title: "Morning briefing",
     sectionAria: "Morning briefing for the current stay",
     pollenLine: (parts: string) => `Pollen count: ${parts}`,
+    waterLine: (temp: string, comfort: string) =>
+      `Water ${temp} °C – ${comfort}`,
+    waterTide: (time: string) => `next high tide at ${time}`,
     astroLine: (phase: string, percent: number) =>
       `${phase} – the moon is ${percent} % lit.`,
     moreTasks: (count: number) =>

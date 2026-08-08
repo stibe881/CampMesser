@@ -3881,6 +3881,9 @@ export const de = {
     title: "Morgen-Briefing",
     sectionAria: "Morgen-Briefing zum laufenden Aufenthalt",
     pollenLine: (parts: string) => `Pollenflug: ${parts}`,
+    waterLine: (temp: string, comfort: string) =>
+      `Wasser ${temp} °C – ${comfort}`,
+    waterTide: (time: string) => `nächstes Hochwasser um ${time}`,
     astroLine: (phase: string, percent: number) =>
       `${phase} – der Mond ist zu ${percent} % beleuchtet.`,
     moreTasks: (count: number) =>
