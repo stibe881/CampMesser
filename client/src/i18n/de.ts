@@ -4402,6 +4402,14 @@ export const de = {
     noteTitle: "Notizen",
     planTitle: "Platzplan",
   },
+  winter: {
+    title: "Frost & Schnee",
+    frostLine: (nights: string) => `Frost in Sicht: ${nights}.`,
+    frostAdvice:
+      "Wassertank, Leitungen und Kanister leeren oder frostfrei lagern.",
+    snowLine: (m: number) => `Schneefallgrenze sinkt auf rund ${m} m ü. M.`,
+    note: "Aus der Prognose für diesen Ort – Mulden und Senken sind oft kälter.",
+  },
   weatherTurn: {
     title: "Morgen kippt das Wetter",
     windLine: (kmh: number) =>

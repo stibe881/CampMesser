@@ -4394,6 +4394,15 @@ export const fr: Translation = {
     noteTitle: "Notes",
     planTitle: "Plan du camping",
   },
+  winter: {
+    title: "Gel et neige",
+    frostLine: (nights: string) => `Gel en vue : ${nights}.`,
+    frostAdvice:
+      "Vider le réservoir d'eau, les tuyaux et les bidons ou les stocker hors gel.",
+    snowLine: (m: number) =>
+      `La limite pluie-neige descend vers ${m} m d'altitude.`,
+    note: "D'après la prévision pour ce lieu – les cuvettes sont souvent plus froides.",
+  },
   weatherTurn: {
     title: "Le temps bascule demain",
     windLine: (kmh: number) =>

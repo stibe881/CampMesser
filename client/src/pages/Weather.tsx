@@ -43,6 +43,7 @@ import OfficialWarnings from "@/components/OfficialWarnings";
 import RainRadar from "@/components/RainRadar";
 import CondensationCard from "@/components/CondensationCard";
 import WeatherTurnCard from "@/components/WeatherTurnCard";
+import WinterCard from "@/components/WinterCard";
 import DryWindowCard from "@/components/DryWindowCard";
 import { weatherTurn } from "@shared/weatherTurn";
 import { Button } from "@/components/ui/button";
@@ -276,7 +277,7 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
     forecast_minutely_15: "16",
     current: "temperature_2m,apparent_temperature,weather_code,wind_speed_10m",
     hourly:
-      "temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,wind_direction_10m,pressure_msl,weather_code,cape,cloud_cover",
+      "temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,wind_direction_10m,pressure_msl,weather_code,cape,cloud_cover,freezing_level_height",
     daily:
       "temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_gusts_10m_max,weather_code,sunrise,sunset,uv_index_max",
   });
@@ -305,6 +306,7 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
       cape: json.hourly.cape?.[i] ?? 0,
       cloudCover: json.hourly.cloud_cover?.[i] ?? 0,
       humidityPercent: json.hourly.relative_humidity_2m?.[i] ?? undefined,
+      freezingLevelM: json.hourly.freezing_level_height?.[i] ?? undefined,
     }))
     .filter(h => h.time.slice(0, 10) <= lastDetailDate);
 
@@ -2127,6 +2129,10 @@ export default function WeatherPage() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Frost & Schneefallgrenze (#428/#429): melden sich nur,
+              wenn eine der beiden Zahlen betrifft. */}
+          <WinterCard days={data.daily} hours={data.hourly} className="mb-4" />
 
           {/* Wetterumschwung (#417): «Morgen kippt das Wetter» – nur,
               wenn morgen deutlich schlechter wird als heute. */}

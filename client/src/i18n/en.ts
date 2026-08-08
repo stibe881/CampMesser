@@ -4275,6 +4275,14 @@ export const en: Translation = {
     noteTitle: "Notes",
     planTitle: "Site map",
   },
+  winter: {
+    title: "Frost & snow",
+    frostLine: (nights: string) => `Frost expected: ${nights}.`,
+    frostAdvice:
+      "Drain the water tank, hoses and canisters or store them frost-free.",
+    snowLine: (m: number) => `Snow line drops to around ${m} m a.s.l.`,
+    note: "From the forecast for this location – hollows and dips are often colder.",
+  },
   weatherTurn: {
     title: "The weather turns tomorrow",
     windLine: (kmh: number) =>
