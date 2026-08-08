@@ -13,7 +13,8 @@ import path from "node:path";
 export const UPLOADS_ROOT = path.join(process.cwd(), "uploads");
 
 /** Nur serverseitig generierte Namen (nanoid + Endung) – kein Pfad-Traversal möglich. */
-export const PHOTO_FILENAME_PATTERN = /^[A-Za-z0-9_-]{8,40}\.(jpg|png|webp)$/;
+export const PHOTO_FILENAME_PATTERN =
+  /^[A-Za-z0-9_-]{8,40}\.(jpg|png|webp|pdf)$/;
 
 /** Ablage für eine Foto-Kategorie: uploads/<subdir>/<fileName>. */
 export interface PhotoStorage {

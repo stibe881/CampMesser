@@ -576,6 +576,7 @@ async function startServer() {
     uploadPath: "/api/documents/:id/photo",
     servePath: "/api/documents/photos/:fileName",
     logTag: "DocumentPhotos",
+    allowPdf: true,
     storage: async () => (await import("../photoStorage")).documentPhotoStorage,
     load: async (id, userId) => {
       const db = await import("../db");

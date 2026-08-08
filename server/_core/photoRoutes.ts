@@ -45,6 +45,11 @@ export interface SinglePhotoRoutes {
   save(id: number, userId: number, fileName: string): Promise<void>;
   /** Datensatz zur Auslieferung über den Dateinamen finden (nur eigene). */
   findOwnedByFileName(fileName: string, userId: number): Promise<unknown>;
+  /**
+   * Auch PDF annehmen (#500)? Nur für Ablagen, deren Inhalte als PDF
+   * ankommen (Karten & Ausweise: Versicherungskarten, Vignetten-Belege).
+   */
+  allowPdf?: boolean;
 }
 
 export function registerSinglePhotoRoutes(
@@ -57,7 +62,10 @@ export function registerSinglePhotoRoutes(
 ): void {
   app.post(
     routes.uploadPath,
-    express.raw({ type: "image/*", limit: MAX_PHOTO_BYTES }),
+    express.raw({
+      type: routes.allowPdf ? ["image/*", "application/pdf"] : "image/*",
+      limit: MAX_PHOTO_BYTES,
+    }),
     async (req, res) => {
       try {
         const user = await authenticate(req, res);
@@ -80,7 +88,10 @@ export function registerSinglePhotoRoutes(
           res.status(415).json({ error: "heicNotSupported" });
           return;
         }
-        const extension = PHOTO_MIME_EXTENSIONS[contentType];
+        const extension =
+          routes.allowPdf && contentType === "application/pdf"
+            ? ".pdf"
+            : PHOTO_MIME_EXTENSIONS[contentType];
         if (!extension) {
           res.status(415).json({ error: "unsupportedType" });
           return;
