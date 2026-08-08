@@ -4115,6 +4115,23 @@ export const fr: Translation = {
     compareAll: "Global",
     unrated: "–",
   },
+  spotCompare: {
+    title: "Comparer deux emplacements",
+    hint: "L'aide à la décision avant de réserver – prix, distance, altitude, caractéristiques et ta note côte à côte. La comparaison des coûts de tous les emplacements se trouve dans les statistiques.",
+    spotA: "Emplacement A",
+    spotB: "Emplacement B",
+    choose: "Choisir …",
+    pickBoth:
+      "Choisis un emplacement à gauche et un à droite, la comparaison apparaîtra.",
+    rowHeader: "Critère",
+    price: "Prix par nuit",
+    distance: "Distance depuis chez toi",
+    elevation: "Altitude",
+    rating: "Ta note",
+    ratingValue: (value: string, rated: number) =>
+      rated === 1 ? `${value} ★ (1 critère)` : `${value} ★ (${rated} critères)`,
+    none: "–",
+  },
   sharedTrack: {
     loading: "Chargement de la randonnée …",
     notFoundTitle: "Randonnée introuvable",

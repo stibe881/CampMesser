@@ -3999,6 +3999,24 @@ export const en: Translation = {
     compareAll: "Overall",
     unrated: "–",
   },
+  spotCompare: {
+    title: "Compare two sites",
+    hint: "The decision aid before you book – price, distance, elevation, features and your rating side by side. The cost comparison across all sites lives in the statistics.",
+    spotA: "Site A",
+    spotB: "Site B",
+    choose: "Choose …",
+    pickBoth: "Pick a site on each side and the comparison appears.",
+    rowHeader: "Aspect",
+    price: "Price per night",
+    distance: "Distance from home",
+    elevation: "Elevation",
+    rating: "Your rating",
+    ratingValue: (value: string, rated: number) =>
+      rated === 1
+        ? `${value} ★ (1 criterion)`
+        : `${value} ★ (${rated} criteria)`,
+    none: "–",
+  },
   sharedTrack: {
     loading: "Loading hike …",
     notFoundTitle: "Hike not found",

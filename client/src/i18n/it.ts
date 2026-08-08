@@ -4084,6 +4084,23 @@ export const it: Translation = {
     compareAll: "Totale",
     unrated: "–",
   },
+  spotCompare: {
+    title: "Confronta due piazzole",
+    hint: "L'aiuto alla decisione prima di prenotare – prezzo, distanza, altitudine, caratteristiche e la tua valutazione fianco a fianco. Il confronto dei costi di tutte le piazzole è nelle statistiche.",
+    spotA: "Piazzola A",
+    spotB: "Piazzola B",
+    choose: "Scegli …",
+    pickBoth:
+      "Scegli una piazzola a sinistra e una a destra: apparirà il confronto.",
+    rowHeader: "Criterio",
+    price: "Prezzo a notte",
+    distance: "Distanza da casa",
+    elevation: "Altitudine",
+    rating: "La tua valutazione",
+    ratingValue: (value: string, rated: number) =>
+      rated === 1 ? `${value} ★ (1 criterio)` : `${value} ★ (${rated} criteri)`,
+    none: "–",
+  },
   sharedTrack: {
     loading: "Caricamento dell'escursione …",
     notFoundTitle: "Escursione non trovata",

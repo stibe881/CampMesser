@@ -4125,6 +4125,25 @@ export const de = {
     compareAll: "Gesamt",
     unrated: "–",
   },
+  spotCompare: {
+    title: "Zwei Plätze vergleichen",
+    hint: "Die Entscheidungshilfe vor dem Buchen – Preis, Distanz, Höhe, Eigenschaften und deine Bewertung nebeneinander. Den Kosten-Vergleich aller Plätze findest du in der Statistik.",
+    spotA: "Platz A",
+    spotB: "Platz B",
+    choose: "Wählen …",
+    pickBoth:
+      "Wähle links und rechts je einen Platz, dann erscheint der Vergleich.",
+    rowHeader: "Merkmal",
+    price: "Preis pro Nacht",
+    distance: "Distanz von zuhause",
+    elevation: "Höhe über Meer",
+    rating: "Deine Bewertung",
+    ratingValue: (value: string, rated: number) =>
+      rated === 1
+        ? `${value} ★ (1 Kriterium)`
+        : `${value} ★ (${rated} Kriterien)`,
+    none: "–",
+  },
   sharedTrack: {
     loading: "Wanderung wird geladen …",
     notFoundTitle: "Wanderung nicht gefunden",
