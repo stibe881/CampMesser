@@ -1,5 +1,15 @@
 # CampMesser – Projekt TODO
 
+## Fünf Vorschläge, alle umgesetzt (08.08.2026, Runde 47)
+
+- [x] Einmalige Posten in der Preistafel (#415): Die Tarife rechneten alles «pro Nacht» – echte Preistafeln haben auch Einmaliges (Endreinigung, Buchungsgebühr, Strompauschale), und der Kosten-Schätzer (#386) multiplizierte es mit den Nächten. Neu ein «einmalig»-Schalter pro Tarifzeile; der Schätzer zählt es genau einmal und weist es getrennt aus. Nacht-Summe und Preis-Spanne lassen Einmaliges aussen vor – eine Endreinigung ist kein Nachtpreis. Auch NUR Einmaliges ist eine gültige Rechnung (0.– je Nacht, ehrlich ausgewiesen). 6 Tests.
+- [x] Platz-Dossier drucken (#416): Das Blatt fürs Handschuhfach und für Mitreisende ohne App – Kontakt, Check-in, Preise (mit Grundpreis, Zeiträumen, Einmalig-Vermerk), Eigenschaften, Merker-Notizen, Notiz und Platzplan auf einer Seite. Nur, was da ist: Ein leerer Abschnitt wird nicht gedruckt. Route /zeltplaetze/:id/drucken, Knopf im Dossier.
+- [x] Wetterumschwung-Hinweis (#417): «Morgen kippt das Wetter – heute Abend abspannen.» Gemeldet wird der SPRUNG von heute auf morgen, nicht das Niveau: Wer bei stetiger 50er-Bise zeltet, weiss das – jeden Tag «Wind!» wäre Lärm. Ein Hinweis, der wichtigste: Wind (Böen ≥ 45 und +20 km/h) vor Regen (≥ 12 und +10 mm) vor Kälte (−8 °C), je mit Handgriff-Rat. Karte im Camp-Wetter, eine Zeile in «Heute» (useDayWeather holt dafür zwei Tage). 7 Tests.
+- [x] Heimkehr-Karte: Merker direkt notieren (#418): Der «Beim nächsten Mal»-Schritt verlinkte ins Dossier – ein Umweg genau im Moment des Einfalls. Neu ein Eingabefeld direkt in der Karte; die Notiz landet am Platz (derselbe Weg wie #396), der Schritt hakt sich ab. 1 Test.
+- [x] Feinschliff (#419): Home.tsx von 2005 auf ~740 Zeilen – Wissens-Suche, Wetter-Widget, Nächste-Reise-Widget, Jahrestags-, Erste-Schritte-, Briefing-Karte und die drei Hinweise wohnen in components/home/ (Muster #322/#414). Kein sichtbarer Unterschied.
+- Keine neuen Migrationen in dieser Runde.
+- [ ] NICHT ANGESCHAUT, ehrlich: nichts davon am Bildschirm – insbesondere die Druckansicht nicht auf Papier. Geprüft sind Typen, alle Tests und der Build.
+
 ## Fünf Vorschläge, alle umgesetzt (08.08.2026, Runde 46)
 
 - [x] Heimkehr-Karte (#410): Nach der Heimkehr klopfte bis zu viererlei einzeln an – Trocknung (#89), Rückblick (#390/#381), und der «Beim nächsten Mal»-Merker (#396) will genau in diesem Moment gefüllt werden. Eine Karte auf der Startseite bündelt das als Abhak-Folge: Zelt trocknen (von Hand – das weiss keine App), Rückblick (erledigt, sobald einer gespeichert ist), Merker (erledigt, sobald am Platz Notizen liegen; ob sie von DIESEM Besuch stammen, weiss niemand – besser grosszügig als ein Haken, der nie zugeht). Alles erledigt → Karte weg. Ersetzt die reine Rückblick-Erinnerung; alte Wegklicks gelten weiter, die Reise-Auswahl trifft weiterhin reviewCandidate. 4 Logik- + 4 UI-Tests.
