@@ -6068,6 +6068,30 @@ export const it: Translation = {
     photoRemoveFailed: "Impossibile rimuovere la foto.",
     photoAlt: (title: string) => `Foto della nota ${title}`,
   },
+  shareLinks: {
+    title: "Link di condivisione attivi",
+    intro:
+      "Tutto ciò che condividi attualmente tramite link, in un unico posto. La disattivazione è immediata – dopo, il link non porta più a nulla.",
+    empty: "Al momento nulla è condiviso tramite link.",
+    unnamed: "Senza nome",
+    expires: (date: string) => `scade il ${date}`,
+    copyAria: (label: string) => `Copia il link a ${label}`,
+    revokeButton: "Disattiva",
+    revokeConfirm: (label: string) =>
+      `Disattivare il link di condivisione a «${label}»?`,
+    revoked: "Link di condivisione disattivato",
+    kinds: {
+      spot: "Dossier della piazzola",
+      packList: "Lista bagagli",
+      packTemplate: "Modello di lista",
+      trip: "Viaggio",
+      recipe: "Ricetta",
+      quiz: "Quiz",
+      shopping: "Lista della spesa",
+      track: "Escursione",
+      location: "Posizione",
+    },
+  },
   stats: {
     expensesTitle: "Spese di tutti i viaggi",
     expensesLink: "Ai viaggi",

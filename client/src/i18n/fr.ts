@@ -6110,6 +6110,30 @@ export const fr: Translation = {
     photoRemoveFailed: "La photo n'a pas pu être retirée.",
     photoAlt: (title: string) => `Photo de la note ${title}`,
   },
+  shareLinks: {
+    title: "Liens de partage actifs",
+    intro:
+      "Tout ce que tu partages actuellement par lien, au même endroit. La désactivation est immédiate – le lien ne mène ensuite nulle part.",
+    empty: "Rien n'est partagé par lien pour le moment.",
+    unnamed: "Sans nom",
+    expires: (date: string) => `expire le ${date}`,
+    copyAria: (label: string) => `Copier le lien vers ${label}`,
+    revokeButton: "Désactiver",
+    revokeConfirm: (label: string) =>
+      `Désactiver le lien de partage vers « ${label} » ?`,
+    revoked: "Lien de partage désactivé",
+    kinds: {
+      spot: "Dossier d'emplacement",
+      packList: "Liste de bagages",
+      packTemplate: "Modèle de liste",
+      trip: "Voyage",
+      recipe: "Recette",
+      quiz: "Quiz",
+      shopping: "Liste de courses",
+      track: "Randonnée",
+      location: "Position",
+    },
+  },
   stats: {
     expensesTitle: "Dépenses de tous les voyages",
     expensesLink: "Vers les voyages",

@@ -120,6 +120,7 @@ import HomeLocationCard from "@/components/profile/HomeLocationCard";
 import PasskeysCard from "@/components/profile/PasskeysCard";
 import QuickBarCard from "@/components/profile/QuickBarCard";
 import CalendarFeedCard from "@/components/profile/CalendarFeedCard";
+import ShareLinksCard from "@/components/profile/ShareLinksCard";
 
 export default function ProfilePage() {
   const { lang, t, setLang } = useI18n();
@@ -573,6 +574,9 @@ export default function ProfilePage() {
       <QuickBarCard />
 
       <CalendarFeedCard />
+
+      {/* Teil-Link-Übersicht (#422) */}
+      <ShareLinksCard />
 
       {/* Statistik: auf Nutzerwunsch im Profil statt als Startseiten-Kachel */}
       <CollapsibleCard

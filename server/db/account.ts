@@ -10,19 +10,29 @@ import {
   InsertUser,
   InsertUserNote,
   and,
+  campSpots,
+  customQuizzes,
+  customRecipes,
   deletedItems,
   desc,
   eq,
   getDb,
+  hikeTracks,
   inArray,
+  locationShares,
+  packLists,
+  packTemplatesCustom,
   passportAbsences,
   requireDb,
+  shoppingLists,
+  shoppingShares,
   tripChanges,
   tripLogs,
   userNotes,
   userSettings,
   users,
 } from "./_shared";
+import type { ShareLinkEntry, ShareLinkKind } from "@shared/shareLinks";
 
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) {
@@ -172,6 +182,223 @@ export async function deleteUserNote(id: number, userId: number) {
     .delete(userNotes)
     .where(and(eq(userNotes.id, id), eq(userNotes.userId, userId)));
 }
+/**
+ * Alle aktiven Teil-Links eines Kontos (#422): neun Tabellen, ein Bild.
+ * Abgelaufene filtert der Aufrufer über shared/shareLinks.ts – die
+ * Abfragen hier liefern schlicht alles mit gesetztem Token.
+ */
+export async function getShareLinkOverview(
+  userId: number
+): Promise<ShareLinkEntry[]> {
+  const db = requireDb(await getDb());
+  const iso = (value: Date | string | null) =>
+    value === null ? null : new Date(value).toISOString();
+
+  const [
+    spots,
+    lists,
+    templates,
+    trips,
+    recipes,
+    quizzes,
+    shoppings,
+    tracks,
+    locations,
+  ] = await Promise.all([
+    db
+      .select({
+        id: campSpots.id,
+        label: campSpots.name,
+        token: campSpots.shareToken,
+        expiresAt: campSpots.shareExpiresAt,
+      })
+      .from(campSpots)
+      .where(eq(campSpots.userId, userId)),
+    db
+      .select({
+        id: packLists.id,
+        label: packLists.name,
+        token: packLists.shareToken,
+        expiresAt: packLists.shareExpiresAt,
+      })
+      .from(packLists)
+      .where(eq(packLists.userId, userId)),
+    db
+      .select({
+        id: packTemplatesCustom.id,
+        label: packTemplatesCustom.name,
+        token: packTemplatesCustom.shareToken,
+        expiresAt: packTemplatesCustom.shareExpiresAt,
+      })
+      .from(packTemplatesCustom)
+      .where(eq(packTemplatesCustom.userId, userId)),
+    db
+      .select({
+        id: tripLogs.id,
+        label: tripLogs.title,
+        token: tripLogs.shareToken,
+        expiresAt: tripLogs.shareExpiresAt,
+      })
+      .from(tripLogs)
+      .where(eq(tripLogs.userId, userId)),
+    db
+      .select({
+        id: customRecipes.id,
+        label: customRecipes.name,
+        token: customRecipes.shareToken,
+        expiresAt: customRecipes.shareExpiresAt,
+      })
+      .from(customRecipes)
+      .where(eq(customRecipes.userId, userId)),
+    db
+      .select({
+        id: customQuizzes.id,
+        label: customQuizzes.title,
+        token: customQuizzes.shareToken,
+        expiresAt: customQuizzes.shareExpiresAt,
+      })
+      .from(customQuizzes)
+      .where(eq(customQuizzes.userId, userId)),
+    db
+      .select({
+        id: shoppingShares.id,
+        label: shoppingLists.name,
+        token: shoppingShares.shareToken,
+        expiresAt: shoppingShares.shareExpiresAt,
+      })
+      .from(shoppingShares)
+      .leftJoin(shoppingLists, eq(shoppingShares.listId, shoppingLists.id))
+      .where(eq(shoppingShares.userId, userId)),
+    db
+      .select({
+        id: hikeTracks.id,
+        label: hikeTracks.name,
+        token: hikeTracks.shareToken,
+        expiresAt: hikeTracks.shareExpiresAt,
+      })
+      .from(hikeTracks)
+      .where(eq(hikeTracks.userId, userId)),
+    db
+      .select({
+        id: locationShares.id,
+        token: locationShares.shareToken,
+        expiresAt: locationShares.shareExpiresAt,
+      })
+      .from(locationShares)
+      .where(eq(locationShares.userId, userId)),
+  ]);
+
+  const collect = (
+    kind: ShareLinkKind,
+    rows: {
+      id: number;
+      label?: string | null;
+      token: string | null;
+      expiresAt: Date | string | null;
+    }[]
+  ): ShareLinkEntry[] =>
+    rows
+      .filter((row): row is typeof row & { token: string } =>
+        Boolean(row.token)
+      )
+      .map(row => ({
+        kind,
+        id: row.id,
+        label: row.label ?? null,
+        token: row.token,
+        expiresAt: iso(row.expiresAt),
+      }));
+
+  return [
+    ...collect("spot", spots),
+    ...collect("packList", lists),
+    ...collect("packTemplate", templates),
+    ...collect("trip", trips),
+    ...collect("recipe", recipes),
+    ...collect("quiz", quizzes),
+    ...collect("shopping", shoppings),
+    ...collect("track", tracks),
+    ...collect("location", locations),
+  ];
+}
+
+/**
+ * Einen Teil-Link beenden (#422): Token (und Ablauf) löschen bzw. die
+ * Teil-Zeile entfernen – dieselbe Wirkung wie der «Link deaktivieren»-
+ * Knopf am jeweiligen Ort. Die userId-Bedingung hält Fremdes unantastbar.
+ */
+export async function revokeShareLink(
+  kind: ShareLinkKind,
+  id: number,
+  userId: number
+): Promise<void> {
+  const db = requireDb(await getDb());
+  const cleared = { shareToken: null, shareExpiresAt: null };
+  switch (kind) {
+    case "spot":
+      await db
+        .update(campSpots)
+        .set(cleared)
+        .where(and(eq(campSpots.id, id), eq(campSpots.userId, userId)));
+      return;
+    case "packList":
+      await db
+        .update(packLists)
+        .set(cleared)
+        .where(and(eq(packLists.id, id), eq(packLists.userId, userId)));
+      return;
+    case "packTemplate":
+      await db
+        .update(packTemplatesCustom)
+        .set(cleared)
+        .where(
+          and(
+            eq(packTemplatesCustom.id, id),
+            eq(packTemplatesCustom.userId, userId)
+          )
+        );
+      return;
+    case "trip":
+      await db
+        .update(tripLogs)
+        .set(cleared)
+        .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
+      return;
+    case "recipe":
+      await db
+        .update(customRecipes)
+        .set(cleared)
+        .where(and(eq(customRecipes.id, id), eq(customRecipes.userId, userId)));
+      return;
+    case "quiz":
+      await db
+        .update(customQuizzes)
+        .set(cleared)
+        .where(and(eq(customQuizzes.id, id), eq(customQuizzes.userId, userId)));
+      return;
+    case "shopping":
+      await db
+        .delete(shoppingShares)
+        .where(
+          and(eq(shoppingShares.id, id), eq(shoppingShares.userId, userId))
+        );
+      return;
+    case "track":
+      await db
+        .update(hikeTracks)
+        .set(cleared)
+        .where(and(eq(hikeTracks.id, id), eq(hikeTracks.userId, userId)));
+      return;
+    case "location":
+      await db
+        .delete(locationShares)
+        .where(
+          and(eq(locationShares.id, id), eq(locationShares.userId, userId))
+        );
+      return;
+  }
+}
+
 /**
  * Reise über den Dateinamen ihrer Buchungsbestätigung finden (#279) –
  * die Auslieferung prüft damit, dass die Datei wirklich dem Konto gehört.

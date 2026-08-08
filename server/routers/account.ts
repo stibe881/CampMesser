@@ -6,6 +6,7 @@
  */
 import { nanoid } from "nanoid";
 import { CALENDAR_TOKEN_LENGTH } from "@shared/calendarFeed";
+import { SHARE_LINK_KINDS } from "@shared/shareLinks";
 import {
   LANGUAGES,
   RAIN_THRESHOLD_MAX_MM,
@@ -50,6 +51,29 @@ export const accountRouters = {
       );
       return { token };
     }),
+  }),
+  /**
+   * Teil-Link-Übersicht (#422): alle aktiven Teil-Links des Kontos an
+   * einem Ort, samt Beenden. Erzeugt wird weiterhin am jeweiligen Ort –
+   * hier ist die Inventur.
+   */
+  shares: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const { sortShareLinks } = await import("@shared/shareLinks");
+      const entries = await db.getShareLinkOverview(ctx.user.id);
+      return sortShareLinks(entries, Date.now());
+    }),
+    revoke: protectedProcedure
+      .input(
+        z.object({
+          kind: z.enum(SHARE_LINK_KINDS),
+          id: z.number().int().positive(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.revokeShareLink(input.kind, input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
   }),
   home: router({
     /** Heim-Standort der Nutzer*in (null = keiner gesetzt). */
