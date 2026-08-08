@@ -344,6 +344,29 @@ export function hikingRoutesQuery(
   );
 }
 
+/**
+ * Overpass-QL für Velorouten im Umkreis (#478): gleiches Muster wie bei
+ * den Wanderrouten, nur mit route=bicycle bzw. route=mtb. Die Antwort
+ * lässt sich mit demselben parseHikingRoutes lesen – eine Route ist eine
+ * Route, nur die Tags sac_scale/ascent sind bei Velos seltener gepflegt.
+ */
+export function bicycleRoutesQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  const box = boundingBoxAround(lat, lon, radiusM);
+  const bbox = [box.south, box.west, box.north, box.east]
+    .map(v => v.toFixed(5))
+    .join(",");
+  const around = `${Math.round(radiusM)},${lat.toFixed(5)},${lon.toFixed(5)}`;
+  return (
+    `[out:json][timeout:25];` +
+    `relation["type"="route"]["route"~"^(bicycle|mtb)$"](around:${around});` +
+    `out geom(${bbox}) ${OVERPASS_HIKING_MAX_RESULTS};`
+  );
+}
+
 /** Punktreihe eines Relations-Mitglieds defensiv lesen (kaputte Punkte raus). */
 function parseGeometry(value: unknown): GeoPoint[] {
   if (!Array.isArray(value)) return [];

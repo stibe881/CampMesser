@@ -587,6 +587,17 @@ export default function SpotDetailPage() {
           />
         </LazySection>
 
+        {/* Velorouten (#478): derselbe Kasten, andere OSM-Routen */}
+        <LazySection minHeight={90}>
+          <NearbyHikes
+            mode="bicycle"
+            latitude={spot.latitude}
+            longitude={spot.longitude}
+            placeName={spot.name}
+            className="mb-4"
+          />
+        </LazySection>
+
         {/* Feuer- und Grillstellen aus OpenStreetMap (#247) – lädt erst beim
             Aufklappen, Overpass wird nie automatisch gefragt */}
         <LazySection minHeight={90}>

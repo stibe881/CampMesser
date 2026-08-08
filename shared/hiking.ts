@@ -60,6 +60,33 @@ export function walkingTimeMinutes(input: {
   return Math.round(hours * 60);
 }
 
+/** Reisetempo auf dem Velo in km/h – Tourenfahrt, nicht Rennrad (#478). */
+export const CYCLING_SPEED_KMH = 15;
+/** Zeitzuschlag pro 100 Höhenmeter Aufstieg in Minuten. */
+export const CYCLING_ASCENT_MIN_PER_100M = 6;
+
+/**
+ * Fahrzeit in Minuten (#478): Flachzeit bei Tourentempo plus Zuschlag für
+ * den Aufstieg. Bewusst einfacher als die SAC-Methode – auf dem Velo
+ * dominiert die Distanz, und die Höhenmeter sind in OSM bei Velorouten
+ * ohnehin selten gepflegt (dann ist es eine reine Flachzeit).
+ */
+export function cyclingTimeMinutes(input: {
+  lengthM: number;
+  ascentM?: number | null;
+}): number {
+  const lengthM = Number.isFinite(input.lengthM)
+    ? Math.max(0, input.lengthM)
+    : 0;
+  const ascentM =
+    typeof input.ascentM === "number" && Number.isFinite(input.ascentM)
+      ? Math.max(0, input.ascentM)
+      : 0;
+  const flatMinutes = (lengthM / 1000 / CYCLING_SPEED_KMH) * 60;
+  const climbMinutes = (ascentM / 100) * CYCLING_ASCENT_MIN_PER_100M;
+  return Math.round(flatMinutes + climbMinutes);
+}
+
 /**
  * Gehzeit lesbar machen. Geschätzte Zeiten werden auf 5 Minuten gerundet –
  * «2 h 07 min» wäre eine Scheingenauigkeit, die die Formel nicht hergibt.

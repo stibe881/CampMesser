@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  cyclingTimeMinutes,
   formatWalkingTime,
   HIKING_ASCENT_M_PER_H,
   HIKING_SPEED_KMH,
@@ -196,5 +197,19 @@ describe("nearestRoutePoint", () => {
   it("liefert null ohne Wegführung", () => {
     expect(nearestRoutePoint([], 46.5, 7.2)).toBeNull();
     expect(nearestRoutePoint([[]], 46.5, 7.2)).toBeNull();
+  });
+});
+
+describe("cyclingTimeMinutes (#478)", () => {
+  it("rechnet Tourentempo plus Aufstiegs-Zuschlag", () => {
+    // 30 km flach bei 15 km/h = 120 min
+    expect(cyclingTimeMinutes({ lengthM: 30_000 })).toBe(120);
+    // dazu 300 Hm à 6 min/100 m = +18 min
+    expect(cyclingTimeMinutes({ lengthM: 30_000, ascentM: 300 })).toBe(138);
+  });
+
+  it("behandelt Unsinn als 0", () => {
+    expect(cyclingTimeMinutes({ lengthM: Number.NaN })).toBe(0);
+    expect(cyclingTimeMinutes({ lengthM: 10_000, ascentM: -50 })).toBe(40);
   });
 });

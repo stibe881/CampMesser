@@ -3736,6 +3736,34 @@ export const it: Translation = {
   },
 
   /** Sentieri escursionistici nelle vicinanze (#238). */
+  nearbyBikes: {
+    sectionAria: "Percorsi ciclabili segnalati nei dintorni",
+    title: "Percorsi ciclabili nei dintorni",
+    subtitle: "Percorsi ciclabili segnalati attorno alla tua posizione.",
+    subtitleAtPlace: (place: string) =>
+      `Percorsi ciclabili segnalati attorno a ${place}.`,
+    searchButton: "Cerca percorsi",
+    loading: "Ricerca dei percorsi ciclabili …",
+    loadFailed:
+      "I percorsi ciclabili non possono essere caricati al momento. Overpass è un servizio gratuito che rallenta con troppe richieste – riprova tra qualche minuto.",
+    empty: (km: number) =>
+      `Nel raggio di ${km} km OpenStreetMap non riporta nessun percorso ciclabile segnalato. Prova con un raggio più grande.`,
+    resultCount: (n: number) =>
+      n === 1
+        ? "1 percorso ciclabile trovato"
+        : `${n} percorsi ciclabili trovati`,
+    durationLabel: "Tempo di percorrenza",
+    durationFlatOnly:
+      "Senza dati altimetrici in OpenStreetMap – il tempo vale per terreno pianeggiante.",
+    durationNote:
+      "Tempo di percorrenza come regola pratica: 15 km/h a ritmo turistico più 6 minuti ogni 100 m di salita. Le pause non sono comprese.",
+    network: {
+      icn: "Percorso ciclabile internazionale",
+      ncn: "Percorso ciclabile nazionale",
+      rcn: "Percorso ciclabile regionale",
+      lcn: "Percorso ciclabile locale",
+    },
+  },
   nearbyHikes: {
     sectionAria: "Sentieri escursionistici segnalati nei dintorni",
     title: "Escursioni nei dintorni",

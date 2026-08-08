@@ -3655,6 +3655,32 @@ export const en: Translation = {
   },
 
   /** Hiking routes nearby (#238). */
+  nearbyBikes: {
+    sectionAria: "Marked cycling routes nearby",
+    title: "Cycling routes nearby",
+    subtitle: "Marked cycling routes around your location.",
+    subtitleAtPlace: (place: string) =>
+      `Marked cycling routes around ${place}.`,
+    searchButton: "Search routes",
+    loading: "Searching for cycling routes …",
+    loadFailed:
+      "The cycling routes could not be loaded right now. Overpass is a free service and throttles heavy use – try again in a few minutes.",
+    empty: (km: number) =>
+      `No marked cycling route is mapped in OpenStreetMap within ${km} km. Try a larger radius.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 cycling route found" : `${n} cycling routes found`,
+    durationLabel: "Riding time",
+    durationFlatOnly:
+      "No elevation data in OpenStreetMap – the riding time assumes flat terrain.",
+    durationNote:
+      "Riding time as a rule of thumb: 15 km/h touring pace plus 6 minutes per 100 m of ascent. Breaks are not included.",
+    network: {
+      icn: "International cycling route",
+      ncn: "National cycling route",
+      rcn: "Regional cycling route",
+      lcn: "Local cycling route",
+    },
+  },
   nearbyHikes: {
     sectionAria: "Waymarked hiking routes in the area",
     title: "Hiking in the area",

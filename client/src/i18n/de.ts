@@ -3778,6 +3778,32 @@ export const de = {
   },
 
   /** Wanderwege in der Nähe (#238). */
+  nearbyBikes: {
+    sectionAria: "Markierte Velorouten in der Umgebung",
+    title: "Velorouten in der Umgebung",
+    subtitle: "Markierte Velorouten rund um deinen Standort.",
+    subtitleAtPlace: (place: string) =>
+      `Markierte Velorouten rund um ${place}.`,
+    searchButton: "Routen suchen",
+    loading: "Velorouten werden gesucht …",
+    loadFailed:
+      "Die Velorouten konnten gerade nicht geladen werden. Overpass ist ein freier Dienst und bremst bei zu vielen Anfragen – versuch es in ein paar Minuten nochmals.",
+    empty: (km: number) =>
+      `Im Umkreis von ${km} km ist in OpenStreetMap keine markierte Veloroute eingetragen. Versuch es mit einem grösseren Umkreis.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 Veloroute gefunden" : `${n} Velorouten gefunden`,
+    durationLabel: "Fahrzeit",
+    durationFlatOnly:
+      "Ohne Höhendaten in OpenStreetMap – die Fahrzeit gilt für flaches Gelände.",
+    durationNote:
+      "Fahrzeit als Faustregel: 15 km/h Tourentempo plus 6 Minuten pro 100 Höhenmeter Aufstieg. Pausen sind nicht enthalten.",
+    network: {
+      icn: "Internationale Veloroute",
+      ncn: "Nationale Veloroute",
+      rcn: "Regionale Veloroute",
+      lcn: "Lokale Veloroute",
+    },
+  },
   nearbyHikes: {
     sectionAria: "Markierte Wanderwege in der Umgebung",
     title: "Wandern in der Umgebung",

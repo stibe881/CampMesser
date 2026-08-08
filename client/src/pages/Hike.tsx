@@ -681,6 +681,8 @@ export default function HikePage() {
 
       {/* Wanderwege in der Nähe: OSM-Routen rund um den aktuellen Standort */}
       <NearbyHikes className="mt-6" />
+      {/* Velorouten (#478): derselbe Kasten, andere OSM-Routen */}
+      <NearbyHikes mode="bicycle" className="mt-6" />
 
       {/* Gespeicherte Wanderungen */}
       <div className="mb-3 mt-6 flex items-center justify-between gap-2">

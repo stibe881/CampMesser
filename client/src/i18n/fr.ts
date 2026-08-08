@@ -3768,6 +3768,34 @@ export const fr: Translation = {
   },
 
   /** Sentiers de randonnée à proximité (#238). */
+  nearbyBikes: {
+    sectionAria: "Itinéraires cyclables balisés à proximité",
+    title: "Itinéraires cyclables à proximité",
+    subtitle: "Itinéraires cyclables balisés autour de ta position.",
+    subtitleAtPlace: (place: string) =>
+      `Itinéraires cyclables balisés autour de ${place}.`,
+    searchButton: "Chercher des itinéraires",
+    loading: "Recherche d'itinéraires cyclables …",
+    loadFailed:
+      "Les itinéraires cyclables n'ont pas pu être chargés. Overpass est un service gratuit qui freine en cas de forte demande – réessaie dans quelques minutes.",
+    empty: (km: number) =>
+      `Aucun itinéraire cyclable balisé n'est cartographié dans OpenStreetMap dans un rayon de ${km} km. Essaie un rayon plus grand.`,
+    resultCount: (n: number) =>
+      n === 1
+        ? "1 itinéraire cyclable trouvé"
+        : `${n} itinéraires cyclables trouvés`,
+    durationLabel: "Temps de parcours",
+    durationFlatOnly:
+      "Pas de données d'altitude dans OpenStreetMap – le temps vaut pour un terrain plat.",
+    durationNote:
+      "Temps de parcours en règle générale : 15 km/h en rythme de randonnée plus 6 minutes par 100 m de montée. Les pauses ne sont pas comprises.",
+    network: {
+      icn: "Itinéraire cyclable international",
+      ncn: "Itinéraire cyclable national",
+      rcn: "Itinéraire cyclable régional",
+      lcn: "Itinéraire cyclable local",
+    },
+  },
   nearbyHikes: {
     sectionAria: "Sentiers de randonnée balisés aux alentours",
     title: "Randonner aux alentours",
