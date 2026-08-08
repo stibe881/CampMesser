@@ -10,6 +10,7 @@ import {
   EUR_RATE_MIN,
   toChfExpenses,
 } from "@shared/expenses";
+import { TRIP_KINDS, normalizeTripKind } from "@shared/tripKind";
 import {
   BUDGET_MAX_RAPPEN,
   EXPENSE_CATEGORIES,
@@ -130,6 +131,8 @@ export const tripsRouters = {
             spotId: z.number().int().positive().nullish(),
             packListId: z.number().int().positive().nullish(),
             location: z.string().max(140).nullish(),
+            // Reise-Art (#460); fehlt sie (alte Clients), gilt Camping
+            kind: z.enum(TRIP_KINDS).optional(),
             title: z.string().max(140).nullish(),
             notes: z.string().max(2000).nullish(),
             startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -180,6 +183,7 @@ export const tripsRouters = {
           spotId: input.spotId ?? null,
           packListId: input.packListId ?? null,
           location: input.location?.trim() || null,
+          kind: normalizeTripKind(input.kind),
           title: input.title?.trim() || null,
           notes: input.notes?.trim() || null,
           startDate: input.startDate,
@@ -311,6 +315,8 @@ export const tripsRouters = {
             spotId: z.number().int().positive().nullish(),
             packListId: z.number().int().positive().nullish(),
             location: z.string().max(140).nullish(),
+            // Reise-Art (#460); fehlt sie (alte Clients), bleibt sie stehen
+            kind: z.enum(TRIP_KINDS).optional(),
             title: z.string().max(140).nullish(),
             notes: z.string().max(2000).nullish(),
             startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -395,6 +401,10 @@ export const tripsRouters = {
           spotId,
           packListId: input.packListId ?? null,
           location,
+          // Ohne Angabe bleibt die gespeicherte Art unangetastet
+          ...(input.kind !== undefined
+            ? { kind: normalizeTripKind(input.kind) }
+            : {}),
           title: input.title?.trim() || null,
           notes: input.notes?.trim() || null,
           startDate: input.startDate,
@@ -474,6 +484,8 @@ export const tripsRouters = {
           spotId: isOwner ? trip.spotId : null,
           packListId: isOwner ? trip.packListId : null,
           location,
+          // Die Kopie ist dieselbe Art von Reise (#460)
+          kind: normalizeTripKind(trip.kind),
           title: trip.title,
           notes: null,
           startDate: input.startDate,

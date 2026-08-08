@@ -471,6 +471,13 @@ export const tripLogs = mysqlTable(
     spotId: int("spotId"),
     /** Freitext-Ort, falls kein Favorit verknüpft ist */
     location: varchar("location", { length: 140 }),
+    /**
+     * Reise-Art (#460, shared/tripKind.ts): camping, strand, hotel,
+     * staedte, wandern, velo, wintersport oder tagesausflug. Steuert,
+     * was die Heute-Ansicht in den Vordergrund stellt; Zeilen von vor
+     * der Spalte gelten als Camping.
+     */
+    kind: varchar("kind", { length: 16 }).notNull().default("camping"),
     title: varchar("title", { length: 140 }),
     notes: text("notes"),
     /** Anreise (erster Abend) */

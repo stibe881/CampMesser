@@ -2498,6 +2498,9 @@ export const en: Translation = {
         .filter(Boolean)
         .join(" · "),
     yearCompareTitle: "Nights per year",
+    kindLabel: "Trip type",
+    kindHint:
+      "Controls what the Today view highlights during the trip – every module stays available.",
     arrivalLabel: "Arrival",
     departureLabel: "Departure",
     titleLabel: "Title (optional)",

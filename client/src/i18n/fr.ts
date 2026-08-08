@@ -2579,6 +2579,9 @@ export const fr: Translation = {
         .filter(Boolean)
         .join(" · "),
     yearCompareTitle: "Nuitées par année",
+    kindLabel: "Type de voyage",
+    kindHint:
+      "Détermine ce que la vue Aujourd’hui met en avant pendant le voyage – tous les modules restent accessibles.",
     arrivalLabel: "Arrivée",
     departureLabel: "Départ",
     titleLabel: "Titre (facultatif)",
