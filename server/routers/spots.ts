@@ -428,6 +428,22 @@ export const spotsRouters = {
         });
         return { success: true } as const;
       }),
+    /** Anpinnen (#455): Wichtiges bleibt oben statt zu verschwinden. */
+    setPinned: protectedProcedure
+      .input(z.object({ id: z.number().int().positive(), pinned: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        const note = await db.getUserNote(input.id, ctx.user.id);
+        if (!note) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Notiz nicht gefunden.",
+          });
+        }
+        await db.updateUserNote(input.id, ctx.user.id, {
+          pinned: input.pinned,
+        });
+        return { success: true } as const;
+      }),
     remove: protectedProcedure
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(async ({ ctx, input }) => {

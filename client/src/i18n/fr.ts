@@ -6233,6 +6233,8 @@ export const fr: Translation = {
     deleteConfirm: "Supprimer vraiment cette note ?",
     editAria: (title: string) => `Modifier la note ${title}`,
     deleteAria: (title: string) => `Supprimer la note ${title}`,
+    pinAria: (title: string) => `Épingler ${title}`,
+    unpinAria: (title: string) => `Détacher ${title}`,
     photoLabel: "Photo (facultatif)",
     photoChoose: "Choisir une photo",
     photoChange: "Changer la photo",

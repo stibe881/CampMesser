@@ -6190,6 +6190,8 @@ export const it: Translation = {
     deleteConfirm: "Vuoi davvero eliminare questa nota?",
     editAria: (title: string) => `Modifica la nota ${title}`,
     deleteAria: (title: string) => `Elimina la nota ${title}`,
+    pinAria: (title: string) => `Fissa ${title}`,
+    unpinAria: (title: string) => `Sblocca ${title}`,
     photoLabel: "Foto (facoltativa)",
     photoChoose: "Scegli foto",
     photoChange: "Cambia foto",

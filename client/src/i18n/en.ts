@@ -6069,6 +6069,8 @@ export const en: Translation = {
     deleteConfirm: "Really delete this note?",
     editAria: (title: string) => `Edit note ${title}`,
     deleteAria: (title: string) => `Delete note ${title}`,
+    pinAria: (title: string) => `Pin ${title}`,
+    unpinAria: (title: string) => `Unpin ${title}`,
     photoLabel: "Photo (optional)",
     photoChoose: "Choose photo",
     photoChange: "Change photo",

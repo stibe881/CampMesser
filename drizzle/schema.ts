@@ -1822,6 +1822,12 @@ export const userNotes = mysqlTable(
      * Schild mit den Platzregeln. null = ohne Foto.
      */
     fileName: varchar("fileName", { length: 64 }),
+    /**
+     * Angepinnt (#455): Wichtiges (Gasflaschen-Typ, WLAN-Passwort) bleibt
+     * oben, statt unter neuen Notizen zu verschwinden. Innerhalb der
+     * angepinnten gilt weiterhin «zuletzt geändert zuerst».
+     */
+    pinned: boolean("pinned").notNull().default(false),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },

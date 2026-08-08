@@ -6236,6 +6236,8 @@ export const de = {
     deleteConfirm: "Diese Notiz wirklich löschen?",
     editAria: (title: string) => `Notiz ${title} bearbeiten`,
     deleteAria: (title: string) => `Notiz ${title} löschen`,
+    pinAria: (title: string) => `${title} anpinnen`,
+    unpinAria: (title: string) => `${title} lösen`,
     photoLabel: "Foto (optional)",
     photoChoose: "Foto auswählen",
     photoChange: "Foto ändern",
