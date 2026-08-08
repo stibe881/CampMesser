@@ -6192,6 +6192,14 @@ export const en: Translation = {
       "Sign-ins from before this overview only appear after that device's next sign-in.",
   },
   fuelLog: {
+    csvButton: "Export as CSV",
+    csvHeaders: [
+      "Date",
+      "Odometer",
+      "Litres",
+      "Amount CHF",
+      "Consumption l/100 km",
+    ],
     title: "Fuel log",
     subtitle: "Fill-ups with odometer reading – for your real consumption.",
     loginFeature: "the fuel log",

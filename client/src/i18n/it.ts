@@ -6315,6 +6315,14 @@ export const it: Translation = {
       "Gli accessi precedenti a questa panoramica compaiono solo dopo il prossimo accesso del dispositivo.",
   },
   fuelLog: {
+    csvButton: "Esporta come CSV",
+    csvHeaders: [
+      "Data",
+      "Chilometraggio",
+      "Litri",
+      "Importo CHF",
+      "Consumo l/100 km",
+    ],
     title: "Libretto carburante",
     subtitle: "I pieni con chilometraggio – per il consumo reale.",
     loginFeature: "il libretto carburante",

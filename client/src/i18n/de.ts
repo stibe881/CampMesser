@@ -6362,6 +6362,14 @@ export const de = {
       "Anmeldungen von vor dieser Übersicht erscheinen erst nach der nächsten Anmeldung des jeweiligen Geräts.",
   },
   fuelLog: {
+    csvButton: "Als CSV exportieren",
+    csvHeaders: [
+      "Datum",
+      "Kilometerstand",
+      "Liter",
+      "Betrag CHF",
+      "Verbrauch l/100 km",
+    ],
     title: "Tankbuch",
     subtitle: "Tankfüllungen mit Kilometerstand – daraus der echte Verbrauch.",
     loginFeature: "das Tankbuch",

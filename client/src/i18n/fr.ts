@@ -6356,6 +6356,14 @@ export const fr: Translation = {
       "Les connexions antérieures à cet aperçu n'apparaissent qu'après la prochaine connexion de l'appareil concerné.",
   },
   fuelLog: {
+    csvButton: "Exporter en CSV",
+    csvHeaders: [
+      "Date",
+      "Kilométrage",
+      "Litres",
+      "Montant CHF",
+      "Consommation l/100 km",
+    ],
     title: "Carnet de carburant",
     subtitle: "Les pleins avec kilométrage – pour la consommation réelle.",
     loginFeature: "le carnet de carburant",
