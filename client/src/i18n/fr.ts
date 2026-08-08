@@ -4475,6 +4475,10 @@ export const fr: Translation = {
     sourceNightly: "d'après le prix par nuit",
     nothingYet: "Rien à calculer encore : indique le nombre.",
     oneOffPart: (amount: string) => `plus forfait unique ${amount}`,
+    seasonPart: (name: string, nights: number, perNight: string) =>
+      `${name} : ${nights} nuit${nights === 1 ? "" : "s"} × ${perNight}`,
+    seasonSplitNote:
+      "Le séjour s'étend sur plusieurs périodes tarifaires – chaque nuit est comptée au tarif valable ce jour-là.",
     addToExpenses: "Dans la caisse",
     foreignCurrency: (currency: string) =>
       `La caisse de voyage est tenue en CHF – merci de saisir les montants en ${currency} à la main.`,

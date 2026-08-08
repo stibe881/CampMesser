@@ -36,8 +36,10 @@ import {
 import {
   cleanCount,
   emptyCounts,
+  estimateAcrossSeasons,
   estimatePitchCost,
   nightsBetween,
+  nightsPerTariff,
   type CountedRow,
 } from "@shared/pitchCostEstimate";
 import { cn } from "@/lib/utils";
@@ -113,6 +115,30 @@ export default function PitchCostEstimator({
     estimate?.source === "tariff"
       ? (tariff?.currency ?? DEFAULT_TARIFF_CURRENCY)
       : DEFAULT_TARIFF_CURRENCY;
+  // Saisonwechsel (#420): Liegt der Aufenthalt in mehreren
+  // Tarif-Zeiträumen, wird je Nacht der gültige Tarif gerechnet. Nur bei
+  // EINER Währung über alle Teile – EUR-Nächte mit CHF-Nächten zu
+  // addieren wäre eine Zahl ohne Bedeutung.
+  const seasonParts =
+    tariffs.length > 1
+      ? nightsPerTariff(tariffs, startDate, endDate, tariffIndex)
+      : [];
+  const multiSeason =
+    new Set(seasonParts.map(part => part.tariffIndex)).size > 1 &&
+    seasonParts.every(
+      part => (tariffs[part.tariffIndex]?.currency ?? currency) === currency
+    );
+  const seasonEstimate =
+    multiSeason && estimate?.source === "tariff"
+      ? estimateAcrossSeasons({
+          tariffs,
+          rows,
+          startDate,
+          endDate,
+          fallbackIndex: tariffIndex,
+        })
+      : null;
+  const totalRappen = seasonEstimate?.totalRappen ?? estimate?.totalRappen;
 
   // Ohne Platz oder ohne jede Preisangabe gibt es nichts zu rechnen.
   if (spotId === null) return null;
@@ -210,24 +236,50 @@ export default function PitchCostEstimator({
             <p className="text-xs text-muted-foreground">{pc.nightlyOnly}</p>
           )}
 
-          {estimate ? (
+          {estimate && totalRappen !== undefined ? (
             <>
               <p className="font-serif text-xl font-bold">
-                {formatRappen(estimate.totalRappen, lang, currency)}
+                {formatRappen(totalRappen, lang, currency)}
               </p>
-              <p className="text-xs text-muted-foreground">
-                {pc.breakdown(
-                  formatRappen(estimate.perNightRappen, lang, currency),
-                  estimate.nights
-                )}
-                {/* Einmaliges (#415) steht getrennt – es skaliert nicht
-                    mit den Nächten und soll auch nicht so aussehen. */}
-                {estimate.oneOffRappen > 0 &&
-                  ` · ${pc.oneOffPart(
-                    formatRappen(estimate.oneOffRappen, lang, currency)
-                  )}`}
-                {estimate.source === "nightly" && ` · ${pc.sourceNightly}`}
-              </p>
+              {seasonEstimate ? (
+                <div className="text-xs text-muted-foreground">
+                  {seasonEstimate.parts.map(part => (
+                    <p key={part.tariffIndex}>
+                      {pc.seasonPart(
+                        tariffs[part.tariffIndex]?.name ?? "?",
+                        part.nights,
+                        formatRappen(part.perNightRappen, lang, currency)
+                      )}
+                    </p>
+                  ))}
+                  {seasonEstimate.oneOffRappen > 0 && (
+                    <p>
+                      {pc.oneOffPart(
+                        formatRappen(
+                          seasonEstimate.oneOffRappen,
+                          lang,
+                          currency
+                        )
+                      )}
+                    </p>
+                  )}
+                  <p>{pc.seasonSplitNote}</p>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {pc.breakdown(
+                    formatRappen(estimate.perNightRappen, lang, currency),
+                    estimate.nights
+                  )}
+                  {/* Einmaliges (#415) steht getrennt – es skaliert nicht
+                      mit den Nächten und soll auch nicht so aussehen. */}
+                  {estimate.oneOffRappen > 0 &&
+                    ` · ${pc.oneOffPart(
+                      formatRappen(estimate.oneOffRappen, lang, currency)
+                    )}`}
+                  {estimate.source === "nightly" && ` · ${pc.sourceNightly}`}
+                </p>
+              )}
               {/* Die Reisekasse wird in CHF geführt (#219). Einen
                   EUR-Betrag als CHF einzutragen wäre eine falsche Zahl
                   mit einem Knopfdruck – dann lieber kein Knopf und ein
@@ -240,7 +292,7 @@ export default function PitchCostEstimator({
                   onClick={() =>
                     addMutation.mutate({
                       tripId,
-                      amountRappen: estimate.totalRappen,
+                      amountRappen: totalRappen,
                       category: "camping",
                       description: pc.expenseLabel(estimate.nights),
                       day: startDate,

@@ -4445,6 +4445,10 @@ export const it: Translation = {
     sourceNightly: "dal prezzo per notte",
     nothingYet: "Ancora niente da calcolare: inserisci il numero.",
     oneOffPart: (amount: string) => `più una tantum ${amount}`,
+    seasonPart: (name: string, nights: number, perNight: string) =>
+      `${name}: ${nights} nott${nights === 1 ? "e" : "i"} × ${perNight}`,
+    seasonSplitNote:
+      "Il soggiorno copre più periodi tariffari – ogni notte è conteggiata alla tariffa valida quel giorno.",
     addToExpenses: "Nella cassa",
     foreignCurrency: (currency: string) =>
       `La cassa di viaggio è tenuta in CHF – inserisci a mano gli importi in ${currency}.`,

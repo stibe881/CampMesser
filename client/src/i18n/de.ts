@@ -4481,6 +4481,10 @@ export const de = {
     sourceNightly: "aus dem Preis pro Nacht",
     nothingYet: "Noch nichts zu rechnen: Anzahl eintragen.",
     oneOffPart: (amount: string) => `dazu einmalig ${amount}`,
+    seasonPart: (name: string, nights: number, perNight: string) =>
+      `${name}: ${nights} ${nights === 1 ? "Nacht" : "Nächte"} × ${perNight}`,
+    seasonSplitNote:
+      "Der Aufenthalt liegt in mehreren Tarif-Zeiträumen – gerechnet wird je Nacht der gültige Tarif.",
     addToExpenses: "In die Reisekasse",
     foreignCurrency: (currency: string) =>
       `Die Reisekasse wird in CHF geführt – Beträge in ${currency} bitte von Hand eintragen.`,

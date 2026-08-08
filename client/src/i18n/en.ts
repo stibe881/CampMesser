@@ -4353,6 +4353,10 @@ export const en: Translation = {
     sourceNightly: "from the price per night",
     nothingYet: "Nothing to work out yet: enter the numbers.",
     oneOffPart: (amount: string) => `plus one-off ${amount}`,
+    seasonPart: (name: string, nights: number, perNight: string) =>
+      `${name}: ${nights} night${nights === 1 ? "" : "s"} × ${perNight}`,
+    seasonSplitNote:
+      "The stay spans several rate periods – each night is charged at the rate valid on that date.",
     addToExpenses: "Add to the kitty",
     foreignCurrency: (currency: string) =>
       `The travel kitty is kept in CHF – please add amounts in ${currency} by hand.`,
