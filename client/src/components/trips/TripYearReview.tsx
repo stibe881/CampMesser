@@ -176,7 +176,7 @@ export default function TripYearReview({
       ) {
         await navigator.share({
           files: [file],
-          title: `CampMesser · ${t.trips.yearReviewTitle} ${yearReview.year}`,
+          title: `ReiseKompass · ${t.trips.yearReviewTitle} ${yearReview.year}`,
         });
       } else {
         const url = URL.createObjectURL(blob);

@@ -11,7 +11,7 @@
  *    gefragt, sondern nur auf einen ausdrücklichen Klick.
  * 2. Ehrlichkeit vor Vollständigkeit: gedeckt, Brennholz und Trinkwasser
  *    stehen nur dort, wo die Tags in OSM gepflegt sind. Fehlt ein Tag,
- *    behauptet CampMesser nichts – dann steht schlicht nichts da.
+ *    behauptet ReiseKompass nichts – dann steht schlicht nichts da.
  *
  * Ob am gewählten Tag überhaupt gefeuert werden darf, sagt nicht OSM, sondern
  * die Waldbrandgefahr-Anzeige im Wetter-Modul. Statt den Text zu doppeln,

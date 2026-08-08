@@ -1,5 +1,5 @@
 /**
- * CampMesser-Bildmarke: die aufgeklappte Klinge eines Taschenmessers, deren
+ * ReiseKompass-Bildmarke: die aufgeklappte Klinge eines Taschenmessers, deren
  * Rücken schräg nach rechts oben in eine Spitze läuft. Der Griff darunter
  * trägt den Nietenpunkt. Klinge und Griff bilden zusammen die Andeutung eines
  * Zeltes – Werkzeug und Camping in einem Zeichen.

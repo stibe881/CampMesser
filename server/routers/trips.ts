@@ -1865,7 +1865,7 @@ export const tripsRouters = {
     }),
     /**
      * Gästebuch-Eintrag über den TEIL-LINK (#254) – der einzige Weg, auf dem
-     * jemand ohne Konto in CampMesser schreibt. Deshalb drei Bremsen: Der
+     * jemand ohne Konto in ReiseKompass schreibt. Deshalb drei Bremsen: Der
      * Token muss gültig und unverfallen sein, pro IP sind es höchstens fünf
      * Einträge pro Stunde, und ein Foto kann ein Gast nicht anhängen (ein
      * anonymer Upload-Pfad wäre eine offene Tür).
@@ -2047,7 +2047,7 @@ export const tripsRouters = {
           menuDayNotes: dayNotes.map(n => ({ day: n.day, note: n.note })),
           packList,
           // Gästebuch (#254): Ohne Konto-Bezug – ein Gast soll nicht sehen,
-          // welche Zeile zu welchem CampMesser-Konto gehört; ob der Eintrag
+          // welche Zeile zu welchem ReiseKompass-Konto gehört; ob der Eintrag
           // von jemandem mit Konto stammt, reicht als Unterscheidung.
           guestbook: guestbook.map(entry => ({
             id: entry.id,

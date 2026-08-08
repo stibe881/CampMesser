@@ -45,7 +45,7 @@ export default function ImpressumPage() {
         <section>
           <h2 className="mb-1 font-serif text-base font-semibold">Haftung</h2>
           <p className="text-muted-foreground">
-            CampMesser ist ein privates Projekt ohne kommerzielle Absicht. Die
+            ReiseKompass ist ein privates Projekt ohne kommerzielle Absicht. Die
             Inhalte (Wetterdaten, Warnungen, Ratgeber, Rechenwerte) sind mit
             Sorgfalt zusammengestellt, bleiben aber Hinweise ohne Gewähr –
             massgeblich sind immer die amtlichen Stellen, die Platzordnung und
@@ -58,7 +58,7 @@ export default function ImpressumPage() {
             Datenschutz
           </h2>
           <p className="text-muted-foreground">
-            Wie CampMesser mit Daten umgeht, steht in der{" "}
+            Wie ReiseKompass mit Daten umgeht, steht in der{" "}
             <Link
               href="/datenschutz"
               className="font-medium text-primary hover:underline"

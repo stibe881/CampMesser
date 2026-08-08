@@ -65,7 +65,7 @@ export default function DatenschutzPage() {
             2. Konto und eigene Inhalte
           </h2>
           <p className="text-muted-foreground">
-            Für ein Konto speichert CampMesser deine E-Mail-Adresse, das
+            Für ein Konto speichert ReiseKompass deine E-Mail-Adresse, das
             Passwort ausschliesslich als Hash (oder einen Passkey) sowie die
             Inhalte, die du selbst anlegst: Reisen, Pack- und Einkaufslisten,
             Plätze, Fotos, Notizen, Einstellungen und Ähnliches. Zweck ist
@@ -92,7 +92,7 @@ export default function DatenschutzPage() {
             4. Cookies und lokale Speicherung
           </h2>
           <p className="text-muted-foreground">
-            CampMesser verwendet ausschliesslich technisch notwendige Cookies
+            ReiseKompass verwendet ausschliesslich technisch notwendige Cookies
             (Anmelde-Sitzung) und die lokale Speicherung des Geräts
             (Einstellungen, Offline-Daten). Es gibt kein Tracking, keine Werbung
             und keine Analyse-Dienste – deshalb auch keinen
@@ -109,8 +109,9 @@ export default function DatenschutzPage() {
             erhält der jeweilige Dienst technisch bedingt deine IP-Adresse und
             die angefragten Koordinaten (z. B. die deines Platzes).
             Standortdaten deines Geräts werden nur mit deiner Freigabe im
-            Browser/Betriebssystem verwendet und nicht auf dem CampMesser-Server
-            gespeichert, ausser du legst sie selbst ab (z. B. als Platz).
+            Browser/Betriebssystem verwendet und nicht auf dem
+            ReiseKompass-Server gespeichert, ausser du legst sie selbst ab (z.
+            B. als Platz).
           </p>
           <ul className="space-y-1 text-muted-foreground">
             {EXTERNAL_SERVICES.map(service => (

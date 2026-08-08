@@ -1,6 +1,6 @@
 /**
  * Cookie-Hinweis (#409) – NUR IM WEB, und bewusst ein HINWEIS, kein
- * Einwilligungs-Banner: CampMesser setzt ausschliesslich technisch
+ * Einwilligungs-Banner: ReiseKompass setzt ausschliesslich technisch
  * notwendige Cookies (Anmelde-Sitzung) und lokale Speicherung, kein
  * Tracking. Dafür verlangen revDSG und DSGVO keine Einwilligung – ein
  * «Alle akzeptieren»-Theater wäre eine Zumutung ohne Rechtsgrund. In der

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Sichert die CampMesser-Datenbank per mysqldump mit Rotation.
+# Sichert die ReiseKompass-Datenbank per mysqldump mit Rotation.
 # Aufruf (z. B. täglich per Cronjob in konsoleH):
 #   bash ~/campmesser/scripts/backup-db.sh
 # Optional per Umgebungsvariablen: BACKUP_DIR (Ziel), KEEP (Anzahl Sicherungen)

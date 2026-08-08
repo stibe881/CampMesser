@@ -2,7 +2,7 @@ import AppIntents
 import SwiftUI
 import WidgetKit
 
-/// Die Widgets von CampMesser (#325, #327).
+/// Die Widgets von ReiseKompass (#325, #327).
 ///
 /// DREI STÜCK, NICHT ZEHN: Ein Widget wird im Vorbeigehen angeschaut,
 /// nicht gelesen. Jedes beantwortet eine Frage oder nimmt einen Handgriff
@@ -301,7 +301,7 @@ struct TaskWidget: Widget {
 // MARK: - Bündel
 
 @main
-struct CampMesserWidgets: WidgetBundle {
+struct ReiseKompassWidgets: WidgetBundle {
   var body: some Widget {
     TripWidget()
     SupplyWidget()

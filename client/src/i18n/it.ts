@@ -117,7 +117,7 @@ export const it: Translation = {
     recentSearchesClear: "cancella",
     heroImageAlt:
       "Tenda con pannelli solari e falò davanti alle Alpi svizzere al tramonto",
-    heroKicker: "Il tuo coltellino svizzero per il campeggio in tenda",
+    heroKicker: "La tua bussola per vacanze, campeggio e gite",
     greeting: {
       morning: (name: string) => `Buongiorno, ${name}`,
       day: (name: string) => `Buongiorno, ${name}`,
@@ -235,7 +235,7 @@ export const it: Translation = {
     openAria: title => `Apri ${title}`,
     onboardingTitle: "Primi passi",
     onboardingSubtitle:
-      "Ecco come preparare CampMesser per la tua prossima avventura.",
+      "Ecco come preparare ReiseKompass per la tua prossima avventura.",
     onboardingDismissAria: "Nascondi la scheda dei primi passi",
     onboardingSteps: {
       account: "Crea un account o accedi",
@@ -252,7 +252,7 @@ export const it: Translation = {
   login: {
     title: "Accedi",
     subtitle:
-      "Con il tuo account CampMesser salvi liste bagagli, inventario e piazzole e le usi su tutti i tuoi dispositivi.",
+      "Con il tuo account ReiseKompass salvi liste bagagli, inventario e piazzole e le usi su tutti i tuoi dispositivi.",
     resetTitle: "Reimposta la password",
     resetSubtitle:
       "Indica l'indirizzo e-mail del tuo account – ti inviamo un link con cui puoi impostare una nuova password.",
@@ -379,7 +379,7 @@ export const it: Translation = {
       "Tutti i tuoi dati saranno eliminati irrevocabilmente. Conferma con la tua password.",
     passwordLabel: "Password",
     deleteFinal: "Elimina definitivamente",
-    versionLine: version => `CampMesser versione ${version}`,
+    versionLine: version => `ReiseKompass versione ${version}`,
     buildDate: date => ` · build del ${date}`,
     notificationsTitle: "Notifiche",
     pushDeviceTitle: "Push su questo dispositivo",
@@ -688,19 +688,19 @@ export const it: Translation = {
   packListPrint: {
     docTitle: name => `${name} – lista bagagli da stampare`,
     docTitleFallback: "Lista bagagli",
-    appTitle: "CampMesser – il coltellino svizzero per il campeggio in tenda",
+    appTitle: "ReiseKompass – la tua bussola per vacanze, campeggio e gite",
     notFound: "Questa lista bagagli non è stata trovata.",
     printButton: "Stampa / Salva come PDF",
     printBrowserHint:
       "Nell'app installata il pulsante apre la vista nel browser – da lì stampa o salva come PDF dal menu.",
-    headerKicker: "CampMesser · Lista bagagli",
+    headerKicker: "ReiseKompass · Lista bagagli",
     meta: (items, categories) =>
       `${items} ${items === 1 ? "voce" : "voci"} · ${categories} ${categories === 1 ? "categoria" : "categorie"}`,
     printedOn: date => `Stato: ${date}`,
     personFilterInfo: name => `Solo le voci di ${name}`,
     emptyList: "Questa lista non contiene voci.",
     footer:
-      "Niente di dimenticato – buon viaggio! · CampMesser – il coltellino svizzero per il campeggio in tenda",
+      "Niente di dimenticato – buon viaggio! · ReiseKompass – la tua bussola per vacanze, campeggio e gite",
   },
   sharedPackList: {
     loadingShared: "Caricamento della lista condivisa …",
@@ -1890,7 +1890,7 @@ export const it: Translation = {
     pushDisabled: "Allerte maltempo disattivate",
     pushTitle: "Allerte maltempo per le tue piazzole",
     pushDesc:
-      "Notifica push in caso di tempesta, temporale o pioggia intensa su una delle tue piazzole salvate. CampMesser ti ricorda inoltre quando gli alimenti nel frigo box stanno per scadere – e 3 giorni prima di un soggiorno pianificato, con lo stato della lista bagagli.",
+      "Notifica push in caso di tempesta, temporale o pioggia intensa su una delle tue piazzole salvate. ReiseKompass ti ricorda inoltre quando gli alimenti nel frigo box stanno per scadere – e 3 giorni prima di un soggiorno pianificato, con lo stato della lista bagagli.",
     pushSaveFirst: "Salva prima una piazzola.",
     pushProfileHint: "Impostazioni dettagliate nel profilo →",
     pushAria: "Attiva le allerte maltempo per le piazzole salvate",
@@ -2199,7 +2199,7 @@ export const it: Translation = {
     costEstimate: (nights: number, amount: string) =>
       `Le tue ${nights === 1 ? "1 notte" : `${nights} notti`} qui fanno circa ${amount} – stima approssimativa.`,
     costHint:
-      "È solo una stima: CampMesser non conosce sconti, bambini, cane o supplementi stagionali. Quanto hai pagato davvero è nella cassa del viaggio corrispondente.",
+      "È solo una stima: ReiseKompass non conosce sconti, bambini, cane o supplementi stagionali. Quanto hai pagato davvero è nella cassa del viaggio corrispondente.",
     costDialogTitle: "Modifica il costo per notte",
     costDialogDesc:
       "Entrambi i campi sono facoltativi – lasciarli vuoti significa «non registrato».",
@@ -2302,11 +2302,11 @@ export const it: Translation = {
     arrived: "Ci sei quasi – guardati attorno!",
     compassActivate: "Attiva la bussola",
     compassActivateHint:
-      "Perché la freccia possa ruotare, CampMesser ha bisogno di accedere alla bussola del tuo dispositivo.",
+      "Perché la freccia possa ruotare, ReiseKompass ha bisogno di accedere alla bussola del tuo dispositivo.",
     movementHint:
       "Direzione ricavata dal tuo movimento – la freccia è corretta solo finché avanzi.",
     noCompassHint:
-      "Nessuna bussola disponibile: la freccia non può ruotare. Orientati con il punto cardinale – oppure fai qualche passo e CampMesser ricaverà la direzione dal tuo movimento.",
+      "Nessuna bussola disponibile: la freccia non può ruotare. Orientati con il punto cardinale – oppure fai qualche passo e ReiseKompass ricaverà la direzione dal tuo movimento.",
     mapTitle: "Mini-mappa",
     mapAria: "Mappa con la tua posizione e le tue mete salvate",
     mapHint: "Punto blu: la tua posizione. Tocca un pin per puntare la meta.",
@@ -2326,7 +2326,7 @@ export const it: Translation = {
     loginFeature: "le escursioni salvate",
     recorderTitle: "Registrazione",
     recorderIntro:
-      "All'avvio CampMesser imposta il GPS sull'alta precisione. Le misure imprecise e i salti vengono filtrati, così distanza e dislivello sono corretti. La registrazione continua anche se cambi pagina.",
+      "All'avvio ReiseKompass imposta il GPS sull'alta precisione. Le misure imprecise e i salti vengono filtrati, così distanza e dislivello sono corretti. La registrazione continua anche se cambi pagina.",
     start: "Avvia la registrazione",
     pause: "Pausa",
     resume: "Riprendi",
@@ -2410,7 +2410,7 @@ export const it: Translation = {
     title: "Sono qui",
     desc: "Manda ai tuoi compagni di viaggio un link con la tua posizione attuale. Il link scade automaticamente e puoi disattivarlo quando vuoi.",
     loginHint:
-      "Per condividere la tua posizione ti serve un account CampMesser.",
+      "Per condividere la tua posizione ti serve un account ReiseKompass.",
     validityLabel: "Valido",
     validityAria: "Durata di validità del link della posizione",
     validityHours: (h: number) => (h === 1 ? "1 ora" : `${h} ore`),
@@ -2451,7 +2451,7 @@ export const it: Translation = {
     invalidHint:
       "I link della posizione scadono dopo poco tempo o vengono disattivati a mano. Chiedi un nuovo link.",
     expiresNote: (date: string) => `Questo link è valido fino al ${date}.`,
-    footer: "Condiviso con CampMesser",
+    footer: "Condiviso con ReiseKompass",
   },
   sharedSpot: {
     tariffsTitle: "Tariffe",
@@ -2473,7 +2473,7 @@ export const it: Translation = {
     contactCheckin: "Check-in",
     contactParcel: "Piazzola",
     footer:
-      "Condiviso con CampMesser – il coltellino svizzero per il campeggio in tenda.",
+      "Condiviso con ReiseKompass – la tua bussola per vacanze, campeggio e gite.",
   },
   trips: {
     detailSubtitle: "Un soggiorno in dettaglio",
@@ -2516,7 +2516,7 @@ export const it: Translation = {
     collageButton: "Collage di foto",
     collageTitle: "Collage di foto",
     collageDescription:
-      "Scegli le foto e la disposizione – CampMesser ne fa un'immagine da condividere, con nome del viaggio e periodo.",
+      "Scegli le foto e la disposizione – ReiseKompass ne fa un'immagine da condividere, con nome del viaggio e periodo.",
     collageLayoutLabel: "Disposizione",
     collageLayoutNames: {
       grid2: "Griglia 2×2",
@@ -2722,7 +2722,7 @@ export const it: Translation = {
     membersButton: "Compagni di viaggio",
     membersAria: name => `Gestisci i compagni di viaggio di ${name}`,
     membersDialogDesc:
-      "Invita altri account CampMesser – i compagni di viaggio possono vedere e modificare il viaggio (solo tu puoi eliminarlo).",
+      "Invita altri account ReiseKompass – i compagni di viaggio possono vedere e modificare il viaggio (solo tu puoi eliminarlo).",
     membersListTitle: "Compagni di viaggio",
     membersOwnerBadge: "Proprietario/a",
     memberRemoveAria: name => `Rimuovi ${name} dal viaggio`,
@@ -2987,17 +2987,17 @@ export const it: Translation = {
     packListNotShared:
       "Questa lista bagagli al momento non è condivisa separatamente – solo visualizzazione, non si può spuntare.",
     footer:
-      "Condiviso con CampMesser – il coltellino svizzero per il campeggio in tenda.",
+      "Condiviso con ReiseKompass – la tua bussola per vacanze, campeggio e gite.",
   },
   tripPrint: {
     docTitle: name => `${name} – Rapporto di viaggio da stampare`,
     docTitleFallback: "Rapporto di viaggio",
-    appTitle: "CampMesser – Il coltellino svizzero per il campeggio in tenda",
+    appTitle: "ReiseKompass – La tua bussola per vacanze, campeggio e gite",
     notFound: "Questo soggiorno non è stato trovato.",
     printButton: "Stampa / Salva come PDF",
     printBrowserHint:
       "Nell'app installata questo pulsante apre la vista nel browser – lì stampa o salva come PDF dal menu.",
-    headerKicker: "CampMesser · Rapporto di viaggio",
+    headerKicker: "ReiseKompass · Rapporto di viaggio",
     printedOn: date => `Stato: ${date}`,
     ratingAria: n => `Valutazione: ${n} stelle su 5`,
     notesTitle: "Note",
@@ -3006,7 +3006,7 @@ export const it: Translation = {
     photosTitle: "Foto",
     photoAlt: (n, name) => `Foto ${n} del soggiorno ${name}`,
     footer:
-      "Bei ricordi! · CampMesser – il coltellino svizzero per il campeggio in tenda",
+      "Bei ricordi! · ReiseKompass – la tua bussola per vacanze, campeggio e gite",
   },
   firstAid: {
     title: "Guida di primo soccorso",
@@ -3629,7 +3629,7 @@ export const it: Translation = {
     outsideRiskArea: (region: string) =>
       `Il Cantone ${region} non rientra nelle aree a rischio TBE dell'UFSP. Le zecche ci sono lo stesso – la borreliosi si trasmette a prescindere da questa classificazione.`,
     outsideSwitzerland:
-      "Fuori dalla Svizzera CampMesser non fornisce una classificazione TBE. Informati sul tuo paese di destinazione prima di partire.",
+      "Fuori dalla Svizzera ReiseKompass non fornisce una classificazione TBE. Informati sul tuo paese di destinazione prima di partire.",
     switzerlandGeneral:
       "In Svizzera tutto il paese è considerato area a rischio TBE – tranne i Cantoni Ginevra e Ticino.",
     tipsTitle: "Come prevenire",
@@ -3696,7 +3696,7 @@ export const it: Translation = {
       `I prossimi passaggi visibili della stazione spaziale vicino a ${place}.`,
     loading: "Calcolo dei passaggi …",
     noLocation:
-      "Per i passaggi CampMesser ha bisogno della tua posizione – autorizza la localizzazione o salva una piazzola.",
+      "Per i passaggi ReiseKompass ha bisogno della tua posizione – autorizza la localizzazione o salva una piazzola.",
     loadFailed:
       "Al momento non è stato possibile caricare i passaggi. Riprova più tardi.",
     noneVisible:
@@ -3715,12 +3715,12 @@ export const it: Translation = {
     sectionAria: "Trova-costellazioni con bussola e inclinazione",
     title: "Trova-costellazioni",
     subtitle:
-      "Alza il telefono verso il cielo – CampMesser ti dice cosa si trova in quella direzione.",
+      "Alza il telefono verso il cielo – ReiseKompass ti dice cosa si trova in quella direzione.",
     subtitleAtPlace: (place: string) =>
       `Alza il telefono verso il cielo – ecco com'è il cielo a ${place}.`,
     locating: "Rilevamento della posizione …",
     noLocation:
-      "Per il trova-costellazioni CampMesser ha bisogno della tua posizione – autorizza la localizzazione o salva una piazzola.",
+      "Per il trova-costellazioni ReiseKompass ha bisogno della tua posizione – autorizza la localizzazione o salva una piazzola.",
     viewTitle: "Nella tua direzione",
     viewDirection: (direction: string, degrees: number) =>
       `${direction}, ${degrees}° sopra l'orizzonte`,
@@ -3732,7 +3732,7 @@ export const it: Translation = {
     lexiconLink: "Leggi nel lessico",
     compassStart: "Avvia la bussola",
     compassHint:
-      "Per la direzione dello sguardo CampMesser ha bisogno della bussola del tuo dispositivo – tocca «Avvia la bussola» e concedi l'accesso.",
+      "Per la direzione dello sguardo ReiseKompass ha bisogno della bussola del tuo dispositivo – tocca «Avvia la bussola» e concedi l'accesso.",
     compassDenied:
       "Senza accesso alla bussola non è possibile determinare la direzione dello sguardo. Puoi riprovare – l'elenco qui sotto resta valido.",
     noCompass:
@@ -3796,7 +3796,7 @@ export const it: Translation = {
     locating: "Posizione in corso di rilevamento …",
     loading: "Ricerca dei sentieri …",
     noLocation:
-      "Per la ricerca CampMesser ha bisogno della tua posizione – abilita la localizzazione oppure apri la sezione nel dossier di una piazzola salvata.",
+      "Per la ricerca ReiseKompass ha bisogno della tua posizione – abilita la localizzazione oppure apri la sezione nel dossier di una piazzola salvata.",
     loadFailed:
       "I sentieri non si sono potuti caricare. Overpass è un servizio gratuito che frena in caso di troppe richieste – riprova tra qualche minuto.",
     empty: (km: number) =>
@@ -4506,7 +4506,7 @@ export const it: Translation = {
     imprintTitle: "Impressum",
     privacyTitle: "Dichiarazione sulla protezione dei dati",
     cookieText:
-      "CampMesser usa solo cookie tecnicamente necessari e la memoria locale – nessun tracciamento, nessuna pubblicità. Dettagli:",
+      "ReiseKompass usa solo cookie tecnicamente necessari e la memoria locale – nessun tracciamento, nessuna pubblicità. Dettagli:",
     cookieOk: "Capito",
     cookieAria: "Informazione sui cookie",
   },
@@ -5289,7 +5289,7 @@ export const it: Translation = {
     subtitle: "Quanto è buio il cielo alla tua posizione?",
     subtitleAtPlace: (place: string) => `Quanto è buio il cielo a ${place}?`,
     outsideCoverage:
-      "Per questo luogo non ci sono dati sulle sorgenti luminose – il set di dati copre la Svizzera e le zone di confine. Una classificazione qui sarebbe indovinata, perciò CampMesser preferisce non mostrarne nessuna.",
+      "Per questo luogo non ci sono dati sulle sorgenti luminose – il set di dati copre la Svizzera e le zone di confine. Una classificazione qui sarebbe indovinata, perciò ReiseKompass preferisce non mostrarne nessuna.",
     scaleAria: (bortle: number) =>
       `Scala di Bortle da 1 (molto buio) a 9 (centro città), livello stimato ${bortle}`,
     scaleDark: "buio",
@@ -5297,7 +5297,7 @@ export const it: Translation = {
     classLine: (bortle: number, label: string) => `Bortle ${bortle} · ${label}`,
     locating: "Posizione in corso di rilevamento …",
     noLocation:
-      "Per la classificazione CampMesser ha bisogno della tua posizione – abilita la localizzazione oppure salva una piazzola.",
+      "Per la classificazione ReiseKompass ha bisogno della tua posizione – abilita la localizzazione oppure salva una piazzola.",
     tonightTitle: "Questa notte",
     tonightLoading: "Caricamento della nuvolosità …",
     tonightWorthIt:
@@ -5317,7 +5317,7 @@ export const it: Translation = {
     nearestTitle: "Sorgenti luminose più vicine:",
     nearestItem: (name: string, distance: string) => `${name} ${distance}`,
     estimateNote:
-      "Stima, non misura: non esiste una misura liberamente accessibile della luminosità del cielo. CampMesser calcola la classificazione dalla distanza dalle maggiori città e agglomerazioni. La formula non conosce le montagne che schermano un alone, i fari proprio accanto o l'aria umida – sul posto può essere più buio o più chiaro.",
+      "Stima, non misura: non esiste una misura liberamente accessibile della luminosità del cielo. ReiseKompass calcola la classificazione dalla distanza dalle maggiori città e agglomerazioni. La formula non conosce le montagne che schermano un alone, i fari proprio accanto o l'aria umida – sul posto può essere più buio o più chiaro.",
   },
 
   excursions: {
@@ -5456,7 +5456,7 @@ export const it: Translation = {
       importUrlFailed:
         "Questa pagina non contiene una ricetta leggibile – copia il testo e usa il campo qui sotto.",
       importHint:
-        "Incolla il testo della ricetta (copiato da un sito o da un messaggio). CampMesser indovina nome, ingredienti e passaggi – tutto resta modificabile prima di salvare.",
+        "Incolla il testo della ricetta (copiato da un sito o da un messaggio). ReiseKompass indovina nome, ingredienti e passaggi – tutto resta modificabile prima di salvare.",
       importPlaceholder:
         "Älplermagronen\n\nIngredienti:\n250 g di maccheroni\n…\n\nPreparazione:\n1. …",
       importApply: "Compila i campi",
@@ -5856,18 +5856,18 @@ export const it: Translation = {
   },
   shoppingPrint: {
     docTitle: "Lista della spesa da stampare",
-    appTitle: "CampMesser – il coltellino svizzero per il campeggio in tenda",
+    appTitle: "ReiseKompass – la tua bussola per vacanze, campeggio e gite",
     printButton: "Stampa / Salva come PDF",
     printBrowserHint:
       "Nell'app installata il pulsante apre la vista nel browser – da lì stampa o salva come PDF dal menu.",
-    headerKicker: "CampMesser · Lista della spesa",
+    headerKicker: "ReiseKompass · Lista della spesa",
     title: "Lista della spesa",
     meta: (items: number, categories: number) =>
       `${items} ${items === 1 ? "voce aperta" : "voci aperte"} · ${categories} ${categories === 1 ? "categoria" : "categorie"}`,
     printedOn: (date: string) => `Stato: ${date}`,
     emptyList: "Nessuna voce aperta – tutto comprato.",
     footer:
-      "Buona spesa! · CampMesser – il coltellino svizzero per il campeggio in tenda",
+      "Buona spesa! · ReiseKompass – la tua bussola per vacanze, campeggio e gite",
   },
   menuPlan: {
     title: "Piano dei pasti",
@@ -5959,16 +5959,16 @@ export const it: Translation = {
   menuPlanPrint: {
     docTitle: (name: string) => `${name} – piano dei pasti da stampare`,
     docTitleFallback: "Piano dei pasti",
-    appTitle: "CampMesser – il coltellino svizzero per il campeggio in tenda",
+    appTitle: "ReiseKompass – la tua bussola per vacanze, campeggio e gite",
     notFound: "Questo soggiorno non è stato trovato.",
     printButton: "Stampa / Salva come PDF",
     printBrowserHint:
       "Nell'app installata il pulsante apre la vista nel browser – da lì stampa o salva come PDF dal menu.",
-    headerKicker: "CampMesser · Piano dei pasti",
+    headerKicker: "ReiseKompass · Piano dei pasti",
     printedOn: (date: string) => `Stato: ${date}`,
     dayHeader: "Giorno",
     footer:
-      "Buon appetito! · CampMesser – il coltellino svizzero per il campeggio in tenda",
+      "Buon appetito! · ReiseKompass – la tua bussola per vacanze, campeggio e gite",
   },
   family: {
     title: "Modalità famiglia",
@@ -6230,7 +6230,7 @@ export const it: Translation = {
     subtitle:
       "La barra di avanzamento per il sedile posteriore: quanta strada verso il campeggio avete già fatto?",
     loginHint:
-      "Accedi, così CampMesser può proporti come meta le piazzole che hai salvato.",
+      "Accedi, così ReiseKompass può proporti come meta le piazzole che hai salvato.",
     noSpots:
       "Nessuna piazzola salvata finora – crea prima una piazzola, poi potrai sceglierla come meta.",
     suggestedFromTrip:
@@ -6240,7 +6240,7 @@ export const it: Translation = {
     targetPlaceholder: "Scegli la meta",
     start: "Si parte",
     startNote:
-      "Toccando il pulsante la tua posizione attuale diventa il punto di partenza. Poi CampMesser misura in modo approssimativo una volta al minuto – così risparmia la batteria.",
+      "Toccando il pulsante la tua posizione attuale diventa il punto di partenza. Poi ReiseKompass misura in modo approssimativo una volta al minuto – così risparmia la batteria.",
     locationFailed:
       "Non è stato possibile determinare la posizione – senza punto di partenza purtroppo non funziona.",
     straightLineBadge: "in linea d'aria",
@@ -6266,17 +6266,17 @@ export const it: Translation = {
       "La posizione è bloccata – autorizzala nelle impostazioni del browser, altrimenti la barra resta ferma.",
     geoUnsupported: "Questo browser non conosce la geolocalizzazione.",
     geoFailed:
-      "Al momento non è stato possibile rilevare la posizione – CampMesser riprova fra un minuto.",
+      "Al momento non è stato possibile rilevare la posizione – ReiseKompass riprova fra un minuto.",
   },
   huntPrint: {
     docTitle: (title: string) => `${title} – caccia al tesoro da stampare`,
     docTitleFallback: "Caccia al tesoro",
-    appTitle: "CampMesser – il coltellino svizzero per il campeggio in tenda",
+    appTitle: "ReiseKompass – la tua bussola per vacanze, campeggio e gite",
     notFound: "Questa caccia al tesoro non è stata trovata.",
     printButton: "Stampa / Salva come PDF",
     printBrowserHint:
       "Nell'app installata il pulsante apre la vista nel browser – da lì stampa o salva come PDF dal menu.",
-    headerKicker: "CampMesser · Caccia al tesoro",
+    headerKicker: "ReiseKompass · Caccia al tesoro",
     meta: (age: string, minutes: number, stations: number) =>
       `${age} · ca. ${minutes} minuti · ${stations} ${stations === 1 ? "tappa" : "tappe"}`,
     missionTitle: "La missione",
@@ -6290,19 +6290,19 @@ export const it: Translation = {
       `Scrivete le lettere raccolte in ordine (${n} lettere):`,
     finaleTitle: "Il finale",
     footer:
-      "Buona scoperta! · CampMesser – il coltellino svizzero per il campeggio in tenda",
+      "Buona scoperta! · ReiseKompass – la tua bussola per vacanze, campeggio e gite",
   },
   badgeCertificate: {
     docTitle: (name: string) => `Diploma per ${name}`,
     docTitleFallback: "Diploma",
-    appTitle: "CampMesser – il coltellino svizzero per il campeggio in tenda",
+    appTitle: "ReiseKompass – la tua bussola per vacanze, campeggio e gite",
     loginFeature: "il diploma dei distintivi",
     notFound: "Questo bambino non è stato trovato.",
     galleryLink: "Stampa il diploma",
     printButton: "Stampa il diploma",
     printBrowserHint:
       "Nell'app installata il pulsante apre la vista nel browser – da lì stampa o salva come PDF dal menu.",
-    kicker: "CampMesser · Modalità famiglia",
+    kicker: "ReiseKompass · Modalità famiglia",
     heading: "Diploma",
     awardedTo: "conferito a",
     badgesIntro: (n: number) =>
@@ -6313,7 +6313,7 @@ export const it: Translation = {
     noBadges:
       "Nessun distintivo guadagnato finora – gioca a una caccia al tesoro o a un quiz e il diploma si riempirà.",
     issuedOn: (date: string) => `Rilasciato il ${date}`,
-    footer: "CampMesser – il coltellino svizzero per il campeggio in tenda",
+    footer: "ReiseKompass – la tua bussola per vacanze, campeggio e gite",
   },
   notFound: {
     heading: "Pagina non trovata",
@@ -6350,7 +6350,7 @@ export const it: Translation = {
     backToActions: "Torna alle azioni",
   },
   install: {
-    title: "Installa CampMesser",
+    title: "Installa ReiseKompass",
     description:
       "Come app sul tuo dispositivo: si avvia più in fretta e funziona offline.",
     installButton: "Installa",
@@ -6362,7 +6362,7 @@ export const it: Translation = {
   update: {
     title: "Nuova versione disponibile",
     description:
-      "È pronta una versione aggiornata di CampMesser. Con l'aggiornamento la pagina si ricarica una volta.",
+      "È pronta una versione aggiornata di ReiseKompass. Con l'aggiornamento la pagina si ricarica una volta.",
     reloadButton: "Aggiorna",
     dismiss: "Chiudi l'avviso di aggiornamento",
   },
@@ -6379,7 +6379,7 @@ export const it: Translation = {
     loginFeature: "l'aggiunta di foto condivise",
     emptyTitle: "Nessuna foto condivisa trovata",
     emptyText:
-      "Apri questa pagina tramite la funzione di condivisione del tuo dispositivo: scegli una foto → Condividi → CampMesser. La voce appare nel menu di condivisione dopo la (re)installazione o l'aggiornamento dell'app.",
+      "Apri questa pagina tramite la funzione di condivisione del tuo dispositivo: scegli una foto → Condividi → ReiseKompass. La voce appare nel menu di condivisione dopo la (re)installazione o l'aggiornamento dell'app.",
     photosCount: (n: number) =>
       n === 1 ? "1 foto pronta" : `${n} foto pronte`,
     photoAlt: (n: number) => `Foto condivisa ${n}`,
@@ -6646,7 +6646,7 @@ export const it: Translation = {
     loadFailed:
       "L'orario non si è potuto caricare in questo momento. Riprova tra un attimo.",
     emptyStations:
-      "Qui l'orario svizzero non trova nessuna fermata. Copre la Svizzera e il traffico transfrontaliero – per una piazzola più lontana all'estero CampMesser qui non sa nulla.",
+      "Qui l'orario svizzero non trova nessuna fermata. Copre la Svizzera e il traffico transfrontaliero – per una piazzola più lontana all'estero ReiseKompass qui non sa nulla.",
     emptyBoard: "Da questa fermata non è prevista nessuna partenza a breve.",
     kind: {
       train: "Treno",

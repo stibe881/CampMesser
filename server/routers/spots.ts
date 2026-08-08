@@ -517,7 +517,7 @@ export const spotsRouters = {
    * Zugriffsschlüssel steht in der `.env` und nie im Browser-Bundle.
    *
    * Bewusst angemeldet-only: Es sind die eigenen Daten aus der zweiten App;
-   * CampMesser soll dafür kein offener Weiterleiter werden. Ist die
+   * ReiseKompass soll dafür kein offener Weiterleiter werden. Ist die
    * Anbindung nicht eingerichtet, kommt `configured: false` und die
    * Oberfläche blendet den Bereich aus – kein Fehlerzustand.
    */

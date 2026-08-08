@@ -82,9 +82,9 @@ describe("Geheimnis und otpauth-URL", () => {
 
   it("baut eine App-taugliche otpauth-URL", () => {
     const url = otpauthUrl("stefan@example.ch", RFC_SECRET);
-    expect(url).toContain("otpauth://totp/CampMesser%3Astefan%40example.ch");
+    expect(url).toContain("otpauth://totp/ReiseKompass%3Astefan%40example.ch");
     expect(url).toContain(`secret=${RFC_SECRET}`);
-    expect(url).toContain("issuer=CampMesser");
+    expect(url).toContain("issuer=ReiseKompass");
     expect(url).toContain("digits=6");
   });
 });

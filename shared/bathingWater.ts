@@ -445,7 +445,7 @@ export function hydroLatestUrl(stationId: string): string {
   const params = new URLSearchParams({
     locations: stationId,
     parameters: "temperature,flow,height",
-    app: "CampMesser",
+    app: "ReiseKompass",
     version: "1.0",
   });
   return `https://api.existenz.ch/apiv1/hydro/latest?${params.toString()}`;

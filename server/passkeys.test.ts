@@ -17,17 +17,21 @@ import {
 
 describe("rpIdFrom", () => {
   it("nimmt den Hostname aus APP_URL (ohne Port und Pfad)", () => {
-    expect(rpIdFrom("https://campmesser.ch", "ignoriert.example")).toBe(
-      "campmesser.ch"
+    expect(rpIdFrom("https://meinreisekompass.ch", "ignoriert.example")).toBe(
+      "meinreisekompass.ch"
     );
-    expect(rpIdFrom("https://campmesser.ch:8443/app", undefined)).toBe(
-      "campmesser.ch"
+    expect(rpIdFrom("https://meinreisekompass.ch:8443/app", undefined)).toBe(
+      "meinreisekompass.ch"
     );
   });
 
   it("fällt bei fehlender oder kaputter APP_URL auf den Request-Host zurück", () => {
-    expect(rpIdFrom(undefined, "campmesser.ch")).toBe("campmesser.ch");
-    expect(rpIdFrom("kein url", "campmesser.ch:3000")).toBe("campmesser.ch");
+    expect(rpIdFrom(undefined, "meinreisekompass.ch")).toBe(
+      "meinreisekompass.ch"
+    );
+    expect(rpIdFrom("kein url", "meinreisekompass.ch:3000")).toBe(
+      "meinreisekompass.ch"
+    );
   });
 
   it("streift den Port vom Request-Host ab", () => {
@@ -42,14 +46,14 @@ describe("rpIdFrom", () => {
 
 describe("originFrom", () => {
   it("nimmt die Origin aus APP_URL (Pfad wird verworfen)", () => {
-    expect(originFrom("https://campmesser.ch/app", "http", "x")).toBe(
-      "https://campmesser.ch"
+    expect(originFrom("https://meinreisekompass.ch/app", "http", "x")).toBe(
+      "https://meinreisekompass.ch"
     );
   });
 
   it("baut die Origin sonst aus Protokoll und Request-Host", () => {
-    expect(originFrom(undefined, "https", "campmesser.ch")).toBe(
-      "https://campmesser.ch"
+    expect(originFrom(undefined, "https", "meinreisekompass.ch")).toBe(
+      "https://meinreisekompass.ch"
     );
     expect(originFrom(undefined, "http", "localhost:3000")).toBe(
       "http://localhost:3000"
@@ -57,8 +61,8 @@ describe("originFrom", () => {
   });
 
   it("nimmt https als Protokoll-Default und localhost als letzten Fallback", () => {
-    expect(originFrom(undefined, undefined, "campmesser.ch")).toBe(
-      "https://campmesser.ch"
+    expect(originFrom(undefined, undefined, "meinreisekompass.ch")).toBe(
+      "https://meinreisekompass.ch"
     );
     expect(originFrom(undefined, undefined, undefined)).toBe(
       "http://localhost:3000"

@@ -4,7 +4,7 @@
  * dieser Strecke («bei km 45 von 120»).
  *
  * EHRLICH BLEIBT: Der Korridor folgt der LUFTLINIE, nicht der Strasse.
- * CampMesser kennt keine Routenführung – ein Routing-Dienst wäre ein eigener
+ * ReiseKompass kennt keine Routenführung – ein Routing-Dienst wäre ein eigener
  * Fremddienst mit eigenem Schlüssel und eigenen Grenzen. Über Land liegt die
  * Strasse meist nah genug an der Luftlinie, dass ein Korridor von wenigen
  * Kilometern die Raststellen trifft; im Gebirge kann sie weit ausholen. Die

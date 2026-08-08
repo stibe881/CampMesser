@@ -400,7 +400,7 @@ export function mailBaseUrl(req: {
   const host = req.get("host");
   return (
     process.env.APP_URL?.replace(/\/+$/, "") ??
-    (host ? `${req.protocol}://${host}` : "https://campmesser.ch")
+    (host ? `${req.protocol}://${host}` : "https://meinreisekompass.ch")
   );
 }
 

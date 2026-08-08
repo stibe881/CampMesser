@@ -1,6 +1,6 @@
-# CampMesser – native App
+# ReiseKompass – native App
 
-Ein dünner nativer Rahmen um dieselbe Web-App (`https://campmesser.ch`).
+Ein dünner nativer Rahmen um dieselbe Web-App (`https://meinreisekompass.ch`).
 Alles Sichtbare kommt aus dem WebView. Hier steht nur, was der Browser im
 WebView nicht kann.
 
@@ -57,9 +57,9 @@ den `iosActions`-Block in `app.json`.
 
 Ein WebView lädt **alles**, was man antippt – auch einen Link auf
 OpenStreetMap oder eine fremde Seite. Ohne Weiche landet man in einer
-fremden Webseite _innerhalb_ von CampMesser, ohne Adresszeile und ohne
+fremden Webseite _innerhalb_ von ReiseKompass, ohne Adresszeile und ohne
 Zurück-Knopf. `onShouldStartLoadWithRequest` in `App.js` gibt deshalb
-alles, was nicht auf `campmesser.ch` liegt, an das System weiter.
+alles, was nicht auf `meinreisekompass.ch` liegt, an das System weiter.
 
 Die **Route** ist ein Sonderfall, weil sie nicht nur nach draussen soll,
 sondern in eine _bestimmte_ App. Dafür gibt es zwei Adressen:

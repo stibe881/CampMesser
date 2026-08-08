@@ -83,7 +83,7 @@ extension WidgetPayload {
     builtAt: "",
     trip: WidgetPanel(
       value: "–",
-      title: "CampMesser",
+      title: "ReiseKompass",
       subtitle: "App öffnen für aktuelle Daten",
       url: "/"
     ),

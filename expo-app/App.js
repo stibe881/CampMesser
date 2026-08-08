@@ -27,7 +27,7 @@ import { ExtensionStorage } from "@bacons/apple-targets";
  */
 
 // Basis-URL der Web-App
-const CAMP_URL = "https://campmesser.ch";
+const CAMP_URL = "https://meinreisekompass.ch";
 
 /**
  * Der gemeinsame Ordner mit der Widget-Erweiterung (#325).
@@ -140,7 +140,7 @@ async function openMaps(appUrl, webUrl) {
  * DAS PROBLEM DAHINTER war grösser als die Route: Ein WebView lädt
  * ALLES, was man antippt – auch einen Link auf OpenStreetMap, eine
  * Telefonnummer oder eine fremde Seite. Ohne diese Weiche landet man in
- * einer fremden Webseite INNERHALB von CampMesser, ohne Adresszeile und
+ * einer fremden Webseite INNERHALB von ReiseKompass, ohne Adresszeile und
  * ohne Zurück-Knopf. Das ist die häufigste Art, wie sich eine
  * WebView-App wie eine Bastelei anfühlt.
  */

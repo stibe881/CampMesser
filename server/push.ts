@@ -81,7 +81,7 @@ export function pushConfigured(): boolean {
 
 function configureWebPush() {
   webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT || "mailto:webmaster@campmesser.ch",
+    process.env.VAPID_SUBJECT || "mailto:webmaster@meinreisekompass.ch",
     process.env.VAPID_PUBLIC_KEY!,
     process.env.VAPID_PRIVATE_KEY!
   );

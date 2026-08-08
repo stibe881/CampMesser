@@ -934,7 +934,7 @@ function picnicKind(tags: Record<string, unknown>): PicnicKind | null {
 /**
  * Overpass-JSON in Raststellen übersetzen. Ausgewertet werden genau die drei
  * Tags, die für eine Pause etwas bedeuten und in OSM auch gepflegt sind:
- * `covered`, `fireplace`, `drinking_water`. Über Toiletten sagt CampMesser
+ * `covered`, `fireplace`, `drinking_water`. Über Toiletten sagt ReiseKompass
  * bewusst NICHTS – ein Rastplatz ohne Tag hat vielleicht welche, vielleicht
  * nicht, und «vielleicht» hilft niemandem mit Kindern im Auto.
  *

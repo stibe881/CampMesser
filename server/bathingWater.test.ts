@@ -124,7 +124,7 @@ describe("hydroLatestUrl und parseHydroLatest", () => {
     expect(url).toContain("temperature");
     expect(url).toContain("flow");
     expect(url).toContain("height");
-    expect(url).toContain("app=CampMesser");
+    expect(url).toContain("app=ReiseKompass");
   });
 
   it("liest Temperatur, Abfluss und Pegel der richtigen Stelle", () => {

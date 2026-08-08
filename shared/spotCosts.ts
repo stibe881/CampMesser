@@ -104,7 +104,7 @@ export function nightsBySpot(stays: SpotStayLike[]): Map<number, number> {
  * Sprache sortiert), damit die Reihenfolge stabil bleibt.
  *
  * `estimatedTotalRappen` ist Nächte × Preis pro Nacht und ausdrücklich nur
- * eine Schätzung: Rabatte, Kinder, Hund und Kurtaxen-Sprünge kennt CampMesser
+ * eine Schätzung: Rabatte, Kinder, Hund und Kurtaxen-Sprünge kennt ReiseKompass
  * nicht. Ohne Übernachtungen bleibt das Feld null statt 0 – «keine Angabe»
  * ist etwas anderes als «kostet nichts».
  */

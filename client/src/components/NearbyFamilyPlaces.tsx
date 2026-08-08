@@ -12,7 +12,7 @@
  * Wie «Ausflüge in der Nähe» lädt der Abschnitt ERST BEIM AUFKLAPPEN –
  * Overpass ist ein freier, rate-limitierter Dienst und wird nie automatisch
  * gefragt. Alter, Zaun, Aufsicht und Eintritt stehen nur dort, wo die Tags in
- * OSM gepflegt sind; fehlt einer, behauptet CampMesser nichts.
+ * OSM gepflegt sind; fehlt einer, behauptet ReiseKompass nichts.
  *
  * Beim Baden kommen zwei Hinweise dazu, kurz und ohne Zeigefinger: die
  * Wassertemperatur steht schon weiter oben in der Badestellen-Info (#223),

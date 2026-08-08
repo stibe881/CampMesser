@@ -2,7 +2,7 @@
  * Brücke zur nativen App (#315/#316).
  *
  * WAS DIE NATIVE APP IST: ein dünner Rahmen um dieselbe Web-App
- * (`expo-app/App.js`, ein WebView auf campmesser.ch). Alles Sichtbare kommt
+ * (`expo-app/App.js`, ein WebView auf meinreisekompass.ch). Alles Sichtbare kommt
  * aus dem Web; nur was der Browser im WebView NICHT kann, macht der Rahmen –
  * echte Push-Mitteilungen von Apple, die Zahl am App-Icon und das lange
  * Drücken auf das Icon.

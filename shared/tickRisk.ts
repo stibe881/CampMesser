@@ -275,7 +275,7 @@ function inRing(latitude: number, longitude: number, ring: Ring): boolean {
  * FSME-Einstufung eines Orts:
  * - `risk`: liegt in einem Kanton, den das BAG als Risikogebiet führt,
  * - `no-risk`: liegt in Genf oder im Tessin,
- * - `unknown`: ausserhalb der Schweiz – für andere Länder führt CampMesser
+ * - `unknown`: ausserhalb der Schweiz – für andere Länder führt ReiseKompass
  *   keine Einstufung, und Raten wäre hier fehl am Platz.
  */
 export type FsmeStatus = "risk" | "no-risk" | "unknown";

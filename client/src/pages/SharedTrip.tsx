@@ -617,7 +617,7 @@ export default function SharedTripPage() {
       )}
 
       {/* Gästebuch (#254): Der einzige Ort, an dem jemand ohne Konto in
-          CampMesser schreibt – darum ohne Foto-Feld und serverseitig auf
+          ReiseKompass schreibt – darum ohne Foto-Feld und serverseitig auf
           fünf Einträge pro Stunde und IP begrenzt. */}
       <SharedGuestbook token={token} entries={data.guestbook} />
 

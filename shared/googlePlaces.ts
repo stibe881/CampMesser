@@ -15,7 +15,7 @@
  * bei Google gar keinen Typ gibt.
  *
  * NUR LISTE, NIE KARTE. Die Nutzungsbedingungen von Google untersagen
- * es, ihre Inhalte zusammen mit einer fremden Karte zu zeigen; CampMesser
+ * es, ihre Inhalte zusammen mit einer fremden Karte zu zeigen; ReiseKompass
  * zeichnet auf Leaflet mit OSM-Kacheln. Die Treffer bleiben deshalb in
  * der Liste, und die Karte zeigt weiter, was aus OSM kommt. Dieselbe
  * Linie wie bei den Fahrzeiten (siehe shared/googleRoutes.ts).

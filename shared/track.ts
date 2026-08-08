@@ -399,7 +399,7 @@ export function buildGpx(options: {
     (points.length > 0 ? new Date(points[0].t) : new Date(0));
   const head = [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<gpx version="1.1" creator="CampMesser" xmlns="http://www.topografix.com/GPX/1/1">',
+    '<gpx version="1.1" creator="ReiseKompass" xmlns="http://www.topografix.com/GPX/1/1">',
     "  <metadata>",
     `    <name>${escapeXml(name)}</name>`,
     `    <time>${new Date(created).toISOString()}</time>`,

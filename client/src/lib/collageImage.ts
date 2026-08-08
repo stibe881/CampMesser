@@ -1,7 +1,7 @@
 /**
  * Foto-Collage einer Reise als teilbares Bild (1080×1350, Instagram-Portrait):
  * zeichnet die gewählten Tagebuch-Fotos schlicht mit der Canvas-API im
- * CampMesser-Look – dunkelgrüne Kopfzeile mit der Bildmarke aus BrandLogo.tsx,
+ * ReiseKompass-Look – dunkelgrüne Kopfzeile mit der Bildmarke aus BrandLogo.tsx,
  * cremefarbener Grund, bernsteinfarbener Zeitraum, dezente Fusszeile.
  * Dasselbe Muster wie beim Jahresrückblick (#91, lib/yearReviewImage.ts),
  * nur mit Bildern statt Kennzahlen.
@@ -90,7 +90,7 @@ function drawCoverImage(
   ctx.restore();
 }
 
-/** Die CampMesser-Bildmarke (Pfad aus BrandLogo.tsx, viewBox 64) zeichnen. */
+/** Die ReiseKompass-Bildmarke (Pfad aus BrandLogo.tsx, viewBox 64) zeichnen. */
 function drawLogo(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -176,7 +176,7 @@ export function drawCollage(
   ctx.fillRect(0, HEIGHT - FOOTER_HEIGHT, WIDTH, FOOTER_HEIGHT);
   ctx.fillStyle = CREAM;
   ctx.font = `600 32px ${SANS}`;
-  ctx.fillText("campmesser.ch", WIDTH / 2, HEIGHT - 30);
+  ctx.fillText("meinreisekompass.ch", WIDTH / 2, HEIGHT - 30);
 
   return tiles.length;
 }

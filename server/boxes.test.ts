@@ -70,20 +70,20 @@ describe("nextBoxCode", () => {
 
 describe("boxScanUrl", () => {
   it("baut den Link auf die Kisten-Ansicht", () => {
-    expect(boxScanUrl("https://campmesser.ch", "K3")).toBe(
-      "https://campmesser.ch/kisten/K3"
+    expect(boxScanUrl("https://meinreisekompass.ch", "K3")).toBe(
+      "https://meinreisekompass.ch/kisten/K3"
     );
   });
 
   it("verträgt einen abschliessenden Schrägstrich", () => {
-    expect(boxScanUrl("https://campmesser.ch/", "K3")).toBe(
-      "https://campmesser.ch/kisten/K3"
+    expect(boxScanUrl("https://meinreisekompass.ch/", "K3")).toBe(
+      "https://meinreisekompass.ch/kisten/K3"
     );
   });
 
   it("säubert die Kennung mit", () => {
-    expect(boxScanUrl("https://campmesser.ch", "k 3")).toBe(
-      "https://campmesser.ch/kisten/K3"
+    expect(boxScanUrl("https://meinreisekompass.ch", "k 3")).toBe(
+      "https://meinreisekompass.ch/kisten/K3"
     );
   });
 });

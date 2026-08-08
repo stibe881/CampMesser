@@ -3,7 +3,7 @@
  * hinterlassen – Mitreisende aus der App heraus, Bekannte über den
  * Teil-Link der Reise.
  *
- * Das ist der einzige Ort in CampMesser, an dem jemand OHNE Konto etwas
+ * Das ist der einzige Ort in ReiseKompass, an dem jemand OHNE Konto etwas
  * schreiben kann. Darum zwei Entscheidungen, die hier in der Logik
  * stecken statt in der Ansicht:
  *

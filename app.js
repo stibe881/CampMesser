@@ -39,7 +39,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || "production";
 const serverEntry = resolve(rootDir, "dist", "index.js");
 if (!existsSync(serverEntry)) {
   console.error(
-    "[CampMesser] dist/index.js fehlt. Bitte einmalig per SSH ausführen:\n" +
+    "[ReiseKompass] dist/index.js fehlt. Bitte einmalig per SSH ausführen:\n" +
       "  cd " +
       rootDir +
       " && pnpm install && pnpm build"
@@ -48,7 +48,7 @@ if (!existsSync(serverEntry)) {
 }
 
 console.log(
-  `[CampMesser] Starte Server (NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT ?? "3000"})`
+  `[ReiseKompass] Starte Server (NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT ?? "3000"})`
 );
 
 await import(pathToFileURL(serverEntry).href);

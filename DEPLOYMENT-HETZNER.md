@@ -1,10 +1,10 @@
-# CampMesser auf Hetzner Webhosting einrichten
+# ReiseKompass auf Hetzner Webhosting einrichten
 
-Diese Anleitung führt Schritt für Schritt durch die Installation von **CampMesser** auf einem Hetzner-Webhosting-Paket mit Node.js. Sie ist konkret auf die Domain **campmesser.ch** und die Datenbank **camping** zugeschnitten, sodass sich alle Werte direkt übernehmen lassen.
+Diese Anleitung führt Schritt für Schritt durch die Installation von **ReiseKompass** auf einem Hetzner-Webhosting-Paket mit Node.js. Sie ist konkret auf die Domain **campmesser.ch** und die Datenbank **camping** zugeschnitten, sodass sich alle Werte direkt übernehmen lassen.
 
 Die Anwendung besteht aus einem Node-Server, der sowohl die Weboberfläche als auch die Programmschnittstelle ausliefert, sowie einer MySQL-Datenbank. Sämtliche Bilder sind fest in die Anwendung eingebaut, sodass keine externen Dienste benötigt werden.
 
-> **Wichtig – aus der Praxis gelernt:** Node.js wirkt bei Hetzner auf die **gesamte Domain**, nicht nur auf eine einzelne Subdomain. Ein erster Versuch mit `camping.gross-ict.ch` hat die komplette Website unter `gross-ict.ch` lahmgelegt (503 Service Unavailable), bis Node.js wieder deaktiviert wurde. Deshalb wird CampMesser jetzt unter der eigenständigen Domain **campmesser.ch** betrieben, wo keine andere Website betroffen ist [1].
+> **Wichtig – aus der Praxis gelernt:** Node.js wirkt bei Hetzner auf die **gesamte Domain**, nicht nur auf eine einzelne Subdomain. Ein erster Versuch mit `camping.gross-ict.ch` hat die komplette Website unter `gross-ict.ch` lahmgelegt (503 Service Unavailable), bis Node.js wieder deaktiviert wurde. Deshalb wird ReiseKompass jetzt unter der eigenständigen Domain **campmesser.ch** betrieben, wo keine andere Website betroffen ist [1].
 
 ## Übersicht der benötigten Angaben
 
@@ -24,7 +24,7 @@ Ist das Verzeichnis noch nicht vorhanden, lege es so an:
 
 ```bash
 cd ~
-git clone https://github.com/stibe881/CampMesser.git campmesser
+git clone https://github.com/stibe881/ReiseKompass.git campmesser
 cd campmesser
 ```
 
@@ -117,7 +117,7 @@ Im Abschnitt **Umgebungsvariablen** trägst du zusätzlich die folgenden Schlüs
 | `DATABASE_URL` | `mysql://jqviwy_0:k8%2CCt%3D%26*%2F28%24@ly8y.your-database.de:3306/camping` |
 | `JWT_SECRET`   | dasselbe Geheimnis wie in der `.env`-Datei                                   |
 
-Klicke danach auf **Aktivieren**. Rufst du nun `https://camping.gross-ict.ch` im Browser auf, sollte die Startseite von CampMesser erscheinen.
+Klicke danach auf **Aktivieren**. Rufst du nun `https://camping.gross-ict.ch` im Browser auf, sollte die Startseite von ReiseKompass erscheinen.
 
 ### Wenn die Seite nicht erscheint
 
@@ -131,7 +131,7 @@ Meldet das Protokoll einen Portkonflikt, ergänze im Formular eine weitere Umgeb
 
 ## Schritt 6: E-Mail-Versand für vergessene Passwörter
 
-Über «Passwort vergessen?» auf der Anmeldeseite verschickt CampMesser einen Link per E-Mail, mit dem sich ein neues Passwort setzen lässt (60 Minuten gültig, einmalig verwendbar). Dafür braucht die Anwendung die Zugangsdaten eines Postfachs deiner Domain. Ohne diese Angaben funktioniert die Anmeldung normal weiter; die Reset-Funktion meldet dann lediglich, dass sie derzeit nicht verfügbar ist.
+Über «Passwort vergessen?» auf der Anmeldeseite verschickt ReiseKompass einen Link per E-Mail, mit dem sich ein neues Passwort setzen lässt (60 Minuten gültig, einmalig verwendbar). Dafür braucht die Anwendung die Zugangsdaten eines Postfachs deiner Domain. Ohne diese Angaben funktioniert die Anmeldung normal weiter; die Reset-Funktion meldet dann lediglich, dass sie derzeit nicht verfügbar ist.
 
 Sobald SMTP konfiguriert ist, ist automatisch auch die **E-Mail-Bestätigung** aktiv: Neue Konten (und geänderte E-Mail-Adressen im Profil) erhalten eine Bestätigungs-Mail mit einem 48 Stunden gültigen Link. Die Bestätigung ist freiwillig – unbestätigte Konten können die App uneingeschränkt nutzen, sehen aber im Profil einen dezenten Hinweis mit der Möglichkeit, die Mail erneut anzufordern. Ohne SMTP entfällt der Versand komplett und es wird nichts blockiert.
 
@@ -172,7 +172,7 @@ Jeder Push auf `main` kann die Live-Seite automatisch aktualisieren: Der Workflo
 
 ### Wie der Neustart wirklich funktioniert
 
-Wichtig zu wissen: CampMesser läuft **nicht** unter Phusion Passenger, sondern als Node.js-Dienst von konsoleH über `app.js` (siehe Schritt 5). Ein `touch tmp/restart.txt` bewirkt darum nichts – frühere Fassungen des Deploy-Skripts taten genau das, weshalb nach einem Deployment weiterhin der alte Build ausgeliefert wurde, obwohl Code, Migrationen und `dist/` bereits aktuell waren.
+Wichtig zu wissen: ReiseKompass läuft **nicht** unter Phusion Passenger, sondern als Node.js-Dienst von konsoleH über `app.js` (siehe Schritt 5). Ein `touch tmp/restart.txt` bewirkt darum nichts – frühere Fassungen des Deploy-Skripts taten genau das, weshalb nach einem Deployment weiterhin der alte Build ausgeliefert wurde, obwohl Code, Migrationen und `dist/` bereits aktuell waren.
 
 Der Neustart geschieht stattdessen, indem der laufende Prozess beendet wird; konsoleH startet ihn beim nächsten HTTP-Aufruf automatisch wieder. Das Skript sucht dafür gezielt Node-Prozesse, deren Arbeitsverzeichnis das App-Verzeichnis ist und deren Kommandozeile auf `app.js` oder `dist/index.js` zeigt – Node-Prozesse anderer Domains auf demselben Account bleiben unangetastet. Von Hand:
 

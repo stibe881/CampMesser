@@ -215,7 +215,7 @@ export const authRouters = {
         return {
           secret,
           url: otpauthUrl(
-            ctx.user.email ?? ctx.user.name ?? "CampMesser",
+            ctx.user.email ?? ctx.user.name ?? "ReiseKompass",
             secret
           ),
         };
@@ -443,7 +443,9 @@ export const authRouters = {
           const host = ctx.req.get("host");
           const base =
             process.env.APP_URL?.replace(/\/+$/, "") ??
-            (host ? `${ctx.req.protocol}://${host}` : "https://campmesser.ch");
+            (host
+              ? `${ctx.req.protocol}://${host}`
+              : "https://meinreisekompass.ch");
           const resetUrl = `${base}/anmelden?reset=${token}`;
           await sendPasswordResetMail(user.email, resetUrl, input.lang).catch(
             err => console.error("[Mailer] Reset-Mail fehlgeschlagen:", err)

@@ -1,7 +1,7 @@
 /**
  * Echte Wegstrecken statt Luftlinie.
  *
- * WARUM DIE ÄNDERUNG: Bis jetzt hat CampMesser überall dort, wo eine
+ * WARUM DIE ÄNDERUNG: Bis jetzt hat ReiseKompass überall dort, wo eine
  * Strecke gebraucht wurde, die Luftlinie genommen und mit einem
  * Pauschal-Tempo multipliziert. Über Land ging das knapp auf; im Gebirge
  * ist es schlicht falsch – vom Wallis ins Tessin sind es Luftlinie

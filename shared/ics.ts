@@ -28,11 +28,16 @@
 import { l4, pick, type L4, type Language } from "./i18n";
 import { tripNights } from "./trips";
 
-/** Domain der stabilen UIDs. */
+/**
+ * Domain der stabilen UIDs – bleibt beim alten Wert, obwohl die App heute
+ * unter meinreisekompass.ch läuft: Die UID ist die IDENTITÄT eines Eintrags.
+ * Änderte sie sich, sähe jeder Kalender nach dem Namenswechsel lauter neue
+ * Ereignisse und die alten blieben als Duplikate stehen.
+ */
 export const ICS_UID_DOMAIN = "campmesser.ch";
 
 /** Link, der in jeder Beschreibung steht. */
-export const CAMPMESSER_URL = "https://campmesser.ch";
+export const APP_PUBLIC_URL = "https://meinreisekompass.ch";
 
 /** Maximale Zeilenlänge in Oktetten (RFC 5545). */
 const MAX_LINE_OCTETS = 75;
@@ -58,10 +63,10 @@ export interface IcsTrip {
 }
 
 const PLANNED_WITH: L4 = l4(
-  "Geplant mit CampMesser",
-  "Prévu avec CampMesser",
-  "Pianificato con CampMesser",
-  "Planned with CampMesser"
+  "Geplant mit ReiseKompass",
+  "Prévu avec ReiseKompass",
+  "Pianificato con ReiseKompass",
+  "Planned with ReiseKompass"
 );
 
 const NIGHTS_LABEL: Record<Language, (n: number) => string> = {
@@ -233,9 +238,9 @@ export function tripEventLines(
     pick(PLANNED_WITH, lang),
   ];
   lines.push(
-    `DESCRIPTION:${escapeIcsText(`${descriptionParts.join(" · ")}\n${CAMPMESSER_URL}`)}`
+    `DESCRIPTION:${escapeIcsText(`${descriptionParts.join(" · ")}\n${APP_PUBLIC_URL}`)}`
   );
-  lines.push(`URL:${CAMPMESSER_URL}`);
+  lines.push(`URL:${APP_PUBLIC_URL}`);
   lines.push("END:VEVENT");
   return lines;
 }
@@ -252,7 +257,7 @@ export function buildTripIcs(
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//CampMesser//Reisen//DE",
+    "PRODID:-//ReiseKompass//Reisen//DE",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
   ];

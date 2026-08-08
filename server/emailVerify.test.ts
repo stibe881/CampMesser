@@ -49,12 +49,12 @@ describe("E-Mail-Bestätigungs-Tokens", () => {
 });
 
 describe("Bestätigungs-Mail", () => {
-  const url = "https://campmesser.ch/anmelden?verify=deadbeef";
+  const url = "https://meinreisekompass.ch/anmelden?verify=deadbeef";
 
-  it("enthält in allen vier Sprachen den Link und einen Betreff mit CampMesser", () => {
+  it("enthält in allen vier Sprachen den Link und einen Betreff mit ReiseKompass", () => {
     for (const lang of LANGUAGES) {
       const mail = buildVerificationMail(url, lang);
-      expect(mail.subject).toContain("CampMesser");
+      expect(mail.subject).toContain("ReiseKompass");
       expect(mail.text).toContain(url);
       expect(mail.text.length).toBeGreaterThan(50);
     }
