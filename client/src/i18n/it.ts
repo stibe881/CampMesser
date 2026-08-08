@@ -4602,6 +4602,44 @@ export const it: Translation = {
     sourceNote:
       "Regole FIS riassunte da fis-ski.com; nozioni sulle valanghe secondo le basi dell'SLF (whiterisk.ch). Chi va regolarmente fuori pista deve frequentare un corso valanghe – nessuna app lo sostituisce.",
   },
+  grilling: {
+    title: "Griglia & cotture",
+    subtitle:
+      "Temperature al cuore, prova della brace e le regole base che fanno la differenza – da consultare alla griglia.",
+    offlineNote:
+      "Tutti i contenuti sono disponibili offline – anche alla griglia senza rete.",
+    tempsTitle: "Temperature al cuore",
+    tempsIntro:
+      "Valori indicativi al cuore della carne – un termometro batte ogni regola empirica. Pollame e carne macinata sempre ben cotti.",
+    tipsTitle: "Regole base alla griglia",
+    tipsIntro: "Ciò che separa il carbonizzato dal perfetto.",
+    sourceNote:
+      "Valori secondo la pratica di cucina corrente e le raccomandazioni USAV sull'igiene alimentare – senza garanzia.",
+  },
+  fireGuide: {
+    title: "Guida al fuoco",
+    subtitle:
+      "Costruire, accendere, mantenere e spegnere bene un falò – passo dopo passo.",
+    offlineNote:
+      "Tutti i contenuti sono disponibili offline – anche al focolare senza rete.",
+    listTitle: "Dall'esca allo spegnimento",
+    listIntro: "I passi nell'ordine in cui si presentano al focolare.",
+    linkBans: "Divieti di fuoco (modulo meteo)",
+    linkWood: "Calcolatore della legna",
+    sourceNote:
+      "Raccomandazioni secondo la pratica di servizi forestali e pompieri – i divieti locali e il regolamento del campeggio hanno sempre la precedenza.",
+  },
+  etiquette: {
+    title: "Galateo del campeggio",
+    subtitle:
+      "Orari di riposo, acque grigie, cani, confini della piazzola – le regole della convivenza in campeggio.",
+    offlineNote: "Tutti i contenuti sono disponibili offline.",
+    listTitle: "Le dieci regole della convivenza",
+    listIntro:
+      "La maggior parte non sta in nessun regolamento – eppure fa la differenza tra buoni e cattivi vicini.",
+    sourceNote:
+      "Raccolto da regolamenti di campeggio diffusi e dalle consuetudini – il regolamento del campeggio vale sempre di più.",
+  },
   waterSafety: {
     title: "Regole di balneazione & bandiere",
     subtitle:

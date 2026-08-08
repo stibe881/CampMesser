@@ -4629,6 +4629,44 @@ export const fr: Translation = {
     sourceNote:
       "Règles FIS reformulées d'après fis-ski.com ; connaissances avalanches selon les bases du SLF (whiterisk.ch). Qui sort régulièrement des pistes a sa place dans un cours d'avalanche – aucune app ne le remplace.",
   },
+  grilling: {
+    title: "Grillades & cuissons",
+    subtitle:
+      "Températures à cœur, test de braise et les règles de base qui font la différence – à consulter au gril.",
+    offlineNote:
+      "Tout le contenu est disponible hors ligne – même au gril sans réseau.",
+    tempsTitle: "Températures à cœur",
+    tempsIntro:
+      "Valeurs indicatives à cœur – un thermomètre bat toute règle empirique. Volaille et viande hachée toujours bien cuites.",
+    tipsTitle: "Règles de base au gril",
+    tipsIntro: "Ce qui sépare le carbonisé du parfait.",
+    sourceNote:
+      "Valeurs selon la pratique culinaire courante et les recommandations de l'OSAV en hygiène alimentaire – sans garantie.",
+  },
+  fireGuide: {
+    title: "Guide du feu",
+    subtitle:
+      "Monter, allumer, entretenir et bien éteindre un feu de camp – pas à pas.",
+    offlineNote:
+      "Tout le contenu est disponible hors ligne – même au foyer sans réseau.",
+    listTitle: "De l'amadou à l'extinction",
+    listIntro: "Les étapes dans l'ordre où elles se posent au foyer.",
+    linkBans: "Interdictions de feu (module météo)",
+    linkWood: "Calculateur de bois",
+    sourceNote:
+      "Recommandations selon la pratique des services forestiers et des pompiers – les interdictions locales et le règlement du camping priment toujours.",
+  },
+  etiquette: {
+    title: "Savoir-vivre au camping",
+    subtitle:
+      "Heures de repos, eaux grises, chiens, limites d'emplacement – les règles du vivre-ensemble au camping.",
+    offlineNote: "Tout le contenu est disponible hors ligne.",
+    listTitle: "Les dix règles du vivre-ensemble",
+    listIntro:
+      "La plupart ne figurent dans aucun règlement – et font pourtant la différence entre bons et mauvais voisins.",
+    sourceNote:
+      "Compilé à partir de règlements de camping courants et des usages – le règlement du camping concerné prime.",
+  },
   waterSafety: {
     title: "Règles de baignade & drapeaux",
     subtitle:

@@ -4509,6 +4509,44 @@ export const en: Translation = {
     sourceNote:
       "FIS rules paraphrased from fis-ski.com; avalanche knowledge based on the SLF fundamentals (whiterisk.ch). Anyone regularly off-piste belongs in an avalanche course – no app replaces one.",
   },
+  grilling: {
+    title: "Grill & cooking times",
+    subtitle:
+      "Core temperatures, the ember test and the rules of thumb that make the difference – for looking up at the grill.",
+    offlineNote:
+      "All content is available offline – even at the grill without signal.",
+    tempsTitle: "Core temperatures",
+    tempsIntro:
+      "Guide values at the core of the meat – a probe thermometer beats any rule of thumb. Always cook poultry and minced meat through.",
+    tipsTitle: "Rules of thumb at the grill",
+    tipsIntro: "What separates charred from perfect.",
+    sourceNote:
+      "Guide values based on common kitchen practice and the Swiss FSVO's food-hygiene advice – no guarantee.",
+  },
+  fireGuide: {
+    title: "Fire guide",
+    subtitle:
+      "Building, lighting, feeding and properly extinguishing a campfire – step by step.",
+    offlineNote:
+      "All content is available offline – even at the fire pit without signal.",
+    listTitle: "From tinder to dousing",
+    listIntro: "The steps in the order they come up at the fire pit.",
+    linkBans: "Fire bans (weather module)",
+    linkWood: "Firewood calculator",
+    sourceNote:
+      "Advice in line with forestry services and fire brigades – local bans and site rules always come first.",
+  },
+  etiquette: {
+    title: "Campsite etiquette",
+    subtitle:
+      "Quiet hours, grey water, dogs, pitch boundaries – the rules of living together on a campsite.",
+    offlineNote: "All content is available offline.",
+    listTitle: "The ten rules of living together",
+    listIntro:
+      "Most of them appear in no site rules – and still make the difference between good and bad neighbours.",
+    sourceNote:
+      "Compiled from common campsite rules and camping custom – the rules of your actual site take precedence.",
+  },
   waterSafety: {
     title: "Bathing rules & flags",
     subtitle:

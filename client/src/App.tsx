@@ -36,6 +36,9 @@ const pageLoaders = {
   TentCare: () => import("./pages/TentCare"),
   WinterKnowledge: () => import("./pages/WinterKnowledge"),
   WaterSafety: () => import("./pages/WaterSafety"),
+  Grilling: () => import("./pages/Grilling"),
+  FireGuide: () => import("./pages/FireGuide"),
+  Etiquette: () => import("./pages/Etiquette"),
   GearRepair: () => import("./pages/GearRepair"),
   StoryDice: () => import("./pages/StoryDice"),
   Songbook: () => import("./pages/Songbook"),
@@ -146,6 +149,9 @@ const CloudsPage = lazyWithRetry(pageLoaders.Clouds);
 const TentCarePage = lazyWithRetry(pageLoaders.TentCare);
 const WinterKnowledgePage = lazyWithRetry(pageLoaders.WinterKnowledge);
 const WaterSafetyPage = lazyWithRetry(pageLoaders.WaterSafety);
+const GrillingPage = lazyWithRetry(pageLoaders.Grilling);
+const FireGuidePage = lazyWithRetry(pageLoaders.FireGuide);
+const EtiquettePage = lazyWithRetry(pageLoaders.Etiquette);
 const GearRepairPage = lazyWithRetry(pageLoaders.GearRepair);
 const StoryDicePage = lazyWithRetry(pageLoaders.StoryDice);
 const SongbookPage = lazyWithRetry(pageLoaders.Songbook);
@@ -251,6 +257,9 @@ function Router() {
           <Route path={"/zeltpflege"} component={TentCarePage} />
           <Route path={"/wintersport"} component={WinterKnowledgePage} />
           <Route path={"/baderegeln"} component={WaterSafetyPage} />
+          <Route path={"/grillieren"} component={GrillingPage} />
+          <Route path={"/feuer"} component={FireGuidePage} />
+          <Route path={"/knigge"} component={EtiquettePage} />
           <Route path={"/reparatur"} component={GearRepairPage} />
           {/* Die GPS-Schatzsuche lebt seit der Zusammenlegung im
               Familien-Modus; alte Lesezeichen und Startbildschirm-Verknüpfungen

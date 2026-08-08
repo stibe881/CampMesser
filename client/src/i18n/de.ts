@@ -4639,6 +4639,45 @@ export const de = {
     sourceNote:
       "FIS-Regeln sinngemäss nach fis-ski.com; Lawinen-Wissen nach den Grundlagen des SLF (whiterisk.ch). Wer regelmässig abseits der Piste unterwegs ist, gehört in einen Lawinenkurs – keine App ersetzt ihn.",
   },
+  grilling: {
+    title: "Grill & Garzeiten",
+    subtitle:
+      "Kerntemperaturen, Glut-Test und die Faustregeln, die den Unterschied machen – zum Nachschlagen am Grill.",
+    offlineNote:
+      "Alle Inhalte sind offline verfügbar – auch am Grill ohne Netz.",
+    tempsTitle: "Kerntemperaturen",
+    tempsIntro:
+      "Richtwerte im Kern des Fleischs – ein Kernthermometer schlägt jede Faustregel. Geflügel und Hackfleisch immer durchgaren.",
+    tipsTitle: "Faustregeln am Grill",
+    tipsIntro: "Was zwischen verkohlt und perfekt entscheidet.",
+    sourceNote:
+      "Richtwerte nach gängiger Küchenpraxis und den Empfehlungen des BLV zur Lebensmittelhygiene – ohne Gewähr.",
+  },
+  fireGuide: {
+    title: "Feuer-Ratgeber",
+    subtitle:
+      "Lagerfeuer aufbauen, anzünden, unterhalten und richtig löschen – Schritt für Schritt.",
+    offlineNote:
+      "Alle Inhalte sind offline verfügbar – auch am Feuerplatz ohne Netz.",
+    listTitle: "Vom Zunder bis zum Löschen",
+    listIntro:
+      "Die Schritte in der Reihenfolge, in der sie sich am Feuerplatz stellen.",
+    linkBans: "Feuerverbote (Wetter-Modul)",
+    linkWood: "Feuerholz-Rechner",
+    sourceNote:
+      "Empfehlungen sinngemäss nach der Praxis von Waldämtern und Feuerwehren – lokale Verbote und Platzregeln gehen immer vor.",
+  },
+  etiquette: {
+    title: "Camping-Knigge",
+    subtitle:
+      "Ruhezeiten, Grauwasser, Hunde, Parzellen-Grenzen – die Regeln des Zusammenlebens auf dem Platz.",
+    offlineNote: "Alle Inhalte sind offline verfügbar.",
+    listTitle: "Die zehn Regeln des Zusammenlebens",
+    listIntro:
+      "Die meisten stehen in keiner Platzordnung – und machen trotzdem den Unterschied zwischen guten und schlechten Nachbarn.",
+    sourceNote:
+      "Zusammengetragen aus verbreiteten Platzordnungen und Camping-Gepflogenheiten – die Regeln des jeweiligen Platzes gehen vor.",
+  },
   waterSafety: {
     title: "Baderegeln & Flaggen",
     subtitle:
