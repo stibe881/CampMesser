@@ -3649,6 +3649,13 @@ export const fr: Translation = {
     stationLine: (waterBody: string, station: string, distance: string) =>
       `${waterBody} · station de mesure ${station}, à ${distance}`,
     marineLine: "Température de l'eau de mer à ton emplacement",
+    waveHeight: (m: string) => `Vagues ${m} m`,
+    waveFrom: (dir: string) => `venant du ${dir}`,
+    waveLevels: {
+      calm: "calme",
+      moderate: "modérée",
+      rough: "forte – prudence à la baignade",
+    },
     noTemperature:
       "Cette station ne mesure pas la température de l'eau – il n'y a que le niveau et le débit.",
     comfort: {

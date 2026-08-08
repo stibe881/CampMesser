@@ -504,7 +504,8 @@ export function marineWaterUrl(latitude: number, longitude: number): string {
   const params = new URLSearchParams({
     latitude: latitude.toFixed(4),
     longitude: longitude.toFixed(4),
-    current: "sea_surface_temperature",
+    // Wellen (#451) gleich mitholen – ein zweiter Abruf wäre Verschwendung
+    current: "sea_surface_temperature,wave_height,wave_direction",
     hourly: "sea_surface_temperature",
     past_days: "1",
     forecast_days: "1",
@@ -518,6 +519,10 @@ export interface MarineWater {
   measuredAtMs: number;
   /** Wert sechs Stunden früher (null = nicht vorhanden) */
   previousC: number | null;
+  /** Signifikante Wellenhöhe in Metern (#451); null = nicht vorhanden */
+  waveHeightM: number | null;
+  /** Richtung, AUS der die Wellen kommen (Grad); null = nicht vorhanden */
+  waveDirectionDeg: number | null;
 }
 
 /**
@@ -527,7 +532,12 @@ export interface MarineWater {
 export function parseMarineWater(json: unknown): MarineWater | null {
   if (!json || typeof json !== "object") return null;
   const data = json as {
-    current?: { time?: unknown; sea_surface_temperature?: unknown };
+    current?: {
+      time?: unknown;
+      sea_surface_temperature?: unknown;
+      wave_height?: unknown;
+      wave_direction?: unknown;
+    };
     hourly?: { time?: unknown; sea_surface_temperature?: unknown };
   };
   const current = data.current;
@@ -560,7 +570,40 @@ export function parseMarineWater(json: unknown): MarineWater | null {
       }
     }
   }
-  return { temperatureC, measuredAtMs, previousC };
+  // Wellen (#451): fehlende oder kaputte Werte bleiben ehrlich null
+  const rawWave = current.wave_height;
+  const waveHeightM =
+    typeof rawWave === "number" && Number.isFinite(rawWave) && rawWave >= 0
+      ? rawWave
+      : null;
+  const rawDirection = current.wave_direction;
+  const waveDirectionDeg =
+    waveHeightM !== null &&
+    typeof rawDirection === "number" &&
+    Number.isFinite(rawDirection)
+      ? ((rawDirection % 360) + 360) % 360
+      : null;
+
+  return {
+    temperatureC,
+    measuredAtMs,
+    previousC,
+    waveHeightM,
+    waveDirectionDeg,
+  };
+}
+
+/**
+ * Wellen-Einstufung (#451) fürs Baden – angelehnt an die Douglas-Skala:
+ * unter einem halben Meter ruhig, bis 1.25 m mässig (See-Stärke «slight»),
+ * darüber ist Baden mit Kindern kein Vergnügen mehr.
+ */
+export type WaveLevel = "calm" | "moderate" | "rough";
+
+export function waveLevel(heightM: number): WaveLevel {
+  if (heightM < 0.5) return "calm";
+  if (heightM < 1.25) return "moderate";
+  return "rough";
 }
 
 /**

@@ -7,6 +7,7 @@ import {
   nearestWaterStation,
   parseHydroLatest,
   parseMarineWater,
+  waveLevel,
   TREND_THRESHOLD_C,
   waterStations,
   waterTrend,
@@ -233,5 +234,41 @@ describe("bathingComfort", () => {
     expect(bathingComfort(19)).toBe("pleasant");
     expect(bathingComfort(23)).toBe("warm");
     expect(bathingComfort(28)).toBe("warm");
+  });
+});
+
+describe("Wellen (#451)", () => {
+  it("liest Wellenhöhe und -richtung aus der Marine-Antwort", () => {
+    const marine = parseMarineWater({
+      current: {
+        time: "2026-08-08T10:00",
+        sea_surface_temperature: 24.1,
+        wave_height: 0.7,
+        wave_direction: 370,
+      },
+    });
+    expect(marine?.waveHeightM).toBe(0.7);
+    // 370° wird auf 10° normalisiert
+    expect(marine?.waveDirectionDeg).toBe(10);
+  });
+
+  it("lässt fehlende oder kaputte Wellen-Werte ehrlich null", () => {
+    const marine = parseMarineWater({
+      current: {
+        time: "2026-08-08T10:00",
+        sea_surface_temperature: 24.1,
+        wave_height: -1,
+        wave_direction: 90,
+      },
+    });
+    expect(marine?.waveHeightM).toBeNull();
+    // Ohne Höhe gibt es auch keine Richtung
+    expect(marine?.waveDirectionDeg).toBeNull();
+  });
+
+  it("stuft die Wellenhöhe fürs Baden ein", () => {
+    expect(waveLevel(0.2)).toBe("calm");
+    expect(waveLevel(0.8)).toBe("moderate");
+    expect(waveLevel(1.6)).toBe("rough");
   });
 });

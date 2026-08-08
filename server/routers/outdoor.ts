@@ -608,6 +608,9 @@ export const outdoorRouters = {
             temperatureC: marine.temperatureC,
             measuredAtMs: marine.measuredAtMs,
             trend: waterTrend(marine.temperatureC, marine.previousC),
+            // Wellen fürs Meer (#451)
+            waveHeightM: marine.waveHeightM,
+            waveDirectionDeg: marine.waveDirectionDeg,
           },
         };
       }),
