@@ -17,30 +17,35 @@ function isoDaysAgo(days: number): string {
   return `${d.getFullYear()}-${month}-${day}`;
 }
 
+const { updateSpy } = vi.hoisted(() => ({ updateSpy: vi.fn() }));
+
 vi.mock("@/lib/trpc", async () => {
   const { trpcMock } = await import("@/test/trpcMock");
   return {
-    trpc: trpcMock({
-      "trips.list": [
-        {
-          id: 3,
-          title: "Aare weekend",
-          location: null,
-          spotName: null,
-          startDate: "2026-01-01",
-          endDate: "__END__",
-          spotId: 5,
-        },
-      ],
-      "packing.feedback.list": [],
-      "spots.list": [
-        {
-          id: 5,
-          name: "Camping Aare",
-          nextTimeJson: null,
-        },
-      ],
-    }),
+    trpc: trpcMock(
+      {
+        "trips.list": [
+          {
+            id: 3,
+            title: "Aare weekend",
+            location: null,
+            spotName: null,
+            startDate: "2026-01-01",
+            endDate: "__END__",
+            spotId: 5,
+          },
+        ],
+        "packing.feedback.list": [],
+        "spots.list": [
+          {
+            id: 5,
+            name: "Camping Aare",
+            nextTimeJson: null,
+          },
+        ],
+      },
+      { "spots.update": updateSpy }
+    ),
   };
 });
 
@@ -105,6 +110,23 @@ describe("HomecomingCard", () => {
     );
     expect(screen.queryByText('Back from "Aare weekend"?')).toBeNull();
     expect(localStorage.getItem("campmesser.homecomingDismissed")).toBe("[3]");
+  });
+
+  // #418: Der Merker lässt sich direkt in der Karte notieren – ohne
+  // Umweg übers Dossier, genau im Moment des Einfalls.
+  it("notiert «beim nächsten Mal» direkt in der Karte", async () => {
+    await renderCard();
+    const input = await screen.findByRole("textbox", {
+      name: "e.g. 25 m extension cord",
+    });
+    await userEvent.type(input, "25 m extension cord");
+    await userEvent.click(screen.getByRole("button", { name: "Note it" }));
+    expect(updateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 5,
+        nextTimeJson: JSON.stringify(["25 m extension cord"]),
+      })
+    );
   });
 
   it("ist barrierefrei", async () => {

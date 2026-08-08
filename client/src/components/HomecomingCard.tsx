@@ -16,13 +16,20 @@
  */
 import { useMemo, useState } from "react";
 import { Link } from "wouter";
-import { CheckCircle2, Circle, Home as HomeIcon, X } from "lucide-react";
+import { CheckCircle2, Circle, Home as HomeIcon, Plus, X } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useTodayIso } from "@/lib/useTodayIso";
 import { homecomingDone, homecomingSteps } from "@shared/homecoming";
-import { parseNextTimeNotes } from "@shared/nextTime";
+import {
+  NEXT_TIME_NOTE_MAX_LENGTH,
+  parseNextTimeNotes,
+  serializeNextTimeNotes,
+} from "@shared/nextTime";
 import { reviewCandidate } from "@shared/reviewPrompt";
 import { tripDisplayName } from "@shared/tripName";
 import { cn } from "@/lib/utils";
@@ -67,6 +74,17 @@ export default function HomecomingCard() {
   const [tentDoneIds, setTentDoneIds] = useState<Set<number>>(() =>
     loadIdSet(TENT_KEY)
   );
+  // Merker direkt hier notieren (#418): Der Umweg übers Dossier war eine
+  // Hürde genau in dem Moment, in dem einem die Notiz einfällt.
+  const [noteDraft, setNoteDraft] = useState("");
+  const utils = trpc.useUtils();
+  const noteMutation = trpc.spots.update.useMutation({
+    onSuccess: () => {
+      void utils.spots.list.invalidate();
+      setNoteDraft("");
+    },
+    onError: () => toast.error(t.common.saveFailed),
+  });
 
   const tripsQuery = trpc.trips.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -194,6 +212,41 @@ export default function HomecomingCard() {
                 )}
                 {hc.stepNextTime}
               </Link>
+              {/* Direkt notieren (#418): Die Notiz landet am Platz wie im
+                  Dossier (#396), der Schritt hakt sich damit ab. */}
+              {parseNextTimeNotes(spot.nextTimeJson ?? null).length === 0 && (
+                <form
+                  className="mt-1.5 flex items-center gap-2 pl-6"
+                  onSubmit={event => {
+                    event.preventDefault();
+                    const note = noteDraft.trim();
+                    if (!note) return;
+                    noteMutation.mutate({
+                      id: spot.id,
+                      nextTimeJson: serializeNextTimeNotes([note]),
+                    });
+                  }}
+                >
+                  <Input
+                    className="h-8"
+                    value={noteDraft}
+                    maxLength={NEXT_TIME_NOTE_MAX_LENGTH}
+                    placeholder={hc.notePlaceholder}
+                    aria-label={hc.notePlaceholder}
+                    onChange={e => setNoteDraft(e.target.value)}
+                  />
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    size="sm"
+                    className="h-8"
+                    disabled={!noteDraft.trim() || noteMutation.isPending}
+                  >
+                    <Plus className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                    {hc.noteSave}
+                  </Button>
+                </form>
+              )}
             </li>
           )}
         </ul>

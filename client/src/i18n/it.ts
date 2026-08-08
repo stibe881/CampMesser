@@ -4369,6 +4369,8 @@ export const it: Translation = {
     stepTentAria: "Spunta l'asciugatura della tenda",
     stepReview: "Compila il bilancio: cosa è mancato, cosa era di troppo?",
     stepNextTime: "Annota «la prossima volta» sul campeggio",
+    notePlaceholder: "es. prolunga da 25 m",
+    noteSave: "Annota",
     dismissAria: "Nascondi il promemoria di rientro per questo soggiorno",
   },
   campfire: {

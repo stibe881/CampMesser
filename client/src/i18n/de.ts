@@ -4405,6 +4405,8 @@ export const de = {
     stepTentAria: "Zelt trocknen abhaken",
     stepReview: "Rückblick ausfüllen: Was fehlte, was war zu viel?",
     stepNextTime: "«Beim nächsten Mal» am Platz notieren",
+    notePlaceholder: "z. B. Kabeltrommel 25 m",
+    noteSave: "Notieren",
     dismissAria: "Heimkehr-Erinnerung zu dieser Reise ausblenden",
   },
   campfire: {

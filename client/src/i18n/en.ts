@@ -4278,6 +4278,8 @@ export const en: Translation = {
     stepTentAria: "Mark tent drying as done",
     stepReview: "Fill in the review: what was missing, what was too much?",
     stepNextTime: "Note “next time” reminders at the campsite",
+    notePlaceholder: "e.g. 25 m extension cord",
+    noteSave: "Note it",
     dismissAria: "Hide the homecoming reminder for this trip",
   },
   campfire: {
