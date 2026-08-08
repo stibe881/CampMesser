@@ -1313,6 +1313,9 @@ export const de = {
     horizonNote:
       "Gerechnet aus dem Hindernis-Profil dieses Platzes. Am flachen Horizont ginge die Sonne früher auf – im Tal kommt sie über den Grat, und das ist die Zeit, die zählt.",
     shadowTitle: "Schattenzeiten heute",
+    shadeBarAria: "Schattenverlauf des Tages",
+    shadeTotals: (sun: string, shadeTime: string) =>
+      `${sun} Sonne · ${shadeTime} Schatten`,
     shadowNone:
       "Deine Hindernisse verdecken die Sonne heute nie – freie Sicht den ganzen Tag.",
     shadowRange: (from: string, to: string) => `${from}–${to} Uhr`,

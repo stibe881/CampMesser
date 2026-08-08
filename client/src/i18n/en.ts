@@ -1265,6 +1265,9 @@ export const en: Translation = {
     horizonNote:
       "Calculated from this pitch's obstacle profile. On a flat horizon the sun would rise earlier – in a valley it clears the ridge, and that is the time that counts.",
     shadowTitle: "Shadow times today",
+    shadeBarAria: "Shade over the day",
+    shadeTotals: (sun: string, shadeTime: string) =>
+      `${sun} sun · ${shadeTime} shade`,
     shadowNone:
       "Your obstacles never hide the sun today – clear view all day long.",
     shadowRange: (from: string, to: string) => `${from}–${to}`,

@@ -1314,6 +1314,9 @@ export const fr: Translation = {
     horizonNote:
       "Calculé à partir du profil d'obstacles de cet emplacement. À l'horizon plat, le soleil se lèverait plus tôt – dans la vallée, il passe la crête, et c'est cette heure-là qui compte.",
     shadowTitle: "Heures d'ombre aujourd'hui",
+    shadeBarAria: "Évolution de l'ombre sur la journée",
+    shadeTotals: (sun: string, shadeTime: string) =>
+      `${sun} de soleil · ${shadeTime} d'ombre`,
     shadowNone:
       "Tes obstacles ne cachent jamais le soleil aujourd'hui – vue dégagée toute la journée.",
     shadowRange: (from: string, to: string) => `${from}–${to}`,

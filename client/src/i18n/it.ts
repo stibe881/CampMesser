@@ -1293,6 +1293,9 @@ export const it: Translation = {
     horizonNote:
       "Calcolato dal profilo degli ostacoli di questa piazzola. All'orizzonte piatto il sole sorgerebbe prima: in valle passa la cresta, ed è quell'ora che conta.",
     shadowTitle: "Orari d'ombra oggi",
+    shadeBarAria: "Andamento dell'ombra nella giornata",
+    shadeTotals: (sun: string, shadeTime: string) =>
+      `${sun} di sole · ${shadeTime} di ombra`,
     shadowNone:
       "I tuoi ostacoli oggi non coprono mai il sole – vista libera tutto il giorno.",
     shadowRange: (from: string, to: string) => `${from}–${to}`,
