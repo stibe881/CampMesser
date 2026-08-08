@@ -4257,6 +4257,20 @@ export const en: Translation = {
       "Before packing up in the morning, let it dry first – the dry window below helps with planning.",
     note: "Estimate from temperature, humidity, clouds and wind. Hollows, meadows and creek banks are damper than the forecast knows.",
   },
+  weatherTurn: {
+    title: "The weather turns tomorrow",
+    windLine: (kmh: number) =>
+      `Gusts up to ${kmh} km/h tomorrow – clearly more than today.`,
+    rainLine: (mm: number) =>
+      `About ${mm} mm of rain tomorrow – clearly more than today.`,
+    coldLine: (drop: number) => `About ${drop} °C colder tomorrow than today.`,
+    windAdvice:
+      "Tension the guy lines tonight, check the pegs, stow the awning and anything loose.",
+    rainAdvice:
+      "Check guy lines and drainage, move weather-sensitive gear under cover.",
+    coldAdvice: "Lay out warm layers and sleeping bags.",
+    note: "Compares today's and tomorrow's daily forecasts – a turn, not a storm warning.",
+  },
   homecoming: {
     title: (trip: string) => `Back from "${trip}"?`,
     intro: "Three quick things while you still remember:",

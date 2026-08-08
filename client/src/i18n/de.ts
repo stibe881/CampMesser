@@ -4384,6 +4384,20 @@ export const de = {
       "Fürs Einpacken am Morgen zuerst abtrocknen lassen – das Trockenfenster unten hilft beim Planen.",
     note: "Abschätzung aus Temperatur, Feuchte, Wolken und Wind. Senken, Wiesen und Bachnähe sind feuchter, als die Prognose weiss.",
   },
+  weatherTurn: {
+    title: "Morgen kippt das Wetter",
+    windLine: (kmh: number) =>
+      `Morgen Böen bis ${kmh} km/h – deutlich mehr als heute.`,
+    rainLine: (mm: number) =>
+      `Morgen rund ${mm} mm Regen – deutlich mehr als heute.`,
+    coldLine: (drop: number) => `Morgen rund ${drop} °C kälter als heute.`,
+    windAdvice:
+      "Heute Abend abspannen, Heringe prüfen, Markise und Loses versorgen.",
+    rainAdvice:
+      "Abspannung und Wassergräben prüfen, Wetterempfindliches unters Dach.",
+    coldAdvice: "Warme Schicht und Schlafsäcke bereitlegen.",
+    note: "Vergleich der Tagesprognosen von heute und morgen – ein Umschwung, keine Unwetterwarnung.",
+  },
   homecoming: {
     title: (trip: string) => `Zurück von «${trip}»?`,
     intro: "Drei Handgriffe, solange du es noch weisst:",

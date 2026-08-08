@@ -4348,6 +4348,20 @@ export const it: Translation = {
       "Prima di smontare al mattino, lascia asciugare – la finestra asciutta qui sotto aiuta a pianificare.",
     note: "Stima da temperatura, umidità, nuvole e vento. Avvallamenti, prati e vicinanza ai ruscelli sono più umidi di quanto sappia la previsione.",
   },
+  weatherTurn: {
+    title: "Domani il tempo cambia",
+    windLine: (kmh: number) =>
+      `Domani raffiche fino a ${kmh} km/h – nettamente più di oggi.`,
+    rainLine: (mm: number) =>
+      `Domani circa ${mm} mm di pioggia – nettamente più di oggi.`,
+    coldLine: (drop: number) => `Domani circa ${drop} °C in meno di oggi.`,
+    windAdvice:
+      "Stasera tendere i tiranti, controllare i picchetti, riporre la veranda e tutto ciò che è sciolto.",
+    rainAdvice:
+      "Controllare tiranti e scoli, mettere al riparo ciò che teme l'acqua.",
+    coldAdvice: "Preparare strati caldi e sacchi a pelo.",
+    note: "Confronto tra le previsioni di oggi e domani – un cambiamento, non un'allerta maltempo.",
+  },
   homecoming: {
     title: (trip: string) => `Di ritorno da «${trip}»?`,
     intro: "Tre gesti finché te lo ricordi:",

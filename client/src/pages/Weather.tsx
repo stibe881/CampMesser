@@ -42,7 +42,9 @@ import PageHeader from "@/components/PageHeader";
 import OfficialWarnings from "@/components/OfficialWarnings";
 import RainRadar from "@/components/RainRadar";
 import CondensationCard from "@/components/CondensationCard";
+import WeatherTurnCard from "@/components/WeatherTurnCard";
 import DryWindowCard from "@/components/DryWindowCard";
+import { weatherTurn } from "@shared/weatherTurn";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -2125,6 +2127,13 @@ export default function WeatherPage() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Wetterumschwung (#417): «Morgen kippt das Wetter» – nur,
+              wenn morgen deutlich schlechter wird als heute. */}
+          <WeatherTurnCard
+            turn={weatherTurn(data.daily[0], data.daily[1])}
+            className="mb-4"
+          />
 
           {/* Tau in der Nacht (#397): erscheint nur, wenn das Zelt nass zu
               werden droht – ein tägliches «bleibt trocken» wäre eine

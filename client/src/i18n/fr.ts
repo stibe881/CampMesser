@@ -4376,6 +4376,21 @@ export const fr: Translation = {
       "Avant de plier le matin, laisse d’abord sécher – la fenêtre sèche ci-dessous aide à planifier.",
     note: "Estimation à partir de la température, de l’humidité, des nuages et du vent. Les creux, prairies et abords de ruisseaux sont plus humides que ne le sait la prévision.",
   },
+  weatherTurn: {
+    title: "Le temps bascule demain",
+    windLine: (kmh: number) =>
+      `Demain, rafales jusqu'à ${kmh} km/h – nettement plus qu'aujourd'hui.`,
+    rainLine: (mm: number) =>
+      `Demain, environ ${mm} mm de pluie – nettement plus qu'aujourd'hui.`,
+    coldLine: (drop: number) =>
+      `Demain, environ ${drop} °C de moins qu'aujourd'hui.`,
+    windAdvice:
+      "Retendre les haubans ce soir, vérifier les sardines, ranger le store et tout ce qui traîne.",
+    rainAdvice:
+      "Vérifier haubans et écoulement, mettre à l'abri ce qui craint l'eau.",
+    coldAdvice: "Préparer couches chaudes et sacs de couchage.",
+    note: "Comparaison des prévisions du jour et du lendemain – un basculement, pas une alerte tempête.",
+  },
   homecoming: {
     title: (trip: string) => `De retour de « ${trip} » ?`,
     intro: "Trois gestes tant que tu t'en souviens :",
