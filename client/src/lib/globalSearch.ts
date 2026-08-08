@@ -236,6 +236,10 @@ export interface OwnContent {
     storage?: string | null;
     category?: string | null;
   }[];
+  /** Karten & Ausweise (#482): gesucht wird über den Titel. */
+  documents?: { id: number; title: string }[];
+  /** Tankbuch (#482): gesucht wird über Datum und Kilometerstand. */
+  fuelFills?: { id: number; day: string; odometerKm: number }[];
   /** Reisen: gesucht wird über Titel und Ort. */
   trips?: {
     id: number;
@@ -280,6 +284,18 @@ const OWN_KIND_LABELS = {
   foodCooled: l4("Kühlbox", "Glacière", "Frigo", "Cool box"),
   foodDry: l4("Trockenvorrat", "Réserve sèche", "Dispensa", "Dry store"),
   trip: l4("Aufenthalt", "Séjour", "Soggiorno", "Stay"),
+  document: l4(
+    "Ausweis / Karte",
+    "Document / carte",
+    "Documento / tessera",
+    "Document / card"
+  ),
+  fuel: l4(
+    "Tankbuch",
+    "Carnet de carburant",
+    "Registro carburante",
+    "Fuel log"
+  ),
   journal: l4(
     "Reise-Journal",
     "Journal du séjour",
@@ -420,6 +436,25 @@ export function searchOwnContent(
     add(`own-food-${item.id}`, p(item.name), "/kuehlbox", kind, [
       item.category ?? undefined,
     ]);
+  }
+  // Karten & Ausweise (#482): «acsi» tippen soll die Karte finden.
+  for (const card of own.documents ?? []) {
+    add(
+      `own-doc-${card.id}`,
+      p(card.title),
+      "/ausweise",
+      p(OWN_KIND_LABELS.document)
+    );
+  }
+  // Tankbuch (#482): gesucht wird über Datum und Kilometerstand – mehr
+  // Text hat eine Tankfüllung nicht.
+  for (const fill of own.fuelFills ?? []) {
+    add(
+      `own-fuel-${fill.id}`,
+      `${fill.day} · ${fill.odometerKm} km`,
+      "/tankbuch",
+      p(OWN_KIND_LABELS.fuel)
+    );
   }
   // Aufenthalte: Titel ODER Ort führen zum Ziel – man erinnert sich mal an
   // das eine, mal an das andere.

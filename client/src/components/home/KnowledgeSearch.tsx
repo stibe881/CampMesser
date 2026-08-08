@@ -110,6 +110,9 @@ export default function KnowledgeSearch() {
   const boxesQuery = trpc.boxes.list.useQuery(undefined, queryOpts);
   const foodQuery = trpc.food.list.useQuery(undefined, queryOpts);
   const searchTripsQuery = trpc.trips.list.useQuery(undefined, queryOpts);
+  // Ausweise & Tankbuch (#482): auch die sollen sich ertippen lassen
+  const documentsQuery = trpc.documents.list.useQuery(undefined, queryOpts);
+  const fuelLogQuery = trpc.fuelLog.list.useQuery(undefined, queryOpts);
   // Der geschriebene Inhalt der Reisen (#349): Journal, Pinnwand,
   // Gästebuch. Wie alle Listen hier erst beim Antippen des Suchfelds –
   // es sind alle Journal-Texte auf einmal, und wer nie sucht, holt nichts.
@@ -213,6 +216,8 @@ export default function KnowledgeSearch() {
               startDate: trip.startDate,
             })),
             tripTexts: tripTexts,
+            documents: documentsQuery.data,
+            fuelFills: fuelLogQuery.data,
           },
           6,
           lang
