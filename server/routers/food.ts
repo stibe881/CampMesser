@@ -543,6 +543,47 @@ export const foodRouters = {
         if (ids.length > 0) await db.reorderShoppingItems(ctx.user.id, ids);
         return { success: true } as const;
       }),
+    /**
+     * Offene Einkäufe in eine andere Liste verschieben (#446): was nach
+     * dem Einkauf übrig bleibt, wandert z. B. von «Ferien» zurück in den
+     * «Wocheneinkauf», statt es abzutippen. Abgehakte Einträge bleiben,
+     * wo sie sind – sie dokumentieren den erledigten Einkauf.
+     */
+    moveOpen: protectedProcedure
+      .input(
+        z.object({
+          fromListId: z.number().int().positive().optional(),
+          toListId: z.number().int().positive(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const from = await requireShoppingList(ctx.user.id, input.fromListId);
+        const to = await requireShoppingList(ctx.user.id, input.toListId);
+        if (from.id === to.id) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Die Ziel-Liste ist dieselbe Liste.",
+          });
+        }
+        const items = await db.getShoppingItems(ctx.user.id, from.id);
+        const open = items.filter(i => !i.checked);
+        if (open.length === 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Keine offenen Einträge zum Verschieben.",
+          });
+        }
+        const targetItems = await db.getShoppingItems(ctx.user.id, to.id);
+        const nextPosition =
+          targetItems.reduce((max, i) => Math.max(max, i.position), 0) + 1;
+        await db.moveShoppingItemsToList(
+          ctx.user.id,
+          open.map(i => i.id),
+          to.id,
+          nextPosition
+        );
+        return { moved: open.length, toListId: to.id } as const;
+      }),
     toggle: protectedProcedure
       .input(z.object({ id: z.number(), checked: z.boolean() }))
       .mutation(({ ctx, input }) =>

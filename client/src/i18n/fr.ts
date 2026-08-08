@@ -5451,6 +5451,13 @@ export const fr: Translation = {
     detailsFailed: "La quantité/note n'a pas pu être enregistrée",
     openTitle: "Encore à acheter",
     doneTitle: "Fait",
+    moveOpenLabel: "Déplacer les entrées ouvertes vers :",
+    moveOpenAria: (name: string) =>
+      `Déplacer toutes les entrées ouvertes vers la liste ${name}`,
+    movedToList: (n: number, name: string) =>
+      n === 1
+        ? `1 entrée déplacée vers « ${name} »`
+        : `${n} entrées déplacées vers « ${name} »`,
     itemCheckAria: (name: string) => `Cocher ${name}`,
     itemUncheckAria: (name: string) => `Rouvrir ${name}`,
     removeAria: (name: string) => `Retirer ${name} de la liste`,

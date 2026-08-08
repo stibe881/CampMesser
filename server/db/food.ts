@@ -315,6 +315,28 @@ export async function reorderShoppingItems(userId: number, itemIds: number[]) {
     )
   );
 }
+/**
+ * Einträge in eine andere Liste verschieben (#446): listId umhängen und
+ * ans Ende der Ziel-Liste sortieren. Nur eigene Zeilen werden angefasst;
+ * die Positionen zählen ab `startPosition` hoch.
+ */
+export async function moveShoppingItemsToList(
+  userId: number,
+  itemIds: number[],
+  toListId: number,
+  startPosition: number
+) {
+  if (itemIds.length === 0) return;
+  const db = requireDb(await getDb());
+  await Promise.all(
+    itemIds.map((id, idx) =>
+      db
+        .update(shoppingItems)
+        .set({ listId: toListId, position: startPosition + idx })
+        .where(and(eq(shoppingItems.id, id), eq(shoppingItems.userId, userId)))
+    )
+  );
+}
 export async function deleteShoppingItem(id: number, userId: number) {
   const db = requireDb(await getDb());
   await db

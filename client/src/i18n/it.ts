@@ -5411,6 +5411,13 @@ export const it: Translation = {
     detailsFailed: "Quantità/nota non salvata",
     openTitle: "Ancora da comprare",
     doneTitle: "Fatto",
+    moveOpenLabel: "Sposta le voci aperte in:",
+    moveOpenAria: (name: string) =>
+      `Sposta tutte le voci aperte nella lista ${name}`,
+    movedToList: (n: number, name: string) =>
+      n === 1
+        ? `1 voce spostata in «${name}»`
+        : `${n} voci spostate in «${name}»`,
     itemCheckAria: (name: string) => `Spunta ${name}`,
     itemUncheckAria: (name: string) => `Riapri ${name}`,
     removeAria: (name: string) => `Rimuovi ${name} dalla lista`,

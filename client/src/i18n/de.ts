@@ -5454,6 +5454,13 @@ export const de = {
     detailsFailed: "Menge/Notiz konnte nicht gespeichert werden",
     openTitle: "Noch zu kaufen",
     doneTitle: "Erledigt",
+    moveOpenLabel: "Offene verschieben nach:",
+    moveOpenAria: (name: string) =>
+      `Alle offenen Einträge in die Liste ${name} verschieben`,
+    movedToList: (n: number, name: string) =>
+      n === 1
+        ? `1 Eintrag nach «${name}» verschoben`
+        : `${n} Einträge nach «${name}» verschoben`,
     itemCheckAria: (name: string) => `${name} abhaken`,
     itemUncheckAria: (name: string) => `${name} wieder öffnen`,
     removeAria: (name: string) => `${name} von der Liste entfernen`,

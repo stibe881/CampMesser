@@ -5306,6 +5306,10 @@ export const en: Translation = {
     detailsFailed: "Quantity/note could not be saved",
     openTitle: "Still to buy",
     doneTitle: "Done",
+    moveOpenLabel: "Move open items to:",
+    moveOpenAria: (name: string) => `Move all open items to the ${name} list`,
+    movedToList: (n: number, name: string) =>
+      n === 1 ? `1 item moved to “${name}”` : `${n} items moved to “${name}”`,
     itemCheckAria: (name: string) => `Tick off ${name}`,
     itemUncheckAria: (name: string) => `Reopen ${name}`,
     removeAria: (name: string) => `Remove ${name} from the list`,
