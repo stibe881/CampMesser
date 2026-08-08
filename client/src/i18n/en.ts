@@ -1296,6 +1296,9 @@ export const en: Translation = {
     photoLightRange: (from, to) => `${from}–${to}`,
   },
   level: {
+    tireFront: (bar: string) => `Tyre pressure front ${bar} bar`,
+    tireRear: (bar: string) => `rear ${bar} bar`,
+    serviceDue: (date: string) => `Service due on ${date}`,
     title: "Spirit level",
     subtitle:
       "Level your caravan, stove or table – lay the phone down flat, display facing up.",
@@ -1326,6 +1329,9 @@ export const en: Translation = {
       "“Zero here” compensates for a crooked phone case or table top: place the phone on a surface you know is level and zero it there. For the caravan: place the phone on the floor or a worktop inside and shim the low side with wedges until the bubble is in the centre.",
   },
   payload: {
+    tireFrontLabel: "Tyre pressure front (bar)",
+    tireRearLabel: "Tyre pressure rear (bar)",
+    serviceDueLabel: "Next service",
     title: "Payload calculator",
     subtitle:
       "Is your rig overloaded? Limits, load and traffic light at a glance.",
@@ -2260,6 +2266,8 @@ export const en: Translation = {
     mapRetry: "Try again",
   },
   hike: {
+    pauseLine: (total: string, pause: string) =>
+      `Total time ${total} – including ${pause} of breaks`,
     title: "Record a hike",
     subtitle:
       "Record hikes and walks from the pitch – with distance, duration, pace and elevation. The track stays on your device until you save it.",
@@ -2498,9 +2506,17 @@ export const en: Translation = {
         .filter(Boolean)
         .join(" · "),
     yearCompareTitle: "Nights per year",
+    kindFilterAll: "All types",
+    kindFilterAria: "Filter trips by type",
     kindLabel: "Trip type",
     kindHint:
       "Controls what the Today view highlights during the trip – every module stays available.",
+    locationSearchButton: "Find place",
+    locationSearchFailed: "Place search unavailable",
+    locationSearchNoResults: "No place found – try another spelling?",
+    locationCoordsSet: "Coordinates set",
+    locationCoordsClearAria: "Remove coordinates",
+    dayLabel: "Date",
     arrivalLabel: "Arrival",
     departureLabel: "Departure",
     titleLabel: "Title (optional)",
@@ -2517,6 +2533,8 @@ export const en: Translation = {
     holidayCantonNone: "No canton – no hints",
     holidaySchoolBadge: name => `Falls within the school holidays (${name})`,
     holidayPublicBadge: (date, name) => `Public holiday on ${date}: ${name}`,
+    holidayDestinationBadge: (country: string, date: string, name: string) =>
+      `Public holiday in ${country} on ${date}: ${name}`,
     holidaySource:
       "School and public holiday data: OpenHolidays API, without guarantee.",
     countdown: days =>
@@ -3580,6 +3598,7 @@ export const en: Translation = {
     sourceMarine: "Source: Open-Meteo Marine",
     safetyNote:
       "These are readings from the nearest station, not from your swimming spot. They say nothing about currents, water quality or bathing rules – check the signs on site.",
+    rulesLink: "Bathing rules & flags",
   },
 
   /** ISS passes in the astro section (#222). */
@@ -3644,6 +3663,32 @@ export const en: Translation = {
   },
 
   /** Hiking routes nearby (#238). */
+  nearbyBikes: {
+    sectionAria: "Marked cycling routes nearby",
+    title: "Cycling routes nearby",
+    subtitle: "Marked cycling routes around your location.",
+    subtitleAtPlace: (place: string) =>
+      `Marked cycling routes around ${place}.`,
+    searchButton: "Search routes",
+    loading: "Searching for cycling routes …",
+    loadFailed:
+      "The cycling routes could not be loaded right now. Overpass is a free service and throttles heavy use – try again in a few minutes.",
+    empty: (km: number) =>
+      `No marked cycling route is mapped in OpenStreetMap within ${km} km. Try a larger radius.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 cycling route found" : `${n} cycling routes found`,
+    durationLabel: "Riding time",
+    durationFlatOnly:
+      "No elevation data in OpenStreetMap – the riding time assumes flat terrain.",
+    durationNote:
+      "Riding time as a rule of thumb: 15 km/h touring pace plus 6 minutes per 100 m of ascent. Breaks are not included.",
+    network: {
+      icn: "International cycling route",
+      ncn: "National cycling route",
+      rcn: "Regional cycling route",
+      lcn: "Local cycling route",
+    },
+  },
   nearbyHikes: {
     sectionAria: "Waymarked hiking routes in the area",
     title: "Hiking in the area",
@@ -3746,6 +3791,9 @@ export const en: Translation = {
     title: "Morning briefing",
     sectionAria: "Morning briefing for the current stay",
     pollenLine: (parts: string) => `Pollen count: ${parts}`,
+    waterLine: (temp: string, comfort: string) =>
+      `Water ${temp} °C – ${comfort}`,
+    waterTide: (time: string) => `next high tide at ${time}`,
     astroLine: (phase: string, percent: number) =>
       `${phase} – the moon is ${percent} % lit.`,
     moreTasks: (count: number) =>
@@ -4038,6 +4086,11 @@ export const en: Translation = {
     addLabel: "New card",
     addPlaceholder: "e.g. ACSI card 2026",
     addButton: "Create",
+    expiryLabel: "Expiry date (optional)",
+    expiryAria: (title: string) => `Expiry date of ${title}`,
+    validUntil: (date: string) => `Valid until ${date}`,
+    expiresSoon: (date: string) => `Expires on ${date}`,
+    expiredOn: (date: string) => `Expired since ${date}`,
     hint: "Create the card, then upload its photo. Photos are private and only visible in your account.",
     added: "Card created",
     empty:
@@ -4299,6 +4352,7 @@ export const en: Translation = {
     tasksLink: "To the pinboard",
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
+    snowDepthLine: (cm: number) => `Snow depth: about ${cm} cm`,
     choresTitle: "Chores today",
     choresEmpty: "Nothing assigned for today.",
     choresToggleAria: (title: string) => `Tick off ${title}`,
@@ -4425,12 +4479,48 @@ export const en: Translation = {
     empty: "No chores or people set up yet.",
     note: "Assignments follow the same rotation as in the app – predictable, no randomness. Tick the boxes on paper.",
   },
+  avalanche: {
+    line: (level: number, label: string) =>
+      `Avalanche danger: level ${level} (${label})`,
+    note: "Source: SLF avalanche bulletin – Switzerland only, no guarantee.",
+  },
+  winterKnowledge: {
+    title: "Slopes & avalanches",
+    subtitle:
+      "The 10 FIS rules of conduct and avalanche basics – for looking up, offline too.",
+    offlineNote:
+      "All content is available offline – even in a dead zone on the mountain.",
+    fisTitle: "The 10 FIS rules of conduct",
+    fisIntro:
+      "Summarised in essence – they apply on every slope, to skis and snowboards alike.",
+    avalancheTitle: "Avalanche basics",
+    avalancheIntro:
+      "Sorts out the terms for terrain beside the slopes – and deliberately replaces no avalanche course.",
+    sourceNote:
+      "FIS rules paraphrased from fis-ski.com; avalanche knowledge based on the SLF fundamentals (whiterisk.ch). Anyone regularly off-piste belongs in an avalanche course – no app replaces one.",
+  },
+  waterSafety: {
+    title: "Bathing rules & flags",
+    subtitle:
+      "The six SLRG bathing rules and what the beach flags mean – for looking up, offline too.",
+    offlineNote:
+      "All content is available offline – even on a beach without signal.",
+    rulesTitle: "The 6 bathing rules",
+    rulesIntro:
+      "Paraphrased from the bathing rules of the Swiss Lifesaving Society SLRG.",
+    flagsTitle: "Beach flags",
+    flagsIntro:
+      "How lifeguard services signal at the sea – some countries differ; when in doubt, the signs on site apply.",
+    sourceNote:
+      "Bathing rules paraphrased from the SLRG (slrg.ch); flags follow international lifesaving practice (ILS). The signage on the beach always takes precedence.",
+  },
   winter: {
     title: "Frost & snow",
     frostLine: (nights: string) => `Frost expected: ${nights}.`,
     frostAdvice:
       "Drain the water tank, hoses and canisters or store them frost-free.",
     snowLine: (m: number) => `Snow line drops to around ${m} m a.s.l.`,
+    snowDepth: (cm: number) => `Snow depth on the ground: about ${cm} cm.`,
     note: "From the forecast for this location – hollows and dips are often colder.",
   },
   weatherTurn: {
@@ -4869,6 +4959,37 @@ export const en: Translation = {
     tooLarge: "The file is too large (10 MB max).",
     offlineNote:
       "Photo or PDF. Once opened, the confirmation stays available without a signal – handy at the barrier at 10 pm.",
+  },
+  sights: {
+    sectionAria: "Sights nearby",
+    title: "Sights nearby",
+    subtitle: "Museums, viewpoints, castles and more around your location.",
+    subtitleAtPlace: (place: string) =>
+      `Museums, viewpoints, castles and more around ${place}.`,
+    radiusLabel: "Radius",
+    radiusGroupAria: "Choose search radius",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Searching for sights …",
+    loadFailed:
+      "The sights could not be loaded right now. Overpass is a free service and throttles heavy use – try again in a few minutes.",
+    empty: (km: number) =>
+      `Nothing is mapped in OpenStreetMap within ${km} km. Try a larger radius.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 place found" : `${n} places found`,
+    kind: {
+      museum: "Museum",
+      viewpoint: "Viewpoint",
+      castle: "Castle",
+      zoo: "Zoo",
+      themePark: "Theme park",
+      monument: "Monument",
+      attraction: "Attraction",
+    },
+    navButton: "Directions",
+    navAria: (name: string) => `Directions to ${name}`,
+    website: "Website",
+    source:
+      "Data from OpenStreetMap via the Overpass API – unfiltered and without guarantee. Curated excursions with descriptions are in the “Excursions nearby” section.",
   },
   shops: {
     sectionAria: "Shopping nearby",
@@ -6136,6 +6257,14 @@ export const en: Translation = {
       "Sign-ins from before this overview only appear after that device's next sign-in.",
   },
   fuelLog: {
+    csvButton: "Export as CSV",
+    csvHeaders: [
+      "Date",
+      "Odometer",
+      "Litres",
+      "Amount CHF",
+      "Consumption l/100 km",
+    ],
     title: "Fuel log",
     subtitle: "Fill-ups with odometer reading – for your real consumption.",
     loginFeature: "the fuel log",
@@ -6178,6 +6307,9 @@ export const en: Translation = {
     loginFeature: "the statistics",
     tripsTitle: "Trip statistics",
     tripsLink: "My trips",
+    kindStatsTitle: "Trips by type",
+    kindStatsLine: (trips: number, nights: number) =>
+      `${trips === 1 ? "1 trip" : `${trips} trips`} · ${nights === 1 ? "1 night" : `${nights} nights`}`,
     tripsEmpty: "No stays recorded yet.",
     nightsInYear: year => `Nights ${year}`,
     nightsTotal: "Nights in total",

@@ -87,6 +87,19 @@ export function normalizeTrackActivity(
 }
 
 /**
+ * Gesamtzeit vom ersten bis zum letzten Punkt in Sekunden (#480) – im
+ * Gegensatz zur Bewegungszeit (`durationS`) MIT allen Pausen. Beide Zahlen
+ * nebeneinander zeigen ehrlich, wie viel des Tages Rast war.
+ */
+export function totalTimeS(points: readonly TrackPoint[]): number {
+  if (points.length < 2) return 0;
+  return Math.max(
+    0,
+    Math.round((points[points.length - 1].t - points[0].t) / 1000)
+  );
+}
+
+/**
  * Ab diesem Bewegungs-Schnitt ist es kein Wandern mehr: zügige Wanderer
  * schaffen 6 km/h, gemütliche Velofahrten beginnen darüber.
  */

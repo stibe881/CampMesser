@@ -26,10 +26,13 @@ import {
   Moon as MoonIcon,
   Sunrise,
   UtensilsCrossed,
+  Waves,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useI18n } from "@/i18n";
-import { pick } from "@shared/i18n";
+import { LOCALE_TAGS, pick } from "@shared/i18n";
+import { bathingComfort } from "@shared/bathingWater";
+import { tripKindPreset } from "@shared/tripKind";
 import { getMoonInfo } from "@shared/moon";
 import { MEALS, MEAL_LABELS } from "@shared/menuPlan";
 import { normalizeTripBoardKind } from "@shared/tripBoard";
@@ -55,6 +58,7 @@ import {
 const ICONS: Record<BriefingKind, typeof CloudSunRain> = {
   weather: CloudSunRain,
   pollen: Flower2,
+  water: Waves,
   meals: UtensilsCrossed,
   tasks: ListTodo,
   astro: MoonIcon,
@@ -65,11 +69,14 @@ export default function MorningBriefing({
   latitude,
   longitude,
   today,
+  tripKind,
 }: {
   tripId: number;
   latitude: number | null;
   longitude: number | null;
   today: string;
+  /** Reise-Art (#460) – bei Strandferien kommt die Badewasser-Zeile dazu. */
+  tripKind?: string | null;
 }) {
   const { lang, t } = useI18n();
   const tb = t.briefing;
@@ -106,6 +113,16 @@ export default function MorningBriefing({
       cancelled = true;
     };
   }, [morning, latitude, longitude, pollenProfile]);
+  // Badewasser (#475): nur bei Strandferien – am Zeltplatz steht die
+  // Karte im Dossier, im Briefing wäre sie dort Doppelspurigkeit.
+  const bathing = tripKindPreset(tripKind).bathing;
+  const waterQuery = trpc.water.nearby.useQuery(
+    { latitude: latitude ?? 0, longitude: longitude ?? 0 },
+    {
+      enabled: morning && bathing && latitude != null && longitude != null,
+      staleTime: 10 * 60 * 1000,
+    }
+  );
   const menuQuery = trpc.menu.listByTrip.useQuery(
     { tripId },
     { enabled: morning, staleTime: 60_000 }
@@ -181,6 +198,39 @@ export default function MorningBriefing({
         )
       : null;
 
+  // Badewasser-Zeile (#475): Temperatur + Badegefühl, dazu das nächste
+  // Hochwasser, wo es einen Tidenhub gibt. Ohne Daten fällt sie weg.
+  const waterData = bathing ? waterQuery.data : undefined;
+  const waterTempC =
+    waterData && waterData.source !== "none"
+      ? waterData.source === "station"
+        ? waterData.reading.temperatureC
+        : (waterData.marine?.temperatureC ?? null)
+      : null;
+  const nextHighTide =
+    waterData && waterData.source === "marine"
+      ? (waterData.marine?.tides ?? []).find(tide => tide.kind === "high")
+      : undefined;
+  const waterLine =
+    waterTempC !== null
+      ? [
+          tb.waterLine(
+            waterTempC.toFixed(1),
+            t.bathingWater.comfort[bathingComfort(waterTempC)]
+          ),
+          nextHighTide
+            ? tb.waterTide(
+                new Date(nextHighTide.timeMs).toLocaleTimeString(
+                  LOCALE_TAGS[lang],
+                  { hour: "2-digit", minute: "2-digit" }
+                )
+              )
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : null;
+
   const moon = getMoonInfo(new Date(), lang);
   const items = briefingItems({
     weather: weather
@@ -189,6 +239,7 @@ export default function MorningBriefing({
         }`
       : null,
     pollen: pollenLine,
+    water: waterLine,
     meals: mealsLine,
     tasks: openTasks,
     astro: tb.astroLine(moon.phaseLabel, Math.round(moon.illumination * 100)),

@@ -72,7 +72,6 @@ import {
   ShoppingBasket,
   Refrigerator,
   Signpost,
-  Star,
   Tent,
   Trash2,
   Trophy,
@@ -95,7 +94,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -107,7 +105,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -185,9 +182,15 @@ import {
 import {
   CANTONS,
   holidayDisplayName,
+  isHolidayCountry,
   overlappingHolidays,
+  type Holiday,
 } from "@shared/holidays";
-import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
+import {
+  loadCantonHolidays,
+  loadCountryHolidays,
+  type CantonHolidays,
+} from "@/lib/holidays";
 import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import LazySection from "@/components/LazySection";
@@ -201,10 +204,8 @@ import TripGuestbook from "@/components/TripGuestbook";
 import TripHistory from "@/components/TripHistory";
 import TripReservation from "@/components/TripReservation";
 import TripTemplatePicker from "@/components/TripTemplatePicker";
+import TripFormDialog, { StarRating } from "@/components/trips/TripFormDialog";
 import { useTodayIso } from "@/lib/useTodayIso";
-
-/** Auswahlwert für «Ort frei eintragen» im Zeltplatz-Select. */
-const FREE_LOCATION = "frei";
 
 /** So viele Tage vor der Anreise erscheinen die Wetter-Packvorschläge. */
 const PACK_SUGGESTION_DAYS_BEFORE = 7;
@@ -214,6 +215,12 @@ const PACK_SUGGESTION_DAYS_BEFORE = 7;
 const HOLIDAY_CANTON_KEY = "campmesser.holidayCanton";
 /** Auswahlwert für «kein Kanton» (keine Hinweise). */
 const HOLIDAY_CANTON_NONE = "keiner";
+
+/** Leere Kantons-Ferien, wenn nur Zielland-Feiertage (#469) zu zeigen sind. */
+const EMPTY_CANTON_HOLIDAYS: CantonHolidays = {
+  school: [],
+  publicHolidays: [],
+};
 
 function loadStoredHolidayCanton(): string {
   try {
@@ -237,63 +244,6 @@ function loadStoredTripsView(): TripsView {
     // Speicher blockiert – mit der Listen-Ansicht starten
   }
   return "list";
-}
-
-/**
- * Ferien-/Feiertags-Hinweise eines geplanten Aufenthalts: Badges nur, wenn
- * der Zeitraum Schulferien oder Feiertage des gewählten Kantons überlappt.
- */
-function StarRating({
-  value,
-  onChange,
-  groupLabel,
-  disabled,
-  size = "md",
-}: {
-  value: number | null;
-  onChange: (rating: number | null) => void;
-  groupLabel: string;
-  disabled?: boolean;
-  size?: "sm" | "md";
-}) {
-  const t = useT();
-  const starClass = size === "sm" ? "h-4 w-4" : "h-6 w-6";
-  return (
-    <div
-      role="radiogroup"
-      aria-label={groupLabel}
-      className="flex items-center gap-0.5"
-    >
-      {[1, 2, 3, 4, 5].map(n => {
-        const active = value !== null && n <= value;
-        const selected = value === n;
-        return (
-          <button
-            key={n}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            disabled={disabled}
-            aria-label={
-              selected ? t.trips.removeRatingAria : t.trips.rateStarAria(n)
-            }
-            onClick={() => onChange(selected ? null : n)}
-            className="rounded p-0.5 transition-transform hover:scale-110 disabled:opacity-50"
-          >
-            <Star
-              className={cn(
-                starClass,
-                active
-                  ? "fill-chart-1 text-chart-1"
-                  : "text-muted-foreground/40"
-              )}
-              aria-hidden="true"
-            />
-          </button>
-        );
-      })}
-    </div>
-  );
 }
 
 /**
@@ -506,63 +456,21 @@ export default function TripsPage() {
    * beim nächsten Öffnen stimmt es.
    */
   const nowMinutes = localMinutes();
-  const [spotChoice, setSpotChoice] = useState<string>(FREE_LOCATION);
-  // "keine" = ohne Packliste, sonst Listen-ID
-  const [packListChoice, setPackListChoice] = useState<string>("keine");
-  const [form, setForm] = useState({
-    location: "",
-    title: "",
-    notes: "",
-    startDate: today,
-    endDate: today,
-    arrivalTime: "",
-    departureTime: "",
-    pitchNumber: "",
-    wifiName: "",
-    wifiPassword: "",
-    pitchNotes: "",
-  });
-  /** Sterne-Bewertung des neuen Eintrags (null = ohne Bewertung). */
-  const [formRating, setFormRating] = useState<number | null>(null);
-  /** Reise-Art (#460) – Camping ist der Normalfall dieser App. */
-  const [formKind, setFormKind] = useState<TripKind>("camping");
   /** Eintrag, der gerade im Formular bearbeitet wird (null = neuer Eintrag). */
   const [editingId, setEditingId] = useState<number | null>(null);
   /** Erfassungs-Dialog «Neue Reise» / «Reise bearbeiten» offen? */
   const [formOpen, setFormOpen] = useState(false);
 
-  /** Formular leeren und in den Neu-Modus zurückkehren. */
-  const resetForm = () => {
-    setEditingId(null);
-    setSpotChoice(FREE_LOCATION);
-    setPackListChoice("keine");
-    setForm({
-      location: "",
-      title: "",
-      notes: "",
-      startDate: today,
-      endDate: today,
-      arrivalTime: "",
-      departureTime: "",
-      pitchNumber: "",
-      wifiName: "",
-      wifiPassword: "",
-      pitchNotes: "",
-    });
-    setFormRating(null);
-    setFormKind("camping");
-  };
-
-  /** Dialog im Neu-Modus öffnen (Formular frisch). */
+  /** Dialog im Neu-Modus öffnen. */
   const openNewTripDialog = () => {
-    resetForm();
+    setEditingId(null);
     setFormOpen(true);
   };
 
-  /** Dialog schliessen und das Formular zurücksetzen. */
+  /** Dialog schliessen. */
   const closeForm = () => {
     setFormOpen(false);
-    resetForm();
+    setEditingId(null);
   };
 
   // Schnellaktion «Neuer Tagebuch-Eintrag» (?neu=1): den Reise-Dialog öffnen
@@ -572,24 +480,6 @@ export default function TripsPage() {
     if (new URLSearchParams(search).get("neu") === "1") openNewTripDialog();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, isAuthenticated]);
-
-  const addMutation = trpc.trips.add.useMutation({
-    onSuccess: () => {
-      utils.trips.list.invalidate();
-      closeForm();
-      toast.success(t.trips.entrySaved);
-    },
-    onError: e => toast.error(e.message || t.trips.entrySaveFailed),
-  });
-
-  const updateMutation = trpc.trips.update.useMutation({
-    onSuccess: () => {
-      utils.trips.list.invalidate();
-      closeForm();
-      toast.success(t.trips.entryUpdated);
-    },
-    onError: e => toast.error(e.message || t.trips.entryUpdateFailed),
-  });
 
   const removeMutation = trpc.trips.remove.useMutation({
     onSuccess: () => utils.trips.list.invalidate(),
@@ -631,6 +521,21 @@ export default function TripsPage() {
 
   const spots = spotsQuery.data ?? [];
   const allTrips = useMemo(() => tripsQuery.data ?? [], [tripsQuery.data]);
+
+  /** Reiseliste nach Art filtern (#466); "alle" = kein Filter. */
+  const [kindFilter, setKindFilter] = useState<TripKind | "alle">("alle");
+  /**
+   * Arten, die in den eigenen Reisen überhaupt vorkommen – Chips für
+   * Arten ohne eine einzige Reise wären tote Knöpfe.
+   */
+  const presentKinds = useMemo(
+    () =>
+      TRIP_KINDS.filter(kind =>
+        allTrips.some(trip => normalizeTripKind(trip.kind) === kind)
+      ),
+    [allTrips]
+  );
+
   // Geplante Aufenthalte (Anreise heute oder später) separat oben anzeigen
   /**
    * Einzelne Reise als eigene Adresse (#310): /tagebuch/17 zeigt genau
@@ -678,15 +583,24 @@ export default function TripsPage() {
    * erscheint an ihrer gewohnten Stelle und ist damit gleich aufgebaut.
    */
   const shownTrips = useMemo(
-    () => (focusId === null ? trips : trips.filter(t => t.id === focusId)),
-    [trips, focusId]
+    () =>
+      focusId === null
+        ? trips.filter(
+            t =>
+              kindFilter === "alle" || normalizeTripKind(t.kind) === kindFilter
+          )
+        : trips.filter(t => t.id === focusId),
+    [trips, focusId, kindFilter]
   );
   const shownPlanned = useMemo(
     () =>
       focusId === null
-        ? plannedTrips
+        ? plannedTrips.filter(
+            t =>
+              kindFilter === "alle" || normalizeTripKind(t.kind) === kindFilter
+          )
         : plannedTrips.filter(t => t.id === focusId),
-    [plannedTrips, focusId]
+    [plannedTrips, focusId, kindFilter]
   );
   /** Fokussierte Reise – für Titel, Rückweg und die «nicht gefunden»-Zeile. */
   const focusTrip =
@@ -800,28 +714,9 @@ export default function TripsPage() {
     downloadIcs([trip], icsFileName(label(trip), trip.startDate));
   };
 
-  /** Eintrag ins Formular laden und den Dialog im Bearbeiten-Modus öffnen. */
+  /** Eintrag im Dialog zum Bearbeiten öffnen – den Rest macht der Dialog. */
   const startEdit = (trip: (typeof allTrips)[number]) => {
     setEditingId(trip.id);
-    setSpotChoice(trip.spotId != null ? String(trip.spotId) : FREE_LOCATION);
-    setPackListChoice(
-      trip.packListId != null ? String(trip.packListId) : "keine"
-    );
-    setForm({
-      location: trip.location ?? "",
-      title: trip.title ?? "",
-      notes: trip.notes ?? "",
-      startDate: trip.startDate,
-      endDate: trip.endDate,
-      arrivalTime: trip.arrivalTime ?? "",
-      departureTime: trip.departureTime ?? "",
-      pitchNumber: trip.pitchNumber ?? "",
-      wifiName: trip.wifiName ?? "",
-      wifiPassword: trip.wifiPassword ?? "",
-      pitchNotes: trip.pitchNotes ?? "",
-    });
-    setFormRating(trip.rating ?? null);
-    setFormKind(normalizeTripKind(trip.kind));
     setFormOpen(true);
   };
 
@@ -853,15 +748,25 @@ export default function TripsPage() {
   /** Aufenthalte fürs Kalender-Gitter (eigene vs. gemeinsame unterscheidbar). */
   const calendarTrips = useMemo<CalendarTrip[]>(
     () =>
-      allTrips.map(trip => ({
-        id: trip.id,
-        name: label(trip),
-        startDate: trip.startDate,
-        endDate: trip.endDate,
-        shared: trip.role === "member" || trip.shared,
-      })),
+      allTrips
+        .filter(
+          trip =>
+            kindFilter === "alle" || normalizeTripKind(trip.kind) === kindFilter
+        )
+        .map(trip => ({
+          id: trip.id,
+          // Die Art (#466) steht am Balken mit dran – Camping als
+          // Normalfall bleibt unbeschriftet
+          name:
+            normalizeTripKind(trip.kind) === "camping"
+              ? label(trip)
+              : `${label(trip)} · ${tripKindLabel(normalizeTripKind(trip.kind), lang)}`,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+          shared: trip.role === "member" || trip.shared,
+        })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allTrips, spots]
+    [allTrips, spots, kindFilter, lang]
   );
 
   /** Klick auf einen Kalender-Balken: Eintrag im Bearbeiten-Dialog öffnen. */
@@ -908,6 +813,55 @@ export default function TripsPage() {
       cancelled = true;
     };
   }, [holidayCanton, plannedTrips.length, tripsView]);
+
+  /**
+   * Feiertage des Ziellandes (#469): Für jede geplante Reise wird das Land
+   * wie bei den Verkehrsregeln (#228) aus Titel und Ortsname geraten; für
+   * DE/AT/FR/IT werden die landesweiten Feiertage geladen. Unabhängig von
+   * der Kantonswahl – wer keine Schweizer Ferien sehen will, verpasst
+   * trotzdem nicht den Feiertag am Zielort, an dem die Läden zu sind.
+   */
+  const [countryHolidays, setCountryHolidays] = useState<
+    Record<string, Holiday[]>
+  >({});
+
+  const neededHolidayCountries = useMemo(() => {
+    const codes = new Set<string>();
+    for (const trip of plannedTrips) {
+      const code = guessCountryCode(`${trip.title ?? ""} ${placeName(trip)}`);
+      if (isHolidayCountry(code)) codes.add(code);
+    }
+    return Array.from(codes).sort();
+  }, [plannedTrips, spots]);
+
+  useEffect(() => {
+    if (tripsView !== "list") return;
+    let cancelled = false;
+    for (const code of neededHolidayCountries) {
+      if (countryHolidays[code]) continue;
+      void loadCountryHolidays(code).then(result => {
+        if (cancelled || !result) return;
+        setCountryHolidays(prev =>
+          prev[code] ? prev : { ...prev, [code]: result }
+        );
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [neededHolidayCountries, tripsView, countryHolidays]);
+
+  /** Zielland-Feiertage einer Reise für die Hinweis-Badges – oder null. */
+  const tripDestinationHolidays = (
+    trip: (typeof trips)[number]
+  ): { countryName: string; holidays: Holiday[] } | null => {
+    const code = tripCountry(trip);
+    if (!isHolidayCountry(code)) return null;
+    const loaded = countryHolidays[code];
+    const countryName = tripCountryName(trip);
+    if (!loaded || loaded.length === 0 || !countryName) return null;
+    return { countryName, holidays: loaded };
+  };
 
   /** Kantons-Auswahl für Ferien-/Feiertags-Hinweise (Liste UND Kalender). */
   const holidayCantonPicker = (
@@ -1040,387 +994,14 @@ export default function TripsPage() {
         </>
       )}
 
-      {/* Dialog «Neue Reise» / «Reise bearbeiten»: gemeinsames Erfassungs-Formular */}
-      <Dialog
+      {/* Erfassungs-Formular (#483): eigener Baustein mit eigenem Zustand */}
+      <TripFormDialog
         open={formOpen}
-        onOpenChange={o => {
-          if (!o) closeForm();
-        }}
-      >
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-serif">
-              {editingId !== null
-                ? t.trips.editEntryTitle
-                : t.trips.newTripButton}
-            </DialogTitle>
-            <DialogDescription>{t.trips.tripFormDialogDesc}</DialogDescription>
-          </DialogHeader>
-          <form
-            className="grid gap-3"
-            onSubmit={e => {
-              e.preventDefault();
-              if (editingShared && editingTrip) {
-                // Mitglieds-Trip: Zeltplatz-/Packlisten-Verknüpfung bleibt
-                // unverändert (gehört der Besitzerin/dem Besitzer)
-                if (editingTrip.spotId === null && !form.location.trim()) {
-                  toast.error(t.trips.choosePlaceError);
-                  return;
-                }
-                updateMutation.mutate({
-                  id: editingTrip.id,
-                  spotId: editingTrip.spotId,
-                  packListId: editingTrip.packListId,
-                  location:
-                    editingTrip.spotId === null
-                      ? form.location.trim()
-                      : editingTrip.location,
-                  kind: formKind,
-                  title: form.title.trim() || null,
-                  notes: form.notes.trim() || null,
-                  startDate: form.startDate,
-                  endDate: form.endDate,
-                  rating: formRating,
-                  arrivalTime: form.arrivalTime || null,
-                  departureTime: form.departureTime || null,
-                  pitchNumber: form.pitchNumber.trim() || null,
-                  wifiName: form.wifiName.trim() || null,
-                  wifiPassword: form.wifiPassword.trim() || null,
-                  pitchNotes: form.pitchNotes.trim() || null,
-                });
-                return;
-              }
-              const spotId =
-                spotChoice === FREE_LOCATION ? null : Number(spotChoice);
-              if (spotId === null && !form.location.trim()) {
-                toast.error(t.trips.choosePlaceError);
-                return;
-              }
-              const payload = {
-                spotId,
-                packListId:
-                  packListChoice === "keine" ? null : Number(packListChoice),
-                location: spotId === null ? form.location.trim() : null,
-                kind: formKind,
-                title: form.title.trim() || null,
-                notes: form.notes.trim() || null,
-                startDate: form.startDate,
-                endDate: form.endDate,
-                rating: formRating,
-                arrivalTime: form.arrivalTime || null,
-                departureTime: form.departureTime || null,
-                pitchNumber: form.pitchNumber.trim() || null,
-                wifiName: form.wifiName.trim() || null,
-                wifiPassword: form.wifiPassword.trim() || null,
-                pitchNotes: form.pitchNotes.trim() || null,
-              };
-              if (editingId !== null) {
-                updateMutation.mutate({ id: editingId, ...payload });
-              } else {
-                addMutation.mutate(payload);
-              }
-            }}
-          >
-            <div className="grid gap-3 sm:grid-cols-2">
-              {/* Zeltplatz/Packliste gehören der Besitzerin/dem Besitzer –
-                  beim Bearbeiten eines Mitglieds-Trips ausgeblendet */}
-              {!editingShared && (
-                <div>
-                  <Label htmlFor="trip-spot">{t.trips.placeLabel}</Label>
-                  <Select value={spotChoice} onValueChange={setSpotChoice}>
-                    <SelectTrigger id="trip-spot" className="mt-1.5 w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={FREE_LOCATION}>
-                        {t.trips.freeLocationOption}
-                      </SelectItem>
-                      {spots.map(s => (
-                        <SelectItem key={s.id} value={String(s.id)}>
-                          {s.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              {(editingShared
-                ? editingTrip?.spotId === null
-                : spotChoice === FREE_LOCATION) && (
-                <div>
-                  <Label htmlFor="trip-location">
-                    {t.trips.locationNameLabel}
-                  </Label>
-                  <Input
-                    id="trip-location"
-                    className="mt-1.5"
-                    placeholder={t.trips.locationPlaceholder}
-                    value={form.location}
-                    onChange={e =>
-                      setForm(f => ({ ...f, location: e.target.value }))
-                    }
-                  />
-                </div>
-              )}
-              {!editingShared && (
-                <div>
-                  <Label htmlFor="trip-packlist">{t.trips.packListLabel}</Label>
-                  <Select
-                    value={packListChoice}
-                    onValueChange={setPackListChoice}
-                  >
-                    <SelectTrigger id="trip-packlist" className="mt-1.5 w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="keine">
-                        {t.trips.noPackList}
-                      </SelectItem>
-                      {/* Archivierte Packlisten (#194) tauchen in der
-                          Auswahl nicht auf – bereits verknüpfte bleiben
-                          aber wählbar, damit nichts stillschweigend abfällt */}
-                      {(listsQuery.data ?? [])
-                        .filter(
-                          l =>
-                            l.archivedAt == null ||
-                            String(l.id) === packListChoice
-                        )
-                        .map(l => (
-                          <SelectItem key={l.id} value={String(l.id)}>
-                            {l.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-            {/* Reise-Art (#460): steuert, was die Heute-Ansicht während
-                der Reise in den Vordergrund stellt – sortieren und
-                vorschlagen, nie sperren. */}
-            <div>
-              <p className="text-sm font-medium">{t.trips.kindLabel}</p>
-              <div
-                className="mt-1.5 flex flex-wrap gap-1.5"
-                role="group"
-                aria-label={t.trips.kindLabel}
-              >
-                {TRIP_KINDS.map(kind => (
-                  <button
-                    key={kind}
-                    type="button"
-                    onClick={() => setFormKind(kind)}
-                    className={cn(
-                      "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-                      formKind === kind
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:text-foreground"
-                    )}
-                    aria-pressed={formKind === kind}
-                  >
-                    {tripKindLabel(kind, lang)}
-                  </button>
-                ))}
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {t.trips.kindHint}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="trip-start">{t.trips.arrivalLabel}</Label>
-                <Input
-                  id="trip-start"
-                  className="mt-1.5"
-                  type="date"
-                  value={form.startDate}
-                  max={form.endDate}
-                  onChange={e =>
-                    setForm(f => ({
-                      ...f,
-                      startDate: e.target.value,
-                      // Abreise automatisch nachziehen, wenn sie vor der Anreise läge
-                      endDate:
-                        f.endDate < e.target.value ? e.target.value : f.endDate,
-                    }))
-                  }
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="trip-end">{t.trips.departureLabel}</Label>
-                <Input
-                  id="trip-end"
-                  className="mt-1.5"
-                  type="date"
-                  value={form.endDate}
-                  min={form.startDate}
-                  onChange={e =>
-                    setForm(f => ({ ...f, endDate: e.target.value }))
-                  }
-                  required
-                />
-              </div>
-            </div>
-            {/* Optionale Uhrzeiten – passend zu den Check-in-Zeiten des Platzes */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="trip-start-time">
-                  {t.trips.arrivalTimeLabel}
-                </Label>
-                <Input
-                  id="trip-start-time"
-                  className="mt-1.5"
-                  type="time"
-                  value={form.arrivalTime}
-                  onChange={e =>
-                    setForm(f => ({ ...f, arrivalTime: e.target.value }))
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="trip-end-time">
-                  {t.trips.departureTimeLabel}
-                </Label>
-                <Input
-                  id="trip-end-time"
-                  className="mt-1.5"
-                  type="time"
-                  value={form.departureTime}
-                  onChange={e =>
-                    setForm(f => ({ ...f, departureTime: e.target.value }))
-                  }
-                />
-              </div>
-            </div>
-            {/* Stellplatz-Details (#252): gelten für diesen Aufenthalt */}
-            <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <p className="text-sm font-medium">{t.trips.pitchSectionTitle}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {t.trips.pitchSectionHint}
-              </p>
-              <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="trip-pitch-number">
-                    {t.trips.pitchNumberLabel}
-                  </Label>
-                  <Input
-                    id="trip-pitch-number"
-                    className="mt-1.5"
-                    maxLength={40}
-                    placeholder={t.trips.pitchNumberPlaceholder}
-                    value={form.pitchNumber}
-                    onChange={e =>
-                      setForm(f => ({ ...f, pitchNumber: e.target.value }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="trip-wifi-name">
-                    {t.trips.wifiNameLabel}
-                  </Label>
-                  <Input
-                    id="trip-wifi-name"
-                    className="mt-1.5"
-                    maxLength={80}
-                    placeholder={t.trips.wifiNamePlaceholder}
-                    value={form.wifiName}
-                    onChange={e =>
-                      setForm(f => ({ ...f, wifiName: e.target.value }))
-                    }
-                  />
-                </div>
-              </div>
-              <div className="mt-3">
-                <Label htmlFor="trip-wifi-password">
-                  {t.trips.wifiPasswordLabel}
-                </Label>
-                <Input
-                  id="trip-wifi-password"
-                  className="mt-1.5"
-                  maxLength={80}
-                  placeholder={t.trips.wifiPasswordPlaceholder}
-                  value={form.wifiPassword}
-                  onChange={e =>
-                    setForm(f => ({ ...f, wifiPassword: e.target.value }))
-                  }
-                />
-              </div>
-              <div className="mt-3">
-                <Label htmlFor="trip-pitch-notes">
-                  {t.trips.pitchNotesLabel}
-                </Label>
-                <Textarea
-                  id="trip-pitch-notes"
-                  className="mt-1.5"
-                  rows={2}
-                  placeholder={t.trips.pitchNotesPlaceholder}
-                  value={form.pitchNotes}
-                  onChange={e =>
-                    setForm(f => ({ ...f, pitchNotes: e.target.value }))
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="trip-title">{t.trips.titleLabel}</Label>
-              <Input
-                id="trip-title"
-                className="mt-1.5"
-                placeholder={t.trips.titlePlaceholder}
-                value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="trip-notes">{t.trips.notesLabel}</Label>
-              <Textarea
-                id="trip-notes"
-                className="mt-1.5"
-                rows={3}
-                placeholder={t.trips.notesPlaceholder}
-                value={form.notes}
-                onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label>{t.trips.ratingLabel}</Label>
-              <div className="mt-1.5">
-                <StarRating
-                  value={formRating}
-                  onChange={setFormRating}
-                  groupLabel={t.trips.ratingFormAria}
-                />
-              </div>
-            </div>
-            <DialogFooter className="pt-1">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={closeForm}
-                disabled={addMutation.isPending || updateMutation.isPending}
-              >
-                {t.common.cancel}
-              </Button>
-              <Button
-                type="submit"
-                disabled={addMutation.isPending || updateMutation.isPending}
-              >
-                {editingId !== null ? (
-                  <Pencil className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                ) : (
-                  <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                )}
-                {addMutation.isPending || updateMutation.isPending
-                  ? t.common.saving
-                  : editingId !== null
-                    ? t.trips.saveChanges
-                    : t.trips.submit}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+        editing={editingTrip}
+        spots={spots}
+        packLists={listsQuery.data ?? []}
+        onClose={closeForm}
+      />
 
       {/* Umschalten und Kalender betreffen die ganze Liste – bei einer
           einzelnen Reise gibt es nichts umzuschalten. */}
@@ -1453,6 +1034,46 @@ export default function TripsPage() {
               {t.trips.viewCalendar}
             </Button>
           </div>
+
+          {/* Nach Art filtern (#466) – erst ab zwei vorkommenden Arten,
+              vorher wäre der Filter ein Knopf ohne Wirkung */}
+          {presentKinds.length > 1 && (
+            <div
+              role="group"
+              aria-label={t.trips.kindFilterAria}
+              className="mb-4 flex flex-wrap gap-1.5"
+            >
+              <button
+                type="button"
+                onClick={() => setKindFilter("alle")}
+                aria-pressed={kindFilter === "alle"}
+                className={cn(
+                  "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                  kindFilter === "alle"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {t.trips.kindFilterAll}
+              </button>
+              {presentKinds.map(kind => (
+                <button
+                  key={kind}
+                  type="button"
+                  onClick={() => setKindFilter(kind)}
+                  aria-pressed={kindFilter === kind}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                    kindFilter === kind
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {tripKindLabel(kind, lang)}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Kalender-Ansicht: Monats-Gitter mit Aufenthalten und Ferien */}
           {tripsView === "calendar" && (
@@ -1629,11 +1250,12 @@ export default function TripsPage() {
                           {t.trips.nightsCount(nights)}
                         </span>
                       </p>
-                      {holidays && (
+                      {(holidays || tripDestinationHolidays(trip)) && (
                         <TripHolidayHints
                           startDate={trip.startDate}
                           endDate={trip.endDate}
-                          holidays={holidays}
+                          holidays={holidays ?? EMPTY_CANTON_HOLIDAYS}
+                          destination={tripDestinationHolidays(trip)}
                         />
                       )}
                       <TripPitchDetails trip={trip} />

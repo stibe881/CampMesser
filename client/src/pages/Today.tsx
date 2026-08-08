@@ -35,6 +35,7 @@ import {
   NotebookPen,
   Refrigerator,
   ShoppingCart,
+  Snowflake,
   Tent,
   UtensilsCrossed,
   TriangleAlert,
@@ -71,6 +72,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useTodayIso } from "@/lib/useTodayIso";
+import AvalancheDanger from "@/components/AvalancheDanger";
 import CampfireLight from "@/components/CampfireLight";
 import LazySection from "@/components/LazySection";
 import BathingWaterCard from "@/components/spots/BathingWaterCard";
@@ -117,7 +119,14 @@ export default function TodayPage() {
     trip?.spotId != null
       ? (spotsQuery.data ?? []).find(s => s.id === trip.spotId)
       : undefined;
-  const weather = useDayWeather(spot?.latitude, spot?.longitude, lang);
+  // Koordinaten: Zeltplatz zuerst, sonst die der Reise aus der Ortssuche
+  // (#465) – damit haben auch Hotel- und Strandreisen Wetter und Wasser.
+  const coords = spot
+    ? { latitude: spot.latitude, longitude: spot.longitude }
+    : trip?.latitude != null && trip?.longitude != null
+      ? { latitude: trip.latitude, longitude: trip.longitude }
+      : null;
+  const weather = useDayWeather(coords?.latitude, coords?.longitude, lang);
 
   const choresQuery = trpc.chores.assignments.useQuery(
     { day: today },
@@ -342,15 +351,36 @@ export default function TodayPage() {
                 </span>
               </p>
             )}
+            {/* Schneehöhe (#470): Beim Wintersport ist sie DIE Zahl des
+                Tages – eine Zeile direkt unter dem Wetter. Bei allen
+                anderen Arten (und ohne Messwert) bleibt sie weg. */}
+            {preset.winter && weather?.snowDepthCm != null && (
+              <p className="mt-1 flex items-center gap-1.5 text-sm font-medium">
+                <Snowflake
+                  className="h-4 w-4 text-primary"
+                  aria-hidden="true"
+                />
+                {td.snowDepthLine(weather.snowDepthCm)}
+              </p>
+            )}
+            {/* SLF-Lawinen-Warnstufe (#471): nur bei Wintersport und nur
+                in der Schweiz – das Bulletin deckt nichts anderes ab. */}
+            {preset.winter && coords && (
+              <AvalancheDanger
+                latitude={coords.latitude}
+                longitude={coords.longitude}
+                className="mt-1.5"
+              />
+            )}
             {/* Lagerfeuer-Ampel (#389): Die Frage stellt sich am Abend
                 genau hier. Ohne Platz-Koordinaten oder Prognose bleibt
                 sie weg – ein Urteil ohne Quellen wäre ein Orakel. Bei
                 Hotel-, Strand- oder Städte-Reisen (#460) stellt sie
                 niemand, dann fehlt sie ebenfalls. */}
-            {preset.campfire && spot && weather && (
+            {preset.campfire && coords && weather && (
               <CampfireLight
-                latitude={spot.latitude}
-                longitude={spot.longitude}
+                latitude={coords.latitude}
+                longitude={coords.longitude}
                 gustsMaxKmh={weather.gustsMaxKmh}
                 className="mt-2"
               />
@@ -398,12 +428,12 @@ export default function TodayPage() {
               des Tages – Temperatur, Wellen und Gezeiten stehen darum
               gleich unter der Kopfzeile statt nur im Platz-Dossier.
               Ohne Platz-Koordinaten bleibt die Karte weg. */}
-          {preset.bathing && spot && (
+          {preset.bathing && coords && (
             <LazySection minHeight={160}>
               <div className="mt-4">
                 <BathingWaterCard
-                  latitude={spot.latitude}
-                  longitude={spot.longitude}
+                  latitude={coords.latitude}
+                  longitude={coords.longitude}
                 />
               </div>
             </LazySection>

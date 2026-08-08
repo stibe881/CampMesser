@@ -3,7 +3,9 @@ import {
   DEFAULT_TRIP_KIND,
   normalizeTripKind,
   TRIP_KINDS,
+  TRIP_KIND_FORMS,
   TRIP_KIND_PRESETS,
+  tripKindForm,
   tripKindLabel,
   tripKindPreset,
 } from "../shared/tripKind";
@@ -47,16 +49,58 @@ describe("Reise-Art (#460)", () => {
       campfire: true,
       bathing: false,
       tentGear: true,
+      winter: false,
     });
     // Nur am Strand steht die Badewasser-Karte in der Heute-Ansicht
     TRIP_KINDS.filter(kind => kind !== "strand").forEach(kind => {
       expect(TRIP_KIND_PRESETS[kind].bathing).toBe(false);
     });
     expect(TRIP_KIND_PRESETS.strand.bathing).toBe(true);
+    // Nur beim Wintersport steht die Schneehöhe in der Heute-Ansicht (#470)
+    TRIP_KINDS.filter(kind => kind !== "wintersport").forEach(kind => {
+      expect(TRIP_KIND_PRESETS[kind].winter).toBe(false);
+    });
+    expect(TRIP_KIND_PRESETS.wintersport.winter).toBe(true);
   });
 
   it("liefert das Preset auch für kaputte Werte (nie undefined)", () => {
     expect(tripKindPreset("strand").bathing).toBe(true);
     expect(tripKindPreset("kaputt")).toEqual(TRIP_KIND_PRESETS.camping);
+  });
+});
+
+describe("Formular-Felder pro Reise-Art (#485)", () => {
+  it("hat für jede Art ein Formular-Preset", () => {
+    TRIP_KINDS.forEach(kind => {
+      expect(TRIP_KIND_FORMS[kind], kind).toBeDefined();
+    });
+  });
+
+  it("bietet die Zeltplatz-Auswahl nur Arten an, die dort schlafen", () => {
+    expect(TRIP_KIND_FORMS.camping.spotSelect).toBe(true);
+    expect(TRIP_KIND_FORMS.wandern.spotSelect).toBe(true);
+    expect(TRIP_KIND_FORMS.velo.spotSelect).toBe(true);
+    expect(TRIP_KIND_FORMS.hotel.spotSelect).toBe(false);
+    expect(TRIP_KIND_FORMS.staedte.spotSelect).toBe(false);
+    expect(TRIP_KIND_FORMS.strand.spotSelect).toBe(false);
+    // Stellplatz-Details gehen mit der Zeltplatz-Auswahl einher
+    TRIP_KINDS.forEach(kind => {
+      expect(TRIP_KIND_FORMS[kind].pitchDetails, kind).toBe(
+        TRIP_KIND_FORMS[kind].spotSelect
+      );
+    });
+  });
+
+  it("fragt nur beim Tagesausflug ein einzelnes Datum ab", () => {
+    TRIP_KINDS.forEach(kind => {
+      expect(TRIP_KIND_FORMS[kind].singleDay, kind).toBe(
+        kind === "tagesausflug"
+      );
+    });
+  });
+
+  it("liefert das Formular-Preset auch für kaputte Werte", () => {
+    expect(tripKindForm("kaputt")).toEqual(TRIP_KIND_FORMS.camping);
+    expect(tripKindForm("tagesausflug").singleDay).toBe(true);
   });
 });

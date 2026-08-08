@@ -87,6 +87,36 @@ export function publicHolidaysUrl(
   return `${OPENHOLIDAYS_BASE}/PublicHolidays?${params.toString()}`;
 }
 
+/**
+ * Ziellands-Feiertage (#469): die vier Nachbarländer, in die von hier aus
+ * tatsächlich gereist wird und die OpenHolidays abdeckt. Das Land wird wie
+ * bei den Verkehrsregeln (#228) aus Titel und Ortsname geraten.
+ */
+export const HOLIDAY_COUNTRIES = ["DE", "AT", "FR", "IT"] as const;
+export type HolidayCountry = (typeof HOLIDAY_COUNTRIES)[number];
+
+export function isHolidayCountry(
+  code: string | null | undefined
+): code is HolidayCountry {
+  return (
+    code != null && (HOLIDAY_COUNTRIES as readonly string[]).includes(code)
+  );
+}
+
+/** URL für die landesweiten Feiertage eines Ziellandes (ohne Subdivision). */
+export function countryPublicHolidaysUrl(
+  countryCode: string,
+  validFrom: string,
+  validTo: string
+): string {
+  const params = new URLSearchParams({
+    countryIsoCode: countryCode,
+    validFrom,
+    validTo,
+  });
+  return `${OPENHOLIDAYS_BASE}/PublicHolidays?${params.toString()}`;
+}
+
 /** API-Antwort defensiv in Holiday-Einträge umwandeln (Unbekanntes fällt weg). */
 export function parseHolidaysResponse(json: unknown): Holiday[] {
   if (!Array.isArray(json)) return [];
@@ -115,6 +145,23 @@ export function parseHolidaysResponse(json: unknown): Holiday[] {
     });
   });
   return holidays;
+}
+
+/**
+ * Nur landesweite Feiertage behalten (#469): ohne Subdivision liefert die
+ * API auch alle regionalen Feiertage – die würden das Zielland-Badge fluten
+ * (in Deutschland z. B. jedes Bundesland einzeln).
+ */
+export function parseNationwideHolidays(json: unknown): Holiday[] {
+  if (!Array.isArray(json)) return [];
+  return parseHolidaysResponse(
+    json.filter(
+      entry =>
+        !!entry &&
+        typeof entry === "object" &&
+        (entry as Record<string, unknown>).nationwide === true
+    )
+  );
 }
 
 /**

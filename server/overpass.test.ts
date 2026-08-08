@@ -21,6 +21,8 @@ import {
   picnicSitesQuery,
   parseOsmAgeYears,
   parseOsmYesNo,
+  parseSights,
+  sightsQuery,
 } from "../client/src/lib/overpass";
 
 describe("parseCampsites", () => {
@@ -904,5 +906,60 @@ describe("Kombinierte Abfrage für die Karte (#339)", () => {
     const q = combinedBboxQuery(["firepits"], 46.712345678, 7.1, 46.9, 7.3);
     expect(q).toContain("46.71235");
     expect(q).not.toContain("46.712345678");
+  });
+});
+
+describe("Sehenswürdigkeiten (#479)", () => {
+  it("baut die Abfrage mit tourism- und historic-Filtern", () => {
+    const query = sightsQuery(46.8, 8.2, 5000);
+    expect(query).toContain("tourism");
+    expect(query).toContain("museum|viewpoint|zoo|theme_park|attraction");
+    expect(query).toContain("castle|monument");
+    expect(query).toContain("around:5000,46.80000,8.20000");
+  });
+
+  it("übernimmt bekannte Arten und verwirft namenlose Attraktionen", () => {
+    const sights = parseSights({
+      elements: [
+        {
+          type: "node",
+          id: 1,
+          lat: 46.8,
+          lon: 8.2,
+          tags: { tourism: "museum", name: "Talmuseum" },
+        },
+        // Namenloser Aussichtspunkt bleibt drin – die Art trägt den Titel
+        {
+          type: "node",
+          id: 2,
+          lat: 46.81,
+          lon: 8.21,
+          tags: { tourism: "viewpoint" },
+        },
+        // Namenlose «Attraktion» ist Kartenrauschen und fliegt raus
+        {
+          type: "node",
+          id: 3,
+          lat: 46.82,
+          lon: 8.22,
+          tags: { tourism: "attraction" },
+        },
+        {
+          type: "way",
+          id: 4,
+          center: { lat: 46.83, lon: 8.23 },
+          tags: { historic: "castle", name: "Schloss Berg" },
+        },
+        {
+          type: "node",
+          id: 5,
+          lat: 46.84,
+          lon: 8.24,
+          tags: { tourism: "hotel", name: "Kein Ziel" },
+        },
+      ],
+    });
+    expect(sights.map(s => s.kind)).toEqual(["museum", "viewpoint", "castle"]);
+    expect(sights[2].id).toBe("way/4");
   });
 });

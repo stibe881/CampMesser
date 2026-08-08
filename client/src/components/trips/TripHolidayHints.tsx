@@ -52,17 +52,26 @@ import {
   CANTONS,
   holidayDisplayName,
   overlappingHolidays,
+  type Holiday,
 } from "@shared/holidays";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
+
+/** Landesweite Feiertage des geratenen Ziellandes (#469). */
+export interface DestinationHolidays {
+  countryName: string;
+  holidays: Holiday[];
+}
 
 export default function TripHolidayHints({
   startDate,
   endDate,
   holidays,
+  destination,
 }: {
   startDate: string;
   endDate: string;
   holidays: CantonHolidays;
+  destination?: DestinationHolidays | null;
 }) {
   const { lang, t } = useI18n();
   // Gleiche Ferien können mehrfach vorkommen (Schulkreise) – Namen deduplizieren
@@ -78,7 +87,15 @@ export default function TripHolidayHints({
     endDate,
     holidays.publicHolidays
   );
-  if (schoolNames.length === 0 && publicDays.length === 0) return null;
+  const destinationDays = destination
+    ? overlappingHolidays(startDate, endDate, destination.holidays)
+    : [];
+  if (
+    schoolNames.length === 0 &&
+    publicDays.length === 0 &&
+    destinationDays.length === 0
+  )
+    return null;
   const fmtDay = (iso: string) =>
     fmtDayMonth(new Date(`${iso}T00:00:00`), lang);
   return (
@@ -104,6 +121,20 @@ export default function TripHolidayHints({
           )}
         </span>
       ))}
+      {destination &&
+        destinationDays.map(h => (
+          <span
+            key={`zielland-${h.id}`}
+            className="flex items-center gap-1 rounded-full bg-chart-2/15 px-2.5 py-0.5 text-xs font-medium"
+          >
+            <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />
+            {t.trips.holidayDestinationBadge(
+              destination.countryName,
+              fmtDay(h.startDate),
+              holidayDisplayName(h, lang)
+            )}
+          </span>
+        ))}
     </p>
   );
 }

@@ -102,57 +102,121 @@ export interface TripKindPreset {
    * des Vertrauens in die Vorschläge.
    */
   tentGear: boolean;
+  /**
+   * Schneehöhe prominent in der Heute-Ansicht (#470)? Nur beim
+   * Wintersport – dort ist sie DIE Zahl des Tages.
+   */
+  winter: boolean;
 }
 
 export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
   // Camping = das heutige Verhalten; keine zusätzlichen Knöpfe nötig.
-  camping: { quickModules: [], campfire: true, bathing: false, tentGear: true },
+  camping: {
+    quickModules: [],
+    campfire: true,
+    bathing: false,
+    tentGear: true,
+    winter: false,
+  },
   strand: {
-    quickModules: ["/wasser", "/packen"],
+    // Baderegeln & Flaggen (#473) gehören an den Strand-Schnellzugriff
+    quickModules: ["/wasser", "/baderegeln", "/packen"],
     campfire: false,
     bathing: true,
     // Strandferien als EIGENE Art heisst: nicht im Zelt (sonst Camping)
     tentGear: false,
+    winter: false,
   },
   hotel: {
     quickModules: ["/ausweise", "/sprachhilfe"],
     campfire: false,
     bathing: false,
     tentGear: false,
+    winter: false,
   },
   staedte: {
     quickModules: ["/ausweise", "/sprachhilfe"],
     campfire: false,
     bathing: false,
     tentGear: false,
+    winter: false,
   },
   wandern: {
     quickModules: ["/wanderung", "/erste-hilfe"],
     campfire: true,
     bathing: false,
     tentGear: true,
+    winter: false,
   },
   velo: {
     quickModules: ["/wanderung", "/reparatur"],
     campfire: false,
     bathing: false,
     tentGear: true,
+    winter: false,
   },
   wintersport: {
-    quickModules: ["/laenderregeln", "/erste-hilfe"],
+    // «Pisten & Lawinen» (#472) zuerst – das schlägt man am Berg nach
+    quickModules: ["/wintersport", "/laenderregeln", "/erste-hilfe"],
     campfire: false,
     bathing: false,
     tentGear: false,
+    winter: true,
   },
   tagesausflug: {
     quickModules: ["/lunchbox", "/regentag"],
     campfire: false,
     bathing: false,
     tentGear: false,
+    winter: false,
   },
 };
 
 /** Preset einer (auch unbekannten) Art – nie undefined. */
 export function tripKindPreset(value: unknown): TripKindPreset {
   return TRIP_KIND_PRESETS[normalizeTripKind(value)];
+}
+
+/**
+ * Welche Felder das Reise-Formular pro Art anbietet (#485): Wer
+ * Hotelferien einträgt, soll keine Zeltplatz-Auswahl und keine
+ * Parzellennummer sehen – nur die Angaben, die zur Art gehören.
+ *
+ * WICHTIG: Das steuert nur die ANZEIGE. Gespeicherte Werte bleiben beim
+ * Umschalten der Art erhalten (versteckte Felder werden unverändert
+ * mitgeschickt) – die Art wechseln darf keine Daten löschen.
+ */
+export interface TripKindFormPreset {
+  /**
+   * Zeltplatz-Favoriten zur Verknüpfung anbieten? Sonst gibt es nur den
+   * Freitext-Ort. Zeltplätze verknüpfen die Arten, die dort schlafen.
+   */
+  spotSelect: boolean;
+  /**
+   * Stellplatz-Block (Parzellennummer, WLAN, Stellplatz-Notizen, #252)
+   * zeigen? Eine Parzellennummer gibt es nur auf dem Platz.
+   */
+  pitchDetails: boolean;
+  /**
+   * Ein-Tages-Reise: nur EIN Datum abfragen, Abreise = Anreise. Ein
+   * Tagesausflug mit getrennter «Abreise» wäre eine Fangfrage.
+   */
+  singleDay: boolean;
+}
+
+export const TRIP_KIND_FORMS: Record<TripKind, TripKindFormPreset> = {
+  camping: { spotSelect: true, pitchDetails: true, singleDay: false },
+  strand: { spotSelect: false, pitchDetails: false, singleDay: false },
+  hotel: { spotSelect: false, pitchDetails: false, singleDay: false },
+  staedte: { spotSelect: false, pitchDetails: false, singleDay: false },
+  // Mehrtages-Touren übernachten oft auf Plätzen – Zeltplatz erlaubt
+  wandern: { spotSelect: true, pitchDetails: true, singleDay: false },
+  velo: { spotSelect: true, pitchDetails: true, singleDay: false },
+  wintersport: { spotSelect: false, pitchDetails: false, singleDay: false },
+  tagesausflug: { spotSelect: false, pitchDetails: false, singleDay: true },
+};
+
+/** Formular-Preset einer (auch unbekannten) Art – nie undefined. */
+export function tripKindForm(value: unknown): TripKindFormPreset {
+  return TRIP_KIND_FORMS[normalizeTripKind(value)];
 }

@@ -40,6 +40,8 @@ vi.mock("@/lib/trpc", () => {
       menu: { listByTrip: { useQuery: () => query({ entries: [] }) } },
       trips: { board: { list: { useQuery: () => query([]) } } },
       recipes: { list: { useQuery: () => query([]) } },
+      // Badewasser (#475) – hier ohne Daten, die Zeile bleibt weg
+      water: { nearby: { useQuery: () => query(null) } },
     },
   };
 });

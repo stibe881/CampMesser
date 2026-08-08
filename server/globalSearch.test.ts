@@ -398,3 +398,28 @@ describe("searchOwnContent: Rezept-Zutaten", () => {
     expect(results.map(r => r.title)).toEqual(["Pilz-Risotto"]);
   });
 });
+
+describe("Suche über Ausweise & Tankbuch (#482)", () => {
+  it("findet eine Karte über den Titel", () => {
+    const hits = searchOwnContent(
+      "acsi",
+      { documents: [{ id: 1, title: "ACSI-Card 2026" }] },
+      6,
+      "de"
+    );
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits[0].path).toBe("/ausweise");
+    expect(hits[0].title).toBe("ACSI-Card 2026");
+  });
+
+  it("findet eine Tankfüllung über den Kilometerstand", () => {
+    const hits = searchOwnContent(
+      "84500",
+      { fuelFills: [{ id: 7, day: "2026-07-01", odometerKm: 84500 }] },
+      6,
+      "de"
+    );
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits[0].path).toBe("/tankbuch");
+  });
+});

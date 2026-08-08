@@ -472,6 +472,14 @@ export const tripLogs = mysqlTable(
     /** Freitext-Ort, falls kein Favorit verknüpft ist */
     location: varchar("location", { length: 140 }),
     /**
+     * Koordinaten des Freitext-Orts (#465, via Ortssuche im Formular).
+     * Reisen ohne Zeltplatz (Hotel, Strand, Städte …) bekommen damit
+     * Wetter, Briefing und Badewasser; null = nicht bestimmt. Bei
+     * verknüpftem Zeltplatz gelten weiterhin DESSEN Koordinaten.
+     */
+    latitude: double("latitude"),
+    longitude: double("longitude"),
+    /**
      * Reise-Art (#460, shared/tripKind.ts): camping, strand, hotel,
      * staedte, wandern, velo, wintersport oder tagesausflug. Steuert,
      * was die Heute-Ansicht in den Vordergrund stellt; Zeilen von vor
@@ -806,6 +814,8 @@ export const pushSubscriptions = mysqlTable(
     lastAstroKey: varchar("lastAstroKey", { length: 64 }),
     /** Schlüssel der letzten Pflege-Erinnerung («gear:YYYY-MM»): max. 1 pro Monat */
     lastGearKey: varchar("lastGearKey", { length: 64 }),
+    /** Schlüssel der letzten Ausweis-Erinnerung (#476, «docs:YYYY-MM»): max. 1 pro Monat */
+    lastDocsKey: varchar("lastDocsKey", { length: 64 }),
     /** Schlüssel des letzten Vorabend-Checks («evepack:<tripId>»): max. 1 pro Reise */
     lastEvePackKey: varchar("lastEvePackKey", { length: 64 }),
     /** Schlüssel der letzten Hitze-Erinnerung («heat:YYYY-MM-DD»): max. 1 pro Tag */
@@ -1860,6 +1870,8 @@ export const documentCards = mysqlTable(
     title: varchar("title", { length: 80 }).notNull(),
     /** Foto der Karte; null = noch keines hochgeladen */
     fileName: varchar("fileName", { length: 64 }),
+    /** Ablaufdatum (#476); null = läuft nicht ab (z. B. Mitgliederkarte) */
+    expiresOn: date("expiresOn", { mode: "string" }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("documentCards_userId").on(table.userId)]

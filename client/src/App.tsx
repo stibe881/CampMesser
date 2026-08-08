@@ -34,6 +34,8 @@ const pageLoaders = {
   Sky: () => import("./pages/Sky"),
   Clouds: () => import("./pages/Clouds"),
   TentCare: () => import("./pages/TentCare"),
+  WinterKnowledge: () => import("./pages/WinterKnowledge"),
+  WaterSafety: () => import("./pages/WaterSafety"),
   GearRepair: () => import("./pages/GearRepair"),
   StoryDice: () => import("./pages/StoryDice"),
   Songbook: () => import("./pages/Songbook"),
@@ -142,6 +144,8 @@ const NaturePage = lazyWithRetry(pageLoaders.Nature);
 const SkyPage = lazyWithRetry(pageLoaders.Sky);
 const CloudsPage = lazyWithRetry(pageLoaders.Clouds);
 const TentCarePage = lazyWithRetry(pageLoaders.TentCare);
+const WinterKnowledgePage = lazyWithRetry(pageLoaders.WinterKnowledge);
+const WaterSafetyPage = lazyWithRetry(pageLoaders.WaterSafety);
 const GearRepairPage = lazyWithRetry(pageLoaders.GearRepair);
 const StoryDicePage = lazyWithRetry(pageLoaders.StoryDice);
 const SongbookPage = lazyWithRetry(pageLoaders.Songbook);
@@ -245,6 +249,8 @@ function Router() {
           <Route path={"/himmel"} component={SkyPage} />
           <Route path={"/wolken"} component={CloudsPage} />
           <Route path={"/zeltpflege"} component={TentCarePage} />
+          <Route path={"/wintersport"} component={WinterKnowledgePage} />
+          <Route path={"/baderegeln"} component={WaterSafetyPage} />
           <Route path={"/reparatur"} component={GearRepairPage} />
           {/* Die GPS-Schatzsuche lebt seit der Zusammenlegung im
               Familien-Modus; alte Lesezeichen und Startbildschirm-Verknüpfungen

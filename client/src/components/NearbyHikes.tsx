@@ -19,7 +19,13 @@
  * (dort ohne Koordinaten – das Bauteil holt sich den Standort selbst).
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Footprints, Loader2, Map as MapIcon, Navigation } from "lucide-react";
+import {
+  Bike,
+  Footprints,
+  Loader2,
+  Map as MapIcon,
+  Navigation,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -36,6 +42,7 @@ import {
 } from "@/lib/mapEngine";
 import { useMapConfig } from "@/hooks/useMapConfig";
 import {
+  bicycleRoutesQuery,
   hikingRoutesQuery,
   HIKING_DEFAULT_RADIUS_M,
   HIKING_SEARCH_RADII_M,
@@ -48,6 +55,7 @@ import { applyRouteDistances } from "@shared/routing";
 import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import { formatDistance } from "@shared/geo";
 import {
+  cyclingTimeMinutes,
   formatWalkingTime,
   nearestRoutePoint,
   routeLengthMeters,
@@ -164,14 +172,21 @@ export default function NearbyHikes({
   longitude,
   placeName,
   className,
+  mode = "hiking",
 }: {
   latitude?: number | null;
   longitude?: number | null;
   placeName?: string | null;
   className?: string;
+  /** «bicycle» sucht Velorouten (#478) statt Wanderwege – gleicher Kasten. */
+  mode?: "hiking" | "bicycle";
 }) {
   const { lang, t } = useI18n();
-  const tn = t.nearbyHikes;
+  const bike = mode === "bicycle";
+  // Velo-Variante (#478): eigene Texte nur, wo es ums Velo geht – der
+  // Rest (Radius, Karte, Navigation) bleibt wortgleich.
+  const tn = bike ? { ...t.nearbyHikes, ...t.nearbyBikes } : t.nearbyHikes;
+  const TitleIcon = bike ? Bike : Footprints;
   const [radiusM, setRadiusM] = useState(HIKING_DEFAULT_RADIUS_M);
   const [status, setStatus] = useState<Status>("idle");
   const [routes, setRoutes] = useState<RouteView[]>([]);
@@ -197,7 +212,7 @@ export default function NearbyHikes({
       lat: view.entry.lat,
       lon: view.entry.lon,
     })),
-    "foot"
+    bike ? "bike" : "foot"
   );
   /** Liste in der Reihenfolge der Wegstrecke (sonst der Luftlinie). */
   const routeList = useMemo(
@@ -251,8 +266,11 @@ export default function NearbyHikes({
     const controller = new AbortController();
     abortRef.current = controller;
     try {
+      const query = bike
+        ? bicycleRoutesQuery(point.lat, point.lon, radiusM)
+        : hikingRoutesQuery(point.lat, point.lon, radiusM);
       const res = await fetchOverpass(
-        `data=${encodeURIComponent(hikingRoutesQuery(point.lat, point.lon, radiusM))}`,
+        `data=${encodeURIComponent(query)}`,
         controller.signal
       );
       const json: unknown = await res.json();
@@ -274,7 +292,7 @@ export default function NearbyHikes({
       if (controller.signal.aborted) return;
       setStatus("failed");
     }
-  }, [locate, origin, radiusM]);
+  }, [bike, locate, origin, radiusM]);
 
   const subtitle = placeName ? tn.subtitleAtPlace(placeName) : tn.subtitle;
 
@@ -284,7 +302,7 @@ export default function NearbyHikes({
       aria-label={tn.sectionAria}
     >
       <div className="mb-1 flex items-center gap-2">
-        <Footprints className="h-4 w-4 text-primary" aria-hidden="true" />
+        <TitleIcon className="h-4 w-4 text-primary" aria-hidden="true" />
         <h3 className="font-serif text-lg font-semibold">{tn.title}</h3>
       </div>
       <p className="mb-3 text-sm text-muted-foreground">{subtitle}</p>
@@ -367,14 +385,19 @@ export default function NearbyHikes({
               const minutes =
                 lengthM === undefined
                   ? null
-                  : walkingTimeMinutes({
-                      lengthM,
-                      ascentM: route.ascentM,
-                      descentM: route.descentM,
-                    });
+                  : bike
+                    ? cyclingTimeMinutes({ lengthM, ascentM: route.ascentM })
+                    : walkingTimeMinutes({
+                        lengthM,
+                        ascentM: route.ascentM,
+                        descentM: route.descentM,
+                      });
+              // Wander- (iwn…lwn) und Velo-Netze (icn…lcn) haben je eigene
+              // Schlüssel – der Blick in die Landkarte bleibt derselbe.
+              const networkMap = tn.network as Record<string, string>;
               const networkLabel =
-                route.network && route.network in tn.network
-                  ? tn.network[route.network as keyof typeof tn.network]
+                route.network && route.network in networkMap
+                  ? networkMap[route.network]
                   : null;
               const open = openId === route.id;
               return (

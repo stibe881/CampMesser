@@ -9,6 +9,7 @@ import { useI18n } from "@/i18n";
 import { fmtWeekdayShort } from "@/lib/dateFormat";
 import {
   frostNights,
+  snowDepthNow,
   snowLineOutlook,
   type FrostDay,
   type SnowLineHour,
@@ -27,7 +28,8 @@ export default function WinterCard({
   const wc = t.winter;
   const frost = frostNights(days);
   const snowLine = snowLineOutlook(hours);
-  if (frost.length === 0 && !snowLine) return null;
+  const snowDepth = snowDepthNow(hours);
+  if (frost.length === 0 && !snowLine && !snowDepth) return null;
 
   return (
     <Card className={className}>
@@ -55,6 +57,9 @@ export default function WinterCard({
         )}
         {snowLine && (
           <p className="text-sm">{wc.snowLine(snowLine.minLevelM)}</p>
+        )}
+        {snowDepth && (
+          <p className="text-sm">{wc.snowDepth(snowDepth.depthCm)}</p>
         )}
         <p className="text-xs text-muted-foreground">{wc.note}</p>
       </CardContent>

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  parseBarInput,
+  sanitizeBar,
+  sanitizeServiceDue,
+  sanitizeVehicle,
+} from "@shared/vehicles";
+import {
   bubblePosition,
   levelingAdvice,
   sanitizeLevelProfile,
@@ -117,5 +123,35 @@ describe("Fahrzeug-Profile", () => {
     expect(sanitizeLevelProfile("wohnmobil")).toBe(DEFAULT_LEVEL_PROFILE);
     expect(sanitizeLevelProfile(null)).toBe(DEFAULT_LEVEL_PROFILE);
     expect(sanitizeLevelProfile(42)).toBe(DEFAULT_LEVEL_PROFILE);
+  });
+});
+
+describe("Reifendruck & Service (#481)", () => {
+  it("säubert bar-Werte und Service-Datum", () => {
+    expect(sanitizeBar(2.5)).toBe(2.5);
+    expect(sanitizeBar(2.55)).toBe(2.6);
+    expect(sanitizeBar(99)).toBe(10);
+    expect(sanitizeBar(0)).toBeNull();
+    expect(sanitizeBar("2.5")).toBeNull();
+    expect(parseBarInput("2,5")).toBe(2.5);
+    expect(parseBarInput("")).toBeNull();
+    expect(sanitizeServiceDue("2026-10-12")).toBe("2026-10-12");
+    expect(sanitizeServiceDue("bald")).toBeNull();
+  });
+
+  it("nimmt die Felder durch sanitizeVehicle mit", () => {
+    const vehicle = sanitizeVehicle(
+      {
+        name: "Bus",
+        kind: "bus",
+        tireFrontBar: 2.5,
+        tireRearBar: 3,
+        serviceDue: "2026-10-12",
+      },
+      "v1"
+    );
+    expect(vehicle?.tireFrontBar).toBe(2.5);
+    expect(vehicle?.tireRearBar).toBe(3);
+    expect(vehicle?.serviceDue).toBe("2026-10-12");
   });
 });

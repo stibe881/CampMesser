@@ -16,6 +16,7 @@ export const phraseGroups = [
   "pitch",
   "shopping",
   "restaurant",
+  "city",
   "emergency",
   "wayfinding",
   "smalltalk",
@@ -53,6 +54,8 @@ export const phraseGroupLabels: Record<PhraseGroup, L4> = {
     "Mangiare & ristorante",
     "Eating out"
   ),
+  // Stadt & Hotel (#474): für Städtereisen und Hotelferien (#460)
+  city: l4("Stadt & Hotel", "Ville & hôtel", "Città & hotel", "City & hotel"),
   emergency: l4(
     "Notfall & Arzt",
     "Urgence & médecin",
@@ -743,5 +746,106 @@ export const phrases: Phrase[] = [
     id: "smalltalk-goodbye",
     group: "smalltalk",
     text: l4("Auf Wiedersehen!", "Au revoir !", "Arrivederci!", "Goodbye!"),
+  },
+  // ── Stadt & Hotel (#474) ─────────────────────────────────────────────
+  {
+    id: "city-hotel-checkin",
+    group: "city",
+    text: l4(
+      "Wir haben ein Zimmer reserviert.",
+      "Nous avons réservé une chambre.",
+      "Abbiamo prenotato una camera.",
+      "We have booked a room."
+    ),
+  },
+  {
+    id: "city-hotel-breakfast",
+    group: "city",
+    text: l4(
+      "Ab wann gibt es Frühstück?",
+      "À partir de quelle heure est servi le petit-déjeuner ?",
+      "Da che ora viene servita la colazione?",
+      "From what time is breakfast served?"
+    ),
+  },
+  {
+    id: "city-hotel-luggage",
+    group: "city",
+    text: l4(
+      "Können wir das Gepäck bis am Abend hier lassen?",
+      "Pouvons-nous laisser nos bagages ici jusqu'au soir ?",
+      "Possiamo lasciare qui i bagagli fino a sera?",
+      "Can we leave our luggage here until the evening?"
+    ),
+  },
+  {
+    id: "city-tickets",
+    group: "city",
+    text: l4(
+      "Zwei Erwachsene und ein Kind, bitte.",
+      "Deux adultes et un enfant, s'il vous plaît.",
+      "Due adulti e un bambino, per favore.",
+      "Two adults and one child, please."
+    ),
+  },
+  {
+    id: "city-museum-hours",
+    group: "city",
+    text: l4(
+      "Bis wann ist heute geöffnet?",
+      "Jusqu'à quelle heure est-ce ouvert aujourd'hui ?",
+      "Fino a che ora è aperto oggi?",
+      "Until what time are you open today?"
+    ),
+  },
+  {
+    id: "city-day-pass",
+    group: "city",
+    text: l4(
+      "Gibt es eine Tageskarte für Bus und Bahn?",
+      "Y a-t-il une carte journalière pour le bus et le train ?",
+      "C'è un biglietto giornaliero per bus e treno?",
+      "Is there a day pass for bus and train?"
+    ),
+  },
+  {
+    id: "city-which-stop",
+    group: "city",
+    text: l4(
+      "An welcher Haltestelle muss ich für die Altstadt aussteigen?",
+      "À quel arrêt dois-je descendre pour la vieille ville ?",
+      "A quale fermata devo scendere per il centro storico?",
+      "Which stop do I get off at for the old town?"
+    ),
+  },
+  {
+    id: "city-tour",
+    group: "city",
+    text: l4(
+      "Wann startet die nächste Stadtführung?",
+      "Quand commence la prochaine visite guidée ?",
+      "Quando parte la prossima visita guidata?",
+      "When does the next guided tour start?"
+    ),
+  },
+  {
+    id: "city-photo",
+    group: "city",
+    text: l4(
+      "Könnten Sie ein Foto von uns machen?",
+      "Pourriez-vous nous prendre en photo ?",
+      "Potrebbe farci una foto?",
+      "Could you take a photo of us?"
+    ),
+  },
+  {
+    id: "city-toilet",
+    group: "city",
+    text: l4(
+      "Wo finde ich eine öffentliche Toilette?",
+      "Où puis-je trouver des toilettes publiques ?",
+      "Dove trovo un bagno pubblico?",
+      "Where can I find a public toilet?"
+    ),
   },
 ];

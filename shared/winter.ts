@@ -38,6 +38,29 @@ export const SNOW_LINE_MIN_PRECIP_PROBABILITY = 30;
 export interface SnowLineHour {
   freezingLevelM?: number | null;
   precipitationProbability: number;
+  /** Schneehöhe am Boden in Metern (#470) – fehlt bei alten Abrufen. */
+  snowDepthM?: number | null;
+}
+
+/** Unter dieser Schneehöhe (cm) gibt es nichts zu melden – das ist Reif. */
+export const SNOW_DEPTH_MIN_CM = 5;
+
+/**
+ * Aktuelle Schneehöhe am Boden (#470): der erste vorhandene Stundenwert,
+ * auf ganze Zentimeter gerundet. null, wenn der Dienst nichts liefert
+ * oder weniger als SNOW_DEPTH_MIN_CM liegt – eine Karte «0 cm Schnee»
+ * im Juli wäre Lärm.
+ */
+export function snowDepthNow(
+  hours: readonly SnowLineHour[]
+): { depthCm: number } | null {
+  const meters = hours.find(
+    hour => typeof hour.snowDepthM === "number"
+  )?.snowDepthM;
+  if (typeof meters !== "number") return null;
+  const depthCm = Math.round(meters * 100);
+  if (depthCm < SNOW_DEPTH_MIN_CM) return null;
+  return { depthCm };
 }
 
 /**

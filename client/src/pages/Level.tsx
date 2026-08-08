@@ -14,7 +14,8 @@ import {
   type LevelProfile,
   type Tilt,
 } from "@shared/level";
-import { findVehicle, type VehicleProfile } from "@shared/vehicles";
+import { findVehicle, kgToInput, type VehicleProfile } from "@shared/vehicles";
+import { fmtMedium } from "@/lib/dateFormat";
 import { type Language } from "@shared/i18n";
 import { useI18n } from "@/i18n";
 import { useDeviceTilt } from "@/hooks/useDeviceTilt";
@@ -289,6 +290,32 @@ export default function LevelPage() {
               {t.level.profileTolerance(fmtTolerance(kind, lang))}
             </span>
           </div>
+          {/* Reifendruck & Service (#481): am Profil notiert, hier ablesbar */}
+          {vehicle &&
+            (vehicle.tireFrontBar !== null ||
+              vehicle.tireRearBar !== null ||
+              vehicle.serviceDue !== null) && (
+              <p className="mb-3 -mt-2 text-xs text-muted-foreground">
+                {[
+                  vehicle.tireFrontBar !== null
+                    ? t.level.tireFront(kgToInput(vehicle.tireFrontBar, lang))
+                    : null,
+                  vehicle.tireRearBar !== null
+                    ? t.level.tireRear(kgToInput(vehicle.tireRearBar, lang))
+                    : null,
+                  vehicle.serviceDue !== null
+                    ? t.level.serviceDue(
+                        fmtMedium(
+                          new Date(`${vehicle.serviceDue}T00:00:00`),
+                          lang
+                        )
+                      )
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            )}
           {/* Dieselben Profile führen den Zuladungs-Rechner (#227) */}
           <p className="mb-4 -mt-2 text-xs text-muted-foreground">
             <Link

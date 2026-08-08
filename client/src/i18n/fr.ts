@@ -1345,6 +1345,9 @@ export const fr: Translation = {
     photoLightRange: (from, to) => `${from}–${to}`,
   },
   level: {
+    tireFront: (bar: string) => `Pression avant ${bar} bar`,
+    tireRear: (bar: string) => `arrière ${bar} bar`,
+    serviceDue: (date: string) => `Service prévu le ${date}`,
     title: "Niveau à bulle",
     subtitle:
       "Mettre à niveau caravane, réchaud ou table – pose le téléphone à plat, écran vers le haut.",
@@ -1376,6 +1379,9 @@ export const fr: Translation = {
       "« Mettre à zéro ici » compense une coque de téléphone ou une table de travers : pose le téléphone sur une surface dont tu sais qu'elle est plane et mets à zéro là. Pour la caravane : pose le téléphone sur le sol ou un plan de travail à l'intérieur et cale le côté bas avec des cales jusqu'à ce que la bulle soit au centre.",
   },
   payload: {
+    tireFrontLabel: "Pression des pneus avant (bar)",
+    tireRearLabel: "Pression des pneus arrière (bar)",
+    serviceDueLabel: "Prochain service",
     title: "Calculateur de charge utile",
     subtitle:
       "Ton attelage est-il surchargé ? Limites, chargement et feu tricolore en un coup d'œil.",
@@ -2335,6 +2341,8 @@ export const fr: Translation = {
     mapRetry: "Réessayer",
   },
   hike: {
+    pauseLine: (total: string, pause: string) =>
+      `Temps total ${total} – dont ${pause} de pauses`,
     title: "Enregistrer une randonnée",
     subtitle:
       "Enregistre tes randonnées et tes balades depuis l'emplacement – avec distance, durée, allure et dénivelé. La trace reste sur ton appareil jusqu'à ce que tu l'enregistres.",
@@ -2579,9 +2587,17 @@ export const fr: Translation = {
         .filter(Boolean)
         .join(" · "),
     yearCompareTitle: "Nuitées par année",
+    kindFilterAll: "Tous les types",
+    kindFilterAria: "Filtrer les voyages par type",
     kindLabel: "Type de voyage",
     kindHint:
       "Détermine ce que la vue Aujourd’hui met en avant pendant le voyage – tous les modules restent accessibles.",
+    locationSearchButton: "Chercher le lieu",
+    locationSearchFailed: "Recherche de lieu indisponible",
+    locationSearchNoResults: "Aucun lieu trouvé – autre orthographe ?",
+    locationCoordsSet: "Coordonnées reprises",
+    locationCoordsClearAria: "Supprimer les coordonnées",
+    dayLabel: "Date",
     arrivalLabel: "Arrivée",
     departureLabel: "Départ",
     titleLabel: "Titre (facultatif)",
@@ -2599,6 +2615,8 @@ export const fr: Translation = {
     holidayCantonNone: "Aucun canton – pas d'indications",
     holidaySchoolBadge: name => `Pendant les vacances scolaires (${name})`,
     holidayPublicBadge: (date, name) => `Jour férié le ${date} : ${name}`,
+    holidayDestinationBadge: (country: string, date: string, name: string) =>
+      `Jour férié en ${country} le ${date} : ${name}`,
     holidaySource:
       "Données de vacances et jours fériés : OpenHolidays API, sans garantie.",
     countdown: days =>
@@ -3691,6 +3709,7 @@ export const fr: Translation = {
     sourceMarine: "Source : Open-Meteo Marine",
     safetyNote:
       "Ce sont les mesures de la station la plus proche, pas de ton lieu de baignade. Elles ne disent rien du courant, de la qualité de l'eau ni des règles de baignade – fie-toi à la signalisation sur place.",
+    rulesLink: "Règles de baignade & drapeaux",
   },
 
   /** Passages de l'ISS dans la partie astro (#222). */
@@ -3757,6 +3776,34 @@ export const fr: Translation = {
   },
 
   /** Sentiers de randonnée à proximité (#238). */
+  nearbyBikes: {
+    sectionAria: "Itinéraires cyclables balisés à proximité",
+    title: "Itinéraires cyclables à proximité",
+    subtitle: "Itinéraires cyclables balisés autour de ta position.",
+    subtitleAtPlace: (place: string) =>
+      `Itinéraires cyclables balisés autour de ${place}.`,
+    searchButton: "Chercher des itinéraires",
+    loading: "Recherche d'itinéraires cyclables …",
+    loadFailed:
+      "Les itinéraires cyclables n'ont pas pu être chargés. Overpass est un service gratuit qui freine en cas de forte demande – réessaie dans quelques minutes.",
+    empty: (km: number) =>
+      `Aucun itinéraire cyclable balisé n'est cartographié dans OpenStreetMap dans un rayon de ${km} km. Essaie un rayon plus grand.`,
+    resultCount: (n: number) =>
+      n === 1
+        ? "1 itinéraire cyclable trouvé"
+        : `${n} itinéraires cyclables trouvés`,
+    durationLabel: "Temps de parcours",
+    durationFlatOnly:
+      "Pas de données d'altitude dans OpenStreetMap – le temps vaut pour un terrain plat.",
+    durationNote:
+      "Temps de parcours en règle générale : 15 km/h en rythme de randonnée plus 6 minutes par 100 m de montée. Les pauses ne sont pas comprises.",
+    network: {
+      icn: "Itinéraire cyclable international",
+      ncn: "Itinéraire cyclable national",
+      rcn: "Itinéraire cyclable régional",
+      lcn: "Itinéraire cyclable local",
+    },
+  },
   nearbyHikes: {
     sectionAria: "Sentiers de randonnée balisés aux alentours",
     title: "Randonner aux alentours",
@@ -3860,6 +3907,8 @@ export const fr: Translation = {
     title: "Briefing du matin",
     sectionAria: "Briefing du matin pour le séjour en cours",
     pollenLine: (parts: string) => `Pollens : ${parts}`,
+    waterLine: (temp: string, comfort: string) => `Eau ${temp} °C – ${comfort}`,
+    waterTide: (time: string) => `prochaine marée haute à ${time}`,
     astroLine: (phase: string, percent: number) =>
       `${phase} – la lune est éclairée à ${percent} %.`,
     moreTasks: (count: number) =>
@@ -4154,6 +4203,11 @@ export const fr: Translation = {
     addLabel: "Nouvelle carte",
     addPlaceholder: "p. ex. Carte ACSI 2026",
     addButton: "Créer",
+    expiryLabel: "Date d'expiration (facultatif)",
+    expiryAria: (title: string) => `Date d'expiration de ${title}`,
+    validUntil: (date: string) => `Valable jusqu'au ${date}`,
+    expiresSoon: (date: string) => `Expire le ${date}`,
+    expiredOn: (date: string) => `Expiré depuis le ${date}`,
     hint: "Crée la carte, puis téléverse sa photo. Les photos sont privées et visibles uniquement dans ton compte.",
     added: "Carte créée",
     empty:
@@ -4417,6 +4471,7 @@ export const fr: Translation = {
     tasksLink: "Vers le tableau",
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
+    snowDepthLine: (cm: number) => `Hauteur de neige : environ ${cm} cm`,
     choresTitle: "Tâches du jour",
     choresEmpty: "Rien n’est réparti pour aujourd’hui.",
     choresToggleAria: (title: string) => `Cocher ${title}`,
@@ -4544,6 +4599,41 @@ export const fr: Translation = {
     empty: "Aucune corvée ou personne enregistrée.",
     note: "La répartition suit la même rotation que dans l'app – prévisible, sans hasard. On coche sur papier.",
   },
+  avalanche: {
+    line: (level: number, label: string) =>
+      `Danger d'avalanche : degré ${level} (${label})`,
+    note: "Source : bulletin d'avalanches du SLF – Suisse uniquement, sans garantie.",
+  },
+  winterKnowledge: {
+    title: "Pistes & avalanches",
+    subtitle:
+      "Les 10 règles de conduite FIS et les bases du danger d'avalanche – à consulter, aussi hors ligne.",
+    offlineNote:
+      "Tout le contenu est disponible hors ligne – même sans réseau en montagne.",
+    fisTitle: "Les 10 règles de conduite FIS",
+    fisIntro:
+      "Résumées dans leur esprit – elles valent sur chaque piste, à ski comme en snowboard.",
+    avalancheTitle: "Bases sur les avalanches",
+    avalancheIntro:
+      "Met de l'ordre dans les notions pour le terrain à côté des pistes – et ne remplace volontairement aucun cours d'avalanche.",
+    sourceNote:
+      "Règles FIS reformulées d'après fis-ski.com ; connaissances avalanches selon les bases du SLF (whiterisk.ch). Qui sort régulièrement des pistes a sa place dans un cours d'avalanche – aucune app ne le remplace.",
+  },
+  waterSafety: {
+    title: "Règles de baignade & drapeaux",
+    subtitle:
+      "Les six règles de baignade SLRG et la signification des drapeaux de plage – à consulter, aussi hors ligne.",
+    offlineNote:
+      "Tout le contenu est disponible hors ligne – même sur une plage sans réseau.",
+    rulesTitle: "Les 6 règles de baignade",
+    rulesIntro:
+      "Reformulées d'après les règles de baignade de la Société Suisse de Sauvetage SSS.",
+    flagsTitle: "Drapeaux de plage",
+    flagsIntro:
+      "Comment les services de sauvetage signalent en bord de mer – certains pays diffèrent ; dans le doute, l'affichage sur place fait foi.",
+    sourceNote:
+      "Règles de baignade reformulées d'après la SSS (slrg.ch) ; drapeaux selon la pratique internationale de sauvetage (ILS). La signalisation sur la plage prime toujours.",
+  },
   winter: {
     title: "Gel et neige",
     frostLine: (nights: string) => `Gel en vue : ${nights}.`,
@@ -4551,6 +4641,7 @@ export const fr: Translation = {
       "Vider le réservoir d'eau, les tuyaux et les bidons ou les stocker hors gel.",
     snowLine: (m: number) =>
       `La limite pluie-neige descend vers ${m} m d'altitude.`,
+    snowDepth: (cm: number) => `Hauteur de neige au sol : environ ${cm} cm.`,
     note: "D'après la prévision pour ce lieu – les cuvettes sont souvent plus froides.",
   },
   weatherTurn: {
@@ -4997,6 +5088,37 @@ export const fr: Translation = {
     tooLarge: "Le fichier est trop volumineux (10 Mo max.).",
     offlineNote:
       "Photo ou PDF. Une fois ouverte, la confirmation reste consultable sans réseau – pratique à la barrière à 22 h.",
+  },
+  sights: {
+    sectionAria: "Curiosités à proximité",
+    title: "Curiosités à proximité",
+    subtitle: "Musées, points de vue, châteaux et plus autour de ta position.",
+    subtitleAtPlace: (place: string) =>
+      `Musées, points de vue, châteaux et plus autour de ${place}.`,
+    radiusLabel: "Rayon",
+    radiusGroupAria: "Choisir le rayon de recherche",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Recherche de curiosités …",
+    loadFailed:
+      "Les curiosités n'ont pas pu être chargées. Overpass est un service gratuit qui freine en cas de forte demande – réessaie dans quelques minutes.",
+    empty: (km: number) =>
+      `Rien n'est cartographié dans OpenStreetMap dans un rayon de ${km} km. Essaie un rayon plus grand.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 lieu trouvé" : `${n} lieux trouvés`,
+    kind: {
+      museum: "Musée",
+      viewpoint: "Point de vue",
+      castle: "Château",
+      zoo: "Zoo",
+      themePark: "Parc d'attractions",
+      monument: "Monument",
+      attraction: "Attraction",
+    },
+    navButton: "Itinéraire",
+    navAria: (name: string) => `Itinéraire vers ${name}`,
+    website: "Site web",
+    source:
+      "Données d'OpenStreetMap via l'API Overpass – brutes et sans garantie. Les excursions sélectionnées avec description se trouvent dans la section « Excursions à proximité ».",
   },
   shops: {
     sectionAria: "Faire les courses à proximité",
@@ -6301,6 +6423,14 @@ export const fr: Translation = {
       "Les connexions antérieures à cet aperçu n'apparaissent qu'après la prochaine connexion de l'appareil concerné.",
   },
   fuelLog: {
+    csvButton: "Exporter en CSV",
+    csvHeaders: [
+      "Date",
+      "Kilométrage",
+      "Litres",
+      "Montant CHF",
+      "Consommation l/100 km",
+    ],
     title: "Carnet de carburant",
     subtitle: "Les pleins avec kilométrage – pour la consommation réelle.",
     loginFeature: "le carnet de carburant",
@@ -6343,6 +6473,9 @@ export const fr: Translation = {
     loginFeature: "les statistiques",
     tripsTitle: "Statistiques des voyages",
     tripsLink: "Mes voyages",
+    kindStatsTitle: "Voyages par type",
+    kindStatsLine: (trips: number, nights: number) =>
+      `${trips === 1 ? "1 voyage" : `${trips} voyages`} · ${nights === 1 ? "1 nuit" : `${nights} nuits`}`,
     tripsEmpty: "Aucun séjour enregistré pour l'instant.",
     nightsInYear: year => `Nuits ${year}`,
     nightsTotal: "Nuits au total",

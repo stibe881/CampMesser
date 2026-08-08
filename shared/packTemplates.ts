@@ -52,6 +52,7 @@ const cat = {
     "Farmacia dei bambini",
     "Children's medicine kit"
   ),
+  dokumente: l4("Dokumente", "Documents", "Documenti", "Documents"),
 };
 
 /** Kategorien auch für andere Module (z. B. Wetter-Packvorschläge) nutzbar. */
@@ -477,6 +478,422 @@ export const packScenarios: PackScenario[] = [
           "Earplugs"
         ),
         category: cat.hygiene,
+      },
+    ],
+  },
+  /**
+   * Szenarien für die Nicht-Camping-Reise-Arten (#468): bewusst OHNE die
+   * Basis-Ausrüstung – wer ins Hotel oder auf die Piste fährt, braucht
+   * weder Zelt noch Gaskocher auf der Liste.
+   */
+  {
+    id: "staedtereise",
+    label: l4("Städtereise", "City trip", "Viaggio in città", "City break"),
+    description: l4(
+      "Leichtes Gepäck für ein paar Tage Stadt – ohne Campingausrüstung.",
+      "Bagage léger pour quelques jours en ville – sans matériel de camping.",
+      "Bagaglio leggero per qualche giorno in città – senza attrezzatura da campeggio.",
+      "Light luggage for a few days in the city – no camping gear."
+    ),
+    icon: "Building2",
+    items: [
+      {
+        name: l4(
+          "Bequeme Schuhe (eingelaufen)",
+          "Chaussures confortables (déjà rodées)",
+          "Scarpe comode (già collaudate)",
+          "Comfortable shoes (broken in)"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Tagesrucksack",
+          "Sac à dos de jour",
+          "Zaino da giorno",
+          "Day pack"
+        ),
+        category: cat.gepaeck,
+      },
+      {
+        name: l4(
+          "Regenschirm oder Regenjacke",
+          "Parapluie ou veste de pluie",
+          "Ombrello o giacca antipioggia",
+          "Umbrella or rain jacket"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Ausgeh-Outfit für den Abend",
+          "Tenue de sortie pour le soir",
+          "Outfit per la sera",
+          "Evening outfit"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Powerbank + Ladekabel",
+          "Powerbank + câble de charge",
+          "Powerbank + cavo di ricarica",
+          "Power bank + charging cable"
+        ),
+        category: cat.lichtEnergie,
+      },
+      {
+        name: l4(
+          "Ausweis / Pass",
+          "Carte d'identité / passeport",
+          "Carta d'identità / passaporto",
+          "ID card / passport"
+        ),
+        category: cat.dokumente,
+      },
+      {
+        name: l4(
+          "Reservationen & Tickets (digital oder gedruckt)",
+          "Réservations & billets (numériques ou imprimés)",
+          "Prenotazioni e biglietti (digitali o stampati)",
+          "Reservations & tickets (digital or printed)"
+        ),
+        category: cat.dokumente,
+      },
+      {
+        name: l4(
+          "Offline-Karte / Stadtplan",
+          "Carte hors ligne / plan de ville",
+          "Mappa offline / pianta della città",
+          "Offline map / city map"
+        ),
+        category: cat.orientierung,
+      },
+      {
+        name: l4("Trinkflasche", "Gourde", "Borraccia", "Water bottle"),
+        category: cat.kueche,
+      },
+      {
+        name: l4(
+          "Kulturbeutel",
+          "Trousse de toilette",
+          "Beauty case",
+          "Toiletry bag"
+        ),
+        category: cat.hygiene,
+      },
+      {
+        name: l4(
+          "Ohrstöpsel & Schlafmaske",
+          "Bouchons d'oreilles & masque de sommeil",
+          "Tappi per le orecchie e mascherina per dormire",
+          "Earplugs & sleep mask"
+        ),
+        category: cat.hygiene,
+      },
+      {
+        name: l4(
+          "Kleines Portemonnaie / Geldgürtel",
+          "Petit portefeuille / ceinture porte-monnaie",
+          "Portafoglio piccolo / marsupio portasoldi",
+          "Small wallet / money belt"
+        ),
+        category: cat.sicherheit,
+      },
+      {
+        name: l4(
+          "Sonnencrème & Sonnenbrille",
+          "Crème solaire & lunettes de soleil",
+          "Crema solare e occhiali da sole",
+          "Sun cream & sunglasses"
+        ),
+        category: cat.hygiene,
+      },
+      {
+        name: l4(
+          "Blasenpflaster & Mini-Apotheke",
+          "Pansements anti-ampoules & mini-pharmacie",
+          "Cerotti per vesciche e mini farmacia",
+          "Blister plasters & mini first aid kit"
+        ),
+        category: cat.sicherheit,
+      },
+    ],
+  },
+  {
+    id: "strand",
+    label: l4(
+      "Strandferien",
+      "Vacances à la plage",
+      "Vacanze al mare",
+      "Beach holiday"
+    ),
+    description: l4(
+      "Alles für Tage am Wasser – Sonnenschutz, Badezeug und Strandspiel.",
+      "Tout pour des journées au bord de l'eau – protection solaire, affaires de bain et jeux de plage.",
+      "Tutto per giornate in riva al mare – protezione solare, costumi e giochi da spiaggia.",
+      "Everything for days by the water – sun protection, swimwear and beach toys."
+    ),
+    icon: "Umbrella",
+    items: [
+      {
+        name: l4(
+          "Badekleidung",
+          "Maillots de bain",
+          "Costumi da bagno",
+          "Swimwear"
+        ),
+        category: cat.kleidung,
+        quantity: 2,
+      },
+      {
+        name: l4(
+          "Strandtücher",
+          "Linges de plage",
+          "Teli da spiaggia",
+          "Beach towels"
+        ),
+        category: cat.hygiene,
+        quantity: 2,
+      },
+      {
+        name: l4(
+          "Sonnencrème wasserfest LSF 50",
+          "Crème solaire résistante à l'eau IP 50",
+          "Crema solare resistente all'acqua SPF 50",
+          "Waterproof sun cream SPF 50"
+        ),
+        category: cat.hygiene,
+      },
+      {
+        name: l4(
+          "After-Sun-Lotion",
+          "Lotion après-soleil",
+          "Lozione doposole",
+          "After-sun lotion"
+        ),
+        category: cat.hygiene,
+      },
+      {
+        name: l4(
+          "Sonnenschirm oder Strandmuschel",
+          "Parasol ou abri de plage",
+          "Ombrellone o tenda da spiaggia",
+          "Parasol or beach shelter"
+        ),
+        category: cat.komfort,
+      },
+      {
+        name: l4(
+          "Sonnenhut & Sonnenbrille",
+          "Chapeau de soleil & lunettes de soleil",
+          "Cappello da sole e occhiali da sole",
+          "Sun hat & sunglasses"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Badeschuhe",
+          "Chaussures de bain",
+          "Scarpe da scoglio",
+          "Water shoes"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Strandmatte / Picknickdecke",
+          "Natte de plage / couverture de pique-nique",
+          "Stuoia da spiaggia / coperta da picnic",
+          "Beach mat / picnic blanket"
+        ),
+        category: cat.komfort,
+      },
+      {
+        name: l4(
+          "Kühltasche für Getränke",
+          "Sac isotherme pour les boissons",
+          "Borsa frigo per le bevande",
+          "Cool bag for drinks"
+        ),
+        category: cat.kueche,
+      },
+      {
+        name: l4("Trinkflaschen", "Gourdes", "Borracce", "Water bottles"),
+        category: cat.kueche,
+      },
+      {
+        name: l4(
+          "Wasserdichte Handy-Hülle",
+          "Pochette étanche pour le téléphone",
+          "Custodia impermeabile per il telefono",
+          "Waterproof phone pouch"
+        ),
+        category: cat.sonstiges,
+      },
+      {
+        name: l4(
+          "Schwimmhilfen für Kinder",
+          "Aides à la natation pour enfants",
+          "Braccioli / aiuti al galleggiamento per bambini",
+          "Swimming aids for kids"
+        ),
+        category: cat.kinder,
+      },
+      {
+        name: l4(
+          "Sandspielzeug",
+          "Jouets de sable",
+          "Giochi da sabbia",
+          "Sand toys"
+        ),
+        category: cat.kinder,
+      },
+      {
+        name: l4(
+          "Abfallsack für den Strand",
+          "Sac poubelle pour la plage",
+          "Sacchetto per i rifiuti in spiaggia",
+          "Rubbish bag for the beach"
+        ),
+        category: cat.sonstiges,
+      },
+    ],
+  },
+  {
+    id: "wintersport",
+    label: l4(
+      "Wintersport",
+      "Sports d'hiver",
+      "Sport invernali",
+      "Winter sports"
+    ),
+    description: l4(
+      "Piste und Schnee – warme Schichten, Schutz und Ausrüstung.",
+      "Pistes et neige – couches chaudes, protection et équipement.",
+      "Piste e neve – strati caldi, protezioni e attrezzatura.",
+      "Slopes and snow – warm layers, protection and gear."
+    ),
+    icon: "Snowflake",
+    items: [
+      {
+        name: l4(
+          "Ski-/Snowboardjacke & -hose",
+          "Veste & pantalon de ski/snowboard",
+          "Giacca e pantaloni da sci/snowboard",
+          "Ski/snowboard jacket & trousers"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Thermounterwäsche",
+          "Sous-vêtements thermiques",
+          "Intimo termico",
+          "Thermal underwear"
+        ),
+        category: cat.kleidung,
+        quantity: 2,
+      },
+      {
+        name: l4(
+          "Skisocken",
+          "Chaussettes de ski",
+          "Calze da sci",
+          "Ski socks"
+        ),
+        category: cat.kleidung,
+        quantity: 3,
+      },
+      {
+        name: l4(
+          "Handschuhe + Ersatzpaar",
+          "Gants + paire de rechange",
+          "Guanti + paio di ricambio",
+          "Gloves + spare pair"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Mütze & Stirnband",
+          "Bonnet & bandeau",
+          "Berretto e fascia",
+          "Beanie & headband"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4("Helm", "Casque", "Casco", "Helmet"),
+        category: cat.sicherheit,
+      },
+      {
+        name: l4(
+          "Skibrille",
+          "Masque de ski",
+          "Maschera da sci",
+          "Ski goggles"
+        ),
+        category: cat.sicherheit,
+      },
+      {
+        name: l4(
+          "Rückenprotektor",
+          "Protection dorsale",
+          "Paraschiena",
+          "Back protector"
+        ),
+        category: cat.sicherheit,
+      },
+      {
+        name: l4(
+          "Sonnencrème & Lippenschutz mit UV-Schutz",
+          "Crème solaire & stick à lèvres avec protection UV",
+          "Crema solare e burrocacao con protezione UV",
+          "Sun cream & UV lip balm"
+        ),
+        category: cat.hygiene,
+      },
+      {
+        name: l4(
+          "Skipass / Abo",
+          "Forfait de ski / abonnement",
+          "Skipass / abbonamento",
+          "Ski pass / season pass"
+        ),
+        category: cat.dokumente,
+      },
+      {
+        name: l4(
+          "Ski-/Snowboard-Ausrüstung oder Miet-Reservation",
+          "Équipement de ski/snowboard ou réservation de location",
+          "Attrezzatura da sci/snowboard o prenotazione del noleggio",
+          "Ski/snowboard gear or rental reservation"
+        ),
+        category: cat.sonstiges,
+      },
+      {
+        name: l4(
+          "Thermosflasche für Tee",
+          "Bouteille thermos pour le thé",
+          "Thermos per il tè",
+          "Thermos flask for tea"
+        ),
+        category: cat.kueche,
+      },
+      {
+        name: l4(
+          "Warme Winterschuhe",
+          "Chaussures d'hiver chaudes",
+          "Scarpe invernali calde",
+          "Warm winter boots"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4("Handwärmer", "Chauffe-mains", "Scaldamani", "Hand warmers"),
+        category: cat.komfort,
       },
     ],
   },

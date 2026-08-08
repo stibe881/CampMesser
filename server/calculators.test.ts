@@ -110,6 +110,18 @@ describe("packScenarios", () => {
     expect(ids).toContain("custom");
   });
 
+  it("enthält die Szenarien der neuen Reise-Arten (#468)", () => {
+    const ids = packScenarios.map(s => s.id);
+    expect(ids).toContain("staedtereise");
+    expect(ids).toContain("strand");
+    expect(ids).toContain("wintersport");
+    // Nicht-Camping-Szenarien tragen bewusst kein Zelt auf der Liste.
+    for (const id of ["staedtereise", "strand", "wintersport"]) {
+      const scenario = packScenarios.find(s => s.id === id)!;
+      expect(scenario.items.some(i => i.name.de.includes("Zelt"))).toBe(false);
+    }
+  });
+
   it("liefert für jedes Szenario ausser custom Einträge", () => {
     for (const s of packScenarios) {
       if (s.id === "custom") {

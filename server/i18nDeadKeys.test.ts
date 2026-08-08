@@ -45,6 +45,17 @@ const ALLOWED = new Set<string>([
   "fr",
   "it",
   "en",
+  // OSM-Netz-Ebenen der Touren (#238/#478): Die Schlüssel werden über
+  // `route.network in networkMap` gegen DATEN aus OpenStreetMap
+  // abgeglichen – im Quelltext stehen sie nie als Bezeichner.
+  "iwn",
+  "nwn",
+  "rwn",
+  "lwn",
+  "icn",
+  "ncn",
+  "rcn",
+  "lcn",
 ]);
 
 /** Alle Schlüssel-Namen aus dem deutschen Paket (Gruppen eingeschlossen). */

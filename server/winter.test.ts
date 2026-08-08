@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { frostNights, snowLineOutlook } from "@shared/winter";
+import { frostNights, snowDepthNow, snowLineOutlook } from "@shared/winter";
 
 /** Frost (#428) und Schneefallgrenze (#429): melden nur, was betrifft. */
 describe("frostNights", () => {
@@ -47,5 +47,30 @@ describe("snowLineOutlook", () => {
 
   it("ohne Daten wird nichts behauptet", () => {
     expect(snowLineOutlook([{ precipitationProbability: 80 }])).toBeNull();
+  });
+});
+
+describe("snowDepthNow", () => {
+  it("meldet die Schneehöhe des ersten Stundenwerts in cm", () => {
+    expect(
+      snowDepthNow([
+        { precipitationProbability: 0, snowDepthM: 0.42 },
+        { precipitationProbability: 0, snowDepthM: 0.4 },
+      ])
+    ).toEqual({ depthCm: 42 });
+  });
+
+  it("unter der Mindesthöhe schweigt sie (Reif ist kein Schnee)", () => {
+    expect(
+      snowDepthNow([{ precipitationProbability: 0, snowDepthM: 0.03 }])
+    ).toBeNull();
+    expect(
+      snowDepthNow([{ precipitationProbability: 0, snowDepthM: 0 }])
+    ).toBeNull();
+  });
+
+  it("ohne Messwert wird nichts behauptet", () => {
+    expect(snowDepthNow([{ precipitationProbability: 50 }])).toBeNull();
+    expect(snowDepthNow([])).toBeNull();
   });
 });

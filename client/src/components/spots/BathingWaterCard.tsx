@@ -3,7 +3,8 @@
  * herausgelöst): Wassertemperatur, Abfluss und Pegel der nächsten
  * BAFU-Messstelle bzw. Meerwasser-Temperatur der Marine-API.
  */
-import { Waves } from "lucide-react";
+import { LifeBuoy, Waves } from "lucide-react";
+import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
@@ -174,6 +175,14 @@ export default function BathingWaterCard({
           {data.source === "station" ? tw.sourceStation : tw.sourceMarine}
         </p>
         <p className="mt-2 text-xs text-muted-foreground">{tw.safetyNote}</p>
+        {/* Baderegeln & Strandflaggen (#473) – ein Klick statt Suchen */}
+        <Link
+          href="/baderegeln"
+          className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+        >
+          <LifeBuoy className="h-4 w-4" aria-hidden="true" />
+          {tw.rulesLink}
+        </Link>
       </CardContent>
     </Card>
   );

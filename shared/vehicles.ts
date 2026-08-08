@@ -68,6 +68,39 @@ export interface VehicleProfile {
   noseKg: number | null;
   /** Zulässige Achslast in kg; null = nicht erfasst. */
   axleKg: number | null;
+  /** Reifendruck vorne in bar (#481); null = nicht erfasst. */
+  tireFrontBar: number | null;
+  /** Reifendruck hinten in bar (#481); null = nicht erfasst. */
+  tireRearBar: number | null;
+  /** Nächster Service als ISO-Datum (#481); null = nicht erfasst. */
+  serviceDue: string | null;
+}
+
+/** Grösster plausibler Reifendruck in bar (Wohnmobil-Hinterachse ~5.5). */
+export const MAX_TIRE_BAR = 10;
+
+/** Zahl auf einen plausiblen bar-Wert bringen (0–10, eine Nachkommastelle). */
+export function sanitizeBar(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  if (value <= 0) return null;
+  return Math.min(MAX_TIRE_BAR, Math.round(value * 10) / 10);
+}
+
+/** Eingetippten bar-Wert lesen (Komma wie Punkt); Leer/Unsinn ergibt null. */
+export function parseBarInput(raw: string): number | null {
+  const cleaned = raw.replace(/\s/g, "").replace(",", ".");
+  if (!cleaned) return null;
+  if (!/^\d*\.?\d*$/.test(cleaned)) return null;
+  const value = Number(cleaned);
+  if (!Number.isFinite(value)) return null;
+  return sanitizeBar(value);
+}
+
+/** ISO-Datum (YYYY-MM-DD) übernehmen, alles andere verwerfen. */
+export function sanitizeServiceDue(value: unknown): string | null {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? value
+    : null;
 }
 
 /** Zahl auf eine sinnvolle kg-Angabe zurechtbiegen (0–40 000, eine Nachkommastelle). */
@@ -124,6 +157,9 @@ export function sanitizeVehicle(
     towKg: sanitizeKg(entry.towKg),
     noseKg: sanitizeKg(entry.noseKg),
     axleKg: sanitizeKg(entry.axleKg),
+    tireFrontBar: sanitizeBar(entry.tireFrontBar),
+    tireRearBar: sanitizeBar(entry.tireRearBar),
+    serviceDue: sanitizeServiceDue(entry.serviceDue),
   };
 }
 
@@ -161,6 +197,9 @@ export function defaultVehicles(
     towKg: null,
     noseKg: null,
     axleKg: null,
+    tireFrontBar: null,
+    tireRearBar: null,
+    serviceDue: null,
   }));
 }
 

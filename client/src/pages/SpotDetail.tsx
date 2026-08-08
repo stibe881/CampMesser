@@ -42,6 +42,7 @@ import CampfireLight from "@/components/CampfireLight";
 import DeparturePlanner from "@/components/DeparturePlanner";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
 import NearbyShops from "@/components/NearbyShops";
+import NearbySights from "@/components/NearbySights";
 import SpotRating from "@/components/SpotRating";
 import NearbyTransit from "@/components/NearbyTransit";
 import TickRiskPanel from "@/components/TickRiskPanel";
@@ -587,6 +588,17 @@ export default function SpotDetailPage() {
           />
         </LazySection>
 
+        {/* Velorouten (#478): derselbe Kasten, andere OSM-Routen */}
+        <LazySection minHeight={90}>
+          <NearbyHikes
+            mode="bicycle"
+            latitude={spot.latitude}
+            longitude={spot.longitude}
+            placeName={spot.name}
+            className="mb-4"
+          />
+        </LazySection>
+
         {/* Feuer- und Grillstellen aus OpenStreetMap (#247) – lädt erst beim
             Aufklappen, Overpass wird nie automatisch gefragt */}
         <LazySection minHeight={90}>
@@ -624,6 +636,17 @@ export default function SpotDetailPage() {
             Abfahrtstafel – beides erst beim Aufklappen geholt */}
         <LazySection minHeight={90}>
           <NearbyTransit
+            latitude={spot.latitude}
+            longitude={spot.longitude}
+            placeName={spot.name}
+            className="mb-4"
+          />
+        </LazySection>
+
+        {/* Sehenswürdigkeiten aus OSM (#479) – roh und flächendeckend,
+            bewusst NEBEN den kuratierten Ausflügen des Ausflugfinders */}
+        <LazySection minHeight={90}>
+          <NearbySights
             latitude={spot.latitude}
             longitude={spot.longitude}
             placeName={spot.name}

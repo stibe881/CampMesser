@@ -5,7 +5,7 @@
  * übliche Tankbuch-Konvention «immer volltanken».
  */
 import { useMemo, useState } from "react";
-import { Fuel, Loader2, Plus, Trash2 } from "lucide-react";
+import { Download, Fuel, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import QueryError from "@/components/QueryError";
@@ -27,6 +27,7 @@ import {
   averageConsumptionL100,
   fuelSegments,
 } from "@shared/fuelLog";
+import { fuelLogCsvFileName, fuelLogToCsv } from "@shared/fuelLogCsv";
 
 export default function FuelLogPage() {
   const ask = useConfirm();
@@ -95,6 +96,27 @@ export default function FuelLogPage() {
     addMutation.mutate({ day, odometerKm, liters10, priceRappen });
   };
 
+  /**
+   * CSV-Export (#477): gleiches Blob-Muster wie bei der Reisekasse (#258)
+   * – rein im Browser, die Datei landet im Download-Ordner.
+   */
+  const downloadCsv = () => {
+    try {
+      const csv = fuelLogToCsv(fills, { headers: tf.csvHeaders });
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fuelLogCsvFileName(todayIso());
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error(t.common.actionFailed);
+    }
+  };
+
   if (loading) return null;
 
   return (
@@ -122,6 +144,20 @@ export default function FuelLogPage() {
                 </p>
               </CardContent>
             </Card>
+          )}
+
+          {/* CSV-Export (#477): fürs Weiterrechnen daheim */}
+          {fills.length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mb-5"
+              onClick={downloadCsv}
+            >
+              <Download className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {tf.csvButton}
+            </Button>
           )}
 
           {/* Erfassen */}

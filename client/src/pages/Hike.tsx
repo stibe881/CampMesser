@@ -84,6 +84,7 @@ import { LOCALE_TAGS, type Language } from "@shared/i18n";
 import {
   buildGpx,
   formatTrackDuration,
+  totalTimeS,
   gpxFileName,
   guessTrackActivity,
   normalizeTrackActivity,
@@ -228,6 +229,21 @@ function TrackMap({ trackId }: { trackId: number }) {
       />
       {/* Höhenprofil und Zwischenzeiten (#280) */}
       <TrackProfile points={points} />
+      {/* Bewegungszeit vs. Gesamtzeit (#480): erst hier, wo die Punkte
+          ohnehin geladen sind – die Liste kennt nur die Bewegungszeit */}
+      {(() => {
+        const total = totalTimeS(points);
+        const pause = total - (trackQuery.data?.durationS ?? 0);
+        if (total <= 0 || pause < 60) return null;
+        return (
+          <p className="mt-2 text-xs text-muted-foreground">
+            {t.hike.pauseLine(
+              formatTrackDuration(total),
+              formatTrackDuration(pause)
+            )}
+          </p>
+        );
+      })()}
     </>
   );
 }
@@ -681,6 +697,8 @@ export default function HikePage() {
 
       {/* Wanderwege in der Nähe: OSM-Routen rund um den aktuellen Standort */}
       <NearbyHikes className="mt-6" />
+      {/* Velorouten (#478): derselbe Kasten, andere OSM-Routen */}
+      <NearbyHikes mode="bicycle" className="mt-6" />
 
       {/* Gespeicherte Wanderungen */}
       <div className="mb-3 mt-6 flex items-center justify-between gap-2">
@@ -908,6 +926,21 @@ export default function HikePage() {
                   );
                 })()}
               </div>
+              {/* Gesamtzeit inkl. Pausen (#480) – nur wenn Rast dabei war */}
+              {(() => {
+                const stats = trackStats(finished.points);
+                const total = totalTimeS(finished.points);
+                const pause = total - stats.durationS;
+                if (total <= 0 || pause < 60) return null;
+                return (
+                  <p className="text-xs text-muted-foreground">
+                    {t.hike.pauseLine(
+                      formatTrackDuration(total),
+                      formatTrackDuration(pause)
+                    )}
+                  </p>
+                );
+              })()}
               <div>
                 <Label htmlFor="hike-name">{t.hike.nameLabel}</Label>
                 <Input

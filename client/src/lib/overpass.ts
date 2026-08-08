@@ -344,6 +344,29 @@ export function hikingRoutesQuery(
   );
 }
 
+/**
+ * Overpass-QL für Velorouten im Umkreis (#478): gleiches Muster wie bei
+ * den Wanderrouten, nur mit route=bicycle bzw. route=mtb. Die Antwort
+ * lässt sich mit demselben parseHikingRoutes lesen – eine Route ist eine
+ * Route, nur die Tags sac_scale/ascent sind bei Velos seltener gepflegt.
+ */
+export function bicycleRoutesQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  const box = boundingBoxAround(lat, lon, radiusM);
+  const bbox = [box.south, box.west, box.north, box.east]
+    .map(v => v.toFixed(5))
+    .join(",");
+  const around = `${Math.round(radiusM)},${lat.toFixed(5)},${lon.toFixed(5)}`;
+  return (
+    `[out:json][timeout:25];` +
+    `relation["type"="route"]["route"~"^(bicycle|mtb)$"](around:${around});` +
+    `out geom(${bbox}) ${OVERPASS_HIKING_MAX_RESULTS};`
+  );
+}
+
 /** Punktreihe eines Relations-Mitglieds defensiv lesen (kaputte Punkte raus). */
 function parseGeometry(value: unknown): GeoPoint[] {
   if (!Array.isArray(value)) return [];
@@ -1056,5 +1079,112 @@ export function nearestShops(
   longitude: number,
   limit: number
 ): ShopDistance[] {
+  return nearestPlaces(list, latitude, longitude, limit);
+}
+
+/* ------------------------------------------------------------------ */
+/* Sehenswürdigkeiten in der Nähe (#479)                               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Rohe OSM-Sicht, bewusst NEBEN dem kuratierten Ausflugfinder (#271):
+ * Der Ausflugfinder kennt ausgesuchte Ausflüge mit Beschreibung, hier
+ * kommt flächendeckend, was in OpenStreetMap als Museum, Aussichtspunkt,
+ * Schloss, Zoo oder Attraktion eingetragen ist – ohne Redaktion, dafür
+ * überall.
+ */
+export const SIGHT_SEARCH_RADII_M = [2000, 5000, 10000];
+export const SIGHT_DEFAULT_RADIUS_M = 5000;
+export const OVERPASS_SIGHT_MAX_RESULTS = 40;
+
+export type SightKind =
+  | "museum"
+  | "viewpoint"
+  | "castle"
+  | "zoo"
+  | "themePark"
+  | "monument"
+  | "attraction";
+
+export interface OsmSight {
+  id: string;
+  lat: number;
+  lon: number;
+  kind: SightKind;
+  name?: string;
+  website?: string;
+}
+
+export function sightsQuery(lat: number, lon: number, radiusM: number): string {
+  const filter = `(around:${Math.round(radiusM)},${lat.toFixed(5)},${lon.toFixed(5)})`;
+  return (
+    `[out:json][timeout:20];` +
+    `(` +
+    `nwr["tourism"~"^(museum|viewpoint|zoo|theme_park|attraction)$"]${filter};` +
+    `nwr["historic"~"^(castle|monument)$"]${filter};` +
+    `);` +
+    `out center ${OVERPASS_SIGHT_MAX_RESULTS};`
+  );
+}
+
+/** Overpass-Tags auf unsere Arten abbilden – Unbekanntes fällt weg. */
+function sightKind(tags: Record<string, unknown>): SightKind | null {
+  const historic = cleanTag(tags.historic);
+  if (historic === "castle") return "castle";
+  if (historic === "monument") return "monument";
+  switch (cleanTag(tags.tourism)) {
+    case "museum":
+      return "museum";
+    case "viewpoint":
+      return "viewpoint";
+    case "zoo":
+      return "zoo";
+    case "theme_park":
+      return "themePark";
+    case "attraction":
+      return "attraction";
+    default:
+      return null;
+  }
+}
+
+export function parseSights(json: unknown): OsmSight[] {
+  const elements = readElements(json);
+  const seen = new Set<string>();
+  const result: OsmSight[] = [];
+  for (let i = 0; i < elements.length; i++) {
+    if (result.length >= OVERPASS_SIGHT_MAX_RESULTS) break;
+    const point = readPointElement(elements[i]);
+    if (!point || seen.has(point.key)) continue;
+    const kind = sightKind(point.tags);
+    if (!kind) continue;
+    // Namenlose «Attraktionen» sind meist Kartenrauschen; ein namenloser
+    // Aussichtspunkt dagegen ist normal und trägt seine Art als Titel.
+    const name = cleanTag(point.tags.name);
+    if (!name && kind !== "viewpoint") continue;
+    seen.add(point.key);
+    result.push({
+      id: point.key,
+      lat: point.lat,
+      lon: point.lon,
+      kind,
+      name,
+      website: cleanWebsite(point.tags.website),
+    });
+  }
+  return result;
+}
+
+export interface SightDistance {
+  place: OsmSight;
+  distanceM: number;
+}
+
+export function nearestSights(
+  list: readonly OsmSight[],
+  latitude: number,
+  longitude: number,
+  limit: number
+): SightDistance[] {
   return nearestPlaces(list, latitude, longitude, limit);
 }

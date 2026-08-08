@@ -25,6 +25,7 @@ import {
   Hammer,
   Languages,
   Leaf,
+  LifeBuoy,
   ListChecks,
   Sandwich,
   LocateFixed,
@@ -41,6 +42,7 @@ import {
   Signpost,
   ShieldQuestion,
   Siren,
+  Snowflake,
   Sparkles,
   Sprout,
   Stamp,
@@ -557,6 +559,42 @@ export const modules: Module[] = [
       "Waterproofing, patching, zips, mould – step by step"
     ),
     icon: Wrench,
+    group: "wissen",
+    offline: true,
+  },
+  {
+    path: "/baderegeln",
+    title: l4(
+      "Baderegeln & Flaggen",
+      "Règles de baignade & drapeaux",
+      "Regole di balneazione & bandiere",
+      "Bathing rules & flags"
+    ),
+    description: l4(
+      "Die 6 SLRG-Baderegeln und was die Strandflaggen bedeuten",
+      "Les 6 règles de baignade SLRG et la signification des drapeaux de plage",
+      "Le 6 regole di balneazione SSS e il significato delle bandiere",
+      "The 6 SLRG bathing rules and what the beach flags mean"
+    ),
+    icon: LifeBuoy,
+    group: "wissen",
+    offline: true,
+  },
+  {
+    path: "/wintersport",
+    title: l4(
+      "Pisten & Lawinen",
+      "Pistes & avalanches",
+      "Piste & valanghe",
+      "Slopes & avalanches"
+    ),
+    description: l4(
+      "Die 10 FIS-Regeln und Lawinen-Grundwissen – auch offline am Berg",
+      "Les 10 règles FIS et les bases des avalanches – aussi hors ligne en montagne",
+      "Le 10 regole FIS e le basi sulle valanghe – anche offline in montagna",
+      "The 10 FIS rules and avalanche basics – offline on the mountain too"
+    ),
+    icon: Snowflake,
     group: "wissen",
     offline: true,
   },
