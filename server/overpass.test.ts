@@ -23,6 +23,15 @@ import {
   parseOsmYesNo,
   parseSights,
   sightsQuery,
+  beachesQuery,
+  parseBeaches,
+  drinkingWaterQuery,
+  parseDrinkingWater,
+  chargersQuery,
+  parseChargers,
+  defibrillatorsQuery,
+  parseDefibrillators,
+  nearestPois,
 } from "../client/src/lib/overpass";
 
 describe("parseCampsites", () => {
@@ -961,5 +970,93 @@ describe("Sehenswürdigkeiten (#479)", () => {
     });
     expect(sights.map(s => s.kind)).toEqual(["museum", "viewpoint", "castle"]);
     expect(sights[2].id).toBe("way/4");
+  });
+});
+
+describe("Einfache Punkt-Suchen (#487/#492/#493/#494)", () => {
+  it("baut die vier Abfragen mit den richtigen Tags", () => {
+    expect(beachesQuery(46.8, 8.2, 5000)).toContain('"natural"="beach"');
+    expect(beachesQuery(46.8, 8.2, 5000)).toContain('"leisure"="beach_resort"');
+    expect(drinkingWaterQuery(46.8, 8.2, 1000)).toContain(
+      '"amenity"="drinking_water"'
+    );
+    expect(chargersQuery(46.8, 8.2, 5000)).toContain(
+      '"amenity"="charging_station"'
+    );
+    expect(defibrillatorsQuery(46.8, 8.2, 1000)).toContain(
+      '"emergency"="defibrillator"'
+    );
+    expect(defibrillatorsQuery(46.8, 8.2, 1000)).toContain(
+      "around:1000,46.80000,8.20000"
+    );
+  });
+
+  it("parst Punkte mit den passenden Detail-Zeilen", () => {
+    const beaches = parseBeaches({
+      elements: [
+        {
+          type: "node",
+          id: 1,
+          lat: 46.8,
+          lon: 8.2,
+          tags: { natural: "beach" },
+        },
+        {
+          type: "way",
+          id: 2,
+          center: { lat: 46.81, lon: 8.21 },
+          tags: { leisure: "beach_resort", name: "Strandbad See" },
+        },
+      ],
+    });
+    // Naturstrände sind oft namenlos – sie bleiben trotzdem drin
+    expect(beaches).toHaveLength(2);
+    expect(beaches[0].name).toBeUndefined();
+    expect(beaches[1].detail).toBe("resort");
+
+    const chargers = parseChargers({
+      elements: [
+        {
+          type: "node",
+          id: 3,
+          lat: 46.8,
+          lon: 8.2,
+          tags: {
+            amenity: "charging_station",
+            operator: "Werke AG",
+            capacity: "4",
+          },
+        },
+      ],
+    });
+    expect(chargers[0].detail).toBe("Werke AG · 4×");
+
+    const defis = parseDefibrillators({
+      elements: [
+        {
+          type: "node",
+          id: 4,
+          lat: 46.8,
+          lon: 8.2,
+          tags: {
+            emergency: "defibrillator",
+            "defibrillator:location": "Eingang Gemeindehaus",
+          },
+        },
+      ],
+    });
+    expect(defis[0].detail).toBe("Eingang Gemeindehaus");
+    expect(parseDrinkingWater({ elements: [] })).toEqual([]);
+  });
+
+  it("sortiert nach Distanz und kappt die Liste", () => {
+    const pois = [
+      { id: "a", lat: 47.0, lon: 8.5 },
+      { id: "b", lat: 46.81, lon: 8.21 },
+      { id: "c", lat: 46.8, lon: 8.2 },
+    ];
+    const nearest = nearestPois(pois, 46.8, 8.2, 2);
+    expect(nearest.map(row => row.place.id)).toEqual(["c", "b"]);
+    expect(nearest[0].distanceM).toBe(0);
   });
 });

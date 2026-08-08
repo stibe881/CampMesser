@@ -4514,6 +4514,45 @@ export const en: Translation = {
     sourceNote:
       "Bathing rules paraphrased from the SLRG (slrg.ch); flags follow international lifesaving practice (ILS). The signage on the beach always takes precedence.",
   },
+  poi: {
+    radiusLabel: "Radius:",
+    radiusGroupAria: "Choose search radius",
+    loading: "Searching …",
+    loadFailed: "The search failed. Try again later.",
+    navButton: "Directions",
+    navAria: (title: string) => `Directions to ${title}`,
+    source: "Source: OpenStreetMap – completeness not guaranteed.",
+    beaches: {
+      title: "Beaches nearby",
+      subtitle:
+        "Natural beaches and beach resorts from OpenStreetMap – where to get to the water today.",
+      unnamed: "Beach",
+      empty: (radius: string) => `No beach recorded within ${radius}.`,
+    },
+    water: {
+      title: "Drinking water nearby",
+      subtitle:
+        "Fountains and drinking-water taps to refill your bottle – from OpenStreetMap.",
+      unnamed: "Fountain",
+      empty: (radius: string) =>
+        `No drinking-water point recorded within ${radius}.`,
+    },
+    chargers: {
+      title: "Charging stations nearby",
+      subtitle:
+        "Charging points for electric cars from OpenStreetMap – operator and bays where tagged.",
+      unnamed: "Charging station",
+      empty: (radius: string) =>
+        `No charging station recorded within ${radius}.`,
+    },
+    defis: {
+      title: "Defibrillators nearby",
+      subtitle:
+        "Public defibrillators from OpenStreetMap – the location note says where the device hangs. In an emergency, call 144 first.",
+      unnamed: "Defibrillator",
+      empty: (radius: string) => `No defibrillator recorded within ${radius}.`,
+    },
+  },
   winter: {
     title: "Frost & snow",
     frostLine: (nights: string) => `Frost expected: ${nights}.`,

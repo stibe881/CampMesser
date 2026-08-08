@@ -4634,6 +4634,47 @@ export const fr: Translation = {
     sourceNote:
       "Règles de baignade reformulées d'après la SSS (slrg.ch) ; drapeaux selon la pratique internationale de sauvetage (ILS). La signalisation sur la plage prime toujours.",
   },
+  poi: {
+    radiusLabel: "Rayon :",
+    radiusGroupAria: "Choisir le rayon de recherche",
+    loading: "Recherche en cours …",
+    loadFailed: "La recherche a échoué. Réessaie plus tard.",
+    navButton: "Itinéraire",
+    navAria: (title: string) => `Itinéraire vers ${title}`,
+    source: "Source : OpenStreetMap – exhaustivité sans garantie.",
+    beaches: {
+      title: "Plages à proximité",
+      subtitle:
+        "Plages naturelles et plages aménagées d'OpenStreetMap – pour aller à l'eau aujourd'hui.",
+      unnamed: "Plage",
+      empty: (radius: string) =>
+        `Aucune plage enregistrée dans un rayon de ${radius}.`,
+    },
+    water: {
+      title: "Eau potable à proximité",
+      subtitle:
+        "Fontaines et robinets d'eau potable pour remplir la gourde – d'OpenStreetMap.",
+      unnamed: "Fontaine",
+      empty: (radius: string) =>
+        `Aucun point d'eau potable enregistré dans un rayon de ${radius}.`,
+    },
+    chargers: {
+      title: "Bornes de recharge à proximité",
+      subtitle:
+        "Points de recharge pour voitures électriques d'OpenStreetMap – exploitant et places, si renseignés.",
+      unnamed: "Borne de recharge",
+      empty: (radius: string) =>
+        `Aucune borne de recharge enregistrée dans un rayon de ${radius}.`,
+    },
+    defis: {
+      title: "Défibrillateurs à proximité",
+      subtitle:
+        "Défibrillateurs publics d'OpenStreetMap – l'indication de lieu dit où se trouve l'appareil. En cas d'urgence, appelle d'abord le 144.",
+      unnamed: "Défibrillateur",
+      empty: (radius: string) =>
+        `Aucun défibrillateur enregistré dans un rayon de ${radius}.`,
+    },
+  },
   winter: {
     title: "Gel et neige",
     frostLine: (nights: string) => `Gel en vue : ${nights}.`,

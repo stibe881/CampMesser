@@ -4607,6 +4607,47 @@ export const it: Translation = {
     sourceNote:
       "Regole di balneazione riassunte secondo la SSS (slrg.ch); bandiere secondo la prassi internazionale di salvataggio (ILS). Fa sempre fede la segnaletica in spiaggia.",
   },
+  poi: {
+    radiusLabel: "Raggio:",
+    radiusGroupAria: "Scegli il raggio di ricerca",
+    loading: "Ricerca in corso …",
+    loadFailed: "La ricerca non è riuscita. Riprova più tardi.",
+    navButton: "Percorso",
+    navAria: (title: string) => `Percorso verso ${title}`,
+    source: "Fonte: OpenStreetMap – completezza senza garanzia.",
+    beaches: {
+      title: "Spiagge nelle vicinanze",
+      subtitle:
+        "Spiagge naturali e stabilimenti balneari da OpenStreetMap – dove andare in acqua oggi.",
+      unnamed: "Spiaggia",
+      empty: (radius: string) =>
+        `Nessuna spiaggia registrata nel raggio di ${radius}.`,
+    },
+    water: {
+      title: "Acqua potabile nelle vicinanze",
+      subtitle:
+        "Fontane e rubinetti di acqua potabile per riempire la borraccia – da OpenStreetMap.",
+      unnamed: "Fontana",
+      empty: (radius: string) =>
+        `Nessun punto di acqua potabile registrato nel raggio di ${radius}.`,
+    },
+    chargers: {
+      title: "Colonnine di ricarica nelle vicinanze",
+      subtitle:
+        "Punti di ricarica per auto elettriche da OpenStreetMap – gestore e posti, se registrati.",
+      unnamed: "Colonnina di ricarica",
+      empty: (radius: string) =>
+        `Nessuna colonnina di ricarica registrata nel raggio di ${radius}.`,
+    },
+    defis: {
+      title: "Defibrillatori nelle vicinanze",
+      subtitle:
+        "Defibrillatori pubblici da OpenStreetMap – l'indicazione del luogo dice dove si trova l'apparecchio. In emergenza chiama prima il 144.",
+      unnamed: "Defibrillatore",
+      empty: (radius: string) =>
+        `Nessun defibrillatore registrato nel raggio di ${radius}.`,
+    },
+  },
   winter: {
     title: "Gelo e neve",
     frostLine: (nights: string) => `Gelo in vista: ${nights}.`,

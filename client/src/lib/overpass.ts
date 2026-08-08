@@ -1188,3 +1188,160 @@ export function nearestSights(
 ): SightDistance[] {
   return nearestPlaces(list, latitude, longitude, limit);
 }
+
+/* ------------------------------------------------------------------ */
+/* Einfache Punkt-Suchen: Strände, Trinkwasser, Ladesäulen, Defis      */
+/* (#487/#492/#493/#494)                                               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Vier Suchen, EIN Muster: Punkte einer Art rund um einen Ort, mit Name
+ * und allenfalls einer Detail-Zeile. Anders als Läden (#273) oder
+ * Sehenswürdigkeiten (#479) braucht keine davon eigene Arten-Symbole –
+ * darum teilen sie sich Abfragebau, Parser und (im Client) die
+ * generische Nähe-Karte.
+ */
+export const OVERPASS_POI_MAX_RESULTS = 30;
+
+export interface OsmPoi {
+  id: string;
+  lat: number;
+  lon: number;
+  name?: string;
+  /** Eine Detail-Zeile, je nach Suche (Betreiber, Standort-Hinweis …). */
+  detail?: string;
+}
+
+function poiQuery(
+  selectors: string[],
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  const filter = `(around:${Math.round(radiusM)},${lat.toFixed(5)},${lon.toFixed(5)})`;
+  return (
+    `[out:json][timeout:20];` +
+    `(` +
+    selectors.map(sel => `${sel}${filter};`).join("") +
+    `);` +
+    `out center ${OVERPASS_POI_MAX_RESULTS};`
+  );
+}
+
+function parsePois(
+  json: unknown,
+  detail: (tags: Record<string, unknown>) => string | undefined
+): OsmPoi[] {
+  const elements = readElements(json);
+  const seen = new Set<string>();
+  const result: OsmPoi[] = [];
+  for (let i = 0; i < elements.length; i++) {
+    if (result.length >= OVERPASS_POI_MAX_RESULTS) break;
+    const point = readPointElement(elements[i]);
+    if (!point || seen.has(point.key)) continue;
+    seen.add(point.key);
+    result.push({
+      id: point.key,
+      lat: point.lat,
+      lon: point.lon,
+      name: cleanTag(point.tags.name),
+      detail: detail(point.tags),
+    });
+  }
+  return result;
+}
+
+export interface PoiDistance {
+  place: OsmPoi;
+  distanceM: number;
+}
+
+export function nearestPois(
+  list: readonly OsmPoi[],
+  latitude: number,
+  longitude: number,
+  limit: number
+): PoiDistance[] {
+  return nearestPlaces(list, latitude, longitude, limit);
+}
+
+/** Strände (#487): natürliche Strände und eingerichtete Strandbäder. */
+export function beachesQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  return poiQuery(
+    ['nwr["natural"="beach"]', 'nwr["leisure"="beach_resort"]'],
+    lat,
+    lon,
+    radiusM
+  );
+}
+
+export function parseBeaches(json: unknown): OsmPoi[] {
+  // Strandbäder tragen ihre Art als Detail – ein Bad hat Infrastruktur,
+  // ein Naturstrand nicht; der Name fehlt bei Stränden oft und ist ok.
+  return parsePois(json, tags =>
+    cleanTag(tags.leisure) === "beach_resort" ? "resort" : undefined
+  );
+}
+
+/** Trinkwasser-Stellen (#492): Brunnen und Wasserhähne zum Auffüllen. */
+export function drinkingWaterQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  return poiQuery(
+    [
+      'node["amenity"="drinking_water"]',
+      'node["man_made"="water_tap"]["drinking_water"="yes"]',
+    ],
+    lat,
+    lon,
+    radiusM
+  );
+}
+
+export function parseDrinkingWater(json: unknown): OsmPoi[] {
+  return parsePois(json, () => undefined);
+}
+
+/** E-Ladesäulen (#493): Betreiber und Anzahl Plätze als Detail. */
+export function chargersQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  return poiQuery(['nwr["amenity"="charging_station"]'], lat, lon, radiusM);
+}
+
+export function parseChargers(json: unknown): OsmPoi[] {
+  return parsePois(json, tags => {
+    const parts: string[] = [];
+    const operator = cleanTag(tags.operator);
+    if (operator) parts.push(operator);
+    const capacity = cleanTag(tags.capacity);
+    if (capacity && /^\d{1,3}$/.test(capacity)) parts.push(`${capacity}×`);
+    return parts.length > 0 ? parts.join(" · ") : undefined;
+  });
+}
+
+/** Defibrillatoren (#494): der Standort-Hinweis ist hier das Wichtigste. */
+export function defibrillatorsQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  return poiQuery(['nwr["emergency"="defibrillator"]'], lat, lon, radiusM);
+}
+
+export function parseDefibrillators(json: unknown): OsmPoi[] {
+  return parsePois(json, tags => {
+    // Der Beschreibungs-Tag sagt, WO das Gerät hängt («Eingang Gemeindehaus»)
+    const location = cleanTag(tags["defibrillator:location"]);
+    if (location) return location;
+    return cleanTag(tags.description);
+  });
+}

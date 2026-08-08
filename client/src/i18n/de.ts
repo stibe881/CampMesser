@@ -4644,6 +4644,47 @@ export const de = {
     sourceNote:
       "Baderegeln sinngemäss nach SLRG (slrg.ch); Flaggen nach der Praxis der internationalen Rettungsdienste (ILS). Massgeblich ist immer die Beschilderung am Strand.",
   },
+  poi: {
+    radiusLabel: "Umkreis:",
+    radiusGroupAria: "Suchradius wählen",
+    loading: "Suche läuft …",
+    loadFailed: "Die Suche hat nicht geklappt. Später nochmals versuchen.",
+    navButton: "Route",
+    navAria: (title: string) => `Route zu ${title}`,
+    source: "Quelle: OpenStreetMap – Vollständigkeit ohne Gewähr.",
+    beaches: {
+      title: "Strände in der Nähe",
+      subtitle:
+        "Naturstrände und Strandbäder aus OpenStreetMap – wo es heute ans Wasser geht.",
+      unnamed: "Strand",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist kein Strand eingetragen.`,
+    },
+    water: {
+      title: "Trinkwasser in der Nähe",
+      subtitle:
+        "Brunnen und Trinkwasserhähne zum Auffüllen der Flasche – aus OpenStreetMap.",
+      unnamed: "Brunnen",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist keine Trinkwasser-Stelle eingetragen.`,
+    },
+    chargers: {
+      title: "Ladesäulen in der Nähe",
+      subtitle:
+        "Ladepunkte für E-Autos aus OpenStreetMap – Betreiber und Plätze, soweit eingetragen.",
+      unnamed: "Ladesäule",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist keine Ladesäule eingetragen.`,
+    },
+    defis: {
+      title: "Defibrillatoren in der Nähe",
+      subtitle:
+        "Öffentliche Defis aus OpenStreetMap – der Standort-Hinweis sagt, wo das Gerät hängt. Im Notfall zuerst 144 anrufen.",
+      unnamed: "Defibrillator",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist kein Defibrillator eingetragen.`,
+    },
+  },
   winter: {
     title: "Frost & Schnee",
     frostLine: (nights: string) => `Frost in Sicht: ${nights}.`,
