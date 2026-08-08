@@ -23,6 +23,84 @@ export type { ChangelogBlock };
 
 export const changelog: ChangelogBlock[] = [
   {
+    id: "2026-08-08.1",
+    date: "2026-08-08",
+    entries: [
+      l4(
+        "Aus CampMesser wird ReiseKompass. Die App kann längst mehr als Zelt-Camping – Hotelferien, Städtereisen, Strand, Wandern und Tagesausflüge. Der neue Name, das Kompass-Logo und die neue Adresse meinreisekompass.ch tragen dem Rechnung; die alte Adresse leitet weiter. Wichtig: Passkeys hängen an der Domain – nach dem Umzug einmal mit Passwort anmelden und den Passkey im Profil neu anlegen.",
+        "CampMesser devient ReiseKompass. L’app sait depuis longtemps faire plus que le camping sous tente – hôtel, city-trips, plage, randonnée et excursions. Le nouveau nom, le logo boussole et la nouvelle adresse meinreisekompass.ch en tiennent compte ; l’ancienne adresse redirige. Important : les passkeys sont liées au domaine – après le déménagement, connecte-toi une fois avec ton mot de passe et recrée la passkey dans le profil.",
+        "CampMesser diventa ReiseKompass. L’app da tempo sa fare più del campeggio in tenda – hotel, città, spiaggia, escursioni e gite. Il nuovo nome, il logo a bussola e il nuovo indirizzo meinreisekompass.ch ne tengono conto; il vecchio indirizzo reindirizza. Importante: le passkey sono legate al dominio – dopo il trasloco accedi una volta con la password e ricrea la passkey nel profilo.",
+        "CampMesser becomes ReiseKompass. The app has long done more than tent camping – hotel holidays, city trips, beach, hiking and day trips. The new name, the compass logo and the new address meinreisekompass.ch reflect that; the old address redirects. Important: passkeys are bound to the domain – after the move, sign in once with your password and recreate your passkey in the profile."
+      ),
+      l4(
+        "Die Heute-Ansicht zeigt jetzt, was zu deiner Reiseart passt: Strände bei Strandferien, Sehenswürdigkeiten bei Hotel- und Städtereisen, ÖV-Abfahrten und Ausflugsziele beim Tagesausflug – jeweils mit echter Distanz zu Fuss oder mit dem Auto.",
+        "La vue Aujourd’hui montre désormais ce qui correspond à ton type de voyage : plages en vacances balnéaires, curiosités en voyage à l’hôtel ou city-trip, départs des transports publics et buts d’excursion en sortie d’un jour – avec la vraie distance à pied ou en voiture.",
+        "La vista Oggi ora mostra ciò che si addice al tuo tipo di viaggio: spiagge nelle vacanze al mare, attrazioni in hotel o città, partenze dei mezzi pubblici e mete per le gite di un giorno – con la vera distanza a piedi o in auto.",
+        "The Today view now shows what fits your trip type: beaches on beach holidays, sights on hotel and city trips, public-transport departures and excursion ideas on day trips – each with the real distance on foot or by car."
+      ),
+      l4(
+        "Beim Platz findest du neu Trinkwasserstellen und E-Ladestationen in der Nähe, und die SOS-Seite zeigt die nächsten Defibrillatoren.",
+        "Près de ton emplacement, tu trouves désormais les points d’eau potable et les bornes de recharge, et la page SOS montre les défibrillateurs les plus proches.",
+        "Vicino alla piazzola ora trovi le fontanelle di acqua potabile e le colonnine di ricarica, e la pagina SOS mostra i defibrillatori più vicini.",
+        "Near your spot you now find drinking-water points and EV chargers, and the SOS page shows the nearest defibrillators."
+      ),
+      l4(
+        "Die Lawinen-Anzeige kennt neben der Schweiz jetzt auch Tirol, Südtirol und das Trentino.",
+        "L’affichage des avalanches couvre désormais, en plus de la Suisse, le Tyrol, le Haut-Adige et le Trentin.",
+        "L’indicazione valanghe ora copre, oltre alla Svizzera, Tirolo, Alto Adige e Trentino.",
+        "The avalanche display now covers Tyrol, South Tyrol and Trentino in addition to Switzerland."
+      ),
+      l4(
+        "Das Platz-Dossier zeigt die nächsten ÖV-Verbindungen von deinem Zuhause zum Platz.",
+        "Le dossier de l’emplacement montre les prochaines liaisons en transports publics depuis chez toi.",
+        "Il dossier della piazzola mostra i prossimi collegamenti con i mezzi pubblici da casa tua.",
+        "The spot dossier shows the next public-transport connections from your home to the spot."
+      ),
+      l4(
+        "Rezepte kannst du jetzt direkt von einer Webseite importieren: Link einfügen, Zutaten und Schritte kommen mit.",
+        "Tu peux désormais importer une recette directement depuis un site web : colle le lien, les ingrédients et les étapes suivent.",
+        "Ora puoi importare una ricetta direttamente da un sito web: incolla il link, ingredienti e passaggi arrivano da soli.",
+        "You can now import recipes straight from a website: paste the link and the ingredients and steps come along."
+      ),
+      l4(
+        "Dokumente nehmen jetzt auch PDFs an und bleiben offline verfügbar.",
+        "Les documents acceptent désormais aussi les PDF et restent disponibles hors ligne.",
+        "I documenti ora accettano anche i PDF e restano disponibili offline.",
+        "Documents now accept PDFs too and stay available offline."
+      ),
+      l4(
+        "Im Tankbuch kannst du das Fahrzeug festhalten, danach filtern und den Verbrauch als Kurve sehen.",
+        "Dans le carnet de carburant, tu peux noter le véhicule, filtrer et voir la consommation en courbe.",
+        "Nel libretto dei rifornimenti puoi indicare il veicolo, filtrare e vedere i consumi come curva.",
+        "In the fuel log you can record the vehicle, filter by it and see consumption as a chart."
+      ),
+      l4(
+        "Die Statistik zeigt neu deine besuchten Länder und den Wert deiner Ausrüstung.",
+        "Les statistiques montrent désormais les pays visités et la valeur de ton équipement.",
+        "Le statistiche ora mostrano i paesi visitati e il valore della tua attrezzatura.",
+        "Statistics now show the countries you visited and the value of your gear."
+      ),
+      l4(
+        "Im Profil gibt es eine Feedback-Funktion – dein Anliegen landet direkt beim Betreiber.",
+        "Le profil propose une fonction de retour – ton message arrive directement chez l’exploitant.",
+        "Nel profilo c’è una funzione di feedback: il tuo messaggio arriva direttamente al gestore.",
+        "The profile has a feedback function – your message goes straight to the operator."
+      ),
+      l4(
+        "Drei neue Wissensseiten: Grill & Garzeiten, Feuer-Ratgeber und Camping-Knigge.",
+        "Trois nouvelles pages de savoir : grillades et cuissons, guide du feu et savoir-vivre au camping.",
+        "Tre nuove pagine di sapere: griglia e cotture, guida al fuoco e galateo del campeggio.",
+        "Three new knowledge pages: grill and cooking times, fire guide and camping etiquette."
+      ),
+      l4(
+        "Ausserdem: Wanderungen nach Länge filtern, das Packlisten-Gewicht pro Person, und die Suche findet jetzt auch die Sprachhilfe.",
+        "Et aussi : filtrer les randonnées par longueur, le poids de la liste par personne, et la recherche trouve désormais l’aide linguistique.",
+        "E inoltre: filtrare le escursioni per lunghezza, il peso della lista per persona, e la ricerca ora trova anche il frasario.",
+        "Also: filter hikes by length, packing weight per person, and search now finds the phrasebook."
+      ),
+    ],
+  },
+  {
     id: "2026-08-06.1",
     date: "2026-08-06",
     entries: [
