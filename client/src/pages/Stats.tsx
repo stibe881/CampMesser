@@ -15,6 +15,7 @@ import {
   Trophy,
   Users,
   Wallet,
+  Globe2,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import QueryError from "@/components/QueryError";
@@ -26,6 +27,8 @@ import { computeTripStats, nightsPerYear } from "@shared/trips";
 import { trackYearRows } from "@shared/trackYears";
 import { tripKindRows } from "@shared/tripKindStats";
 import { tripKindLabel } from "@shared/tripKind";
+import { visitedCountryRows } from "@/lib/tripCountries";
+import { inventoryValue } from "@shared/inventoryValue";
 import { estimatedTotalRappen, spotCostComparison } from "@shared/spotCosts";
 import { EXPENSE_CATEGORY_LABELS } from "@shared/expenses";
 import { formatChf } from "@/lib/money";
@@ -163,6 +166,9 @@ export default function Stats() {
     staleTime: 60_000,
   });
   // Wander-Jahresbilanz (#450): aus den gespeicherten Tracks (#220)
+  const inventoryQuery = trpc.inventory.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
   const tracksQuery = trpc.tracks.list.useQuery(undefined, {
     enabled,
     staleTime: 60_000,
@@ -243,6 +249,18 @@ export default function Stats() {
   // Reisen nach Art (#467) – erst ab zwei Arten interessant: eine
   // Tabelle mit einer einzigen Zeile «Camping» sagt niemandem etwas.
   const kindRows = useMemo(() => tripKindRows(trips), [trips]);
+  /** Länder-Statistik (#510): Land aus Ort/Titel/Platzname geraten. */
+  const countryStats = useMemo(() => {
+    const spotNames = new Map(
+      (spotsQuery.data ?? []).map(spot => [spot.id, spot.name])
+    );
+    return visitedCountryRows(trips, spotNames);
+  }, [trips, spotsQuery.data]);
+  /** Inventar-Gesamtwert (#511) aus den erfassten Kaufpreisen. */
+  const inventoryWorth = useMemo(
+    () => inventoryValue(inventoryQuery.data ?? []),
+    [inventoryQuery.data]
+  );
 
   const sightings = useMemo(
     () => sightingsQuery.data ?? [],
@@ -607,6 +625,78 @@ export default function Stats() {
                 </li>
               ))}
             </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Länder-Statistik (#510): nur erkannte Länder – ein Ort wie
+          «Thun» nennt kein Land und wird ehrlich als «ohne Angabe»
+          gezählt statt geraten. */}
+      {countryStats.rows.length > 0 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <SectionHeader
+              icon={Globe2}
+              title={ts.countriesTitle}
+              href="/tagebuch"
+              linkLabel={ts.tripsLink}
+            />
+            <ul className="space-y-2">
+              {countryStats.rows.map(row => (
+                <li
+                  key={row.code}
+                  className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-border/60 pb-2 last:border-0 last:pb-0"
+                >
+                  <span className="text-sm font-semibold">
+                    {row.flag} {pick(row.name, lang)}
+                  </span>
+                  <span className="text-sm tabular-nums text-muted-foreground">
+                    {ts.kindStatsLine(row.trips, row.nights)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {countryStats.unassigned > 0 && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {ts.countriesUnassigned(countryStats.unassigned)}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Inventar-Gesamtwert (#511): Untergrenze aus den erfassten
+          Kaufpreisen – als Zahl fürs Versicherungs-Gespräch. */}
+      {inventoryWorth.totalRappen > 0 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <SectionHeader
+              icon={Wallet}
+              title={ts.inventoryValueTitle}
+              href="/inventar"
+              linkLabel={ts.inventoryLink}
+            />
+            <p className="font-serif text-2xl font-bold text-primary">
+              CHF {formatChf(inventoryWorth.totalRappen, lang)}
+            </p>
+            <ul className="mt-2 space-y-1">
+              {inventoryWorth.rows.slice(0, 6).map(row => (
+                <li
+                  key={row.category}
+                  className="flex items-baseline justify-between gap-3 text-sm"
+                >
+                  <span>{row.category}</span>
+                  <span className="tabular-nums text-muted-foreground">
+                    CHF {formatChf(row.rappen, lang)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {inventoryWorth.unvaluedCount > 0 && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {ts.inventoryValueHint(inventoryWorth.unvaluedCount)}
+              </p>
+            )}
           </CardContent>
         </Card>
       )}

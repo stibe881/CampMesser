@@ -6582,6 +6582,17 @@ export const de = {
     deleteAria: (km: number) => `Tankfüllung bei ${km} km löschen`,
   },
   stats: {
+    countriesTitle: "Besuchte Länder",
+    countriesUnassigned: (n: number) =>
+      n === 1
+        ? "1 Reise ohne erkennbares Land (Ort nennt keins)."
+        : `${n} Reisen ohne erkennbares Land (Ort nennt keins).`,
+    inventoryValueTitle: "Inventar-Wert",
+    inventoryLink: "Zum Inventar",
+    inventoryValueHint: (n: number) =>
+      n === 1
+        ? "Untergrenze – 1 Gegenstand ohne erfassten Preis."
+        : `Untergrenze – ${n} Gegenstände ohne erfassten Preis.`,
     expensesTitle: "Ausgaben über alle Reisen",
     expensesLink: "Zu den Reisen",
     expensesTotal: "Gesamt",

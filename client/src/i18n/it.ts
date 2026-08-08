@@ -6536,6 +6536,17 @@ export const it: Translation = {
     deleteAria: (km: number) => `Elimina il pieno a ${km} km`,
   },
   stats: {
+    countriesTitle: "Paesi visitati",
+    countriesUnassigned: (n: number) =>
+      n === 1
+        ? "1 viaggio senza paese riconoscibile (il luogo non ne indica)."
+        : `${n} viaggi senza paese riconoscibile (il luogo non ne indica).`,
+    inventoryValueTitle: "Valore dell'inventario",
+    inventoryLink: "All'inventario",
+    inventoryValueHint: (n: number) =>
+      n === 1
+        ? "Limite inferiore – 1 oggetto senza prezzo registrato."
+        : `Limite inferiore – ${n} oggetti senza prezzo registrato.`,
     expensesTitle: "Spese di tutti i viaggi",
     expensesLink: "Ai viaggi",
     expensesTotal: "Totale",

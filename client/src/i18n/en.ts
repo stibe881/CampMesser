@@ -6408,6 +6408,17 @@ export const en: Translation = {
     deleteAria: (km: number) => `Delete the fill-up at ${km} km`,
   },
   stats: {
+    countriesTitle: "Countries visited",
+    countriesUnassigned: (n: number) =>
+      n === 1
+        ? "1 trip without a recognisable country (the place names none)."
+        : `${n} trips without a recognisable country (the place names none).`,
+    inventoryValueTitle: "Inventory value",
+    inventoryLink: "To the inventory",
+    inventoryValueHint: (n: number) =>
+      n === 1
+        ? "Lower bound – 1 item without a recorded price."
+        : `Lower bound – ${n} items without a recorded price.`,
     expensesTitle: "Spending across all trips",
     expensesLink: "To the trips",
     expensesTotal: "Total",
