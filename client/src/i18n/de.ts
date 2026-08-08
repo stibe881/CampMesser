@@ -214,6 +214,7 @@ export const de = {
       nature: "Natur",
       care: "Pflege",
       clouds: "Wolken",
+      phrases: "Sprachhilfe",
       own: "Meine Inhalte",
     },
     recentTitle: "Zuletzt genutzt",

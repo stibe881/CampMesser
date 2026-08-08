@@ -211,6 +211,7 @@ export const fr: Translation = {
       nature: "Nature",
       care: "Entretien",
       clouds: "Nuages",
+      phrases: "Aide linguistique",
       own: "Mes contenus",
     },
     recentTitle: "Utilisés récemment",

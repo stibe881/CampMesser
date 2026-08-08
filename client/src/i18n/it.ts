@@ -204,6 +204,7 @@ export const it: Translation = {
       nature: "Natura",
       care: "Manutenzione",
       clouds: "Nuvole",
+      phrases: "Aiuto linguistico",
       own: "I miei contenuti",
     },
     recentTitle: "Usati di recente",

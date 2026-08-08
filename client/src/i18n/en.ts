@@ -203,6 +203,7 @@ export const en: Translation = {
       nature: "Nature",
       care: "Care",
       clouds: "Clouds",
+      phrases: "Phrasebook",
       own: "My content",
     },
     recentTitle: "Recently used",

@@ -20,6 +20,7 @@ import { tentCareGuides } from "@/data/tentCare";
 import { groupLabels, modules } from "@/data/modules";
 import { natureEntries } from "@/data/nature";
 import { recipes } from "@/data/recipes";
+import { phraseGroupLabels, phrases } from "@/data/phrases";
 import { RECIPE_METHOD_LABELS } from "@shared/customRecipes";
 import { l4, pick, type L4, type Language } from "@shared/i18n";
 import { normalizeText } from "@shared/textMatch";
@@ -146,6 +147,26 @@ export function buildIndex(lang: Language): IndexEntry[] {
       p(n.funFact),
       ...n.features.map(f => p(f)),
     ]);
+  }
+  // Sprachhilfe (#513): Gesucht wird in der eigenen Sprache («Steckdose»),
+  // aber auch mal nach dem fremden Wort («grazie») – darum stehen ALLE
+  // vier Sprachfassungen des Satzes im Suchtext.
+  for (const ph of phrases) {
+    add(
+      `phrase-${ph.id}`,
+      p(ph.text),
+      "phrases",
+      "/sprachhilfe",
+      p(phraseGroupLabels[ph.group]),
+      [
+        ph.text.de,
+        ph.text.fr,
+        ph.text.it,
+        ph.text.en,
+        p(phraseGroupLabels[ph.group]),
+        ph.note ? p(ph.note) : undefined,
+      ]
+    );
   }
   return entries;
 }
