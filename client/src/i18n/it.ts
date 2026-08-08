@@ -1324,6 +1324,9 @@ export const it: Translation = {
     photoLightRange: (from, to) => `${from}–${to}`,
   },
   level: {
+    tireFront: (bar: string) => `Pressione anteriore ${bar} bar`,
+    tireRear: (bar: string) => `posteriore ${bar} bar`,
+    serviceDue: (date: string) => `Tagliando previsto il ${date}`,
     title: "Livella a bolla",
     subtitle:
       "Livellare caravan, fornello o tavolo – appoggia il telefono in piano, display verso l'alto.",
@@ -1355,6 +1358,9 @@ export const it: Translation = {
       "«Azzera qui» compensa una custodia del telefono o un piano storti: appoggia il telefono su una superficie che sai essere piana e azzera lì. Per il caravan: appoggia il telefono sul pavimento o su un piano di lavoro all'interno e metti dei cunei sotto il lato basso finché la bolla è al centro.",
   },
   payload: {
+    tireFrontLabel: "Pressione pneumatici anteriore (bar)",
+    tireRearLabel: "Pressione pneumatici posteriore (bar)",
+    serviceDueLabel: "Prossimo tagliando",
     title: "Calcolatore del carico",
     subtitle:
       "Il tuo traino è sovraccarico? Limiti, carico e semaforo in un colpo d'occhio.",

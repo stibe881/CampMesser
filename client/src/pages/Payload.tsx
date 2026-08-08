@@ -29,6 +29,7 @@ import {
   defaultVehicleRole,
   findVehicle,
   kgToInput,
+  parseBarInput,
   newVehicleId,
   parseKgInput,
   sanitizeVehicles,
@@ -180,6 +181,9 @@ export default function PayloadPage() {
         towKg: null,
         noseKg: null,
         axleKg: null,
+        tireFrontBar: null,
+        tireRearBar: null,
+        serviceDue: null,
       },
     ]);
     setEditorOpen(true);
@@ -434,6 +438,79 @@ export default function PayloadPage() {
                       kgField(vehicle, "towKg", t.payload.towKgLabel)}
                     {kgField(vehicle, "noseKg", t.payload.noseKgLabel)}
                     {kgField(vehicle, "axleKg", t.payload.axleKgLabel)}
+                  </div>
+                )}
+                {/* Reifendruck & Service (#481): am Fahrzeug notiert, an der
+                    Tankstelle nachgeschlagen – ein Zettel weniger */}
+                {vehicle.role !== "none" && (
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div>
+                      <Label
+                        htmlFor={`veh-${vehicle.id}-tirefront`}
+                        className="text-xs text-muted-foreground"
+                      >
+                        {t.payload.tireFrontLabel}
+                      </Label>
+                      <Input
+                        id={`veh-${vehicle.id}-tirefront`}
+                        inputMode="decimal"
+                        placeholder="2.5"
+                        className="mt-1 h-9"
+                        defaultValue={
+                          vehicle.tireFrontBar === null
+                            ? ""
+                            : kgToInput(vehicle.tireFrontBar, lang)
+                        }
+                        onBlur={event =>
+                          patchVehicle(vehicle.id, {
+                            tireFrontBar: parseBarInput(event.target.value),
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label
+                        htmlFor={`veh-${vehicle.id}-tirerear`}
+                        className="text-xs text-muted-foreground"
+                      >
+                        {t.payload.tireRearLabel}
+                      </Label>
+                      <Input
+                        id={`veh-${vehicle.id}-tirerear`}
+                        inputMode="decimal"
+                        placeholder="3.0"
+                        className="mt-1 h-9"
+                        defaultValue={
+                          vehicle.tireRearBar === null
+                            ? ""
+                            : kgToInput(vehicle.tireRearBar, lang)
+                        }
+                        onBlur={event =>
+                          patchVehicle(vehicle.id, {
+                            tireRearBar: parseBarInput(event.target.value),
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label
+                        htmlFor={`veh-${vehicle.id}-service`}
+                        className="text-xs text-muted-foreground"
+                      >
+                        {t.payload.serviceDueLabel}
+                      </Label>
+                      <Input
+                        id={`veh-${vehicle.id}-service`}
+                        type="date"
+                        className="mt-1 h-9"
+                        value={vehicle.serviceDue ?? ""}
+                        onChange={event =>
+                          patchVehicle(vehicle.id, {
+                            serviceDue: event.target.value || null,
+                          })
+                        }
+                      />
+                    </div>
                   </div>
                 )}
               </div>

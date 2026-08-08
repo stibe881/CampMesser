@@ -1344,6 +1344,9 @@ export const de = {
     photoLightRange: (from: string, to: string) => `${from}–${to} Uhr`,
   },
   level: {
+    tireFront: (bar: string) => `Reifendruck vorne ${bar} bar`,
+    tireRear: (bar: string) => `hinten ${bar} bar`,
+    serviceDue: (date: string) => `Service fällig am ${date}`,
     title: "Wasserwaage",
     subtitle:
       "Wohnwagen, Kocher oder Tisch ausrichten – Handy flach auflegen, Display nach oben.",
@@ -1375,6 +1378,9 @@ export const de = {
       "«Hier nullen» gleicht eine schiefe Handy-Hülle oder Tischplatte aus: Lege das Handy auf eine Fläche, von der du weisst, dass sie eben ist, und nulle dort. Für den Wohnwagen: Handy auf den Boden oder eine Arbeitsfläche im Innern legen und die tiefe Seite mit Keilen unterlegen, bis die Blase in der Mitte ist.",
   },
   payload: {
+    tireFrontLabel: "Reifendruck vorne (bar)",
+    tireRearLabel: "Reifendruck hinten (bar)",
+    serviceDueLabel: "Nächster Service",
     title: "Zuladungs-Rechner",
     subtitle:
       "Ist dein Gespann überladen? Grenzwerte, Ladung und Ampel auf einen Blick.",

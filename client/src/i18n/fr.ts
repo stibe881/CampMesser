@@ -1345,6 +1345,9 @@ export const fr: Translation = {
     photoLightRange: (from, to) => `${from}–${to}`,
   },
   level: {
+    tireFront: (bar: string) => `Pression avant ${bar} bar`,
+    tireRear: (bar: string) => `arrière ${bar} bar`,
+    serviceDue: (date: string) => `Service prévu le ${date}`,
     title: "Niveau à bulle",
     subtitle:
       "Mettre à niveau caravane, réchaud ou table – pose le téléphone à plat, écran vers le haut.",
@@ -1376,6 +1379,9 @@ export const fr: Translation = {
       "« Mettre à zéro ici » compense une coque de téléphone ou une table de travers : pose le téléphone sur une surface dont tu sais qu'elle est plane et mets à zéro là. Pour la caravane : pose le téléphone sur le sol ou un plan de travail à l'intérieur et cale le côté bas avec des cales jusqu'à ce que la bulle soit au centre.",
   },
   payload: {
+    tireFrontLabel: "Pression des pneus avant (bar)",
+    tireRearLabel: "Pression des pneus arrière (bar)",
+    serviceDueLabel: "Prochain service",
     title: "Calculateur de charge utile",
     subtitle:
       "Ton attelage est-il surchargé ? Limites, chargement et feu tricolore en un coup d'œil.",

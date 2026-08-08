@@ -1296,6 +1296,9 @@ export const en: Translation = {
     photoLightRange: (from, to) => `${from}–${to}`,
   },
   level: {
+    tireFront: (bar: string) => `Tyre pressure front ${bar} bar`,
+    tireRear: (bar: string) => `rear ${bar} bar`,
+    serviceDue: (date: string) => `Service due on ${date}`,
     title: "Spirit level",
     subtitle:
       "Level your caravan, stove or table – lay the phone down flat, display facing up.",
@@ -1326,6 +1329,9 @@ export const en: Translation = {
       "“Zero here” compensates for a crooked phone case or table top: place the phone on a surface you know is level and zero it there. For the caravan: place the phone on the floor or a worktop inside and shim the low side with wedges until the bubble is in the centre.",
   },
   payload: {
+    tireFrontLabel: "Tyre pressure front (bar)",
+    tireRearLabel: "Tyre pressure rear (bar)",
+    serviceDueLabel: "Next service",
     title: "Payload calculator",
     subtitle:
       "Is your rig overloaded? Limits, load and traffic light at a glance.",
