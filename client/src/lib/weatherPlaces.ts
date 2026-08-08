@@ -94,3 +94,44 @@ export function removeWeatherPlace(
 ): WeatherPlace[] {
   return places.filter(p => !isSameWeatherPlace(p, doomed));
 }
+
+/** Gespeicherte Wetter-Orte laden (defensiv – kaputte Daten werden bereinigt). */
+export function loadStoredWeatherPlaces(): WeatherPlace[] {
+  try {
+    const raw = localStorage.getItem(WEATHER_PLACES_KEY);
+    return raw ? sanitizeWeatherPlaces(JSON.parse(raw)) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function storeWeatherPlaces(places: WeatherPlace[]) {
+  try {
+    localStorage.setItem(WEATHER_PLACES_KEY, JSON.stringify(places));
+  } catch {
+    // Speicher voll/blockiert – die Chips leben dann nur diese Sitzung
+  }
+}
+
+/** Zuletzt gewählten Wetter-Ort laden – null = eigener Standort. */
+export function loadLastWeatherPlace(): WeatherPlace | null {
+  try {
+    const raw = localStorage.getItem(LAST_WEATHER_PLACE_KEY);
+    return raw ? sanitizeWeatherPlace(JSON.parse(raw)) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Zuletzt gewählten Wetter-Ort merken bzw. (null) wieder vergessen. */
+export function storeLastWeatherPlace(place: WeatherPlace | null) {
+  try {
+    if (place) {
+      localStorage.setItem(LAST_WEATHER_PLACE_KEY, JSON.stringify(place));
+    } else {
+      localStorage.removeItem(LAST_WEATHER_PLACE_KEY);
+    }
+  } catch {
+    // Speicher blockiert – dann startet die Seite eben mit dem Standort
+  }
+}
