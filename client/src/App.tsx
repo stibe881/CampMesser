@@ -38,6 +38,7 @@ const pageLoaders = {
   StoryDice: () => import("./pages/StoryDice"),
   Songbook: () => import("./pages/Songbook"),
   Chores: () => import("./pages/Chores"),
+  ChoresPrint: () => import("./pages/ChoresPrint"),
   Thunder: () => import("./pages/Thunder"),
   Phrasebook: () => import("./pages/Phrasebook"),
   Recipes: () => import("./pages/Recipes"),
@@ -143,6 +144,7 @@ const GearRepairPage = lazyWithRetry(pageLoaders.GearRepair);
 const StoryDicePage = lazyWithRetry(pageLoaders.StoryDice);
 const SongbookPage = lazyWithRetry(pageLoaders.Songbook);
 const ChoresPage = lazyWithRetry(pageLoaders.Chores);
+const ChoresPrintPage = lazyWithRetry(pageLoaders.ChoresPrint);
 const ThunderPage = lazyWithRetry(pageLoaders.Thunder);
 const PhrasebookPage = lazyWithRetry(pageLoaders.Phrasebook);
 const RecipesPage = lazyWithRetry(pageLoaders.Recipes);
@@ -248,6 +250,8 @@ function Router() {
           </Route>
           <Route path={"/erzaehlwuerfel"} component={StoryDicePage} />
           <Route path={"/liederbuch"} component={SongbookPage} />
+          {/* Druckroute VOR der Basis-Route (#430) */}
+          <Route path={"/aemtli/drucken"} component={ChoresPrintPage} />
           <Route path={"/aemtli"} component={ChoresPage} />
           <Route path={"/gewitter"} component={ThunderPage} />
           <Route path={"/sprachhilfe"} component={PhrasebookPage} />

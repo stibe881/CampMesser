@@ -4410,6 +4410,15 @@ export const de = {
     noteTitle: "Notizen",
     planTitle: "Platzplan",
   },
+  choresPrint: {
+    kicker: "Familien-Modus",
+    title: "Ämtli-Wochenplan",
+    docTitle: "Ämtli-Wochenplan",
+    openButton: "Wochenplan drucken",
+    choreColumn: "Ämtli",
+    empty: "Noch keine Ämtli oder Personen erfasst.",
+    note: "Die Zuteilung folgt derselben Rotation wie in der App – nachrechenbar, ohne Zufall. Abgehakt wird auf Papier.",
+  },
   winter: {
     title: "Frost & Schnee",
     frostLine: (nights: string) => `Frost in Sicht: ${nights}.`,

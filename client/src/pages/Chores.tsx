@@ -17,8 +17,10 @@ import {
   Trash2,
   Trophy,
   Users,
+  Printer,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "wouter";
 import PageHeader from "@/components/PageHeader";
 import RewardGoals from "@/components/family/RewardGoals";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -301,6 +303,17 @@ export default function ChoresPage() {
           {tc.distribute}
         </Button>
       </div>
+
+      {/* Wochenplan drucken (#430): der Plan hängt am besten am
+          Kühlschrank im Vorzelt. */}
+      {chores.length > 0 && children.length > 0 && (
+        <Button asChild variant="outline" size="sm" className="mb-4">
+          <Link href="/aemtli/drucken">
+            <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.choresPrint.openButton}
+          </Link>
+        </Button>
+      )}
 
       {dayAssignments.length > 0 && (
         <div className="mb-4">

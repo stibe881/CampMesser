@@ -4283,6 +4283,15 @@ export const en: Translation = {
     noteTitle: "Notes",
     planTitle: "Site map",
   },
+  choresPrint: {
+    kicker: "Family mode",
+    title: "Weekly chore plan",
+    docTitle: "Weekly chore plan",
+    openButton: "Print weekly plan",
+    choreColumn: "Chore",
+    empty: "No chores or people set up yet.",
+    note: "Assignments follow the same rotation as in the app – predictable, no randomness. Tick the boxes on paper.",
+  },
   winter: {
     title: "Frost & snow",
     frostLine: (nights: string) => `Frost expected: ${nights}.`,

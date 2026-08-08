@@ -4374,6 +4374,15 @@ export const it: Translation = {
     noteTitle: "Note",
     planTitle: "Piantina del campeggio",
   },
+  choresPrint: {
+    kicker: "Modalità famiglia",
+    title: "Piano settimanale dei compiti",
+    docTitle: "Piano dei compiti",
+    openButton: "Stampa il piano",
+    choreColumn: "Compito",
+    empty: "Nessun compito o persona registrata.",
+    note: "L'assegnazione segue la stessa rotazione dell'app – prevedibile, senza caso. Si spunta su carta.",
+  },
   winter: {
     title: "Gelo e neve",
     frostLine: (nights: string) => `Gelo in vista: ${nights}.`,

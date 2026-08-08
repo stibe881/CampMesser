@@ -4402,6 +4402,15 @@ export const fr: Translation = {
     noteTitle: "Notes",
     planTitle: "Plan du camping",
   },
+  choresPrint: {
+    kicker: "Mode famille",
+    title: "Plan des corvées de la semaine",
+    docTitle: "Plan des corvées",
+    openButton: "Imprimer le plan",
+    choreColumn: "Corvée",
+    empty: "Aucune corvée ou personne enregistrée.",
+    note: "La répartition suit la même rotation que dans l'app – prévisible, sans hasard. On coche sur papier.",
+  },
   winter: {
     title: "Gel et neige",
     frostLine: (nights: string) => `Gel en vue : ${nights}.`,
