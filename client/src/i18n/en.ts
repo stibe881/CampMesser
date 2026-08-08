@@ -2501,6 +2501,11 @@ export const en: Translation = {
     kindLabel: "Trip type",
     kindHint:
       "Controls what the Today view highlights during the trip – every module stays available.",
+    locationSearchButton: "Find place",
+    locationSearchFailed: "Place search unavailable",
+    locationSearchNoResults: "No place found – try another spelling?",
+    locationCoordsSet: "Coordinates set",
+    locationCoordsClearAria: "Remove coordinates",
     dayLabel: "Date",
     arrivalLabel: "Arrival",
     departureLabel: "Departure",

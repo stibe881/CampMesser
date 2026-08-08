@@ -131,6 +131,9 @@ export const tripsRouters = {
             spotId: z.number().int().positive().nullish(),
             packListId: z.number().int().positive().nullish(),
             location: z.string().max(140).nullish(),
+            // Koordinaten des Freitext-Orts aus der Ortssuche (#465)
+            latitude: z.number().min(-90).max(90).nullish(),
+            longitude: z.number().min(-180).max(180).nullish(),
             // Reise-Art (#460); fehlt sie (alte Clients), gilt Camping
             kind: z.enum(TRIP_KINDS).optional(),
             title: z.string().max(140).nullish(),
@@ -178,11 +181,15 @@ export const tripsRouters = {
             });
           }
         }
+        // Koordinaten nur als Paar – eine halbe Position ist keine (#465)
+        const hasCoords = input.latitude != null && input.longitude != null;
         const id = await db.addTripLog({
           userId: ctx.user.id,
           spotId: input.spotId ?? null,
           packListId: input.packListId ?? null,
           location: input.location?.trim() || null,
+          latitude: hasCoords ? input.latitude : null,
+          longitude: hasCoords ? input.longitude : null,
           kind: normalizeTripKind(input.kind),
           title: input.title?.trim() || null,
           notes: input.notes?.trim() || null,
@@ -316,6 +323,10 @@ export const tripsRouters = {
             spotId: z.number().int().positive().nullish(),
             packListId: z.number().int().positive().nullish(),
             location: z.string().max(140).nullish(),
+            // Koordinaten des Freitext-Orts aus der Ortssuche (#465);
+            // undefined = unangetastet lassen (alte Clients)
+            latitude: z.number().min(-90).max(90).nullish(),
+            longitude: z.number().min(-180).max(180).nullish(),
             // Reise-Art (#460); fehlt sie (alte Clients), bleibt sie stehen
             kind: z.enum(TRIP_KINDS).optional(),
             title: z.string().max(140).nullish(),
@@ -398,10 +409,20 @@ export const tripsRouters = {
           trip.endDate !== input.endDate ||
           trip.spotId !== spotId ||
           trip.location !== location;
+        // Koordinaten nur als Paar (#465); undefined = unangetastet
+        const coordsGiven =
+          input.latitude !== undefined || input.longitude !== undefined;
+        const hasCoords = input.latitude != null && input.longitude != null;
         await db.updateTripLog(input.id, trip.userId, {
           spotId,
           packListId: input.packListId ?? null,
           location,
+          ...(coordsGiven
+            ? {
+                latitude: hasCoords ? input.latitude : null,
+                longitude: hasCoords ? input.longitude : null,
+              }
+            : {}),
           // Ohne Angabe bleibt die gespeicherte Art unangetastet
           ...(input.kind !== undefined
             ? { kind: normalizeTripKind(input.kind) }
@@ -485,7 +506,9 @@ export const tripsRouters = {
           spotId: isOwner ? trip.spotId : null,
           packListId: isOwner ? trip.packListId : null,
           location,
-          // Die Kopie ist dieselbe Art von Reise (#460)
+          // Ort samt Koordinaten (#465) und Art (#460) wandern mit
+          latitude: trip.latitude,
+          longitude: trip.longitude,
           kind: normalizeTripKind(trip.kind),
           title: trip.title,
           notes: null,

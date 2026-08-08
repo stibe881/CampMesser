@@ -2588,6 +2588,11 @@ export const de = {
     kindLabel: "Art der Reise",
     kindHint:
       "Steuert, was die Heute-Ansicht während der Reise hervorhebt – alle Module bleiben trotzdem erreichbar.",
+    locationSearchButton: "Ort suchen",
+    locationSearchFailed: "Ortssuche nicht erreichbar",
+    locationSearchNoResults: "Kein Ort gefunden – anders schreiben?",
+    locationCoordsSet: "Koordinaten übernommen",
+    locationCoordsClearAria: "Koordinaten entfernen",
     dayLabel: "Datum",
     arrivalLabel: "Anreise",
     departureLabel: "Abreise",

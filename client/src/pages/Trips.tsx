@@ -72,6 +72,7 @@ import {
   Share2,
   ShoppingBasket,
   Refrigerator,
+  Search,
   Signpost,
   Star,
   Tent,
@@ -80,7 +81,9 @@ import {
   Users,
   UtensilsCrossed,
   Wallet,
+  X,
 } from "lucide-react";
+import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
 import { Link, useRoute, useSearch } from "wouter";
 import { toast } from "sonner";
 import QRCode from "qrcode";
@@ -527,6 +530,18 @@ export default function TripsPage() {
   const [formRating, setFormRating] = useState<number | null>(null);
   /** Reise-Art (#460) – Camping ist der Normalfall dieser App. */
   const [formKind, setFormKind] = useState<TripKind>("camping");
+  /**
+   * Koordinaten des Freitext-Orts aus der Ortssuche (#465); null = keine
+   * bestimmt. Wer den Ortstext von Hand ändert, verliert sie wieder – die
+   * Koordinaten gehören zum GEWÄHLTEN Ort, nicht zum getippten Text.
+   */
+  const [formCoords, setFormCoords] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  /** Treffer der Ortssuche; null = (noch) nicht gesucht. */
+  const [placeResults, setPlaceResults] = useState<PlaceResult[] | null>(null);
+  const [placeSearching, setPlaceSearching] = useState(false);
   /** Eintrag, der gerade im Formular bearbeitet wird (null = neuer Eintrag). */
   const [editingId, setEditingId] = useState<number | null>(null);
   /** Erfassungs-Dialog «Neue Reise» / «Reise bearbeiten» offen? */
@@ -552,6 +567,8 @@ export default function TripsPage() {
     });
     setFormRating(null);
     setFormKind("camping");
+    setFormCoords(null);
+    setPlaceResults(null);
   };
 
   /** Dialog im Neu-Modus öffnen (Formular frisch). */
@@ -855,7 +872,34 @@ export default function TripsPage() {
     });
     setFormRating(trip.rating ?? null);
     setFormKind(normalizeTripKind(trip.kind));
+    setFormCoords(
+      trip.latitude != null && trip.longitude != null
+        ? { lat: trip.latitude, lng: trip.longitude }
+        : null
+    );
+    setPlaceResults(null);
     setFormOpen(true);
+  };
+
+  /** Ortssuche (#465): Treffer zur getippten Eingabe holen. */
+  const runPlaceSearch = async () => {
+    const query = form.location.trim();
+    if (!query) return;
+    setPlaceSearching(true);
+    try {
+      setPlaceResults(await searchPlaces(query, lang));
+    } catch {
+      toast.error(t.trips.locationSearchFailed);
+    } finally {
+      setPlaceSearching(false);
+    }
+  };
+
+  /** Treffer übernehmen: Name wird zum Ort, Koordinaten bleiben daran. */
+  const pickPlace = (place: PlaceResult) => {
+    setForm(f => ({ ...f, location: place.name }));
+    setFormCoords({ lat: place.latitude, lng: place.longitude });
+    setPlaceResults(null);
   };
 
   const pastTripLikes = useMemo(
@@ -1108,6 +1152,8 @@ export default function TripsPage() {
                     editingTrip.spotId === null
                       ? form.location.trim()
                       : editingTrip.location,
+                  latitude: formCoords?.lat ?? null,
+                  longitude: formCoords?.lng ?? null,
                   kind: formKind,
                   title: form.title.trim() || null,
                   notes: form.notes.trim() || null,
@@ -1137,6 +1183,8 @@ export default function TripsPage() {
                 packListId:
                   packListChoice === "keine" ? null : Number(packListChoice),
                 location: spotId === null ? form.location.trim() : null,
+                latitude: spotId === null ? (formCoords?.lat ?? null) : null,
+                longitude: spotId === null ? (formCoords?.lng ?? null) : null,
                 kind: formKind,
                 title: form.title.trim() || null,
                 notes: form.notes.trim() || null,
@@ -1194,10 +1242,67 @@ export default function TripsPage() {
                     className="mt-1.5"
                     placeholder={t.trips.locationPlaceholder}
                     value={form.location}
-                    onChange={e =>
-                      setForm(f => ({ ...f, location: e.target.value }))
-                    }
+                    onChange={e => {
+                      // Von Hand geändert → die Koordinaten des vorher
+                      // gewählten Orts gelten nicht mehr (#465)
+                      setFormCoords(null);
+                      setForm(f => ({ ...f, location: e.target.value }));
+                    }}
                   />
+                  {/* Ortssuche (#465): macht aus dem Freitext einen Ort
+                      MIT Koordinaten – damit Hotel-, Strand- und
+                      Städtereisen Wetter und Heute-Ansicht bekommen. */}
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={!form.location.trim() || placeSearching}
+                      onClick={() => void runPlaceSearch()}
+                    >
+                      <Search
+                        className="mr-1.5 h-3.5 w-3.5"
+                        aria-hidden="true"
+                      />
+                      {t.trips.locationSearchButton}
+                    </Button>
+                    {formCoords && (
+                      <span className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-accent-foreground">
+                        <MapPin className="h-3 w-3" aria-hidden="true" />
+                        {t.trips.locationCoordsSet}
+                        <button
+                          type="button"
+                          onClick={() => setFormCoords(null)}
+                          aria-label={t.trips.locationCoordsClearAria}
+                          className="ml-0.5 text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="h-3 w-3" aria-hidden="true" />
+                        </button>
+                      </span>
+                    )}
+                  </div>
+                  {placeResults !== null &&
+                    (placeResults.length === 0 ? (
+                      <p className="mt-1.5 text-xs text-muted-foreground">
+                        {t.trips.locationSearchNoResults}
+                      </p>
+                    ) : (
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {placeResults.map(place => (
+                          <button
+                            key={place.id}
+                            type="button"
+                            onClick={() => pickPlace(place)}
+                            className="rounded-full bg-muted px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                          >
+                            {place.name}
+                            {place.region && (
+                              <span className="text-xs"> · {place.region}</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
                 </div>
               )}
               {!editingShared && (

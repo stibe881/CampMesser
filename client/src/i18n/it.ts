@@ -2556,6 +2556,11 @@ export const it: Translation = {
     kindLabel: "Tipo di viaggio",
     kindHint:
       "Determina cosa mette in evidenza la vista Oggi durante il viaggio – tutti i moduli restano accessibili.",
+    locationSearchButton: "Cerca località",
+    locationSearchFailed: "Ricerca località non disponibile",
+    locationSearchNoResults: "Nessuna località trovata – altra grafia?",
+    locationCoordsSet: "Coordinate acquisite",
+    locationCoordsClearAria: "Rimuovi le coordinate",
     dayLabel: "Data",
     arrivalLabel: "Arrivo",
     departureLabel: "Partenza",

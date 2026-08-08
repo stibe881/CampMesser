@@ -38,8 +38,10 @@ export default function BriefingWidget() {
   return (
     <MorningBriefing
       tripId={current.id}
-      latitude={spot?.latitude ?? null}
-      longitude={spot?.longitude ?? null}
+      // Ohne Zeltplatz zählen die Reise-Koordinaten aus der Ortssuche
+      // (#465) – Hotel- und Strandreisen bekommen so ihr Briefing-Wetter
+      latitude={spot?.latitude ?? current.latitude ?? null}
+      longitude={spot?.longitude ?? current.longitude ?? null}
       today={today}
     />
   );

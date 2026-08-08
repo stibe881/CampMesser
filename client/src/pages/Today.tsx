@@ -117,7 +117,14 @@ export default function TodayPage() {
     trip?.spotId != null
       ? (spotsQuery.data ?? []).find(s => s.id === trip.spotId)
       : undefined;
-  const weather = useDayWeather(spot?.latitude, spot?.longitude, lang);
+  // Koordinaten: Zeltplatz zuerst, sonst die der Reise aus der Ortssuche
+  // (#465) – damit haben auch Hotel- und Strandreisen Wetter und Wasser.
+  const coords = spot
+    ? { latitude: spot.latitude, longitude: spot.longitude }
+    : trip?.latitude != null && trip?.longitude != null
+      ? { latitude: trip.latitude, longitude: trip.longitude }
+      : null;
+  const weather = useDayWeather(coords?.latitude, coords?.longitude, lang);
 
   const choresQuery = trpc.chores.assignments.useQuery(
     { day: today },
@@ -347,10 +354,10 @@ export default function TodayPage() {
                 sie weg – ein Urteil ohne Quellen wäre ein Orakel. Bei
                 Hotel-, Strand- oder Städte-Reisen (#460) stellt sie
                 niemand, dann fehlt sie ebenfalls. */}
-            {preset.campfire && spot && weather && (
+            {preset.campfire && coords && weather && (
               <CampfireLight
-                latitude={spot.latitude}
-                longitude={spot.longitude}
+                latitude={coords.latitude}
+                longitude={coords.longitude}
                 gustsMaxKmh={weather.gustsMaxKmh}
                 className="mt-2"
               />
@@ -398,12 +405,12 @@ export default function TodayPage() {
               des Tages – Temperatur, Wellen und Gezeiten stehen darum
               gleich unter der Kopfzeile statt nur im Platz-Dossier.
               Ohne Platz-Koordinaten bleibt die Karte weg. */}
-          {preset.bathing && spot && (
+          {preset.bathing && coords && (
             <LazySection minHeight={160}>
               <div className="mt-4">
                 <BathingWaterCard
-                  latitude={spot.latitude}
-                  longitude={spot.longitude}
+                  latitude={coords.latitude}
+                  longitude={coords.longitude}
                 />
               </div>
             </LazySection>

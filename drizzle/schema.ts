@@ -472,6 +472,14 @@ export const tripLogs = mysqlTable(
     /** Freitext-Ort, falls kein Favorit verknüpft ist */
     location: varchar("location", { length: 140 }),
     /**
+     * Koordinaten des Freitext-Orts (#465, via Ortssuche im Formular).
+     * Reisen ohne Zeltplatz (Hotel, Strand, Städte …) bekommen damit
+     * Wetter, Briefing und Badewasser; null = nicht bestimmt. Bei
+     * verknüpftem Zeltplatz gelten weiterhin DESSEN Koordinaten.
+     */
+    latitude: double("latitude"),
+    longitude: double("longitude"),
+    /**
      * Reise-Art (#460, shared/tripKind.ts): camping, strand, hotel,
      * staedte, wandern, velo, wintersport oder tagesausflug. Steuert,
      * was die Heute-Ansicht in den Vordergrund stellt; Zeilen von vor
