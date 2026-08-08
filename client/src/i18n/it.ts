@@ -4527,6 +4527,11 @@ export const it: Translation = {
     empty: "Nessun compito o persona registrata.",
     note: "L'assegnazione segue la stessa rotazione dell'app – prevedibile, senza caso. Si spunta su carta.",
   },
+  avalanche: {
+    line: (level: number, label: string) =>
+      `Pericolo di valanghe: grado ${level} (${label})`,
+    note: "Fonte: bollettino valanghe SLF – solo Svizzera, senza garanzia.",
+  },
   winter: {
     title: "Gelo e neve",
     frostLine: (nights: string) => `Gelo in vista: ${nights}.`,

@@ -4566,6 +4566,11 @@ export const de = {
     empty: "Noch keine Ämtli oder Personen erfasst.",
     note: "Die Zuteilung folgt derselben Rotation wie in der App – nachrechenbar, ohne Zufall. Abgehakt wird auf Papier.",
   },
+  avalanche: {
+    line: (level: number, label: string) =>
+      `Lawinengefahr: Stufe ${level} (${label})`,
+    note: "Quelle: SLF-Lawinenbulletin – gilt nur für die Schweiz, ohne Gewähr.",
+  },
   winter: {
     title: "Frost & Schnee",
     frostLine: (nights: string) => `Frost in Sicht: ${nights}.`,

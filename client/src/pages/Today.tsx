@@ -72,6 +72,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useTodayIso } from "@/lib/useTodayIso";
+import AvalancheDanger from "@/components/AvalancheDanger";
 import CampfireLight from "@/components/CampfireLight";
 import LazySection from "@/components/LazySection";
 import BathingWaterCard from "@/components/spots/BathingWaterCard";
@@ -361,6 +362,15 @@ export default function TodayPage() {
                 />
                 {td.snowDepthLine(weather.snowDepthCm)}
               </p>
+            )}
+            {/* SLF-Lawinen-Warnstufe (#471): nur bei Wintersport und nur
+                in der Schweiz – das Bulletin deckt nichts anderes ab. */}
+            {preset.winter && coords && (
+              <AvalancheDanger
+                latitude={coords.latitude}
+                longitude={coords.longitude}
+                className="mt-1.5"
+              />
             )}
             {/* Lagerfeuer-Ampel (#389): Die Frage stellt sich am Abend
                 genau hier. Ohne Platz-Koordinaten oder Prognose bleibt

@@ -4436,6 +4436,11 @@ export const en: Translation = {
     empty: "No chores or people set up yet.",
     note: "Assignments follow the same rotation as in the app – predictable, no randomness. Tick the boxes on paper.",
   },
+  avalanche: {
+    line: (level: number, label: string) =>
+      `Avalanche danger: level ${level} (${label})`,
+    note: "Source: SLF avalanche bulletin – Switzerland only, no guarantee.",
+  },
   winter: {
     title: "Frost & snow",
     frostLine: (nights: string) => `Frost expected: ${nights}.`,

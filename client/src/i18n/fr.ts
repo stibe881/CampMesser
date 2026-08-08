@@ -4555,6 +4555,11 @@ export const fr: Translation = {
     empty: "Aucune corvée ou personne enregistrée.",
     note: "La répartition suit la même rotation que dans l'app – prévisible, sans hasard. On coche sur papier.",
   },
+  avalanche: {
+    line: (level: number, label: string) =>
+      `Danger d'avalanche : degré ${level} (${label})`,
+    note: "Source : bulletin d'avalanches du SLF – Suisse uniquement, sans garantie.",
+  },
   winter: {
     title: "Gel et neige",
     frostLine: (nights: string) => `Gel en vue : ${nights}.`,
