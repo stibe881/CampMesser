@@ -3690,6 +3690,11 @@ export const en: Translation = {
     },
   },
   nearbyHikes: {
+    lengthFilterAria: "Filter by route length",
+    lengthAll: "All lengths",
+    lengthShort: "up to 5 km",
+    lengthMedium: "5–15 km",
+    lengthLong: "over 15 km",
     sectionAria: "Waymarked hiking routes in the area",
     title: "Hiking in the area",
     subtitle: "Waymarked hiking routes around your location.",

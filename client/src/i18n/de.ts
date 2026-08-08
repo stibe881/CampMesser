@@ -3813,6 +3813,11 @@ export const de = {
     },
   },
   nearbyHikes: {
+    lengthFilterAria: "Nach Routen-Länge filtern",
+    lengthAll: "Alle Längen",
+    lengthShort: "bis 5 km",
+    lengthMedium: "5–15 km",
+    lengthLong: "über 15 km",
     sectionAria: "Markierte Wanderwege in der Umgebung",
     title: "Wandern in der Umgebung",
     subtitle: "Markierte Wanderwege rund um deinen Standort.",

@@ -286,3 +286,24 @@ export function nearestRoutePoint(
   }
   return best;
 }
+
+/**
+ * Längen-Klasse einer Route (#495): kurz (bis 5 km), mittel (bis 15 km),
+ * lang (darüber). Ohne bekannte Länge null – solche Routen erscheinen
+ * nur im Filter «alle», statt in einer falschen Klasse zu landen.
+ */
+export type RouteLengthClass = "kurz" | "mittel" | "lang";
+
+export const ROUTE_LENGTH_SHORT_MAX_M = 5000;
+export const ROUTE_LENGTH_MEDIUM_MAX_M = 15000;
+
+export function routeLengthClass(
+  lengthM: number | undefined
+): RouteLengthClass | null {
+  if (lengthM === undefined || !Number.isFinite(lengthM) || lengthM <= 0) {
+    return null;
+  }
+  if (lengthM <= ROUTE_LENGTH_SHORT_MAX_M) return "kurz";
+  if (lengthM <= ROUTE_LENGTH_MEDIUM_MAX_M) return "mittel";
+  return "lang";
+}

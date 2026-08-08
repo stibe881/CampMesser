@@ -3773,6 +3773,11 @@ export const it: Translation = {
     },
   },
   nearbyHikes: {
+    lengthFilterAria: "Filtra per lunghezza del percorso",
+    lengthAll: "Tutte le lunghezze",
+    lengthShort: "fino a 5 km",
+    lengthMedium: "5–15 km",
+    lengthLong: "oltre 15 km",
     sectionAria: "Sentieri escursionistici segnalati nei dintorni",
     title: "Escursioni nei dintorni",
     subtitle: "Sentieri escursionistici segnalati attorno alla tua posizione.",

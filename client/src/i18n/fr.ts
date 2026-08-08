@@ -3805,6 +3805,11 @@ export const fr: Translation = {
     },
   },
   nearbyHikes: {
+    lengthFilterAria: "Filtrer par longueur d'itinéraire",
+    lengthAll: "Toutes les longueurs",
+    lengthShort: "jusqu'à 5 km",
+    lengthMedium: "5–15 km",
+    lengthLong: "plus de 15 km",
     sectionAria: "Sentiers de randonnée balisés aux alentours",
     title: "Randonner aux alentours",
     subtitle: "Sentiers de randonnée balisés autour de ta position.",
