@@ -451,294 +451,126 @@ async function startServer() {
       if (!res.headersSent) res.status(500).json({ error: "serverError" });
     }
   });
-  // ── Foto für eigene Rezepte ─────────────────────────────────────────────
-  // Gleiche Technik wie die Tagebuch-Fotos (Raw-Body, Client-Resize,
-  // Ablage unter uploads/recipes/), aber genau EIN Foto pro Rezept:
-  // ein neuer Upload ersetzt das bisherige Foto.
-  app.post(
-    "/api/recipes/:recipeId/photo",
-    express.raw({ type: "image/*", limit: MAX_PHOTO_BYTES }),
-    async (req, res) => {
-      try {
-        const user = await authenticatePhotoRequest(req, res);
-        if (!user) return;
-        const recipeId = Number(req.params.recipeId);
-        if (!Number.isInteger(recipeId) || recipeId <= 0) {
-          res.status(400).json({ error: "badRequest" });
-          return;
-        }
-        const db = await import("../db");
-        const recipe = await db.getCustomRecipe(recipeId, user.id);
-        if (!recipe) {
-          res.status(404).json({ error: "notFound" });
-          return;
-        }
-        const contentType = String(req.headers["content-type"] ?? "")
-          .split(";")[0]
-          .trim()
-          .toLowerCase();
-        if (contentType === "image/heic" || contentType === "image/heif") {
-          res.status(415).json({ error: "heicNotSupported" });
-          return;
-        }
-        const extension = PHOTO_MIME_EXTENSIONS[contentType];
-        if (!extension) {
-          res.status(415).json({ error: "unsupportedType" });
-          return;
-        }
-        const body = req.body as unknown;
-        if (!Buffer.isBuffer(body) || body.length === 0) {
-          res.status(400).json({ error: "emptyBody" });
-          return;
-        }
-        if (body.length > MAX_PHOTO_BYTES) {
-          res.status(413).json({ error: "tooLarge" });
-          return;
-        }
-        const { nanoid } = await import("nanoid");
-        const fileName = `${nanoid(16)}${extension}`;
-        const { recipePhotoStorage } = await import("../photoStorage");
-        await recipePhotoStorage.saveFile(fileName, body);
-        await db.updateCustomRecipe(recipeId, user.id, {
-          imageFileName: fileName,
-        });
-        // Altes Foto erst nach erfolgreichem DB-Update entfernen
-        if (recipe.imageFileName) {
-          await recipePhotoStorage.deleteFiles([recipe.imageFileName]);
-        }
-        res.json({ fileName });
-      } catch (error) {
-        console.error("[RecipePhotos] Upload fehlgeschlagen:", error);
-        if (!res.headersSent) res.status(500).json({ error: "serverError" });
-      }
-    }
-  );
-  // Auslieferung: nur die Besitzerin/der Besitzer des Rezepts sieht das Foto.
-  app.get("/api/recipes/photos/:fileName", async (req, res) => {
-    try {
-      const user = await authenticatePhotoRequest(req, res);
-      if (!user) return;
-      const { PHOTO_FILENAME_PATTERN, recipePhotoStorage } =
-        await import("../photoStorage");
-      const fileName = req.params.fileName;
-      if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
-        res.status(400).json({ error: "badRequest" });
-        return;
-      }
+  // ── Ein-Foto-Ablagen über die Fabrik (#457) ─────────────────────────────
+  // Rezept, Inventar-Foto, Inventar-Beleg, Beobachtung, Fang und Notiz
+  // teilen exakt dieselbe Upload/Auslieferungs-Logik – registriert aus
+  // je einer Beschreibung (server/_core/photoRoutes.ts). Verhalten und
+  // Pfade sind unverändert.
+  const { registerSinglePhotoRoutes } = await import("./photoRoutes");
+  registerSinglePhotoRoutes(app, authenticatePhotoRequest, {
+    uploadPath: "/api/recipes/:id/photo",
+    servePath: "/api/recipes/photos/:fileName",
+    logTag: "RecipePhotos",
+    storage: async () => (await import("../photoStorage")).recipePhotoStorage,
+    load: async (id, userId) => {
       const db = await import("../db");
-      const recipe = await db.getCustomRecipeByImageFileName(fileName, user.id);
-      if (!recipe) {
-        res.status(404).json({ error: "notFound" });
-        return;
-      }
-      res.sendFile(
-        recipePhotoStorage.photoPath(fileName),
-        { headers: { "Cache-Control": "private, max-age=3600" } },
-        error => {
-          // Datei fehlt auf der Platte (z. B. nach Server-Umzug ohne uploads/)
-          if (error && !res.headersSent) {
-            res.status(404).json({ error: "notFound" });
-          }
-        }
-      );
-    } catch (error) {
-      console.error("[RecipePhotos] Auslieferung fehlgeschlagen:", error);
-      if (!res.headersSent) res.status(500).json({ error: "serverError" });
-    }
+      const recipe = await db.getCustomRecipe(id, userId);
+      return recipe ? { current: recipe.imageFileName ?? null } : null;
+    },
+    save: async (id, userId, fileName) => {
+      const db = await import("../db");
+      await db.updateCustomRecipe(id, userId, { imageFileName: fileName });
+    },
+    findOwnedByFileName: async (fileName, userId) => {
+      const db = await import("../db");
+      return db.getCustomRecipeByImageFileName(fileName, userId);
+    },
   });
-  // ── Foto für Inventar-Gegenstände ───────────────────────────────────────
-  // Gleiche Technik wie das Rezept-Foto (Raw-Body, Client-Resize, Ablage
-  // unter uploads/inventory/), genau EIN Foto pro Gegenstand: ein neuer
-  // Upload ersetzt das bisherige Foto.
-  app.post(
-    "/api/inventory/:itemId/photo",
-    express.raw({ type: "image/*", limit: MAX_PHOTO_BYTES }),
-    async (req, res) => {
-      try {
-        const user = await authenticatePhotoRequest(req, res);
-        if (!user) return;
-        const itemId = Number(req.params.itemId);
-        if (!Number.isInteger(itemId) || itemId <= 0) {
-          res.status(400).json({ error: "badRequest" });
-          return;
-        }
-        const db = await import("../db");
-        const item = await db.getInventoryItem(itemId, user.id);
-        if (!item) {
-          res.status(404).json({ error: "notFound" });
-          return;
-        }
-        const contentType = String(req.headers["content-type"] ?? "")
-          .split(";")[0]
-          .trim()
-          .toLowerCase();
-        if (contentType === "image/heic" || contentType === "image/heif") {
-          res.status(415).json({ error: "heicNotSupported" });
-          return;
-        }
-        const extension = PHOTO_MIME_EXTENSIONS[contentType];
-        if (!extension) {
-          res.status(415).json({ error: "unsupportedType" });
-          return;
-        }
-        const body = req.body as unknown;
-        if (!Buffer.isBuffer(body) || body.length === 0) {
-          res.status(400).json({ error: "emptyBody" });
-          return;
-        }
-        if (body.length > MAX_PHOTO_BYTES) {
-          res.status(413).json({ error: "tooLarge" });
-          return;
-        }
-        const { nanoid } = await import("nanoid");
-        const fileName = `${nanoid(16)}${extension}`;
-        const { inventoryPhotoStorage } = await import("../photoStorage");
-        await inventoryPhotoStorage.saveFile(fileName, body);
-        await db.updateInventoryItem(itemId, user.id, {
-          imageFileName: fileName,
-        });
-        // Altes Foto erst nach erfolgreichem DB-Update entfernen
-        if (item.imageFileName) {
-          await inventoryPhotoStorage.deleteFiles([item.imageFileName]);
-        }
-        res.json({ fileName });
-      } catch (error) {
-        console.error("[InventoryPhotos] Upload fehlgeschlagen:", error);
-        if (!res.headersSent) res.status(500).json({ error: "serverError" });
-      }
-    }
-  );
-  // Auslieferung: nur die Besitzerin/der Besitzer des Gegenstands sieht das Foto.
-  app.get("/api/inventory/photos/:fileName", async (req, res) => {
-    try {
-      const user = await authenticatePhotoRequest(req, res);
-      if (!user) return;
-      const { PHOTO_FILENAME_PATTERN, inventoryPhotoStorage } =
-        await import("../photoStorage");
-      const fileName = req.params.fileName;
-      if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
-        res.status(400).json({ error: "badRequest" });
-        return;
-      }
+  registerSinglePhotoRoutes(app, authenticatePhotoRequest, {
+    uploadPath: "/api/inventory/:id/photo",
+    servePath: "/api/inventory/photos/:fileName",
+    logTag: "InventoryPhotos",
+    storage: async () =>
+      (await import("../photoStorage")).inventoryPhotoStorage,
+    load: async (id, userId) => {
       const db = await import("../db");
-      const item = await db.getInventoryItemByImageFileName(fileName, user.id);
-      if (!item) {
-        res.status(404).json({ error: "notFound" });
-        return;
-      }
-      res.sendFile(
-        inventoryPhotoStorage.photoPath(fileName),
-        { headers: { "Cache-Control": "private, max-age=3600" } },
-        error => {
-          // Datei fehlt auf der Platte (z. B. nach Server-Umzug ohne uploads/)
-          if (error && !res.headersSent) {
-            res.status(404).json({ error: "notFound" });
-          }
-        }
-      );
-    } catch (error) {
-      console.error("[InventoryPhotos] Auslieferung fehlgeschlagen:", error);
-      if (!res.headersSent) res.status(500).json({ error: "serverError" });
-    }
+      const item = await db.getInventoryItem(id, userId);
+      return item ? { current: item.imageFileName ?? null } : null;
+    },
+    save: async (id, userId, fileName) => {
+      const db = await import("../db");
+      await db.updateInventoryItem(id, userId, { imageFileName: fileName });
+    },
+    findOwnedByFileName: async (fileName, userId) => {
+      const db = await import("../db");
+      return db.getInventoryItemByImageFileName(fileName, userId);
+    },
   });
-  // ── Beleg (Kaufquittung) für Inventar-Gegenstände ───────────────────────
-  // Belege sind in der Praxis Fotos der Quittung – deshalb exakt dieselbe
-  // Technik wie das Gegenstands-Foto (Raw-Body, Client-Resize, Ablage unter
-  // uploads/receipts/), genau EIN Beleg pro Gegenstand: ein neuer Upload
-  // ersetzt den bisherigen Beleg.
-  app.post(
-    "/api/inventory/:itemId/receipt",
-    express.raw({ type: "image/*", limit: MAX_PHOTO_BYTES }),
-    async (req, res) => {
-      try {
-        const user = await authenticatePhotoRequest(req, res);
-        if (!user) return;
-        const itemId = Number(req.params.itemId);
-        if (!Number.isInteger(itemId) || itemId <= 0) {
-          res.status(400).json({ error: "badRequest" });
-          return;
-        }
-        const db = await import("../db");
-        const item = await db.getInventoryItem(itemId, user.id);
-        if (!item) {
-          res.status(404).json({ error: "notFound" });
-          return;
-        }
-        const contentType = String(req.headers["content-type"] ?? "")
-          .split(";")[0]
-          .trim()
-          .toLowerCase();
-        if (contentType === "image/heic" || contentType === "image/heif") {
-          res.status(415).json({ error: "heicNotSupported" });
-          return;
-        }
-        const extension = PHOTO_MIME_EXTENSIONS[contentType];
-        if (!extension) {
-          res.status(415).json({ error: "unsupportedType" });
-          return;
-        }
-        const body = req.body as unknown;
-        if (!Buffer.isBuffer(body) || body.length === 0) {
-          res.status(400).json({ error: "emptyBody" });
-          return;
-        }
-        if (body.length > MAX_PHOTO_BYTES) {
-          res.status(413).json({ error: "tooLarge" });
-          return;
-        }
-        const { nanoid } = await import("nanoid");
-        const fileName = `${nanoid(16)}${extension}`;
-        const { receiptPhotoStorage } = await import("../photoStorage");
-        await receiptPhotoStorage.saveFile(fileName, body);
-        await db.updateInventoryItem(itemId, user.id, {
-          receiptFileName: fileName,
-        });
-        // Alten Beleg erst nach erfolgreichem DB-Update entfernen
-        if (item.receiptFileName) {
-          await receiptPhotoStorage.deleteFiles([item.receiptFileName]);
-        }
-        res.json({ fileName });
-      } catch (error) {
-        console.error("[InventoryReceipts] Upload fehlgeschlagen:", error);
-        if (!res.headersSent) res.status(500).json({ error: "serverError" });
-      }
-    }
-  );
-  // Auslieferung: nur die Besitzerin/der Besitzer des Gegenstands sieht den Beleg.
-  app.get("/api/inventory/receipts/:fileName", async (req, res) => {
-    try {
-      const user = await authenticatePhotoRequest(req, res);
-      if (!user) return;
-      const { PHOTO_FILENAME_PATTERN, receiptPhotoStorage } =
-        await import("../photoStorage");
-      const fileName = req.params.fileName;
-      if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
-        res.status(400).json({ error: "badRequest" });
-        return;
-      }
+  registerSinglePhotoRoutes(app, authenticatePhotoRequest, {
+    uploadPath: "/api/inventory/:id/receipt",
+    servePath: "/api/inventory/receipts/:fileName",
+    logTag: "InventoryReceipts",
+    storage: async () => (await import("../photoStorage")).receiptPhotoStorage,
+    load: async (id, userId) => {
       const db = await import("../db");
-      const item = await db.getInventoryItemByReceiptFileName(
-        fileName,
-        user.id
-      );
-      if (!item) {
-        res.status(404).json({ error: "notFound" });
-        return;
-      }
-      res.sendFile(
-        receiptPhotoStorage.photoPath(fileName),
-        { headers: { "Cache-Control": "private, max-age=3600" } },
-        error => {
-          // Datei fehlt auf der Platte (z. B. nach Server-Umzug ohne uploads/)
-          if (error && !res.headersSent) {
-            res.status(404).json({ error: "notFound" });
-          }
-        }
-      );
-    } catch (error) {
-      console.error("[InventoryReceipts] Auslieferung fehlgeschlagen:", error);
-      if (!res.headersSent) res.status(500).json({ error: "serverError" });
-    }
+      const item = await db.getInventoryItem(id, userId);
+      return item ? { current: item.receiptFileName ?? null } : null;
+    },
+    save: async (id, userId, fileName) => {
+      const db = await import("../db");
+      await db.updateInventoryItem(id, userId, { receiptFileName: fileName });
+    },
+    findOwnedByFileName: async (fileName, userId) => {
+      const db = await import("../db");
+      return db.getInventoryItemByReceiptFileName(fileName, userId);
+    },
+  });
+  registerSinglePhotoRoutes(app, authenticatePhotoRequest, {
+    uploadPath: "/api/sightings/:id/photo",
+    servePath: "/api/sightings/photos/:fileName",
+    logTag: "SightingPhotos",
+    storage: async () => (await import("../photoStorage")).sightingPhotoStorage,
+    load: async (id, userId) => {
+      const db = await import("../db");
+      const sighting = await db.getNatureSighting(id, userId);
+      return sighting ? { current: sighting.fileName ?? null } : null;
+    },
+    save: async (id, userId, fileName) => {
+      const db = await import("../db");
+      await db.updateNatureSighting(id, userId, { fileName });
+    },
+    findOwnedByFileName: async (fileName, userId) => {
+      const db = await import("../db");
+      return db.getNatureSightingByFileName(fileName, userId);
+    },
+  });
+  registerSinglePhotoRoutes(app, authenticatePhotoRequest, {
+    uploadPath: "/api/catches/:id/photo",
+    servePath: "/api/catches/photos/:fileName",
+    logTag: "CatchPhotos",
+    storage: async () => (await import("../photoStorage")).catchPhotoStorage,
+    load: async (id, userId) => {
+      const db = await import("../db");
+      const entry = await db.getFishCatch(id, userId);
+      return entry ? { current: entry.fileName ?? null } : null;
+    },
+    save: async (id, userId, fileName) => {
+      const db = await import("../db");
+      await db.updateFishCatch(id, userId, { fileName });
+    },
+    findOwnedByFileName: async (fileName, userId) => {
+      const db = await import("../db");
+      return db.getFishCatchByFileName(fileName, userId);
+    },
+  });
+  registerSinglePhotoRoutes(app, authenticatePhotoRequest, {
+    uploadPath: "/api/notes/:id/photo",
+    servePath: "/api/notes/photos/:fileName",
+    logTag: "NotePhotos",
+    storage: async () => (await import("../photoStorage")).notePhotoStorage,
+    load: async (id, userId) => {
+      const db = await import("../db");
+      const note = await db.getUserNote(id, userId);
+      return note ? { current: note.fileName ?? null } : null;
+    },
+    save: async (id, userId, fileName) => {
+      const db = await import("../db");
+      await db.updateUserNote(id, userId, { fileName });
+    },
+    findOwnedByFileName: async (fileName, userId) => {
+      const db = await import("../db");
+      return db.getUserNoteByFileName(fileName, userId);
+    },
   });
   // ── Buchungsbestätigung zur Reise (#279) ────────────────────────────────
   // Als einzige Ablage sind hier auch PDF erlaubt: Bestätigungen kommen als
@@ -829,285 +661,6 @@ async function startServer() {
       );
     } catch (error) {
       console.error("[Reservations] Auslieferung fehlgeschlagen:", error);
-      if (!res.headersSent) res.status(500).json({ error: "serverError" });
-    }
-  });
-  // ── Foto für Natur-Beobachtungen ────────────────────────────────────────
-  // Gleiche Technik wie das Inventar-Foto (Raw-Body, Client-Resize, Ablage
-  // unter uploads/sightings/), genau EIN Foto pro Beobachtung: ein neuer
-  // Upload ersetzt das bisherige Foto.
-  app.post(
-    "/api/sightings/:id/photo",
-    express.raw({ type: "image/*", limit: MAX_PHOTO_BYTES }),
-    async (req, res) => {
-      try {
-        const user = await authenticatePhotoRequest(req, res);
-        if (!user) return;
-        const sightingId = Number(req.params.id);
-        if (!Number.isInteger(sightingId) || sightingId <= 0) {
-          res.status(400).json({ error: "badRequest" });
-          return;
-        }
-        const db = await import("../db");
-        const sighting = await db.getNatureSighting(sightingId, user.id);
-        if (!sighting) {
-          res.status(404).json({ error: "notFound" });
-          return;
-        }
-        const contentType = String(req.headers["content-type"] ?? "")
-          .split(";")[0]
-          .trim()
-          .toLowerCase();
-        if (contentType === "image/heic" || contentType === "image/heif") {
-          res.status(415).json({ error: "heicNotSupported" });
-          return;
-        }
-        const extension = PHOTO_MIME_EXTENSIONS[contentType];
-        if (!extension) {
-          res.status(415).json({ error: "unsupportedType" });
-          return;
-        }
-        const body = req.body as unknown;
-        if (!Buffer.isBuffer(body) || body.length === 0) {
-          res.status(400).json({ error: "emptyBody" });
-          return;
-        }
-        if (body.length > MAX_PHOTO_BYTES) {
-          res.status(413).json({ error: "tooLarge" });
-          return;
-        }
-        const { nanoid } = await import("nanoid");
-        const fileName = `${nanoid(16)}${extension}`;
-        const { sightingPhotoStorage } = await import("../photoStorage");
-        await sightingPhotoStorage.saveFile(fileName, body);
-        await db.updateNatureSighting(sightingId, user.id, { fileName });
-        // Altes Foto erst nach erfolgreichem DB-Update entfernen
-        if (sighting.fileName) {
-          await sightingPhotoStorage.deleteFiles([sighting.fileName]);
-        }
-        res.json({ fileName });
-      } catch (error) {
-        console.error("[SightingPhotos] Upload fehlgeschlagen:", error);
-        if (!res.headersSent) res.status(500).json({ error: "serverError" });
-      }
-    }
-  );
-  // Auslieferung: nur die Besitzerin/der Besitzer der Beobachtung sieht das Foto.
-  app.get("/api/sightings/photos/:fileName", async (req, res) => {
-    try {
-      const user = await authenticatePhotoRequest(req, res);
-      if (!user) return;
-      const { PHOTO_FILENAME_PATTERN, sightingPhotoStorage } =
-        await import("../photoStorage");
-      const fileName = req.params.fileName;
-      if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
-        res.status(400).json({ error: "badRequest" });
-        return;
-      }
-      const db = await import("../db");
-      const sighting = await db.getNatureSightingByFileName(fileName, user.id);
-      if (!sighting) {
-        res.status(404).json({ error: "notFound" });
-        return;
-      }
-      res.sendFile(
-        sightingPhotoStorage.photoPath(fileName),
-        { headers: { "Cache-Control": "private, max-age=3600" } },
-        error => {
-          // Datei fehlt auf der Platte (z. B. nach Server-Umzug ohne uploads/)
-          if (error && !res.headersSent) {
-            res.status(404).json({ error: "notFound" });
-          }
-        }
-      );
-    } catch (error) {
-      console.error("[SightingPhotos] Auslieferung fehlgeschlagen:", error);
-      if (!res.headersSent) res.status(500).json({ error: "serverError" });
-    }
-  });
-  // ── Foto für Fänge im Fangbuch (#236) ───────────────────────────────────
-  // Gleiche Technik wie das Beobachtungs-Foto (Raw-Body, Client-Resize,
-  // Ablage unter uploads/catches/), genau EIN Foto pro Fang: ein neuer
-  // Upload ersetzt das bisherige Foto.
-  app.post(
-    "/api/catches/:id/photo",
-    express.raw({ type: "image/*", limit: MAX_PHOTO_BYTES }),
-    async (req, res) => {
-      try {
-        const user = await authenticatePhotoRequest(req, res);
-        if (!user) return;
-        const catchId = Number(req.params.id);
-        if (!Number.isInteger(catchId) || catchId <= 0) {
-          res.status(400).json({ error: "badRequest" });
-          return;
-        }
-        const db = await import("../db");
-        const entry = await db.getFishCatch(catchId, user.id);
-        if (!entry) {
-          res.status(404).json({ error: "notFound" });
-          return;
-        }
-        const contentType = String(req.headers["content-type"] ?? "")
-          .split(";")[0]
-          .trim()
-          .toLowerCase();
-        if (contentType === "image/heic" || contentType === "image/heif") {
-          res.status(415).json({ error: "heicNotSupported" });
-          return;
-        }
-        const extension = PHOTO_MIME_EXTENSIONS[contentType];
-        if (!extension) {
-          res.status(415).json({ error: "unsupportedType" });
-          return;
-        }
-        const body = req.body as unknown;
-        if (!Buffer.isBuffer(body) || body.length === 0) {
-          res.status(400).json({ error: "emptyBody" });
-          return;
-        }
-        if (body.length > MAX_PHOTO_BYTES) {
-          res.status(413).json({ error: "tooLarge" });
-          return;
-        }
-        const { nanoid } = await import("nanoid");
-        const fileName = `${nanoid(16)}${extension}`;
-        const { catchPhotoStorage } = await import("../photoStorage");
-        await catchPhotoStorage.saveFile(fileName, body);
-        await db.updateFishCatch(catchId, user.id, { fileName });
-        // Altes Foto erst nach erfolgreichem DB-Update entfernen
-        if (entry.fileName) {
-          await catchPhotoStorage.deleteFiles([entry.fileName]);
-        }
-        res.json({ fileName });
-      } catch (error) {
-        console.error("[CatchPhotos] Upload fehlgeschlagen:", error);
-        if (!res.headersSent) res.status(500).json({ error: "serverError" });
-      }
-    }
-  );
-  // Auslieferung: nur die Besitzerin/der Besitzer des Fangs sieht das Foto.
-  app.get("/api/catches/photos/:fileName", async (req, res) => {
-    try {
-      const user = await authenticatePhotoRequest(req, res);
-      if (!user) return;
-      const { PHOTO_FILENAME_PATTERN, catchPhotoStorage } =
-        await import("../photoStorage");
-      const fileName = req.params.fileName;
-      if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
-        res.status(400).json({ error: "badRequest" });
-        return;
-      }
-      const db = await import("../db");
-      const entry = await db.getFishCatchByFileName(fileName, user.id);
-      if (!entry) {
-        res.status(404).json({ error: "notFound" });
-        return;
-      }
-      res.sendFile(
-        catchPhotoStorage.photoPath(fileName),
-        { headers: { "Cache-Control": "private, max-age=3600" } },
-        error => {
-          // Datei fehlt auf der Platte (z. B. nach Server-Umzug ohne uploads/)
-          if (error && !res.headersSent) {
-            res.status(404).json({ error: "notFound" });
-          }
-        }
-      );
-    } catch (error) {
-      console.error("[CatchPhotos] Auslieferung fehlgeschlagen:", error);
-      if (!res.headersSent) res.status(500).json({ error: "serverError" });
-    }
-  });
-  // ── Foto für freie Notizen (#433) ───────────────────────────────────────
-  // Gleiche Technik wie das Beobachtungs-Foto (Raw-Body, Client-Resize,
-  // Ablage unter uploads/notes/), genau EIN Foto pro Notiz: ein neuer
-  // Upload ersetzt das bisherige Foto.
-  app.post(
-    "/api/notes/:id/photo",
-    express.raw({ type: "image/*", limit: MAX_PHOTO_BYTES }),
-    async (req, res) => {
-      try {
-        const user = await authenticatePhotoRequest(req, res);
-        if (!user) return;
-        const noteId = Number(req.params.id);
-        if (!Number.isInteger(noteId) || noteId <= 0) {
-          res.status(400).json({ error: "badRequest" });
-          return;
-        }
-        const db = await import("../db");
-        const note = await db.getUserNote(noteId, user.id);
-        if (!note) {
-          res.status(404).json({ error: "notFound" });
-          return;
-        }
-        const contentType = String(req.headers["content-type"] ?? "")
-          .split(";")[0]
-          .trim()
-          .toLowerCase();
-        if (contentType === "image/heic" || contentType === "image/heif") {
-          res.status(415).json({ error: "heicNotSupported" });
-          return;
-        }
-        const extension = PHOTO_MIME_EXTENSIONS[contentType];
-        if (!extension) {
-          res.status(415).json({ error: "unsupportedType" });
-          return;
-        }
-        const body = req.body as unknown;
-        if (!Buffer.isBuffer(body) || body.length === 0) {
-          res.status(400).json({ error: "emptyBody" });
-          return;
-        }
-        if (body.length > MAX_PHOTO_BYTES) {
-          res.status(413).json({ error: "tooLarge" });
-          return;
-        }
-        const { nanoid } = await import("nanoid");
-        const fileName = `${nanoid(16)}${extension}`;
-        const { notePhotoStorage } = await import("../photoStorage");
-        await notePhotoStorage.saveFile(fileName, body);
-        await db.updateUserNote(noteId, user.id, { fileName });
-        // Altes Foto erst nach erfolgreichem DB-Update entfernen
-        if (note.fileName) {
-          await notePhotoStorage.deleteFiles([note.fileName]);
-        }
-        res.json({ fileName });
-      } catch (error) {
-        console.error("[NotePhotos] Upload fehlgeschlagen:", error);
-        if (!res.headersSent) res.status(500).json({ error: "serverError" });
-      }
-    }
-  );
-  // Auslieferung: nur die Besitzerin/der Besitzer der Notiz sieht das Foto.
-  app.get("/api/notes/photos/:fileName", async (req, res) => {
-    try {
-      const user = await authenticatePhotoRequest(req, res);
-      if (!user) return;
-      const { PHOTO_FILENAME_PATTERN, notePhotoStorage } =
-        await import("../photoStorage");
-      const fileName = req.params.fileName;
-      if (!PHOTO_FILENAME_PATTERN.test(fileName)) {
-        res.status(400).json({ error: "badRequest" });
-        return;
-      }
-      const db = await import("../db");
-      const note = await db.getUserNoteByFileName(fileName, user.id);
-      if (!note) {
-        res.status(404).json({ error: "notFound" });
-        return;
-      }
-      res.sendFile(
-        notePhotoStorage.photoPath(fileName),
-        { headers: { "Cache-Control": "private, max-age=3600" } },
-        error => {
-          // Datei fehlt auf der Platte (z. B. nach Server-Umzug ohne uploads/)
-          if (error && !res.headersSent) {
-            res.status(404).json({ error: "notFound" });
-          }
-        }
-      );
-    } catch (error) {
-      console.error("[NotePhotos] Auslieferung fehlgeschlagen:", error);
       if (!res.headersSent) res.status(500).json({ error: "serverError" });
     }
   });
