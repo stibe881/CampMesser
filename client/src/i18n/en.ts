@@ -4952,6 +4952,37 @@ export const en: Translation = {
     offlineNote:
       "Photo or PDF. Once opened, the confirmation stays available without a signal – handy at the barrier at 10 pm.",
   },
+  sights: {
+    sectionAria: "Sights nearby",
+    title: "Sights nearby",
+    subtitle: "Museums, viewpoints, castles and more around your location.",
+    subtitleAtPlace: (place: string) =>
+      `Museums, viewpoints, castles and more around ${place}.`,
+    radiusLabel: "Radius",
+    radiusGroupAria: "Choose search radius",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Searching for sights …",
+    loadFailed:
+      "The sights could not be loaded right now. Overpass is a free service and throttles heavy use – try again in a few minutes.",
+    empty: (km: number) =>
+      `Nothing is mapped in OpenStreetMap within ${km} km. Try a larger radius.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 place found" : `${n} places found`,
+    kind: {
+      museum: "Museum",
+      viewpoint: "Viewpoint",
+      castle: "Castle",
+      zoo: "Zoo",
+      themePark: "Theme park",
+      monument: "Monument",
+      attraction: "Attraction",
+    },
+    navButton: "Directions",
+    navAria: (name: string) => `Directions to ${name}`,
+    website: "Website",
+    source:
+      "Data from OpenStreetMap via the Overpass API – unfiltered and without guarantee. Curated excursions with descriptions are in the “Excursions nearby” section.",
+  },
   shops: {
     sectionAria: "Shopping nearby",
     title: "Shopping nearby",

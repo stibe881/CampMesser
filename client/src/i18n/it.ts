@@ -5050,6 +5050,38 @@ export const it: Translation = {
     offlineNote:
       "Foto o PDF. Una volta aperta, la conferma resta consultabile anche senza rete – comodo alla sbarra alle 22.",
   },
+  sights: {
+    sectionAria: "Attrazioni nei dintorni",
+    title: "Attrazioni nei dintorni",
+    subtitle:
+      "Musei, punti panoramici, castelli e altro attorno alla tua posizione.",
+    subtitleAtPlace: (place: string) =>
+      `Musei, punti panoramici, castelli e altro attorno a ${place}.`,
+    radiusLabel: "Raggio",
+    radiusGroupAria: "Scegli il raggio di ricerca",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Ricerca delle attrazioni …",
+    loadFailed:
+      "Le attrazioni non possono essere caricate al momento. Overpass è un servizio gratuito che rallenta con troppe richieste – riprova tra qualche minuto.",
+    empty: (km: number) =>
+      `Nel raggio di ${km} km OpenStreetMap non riporta nulla. Prova con un raggio più grande.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 luogo trovato" : `${n} luoghi trovati`,
+    kind: {
+      museum: "Museo",
+      viewpoint: "Punto panoramico",
+      castle: "Castello",
+      zoo: "Zoo",
+      themePark: "Parco divertimenti",
+      monument: "Monumento",
+      attraction: "Attrazione",
+    },
+    navButton: "Navigazione",
+    navAria: (name: string) => `Navigazione verso ${name}`,
+    website: "Sito web",
+    source:
+      "Dati da OpenStreetMap tramite l'API Overpass – grezzi e senza garanzia. Le gite selezionate con descrizione si trovano nella sezione «Gite nei dintorni».",
+  },
   shops: {
     sectionAria: "Fare la spesa nei dintorni",
     title: "Fare la spesa nei dintorni",

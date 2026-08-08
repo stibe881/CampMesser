@@ -5087,6 +5087,38 @@ export const de = {
     offlineNote:
       "Foto oder PDF. Einmal geöffnet, bleibt die Bestätigung auch ohne Empfang abrufbar – praktisch an der Schranke um 22 Uhr.",
   },
+  sights: {
+    sectionAria: "Sehenswürdigkeiten in der Umgebung",
+    title: "Sehenswürdigkeiten in der Nähe",
+    subtitle:
+      "Museen, Aussichtspunkte, Schlösser und mehr rund um deinen Standort.",
+    subtitleAtPlace: (place: string) =>
+      `Museen, Aussichtspunkte, Schlösser und mehr rund um ${place}.`,
+    radiusLabel: "Umkreis",
+    radiusGroupAria: "Suchradius wählen",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Sehenswürdigkeiten werden gesucht …",
+    loadFailed:
+      "Die Sehenswürdigkeiten konnten gerade nicht geladen werden. Overpass ist ein freier Dienst und bremst bei zu vielen Anfragen – versuch es in ein paar Minuten nochmals.",
+    empty: (km: number) =>
+      `Im Umkreis von ${km} km ist in OpenStreetMap nichts eingetragen. Versuch es mit einem grösseren Umkreis.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 Ort gefunden" : `${n} Orte gefunden`,
+    kind: {
+      museum: "Museum",
+      viewpoint: "Aussichtspunkt",
+      castle: "Schloss/Burg",
+      zoo: "Zoo/Tierpark",
+      themePark: "Freizeitpark",
+      monument: "Denkmal",
+      attraction: "Attraktion",
+    },
+    navButton: "Navigation",
+    navAria: (name: string) => `Navigation zu ${name}`,
+    website: "Website",
+    source:
+      "Daten aus OpenStreetMap über die Overpass-API – ungefiltert und ohne Gewähr. Kuratierte Ausflüge mit Beschreibung findest du im Abschnitt «Ausflüge in der Nähe».",
+  },
   shops: {
     sectionAria: "Einkaufen in der Nähe",
     title: "Einkaufen in der Nähe",

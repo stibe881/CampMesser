@@ -5081,6 +5081,37 @@ export const fr: Translation = {
     offlineNote:
       "Photo ou PDF. Une fois ouverte, la confirmation reste consultable sans réseau – pratique à la barrière à 22 h.",
   },
+  sights: {
+    sectionAria: "Curiosités à proximité",
+    title: "Curiosités à proximité",
+    subtitle: "Musées, points de vue, châteaux et plus autour de ta position.",
+    subtitleAtPlace: (place: string) =>
+      `Musées, points de vue, châteaux et plus autour de ${place}.`,
+    radiusLabel: "Rayon",
+    radiusGroupAria: "Choisir le rayon de recherche",
+    radiusOption: (km: number) => `${km} km`,
+    loading: "Recherche de curiosités …",
+    loadFailed:
+      "Les curiosités n'ont pas pu être chargées. Overpass est un service gratuit qui freine en cas de forte demande – réessaie dans quelques minutes.",
+    empty: (km: number) =>
+      `Rien n'est cartographié dans OpenStreetMap dans un rayon de ${km} km. Essaie un rayon plus grand.`,
+    resultCount: (n: number) =>
+      n === 1 ? "1 lieu trouvé" : `${n} lieux trouvés`,
+    kind: {
+      museum: "Musée",
+      viewpoint: "Point de vue",
+      castle: "Château",
+      zoo: "Zoo",
+      themePark: "Parc d'attractions",
+      monument: "Monument",
+      attraction: "Attraction",
+    },
+    navButton: "Itinéraire",
+    navAria: (name: string) => `Itinéraire vers ${name}`,
+    website: "Site web",
+    source:
+      "Données d'OpenStreetMap via l'API Overpass – brutes et sans garantie. Les excursions sélectionnées avec description se trouvent dans la section « Excursions à proximité ».",
+  },
   shops: {
     sectionAria: "Faire les courses à proximité",
     title: "Faire les courses à proximité",
