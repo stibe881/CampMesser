@@ -26,6 +26,8 @@ vi.mock("@/lib/trpc", async () => {
           userId: 1,
           title: "Thun",
           location: "Thun",
+          // Reise-Art (#460): Wandern → zusätzlicher Schnellzugriff
+          kind: "wandern",
           spotId: null,
           packListId: null,
           startDate: "2026-08-05",
@@ -85,6 +87,17 @@ describe("Heute-Ansicht", () => {
     // nichts davon ändern – das war der Befund aus #330.
     expect(targets.some(href => href.startsWith("/menueplan"))).toBe(true);
     expect(targets.some(href => href.startsWith("/aemtli"))).toBe(true);
+  });
+
+  it("zeigt die Schnellzugriffe der Reise-Art (#460)", async () => {
+    await renderToday();
+    await screen.findAllByText(/Thun/);
+    const targets = screen
+      .getAllByRole("link")
+      .map(link => link.getAttribute("href") ?? "");
+    // «Wandern» bringt die Tour-Aufzeichnung als zusätzlichen Knopf –
+    // die drei Standard-Wege (oben geprüft) bleiben daneben bestehen.
+    expect(targets).toContain("/wanderung");
   });
 
   it("ist barrierefrei", async () => {
