@@ -2553,6 +2553,8 @@ export const it: Translation = {
         .filter(Boolean)
         .join(" · "),
     yearCompareTitle: "Notti per anno",
+    kindFilterAll: "Tutti i tipi",
+    kindFilterAria: "Filtra i viaggi per tipo",
     kindLabel: "Tipo di viaggio",
     kindHint:
       "Determina cosa mette in evidenza la vista Oggi durante il viaggio – tutti i moduli restano accessibili.",

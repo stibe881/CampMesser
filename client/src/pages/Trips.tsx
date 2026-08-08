@@ -653,6 +653,20 @@ export default function TripsPage() {
   /** Welche Felder das Formular für die gewählte Art zeigt (#485). */
   const kindForm = tripKindForm(formKind);
 
+  /** Reiseliste nach Art filtern (#466); "alle" = kein Filter. */
+  const [kindFilter, setKindFilter] = useState<TripKind | "alle">("alle");
+  /**
+   * Arten, die in den eigenen Reisen überhaupt vorkommen – Chips für
+   * Arten ohne eine einzige Reise wären tote Knöpfe.
+   */
+  const presentKinds = useMemo(
+    () =>
+      TRIP_KINDS.filter(kind =>
+        allTrips.some(trip => normalizeTripKind(trip.kind) === kind)
+      ),
+    [allTrips]
+  );
+
   /**
    * Art im Formular wechseln (#485): Felder, die es für die neue Art
    * nicht gibt, werden aufgeräumt statt unsichtbar mitgeschleppt – ein
@@ -721,15 +735,24 @@ export default function TripsPage() {
    * erscheint an ihrer gewohnten Stelle und ist damit gleich aufgebaut.
    */
   const shownTrips = useMemo(
-    () => (focusId === null ? trips : trips.filter(t => t.id === focusId)),
-    [trips, focusId]
+    () =>
+      focusId === null
+        ? trips.filter(
+            t =>
+              kindFilter === "alle" || normalizeTripKind(t.kind) === kindFilter
+          )
+        : trips.filter(t => t.id === focusId),
+    [trips, focusId, kindFilter]
   );
   const shownPlanned = useMemo(
     () =>
       focusId === null
-        ? plannedTrips
+        ? plannedTrips.filter(
+            t =>
+              kindFilter === "alle" || normalizeTripKind(t.kind) === kindFilter
+          )
         : plannedTrips.filter(t => t.id === focusId),
-    [plannedTrips, focusId]
+    [plannedTrips, focusId, kindFilter]
   );
   /** Fokussierte Reise – für Titel, Rückweg und die «nicht gefunden»-Zeile. */
   const focusTrip =
@@ -930,15 +953,25 @@ export default function TripsPage() {
   /** Aufenthalte fürs Kalender-Gitter (eigene vs. gemeinsame unterscheidbar). */
   const calendarTrips = useMemo<CalendarTrip[]>(
     () =>
-      allTrips.map(trip => ({
-        id: trip.id,
-        name: label(trip),
-        startDate: trip.startDate,
-        endDate: trip.endDate,
-        shared: trip.role === "member" || trip.shared,
-      })),
+      allTrips
+        .filter(
+          trip =>
+            kindFilter === "alle" || normalizeTripKind(trip.kind) === kindFilter
+        )
+        .map(trip => ({
+          id: trip.id,
+          // Die Art (#466) steht am Balken mit dran – Camping als
+          // Normalfall bleibt unbeschriftet
+          name:
+            normalizeTripKind(trip.kind) === "camping"
+              ? label(trip)
+              : `${label(trip)} · ${tripKindLabel(normalizeTripKind(trip.kind), lang)}`,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+          shared: trip.role === "member" || trip.shared,
+        })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allTrips, spots]
+    [allTrips, spots, kindFilter, lang]
   );
 
   /** Klick auf einen Kalender-Balken: Eintrag im Bearbeiten-Dialog öffnen. */
@@ -1616,6 +1649,46 @@ export default function TripsPage() {
               {t.trips.viewCalendar}
             </Button>
           </div>
+
+          {/* Nach Art filtern (#466) – erst ab zwei vorkommenden Arten,
+              vorher wäre der Filter ein Knopf ohne Wirkung */}
+          {presentKinds.length > 1 && (
+            <div
+              role="group"
+              aria-label={t.trips.kindFilterAria}
+              className="mb-4 flex flex-wrap gap-1.5"
+            >
+              <button
+                type="button"
+                onClick={() => setKindFilter("alle")}
+                aria-pressed={kindFilter === "alle"}
+                className={cn(
+                  "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                  kindFilter === "alle"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {t.trips.kindFilterAll}
+              </button>
+              {presentKinds.map(kind => (
+                <button
+                  key={kind}
+                  type="button"
+                  onClick={() => setKindFilter(kind)}
+                  aria-pressed={kindFilter === kind}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                    kindFilter === kind
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {tripKindLabel(kind, lang)}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Kalender-Ansicht: Monats-Gitter mit Aufenthalten und Ferien */}
           {tripsView === "calendar" && (

@@ -2585,6 +2585,8 @@ export const de = {
         .filter(Boolean)
         .join(" · "),
     yearCompareTitle: "Übernachtungen pro Jahr",
+    kindFilterAll: "Alle Arten",
+    kindFilterAria: "Reisen nach Art filtern",
     kindLabel: "Art der Reise",
     kindHint:
       "Steuert, was die Heute-Ansicht während der Reise hervorhebt – alle Module bleiben trotzdem erreichbar.",

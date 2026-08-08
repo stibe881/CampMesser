@@ -2579,6 +2579,8 @@ export const fr: Translation = {
         .filter(Boolean)
         .join(" · "),
     yearCompareTitle: "Nuitées par année",
+    kindFilterAll: "Tous les types",
+    kindFilterAria: "Filtrer les voyages par type",
     kindLabel: "Type de voyage",
     kindHint:
       "Détermine ce que la vue Aujourd’hui met en avant pendant le voyage – tous les modules restent accessibles.",
