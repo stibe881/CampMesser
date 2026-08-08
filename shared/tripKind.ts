@@ -96,45 +96,59 @@ export interface TripKindPreset {
    * steht sie weiterhin im Dossier.
    */
   bathing: boolean;
+  /**
+   * Schläft man draussen? Steuert die Zelt-Zeilen der Packvorschläge
+   * (#464): «Zusätzliche Heringe» im Hotel wären ein Witz auf Kosten
+   * des Vertrauens in die Vorschläge.
+   */
+  tentGear: boolean;
 }
 
 export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
   // Camping = das heutige Verhalten; keine zusätzlichen Knöpfe nötig.
-  camping: { quickModules: [], campfire: true, bathing: false },
+  camping: { quickModules: [], campfire: true, bathing: false, tentGear: true },
   strand: {
     quickModules: ["/wasser", "/packen"],
     campfire: false,
     bathing: true,
+    // Strandferien als EIGENE Art heisst: nicht im Zelt (sonst Camping)
+    tentGear: false,
   },
   hotel: {
     quickModules: ["/ausweise", "/sprachhilfe"],
     campfire: false,
     bathing: false,
+    tentGear: false,
   },
   staedte: {
     quickModules: ["/ausweise", "/sprachhilfe"],
     campfire: false,
     bathing: false,
+    tentGear: false,
   },
   wandern: {
     quickModules: ["/wanderung", "/erste-hilfe"],
     campfire: true,
     bathing: false,
+    tentGear: true,
   },
   velo: {
     quickModules: ["/wanderung", "/reparatur"],
     campfire: false,
     bathing: false,
+    tentGear: true,
   },
   wintersport: {
     quickModules: ["/laenderregeln", "/erste-hilfe"],
     campfire: false,
     bathing: false,
+    tentGear: false,
   },
   tagesausflug: {
     quickModules: ["/lunchbox", "/regentag"],
     campfire: false,
     bathing: false,
+    tentGear: false,
   },
 };
 

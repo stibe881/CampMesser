@@ -98,6 +98,7 @@ import {
   type ForecastDay,
   type PackSuggestion,
 } from "@shared/packSuggestions";
+import { tripKindPreset } from "@shared/tripKind";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import { todayIso } from "@shared/localDate";
@@ -108,12 +109,15 @@ export default function TripPackSuggestions({
   longitude,
   startDate,
   endDate,
+  kind,
 }: {
   listId: number;
   latitude: number;
   longitude: number;
   startDate: string;
   endDate: string;
+  /** Reise-Art (#464): ohne Zelt keine Zelt-Vorschläge. */
+  kind?: string | null;
 }) {
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
@@ -172,8 +176,13 @@ export default function TripPackSuggestions({
   }, [latitude, longitude, startDate, endDate]);
 
   const suggestions = useMemo(
-    () => (forecastDays ? packingSuggestions(forecastDays, lang) : []),
-    [forecastDays, lang]
+    () =>
+      forecastDays
+        ? packingSuggestions(forecastDays, lang, {
+            tentGear: tripKindPreset(kind).tentGear,
+          })
+        : [],
+    [forecastDays, lang, kind]
   );
   const listItems = itemsQuery.data?.items;
   // Namens-Abgleich case-insensitiv gegen die Einträge in der aktiven Sprache

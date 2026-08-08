@@ -40,6 +40,11 @@ interface SuggestionL4 {
   name: L4;
   category: L4;
   reason: L4;
+  /**
+   * Gehört zur Zelt-Ausrüstung (#464)? Solche Zeilen fallen weg, wenn die
+   * Reise-Art nicht draussen übernachtet (Hotel, Städtereise …).
+   */
+  tent?: boolean;
 }
 
 /** Gemeinsamer Eintrag der Regen- und Wind-Regel (wird dedupliziert). */
@@ -58,9 +63,19 @@ const extraPegs = l4(
  */
 export function packingSuggestions(
   forecastDays: ForecastDay[],
-  lang: Language = "de"
+  lang: Language = "de",
+  options: {
+    /**
+     * Zelt-Zeilen vorschlagen (#464)? false bei Reise-Arten, die nicht
+     * draussen übernachten – «Zusätzliche Heringe» im Hotel untergraben
+     * das Vertrauen in alle übrigen Vorschläge. Voreinstellung true,
+     * damit bestehende Aufrufer unverändert bleiben.
+     */
+    tentGear?: boolean;
+  } = {}
 ): PackSuggestion[] {
   if (forecastDays.length === 0) return [];
+  const tentGear = options.tentGear !== false;
 
   const maxPrecip = Math.max(...forecastDays.map(d => d.precipProb));
   const maxTemp = Math.max(...forecastDays.map(d => d.tMax));
@@ -100,8 +115,9 @@ export function packingSuggestions(
         ),
         category: packCategories.schlafen,
         reason,
+        tent: true,
       },
-      { name: extraPegs, category: packCategories.schlafen, reason }
+      { name: extraPegs, category: packCategories.schlafen, reason, tent: true }
     );
   }
 
@@ -160,6 +176,7 @@ export function packingSuggestions(
         ),
         category: packCategories.schlafen,
         reason,
+        tent: true,
       },
       {
         name: l4("Mütze", "Bonnet", "Berretto", "Beanie"),
@@ -175,6 +192,7 @@ export function packingSuggestions(
         ),
         category: packCategories.schlafen,
         reason,
+        tent: true,
       }
     );
   }
@@ -197,8 +215,9 @@ export function packingSuggestions(
         ),
         category: packCategories.schlafen,
         reason,
+        tent: true,
       },
-      { name: extraPegs, category: packCategories.schlafen, reason }
+      { name: extraPegs, category: packCategories.schlafen, reason, tent: true }
     );
   }
 
@@ -206,6 +225,8 @@ export function packingSuggestions(
   const seen = new Set<string>();
   const result: PackSuggestion[] = [];
   for (const suggestion of suggestions) {
+    // Zelt-Zeilen (#464) fallen weg, wenn die Reise nicht draussen schläft
+    if (suggestion.tent && !tentGear) continue;
     if (seen.has(suggestion.name.de)) continue;
     seen.add(suggestion.name.de);
     result.push({

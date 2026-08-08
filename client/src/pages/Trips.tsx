@@ -1652,6 +1652,7 @@ export default function TripsPage() {
                           longitude={suggestionSpot.longitude}
                           startDate={trip.startDate}
                           endDate={trip.endDate}
+                          kind={trip.kind}
                         />
                       )}
                       {/* Was frühere Reisen über diese Liste sagen (#381) –

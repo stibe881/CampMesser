@@ -46,6 +46,7 @@ describe("Reise-Art (#460)", () => {
       quickModules: [],
       campfire: true,
       bathing: false,
+      tentGear: true,
     });
     // Nur am Strand steht die Badewasser-Karte in der Heute-Ansicht
     TRIP_KINDS.filter(kind => kind !== "strand").forEach(kind => {
