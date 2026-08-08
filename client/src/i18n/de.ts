@@ -2337,6 +2337,8 @@ export const de = {
     mapRetry: "Erneut versuchen",
   },
   hike: {
+    pauseLine: (total: string, pause: string) =>
+      `Gesamtzeit ${total} – davon ${pause} Pausen`,
     title: "Wanderung aufzeichnen",
     subtitle:
       "Zeichne Wanderungen und Spaziergänge vom Platz aus auf – mit Strecke, Dauer, Tempo und Höhenmetern. Der Track bleibt auf deinem Gerät, bis du ihn speicherst.",

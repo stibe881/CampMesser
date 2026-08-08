@@ -14,6 +14,7 @@ import {
   TRACK_PAUSE_GAP_MS,
   trackStats,
   type TrackPoint,
+  totalTimeS,
 } from "@shared/track";
 
 /** Startpunkt im Flachland (Bern) – von hier aus wird gerechnet. */
@@ -360,5 +361,22 @@ describe("Aktivitätstyp (#449)", () => {
     // Ohne Bewegungszeit bleibt es eine Wanderung
     expect(guessTrackActivity(5000, 0)).toBe("hike");
     expect(guessTrackActivity(0, 3600)).toBe("hike");
+  });
+});
+
+describe("totalTimeS (#480)", () => {
+  it("misst vom ersten bis zum letzten Punkt, Pausen inklusive", () => {
+    const points = [
+      { lat: 46.8, lon: 8.2, ele: null, t: 1_000_000 },
+      { lat: 46.801, lon: 8.201, ele: null, t: 1_060_000 },
+      // 10 Minuten Rast – die Bewegungszeit liesse diese Lücke weg
+      { lat: 46.802, lon: 8.202, ele: null, t: 1_660_000 },
+    ];
+    expect(totalTimeS(points)).toBe(660);
+  });
+
+  it("ohne zwei Punkte gibt es keine Zeit", () => {
+    expect(totalTimeS([])).toBe(0);
+    expect(totalTimeS([{ lat: 46.8, lon: 8.2, ele: null, t: 5 }])).toBe(0);
   });
 });

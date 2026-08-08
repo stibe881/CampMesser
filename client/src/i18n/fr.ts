@@ -2335,6 +2335,8 @@ export const fr: Translation = {
     mapRetry: "Réessayer",
   },
   hike: {
+    pauseLine: (total: string, pause: string) =>
+      `Temps total ${total} – dont ${pause} de pauses`,
     title: "Enregistrer une randonnée",
     subtitle:
       "Enregistre tes randonnées et tes balades depuis l'emplacement – avec distance, durée, allure et dénivelé. La trace reste sur ton appareil jusqu'à ce que tu l'enregistres.",

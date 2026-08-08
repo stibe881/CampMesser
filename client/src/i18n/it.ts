@@ -2308,6 +2308,8 @@ export const it: Translation = {
     mapRetry: "Riprova",
   },
   hike: {
+    pauseLine: (total: string, pause: string) =>
+      `Tempo totale ${total} – di cui ${pause} di pause`,
     title: "Registra un'escursione",
     subtitle:
       "Registra escursioni e passeggiate dalla piazzola – con distanza, durata, andatura e dislivello. La traccia resta sul tuo dispositivo finché non la salvi.",

@@ -2260,6 +2260,8 @@ export const en: Translation = {
     mapRetry: "Try again",
   },
   hike: {
+    pauseLine: (total: string, pause: string) =>
+      `Total time ${total} – including ${pause} of breaks`,
     title: "Record a hike",
     subtitle:
       "Record hikes and walks from the pitch – with distance, duration, pace and elevation. The track stays on your device until you save it.",
