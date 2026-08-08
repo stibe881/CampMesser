@@ -380,3 +380,21 @@ describe("searchOwnContent", () => {
     expect(searchOwnContent("liste", many, 4)).toHaveLength(4);
   });
 });
+
+// #435: «Reis» tippen soll das eigene Risotto finden – die Zutaten
+// zählen zum Suchtext der eigenen Rezepte.
+describe("searchOwnContent: Rezept-Zutaten", () => {
+  it("findet ein eigenes Rezept über eine Zutat", () => {
+    const results = searchOwnContent("reis", {
+      recipes: [
+        {
+          id: 3,
+          name: "Pilz-Risotto",
+          ingredientsJson: JSON.stringify(["Reis", "Pilze", "Parmesan"]),
+        },
+        { id: 4, name: "Tomatensuppe", ingredientsJson: "[]" },
+      ],
+    });
+    expect(results.map(r => r.title)).toEqual(["Pilz-Risotto"]);
+  });
+});
