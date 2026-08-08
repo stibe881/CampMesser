@@ -1761,6 +1761,7 @@ export default function TripsPage() {
                               }
                               shared={trip.shared || trip.role === "member"}
                               budgetRappen={trip.budgetRappen}
+                              eurRateX10000={trip.eurRateX10000}
                               spotId={trip.spotId}
                               startDate={trip.startDate}
                               endDate={trip.endDate}
@@ -2186,6 +2187,7 @@ export default function TripsPage() {
                               }
                               shared={trip.shared || trip.role === "member"}
                               budgetRappen={trip.budgetRappen}
+                              eurRateX10000={trip.eurRateX10000}
                               spotId={trip.spotId}
                               startDate={trip.startDate}
                               endDate={trip.endDate}

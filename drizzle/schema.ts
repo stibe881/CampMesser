@@ -502,6 +502,13 @@ export const tripLogs = mysqlTable(
      * Wochen Frankreich haben nichts miteinander zu tun.
      */
     budgetRappen: int("budgetRappen"),
+    /**
+     * Euro-Kurs der Reisekasse (#441): CHF pro EUR × 10 000 (0.94 → 9400).
+     * null = kein Kurs gesetzt; Euro-Beträge bleiben dann unverrechnet.
+     * Am Aufenthalt und nicht global: Der Kurs gehört zur Reise, wie man
+     * ihn damals getauscht hat.
+     */
+    eurRateX10000: int("eurRateX10000"),
     pitchNumber: varchar("pitchNumber", { length: 40 }),
     wifiName: varchar("wifiName", { length: 80 }),
     wifiPassword: varchar("wifiPassword", { length: 80 }),
@@ -1014,6 +1021,13 @@ export const tripExpenses = mysqlTable(
     category: varchar("category", { length: 20 }).notNull(),
     /** Kurze Beschreibung («Znacht Migros»); leer erlaubt */
     description: varchar("description", { length: 160 }),
+    /**
+     * Währung des Betrags (#441): "CHF" oder "EUR". Der Betrag bleibt in
+     * der ERFASSTEN Währung stehen – umgerechnet wird erst beim Anzeigen,
+     * über den Kurs an der Reise (tripLogs.eurRateX10000). So bleibt der
+     * Beleg-Betrag exakt, auch wenn der Kurs später angepasst wird.
+     */
+    currency: varchar("currency", { length: 3 }).notNull().default("CHF"),
     /** Tag der Ausgabe */
     day: date("day", { mode: "string" }).notNull(),
     /** Wer bezahlt hat – freier Name, Grundlage für «wer schuldet wem» */

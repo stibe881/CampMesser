@@ -108,6 +108,18 @@ export async function getTripLog(id: number, userId: number) {
  * die Grenze davon gemeinsam gepflegt werden. Die Berechtigung prüft der
  * Router mit canAccessTrip.
  */
+/** Euro-Kurs der Reisekasse (#441) setzen; null entfernt ihn. */
+export async function setTripEurRate(
+  tripId: number,
+  eurRateX10000: number | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripLogs)
+    .set({ eurRateX10000 })
+    .where(eq(tripLogs.id, tripId));
+}
+
 export async function setTripBudget(
   tripId: number,
   budgetRappen: number | null
@@ -819,16 +831,20 @@ export async function getExpensesForTrips(tripIds: number[]) {
 export async function getExpenseTotalsForTrips(tripIds: number[]) {
   if (tripIds.length === 0) return [];
   const db = requireDb(await getDb());
+  // Nach Währung getrennt (#441) – der Aufrufer rechnet Euro zum Kurs
+  // der Reise um; eine SQL-Summe über beide Währungen wäre Unsinn.
   const rows = await db
     .select({
       tripId: tripExpenses.tripId,
+      currency: tripExpenses.currency,
       totalRappen: sql<string>`sum(${tripExpenses.amountRappen})`,
     })
     .from(tripExpenses)
     .where(inArray(tripExpenses.tripId, tripIds))
-    .groupBy(tripExpenses.tripId);
+    .groupBy(tripExpenses.tripId, tripExpenses.currency);
   return rows.map(row => ({
     tripId: row.tripId,
+    currency: row.currency,
     totalRappen: Number(row.totalRappen ?? 0),
   }));
 }

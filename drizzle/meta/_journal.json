@@ -736,6 +736,13 @@
       "when": 1786200461335,
       "tag": "0104_optimal_squadron_supreme",
       "breakpoints": true
+    },
+    {
+      "idx": 105,
+      "version": "5",
+      "when": 1786202854630,
+      "tag": "0105_omniscient_captain_universe",
+      "breakpoints": true
     }
   ]
 }

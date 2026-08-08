@@ -42,10 +42,91 @@ export function normalizeExpenseCategory(value: string): ExpenseCategory {
     : "sonstiges";
 }
 
+/**
+ * Währungen der Reisekasse (#441). Bewusst nur zwei: CHF ist die Heimat-
+ * währung, EUR das, was auf Campingplätzen rundherum auf dem Beleg steht.
+ * Jede weitere Währung wäre ein weiterer Kurs, den niemand pflegt.
+ */
+export const EXPENSE_CURRENCIES = ["CHF", "EUR"] as const;
+export type ExpenseCurrency = (typeof EXPENSE_CURRENCIES)[number];
+
+/** Unbekannte Währungen (Alt-Zeilen vor #441) gelten als CHF. */
+export function normalizeExpenseCurrency(value: unknown): ExpenseCurrency {
+  return value === "EUR" ? "EUR" : "CHF";
+}
+
+/** Kurs-Auflösung: CHF pro EUR × 10 000 (0.94 → 9400). */
+export const EUR_RATE_SCALE = 10_000;
+/** Plausibilitätsgrenzen – ausserhalb liegt ein Tippfehler, kein Kurs. */
+export const EUR_RATE_MIN = Math.round(0.5 * EUR_RATE_SCALE);
+export const EUR_RATE_MAX = Math.round(2 * EUR_RATE_SCALE);
+
+/** Kurs-Eingabe («0.94» oder «0,94») → gespeicherter Wert; null = ungültig. */
+export function parseEurRate(input: string): number | null {
+  const value = Number(input.trim().replace(",", "."));
+  if (!Number.isFinite(value)) return null;
+  const scaled = Math.round(value * EUR_RATE_SCALE);
+  if (scaled < EUR_RATE_MIN || scaled > EUR_RATE_MAX) return null;
+  return scaled;
+}
+
+/** Gespeicherter Kurs → Eingabe-Text («9400» → «0.94»). */
+export function eurRateToInput(rateX10000: number): string {
+  return (rateX10000 / EUR_RATE_SCALE)
+    .toFixed(4)
+    .replace(/0+$/, "")
+    .replace(/\.$/, ".0");
+}
+
 /** Minimalform eines Ausgaben-Eintrags für Summen und Aufteilungen. */
 export interface ExpenseLike {
   amountRappen: number;
   category: string;
+  /** "CHF" | "EUR"; fehlt bei Alt-Zeilen und gilt dann als CHF (#441). */
+  currency?: string;
+}
+
+/**
+ * CHF-Wert einer Ausgabe: CHF-Beträge unverändert, EUR über den Kurs der
+ * Reise; null, wenn ein EUR-Betrag ohne Kurs dasteht – DANN GIBT ES
+ * KEINEN WERT, und so wird er auch behandelt (weglassen und sagen),
+ * statt still 1:1 zu tun.
+ */
+export function expenseChfRappen(
+  expense: Pick<ExpenseLike, "amountRappen" | "currency">,
+  eurRateX10000: number | null
+): number | null {
+  const amount = cleanRappen(expense.amountRappen);
+  if (normalizeExpenseCurrency(expense.currency) === "CHF") return amount;
+  if (eurRateX10000 === null) return null;
+  return Math.round((amount * eurRateX10000) / EUR_RATE_SCALE);
+}
+
+/**
+ * Ausgabenliste in eine reine CHF-Sicht übersetzen, mit der alle
+ * bestehende Mathematik (Summe, Kategorien, Budget, Ausgleich)
+ * unverändert weiterrechnet. EUR-Beträge ohne Kurs fliegen raus und
+ * werden als `excludedEurRappen` gemeldet – der Aufrufer sagt es ehrlich.
+ */
+export function toChfExpenses<T extends ExpenseLike>(
+  expenses: readonly T[],
+  eurRateX10000: number | null
+): { converted: T[]; eurRappen: number; excludedEurRappen: number } {
+  const converted: T[] = [];
+  let eurRappen = 0;
+  let excludedEurRappen = 0;
+  for (const expense of expenses) {
+    if (normalizeExpenseCurrency(expense.currency) === "EUR") {
+      eurRappen += cleanRappen(expense.amountRappen);
+    }
+    const chf = expenseChfRappen(expense, eurRateX10000);
+    if (chf === null) {
+      excludedEurRappen += cleanRappen(expense.amountRappen);
+      continue;
+    }
+    converted.push({ ...expense, amountRappen: chf, currency: "CHF" });
+  }
+  return { converted, eurRappen, excludedEurRappen };
 }
 
 /** Ganzzahliger, nicht negativer Rappen-Betrag (ungültige Werte = 0). */

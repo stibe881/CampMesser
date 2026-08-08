@@ -71,6 +71,7 @@ import { useTodayIso } from "@/lib/useTodayIso";
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_LABELS,
+  EXPENSE_CURRENCIES,
   EXPENSE_DESCRIPTION_MAX_LENGTH,
   EXPENSE_MAX_RAPPEN,
   EXPENSE_PAID_BY_MAX_LENGTH,
@@ -78,10 +79,15 @@ import {
   budgetForecast,
   budgetStatus,
   BUDGET_MAX_RAPPEN,
+  eurRateToInput,
   expensesTotalRappen,
   normalizeExpenseCategory,
+  normalizeExpenseCurrency,
+  parseEurRate,
   settleUp,
+  toChfExpenses,
   type ExpenseCategory,
+  type ExpenseCurrency,
 } from "@shared/expenses";
 import { csvFileName, expensesToCsv } from "@shared/expensesCsv";
 import {
@@ -133,6 +139,7 @@ export default function TripExpenses({
   defaultDay,
   shared,
   budgetRappen,
+  eurRateX10000,
   spotId,
   startDate,
   endDate,
@@ -144,6 +151,8 @@ export default function TripExpenses({
   shared: boolean;
   /** Reise-Budget in Rappen (#256); null = keins gesetzt. */
   budgetRappen: number | null;
+  /** Euro-Kurs der Reise (#441): CHF pro EUR × 10 000; null = keiner. */
+  eurRateX10000: number | null;
   /** Verknüpfter Zeltplatz – Quelle der Tarife für die Schätzung (#386). */
   spotId: number | null;
   startDate: string;
@@ -158,6 +167,15 @@ export default function TripExpenses({
   /** null = Formular zu, "neu" = neue Ausgabe, sonst die Id der bearbeiteten. */
   const [editing, setEditing] = useState<number | "neu" | null>(null);
   const [amount, setAmount] = useState("");
+  /**
+   * Währung des Formulars (#441): wird beim Erfassen bewusst NICHT
+   * zurückgesetzt – wer im Ausland einmal auf Euro stellt, erfasst die
+   * nächsten Belege auch in Euro.
+   */
+  const [currency, setCurrency] = useState<ExpenseCurrency>("CHF");
+  /** Kurs-Eingabe (#441): offen = Feld sichtbar. */
+  const [editingRate, setEditingRate] = useState(false);
+  const [rateInput, setRateInput] = useState("");
   const [category, setCategory] = useState<ExpenseCategory>("essen");
   const [description, setDescription] = useState("");
   const [day, setDay] = useState(defaultDay);
@@ -194,8 +212,9 @@ export default function TripExpenses({
   const totalsQuery = trpc.trips.expenses.totals.useQuery(undefined, {
     staleTime: 60_000,
   });
-  const storedTotal =
-    totalsQuery.data?.find(row => row.tripId === tripId)?.totalRappen ?? 0;
+  const storedRow = totalsQuery.data?.find(row => row.tripId === tripId);
+  const storedTotal = storedRow?.totalRappen ?? 0;
+  const storedEurOpen = storedRow?.eurOpenRappen ?? 0;
 
   const closeForm = () => {
     setEditing(null);
@@ -234,24 +253,41 @@ export default function TripExpenses({
     onError: () => toast.error(t.tripExpenses.deleteFailed),
   });
 
-  const total = useMemo(() => expensesTotalRappen(expenses), [expenses]);
+  /**
+   * CHF-Sicht der Ausgaben (#441): Euro-Beträge zum Reise-Kurs, ohne Kurs
+   * fliegen sie aus allen Rechnungen (Summe, Kategorien, Budget,
+   * Ausgleich) und werden separat als «unverrechnet» ausgewiesen.
+   */
+  const chfView = useMemo(
+    () => toChfExpenses(expenses, eurRateX10000),
+    [expenses, eurRateX10000]
+  );
+  const total = useMemo(
+    () => expensesTotalRappen(chfView.converted),
+    [chfView]
+  );
   // Offen zählt die geladene Liste – sie ist nach dem Erfassen sofort
   // aktuell, während die Summen-Abfrage erst nachzieht.
   const badgeTotal = open && !query.isLoading ? total : storedTotal;
-  const byCategory = useMemo(() => expensesByCategory(expenses), [expenses]);
+  const badgeEurOpen =
+    open && !query.isLoading ? chfView.excludedEurRappen : storedEurOpen;
+  const byCategory = useMemo(
+    () => expensesByCategory(chfView.converted),
+    [chfView]
+  );
   const budget = budgetStatus(total, budgetRappen);
   // Hochrechnung (#398): nur WÄHREND der Reise, solange Tage übrig sind –
   // die Regeln (Platz & Sprit einmalig) stehen in shared/expenses.ts.
   const forecast = useMemo(
     () =>
       budgetForecast({
-        expenses,
+        expenses: chfView.converted,
         startDate,
         endDate,
         todayIso: today,
         budgetRappen,
       }),
-    [expenses, startDate, endDate, today, budgetRappen]
+    [chfView, startDate, endDate, today, budgetRappen]
   );
   const budgetMutation = trpc.trips.expenses.setBudget.useMutation({
     onSuccess: () => {
@@ -263,9 +299,21 @@ export default function TripExpenses({
   });
   const settlements = useMemo(
     () =>
-      settleUp(expenses.map(e => ({ who: e.paidBy, rappen: e.amountRappen }))),
-    [expenses]
+      settleUp(
+        chfView.converted.map(e => ({ who: e.paidBy, rappen: e.amountRappen }))
+      ),
+    [chfView]
   );
+  const rateMutation = trpc.trips.expenses.setEurRate.useMutation({
+    onSuccess: () => {
+      // Der Kurs hängt an der Reise – die Reise-Liste liefert ihn als Prop
+      utils.trips.list.invalidate();
+      utils.trips.expenses.totals.invalidate();
+      setEditingRate(false);
+      toast.success(t.tripExpenses.eurRateSaved);
+    },
+    onError: e => toast.error(e.message || t.common.saveFailed),
+  });
   /** Bereits erfasste Zahlende – als Vorschläge fürs Namensfeld. */
   const knownPayers = useMemo(() => {
     const names: string[] = [];
@@ -280,6 +328,7 @@ export default function TripExpenses({
 
   const money = (rappen: number) =>
     `${t.tripExpenses.currency} ${formatChf(rappen, lang)}`;
+  const eurMoney = (rappen: number) => `€ ${formatChf(rappen, lang)}`;
   const fmtDay = (iso: string) => fmtShort(new Date(`${iso}T00:00:00`), lang);
   const labelOf = (expense: { description: string | null }) =>
     expense.description?.trim() || t.tripExpenses.untitled;
@@ -298,6 +347,7 @@ export default function TripExpenses({
   const startEditExpense = (expense: (typeof expenses)[number]) => {
     setEditing(expense.id);
     setAmount(rappenToInput(expense.amountRappen));
+    setCurrency(normalizeExpenseCurrency(expense.currency));
     setCategory(normalizeExpenseCategory(expense.category));
     setDescription(expense.description ?? "");
     setDay(expense.day);
@@ -317,6 +367,7 @@ export default function TripExpenses({
     }
     const payload = {
       amountRappen: Math.min(rappen, EXPENSE_MAX_RAPPEN),
+      currency,
       category,
       description: description.trim().slice(0, EXPENSE_DESCRIPTION_MAX_LENGTH),
       day,
@@ -349,6 +400,8 @@ export default function TripExpenses({
     }
     setEditing("neu");
     setAmount(rappenToInput(fuelResult.rappen));
+    // Der Fahrtkosten-Rechner rechnet in CHF – die Formular-Währung passt sich an
+    setCurrency("CHF");
     setCategory("sprit");
     setDescription(
       t.tripExpenses.fuelDescription(Math.round(fuelResult.totalKm))
@@ -396,9 +449,11 @@ export default function TripExpenses({
         </span>
         {/* Der Betrag steht auch ZUGEKLAPPT da (#345) – dort ist er der
             einzige Grund, den Abschnitt überhaupt anzusehen. */}
-        {badgeTotal > 0 && (
+        {(badgeTotal > 0 || badgeEurOpen > 0) && (
           <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
-            {money(badgeTotal)}
+            {badgeTotal > 0 && money(badgeTotal)}
+            {badgeTotal > 0 && badgeEurOpen > 0 && " + "}
+            {badgeEurOpen > 0 && eurMoney(badgeEurOpen)}
           </span>
         )}
         <ChevronDown
@@ -581,14 +636,128 @@ export default function TripExpenses({
               ) : (
                 <>
                   {/* Summe */}
-                  <div className="flex items-baseline justify-between rounded-lg bg-muted/40 px-3 py-2">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      {t.tripExpenses.total}
-                    </span>
-                    <span className="font-mono text-lg font-bold tabular-nums">
-                      {money(total)}
-                    </span>
+                  <div className="rounded-lg bg-muted/40 px-3 py-2">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t.tripExpenses.total}
+                      </span>
+                      <span className="font-mono text-lg font-bold tabular-nums">
+                        {money(total)}
+                      </span>
+                    </div>
+                    {chfView.eurRappen > 0 && eurRateX10000 !== null && (
+                      <p className="mt-0.5 text-right text-xs text-muted-foreground">
+                        {t.tripExpenses.eurConvertedNote(
+                          eurMoney(chfView.eurRappen),
+                          eurRateToInput(eurRateX10000)
+                        )}
+                      </p>
+                    )}
+                    {chfView.excludedEurRappen > 0 && (
+                      <p className="mt-0.5 text-right text-xs font-medium text-destructive">
+                        {t.tripExpenses.eurUnconvertedNote(
+                          eurMoney(chfView.excludedEurRappen)
+                        )}
+                      </p>
+                    )}
                   </div>
+
+                  {/* Euro-Kurs (#441): erscheint, sobald Euro im Spiel ist */}
+                  {chfView.eurRappen > 0 && (
+                    <div className="rounded-lg border border-border bg-muted/20 px-3 py-2">
+                      {editingRate ? (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <label
+                            className="text-xs text-muted-foreground"
+                            htmlFor={`eur-rate-${tripId}`}
+                          >
+                            1 € =
+                          </label>
+                          <Input
+                            id={`eur-rate-${tripId}`}
+                            inputMode="decimal"
+                            className="w-24"
+                            value={rateInput}
+                            placeholder="0.94"
+                            onChange={e => setRateInput(e.target.value)}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            {t.tripExpenses.currency}
+                          </span>
+                          <Button
+                            size="sm"
+                            disabled={rateMutation.isPending}
+                            onClick={() => {
+                              const rate = parseEurRate(rateInput);
+                              if (rate === null) {
+                                toast.error(t.tripExpenses.eurRateInvalid);
+                                return;
+                              }
+                              rateMutation.mutate({
+                                tripId,
+                                eurRateX10000: rate,
+                              });
+                            }}
+                          >
+                            {t.common.save}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setEditingRate(false)}
+                          >
+                            {t.common.cancel}
+                          </Button>
+                          {eurRateX10000 !== null && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-muted-foreground"
+                              disabled={rateMutation.isPending}
+                              onClick={() =>
+                                rateMutation.mutate({
+                                  tripId,
+                                  eurRateX10000: null,
+                                })
+                              }
+                            >
+                              {t.tripExpenses.eurRateRemove}
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {eurRateX10000 !== null
+                              ? t.tripExpenses.eurRateLine(
+                                  eurRateToInput(eurRateX10000)
+                                )
+                              : t.tripExpenses.eurRateMissing}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => {
+                              setRateInput(
+                                eurRateX10000 !== null
+                                  ? eurRateToInput(eurRateX10000)
+                                  : ""
+                              );
+                              setEditingRate(true);
+                            }}
+                          >
+                            {eurRateX10000 !== null
+                              ? t.tripExpenses.eurRateEdit
+                              : t.tripExpenses.eurRateSet}
+                          </Button>
+                        </div>
+                      )}
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        {t.tripExpenses.eurRateHint}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Aufteilung nach Kategorie – schlichte Balken */}
                   <div>
@@ -825,7 +994,9 @@ export default function TripExpenses({
                           </p>
                         </div>
                         <span className="shrink-0 font-mono text-sm font-semibold tabular-nums">
-                          {money(expense.amountRappen)}
+                          {normalizeExpenseCurrency(expense.currency) === "EUR"
+                            ? eurMoney(expense.amountRappen)
+                            : money(expense.amountRappen)}
                         </span>
                         <Button
                           variant="ghost"
@@ -889,6 +1060,30 @@ export default function TripExpenses({
                         value={amount}
                         onChange={e => setAmount(e.target.value)}
                       />
+                      {/* Währung (#441): CHF oder EUR – die Wahl bleibt
+                          für die nächste Ausgabe stehen */}
+                      <div
+                        className="mt-1.5 flex gap-1.5"
+                        role="group"
+                        aria-label={t.tripExpenses.currencyAria}
+                      >
+                        {EXPENSE_CURRENCIES.map(code => (
+                          <button
+                            key={code}
+                            type="button"
+                            onClick={() => setCurrency(code)}
+                            aria-pressed={currency === code}
+                            className={cn(
+                              "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                              currency === code
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            {code === "EUR" ? "€ EUR" : code}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor={`expense-day-${tripId}`}>

@@ -94,7 +94,7 @@ describe("expensesToCsv", () => {
     expect(lines.length).toBe(4);
     expect(lines[0]).toContain("Datum;Kategorie");
     expect(lines[1]).toContain('"Znacht; Migros"');
-    expect(lines[3]).toBe(";;;Total;165.50");
+    expect(lines[3]).toBe(";;;Total;CHF;165.50");
   });
 
   it("übersetzt die Kategorie über die Ansicht", () => {
@@ -111,7 +111,7 @@ describe("expensesToCsv", () => {
   it("liefert auch ohne Ausgaben Kopf- und Summenzeile", () => {
     const lines = expensesToCsv([], options).trim().split("\r\n");
     expect(lines.length).toBe(2);
-    expect(lines[1]).toBe(";;;Total;0.00");
+    expect(lines[1]).toBe(";;;Total;CHF;0.00");
   });
 });
 
