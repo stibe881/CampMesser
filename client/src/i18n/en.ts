@@ -6116,6 +6116,14 @@ export const en: Translation = {
     staysLabel: "Stays",
     favoriteLabel: "Favourite pitch",
     avgRatingLabel: "Avg. rating",
+    hikeYearsTitle: "Hiking year totals",
+    hikeYearsLink: "To your hikes",
+    hikeYearsLine: (tours: number, km: string, ascent: string) =>
+      tours === 1
+        ? `1 tour · ${km} km · ${ascent} m up`
+        : `${tours} tours · ${km} km · ${ascent} m up`,
+    hikeYearsBike: (n: number) =>
+      n === 1 ? "including 1 bike ride" : `including ${n} bike rides`,
     weatherLuckTitle: "Weather luck",
     weatherLuckDry: pct => `${pct}% of your camping days were dry`,
     weatherLuckAvgMax: temp => `avg daily high ${temp}°`,

@@ -6285,6 +6285,14 @@ export const de = {
     staysLabel: "Aufenthalte",
     favoriteLabel: "Lieblingsplatz",
     avgRatingLabel: "Ø Bewertung",
+    hikeYearsTitle: "Wander-Jahresbilanz",
+    hikeYearsLink: "Zu den Wanderungen",
+    hikeYearsLine: (tours: number, km: string, ascent: string) =>
+      tours === 1
+        ? `1 Tour · ${km} km · ${ascent} Hm`
+        : `${tours} Touren · ${km} km · ${ascent} Hm`,
+    hikeYearsBike: (n: number) =>
+      n === 1 ? "davon 1 Velotour" : `davon ${n} Velotouren`,
     weatherLuckTitle: "Wetter-Glück",
     weatherLuckDry: (pct: number) =>
       `${pct} % deiner Campingtage waren trocken`,

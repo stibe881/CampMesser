@@ -6281,6 +6281,14 @@ export const fr: Translation = {
     staysLabel: "Séjours",
     favoriteLabel: "Emplacement préféré",
     avgRatingLabel: "Note moyenne",
+    hikeYearsTitle: "Bilan annuel des randonnées",
+    hikeYearsLink: "Vers les randonnées",
+    hikeYearsLine: (tours: number, km: string, ascent: string) =>
+      tours === 1
+        ? `1 sortie · ${km} km · ${ascent} m D+`
+        : `${tours} sorties · ${km} km · ${ascent} m D+`,
+    hikeYearsBike: (n: number) =>
+      n === 1 ? "dont 1 sortie à vélo" : `dont ${n} sorties à vélo`,
     weatherLuckTitle: "Chance météo",
     weatherLuckDry: pct => `${pct} % de tes jours de camping ont été secs`,
     weatherLuckAvgMax: temp => `max. journalier moyen ${temp}°`,
