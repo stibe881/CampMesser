@@ -57,6 +57,36 @@ export const accountRouters = {
    * Tankbuch (#443): schlichtes CRUD auf eigenen Tankfüllungen. Die
    * Verbrauchs-Rechnung steckt in shared/fuelLog.ts und läuft im Client.
    */
+  /**
+   * Feedback aus der App (#512): Kurznachricht ans Betreiber-Postfach
+   * über das bestehende SMTP (#56). Ohne SMTP ehrliche Absage statt
+   * stilles Verschlucken; 5 Meldungen pro Stunde und Konto reichen.
+   */
+  feedback: router({
+    send: protectedProcedure
+      .input(z.object({ message: z.string().trim().min(10).max(2000) }))
+      .mutation(async ({ ctx, input }) => {
+        const { allowAction } = await import("../rateLimit");
+        if (!allowAction(`feedback:${ctx.user.id}`, 5, 60 * 60 * 1000)) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "rateLimited",
+          });
+        }
+        const { mailConfigured, sendFeedbackMail } = await import("../mailer");
+        if (!mailConfigured()) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "mailNotConfigured",
+          });
+        }
+        await sendFeedbackMail(
+          { email: ctx.user.email ?? "", name: ctx.user.name ?? null },
+          input.message
+        );
+        return { success: true } as const;
+      }),
+  }),
   fuelLog: router({
     list: protectedProcedure.query(({ ctx }) => db.getFuelLogs(ctx.user.id)),
     add: protectedProcedure

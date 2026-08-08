@@ -4684,6 +4684,17 @@ export const fr: Translation = {
     sourceNote:
       "Règles de baignade reformulées d'après la SSS (slrg.ch) ; drapeaux selon la pratique internationale de sauvetage (ILS). La signalisation sur la plage prime toujours.",
   },
+  feedback: {
+    title: "Feedback & signaler une erreur",
+    intro:
+      "Qu'est-ce qui coince, manque ou agace ? Le message va directement à la boîte de l'exploitant – avec ton adresse e-mail pour les questions.",
+    placeholder: "Décris brièvement ce que tu as vécu ou souhaité …",
+    send: "Envoyer",
+    sent: "Merci ! Le message est en route.",
+    mailNotConfigured: "L'envoi d'e-mails n'est pas configuré sur le serveur.",
+    rateLimited: "Assez pour cette heure – réessaie plus tard.",
+    note: "Au moins 10 caractères. Sont transmis le message, le nom et l'adresse e-mail.",
+  },
   connections: {
     title: "TP pour le trajet",
     subtitle:

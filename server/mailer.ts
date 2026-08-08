@@ -159,3 +159,33 @@ export async function sendVerificationMail(
 ): Promise<void> {
   await sendMail(to, buildVerificationMail(verifyUrl, lang));
 }
+
+/**
+ * Feedback aus der App (#512): Kurznachricht ans Betreiber-Postfach
+ * (FEEDBACK_EMAIL, sonst SMTP_FROM/SMTP_USER). Die Absender-Adresse der
+ * Person steht im Text – als Antwort-Adresse taugt sie, ohne dass die
+ * App fremde Absender fälscht.
+ */
+export function buildFeedbackMail(
+  fromUser: { email: string; name: string | null },
+  message: string
+): { subject: string; text: string } {
+  return {
+    subject: "CampMesser-Feedback",
+    text:
+      `Feedback von ${fromUser.name ?? "–"} <${fromUser.email}>:\n\n` +
+      `${message.trim()}\n`,
+  };
+}
+
+export async function sendFeedbackMail(
+  fromUser: { email: string; name: string | null },
+  message: string
+): Promise<void> {
+  const to =
+    process.env.FEEDBACK_EMAIL ??
+    process.env.SMTP_FROM ??
+    process.env.SMTP_USER;
+  if (!to) throw new Error("Kein Feedback-Postfach konfiguriert");
+  await sendMail(to, buildFeedbackMail(fromUser, message));
+}

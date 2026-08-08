@@ -4564,6 +4564,17 @@ export const en: Translation = {
     sourceNote:
       "Bathing rules paraphrased from the SLRG (slrg.ch); flags follow international lifesaving practice (ILS). The signage on the beach always takes precedence.",
   },
+  feedback: {
+    title: "Feedback & report a problem",
+    intro:
+      "What's broken, missing or annoying? The message goes straight to the operator's inbox – with your email address for follow-up questions.",
+    placeholder: "Briefly describe what you ran into or wish for …",
+    send: "Send",
+    sent: "Thank you! The message is on its way.",
+    mailNotConfigured: "Email sending is not configured on the server.",
+    rateLimited: "Enough for this hour – try again later.",
+    note: "At least 10 characters. The message, your name and email address are transmitted.",
+  },
   connections: {
     title: "Public transport to get there",
     subtitle:

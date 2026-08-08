@@ -4695,6 +4695,18 @@ export const de = {
     sourceNote:
       "Baderegeln sinngemäss nach SLRG (slrg.ch); Flaggen nach der Praxis der internationalen Rettungsdienste (ILS). Massgeblich ist immer die Beschilderung am Strand.",
   },
+  feedback: {
+    title: "Feedback & Fehler melden",
+    intro:
+      "Was klemmt, was fehlt, was nervt? Die Nachricht geht direkt ans Betreiber-Postfach – mit deiner E-Mail-Adresse als Absender für Rückfragen.",
+    placeholder: "Beschreibe kurz, was du erlebt hast oder dir wünschst …",
+    send: "Abschicken",
+    sent: "Danke! Die Nachricht ist unterwegs.",
+    mailNotConfigured:
+      "Der Mail-Versand ist auf dem Server nicht eingerichtet.",
+    rateLimited: "Genug für diese Stunde – versuch es später nochmals.",
+    note: "Mindestens 10 Zeichen. Übermittelt werden Nachricht, Name und E-Mail-Adresse.",
+  },
   connections: {
     title: "ÖV zur Anreise",
     subtitle:

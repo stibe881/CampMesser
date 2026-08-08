@@ -4657,6 +4657,17 @@ export const it: Translation = {
     sourceNote:
       "Regole di balneazione riassunte secondo la SSS (slrg.ch); bandiere secondo la prassi internazionale di salvataggio (ILS). Fa sempre fede la segnaletica in spiaggia.",
   },
+  feedback: {
+    title: "Feedback & segnalare errori",
+    intro:
+      "Cosa non va, cosa manca, cosa infastidisce? Il messaggio va direttamente alla casella del gestore – con il tuo indirizzo e-mail per eventuali domande.",
+    placeholder: "Descrivi in breve cosa hai riscontrato o desideri …",
+    send: "Invia",
+    sent: "Grazie! Il messaggio è in viaggio.",
+    mailNotConfigured: "L'invio di e-mail non è configurato sul server.",
+    rateLimited: "Basta per quest'ora – riprova più tardi.",
+    note: "Almeno 10 caratteri. Vengono trasmessi messaggio, nome e indirizzo e-mail.",
+  },
   connections: {
     title: "TP per il viaggio",
     subtitle:
