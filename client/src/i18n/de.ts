@@ -2061,6 +2061,8 @@ export const de = {
     familySearchHint: "Tippe auf «In diesem Ausschnitt suchen».",
   },
   spotDetail: {
+    staysShowAll: (n: number) => `Alle ${n} Aufenthalte zeigen`,
+    staysShowLess: "Weniger zeigen",
     tariffCurrencyAria: "Währung",
     tariffUnitPlaceholder: "z. B. pro Tag",
     tariffPeriodAdd: "Zeitraum hinzufügen",

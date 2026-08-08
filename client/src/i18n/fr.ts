@@ -2062,6 +2062,8 @@ export const fr: Translation = {
     familySearchHint: "Touche « Chercher dans cette zone ».",
   },
   spotDetail: {
+    staysShowAll: (n: number) => `Afficher les ${n} séjours`,
+    staysShowLess: "Afficher moins",
     tariffCurrencyAria: "Monnaie",
     tariffUnitPlaceholder: "p. ex. par jour",
     tariffPeriodAdd: "Ajouter une période",

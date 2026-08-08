@@ -108,6 +108,7 @@ export default function SpotDetailPage() {
   });
   const [weather, setWeather] = useState<DossierWeather | null>(null);
   const [weatherFailed, setWeatherFailed] = useState(false);
+  const [showAllStays, setShowAllStays] = useState(false);
   const utils = trpc.useUtils();
   const photosQuery = trpc.spots.photos.list.useQuery(
     { spotId },
@@ -747,24 +748,53 @@ export default function SpotDetailPage() {
                   </div>
                 </div>
                 <ul className="space-y-1.5">
-                  {spotTrips.slice(0, 3).map(trip => (
-                    <li
-                      key={trip.id}
-                      className="flex items-center gap-2 text-sm text-muted-foreground"
-                    >
-                      <CalendarDays
-                        className="h-3.5 w-3.5 shrink-0"
-                        aria-hidden="true"
-                      />
-                      {fmtMedium(new Date(`${trip.startDate}T00:00:00`), lang)}{" "}
-                      · {tripNights(trip.startDate, trip.endDate)}{" "}
-                      {tripNights(trip.startDate, trip.endDate) === 1
-                        ? t.common.night
-                        : t.common.nights}
-                      {trip.title && ` · ${trip.title}`}
-                    </li>
-                  ))}
+                  {/* Besuchs-Verlauf (#496): auf Wunsch ALLE Aufenthalte,
+                      je mit Bewertung und Sprung in die Reise – «zum
+                      vierten Mal hier» ist sonst nirgends nachzulesen. */}
+                  {(showAllStays ? spotTrips : spotTrips.slice(0, 3)).map(
+                    trip => (
+                      <li
+                        key={trip.id}
+                        className="flex items-center gap-2 text-sm text-muted-foreground"
+                      >
+                        <CalendarDays
+                          className="h-3.5 w-3.5 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <Link
+                          href={`/tagebuch/${trip.id}`}
+                          className="min-w-0 hover:text-primary hover:underline"
+                        >
+                          {fmtMedium(
+                            new Date(`${trip.startDate}T00:00:00`),
+                            lang
+                          )}{" "}
+                          · {tripNights(trip.startDate, trip.endDate)}{" "}
+                          {tripNights(trip.startDate, trip.endDate) === 1
+                            ? t.common.night
+                            : t.common.nights}
+                          {trip.title && ` · ${trip.title}`}
+                        </Link>
+                        {trip.rating != null && trip.rating > 0 && (
+                          <span className="shrink-0 text-xs font-medium text-chart-1">
+                            {trip.rating} ★
+                          </span>
+                        )}
+                      </li>
+                    )
+                  )}
                 </ul>
+                {spotTrips.length > 3 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllStays(open => !open)}
+                    className="mt-2 text-sm font-medium text-primary hover:underline"
+                  >
+                    {showAllStays
+                      ? t.spotDetail.staysShowLess
+                      : t.spotDetail.staysShowAll(spotTrips.length)}
+                  </button>
+                )}
               </>
             ) : (
               <p className="text-sm text-muted-foreground">

@@ -1999,6 +1999,8 @@ export const en: Translation = {
     familySearchHint: "Tap “Search this area”.",
   },
   spotDetail: {
+    staysShowAll: (n: number) => `Show all ${n} stays`,
+    staysShowLess: "Show fewer",
     tariffCurrencyAria: "Currency",
     tariffUnitPlaceholder: "e.g. per day",
     tariffPeriodAdd: "Add period",
