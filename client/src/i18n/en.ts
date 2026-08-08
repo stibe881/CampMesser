@@ -4441,6 +4441,21 @@ export const en: Translation = {
       `Avalanche danger: level ${level} (${label})`,
     note: "Source: SLF avalanche bulletin – Switzerland only, no guarantee.",
   },
+  winterKnowledge: {
+    title: "Slopes & avalanches",
+    subtitle:
+      "The 10 FIS rules of conduct and avalanche basics – for looking up, offline too.",
+    offlineNote:
+      "All content is available offline – even in a dead zone on the mountain.",
+    fisTitle: "The 10 FIS rules of conduct",
+    fisIntro:
+      "Summarised in essence – they apply on every slope, to skis and snowboards alike.",
+    avalancheTitle: "Avalanche basics",
+    avalancheIntro:
+      "Sorts out the terms for terrain beside the slopes – and deliberately replaces no avalanche course.",
+    sourceNote:
+      "FIS rules paraphrased from fis-ski.com; avalanche knowledge based on the SLF fundamentals (whiterisk.ch). Anyone regularly off-piste belongs in an avalanche course – no app replaces one.",
+  },
   winter: {
     title: "Frost & snow",
     frostLine: (nights: string) => `Frost expected: ${nights}.`,

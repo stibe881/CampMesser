@@ -4532,6 +4532,21 @@ export const it: Translation = {
       `Pericolo di valanghe: grado ${level} (${label})`,
     note: "Fonte: bollettino valanghe SLF – solo Svizzera, senza garanzia.",
   },
+  winterKnowledge: {
+    title: "Piste & valanghe",
+    subtitle:
+      "Le 10 regole di condotta FIS e le basi sul pericolo di valanghe – da consultare, anche offline.",
+    offlineNote:
+      "Tutti i contenuti sono disponibili offline – anche senza rete in montagna.",
+    fisTitle: "Le 10 regole di condotta FIS",
+    fisIntro:
+      "Riassunte nel loro senso – valgono su ogni pista, per sci e snowboard allo stesso modo.",
+    avalancheTitle: "Basi sulle valanghe",
+    avalancheIntro:
+      "Mette ordine nei concetti per il terreno accanto alle piste – e volutamente non sostituisce nessun corso valanghe.",
+    sourceNote:
+      "Regole FIS riassunte da fis-ski.com; nozioni sulle valanghe secondo le basi dell'SLF (whiterisk.ch). Chi va regolarmente fuori pista deve frequentare un corso valanghe – nessuna app lo sostituisce.",
+  },
   winter: {
     title: "Gelo e neve",
     frostLine: (nights: string) => `Gelo in vista: ${nights}.`,

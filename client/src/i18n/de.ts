@@ -4571,6 +4571,21 @@ export const de = {
       `Lawinengefahr: Stufe ${level} (${label})`,
     note: "Quelle: SLF-Lawinenbulletin – gilt nur für die Schweiz, ohne Gewähr.",
   },
+  winterKnowledge: {
+    title: "Pisten & Lawinen",
+    subtitle:
+      "Die 10 FIS-Verhaltensregeln und das Grundwissen zur Lawinengefahr – zum Nachschlagen, auch offline.",
+    offlineNote:
+      "Alle Inhalte sind offline verfügbar – auch im Funkloch am Berg.",
+    fisTitle: "Die 10 FIS-Verhaltensregeln",
+    fisIntro:
+      "Sinngemäss zusammengefasst – sie gelten auf jeder Piste, für Ski und Snowboard gleichermassen.",
+    avalancheTitle: "Lawinen-Grundwissen",
+    avalancheIntro:
+      "Ordnet die Begriffe fürs Gelände neben der Piste – und ersetzt bewusst keinen Lawinenkurs.",
+    sourceNote:
+      "FIS-Regeln sinngemäss nach fis-ski.com; Lawinen-Wissen nach den Grundlagen des SLF (whiterisk.ch). Wer regelmässig abseits der Piste unterwegs ist, gehört in einen Lawinenkurs – keine App ersetzt ihn.",
+  },
   winter: {
     title: "Frost & Schnee",
     frostLine: (nights: string) => `Frost in Sicht: ${nights}.`,

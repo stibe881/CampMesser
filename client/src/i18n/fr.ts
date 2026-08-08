@@ -4560,6 +4560,21 @@ export const fr: Translation = {
       `Danger d'avalanche : degré ${level} (${label})`,
     note: "Source : bulletin d'avalanches du SLF – Suisse uniquement, sans garantie.",
   },
+  winterKnowledge: {
+    title: "Pistes & avalanches",
+    subtitle:
+      "Les 10 règles de conduite FIS et les bases du danger d'avalanche – à consulter, aussi hors ligne.",
+    offlineNote:
+      "Tout le contenu est disponible hors ligne – même sans réseau en montagne.",
+    fisTitle: "Les 10 règles de conduite FIS",
+    fisIntro:
+      "Résumées dans leur esprit – elles valent sur chaque piste, à ski comme en snowboard.",
+    avalancheTitle: "Bases sur les avalanches",
+    avalancheIntro:
+      "Met de l'ordre dans les notions pour le terrain à côté des pistes – et ne remplace volontairement aucun cours d'avalanche.",
+    sourceNote:
+      "Règles FIS reformulées d'après fis-ski.com ; connaissances avalanches selon les bases du SLF (whiterisk.ch). Qui sort régulièrement des pistes a sa place dans un cours d'avalanche – aucune app ne le remplace.",
+  },
   winter: {
     title: "Gel et neige",
     frostLine: (nights: string) => `Gel en vue : ${nights}.`,

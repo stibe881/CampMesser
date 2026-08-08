@@ -155,7 +155,8 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     winter: false,
   },
   wintersport: {
-    quickModules: ["/laenderregeln", "/erste-hilfe"],
+    // «Pisten & Lawinen» (#472) zuerst – das schlägt man am Berg nach
+    quickModules: ["/wintersport", "/laenderregeln", "/erste-hilfe"],
     campfire: false,
     bathing: false,
     tentGear: false,
