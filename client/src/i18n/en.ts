@@ -1476,6 +1476,9 @@ export const en: Translation = {
     regaLinkAria: "Open the official Rega app page (external link)",
     regaLink: "To the official Rega app",
     guideTitle: "How to make the emergency call properly",
+    abroadTitle: "Emergency numbers abroad",
+    abroadHint:
+      "112 works across Europe. For mountain rescue and ambulance, the direct national numbers are often faster – here they are for the common camping countries.",
   },
   energy: {
     title: "Energy budget calculator",

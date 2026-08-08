@@ -1526,6 +1526,9 @@ export const de = {
     regaLinkAria: "Offizielle Rega-App-Seite öffnen (externer Link)",
     regaLink: "Zur offiziellen Rega-App",
     guideTitle: "So setzt du den Notruf richtig ab",
+    abroadTitle: "Notrufnummern im Ausland",
+    abroadHint:
+      "Die 112 funktioniert europaweit. Für Bergrettung und Sanität sind die direkten Landesnummern oft schneller – hier für die gängigen Camping-Länder.",
   },
   energy: {
     title: "Energie-Budget-Rechner",

@@ -1505,6 +1505,9 @@ export const it: Translation = {
     regaLinkAria: "Apri la pagina ufficiale dell'app Rega (link esterno)",
     regaLink: "All'app Rega ufficiale",
     guideTitle: "Come effettuare correttamente la chiamata d'emergenza",
+    abroadTitle: "Numeri d'emergenza all'estero",
+    abroadHint:
+      "Il 112 funziona in tutta Europa. Per il soccorso alpino e l'ambulanza i numeri nazionali diretti sono spesso più rapidi – eccoli per i paesi da campeggio più comuni.",
   },
   energy: {
     title: "Calcolatore del budget energetico",

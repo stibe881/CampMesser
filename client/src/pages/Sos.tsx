@@ -20,6 +20,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { formatDMS, wgs84ToLV95 } from "@/lib/sun";
+import { EMERGENCY_COUNTRIES } from "@shared/emergencyNumbers";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import {
   DEFAULT_LOCATION_SHARE_HOURS,
@@ -37,6 +38,14 @@ interface GeoState {
   altitude?: number | null;
   timestamp?: number;
   errorKey?: "unsupported" | "denied" | "failed";
+}
+
+/** Flaggen-Emoji aus dem ISO-Code (Regional-Indicator-Zeichen). */
+function flagEmoji(code: string): string {
+  return String.fromCodePoint(
+    0x1f1e6 + code.toUpperCase().charCodeAt(0) - 65,
+    0x1f1e6 + code.toUpperCase().charCodeAt(1) - 65
+  );
 }
 
 /** Frische Position holen – bewusst ohne gecachten Wert (maximumAge 0). */
@@ -524,6 +533,46 @@ export default function SosPage() {
           </a>
         </CardContent>
       </Card>
+
+      {/* Notrufnummern im Ausland (#432) – die Schweiz steht schon oben */}
+      <h2 className="mb-3 font-serif text-lg font-semibold">
+        {t.sos.abroadTitle}
+      </h2>
+      <p className="mb-3 text-sm text-muted-foreground">{t.sos.abroadHint}</p>
+      <div className="mb-6 space-y-2">
+        {EMERGENCY_COUNTRIES.filter(country => country.code !== "ch").map(
+          country => (
+            <details
+              key={country.code}
+              className="rounded-xl border border-border bg-card"
+            >
+              <summary className="flex cursor-pointer items-center gap-2 px-4 py-3 font-semibold marker:text-muted-foreground">
+                <span aria-hidden="true">{flagEmoji(country.code)}</span>
+                {pick(country.name, lang)}
+              </summary>
+              <div className="flex flex-wrap gap-2 px-4 pb-4">
+                {country.numbers.map(entry => (
+                  <a
+                    key={`${country.code}-${entry.number}-${entry.label.de}`}
+                    href={`tel:${entry.number}`}
+                    className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 transition-colors hover:border-destructive/30"
+                    aria-label={t.sos.callAria(pick(entry.label, lang))}
+                  >
+                    <Phone
+                      className="h-3.5 w-3.5 text-destructive"
+                      aria-hidden="true"
+                    />
+                    <span className="text-sm">{pick(entry.label, lang)}</span>
+                    <span className="font-mono text-sm font-bold">
+                      {entry.number}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </details>
+          )
+        )}
+      </div>
 
       {/* Notruf-Anleitung */}
       <h2 className="mb-3 font-serif text-lg font-semibold">

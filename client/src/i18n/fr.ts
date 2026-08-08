@@ -1528,6 +1528,9 @@ export const fr: Translation = {
       "Ouvrir la page officielle de l'application Rega (lien externe)",
     regaLink: "Vers l'application Rega officielle",
     guideTitle: "Comment bien passer l'appel d'urgence",
+    abroadTitle: "Numéros d'urgence à l'étranger",
+    abroadHint:
+      "Le 112 fonctionne dans toute l'Europe. Pour le secours en montagne et l'ambulance, les numéros nationaux directs sont souvent plus rapides – les voici pour les pays de camping courants.",
   },
   energy: {
     title: "Calculateur de budget énergie",
