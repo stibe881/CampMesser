@@ -6364,6 +6364,12 @@ export const en: Translation = {
       "Sign-ins from before this overview only appear after that device's next sign-in.",
   },
   fuelLog: {
+    vehicleLabel: "Vehicle",
+    vehicleNone: "No vehicle",
+    vehicleAll: "All vehicles",
+    chartTitle: "Consumption over time",
+    chartHint:
+      "Consumption per segment between two fill-ups, by odometer – plausible segments only.",
     csvButton: "Export as CSV",
     csvHeaders: [
       "Date",
@@ -6371,6 +6377,7 @@ export const en: Translation = {
       "Litres",
       "Amount CHF",
       "Consumption l/100 km",
+      "Vehicle",
     ],
     title: "Fuel log",
     subtitle: "Fill-ups with odometer reading – for your real consumption.",

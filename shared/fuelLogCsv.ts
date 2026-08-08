@@ -10,6 +10,8 @@ import { fuelSegments, type FuelFillLike } from "./fuelLog";
 export interface CsvFuelFillLike extends FuelFillLike {
   /** Bezahlter Gesamtbetrag in Rappen; null = nicht erfasst. */
   priceRappen?: number | null;
+  /** Fahrzeug-Name (#503); leer bei alten Einträgen. */
+  vehicle?: string | null;
 }
 
 /**
@@ -20,7 +22,7 @@ export interface CsvFuelFillLike extends FuelFillLike {
 export function fuelLogToCsv(
   fills: readonly CsvFuelFillLike[],
   options: {
-    /** Spaltentitel: Datum, Kilometerstand, Liter, Betrag, Verbrauch */
+    /** Spaltentitel: Datum, Kilometerstand, Liter, Betrag, Verbrauch, Fahrzeug */
     headers: readonly string[];
   }
 ): string {
@@ -39,6 +41,7 @@ export function fuelLogToCsv(
         (fill.liters10 / 10).toFixed(1),
         fill.priceRappen != null ? csvAmount(fill.priceRappen) : "",
         l100 !== undefined ? l100.toFixed(1) : "",
+        fill.vehicle ?? "",
       ])
     );
   });

@@ -66,6 +66,8 @@ export const accountRouters = {
           odometerKm: z.number().int().min(0).max(FUEL_MAX_ODOMETER_KM),
           liters10: z.number().int().min(1).max(FUEL_MAX_LITERS10),
           priceRappen: z.number().int().min(1).max(1_000_000).nullish(),
+          /** Fahrzeug-Name (#503) aus den Fahrzeug-Profilen; frei gelassen = ohne */
+          vehicle: z.string().trim().min(1).max(80).nullish(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -75,6 +77,7 @@ export const accountRouters = {
           odometerKm: input.odometerKm,
           liters10: input.liters10,
           priceRappen: input.priceRappen ?? null,
+          vehicle: input.vehicle ?? null,
         });
         return { id };
       }),

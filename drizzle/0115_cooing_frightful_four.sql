@@ -1,0 +1,1 @@
+ALTER TABLE `fuelLogs` ADD `vehicle` varchar(80);

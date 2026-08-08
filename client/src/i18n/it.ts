@@ -6492,6 +6492,12 @@ export const it: Translation = {
       "Gli accessi precedenti a questa panoramica compaiono solo dopo il prossimo accesso del dispositivo.",
   },
   fuelLog: {
+    vehicleLabel: "Veicolo",
+    vehicleNone: "Senza veicolo",
+    vehicleAll: "Tutti i veicoli",
+    chartTitle: "Andamento dei consumi",
+    chartHint:
+      "Consumo per tratta fra due pieni, secondo il chilometraggio – solo tratte plausibili.",
     csvButton: "Esporta come CSV",
     csvHeaders: [
       "Data",
@@ -6499,6 +6505,7 @@ export const it: Translation = {
       "Litri",
       "Importo CHF",
       "Consumo l/100 km",
+      "Veicolo",
     ],
     title: "Libretto carburante",
     subtitle: "I pieni con chilometraggio – per il consumo reale.",

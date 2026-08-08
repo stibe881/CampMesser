@@ -6532,6 +6532,12 @@ export const fr: Translation = {
       "Les connexions antérieures à cet aperçu n'apparaissent qu'après la prochaine connexion de l'appareil concerné.",
   },
   fuelLog: {
+    vehicleLabel: "Véhicule",
+    vehicleNone: "Sans véhicule",
+    vehicleAll: "Tous les véhicules",
+    chartTitle: "Évolution de la consommation",
+    chartHint:
+      "Consommation par tronçon entre deux pleins, selon le kilométrage – uniquement les tronçons plausibles.",
     csvButton: "Exporter en CSV",
     csvHeaders: [
       "Date",
@@ -6539,6 +6545,7 @@ export const fr: Translation = {
       "Litres",
       "Montant CHF",
       "Consommation l/100 km",
+      "Véhicule",
     ],
     title: "Carnet de carburant",
     subtitle: "Les pleins avec kilométrage – pour la consommation réelle.",

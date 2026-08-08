@@ -6538,6 +6538,12 @@ export const de = {
       "Anmeldungen von vor dieser Übersicht erscheinen erst nach der nächsten Anmeldung des jeweiligen Geräts.",
   },
   fuelLog: {
+    vehicleLabel: "Fahrzeug",
+    vehicleNone: "Ohne Fahrzeug",
+    vehicleAll: "Alle Fahrzeuge",
+    chartTitle: "Verbrauchs-Verlauf",
+    chartHint:
+      "Verbrauch je Abschnitt zwischen zwei Füllungen, nach Kilometerstand – nur plausible Abschnitte.",
     csvButton: "Als CSV exportieren",
     csvHeaders: [
       "Datum",
@@ -6545,6 +6551,7 @@ export const de = {
       "Liter",
       "Betrag CHF",
       "Verbrauch l/100 km",
+      "Fahrzeug",
     ],
     title: "Tankbuch",
     subtitle: "Tankfüllungen mit Kilometerstand – daraus der echte Verbrauch.",

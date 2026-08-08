@@ -28,6 +28,16 @@ import {
   fuelSegments,
 } from "@shared/fuelLog";
 import { fuelLogCsvFileName, fuelLogToCsv } from "@shared/fuelLogCsv";
+import { loadVehicles } from "@/lib/vehicleStore";
+import { cn } from "@/lib/utils";
+import {
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 export default function FuelLogPage() {
   const ask = useConfirm();
@@ -44,6 +54,33 @@ export default function FuelLogPage() {
   const [odometer, setOdometer] = useState("");
   const [liters, setLiters] = useState("");
   const [price, setPrice] = useState("");
+  // Fahrzeug (#503): Namen aus den Fahrzeug-Profilen (#200) – wer Auto
+  // UND Wohnmobil fährt, bekommt sonst Verbrauchs-Brei.
+  const vehicles = useState(() => loadVehicles(t.level.profileNames))[0];
+  const [vehicle, setVehicle] = useState("");
+  const [vehicleFilter, setVehicleFilter] = useState<string>("alle");
+
+  /** Fahrzeuge, die im Tankbuch tatsächlich vorkommen. */
+  const usedVehicles = useMemo(() => {
+    const names = new Set<string>();
+    let unassigned = false;
+    fills.forEach(fill => {
+      if (fill.vehicle) names.add(fill.vehicle);
+      else unassigned = true;
+    });
+    return { names: Array.from(names).sort(), unassigned };
+  }, [fills]);
+  const filteredFills = useMemo(
+    () =>
+      vehicleFilter === "alle"
+        ? fills
+        : fills.filter(fill =>
+            vehicleFilter === ""
+              ? fill.vehicle == null
+              : fill.vehicle === vehicleFilter
+          ),
+    [fills, vehicleFilter]
+  );
 
   const addMutation = trpc.fuelLog.add.useMutation({
     onSuccess: () => {
@@ -60,13 +97,27 @@ export default function FuelLogPage() {
     onError: () => toast.error(t.common.actionFailed),
   });
 
-  const average = useMemo(() => averageConsumptionL100(fills), [fills]);
+  const average = useMemo(
+    () => averageConsumptionL100(filteredFills),
+    [filteredFills]
+  );
   /** Verbrauch je Füllung: Abschnitt, der an dieser Füllung ENDET. */
   const segmentByToKm = useMemo(() => {
     const map = new Map<number, ReturnType<typeof fuelSegments>[number]>();
-    fuelSegments(fills).forEach(segment => map.set(segment.toKm, segment));
+    fuelSegments(filteredFills).forEach(segment =>
+      map.set(segment.toKm, segment)
+    );
     return map;
-  }, [fills]);
+  }, [filteredFills]);
+
+  /** Verbrauchs-Verlauf (#504): plausible Abschnitte, älteste zuerst. */
+  const chartData = useMemo(
+    () =>
+      fuelSegments(filteredFills)
+        .filter(segment => segment.plausible)
+        .map(segment => ({ km: segment.toKm, l100: segment.l100 })),
+    [filteredFills]
+  );
 
   const submit = () => {
     const odometerKm = Math.round(Number(odometer.replace(",", ".")));
@@ -93,7 +144,13 @@ export default function FuelLogPage() {
       toast.error(tf.priceInvalid);
       return;
     }
-    addMutation.mutate({ day, odometerKm, liters10, priceRappen });
+    addMutation.mutate({
+      day,
+      odometerKm,
+      liters10,
+      priceRappen,
+      vehicle: vehicle || null,
+    });
   };
 
   /**
@@ -102,7 +159,7 @@ export default function FuelLogPage() {
    */
   const downloadCsv = () => {
     try {
-      const csv = fuelLogToCsv(fills, { headers: tf.csvHeaders });
+      const csv = fuelLogToCsv(filteredFills, { headers: tf.csvHeaders });
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -127,6 +184,35 @@ export default function FuelLogPage() {
         <LoginPrompt feature={tf.loginFeature} />
       ) : (
         <>
+          {/* Fahrzeug-Filter (#503): erst sichtbar, wenn das Tankbuch
+              überhaupt Fahrzeuge kennt */}
+          {usedVehicles.names.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {[
+                ["alle", tf.vehicleAll] as const,
+                ...usedVehicles.names.map(name => [name, name] as const),
+                ...(usedVehicles.unassigned
+                  ? [["", tf.vehicleNone] as const]
+                  : []),
+              ].map(([value, label]) => (
+                <button
+                  key={value === "" ? "__none" : value}
+                  type="button"
+                  onClick={() => setVehicleFilter(value)}
+                  aria-pressed={vehicleFilter === value}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-sm transition-colors",
+                    vehicleFilter === value
+                      ? "border-primary bg-accent text-accent-foreground"
+                      : "border-border text-muted-foreground hover:border-primary/40"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
           {average !== null && (
             <Card className="mb-5">
               <CardContent className="pt-5">
@@ -158,6 +244,57 @@ export default function FuelLogPage() {
               <Download className="mr-1.5 h-4 w-4" aria-hidden="true" />
               {tf.csvButton}
             </Button>
+          )}
+
+          {/* Verbrauchs-Verlauf (#504): ein schleichender Mehrverbrauch
+              fällt in Zahlenreihen nicht auf – als Linie schon. Erst ab
+              zwei plausiblen Abschnitten ist eine Linie ehrlich. */}
+          {chartData.length >= 2 && (
+            <Card className="mb-5">
+              <CardContent className="pt-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {tf.chartTitle}
+                </p>
+                <div className="mt-2 h-40 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={chartData}
+                      margin={{ top: 5, right: 8, bottom: 0, left: -18 }}
+                    >
+                      <XAxis
+                        dataKey="km"
+                        tickFormatter={value => `${Math.round(value / 1000)}k`}
+                        fontSize={11}
+                      />
+                      <YAxis
+                        domain={["dataMin - 1", "dataMax + 1"]}
+                        tickFormatter={value => Number(value).toFixed(0)}
+                        fontSize={11}
+                      />
+                      <Tooltip
+                        formatter={(value: number) => [
+                          `${value.toFixed(1)} l/100 km`,
+                          "",
+                        ]}
+                        labelFormatter={value =>
+                          `${Number(value).toLocaleString()} km`
+                        }
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="l100"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={2}
+                        dot={{ r: 3 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {tf.chartHint}
+                </p>
+              </CardContent>
+            </Card>
           )}
 
           {/* Erfassen */}
@@ -212,6 +349,23 @@ export default function FuelLogPage() {
                     onChange={e => setPrice(e.target.value)}
                   />
                 </div>
+                {/* Fahrzeug (#503): aus den Fahrzeug-Profilen (#200) */}
+                <div>
+                  <Label htmlFor="fuel-vehicle">{tf.vehicleLabel}</Label>
+                  <select
+                    id="fuel-vehicle"
+                    className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    value={vehicle}
+                    onChange={e => setVehicle(e.target.value)}
+                  >
+                    <option value="">{tf.vehicleNone}</option>
+                    {vehicles.vehicles.map(profile => (
+                      <option key={profile.id} value={profile.name}>
+                        {profile.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <Button
                 className="mt-3"
@@ -236,11 +390,11 @@ export default function FuelLogPage() {
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               {t.common.loading}
             </p>
-          ) : fills.length === 0 ? (
+          ) : filteredFills.length === 0 ? (
             <p className="text-sm text-muted-foreground">{tf.empty}</p>
           ) : (
             <ul className="space-y-1.5">
-              {fills.map(fill => {
+              {filteredFills.map(fill => {
                 const segment = segmentByToKm.get(fill.odometerKm);
                 return (
                   <li
@@ -256,6 +410,7 @@ export default function FuelLogPage() {
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {fmtShort(new Date(`${fill.day}T00:00:00`), lang)}
+                        {fill.vehicle && ` · ${fill.vehicle}`}
                         {segment &&
                           ` · ${tf.segmentLine(
                             segment.distanceKm,
