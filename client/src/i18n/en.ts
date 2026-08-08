@@ -5182,6 +5182,7 @@ export const en: Translation = {
     detailsPricePlaceholder: "e.g. 3.50",
     detailsPriceHint:
       "Leave empty if you do not want to record a price. The total sits at the top of the list.",
+    lastPriceSuggestion: (amount: string) => `Last time: ${amount} – use it`,
     detailsPriceBooked:
       "Already transferred to the trip fund – the price stays as it was booked.",
     totalLabel: "Total:",

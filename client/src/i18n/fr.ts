@@ -5323,6 +5323,8 @@ export const fr: Translation = {
     detailsPricePlaceholder: "p. ex. 3.50",
     detailsPriceHint:
       "Laisse vide si tu ne veux pas saisir de prix. Le total figure en haut de la liste.",
+    lastPriceSuggestion: (amount: string) =>
+      `La dernière fois : ${amount} – reprendre`,
     detailsPriceBooked:
       "Déjà repris dans la caisse de voyage – le prix reste tel qu'il a été comptabilisé.",
     totalLabel: "Total :",

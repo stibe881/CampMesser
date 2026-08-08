@@ -5326,6 +5326,8 @@ export const de = {
     detailsPricePlaceholder: "z. B. 3.50",
     detailsPriceHint:
       "Leer lassen, wenn du keinen Preis erfassen willst. Die Summe steht oben auf der Liste.",
+    lastPriceSuggestion: (amount: string) =>
+      `Letztes Mal: ${amount} – übernehmen`,
     detailsPriceBooked:
       "Schon in die Reisekasse übernommen – der Preis bleibt, wie er verbucht wurde.",
     totalLabel: "Summe:",

@@ -5,6 +5,8 @@ import {
   SHOPPING_HISTORY_MAX,
   shoppingSuggestions,
   type ShoppingHistoryEntry,
+  lastKnownPrice,
+  rememberShoppingPrice,
 } from "../client/src/lib/shoppingHistory";
 
 describe("sanitizeShoppingHistory", () => {
@@ -116,5 +118,37 @@ describe("shoppingSuggestions", () => {
 
   it("keine Treffer → leere Liste", () => {
     expect(shoppingSuggestions("Zelt", sources)).toEqual([]);
+  });
+});
+
+// Letzter Preis als Vorschlag (#434): Der Preis hängt sich an den
+// bestehenden Eintrag, Kategorie und Menge bleiben erhalten.
+describe("rememberShoppingPrice", () => {
+  it("merkt den Preis am bestehenden Eintrag, ohne Kategorie/Menge zu verlieren", () => {
+    const history = [
+      { name: "Milch", category: "kuehl", quantity: "2×" },
+      { name: "Brot" },
+    ];
+    const next = rememberShoppingPrice(history, "milch", 350);
+    expect(next[0]).toMatchObject({
+      name: "Milch",
+      quantity: "2×",
+      priceRappen: 350,
+    });
+    expect(lastKnownPrice(next, "MILCH")).toBe(350);
+  });
+
+  it("unbekannte Namen bekommen einen frischen Eintrag", () => {
+    const next = rememberShoppingPrice([], "Käse", 890);
+    expect(next).toEqual([{ name: "Käse", priceRappen: 890 }]);
+    expect(lastKnownPrice(next, "Wurst")).toBeNull();
+  });
+
+  it("der Verlauf übersteht unsinnige Preise", () => {
+    // 0 und Negatives fliegen beim Säubern raus – ein «letztes Mal
+    // gratis» wäre kein Vorschlag.
+    expect(
+      sanitizeShoppingHistory([{ name: "Milch", priceRappen: -5 }])
+    ).toEqual([{ name: "Milch" }]);
   });
 });

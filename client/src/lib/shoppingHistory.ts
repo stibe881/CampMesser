@@ -7,6 +7,7 @@
  * ohne Browser (server/shoppingHistory.test.ts).
  */
 import { isShoppingCategoryValue } from "@shared/shopping";
+import { MAX_SHOPPING_PRICE_RAPPEN } from "@shared/shoppingPrices";
 
 export interface ShoppingHistoryEntry {
   name: string;
@@ -14,6 +15,8 @@ export interface ShoppingHistoryEntry {
   category?: string | null;
   /** Gemerkte Menge, z. B. «2×» oder «500 g» */
   quantity?: string | null;
+  /** Zuletzt erfasster Preis in Rappen (#434) – als Vorschlag beim nächsten Kauf. */
+  priceRappen?: number | null;
 }
 
 export const SHOPPING_HISTORY_KEY = "campmesser.shoppingHistory";
@@ -40,6 +43,17 @@ function sanitizeEntry(raw: unknown): ShoppingHistoryEntry | null {
   }
   if (typeof quantity === "string" && quantity.trim()) {
     entry.quantity = quantity.trim().slice(0, 40);
+  }
+  const { priceRappen } = raw as Record<string, unknown>;
+  if (
+    typeof priceRappen === "number" &&
+    Number.isFinite(priceRappen) &&
+    priceRappen > 0
+  ) {
+    entry.priceRappen = Math.min(
+      Math.round(priceRappen),
+      MAX_SHOPPING_PRICE_RAPPEN
+    );
   }
   return entry;
 }
@@ -82,6 +96,37 @@ export function rememberShoppingEntry(
     0,
     SHOPPING_HISTORY_MAX
   );
+}
+
+/**
+ * Den zuletzt erfassten Preis eines Eintrags vermerken (#434): Der Preis
+ * hängt sich an den bestehenden Verlaufs-Eintrag (Kategorie und Menge
+ * bleiben erhalten); ohne Eintrag entsteht einer. Der Eintrag rückt wie
+ * beim normalen Merken nach vorn. Pure Funktion.
+ */
+export function rememberShoppingPrice(
+  history: ShoppingHistoryEntry[],
+  name: string,
+  priceRappen: number
+): ShoppingHistoryEntry[] {
+  const key = nameKey(name);
+  if (!key) return history;
+  const existing = history.find(e => nameKey(e.name) === key);
+  return rememberShoppingEntry(history, {
+    ...(existing ?? { name: name.trim().slice(0, 160) }),
+    priceRappen,
+  });
+}
+
+/** Der gemerkte Preis zu einem Namen – null, wenn keiner bekannt ist. */
+export function lastKnownPrice(
+  history: readonly ShoppingHistoryEntry[],
+  name: string
+): number | null {
+  const key = nameKey(name);
+  if (!key) return null;
+  const entry = history.find(e => nameKey(e.name) === key);
+  return entry?.priceRappen ?? null;
 }
 
 /**

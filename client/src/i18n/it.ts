@@ -5284,6 +5284,8 @@ export const it: Translation = {
     detailsPricePlaceholder: "es. 3.50",
     detailsPriceHint:
       "Lascia vuoto se non vuoi registrare un prezzo. Il totale è in cima alla lista.",
+    lastPriceSuggestion: (amount: string) =>
+      `L'ultima volta: ${amount} – riprendi`,
     detailsPriceBooked:
       "Già ripreso nella cassa di viaggio – il prezzo resta come è stato registrato.",
     totalLabel: "Totale:",

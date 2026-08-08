@@ -23,6 +23,7 @@ export default function ShoppingItemDetailsPopover({
   item,
   saving,
   onSave,
+  lastPriceRappen,
 }: {
   item: {
     id: number;
@@ -33,6 +34,8 @@ export default function ShoppingItemDetailsPopover({
     bookedExpenseId?: number | null;
   };
   saving: boolean;
+  /** Zuletzt erfasster Preis aus dem Einkaufs-Verlauf (#434). */
+  lastPriceRappen?: number | null;
   onSave: (data: {
     id: number;
     quantity: string;
@@ -138,6 +141,18 @@ export default function ShoppingItemDetailsPopover({
                 ? t.shopping.detailsPriceBooked
                 : t.shopping.detailsPriceHint}
             </p>
+            {/* Letzter Preis als Vorschlag (#434): ein Fingertipp statt
+                Kopfrechnen – aber nie stumm vorausgefüllt, ein
+                übersehener alter Preis wäre eine falsche Zahl. */}
+            {!booked && !price.trim() && lastPriceRappen != null && (
+              <button
+                type="button"
+                className="text-xs font-medium text-primary hover:underline"
+                onClick={() => setPrice(rappenToInput(lastPriceRappen))}
+              >
+                {t.shopping.lastPriceSuggestion(rappenToInput(lastPriceRappen))}
+              </button>
+            )}
           </div>
           <Button type="submit" size="sm" className="w-full" disabled={saving}>
             {t.common.save}
