@@ -43,6 +43,14 @@ import DeparturePlanner from "@/components/DeparturePlanner";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
 import NearbyShops from "@/components/NearbyShops";
 import NearbySights from "@/components/NearbySights";
+import NearbyPoints from "@/components/NearbyPoints";
+import {
+  chargersQuery,
+  drinkingWaterQuery,
+  parseChargers,
+  parseDrinkingWater,
+} from "@/lib/overpass";
+import { GlassWater, PlugZap } from "lucide-react";
 import SpotRating from "@/components/SpotRating";
 import NearbyTransit from "@/components/NearbyTransit";
 import TickRiskPanel from "@/components/TickRiskPanel";
@@ -650,6 +658,42 @@ export default function SpotDetailPage() {
             latitude={spot.latitude}
             longitude={spot.longitude}
             placeName={spot.name}
+            className="mb-4"
+          />
+        </LazySection>
+
+        {/* Trinkwasser-Stellen (#492): Brunnen zum Auffüllen – zu Fuss
+            erreichbar gedacht, darum kleine Radien und Fussweg-Distanz */}
+        <LazySection minHeight={90}>
+          <NearbyPoints
+            latitude={spot.latitude}
+            longitude={spot.longitude}
+            icon={GlassWater}
+            texts={t.poi.water}
+            query={drinkingWaterQuery}
+            parse={parseDrinkingWater}
+            radii={[500, 1000, 2000]}
+            defaultRadiusM={1000}
+            profile="foot"
+            sectionId="spot-water"
+            className="mb-4"
+          />
+        </LazySection>
+
+        {/* E-Ladesäulen (#493): fürs elektrische Anreisen – Betreiber und
+            Anzahl Plätze, soweit in OSM eingetragen */}
+        <LazySection minHeight={90}>
+          <NearbyPoints
+            latitude={spot.latitude}
+            longitude={spot.longitude}
+            icon={PlugZap}
+            texts={t.poi.chargers}
+            query={chargersQuery}
+            parse={parseChargers}
+            radii={[2000, 5000, 10000]}
+            defaultRadiusM={5000}
+            profile="car"
+            sectionId="spot-chargers"
             className="mb-4"
           />
         </LazySection>

@@ -21,6 +21,9 @@ import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { formatDMS, wgs84ToLV95 } from "@/lib/sun";
 import { EMERGENCY_COUNTRIES } from "@shared/emergencyNumbers";
+import NearbyPoints from "@/components/NearbyPoints";
+import { defibrillatorsQuery, parseDefibrillators } from "@/lib/overpass";
+import { HeartPulse } from "lucide-react";
 import { LANGUAGES, LANGUAGE_LABELS, LOCALE_TAGS, pick } from "@shared/i18n";
 import { emergencyPhrase } from "@shared/emergencyPhrase";
 import {
@@ -555,6 +558,28 @@ export default function SosPage() {
           </a>
         ))}
       </div>
+
+      {/* Defibrillatoren in der Nähe (#494): Im Herznotfall zählt der
+          nächste Defi – die Suche braucht den Standort von oben und
+          bleibt darum weg, solange er fehlt. Erst 144 anrufen, dann
+          holen (der Hinweis steht in der Karte). */}
+      {geo.status === "ok" &&
+        geo.lat !== undefined &&
+        geo.lng !== undefined && (
+          <NearbyPoints
+            latitude={geo.lat}
+            longitude={geo.lng}
+            icon={HeartPulse}
+            texts={t.poi.defis}
+            query={defibrillatorsQuery}
+            parse={parseDefibrillators}
+            radii={[500, 1000, 2000]}
+            defaultRadiusM={1000}
+            profile="foot"
+            sectionId="sos-defis"
+            className="mb-6"
+          />
+        )}
 
       {/* Rega-Hinweis */}
       <Card className="mb-6 bg-accent/50">
