@@ -272,12 +272,13 @@ export const tripsRouters = {
           }
         }
 
-        // 2. Die Reise selbst
+        // 2. Die Reise selbst – die Vorlage bringt ihre Art mit (#463)
         const tripId = await db.addTripLog({
           userId: ctx.user.id,
           spotId: input.spotId ?? null,
           packListId,
           location: input.location?.trim() || null,
+          kind: normalizeTripKind(template.kind),
           title: input.title?.trim() || title,
           startDate: input.startDate,
           endDate,

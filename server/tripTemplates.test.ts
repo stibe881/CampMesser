@@ -7,6 +7,7 @@ import {
   tripTemplates,
 } from "@shared/tripTemplates";
 import { packScenarios } from "@shared/packTemplates";
+import { TRIP_KINDS } from "@shared/tripKind";
 import { recipes } from "../client/src/data/recipes";
 
 describe("Reise-Vorlagen (#284)", () => {
@@ -87,5 +88,27 @@ describe("Reise-Vorlagen (#284)", () => {
     expect(templateListName("Wochenende", "2026-06-12")).toBe(
       "Wochenende 12.06."
     );
+  });
+});
+
+describe("Reise-Art der Vorlagen (#463)", () => {
+  it("gibt jeder Vorlage eine gültige Art", () => {
+    tripTemplates.forEach(template => {
+      expect(TRIP_KINDS, template.id).toContain(template.kind);
+    });
+  });
+
+  it("deckt neben Camping auch Stadt, Strand und Wandern ab", () => {
+    const kinds = new Set(tripTemplates.map(t => t.kind));
+    expect(kinds.has("camping")).toBe(true);
+    expect(kinds.has("staedte")).toBe(true);
+    expect(kinds.has("strand")).toBe(true);
+    expect(kinds.has("wandern")).toBe(true);
+  });
+
+  it("plant für den Städtetrip bewusst KEIN Essen – dort isst man auswärts", () => {
+    const template = tripTemplateById("staedtetrip")!;
+    expect(template.dinners).toEqual([]);
+    expect(templateMenuPlan(template, "2026-08-10")).toEqual([]);
   });
 });
