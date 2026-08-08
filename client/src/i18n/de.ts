@@ -2588,6 +2588,7 @@ export const de = {
     kindLabel: "Art der Reise",
     kindHint:
       "Steuert, was die Heute-Ansicht während der Reise hervorhebt – alle Module bleiben trotzdem erreichbar.",
+    dayLabel: "Datum",
     arrivalLabel: "Anreise",
     departureLabel: "Abreise",
     titleLabel: "Titel (optional)",

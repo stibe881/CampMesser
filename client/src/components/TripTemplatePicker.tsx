@@ -41,7 +41,7 @@ import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { templateEndDate, tripTemplates } from "@shared/tripTemplates";
-import { tripKindLabel } from "@shared/tripKind";
+import { tripKindForm, tripKindLabel } from "@shared/tripKind";
 
 /** Symbol je Vorlage – der Name steht als String in den Daten. */
 const TEMPLATE_ICONS: Record<string, LucideIcon> = {
@@ -152,7 +152,14 @@ export default function TripTemplatePicker({
                   <button
                     key={entry.id}
                     type="button"
-                    onClick={() => setTemplateId(entry.id)}
+                    onClick={() => {
+                      setTemplateId(entry.id);
+                      // Ohne Zeltplatz-Auswahl für diese Art (#485) darf
+                      // kein unsichtbar gewählter Platz hängenbleiben
+                      if (!tripKindForm(entry.kind).spotSelect) {
+                        setSpotId(null);
+                      }
+                    }}
                     aria-pressed={active}
                     className={cn(
                       "rounded-xl border p-3 text-left transition-colors",
@@ -199,7 +206,8 @@ export default function TripTemplatePicker({
               </p>
             </div>
 
-            {spots.length > 0 && (
+            {/* Zeltplatz nur für Arten, die dort schlafen (#485) */}
+            {spots.length > 0 && tripKindForm(template.kind).spotSelect && (
               <div>
                 <Label htmlFor="template-spot">{tt.spotLabel}</Label>
                 <select

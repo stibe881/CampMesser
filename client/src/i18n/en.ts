@@ -2501,6 +2501,7 @@ export const en: Translation = {
     kindLabel: "Trip type",
     kindHint:
       "Controls what the Today view highlights during the trip – every module stays available.",
+    dayLabel: "Date",
     arrivalLabel: "Arrival",
     departureLabel: "Departure",
     titleLabel: "Title (optional)",

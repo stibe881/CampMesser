@@ -2556,6 +2556,7 @@ export const it: Translation = {
     kindLabel: "Tipo di viaggio",
     kindHint:
       "Determina cosa mette in evidenza la vista Oggi durante il viaggio – tutti i moduli restano accessibili.",
+    dayLabel: "Data",
     arrivalLabel: "Arrivo",
     departureLabel: "Partenza",
     titleLabel: "Titolo (facoltativo)",

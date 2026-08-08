@@ -33,6 +33,7 @@ import { tripDisplayName, tripPlaceName } from "@shared/tripName";
 import {
   TRIP_KINDS,
   normalizeTripKind,
+  tripKindForm,
   tripKindLabel,
   type TripKind,
 } from "@shared/tripKind";
@@ -631,6 +632,31 @@ export default function TripsPage() {
 
   const spots = spotsQuery.data ?? [];
   const allTrips = useMemo(() => tripsQuery.data ?? [], [tripsQuery.data]);
+
+  /** Welche Felder das Formular für die gewählte Art zeigt (#485). */
+  const kindForm = tripKindForm(formKind);
+
+  /**
+   * Art im Formular wechseln (#485): Felder, die es für die neue Art
+   * nicht gibt, werden aufgeräumt statt unsichtbar mitgeschleppt – ein
+   * verknüpfter Zeltplatz wird zum sichtbaren Freitext-Ort (nichts geht
+   * verloren), beim Tagesausflug rückt die Abreise auf die Anreise.
+   */
+  const selectKind = (kind: TripKind) => {
+    setFormKind(kind);
+    const next = tripKindForm(kind);
+    if (!next.spotSelect && spotChoice !== FREE_LOCATION) {
+      const spotName = spots.find(s => String(s.id) === spotChoice)?.name ?? "";
+      setSpotChoice(FREE_LOCATION);
+      setForm(f => ({
+        ...f,
+        location: f.location.trim() ? f.location : spotName,
+      }));
+    }
+    if (next.singleDay) {
+      setForm(f => ({ ...f, endDate: f.startDate }));
+    }
+  };
   // Geplante Aufenthalte (Anreise heute oder später) separat oben anzeigen
   /**
    * Einzelne Reise als eigene Adresse (#310): /tagebuch/17 zeigt genau
@@ -803,12 +829,19 @@ export default function TripsPage() {
   /** Eintrag ins Formular laden und den Dialog im Bearbeiten-Modus öffnen. */
   const startEdit = (trip: (typeof allTrips)[number]) => {
     setEditingId(trip.id);
-    setSpotChoice(trip.spotId != null ? String(trip.spotId) : FREE_LOCATION);
+    // Hat die Art keine Zeltplatz-Auswahl (#485), hängt aber (aus alter
+    // Zeit) ein Platz an der Reise, wird er zum sichtbaren Freitext-Ort –
+    // sonst gäbe es im Formular gar kein Orts-Feld.
+    const editKind = tripKindForm(normalizeTripKind(trip.kind));
+    const keepSpot = trip.spotId != null && editKind.spotSelect;
+    setSpotChoice(keepSpot ? String(trip.spotId) : FREE_LOCATION);
     setPackListChoice(
       trip.packListId != null ? String(trip.packListId) : "keine"
     );
     setForm({
-      location: trip.location ?? "",
+      location:
+        trip.location ??
+        (trip.spotId != null && !keepSpot ? (freshSpotName(trip) ?? "") : ""),
       title: trip.title ?? "",
       notes: trip.notes ?? "",
       startDate: trip.startDate,
@@ -1090,8 +1123,11 @@ export default function TripsPage() {
                 });
                 return;
               }
+              // Ohne Zeltplatz-Auswahl für diese Art (#485) zählt nur der Ort
               const spotId =
-                spotChoice === FREE_LOCATION ? null : Number(spotChoice);
+                !kindForm.spotSelect || spotChoice === FREE_LOCATION
+                  ? null
+                  : Number(spotChoice);
               if (spotId === null && !form.location.trim()) {
                 toast.error(t.trips.choosePlaceError);
                 return;
@@ -1123,8 +1159,10 @@ export default function TripsPage() {
           >
             <div className="grid gap-3 sm:grid-cols-2">
               {/* Zeltplatz/Packliste gehören der Besitzerin/dem Besitzer –
-                  beim Bearbeiten eines Mitglieds-Trips ausgeblendet */}
-              {!editingShared && (
+                  beim Bearbeiten eines Mitglieds-Trips ausgeblendet.
+                  Die Zeltplatz-Auswahl gibt es nur für Arten, die dort
+                  schlafen (#485) – bei Hotelferien zählt der Ort. */}
+              {!editingShared && kindForm.spotSelect && (
                 <div>
                   <Label htmlFor="trip-spot">{t.trips.placeLabel}</Label>
                   <Select value={spotChoice} onValueChange={setSpotChoice}>
@@ -1209,7 +1247,7 @@ export default function TripsPage() {
                   <button
                     key={kind}
                     type="button"
-                    onClick={() => setFormKind(kind)}
+                    onClick={() => selectKind(kind)}
                     className={cn(
                       "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
                       formKind === kind
@@ -1226,41 +1264,54 @@ export default function TripsPage() {
                 {t.trips.kindHint}
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div
+              className={cn("grid gap-3", !kindForm.singleDay && "grid-cols-2")}
+            >
               <div>
-                <Label htmlFor="trip-start">{t.trips.arrivalLabel}</Label>
+                <Label htmlFor="trip-start">
+                  {/* Tagesausflug (#485): EIN Tag, also «Datum» statt
+                      «Anreise» – eine getrennte Abreise wäre eine
+                      Fangfrage. */}
+                  {kindForm.singleDay ? t.trips.dayLabel : t.trips.arrivalLabel}
+                </Label>
                 <Input
                   id="trip-start"
                   className="mt-1.5"
                   type="date"
                   value={form.startDate}
-                  max={form.endDate}
+                  max={kindForm.singleDay ? undefined : form.endDate}
                   onChange={e =>
                     setForm(f => ({
                       ...f,
                       startDate: e.target.value,
-                      // Abreise automatisch nachziehen, wenn sie vor der Anreise läge
-                      endDate:
-                        f.endDate < e.target.value ? e.target.value : f.endDate,
+                      // Abreise nachziehen: beim Tagesausflug immer gleich,
+                      // sonst nur, wenn sie vor der Anreise läge
+                      endDate: kindForm.singleDay
+                        ? e.target.value
+                        : f.endDate < e.target.value
+                          ? e.target.value
+                          : f.endDate,
                     }))
                   }
                   required
                 />
               </div>
-              <div>
-                <Label htmlFor="trip-end">{t.trips.departureLabel}</Label>
-                <Input
-                  id="trip-end"
-                  className="mt-1.5"
-                  type="date"
-                  value={form.endDate}
-                  min={form.startDate}
-                  onChange={e =>
-                    setForm(f => ({ ...f, endDate: e.target.value }))
-                  }
-                  required
-                />
-              </div>
+              {!kindForm.singleDay && (
+                <div>
+                  <Label htmlFor="trip-end">{t.trips.departureLabel}</Label>
+                  <Input
+                    id="trip-end"
+                    className="mt-1.5"
+                    type="date"
+                    value={form.endDate}
+                    min={form.startDate}
+                    onChange={e =>
+                      setForm(f => ({ ...f, endDate: e.target.value }))
+                    }
+                    required
+                  />
+                </div>
+              )}
             </div>
             {/* Optionale Uhrzeiten – passend zu den Check-in-Zeiten des Platzes */}
             <div className="grid grid-cols-2 gap-3">
@@ -1293,75 +1344,82 @@ export default function TripsPage() {
                 />
               </div>
             </div>
-            {/* Stellplatz-Details (#252): gelten für diesen Aufenthalt */}
-            <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <p className="text-sm font-medium">{t.trips.pitchSectionTitle}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {t.trips.pitchSectionHint}
-              </p>
-              <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="trip-pitch-number">
-                    {t.trips.pitchNumberLabel}
-                  </Label>
-                  <Input
-                    id="trip-pitch-number"
-                    className="mt-1.5"
-                    maxLength={40}
-                    placeholder={t.trips.pitchNumberPlaceholder}
-                    value={form.pitchNumber}
-                    onChange={e =>
-                      setForm(f => ({ ...f, pitchNumber: e.target.value }))
-                    }
-                  />
+            {/* Stellplatz-Details (#252): gelten für diesen Aufenthalt.
+                Nur für Arten mit Platz (#485) – im Hotel gibt es keine
+                Parzellennummer. Gespeicherte Werte bleiben beim Umschalten
+                erhalten, die Felder sind nur ausgeblendet. */}
+            {kindForm.pitchDetails && (
+              <div className="rounded-lg border border-border bg-muted/30 p-3">
+                <p className="text-sm font-medium">
+                  {t.trips.pitchSectionTitle}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {t.trips.pitchSectionHint}
+                </p>
+                <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <Label htmlFor="trip-pitch-number">
+                      {t.trips.pitchNumberLabel}
+                    </Label>
+                    <Input
+                      id="trip-pitch-number"
+                      className="mt-1.5"
+                      maxLength={40}
+                      placeholder={t.trips.pitchNumberPlaceholder}
+                      value={form.pitchNumber}
+                      onChange={e =>
+                        setForm(f => ({ ...f, pitchNumber: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="trip-wifi-name">
+                      {t.trips.wifiNameLabel}
+                    </Label>
+                    <Input
+                      id="trip-wifi-name"
+                      className="mt-1.5"
+                      maxLength={80}
+                      placeholder={t.trips.wifiNamePlaceholder}
+                      value={form.wifiName}
+                      onChange={e =>
+                        setForm(f => ({ ...f, wifiName: e.target.value }))
+                      }
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="trip-wifi-name">
-                    {t.trips.wifiNameLabel}
+                <div className="mt-3">
+                  <Label htmlFor="trip-wifi-password">
+                    {t.trips.wifiPasswordLabel}
                   </Label>
                   <Input
-                    id="trip-wifi-name"
+                    id="trip-wifi-password"
                     className="mt-1.5"
                     maxLength={80}
-                    placeholder={t.trips.wifiNamePlaceholder}
-                    value={form.wifiName}
+                    placeholder={t.trips.wifiPasswordPlaceholder}
+                    value={form.wifiPassword}
                     onChange={e =>
-                      setForm(f => ({ ...f, wifiName: e.target.value }))
+                      setForm(f => ({ ...f, wifiPassword: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="mt-3">
+                  <Label htmlFor="trip-pitch-notes">
+                    {t.trips.pitchNotesLabel}
+                  </Label>
+                  <Textarea
+                    id="trip-pitch-notes"
+                    className="mt-1.5"
+                    rows={2}
+                    placeholder={t.trips.pitchNotesPlaceholder}
+                    value={form.pitchNotes}
+                    onChange={e =>
+                      setForm(f => ({ ...f, pitchNotes: e.target.value }))
                     }
                   />
                 </div>
               </div>
-              <div className="mt-3">
-                <Label htmlFor="trip-wifi-password">
-                  {t.trips.wifiPasswordLabel}
-                </Label>
-                <Input
-                  id="trip-wifi-password"
-                  className="mt-1.5"
-                  maxLength={80}
-                  placeholder={t.trips.wifiPasswordPlaceholder}
-                  value={form.wifiPassword}
-                  onChange={e =>
-                    setForm(f => ({ ...f, wifiPassword: e.target.value }))
-                  }
-                />
-              </div>
-              <div className="mt-3">
-                <Label htmlFor="trip-pitch-notes">
-                  {t.trips.pitchNotesLabel}
-                </Label>
-                <Textarea
-                  id="trip-pitch-notes"
-                  className="mt-1.5"
-                  rows={2}
-                  placeholder={t.trips.pitchNotesPlaceholder}
-                  value={form.pitchNotes}
-                  onChange={e =>
-                    setForm(f => ({ ...f, pitchNotes: e.target.value }))
-                  }
-                />
-              </div>
-            </div>
+            )}
             <div>
               <Label htmlFor="trip-title">{t.trips.titleLabel}</Label>
               <Input
