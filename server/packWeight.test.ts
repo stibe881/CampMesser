@@ -3,6 +3,7 @@ import {
   computePackWeight,
   formatGrams,
   weightBudgetStatus,
+  personWeights,
 } from "@shared/packWeight";
 
 const inventory = [
@@ -105,5 +106,41 @@ describe("weightBudgetStatus", () => {
       percent: 0,
       overGrams: 5000,
     });
+  });
+});
+
+describe("personWeights (#506)", () => {
+  const inventory = [
+    { name: "Zelt", weightGrams: 3200, volumeLiters: 20 },
+    { name: "Schlafsack", weightGrams: 900, volumeLiters: 8 },
+    { name: "Kocher", weightGrams: 450, volumeLiters: 2 },
+  ];
+
+  it("summiert das Gewicht je Person, schwerste zuerst, Allgemein zuletzt", () => {
+    const rows = personWeights(
+      [
+        { name: "Zelt", quantity: 1, checked: false, assignee: "Ben" },
+        { name: "Schlafsack", quantity: 2, checked: true, assignee: "Anna" },
+        { name: "Kocher", quantity: 1, checked: false, assignee: null },
+        // Ohne Inventar-Treffer zählt nichts – ehrlich statt geraten
+        { name: "Unbekanntes", quantity: 1, checked: false, assignee: "Ben" },
+      ],
+      inventory
+    );
+    expect(rows).toEqual([
+      { person: "Ben", grams: 3200 },
+      { person: "Anna", grams: 1800 },
+      { person: null, grams: 450 },
+    ]);
+  });
+
+  it("liefert leer, wenn nichts zugeordnet oder gewogen ist", () => {
+    expect(personWeights([], inventory)).toEqual([]);
+    expect(
+      personWeights(
+        [{ name: "Nirgends", quantity: 1, checked: false, assignee: "Anna" }],
+        inventory
+      )
+    ).toEqual([]);
   });
 });

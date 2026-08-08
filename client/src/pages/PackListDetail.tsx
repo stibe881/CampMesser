@@ -62,6 +62,7 @@ import {
 } from "@shared/packCategories";
 import {
   computePackWeight,
+  personWeights,
   formatGrams,
   weightBudgetStatus,
 } from "@shared/packWeight";
@@ -682,6 +683,11 @@ export default function PackListDetailPage() {
     () => computePackWeight(query.data?.items ?? [], inventoryQuery.data ?? []),
     [query.data?.items, inventoryQuery.data]
   );
+  /** Traglast pro Person (#506) über denselben Inventar-Abgleich. */
+  const personLoads = useMemo(
+    () => personWeights(query.data?.items ?? [], inventoryQuery.data ?? []),
+    [query.data?.items, inventoryQuery.data]
+  );
 
   const budgetMutation = trpc.packing.setWeightBudget.useMutation({
     onSuccess: (_data, vars) => {
@@ -838,6 +844,25 @@ export default function PackListDetailPage() {
                   weight.matchedCount + weight.unmatchedCount
                 )}
               </span>
+            </p>
+          )}
+          {/* Traglast pro Person (#506): «Wer packt was» (#67) und die
+              Inventar-Gewichte (#30) zusammengeführt – beim Wandern
+              zählt, wie viel Kilo JEDE Person trägt. Nur sichtbar,
+              wenn Einträge einer Person zugeordnet sind. */}
+          {personLoads.some(row => row.person !== null) && (
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+              <span className="text-xs font-semibold uppercase tracking-wide">
+                {t.packListDetail.personWeightTitle}
+              </span>
+              {personLoads.map(row => (
+                <span key={row.person ?? "__general"}>
+                  {row.person ?? t.packListDetail.sectionGeneral}{" "}
+                  <span className="font-medium text-foreground">
+                    {formatGrams(row.grams, lang)}
+                  </span>
+                </span>
+              ))}
             </p>
           )}
           {budget !== null && budgetGrams !== null ? (

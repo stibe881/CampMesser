@@ -549,6 +549,7 @@ export const en: Translation = {
     archivedBadge: "archived",
   },
   packListDetail: {
+    personWeightTitle: "Load per person:",
     boxBadgeAria: "Stored in box",
     backLabel: "Packing lists",
     fallbackTitle: "Packing list",

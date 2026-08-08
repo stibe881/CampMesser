@@ -573,6 +573,7 @@ export const de = {
     archivedBadge: "archiviert",
   },
   packListDetail: {
+    personWeightTitle: "Traglast:",
     boxBadgeAria: "Liegt in Kiste",
     backLabel: "Packlisten",
     fallbackTitle: "Packliste",

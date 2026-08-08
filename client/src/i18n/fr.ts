@@ -570,6 +570,7 @@ export const fr: Translation = {
     archivedBadge: "archivée",
   },
   packListDetail: {
+    personWeightTitle: "Charge :",
     boxBadgeAria: "Se trouve dans la caisse",
     backLabel: "Listes de bagages",
     fallbackTitle: "Liste de bagages",
