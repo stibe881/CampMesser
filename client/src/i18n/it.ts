@@ -3155,6 +3155,9 @@ export const it: Translation = {
     scoreLine: (points: number, done: number) => `${points} p. · ${done}×`,
     scoreHint:
       "I punti arrivano solo con la spunta – essere assegnati non è ancora un merito.",
+    historyTitle: "Punti per settimana",
+    historyBarAria: (week: string, points: number) =>
+      `Settimana dal ${week}: ${points} punti`,
     choresTitle: "Compiti",
     newChore: "Nuovo compito",
     newChorePlaceholder: "ad es. lavare i piatti",

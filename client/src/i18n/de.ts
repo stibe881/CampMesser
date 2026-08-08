@@ -3197,6 +3197,9 @@ export const de = {
     scoreLine: (points: number, done: number) => `${points} P. · ${done}×`,
     scoreHint:
       "Punkte gibt es erst beim Abhaken – eine zugeteilte Aufgabe ist noch kein Verdienst.",
+    historyTitle: "Punkte pro Woche",
+    historyBarAria: (week: string, points: number) =>
+      `Woche ab ${week}: ${points} Punkte`,
     choresTitle: "Ämtli",
     newChore: "Neues Ämtli",
     newChorePlaceholder: "z. B. Abwaschen",

@@ -3083,6 +3083,9 @@ export const en: Translation = {
     scoreLine: (points: number, done: number) => `${points} pts · ${done}×`,
     scoreHint:
       "Points only count once a chore is ticked off – being assigned is not an achievement yet.",
+    historyTitle: "Points per week",
+    historyBarAria: (week: string, points: number) =>
+      `Week of ${week}: ${points} points`,
     choresTitle: "Chores",
     newChore: "New chore",
     newChorePlaceholder: "e.g. wash up",

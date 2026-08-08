@@ -37,7 +37,9 @@ import { trpc } from "@/lib/trpc";
 import { enqueueToggle } from "@/lib/offlineQueue";
 import { hapticTick } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
+import { fmtDayMonth } from "@/lib/dateFormat";
 import { todayIso } from "@shared/localDate";
+import { weeklyPointsHistory } from "@shared/choreHistory";
 import {
   DEFAULT_CHORE_POINTS,
   MAX_CHORE_POINTS,
@@ -50,7 +52,7 @@ import { newlyReachableRewards } from "@shared/rewards";
 
 export default function ChoresPage() {
   const ask = useConfirm();
-  const { t } = useI18n();
+  const { lang, t } = useI18n();
   const tc = t.chores;
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
@@ -177,6 +179,11 @@ export default function ChoresPage() {
 
   const progress = dayProgress(dayAssignments);
   const scores = scoreboard(children, chores, allAssignments);
+  // Punkte-Verlauf (#431): wochenweise, aus denselben Zuteilungen
+  const history = useMemo(
+    () => weeklyPointsHistory(children, chores, allAssignments, todayIso()),
+    [children, chores, allAssignments]
+  );
 
   if (loading) return null;
   if (!isAuthenticated) {
@@ -445,6 +452,59 @@ export default function ChoresPage() {
               ))}
             </ul>
             <p className="mt-3 text-xs text-muted-foreground">{tc.scoreHint}</p>
+
+            {/* Punkte-Verlauf pro Kind (#431): Wochenbalken statt nur Stand */}
+            {history && (
+              <div className="mt-4 border-t border-border pt-3">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {tc.historyTitle}
+                </p>
+                <div className="space-y-3">
+                  {history.rows.map(row => (
+                    <div key={row.childId}>
+                      <p className="mb-1 text-xs font-medium">{row.name}</p>
+                      <div className="flex items-end gap-1.5">
+                        {row.points.map((points, i) => (
+                          <div
+                            key={history.weekStarts[i]}
+                            className="min-w-0 flex-1"
+                          >
+                            <div
+                              className="flex h-10 items-end overflow-hidden rounded bg-muted"
+                              role="img"
+                              aria-label={tc.historyBarAria(
+                                fmtDayMonth(history.weekStarts[i], lang),
+                                points
+                              )}
+                            >
+                              <div
+                                className="w-full rounded bg-chart-1"
+                                style={{
+                                  height: `${Math.round((points / history.maxPoints) * 100)}%`,
+                                }}
+                              />
+                            </div>
+                            <p className="mt-0.5 text-center text-[10px] tabular-nums text-muted-foreground">
+                              {points}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex gap-1.5" aria-hidden="true">
+                    {history.weekStarts.map(start => (
+                      <p
+                        key={start}
+                        className="min-w-0 flex-1 text-center text-[10px] text-muted-foreground"
+                      >
+                        {fmtDayMonth(start, lang)}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

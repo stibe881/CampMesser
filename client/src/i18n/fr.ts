@@ -3186,6 +3186,9 @@ export const fr: Translation = {
     scoreLine: (points: number, done: number) => `${points} pts · ${done}×`,
     scoreHint:
       "Les points ne comptent qu'une fois la tâche cochée – être désigné n'est pas encore un mérite.",
+    historyTitle: "Points par semaine",
+    historyBarAria: (week: string, points: number) =>
+      `Semaine du ${week} : ${points} points`,
     choresTitle: "Tâches",
     newChore: "Nouvelle tâche",
     newChorePlaceholder: "p. ex. faire la vaisselle",
