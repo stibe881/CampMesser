@@ -44,6 +44,12 @@ export const MAX_TARIFF_PERIODS = 6;
 export interface SpotTariffRow {
   label: string;
   priceRappen: number;
+  /**
+   * Einmalig statt pro Nacht (#415): Endreinigung, Buchungsgebühr,
+   * Strompauschale. Echte Preistafeln haben beides – ohne das Merkmal
+   * multiplizierte der Kosten-Schätzer die Endreinigung mit den Nächten.
+   */
+  oneOff?: boolean;
 }
 
 /**
@@ -187,11 +193,17 @@ export function parseSpotTariffs(raw: string | null | undefined): SpotTariff[] {
     if (Array.isArray(record.rows)) {
       for (const rawRow of record.rows.slice(0, MAX_TARIFF_ROWS)) {
         if (typeof rawRow !== "object" || rawRow === null) continue;
-        const row = rawRow as { label?: unknown; priceRappen?: unknown };
+        const row = rawRow as {
+          label?: unknown;
+          priceRappen?: unknown;
+          oneOff?: unknown;
+        };
         const label = cleanText(row.label, TARIFF_ROW_LABEL_MAX_LENGTH);
         const priceRappen = cleanRappen(row.priceRappen);
         if (!label || priceRappen === null) continue;
-        rows.push({ label, priceRappen });
+        const cleanRow: SpotTariffRow = { label, priceRappen };
+        if (row.oneOff === true) cleanRow.oneOff = true;
+        rows.push(cleanRow);
       }
     }
     const tariff: SpotTariff = {
@@ -225,9 +237,16 @@ export function serializeSpotTariffs(
   return json.length > TARIFFS_JSON_MAX_LENGTH ? null : json;
 }
 
-/** Summe aller Zeilen eines Tarifs in Rappen – «für zwei Erwachsene und ein Kind». */
+/**
+ * Summe der PRO-NACHT-Zeilen eines Tarifs in Rappen – «für je einmal
+ * jede Zeile». Einmaliges (#415) bleibt draussen: Eine Endreinigung in
+ * der Nacht-Summe wäre eine Zahl, die zu keiner Rechnung passt.
+ */
 export function tariffTotalRappen(tariff: SpotTariff): number {
-  return tariff.rows.reduce((sum, row) => sum + row.priceRappen, 0);
+  return tariff.rows.reduce(
+    (sum, row) => (row.oneOff ? sum : sum + row.priceRappen),
+    0
+  );
 }
 
 /**
@@ -238,8 +257,10 @@ export function tariffTotalRappen(tariff: SpotTariff): number {
 export function tariffRange(
   tariffs: readonly SpotTariff[]
 ): { minRappen: number; maxRappen: number } | null {
+  // Einmaliges (#415) zählt nicht: «50.– Endreinigung» ist kein
+  // Nachtpreis und würde die Spanne nach oben verfälschen.
   const prices = tariffs.flatMap(tariff =>
-    tariff.rows.map(row => row.priceRappen)
+    tariff.rows.filter(row => !row.oneOff).map(row => row.priceRappen)
   );
   if (prices.length === 0) return null;
   return {

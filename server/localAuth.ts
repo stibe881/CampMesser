@@ -89,11 +89,26 @@ export async function registerUser(
   return rows[0];
 }
 
-/** Session-Token für ein lokales Konto ausstellen (gleiche JWT-Infrastruktur wie bisher). */
-export async function createLocalSessionToken(user: User): Promise<string> {
+/**
+ * Session-Token für ein lokales Konto ausstellen (gleiche JWT-Infrastruktur
+ * wie bisher). Seit #423 hält eine userSessions-Zeile die Anmeldung fest –
+ * ihre tokenId steht als `sid` im JWT und macht die Anmeldung widerrufbar.
+ */
+export async function createLocalSessionToken(
+  user: User,
+  userAgent?: string | null
+): Promise<string> {
+  const db = await import("./db");
+  const tokenId = randomBytes(16).toString("hex");
+  await db.createUserSession({
+    userId: user.id,
+    tokenId,
+    userAgent: userAgent?.slice(0, 255) || null,
+  });
   return sdk.createSessionToken(user.openId, {
     name: user.name || user.email || "Camper",
     expiresInMs: ONE_YEAR_MS,
+    sessionId: tokenId,
   });
 }
 
@@ -200,6 +215,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     fishCatches,
     tickBites,
     userNotes,
+    userSessions,
     tripChanges,
   } = await import("../drizzle/schema");
   const { inArray, or } = await import("drizzle-orm");
@@ -252,6 +268,10 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     .select({ fileName: fishCatches.fileName })
     .from(fishCatches)
     .where(eq(fishCatches.userId, userId));
+  const noteRows = await db
+    .select({ fileName: userNotes.fileName })
+    .from(userNotes)
+    .where(eq(userNotes.userId, userId));
   // Packlisten-Positionen zuerst (referenzieren Listen)
   const lists = await db
     .select({ id: packLists.id })
@@ -403,6 +423,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(fishCatches).where(eq(fishCatches.userId, userId));
   // Freie Notizen (#246) hängen ebenfalls direkt am Konto
   await db.delete(userNotes).where(eq(userNotes.userId, userId));
+  // Angemeldete Geräte (#423): alle Anmeldungen des Kontos beenden
+  await db.delete(userSessions).where(eq(userSessions.userId, userId));
   await db.delete(users).where(eq(users.id, userId));
   // Zuletzt die Upload-Dateien vom Webspace entfernen – fehlende Dateien
   // blockieren nie, und verwaiste Dateien sind schlimmstenfalls harmlos.
@@ -414,6 +436,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     receiptPhotoStorage,
     sightingPhotoStorage,
     catchPhotoStorage,
+    notePhotoStorage,
     reservationStorage,
   } = await import("./photoStorage");
   await tripPhotoStorage.deleteFiles(photoRows.map(p => p.fileName));
@@ -440,6 +463,11 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   );
   await catchPhotoStorage.deleteFiles(
     catchRows
+      .map(r => r.fileName)
+      .filter((name): name is string => Boolean(name))
+  );
+  await notePhotoStorage.deleteFiles(
+    noteRows
       .map(r => r.fileName)
       .filter((name): name is string => Boolean(name))
   );

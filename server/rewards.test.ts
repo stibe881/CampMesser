@@ -3,6 +3,7 @@ import {
   availablePoints,
   canRedeem,
   clampRewardPoints,
+  newlyReachableRewards,
   rewardProgress,
   spentPoints,
 } from "@shared/rewards";
@@ -47,5 +48,32 @@ describe("Belohnungs-Punkte", () => {
     expect(clampRewardPoints(9999)).toBe(500);
     expect(clampRewardPoints(20.4)).toBe(20);
     expect(clampRewardPoints(NaN)).toBe(1);
+  });
+
+  // #413: Gemeldet wird nur der ÜBERGANG über die Ziel-Schwelle.
+  it("meldet ein Ziel genau beim Überschreiten der Schwelle", () => {
+    const rewards = [
+      { title: "Glacé", points: 20 },
+      { title: "Minigolf", points: 50 },
+    ];
+    // 18 → 21 Punkte: das Glacé wird erreichbar, Minigolf noch nicht.
+    expect(newlyReachableRewards(rewards, [], 1, 18, 21)).toEqual([
+      { title: "Glacé", points: 20 },
+    ]);
+    // 21 → 24: das Glacé war schon erreichbar – kein zweites Mal melden.
+    expect(newlyReachableRewards(rewards, [], 1, 21, 24)).toEqual([]);
+    // Abhaken rückgängig (Punkte sinken): nie melden.
+    expect(newlyReachableRewards(rewards, [], 1, 21, 18)).toEqual([]);
+  });
+
+  it("rechnet Eingelöstes vor der Schwellen-Prüfung ab", () => {
+    const rewards = [{ title: "Glacé", points: 20 }];
+    const redemptions = [{ childId: 1, points: 10 }];
+    // 25 → 28 verdient, 10 eingelöst: verfügbar 15 → 18, kein Übergang.
+    expect(newlyReachableRewards(rewards, redemptions, 1, 25, 28)).toEqual([]);
+    // 28 → 31 verdient: verfügbar 18 → 21, jetzt kippt es.
+    expect(newlyReachableRewards(rewards, redemptions, 1, 28, 31)).toEqual(
+      rewards
+    );
   });
 });

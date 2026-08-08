@@ -300,3 +300,34 @@ describe("Tarif-Zeiträume", () => {
     expect(tariffActiveOn(withPeriods(undefined), "2026-07-01")).toBe(false);
   });
 });
+
+// Einmalige Posten (#415): das Merkmal überlebt das Speichern, und die
+// Nacht-Kennzahlen lassen es aussen vor.
+describe("einmalige Tarifzeilen", () => {
+  const tariffs = [
+    {
+      name: "Hauptsaison",
+      currency: "CHF" as const,
+      rows: [
+        { label: "Erwachsene", priceRappen: 1600 },
+        { label: "Endreinigung", priceRappen: 5000, oneOff: true },
+      ],
+    },
+  ];
+
+  it("parse und serialize erhalten das Merkmal", () => {
+    const roundtrip = parseSpotTariffs(serializeSpotTariffs(tariffs));
+    expect(roundtrip[0].rows[0].oneOff).toBeUndefined();
+    expect(roundtrip[0].rows[1].oneOff).toBe(true);
+  });
+
+  it("die Nacht-Summe lässt Einmaliges aus", () => {
+    // Eine Endreinigung in der Nacht-Summe wäre eine Zahl, die zu
+    // keiner Rechnung passt.
+    expect(tariffTotalRappen(tariffs[0])).toBe(1600);
+  });
+
+  it("die Preis-Spanne lässt Einmaliges aus", () => {
+    expect(tariffRange(tariffs)).toEqual({ minRappen: 1600, maxRappen: 1600 });
+  });
+});

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   cleanCount,
+  estimateAcrossSeasons,
+  nightsPerTariff,
   emptyCounts,
   estimatePitchCost,
   nightsBetween,
@@ -65,6 +67,7 @@ describe("estimatePitchCost", () => {
     const found = estimatePitchCost({ nights: 5, rows: ROWS });
     expect(found).toEqual({
       perNightRappen: 6400,
+      oneOffRappen: 0,
       totalRappen: 32000,
       nights: 5,
       source: "tariff",
@@ -112,5 +115,122 @@ describe("emptyCounts", () => {
     });
     expect(counts.map(row => row.count)).toEqual([0, 0]);
     expect(counts[0]).toMatchObject({ label: "Erwachsene", priceRappen: 1600 });
+  });
+});
+
+// Einmalige Posten (#415): Endreinigung und Buchungsgebühr zählen genau
+// einmal – nicht mal Nächte.
+describe("einmalige Posten", () => {
+  it("rechnet Einmaliges nicht mit den Nächten hoch", () => {
+    const estimate = estimatePitchCost({
+      nights: 5,
+      rows: [
+        { label: "Erwachsene", priceRappen: 1200, count: 2 },
+        { label: "Endreinigung", priceRappen: 5000, count: 1, oneOff: true },
+      ],
+      nightlyRappen: 0,
+    });
+    expect(estimate).toMatchObject({
+      perNightRappen: 2400,
+      oneOffRappen: 5000,
+      totalRappen: 2400 * 5 + 5000,
+      source: "tariff",
+    });
+  });
+
+  it("nur Einmaliges ist trotzdem eine Rechnung", () => {
+    const estimate = estimatePitchCost({
+      nights: 3,
+      rows: [
+        { label: "Buchungsgebühr", priceRappen: 800, count: 1, oneOff: true },
+      ],
+      nightlyRappen: 0,
+    });
+    expect(estimate).toMatchObject({
+      perNightRappen: 0,
+      oneOffRappen: 800,
+      totalRappen: 800,
+    });
+  });
+
+  it("emptyCounts trägt das Einmalig-Merkmal weiter", () => {
+    const counts = emptyCounts({
+      name: "Hauptsaison",
+      currency: "CHF",
+      rows: [
+        { label: "Erwachsene", priceRappen: 1600 },
+        { label: "Endreinigung", priceRappen: 5000, oneOff: true },
+      ],
+    });
+    expect(counts[0].oneOff).toBeUndefined();
+    expect(counts[1].oneOff).toBe(true);
+  });
+});
+
+// Saisonwechsel (#420): jede Nacht gehört zu ihrem Datum.
+describe("Saisonwechsel", () => {
+  const tariffs = [
+    {
+      name: "Nebensaison",
+      currency: "CHF" as const,
+      rows: [{ label: "Erwachsene", priceRappen: 1000 }],
+      periods: [{ from: "04-01", to: "06-27" }],
+    },
+    {
+      name: "Hauptsaison",
+      currency: "CHF" as const,
+      rows: [{ label: "Erwachsene", priceRappen: 1500 }],
+      periods: [{ from: "06-28", to: "08-23" }],
+    },
+  ];
+
+  it("teilt die Nächte an der Tarifgrenze auf", () => {
+    // 26.06.–01.07. = 5 Nächte: 26./27.06. Nebensaison, 28.–30.06. Haupt.
+    expect(nightsPerTariff(tariffs, "2026-06-26", "2026-07-01", 0)).toEqual([
+      { tariffIndex: 0, nights: 2 },
+      { tariffIndex: 1, nights: 3 },
+    ]);
+  });
+
+  it("Nächte ohne Zeitraum fallen auf den gewählten Tarif zurück", () => {
+    // September liegt in keinem Zeitraum – gerechnet wird der gewählte.
+    expect(nightsPerTariff(tariffs, "2026-09-01", "2026-09-03", 1)).toEqual([
+      { tariffIndex: 1, nights: 2 },
+    ]);
+  });
+
+  it("rechnet je Nacht den gültigen Preis, Einmaliges einmal", () => {
+    const result = estimateAcrossSeasons({
+      tariffs,
+      rows: [
+        { label: "Erwachsene", priceRappen: 1000, count: 2 },
+        { label: "Endreinigung", priceRappen: 3000, count: 1, oneOff: true },
+      ],
+      startDate: "2026-06-26",
+      endDate: "2026-07-01",
+      fallbackIndex: 0,
+    });
+    // 2 Nächte × 2×10.– + 3 Nächte × 2×15.– + 30.– einmalig
+    expect(result).toEqual({
+      parts: [
+        { tariffIndex: 0, nights: 2, perNightRappen: 2000 },
+        { tariffIndex: 1, nights: 3, perNightRappen: 3000 },
+      ],
+      oneOffRappen: 3000,
+      totalRappen: 2 * 2000 + 3 * 3000 + 3000,
+    });
+  });
+
+  it("eine Zeile ohne Gegenstück behält ihren gewählten Preis", () => {
+    // «Hund» gibt es nur in der Nebensaison – lieber leicht ungenau als
+    // eine stumm verschwundene Position.
+    const result = estimateAcrossSeasons({
+      tariffs,
+      rows: [{ label: "Hund", priceRappen: 300, count: 1 }],
+      startDate: "2026-06-26",
+      endDate: "2026-07-01",
+      fallbackIndex: 0,
+    });
+    expect(result?.parts.map(p => p.perNightRappen)).toEqual([300, 300]);
   });
 });

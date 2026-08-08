@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { describeWeatherCode } from "@shared/weather";
+import { weatherTurn, type WeatherTurn } from "@shared/weatherTurn";
 import type { Language } from "@shared/i18n";
 
 /**
@@ -28,6 +29,11 @@ export interface DayWeather {
    * Böe, nicht im Mittelwert.
    */
   gustsMaxKmh: number | null;
+  /**
+   * Kippt das Wetter von heute auf morgen? (#417) – dafür holt die
+   * Abfrage zwei Tage statt einen; null heisst «nichts zu sagen».
+   */
+  turn: WeatherTurn | null;
 }
 
 export function useDayWeather(
@@ -46,9 +52,9 @@ export function useDayWeather(
       latitude: latitude.toFixed(4),
       longitude: longitude.toFixed(4),
       timezone: "auto",
-      forecast_days: "1",
+      forecast_days: "2",
       daily:
-        "temperature_2m_max,temperature_2m_min,weather_code,wind_gusts_10m_max",
+        "temperature_2m_max,temperature_2m_min,weather_code,wind_gusts_10m_max,precipitation_sum",
     });
     fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`)
       .then(res => (res.ok ? res.json() : Promise.reject(new Error("no"))))
@@ -59,6 +65,28 @@ export function useDayWeather(
         const code = json?.daily?.weather_code?.[0];
         const gusts = json?.daily?.wind_gusts_10m_max?.[0];
         if (typeof max !== "number" || typeof min !== "number") return;
+        /** Tag i als Umschwungs-Eingabe – null, wenn ein Wert fehlt. */
+        const turnDay = (i: number) => {
+          const d = json?.daily;
+          const date = d?.time?.[i];
+          const tempMaxC = d?.temperature_2m_max?.[i];
+          const rain = d?.precipitation_sum?.[i];
+          const g = d?.wind_gusts_10m_max?.[i];
+          if (
+            typeof date !== "string" ||
+            typeof tempMaxC !== "number" ||
+            typeof rain !== "number" ||
+            typeof g !== "number"
+          ) {
+            return undefined;
+          }
+          return {
+            date,
+            tempMaxC,
+            precipitationSumMm: rain,
+            windGustsMaxKmh: g,
+          };
+        };
         setWeather({
           maxC: max,
           minC: min,
@@ -67,6 +95,7 @@ export function useDayWeather(
               ? describeWeatherCode(code, lang).label
               : "",
           gustsMaxKmh: typeof gusts === "number" ? Math.round(gusts) : null,
+          turn: weatherTurn(turnDay(0), turnDay(1)),
         });
       })
       .catch(() => {

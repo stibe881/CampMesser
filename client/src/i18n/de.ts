@@ -1526,6 +1526,9 @@ export const de = {
     regaLinkAria: "Offizielle Rega-App-Seite öffnen (externer Link)",
     regaLink: "Zur offiziellen Rega-App",
     guideTitle: "So setzt du den Notruf richtig ab",
+    abroadTitle: "Notrufnummern im Ausland",
+    abroadHint:
+      "Die 112 funktioniert europaweit. Für Bergrettung und Sanität sind die direkten Landesnummern oft schneller – hier für die gängigen Camping-Länder.",
   },
   energy: {
     title: "Energie-Budget-Rechner",
@@ -1917,6 +1920,8 @@ export const de = {
     noteLabel: "Notiz (optional)",
     notePlaceholder: "z. B. Platz am Bach, schattig am Morgen",
     attrFilterAria: "Nach Eigenschaften filtern",
+    sortByDistance: "Nach Distanz",
+    distanceFromHome: (km: string) => `${km} von zuhause`,
     attrFilterShade: "Viel Schatten",
     attrFilterQuiet: "Ruhig",
     attrFilterWifi: "WLAN",
@@ -2189,6 +2194,9 @@ export const de = {
     tariffRowLabelPlaceholder: "z. B. Erwachsene",
     tariffRowPriceAria: "Preis pro Nacht",
     tariffTotal: (amount: string) => `Zusammen ${amount}`,
+    tariffRowOneOff: "einmalig",
+    tariffRowOneOffAria: (label: string) =>
+      `${label}: einmalig statt pro Nacht`,
     tariffRemoveAria: (name: string) => `Tarif ${name} entfernen`,
     tariffRowRemoveAria: (label: string) => `Zeile ${label} entfernen`,
     costPriceLabel: "Platz pro Nacht",
@@ -2376,6 +2384,12 @@ export const de = {
     mapEmpty: "Zu dieser Wanderung sind keine Punkte gespeichert.",
     gpxExport: "GPX herunterladen",
     gpxDone: "GPX-Datei erstellt",
+    gpxImport: "GPX importieren",
+    gpxImporting: "Importiert …",
+    gpxImported: "Wanderung importiert.",
+    gpxImportedEstimated:
+      "Wanderung importiert. Die Datei trug keine Zeiten – Dauer und Tempo sind aus 4 km/h hergeleitet.",
+    gpxImportFailed: "Datei konnte nicht als GPX gelesen werden.",
     gpxFailed: "GPX-Export nicht möglich",
     gpxFallbackName: "Wanderung",
     gpxAria: (name: string) => `${name} als GPX herunterladen`,
@@ -2443,6 +2457,7 @@ export const de = {
   },
   sharedSpot: {
     tariffsTitle: "Tarife",
+    tariffRowOneOff: "einmalig",
     invalid: "Dieser Teil-Link ist abgelaufen oder nicht mehr gültig.",
     invalidHint:
       "Er ist abgelaufen oder die Besitzerin bzw. der Besitzer hat das Teilen beendet.",
@@ -3182,6 +3197,9 @@ export const de = {
     scoreLine: (points: number, done: number) => `${points} P. · ${done}×`,
     scoreHint:
       "Punkte gibt es erst beim Abhaken – eine zugeteilte Aufgabe ist noch kein Verdienst.",
+    historyTitle: "Punkte pro Woche",
+    historyBarAria: (week: string, points: number) =>
+      `Woche ab ${week}: ${points} Punkte`,
     choresTitle: "Ämtli",
     newChore: "Neues Ämtli",
     newChorePlaceholder: "z. B. Abwaschen",
@@ -4356,6 +4374,8 @@ export const de = {
     historyTitle: "Eingelöst",
     historyLine: (name: string, title: string, points: number, date: string) =>
       `${name}: «${title}» für ${points} P. am ${date}`,
+    reachedToast: (name: string, title: string) =>
+      `${name} hat jetzt genug Punkte für «${title}»!`,
   },
   nextTime: {
     title: "Beim nächsten Mal",
@@ -4378,11 +4398,66 @@ export const de = {
       "Fürs Einpacken am Morgen zuerst abtrocknen lassen – das Trockenfenster unten hilft beim Planen.",
     note: "Abschätzung aus Temperatur, Feuchte, Wolken und Wind. Senken, Wiesen und Bachnähe sind feuchter, als die Prognose weiss.",
   },
-  reviewPrompt: {
+  spotPrint: {
+    kicker: "Platz-Dossier",
+    docTitle: (name: string) => `Dossier: ${name}`,
+    openButton: "Dossier drucken",
+    notFound: "Dieser Platz wurde nicht gefunden.",
+    coords: (lat: string, lon: string) => `${lat}, ${lon}`,
+    elevation: (m: number) => `${m} m ü. M.`,
+    contactTitle: "Kontakt & Ankunft",
+    phoneLabel: "Rezeption",
+    checkinLabel: "Check-in/-out",
+    parcelLabel: "Parzelle",
+    tariffsTitle: "Preise",
+    basePrice: (amount: string) => `Grundpreis pro Nacht: ${amount}`,
+    attributesTitle: "Eigenschaften",
+    nextTimeTitle: "Beim nächsten Mal",
+    noteTitle: "Notizen",
+    planTitle: "Platzplan",
+  },
+  choresPrint: {
+    kicker: "Familien-Modus",
+    title: "Ämtli-Wochenplan",
+    docTitle: "Ämtli-Wochenplan",
+    openButton: "Wochenplan drucken",
+    choreColumn: "Ämtli",
+    empty: "Noch keine Ämtli oder Personen erfasst.",
+    note: "Die Zuteilung folgt derselben Rotation wie in der App – nachrechenbar, ohne Zufall. Abgehakt wird auf Papier.",
+  },
+  winter: {
+    title: "Frost & Schnee",
+    frostLine: (nights: string) => `Frost in Sicht: ${nights}.`,
+    frostAdvice:
+      "Wassertank, Leitungen und Kanister leeren oder frostfrei lagern.",
+    snowLine: (m: number) => `Schneefallgrenze sinkt auf rund ${m} m ü. M.`,
+    note: "Aus der Prognose für diesen Ort – Mulden und Senken sind oft kälter.",
+  },
+  weatherTurn: {
+    title: "Morgen kippt das Wetter",
+    windLine: (kmh: number) =>
+      `Morgen Böen bis ${kmh} km/h – deutlich mehr als heute.`,
+    rainLine: (mm: number) =>
+      `Morgen rund ${mm} mm Regen – deutlich mehr als heute.`,
+    coldLine: (drop: number) => `Morgen rund ${drop} °C kälter als heute.`,
+    windAdvice:
+      "Heute Abend abspannen, Heringe prüfen, Markise und Loses versorgen.",
+    rainAdvice:
+      "Abspannung und Wassergräben prüfen, Wetterempfindliches unters Dach.",
+    coldAdvice: "Warme Schicht und Schlafsäcke bereitlegen.",
+    note: "Vergleich der Tagesprognosen von heute und morgen – ein Umschwung, keine Unwetterwarnung.",
+  },
+  homecoming: {
     title: (trip: string) => `Zurück von «${trip}»?`,
-    body: "Zwei Fragen, solange du es noch weisst: Was hast du nicht gebraucht, was hat gefehlt? Das verbessert die nächste Packliste.",
-    open: "Rückblick ausfüllen",
-    dismissAria: "Erinnerung zu dieser Reise ausblenden",
+    intro: "Drei Handgriffe, solange du es noch weisst:",
+    stepTent: "Zelt & Planen trocknen",
+    stepTentAria: "Zelt trocknen abhaken",
+    dryingDay: (day: string) => `Bestes Trocknungs-Wetter daheim: ${day}.`,
+    stepReview: "Rückblick ausfüllen: Was fehlte, was war zu viel?",
+    stepNextTime: "«Beim nächsten Mal» am Platz notieren",
+    notePlaceholder: "z. B. Kabeltrommel 25 m",
+    noteSave: "Notieren",
+    dismissAria: "Heimkehr-Erinnerung zu dieser Reise ausblenden",
   },
   campfire: {
     stateOk: "Lagerfeuer: Spricht nichts dagegen.",
@@ -4407,6 +4482,9 @@ export const de = {
     start: "Jetzt vorbereiten",
     again: "Nochmals holen",
     running: "Wird geholt …",
+    lastRun: (when: string) => `Daten-Stand: ${when}.`,
+    autoNote:
+      "Kurz vor der Reise frischt die App die Daten beim Öffnen selbst auf – die Karten bleiben, wie geladen.",
     stepTrip: "Reise, Platz und Mitreisende",
     stepPacking: "Packliste",
     stepMenu: "Menüplan und Rezepte",
@@ -4434,6 +4512,11 @@ export const de = {
       `${perNight} pro Nacht × ${nights}`,
     sourceNightly: "aus dem Preis pro Nacht",
     nothingYet: "Noch nichts zu rechnen: Anzahl eintragen.",
+    oneOffPart: (amount: string) => `dazu einmalig ${amount}`,
+    seasonPart: (name: string, nights: number, perNight: string) =>
+      `${name}: ${nights} ${nights === 1 ? "Nacht" : "Nächte"} × ${perNight}`,
+    seasonSplitNote:
+      "Der Aufenthalt liegt in mehreren Tarif-Zeiträumen – gerechnet wird je Nacht der gültige Tarif.",
     addToExpenses: "In die Reisekasse",
     foreignCurrency: (currency: string) =>
       `Die Reisekasse wird in CHF geführt – Beträge in ${currency} bitte von Hand eintragen.`,
@@ -5275,6 +5358,8 @@ export const de = {
     detailsPricePlaceholder: "z. B. 3.50",
     detailsPriceHint:
       "Leer lassen, wenn du keinen Preis erfassen willst. Die Summe steht oben auf der Liste.",
+    lastPriceSuggestion: (amount: string) =>
+      `Letztes Mal: ${amount} – übernehmen`,
     detailsPriceBooked:
       "Schon in die Reisekasse übernommen – der Preis bleibt, wie er verbucht wurde.",
     totalLabel: "Summe:",
@@ -5491,6 +5576,8 @@ export const de = {
     previewAria: (name: string) => `Rezept ${name} ansehen`,
     previewServings: (n: number) => `${n} Portionen`,
     previewIngredients: "Zutaten",
+    stockAllCovered: "Alle Zutaten sind in Kühlbox oder Vorrat vorhanden.",
+    stockMissing: (list: string) => `Fehlt im Vorrat: ${list}`,
     previewSteps: "Zubereitung",
     previewTip: "Tipp",
     previewOpenInBook: "Im Rezeptbuch öffnen",
@@ -6009,6 +6096,65 @@ export const de = {
     deleteConfirm: "Diese Notiz wirklich löschen?",
     editAria: (title: string) => `Notiz ${title} bearbeiten`,
     deleteAria: (title: string) => `Notiz ${title} löschen`,
+    photoLabel: "Foto (optional)",
+    photoChoose: "Foto auswählen",
+    photoChange: "Foto ändern",
+    photoRemove: "Foto entfernen",
+    photoPreviewAlt: "Vorschau des Notiz-Fotos",
+    photoHint:
+      "JPEG, PNG oder WebP – wird vor dem Hochladen automatisch verkleinert.",
+    photoUploading: "Foto wird hochgeladen …",
+    photoUploadFailed:
+      "Gespeichert, aber das Foto konnte nicht hochgeladen werden.",
+    photoTooLarge: "Das Foto ist zu gross (max. 5 MB).",
+    photoHeic:
+      "HEIC/HEIF kann der Browser nicht lesen – bitte als JPEG exportieren.",
+    photoReadFailed: "Das Bild konnte nicht gelesen werden.",
+    photoRemoveFailed: "Das Foto konnte nicht entfernt werden.",
+    photoAlt: (title: string) => `Foto zur Notiz ${title}`,
+  },
+  shareLinks: {
+    title: "Aktive Teil-Links",
+    intro:
+      "Alles, was du gerade per Link teilst, an einem Ort. Beenden wirkt sofort – der Link zeigt danach ins Leere.",
+    empty: "Zurzeit ist nichts per Link geteilt.",
+    unnamed: "Ohne Namen",
+    expires: (date: string) => `läuft ab am ${date}`,
+    copyAria: (label: string) => `Link zu ${label} kopieren`,
+    revokeButton: "Beenden",
+    revokeConfirm: (label: string) => `Teil-Link zu «${label}» beenden?`,
+    revoked: "Teil-Link beendet",
+    kinds: {
+      spot: "Platz-Dossier",
+      packList: "Packliste",
+      packTemplate: "Packvorlage",
+      trip: "Reise",
+      recipe: "Rezept",
+      quiz: "Quiz",
+      shopping: "Einkaufsliste",
+      track: "Wanderung",
+      location: "Standort",
+    },
+  },
+  devices: {
+    title: "Angemeldete Geräte",
+    intro:
+      "Jede Anmeldung an diesem Konto, mit «zuletzt aktiv». Ein abgemeldetes Gerät ist sofort draussen – auch wenn es das Handy ist, das im Zug liegen geblieben ist.",
+    empty: "Keine erfassten Anmeldungen.",
+    unknownDevice: "Unbekanntes Gerät",
+    currentBadge: "Dieses Gerät",
+    lastSeen: (date: string) => `Zuletzt aktiv: ${date}`,
+    signedInAt: (date: string) => `Angemeldet: ${date}`,
+    revokeButton: "Abmelden",
+    revokeConfirm: "Dieses Gerät abmelden?",
+    revoked: "Gerät abgemeldet",
+    revokeOthersButton: "Alle anderen Geräte abmelden",
+    revokeOthersConfirm:
+      "Alle anderen Geräte abmelden? Dieses Gerät bleibt angemeldet.",
+    othersRevoked: (n: number) =>
+      n === 1 ? "1 Gerät abgemeldet" : `${n} Geräte abgemeldet`,
+    legacyHint:
+      "Anmeldungen von vor dieser Übersicht erscheinen erst nach der nächsten Anmeldung des jeweiligen Geräts.",
   },
   stats: {
     expensesTitle: "Ausgaben über alle Reisen",

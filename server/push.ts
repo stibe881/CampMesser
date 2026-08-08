@@ -16,6 +16,11 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 import webpush from "web-push";
 import { LANGUAGES, type Language } from "@shared/i18n";
 import {
+  weatherTurn,
+  type TurnDay,
+  type WeatherTurn,
+} from "../shared/weatherTurn";
+import {
   dryingAlertText,
   evePackAlertText,
   foodAlertText,
@@ -354,6 +359,8 @@ export interface PushCheckResult {
   tripSent: number;
   /** Verschickte Zelt-Trocknungs-Erinnerungen (Tag nach der Heimkehr) */
   drySent: number;
+  /** Wetterumschwung-Pushes (#427). */
+  turnSent: number;
   /** Verschickte Vorabend-Checks (Abend vor der Anreise) */
   evePackSent: number;
   /** Verschickte Sternschnuppen-Tipps (klare Nacht am Heim-Ort) */
@@ -811,6 +818,107 @@ const RAIN_MAX_PAST_DAYS = 92;
  * über den Forecast-Endpoint mit past_days, weil das Archiv die jüngsten Tage
  * noch nicht führt.
  */
+export interface WeatherTurnPushAlert {
+  title: string;
+  body: string;
+  /** Dedup «turn:<tripId>:<morgen>» – pro Reise und Tag höchstens einer. */
+  key: string;
+}
+
+/** Tagesprognose heute+morgen für den Umschwungs-Vergleich (#427). */
+async function dailyTurnFor(lat: number, lon: number): Promise<TurnDay[]> {
+  const params = new URLSearchParams({
+    latitude: lat.toFixed(4),
+    longitude: lon.toFixed(4),
+    timezone: "auto",
+    forecast_days: "2",
+    daily: "temperature_2m_max,precipitation_sum,wind_gusts_10m_max",
+  });
+  const res = await fetch(
+    `https://api.open-meteo.com/v1/forecast?${params.toString()}`
+  );
+  if (!res.ok) throw new Error(`Wetterdienst: ${res.status}`);
+  const json = (await res.json()) as {
+    daily?: {
+      time?: string[];
+      temperature_2m_max?: number[];
+      precipitation_sum?: number[];
+      wind_gusts_10m_max?: number[];
+    };
+  };
+  const time = json.daily?.time ?? [];
+  return time.map((date, i) => ({
+    date,
+    tempMaxC: Number(json.daily?.temperature_2m_max?.[i] ?? NaN),
+    precipitationSumMm: Number(json.daily?.precipitation_sum?.[i] ?? 0),
+    windGustsMaxKmh: Number(json.daily?.wind_gusts_10m_max?.[i] ?? 0),
+  }));
+}
+
+/** Titel und Text des Umschwung-Push in der Sprache des Geräts. */
+function weatherTurnPushText(
+  turn: WeatherTurn,
+  name: string,
+  lang: Language
+): { title: string; body: string } {
+  const titles: Record<Language, string> = {
+    de: "Morgen kippt das Wetter",
+    en: "The weather turns tomorrow",
+    fr: "Le temps bascule demain",
+    it: "Domani il tempo cambia",
+  };
+  const bodies: Record<Language, Record<WeatherTurn["kind"], string>> = {
+    de: {
+      wind: `${name}: morgen Böen bis ${turn.value} km/h – heute Abend abspannen und Heringe prüfen.`,
+      rain: `${name}: morgen rund ${turn.value} mm Regen – Abspannung und Wassergräben prüfen.`,
+      cold: `${name}: morgen rund ${turn.value} °C kälter – warme Schicht und Schlafsäcke bereitlegen.`,
+    },
+    en: {
+      wind: `${name}: gusts up to ${turn.value} km/h tomorrow – tension the guy lines tonight and check the pegs.`,
+      rain: `${name}: about ${turn.value} mm of rain tomorrow – check guy lines and drainage.`,
+      cold: `${name}: about ${turn.value} °C colder tomorrow – lay out warm layers and sleeping bags.`,
+    },
+    fr: {
+      wind: `${name} : demain rafales jusqu'à ${turn.value} km/h – retendre les haubans ce soir et vérifier les sardines.`,
+      rain: `${name} : demain environ ${turn.value} mm de pluie – vérifier haubans et écoulement.`,
+      cold: `${name} : demain environ ${turn.value} °C de moins – préparer couches chaudes et sacs de couchage.`,
+    },
+    it: {
+      wind: `${name}: domani raffiche fino a ${turn.value} km/h – stasera tendere i tiranti e controllare i picchetti.`,
+      rain: `${name}: domani circa ${turn.value} mm di pioggia – controllare tiranti e scoli.`,
+      cold: `${name}: domani circa ${turn.value} °C in meno – preparare strati caldi e sacchi a pelo.`,
+    },
+  };
+  return { title: titles[lang], body: bodies[lang][turn.kind] };
+}
+
+/**
+ * Umschwung-Push bauen (#427): der erste laufende Aufenthalt mit einem
+ * Umschwung gewinnt (kleinste Id – deterministisch für den Dedup).
+ * Reine Funktion, für Tests exportiert.
+ */
+export function buildWeatherTurnAlert(
+  trips: readonly { id: number; name: string; spotId: number }[],
+  turnBySpotId: ReadonlyMap<number, { turn: WeatherTurn; tomorrow: string }>,
+  lang: Language = "de"
+): WeatherTurnPushAlert | null {
+  const candidates = trips
+    .map(trip => ({ trip, value: turnBySpotId.get(trip.spotId) }))
+    .filter(
+      (
+        x
+      ): x is {
+        trip: (typeof trips)[number];
+        value: { turn: WeatherTurn; tomorrow: string };
+      } => x.value !== undefined
+    )
+    .sort((a, b) => a.trip.id - b.trip.id);
+  const first = candidates[0];
+  if (!first) return null;
+  const text = weatherTurnPushText(first.value.turn, first.trip.name, lang);
+  return { ...text, key: `turn:${first.trip.id}:${first.value.tomorrow}` };
+}
+
 async function dailyRainFor(
   lat: number,
   lon: number,
@@ -980,6 +1088,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     foodSent: 0,
     tripSent: 0,
     drySent: 0,
+    turnSent: 0,
     evePackSent: 0,
     astroSent: 0,
     gearSent: 0,
@@ -1212,6 +1321,64 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     for (const lang of langsOf(userId)) {
       const alert = buildDryingAlert(own, rainByTripId, today, lang);
       if (alert) dryAlertByUser.set(alertFor(userId, lang), alert);
+    }
+  }
+
+  // ── Wetterumschwung (#427): abends beim LAUFENDEN Aufenthalt ──
+  // Der Hinweis aus der App (#417) als Push: Wer abends nicht in die App
+  // schaut, verpasst «morgen kippt das Wetter – heute Abend abspannen».
+  // Gleiches Abendfenster wie der Vorabend-Check, Regeln in
+  // shared/weatherTurn.ts, Dedup pro Reise und Morgen-Datum.
+  const turnAlertByUser = new Map<string, WeatherTurnPushAlert>();
+  if (
+    eveningHour >= EVE_PACK_SEND_HOUR_FROM &&
+    eveningHour <= EVE_PACK_SEND_HOUR_TO
+  ) {
+    const running = allTrips.filter(
+      trip =>
+        trip.spotId !== null && trip.startDate <= today && trip.endDate >= today
+    );
+    const turnBySpotId = new Map<
+      number,
+      { turn: WeatherTurn; tomorrow: string }
+    >();
+    const turnCache = new Map<
+      string,
+      { turn: WeatherTurn; tomorrow: string } | null
+    >();
+    for (const trip of running) {
+      const spot = trip.spotId !== null ? spotById.get(trip.spotId) : undefined;
+      if (!spot) continue;
+      const cacheKey = `${spot.latitude.toFixed(2)},${spot.longitude.toFixed(2)}`;
+      if (!turnCache.has(cacheKey)) {
+        try {
+          const days = await dailyTurnFor(spot.latitude, spot.longitude);
+          const turn = weatherTurn(days[0], days[1]);
+          turnCache.set(
+            cacheKey,
+            turn && days[1] ? { turn, tomorrow: days[1].date } : null
+          );
+        } catch {
+          turnCache.set(cacheKey, null); // Wetterdienst weg → kein Push
+        }
+      }
+      const value = turnCache.get(cacheKey);
+      if (value) turnBySpotId.set(spot.id, value);
+    }
+    if (turnBySpotId.size > 0) {
+      for (const userId of userIds) {
+        const own = running
+          .filter(trip => trip.userId === userId)
+          .map(trip => ({
+            id: trip.id,
+            name: tripDisplayName(trip),
+            spotId: trip.spotId as number,
+          }));
+        for (const lang of langsOf(userId)) {
+          const alert = buildWeatherTurnAlert(own, turnBySpotId, lang);
+          if (alert) turnAlertByUser.set(alertFor(userId, lang), alert);
+        }
+      }
     }
   }
 
@@ -1670,6 +1837,37 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         await db
           .update(pushSubscriptions)
           .set({ lastDryKey: dryAlert.key, lastNotifiedAt: new Date() })
+          .where(eq(pushSubscriptions.id, sub.id));
+      } else if (outcome === "gone") {
+        continue;
+      }
+    }
+
+    // ── Wetterumschwung (#427): abends beim laufenden Aufenthalt (Flag wantsWeather) ──
+    const turnAlert = subscriptionWants(sub, "weather")
+      ? turnAlertByUser.get(alertFor(sub.userId, subLang(sub.lang)))
+      : undefined;
+    if (turnAlert && turnAlert.key !== sub.lastTurnKey) {
+      const turnPayload = JSON.stringify({
+        title: turnAlert.title,
+        body: turnAlert.body,
+        url: "/wetter",
+        tag: "campmesser-weather-turn",
+      });
+      const outcome = await sendTo(sub, turnPayload);
+      if (outcome === "sent") {
+        result.turnSent += 1;
+        await logPushOnce(
+          sub.userId,
+          "weather",
+          turnAlert.key,
+          turnAlert.title,
+          turnAlert.body,
+          "/wetter"
+        );
+        await db
+          .update(pushSubscriptions)
+          .set({ lastTurnKey: turnAlert.key, lastNotifiedAt: new Date() })
           .where(eq(pushSubscriptions.id, sub.id));
       } else if (outcome === "gone") {
         continue;

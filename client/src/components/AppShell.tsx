@@ -49,6 +49,7 @@ import BrandLogo from "@/components/BrandLogo";
 import InstallPrompt from "@/components/InstallPrompt";
 import OfflineBanner from "@/components/OfflineBanner";
 import OfflineSync from "@/components/OfflineSync";
+import OfflineRefresh from "@/components/OfflineRefresh";
 import SettingsSync from "@/components/SettingsSync";
 import DirectionsPrompt from "@/components/DirectionsPrompt";
 import UpdatePrompt from "@/components/UpdatePrompt";
@@ -440,6 +441,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Offline gesetzte Häkchen nachschicken (ohne eigene Darstellung) */}
       <OfflineSync />
+
+      {/* Offline-Paket kurz vor der Reise auffrischen (#411, ohne Darstellung) */}
+      <OfflineRefresh />
 
       {/* Design und Karten-App vom Konto übernehmen (#360, ohne Darstellung) */}
       <SettingsSync />

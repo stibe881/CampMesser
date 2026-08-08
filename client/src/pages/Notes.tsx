@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { fmtDate, fmtLong } from "@/lib/dateFormat";
 import { useConfirm } from "@/components/ConfirmDialog";
 import {
+  ImagePlus,
   Loader2,
   NotebookPen,
   Pencil,
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { resizeImageForUpload } from "@/lib/imageResize";
 import { useI18n } from "@/i18n";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { cn } from "@/lib/utils";
@@ -42,6 +44,11 @@ import {
   parseNoteTags,
 } from "@shared/notes";
 
+/** Foto-URL einer Notiz (#433) – ausgeliefert nur an den eigenen Account. */
+function notePhotoUrl(fileName: string): string {
+  return `/api/notes/photos/${fileName}`;
+}
+
 /** Formularzustand des Dialogs; id = null heisst «neue Notiz». */
 interface NoteDraft {
   id: number | null;
@@ -49,9 +56,17 @@ interface NoteDraft {
   text: string;
   /** Stichwörter als kommagetrennte Eingabe – gesäubert wird beim Speichern */
   tags: string;
+  /** Bereits gespeichertes Foto der Notiz (#433); null = ohne */
+  fileName: string | null;
 }
 
-const EMPTY_DRAFT: NoteDraft = { id: null, title: "", text: "", tags: "" };
+const EMPTY_DRAFT: NoteDraft = {
+  id: null,
+  title: "",
+  text: "",
+  tags: "",
+  fileName: null,
+};
 
 /**
  * Freie Notizen (#246): das Auffangbecken für alles, was in kein anderes
@@ -72,6 +87,13 @@ export default function NotesPage() {
   const [activeTags, setActiveTags] = useState<string[]>([]);
   const [draft, setDraft] = useState<NoteDraft>(EMPTY_DRAFT);
   const [dialogOpen, setDialogOpen] = useState(false);
+  // Foto-Zustand (#433): Auswahl wird erst nach dem Speichern hochgeladen –
+  // dasselbe Muster wie bei Beobachtungen und Fängen.
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  const [removePhoto, setRemovePhoto] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
 
   const notes = useMemo(() => notesQuery.data ?? [], [notesQuery.data]);
   const tagChips = useMemo(() => collectNoteTags(notes), [notes]);
@@ -88,24 +110,14 @@ export default function NotesPage() {
   const closeDialog = () => {
     setDialogOpen(false);
     setDraft(EMPTY_DRAFT);
+    setPhotoBlob(null);
+    setPhotoPreviewUrl(null);
+    setRemovePhoto(false);
   };
 
-  const addMutation = trpc.notes.add.useMutation({
-    onSuccess: () => {
-      utils.notes.list.invalidate();
-      closeDialog();
-      toast.success(t.notes.saved);
-    },
-    onError: e => toast.error(e.message || t.notes.saveFailed),
-  });
-  const updateMutation = trpc.notes.update.useMutation({
-    onSuccess: () => {
-      utils.notes.list.invalidate();
-      closeDialog();
-      toast.success(t.notes.updated);
-    },
-    onError: e => toast.error(e.message || t.notes.saveFailed),
-  });
+  const addMutation = trpc.notes.add.useMutation();
+  const updateMutation = trpc.notes.update.useMutation();
+  const removePhotoMutation = trpc.notes.removePhoto.useMutation();
   const removeMutation = trpc.notes.remove.useMutation({
     onSuccess: () => {
       utils.notes.list.invalidate();
@@ -125,31 +137,106 @@ export default function NotesPage() {
       title: note.title ?? "",
       text: note.text,
       tags: parseNoteTags(note.tags).join(", "),
+      fileName: note.fileName ?? null,
     });
     setDialogOpen(true);
   };
 
-  const submit = () => {
+  // Foto-Vorschau (#433): frisch gewählt schlägt gespeichert
+  const previewUrl =
+    photoPreviewUrl ??
+    (draft.fileName && !removePhoto ? notePhotoUrl(draft.fileName) : null);
+
+  const handlePhotoSelected = async (fileList: FileList | null) => {
+    const file = fileList?.[0];
+    if (photoInputRef.current) photoInputRef.current.value = "";
+    if (!file) return;
+    try {
+      const blob = await resizeImageForUpload(file);
+      setPhotoBlob(blob);
+      setPhotoPreviewUrl(URL.createObjectURL(blob));
+      setRemovePhoto(false);
+    } catch {
+      // Dekodieren fehlgeschlagen – bei HEIC/HEIF gezielt darauf hinweisen
+      const isHeic =
+        /image\/hei[cf]/.test(file.type) || /\.hei[cf]$/i.test(file.name);
+      toast.error(isHeic ? t.notes.photoHeic : t.notes.photoReadFailed);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoBlob(null);
+    setPhotoPreviewUrl(null);
+    if (draft.fileName) setRemovePhoto(true);
+  };
+
+  const submit = async () => {
     if (!draft.text.trim()) {
       toast.error(t.notes.textRequired);
       return;
     }
     const tags = normalizeNoteTags(draft.tags);
-    if (draft.id === null) {
-      addMutation.mutate({ title: draft.title, text: draft.text, tags });
-    } else {
-      updateMutation.mutate({
-        id: draft.id,
-        title: draft.title,
-        text: draft.text,
-        tags,
-      });
+    try {
+      let id: number;
+      if (draft.id === null) {
+        ({ id } = await addMutation.mutateAsync({
+          title: draft.title,
+          text: draft.text,
+          tags,
+        }));
+      } else {
+        await updateMutation.mutateAsync({
+          id: draft.id,
+          title: draft.title,
+          text: draft.text,
+          tags,
+        });
+        id = draft.id;
+      }
+      // Foto-Schritt nach dem Speichern (#433): Upload ersetzt ein
+      // bestehendes Foto serverseitig, Entfernen läuft über tRPC.
+      if (photoBlob) {
+        setPhotoUploading(true);
+        try {
+          const response = await fetch(`/api/notes/${id}/photo`, {
+            method: "POST",
+            headers: { "Content-Type": "image/jpeg" },
+            body: photoBlob,
+            credentials: "include",
+          });
+          if (!response.ok) {
+            toast.error(
+              response.status === 413
+                ? t.notes.photoTooLarge
+                : t.notes.photoUploadFailed
+            );
+          }
+        } catch {
+          toast.error(t.notes.photoUploadFailed);
+        } finally {
+          setPhotoUploading(false);
+        }
+      } else if (removePhoto && draft.fileName) {
+        try {
+          await removePhotoMutation.mutateAsync({ id });
+        } catch {
+          toast.error(t.notes.photoRemoveFailed);
+        }
+      }
+      void utils.notes.list.invalidate();
+      toast.success(draft.id === null ? t.notes.saved : t.notes.updated);
+      closeDialog();
+    } catch (error) {
+      toast.error(
+        (error instanceof Error && error.message) || t.notes.saveFailed
+      );
     }
   };
 
   const fmtDate = (value: Date | string) => fmtLong(new Date(value), lang);
 
-  const saving = addMutation.isPending || updateMutation.isPending;
+  const saving =
+    addMutation.isPending || updateMutation.isPending || photoUploading;
 
   return (
     <div className="container max-w-3xl py-6 md:py-8">
@@ -259,6 +346,16 @@ export default function NotesPage() {
                   <Card>
                     <CardContent className="flex items-start gap-2 p-4">
                       <div className="min-w-0 flex-1">
+                        {note.fileName && (
+                          <img
+                            src={notePhotoUrl(note.fileName)}
+                            alt={t.notes.photoAlt(
+                              note.title || t.notes.untitled
+                            )}
+                            loading="lazy"
+                            className="mb-2 max-h-44 w-full rounded-lg border border-border/60 object-cover"
+                          />
+                        )}
                         <h2 className="font-semibold">
                           {note.title || t.notes.untitled}
                         </h2>
@@ -364,13 +461,56 @@ export default function NotesPage() {
                 {t.notes.tagsHint(NOTE_MAX_TAGS)}
               </p>
             </div>
+            <div>
+              <p className="mb-1.5 text-sm font-medium">{t.notes.photoLabel}</p>
+              {previewUrl && (
+                <img
+                  src={previewUrl}
+                  alt={t.notes.photoPreviewAlt}
+                  className="mb-2 aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
+                />
+              )}
+              <div className="flex gap-2">
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => void handlePhotoSelected(e.target.files)}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => photoInputRef.current?.click()}
+                >
+                  <ImagePlus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {previewUrl ? t.notes.photoChange : t.notes.photoChoose}
+                </Button>
+                {previewUrl && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={handleRemovePhoto}
+                  >
+                    <Trash2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    {t.notes.photoRemove}
+                  </Button>
+                )}
+              </div>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                {t.notes.photoHint}
+              </p>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={closeDialog}>
               {t.common.cancel}
             </Button>
-            <Button onClick={submit} disabled={saving}>
-              {t.notes.save}
+            <Button onClick={() => void submit()} disabled={saving}>
+              {photoUploading ? t.notes.photoUploading : t.notes.save}
             </Button>
           </DialogFooter>
         </DialogContent>

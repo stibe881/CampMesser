@@ -62,6 +62,8 @@ import {
   saveShoppingHistory,
   shoppingSuggestions,
   type ShoppingHistoryEntry,
+  lastKnownPrice,
+  rememberShoppingPrice,
 } from "@/lib/shoppingHistory";
 import { trpc } from "@/lib/trpc";
 import { hapticTick } from "@/lib/haptics";
@@ -784,7 +786,24 @@ export default function ShoppingPage() {
                             <ShoppingItemDetailsPopover
                               item={item}
                               saving={updateMutation.isPending}
-                              onSave={data => updateMutation.mutateAsync(data)}
+                              lastPriceRappen={lastKnownPrice(
+                                history,
+                                item.name
+                              )}
+                              onSave={async data => {
+                                await updateMutation.mutateAsync(data);
+                                // Preis für den nächsten Kauf merken (#434)
+                                if (data.priceRappen) {
+                                  const next = rememberShoppingPrice(
+                                    history,
+                                    item.name,
+                                    data.priceRappen
+                                  );
+                                  setHistory(next);
+                                  saveShoppingHistory(next);
+                                  historySync.push(next);
+                                }
+                              }}
                             />
                             <Select
                               value={

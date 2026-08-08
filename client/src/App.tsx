@@ -38,6 +38,7 @@ const pageLoaders = {
   StoryDice: () => import("./pages/StoryDice"),
   Songbook: () => import("./pages/Songbook"),
   Chores: () => import("./pages/Chores"),
+  ChoresPrint: () => import("./pages/ChoresPrint"),
   Thunder: () => import("./pages/Thunder"),
   Phrasebook: () => import("./pages/Phrasebook"),
   Recipes: () => import("./pages/Recipes"),
@@ -63,6 +64,7 @@ const pageLoaders = {
   Spots: () => import("./pages/Spots"),
   MapView: () => import("./pages/MapView"),
   SpotDetail: () => import("./pages/SpotDetail"),
+  SpotPrint: () => import("./pages/SpotPrint"),
   Impressum: () => import("./pages/Impressum"),
   Datenschutz: () => import("./pages/Datenschutz"),
   TentFinder: () => import("./pages/TentFinder"),
@@ -142,6 +144,7 @@ const GearRepairPage = lazyWithRetry(pageLoaders.GearRepair);
 const StoryDicePage = lazyWithRetry(pageLoaders.StoryDice);
 const SongbookPage = lazyWithRetry(pageLoaders.Songbook);
 const ChoresPage = lazyWithRetry(pageLoaders.Chores);
+const ChoresPrintPage = lazyWithRetry(pageLoaders.ChoresPrint);
 const ThunderPage = lazyWithRetry(pageLoaders.Thunder);
 const PhrasebookPage = lazyWithRetry(pageLoaders.Phrasebook);
 const RecipesPage = lazyWithRetry(pageLoaders.Recipes);
@@ -167,6 +170,7 @@ const QuietPage = lazyWithRetry(pageLoaders.Quiet);
 const SpotsPage = lazyWithRetry(pageLoaders.Spots);
 const MapViewPage = lazyWithRetry(pageLoaders.MapView);
 const SpotDetailPage = lazyWithRetry(pageLoaders.SpotDetail);
+const SpotPrintPage = lazyWithRetry(pageLoaders.SpotPrint);
 const TentFinderPage = lazyWithRetry(pageLoaders.TentFinder);
 const HikePage = lazyWithRetry(pageLoaders.Hike);
 const TripsPage = lazyWithRetry(pageLoaders.Trips);
@@ -246,6 +250,8 @@ function Router() {
           </Route>
           <Route path={"/erzaehlwuerfel"} component={StoryDicePage} />
           <Route path={"/liederbuch"} component={SongbookPage} />
+          {/* Druckroute VOR der Basis-Route (#430) */}
+          <Route path={"/aemtli/drucken"} component={ChoresPrintPage} />
           <Route path={"/aemtli"} component={ChoresPage} />
           <Route path={"/gewitter"} component={ThunderPage} />
           <Route path={"/sprachhilfe"} component={PhrasebookPage} />
@@ -271,6 +277,8 @@ function Router() {
           <Route path={"/nachtruhe"} component={QuietPage} />
           <Route path={"/zeltplaetze"} component={SpotsPage} />
           <Route path={"/karte"} component={MapViewPage} />
+          {/* Druckroute VOR der Detail-Route, sonst fängt :id auch «drucken» ab */}
+          <Route path={"/zeltplaetze/:id/drucken"} component={SpotPrintPage} />
           <Route path={"/zeltplaetze/:id"} component={SpotDetailPage} />
           <Route path={"/zeltfinder"} component={TentFinderPage} />
           <Route path={"/wanderung"} component={HikePage} />

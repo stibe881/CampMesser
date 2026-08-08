@@ -59,9 +59,25 @@ export function registerOAuthRoutes(app: Express) {
         lastSignedIn: new Date(),
       });
 
+      // Angemeldete Geräte (#423): auch OAuth-Logins halten ihre Anmeldung
+      // als userSessions-Zeile fest, sonst wären sie unsichtbar und
+      // unwiderrufbar.
+      let sessionId: string | undefined;
+      const user = await db.getUserByOpenId(userInfo.openId);
+      if (user) {
+        const { randomBytes } = await import("node:crypto");
+        sessionId = randomBytes(16).toString("hex");
+        await db.createUserSession({
+          userId: user.id,
+          tokenId: sessionId,
+          userAgent: (req.headers["user-agent"] ?? "").slice(0, 255) || null,
+        });
+      }
+
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",
         expiresInMs: ONE_YEAR_MS,
+        sessionId,
       });
 
       const cookieOptions = getSessionCookieOptions(req);

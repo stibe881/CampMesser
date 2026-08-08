@@ -1476,6 +1476,9 @@ export const en: Translation = {
     regaLinkAria: "Open the official Rega app page (external link)",
     regaLink: "To the official Rega app",
     guideTitle: "How to make the emergency call properly",
+    abroadTitle: "Emergency numbers abroad",
+    abroadHint:
+      "112 works across Europe. For mountain rescue and ambulance, the direct national numbers are often faster – here they are for the common camping countries.",
   },
   energy: {
     title: "Energy budget calculator",
@@ -1860,6 +1863,8 @@ export const en: Translation = {
     noteLabel: "Note (optional)",
     notePlaceholder: "e.g. spot by the stream, shady in the morning",
     attrFilterAria: "Filter by attributes",
+    sortByDistance: "By distance",
+    distanceFromHome: (km: string) => `${km} from home`,
     attrFilterShade: "Plenty of shade",
     attrFilterQuiet: "Quiet",
     attrFilterWifi: "Wi-Fi",
@@ -2122,6 +2127,9 @@ export const en: Translation = {
     tariffRowLabelPlaceholder: "e.g. adults",
     tariffRowPriceAria: "Price per night",
     tariffTotal: (amount: string) => `Together ${amount}`,
+    tariffRowOneOff: "one-off",
+    tariffRowOneOffAria: (label: string) =>
+      `${label}: one-off instead of per night`,
     tariffRemoveAria: (name: string) => `Remove rate ${name}`,
     tariffRowRemoveAria: (label: string) => `Remove row ${label}`,
     costPriceLabel: "Pitch per night",
@@ -2297,6 +2305,12 @@ export const en: Translation = {
     mapEmpty: "No points are stored for this hike.",
     gpxExport: "Download GPX",
     gpxDone: "GPX file created",
+    gpxImport: "Import GPX",
+    gpxImporting: "Importing …",
+    gpxImported: "Hike imported.",
+    gpxImportedEstimated:
+      "Hike imported. The file had no timestamps – duration and pace are derived from 4 km/h.",
+    gpxImportFailed: "The file could not be read as GPX.",
     gpxFailed: "GPX export not possible",
     gpxFallbackName: "Hike",
     gpxAria: (name: string) => `Download ${name} as GPX`,
@@ -2363,6 +2377,7 @@ export const en: Translation = {
   },
   sharedSpot: {
     tariffsTitle: "Tariffs",
+    tariffRowOneOff: "one-off",
     invalid: "This share link has expired or is no longer valid.",
     invalidHint: "It has expired or the owner has stopped sharing.",
     badge: "Shared pitch",
@@ -3068,6 +3083,9 @@ export const en: Translation = {
     scoreLine: (points: number, done: number) => `${points} pts · ${done}×`,
     scoreHint:
       "Points only count once a chore is ticked off – being assigned is not an achievement yet.",
+    historyTitle: "Points per week",
+    historyBarAria: (week: string, points: number) =>
+      `Week of ${week}: ${points} points`,
     choresTitle: "Chores",
     newChore: "New chore",
     newChorePlaceholder: "e.g. wash up",
@@ -4229,6 +4247,8 @@ export const en: Translation = {
     historyTitle: "Redeemed",
     historyLine: (name: string, title: string, points: number, date: string) =>
       `${name}: “${title}” for ${points} pts on ${date}`,
+    reachedToast: (name: string, title: string) =>
+      `${name} now has enough points for “${title}”!`,
   },
   nextTime: {
     title: "Next time",
@@ -4251,11 +4271,66 @@ export const en: Translation = {
       "Before packing up in the morning, let it dry first – the dry window below helps with planning.",
     note: "Estimate from temperature, humidity, clouds and wind. Hollows, meadows and creek banks are damper than the forecast knows.",
   },
-  reviewPrompt: {
+  spotPrint: {
+    kicker: "Campsite dossier",
+    docTitle: (name: string) => `Dossier: ${name}`,
+    openButton: "Print dossier",
+    notFound: "This campsite was not found.",
+    coords: (lat: string, lon: string) => `${lat}, ${lon}`,
+    elevation: (m: number) => `${m} m a.s.l.`,
+    contactTitle: "Contact & arrival",
+    phoneLabel: "Reception",
+    checkinLabel: "Check-in/-out",
+    parcelLabel: "Pitch no.",
+    tariffsTitle: "Prices",
+    basePrice: (amount: string) => `Base price per night: ${amount}`,
+    attributesTitle: "Facilities",
+    nextTimeTitle: "Next time",
+    noteTitle: "Notes",
+    planTitle: "Site map",
+  },
+  choresPrint: {
+    kicker: "Family mode",
+    title: "Weekly chore plan",
+    docTitle: "Weekly chore plan",
+    openButton: "Print weekly plan",
+    choreColumn: "Chore",
+    empty: "No chores or people set up yet.",
+    note: "Assignments follow the same rotation as in the app – predictable, no randomness. Tick the boxes on paper.",
+  },
+  winter: {
+    title: "Frost & snow",
+    frostLine: (nights: string) => `Frost expected: ${nights}.`,
+    frostAdvice:
+      "Drain the water tank, hoses and canisters or store them frost-free.",
+    snowLine: (m: number) => `Snow line drops to around ${m} m a.s.l.`,
+    note: "From the forecast for this location – hollows and dips are often colder.",
+  },
+  weatherTurn: {
+    title: "The weather turns tomorrow",
+    windLine: (kmh: number) =>
+      `Gusts up to ${kmh} km/h tomorrow – clearly more than today.`,
+    rainLine: (mm: number) =>
+      `About ${mm} mm of rain tomorrow – clearly more than today.`,
+    coldLine: (drop: number) => `About ${drop} °C colder tomorrow than today.`,
+    windAdvice:
+      "Tension the guy lines tonight, check the pegs, stow the awning and anything loose.",
+    rainAdvice:
+      "Check guy lines and drainage, move weather-sensitive gear under cover.",
+    coldAdvice: "Lay out warm layers and sleeping bags.",
+    note: "Compares today's and tomorrow's daily forecasts – a turn, not a storm warning.",
+  },
+  homecoming: {
     title: (trip: string) => `Back from "${trip}"?`,
-    body: "Two questions while you still remember: what went unused, what was missing? It improves the next packing list.",
-    open: "Fill in the review",
-    dismissAria: "Hide the reminder for this trip",
+    intro: "Three quick things while you still remember:",
+    stepTent: "Dry the tent & tarps",
+    stepTentAria: "Mark tent drying as done",
+    dryingDay: (day: string) => `Best drying weather at home: ${day}.`,
+    stepReview: "Fill in the review: what was missing, what was too much?",
+    stepNextTime: "Note “next time” reminders at the campsite",
+    notePlaceholder: "e.g. 25 m extension cord",
+    noteSave: "Note it",
+    dismissAria: "Hide the homecoming reminder for this trip",
   },
   campfire: {
     stateOk: "Campfire: nothing speaks against it.",
@@ -4280,6 +4355,9 @@ export const en: Translation = {
     start: "Prepare now",
     again: "Fetch again",
     running: "Fetching …",
+    lastRun: (when: string) => `Data as of ${when}.`,
+    autoNote:
+      "Shortly before the trip, the app refreshes the data by itself when opened – the maps stay as downloaded.",
     stepTrip: "Trip, pitch and companions",
     stepPacking: "Packing list",
     stepMenu: "Menu plan and recipes",
@@ -4306,6 +4384,11 @@ export const en: Translation = {
       `${perNight} per night × ${nights}`,
     sourceNightly: "from the price per night",
     nothingYet: "Nothing to work out yet: enter the numbers.",
+    oneOffPart: (amount: string) => `plus one-off ${amount}`,
+    seasonPart: (name: string, nights: number, perNight: string) =>
+      `${name}: ${nights} night${nights === 1 ? "" : "s"} × ${perNight}`,
+    seasonSplitNote:
+      "The stay spans several rate periods – each night is charged at the rate valid on that date.",
     addToExpenses: "Add to the kitty",
     foreignCurrency: (currency: string) =>
       `The travel kitty is kept in CHF – please add amounts in ${currency} by hand.`,
@@ -5131,6 +5214,7 @@ export const en: Translation = {
     detailsPricePlaceholder: "e.g. 3.50",
     detailsPriceHint:
       "Leave empty if you do not want to record a price. The total sits at the top of the list.",
+    lastPriceSuggestion: (amount: string) => `Last time: ${amount} – use it`,
     detailsPriceBooked:
       "Already transferred to the trip fund – the price stays as it was booked.",
     totalLabel: "Total:",
@@ -5343,6 +5427,8 @@ export const en: Translation = {
     previewAria: (name: string) => `View recipe ${name}`,
     previewServings: (n: number) => `${n} servings`,
     previewIngredients: "Ingredients",
+    stockAllCovered: "All ingredients are in the cool box or pantry.",
+    stockMissing: (list: string) => `Missing from your stock: ${list}`,
     previewSteps: "Method",
     previewTip: "Tip",
     previewOpenInBook: "Open in the recipe book",
@@ -5849,6 +5935,62 @@ export const en: Translation = {
     deleteConfirm: "Really delete this note?",
     editAria: (title: string) => `Edit note ${title}`,
     deleteAria: (title: string) => `Delete note ${title}`,
+    photoLabel: "Photo (optional)",
+    photoChoose: "Choose photo",
+    photoChange: "Change photo",
+    photoRemove: "Remove photo",
+    photoPreviewAlt: "Preview of the note photo",
+    photoHint: "JPEG, PNG or WebP – automatically resized before uploading.",
+    photoUploading: "Uploading photo …",
+    photoUploadFailed: "Saved, but the photo could not be uploaded.",
+    photoTooLarge: "The photo is too large (max. 5 MB).",
+    photoHeic: "The browser cannot read HEIC/HEIF – please export as JPEG.",
+    photoReadFailed: "The image could not be read.",
+    photoRemoveFailed: "The photo could not be removed.",
+    photoAlt: (title: string) => `Photo for note ${title}`,
+  },
+  shareLinks: {
+    title: "Active share links",
+    intro:
+      "Everything you are currently sharing via link, in one place. Revoking takes effect immediately – the link then leads nowhere.",
+    empty: "Nothing is shared via link at the moment.",
+    unnamed: "Unnamed",
+    expires: (date: string) => `expires on ${date}`,
+    copyAria: (label: string) => `Copy link to ${label}`,
+    revokeButton: "Revoke",
+    revokeConfirm: (label: string) => `Revoke the share link to “${label}”?`,
+    revoked: "Share link revoked",
+    kinds: {
+      spot: "Spot dossier",
+      packList: "Packing list",
+      packTemplate: "Packing template",
+      trip: "Trip",
+      recipe: "Recipe",
+      quiz: "Quiz",
+      shopping: "Shopping list",
+      track: "Hike",
+      location: "Location",
+    },
+  },
+  devices: {
+    title: "Signed-in devices",
+    intro:
+      "Every sign-in to this account, with last activity. A signed-out device is locked out immediately – even if it's the phone left on the train.",
+    empty: "No recorded sign-ins.",
+    unknownDevice: "Unknown device",
+    currentBadge: "This device",
+    lastSeen: (date: string) => `Last active: ${date}`,
+    signedInAt: (date: string) => `Signed in: ${date}`,
+    revokeButton: "Sign out",
+    revokeConfirm: "Sign out this device?",
+    revoked: "Device signed out",
+    revokeOthersButton: "Sign out all other devices",
+    revokeOthersConfirm:
+      "Sign out all other devices? This device stays signed in.",
+    othersRevoked: (n: number) =>
+      n === 1 ? "1 device signed out" : `${n} devices signed out`,
+    legacyHint:
+      "Sign-ins from before this overview only appear after that device's next sign-in.",
   },
   stats: {
     expensesTitle: "Spending across all trips",

@@ -6,6 +6,7 @@
  */
 import { nanoid } from "nanoid";
 import { CALENDAR_TOKEN_LENGTH } from "@shared/calendarFeed";
+import { SHARE_LINK_KINDS } from "@shared/shareLinks";
 import {
   LANGUAGES,
   RAIN_THRESHOLD_MAX_MM,
@@ -50,6 +51,63 @@ export const accountRouters = {
       );
       return { token };
     }),
+  }),
+  /**
+   * Angemeldete Geräte (#423): jede Anmeldung seit der Geräte-Verwaltung
+   * ist eine userSessions-Zeile; «abmelden» löscht sie und macht das
+   * zugehörige Cookie sofort wertlos. Ältere Anmeldungen (JWT ohne sid)
+   * erscheinen erst nach dem nächsten Login.
+   */
+  devices: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const { sdk } = await import("../_core/sdk");
+      const sid = await sdk.sessionTokenIdFromRequest(ctx.req);
+      const rows = await db.listUserSessions(ctx.user.id);
+      // tokenId bleibt auf dem Server – der Client bekommt nur die Zeilen-Id
+      return rows.map(row => ({
+        id: row.id,
+        userAgent: row.userAgent,
+        createdAt: row.createdAt,
+        lastSeenAt: row.lastSeenAt,
+        current: sid !== null && row.tokenId === sid,
+      }));
+    }),
+    revoke: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteUserSession(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+    /** Alle anderen Geräte abmelden – die aktuelle Anmeldung bleibt. */
+    revokeOthers: protectedProcedure.mutation(async ({ ctx }) => {
+      const { sdk } = await import("../_core/sdk");
+      const sid = await sdk.sessionTokenIdFromRequest(ctx.req);
+      const removed = await db.deleteUserSessions(ctx.user.id, sid);
+      return { removed } as const;
+    }),
+  }),
+  /**
+   * Teil-Link-Übersicht (#422): alle aktiven Teil-Links des Kontos an
+   * einem Ort, samt Beenden. Erzeugt wird weiterhin am jeweiligen Ort –
+   * hier ist die Inventur.
+   */
+  shares: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const { sortShareLinks } = await import("@shared/shareLinks");
+      const entries = await db.getShareLinkOverview(ctx.user.id);
+      return sortShareLinks(entries, Date.now());
+    }),
+    revoke: protectedProcedure
+      .input(
+        z.object({
+          kind: z.enum(SHARE_LINK_KINDS),
+          id: z.number().int().positive(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.revokeShareLink(input.kind, input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
   }),
   home: router({
     /** Heim-Standort der Nutzer*in (null = keiner gesetzt). */

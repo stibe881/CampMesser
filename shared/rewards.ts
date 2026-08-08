@@ -67,6 +67,35 @@ export function canRedeem(
   return availablePoints(earnedPoints, redemptions, childId) >= rewardPoints;
 }
 
+export interface RewardLike {
+  title: string;
+  points: number;
+}
+
+/**
+ * Welche Ziele durch einen Punkte-Zuwachs GERADE erreichbar wurden (#413).
+ *
+ * Der Moment, in dem der Balken voll wird, passierte stumm: Das Kind
+ * hakt ein Ämtli ab, und niemand merkt, dass jetzt das Glacé drin
+ * liegt. Gemeldet wird nur der ÜBERGANG – Ziele, die vorher schon
+ * erreichbar waren, melden sich nicht bei jedem weiteren Ämtli neu.
+ */
+export function newlyReachableRewards<T extends RewardLike>(
+  rewards: readonly T[],
+  redemptions: readonly RedemptionLike[],
+  childId: number,
+  earnedBefore: number,
+  earnedAfter: number
+): T[] {
+  const before = availablePoints(earnedBefore, redemptions, childId);
+  const after = availablePoints(earnedAfter, redemptions, childId);
+  if (after <= before) return [];
+  return rewards.filter(
+    reward =>
+      reward.points > 0 && before < reward.points && after >= reward.points
+  );
+}
+
 /** Fortschritt zu einem Ziel in Prozent (gedeckelt bei 100). */
 export function rewardProgress(
   available: number,

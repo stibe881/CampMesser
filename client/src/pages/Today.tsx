@@ -37,6 +37,7 @@ import {
   ShoppingCart,
   Tent,
   UtensilsCrossed,
+  TriangleAlert,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -63,6 +64,7 @@ import { recipes } from "@/data/recipes";
 import { loadTodayStart, saveTodayStart } from "@/lib/todayStart";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { useDayWeather } from "@/lib/useDayWeather";
+import { weatherTurnTexts } from "@/components/WeatherTurnCard";
 import { enqueueToggle } from "@/lib/offlineQueue";
 import { hapticTick } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
@@ -310,6 +312,21 @@ export default function TodayPage() {
                   Math.round(weather.maxC),
                   weather.label
                 )}
+              </p>
+            )}
+            {/* Wetterumschwung (#417): «Morgen kippt das Wetter» steht
+                genau dort, wo man abends draufschaut – als eine Zeile,
+                die nur erscheint, wenn es etwas zu sagen gibt. */}
+            {weather?.turn && (
+              <p className="mt-1.5 flex items-start gap-1.5 text-sm">
+                <TriangleAlert
+                  className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                <span>
+                  {weatherTurnTexts(t, weather.turn).line}{" "}
+                  {weatherTurnTexts(t, weather.turn).advice}
+                </span>
               </p>
             )}
             {/* Lagerfeuer-Ampel (#389): Die Frage stellt sich am Abend

@@ -17,8 +17,10 @@ import {
   Trash2,
   Trophy,
   Users,
+  Printer,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "wouter";
 import PageHeader from "@/components/PageHeader";
 import RewardGoals from "@/components/family/RewardGoals";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -35,7 +37,9 @@ import { trpc } from "@/lib/trpc";
 import { enqueueToggle } from "@/lib/offlineQueue";
 import { hapticTick } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
+import { fmtDayMonth } from "@/lib/dateFormat";
 import { todayIso } from "@shared/localDate";
+import { weeklyPointsHistory } from "@shared/choreHistory";
 import {
   DEFAULT_CHORE_POINTS,
   MAX_CHORE_POINTS,
@@ -44,10 +48,11 @@ import {
   dayProgress,
   scoreboard,
 } from "@shared/chores";
+import { newlyReachableRewards } from "@shared/rewards";
 
 export default function ChoresPage() {
   const ask = useConfirm();
-  const { t } = useI18n();
+  const { lang, t } = useI18n();
   const tc = t.chores;
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
@@ -74,6 +79,14 @@ export default function ChoresPage() {
     {},
     { enabled: isAuthenticated }
   );
+  // Für den Ziel-erreicht-Moment (#413) – dieselben Abfragen wie in
+  // RewardGoals, React Query dedupliziert sie.
+  const rewardsQuery = trpc.rewards.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const redemptionsQuery = trpc.rewards.redemptions.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
   const chores = useMemo(() => choresQuery.data ?? [], [choresQuery.data]);
   const children = useMemo(
@@ -166,6 +179,11 @@ export default function ChoresPage() {
 
   const progress = dayProgress(dayAssignments);
   const scores = scoreboard(children, chores, allAssignments);
+  // Punkte-Verlauf (#431): wochenweise, aus denselben Zuteilungen
+  const history = useMemo(
+    () => weeklyPointsHistory(children, chores, allAssignments, todayIso()),
+    [children, chores, allAssignments]
+  );
 
   if (loading) return null;
   if (!isAuthenticated) {
@@ -293,6 +311,17 @@ export default function ChoresPage() {
         </Button>
       </div>
 
+      {/* Wochenplan drucken (#430): der Plan hängt am besten am
+          Kühlschrank im Vorzelt. */}
+      {chores.length > 0 && children.length > 0 && (
+        <Button asChild variant="outline" size="sm" className="mb-4">
+          <Link href="/aemtli/drucken">
+            <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.choresPrint.openButton}
+          </Link>
+        </Button>
+      )}
+
       {dayAssignments.length > 0 && (
         <div className="mb-4">
           <div className="mb-1 flex items-center justify-between text-sm">
@@ -322,9 +351,35 @@ export default function ChoresPage() {
             >
               <button
                 type="button"
-                onClick={() =>
-                  setDone.mutate({ id: assignment.id, done: !done })
-                }
+                onClick={() => {
+                  // Ziel-erreicht-Moment (#413): Nur beim ABHAKEN und nur
+                  // mit geladenen Zielen/Einlösungen – ein falsches «genug
+                  // Punkte!» wäre schlimmer als ein verpasstes.
+                  if (
+                    !done &&
+                    assignment.childId !== null &&
+                    rewardsQuery.data &&
+                    redemptionsQuery.data
+                  ) {
+                    const { childId } = assignment;
+                    const row = scores.find(s => s.childId === childId);
+                    const reached = row
+                      ? newlyReachableRewards(
+                          rewardsQuery.data,
+                          redemptionsQuery.data,
+                          childId,
+                          row.points,
+                          row.points + chore.points
+                        )
+                      : [];
+                    if (reached.length > 0) {
+                      toast.success(
+                        t.rewards.reachedToast(row!.name, reached[0].title)
+                      );
+                    }
+                  }
+                  setDone.mutate({ id: assignment.id, done: !done });
+                }}
                 className={cn(
                   "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
                   done
@@ -397,6 +452,59 @@ export default function ChoresPage() {
               ))}
             </ul>
             <p className="mt-3 text-xs text-muted-foreground">{tc.scoreHint}</p>
+
+            {/* Punkte-Verlauf pro Kind (#431): Wochenbalken statt nur Stand */}
+            {history && (
+              <div className="mt-4 border-t border-border pt-3">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {tc.historyTitle}
+                </p>
+                <div className="space-y-3">
+                  {history.rows.map(row => (
+                    <div key={row.childId}>
+                      <p className="mb-1 text-xs font-medium">{row.name}</p>
+                      <div className="flex items-end gap-1.5">
+                        {row.points.map((points, i) => (
+                          <div
+                            key={history.weekStarts[i]}
+                            className="min-w-0 flex-1"
+                          >
+                            <div
+                              className="flex h-10 items-end overflow-hidden rounded bg-muted"
+                              role="img"
+                              aria-label={tc.historyBarAria(
+                                fmtDayMonth(history.weekStarts[i], lang),
+                                points
+                              )}
+                            >
+                              <div
+                                className="w-full rounded bg-chart-1"
+                                style={{
+                                  height: `${Math.round((points / history.maxPoints) * 100)}%`,
+                                }}
+                              />
+                            </div>
+                            <p className="mt-0.5 text-center text-[10px] tabular-nums text-muted-foreground">
+                              {points}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex gap-1.5" aria-hidden="true">
+                    {history.weekStarts.map(start => (
+                      <p
+                        key={start}
+                        className="min-w-0 flex-1 text-center text-[10px] text-muted-foreground"
+                      >
+                        {fmtDayMonth(start, lang)}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

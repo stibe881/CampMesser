@@ -20,7 +20,7 @@
  *      grob, aber besser als nichts.
  * Gibt es beides nicht, wird nichts behauptet (null).
  */
-import type { SpotTariff } from "./spotTariffs";
+import { tariffActiveOn, type SpotTariff } from "./spotTariffs";
 
 /** Eine Tarifzeile mit der gewählten Anzahl. */
 export interface CountedRow {
@@ -28,11 +28,15 @@ export interface CountedRow {
   priceRappen: number;
   /** Wie viele davon – Erwachsene, Kinder, Stellplätze. */
   count: number;
+  /** Einmalig statt pro Nacht (#415) – zählt genau einmal. */
+  oneOff?: boolean;
 }
 
 export interface CostEstimate {
   /** Kosten je Nacht in Rappen. */
   perNightRappen: number;
+  /** Einmalige Posten in Rappen (#415) – Endreinigung, Buchungsgebühr. */
+  oneOffRappen: number;
   /** Kosten für den ganzen Aufenthalt in Rappen. */
   totalRappen: number;
   nights: number;
@@ -61,10 +65,24 @@ export function nightsBetween(startDate: string, endDate: string): number {
   return Math.max(0, Math.round((end - start) / 86_400_000));
 }
 
-/** Kosten je Nacht aus den gewählten Zeilen. */
+/** Kosten je Nacht aus den gewählten Zeilen (ohne Einmaliges). */
 export function perNightFromRows(rows: readonly CountedRow[]): number {
   return rows.reduce(
-    (sum, row) => sum + Math.max(0, row.priceRappen) * cleanCount(row.count),
+    (sum, row) =>
+      row.oneOff
+        ? sum
+        : sum + Math.max(0, row.priceRappen) * cleanCount(row.count),
+    0
+  );
+}
+
+/** Einmalige Posten aus den gewählten Zeilen – zählen genau einmal (#415). */
+export function oneOffFromRows(rows: readonly CountedRow[]): number {
+  return rows.reduce(
+    (sum, row) =>
+      row.oneOff
+        ? sum + Math.max(0, row.priceRappen) * cleanCount(row.count)
+        : sum,
     0
   );
 }
@@ -85,10 +103,14 @@ export function estimatePitchCost(input: {
   if (nights <= 0) return null;
 
   const fromRows = input.rows ? perNightFromRows(input.rows) : 0;
-  if (fromRows > 0) {
+  const fromOneOff = input.rows ? oneOffFromRows(input.rows) : 0;
+  // Auch NUR Einmaliges ist eine Rechnung: Wer bloss die Buchungsgebühr
+  // angewählt hat, bekommt sie – mit 0.– je Nacht, ehrlich ausgewiesen.
+  if (fromRows > 0 || fromOneOff > 0) {
     return {
       perNightRappen: fromRows,
-      totalRappen: fromRows * nights,
+      oneOffRappen: fromOneOff,
+      totalRappen: fromRows * nights + fromOneOff,
       nights,
       source: "tariff",
     };
@@ -97,6 +119,7 @@ export function estimatePitchCost(input: {
   if (nightly > 0) {
     return {
       perNightRappen: nightly,
+      oneOffRappen: 0,
       totalRappen: nightly * nights,
       nights,
       source: "nightly",
@@ -117,5 +140,96 @@ export function emptyCounts(tariff: SpotTariff): CountedRow[] {
     label: row.label,
     priceRappen: row.priceRappen,
     count: 0,
+    ...(row.oneOff ? { oneOff: true } : {}),
   }));
+}
+/**
+ * Saisonwechsel mitten im Aufenthalt (#420).
+ *
+ * Wer vom 28.06. bis 05.07. bleibt, zahlt vier Nächte Nebensaison und
+ * drei Nächte Hauptsaison – der Schätzer rechnete bisher stur mit dem
+ * Anreise-Tarif. Jede NACHT gehört zu ihrem Datum: Für jedes wird der
+ * erste Tarif genommen, dessen Zeitraum (#394) es abdeckt; Nächte ohne
+ * Treffer fallen auf den gewählten Tarif zurück – besser die gewählte
+ * Rechnung als gar keine.
+ */
+export interface SeasonPart {
+  tariffIndex: number;
+  nights: number;
+}
+
+/** ISO-Tag + n Tage, über die Kalenderfelder (#333). */
+function shiftIso(iso: string, days: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const date = new Date(y, (m ?? 1) - 1, (d ?? 1) + days);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+export function nightsPerTariff(
+  tariffs: readonly SpotTariff[],
+  startDate: string,
+  endDate: string,
+  fallbackIndex: number
+): SeasonPart[] {
+  const nights = nightsBetween(startDate, endDate);
+  const counts = new Map<number, number>();
+  for (let i = 0; i < nights; i += 1) {
+    const night = shiftIso(startDate, i);
+    let index = tariffs.findIndex(tariff => tariffActiveOn(tariff, night));
+    if (index < 0) index = fallbackIndex;
+    counts.set(index, (counts.get(index) ?? 0) + 1);
+  }
+  return Array.from(counts, ([tariffIndex, n]) => ({
+    tariffIndex,
+    nights: n,
+  }));
+}
+
+/**
+ * Schätzung über mehrere Saisons: Die eingetippten Anzahlen gelten für
+ * alle Teile – zwei Erwachsene bleiben zwei Erwachsene, nur der Preis
+ * je Zeile wechselt mit dem Tarif. Eine Zeile, die es im anderen Tarif
+ * nicht gibt (abweichende Bezeichnung), behält ihren gewählten Preis –
+ * lieber leicht ungenau als eine stumm verschwundene Position.
+ * Einmaliges (#415) zählt genau einmal, egal wie viele Saisons.
+ */
+export function estimateAcrossSeasons(input: {
+  tariffs: readonly SpotTariff[];
+  rows: readonly CountedRow[];
+  startDate: string;
+  endDate: string;
+  fallbackIndex: number;
+}): {
+  parts: { tariffIndex: number; nights: number; perNightRappen: number }[];
+  oneOffRappen: number;
+  totalRappen: number;
+} | null {
+  const seasonParts = nightsPerTariff(
+    input.tariffs,
+    input.startDate,
+    input.endDate,
+    input.fallbackIndex
+  );
+  if (seasonParts.length === 0) return null;
+
+  const parts = seasonParts.map(part => {
+    const tariff = input.tariffs[part.tariffIndex];
+    const perNightRappen = input.rows.reduce((sum, row) => {
+      if (row.oneOff) return sum;
+      const count = cleanCount(row.count);
+      if (count === 0) return sum;
+      const match = tariff?.rows.find(r => !r.oneOff && r.label === row.label);
+      const price = match ? match.priceRappen : Math.max(0, row.priceRappen);
+      return sum + price * count;
+    }, 0);
+    return { ...part, perNightRappen };
+  });
+  const oneOffRappen = oneOffFromRows(input.rows);
+  const totalRappen =
+    parts.reduce((sum, part) => sum + part.nights * part.perNightRappen, 0) +
+    oneOffRappen;
+  if (totalRappen <= 0) return null;
+  return { parts, oneOffRappen, totalRappen };
 }

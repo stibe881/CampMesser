@@ -55,6 +55,8 @@ import { useTodayIso } from "@/lib/useTodayIso";
 interface DraftRow {
   label: string;
   price: string;
+  /** Einmalig statt pro Nacht (#415). */
+  oneOff: boolean;
 }
 /** Ein Zeitraum im Entwurf: beide Enden als «TT.MM.»-Text. */
 interface DraftPeriod {
@@ -106,6 +108,7 @@ export default function SpotTariffs({
         rows: tariff.rows.map(row => ({
           label: row.label,
           price: toInput(row.priceRappen),
+          oneOff: row.oneOff ?? false,
         })),
         currency: tariff.currency,
         unit: tariff.unit ?? "",
@@ -127,7 +130,8 @@ export default function SpotTariffs({
     // Vorlage) fallen weiter still weg.
     const clean: SpotTariff[] = [];
     for (const tariff of draft) {
-      const rows: { label: string; priceRappen: number }[] = [];
+      const rows: { label: string; priceRappen: number; oneOff?: boolean }[] =
+        [];
       for (const row of tariff.rows) {
         const label = row.label.trim();
         const priceRappen = parseAmountInput(row.price);
@@ -140,7 +144,11 @@ export default function SpotTariffs({
           toast.error(ts.tariffRowPriceInvalid(label));
           return;
         }
-        rows.push({ label, priceRappen });
+        rows.push({
+          label,
+          priceRappen,
+          ...(row.oneOff ? { oneOff: true } : {}),
+        });
       }
       clean.push({
         name: tariff.name,
@@ -217,6 +225,11 @@ export default function SpotTariffs({
                         </dt>
                         <dd className="font-medium tabular-nums">
                           {formatRappen(row.priceRappen, lang, tariff.currency)}
+                          {row.oneOff && (
+                            <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                              {ts.tariffRowOneOff}
+                            </span>
+                          )}
                         </dd>
                       </div>
                     ))}
@@ -452,6 +465,27 @@ export default function SpotTariffs({
                           })
                         }
                       />
+                      {/* Einmalig statt pro Nacht (#415): Endreinigung,
+                          Buchungsgebühr – der Schätzer zählt sie einmal. */}
+                      <Button
+                        type="button"
+                        variant={row.oneOff ? "secondary" : "ghost"}
+                        size="sm"
+                        className="h-9 shrink-0 px-2 text-xs"
+                        aria-pressed={row.oneOff}
+                        aria-label={ts.tariffRowOneOffAria(
+                          row.label || ts.tariffRowLabelPlaceholder
+                        )}
+                        onClick={() =>
+                          patch(index, {
+                            rows: tariff.rows.map((r, i) =>
+                              i === rowIndex ? { ...r, oneOff: !r.oneOff } : r
+                            ),
+                          })
+                        }
+                      >
+                        {ts.tariffRowOneOff}
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -477,7 +511,10 @@ export default function SpotTariffs({
                     className="mt-2"
                     onClick={() =>
                       patch(index, {
-                        rows: [...tariff.rows, { label: "", price: "" }],
+                        rows: [
+                          ...tariff.rows,
+                          { label: "", price: "", oneOff: false },
+                        ],
                       })
                     }
                   >
@@ -495,7 +532,7 @@ export default function SpotTariffs({
                     ...list,
                     {
                       name: "",
-                      rows: [{ label: "", price: "" }],
+                      rows: [{ label: "", price: "", oneOff: false }],
                       currency: DEFAULT_TARIFF_CURRENCY,
                       unit: "",
                       periods: [],

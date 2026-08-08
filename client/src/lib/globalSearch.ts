@@ -17,7 +17,10 @@
  */
 import { LOCALE_TAGS, l4, pick, type L4, type Language } from "@shared/i18n";
 import { fuzzyWordMatch, levenshtein, normalizeText } from "@shared/textMatch";
+import { parseNextTimeNotes } from "@shared/nextTime";
 import { parseNoteTags } from "@shared/notes";
+import { parseSpotTariffs } from "@shared/spotTariffs";
+import { parseStringList } from "@shared/customRecipes";
 import {
   shorten,
   type IndexEntry,
@@ -181,8 +184,21 @@ export interface OwnContent {
     detail?: string;
   }[];
   packLists?: { id: number; name: string }[];
-  spots?: { id: number; name: string; note?: string | null }[];
-  recipes?: { id: number; name: string }[];
+  /**
+   * Plätze. Seit #412 zählen auch die «Beim nächsten Mal»-Merker (#396)
+   * und die Tarifnamen (#369) zum Suchtext: «Kabeltrommel» oder
+   * «Hauptsaison» tippen soll den Platz finden – beides liegt als JSON
+   * am Platz und war für die Suche bis dahin unsichtbar.
+   */
+  spots?: {
+    id: number;
+    name: string;
+    note?: string | null;
+    nextTimeJson?: string | null;
+    tariffsJson?: string | null;
+  }[];
+  /** Eigene Rezepte – seit #435 zählen auch die Zutaten zum Suchtext. */
+  recipes?: { id: number; name: string; ingredientsJson?: string | null }[];
   hunts?: { id: number; title: string }[];
   quizzes?: { id: number; title: string }[];
   tentTargets?: { id: string; name: string }[];
@@ -322,20 +338,29 @@ export function searchOwnContent(
   }
   for (const spot of own.spots ?? []) {
     const kind = p(OWN_KIND_LABELS.spot);
+    // Merker-Notizen und Tarif-Texte in den Suchtext, nicht ins Snippet:
+    // Die Antwort auf «Kabeltrommel» ist der Platz, nicht die Notiz.
+    const notes = parseNextTimeNotes(spot.nextTimeJson ?? null);
+    const tariffTexts = parseSpotTariffs(spot.tariffsJson ?? null).flatMap(
+      tariff => [tariff.name, ...tariff.rows.map(row => row.label)]
+    );
     add(
       `own-spot-${spot.id}`,
       p(spot.name),
       `/zeltplaetze/${spot.id}`,
       spot.note ? `${kind} · ${spot.note}` : kind,
-      [spot.note ?? undefined]
+      [spot.note ?? undefined, ...notes, ...tariffTexts]
     );
   }
   for (const recipe of own.recipes ?? []) {
+    // «Reis» tippen soll das eigene Risotto finden (#435): Die Zutaten
+    // zählen zum Suchtext – im Snippet bleibt die Rezept-Kennung.
     add(
       `own-recipe-${recipe.id}`,
       p(recipe.name),
       "/rezepte",
-      p(OWN_KIND_LABELS.recipe)
+      p(OWN_KIND_LABELS.recipe),
+      parseStringList(recipe.ingredientsJson ?? "[]")
     );
   }
   for (const hunt of own.hunts ?? []) {

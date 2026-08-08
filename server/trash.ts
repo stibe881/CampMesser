@@ -319,7 +319,10 @@ async function snapshotNote(
   // Eine Notiz ohne Titel trägt ihren Text als Beschriftung
   return {
     payload: { userNotes: notes },
-    files: [],
+    // Das Foto der Notiz (#433) überlebt den Papierkorb wie die Zeile
+    files: notes[0].fileName
+      ? [{ storage: "notes", fileName: notes[0].fileName }]
+      : [],
     label: trimLabel(notes[0].title || notes[0].text, String(id)),
     detail: null,
   };
@@ -654,6 +657,8 @@ async function removeFiles(files: readonly TrashFile[]): Promise<void> {
     // Ab #318: Foto und Beleg eines Ausrüstungs-Gegenstands.
     inventory: [],
     receipts: [],
+    // Ab #433: das Foto einer freien Notiz.
+    notes: [],
   };
   files.forEach(file => {
     if (byStorage[file.storage]) byStorage[file.storage].push(file.fileName);
@@ -666,6 +671,7 @@ async function removeFiles(files: readonly TrashFile[]): Promise<void> {
       [byStorage.reservations, storages.reservationStorage],
       [byStorage.inventory, storages.inventoryPhotoStorage],
       [byStorage.receipts, storages.receiptPhotoStorage],
+      [byStorage.notes, storages.notePhotoStorage],
     ];
   for (const [names, storage] of targets) {
     if (names.length > 0) await storage.deleteFiles(names);

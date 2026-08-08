@@ -1,0 +1,1 @@
+ALTER TABLE `userNotes` ADD `fileName` varchar(64);

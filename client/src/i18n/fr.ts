@@ -1528,6 +1528,9 @@ export const fr: Translation = {
       "Ouvrir la page officielle de l'application Rega (lien externe)",
     regaLink: "Vers l'application Rega officielle",
     guideTitle: "Comment bien passer l'appel d'urgence",
+    abroadTitle: "Numéros d'urgence à l'étranger",
+    abroadHint:
+      "Le 112 fonctionne dans toute l'Europe. Pour le secours en montagne et l'ambulance, les numéros nationaux directs sont souvent plus rapides – les voici pour les pays de camping courants.",
   },
   energy: {
     title: "Calculateur de budget énergie",
@@ -1919,6 +1922,8 @@ export const fr: Translation = {
     noteLabel: "Note (facultatif)",
     notePlaceholder: "p. ex. place au bord du ruisseau, ombragée le matin",
     attrFilterAria: "Filtrer par caractéristiques",
+    sortByDistance: "Par distance",
+    distanceFromHome: (km: string) => `${km} de la maison`,
     attrFilterShade: "Beaucoup d'ombre",
     attrFilterQuiet: "Calme",
     attrFilterWifi: "Wi-Fi",
@@ -2188,6 +2193,9 @@ export const fr: Translation = {
     tariffRowLabelPlaceholder: "p. ex. adultes",
     tariffRowPriceAria: "Prix par nuit",
     tariffTotal: (amount: string) => `Ensemble ${amount}`,
+    tariffRowOneOff: "forfait unique",
+    tariffRowOneOffAria: (label: string) =>
+      `${label} : forfait unique au lieu de par nuit`,
     tariffRemoveAria: (name: string) => `Supprimer le tarif ${name}`,
     tariffRowRemoveAria: (label: string) => `Supprimer la ligne ${label}`,
     costPriceLabel: "Emplacement par nuit",
@@ -2374,6 +2382,12 @@ export const fr: Translation = {
     mapEmpty: "Aucun point enregistré pour cette randonnée.",
     gpxExport: "Télécharger le GPX",
     gpxDone: "Fichier GPX créé",
+    gpxImport: "Importer un GPX",
+    gpxImporting: "Importation …",
+    gpxImported: "Randonnée importée.",
+    gpxImportedEstimated:
+      "Randonnée importée. Le fichier ne contenait pas d'horodatage – durée et allure sont déduites de 4 km/h.",
+    gpxImportFailed: "Le fichier n'a pas pu être lu comme GPX.",
     gpxFailed: "Export GPX impossible",
     gpxFallbackName: "Randonnée",
     gpxAria: (name: string) => `Télécharger ${name} en GPX`,
@@ -2440,6 +2454,7 @@ export const fr: Translation = {
   },
   sharedSpot: {
     tariffsTitle: "Tarifs",
+    tariffRowOneOff: "forfait unique",
     invalid: "Ce lien de partage a expiré ou n'est plus valable.",
     invalidHint: "Il a expiré ou la ou le propriétaire a mis fin au partage.",
     badge: "Emplacement partagé",
@@ -3171,6 +3186,9 @@ export const fr: Translation = {
     scoreLine: (points: number, done: number) => `${points} pts · ${done}×`,
     scoreHint:
       "Les points ne comptent qu'une fois la tâche cochée – être désigné n'est pas encore un mérite.",
+    historyTitle: "Points par semaine",
+    historyBarAria: (week: string, points: number) =>
+      `Semaine du ${week} : ${points} points`,
     choresTitle: "Tâches",
     newChore: "Nouvelle tâche",
     newChorePlaceholder: "p. ex. faire la vaisselle",
@@ -4347,6 +4365,8 @@ export const fr: Translation = {
     historyTitle: "Échangé",
     historyLine: (name: string, title: string, points: number, date: string) =>
       `${name} : « ${title} » pour ${points} pts le ${date}`,
+    reachedToast: (name: string, title: string) =>
+      `${name} a maintenant assez de points pour « ${title} » !`,
   },
   nextTime: {
     title: "La prochaine fois",
@@ -4370,11 +4390,70 @@ export const fr: Translation = {
       "Avant de plier le matin, laisse d’abord sécher – la fenêtre sèche ci-dessous aide à planifier.",
     note: "Estimation à partir de la température, de l’humidité, des nuages et du vent. Les creux, prairies et abords de ruisseaux sont plus humides que ne le sait la prévision.",
   },
-  reviewPrompt: {
+  spotPrint: {
+    kicker: "Dossier du camping",
+    docTitle: (name: string) => `Dossier : ${name}`,
+    openButton: "Imprimer le dossier",
+    notFound: "Ce camping est introuvable.",
+    coords: (lat: string, lon: string) => `${lat}, ${lon}`,
+    elevation: (m: number) => `${m} m d'altitude`,
+    contactTitle: "Contact et arrivée",
+    phoneLabel: "Réception",
+    checkinLabel: "Check-in/-out",
+    parcelLabel: "Parcelle",
+    tariffsTitle: "Prix",
+    basePrice: (amount: string) => `Prix de base par nuit : ${amount}`,
+    attributesTitle: "Équipements",
+    nextTimeTitle: "La prochaine fois",
+    noteTitle: "Notes",
+    planTitle: "Plan du camping",
+  },
+  choresPrint: {
+    kicker: "Mode famille",
+    title: "Plan des corvées de la semaine",
+    docTitle: "Plan des corvées",
+    openButton: "Imprimer le plan",
+    choreColumn: "Corvée",
+    empty: "Aucune corvée ou personne enregistrée.",
+    note: "La répartition suit la même rotation que dans l'app – prévisible, sans hasard. On coche sur papier.",
+  },
+  winter: {
+    title: "Gel et neige",
+    frostLine: (nights: string) => `Gel en vue : ${nights}.`,
+    frostAdvice:
+      "Vider le réservoir d'eau, les tuyaux et les bidons ou les stocker hors gel.",
+    snowLine: (m: number) =>
+      `La limite pluie-neige descend vers ${m} m d'altitude.`,
+    note: "D'après la prévision pour ce lieu – les cuvettes sont souvent plus froides.",
+  },
+  weatherTurn: {
+    title: "Le temps bascule demain",
+    windLine: (kmh: number) =>
+      `Demain, rafales jusqu'à ${kmh} km/h – nettement plus qu'aujourd'hui.`,
+    rainLine: (mm: number) =>
+      `Demain, environ ${mm} mm de pluie – nettement plus qu'aujourd'hui.`,
+    coldLine: (drop: number) =>
+      `Demain, environ ${drop} °C de moins qu'aujourd'hui.`,
+    windAdvice:
+      "Retendre les haubans ce soir, vérifier les sardines, ranger le store et tout ce qui traîne.",
+    rainAdvice:
+      "Vérifier haubans et écoulement, mettre à l'abri ce qui craint l'eau.",
+    coldAdvice: "Préparer couches chaudes et sacs de couchage.",
+    note: "Comparaison des prévisions du jour et du lendemain – un basculement, pas une alerte tempête.",
+  },
+  homecoming: {
     title: (trip: string) => `De retour de « ${trip} » ?`,
-    body: "Deux questions tant que tu t'en souviens : qu'est-ce qui n'a pas servi, qu'est-ce qui a manqué ? Cela améliore la prochaine liste de bagages.",
-    open: "Remplir le bilan",
-    dismissAria: "Masquer le rappel pour ce séjour",
+    intro: "Trois gestes tant que tu t'en souviens :",
+    stepTent: "Faire sécher la tente et les bâches",
+    stepTentAria: "Cocher le séchage de la tente",
+    dryingDay: (day: string) =>
+      `Meilleur temps de séchage à la maison : ${day}.`,
+    stepReview:
+      "Remplir le bilan : qu'est-ce qui a manqué, qu'est-ce qui était en trop ?",
+    stepNextTime: "Noter « la prochaine fois » sur le camping",
+    notePlaceholder: "p. ex. rallonge de 25 m",
+    noteSave: "Noter",
+    dismissAria: "Masquer le rappel de retour pour ce séjour",
   },
   campfire: {
     stateOk: "Feu de camp : rien ne s'y oppose.",
@@ -4399,6 +4478,9 @@ export const fr: Translation = {
     start: "Préparer maintenant",
     again: "Recharger",
     running: "Chargement …",
+    lastRun: (when: string) => `Données au ${when}.`,
+    autoNote:
+      "Peu avant le voyage, l’app actualise elle-même les données à l’ouverture – les cartes restent telles quelles.",
     stepTrip: "Séjour, emplacement et compagnons",
     stepPacking: "Liste de bagages",
     stepMenu: "Menus et recettes",
@@ -4426,6 +4508,11 @@ export const fr: Translation = {
       `${perNight} par nuit × ${nights}`,
     sourceNightly: "d'après le prix par nuit",
     nothingYet: "Rien à calculer encore : indique le nombre.",
+    oneOffPart: (amount: string) => `plus forfait unique ${amount}`,
+    seasonPart: (name: string, nights: number, perNight: string) =>
+      `${name} : ${nights} nuit${nights === 1 ? "" : "s"} × ${perNight}`,
+    seasonSplitNote:
+      "Le séjour s'étend sur plusieurs périodes tarifaires – chaque nuit est comptée au tarif valable ce jour-là.",
     addToExpenses: "Dans la caisse",
     foreignCurrency: (currency: string) =>
       `La caisse de voyage est tenue en CHF – merci de saisir les montants en ${currency} à la main.`,
@@ -5270,6 +5357,8 @@ export const fr: Translation = {
     detailsPricePlaceholder: "p. ex. 3.50",
     detailsPriceHint:
       "Laisse vide si tu ne veux pas saisir de prix. Le total figure en haut de la liste.",
+    lastPriceSuggestion: (amount: string) =>
+      `La dernière fois : ${amount} – reprendre`,
     detailsPriceBooked:
       "Déjà repris dans la caisse de voyage – le prix reste tel qu'il a été comptabilisé.",
     totalLabel: "Total :",
@@ -5486,6 +5575,9 @@ export const fr: Translation = {
     previewAria: (name: string) => `Voir la recette ${name}`,
     previewServings: (n: number) => `${n} portions`,
     previewIngredients: "Ingrédients",
+    stockAllCovered:
+      "Tous les ingrédients sont dans la glacière ou la réserve.",
+    stockMissing: (list: string) => `Manque dans la réserve : ${list}`,
     previewSteps: "Préparation",
     previewTip: "Astuce",
     previewOpenInBook: "Ouvrir dans le livre de recettes",
@@ -6004,6 +6096,63 @@ export const fr: Translation = {
     deleteConfirm: "Supprimer vraiment cette note ?",
     editAria: (title: string) => `Modifier la note ${title}`,
     deleteAria: (title: string) => `Supprimer la note ${title}`,
+    photoLabel: "Photo (facultatif)",
+    photoChoose: "Choisir une photo",
+    photoChange: "Changer la photo",
+    photoRemove: "Retirer la photo",
+    photoPreviewAlt: "Aperçu de la photo de la note",
+    photoHint: "JPEG, PNG ou WebP – réduite automatiquement avant l'envoi.",
+    photoUploading: "Envoi de la photo …",
+    photoUploadFailed: "Enregistré, mais la photo n'a pas pu être envoyée.",
+    photoTooLarge: "La photo est trop grande (max. 5 Mo).",
+    photoHeic: "Le navigateur ne peut pas lire HEIC/HEIF – exportez en JPEG.",
+    photoReadFailed: "L'image n'a pas pu être lue.",
+    photoRemoveFailed: "La photo n'a pas pu être retirée.",
+    photoAlt: (title: string) => `Photo de la note ${title}`,
+  },
+  shareLinks: {
+    title: "Liens de partage actifs",
+    intro:
+      "Tout ce que tu partages actuellement par lien, au même endroit. La désactivation est immédiate – le lien ne mène ensuite nulle part.",
+    empty: "Rien n'est partagé par lien pour le moment.",
+    unnamed: "Sans nom",
+    expires: (date: string) => `expire le ${date}`,
+    copyAria: (label: string) => `Copier le lien vers ${label}`,
+    revokeButton: "Désactiver",
+    revokeConfirm: (label: string) =>
+      `Désactiver le lien de partage vers « ${label} » ?`,
+    revoked: "Lien de partage désactivé",
+    kinds: {
+      spot: "Dossier d'emplacement",
+      packList: "Liste de bagages",
+      packTemplate: "Modèle de liste",
+      trip: "Voyage",
+      recipe: "Recette",
+      quiz: "Quiz",
+      shopping: "Liste de courses",
+      track: "Randonnée",
+      location: "Position",
+    },
+  },
+  devices: {
+    title: "Appareils connectés",
+    intro:
+      "Chaque connexion à ce compte, avec la dernière activité. Un appareil déconnecté est exclu immédiatement – même si c'est le téléphone oublié dans le train.",
+    empty: "Aucune connexion enregistrée.",
+    unknownDevice: "Appareil inconnu",
+    currentBadge: "Cet appareil",
+    lastSeen: (date: string) => `Dernière activité : ${date}`,
+    signedInAt: (date: string) => `Connecté : ${date}`,
+    revokeButton: "Déconnecter",
+    revokeConfirm: "Déconnecter cet appareil ?",
+    revoked: "Appareil déconnecté",
+    revokeOthersButton: "Déconnecter tous les autres appareils",
+    revokeOthersConfirm:
+      "Déconnecter tous les autres appareils ? Cet appareil reste connecté.",
+    othersRevoked: (n: number) =>
+      n === 1 ? "1 appareil déconnecté" : `${n} appareils déconnectés`,
+    legacyHint:
+      "Les connexions antérieures à cet aperçu n'apparaissent qu'après la prochaine connexion de l'appareil concerné.",
   },
   stats: {
     expensesTitle: "Dépenses de tous les voyages",

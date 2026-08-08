@@ -31,7 +31,19 @@ export const authRouters = {
         verifyMailEnabled: mailConfigured(),
       };
     }),
-    logout: publicProcedure.mutation(({ ctx }) => {
+    logout: publicProcedure.mutation(async ({ ctx }) => {
+      // Angemeldete Geräte (#423): die eigene Anmeldungs-Zeile mitputzen,
+      // damit sie nicht als Geist in der Geräte-Liste stehen bleibt.
+      try {
+        const { sdk } = await import("../_core/sdk");
+        const sid = await sdk.sessionTokenIdFromRequest(ctx.req);
+        if (sid) {
+          const db = await import("../db");
+          await db.deleteUserSessionByTokenId(sid);
+        }
+      } catch {
+        // Aufräumen darf das Abmelden nie verhindern
+      }
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return {
@@ -78,7 +90,10 @@ export const authRouters = {
           input.email,
           input.password
         );
-        const token = await createLocalSessionToken(user);
+        const token = await createLocalSessionToken(
+          user,
+          ctx.req.headers["user-agent"]
+        );
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, {
           ...cookieOptions,
@@ -132,7 +147,10 @@ export const authRouters = {
         const ok = await verifyPassword(input.password, user.passwordHash);
         if (!ok) throw invalid();
         clearFailures(limitKey);
-        const token = await createLocalSessionToken(user);
+        const token = await createLocalSessionToken(
+          user,
+          ctx.req.headers["user-agent"]
+        );
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, {
           ...cookieOptions,
@@ -345,7 +363,10 @@ export const authRouters = {
         // Verwendetes und alle weiteren offenen Tokens des Kontos entwerten
         await consumeResetTokens(user.id);
         // Direkt anmelden
-        const token = await createLocalSessionToken(user);
+        const token = await createLocalSessionToken(
+          user,
+          ctx.req.headers["user-agent"]
+        );
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, {
           ...cookieOptions,
@@ -525,7 +546,10 @@ export const authRouters = {
           });
         }
         const { createLocalSessionToken } = await import("../localAuth");
-        const token = await createLocalSessionToken(user);
+        const token = await createLocalSessionToken(
+          user,
+          ctx.req.headers["user-agent"]
+        );
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, {
           ...cookieOptions,

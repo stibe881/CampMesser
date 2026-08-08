@@ -4,6 +4,7 @@ import {
   matchWords,
   stockCoversIngredient,
   type LeftoverRecipe,
+  missingIngredients,
 } from "@shared/leftovers";
 
 const pasta: LeftoverRecipe = {
@@ -199,5 +200,25 @@ describe("leftoverSuggestions", () => {
     });
     expect(first.matched.length).toBe(1);
     expect(first.matched[0].item.id).toBe(1);
+  });
+});
+
+// #436: die Umkehrung der Resteverwertung – was fehlt zum geplanten Rezept?
+describe("missingIngredients", () => {
+  it("meldet nur, was der Bestand nicht deckt", () => {
+    const stock = [
+      { id: 1, name: "Tomaten" },
+      { id: 2, name: "Bergkäse" },
+    ];
+    expect(
+      missingIngredients(
+        ["4 Tomaten, gewürfelt", "200 g Käse", "1 Zwiebel"],
+        stock
+      )
+    ).toEqual(["1 Zwiebel"]);
+  });
+
+  it("leerer Bestand heisst: alles fehlt", () => {
+    expect(missingIngredients(["Reis"], [])).toEqual(["Reis"]);
   });
 });

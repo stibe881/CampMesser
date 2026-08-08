@@ -715,6 +715,27 @@
       "when": 1786142324794,
       "tag": "0101_clumsy_otto_octavius",
       "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "5",
+      "when": 1786198809821,
+      "tag": "0102_happy_firebird",
+      "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "5",
+      "when": 1786199781433,
+      "tag": "0103_slim_hellfire_club",
+      "breakpoints": true
+    },
+    {
+      "idx": 104,
+      "version": "5",
+      "when": 1786200461335,
+      "tag": "0104_optimal_squadron_supreme",
+      "breakpoints": true
     }
   ]
 }

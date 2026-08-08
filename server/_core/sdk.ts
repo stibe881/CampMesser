@@ -27,6 +27,12 @@ export type SessionPayload = {
   openId: string;
   appId: string;
   name: string;
+  /**
+   * tokenId der userSessions-Zeile (#423); fehlt bei Anmeldungen von vor
+   * der Geräte-Verwaltung – solche Cookies bleiben gültig, lassen sich
+   * aber nicht einzeln beenden.
+   */
+  sid?: string;
 };
 
 const EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
@@ -170,13 +176,14 @@ class SDKServer {
    */
   async createSessionToken(
     openId: string,
-    options: { expiresInMs?: number; name?: string } = {}
+    options: { expiresInMs?: number; name?: string; sessionId?: string } = {}
   ): Promise<string> {
     return this.signSession(
       {
         openId,
         appId: ENV.appId,
         name: options.name || "",
+        sid: options.sessionId,
       },
       options
     );
@@ -195,15 +202,19 @@ class SDKServer {
       openId: payload.openId,
       appId: payload.appId,
       name: payload.name,
+      ...(payload.sid ? { sid: payload.sid } : {}),
     })
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
       .setExpirationTime(expirationSeconds)
       .sign(secretKey);
   }
 
-  async verifySession(
-    cookieValue: string | undefined | null
-  ): Promise<{ openId: string; appId: string; name: string } | null> {
+  async verifySession(cookieValue: string | undefined | null): Promise<{
+    openId: string;
+    appId: string;
+    name: string;
+    sid?: string;
+  } | null> {
     if (!cookieValue) {
       console.warn("[Auth] Missing session cookie");
       return null;
@@ -214,7 +225,7 @@ class SDKServer {
       const { payload } = await jwtVerify(cookieValue, secretKey, {
         algorithms: ["HS256"],
       });
-      const { openId, appId, name } = payload as Record<string, unknown>;
+      const { openId, appId, name, sid } = payload as Record<string, unknown>;
 
       if (
         !isNonEmptyString(openId) ||
@@ -229,6 +240,7 @@ class SDKServer {
         openId,
         appId,
         name,
+        ...(isNonEmptyString(sid) ? { sid } : {}),
       };
     } catch (error) {
       console.warn("[Auth] Session verification failed", String(error));
@@ -290,6 +302,22 @@ class SDKServer {
       return buildCronUser(userInfo);
     }
 
+    // Angemeldete Geräte (#423): Trägt das JWT eine Session-Id, muss die
+    // Zeile noch existieren – «Gerät abmelden» löscht sie, und damit ist
+    // das Cookie wertlos. JWTs ohne sid (von vor der Geräte-Verwaltung)
+    // laufen unverändert weiter.
+    if (session.sid) {
+      const live = await db.getUserSessionByTokenId(session.sid);
+      if (!live) {
+        throw ForbiddenError("Session revoked");
+      }
+      // «zuletzt aktiv» grob nachführen – höchstens einmal pro Stunde,
+      // sonst schreibt jede Anfrage in die Tabelle.
+      if (Date.now() - new Date(live.lastSeenAt).getTime() > 3600_000) {
+        void db.touchUserSession(session.sid).catch(() => {});
+      }
+    }
+
     const sessionUserId = session.openId;
     const signedInAt = new Date();
     let user = await db.getUserByOpenId(sessionUserId);
@@ -322,6 +350,24 @@ class SDKServer {
     });
 
     return user;
+  }
+
+  /**
+   * Session-Id (sid) der aktuellen Anfrage (#423) – null bei Cookies von
+   * vor der Geräte-Verwaltung. Für «dieses Gerät» in der Geräte-Liste
+   * und fürs Aufräumen beim Logout.
+   */
+  async sessionTokenIdFromRequest(req: Request): Promise<string | null> {
+    const cookies = this.parseCookies(req.headers.cookie);
+    let sessionToken = cookies.get(COOKIE_NAME);
+    if (!sessionToken) {
+      const authHeader = req.headers.authorization;
+      if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
+        sessionToken = authHeader.slice(7);
+      }
+    }
+    const session = await this.verifySession(sessionToken);
+    return session?.sid ?? null;
   }
 }
 

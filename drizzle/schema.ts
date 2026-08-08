@@ -51,6 +51,36 @@ export const users = mysqlTable("users", {
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
 
+/**
+ * Angemeldete Geräte (#423): eine Zeile pro Anmeldung. Bisher war die
+ * Session NUR ein JWT im Cookie – ein Jahr gültig und durch nichts zu
+ * widerrufen ausser dem Ablauf. Neue Logins tragen die tokenId der Zeile
+ * als `sid` im JWT; fehlt die Zeile, ist die Anmeldung beendet. Alte
+ * Cookies ohne `sid` bleiben gültig (sanfter Übergang), erscheinen aber
+ * nicht in der Geräte-Liste – erst die nächste Anmeldung tut es.
+ */
+export const userSessions = mysqlTable(
+  "userSessions",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Zufalls-Id der Anmeldung – steht als `sid` im JWT, nie im Client-Code. */
+    tokenId: varchar("tokenId", { length: 32 }).notNull(),
+    /** User-Agent beim Login – fürs Wiedererkennen («iPhone», «Firefox») */
+    userAgent: varchar("userAgent", { length: 255 }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    /** Grob nachgeführt (höchstens stündlich) – reicht für «zuletzt aktiv». */
+    lastSeenAt: timestamp("lastSeenAt").defaultNow().notNull(),
+  },
+  table => [
+    index("userSessions_userId").on(table.userId),
+    uniqueIndex("userSessions_tokenId").on(table.tokenId),
+  ]
+);
+
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertUserSession = typeof userSessions.$inferInsert;
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
@@ -748,6 +778,8 @@ export const pushSubscriptions = mysqlTable(
     lastTripKey: varchar("lastTripKey", { length: 64 }),
     /** Schlüssel der letzten Trocknungs-Erinnerung («dry:<tripId>»): max. 1 Erinnerung pro Heimkehr */
     lastDryKey: varchar("lastDryKey", { length: 64 }),
+    /** Dedup des Wetterumschwung-Push (#427): «turn:<tripId>:<morgen>». */
+    lastTurnKey: varchar("lastTurnKey", { length: 64 }),
     /** Schlüssel des letzten Sternschnuppen-Tipps («astro:YYYY-MM-DD»): max. 1 pro Nacht */
     lastAstroKey: varchar("lastAstroKey", { length: 64 }),
     /** Schlüssel der letzten Pflege-Erinnerung («gear:YYYY-MM»): max. 1 pro Monat */
@@ -1756,6 +1788,12 @@ export const userNotes = mysqlTable(
     text: text("text").notNull(),
     /** Stichwörter, kommagetrennt und normalisiert (shared/notes.ts) */
     tags: varchar("tags", { length: 300 }).notNull().default(""),
+    /**
+     * Foto zur Notiz (#433): genau EIN Bild, Ablage unter uploads/notes/
+     * wie bei Beobachtungen und Fängen – der Zettel mit der Skizze, das
+     * Schild mit den Platzregeln. null = ohne Foto.
+     */
+    fileName: varchar("fileName", { length: 64 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
