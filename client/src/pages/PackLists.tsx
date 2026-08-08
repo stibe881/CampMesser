@@ -12,6 +12,7 @@ import {
   Backpack,
   Bike,
   Bookmark,
+  Building2,
   ChevronDown,
   Copy,
   Link2,
@@ -22,7 +23,9 @@ import {
   QrCode,
   Scale,
   Share2,
+  Snowflake,
   Trash2,
+  Umbrella,
   Users,
   X,
 } from "lucide-react";
@@ -61,6 +64,9 @@ const scenarioIcons: Record<
   solo: Backpack,
   familie: Users,
   motorrad: Bike,
+  staedtereise: Building2,
+  strand: Umbrella,
+  wintersport: Snowflake,
   custom: ListPlus,
 };
 

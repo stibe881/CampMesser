@@ -172,7 +172,8 @@ export const tripTemplates: TripTemplate[] = [
     ),
     kind: "staedte",
     nights: 3,
-    packScenario: "solo",
+    // Städtereise-Szenario (#468): ohne Zelt und Kocher statt Solo-Camping.
+    packScenario: "staedtereise",
     dinners: [],
     breakfasts: [],
     icon: "Building2",
@@ -193,7 +194,8 @@ export const tripTemplates: TripTemplate[] = [
     ),
     kind: "strand",
     nights: 7,
-    packScenario: "familie",
+    // Strand-Szenario (#468): Sonnenschutz und Badezeug statt Zeltliste.
+    packScenario: "strand",
     dinners: [
       "one-pot-pasta",
       "grill-ananas",
