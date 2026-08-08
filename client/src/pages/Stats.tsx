@@ -11,6 +11,7 @@ import {
   Link2,
   Loader2,
   Star,
+  Tent,
   Trophy,
   Users,
   Wallet,
@@ -23,6 +24,8 @@ import { Progress } from "@/components/ui/progress";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { computeTripStats, nightsPerYear } from "@shared/trips";
 import { trackYearRows } from "@shared/trackYears";
+import { tripKindRows } from "@shared/tripKindStats";
+import { tripKindLabel } from "@shared/tripKind";
 import { estimatedTotalRappen, spotCostComparison } from "@shared/spotCosts";
 import { EXPENSE_CATEGORY_LABELS } from "@shared/expenses";
 import { formatChf } from "@/lib/money";
@@ -236,6 +239,10 @@ export default function Stats() {
     () => trackYearRows(tracksQuery.data ?? []),
     [tracksQuery.data]
   );
+
+  // Reisen nach Art (#467) – erst ab zwei Arten interessant: eine
+  // Tabelle mit einer einzigen Zeile «Camping» sagt niemandem etwas.
+  const kindRows = useMemo(() => tripKindRows(trips), [trips]);
 
   const sightings = useMemo(
     () => sightingsQuery.data ?? [],
@@ -567,6 +574,36 @@ export default function Stats() {
                       {ts.hikeYearsBike(row.bikeTours)}
                     </p>
                   )}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Reisen nach Art (#467): wie viel Camping steckt im Jahr wirklich?
+          Erst ab zwei Arten – eine Ein-Zeilen-Tabelle wäre Tapete. */}
+      {kindRows.length > 1 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <SectionHeader
+              icon={Tent}
+              title={ts.kindStatsTitle}
+              href="/tagebuch"
+              linkLabel={ts.tripsLink}
+            />
+            <ul className="space-y-2">
+              {kindRows.map(row => (
+                <li
+                  key={row.kind}
+                  className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-border/60 pb-2 last:border-0 last:pb-0"
+                >
+                  <span className="text-sm font-semibold">
+                    {tripKindLabel(row.kind, lang)}
+                  </span>
+                  <span className="text-sm tabular-nums text-muted-foreground">
+                    {ts.kindStatsLine(row.trips, row.nights)}
+                  </span>
                 </li>
               ))}
             </ul>

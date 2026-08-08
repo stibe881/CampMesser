@@ -6351,6 +6351,9 @@ export const fr: Translation = {
     loginFeature: "les statistiques",
     tripsTitle: "Statistiques des voyages",
     tripsLink: "Mes voyages",
+    kindStatsTitle: "Voyages par type",
+    kindStatsLine: (trips: number, nights: number) =>
+      `${trips === 1 ? "1 voyage" : `${trips} voyages`} · ${nights === 1 ? "1 nuit" : `${nights} nuits`}`,
     tripsEmpty: "Aucun séjour enregistré pour l'instant.",
     nightsInYear: year => `Nuits ${year}`,
     nightsTotal: "Nuits au total",

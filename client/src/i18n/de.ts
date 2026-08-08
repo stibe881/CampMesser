@@ -6356,6 +6356,9 @@ export const de = {
     loginFeature: "die Statistik",
     tripsTitle: "Reise-Statistik",
     tripsLink: "Meine Reisen",
+    kindStatsTitle: "Reisen nach Art",
+    kindStatsLine: (trips: number, nights: number) =>
+      `${trips === 1 ? "1 Reise" : `${trips} Reisen`} · ${nights === 1 ? "1 Nacht" : `${nights} Nächte`}`,
     tripsEmpty: "Noch keine Aufenthalte erfasst.",
     nightsInYear: (year: number) => `Nächte ${year}`,
     nightsTotal: "Nächte gesamt",
