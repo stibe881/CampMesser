@@ -5544,6 +5544,8 @@ export const de = {
     previewAria: (name: string) => `Rezept ${name} ansehen`,
     previewServings: (n: number) => `${n} Portionen`,
     previewIngredients: "Zutaten",
+    stockAllCovered: "Alle Zutaten sind in Kühlbox oder Vorrat vorhanden.",
+    stockMissing: (list: string) => `Fehlt im Vorrat: ${list}`,
     previewSteps: "Zubereitung",
     previewTip: "Tipp",
     previewOpenInBook: "Im Rezeptbuch öffnen",

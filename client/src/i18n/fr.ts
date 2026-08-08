@@ -5541,6 +5541,9 @@ export const fr: Translation = {
     previewAria: (name: string) => `Voir la recette ${name}`,
     previewServings: (n: number) => `${n} portions`,
     previewIngredients: "Ingrédients",
+    stockAllCovered:
+      "Tous les ingrédients sont dans la glacière ou la réserve.",
+    stockMissing: (list: string) => `Manque dans la réserve : ${list}`,
     previewSteps: "Préparation",
     previewTip: "Astuce",
     previewOpenInBook: "Ouvrir dans le livre de recettes",

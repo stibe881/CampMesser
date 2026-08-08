@@ -49,6 +49,7 @@ import {
   RECIPE_METHOD_LABELS,
 } from "@shared/customRecipes";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
+import { missingIngredients } from "@shared/leftovers";
 import { clampServings, scaleIngredientsForServings } from "@shared/servings";
 import { summarizeIngredients } from "@shared/groceryList";
 import { tripDisplayName } from "@shared/tripName";
@@ -151,6 +152,12 @@ export default function MenuPlanPage() {
   const [picker, setPicker] = useState<PickerSlot | null>(null);
   /** Offene Rezept-Vorschau (null = zu). */
   const [preview, setPreview] = useState<RecipePreview | null>(null);
+  // Kühlbox + Trockenvorrat für den Fehlt-Abgleich (#436) – geladen
+  // erst, wenn eine Vorschau offen ist; vorher gibt es nichts abzugleichen.
+  const stockQuery = trpc.food.list.useQuery(undefined, {
+    enabled: preview !== null,
+    staleTime: 60_000,
+  });
   const [search, setSearch] = useState("");
   const [freeText, setFreeText] = useState("");
   /** Tages-Notiz-Editor: Tag + aktueller Eingabewert (null = zu). */
@@ -1005,6 +1012,30 @@ export default function MenuPlanPage() {
                       </li>
                     ))}
                   </ul>
+                  {/* Was fehlt fürs Essen? (#436) Abgeglichen gegen
+                      Kühlbox und Trockenvorrat – die Umkehrung der
+                      Resteverwertung (#235). Nichts erfasst → kein
+                      Urteil: Ein leerer Vorrat heisst meist nur, dass
+                      niemand ihn führt. */}
+                  {(stockQuery.data?.length ?? 0) > 0 &&
+                    (() => {
+                      const missing = missingIngredients(
+                        preview.ingredients,
+                        stockQuery.data ?? []
+                      );
+                      if (missing.length === 0) {
+                        return (
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            {t.menuPlan.stockAllCovered}
+                          </p>
+                        );
+                      }
+                      return (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {t.menuPlan.stockMissing(missing.join(", "))}
+                        </p>
+                      );
+                    })()}
                 </div>
                 <div>
                   <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">

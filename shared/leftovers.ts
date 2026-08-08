@@ -100,6 +100,21 @@ export function stockCoversIngredient(
   return false;
 }
 
+/**
+ * Welche Zutaten-Zeilen der Bestand NICHT deckt (#436) – die Umkehrung
+ * der Resteverwertung: Dort sucht man Rezepte zum Vorrat, hier fehlende
+ * Zutaten zum geplanten Rezept. Gleicher Abgleich, gleiche Toleranz.
+ */
+export function missingIngredients(
+  ingredients: readonly string[],
+  stock: readonly StockItem[]
+): string[] {
+  return ingredients.filter(
+    ingredient =>
+      !stock.some(item => stockCoversIngredient(ingredient, item.name))
+  );
+}
+
 /** Zuschlag pro bald ablaufendem Vorrat – bevorzugt, was weg muss. */
 export const URGENT_BONUS = 0.5;
 /** Kleiner Zuschlag für Favoriten – bricht nur echte Gleichstände. */
