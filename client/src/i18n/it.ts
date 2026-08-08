@@ -2162,6 +2162,9 @@ export const it: Translation = {
     tariffRowLabelPlaceholder: "p. es. adulti",
     tariffRowPriceAria: "Prezzo per notte",
     tariffTotal: (amount: string) => `In tutto ${amount}`,
+    tariffRowOneOff: "una tantum",
+    tariffRowOneOffAria: (label: string) =>
+      `${label}: una tantum invece che a notte`,
     tariffRemoveAria: (name: string) => `Rimuovi la tariffa ${name}`,
     tariffRowRemoveAria: (label: string) => `Rimuovi la riga ${label}`,
     costPriceLabel: "Piazzola per notte",
@@ -2415,6 +2418,7 @@ export const it: Translation = {
   },
   sharedSpot: {
     tariffsTitle: "Tariffe",
+    tariffRowOneOff: "una tantum",
     invalid: "Questo link di condivisione è scaduto o non è più valido.",
     invalidHint:
       "È scaduto oppure la proprietaria o il proprietario ha terminato la condivisione.",
@@ -4406,6 +4410,7 @@ export const it: Translation = {
       `${perNight} a notte × ${nights}`,
     sourceNightly: "dal prezzo per notte",
     nothingYet: "Ancora niente da calcolare: inserisci il numero.",
+    oneOffPart: (amount: string) => `più una tantum ${amount}`,
     addToExpenses: "Nella cassa",
     foreignCurrency: (currency: string) =>
       `La cassa di viaggio è tenuta in CHF – inserisci a mano gli importi in ${currency}.`,

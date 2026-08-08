@@ -2188,6 +2188,9 @@ export const fr: Translation = {
     tariffRowLabelPlaceholder: "p. ex. adultes",
     tariffRowPriceAria: "Prix par nuit",
     tariffTotal: (amount: string) => `Ensemble ${amount}`,
+    tariffRowOneOff: "forfait unique",
+    tariffRowOneOffAria: (label: string) =>
+      `${label} : forfait unique au lieu de par nuit`,
     tariffRemoveAria: (name: string) => `Supprimer le tarif ${name}`,
     tariffRowRemoveAria: (label: string) => `Supprimer la ligne ${label}`,
     costPriceLabel: "Emplacement par nuit",
@@ -2440,6 +2443,7 @@ export const fr: Translation = {
   },
   sharedSpot: {
     tariffsTitle: "Tarifs",
+    tariffRowOneOff: "forfait unique",
     invalid: "Ce lien de partage a expiré ou n'est plus valable.",
     invalidHint: "Il a expiré ou la ou le propriétaire a mis fin au partage.",
     badge: "Emplacement partagé",
@@ -4435,6 +4439,7 @@ export const fr: Translation = {
       `${perNight} par nuit × ${nights}`,
     sourceNightly: "d'après le prix par nuit",
     nothingYet: "Rien à calculer encore : indique le nombre.",
+    oneOffPart: (amount: string) => `plus forfait unique ${amount}`,
     addToExpenses: "Dans la caisse",
     foreignCurrency: (currency: string) =>
       `La caisse de voyage est tenue en CHF – merci de saisir les montants en ${currency} à la main.`,

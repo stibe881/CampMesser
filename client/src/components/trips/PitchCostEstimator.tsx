@@ -183,6 +183,7 @@ export default function PitchCostEstimator({
                         lang,
                         tariff?.currency ?? DEFAULT_TARIFF_CURRENCY
                       )}
+                      {row.oneOff && ` · ${t.spotDetail.tariffRowOneOff}`}
                     </span>
                   </span>
                   <Input
@@ -219,6 +220,12 @@ export default function PitchCostEstimator({
                   formatRappen(estimate.perNightRappen, lang, currency),
                   estimate.nights
                 )}
+                {/* Einmaliges (#415) steht getrennt – es skaliert nicht
+                    mit den Nächten und soll auch nicht so aussehen. */}
+                {estimate.oneOffRappen > 0 &&
+                  ` · ${pc.oneOffPart(
+                    formatRappen(estimate.oneOffRappen, lang, currency)
+                  )}`}
                 {estimate.source === "nightly" && ` · ${pc.sourceNightly}`}
               </p>
               {/* Die Reisekasse wird in CHF geführt (#219). Einen

@@ -2189,6 +2189,9 @@ export const de = {
     tariffRowLabelPlaceholder: "z. B. Erwachsene",
     tariffRowPriceAria: "Preis pro Nacht",
     tariffTotal: (amount: string) => `Zusammen ${amount}`,
+    tariffRowOneOff: "einmalig",
+    tariffRowOneOffAria: (label: string) =>
+      `${label}: einmalig statt pro Nacht`,
     tariffRemoveAria: (name: string) => `Tarif ${name} entfernen`,
     tariffRowRemoveAria: (label: string) => `Zeile ${label} entfernen`,
     costPriceLabel: "Platz pro Nacht",
@@ -2443,6 +2446,7 @@ export const de = {
   },
   sharedSpot: {
     tariffsTitle: "Tarife",
+    tariffRowOneOff: "einmalig",
     invalid: "Dieser Teil-Link ist abgelaufen oder nicht mehr gültig.",
     invalidHint:
       "Er ist abgelaufen oder die Besitzerin bzw. der Besitzer hat das Teilen beendet.",
@@ -4442,6 +4446,7 @@ export const de = {
       `${perNight} pro Nacht × ${nights}`,
     sourceNightly: "aus dem Preis pro Nacht",
     nothingYet: "Noch nichts zu rechnen: Anzahl eintragen.",
+    oneOffPart: (amount: string) => `dazu einmalig ${amount}`,
     addToExpenses: "In die Reisekasse",
     foreignCurrency: (currency: string) =>
       `Die Reisekasse wird in CHF geführt – Beträge in ${currency} bitte von Hand eintragen.`,

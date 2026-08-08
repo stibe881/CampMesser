@@ -251,6 +251,11 @@ export default function SharedSpotPage() {
                         </dt>
                         <dd className="shrink-0 font-mono">
                           {formatRappen(row.priceRappen, lang, tariff.currency)}
+                          {row.oneOff && (
+                            <span className="ml-1.5 font-sans text-xs text-muted-foreground">
+                              {t.sharedSpot.tariffRowOneOff}
+                            </span>
+                          )}
                         </dd>
                       </div>
                     ))}

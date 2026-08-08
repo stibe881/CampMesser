@@ -65,6 +65,7 @@ describe("estimatePitchCost", () => {
     const found = estimatePitchCost({ nights: 5, rows: ROWS });
     expect(found).toEqual({
       perNightRappen: 6400,
+      oneOffRappen: 0,
       totalRappen: 32000,
       nights: 5,
       source: "tariff",
@@ -112,5 +113,54 @@ describe("emptyCounts", () => {
     });
     expect(counts.map(row => row.count)).toEqual([0, 0]);
     expect(counts[0]).toMatchObject({ label: "Erwachsene", priceRappen: 1600 });
+  });
+});
+
+// Einmalige Posten (#415): Endreinigung und Buchungsgebühr zählen genau
+// einmal – nicht mal Nächte.
+describe("einmalige Posten", () => {
+  it("rechnet Einmaliges nicht mit den Nächten hoch", () => {
+    const estimate = estimatePitchCost({
+      nights: 5,
+      rows: [
+        { label: "Erwachsene", priceRappen: 1200, count: 2 },
+        { label: "Endreinigung", priceRappen: 5000, count: 1, oneOff: true },
+      ],
+      nightlyRappen: 0,
+    });
+    expect(estimate).toMatchObject({
+      perNightRappen: 2400,
+      oneOffRappen: 5000,
+      totalRappen: 2400 * 5 + 5000,
+      source: "tariff",
+    });
+  });
+
+  it("nur Einmaliges ist trotzdem eine Rechnung", () => {
+    const estimate = estimatePitchCost({
+      nights: 3,
+      rows: [
+        { label: "Buchungsgebühr", priceRappen: 800, count: 1, oneOff: true },
+      ],
+      nightlyRappen: 0,
+    });
+    expect(estimate).toMatchObject({
+      perNightRappen: 0,
+      oneOffRappen: 800,
+      totalRappen: 800,
+    });
+  });
+
+  it("emptyCounts trägt das Einmalig-Merkmal weiter", () => {
+    const counts = emptyCounts({
+      name: "Hauptsaison",
+      currency: "CHF",
+      rows: [
+        { label: "Erwachsene", priceRappen: 1600 },
+        { label: "Endreinigung", priceRappen: 5000, oneOff: true },
+      ],
+    });
+    expect(counts[0].oneOff).toBeUndefined();
+    expect(counts[1].oneOff).toBe(true);
   });
 });

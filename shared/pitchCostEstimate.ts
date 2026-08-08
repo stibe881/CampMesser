@@ -28,11 +28,15 @@ export interface CountedRow {
   priceRappen: number;
   /** Wie viele davon – Erwachsene, Kinder, Stellplätze. */
   count: number;
+  /** Einmalig statt pro Nacht (#415) – zählt genau einmal. */
+  oneOff?: boolean;
 }
 
 export interface CostEstimate {
   /** Kosten je Nacht in Rappen. */
   perNightRappen: number;
+  /** Einmalige Posten in Rappen (#415) – Endreinigung, Buchungsgebühr. */
+  oneOffRappen: number;
   /** Kosten für den ganzen Aufenthalt in Rappen. */
   totalRappen: number;
   nights: number;
@@ -61,10 +65,24 @@ export function nightsBetween(startDate: string, endDate: string): number {
   return Math.max(0, Math.round((end - start) / 86_400_000));
 }
 
-/** Kosten je Nacht aus den gewählten Zeilen. */
+/** Kosten je Nacht aus den gewählten Zeilen (ohne Einmaliges). */
 export function perNightFromRows(rows: readonly CountedRow[]): number {
   return rows.reduce(
-    (sum, row) => sum + Math.max(0, row.priceRappen) * cleanCount(row.count),
+    (sum, row) =>
+      row.oneOff
+        ? sum
+        : sum + Math.max(0, row.priceRappen) * cleanCount(row.count),
+    0
+  );
+}
+
+/** Einmalige Posten aus den gewählten Zeilen – zählen genau einmal (#415). */
+export function oneOffFromRows(rows: readonly CountedRow[]): number {
+  return rows.reduce(
+    (sum, row) =>
+      row.oneOff
+        ? sum + Math.max(0, row.priceRappen) * cleanCount(row.count)
+        : sum,
     0
   );
 }
@@ -85,10 +103,14 @@ export function estimatePitchCost(input: {
   if (nights <= 0) return null;
 
   const fromRows = input.rows ? perNightFromRows(input.rows) : 0;
-  if (fromRows > 0) {
+  const fromOneOff = input.rows ? oneOffFromRows(input.rows) : 0;
+  // Auch NUR Einmaliges ist eine Rechnung: Wer bloss die Buchungsgebühr
+  // angewählt hat, bekommt sie – mit 0.– je Nacht, ehrlich ausgewiesen.
+  if (fromRows > 0 || fromOneOff > 0) {
     return {
       perNightRappen: fromRows,
-      totalRappen: fromRows * nights,
+      oneOffRappen: fromOneOff,
+      totalRappen: fromRows * nights + fromOneOff,
       nights,
       source: "tariff",
     };
@@ -97,6 +119,7 @@ export function estimatePitchCost(input: {
   if (nightly > 0) {
     return {
       perNightRappen: nightly,
+      oneOffRappen: 0,
       totalRappen: nightly * nights,
       nights,
       source: "nightly",
@@ -117,5 +140,6 @@ export function emptyCounts(tariff: SpotTariff): CountedRow[] {
     label: row.label,
     priceRappen: row.priceRappen,
     count: 0,
+    ...(row.oneOff ? { oneOff: true } : {}),
   }));
 }

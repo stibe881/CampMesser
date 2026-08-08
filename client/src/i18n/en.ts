@@ -2122,6 +2122,9 @@ export const en: Translation = {
     tariffRowLabelPlaceholder: "e.g. adults",
     tariffRowPriceAria: "Price per night",
     tariffTotal: (amount: string) => `Together ${amount}`,
+    tariffRowOneOff: "one-off",
+    tariffRowOneOffAria: (label: string) =>
+      `${label}: one-off instead of per night`,
     tariffRemoveAria: (name: string) => `Remove rate ${name}`,
     tariffRowRemoveAria: (label: string) => `Remove row ${label}`,
     costPriceLabel: "Pitch per night",
@@ -2363,6 +2366,7 @@ export const en: Translation = {
   },
   sharedSpot: {
     tariffsTitle: "Tariffs",
+    tariffRowOneOff: "one-off",
     invalid: "This share link has expired or is no longer valid.",
     invalidHint: "It has expired or the owner has stopped sharing.",
     badge: "Shared pitch",
@@ -4314,6 +4318,7 @@ export const en: Translation = {
       `${perNight} per night × ${nights}`,
     sourceNightly: "from the price per night",
     nothingYet: "Nothing to work out yet: enter the numbers.",
+    oneOffPart: (amount: string) => `plus one-off ${amount}`,
     addToExpenses: "Add to the kitty",
     foreignCurrency: (currency: string) =>
       `The travel kitty is kept in CHF – please add amounts in ${currency} by hand.`,
