@@ -1,5 +1,13 @@
 # CampMesser – Projekt TODO
 
+## Reise-Arten (Nutzerwunsch 08.08.2026, Runde 50)
+
+- [x] Reise-Art pro Reise (#460): Camping (Normalfall), Strandferien, Hotelferien, Städtereise, Wandern, Velotour, Wintersport, Tagesausflug – als Chips im Reise-Formular (Neu und Bearbeiten), gespeichert in tripLogs.kind (Migration 0112, alte Zeilen gelten als Camping). Duplizieren übernimmt die Art; die Listen zeigen sie als Etikett, nur abseits des Normalfalls. Bewusst PRO REISE statt als globaler App-Schalter: Die App weiss über Start/Ende, welche Reise läuft – niemand muss umschalten. Katalog/Labels/Presets in shared/tripKind.ts, 5 Tests. Die Art sortiert und schlägt vor, sie sperrt nie ein Modul.
+- [x] Heute-Ansicht folgt der Reise-Art (#461): Pro Art zusätzliche Schnellzugriffe zu den drei Standard-Knöpfen (Wandern → Tour-Aufzeichnung + Erste Hilfe, Städtereise/Hotel → Ausweise + Sprachhilfe, Velotour → Touren + Reparatur, Wintersport → Länderregeln + Erste Hilfe, Tagesausflug → Lunchbox + Regentag-Ideen, Strand → Trinkwasser + Packlisten); Lagerfeuer-Ampel nur noch bei Camping und Wandern; bei Strandferien steht die Badewasser-Karte direkt unter der Kopfzeile. Bei Camping bleibt alles exakt wie bisher. UI-Test erweitert.
+- [x] Gezeiten in der Badewasser-Karte (#462): Nächstes Hoch-/Niedrigwasser aus dem stündlichen Meeresspiegel der Marine-API (sea_level_height_msl, tideExtremes) – stundengenau, unter 0.4 m Tidenhub (Mittelmeer) bleibt die Zeile ehrlich weg. Wirkt überall, wo die Karte steht (Platz-Dossier und neu die Heute-Ansicht bei Strandferien). 4 Tests.
+- Migration dieser Runde: 0112 (tripLogs.kind) – auf dem Server stehen damit 0095–0112 aus.
+- [ ] NICHT ANGESCHAUT, ehrlich: nichts davon am Bildschirm; die Gezeiten-Zeile nicht gegen eine echte Küsten-Antwort geprüft (nur gegen konstruierte Reihen). Geprüft sind Typen, alle Tests und der Build.
+
 ## Zwanzig Vorschläge (08.08.2026, Runde 49)
 
 - [x] Platz-Vergleich (#440): Zwei Favoriten Kopf an Kopf in der Zeltplatz-Liste – Preis/Nacht, Distanz zum Zuhause, Höhe, die vier Kriterien-Bewertungen (#278) und alle Platz-Eigenschaften nebeneinander, der bessere Wert markiert (compareAdvantage in shared/spotCompare.ts, «tiefer/höher gewinnt» je Zeile, ohne Daten kein Sieger). Anders als die Rangliste #278: direkter Zweier-Vergleich statt Punktzahl. 7 Tests.
