@@ -2749,6 +2749,7 @@ export const en: Translation = {
     fuelApply: "Add to the kitty",
     fuelInvalid: "Please enter distance, consumption and price.",
     fuelDescription: (km: number) => `Drive ${km} km`,
+    fuelFromLog: (l100: string) => `Use the fuel-log average: ${l100} l/100 km`,
     powerTitle: "Pitch electricity meter",
     powerHint:
       "Reading on arrival and departure; the price per kWh is posted on the hook-up box. Entries stay saved per trip.",
@@ -6022,6 +6023,33 @@ export const en: Translation = {
       n === 1 ? "1 device signed out" : `${n} devices signed out`,
     legacyHint:
       "Sign-ins from before this overview only appear after that device's next sign-in.",
+  },
+  fuelLog: {
+    title: "Fuel log",
+    subtitle: "Fill-ups with odometer reading – for your real consumption.",
+    loginFeature: "the fuel log",
+    averageTitle: "Average consumption",
+    averageHint:
+      "Weighted across all plausible segments. The trip cost calculator in the kitty can adopt this value.",
+    addTitle: "Record a fill-up",
+    addHint:
+      "Always fill the tank completely – only then the maths between two fill-ups works. Price is optional.",
+    dayLabel: "Date",
+    odometerLabel: "Odometer",
+    litersLabel: "Litres",
+    priceLabel: "Paid (CHF, optional)",
+    addButton: "Record",
+    saved: "Fill-up recorded",
+    odometerInvalid: "Please enter a valid odometer reading.",
+    litersInvalid: "Please enter the litres (max. 200).",
+    priceInvalid: "The amount is invalid.",
+    empty:
+      "No fill-ups yet. From the second one, the log calculates consumption.",
+    segmentLine: (km: number, l100: string) =>
+      `${km} km since last fill-up · ${l100} l/100 km`,
+    segmentImplausible: "(implausible, excluded from the average)",
+    deleteConfirm: "Delete this fill-up?",
+    deleteAria: (km: number) => `Delete the fill-up at ${km} km`,
   },
   stats: {
     expensesTitle: "Spending across all trips",

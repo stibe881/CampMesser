@@ -78,6 +78,7 @@ const pageLoaders = {
   TripShopping: () => import("./pages/TripShopping"),
   Level: () => import("./pages/Level"),
   Payload: () => import("./pages/Payload"),
+  FuelLog: () => import("./pages/FuelLog"),
   Countries: () => import("./pages/Countries"),
   Login: () => import("./pages/Login"),
   Lawn: () => import("./pages/Lawn"),
@@ -182,6 +183,7 @@ const MenuPlanPrintPage = lazyWithRetry(pageLoaders.MenuPlanPrint);
 const TripShoppingPage = lazyWithRetry(pageLoaders.TripShopping);
 const LevelPage = lazyWithRetry(pageLoaders.Level);
 const PayloadPage = lazyWithRetry(pageLoaders.Payload);
+const FuelLogPage = lazyWithRetry(pageLoaders.FuelLog);
 const CountriesPage = lazyWithRetry(pageLoaders.Countries);
 const LoginPage = lazyWithRetry(pageLoaders.Login);
 const LawnPage = lazyWithRetry(pageLoaders.Lawn);
@@ -304,6 +306,7 @@ function Router() {
           <Route path={"/menueplan/:tripId"} component={MenuPlanPage} />
           <Route path={"/wasserwaage"} component={LevelPage} />
           <Route path={"/zuladung"} component={PayloadPage} />
+          <Route path={"/tankbuch"} component={FuelLogPage} />
           <Route path={"/laenderregeln"} component={CountriesPage} />
           <Route path={"/anmelden"} component={LoginPage} />
           <Route path={"/rasen"} component={LawnPage} />

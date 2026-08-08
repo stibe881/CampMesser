@@ -7,6 +7,7 @@
 import {
   ENV,
   HISTORY_LIMIT,
+  InsertFuelLog,
   InsertUser,
   InsertUserNote,
   and,
@@ -16,6 +17,7 @@ import {
   deletedItems,
   desc,
   eq,
+  fuelLogs,
   getDb,
   hikeTracks,
   inArray,
@@ -183,6 +185,31 @@ export async function deleteUserNote(id: number, userId: number) {
     .delete(userNotes)
     .where(and(eq(userNotes.id, id), eq(userNotes.userId, userId)));
 }
+// ── Tankbuch (#443) ──
+
+/** Tankfüllungen eines Kontos, jüngster Kilometerstand zuoberst. */
+export async function getFuelLogs(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(fuelLogs)
+    .where(eq(fuelLogs.userId, userId))
+    .orderBy(desc(fuelLogs.odometerKm), desc(fuelLogs.id));
+}
+
+export async function addFuelLog(data: InsertFuelLog) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(fuelLogs).values(data);
+  return result.insertId;
+}
+
+export async function deleteFuelLog(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(fuelLogs)
+    .where(and(eq(fuelLogs.id, id), eq(fuelLogs.userId, userId)));
+}
+
 // ── Angemeldete Geräte (#423) ──
 
 /** Neue Anmeldung festhalten – die tokenId wandert als `sid` ins JWT. */

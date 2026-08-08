@@ -1818,6 +1818,34 @@ export type UserNote = typeof userNotes.$inferSelect;
 export type InsertUserNote = typeof userNotes.$inferInsert;
 
 /**
+ * Tankbuch (#443): eine Zeile pro Tankfüllung. Aus zwei aufeinander-
+ * folgenden VOLLEN Füllungen ergibt sich der echte Verbrauch – die
+ * getankten Liter der zweiten Füllung geteilt durch die gefahrenen
+ * Kilometer. Liter als Zehntel-Ganzzahl, wie überall kein Fliesskomma
+ * in der Datenbank.
+ */
+export const fuelLogs = mysqlTable(
+  "fuelLogs",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Tag der Tankfüllung */
+    day: date("day", { mode: "string" }).notNull(),
+    /** Kilometerstand beim Tanken */
+    odometerKm: int("odometerKm").notNull(),
+    /** Getankte Menge in Deziliter-Auflösung (Liter × 10) */
+    liters10: int("liters10").notNull(),
+    /** Bezahlter Gesamtbetrag in Rappen; null = nicht erfasst */
+    priceRappen: int("priceRappen"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("fuelLogs_userId").on(table.userId)]
+);
+
+export type FuelLog = typeof fuelLogs.$inferSelect;
+export type InsertFuelLog = typeof fuelLogs.$inferInsert;
+
+/**
  * GPS-Schatzsuche (#267): Wegpunkte, die Erwachsene am Platz verstecken
  * und Kinder mit dem Handy suchen.
  *

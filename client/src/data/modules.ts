@@ -47,6 +47,7 @@ import {
   Tent,
   TreePine,
   Truck,
+  Fuel,
   Users,
   Wrench,
 } from "lucide-react";
@@ -505,6 +506,23 @@ export const modules: Module[] = [
     icon: Truck,
     group: "ausruestung",
     offline: true,
+  },
+  {
+    path: "/tankbuch",
+    title: l4(
+      "Tankbuch",
+      "Carnet de carburant",
+      "Libretto carburante",
+      "Fuel log"
+    ),
+    description: l4(
+      "Tankfüllungen erfassen und den echten Verbrauch kennen",
+      "Note les pleins et connais ta consommation réelle",
+      "Registra i pieni e conosci il consumo reale",
+      "Record fill-ups and know your real consumption"
+    ),
+    icon: Fuel,
+    group: "ausruestung",
   },
   {
     path: "/zeltpflege",

@@ -96,6 +96,7 @@ import {
   fuelCost,
 } from "@shared/fuelCost";
 import { parseKwhInput, powerMeterCost } from "@shared/powerMeter";
+import { averageConsumptionL100 } from "@shared/fuelLog";
 import {
   TRIP_BOARD_KINDS,
   TRIP_BOARD_KIND_LABELS,
@@ -414,6 +415,18 @@ export default function TripExpenses({
   };
 
   const busy = addMutation.isPending || updateMutation.isPending;
+
+  /**
+   * Ø-Verbrauch aus dem Tankbuch (#443) – erst beim Öffnen des
+   * Fahrtkosten-Rechners geholt und nur als Vorschlag angeboten.
+   */
+  const fuelLogQuery = trpc.fuelLog.list.useQuery(undefined, {
+    enabled: fuelOpen,
+  });
+  const fuelLogAverage = useMemo(
+    () => averageConsumptionL100(fuelLogQuery.data ?? []),
+    [fuelLogQuery.data]
+  );
 
   /** Zwischenstand des Fahrtkosten-Rechners (#259). */
   const fuelResult = fuelCost({
@@ -983,6 +996,19 @@ export default function TripExpenses({
                               value={fuelConsumption}
                               onChange={e => setFuelConsumption(e.target.value)}
                             />
+                            {fuelLogAverage !== null && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setFuelConsumption(fuelLogAverage.toFixed(1))
+                                }
+                                className="mt-1 text-xs font-medium text-primary hover:underline"
+                              >
+                                {t.tripExpenses.fuelFromLog(
+                                  fuelLogAverage.toFixed(1)
+                                )}
+                              </button>
+                            )}
                           </div>
                           <div>
                             <label

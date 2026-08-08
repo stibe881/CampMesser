@@ -2852,6 +2852,8 @@ export const de = {
     fuelApply: "In die Reisekasse übernehmen",
     fuelInvalid: "Bitte Strecke, Verbrauch und Preis eintragen.",
     fuelDescription: (km: number) => `Fahrt ${km} km`,
+    fuelFromLog: (l100: string) =>
+      `Ø aus dem Tankbuch übernehmen: ${l100} l/100 km`,
     powerTitle: "Stromzähler am Stellplatz",
     powerHint:
       "Zählerstand bei Ankunft und Abreise, Preis pro kWh steht am Stromkasten. Die Eingaben bleiben pro Reise gemerkt.",
@@ -6186,6 +6188,33 @@ export const de = {
       n === 1 ? "1 Gerät abgemeldet" : `${n} Geräte abgemeldet`,
     legacyHint:
       "Anmeldungen von vor dieser Übersicht erscheinen erst nach der nächsten Anmeldung des jeweiligen Geräts.",
+  },
+  fuelLog: {
+    title: "Tankbuch",
+    subtitle: "Tankfüllungen mit Kilometerstand – daraus der echte Verbrauch.",
+    loginFeature: "das Tankbuch",
+    averageTitle: "Durchschnittsverbrauch",
+    averageHint:
+      "Gewichtet über alle plausiblen Abschnitte. Der Fahrtkosten-Rechner in der Reisekasse kann diesen Wert übernehmen.",
+    addTitle: "Tankfüllung erfassen",
+    addHint:
+      "Immer volltanken – nur dann stimmt die Rechnung zwischen zwei Füllungen. Preis ist optional.",
+    dayLabel: "Datum",
+    odometerLabel: "Kilometerstand",
+    litersLabel: "Getankte Liter",
+    priceLabel: "Bezahlt (CHF, optional)",
+    addButton: "Erfassen",
+    saved: "Tankfüllung erfasst",
+    odometerInvalid: "Bitte einen gültigen Kilometerstand eintragen.",
+    litersInvalid: "Bitte die getankten Liter eintragen (max. 200).",
+    priceInvalid: "Der Betrag ist ungültig.",
+    empty:
+      "Noch keine Tankfüllungen. Ab der zweiten Füllung rechnet das Tankbuch den Verbrauch.",
+    segmentLine: (km: number, l100: string) =>
+      `${km} km seit letzter Füllung · ${l100} l/100 km`,
+    segmentImplausible: "(unplausibel, zählt nicht zum Durchschnitt)",
+    deleteConfirm: "Diese Tankfüllung löschen?",
+    deleteAria: (km: number) => `Tankfüllung bei ${km} km löschen`,
   },
   stats: {
     expensesTitle: "Ausgaben über alle Reisen",

@@ -2814,6 +2814,8 @@ export const it: Translation = {
     fuelApply: "Riprendere nella cassa",
     fuelInvalid: "Inserisci distanza, consumo e prezzo.",
     fuelDescription: (km: number) => `Tragitto ${km} km`,
+    fuelFromLog: (l100: string) =>
+      `Riprendi la media del libretto: ${l100} l/100 km`,
     powerTitle: "Contatore elettrico della piazzola",
     powerHint:
       "Lettura all'arrivo e alla partenza, il prezzo per kWh è indicato sulla colonnina. I valori restano memorizzati per viaggio.",
@@ -6142,6 +6144,33 @@ export const it: Translation = {
       n === 1 ? "1 dispositivo disconnesso" : `${n} dispositivi disconnessi`,
     legacyHint:
       "Gli accessi precedenti a questa panoramica compaiono solo dopo il prossimo accesso del dispositivo.",
+  },
+  fuelLog: {
+    title: "Libretto carburante",
+    subtitle: "I pieni con chilometraggio – per il consumo reale.",
+    loginFeature: "il libretto carburante",
+    averageTitle: "Consumo medio",
+    averageHint:
+      "Ponderato su tutti i tratti plausibili. Il calcolatore dei costi di viaggio nella cassa può riprendere questo valore.",
+    addTitle: "Registra un pieno",
+    addHint:
+      "Fai sempre il pieno completo – solo così il calcolo tra due pieni è corretto. Il prezzo è facoltativo.",
+    dayLabel: "Data",
+    odometerLabel: "Chilometraggio",
+    litersLabel: "Litri",
+    priceLabel: "Pagato (CHF, facoltativo)",
+    addButton: "Registra",
+    saved: "Pieno registrato",
+    odometerInvalid: "Inserisci un chilometraggio valido.",
+    litersInvalid: "Inserisci i litri (max. 200).",
+    priceInvalid: "L'importo non è valido.",
+    empty:
+      "Nessun pieno registrato. Dal secondo pieno il libretto calcola il consumo.",
+    segmentLine: (km: number, l100: string) =>
+      `${km} km dall'ultimo pieno · ${l100} l/100 km`,
+    segmentImplausible: "(non plausibile, escluso dalla media)",
+    deleteConfirm: "Eliminare questo pieno?",
+    deleteAria: (km: number) => `Elimina il pieno a ${km} km`,
   },
   stats: {
     expensesTitle: "Spese di tutti i viaggi",

@@ -2843,6 +2843,8 @@ export const fr: Translation = {
     fuelApply: "Reprendre dans la caisse",
     fuelInvalid: "Merci d'indiquer distance, consommation et prix.",
     fuelDescription: (km: number) => `Trajet ${km} km`,
+    fuelFromLog: (l100: string) =>
+      `Reprendre la moyenne du carnet : ${l100} l/100 km`,
     powerTitle: "Compteur électrique de l'emplacement",
     powerHint:
       "Relevé à l'arrivée et au départ, le prix par kWh est affiché sur la borne. Les saisies restent mémorisées par voyage.",
@@ -6184,6 +6186,33 @@ export const fr: Translation = {
       n === 1 ? "1 appareil déconnecté" : `${n} appareils déconnectés`,
     legacyHint:
       "Les connexions antérieures à cet aperçu n'apparaissent qu'après la prochaine connexion de l'appareil concerné.",
+  },
+  fuelLog: {
+    title: "Carnet de carburant",
+    subtitle: "Les pleins avec kilométrage – pour la consommation réelle.",
+    loginFeature: "le carnet de carburant",
+    averageTitle: "Consommation moyenne",
+    averageHint:
+      "Pondérée sur tous les tronçons plausibles. Le calculateur de frais de route de la caisse peut reprendre cette valeur.",
+    addTitle: "Saisir un plein",
+    addHint:
+      "Toujours faire le plein complet – le calcul entre deux pleins n'est juste qu'ainsi. Le prix est facultatif.",
+    dayLabel: "Date",
+    odometerLabel: "Kilométrage",
+    litersLabel: "Litres",
+    priceLabel: "Payé (CHF, facultatif)",
+    addButton: "Saisir",
+    saved: "Plein enregistré",
+    odometerInvalid: "Merci d'indiquer un kilométrage valide.",
+    litersInvalid: "Merci d'indiquer les litres (max. 200).",
+    priceInvalid: "Le montant est invalide.",
+    empty:
+      "Pas encore de pleins. Dès le deuxième, le carnet calcule la consommation.",
+    segmentLine: (km: number, l100: string) =>
+      `${km} km depuis le dernier plein · ${l100} l/100 km`,
+    segmentImplausible: "(non plausible, exclu de la moyenne)",
+    deleteConfirm: "Supprimer ce plein ?",
+    deleteAria: (km: number) => `Supprimer le plein à ${km} km`,
   },
   stats: {
     expensesTitle: "Dépenses de tous les voyages",

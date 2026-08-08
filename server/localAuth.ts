@@ -216,6 +216,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     tickBites,
     userNotes,
     userSessions,
+    fuelLogs,
     tripChanges,
   } = await import("../drizzle/schema");
   const { inArray, or } = await import("drizzle-orm");
@@ -425,6 +426,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(userNotes).where(eq(userNotes.userId, userId));
   // Angemeldete Geräte (#423): alle Anmeldungen des Kontos beenden
   await db.delete(userSessions).where(eq(userSessions.userId, userId));
+  // Tankbuch (#443)
+  await db.delete(fuelLogs).where(eq(fuelLogs.userId, userId));
   await db.delete(users).where(eq(users.id, userId));
   // Zuletzt die Upload-Dateien vom Webspace entfernen – fehlende Dateien
   // blockieren nie, und verwaiste Dateien sind schlimmstenfalls harmlos.
