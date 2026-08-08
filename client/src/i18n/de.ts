@@ -4356,6 +4356,8 @@ export const de = {
     historyTitle: "Eingelöst",
     historyLine: (name: string, title: string, points: number, date: string) =>
       `${name}: «${title}» für ${points} P. am ${date}`,
+    reachedToast: (name: string, title: string) =>
+      `${name} hat jetzt genug Punkte für «${title}»!`,
   },
   nextTime: {
     title: "Beim nächsten Mal",

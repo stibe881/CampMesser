@@ -4229,6 +4229,8 @@ export const en: Translation = {
     historyTitle: "Redeemed",
     historyLine: (name: string, title: string, points: number, date: string) =>
       `${name}: “${title}” for ${points} pts on ${date}`,
+    reachedToast: (name: string, title: string) =>
+      `${name} now has enough points for “${title}”!`,
   },
   nextTime: {
     title: "Next time",

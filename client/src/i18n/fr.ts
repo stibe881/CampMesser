@@ -4347,6 +4347,8 @@ export const fr: Translation = {
     historyTitle: "Échangé",
     historyLine: (name: string, title: string, points: number, date: string) =>
       `${name} : « ${title} » pour ${points} pts le ${date}`,
+    reachedToast: (name: string, title: string) =>
+      `${name} a maintenant assez de points pour « ${title} » !`,
   },
   nextTime: {
     title: "La prochaine fois",

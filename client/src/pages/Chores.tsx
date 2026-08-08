@@ -44,6 +44,7 @@ import {
   dayProgress,
   scoreboard,
 } from "@shared/chores";
+import { newlyReachableRewards } from "@shared/rewards";
 
 export default function ChoresPage() {
   const ask = useConfirm();
@@ -74,6 +75,14 @@ export default function ChoresPage() {
     {},
     { enabled: isAuthenticated }
   );
+  // Für den Ziel-erreicht-Moment (#413) – dieselben Abfragen wie in
+  // RewardGoals, React Query dedupliziert sie.
+  const rewardsQuery = trpc.rewards.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const redemptionsQuery = trpc.rewards.redemptions.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
   const chores = useMemo(() => choresQuery.data ?? [], [choresQuery.data]);
   const children = useMemo(
@@ -322,9 +331,35 @@ export default function ChoresPage() {
             >
               <button
                 type="button"
-                onClick={() =>
-                  setDone.mutate({ id: assignment.id, done: !done })
-                }
+                onClick={() => {
+                  // Ziel-erreicht-Moment (#413): Nur beim ABHAKEN und nur
+                  // mit geladenen Zielen/Einlösungen – ein falsches «genug
+                  // Punkte!» wäre schlimmer als ein verpasstes.
+                  if (
+                    !done &&
+                    assignment.childId !== null &&
+                    rewardsQuery.data &&
+                    redemptionsQuery.data
+                  ) {
+                    const { childId } = assignment;
+                    const row = scores.find(s => s.childId === childId);
+                    const reached = row
+                      ? newlyReachableRewards(
+                          rewardsQuery.data,
+                          redemptionsQuery.data,
+                          childId,
+                          row.points,
+                          row.points + chore.points
+                        )
+                      : [];
+                    if (reached.length > 0) {
+                      toast.success(
+                        t.rewards.reachedToast(row!.name, reached[0].title)
+                      );
+                    }
+                  }
+                  setDone.mutate({ id: assignment.id, done: !done });
+                }}
                 className={cn(
                   "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
                   done
