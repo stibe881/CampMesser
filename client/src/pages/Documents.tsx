@@ -26,10 +26,14 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { resizeImageForUpload } from "@/lib/imageResize";
+import { useTodayIso } from "@/lib/useTodayIso";
+import { fmtMedium } from "@/lib/dateFormat";
+import { documentExpiryStatus } from "@shared/documentExpiry";
+import { cn } from "@/lib/utils";
 
 export default function DocumentsPage() {
   const ask = useConfirm();
-  const { t } = useI18n();
+  const { lang, t } = useI18n();
   const td = t.documents;
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
@@ -38,7 +42,9 @@ export default function DocumentsPage() {
   });
   const cards = query.data ?? [];
 
+  const today = useTodayIso();
   const [title, setTitle] = useState("");
+  const [expiresOn, setExpiresOn] = useState("");
   const [uploadingId, setUploadingId] = useState<number | null>(null);
   const [viewer, setViewer] = useState<{
     title: string;
@@ -51,9 +57,15 @@ export default function DocumentsPage() {
     onSuccess: () => {
       utils.documents.list.invalidate();
       setTitle("");
+      setExpiresOn("");
       toast.success(td.added);
     },
     onError: e => toast.error(e.message || t.common.saveFailed),
+  });
+  // Ablaufdatum nachträglich setzen oder entfernen (#476)
+  const expiryMutation = trpc.documents.rename.useMutation({
+    onSuccess: () => utils.documents.list.invalidate(),
+    onError: () => toast.error(t.common.saveFailed),
   });
   const removeMutation = trpc.documents.remove.useMutation({
     onSuccess: () => utils.documents.list.invalidate(),
@@ -127,11 +139,28 @@ export default function DocumentsPage() {
                 />
                 <Button
                   disabled={!title.trim() || addMutation.isPending}
-                  onClick={() => addMutation.mutate({ title: title.trim() })}
+                  onClick={() =>
+                    addMutation.mutate({
+                      title: title.trim(),
+                      expiresOn: expiresOn || null,
+                    })
+                  }
                 >
                   <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
                   {td.addButton}
                 </Button>
+              </div>
+              {/* Ablaufdatum (#476): optional – Mitgliederkarten ohne
+                  Datum bleiben einfach ohne */}
+              <div className="mt-3">
+                <Label htmlFor="document-expiry">{td.expiryLabel}</Label>
+                <Input
+                  id="document-expiry"
+                  type="date"
+                  className="mt-1 w-44"
+                  value={expiresOn}
+                  onChange={e => setExpiresOn(e.target.value)}
+                />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">{td.hint}</p>
             </CardContent>
@@ -188,6 +217,52 @@ export default function DocumentsPage() {
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{card.title}</p>
+                    {/* Ablauf-Hinweis (#476): amber ab 30 Tagen, rot danach */}
+                    {(() => {
+                      const status = documentExpiryStatus(
+                        card.expiresOn,
+                        today
+                      );
+                      if (!status) return null;
+                      const date = fmtMedium(
+                        new Date(`${card.expiresOn}T00:00:00`),
+                        lang
+                      );
+                      return (
+                        <p
+                          className={cn(
+                            "mt-0.5 text-xs",
+                            status === "expired"
+                              ? "font-medium text-destructive"
+                              : status === "soon"
+                                ? "font-medium text-amber-700 dark:text-amber-400"
+                                : "text-muted-foreground"
+                          )}
+                        >
+                          {status === "expired"
+                            ? td.expiredOn(date)
+                            : status === "soon"
+                              ? td.expiresSoon(date)
+                              : td.validUntil(date)}
+                        </p>
+                      );
+                    })()}
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                      <Input
+                        type="date"
+                        className="h-8 w-40 text-xs"
+                        value={card.expiresOn ?? ""}
+                        aria-label={td.expiryAria(card.title)}
+                        disabled={expiryMutation.isPending}
+                        onChange={e =>
+                          expiryMutation.mutate({
+                            id: card.id,
+                            title: card.title,
+                            expiresOn: e.target.value || null,
+                          })
+                        }
+                      />
+                    </div>
                     <Button
                       variant="outline"
                       size="sm"

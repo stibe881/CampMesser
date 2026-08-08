@@ -21,6 +21,7 @@ import {
   type WeatherTurn,
 } from "../shared/weatherTurn";
 import {
+  docsAlertText,
   dryingAlertText,
   evePackAlertText,
   foodAlertText,
@@ -33,6 +34,7 @@ import {
 } from "@shared/pushTexts";
 import {
   campSpots,
+  documentCards,
   foodItems,
   gearTasks,
   homeLocations,
@@ -46,6 +48,10 @@ import {
   meteorShowers,
   type MeteorShower,
 } from "../shared/astro";
+import {
+  expiringDocuments,
+  type ExpiringDocumentLike,
+} from "../shared/documentExpiry";
 import { expiryInfo } from "../shared/food";
 import { gearTaskDue, type GearTaskLike } from "../shared/gearTasks";
 import { heatAdvice } from "../shared/heatCare";
@@ -119,7 +125,8 @@ export type PushKind = "weather" | "food" | "trip" | "astro" | "gear" | "heat";
  * Arten im Benachrichtigungs-Verlauf (#201): wie PushKind, aber mit den beiden
  * Sonderfällen, die am Flag «trip» hängen und trotzdem eigene Meldungen sind.
  */
-export type PushLogKind = PushKind | "drying" | "evepack" | "board" | "join";
+export type PushLogKind =
+  PushKind | "drying" | "evepack" | "board" | "join" | "docs";
 
 /** So viele Einträge behält der Verlauf pro Konto (ältere fallen weg). */
 export const PUSH_LOG_LIMIT = 50;
@@ -367,6 +374,8 @@ export interface PushCheckResult {
   astroSent: number;
   /** Verschickte Pflege-Erinnerungen (fällige Ausrüstungs-Aufgaben) */
   gearSent: number;
+  /** Verschickte Ausweis-Erinnerungen (#476) */
+  docsSent: number;
   /** Verschickte Sonnencreme-/Trink-Erinnerungen (heisse, sonnige Tage) */
   heatSent: number;
   removed: number;
@@ -450,6 +459,36 @@ export function buildGearAlert(
   const rest = due.length - names.length;
   const text = gearAlertText(due.length, nameList(names, rest, lang), lang);
   return { ...text, key: `gear:${today.slice(0, 7)}` };
+}
+
+export interface DocsAlert {
+  title: string;
+  body: string;
+  /** Dedup-Schlüssel «docs:YYYY-MM» – max. eine Ausweis-Erinnerung pro Monat und Abo */
+  key: string;
+}
+
+/** Wie viele Karten-Titel in der Ausweis-Erinnerung ausgeschrieben werden. */
+const DOCS_ALERT_MAX_NAMES = 3;
+
+/**
+ * Ausweis-Erinnerung (#476) bauen: Karten, die innert 30 Tagen ablaufen
+ * oder schon abgelaufen sind (expiringDocuments aus
+ * shared/documentExpiry.ts). Gibt null zurück, wenn nichts ansteht;
+ * Schlüssel «docs:YYYY-MM» begrenzt auf einmal pro Monat und Abo.
+ */
+export function buildDocsAlert(
+  cards: readonly ExpiringDocumentLike[],
+  today: string,
+  lang: Language = "de"
+): DocsAlert | null {
+  const due = expiringDocuments(cards, today);
+  if (due.length === 0) return null;
+
+  const names = due.slice(0, DOCS_ALERT_MAX_NAMES).map(c => c.title);
+  const rest = due.length - names.length;
+  const text = docsAlertText(due.length, nameList(names, rest, lang), lang);
+  return { ...text, key: `docs:${today.slice(0, 7)}` };
 }
 
 /**
@@ -1092,6 +1131,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     evePackSent: 0,
     astroSent: 0,
     gearSent: 0,
+    docsSent: 0,
     heatSent: 0,
     removed: 0,
   };
@@ -1167,6 +1207,20 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     for (const lang of langsOf(userId)) {
       const alert = buildGearAlert(tasks, today, lang);
       if (alert) gearAlertByUser.set(alertFor(userId, lang), alert);
+    }
+  }
+
+  // Karten & Ausweise (#476): ablaufende Dokumente pro Nutzer*in vorbereiten
+  const allDocCards = await db
+    .select()
+    .from(documentCards)
+    .where(inArray(documentCards.userId, userIds));
+  const docsAlertByUser = new Map<string, DocsAlert>();
+  for (const userId of userIds) {
+    const cards = allDocCards.filter(card => card.userId === userId);
+    for (const lang of langsOf(userId)) {
+      const alert = buildDocsAlert(cards, today, lang);
+      if (alert) docsAlertByUser.set(alertFor(userId, lang), alert);
     }
   }
 
@@ -1932,6 +1986,41 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         await db
           .update(pushSubscriptions)
           .set({ lastGearKey: gearAlert.key, lastNotifiedAt: new Date() })
+          .where(eq(pushSubscriptions.id, sub.id));
+      } else if (outcome === "gone") {
+        continue;
+      }
+    }
+
+    // ── Ausweise: Ablauf-Erinnerung (#476, max. eine pro Monat und Abo) ──
+    // Läuft über dieselbe Einstellung wie die Pflege-Erinnerung («gear»):
+    // beides sind seltene Unterhalts-Hinweise, ein eigener Schalter im
+    // Profil wäre mehr Verwaltung als Nutzen.
+    const docsAlert = subscriptionWants(sub, "gear")
+      ? docsAlertByUser.get(alertFor(sub.userId, subLang(sub.lang)))
+      : undefined;
+    if (docsAlert && docsAlert.key !== sub.lastDocsKey) {
+      const docsPayload = JSON.stringify({
+        title: docsAlert.title,
+        body: docsAlert.body,
+        url: "/ausweise",
+        // Eigener Tag, damit die Erinnerung andere Meldungen nicht ersetzt
+        tag: "campmesser-docs",
+      });
+      const outcome = await sendTo(sub, docsPayload);
+      if (outcome === "sent") {
+        result.docsSent += 1;
+        await logPushOnce(
+          sub.userId,
+          "docs",
+          docsAlert.key,
+          docsAlert.title,
+          docsAlert.body,
+          "/ausweise"
+        );
+        await db
+          .update(pushSubscriptions)
+          .set({ lastDocsKey: docsAlert.key, lastNotifiedAt: new Date() })
           .where(eq(pushSubscriptions.id, sub.id));
       } else if (outcome === "gone") {
         continue;

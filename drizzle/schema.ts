@@ -814,6 +814,8 @@ export const pushSubscriptions = mysqlTable(
     lastAstroKey: varchar("lastAstroKey", { length: 64 }),
     /** Schlüssel der letzten Pflege-Erinnerung («gear:YYYY-MM»): max. 1 pro Monat */
     lastGearKey: varchar("lastGearKey", { length: 64 }),
+    /** Schlüssel der letzten Ausweis-Erinnerung (#476, «docs:YYYY-MM»): max. 1 pro Monat */
+    lastDocsKey: varchar("lastDocsKey", { length: 64 }),
     /** Schlüssel des letzten Vorabend-Checks («evepack:<tripId>»): max. 1 pro Reise */
     lastEvePackKey: varchar("lastEvePackKey", { length: 64 }),
     /** Schlüssel der letzten Hitze-Erinnerung («heat:YYYY-MM-DD»): max. 1 pro Tag */
@@ -1868,6 +1870,8 @@ export const documentCards = mysqlTable(
     title: varchar("title", { length: 80 }).notNull(),
     /** Foto der Karte; null = noch keines hochgeladen */
     fileName: varchar("fileName", { length: 64 }),
+    /** Ablaufdatum (#476); null = läuft nicht ab (z. B. Mitgliederkarte) */
+    expiresOn: date("expiresOn", { mode: "string" }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("documentCards_userId").on(table.userId)]

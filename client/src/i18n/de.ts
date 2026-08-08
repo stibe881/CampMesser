@@ -4178,6 +4178,11 @@ export const de = {
     addLabel: "Neue Karte",
     addPlaceholder: "z. B. ACSI-Card 2026",
     addButton: "Anlegen",
+    expiryLabel: "Ablaufdatum (optional)",
+    expiryAria: (title: string) => `Ablaufdatum von ${title}`,
+    validUntil: (date: string) => `Gültig bis ${date}`,
+    expiresSoon: (date: string) => `Läuft am ${date} ab`,
+    expiredOn: (date: string) => `Abgelaufen seit ${date}`,
     hint: "Karte anlegen, dann das Foto dazu hochladen. Die Fotos sind privat und nur in deinem Konto sichtbar.",
     added: "Karte angelegt",
     empty:

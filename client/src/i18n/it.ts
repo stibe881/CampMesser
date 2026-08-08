@@ -4137,6 +4137,11 @@ export const it: Translation = {
     addLabel: "Nuova tessera",
     addPlaceholder: "es. ACSI-Card 2026",
     addButton: "Crea",
+    expiryLabel: "Data di scadenza (facoltativa)",
+    expiryAria: (title: string) => `Data di scadenza di ${title}`,
+    validUntil: (date: string) => `Valida fino al ${date}`,
+    expiresSoon: (date: string) => `Scade il ${date}`,
+    expiredOn: (date: string) => `Scaduta dal ${date}`,
     hint: "Crea la tessera, poi carica la sua foto. Le foto sono private e visibili solo nel tuo account.",
     added: "Tessera creata",
     empty:

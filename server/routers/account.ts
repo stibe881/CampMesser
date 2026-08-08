@@ -95,11 +95,21 @@ export const accountRouters = {
       db.getDocumentCards(ctx.user.id)
     ),
     add: protectedProcedure
-      .input(z.object({ title: z.string().trim().min(1).max(80) }))
+      .input(
+        z.object({
+          title: z.string().trim().min(1).max(80),
+          // Ablaufdatum (#476); null/weggelassen = läuft nicht ab
+          expiresOn: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/)
+            .nullish(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const id = await db.addDocumentCard({
           userId: ctx.user.id,
           title: input.title.trim(),
+          expiresOn: input.expiresOn ?? null,
         });
         return { id };
       }),
@@ -108,11 +118,19 @@ export const accountRouters = {
         z.object({
           id: z.number().int().positive(),
           title: z.string().trim().min(1).max(80),
+          // undefined = unangetastet, null = Ablaufdatum entfernen (#476)
+          expiresOn: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/)
+            .nullish(),
         })
       )
       .mutation(async ({ ctx, input }) => {
         await db.updateDocumentCard(input.id, ctx.user.id, {
           title: input.title.trim(),
+          ...(input.expiresOn !== undefined
+            ? { expiresOn: input.expiresOn }
+            : {}),
         });
         return { success: true } as const;
       }),

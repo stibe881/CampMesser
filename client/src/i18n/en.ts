@@ -4052,6 +4052,11 @@ export const en: Translation = {
     addLabel: "New card",
     addPlaceholder: "e.g. ACSI card 2026",
     addButton: "Create",
+    expiryLabel: "Expiry date (optional)",
+    expiryAria: (title: string) => `Expiry date of ${title}`,
+    validUntil: (date: string) => `Valid until ${date}`,
+    expiresSoon: (date: string) => `Expires on ${date}`,
+    expiredOn: (date: string) => `Expired since ${date}`,
     hint: "Create the card, then upload its photo. Photos are private and only visible in your account.",
     added: "Card created",
     empty:

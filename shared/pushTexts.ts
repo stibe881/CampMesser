@@ -101,6 +101,37 @@ export function gearAlertText(count: number, list: string, lang: Language) {
   };
 }
 
+/** Karten & Ausweise (#476): ablaufende oder abgelaufene Dokumente. */
+export function docsAlertText(count: number, list: string, lang: Language) {
+  return {
+    title: pick(
+      l4(
+        "🪪 Ausweise: Ablaufdatum prüfen",
+        "🪪 Documents : vérifier la date d'expiration",
+        "🪪 Documenti: controllare la scadenza",
+        "🪪 Documents: check expiry date"
+      ),
+      lang
+    ),
+    body: pick(
+      count === 1
+        ? l4(
+            `1 Karte läuft bald ab oder ist abgelaufen: ${list}`,
+            `1 carte expire bientôt ou est expirée : ${list}`,
+            `1 tessera sta per scadere o è scaduta: ${list}`,
+            `1 card is about to expire or has expired: ${list}`
+          )
+        : l4(
+            `${count} Karten laufen bald ab oder sind abgelaufen: ${list}`,
+            `${count} cartes expirent bientôt ou sont expirées : ${list}`,
+            `${count} tessere stanno per scadere o sono scadute: ${list}`,
+            `${count} cards are about to expire or have expired: ${list}`
+          ),
+      lang
+    ),
+  };
+}
+
 /** Sonnencreme- und Trink-Erinnerung. */
 export function heatAlertText(
   input: {
