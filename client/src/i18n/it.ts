@@ -2839,6 +2839,7 @@ export const it: Translation = {
     removeFailed: "Impossibile togliere il biglietto",
   },
   tripExpenses: {
+    budgetTightNote: "Il budget si sta esaurendo.",
     fuelTitle: "Calcolare i costi di viaggio",
     fuelHint:
       "Chilometri × consumo × prezzo del carburante. Si calcola con il consumo medio – chi vuole più precisione inserisce l'importo a mano.",

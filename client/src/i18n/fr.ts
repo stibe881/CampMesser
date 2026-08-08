@@ -2868,6 +2868,7 @@ export const fr: Translation = {
     removeFailed: "La note n'a pas pu être retirée",
   },
   tripExpenses: {
+    budgetTightNote: "Le budget devient serré.",
     fuelTitle: "Calculer les frais de route",
     fuelHint:
       "Kilomètres × consommation × prix du carburant. Le calcul utilise la consommation moyenne – pour plus de précision, saisis le montant à la main.",

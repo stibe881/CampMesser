@@ -2774,6 +2774,7 @@ export const en: Translation = {
     removeFailed: "The note could not be removed",
   },
   tripExpenses: {
+    budgetTightNote: "The budget is getting tight.",
     fuelTitle: "Work out fuel costs",
     fuelHint:
       "Kilometres × consumption × fuel price. The maths uses your average consumption – if you want it exact, type the amount in by hand.",

@@ -631,7 +631,9 @@ export default function TripExpenses({
                     "mt-1 text-xs",
                     budget.level === "over"
                       ? "font-medium text-destructive"
-                      : "text-muted-foreground"
+                      : budget.level === "tight"
+                        ? "font-medium text-amber-700 dark:text-amber-400"
+                        : "text-muted-foreground"
                   )}
                 >
                   {budget.level === "over"
@@ -643,6 +645,10 @@ export default function TripExpenses({
                         money(budget.remainingRappen),
                         budget.percent
                       )}
+                  {/* Warnband (#497): Ab 80 % färbte sich bisher nur der
+                      Balken – die Zeile sagt es jetzt auch in Worten. */}
+                  {budget.level === "tight" &&
+                    ` ${t.tripExpenses.budgetTightNote}`}
                 </p>
                 {/* Hochrechnung (#398): «Reicht das bei diesem Tempo?» –
                     die Frage stellt sich mitten in der Reise, nicht am

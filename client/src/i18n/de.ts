@@ -2877,6 +2877,7 @@ export const de = {
     removeFailed: "Zettel konnte nicht entfernt werden",
   },
   tripExpenses: {
+    budgetTightNote: "Das Budget wird knapp.",
     fuelTitle: "Fahrtkosten berechnen",
     fuelHint:
       "Kilometer × Verbrauch × Spritpreis. Gerechnet wird mit dem Durchschnittsverbrauch – wer es genauer will, tippt den Betrag von Hand ein.",
