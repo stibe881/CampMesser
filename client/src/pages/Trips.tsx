@@ -189,9 +189,15 @@ import {
 import {
   CANTONS,
   holidayDisplayName,
+  isHolidayCountry,
   overlappingHolidays,
+  type Holiday,
 } from "@shared/holidays";
-import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
+import {
+  loadCantonHolidays,
+  loadCountryHolidays,
+  type CantonHolidays,
+} from "@/lib/holidays";
 import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import LazySection from "@/components/LazySection";
@@ -218,6 +224,12 @@ const PACK_SUGGESTION_DAYS_BEFORE = 7;
 const HOLIDAY_CANTON_KEY = "campmesser.holidayCanton";
 /** Auswahlwert für «kein Kanton» (keine Hinweise). */
 const HOLIDAY_CANTON_NONE = "keiner";
+
+/** Leere Kantons-Ferien, wenn nur Zielland-Feiertage (#469) zu zeigen sind. */
+const EMPTY_CANTON_HOLIDAYS: CantonHolidays = {
+  school: [],
+  publicHolidays: [],
+};
 
 function loadStoredHolidayCanton(): string {
   try {
@@ -1018,6 +1030,55 @@ export default function TripsPage() {
       cancelled = true;
     };
   }, [holidayCanton, plannedTrips.length, tripsView]);
+
+  /**
+   * Feiertage des Ziellandes (#469): Für jede geplante Reise wird das Land
+   * wie bei den Verkehrsregeln (#228) aus Titel und Ortsname geraten; für
+   * DE/AT/FR/IT werden die landesweiten Feiertage geladen. Unabhängig von
+   * der Kantonswahl – wer keine Schweizer Ferien sehen will, verpasst
+   * trotzdem nicht den Feiertag am Zielort, an dem die Läden zu sind.
+   */
+  const [countryHolidays, setCountryHolidays] = useState<
+    Record<string, Holiday[]>
+  >({});
+
+  const neededHolidayCountries = useMemo(() => {
+    const codes = new Set<string>();
+    for (const trip of plannedTrips) {
+      const code = guessCountryCode(`${trip.title ?? ""} ${placeName(trip)}`);
+      if (isHolidayCountry(code)) codes.add(code);
+    }
+    return Array.from(codes).sort();
+  }, [plannedTrips, spots]);
+
+  useEffect(() => {
+    if (tripsView !== "list") return;
+    let cancelled = false;
+    for (const code of neededHolidayCountries) {
+      if (countryHolidays[code]) continue;
+      void loadCountryHolidays(code).then(result => {
+        if (cancelled || !result) return;
+        setCountryHolidays(prev =>
+          prev[code] ? prev : { ...prev, [code]: result }
+        );
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [neededHolidayCountries, tripsView, countryHolidays]);
+
+  /** Zielland-Feiertage einer Reise für die Hinweis-Badges – oder null. */
+  const tripDestinationHolidays = (
+    trip: (typeof trips)[number]
+  ): { countryName: string; holidays: Holiday[] } | null => {
+    const code = tripCountry(trip);
+    if (!isHolidayCountry(code)) return null;
+    const loaded = countryHolidays[code];
+    const countryName = tripCountryName(trip);
+    if (!loaded || loaded.length === 0 || !countryName) return null;
+    return { countryName, holidays: loaded };
+  };
 
   /** Kantons-Auswahl für Ferien-/Feiertags-Hinweise (Liste UND Kalender). */
   const holidayCantonPicker = (
@@ -1865,11 +1926,12 @@ export default function TripsPage() {
                           {t.trips.nightsCount(nights)}
                         </span>
                       </p>
-                      {holidays && (
+                      {(holidays || tripDestinationHolidays(trip)) && (
                         <TripHolidayHints
                           startDate={trip.startDate}
                           endDate={trip.endDate}
-                          holidays={holidays}
+                          holidays={holidays ?? EMPTY_CANTON_HOLIDAYS}
+                          destination={tripDestinationHolidays(trip)}
                         />
                       )}
                       <TripPitchDetails trip={trip} />

@@ -2613,6 +2613,8 @@ export const de = {
     holidaySchoolBadge: (name: string) => `Liegt in den Schulferien (${name})`,
     holidayPublicBadge: (date: string, name: string) =>
       `Feiertag am ${date}: ${name}`,
+    holidayDestinationBadge: (country: string, date: string, name: string) =>
+      `Feiertag in ${country} am ${date}: ${name}`,
     holidaySource: "Ferien- und Feiertagsdaten: OpenHolidays API, ohne Gewähr.",
     countdown: (days: number) =>
       days === 0

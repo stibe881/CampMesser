@@ -2525,6 +2525,8 @@ export const en: Translation = {
     holidayCantonNone: "No canton – no hints",
     holidaySchoolBadge: name => `Falls within the school holidays (${name})`,
     holidayPublicBadge: (date, name) => `Public holiday on ${date}: ${name}`,
+    holidayDestinationBadge: (country: string, date: string, name: string) =>
+      `Public holiday in ${country} on ${date}: ${name}`,
     holidaySource:
       "School and public holiday data: OpenHolidays API, without guarantee.",
     countdown: days =>

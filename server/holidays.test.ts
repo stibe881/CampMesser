@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   CANTONS,
+  countryPublicHolidaysUrl,
   holidayDisplayName,
+  isHolidayCountry,
   overlappingHolidays,
   parseHolidaysResponse,
+  parseNationwideHolidays,
   publicHolidaysUrl,
   schoolHolidaysUrl,
   type Holiday,
@@ -42,6 +45,52 @@ describe("schoolHolidaysUrl / publicHolidaysUrl", () => {
     const url = publicHolidaysUrl("TI", "2026-01-01", "2027-12-31");
     expect(url).toContain("openholidaysapi.org/PublicHolidays");
     expect(url).toContain("subdivisionCode=CH-TI");
+  });
+});
+
+describe("Zielland-Feiertage (#469)", () => {
+  it("kennt die vier unterstützten Reiseländer", () => {
+    expect(isHolidayCountry("DE")).toBe(true);
+    expect(isHolidayCountry("AT")).toBe(true);
+    expect(isHolidayCountry("FR")).toBe(true);
+    expect(isHolidayCountry("IT")).toBe(true);
+    // Die Schweiz läuft über die Kantonswahl, nicht übers Zielland
+    expect(isHolidayCountry("CH")).toBe(false);
+    expect(isHolidayCountry("HR")).toBe(false);
+    expect(isHolidayCountry(null)).toBe(false);
+  });
+
+  it("baut die Länder-URL ohne Subdivision", () => {
+    const url = countryPublicHolidaysUrl("IT", "2026-01-01", "2027-12-31");
+    expect(url).toContain("openholidaysapi.org/PublicHolidays");
+    expect(url).toContain("countryIsoCode=IT");
+    expect(url).not.toContain("subdivisionCode");
+  });
+
+  it("behält nur landesweite Feiertage", () => {
+    const parsed = parseNationwideHolidays([
+      {
+        id: "national",
+        startDate: "2026-08-15",
+        endDate: "2026-08-15",
+        nationwide: true,
+        name: [{ language: "IT", text: "Ferragosto" }],
+      },
+      {
+        id: "regional",
+        startDate: "2026-12-07",
+        endDate: "2026-12-07",
+        nationwide: false,
+        name: [{ language: "IT", text: "Sant'Ambrogio" }],
+      },
+    ]);
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0].id).toBe("national");
+  });
+
+  it("liefert bei Nicht-Arrays eine leere Liste", () => {
+    expect(parseNationwideHolidays(null)).toEqual([]);
+    expect(parseNationwideHolidays({ error: "nope" })).toEqual([]);
   });
 });
 

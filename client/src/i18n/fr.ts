@@ -2607,6 +2607,8 @@ export const fr: Translation = {
     holidayCantonNone: "Aucun canton – pas d'indications",
     holidaySchoolBadge: name => `Pendant les vacances scolaires (${name})`,
     holidayPublicBadge: (date, name) => `Jour férié le ${date} : ${name}`,
+    holidayDestinationBadge: (country: string, date: string, name: string) =>
+      `Jour férié en ${country} le ${date} : ${name}`,
     holidaySource:
       "Données de vacances et jours fériés : OpenHolidays API, sans garantie.",
     countdown: days =>
