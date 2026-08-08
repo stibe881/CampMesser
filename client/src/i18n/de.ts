@@ -4439,6 +4439,7 @@ export const de = {
     tasksLink: "Zur Pinnwand",
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
+    snowDepthLine: (cm: number) => `Schneehöhe: rund ${cm} cm`,
     choresTitle: "Ämtli heute",
     choresEmpty: "Für heute ist nichts verteilt.",
     choresToggleAria: (title: string) => `${title} abhaken`,
@@ -4571,6 +4572,7 @@ export const de = {
     frostAdvice:
       "Wassertank, Leitungen und Kanister leeren oder frostfrei lagern.",
     snowLine: (m: number) => `Schneefallgrenze sinkt auf rund ${m} m ü. M.`,
+    snowDepth: (cm: number) => `Schneehöhe am Boden: rund ${cm} cm.`,
     note: "Aus der Prognose für diesen Ort – Mulden und Senken sind oft kälter.",
   },
   weatherTurn: {

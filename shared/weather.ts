@@ -10,6 +10,8 @@ import { l4, pick, LOCALE_TAGS, type L4, type Language } from "./i18n";
 export interface HourlyWeather {
   /** Nullgradgrenze in Metern (#429) – fehlt bei alten Abrufen. */
   freezingLevelM?: number;
+  /** Schneehöhe am Boden in Metern (#470) – nur das Wetter-Modul ruft sie ab. */
+  snowDepthM?: number;
   time: string;
   temperatureC: number;
   apparentC: number;

@@ -49,12 +49,18 @@ describe("Reise-Art (#460)", () => {
       campfire: true,
       bathing: false,
       tentGear: true,
+      winter: false,
     });
     // Nur am Strand steht die Badewasser-Karte in der Heute-Ansicht
     TRIP_KINDS.filter(kind => kind !== "strand").forEach(kind => {
       expect(TRIP_KIND_PRESETS[kind].bathing).toBe(false);
     });
     expect(TRIP_KIND_PRESETS.strand.bathing).toBe(true);
+    // Nur beim Wintersport steht die Schneehöhe in der Heute-Ansicht (#470)
+    TRIP_KINDS.filter(kind => kind !== "wintersport").forEach(kind => {
+      expect(TRIP_KIND_PRESETS[kind].winter).toBe(false);
+    });
+    expect(TRIP_KIND_PRESETS.wintersport.winter).toBe(true);
   });
 
   it("liefert das Preset auch für kaputte Werte (nie undefined)", () => {

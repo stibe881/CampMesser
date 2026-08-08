@@ -34,6 +34,11 @@ export interface DayWeather {
    * Abfrage zwei Tage statt einen; null heisst «nichts zu sagen».
    */
   turn: WeatherTurn | null;
+  /**
+   * Aktuelle Schneehöhe am Boden in cm (#470); null, wenn der Dienst
+   * nichts liefert. Die Heute-Ansicht zeigt sie nur bei Wintersport.
+   */
+  snowDepthCm: number | null;
 }
 
 export function useDayWeather(
@@ -55,6 +60,8 @@ export function useDayWeather(
       forecast_days: "2",
       daily:
         "temperature_2m_max,temperature_2m_min,weather_code,wind_gusts_10m_max,precipitation_sum",
+      // Schneehöhe (#470) für die Wintersport-Zeile – gleicher Abruf.
+      current: "snow_depth",
     });
     fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`)
       .then(res => (res.ok ? res.json() : Promise.reject(new Error("no"))))
@@ -96,6 +103,10 @@ export function useDayWeather(
               : "",
           gustsMaxKmh: typeof gusts === "number" ? Math.round(gusts) : null,
           turn: weatherTurn(turnDay(0), turnDay(1)),
+          snowDepthCm:
+            typeof json?.current?.snow_depth === "number"
+              ? Math.round(json.current.snow_depth * 100)
+              : null,
         });
       })
       .catch(() => {

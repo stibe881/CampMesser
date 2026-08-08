@@ -4309,6 +4309,7 @@ export const en: Translation = {
     tasksLink: "To the pinboard",
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
+    snowDepthLine: (cm: number) => `Snow depth: about ${cm} cm`,
     choresTitle: "Chores today",
     choresEmpty: "Nothing assigned for today.",
     choresToggleAria: (title: string) => `Tick off ${title}`,
@@ -4441,6 +4442,7 @@ export const en: Translation = {
     frostAdvice:
       "Drain the water tank, hoses and canisters or store them frost-free.",
     snowLine: (m: number) => `Snow line drops to around ${m} m a.s.l.`,
+    snowDepth: (cm: number) => `Snow depth on the ground: about ${cm} cm.`,
     note: "From the forecast for this location – hollows and dips are often colder.",
   },
   weatherTurn: {

@@ -35,6 +35,7 @@ import {
   NotebookPen,
   Refrigerator,
   ShoppingCart,
+  Snowflake,
   Tent,
   UtensilsCrossed,
   TriangleAlert,
@@ -347,6 +348,18 @@ export default function TodayPage() {
                   {weatherTurnTexts(t, weather.turn).line}{" "}
                   {weatherTurnTexts(t, weather.turn).advice}
                 </span>
+              </p>
+            )}
+            {/* Schneehöhe (#470): Beim Wintersport ist sie DIE Zahl des
+                Tages – eine Zeile direkt unter dem Wetter. Bei allen
+                anderen Arten (und ohne Messwert) bleibt sie weg. */}
+            {preset.winter && weather?.snowDepthCm != null && (
+              <p className="mt-1 flex items-center gap-1.5 text-sm font-medium">
+                <Snowflake
+                  className="h-4 w-4 text-primary"
+                  aria-hidden="true"
+                />
+                {td.snowDepthLine(weather.snowDepthCm)}
               </p>
             )}
             {/* Lagerfeuer-Ampel (#389): Die Frage stellt sich am Abend

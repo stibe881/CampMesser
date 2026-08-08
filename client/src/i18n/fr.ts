@@ -4427,6 +4427,7 @@ export const fr: Translation = {
     tasksLink: "Vers le tableau",
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
+    snowDepthLine: (cm: number) => `Hauteur de neige : environ ${cm} cm`,
     choresTitle: "Tâches du jour",
     choresEmpty: "Rien n’est réparti pour aujourd’hui.",
     choresToggleAria: (title: string) => `Cocher ${title}`,
@@ -4561,6 +4562,7 @@ export const fr: Translation = {
       "Vider le réservoir d'eau, les tuyaux et les bidons ou les stocker hors gel.",
     snowLine: (m: number) =>
       `La limite pluie-neige descend vers ${m} m d'altitude.`,
+    snowDepth: (cm: number) => `Hauteur de neige au sol : environ ${cm} cm.`,
     note: "D'après la prévision pour ce lieu – les cuvettes sont souvent plus froides.",
   },
   weatherTurn: {

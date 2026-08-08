@@ -102,53 +102,71 @@ export interface TripKindPreset {
    * des Vertrauens in die Vorschläge.
    */
   tentGear: boolean;
+  /**
+   * Schneehöhe prominent in der Heute-Ansicht (#470)? Nur beim
+   * Wintersport – dort ist sie DIE Zahl des Tages.
+   */
+  winter: boolean;
 }
 
 export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
   // Camping = das heutige Verhalten; keine zusätzlichen Knöpfe nötig.
-  camping: { quickModules: [], campfire: true, bathing: false, tentGear: true },
+  camping: {
+    quickModules: [],
+    campfire: true,
+    bathing: false,
+    tentGear: true,
+    winter: false,
+  },
   strand: {
     quickModules: ["/wasser", "/packen"],
     campfire: false,
     bathing: true,
     // Strandferien als EIGENE Art heisst: nicht im Zelt (sonst Camping)
     tentGear: false,
+    winter: false,
   },
   hotel: {
     quickModules: ["/ausweise", "/sprachhilfe"],
     campfire: false,
     bathing: false,
     tentGear: false,
+    winter: false,
   },
   staedte: {
     quickModules: ["/ausweise", "/sprachhilfe"],
     campfire: false,
     bathing: false,
     tentGear: false,
+    winter: false,
   },
   wandern: {
     quickModules: ["/wanderung", "/erste-hilfe"],
     campfire: true,
     bathing: false,
     tentGear: true,
+    winter: false,
   },
   velo: {
     quickModules: ["/wanderung", "/reparatur"],
     campfire: false,
     bathing: false,
     tentGear: true,
+    winter: false,
   },
   wintersport: {
     quickModules: ["/laenderregeln", "/erste-hilfe"],
     campfire: false,
     bathing: false,
     tentGear: false,
+    winter: true,
   },
   tagesausflug: {
     quickModules: ["/lunchbox", "/regentag"],
     campfire: false,
     bathing: false,
     tentGear: false,
+    winter: false,
   },
 };
 
