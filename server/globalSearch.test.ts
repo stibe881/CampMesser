@@ -146,6 +146,45 @@ describe("searchKnowledge", () => {
     ]);
   });
 
+  // #412: Merker (#396) und Tarife (#369) liegen als JSON am Platz –
+  // «Kabeltrommel» oder «Hauptsaison» tippen soll den Platz finden.
+  it("findet einen Platz über seine «Beim nächsten Mal»-Notizen", () => {
+    const results = searchOwnContent("kabeltrommel", {
+      spots: [
+        {
+          id: 7,
+          name: "Camping Aare",
+          note: null,
+          nextTimeJson: JSON.stringify(["Kabeltrommel 25 m mitnehmen"]),
+        },
+      ],
+    });
+    expect(results.map(r => r.path)).toEqual(["/zeltplaetze/7"]);
+  });
+
+  it("findet einen Platz über Tarifnamen und Tarifzeilen", () => {
+    const spots = [
+      {
+        id: 8,
+        name: "Camping Lago",
+        note: null,
+        tariffsJson: JSON.stringify([
+          {
+            name: "Hauptsaison",
+            rows: [{ label: "Erwachsene", priceRappen: 1200 }],
+            currency: "CHF",
+          },
+        ]),
+      },
+    ];
+    expect(searchOwnContent("hauptsaison", { spots }).map(r => r.path)).toEqual(
+      ["/zeltplaetze/8"]
+    );
+    expect(searchOwnContent("erwachsene", { spots }).map(r => r.path)).toEqual([
+      "/zeltplaetze/8",
+    ]);
+  });
+
   it("findet nichts bei Distanz 3", () => {
     expect(searchKnowledge("Palsxyz")).toEqual([]);
   });
