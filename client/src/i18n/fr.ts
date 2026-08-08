@@ -5165,6 +5165,16 @@ export const fr: Translation = {
         "Ta recette apparaît dans le livre de recettes et est prise en compte dans les suggestions de la glacière.",
       nameLabel: "Nom",
       namePlaceholder: "p. ex. Les Älplermagronen de grand-maman",
+      importButton: "Reprendre depuis un texte",
+      importHint:
+        "Colle le texte de la recette (copié d'un site ou d'un message). CampMesser devine le nom, les ingrédients et les étapes – tout reste modifiable avant d'enregistrer.",
+      importPlaceholder:
+        "Älplermagronen\n\nIngrédients :\n250 g de macaronis\n…\n\nPréparation :\n1. …",
+      importApply: "Remplir les champs",
+      importNothing:
+        "Aucune recette reconnaissable dans ce texte. Vérifie que les ingrédients ou les étapes sont ligne par ligne.",
+      importApplied: (ing: number, steps: number) =>
+        `Repris : ${ing} ingrédients, ${steps} étapes – vérifie rapidement.`,
       methodLabel: "Cuisson",
       difficultyLabel: "Difficulté",
       timeLabel: "Temps (minutes)",

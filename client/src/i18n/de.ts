@@ -5174,6 +5174,16 @@ export const de = {
         "Dein Rezept erscheint im Rezeptbuch und wird bei den Kühlbox-Vorschlägen berücksichtigt.",
       nameLabel: "Name",
       namePlaceholder: "z. B. Grosis Älplermagronen",
+      importButton: "Aus Text übernehmen",
+      importHint:
+        "Rezept-Text einfügen (kopiert von einer Website oder aus einer Nachricht). CampMesser rät Name, Zutaten und Schritte – alles bleibt vor dem Speichern korrigierbar.",
+      importPlaceholder:
+        "Älplermagronen\n\nZutaten:\n250 g Magronen\n…\n\nZubereitung:\n1. …",
+      importApply: "Felder füllen",
+      importNothing:
+        "Im Text liess sich kein Rezept erkennen. Prüfe, ob Zutaten oder Schritte zeilenweise dastehen.",
+      importApplied: (ing: number, steps: number) =>
+        `Übernommen: ${ing} Zutaten, ${steps} Schritte – bitte kurz prüfen.`,
       methodLabel: "Zubereitung",
       difficultyLabel: "Schwierigkeit",
       timeLabel: "Zeit (Minuten)",

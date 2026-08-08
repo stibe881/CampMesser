@@ -5131,6 +5131,16 @@ export const it: Translation = {
         "La tua ricetta appare nel ricettario e viene considerata nei suggerimenti del frigo box.",
       nameLabel: "Nome",
       namePlaceholder: "ad es. Gli Älplermagronen della nonna",
+      importButton: "Riprendi da un testo",
+      importHint:
+        "Incolla il testo della ricetta (copiato da un sito o da un messaggio). CampMesser indovina nome, ingredienti e passaggi – tutto resta modificabile prima di salvare.",
+      importPlaceholder:
+        "Älplermagronen\n\nIngredienti:\n250 g di maccheroni\n…\n\nPreparazione:\n1. …",
+      importApply: "Compila i campi",
+      importNothing:
+        "Nel testo non si riconosce una ricetta. Controlla che ingredienti o passaggi siano riga per riga.",
+      importApplied: (ing: number, steps: number) =>
+        `Ripresi: ${ing} ingredienti, ${steps} passaggi – dai una controllata.`,
       methodLabel: "Cottura",
       difficultyLabel: "Difficoltà",
       timeLabel: "Tempo (minuti)",

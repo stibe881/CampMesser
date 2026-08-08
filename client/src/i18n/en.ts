@@ -5029,6 +5029,16 @@ export const en: Translation = {
         "Your recipe appears in the recipe book and is taken into account in the cool-box suggestions.",
       nameLabel: "Name",
       namePlaceholder: "e.g. Granny's Älplermagronen",
+      importButton: "Paste from text",
+      importHint:
+        "Paste the recipe text (copied from a website or a message). CampMesser guesses the name, ingredients and steps – everything stays editable before saving.",
+      importPlaceholder:
+        "Älplermagronen\n\nIngredients:\n250 g macaroni\n…\n\nInstructions:\n1. …",
+      importApply: "Fill the fields",
+      importNothing:
+        "No recipe could be recognised in that text. Check that ingredients or steps are on separate lines.",
+      importApplied: (ing: number, steps: number) =>
+        `Applied: ${ing} ingredients, ${steps} steps – please double-check.`,
       methodLabel: "Cooking method",
       difficultyLabel: "Difficulty",
       timeLabel: "Time (minutes)",

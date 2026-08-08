@@ -6,6 +6,7 @@ import {
   Baby,
   ChefHat,
   ChevronDown,
+  ClipboardPaste,
   ChevronLeft,
   ChevronRight,
   ChevronUp,
@@ -77,6 +78,7 @@ import {
   QUICK_TIMER_MINUTES,
 } from "@shared/cookTimer";
 import { pick } from "@shared/i18n";
+import { parseRecipeText } from "@shared/recipeImport";
 import { clampServings, scaleIngredientsForServings } from "@shared/servings";
 import { useI18n, useT } from "@/i18n";
 import {
@@ -134,6 +136,10 @@ function RecipeEditorDialog({
     initial ? parseStringList(initial.stepsJson, 20).join("\n") : ""
   );
   const [tip, setTip] = useState(initial?.tip ?? "");
+  // Aus Text übernehmen (#444): kopiertes Rezept heuristisch in die
+  // Felder zerlegen – das Ergebnis bleibt vor dem Speichern korrigierbar.
+  const [importOpen, setImportOpen] = useState(false);
+  const [importText, setImportText] = useState("");
   // Foto: neu ausgewählt (bereits verkleinert), Vorschau-URL und
   // «bestehendes Foto entfernen»-Wunsch – ausgeführt wird alles beim Speichern.
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
@@ -167,6 +173,33 @@ function RecipeEditorDialog({
     (initial?.imageFileName && !removePhoto
       ? recipePhotoUrl(initial.imageFileName)
       : null);
+
+  const applyImport = () => {
+    const parsed = parseRecipeText(importText);
+    if (
+      !parsed.name &&
+      parsed.ingredients.length === 0 &&
+      parsed.steps.length === 0
+    ) {
+      toast.error(t.recipes.editor.importNothing);
+      return;
+    }
+    // Ein von Hand gesetzter Name bleibt stehen; leere Felder werden gefüllt,
+    // erkannte Listen ersetzen den bisherigen Feld-Inhalt.
+    if (parsed.name && !name.trim()) setName(parsed.name);
+    if (parsed.ingredients.length > 0) {
+      setIngredients(parsed.ingredients.join("\n"));
+    }
+    if (parsed.steps.length > 0) setSteps(parsed.steps.join("\n"));
+    setImportOpen(false);
+    setImportText("");
+    toast.success(
+      t.recipes.editor.importApplied(
+        parsed.ingredients.length,
+        parsed.steps.length
+      )
+    );
+  };
 
   const handlePhotoSelected = async (fileList: FileList | null) => {
     const file = fileList?.[0];
@@ -258,6 +291,55 @@ function RecipeEditorDialog({
         <DialogDescription>{t.recipes.editor.description}</DialogDescription>
       </DialogHeader>
       <div className="space-y-3">
+        {!importOpen ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setImportOpen(true)}
+          >
+            <ClipboardPaste className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.recipes.editor.importButton}
+          </Button>
+        ) : (
+          <div className="rounded-lg border border-border p-3">
+            <Label htmlFor="recipe-import">
+              {t.recipes.editor.importButton}
+            </Label>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t.recipes.editor.importHint}
+            </p>
+            <Textarea
+              id="recipe-import"
+              className="mt-1.5 text-sm"
+              rows={6}
+              placeholder={t.recipes.editor.importPlaceholder}
+              value={importText}
+              onChange={e => setImportText(e.target.value)}
+            />
+            <div className="mt-2 flex gap-2">
+              <Button
+                type="button"
+                size="sm"
+                disabled={!importText.trim()}
+                onClick={applyImport}
+              >
+                {t.recipes.editor.importApply}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setImportOpen(false);
+                  setImportText("");
+                }}
+              >
+                {t.common.cancel}
+              </Button>
+            </div>
+          </div>
+        )}
         <div>
           <Label htmlFor="recipe-name">{t.recipes.editor.nameLabel}</Label>
           <Input
