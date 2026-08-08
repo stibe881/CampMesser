@@ -6,7 +6,9 @@
  */
 import {
   CustomTemplateItem,
+  MAX_MISSING_PER_TRIP,
   MAX_PACK_SUGGESTIONS,
+  cleanFeedbackName,
   MAX_PERSONS,
   MAX_PERSON_NAME_LENGTH,
   TRPCError,
@@ -161,6 +163,24 @@ export const packingRouters = {
             message: "Liste nicht gefunden",
           });
         await db.setPackListArchived(input.listId, ctx.user.id, input.archived);
+        return { success: true } as const;
+      }),
+    /** Liste umbenennen (#406, Nutzermeldung 07.08.2026). */
+    rename: protectedProcedure
+      .input(
+        z.object({
+          listId: z.number().int().positive(),
+          name: z.string().trim().min(1).max(100),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const list = await db.getPackList(input.listId, ctx.user.id);
+        if (!list)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Liste nicht gefunden",
+          });
+        await db.renamePackList(input.listId, ctx.user.id, input.name.trim());
         return { success: true } as const;
       }),
     /**
@@ -716,5 +736,48 @@ export const packingRouters = {
         await db.setPackItemChecked(input.itemId, input.checked, null);
         return { success: true } as const;
       }),
+    /**
+     * Rückblick nach der Reise (#381).
+     *
+     * ALLE RÜCKMELDUNGEN AUF EINMAL, nicht je Reise: Die Auswertung
+     * braucht die Geschichte – «zweimal nicht gebraucht» lässt sich aus
+     * einer einzelnen Reise nicht ablesen. Zusammengezählt wird im
+     * Browser mit `summarizeFeedback`, damit dieselbe Antwort sowohl den
+     * Rückblick als auch die Hinweise auf der Packliste bedient.
+     */
+    feedback: router({
+      list: protectedProcedure.query(async ({ ctx }) => {
+        return db.getPackFeedback(ctx.user.id);
+      }),
+      /**
+       * Den Rückblick EINER Reise ersetzen. Ersetzen und nicht ergänzen:
+       * Wer ein Häkchen wieder wegnimmt, meint das auch so.
+       */
+      save: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            unused: z.array(z.string()).max(200),
+            missing: z.array(z.string()).max(MAX_MISSING_PER_TRIP),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.getTripLog(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          const entries = [
+            ...input.unused.map(name => ({ kind: "unused" as const, name })),
+            ...input.missing.map(name => ({ kind: "missing" as const, name })),
+          ]
+            .map(entry => ({ ...entry, name: cleanFeedbackName(entry.name) }))
+            .filter(entry => entry.name.length > 0);
+          await db.savePackFeedback(ctx.user.id, input.tripId, entries);
+          return { success: true, saved: entries.length } as const;
+        }),
+    }),
   }),
 };

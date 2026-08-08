@@ -24,6 +24,7 @@ import {
   Compass,
   Download,
   Droplets,
+  Grid2x2,
   Images,
   Loader2,
   MapPin,
@@ -61,6 +62,10 @@ import {
   type SpotSectionKey,
 } from "@shared/spotSections";
 import SpotTariffs from "@/components/spots/SpotTariffs";
+import PitchSketchCard from "@/components/spots/PitchSketchCard";
+import NextTimeNotes from "@/components/spots/NextTimeNotes";
+import SitePlanCard from "@/components/spots/SitePlanCard";
+import CampfireLight from "@/components/CampfireLight";
 import DeparturePlanner from "@/components/DeparturePlanner";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
 import NearbyShops from "@/components/NearbyShops";
@@ -700,6 +705,11 @@ export default function SpotDetailPage() {
     { enabled: isAuthenticated && Number.isInteger(spotId) && spotId > 0 }
   );
   const removePhotoMutation = trpc.spots.photos.remove.useMutation();
+  // Galerie (#82) und Platzplan (#401) teilen sich Tabelle und Abfrage –
+  // getrennt wird erst hier, über `kind`.
+  const galleryPhotos = (photosQuery.data ?? []).filter(p => p.kind !== "plan");
+  const planPhoto =
+    (photosQuery.data ?? []).find(p => p.kind === "plan") ?? null;
 
   // QR-Code zum Teil-Link erzeugen: am Platz einfach abscannen lassen statt Link verschicken
   useEffect(() => {
@@ -994,36 +1004,10 @@ export default function SpotDetailPage() {
           {t.spotDetail.sectionPlace}
         </SectionHeading>
 
-        {/* Platz-Eigenschaften: Schatten, Sanitär, Lärm, WLAN … */}
-        <Card className="mb-4 mt-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <SlidersHorizontal
-                className="h-4 w-4 text-primary"
-                aria-hidden="true"
-              />
-              {t.spotDetail.attributesTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {Object.keys(attributes).length > 0 ? (
-              <SpotAttributeChips attributes={attributes} lang={lang} />
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                {t.spotDetail.attributesEmpty}
-              </p>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-3"
-              onClick={openAttrDialog}
-            >
-              {t.spotDetail.attributesEditButton}
-            </Button>
-          </CardContent>
-        </Card>
-
+        {/* NEU GEORDNET (#402, Nutzerwunsch): zuerst das Operative
+            (Kontakt, Plan, Skizze – was man VOR ORT sucht), dann die
+            Beschreibung (Eigenschaften, Kosten), zuletzt das eigene
+            Urteil und das Spezialwerkzeug fürs Sonnen-Modul. */}
         {/* Kontakt & Check-in: Rezeptions-Telefon, Zeiten, Parzellen-Nummer */}
         <Card className="mb-4">
           <CardHeader className="pb-3">
@@ -1080,6 +1064,67 @@ export default function SpotDetailPage() {
               onClick={openContactDialog}
             >
               {t.spotDetail.contactEditButton}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Campingplatz-Plan (#401): das Blatt von der Rezeption –
+            wo die Parzelle liegt, wo Duschen und Abwasch sind. Direkt
+            nach dem Kontakt, denn zusammen beantworten sie «wie finde
+            ich mich hier zurecht». */}
+        <SitePlanCard
+          spotId={spot.id}
+          spotName={spot.name}
+          plan={planPhoto}
+          onChanged={() => utils.spots.photos.list.invalidate({ spotId })}
+          deletePhoto={photoId => removePhotoMutation.mutateAsync({ photoId })}
+          className="mb-4"
+        />
+
+        {/* Stellplatz-Skizze (#382): Wie es beim letzten Mal gepasst hat.
+            Die Parzellennummer und das WLAN wechseln bei jedem Besuch und
+            stehen deshalb an der Reise (#252); die Skizze nützt genau
+            dann, wenn man wiederkommt, und gehört darum zum Platz. */}
+        <Card className="mb-4">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Grid2x2 className="h-4 w-4 text-primary" aria-hidden="true" />
+              {t.pitchSketch.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PitchSketchCard
+              spotId={spot.id}
+              pitchSketchJson={spot.pitchSketchJson}
+            />
+          </CardContent>
+        </Card>
+        {/* Platz-Eigenschaften: Schatten, Sanitär, Lärm, WLAN … */}
+        <Card className="mb-4 mt-4">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <SlidersHorizontal
+                className="h-4 w-4 text-primary"
+                aria-hidden="true"
+              />
+              {t.spotDetail.attributesTitle}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {Object.keys(attributes).length > 0 ? (
+              <SpotAttributeChips attributes={attributes} lang={lang} />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {t.spotDetail.attributesEmpty}
+              </p>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3"
+              onClick={openAttrDialog}
+            >
+              {t.spotDetail.attributesEditButton}
             </Button>
           </CardContent>
         </Card>
@@ -1318,6 +1363,14 @@ export default function SpotDetailPage() {
                     {t.spotDetail.noAlerts}
                   </p>
                 )}
+                {/* Lagerfeuer-Ampel (#389): Gefahrenstufe, Verbots-Schwelle
+                    und Böen in EINER Antwort statt in drei Modulen. */}
+                <CampfireLight
+                  latitude={spot.latitude}
+                  longitude={spot.longitude}
+                  gustsMaxKmh={weather.maxGusts24hKmh}
+                  className="mb-3"
+                />
                 <div className="divide-y divide-border/60">
                   {weather.daily.map((d, i) => (
                     <div
@@ -1666,6 +1719,16 @@ export default function SpotDetailPage() {
           </CardContent>
         </Card>
 
+        {/* «Beim nächsten Mal» (#396): der Zettel, der beim Planen der
+            nächsten Reise hierher von selbst wieder auftaucht. Direkt
+            nach den Aufenthalten – Rückschau und Vorsatz gehören
+            nebeneinander. Bleibt privat, wie die Fotos darunter. */}
+        <NextTimeNotes
+          spotId={spot.id}
+          nextTimeJson={spot.nextTimeJson}
+          className="mt-4"
+        />
+
         {/* Fotos: privat – die geteilte Ansicht (/platz/:token) zeigt sie nicht */}
         <Card className="mt-4">
           <CardHeader className="pb-3">
@@ -1679,7 +1742,7 @@ export default function SpotDetailPage() {
               {t.spotDetail.photosHint}
             </p>
             <PhotoGallery
-              photos={photosQuery.data ?? []}
+              photos={galleryPhotos}
               loadFailed={photosQuery.isError}
               name={spot.name}
               maxPhotos={MAX_PHOTOS_PER_SPOT}

@@ -24,6 +24,11 @@ import {
   protectedProcedure,
   publicProcedure,
   rotateAssignments,
+  scoreboard,
+  availablePoints,
+  clampRewardPoints,
+  MAX_REWARDS,
+  REWARD_TITLE_MAX_LENGTH,
   router,
   serializeQuizQuestions,
   shareExpiryFor,
@@ -614,5 +619,92 @@ export const familyRouters = {
           };
         }),
     }),
+  }),
+  /**
+   * Belohnungs-Ziele (#399): Punkte aus dem Ämtli-Plan einlösen.
+   *
+   * DIE EINLÖSUNG PRÜFT SERVERSEITIG gegen den echten Punktestand –
+   * dieselbe Rechnung wie die Rangliste (scoreboard), minus bereits
+   * Eingelöstes. Ein Klient, der mehr behauptet, bekommt einen Fehler,
+   * keine Belohnung.
+   */
+  rewards: router({
+    list: protectedProcedure.query(({ ctx }) =>
+      db.getFamilyRewards(ctx.user.id)
+    ),
+    redemptions: protectedProcedure.query(({ ctx }) =>
+      db.getFamilyRedemptions(ctx.user.id)
+    ),
+    add: protectedProcedure
+      .input(
+        z.object({
+          title: z.string().trim().min(1).max(REWARD_TITLE_MAX_LENGTH),
+          points: z.number().int(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const existing = await db.getFamilyRewards(ctx.user.id);
+        if (existing.length >= MAX_REWARDS) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Mehr als ${MAX_REWARDS} Ziele sind nicht vorgesehen.`,
+          });
+        }
+        const id = await db.addFamilyReward({
+          userId: ctx.user.id,
+          title: input.title.trim(),
+          points: clampRewardPoints(input.points),
+        });
+        return { id } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteFamilyReward(input.id, ctx.user.id);
+        return { success: true } as const;
+      }),
+    redeem: protectedProcedure
+      .input(
+        z.object({
+          rewardId: z.number().int().positive(),
+          childId: z.number().int().positive(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const [rewards, children, chores, assignments, redemptions] =
+          await Promise.all([
+            db.getFamilyRewards(ctx.user.id),
+            db.getFamilyChildren(ctx.user.id),
+            db.getCampChores(ctx.user.id),
+            db.getChoreAssignments(ctx.user.id),
+            db.getFamilyRedemptions(ctx.user.id),
+          ]);
+        const reward = rewards.find(r => r.id === input.rewardId);
+        const child = children.find(c => c.id === input.childId);
+        if (!reward || !child) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Ziel oder Kind nicht gefunden.",
+          });
+        }
+        const earned =
+          scoreboard(children, chores, assignments).find(
+            row => row.childId === child.id
+          )?.points ?? 0;
+        if (availablePoints(earned, redemptions, child.id) < reward.points) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Die Punkte reichen noch nicht.",
+          });
+        }
+        // Schnappschuss statt Verweis – Begründung am Tabellen-Schema.
+        const id = await db.addFamilyRedemption({
+          userId: ctx.user.id,
+          childId: child.id,
+          title: reward.title,
+          points: reward.points,
+        });
+        return { id } as const;
+      }),
   }),
 };

@@ -1062,17 +1062,39 @@ async function startServer() {
           res.status(413).json({ error: "tooLarge" });
           return;
         }
-        if (
-          (await db.countSpotPhotos(spotId, user.id)) >= MAX_PHOTOS_PER_SPOT
-        ) {
-          res.status(409).json({ error: "limitReached" });
-          return;
+        // «plan» = der Campingplatz-Plan (#401): höchstens einer pro
+        // Platz, ein neuer ersetzt den alten. Alles andere ist Galerie.
+        const kind = req.query.kind === "plan" ? "plan" : "foto";
+        const existing = await db.getSpotPhotos(spotId, user.id);
+        if (kind === "foto") {
+          // Der Plan belegt keinen der 12 Galerie-Plätze.
+          const galleryCount = existing.filter(p => p.kind !== "plan").length;
+          if (galleryCount >= MAX_PHOTOS_PER_SPOT) {
+            res.status(409).json({ error: "limitReached" });
+            return;
+          }
         }
         const { nanoid } = await import("nanoid");
         const fileName = `${nanoid(16)}${extension}`;
         const { spotPhotoStorage } = await import("../photoStorage");
         await spotPhotoStorage.saveFile(fileName, body);
-        const id = await db.addSpotPhoto({ userId: user.id, spotId, fileName });
+        const id = await db.addSpotPhoto({
+          userId: user.id,
+          spotId,
+          fileName,
+          kind,
+        });
+        if (kind === "plan") {
+          // Den alten Plan erst NACH dem erfolgreichen Speichern wegräumen –
+          // schlägt der Upload fehl, bleibt wenigstens der alte stehen.
+          const oldPlans = existing.filter(p => p.kind === "plan");
+          for (const old of oldPlans) {
+            await db.deleteSpotPhoto(old.id, user.id);
+          }
+          if (oldPlans.length > 0) {
+            await spotPhotoStorage.deleteFiles(oldPlans.map(p => p.fileName));
+          }
+        }
         res.json({ id, fileName });
       } catch (error) {
         console.error("[SpotPhotos] Upload fehlgeschlagen:", error);

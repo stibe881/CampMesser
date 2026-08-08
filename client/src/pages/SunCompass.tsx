@@ -30,6 +30,12 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { getSunPosition, getSunTimes } from "@/lib/sun";
 import { isBlocked } from "@shared/obstacles";
+import {
+  delayVersusOpen,
+  sunWindow,
+  type SunSample,
+} from "@shared/sunOverHorizon";
+import { formatDuration, formatMinutes } from "@shared/turnaround";
 import { compassDirection, goldenBlueHours } from "@shared/solar";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
 import { useI18n } from "@/i18n";
@@ -911,6 +917,44 @@ export default function SunCompassPage() {
         : [],
     [geo, selectedDate, obstacles]
   );
+
+  /**
+   * Wann kommt die Sonne über den Grat, wann ist sie wieder weg (#380)?
+   *
+   * DER SONNENAUFGANG AUS DER WETTER-APP GILT AM MEER. Im Bergtal ist
+   * die Sonne schnell eine Stunde später da – und seit #372 weiss das
+   * Hindernis-Profil, wo die Berge stehen. Die Proben werden hier
+   * gebaut, ausgewertet wird in `shared/sunOverHorizon.ts`.
+   *
+   * ZWEI-MINUTEN-SCHRITTE: Die Sonnenscheibe braucht selbst gut zwei
+   * Minuten, um ihren eigenen Durchmesser zu wandern – feiner wäre eine
+   * Genauigkeit, die weder das Höhenmodell noch der Baum vor dem Zelt
+   * hergibt.
+   */
+  const horizonSun = useMemo(() => {
+    if (geo.status !== "ok" || obstacles.length === 0) return null;
+    const dayStart = new Date(selectedDate);
+    dayStart.setHours(0, 0, 0, 0);
+    const samples: SunSample[] = [];
+    for (let m = 0; m <= 1440; m += 2) {
+      const at = new Date(dayStart.getTime() + m * 60000);
+      const pos = getSunPosition(at, geo.lat!, geo.lng!);
+      samples.push({
+        minutes: m,
+        azimuth: pos.azimuth,
+        altitude: pos.altitude,
+      });
+    }
+    const window = sunWindow(samples, obstacles);
+    const open = getSunTimes(selectedDate, geo.lat!, geo.lng!);
+    const openSunrise = open.sunrise
+      ? open.sunrise.getHours() * 60 + open.sunrise.getMinutes()
+      : null;
+    return {
+      ...window,
+      delayMinutes: delayVersusOpen(window.firstMinutes, openSunrise),
+    };
+  }, [geo, selectedDate, obstacles]);
   const sunBlockedNow =
     sunPos !== null &&
     sunPos.altitude > 0 &&
@@ -1516,6 +1560,48 @@ export default function SunCompassPage() {
               <p className="mt-2 text-xs text-muted-foreground">
                 {t.sunCompass.fistTip}
               </p>
+
+              {horizonSun && (
+                <div className="mt-4 rounded-lg border border-border p-3">
+                  <p className="mb-1.5 flex items-center gap-2 text-sm font-semibold">
+                    <Sunrise
+                      className="h-4 w-4 text-primary"
+                      aria-hidden="true"
+                    />
+                    {t.sunCompass.horizonTitle}
+                  </p>
+                  {horizonSun.fullyShaded ? (
+                    <p className="text-sm text-muted-foreground">
+                      {t.sunCompass.horizonShaded}
+                    </p>
+                  ) : horizonSun.firstMinutes === null ? (
+                    <p className="text-sm text-muted-foreground">
+                      {t.sunCompass.horizonNone}
+                    </p>
+                  ) : (
+                    <>
+                      <p className="font-mono text-xl font-bold leading-tight">
+                        {formatMinutes(horizonSun.firstMinutes)}
+                        {horizonSun.lastMinutes !== null &&
+                          ` – ${formatMinutes(horizonSun.lastMinutes)}`}
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {t.sunCompass.horizonSunny(
+                          formatDuration(horizonSun.sunnyMinutes)
+                        )}
+                        {horizonSun.delayMinutes !== null &&
+                          horizonSun.delayMinutes > 0 &&
+                          ` · ${t.sunCompass.horizonDelay(
+                            formatDuration(horizonSun.delayMinutes)
+                          )}`}
+                      </p>
+                    </>
+                  )}
+                  <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
+                    {t.sunCompass.horizonNote}
+                  </p>
+                </div>
+              )}
 
               {obstacles.length > 0 && (
                 <div className="mt-4 rounded-lg bg-accent/50 p-3">

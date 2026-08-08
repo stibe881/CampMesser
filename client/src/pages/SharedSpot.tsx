@@ -4,7 +4,9 @@ import { useParams } from "wouter";
 import {
   AlertTriangle,
   Droplets,
+  Grid2x2,
   Loader2,
+  Wallet,
   MapPin,
   Phone,
   Sunrise,
@@ -13,7 +15,21 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import SpotAttributeChips from "@/components/SpotAttributeChips";
+import PitchSketchView, {
+  PitchSketchLegend,
+} from "@/components/spots/PitchSketchView";
 import { parseSpotAttributes } from "@shared/spotAttributes";
+import {
+  formatMeters,
+  parsePitchSketch,
+  pitchAreaM2,
+  usedAreaM2,
+} from "@shared/pitchSketch";
+import {
+  formatRappen,
+  formatTariffPeriods,
+  parseSpotTariffs,
+} from "@shared/spotTariffs";
 import { trpc } from "@/lib/trpc";
 import { getSunTimes } from "@/lib/sun";
 import { describeWeatherCode } from "@shared/weather";
@@ -56,6 +72,14 @@ export default function SharedSpotPage() {
     () =>
       spot ? getSunTimes(new Date(), spot.latitude, spot.longitude) : null,
     [spot]
+  );
+  const sketch = useMemo(
+    () => parsePitchSketch(spot?.pitchSketchJson ?? null),
+    [spot?.pitchSketchJson]
+  );
+  const tariffs = useMemo(
+    () => parseSpotTariffs(spot?.tariffsJson ?? null),
+    [spot?.tariffsJson]
   );
   const fmtTime = (d: Date | null) =>
     d
@@ -156,6 +180,84 @@ export default function SharedSpotPage() {
                 </div>
               )}
             </dl>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Stellplatz-Skizze (#382) – nur lesend. Sie ist genau das, was man
+          Mitreisenden schickt: «So haben wir letztes Jahr gestanden.» */}
+      {sketch && (
+        <Card className="mt-5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Grid2x2 className="h-4 w-4 text-primary" aria-hidden="true" />
+              {t.pitchSketch.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PitchSketchView sketch={sketch} />
+            <PitchSketchLegend sketch={sketch} />
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t.pitchSketch.areaLine(
+                formatMeters(sketch.widthM),
+                formatMeters(sketch.depthM),
+                usedAreaM2(sketch),
+                pitchAreaM2(sketch)
+              )}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Die Preistafel (#369, #392) – nur lesend. «Nimm Bargeld mit, der
+          Platz kostet 24.– plus 8.– pro Kind» ist für Mitreisende
+          mindestens so nützlich wie die Skizze. */}
+      {tariffs.length > 0 && (
+        <Card className="mt-5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Wallet className="h-4 w-4 text-primary" aria-hidden="true" />
+              {t.sharedSpot.tariffsTitle}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-3">
+              {tariffs.map(tariff => (
+                <li
+                  key={tariff.name}
+                  className="rounded-lg border border-border px-3 py-2"
+                >
+                  <p className="flex flex-wrap items-baseline gap-x-2 text-sm font-semibold">
+                    {tariff.name}
+                    {tariff.unit && (
+                      <span className="font-normal text-muted-foreground">
+                        {tariff.unit}
+                      </span>
+                    )}
+                  </p>
+                  {tariff.periods && tariff.periods.length > 0 && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {formatTariffPeriods(tariff.periods)}
+                    </p>
+                  )}
+                  <dl className="mt-1 space-y-0.5 text-sm">
+                    {tariff.rows.map(row => (
+                      <div
+                        key={row.label}
+                        className="flex items-baseline justify-between gap-3"
+                      >
+                        <dt className="min-w-0 truncate text-muted-foreground">
+                          {row.label}
+                        </dt>
+                        <dd className="shrink-0 font-mono">
+                          {formatRappen(row.priceRappen, lang, tariff.currency)}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </li>
+              ))}
+            </ul>
           </CardContent>
         </Card>
       )}

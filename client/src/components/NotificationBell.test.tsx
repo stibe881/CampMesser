@@ -34,6 +34,8 @@ const LOG = [
 ];
 
 const authState = { isAuthenticated: true };
+/** Server-Stand des Geräte-Syncs (#393) – je Test überschreibbar. */
+const settingsState: { all: Record<string, string> } = { all: {} };
 
 vi.mock("@/_core/hooks/useAuth", () => ({
   useAuth: () => ({
@@ -61,7 +63,7 @@ vi.mock("@/lib/trpc", () => {
         logout: { useMutation: mutation },
       },
       settings: {
-        all: { useQuery: () => query([]) },
+        all: { useQuery: () => query(settingsState.all) },
         set: { useMutation: mutation },
       },
       push: { log: { useQuery: () => query(LOG) } },
@@ -77,6 +79,7 @@ async function renderBell() {
 describe("Benachrichtigungs-Glocke", () => {
   beforeEach(() => {
     authState.isAuthenticated = true;
+    settingsState.all = {};
     localStorage.removeItem(PUSH_SEEN_KEY);
   });
 
@@ -104,6 +107,35 @@ describe("Benachrichtigungs-Glocke", () => {
     await renderBell();
     const bell = await screen.findByRole("button");
     expect(bell.textContent).toBe("");
+  });
+
+  it("übernimmt den Gesehen-Stand vom anderen Gerät (#393)", async () => {
+    // Am Telefon gelesen – das Tablet soll den Punkt auch verlieren.
+    settingsState.all = {
+      pushSeenAt: JSON.stringify("2026-08-07T10:00:00.000Z"),
+    };
+    await renderBell();
+    const bell = await screen.findByRole("button");
+    expect(bell.textContent).toBe("");
+    // Und der Stand landet lokal, damit er auch offline gilt.
+    expect(localStorage.getItem(PUSH_SEEN_KEY)).toBe(
+      "2026-08-07T10:00:00.000Z"
+    );
+  });
+
+  it("lässt den Server nichts «ungesehen» machen (#393)", async () => {
+    // Der jüngere Zeitpunkt gewinnt – ein veralteter Server-Stand darf
+    // keine schon gesehenen Meldungen wieder als neu markieren.
+    localStorage.setItem(PUSH_SEEN_KEY, "2026-08-07T10:00:00.000Z");
+    settingsState.all = {
+      pushSeenAt: JSON.stringify("2026-08-06T18:00:00.000Z"),
+    };
+    await renderBell();
+    const bell = await screen.findByRole("button");
+    expect(bell.textContent).toBe("");
+    expect(localStorage.getItem(PUSH_SEEN_KEY)).toBe(
+      "2026-08-07T10:00:00.000Z"
+    );
   });
 
   it("bleibt für Abgemeldete ganz weg", async () => {

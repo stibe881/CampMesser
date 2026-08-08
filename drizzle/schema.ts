@@ -112,6 +112,29 @@ export const campSpots = mysqlTable(
     ratingQuiet: tinyint("ratingQuiet"),
     ratingShade: tinyint("ratingShade"),
     ratingKids: tinyint("ratingKids"),
+    /**
+     * Stellplatz-Skizze als JSON (#382): Platzmass und Rechtecke für Zelt,
+     * Vordach, Auto, Tisch, Strom-Säule und Baum – Format in
+     * shared/pitchSketch.ts. null = keine Skizze erfasst.
+     *
+     * BEWUSST AM PLATZ, nicht an der Reise: Die Parzellennummer und das
+     * WLAN-Passwort wechseln bei jedem Besuch und stehen deshalb an der
+     * Reise (#252). Die Skizze ist das Gegenteil – sie nützt genau dann,
+     * wenn man WIEDERKOMMT, und wer sie an der Reise vom vorletzten
+     * Sommer suchen müsste, findet sie nie.
+     *
+     * JSON und keine Tabelle aus demselben Grund wie bei tariffsJson
+     * daneben: Die Rechtecke gehören ausschliesslich zu ihrem Platz,
+     * werden nur als Ganzes gelesen und nie einzeln gesucht.
+     */
+    pitchSketchJson: text("pitchSketchJson"),
+    /**
+     * «Beim nächsten Mal»-Merker als JSON-Liste kurzer Zeilen (#396):
+     * «Kabeltrommel 25 m», «Parzelle 12 meiden». Format und Begründung in
+     * shared/nextTime.ts; JSON statt Tabelle aus demselben Grund wie bei
+     * tariffsJson. null = kein Zettel.
+     */
+    nextTimeJson: text("nextTimeJson"),
     /** Öffentlicher Teil-Token: Wer den Link kennt, sieht das Platz-Dossier (nur lesend). */
     shareToken: varchar("shareToken", { length: 32 }),
     /** Ablauf des Teil-Links (UTC); null = unbegrenzt gültig. */
@@ -333,6 +356,10 @@ export const powerConsumers = mysqlTable(
     watts: float("watts").notNull().default(0),
     hoursPerDay: float("hoursPerDay").notNull().default(0),
     enabled: boolean("enabled").notNull().default(true),
+    /** 230-V-Gerät am Wechselrichter – kostet den Umwandlungsverlust (#405). */
+    inverter: boolean("inverter").notNull().default(false),
+    /** Kühlgerät: Laufzeit kommt aus der Wetterprognose (#405). */
+    cooling: boolean("cooling").notNull().default(false),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("powerConsumers_userId").on(table.userId)]
@@ -639,6 +666,14 @@ export const spotPhotos = mysqlTable(
     spotId: int("spotId").notNull(),
     /** Serverseitig generierter Dateiname (nanoid + .jpg/.png/.webp) */
     fileName: varchar("fileName", { length: 64 }).notNull(),
+    /**
+     * «foto» = Galerie-Bild (#82), «plan» = der Campingplatz-Plan (#401).
+     * Vom Plan gibt es höchstens EINEN pro Platz – ein neuer ersetzt den
+     * alten. Eine eigene Tabelle für ein einzelnes Bild wäre Overhead;
+     * Ablage und Aufräumen (Konto-Löschung, Papierkorb) laufen so über
+     * dieselben Wege wie die Galerie.
+     */
+    kind: varchar("kind", { length: 12 }).notNull().default("foto"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [
@@ -1218,6 +1253,52 @@ export const familyChildren = mysqlTable(
 
 export type FamilyChild = typeof familyChildren.$inferSelect;
 export type InsertFamilyChild = typeof familyChildren.$inferInsert;
+
+/**
+ * Belohnungs-Ziele im Familien-Modus (#399): «Glacé am Kiosk – 20 Punkte».
+ * Die Punkte kommen aus dem Ämtli-Plan (#270); hier steht, was man damit
+ * MACHEN kann. Ohne Ziel ist die Rangliste nur eine Tabelle.
+ */
+export const familyRewards = mysqlTable(
+  "familyRewards",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    title: varchar("title", { length: 80 }).notNull(),
+    /** Preis in Ämtli-Punkten. */
+    points: int("points").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("familyRewards_userId").on(table.userId)]
+);
+
+export type FamilyReward = typeof familyRewards.$inferSelect;
+export type InsertFamilyReward = typeof familyRewards.$inferInsert;
+
+/**
+ * Eingelöste Belohnungen (#399): Titel und Punkte als SCHNAPPSCHUSS, denn
+ * das Ziel darf später gelöscht oder teurer werden, ohne dass sich die
+ * Geschichte umschreibt – eingelöst ist eingelöst.
+ */
+export const familyRedemptions = mysqlTable(
+  "familyRedemptions",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    /** Kind, das eingelöst hat (familyChildren.id). */
+    childId: int("childId").notNull(),
+    title: varchar("title", { length: 80 }).notNull(),
+    points: int("points").notNull(),
+    redeemedAt: timestamp("redeemedAt").defaultNow().notNull(),
+  },
+  table => [
+    index("familyRedemptions_userId").on(table.userId),
+    index("familyRedemptions_childId").on(table.childId),
+  ]
+);
+
+export type FamilyRedemption = typeof familyRedemptions.$inferSelect;
+export type InsertFamilyRedemption = typeof familyRedemptions.$inferInsert;
 
 /**
  * Verdiente Abzeichen pro Kind: badgeId verweist auf den Katalog in
@@ -1843,6 +1924,39 @@ export type InsertDeletedItem = typeof deletedItems.$inferInsert;
  * `label` ist NUTZERTEXT (Titel einer Ausgabe, Tag im Journal) und bleibt
  * bewusst unübersetzt – übersetzt wird nur, was die App selbst benennt.
  */
+/**
+ * Rückmeldung nach der Reise (#381): Was war nicht nötig, was hat
+ * gefehlt?
+ *
+ * EINE ZEILE JE MELDUNG, nicht je Gegenstand: Dieselbe Regenhose kann
+ * über Jahre mehrfach auffallen, und genau das Zählen macht aus einer
+ * Beobachtung einen Hinweis. Zusammengefasst wird beim Lesen
+ * (`shared/packFeedback.ts`), nicht beim Schreiben.
+ *
+ * Der Name steht als TEXT drin und nicht als Verweis auf `packItems`:
+ * Die Liste einer vergangenen Reise wird gelöscht, archiviert oder
+ * umgeschrieben – die Erfahrung soll das überleben.
+ */
+export const packFeedback = mysqlTable(
+  "packFeedback",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    tripId: int("tripId").notNull(),
+    /** «unused» = war nicht nötig, «missing» = hat gefehlt */
+    kind: mysqlEnum("kind", ["unused", "missing"]).notNull(),
+    name: varchar("name", { length: 160 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    index("packFeedback_userId").on(table.userId),
+    index("packFeedback_tripId").on(table.tripId),
+  ]
+);
+
+export type PackFeedback = typeof packFeedback.$inferSelect;
+export type InsertPackFeedback = typeof packFeedback.$inferInsert;
+
 export const tripChanges = mysqlTable(
   "tripChanges",
   {

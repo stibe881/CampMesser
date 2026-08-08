@@ -38,6 +38,7 @@ import QRCode from "qrcode";
 import { useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import KitchenConverterDialog from "@/components/KitchenConverter";
+import AltitudeCookingNote from "@/components/AltitudeCookingNote";
 import PageHeader from "@/components/PageHeader";
 import QueryError from "@/components/QueryError";
 import ServingsStepper from "@/components/ServingsStepper";
@@ -1456,6 +1457,11 @@ export default function RecipesPage() {
                   </span>
                 </DialogDescription>
               </DialogHeader>
+
+              {/* Die Höhe ändert das Kochen (#385): erscheint nur, wenn
+                  ein Aufenthalt läuft und sein Platz eine erfasste Höhe
+                  über der Schwelle hat. Im Flachland bleibt es still. */}
+              <AltitudeCookingNote minutes={selected.timeMinutes} />
 
               <div className="flex flex-wrap gap-2">
                 <Button

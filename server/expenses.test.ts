@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  budgetForecast,
   budgetStatus,
   BUDGET_TIGHT_RATIO,
   EXPENSE_CATEGORIES,
@@ -332,5 +333,83 @@ describe("expenseStats", () => {
     expect(stats.years).toEqual([]);
     expect(stats.topCategory).toBeNull();
     expect(stats.perNightRappen).toBeNull();
+  });
+});
+
+/**
+ * Budget-Hochrechnung (#398): «Reicht das Budget bei diesem Tempo?»
+ */
+describe("budgetForecast", () => {
+  const TRIP = { startDate: "2026-08-01", endDate: "2026-08-07" };
+
+  it("rechnet laufende Kosten hoch, Grundkosten nur einmal", () => {
+    // Tag 3 von 7: Platz 200.–, Essen bisher 90.– (30.–/Tag).
+    const forecast = budgetForecast({
+      ...TRIP,
+      todayIso: "2026-08-03",
+      expenses: [
+        { amountRappen: 20000, category: "camping" },
+        { amountRappen: 6000, category: "essen" },
+        { amountRappen: 3000, category: "essen" },
+      ],
+    });
+    // 200 + 90 + 4 × 30 = 410 – NICHT 7 × (290/3): Die Platzmiete
+    // fällt nicht jeden Tag noch einmal an.
+    expect(forecast).not.toBeNull();
+    expect(forecast!.projectedRappen).toBe(41000);
+    expect(forecast!.variablePerDayRappen).toBe(3000);
+    expect(forecast!.elapsedDays).toBe(3);
+    expect(forecast!.remainingDays).toBe(4);
+  });
+
+  it("misst die Prognose am Budget mit denselben Stufen wie der Stand", () => {
+    const base = {
+      ...TRIP,
+      todayIso: "2026-08-03",
+      expenses: [{ amountRappen: 9000, category: "essen" }],
+    };
+    // Hochrechnung: 90 + 4 × 30 = 210
+    expect(budgetForecast({ ...base, budgetRappen: 30000 })!.level).toBe("ok");
+    expect(budgetForecast({ ...base, budgetRappen: 25000 })!.level).toBe(
+      "tight"
+    );
+    expect(budgetForecast({ ...base, budgetRappen: 20000 })!.level).toBe(
+      "over"
+    );
+    expect(budgetForecast(base)!.level).toBeNull();
+  });
+
+  it("schweigt vor der Reise, am letzten Tag und danach", () => {
+    const expenses = [{ amountRappen: 1000, category: "essen" }];
+    expect(
+      budgetForecast({ ...TRIP, todayIso: "2026-07-31", expenses })
+    ).toBeNull();
+    expect(
+      budgetForecast({ ...TRIP, todayIso: "2026-08-07", expenses })
+    ).toBeNull();
+    expect(
+      budgetForecast({ ...TRIP, todayIso: "2026-08-09", expenses })
+    ).toBeNull();
+  });
+
+  it("Sprit zählt wie die Platzmiete zu den Grundkosten", () => {
+    // Getankt wird an Fahrtagen – wer das täglich hochrechnet, tankt in
+    // der Prognose jeden Tag.
+    const forecast = budgetForecast({
+      ...TRIP,
+      todayIso: "2026-08-02",
+      expenses: [{ amountRappen: 8000, category: "sprit" }],
+    });
+    expect(forecast!.projectedRappen).toBe(8000);
+    expect(forecast!.variablePerDayRappen).toBe(0);
+  });
+
+  it("ohne Ausgaben ist die Prognose schlicht 0", () => {
+    const forecast = budgetForecast({
+      ...TRIP,
+      todayIso: "2026-08-03",
+      expenses: [],
+    });
+    expect(forecast!.projectedRappen).toBe(0);
   });
 });

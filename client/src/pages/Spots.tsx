@@ -20,6 +20,7 @@ import { Link } from "wouter";
 import PageHeader from "@/components/PageHeader";
 import QueryError from "@/components/QueryError";
 import SpotRatingCompare from "@/components/SpotRatingCompare";
+import WeekendPicker from "@/components/spots/WeekendPicker";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -554,6 +555,12 @@ export default function SpotsPage() {
           </Button>
 
           <PushOptIn hasSpots={(spots?.length ?? 0) > 0} />
+
+          {/* «Wohin am Wochenende?» (#383): die Favoriten nach der
+              Prognose ordnen, statt zwölf Dossiers durchzuklicken.
+              Erscheint erst ab zwei Plätzen – bei einem gibt es nichts
+              zu vergleichen. */}
+          <WeekendPicker spots={spots ?? []} />
 
           {/* Plätze nach Bewertungs-Kriterien vergleichen (#278) – erscheint
               erst, wenn mindestens zwei Plätze bewertet sind */}

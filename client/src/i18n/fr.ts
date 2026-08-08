@@ -131,7 +131,7 @@ export const fr: Translation = {
     heroTitle1: "Tout pour le camp.",
     heroTitle2: "Dans une seule app.",
     heroSubtitle:
-      "Planification, sécurité, énergie et nature – 16 outils malins pour ta prochaine aventure.",
+      "Planification, sécurité, énergie et nature – plus de 40 outils malins pour ta prochaine aventure.",
     sunInfo: (sunrise, sunset) =>
       `Aujourd'hui : lever du soleil ${sunrise} · coucher du soleil ${sunset}`,
     nextTripFallback: "Prochain trip",
@@ -509,6 +509,11 @@ export const fr: Translation = {
     duplicateFailed: "Échec de la copie",
     openAria: name => `Ouvrir la liste de bagages ${name}`,
     duplicateAria: name => `Dupliquer la liste de bagages ${name}`,
+    renameAria: (name: string) => `Renommer la liste de bagages ${name}`,
+    renameTitle: "Renommer la liste",
+    renameSaved: "Nom enregistré.",
+    saveTemplateAria: (name: string) =>
+      `Enregistrer la liste ${name} comme modèle`,
     deleteAria: name => `Supprimer la liste de bagages ${name}`,
     deleteConfirm: name => `Vraiment supprimer la liste «${name}» ?`,
     emptyTitle: "Pas encore de liste de bagages",
@@ -562,6 +567,7 @@ export const fr: Translation = {
     archivedBadge: "archivée",
   },
   packListDetail: {
+    boxBadgeAria: "Se trouve dans la caisse",
     backLabel: "Listes de bagages",
     fallbackTitle: "Liste de bagages",
     loginFeature: "tes listes de bagages",
@@ -1299,6 +1305,14 @@ export const fr: Translation = {
     addNumeric: "Saisir avec des chiffres",
     fistTip:
       "Astuce pour la hauteur : tends le bras – un poing correspond à environ 10°. Un arbre qui se termine à deux poings et demi au-dessus de l'horizon fait donc environ 25°.",
+    horizonTitle: "Soleil au-dessus de la crête",
+    horizonShaded: "À l'ombre toute la journée – ici, aucun soleil ne passe.",
+    horizonNone: "Aujourd'hui, le soleil ne dépasse pas l'horizon.",
+    horizonSunny: (duration: string) => `${duration} au soleil`,
+    horizonDelay: (duration: string) =>
+      `${duration} plus tard qu'à l'horizon dégagé`,
+    horizonNote:
+      "Calculé à partir du profil d'obstacles de cet emplacement. À l'horizon plat, le soleil se lèverait plus tôt – dans la vallée, il passe la crête, et c'est cette heure-là qui compte.",
     shadowTitle: "Heures d'ombre aujourd'hui",
     shadowNone:
       "Tes obstacles ne cachent jamais le soleil aujourd'hui – vue dégagée toute la journée.",
@@ -1577,6 +1591,17 @@ export const fr: Translation = {
     consumerShare: (p: number) => `${p} % de la consommation journalière`,
     templatesHint:
       "Les modèles sont des ordres de grandeur tirés de la pratique – pour les appareils à compresseur, il s'agit du temps de fonctionnement, pas du temps de présence. Ce qui figure sur la plaque signalétique prime.",
+    coolingBadge: (hours: number, temp: number) =>
+      `Appareil frigorifique : env. ${hours} h de marche à ${temp} °C selon la prévision`,
+    coolingBadgeNoWeather:
+      "Appareil frigorifique – la durée de marche viendra de la météo dès qu’une prévision est chargée",
+    inverterBadge: "230 V via onduleur (+18 % comptés)",
+    formInverter: "Appareil 230 V (onduleur, +18 %)",
+    formCooling: "Appareil frigorifique – durée selon la météo",
+    coolingToggleAria: (name: string) =>
+      `${name} : activer ou désactiver la durée selon la météo`,
+    inverterToggleAria: (name: string) =>
+      `${name} : activer ou désactiver le supplément onduleur`,
     solarLabel: "Panneaux solaires (W au total)",
     solarHint: "p. ex. 2 panneaux de 200 W = 400",
     mountLabel: "Installation",
@@ -1848,10 +1873,10 @@ export const fr: Translation = {
       "Au-dessus de 30 °C en plein soleil, le gazon souffre sous le sol de tente dès le premier jour.",
   },
   spots: {
-    title: "Emplacements favoris",
+    title: "Campings",
     subtitle:
       "Enregistre tes emplacements prévus et consulte la météo et la position du soleil à l'avance.",
-    loginFeature: "tes emplacements favoris",
+    loginFeature: "tes campings",
     addSpot: "Ajouter un emplacement",
     empty:
       "Pas encore de favoris. Enregistre ton premier emplacement prévu – par coordonnées ou directement avec ta position actuelle.",
@@ -2015,6 +2040,18 @@ export const fr: Translation = {
     familySearchHint: "Touche « Chercher dans cette zone ».",
   },
   spotDetail: {
+    tariffCurrencyAria: "Monnaie",
+    tariffUnitPlaceholder: "p. ex. par jour",
+    tariffPeriodAdd: "Ajouter une période",
+    tariffPeriodFromAria: "Valable dès (JJ.MM.)",
+    tariffPeriodToAria: "Valable jusqu'au (JJ.MM.)",
+    tariffPeriodRemoveAria: "Supprimer la période",
+    tariffActiveNow: "en vigueur",
+    tariffCopySuffix: "(copie)",
+    tariffDuplicateAria: (name: string) => `Dupliquer le tarif ${name}`,
+    tariffRowLabelMissing: "Une ligne de tarif a un prix mais pas de libellé.",
+    tariffRowPriceInvalid: (label: string) =>
+      `Le prix pour «${label}» manque ou est illisible.`,
     fallbackTitle: "Emplacement",
     backLabel: "Emplacements",
     notFoundTitle: "Emplacement introuvable",
@@ -2402,6 +2439,7 @@ export const fr: Translation = {
     footer: "Partagé avec CampMesser",
   },
   sharedSpot: {
+    tariffsTitle: "Tarifs",
     invalid: "Ce lien de partage a expiré ou n'est plus valable.",
     invalidHint: "Il a expiré ou la ou le propriétaire a mis fin au partage.",
     badge: "Emplacement partagé",
@@ -2806,6 +2844,11 @@ export const fr: Translation = {
       `Il reste ${amount} (${percent} % utilisé).`,
     budgetOver: (amount: string, percent: number) =>
       `${amount} au-dessus du budget (${percent} % utilisé).`,
+    forecastLine: (amount: string, day: number, total: number) =>
+      `À ce rythme, environ ${amount} d’ici la fin (jour ${day} sur ${total}).`,
+    forecastOver: "Cela dépasse la limite.",
+    forecastNote:
+      "Le camping et le carburant comptent une fois dans la projection, pas chaque jour.",
     title: "Caisse du voyage",
     toggleAria: (name: string) =>
       `Ouvrir ou fermer la caisse du voyage ${name}`,
@@ -4172,6 +4215,9 @@ export const fr: Translation = {
     noTrips: "Aucun voyage enregistré pour l'instant.",
     personEmpty: (person: string) =>
       `${person} n'a encore participé à aucun voyage. Coche ci-dessous.`,
+    noPlaceEmpty:
+      "Les voyages comptent, mais il leur manque le nom du lieu – un tampon a besoin d’un lieu. Ajoute un camping ou un lieu au voyage et le tampon apparaîtra.",
+    tripNoStamp: "Pas de tampon – il manque le camping ou le lieu.",
     print: "Imprimer le passeport",
     note: "Les tampons proviennent des voyages du carnet ; rien n'est saisi deux fois. Chaque camping reçoit, à partir de son nom, la même forme, la même couleur et la même inclinaison – identiques sur chaque appareil.",
   },
@@ -4248,6 +4294,260 @@ export const fr: Translation = {
         : `${who} a ${action} «${area}»`,
     andMore: (count: number) => `et ${count} de plus`,
     note: "On note QUI a modifié QUOI et QUAND, dans quel domaine – pas l'ancienne et la nouvelle valeur. Ce que quelqu'un fait coup sur coup tient sur une ligne avec le nombre : douze articles sur la liste de courses ne doivent pas enterrer tout le reste.",
+  },
+  packExperience: {
+    title: "D'après les voyages précédents",
+    missingHint: "Cela a déjà manqué une fois :",
+    unusedHint: "Cela est parti plusieurs fois sans servir :",
+    unusedCount: (times: number) => `${times}× pas utilisé`,
+    addAria: (name: string) => `Ajouter « ${name} » à la liste`,
+    added: (name: string) => `« ${name} » ajouté.`,
+  },
+  sitePlan: {
+    title: "Plan du camping",
+    empty:
+      "Pas encore de plan. Photographie le plan à la réception – la prochaine fois, tu sauras où tout se trouve.",
+    add: "Téléverser le plan",
+    replace: "Remplacer le plan",
+    remove: "Supprimer",
+    uploading: "Envoi en cours …",
+    uploaded: "Plan enregistré.",
+    uploadFailed: "Échec de l’envoi. Réessaie.",
+    readFailed: "Impossible de lire l’image.",
+    deleteConfirm: "Vraiment supprimer le plan ?",
+    deleted: "Plan supprimé.",
+    alt: (name: string) => `Plan du camping ${name}`,
+    openAria: (name: string) => `Afficher le plan du camping ${name} en grand`,
+  },
+  legal: {
+    imprintTitle: "Mentions légales",
+    privacyTitle: "Déclaration de confidentialité",
+    cookieText:
+      "CampMesser n’utilise que des cookies techniquement nécessaires et le stockage local – pas de traçage, pas de publicité. Détails :",
+    cookieOk: "Compris",
+    cookieAria: "Information sur les cookies",
+  },
+  rewards: {
+    title: "Objectifs de récompense",
+    hint: "Échanger les points de corvées : fixe le prix d’un objectif – la barre montre le chemin restant.",
+    availableLine: (name: string, points: number) =>
+      `${name} a ${points} point${points === 1 ? "" : "s"} à échanger.`,
+    empty:
+      "Pas encore d’objectifs. Crée le premier – par exemple « glace au kiosque ».",
+    pointsLine: (points: number) => `${points} pts`,
+    redeem: "Échanger",
+    redeemed: "Échangé !",
+    removeAria: (title: string) => `Supprimer l’objectif « ${title} »`,
+    progressAria: (name: string, title: string, percent: number) =>
+      `${name} est à ${percent} % de « ${title} »`,
+    titlePlaceholder: "p. ex. glace au kiosque",
+    pointsPlaceholder: "Points",
+    addAria: "Ajouter un objectif",
+    formError: "Indique un titre et des points supérieurs à zéro.",
+    historyTitle: "Échangé",
+    historyLine: (name: string, title: string, points: number, date: string) =>
+      `${name} : « ${title} » pour ${points} pts le ${date}`,
+  },
+  nextTime: {
+    title: "La prochaine fois",
+    empty:
+      "Rien de noté pour l’instant. Que faut-il changer à la prochaine visite ?",
+    placeholder: "p. ex. rallonge 25 m",
+    add: "Noter",
+    removeAria: (note: string) => `Supprimer la note «${note}»`,
+    hint: "La note réapparaît d’elle-même dès que tu planifies le prochain voyage vers ce camping. Ce qui est réglé, tu le supprimes.",
+    reminderTitle: (place: string) =>
+      `La prochaine fois à ${place} – tes notes de la dernière visite :`,
+    reminderLink: "Vers le dossier du camping",
+  },
+  condensation: {
+    title: "Rosée pendant la nuit",
+    high: (time: string) =>
+      `Nuit claire et calme : vers ${time}, l’air atteint le point de rosée – la tente sera probablement mouillée.`,
+    possible: (time: string) =>
+      `L’air s’approche du point de rosée (vers ${time}) – de la rosée sur la tente est possible.`,
+    advice:
+      "Avant de plier le matin, laisse d’abord sécher – la fenêtre sèche ci-dessous aide à planifier.",
+    note: "Estimation à partir de la température, de l’humidité, des nuages et du vent. Les creux, prairies et abords de ruisseaux sont plus humides que ne le sait la prévision.",
+  },
+  reviewPrompt: {
+    title: (trip: string) => `De retour de « ${trip} » ?`,
+    body: "Deux questions tant que tu t'en souviens : qu'est-ce qui n'a pas servi, qu'est-ce qui a manqué ? Cela améliore la prochaine liste de bagages.",
+    open: "Remplir le bilan",
+    dismissAria: "Masquer le rappel pour ce séjour",
+  },
+  campfire: {
+    stateOk: "Feu de camp : rien ne s'y oppose.",
+    stateCaution: "Feu de camp : seulement avec prudence.",
+    stateNo: "Feu de camp : mieux vaut pas aujourd'hui.",
+    reasonBan: (title: string) =>
+      `Niveau officiel « ${title} » – une interdiction de feu est probable.`,
+    reasonDanger: (title: string) => `Niveau officiel « ${title} ».`,
+    reasonStrongWind: (kmh: number) =>
+      `Rafales jusqu'à ${kmh} km/h – un feu ouvert n'est pas une bonne idée.`,
+    reasonSparkWind: (kmh: number) =>
+      `Rafales jusqu'à ${kmh} km/h – les étincelles volent dans le sec d'à côté.`,
+    reasonNoDanger:
+      "Hors de Suisse, il n'y a pas de niveau de danger officiel – ce verdict ne connaît que le vent.",
+    note: "Le règlement du camping a le dernier mot. Fait foi :",
+    portal: "waldbrandgefahr.ch",
+  },
+  tripOffline: {
+    title: "Préparer pour la route",
+    intro:
+      "Charge tout pour ce séjour sur cet appareil : emplacement, liste de bagages, menus avec recettes et cartes autour du camping.",
+    start: "Préparer maintenant",
+    again: "Recharger",
+    running: "Chargement …",
+    stepTrip: "Séjour, emplacement et compagnons",
+    stepPacking: "Liste de bagages",
+    stepMenu: "Menus et recettes",
+    stepMap: "Cartes autour de l'emplacement",
+    stepFailed: "Échec – sans réseau, cette partie manquera.",
+    noList: "Aucune liste de bagages liée.",
+    noSpot: "Aucun emplacement lié.",
+    noTileCache: "Cet appareil ne peut pas stocker de cartes.",
+    tileProgress: (done: number, total: number) =>
+      `${done} sur ${total} tuiles`,
+    tilesStored: (count: number) => `${count} tuiles enregistrées`,
+    note: "Ce qui est écrit ici est honnête : une étape rouge manquera vraiment hors ligne. Et le navigateur décide seul de ce qu'il jette quand la place manque – avant un long voyage, un second passage vaut la peine.",
+  },
+  pitchCost: {
+    title: "Estimer le coût de l'emplacement",
+    hint: (nights: number) =>
+      nights === 1
+        ? "1 nuit. Indique combien vous êtes."
+        : `${nights} nuits. Indique combien vous êtes.`,
+    tariffGroupAria: "Choisir le tarif",
+    countAria: (label: string) => `Nombre de ${label}`,
+    nightlyOnly:
+      "Aucun tarif saisi pour cet emplacement – le calcul utilise le prix par nuit.",
+    breakdown: (perNight: string, nights: number) =>
+      `${perNight} par nuit × ${nights}`,
+    sourceNightly: "d'après le prix par nuit",
+    nothingYet: "Rien à calculer encore : indique le nombre.",
+    addToExpenses: "Dans la caisse",
+    foreignCurrency: (currency: string) =>
+      `La caisse de voyage est tenue en CHF – merci de saisir les montants en ${currency} à la main.`,
+    added: "Coût de l'emplacement enregistré.",
+    expenseLabel: (nights: number) =>
+      nights === 1 ? "Emplacement, 1 nuit" : `Emplacement, ${nights} nuits`,
+    meFallback: "Moi",
+    note: "Une estimation, pas une facture : la réception compte souvent la taxe de séjour, le chien et l'électricité autrement. Rien n'est enregistré sans que tu appuies.",
+  },
+  altitudeCooking: {
+    headline: (m: number, boiling: number) =>
+      `À ${m} m, l'eau bout à ${boiling} °C.`,
+    estimate: (base: number, adjusted: number) =>
+      `Compte environ ${adjusted} minutes au lieu de ${base} – valeur indicative, pas mesurée.`,
+    pressureCooker:
+      "À cette altitude, l'autocuiseur vaut la peine pour tout ce qui mijote longtemps.",
+    source: (spot: string) => `Altitude de ${spot}, ton séjour en cours.`,
+    guide:
+      "Vaut pour tout ce qui cuit dans l'eau – pas pour la poêle ni le four.",
+  },
+  dryWindow: {
+    title: "Créneau au sec",
+    lengthGroupAria: "Combien de temps te faut-il pour monter ou démonter ?",
+    hours: (count: number) => (count === 1 ? "1 heure" : `${count} heures`),
+    tooShort: "Les prévisions ne suffisent pas encore pour ce créneau.",
+    verdictGood: "Ça va : assez sec et calme pour monter et démonter.",
+    verdictUsable: "Possible – mais compte avec un peu d'humidité ou de vent.",
+    verdictPoor:
+      "Pas de bon créneau. Le meilleur parmi des mauvais reste mauvais.",
+    rainLabel: "Pluie dans le créneau",
+    rainNone: "aucune pluie annoncée",
+    rainAmount: (mm: number) => `${mm} mm`,
+    gustsLabel: "Rafale la plus forte",
+    gusts: (kmh: number) => `${kmh} km/h`,
+    gustWarning:
+      "Avec de telles rafales, on ne monte pas une tente seul – attends ou cherche un abri du vent.",
+    note: "On cherche le meilleur créneau continu dans les 48 prochaines heures ; à égalité, le plus tôt l'emporte. Le vent compte par les RAFALES, pas par la moyenne – une tente s'envole dans la rafale.",
+  },
+  weekendPicker: {
+    title: "Où aller ce week-end ?",
+    show: "Comparer",
+    range: (from: string, to: string) => `Samedi ${from} à dimanche ${to}`,
+    sortWeather: "Par météo",
+    sortTravel: "Par temps de trajet",
+    dry: (score: number) => `sec ${score}`,
+    warmth: (score: number) => `chaud ${score}`,
+    wind: (score: number) => `calme ${score}`,
+    noForecast: "Aucune prévision disponible.",
+    failed: "Le service météo ne répond pas pour le moment.",
+    capped: (shown: number, total: number) =>
+      `Comparaison des ${shown} premiers emplacements sur ${total}.`,
+    note: "La note pondère la pluie à 55 %, la température à 30 % et le vent à 15 % – la pluie décide si l'on part. Le temps de trajet n'est PAS inclus ; il figure à côté, car toi seul sais ce que vaut une heure de route. Et tout ceci est une prévision, pas une promesse.",
+  },
+  pitchSketch: {
+    title: "Croquis de l'emplacement",
+    empty:
+      "Pas encore de croquis. À la deuxième visite, on sait de nouveau comment ça tenait.",
+    create: "Créer un croquis",
+    edit: "Modifier",
+    hint: "Choisis un objet, puis touche l'endroit voulu. Tout s'aligne sur le demi-mètre.",
+    addTitle: "Ajouter",
+    full: (max: number) => `Plus de ${max} objets, ce n'est plus un croquis.`,
+    itemWidth: "Largeur (m)",
+    itemDepth: "Profondeur (m)",
+    pitchWidth: "Largeur de l'emplacement (m)",
+    pitchDepth: "Profondeur de l'emplacement (m)",
+    rotate: "Pivoter",
+    remove: "Retirer",
+    moveLeft: "← gauche",
+    moveRight: "droite →",
+    moveUp: "↑ devant",
+    moveDown: "derrière ↓",
+    edgeLeft: "Distance à gauche",
+    edgeRight: "Distance à droite",
+    edgeTop: "Distance devant",
+    edgeBottom: "Distance derrière",
+    nearest: "Objet le plus proche",
+    alone: "seul",
+    overlap: (a: string, b: string) => `${a} et ${b} se chevauchent.`,
+    areaLine: (width: string, depth: string, used: number, total: number) =>
+      `Emplacement ${width} × ${depth} – ${used} de ${total} m² occupés.`,
+    sketchAria: (width: string, depth: string, count: number) =>
+      `Croquis de l'emplacement, ${width} sur ${depth}, ${count} objets`,
+    itemAria: (name: string, width: string, depth: string) =>
+      `${name}, ${width} sur ${depth}`,
+    saved: "Croquis enregistré.",
+  },
+  tripReview: {
+    title: "Bilan",
+    toggleAria: (trip: string) => `Ouvrir le bilan de ${trip}`,
+    intro:
+      "Deux questions qui améliorent la prochaine liste. Rien n'est supprimé ni ajouté automatiquement – l'app montrera simplement ce qui s'est remarqué.",
+    unusedTitle: "Pas utilisé",
+    noList: "Aucune liste de bagages n'est liée à ce voyage.",
+    emptyList: "La liste est vide.",
+    missingTitle: "A manqué",
+    missingPlaceholder: "p. ex. pinces à linge",
+    missingAdd: "Ajouter",
+    missingRemove: (name: string) => `Retirer « ${name} »`,
+    save: "Enregistrer le bilan",
+    saved: "Bilan enregistré.",
+    note: "Une fois inutilisé ne veut rien dire – la crème solaire d'un juillet pluvieux repart l'an prochain. Ce n'est qu'à partir de la deuxième fois que cela devient un indice. Ce qui a manqué est proposé tout de suite.",
+  },
+  turnaround: {
+    stormForecast: (clock: string) => `Orage annoncé dès ${clock}.`,
+    stormPropensity: (clock: string) =>
+      `Air instable dès ${clock} – orages locaux possibles.`,
+    stormBeatsSunset:
+      "Alors la limite, c'est le nuage, pas le soleil – prévois le retour avant.",
+    title: "Heure de demi-tour",
+    shapeLabel: "Forme du parcours",
+    outAndBack: "Aller-retour",
+    loop: "Boucle",
+    turnaroundLabel: "Faire demi-tour au plus tard",
+    latestStartLabel: "Départ au plus tard",
+    left: (duration: string) => `encore ${duration}`,
+    overdue: "Fais demi-tour",
+    tooLong: (duration: string) =>
+      `La journée ne suffit plus pour tout le parcours (${duration}).`,
+    bufferLabel: "Marge avant le coucher du soleil (minutes)",
+    sunsetAt: (time: string) => `Coucher du soleil ${time}`,
+    note: "Calculé depuis le coucher du soleil au point de départ. En forêt et dans la vallée, il fait nuit bien plus tôt – c'est à cela que sert la marge.",
   },
   trash: {
     title: "Corbeille",

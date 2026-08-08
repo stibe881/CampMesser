@@ -129,7 +129,7 @@ export const de = {
     heroTitle1: "Alles fürs Camp.",
     heroTitle2: "In einer App.",
     heroSubtitle:
-      "Planung, Sicherheit, Energie und Naturerlebnis – 16 smarte Werkzeuge für dein nächstes Abenteuer.",
+      "Planung, Sicherheit, Energie und Naturerlebnis – über 40 smarte Werkzeuge für dein nächstes Abenteuer.",
     sunInfo: (sunrise: string, sunset: string) =>
       `Heute: Sonnenaufgang ${sunrise} · Sonnenuntergang ${sunset}`,
     nextTripFallback: "Nächster Trip",
@@ -510,6 +510,11 @@ export const de = {
     duplicateFailed: "Kopieren fehlgeschlagen",
     openAria: (name: string) => `Packliste ${name} öffnen`,
     duplicateAria: (name: string) => `Packliste ${name} duplizieren`,
+    renameAria: (name: string) => `Packliste ${name} umbenennen`,
+    renameTitle: "Packliste umbenennen",
+    renameSaved: "Name gespeichert.",
+    saveTemplateAria: (name: string) =>
+      `Packliste ${name} als Vorlage speichern`,
     deleteAria: (name: string) => `Packliste ${name} löschen`,
     deleteConfirm: (name: string) => `Liste «${name}» wirklich löschen?`,
     emptyTitle: "Noch keine Packlisten",
@@ -565,6 +570,7 @@ export const de = {
     archivedBadge: "archiviert",
   },
   packListDetail: {
+    boxBadgeAria: "Liegt in Kiste",
     backLabel: "Packlisten",
     fallbackTitle: "Packliste",
     loginFeature: "deine Packlisten",
@@ -1140,7 +1146,7 @@ export const de = {
     placesNoAlert: "Keine Warnung",
     placesCheckFailed: "Prüfung fehlgeschlagen",
     placesEmpty:
-      "Noch keine Plätze gespeichert – lege Zeltplatz-Favoriten an oder setze deinen Heim-Standort im Profil.",
+      "Noch keine Plätze gespeichert – lege Campingplätze an oder setze deinen Heim-Standort im Profil.",
     placesSelectAria: (name: string) =>
       `Wetter für ${name} in der Hauptansicht anzeigen`,
   },
@@ -1298,6 +1304,14 @@ export const de = {
     addNumeric: "Mit Zahlen eintragen",
     fistTip:
       "Tipp zur Höhe: Strecke den Arm aus – eine Faust entspricht etwa 10°. Ein Baum, der zweieinhalb Fäuste über dem Horizont endet, hat also rund 25°.",
+    horizonTitle: "Sonne über dem Grat",
+    horizonShaded: "Den ganzen Tag im Schatten – hier kommt keine Sonne durch.",
+    horizonNone: "Heute steht die Sonne nicht über dem Horizont.",
+    horizonSunny: (duration: string) => `${duration} besonnt`,
+    horizonDelay: (duration: string) =>
+      `${duration} später als am freien Horizont`,
+    horizonNote:
+      "Gerechnet aus dem Hindernis-Profil dieses Platzes. Am flachen Horizont ginge die Sonne früher auf – im Tal kommt sie über den Grat, und das ist die Zeit, die zählt.",
     shadowTitle: "Schattenzeiten heute",
     shadowNone:
       "Deine Hindernisse verdecken die Sonne heute nie – freie Sicht den ganzen Tag.",
@@ -1576,6 +1590,17 @@ export const de = {
     consumerShare: (p: number) => `${p} % des Tagesverbrauchs`,
     templatesHint:
       "Die Vorlagen sind Anhaltspunkte aus der Praxis – bei Kompressorgeräten ist die Laufzeit gemeint, nicht die Standzeit. Was auf dem Typenschild steht, gilt vor der Vorlage.",
+    coolingBadge: (hours: number, temp: number) =>
+      `Kühlgerät: rund ${hours} h Laufzeit bei ${temp} °C aus der Prognose`,
+    coolingBadgeNoWeather:
+      "Kühlgerät – die Laufzeit kommt aus dem Wetter, sobald eine Prognose geladen ist",
+    inverterBadge: "230 V über Wechselrichter (+18 % gerechnet)",
+    formInverter: "230-V-Gerät (Wechselrichter, +18 %)",
+    formCooling: "Kühlgerät – Laufzeit nach Wetter",
+    coolingToggleAria: (name: string) =>
+      `${name}: Laufzeit nach Wetter ein- oder ausschalten`,
+    inverterToggleAria: (name: string) =>
+      `${name}: Wechselrichter-Aufschlag ein- oder ausschalten`,
     solarLabel: "Solarpanels (W gesamt)",
     solarHint: "z. B. 2 × 200-W-Panels = 400",
     mountLabel: "Aufstellung",
@@ -1628,7 +1653,7 @@ export const de = {
     forecastOk: (avg: number, days: number, source: string) =>
       `Übernommen: Ø ${avg} h Sonnenschein pro Tag (Prognose für die nächsten ${days} Tage – Quelle: ${source}).`,
     forecastError:
-      "Automatische Prognose nicht verfügbar – erlaube den Standortzugriff, speichere einen Zeltplatz-Favoriten oder setze den Wert manuell.",
+      "Automatische Prognose nicht verfügbar – erlaube den Standortzugriff, speichere einen Campingplatz oder setze den Wert manuell.",
     guidelinePrefix:
       "Richtwerte Schweiz: Sommer sonnig 5–6 h, wechselhaft 3–4 h, bedeckt 1–2 h. Verschattung durch Bäume oder Berge reduziert den Wert deutlich – prüfe den Sonnenverlauf im ",
     sunCompassLink: "Sonnenstand-Kompass",
@@ -1847,10 +1872,10 @@ export const de = {
       "Bei über 30 °C in praller Sonne leidet der Rasen unter dem Zeltboden schon nach einem Tag.",
   },
   spots: {
-    title: "Zeltplatz-Favoriten",
+    title: "Campingplätze",
     subtitle:
       "Speichere geplante Zeltplätze und rufe Wetter und Sonnenstand im Voraus ab.",
-    loginFeature: "deine Zeltplatz-Favoriten",
+    loginFeature: "deine Campingplätze",
     addSpot: "Zeltplatz hinzufügen",
     empty:
       "Noch keine Favoriten. Speichere deinen ersten geplanten Zeltplatz – per Koordinaten oder direkt mit deinem aktuellen Standort.",
@@ -1911,8 +1936,8 @@ export const de = {
     loginFeature: "deine Zeltplatz-Karte",
     mapAria: "Karte mit deinen gespeicherten Zeltplätzen",
     empty:
-      "Noch keine Plätze auf der Karte. Speichere zuerst einen Zeltplatz-Favoriten, dann erscheint er hier als Pin.",
-    emptyCta: "Zu den Zeltplatz-Favoriten",
+      "Noch keine Plätze auf der Karte. Speichere zuerst einen Campingplatz, dann erscheint er hier als Pin.",
+    emptyCta: "Zu den Campingplätzen",
     nightsHere: (n: number) =>
       n === 1
         ? "1 Übernachtung laut «Meine Reisen»"
@@ -2014,6 +2039,19 @@ export const de = {
     familySearchHint: "Tippe auf «In diesem Ausschnitt suchen».",
   },
   spotDetail: {
+    tariffCurrencyAria: "Währung",
+    tariffUnitPlaceholder: "z. B. pro Tag",
+    tariffPeriodAdd: "Zeitraum hinzufügen",
+    tariffPeriodFromAria: "Gültig ab (TT.MM.)",
+    tariffPeriodToAria: "Gültig bis (TT.MM.)",
+    tariffPeriodRemoveAria: "Zeitraum entfernen",
+    tariffActiveNow: "gilt jetzt",
+    tariffCopySuffix: "(Kopie)",
+    tariffDuplicateAria: (name: string) => `Tarif ${name} duplizieren`,
+    tariffRowLabelMissing:
+      "Eine Tarifzeile hat einen Preis, aber keine Bezeichnung.",
+    tariffRowPriceInvalid: (label: string) =>
+      `Der Preis für «${label}» fehlt oder ist nicht lesbar.`,
     fallbackTitle: "Zeltplatz",
     backLabel: "Zeltplätze",
     notFoundTitle: "Zeltplatz nicht gefunden",
@@ -2404,6 +2442,7 @@ export const de = {
     footer: "Geteilt mit CampMesser",
   },
   sharedSpot: {
+    tariffsTitle: "Tarife",
     invalid: "Dieser Teil-Link ist abgelaufen oder nicht mehr gültig.",
     invalidHint:
       "Er ist abgelaufen oder die Besitzerin bzw. der Besitzer hat das Teilen beendet.",
@@ -2814,6 +2853,11 @@ export const de = {
       `Noch ${amount} übrig (${percent} % verbraucht).`,
     budgetOver: (amount: string, percent: number) =>
       `${amount} über dem Budget (${percent} % verbraucht).`,
+    forecastLine: (amount: string, day: number, total: number) =>
+      `Bei diesem Tempo bis zum Ende rund ${amount} (Tag ${day} von ${total}).`,
+    forecastOver: "Das übersteigt die Limite.",
+    forecastNote:
+      "Platz und Sprit zählen in der Hochrechnung einmal, nicht täglich.",
     title: "Reisekasse",
     toggleAria: (name: string) => `Reisekasse von ${name} auf- oder zuklappen`,
     hint: "Halte fest, was die Reise kostet – am Schluss siehst du, wer wem was schuldet.",
@@ -4180,6 +4224,9 @@ export const de = {
     noTrips: "Noch keine Reisen eingetragen.",
     personEmpty: (person: string) =>
       `${person} war noch auf keiner Reise dabei. Setz unten die Haken.`,
+    noPlaceEmpty:
+      "Die Reisen zählen, aber ihnen fehlt der Platzname – ein Stempel braucht einen Ort. Trag bei der Reise einen Zeltplatz oder Ort ein, dann erscheint der Stempel.",
+    tripNoStamp: "Gibt keinen Stempel – der Reise fehlt Platz oder Ort.",
     print: "Pass drucken",
     note: "Die Stempel entstehen aus den Reisen im Tagebuch; nichts wird doppelt erfasst. Jeder Platz bekommt aus seinem Namen dieselbe Form, Farbe und Schräglage – auf jedem Gerät und nach jedem Neuladen gleich.",
   },
@@ -4256,6 +4303,259 @@ export const de = {
         : `${who} hat «${area}» ${action}`,
     andMore: (count: number) => `und ${count} weitere`,
     note: "Festgehalten wird, WER WANN in welchem Bereich etwas geändert hat – nicht der alte und der neue Wert. Was jemand kurz nacheinander macht, steht als eine Zeile mit Anzahl: Zwölf Posten auf der Einkaufsliste sollen nicht alles andere begraben.",
+  },
+  packExperience: {
+    title: "Aus früheren Reisen",
+    missingHint: "Das hat schon einmal gefehlt:",
+    unusedHint: "Das war mehrfach dabei, ohne gebraucht zu werden:",
+    unusedCount: (times: number) => `${times}× nicht gebraucht`,
+    addAria: (name: string) => `«${name}» auf die Liste setzen`,
+    added: (name: string) => `«${name}» hinzugefügt.`,
+  },
+  sitePlan: {
+    title: "Platzplan",
+    empty:
+      "Noch kein Plan hinterlegt. Fotografiere die Platzkarte an der Rezeption – dann weisst du beim nächsten Mal, wo alles liegt.",
+    add: "Plan hochladen",
+    replace: "Plan ersetzen",
+    remove: "Entfernen",
+    uploading: "Lädt hoch …",
+    uploaded: "Platzplan gespeichert.",
+    uploadFailed: "Hochladen fehlgeschlagen. Versuch es noch einmal.",
+    readFailed: "Bild konnte nicht gelesen werden.",
+    deleteConfirm: "Platzplan wirklich entfernen?",
+    deleted: "Platzplan entfernt.",
+    alt: (name: string) => `Platzplan von ${name}`,
+    openAria: (name: string) => `Platzplan von ${name} gross anzeigen`,
+  },
+  legal: {
+    imprintTitle: "Impressum",
+    privacyTitle: "Datenschutzerklärung",
+    cookieText:
+      "CampMesser verwendet nur technisch notwendige Cookies und lokale Speicherung – kein Tracking, keine Werbung. Details:",
+    cookieOk: "Verstanden",
+    cookieAria: "Hinweis zu Cookies",
+  },
+  rewards: {
+    title: "Belohnungs-Ziele",
+    hint: "Ämtli-Punkte einlösen: Lege fest, was ein Ziel kostet – der Balken zeigt, wie weit es noch ist.",
+    availableLine: (name: string, points: number) =>
+      `${name} hat ${points} ${points === 1 ? "Punkt" : "Punkte"} zum Einlösen.`,
+    empty:
+      "Noch keine Ziele. Leg das erste fest – zum Beispiel «Glacé am Kiosk».",
+    pointsLine: (points: number) => `${points} P.`,
+    redeem: "Einlösen",
+    redeemed: "Eingelöst!",
+    removeAria: (title: string) => `Ziel «${title}» löschen`,
+    progressAria: (name: string, title: string, percent: number) =>
+      `${name} ist bei ${percent} % von «${title}»`,
+    titlePlaceholder: "z. B. Glacé am Kiosk",
+    pointsPlaceholder: "Punkte",
+    addAria: "Ziel hinzufügen",
+    formError: "Bitte Titel und Punkte grösser als null angeben.",
+    historyTitle: "Eingelöst",
+    historyLine: (name: string, title: string, points: number, date: string) =>
+      `${name}: «${title}» für ${points} P. am ${date}`,
+  },
+  nextTime: {
+    title: "Beim nächsten Mal",
+    empty: "Noch nichts notiert. Was soll beim nächsten Besuch anders sein?",
+    placeholder: "z. B. Kabeltrommel 25 m",
+    add: "Notieren",
+    removeAria: (note: string) => `Notiz «${note}» löschen`,
+    hint: "Der Zettel taucht von selbst wieder auf, sobald du die nächste Reise an diesen Platz planst. Erledigtes löschst du einfach.",
+    reminderTitle: (place: string) =>
+      `Beim nächsten Mal am ${place} – deine Notizen vom letzten Besuch:`,
+    reminderLink: "Zum Platz-Dossier",
+  },
+  condensation: {
+    title: "Tau in der Nacht",
+    high: (time: string) =>
+      `Klare, ruhige Nacht: Gegen ${time} Uhr erreicht die Luft den Taupunkt – das Zelt wird wahrscheinlich nass.`,
+    possible: (time: string) =>
+      `Die Luft kommt dem Taupunkt nahe (gegen ${time} Uhr) – Tau auf dem Zelt ist möglich.`,
+    advice:
+      "Fürs Einpacken am Morgen zuerst abtrocknen lassen – das Trockenfenster unten hilft beim Planen.",
+    note: "Abschätzung aus Temperatur, Feuchte, Wolken und Wind. Senken, Wiesen und Bachnähe sind feuchter, als die Prognose weiss.",
+  },
+  reviewPrompt: {
+    title: (trip: string) => `Zurück von «${trip}»?`,
+    body: "Zwei Fragen, solange du es noch weisst: Was hast du nicht gebraucht, was hat gefehlt? Das verbessert die nächste Packliste.",
+    open: "Rückblick ausfüllen",
+    dismissAria: "Erinnerung zu dieser Reise ausblenden",
+  },
+  campfire: {
+    stateOk: "Lagerfeuer: Spricht nichts dagegen.",
+    stateCaution: "Lagerfeuer: Nur mit Vorsicht.",
+    stateNo: "Lagerfeuer: Heute besser nicht.",
+    reasonBan: (title: string) =>
+      `Amtliche Stufe «${title}» – ein Feuerverbot ist wahrscheinlich.`,
+    reasonDanger: (title: string) => `Amtliche Stufe «${title}».`,
+    reasonStrongWind: (kmh: number) =>
+      `Böen bis ${kmh} km/h – offenes Feuer ist keine gute Idee.`,
+    reasonSparkWind: (kmh: number) =>
+      `Böen bis ${kmh} km/h – Funkenflug ins Trockene nebenan.`,
+    reasonNoDanger:
+      "Ausserhalb der Schweiz gibt es keine amtliche Gefahrenstufe – dieses Urteil kennt nur den Wind.",
+    note: "Die Platzordnung hat das letzte Wort. Verbindlich ist:",
+    portal: "waldbrandgefahr.ch",
+  },
+  tripOffline: {
+    title: "Für unterwegs vorbereiten",
+    intro:
+      "Holt alles für diese Reise auf dieses Gerät: Platz, Packliste, Menüplan samt Rezepten und Karten rund um den Platz.",
+    start: "Jetzt vorbereiten",
+    again: "Nochmals holen",
+    running: "Wird geholt …",
+    stepTrip: "Reise, Platz und Mitreisende",
+    stepPacking: "Packliste",
+    stepMenu: "Menüplan und Rezepte",
+    stepMap: "Karten rund um den Platz",
+    stepFailed: "Hat nicht geklappt – ohne Netz fehlt dieser Teil.",
+    noList: "Keine Packliste verknüpft.",
+    noSpot: "Kein Zeltplatz verknüpft.",
+    noTileCache: "Dieses Gerät kann keine Karten speichern.",
+    tileProgress: (done: number, total: number) =>
+      `${done} von ${total} Kacheln`,
+    tilesStored: (count: number) => `${count} Kacheln gespeichert`,
+    note: "Was hier steht, ist ehrlich: Ein roter Schritt fehlt offline wirklich. Und der Browser entscheidet selbst, was er wieder wegwirft, wenn der Speicher knapp wird – vor einer langen Reise lohnt sich ein zweiter Durchgang.",
+  },
+  pitchCost: {
+    title: "Platzkosten schätzen",
+    hint: (nights: number) =>
+      nights === 1
+        ? "1 Nacht. Trage ein, wie viele ihr seid."
+        : `${nights} Nächte. Trage ein, wie viele ihr seid.`,
+    tariffGroupAria: "Tarif wählen",
+    countAria: (label: string) => `Anzahl ${label}`,
+    nightlyOnly:
+      "Für diesen Platz sind keine Tarife erfasst – gerechnet wird mit dem Preis pro Nacht.",
+    breakdown: (perNight: string, nights: number) =>
+      `${perNight} pro Nacht × ${nights}`,
+    sourceNightly: "aus dem Preis pro Nacht",
+    nothingYet: "Noch nichts zu rechnen: Anzahl eintragen.",
+    addToExpenses: "In die Reisekasse",
+    foreignCurrency: (currency: string) =>
+      `Die Reisekasse wird in CHF geführt – Beträge in ${currency} bitte von Hand eintragen.`,
+    added: "Platzkosten eingetragen.",
+    expenseLabel: (nights: number) =>
+      nights === 1 ? "Stellplatz, 1 Nacht" : `Stellplatz, ${nights} Nächte`,
+    meFallback: "Ich",
+    note: "Eine Schätzung, kein Beleg: Die Rezeption rechnet Kurtaxe, Hund und Strom oft anders. Eingetragen wird nur, was du hier drückst.",
+  },
+  altitudeCooking: {
+    headline: (m: number, boiling: number) =>
+      `Auf ${m} m siedet Wasser bei ${boiling} °C.`,
+    estimate: (base: number, adjusted: number) =>
+      `Rechne mit rund ${adjusted} statt ${base} Minuten – Richtwert, kein Messwert.`,
+    pressureCooker:
+      "Auf dieser Höhe lohnt sich der Dampfkochtopf für alles, was lange köchelt.",
+    source: (spot: string) => `Höhe von ${spot}, deinem laufenden Aufenthalt.`,
+    guide: "Gilt für alles, was im Wasser gart – nicht für Pfanne und Ofen.",
+  },
+  dryWindow: {
+    title: "Trockenes Zeitfenster",
+    lengthGroupAria: "Wie lange brauchst du zum Auf- oder Abbauen?",
+    hours: (count: number) => (count === 1 ? "1 Stunde" : `${count} Stunden`),
+    tooShort: "Die Prognose reicht für dieses Fenster noch nicht.",
+    verdictGood: "Passt: trocken und ruhig genug zum Auf- und Abbauen.",
+    verdictUsable: "Geht – aber rechne mit etwas Nässe oder Wind.",
+    verdictPoor:
+      "Kein gutes Fenster. Das beste von lauter schlechten bleibt schlecht.",
+    rainLabel: "Regen im Fenster",
+    rainNone: "kein Regen gemeldet",
+    rainAmount: (mm: number) => `${mm} mm`,
+    gustsLabel: "Stärkste Böe",
+    gusts: (kmh: number) => `${kmh} km/h`,
+    gustWarning:
+      "Bei solchen Böen stellt man ein Zelt nicht allein auf – warte lieber oder such dir Windschatten.",
+    note: "Gesucht wird das beste zusammenhängende Fenster in den nächsten 48 Stunden; bei Gleichstand gewinnt das frühere. Der Wind zählt über die BÖEN, nicht über das Mittel – weggeflogen ist ein Zelt in der Böe.",
+  },
+  weekendPicker: {
+    title: "Wohin am Wochenende?",
+    show: "Vergleichen",
+    range: (from: string, to: string) => `Samstag ${from} bis Sonntag ${to}`,
+    sortWeather: "Nach Wetter",
+    sortTravel: "Nach Fahrzeit",
+    dry: (score: number) => `trocken ${score}`,
+    warmth: (score: number) => `warm ${score}`,
+    wind: (score: number) => `windstill ${score}`,
+    noForecast: "Keine Prognose verfügbar.",
+    failed: "Der Wetterdienst antwortet gerade nicht.",
+    capped: (shown: number, total: number) =>
+      `Verglichen werden die ersten ${shown} von ${total} Plätzen.`,
+    note: "Die Note gewichtet Regen mit 55 %, Temperatur mit 30 % und Wind mit 15 % – Regen entscheidet, ob man fährt. Die Fahrzeit ist NICHT eingerechnet; sie steht daneben, weil nur du weisst, was dir eine Stunde Fahrt wert ist. Und alles hier ist eine Prognose, keine Zusage.",
+  },
+  pitchSketch: {
+    title: "Stellplatz-Skizze",
+    empty:
+      "Noch keine Skizze. Beim zweiten Besuch weiss man damit wieder, wie es gepasst hat.",
+    create: "Skizze anlegen",
+    edit: "Bearbeiten",
+    hint: "Gegenstand wählen, dann auf die Zielstelle tippen. Alles rastet auf einen halben Meter.",
+    addTitle: "Hinzufügen",
+    full: (max: number) =>
+      `Mehr als ${max} Gegenstände sind keine Skizze mehr.`,
+    itemWidth: "Breite (m)",
+    itemDepth: "Tiefe (m)",
+    pitchWidth: "Platz-Breite (m)",
+    pitchDepth: "Platz-Tiefe (m)",
+    rotate: "Drehen",
+    remove: "Entfernen",
+    moveLeft: "← links",
+    moveRight: "rechts →",
+    moveUp: "↑ vorne",
+    moveDown: "hinten ↓",
+    edgeLeft: "Abstand links",
+    edgeRight: "Abstand rechts",
+    edgeTop: "Abstand vorne",
+    edgeBottom: "Abstand hinten",
+    nearest: "Nächster Gegenstand",
+    alone: "steht allein",
+    overlap: (a: string, b: string) => `${a} und ${b} überlappen sich.`,
+    areaLine: (width: string, depth: string, used: number, total: number) =>
+      `Platz ${width} × ${depth} – belegt ${used} von ${total} m².`,
+    sketchAria: (width: string, depth: string, count: number) =>
+      `Stellplatz-Skizze, ${width} mal ${depth}, ${count} Gegenstände`,
+    itemAria: (name: string, width: string, depth: string) =>
+      `${name}, ${width} mal ${depth}`,
+    saved: "Skizze gespeichert.",
+  },
+  tripReview: {
+    title: "Rückblick",
+    toggleAria: (trip: string) => `Rückblick zu ${trip} öffnen`,
+    intro:
+      "Zwei Fragen, die die nächste Packliste besser machen. Gestrichen oder ergänzt wird nichts automatisch – die App zeigt beim nächsten Mal nur, was aufgefallen ist.",
+    unusedTitle: "Nicht gebraucht",
+    noList: "Zu dieser Reise ist keine Packliste verknüpft.",
+    emptyList: "Die Packliste ist leer.",
+    missingTitle: "Hat gefehlt",
+    missingPlaceholder: "z. B. Wäscheklammern",
+    missingAdd: "Hinzufügen",
+    missingRemove: (name: string) => `«${name}» entfernen`,
+    save: "Rückblick speichern",
+    saved: "Rückblick gespeichert.",
+    note: "Einmal nicht gebraucht heisst nichts – die Sonnencreme im verregneten Juli kommt nächstes Jahr wieder mit. Erst ab dem zweiten Mal wird daraus ein Hinweis. Was gefehlt hat, wird sofort vorgeschlagen.",
+  },
+  turnaround: {
+    stormForecast: (clock: string) => `Gewitter ab ${clock} angesagt.`,
+    stormPropensity: (clock: string) =>
+      `Ab ${clock} labile Luft – lokale Gewitter möglich.`,
+    stormBeatsSunset:
+      "Dann ist die Wolke die Deadline, nicht die Sonne – plane die Rückkehr davor.",
+    title: "Umkehrzeit",
+    shapeLabel: "Wegform",
+    outAndBack: "Hin und zurück",
+    loop: "Rundweg",
+    turnaroundLabel: "Spätestens umkehren",
+    latestStartLabel: "Spätester Start",
+    left: (duration: string) => `noch ${duration}`,
+    overdue: "Jetzt umkehren",
+    tooLong: (duration: string) =>
+      `Für die ganze Tour (${duration}) reicht der Tag nicht mehr.`,
+    bufferLabel: "Reserve vor Sonnenuntergang (Minuten)",
+    sunsetAt: (time: string) => `Sonnenuntergang ${time}`,
+    note: "Gerechnet vom Sonnenuntergang am Startpunkt. Im Wald und im Tal wird es deutlich früher dunkel – dafür ist die Reserve da.",
   },
   trash: {
     title: "Papierkorb",

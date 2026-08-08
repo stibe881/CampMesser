@@ -30,6 +30,7 @@ import {
   Check,
   ClipboardList,
   CloudSunRain,
+  KeyRound,
   ListChecks,
   NotebookPen,
   Refrigerator,
@@ -68,6 +69,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useTodayIso } from "@/lib/useTodayIso";
+import CampfireLight from "@/components/CampfireLight";
 
 export default function TodayPage() {
   const { lang, t } = useI18n();
@@ -280,6 +282,20 @@ export default function TodayPage() {
                 {nights === 0 ? td.departureToday : td.nightsLeft(nights)}
               </p>
             )}
+            {/* Check-in/Check-out (#400): Die Zeiten stehen seit #152 am
+                Platz – gesucht werden sie genau am An- und Abreisetag,
+                und genau dann stehen sie jetzt hier. An allen anderen
+                Tagen wäre die Zeile Lärm. */}
+            {spot?.checkinInfo &&
+              (trip.startDate === today || trip.endDate === today) && (
+                <p className="mt-1 flex items-center gap-1.5 text-sm">
+                  <KeyRound
+                    className="h-4 w-4 shrink-0 text-primary"
+                    aria-hidden="true"
+                  />
+                  {spot.checkinInfo}
+                </p>
+              )}
             {/* Das Wetter bestimmt den Tag – es gehört in die Kopfzeile,
                 nicht hinter einen Knopf. Ohne Koordinaten oder ohne Netz
                 bleibt die Zeile weg statt zu behaupten, es sei nichts. */}
@@ -295,6 +311,17 @@ export default function TodayPage() {
                   weather.label
                 )}
               </p>
+            )}
+            {/* Lagerfeuer-Ampel (#389): Die Frage stellt sich am Abend
+                genau hier. Ohne Platz-Koordinaten oder Prognose bleibt
+                sie weg – ein Urteil ohne Quellen wäre ein Orakel. */}
+            {spot && weather && (
+              <CampfireLight
+                latitude={spot.latitude}
+                longitude={spot.longitude}
+                gustsMaxKmh={weather.gustsMaxKmh}
+                className="mt-2"
+              />
             )}
             <div className="mt-3 flex flex-wrap gap-2">
               <Button asChild size="sm" variant="outline">

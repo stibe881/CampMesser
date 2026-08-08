@@ -12,6 +12,9 @@ import {
   storageCapacityWh,
   usablePercentOf,
   type PowerStorage,
+  INVERTER_EFFICIENCY,
+  applyWeatherToConsumers,
+  coolingHoursPerDay,
 } from "@shared/powerBudget";
 
 const storage = (patch: Partial<PowerStorage> = {}): PowerStorage => ({
@@ -326,5 +329,61 @@ describe("CONSUMER_TEMPLATES", () => {
       expect(template.hoursPerDay).toBeGreaterThan(0);
       expect(template.hoursPerDay).toBeLessThanOrEqual(24);
     }
+  });
+});
+
+/**
+ * Genauer rechnen (#405): Wechselrichter-Verlust und Kühlgeräte-Laufzeit
+ * aus dem Wetter – die zwei grössten Ungenauigkeiten des alten Rechners.
+ */
+describe("Wechselrichter-Verlust (#405)", () => {
+  it("ein 230-V-Gerät kostet den Umwandlungsverlust obendrauf", () => {
+    const dc = consumerDailyWh({ watts: 85, hoursPerDay: 2 });
+    const ac = consumerDailyWh({ watts: 85, hoursPerDay: 2, inverter: true });
+    expect(dc).toBe(170);
+    expect(ac).toBe(200);
+    expect(INVERTER_EFFICIENCY).toBe(0.85);
+  });
+
+  it("ohne Kennzeichen ändert sich nichts an alten Einträgen", () => {
+    expect(consumerDailyWh({ watts: 60, hoursPerDay: 8 })).toBe(480);
+  });
+});
+
+describe("Kühlgeräte nach Wetter (#405)", () => {
+  it("je wärmer, desto länger läuft der Kompressor", () => {
+    expect(coolingHoursPerDay(15)).toBeLessThan(coolingHoursPerDay(25));
+    expect(coolingHoursPerDay(25)).toBeLessThan(coolingHoursPerDay(35));
+  });
+
+  it("liefert plausible Werte: ~5 h bei 15 °C, ~12 h bei 30 °C", () => {
+    expect(coolingHoursPerDay(15)).toBe(5);
+    expect(coolingHoursPerDay(30)).toBe(12);
+  });
+
+  it("ist nach unten und oben gedeckelt", () => {
+    // Auch der Hitzesommer lässt den Kompressor nicht rund um die Uhr
+    // laufen – und im Winter steht er nie ganz still. Die Deckelwerte
+    // sind auf halbe Stunden gerundet (0,15 × 24 ≈ 3,5; 0,7 × 24 ≈ 17).
+    expect(coolingHoursPerDay(-10)).toBe(3.5);
+    expect(coolingHoursPerDay(45)).toBe(17);
+  });
+
+  it("applyWeatherToConsumers fasst NUR Kühlgeräte an", () => {
+    const consumers = [
+      { name: "Kühlbox", watts: 45, hoursPerDay: 8, cooling: true },
+      { name: "Licht", watts: 8, hoursPerDay: 4 },
+    ];
+    const adjusted = applyWeatherToConsumers(consumers, 30);
+    expect(adjusted[0].hoursPerDay).toBe(coolingHoursPerDay(30));
+    expect(adjusted[1].hoursPerDay).toBe(4);
+  });
+
+  it("ohne Prognose bleibt der gespeicherte Richtwert stehen", () => {
+    // Lieber der alte Richtwert als eine erfundene Zahl.
+    const consumers = [
+      { name: "Kühlbox", watts: 45, hoursPerDay: 8, cooling: true },
+    ];
+    expect(applyWeatherToConsumers(consumers, null)[0].hoursPerDay).toBe(8);
   });
 });

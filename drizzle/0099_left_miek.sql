@@ -1,0 +1,1 @@
+ALTER TABLE `spotPhotos` ADD `kind` varchar(12) DEFAULT 'foto' NOT NULL;

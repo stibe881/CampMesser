@@ -232,6 +232,106 @@ export function budgetStatus(
   };
 }
 
+// ── Budget-Hochrechnung (#398) ──────────────────────────────────────────
+
+/**
+ * Kategorien, die als GRUNDKOSTEN gelten: einmal bezahlt, nicht täglich.
+ *
+ * Die Platzmiete fällt am ersten Tag, der Sprit an den Fahrtagen – wer
+ * beides linear auf die restlichen Tage hochrechnet, «zahlt» den Platz
+ * in der Prognose jeden Tag noch einmal und erschrickt grundlos. Essen,
+ * Freizeit und Sonstiges dagegen laufen wirklich täglich weiter.
+ */
+export const ONE_OFF_CATEGORIES: readonly ExpenseCategory[] = [
+  "camping",
+  "sprit",
+];
+
+export interface BudgetForecast {
+  /** Voraussichtliche Gesamtausgaben am Ende der Reise. */
+  projectedRappen: number;
+  /** Grundkosten (Platz, Sprit) – zählen einmal, nicht täglich. */
+  baseRappen: number;
+  /** Laufende Kosten bisher (Essen, Freizeit, Sonstiges). */
+  variableRappen: number;
+  /** Laufende Kosten pro Tag bisher. */
+  variablePerDayRappen: number;
+  elapsedDays: number;
+  remainingDays: number;
+  /** Einschätzung gegen das Budget; null, wenn keines gesetzt ist. */
+  level: BudgetLevel | null;
+}
+
+/** Tage von `from` bis `to` einschliesslich beider; 0 bei Unlesbarem. */
+function daysInclusive(from: string, to: string): number {
+  const start = Date.parse(`${from}T00:00:00Z`);
+  const end = Date.parse(`${to}T00:00:00Z`);
+  if (Number.isNaN(start) || Number.isNaN(end) || end < start) return 0;
+  return Math.round((end - start) / 86400000) + 1;
+}
+
+/**
+ * «Reicht das Budget bei diesem Tempo?» – die Hochrechnung während der
+ * laufenden Reise.
+ *
+ * NUR WÄHREND DER REISE, und nur solange noch Tage übrig sind: Vor der
+ * Abreise gibt es kein Tempo, am letzten Tag nichts mehr hochzurechnen,
+ * und nach der Heimkehr ist die Kasse Geschichte, keine Prognose.
+ *
+ * Grundkosten (Platz, Sprit) zählen einmal; hochgerechnet werden nur
+ * die laufenden Kategorien – Begründung bei `ONE_OFF_CATEGORIES`.
+ */
+export function budgetForecast(args: {
+  expenses: readonly ExpenseLike[];
+  startDate: string;
+  endDate: string;
+  todayIso: string;
+  budgetRappen?: number | null;
+}): BudgetForecast | null {
+  const totalDays = daysInclusive(args.startDate, args.endDate);
+  const elapsedDays = daysInclusive(args.startDate, args.todayIso);
+  if (totalDays === 0 || elapsedDays === 0) return null;
+  const remainingDays = totalDays - elapsedDays;
+  if (remainingDays < 1) return null;
+
+  let baseRappen = 0;
+  let variableRappen = 0;
+  for (const expense of args.expenses) {
+    const amount = cleanRappen(expense.amountRappen);
+    if (
+      ONE_OFF_CATEGORIES.includes(normalizeExpenseCategory(expense.category))
+    ) {
+      baseRappen += amount;
+    } else {
+      variableRappen += amount;
+    }
+  }
+
+  const variablePerDayRappen = Math.round(variableRappen / elapsedDays);
+  const projectedRappen =
+    baseRappen + variableRappen + variablePerDayRappen * remainingDays;
+
+  const budget = cleanRappen(args.budgetRappen ?? 0);
+  const level: BudgetLevel | null =
+    budget > 0
+      ? projectedRappen > budget
+        ? "over"
+        : projectedRappen >= budget * BUDGET_TIGHT_RATIO
+          ? "tight"
+          : "ok"
+      : null;
+
+  return {
+    projectedRappen,
+    baseRappen,
+    variableRappen,
+    variablePerDayRappen,
+    elapsedDays,
+    remainingDays,
+    level,
+  };
+}
+
 /**
  * Budget pro Nacht – die ehrlichere Zahl beim Vergleich zweier Reisen.
  * Ohne Nächte (Tagesausflug) gibt es keine, dann kommt null zurück.

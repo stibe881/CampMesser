@@ -155,6 +155,14 @@ export function usablePercentOf(storage: PowerStorage | null): number {
   return Math.max(MIN_USABLE_PERCENT, Math.min(100, Math.round(value)));
 }
 
+/**
+ * Wirkungsgrad des Wechselrichters (#405): Ein 230-V-Gerät an der
+ * 12-V-Anlage bezieht seine Watt HINTER dem Wechselrichter – der Speicher
+ * gibt rund 15 % mehr her, als auf dem Typenschild steht. Wer das nicht
+ * rechnet, wundert sich am dritten Tag über den leeren Akku.
+ */
+export const INVERTER_EFFICIENCY = 0.85;
+
 /** Ein Verbraucher, wie er in die Rechnung eingeht. */
 export interface PowerConsumer {
   name?: string;
@@ -164,6 +172,14 @@ export interface PowerConsumer {
   hoursPerDay: number;
   /** false = ausgeschaltet und damit nicht gerechnet. */
   enabled?: boolean;
+  /** 230-V-Gerät am Wechselrichter – kostet den Umwandlungsverlust (#405). */
+  inverter?: boolean;
+  /**
+   * Kühlgerät (#405): Die LAUFZEIT des Kompressors hängt an der
+   * Aussentemperatur, nicht am Bauchgefühl – sie kommt dann aus der
+   * Wetterprognose (`coolingHoursPerDay`) statt von Hand.
+   */
+  cooling?: boolean;
 }
 
 /** Verbrauch eines Verbrauchers in Wh pro Tag (nie negativ, max. 24 h). */
@@ -175,7 +191,48 @@ export function consumerDailyWh(consumer: PowerConsumer): number {
   const hours = Number.isFinite(consumer.hoursPerDay)
     ? Math.max(0, Math.min(24, consumer.hoursPerDay))
     : 0;
-  return Math.round(watts * hours * 10) / 10;
+  const raw = watts * hours;
+  // Der Wechselrichter-Verlust kommt OBEN drauf: Das Typenschild nennt,
+  // was das Gerät zieht – der Speicher liefert mehr.
+  const withInverter = consumer.inverter ? raw / INVERTER_EFFICIENCY : raw;
+  return Math.round(withInverter * 10) / 10;
+}
+
+// ── Kühlgeräte nach Wetter (#405) ──────────────────────────────────────────
+
+/**
+ * Kompressor-Laufzeit aus der Tageshöchsttemperatur.
+ *
+ * DIE GRÖSSTE UNGENAUIGKEIT des alten Rechners war genau diese Zahl: Ob
+ * die Kühlbox 5 oder 12 Stunden läuft, macht bei 45 W mehr aus als jede
+ * andere Angabe – und niemand weiss sie auswendig, weil sie vom Wetter
+ * abhängt. Die Faustkurve: Bei 15 °C läuft der Kompressor rund 20 % der
+ * Zeit, je Grad mehr etwa 2 Prozentpunkte länger; gedeckelt bei 70 %
+ * (mehr schafft auch ein Sommer nicht, solange das Gerät passt).
+ * Anhaltspunkte aus der Praxis, keine Herstellerangabe – deshalb bleibt
+ * die Laufzeit von Hand übersteuerbar.
+ */
+export function coolingHoursPerDay(tempMaxC: number): number {
+  if (!Number.isFinite(tempMaxC)) return 8;
+  const duty = Math.max(0.15, Math.min(0.7, 0.2 + 0.02 * (tempMaxC - 15)));
+  return Math.round(duty * 24 * 2) / 2;
+}
+
+/**
+ * Kühlgeräten die Laufzeit aus dem Wetter geben. Ohne Temperatur (keine
+ * Prognose geladen) bleibt der gespeicherte Wert stehen – lieber der alte
+ * Richtwert als eine erfundene Zahl.
+ */
+export function applyWeatherToConsumers<T extends PowerConsumer>(
+  consumers: readonly T[],
+  tempMaxC: number | null
+): T[] {
+  if (tempMaxC === null) return consumers.slice();
+  return consumers.map(consumer =>
+    consumer.cooling
+      ? { ...consumer, hoursPerDay: coolingHoursPerDay(tempMaxC) }
+      : consumer
+  );
 }
 
 export interface ConsumerShare {
@@ -376,6 +433,10 @@ export interface ConsumerTemplate {
   key: ConsumerTemplateKey;
   watts: number;
   hoursPerDay: number;
+  /** Kühlgerät: Laufzeit kommt aus dem Wetter (#405). */
+  cooling?: boolean;
+  /** Typisches 230-V-Gerät am Wechselrichter (#405). */
+  inverter?: boolean;
 }
 
 /**
@@ -385,17 +446,17 @@ export interface ConsumerTemplate {
  * dem Typenschild steht, gilt immer vor der Vorlage.
  */
 export const CONSUMER_TEMPLATES: ConsumerTemplate[] = [
-  { key: "fridge", watts: 60, hoursPerDay: 8 },
-  { key: "coolbox", watts: 45, hoursPerDay: 8 },
+  { key: "fridge", watts: 60, hoursPerDay: 8, cooling: true },
+  { key: "coolbox", watts: 45, hoursPerDay: 8, cooling: true },
   { key: "led", watts: 8, hoursPerDay: 4 },
   { key: "phone", watts: 15, hoursPerDay: 2 },
-  { key: "laptop", watts: 60, hoursPerDay: 2 },
+  { key: "laptop", watts: 60, hoursPerDay: 2, inverter: true },
   { key: "pump", watts: 50, hoursPerDay: 0.5 },
   { key: "heater", watts: 30, hoursPerDay: 6 },
   { key: "fan", watts: 15, hoursPerDay: 4 },
   { key: "camera", watts: 20, hoursPerDay: 1.5 },
   { key: "drone", watts: 90, hoursPerDay: 1 },
-  { key: "tv", watts: 40, hoursPerDay: 2 },
+  { key: "tv", watts: 40, hoursPerDay: 2, inverter: true },
   { key: "router", watts: 10, hoursPerDay: 12 },
 ];
 

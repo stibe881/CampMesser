@@ -7,6 +7,7 @@ import { Redirect, Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import OfflinePrecache from "./components/OfflinePrecache";
 import AppShell from "./components/AppShell";
+import CookieNotice from "./components/CookieNotice";
 import NativeNavigation from "./components/NativeNavigation";
 import WidgetSync from "./components/WidgetSync";
 import { ConfirmProvider } from "./components/ConfirmDialog";
@@ -62,6 +63,8 @@ const pageLoaders = {
   Spots: () => import("./pages/Spots"),
   MapView: () => import("./pages/MapView"),
   SpotDetail: () => import("./pages/SpotDetail"),
+  Impressum: () => import("./pages/Impressum"),
+  Datenschutz: () => import("./pages/Datenschutz"),
   TentFinder: () => import("./pages/TentFinder"),
   Hike: () => import("./pages/Hike"),
   Trips: () => import("./pages/Trips"),
@@ -183,6 +186,8 @@ const ProfilePage = lazyWithRetry(pageLoaders.Profile);
 const SharedPackListPage = lazyWithRetry(pageLoaders.SharedPackList);
 const SharedShoppingPage = lazyWithRetry(pageLoaders.SharedShopping);
 const SharedSpotPage = lazyWithRetry(pageLoaders.SharedSpot);
+const ImpressumPage = lazyWithRetry(pageLoaders.Impressum);
+const DatenschutzPage = lazyWithRetry(pageLoaders.Datenschutz);
 const SharedLocationPage = lazyWithRetry(pageLoaders.SharedLocation);
 const SharedTemplatePage = lazyWithRetry(pageLoaders.SharedTemplate);
 const SharedQuizPage = lazyWithRetry(pageLoaders.SharedQuiz);
@@ -302,6 +307,9 @@ function Router() {
             component={SharedShoppingPage}
           />
           <Route path={"/platz/:token"} component={SharedSpotPage} />
+          {/* Rechtliches (#409): öffentlich erreichbar, auch ohne Konto */}
+          <Route path={"/impressum"} component={ImpressumPage} />
+          <Route path={"/datenschutz"} component={DatenschutzPage} />
           <Route path={"/standort/:token"} component={SharedLocationPage} />
           <Route path={"/vorlage/:token"} component={SharedTemplatePage} />
           <Route path={"/quiz/:token"} component={SharedQuizPage} />
@@ -360,6 +368,9 @@ function App() {
                 LanguageProvider, weil die Knöpfe übersetzt sind */}
             <ConfirmProvider>
               <Router />
+              {/* Cookie-Hinweis (#409): nur im Web, nur bis zum ersten
+                  «Verstanden» – Begründung in der Komponente. */}
+              <CookieNotice />
             </ConfirmProvider>
           </LanguageProvider>
         </TooltipProvider>

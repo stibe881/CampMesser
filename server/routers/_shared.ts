@@ -92,6 +92,7 @@ import {
 export { buildTripSectionCounts } from "@shared/tripSectionCounts";
 export { buildTripReadinessCounts } from "@shared/tripReadinessCounts";
 export { boardAlertText, tripJoinAlertText } from "@shared/pushTexts";
+export { cleanFeedbackName, MAX_MISSING_PER_TRIP } from "@shared/packFeedback";
 export { tripDisplayName } from "@shared/tripName";
 export { notifyUsers } from "../push";
 export {
@@ -99,6 +100,16 @@ export {
   serializeSpotTariffs,
   TARIFFS_JSON_MAX_LENGTH,
 } from "@shared/spotTariffs";
+export {
+  parsePitchSketch,
+  serializePitchSketch,
+  PITCH_SKETCH_JSON_MAX_LENGTH,
+} from "@shared/pitchSketch";
+export {
+  parseNextTimeNotes,
+  serializeNextTimeNotes,
+  NEXT_TIME_JSON_MAX_LENGTH,
+} from "@shared/nextTime";
 import {
   NOTE_TAG_MAX_LENGTH,
   NOTE_TEXT_MAX_LENGTH,
@@ -199,7 +210,14 @@ import {
   MAX_CHORES,
   MAX_CHORE_TITLE_LENGTH,
   rotateAssignments,
+  scoreboard,
 } from "@shared/chores";
+import {
+  MAX_REWARDS,
+  REWARD_TITLE_MAX_LENGTH,
+  availablePoints,
+  clampRewardPoints,
+} from "@shared/rewards";
 import { MAX_PACK_SUGGESTIONS, packSuggestions } from "@shared/packHistory";
 import { MAX_STARS, clampStars } from "@shared/spotRatings";
 import {
@@ -507,6 +525,8 @@ export {
   MAX_CHORES,
   MAX_CHORE_TITLE_LENGTH,
   MAX_DATE_OPTIONS,
+  MAX_REWARDS,
+  REWARD_TITLE_MAX_LENGTH,
   MAX_EXPIRY_DAYS,
   MAX_FOOD_ITEM_NAME_LENGTH,
   MAX_FOOD_ITEM_QUANTITY_LENGTH,
@@ -614,6 +634,9 @@ export {
   publicProcedure,
   remapMenuDays,
   rotateAssignments,
+  scoreboard,
+  availablePoints,
+  clampRewardPoints,
   routeDistanceM,
   routeElevation,
   routeLengthM,

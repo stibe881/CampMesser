@@ -18,6 +18,12 @@ export interface DossierWeather {
     weatherCode: number;
   }[];
   alerts: WeatherAlert[];
+  /**
+   * Höchste Böe der nächsten 24 Stunden in km/h; null, wenn der Dienst
+   * sie nicht liefert. Für die Lagerfeuer-Ampel (#389) – die Stunden
+   * werden hier ohnehin gelesen, ein zweiter Abruf wäre Verschwendung.
+   */
+  maxGusts24hKmh: number | null;
 }
 
 export async function fetchDossierWeather(
@@ -63,5 +69,14 @@ export async function fetchDossierWeather(
       weatherCode: json.daily.weather_code[i],
     })),
     alerts: detectAlerts(hourly, lang),
+    maxGusts24hKmh: hourly
+      .slice(0, 24)
+      .reduce<number | null>(
+        (max, hour) =>
+          Number.isFinite(hour.windGustsKmh)
+            ? Math.max(max ?? 0, Math.round(hour.windGustsKmh))
+            : max,
+        null
+      ),
   };
 }

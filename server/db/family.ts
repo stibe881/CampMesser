@@ -8,6 +8,8 @@ import {
   InsertCampChore,
   InsertChoreAssignment,
   InsertFamilyChild,
+  InsertFamilyRedemption,
+  InsertFamilyReward,
   InsertTreasureHunt,
   InsertTreasurePoint,
   and,
@@ -19,6 +21,8 @@ import {
   desc,
   eq,
   familyChildren,
+  familyRedemptions,
+  familyRewards,
   getDb,
   passportAbsences,
   requireDb,
@@ -298,4 +302,39 @@ export async function deleteChoreAssignmentsForDay(
     .where(
       and(eq(choreAssignments.userId, userId), eq(choreAssignments.day, day))
     );
+}
+
+// ── Belohnungs-Ziele (#399) ──
+export async function getFamilyRewards(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(familyRewards)
+    .where(eq(familyRewards.userId, userId))
+    .orderBy(asc(familyRewards.points), asc(familyRewards.id));
+}
+export async function addFamilyReward(data: InsertFamilyReward) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(familyRewards).values(data);
+  return result.insertId;
+}
+export async function deleteFamilyReward(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(familyRewards)
+    .where(and(eq(familyRewards.id, id), eq(familyRewards.userId, userId)));
+}
+/** Einlösungen, die Jüngste zuoberst – die Geschichte liest sich rückwärts. */
+export async function getFamilyRedemptions(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(familyRedemptions)
+    .where(eq(familyRedemptions.userId, userId))
+    .orderBy(desc(familyRedemptions.id));
+}
+export async function addFamilyRedemption(data: InsertFamilyRedemption) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(familyRedemptions).values(data);
+  return result.insertId;
 }

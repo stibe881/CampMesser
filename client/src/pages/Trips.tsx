@@ -20,6 +20,7 @@ import TripHolidayHints from "@/components/trips/TripHolidayHints";
 import TripJournal from "@/components/trips/TripJournal";
 import TripMembersDialog from "@/components/trips/TripMembersDialog";
 import TripPackSuggestions from "@/components/trips/TripPackSuggestions";
+import PackExperienceHints from "@/components/trips/PackExperienceHints";
 import TripPitchDetails from "@/components/trips/TripPitchDetails";
 import TripReadinessCard from "@/components/trips/TripReadinessCard";
 import TripShareDialog from "@/components/trips/TripShareDialog";
@@ -185,6 +186,9 @@ import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import LazySection from "@/components/LazySection";
 import TripMoreSections from "@/components/trips/TripMoreSections";
+import TripReview from "@/components/trips/TripReview";
+import TripOfflinePrep from "@/components/trips/TripOfflinePrep";
+import NextTimeReminder from "@/components/trips/NextTimeReminder";
 import TripYearReview from "@/components/trips/TripYearReview";
 import TripDatePoll from "@/components/TripDatePoll";
 import TripGuestbook from "@/components/TripGuestbook";
@@ -1600,6 +1604,11 @@ export default function TripsPage() {
                           endDate={trip.endDate}
                         />
                       )}
+                      {/* Was frühere Reisen über diese Liste sagen (#381) –
+                          nur solange Packen noch ein Thema ist. */}
+                      {packingMatters && trip.packListId != null && (
+                        <PackExperienceHints listId={trip.packListId} />
+                      )}
                       <div className="mt-2 flex flex-wrap gap-2">
                         {/* Der Weg zu allem Übrigen (#359): In der Liste
                             stehen nur noch Titelzeile, Bereitschaft und
@@ -1752,6 +1761,9 @@ export default function TripsPage() {
                               }
                               shared={trip.shared || trip.role === "member"}
                               budgetRappen={trip.budgetRappen}
+                              spotId={trip.spotId}
+                              startDate={trip.startDate}
+                              endDate={trip.endDate}
                             />
                           </Suspense>
                           {/* Termin-Finder (#253): nur bei gemeinsamen Reisen und
@@ -1793,7 +1805,24 @@ export default function TripsPage() {
                           {/* SELTENES HINTER EINEN SCHALTER (#357): Verlauf, Gästebuch
                             und Reservation braucht man selten – als eigene graue
                             Balken machten sie den Stapel unlesbar. */}
-                          <TripMoreSections count={3}>
+                          {/* «Beim nächsten Mal» (#396): Die Notiz vom
+                            letzten Aufenthalt gehört GENAU hierher – beim
+                            Planen der nächsten Reise an denselben Platz,
+                            nicht versteckt im Dossier. */}
+                          {trip.spotId != null && (
+                            <NextTimeReminder spotId={trip.spotId} />
+                          )}
+                          <TripMoreSections count={4}>
+                            {/* Für unterwegs vorbereiten (#387): Offline gab
+                              es bisher stückweise, und man musste an
+                              mehrere Dinge einzeln denken. Ein Knopf für
+                              diese Reise – vor der Abfahrt, nicht im
+                              Funkloch. */}
+                            <TripOfflinePrep
+                              tripId={trip.id}
+                              spotId={trip.spotId}
+                              packListId={trip.packListId}
+                            />
                             {/* Änderungsverlauf (#296): nur bei gemeinsamen
                               Reisen – allein ist «wer war das» schon
                               beantwortet */}
@@ -2157,6 +2186,9 @@ export default function TripsPage() {
                               }
                               shared={trip.shared || trip.role === "member"}
                               budgetRappen={trip.budgetRappen}
+                              spotId={trip.spotId}
+                              startDate={trip.startDate}
+                              endDate={trip.endDate}
                             />
                             {/* Pinnwand (#245, für jede Reise seit #344) */}
                             <TripBoard
@@ -2177,7 +2209,16 @@ export default function TripsPage() {
                               endDate={trip.endDate}
                             />
                             {/* Seltenes hinter einen Schalter (#357) */}
-                            <TripMoreSections count={3}>
+                            <TripMoreSections count={4}>
+                              {/* Rückblick (#381): Erst nach der Reise
+                                weiss man, was nicht nötig war und was
+                                gefehlt hat – und nur dann verbessert es
+                                die nächste Liste. */}
+                              <TripReview
+                                tripId={trip.id}
+                                packListId={trip.packListId}
+                                tripName={label(trip)}
+                              />
                               {/* Änderungsverlauf (#296) auch rückblickend:
                                 «wer hat das damals eingetragen» */}
                               {(trip.shared || trip.role === "member") && (

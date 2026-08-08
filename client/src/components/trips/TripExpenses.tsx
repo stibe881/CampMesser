@@ -56,6 +56,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/_core/hooks/useAuth";
+import PitchCostEstimator from "./PitchCostEstimator";
 import { trpc } from "@/lib/trpc";
 import { useI18n, useT } from "@/i18n";
 import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
@@ -66,6 +67,7 @@ import {
 } from "@shared/collageLayout";
 import { cn } from "@/lib/utils";
 import { formatChf, parseChfInput, rappenToInput } from "@/lib/money";
+import { useTodayIso } from "@/lib/useTodayIso";
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_LABELS,
@@ -73,6 +75,7 @@ import {
   EXPENSE_MAX_RAPPEN,
   EXPENSE_PAID_BY_MAX_LENGTH,
   expensesByCategory,
+  budgetForecast,
   budgetStatus,
   BUDGET_MAX_RAPPEN,
   expensesTotalRappen,
@@ -130,6 +133,9 @@ export default function TripExpenses({
   defaultDay,
   shared,
   budgetRappen,
+  spotId,
+  startDate,
+  endDate,
 }: {
   tripId: number;
   tripName: string;
@@ -138,9 +144,14 @@ export default function TripExpenses({
   shared: boolean;
   /** Reise-Budget in Rappen (#256); null = keins gesetzt. */
   budgetRappen: number | null;
+  /** Verknüpfter Zeltplatz – Quelle der Tarife für die Schätzung (#386). */
+  spotId: number | null;
+  startDate: string;
+  endDate: string;
 }) {
   const ask = useConfirm();
   const { lang, t } = useI18n();
+  const today = useTodayIso();
   const { user } = useAuth();
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
@@ -229,6 +240,19 @@ export default function TripExpenses({
   const badgeTotal = open && !query.isLoading ? total : storedTotal;
   const byCategory = useMemo(() => expensesByCategory(expenses), [expenses]);
   const budget = budgetStatus(total, budgetRappen);
+  // Hochrechnung (#398): nur WÄHREND der Reise, solange Tage übrig sind –
+  // die Regeln (Platz & Sprit einmalig) stehen in shared/expenses.ts.
+  const forecast = useMemo(
+    () =>
+      budgetForecast({
+        expenses,
+        startDate,
+        endDate,
+        todayIso: today,
+        budgetRappen,
+      }),
+    [expenses, startDate, endDate, today, budgetRappen]
+  );
   const budgetMutation = trpc.trips.expenses.setBudget.useMutation({
     onSuccess: () => {
       utils.trips.list.invalidate();
@@ -492,6 +516,32 @@ export default function TripExpenses({
                         budget.percent
                       )}
                 </p>
+                {/* Hochrechnung (#398): «Reicht das bei diesem Tempo?» –
+                    die Frage stellt sich mitten in der Reise, nicht am
+                    Ende, wenn der Stand-Balken sie längst beantwortet. */}
+                {forecast && (
+                  <>
+                    <p
+                      className={cn(
+                        "mt-1.5 text-xs",
+                        forecast.level === "over"
+                          ? "font-medium text-destructive"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {t.tripExpenses.forecastLine(
+                        money(forecast.projectedRappen),
+                        forecast.elapsedDays,
+                        forecast.elapsedDays + forecast.remainingDays
+                      )}
+                      {forecast.level === "over" &&
+                        ` ${t.tripExpenses.forecastOver}`}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      {t.tripExpenses.forecastNote}
+                    </p>
+                  </>
+                )}
                 <Button
                   size="sm"
                   variant="ghost"
@@ -636,6 +686,17 @@ export default function TripExpenses({
                     <Download className="mr-1.5 h-4 w-4" aria-hidden="true" />
                     {t.tripExpenses.csvButton}
                   </Button>
+
+                  {/* Platzkosten schätzen (#386): Tarife (#369) × Nächte ×
+                      Personen. Trägt nichts von selbst ein – die Rezeption
+                      rechnet am Ende doch anders. */}
+                  <PitchCostEstimator
+                    tripId={tripId}
+                    spotId={spotId}
+                    startDate={startDate}
+                    endDate={endDate}
+                    onAdded={invalidate}
+                  />
 
                   {/* Fahrtkosten-Rechner (#259): der einzige Posten ohne
                       Beleg – man weiss nur, wie weit man gefahren ist */}
