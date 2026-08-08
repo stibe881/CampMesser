@@ -748,6 +748,8 @@ export const pushSubscriptions = mysqlTable(
     lastTripKey: varchar("lastTripKey", { length: 64 }),
     /** Schlüssel der letzten Trocknungs-Erinnerung («dry:<tripId>»): max. 1 Erinnerung pro Heimkehr */
     lastDryKey: varchar("lastDryKey", { length: 64 }),
+    /** Dedup des Wetterumschwung-Push (#427): «turn:<tripId>:<morgen>». */
+    lastTurnKey: varchar("lastTurnKey", { length: 64 }),
     /** Schlüssel des letzten Sternschnuppen-Tipps («astro:YYYY-MM-DD»): max. 1 pro Nacht */
     lastAstroKey: varchar("lastAstroKey", { length: 64 }),
     /** Schlüssel der letzten Pflege-Erinnerung («gear:YYYY-MM»): max. 1 pro Monat */

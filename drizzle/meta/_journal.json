@@ -715,6 +715,13 @@
       "when": 1786142324794,
       "tag": "0101_clumsy_otto_octavius",
       "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "5",
+      "when": 1786198809821,
+      "tag": "0102_happy_firebird",
+      "breakpoints": true
     }
   ]
 }

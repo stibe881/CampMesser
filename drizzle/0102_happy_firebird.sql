@@ -1,0 +1,1 @@
+ALTER TABLE `pushSubscriptions` ADD `lastTurnKey` varchar(64);
