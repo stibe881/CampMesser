@@ -1505,6 +1505,11 @@ export const de = {
     geoFailed:
       "Standort konnte nicht ermittelt werden. Bitte erneut versuchen.",
     coordsCopied: "Koordinaten kopiert",
+    phraseTitle: "Satz zum Vorlesen",
+    phraseHint:
+      "Für den Notruf im Ausland: den Satz in der Sprache der Zentrale vorlesen – die Koordinaten stehen schon drin.",
+    phraseCopyAria: (language: string) =>
+      `Notruf-Satz auf ${language} kopieren`,
     copyFailed: "Kopieren nicht möglich",
     locationTitle: "Dein Standort",
     refresh: "Aktualisieren",

@@ -1506,6 +1506,11 @@ export const fr: Translation = {
       "Accès à la position refusé. Autorise-le dans les réglages du navigateur.",
     geoFailed: "Impossible de déterminer la position. Réessaie.",
     coordsCopied: "Coordonnées copiées",
+    phraseTitle: "Phrase à lire",
+    phraseHint:
+      "Pour l'appel d'urgence à l'étranger : lis la phrase dans la langue de la centrale – les coordonnées y figurent déjà.",
+    phraseCopyAria: (language: string) =>
+      `Copier la phrase d'urgence en ${language}`,
     copyFailed: "Copie impossible",
     locationTitle: "Ta position",
     refresh: "Actualiser",

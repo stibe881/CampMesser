@@ -21,7 +21,8 @@ import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { formatDMS, wgs84ToLV95 } from "@/lib/sun";
 import { EMERGENCY_COUNTRIES } from "@shared/emergencyNumbers";
-import { LOCALE_TAGS, pick } from "@shared/i18n";
+import { LANGUAGES, LANGUAGE_LABELS, LOCALE_TAGS, pick } from "@shared/i18n";
+import { emergencyPhrase } from "@shared/emergencyPhrase";
 import {
   DEFAULT_LOCATION_SHARE_HOURS,
   LOCATION_SHARE_EXPIRY_HOURS,
@@ -472,6 +473,50 @@ export default function SosPage() {
                       )
                     )}
                 </p>
+
+                {/* Satz zum Vorlesen (#448): die Position in der Sprache
+                    der Notrufzentrale – vorlesen statt formulieren */}
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {t.sos.phraseTitle}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {t.sos.phraseHint}
+                  </p>
+                  <ul className="mt-2 space-y-1.5">
+                    {LANGUAGES.map(phraseLang => {
+                      const phrase = emergencyPhrase(
+                        phraseLang,
+                        geo.lat!,
+                        geo.lng!
+                      );
+                      return (
+                        <li
+                          key={phraseLang}
+                          className="flex items-center gap-2 rounded-lg bg-muted p-3"
+                        >
+                          <span className="w-7 shrink-0 text-xs font-bold uppercase text-muted-foreground">
+                            {phraseLang}
+                          </span>
+                          <span className="min-w-0 flex-1 text-sm">
+                            {phrase}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 shrink-0"
+                            onClick={() => copyCoords(phrase)}
+                            aria-label={t.sos.phraseCopyAria(
+                              LANGUAGE_LABELS[phraseLang]
+                            )}
+                          >
+                            <Copy className="h-4 w-4" aria-hidden="true" />
+                          </Button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               </div>
             )}
         </CardContent>

@@ -1484,6 +1484,11 @@ export const it: Translation = {
       "Accesso alla posizione negato. Autorizzalo nelle impostazioni del browser.",
     geoFailed: "Impossibile determinare la posizione. Riprova.",
     coordsCopied: "Coordinate copiate",
+    phraseTitle: "Frase da leggere",
+    phraseHint:
+      "Per la chiamata d'emergenza all'estero: leggi la frase nella lingua della centrale – le coordinate sono già incluse.",
+    phraseCopyAria: (language: string) =>
+      `Copia la frase d'emergenza in ${language}`,
     copyFailed: "Copia non possibile",
     locationTitle: "La tua posizione",
     refresh: "Aggiorna",

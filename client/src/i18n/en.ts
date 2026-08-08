@@ -1455,6 +1455,11 @@ export const en: Translation = {
       "Location access denied. Please allow it in your browser settings.",
     geoFailed: "Could not determine your location. Please try again.",
     coordsCopied: "Coordinates copied",
+    phraseTitle: "Sentence to read out",
+    phraseHint:
+      "For emergency calls abroad: read the sentence in the dispatcher's language – the coordinates are already in it.",
+    phraseCopyAria: (language: string) =>
+      `Copy the emergency sentence in ${language}`,
     copyFailed: "Copying not possible",
     locationTitle: "Your location",
     refresh: "Refresh",
