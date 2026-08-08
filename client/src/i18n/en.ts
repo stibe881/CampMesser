@@ -2749,6 +2749,16 @@ export const en: Translation = {
     fuelApply: "Add to the kitty",
     fuelInvalid: "Please enter distance, consumption and price.",
     fuelDescription: (km: number) => `Drive ${km} km`,
+    powerTitle: "Pitch electricity meter",
+    powerHint:
+      "Reading on arrival and departure; the price per kWh is posted on the hook-up box. Entries stay saved per trip.",
+    powerStartLabel: "Arrival reading (kWh)",
+    powerEndLabel: "Departure reading (kWh)",
+    powerPriceLabel: "Price per kWh (CHF)",
+    powerResult: (kwh: string, amount: string) => `${kwh} kWh ≈ ${amount}`,
+    powerApply: "Add to the kitty",
+    powerInvalid: "Please enter both readings and the price.",
+    powerDescription: (kwh: number) => `Electricity ${kwh} kWh`,
     csvButton: "Export as CSV",
     csvAria: (trip: string) => `Download the kitty for ${trip} as CSV`,
     csvHeaders: [

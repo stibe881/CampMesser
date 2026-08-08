@@ -95,6 +95,7 @@ import {
   DEFAULT_FUEL_PRICE_RAPPEN,
   fuelCost,
 } from "@shared/fuelCost";
+import { parseKwhInput, powerMeterCost } from "@shared/powerMeter";
 import {
   TRIP_BOARD_KINDS,
   TRIP_BOARD_KIND_LABELS,
@@ -118,6 +119,12 @@ import {
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import { todayIso } from "@shared/localDate";
+
+/**
+ * Stromzähler-Eingaben (#442) pro Reise in localStorage: Der Stand bei
+ * Ankunft muss bis zur Abreise überleben – Wochen später, anderes Öffnen.
+ */
+const POWER_STORAGE_PREFIX = "campmesser.powerMeter.";
 
 const EXPENSE_CATEGORY_BARS: Record<ExpenseCategory, string> = {
   camping: "bg-chart-1",
@@ -193,6 +200,34 @@ export default function TripExpenses({
     rappenToInput(DEFAULT_FUEL_PRICE_RAPPEN)
   );
   const [fuelRoundTrip, setFuelRoundTrip] = useState(true);
+  /** Stromzähler (#442): Stand Ankunft/Abreise + Preis pro kWh. */
+  const [powerOpen, setPowerOpen] = useState(false);
+  const [power, setPower] = useState(() => {
+    try {
+      const raw = localStorage.getItem(POWER_STORAGE_PREFIX + tripId);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<Record<string, string>>;
+        return {
+          start: typeof parsed.start === "string" ? parsed.start : "",
+          end: typeof parsed.end === "string" ? parsed.end : "",
+          price: typeof parsed.price === "string" ? parsed.price : "",
+        };
+      }
+    } catch {
+      // defekter Eintrag – leer starten
+    }
+    return { start: "", end: "", price: "" };
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        POWER_STORAGE_PREFIX + tripId,
+        JSON.stringify(power)
+      );
+    } catch {
+      // Speicher voll/blockiert – der Rechner funktioniert trotzdem
+    }
+  }, [power, tripId]);
 
   const query = trpc.trips.expenses.list.useQuery(
     { tripId },
@@ -411,6 +446,31 @@ export default function TripExpenses({
       knownPayers[0] ?? user?.name ?? user?.email ?? t.tripExpenses.meFallback
     );
     setFuelOpen(false);
+  };
+
+  /** Zwischenstand des Stromzähler-Rechners (#442). */
+  const powerResult = powerMeterCost({
+    startKwh: parseKwhInput(power.start) ?? Number.NaN,
+    endKwh: parseKwhInput(power.end) ?? Number.NaN,
+    pricePerKwhRappen: parseChfInput(power.price) ?? 0,
+  });
+
+  /** Wie beim Sprit (#259): vorausfüllen statt eintragen. */
+  const applyPowerResult = () => {
+    if (powerResult.rappen < 1) {
+      toast.error(t.tripExpenses.powerInvalid);
+      return;
+    }
+    setEditing("neu");
+    setAmount(rappenToInput(powerResult.rappen));
+    setCurrency("CHF");
+    setCategory("camping");
+    setDescription(t.tripExpenses.powerDescription(powerResult.kwh));
+    setDay(defaultDay);
+    setPaidBy(
+      knownPayers[0] ?? user?.name ?? user?.email ?? t.tripExpenses.meFallback
+    );
+    setPowerOpen(false);
   };
 
   /**
@@ -961,6 +1021,113 @@ export default function TripExpenses({
                           disabled={fuelResult.rappen < 1}
                         >
                           {t.tripExpenses.fuelApply}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Stromzähler (#442): Stand bei Ankunft und Abreise,
+                      Preis pro kWh steht am Kasten – die Eingaben bleiben
+                      pro Reise gemerkt, damit der Ankunfts-Stand die
+                      Wochen bis zur Abreise überlebt */}
+                  <div className="rounded-lg border border-border bg-muted/20 px-3 py-2">
+                    <button
+                      type="button"
+                      onClick={() => setPowerOpen(o => !o)}
+                      aria-expanded={powerOpen}
+                      className="flex w-full items-center gap-2 text-left text-sm font-medium"
+                    >
+                      <Gauge
+                        className="h-4 w-4 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                      <span className="flex-1">
+                        {t.tripExpenses.powerTitle}
+                      </span>
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                          powerOpen && "rotate-180"
+                        )}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    {powerOpen && (
+                      <div className="mt-2 space-y-2">
+                        <p className="text-xs text-muted-foreground">
+                          {t.tripExpenses.powerHint}
+                        </p>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                          <div>
+                            <label
+                              className="text-xs text-muted-foreground"
+                              htmlFor={`power-start-${tripId}`}
+                            >
+                              {t.tripExpenses.powerStartLabel}
+                            </label>
+                            <Input
+                              id={`power-start-${tripId}`}
+                              inputMode="decimal"
+                              value={power.start}
+                              placeholder="0.0"
+                              onChange={e =>
+                                setPower(p => ({
+                                  ...p,
+                                  start: e.target.value,
+                                }))
+                              }
+                            />
+                          </div>
+                          <div>
+                            <label
+                              className="text-xs text-muted-foreground"
+                              htmlFor={`power-end-${tripId}`}
+                            >
+                              {t.tripExpenses.powerEndLabel}
+                            </label>
+                            <Input
+                              id={`power-end-${tripId}`}
+                              inputMode="decimal"
+                              value={power.end}
+                              placeholder="0.0"
+                              onChange={e =>
+                                setPower(p => ({ ...p, end: e.target.value }))
+                              }
+                            />
+                          </div>
+                          <div>
+                            <label
+                              className="text-xs text-muted-foreground"
+                              htmlFor={`power-price-${tripId}`}
+                            >
+                              {t.tripExpenses.powerPriceLabel}
+                            </label>
+                            <Input
+                              id={`power-price-${tripId}`}
+                              inputMode="decimal"
+                              value={power.price}
+                              placeholder="0.65"
+                              onChange={e =>
+                                setPower(p => ({
+                                  ...p,
+                                  price: e.target.value,
+                                }))
+                              }
+                            />
+                          </div>
+                        </div>
+                        <p className="text-sm">
+                          {t.tripExpenses.powerResult(
+                            powerResult.kwh.toFixed(1),
+                            money(powerResult.rappen)
+                          )}
+                        </p>
+                        <Button
+                          size="sm"
+                          onClick={applyPowerResult}
+                          disabled={powerResult.rappen < 1}
+                        >
+                          {t.tripExpenses.powerApply}
                         </Button>
                       </div>
                     )}

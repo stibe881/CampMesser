@@ -2814,6 +2814,16 @@ export const it: Translation = {
     fuelApply: "Riprendere nella cassa",
     fuelInvalid: "Inserisci distanza, consumo e prezzo.",
     fuelDescription: (km: number) => `Tragitto ${km} km`,
+    powerTitle: "Contatore elettrico della piazzola",
+    powerHint:
+      "Lettura all'arrivo e alla partenza, il prezzo per kWh è indicato sulla colonnina. I valori restano memorizzati per viaggio.",
+    powerStartLabel: "Lettura arrivo (kWh)",
+    powerEndLabel: "Lettura partenza (kWh)",
+    powerPriceLabel: "Prezzo per kWh (CHF)",
+    powerResult: (kwh: string, amount: string) => `${kwh} kWh ≈ ${amount}`,
+    powerApply: "Riprendere nella cassa",
+    powerInvalid: "Inserisci entrambe le letture e il prezzo.",
+    powerDescription: (kwh: number) => `Elettricità ${kwh} kWh`,
     csvButton: "Esportare come CSV",
     csvAria: (trip: string) => `Scaricare la cassa di ${trip} come CSV`,
     csvHeaders: [

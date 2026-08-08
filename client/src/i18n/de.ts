@@ -2852,6 +2852,16 @@ export const de = {
     fuelApply: "In die Reisekasse übernehmen",
     fuelInvalid: "Bitte Strecke, Verbrauch und Preis eintragen.",
     fuelDescription: (km: number) => `Fahrt ${km} km`,
+    powerTitle: "Stromzähler am Stellplatz",
+    powerHint:
+      "Zählerstand bei Ankunft und Abreise, Preis pro kWh steht am Stromkasten. Die Eingaben bleiben pro Reise gemerkt.",
+    powerStartLabel: "Stand Ankunft (kWh)",
+    powerEndLabel: "Stand Abreise (kWh)",
+    powerPriceLabel: "Preis pro kWh (CHF)",
+    powerResult: (kwh: string, amount: string) => `${kwh} kWh ≈ ${amount}`,
+    powerApply: "In die Reisekasse übernehmen",
+    powerInvalid: "Bitte beide Zählerstände und den Preis eintragen.",
+    powerDescription: (kwh: number) => `Strom ${kwh} kWh`,
     csvButton: "Als CSV exportieren",
     csvAria: (trip: string) => `Reisekasse von ${trip} als CSV herunterladen`,
     csvHeaders: [

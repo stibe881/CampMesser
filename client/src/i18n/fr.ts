@@ -2843,6 +2843,16 @@ export const fr: Translation = {
     fuelApply: "Reprendre dans la caisse",
     fuelInvalid: "Merci d'indiquer distance, consommation et prix.",
     fuelDescription: (km: number) => `Trajet ${km} km`,
+    powerTitle: "Compteur électrique de l'emplacement",
+    powerHint:
+      "Relevé à l'arrivée et au départ, le prix par kWh est affiché sur la borne. Les saisies restent mémorisées par voyage.",
+    powerStartLabel: "Relevé arrivée (kWh)",
+    powerEndLabel: "Relevé départ (kWh)",
+    powerPriceLabel: "Prix par kWh (CHF)",
+    powerResult: (kwh: string, amount: string) => `${kwh} kWh ≈ ${amount}`,
+    powerApply: "Reprendre dans la caisse",
+    powerInvalid: "Merci d'indiquer les deux relevés et le prix.",
+    powerDescription: (kwh: number) => `Électricité ${kwh} kWh`,
     csvButton: "Exporter en CSV",
     csvAria: (trip: string) => `Télécharger la caisse de ${trip} au format CSV`,
     csvHeaders: [
