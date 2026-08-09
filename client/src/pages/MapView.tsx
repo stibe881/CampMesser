@@ -8,7 +8,16 @@
 import { useMemo, useRef, useState } from "react";
 import { fmtLong } from "@/lib/dateFormat";
 import { Link, useSearch } from "wouter";
-import { Camera, Loader2, MapPin, Search, Star, Trash2, X } from "lucide-react";
+import {
+  Camera,
+  Loader2,
+  MapPin,
+  Search,
+  Star,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { resizeImageForUpload } from "@/lib/imageResize";
 import PageHeader from "@/components/PageHeader";
@@ -17,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
+import { parsePlacesFile } from "@/lib/placeImport";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -203,6 +213,36 @@ export default function MapViewPage() {
       toast.error(t.trips.locationSearchFailed);
     } finally {
       setPlaceSearching(false);
+    }
+  };
+  // GPX/KML-Import (#632): Wegpunkte aus der Datei werden zu Merkorten –
+  // ein Aufruf je Punkt über dieselbe add-Mutation wie der Karten-Klick.
+  const importInputRef = useRef<HTMLInputElement | null>(null);
+  const [importing, setImporting] = useState(false);
+  const handleImportFile = async (files: FileList | null) => {
+    const file = files?.[0];
+    if (importInputRef.current) importInputRef.current.value = "";
+    if (!file) return;
+    try {
+      const places = parsePlacesFile(await file.text());
+      if (places.length === 0) {
+        toast.error(t.mapView.importNone);
+        return;
+      }
+      setImporting(true);
+      for (const place of places) {
+        await utils.client.savedPlaces.add.mutate({
+          name: place.name,
+          latitude: place.latitude,
+          longitude: place.longitude,
+        });
+      }
+      await utils.savedPlaces.list.invalidate();
+      toast.success(t.mapView.importDone(places.length));
+    } catch {
+      toast.error(t.mapView.importFailed);
+    } finally {
+      setImporting(false);
     }
   };
   const utils = trpc.useUtils();
@@ -455,6 +495,38 @@ export default function MapViewPage() {
             stageRoutes={stageRoutes}
             focusPoint={focusPoint}
           />
+
+          {/* GPX/KML-Import (#632): Wegpunkte als Merkorte übernehmen */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".gpx,.kml,application/gpx+xml,application/vnd.google-earth.kml+xml"
+              className="hidden"
+              aria-hidden="true"
+              tabIndex={-1}
+              onChange={e => void handleImportFile(e.target.files)}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={importing}
+              onClick={() => importInputRef.current?.click()}
+            >
+              {importing ? (
+                <Loader2
+                  className="mr-1.5 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Upload className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              )}
+              {t.mapView.importButton}
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              {t.mapView.importHint}
+            </span>
+          </div>
 
           {/* Merkorte-Verwaltungsliste (#563): Bei vielen Sternen skaliert
               die Karte allein nicht mehr – hier stehen alle mit Farbe,

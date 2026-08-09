@@ -2084,6 +2084,12 @@ export const de = {
     savedPlacesListTitle: "Deine Merkorte",
     searchPlaceholder: "Ort suchen \u2013 z. B. Bellinzona",
     searchAria: "Ort auf der Karte suchen",
+    importButton: "GPX/KML importieren",
+    importHint: "Wegpunkte aus der Datei werden zu Merkorten.",
+    importDone: (n: number) =>
+      n === 1 ? "1 Merkort importiert." : `${n} Merkorte importiert.`,
+    importNone: "Keine Wegpunkte in der Datei gefunden.",
+    importFailed: "Import fehlgeschlagen.",
     savedPlacesListAria: (name: string) =>
       `Merkort ${name} auf der Karte zeigen`,
     savedPlacesDistance: (km: string) => `${km} von zuhause`,

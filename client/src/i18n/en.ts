@@ -2019,6 +2019,12 @@ export const en: Translation = {
     savedPlacesListTitle: "Your saved places",
     searchPlaceholder: "Search a place \u2013 e.g. Bellinzona",
     searchAria: "Search a place on the map",
+    importButton: "Import GPX/KML",
+    importHint: "Waypoints from the file become saved places.",
+    importDone: (n: number) =>
+      n === 1 ? "1 place imported." : `${n} places imported.`,
+    importNone: "No waypoints found in the file.",
+    importFailed: "Import failed.",
     savedPlacesListAria: (name: string) => `Show place ${name} on the map`,
     savedPlacesDistance: (km: string) => `${km} from home`,
     placePhotoAdd: (name: string) => `Add a photo to ${name}`,

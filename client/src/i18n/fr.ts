@@ -2086,6 +2086,12 @@ export const fr: Translation = {
     savedPlacesListTitle: "Tes lieux \u00e0 retenir",
     searchPlaceholder: "Chercher un lieu \u2013 p. ex. Bellinzone",
     searchAria: "Chercher un lieu sur la carte",
+    importButton: "Importer GPX/KML",
+    importHint: "Les points du fichier deviennent des lieux \u00e0 retenir.",
+    importDone: (n: number) =>
+      n === 1 ? "1 lieu import\u00e9." : `${n} lieux import\u00e9s.`,
+    importNone: "Aucun point trouv\u00e9 dans le fichier.",
+    importFailed: "\u00c9chec de l\u2019import.",
     savedPlacesListAria: (name: string) =>
       `Afficher le lieu ${name} sur la carte`,
     savedPlacesDistance: (km: string) => `${km} de chez toi`,
