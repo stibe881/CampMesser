@@ -28,6 +28,54 @@ export type { ChangelogBlock };
 
 export const changelog: ChangelogBlock[] = [
   {
+    id: "2026-08-09.5",
+    date: "2026-08-09",
+    entries: [
+      l4(
+        "Neue Reiseart Motorradurlaub: Packliste, Schnellzugriffe (Länderregeln, Tankbuch, Reparatur) und Formular passen sich an – wie bei allen Reisearten. Und die Velotour darf neu auch ans Lagerfeuer.",
+        "Nouveau type de voyage « moto » : liste de bagages, accès rapides (règles des pays, carnet d’essence, réparation) et formulaire s’adaptent – comme pour chaque type de voyage. Et le tour à vélo a désormais droit au feu de camp.",
+        "Nuovo tipo di viaggio «moto»: lista bagagli, accessi rapidi (regole dei paesi, libretto carburante, riparazione) e modulo si adattano – come per ogni tipo di viaggio. E il giro in bici ora può stare anche al falò.",
+        "New trip type motorbike tour: packing list, quick links (country rules, fuel log, repair) and the form adapt – as with every trip type. And the bike tour is now allowed at the campfire too."
+      ),
+      l4(
+        "Drucken klappt jetzt auch aus der installierten App: Die Druckseiten melden dich im Browser-Tab über ein kurzlebiges Ticket selbst an – kein «Anmeldung erforderlich» mehr beim Reisepass und den anderen Druckansichten.",
+        "L’impression fonctionne désormais aussi depuis l’app installée : les pages d’impression te connectent elles-mêmes dans l’onglet du navigateur via un ticket éphémère – fini le « connexion requise » pour le passeport et les autres vues d’impression.",
+        "La stampa ora funziona anche dall’app installata: le pagine di stampa ti collegano da sole nella scheda del browser tramite un ticket a breve durata – niente più «accesso richiesto» per il passaporto e le altre viste di stampa.",
+        "Printing now works from the installed app too: the print pages sign you in inside the browser tab via a short-lived ticket – no more “sign-in required” for the passport and the other print views."
+      ),
+      l4(
+        "Der Rückblick nach der Reise ist einen Klick nah: Der Hinweis auf der Startseite springt direkt hin. Und er kennt jetzt Personen – wie die Packliste: filtern nach Person, und was gefehlt hat, gehört gleich jemandem.",
+        "La rétrospective après le voyage est à un clic : l’indication sur la page d’accueil y mène directement. Et elle connaît désormais les personnes – comme la liste de bagages : filtrer par personne, et ce qui a manqué appartient tout de suite à quelqu’un.",
+        "La retrospettiva dopo il viaggio è a un clic: l’avviso sulla pagina iniziale porta direttamente lì. E ora conosce le persone – come la lista bagagli: filtri per persona, e ciò che è mancato appartiene subito a qualcuno.",
+        "The post-trip review is one tap away: the note on the home page jumps straight to it. And it now knows people – like the packing list: filter by person, and whatever was missing belongs to someone right away."
+      ),
+      l4(
+        "Etappen überall: Druckbericht und Kalender-Export führen die Stationen auf, der Kalender zeigt Etappen-Tage, das Tages-Journal weiss, wo du warst. Dazu Fahrzeit und Distanz zwischen den Etappen, Wetter je Etappe, ein Weiterreise-Hinweis am Vorabend, eine Offline-Karte der ganzen Rundreise – und der Unwetter-Push warnt am Ort der aktuellen Etappe.",
+        "Les étapes partout : le rapport imprimé et l’export calendrier listent les stations, le calendrier montre les jours d’étape, le journal sait où tu étais. S’y ajoutent temps de route et distance entre les étapes, la météo par étape, un rappel de départ la veille, une carte hors ligne de tout le circuit – et l’alerte intempéries surveille l’étape actuelle.",
+        "Tappe ovunque: il rapporto stampato e l’esportazione calendario elencano le stazioni, il calendario mostra i giorni di tappa, il diario sa dove eri. In più tempo di guida e distanza tra le tappe, meteo per tappa, un promemoria della partenza la sera prima, una mappa offline dell’intero giro – e l’avviso maltempo sorveglia la tappa attuale.",
+        "Stages everywhere: the printed report and the calendar export list the stops, the calendar shows stage days, the journal knows where you were. Plus driving time and distance between stages, weather per stage, a move-on reminder the evening before, an offline map of the whole round trip – and the storm push watches your current stage."
+      ),
+      l4(
+        "Merkorte werden nützlicher: Vom Stern auf der Karte machst du direkt eine Etappe oder planst eine Reise, unter der Karte steht die Liste aller Merkorte mit Notiz und Distanz von zuhause – und die globale Suche findet sie.",
+        "Les lieux retenus deviennent plus utiles : depuis l’étoile sur la carte, tu crées directement une étape ou planifies un voyage, sous la carte figure la liste de tous les lieux avec note et distance de chez toi – et la recherche globale les trouve.",
+        "I luoghi salvati diventano più utili: dalla stella sulla mappa crei direttamente una tappa o pianifichi un viaggio, sotto la mappa c’è l’elenco di tutti i luoghi con nota e distanza da casa – e la ricerca globale li trova.",
+        "Saved places get more useful: from the star on the map you create a stage or plan a trip directly, below the map sits the list of all saved places with note and distance from home – and the global search finds them."
+      ),
+      l4(
+        "Die Reisekasse denkt mit: Mitten in der Reise sagt sie dein Tagesbudget bis zur Abreise, die Beleg-Galerie zeigt alle Quittungen einer Reise beisammen, und beim Planen schätzt die App die Übernachtungskosten aus deinen bisherigen Reisen gleicher Art.",
+        "La caisse de voyage réfléchit avec toi : en plein voyage, elle indique ton budget quotidien jusqu’au départ, la galerie des justificatifs montre tous les tickets d’un voyage ensemble, et à la planification l’app estime les coûts de nuitée d’après tes voyages passés du même type.",
+        "La cassa di viaggio pensa con te: durante il viaggio indica il tuo budget giornaliero fino alla partenza, la galleria degli scontrini mostra tutte le ricevute di un viaggio insieme, e in fase di pianificazione l’app stima i costi di pernottamento dai tuoi viaggi passati dello stesso tipo.",
+        "The trip wallet thinks along: mid-trip it tells you your daily budget until departure, the receipt gallery shows all of a trip’s receipts together, and while planning the app estimates the nightly costs from your past trips of the same kind."
+      ),
+      l4(
+        "Unterwegs besser informiert: Die Wetterseite zeigt die Luftqualität als Ampel (auch im Morgen-Briefing, wenn sie schlecht ist), die Heute-Ansicht warnt vor Feiertagen des Reiselands – Läden zu, Einkauf vorher. Die Länder-Seite kennt neu Schweden, Norwegen und Belgien, und die Sprachhilfe hilft bei Panne und Werkstatt in vier Sprachen.",
+        "Mieux informé en route : la page météo montre la qualité de l’air en feu tricolore (aussi dans le briefing du matin quand elle est mauvaise), la vue Aujourd’hui avertit des jours fériés du pays de voyage – magasins fermés, courses avant. La page des pays connaît désormais la Suède, la Norvège et la Belgique, et l’aide linguistique t’assiste en cas de panne et au garage en quatre langues.",
+        "Meglio informati in viaggio: la pagina meteo mostra la qualità dell’aria come semaforo (anche nel briefing del mattino quando è cattiva), la vista Oggi avvisa dei giorni festivi del paese di viaggio – negozi chiusi, spesa prima. La pagina dei paesi ora conosce Svezia, Norvegia e Belgio, e l’aiuto linguistico ti assiste con guasti e officina in quattro lingue.",
+        "Better informed on the road: the weather page shows air quality as a traffic light (also in the morning briefing when it is bad), the Today view warns about your destination’s public holidays – shops closed, shop beforehand. The countries page now covers Sweden, Norway and Belgium, and the phrasebook helps with breakdowns and the garage in four languages."
+      ),
+    ],
+  },
+  {
     id: "2026-08-09.4",
     date: "2026-08-09",
     entries: [
@@ -114,24 +162,6 @@ export const changelog: ChangelogBlock[] = [
         "En plus : les voyages à l'hôtel et en ville saisissent une chambre au lieu d'une parcelle, l'aide linguistique connaît quatre nouvelles phrases d'hôtel, la météo propose le lieu de ton prochain voyage comme lieu météo, et « Quoi de neuf » ne charge son historique ancien que sur demande.",
         "In più: i viaggi in hotel e in città registrano una camera invece di una piazzola, l'aiuto linguistico conosce quattro nuove frasi da hotel, il meteo propone il luogo del tuo prossimo viaggio come località meteo, e «Cosa c'è di nuovo» carica la storia più vecchia solo su richiesta.",
         "Also new: hotel and city trips record a room instead of a pitch, the phrasebook knows four new hotel phrases, the weather suggests your next trip's location as a weather place, and “What's new” loads its older history only on request."
-      ),
-    ],
-  },
-  {
-    id: "2026-08-09.2",
-    date: "2026-08-09",
-    entries: [
-      l4(
-        "Der Rückblick nach der Reise ist jetzt nach Kategorien gegliedert – wie die Packliste selbst. Und was gefehlt hat, bekommt beim Erfassen gleich seine Kategorie: Der Vorschlag auf der Packliste legt es später in die richtige Gruppe statt in «Allgemein».",
-        "La rétrospective après le voyage est désormais structurée par catégories – comme la liste de bagages. Et ce qui a manqué reçoit sa catégorie dès la saisie : la suggestion sur la liste le placera ensuite dans le bon groupe au lieu de « Général ».",
-        "La retrospettiva dopo il viaggio ora è suddivisa per categorie – come la lista bagagli. E ciò che è mancato riceve subito la sua categoria: il suggerimento sulla lista lo metterà poi nel gruppo giusto invece che in «Generale».",
-        "The post-trip review is now grouped by categories – just like the packing list. And missing items get their category right when you note them: the suggestion on the list later places them in the right group instead of “General”."
-      ),
-      l4(
-        "Unwetter-Push nur noch, wo du gerade bist: Gewarnt wird am Ort der laufenden Reise (verknüpfter Platz oder Ort mit Koordinaten) – nicht mehr das ganze Jahr für jeden gespeicherten Platz und den Heim-Standort. Das Daheim wird nur noch gewarnt, wenn eine laufende Reise in seiner Nähe liegt. In der App selbst siehst du die Warnungen deiner Plätze weiterhin jederzeit.",
-        "Alerte intempéries seulement là où tu es : l’avertissement concerne le lieu du voyage en cours (emplacement lié ou lieu avec coordonnées) – plus toute l’année pour chaque emplacement enregistré et le domicile. Le domicile n’est averti que si un voyage en cours se trouve à proximité. Dans l’app, tu vois toujours les alertes de tes emplacements à tout moment.",
-        "Avviso maltempo solo dove sei: l’avviso riguarda il luogo del viaggio in corso (piazzola collegata o luogo con coordinate) – non più tutto l’anno per ogni piazzola salvata e per casa. Casa viene avvisata solo se un viaggio in corso è nelle vicinanze. Nell’app vedi comunque sempre gli avvisi delle tue piazzole.",
-        "Storm push only where you are: warnings cover the location of the running trip (linked spot or place with coordinates) – no longer all year for every saved spot and your home. Home is only warned when a running trip is nearby. In the app itself you still see your spots’ warnings at any time."
       ),
     ],
   },

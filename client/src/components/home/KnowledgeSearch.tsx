@@ -258,7 +258,7 @@ export default function KnowledgeSearch({
           }}
           placeholder={t.home.searchPlaceholder}
           aria-label={t.home.searchAria}
-          className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
+          className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
         />
       </div>
       {!hasQuery && focused && recent.length > 0 && (
