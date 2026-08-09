@@ -521,6 +521,27 @@ export default function PackListDetailPage() {
   );
 
   /**
+   * «Nur meine Sachen» als Start (#542): Bei Listen einer GEMEINSAMEN Reise
+   * öffnet sich der eigene Bereich, sobald er Einträge hat – jeder sieht
+   * zuerst, was ER packen muss. Umschalten bleibt frei; private Listen
+   * starten wie bisher bei «Allgemein».
+   */
+  const [sectionInitFor, setSectionInitFor] = useState<number | null>(null);
+  useEffect(() => {
+    if (sectionInitFor === listId || !query.data) return;
+    setSectionInitFor(listId);
+    if (
+      query.data.sharedTrip === true &&
+      ownPerson &&
+      (query.data.items ?? []).some(
+        i => (i.assignee ?? "").trim() === ownPerson
+      )
+    ) {
+      setActiveSection(ownPerson);
+    }
+  }, [sectionInitFor, listId, query.data, ownPerson]);
+
+  /**
    * Mitreisende der verknüpften Reise, die noch keinen Bereich haben –
    * Vorschläge im Dialog «Personen verwalten» (nur bei geteilten Reisen).
    */
