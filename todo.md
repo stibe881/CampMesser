@@ -5,7 +5,7 @@
 - [ ] #536 Etappen-Reisen (Zwischenhalte)
 - [ ] #537 Merkorte (Wunschziele) auf der Karte
 - [x] #538 Wetterfenster-Finder: bewertet alle Wochenenden der 16-Tage-Prognose (Regen wiegt am schwersten, dann Temperatur, dann Böen) und zeigt sie auf der Wetterseite als Ampel-Liste, bestes zuoberst (shared/weatherWindow.ts, 4 Tests)
-- [ ] #539 Feiertage des Reiselands
+- [x] #539 Feiertage des Reiselands: Fällt ein landesweiter Feiertag des Ziellands in die Reise, zeigt ihn das Cockpit unter dem Auslands-Hinweis («Läden oft geschlossen»). Quelle Nager.Date, serverseitig 7 Tage gecacht (server/holidaysAbroad.ts, 2 Tests); regionale Feiertage bewusst ausgefiltert. CH-Feiertage EXISTIERTEN BEREITS (#70)
 - [ ] #540 Beleg-Foto pro Reisekassen-Ausgabe
 - [x] #541 Ausgabe aus der Heute-Ansicht erfassen (QuickExpense-Knopf in der Reise-Kopfzeile: Betrag mit CHF/EUR, Kategorie-Chips, optionale Notiz; heutiger Tag, eigenes Konto als Zahler)
 - [x] #542 GRÖSSTENTEILS EXISTIERTE BEREITS: Die Personen-Tabs zeigen seit #127 genau einen Bereich (= Filter) und tragen den «5/8»-Badge. Neu ist nur der Start im EIGENEN Bereich bei Listen gemeinsamer Reisen – jeder sieht zuerst, was er selbst packen muss

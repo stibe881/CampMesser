@@ -2544,6 +2544,8 @@ export const fr: Translation = {
     readinessAbroadHint: (country: string) =>
       `Ce voyage mène en ${country} – pense à la vignette, aux péages et aux équipements obligatoires.`,
     readinessAbroadLink: "Ouvrir la fiche pays",
+    readinessHolidaysTitle: "Jour férié au pays de destination :",
+    readinessHolidaysHint: "– les magasins sont souvent fermés ce jour-là.",
     whoAlongTitle: "Qui vient ?",
     whoAlongHint:
       "Touché = présent. Les tampons du passeport en découlent – le tampon familial seulement si tout le monde est là.",

@@ -2520,6 +2520,8 @@ export const it: Translation = {
     readinessAbroadHint: (country: string) =>
       `Questo viaggio porta in ${country} – pensa a vignetta, pedaggi e dotazioni obbligatorie.`,
     readinessAbroadLink: "Apri la scheda paese",
+    readinessHolidaysTitle: "Giorno festivo nel paese di viaggio:",
+    readinessHolidaysHint: "– i negozi sono spesso chiusi.",
     whoAlongTitle: "Chi viene?",
     whoAlongHint:
       "Toccato = presente. Da qui nascono i timbri del passaporto – quello di famiglia solo se ci sono tutti.",

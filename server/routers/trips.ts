@@ -12,6 +12,7 @@ import {
 } from "@shared/expenses";
 import { TRIP_KINDS, normalizeTripKind } from "@shared/tripKind";
 import { getEcbEurRate } from "../ecbRates";
+import { getHolidaysAbroad } from "../holidaysAbroad";
 import {
   BUDGET_MAX_RAPPEN,
   EXPENSE_CATEGORIES,
@@ -91,6 +92,21 @@ async function applyAbsences(
 
 export const tripsRouters = {
   trips: router({
+    /**
+     * Feiertage des Reiselands (#539) im Reisezeitraum – fürs Cockpit.
+     * Serverseitig gecacht (Nager.Date); null = Quelle nicht erreichbar.
+     */
+    holidaysAbroad: protectedProcedure
+      .input(
+        z.object({
+          country: z.string().regex(/^[A-Za-z]{2}$/),
+          from: z.string().regex(ISO_DAY),
+          to: z.string().regex(ISO_DAY),
+        })
+      )
+      .query(({ input }) =>
+        getHolidaysAbroad(input.country, input.from, input.to)
+      ),
     /** Buchungsbestätigung entfernen (#279) – Datei und Verweis. */
     removeReservation: protectedProcedure
       .input(z.object({ tripId: z.number().int().positive() }))

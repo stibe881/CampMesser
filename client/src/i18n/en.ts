@@ -2466,6 +2466,8 @@ export const en: Translation = {
     readinessAbroadHint: (country: string) =>
       `This trip goes to ${country} – remember vignette, tolls and mandatory equipment.`,
     readinessAbroadLink: "Open country factsheet",
+    readinessHolidaysTitle: "Public holiday at your destination:",
+    readinessHolidaysHint: "– shops are often closed then.",
     whoAlongTitle: "Who’s along?",
     whoAlongHint:
       "Tapped means along. The passport stamps come from this – the family stamp only when everyone is along.",
