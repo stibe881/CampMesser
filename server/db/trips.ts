@@ -812,6 +812,47 @@ export async function deleteTripJournalEntry(tripId: number, day: string) {
     .where(and(eq(tripJournal.tripId, tripId), eq(tripJournal.day, day)));
 }
 /**
+ * Einzelnen Journal-Eintrag laden (#590) – OHNE Berechtigungs-Prüfung;
+ * der Aufrufer prüft canAccessTrip über die tripId des Ergebnisses.
+ */
+export async function getTripJournalEntryById(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripJournal)
+    .where(eq(tripJournal.id, id))
+    .limit(1);
+  return rows[0];
+}
+/** Journal-Eintrag eines Tags laden – für das Foto-Aufräumen beim Löschen. */
+export async function getTripJournalEntryByDay(tripId: number, day: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripJournal)
+    .where(and(eq(tripJournal.tripId, tripId), eq(tripJournal.day, day)))
+    .limit(1);
+  return rows[0];
+}
+/** Journal-Eintrag über den Foto-Dateinamen finden (Auslieferung #590). */
+export async function getTripJournalEntryByPhotoFileName(fileName: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripJournal)
+    .where(eq(tripJournal.photoFileName, fileName))
+    .limit(1);
+  return rows[0];
+}
+/** Foto-Dateinamen am Journal-Eintrag setzen oder lösen (#590). */
+export async function setTripJournalPhoto(id: number, fileName: string | null) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripJournal)
+    .set({ photoFileName: fileName })
+    .where(eq(tripJournal.id, id));
+}
+/**
  * Ausgaben einer Reise, neuste zuoberst (Tag absteigend, bei gleichem Tag
  * die zuletzt erfasste zuerst) – nur NACH einer canAccessTrip-Prüfung im
  * Router verwenden.

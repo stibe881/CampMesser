@@ -2076,6 +2076,12 @@ export const fr: Translation = {
     savedPlacesListAria: (name: string) =>
       `Afficher le lieu ${name} sur la carte`,
     savedPlacesDistance: (km: string) => `${km} de chez toi`,
+    placePhotoAdd: (name: string) => `Ajouter une photo à ${name}`,
+    placePhotoViewAria: (name: string) => `Voir la photo de ${name}`,
+    placePhotoRemove: (name: string) => `Retirer la photo de ${name}`,
+    placePhotoFailed: "La photo n’a pas pu être envoyée",
+    placePhotoHeic:
+      "Les photos HEIC ne sont pas prises en charge – choisis un JPG.",
     savedPlaceCreatedToast: (name: string) =>
       `Lieu \u00ab\u202f${name}\u202f\u00bb enregistr\u00e9`,
     createdToast: (name: string) => `«${name}» créé comme favori`,
@@ -2932,6 +2938,12 @@ export const fr: Translation = {
     journalDeleted: "Entrée du journal supprimée",
     journalSaveFailed: "Impossible d'enregistrer l'entrée du journal",
     journalBy: (name: string) => `par ${name}`,
+    journalPhotoAdd: "Ajouter une photo du jour",
+    journalPhotoViewAria: (day: string) => `Voir la photo du ${day}`,
+    journalPhotoRemove: "Retirer la photo",
+    journalPhotoFailed: "La photo n’a pas pu être envoyée",
+    journalPhotoHeic:
+      "Les photos HEIC ne sont pas prises en charge – choisis un JPG.",
   },
   clientErrors: {
     title: "Rapports de plantage",

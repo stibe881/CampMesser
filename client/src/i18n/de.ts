@@ -2074,6 +2074,12 @@ export const de = {
     savedPlacesListAria: (name: string) =>
       `Merkort ${name} auf der Karte zeigen`,
     savedPlacesDistance: (km: string) => `${km} von zuhause`,
+    placePhotoAdd: (name: string) => `Foto zu ${name} anfügen`,
+    placePhotoViewAria: (name: string) => `Foto von ${name} ansehen`,
+    placePhotoRemove: (name: string) => `Foto von ${name} entfernen`,
+    placePhotoFailed: "Foto konnte nicht hochgeladen werden",
+    placePhotoHeic:
+      "HEIC-Fotos werden nicht unterstützt – bitte als JPG wählen.",
     savedPlaceCreatedToast: (name: string) =>
       `Merkort \u00ab${name}\u00bb gespeichert`,
     createdToast: (name: string) => `«${name}» als Favorit angelegt`,
@@ -2942,6 +2948,12 @@ export const de = {
     journalDeleted: "Tagebuch-Eintrag gelöscht",
     journalSaveFailed: "Tagebuch-Eintrag konnte nicht gespeichert werden",
     journalBy: (name: string) => `von ${name}`,
+    journalPhotoAdd: "Foto zum Tag anfügen",
+    journalPhotoViewAria: (day: string) => `Foto vom ${day} ansehen`,
+    journalPhotoRemove: "Foto entfernen",
+    journalPhotoFailed: "Foto konnte nicht hochgeladen werden",
+    journalPhotoHeic:
+      "HEIC-Fotos werden nicht unterstützt – bitte als JPG wählen.",
   },
   clientErrors: {
     title: "Absturzmeldungen",

@@ -781,10 +781,10 @@ export type InsertHomeLocation = typeof homeLocations.$inferInsert;
 
 /**
  * Merkorte (#537): Wunschziele von der Karte – «da wollen wir mal hin».
- * Bewusst LEICHTER als ein campSpots-Favorit: nur Name, Notiz und
- * Pin-Farbe (Schlüssel aus shared/savedPlaces.ts), kein Dossier, keine
- * Fotos. Beim Reise-Anlegen dienen sie als Orts-Vorschlag mit
- * Koordinaten.
+ * Bewusst LEICHTER als ein campSpots-Favorit: nur Name, Notiz, Pin-Farbe
+ * (Schlüssel aus shared/savedPlaces.ts) und seit #589 EIN Foto («so sah
+ * die Bucht im Prospekt aus»), aber kein Dossier und keine Galerie. Beim
+ * Reise-Anlegen dienen sie als Orts-Vorschlag mit Koordinaten.
  */
 export const savedPlaces = mysqlTable(
   "savedPlaces",
@@ -798,6 +798,8 @@ export const savedPlaces = mysqlTable(
     note: varchar("note", { length: 240 }),
     /** Pin-Farbe: red | orange | green | blue | purple */
     color: varchar("color", { length: 12 }).notNull().default("red"),
+    /** EIN Foto zum Merkort (#589) unter uploads/places/<fileName>. */
+    photoFileName: varchar("photoFileName", { length: 64 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
@@ -1047,6 +1049,13 @@ export const tripJournal = mysqlTable(
     tripId: int("tripId").notNull(),
     day: date("day", { mode: "string" }).notNull(),
     text: varchar("text", { length: 2000 }).notNull(),
+    /**
+     * Foto des Tages (#590): genau EIN Bild pro Journal-Eintrag unter
+     * uploads/journal/<fileName> – wie der Beleg der Reisekasse (#540).
+     * Die grosse Galerie bleibt bei tripPhotos; hier geht es um «das eine
+     * Bild zu diesem Tag».
+     */
+    photoFileName: varchar("photoFileName", { length: 64 }),
     /** Konto, das den Eintrag zuletzt geschrieben hat; null = unbekannt */
     createdByUserId: int("createdByUserId"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),

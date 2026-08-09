@@ -2009,6 +2009,11 @@ export const en: Translation = {
     savedPlacesListTitle: "Your saved places",
     savedPlacesListAria: (name: string) => `Show place ${name} on the map`,
     savedPlacesDistance: (km: string) => `${km} from home`,
+    placePhotoAdd: (name: string) => `Add a photo to ${name}`,
+    placePhotoViewAria: (name: string) => `View photo of ${name}`,
+    placePhotoRemove: (name: string) => `Remove photo of ${name}`,
+    placePhotoFailed: "Photo could not be uploaded",
+    placePhotoHeic: "HEIC photos are not supported – please choose a JPG.",
     savedPlaceCreatedToast: (name: string) =>
       `Saved place \u201c${name}\u201d stored`,
     createdToast: (name: string) => `“${name}” created as favourite`,
@@ -2836,6 +2841,11 @@ export const en: Translation = {
     journalDeleted: "Journal entry deleted",
     journalSaveFailed: "Journal entry could not be saved",
     journalBy: (name: string) => `by ${name}`,
+    journalPhotoAdd: "Add a photo of the day",
+    journalPhotoViewAria: (day: string) => `View photo of ${day}`,
+    journalPhotoRemove: "Remove photo",
+    journalPhotoFailed: "Photo could not be uploaded",
+    journalPhotoHeic: "HEIC photos are not supported – please choose a JPG.",
   },
   clientErrors: {
     title: "Crash reports",

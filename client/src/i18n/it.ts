@@ -2048,6 +2048,11 @@ export const it: Translation = {
     savedPlacesListAria: (name: string) =>
       `Mostra il luogo ${name} sulla mappa`,
     savedPlacesDistance: (km: string) => `${km} da casa`,
+    placePhotoAdd: (name: string) => `Aggiungi una foto a ${name}`,
+    placePhotoViewAria: (name: string) => `Vedi la foto di ${name}`,
+    placePhotoRemove: (name: string) => `Rimuovi la foto di ${name}`,
+    placePhotoFailed: "Impossibile caricare la foto",
+    placePhotoHeic: "Le foto HEIC non sono supportate – scegli un JPG.",
     savedPlaceCreatedToast: (name: string) =>
       `Luogo \u00ab${name}\u00bb salvato`,
     createdToast: (name: string) => `«${name}» creato come preferito`,
@@ -2905,6 +2910,11 @@ export const it: Translation = {
     journalDeleted: "Voce del diario eliminata",
     journalSaveFailed: "Impossibile salvare la voce del diario",
     journalBy: (name: string) => `di ${name}`,
+    journalPhotoAdd: "Aggiungi una foto del giorno",
+    journalPhotoViewAria: (day: string) => `Vedi la foto del ${day}`,
+    journalPhotoRemove: "Rimuovi la foto",
+    journalPhotoFailed: "Impossibile caricare la foto",
+    journalPhotoHeic: "Le foto HEIC non sono supportate – scegli un JPG.",
   },
   clientErrors: {
     title: "Segnalazioni di crash",

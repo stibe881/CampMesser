@@ -404,7 +404,37 @@ export const spotsRouters = {
     remove: protectedProcedure
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(async ({ ctx, input }) => {
+        // Das Foto (#589) hängt am Merkort – ohne Zeile keine Datei.
+        const place = await db.getSavedPlace(input.id, ctx.user.id);
         await db.deleteSavedPlace(input.id, ctx.user.id);
+        if (place?.photoFileName) {
+          const { placePhotoStorage } = await import("../photoStorage");
+          await placePhotoStorage.deleteFiles([place.photoFileName]);
+        }
+        return { success: true } as const;
+      }),
+    /**
+     * Foto (#589) eines Merkorts entfernen, ohne den Merkort zu löschen –
+     * der Upload läuft als Raw-POST über /api/places/:id/photo
+     * (server/_core/index.ts).
+     */
+    removePhoto: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const place = await db.getSavedPlace(input.id, ctx.user.id);
+        if (!place) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Merkort nicht gefunden.",
+          });
+        }
+        if (place.photoFileName) {
+          await db.updateSavedPlace(input.id, ctx.user.id, {
+            photoFileName: null,
+          });
+          const { placePhotoStorage } = await import("../photoStorage");
+          await placePhotoStorage.deleteFiles([place.photoFileName]);
+        }
         return { success: true } as const;
       }),
   }),

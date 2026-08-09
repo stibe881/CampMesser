@@ -136,3 +136,31 @@ export async function deleteSavedPlace(id: number, userId: number) {
     .delete(savedPlaces)
     .where(and(eq(savedPlaces.id, id), eq(savedPlaces.userId, userId)));
 }
+/** Einzelnen Merkort laden (#589) – nur eigene. */
+export async function getSavedPlace(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(savedPlaces)
+    .where(and(eq(savedPlaces.id, id), eq(savedPlaces.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+/** Merkort über den Foto-Dateinamen finden (Auslieferung #589) – nur eigene. */
+export async function getSavedPlaceByPhotoFileName(
+  fileName: string,
+  userId: number
+) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(savedPlaces)
+    .where(
+      and(
+        eq(savedPlaces.photoFileName, fileName),
+        eq(savedPlaces.userId, userId)
+      )
+    )
+    .limit(1);
+  return rows[0];
+}

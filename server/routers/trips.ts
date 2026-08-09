@@ -833,7 +833,16 @@ export const tripsRouters = {
               ctx.user.id
             );
           } else {
+            // Das Tages-Foto (#590) hängt am Eintrag – ohne Zeile keine Datei.
+            const entry = await db.getTripJournalEntryByDay(
+              input.tripId,
+              input.day
+            );
             await db.deleteTripJournalEntry(input.tripId, input.day);
+            if (entry?.photoFileName) {
+              const { journalPhotoStorage } = await import("../photoStorage");
+              await journalPhotoStorage.deleteFiles([entry.photoFileName]);
+            }
           }
           await noteTripChange(
             input.tripId,
@@ -842,6 +851,31 @@ export const tripsRouters = {
             text ? "edit" : "remove",
             input.day
           );
+          return { success: true } as const;
+        }),
+      /**
+       * Tages-Foto (#590) eines Journal-Eintrags entfernen, ohne den Text
+       * zu löschen – der Upload läuft als Raw-POST über
+       * /api/trips/journal/:id/photo (server/_core/index.ts).
+       */
+      removePhoto: protectedProcedure
+        .input(z.object({ id: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const entry = await db.getTripJournalEntryById(input.id);
+          const trip = entry
+            ? await db.canAccessTrip(entry.tripId, ctx.user.id)
+            : undefined;
+          if (!entry || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Eintrag nicht gefunden.",
+            });
+          }
+          if (entry.photoFileName) {
+            await db.setTripJournalPhoto(input.id, null);
+            const { journalPhotoStorage } = await import("../photoStorage");
+            await journalPhotoStorage.deleteFiles([entry.photoFileName]);
+          }
           return { success: true } as const;
         }),
     }),

@@ -302,6 +302,20 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     .select({ fileName: userNotes.fileName })
     .from(userNotes)
     .where(eq(userNotes.userId, userId));
+  // Tages-Fotos des Journals (#590): nur die eigener Reisen – Einträge in
+  // FREMDEN Reisen bleiben stehen, also auch ihre Fotos.
+  const journalPhotoRows =
+    ownedTripIds.length > 0
+      ? await db
+          .select({ photoFileName: tripJournal.photoFileName })
+          .from(tripJournal)
+          .where(inArray(tripJournal.tripId, ownedTripIds))
+      : [];
+  // Merkort-Fotos (#589) hängen direkt am Konto
+  const placePhotoRows = await db
+    .select({ photoFileName: savedPlaces.photoFileName })
+    .from(savedPlaces)
+    .where(eq(savedPlaces.userId, userId));
   // Packlisten-Positionen zuerst (referenzieren Listen)
   const lists = await db
     .select({ id: packLists.id })
@@ -479,6 +493,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     notePhotoStorage,
     documentPhotoStorage,
     reservationStorage,
+    journalPhotoStorage,
+    placePhotoStorage,
   } = await import("./photoStorage");
   await tripPhotoStorage.deleteFiles(photoRows.map(p => p.fileName));
   await recipePhotoStorage.deleteFiles(
@@ -520,6 +536,16 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await reservationStorage.deleteFiles(
     ownedTrips
       .map(t => t.reservationFileName)
+      .filter((name): name is string => Boolean(name))
+  );
+  await journalPhotoStorage.deleteFiles(
+    journalPhotoRows
+      .map(r => r.photoFileName)
+      .filter((name): name is string => Boolean(name))
+  );
+  await placePhotoStorage.deleteFiles(
+    placePhotoRows
+      .map(r => r.photoFileName)
       .filter((name): name is string => Boolean(name))
   );
   // Papierkorb (#295) zum Schluss: Wer sein Konto löscht, will auch das
