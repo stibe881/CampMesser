@@ -3065,6 +3065,35 @@ export const fr: Translation = {
     photoHeic:
       "Les photos HEIC ne sont pas prises en charge \u2013 choisis un JPG.",
   },
+  tripStops: {
+    title: "\u00c9tapes",
+    hint: "Circuit\u202f? Plusieurs lieux avec leurs propres dates \u2013 la m\u00e9t\u00e9o et les environs de la vue Aujourd\u2019hui suivent l\u2019\u00e9tape en cours.",
+    empty:
+      "Pas encore d\u2019\u00e9tapes \u2013 ajoute la premi\u00e8re station du circuit.",
+    toggleAria: (trip: string) =>
+      `Afficher ou masquer les \u00e9tapes de ${trip}`,
+    addButton: "Ajouter une \u00e9tape",
+    newTitle: "Nouvelle \u00e9tape",
+    editTitle: "Modifier l\u2019\u00e9tape",
+    nameLabel: "Lieu",
+    namePlaceholder: "p. ex. lac de C\u00f4me",
+    fromLabel: "Arriv\u00e9e",
+    toLabel: "D\u00e9part",
+    saved: "\u00c9tape enregistr\u00e9e",
+    updated: "\u00c9tape mise \u00e0 jour",
+    deleted: "\u00c9tape retir\u00e9e",
+    deleteConfirm: (name: string) =>
+      `Retirer vraiment l\u2019\u00e9tape \u00ab\u202f${name}\u202f\u00bb\u202f?`,
+    deleteAria: (name: string) => `Retirer l\u2019\u00e9tape ${name}`,
+    editAria: (name: string) => `Modifier l\u2019\u00e9tape ${name}`,
+    nameRequired: "Donne un lieu \u00e0 l\u2019\u00e9tape.",
+    currentBadge: "ici maintenant",
+    noCoordsNote:
+      "Les \u00e9tapes sans r\u00e9sultat de la recherche de lieu n\u2019apparaissent pas sur la carte.",
+    noCoordsShort: "sans coordonn\u00e9es",
+    mapAria: "Carte des \u00e9tapes",
+    maxReached: (n: number) => `Au plus ${n} \u00e9tapes`,
+  },
   tripInvite: {
     badge: "Invitation au voyage",
     title: "Invitation à un voyage",
@@ -4566,6 +4595,8 @@ export const fr: Translation = {
     nightsLeft: (nights: number) =>
       nights === 1 ? "encore 1 nuit" : `encore ${nights} nuits`,
     departureToday: "Départ aujourd'hui",
+    stageLine: (name: string, until: string) =>
+      `\u00c9tape\u202f: ${name} \u00b7 jusqu\u2019au ${until}`,
     weather: "Météo",
     menu: "Menu",
     shopping: "Liste de courses",

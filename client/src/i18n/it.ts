@@ -3032,6 +3032,33 @@ export const it: Translation = {
     photoReadFailed: "Impossibile leggere la foto",
     photoHeic: "Le foto HEIC non sono supportate \u2013 scegli un JPG.",
   },
+  tripStops: {
+    title: "Tappe",
+    hint: "Viaggio itinerante? Pi\u00f9 luoghi con date proprie \u2013 meteo e dintorni della vista Oggi seguono la tappa attuale.",
+    empty: "Ancora nessuna tappa \u2013 aggiungi la prima stazione del giro.",
+    toggleAria: (trip: string) => `Mostra o nascondi le tappe di ${trip}`,
+    addButton: "Aggiungi tappa",
+    newTitle: "Nuova tappa",
+    editTitle: "Modifica tappa",
+    nameLabel: "Luogo",
+    namePlaceholder: "es. Lago di Como",
+    fromLabel: "Arrivo",
+    toLabel: "Partenza",
+    saved: "Tappa salvata",
+    updated: "Tappa aggiornata",
+    deleted: "Tappa rimossa",
+    deleteConfirm: (name: string) =>
+      `Rimuovere davvero la tappa \u00ab${name}\u00bb?`,
+    deleteAria: (name: string) => `Rimuovi la tappa ${name}`,
+    editAria: (name: string) => `Modifica la tappa ${name}`,
+    nameRequired: "Indica un luogo per la tappa.",
+    currentBadge: "ora qui",
+    noCoordsNote:
+      "Le tappe senza risultato dalla ricerca luoghi non compaiono sulla mappa.",
+    noCoordsShort: "senza coordinate",
+    mapAria: "Mappa delle tappe",
+    maxReached: (n: number) => `Al massimo ${n} tappe`,
+  },
   tripInvite: {
     badge: "Invito al viaggio",
     title: "Invito a un viaggio",
@@ -4534,6 +4561,8 @@ export const it: Translation = {
     nightsLeft: (nights: number) =>
       nights === 1 ? "ancora 1 notte" : `ancora ${nights} notti`,
     departureToday: "Oggi si parte",
+    stageLine: (name: string, until: string) =>
+      `Tappa: ${name} \u00b7 fino al ${until}`,
     weather: "Meteo",
     menu: "Menu",
     shopping: "Lista della spesa",

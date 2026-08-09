@@ -194,6 +194,7 @@ import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import LazySection from "@/components/LazySection";
 import TripMoreSections from "@/components/trips/TripMoreSections";
+import TripStops from "@/components/trips/TripStops";
 import TripReview from "@/components/trips/TripReview";
 import TripOfflinePrep from "@/components/trips/TripOfflinePrep";
 import NextTimeReminder from "@/components/trips/NextTimeReminder";
@@ -1309,6 +1310,15 @@ export default function TripsPage() {
                           {trip.spotId != null && (
                             <NextTimeReminder spotId={trip.spotId} />
                           )}
+                          {/* Etappen (#536): bei geplanten Reisen direkt
+                            sichtbar – die Rundreise plant man VOR der
+                            Abfahrt, nicht hinter dem «Mehr»-Schalter */}
+                          <TripStops
+                            tripId={trip.id}
+                            tripName={label(trip)}
+                            startDate={trip.startDate}
+                            endDate={trip.endDate}
+                          />
                           <TripMoreSections count={4}>
                             {/* Für unterwegs vorbereiten (#387): Offline gab
                               es bisher stückweise, und man musste an
@@ -1716,7 +1726,15 @@ export default function TripsPage() {
                               endDate={trip.endDate}
                             />
                             {/* Seltenes hinter einen Schalter (#357) */}
-                            <TripMoreSections count={4}>
+                            <TripMoreSections count={5}>
+                              {/* Etappen (#536): rückblickend die
+                                Stationen der Rundreise */}
+                              <TripStops
+                                tripId={trip.id}
+                                tripName={label(trip)}
+                                startDate={trip.startDate}
+                                endDate={trip.endDate}
+                              />
                               {/* Rückblick (#381): Erst nach der Reise
                                 weiss man, was nicht nötig war und was
                                 gefehlt hat – und nur dann verbessert es

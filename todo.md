@@ -2,7 +2,7 @@
 
 ## Zwanzig Vorschläge (09.08.2026, Runde 54)
 
-- [ ] #536 Etappen-Reisen (Zwischenhalte)
+- [x] #536 Etappen-Reisen (Zwischenhalte): Abschnitt «Etappen» an der Reise (Tabelle tripStops, Migration 0121, Router trips.stops mit canAccessTrip – Mitreisende planen mit, max. 12). Jede Etappe hat Ort (Ortssuche #465 mit Koordinaten), Ankunft und Weiterreise; eine Mini-Karte verbindet die nummerierten Punkte, die aktuelle Etappe ist grün. Die Heute-Ansicht nimmt die Koordinaten der AKTUELLEN Etappe (shared/tripStops.ts, 4 Tests – am Wechseltag gilt der neu angefahrene Ort) für Wetter/Umgebung und zeigt «Etappe: … · bis …»; Papierkorb nimmt die Etappen mit
 - [x] #537 Merkorte (Wunschziele) auf der Karte: Karten-Klick fragt neu «Favorit oder Merkort?» – der Merkort ist die leichte Ablage mit Notiz und wählbarer Pin-Farbe (5 Farben, shared/savedPlaces.ts; Tabelle savedPlaces, Migration 0120, Router trpc.savedPlaces). Stern-Pins mit eigener Ebene/Legende, Popup mit Notiz/Navigation/Entfernen; beim Reise-Anlegen erscheinen die Merkorte als Orts-Vorschlag mit Koordinaten. Konto-Löschung räumt die Tabelle mit ab
 - [x] #538 Wetterfenster-Finder: bewertet alle Wochenenden der 16-Tage-Prognose (Regen wiegt am schwersten, dann Temperatur, dann Böen) und zeigt sie auf der Wetterseite als Ampel-Liste, bestes zuoberst (shared/weatherWindow.ts, 4 Tests)
 - [x] #539 Feiertage des Reiselands: Fällt ein landesweiter Feiertag des Ziellands in die Reise, zeigt ihn das Cockpit unter dem Auslands-Hinweis («Läden oft geschlossen»). Quelle Nager.Date, serverseitig 7 Tage gecacht (server/holidaysAbroad.ts, 2 Tests); regionale Feiertage bewusst ausgefiltert. CH-Feiertage EXISTIERTEN BEREITS (#70)

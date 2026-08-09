@@ -41,6 +41,7 @@ import {
   tripDateOptions,
   tripDateVotes,
   tripExpenses,
+  tripStops,
   tripGuestbook,
   tripInvites,
   tripJournal,
@@ -80,6 +81,7 @@ const TABLES: Record<string, MySqlTable> = {
   tripLogs,
   tripPhotos,
   tripExpenses,
+  tripStops,
   tripBoardNotes,
   tripChanges,
   tripJournal,
@@ -194,6 +196,11 @@ async function snapshotTrip(
       .select()
       .from(tripBoardNotes)
       .where(eq(tripBoardNotes.tripId, id)),
+    // Etappen (#536) gehören zur Reise
+    tripStops: await db
+      .select()
+      .from(tripStops)
+      .where(eq(tripStops.tripId, id)),
     tripJournal: await db
       .select()
       .from(tripJournal)

@@ -22,7 +22,7 @@
  * Wer die Seite im Winter öffnet, holt nichts.
  */
 import { useMemo } from "react";
-import { fmtWeekdayLong } from "@/lib/dateFormat";
+import { fmtDayMonth, fmtWeekdayLong } from "@/lib/dateFormat";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -32,6 +32,7 @@ import {
   CloudSunRain,
   KeyRound,
   ListChecks,
+  MapPin,
   NotebookPen,
   Refrigerator,
   ShoppingCart,
@@ -56,6 +57,7 @@ import { trpc } from "@/lib/trpc";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { MEAL_LABELS } from "@shared/menuPlan";
 import { currentTripDay } from "@shared/trips";
+import { currentTripStop } from "@shared/tripStops";
 import { expiryInfo, isUrgentExpiry } from "@shared/food";
 import {
   nightsLeft,
@@ -137,13 +139,27 @@ export default function TodayPage() {
     trip?.spotId != null
       ? (spotsQuery.data ?? []).find(s => s.id === trip.spotId)
       : undefined;
-  // Koordinaten: Zeltplatz zuerst, sonst die der Reise aus der Ortssuche
-  // (#465) – damit haben auch Hotel- und Strandreisen Wetter und Wasser.
-  const coords = spot
-    ? { latitude: spot.latitude, longitude: spot.longitude }
-    : trip?.latitude != null && trip?.longitude != null
-      ? { latitude: trip.latitude, longitude: trip.longitude }
-      : null;
+  // Etappen (#536): Ist die Reise eine Rundreise, gilt die AKTUELLE
+  // Etappe – Wetter, Umgebung und Karten wandern mit dem Standort mit.
+  const stopsQuery = trpc.trips.stops.list.useQuery(
+    { tripId: trip?.id ?? 0 },
+    { enabled: Boolean(trip), staleTime: 5 * 60_000 }
+  );
+  const currentStop = useMemo(
+    () => currentTripStop(stopsQuery.data ?? [], today),
+    [stopsQuery.data, today]
+  );
+  // Koordinaten: aktuelle Etappe zuerst (#536), dann Zeltplatz, sonst die
+  // der Reise aus der Ortssuche (#465) – damit haben auch Hotel- und
+  // Strandreisen Wetter und Wasser.
+  const coords =
+    currentStop?.latitude != null && currentStop.longitude != null
+      ? { latitude: currentStop.latitude, longitude: currentStop.longitude }
+      : spot
+        ? { latitude: spot.latitude, longitude: spot.longitude }
+        : trip?.latitude != null && trip?.longitude != null
+          ? { latitude: trip.latitude, longitude: trip.longitude }
+          : null;
   const weather = useDayWeather(coords?.latitude, coords?.longitude, lang);
 
   const choresQuery = trpc.chores.assignments.useQuery(
@@ -338,6 +354,21 @@ export default function TodayPage() {
                   {spot.checkinInfo}
                 </p>
               )}
+            {/* Aktuelle Etappe (#536): Bei einer Rundreise steht hier,
+                WO man gerade ist – Wetter und Umgebung unten beziehen
+                sich auf genau diesen Ort. */}
+            {currentStop && (
+              <p className="mt-1 flex items-center gap-1.5 text-sm">
+                <MapPin
+                  className="h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                {td.stageLine(
+                  currentStop.name,
+                  fmtDayMonth(new Date(`${currentStop.endDate}T00:00:00`), lang)
+                )}
+              </p>
+            )}
             {/* Das Wetter bestimmt den Tag – es gehört in die Kopfzeile,
                 nicht hinter einen Knopf. Ohne Koordinaten oder ohne Netz
                 bleibt die Zeile weg statt zu behaupten, es sei nichts. */}

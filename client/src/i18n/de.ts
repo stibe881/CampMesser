@@ -3070,6 +3070,33 @@ export const de = {
     photoHeic:
       "HEIC-Fotos werden nicht unterstützt \u2013 bitte als JPG w\u00e4hlen.",
   },
+  tripStops: {
+    title: "Etappen",
+    hint: "Rundreise? Mehrere Orte mit je eigenem Von/Bis \u2013 Wetter und Umgebung in der Heute-Ansicht folgen der aktuellen Etappe.",
+    empty: "Noch keine Etappen \u2013 lege die erste Station der Rundreise an.",
+    toggleAria: (trip: string) => `Etappen von ${trip} ein- oder ausblenden`,
+    addButton: "Etappe hinzuf\u00fcgen",
+    newTitle: "Neue Etappe",
+    editTitle: "Etappe bearbeiten",
+    nameLabel: "Ort",
+    namePlaceholder: "z. B. Comersee",
+    fromLabel: "Ankunft",
+    toLabel: "Weiterreise",
+    saved: "Etappe gespeichert",
+    updated: "Etappe aktualisiert",
+    deleted: "Etappe entfernt",
+    deleteConfirm: (name: string) =>
+      `Etappe \u00ab${name}\u00bb wirklich entfernen?`,
+    deleteAria: (name: string) => `Etappe ${name} entfernen`,
+    editAria: (name: string) => `Etappe ${name} bearbeiten`,
+    nameRequired: "Gib der Etappe einen Ort.",
+    currentBadge: "jetzt hier",
+    noCoordsNote:
+      "Etappen ohne Treffer aus der Ortssuche stehen nicht auf der Karte.",
+    noCoordsShort: "ohne Koordinaten",
+    mapAria: "Karte der Etappen",
+    maxReached: (n: number) => `H\u00f6chstens ${n} Etappen`,
+  },
   tripInvite: {
     badge: "Reise-Einladung",
     title: "Einladung zu einer Reise",
@@ -4572,6 +4599,8 @@ export const de = {
     nightsLeft: (nights: number) =>
       nights === 1 ? "noch 1 Nacht" : `noch ${nights} Nächte`,
     departureToday: "Heute ist Abreisetag",
+    stageLine: (name: string, until: string) =>
+      `Etappe: ${name} \u00b7 bis ${until}`,
     weather: "Wetter",
     menu: "Menüplan",
     shopping: "Einkaufsliste",
