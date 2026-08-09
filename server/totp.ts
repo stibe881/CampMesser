@@ -107,7 +107,7 @@ export function verifyTotp(
 
 /** otpauth-URL für den QR-Code der Authenticator-App. */
 export function otpauthUrl(account: string, secretBase32: string): string {
-  const issuer = "CampMesser";
+  const issuer = "ReiseKompass";
   const label = encodeURIComponent(`${issuer}:${account}`);
   const params = new URLSearchParams({
     secret: secretBase32,

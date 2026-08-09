@@ -10,7 +10,7 @@ import { join } from "node:path";
  * kennt, greift beim nächsten Löschen-Knopf wieder zum Browser-Dialog –
  * und niemand merkt es, weil er ja funktioniert. Nur eben in der Sprache
  * des Betriebssystems, mit «OK» statt «Löschen» und in der nativen App
- * mit «campmesser.ch» darüber.
+ * mit «meinreisekompass.ch» darüber.
  *
  * Dieser Test liest den Client-Quelltext und lässt es nicht durch.
  */

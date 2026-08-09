@@ -43,19 +43,19 @@ describe("Adressen des Abos", () => {
   });
 
   it("baut eine vollständige Adresse ohne doppelten Schrägstrich", () => {
-    expect(calendarFeedUrl("https://campmesser.ch", token)).toBe(
-      `https://campmesser.ch/api/kalender/${token}.ics`
+    expect(calendarFeedUrl("https://meinreisekompass.ch", token)).toBe(
+      `https://meinreisekompass.ch/api/kalender/${token}.ics`
     );
-    expect(calendarFeedUrl("https://campmesser.ch/", token)).toBe(
-      `https://campmesser.ch/api/kalender/${token}.ics`
+    expect(calendarFeedUrl("https://meinreisekompass.ch/", token)).toBe(
+      `https://meinreisekompass.ch/api/kalender/${token}.ics`
     );
   });
 
   it("webcal:// ist dieselbe Adresse mit anderem Vorspann", () => {
     // Ein Klick darauf öffnet die Kalender-App und fragt «abonnieren?»,
     // statt die Datei herunterzuladen.
-    expect(calendarWebcalUrl("https://campmesser.ch", token)).toBe(
-      `webcal://campmesser.ch/api/kalender/${token}.ics`
+    expect(calendarWebcalUrl("https://meinreisekompass.ch", token)).toBe(
+      `webcal://meinreisekompass.ch/api/kalender/${token}.ics`
     );
     expect(calendarWebcalUrl("http://localhost:3000", token)).toBe(
       `webcal://localhost:3000/api/kalender/${token}.ics`

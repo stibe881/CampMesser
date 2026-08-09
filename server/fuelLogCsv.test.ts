@@ -9,6 +9,7 @@ describe("fuelLogToCsv", () => {
     "Liter",
     "Betrag CHF",
     "Verbrauch l/100 km",
+    "Fahrzeug",
   ];
 
   it("baut Kopfzeile, Zeilen und Verbrauchs-Spalte", () => {
@@ -19,6 +20,7 @@ describe("fuelLogToCsv", () => {
           odometerKm: 84_000,
           liters10: 425,
           priceRappen: 7490,
+          vehicle: "Bus",
         },
         {
           day: "2026-07-15",
@@ -31,12 +33,12 @@ describe("fuelLogToCsv", () => {
     );
     const lines = csv.replace(/^﻿/, "").trim().split("\r\n");
     expect(lines[0]).toBe(
-      "Datum;Kilometerstand;Liter;Betrag CHF;Verbrauch l/100 km"
+      "Datum;Kilometerstand;Liter;Betrag CHF;Verbrauch l/100 km;Fahrzeug"
     );
     // Erste Füllung: kein Abschnitt davor → Verbrauchs-Spalte leer
-    expect(lines[1]).toBe("2026-07-01;84000;42.5;74.90;");
+    expect(lines[1]).toBe("2026-07-01;84000;42.5;74.90;;Bus");
     // Zweite Füllung: 48 l auf 600 km = 8.0 l/100 km, Betrag nicht erfasst
-    expect(lines[2]).toBe("2026-07-15;84600;48.0;;8.0");
+    expect(lines[2]).toBe("2026-07-15;84600;48.0;;8.0;");
   });
 
   it("sortiert nach Kilometerstand, nicht nach Eingabe-Reihenfolge", () => {

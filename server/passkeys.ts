@@ -19,7 +19,7 @@ import { and, eq } from "drizzle-orm";
 import { passkeys, type Passkey, type User } from "../drizzle/schema";
 import { getDb } from "./db";
 
-export const RP_NAME = "CampMesser";
+export const RP_NAME = "ReiseKompass";
 
 // ---------------------------------------------------------------------------
 // rpID/Origin-Ableitung – reine Funktionen (für Tests exportiert)
@@ -207,7 +207,7 @@ export async function createRegistrationOptions(
     // Stabile Konto-Kennung auf dem Authenticator (nie die E-Mail als Id)
     userID: new TextEncoder().encode(`campmesser:${user.id}`),
     userName: user.email || user.name || `konto-${user.id}`,
-    userDisplayName: user.name || user.email || "CampMesser",
+    userDisplayName: user.name || user.email || "ReiseKompass",
     attestationType: "none",
     excludeCredentials: existing.map(p => ({
       id: p.credentialId,

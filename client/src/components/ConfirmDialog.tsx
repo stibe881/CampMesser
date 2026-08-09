@@ -36,7 +36,7 @@ import { useI18n } from "@/i18n";
  *    nicht ändern. Hier steht «Löschen» – und rot, damit der gefährliche
  *    Knopf nicht aussieht wie der harmlose.
  *
- * 3. IN DER NATIVEN APP STEHT «campmesser.ch» DARÜBER. Der WebView schreibt
+ * 3. IN DER NATIVEN APP STEHT «meinreisekompass.ch» DARÜBER. Der WebView schreibt
  *    die Herkunft über den Kasten. Es ist die einzige Stelle, an der die
  *    App verrät, dass sie eine Webseite ist – und sie tut es im
  *    unpassendsten Moment.

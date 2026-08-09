@@ -10,8 +10,8 @@
  */
 module.exports = {
   type: "widget",
-  name: "CampMesserWidgets",
-  displayName: "CampMesser",
+  name: "ReiseKompassWidgets",
+  displayName: "ReiseKompass",
   icon: "../../assets/icon.png",
   colors: {
     // Die Akzentfarbe der App (siehe client/src/index.css, --primary)

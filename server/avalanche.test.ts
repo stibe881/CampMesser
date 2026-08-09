@@ -5,6 +5,12 @@ import {
   inSwitzerland,
   pointInGeometry,
   pointInRing,
+  euregioBulletinUrl,
+  euregioDangerForRegion,
+  euregioMicroRegionsUrl,
+  euregioRegionsAt,
+  microRegionAt,
+  parseEuregioDate,
 } from "@shared/avalanche";
 
 /** SLF-Lawinen-Warnstufe (#471): Punkt-in-Region und CAAML-Stufen. */
@@ -124,5 +130,85 @@ describe("avalancheDangerAt", () => {
     expect(avalancheDangerAt(geojson, 46.5, 8.5)).toBeNull();
     expect(avalancheDangerAt(null, 46.5, 8.5)).toBeNull();
     expect(avalancheDangerAt({ features: "kaputt" }, 46.5, 8.5)).toBeNull();
+  });
+});
+
+describe("Euregio-Lawinenreport (#490)", () => {
+  it("kennt die drei Regionen und findet Kandidaten per Bounding-Box", () => {
+    // Innsbruck → Tirol
+    expect(euregioRegionsAt(47.26, 11.39)).toEqual(["AT-07"]);
+    // Bozen → Südtirol (und wegen Überlappung evtl. Tirol)
+    expect(euregioRegionsAt(46.5, 11.35)).toContain("IT-32-BZ");
+    // Trento → Trentino
+    expect(euregioRegionsAt(46.07, 11.12)).toContain("IT-32-TN");
+    // Bern liegt in keiner Euregio-Region
+    expect(euregioRegionsAt(46.95, 7.45)).toEqual([]);
+  });
+
+  it("liest das Bulletin-Datum und baut die Endpunkt-URLs", () => {
+    expect(parseEuregioDate({ date: "2026-05-02T15:00:00Z" })).toBe(
+      "2026-05-02"
+    );
+    expect(parseEuregioDate({ date: 42 })).toBeNull();
+    expect(parseEuregioDate(null)).toBeNull();
+    expect(euregioBulletinUrl("2026-05-02", "AT-07")).toBe(
+      "https://static.avalanche.report/eaws_bulletins/2026-05-02/2026-05-02-AT-07.json"
+    );
+    expect(euregioMicroRegionsUrl("IT-32-BZ")).toBe(
+      "https://regions.avalanches.org/micro-regions/IT-32-BZ_micro-regions.geojson.json"
+    );
+  });
+
+  it("findet die Mikro-Region eines Punkts über die Polygone", () => {
+    const geojson = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: { id: "AT-07-05" },
+          geometry: {
+            type: "MultiPolygon",
+            coordinates: [
+              [
+                [
+                  [11.0, 47.0],
+                  [12.0, 47.0],
+                  [12.0, 47.5],
+                  [11.0, 47.5],
+                  [11.0, 47.0],
+                ],
+              ],
+            ],
+          },
+        },
+      ],
+    };
+    expect(microRegionAt(geojson, 47.25, 11.5)).toBe("AT-07-05");
+    expect(microRegionAt(geojson, 46.0, 11.5)).toBeNull();
+    expect(microRegionAt({}, 47.25, 11.5)).toBeNull();
+  });
+
+  it("nimmt die höchste Stufe aller Bulletins der Mikro-Region", () => {
+    const bulletins = {
+      bulletins: [
+        {
+          regions: [{ regionID: "AT-07-05" }],
+          dangerRatings: [
+            { mainValue: "moderate", validTimePeriod: "earlier" },
+            { mainValue: "considerable", validTimePeriod: "later" },
+          ],
+        },
+        {
+          regions: [{ regionID: "AT-07-99" }],
+          dangerRatings: [{ mainValue: "high" }],
+        },
+      ],
+    };
+    expect(euregioDangerForRegion(bulletins, "AT-07-05")).toEqual({
+      level: 3,
+    });
+    // Fremde Mikro-Region färbt nicht ab; Unbekanntes ergibt null
+    expect(euregioDangerForRegion(bulletins, "AT-07-01")).toBeNull();
+    expect(euregioDangerForRegion({}, "AT-07-05")).toBeNull();
   });
 });

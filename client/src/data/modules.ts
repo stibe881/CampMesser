@@ -53,6 +53,8 @@ import {
   IdCard,
   Users,
   Wrench,
+  Beef,
+  Handshake,
 } from "lucide-react";
 
 export interface Module {
@@ -559,6 +561,55 @@ export const modules: Module[] = [
       "Waterproofing, patching, zips, mould – step by step"
     ),
     icon: Wrench,
+    group: "wissen",
+    offline: true,
+  },
+  {
+    path: "/grillieren",
+    title: l4(
+      "Grill & Garzeiten",
+      "Grillades & cuissons",
+      "Griglia & cotture",
+      "Grill & cooking times"
+    ),
+    description: l4(
+      "Kerntemperaturen, Glut-Test und Faustregeln fürs Grillieren",
+      "Températures à cœur, test de braise et règles de base pour griller",
+      "Temperature al cuore, prova della brace e regole base per grigliare",
+      "Core temperatures, ember test and rules of thumb for grilling"
+    ),
+    icon: Beef,
+    group: "wissen",
+    offline: true,
+  },
+  {
+    path: "/feuer",
+    title: l4("Feuer-Ratgeber", "Guide du feu", "Guida al fuoco", "Fire guide"),
+    description: l4(
+      "Aufbau, Anzünden und richtiges Löschen eines Lagerfeuers",
+      "Montage, allumage et extinction correcte d'un feu de camp",
+      "Costruzione, accensione e spegnimento corretto di un falò",
+      "Building, lighting and properly extinguishing a campfire"
+    ),
+    icon: Flame,
+    group: "wissen",
+    offline: true,
+  },
+  {
+    path: "/knigge",
+    title: l4(
+      "Camping-Knigge",
+      "Savoir-vivre au camping",
+      "Galateo del campeggio",
+      "Campsite etiquette"
+    ),
+    description: l4(
+      "Ruhezeiten, Grauwasser, Hunde – die Regeln des Zusammenlebens",
+      "Heures de repos, eaux grises, chiens – les règles du vivre-ensemble",
+      "Orari di riposo, acque grigie, cani – le regole della convivenza",
+      "Quiet hours, grey water, dogs – the rules of living together"
+    ),
+    icon: Handshake,
     group: "wissen",
     offline: true,
   },

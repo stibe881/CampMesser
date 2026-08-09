@@ -97,7 +97,7 @@ export async function ogMetaForShareRequest(
     const items = await db.getPackItems(list.id);
     const count = items.length === 1 ? "1 Eintrag" : `${items.length} Einträge`;
     return {
-      title: `${list.name} – CampMesser`,
+      title: `${list.name} – ReiseKompass`,
       description: `Geteilte Packliste mit ${count} – zum Mitpacken und Abhaken.`,
       url,
       image,
@@ -110,7 +110,7 @@ export async function ogMetaForShareRequest(
     const items = parseCustomTemplateItems(template.itemsJson);
     const count = items.length === 1 ? "1 Eintrag" : `${items.length} Einträge`;
     return {
-      title: `${template.name} – CampMesser`,
+      title: `${template.name} – ReiseKompass`,
       description: `Geteilte Packvorlage mit ${count} – zum Übernehmen als eigene Vorlage.`,
       url,
       image,
@@ -125,7 +125,7 @@ export async function ogMetaForShareRequest(
     const count =
       open === 1 ? "1 offenem Eintrag" : `${open} offenen Einträgen`;
     return {
-      title: "Einkaufsliste – CampMesser",
+      title: "Einkaufsliste – ReiseKompass",
       description: `Geteilte Einkaufsliste mit ${count} – zum Mitbringen und Abhaken.`,
       url,
       image,
@@ -138,7 +138,7 @@ export async function ogMetaForShareRequest(
     const count = parseQuizQuestions(quiz.questionsJson).length;
     const countText = count === 1 ? "1 Frage" : `${count} Fragen`;
     return {
-      title: `${quiz.title} – CampMesser`,
+      title: `${quiz.title} – ReiseKompass`,
       description: `Geteiltes Quiz mit ${countText} – zum Übernehmen und Mitspielen.`,
       url,
       image,
@@ -151,7 +151,7 @@ export async function ogMetaForShareRequest(
     const count = parseStringList(recipe.ingredientsJson).length;
     const countText = count === 1 ? "1 Zutat" : `${count} Zutaten`;
     return {
-      title: `${recipe.name} – CampMesser`,
+      title: `${recipe.name} – ReiseKompass`,
       description: `Geteiltes Campingrezept mit ${countText} · ${recipe.timeMinutes} Min. – zum Nachkochen und Übernehmen.`,
       url,
       image,
@@ -166,7 +166,9 @@ export async function ogMetaForShareRequest(
     // Bewusst OHNE Koordinaten in der Vorschau: die Position steht auf der
     // Seite, sie muss nicht zusätzlich in jeder Chat-Vorschau auftauchen.
     return {
-      title: who ? `Standort von ${who} – CampMesser` : "Standort – CampMesser",
+      title: who
+        ? `Standort von ${who} – ReiseKompass`
+        : "Standort – ReiseKompass",
       description:
         "Geteilter Standort mit Karte, Koordinaten und Navigation – der Link läuft nach kurzer Zeit ab.",
       url,
@@ -179,7 +181,7 @@ export async function ogMetaForShareRequest(
     if (!track) return null;
     const km = (track.distanceM / 1000).toFixed(1).replace(".", ",");
     return {
-      title: `${track.name} – CampMesser`,
+      title: `${track.name} – ReiseKompass`,
       description: `Geteilte Wanderung: ${km} km, ${track.ascentM} Höhenmeter im Aufstieg – mit Karte und Höhenprofil.`,
       url,
       image,
@@ -196,7 +198,7 @@ export async function ogMetaForShareRequest(
     }
     const name = trip.title || place || "Reise";
     return {
-      title: `${name} – CampMesser`,
+      title: `${name} – ReiseKompass`,
       description:
         "Geteilter Reise-Hub mit Reise-Infos, Platz, Menüplan und Packliste – zum Mitlesen und Mitpacken.",
       url,
@@ -207,7 +209,7 @@ export async function ogMetaForShareRequest(
   const spot = await db.getCampSpotByToken(token);
   if (!spot) return null;
   return {
-    title: `${spot.name} – CampMesser`,
+    title: `${spot.name} – ReiseKompass`,
     description: `Geteiltes Platz-Dossier (${spot.latitude.toFixed(4)}, ${spot.longitude.toFixed(4)}) mit Sonnenzeiten und 3-Tage-Wetter.`,
     url,
     image,

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Aktualisiert CampMesser auf einem Hetzner-Webhosting-Account.
+# Aktualisiert ReiseKompass auf einem Hetzner-Webhosting-Account.
 # Aufruf per SSH:  bash ~/campmesser/scripts/deploy-hetzner.sh
 set -euo pipefail
 
@@ -54,7 +54,7 @@ echo "==> Produktions-Build erstellen"
 $PKG run build
 
 echo "==> Anwendung neu starten (konsoleH-Node.js-Dienst)"
-# CampMesser läuft als Node.js-Dienst von konsoleH über app.js – Phusion
+# ReiseKompass läuft als Node.js-Dienst von konsoleH über app.js – Phusion
 # Passenger ist hier nicht im Spiel, ein `touch tmp/restart.txt` bewirkt darum
 # gar nichts. Der Dienst startet neu, sobald der laufende Prozess beendet ist;
 # konsoleH zieht ihn beim nächsten HTTP-Aufruf wieder hoch. Damit dabei nie ein
@@ -92,7 +92,7 @@ else
   echo "    kein laufender Prozess gefunden – konsoleH startet beim ersten Aufruf"
 fi
 
-HEALTH_URL="${PUBLIC_URL:-${APP_URL:-https://campmesser.ch}}/api/health"
+HEALTH_URL="${PUBLIC_URL:-${APP_URL:-https://meinreisekompass.ch}}/api/health"
 echo "==> Anwendung aufwecken und prüfen: $HEALTH_URL"
 HEALTH=""
 for _ in 1 2 3 4 5 6 7 8 9 10; do

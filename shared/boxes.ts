@@ -57,7 +57,7 @@ export function nextBoxCode(existing: readonly string[], prefix = "K"): string {
 
 /**
  * Adresse, die im QR-Code steckt. Bewusst ein normaler Link auf die App:
- * Jede Kamera öffnet ihn, ohne dass CampMesser installiert sein muss, und
+ * Jede Kamera öffnet ihn, ohne dass ReiseKompass installiert sein muss, und
  * wer angemeldet ist, sieht sofort den Inhalt der Kiste.
  */
 export function boxScanUrl(origin: string, code: string): string {

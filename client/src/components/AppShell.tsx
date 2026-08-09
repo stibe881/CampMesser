@@ -331,7 +331,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <BrandLogo className="h-6 w-6" />
             </span>
             <span className="font-serif text-lg font-semibold tracking-tight">
-              CampMesser
+              ReiseKompass
             </span>
           </Link>
           <div className="flex items-center gap-2">

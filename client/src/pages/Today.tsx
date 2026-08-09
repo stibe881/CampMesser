@@ -76,6 +76,12 @@ import AvalancheDanger from "@/components/AvalancheDanger";
 import CampfireLight from "@/components/CampfireLight";
 import LazySection from "@/components/LazySection";
 import BathingWaterCard from "@/components/spots/BathingWaterCard";
+import NearbyPoints from "@/components/NearbyPoints";
+import NearbySights from "@/components/NearbySights";
+import NearbyTransit from "@/components/NearbyTransit";
+import NearbyExcursions from "@/components/NearbyExcursions";
+import { beachesQuery, parseBeaches } from "@/lib/overpass";
+import { Umbrella } from "lucide-react";
 import { modules } from "@/data/modules";
 import { tripKindPreset } from "@shared/tripKind";
 
@@ -436,6 +442,71 @@ export default function TodayPage() {
                   longitude={coords.longitude}
                 />
               </div>
+            </LazySection>
+          )}
+
+          {/* Strände in der Nähe (#487): Bei Strandferien ist «wo geht es
+              heute ans Wasser?» die Frage des Tages – Suche erst auf
+              Klick, wie bei allen Overpass-Karten. */}
+          {preset.beaches && coords && (
+            <LazySection minHeight={120}>
+              <NearbyPoints
+                className="mt-4"
+                latitude={coords.latitude}
+                longitude={coords.longitude}
+                icon={Umbrella}
+                texts={t.poi.beaches}
+                query={beachesQuery}
+                parse={parseBeaches}
+                radii={[2000, 5000, 10000]}
+                defaultRadiusM={5000}
+                profile="car"
+                sectionId="today-beaches"
+              />
+            </LazySection>
+          )}
+
+          {/* Sehenswürdigkeiten (#486): Bei Städtereise und Hotelferien
+              ist «was gibt es hier?» der Kern des Tages – dieselbe
+              OSM-Liste wie im Platz-Dossier (#479), an den
+              Reise-Koordinaten (#465). */}
+          {preset.sights && coords && (
+            <LazySection minHeight={120}>
+              <NearbySights
+                className="mt-4"
+                latitude={coords.latitude}
+                longitude={coords.longitude}
+                placeName={place}
+              />
+            </LazySection>
+          )}
+
+          {/* ÖV-Abfahrten (#488): In der Stadt bewegt man sich mit Bahn
+              und Bus – dieselbe Abfahrtstafel wie am Platz (#249). Die
+              Daten decken die Schweiz ab; anderswo bleibt die Suche
+              ehrlich leer. */}
+          {preset.transit && coords && (
+            <LazySection minHeight={120}>
+              <NearbyTransit
+                className="mt-4"
+                latitude={coords.latitude}
+                longitude={coords.longitude}
+                placeName={place}
+              />
+            </LazySection>
+          )}
+
+          {/* Kuratierte Ausflüge (#489): Beim Tagesausflug IST der
+              Ausflug die Reise – der Ausflugfinder (#271) direkt hier
+              statt nur auf der Karte und im Dossier. */}
+          {preset.excursions && coords && (
+            <LazySection minHeight={120}>
+              <NearbyExcursions
+                className="mt-4"
+                latitude={coords.latitude}
+                longitude={coords.longitude}
+                placeName={place}
+              />
             </LazySection>
           )}
 

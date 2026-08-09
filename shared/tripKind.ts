@@ -107,6 +107,26 @@ export interface TripKindPreset {
    * Wintersport – dort ist sie DIE Zahl des Tages.
    */
   winter: boolean;
+  /**
+   * Sehenswürdigkeiten in der Heute-Ansicht (#486)? Bei Städtereise und
+   * Hotelferien ist «was gibt es hier?» die Frage des Tages – am
+   * Zeltplatz steht dieselbe Liste weiterhin im Dossier.
+   */
+  sights: boolean;
+  /** Strände in der Nähe (#487) – nur bei Strandferien. */
+  beaches: boolean;
+  /**
+   * ÖV-Haltestellen mit Abfahrten in der Heute-Ansicht (#488)? In der
+   * Stadt und im Hotel bewegt man sich mit Bahn und Bus; die Daten
+   * (transport.opendata.ch) decken die Schweiz ab – anderswo bleibt die
+   * Suche ehrlich leer.
+   */
+  transit: boolean;
+  /**
+   * Kuratierte Ausflüge (Ausflugfinder #271) in der Heute-Ansicht
+   * (#489)? Beim Tagesausflug IST der Ausflug die Reise.
+   */
+  excursions: boolean;
 }
 
 export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
@@ -117,6 +137,10 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     bathing: false,
     tentGear: true,
     winter: false,
+    sights: false,
+    beaches: false,
+    transit: false,
+    excursions: false,
   },
   strand: {
     // Baderegeln & Flaggen (#473) gehören an den Strand-Schnellzugriff
@@ -126,6 +150,10 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     // Strandferien als EIGENE Art heisst: nicht im Zelt (sonst Camping)
     tentGear: false,
     winter: false,
+    sights: false,
+    beaches: true,
+    transit: false,
+    excursions: false,
   },
   hotel: {
     quickModules: ["/ausweise", "/sprachhilfe"],
@@ -133,6 +161,10 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     bathing: false,
     tentGear: false,
     winter: false,
+    sights: true,
+    beaches: false,
+    transit: true,
+    excursions: false,
   },
   staedte: {
     quickModules: ["/ausweise", "/sprachhilfe"],
@@ -140,6 +172,10 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     bathing: false,
     tentGear: false,
     winter: false,
+    sights: true,
+    beaches: false,
+    transit: true,
+    excursions: false,
   },
   wandern: {
     quickModules: ["/wanderung", "/erste-hilfe"],
@@ -147,6 +183,10 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     bathing: false,
     tentGear: true,
     winter: false,
+    sights: false,
+    beaches: false,
+    transit: false,
+    excursions: false,
   },
   velo: {
     quickModules: ["/wanderung", "/reparatur"],
@@ -154,6 +194,10 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     bathing: false,
     tentGear: true,
     winter: false,
+    sights: false,
+    beaches: false,
+    transit: false,
+    excursions: false,
   },
   wintersport: {
     // «Pisten & Lawinen» (#472) zuerst – das schlägt man am Berg nach
@@ -162,6 +206,10 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     bathing: false,
     tentGear: false,
     winter: true,
+    sights: false,
+    beaches: false,
+    transit: false,
+    excursions: false,
   },
   tagesausflug: {
     quickModules: ["/lunchbox", "/regentag"],
@@ -169,6 +217,10 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     bathing: false,
     tentGear: false,
     winter: false,
+    sights: false,
+    beaches: false,
+    transit: true,
+    excursions: true,
   },
 };
 

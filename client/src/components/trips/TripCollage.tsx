@@ -197,7 +197,7 @@ export default function TripCollage({
       ) {
         await navigator.share({
           files: [file],
-          title: `CampMesser · ${tripName}`,
+          title: `ReiseKompass · ${tripName}`,
         });
       } else {
         downloadBlob(blob);

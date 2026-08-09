@@ -4,7 +4,7 @@
  * Alle Karten der App liefen bisher direkt gegen Leaflet. Weil die Karte
  * neu Google Maps sein soll, liegt zwischen den Ansichten und dem
  * Kartendienst jetzt DIESE Schicht. Sie bietet genau die Handvoll Dinge
- * an, die CampMesser wirklich braucht – Karte, Pin, Popup, Linie, Kreis,
+ * an, die ReiseKompass wirklich braucht – Karte, Pin, Popup, Linie, Kreis,
  * Ebene, Ausschnitt – und nicht mehr.
  *
  * ZWEI ANTRIEBE, und der zweite ist keine Bequemlichkeit:
@@ -216,7 +216,7 @@ export function loadGoogleMaps(config: MapConfig): Promise<boolean> {
     const timer = window.setTimeout(() => resolve(false), LOAD_TIMEOUT_MS);
     const script = document.createElement("script");
     script.id = SCRIPT_ID;
-    const callbackName = "initCampMesserGoogleMaps";
+    const callbackName = "initReiseKompassGoogleMaps";
     (window as any)[callbackName] = () => {
       window.clearTimeout(timer);
       resolve(googleReady());

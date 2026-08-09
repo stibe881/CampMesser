@@ -5,7 +5,14 @@
  * Upload über die Ein-Foto-Fabrik #457), an der Rezeption vorzeigen.
  */
 import { useRef, useState } from "react";
-import { IdCard, ImagePlus, Loader2, Plus, Trash2 } from "lucide-react";
+import {
+  FileText,
+  IdCard,
+  ImagePlus,
+  Loader2,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import QueryError from "@/components/QueryError";
@@ -84,10 +91,13 @@ export default function DocumentsPage() {
     if (!file || cardId === null) return;
     setUploadingId(cardId);
     try {
-      const blob = await resizeImageForUpload(file);
+      // PDF (#500): unverändert hochladen – ein PDF lässt sich nicht wie
+      // ein Foto verkleinern; zu grosse Dateien sagt der Server ehrlich ab.
+      const isPdf = file.type === "application/pdf";
+      const blob = isPdf ? file : await resizeImageForUpload(file);
       const response = await fetch(`/api/documents/${cardId}/photo`, {
         method: "POST",
-        headers: { "Content-Type": "image/jpeg" },
+        headers: { "Content-Type": isPdf ? "application/pdf" : "image/jpeg" },
         body: blob,
         credentials: "include",
       });
@@ -120,7 +130,7 @@ export default function DocumentsPage() {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,application/pdf"
             className="hidden"
             tabIndex={-1}
             aria-hidden="true"
@@ -193,7 +203,22 @@ export default function DocumentsPage() {
                   key={card.id}
                   className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
                 >
-                  {card.fileName ? (
+                  {card.fileName?.endsWith(".pdf") ? (
+                    // PDF (#500): kein Vorschaubild – der Klick öffnet die
+                    // Datei im neuen Tab, dort rendert sie der Browser.
+                    <a
+                      href={`/api/documents/photos/${card.fileName}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex h-16 w-24 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border border-border text-muted-foreground"
+                      aria-label={td.viewAria(card.title)}
+                    >
+                      <FileText className="h-6 w-6" aria-hidden="true" />
+                      <span className="text-[10px] font-semibold uppercase">
+                        PDF
+                      </span>
+                    </a>
+                  ) : card.fileName ? (
                     <button
                       type="button"
                       className="shrink-0 overflow-hidden rounded-lg border border-border"

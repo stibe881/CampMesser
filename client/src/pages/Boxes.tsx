@@ -235,7 +235,11 @@ export default function BoxesPage() {
         ctx.font = "32px sans-serif";
         if (box.location) ctx.fillText(box.location, margin + 32, top + 206);
         ctx.font = "24px sans-serif";
-        ctx.fillText("campmesser.ch", margin + 32, top + labelHeight - 48);
+        ctx.fillText(
+          "meinreisekompass.ch",
+          margin + 32,
+          top + labelHeight - 48
+        );
       }
       canvas.toBlob(blob => {
         if (!blob) {
@@ -579,7 +583,7 @@ export default function BoxesPage() {
                     </p>
                   )}
                   <p className="mt-1 text-[0.6rem] text-muted-foreground">
-                    campmesser.ch
+                    meinreisekompass.ch
                   </p>
                 </div>
                 {labelQr && (
@@ -631,7 +635,7 @@ export default function BoxesPage() {
                   {labelBox.location && (
                     <p className="print-label-place">{labelBox.location}</p>
                   )}
-                  <p className="print-label-brand">campmesser.ch</p>
+                  <p className="print-label-brand">meinreisekompass.ch</p>
                 </div>
                 {labelQr && <img src={labelQr} alt="" />}
               </div>

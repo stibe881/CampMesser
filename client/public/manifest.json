@@ -1,7 +1,7 @@
 {
-  "name": "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
-  "short_name": "CampMesser",
-  "description": "Planung, Sicherheit, Energie und Naturerlebnis – smarte Werkzeuge fürs Zelt-Camping.",
+  "name": "ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
+  "short_name": "ReiseKompass",
+  "description": "Planung, Sicherheit, Energie und Naturerlebnis – smarte Werkzeuge für Ferien, Camping und Ausflüge.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "name": "Camp-Wetter",
+      "name": "Reise-Wetter",
       "short_name": "Wetter",
       "description": "Vorhersage und Unwetterwarnungen",
       "url": "/wetter",

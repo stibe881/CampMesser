@@ -123,6 +123,7 @@ import QuickBarCard from "@/components/profile/QuickBarCard";
 import CalendarFeedCard from "@/components/profile/CalendarFeedCard";
 import ShareLinksCard from "@/components/profile/ShareLinksCard";
 import DevicesCard from "@/components/profile/DevicesCard";
+import FeedbackCard from "@/components/profile/FeedbackCard";
 
 export default function ProfilePage() {
   const { lang, t, setLang } = useI18n();
@@ -585,6 +586,9 @@ export default function ProfilePage() {
 
       {/* Angemeldete Geräte (#423) */}
       <DevicesCard />
+
+      {/* Feedback ans Betreiber-Postfach (#512) */}
+      <FeedbackCard />
 
       {/* Statistik: auf Nutzerwunsch im Profil statt als Startseiten-Kachel */}
       <CollapsibleCard

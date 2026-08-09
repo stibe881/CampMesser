@@ -1900,6 +1900,8 @@ export const fuelLogs = mysqlTable(
     liters10: int("liters10").notNull(),
     /** Bezahlter Gesamtbetrag in Rappen; null = nicht erfasst */
     priceRappen: int("priceRappen"),
+    /** Fahrzeug-Name (#503); null = altes Tankbuch ohne Zuordnung */
+    vehicle: varchar("vehicle", { length: 80 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("fuelLogs_userId").on(table.userId)]

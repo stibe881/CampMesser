@@ -1,8 +1,8 @@
 /**
- * CampMesser-Bildmarke: die aufgeklappte Klinge eines Taschenmessers, deren
- * Rücken schräg nach rechts oben in eine Spitze läuft. Der Griff darunter
- * trägt den Nietenpunkt. Klinge und Griff bilden zusammen die Andeutung eines
- * Zeltes – Werkzeug und Camping in einem Zeichen.
+ * ReiseKompass-Bildmarke: ein Kompass mit schräg auf Nordost gestellter
+ * Nadel. Der Ring ist das Zifferblatt, die Nordhälfte der Nadel ist gefüllt,
+ * der Punkt in der Mitte ist die Lagerung – darüber sitzt der Nord-Strich.
+ * Die Nadel zeigt bewusst nicht stur nach oben: Aufbruch, nicht Stillstand.
  *
  * Als handgezeichnetes SVG umgesetzt (statt Bilddatei), damit die Marke in jeder
  * Grösse scharf bleibt, echte Transparenz besitzt und ihre Farbe per
@@ -21,16 +21,18 @@ export default function BrandLogo({ className }: { className?: string }) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
+      {/* Zifferblatt */}
+      <circle cx="32" cy="34" r="21" />
+      {/* Nord-Strich über dem Ring */}
+      <path d="M32 5 L32 9" />
       {/*
-        Klinge: vom Drehpunkt links unten steigt der Rücken zur Spitze rechts
-        oben, die Schneide verläuft darunter flacher zurück – eine geschlossene,
-        asymmetrische Form, die eindeutig als Messerklinge lesbar ist.
+        Nadel als Raute von Südwest nach Nordost. Die Nordhälfte (Spitze
+        oben rechts) ist gefüllt, damit die Richtung auch klein lesbar bleibt.
       */}
-      <path d="M14 40 L52 12 C54 19 48 32 36 40 Z" />
-      {/* Griff des Taschenmessers */}
-      <rect x="8" y="43" width="48" height="13" rx="6.5" />
-      {/* Nietenpunkt am Griff */}
-      <circle cx="17.5" cy="49.5" r="2.4" fill="currentColor" stroke="none" />
+      <path d="M42.6 23.4 L35.2 37.2 L28.8 30.8 Z" fill="currentColor" />
+      <path d="M42.6 23.4 L35.2 37.2 L21.4 44.6 L28.8 30.8 Z" />
+      {/* Lagerpunkt der Nadel */}
+      <circle cx="32" cy="34" r="2.4" fill="currentColor" stroke="none" />
     </svg>
   );
 }

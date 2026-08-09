@@ -50,6 +50,10 @@ describe("Reise-Art (#460)", () => {
       bathing: false,
       tentGear: true,
       winter: false,
+      sights: false,
+      beaches: false,
+      transit: false,
+      excursions: false,
     });
     // Nur am Strand steht die Badewasser-Karte in der Heute-Ansicht
     TRIP_KINDS.filter(kind => kind !== "strand").forEach(kind => {
@@ -61,6 +65,24 @@ describe("Reise-Art (#460)", () => {
       expect(TRIP_KIND_PRESETS[kind].winter).toBe(false);
     });
     expect(TRIP_KIND_PRESETS.wintersport.winter).toBe(true);
+    // Stadt & Hotel bekommen Sehenswürdigkeiten und ÖV (#486/#488),
+    // der Strand seine Strände (#487), der Tagesausflug die kuratierten
+    // Ausflüge samt ÖV (#489)
+    expect(TRIP_KIND_PRESETS.staedte.sights).toBe(true);
+    expect(TRIP_KIND_PRESETS.hotel.sights).toBe(true);
+    expect(TRIP_KIND_PRESETS.camping.sights).toBe(false);
+    TRIP_KINDS.filter(kind => kind !== "strand").forEach(kind => {
+      expect(TRIP_KIND_PRESETS[kind].beaches).toBe(false);
+    });
+    expect(TRIP_KIND_PRESETS.strand.beaches).toBe(true);
+    expect(TRIP_KIND_PRESETS.staedte.transit).toBe(true);
+    expect(TRIP_KIND_PRESETS.hotel.transit).toBe(true);
+    expect(TRIP_KIND_PRESETS.tagesausflug.transit).toBe(true);
+    expect(TRIP_KIND_PRESETS.camping.transit).toBe(false);
+    TRIP_KINDS.filter(kind => kind !== "tagesausflug").forEach(kind => {
+      expect(TRIP_KIND_PRESETS[kind].excursions).toBe(false);
+    });
+    expect(TRIP_KIND_PRESETS.tagesausflug.excursions).toBe(true);
   });
 
   it("liefert das Preset auch für kaputte Werte (nie undefined)", () => {

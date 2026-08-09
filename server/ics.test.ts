@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  CAMPMESSER_URL,
+  APP_PUBLIC_URL,
   addDaysIso,
   buildTripIcs,
   escapeIcsText,
@@ -231,11 +231,11 @@ describe("tripEventLines", () => {
   it("schreibt Nächte und Link in die Beschreibung", () => {
     const event = tripEventLines(trip, { dtstamp: DTSTAMP }) ?? [];
     expect(event).toContain(
-      `DESCRIPTION:5 Nächte · Geplant mit CampMesser\\n${CAMPMESSER_URL}`
+      `DESCRIPTION:5 Nächte · Geplant mit ReiseKompass\\n${APP_PUBLIC_URL}`
     );
     const it = tripEventLines(trip, { dtstamp: DTSTAMP, lang: "it" }) ?? [];
     expect(it).toContain(
-      `DESCRIPTION:5 notti · Pianificato con CampMesser\\n${CAMPMESSER_URL}`
+      `DESCRIPTION:5 notti · Pianificato con ReiseKompass\\n${APP_PUBLIC_URL}`
     );
   });
 
@@ -246,7 +246,7 @@ describe("tripEventLines", () => {
         { dtstamp: DTSTAMP }
       ) ?? [];
     expect(event).toContain(
-      `DESCRIPTION:Geplant mit CampMesser\\n${CAMPMESSER_URL}`
+      `DESCRIPTION:Geplant mit ReiseKompass\\n${APP_PUBLIC_URL}`
     );
   });
 
@@ -272,7 +272,7 @@ describe("buildTripIcs", () => {
     expect(ics.startsWith("BEGIN:VCALENDAR\r\n")).toBe(true);
     expect(ics.endsWith("END:VCALENDAR\r\n")).toBe(true);
     expect(ics).toContain("VERSION:2.0");
-    expect(ics).toContain("PRODID:-//CampMesser//Reisen//DE");
+    expect(ics).toContain("PRODID:-//ReiseKompass//Reisen//DE");
     // kein einziges nacktes \n ausserhalb der CRLF-Paare
     expect(ics.replace(/\r\n/g, "")).not.toContain("\n");
   });
@@ -303,7 +303,7 @@ describe("buildTripIcs", () => {
   it("bleibt ohne Reisen ein gültiger, leerer Kalender", () => {
     const ics = buildTripIcs([], { dtstamp: DTSTAMP });
     expect(ics).toBe(
-      "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//CampMesser//Reisen//DE\r\n" +
+      "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//ReiseKompass//Reisen//DE\r\n" +
         "CALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nEND:VCALENDAR\r\n"
     );
   });

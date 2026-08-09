@@ -8,7 +8,7 @@ import { expect, test } from "@playwright/test";
 
 test("Startseite rendert das Modul-Grid", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle(/CampMesser/);
+  await expect(page).toHaveTitle(/ReiseKompass/);
   // Hero und mindestens eine bekannte Modul-Kachel sichtbar
   await expect(
     page.getByRole("link", { name: /SOS & Notfall öffnen/ })

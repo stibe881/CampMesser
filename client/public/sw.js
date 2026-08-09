@@ -1,5 +1,5 @@
 /*
- * CampMesser Service Worker
+ * ReiseKompass Service Worker
  * Strategie:
  * - App-Shell (HTML/JS/CSS): network-first mit Cache-Fallback, damit die App
  *   auch komplett offline startet.
@@ -28,6 +28,11 @@ const MAP_TILE_CACHE = "campmesser-map-tiles";
 // die Datei nicht wegräumt, die man unterwegs braucht.
 const RESERVATION_CACHE = "campmesser-reservations";
 const RESERVATION_PATH = "/api/trips/reservations/";
+// Karten & Ausweise (#499) – die ACSI-Card zeigt man an der Rezeption,
+// also genau dort, wo oft kein Empfang ist. Gleiches Muster wie die
+// Buchungsbestätigung: Netz zuerst, jede gute Antwort in den Cache.
+const DOCUMENT_CACHE = "campmesser-documents";
+const DOCUMENT_PATH = "/api/documents/photos/";
 const MAP_TILE_HOSTS = ["tile.openstreetmap.org", "server.arcgisonline.com"];
 
 // Routen der Wissens-Module, die offline funktionieren sollen (SPA: alle laden dieselbe Shell)
@@ -53,7 +58,11 @@ self.addEventListener("activate", event => {
               key =>
                 !key.startsWith(CACHE_VERSION) &&
                 key !== SHARE_CACHE &&
-                key !== MAP_TILE_CACHE
+                key !== MAP_TILE_CACHE &&
+                // Ohne diese beiden Ausnahmen räumte jedes App-Update
+                // genau die Dateien weg, die man unterwegs braucht
+                key !== RESERVATION_CACHE &&
+                key !== DOCUMENT_CACHE
             )
             .map(key => caches.delete(key))
         )
@@ -72,7 +81,7 @@ self.addEventListener("message", event => {
 // Push-Meldungen: Unwetter-Warnungen und Kühlbox-MHD-Erinnerungen anzeigen.
 // Der Payload-Tag trennt die beiden, damit sie sich nicht gegenseitig ersetzen.
 self.addEventListener("push", event => {
-  let data = { title: "CampMesser", body: "", url: "/wetter" };
+  let data = { title: "ReiseKompass", body: "", url: "/wetter" };
   try {
     data = { ...data, ...event.data.json() };
   } catch {
@@ -189,6 +198,25 @@ self.addEventListener("fetch", event => {
   if (url.pathname.startsWith(RESERVATION_PATH)) {
     event.respondWith(
       caches.open(RESERVATION_CACHE).then(async cache => {
+        try {
+          const response = await fetch(request);
+          if (response.ok) await cache.put(request, response.clone());
+          return response;
+        } catch (error) {
+          const cached = await cache.match(request);
+          if (cached) return cached;
+          throw error;
+        }
+      })
+    );
+    return;
+  }
+
+  // Ausweis-Fotos (#499): erst Netz, dann Cache – wie die Reservation.
+  // Beim nächsten Öffnen mit Empfang frischt sich der Cache von selbst.
+  if (url.pathname.startsWith(DOCUMENT_PATH)) {
+    event.respondWith(
+      caches.open(DOCUMENT_CACHE).then(async cache => {
         try {
           const response = await fetch(request);
           if (response.ok) await cache.put(request, response.clone());

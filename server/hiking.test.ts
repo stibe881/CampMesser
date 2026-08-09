@@ -13,6 +13,7 @@ import {
   sacScaleLabel,
   walkingTimeMinutes,
   type SacGrade,
+  routeLengthClass,
 } from "@shared/hiking";
 import { LANGUAGES } from "@shared/i18n";
 
@@ -211,5 +212,21 @@ describe("cyclingTimeMinutes (#478)", () => {
   it("behandelt Unsinn als 0", () => {
     expect(cyclingTimeMinutes({ lengthM: Number.NaN })).toBe(0);
     expect(cyclingTimeMinutes({ lengthM: 10_000, ascentM: -50 })).toBe(40);
+  });
+});
+
+describe("routeLengthClass (#495)", () => {
+  it("teilt Routen in kurz, mittel und lang", () => {
+    expect(routeLengthClass(3000)).toBe("kurz");
+    expect(routeLengthClass(5000)).toBe("kurz");
+    expect(routeLengthClass(12000)).toBe("mittel");
+    expect(routeLengthClass(15000)).toBe("mittel");
+    expect(routeLengthClass(24000)).toBe("lang");
+  });
+
+  it("gibt null ohne verlässliche Länge (nur unter «alle» sichtbar)", () => {
+    expect(routeLengthClass(undefined)).toBeNull();
+    expect(routeLengthClass(0)).toBeNull();
+    expect(routeLengthClass(Number.NaN)).toBeNull();
   });
 });

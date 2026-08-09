@@ -63,6 +63,8 @@ import {
   sacScaleLabel,
   walkingTimeMinutes,
   type GeoPoint,
+  routeLengthClass,
+  type RouteLengthClass,
 } from "@shared/hiking";
 import { cn } from "@/lib/utils";
 
@@ -190,6 +192,11 @@ export default function NearbyHikes({
   const [radiusM, setRadiusM] = useState(HIKING_DEFAULT_RADIUS_M);
   const [status, setStatus] = useState<Status>("idle");
   const [routes, setRoutes] = useState<RouteView[]>([]);
+  // Längen-Filter (#495): In dichten Netzen macht erst «bis 5 km» die
+  // Liste brauchbar. Routen ohne Länge erscheinen nur unter «alle».
+  const [lengthFilter, setLengthFilter] = useState<RouteLengthClass | "alle">(
+    "alle"
+  );
   const [openId, setOpenId] = useState<string | null>(null);
   const [gpsOrigin, setGpsOrigin] = useState<GeoPoint | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -231,6 +238,16 @@ export default function NearbyHikes({
         onFoot: entry.routed,
       })),
     [routes, routedDistances.byId]
+  );
+  const filteredRouteList = useMemo(
+    () =>
+      lengthFilter === "alle"
+        ? routeList
+        : routeList.filter(
+            entry =>
+              routeLengthClass(entry.view.route.distanceM) === lengthFilter
+          ),
+    [routeList, lengthFilter]
   );
 
   // Beim Verlassen die laufende Overpass-Anfrage abbrechen
@@ -372,11 +389,40 @@ export default function NearbyHikes({
 
       {status === "ready" && routes.length > 0 && origin && (
         <>
+          <div
+            className="mt-3 flex flex-wrap items-center gap-2"
+            role="group"
+            aria-label={tn.lengthFilterAria}
+          >
+            {(
+              [
+                ["alle", tn.lengthAll],
+                ["kurz", tn.lengthShort],
+                ["mittel", tn.lengthMedium],
+                ["lang", tn.lengthLong],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setLengthFilter(value)}
+                aria-pressed={lengthFilter === value}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-sm transition-colors",
+                  lengthFilter === value
+                    ? "border-primary bg-accent text-accent-foreground"
+                    : "border-border text-muted-foreground hover:border-primary/40"
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <p className="mt-3 text-sm font-medium">
-            {tn.resultCount(routes.length)}
+            {tn.resultCount(filteredRouteList.length)}
           </p>
           <ul className="mt-2 space-y-3">
-            {routeList.map(({ view, distanceM, onFoot }) => {
+            {filteredRouteList.map(({ view, distanceM, onFoot }) => {
               const { route } = view;
               const title =
                 route.name ??

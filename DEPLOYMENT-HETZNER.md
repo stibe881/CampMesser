@@ -1,20 +1,20 @@
-# CampMesser auf Hetzner Webhosting einrichten
+# ReiseKompass auf Hetzner Webhosting einrichten
 
-Diese Anleitung führt Schritt für Schritt durch die Installation von **CampMesser** auf einem Hetzner-Webhosting-Paket mit Node.js. Sie ist konkret auf die Domain **campmesser.ch** und die Datenbank **camping** zugeschnitten, sodass sich alle Werte direkt übernehmen lassen.
+Diese Anleitung führt Schritt für Schritt durch die Installation von **ReiseKompass** (früher CampMesser) auf einem Hetzner-Webhosting-Paket mit Node.js. Sie ist konkret auf die Domain **meinreisekompass.ch** und die Datenbank **camping** zugeschnitten, sodass sich alle Werte direkt übernehmen lassen. Bis zum vollzogenen Domain-Umzug läuft die App unter **campmesser.ch** – der Umzug ist im Abschnitt «Domain-Umzug» am Ende beschrieben.
 
 Die Anwendung besteht aus einem Node-Server, der sowohl die Weboberfläche als auch die Programmschnittstelle ausliefert, sowie einer MySQL-Datenbank. Sämtliche Bilder sind fest in die Anwendung eingebaut, sodass keine externen Dienste benötigt werden.
 
-> **Wichtig – aus der Praxis gelernt:** Node.js wirkt bei Hetzner auf die **gesamte Domain**, nicht nur auf eine einzelne Subdomain. Ein erster Versuch mit `camping.gross-ict.ch` hat die komplette Website unter `gross-ict.ch` lahmgelegt (503 Service Unavailable), bis Node.js wieder deaktiviert wurde. Deshalb wird CampMesser jetzt unter der eigenständigen Domain **campmesser.ch** betrieben, wo keine andere Website betroffen ist [1].
+> **Wichtig – aus der Praxis gelernt:** Node.js wirkt bei Hetzner auf die **gesamte Domain**, nicht nur auf eine einzelne Subdomain. Ein erster Versuch mit `camping.gross-ict.ch` hat die komplette Website unter `gross-ict.ch` lahmgelegt (503 Service Unavailable), bis Node.js wieder deaktiviert wurde. Deshalb wird ReiseKompass unter einer eigenständigen Domain betrieben (zuerst **campmesser.ch**, neu **meinreisekompass.ch**), wo keine andere Website betroffen ist [1].
 
 ## Übersicht der benötigten Angaben
 
-| Angabe                         | Wert                                     |
-| ------------------------------ | ---------------------------------------- |
-| Domain                         | `campmesser.ch`                          |
-| Datenbank                      | `camping` auf `ly8y.your-database.de`    |
-| Datenbank-Benutzer             | `jqviwy_0`                               |
-| Node.js-Version                | 24                                       |
-| Zielverzeichnis auf dem Server | `~/campmesser` (ausserhalb des Webspace) |
+| Angabe                         | Wert                                                   |
+| ------------------------------ | ------------------------------------------------------ |
+| Domain                         | `meinreisekompass.ch` (bis zum Umzug: `campmesser.ch`) |
+| Datenbank                      | `camping` auf `ly8y.your-database.de`                  |
+| Datenbank-Benutzer             | `jqviwy_0`                                             |
+| Node.js-Version                | 24                                                     |
+| Zielverzeichnis auf dem Server | `~/campmesser` (ausserhalb des Webspace)               |
 
 ## Schritt 1: Code auf den Server laden
 
@@ -92,7 +92,7 @@ Sollte der Befehl in der Hosting-Umgebung nicht durchlaufen, spiele ersatzweise 
 
 ## Schritt 5: Node.js in konsoleH konfigurieren
 
-Öffne in konsoleH die Domain `campmesser.ch` – **nicht** `gross-ict.ch` – und dort links **Einstellungen → Node.js Konfiguration**. Trage die folgenden Werte in das Formular ein:
+Öffne in konsoleH die App-Domain (`meinreisekompass.ch`, vor dem Umzug `campmesser.ch`) – **nicht** `gross-ict.ch` – und dort links **Einstellungen → Node.js Konfiguration**. Trage die folgenden Werte in das Formular ein:
 
 | Feld im Formular             | Einzutragender Wert |
 | ---------------------------- | ------------------- |
@@ -117,7 +117,7 @@ Im Abschnitt **Umgebungsvariablen** trägst du zusätzlich die folgenden Schlüs
 | `DATABASE_URL` | `mysql://jqviwy_0:k8%2CCt%3D%26*%2F28%24@ly8y.your-database.de:3306/camping` |
 | `JWT_SECRET`   | dasselbe Geheimnis wie in der `.env`-Datei                                   |
 
-Klicke danach auf **Aktivieren**. Rufst du nun `https://camping.gross-ict.ch` im Browser auf, sollte die Startseite von CampMesser erscheinen.
+Klicke danach auf **Aktivieren**. Rufst du nun die App-Domain im Browser auf, sollte die Startseite von ReiseKompass erscheinen.
 
 ### Wenn die Seite nicht erscheint
 
@@ -131,28 +131,28 @@ Meldet das Protokoll einen Portkonflikt, ergänze im Formular eine weitere Umgeb
 
 ## Schritt 6: E-Mail-Versand für vergessene Passwörter
 
-Über «Passwort vergessen?» auf der Anmeldeseite verschickt CampMesser einen Link per E-Mail, mit dem sich ein neues Passwort setzen lässt (60 Minuten gültig, einmalig verwendbar). Dafür braucht die Anwendung die Zugangsdaten eines Postfachs deiner Domain. Ohne diese Angaben funktioniert die Anmeldung normal weiter; die Reset-Funktion meldet dann lediglich, dass sie derzeit nicht verfügbar ist.
+Über «Passwort vergessen?» auf der Anmeldeseite verschickt ReiseKompass einen Link per E-Mail, mit dem sich ein neues Passwort setzen lässt (60 Minuten gültig, einmalig verwendbar). Dafür braucht die Anwendung die Zugangsdaten eines Postfachs deiner Domain. Ohne diese Angaben funktioniert die Anmeldung normal weiter; die Reset-Funktion meldet dann lediglich, dass sie derzeit nicht verfügbar ist.
 
 Sobald SMTP konfiguriert ist, ist automatisch auch die **E-Mail-Bestätigung** aktiv: Neue Konten (und geänderte E-Mail-Adressen im Profil) erhalten eine Bestätigungs-Mail mit einem 48 Stunden gültigen Link. Die Bestätigung ist freiwillig – unbestätigte Konten können die App uneingeschränkt nutzen, sehen aber im Profil einen dezenten Hinweis mit der Möglichkeit, die Mail erneut anzufordern. Ohne SMTP entfällt der Versand komplett und es wird nichts blockiert.
 
 So richtest du das Postfach bei Hetzner ein:
 
-1. Lege in konsoleH unter **E-Mail → Postfächer** ein neues Postfach an, z. B. `noreply@campmesser.ch`, und vergib ein starkes Passwort.
+1. Lege in konsoleH unter **E-Mail → Postfächer** ein neues Postfach an, z. B. `noreply@meinreisekompass.ch`, und vergib ein starkes Passwort.
 2. Als Mailserver dient der Hetzner-Mailserver deines Pakets (in konsoleH bei den Postfach-Details ersichtlich, üblicherweise `mail.deine-domain` oder der dort genannte `mailXX.hetzner`-Host). Verwende **Port 587 mit STARTTLS** – die Anwendung handelt die Verschlüsselung automatisch aus (Port 465 = direktes TLS wird ebenfalls erkannt).
 3. Hinterlege die Werte in der `.env`-Datei oder als Umgebungsvariablen im konsoleH-Formular:
 
-| Schlüssel   | Beispielwert            |
-| ----------- | ----------------------- |
-| `SMTP_HOST` | `mail.campmesser.ch`    |
-| `SMTP_PORT` | `587`                   |
-| `SMTP_USER` | `noreply@campmesser.ch` |
-| `SMTP_PASS` | Postfach-Passwort       |
-| `SMTP_FROM` | `noreply@campmesser.ch` |
-| `APP_URL`   | `https://campmesser.ch` |
+| Schlüssel   | Beispielwert                  |
+| ----------- | ----------------------------- |
+| `SMTP_HOST` | `mail.meinreisekompass.ch`    |
+| `SMTP_PORT` | `587`                         |
+| `SMTP_USER` | `noreply@meinreisekompass.ch` |
+| `SMTP_PASS` | Postfach-Passwort             |
+| `SMTP_FROM` | `noreply@meinreisekompass.ch` |
+| `APP_URL`   | `https://meinreisekompass.ch` |
 
 `APP_URL` ist die öffentliche Adresse der Anwendung und bestimmt, auf welche Domain die Links in den Reset-Mails zeigen. Fehlt die Angabe, verwendet der Server den Host der jeweiligen Anfrage. Nach dem Eintragen die Anwendung in konsoleH einmal neu aktivieren und den Versand über «Passwort vergessen?» auf der Anmeldeseite testen (auch den Spam-Ordner prüfen).
 
-**Wichtig für die Passkey-Anmeldung (WebAuthn):** `APP_URL` legt zusätzlich die Passkey-Domäne (rpID/Origin) fest und muss deshalb exakt auf die öffentliche Adresse zeigen, im Livebetrieb also `https://campmesser.ch`. Stimmt der Wert nicht mit der im Browser aufgerufenen Domain überein, schlagen das Anlegen und die Anmeldung mit Passkeys fehl; bereits angelegte Passkeys sind an die Domäne gebunden und würden nach einem Domain-Wechsel nicht mehr funktionieren.
+**Wichtig für die Passkey-Anmeldung (WebAuthn):** `APP_URL` legt zusätzlich die Passkey-Domäne (rpID/Origin) fest und muss deshalb exakt auf die öffentliche Adresse zeigen, im Livebetrieb also `https://meinreisekompass.ch`. Stimmt der Wert nicht mit der im Browser aufgerufenen Domain überein, schlagen das Anlegen und die Anmeldung mit Passkeys fehl; bereits angelegte Passkeys sind an die Domäne gebunden und würden nach einem Domain-Wechsel nicht mehr funktionieren.
 
 ## Schritt 7: Funktionsprüfung
 
@@ -172,7 +172,7 @@ Jeder Push auf `main` kann die Live-Seite automatisch aktualisieren: Der Workflo
 
 ### Wie der Neustart wirklich funktioniert
 
-Wichtig zu wissen: CampMesser läuft **nicht** unter Phusion Passenger, sondern als Node.js-Dienst von konsoleH über `app.js` (siehe Schritt 5). Ein `touch tmp/restart.txt` bewirkt darum nichts – frühere Fassungen des Deploy-Skripts taten genau das, weshalb nach einem Deployment weiterhin der alte Build ausgeliefert wurde, obwohl Code, Migrationen und `dist/` bereits aktuell waren.
+Wichtig zu wissen: ReiseKompass läuft **nicht** unter Phusion Passenger, sondern als Node.js-Dienst von konsoleH über `app.js` (siehe Schritt 5). Ein `touch tmp/restart.txt` bewirkt darum nichts – frühere Fassungen des Deploy-Skripts taten genau das, weshalb nach einem Deployment weiterhin der alte Build ausgeliefert wurde, obwohl Code, Migrationen und `dist/` bereits aktuell waren.
 
 Der Neustart geschieht stattdessen, indem der laufende Prozess beendet wird; konsoleH startet ihn beim nächsten HTTP-Aufruf automatisch wieder. Das Skript sucht dafür gezielt Node-Prozesse, deren Arbeitsverzeichnis das App-Verzeichnis ist und deren Kommandozeile auf `app.js` oder `dist/index.js` zeigt – Node-Prozesse anderer Domains auf demselben Account bleiben unangetastet. Von Hand:
 
@@ -183,7 +183,7 @@ for pid in $(pgrep -u "$(id -u)" node); do
 done
 ```
 
-Nur die so gefundenen PIDs beenden (`kill <pid>`), danach `curl -s https://campmesser.ch/api/health` aufrufen. Antwortet der Endpoint mit dem erwarteten `version`-Wert und kleiner `uptimeSeconds`, ist der Neustart erfolgt. Meldet er bei mehreren Aufrufen abwechselnd unterschiedliche `uptimeSeconds`, laufen noch veraltete Prozesse parallel – dann bleibt der alte Build sichtbar, obwohl `dist/version.json` bereits stimmt.
+Nur die so gefundenen PIDs beenden (`kill <pid>`), danach `curl -s https://meinreisekompass.ch/api/health` aufrufen. Antwortet der Endpoint mit dem erwarteten `version`-Wert und kleiner `uptimeSeconds`, ist der Neustart erfolgt. Meldet er bei mehreren Aufrufen abwechselnd unterschiedliche `uptimeSeconds`, laufen noch veraltete Prozesse parallel – dann bleibt der alte Build sichtbar, obwohl `dist/version.json` bereits stimmt.
 
 Einmalige Einrichtung:
 
@@ -199,7 +199,7 @@ Solange die Secrets fehlen, überspringt der Workflow das Deployment mit einem H
 
 ## Überwachung (Health-Check)
 
-Die Anwendung bietet unter `/api/health` einen Health-Endpoint: HTTP 200 mit `{"status":"ok"}`, wenn Prozess und Datenbank erreichbar sind, sonst 503. Richte einen kostenlosen Uptime-Dienst (z. B. UptimeRobot oder Better Stack) auf `https://campmesser.ch/api/health` ein, damit du bei einem Ausfall per E-Mail gewarnt wirst, statt ihn zufällig zu bemerken.
+Die Anwendung bietet unter `/api/health` einen Health-Endpoint: HTTP 200 mit `{"status":"ok"}`, wenn Prozess und Datenbank erreichbar sind, sonst 503. Richte einen kostenlosen Uptime-Dienst (z. B. UptimeRobot oder Better Stack) auf `https://meinreisekompass.ch/api/health` ein, damit du bei einem Ausfall per E-Mail gewarnt wirst, statt ihn zufällig zu bemerken.
 
 ## Unwetter-Push einrichten (optional)
 
@@ -210,7 +210,7 @@ Die App kann Push-Benachrichtigungen senden, wenn an einem gespeicherten Zeltpla
 3. Den Warn-Check regelmässig auslösen (konsoleH legt den Node-Prozess bei Ruhe schlafen, deshalb per Cronjob): in konsoleH unter **Services → Cronjobs** z. B. stündlich anlegen:
 
 ```
-curl -fsS "https://campmesser.ch/api/push/check?secret=DEIN_CRON_SECRET" > /dev/null
+curl -fsS "https://meinreisekompass.ch/api/push/check?secret=DEIN_CRON_SECRET" > /dev/null
 ```
 
 Der Endpoint prüft alle Plätze abonnierter Nutzer\*innen und sendet pro Warnlage genau eine Benachrichtigung; entspannte Lagen setzen den Zähler zurück. Ungültig gewordene Abos werden automatisch aufgeräumt.
@@ -261,3 +261,17 @@ Stösst das Webhosting-Paket an Grenzen, etwa beim Arbeitsspeicher während des 
 ## Referenzen
 
 [1] [Node.js Configuration – Hetzner Docs](https://docs.hetzner.com/managed/administration-on-konsoleh/nodejs/)
+
+## Domain-Umzug: von campmesser.ch zu meinreisekompass.ch
+
+Mit dem Namenswechsel zu ReiseKompass zieht die App auf **meinreisekompass.ch** um. Der Code ist bereits umgestellt – diese Schritte macht der Betreiber einmalig in konsoleH:
+
+1. **Domain registrieren:** `meinreisekompass.ch` registrieren (z. B. direkt bei Hetzner oder einem beliebigen .ch-Registrar) und dem Webhosting-Paket zuordnen. Das SSL-Zertifikat (Let's Encrypt) in konsoleH für die neue Domain aktivieren.
+2. **Node.js auf die neue Domain legen:** In konsoleH bei `meinreisekompass.ch` dieselbe Node.js-Konfiguration eintragen wie in Schritt 5 (gleiches Arbeitsverzeichnis `campmesser` – das Server-Verzeichnis behält bewusst den alten Namen, damit Deploy, Backup und Cronjobs unverändert weiterlaufen).
+3. **`.env` nachführen:** `APP_URL=https://meinreisekompass.ch` setzen; falls ein neues Postfach angelegt wird, auch `SMTP_HOST`, `SMTP_USER` und `SMTP_FROM` (das alte Postfach funktioniert übergangsweise weiter). Danach die Anwendung in konsoleH neu aktivieren.
+4. **Weiterleitung einrichten:** `campmesser.ch` bleibt registriert und leitet dauerhaft (301) auf `https://meinreisekompass.ch` weiter. So funktionieren alte geteilte Links, QR-Codes auf gedruckten Kisten-Etiketten und abonnierte Kalender-Feeds weiter.
+5. **Uptime-Dienst und Cronjobs** auf die neue Adresse umstellen (Health-Check, Push-Cron – siehe oben).
+
+**Ehrliche Warnung zu Passkeys:** Passkeys sind kryptografisch an die Domäne gebunden (rpID). Nach dem Umzug funktionieren auf `campmesser.ch` angelegte Passkeys **nicht** auf `meinreisekompass.ch` – das lässt sich technisch nicht migrieren. Betroffene melden sich einmal mit Passwort an und legen den Passkey im Profil neu an. Push-Abos und Anmelde-Sitzungen der PWA hängen dagegen am Browser-Speicher der jeweiligen Domain: Auch hier heisst es einmal neu anmelden, wer die App bisher unter der alten Domain installiert hatte (die installierte PWA am besten neu von der neuen Domain installieren).
+
+**Reihenfolge beachten:** Diese Code-Version zeigt in Mails, Kalender-Einträgen und Wasserzeichen bereits auf `meinreisekompass.ch`. Sie gehört deshalb erst auf den Server, wenn die neue Domain aufgeschaltet ist (Schritte 1–3) – sonst zeigen die Links ins Leere.

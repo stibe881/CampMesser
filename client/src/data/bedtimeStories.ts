@@ -3,7 +3,7 @@
  *
  * Kurze Vorlesegeschichten rund um Natur und Camping – 3 bis 5 Minuten, so
  * lange, wie ein Kind abends noch zuhört. Alle Geschichten sind eigens für
- * CampMesser geschrieben und liegen vollständig in DE/FR/IT/EN vor.
+ * ReiseKompass geschrieben und liegen vollständig in DE/FR/IT/EN vor.
  *
  * Ton: warmherzig, in der Du-Form dort, wo die Geschichte das Kind direkt
  * anspricht (meist am Schluss), ohne Gruseliges für die Kleinen. Zwei

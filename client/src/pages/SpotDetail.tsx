@@ -43,6 +43,15 @@ import DeparturePlanner from "@/components/DeparturePlanner";
 import NearbyFamilyPlaces from "@/components/NearbyFamilyPlaces";
 import NearbyShops from "@/components/NearbyShops";
 import NearbySights from "@/components/NearbySights";
+import NearbyPoints from "@/components/NearbyPoints";
+import TransitConnections from "@/components/TransitConnections";
+import {
+  chargersQuery,
+  drinkingWaterQuery,
+  parseChargers,
+  parseDrinkingWater,
+} from "@/lib/overpass";
+import { GlassWater, PlugZap } from "lucide-react";
 import SpotRating from "@/components/SpotRating";
 import NearbyTransit from "@/components/NearbyTransit";
 import TickRiskPanel from "@/components/TickRiskPanel";
@@ -100,6 +109,7 @@ export default function SpotDetailPage() {
   });
   const [weather, setWeather] = useState<DossierWeather | null>(null);
   const [weatherFailed, setWeatherFailed] = useState(false);
+  const [showAllStays, setShowAllStays] = useState(false);
   const utils = trpc.useUtils();
   const photosQuery = trpc.spots.photos.list.useQuery(
     { spotId },
@@ -379,6 +389,17 @@ export default function SpotDetailPage() {
           />
         </LazySection>
 
+        {/* ÖV-Verbindung zur Anreise (#491): von daheim hierher – die
+            Anreise-Navigation (#103) kennt nur das Auto */}
+        <LazySection minHeight={90}>
+          <TransitConnections
+            latitude={spot.latitude}
+            longitude={spot.longitude}
+            placeName={spot.name}
+            className="mb-4"
+          />
+        </LazySection>
+
         {/* Rast unterwegs: Picknickplätze im Korridor der Anfahrt (#250) */}
         <LazySection minHeight={200}>
           <PicnicStops
@@ -654,6 +675,42 @@ export default function SpotDetailPage() {
           />
         </LazySection>
 
+        {/* Trinkwasser-Stellen (#492): Brunnen zum Auffüllen – zu Fuss
+            erreichbar gedacht, darum kleine Radien und Fussweg-Distanz */}
+        <LazySection minHeight={90}>
+          <NearbyPoints
+            latitude={spot.latitude}
+            longitude={spot.longitude}
+            icon={GlassWater}
+            texts={t.poi.water}
+            query={drinkingWaterQuery}
+            parse={parseDrinkingWater}
+            radii={[500, 1000, 2000]}
+            defaultRadiusM={1000}
+            profile="foot"
+            sectionId="spot-water"
+            className="mb-4"
+          />
+        </LazySection>
+
+        {/* E-Ladesäulen (#493): fürs elektrische Anreisen – Betreiber und
+            Anzahl Plätze, soweit in OSM eingetragen */}
+        <LazySection minHeight={90}>
+          <NearbyPoints
+            latitude={spot.latitude}
+            longitude={spot.longitude}
+            icon={PlugZap}
+            texts={t.poi.chargers}
+            query={chargersQuery}
+            parse={parseChargers}
+            radii={[2000, 5000, 10000]}
+            defaultRadiusM={5000}
+            profile="car"
+            sectionId="spot-chargers"
+            className="mb-4"
+          />
+        </LazySection>
+
         {/* Ausflüge in der Nähe aus der eigenen Ausflugfinder-App (#271) –
             lädt erst beim Aufklappen, damit das Dossier nicht darauf wartet */}
         <LazySection minHeight={90}>
@@ -703,24 +760,53 @@ export default function SpotDetailPage() {
                   </div>
                 </div>
                 <ul className="space-y-1.5">
-                  {spotTrips.slice(0, 3).map(trip => (
-                    <li
-                      key={trip.id}
-                      className="flex items-center gap-2 text-sm text-muted-foreground"
-                    >
-                      <CalendarDays
-                        className="h-3.5 w-3.5 shrink-0"
-                        aria-hidden="true"
-                      />
-                      {fmtMedium(new Date(`${trip.startDate}T00:00:00`), lang)}{" "}
-                      · {tripNights(trip.startDate, trip.endDate)}{" "}
-                      {tripNights(trip.startDate, trip.endDate) === 1
-                        ? t.common.night
-                        : t.common.nights}
-                      {trip.title && ` · ${trip.title}`}
-                    </li>
-                  ))}
+                  {/* Besuchs-Verlauf (#496): auf Wunsch ALLE Aufenthalte,
+                      je mit Bewertung und Sprung in die Reise – «zum
+                      vierten Mal hier» ist sonst nirgends nachzulesen. */}
+                  {(showAllStays ? spotTrips : spotTrips.slice(0, 3)).map(
+                    trip => (
+                      <li
+                        key={trip.id}
+                        className="flex items-center gap-2 text-sm text-muted-foreground"
+                      >
+                        <CalendarDays
+                          className="h-3.5 w-3.5 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <Link
+                          href={`/tagebuch/${trip.id}`}
+                          className="min-w-0 hover:text-primary hover:underline"
+                        >
+                          {fmtMedium(
+                            new Date(`${trip.startDate}T00:00:00`),
+                            lang
+                          )}{" "}
+                          · {tripNights(trip.startDate, trip.endDate)}{" "}
+                          {tripNights(trip.startDate, trip.endDate) === 1
+                            ? t.common.night
+                            : t.common.nights}
+                          {trip.title && ` · ${trip.title}`}
+                        </Link>
+                        {trip.rating != null && trip.rating > 0 && (
+                          <span className="shrink-0 text-xs font-medium text-chart-1">
+                            {trip.rating} ★
+                          </span>
+                        )}
+                      </li>
+                    )
+                  )}
                 </ul>
+                {spotTrips.length > 3 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllStays(open => !open)}
+                    className="mt-2 text-sm font-medium text-primary hover:underline"
+                  >
+                    {showAllStays
+                      ? t.spotDetail.staysShowLess
+                      : t.spotDetail.staysShowAll(spotTrips.length)}
+                  </button>
+                )}
               </>
             ) : (
               <p className="text-sm text-muted-foreground">

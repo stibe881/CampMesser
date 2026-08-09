@@ -115,3 +115,53 @@ export function formatGrams(grams: number, lang: Language = "de"): string {
   }
   return `${Math.round(grams)} g`;
 }
+
+/* ------------------------------------------------------------------ */
+/* Traglast pro Person (#506)                                          */
+/* ------------------------------------------------------------------ */
+
+export interface AssignedPackItemLike extends PackItemLike {
+  /** «Wer packt was» (#67): Name der Person; leer = Allgemein. */
+  assignee?: string | null;
+}
+
+export interface PersonWeightRow {
+  /** null = Einträge ohne Person («Allgemein»). */
+  person: string | null;
+  grams: number;
+}
+
+/**
+ * Gewicht je Person über denselben Inventar-Abgleich wie die
+ * Gesamt-Bilanz – beim Wandern zählt, wie viel Kilo JEDE Person trägt,
+ * nicht nur die Summe. Nur Zeilen mit Gewicht; schwerste zuerst,
+ * «Allgemein» (null) zuletzt.
+ */
+export function personWeights(
+  items: readonly AssignedPackItemLike[],
+  inventory: readonly InventoryItemLike[]
+): PersonWeightRow[] {
+  const byName = new Map<string, InventoryItemLike>();
+  for (const inv of inventory) {
+    const key = normalizeName(inv.name);
+    if (!byName.has(key)) byName.set(key, inv);
+  }
+  const grams = new Map<string | null, number>();
+  for (const item of items) {
+    const match = byName.get(normalizeName(item.name));
+    if (!match) continue;
+    const person = item.assignee?.trim() || null;
+    grams.set(
+      person,
+      (grams.get(person) ?? 0) + match.weightGrams * item.quantity
+    );
+  }
+  return Array.from(grams.entries())
+    .filter(([, value]) => value > 0)
+    .map(([person, value]) => ({ person, grams: value }))
+    .sort((a, b) => {
+      if (a.person === null) return 1;
+      if (b.person === null) return -1;
+      return b.grams - a.grams;
+    });
+}

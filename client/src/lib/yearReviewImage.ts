@@ -1,7 +1,7 @@
 /**
  * Jahresrückblick als teilbares Bild (1080×1350, Instagram-Portrait):
  * zeichnet die Kennzahlen der Rückblick-Karte schlicht mit der Canvas-API
- * (keine html2canvas-Dependency) im CampMesser-Look – cremefarbener Grund,
+ * (keine html2canvas-Dependency) im ReiseKompass-Look – cremefarbener Grund,
  * dunkelgrüne Kopfzeile mit der Bildmarke aus BrandLogo.tsx, grosse Zahlen,
  * bernsteinfarbene Akzente. Die Texte kommen aus dem trips-Namespace des
  * Wörterbuchs und werden von der Aufrufstelle hereingereicht; `lang` steuert
@@ -87,7 +87,7 @@ function drawCoverImage(
   ctx.restore();
 }
 
-/** Die CampMesser-Bildmarke (Pfad aus BrandLogo.tsx, viewBox 64) zeichnen. */
+/** Die ReiseKompass-Bildmarke (Pfad aus BrandLogo.tsx, viewBox 64) zeichnen. */
 function drawLogo(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -145,7 +145,7 @@ export function drawYearReview(
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = CREAM;
   ctx.font = `700 64px ${SERIF}`;
-  ctx.fillText("CampMesser", WIDTH / 2, 232);
+  ctx.fillText("ReiseKompass", WIDTH / 2, 232);
   ctx.fillStyle = AMBER;
   ctx.font = `600 40px ${SANS}`;
   ctx.fillText(ellipsize(ctx, labels.subtitle, WIDTH - 120), WIDTH / 2, 296);
@@ -239,5 +239,5 @@ export function drawYearReview(
   ctx.fillRect(0, HEIGHT - 80, WIDTH, 80);
   ctx.fillStyle = CREAM;
   ctx.font = `600 34px ${SANS}`;
-  ctx.fillText("campmesser.ch", WIDTH / 2, HEIGHT - 30);
+  ctx.fillText("meinreisekompass.ch", WIDTH / 2, HEIGHT - 30);
 }

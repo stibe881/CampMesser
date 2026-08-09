@@ -115,7 +115,7 @@ export const en: Translation = {
   home: {
     heroImageAlt:
       "Tent with solar panels and campfire in front of the Swiss Alps at sunset",
-    heroKicker: "Your Swiss army knife for tent camping",
+    heroKicker: "Your compass for holidays, camping and day trips",
     greeting: {
       morning: (name: string) => `Good morning, ${name}`,
       day: (name: string) => `Good afternoon, ${name}`,
@@ -203,6 +203,7 @@ export const en: Translation = {
       nature: "Nature",
       care: "Care",
       clouds: "Clouds",
+      phrases: "Phrasebook",
       own: "My content",
     },
     recentTitle: "Recently used",
@@ -232,7 +233,7 @@ export const en: Translation = {
     hideAria: title => `Hide ${title}`,
     openAria: title => `Open ${title}`,
     onboardingTitle: "First steps",
-    onboardingSubtitle: "How to set up CampMesser for your next adventure.",
+    onboardingSubtitle: "How to set up ReiseKompass for your next adventure.",
     onboardingDismissAria: "Hide the first-steps card",
     onboardingSteps: {
       account: "Create an account or sign in",
@@ -249,7 +250,7 @@ export const en: Translation = {
   login: {
     title: "Sign in",
     subtitle:
-      "With your CampMesser account you save packing lists, inventory and pitches and use them on all your devices.",
+      "With your ReiseKompass account you save packing lists, inventory and pitches and use them on all your devices.",
     resetTitle: "Reset password",
     resetSubtitle:
       "Enter your account's email address – we'll send you a link that lets you set a new password.",
@@ -373,7 +374,7 @@ export const en: Translation = {
       "All your data will be deleted irrevocably. Confirm with your password.",
     passwordLabel: "Password",
     deleteFinal: "Delete permanently",
-    versionLine: version => `CampMesser version ${version}`,
+    versionLine: version => `ReiseKompass version ${version}`,
     buildDate: date => ` · build from ${date}`,
     notificationsTitle: "Notifications",
     pushDeviceTitle: "Push on this device",
@@ -549,6 +550,7 @@ export const en: Translation = {
     archivedBadge: "archived",
   },
   packListDetail: {
+    personWeightTitle: "Load per person:",
     boxBadgeAria: "Stored in box",
     backLabel: "Packing lists",
     fallbackTitle: "Packing list",
@@ -675,19 +677,19 @@ export const en: Translation = {
   packListPrint: {
     docTitle: name => `${name} – printable packing list`,
     docTitleFallback: "Packing list",
-    appTitle: "CampMesser – the Swiss army knife for tent camping",
+    appTitle: "ReiseKompass – your compass for holidays, camping and day trips",
     notFound: "This packing list could not be found.",
     printButton: "Print / Save as PDF",
     printBrowserHint:
       "In the installed app this button opens the view in your browser – print or save as PDF from its menu there.",
-    headerKicker: "CampMesser · Packing list",
+    headerKicker: "ReiseKompass · Packing list",
     meta: (items, categories) =>
       `${items} ${items === 1 ? "item" : "items"} · ${categories} ${categories === 1 ? "category" : "categories"}`,
     printedOn: date => `As of ${date}`,
     personFilterInfo: name => `Only items for ${name}`,
     emptyList: "This list has no items.",
     footer:
-      "Nothing forgotten – have a great trip! · CampMesser – the Swiss army knife for tent camping",
+      "Nothing forgotten – have a great trip! · ReiseKompass – your compass for holidays, camping and day trips",
   },
   sharedPackList: {
     loadingShared: "Loading shared list …",
@@ -1857,7 +1859,7 @@ export const en: Translation = {
     pushDisabled: "Storm alerts disabled",
     pushTitle: "Storm alerts for your pitches",
     pushDesc:
-      "Push notification for storms, thunderstorms or heavy rain at one of your saved pitches. CampMesser also reminds you when food in the cool box is about to expire – and 3 days before a planned stay, including your packing list progress.",
+      "Push notification for storms, thunderstorms or heavy rain at one of your saved pitches. ReiseKompass also reminds you when food in the cool box is about to expire – and 3 days before a planned stay, including your packing list progress.",
     pushSaveFirst: "Save a pitch first.",
     pushProfileHint: "Fine-tune in your profile →",
     pushAria: "Enable storm alerts for saved pitches",
@@ -1999,6 +2001,8 @@ export const en: Translation = {
     familySearchHint: "Tap “Search this area”.",
   },
   spotDetail: {
+    staysShowAll: (n: number) => `Show all ${n} stays`,
+    staysShowLess: "Show fewer",
     tariffCurrencyAria: "Currency",
     tariffUnitPlaceholder: "e.g. per day",
     tariffPeriodAdd: "Add period",
@@ -2155,7 +2159,7 @@ export const en: Translation = {
     costEstimate: (nights: number, amount: string) =>
       `Your ${nights === 1 ? "1 night" : `${nights} nights`} here add up to roughly ${amount} – a rough estimate.`,
     costHint:
-      "Only an estimate: CampMesser knows nothing about discounts, children, dogs or seasonal surcharges. What you actually paid is in the trip kitty of the stay in question.",
+      "Only an estimate: ReiseKompass knows nothing about discounts, children, dogs or seasonal surcharges. What you actually paid is in the trip kitty of the stay in question.",
     costDialogTitle: "Edit cost per night",
     costDialogDesc:
       "Both fields are optional – leaving one empty means “not recorded”.",
@@ -2251,11 +2255,11 @@ export const en: Translation = {
     arrived: "You are practically there – look around!",
     compassActivate: "Enable compass",
     compassActivateHint:
-      "For the arrow to rotate, CampMesser needs access to your device's compass.",
+      "For the arrow to rotate, ReiseKompass needs access to your device's compass.",
     movementHint:
       "Direction taken from your movement – the arrow is only correct while you keep walking.",
     noCompassHint:
-      "No compass available: the arrow cannot rotate. Use the cardinal direction instead – or walk a few steps and CampMesser will take the direction from your movement.",
+      "No compass available: the arrow cannot rotate. Use the cardinal direction instead – or walk a few steps and ReiseKompass will take the direction from your movement.",
     mapTitle: "Mini map",
     mapAria: "Map with your position and your saved targets",
     mapHint: "Blue dot: your position. Tap a pin to aim for that target.",
@@ -2274,7 +2278,7 @@ export const en: Translation = {
     loginFeature: "saved hikes",
     recorderTitle: "Recording",
     recorderIntro:
-      "On start CampMesser switches the GPS to high accuracy. Inaccurate readings and jumps are filtered out so distance and elevation stay right. Recording continues when you switch to another page.",
+      "On start ReiseKompass switches the GPS to high accuracy. Inaccurate readings and jumps are filtered out so distance and elevation stay right. Recording continues when you switch to another page.",
     start: "Start recording",
     pause: "Pause",
     resume: "Resume",
@@ -2355,7 +2359,7 @@ export const en: Translation = {
   locationShare: {
     title: "I'm here",
     desc: "Send fellow travellers a link with your current location. The link expires automatically and can be switched off at any time.",
-    loginHint: "You need a CampMesser account to share your location.",
+    loginHint: "You need a ReiseKompass account to share your location.",
     validityLabel: "Valid for",
     validityAria: "Validity of the location link",
     validityHours: (h: number) => (h === 1 ? "1 hour" : `${h} hours`),
@@ -2395,7 +2399,7 @@ export const en: Translation = {
     invalidHint:
       "Location links expire after a short while or are switched off by hand. Ask for a new link.",
     expiresNote: (date: string) => `This link is valid until ${date}.`,
-    footer: "Shared with CampMesser",
+    footer: "Shared with ReiseKompass",
   },
   sharedSpot: {
     tariffsTitle: "Tariffs",
@@ -2415,7 +2419,8 @@ export const en: Translation = {
     contactPhone: "Reception phone",
     contactCheckin: "Check-in",
     contactParcel: "Pitch no.",
-    footer: "Shared with CampMesser – the Swiss army knife for tent camping.",
+    footer:
+      "Shared with ReiseKompass – your compass for holidays, camping and day trips.",
   },
   trips: {
     detailSubtitle: "A single stay in detail",
@@ -2457,7 +2462,7 @@ export const en: Translation = {
     collageButton: "Photo collage",
     collageTitle: "Photo collage",
     collageDescription:
-      "Pick the photos and the arrangement – CampMesser turns them into an image to share, with trip name and dates.",
+      "Pick the photos and the arrangement – ReiseKompass turns them into an image to share, with trip name and dates.",
     collageLayoutLabel: "Arrangement",
     collageLayoutNames: {
       grid2: "Grid 2×2",
@@ -2655,7 +2660,7 @@ export const en: Translation = {
     membersButton: "Travel companions",
     membersAria: name => `Manage travel companions of ${name}`,
     membersDialogDesc:
-      "Invite other CampMesser accounts – travel companions can view and edit the trip (only you can delete it).",
+      "Invite other ReiseKompass accounts – travel companions can view and edit the trip (only you can delete it).",
     membersListTitle: "Travel companions",
     membersOwnerBadge: "Owner",
     memberRemoveAria: name => `Remove ${name} from the trip`,
@@ -2772,6 +2777,7 @@ export const en: Translation = {
     removeFailed: "The note could not be removed",
   },
   tripExpenses: {
+    budgetTightNote: "The budget is getting tight.",
     fuelTitle: "Work out fuel costs",
     fuelHint:
       "Kilometres × consumption × fuel price. The maths uses your average consumption – if you want it exact, type the amount in by hand.",
@@ -2912,17 +2918,18 @@ export const en: Translation = {
     contactParcel: "Pitch no.",
     packListNotShared:
       "This packing list is currently not shared separately – view only, ticking off is not possible.",
-    footer: "Shared with CampMesser – the Swiss army knife for tent camping.",
+    footer:
+      "Shared with ReiseKompass – your compass for holidays, camping and day trips.",
   },
   tripPrint: {
     docTitle: name => `${name} – Trip report for printing`,
     docTitleFallback: "Trip report",
-    appTitle: "CampMesser – The Swiss army knife for tent camping",
+    appTitle: "ReiseKompass – Your compass for holidays, camping and day trips",
     notFound: "This stay was not found.",
     printButton: "Print / Save as PDF",
     printBrowserHint:
       "In the installed app this button opens the view in the browser – print or save as PDF from the menu there.",
-    headerKicker: "CampMesser · Trip report",
+    headerKicker: "ReiseKompass · Trip report",
     printedOn: date => `As of: ${date}`,
     ratingAria: n => `Rating: ${n} of 5 stars`,
     notesTitle: "Notes",
@@ -2931,7 +2938,7 @@ export const en: Translation = {
     photosTitle: "Photos",
     photoAlt: (n, name) => `Photo ${n} of the stay ${name}`,
     footer:
-      "Great memories! · CampMesser – the Swiss army knife for tent camping",
+      "Great memories! · ReiseKompass – your compass for holidays, camping and day trips",
   },
   firstAid: {
     title: "First aid guide",
@@ -3545,7 +3552,7 @@ export const en: Translation = {
     outsideRiskArea: (region: string) =>
       `The canton of ${region} is not among the FOPH's TBE risk areas. There are still ticks here – Lyme disease is transmitted regardless of this classification.`,
     outsideSwitzerland:
-      "Outside Switzerland CampMesser does not provide a TBE classification. Check the situation for your destination before you leave.",
+      "Outside Switzerland ReiseKompass does not provide a TBE classification. Check the situation for your destination before you leave.",
     switzerlandGeneral:
       "In Switzerland the whole country counts as a TBE risk area – except the cantons of Geneva and Ticino.",
     tipsTitle: "How to protect yourself",
@@ -3611,7 +3618,7 @@ export const en: Translation = {
       `The next visible passes of the space station near ${place}.`,
     loading: "Working out the passes …",
     noLocation:
-      "CampMesser needs your location for the passes – allow location access or save a pitch.",
+      "ReiseKompass needs your location for the passes – allow location access or save a pitch.",
     loadFailed: "The passes could not be loaded right now. Try again later.",
     noneVisible:
       "No pass is visible from here in the next four days. That changes every few weeks – check back later.",
@@ -3629,7 +3636,7 @@ export const en: Translation = {
     sectionAria: "Constellation finder using compass and tilt",
     title: "Constellation finder",
     subtitle:
-      "Hold your phone up to the sky – CampMesser tells you what stands in that direction.",
+      "Hold your phone up to the sky – ReiseKompass tells you what stands in that direction.",
     subtitleAtPlace: (place: string) =>
       `Hold your phone up to the sky – this is how the sky stands at ${place}.`,
     locating: "Determining your location …",
@@ -3646,7 +3653,7 @@ export const en: Translation = {
     lexiconLink: "Read up in the lexicon",
     compassStart: "Start compass",
     compassHint:
-      "For the viewing direction CampMesser needs your device compass – tap “Start compass” and allow access.",
+      "For the viewing direction ReiseKompass needs your device compass – tap “Start compass” and allow access.",
     compassDenied:
       "Without compass access the viewing direction cannot be worked out. You can try again – the list below still holds.",
     noCompass:
@@ -3690,6 +3697,11 @@ export const en: Translation = {
     },
   },
   nearbyHikes: {
+    lengthFilterAria: "Filter by route length",
+    lengthAll: "All lengths",
+    lengthShort: "up to 5 km",
+    lengthMedium: "5–15 km",
+    lengthLong: "over 15 km",
     sectionAria: "Waymarked hiking routes in the area",
     title: "Hiking in the area",
     subtitle: "Waymarked hiking routes around your location.",
@@ -3703,7 +3715,7 @@ export const en: Translation = {
     locating: "Determining location …",
     loading: "Searching for routes …",
     noLocation:
-      "For the search CampMesser needs your location – allow positioning or open the section in the dossier of a saved pitch.",
+      "For the search ReiseKompass needs your location – allow positioning or open the section in the dossier of a saved pitch.",
     loadFailed:
       "The routes could not be loaded just now. Overpass is a free service that throttles heavy use – try again in a few minutes.",
     empty: (km: number) =>
@@ -4097,8 +4109,8 @@ export const en: Translation = {
       "No cards yet. Create the first one above – the ACSI card or your TCS membership, for example.",
     deleteConfirm: "Delete the card including its photo?",
     deleteAria: (title: string) => `Delete ${title}`,
-    photoAdd: "Add photo",
-    photoReplace: "Replace photo",
+    photoAdd: "Add photo or PDF",
+    photoReplace: "Replace file",
     photoUploading: "Uploading …",
     photoSaved: "Photo saved",
     photoFailed: "The photo could not be uploaded.",
@@ -4404,7 +4416,7 @@ export const en: Translation = {
     imprintTitle: "Legal notice",
     privacyTitle: "Privacy policy",
     cookieText:
-      "CampMesser only uses technically necessary cookies and local storage – no tracking, no ads. Details:",
+      "ReiseKompass only uses technically necessary cookies and local storage – no tracking, no ads. Details:",
     cookieOk: "Got it",
     cookieAria: "Cookie notice",
   },
@@ -4483,6 +4495,8 @@ export const en: Translation = {
     line: (level: number, label: string) =>
       `Avalanche danger: level ${level} (${label})`,
     note: "Source: SLF avalanche bulletin – Switzerland only, no guarantee.",
+    noteEuregio:
+      "Source: Euregio avalanche report (avalanche.report) – covers Tyrol, South Tyrol and Trentino, no guarantee.",
   },
   winterKnowledge: {
     title: "Slopes & avalanches",
@@ -4499,6 +4513,44 @@ export const en: Translation = {
     sourceNote:
       "FIS rules paraphrased from fis-ski.com; avalanche knowledge based on the SLF fundamentals (whiterisk.ch). Anyone regularly off-piste belongs in an avalanche course – no app replaces one.",
   },
+  grilling: {
+    title: "Grill & cooking times",
+    subtitle:
+      "Core temperatures, the ember test and the rules of thumb that make the difference – for looking up at the grill.",
+    offlineNote:
+      "All content is available offline – even at the grill without signal.",
+    tempsTitle: "Core temperatures",
+    tempsIntro:
+      "Guide values at the core of the meat – a probe thermometer beats any rule of thumb. Always cook poultry and minced meat through.",
+    tipsTitle: "Rules of thumb at the grill",
+    tipsIntro: "What separates charred from perfect.",
+    sourceNote:
+      "Guide values based on common kitchen practice and the Swiss FSVO's food-hygiene advice – no guarantee.",
+  },
+  fireGuide: {
+    title: "Fire guide",
+    subtitle:
+      "Building, lighting, feeding and properly extinguishing a campfire – step by step.",
+    offlineNote:
+      "All content is available offline – even at the fire pit without signal.",
+    listTitle: "From tinder to dousing",
+    listIntro: "The steps in the order they come up at the fire pit.",
+    linkBans: "Fire bans (weather module)",
+    linkWood: "Firewood calculator",
+    sourceNote:
+      "Advice in line with forestry services and fire brigades – local bans and site rules always come first.",
+  },
+  etiquette: {
+    title: "Campsite etiquette",
+    subtitle:
+      "Quiet hours, grey water, dogs, pitch boundaries – the rules of living together on a campsite.",
+    offlineNote: "All content is available offline.",
+    listTitle: "The ten rules of living together",
+    listIntro:
+      "Most of them appear in no site rules – and still make the difference between good and bad neighbours.",
+    sourceNote:
+      "Compiled from common campsite rules and camping custom – the rules of your actual site take precedence.",
+  },
   waterSafety: {
     title: "Bathing rules & flags",
     subtitle:
@@ -4513,6 +4565,72 @@ export const en: Translation = {
       "How lifeguard services signal at the sea – some countries differ; when in doubt, the signs on site apply.",
     sourceNote:
       "Bathing rules paraphrased from the SLRG (slrg.ch); flags follow international lifesaving practice (ILS). The signage on the beach always takes precedence.",
+  },
+  feedback: {
+    title: "Feedback & report a problem",
+    intro:
+      "What's broken, missing or annoying? The message goes straight to the operator's inbox – with your email address for follow-up questions.",
+    placeholder: "Briefly describe what you ran into or wish for …",
+    send: "Send",
+    sent: "Thank you! The message is on its way.",
+    mailNotConfigured: "Email sending is not configured on the server.",
+    rateLimited: "Enough for this hour – try again later.",
+    note: "At least 10 characters. The message, your name and email address are transmitted.",
+  },
+  connections: {
+    title: "Public transport to get there",
+    subtitle:
+      "The next connections from your home to here – from the open Swiss timetable.",
+    subtitleAtPlace: (place: string) =>
+      `The next connections from your home to ${place} – from the open Swiss timetable.`,
+    noHome: "Your home location is missing for the search.",
+    noHomeLink: "Set it in your profile",
+    empty:
+      "No connection found – the timetable covers Switzerland and cross-border traffic.",
+    durationLine: (min: number) =>
+      min >= 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min} min`,
+    transfersLine: (n: number) =>
+      n === 0 ? "direct" : n === 1 ? "1 change" : `${n} changes`,
+    source: "Source: transport.opendata.ch – no guarantee.",
+  },
+  poi: {
+    radiusLabel: "Radius:",
+    radiusGroupAria: "Choose search radius",
+    loading: "Searching …",
+    loadFailed: "The search failed. Try again later.",
+    navButton: "Directions",
+    navAria: (title: string) => `Directions to ${title}`,
+    source: "Source: OpenStreetMap – completeness not guaranteed.",
+    beaches: {
+      title: "Beaches nearby",
+      subtitle:
+        "Natural beaches and beach resorts from OpenStreetMap – where to get to the water today.",
+      unnamed: "Beach",
+      empty: (radius: string) => `No beach recorded within ${radius}.`,
+    },
+    water: {
+      title: "Drinking water nearby",
+      subtitle:
+        "Fountains and drinking-water taps to refill your bottle – from OpenStreetMap.",
+      unnamed: "Fountain",
+      empty: (radius: string) =>
+        `No drinking-water point recorded within ${radius}.`,
+    },
+    chargers: {
+      title: "Charging stations nearby",
+      subtitle:
+        "Charging points for electric cars from OpenStreetMap – operator and bays where tagged.",
+      unnamed: "Charging station",
+      empty: (radius: string) =>
+        `No charging station recorded within ${radius}.`,
+    },
+    defis: {
+      title: "Defibrillators nearby",
+      subtitle:
+        "Public defibrillators from OpenStreetMap – the location note says where the device hangs. In an emergency, call 144 first.",
+      unnamed: "Defibrillator",
+      empty: (radius: string) => `No defibrillator recorded within ${radius}.`,
+    },
   },
   winter: {
     title: "Frost & snow",
@@ -5072,7 +5190,7 @@ export const en: Translation = {
     subtitle: "How dark is the sky at your location?",
     subtitleAtPlace: (place: string) => `How dark is the sky at ${place}?`,
     outsideCoverage:
-      "There is no light source data for this location – the dataset covers Switzerland and the neighbouring border regions. A classification here would be guesswork, so CampMesser shows none.",
+      "There is no light source data for this location – the dataset covers Switzerland and the neighbouring border regions. A classification here would be guesswork, so ReiseKompass shows none.",
     scaleAria: (bortle: number) =>
       `Bortle scale from 1 (very dark) to 9 (inner city), estimated level ${bortle}`,
     scaleDark: "dark",
@@ -5080,7 +5198,7 @@ export const en: Translation = {
     classLine: (bortle: number, label: string) => `Bortle ${bortle} · ${label}`,
     locating: "Determining location …",
     noLocation:
-      "For the classification CampMesser needs your location – allow positioning or save a pitch.",
+      "For the classification ReiseKompass needs your location – allow positioning or save a pitch.",
     tonightTitle: "Tonight",
     tonightLoading: "Loading cloud cover …",
     tonightWorthIt:
@@ -5098,7 +5216,7 @@ export const en: Translation = {
     nearestTitle: "Nearest light sources:",
     nearestItem: (name: string, distance: string) => `${name} ${distance}`,
     estimateNote:
-      "An estimate, not a measurement: there is no freely available measurement of sky brightness. CampMesser works the classification out from the distance to the largest towns and urban areas. The formula knows nothing of mountains that block a light dome, floodlights next door or humid air – on the ground it may be darker or brighter.",
+      "An estimate, not a measurement: there is no freely available measurement of sky brightness. ReiseKompass works the classification out from the distance to the largest towns and urban areas. The formula knows nothing of mountains that block a light dome, floodlights next door or humid air – on the ground it may be darker or brighter.",
   },
 
   excursions: {
@@ -5228,8 +5346,12 @@ export const en: Translation = {
       nameLabel: "Name",
       namePlaceholder: "e.g. Granny's Älplermagronen",
       importButton: "Paste from text",
+      importUrlLabel: "Import from a web link",
+      importUrlButton: "Fetch",
+      importUrlFailed:
+        "This page has no readable recipe – copy the text and use the field below.",
       importHint:
-        "Paste the recipe text (copied from a website or a message). CampMesser guesses the name, ingredients and steps – everything stays editable before saving.",
+        "Paste the recipe text (copied from a website or a message). ReiseKompass guesses the name, ingredients and steps – everything stays editable before saving.",
       importPlaceholder:
         "Älplermagronen\n\nIngredients:\n250 g macaroni\n…\n\nInstructions:\n1. …",
       importApply: "Fill the fields",
@@ -5621,18 +5743,18 @@ export const en: Translation = {
   },
   shoppingPrint: {
     docTitle: "Printable shopping list",
-    appTitle: "CampMesser – the Swiss army knife for tent camping",
+    appTitle: "ReiseKompass – your compass for holidays, camping and day trips",
     printButton: "Print / Save as PDF",
     printBrowserHint:
       "In the installed app this button opens the view in your browser – print or save as PDF from its menu there.",
-    headerKicker: "CampMesser · Shopping list",
+    headerKicker: "ReiseKompass · Shopping list",
     title: "Shopping list",
     meta: (items: number, categories: number) =>
       `${items} ${items === 1 ? "open item" : "open items"} · ${categories} ${categories === 1 ? "category" : "categories"}`,
     printedOn: (date: string) => `As of ${date}`,
     emptyList: "No open items – everything bought.",
     footer:
-      "Happy shopping! · CampMesser – the Swiss army knife for tent camping",
+      "Happy shopping! · ReiseKompass – your compass for holidays, camping and day trips",
   },
   menuPlan: {
     title: "Meal plan",
@@ -5724,16 +5846,16 @@ export const en: Translation = {
   menuPlanPrint: {
     docTitle: (name: string) => `${name} – printable meal plan`,
     docTitleFallback: "Meal plan",
-    appTitle: "CampMesser – the Swiss army knife for tent camping",
+    appTitle: "ReiseKompass – your compass for holidays, camping and day trips",
     notFound: "This stay could not be found.",
     printButton: "Print / Save as PDF",
     printBrowserHint:
       "In the installed app this button opens the view in your browser – print or save as PDF from its menu there.",
-    headerKicker: "CampMesser · Meal plan",
+    headerKicker: "ReiseKompass · Meal plan",
     printedOn: (date: string) => `As of ${date}`,
     dayHeader: "Day",
     footer:
-      "Enjoy your meals! · CampMesser – the Swiss army knife for tent camping",
+      "Enjoy your meals! · ReiseKompass – your compass for holidays, camping and day trips",
   },
   family: {
     title: "Family mode",
@@ -5987,7 +6109,7 @@ export const en: Translation = {
     subtitle:
       "The progress bar for the back seat: how much of the way to the campsite have you covered already?",
     loginHint:
-      "Sign in so that CampMesser can offer your saved pitches as a destination.",
+      "Sign in so that ReiseKompass can offer your saved pitches as a destination.",
     noSpots:
       "No pitches saved yet – create a pitch first, then you can choose it as your destination.",
     suggestedFromTrip:
@@ -5997,7 +6119,7 @@ export const en: Translation = {
     targetPlaceholder: "Choose destination",
     start: "Off we go",
     startNote:
-      "Tapping this sets your current location as the starting point. After that CampMesser takes a rough reading once a minute – that goes easy on the battery.",
+      "Tapping this sets your current location as the starting point. After that ReiseKompass takes a rough reading once a minute – that goes easy on the battery.",
     locationFailed:
       "Your location could not be determined – without a starting point this sadly does not work.",
     straightLineBadge: "straight line",
@@ -6023,17 +6145,17 @@ export const en: Translation = {
       "Location access is blocked – allow it in your browser settings, otherwise the bar stands still.",
     geoUnsupported: "This browser does not support location services.",
     geoFailed:
-      "Your location could not be determined just now – CampMesser will try again in a minute.",
+      "Your location could not be determined just now – ReiseKompass will try again in a minute.",
   },
   huntPrint: {
     docTitle: (title: string) => `${title} – printable scavenger hunt`,
     docTitleFallback: "Scavenger hunt",
-    appTitle: "CampMesser – the Swiss army knife for tent camping",
+    appTitle: "ReiseKompass – your compass for holidays, camping and day trips",
     notFound: "This scavenger hunt could not be found.",
     printButton: "Print / Save as PDF",
     printBrowserHint:
       "In the installed app this button opens the view in your browser – print or save as PDF from its menu there.",
-    headerKicker: "CampMesser · Scavenger hunt",
+    headerKicker: "ReiseKompass · Scavenger hunt",
     meta: (age: string, minutes: number, stations: number) =>
       `${age} · approx. ${minutes} minutes · ${stations} ${stations === 1 ? "station" : "stations"}`,
     missionTitle: "The mission",
@@ -6047,19 +6169,19 @@ export const en: Translation = {
       `Write the collected letters in order (${n} letters):`,
     finaleTitle: "The finale",
     footer:
-      "Have fun exploring! · CampMesser – the Swiss army knife for tent camping",
+      "Have fun exploring! · ReiseKompass – your compass for holidays, camping and day trips",
   },
   badgeCertificate: {
     docTitle: (name: string) => `Certificate for ${name}`,
     docTitleFallback: "Certificate",
-    appTitle: "CampMesser – the Swiss army knife for tent camping",
+    appTitle: "ReiseKompass – your compass for holidays, camping and day trips",
     loginFeature: "the badge certificate",
     notFound: "This child was not found.",
     galleryLink: "Print certificate",
     printButton: "Print certificate",
     printBrowserHint:
       "In the installed app this button opens the view in the browser – print or save as PDF from the menu there.",
-    kicker: "CampMesser · Family mode",
+    kicker: "ReiseKompass · Family mode",
     heading: "Certificate",
     awardedTo: "awarded to",
     badgesIntro: (n: number) =>
@@ -6068,7 +6190,7 @@ export const en: Translation = {
     noBadges:
       "No badges earned yet – play a scavenger hunt or a quiz and the certificate will fill up.",
     issuedOn: (date: string) => `Issued on ${date}`,
-    footer: "CampMesser – the Swiss army knife for tent camping",
+    footer: "ReiseKompass – your compass for holidays, camping and day trips",
   },
   notFound: {
     heading: "Page not found",
@@ -6105,7 +6227,7 @@ export const en: Translation = {
     backToActions: "Back to the actions",
   },
   install: {
-    title: "Install CampMesser",
+    title: "Install ReiseKompass",
     description: "As an app on your device – starts faster and works offline.",
     installButton: "Install",
     iosStep1: "Tap the share icon",
@@ -6116,7 +6238,7 @@ export const en: Translation = {
   update: {
     title: "New version available",
     description:
-      "An updated version of CampMesser is ready. Refreshing reloads the page once.",
+      "An updated version of ReiseKompass is ready. Refreshing reloads the page once.",
     reloadButton: "Refresh",
     dismiss: "Dismiss update notice",
   },
@@ -6133,7 +6255,7 @@ export const en: Translation = {
     loginFeature: "adding shared photos",
     emptyTitle: "No shared photos found",
     emptyText:
-      "Open this page via your device's share function: pick a photo → Share → CampMesser. The entry appears in the share menu after the app has been (re)installed or updated.",
+      "Open this page via your device's share function: pick a photo → Share → ReiseKompass. The entry appears in the share menu after the app has been (re)installed or updated.",
     photosCount: (n: number) =>
       n === 1 ? "1 photo ready" : `${n} photos ready`,
     photoAlt: (n: number) => `Shared photo ${n}`,
@@ -6257,6 +6379,12 @@ export const en: Translation = {
       "Sign-ins from before this overview only appear after that device's next sign-in.",
   },
   fuelLog: {
+    vehicleLabel: "Vehicle",
+    vehicleNone: "No vehicle",
+    vehicleAll: "All vehicles",
+    chartTitle: "Consumption over time",
+    chartHint:
+      "Consumption per segment between two fill-ups, by odometer – plausible segments only.",
     csvButton: "Export as CSV",
     csvHeaders: [
       "Date",
@@ -6264,6 +6392,7 @@ export const en: Translation = {
       "Litres",
       "Amount CHF",
       "Consumption l/100 km",
+      "Vehicle",
     ],
     title: "Fuel log",
     subtitle: "Fill-ups with odometer reading – for your real consumption.",
@@ -6292,6 +6421,17 @@ export const en: Translation = {
     deleteAria: (km: number) => `Delete the fill-up at ${km} km`,
   },
   stats: {
+    countriesTitle: "Countries visited",
+    countriesUnassigned: (n: number) =>
+      n === 1
+        ? "1 trip without a recognisable country (the place names none)."
+        : `${n} trips without a recognisable country (the place names none).`,
+    inventoryValueTitle: "Inventory value",
+    inventoryLink: "To the inventory",
+    inventoryValueHint: (n: number) =>
+      n === 1
+        ? "Lower bound – 1 item without a recorded price."
+        : `Lower bound – ${n} items without a recorded price.`,
     expensesTitle: "Spending across all trips",
     expensesLink: "To the trips",
     expensesTotal: "Total",
@@ -6379,7 +6519,7 @@ export const en: Translation = {
     loadFailed:
       "The timetable could not be loaded just now. Try again in a moment.",
     emptyStations:
-      "The Swiss timetable finds no stop here. It covers Switzerland and cross-border traffic – for a pitch further abroad, CampMesser knows nothing at this point.",
+      "The Swiss timetable finds no stop here. It covers Switzerland and cross-border traffic – for a pitch further abroad, ReiseKompass knows nothing at this point.",
     emptyBoard: "No departure is listed from this stop any time soon.",
     kind: {
       train: "Train",

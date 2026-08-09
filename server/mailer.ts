@@ -17,17 +17,17 @@ export function mailConfigured(): boolean {
 }
 
 const subject = l4(
-  "CampMesser: Passwort zurücksetzen",
-  "CampMesser : réinitialiser le mot de passe",
-  "CampMesser: reimposta la password",
-  "CampMesser: reset your password"
+  "ReiseKompass: Passwort zurücksetzen",
+  "ReiseKompass : réinitialiser le mot de passe",
+  "ReiseKompass: reimposta la password",
+  "ReiseKompass: reset your password"
 );
 
 const intro = l4(
-  "du (oder jemand anderes) hast angefordert, das Passwort deines CampMesser-Kontos zurückzusetzen.",
-  "tu as (ou quelqu'un d'autre a) demandé à réinitialiser le mot de passe de ton compte CampMesser.",
-  "tu (o qualcun altro) hai richiesto di reimpostare la password del tuo account CampMesser.",
-  "you (or someone else) requested to reset the password of your CampMesser account."
+  "du (oder jemand anderes) hast angefordert, das Passwort deines ReiseKompass-Kontos zurückzusetzen.",
+  "tu as (ou quelqu'un d'autre a) demandé à réinitialiser le mot de passe de ton compte ReiseKompass.",
+  "tu (o qualcun altro) hai richiesto di reimpostare la password del tuo account ReiseKompass.",
+  "you (or someone else) requested to reset the password of your ReiseKompass account."
 );
 
 const action = l4(
@@ -63,7 +63,7 @@ export function buildPasswordResetMail(
       "",
       pick(outro, lang),
       "",
-      "CampMesser",
+      "ReiseKompass",
     ].join("\n"),
   };
 }
@@ -71,17 +71,17 @@ export function buildPasswordResetMail(
 // --- E-Mail-Bestätigung nach Registrierung bzw. Adress-Änderung -----------
 
 const verifySubject = l4(
-  "CampMesser: E-Mail-Adresse bestätigen",
-  "CampMesser : confirmer l'adresse e-mail",
-  "CampMesser: conferma l'indirizzo e-mail",
-  "CampMesser: confirm your email address"
+  "ReiseKompass: E-Mail-Adresse bestätigen",
+  "ReiseKompass : confirmer l'adresse e-mail",
+  "ReiseKompass: conferma l'indirizzo e-mail",
+  "ReiseKompass: confirm your email address"
 );
 
 const verifyIntro = l4(
-  "schön, dass du dabei bist! Bitte bestätige, dass diese E-Mail-Adresse zu deinem CampMesser-Konto gehört.",
-  "content de te compter parmi nous ! Confirme que cette adresse e-mail appartient bien à ton compte CampMesser.",
-  "che bello averti con noi! Conferma che questo indirizzo e-mail appartiene al tuo account CampMesser.",
-  "great to have you on board! Please confirm that this email address belongs to your CampMesser account."
+  "schön, dass du dabei bist! Bitte bestätige, dass diese E-Mail-Adresse zu deinem ReiseKompass-Konto gehört.",
+  "content de te compter parmi nous ! Confirme que cette adresse e-mail appartient bien à ton compte ReiseKompass.",
+  "che bello averti con noi! Conferma che questo indirizzo e-mail appartiene al tuo account ReiseKompass.",
+  "great to have you on board! Please confirm that this email address belongs to your ReiseKompass account."
 );
 
 const verifyAction = l4(
@@ -92,10 +92,10 @@ const verifyAction = l4(
 );
 
 const verifyOutro = l4(
-  "Falls du kein Konto bei CampMesser erstellt hast, kannst du diese E-Mail ignorieren.",
-  "Si tu n'as pas créé de compte CampMesser, tu peux ignorer cet e-mail.",
-  "Se non hai creato un account CampMesser, puoi ignorare questa e-mail.",
-  "If you didn't create a CampMesser account, you can ignore this email."
+  "Falls du kein Konto bei ReiseKompass erstellt hast, kannst du diese E-Mail ignorieren.",
+  "Si tu n'as pas créé de compte ReiseKompass, tu peux ignorer cet e-mail.",
+  "Se non hai creato un account ReiseKompass, puoi ignorare questa e-mail.",
+  "If you didn't create a ReiseKompass account, you can ignore this email."
 );
 
 /** Betreff und Text der Bestätigungs-Mail erzeugen (reine Funktion, testbar). */
@@ -115,7 +115,7 @@ export function buildVerificationMail(
       "",
       pick(verifyOutro, lang),
       "",
-      "CampMesser",
+      "ReiseKompass",
     ].join("\n"),
   };
 }
@@ -158,4 +158,34 @@ export async function sendVerificationMail(
   lang: Language
 ): Promise<void> {
   await sendMail(to, buildVerificationMail(verifyUrl, lang));
+}
+
+/**
+ * Feedback aus der App (#512): Kurznachricht ans Betreiber-Postfach
+ * (FEEDBACK_EMAIL, sonst SMTP_FROM/SMTP_USER). Die Absender-Adresse der
+ * Person steht im Text – als Antwort-Adresse taugt sie, ohne dass die
+ * App fremde Absender fälscht.
+ */
+export function buildFeedbackMail(
+  fromUser: { email: string; name: string | null },
+  message: string
+): { subject: string; text: string } {
+  return {
+    subject: "ReiseKompass-Feedback",
+    text:
+      `Feedback von ${fromUser.name ?? "–"} <${fromUser.email}>:\n\n` +
+      `${message.trim()}\n`,
+  };
+}
+
+export async function sendFeedbackMail(
+  fromUser: { email: string; name: string | null },
+  message: string
+): Promise<void> {
+  const to =
+    process.env.FEEDBACK_EMAIL ??
+    process.env.SMTP_FROM ??
+    process.env.SMTP_USER;
+  if (!to) throw new Error("Kein Feedback-Postfach konfiguriert");
+  await sendMail(to, buildFeedbackMail(fromUser, message));
 }

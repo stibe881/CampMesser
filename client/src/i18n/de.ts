@@ -119,7 +119,7 @@ export const de = {
   home: {
     heroImageAlt:
       "Zelt mit Solarpanels und Lagerfeuer vor Schweizer Alpen bei Sonnenuntergang",
-    heroKicker: "Dein Schweizer Taschenmesser fürs Zelt-Camping",
+    heroKicker: "Dein Kompass für Ferien, Camping und Ausflüge",
     greeting: {
       morning: (name: string) => `Guten Morgen, ${name}`,
       day: (name: string) => `Guten Tag, ${name}`,
@@ -214,6 +214,7 @@ export const de = {
       nature: "Natur",
       care: "Pflege",
       clouds: "Wolken",
+      phrases: "Sprachhilfe",
       own: "Meine Inhalte",
     },
     recentTitle: "Zuletzt genutzt",
@@ -243,7 +244,8 @@ export const de = {
     hideAria: (title: string) => `${title} ausblenden`,
     openAria: (title: string) => `${title} öffnen`,
     onboardingTitle: "Erste Schritte",
-    onboardingSubtitle: "So richtest du CampMesser fürs nächste Abenteuer ein.",
+    onboardingSubtitle:
+      "So richtest du ReiseKompass fürs nächste Abenteuer ein.",
     onboardingDismissAria: "Erste-Schritte-Karte ausblenden",
     onboardingSteps: {
       account: "Konto erstellen oder anmelden",
@@ -261,7 +263,7 @@ export const de = {
   login: {
     title: "Anmelden",
     subtitle:
-      "Mit deinem CampMesser-Konto speicherst du Packlisten, Inventar und Zeltplätze und nutzt sie auf allen Geräten.",
+      "Mit deinem ReiseKompass-Konto speicherst du Packlisten, Inventar und Zeltplätze und nutzt sie auf allen Geräten.",
     resetTitle: "Passwort zurücksetzen",
     resetSubtitle:
       "Gib die E-Mail-Adresse deines Kontos an – wir schicken dir einen Link, mit dem du ein neues Passwort setzen kannst.",
@@ -390,7 +392,7 @@ export const de = {
       "Alle deine Daten werden unwiderruflich gelöscht. Bestätige mit deinem Passwort.",
     passwordLabel: "Passwort",
     deleteFinal: "Endgültig löschen",
-    versionLine: (version: string) => `CampMesser Version ${version}`,
+    versionLine: (version: string) => `ReiseKompass Version ${version}`,
     buildDate: (date: string) => ` · Build vom ${date}`,
     notificationsTitle: "Mitteilungen",
     pushDeviceTitle: "Push auf diesem Gerät",
@@ -573,6 +575,7 @@ export const de = {
     archivedBadge: "archiviert",
   },
   packListDetail: {
+    personWeightTitle: "Traglast:",
     boxBadgeAria: "Liegt in Kiste",
     backLabel: "Packlisten",
     fallbackTitle: "Packliste",
@@ -708,19 +711,19 @@ export const de = {
   packListPrint: {
     docTitle: (name: string) => `${name} – Packliste zum Ausdrucken`,
     docTitleFallback: "Packliste",
-    appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    appTitle: "ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
     notFound: "Diese Packliste wurde nicht gefunden.",
     printButton: "Drucken / Als PDF sichern",
     printBrowserHint:
       "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
-    headerKicker: "CampMesser · Packliste",
+    headerKicker: "ReiseKompass · Packliste",
     meta: (items: number, categories: number) =>
       `${items} ${items === 1 ? "Eintrag" : "Einträge"} · ${categories} ${categories === 1 ? "Kategorie" : "Kategorien"}`,
     printedOn: (date: string) => `Stand: ${date}`,
     personFilterInfo: (name: string) => `Nur Einträge von ${name}`,
     emptyList: "Diese Liste hat keine Einträge.",
     footer:
-      "Nichts vergessen – gute Reise! · CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+      "Nichts vergessen – gute Reise! · ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
   },
   sharedPackList: {
     loadingShared: "Geteilte Liste wird geladen …",
@@ -1913,7 +1916,7 @@ export const de = {
     pushDisabled: "Unwetter-Warnungen deaktiviert",
     pushTitle: "Unwetter-Warnungen für deine Plätze",
     pushDesc:
-      "Push-Benachrichtigung bei Sturm, Gewitter oder Starkregen an einem deiner gespeicherten Zeltplätze. Zusätzlich erinnert dich CampMesser, wenn Lebensmittel in der Kühlbox bald ablaufen – und 3 Tage vor einem geplanten Aufenthalt inklusive Packlisten-Stand.",
+      "Push-Benachrichtigung bei Sturm, Gewitter oder Starkregen an einem deiner gespeicherten Zeltplätze. Zusätzlich erinnert dich ReiseKompass, wenn Lebensmittel in der Kühlbox bald ablaufen – und 3 Tage vor einem geplanten Aufenthalt inklusive Packlisten-Stand.",
     pushSaveFirst: "Speichere zuerst einen Zeltplatz.",
     pushProfileHint: "Feineinstellungen im Profil →",
     pushAria: "Unwetter-Warnungen für gespeicherte Zeltplätze aktivieren",
@@ -2061,6 +2064,8 @@ export const de = {
     familySearchHint: "Tippe auf «In diesem Ausschnitt suchen».",
   },
   spotDetail: {
+    staysShowAll: (n: number) => `Alle ${n} Aufenthalte zeigen`,
+    staysShowLess: "Weniger zeigen",
     tariffCurrencyAria: "Währung",
     tariffUnitPlaceholder: "z. B. pro Tag",
     tariffPeriodAdd: "Zeitraum hinzufügen",
@@ -2222,7 +2227,7 @@ export const de = {
     costEstimate: (nights: number, amount: string) =>
       `Deine ${nights === 1 ? "1 Nacht" : `${nights} Nächte`} hier ergeben rund ${amount} – grobe Schätzung.`,
     costHint:
-      "Nur eine Schätzung: Rabatte, Kinder, Hund und Saison-Zuschläge kennt CampMesser nicht. Was du wirklich bezahlt hast, steht in der Reisekasse der jeweiligen Reise.",
+      "Nur eine Schätzung: Rabatte, Kinder, Hund und Saison-Zuschläge kennt ReiseKompass nicht. Was du wirklich bezahlt hast, steht in der Reisekasse der jeweiligen Reise.",
     costDialogTitle: "Kosten pro Nacht bearbeiten",
     costDialogDesc:
       "Beide Felder sind optional – leer lassen heisst «nicht erfasst».",
@@ -2326,11 +2331,11 @@ export const de = {
     arrived: "Du bist praktisch da – schau dich um!",
     compassActivate: "Kompass aktivieren",
     compassActivateHint:
-      "Damit der Pfeil mitdrehen kann, braucht CampMesser Zugriff auf den Kompass deines Geräts.",
+      "Damit der Pfeil mitdrehen kann, braucht ReiseKompass Zugriff auf den Kompass deines Geräts.",
     movementHint:
       "Richtung aus deiner Bewegung übernommen – der Pfeil stimmt nur, solange du dich vorwärts bewegst.",
     noCompassHint:
-      "Kein Kompass verfügbar: Der Pfeil kann nicht mitdrehen. Richte dich nach der Himmelsrichtung – oder geh ein paar Schritte, dann übernimmt CampMesser die Richtung aus deiner Bewegung.",
+      "Kein Kompass verfügbar: Der Pfeil kann nicht mitdrehen. Richte dich nach der Himmelsrichtung – oder geh ein paar Schritte, dann übernimmt ReiseKompass die Richtung aus deiner Bewegung.",
     mapTitle: "Mini-Karte",
     mapAria: "Karte mit deiner Position und deinen gespeicherten Zielen",
     mapHint:
@@ -2351,7 +2356,7 @@ export const de = {
     loginFeature: "gespeicherte Wanderungen",
     recorderTitle: "Aufzeichnung",
     recorderIntro:
-      "Beim Start schaltet CampMesser das GPS auf hohe Genauigkeit. Ungenaue Messungen und Sprünge werden weggefiltert, damit Strecke und Höhenmeter stimmen. Die Aufzeichnung läuft weiter, wenn du zu einer anderen Seite wechselst.",
+      "Beim Start schaltet ReiseKompass das GPS auf hohe Genauigkeit. Ungenaue Messungen und Sprünge werden weggefiltert, damit Strecke und Höhenmeter stimmen. Die Aufzeichnung läuft weiter, wenn du zu einer anderen Seite wechselst.",
     start: "Aufzeichnung starten",
     pause: "Pause",
     resume: "Fortsetzen",
@@ -2434,7 +2439,8 @@ export const de = {
   locationShare: {
     title: "Hier bin ich",
     desc: "Schick Mitreisenden einen Link mit deinem aktuellen Standort. Der Link läuft automatisch ab und lässt sich jederzeit deaktivieren.",
-    loginHint: "Zum Teilen deines Standorts brauchst du ein CampMesser-Konto.",
+    loginHint:
+      "Zum Teilen deines Standorts brauchst du ein ReiseKompass-Konto.",
     validityLabel: "Gültig",
     validityAria: "Gültigkeit des Standort-Links",
     validityHours: (h: number) => (h === 1 ? "1 Stunde" : `${h} Stunden`),
@@ -2475,7 +2481,7 @@ export const de = {
     invalidHint:
       "Standort-Links laufen nach kurzer Zeit ab oder werden von Hand deaktiviert. Frag nach einem neuen Link.",
     expiresNote: (date: string) => `Dieser Link ist gültig bis ${date}.`,
-    footer: "Geteilt mit CampMesser",
+    footer: "Geteilt mit ReiseKompass",
   },
   sharedSpot: {
     tariffsTitle: "Tarife",
@@ -2497,7 +2503,7 @@ export const de = {
     contactCheckin: "Check-in",
     contactParcel: "Parzelle",
     footer:
-      "Geteilt mit CampMesser – dem Schweizer Taschenmesser fürs Zelt-Camping.",
+      "Geteilt mit ReiseKompass – deinem Kompass für Ferien, Camping und Ausflüge.",
   },
   trips: {
     detailSubtitle: "Ein Aufenthalt im Detail",
@@ -2543,7 +2549,7 @@ export const de = {
     collageButton: "Foto-Collage",
     collageTitle: "Foto-Collage",
     collageDescription:
-      "Wähle Fotos und Anordnung – CampMesser macht daraus ein Bild zum Teilen, mit Reisename und Zeitraum.",
+      "Wähle Fotos und Anordnung – ReiseKompass macht daraus ein Bild zum Teilen, mit Reisename und Zeitraum.",
     collageLayoutLabel: "Anordnung",
     collageLayoutNames: {
       grid2: "Raster 2×2",
@@ -2753,7 +2759,7 @@ export const de = {
     membersButton: "Mitreisende",
     membersAria: (name: string) => `Mitreisende von ${name} verwalten`,
     membersDialogDesc:
-      "Lade andere CampMesser-Konten ein – Mitreisende können die Reise ansehen und bearbeiten (löschen kannst nur du).",
+      "Lade andere ReiseKompass-Konten ein – Mitreisende können die Reise ansehen und bearbeiten (löschen kannst nur du).",
     membersListTitle: "Mitreisende",
     membersOwnerBadge: "Besitzer*in",
     memberRemoveAria: (name: string) => `${name} von der Reise entfernen`,
@@ -2875,6 +2881,7 @@ export const de = {
     removeFailed: "Zettel konnte nicht entfernt werden",
   },
   tripExpenses: {
+    budgetTightNote: "Das Budget wird knapp.",
     fuelTitle: "Fahrtkosten berechnen",
     fuelHint:
       "Kilometer × Verbrauch × Spritpreis. Gerechnet wird mit dem Durchschnittsverbrauch – wer es genauer will, tippt den Betrag von Hand ein.",
@@ -3021,17 +3028,17 @@ export const de = {
     packListNotShared:
       "Diese Packliste wird momentan nicht separat geteilt – nur Ansicht, Abhaken ist nicht möglich.",
     footer:
-      "Geteilt mit CampMesser – dem Schweizer Taschenmesser fürs Zelt-Camping.",
+      "Geteilt mit ReiseKompass – deinem Kompass für Ferien, Camping und Ausflüge.",
   },
   tripPrint: {
     docTitle: (name: string) => `${name} – Reisebericht zum Ausdrucken`,
     docTitleFallback: "Reisebericht",
-    appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    appTitle: "ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
     notFound: "Dieser Aufenthalt wurde nicht gefunden.",
     printButton: "Drucken / Als PDF sichern",
     printBrowserHint:
       "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
-    headerKicker: "CampMesser · Reisebericht",
+    headerKicker: "ReiseKompass · Reisebericht",
     printedOn: (date: string) => `Stand: ${date}`,
     ratingAria: (n: number) => `Bewertung: ${n} von 5 Sternen`,
     notesTitle: "Notizen",
@@ -3040,7 +3047,7 @@ export const de = {
     photosTitle: "Fotos",
     photoAlt: (n: number, name: string) => `Foto ${n} vom Aufenthalt ${name}`,
     footer:
-      "Schöne Erinnerungen! · CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+      "Schöne Erinnerungen! · ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
   },
   firstAid: {
     title: "Erste-Hilfe-Guide",
@@ -3667,7 +3674,7 @@ export const de = {
     outsideRiskArea: (region: string) =>
       `Der Kanton ${region} zählt nicht zu den FSME-Risikogebieten des BAG. Zecken gibt es hier trotzdem – auch Borreliose überträgt sich unabhängig davon.`,
     outsideSwitzerland:
-      "Ausserhalb der Schweiz führt CampMesser keine FSME-Einstufung. Erkundige dich für dein Reiseland vor der Abreise.",
+      "Ausserhalb der Schweiz führt ReiseKompass keine FSME-Einstufung. Erkundige dich für dein Reiseland vor der Abreise.",
     switzerlandGeneral:
       "In der Schweiz gilt das ganze Land als FSME-Risikogebiet – ausser den Kantonen Genf und Tessin.",
     tipsTitle: "So beugst du vor",
@@ -3733,7 +3740,7 @@ export const de = {
       `Die nächsten sichtbaren Überflüge der Raumstation bei ${place}.`,
     loading: "Überflüge werden berechnet …",
     noLocation:
-      "Für die Überflüge braucht CampMesser deinen Standort – gib die Ortung frei oder speichere einen Zeltplatz.",
+      "Für die Überflüge braucht ReiseKompass deinen Standort – gib die Ortung frei oder speichere einen Zeltplatz.",
     loadFailed:
       "Die Überflüge konnten gerade nicht geladen werden. Versuch es später nochmals.",
     noneVisible:
@@ -3752,12 +3759,12 @@ export const de = {
     sectionAria: "Sternbild-Finder mit Kompass und Neigung",
     title: "Sternbild-Finder",
     subtitle:
-      "Halt das Handy an den Himmel – CampMesser sagt dir, was in dieser Richtung steht.",
+      "Halt das Handy an den Himmel – ReiseKompass sagt dir, was in dieser Richtung steht.",
     subtitleAtPlace: (place: string) =>
       `Halt das Handy an den Himmel – so steht der Himmel gerade bei ${place}.`,
     locating: "Standort wird bestimmt …",
     noLocation:
-      "Für den Sternbild-Finder braucht CampMesser deinen Standort – gib die Ortung frei oder speichere einen Zeltplatz.",
+      "Für den Sternbild-Finder braucht ReiseKompass deinen Standort – gib die Ortung frei oder speichere einen Zeltplatz.",
     viewTitle: "In Blickrichtung",
     viewDirection: (direction: string, degrees: number) =>
       `${direction}, ${degrees}° über dem Horizont`,
@@ -3769,7 +3776,7 @@ export const de = {
     lexiconLink: "Im Lexikon nachlesen",
     compassStart: "Kompass starten",
     compassHint:
-      "Für die Blickrichtung braucht CampMesser den Kompass deines Geräts – tipp auf «Kompass starten» und erlaube den Zugriff.",
+      "Für die Blickrichtung braucht ReiseKompass den Kompass deines Geräts – tipp auf «Kompass starten» und erlaube den Zugriff.",
     compassDenied:
       "Ohne Kompass-Zugriff lässt sich die Blickrichtung nicht bestimmen. Du kannst es nochmals versuchen – die Liste unten stimmt auch so.",
     noCompass:
@@ -3813,6 +3820,11 @@ export const de = {
     },
   },
   nearbyHikes: {
+    lengthFilterAria: "Nach Routen-Länge filtern",
+    lengthAll: "Alle Längen",
+    lengthShort: "bis 5 km",
+    lengthMedium: "5–15 km",
+    lengthLong: "über 15 km",
     sectionAria: "Markierte Wanderwege in der Umgebung",
     title: "Wandern in der Umgebung",
     subtitle: "Markierte Wanderwege rund um deinen Standort.",
@@ -3826,7 +3838,7 @@ export const de = {
     locating: "Standort wird bestimmt …",
     loading: "Wanderwege werden gesucht …",
     noLocation:
-      "Für die Suche braucht CampMesser deinen Standort – gib die Ortung frei oder öffne den Abschnitt im Dossier eines gespeicherten Platzes.",
+      "Für die Suche braucht ReiseKompass deinen Standort – gib die Ortung frei oder öffne den Abschnitt im Dossier eines gespeicherten Platzes.",
     loadFailed:
       "Die Wanderwege konnten gerade nicht geladen werden. Overpass ist ein freier Dienst und bremst bei zu vielen Anfragen – versuch es in ein paar Minuten nochmals.",
     empty: (km: number) =>
@@ -4223,8 +4235,8 @@ export const de = {
       "Noch keine Karten. Lege oben die erste an – zum Beispiel die ACSI-Card oder den TCS-Ausweis.",
     deleteConfirm: "Karte samt Foto löschen?",
     deleteAria: (title: string) => `${title} löschen`,
-    photoAdd: "Foto hinzufügen",
-    photoReplace: "Foto ersetzen",
+    photoAdd: "Foto oder PDF hinzufügen",
+    photoReplace: "Foto/PDF ersetzen",
     photoUploading: "Wird hochgeladen …",
     photoSaved: "Foto gespeichert",
     photoFailed: "Das Foto konnte nicht hochgeladen werden.",
@@ -4534,7 +4546,7 @@ export const de = {
     imprintTitle: "Impressum",
     privacyTitle: "Datenschutzerklärung",
     cookieText:
-      "CampMesser verwendet nur technisch notwendige Cookies und lokale Speicherung – kein Tracking, keine Werbung. Details:",
+      "ReiseKompass verwendet nur technisch notwendige Cookies und lokale Speicherung – kein Tracking, keine Werbung. Details:",
     cookieOk: "Verstanden",
     cookieAria: "Hinweis zu Cookies",
   },
@@ -4613,6 +4625,8 @@ export const de = {
     line: (level: number, label: string) =>
       `Lawinengefahr: Stufe ${level} (${label})`,
     note: "Quelle: SLF-Lawinenbulletin – gilt nur für die Schweiz, ohne Gewähr.",
+    noteEuregio:
+      "Quelle: Euregio-Lawinenreport (avalanche.report) – gilt für Tirol, Südtirol und Trentino, ohne Gewähr.",
   },
   winterKnowledge: {
     title: "Pisten & Lawinen",
@@ -4629,6 +4643,45 @@ export const de = {
     sourceNote:
       "FIS-Regeln sinngemäss nach fis-ski.com; Lawinen-Wissen nach den Grundlagen des SLF (whiterisk.ch). Wer regelmässig abseits der Piste unterwegs ist, gehört in einen Lawinenkurs – keine App ersetzt ihn.",
   },
+  grilling: {
+    title: "Grill & Garzeiten",
+    subtitle:
+      "Kerntemperaturen, Glut-Test und die Faustregeln, die den Unterschied machen – zum Nachschlagen am Grill.",
+    offlineNote:
+      "Alle Inhalte sind offline verfügbar – auch am Grill ohne Netz.",
+    tempsTitle: "Kerntemperaturen",
+    tempsIntro:
+      "Richtwerte im Kern des Fleischs – ein Kernthermometer schlägt jede Faustregel. Geflügel und Hackfleisch immer durchgaren.",
+    tipsTitle: "Faustregeln am Grill",
+    tipsIntro: "Was zwischen verkohlt und perfekt entscheidet.",
+    sourceNote:
+      "Richtwerte nach gängiger Küchenpraxis und den Empfehlungen des BLV zur Lebensmittelhygiene – ohne Gewähr.",
+  },
+  fireGuide: {
+    title: "Feuer-Ratgeber",
+    subtitle:
+      "Lagerfeuer aufbauen, anzünden, unterhalten und richtig löschen – Schritt für Schritt.",
+    offlineNote:
+      "Alle Inhalte sind offline verfügbar – auch am Feuerplatz ohne Netz.",
+    listTitle: "Vom Zunder bis zum Löschen",
+    listIntro:
+      "Die Schritte in der Reihenfolge, in der sie sich am Feuerplatz stellen.",
+    linkBans: "Feuerverbote (Wetter-Modul)",
+    linkWood: "Feuerholz-Rechner",
+    sourceNote:
+      "Empfehlungen sinngemäss nach der Praxis von Waldämtern und Feuerwehren – lokale Verbote und Platzregeln gehen immer vor.",
+  },
+  etiquette: {
+    title: "Camping-Knigge",
+    subtitle:
+      "Ruhezeiten, Grauwasser, Hunde, Parzellen-Grenzen – die Regeln des Zusammenlebens auf dem Platz.",
+    offlineNote: "Alle Inhalte sind offline verfügbar.",
+    listTitle: "Die zehn Regeln des Zusammenlebens",
+    listIntro:
+      "Die meisten stehen in keiner Platzordnung – und machen trotzdem den Unterschied zwischen guten und schlechten Nachbarn.",
+    sourceNote:
+      "Zusammengetragen aus verbreiteten Platzordnungen und Camping-Gepflogenheiten – die Regeln des jeweiligen Platzes gehen vor.",
+  },
   waterSafety: {
     title: "Baderegeln & Flaggen",
     subtitle:
@@ -4643,6 +4696,75 @@ export const de = {
       "So signalisieren Rettungsdienste am Meer – einzelne Länder weichen ab, im Zweifel gilt der Aushang vor Ort.",
     sourceNote:
       "Baderegeln sinngemäss nach SLRG (slrg.ch); Flaggen nach der Praxis der internationalen Rettungsdienste (ILS). Massgeblich ist immer die Beschilderung am Strand.",
+  },
+  feedback: {
+    title: "Feedback & Fehler melden",
+    intro:
+      "Was klemmt, was fehlt, was nervt? Die Nachricht geht direkt ans Betreiber-Postfach – mit deiner E-Mail-Adresse als Absender für Rückfragen.",
+    placeholder: "Beschreibe kurz, was du erlebt hast oder dir wünschst …",
+    send: "Abschicken",
+    sent: "Danke! Die Nachricht ist unterwegs.",
+    mailNotConfigured:
+      "Der Mail-Versand ist auf dem Server nicht eingerichtet.",
+    rateLimited: "Genug für diese Stunde – versuch es später nochmals.",
+    note: "Mindestens 10 Zeichen. Übermittelt werden Nachricht, Name und E-Mail-Adresse.",
+  },
+  connections: {
+    title: "ÖV zur Anreise",
+    subtitle:
+      "Die nächsten Verbindungen von deinem Zuhause hierher – aus dem offenen Schweizer Fahrplan.",
+    subtitleAtPlace: (place: string) =>
+      `Die nächsten Verbindungen von deinem Zuhause nach ${place} – aus dem offenen Schweizer Fahrplan.`,
+    noHome: "Für die Suche fehlt dein Heim-Standort.",
+    noHomeLink: "Im Profil hinterlegen",
+    empty:
+      "Keine Verbindung gefunden – der Fahrplan deckt die Schweiz samt Grenzverkehr ab.",
+    durationLine: (min: number) =>
+      min >= 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min} min`,
+    transfersLine: (n: number) =>
+      n === 0 ? "direkt" : n === 1 ? "1× umsteigen" : `${n}× umsteigen`,
+    source: "Quelle: transport.opendata.ch – ohne Gewähr.",
+  },
+  poi: {
+    radiusLabel: "Umkreis:",
+    radiusGroupAria: "Suchradius wählen",
+    loading: "Suche läuft …",
+    loadFailed: "Die Suche hat nicht geklappt. Später nochmals versuchen.",
+    navButton: "Route",
+    navAria: (title: string) => `Route zu ${title}`,
+    source: "Quelle: OpenStreetMap – Vollständigkeit ohne Gewähr.",
+    beaches: {
+      title: "Strände in der Nähe",
+      subtitle:
+        "Naturstrände und Strandbäder aus OpenStreetMap – wo es heute ans Wasser geht.",
+      unnamed: "Strand",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist kein Strand eingetragen.`,
+    },
+    water: {
+      title: "Trinkwasser in der Nähe",
+      subtitle:
+        "Brunnen und Trinkwasserhähne zum Auffüllen der Flasche – aus OpenStreetMap.",
+      unnamed: "Brunnen",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist keine Trinkwasser-Stelle eingetragen.`,
+    },
+    chargers: {
+      title: "Ladesäulen in der Nähe",
+      subtitle:
+        "Ladepunkte für E-Autos aus OpenStreetMap – Betreiber und Plätze, soweit eingetragen.",
+      unnamed: "Ladesäule",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist keine Ladesäule eingetragen.`,
+    },
+    defis: {
+      title: "Defibrillatoren in der Nähe",
+      subtitle:
+        "Öffentliche Defis aus OpenStreetMap – der Standort-Hinweis sagt, wo das Gerät hängt. Im Notfall zuerst 144 anrufen.",
+      unnamed: "Defibrillator",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist kein Defibrillator eingetragen.`,
+    },
   },
   winter: {
     title: "Frost & Schnee",
@@ -5210,7 +5332,7 @@ export const de = {
     subtitleAtPlace: (place: string) =>
       `Wie dunkel ist der Himmel bei ${place}?`,
     outsideCoverage:
-      "Für diesen Ort liegen keine Lichtquellen-Daten vor – der Datensatz deckt die Schweiz und das grenznahe Ausland ab. Eine Einstufung wäre hier geraten, deshalb zeigt CampMesser lieber keine.",
+      "Für diesen Ort liegen keine Lichtquellen-Daten vor – der Datensatz deckt die Schweiz und das grenznahe Ausland ab. Eine Einstufung wäre hier geraten, deshalb zeigt ReiseKompass lieber keine.",
     scaleAria: (bortle: number) =>
       `Bortle-Skala von 1 (sehr dunkel) bis 9 (Innenstadt), geschätzte Stufe ${bortle}`,
     scaleDark: "dunkel",
@@ -5218,7 +5340,7 @@ export const de = {
     classLine: (bortle: number, label: string) => `Bortle ${bortle} · ${label}`,
     locating: "Standort wird bestimmt …",
     noLocation:
-      "Für die Einstufung braucht CampMesser deinen Standort – gib die Ortung frei oder speichere einen Zeltplatz.",
+      "Für die Einstufung braucht ReiseKompass deinen Standort – gib die Ortung frei oder speichere einen Zeltplatz.",
     tonightTitle: "Heute Nacht",
     tonightLoading: "Bewölkung wird geladen …",
     tonightWorthIt:
@@ -5237,7 +5359,7 @@ export const de = {
     nearestTitle: "Nächste Lichtquellen:",
     nearestItem: (name: string, distance: string) => `${name} ${distance}`,
     estimateNote:
-      "Schätzung, keine Messung: Eine frei abrufbare Messung der Himmelshelligkeit gibt es nicht. CampMesser rechnet die Einstufung aus der Distanz zu den grössten Städten und Agglomerationen. Berge, die eine Lichtglocke abschirmen, Flutlicht gleich nebenan oder feuchte Luft kennt die Formel nicht – vor Ort kann es dunkler oder heller sein.",
+      "Schätzung, keine Messung: Eine frei abrufbare Messung der Himmelshelligkeit gibt es nicht. ReiseKompass rechnet die Einstufung aus der Distanz zu den grössten Städten und Agglomerationen. Berge, die eine Lichtglocke abschirmen, Flutlicht gleich nebenan oder feuchte Luft kennt die Formel nicht – vor Ort kann es dunkler oder heller sein.",
   },
 
   /**
@@ -5375,8 +5497,12 @@ export const de = {
       nameLabel: "Name",
       namePlaceholder: "z. B. Grosis Älplermagronen",
       importButton: "Aus Text übernehmen",
+      importUrlLabel: "Aus Web-Link übernehmen",
+      importUrlButton: "Holen",
+      importUrlFailed:
+        "Auf dieser Seite steht kein lesbares Rezept – kopiere den Text und nutze das Feld darunter.",
       importHint:
-        "Rezept-Text einfügen (kopiert von einer Website oder aus einer Nachricht). CampMesser rät Name, Zutaten und Schritte – alles bleibt vor dem Speichern korrigierbar.",
+        "Rezept-Text einfügen (kopiert von einer Website oder aus einer Nachricht). ReiseKompass rät Name, Zutaten und Schritte – alles bleibt vor dem Speichern korrigierbar.",
       importPlaceholder:
         "Älplermagronen\n\nZutaten:\n250 g Magronen\n…\n\nZubereitung:\n1. …",
       importApply: "Felder füllen",
@@ -5776,18 +5902,18 @@ export const de = {
   },
   shoppingPrint: {
     docTitle: "Einkaufsliste zum Ausdrucken",
-    appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    appTitle: "ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
     printButton: "Drucken / Als PDF sichern",
     printBrowserHint:
       "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
-    headerKicker: "CampMesser · Einkaufsliste",
+    headerKicker: "ReiseKompass · Einkaufsliste",
     title: "Einkaufsliste",
     meta: (items: number, categories: number) =>
       `${items} ${items === 1 ? "offener Eintrag" : "offene Einträge"} · ${categories} ${categories === 1 ? "Kategorie" : "Kategorien"}`,
     printedOn: (date: string) => `Stand: ${date}`,
     emptyList: "Keine offenen Einträge – alles eingekauft.",
     footer:
-      "Guten Einkauf! · CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+      "Guten Einkauf! · ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
   },
   menuPlan: {
     title: "Menüplan",
@@ -5880,16 +6006,16 @@ export const de = {
   menuPlanPrint: {
     docTitle: (name: string) => `${name} – Menüplan zum Ausdrucken`,
     docTitleFallback: "Menüplan",
-    appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    appTitle: "ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
     notFound: "Dieser Aufenthalt wurde nicht gefunden.",
     printButton: "Drucken / Als PDF sichern",
     printBrowserHint:
       "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
-    headerKicker: "CampMesser · Menüplan",
+    headerKicker: "ReiseKompass · Menüplan",
     printedOn: (date: string) => `Stand: ${date}`,
     dayHeader: "Tag",
     footer:
-      "En Guete! · CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+      "En Guete! · ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
   },
   family: {
     title: "Familien-Modus",
@@ -6149,7 +6275,7 @@ export const de = {
     subtitle:
       "Der Fortschrittsbalken für den Rücksitz: Wie viel der Strecke zum Zeltplatz habt ihr schon geschafft?",
     loginHint:
-      "Melde dich an, damit CampMesser deine gespeicherten Plätze als Ziel anbieten kann.",
+      "Melde dich an, damit ReiseKompass deine gespeicherten Plätze als Ziel anbieten kann.",
     noSpots:
       "Noch keine Plätze gespeichert – leg zuerst einen Zeltplatz an, dann kannst du ihn als Ziel wählen.",
     suggestedFromTrip:
@@ -6159,7 +6285,7 @@ export const de = {
     targetPlaceholder: "Ziel wählen",
     start: "Losfahren",
     startNote:
-      "Beim Tippen wird dein aktueller Standort als Startpunkt gesetzt. Danach misst CampMesser einmal pro Minute grob nach – das schont den Akku.",
+      "Beim Tippen wird dein aktueller Standort als Startpunkt gesetzt. Danach misst ReiseKompass einmal pro Minute grob nach – das schont den Akku.",
     locationFailed:
       "Standort konnte nicht ermittelt werden – ohne Startpunkt geht es leider nicht.",
     straightLineBadge: "Luftlinie",
@@ -6185,17 +6311,17 @@ export const de = {
       "Der Standort ist gesperrt – erlaube ihn in den Browser-Einstellungen, sonst steht der Balken still.",
     geoUnsupported: "Dieser Browser kennt keine Standortbestimmung.",
     geoFailed:
-      "Der Standort war gerade nicht zu ermitteln – CampMesser versucht es in einer Minute wieder.",
+      "Der Standort war gerade nicht zu ermitteln – ReiseKompass versucht es in einer Minute wieder.",
   },
   huntPrint: {
     docTitle: (title: string) => `${title} – Schnitzeljagd zum Ausdrucken`,
     docTitleFallback: "Schnitzeljagd",
-    appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    appTitle: "ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
     notFound: "Diese Schnitzeljagd wurde nicht gefunden.",
     printButton: "Drucken / Als PDF sichern",
     printBrowserHint:
       "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
-    headerKicker: "CampMesser · Schnitzeljagd",
+    headerKicker: "ReiseKompass · Schnitzeljagd",
     meta: (age: string, minutes: number, stations: number) =>
       `${age} · ca. ${minutes} Minuten · ${stations} ${stations === 1 ? "Station" : "Stationen"}`,
     missionTitle: "Die Mission",
@@ -6209,19 +6335,19 @@ export const de = {
       `Tragt die gesammelten Buchstaben der Reihe nach ein (${n} Buchstaben):`,
     finaleTitle: "Das Finale",
     footer:
-      "Viel Spass beim Entdecken! · CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+      "Viel Spass beim Entdecken! · ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
   },
   badgeCertificate: {
     docTitle: (name: string) => `Urkunde für ${name}`,
     docTitleFallback: "Urkunde",
-    appTitle: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    appTitle: "ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
     loginFeature: "die Abzeichen-Urkunde",
     notFound: "Dieses Kind wurde nicht gefunden.",
     galleryLink: "Urkunde drucken",
     printButton: "Urkunde drucken",
     printBrowserHint:
       "In der installierten App öffnet der Knopf die Ansicht im Browser – dort über das Menü drucken oder als PDF sichern.",
-    kicker: "CampMesser · Familien-Modus",
+    kicker: "ReiseKompass · Familien-Modus",
     heading: "Urkunde",
     awardedTo: "verliehen an",
     badgesIntro: (n: number) =>
@@ -6232,7 +6358,7 @@ export const de = {
     noBadges:
       "Noch kein Abzeichen verdient – spiele eine Schnitzeljagd oder ein Quiz, dann füllt sich die Urkunde.",
     issuedOn: (date: string) => `Ausgestellt am ${date}`,
-    footer: "CampMesser – Das Schweizer Taschenmesser fürs Zelt-Camping",
+    footer: "ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
   },
   notFound: {
     heading: "Seite nicht gefunden",
@@ -6270,7 +6396,7 @@ export const de = {
     backToActions: "Zurück zu den Aktionen",
   },
   install: {
-    title: "CampMesser installieren",
+    title: "ReiseKompass installieren",
     description:
       "Als App auf deinem Gerät – startet schneller und funktioniert offline.",
     installButton: "Installieren",
@@ -6282,7 +6408,7 @@ export const de = {
   update: {
     title: "Neue Version verfügbar",
     description:
-      "Eine aktualisierte Version von CampMesser ist bereit. Beim Aktualisieren lädt die Seite einmal neu.",
+      "Eine aktualisierte Version von ReiseKompass ist bereit. Beim Aktualisieren lädt die Seite einmal neu.",
     reloadButton: "Aktualisieren",
     dismiss: "Update-Hinweis schliessen",
   },
@@ -6299,7 +6425,7 @@ export const de = {
     loginFeature: "das Übernehmen geteilter Fotos",
     emptyTitle: "Keine geteilten Fotos gefunden",
     emptyText:
-      "Öffne diese Seite über die Teilen-Funktion deines Geräts: Foto wählen → Teilen → CampMesser. Der Eintrag im Teilen-Menü erscheint, nachdem die App (neu) installiert oder aktualisiert wurde.",
+      "Öffne diese Seite über die Teilen-Funktion deines Geräts: Foto wählen → Teilen → ReiseKompass. Der Eintrag im Teilen-Menü erscheint, nachdem die App (neu) installiert oder aktualisiert wurde.",
     photosCount: (n: number) =>
       n === 1 ? "1 Foto bereit" : `${n} Fotos bereit`,
     photoAlt: (n: number) => `Geteiltes Foto ${n}`,
@@ -6428,6 +6554,12 @@ export const de = {
       "Anmeldungen von vor dieser Übersicht erscheinen erst nach der nächsten Anmeldung des jeweiligen Geräts.",
   },
   fuelLog: {
+    vehicleLabel: "Fahrzeug",
+    vehicleNone: "Ohne Fahrzeug",
+    vehicleAll: "Alle Fahrzeuge",
+    chartTitle: "Verbrauchs-Verlauf",
+    chartHint:
+      "Verbrauch je Abschnitt zwischen zwei Füllungen, nach Kilometerstand – nur plausible Abschnitte.",
     csvButton: "Als CSV exportieren",
     csvHeaders: [
       "Datum",
@@ -6435,6 +6567,7 @@ export const de = {
       "Liter",
       "Betrag CHF",
       "Verbrauch l/100 km",
+      "Fahrzeug",
     ],
     title: "Tankbuch",
     subtitle: "Tankfüllungen mit Kilometerstand – daraus der echte Verbrauch.",
@@ -6463,6 +6596,17 @@ export const de = {
     deleteAria: (km: number) => `Tankfüllung bei ${km} km löschen`,
   },
   stats: {
+    countriesTitle: "Besuchte Länder",
+    countriesUnassigned: (n: number) =>
+      n === 1
+        ? "1 Reise ohne erkennbares Land (Ort nennt keins)."
+        : `${n} Reisen ohne erkennbares Land (Ort nennt keins).`,
+    inventoryValueTitle: "Inventar-Wert",
+    inventoryLink: "Zum Inventar",
+    inventoryValueHint: (n: number) =>
+      n === 1
+        ? "Untergrenze – 1 Gegenstand ohne erfassten Preis."
+        : `Untergrenze – ${n} Gegenstände ohne erfassten Preis.`,
     expensesTitle: "Ausgaben über alle Reisen",
     expensesLink: "Zu den Reisen",
     expensesTotal: "Gesamt",
@@ -6558,7 +6702,7 @@ export const de = {
     loadFailed:
       "Der Fahrplan konnte gerade nicht geladen werden. Versuch es in einem Moment nochmals.",
     emptyStations:
-      "Hier findet der Schweizer Fahrplan keine Haltestelle. Er deckt die Schweiz und den Grenzverkehr ab – für einen Platz weiter im Ausland weiss CampMesser an dieser Stelle nichts.",
+      "Hier findet der Schweizer Fahrplan keine Haltestelle. Er deckt die Schweiz und den Grenzverkehr ab – für einen Platz weiter im Ausland weiss ReiseKompass an dieser Stelle nichts.",
     emptyBoard:
       "Für die nächste Zeit ist ab dieser Haltestelle keine Abfahrt eingetragen.",
     kind: {

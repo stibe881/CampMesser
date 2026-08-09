@@ -90,6 +90,17 @@ describe("searchKnowledge", () => {
     expect(recipe[0]?.module).toBe("recipes");
   });
 
+  it("findet Sprachhilfe-Sätze – auch übers fremde Wort (#513)", () => {
+    // «Stromanschluss» steht im deutschen Satz der Sprachhilfe
+    const de = searchKnowledge("stromanschluss");
+    expect(
+      de.some(r => r.module === "phrases" && r.path === "/sprachhilfe")
+    ).toBe(true);
+    // «grazie» steht nur in der italienischen Fassung – gefunden wird es trotzdem
+    const it = searchKnowledge("grazie");
+    expect(it.some(r => r.module === "phrases")).toBe(true);
+  });
+
   it("findet Natur-Einträge über den Inhalt", () => {
     const results = searchKnowledge("fuchs");
     expect(results.some(r => r.module === "nature")).toBe(true);

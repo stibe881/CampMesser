@@ -66,7 +66,7 @@ export default function DashboardLayout({
             </h1>
             <p className="text-sm text-muted-foreground text-center max-w-sm">
               Dieser Bereich erfordert eine Anmeldung mit deinem
-              CampMesser-Konto.
+              ReiseKompass-Konto.
             </p>
           </div>
           <Button

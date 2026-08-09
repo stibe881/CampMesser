@@ -62,12 +62,12 @@ describe("Passwort-Reset-Tokens", () => {
 });
 
 describe("Reset-Mail", () => {
-  const url = "https://campmesser.ch/anmelden?reset=deadbeef";
+  const url = "https://meinreisekompass.ch/anmelden?reset=deadbeef";
 
-  it("enthält in allen vier Sprachen den Link und einen Betreff mit CampMesser", () => {
+  it("enthält in allen vier Sprachen den Link und einen Betreff mit ReiseKompass", () => {
     for (const lang of LANGUAGES) {
       const mail = buildPasswordResetMail(url, lang);
-      expect(mail.subject).toContain("CampMesser");
+      expect(mail.subject).toContain("ReiseKompass");
       expect(mail.text).toContain(url);
       expect(mail.text.length).toBeGreaterThan(50);
     }

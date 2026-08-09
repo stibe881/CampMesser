@@ -8,7 +8,7 @@
  *
  * ALLE WEGE, STRECKEN UND LINIEN BLEIBEN BEI OSM/OSRM. Das ist nicht nur
  * Geschmack: Die Nutzungsbedingungen von Google untersagen es, ihre Inhalte
- * zusammen mit einer fremden Karte zu zeigen. CampMesser zeichnet auf
+ * zusammen mit einer fremden Karte zu zeigen. ReiseKompass zeichnet auf
  * Leaflet mit OpenStreetMap-Kacheln – eine von Google berechnete Linie
  * gehörte dort nicht hin. Eine Zahl im Text ist etwas anderes als eine
  * Geometrie auf einer fremden Karte.

@@ -17,6 +17,7 @@ export type SearchCategory =
   | "nature"
   | "clouds"
   | "care"
+  | "phrases"
   | "own";
 
 /** Ein indexierter Eintrag: Anzeige-Felder plus normalisierter Suchtext. */

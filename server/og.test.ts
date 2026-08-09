@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { escapeHtml, injectOgTags, renderOgTags } from "./_core/og";
 
 const META = {
-  title: "Sommerferien – CampMesser",
+  title: "Sommerferien – ReiseKompass",
   description:
     "Geteilte Packliste mit 12 Einträgen – zum Mitpacken und Abhaken.",
-  url: "https://campmesser.ch/liste/abc12345",
-  image: "https://campmesser.ch/icons/icon-512.png",
+  url: "https://meinreisekompass.ch/liste/abc12345",
+  image: "https://meinreisekompass.ch/icons/icon-512.png",
 };
 
 describe("escapeHtml", () => {
@@ -27,14 +27,14 @@ describe("renderOgTags", () => {
   it("rendert alle OG- und Twitter-Tags", () => {
     const tags = renderOgTags(META);
     expect(tags).toContain(
-      `<meta property="og:title" content="Sommerferien – CampMesser" />`
+      `<meta property="og:title" content="Sommerferien – ReiseKompass" />`
     );
     expect(tags).toContain(`<meta property="og:type" content="website" />`);
     expect(tags).toContain(
-      `<meta property="og:url" content="https://campmesser.ch/liste/abc12345" />`
+      `<meta property="og:url" content="https://meinreisekompass.ch/liste/abc12345" />`
     );
     expect(tags).toContain(
-      `<meta property="og:image" content="https://campmesser.ch/icons/icon-512.png" />`
+      `<meta property="og:image" content="https://meinreisekompass.ch/icons/icon-512.png" />`
     );
     expect(tags).toContain(`<meta name="twitter:card" content="summary" />`);
   });
@@ -42,7 +42,7 @@ describe("renderOgTags", () => {
   it("escapet Namen mit HTML-Sonderzeichen (XSS)", () => {
     const tags = renderOgTags({
       ...META,
-      title: `"><script>alert(1)</script> – CampMesser`,
+      title: `"><script>alert(1)</script> – ReiseKompass`,
     });
     expect(tags).not.toContain("<script>");
     expect(tags).toContain("&quot;&gt;&lt;script&gt;");
@@ -50,7 +50,7 @@ describe("renderOgTags", () => {
 });
 
 describe("injectOgTags", () => {
-  const html = `<!doctype html><html><head><title>CampMesser</title></head><body><div id="root"></div></body></html>`;
+  const html = `<!doctype html><html><head><title>ReiseKompass</title></head><body><div id="root"></div></body></html>`;
 
   it("fügt die Tags vor </head> ein", () => {
     const result = injectOgTags(html, META);
@@ -60,7 +60,7 @@ describe("injectOgTags", () => {
     expect(ogTitle).toBeLessThan(headEnd);
     // Rest des Dokuments bleibt unverändert
     expect(result).toContain(`<div id="root"></div>`);
-    expect(result).toContain("<title>CampMesser</title>");
+    expect(result).toContain("<title>ReiseKompass</title>");
   });
 
   it("lässt HTML ohne </head> unverändert", () => {
