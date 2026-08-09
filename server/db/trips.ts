@@ -17,6 +17,7 @@ import {
   campSpots,
   desc,
   eq,
+  getTableColumns,
   getDb,
   inArray,
   isShareExpired,
@@ -42,11 +43,18 @@ import {
 } from "./_shared";
 
 // ── Reise-Tagebuch ──
+/**
+ * Eigene Reisen, flach plus `spotName` des verknüpften Zeltplatzes. Der
+ * Name muss aus der Datenbank mitkommen: Ohne ihn zeigte z. B. der
+ * Kinder-Reisepass «Ohne Platzname», obwohl die Reise einen Platz hatte –
+ * der Client kennt nur die spotId, nicht den Namen.
+ */
 export async function getTripLogs(userId: number) {
   const db = requireDb(await getDb());
   return db
-    .select()
+    .select({ ...getTableColumns(tripLogs), spotName: campSpots.name })
     .from(tripLogs)
+    .leftJoin(campSpots, eq(campSpots.id, tripLogs.spotId))
     .where(eq(tripLogs.userId, userId))
     .orderBy(desc(tripLogs.startDate), desc(tripLogs.id));
 }

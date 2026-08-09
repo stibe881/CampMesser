@@ -13,7 +13,16 @@
  * Der Inhalt ist unverändert übernommen; die relativen Pfade sind eine
  * Ebene tiefer gerückt.
  */
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  getTableColumns,
+  inArray,
+  isNull,
+  sql,
+} from "drizzle-orm";
 import { isShareExpired } from "@shared/sharing";
 import { HISTORY_LIMIT } from "@shared/tripHistory";
 import { drizzle } from "drizzle-orm/mysql2";
@@ -206,6 +215,7 @@ export {
   gearTasks,
   hikeTracks,
   homeLocations,
+  getTableColumns,
   inArray,
   inventoryItems,
   isNull,
