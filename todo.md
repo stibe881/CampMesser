@@ -7,7 +7,7 @@
 - [ ] #538 Wetterfenster-Finder (bestes Wochenende)
 - [ ] #539 Feiertage des Reiselands
 - [ ] #540 Beleg-Foto pro Reisekassen-Ausgabe
-- [ ] #541 Ausgabe aus der Heute-Ansicht erfassen
+- [x] #541 Ausgabe aus der Heute-Ansicht erfassen (QuickExpense-Knopf in der Reise-Kopfzeile: Betrag mit CHF/EUR, Kategorie-Chips, optionale Notiz; heutiger Tag, eigenes Konto als Zahler)
 - [x] #542 GRÖSSTENTEILS EXISTIERTE BEREITS: Die Personen-Tabs zeigen seit #127 genau einen Bereich (= Filter) und tragen den «5/8»-Badge. Neu ist nur der Start im EIGENEN Bereich bei Listen gemeinsamer Reisen – jeder sieht zuerst, was er selbst packen muss
 - [x] #543 Pack-/Einkaufsliste als Text kopieren (ClipboardCopy-Knopf, gruppiert wie die Anzeige, Häkchen als ✓)
 - [x] #544 Abhakbare Checkboxen in Notizen («- [ ] Text» wird antippbar; parseNoteLines/toggleNoteCheckbox in shared/notes.ts, 4 Tests; Hinweis unterm Textfeld)

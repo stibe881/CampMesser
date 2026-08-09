@@ -76,6 +76,7 @@ import { useState } from "react";
 import { useTodayIso } from "@/lib/useTodayIso";
 import AvalancheDanger from "@/components/AvalancheDanger";
 import CampfireLight from "@/components/CampfireLight";
+import QuickExpense from "@/components/trips/QuickExpense";
 import LazySection from "@/components/LazySection";
 import BathingWaterCard from "@/components/spots/BathingWaterCard";
 import NearbyPoints from "@/components/NearbyPoints";
@@ -425,6 +426,8 @@ export default function TodayPage() {
                   {td.shopping}
                 </Link>
               </Button>
+              {/* Ausgabe erfassen (#541): der schnelle Griff an die Kasse */}
+              <QuickExpense tripId={trip.id} />
               {/* Schnellzugriffe der Reise-Art (#460): Wandern zeigt die
                   Tour-Aufzeichnung, Städtereisen die Ausweise – zusätzlich
                   zu den drei Standard-Knöpfen, nie an deren Stelle. */}
