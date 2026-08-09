@@ -46,6 +46,7 @@ describe("Zusammenzählen", () => {
       label: "Regenhose",
       unusedTrips: 1,
       missingTrips: 1,
+      category: null,
     });
   });
 
@@ -119,12 +120,23 @@ describe("Nicht Gebrauchtes", () => {
 });
 
 describe("Gefehltes", () => {
+  it("reicht die Kategorie an den Vorschlag weiter", () => {
+    const summary = summarizeFeedback([
+      { tripId: 1, kind: "missing", name: "Wäscheklammern", category: null },
+      { tripId: 2, kind: "missing", name: "Wäscheklammern", category: "Küche" },
+    ]);
+    const suggestions = missingSuggestions([], summary);
+    expect(suggestions).toEqual([
+      { name: "Wäscheklammern", missingTrips: 2, category: "Küche" },
+    ]);
+  });
+
   it("reicht EINMAL – Vergessen ist teurer als ein zweiter Blick", () => {
     const summary = summarizeFeedback(
       rows({ tripId: 1, kind: "missing", name: "Wäscheklammern" })
     );
     expect(missingSuggestions([{ name: "Zelt" }], summary)).toEqual([
-      { name: "Wäscheklammern", missingTrips: 1 },
+      { name: "Wäscheklammern", missingTrips: 1, category: null },
     ]);
   });
 

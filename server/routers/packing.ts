@@ -758,7 +758,16 @@ export const packingRouters = {
           z.object({
             tripId: z.number().int().positive(),
             unused: z.array(z.string()).max(200),
-            missing: z.array(z.string()).max(MAX_MISSING_PER_TRIP),
+            // Kategorie wie auf der Packliste – der spätere Vorschlag
+            // legt den Gegenstand damit gleich in die richtige Gruppe.
+            missing: z
+              .array(
+                z.object({
+                  name: z.string(),
+                  category: z.string().max(80).nullish(),
+                })
+              )
+              .max(MAX_MISSING_PER_TRIP),
           })
         )
         .mutation(async ({ ctx, input }) => {
@@ -770,8 +779,16 @@ export const packingRouters = {
             });
           }
           const entries = [
-            ...input.unused.map(name => ({ kind: "unused" as const, name })),
-            ...input.missing.map(name => ({ kind: "missing" as const, name })),
+            ...input.unused.map(name => ({
+              kind: "unused" as const,
+              name,
+              category: null as string | null,
+            })),
+            ...input.missing.map(entry => ({
+              kind: "missing" as const,
+              name: entry.name,
+              category: entry.category?.trim().slice(0, 80) || null,
+            })),
           ]
             .map(entry => ({ ...entry, name: cleanFeedbackName(entry.name) }))
             .filter(entry => entry.name.length > 0);

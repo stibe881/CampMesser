@@ -4946,6 +4946,8 @@ export const fr: Translation = {
     saved: "Croquis enregistré.",
   },
   tripReview: {
+    noCategory: "Sans catégorie",
+    missingCategoryAria: "Catégorie de l’objet manquant",
     title: "Bilan",
     toggleAria: (trip: string) => `Ouvrir le bilan de ${trip}`,
     intro:

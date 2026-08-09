@@ -344,6 +344,7 @@ export async function getPackFeedback(userId: number) {
       tripId: packFeedback.tripId,
       kind: packFeedback.kind,
       name: packFeedback.name,
+      category: packFeedback.category,
     })
     .from(packFeedback)
     .where(eq(packFeedback.userId, userId))
@@ -360,7 +361,11 @@ export async function getPackFeedback(userId: number) {
 export async function savePackFeedback(
   userId: number,
   tripId: number,
-  entries: { kind: "unused" | "missing"; name: string }[]
+  entries: {
+    kind: "unused" | "missing";
+    name: string;
+    category?: string | null;
+  }[]
 ) {
   const db = requireDb(await getDb());
   await db

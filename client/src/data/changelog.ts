@@ -27,6 +27,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-09",
     entries: [
       l4(
+        "Der Rückblick nach der Reise ist jetzt nach Kategorien gegliedert – wie die Packliste selbst. Und was gefehlt hat, bekommt beim Erfassen gleich seine Kategorie: Der Vorschlag auf der Packliste legt es später in die richtige Gruppe statt in «Allgemein».",
+        "La rétrospective après le voyage est désormais structurée par catégories – comme la liste de bagages. Et ce qui a manqué reçoit sa catégorie dès la saisie : la suggestion sur la liste le placera ensuite dans le bon groupe au lieu de « Général ».",
+        "La retrospettiva dopo il viaggio ora è suddivisa per categorie – come la lista bagagli. E ciò che è mancato riceve subito la sua categoria: il suggerimento sulla lista lo metterà poi nel gruppo giusto invece che in «Generale».",
+        "The post-trip review is now grouped by categories – just like the packing list. And missing items get their category right when you note them: the suggestion on the list later places them in the right group instead of “General”."
+      ),
+      l4(
         "Unwetter-Push nur noch, wo du gerade bist: Gewarnt wird am Ort der laufenden Reise (verknüpfter Platz oder Ort mit Koordinaten) – nicht mehr das ganze Jahr für jeden gespeicherten Platz und den Heim-Standort. Das Daheim wird nur noch gewarnt, wenn eine laufende Reise in seiner Nähe liegt. In der App selbst siehst du die Warnungen deiner Plätze weiterhin jederzeit.",
         "Alerte intempéries seulement là où tu es : l’avertissement concerne le lieu du voyage en cours (emplacement lié ou lieu avec coordonnées) – plus toute l’année pour chaque emplacement enregistré et le domicile. Le domicile n’est averti que si un voyage en cours se trouve à proximité. Dans l’app, tu vois toujours les alertes de tes emplacements à tout moment.",
         "Avviso maltempo solo dove sei: l’avviso riguarda il luogo del viaggio in corso (piazzola collegata o luogo con coordinate) – non più tutto l’anno per ogni piazzola salvata e per casa. Casa viene avvisata solo se un viaggio in corso è nelle vicinanze. Nell’app vedi comunque sempre gli avvisi delle tue piazzole.",

@@ -2105,6 +2105,13 @@ export const packFeedback = mysqlTable(
     /** «unused» = war nicht nötig, «missing» = hat gefehlt */
     kind: mysqlEnum("kind", ["unused", "missing"]).notNull(),
     name: varchar("name", { length: 160 }).notNull(),
+    /**
+     * Kategorie wie auf der Packliste – bei «missing» aus der Auswahl im
+     * Rückblick, damit der spätere Vorschlag den Gegenstand gleich in die
+     * richtige Kategorie legt statt stur nach «Allgemein». Leer bei alten
+     * Zeilen und ohne Angabe.
+     */
+    category: varchar("category", { length: 80 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [

@@ -4953,6 +4953,8 @@ export const de = {
     saved: "Skizze gespeichert.",
   },
   tripReview: {
+    noCategory: "Ohne Kategorie",
+    missingCategoryAria: "Kategorie für den fehlenden Gegenstand",
     title: "Rückblick",
     toggleAria: (trip: string) => `Rückblick zu ${trip} öffnen`,
     intro:

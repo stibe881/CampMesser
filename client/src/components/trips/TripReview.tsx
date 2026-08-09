@@ -16,12 +16,19 @@
  * ein Hinweis. Entschieden wird nie automatisch – die App streicht
  * nichts und fügt nichts ein.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, Plus, RotateCcw, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useT } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { cleanFeedbackName, MAX_MISSING_PER_TRIP } from "@shared/packFeedback";
@@ -41,8 +48,12 @@ export default function TripReview({
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
   const [unused, setUnused] = useState<Set<string>>(new Set());
-  const [missing, setMissing] = useState<string[]>([]);
+  const [missing, setMissing] = useState<
+    { name: string; category: string | null }[]
+  >([]);
   const [draft, setDraft] = useState("");
+  /** Kategorie fürs nächste fehlende Ding; "" = ohne Kategorie. */
+  const [draftCategory, setDraftCategory] = useState("");
 
   const itemsQuery = trpc.packing.items.useQuery(
     { listId: packListId ?? 0 },
@@ -69,13 +80,37 @@ export default function TripReview({
     if (!open || loaded || !feedbackQuery.data) return;
     const mine = feedbackQuery.data.filter(row => row.tripId === tripId);
     setUnused(new Set(mine.filter(r => r.kind === "unused").map(r => r.name)));
-    setMissing(mine.filter(r => r.kind === "missing").map(r => r.name));
+    setMissing(
+      mine
+        .filter(r => r.kind === "missing")
+        .map(r => ({ name: r.name, category: r.category ?? null }))
+    );
     setLoaded(true);
   }, [open, loaded, feedbackQuery.data, tripId]);
 
   // `packing.items` liefert Liste, Mitglieder UND Einträge – hier zählt
   // nur der letzte Teil.
   const items = itemsQuery.data?.items ?? [];
+  /**
+   * Nach Kategorien gruppiert, in der Reihenfolge ihres ersten
+   * Auftauchens – dieselbe Ordnung wie auf der Packliste selbst
+   * (Nutzerwunsch 09.08.2026: keine flache Liste mehr).
+   */
+  const grouped = useMemo(() => {
+    const map = new Map<string, typeof items>();
+    for (const item of items) {
+      const key = item.category?.trim() || "";
+      const list = map.get(key) ?? [];
+      list.push(item);
+      map.set(key, list);
+    }
+    return Array.from(map.entries());
+  }, [items]);
+  /** Kategorien der Liste – für die Auswahl beim fehlenden Ding. */
+  const categories = useMemo(
+    () => grouped.map(([category]) => category).filter(Boolean),
+    [grouped]
+  );
   const toggle = (name: string) =>
     setUnused(prev => {
       const next = new Set(prev);
@@ -87,7 +122,12 @@ export default function TripReview({
   const addMissing = () => {
     const clean = cleanFeedbackName(draft);
     if (!clean || missing.length >= MAX_MISSING_PER_TRIP) return;
-    if (!missing.includes(clean)) setMissing(prev => [...prev, clean]);
+    if (!missing.some(entry => entry.name === clean)) {
+      setMissing(prev => [
+        ...prev,
+        { name: clean, category: draftCategory || null },
+      ]);
+    }
     setDraft("");
   };
 
@@ -122,28 +162,38 @@ export default function TripReview({
           ) : items.length === 0 ? (
             <p className="mt-1 text-xs text-muted-foreground">{tr.emptyList}</p>
           ) : (
-            <ul className="mt-1.5 space-y-1">
-              {items.map(item => (
-                <li key={item.id} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`review-${item.id}`}
-                    checked={unused.has(item.name)}
-                    onCheckedChange={() => toggle(item.name)}
-                  />
-                  <label
-                    htmlFor={`review-${item.id}`}
-                    className="min-w-0 flex-1 truncate text-sm"
-                  >
-                    {item.name}
-                  </label>
-                </li>
+            <div className="mt-1.5 space-y-2.5">
+              {grouped.map(([category, groupItems]) => (
+                <div key={category || "__ohne__"}>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    {category || tr.noCategory}
+                  </p>
+                  <ul className="mt-1 space-y-1">
+                    {groupItems.map(item => (
+                      <li key={item.id} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`review-${item.id}`}
+                          checked={unused.has(item.name)}
+                          onCheckedChange={() => toggle(item.name)}
+                        />
+                        <label
+                          htmlFor={`review-${item.id}`}
+                          className="min-w-0 flex-1 truncate text-sm"
+                        >
+                          {item.name}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
 
           <p className="mt-4 text-sm font-medium">{tr.missingTitle}</p>
-          <div className="mt-1.5 flex gap-2">
+          <div className="mt-1.5 flex flex-wrap gap-2">
             <Input
+              className="min-w-0 flex-1 basis-40"
               value={draft}
               placeholder={tr.missingPlaceholder}
               aria-label={tr.missingTitle}
@@ -155,6 +205,32 @@ export default function TripReview({
                 }
               }}
             />
+            {/* Kategorie wie beim Eintragen auf der Packliste (#126) –
+                der Vorschlag landet später gleich in der richtigen
+                Gruppe statt in «Allgemein». */}
+            {categories.length > 0 && (
+              <Select
+                value={draftCategory || "__ohne__"}
+                onValueChange={value =>
+                  setDraftCategory(value === "__ohne__" ? "" : value)
+                }
+              >
+                <SelectTrigger
+                  className="w-36 shrink-0"
+                  aria-label={tr.missingCategoryAria}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__ohne__">{tr.noCategory}</SelectItem>
+                  {categories.map(category => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Button
               type="button"
               variant="outline"
@@ -168,17 +244,24 @@ export default function TripReview({
           </div>
           {missing.length > 0 && (
             <ul className="mt-2 flex flex-wrap gap-1.5">
-              {missing.map(name => (
-                <li key={name}>
+              {missing.map(entry => (
+                <li key={entry.name}>
                   <button
                     type="button"
                     className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs hover:bg-accent"
-                    aria-label={tr.missingRemove(name)}
+                    aria-label={tr.missingRemove(entry.name)}
                     onClick={() =>
-                      setMissing(prev => prev.filter(x => x !== name))
+                      setMissing(prev =>
+                        prev.filter(x => x.name !== entry.name)
+                      )
                     }
                   >
-                    {name}
+                    {entry.name}
+                    {entry.category && (
+                      <span className="text-muted-foreground">
+                        · {entry.category}
+                      </span>
+                    )}
                     <X className="h-3 w-3" aria-hidden="true" />
                   </button>
                 </li>
