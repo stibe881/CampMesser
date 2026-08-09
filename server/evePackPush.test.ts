@@ -151,3 +151,51 @@ describe("buildStageMoveAlert", () => {
     expect(alert?.title).toBe("Demain, direction Verona");
   });
 });
+
+/** Feiertags-Vorwarnung (#606): «Morgen ist Feiertag: …». */
+describe("buildHolidayEveAlert", () => {
+  const holidays = new Map([
+    ["IT", { date: TOMORROW, localName: "Ferragosto" }],
+    ["FR", null],
+  ]);
+
+  it("meldet den Feiertag von morgen im Reiseland", async () => {
+    const { buildHolidayEveAlert } = await import("./push");
+    const alert = buildHolidayEveAlert(
+      [{ id: 4, countryCode: "IT" }],
+      holidays,
+      TOMORROW
+    );
+    expect(alert?.title).toContain("Ferragosto");
+    expect(alert?.key).toBe(`holiday:4:${TOMORROW}`);
+    expect(alert?.url).toBe("/heute");
+  });
+
+  it("schweigt ohne Feiertag, ohne Land und in der Schweiz", async () => {
+    const { buildHolidayEveAlert } = await import("./push");
+    expect(
+      buildHolidayEveAlert([{ id: 4, countryCode: "FR" }], holidays, TOMORROW)
+    ).toBeNull();
+    expect(
+      buildHolidayEveAlert([{ id: 4, countryCode: null }], holidays, TOMORROW)
+    ).toBeNull();
+    // Daheim kennt man seine Feiertage – CH bleibt bewusst still
+    const chHolidays = new Map([
+      ["CH", { date: TOMORROW, localName: "Bundesfeier" }],
+    ]);
+    expect(
+      buildHolidayEveAlert([{ id: 4, countryCode: "CH" }], chHolidays, TOMORROW)
+    ).toBeNull();
+  });
+
+  it("übersetzt den Titel", async () => {
+    const { buildHolidayEveAlert } = await import("./push");
+    const alert = buildHolidayEveAlert(
+      [{ id: 4, countryCode: "IT" }],
+      holidays,
+      TOMORROW,
+      "it"
+    );
+    expect(alert?.title).toBe("Domani è festivo: Ferragosto");
+  });
+});

@@ -1539,6 +1539,15 @@ export const fr: Translation = {
     emergencyTitle: "Appel d'urgence",
     callAria: (number: string) => `Appeler le numéro d'urgence ${number}`,
     campingTitle: "Nuitées & camping",
+    vignetteExpenseButton: (price: string) =>
+      `Ajouter ${price} à la caisse de voyage`,
+    vignetteExpenseTitle: "Vignette dans la caisse de voyage",
+    vignetteExpenseHint: (what: string, price: string) =>
+      `Inscrit « ${what} » comme dépense de ${price}. Le prix indicatif reste modifiable dans la caisse de voyage.`,
+    vignetteExpenseTripLabel: "Choisir le voyage",
+    vignetteExpenseSave: "Inscrire",
+    vignetteExpenseSaved: "Inscrit dans la caisse de voyage",
+    vignetteExpenseNoTrips: "Pas encore de voyage – crées-en un d'abord.",
     updatedLine: (country: string, date: string) =>
       `${country} : état au ${date}. Valeurs en km/h ; sans garantie.`,
   },
@@ -4939,6 +4948,14 @@ export const fr: Translation = {
     source: "Source : transport.opendata.ch – sans garantie.",
   },
   poi: {
+    hospitals: {
+      title: "Hôpitaux à proximité",
+      subtitle:
+        "D'OpenStreetMap – « 24h » signifie : urgences renseignées. En cas d'urgence, appelle d'abord le 144 ou le 112.",
+      unnamed: "Hôpital",
+      empty: (radius: string) =>
+        `Aucun hôpital renseigné dans un rayon de ${radius}.`,
+    },
     pharmacies: {
       title: "Pharmacies à proximité",
       subtitle: "Depuis OpenStreetMap – horaires si renseignés, sans garantie.",

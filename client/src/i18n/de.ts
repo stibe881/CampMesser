@@ -1537,6 +1537,15 @@ export const de = {
     emergencyTitle: "Notruf",
     callAria: (number: string) => `Notruf ${number} anrufen`,
     campingTitle: "Übernachten & Campen",
+    vignetteExpenseButton: (price: string) =>
+      `${price} in die Reisekasse übernehmen`,
+    vignetteExpenseTitle: "Vignette in die Reisekasse",
+    vignetteExpenseHint: (what: string, price: string) =>
+      `Trägt «${what}» mit ${price} als Ausgabe ein. Der Richtpreis lässt sich in der Reisekasse jederzeit anpassen.`,
+    vignetteExpenseTripLabel: "Reise wählen",
+    vignetteExpenseSave: "Eintragen",
+    vignetteExpenseSaved: "In der Reisekasse eingetragen",
+    vignetteExpenseNoTrips: "Noch keine Reise vorhanden – lege zuerst eine an.",
     updatedLine: (country: string, date: string) =>
       `${country}: Stand ${date}. Angaben in km/h; ohne Gewähr.`,
   },
@@ -4940,6 +4949,14 @@ export const de = {
     source: "Quelle: transport.opendata.ch – ohne Gewähr.",
   },
   poi: {
+    hospitals: {
+      title: "Spitäler in der Nähe",
+      subtitle:
+        "Aus OpenStreetMap – «24h» heisst: Notaufnahme eingetragen. Im Notfall zuerst 144 bzw. 112 anrufen.",
+      unnamed: "Spital",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist kein Spital eingetragen.`,
+    },
     pharmacies: {
       title: "Apotheken in der Nähe",
       subtitle:

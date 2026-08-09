@@ -69,6 +69,8 @@ import {
   warningsForPoint,
 } from "@shared/meteoAlarm";
 import { getOfficialWarnings } from "./meteoAlarm";
+import { guessCountryCode } from "@shared/countryGuess";
+import { getHolidaysAbroad, type PublicHoliday } from "./holidaysAbroad";
 import {
   detectAlerts,
   nightCloudCover,
@@ -673,6 +675,73 @@ export function buildStageMoveAlert(
   return {
     ...text,
     key: `stagemove:${next.tripId}:${next.startDate}`,
+    url: "/heute",
+  };
+}
+
+/** Texte der Feiertags-Vorwarnung (#606) in vier Sprachen. */
+function holidayEveAlertText(holidayName: string, lang: Language) {
+  const texts: Record<Language, { title: string; body: string }> = {
+    de: {
+      title: `Morgen ist Feiertag: ${holidayName}`,
+      body: "Läden sind oft geschlossen – heute noch einkaufen.",
+    },
+    fr: {
+      title: `Demain, c'est férié : ${holidayName}`,
+      body: "Les magasins seront souvent fermés – fais les courses aujourd'hui.",
+    },
+    it: {
+      title: `Domani è festivo: ${holidayName}`,
+      body: "I negozi saranno spesso chiusi – fai la spesa oggi.",
+    },
+    en: {
+      title: `Public holiday tomorrow: ${holidayName}`,
+      body: "Shops are often closed – do your shopping today.",
+    },
+  };
+  return texts[lang] ?? texts.de;
+}
+
+/** Eine laufende Reise mit geratenem Reiseland (ISO-2, gross). */
+export interface TripForHoliday {
+  id: number;
+  countryCode: string | null;
+}
+
+/**
+ * Feiertags-Vorwarnung (#606): Ist MORGEN ein Feiertag im Reiseland einer
+ * laufenden Auslands-Reise, warnt der Abend-Push vor zu Läden und vollen
+ * Strassen – Quelle wie der Hinweis in Cockpit und Heute-Ansicht (#539,
+ * Nager.Date). Gleicher Kanal wie der Vorabend-Check; Pack-Check und
+ * Etappen-Hinweis haben Vorrang. Die Schweiz bleibt aussen vor – daheim
+ * kennt man seine Feiertage. Reine Funktion für Tests; bei mehreren
+ * Reisen gewinnt die kleinste Id.
+ */
+export function buildHolidayEveAlert(
+  trips: readonly TripForHoliday[],
+  holidayByCountry: ReadonlyMap<
+    string,
+    { date: string; localName: string } | null
+  >,
+  tomorrow: string,
+  lang: Language = "de"
+): EvePackAlert | null {
+  const hit = trips
+    .filter(
+      (trip): trip is TripForHoliday & { countryCode: string } =>
+        trip.countryCode !== null && trip.countryCode !== "CH"
+    )
+    .map(trip => ({
+      trip,
+      holiday: holidayByCountry.get(trip.countryCode) ?? null,
+    }))
+    .filter(x => x.holiday !== null && x.holiday.date === tomorrow)
+    .sort((a, b) => a.trip.id - b.trip.id)[0];
+  if (!hit || !hit.holiday) return null;
+  const text = holidayEveAlertText(hit.holiday.localName, lang);
+  return {
+    ...text,
+    key: `holiday:${hit.trip.id}:${hit.holiday.date}`,
     url: "/heute",
   };
 }
@@ -1601,6 +1670,56 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
           if (alert) evePackAlertByUser.set(mapKey, alert);
         }
       });
+
+      // Feiertags-Vorwarnung (#606): Morgen Feiertag im Reiseland? Land
+      // aus Titel/Ort/Platz/Etappen geraten (shared/countryGuess), Feier-
+      // tage aus derselben Quelle wie Cockpit und Heute-Ansicht (#539).
+      const tomorrowIso = shiftIsoDay(today, 1);
+      const countryByTrip = new Map<number, string | null>();
+      for (const trip of activeTrips) {
+        const stopNames = (stopsByTrip.get(trip.id) ?? [])
+          .map(stop => stop.name)
+          .join(" ");
+        countryByTrip.set(
+          trip.id,
+          guessCountryCode(
+            `${trip.title ?? ""} ${tripDisplayName(trip)} ${trip.location ?? ""} ${stopNames}`
+          )
+        );
+      }
+      const wantedCountries = new Set(
+        Array.from(countryByTrip.values()).filter(
+          (code): code is string => code !== null && code !== "CH"
+        )
+      );
+      const holidayByCountry = new Map<string, PublicHoliday | null>();
+      for (const code of Array.from(wantedCountries)) {
+        try {
+          const list = await getHolidaysAbroad(code, tomorrowIso, tomorrowIso);
+          holidayByCountry.set(code, list?.[0] ?? null);
+        } catch {
+          holidayByCountry.set(code, null); // Feiertagsdienst weg → kein Push
+        }
+      }
+      if (holidayByCountry.size > 0) {
+        activeByUser.forEach((tripIds, userId) => {
+          const own = Array.from(tripIds, id => ({
+            id,
+            countryCode: countryByTrip.get(id) ?? null,
+          }));
+          for (const lang of langsOf(userId)) {
+            const mapKey = alertFor(userId, lang);
+            if (evePackAlertByUser.has(mapKey)) continue;
+            const alert = buildHolidayEveAlert(
+              own,
+              holidayByCountry,
+              tomorrowIso,
+              lang
+            );
+            if (alert) evePackAlertByUser.set(mapKey, alert);
+          }
+        });
+      }
     }
   }
   /** Koordinaten einer Reise: aktuelle Etappe vor Platz vor Freitext-Ort. */

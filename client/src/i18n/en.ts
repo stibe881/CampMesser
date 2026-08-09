@@ -1487,6 +1487,14 @@ export const en: Translation = {
     emergencyTitle: "Emergency number",
     callAria: (number: string) => `Call emergency number ${number}`,
     campingTitle: "Overnight stays & camping",
+    vignetteExpenseButton: (price: string) => `Add ${price} to the travel fund`,
+    vignetteExpenseTitle: "Vignette into the travel fund",
+    vignetteExpenseHint: (what: string, price: string) =>
+      `Records "${what}" as an expense of ${price}. The guide price can be adjusted in the travel fund at any time.`,
+    vignetteExpenseTripLabel: "Choose trip",
+    vignetteExpenseSave: "Record",
+    vignetteExpenseSaved: "Recorded in the travel fund",
+    vignetteExpenseNoTrips: "No trip yet – create one first.",
     updatedLine: (country: string, date: string) =>
       `${country}: as of ${date}. Figures in km/h; no guarantee.`,
   },
@@ -4801,6 +4809,13 @@ export const en: Translation = {
     source: "Source: transport.opendata.ch – no guarantee.",
   },
   poi: {
+    hospitals: {
+      title: "Hospitals nearby",
+      subtitle:
+        'From OpenStreetMap – "24h" means an emergency department is recorded. In an emergency, call 144 or 112 first.',
+      unnamed: "Hospital",
+      empty: (radius: string) => `No hospital is recorded within ${radius}.`,
+    },
     pharmacies: {
       title: "Pharmacies nearby",
       subtitle:

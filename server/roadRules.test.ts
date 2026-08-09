@@ -4,6 +4,7 @@ import {
   guessCountryCode,
   roadRules,
 } from "../client/src/data/roadRules";
+import { COUNTRY_ALIASES } from "@shared/countryGuess";
 import { LANGUAGES, pick } from "@shared/i18n";
 
 describe("Länder-Datensatz", () => {
@@ -60,15 +61,27 @@ describe("Länder-Datensatz", () => {
   });
 
   it("hält die Hinweis-Wörter eindeutig und lang genug", () => {
+    // Die Aliasse liegen seit #606 in shared/countryGuess.ts (der
+    // Feiertags-Push rät das Land auf dem Server) – gleiche Regeln.
     const seen = new Set<string>();
-    for (const country of roadRules) {
-      expect(country.aliases.length).toBeGreaterThan(0);
-      for (const alias of country.aliases) {
+    for (const [code, aliases] of Object.entries(COUNTRY_ALIASES)) {
+      expect(aliases.length, code).toBeGreaterThan(0);
+      for (const alias of aliases) {
         expect(alias.length, alias).toBeGreaterThanOrEqual(4);
         expect(alias).toBe(alias.toLowerCase());
         expect(seen.has(alias), alias).toBe(false);
         seen.add(alias);
       }
+    }
+  });
+
+  it("kennt für jedes Land Aliasse – und keine verwaisten", () => {
+    const codes = new Set(roadRules.map(c => c.code));
+    for (const country of roadRules) {
+      expect(COUNTRY_ALIASES[country.code], country.code).toBeDefined();
+    }
+    for (const code of Object.keys(COUNTRY_ALIASES)) {
+      expect(codes.has(code), code).toBe(true);
     }
   });
 });

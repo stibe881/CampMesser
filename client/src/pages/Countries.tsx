@@ -15,6 +15,7 @@ import {
   Plug,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import VignetteExpenseButton from "@/components/VignetteExpenseButton";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   findCountryRules,
@@ -147,6 +148,13 @@ export default function CountriesPage() {
           <span className="font-medium">{t.roadRules.trailerTitle}: </span>
           {text(country.trailer)}
         </p>
+        {/* Vignetten-Richtpreis in die Reisekasse übernehmen (#604) */}
+        {country.vignette && (
+          <VignetteExpenseButton
+            vignette={country.vignette}
+            countryName={pick(country.name, lang)}
+          />
+        )}
       </RuleCard>
 
       <RuleCard
