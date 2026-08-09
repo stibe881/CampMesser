@@ -9,7 +9,7 @@ import { useI18n } from "@/i18n";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { customHuntDbId, customHuntToScavengerHunt } from "@/lib/customHunts";
-import { isStandaloneApp } from "@/lib/standalone";
+import { printNeedsBrowserTab } from "@/lib/standalone";
 
 /**
  * Druckfreundliche Ansicht einer Schnitzeljagd: Stationen, Rätsel und
@@ -20,7 +20,7 @@ import { isStandaloneApp } from "@/lib/standalone";
 
 export default function HuntPrintPage() {
   const { lang, t } = useI18n();
-  const standalone = isStandaloneApp();
+  const standalone = printNeedsBrowserTab();
   const params = useParams<{ id: string }>();
   const customId = customHuntDbId(params.id ?? "");
   const { isAuthenticated } = useAuth();

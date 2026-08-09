@@ -8,7 +8,7 @@ import LoginPrompt from "@/components/LoginPrompt";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
-import { isStandaloneApp } from "@/lib/standalone";
+import { printNeedsBrowserTab } from "@/lib/standalone";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { parsePersons } from "@shared/packPersons";
 import { sortPackCategoryGroups } from "@shared/packCategories";
@@ -21,7 +21,7 @@ import { sortPackCategoryGroups } from "@shared/packCategories";
  */
 export default function PackListPrintPage() {
   const { lang, t } = useI18n();
-  const standalone = isStandaloneApp();
+  const standalone = printNeedsBrowserTab();
   const params = useParams<{ id: string }>();
   const listId = Number(params.id);
   const { isAuthenticated, loading } = useAuth();

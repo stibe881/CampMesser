@@ -14,7 +14,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { fmtLong, fmtWeekdayDay } from "@/lib/dateFormat";
-import { isStandaloneApp } from "@/lib/standalone";
+import { printNeedsBrowserTab } from "@/lib/standalone";
 import { useTodayIso } from "@/lib/useTodayIso";
 import { choresForDay, rotateAssignments } from "@shared/chores";
 
@@ -30,7 +30,7 @@ function shiftIso(iso: string, days: number): string {
 export default function ChoresPrintPage() {
   const { lang, t } = useI18n();
   const cp = t.choresPrint;
-  const standalone = isStandaloneApp();
+  const standalone = printNeedsBrowserTab();
   const today = useTodayIso();
   const { isAuthenticated, loading } = useAuth();
 

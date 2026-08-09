@@ -326,6 +326,16 @@ export default function App() {
       if (data.type === "OPEN_DIRECTIONS") {
         await openMaps(data.appUrl, data.webUrl);
       }
+      if (data.type === "OPEN_EXTERNAL_URL") {
+        // Druckseiten (PrintButton): Der WebView kennt keinen Druckdialog,
+        // und same-origin-Links bleiben durch onShouldStartLoadWithRequest
+        // im WebView – nur wir können Safari wirklich öffnen. Aus Vorsicht
+        // nur die eigene Adresse; der WebView soll uns nirgendwohin
+        // schicken können.
+        if (typeof data.url === "string" && data.url.startsWith(CAMP_URL)) {
+          await Linking.openURL(data.url).catch(() => {});
+        }
+      }
       if (data.type === "SET_WIDGET_DATA" && data.payload) {
         // Als Zeichenkette ablegen und erst DANACH neu zeichnen lassen –
         // umgekehrt läse das Widget noch den alten Stand und zeigte ihn

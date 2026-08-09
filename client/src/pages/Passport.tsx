@@ -33,7 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
-import { isStandaloneApp } from "@/lib/standalone";
+import { printNeedsBrowserTab } from "@/lib/standalone";
 import PrintButton from "@/components/PrintButton";
 import { cn } from "@/lib/utils";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
@@ -370,7 +370,7 @@ export default function PassportPage() {
             variant="outline"
             className="mt-6 w-full print:hidden"
           />
-          {isStandaloneApp() && (
+          {printNeedsBrowserTab() && (
             <p className="mt-1.5 text-xs text-muted-foreground print:hidden">
               {t.packListPrint.printBrowserHint}
             </p>

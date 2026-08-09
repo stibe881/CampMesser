@@ -11,7 +11,7 @@ import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { isStandaloneApp } from "@/lib/standalone";
+import { printNeedsBrowserTab } from "@/lib/standalone";
 
 /**
  * Festliche, druckfreundliche Abzeichen-Urkunde eines Kindes: Name gross,
@@ -23,7 +23,7 @@ import { isStandaloneApp } from "@/lib/standalone";
 export default function BadgeCertificatePage() {
   const { lang, t } = useI18n();
   const tc = t.badgeCertificate;
-  const standalone = isStandaloneApp();
+  const standalone = printNeedsBrowserTab();
   const params = useParams<{ childId: string }>();
   const childId = Number(params.childId);
   const validId = Number.isInteger(childId) && childId > 0;

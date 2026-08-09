@@ -1,5 +1,9 @@
 # CampMesser – Projekt TODO
 
+## Nachbesserung «Pass drucken» (09.08.2026, vierter Anlauf)
+
+- [x] «Pass drucken funktioniert immer noch nicht» (Nutzermeldung, vierter Anlauf – Ursache: die NATIVE iOS-App war von allen bisherigen Anläufen NIE abgedeckt): Im Expo-WebView ist `isStandaloneApp()` false (kein display-mode: standalone, kein navigator.standalone) → der PrintButton lief in den Browser-Zweig und rief `window.print()`, das im WKWebView schlicht nichts tut; ein Ticket-Link hätte auch nicht geholfen, weil `onShouldStartLoadWithRequest` same-origin-Links IM WebView hält. Fix: (1) neuer Helfer `printNeedsBrowserTab()` in client/src/lib/standalone.ts (= Standalone ODER native App), alle 9 Druckseiten-Hinweise darauf umgestellt (BadgeCertificate, PackListPrint, Passport, SpotPrint, ChoresPrint, ShoppingPrint, HuntPrint, TripPrint, MenuPlanPrint); (2) neue Brücken-Nachricht `OPEN_EXTERNAL_URL` (nativeBridge.ts `openExternalUrl`, Handler in expo-app/App.js mit Guard `url.startsWith(CAMP_URL)` – der WebView darf Safari nur auf die eigene Adresse schicken) öffnet die ABSOLUTE Druck-Ticket-Adresse (`/api/print-login?ticket=…&next=…`) in Safari, wo die Session gesetzt und der Druckdialog funktioniert; (3) PrintButton mit drei ausdrücklichen Zweigen (Browser: window.print(); PWA: \_blank-Link; nativ: Brücke) + neuer UI-Test PrintButton.test.tsx, der ALLE drei Zweige prüft. EHRLICH: Der App.js-Teil wirkt erst mit einem neuen Expo-Build der iOS-App – bis dahin öffnet der Knopf in der ALTEN nativen App weiterhin nichts (die Web-Teile deployen sofort, schaden aber nicht)
+
 ## Zwanzig Vorschläge (09.08.2026, Runde 55)
 
 Nutzerwünsche dieser Runde (alle umgesetzt):
