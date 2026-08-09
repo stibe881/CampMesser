@@ -342,6 +342,14 @@ export const en: Translation = {
     themeLight: "Light",
     themeDark: "Dark",
     themeAuto: "Automatic (system)",
+    fontScaleTitle: "Font size",
+    fontScaleLabels: {
+      normal: "Normal",
+      large: "Large",
+      xlarge: "Extra large",
+    },
+    fontScaleHint:
+      "Applies only on this device – your tablet may differ from your phone.",
     nameTitle: "Change name",
     nameAria: "Name",
     namePlaceholder: "Your name",

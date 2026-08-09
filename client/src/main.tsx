@@ -3,6 +3,7 @@ import {
   restoreQueryCache,
   startQueryPersistence,
 } from "@/lib/queryPersistence";
+import { applyFontScale, getFontScale } from "@/lib/fontScale";
 import { COOKIE_NAME, UNAUTHED_ERR_MSG } from "@shared/const";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
@@ -34,6 +35,9 @@ import "./index.css";
 const queryClient = new QueryClient({
   defaultOptions: { queries: { gcTime: 7 * 24 * 60 * 60 * 1000 } },
 });
+
+// Schriftgrösse (#546) so früh wie möglich anwenden, damit nichts umspringt
+applyFontScale(getFontScale());
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;

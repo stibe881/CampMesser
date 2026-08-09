@@ -359,6 +359,14 @@ export const de = {
     themeLight: "Hell",
     themeDark: "Dunkel",
     themeAuto: "Automatisch (System)",
+    fontScaleTitle: "Schriftgrösse",
+    fontScaleLabels: {
+      normal: "Normal",
+      large: "Gross",
+      xlarge: "Sehr gross",
+    },
+    fontScaleHint:
+      "Gilt nur auf diesem Gerät – auf dem Tablet darf es anders sein als auf dem Handy.",
     nameTitle: "Name ändern",
     nameAria: "Name",
     namePlaceholder: "Dein Name",

@@ -12,7 +12,7 @@
 - [x] #543 Pack-/Einkaufsliste als Text kopieren (ClipboardCopy-Knopf, gruppiert wie die Anzeige, Häkchen als ✓)
 - [x] #544 Abhakbare Checkboxen in Notizen («- [ ] Text» wird antippbar; parseNoteLines/toggleNoteCheckbox in shared/notes.ts, 4 Tests; Hinweis unterm Textfeld)
 - [ ] #545 Eigene Sätze in der Sprachhilfe
-- [ ] #546 Schriftgrösse-Einstellung
+- [x] #546 Schriftgrösse-Einstellung (3 Stufen im Profil unter dem Design; Wurzel-Schriftgrösse 100/112.5/125 %, nur pro Gerät gespeichert – lib/fontScale.ts, angewendet beim App-Start)
 - [ ] #547 Notfall-Koordinaten (LV95) im SOS
 - [ ] #548 Regenwetter-Karte in Heute (Museen/Hallenbäder)
 - [ ] #549 Menüplan-Autofüllen kennt das Wetter

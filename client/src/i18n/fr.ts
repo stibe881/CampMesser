@@ -355,6 +355,14 @@ export const fr: Translation = {
     themeLight: "Clair",
     themeDark: "Sombre",
     themeAuto: "Automatique (système)",
+    fontScaleTitle: "Taille du texte",
+    fontScaleLabels: {
+      normal: "Normale",
+      large: "Grande",
+      xlarge: "Très grande",
+    },
+    fontScaleHint:
+      "Ne vaut que sur cet appareil – la tablette peut différer du téléphone.",
     nameTitle: "Changer le nom",
     nameAria: "Nom",
     namePlaceholder: "Ton nom",
