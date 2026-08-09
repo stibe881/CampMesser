@@ -474,13 +474,54 @@ export default function MenuPlanPage() {
         kind: BREAKFAST_RECIPE_IDS.has(r.id)
           ? ("breakfast" as const)
           : ("main" as const),
+        // Wetter-Weiche (#549): Was zwingend offenes Feuer braucht
+        fireOnly: r.method === "Offenes Feuer",
       }));
     const own = customRows.map(r => ({
       id: `${CUSTOM_PREFIX}${r.id}`,
       kind: "main" as const,
+      fireOnly: r.method === "Offenes Feuer",
     }));
     return [...builtIn, ...own];
   }, [customRows]);
+
+  /**
+   * Regentage der Reise aus der Prognose (#549) – nur beim Klick aufs
+   * Autofüllen geholt; ohne Koordinaten oder ohne Netz kommt eine leere
+   * Liste zurück und das Füllen läuft wie bisher.
+   */
+  const fetchRainyDays = async (): Promise<string[]> => {
+    const spotForCoords =
+      trip?.spotId != null
+        ? (spotsQuery.data ?? []).find(s => s.id === trip.spotId)
+        : undefined;
+    const lat = spotForCoords?.latitude ?? trip?.latitude;
+    const lon = spotForCoords?.longitude ?? trip?.longitude;
+    if (lat == null || lon == null) return [];
+    try {
+      const params = new URLSearchParams({
+        latitude: lat.toFixed(4),
+        longitude: lon.toFixed(4),
+        timezone: "auto",
+        forecast_days: "16",
+        daily: "precipitation_sum",
+      });
+      const res = await fetch(
+        `https://api.open-meteo.com/v1/forecast?${params.toString()}`
+      );
+      if (!res.ok) return [];
+      const json = await res.json();
+      const time: unknown = json?.daily?.time;
+      const rain: unknown = json?.daily?.precipitation_sum;
+      if (!Array.isArray(time) || !Array.isArray(rain)) return [];
+      return time.filter(
+        (day, i): day is string =>
+          typeof day === "string" && typeof rain[i] === "number" && rain[i] >= 5
+      );
+    } catch {
+      return [];
+    }
+  };
 
   /** Die soeben automatisch gesetzten Slots wieder leeren (Toast-Aktion). */
   const undoAutofill = async (slots: { day: string; meal: Meal }[]) => {
@@ -508,6 +549,9 @@ export default function MenuPlanPage() {
    * das nur die soeben gesetzten Einträge wieder entfernt.
    */
   const runAutofill = async () => {
+    // Wetter zuerst (#549): Regentage meiden Feuer-Rezepte, trockene
+    // Abende bevorzugen sie – scheitert der Abruf, füllt es wie bisher.
+    const rainyDays = await fetchRainyDays();
     const assignments = autofillMenuPlan({
       days,
       meals: ["breakfast", "lunch", "dinner"],
@@ -518,6 +562,7 @@ export default function MenuPlanPage() {
       })),
       recipes: autofillRecipes,
       seed: tripId,
+      rainyDays,
     });
     if (assignments.length === 0) {
       toast.info(t.menuPlan.autofillNothing);
@@ -549,6 +594,10 @@ export default function MenuPlanPage() {
             undoAutofill(assignments.map(a => ({ day: a.day, meal: a.meal }))),
         },
       });
+      // Sichtbare Begründung (#549), wenn das Wetter mitentschieden hat
+      if (rainyDays.some(day => days.includes(day))) {
+        toast.info(t.menuPlan.autofillWeatherNote, { duration: 8000 });
+      }
     } catch {
       toast.error(t.menuPlan.autofillFailed);
     } finally {

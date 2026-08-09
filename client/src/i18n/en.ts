@@ -5901,6 +5901,8 @@ export const en: Translation = {
     printButton: "Print",
     autofillButton: "Fill automatically",
     autofillNothing: "No empty meal slots to fill.",
+    autofillWeatherNote:
+      "Weather considered: no fire recipes on rainy days, the grill first on dry evenings.",
     autofillDone: (n: number) =>
       n === 1
         ? "1 meal planned automatically"

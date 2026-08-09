@@ -6064,6 +6064,8 @@ export const de = {
     printButton: "Drucken",
     autofillButton: "Automatisch füllen",
     autofillNothing: "Keine leeren Mahlzeiten-Slots zum Füllen gefunden.",
+    autofillWeatherNote:
+      "Wetter berücksichtigt: An Regentagen kein Feuer-Rezept, an trockenen Abenden zuerst der Grill.",
     autofillDone: (n: number) =>
       n === 1
         ? "1 Mahlzeit automatisch geplant"

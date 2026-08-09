@@ -6061,6 +6061,8 @@ export const fr: Translation = {
     printButton: "Imprimer",
     autofillButton: "Remplir automatiquement",
     autofillNothing: "Aucun créneau de repas vide à remplir.",
+    autofillWeatherNote:
+      "Météo prise en compte : pas de recette au feu les jours de pluie, le gril d’abord les soirs secs.",
     autofillDone: (n: number) =>
       n === 1
         ? "1 repas planifié automatiquement"

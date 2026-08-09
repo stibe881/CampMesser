@@ -6020,6 +6020,8 @@ export const it: Translation = {
     printButton: "Stampa",
     autofillButton: "Riempi automaticamente",
     autofillNothing: "Nessuno slot dei pasti vuoto da riempire.",
+    autofillWeatherNote:
+      "Meteo considerato: niente ricette al fuoco nei giorni di pioggia, la griglia per prima nelle sere asciutte.",
     autofillDone: (n: number) =>
       n === 1
         ? "1 pasto pianificato automaticamente"
