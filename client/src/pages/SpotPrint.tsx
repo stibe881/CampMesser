@@ -20,7 +20,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { fmtLong } from "@/lib/dateFormat";
-import { isStandaloneApp } from "@/lib/standalone";
+import { printNeedsBrowserTab } from "@/lib/standalone";
 import { pick } from "@shared/i18n";
 import {
   listSpotAttributes,
@@ -36,7 +36,7 @@ import {
 export default function SpotPrintPage() {
   const { lang, t } = useI18n();
   const sp = t.spotPrint;
-  const standalone = isStandaloneApp();
+  const standalone = printNeedsBrowserTab();
   const params = useParams<{ id: string }>();
   const spotId = Number(params.id);
   const { isAuthenticated, loading } = useAuth();

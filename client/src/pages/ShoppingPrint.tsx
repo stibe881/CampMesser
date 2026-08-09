@@ -7,7 +7,7 @@ import LoginPrompt from "@/components/LoginPrompt";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
-import { isStandaloneApp } from "@/lib/standalone";
+import { printNeedsBrowserTab } from "@/lib/standalone";
 import { LOCALE_TAGS } from "@shared/i18n";
 import {
   groupByShoppingCategory,
@@ -26,7 +26,7 @@ import {
  */
 export default function ShoppingPrintPage() {
   const { lang, t } = useI18n();
-  const standalone = isStandaloneApp();
+  const standalone = printNeedsBrowserTab();
   const { isAuthenticated, loading } = useAuth();
   // Gewünschte Liste aus der Adresse (?liste=12); ungültige Werte = Vorgabe
   const listId = useMemo(() => {

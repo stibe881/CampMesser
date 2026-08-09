@@ -42,7 +42,22 @@ export const NATIVE_MESSAGES = {
    * native Rahmen prüft das und nimmt sonst die Web-Adresse.
    */
   openDirections: "OPEN_DIRECTIONS",
+  /**
+   * Eigene Adresse im Standard-Browser (Safari) öffnen (`url`). Gebraucht
+   * vom Drucken: Der WebView kennt keinen Druckdialog, und same-origin-
+   * Links bleiben durch onShouldStartLoadWithRequest IM WebView – nur der
+   * native Rahmen kann Safari wirklich öffnen.
+   */
+  openExternal: "OPEN_EXTERNAL_URL",
 } as const;
+
+/**
+ * Eigene Adresse in Safari öffnen (Druckseiten). Im Browser passiert
+ * nichts – Aufrufer prüfen mit isNativeApp(), ob dieser Weg gilt.
+ */
+export function openExternalUrl(url: string) {
+  postToNative(NATIVE_MESSAGES.openExternal, { url });
+}
 
 /** Ereignis nativ → Web: die App möchte, dass wir zu `detail` navigieren. */
 export const NATIVE_NAVIGATE_EVENT = "campmesser:native-navigate";
