@@ -517,6 +517,22 @@ export const tripsRouters = {
         return { success: true } as const;
       }),
     /**
+     * Aufenthalt archivieren/hervorholen (Nutzerwunsch 09.08.2026):
+     * nur der EIGENE Eintrag – die userId-Bedingung in der DB-Schicht
+     * lässt fremde und Mitglieds-Reisen unangetastet.
+     */
+    setArchived: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          archived: z.boolean(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.setTripLogArchived(input.id, ctx.user.id, input.archived);
+        return { success: true } as const;
+      }),
+    /**
      * Reise duplizieren: legt eine neue geplante Reise mit neuem Zeitraum an –
      * die Kopie gehört IMMER dem aufrufenden Konto (auch Mitreisende dürfen
      * duplizieren). Übernommen werden Titel, Ort sowie Zeltplatz- und
@@ -817,7 +833,16 @@ export const tripsRouters = {
               ctx.user.id
             );
           } else {
+            // Das Tages-Foto (#590) hängt am Eintrag – ohne Zeile keine Datei.
+            const entry = await db.getTripJournalEntryByDay(
+              input.tripId,
+              input.day
+            );
             await db.deleteTripJournalEntry(input.tripId, input.day);
+            if (entry?.photoFileName) {
+              const { journalPhotoStorage } = await import("../photoStorage");
+              await journalPhotoStorage.deleteFiles([entry.photoFileName]);
+            }
           }
           await noteTripChange(
             input.tripId,
@@ -826,6 +851,31 @@ export const tripsRouters = {
             text ? "edit" : "remove",
             input.day
           );
+          return { success: true } as const;
+        }),
+      /**
+       * Tages-Foto (#590) eines Journal-Eintrags entfernen, ohne den Text
+       * zu löschen – der Upload läuft als Raw-POST über
+       * /api/trips/journal/:id/photo (server/_core/index.ts).
+       */
+      removePhoto: protectedProcedure
+        .input(z.object({ id: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const entry = await db.getTripJournalEntryById(input.id);
+          const trip = entry
+            ? await db.canAccessTrip(entry.tripId, ctx.user.id)
+            : undefined;
+          if (!entry || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Eintrag nicht gefunden.",
+            });
+          }
+          if (entry.photoFileName) {
+            await db.setTripJournalPhoto(input.id, null);
+            const { journalPhotoStorage } = await import("../photoStorage");
+            await journalPhotoStorage.deleteFiles([entry.photoFileName]);
+          }
           return { success: true } as const;
         }),
     }),
@@ -866,6 +916,9 @@ export const tripsRouters = {
           name: stop.name,
           startDate: stop.startDate,
           endDate: stop.endDate,
+          // Koordinaten für die Rundreise-Kilometer (#580)
+          latitude: stop.latitude,
+          longitude: stop.longitude,
         }));
       }),
       add: protectedProcedure

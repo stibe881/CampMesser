@@ -1462,6 +1462,7 @@ export const en: Translation = {
   },
   roadRules: {
     plugTitle: "Sockets & adapters",
+    twoWheelsTitle: "Motorbike & bike",
     tippingTitle: "Tipping",
     paymentTitle: "Cash & cards",
     title: "Tolls, vignettes & rules",
@@ -1525,6 +1526,12 @@ export const en: Translation = {
     regaText:
       "The official Rega app automatically transmits your position to the operations centre when you raise the alarm – this speeds up mountain rescue considerably. We recommend installing it as well. Alternatively, you can read out the coordinates shown above when calling 1414.",
     regaLinkAria: "Open the official Rega app page (external link)",
+    breakdownTitle: "Breakdown & garage",
+    breakdownHint:
+      "Vest on, triangle out, everyone behind the barrier \u2013 only then make the call.",
+    breakdownTcsHome: "TCS roadside assistance (Switzerland)",
+    breakdownTcsAbroad: "TCS from abroad",
+    breakdownPhrasesLink: "Breakdown & garage phrases in four languages",
     regaLink: "To the official Rega app",
     guideTitle: "How to make the emergency call properly",
     abroadTitle: "Emergency numbers abroad",
@@ -2002,6 +2009,11 @@ export const en: Translation = {
     savedPlacesListTitle: "Your saved places",
     savedPlacesListAria: (name: string) => `Show place ${name} on the map`,
     savedPlacesDistance: (km: string) => `${km} from home`,
+    placePhotoAdd: (name: string) => `Add a photo to ${name}`,
+    placePhotoViewAria: (name: string) => `View photo of ${name}`,
+    placePhotoRemove: (name: string) => `Remove photo of ${name}`,
+    placePhotoFailed: "Photo could not be uploaded",
+    placePhotoHeic: "HEIC photos are not supported – please choose a JPG.",
     savedPlaceCreatedToast: (name: string) =>
       `Saved place \u201c${name}\u201d stored`,
     createdToast: (name: string) => `“${name}” created as favourite`,
@@ -2492,6 +2504,9 @@ export const en: Translation = {
     readinessAbroadLink: "Open country factsheet",
     readinessHolidaysTitle: "Public holiday at your destination:",
     readinessHolidaysHint: "– shops are often closed then.",
+    tripWindowLine: (summary: string) => `Trip-day weather: ${summary}`,
+    tripWindowPartial: (n: number) =>
+      `(preliminary \u2013 only ${n} ${n === 1 ? "day" : "days"} in the forecast)`,
     whoAlongTitle: "Who’s along?",
     whoAlongHint:
       "Tapped means along. The passport stamps come from this – the family stamp only when everyone is along.",
@@ -2632,6 +2647,13 @@ export const en: Translation = {
     menuPlanAria: (name: string) => `Open the meal plan for ${name}`,
     deletePlannedAria: name => `Delete planned stay ${name}`,
     deleteEntryAria: name => `Delete entry ${name}`,
+    archiveAria: (name: string) => `Archive ${name}`,
+    unarchiveAria: (name: string) => `Restore ${name} from the archive`,
+    archiveSection: (n: number) => `Archive (${n})`,
+    archiveHint:
+      "Archived stays still count for statistics and the passport \u2013 they are only cleared from the list.",
+    archivedToast: "Moved to the archive",
+    unarchivedToast: "Restored from the archive",
     dossierAria: (name: string) => `Open the dossier for ${name}`,
     entriesTitle: "Your stays",
     empty: "No entries yet – record your first camping stay with “New trip”.",
@@ -2819,6 +2841,11 @@ export const en: Translation = {
     journalDeleted: "Journal entry deleted",
     journalSaveFailed: "Journal entry could not be saved",
     journalBy: (name: string) => `by ${name}`,
+    journalPhotoAdd: "Add a photo of the day",
+    journalPhotoViewAria: (day: string) => `View photo of ${day}`,
+    journalPhotoRemove: "Remove photo",
+    journalPhotoFailed: "Photo could not be uploaded",
+    journalPhotoHeic: "HEIC photos are not supported – please choose a JPG.",
   },
   clientErrors: {
     title: "Crash reports",
@@ -2990,6 +3017,11 @@ export const en: Translation = {
     editTitle: "Edit stage",
     nameLabel: "Place",
     namePlaceholder: "e.g. Lake Como",
+    suggestionsLabel: "From favourites & saved places:",
+    shiftConfirm: (n: number, tage: number) =>
+      `Shift ${n === 1 ? "the following stage" : `the ${n} following stages`} by ${tage > 0 ? `+${tage}` : tage} ${Math.abs(tage) === 1 ? "day" : "days"}?`,
+    shifted: (n: number) =>
+      n === 1 ? "1 stage shifted" : `${n} stages shifted`,
     fromLabel: "Arrival",
     toLabel: "Moving on",
     saved: "Stage saved",
@@ -4517,6 +4549,7 @@ export const en: Translation = {
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Snow depth: about ${cm} cm`,
+    freezingLine: (m: number) => `Snow line \u2248 ${m} m`,
     snowfallLine: (cm: number) => `Fresh snow today: around ${cm} cm`,
     expenseButton: "Add expense",
     expenseHint: "Goes into this trip's wallet with today's date.",
@@ -4857,6 +4890,8 @@ export const en: Translation = {
     dryingDay: (day: string) => `Best drying weather at home: ${day}.`,
     stepReview: "Fill in the review: what was missing, what was too much?",
     stepNextTime: "Note “next time” reminders at the campsite",
+    stepReviewAria: "Mark the review as done",
+    stepNextTimeAria: "Mark “next time” as done",
     notePlaceholder: "e.g. 25 m extension cord",
     noteSave: "Note it",
     dismissAria: "Hide the homecoming reminder for this trip",
@@ -6476,6 +6511,12 @@ export const en: Translation = {
     subtitle:
       "Add photos shared from your device directly to one of your trips.",
     loginFeature: "adding shared photos",
+    placeTitle: "Shared place recognized",
+    placeNameLabel: "Name of the saved place",
+    placeNamePlaceholder: "e.g. Lakeside campsite",
+    placeSave: "Save as a place",
+    placeSaved: "Place saved.",
+    placeToMap: "To the map",
     emptyTitle: "No shared photos found",
     emptyText:
       "Open this page via your device's share function: pick a photo → Share → ReiseKompass. The entry appears in the share menu after the app has been (re)installed or updated.",
@@ -6682,6 +6723,11 @@ export const en: Translation = {
     favoriteLabel: "Favourite pitch",
     avgRatingLabel: "Avg. rating",
     hikeYearsTitle: "Hiking year totals",
+    stageKmTitle: "Round-trip kilometres",
+    stageKmLine: (km: string) => `\u2248 ${km} km`,
+    stageKmHint: "By road between the stages (OSRM/OpenStreetMap).",
+    stageKmHintEstimate:
+      "By road between the stages (OSRM/OpenStreetMap); a few segments without a route are estimated as the crow flies.",
     hikeYearsLink: "To your hikes",
     hikeYearsLine: (tours: number, km: string, ascent: string) =>
       tours === 1

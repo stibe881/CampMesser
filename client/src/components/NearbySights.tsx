@@ -187,6 +187,7 @@ export default function NearbySights({
           {status === "loading" && (
             <div
               className="mt-3 space-y-2"
+              role="status"
               aria-busy="true"
               aria-label={ts.loading}
             >

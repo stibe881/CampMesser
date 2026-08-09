@@ -482,6 +482,102 @@ export const packScenarios: PackScenario[] = [
     ],
   },
   /**
+   * Freies Campen (Nutzerwunsch 09.08.2026): Zelt ohne Platz heisst ohne
+   * Wasserhahn, ohne WC und ohne Abfalleimer – die Liste ergänzt genau
+   * das, was der Platz sonst stellt. Grundsatz: alles wieder mitnehmen.
+   */
+  {
+    id: "wildcampen",
+    label: l4(
+      "Freies Campen",
+      "Camping sauvage",
+      "Campeggio libero",
+      "Wild camping"
+    ),
+    description: l4(
+      "Zelten ohne Platz: Wasser, Hygiene und Abfall selbst organisiert.",
+      "Camper sans emplacement : eau, hygiène et déchets à organiser soi-même.",
+      "Campeggiare senza piazzola: acqua, igiene e rifiuti da organizzare da sé.",
+      "Camping without a site: water, hygiene and waste organised yourself."
+    ),
+    icon: "Trees",
+    items: [
+      ...basisAusruestung,
+      {
+        name: l4(
+          "Wasserkanister / Wassersack",
+          "Bidon / poche à eau",
+          "Tanica / sacca per l'acqua",
+          "Water canister / water bag"
+        ),
+        category: cat.kueche,
+      },
+      {
+        name: l4(
+          "Wasserfilter oder Entkeimungstabletten",
+          "Filtre à eau ou pastilles de purification",
+          "Filtro per l'acqua o pastiglie potabilizzanti",
+          "Water filter or purification tablets"
+        ),
+        category: cat.kueche,
+      },
+      {
+        name: l4(
+          "Kleine Schaufel (Toilettengang)",
+          "Petite pelle (besoins naturels)",
+          "Piccola pala (bisogni nel bosco)",
+          "Small trowel (toilet duty)"
+        ),
+        category: cat.hygiene,
+      },
+      {
+        name: l4(
+          "Abfallsäcke (alles wieder mitnehmen)",
+          "Sacs poubelle (tout remporter)",
+          "Sacchi per i rifiuti (riportare tutto)",
+          "Rubbish bags (pack everything out)"
+        ),
+        category: cat.sonstiges,
+      },
+      {
+        name: l4(
+          "Powerbank gross (keine Steckdose)",
+          "Grande powerbank (pas de prise)",
+          "Powerbank grande (nessuna presa)",
+          "Large power bank (no socket)"
+        ),
+        category: cat.lichtEnergie,
+      },
+      {
+        name: l4(
+          "Ersatzbatterien für die Stirnlampe",
+          "Piles de rechange pour la lampe frontale",
+          "Batterie di ricambio per la frontale",
+          "Spare batteries for the headlamp"
+        ),
+        category: cat.lichtEnergie,
+      },
+      {
+        name: l4(
+          "Biologisch abbaubare Seife",
+          "Savon biodégradable",
+          "Sapone biodegradabile",
+          "Biodegradable soap"
+        ),
+        category: cat.hygiene,
+      },
+      {
+        name: l4(
+          "Karte / Offline-Karten der Gegend",
+          "Carte / cartes hors ligne de la région",
+          "Mappa / mappe offline della zona",
+          "Map / offline maps of the area"
+        ),
+        category: cat.orientierung,
+      },
+    ],
+  },
+  /**
    * Szenarien für die Nicht-Camping-Reise-Arten (#468): bewusst OHNE die
    * Basis-Ausrüstung – wer ins Hotel oder auf die Piste fährt, braucht
    * weder Zelt noch Gaskocher auf der Liste.

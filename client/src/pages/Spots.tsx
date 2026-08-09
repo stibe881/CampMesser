@@ -54,6 +54,7 @@ import { getSunTimes } from "@/lib/sun";
 import { useI18n, useT } from "@/i18n";
 import { LOCALE_TAGS, type Language } from "@shared/i18n";
 import { distanceMeters } from "@shared/geo";
+import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import { cn } from "@/lib/utils";
 import {
   parseSpotAttributes,
@@ -453,18 +454,59 @@ export default function SpotsPage() {
   });
   const home = homeQuery.data ?? null;
   const [sortByDistance, setSortByDistance] = useState(false);
+  // Strassen-Kilometer statt Luftlinie (Nutzerwunsch 09.08.2026): eine
+  // Tabellen-Abfrage für die ganze Liste; ohne Antwort bleibt je Platz
+  // die Luftlinie stehen.
+  const spotTargets = useMemo(
+    () =>
+      visibleSpots.map(spot => ({
+        id: String(spot.id),
+        lat: spot.latitude,
+        lon: spot.longitude,
+      })),
+    [visibleSpots]
+  );
+  const routedSpotKm = useRoutedDistances(
+    home ? { lat: home.latitude, lon: home.longitude } : null,
+    spotTargets,
+    "car"
+  );
+  const spotDistanceM = (spot: {
+    id: number;
+    latitude: number;
+    longitude: number;
+  }): number | null => {
+    const routed = routedSpotKm.byId.get(String(spot.id));
+    if (routed != null) return routed;
+    return home
+      ? distanceMeters(
+          home.latitude,
+          home.longitude,
+          spot.latitude,
+          spot.longitude
+        )
+      : null;
+  };
   const sortedSpots = useMemo(() => {
     if (!sortByDistance || !home) return visibleSpots;
-    return [...visibleSpots].sort(
-      (a, b) =>
-        distanceMeters(home.latitude, home.longitude, a.latitude, a.longitude) -
-        distanceMeters(home.latitude, home.longitude, b.latitude, b.longitude)
-    );
-  }, [visibleSpots, sortByDistance, home]);
-  const distanceLabel = (spot: { latitude: number; longitude: number }) =>
-    home
-      ? `${Math.round(distanceMeters(home.latitude, home.longitude, spot.latitude, spot.longitude) / 1000)} km`
-      : null;
+    const meters = (spot: (typeof visibleSpots)[number]) =>
+      routedSpotKm.byId.get(String(spot.id)) ??
+      distanceMeters(
+        home.latitude,
+        home.longitude,
+        spot.latitude,
+        spot.longitude
+      );
+    return [...visibleSpots].sort((a, b) => meters(a) - meters(b));
+  }, [visibleSpots, sortByDistance, home, routedSpotKm.byId]);
+  const distanceLabel = (spot: {
+    id: number;
+    latitude: number;
+    longitude: number;
+  }) => {
+    const meters = spotDistanceM(spot);
+    return meters != null ? `${Math.round(meters / 1000)} km` : null;
+  };
 
   const filterLabels: Record<string, string> = {
     shade: t.spots.attrFilterShade,

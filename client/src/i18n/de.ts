@@ -1512,6 +1512,7 @@ export const de = {
   },
   roadRules: {
     plugTitle: "Steckdosen & Adapter",
+    twoWheelsTitle: "Motorrad & Velo",
     tippingTitle: "Trinkgeld",
     paymentTitle: "Bargeld & Karte",
     title: "Maut, Vignette & Regeln",
@@ -1575,6 +1576,13 @@ export const de = {
     regaText:
       "Die offizielle Rega-App übermittelt beim Alarmieren automatisch deine Position an die Einsatzzentrale – das beschleunigt die Rettung in den Bergen erheblich. Wir empfehlen, sie zusätzlich zu installieren. Alternativ kannst du beim Anruf auf 1414 die oben angezeigten Koordinaten durchgeben.",
     regaLinkAria: "Offizielle Rega-App-Seite öffnen (externer Link)",
+    breakdownTitle: "Panne & Werkstatt",
+    breakdownHint:
+      "Warnweste anziehen, Pannendreieck stellen, alle hinter die Leitplanke \u2013 erst dann telefonieren.",
+    breakdownTcsHome: "TCS-Pannenhilfe (Schweiz)",
+    breakdownTcsAbroad: "TCS aus dem Ausland",
+    breakdownPhrasesLink:
+      "S\u00e4tze f\u00fcr Panne & Werkstatt in vier Sprachen",
     regaLink: "Zur offiziellen Rega-App",
     guideTitle: "So setzt du den Notruf richtig ab",
     abroadTitle: "Notrufnummern im Ausland",
@@ -2066,6 +2074,12 @@ export const de = {
     savedPlacesListAria: (name: string) =>
       `Merkort ${name} auf der Karte zeigen`,
     savedPlacesDistance: (km: string) => `${km} von zuhause`,
+    placePhotoAdd: (name: string) => `Foto zu ${name} anfügen`,
+    placePhotoViewAria: (name: string) => `Foto von ${name} ansehen`,
+    placePhotoRemove: (name: string) => `Foto von ${name} entfernen`,
+    placePhotoFailed: "Foto konnte nicht hochgeladen werden",
+    placePhotoHeic:
+      "HEIC-Fotos werden nicht unterstützt – bitte als JPG wählen.",
     savedPlaceCreatedToast: (name: string) =>
       `Merkort \u00ab${name}\u00bb gespeichert`,
     createdToast: (name: string) => `«${name}» als Favorit angelegt`,
@@ -2577,6 +2591,9 @@ export const de = {
     readinessAbroadLink: "Länder-Merkblatt öffnen",
     readinessHolidaysTitle: "Feiertag im Reiseland:",
     readinessHolidaysHint: "– Läden sind dann oft geschlossen.",
+    tripWindowLine: (summary: string) => `Reisetage-Wetter: ${summary}`,
+    tripWindowPartial: (n: number) =>
+      `(vorl\u00e4ufig \u2013 erst ${n} ${n === 1 ? "Tag" : "Tage"} in der Prognose)`,
     whoAlongTitle: "Wer ist dabei?",
     whoAlongHint:
       "Angetippt heisst dabei. Daraus entstehen die Stempel im Reisepass – der Familien-Stempel nur, wenn alle dabei sind.",
@@ -2722,6 +2739,13 @@ export const de = {
     menuPlanAria: (name: string) => `Menüplan für ${name} öffnen`,
     deletePlannedAria: (name: string) => `Geplanten Aufenthalt ${name} löschen`,
     deleteEntryAria: (name: string) => `Eintrag ${name} löschen`,
+    archiveAria: (name: string) => `${name} archivieren`,
+    unarchiveAria: (name: string) => `${name} aus dem Archiv holen`,
+    archiveSection: (n: number) => `Archiv (${n})`,
+    archiveHint:
+      "Archivierte Aufenthalte z\u00e4hlen weiter f\u00fcr Statistik und Reisepass \u2013 sie sind nur aus der Liste ger\u00e4umt.",
+    archivedToast: "Im Archiv abgelegt",
+    unarchivedToast: "Aus dem Archiv geholt",
     dossierAria: (name: string) => `Dossier von ${name} öffnen`,
     entriesTitle: "Deine Aufenthalte",
     empty:
@@ -2924,6 +2948,12 @@ export const de = {
     journalDeleted: "Tagebuch-Eintrag gelöscht",
     journalSaveFailed: "Tagebuch-Eintrag konnte nicht gespeichert werden",
     journalBy: (name: string) => `von ${name}`,
+    journalPhotoAdd: "Foto zum Tag anfügen",
+    journalPhotoViewAria: (day: string) => `Foto vom ${day} ansehen`,
+    journalPhotoRemove: "Foto entfernen",
+    journalPhotoFailed: "Foto konnte nicht hochgeladen werden",
+    journalPhotoHeic:
+      "HEIC-Fotos werden nicht unterstützt – bitte als JPG wählen.",
   },
   clientErrors: {
     title: "Absturzmeldungen",
@@ -3100,6 +3130,11 @@ export const de = {
     editTitle: "Etappe bearbeiten",
     nameLabel: "Ort",
     namePlaceholder: "z. B. Comersee",
+    suggestionsLabel: "Aus Favoriten & Merkorten:",
+    shiftConfirm: (n: number, tage: number) =>
+      `${n === 1 ? "Die folgende Etappe" : `Die ${n} folgenden Etappen`} um ${tage > 0 ? `+${tage}` : tage} ${Math.abs(tage) === 1 ? "Tag" : "Tage"} mitverschieben?`,
+    shifted: (n: number) =>
+      n === 1 ? "1 Etappe mitverschoben" : `${n} Etappen mitverschoben`,
     fromLabel: "Ankunft",
     toLabel: "Weiterreise",
     saved: "Etappe gespeichert",
@@ -4651,6 +4686,7 @@ export const de = {
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Schneehöhe: rund ${cm} cm`,
+    freezingLine: (m: number) => `Schneefallgrenze \u2248 ${m} m`,
     snowfallLine: (cm: number) => `Neuschnee heute: rund ${cm} cm`,
     expenseButton: "Ausgabe erfassen",
     expenseHint: "Landet mit dem heutigen Tag in der Reisekasse dieser Reise.",
@@ -5001,6 +5037,8 @@ export const de = {
     dryingDay: (day: string) => `Bestes Trocknungs-Wetter daheim: ${day}.`,
     stepReview: "Rückblick ausfüllen: Was fehlte, was war zu viel?",
     stepNextTime: "«Beim nächsten Mal» am Platz notieren",
+    stepReviewAria: "Rückblick als erledigt abhaken",
+    stepNextTimeAria: "«Beim nächsten Mal» als erledigt abhaken",
     notePlaceholder: "z. B. Kabeltrommel 25 m",
     noteSave: "Notieren",
     dismissAria: "Heimkehr-Erinnerung zu dieser Reise ausblenden",
@@ -6658,6 +6696,12 @@ export const de = {
     subtitle:
       "Fotos aus der Teilen-Funktion deines Geräts direkt in eine Reise übernehmen.",
     loginFeature: "das Übernehmen geteilter Fotos",
+    placeTitle: "Geteilter Ort erkannt",
+    placeNameLabel: "Name des Merkorts",
+    placeNamePlaceholder: "z. B. Camping am See",
+    placeSave: "Als Merkort speichern",
+    placeSaved: "Merkort gespeichert.",
+    placeToMap: "Zur Karte",
     emptyTitle: "Keine geteilten Fotos gefunden",
     emptyText:
       "Öffne diese Seite über die Teilen-Funktion deines Geräts: Foto wählen → Teilen → ReiseKompass. Der Eintrag im Teilen-Menü erscheint, nachdem die App (neu) installiert oder aktualisiert wurde.",
@@ -6869,6 +6913,11 @@ export const de = {
     favoriteLabel: "Lieblingsplatz",
     avgRatingLabel: "Ø Bewertung",
     hikeYearsTitle: "Wander-Jahresbilanz",
+    stageKmTitle: "Rundreise-Kilometer",
+    stageKmLine: (km: string) => `\u2248 ${km} km`,
+    stageKmHint: "Über die Strasse zwischen den Etappen (OSRM/OpenStreetMap).",
+    stageKmHintEstimate:
+      "Über die Strasse zwischen den Etappen (OSRM/OpenStreetMap); einzelne Abschnitte ohne Route sind aus der Luftlinie geschätzt.",
     hikeYearsLink: "Zu den Wanderungen",
     hikeYearsLine: (tours: number, km: string, ascent: string) =>
       tours === 1

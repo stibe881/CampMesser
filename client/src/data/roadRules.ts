@@ -48,6 +48,8 @@ export interface CountryRules {
   tipping: L4;
   /** Bargeld oder Karte? Was auf Reisen wirklich angenommen wird (#550). */
   payment: L4;
+  /** Motorrad & Velo (#581): Maut, Helm- und Sonderregeln für Zweiräder. */
+  twoWheels: L4;
   /** Wichtigste Notrufnummer. */
   emergency: string;
   emergencyNote: L4;
@@ -118,6 +120,12 @@ export const roadRules: CountryRules[] = [
       "Paiement par carte presque partout, aussi sans contact et par téléphone – l'argent liquide ne sert guère qu'au magasin de ferme ou sur de très petits campings.",
       "Pagamento con carta quasi ovunque, anche contactless e con il telefono – il contante serve al massimo al negozio della fattoria o in campeggi molto piccoli.",
       "Card payment almost everywhere, including contactless and by phone – cash is only needed at farm shops or very small campsites."
+    ),
+    twoWheels: l4(
+      "Das Motorrad braucht eine EIGENE Vignette; Velos fahren vignettefrei. Helmpflicht auf dem Motorrad; auf dem Velo nur für schnelle E-Bikes.",
+      "La moto a besoin de sa PROPRE vignette ; les vélos circulent sans. Casque obligatoire à moto ; à vélo seulement pour les e-bikes rapides.",
+      "La moto ha bisogno di una PROPRIA vignetta; le bici circolano senza. Casco obbligatorio in moto; in bici solo per le e-bike veloci.",
+      "Motorbikes need their OWN vignette; bicycles ride vignette-free. Helmet mandatory on the motorbike; on bicycles only for fast e-bikes."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -208,6 +216,12 @@ export const roadRules: CountryRules[] = [
       "Molto più contante che da noi: piccoli ristoranti, panetterie, chioschi e alcuni campeggi accettano SOLO contanti – tieni sempre qualche euro. La Girocard è più diffusa della carta di credito.",
       "Noticeably more cash than at home: smaller restaurants, bakeries, kiosks and some campsites take CASH ONLY – always carry some euros. Girocard is more common than credit cards."
     ),
+    twoWheels: l4(
+      "Keine Maut für Motorräder. Helmpflicht auf dem Motorrad; fürs Velo gibt es keine Helmpflicht.",
+      "Pas de péage pour les motos. Casque obligatoire à moto ; pas d'obligation à vélo.",
+      "Nessun pedaggio per le moto. Casco obbligatorio in moto; nessun obbligo in bici.",
+      "No toll for motorbikes. Helmet mandatory on the motorbike; no helmet requirement for bicycles."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Feuerwehr und Rettung, 110 für die Polizei.",
@@ -297,6 +311,12 @@ export const roadRules: CountryRules[] = [
       "Le carte sono diffuse, ma il contante resta amato – rifugi, piccole osterie e parchimetri vogliono spesso monete. Tieni una riserva di euro nel cassetto.",
       "Cards are widespread, but cash stays popular – mountain huts, small inns and parking meters often want coins. Keep a euro reserve in the glovebox."
     ),
+    twoWheels: l4(
+      "Das Motorrad braucht eine eigene, günstigere Vignette. Helmpflicht auf dem Motorrad; Velohelm-Pflicht für Kinder unter 12.",
+      "La moto a besoin de sa propre vignette, moins chère. Casque obligatoire à moto ; casque vélo obligatoire pour les moins de 12 ans.",
+      "La moto ha bisogno di una propria vignetta, più economica. Casco obbligatorio in moto; casco in bici obbligatorio sotto i 12 anni.",
+      "Motorbikes need their own, cheaper vignette. Helmet mandatory on the motorbike; bicycle helmet mandatory under 12."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 europaweit, 133 Polizei, 144 Rettung, 140 Bergrettung.",
@@ -383,6 +403,12 @@ export const roadRules: CountryRules[] = [
       "Le paiement par carte est obligatoire pour les commerçants depuis quelques années et fonctionne le plus souvent – aux bars de plage, marchés et petits campings, le liquide reste plus rapide. Le péage d'autoroute se paie par carte.",
       "Il pagamento con carta è obbligatorio per gli esercenti da qualche anno e di solito funziona – nei bar in spiaggia, ai mercati e nei piccoli campeggi il contante resta più veloce. Il pedaggio autostradale si paga con carta.",
       "Card payment has been mandatory for merchants for a few years and usually works – at beach bars, markets and small campsites cash is still quicker. Motorway tolls take cards."
+    ),
+    twoWheels: l4(
+      "Motorräder zahlen Autobahnmaut, auf die Autobahn dürfen sie erst ab 150 ccm. Helmpflicht auch für Roller und Töffli.",
+      "Les motos paient le péage et n'accèdent à l'autoroute qu'à partir de 150 cm³. Casque obligatoire aussi pour les scooters.",
+      "Le moto pagano il pedaggio e possono entrare in autostrada solo da 150 cc. Casco obbligatorio anche per gli scooter.",
+      "Motorbikes pay the motorway toll and may only enter from 150 cc. Helmets are mandatory for scooters and mopeds too."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -477,6 +503,12 @@ export const roadRules: CountryRules[] = [
       "La carta va quasi ovunque, spesso già per piccoli importi – solo i mercati e alcune boulangerie vogliono contanti. I caselli accettano carte (non sempre le carte di debito estere – porta una carta di credito).",
       "Cards work almost everywhere, often even for small amounts – only weekly markets and some bakeries want cash. Toll booths take cards (not always foreign debit cards – carry a credit card)."
     ),
+    twoWheels: l4(
+      "Motorräder zahlen ermässigte Maut (Classe 5). Auf dem Motorrad sind Helm UND zertifizierte Handschuhe Pflicht; Velohelm für Kinder unter 12.",
+      "Les motos paient un péage réduit (classe 5). À moto, casque ET gants certifiés obligatoires ; casque vélo pour les moins de 12 ans.",
+      "Le moto pagano un pedaggio ridotto (classe 5). In moto casco E guanti certificati obbligatori; casco in bici sotto i 12 anni.",
+      "Motorbikes pay a reduced toll (class 5). On the motorbike helmet AND certified gloves are mandatory; bicycle helmet under 12."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 europaweit, 15 Rettungsdienst, 17 Polizei, 18 Feuerwehr.",
@@ -569,6 +601,12 @@ export const roadRules: CountryRules[] = [
       "Le carte sono normali in città e nei campeggi grandi; in agriturismi, rifugi e ai parchimetri aiuta il contante. La vignetta si compra comunque online.",
       "Cards are normal in cities and on bigger campsites; at farms, huts and parking meters cash helps. The vignette is bought online anyway."
     ),
+    twoWheels: l4(
+      "Fürs Motorrad gibt es die halbe Vignette. Helmpflicht auf dem Motorrad; Velohelm-Pflicht bis 18.",
+      "La moto paie une demi-vignette. Casque obligatoire à moto ; casque vélo obligatoire jusqu'à 18 ans.",
+      "Per la moto c'è la mezza vignetta. Casco obbligatorio in moto; casco in bici obbligatorio fino a 18 anni.",
+      "Motorbikes get the half-price vignette. Helmet mandatory on the motorbike; bicycle helmet mandatory up to 18."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Rettung und Feuerwehr, 113 für die Polizei.",
@@ -652,6 +690,12 @@ export const roadRules: CountryRules[] = [
       "Attention : beaucoup de supermarchés et d'automates n'acceptent QUE les cartes de débit, souvent PAS les cartes de crédit – la carte de débit suisse passe généralement, et le liquide n'est souvent plus accepté du tout.",
       "Attenzione: molti supermercati e distributori accettano SOLO carte di debito, spesso NIENTE carte di credito – la carta di debito svizzera di solito funziona, e il contante in molti posti non è più accettato.",
       "Careful: many supermarkets and machines take DEBIT cards only, often NO credit cards – Swiss debit cards usually work, and cash is no longer accepted in many places."
+    ),
+    twoWheels: l4(
+      "Keine Maut. Das Veloland schlechthin: eigene Wege und Ampeln, keine Velohelm-Pflicht; auf dem Motorrad gilt Helmpflicht.",
+      "Pas de péage. LE pays du vélo : pistes et feux dédiés, pas d'obligation de casque à vélo ; à moto, casque obligatoire.",
+      "Nessun pedaggio. IL paese della bici: piste e semafori dedicati, nessun obbligo di casco in bici; in moto casco obbligatorio.",
+      "No toll. THE cycling country: dedicated paths and lights, no bicycle helmet requirement; on the motorbike a helmet is mandatory."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -737,6 +781,12 @@ export const roadRules: CountryRules[] = [
       "Simple depuis le passage à l'euro : cartes courantes en ville et sur les campings ; aux plages, marchés et pour le parking, le liquide est pratique. Plus besoin de changer des kunas !",
       "Semplice dall'ingresso nell'euro: carte comuni in città e nei campeggi; in spiaggia, ai mercati e per il parcheggio il contante è pratico. Niente più kune da cambiare!",
       "Simple since the euro switch: cards are common in towns and on campsites; at beaches, markets and for parking, cash is handy. No more kuna to exchange!"
+    ),
+    twoWheels: l4(
+      "Motorräder zahlen Maut. Helmpflicht; Motorräder fahren auch tagsüber mit Licht.",
+      "Les motos paient le péage. Casque obligatoire ; les motos roulent feux allumés même de jour.",
+      "Le moto pagano il pedaggio. Casco obbligatorio; le moto viaggiano con le luci accese anche di giorno.",
+      "Motorbikes pay the toll. Helmet mandatory; motorbikes ride with lights on during the day too."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -824,6 +874,12 @@ export const roadRules: CountryRules[] = [
       "La carte passe presque partout, même pour le café – seuls les marchés, chiringuitos et petits bars veulent parfois du liquide. Garde une pièce d'identité : elle est parfois demandée lors du paiement par carte.",
       "La carta va quasi ovunque, anche per il caffè – solo mercati, chiringuiti e piccoli bar vogliono a volte contanti. Tieni un documento: con la carta a volte lo chiedono.",
       "Cards work almost everywhere, even for coffee – only markets, chiringuitos and small bars sometimes want cash. Keep ID handy: card payments occasionally require a document."
+    ),
+    twoWheels: l4(
+      "Helmpflicht auf dem Motorrad. BESONDERS: Ausserorts gilt die Helmpflicht auch auf dem Velo (innerorts bis 16).",
+      "Casque obligatoire à moto. PARTICULARITÉ : hors agglomération, le casque est aussi obligatoire à vélo (en ville jusqu'à 16 ans).",
+      "Casco obbligatorio in moto. PARTICOLARITÀ: fuori dai centri abitati il casco è obbligatorio anche in bici (in città fino a 16 anni).",
+      "Helmet mandatory on the motorbike. NOTE: outside built-up areas helmets are mandatory on bicycles too (in town up to 16)."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -914,6 +970,12 @@ export const roadRules: CountryRules[] = [
       "I bancomat Multibanco e la carta vanno ovunque; piccoli caffè, mercati e bar in spiaggia vogliono a volte contanti. Per il pedaggio elettronico serve per forza la registrazione con carta.",
       "Multibanco machines and card payment are everywhere; small cafés, markets and beach bars sometimes want cash. The electronic toll strictly requires card registration."
     ),
+    twoWheels: l4(
+      "Auch Motorräder zahlen die elektronische Maut – die Portal-Falle gilt genauso. Helmpflicht.",
+      "Les motos paient aussi le péage électronique – le piège des portiques vaut pareil. Casque obligatoire.",
+      "Anche le moto pagano il pedaggio elettronico – la trappola dei portali vale ugualmente. Casco obbligatorio.",
+      "Motorbikes also pay the electronic toll – the gantry trap applies just the same. Helmet mandatory."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Polizei, Feuerwehr und Rettung.",
@@ -1000,6 +1062,12 @@ export const roadRules: CountryRules[] = [
       "Les commerçants doivent accepter les cartes, et en ville ça marche – sur les îles, aux kiosques et dans les tavernes familiales, le liquide reste souvent plus rapide. Le péage prend les cartes.",
       "Gli esercenti devono accettare le carte, e in città funziona – sulle isole, ai chioschi e nelle taverne a conduzione familiare il contante resta spesso più veloce. Il pedaggio accetta carte.",
       "Merchants must take cards, and in cities they do – on islands, at kiosks and in family tavernas cash is still often quicker. Tolls take cards."
+    ),
+    twoWheels: l4(
+      "Helmpflicht auf dem Motorrad – auch wenn Einheimische sie oft ignorieren, wird gebüsst. Motorräder zahlen ermässigte Maut.",
+      "Casque obligatoire à moto – même si les locaux l'ignorent souvent, l'amende tombe. Les motos paient un péage réduit.",
+      "Casco obbligatorio in moto – anche se i locali spesso lo ignorano, la multa arriva. Le moto pagano un pedaggio ridotto.",
+      "Helmet mandatory on the motorbike – locals may ignore it, the fine still comes. Motorbikes pay a reduced toll."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -1090,6 +1158,12 @@ export const roadRules: CountryRules[] = [
       "Quasi senza contanti: carta e telefono vanno ovunque, alcuni distributori e negozi non accettano più contante. Una carta di credito più una di debito coprono tutto – cambiare corone conviene poco.",
       "Almost cashless: card and phone pay everywhere, some machines and shops no longer take cash at all. A credit card plus a debit card cover everything – exchanging kroner is hardly worth it."
     ),
+    twoWheels: l4(
+      "Die grossen Brücken kosten auch fürs Motorrad. Keine Velohelm-Pflicht, aber Handzeichen beim Abbiegen sind fürs Velo vorgeschrieben.",
+      "Les grands ponts sont payants aussi pour la moto. Pas de casque vélo obligatoire, mais les signes de la main sont prescrits à vélo.",
+      "I grandi ponti si pagano anche in moto. Nessun obbligo di casco in bici, ma i segnali con la mano sono prescritti.",
+      "The big bridges charge motorbikes too. No bicycle helmet requirement, but hand signals when turning are mandatory on bikes."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Polizei, Feuerwehr und Rettung; 114 für die Polizei ohne Notfall.",
@@ -1179,6 +1253,12 @@ export const roadRules: CountryRules[] = [
       "Presque sans espèces : carte et téléphone passent partout, beaucoup de magasins et cafés n'acceptent plus du tout le liquide – changer des couronnes ne vaut guère la peine. Les locaux paient avec Swish, qui exige toutefois un compte suédois.",
       "Quasi senza contanti: carta e telefono vanno ovunque, molti negozi e caffè non accettano più contante – cambiare corone conviene poco. I locali pagano con Swish, che però richiede un conto svedese.",
       "Almost cashless: card and phone pay everywhere, many shops and cafés no longer take cash at all – exchanging kronor is hardly worth it. Locals pay with Swish, which requires a Swedish account though."
+    ),
+    twoWheels: l4(
+      "Motorräder sind von der City-Maut befreit. Velohelm-Pflicht für Kinder bis 15.",
+      "Les motos sont exemptées du péage urbain. Casque vélo obligatoire jusqu'à 15 ans.",
+      "Le moto sono esenti dal pedaggio urbano. Casco in bici obbligatorio fino a 15 anni.",
+      "Motorbikes are exempt from the congestion tax. Bicycle helmet mandatory up to 15."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -1273,6 +1353,12 @@ export const roadRules: CountryRules[] = [
       "Carta e telefono pagano praticamente ovunque, anche su traghetti e campeggi – la Norvegia è quasi senza contanti. Un po' di contante serve al massimo nelle piazzole natura non presidiate con cassetta.",
       "Card and phone pay practically everywhere, on ferries and campsites too – Norway is almost cashless. A little cash is only needed at unstaffed nature sites with an honesty box."
     ),
+    twoWheels: l4(
+      "Die meisten Mautstationen sind für Motorräder GRATIS. Helmpflicht; die Winterreifen-Regeln gelten auch fürs Motorrad.",
+      "La plupart des stations de péage sont GRATUITES pour les motos. Casque obligatoire ; les règles de pneus d'hiver valent aussi à moto.",
+      "La maggior parte delle stazioni di pedaggio è GRATUITA per le moto. Casco obbligatorio; le regole sugli pneumatici invernali valgono anche in moto.",
+      "Most toll stations are FREE for motorbikes. Helmet mandatory; the winter tyre rules apply to motorbikes too."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 Polizei, 110 Feuerwehr, 113 Sanität – alle drei führen zum Notfall; 112 funktioniert immer.",
@@ -1364,6 +1450,12 @@ export const roadRules: CountryRules[] = [
       "Carta quasi ovunque – i locali pagano con Bancontact, le carte di debito e credito estere funzionano in negozi e distributori. Un po' di contante per mercato, friggitoria e piccoli caffè non guasta.",
       "Card almost everywhere – locals pay with Bancontact, foreign debit and credit cards work in shops and petrol stations. A little cash for the market, the frituur and small cafés does no harm."
     ),
+    twoWheels: l4(
+      "Keine Maut; Motorräder sind von den LEZ-Regeln derzeit ausgenommen. Keine allgemeine Velohelm-Pflicht.",
+      "Pas de péage ; les motos sont pour l'instant exemptées des règles LEZ. Pas d'obligation générale de casque à vélo.",
+      "Nessun pedaggio; le moto sono per ora esenti dalle regole LEZ. Nessun obbligo generale di casco in bici.",
+      "No toll; motorbikes are currently exempt from the LEZ rules. No general bicycle helmet requirement."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Rettung und Feuerwehr, 101 für die Polizei; 112 funktioniert für alles.",
@@ -1400,6 +1492,305 @@ export const roadRules: CountryRules[] = [
       "ostende",
       "flandern",
       "wallonien",
+    ],
+  },
+  {
+    code: "CZ",
+    flag: "🇨🇿",
+    name: l4("Tschechien", "Tchéquie", "Cechia", "Czechia"),
+    updated: "2026-08-09",
+    toll: l4(
+      "E-Vignette (elektronische Autobahnvignette) fürs Kennzeichen, NUR digital: online unter edalnice.cz kaufen (10 Tage, Monat oder Jahr) – es gibt keinen Kleber, und die Kamera kennt keine Gnade. Über 3,5 t gilt die elektronische Streckenmaut mit Bordgerät.",
+      "E-vignette (vignette autoroutière électronique) liée à la plaque, UNIQUEMENT numérique : achat en ligne sur edalnice.cz (10 jours, mois ou année) – pas d'autocollant, et la caméra est sans pitié. Au-delà de 3,5 t, péage électronique au kilomètre avec boîtier.",
+      "E-vignetta (vignetta autostradale elettronica) legata alla targa, SOLO digitale: acquisto online su edalnice.cz (10 giorni, mese o anno) – niente adesivo, e la telecamera non perdona. Oltre 3,5 t vale il pedaggio elettronico chilometrico con dispositivo.",
+      "E-vignette (electronic motorway vignette) tied to the plate, ONLY digital: buy online at edalnice.cz (10 days, month or year) – there is no sticker, and the camera shows no mercy. Above 3.5 t the electronic per-kilometre toll with on-board unit applies."
+    ),
+    trailer: l4(
+      "Der Anhänger hinter dem Personenwagen braucht keine eigene Vignette – die Vignette hängt am Zugfahrzeug. Gespanne fahren höchstens 80.",
+      "La remorque derrière la voiture n'a pas besoin de sa propre vignette – la vignette suit le véhicule tracteur. Les attelages roulent à 80 au maximum.",
+      "Il rimorchio dietro l'automobile non ha bisogno di una propria vignetta – la vignetta segue la motrice. I traini viaggiano al massimo a 80.",
+      "The trailer behind a car needs no vignette of its own – the vignette follows the towing vehicle. Rigs drive at 80 at most."
+    ),
+    speed: { motorway: 80, rural: 80, urban: 50 },
+    speedNote: l4(
+      "Angaben für Gespanne. Personenwagen allein: 130 auf der Autobahn, 90 ausserorts.",
+      "Valeurs pour les attelages. Voiture seule : 130 sur autoroute, 90 hors localité.",
+      "Valori per i traini. Automobile da sola: 130 in autostrada, 90 fuori dai centri.",
+      "Figures for rigs. Car alone: 130 on motorways, 90 outside built-up areas."
+    ),
+    bacPermille: 0,
+    bacNote: l4(
+      "0,0 ‰ – absolute Nulltoleranz, und sie gilt auch auf dem Velo.",
+      "0,0 ‰ – tolérance zéro absolue, valable aussi à vélo.",
+      "0,0 ‰ – tolleranza zero assoluta, valida anche in bici.",
+      "0.0 ‰ – absolute zero tolerance, and it applies on bicycles too."
+    ),
+    equipment: l4(
+      "Warndreieck, Warnweste UND Verbandskasten sind Pflicht – der Verbandskasten auch für ausländische Fahrzeuge. Abblendlicht gilt rund um die Uhr, das ganze Jahr.",
+      "Triangle, gilet ET trousse de secours obligatoires – la trousse aussi pour les véhicules étrangers. Feux de croisement en permanence, toute l'année.",
+      "Triangolo, gilet E cassetta di pronto soccorso obbligatori – la cassetta anche per i veicoli esteri. Anabbaglianti sempre accesi, tutto l'anno.",
+      "Warning triangle, vest AND first-aid kit are mandatory – the kit for foreign vehicles too. Dipped lights around the clock, all year."
+    ),
+    zones: l4(
+      "Keine Umweltzonen. In Prag ist die Innenstadt teils für Durchgangsverkehr gesperrt – Parkzonen ernst nehmen, abgeschleppt wird zügig.",
+      "Pas de zones environnementales. À Prague, le centre est en partie fermé au transit – prendre les zones de stationnement au sérieux, la fourrière est rapide.",
+      "Nessuna zona ambientale. A Praga il centro è in parte chiuso al traffico di transito – prendere sul serio le zone di parcheggio, il carro attrezzi è rapido.",
+      "No low-emission zones. In Prague parts of the centre are closed to through traffic – take the parking zones seriously, towing is swift."
+    ),
+    plug: l4(
+      "Typ E (mit Erdungsstift in der Dose). Der Eurostecker passt; der Schweizer Dreipol-Stecker braucht einen Adapter.",
+      "Type E (avec broche de terre dans la prise). L'europlug passe ; la fiche suisse à trois broches nécessite un adaptateur.",
+      "Tipo E (con spinotto di terra nella presa). L'europlug passa; la spina svizzera a tre poli richiede un adattatore.",
+      "Type E (with earth pin in the socket). Europlugs fit; the Swiss three-pin plug needs an adapter."
+    ),
+    tipping: l4(
+      "Rund 10 % sind im Restaurant üblich – das Trinkgeld beim Bezahlen ansagen, nicht auf dem Tisch liegen lassen.",
+      "Environ 10 % au restaurant – annoncer le pourboire au moment de payer, ne pas le laisser sur la table.",
+      "Circa il 10 % al ristorante – annunciare la mancia al momento di pagare, non lasciarla sul tavolo.",
+      "Around 10 % in restaurants – state the tip when paying, don't leave it on the table."
+    ),
+    payment: l4(
+      "Karte fast überall, auch kontaktlos. Bezahlt wird in Kronen (CZK) – Euro werden mancherorts genommen, aber zu schlechtem Kurs; ein paar Kronen für Markt und Parkautomat schaden nicht.",
+      "Carte presque partout, aussi sans contact. On paie en couronnes (CZK) – l'euro est parfois accepté, mais à mauvais taux ; quelques couronnes pour le marché et l'horodateur ne font pas de mal.",
+      "Carta quasi ovunque, anche contactless. Si paga in corone (CZK) – l'euro a volte è accettato, ma a cambio sfavorevole; qualche corona per mercato e parchimetro non guasta.",
+      "Card almost everywhere, contactless too. You pay in koruna (CZK) – euros are sometimes taken, at a poor rate; a few koruna for the market and parking meter do no harm."
+    ),
+    twoWheels: l4(
+      "Motorräder brauchen KEINE Vignette. Helmpflicht, Licht immer an – und die Nulltoleranz beim Alkohol gilt auch auf dem Velo.",
+      "Les motos n'ont PAS besoin de vignette. Casque obligatoire, feux toujours allumés – et la tolérance zéro pour l'alcool vaut aussi à vélo.",
+      "Le moto NON hanno bisogno della vignetta. Casco obbligatorio, luci sempre accese – e la tolleranza zero per l'alcol vale anche in bici.",
+      "Motorbikes need NO vignette. Helmet mandatory, lights always on – and the zero alcohol limit applies on bicycles too."
+    ),
+    emergency: "112",
+    emergencyNote: l4(
+      "112 europaweit; 158 Polizei, 155 Rettung, 150 Feuerwehr.",
+      "112 partout en Europe ; 158 police, 155 ambulance, 150 pompiers.",
+      "112 in tutta Europa; 158 polizia, 155 ambulanza, 150 pompieri.",
+      "112 across Europe; 158 police, 155 ambulance, 150 fire brigade."
+    ),
+    camping: l4(
+      "Wildcampen ist verboten, in Schutzgebieten (Riesengebirge, Böhmische Schweiz) wird streng gebüsst. Übernachten im Fahrzeug auf Parkplätzen wird meist geduldet, campieren nicht – das Platznetz ist dicht und günstig.",
+      "Le camping sauvage est interdit, sévèrement amendé dans les zones protégées (monts des Géants, Suisse bohémienne). Dormir dans le véhicule sur un parking est le plus souvent toléré, camper non – le réseau de campings est dense et bon marché.",
+      "Il campeggio libero è vietato, severamente multato nelle aree protette (Monti dei Giganti, Svizzera boema). Dormire in veicolo nei parcheggi è per lo più tollerato, campeggiare no – la rete di campeggi è fitta ed economica.",
+      "Wild camping is banned and fined hard in protected areas (Giant Mountains, Bohemian Switzerland). Sleeping in the vehicle in car parks is mostly tolerated, camping is not – the campsite network is dense and cheap."
+    ),
+    aliases: [
+      "tschechien",
+      "tchequie",
+      "cechia",
+      "czechia",
+      "cesko",
+      "prag",
+      "praha",
+      "prague",
+      "praga",
+      "böhmen",
+      "boehmen",
+      "mähren",
+      "maehren",
+      "riesengebirge",
+      "krumlov",
+      "pilsen",
+      "brünn",
+      "bruenn",
+    ],
+  },
+  {
+    code: "PL",
+    flag: "🇵🇱",
+    name: l4("Polen", "Pologne", "Polonia", "Poland"),
+    updated: "2026-08-09",
+    toll: l4(
+      "Keine Vignette bis 3,5 t. Die staatlichen Autobahnabschnitte (A2 Konin–Stryków, A4 Wrocław–Sośnica) zahlt der Personenwagen per e-TOLL-App oder E-Ticket VOR der Fahrt; die privaten Abschnitte der A1, A2 und A4 kassieren klassisch an der Schranke.",
+      "Pas de vignette jusqu'à 3,5 t. Les tronçons d'autoroute publics (A2 Konin–Stryków, A4 Wrocław–Sośnica) se paient AVANT le trajet via l'app e-TOLL ou un e-ticket ; les tronçons privés des A1, A2 et A4 encaissent classiquement à la barrière.",
+      "Nessuna vignetta fino a 3,5 t. I tratti autostradali statali (A2 Konin–Stryków, A4 Wrocław–Sośnica) si pagano PRIMA del viaggio via app e-TOLL o e-ticket; i tratti privati di A1, A2 e A4 incassano classicamente alla barriera.",
+      "No vignette up to 3.5 t. The state motorway sections (A2 Konin–Stryków, A4 Wrocław–Sośnica) are paid BEFORE the trip via the e-TOLL app or an e-ticket; the private sections of the A1, A2 and A4 collect classically at the barrier."
+    ),
+    trailer: l4(
+      "Gespanne fahren höchstens 80 auf der Autobahn und 70 ausserorts – deutlich langsamer als der Verkehr, rechts bleiben.",
+      "Les attelages roulent à 80 au maximum sur autoroute et 70 hors localité – nettement plus lents que le trafic, rester à droite.",
+      "I traini viaggiano al massimo a 80 in autostrada e 70 fuori dai centri – ben più lenti del traffico, restare a destra.",
+      "Rigs drive at 80 at most on motorways and 70 outside built-up areas – noticeably slower than the traffic, keep right."
+    ),
+    speed: { motorway: 80, rural: 70, urban: 50 },
+    speedNote: l4(
+      "Angaben für Gespanne. Personenwagen allein: bis 140 auf der Autobahn – gefahren wird oft schneller, die Kontrollen sind trotzdem real.",
+      "Valeurs pour les attelages. Voiture seule : jusqu'à 140 sur autoroute – on roule souvent plus vite, les contrôles sont pourtant réels.",
+      "Valori per i traini. Automobile da sola: fino a 140 in autostrada – spesso si va più veloci, ma i controlli sono reali.",
+      "Figures for rigs. Car alone: up to 140 on motorways – people often drive faster, the checks are real nonetheless."
+    ),
+    bacPermille: 0.2,
+    bacNote: l4(
+      "0,2 ‰ – praktisch Nulltoleranz; ab 0,5 ‰ ist es eine Straftat.",
+      "0,2 ‰ – quasiment tolérance zéro ; dès 0,5 ‰, c'est un délit.",
+      "0,2 ‰ – praticamente tolleranza zero; da 0,5 ‰ è reato.",
+      "0.2 ‰ – practically zero tolerance; from 0.5 ‰ it is a criminal offence."
+    ),
+    equipment: l4(
+      "Warndreieck UND Feuerlöscher sind Pflicht – der Feuerlöscher auch im ausländischen Fahrzeug. Warnweste dringend empfohlen, Abblendlicht gilt rund um die Uhr.",
+      "Triangle ET extincteur obligatoires – l'extincteur aussi dans les véhicules étrangers. Gilet fortement conseillé, feux de croisement en permanence.",
+      "Triangolo ED estintore obbligatori – l'estintore anche nei veicoli esteri. Gilet fortemente consigliato, anabbaglianti sempre accesi.",
+      "Warning triangle AND fire extinguisher are mandatory – the extinguisher in foreign vehicles too. Vest strongly recommended, dipped lights around the clock."
+    ),
+    zones: l4(
+      "Die ersten Umweltzonen kommen: Warschau hat seit 2024 eine (alte Diesel bleiben draussen), Krakau zieht nach – vor der Stadtfahrt kurz die aktuelle Lage prüfen.",
+      "Les premières zones environnementales arrivent : Varsovie en a une depuis 2024 (les vieux diesels restent dehors), Cracovie suit – vérifier la situation avant d'entrer en ville.",
+      "Arrivano le prime zone ambientali: Varsavia ne ha una dal 2024 (i vecchi diesel restano fuori), Cracovia segue – verificare la situazione prima di entrare in città.",
+      "The first low-emission zones are arriving: Warsaw has had one since 2024 (old diesels stay out), Kraków is following – check the current rules before driving into town."
+    ),
+    plug: l4(
+      "Typ E (mit Erdungsstift in der Dose). Der Eurostecker passt; der Schweizer Dreipol-Stecker braucht einen Adapter.",
+      "Type E (avec broche de terre dans la prise). L'europlug passe ; la fiche suisse à trois broches nécessite un adaptateur.",
+      "Tipo E (con spinotto di terra nella presa). L'europlug passa; la spina svizzera a tre poli richiede un adattatore.",
+      "Type E (with earth pin in the socket). Europlugs fit; the Swiss three-pin plug needs an adapter."
+    ),
+    tipping: l4(
+      "Rund 10 % sind üblich. ACHTUNG Falle: Wer beim Bezahlen «danke» sagt, sagt «stimmt so» – das Rückgeld ist dann weg.",
+      "Environ 10 % sont d'usage. ATTENTION au piège : dire « merci » en payant signifie « gardez la monnaie » – elle ne revient pas.",
+      "Circa il 10 % è d'uso. ATTENZIONE alla trappola: dire «grazie» mentre si paga significa «tenga il resto» – il resto non torna.",
+      "Around 10 % is customary. WATCH the trap: saying “thank you” while paying means “keep the change” – it won't come back."
+    ),
+    payment: l4(
+      "Karte und Handy zahlen praktisch überall, die Einheimischen nutzen BLIK. Bezahlt wird in Złoty – Bargeld braucht es kaum noch, ein paar Scheine für Markt und Landkiosk reichen.",
+      "Carte et téléphone paient pratiquement partout, les locaux utilisent BLIK. On paie en złoty – le liquide ne sert presque plus, quelques billets pour le marché et le kiosque suffisent.",
+      "Carta e telefono pagano praticamente ovunque, i locali usano BLIK. Si paga in złoty – il contante serve ormai poco, poche banconote per mercato e chiosco bastano.",
+      "Card and phone pay practically everywhere, locals use BLIK. You pay in złoty – cash is hardly needed any more, a few notes for the market and roadside kiosk suffice."
+    ),
+    twoWheels: l4(
+      "Motorräder zahlen auf den Mautabschnitten den halben Tarif. Helmpflicht, Licht immer an; fürs Velo gibt es keine Helmpflicht.",
+      "Les motos paient demi-tarif sur les tronçons à péage. Casque obligatoire, feux toujours allumés ; pas d'obligation de casque à vélo.",
+      "Le moto pagano metà tariffa sui tratti a pedaggio. Casco obbligatorio, luci sempre accese; nessun obbligo di casco in bici.",
+      "Motorbikes pay half the rate on toll sections. Helmet mandatory, lights always on; no bicycle helmet requirement."
+    ),
+    emergency: "112",
+    emergencyNote: l4(
+      "112 europaweit; 997 Polizei, 998 Feuerwehr, 999 Rettung.",
+      "112 partout en Europe ; 997 police, 998 pompiers, 999 ambulance.",
+      "112 in tutta Europa; 997 polizia, 998 pompieri, 999 ambulanza.",
+      "112 across Europe; 997 police, 998 fire brigade, 999 ambulance."
+    ),
+    camping: l4(
+      "Wildcampen ist grundsätzlich verboten – ABER: Im Programm «Zanocuj w lesie» erlauben viele Staatsforste das Zelt für ein, zwei Nächte (Karte online, Regeln beachten). Wohnmobile übernachten auf Plätzen oder bewachten Parkplätzen; an Ostsee und in Masuren ist das Netz dicht.",
+      "Le camping sauvage est en principe interdit – MAIS : le programme « Zanocuj w lesie » permet la tente une ou deux nuits dans beaucoup de forêts d'État (carte en ligne, règles à respecter). Les camping-cars dorment sur les campings ou parkings gardés ; le réseau est dense sur la Baltique et en Mazurie.",
+      "Il campeggio libero è in linea di massima vietato – MA: il programma «Zanocuj w lesie» permette la tenda per una o due notti in molte foreste statali (mappa online, regole da rispettare). I camper pernottano in campeggio o in parcheggi custoditi; sul Baltico e in Masuria la rete è fitta.",
+      "Wild camping is banned in principle – BUT: the “Zanocuj w lesie” programme allows tents for a night or two in many state forests (map online, follow the rules). Motorhomes stay on campsites or guarded car parks; the network is dense on the Baltic and in Masuria."
+    ),
+    aliases: [
+      "polen",
+      "pologne",
+      "polonia",
+      "poland",
+      "polska",
+      "warschau",
+      "warszawa",
+      "varsovie",
+      "varsavia",
+      "krakau",
+      "krakow",
+      "cracovie",
+      "cracovia",
+      "danzig",
+      "gdansk",
+      "masuren",
+      "mazury",
+      "breslau",
+      "wroclaw",
+      "zakopane",
+    ],
+  },
+  {
+    code: "HU",
+    flag: "🇭🇺",
+    name: l4("Ungarn", "Hongrie", "Ungheria", "Hungary"),
+    updated: "2026-08-09",
+    toll: l4(
+      "E-Vignette (e-Matrica) fürs Kennzeichen – nur digital, kein Kleber: online oder an der Tankstelle registrieren (10 Tage, Monat, Jahr; Personenwagen = Kategorie D1). Kameras kontrollieren; eine falsche Kategorie wird satt nachverrechnet, darum das Kennzeichen beim Kauf doppelt prüfen.",
+      "E-vignette (e-Matrica) liée à la plaque – uniquement numérique, pas d'autocollant : enregistrement en ligne ou en station-service (10 jours, mois, année ; voiture = catégorie D1). Des caméras contrôlent ; une mauvaise catégorie est lourdement refacturée, donc vérifier deux fois la plaque à l'achat.",
+      "E-vignetta (e-Matrica) legata alla targa – solo digitale, niente adesivo: registrazione online o al distributore (10 giorni, mese, anno; automobile = categoria D1). Le telecamere controllano; una categoria sbagliata viene rifatturata salata, quindi controllare due volte la targa all'acquisto.",
+      "E-vignette (e-Matrica) tied to the plate – digital only, no sticker: register online or at petrol stations (10 days, month, year; car = category D1). Cameras check; a wrong category is billed heavily afterwards, so double-check the plate when buying."
+    ),
+    trailer: l4(
+      "Hinter dem Personenwagen (D1) fährt der Anhänger ohne eigene Vignette; hinter schwereren Fahrzeugen (D2) braucht er die U-Vignette. Gespanne fahren höchstens 80.",
+      "Derrière la voiture (D1), la remorque roule sans vignette propre ; derrière les véhicules plus lourds (D2), il lui faut la vignette U. Les attelages roulent à 80 au maximum.",
+      "Dietro l'automobile (D1) il rimorchio viaggia senza vignetta propria; dietro i veicoli più pesanti (D2) serve la vignetta U. I traini viaggiano al massimo a 80.",
+      "Behind a car (D1) the trailer travels without its own vignette; behind heavier vehicles (D2) it needs the U vignette. Rigs drive at 80 at most."
+    ),
+    speed: { motorway: 80, rural: 70, urban: 50 },
+    speedNote: l4(
+      "Angaben für Gespanne. Personenwagen allein: 130 auf der Autobahn, 90 ausserorts.",
+      "Valeurs pour les attelages. Voiture seule : 130 sur autoroute, 90 hors localité.",
+      "Valori per i traini. Automobile da sola: 130 in autostrada, 90 fuori dai centri.",
+      "Figures for rigs. Car alone: 130 on motorways, 90 outside built-up areas."
+    ),
+    bacPermille: 0,
+    bacNote: l4(
+      "0,0 ‰ – absolute Nulltoleranz, ohne Ausnahme.",
+      "0,0 ‰ – tolérance zéro absolue, sans exception.",
+      "0,0 ‰ – tolleranza zero assoluta, senza eccezioni.",
+      "0.0 ‰ – absolute zero tolerance, no exceptions."
+    ),
+    equipment: l4(
+      "Warndreieck Pflicht; die Warnweste muss ausserorts anziehen, wer das Fahrzeug verlässt. Ausserorts gilt auch am Tag Lichtpflicht.",
+      "Triangle obligatoire ; hors agglomération, le gilet doit être porté par qui quitte le véhicule. Hors agglomération, feux obligatoires même de jour.",
+      "Triangolo obbligatorio; fuori dai centri il gilet va indossato da chi lascia il veicolo. Fuori dai centri le luci sono obbligatorie anche di giorno.",
+      "Warning triangle mandatory; outside built-up areas the vest must be worn by anyone leaving the vehicle. Outside built-up areas lights are mandatory even by day."
+    ),
+    zones: l4(
+      "Keine Umweltzonen für Personenwagen. Bei Smog-Alarm kann Budapest kurzfristig Fahrverbote nach Kennzeichen verhängen – kommt selten vor.",
+      "Pas de zones environnementales pour les voitures. En cas d'alerte au smog, Budapest peut imposer des restrictions temporaires par plaque – c'est rare.",
+      "Nessuna zona ambientale per le automobili. In caso di allarme smog Budapest può imporre divieti temporanei per targa – succede di rado.",
+      "No low-emission zones for cars. During smog alerts Budapest can impose short-term plate-based bans – it rarely happens."
+    ),
+    plug: l4(
+      "Typ F (Schuko). Der Eurostecker passt; der Schweizer Dreipol-Stecker braucht einen Adapter.",
+      "Type F (Schuko). L'europlug passe ; la fiche suisse à trois broches nécessite un adaptateur.",
+      "Tipo F (Schuko). L'europlug passa; la spina svizzera a tre poli richiede un adattatore.",
+      "Type F (Schuko). Europlugs fit; the Swiss three-pin plug needs an adapter."
+    ),
+    tipping: l4(
+      "10–15 % sind üblich – ABER: Viele Lokale setzen eine Servicegebühr («szervizdíj») von 12–15 % auf die Rechnung; steht sie drauf, ist kein Trinkgeld mehr nötig.",
+      "10–15 % sont d'usage – MAIS : beaucoup d'établissements ajoutent des frais de service (« szervizdíj ») de 12–15 % à l'addition ; s'ils y figurent, plus besoin de pourboire.",
+      "Il 10–15 % è d'uso – MA: molti locali aggiungono al conto una tassa di servizio («szervizdíj») del 12–15 %; se c'è, la mancia non serve più.",
+      "10–15 % is customary – BUT: many places add a 12–15 % service charge (“szervizdíj”) to the bill; if it's on there, no tip is needed."
+    ),
+    payment: l4(
+      "Karte weit verbreitet, auch kontaktlos. Bezahlt wird in Forint – Euro werden touristisch genommen, aber zu schlechtem Kurs; Trinkgeld am besten bar in Forint.",
+      "Carte très répandue, aussi sans contact. On paie en forints – l'euro est accepté dans les zones touristiques, mais à mauvais taux ; le pourboire de préférence en liquide, en forints.",
+      "Carta molto diffusa, anche contactless. Si paga in fiorini – l'euro è accettato nelle zone turistiche, ma a cambio sfavorevole; la mancia meglio in contanti, in fiorini.",
+      "Card widely accepted, contactless too. You pay in forint – euros are taken in tourist spots at a poor rate; tip best in cash, in forint."
+    ),
+    twoWheels: l4(
+      "Fürs Motorrad gibt es die günstigere D1M-Vignette. Helmpflicht, Licht immer an – und die Nulltoleranz beim Alkohol gilt auch hier.",
+      "La moto bénéficie de la vignette D1M, moins chère. Casque obligatoire, feux toujours allumés – et la tolérance zéro pour l'alcool vaut ici aussi.",
+      "Per la moto c'è la vignetta D1M, più economica. Casco obbligatorio, luci sempre accese – e la tolleranza zero per l'alcol vale anche qui.",
+      "Motorbikes get the cheaper D1M vignette. Helmet mandatory, lights always on – and the zero alcohol limit applies here too."
+    ),
+    emergency: "112",
+    emergencyNote: l4(
+      "112 europaweit; 104 Rettung, 105 Feuerwehr, 107 Polizei.",
+      "112 partout en Europe ; 104 ambulance, 105 pompiers, 107 police.",
+      "112 in tutta Europa; 104 ambulanza, 105 pompieri, 107 polizia.",
+      "112 across Europe; 104 ambulance, 105 fire brigade, 107 police."
+    ),
+    camping: l4(
+      "Wildcampen und freies Übernachten im Fahrzeug sind verboten. Rund um den Balaton (Plattensee) ist das Platznetz dicht – im Hochsommer trotzdem reservieren.",
+      "Le camping sauvage et la nuit libre en véhicule sont interdits. Autour du Balaton, le réseau de campings est dense – réserver quand même en plein été.",
+      "Il campeggio libero e il pernottamento libero in veicolo sono vietati. Attorno al Balaton la rete di campeggi è fitta – in piena estate meglio comunque prenotare.",
+      "Wild camping and free overnighting in the vehicle are banned. Around Lake Balaton the campsite network is dense – still book ahead in high summer."
+    ),
+    aliases: [
+      "ungarn",
+      "hongrie",
+      "ungheria",
+      "hungary",
+      "magyarorszag",
+      "budapest",
+      "balaton",
+      "plattensee",
+      "puszta",
+      "debrecen",
+      "sopron",
+      "esztergom",
     ],
   },
 ];

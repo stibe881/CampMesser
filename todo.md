@@ -1088,3 +1088,33 @@ Die zwanzig Vorschläge:
 - [x] Service Worker Cache-Version v3 → v4 erhöht, damit alte Symbole ersetzt werden
 - [x] Geprüft: Startseite, Anmeldeseite, SOS, mobile Ansicht – TypeScript sauber, 88 Tests grün
 - [x] Checkpoint f49ca398 gespeichert, veröffentlicht und ins GitHub-Repo gepusht
+
+## Zwanzig Vorschläge (09.08.2026, Runde 56) + Nutzerwünsche
+
+- [x] Nutzerwunsch: Strassen-Kilometer statt Luftlinie überall, wo eine fahrbare Distanz angezeigt wird – Etappen-Statistik (#580, OSRM-Ketten-Tabelle mit Schätz-Rückfall), Merkorte-Liste auf der Karte, Zeltplatz-Favoriten (Anzeige UND Distanz-Sortierung) und Platz-Vergleich (je eine Tabellen-Abfrage, Rückfall Luftlinie ohne Netz); bewusst Luftlinie bleiben Zelt-Finder/Schatzsuche (Fussweg-Peilung), Gewitter-Zähler und das Karten-Messwerkzeug
+- [x] Nutzerwunsch: Reiseart «Freies Campen» (Zelt ohne Campingplatz) – Schnellzugriffe Landesregeln/Trinkwasser/Feuer-Ratgeber, Zeltausrüstung und Lagerfeuer-Ampel wie Camping, Formular ohne Parzellen-/WLAN-Block, eigene Packvorlage (Wasserfilter, Schäufelchen, Abfallsäcke, Powerbank) samt automatischem Vorschlag beim Reise-Anlegen; kein DB-Schema-Change (kind-Spalte nimmt den neuen Wert auf)
+- [x] Nutzerwunsch: Vergangene Aufenthalte archivieren – tripLogs.archivedAt (Migration 0123), trips.setArchived (nur Besitzer), Archiv-Abschnitt mit Aufklapper unter den vergangenen Reisen (Zurückholen per Knopf); archivierte Reisen zählen weiter in Statistik, Reisepass und Suche
+- [x] Nutzerwunsch: Zu breite Datums-/Zeitfelder auf dem iPhone (Reise-Formular, Vorlagen-Dialog) – iOS-@supports-Block in index.css nimmt nativen date/time-Inputs die intrinsische Breite (EHRLICH: nicht auf einem echten Gerät verifiziert)
+- [x] Nutzerwunsch (Vorrunde): Heimkehr-Karte abhakbar – jeder Kreis ist jetzt ein eigener Abhak-Knopf (localStorage je Reise), Text bleibt Link
+- [x] #576 Etappe↔Zeltplatz: Beim Etappen-Erfassen schlagen Favoriten und Merkorte den Ort samt Koordinaten vor (ABWEICHUNG: Verknüpfung über den NAMEN wie in computeTripStats, bewusst keine spotId-Spalte)
+- [x] #577 Rundreise aus Merkorten: dieselben Vorschlags-Chips machen Merkorte direkt zu Etappen
+- [x] #578 Folge-Etappen mitverschieben: Verschiebt man eine Etappe, bietet die App an, alle späteren um dieselbe Tagesdifferenz mitzunehmen (Bestätigungs-Dialog)
+- [x] #579 Vorabend-Check kennt Etappen: Push «Morgen weiter nach X» am Abend vor einem Etappenwechsel (teilt den evepack-Kanal, Pack-Check hat Vorrang, url /heute; 3 Tests)
+- [x] #580 Reise-Kilometer: Statistik summiert Etappen-Distanzen pro Jahr – seit dem Nutzerwunsch vom 09.08.2026 ÜBER DIE STRASSE (OSRM-Ketten-Tabelle, eine Abfrage pro Reise; Abschnitte ohne Route werden aus der Luftlinie mit Umwegfaktor geschätzt und die Karte sagt das)
+- [x] #581 Zweirad-Feld: Pflichtfeld twoWheels in allen 18 Länderkatalogen + Karte «Motorrad & Velo» auf der Länder-Seite
+- [x] #582 Länderkatalog CZ/PL/HU: drei komplette Länder (E-Vignetten-Fallen, Promillegrenzen, Camping-Hinweise) + Notrufnummern in shared/emergencyNumbers.ts
+- [x] #583 Pannenhilfe-Karte im SOS (TCS 140 / +41 58 827 22 20, Link zur Sprachhilfe)
+- [x] #584 Orte per Teilen-Menü → Merkort: Share Target nimmt Titel/Text/URL an, shared/sharedPlace.ts parst geo:/Google-Maps/OSM-Links (10 Tests), /teilen bietet «Als Merkort speichern» (EHRLICH: maps.app.goo.gl-Kurzlinks tragen keine Koordinaten und werden bewusst nicht übers Netz aufgelöst)
+- [x] #585 Schneefallgrenze in der Heute-Ansicht (freezing_level_height im bestehenden Open-Meteo-Abruf, auf 100 m gerundet)
+- [x] #586 Tagesbudget in der Schnell-Ausgabe: QuickExpense zeigt das verbleibende Tagesbudget der laufenden Reise
+- [x] #587 Reisetage-Wetterampel im Cockpit: tripWindow() in shared/weatherWindow.ts (3 Tests) bewertet die Reisetage in der 16-Tage-Prognose, Ampel-Zeile mit «vorläufig»-Hinweis bei Teilabdeckung
+- [x] #588 Luftqualität in der Heute-Ansicht: Zeile nur ab «schlecht» (EAQI, gleiche Schwelle wie Morgen-Briefing)
+- [x] #589 Foto am Merkort: savedPlaces.photoFileName (Migration 0124), Upload über die Foto-Routen-Fabrik, Thumbnail + Entfernen in der Karten-Verwaltungsliste
+- [x] #590 Journal-Foto: tripJournal.photoFileName (Migration 0124), EIN Bild pro Tag (canAccessTrip – Mitreisende dürfen bebildern), Kamera-Knopf/Thumbnail im Tages-Journal; Aufräumen in Papierkorb und Konto-Löschung mitgezogen
+- [x] #591 Etappen in der globalen Suche (trips.stops.listAll, Treffer verlinken auf /tagebuch/<id>)
+- [x] #592 Länder-Statistik mit Etappen: visitedCountryRows verteilt Nächte je Etappen-Land (3 Tests); Reisen ohne Etappen zählen wie bisher
+- [ ] #593 SpotsMap.tsx weiter aufteilen – EHRLICH NICHT UMGESETZT: Die Marker-Bauer (~500 Zeilen) hängen in einer useEffect-Closure an Dutzenden Refs/Settern/navigate; sie ohne Bildschirm-Verifikation herauszuziehen wäre reines Risiko, und #574 hat die Datei bereits entlastet
+- [x] #594 Vier weitere axe-Seiten in Playwright (/wetter, /karte, /sprachhilfe, /laenderregeln); dabei ~20 Lade-Container mit aria-busy um role="status" ergänzt (axe-Regel aria-prohibited-attr)
+- [x] #595 UI-Tests Runde 55: TripReview (Personen-Filter), Feiertags-Zeile der Heute-Ansicht, AirQualityCard (fetch-Attrappe), Kosten-Schätzung im Reise-Dialog – je mit axe
+
+EHRLICH (Runde 56): Nichts davon wurde am Bildschirm verifiziert (kein Browser-Zugriff auf die laufende App); der iOS-Feld-Fix ist nur nach CSS-Logik geprüft. Migrationen dieser Runde: 0123 (tripLogs.archivedAt) und 0124 (savedPlaces.photoFileName, tripJournal.photoFileName) – laufen beim nächsten Deploy.

@@ -15,6 +15,7 @@
 import { Suspense, lazy } from "react";
 import { Link } from "wouter";
 import {
+  Archive,
   CalendarDays,
   CalendarPlus,
   Clock,
@@ -144,6 +145,7 @@ export function TripActionColumn({
   onHub,
   onRemove,
   onIcs,
+  onArchive,
   onLeave,
   leavePending,
 }: {
@@ -157,6 +159,11 @@ export function TripActionColumn({
   onRemove: () => void;
   /** Kalender-Export (#244) – nur in der «past»-Spalte sichtbar. */
   onIcs: () => void;
+  /**
+   * Archivieren (Nutzerwunsch 09.08.2026): nur rückblickend und nur
+   * für Besitzerinnen – ohne Handler erscheint kein Knopf.
+   */
+  onArchive?: () => void;
   onLeave: () => void;
   leavePending: boolean;
 }) {
@@ -210,6 +217,18 @@ export function TripActionColumn({
       >
         <CopyPlus className="h-3.5 w-3.5" aria-hidden="true" />
       </Button>
+      {phase === "past" && trip.role === "owner" && onArchive && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+          onClick={onArchive}
+          aria-label={t.trips.archiveAria(name)}
+          title={t.trips.archiveHint}
+        >
+          <Archive className="h-3.5 w-3.5" aria-hidden="true" />
+        </Button>
+      )}
       {trip.role === "owner" ? (
         <>
           <Button

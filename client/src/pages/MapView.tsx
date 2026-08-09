@@ -5,11 +5,12 @@
  * (#563). Die Karte selbst (Pins, Ebenen, Cluster, Popups, Dialoge) wohnt in
  * components/map/SpotsMap.tsx, das Pin-Vokabular in components/map/mapPins.ts.
  */
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { fmtLong } from "@/lib/dateFormat";
 import { Link, useSearch } from "wouter";
-import { MapPin, Star, Trash2 } from "lucide-react";
+import { Camera, Loader2, MapPin, Star, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import { resizeImageForUpload } from "@/lib/imageResize";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ import {
   normalizeSavedPlaceColor,
 } from "@shared/savedPlaces";
 import { distanceMeters } from "@shared/geo";
+import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import { type Excursion } from "@shared/excursions";
 import { tripNights } from "@shared/trips";
 import SpotsMap from "@/components/map/SpotsMap";
@@ -58,6 +60,22 @@ export default function MapViewPage() {
     enabled: isAuthenticated && (savedPlacesData?.length ?? 0) > 0,
     staleTime: 5 * 60_000,
   });
+  // Strassen-Kilometer statt Luftlinie (Nutzerwunsch 09.08.2026): eine
+  // Tabellen-Abfrage für die ganze Liste; ohne Antwort bleibt die Luftlinie.
+  const placeTargets = useMemo(
+    () =>
+      (savedPlacesData ?? []).map(place => ({
+        id: String(place.id),
+        lat: place.latitude,
+        lon: place.longitude,
+      })),
+    [savedPlacesData]
+  );
+  const routedPlaceKm = useRoutedDistances(
+    home ? { lat: home.latitude, lon: home.longitude } : null,
+    placeTargets,
+    "car"
+  );
   const [focusPoint, setFocusPoint] = useState<{
     lat: number;
     lon: number;
@@ -71,6 +89,41 @@ export default function MapViewPage() {
     },
     onError: () => toast.error(t.common.actionFailed),
   });
+  // Foto am Merkort (#589): EIN Bild pro Merkort, hochgeladen wie das
+  // Tages-Foto im Journal (Raw-POST mit Client-Resize). Der Kamera-Knopf
+  // merkt sich den Merkort, das versteckte Datei-Feld liefert das Bild.
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const photoPlaceIdRef = useRef<number | null>(null);
+  const [photoUploadingId, setPhotoUploadingId] = useState<number | null>(null);
+  const removePlacePhotoMutation = trpc.savedPlaces.removePhoto.useMutation({
+    onSuccess: () => void utils.savedPlaces.list.invalidate(),
+    onError: () => toast.error(t.common.actionFailed),
+  });
+  const handlePlacePhotoSelected = async (fileList: FileList | null) => {
+    const file = fileList?.[0];
+    const placeId = photoPlaceIdRef.current;
+    if (photoInputRef.current) photoInputRef.current.value = "";
+    if (!file || placeId == null) return;
+    try {
+      const blob = await resizeImageForUpload(file);
+      setPhotoUploadingId(placeId);
+      const response = await fetch(`/api/places/${placeId}/photo`, {
+        method: "POST",
+        headers: { "Content-Type": blob.type },
+        body: blob,
+      });
+      if (!response.ok) throw new Error("upload");
+      await utils.savedPlaces.list.invalidate();
+    } catch {
+      const isHeic =
+        /image\/hei[cf]/.test(file.type) || /\.hei[cf]$/i.test(file.name);
+      toast.error(
+        isHeic ? t.mapView.placePhotoHeic : t.mapView.placePhotoFailed
+      );
+    } finally {
+      setPhotoUploadingId(null);
+    }
+  };
 
   // Ausflugfinder-Anbindung (#271): zuerst die billige Frage, ob das Feature
   // überhaupt eingerichtet ist (fasst die Quelle nicht an) – erst wenn ja,
@@ -228,16 +281,29 @@ export default function MapViewPage() {
                   <Star className="h-4 w-4 text-primary" aria-hidden="true" />
                   {t.mapView.savedPlacesListTitle}
                 </h2>
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  aria-hidden="true"
+                  tabIndex={-1}
+                  onChange={e => void handlePlacePhotoSelected(e.target.files)}
+                />
                 <ul className="space-y-1">
                   {(savedPlacesData ?? []).map(place => {
-                    const distanceKm = home
-                      ? distanceMeters(
-                          home.latitude,
-                          home.longitude,
-                          place.latitude,
-                          place.longitude
-                        ) / 1000
-                      : null;
+                    const routedM = routedPlaceKm.byId.get(String(place.id));
+                    const distanceKm =
+                      routedM != null
+                        ? routedM / 1000
+                        : home
+                          ? distanceMeters(
+                              home.latitude,
+                              home.longitude,
+                              place.latitude,
+                              place.longitude
+                            ) / 1000
+                          : null;
                     return (
                       <li
                         key={place.id}
@@ -283,6 +349,66 @@ export default function MapViewPage() {
                             </span>
                           </span>
                         </button>
+                        {place.photoFileName ? (
+                          <span className="flex shrink-0 items-center gap-0.5">
+                            <a
+                              href={`/api/places/photos/${place.photoFileName}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              aria-label={t.mapView.placePhotoViewAria(
+                                place.name
+                              )}
+                            >
+                              <img
+                                src={`/api/places/photos/${place.photoFileName}`}
+                                alt=""
+                                className="h-9 w-9 rounded-md object-cover"
+                                loading="lazy"
+                              />
+                            </a>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-muted-foreground/60 hover:text-destructive"
+                              disabled={removePlacePhotoMutation.isPending}
+                              onClick={() =>
+                                removePlacePhotoMutation.mutate({
+                                  id: place.id,
+                                })
+                              }
+                              aria-label={t.mapView.placePhotoRemove(
+                                place.name
+                              )}
+                            >
+                              <X className="h-3 w-3" aria-hidden="true" />
+                            </Button>
+                          </span>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 shrink-0 text-muted-foreground/60 hover:text-foreground"
+                            disabled={photoUploadingId === place.id}
+                            onClick={() => {
+                              photoPlaceIdRef.current = place.id;
+                              photoInputRef.current?.click();
+                            }}
+                            aria-label={t.mapView.placePhotoAdd(place.name)}
+                            title={t.mapView.placePhotoAdd(place.name)}
+                          >
+                            {photoUploadingId === place.id ? (
+                              <Loader2
+                                className="h-3.5 w-3.5 animate-spin"
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <Camera
+                                className="h-3.5 w-3.5"
+                                aria-hidden="true"
+                              />
+                            )}
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"

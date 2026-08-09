@@ -40,6 +40,15 @@ const DISMISSED_KEY = "campmesser.homecomingDismissed";
 /** Der Schlüssel der Vorgänger-Karte (#390) – Wegklicks gelten weiter. */
 const LEGACY_DISMISSED_KEY = "campmesser.reviewPromptDismissed";
 const TENT_KEY = "campmesser.homecomingTent";
+/**
+ * Auch Rückblick und Merker sind VON HAND abhakbar (Nutzerwunsch
+ * 09.08.2026): Die Kreise sahen nach Checkboxen aus, liessen sich aber
+ * nicht antippen – ihr Haken kam nur «von selbst» aus den Daten. Wer
+ * einen Schritt ohne die App erledigt hat (oder ihn diesmal nicht
+ * braucht), hakt ihn jetzt direkt ab; der Daten-Haken gilt weiterhin.
+ */
+const REVIEW_KEY = "campmesser.homecomingReview";
+const NEXT_TIME_KEY = "campmesser.homecomingNextTime";
 
 function loadIdSet(key: string): Set<number> {
   try {
@@ -75,6 +84,12 @@ export default function HomecomingCard() {
   });
   const [tentDoneIds, setTentDoneIds] = useState<Set<number>>(() =>
     loadIdSet(TENT_KEY)
+  );
+  const [reviewDoneIds, setReviewDoneIds] = useState<Set<number>>(() =>
+    loadIdSet(REVIEW_KEY)
+  );
+  const [nextTimeDoneIds, setNextTimeDoneIds] = useState<Set<number>>(() =>
+    loadIdSet(NEXT_TIME_KEY)
   );
   // Merker direkt hier notieren (#418): Der Umweg übers Dossier war eine
   // Hürde genau in dem Moment, in dem einem die Notiz einfällt.
@@ -130,11 +145,17 @@ export default function HomecomingCard() {
   const spot = candidate.spotId
     ? (spotsQuery.data ?? []).find(s => s.id === candidate.spotId)
     : undefined;
+  // Erledigt ist, was die Daten sagen ODER was von Hand abgehakt wurde.
+  const reviewDone =
+    reviewed.has(candidate.id) || reviewDoneIds.has(candidate.id);
+  const nextTimeDone =
+    parseNextTimeNotes(spot?.nextTimeJson ?? null).length > 0 ||
+    nextTimeDoneIds.has(candidate.id);
   const steps = homecomingSteps({
     tentDone: tentDoneIds.has(candidate.id),
-    hasReview: reviewed.has(candidate.id),
+    hasReview: reviewDone,
     spotId: spot ? spot.id : null,
-    nextTimeCount: parseNextTimeNotes(spot?.nextTimeJson ?? null).length,
+    nextTimeCount: nextTimeDone ? 1 : 0,
   });
   if (homecomingDone(steps)) return null;
 
@@ -145,13 +166,22 @@ export default function HomecomingCard() {
     saveIdSet(DISMISSED_KEY, next);
   };
 
-  const toggleTent = () => {
-    const next = new Set(tentDoneIds);
+  const toggleIn = (
+    key: string,
+    ids: Set<number>,
+    setIds: (next: Set<number>) => void
+  ) => {
+    const next = new Set(ids);
     if (next.has(candidate.id)) next.delete(candidate.id);
     else next.add(candidate.id);
-    setTentDoneIds(next);
-    saveIdSet(TENT_KEY, next);
+    setIds(next);
+    saveIdSet(key, next);
   };
+  const toggleTent = () => toggleIn(TENT_KEY, tentDoneIds, setTentDoneIds);
+  const toggleReview = () =>
+    toggleIn(REVIEW_KEY, reviewDoneIds, setReviewDoneIds);
+  const toggleNextTime = () =>
+    toggleIn(NEXT_TIME_KEY, nextTimeDoneIds, setNextTimeDoneIds);
 
   const stepIcon = (done: boolean) =>
     done ? (
@@ -207,38 +237,49 @@ export default function HomecomingCard() {
             )}
           </li>
           <li>
-            {/* Direkt ZUM Rückblick springen (?rueckblick=1): «Mehr»-
-                Schalter und Rückblick öffnen sich dort von selbst. */}
-            <Link
-              href={`/tagebuch/${candidate.id}?rueckblick=1`}
-              className={cn(
-                stepClass(reviewed.has(candidate.id)),
-                "hover:underline"
-              )}
-            >
-              {stepIcon(reviewed.has(candidate.id))}
-              {hc.stepReview}
-            </Link>
+            {/* Kreis = abhaken (Nutzerwunsch 09.08.2026), Text = Sprung
+                DIREKT zum Rückblick (?rueckblick=1): «Mehr»-Schalter und
+                Rückblick öffnen sich dort von selbst. */}
+            <span className={stepClass(reviewDone)}>
+              <button
+                type="button"
+                onClick={toggleReview}
+                aria-pressed={reviewDone}
+                aria-label={hc.stepReviewAria}
+                className="shrink-0"
+              >
+                {stepIcon(reviewDone)}
+              </button>
+              <Link
+                href={`/tagebuch/${candidate.id}?rueckblick=1`}
+                className="text-left hover:underline"
+              >
+                {hc.stepReview}
+              </Link>
+            </span>
           </li>
           {spot && (
             <li>
-              <Link
-                href={`/zeltplaetze/${spot.id}`}
-                className={cn(
-                  stepClass(
-                    parseNextTimeNotes(spot.nextTimeJson ?? null).length > 0
-                  ),
-                  "hover:underline"
-                )}
-              >
-                {stepIcon(
-                  parseNextTimeNotes(spot.nextTimeJson ?? null).length > 0
-                )}
-                {hc.stepNextTime}
-              </Link>
+              <span className={stepClass(nextTimeDone)}>
+                <button
+                  type="button"
+                  onClick={toggleNextTime}
+                  aria-pressed={nextTimeDone}
+                  aria-label={hc.stepNextTimeAria}
+                  className="shrink-0"
+                >
+                  {stepIcon(nextTimeDone)}
+                </button>
+                <Link
+                  href={`/zeltplaetze/${spot.id}`}
+                  className="text-left hover:underline"
+                >
+                  {hc.stepNextTime}
+                </Link>
+              </span>
               {/* Direkt notieren (#418): Die Notiz landet am Platz wie im
                   Dossier (#396), der Schritt hakt sich damit ab. */}
-              {parseNextTimeNotes(spot.nextTimeJson ?? null).length === 0 && (
+              {!nextTimeDone && (
                 <form
                   className="mt-1.5 flex items-center gap-2 pl-6"
                   onSubmit={event => {

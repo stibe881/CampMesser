@@ -647,6 +647,7 @@ export default function WeatherPage() {
 
       {(state === "locating" || state === "loading") && (
         <div
+          role="status"
           className="space-y-3"
           aria-busy="true"
           aria-label={t.weather.loadingAria}
@@ -1008,6 +1009,7 @@ export default function WeatherPage() {
                 <CardContent className="pt-5">
                   {pollen.status === "loading" && (
                     <div
+                      role="status"
                       aria-busy="true"
                       aria-label={t.weather.pollenLoadingAria}
                     >

@@ -230,6 +230,7 @@ export default function CompareSection({
               {searching && (
                 <div
                   className="mt-3"
+                  role="status"
                   aria-busy="true"
                   aria-label={t.weather.compareSearchingAria}
                 >
@@ -330,6 +331,7 @@ export default function CompareSection({
               </div>
               {forecast.status === "loading" && (
                 <div
+                  role="status"
                   aria-busy="true"
                   aria-label={t.weather.compareLoadingAria}
                   className="space-y-2"

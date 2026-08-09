@@ -360,6 +360,7 @@ export default function PicnicStops({
           {(status === "loading" || status === "locating") && (
             <div
               className="mt-3 space-y-2"
+              role="status"
               aria-busy="true"
               aria-label={status === "locating" ? tp.locating : tp.loading}
             >

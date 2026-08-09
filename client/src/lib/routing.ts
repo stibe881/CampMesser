@@ -15,8 +15,10 @@
 import {
   MAX_TABLE_TARGETS,
   estimateRoadDistanceM,
+  osrmChainTableUrl,
   osrmRouteUrl,
   osrmTableUrl,
+  parseOsrmChain,
   parseOsrmRoute,
   parseOsrmTable,
   routeCacheKey,
@@ -212,6 +214,51 @@ export async function fetchPlaceDurations(
 ): Promise<Map<string, number>> {
   return fetchTable(origin, targets, profile, "durations", options);
 }
+
+/**
+ * Wegstrecken der aufeinanderfolgenden Abschnitte einer Punkt-KETTE
+ * (Strassen-Kilometer der Etappen-Statistik #580): EINE Tabellen-Abfrage
+ * pro Reise, ohne Geometrie. `null` je Abschnitt heisst «keine Route» –
+ * der Aufrufer schätzt dann genau diesen Abschnitt aus der Luftlinie.
+ * Zwischengespeichert je Sitzung wie die anderen Tabellen-Abfragen.
+ */
+export async function fetchChainDistances(
+  points: GeoPoint[],
+  profile: RoutingProfile,
+  options: { signal?: AbortSignal } = {}
+): Promise<(number | null)[]> {
+  const empty = new Array<number | null>(Math.max(0, points.length - 1)).fill(
+    null
+  );
+  if (points.length < 2 || points.length > MAX_TABLE_TARGETS) return empty;
+  const key = `chain:${profile}:${points
+    .map(p => `${p.lat.toFixed(4)},${p.lon.toFixed(4)}`)
+    .join("|")}`;
+  const cached = chainCache.get(key);
+  if (cached) return cached;
+
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const onAbort = () => controller.abort();
+  options.signal?.addEventListener("abort", onAbort);
+  try {
+    const response = await fetch(osrmChainTableUrl(profile, points), {
+      signal: controller.signal,
+    });
+    if (!response.ok) return empty;
+    const result = parseOsrmChain(await response.json(), points.length);
+    chainCache.set(key, result);
+    return result;
+  } catch {
+    return empty;
+  } finally {
+    window.clearTimeout(timer);
+    options.signal?.removeEventListener("abort", onAbort);
+  }
+}
+
+/** Zwischenspeicher der Ketten-Abfragen (Sitzung, nicht localStorage). */
+const chainCache = new Map<string, (number | null)[]>();
 
 async function fetchTable(
   origin: GeoPoint,

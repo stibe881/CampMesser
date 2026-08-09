@@ -21,6 +21,8 @@ import {
   Plus,
   Route,
   Search,
+  Star,
+  Tent,
   Trash2,
   X,
 } from "lucide-react";
@@ -107,6 +109,39 @@ export default function TripStops({
 
   /** null = Formular zu, "neu" = neue Etappe, sonst die Id der bearbeiteten. */
   const [editing, setEditing] = useState<number | "neu" | null>(null);
+  /**
+   * Favoriten und Merkorte als Etappen-Vorschlag (#576/#577): Die
+   * Rundreise entsteht aus der Wunschliste – ein Tipp übernimmt Name
+   * UND Koordinaten. Geladen erst, wenn das Formular offen ist.
+   */
+  const spotsQuery = trpc.spots.list.useQuery(undefined, {
+    enabled: editing !== null,
+    staleTime: 5 * 60_000,
+  });
+  const savedPlacesQuery = trpc.savedPlaces.list.useQuery(undefined, {
+    enabled: editing !== null,
+    staleTime: 5 * 60_000,
+  });
+  const pickSuggestions = useMemo(
+    () => [
+      ...(spotsQuery.data ?? []).map(spot => ({
+        key: `spot-${spot.id}`,
+        name: spot.name,
+        lat: spot.latitude,
+        lng: spot.longitude,
+        kind: "spot" as const,
+      })),
+      ...(savedPlacesQuery.data ?? []).map(place => ({
+        key: `place-${place.id}`,
+        name: place.name,
+        lat: place.latitude,
+        lng: place.longitude,
+        kind: "saved" as const,
+      })),
+    ],
+    [spotsQuery.data, savedPlacesQuery.data]
+  );
+
   const [name, setName] = useState("");
   const [from, setFrom] = useState(startDate);
   const [to, setTo] = useState(endDate);
@@ -193,6 +228,49 @@ export default function TripStops({
     setPlaceResults(null);
   };
 
+  /** Tage zwischen zwei ISO-Daten (b − a), Vorzeichen inklusive. */
+  const isoDayDiff = (a: string, b: string) =>
+    Math.round(
+      (new Date(`${b}T00:00:00`).getTime() -
+        new Date(`${a}T00:00:00`).getTime()) /
+        86_400_000
+    );
+
+  /**
+   * Folge-Etappen mitverschieben (#578): Wer eine Etappe verlängert,
+   * will selten alle folgenden von Hand anfassen. Nach dem Speichern
+   * fragt die App einmal – auf Wunsch wandern alle Etappen, die ab der
+   * ALTEN Weiterreise beginnen, um dieselbe Tagezahl.
+   */
+  const maybeShiftFollowers = async (
+    original: (typeof stops)[number] | null,
+    newEnd: string
+  ) => {
+    if (!original || original.endDate === newEnd) return;
+    const delta = isoDayDiff(original.endDate, newEnd);
+    const followers = stops.filter(
+      stop => stop.id !== original.id && stop.startDate >= original.endDate
+    );
+    if (delta === 0 || followers.length === 0) return;
+    if (!(await ask({ title: ts.shiftConfirm(followers.length, delta) }))) {
+      return;
+    }
+    try {
+      for (const stop of followers) {
+        await utils.client.trips.stops.update.mutate({
+          id: stop.id,
+          startDate: shiftIsoDay(stop.startDate, delta),
+          endDate: shiftIsoDay(stop.endDate, delta),
+        });
+      }
+      toast.success(ts.shifted(followers.length));
+    } catch {
+      toast.error(t.common.saveFailed);
+    } finally {
+      void invalidate();
+    }
+  };
+
   const submit = () => {
     const trimmed = name.trim();
     if (!trimmed) {
@@ -206,9 +284,17 @@ export default function TripStops({
       startDate: from,
       endDate: to,
     };
-    if (editing === "neu") addMutation.mutate({ tripId, ...payload });
-    else if (typeof editing === "number")
-      updateMutation.mutate({ id: editing, ...payload });
+    if (editing === "neu") {
+      addMutation.mutate({ tripId, ...payload });
+    } else if (typeof editing === "number") {
+      const original = stops.find(stop => stop.id === editing) ?? null;
+      updateMutation.mutate(
+        { id: editing, ...payload },
+        {
+          onSuccess: () => void maybeShiftFollowers(original, payload.endDate),
+        }
+      );
+    }
   };
 
   const busy = addMutation.isPending || updateMutation.isPending;
@@ -632,6 +718,35 @@ export default function TripStops({
                         </span>
                       )}
                     </div>
+                    {/* Favoriten & Merkorte als Ein-Tipp-Vorschlag
+                        (#576/#577): Name UND Koordinaten auf einmal –
+                        die Rundreise entsteht aus der Wunschliste. */}
+                    {pickSuggestions.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs text-muted-foreground">
+                          {ts.suggestionsLabel}
+                        </span>
+                        {pickSuggestions.slice(0, 8).map(pick => (
+                          <button
+                            key={pick.key}
+                            type="button"
+                            onClick={() => {
+                              setName(pick.name);
+                              setCoords({ lat: pick.lat, lng: pick.lng });
+                              setPlaceResults(null);
+                            }}
+                            className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                          >
+                            {pick.kind === "spot" ? (
+                              <Tent className="h-3 w-3" aria-hidden="true" />
+                            ) : (
+                              <Star className="h-3 w-3" aria-hidden="true" />
+                            )}
+                            {pick.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     {placeResults !== null &&
                       (placeResults.length === 0 ? (
                         <p className="mt-1.5 text-xs text-muted-foreground">

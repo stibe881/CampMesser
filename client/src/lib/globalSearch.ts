@@ -250,6 +250,11 @@ export interface OwnContent {
   }[];
   /** Merkorte (#564): gesucht wird über Name und Notiz, Treffer → Karte. */
   savedPlaces?: { id: number; name: string; note?: string | null }[];
+  /**
+   * Etappen von Rundreisen (#591): «Verona» tippen findet die Reise,
+   * die dort Halt macht. `tripName` kommt vom Aufrufer (tripName.ts).
+   */
+  tripStops?: { id: number; tripId: number; name: string; tripName: string }[];
 }
 
 /** Typ-Labels für die Snippet-Zeile eigener Treffer. */
@@ -299,6 +304,7 @@ const OWN_KIND_LABELS = {
     "Fuel log"
   ),
   savedPlace: l4("Merkort", "Lieu à retenir", "Luogo salvato", "Saved place"),
+  tripStop: l4("Etappe", "Étape", "Tappa", "Stage"),
   journal: l4(
     "Reise-Journal",
     "Journal du séjour",
@@ -469,6 +475,17 @@ export function searchOwnContent(
       "/karte",
       place.note ? `${kind} · ${place.note}` : kind,
       [place.note ?? undefined]
+    );
+  }
+  // Etappen (#591): Der Etappen-Ort führt zur Rundreise – im Snippet
+  // steht, zu WELCHER Reise die Station gehört.
+  for (const stop of own.tripStops ?? []) {
+    add(
+      `own-trip-stop-${stop.id}`,
+      p(stop.name),
+      `/tagebuch/${stop.tripId}`,
+      `${p(OWN_KIND_LABELS.tripStop)} · ${stop.tripName}`,
+      [stop.tripName]
     );
   }
   // Aufenthalte: Titel ODER Ort führen zum Ziel – man erinnert sich mal an

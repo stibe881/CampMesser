@@ -1,6 +1,7 @@
 /**
- * Reise-Art (#460): Camping, Strandferien, Hotelferien, Städtereise,
- * Wandern, Velotour, Wintersport oder Tagesausflug – pro REISE, nicht als
+ * Reise-Art (#460): Camping, Freies Campen, Strandferien, Hotelferien,
+ * Städtereise, Wandern, Velotour, Wintersport oder Tagesausflug – pro
+ * REISE, nicht als
  * globaler App-Schalter. Die App weiss über Start/Ende ohnehin, welche
  * Reise gerade läuft; damit stellt sich die Heute-Ansicht von selbst um,
  * ohne dass jemand einen Modus umschalten (und wieder zurückschalten)
@@ -19,6 +20,7 @@ import { l4, pick, type L4, type Language } from "./i18n";
 
 export const TRIP_KINDS = [
   "camping",
+  "wildcampen",
   "strand",
   "hotel",
   "staedte",
@@ -36,6 +38,12 @@ export const DEFAULT_TRIP_KIND: TripKind = "camping";
 
 const TRIP_KIND_LABELS: Record<TripKind, L4> = {
   camping: l4("Camping", "Camping", "Campeggio", "Camping"),
+  wildcampen: l4(
+    "Freies Campen",
+    "Camping sauvage",
+    "Campeggio libero",
+    "Wild camping"
+  ),
   strand: l4(
     "Strandferien",
     "Vacances balnéaires",
@@ -142,6 +150,22 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
   // Camping = das heutige Verhalten; keine zusätzlichen Knöpfe nötig.
   camping: {
     quickModules: [],
+    campfire: true,
+    bathing: false,
+    tentGear: true,
+    winter: false,
+    sights: false,
+    beaches: false,
+    transit: false,
+    excursions: false,
+    bike: false,
+  },
+  // Freies Campen (Nutzerwunsch 09.08.2026): Zelt, aber KEIN Platz. Ohne
+  // Wasserhahn zählt der Trinkwasser-Rechner, ohne Feuerstelle der
+  // Feuer-Ratgeber – und OB man überhaupt frei stehen darf, sagen die
+  // Landesregeln (camping-Feld im Länderkatalog).
+  wildcampen: {
+    quickModules: ["/laenderregeln", "/wasser", "/feuer"],
     campfire: true,
     bathing: false,
     tentGear: true,
@@ -303,6 +327,15 @@ export const TRIP_KIND_FORMS: Record<TripKind, TripKindFormPreset> = {
   camping: {
     spotSelect: true,
     pitchDetails: true,
+    hotelDetails: false,
+    singleDay: false,
+  },
+  // Frei stehen heisst: kein Campingplatz. Der eigene Merk-Platz (ein
+  // Zeltplatz-Favorit kann auch eine wilde Stelle sein) bleibt
+  // verknüpfbar – aber Parzellennummer und Platz-WLAN gibt es nicht.
+  wildcampen: {
+    spotSelect: true,
+    pitchDetails: false,
     hotelDetails: false,
     singleDay: false,
   },

@@ -18,6 +18,7 @@ import { formatChf } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { distanceMeters } from "@shared/geo";
+import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import {
   attributeCompareRows,
   compareAdvantage,
@@ -78,6 +79,26 @@ export default function SpotCompare({
     [spots, lang]
   );
 
+  // Strassen-Kilometer statt Luftlinie (Nutzerwunsch 09.08.2026): eine
+  // Tabellen-Abfrage für die beiden Kandidaten; ohne Antwort bleibt die
+  // Luftlinie. Der Haken steht VOR dem frühen return (Hook-Regeln).
+  const compareTargets = useMemo(
+    () =>
+      spots
+        .filter(spot => spot.id === aId || spot.id === bId)
+        .map(spot => ({
+          id: String(spot.id),
+          lat: spot.latitude,
+          lon: spot.longitude,
+        })),
+    [spots, aId, bId]
+  );
+  const routedCompareKm = useRoutedDistances(
+    home ? { lat: home.latitude, lon: home.longitude } : null,
+    compareTargets,
+    "car"
+  );
+
   if (spots.length < 2) return null;
 
   const spotA = sorted.find(s => s.id === aId) ?? null;
@@ -118,8 +139,10 @@ export default function SpotCompare({
     const priceA = nightlyRappen(spotA);
     const priceB = nightlyRappen(spotB);
     const priceAdv = compareAdvantage(priceA, priceB, "lower");
-    const km = (spot: CompareSpotLike) =>
-      home
+    const km = (spot: CompareSpotLike) => {
+      const routed = routedCompareKm.byId.get(String(spot.id));
+      if (routed != null) return Math.round(routed / 1000);
+      return home
         ? Math.round(
             distanceMeters(
               home.latitude,
@@ -129,6 +152,7 @@ export default function SpotCompare({
             ) / 1000
           )
         : null;
+    };
     const kmA = km(spotA);
     const kmB = km(spotB);
     const distanceAdv = compareAdvantage(kmA, kmB, "lower");

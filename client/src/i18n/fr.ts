@@ -1514,6 +1514,7 @@ export const fr: Translation = {
   },
   roadRules: {
     plugTitle: "Prises & adaptateurs",
+    twoWheelsTitle: "Moto & v\u00e9lo",
     tippingTitle: "Pourboire",
     paymentTitle: "Espèces & cartes",
     title: "Péage, vignette & règles",
@@ -1579,6 +1580,12 @@ export const fr: Translation = {
     regaLinkAria:
       "Ouvrir la page officielle de l'application Rega (lien externe)",
     regaLink: "Vers l'application Rega officielle",
+    breakdownTitle: "Panne & garage",
+    breakdownHint:
+      "Gilet, triangle, tout le monde derri\u00e8re la glissi\u00e8re \u2013 ensuite seulement, t\u00e9l\u00e9phoner.",
+    breakdownTcsHome: "D\u00e9pannage TCS (Suisse)",
+    breakdownTcsAbroad: "TCS depuis l\u2019\u00e9tranger",
+    breakdownPhrasesLink: "Phrases panne & garage en quatre langues",
     guideTitle: "Comment bien passer l'appel d'urgence",
     abroadTitle: "Numéros d'urgence à l'étranger",
     abroadHint:
@@ -2069,6 +2076,12 @@ export const fr: Translation = {
     savedPlacesListAria: (name: string) =>
       `Afficher le lieu ${name} sur la carte`,
     savedPlacesDistance: (km: string) => `${km} de chez toi`,
+    placePhotoAdd: (name: string) => `Ajouter une photo à ${name}`,
+    placePhotoViewAria: (name: string) => `Voir la photo de ${name}`,
+    placePhotoRemove: (name: string) => `Retirer la photo de ${name}`,
+    placePhotoFailed: "La photo n’a pas pu être envoyée",
+    placePhotoHeic:
+      "Les photos HEIC ne sont pas prises en charge – choisis un JPG.",
     savedPlaceCreatedToast: (name: string) =>
       `Lieu \u00ab\u202f${name}\u202f\u00bb enregistr\u00e9`,
     createdToast: (name: string) => `«${name}» créé comme favori`,
@@ -2574,6 +2587,10 @@ export const fr: Translation = {
     readinessAbroadLink: "Ouvrir la fiche pays",
     readinessHolidaysTitle: "Jour férié au pays de destination :",
     readinessHolidaysHint: "– les magasins sont souvent fermés ce jour-là.",
+    tripWindowLine: (summary: string) =>
+      `M\u00e9t\u00e9o des jours de voyage\u202f: ${summary}`,
+    tripWindowPartial: (n: number) =>
+      `(provisoire \u2013 seulement ${n} ${n === 1 ? "jour" : "jours"} dans les pr\u00e9visions)`,
     whoAlongTitle: "Qui vient ?",
     whoAlongHint:
       "Touché = présent. Les tampons du passeport en découlent – le tampon familial seulement si tout le monde est là.",
@@ -2718,6 +2735,13 @@ export const fr: Translation = {
     menuPlanAria: (name: string) => `Ouvrir le plan des repas de ${name}`,
     deletePlannedAria: name => `Supprimer le séjour prévu ${name}`,
     deleteEntryAria: name => `Supprimer l'entrée ${name}`,
+    archiveAria: (name: string) => `Archiver ${name}`,
+    unarchiveAria: (name: string) => `Sortir ${name} des archives`,
+    archiveSection: (n: number) => `Archives (${n})`,
+    archiveHint:
+      "Les s\u00e9jours archiv\u00e9s comptent toujours pour les statistiques et le passeport \u2013 ils sont juste retir\u00e9s de la liste.",
+    archivedToast: "Plac\u00e9 dans les archives",
+    unarchivedToast: "Sorti des archives",
     dossierAria: (name: string) => `Ouvrir le dossier de ${name}`,
     entriesTitle: "Tes séjours",
     empty:
@@ -2914,6 +2938,12 @@ export const fr: Translation = {
     journalDeleted: "Entrée du journal supprimée",
     journalSaveFailed: "Impossible d'enregistrer l'entrée du journal",
     journalBy: (name: string) => `par ${name}`,
+    journalPhotoAdd: "Ajouter une photo du jour",
+    journalPhotoViewAria: (day: string) => `Voir la photo du ${day}`,
+    journalPhotoRemove: "Retirer la photo",
+    journalPhotoFailed: "La photo n’a pas pu être envoyée",
+    journalPhotoHeic:
+      "Les photos HEIC ne sont pas prises en charge – choisis un JPG.",
   },
   clientErrors: {
     title: "Rapports de plantage",
@@ -3097,6 +3127,13 @@ export const fr: Translation = {
     editTitle: "Modifier l\u2019\u00e9tape",
     nameLabel: "Lieu",
     namePlaceholder: "p. ex. lac de C\u00f4me",
+    suggestionsLabel: "Depuis favoris et lieux retenus\u202f:",
+    shiftConfirm: (n: number, tage: number) =>
+      `D\u00e9caler ${n === 1 ? "l\u2019\u00e9tape suivante" : `les ${n} \u00e9tapes suivantes`} de ${tage > 0 ? `+${tage}` : tage} ${Math.abs(tage) === 1 ? "jour" : "jours"}\u202f?`,
+    shifted: (n: number) =>
+      n === 1
+        ? "1 \u00e9tape d\u00e9cal\u00e9e"
+        : `${n} \u00e9tapes d\u00e9cal\u00e9es`,
     fromLabel: "Arriv\u00e9e",
     toLabel: "D\u00e9part",
     saved: "\u00c9tape enregistr\u00e9e",
@@ -4648,6 +4685,7 @@ export const fr: Translation = {
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Hauteur de neige : environ ${cm} cm`,
+    freezingLine: (m: number) => `Limite pluie-neige \u2248 ${m} m`,
     snowfallLine: (cm: number) => `Neige fraîche aujourd’hui : env. ${cm} cm`,
     expenseButton: "Saisir une dépense",
     expenseHint: "Ajoutée à la caisse de ce voyage avec la date du jour.",
@@ -5000,6 +5038,8 @@ export const fr: Translation = {
     stepReview:
       "Remplir le bilan : qu'est-ce qui a manqué, qu'est-ce qui était en trop ?",
     stepNextTime: "Noter « la prochaine fois » sur le camping",
+    stepReviewAria: "Cocher la rétrospective comme faite",
+    stepNextTimeAria: "Cocher « la prochaine fois » comme fait",
     notePlaceholder: "p. ex. rallonge de 25 m",
     noteSave: "Noter",
     dismissAria: "Masquer le rappel de retour pour ce séjour",
@@ -6667,6 +6707,12 @@ export const fr: Translation = {
     subtitle:
       "Ajoute directement à un voyage les photos partagées depuis ton appareil.",
     loginFeature: "l'ajout de photos partagées",
+    placeTitle: "Lieu partagé reconnu",
+    placeNameLabel: "Nom du lieu repéré",
+    placeNamePlaceholder: "p. ex. Camping au bord du lac",
+    placeSave: "Enregistrer comme lieu repéré",
+    placeSaved: "Lieu repéré enregistré.",
+    placeToMap: "Vers la carte",
     emptyTitle: "Aucune photo partagée trouvée",
     emptyText:
       "Ouvre cette page via la fonction de partage de ton appareil : choisir une photo → Partager → ReiseKompass. L'entrée apparaît dans le menu de partage après (ré)installation ou mise à jour de l'app.",
@@ -6875,6 +6921,11 @@ export const fr: Translation = {
     favoriteLabel: "Emplacement préféré",
     avgRatingLabel: "Note moyenne",
     hikeYearsTitle: "Bilan annuel des randonnées",
+    stageKmTitle: "Kilom\u00e8tres des circuits",
+    stageKmLine: (km: string) => `\u2248 ${km} km`,
+    stageKmHint: "Par la route entre les étapes (OSRM/OpenStreetMap).",
+    stageKmHintEstimate:
+      "Par la route entre les étapes (OSRM/OpenStreetMap) ; quelques tronçons sans itinéraire sont estimés à vol d’oiseau.",
     hikeYearsLink: "Vers les randonnées",
     hikeYearsLine: (tours: number, km: string, ascent: string) =>
       tours === 1

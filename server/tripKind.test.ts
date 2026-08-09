@@ -11,9 +11,10 @@ import {
 } from "../shared/tripKind";
 
 describe("Reise-Art (#460)", () => {
-  it("kennt die neun Arten, Camping zuerst", () => {
+  it("kennt die zehn Arten, Camping zuerst", () => {
     expect(TRIP_KINDS).toEqual([
       "camping",
+      "wildcampen",
       "strand",
       "hotel",
       "staedte",
@@ -24,6 +25,27 @@ describe("Reise-Art (#460)", () => {
       "tagesausflug",
     ]);
     expect(DEFAULT_TRIP_KIND).toBe("camping");
+  });
+
+  it("Freies Campen (Nutzerwunsch 09.08.2026): Zelt ohne Platz", () => {
+    const preset = tripKindPreset("wildcampen");
+    // Draussen wie beim Camping: Zeltausrüstung und Lagerfeuer-Ampel an
+    expect(preset.tentGear).toBe(true);
+    expect(preset.campfire).toBe(true);
+    // Ohne Platz zählen Landesregeln (darf man?), Trinkwasser und Feuer
+    expect(preset.quickModules).toEqual([
+      "/laenderregeln",
+      "/wasser",
+      "/feuer",
+    ]);
+    // Formular: eigener Merk-Platz verknüpfbar, aber KEINE Parzellennummer
+    // und kein Hotel-Block – frei stehen heisst kein Campingplatz
+    expect(tripKindForm("wildcampen")).toEqual({
+      spotSelect: true,
+      pitchDetails: false,
+      hotelDetails: false,
+      singleDay: false,
+    });
   });
 
   it("Motorradtour (Nutzerwunsch 09.08.2026): Zelt, Feuer, Landesregeln", () => {
@@ -132,12 +154,16 @@ describe("Formular-Felder pro Reise-Art (#485)", () => {
     expect(TRIP_KIND_FORMS.hotel.spotSelect).toBe(false);
     expect(TRIP_KIND_FORMS.staedte.spotSelect).toBe(false);
     expect(TRIP_KIND_FORMS.strand.spotSelect).toBe(false);
-    // Stellplatz-Details gehen mit der Zeltplatz-Auswahl einher
-    TRIP_KINDS.forEach(kind => {
+    // Stellplatz-Details gehen mit der Zeltplatz-Auswahl einher – AUSSER
+    // beim freien Campen: Der eigene Merk-Platz bleibt verknüpfbar, aber
+    // Parzellennummer und Platz-WLAN gibt es ohne Campingplatz nicht.
+    TRIP_KINDS.filter(kind => kind !== "wildcampen").forEach(kind => {
       expect(TRIP_KIND_FORMS[kind].pitchDetails, kind).toBe(
         TRIP_KIND_FORMS[kind].spotSelect
       );
     });
+    expect(TRIP_KIND_FORMS.wildcampen.spotSelect).toBe(true);
+    expect(TRIP_KIND_FORMS.wildcampen.pitchDetails).toBe(false);
     // Zimmer-Details (#520): bei Übernachtungs-Arten ohne Platz
     TRIP_KINDS.forEach(kind => {
       expect(TRIP_KIND_FORMS[kind].hotelDetails, kind).toBe(

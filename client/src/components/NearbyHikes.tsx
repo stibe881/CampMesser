@@ -368,6 +368,7 @@ export default function NearbyHikes({
       {status === "loading" && (
         <div
           className="mt-3 space-y-2"
+          role="status"
           aria-busy="true"
           aria-label={tn.loading}
         >

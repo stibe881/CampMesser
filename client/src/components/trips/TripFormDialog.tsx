@@ -55,6 +55,7 @@ import { pick } from "@shared/i18n";
  * Tagesausflug braucht selten eine Liste.
  */
 const KIND_SCENARIO: Partial<Record<TripKind, string>> = {
+  wildcampen: "wildcampen",
   strand: "strand",
   hotel: "hotelferien",
   staedte: "staedtereise",

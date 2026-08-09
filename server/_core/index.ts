@@ -678,6 +678,55 @@ async function startServer() {
       return expense && trip ? expense : null;
     },
   });
+  // ── Tages-Foto im Reise-Journal (#590) ──────────────────────────────────
+  // Wie der Reisekassen-Beleg: canAccessTrip statt Besitzer-Prüfung, denn
+  // das Journal gehört der REISE – Mitreisende dürfen den Tag bebildern.
+  registerSinglePhotoRoutes(app, authenticatePhotoRequest, {
+    uploadPath: "/api/trips/journal/:id/photo",
+    servePath: "/api/trips/journal/photos/:fileName",
+    logTag: "JournalPhotos",
+    storage: async () => (await import("../photoStorage")).journalPhotoStorage,
+    load: async (id, userId) => {
+      const db = await import("../db");
+      const entry = await db.getTripJournalEntryById(id);
+      const trip = entry
+        ? await db.canAccessTrip(entry.tripId, userId)
+        : undefined;
+      return entry && trip ? { current: entry.photoFileName ?? null } : null;
+    },
+    save: async (id, _userId, fileName) => {
+      const db = await import("../db");
+      await db.setTripJournalPhoto(id, fileName);
+    },
+    findOwnedByFileName: async (fileName, userId) => {
+      const db = await import("../db");
+      const entry = await db.getTripJournalEntryByPhotoFileName(fileName);
+      const trip = entry
+        ? await db.canAccessTrip(entry.tripId, userId)
+        : undefined;
+      return entry && trip ? entry : null;
+    },
+  });
+  // ── Foto am Merkort (#589) ──────────────────────────────────────────────
+  registerSinglePhotoRoutes(app, authenticatePhotoRequest, {
+    uploadPath: "/api/places/:id/photo",
+    servePath: "/api/places/photos/:fileName",
+    logTag: "PlacePhotos",
+    storage: async () => (await import("../photoStorage")).placePhotoStorage,
+    load: async (id, userId) => {
+      const db = await import("../db");
+      const place = await db.getSavedPlace(id, userId);
+      return place ? { current: place.photoFileName ?? null } : null;
+    },
+    save: async (id, userId, fileName) => {
+      const db = await import("../db");
+      await db.updateSavedPlace(id, userId, { photoFileName: fileName });
+    },
+    findOwnedByFileName: async (fileName, userId) => {
+      const db = await import("../db");
+      return db.getSavedPlaceByPhotoFileName(fileName, userId);
+    },
+  });
   // ── Buchungsbestätigung zur Reise (#279) ────────────────────────────────
   // Als einzige Ablage sind hier auch PDF erlaubt: Bestätigungen kommen als
   // PDF, und jemanden zum Abfotografieren seines eigenen PDFs zu zwingen

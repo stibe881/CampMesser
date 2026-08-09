@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -17,6 +17,7 @@ import {
   Users,
   Wallet,
   Globe2,
+  Route,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import QueryError from "@/components/QueryError";
@@ -28,6 +29,8 @@ import { Input } from "@/components/ui/input";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { computeTripStats, nightsPerYear } from "@shared/trips";
 import { trackYearRows } from "@shared/trackYears";
+import { distanceMeters } from "@shared/geo";
+import { estimateRoadDistanceM } from "@shared/routing";
 import { tripKindRows } from "@shared/tripKindStats";
 import { tripKindLabel } from "@shared/tripKind";
 import { visitedCountryRows } from "@/lib/tripCountries";
@@ -289,13 +292,120 @@ export default function Stats() {
   // Reisen nach Art (#467) – erst ab zwei Arten interessant: eine
   // Tabelle mit einer einzigen Zeile «Camping» sagt niemandem etwas.
   const kindRows = useMemo(() => tripKindRows(trips), [trips]);
-  /** Länder-Statistik (#510): Land aus Ort/Titel/Platzname geraten. */
+  /**
+   * Länder-Statistik (#510): Land aus Ort/Titel/Platzname geraten –
+   * seit #592 helfen auch die Etappen-Namen mit: Die Rundreise durch
+   * drei Länder zählt drei, mit den Nächten der jeweiligen Etappe.
+   */
+  const allStopsQuery = trpc.trips.stops.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 5 * 60_000,
+  });
   const countryStats = useMemo(() => {
     const spotNames = new Map(
       (spotsQuery.data ?? []).map(spot => [spot.id, spot.name])
     );
-    return visitedCountryRows(trips, spotNames);
-  }, [trips, spotsQuery.data]);
+    const stopsByTrip = new Map<
+      number,
+      { name: string; startDate: string; endDate: string }[]
+    >();
+    for (const stop of allStopsQuery.data ?? []) {
+      const list = stopsByTrip.get(stop.tripId) ?? [];
+      list.push(stop);
+      stopsByTrip.set(stop.tripId, list);
+    }
+    return visitedCountryRows(trips, spotNames, stopsByTrip);
+  }, [trips, spotsQuery.data, allStopsQuery.data]);
+  /**
+   * Rundreise-Kilometer (#580) ÜBER DIE STRASSE (Nutzerwunsch 09.08.2026):
+   * Je Reise werden die zusammenhängenden Etappen-Ketten mit Koordinaten
+   * gebildet und mit EINER Tabellen-Abfrage pro Kette beim Routen-Dienst
+   * (OSRM, ohne Geometrie) in Wegstrecken übersetzt. Abschnitte, für die
+   * der Dienst nichts liefert (kein Netz, keine Route), werden aus der
+   * Luftlinie mit Umwegfaktor geschätzt – und die Karte sagt das dann.
+   */
+  const stageChains = useMemo(() => {
+    const stopsByTrip = new Map<
+      number,
+      { latitude: number | null; longitude: number | null }[]
+    >();
+    for (const stop of allStopsQuery.data ?? []) {
+      const list = stopsByTrip.get(stop.tripId) ?? [];
+      list.push(stop);
+      stopsByTrip.set(stop.tripId, list);
+    }
+    const chains: { year: string; points: { lat: number; lon: number }[] }[] =
+      [];
+    for (const trip of trips) {
+      const stops = stopsByTrip.get(trip.id) ?? [];
+      const year = trip.startDate.slice(0, 4);
+      // Zusammenhängende Läufe mit Koordinaten: eine Etappe ohne
+      // Koordinaten unterbricht die Kette (wie bisher: der Abschnitt
+      // davor/danach zählt nicht).
+      let run: { lat: number; lon: number }[] = [];
+      const flush = () => {
+        if (run.length >= 2) chains.push({ year, points: run });
+        run = [];
+      };
+      for (const stop of stops) {
+        if (stop.latitude != null && stop.longitude != null) {
+          run.push({ lat: stop.latitude, lon: stop.longitude });
+        } else {
+          flush();
+        }
+      }
+      flush();
+    }
+    return chains;
+  }, [trips, allStopsQuery.data]);
+  const [stageKm, setStageKm] = useState<{
+    rows: { year: string; meters: number }[];
+    estimated: boolean;
+  } | null>(null);
+  useEffect(() => {
+    setStageKm(null);
+    if (stageChains.length === 0) return;
+    let cancelled = false;
+    void (async () => {
+      const { fetchChainDistances } = await import("@/lib/routing");
+      const metersByYear = new Map<string, number>();
+      let estimated = false;
+      for (const chain of stageChains) {
+        const routed = cancelled
+          ? []
+          : await fetchChainDistances(chain.points, "car");
+        if (cancelled) return;
+        let meters = 0;
+        for (let i = 1; i < chain.points.length; i++) {
+          const segment = routed[i - 1];
+          if (segment != null) {
+            meters += segment;
+          } else {
+            estimated = true;
+            meters += estimateRoadDistanceM(
+              distanceMeters(
+                chain.points[i - 1].lat,
+                chain.points[i - 1].lon,
+                chain.points[i].lat,
+                chain.points[i].lon
+              )
+            );
+          }
+        }
+        metersByYear.set(
+          chain.year,
+          (metersByYear.get(chain.year) ?? 0) + meters
+        );
+      }
+      const rows = Array.from(metersByYear.entries())
+        .map(([year, meters]) => ({ year, meters }))
+        .sort((a, b) => b.year.localeCompare(a.year));
+      if (!cancelled) setStageKm({ rows, estimated });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [stageChains]);
   /** Inventar-Gesamtwert (#511) aus den erfassten Kaufpreisen. */
   const inventoryWorth = useMemo(
     () => inventoryValue(inventoryQuery.data ?? []),
@@ -635,6 +745,54 @@ export default function Stats() {
                 </li>
               ))}
             </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Rundreise-Kilometer (#580): die Zahl, die am Lagerfeuer erzählt
+          wird – über die Strasse (OSRM), geschätzte Abschnitte werden
+          ehrlich dazugesagt. */}
+      {stageChains.length > 0 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <SectionHeader
+              icon={Route}
+              title={ts.stageKmTitle}
+              href="/tagebuch"
+              linkLabel={ts.tripsLink}
+            />
+            {stageKm === null ? (
+              <p
+                role="status"
+                className="flex items-center gap-2 text-sm text-muted-foreground"
+              >
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                {t.common.loading}
+              </p>
+            ) : (
+              <>
+                <ul className="space-y-2">
+                  {stageKm.rows.map(row => (
+                    <li
+                      key={row.year}
+                      className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-border/60 pb-2 last:border-0 last:pb-0"
+                    >
+                      <span className="text-sm font-semibold">{row.year}</span>
+                      <span className="text-sm tabular-nums">
+                        {ts.stageKmLine(
+                          Math.round(row.meters / 1000).toLocaleString(
+                            LOCALE_TAGS[lang]
+                          )
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {stageKm.estimated ? ts.stageKmHintEstimate : ts.stageKmHint}
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       )}

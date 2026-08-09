@@ -123,3 +123,31 @@ describe("buildEvePackAlert", () => {
     expect(EVE_PACK_SEND_HOUR_TO).toBe(21);
   });
 });
+
+/** Etappen-Vorabend-Hinweis (#579): «Morgen weiter nach …». */
+describe("buildStageMoveAlert", () => {
+  const stops = [
+    { tripId: 3, name: "Verona", startDate: TOMORROW },
+    { tripId: 3, name: "Comersee", startDate: "2026-08-01" },
+  ];
+
+  it("meldet die Etappe, die morgen beginnt", async () => {
+    const { buildStageMoveAlert } = await import("./push");
+    const alert = buildStageMoveAlert(stops, new Set([3]), TODAY);
+    expect(alert?.title).toContain("Verona");
+    expect(alert?.key).toBe(`stagemove:3:${TOMORROW}`);
+    expect(alert?.url).toBe("/heute");
+  });
+
+  it("schweigt ohne Wechsel morgen oder ohne laufende Reise", async () => {
+    const { buildStageMoveAlert } = await import("./push");
+    expect(buildStageMoveAlert(stops, new Set([99]), TODAY)).toBeNull();
+    expect(buildStageMoveAlert(stops, new Set([3]), "2026-08-05")).toBeNull();
+  });
+
+  it("übersetzt den Titel", async () => {
+    const { buildStageMoveAlert } = await import("./push");
+    const alert = buildStageMoveAlert(stops, new Set([3]), TODAY, "fr");
+    expect(alert?.title).toBe("Demain, direction Verona");
+  });
+});

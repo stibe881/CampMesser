@@ -221,6 +221,7 @@ export default function NearbyTransit({
           {status === "loading" && (
             <div
               className="mt-3 space-y-2"
+              role="status"
               aria-busy="true"
               aria-label={tt.loadingStations}
             >
@@ -287,6 +288,7 @@ export default function NearbyTransit({
                         {boardStatus === "loading" && (
                           <div
                             className="space-y-2"
+                            role="status"
                             aria-busy="true"
                             aria-label={tt.loadingBoard}
                           >

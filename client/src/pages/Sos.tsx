@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useConfirm } from "@/components/ConfirmDialog";
+import { Link } from "wouter";
 import {
   Phone,
   MapPin,
@@ -9,6 +10,7 @@ import {
   ExternalLink,
   Info,
   Share2,
+  Wrench,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
@@ -631,6 +633,56 @@ export default function SosPage() {
             className="mb-6"
           />
         )}
+
+      {/* Pannenhilfe (#583): bei einer Panne alles an einem Ort – die
+          TCS-Nummern, die drei Handgriffe davor und der Sprung ins
+          Sprachhilfe-Kapitel «Panne & Werkstatt» (#571). Die Nummern
+          des Reiselands stehen gleich darunter (#521). */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <h2 className="mb-2 flex items-center gap-2 font-serif text-lg font-semibold">
+            <Wrench className="h-5 w-5 text-primary" aria-hidden="true" />
+            {t.sos.breakdownTitle}
+          </h2>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {t.sos.breakdownHint}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a
+              href="tel:140"
+              className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 transition-colors hover:border-destructive/30"
+              aria-label={t.sos.callAria(t.sos.breakdownTcsHome)}
+            >
+              <Phone
+                className="h-3.5 w-3.5 text-destructive"
+                aria-hidden="true"
+              />
+              <span className="text-sm">{t.sos.breakdownTcsHome}</span>
+              <span className="font-mono text-sm font-bold">140</span>
+            </a>
+            <a
+              href="tel:+41588272220"
+              className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 transition-colors hover:border-destructive/30"
+              aria-label={t.sos.callAria(t.sos.breakdownTcsAbroad)}
+            >
+              <Phone
+                className="h-3.5 w-3.5 text-destructive"
+                aria-hidden="true"
+              />
+              <span className="text-sm">{t.sos.breakdownTcsAbroad}</span>
+              <span className="font-mono text-sm font-bold">
+                +41 58 827 22 20
+              </span>
+            </a>
+          </div>
+          <Link
+            href="/sprachhilfe"
+            className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+          >
+            {t.sos.breakdownPhrasesLink}
+          </Link>
+        </CardContent>
+      </Card>
 
       {/* Rega-Hinweis */}
       <Card className="mb-6 bg-accent/50">

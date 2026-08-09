@@ -81,6 +81,12 @@ export const documentPhotoStorage = createPhotoStorage("documents");
 /** Beleg-Fotos der Reisekasse (#540): uploads/expenses/<fileName> */
 export const expensePhotoStorage = createPhotoStorage("expenses");
 
+/** Tages-Foto im Reise-Journal (#590): uploads/journal/<fileName> */
+export const journalPhotoStorage = createPhotoStorage("journal");
+
+/** Foto eines Merkorts (#589): uploads/places/<fileName> */
+export const placePhotoStorage = createPhotoStorage("places");
+
 /**
  * Buchungsbestätigungen zu Reisen (#279): uploads/reservations/<fileName>.
  * Als einzige Ablage sind hier auch PDF erlaubt – die Prüfung von Typ und

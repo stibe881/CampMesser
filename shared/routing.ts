@@ -332,6 +332,48 @@ export function osrmTableUrl(
 }
 
 /**
+ * Tabelle über eine KETTE von Punkten (Nutzerwunsch 09.08.2026,
+ * Strassen- statt Luftlinien-Kilometer in der Etappen-Statistik #580):
+ * EINE Anfrage pro Reise liefert die Matrix aller Punkte, aus der die
+ * aufeinanderfolgenden Abschnitte gelesen werden – ohne Geometrie, also
+ * viel billiger als eine Routen-Abfrage je Abschnitt.
+ */
+export function osrmChainTableUrl(
+  profile: RoutingProfile,
+  points: GeoPoint[]
+): string {
+  const coords = points.map(coordinate).join(";");
+  const params = new URLSearchParams({ annotations: "distance" });
+  return `${OSRM_BASE_URL}/${ROUTING_PROFILES[profile].path}/table/v1/driving/${coords}?${params.toString()}`;
+}
+
+/**
+ * Aus der Ketten-Antwort die Wegstrecken der AUFEINANDERFOLGENDEN
+ * Abschnitte lesen (Punkt i → Punkt i+1): für n Punkte n−1 Werte, in der
+ * Reihenfolge der Anfrage. `null` je Abschnitt heisst «keine Route» –
+ * der Aufrufer schätzt dann diesen einen Abschnitt aus der Luftlinie.
+ */
+export function parseOsrmChain(
+  json: unknown,
+  pointCount: number
+): (number | null)[] {
+  const empty = new Array<number | null>(Math.max(0, pointCount - 1)).fill(
+    null
+  );
+  if (!json || typeof json !== "object") return empty;
+  const body = json as { code?: unknown; distances?: unknown };
+  if (body.code !== "Ok" || !Array.isArray(body.distances)) return empty;
+  return empty.map((_, index) => {
+    const row = (body.distances as unknown[])[index];
+    if (!Array.isArray(row)) return null;
+    const value = row[index + 1];
+    return typeof value === "number" && Number.isFinite(value) && value >= 0
+      ? value
+      : null;
+  });
+}
+
+/**
  * Antwort des Tabellen-Diensts lesen: Wegstrecke in Metern je Ziel, in der
  * Reihenfolge der Anfrage. `null` steht für «nicht erreichbar» – eine
  * Hütte ohne Weganschluss bekommt keine erfundene Zahl.

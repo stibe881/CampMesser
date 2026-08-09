@@ -58,6 +58,54 @@ function weekday(date: string): number {
  * Ein Wochenende zählt nur, wenn BEIDE Tage noch bevorstehen und in der
  * Prognose liegen – ein halbes Wochenende ist keine Empfehlung.
  */
+export interface TripWindow {
+  /** 0–100; Mittel der bewerteten Reisetage. */
+  score: number;
+  verdict: WeekendVerdict;
+  /** Regensumme der bewerteten Tage in mm (gerundet). */
+  rainMm: number;
+  /** Wärmster bewerteter Tag (gerundet). */
+  tempMaxC: number;
+  /** Wie viele Reisetage die Prognose abdeckt. */
+  coveredDays: number;
+  /** Deckt die Prognose alle Reisetage ab? Sonst ist das Urteil vorläufig. */
+  complete: boolean;
+}
+
+/**
+ * Reisetage-Ampel (#587): Bewertet DIE Tage einer konkreten Reise mit
+ * derselben Punktelogik wie die Wochenenden. Liegen erst einige
+ * Reisetage in der Prognose, wird ehrlich «vorläufig» signalisiert
+ * (`complete: false`); liegt kein einziger Tag im Fenster, kommt null.
+ */
+export function tripWindow(
+  days: readonly WeekendDayLike[],
+  startDate: string,
+  endDate: string
+): TripWindow | null {
+  const covered = days.filter(d => d.date >= startDate && d.date <= endDate);
+  if (covered.length === 0) return null;
+  const score = Math.round(
+    covered.reduce((sum, d) => sum + dayScore(d), 0) / covered.length
+  );
+  const tripDays =
+    Math.round(
+      (new Date(`${endDate}T00:00:00Z`).getTime() -
+        new Date(`${startDate}T00:00:00Z`).getTime()) /
+        86_400_000
+    ) + 1;
+  return {
+    score,
+    verdict: score >= 75 ? "top" : score >= 50 ? "ok" : "bad",
+    rainMm: Math.round(
+      covered.reduce((sum, d) => sum + d.precipitationSumMm, 0)
+    ),
+    tempMaxC: Math.round(Math.max(...covered.map(d => d.tempMaxC))),
+    coveredDays: covered.length,
+    complete: covered.length >= tripDays,
+  };
+}
+
 export function weekendWindows(
   days: readonly WeekendDayLike[],
   todayIso: string

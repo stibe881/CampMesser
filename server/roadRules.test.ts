@@ -31,6 +31,7 @@ describe("Länder-Datensatz", () => {
       "bacNote",
       "equipment",
       "zones",
+      "twoWheels",
       "emergencyNote",
       "camping",
     ] as const;

@@ -187,6 +187,12 @@ async function snapshotTrip(
     .select()
     .from(tripExpenses)
     .where(eq(tripExpenses.tripId, id));
+  // Journal separat gehalten: die Tages-Fotos (#590) müssen mit in die
+  // Datei-Liste, damit sie den Papierkorb überleben und mit ihm fallen.
+  const journal = await db
+    .select()
+    .from(tripJournal)
+    .where(eq(tripJournal.tripId, id));
 
   const payload: TrashPayload = {
     tripLogs: trips,
@@ -201,10 +207,7 @@ async function snapshotTrip(
       .select()
       .from(tripStops)
       .where(eq(tripStops.tripId, id)),
-    tripJournal: await db
-      .select()
-      .from(tripJournal)
-      .where(eq(tripJournal.tripId, id)),
+    tripJournal: journal,
     tripMembers: await db
       .select()
       .from(tripMembers)
@@ -263,6 +266,12 @@ async function snapshotTrip(
   expenses.forEach(expense => {
     if (expense.photoFileName) {
       files.push({ storage: "expenses", fileName: expense.photoFileName });
+    }
+  });
+  // Tages-Fotos des Journals (#590) ebenso
+  journal.forEach(entry => {
+    if (entry.photoFileName) {
+      files.push({ storage: "journal", fileName: entry.photoFileName });
     }
   });
 
@@ -676,6 +685,8 @@ async function removeFiles(files: readonly TrashFile[]): Promise<void> {
     notes: [],
     // Ab #540: die Belege der Reisekasse.
     expenses: [],
+    // Ab #590: die Tages-Fotos des Journals.
+    journal: [],
   };
   files.forEach(file => {
     if (byStorage[file.storage]) byStorage[file.storage].push(file.fileName);
@@ -690,6 +701,7 @@ async function removeFiles(files: readonly TrashFile[]): Promise<void> {
       [byStorage.receipts, storages.receiptPhotoStorage],
       [byStorage.notes, storages.notePhotoStorage],
       [byStorage.expenses, storages.expensePhotoStorage],
+      [byStorage.journal, storages.journalPhotoStorage],
     ];
   for (const [names, storage] of targets) {
     if (names.length > 0) await storage.deleteFiles(names);

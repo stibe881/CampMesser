@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   DETOUR_FACTOR,
   applyRouteDistances,
+  osrmChainTableUrl,
   osrmTableUrl,
+  parseOsrmChain,
   parseOsrmTable,
   estimateRoadDistanceM,
   offsetOnRoute,
@@ -243,5 +245,47 @@ describe("Distanzen zu Fundorten über den Weg", () => {
     const list = [{ place: { id: "a" }, distanceM: 800 }];
     applyRouteDistances(list, new Map([["a", 900]]));
     expect(list[0].distanceM).toBe(800);
+  });
+});
+
+describe("Etappen-Kette über die Strasse (Nutzerwunsch 09.08.2026)", () => {
+  it("fragt die ganze Kette in EINER Tabellen-Anfrage ab (alle-zu-allen)", () => {
+    const url = osrmChainTableUrl("car", [ZUERICH, BIEL, { lat: 47, lon: 8 }]);
+    expect(url).toContain("/routed-car/table/v1/driving/");
+    expect(url).toContain("8.54170,47.37690;7.44740,46.94800;8.00000,47.00000");
+    // KEINE sources-Einschränkung – gebraucht wird die Diagonale i → i+1
+    expect(url).not.toContain("sources=");
+    expect(url).toContain("annotations=distance");
+  });
+
+  it("liest die aufeinanderfolgenden Abschnitte aus der Matrix", () => {
+    const answer = {
+      code: "Ok",
+      distances: [
+        [0, 1200, 9999],
+        [1200, 0, 800],
+        [9999, 800, 0],
+      ],
+    };
+    // Drei Punkte → zwei Abschnitte: 0→1 und 1→2 (nie die Diagonale 0→2)
+    expect(parseOsrmChain(answer, 3)).toEqual([1200, 800]);
+  });
+
+  it("macht aus fehlenden Routen null je Abschnitt", () => {
+    expect(
+      parseOsrmChain(
+        {
+          code: "Ok",
+          distances: [
+            [0, null],
+            [null, 0],
+          ],
+        },
+        2
+      )
+    ).toEqual([null]);
+    expect(parseOsrmChain({ code: "NoTable" }, 3)).toEqual([null, null]);
+    expect(parseOsrmChain(null, 2)).toEqual([null]);
+    expect(parseOsrmChain(null, 1)).toEqual([]);
   });
 });
