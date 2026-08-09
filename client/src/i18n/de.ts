@@ -4606,6 +4606,8 @@ export const de = {
     departureToday: "Heute ist Abreisetag",
     stageLine: (name: string, until: string) =>
       `Etappe: ${name} \u00b7 bis ${until}`,
+    stageNext: (name: string) => `Morgen weiter nach ${name}`,
+    stageNextNavAria: (name: string) => `Navigation nach ${name} starten`,
     weather: "Wetter",
     menu: "Menüplan",
     shopping: "Einkaufsliste",

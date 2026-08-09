@@ -4476,6 +4476,8 @@ export const en: Translation = {
     departureToday: "Departure day",
     stageLine: (name: string, until: string) =>
       `Stage: ${name} \u00b7 until ${until}`,
+    stageNext: (name: string) => `Moving on to ${name} tomorrow`,
+    stageNextNavAria: (name: string) => `Start navigation to ${name}`,
     weather: "Weather",
     menu: "Meal plan",
     shopping: "Shopping list",

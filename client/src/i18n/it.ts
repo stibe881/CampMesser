@@ -4568,6 +4568,8 @@ export const it: Translation = {
     departureToday: "Oggi si parte",
     stageLine: (name: string, until: string) =>
       `Tappa: ${name} \u00b7 fino al ${until}`,
+    stageNext: (name: string) => `Domani si prosegue per ${name}`,
+    stageNextNavAria: (name: string) => `Avvia la navigazione verso ${name}`,
     weather: "Meteo",
     menu: "Menu",
     shopping: "Lista della spesa",

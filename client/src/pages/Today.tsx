@@ -33,6 +33,7 @@ import {
   KeyRound,
   ListChecks,
   MapPin,
+  Route,
   NotebookPen,
   Refrigerator,
   ShoppingCart,
@@ -57,7 +58,9 @@ import { trpc } from "@/lib/trpc";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { MEAL_LABELS } from "@shared/menuPlan";
 import { currentTripDay } from "@shared/trips";
-import { currentTripStop } from "@shared/tripStops";
+import { currentTripStop, sortTripStops } from "@shared/tripStops";
+import { shiftIsoDay } from "@shared/localDate";
+import { defaultProvider, directionsUrl } from "@/lib/directions";
 import { expiryInfo, isUrgentExpiry } from "@shared/food";
 import {
   nightsLeft,
@@ -149,6 +152,19 @@ export default function TodayPage() {
     () => currentTripStop(stopsQuery.data ?? [], today),
     [stopsQuery.data, today]
   );
+  /**
+   * Weiterreise-Hinweis (#559): Beginnt MORGEN eine neue Etappe, sagt es
+   * die Kopfzeile heute Abend – mit Navigations-Link, wenn die Etappe
+   * Koordinaten hat.
+   */
+  const nextStop = useMemo(() => {
+    const tomorrow = shiftIsoDay(today, 1);
+    return (
+      sortTripStops(stopsQuery.data ?? []).find(
+        stop => stop.startDate === tomorrow
+      ) ?? null
+    );
+  }, [stopsQuery.data, today]);
   // Koordinaten: aktuelle Etappe zuerst (#536), dann Zeltplatz, sonst die
   // der Reise aus der Ortssuche (#465) – damit haben auch Hotel- und
   // Strandreisen Wetter und Wasser.
@@ -366,6 +382,34 @@ export default function TodayPage() {
                 {td.stageLine(
                   currentStop.name,
                   fmtDayMonth(new Date(`${currentStop.endDate}T00:00:00`), lang)
+                )}
+              </p>
+            )}
+            {/* Weiterreise-Hinweis (#559): morgen beginnt die nächste
+                Etappe – mit Sprung in die Navigation, wo Koordinaten da
+                sind. */}
+            {nextStop && (
+              <p className="mt-1 flex items-center gap-1.5 text-sm">
+                <Route
+                  className="h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                {nextStop.latitude != null && nextStop.longitude != null ? (
+                  <a
+                    href={directionsUrl(
+                      nextStop.latitude,
+                      nextStop.longitude,
+                      defaultProvider()
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-primary hover:underline"
+                    aria-label={td.stageNextNavAria(nextStop.name)}
+                  >
+                    {td.stageNext(nextStop.name)}
+                  </a>
+                ) : (
+                  td.stageNext(nextStop.name)
                 )}
               </p>
             )}

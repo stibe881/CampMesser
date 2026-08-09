@@ -4602,6 +4602,9 @@ export const fr: Translation = {
     departureToday: "Départ aujourd'hui",
     stageLine: (name: string, until: string) =>
       `\u00c9tape\u202f: ${name} \u00b7 jusqu\u2019au ${until}`,
+    stageNext: (name: string) => `Demain, direction ${name}`,
+    stageNextNavAria: (name: string) =>
+      `D\u00e9marrer la navigation vers ${name}`,
     weather: "Météo",
     menu: "Menu",
     shopping: "Liste de courses",
