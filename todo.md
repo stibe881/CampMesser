@@ -21,7 +21,7 @@
 - [x] #552 Offline-Paket für geplante Routen: «Offline-Karte laden» pro gespeicherter Route lädt die Kacheln in einem 1-km-Korridor entlang der Strecke (tilesForCorridor in mapTiles.ts, 5 Tests) in denselben Cache wie die Platz-Pakete (#217) – der Service Worker bedient sie ohne Änderung. Fortschritt/Abbrechen/Löschen wie beim Platz; Löschen der Route räumt das Paket mit ab
 - [x] #553 Jahresziel Reisenächte in der Statistik (eigene Karte mit Fortschrittsbalken fürs laufende Jahr; Ziel 1–365 selbst gesteckt, am Konto gesynct über neuen Schlüssel nightsGoal, jederzeit entfernbar)
 - [x] #554 Technik: TripsPage aufteilen: Die zwei fast wortgleichen Reise-Karten (geplant/vergangen) teilten sich Meta-Zeile, Aktions-Spalte und den LazySection-Stapel der Detailseite als KOPIEN – jede Änderung musste zweimal getippt werden (zuletzt #536). Neu leben die drei Blöcke einmal in TripListItemParts.tsx (TripMetaLine, TripActionColumn, TripDetailSections mit phase «planned»/«past»); Trips.tsx schrumpft von 1951 auf 1431 Zeilen, Verhalten unverändert
-- [ ] #555 Technik: Druckseiten im Playwright-Smoke-Test
+- [x] #555 Technik: Druckseiten im Playwright-Smoke-Test: alle 9 Druck-Routen (Packliste, Ämtli, Einkauf, Platz, Reise, Menüplan, Reisepass, Schnitzeljagd, Urkunde) werden abgemeldet angefahren – erwartet wird der Anmelde-Hinweis bzw. «nicht gefunden», pageerror-Ereignisse lassen den Test durchfallen. Fängt weisse Seiten aus kaputten Chunks und Routen-Reihenfolge-Fehlern («/:id fängt drucken ab»); lokal verifiziert, 13/13 Smoke-Tests grün
 
 ## Zwanzig Vorschläge (09.08.2026, Runde 53)
 
