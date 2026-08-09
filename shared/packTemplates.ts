@@ -898,6 +898,301 @@ export const packScenarios: PackScenario[] = [
     ],
   },
   {
+    id: "hotelferien",
+    label: l4(
+      "Hotelferien",
+      "Vacances à l'hôtel",
+      "Vacanze in hotel",
+      "Hotel holiday"
+    ),
+    description: l4(
+      "Koffer statt Zelt – Papiere, Ladegeräte und Kleider, ohne Camping-Ballast.",
+      "Valise au lieu de la tente – papiers, chargeurs et vêtements, sans le matériel de camping.",
+      "Valigia invece della tenda – documenti, caricatori e vestiti, senza zavorra da campeggio.",
+      "Suitcase instead of tent – papers, chargers and clothes, without the camping load."
+    ),
+    icon: "Building2",
+    items: [
+      {
+        name: l4(
+          "Reisepass / ID",
+          "Passeport / CI",
+          "Passaporto / CI",
+          "Passport / ID"
+        ),
+        category: cat.dokumente,
+      },
+      {
+        name: l4(
+          "Buchungsbestätigung",
+          "Confirmation de réservation",
+          "Conferma di prenotazione",
+          "Booking confirmation"
+        ),
+        category: cat.dokumente,
+      },
+      {
+        name: l4(
+          "Kreditkarte & Bargeld",
+          "Carte de crédit & espèces",
+          "Carta di credito e contanti",
+          "Credit card & cash"
+        ),
+        category: cat.dokumente,
+      },
+      {
+        name: l4(
+          "Ladegeräte & Kabel",
+          "Chargeurs & câbles",
+          "Caricatori e cavi",
+          "Chargers & cables"
+        ),
+        category: cat.lichtEnergie,
+      },
+      {
+        name: l4(
+          "Reiseadapter",
+          "Adaptateur de voyage",
+          "Adattatore da viaggio",
+          "Travel adapter"
+        ),
+        category: cat.lichtEnergie,
+      },
+      {
+        name: l4("Powerbank", "Batterie externe", "Powerbank", "Power bank"),
+        category: cat.lichtEnergie,
+      },
+      {
+        name: l4(
+          "Kulturbeutel",
+          "Trousse de toilette",
+          "Beauty case",
+          "Toiletry bag"
+        ),
+        category: cat.hygiene,
+      },
+      {
+        name: l4(
+          "Medikamente & Apotheke",
+          "Médicaments & pharmacie",
+          "Medicinali e farmacia",
+          "Medication & first aid"
+        ),
+        category: cat.sicherheit,
+      },
+      {
+        name: l4(
+          "Wechselwäsche pro Tag",
+          "Linge de rechange par jour",
+          "Cambio per ogni giorno",
+          "Change of clothes per day"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Bequeme Schuhe",
+          "Chaussures confortables",
+          "Scarpe comode",
+          "Comfortable shoes"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Regenjacke",
+          "Veste de pluie",
+          "Giacca antipioggia",
+          "Rain jacket"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Badesachen fürs Hotelbad",
+          "Affaires de bain pour la piscine",
+          "Costume per la piscina",
+          "Swim kit for the hotel pool"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Ohrenstöpsel & Schlafmaske",
+          "Bouchons d'oreilles & masque",
+          "Tappi e mascherina",
+          "Earplugs & sleep mask"
+        ),
+        category: cat.komfort,
+      },
+      {
+        name: l4(
+          "Tagesrucksack",
+          "Sac à dos de jour",
+          "Zainetto da giorno",
+          "Day pack"
+        ),
+        category: cat.gepaeck,
+      },
+      {
+        name: l4(
+          "Wäschesack",
+          "Sac à linge",
+          "Sacco biancheria",
+          "Laundry bag"
+        ),
+        category: cat.gepaeck,
+      },
+      {
+        name: l4(
+          "Buch / Reiselektüre",
+          "Livre / lecture",
+          "Libro / lettura",
+          "Book / holiday reading"
+        ),
+        category: cat.komfort,
+      },
+    ],
+  },
+  {
+    id: "velotour",
+    label: l4("Velotour", "Randonnée à vélo", "Tour in bici", "Bike tour"),
+    description: l4(
+      "Alles für Tagesetappen auf zwei Rädern – Werkzeug, Licht und Verpflegung.",
+      "Tout pour des étapes à vélo – outils, éclairage et ravitaillement.",
+      "Tutto per le tappe in bici – attrezzi, luci e viveri.",
+      "Everything for day stages on two wheels – tools, lights and provisions."
+    ),
+    icon: "Bike",
+    items: [
+      {
+        name: l4("Velohelm", "Casque vélo", "Casco bici", "Bike helmet"),
+        category: cat.sicherheit,
+      },
+      {
+        name: l4(
+          "Flickzeug & Ersatzschlauch",
+          "Kit de réparation & chambre à air",
+          "Kit riparazione e camera d'aria",
+          "Repair kit & spare tube"
+        ),
+        category: cat.werkzeug,
+      },
+      {
+        name: l4("Pumpe", "Pompe", "Pompa", "Pump"),
+        category: cat.werkzeug,
+      },
+      {
+        name: l4(
+          "Multitool & Kettenöl",
+          "Multitool & huile de chaîne",
+          "Multitool e olio catena",
+          "Multitool & chain oil"
+        ),
+        category: cat.werkzeug,
+      },
+      {
+        name: l4(
+          "Velolichter & Ersatzakku",
+          "Éclairage & batterie de rechange",
+          "Luci e batteria di scorta",
+          "Bike lights & spare battery"
+        ),
+        category: cat.lichtEnergie,
+      },
+      {
+        name: l4("Veloschloss", "Antivol", "Lucchetto", "Bike lock"),
+        category: cat.sicherheit,
+      },
+      {
+        name: l4(
+          "Velotaschen / Gepäckträgertasche",
+          "Sacoches",
+          "Borse da bici",
+          "Panniers"
+        ),
+        category: cat.gepaeck,
+      },
+      {
+        name: l4(
+          "Velohandschuhe",
+          "Gants vélo",
+          "Guanti bici",
+          "Cycling gloves"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Velohose & Trikots",
+          "Cuissard & maillots",
+          "Pantaloncini e maglie",
+          "Bike shorts & jerseys"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4(
+          "Regenjacke",
+          "Veste de pluie",
+          "Giacca antipioggia",
+          "Rain jacket"
+        ),
+        category: cat.kleidung,
+      },
+      {
+        name: l4("Trinkflaschen", "Bidons", "Borracce", "Water bottles"),
+        category: cat.kueche,
+        quantity: 2,
+      },
+      {
+        name: l4(
+          "Riegel & Notproviant",
+          "Barres & en-cas de secours",
+          "Barrette e scorta d'emergenza",
+          "Bars & emergency snacks"
+        ),
+        category: cat.kueche,
+      },
+      {
+        name: l4(
+          "Sonnencreme & Brille",
+          "Crème solaire & lunettes",
+          "Crema solare e occhiali",
+          "Sunscreen & glasses"
+        ),
+        category: cat.sicherheit,
+      },
+      {
+        name: l4(
+          "Karte / GPS-Halterung",
+          "Carte / support GPS",
+          "Mappa / supporto GPS",
+          "Map / GPS mount"
+        ),
+        category: cat.orientierung,
+      },
+      {
+        name: l4(
+          "Erste-Hilfe-Set",
+          "Trousse de premiers secours",
+          "Kit di primo soccorso",
+          "First aid kit"
+        ),
+        category: cat.sicherheit,
+      },
+      {
+        name: l4(
+          "Wechselkleider für abends",
+          "Vêtements pour le soir",
+          "Vestiti per la sera",
+          "Change of clothes for the evening"
+        ),
+        category: cat.kleidung,
+      },
+    ],
+  },
+  {
     id: "custom",
     label: l4(
       "Eigene Liste",

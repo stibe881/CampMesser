@@ -44,6 +44,23 @@ import {
   type TripKind,
 } from "@shared/tripKind";
 import { cn } from "@/lib/utils";
+import { packScenarios } from "@shared/packTemplates";
+import { pick } from "@shared/i18n";
+
+/**
+ * Passende Packvorlage je Reiseart (#517). Bewusst OHNE Camping und
+ * Tagesausflug: Beim Camping ist «Solo oder Familie?» eine echte Frage
+ * (die Auswahl in den Packlisten kann sie stellen, wir nicht), und der
+ * Tagesausflug braucht selten eine Liste.
+ */
+const KIND_SCENARIO: Partial<Record<TripKind, string>> = {
+  strand: "strand",
+  hotel: "hotelferien",
+  staedte: "staedtereise",
+  wandern: "solo",
+  velo: "velotour",
+  wintersport: "wintersport",
+};
 
 /** Auswahl-Wert «freier Ort» (kein Zeltplatz-Favorit verknüpft). */
 const FREE_LOCATION = "frei";
@@ -333,6 +350,21 @@ export default function TripFormDialog({
     onError: e => toast.error(e.message || t.trips.entryUpdateFailed),
   });
 
+  // Vorlagen-Vorschlag (#517): Liste aus der Szenario-Vorlage erstellen
+  // und gleich mit der Reise verknüpfen.
+  const suggestedScenario =
+    !editingShared && packListChoice === "keine"
+      ? (packScenarios.find(s => s.id === KIND_SCENARIO[formKind]) ?? null)
+      : null;
+  const createListMutation = trpc.packing.createList.useMutation({
+    onSuccess: (data: { listId: number }) => {
+      utils.packing.lists.invalidate();
+      setPackListChoice(String(data.listId));
+      toast.success(t.trips.templateListCreated);
+    },
+    onError: () => toast.error(t.common.actionFailed),
+  });
+
   /**
    * Art im Formular wechseln (#485): Felder, die es für die neue Art
    * nicht gibt, werden aufgeräumt statt unsichtbar mitgeschleppt – ein
@@ -594,6 +626,24 @@ export default function TripFormDialog({
                       ))}
                   </SelectContent>
                 </Select>
+                {suggestedScenario && (
+                  <button
+                    type="button"
+                    disabled={createListMutation.isPending}
+                    onClick={() =>
+                      createListMutation.mutate({
+                        name: pick(suggestedScenario.label, lang),
+                        scenario: suggestedScenario.id,
+                        lang,
+                      })
+                    }
+                    className="mt-1.5 text-left text-xs font-medium text-primary hover:underline disabled:opacity-50"
+                  >
+                    {t.trips.templateSuggest(
+                      pick(suggestedScenario.label, lang)
+                    )}
+                  </button>
+                )}
               </div>
             )}
           </div>

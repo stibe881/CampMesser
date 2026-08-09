@@ -2482,6 +2482,9 @@ export const it: Translation = {
       "Condiviso con ReiseKompass – la tua bussola per vacanze, campeggio e gite.",
   },
   trips: {
+    templateSuggest: (name: string) =>
+      `Usa il modello «${name}» come lista bagagli`,
+    templateListCreated: "Lista creata dal modello e collegata.",
     readinessAbroadHint: (country: string) =>
       `Questo viaggio porta in ${country} – pensa a vignetta, pedaggi e dotazioni obbligatorie.`,
     readinessAbroadLink: "Apri la scheda paese",

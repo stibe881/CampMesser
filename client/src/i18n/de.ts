@@ -2511,6 +2511,9 @@ export const de = {
       "Geteilt mit ReiseKompass – deinem Kompass für Ferien, Camping und Ausflüge.",
   },
   trips: {
+    templateSuggest: (name: string) =>
+      `Vorlage «${name}» als Packliste übernehmen`,
+    templateListCreated: "Packliste aus der Vorlage erstellt und verknüpft.",
     readinessAbroadHint: (country: string) =>
       `Diese Reise führt nach ${country} – denk an Vignette, Maut und Mitführpflichten.`,
     readinessAbroadLink: "Länder-Merkblatt öffnen",

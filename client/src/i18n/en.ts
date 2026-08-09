@@ -2429,6 +2429,9 @@ export const en: Translation = {
       "Shared with ReiseKompass – your compass for holidays, camping and day trips.",
   },
   trips: {
+    templateSuggest: (name: string) =>
+      `Use the “${name}” template as packing list`,
+    templateListCreated: "Packing list created from the template and linked.",
     readinessAbroadHint: (country: string) =>
       `This trip goes to ${country} – remember vignette, tolls and mandatory equipment.`,
     readinessAbroadLink: "Open country factsheet",
