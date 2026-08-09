@@ -1044,6 +1044,19 @@ export async function getTripExpenseById(id: number) {
     .limit(1);
   return rows[0];
 }
+/**
+ * Ausgabe über ihren Beleg-Dateinamen finden (#540) – die Auslieferung
+ * des Fotos prüft den Zugriff danach über canAccessTrip.
+ */
+export async function getTripExpenseByPhotoFileName(fileName: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripExpenses)
+    .where(eq(tripExpenses.photoFileName, fileName))
+    .limit(1);
+  return rows[0];
+}
 /** Ausgabe erfassen – nur NACH einer canAccessTrip-Prüfung im Router. */
 export async function addTripExpense(data: InsertTripExpense) {
   const db = requireDb(await getDb());

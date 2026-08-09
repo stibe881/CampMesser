@@ -1,0 +1,1 @@
+ALTER TABLE `tripExpenses` ADD `photoFileName` varchar(60);

@@ -13,6 +13,7 @@ import {
   BookOpen,
   CalendarClock,
   CalendarPlus,
+  Camera,
   Clock,
   CalendarDays,
   ChevronDown,
@@ -106,6 +107,7 @@ import {
   tripBoardCounts,
   type TripBoardKind,
 } from "@shared/tripBoard";
+import { resizeImageForUpload } from "@/lib/imageResize";
 import { buildTripIcs, icsFileName, type IcsTrip } from "@shared/ics";
 import {
   countMainSlots,
@@ -126,6 +128,10 @@ import { todayIso } from "@shared/localDate";
  * Ankunft muss bis zur Abreise überleben – Wochen später, anderes Öffnen.
  */
 const POWER_STORAGE_PREFIX = "campmesser.powerMeter.";
+
+/** URL eines Beleg-Fotos (#540) – gleiche Origin, Zugriff über das Cookie. */
+const expensePhotoUrl = (fileName: string) =>
+  `/api/trips/expenses/photos/${fileName}`;
 
 const EXPENSE_CATEGORY_BARS: Record<ExpenseCategory, string> = {
   camping: "bg-chart-1",
@@ -188,6 +194,15 @@ export default function TripExpenses({
   const [description, setDescription] = useState("");
   const [day, setDay] = useState(defaultDay);
   const [paidBy, setPaidBy] = useState("");
+  /**
+   * Beleg-Foto (#540): frisch gewählt als Blob, hochgeladen erst NACH dem
+   * Speichern der Ausgabe – vorher gibt es für neue keine Id.
+   */
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  const [photoRemove, setPhotoRemove] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
   /** Budget-Feld (#256): offen = Eingabe sichtbar. */
   const [editingBudget, setEditingBudget] = useState(false);
   const [budgetInput, setBudgetInput] = useState("");
@@ -256,6 +271,12 @@ export default function TripExpenses({
     setEditing(null);
     setAmount("");
     setDescription("");
+    setPhotoBlob(null);
+    setPhotoPreviewUrl(url => {
+      if (url) URL.revokeObjectURL(url);
+      return null;
+    });
+    setPhotoRemove(false);
   };
 
   const invalidate = () => {
@@ -288,6 +309,8 @@ export default function TripExpenses({
     },
     onError: () => toast.error(t.tripExpenses.deleteFailed),
   });
+  /** Beleg-Foto entfernen (#540) – der Upload läuft als Raw-POST, s. submit. */
+  const removePhotoMutation = trpc.trips.expenses.removePhoto.useMutation();
 
   /**
    * CHF-Sicht der Ausgaben (#441): Euro-Beträge zum Reise-Kurs, ohne Kurs
@@ -379,6 +402,15 @@ export default function TripExpenses({
   const labelOf = (expense: { description: string | null }) =>
     expense.description?.trim() || t.tripExpenses.untitled;
 
+  const resetPhotoState = () => {
+    setPhotoBlob(null);
+    setPhotoPreviewUrl(url => {
+      if (url) URL.revokeObjectURL(url);
+      return null;
+    });
+    setPhotoRemove(false);
+  };
+
   const startNew = () => {
     setEditing("neu");
     setAmount("");
@@ -388,6 +420,7 @@ export default function TripExpenses({
     setPaidBy(
       knownPayers[0] ?? user?.name ?? user?.email ?? t.tripExpenses.meFallback
     );
+    resetPhotoState();
   };
 
   const startEditExpense = (expense: (typeof expenses)[number]) => {
@@ -398,9 +431,46 @@ export default function TripExpenses({
     setDescription(expense.description ?? "");
     setDay(expense.day);
     setPaidBy(expense.paidBy);
+    resetPhotoState();
   };
 
-  const submit = () => {
+  /** Beleg der gerade bearbeiteten Ausgabe – fürs Vorschau-Bild im Formular. */
+  const editingPhotoFileName =
+    typeof editing === "number"
+      ? (expenses.find(e => e.id === editing)?.photoFileName ?? null)
+      : null;
+
+  const handlePhotoSelected = async (fileList: FileList | null) => {
+    const file = fileList?.[0];
+    if (photoInputRef.current) photoInputRef.current.value = "";
+    if (!file) return;
+    try {
+      const blob = await resizeImageForUpload(file);
+      setPhotoBlob(blob);
+      setPhotoPreviewUrl(url => {
+        if (url) URL.revokeObjectURL(url);
+        return URL.createObjectURL(blob);
+      });
+      setPhotoRemove(false);
+    } catch {
+      const isHeic =
+        /image\/hei[cf]/.test(file.type) || /\.hei[cf]$/i.test(file.name);
+      toast.error(
+        isHeic ? t.tripExpenses.photoHeic : t.tripExpenses.photoReadFailed
+      );
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoBlob(null);
+    setPhotoPreviewUrl(url => {
+      if (url) URL.revokeObjectURL(url);
+      return null;
+    });
+    if (editingPhotoFileName) setPhotoRemove(true);
+  };
+
+  const submit = async () => {
     const rappen = parseChfInput(amount);
     if (rappen === null || rappen < 1) {
       toast.error(t.tripExpenses.amountInvalid);
@@ -419,12 +489,60 @@ export default function TripExpenses({
       day,
       paidBy: who.slice(0, EXPENSE_PAID_BY_MAX_LENGTH),
     };
-    if (editing === "neu") addMutation.mutate({ tripId, ...payload });
-    else if (typeof editing === "number")
-      updateMutation.mutate({ id: editing, ...payload });
+    // Foto-Zustand VOR dem Speichern festhalten: onSuccess der Mutation
+    // schliesst das Formular und setzt die States zurück.
+    const blob = photoBlob;
+    const wantRemove = photoRemove && editingPhotoFileName !== null;
+    let id: number;
+    try {
+      if (editing === "neu") {
+        ({ id } = await addMutation.mutateAsync({ tripId, ...payload }));
+      } else if (typeof editing === "number") {
+        await updateMutation.mutateAsync({ id: editing, ...payload });
+        id = editing;
+      } else {
+        return;
+      }
+    } catch {
+      // Fehler-Toast kommt aus onError der Mutation
+      return;
+    }
+    // Beleg-Schritt (#540) NACH dem Speichern – neue Ausgaben haben erst
+    // jetzt eine Id. Upload ersetzt einen bestehenden Beleg serverseitig.
+    if (blob) {
+      setPhotoUploading(true);
+      try {
+        const response = await fetch(`/api/trips/expenses/${id}/photo`, {
+          method: "POST",
+          headers: { "Content-Type": "image/jpeg" },
+          body: blob,
+          credentials: "include",
+        });
+        if (!response.ok) {
+          toast.error(
+            response.status === 413
+              ? t.tripExpenses.photoTooLarge
+              : t.tripExpenses.photoUploadFailed
+          );
+        }
+      } catch {
+        toast.error(t.tripExpenses.photoUploadFailed);
+      } finally {
+        setPhotoUploading(false);
+      }
+      invalidate();
+    } else if (wantRemove) {
+      try {
+        await removePhotoMutation.mutateAsync({ id });
+      } catch {
+        toast.error(t.tripExpenses.photoRemoveFailed);
+      }
+      invalidate();
+    }
   };
 
-  const busy = addMutation.isPending || updateMutation.isPending;
+  const busy =
+    addMutation.isPending || updateMutation.isPending || photoUploading;
 
   /**
    * Ø-Verbrauch aus dem Tankbuch (#443) – erst beim Öffnen des
@@ -1209,6 +1327,26 @@ export default function TripExpenses({
                         key={expense.id}
                         className="flex items-start gap-2 rounded-lg bg-muted/40 px-3 py-2"
                       >
+                        {/* Beleg (#540): kleines Vorschau-Bild, Klick öffnet
+                            die volle Quittung in einem neuen Tab */}
+                        {expense.photoFileName && (
+                          <a
+                            href={expensePhotoUrl(expense.photoFileName)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="shrink-0"
+                            aria-label={t.tripExpenses.photoViewAria(
+                              labelOf(expense)
+                            )}
+                          >
+                            <img
+                              src={expensePhotoUrl(expense.photoFileName)}
+                              alt=""
+                              loading="lazy"
+                              className="h-9 w-9 rounded-md border border-border object-cover"
+                            />
+                          </a>
+                        )}
                         <div className="min-w-0 flex-1">
                           <p className="flex flex-wrap items-center gap-x-2 text-sm font-medium">
                             {labelOf(expense)}
@@ -1373,6 +1511,65 @@ export default function TripExpenses({
                       value={description}
                       onChange={e => setDescription(e.target.value)}
                     />
+                  </div>
+                  {/* Beleg-Foto (#540): eine Quittung pro Ausgabe */}
+                  <div>
+                    <Label className="mb-1 block">
+                      {t.tripExpenses.photoLabel}
+                    </Label>
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={e => void handlePhotoSelected(e.target.files)}
+                    />
+                    {(() => {
+                      const previewUrl =
+                        photoPreviewUrl ??
+                        (editingPhotoFileName && !photoRemove
+                          ? expensePhotoUrl(editingPhotoFileName)
+                          : null);
+                      return previewUrl ? (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <img
+                            src={previewUrl}
+                            alt=""
+                            className="h-16 w-16 rounded-lg border border-border object-cover"
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => photoInputRef.current?.click()}
+                          >
+                            {t.tripExpenses.photoChange}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-muted-foreground"
+                            onClick={handleRemovePhoto}
+                          >
+                            {t.tripExpenses.photoRemove}
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => photoInputRef.current?.click()}
+                        >
+                          <Camera
+                            className="mr-1.5 h-4 w-4"
+                            aria-hidden="true"
+                          />
+                          {t.tripExpenses.photoAdd}
+                        </Button>
+                      );
+                    })()}
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t.tripExpenses.photoHint}
+                    </p>
                   </div>
                   <div>
                     <Label htmlFor={`expense-paidby-${tripId}`}>

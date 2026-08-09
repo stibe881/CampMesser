@@ -592,6 +592,38 @@ async function startServer() {
       return db.getDocumentCardByFileName(fileName, userId);
     },
   });
+  // ── Beleg-Foto pro Reisekassen-Ausgabe (#540) ───────────────────────────
+  // Läuft über die Fabrik, aber mit canAccessTrip statt Besitzer-Prüfung:
+  // die Reisekasse gehört der REISE, also dürfen Mitreisende Belege
+  // anhängen und ansehen – genau wie sie Ausgaben erfassen dürfen.
+  registerSinglePhotoRoutes(app, authenticatePhotoRequest, {
+    uploadPath: "/api/trips/expenses/:id/photo",
+    servePath: "/api/trips/expenses/photos/:fileName",
+    logTag: "ExpensePhotos",
+    storage: async () => (await import("../photoStorage")).expensePhotoStorage,
+    load: async (id, userId) => {
+      const db = await import("../db");
+      const expense = await db.getTripExpenseById(id);
+      const trip = expense
+        ? await db.canAccessTrip(expense.tripId, userId)
+        : undefined;
+      return expense && trip
+        ? { current: expense.photoFileName ?? null }
+        : null;
+    },
+    save: async (id, _userId, fileName) => {
+      const db = await import("../db");
+      await db.updateTripExpense(id, { photoFileName: fileName });
+    },
+    findOwnedByFileName: async (fileName, userId) => {
+      const db = await import("../db");
+      const expense = await db.getTripExpenseByPhotoFileName(fileName);
+      const trip = expense
+        ? await db.canAccessTrip(expense.tripId, userId)
+        : undefined;
+      return expense && trip ? expense : null;
+    },
+  });
   // ── Buchungsbestätigung zur Reise (#279) ────────────────────────────────
   // Als einzige Ablage sind hier auch PDF erlaubt: Bestätigungen kommen als
   // PDF, und jemanden zum Abfotografieren seines eigenen PDFs zu zwingen

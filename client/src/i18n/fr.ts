@@ -3034,6 +3034,20 @@ export const fr: Translation = {
     paidByLine: (name: string) => `payé par ${name}`,
     byLine: (name: string) => `saisi par ${name}`,
     untitled: "Sans description",
+    photoLabel: "Photo du justificatif (optionnel)",
+    photoAdd: "Photographier le justificatif",
+    photoChange: "Remplacer le justificatif",
+    photoRemove: "Retirer le justificatif",
+    photoHint:
+      "Une photo du ticket pour cette d\u00e9pense \u2013 pratique pour les comptes de retour.",
+    photoViewAria: (label: string) => `Voir le justificatif de ${label}`,
+    photoTooLarge: "La photo est trop volumineuse.",
+    photoUploadFailed:
+      "Le justificatif n\u2019a pas pu \u00eatre t\u00e9l\u00e9vers\u00e9",
+    photoRemoveFailed: "Le justificatif n\u2019a pas pu \u00eatre retir\u00e9",
+    photoReadFailed: "La photo n\u2019a pas pu \u00eatre lue",
+    photoHeic:
+      "Les photos HEIC ne sont pas prises en charge \u2013 choisis un JPG.",
   },
   tripInvite: {
     badge: "Invitation au voyage",

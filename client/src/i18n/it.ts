@@ -3003,6 +3003,18 @@ export const it: Translation = {
     paidByLine: (name: string) => `pagato da ${name}`,
     byLine: (name: string) => `registrato da ${name}`,
     untitled: "Senza descrizione",
+    photoLabel: "Foto dello scontrino (facoltativa)",
+    photoAdd: "Fotografa lo scontrino",
+    photoChange: "Sostituisci lo scontrino",
+    photoRemove: "Rimuovi lo scontrino",
+    photoHint:
+      "Una foto della ricevuta per questa spesa \u2013 utile per i conti a casa.",
+    photoViewAria: (label: string) => `Vedi lo scontrino di ${label}`,
+    photoTooLarge: "La foto \u00e8 troppo grande.",
+    photoUploadFailed: "Impossibile caricare lo scontrino",
+    photoRemoveFailed: "Impossibile rimuovere lo scontrino",
+    photoReadFailed: "Impossibile leggere la foto",
+    photoHeic: "Le foto HEIC non sono supportate \u2013 scegli un JPG.",
   },
   tripInvite: {
     badge: "Invito al viaggio",

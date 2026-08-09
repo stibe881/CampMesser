@@ -3041,6 +3041,19 @@ export const de = {
     paidByLine: (name: string) => `bezahlt von ${name}`,
     byLine: (name: string) => `erfasst von ${name}`,
     untitled: "Ohne Beschreibung",
+    photoLabel: "Beleg-Foto (optional)",
+    photoAdd: "Beleg fotografieren",
+    photoChange: "Beleg ersetzen",
+    photoRemove: "Beleg entfernen",
+    photoHint:
+      "Ein Foto der Quittung zur Ausgabe – praktisch fürs Abrechnen daheim.",
+    photoViewAria: (label: string) => `Beleg zu ${label} ansehen`,
+    photoTooLarge: "Das Foto ist zu gross.",
+    photoUploadFailed: "Beleg konnte nicht hochgeladen werden",
+    photoRemoveFailed: "Beleg konnte nicht entfernt werden",
+    photoReadFailed: "Foto konnte nicht gelesen werden",
+    photoHeic:
+      "HEIC-Fotos werden nicht unterstützt \u2013 bitte als JPG w\u00e4hlen.",
   },
   tripInvite: {
     badge: "Reise-Einladung",

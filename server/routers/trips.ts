@@ -1115,6 +1115,11 @@ export const tripsRouters = {
             });
           }
           await db.deleteTripExpense(input.id);
+          // Der Beleg (#540) hängt an der Ausgabe – ohne Zeile keine Datei.
+          if (expense.photoFileName) {
+            const { expensePhotoStorage } = await import("../photoStorage");
+            await expensePhotoStorage.deleteFiles([expense.photoFileName]);
+          }
           await noteTripChange(
             expense.tripId,
             ctx.user.id,
@@ -1122,6 +1127,31 @@ export const tripsRouters = {
             "remove",
             expense.description || expense.category
           );
+          return { success: true } as const;
+        }),
+      /**
+       * Beleg-Foto (#540) einer Ausgabe entfernen, ohne die Ausgabe zu
+       * löschen – der Upload läuft als Raw-POST über
+       * /api/trips/expenses/:id/photo (server/_core/index.ts).
+       */
+      removePhoto: protectedProcedure
+        .input(z.object({ id: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const expense = await db.getTripExpenseById(input.id);
+          const trip = expense
+            ? await db.canAccessTrip(expense.tripId, ctx.user.id)
+            : undefined;
+          if (!expense || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Ausgabe nicht gefunden.",
+            });
+          }
+          if (expense.photoFileName) {
+            await db.updateTripExpense(input.id, { photoFileName: null });
+            const { expensePhotoStorage } = await import("../photoStorage");
+            await expensePhotoStorage.deleteFiles([expense.photoFileName]);
+          }
           return { success: true } as const;
         }),
     }),

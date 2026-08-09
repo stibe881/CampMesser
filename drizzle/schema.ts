@@ -1062,6 +1062,11 @@ export const tripExpenses = mysqlTable(
     day: date("day", { mode: "string" }).notNull(),
     /** Wer bezahlt hat – freier Name, Grundlage für «wer schuldet wem» */
     paidBy: varchar("paidBy", { length: 80 }).notNull(),
+    /**
+     * Beleg-Foto (#540): Dateiname unter uploads/expenses/; null = keins.
+     * Genau EIN Foto pro Ausgabe – die Quittung, nicht ein Album.
+     */
+    photoFileName: varchar("photoFileName", { length: 60 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },

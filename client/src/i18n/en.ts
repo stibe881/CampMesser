@@ -2935,6 +2935,18 @@ export const en: Translation = {
     paidByLine: (name: string) => `paid by ${name}`,
     byLine: (name: string) => `recorded by ${name}`,
     untitled: "No description",
+    photoLabel: "Receipt photo (optional)",
+    photoAdd: "Photograph receipt",
+    photoChange: "Replace receipt",
+    photoRemove: "Remove receipt",
+    photoHint:
+      "A photo of the receipt for this expense \u2013 handy for settling up at home.",
+    photoViewAria: (label: string) => `View receipt for ${label}`,
+    photoTooLarge: "The photo is too large.",
+    photoUploadFailed: "Receipt could not be uploaded",
+    photoRemoveFailed: "Receipt could not be removed",
+    photoReadFailed: "Photo could not be read",
+    photoHeic: "HEIC photos are not supported \u2013 please choose a JPG.",
   },
   tripInvite: {
     badge: "Trip invitation",
