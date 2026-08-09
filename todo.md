@@ -3,7 +3,7 @@
 ## Zwanzig Vorschläge (09.08.2026, Runde 54)
 
 - [ ] #536 Etappen-Reisen (Zwischenhalte)
-- [ ] #537 Merkorte (Wunschziele) auf der Karte
+- [x] #537 Merkorte (Wunschziele) auf der Karte: Karten-Klick fragt neu «Favorit oder Merkort?» – der Merkort ist die leichte Ablage mit Notiz und wählbarer Pin-Farbe (5 Farben, shared/savedPlaces.ts; Tabelle savedPlaces, Migration 0120, Router trpc.savedPlaces). Stern-Pins mit eigener Ebene/Legende, Popup mit Notiz/Navigation/Entfernen; beim Reise-Anlegen erscheinen die Merkorte als Orts-Vorschlag mit Koordinaten. Konto-Löschung räumt die Tabelle mit ab
 - [x] #538 Wetterfenster-Finder: bewertet alle Wochenenden der 16-Tage-Prognose (Regen wiegt am schwersten, dann Temperatur, dann Böen) und zeigt sie auf der Wetterseite als Ampel-Liste, bestes zuoberst (shared/weatherWindow.ts, 4 Tests)
 - [x] #539 Feiertage des Reiselands: Fällt ein landesweiter Feiertag des Ziellands in die Reise, zeigt ihn das Cockpit unter dem Auslands-Hinweis («Läden oft geschlossen»). Quelle Nager.Date, serverseitig 7 Tage gecacht (server/holidaysAbroad.ts, 2 Tests); regionale Feiertage bewusst ausgefiltert. CH-Feiertage EXISTIERTEN BEREITS (#70)
 - [x] #540 Beleg-Foto pro Reisekassen-Ausgabe: eine Quittung pro Ausgabe (Spalte tripExpenses.photoFileName, Migration 0119, uploads/expenses/); Upload/Auslieferung über die Foto-Routen-Fabrik mit canAccessTrip statt Besitzer-Prüfung – Mitreisende dürfen Belege anhängen und ansehen. Formular mit Vorschau/Ersetzen/Entfernen, Mini-Thumbnail in der Liste (Klick öffnet die Quittung), Papierkorb nimmt Beleg-Dateien mit

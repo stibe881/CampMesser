@@ -772,6 +772,34 @@ export const homeLocations = mysqlTable(
 export type HomeLocation = typeof homeLocations.$inferSelect;
 export type InsertHomeLocation = typeof homeLocations.$inferInsert;
 
+/**
+ * Merkorte (#537): Wunschziele von der Karte – «da wollen wir mal hin».
+ * Bewusst LEICHTER als ein campSpots-Favorit: nur Name, Notiz und
+ * Pin-Farbe (Schlüssel aus shared/savedPlaces.ts), kein Dossier, keine
+ * Fotos. Beim Reise-Anlegen dienen sie als Orts-Vorschlag mit
+ * Koordinaten.
+ */
+export const savedPlaces = mysqlTable(
+  "savedPlaces",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 120 }).notNull(),
+    latitude: double("latitude").notNull(),
+    longitude: double("longitude").notNull(),
+    /** Kurze Notiz («vom Nachbarn empfohlen»); null = keine */
+    note: varchar("note", { length: 240 }),
+    /** Pin-Farbe: red | orange | green | blue | purple */
+    color: varchar("color", { length: 12 }).notNull().default("red"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("savedPlaces_userId").on(table.userId)]
+);
+
+export type SavedPlace = typeof savedPlaces.$inferSelect;
+export type InsertSavedPlace = typeof savedPlaces.$inferInsert;
+
 /** Web-Push-Abos für Unwetter-Warnungen an gespeicherten Zeltplätzen. */
 export const pushSubscriptions = mysqlTable(
   "pushSubscriptions",

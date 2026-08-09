@@ -234,6 +234,16 @@ export default function TripFormDialog({
   const people = peopleQuery.data ?? [];
 
   /**
+   * Merkorte (#537) als Orts-Vorschlag beim ANLEGEN einer Reise: Wer auf
+   * der Karte Wunschziele gesammelt hat, soll sie hier nicht nochmals
+   * eintippen. Nur bei neuen Reisen – beim Bearbeiten steht der Ort fest.
+   */
+  const savedPlacesQuery = trpc.savedPlaces.list.useQuery(undefined, {
+    enabled: open && editingId === null,
+  });
+  const savedPlaces = savedPlacesQuery.data ?? [];
+
+  /**
    * `absentIds` aufbauen, sobald die Abwesenheiten da sind: beim
    * Bearbeiten die gespeicherten dieser Reise, bei einer neuen Reise
    * leer (= alle dabei). Der Schlüssel verhindert, dass ein späteres
@@ -596,6 +606,37 @@ export default function TripFormDialog({
                       ))}
                     </div>
                   ))}
+                {/* Merkorte (#537): Klick übernimmt Name UND Koordinaten */}
+                {editingId === null && savedPlaces.length > 0 && (
+                  <div className="mt-1.5">
+                    <p className="text-xs text-muted-foreground">
+                      {t.trips.savedPlacesSuggestTitle}
+                    </p>
+                    <div
+                      className="mt-1 flex flex-wrap gap-1.5"
+                      role="group"
+                      aria-label={t.trips.savedPlacesSuggestTitle}
+                    >
+                      {savedPlaces.slice(0, 6).map(place => (
+                        <button
+                          key={place.id}
+                          type="button"
+                          onClick={() => {
+                            setForm(f => ({ ...f, location: place.name }));
+                            setFormCoords({
+                              lat: place.latitude,
+                              lng: place.longitude,
+                            });
+                            setPlaceResults(null);
+                          }}
+                          className="rounded-full bg-accent px-3 py-1.5 text-sm text-accent-foreground transition-colors hover:opacity-80"
+                        >
+                          {place.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             {!editingShared && (
