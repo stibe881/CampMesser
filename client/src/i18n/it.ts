@@ -675,6 +675,11 @@ export const it: Translation = {
     budgetRemoved: "Budget di peso rimosso",
     budgetSaveFailed: "Impossibile salvare il budget",
     budgetInvalid: "Inserisci un peso tra 0,1 e 500 kg",
+    personBudgetLabel: "Limite per persona (kg)",
+    personBudgetPlaceholder: "es. 23",
+    personBudgetHint:
+      "Per esempio 23 kg di bagaglio aereo – la riga del carico evidenzia le persone oltre il limite. Lascia vuoto per nessun limite.",
+    personBudgetInfo: (limit: string) => `Limite: ${limit} a persona`,
     uncheckAllButton: "Togli tutte le spunte",
     uncheckAllConfirm: (n: number) =>
       n === 1

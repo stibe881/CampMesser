@@ -282,6 +282,8 @@ export default function PackListDetailPage() {
   /** Dialog «Gewichts-Budget» mit kg-Eingabe. */
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
   const [budgetDraft, setBudgetDraft] = useState("");
+  /** Limite pro Person in kg (#518) – leer heisst «keine Limite». */
+  const [personBudgetDraft, setPersonBudgetDraft] = useState("");
 
   // QR-Code zum Teil-Link erzeugen: am Platz einfach abscannen lassen statt Link verschicken
   useEffect(() => {
@@ -696,7 +698,7 @@ export default function PackListDetailPage() {
       utils.packing.lists.invalidate();
       setBudgetDialogOpen(false);
       toast.success(
-        vars.grams === null
+        vars.grams === null && (vars.personGrams ?? null) === null
           ? t.packListDetail.budgetRemoved
           : t.packListDetail.budgetSaved
       );
@@ -781,14 +783,18 @@ export default function PackListDetailPage() {
 
   const items = query.data.items;
   const budgetGrams = query.data.list.weightBudgetGrams ?? null;
+  const personBudgetGrams = query.data.list.personWeightBudgetGrams ?? null;
   const budget =
     budgetGrams !== null
       ? weightBudgetStatus(weight.totalGrams, budgetGrams)
       : null;
-  /** Budget-Dialog öffnen, Eingabefeld mit dem aktuellen Budget (kg) vorbefüllen. */
+  /** Budget-Dialog öffnen, Eingabefelder mit den aktuellen Werten (kg) vorbefüllen. */
   const openBudgetDialog = () => {
     const kg = budgetGrams !== null ? (budgetGrams / 1000).toString() : "";
     setBudgetDraft(lang === "en" ? kg : kg.replace(".", ","));
+    const personKg =
+      personBudgetGrams !== null ? (personBudgetGrams / 1000).toString() : "";
+    setPersonBudgetDraft(lang === "en" ? personKg : personKg.replace(".", ","));
     setBudgetDialogOpen(true);
   };
   const checkedCount = items.filter(i => i.checked).length;
@@ -855,14 +861,38 @@ export default function PackListDetailPage() {
               <span className="text-xs font-semibold uppercase tracking-wide">
                 {t.packListDetail.personWeightTitle}
               </span>
-              {personLoads.map(row => (
-                <span key={row.person ?? "__general"}>
-                  {row.person ?? t.packListDetail.sectionGeneral}{" "}
-                  <span className="font-medium text-foreground">
-                    {formatGrams(row.grams, lang)}
+              {personLoads.map(row => {
+                // Limite pro Person (#518): Ampel nur für echte Personen –
+                // «Allgemein» trägt niemand allein.
+                const status =
+                  row.person !== null && personBudgetGrams !== null
+                    ? weightBudgetStatus(row.grams, personBudgetGrams)
+                    : null;
+                return (
+                  <span key={row.person ?? "__general"}>
+                    {row.person ?? t.packListDetail.sectionGeneral}{" "}
+                    <span
+                      className={cn(
+                        "font-medium",
+                        status?.level === "over"
+                          ? "text-destructive"
+                          : status?.level === "warn"
+                            ? "text-amber-600 dark:text-amber-500"
+                            : "text-foreground"
+                      )}
+                    >
+                      {formatGrams(row.grams, lang)}
+                    </span>
                   </span>
+                );
+              })}
+              {personBudgetGrams !== null && (
+                <span className="text-xs">
+                  {t.packListDetail.personBudgetInfo(
+                    formatGrams(personBudgetGrams, lang)
+                  )}
                 </span>
-              ))}
+              )}
             </p>
           )}
           {budget !== null && budgetGrams !== null ? (
@@ -1755,12 +1785,25 @@ export default function PackListDetailPage() {
           <form
             onSubmit={e => {
               e.preventDefault();
-              const grams = parseKgToGrams(budgetDraft);
-              if (grams === null) {
-                toast.error(t.packListDetail.budgetInvalid);
-                return;
+              // Beide Felder sind einzeln optional (#518): leer = keine
+              // Limite (null räumt eine bestehende ab).
+              let grams: number | null = null;
+              if (budgetDraft.trim() !== "") {
+                grams = parseKgToGrams(budgetDraft);
+                if (grams === null) {
+                  toast.error(t.packListDetail.budgetInvalid);
+                  return;
+                }
               }
-              budgetMutation.mutate({ listId, grams });
+              let personGrams: number | null = null;
+              if (personBudgetDraft.trim() !== "") {
+                personGrams = parseKgToGrams(personBudgetDraft);
+                if (personGrams === null) {
+                  toast.error(t.packListDetail.budgetInvalid);
+                  return;
+                }
+              }
+              budgetMutation.mutate({ listId, grams, personGrams });
             }}
           >
             <Label htmlFor="weight-budget">
@@ -1775,10 +1818,27 @@ export default function PackListDetailPage() {
               onChange={e => setBudgetDraft(e.target.value)}
               autoFocus
             />
+            <Label htmlFor="person-weight-budget" className="mt-4 block">
+              {t.packListDetail.personBudgetLabel}
+            </Label>
+            <Input
+              id="person-weight-budget"
+              className="mt-1.5"
+              inputMode="decimal"
+              placeholder={t.packListDetail.personBudgetPlaceholder}
+              value={personBudgetDraft}
+              onChange={e => setPersonBudgetDraft(e.target.value)}
+            />
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              {t.packListDetail.personBudgetHint}
+            </p>
             <Button
               type="submit"
               className="mt-4 w-full"
-              disabled={budgetMutation.isPending || !budgetDraft.trim()}
+              disabled={
+                budgetMutation.isPending ||
+                (!budgetDraft.trim() && !personBudgetDraft.trim())
+              }
             >
               {budgetMutation.isPending && (
                 <Loader2
@@ -1788,13 +1848,19 @@ export default function PackListDetailPage() {
               )}
               {t.packListDetail.budgetSave}
             </Button>
-            {budgetGrams !== null && (
+            {(budgetGrams !== null || personBudgetGrams !== null) && (
               <Button
                 type="button"
                 variant="ghost"
                 className="mt-2 w-full text-muted-foreground hover:text-destructive"
                 disabled={budgetMutation.isPending}
-                onClick={() => budgetMutation.mutate({ listId, grams: null })}
+                onClick={() =>
+                  budgetMutation.mutate({
+                    listId,
+                    grams: null,
+                    personGrams: null,
+                  })
+                }
               >
                 {t.packListDetail.budgetRemove}
               </Button>

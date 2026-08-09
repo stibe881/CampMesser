@@ -697,6 +697,11 @@ export const de = {
     budgetRemoved: "Gewichts-Budget entfernt",
     budgetSaveFailed: "Budget konnte nicht gespeichert werden",
     budgetInvalid: "Gib ein Gewicht zwischen 0,1 und 500 kg ein",
+    personBudgetLabel: "Limite pro Person (kg)",
+    personBudgetPlaceholder: "z. B. 23",
+    personBudgetHint:
+      "Zum Beispiel 23 kg Fluggepäck – die Traglast-Zeile färbt Personen über der Limite ein. Leer lassen für keine Limite.",
+    personBudgetInfo: (limit: string) => `Limite: ${limit} pro Person`,
     uncheckAllButton: "Alle Haken lösen",
     uncheckAllConfirm: (n: number) =>
       n === 1
