@@ -4384,6 +4384,7 @@ export const en: Translation = {
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Snow depth: about ${cm} cm`,
+    snowfallLine: (cm: number) => `Fresh snow today: around ${cm} cm`,
     choresTitle: "Chores today",
     choresEmpty: "Nothing assigned for today.",
     choresToggleAria: (title: string) => `Tick off ${title}`,
@@ -4613,6 +4614,33 @@ export const en: Translation = {
     source: "Source: transport.opendata.ch – no guarantee.",
   },
   poi: {
+    pharmacies: {
+      title: "Pharmacies nearby",
+      subtitle:
+        "From OpenStreetMap – opening hours where recorded, no guarantee.",
+      unnamed: "Pharmacy",
+      empty: (radius: string) => `No pharmacy recorded within ${radius}.`,
+    },
+    laundry: {
+      title: "Laundrettes nearby",
+      subtitle:
+        "Laundrettes and dry cleaners from OpenStreetMap – for laundry day on the road.",
+      unnamed: "Laundrette",
+      empty: (radius: string) => `No laundrette recorded within ${radius}.`,
+    },
+    bikeShops: {
+      title: "Bike shops & workshops",
+      subtitle: "From OpenStreetMap – “Service” means repair is recorded.",
+      unnamed: "Bike shop",
+      empty: (radius: string) => `No bike shop recorded within ${radius}.`,
+    },
+    winterSpots: {
+      title: "Lifts & cross-country trails nearby",
+      subtitle:
+        "Lifts and named cross-country trails from OpenStreetMap – the start of the snow day.",
+      unnamed: "Lift",
+      empty: (radius: string) => `No lift or trail recorded within ${radius}.`,
+    },
     radiusLabel: "Radius:",
     radiusGroupAria: "Choose search radius",
     loading: "Searching …",

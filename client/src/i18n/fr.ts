@@ -4503,6 +4503,7 @@ export const fr: Translation = {
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Hauteur de neige : environ ${cm} cm`,
+    snowfallLine: (cm: number) => `Neige fraîche aujourd’hui : env. ${cm} cm`,
     choresTitle: "Tâches du jour",
     choresEmpty: "Rien n’est réparti pour aujourd’hui.",
     choresToggleAria: (title: string) => `Cocher ${title}`,
@@ -4733,6 +4734,37 @@ export const fr: Translation = {
     source: "Source : transport.opendata.ch – sans garantie.",
   },
   poi: {
+    pharmacies: {
+      title: "Pharmacies à proximité",
+      subtitle: "Depuis OpenStreetMap – horaires si renseignés, sans garantie.",
+      unnamed: "Pharmacie",
+      empty: (radius: string) =>
+        `Aucune pharmacie répertoriée dans un rayon de ${radius}.`,
+    },
+    laundry: {
+      title: "Laveries à proximité",
+      subtitle:
+        "Laveries et pressings d’OpenStreetMap – pour le jour de lessive en voyage.",
+      unnamed: "Laverie",
+      empty: (radius: string) =>
+        `Aucune laverie répertoriée dans un rayon de ${radius}.`,
+    },
+    bikeShops: {
+      title: "Magasins & ateliers vélo",
+      subtitle:
+        "Depuis OpenStreetMap – « Service » signifie que la réparation est renseignée.",
+      unnamed: "Magasin de vélos",
+      empty: (radius: string) =>
+        `Aucun magasin de vélos répertorié dans un rayon de ${radius}.`,
+    },
+    winterSpots: {
+      title: "Remontées & pistes de fond à proximité",
+      subtitle:
+        "Remontées mécaniques et pistes de fond nommées d’OpenStreetMap – le départ de la journée de neige.",
+      unnamed: "Remontée",
+      empty: (radius: string) =>
+        `Aucune remontée ni piste de fond répertoriée dans un rayon de ${radius}.`,
+    },
     radiusLabel: "Rayon :",
     radiusGroupAria: "Choisir le rayon de recherche",
     loading: "Recherche en cours …",

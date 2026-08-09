@@ -4473,6 +4473,7 @@ export const it: Translation = {
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Altezza neve: circa ${cm} cm`,
+    snowfallLine: (cm: number) => `Neve fresca oggi: circa ${cm} cm`,
     choresTitle: "Turni di oggi",
     choresEmpty: "Per oggi non è assegnato nulla.",
     choresToggleAria: (title: string) => `Spunta ${title}`,
@@ -4704,6 +4705,37 @@ export const it: Translation = {
     source: "Fonte: transport.opendata.ch – senza garanzia.",
   },
   poi: {
+    pharmacies: {
+      title: "Farmacie nelle vicinanze",
+      subtitle: "Da OpenStreetMap – orari se registrati, senza garanzia.",
+      unnamed: "Farmacia",
+      empty: (radius: string) =>
+        `Nel raggio di ${radius} non è registrata nessuna farmacia.`,
+    },
+    laundry: {
+      title: "Lavanderie nelle vicinanze",
+      subtitle:
+        "Lavanderie e lavasecco da OpenStreetMap – per il giorno di bucato in viaggio.",
+      unnamed: "Lavanderia",
+      empty: (radius: string) =>
+        `Nel raggio di ${radius} non è registrata nessuna lavanderia.`,
+    },
+    bikeShops: {
+      title: "Negozi e officine bici",
+      subtitle:
+        "Da OpenStreetMap – «Service» significa che la riparazione è registrata.",
+      unnamed: "Negozio di bici",
+      empty: (radius: string) =>
+        `Nel raggio di ${radius} non è registrato nessun negozio di bici.`,
+    },
+    winterSpots: {
+      title: "Impianti e piste di fondo vicini",
+      subtitle:
+        "Impianti di risalita e piste di fondo con nome da OpenStreetMap – l’inizio della giornata sulla neve.",
+      unnamed: "Impianto",
+      empty: (radius: string) =>
+        `Nel raggio di ${radius} non è registrato nessun impianto né pista di fondo.`,
+    },
     radiusLabel: "Raggio:",
     radiusGroupAria: "Scegli il raggio di ricerca",
     loading: "Ricerca in corso …",

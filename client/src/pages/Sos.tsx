@@ -25,8 +25,13 @@ import { guessCountryCode } from "@/data/roadRules";
 import { isTripActiveOn } from "@shared/trips";
 import { useTodayIso } from "@/lib/useTodayIso";
 import NearbyPoints from "@/components/NearbyPoints";
-import { defibrillatorsQuery, parseDefibrillators } from "@/lib/overpass";
-import { HeartPulse } from "lucide-react";
+import {
+  defibrillatorsQuery,
+  parseDefibrillators,
+  parsePharmacies,
+  pharmaciesQuery,
+} from "@/lib/overpass";
+import { HeartPulse, Pill } from "lucide-react";
 import { LANGUAGES, LANGUAGE_LABELS, LOCALE_TAGS, pick } from "@shared/i18n";
 import { emergencyPhrase } from "@shared/emergencyPhrase";
 import {
@@ -602,6 +607,26 @@ export default function SosPage() {
             defaultRadiusM={1000}
             profile="foot"
             sectionId="sos-defis"
+            className="mb-6"
+          />
+        )}
+
+      {/* Apotheken (#529): nach den Defis – das zweithäufigste «wo ist
+          das nächste …?» im Ernstfall. */}
+      {geo.status === "ok" &&
+        geo.lat !== undefined &&
+        geo.lng !== undefined && (
+          <NearbyPoints
+            latitude={geo.lat}
+            longitude={geo.lng}
+            icon={Pill}
+            texts={t.poi.pharmacies}
+            query={pharmaciesQuery}
+            parse={parsePharmacies}
+            radii={[1000, 2000, 5000]}
+            defaultRadiusM={2000}
+            profile="foot"
+            sectionId="sos-pharmacies"
             className="mb-6"
           />
         )}

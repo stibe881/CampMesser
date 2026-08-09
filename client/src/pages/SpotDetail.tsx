@@ -47,11 +47,13 @@ import NearbyPoints from "@/components/NearbyPoints";
 import TransitConnections from "@/components/TransitConnections";
 import {
   chargersQuery,
+  laundryQuery,
+  parseLaundry,
   drinkingWaterQuery,
   parseChargers,
   parseDrinkingWater,
 } from "@/lib/overpass";
-import { GlassWater, PlugZap } from "lucide-react";
+import { GlassWater, PlugZap, WashingMachine } from "lucide-react";
 import SpotRating from "@/components/SpotRating";
 import NearbyTransit from "@/components/NearbyTransit";
 import TickRiskPanel from "@/components/TickRiskPanel";
@@ -707,6 +709,24 @@ export default function SpotDetailPage() {
             defaultRadiusM={5000}
             profile="car"
             sectionId="spot-chargers"
+            className="mb-4"
+          />
+        </LazySection>
+
+        {/* Waschsalons (#528): auf langen Reisen die wichtigste Adresse
+            nach dem Einkaufsladen. */}
+        <LazySection minHeight={90}>
+          <NearbyPoints
+            latitude={spot.latitude}
+            longitude={spot.longitude}
+            icon={WashingMachine}
+            texts={t.poi.laundry}
+            query={laundryQuery}
+            parse={parseLaundry}
+            radii={[2000, 5000, 10000]}
+            defaultRadiusM={5000}
+            profile="car"
+            sectionId="spot-laundry"
             className="mb-4"
           />
         </LazySection>

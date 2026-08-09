@@ -1345,3 +1345,86 @@ export function parseDefibrillators(json: unknown): OsmPoi[] {
     return cleanTag(tags.description);
   });
 }
+
+/** Apotheken (#529): im Notfall zählt die nächste, nicht die schönste. */
+export function pharmaciesQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  return poiQuery(['nwr["amenity"="pharmacy"]'], lat, lon, radiusM);
+}
+
+export function parsePharmacies(json: unknown): OsmPoi[] {
+  return parsePois(json, tags => {
+    // Öffnungszeiten als Rohtext – besser als nichts, ehrlicher als raten
+    return cleanTag(tags.opening_hours);
+  });
+}
+
+/** Waschsalons (#528): auf langen Reisen wichtiger als jede Sehenswürdigkeit. */
+export function laundryQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  return poiQuery(
+    ['nwr["shop"="laundry"]', 'nwr["shop"="dry_cleaning"]'],
+    lat,
+    lon,
+    radiusM
+  );
+}
+
+export function parseLaundry(json: unknown): OsmPoi[] {
+  return parsePois(json, tags => cleanTag(tags.opening_hours));
+}
+
+/** Velo-Läden & -Werkstätten (#527) für die Velo-Reiseart. */
+export function bikeShopsQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  return poiQuery(['nwr["shop"="bicycle"]'], lat, lon, radiusM);
+}
+
+export function parseBikeShops(json: unknown): OsmPoi[] {
+  return parsePois(json, tags => {
+    const parts: string[] = [];
+    if (cleanTag(tags["service:bicycle:repair"]) === "yes")
+      parts.push("Service");
+    const operator = cleanTag(tags.operator);
+    if (operator) parts.push(operator);
+    return parts.length > 0 ? parts.join(" · ") : undefined;
+  });
+}
+
+/**
+ * Pisten- und Loipen-Einstiege (#526): OSM führt Abfahrten und Loipen als
+ * Wege (piste:type) – für eine Distanz-Liste zählen Aufstiegshilfen und
+ * benannte Winter-Wege in der Nähe.
+ */
+export function wintersportQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  return poiQuery(
+    [
+      'nwr["aerialway"]["aerialway"!="pylon"]["aerialway"!="goods"]',
+      'way["piste:type"="nordic"]["name"]',
+    ],
+    lat,
+    lon,
+    radiusM
+  );
+}
+
+export function parseWintersport(json: unknown): OsmPoi[] {
+  return parsePois(json, tags => {
+    const aerialway = cleanTag(tags.aerialway);
+    if (aerialway) return aerialway.replace(/_/g, " ");
+    return cleanTag(tags["piste:type"]);
+  });
+}

@@ -54,6 +54,7 @@ describe("Reise-Art (#460)", () => {
       beaches: false,
       transit: false,
       excursions: false,
+      bike: false,
     });
     // Nur am Strand steht die Badewasser-Karte in der Heute-Ansicht
     TRIP_KINDS.filter(kind => kind !== "strand").forEach(kind => {
@@ -83,6 +84,11 @@ describe("Reise-Art (#460)", () => {
       expect(TRIP_KIND_PRESETS[kind].excursions).toBe(false);
     });
     expect(TRIP_KIND_PRESETS.tagesausflug.excursions).toBe(true);
+    // Velo-Läden (#527) zeigt nur die Velotour
+    for (const kind of TRIP_KINDS.filter(k => k !== "velo")) {
+      expect(TRIP_KIND_PRESETS[kind].bike).toBe(false);
+    }
+    expect(TRIP_KIND_PRESETS.velo.bike).toBe(true);
   });
 
   it("liefert das Preset auch für kaputte Werte (nie undefined)", () => {

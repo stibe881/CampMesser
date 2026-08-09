@@ -11,11 +11,11 @@
 - [x] #522 Steckdosen & Adapter pro Land (9 Länder)
 - [x] #523 Trinkgeld-Knigge pro Land (9 Länder)
 - [x] #524 Auslands-Hinweis im Reise-Cockpit (Link ?land=…; Push-Teil bewusst weggelassen – Push bleibt kurz)
-- [ ] #525 Schneehöhe & Neuschnee (Wintersport)
-- [ ] #526 Pisten & Loipen in der Nähe
-- [ ] #527 Velo-Werkstätten in der Nähe
-- [ ] #528 Waschsalon-Finder im Dossier
-- [ ] #529 Apotheken im SOS
+- [x] #525 Schneehöhe EXISTIERTE BEREITS (#470) – neu ist nur die Neuschnee-Angabe (snowfall_sum) in derselben Zeile
+- [x] #526 Bahnen & Loipen in der Nähe (Heute-Ansicht, Wintersport; aerialway + piste:type=nordic)
+- [x] #527 Velo-Läden & Werkstätten (Heute-Ansicht, neues Preset-Flag bike)
+- [x] #528 Waschsalons im Platz-Dossier (shop=laundry/dry_cleaning)
+- [x] #529 Apotheken im SOS (amenity=pharmacy, Öffnungszeiten als Detail)
 - [ ] #530 Sprachhilfe Hotel & Städtereise
 - [ ] #531 Statistik: Verteilung nach Reisearten
 - [ ] #532 Wander-Summen in der Statistik

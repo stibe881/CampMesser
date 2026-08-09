@@ -4512,6 +4512,7 @@ export const de = {
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Schneehöhe: rund ${cm} cm`,
+    snowfallLine: (cm: number) => `Neuschnee heute: rund ${cm} cm`,
     choresTitle: "Ämtli heute",
     choresEmpty: "Für heute ist nichts verteilt.",
     choresToggleAria: (title: string) => `${title} abhaken`,
@@ -4743,6 +4744,38 @@ export const de = {
     source: "Quelle: transport.opendata.ch – ohne Gewähr.",
   },
   poi: {
+    pharmacies: {
+      title: "Apotheken in der Nähe",
+      subtitle:
+        "Aus OpenStreetMap – Öffnungszeiten, soweit eingetragen, ohne Gewähr.",
+      unnamed: "Apotheke",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist keine Apotheke eingetragen.`,
+    },
+    laundry: {
+      title: "Waschsalons in der Nähe",
+      subtitle:
+        "Waschsalons und Textilreinigungen aus OpenStreetMap – für den Waschtag unterwegs.",
+      unnamed: "Waschsalon",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist kein Waschsalon eingetragen.`,
+    },
+    bikeShops: {
+      title: "Velo-Läden & Werkstätten",
+      subtitle:
+        "Aus OpenStreetMap – «Service» heisst: Reparatur ist eingetragen.",
+      unnamed: "Velo-Laden",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist kein Velo-Laden eingetragen.`,
+    },
+    winterSpots: {
+      title: "Bahnen & Loipen in der Nähe",
+      subtitle:
+        "Aufstiegshilfen und benannte Loipen aus OpenStreetMap – der Einstieg in den Schneetag.",
+      unnamed: "Bahn",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist keine Bahn und keine Loipe eingetragen.`,
+    },
     radiusLabel: "Umkreis:",
     radiusGroupAria: "Suchradius wählen",
     loading: "Suche läuft …",

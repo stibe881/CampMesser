@@ -39,6 +39,8 @@ import {
   Tent,
   UtensilsCrossed,
   TriangleAlert,
+  Bike,
+  CableCar,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -80,7 +82,14 @@ import NearbyPoints from "@/components/NearbyPoints";
 import NearbySights from "@/components/NearbySights";
 import NearbyTransit from "@/components/NearbyTransit";
 import NearbyExcursions from "@/components/NearbyExcursions";
-import { beachesQuery, parseBeaches } from "@/lib/overpass";
+import {
+  beachesQuery,
+  bikeShopsQuery,
+  parseBeaches,
+  parseBikeShops,
+  parseWintersport,
+  wintersportQuery,
+} from "@/lib/overpass";
 import { Umbrella } from "lucide-react";
 import { modules } from "@/data/modules";
 import { tripKindPreset } from "@shared/tripKind";
@@ -367,6 +376,9 @@ export default function TodayPage() {
                   aria-hidden="true"
                 />
                 {td.snowDepthLine(weather.snowDepthCm)}
+                {weather.snowfallTodayCm != null &&
+                  weather.snowfallTodayCm > 0 &&
+                  ` · ${td.snowfallLine(weather.snowfallTodayCm)}`}
               </p>
             )}
             {/* SLF-Lawinen-Warnstufe (#471): nur bei Wintersport und nur
@@ -462,6 +474,44 @@ export default function TodayPage() {
                 defaultRadiusM={5000}
                 profile="car"
                 sectionId="today-beaches"
+              />
+            </LazySection>
+          )}
+          {/* Velo-Läden & -Werkstätten (#527): auf der Velotour ist der
+              nächste Schlauch wichtiger als jede Sehenswürdigkeit. */}
+          {preset.bike && coords && (
+            <LazySection minHeight={120}>
+              <NearbyPoints
+                className="mt-4"
+                latitude={coords.latitude}
+                longitude={coords.longitude}
+                icon={Bike}
+                texts={t.poi.bikeShops}
+                query={bikeShopsQuery}
+                parse={parseBikeShops}
+                radii={[2000, 5000, 10000]}
+                defaultRadiusM={5000}
+                profile="car"
+                sectionId="today-bike"
+              />
+            </LazySection>
+          )}
+          {/* Bahnen & Loipen (#526): beim Wintersport der Einstieg zum
+              Tag – Aufstiegshilfen und benannte Loipen aus OSM. */}
+          {preset.winter && coords && (
+            <LazySection minHeight={120}>
+              <NearbyPoints
+                className="mt-4"
+                latitude={coords.latitude}
+                longitude={coords.longitude}
+                icon={CableCar}
+                texts={t.poi.winterSpots}
+                query={wintersportQuery}
+                parse={parseWintersport}
+                radii={[2000, 5000, 10000]}
+                defaultRadiusM={5000}
+                profile="car"
+                sectionId="today-winter"
               />
             </LazySection>
           )}

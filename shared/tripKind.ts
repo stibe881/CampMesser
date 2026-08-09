@@ -127,6 +127,8 @@ export interface TripKindPreset {
    * (#489)? Beim Tagesausflug IST der Ausflug die Reise.
    */
   excursions: boolean;
+  /** Velo-Läden & -Werkstätten in der Heute-Ansicht zeigen (#527). */
+  bike: boolean;
 }
 
 export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
@@ -141,6 +143,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: false,
     excursions: false,
+    bike: false,
   },
   strand: {
     // Baderegeln & Flaggen (#473) gehören an den Strand-Schnellzugriff
@@ -154,6 +157,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: true,
     transit: false,
     excursions: false,
+    bike: false,
   },
   hotel: {
     quickModules: ["/ausweise", "/sprachhilfe"],
@@ -165,6 +169,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: true,
     excursions: false,
+    bike: false,
   },
   staedte: {
     quickModules: ["/ausweise", "/sprachhilfe"],
@@ -176,6 +181,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: true,
     excursions: false,
+    bike: false,
   },
   wandern: {
     quickModules: ["/wanderung", "/erste-hilfe"],
@@ -187,6 +193,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: false,
     excursions: false,
+    bike: false,
   },
   velo: {
     quickModules: ["/wanderung", "/reparatur"],
@@ -198,6 +205,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: false,
     excursions: false,
+    bike: true,
   },
   wintersport: {
     // «Pisten & Lawinen» (#472) zuerst – das schlägt man am Berg nach
@@ -210,6 +218,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: false,
     excursions: false,
+    bike: false,
   },
   tagesausflug: {
     quickModules: ["/lunchbox", "/regentag"],
@@ -221,6 +230,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: true,
     excursions: true,
+    bike: false,
   },
 };
 
