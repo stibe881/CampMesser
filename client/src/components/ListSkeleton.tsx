@@ -22,7 +22,12 @@ export default function ListSkeleton({
 }) {
   const { t } = useI18n();
   return (
-    <div className="space-y-3" aria-busy="true" aria-label={t.common.loading}>
+    <div
+      role="status"
+      className="space-y-3"
+      aria-busy="true"
+      aria-label={t.common.loading}
+    >
       {Array.from({ length: rows }, (_, index) => (
         <Skeleton
           key={index}

@@ -139,7 +139,11 @@ export default function SpotClimateCard({
             {t.spotDetail.climateIntro}
           </p>
           {climate.status === "loading" && (
-            <div aria-busy="true" aria-label={t.spotDetail.climateLoadingAria}>
+            <div
+              role="status"
+              aria-busy="true"
+              aria-label={t.spotDetail.climateLoadingAria}
+            >
               <Skeleton className="h-48 w-full rounded-lg" />
             </div>
           )}

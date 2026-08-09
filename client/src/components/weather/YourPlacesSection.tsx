@@ -138,6 +138,7 @@ export default function YourPlacesSection({
             {!homeSettled || checks === null ? (
               <div
                 className="mt-3 space-y-2"
+                role="status"
                 aria-busy="true"
                 aria-label={t.weather.placesLoadingAria}
               >

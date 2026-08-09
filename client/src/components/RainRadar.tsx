@@ -221,7 +221,11 @@ export default function RainRadar({ lat, lon }: { lat: number; lon: number }) {
               {t.weather.radarIntro}
             </p>
             {state.status === "loading" && (
-              <div aria-busy="true" aria-label={t.weather.radarLoadingAria}>
+              <div
+                role="status"
+                aria-busy="true"
+                aria-label={t.weather.radarLoadingAria}
+              >
                 <Skeleton className="h-72 w-full rounded-xl" />
               </div>
             )}

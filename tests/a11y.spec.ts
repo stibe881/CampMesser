@@ -40,3 +40,30 @@ test("Erste-Hilfe-Modul ohne A11y-Verstösse", async ({ page }) => {
   await page.getByText("Zeckenbiss").first().waitFor();
   await expectNoViolations(page);
 });
+
+// Weitere Seiten (#594): Der Hero-Kontrast-Fund hat gezeigt, dass sich
+// jede zusätzliche axe-Seite lohnt. Abgemeldet geprüft – die Karte
+// zeigt dann den Anmelde-Hinweis, Sprachhilfe und Länder sind statisch.
+test("Wetter-Seite ohne A11y-Verstösse", async ({ page }) => {
+  await page.goto("/wetter");
+  await page.getByRole("heading").first().waitFor();
+  await expectNoViolations(page);
+});
+
+test("Karten-Seite ohne A11y-Verstösse", async ({ page }) => {
+  await page.goto("/karte");
+  await page.getByRole("heading").first().waitFor();
+  await expectNoViolations(page);
+});
+
+test("Sprachhilfe ohne A11y-Verstösse", async ({ page }) => {
+  await page.goto("/sprachhilfe");
+  await page.getByRole("heading").first().waitFor();
+  await expectNoViolations(page);
+});
+
+test("Länder-Seite ohne A11y-Verstösse", async ({ page }) => {
+  await page.goto("/laenderregeln");
+  await page.getByRole("heading").first().waitFor();
+  await expectNoViolations(page);
+});

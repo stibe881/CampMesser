@@ -91,6 +91,7 @@ export default function PlaceSearch({
         {searching && (
           <div
             className="mt-3"
+            role="status"
             aria-busy="true"
             aria-label={t.weather.compareSearchingAria}
           >
