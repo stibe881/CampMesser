@@ -595,6 +595,9 @@ export default function TodayPage() {
                 {weather.snowfallTodayCm != null &&
                   weather.snowfallTodayCm > 0 &&
                   ` · ${td.snowfallLine(weather.snowfallTodayCm)}`}
+                {/* Schneefallgrenze (#585) in derselben Zeile */}
+                {weather.freezingLevelM != null &&
+                  ` · ${td.freezingLine(weather.freezingLevelM)}`}
               </p>
             )}
             {/* SLF-Lawinen-Warnstufe (#471): nur bei Wintersport und nur

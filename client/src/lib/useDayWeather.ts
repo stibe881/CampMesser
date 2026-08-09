@@ -43,6 +43,11 @@ export interface DayWeather {
   snowfallTodayCm: number | null;
   /** Regensumme heute in mm (#548); null ohne Messwert. */
   rainTodayMm: number | null;
+  /**
+   * Aktuelle Schneefallgrenze (Nullgradgrenze) in m ü. M. (#585);
+   * null ohne Messwert. Für Wintersport und Pässe-Fahrten.
+   */
+  freezingLevelM: number | null;
 }
 
 export function useDayWeather(
@@ -64,8 +69,8 @@ export function useDayWeather(
       forecast_days: "2",
       daily:
         "temperature_2m_max,temperature_2m_min,weather_code,wind_gusts_10m_max,precipitation_sum,snowfall_sum",
-      // Schneehöhe (#470) für die Wintersport-Zeile – gleicher Abruf.
-      current: "snow_depth",
+      // Schneehöhe (#470) und Schneefallgrenze (#585) – gleicher Abruf.
+      current: "snow_depth,freezing_level_height",
     });
     fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`)
       .then(res => (res.ok ? res.json() : Promise.reject(new Error("no"))))
@@ -118,6 +123,11 @@ export function useDayWeather(
           rainTodayMm:
             typeof json?.daily?.precipitation_sum?.[0] === "number"
               ? json.daily.precipitation_sum[0]
+              : null,
+          freezingLevelM:
+            typeof json?.current?.freezing_level_height === "number"
+              ? // Auf 100 m runden – genauer ist die Prognose ohnehin nicht.
+                Math.round(json.current.freezing_level_height / 100) * 100
               : null,
         });
       })

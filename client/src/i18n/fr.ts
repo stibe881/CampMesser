@@ -4669,6 +4669,7 @@ export const fr: Translation = {
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Hauteur de neige : environ ${cm} cm`,
+    freezingLine: (m: number) => `Limite pluie-neige \u2248 ${m} m`,
     snowfallLine: (cm: number) => `Neige fraîche aujourd’hui : env. ${cm} cm`,
     expenseButton: "Saisir une dépense",
     expenseHint: "Ajoutée à la caisse de ce voyage avec la date du jour.",

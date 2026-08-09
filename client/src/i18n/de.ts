@@ -4671,6 +4671,7 @@ export const de = {
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Schneehöhe: rund ${cm} cm`,
+    freezingLine: (m: number) => `Schneefallgrenze \u2248 ${m} m`,
     snowfallLine: (cm: number) => `Neuschnee heute: rund ${cm} cm`,
     expenseButton: "Ausgabe erfassen",
     expenseHint: "Landet mit dem heutigen Tag in der Reisekasse dieser Reise.",
