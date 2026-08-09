@@ -6769,6 +6769,11 @@ export const en: Translation = {
   },
   stats: {
     countriesTitle: "Countries visited",
+    visitedMapTitle: "Where we have been",
+    visitedMapLink: "Open map",
+    visitedMapAria: "Map of visited places",
+    visitedMapCount: (n: number) =>
+      n === 1 ? "1 visited place" : `${n} visited places`,
     countriesUnassigned: (n: number) =>
       n === 1
         ? "1 trip without a recognisable country (the place names none)."

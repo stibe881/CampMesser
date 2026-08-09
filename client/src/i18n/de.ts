@@ -6964,6 +6964,11 @@ export const de = {
   },
   stats: {
     countriesTitle: "Besuchte Länder",
+    visitedMapTitle: "Wo waren wir schon",
+    visitedMapLink: "Zur Karte",
+    visitedMapAria: "Karte der besuchten Orte",
+    visitedMapCount: (n: number) =>
+      n === 1 ? "1 besuchter Ort" : `${n} besuchte Orte`,
     countriesUnassigned: (n: number) =>
       n === 1
         ? "1 Reise ohne erkennbares Land (Ort nennt keins)."

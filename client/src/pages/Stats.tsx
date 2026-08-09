@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -57,6 +57,10 @@ import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { useTodayIso } from "@/lib/useTodayIso";
+
+// «Wo waren wir schon»-Karte (#633): Karten-Engine nur laden, wenn es
+// wirklich Punkte gibt – die Statistik bleibt sonst kartenfrei.
+const VisitedMap = lazy(() => import("@/components/stats/VisitedMap"));
 
 /**
  * Statistik-Dashboard: bündelt die bereits vorhandenen Auswertungen der App
@@ -301,6 +305,50 @@ export default function Stats() {
     enabled: isAuthenticated,
     staleTime: 5 * 60_000,
   });
+  /**
+   * «Wo waren wir schon» (#633): alle BESUCHTEN Orte mit Koordinaten –
+   * angetretene Reisen (#465), deren Zeltplätze und Etappen. Nahe
+   * Duplikate (gleiche 3 Nachkommastellen) fallen zusammen.
+   */
+  const visitedPoints = useMemo(() => {
+    const points: { lat: number; lng: number; name: string }[] = [];
+    const seen = new Set<string>();
+    const push = (
+      lat: number | null | undefined,
+      lng: number | null | undefined,
+      name: string
+    ) => {
+      if (lat == null || lng == null) return;
+      const key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      points.push({ lat, lng, name });
+    };
+    const startedTripIds = new Set<number>();
+    for (const trip of trips) {
+      if (trip.startDate > today) continue;
+      startedTripIds.add(trip.id);
+      const name =
+        trip.title ||
+        (trip.spotId != null
+          ? (spots.find(s => s.id === trip.spotId)?.name ?? trip.spotName)
+          : null) ||
+        trip.location ||
+        "";
+      if (trip.latitude != null && trip.longitude != null) {
+        push(trip.latitude, trip.longitude, name);
+      } else if (trip.spotId != null) {
+        const spot = spots.find(s => s.id === trip.spotId);
+        if (spot) push(spot.latitude, spot.longitude, spot.name);
+      }
+    }
+    for (const stop of allStopsQuery.data ?? []) {
+      if (!startedTripIds.has(stop.tripId) || stop.startDate > today) continue;
+      push(stop.latitude, stop.longitude, stop.name);
+    }
+    return points;
+  }, [trips, spots, allStopsQuery.data, today]);
+
   const countryStats = useMemo(() => {
     const spotNames = new Map(
       (spotsQuery.data ?? []).map(spot => [spot.id, spot.name])
@@ -949,6 +997,32 @@ export default function Stats() {
                 </li>
               ))}
             </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* «Wo waren wir schon» (#633): alle besuchten Orte auf einer
+          Mini-Karte – Reisen, Zeltplätze und Etappen mit Koordinaten. */}
+      {visitedPoints.length > 0 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <SectionHeader
+              icon={Globe2}
+              title={ts.visitedMapTitle}
+              href="/karte"
+              linkLabel={ts.visitedMapLink}
+            />
+            <Suspense
+              fallback={<div className="h-64 w-full rounded-lg bg-muted/40" />}
+            >
+              <VisitedMap
+                points={visitedPoints}
+                ariaLabel={ts.visitedMapAria}
+              />
+            </Suspense>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {ts.visitedMapCount(visitedPoints.length)}
+            </p>
           </CardContent>
         </Card>
       )}
