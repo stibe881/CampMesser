@@ -32,6 +32,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-09",
     entries: [
       l4(
+        "Kilometer heissen jetzt Strassen-Kilometer: Rundreise-Statistik, Merkorte-Liste, Zeltplatz-Favoriten und Platz-Vergleich rechnen über die Strasse (OpenStreetMap-Routing) statt Luftlinie – ohne Netz bleibt die Luftlinie, und wo geschätzt wird, steht es dabei.",
+        "Les kilomètres sont désormais des kilomètres par la route : statistiques d’itinérance, liste des lieux repérés, emplacements favoris et comparaison d’emplacements calculent par la route (routage OpenStreetMap) au lieu du vol d’oiseau – hors ligne, le vol d’oiseau reste, et quand c’est estimé, c’est indiqué.",
+        "I chilometri ora sono chilometri su strada: statistiche degli itinerari, lista dei luoghi salvati, piazzole preferite e confronto piazzole calcolano su strada (routing OpenStreetMap) invece che in linea d’aria – offline resta la linea d’aria, e dove si stima, è indicato.",
+        "Kilometres are now road kilometres: round-trip statistics, saved places list, favourite spots and the spot comparison calculate by road (OpenStreetMap routing) instead of as the crow flies – offline the straight line remains, and where estimated, it says so."
+      ),
+      l4(
         "Neue Reiseart «Freies Campen»: Zelten ohne Campingplatz. Die Heute-Ansicht stellt Landesregeln, Trinkwasser-Rechner und Feuer-Ratgeber nach vorn, und die neue Packvorlage denkt an Wasserfilter, Schäufelchen und Abfallsäcke – alles wieder mitnehmen.",
         "Nouveau type de voyage « Camping sauvage » : camper sans terrain. La vue Aujourd’hui met en avant les règles des pays, le calculateur d’eau potable et le guide du feu, et le nouveau modèle de liste pense au filtre à eau, à la petite pelle et aux sacs poubelle – tout remporter.",
         "Nuovo tipo di viaggio «Campeggio libero»: in tenda senza campeggio. La vista Oggi mette in primo piano regole dei paesi, calcolatore dell’acqua potabile e guida al fuoco, e il nuovo modello di lista pensa a filtro dell’acqua, paletta e sacchi per i rifiuti – riportare tutto.",

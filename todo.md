@@ -1091,6 +1091,7 @@ Die zwanzig Vorschläge:
 
 ## Zwanzig Vorschläge (09.08.2026, Runde 56) + Nutzerwünsche
 
+- [x] Nutzerwunsch: Strassen-Kilometer statt Luftlinie überall, wo eine fahrbare Distanz angezeigt wird – Etappen-Statistik (#580, OSRM-Ketten-Tabelle mit Schätz-Rückfall), Merkorte-Liste auf der Karte, Zeltplatz-Favoriten (Anzeige UND Distanz-Sortierung) und Platz-Vergleich (je eine Tabellen-Abfrage, Rückfall Luftlinie ohne Netz); bewusst Luftlinie bleiben Zelt-Finder/Schatzsuche (Fussweg-Peilung), Gewitter-Zähler und das Karten-Messwerkzeug
 - [x] Nutzerwunsch: Reiseart «Freies Campen» (Zelt ohne Campingplatz) – Schnellzugriffe Landesregeln/Trinkwasser/Feuer-Ratgeber, Zeltausrüstung und Lagerfeuer-Ampel wie Camping, Formular ohne Parzellen-/WLAN-Block, eigene Packvorlage (Wasserfilter, Schäufelchen, Abfallsäcke, Powerbank) samt automatischem Vorschlag beim Reise-Anlegen; kein DB-Schema-Change (kind-Spalte nimmt den neuen Wert auf)
 - [x] Nutzerwunsch: Vergangene Aufenthalte archivieren – tripLogs.archivedAt (Migration 0123), trips.setArchived (nur Besitzer), Archiv-Abschnitt mit Aufklapper unter den vergangenen Reisen (Zurückholen per Knopf); archivierte Reisen zählen weiter in Statistik, Reisepass und Suche
 - [x] Nutzerwunsch: Zu breite Datums-/Zeitfelder auf dem iPhone (Reise-Formular, Vorlagen-Dialog) – iOS-@supports-Block in index.css nimmt nativen date/time-Inputs die intrinsische Breite (EHRLICH: nicht auf einem echten Gerät verifiziert)
@@ -1099,7 +1100,7 @@ Die zwanzig Vorschläge:
 - [x] #577 Rundreise aus Merkorten: dieselben Vorschlags-Chips machen Merkorte direkt zu Etappen
 - [x] #578 Folge-Etappen mitverschieben: Verschiebt man eine Etappe, bietet die App an, alle späteren um dieselbe Tagesdifferenz mitzunehmen (Bestätigungs-Dialog)
 - [x] #579 Vorabend-Check kennt Etappen: Push «Morgen weiter nach X» am Abend vor einem Etappenwechsel (teilt den evepack-Kanal, Pack-Check hat Vorrang, url /heute; 3 Tests)
-- [x] #580 Reise-Kilometer: Statistik summiert Etappen-Distanzen pro Jahr (EHRLICH: Luftlinie zwischen Etappen mit Koordinaten, keine Strassen-Kilometer)
+- [x] #580 Reise-Kilometer: Statistik summiert Etappen-Distanzen pro Jahr – seit dem Nutzerwunsch vom 09.08.2026 ÜBER DIE STRASSE (OSRM-Ketten-Tabelle, eine Abfrage pro Reise; Abschnitte ohne Route werden aus der Luftlinie mit Umwegfaktor geschätzt und die Karte sagt das)
 - [x] #581 Zweirad-Feld: Pflichtfeld twoWheels in allen 18 Länderkatalogen + Karte «Motorrad & Velo» auf der Länder-Seite
 - [x] #582 Länderkatalog CZ/PL/HU: drei komplette Länder (E-Vignetten-Fallen, Promillegrenzen, Camping-Hinweise) + Notrufnummern in shared/emergencyNumbers.ts
 - [x] #583 Pannenhilfe-Karte im SOS (TCS 140 / +41 58 827 22 20, Link zur Sprachhilfe)

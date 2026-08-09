@@ -32,6 +32,7 @@ import {
   normalizeSavedPlaceColor,
 } from "@shared/savedPlaces";
 import { distanceMeters } from "@shared/geo";
+import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import { type Excursion } from "@shared/excursions";
 import { tripNights } from "@shared/trips";
 import SpotsMap from "@/components/map/SpotsMap";
@@ -59,6 +60,22 @@ export default function MapViewPage() {
     enabled: isAuthenticated && (savedPlacesData?.length ?? 0) > 0,
     staleTime: 5 * 60_000,
   });
+  // Strassen-Kilometer statt Luftlinie (Nutzerwunsch 09.08.2026): eine
+  // Tabellen-Abfrage für die ganze Liste; ohne Antwort bleibt die Luftlinie.
+  const placeTargets = useMemo(
+    () =>
+      (savedPlacesData ?? []).map(place => ({
+        id: String(place.id),
+        lat: place.latitude,
+        lon: place.longitude,
+      })),
+    [savedPlacesData]
+  );
+  const routedPlaceKm = useRoutedDistances(
+    home ? { lat: home.latitude, lon: home.longitude } : null,
+    placeTargets,
+    "car"
+  );
   const [focusPoint, setFocusPoint] = useState<{
     lat: number;
     lon: number;
@@ -275,14 +292,18 @@ export default function MapViewPage() {
                 />
                 <ul className="space-y-1">
                   {(savedPlacesData ?? []).map(place => {
-                    const distanceKm = home
-                      ? distanceMeters(
-                          home.latitude,
-                          home.longitude,
-                          place.latitude,
-                          place.longitude
-                        ) / 1000
-                      : null;
+                    const routedM = routedPlaceKm.byId.get(String(place.id));
+                    const distanceKm =
+                      routedM != null
+                        ? routedM / 1000
+                        : home
+                          ? distanceMeters(
+                              home.latitude,
+                              home.longitude,
+                              place.latitude,
+                              place.longitude
+                            ) / 1000
+                          : null;
                     return (
                       <li
                         key={place.id}

@@ -6923,8 +6923,9 @@ export const fr: Translation = {
     hikeYearsTitle: "Bilan annuel des randonnées",
     stageKmTitle: "Kilom\u00e8tres des circuits",
     stageKmLine: (km: string) => `\u2248 ${km} km`,
-    stageKmHint:
-      "\u00c0 vol d\u2019oiseau entre les \u00e9tapes \u2013 les temps de route r\u00e9els figurent sur le voyage.",
+    stageKmHint: "Par la route entre les étapes (OSRM/OpenStreetMap).",
+    stageKmHintEstimate:
+      "Par la route entre les étapes (OSRM/OpenStreetMap) ; quelques tronçons sans itinéraire sont estimés à vol d’oiseau.",
     hikeYearsLink: "Vers les randonnées",
     hikeYearsLine: (tours: number, km: string, ascent: string) =>
       tours === 1

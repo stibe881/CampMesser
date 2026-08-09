@@ -6725,8 +6725,9 @@ export const en: Translation = {
     hikeYearsTitle: "Hiking year totals",
     stageKmTitle: "Round-trip kilometres",
     stageKmLine: (km: string) => `\u2248 ${km} km`,
-    stageKmHint:
-      "As the crow flies between stages \u2013 real driving times live on the trip.",
+    stageKmHint: "By road between the stages (OSRM/OpenStreetMap).",
+    stageKmHintEstimate:
+      "By road between the stages (OSRM/OpenStreetMap); a few segments without a route are estimated as the crow flies.",
     hikeYearsLink: "To your hikes",
     hikeYearsLine: (tours: number, km: string, ascent: string) =>
       tours === 1

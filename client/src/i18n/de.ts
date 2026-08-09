@@ -6915,8 +6915,9 @@ export const de = {
     hikeYearsTitle: "Wander-Jahresbilanz",
     stageKmTitle: "Rundreise-Kilometer",
     stageKmLine: (km: string) => `\u2248 ${km} km`,
-    stageKmHint:
-      "Luftlinie zwischen den Etappen \u2013 die echten Fahrzeiten stehen an der Reise.",
+    stageKmHint: "Über die Strasse zwischen den Etappen (OSRM/OpenStreetMap).",
+    stageKmHintEstimate:
+      "Über die Strasse zwischen den Etappen (OSRM/OpenStreetMap); einzelne Abschnitte ohne Route sind aus der Luftlinie geschätzt.",
     hikeYearsLink: "Zu den Wanderungen",
     hikeYearsLine: (tours: number, km: string, ascent: string) =>
       tours === 1
