@@ -1576,6 +1576,13 @@ export const de = {
     regaText:
       "Die offizielle Rega-App übermittelt beim Alarmieren automatisch deine Position an die Einsatzzentrale – das beschleunigt die Rettung in den Bergen erheblich. Wir empfehlen, sie zusätzlich zu installieren. Alternativ kannst du beim Anruf auf 1414 die oben angezeigten Koordinaten durchgeben.",
     regaLinkAria: "Offizielle Rega-App-Seite öffnen (externer Link)",
+    breakdownTitle: "Panne & Werkstatt",
+    breakdownHint:
+      "Warnweste anziehen, Pannendreieck stellen, alle hinter die Leitplanke \u2013 erst dann telefonieren.",
+    breakdownTcsHome: "TCS-Pannenhilfe (Schweiz)",
+    breakdownTcsAbroad: "TCS aus dem Ausland",
+    breakdownPhrasesLink:
+      "S\u00e4tze f\u00fcr Panne & Werkstatt in vier Sprachen",
     regaLink: "Zur offiziellen Rega-App",
     guideTitle: "So setzt du den Notruf richtig ab",
     abroadTitle: "Notrufnummern im Ausland",

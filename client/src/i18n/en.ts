@@ -1526,6 +1526,12 @@ export const en: Translation = {
     regaText:
       "The official Rega app automatically transmits your position to the operations centre when you raise the alarm – this speeds up mountain rescue considerably. We recommend installing it as well. Alternatively, you can read out the coordinates shown above when calling 1414.",
     regaLinkAria: "Open the official Rega app page (external link)",
+    breakdownTitle: "Breakdown & garage",
+    breakdownHint:
+      "Vest on, triangle out, everyone behind the barrier \u2013 only then make the call.",
+    breakdownTcsHome: "TCS roadside assistance (Switzerland)",
+    breakdownTcsAbroad: "TCS from abroad",
+    breakdownPhrasesLink: "Breakdown & garage phrases in four languages",
     regaLink: "To the official Rega app",
     guideTitle: "How to make the emergency call properly",
     abroadTitle: "Emergency numbers abroad",

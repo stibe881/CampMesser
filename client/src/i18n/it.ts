@@ -1556,6 +1556,12 @@ export const it: Translation = {
     regaText:
       "L'app ufficiale della Rega trasmette automaticamente la tua posizione alla centrale operativa al momento dell'allarme – questo accelera notevolmente il soccorso in montagna. Consigliamo di installarla in aggiunta. In alternativa puoi comunicare le coordinate mostrate sopra chiamando il 1414.",
     regaLinkAria: "Apri la pagina ufficiale dell'app Rega (link esterno)",
+    breakdownTitle: "Guasto & officina",
+    breakdownHint:
+      "Gilet, triangolo, tutti dietro il guardrail \u2013 solo dopo telefonare.",
+    breakdownTcsHome: "Soccorso stradale TCS (Svizzera)",
+    breakdownTcsAbroad: "TCS dall\u2019estero",
+    breakdownPhrasesLink: "Frasi per guasto e officina in quattro lingue",
     regaLink: "All'app Rega ufficiale",
     guideTitle: "Come effettuare correttamente la chiamata d'emergenza",
     abroadTitle: "Numeri d'emergenza all'estero",

@@ -1580,6 +1580,12 @@ export const fr: Translation = {
     regaLinkAria:
       "Ouvrir la page officielle de l'application Rega (lien externe)",
     regaLink: "Vers l'application Rega officielle",
+    breakdownTitle: "Panne & garage",
+    breakdownHint:
+      "Gilet, triangle, tout le monde derri\u00e8re la glissi\u00e8re \u2013 ensuite seulement, t\u00e9l\u00e9phoner.",
+    breakdownTcsHome: "D\u00e9pannage TCS (Suisse)",
+    breakdownTcsAbroad: "TCS depuis l\u2019\u00e9tranger",
+    breakdownPhrasesLink: "Phrases panne & garage en quatre langues",
     guideTitle: "Comment bien passer l'appel d'urgence",
     abroadTitle: "Numéros d'urgence à l'étranger",
     abroadHint:
