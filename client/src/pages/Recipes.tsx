@@ -104,6 +104,17 @@ import {
   storeRecipeFavorites,
   toggleFavorite,
 } from "@/lib/recipeFavorites";
+import {
+  MAX_NOTE_LENGTH,
+  loadRecipeNotes,
+  markCooked,
+  sanitizeRecipeNotes,
+  setRecipeNote,
+  storeRecipeNotes,
+  type RecipeNotesMap,
+} from "@/lib/recipeNotes";
+import { fmtLong } from "@/lib/dateFormat";
+import { useTodayIso } from "@/lib/useTodayIso";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { useWakeLock } from "@/lib/useWakeLock";
 import { cn } from "@/lib/utils";
@@ -1056,6 +1067,31 @@ export default function RecipesPage() {
   };
   const isFavorite = (recipeId: string) => favorites.includes(recipeId);
 
+  // Koch-Notizen & «zuletzt gekocht» (#635): gleiche Ablage wie die
+  // Favoriten – localStorage als schnelle Quelle, Geräte-Sync fürs Konto.
+  const today = useTodayIso();
+  const [recipeNotes, setRecipeNotes] = useState<RecipeNotesMap>(() =>
+    loadRecipeNotes()
+  );
+  const notesSync = useSyncedSetting<RecipeNotesMap>("recipeNotes", value => {
+    const clean = sanitizeRecipeNotes(value);
+    setRecipeNotes(clean);
+    storeRecipeNotes(clean);
+  });
+  const applyRecipeNotes = (next: RecipeNotesMap) => {
+    setRecipeNotes(next);
+    storeRecipeNotes(next);
+    notesSync.push(next);
+  };
+  /** Notiz-Entwurf des offenen Rezepts – erst «Speichern» schreibt. */
+  const [noteDraft, setNoteDraft] = useState("");
+  useEffect(() => {
+    setNoteDraft(selected ? (recipeNotes[selected.id]?.note ?? "") : "");
+    // Nur beim Rezept-Wechsel neu befüllen – Tippen soll nicht
+    // vom Sync überschrieben werden.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?.id]);
+
   // Schnellaktion «Rezept suchen» (?suche=1): Fokus direkt ins Suchfeld
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearch();
@@ -1809,6 +1845,67 @@ export default function RecipesPage() {
                     <p className="mt-1 text-sm">{pick(selected.tip, lang)}</p>
                   </div>
                 )}
+
+                {/* Koch-Notizen & «zuletzt gekocht» (#635): private
+                    Merkzettel («doppelt Curry») und der Tag des letzten
+                    Kochens – synchronisiert wie die Favoriten. */}
+                <div className="rounded-lg border border-border p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t.recipes.notesTitle}
+                  </p>
+                  {recipeNotes[selected.id]?.lastCooked && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t.recipes.lastCooked(
+                        fmtLong(
+                          new Date(
+                            `${recipeNotes[selected.id]?.lastCooked}T00:00:00`
+                          ),
+                          lang
+                        )
+                      )}
+                    </p>
+                  )}
+                  <Textarea
+                    className="mt-2"
+                    rows={2}
+                    maxLength={MAX_NOTE_LENGTH}
+                    placeholder={t.recipes.notesPlaceholder}
+                    aria-label={t.recipes.notesAria(pick(selected.name, lang))}
+                    value={noteDraft}
+                    onChange={e => setNoteDraft(e.target.value)}
+                  />
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={
+                        noteDraft === (recipeNotes[selected.id]?.note ?? "")
+                      }
+                      onClick={() =>
+                        applyRecipeNotes(
+                          setRecipeNote(recipeNotes, selected.id, noteDraft)
+                        )
+                      }
+                    >
+                      {t.common.save}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        applyRecipeNotes(
+                          markCooked(recipeNotes, selected.id, today)
+                        )
+                      }
+                    >
+                      <CookingPot
+                        className="mr-1.5 h-4 w-4"
+                        aria-hidden="true"
+                      />
+                      {t.recipes.cookedToday}
+                    </Button>
+                  </div>
+                </div>
 
                 {/* Eigene Rezepte lassen sich teilen, bearbeiten und löschen */}
                 {customRowFor(selected) && (

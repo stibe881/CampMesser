@@ -5618,6 +5618,12 @@ export const en: Translation = {
     ingredientsTitle: "Ingredients",
     stepsTitle: "Preparation",
     tipTitle: "Tip",
+    notesTitle: "My cooking notes",
+    notesPlaceholder:
+      "e.g. use double the curry, the kids loved it \u2013 visible only to you",
+    notesAria: (name: string) => `Cooking note for ${name}`,
+    lastCooked: (date: string) => `Last cooked: ${date}`,
+    cookedToday: "Cooked today",
     deleteConfirm: (name: string) => `Really delete the recipe “${name}”?`,
     favoritesFilter: "Favourites",
     favoriteAria: (name: string) => `Save ${name} as a favourite`,

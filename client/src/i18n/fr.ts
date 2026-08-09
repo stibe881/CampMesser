@@ -5790,6 +5790,13 @@ export const fr: Translation = {
     ingredientsTitle: "Ingrédients",
     stepsTitle: "Préparation",
     tipTitle: "Astuce",
+    notesTitle: "Mes notes de cuisine",
+    notesPlaceholder:
+      "p. ex. doubler le curry, les enfants ont ador\u00e9 \u2013 visible uniquement par toi",
+    notesAria: (name: string) => `Note de cuisine pour ${name}`,
+    lastCooked: (date: string) =>
+      `Cuisin\u00e9 la derni\u00e8re fois\u00a0: ${date}`,
+    cookedToday: "Cuisin\u00e9 aujourd\u2019hui",
     deleteConfirm: (name: string) =>
       `Supprimer vraiment la recette « ${name} » ?`,
     favoritesFilter: "Favoris",

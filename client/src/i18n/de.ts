@@ -5789,6 +5789,12 @@ export const de = {
     ingredientsTitle: "Zutaten",
     stepsTitle: "Zubereitung",
     tipTitle: "Tipp",
+    notesTitle: "Meine Koch-Notizen",
+    notesPlaceholder:
+      "z. B. doppelt Curry nehmen, Kinder mochten es \u2013 nur f\u00fcr dich sichtbar",
+    notesAria: (name: string) => `Koch-Notiz zu ${name}`,
+    lastCooked: (date: string) => `Zuletzt gekocht: ${date}`,
+    cookedToday: "Heute gekocht",
     deleteConfirm: (name: string) => `Rezept «${name}» wirklich löschen?`,
     favoritesFilter: "Favoriten",
     favoriteAria: (name: string) => `${name} als Favorit speichern`,
