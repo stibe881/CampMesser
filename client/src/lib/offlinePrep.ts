@@ -56,6 +56,12 @@ export async function prefetchTripCore(
   await utils.trips.list.prefetch();
   await utils.spots.list.prefetch();
   await utils.trips.members.list.prefetch({ tripId });
+  // Offline-Persistenz erweitert (#645): Etappen, Journal und Merkorte
+  // gehören ins Reise-Paket – sie laden sonst erst beim Aufklappen und
+  // wären im Funkloch leer, obwohl #302 sie längst speichern könnte.
+  await utils.trips.stops.list.prefetch({ tripId });
+  await utils.trips.journal.list.prefetch({ tripId });
+  await utils.savedPlaces.list.prefetch();
   if (spotId !== null) {
     await utils.spots.photos.list.prefetch({ spotId });
   }
