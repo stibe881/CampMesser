@@ -2988,6 +2988,11 @@ export const en: Translation = {
     noCoordsShort: "no coordinates",
     mapAria: "Map of the stages",
     maxReached: (n: number) => `At most ${n} stages`,
+    legLine: (km: string, duration: string) =>
+      `Drive: \u2248 ${km} \u00b7 ${duration}`,
+    legEstimated: "estimated as the crow flies",
+    legTotal: (km: string, duration: string) =>
+      `Whole loop: \u2248 ${km} \u00b7 ${duration}`,
   },
   tripInvite: {
     badge: "Trip invitation",

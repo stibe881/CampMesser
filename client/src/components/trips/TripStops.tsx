@@ -35,6 +35,9 @@ import { useI18n } from "@/i18n";
 import { fmtShort } from "@/lib/dateFormat";
 import { useTodayIso } from "@/lib/useTodayIso";
 import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
+import { routeOrEstimate } from "@/lib/routing";
+import WeatherIcon from "@/components/weather/WeatherIcon";
+import { shiftIsoDay } from "@shared/localDate";
 import { loadMapLayer } from "@/lib/mapLayers";
 import {
   createMap,
@@ -51,6 +54,21 @@ import {
   currentTripStop,
 } from "@shared/tripStops";
 import { cn } from "@/lib/utils";
+
+/** Kilometer knapp formatieren: unter 10 km eine Nachkommastelle. */
+function fmtKm(distanceM: number): string {
+  const km = distanceM / 1000;
+  return km < 10 ? `${km.toFixed(1)} km` : `${Math.round(km)} km`;
+}
+
+/** Fahrzeit als «2 h 40» bzw. «35 min». */
+function fmtDrive(durationS: number): string {
+  const minutes = Math.round(durationS / 60);
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `${h} h` : `${h} h ${String(m).padStart(2, "0")}`;
+}
 
 /** Nummerierter Etappen-Punkt – gleiche divIcon-Technik wie die Karte. */
 function stopIcon(index: number, active: boolean) {
@@ -250,6 +268,121 @@ export default function TripStops({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, maps.ready, maps.config, mapStops.length > 0]);
 
+  /**
+   * Fahrzeit & Distanz zwischen den Etappen (#558): OSRM-Routing (#299)
+   * je Abschnitt, Schlüssel ist die ZIEL-Etappe. Ohne Netz kommt die
+   * Luftlinien-Schätzung – als solche gekennzeichnet. Der Routen-Cache
+   * in fetchRoute macht Wiederholungen gratis.
+   */
+  const [legs, setLegs] = useState<
+    Map<number, { distanceM: number; durationS: number; estimated: boolean }>
+  >(new Map());
+  useEffect(() => {
+    if (!open || mapStops.length < 2) {
+      setLegs(new Map());
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const next = new Map<
+        number,
+        { distanceM: number; durationS: number; estimated: boolean }
+      >();
+      for (let i = 1; i < mapStops.length; i++) {
+        const fromStop = mapStops[i - 1];
+        const toStop = mapStops[i];
+        const route = await routeOrEstimate(
+          [
+            { lat: fromStop.latitude, lon: fromStop.longitude },
+            { lat: toStop.latitude, lon: toStop.longitude },
+          ],
+          "car",
+          70
+        );
+        if (cancelled) return;
+        next.set(toStop.id, {
+          distanceM: route.distanceM,
+          durationS: route.durationS,
+          estimated: route.source !== "route",
+        });
+      }
+      if (!cancelled) setLegs(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, mapStops]);
+  const legTotal = useMemo(() => {
+    if (legs.size === 0 || legs.size < mapStops.length - 1) return null;
+    let distanceM = 0;
+    let durationS = 0;
+    let estimated = false;
+    legs.forEach(leg => {
+      distanceM += leg.distanceM;
+      durationS += leg.durationS;
+      estimated = estimated || leg.estimated;
+    });
+    return { distanceM, durationS, estimated };
+  }, [legs, mapStops.length]);
+
+  /**
+   * Wetter je Etappe (#560): Symbol und Höchsttemperatur am Ankunftstag,
+   * soweit die 16-Tage-Prognose reicht – weiter draussen bleibt die Zeile
+   * ehrlich leer. Ein Abruf je Etappe mit Koordinaten im Fenster.
+   */
+  const [stageWeather, setStageWeather] = useState<
+    Map<number, { code: number; tMax: number }>
+  >(new Map());
+  useEffect(() => {
+    if (!open) return;
+    const horizon = shiftIsoDay(today, 15);
+    const targets = mapStops.filter(
+      stop => stop.startDate >= today && stop.startDate <= horizon
+    );
+    if (targets.length === 0) {
+      setStageWeather(new Map());
+      return;
+    }
+    let cancelled = false;
+    void Promise.all(
+      targets.map(async stop => {
+        try {
+          const params = new URLSearchParams({
+            latitude: String(stop.latitude),
+            longitude: String(stop.longitude),
+            daily: "weather_code,temperature_2m_max",
+            timezone: "auto",
+            start_date: stop.startDate,
+            end_date: stop.startDate,
+          });
+          const res = await fetch(
+            `https://api.open-meteo.com/v1/forecast?${params.toString()}`
+          );
+          if (!res.ok) return null;
+          const json = (await res.json()) as {
+            daily?: { weather_code?: number[]; temperature_2m_max?: number[] };
+          };
+          const code = json.daily?.weather_code?.[0];
+          const tMax = json.daily?.temperature_2m_max?.[0];
+          if (typeof code !== "number" || typeof tMax !== "number") return null;
+          return { id: stop.id, code, tMax };
+        } catch {
+          return null;
+        }
+      })
+    ).then(rows => {
+      if (cancelled) return;
+      const next = new Map<number, { code: number; tMax: number }>();
+      for (const row of rows) {
+        if (row) next.set(row.id, { code: row.code, tMax: row.tMax });
+      }
+      setStageWeather(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, mapStops, today]);
+
   useEffect(() => {
     const engine = engineRef.current;
     const layer = layerRef.current;
@@ -355,10 +488,39 @@ export default function TripStops({
                             </span>
                           )}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {fmtDay(stop.startDate)} – {fmtDay(stop.endDate)}
-                          {stop.latitude == null && ` · ${ts.noCoordsShort}`}
+                        <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
+                          <span>
+                            {fmtDay(stop.startDate)} – {fmtDay(stop.endDate)}
+                            {stop.latitude == null && ` · ${ts.noCoordsShort}`}
+                          </span>
+                          {/* Wetter am Ankunftstag (#560), soweit die
+                              16-Tage-Prognose reicht */}
+                          {(() => {
+                            const wx = stageWeather.get(stop.id);
+                            return wx ? (
+                              <span className="flex items-center gap-1">
+                                <WeatherIcon
+                                  code={wx.code}
+                                  className="h-3.5 w-3.5"
+                                />
+                                {Math.round(wx.tMax)}°
+                              </span>
+                            ) : null;
+                          })()}
                         </p>
+                        {/* Fahrt ab der vorherigen Etappe (#558) */}
+                        {(() => {
+                          const leg = legs.get(stop.id);
+                          return leg ? (
+                            <p className="text-xs text-muted-foreground">
+                              {ts.legLine(
+                                fmtKm(leg.distanceM),
+                                fmtDrive(leg.durationS)
+                              )}
+                              {leg.estimated && ` (${ts.legEstimated})`}
+                            </p>
+                          ) : null;
+                        })()}
                       </div>
                       <Button
                         variant="ghost"
@@ -384,6 +546,16 @@ export default function TripStops({
                     </li>
                   ))}
                 </ol>
+              )}
+              {/* Summe der Rundreise (#558): erst wenn alle Abschnitte da sind */}
+              {legTotal && (
+                <p className="text-xs font-medium text-muted-foreground">
+                  {ts.legTotal(
+                    fmtKm(legTotal.distanceM),
+                    fmtDrive(legTotal.durationS)
+                  )}
+                  {legTotal.estimated && ` (${ts.legEstimated})`}
+                </p>
               )}
 
               {editing === null ? (

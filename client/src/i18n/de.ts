@@ -3096,6 +3096,11 @@ export const de = {
     noCoordsShort: "ohne Koordinaten",
     mapAria: "Karte der Etappen",
     maxReached: (n: number) => `H\u00f6chstens ${n} Etappen`,
+    legLine: (km: string, duration: string) =>
+      `Fahrt: \u2248 ${km} \u00b7 ${duration}`,
+    legEstimated: "Luftlinie gesch\u00e4tzt",
+    legTotal: (km: string, duration: string) =>
+      `Ganze Rundreise: \u2248 ${km} \u00b7 ${duration}`,
   },
   tripInvite: {
     badge: "Reise-Einladung",

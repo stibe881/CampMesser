@@ -3058,6 +3058,11 @@ export const it: Translation = {
     noCoordsShort: "senza coordinate",
     mapAria: "Mappa delle tappe",
     maxReached: (n: number) => `Al massimo ${n} tappe`,
+    legLine: (km: string, duration: string) =>
+      `Tragitto: \u2248 ${km} \u00b7 ${duration}`,
+    legEstimated: "stima in linea d\u2019aria",
+    legTotal: (km: string, duration: string) =>
+      `Intero giro: \u2248 ${km} \u00b7 ${duration}`,
   },
   tripInvite: {
     badge: "Invito al viaggio",

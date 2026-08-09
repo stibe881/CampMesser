@@ -3093,6 +3093,11 @@ export const fr: Translation = {
     noCoordsShort: "sans coordonn\u00e9es",
     mapAria: "Carte des \u00e9tapes",
     maxReached: (n: number) => `Au plus ${n} \u00e9tapes`,
+    legLine: (km: string, duration: string) =>
+      `Trajet\u00a0: \u2248 ${km} \u00b7 ${duration}`,
+    legEstimated: "estim\u00e9 \u00e0 vol d\u2019oiseau",
+    legTotal: (km: string, duration: string) =>
+      `Tout le circuit\u00a0: \u2248 ${km} \u00b7 ${duration}`,
   },
   tripInvite: {
     badge: "Invitation au voyage",
