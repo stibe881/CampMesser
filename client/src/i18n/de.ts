@@ -1019,6 +1019,7 @@ export const de = {
   },
   weather: {
     tripPlaceSuggest: (name: string) => `Reise-Ort «${name}» merken`,
+    savedPlaceSuggest: (name: string) => `Merkort «${name}» merken`,
     mosquitoTitle: "Stechmücken heute Abend",
     mosquitoAria: "Stechmücken-Index für den Abend",
     mosquitoBarAria: (score: number) => `Stechmücken-Index ${score} von 100`,
@@ -2080,6 +2081,12 @@ export const de = {
     placePhotoFailed: "Foto konnte nicht hochgeladen werden",
     placePhotoHeic:
       "HEIC-Fotos werden nicht unterstützt – bitte als JPG wählen.",
+    savedPlacePromote: "Zum Zeltplatz-Favoriten machen",
+    savedPlacePromoted: "Merkort ist jetzt ein Zeltplatz-Favorit.",
+    colorFilterAria: "Merkorte nach Farbe filtern",
+    colorAll: "Alle",
+    colorLegendEdit: "Legende bearbeiten",
+    colorNameAria: (color: string) => `Eigener Name für die Farbe ${color}`,
     savedPlaceCreatedToast: (name: string) =>
       `Merkort \u00ab${name}\u00bb gespeichert`,
     createdToast: (name: string) => `«${name}» als Favorit angelegt`,
@@ -4671,6 +4678,9 @@ export const de = {
     stageNextNavAria: (name: string) => `Navigation nach ${name} starten`,
     holidayToday: "Heute",
     holidayTomorrow: "Morgen",
+    nearbyPlaceLine: (name: string, km: number) =>
+      `Dein Merkort «${name}» liegt nur ${km} km entfernt.`,
+    nearbyPlaceMap: "Zur Karte",
     holidayLine: (when: string, country: string, name: string) =>
       `${when} Feiertag (${country}): ${name} \u2013 L\u00e4den oft geschlossen.`,
     weather: "Wetter",

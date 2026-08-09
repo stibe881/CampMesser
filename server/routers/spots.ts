@@ -404,13 +404,11 @@ export const spotsRouters = {
     remove: protectedProcedure
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(async ({ ctx, input }) => {
-        // Das Foto (#589) hängt am Merkort – ohne Zeile keine Datei.
-        const place = await db.getSavedPlace(input.id, ctx.user.id);
+        // Papierkorb (#613): Schnappschuss samt Foto-Verweis; die Datei
+        // bleibt auf dem Webspace liegen, bis der Eintrag abläuft.
+        const { capture } = await import("../trash");
+        await capture("savedPlace", input.id, ctx.user.id);
         await db.deleteSavedPlace(input.id, ctx.user.id);
-        if (place?.photoFileName) {
-          const { placePhotoStorage } = await import("../photoStorage");
-          await placePhotoStorage.deleteFiles([place.photoFileName]);
-        }
         return { success: true } as const;
       }),
     /**
@@ -436,6 +434,59 @@ export const spotsRouters = {
           await placePhotoStorage.deleteFiles([place.photoFileName]);
         }
         return { success: true } as const;
+      }),
+    /**
+     * Merkort befördern (#600): aus dem Wunsch wird ein Zeltplatz-Favorit
+     * mit Dossier. Name, Koordinaten und Notiz ziehen um, das Foto (#589)
+     * wandert in die Platz-Galerie (Datei wird kopiert, dann räumt der
+     * Merkort-Speicher auf). Der Merkort selbst wird danach gelöscht –
+     * sein Inhalt lebt im Favoriten weiter.
+     */
+    promote: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const place = await db.getSavedPlace(input.id, ctx.user.id);
+        if (!place) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Merkort nicht gefunden.",
+          });
+        }
+        const spotId = await db.addCampSpot({
+          userId: ctx.user.id,
+          name: place.name,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          note: place.note || null,
+        });
+        if (place.photoFileName) {
+          try {
+            const { placePhotoStorage, spotPhotoStorage } =
+              await import("../photoStorage");
+            const { readFile } = await import("node:fs/promises");
+            const { nanoid } = await import("nanoid");
+            const data = await readFile(
+              placePhotoStorage.photoPath(place.photoFileName)
+            );
+            const extension = place.photoFileName.slice(
+              place.photoFileName.lastIndexOf(".")
+            );
+            const fileName = `${nanoid(16)}${extension}`;
+            await spotPhotoStorage.saveFile(fileName, data);
+            await db.addSpotPhoto({
+              userId: ctx.user.id,
+              spotId,
+              fileName,
+            });
+            await placePhotoStorage.deleteFiles([place.photoFileName]);
+          } catch (error) {
+            // Foto-Umzug gescheitert (Datei fehlt auf der Platte) – der
+            // Favorit ist trotzdem angelegt, nur ohne Bild.
+            console.error("[SavedPlaces] Foto-Umzug fehlgeschlagen:", error);
+          }
+        }
+        await db.deleteSavedPlace(input.id, ctx.user.id);
+        return { spotId };
       }),
   }),
 

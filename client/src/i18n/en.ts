@@ -977,6 +977,7 @@ export const en: Translation = {
   },
   weather: {
     tripPlaceSuggest: (name: string) => `Remember trip place “${name}”`,
+    savedPlaceSuggest: (name: string) => `Remember saved place “${name}”`,
     mosquitoTitle: "Mosquitoes tonight",
     mosquitoAria: "Mosquito index for the evening",
     mosquitoBarAria: (score: number) => `Mosquito index ${score} out of 100`,
@@ -2014,6 +2015,12 @@ export const en: Translation = {
     placePhotoRemove: (name: string) => `Remove photo of ${name}`,
     placePhotoFailed: "Photo could not be uploaded",
     placePhotoHeic: "HEIC photos are not supported – please choose a JPG.",
+    savedPlacePromote: "Turn into a favourite pitch",
+    savedPlacePromoted: "The saved place is now a favourite pitch.",
+    colorFilterAria: "Filter saved places by colour",
+    colorAll: "All",
+    colorLegendEdit: "Edit legend",
+    colorNameAria: (color: string) => `Custom name for the colour ${color}`,
     savedPlaceCreatedToast: (name: string) =>
       `Saved place \u201c${name}\u201d stored`,
     createdToast: (name: string) => `“${name}” created as favourite`,
@@ -4534,6 +4541,9 @@ export const en: Translation = {
     stageNextNavAria: (name: string) => `Start navigation to ${name}`,
     holidayToday: "Today",
     holidayTomorrow: "Tomorrow",
+    nearbyPlaceLine: (name: string, km: number) =>
+      `Your saved place “${name}” is only ${km} km away.`,
+    nearbyPlaceMap: "To the map",
     holidayLine: (when: string, country: string, name: string) =>
       `${when} is a public holiday (${country}): ${name} \u2013 shops often closed.`,
     weather: "Weather",

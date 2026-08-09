@@ -204,6 +204,27 @@ export default function WeatherPage() {
     }
   );
 
+  // Merkorte als Wetter-Orte (#618): Wer sich eine Bucht gemerkt hat,
+  // will auch wissen, wie dort das Wetter wird – der erste Merkort, der
+  // noch kein Wetter-Ort ist, wird als Chip vorgeschlagen.
+  const { data: savedPlacesForWeather } = trpc.savedPlaces.list.useQuery(
+    undefined,
+    { enabled: isAuthenticated, staleTime: 5 * 60_000 }
+  );
+  const savedPlaceSuggestion = useMemo(() => {
+    for (const place of savedPlacesForWeather ?? []) {
+      const suggestion: WeatherPlace = {
+        name: place.name.slice(0, 80),
+        lat: place.latitude,
+        lon: place.longitude,
+      };
+      if (!suggestion.name) continue;
+      if (places.some(entry => isSameWeatherPlace(entry, suggestion))) continue;
+      return suggestion;
+    }
+    return null;
+  }, [savedPlacesForWeather, places]);
+
   const todayIsoForTrips = useTodayIso();
   const tripPlaceSuggestion = useMemo(() => {
     const candidates = (tripsForPlaces ?? [])
@@ -619,6 +640,19 @@ export default function WeatherPage() {
           >
             <Plus className="h-3.5 w-3.5" aria-hidden="true" />
             {t.weather.tripPlaceSuggest(tripPlaceSuggestion.name)}
+          </button>
+        )}
+        {savedPlaceSuggestion && (
+          <button
+            type="button"
+            onClick={() => {
+              const next = addWeatherPlace(places, savedPlaceSuggestion);
+              if (next) savePlaces(next);
+            }}
+            className="flex items-center gap-1.5 rounded-full border border-dashed border-primary/50 bg-card px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:border-primary"
+          >
+            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+            {t.weather.savedPlaceSuggest(savedPlaceSuggestion.name)}
           </button>
         )}
         <button

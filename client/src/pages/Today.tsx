@@ -24,6 +24,7 @@
 import { useEffect, useMemo } from "react";
 import { fmtDayMonth, fmtWeekdayLong } from "@/lib/dateFormat";
 import { Link } from "wouter";
+import { distanceMeters } from "@shared/geo";
 import {
   ArrowRight,
   CalendarDays,
@@ -38,6 +39,7 @@ import {
   Refrigerator,
   ShoppingCart,
   Snowflake,
+  Star,
   Tent,
   UtensilsCrossed,
   TriangleAlert,
@@ -248,6 +250,70 @@ export default function TodayPage() {
           airQualityLabel(airQualityLevel(airAqi), lang)
         )
       : null;
+
+  /**
+   * Merkort in der Nähe (#601): Liegt ein gemerkter Wunschort keine
+   * 30 km vom aktuellen Standort der Reise, sagt es die Kopfzeile –
+   * genau dafür hat man ihn ja gemerkt. Gesucht wird per Luftlinie
+   * (Radius-Frage), angezeigt die Strassen-Strecke; ohne Netz bleibt
+   * die Luftlinie.
+   */
+  const savedPlacesQuery = trpc.savedPlaces.list.useQuery(undefined, {
+    enabled: Boolean(trip) && coords != null,
+    staleTime: 5 * 60_000,
+  });
+  const nearbyPlace = useMemo(() => {
+    if (!coords) return null;
+    let best: {
+      place: NonNullable<typeof savedPlacesQuery.data>[number];
+      meters: number;
+    } | null = null;
+    for (const place of savedPlacesQuery.data ?? []) {
+      const meters = distanceMeters(
+        coords.latitude,
+        coords.longitude,
+        place.latitude,
+        place.longitude
+      );
+      if (meters < 30_000 && (best === null || meters < best.meters)) {
+        best = { place, meters };
+      }
+    }
+    return best;
+    // coords ist ein pro Render neues Objekt – verglichen wird über die Zahlen
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedPlacesQuery.data, coords?.latitude, coords?.longitude]);
+  const [nearbyKm, setNearbyKm] = useState<number | null>(null);
+  useEffect(() => {
+    setNearbyKm(null);
+    if (!nearbyPlace || coords == null) return;
+    let cancelled = false;
+    void import("@/lib/routing")
+      .then(({ fetchPlaceDistances }) =>
+        fetchPlaceDistances(
+          { lat: coords.latitude, lon: coords.longitude },
+          [
+            {
+              id: "nearby",
+              lat: nearbyPlace.place.latitude,
+              lon: nearbyPlace.place.longitude,
+            },
+          ],
+          "car"
+        )
+      )
+      .then(result => {
+        if (cancelled) return;
+        setNearbyKm((result.get("nearby") ?? nearbyPlace.meters) / 1000);
+      })
+      .catch(() => {
+        if (!cancelled) setNearbyKm(nearbyPlace.meters / 1000);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nearbyPlace, coords?.latitude, coords?.longitude]);
 
   const choresQuery = trpc.chores.assignments.useQuery(
     { day: today },
@@ -536,6 +602,28 @@ export default function TodayPage() {
                     className="font-medium text-primary hover:underline"
                   >
                     {td.shopping}
+                  </Link>
+                </span>
+              </p>
+            )}
+            {/* Merkort in der Nähe (#601): der gemerkte Wunschort, für den
+                man jetzt endlich in der Gegend ist. */}
+            {nearbyPlace && (
+              <p className="mt-1 flex items-start gap-1.5 text-sm">
+                <Star
+                  className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                <span>
+                  {td.nearbyPlaceLine(
+                    nearbyPlace.place.name,
+                    Math.round(nearbyKm ?? nearbyPlace.meters / 1000)
+                  )}{" "}
+                  <Link
+                    href="/karte"
+                    className="font-medium text-primary hover:underline"
+                  >
+                    {td.nearbyPlaceMap}
                   </Link>
                 </span>
               </p>

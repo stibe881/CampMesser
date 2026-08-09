@@ -1166,6 +1166,15 @@ export default function SpotsMap({
       kind.className = "text-xs";
       kind.textContent = t.mapView.savedPlaceKind;
       popup.appendChild(kind);
+      // Foto (#599): die Vorschau aus der Verwaltungsliste auch im Popup
+      if (place.photoFileName) {
+        const photo = document.createElement("img");
+        photo.src = `/api/places/photos/${place.photoFileName}`;
+        photo.alt = "";
+        photo.loading = "lazy";
+        photo.className = "mt-1 h-24 w-full rounded-md object-cover";
+        popup.appendChild(photo);
+      }
       if (place.note) {
         const note = document.createElement("p");
         note.className = "text-xs";
@@ -1209,6 +1218,29 @@ export default function SpotsMap({
         );
       });
       popup.appendChild(planTrip);
+      // Befördern (#600): aus dem Wunsch wird ein Favorit mit Dossier –
+      // Name, Koordinaten, Notiz und Foto ziehen um, der Merkort geht.
+      const promote = document.createElement("button");
+      promote.type = "button";
+      promote.textContent = t.mapView.savedPlacePromote;
+      promote.className = "block text-sm font-medium underline";
+      promote.addEventListener("click", async () => {
+        promote.disabled = true;
+        try {
+          const { spotId } = await utils.client.savedPlaces.promote.mutate({
+            id: place.id,
+          });
+          toast.success(t.mapView.savedPlacePromoted);
+          void utils.savedPlaces.list.invalidate();
+          void utils.spots.list.invalidate();
+          engineRef.current?.closePopup();
+          navigate(`/zeltplaetze/${spotId}`);
+        } catch {
+          toast.error(t.common.actionFailed);
+          promote.disabled = false;
+        }
+      });
+      popup.appendChild(promote);
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = t.mapView.savedPlaceDelete;

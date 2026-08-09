@@ -28,6 +28,8 @@ export interface SavedPlacePin {
   longitude: number;
   note: string | null;
   color: string;
+  /** EIN Foto (#589); im Popup als Vorschau (#599). */
+  photoFileName: string | null;
 }
 
 /** Natur-Beobachtung mit Koordinaten – Datum bereits sprachrichtig formatiert. */

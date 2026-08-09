@@ -31,6 +31,7 @@ import {
   packItems,
   packLists,
   passportAbsences,
+  savedPlaces,
   shoppingItems,
   shoppingLists,
   shoppingShares,
@@ -98,6 +99,7 @@ const TABLES: Record<string, MySqlTable> = {
   packItems,
   campSpots,
   spotPhotos,
+  savedPlaces,
   userNotes,
   customRecipes,
   hikeTracks,
@@ -330,6 +332,30 @@ async function snapshotSpot(
   };
 }
 
+/**
+ * Merkorte (#613): eine Zeile plus höchstens ein Foto (#589) – seit dem
+ * Foto ist «aus Versehen gelöscht» kein Ein-Klick-Schaden mehr.
+ */
+async function snapshotSavedPlace(
+  db: Db,
+  id: number,
+  userId: number
+): Promise<Snapshot | null> {
+  const places = await db
+    .select()
+    .from(savedPlaces)
+    .where(and(eq(savedPlaces.id, id), eq(savedPlaces.userId, userId)));
+  if (places.length === 0) return null;
+  return {
+    payload: { savedPlaces: places },
+    files: places[0].photoFileName
+      ? [{ storage: "places", fileName: places[0].photoFileName }]
+      : [],
+    label: trimLabel(places[0].name, String(id)),
+    detail: `${places[0].latitude.toFixed(4)}, ${places[0].longitude.toFixed(4)}`,
+  };
+}
+
 async function snapshotNote(
   db: Db,
   id: number,
@@ -504,6 +530,7 @@ const MAIN_TABLE: Record<TrashKind, string> = {
   box: "storageBoxes",
   gear: "inventoryItems",
   shoppingList: "shoppingLists",
+  savedPlace: "savedPlaces",
 };
 
 const SNAPSHOTS: Record<
@@ -519,6 +546,7 @@ const SNAPSHOTS: Record<
   box: snapshotBox,
   gear: snapshotGear,
   shoppingList: snapshotShoppingList,
+  savedPlace: snapshotSavedPlace,
 };
 
 /**
@@ -687,6 +715,8 @@ async function removeFiles(files: readonly TrashFile[]): Promise<void> {
     expenses: [],
     // Ab #590: die Tages-Fotos des Journals.
     journal: [],
+    // Ab #613: das Foto eines Merkorts.
+    places: [],
   };
   files.forEach(file => {
     if (byStorage[file.storage]) byStorage[file.storage].push(file.fileName);
@@ -702,6 +732,7 @@ async function removeFiles(files: readonly TrashFile[]): Promise<void> {
       [byStorage.notes, storages.notePhotoStorage],
       [byStorage.expenses, storages.expensePhotoStorage],
       [byStorage.journal, storages.journalPhotoStorage],
+      [byStorage.places, storages.placePhotoStorage],
     ];
   for (const [names, storage] of targets) {
     if (names.length > 0) await storage.deleteFiles(names);

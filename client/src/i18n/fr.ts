@@ -1021,6 +1021,7 @@ export const fr: Translation = {
   },
   weather: {
     tripPlaceSuggest: (name: string) => `Retenir le lieu du voyage « ${name} »`,
+    savedPlaceSuggest: (name: string) => `Retenir le lieu repéré « ${name} »`,
     mosquitoTitle: "Moustiques ce soir",
     mosquitoAria: "Indice moustiques pour la soirée",
     mosquitoBarAria: (score: number) => `Indice moustiques ${score} sur 100`,
@@ -2082,6 +2083,13 @@ export const fr: Translation = {
     placePhotoFailed: "La photo n’a pas pu être envoyée",
     placePhotoHeic:
       "Les photos HEIC ne sont pas prises en charge – choisis un JPG.",
+    savedPlacePromote: "Transformer en emplacement favori",
+    savedPlacePromoted: "Le lieu repéré est maintenant un emplacement favori.",
+    colorFilterAria: "Filtrer les lieux repérés par couleur",
+    colorAll: "Tous",
+    colorLegendEdit: "Modifier la légende",
+    colorNameAria: (color: string) =>
+      `Nom personnalisé pour la couleur ${color}`,
     savedPlaceCreatedToast: (name: string) =>
       `Lieu \u00ab\u202f${name}\u202f\u00bb enregistr\u00e9`,
     createdToast: (name: string) => `«${name}» créé comme favori`,
@@ -4670,6 +4678,9 @@ export const fr: Translation = {
       `D\u00e9marrer la navigation vers ${name}`,
     holidayToday: "Aujourd\u2019hui",
     holidayTomorrow: "Demain",
+    nearbyPlaceLine: (name: string, km: number) =>
+      `Ton lieu repéré « ${name} » n’est qu’à ${km} km.`,
+    nearbyPlaceMap: "Vers la carte",
     holidayLine: (when: string, country: string, name: string) =>
       `${when}, jour f\u00e9ri\u00e9 (${country})\u202f: ${name} \u2013 magasins souvent ferm\u00e9s.`,
     weather: "Météo",
