@@ -3204,6 +3204,15 @@ export const de = {
     searchPlaceholder: "Satz suchen …",
     searchAria: "Sprachhilfe durchsuchen",
     searchEmpty: "Kein Satz gefunden – versuch ein anderes Stichwort.",
+    customTitle: "Eigene Sätze",
+    customHint:
+      "Was DIR auf dieser Reise wichtig ist – gespeichert auf deinem Konto, offline verfügbar. Die Sätze gehören zur gewählten Zielsprache.",
+    customMeaningPlaceholder: "In deiner Sprache",
+    customTranslationPlaceholder: (langName: string) =>
+      `Übersetzung (${langName})`,
+    customAdd: "Speichern",
+    customFull: "Mehr als 100 eigene Sätze gehen nicht – lösch zuerst alte.",
+    customDeleteAria: (text: string) => `Eigenen Satz «${text}» löschen`,
     copyAria: (text: string) => `«${text}» kopieren`,
     copied: "Satz kopiert.",
     copyFailed: "Kopieren hat nicht geklappt.",

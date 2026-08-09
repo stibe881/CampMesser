@@ -3091,6 +3091,15 @@ export const en: Translation = {
     searchPlaceholder: "Search for a phrase …",
     searchAria: "Search the phrasebook",
     searchEmpty: "No phrase found – try another keyword.",
+    customTitle: "Your own phrases",
+    customHint:
+      "What matters to YOU on this trip – stored with your account, available offline. Phrases belong to the selected target language.",
+    customMeaningPlaceholder: "In your language",
+    customTranslationPlaceholder: (langName: string) =>
+      `Translation (${langName})`,
+    customAdd: "Save",
+    customFull: "No more than 100 own phrases – delete old ones first.",
+    customDeleteAria: (text: string) => `Delete own phrase “${text}”`,
     copyAria: (text: string) => `Copy “${text}”`,
     copied: "Phrase copied.",
     copyFailed: "Copying did not work.",

@@ -11,7 +11,7 @@
 - [x] #542 GRÖSSTENTEILS EXISTIERTE BEREITS: Die Personen-Tabs zeigen seit #127 genau einen Bereich (= Filter) und tragen den «5/8»-Badge. Neu ist nur der Start im EIGENEN Bereich bei Listen gemeinsamer Reisen – jeder sieht zuerst, was er selbst packen muss
 - [x] #543 Pack-/Einkaufsliste als Text kopieren (ClipboardCopy-Knopf, gruppiert wie die Anzeige, Häkchen als ✓)
 - [x] #544 Abhakbare Checkboxen in Notizen («- [ ] Text» wird antippbar; parseNoteLines/toggleNoteCheckbox in shared/notes.ts, 4 Tests; Hinweis unterm Textfeld)
-- [ ] #545 Eigene Sätze in der Sprachhilfe
+- [x] #545 Eigene Sätze in der Sprachhilfe (Abschnitt «Eigene Sätze» mit eigener Übersetzung je Zielsprache, Vorlesen/Löschen; lokal + Konto-Sync über neuen Sync-Schlüssel phrasebookCustom, max. 100 Einträge)
 - [x] #546 Schriftgrösse-Einstellung (3 Stufen im Profil unter dem Design; Wurzel-Schriftgrösse 100/112.5/125 %, nur pro Gerät gespeichert – lib/fontScale.ts, angewendet beim App-Start)
 - [x] #547 GRÖSSTENTEILS EXISTIERTE BEREITS: LV95-Anzeige im SOS und der Vorlese-Satz (#448) waren da. Neu hängt der Satz in der Schweiz die LV95-Koordinaten an («Schweizer Koordinaten: 2'600'123 / 1'199'456») – die Zahlen, mit denen die Einsatzzentrale arbeitet (formatLv95 + 3 Tests)
 - [ ] #548 Regenwetter-Karte in Heute (Museen/Hallenbäder)

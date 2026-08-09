@@ -3194,6 +3194,16 @@ export const fr: Translation = {
     searchPlaceholder: "Chercher une phrase …",
     searchAria: "Rechercher dans l'aide linguistique",
     searchEmpty: "Aucune phrase trouvée – essaie un autre mot-clé.",
+    customTitle: "Tes propres phrases",
+    customHint:
+      "Ce qui compte pour TOI sur ce voyage – enregistré sur ton compte, disponible hors ligne. Les phrases appartiennent à la langue cible choisie.",
+    customMeaningPlaceholder: "Dans ta langue",
+    customTranslationPlaceholder: (langName: string) =>
+      `Traduction (${langName})`,
+    customAdd: "Enregistrer",
+    customFull:
+      "Pas plus de 100 phrases personnelles – supprime d'abord les anciennes.",
+    customDeleteAria: (text: string) => `Supprimer la phrase « ${text} »`,
     copyAria: (text: string) => `Copier « ${text} »`,
     copied: "Phrase copiée.",
     copyFailed: "La copie n'a pas fonctionné.",

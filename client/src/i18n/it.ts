@@ -3163,6 +3163,15 @@ export const it: Translation = {
     searchPlaceholder: "Cerca una frase …",
     searchAria: "Cerca nell'aiuto linguistico",
     searchEmpty: "Nessuna frase trovata – prova con un'altra parola chiave.",
+    customTitle: "Le tue frasi",
+    customHint:
+      "Ciò che conta per TE in questo viaggio – salvato sul tuo account, disponibile offline. Le frasi appartengono alla lingua di destinazione scelta.",
+    customMeaningPlaceholder: "Nella tua lingua",
+    customTranslationPlaceholder: (langName: string) =>
+      `Traduzione (${langName})`,
+    customAdd: "Salva",
+    customFull: "Non più di 100 frasi personali – elimina prima le vecchie.",
+    customDeleteAria: (text: string) => `Elimina la frase «${text}»`,
     copyAria: (text: string) => `Copia «${text}»`,
     copied: "Frase copiata.",
     copyFailed: "La copia non è riuscita.",
