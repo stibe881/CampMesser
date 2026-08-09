@@ -23,9 +23,13 @@ import {
   EXPENSE_CURRENCIES,
   EXPENSE_MAX_RAPPEN,
   EXPENSE_PAID_BY_MAX_LENGTH,
+  dailyBudgetLeftRappen,
+  expensesTotalRappen,
+  toChfExpenses,
   type ExpenseCategory,
   type ExpenseCurrency,
 } from "@shared/expenses";
+import { formatChf } from "@/lib/money";
 
 /**
  * Ausgabe direkt aus der Heute-Ansicht erfassen (#541): Betrag, Kategorie,
@@ -43,6 +47,36 @@ export default function QuickExpense({ tripId }: { tripId: number }) {
   const [currency, setCurrency] = useState<ExpenseCurrency>("CHF");
   const [category, setCategory] = useState<ExpenseCategory>("essen");
   const [description, setDescription] = useState("");
+
+  /**
+   * Tagesbudget im Schnell-Dialog (#586): Wer an der Kasse steht, will
+   * wissen, was heute noch drinliegt – nicht erst auf der Reise-Seite.
+   * Budget und Kurs stehen an der Reise (trips.list ist ohnehin
+   * geladen); die Ausgaben kommen erst beim Öffnen des Dialogs.
+   */
+  const tripsQuery = trpc.trips.list.useQuery(undefined, {
+    enabled: open,
+    staleTime: 60_000,
+  });
+  const trip = (tripsQuery.data ?? []).find(tr => tr.id === tripId) ?? null;
+  const expensesQuery = trpc.trips.expenses.list.useQuery(
+    { tripId },
+    { enabled: open && trip != null && trip.budgetRappen != null }
+  );
+  const daily = (() => {
+    if (!trip || trip.budgetRappen == null || !expensesQuery.data) return null;
+    const { converted } = toChfExpenses(
+      expensesQuery.data,
+      trip.eurRateX10000 ?? null
+    );
+    return dailyBudgetLeftRappen({
+      budgetRappen: trip.budgetRappen,
+      spentRappen: expensesTotalRappen(converted),
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+      todayIso: todayIso(),
+    });
+  })();
 
   const mutation = trpc.trips.expenses.add.useMutation({
     onSuccess: () => {
@@ -87,6 +121,13 @@ export default function QuickExpense({ tripId }: { tripId: number }) {
             <DialogTitle>{t.today.expenseButton}</DialogTitle>
             <DialogDescription>{t.today.expenseHint}</DialogDescription>
           </DialogHeader>
+          {/* Tagesbudget (#586): dieselbe Zeile wie in der Reisekasse –
+              nur wenn ein Budget gesetzt ist und noch etwas drinliegt. */}
+          {daily !== null && (
+            <p className="text-sm font-medium text-primary">
+              {t.tripExpenses.dailyBudgetLine(`${formatChf(daily, lang)} CHF`)}
+            </p>
+          )}
           <form
             onSubmit={e => {
               e.preventDefault();
