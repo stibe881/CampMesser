@@ -31,6 +31,9 @@ function vehicle(over: Partial<VehicleProfile>): VehicleProfile {
     towKg: null,
     noseKg: null,
     axleKg: null,
+    tireFrontBar: null,
+    tireRearBar: null,
+    serviceDue: null,
     ...over,
   };
 }

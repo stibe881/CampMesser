@@ -31,13 +31,13 @@ describe("Bestätigungen laufen über den App-Dialog", () => {
       // Der Ersatz selbst darf den alten Namen im erklärenden Text nennen.
       if (file.endsWith("ConfirmDialog.tsx")) continue;
       const text = readFileSync(file, "utf8");
-      for (const [i, line] of text.split("\n").entries()) {
+      text.split("\n").forEach((line, i) => {
         // `onConfirm`, `confirmLabel`, `useConfirm` usw. sind erlaubt –
         // gesucht ist der AUFRUF der globalen Browser-Funktion.
         if (/(?<![\w.])(?:window\.)?confirm\s*\(/.test(line)) {
           offenders.push(`${file.slice(CLIENT.length + 1)}:${i + 1}`);
         }
-      }
+      });
     }
     expect(offenders).toEqual([]);
   });

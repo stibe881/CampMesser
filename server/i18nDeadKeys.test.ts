@@ -65,7 +65,9 @@ function germanKeys(): string[] {
     "utf8"
   );
   const keys = new Set<string>();
-  for (const match of text.matchAll(/^\s+([A-Za-z_$][\w$]*)\s*:/gm)) {
+  for (const match of Array.from(
+    text.matchAll(/^\s+([A-Za-z_$][\w$]*)\s*:/gm)
+  )) {
     keys.add(match[1]);
   }
   return Array.from(keys);
@@ -84,7 +86,7 @@ function usedWords(): Set<string> {
   const words = new Set<string>();
   for (const file of files) {
     const text = readFileSync(join(ROOT, file), "utf8");
-    for (const match of text.matchAll(/[A-Za-z_$][\w$]*/g)) {
+    for (const match of Array.from(text.matchAll(/[A-Za-z_$][\w$]*/g))) {
       words.add(match[0]);
     }
   }

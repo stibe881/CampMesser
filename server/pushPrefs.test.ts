@@ -16,6 +16,7 @@ function prefs(overrides: Partial<PushPrefs> = {}): PushPrefs {
     wantsTrips: true,
     wantsAstro: true,
     wantsGear: true,
+    wantsHeat: true,
     windThresholdKmh: null,
     rainThresholdMm: null,
     ...overrides,

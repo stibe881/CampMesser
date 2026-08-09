@@ -20,7 +20,7 @@
 - [x] #531 EXISTIERTE BEREITS (tripKindRows/kindStatsTitle in der Statistik) – kein Code
 - [x] #532 EXISTIERTE BEREITS (trackYearRows in der Statistik) – kein Code
 - [x] #533 Reise-Ort als Wetter-Ort: Vorschlags-Chip für Freitext-Reisen mit Ortssuche-Koordinaten (Zeltplätze hatten schon eigene Chips)
-- [ ] #534 Tests in die Typprüfung (tsconfig)
+- [x] #534 Tests in die Typprüfung: das `**/*.test.ts`-Exclude in tsconfig.json entfernt (die Wurzel der CI-Altlasten aus den Runden zuvor – .test.ts-Dateien sah nur vitest, nie tsc) und die neun aufgelaufenen Typ-Fehler bereinigt (fehlende User-/Vehicle-/PushPrefs-/Tariff-Felder in Fixtures, zwei Iterator-Spreads, ein überzähliges Feld, ein möglicherweise-undefined)
 - [ ] #535 Changelog-Chunk entlasten (ältere Blöcke lazy)
 - Druck-Fix vorgezogen: PrintButton mit echtem _blank-Link für alle 9 Druckseiten (iOS-PWA verschluckte window.open)
 

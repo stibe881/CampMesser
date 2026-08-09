@@ -19,7 +19,7 @@ describe("parseGpx", () => {
       lon: 7.45,
       ele: 540,
     });
-    expect(result?.points[1].t - result!.points[0].t).toBe(20 * 60_000);
+    expect(result!.points[1].t - result!.points[0].t).toBe(20 * 60_000);
   });
 
   it("leitet fehlende Zeiten aus 4 km/h Gehtempo her", () => {
