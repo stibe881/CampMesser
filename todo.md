@@ -17,7 +17,7 @@
 - [ ] #548 Regenwetter-Karte in Heute (Museen/Hallenbäder)
 - [ ] #549 Menüplan-Autofüllen kennt das Wetter
 - [x] #550 Bargeld & Kartenzahlung pro Land (neues Feld payment für alle 9 Länder, eigene Karte auf der Länder-Seite – inkl. NL-Falle «nur Debitkarten» und DE-Bargeld-Hinweis)
-- [ ] #551 Drei neue Länder komplett (PT, GR, DK)
+- [x] #551 Drei neue Länder komplett: Portugal, Griechenland, Dänemark mit allen Feldern (Maut inkl. PT-Portal-Falle, Gespann-Tempi, Promille, Mitführpflichten wie GR-Feuerlöscher, Umweltzonen inkl. DK-miljøzoner-Registrierung, Steckdosen inkl. Typ K, Trinkgeld, Bargeld/Karte, Notruf, Camping-Regeln, Aliase). SOS-Katalog um PT und GR ergänzt (DK war schon drin)
 - [ ] #552 Offline-Paket für geplante Routen
 - [ ] #553 Jahresziel Reisenächte in der Statistik
 - [ ] #554 Technik: TripsPage aufteilen
