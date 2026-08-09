@@ -24,7 +24,12 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
-import { LOCALE_TAGS } from "@shared/i18n";
+import { LOCALE_TAGS, pick } from "@shared/i18n";
+import {
+  AMPERE_DEVICES,
+  AMPERE_OPTIONS,
+  ampereCheck,
+} from "@shared/ampereHelper";
 import { compassDirection, computeSolarAlignment } from "@shared/solar";
 import {
   BATTERY_CHEMISTRIES,
@@ -82,6 +87,9 @@ function numberToInput(value: number | null): string {
 }
 
 export default function EnergyPage() {
+  // Ampere-Helfer am Platz (#639): Säulen-Sicherung + gewählte Geräte
+  const [fuseAmps, setFuseAmps] = useState<number>(10);
+  const [ampDevices, setAmpDevices] = useState<string[]>([]);
   const { isAuthenticated, loading } = useAuth();
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
@@ -1337,6 +1345,106 @@ export default function EnergyPage() {
           {t.energy.empty}
         </p>
       )}
+
+      {/* Ampere-Helfer am Platz (#639): hält die Säulen-Sicherung, wenn
+          Wasserkocher UND Heizlüfter laufen? Gerechnet mit 230 V. */}
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <h2 className="mb-1 font-serif text-lg font-semibold">
+            {t.energy.ampereTitle}
+          </h2>
+          <p className="mb-3 text-xs text-muted-foreground">
+            {t.energy.ampereHint}
+          </p>
+          <p className="mb-1.5 text-sm font-medium">{t.energy.ampereFuse}</p>
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {AMPERE_OPTIONS.map(amps => (
+              <button
+                key={amps}
+                type="button"
+                aria-pressed={fuseAmps === amps}
+                onClick={() => setFuseAmps(amps)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-sm transition-colors",
+                  fuseAmps === amps
+                    ? "border-primary bg-accent font-semibold"
+                    : "border-border hover:bg-accent/50"
+                )}
+              >
+                {amps} A
+              </button>
+            ))}
+          </div>
+          <p className="mb-1.5 text-sm font-medium">{t.energy.ampereDevices}</p>
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {AMPERE_DEVICES.map(device => {
+              const active = ampDevices.includes(device.id);
+              return (
+                <button
+                  key={device.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() =>
+                    setAmpDevices(prev =>
+                      active
+                        ? prev.filter(id => id !== device.id)
+                        : [...prev, device.id]
+                    )
+                  }
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-xs transition-colors",
+                    active
+                      ? "border-primary bg-accent font-semibold"
+                      : "border-border hover:bg-accent/50"
+                  )}
+                >
+                  {pick(device.label, lang)} · {device.watts} W
+                </button>
+              );
+            })}
+          </div>
+          {(() => {
+            const check = ampereCheck(ampDevices, fuseAmps);
+            const ratio =
+              check.limitWatts > 0
+                ? Math.min(1, check.totalWatts / check.limitWatts)
+                : 0;
+            return (
+              <div>
+                <div
+                  className="h-2 w-full overflow-hidden rounded-full bg-muted"
+                  aria-hidden="true"
+                >
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all",
+                      check.ok ? "bg-green-600" : "bg-destructive"
+                    )}
+                    style={{ width: `${Math.round(ratio * 100)}%` }}
+                  />
+                </div>
+                <p
+                  className={cn(
+                    "mt-2 text-sm font-medium",
+                    !check.ok && "text-destructive"
+                  )}
+                  role="status"
+                >
+                  {t.energy.ampereResult(
+                    check.totalWatts,
+                    check.totalAmps,
+                    check.limitWatts,
+                    fuseAmps
+                  )}{" "}
+                  {check.ok
+                    ? t.energy.ampereOk(check.marginWatts)
+                    : t.energy.ampereOver(-check.marginWatts)}
+                </p>
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
     </div>
   );
 }

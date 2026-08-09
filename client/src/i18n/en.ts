@@ -1559,6 +1559,15 @@ export const en: Translation = {
     sourceSpot: (name: string) => `pitch “${name}”`,
     sourceLocation: "your location",
     rangeSelfSufficient: "Unlimited – solar covers the consumption",
+    ampereTitle: "Pitch ampere helper",
+    ampereHint:
+      "Will the bollard fuse hold? Tap the appliances \u2013 calculated at 230 V with typical rated powers.",
+    ampereFuse: "Bollard fuse",
+    ampereDevices: "What runs at the same time?",
+    ampereResult: (w: number, a: number, limitW: number, fuse: number) =>
+      `${w} W (\u2248 ${a} A) of ${limitW} W at ${fuse} A.`,
+    ampereOk: (margin: number) => `Headroom: ${margin} W.`,
+    ampereOver: (over: number) => `${over} W too much \u2013 the fuse trips.`,
     rangeOverMax: (d: number) => `> ${d} days`,
     rangeDays: (d: number) => `${d} days`,
     rangeHours: (h: number) => `${h} h`,

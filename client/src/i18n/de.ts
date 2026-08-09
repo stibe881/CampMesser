@@ -1611,6 +1611,16 @@ export const de = {
     sourceSpot: (name: string) => `Zeltplatz «${name}»`,
     sourceLocation: "deinem Standort",
     rangeSelfSufficient: "Unbegrenzt – Solar deckt den Verbrauch",
+    ampereTitle: "Ampere-Helfer am Platz",
+    ampereHint:
+      "H\u00e4lt die S\u00e4ulen-Sicherung? Ger\u00e4te antippen \u2013 gerechnet wird mit 230 V und typischen Nennleistungen.",
+    ampereFuse: "Absicherung der S\u00e4ule",
+    ampereDevices: "Was l\u00e4uft gleichzeitig?",
+    ampereResult: (w: number, a: number, limitW: number, fuse: number) =>
+      `${w} W (\u2248 ${a} A) von ${limitW} W bei ${fuse} A.`,
+    ampereOk: (margin: number) => `Reserve: ${margin} W.`,
+    ampereOver: (over: number) =>
+      `${over} W zu viel \u2013 die Sicherung f\u00e4llt.`,
     rangeOverMax: (d: number) => `> ${d} Tage`,
     rangeDays: (d: number) => `${d} Tage`,
     rangeHours: (h: number) => `${h} h`,

@@ -1613,6 +1613,15 @@ export const fr: Translation = {
     sourceSpot: (name: string) => `emplacement «${name}»`,
     sourceLocation: "ta position",
     rangeSelfSufficient: "Illimitée – le solaire couvre la consommation",
+    ampereTitle: "Aide amp\u00e8res \u00e0 l\u2019emplacement",
+    ampereHint:
+      "Le fusible de la borne tiendra-t-il\u00a0? Touche les appareils \u2013 calcul\u00e9 \u00e0 230 V avec des puissances typiques.",
+    ampereFuse: "Fusible de la borne",
+    ampereDevices: "Qu\u2019est-ce qui tourne en m\u00eame temps\u00a0?",
+    ampereResult: (w: number, a: number, limitW: number, fuse: number) =>
+      `${w} W (\u2248 ${a} A) sur ${limitW} W \u00e0 ${fuse} A.`,
+    ampereOk: (margin: number) => `Marge\u00a0: ${margin} W.`,
+    ampereOver: (over: number) => `${over} W de trop \u2013 le fusible saute.`,
     rangeOverMax: (d: number) => `> ${d} jours`,
     rangeDays: (d: number) => `${d} jours`,
     rangeHours: (h: number) => `${h} h`,

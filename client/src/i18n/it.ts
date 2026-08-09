@@ -1590,6 +1590,16 @@ export const it: Translation = {
     sourceSpot: (name: string) => `piazzola «${name}»`,
     sourceLocation: "la tua posizione",
     rangeSelfSufficient: "Illimitata – il solare copre il consumo",
+    ampereTitle: "Aiuto ampere alla piazzola",
+    ampereHint:
+      "Regger\u00e0 il fusibile della colonnina? Tocca gli apparecchi \u2013 calcolato a 230 V con potenze tipiche.",
+    ampereFuse: "Fusibile della colonnina",
+    ampereDevices: "Cosa funziona in contemporanea?",
+    ampereResult: (w: number, a: number, limitW: number, fuse: number) =>
+      `${w} W (\u2248 ${a} A) su ${limitW} W a ${fuse} A.`,
+    ampereOk: (margin: number) => `Riserva: ${margin} W.`,
+    ampereOver: (over: number) =>
+      `${over} W di troppo \u2013 il fusibile salta.`,
     rangeOverMax: (d: number) => `> ${d} giorni`,
     rangeDays: (d: number) => `${d} giorni`,
     rangeHours: (h: number) => `${h} h`,
