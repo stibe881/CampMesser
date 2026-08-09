@@ -225,7 +225,15 @@
 }
 
 @media print {
-  body > *:not(.print-labels) {
+  /*
+   * NUR wenn ein Etiketten-Bogen im DOM hängt (Kisten-Seite, Dialog
+   * offen) darf alles andere verschwinden. Ohne das :has() galt die
+   * Regel auf JEDER Seite – der Bogen existiert aber nur auf der
+   * Kisten-Seite, also blendete jeder andere Ausdruck (Reisepass,
+   * Packliste …) schlicht die ganze App aus und es kam ein weisses
+   * Blatt aus dem Drucker (Nutzermeldung 09.08.2026).
+   */
+  body:has(.print-labels) > *:not(.print-labels) {
     display: none !important;
   }
   .print-labels {

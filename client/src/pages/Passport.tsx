@@ -39,11 +39,13 @@ import { cn } from "@/lib/utils";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import {
   passportSummary,
+  startedTrips,
   tripsForFamily,
   tripsForTraveller,
   type PassportStamp,
   type PassportTrip,
 } from "@shared/passport";
+import { localDay } from "@shared/localDate";
 
 /** Ein Stempel als SVG – Form und Farbe kommen aus dem Platznamen. */
 function StampMark({ stamp, label }: { stamp: PassportStamp; label: string }) {
@@ -172,12 +174,16 @@ export default function PassportPage() {
    */
   const trips: PassportTrip[] = useMemo(
     () =>
-      (tripsQuery.data ?? []).map(trip => ({
-        id: trip.id,
-        placeName: trip.spotName || trip.location || trip.title || null,
-        startDate: trip.startDate,
-        endDate: trip.endDate,
-      })),
+      // Geplante Reisen stempeln nicht – nur, was schon begonnen hat.
+      startedTrips(
+        (tripsQuery.data ?? []).map(trip => ({
+          id: trip.id,
+          placeName: trip.spotName || trip.location || trip.title || null,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+        })),
+        localDay()
+      ),
     [tripsQuery.data]
   );
 
