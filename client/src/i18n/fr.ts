@@ -6707,6 +6707,12 @@ export const fr: Translation = {
     subtitle:
       "Ajoute directement à un voyage les photos partagées depuis ton appareil.",
     loginFeature: "l'ajout de photos partagées",
+    placeTitle: "Lieu partagé reconnu",
+    placeNameLabel: "Nom du lieu repéré",
+    placeNamePlaceholder: "p. ex. Camping au bord du lac",
+    placeSave: "Enregistrer comme lieu repéré",
+    placeSaved: "Lieu repéré enregistré.",
+    placeToMap: "Vers la carte",
     emptyTitle: "Aucune photo partagée trouvée",
     emptyText:
       "Ouvre cette page via la fonction de partage de ton appareil : choisir une photo → Partager → ReiseKompass. L'entrée apparaît dans le menu de partage après (ré)installation ou mise à jour de l'app.",

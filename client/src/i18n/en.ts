@@ -6511,6 +6511,12 @@ export const en: Translation = {
     subtitle:
       "Add photos shared from your device directly to one of your trips.",
     loginFeature: "adding shared photos",
+    placeTitle: "Shared place recognized",
+    placeNameLabel: "Name of the saved place",
+    placeNamePlaceholder: "e.g. Lakeside campsite",
+    placeSave: "Save as a place",
+    placeSaved: "Place saved.",
+    placeToMap: "To the map",
     emptyTitle: "No shared photos found",
     emptyText:
       "Open this page via your device's share function: pick a photo → Share → ReiseKompass. The entry appears in the share menu after the app has been (re)installed or updated.",

@@ -6,14 +6,27 @@
  * Reise über die bestehende Trip-Foto-Route hoch (Client-Resize wie überall).
  * Ohne geteilte Dateien (z. B. direkt aufgerufen oder mit altem Service
  * Worker) zeigt die Seite einen Hinweis, wie das Teilen funktioniert.
+ *
+ * Geteilte ORTE (#584): Steckt im geteilten Text/Link ein Punkt mit
+ * Koordinaten (geo:, Google Maps, OSM – shared/sharedPlace.ts), bietet die
+ * Seite an, ihn als Merkort zu speichern.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
-import { CheckCircle2, Loader2, Share2, Upload, X } from "lucide-react";
+import {
+  CheckCircle2,
+  Loader2,
+  MapPin,
+  Share2,
+  Star,
+  Upload,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -28,6 +41,8 @@ import { tripDisplayName } from "@shared/tripName";
 import { LOCALE_TAGS } from "@shared/i18n";
 import { resizeImageForUpload } from "@/lib/imageResize";
 import { trpc } from "@/lib/trpc";
+import { parseSharedPlace, type SharedPlace } from "@shared/sharedPlace";
+import { SAVED_PLACE_NAME_MAX_LENGTH } from "@shared/savedPlaces";
 
 /** Muss zum Cache-Namen im Service Worker (client/public/sw.js) passen. */
 const SHARE_CACHE = "campmesser-share";
@@ -47,10 +62,11 @@ async function readSharedPhotos(): Promise<Blob[]> {
   if (!("caches" in window)) return [];
   try {
     const cache = await caches.open(SHARE_CACHE);
-    // Reihenfolge der Teilen-Auswahl beibehalten (share-photo-0, -1, …)
-    const keys = Array.from(await cache.keys()).sort((a, b) =>
-      a.url.localeCompare(b.url, undefined, { numeric: true })
-    );
+    // Reihenfolge der Teilen-Auswahl beibehalten (share-photo-0, -1, …);
+    // der Text-Eintrag (#584) liegt im selben Cache und bleibt hier aussen vor
+    const keys = Array.from(await cache.keys())
+      .filter(key => key.url.includes("share-photo"))
+      .sort((a, b) => a.url.localeCompare(b.url, undefined, { numeric: true }));
     const blobs: Blob[] = [];
     for (let i = 0; i < keys.length; i += 1) {
       const response = await cache.match(keys[i]);
@@ -60,6 +76,28 @@ async function readSharedPhotos(): Promise<Blob[]> {
     return blobs;
   } catch {
     return [];
+  }
+}
+
+/**
+ * Geteilten Text (#584) aus dem Share-Cache lesen und in einen Ort
+ * übersetzen – wie die Fotos wird der Eintrag genau einmal konsumiert.
+ */
+async function readSharedPlace(): Promise<SharedPlace | null> {
+  if (!("caches" in window)) return null;
+  try {
+    const cache = await caches.open(SHARE_CACHE);
+    const response = await cache.match("/teilen/share-text");
+    if (!response) return null;
+    const shared = (await response.json()) as {
+      title?: string;
+      text?: string;
+      url?: string;
+    };
+    await cache.delete("/teilen/share-text");
+    return parseSharedPlace(shared.title, shared.text, shared.url);
+  } catch {
+    return null;
   }
 }
 
@@ -76,7 +114,20 @@ export default function ShareTargetPage() {
   const [tripId, setTripId] = useState<string>("");
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [uploadedCount, setUploadedCount] = useState<number | null>(null);
+  // Geteilter Ort (#584): erkannter Punkt samt editierbarem Namen
+  const [place, setPlace] = useState<SharedPlace | null>(null);
+  const [placeName, setPlaceName] = useState("");
+  const [placeSaved, setPlaceSaved] = useState(false);
   const readRef = useRef(false);
+
+  const utils = trpc.useUtils();
+  const savePlaceMutation = trpc.savedPlaces.add.useMutation({
+    onSuccess: () => {
+      setPlaceSaved(true);
+      void utils.savedPlaces.list.invalidate();
+    },
+    onError: () => toast.error(t.common.actionFailed),
+  });
 
   // Geteilte Dateien genau EINMAL aus dem Cache übernehmen (StrictMode-fest)
   useEffect(() => {
@@ -90,6 +141,12 @@ export default function ShareTargetPage() {
           url: URL.createObjectURL(blob),
         }))
       );
+    });
+    void readSharedPlace().then(found => {
+      if (found) {
+        setPlace(found);
+        setPlaceName(found.name);
+      }
     });
   }, []);
 
@@ -212,101 +269,169 @@ export default function ShareTargetPage() {
             <Link href="/tagebuch">{ts.toTrip}</Link>
           </Button>
         </div>
-      ) : photos.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center">
-          <Share2
-            className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
-            aria-hidden="true"
-          />
-          <p className="font-medium">{ts.emptyTitle}</p>
-          <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-            {ts.emptyText}
-          </p>
-        </div>
       ) : (
         <div className="space-y-5">
-          <div>
-            <p className="mb-2 text-sm font-medium">
-              {ts.photosCount(photos.length)}
-            </p>
-            <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-              {photos.map((photo, index) => (
-                <li key={photo.id} className="relative">
-                  <img
-                    src={photo.url}
-                    alt={ts.photoAlt(index + 1)}
-                    className="aspect-square w-full rounded-lg border border-border object-cover"
+          {place && (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="flex items-center gap-2 font-medium">
+                <MapPin className="h-4 w-4 text-primary" aria-hidden="true" />
+                {ts.placeTitle}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {place.latitude.toFixed(5)}, {place.longitude.toFixed(5)}
+              </p>
+              {placeSaved ? (
+                <p className="mt-3 flex items-center gap-2 text-sm">
+                  <CheckCircle2
+                    className="h-4 w-4 text-primary"
+                    aria-hidden="true"
                   />
-                  <button
-                    type="button"
-                    onClick={() => removePhoto(photo.id)}
-                    disabled={uploading}
-                    aria-label={ts.removePhotoAria(index + 1)}
-                    className="absolute right-1 top-1 rounded-full bg-background/90 p-1 text-muted-foreground shadow hover:text-destructive"
+                  {ts.placeSaved}
+                  <Link
+                    href="/karte"
+                    className="font-medium text-primary hover:underline"
                   >
-                    <X className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {tripsQuery.isLoading ? (
-            <div className="flex justify-center py-6">
-              <Loader2
-                className="h-5 w-5 animate-spin text-muted-foreground"
-                aria-label={t.common.loading}
-              />
+                    {ts.placeToMap}
+                  </Link>
+                </p>
+              ) : (
+                <>
+                  <div className="mt-3">
+                    <Label htmlFor="share-place-name">
+                      {ts.placeNameLabel}
+                    </Label>
+                    <Input
+                      id="share-place-name"
+                      value={placeName}
+                      maxLength={SAVED_PLACE_NAME_MAX_LENGTH}
+                      placeholder={ts.placeNamePlaceholder}
+                      onChange={e => setPlaceName(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    className="mt-3"
+                    disabled={savePlaceMutation.isPending || !placeName.trim()}
+                    onClick={() =>
+                      savePlaceMutation.mutate({
+                        name: placeName.trim(),
+                        latitude: place.latitude,
+                        longitude: place.longitude,
+                      })
+                    }
+                  >
+                    {savePlaceMutation.isPending ? (
+                      <Loader2
+                        className="mr-2 h-4 w-4 animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <Star className="mr-2 h-4 w-4" aria-hidden="true" />
+                    )}
+                    {ts.placeSave}
+                  </Button>
+                </>
+              )}
             </div>
-          ) : trips.length === 0 ? (
-            <div className="rounded-lg bg-accent/50 p-4 text-sm">
-              <p className="text-muted-foreground">{ts.noTrips}</p>
-              <Link
-                href="/tagebuch"
-                className="mt-1.5 inline-block font-medium text-primary hover:underline"
-              >
-                {ts.toTrips}
-              </Link>
-            </div>
+          )}
+          {photos.length === 0 ? (
+            place ? null : (
+              <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center">
+                <Share2
+                  className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50"
+                  aria-hidden="true"
+                />
+                <p className="font-medium">{ts.emptyTitle}</p>
+                <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                  {ts.emptyText}
+                </p>
+              </div>
+            )
           ) : (
             <>
               <div>
-                <Label htmlFor="share-trip">{ts.tripLabel}</Label>
-                <Select
-                  value={tripId}
-                  onValueChange={setTripId}
-                  disabled={uploading}
-                >
-                  <SelectTrigger id="share-trip" aria-label={ts.tripAria}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {trips.map(trip => (
-                      <SelectItem key={trip.id} value={String(trip.id)}>
-                        {tripLabel(trip)} ·{" "}
-                        {fmtRange(trip.startDate, trip.endDate)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <p className="mb-2 text-sm font-medium">
+                  {ts.photosCount(photos.length)}
+                </p>
+                <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                  {photos.map((photo, index) => (
+                    <li key={photo.id} className="relative">
+                      <img
+                        src={photo.url}
+                        alt={ts.photoAlt(index + 1)}
+                        className="aspect-square w-full rounded-lg border border-border object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(photo.id)}
+                        disabled={uploading}
+                        aria-label={ts.removePhotoAria(index + 1)}
+                        className="absolute right-1 top-1 rounded-full bg-background/90 p-1 text-muted-foreground shadow hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <Button
-                className="w-full"
-                onClick={() => void upload()}
-                disabled={uploading || !tripId}
-              >
-                {uploading ? (
+
+              {tripsQuery.isLoading ? (
+                <div className="flex justify-center py-6">
                   <Loader2
-                    className="mr-2 h-4 w-4 animate-spin"
-                    aria-hidden="true"
+                    className="h-5 w-5 animate-spin text-muted-foreground"
+                    aria-label={t.common.loading}
                   />
-                ) : (
-                  <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
-                )}
-                {uploading
-                  ? ts.uploading((uploadingIndex ?? 0) + 1, photos.length)
-                  : ts.upload}
-              </Button>
+                </div>
+              ) : trips.length === 0 ? (
+                <div className="rounded-lg bg-accent/50 p-4 text-sm">
+                  <p className="text-muted-foreground">{ts.noTrips}</p>
+                  <Link
+                    href="/tagebuch"
+                    className="mt-1.5 inline-block font-medium text-primary hover:underline"
+                  >
+                    {ts.toTrips}
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <Label htmlFor="share-trip">{ts.tripLabel}</Label>
+                    <Select
+                      value={tripId}
+                      onValueChange={setTripId}
+                      disabled={uploading}
+                    >
+                      <SelectTrigger id="share-trip" aria-label={ts.tripAria}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {trips.map(trip => (
+                          <SelectItem key={trip.id} value={String(trip.id)}>
+                            {tripLabel(trip)} ·{" "}
+                            {fmtRange(trip.startDate, trip.endDate)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    className="w-full"
+                    onClick={() => void upload()}
+                    disabled={uploading || !tripId}
+                  >
+                    {uploading ? (
+                      <Loader2
+                        className="mr-2 h-4 w-4 animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
+                    )}
+                    {uploading
+                      ? ts.uploading((uploadingIndex ?? 0) + 1, photos.length)
+                      : ts.upload}
+                  </Button>
+                </>
+              )}
             </>
           )}
         </div>

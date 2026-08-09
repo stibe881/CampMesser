@@ -26,7 +26,8 @@
         }
       ],
       "title": "title",
-      "text": "text"
+      "text": "text",
+      "url": "url"
     }
   },
   "shortcuts": [

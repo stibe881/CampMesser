@@ -6651,6 +6651,12 @@ export const it: Translation = {
     subtitle:
       "Aggiungi direttamente a un viaggio le foto condivise dal tuo dispositivo.",
     loginFeature: "l'aggiunta di foto condivise",
+    placeTitle: "Luogo condiviso riconosciuto",
+    placeNameLabel: "Nome del luogo salvato",
+    placeNamePlaceholder: "p. es. Campeggio al lago",
+    placeSave: "Salva come luogo salvato",
+    placeSaved: "Luogo salvato.",
+    placeToMap: "Alla mappa",
     emptyTitle: "Nessuna foto condivisa trovata",
     emptyText:
       "Apri questa pagina tramite la funzione di condivisione del tuo dispositivo: scegli una foto → Condividi → ReiseKompass. La voce appare nel menu di condivisione dopo la (re)installazione o l'aggiornamento dell'app.",

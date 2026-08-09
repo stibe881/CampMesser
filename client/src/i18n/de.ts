@@ -6696,6 +6696,12 @@ export const de = {
     subtitle:
       "Fotos aus der Teilen-Funktion deines Geräts direkt in eine Reise übernehmen.",
     loginFeature: "das Übernehmen geteilter Fotos",
+    placeTitle: "Geteilter Ort erkannt",
+    placeNameLabel: "Name des Merkorts",
+    placeNamePlaceholder: "z. B. Camping am See",
+    placeSave: "Als Merkort speichern",
+    placeSaved: "Merkort gespeichert.",
+    placeToMap: "Zur Karte",
     emptyTitle: "Keine geteilten Fotos gefunden",
     emptyText:
       "Öffne diese Seite über die Teilen-Funktion deines Geräts: Foto wählen → Teilen → ReiseKompass. Der Eintrag im Teilen-Menü erscheint, nachdem die App (neu) installiert oder aktualisiert wurde.",

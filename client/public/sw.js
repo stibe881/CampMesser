@@ -146,6 +146,21 @@ async function handleShareTargetPost(request) {
         )
       )
     );
+    // Geteilte Orte (#584): Titel/Text/URL mitgeben – die Seite versucht,
+    // daraus Koordinaten für einen Merkort zu lesen.
+    const shared = {};
+    ["title", "text", "url"].forEach(field => {
+      const value = formData.get(field);
+      if (typeof value === "string" && value) shared[field] = value;
+    });
+    if (Object.keys(shared).length > 0) {
+      await cache.put(
+        "/teilen/share-text",
+        new Response(JSON.stringify(shared), {
+          headers: { "Content-Type": "application/json" },
+        })
+      );
+    }
   } catch (error) {
     // Formulardaten nicht lesbar – trotzdem zur Seite umleiten
   }
