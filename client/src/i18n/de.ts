@@ -6759,6 +6759,17 @@ export const de = {
     spotCostsHint:
       "Preis pro Nacht inklusive Kurtaxe und Nebenkosten, günstigster Platz zuoberst. Die Gesamtbeträge sind Nächte × Preis und damit nur eine Schätzung – was du wirklich bezahlt hast, steht in der Reisekasse der jeweiligen Reise.",
     yearCompareTitle: "Übernachtungen pro Jahr",
+    goalTitle: "Jahresziel Reisenächte",
+    goalHint:
+      "Steck dir ein Ziel – zum Beispiel 30 Nächte draussen – und schau zu, wie der Balken übers Jahr wächst.",
+    goalLine: (nights: number, goal: number, year: number) =>
+      `${nights} von ${goal} Nächten im ${year}`,
+    goalAria: (pct: number) => `Jahresziel: ${pct} Prozent erreicht`,
+    goalReached: "Ziel erreicht – schöner Jahrgang!",
+    goalRemaining: (n: number) =>
+      n === 1 ? "Noch 1 Nacht bis zum Ziel" : `Noch ${n} Nächte bis zum Ziel`,
+    goalSet: "Ziel setzen",
+    goalRemove: "Ziel entfernen",
     nightsCount: (n: number) => (n === 1 ? "1 Nacht" : `${n} Nächte`),
     milestonesTitle: "Meilensteine",
     milestonesAchieved: (achieved: number, total: number) =>

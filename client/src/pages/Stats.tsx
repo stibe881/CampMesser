@@ -11,6 +11,7 @@ import {
   Link2,
   Loader2,
   Star,
+  Target,
   Tent,
   Trophy,
   Users,
@@ -22,6 +23,8 @@ import QueryError from "@/components/QueryError";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import { computeTripStats, nightsPerYear } from "@shared/trips";
 import { trackYearRows } from "@shared/trackYears";
@@ -188,6 +191,43 @@ export default function Stats() {
     setKnotStats(clean);
     storeKnotProgress(clean);
   });
+
+  // Jahresziel Reisenächte (#553): selbst gesteckt, am Konto gesynct
+  const [nightsGoal, setNightsGoal] = useState<number | null>(() => {
+    try {
+      const raw = localStorage.getItem("campmesser.nightsGoal");
+      const value = raw === null ? NaN : Number(raw);
+      return Number.isInteger(value) && value >= 1 && value <= 365
+        ? value
+        : null;
+    } catch {
+      return null;
+    }
+  });
+  const [goalDraft, setGoalDraft] = useState("");
+  const goalSync = useSyncedSetting<number | null>("nightsGoal", value => {
+    const clean =
+      typeof value === "number" && Number.isInteger(value) && value >= 1
+        ? Math.min(value, 365)
+        : null;
+    setNightsGoal(clean);
+    try {
+      if (clean === null) localStorage.removeItem("campmesser.nightsGoal");
+      else localStorage.setItem("campmesser.nightsGoal", String(clean));
+    } catch {
+      // localStorage nicht verfügbar
+    }
+  });
+  const updateNightsGoal = (value: number | null) => {
+    setNightsGoal(value);
+    try {
+      if (value === null) localStorage.removeItem("campmesser.nightsGoal");
+      else localStorage.setItem("campmesser.nightsGoal", String(value));
+    } catch {
+      // localStorage nicht verfügbar
+    }
+    goalSync.push(value);
+  };
 
   const today = useTodayIso();
   const currentYear = new Date().getFullYear();
@@ -747,6 +787,89 @@ export default function Stats() {
                 );
               })}
             </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Jahresziel Reisenächte (#553): selbst gesteckt, mit Fortschritt */}
+      {tripStats.totalTrips > 0 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <SectionHeader
+              icon={Target}
+              title={ts.goalTitle}
+              href="/tagebuch"
+              linkLabel={ts.tripsLink}
+            />
+            {nightsGoal !== null ? (
+              (() => {
+                const nights = tripStats.nightsByYear[currentYear] ?? 0;
+                const pct = Math.min(
+                  100,
+                  Math.round((nights / nightsGoal) * 100)
+                );
+                return (
+                  <>
+                    <p className="text-sm font-medium">
+                      {ts.goalLine(nights, nightsGoal, currentYear)}
+                    </p>
+                    <Progress
+                      className="mt-2"
+                      value={pct}
+                      aria-label={ts.goalAria(pct)}
+                    />
+                    <div className="mt-1.5 flex items-center justify-between gap-2">
+                      <p className="text-xs text-muted-foreground">
+                        {nights >= nightsGoal
+                          ? ts.goalReached
+                          : ts.goalRemaining(nightsGoal - nights)}
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs text-muted-foreground"
+                        onClick={() => updateNightsGoal(null)}
+                      >
+                        {ts.goalRemove}
+                      </Button>
+                    </div>
+                  </>
+                );
+              })()
+            ) : (
+              <>
+                <p className="mb-2 text-sm text-muted-foreground">
+                  {ts.goalHint}
+                </p>
+                <form
+                  className="flex gap-2"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    const value = Number(goalDraft.trim());
+                    if (Number.isInteger(value) && value >= 1 && value <= 365) {
+                      updateNightsGoal(value);
+                      setGoalDraft("");
+                    }
+                  }}
+                >
+                  <Input
+                    inputMode="numeric"
+                    placeholder="30"
+                    className="w-28"
+                    value={goalDraft}
+                    onChange={e => setGoalDraft(e.target.value)}
+                    aria-label={ts.goalTitle}
+                  />
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    disabled={!goalDraft.trim()}
+                  >
+                    {ts.goalSet}
+                  </Button>
+                </form>
+              </>
+            )}
           </CardContent>
         </Card>
       )}

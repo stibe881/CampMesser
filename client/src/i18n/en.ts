@@ -6579,6 +6579,17 @@ export const en: Translation = {
     spotCostsHint:
       "Price per night including tourist tax and extras, cheapest at the top. The totals are nights × price and therefore only an estimate – what you actually paid is in the trip kitty of the stay in question.",
     yearCompareTitle: "Nights per year",
+    goalTitle: "Yearly nights goal",
+    goalHint:
+      "Set yourself a goal – say 30 nights outdoors – and watch the bar grow over the year.",
+    goalLine: (nights: number, goal: number, year: number) =>
+      `${nights} of ${goal} nights in ${year}`,
+    goalAria: (pct: number) => `Yearly goal: ${pct} percent reached`,
+    goalReached: "Goal reached – a fine year!",
+    goalRemaining: (n: number) =>
+      n === 1 ? "1 night to go" : `${n} nights to go`,
+    goalSet: "Set goal",
+    goalRemove: "Remove goal",
     nightsCount: n => (n === 1 ? "1 night" : `${n} nights`),
     milestonesTitle: "Milestones",
     milestonesAchieved: (achieved, total) =>

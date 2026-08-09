@@ -67,6 +67,8 @@ export const SYNCED_SETTING_KEYS = [
   "pushSeenAt",
   /** Eigene Sätze der Sprachhilfe (#545) */
   "phrasebookCustom",
+  /** Jahresziel Reisenächte in der Statistik (#553) */
+  "nightsGoal",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];

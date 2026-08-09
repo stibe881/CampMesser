@@ -6758,6 +6758,19 @@ export const fr: Translation = {
     spotCostsHint:
       "Prix par nuit taxe de séjour et frais annexes compris, le moins cher en haut. Les totaux sont le produit nuits × prix et donc de simples estimations – ce que tu as vraiment payé figure dans la caisse du séjour concerné.",
     yearCompareTitle: "Nuitées par année",
+    goalTitle: "Objectif annuel de nuitées",
+    goalHint:
+      "Fixe-toi un objectif – par exemple 30 nuits dehors – et regarde la barre grandir au fil de l'année.",
+    goalLine: (nights: number, goal: number, year: number) =>
+      `${nights} nuitées sur ${goal} en ${year}`,
+    goalAria: (pct: number) => `Objectif annuel : ${pct} pour cent atteints`,
+    goalReached: "Objectif atteint – belle année !",
+    goalRemaining: (n: number) =>
+      n === 1
+        ? "Encore 1 nuit jusqu'à l'objectif"
+        : `Encore ${n} nuits jusqu'à l'objectif`,
+    goalSet: "Définir l'objectif",
+    goalRemove: "Retirer l'objectif",
     nightsCount: n => (n === 1 ? "1 nuit" : `${n} nuits`),
     milestonesTitle: "Jalons",
     milestonesAchieved: (achieved, total) =>

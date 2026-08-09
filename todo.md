@@ -19,7 +19,7 @@
 - [x] #550 Bargeld & Kartenzahlung pro Land (neues Feld payment für alle 9 Länder, eigene Karte auf der Länder-Seite – inkl. NL-Falle «nur Debitkarten» und DE-Bargeld-Hinweis)
 - [x] #551 Drei neue Länder komplett: Portugal, Griechenland, Dänemark mit allen Feldern (Maut inkl. PT-Portal-Falle, Gespann-Tempi, Promille, Mitführpflichten wie GR-Feuerlöscher, Umweltzonen inkl. DK-miljøzoner-Registrierung, Steckdosen inkl. Typ K, Trinkgeld, Bargeld/Karte, Notruf, Camping-Regeln, Aliase). SOS-Katalog um PT und GR ergänzt (DK war schon drin)
 - [ ] #552 Offline-Paket für geplante Routen
-- [ ] #553 Jahresziel Reisenächte in der Statistik
+- [x] #553 Jahresziel Reisenächte in der Statistik (eigene Karte mit Fortschrittsbalken fürs laufende Jahr; Ziel 1–365 selbst gesteckt, am Konto gesynct über neuen Schlüssel nightsGoal, jederzeit entfernbar)
 - [ ] #554 Technik: TripsPage aufteilen
 - [ ] #555 Technik: Druckseiten im Playwright-Smoke-Test
 
