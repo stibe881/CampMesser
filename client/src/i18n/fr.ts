@@ -2581,6 +2581,10 @@ export const fr: Translation = {
     readinessAbroadLink: "Ouvrir la fiche pays",
     readinessHolidaysTitle: "Jour férié au pays de destination :",
     readinessHolidaysHint: "– les magasins sont souvent fermés ce jour-là.",
+    tripWindowLine: (summary: string) =>
+      `M\u00e9t\u00e9o des jours de voyage\u202f: ${summary}`,
+    tripWindowPartial: (n: number) =>
+      `(provisoire \u2013 seulement ${n} ${n === 1 ? "jour" : "jours"} dans les pr\u00e9visions)`,
     whoAlongTitle: "Qui vient ?",
     whoAlongHint:
       "Touché = présent. Les tampons du passeport en découlent – le tampon familial seulement si tout le monde est là.",

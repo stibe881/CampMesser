@@ -2557,6 +2557,10 @@ export const it: Translation = {
     readinessAbroadLink: "Apri la scheda paese",
     readinessHolidaysTitle: "Giorno festivo nel paese di viaggio:",
     readinessHolidaysHint: "– i negozi sono spesso chiusi.",
+    tripWindowLine: (summary: string) =>
+      `Meteo dei giorni di viaggio: ${summary}`,
+    tripWindowPartial: (n: number) =>
+      `(provvisorio \u2013 solo ${n} ${n === 1 ? "giorno" : "giorni"} in previsione)`,
     whoAlongTitle: "Chi viene?",
     whoAlongHint:
       "Toccato = presente. Da qui nascono i timbri del passaporto – quello di famiglia solo se ci sono tutti.",

@@ -2499,6 +2499,9 @@ export const en: Translation = {
     readinessAbroadLink: "Open country factsheet",
     readinessHolidaysTitle: "Public holiday at your destination:",
     readinessHolidaysHint: "– shops are often closed then.",
+    tripWindowLine: (summary: string) => `Trip-day weather: ${summary}`,
+    tripWindowPartial: (n: number) =>
+      `(preliminary \u2013 only ${n} ${n === 1 ? "day" : "days"} in the forecast)`,
     whoAlongTitle: "Who’s along?",
     whoAlongHint:
       "Tapped means along. The passport stamps come from this – the family stamp only when everyone is along.",

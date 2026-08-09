@@ -55,6 +55,7 @@ import {
   type CollageLayoutId,
 } from "@shared/collageLayout";
 import { cn } from "@/lib/utils";
+import { tripWindow, type TripWindow } from "@shared/weatherWindow";
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_LABELS,
@@ -114,6 +115,8 @@ export default function TripReadinessCard({
   trip,
   tripName,
   onEdit,
+  latitude = null,
+  longitude = null,
 }: {
   trip: {
     id: number;
@@ -130,6 +133,9 @@ export default function TripReadinessCard({
   };
   tripName: string;
   onEdit: () => void;
+  /** Koordinaten für die Reisetage-Ampel (#587); null = keine Prognose. */
+  latitude?: number | null;
+  longitude?: number | null;
 }) {
   const t = useT();
   const { lang } = useI18n();
@@ -154,6 +160,59 @@ export default function TripReadinessCard({
     },
     { enabled: open && abroad !== null, staleTime: 24 * 60 * 60 * 1000 }
   );
+
+  /**
+   * Reisetage-Ampel (#587): Der Wetterfenster-Finder (#538) bewertet
+   * hier DIE Tage dieser Reise – erst beim Aufklappen und nur mit
+   * Koordinaten. Liegen erst einige Reisetage in der 16-Tage-Prognose,
+   * sagt die Zeile ehrlich «vorläufig».
+   */
+  const [tripWx, setTripWx] = useState<TripWindow | null>(null);
+  useEffect(() => {
+    if (!open || latitude == null || longitude == null) return;
+    let cancelled = false;
+    const params = new URLSearchParams({
+      latitude: latitude.toFixed(4),
+      longitude: longitude.toFixed(4),
+      timezone: "auto",
+      forecast_days: "16",
+      daily:
+        "temperature_2m_max,precipitation_sum,precipitation_probability_max,wind_gusts_10m_max",
+    });
+    fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`)
+      .then(res => (res.ok ? res.json() : null))
+      .then(
+        (
+          json: {
+            daily?: {
+              time?: string[];
+              temperature_2m_max?: number[];
+              precipitation_sum?: number[];
+              precipitation_probability_max?: number[];
+              wind_gusts_10m_max?: number[];
+            };
+          } | null
+        ) => {
+          if (cancelled || !json?.daily?.time) return;
+          const daily = json.daily;
+          const days = daily.time!.map((date, i) => ({
+            date,
+            tempMaxC: daily.temperature_2m_max?.[i] ?? 0,
+            precipitationSumMm: daily.precipitation_sum?.[i] ?? 0,
+            precipitationProbabilityMax:
+              daily.precipitation_probability_max?.[i],
+            windGustsMaxKmh: daily.wind_gusts_10m_max?.[i],
+          }));
+          setTripWx(tripWindow(days, trip.startDate, trip.endDate));
+        }
+      )
+      .catch(() => {
+        // Ohne Netz bleibt die Zeile weg.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, latitude, longitude, trip.startDate, trip.endDate]);
 
   const packQuery = trpc.packing.progress.useQuery(
     { listId: trip.packListId ?? 0 },
@@ -430,6 +489,30 @@ export default function TripReadinessCard({
                 </span>
               ))}{" "}
               {t.trips.readinessHolidaysHint}
+            </p>
+          )}
+          {/* Reisetage-Ampel (#587): das Wetterfenster für GENAU diese
+              Reisetage, sobald sie in der 16-Tage-Prognose liegen. */}
+          {tripWx && (
+            <p className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+              <span
+                className={cn(
+                  "h-2.5 w-2.5 shrink-0 rounded-full",
+                  tripWx.verdict === "top"
+                    ? "bg-primary"
+                    : tripWx.verdict === "ok"
+                      ? "bg-amber-500"
+                      : "bg-destructive/70"
+                )}
+                aria-hidden="true"
+              />
+              <span>
+                {t.trips.tripWindowLine(
+                  t.weather.windowSummary(tripWx.tempMaxC, tripWx.rainMm)
+                )}
+                {!tripWx.complete &&
+                  ` ${t.trips.tripWindowPartial(tripWx.coveredDays)}`}
+              </span>
             </p>
           )}
         </div>

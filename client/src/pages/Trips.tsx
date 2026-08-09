@@ -1111,6 +1111,22 @@ export default function TripsPage() {
                         trip={trip}
                         tripName={label(trip)}
                         onEdit={() => startEdit(trip)}
+                        // Reisetage-Ampel (#587): Platz-Koordinaten,
+                        // sonst die der Reise aus der Ortssuche (#465)
+                        latitude={
+                          (trip.spotId != null
+                            ? spots.find(s => s.id === trip.spotId)?.latitude
+                            : undefined) ??
+                          trip.latitude ??
+                          null
+                        }
+                        longitude={
+                          (trip.spotId != null
+                            ? spots.find(s => s.id === trip.spotId)?.longitude
+                            : undefined) ??
+                          trip.longitude ??
+                          null
+                        }
                       />
                       {packingMatters && trip.packListId != null && (
                         <PackProgress listId={trip.packListId} />

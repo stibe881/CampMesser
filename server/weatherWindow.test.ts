@@ -76,3 +76,41 @@ describe("Wetterfenster-Finder (#538)", () => {
     expect(w.verdict).toBe("top");
   });
 });
+
+/** Reisetage-Ampel (#587): bewertet DIE Tage einer konkreten Reise. */
+describe("tripWindow", () => {
+  const day = (date: string, rain = 0, temp = 22) => ({
+    date,
+    tempMaxC: temp,
+    precipitationSumMm: rain,
+  });
+
+  it("bewertet die Reisetage und meldet volle Abdeckung", async () => {
+    const { tripWindow } = await import("@shared/weatherWindow");
+    const days = [
+      day("2026-08-10"),
+      day("2026-08-11"),
+      day("2026-08-12"),
+      day("2026-08-13"),
+    ];
+    const wx = tripWindow(days, "2026-08-11", "2026-08-12");
+    expect(wx?.verdict).toBe("top");
+    expect(wx?.coveredDays).toBe(2);
+    expect(wx?.complete).toBe(true);
+  });
+
+  it("sagt ehrlich «vorläufig», wenn Tage fehlen", async () => {
+    const { tripWindow } = await import("@shared/weatherWindow");
+    const wx = tripWindow([day("2026-08-11", 12)], "2026-08-11", "2026-08-14");
+    expect(wx?.complete).toBe(false);
+    expect(wx?.coveredDays).toBe(1);
+    expect(wx?.verdict).toBe("bad");
+  });
+
+  it("liefert null ausserhalb der Prognose", async () => {
+    const { tripWindow } = await import("@shared/weatherWindow");
+    expect(
+      tripWindow([day("2026-08-10")], "2026-09-01", "2026-09-03")
+    ).toBeNull();
+  });
+});

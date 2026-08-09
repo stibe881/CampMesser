@@ -2585,6 +2585,9 @@ export const de = {
     readinessAbroadLink: "Länder-Merkblatt öffnen",
     readinessHolidaysTitle: "Feiertag im Reiseland:",
     readinessHolidaysHint: "– Läden sind dann oft geschlossen.",
+    tripWindowLine: (summary: string) => `Reisetage-Wetter: ${summary}`,
+    tripWindowPartial: (n: number) =>
+      `(vorl\u00e4ufig \u2013 erst ${n} ${n === 1 ? "Tag" : "Tage"} in der Prognose)`,
     whoAlongTitle: "Wer ist dabei?",
     whoAlongHint:
       "Angetippt heisst dabei. Daraus entstehen die Stempel im Reisepass – der Familien-Stempel nur, wenn alle dabei sind.",
