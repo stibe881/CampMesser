@@ -57,7 +57,8 @@ import { gearTaskDue, type GearTaskLike } from "../shared/gearTasks";
 import { heatAdvice } from "../shared/heatCare";
 import { pick } from "../shared/i18n";
 import { getMoonInfo } from "../shared/moon";
-import { daysUntilTrip } from "../shared/trips";
+import { daysUntilTrip, isTripActiveOn } from "../shared/trips";
+import { distanceMeters } from "../shared/geo";
 import {
   ATTRIBUTION,
   eventLabel,
@@ -1119,6 +1120,13 @@ export async function notifyUsers(
  * Die Mitteilungs-Flags pro Abo (wantsWeather/wantsFood/wantsTrips/
  * wantsAstro/wantsGear) werden über subscriptionWants respektiert.
  */
+/**
+ * So nah (Luftlinie) muss eine laufende Reise beim Heim-Standort liegen,
+ * damit auch der Heim-Ort Unwetter-Push bekommt. Grosszügig gewählt:
+ * Beim Tagesausflug in die Nachbargemeinde ist das Daheim mitbetroffen.
+ */
+const HOME_TRIP_RADIUS_M = 25_000;
+
 export async function checkAndNotify(): Promise<PushCheckResult> {
   const result: PushCheckResult = {
     subscriptions: 0,
@@ -1389,8 +1397,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     eveningHour <= EVE_PACK_SEND_HOUR_TO
   ) {
     const running = allTrips.filter(
-      trip =>
-        trip.spotId !== null && trip.startDate <= today && trip.endDate >= today
+      trip => trip.spotId !== null && isTripActiveOn(trip, today)
     );
     const turnBySpotId = new Map<
       number,
@@ -1471,7 +1478,32 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     latitude: number;
     longitude: number;
   }[] = [];
+  /**
+   * GEWARNT WIRD NUR, WO GERADE EINE REISE IST (Nutzer-Entscheid
+   * 09.08.2026): Vorher bekam man Unwetter-Push für jeden gespeicherten
+   * Platz und den Heim-Standort, das ganze Jahr – Lärm statt Warnung.
+   * Jetzt zählen die Orte der HEUTE laufenden Reisen (verknüpfter Platz
+   * oder Freitext-Ort mit Koordinaten aus der Ortssuche). Der Heim-Ort
+   * wird nur geprüft, wenn eine laufende Reise in seiner Nähe liegt –
+   * Ferien auf Balkonien sind auch Ferien.
+   */
+  const activeTrips = allTrips.filter(trip => isTripActiveOn(trip, today));
+  const activeSpotIds = new Set(
+    activeTrips
+      .map(trip => trip.spotId)
+      .filter((id): id is number => id !== null)
+  );
+  /** Koordinaten einer Reise: verknüpfter Platz vor Freitext-Ort. */
+  const tripCoords = (trip: (typeof allTrips)[number]) => {
+    const spot = trip.spotId !== null ? spotById.get(trip.spotId) : undefined;
+    if (spot) return { latitude: spot.latitude, longitude: spot.longitude };
+    if (trip.latitude != null && trip.longitude != null) {
+      return { latitude: trip.latitude, longitude: trip.longitude };
+    }
+    return null;
+  };
   for (const spot of spots) {
+    if (!activeSpotIds.has(spot.id)) continue;
     const hourly = await cachedHourly(spot.latitude, spot.longitude);
     if (!hourly) continue;
     weatherPoints.push({
@@ -1483,7 +1515,38 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       longitude: spot.longitude,
     });
   }
+  // Laufende Reisen ohne Platz, aber mit Koordinaten (#465): Hotel-,
+  // Strand- und Städtereisen sollen dieselbe Warnung bekommen wie ein
+  // verknüpfter Zeltplatz.
+  for (const trip of activeTrips) {
+    if (trip.spotId !== null || trip.latitude == null || trip.longitude == null)
+      continue;
+    const hourly = await cachedHourly(trip.latitude, trip.longitude);
+    if (!hourly) continue;
+    weatherPoints.push({
+      userId: trip.userId,
+      name: tripDisplayName(trip),
+      keyPrefix: `trip:${trip.id}`,
+      hourly,
+      latitude: trip.latitude,
+      longitude: trip.longitude,
+    });
+  }
   for (const home of homes) {
+    const tripAtHome = activeTrips.some(trip => {
+      if (trip.userId !== home.userId) return false;
+      const coords = tripCoords(trip);
+      return (
+        coords !== null &&
+        distanceMeters(
+          coords.latitude,
+          coords.longitude,
+          home.latitude,
+          home.longitude
+        ) <= HOME_TRIP_RADIUS_M
+      );
+    });
+    if (!tripAtHome) continue;
     const hourly = await cachedHourly(home.latitude, home.longitude);
     if (!hourly) continue;
     weatherPoints.push({

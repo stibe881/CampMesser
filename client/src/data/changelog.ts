@@ -23,6 +23,18 @@ export type { ChangelogBlock };
 
 export const changelog: ChangelogBlock[] = [
   {
+    id: "2026-08-09.2",
+    date: "2026-08-09",
+    entries: [
+      l4(
+        "Unwetter-Push nur noch, wo du gerade bist: Gewarnt wird am Ort der laufenden Reise (verknüpfter Platz oder Ort mit Koordinaten) – nicht mehr das ganze Jahr für jeden gespeicherten Platz und den Heim-Standort. Das Daheim wird nur noch gewarnt, wenn eine laufende Reise in seiner Nähe liegt. In der App selbst siehst du die Warnungen deiner Plätze weiterhin jederzeit.",
+        "Alerte intempéries seulement là où tu es : l’avertissement concerne le lieu du voyage en cours (emplacement lié ou lieu avec coordonnées) – plus toute l’année pour chaque emplacement enregistré et le domicile. Le domicile n’est averti que si un voyage en cours se trouve à proximité. Dans l’app, tu vois toujours les alertes de tes emplacements à tout moment.",
+        "Avviso maltempo solo dove sei: l’avviso riguarda il luogo del viaggio in corso (piazzola collegata o luogo con coordinate) – non più tutto l’anno per ogni piazzola salvata e per casa. Casa viene avvisata solo se un viaggio in corso è nelle vicinanze. Nell’app vedi comunque sempre gli avvisi delle tue piazzole.",
+        "Storm push only where you are: warnings cover the location of the running trip (linked spot or place with coordinates) – no longer all year for every saved spot and your home. Home is only warned when a running trip is nearby. In the app itself you still see your spots’ warnings at any time."
+      ),
+    ],
+  },
+  {
     id: "2026-08-09.1",
     date: "2026-08-09",
     entries: [
