@@ -18,7 +18,7 @@
 - [x] #549 Menüplan-Autofüllen kennt das Wetter: Beim Klick wird die Regenprognose der Reise-Koordinaten geholt – an Regentagen (≥ 5 mm) fallen «Offenes Feuer»-Rezepte weg, an trockenen Abenden kommt zuerst der Grill; ein Toast begründet es. Ohne Koordinaten/Netz füllt es wie bisher (3 Tests)
 - [x] #550 Bargeld & Kartenzahlung pro Land (neues Feld payment für alle 9 Länder, eigene Karte auf der Länder-Seite – inkl. NL-Falle «nur Debitkarten» und DE-Bargeld-Hinweis)
 - [x] #551 Drei neue Länder komplett: Portugal, Griechenland, Dänemark mit allen Feldern (Maut inkl. PT-Portal-Falle, Gespann-Tempi, Promille, Mitführpflichten wie GR-Feuerlöscher, Umweltzonen inkl. DK-miljøzoner-Registrierung, Steckdosen inkl. Typ K, Trinkgeld, Bargeld/Karte, Notruf, Camping-Regeln, Aliase). SOS-Katalog um PT und GR ergänzt (DK war schon drin)
-- [ ] #552 Offline-Paket für geplante Routen
+- [x] #552 Offline-Paket für geplante Routen: «Offline-Karte laden» pro gespeicherter Route lädt die Kacheln in einem 1-km-Korridor entlang der Strecke (tilesForCorridor in mapTiles.ts, 5 Tests) in denselben Cache wie die Platz-Pakete (#217) – der Service Worker bedient sie ohne Änderung. Fortschritt/Abbrechen/Löschen wie beim Platz; Löschen der Route räumt das Paket mit ab
 - [x] #553 Jahresziel Reisenächte in der Statistik (eigene Karte mit Fortschrittsbalken fürs laufende Jahr; Ziel 1–365 selbst gesteckt, am Konto gesynct über neuen Schlüssel nightsGoal, jederzeit entfernbar)
 - [ ] #554 Technik: TripsPage aufteilen
 - [ ] #555 Technik: Druckseiten im Playwright-Smoke-Test

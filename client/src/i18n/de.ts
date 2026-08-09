@@ -5305,6 +5305,16 @@ export const de = {
     summary: (distance: string, ascent: number, time: string) =>
       `${distance} · ↑${ascent} m · ${time}`,
     removeAria: (name: string) => `Route ${name} löschen`,
+    offlineDownload: "Offline-Karte laden",
+    offlineDownloadAria: (name: string) =>
+      `Offline-Karte f\u00fcr Route ${name} laden`,
+    offlineDelete: "Offline-Karte l\u00f6schen",
+    offlineDeleteAria: (name: string) =>
+      `Offline-Karte der Route ${name} l\u00f6schen`,
+    offlineSaved: (tiles: number, mb: string) =>
+      `${tiles} Kacheln \u00b7 ${mb} MB`,
+    offlineHint:
+      "\u00abOffline-Karte laden\u00bb legt die Karten-Kacheln in einem 1-km-Korridor entlang der Route auf dem Ger\u00e4t ab \u2013 f\u00fcr unterwegs ohne Empfang.",
   },
   trackProfile: {
     sectionAria: "Höhenprofil und Zwischenzeiten",

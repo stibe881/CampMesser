@@ -5300,6 +5300,16 @@ export const fr: Translation = {
     summary: (distance: string, ascent: number, time: string) =>
       `${distance} · ↑${ascent} m · ${time}`,
     removeAria: (name: string) => `Supprimer l'itinéraire ${name}`,
+    offlineDownload: "Charger la carte hors ligne",
+    offlineDownloadAria: (name: string) =>
+      `Charger la carte hors ligne pour l\u2019itin\u00e9raire ${name}`,
+    offlineDelete: "Supprimer la carte hors ligne",
+    offlineDeleteAria: (name: string) =>
+      `Supprimer la carte hors ligne de l\u2019itin\u00e9raire ${name}`,
+    offlineSaved: (tiles: number, mb: string) =>
+      `${tiles} tuiles \u00b7 ${mb} Mo`,
+    offlineHint:
+      "\u00ab\u202fCharger la carte hors ligne\u202f\u00bb enregistre les tuiles de carte dans un corridor de 1 km le long de l\u2019itin\u00e9raire \u2013 pour la route sans r\u00e9seau.",
   },
   trackProfile: {
     sectionAria: "Profil altimétrique et temps intermédiaires",

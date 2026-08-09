@@ -5161,6 +5161,15 @@ export const en: Translation = {
     summary: (distance: string, ascent: number, time: string) =>
       `${distance} · ↑${ascent} m · ${time}`,
     removeAria: (name: string) => `Delete route ${name}`,
+    offlineDownload: "Download offline map",
+    offlineDownloadAria: (name: string) =>
+      `Download offline map for route ${name}`,
+    offlineDelete: "Delete offline map",
+    offlineDeleteAria: (name: string) => `Delete offline map of route ${name}`,
+    offlineSaved: (tiles: number, mb: string) =>
+      `${tiles} tiles \u00b7 ${mb} MB`,
+    offlineHint:
+      "\u201cDownload offline map\u201d stores the map tiles in a 1 km corridor along the route on this device \u2013 for the trail without reception.",
   },
   trackProfile: {
     sectionAria: "Elevation profile and splits",

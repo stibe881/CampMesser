@@ -5265,6 +5265,16 @@ export const it: Translation = {
     summary: (distance: string, ascent: number, time: string) =>
       `${distance} · ↑${ascent} m · ${time}`,
     removeAria: (name: string) => `Elimina il percorso ${name}`,
+    offlineDownload: "Scarica mappa offline",
+    offlineDownloadAria: (name: string) =>
+      `Scarica la mappa offline per il percorso ${name}`,
+    offlineDelete: "Elimina mappa offline",
+    offlineDeleteAria: (name: string) =>
+      `Elimina la mappa offline del percorso ${name}`,
+    offlineSaved: (tiles: number, mb: string) =>
+      `${tiles} tessere \u00b7 ${mb} MB`,
+    offlineHint:
+      "\u00abScarica mappa offline\u00bb salva le tessere della mappa in un corridoio di 1 km lungo il percorso \u2013 per il cammino senza campo.",
   },
   trackProfile: {
     sectionAria: "Profilo altimetrico e tempi intermedi",

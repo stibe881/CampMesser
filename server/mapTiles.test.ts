@@ -7,6 +7,7 @@ import {
   OFFLINE_BASE_ZOOM,
   tileUrl,
   tilesForArea,
+  tilesForCorridor,
   zoomLevelsUpTo,
 } from "../client/src/lib/mapTiles";
 
@@ -128,6 +129,80 @@ describe("tilesForArea", () => {
 
   it("liefert ohne Zoomstufen nichts", () => {
     expect(tilesForArea(LAT, LON, 5, [])).toEqual([]);
+  });
+});
+
+describe("tilesForCorridor", () => {
+  // Eine ~7 km lange Linie von Zürich Richtung Uetliberg/Albis
+  const ROUTE = [
+    { lat: 47.3769, lon: 8.5417 },
+    { lat: 47.35, lon: 8.49 },
+    { lat: 47.32, lon: 8.51 },
+  ];
+
+  it("deckt Start und Ziel auf jeder Zoomstufe ab", () => {
+    const tiles = tilesForCorridor(ROUTE, 1, [12, 13, 14]);
+    [12, 13, 14].forEach(z => {
+      const first = ROUTE[0];
+      const last = ROUTE[ROUTE.length - 1];
+      expect(tiles).toContainEqual({
+        z,
+        x: lonToTileX(first.lon, z),
+        y: latToTileY(first.lat, z),
+      });
+      expect(tiles).toContainEqual({
+        z,
+        x: lonToTileX(last.lon, z),
+        y: latToTileY(last.lat, z),
+      });
+    });
+  });
+
+  it("lässt zwischen weit auseinander liegenden Wegpunkten keine Lücke", () => {
+    // Nur Start und Ziel gesetzt – die Stützstellen müssen die Strecke
+    // dazwischen füllen: auch die Kachel der Streckenmitte ist dabei.
+    const tiles = tilesForCorridor([ROUTE[0], ROUTE[2]], 0.5, [15]);
+    const mid = {
+      lat: (ROUTE[0].lat + ROUTE[2].lat) / 2,
+      lon: (ROUTE[0].lon + ROUTE[2].lon) / 2,
+    };
+    expect(tiles).toContainEqual({
+      z: 15,
+      x: lonToTileX(mid.lon, 15),
+      y: latToTileY(mid.lat, 15),
+    });
+  });
+
+  it("enthält keine Duplikate und braucht weit weniger Kacheln als die Fläche", () => {
+    const tiles = tilesForCorridor(ROUTE, 1, zoomLevelsUpTo(15));
+    const keys = tiles.map(t => `${t.z}/${t.x}/${t.y}`);
+    expect(new Set(keys).size).toBe(keys.length);
+    // Der Korridor ist der ganze Zweck: gleiche Strecke als Umkreis-Paket
+    // (Radius ≈ halbe Streckenlänge) wäre um ein Mehrfaches grösser.
+    const area = tilesForArea(47.35, 8.52, 4, zoomLevelsUpTo(15));
+    expect(tiles.length).toBeLessThan(area.length);
+  });
+
+  it("hält die harte Obergrenze ein und behält die grobe Übersicht", () => {
+    // Eine lange Strecke quer durch die Schweiz sprengt die Grenze
+    const long = [
+      { lat: 46.2, lon: 6.15 },
+      { lat: 47.55, lon: 9.35 },
+    ];
+    const tiles = tilesForCorridor(long, 2, zoomLevelsUpTo(16));
+    expect(tiles.length).toBe(MAX_OFFLINE_TILES);
+    const coarse = tilesForCorridor(long, 2, [OFFLINE_BASE_ZOOM]);
+    expect(tiles.filter(t => t.z === OFFLINE_BASE_ZOOM).length).toBe(
+      coarse.length
+    );
+  });
+
+  it("bleibt ohne brauchbare Punkte oder Zoomstufen leer", () => {
+    expect(tilesForCorridor([], 1, [14])).toEqual([]);
+    expect(tilesForCorridor([{ lat: Number.NaN, lon: 8.5 }], 1, [14])).toEqual(
+      []
+    );
+    expect(tilesForCorridor(ROUTE, 1, [])).toEqual([]);
   });
 });
 

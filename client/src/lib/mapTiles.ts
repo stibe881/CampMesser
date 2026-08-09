@@ -136,6 +136,82 @@ export function tilesForArea(
   return tiles;
 }
 
+/**
+ * Alle Kacheln in einem KORRIDOR entlang einer Linie (#552): für jede
+ * Zoomstufe werden Stützstellen entlang der Strecke gebildet (halbe
+ * Korridor-Breite als Schrittweite, damit keine Lücke entsteht) und um
+ * jede Stützstelle das Kachel-Rechteck der Korridor-Breite eingesammelt –
+ * ohne Duplikate und höchstens MAX_OFFLINE_TILES Stück.
+ *
+ * Reihenfolge: Zoomstufen aufsteigend, innerhalb einer Stufe dem Weg
+ * entlang von Start nach Ziel. Greift die Obergrenze, bleibt die grobe
+ * Übersicht der GANZEN Route vollständig; fehlen Details, dann am Ende
+ * der Strecke – und die Anzeige sagt das ehrlich.
+ */
+export function tilesForCorridor(
+  points: { lat: number; lon: number }[],
+  corridorKm: number,
+  zoomLevels: number[]
+): MapTile[] {
+  const tiles: MapTile[] = [];
+  const path = points.filter(
+    p => Number.isFinite(p.lat) && Number.isFinite(p.lon)
+  );
+  if (path.length === 0) return tiles;
+
+  const corridor = Number.isFinite(corridorKm) ? Math.max(0, corridorKm) : 0;
+  // Stützstellen entlang der Linie – zwischen zwei weit auseinander
+  // liegenden Wegpunkten darf kein Loch in der Kachel-Abdeckung bleiben.
+  const stepKm = Math.max(0.1, corridor / 2);
+  const sampled: { lat: number; lon: number }[] = [path[0]];
+  for (let i = 1; i < path.length; i++) {
+    const a = path[i - 1];
+    const b = path[i];
+    const midLat = ((a.lat + b.lat) / 2) * (Math.PI / 180);
+    const dLatKm = (b.lat - a.lat) * KM_PER_DEGREE_LAT;
+    const dLonKm = (b.lon - a.lon) * KM_PER_DEGREE_LAT * Math.cos(midLat);
+    const lengthKm = Math.hypot(dLatKm, dLonKm);
+    const steps = Math.max(1, Math.ceil(lengthKm / stepKm));
+    for (let s = 1; s <= steps; s++) {
+      sampled.push({
+        lat: a.lat + ((b.lat - a.lat) * s) / steps,
+        lon: a.lon + ((b.lon - a.lon) * s) / steps,
+      });
+    }
+  }
+
+  const seen = new Set<string>();
+  const levels = Array.from(new Set(zoomLevels.filter(z => Number.isFinite(z))))
+    .map(z => Math.floor(z))
+    .filter(z => z >= 0 && z <= 20)
+    .sort((a, b) => a - b);
+
+  for (let i = 0; i < levels.length; i++) {
+    const z = levels[i];
+    for (let j = 0; j < sampled.length; j++) {
+      const point = sampled[j];
+      const centerLat = clamp(point.lat, -MAX_MERCATOR_LAT, MAX_MERCATOR_LAT);
+      const latDelta = corridor / KM_PER_DEGREE_LAT;
+      const cosLat = Math.max(0.01, Math.cos((centerLat * Math.PI) / 180));
+      const lonDelta = corridor / (KM_PER_DEGREE_LAT * cosLat);
+      const minX = lonToTileX(point.lon - lonDelta, z);
+      const maxX = lonToTileX(point.lon + lonDelta, z);
+      const minY = latToTileY(centerLat + latDelta, z);
+      const maxY = latToTileY(centerLat - latDelta, z);
+      for (let x = Math.min(minX, maxX); x <= Math.max(minX, maxX); x++) {
+        for (let y = Math.min(minY, maxY); y <= Math.max(minY, maxY); y++) {
+          const key = `${z}/${x}/${y}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          if (tiles.length >= MAX_OFFLINE_TILES) return tiles;
+          tiles.push({ z, x, y });
+        }
+      }
+    }
+  }
+  return tiles;
+}
+
 /** Kachel-URL für den gewünschten Basis-Layer (OSM: z/x/y, Esri: z/y/x). */
 export function tileUrl(tile: MapTile, layer: MapLayerKind): string {
   return layer === "satellite"
@@ -158,10 +234,10 @@ export interface OfflineMapPack {
   savedAt: string;
 }
 
-/** Alle gespeicherten Pakete lesen (Schlüssel = Platz-ID als Text). */
-export function loadOfflineMaps(): Record<string, OfflineMapPack> {
+/** Alle gespeicherten Pakete unter einem localStorage-Schlüssel lesen. */
+function loadPacks(storageKey: string): Record<string, OfflineMapPack> {
   try {
-    const raw = localStorage.getItem(OFFLINE_MAPS_KEY);
+    const raw = localStorage.getItem(storageKey);
     if (!raw) return {};
     const parsed: unknown = JSON.parse(raw);
     if (typeof parsed !== "object" || parsed === null) return {};
@@ -192,24 +268,59 @@ export function loadOfflineMaps(): Record<string, OfflineMapPack> {
   }
 }
 
-function storeOfflineMaps(packs: Record<string, OfflineMapPack>) {
+function storePacks(storageKey: string, packs: Record<string, OfflineMapPack>) {
   try {
-    localStorage.setItem(OFFLINE_MAPS_KEY, JSON.stringify(packs));
+    localStorage.setItem(storageKey, JSON.stringify(packs));
   } catch {
     /* Speicher voll oder gesperrt – der Cache selbst bleibt trotzdem gültig */
   }
 }
 
+/** Alle gespeicherten Platz-Pakete lesen (Schlüssel = Platz-ID als Text). */
+export function loadOfflineMaps(): Record<string, OfflineMapPack> {
+  return loadPacks(OFFLINE_MAPS_KEY);
+}
+
 export function rememberOfflineMap(spotId: number, pack: OfflineMapPack) {
   const packs = loadOfflineMaps();
   packs[String(spotId)] = pack;
-  storeOfflineMaps(packs);
+  storePacks(OFFLINE_MAPS_KEY, packs);
 }
 
 export function forgetOfflineMap(spotId: number) {
   const packs = loadOfflineMaps();
   delete packs[String(spotId)];
-  storeOfflineMaps(packs);
+  storePacks(OFFLINE_MAPS_KEY, packs);
+}
+
+// ---- Pakete entlang geplanter Routen (#552) --------------------------------
+
+export const OFFLINE_ROUTES_KEY = "campmesser.offlineRoutes";
+
+/** Korridor-Breite entlang der Route – 1 km deckt Kehren des Wegs mit ab. */
+export const ROUTE_CORRIDOR_KM = 1;
+
+/** Feinster Zoom eines Routen-Pakets (Mittelweg aus OFFLINE_MAX_ZOOMS). */
+export const ROUTE_MAX_ZOOM = 15;
+
+/** Pakete geplanter Routen (Schlüssel = Routen-ID als Text). */
+export function loadOfflineRoutePacks(): Record<string, OfflineMapPack> {
+  return loadPacks(OFFLINE_ROUTES_KEY);
+}
+
+export function rememberOfflineRoutePack(
+  routeId: number,
+  pack: OfflineMapPack
+) {
+  const packs = loadOfflineRoutePacks();
+  packs[String(routeId)] = pack;
+  storePacks(OFFLINE_ROUTES_KEY, packs);
+}
+
+export function forgetOfflineRoutePack(routeId: number) {
+  const packs = loadOfflineRoutePacks();
+  delete packs[String(routeId)];
+  storePacks(OFFLINE_ROUTES_KEY, packs);
 }
 
 // ---- Download / Löschen ----------------------------------------------------
