@@ -6551,6 +6551,8 @@ export const fr: Translation = {
     titlePlaceholder: "p. ex. idées pour le Tessin",
     textLabel: "Note",
     textPlaceholder: "Écris simplement …",
+    checkboxHint:
+      "Astuce : une ligne comme « - [ ] échanger la bouteille de gaz » devient une case à cocher.",
     tagsLabel: "Mots-clés",
     tagsPlaceholder: "p. ex. Tessin, été, tente",
     tagsHint: (max: number) =>

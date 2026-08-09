@@ -6504,6 +6504,8 @@ export const it: Translation = {
     titlePlaceholder: "p. es. idee per il Ticino",
     textLabel: "Nota",
     textPlaceholder: "Scrivi liberamente …",
+    checkboxHint:
+      "Suggerimento: una riga come «- [ ] cambiare la bombola del gas» diventa una casella da spuntare.",
     tagsLabel: "Parole chiave",
     tagsPlaceholder: "p. es. Ticino, estate, tenda",
     tagsHint: (max: number) =>

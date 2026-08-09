@@ -6550,6 +6550,8 @@ export const de = {
     titlePlaceholder: "z. B. Ideen fürs Tessin",
     textLabel: "Notiz",
     textPlaceholder: "Schreib einfach drauflos …",
+    checkboxHint:
+      "Tipp: Eine Zeile wie «- [ ] Gasflasche tauschen» wird zur abhakbaren Checkbox.",
     tagsLabel: "Stichwörter",
     tagsPlaceholder: "z. B. Tessin, Sommer, Zelt",
     tagsHint: (max: number) =>

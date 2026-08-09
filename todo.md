@@ -10,7 +10,7 @@
 - [ ] #541 Ausgabe aus der Heute-Ansicht erfassen
 - [ ] #542 Packfortschritt pro Person + Filter «nur meine Sachen»
 - [x] #543 Pack-/Einkaufsliste als Text kopieren (ClipboardCopy-Knopf, gruppiert wie die Anzeige, Häkchen als ✓)
-- [ ] #544 Abhakbare Checkboxen in Notizen
+- [x] #544 Abhakbare Checkboxen in Notizen («- [ ] Text» wird antippbar; parseNoteLines/toggleNoteCheckbox in shared/notes.ts, 4 Tests; Hinweis unterm Textfeld)
 - [ ] #545 Eigene Sätze in der Sprachhilfe
 - [ ] #546 Schriftgrösse-Einstellung
 - [ ] #547 Notfall-Koordinaten (LV95) im SOS

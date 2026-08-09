@@ -6375,6 +6375,8 @@ export const en: Translation = {
     titlePlaceholder: "e.g. ideas for Ticino",
     textLabel: "Note",
     textPlaceholder: "Just start writing …",
+    checkboxHint:
+      "Tip: a line like “- [ ] swap the gas bottle” becomes a tickable checkbox.",
     tagsLabel: "Keywords",
     tagsPlaceholder: "e.g. Ticino, summer, tent",
     tagsHint: (max: number) =>
