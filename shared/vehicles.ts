@@ -74,6 +74,47 @@ export interface VehicleProfile {
   tireRearBar: number | null;
   /** Nächster Service als ISO-Datum (#481); null = nicht erfasst. */
   serviceDue: string | null;
+  /** Radstand in cm (#651, Keil-Rechner der Wasserwaage); null = nicht erfasst. */
+  wheelbaseCm: number | null;
+  /** Spurweite in cm (#651); null = nicht erfasst. */
+  trackCm: number | null;
+}
+
+/** Grösster plausibler Radstand in cm (Liner-Wohnmobile ~ 500, mit Luft). */
+export const MAX_VEHICLE_CM = 1500;
+
+/** Zahl auf eine plausible cm-Angabe bringen (ganze cm, 1–1500). */
+export function sanitizeCm(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  if (value <= 0) return null;
+  return Math.min(MAX_VEHICLE_CM, Math.round(value));
+}
+
+/** Eingetippte cm-Angabe lesen; Leer/Unsinn ergibt null. */
+export function parseCmInput(raw: string): number | null {
+  const cleaned = raw.replace(/[\s'’]/g, "").replace(",", ".");
+  if (!cleaned) return null;
+  if (!/^\d*\.?\d*$/.test(cleaned)) return null;
+  const value = Number(cleaned);
+  if (!Number.isFinite(value)) return null;
+  return sanitizeCm(value);
+}
+
+/**
+ * Keil-Rechner (#651): Wie hoch muss der Auffahrkeil sein, damit die
+ * gemessene Neigung verschwindet? Höhe = tan(Winkel) × Radabstand –
+ * fürs Nicken der Radstand, fürs Rollen die Spurweite. Gerundet auf
+ * halbe cm; das Vorzeichen des Winkels spielt keine Rolle (der Keil
+ * kommt einfach unter die TIEFE Seite).
+ */
+export function wedgeHeightCm(
+  angleDeg: number,
+  spanCm: number | null
+): number | null {
+  if (spanCm === null || spanCm <= 0 || !Number.isFinite(angleDeg)) return null;
+  const height = Math.tan((Math.abs(angleDeg) * Math.PI) / 180) * spanCm;
+  if (!Number.isFinite(height)) return null;
+  return Math.round(height * 2) / 2;
 }
 
 /** Grösster plausibler Reifendruck in bar (Wohnmobil-Hinterachse ~5.5). */
@@ -160,6 +201,8 @@ export function sanitizeVehicle(
     tireFrontBar: sanitizeBar(entry.tireFrontBar),
     tireRearBar: sanitizeBar(entry.tireRearBar),
     serviceDue: sanitizeServiceDue(entry.serviceDue),
+    wheelbaseCm: sanitizeCm(entry.wheelbaseCm),
+    trackCm: sanitizeCm(entry.trackCm),
   };
 }
 
@@ -200,6 +243,8 @@ export function defaultVehicles(
     tireFrontBar: null,
     tireRearBar: null,
     serviceDue: null,
+    wheelbaseCm: null,
+    trackCm: null,
   }));
 }
 

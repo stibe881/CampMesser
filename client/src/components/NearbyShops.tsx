@@ -34,6 +34,7 @@ import {
   ShoppingCart,
   Sprout,
   Store,
+  PawPrint,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -86,6 +87,7 @@ const kindIcons: Record<ShopKind, typeof Store> = {
   bakery: Croissant,
   farm: Sprout,
   butcher: Store,
+  vet: PawPrint,
 };
 
 export default function NearbyShops({

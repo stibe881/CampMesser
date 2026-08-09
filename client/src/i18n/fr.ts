@@ -1402,6 +1402,9 @@ export const fr: Translation = {
     waitingSensor: "En attente des données du capteur",
     pitchLabel: "Avant / arrière",
     rollLabel: "Gauche / droite",
+    wedgeTitle: "Calcul de cale\u00a0:",
+    wedgePitch: (cm: string) => `avant/arri\u00e8re ~${cm} cm \u00e0 caler`,
+    wedgeRoll: (cm: string) => `gauche/droite ~${cm} cm \u00e0 caler`,
     levelNow: "De niveau – position parfaite !",
     zeroHere: "Mettre à zéro ici",
     resetCalibration: "Réinitialiser le calibrage",
@@ -1423,6 +1426,8 @@ export const fr: Translation = {
     tireFrontLabel: "Pression des pneus avant (bar)",
     tireRearLabel: "Pression des pneus arrière (bar)",
     serviceDueLabel: "Prochain service",
+    wheelbaseLabel: "Empattement (cm)",
+    trackLabel: "Voie (cm)",
     title: "Calculateur de charge utile",
     subtitle:
       "Ton attelage est-il surchargé ? Limites, chargement et feu tricolore en un coup d'œil.",
@@ -1528,6 +1533,8 @@ export const fr: Translation = {
   roadRules: {
     plugTitle: "Prises & adaptateurs",
     twoWheelsTitle: "Moto & v\u00e9lo",
+    quietTitle: "Repos et usages",
+    dogsTitle: "Voyager avec un chien",
     tippingTitle: "Pourboire",
     paymentTitle: "Espèces & cartes",
     title: "Péage, vignette & règles",
@@ -1639,6 +1646,14 @@ export const fr: Translation = {
     rangeUnknown: "–",
     rangeLabel: "Autonomie",
     consumptionPerDay: "Consommation / jour",
+    powerCostLabel: "Prix du courant",
+    powerCostUnit:
+      "CHF/kWh (indiqu\u00e9 \u00e0 la borne ou \u00e0 la r\u00e9ception)",
+    powerCostPerDay: (chf: string) =>
+      `\u2248 ${chf} CHF d'\u00e9lectricit\u00e9 par jour`,
+    powerCostPerWeek: (chf: string) => `${chf} CHF par semaine`,
+    powerCostHint:
+      "Calcul\u00e9 \u00e0 partir de ta consommation journali\u00e8re ci-dessus. Pour la caisse de voyage\u00a0: saisis-le comme d\u00e9pense \u2013 le montant ici est une estimation.",
     solarPerDay: "Production solaire / jour",
     balancePerDay: "Bilan / jour",
     availableLabel: "Utilisable maintenant",
@@ -2125,6 +2140,7 @@ export const fr: Translation = {
     savedPlacePromote: "Transformer en emplacement favori",
     savedPlacePromoted: "Le lieu repéré est maintenant un emplacement favori.",
     colorFilterAria: "Filtrer les lieux repérés par couleur",
+    placeSearchPlaceholder: "Rechercher un lieu retenu (nom ou note)",
     colorAll: "Tous",
     colorLegendEdit: "Modifier la légende",
     colorNameAria: (color: string) =>
@@ -2759,6 +2775,12 @@ export const fr: Translation = {
     submit: "Enregistrer l'entrée",
     moreSections: "Plus sur le voyage",
     statsLink: "Voir les statistiques et jalons",
+    monthIdeasTitle: "O\u00f9 aller en \u2026\u00a0?",
+    monthIdeasAria: "Id\u00e9es de destination par mois",
+    monthIdeasRow: (visits: number, nights: number, year: number) =>
+      `${visits}\u00d7 \u00b7 ${nights === 1 ? "1 nuit" : `${nights} nuits`} \u00b7 derni\u00e8re fois ${year}`,
+    monthIdeasEmpty: (month: string) =>
+      `Tu n'es encore jamais parti en ${month} \u2013 l'occasion d'une premi\u00e8re.`,
     plannedTitle: "Séjours prévus",
     holidaySectionLabel: "Vacances scolaires & jours fériés",
     holidayCantonAria:
@@ -2996,6 +3018,7 @@ export const fr: Translation = {
     journalCount: (n: number) => (n === 1 ? "1 entrée" : `${n} entrées`),
     journalEmptyDay: "Rien de noté pour l'instant",
     journalPlaceholder: "Qu'est-ce qui s'est passé aujourd'hui ?",
+    journalMoodAria: "Humeur du jour",
     journalEditAria: (day: string) => `Modifier l'entrée du ${day}`,
     journalSave: "Enregistrer",
     journalSaved: "Entrée du journal enregistrée",
@@ -3225,6 +3248,8 @@ export const fr: Translation = {
     legLine: (km: string, duration: string) =>
       `Trajet\u00a0: \u2248 ${km} \u00b7 ${duration}`,
     legEstimated: "estim\u00e9 \u00e0 vol d\u2019oiseau",
+    legTooLong: (drive: string) =>
+      `Longue \u00e9tape (${drive}) \u2013 une halte interm\u00e9diaire rend la journ\u00e9e plus d\u00e9tendue.`,
     legTotal: (km: string, duration: string) =>
       `Tout le circuit\u00a0: \u2248 ${km} \u00b7 ${duration}`,
     optimizeButton: "Circuit le plus court",
@@ -4722,6 +4747,14 @@ export const fr: Translation = {
       "Ce sont les mêmes personnes que dans le mode famille – celles qui y figurent apparaissent ici.",
     noPlaceEmpty:
       "Les voyages comptent, mais il leur manque le nom du lieu – un tampon a besoin d’un lieu. Ajoute un camping ou un lieu au voyage et le tampon apparaîtra.",
+    shareImage: "Enregistrer comme image",
+    imageSaved: "Image enregistr\u00e9e.",
+    imageFailed: "L'image n'a pas pu \u00eatre cr\u00e9\u00e9e.",
+    countriesTitle: "Tampons des pays",
+    countryStampAria: (country: string, trips: number) =>
+      `Tampon du pays ${country}, ${trips} voyages`,
+    rankReached: (title: string) =>
+      `Nouveau niveau atteint\u00a0: \u00ab\u00a0${title}\u00a0\u00bb\u00a0!`,
     print: "Imprimer le passeport",
     note: "Les tampons proviennent des voyages du carnet ; rien n'est saisi deux fois. Chaque camping reçoit, à partir de son nom, la même forme, la même couleur et la même inclinaison – identiques sur chaque appareil.",
   },
@@ -4764,6 +4797,12 @@ export const fr: Translation = {
     nightsLeft: (nights: number) =>
       nights === 1 ? "encore 1 nuit" : `encore ${nights} nuits`,
     departureToday: "Départ aujourd'hui",
+    birthdayToday: (name: string, age: number | null) =>
+      age === null
+        ? `Aujourd'hui, c'est l'anniversaire de ${name} \u2013 g\u00e2teau\u00a0!`
+        : `Aujourd'hui, ${name} f\u00eate ses ${age} ans \u2013 g\u00e2teau\u00a0!`,
+    birthdayUpcoming: (name: string, date: string) =>
+      `${name} f\u00eate son anniversaire le ${date} \u2013 pendant ce voyage\u00a0!`,
     stageLine: (name: string, until: string) =>
       `\u00c9tape\u202f: ${name} \u00b7 jusqu\u2019au ${until}`,
     stageNext: (name: string) => `Demain, direction ${name}`,
@@ -5651,6 +5690,7 @@ export const fr: Translation = {
       bakery: "Boulangerie",
       farm: "Vente à la ferme",
       butcher: "Boucherie",
+      vet: "V\u00e9t\u00e9rinaire",
     },
     openNow: "Ouvert",
     closedNow: "Fermé",
@@ -6523,6 +6563,8 @@ export const fr: Translation = {
     childrenEmpty:
       "Aucun enfant pour l'instant – ajoute un prénom ci-dessous pour pouvoir collectionner des badges.",
     childNamePlaceholder: "Prénom de l'enfant",
+    birthdayLabel: "Anniversaire",
+    birthdayAria: (name: string) => `Anniversaire de ${name}`,
     addChild: "Ajouter un enfant",
     renameChildAria: (name: string) => `Renommer ${name}`,
     renameSaveAria: (name: string) =>

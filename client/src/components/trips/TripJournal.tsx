@@ -114,6 +114,15 @@ import { useHashSection } from "@/hooks/useHashSection";
 import { useTripSectionCounts } from "@/hooks/useTripSectionCounts";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 
+/** Die fünf Stimmungen des Tages-Journals (#661) – gespeichert wird das Emoji. */
+const JOURNAL_MOODS = [
+  "\u{1F604}",
+  "\u{1F642}",
+  "\u{1F610}",
+  "\u{1F615}",
+  "\u{1F62B}",
+];
+
 export default function TripJournal({
   tripId,
   tripName,
@@ -141,6 +150,8 @@ export default function TripJournal({
   /** Tag, dessen Textfeld gerade offen ist (null = keines). */
   const [editingDay, setEditingDay] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+  /** Stimmung des Tages (#661) – das Emoji selbst, null = keine. */
+  const [draftMood, setDraftMood] = useState<string | null>(null);
   const query = trpc.trips.journal.list.useQuery({ tripId }, { enabled: open });
   // Etappen (#572): Bei einer Rundreise trägt jeder Tag den Ort, an dem
   // man ihn verbracht hat – man sieht später, WO «Regentag, Museum» war.
@@ -280,6 +291,14 @@ export default function TripJournal({
                       <div className="min-w-0 flex-1">
                         <p className="flex flex-wrap items-center gap-x-1.5 text-xs font-semibold capitalize text-muted-foreground">
                           {fmtDay(day)}
+                          {entry?.mood && (
+                            <span
+                              className="text-sm leading-none"
+                              title={t.trips.journalMoodAria}
+                            >
+                              {entry.mood}
+                            </span>
+                          )}
                           {(() => {
                             const stage = stageOf(day);
                             return stage ? (
@@ -396,6 +415,7 @@ export default function TripJournal({
                           onClick={() => {
                             setEditingDay(day);
                             setDraft(entry?.text ?? "");
+                            setDraftMood(entry?.mood ?? null);
                           }}
                           aria-label={t.trips.journalEditAria(fmtDay(day))}
                         >
@@ -413,12 +433,46 @@ export default function TripJournal({
                           onChange={e => setDraft(e.target.value)}
                           aria-label={t.trips.journalEditAria(fmtDay(day))}
                         />
+                        {/* Stimmung des Tages (#661): antippen wählt,
+                            nochmals antippen löscht */}
+                        <div
+                          className="mt-1.5 flex gap-1"
+                          role="group"
+                          aria-label={t.trips.journalMoodAria}
+                        >
+                          {JOURNAL_MOODS.map(mood => (
+                            <button
+                              key={mood}
+                              type="button"
+                              onClick={() =>
+                                setDraftMood(current =>
+                                  current === mood ? null : mood
+                                )
+                              }
+                              aria-pressed={draftMood === mood}
+                              aria-label={`${t.trips.journalMoodAria}: ${mood}`}
+                              className={cn(
+                                "rounded-full border px-2 py-0.5 text-base leading-none transition-colors",
+                                draftMood === mood
+                                  ? "border-primary bg-accent"
+                                  : "border-border opacity-60 hover:opacity-100"
+                              )}
+                            >
+                              {mood}
+                            </button>
+                          ))}
+                        </div>
                         <div className="mt-1.5 flex gap-2">
                           <Button
                             size="sm"
                             disabled={setMutation.isPending}
                             onClick={() =>
-                              setMutation.mutate({ tripId, day, text: draft })
+                              setMutation.mutate({
+                                tripId,
+                                day,
+                                text: draft,
+                                mood: draftMood,
+                              })
                             }
                           >
                             {t.trips.journalSave}

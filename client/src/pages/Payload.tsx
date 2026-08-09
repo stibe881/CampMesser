@@ -36,6 +36,7 @@ import {
   VEHICLE_ROLES,
   type VehicleProfile,
   type VehicleRole,
+  parseCmInput,
 } from "@shared/vehicles";
 import {
   evaluatePayload,
@@ -184,6 +185,8 @@ export default function PayloadPage() {
         tireFrontBar: null,
         tireRearBar: null,
         serviceDue: null,
+        wheelbaseCm: null,
+        trackCm: null,
       },
     ]);
     setEditorOpen(true);
@@ -507,6 +510,56 @@ export default function PayloadPage() {
                         onChange={event =>
                           patchVehicle(vehicle.id, {
                             serviceDue: event.target.value || null,
+                          })
+                        }
+                      />
+                    </div>
+                    {/* Radstand & Spurweite (#651): füttern den Keil-Rechner
+                        der Wasserwaage – tan(Neigung) × Abstand = Keil-Höhe */}
+                    <div>
+                      <Label
+                        htmlFor={`veh-${vehicle.id}-wheelbase`}
+                        className="text-xs text-muted-foreground"
+                      >
+                        {t.payload.wheelbaseLabel}
+                      </Label>
+                      <Input
+                        id={`veh-${vehicle.id}-wheelbase`}
+                        inputMode="numeric"
+                        placeholder="340"
+                        className="mt-1 h-9"
+                        defaultValue={
+                          vehicle.wheelbaseCm === null
+                            ? ""
+                            : String(vehicle.wheelbaseCm)
+                        }
+                        onBlur={event =>
+                          patchVehicle(vehicle.id, {
+                            wheelbaseCm: parseCmInput(event.target.value),
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label
+                        htmlFor={`veh-${vehicle.id}-track`}
+                        className="text-xs text-muted-foreground"
+                      >
+                        {t.payload.trackLabel}
+                      </Label>
+                      <Input
+                        id={`veh-${vehicle.id}-track`}
+                        inputMode="numeric"
+                        placeholder="190"
+                        className="mt-1 h-9"
+                        defaultValue={
+                          vehicle.trackCm === null
+                            ? ""
+                            : String(vehicle.trackCm)
+                        }
+                        onBlur={event =>
+                          patchVehicle(vehicle.id, {
+                            trackCm: parseCmInput(event.target.value),
                           })
                         }
                       />

@@ -70,6 +70,14 @@ export interface CountryRules {
   emergencyNote: L4;
   /** Besonderheiten fürs Campen, inkl. Übernachten auf Rastplätzen. */
   camping: L4;
+  /**
+   * Ruhezeiten & Alltags-Gepflogenheiten (#655): Mittags-/Nachtruhe,
+   * Ladenöffnung am Sonntag. Optional – Länder ohne Eintrag zeigen die
+   * Karte schlicht nicht (ehrlicher als Halbwissen).
+   */
+  quiet?: L4;
+  /** Mit Hund unterwegs (#657): Einreise, Leine, Strand. Optional wie quiet. */
+  dogs?: L4;
 }
 
 export const roadRules: CountryRules[] = [
@@ -78,6 +86,18 @@ export const roadRules: CountryRules[] = [
     flag: "🇨🇭",
     name: l4("Schweiz", "Suisse", "Svizzera", "Switzerland"),
     updated: "2026-08-03",
+    quiet: l4(
+      "Mittagsruhe (oft 12–13 Uhr) und Nachtruhe ab 22 Uhr sind auf den meisten Plätzen fest – die Schranke ist dann teils zu. Sonntags sind fast alle Läden geschlossen; am Samstag einkaufen.",
+      "Repos de midi (souvent 12–13 h) et repos nocturne dès 22 h sont la règle sur la plupart des campings – la barrière est parfois fermée. Le dimanche, presque tous les magasins sont fermés ; fais tes courses le samedi.",
+      "Riposo di mezzogiorno (spesso 12–13) e riposo notturno dalle 22 sono fissi nella maggior parte dei campeggi – la sbarra a volte è chiusa. La domenica quasi tutti i negozi sono chiusi; fai la spesa il sabato.",
+      "Midday quiet (often 12–1 pm) and night quiet from 10 pm are standard on most sites – the barrier may be closed. On Sundays almost all shops are closed; buy groceries on Saturday."
+    ),
+    dogs: l4(
+      "Hunde sind auf vielen Plätzen willkommen (Gebühr und Leinenpflicht üblich). An Badestellen gelten örtliche Verbote – nach Hundebadeplätzen fragen.",
+      "Les chiens sont bienvenus sur beaucoup de campings (taxe et laisse obligatoire d'usage). Aux plages, des interdictions locales s'appliquent – demande les zones autorisées aux chiens.",
+      "I cani sono benvenuti in molti campeggi (tassa e guinzaglio obbligatorio di norma). Nelle zone balneari valgono divieti locali – chiedi delle spiagge per cani.",
+      "Dogs are welcome on many sites (fee and leash requirement are common). Local bans apply at bathing spots – ask for dog-friendly beaches."
+    ),
     toll: l4(
       "Autobahn-Vignette Pflicht für alle Fahrzeuge bis 3,5 t – als Kleber oder als E-Vignette fürs Kontrollschild, gültig von Anfang Dezember des Vorjahres bis Ende Januar des Folgejahres (14 Monate). Über 3,5 t gilt die pauschale Schwerverkehrsabgabe. Eine Streckenmaut gibt es sonst nicht; der Grosse-St.-Bernhard-Tunnel und die Autoverlade (Furka, Lötschberg, Vereina) kosten extra.",
       "Vignette autoroutière obligatoire pour tous les véhicules jusqu'à 3,5 t – autocollant ou vignette électronique liée à la plaque, valable de début décembre de l'année précédente à fin janvier de l'année suivante (14 mois). Au-delà de 3,5 t s'applique la redevance forfaitaire sur le trafic des poids lourds. Sinon pas de péage au kilomètre ; le tunnel du Grand-Saint-Bernard et les navettes ferroviaires (Furka, Lötschberg, Vereina) sont payants.",
@@ -169,6 +189,18 @@ export const roadRules: CountryRules[] = [
     flag: "🇩🇪",
     name: l4("Deutschland", "Allemagne", "Germania", "Germany"),
     updated: "2026-08-03",
+    quiet: l4(
+      "Nachtruhe meist 22–7 Uhr, vielerorts zusätzlich Mittagsruhe – dann keine An-/Abreise mit dem Auto. Sonntags sind Läden zu (Bäcker am Morgen, Tankstellen ausgenommen).",
+      "Repos nocturne en général 22 h–7 h, souvent aussi repos de midi – pas d'arrivée/départ en voiture pendant ce temps. Le dimanche, les magasins sont fermés (boulangeries le matin et stations-service exceptées).",
+      "Riposo notturno di solito 22–7, in molti posti anche riposo di mezzogiorno – niente arrivi/partenze in auto in quelle ore. La domenica i negozi sono chiusi (tranne panetterie al mattino e stazioni di servizio).",
+      "Night quiet usually 10 pm–7 am, many sites add a midday rest – no car arrivals/departures during it. Shops are closed on Sundays (except morning bakeries and petrol stations)."
+    ),
+    dogs: l4(
+      "EU-Heimtierausweis mit Tollwutimpfung und Mikrochip sind Pflicht. Leinenpflicht ist je nach Bundesland und Saison unterschiedlich; an Badeseen gibt es oft eigene Hundestrände.",
+      "Passeport européen pour animaux avec vaccin antirabique et puce obligatoires. La laisse dépend du Land et de la saison ; les lacs ont souvent des plages dédiées aux chiens.",
+      "Passaporto UE per animali con vaccino antirabbico e microchip obbligatori. Il guinzaglio varia per Land e stagione; ai laghi ci sono spesso spiagge apposta per cani.",
+      "EU pet passport with rabies vaccination and microchip are mandatory. Leash rules vary by state and season; lakes often have dedicated dog beaches."
+    ),
     toll: l4(
       "Keine Vignette und keine Maut für Personenwagen und Wohnmobile. Die Lkw-Maut betrifft den Güterverkehr, nicht dein Gespann.",
       "Ni vignette ni péage pour les voitures et les camping-cars. Le péage poids lourds concerne le transport de marchandises, pas ton attelage.",
@@ -250,6 +282,18 @@ export const roadRules: CountryRules[] = [
     flag: "🇦🇹",
     name: l4("Österreich", "Autriche", "Austria", "Austria"),
     updated: "2026-08-03",
+    quiet: l4(
+      "Mittagsruhe (oft 12–14 Uhr) und Nachtruhe ab 22 Uhr sind verbreitet und werden ernst genommen. Sonntags sind Läden geschlossen; Bäckereien öffnen morgens.",
+      "Repos de midi (souvent 12–14 h) et repos nocturne dès 22 h sont répandus et pris au sérieux. Le dimanche, les magasins sont fermés ; les boulangeries ouvrent le matin.",
+      "Riposo di mezzogiorno (spesso 12–14) e riposo notturno dalle 22 sono diffusi e presi sul serio. La domenica i negozi sono chiusi; le panetterie aprono al mattino.",
+      "Midday rest (often 12–2 pm) and night quiet from 10 pm are widespread and taken seriously. Shops are closed on Sundays; bakeries open in the morning."
+    ),
+    dogs: l4(
+      "EU-Heimtierausweis Pflicht. In der Öffentlichkeit gilt meist Leinen- ODER Maulkorbpflicht, im öffentlichen Verkehr Maulkorb – einen mitnehmen.",
+      "Passeport européen pour animaux obligatoire. En public, laisse OU muselière en général ; muselière dans les transports publics – emporte-en une.",
+      "Passaporto UE per animali obbligatorio. In pubblico di norma guinzaglio O museruola; museruola sui mezzi pubblici – portane una.",
+      "EU pet passport required. In public, leash OR muzzle usually applies; muzzle on public transport – bring one."
+    ),
     toll: l4(
       "Vignette Pflicht auf Autobahnen und Schnellstrassen für Fahrzeuge bis 3,5 t – als Kleber oder digital fürs Kennzeichen (Tages-, 10-Tages-, 2-Monats- und Jahresvignette). Über 3,5 t, also auch für schwere Wohnmobile, gilt die fahrleistungsabhängige Maut mit der GO-Box. Brenner, Tauern-, Arlberg- und Karawankentunnel kosten zusätzlich Sondermaut.",
       "Vignette obligatoire sur autoroutes et voies rapides pour les véhicules jusqu'à 3,5 t – autocollant ou vignette numérique liée à la plaque (1 jour, 10 jours, 2 mois, 1 an). Au-delà de 3,5 t, donc aussi pour les camping-cars lourds, s'applique le péage au kilomètre avec la GO-Box. Le Brenner ainsi que les tunnels des Tauern, de l'Arlberg et des Karawanken exigent un péage spécial.",
@@ -341,6 +385,18 @@ export const roadRules: CountryRules[] = [
     flag: "🇮🇹",
     name: l4("Italien", "Italie", "Italia", "Italy"),
     updated: "2026-08-03",
+    quiet: l4(
+      "Die Mittagsruhe (etwa 13–16 Uhr) ist auf Plätzen oft streng – Schranke zu, kein Autoverkehr. Läden machen mittags Pause; sonntags ist regional vieles offen, im Süden weniger.",
+      "Le repos de midi (env. 13–16 h) est souvent strict sur les campings – barrière fermée, pas de circulation. Les magasins font la pause de midi ; le dimanche, beaucoup ouvrent selon la région.",
+      "Il riposo pomeridiano (circa 13–16) nei campeggi è spesso rigido – sbarra chiusa, niente auto. I negozi fanno pausa pranzo; la domenica molto è aperto a seconda della regione.",
+      "The afternoon rest (about 1–4 pm) is often strict on campsites – barrier closed, no car traffic. Shops take a midday break; Sunday opening varies by region."
+    ),
+    dogs: l4(
+      "EU-Heimtierausweis Pflicht; Leinenpflicht gilt allgemein, ein Maulkorb ist mitzuführen. Viele Strände verbieten Hunde im Sommer – nach «spiaggia per cani» suchen.",
+      "Passeport européen obligatoire ; laisse en général obligatoire, muselière à avoir sur soi. Beaucoup de plages interdisent les chiens en été – cherche une « spiaggia per cani ».",
+      "Passaporto UE obbligatorio; guinzaglio in genere obbligatorio, museruola da portare con sé. Molte spiagge vietano i cani d'estate – cerca una «spiaggia per cani».",
+      "EU pet passport required; leash generally mandatory, carry a muzzle. Many beaches ban dogs in summer – look for a “spiaggia per cani”."
+    ),
     toll: l4(
       "Keine Vignette, dafür Streckenmaut auf fast allen Autostrade: Ticket ziehen, bei der Ausfahrt mit Karte, bar oder Telepass zahlen. Die Alpentunnel Mont Blanc, Grosser St. Bernhard und Fréjus kosten separat.",
       "Pas de vignette, mais un péage au kilomètre sur presque toutes les autostrades : prends un ticket, paie à la sortie par carte, en espèces ou avec le Telepass. Les tunnels alpins du Mont-Blanc, du Grand-Saint-Bernard et du Fréjus sont facturés à part.",
@@ -422,6 +478,18 @@ export const roadRules: CountryRules[] = [
     flag: "🇫🇷",
     name: l4("Frankreich", "France", "Francia", "France"),
     updated: "2026-08-03",
+    quiet: l4(
+      "Nachtruhe meist ab 22/23 Uhr; eine strenge Mittagsruhe kennen die wenigsten Plätze. Läden schliessen mittags gern zwei Stunden, sonntags ist ab Mittag fast alles zu.",
+      "Repos nocturne dès 22/23 h en général ; peu de campings ont un repos de midi strict. Les magasins ferment volontiers deux heures à midi ; le dimanche après-midi, presque tout est fermé.",
+      "Riposo notturno di solito dalle 22/23; pochi campeggi hanno un riposo di mezzogiorno rigido. I negozi chiudono volentieri due ore a pranzo; la domenica pomeriggio quasi tutto è chiuso.",
+      "Night quiet usually from 10/11 pm; few sites enforce a midday rest. Shops often close for two hours at lunch; on Sunday afternoons almost everything is shut."
+    ),
+    dogs: l4(
+      "EU-Heimtierausweis Pflicht. Kampfhund-Kategorien 1/2 sind stark reglementiert; an vielen Stränden gilt im Sommer Hundeverbot – Hinweistafeln beachten.",
+      "Passeport européen obligatoire. Les chiens de catégories 1/2 sont très réglementés ; beaucoup de plages interdisent les chiens en été – observe les panneaux.",
+      "Passaporto UE obbligatorio. I cani di categoria 1/2 sono molto regolamentati; molte spiagge vietano i cani d'estate – osserva i cartelli.",
+      "EU pet passport required. Category 1/2 dogs are heavily regulated; many beaches ban dogs in summer – watch the signs."
+    ),
     toll: l4(
       "Keine Vignette, dafür Péage auf den meisten Autobahnen: Ticket ziehen und bei der Ausfahrt zahlen. Für Umweltzonen brauchst du zusätzlich die Crit'Air-Plakette – auch mit ausländischem Kennzeichen, sie muss vorab online bestellt werden.",
       "Pas de vignette, mais le péage sur la plupart des autoroutes : prends un ticket et paie à la sortie. Pour les zones à faibles émissions il te faut en plus la vignette Crit'Air – aussi avec une plaque étrangère, à commander en ligne à l'avance.",
@@ -594,6 +662,18 @@ export const roadRules: CountryRules[] = [
     flag: "🇳🇱",
     name: l4("Niederlande", "Pays-Bas", "Paesi Bassi", "Netherlands"),
     updated: "2026-08-03",
+    quiet: l4(
+      "Nachtruhe meist 22/23–7 Uhr, eine Mittagsruhe ist unüblich. Supermärkte sind auch sonntags offen (auf dem Land teils erst ab Mittag).",
+      "Repos nocturne en général 22/23 h–7 h, pas de repos de midi. Les supermarchés ouvrent aussi le dimanche (parfois dès midi à la campagne).",
+      "Riposo notturno di solito 22/23–7, il riposo di mezzogiorno non è usuale. I supermercati sono aperti anche la domenica (in campagna a volte solo dal mezzogiorno).",
+      "Night quiet usually 10/11 pm–7 am, no midday rest. Supermarkets open on Sundays too (in the countryside sometimes only from noon)."
+    ),
+    dogs: l4(
+      "EU-Heimtierausweis Pflicht. Viele Plätze sind ausdrücklich hundefreundlich; «losloopgebieden» erlauben Freilauf, Strände ausserhalb des Sommers meist auch.",
+      "Passeport européen obligatoire. Beaucoup de campings sont très accueillants pour les chiens ; les « losloopgebieden » permettent la liberté, les plages hors été aussi en général.",
+      "Passaporto UE obbligatorio. Molti campeggi accolgono volentieri i cani; nelle «losloopgebieden» possono correre liberi, sulle spiagge fuori estate di solito pure.",
+      "EU pet passport required. Many sites are expressly dog-friendly; “losloopgebieden” allow off-leash running, beaches outside summer usually too."
+    ),
     toll: l4(
       "Keine Vignette und keine Autobahnmaut. Nur der Westerscheldetunnel und der Kiltunnel kosten Gebühr.",
       "Ni vignette ni péage autoroutier. Seuls le tunnel de l'Escaut occidental et le Kiltunnel sont payants.",
@@ -675,6 +755,18 @@ export const roadRules: CountryRules[] = [
     flag: "🇭🇷",
     name: l4("Kroatien", "Croatie", "Croazia", "Croatia"),
     updated: "2026-08-03",
+    quiet: l4(
+      "Nachtruhe meist 23–6 Uhr, dazu vielerorts Mittagsruhe in der grössten Hitze. Sonntags sind die meisten Läden geschlossen – Touristenorte machen Ausnahmen.",
+      "Repos nocturne en général 23 h–6 h, souvent aussi repos de midi aux heures les plus chaudes. Le dimanche, la plupart des magasins sont fermés – sauf dans les lieux touristiques.",
+      "Riposo notturno di solito 23–6, in molti posti anche riposo nelle ore più calde. La domenica la maggior parte dei negozi è chiusa – i luoghi turistici fanno eccezione.",
+      "Night quiet usually 11 pm–6 am, plus a midday rest in the hottest hours in many places. Most shops are closed on Sundays – tourist spots make exceptions."
+    ),
+    dogs: l4(
+      "EU-Heimtierausweis Pflicht. Viele Küsten-Plätze führen eigene Hundestrände; in Nationalpärken gelten Leinenpflicht und teils Zutrittsverbote.",
+      "Passeport européen obligatoire. Beaucoup de campings côtiers ont leur plage pour chiens ; dans les parcs nationaux, laisse obligatoire et accès parfois interdit.",
+      "Passaporto UE obbligatorio. Molti campeggi sulla costa hanno la loro spiaggia per cani; nei parchi nazionali guinzaglio obbligatorio e accessi a volte vietati.",
+      "EU pet passport required. Many coastal sites have their own dog beaches; national parks require leashes and sometimes ban entry."
+    ),
     toll: l4(
       "Keine Vignette, dafür Streckenmaut auf den Autobahnen: Ticket ziehen, bei der Ausfahrt zahlen. Brücken und Tunnel wie der Ucka-Tunnel kosten separat.",
       "Pas de vignette, mais un péage au kilomètre sur les autoroutes : prends un ticket, paie à la sortie. Ponts et tunnels comme celui de l'Učka sont facturés à part.",
@@ -756,6 +848,18 @@ export const roadRules: CountryRules[] = [
     flag: "🇪🇸",
     name: l4("Spanien", "Espagne", "Spagna", "Spain"),
     updated: "2026-08-03",
+    quiet: l4(
+      "Der Tag tickt später: Siesta etwa 14–17 Uhr (kleine Läden zu), Abendessen ab 21 Uhr, Nachtruhe auf Plätzen ab 23/24 Uhr. Sonntags ist ausserhalb der Zentren vieles geschlossen.",
+      "La journée vit plus tard : sieste env. 14–17 h (petits commerces fermés), souper dès 21 h, repos nocturne dès 23 h/minuit sur les campings. Le dimanche, beaucoup ferment hors des centres.",
+      "La giornata vive più tardi: siesta circa 14–17 (piccoli negozi chiusi), cena dalle 21, riposo notturno nei campeggi dalle 23/24. La domenica fuori dai centri molto è chiuso.",
+      "The day runs later: siesta about 2–5 pm (small shops closed), dinner from 9 pm, campsite night quiet from 11 pm/midnight. Outside city centres much is closed on Sundays."
+    ),
+    dogs: l4(
+      "EU-Heimtierausweis Pflicht; als «potenziell gefährlich» eingestufte Rassen brauchen Leine UND Maulkorb. Badestrände verbieten Hunde im Sommer meist – «playas caninas» sind ausgeschildert.",
+      "Passeport européen obligatoire ; les races classées « potentiellement dangereuses » exigent laisse ET muselière. Les plages interdisent en général les chiens en été – les « playas caninas » sont signalées.",
+      "Passaporto UE obbligatorio; le razze classificate «potenzialmente pericolose» richiedono guinzaglio E museruola. Le spiagge d'estate di norma vietano i cani – le «playas caninas» sono segnalate.",
+      "EU pet passport required; breeds classed as “potentially dangerous” need leash AND muzzle. Bathing beaches usually ban dogs in summer – “playas caninas” are signposted."
+    ),
     toll: l4(
       "Keine Vignette. Ein Teil der Autobahnen (AP) ist mautpflichtig; viele Strecken wurden 2021 gebührenfrei, im Norden und in Tunneln zahlst du weiterhin.",
       "Pas de vignette. Une partie des autoroutes (AP) est payante ; beaucoup de tronçons sont devenus gratuits en 2021, mais dans le nord et dans les tunnels tu paies toujours.",

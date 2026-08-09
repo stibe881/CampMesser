@@ -977,7 +977,13 @@ export function parsePicnicSites(json: unknown): OsmPicnicSite[] {
  * die Bäckerei und nicht den nächsten Laden.
  */
 export type ShopKind =
-  "supermarket" | "convenience" | "bakery" | "farm" | "butcher";
+  | "supermarket"
+  | "convenience"
+  | "bakery"
+  | "farm"
+  | "butcher"
+  /** Tierarzt (#657): mit Hund unterwegs will man den nächsten kennen. */
+  | "vet";
 
 export interface OsmShop {
   id: string;
@@ -1003,7 +1009,12 @@ export const OVERPASS_SHOP_MAX_RESULTS = 60;
 /** Die abgefragten Ladenarten mit demselben Ortsfilter. */
 function shopElements(filter: string): string {
   const kinds = `["shop"~"^(supermarket|convenience|bakery|farm|butcher)$"]`;
-  return `node${kinds}${filter};way${kinds}${filter};`;
+  // Tierärzte (#657) hängen in OSM an amenity, nicht an shop
+  const vet = `["amenity"="veterinary"]`;
+  return (
+    `node${kinds}${filter};way${kinds}${filter};` +
+    `node${vet}${filter};way${vet}${filter};`
+  );
 }
 
 /** Overpass-QL für Einkaufsmöglichkeiten im Umkreis. */
@@ -1018,6 +1029,7 @@ export function shopsQuery(lat: number, lon: number, radiusM: number): string {
 
 /** Overpass-Wert von `shop` auf unsere Arten abbilden. */
 function shopKind(tags: Record<string, unknown>): ShopKind | null {
+  if (cleanTag(tags.amenity) === "veterinary") return "vet";
   const shop = cleanTag(tags.shop);
   switch (shop) {
     case "supermarket":

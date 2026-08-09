@@ -1400,6 +1400,9 @@ export const de = {
     waitingSensor: "Warte auf Sensordaten",
     pitchLabel: "Vor / zurück",
     rollLabel: "Links / rechts",
+    wedgeTitle: "Keil-Rechner:",
+    wedgePitch: (cm: string) => `vor/zur\u00fcck ~${cm} cm unterlegen`,
+    wedgeRoll: (cm: string) => `links/rechts ~${cm} cm unterlegen`,
     levelNow: "In Waage – perfekter Stand!",
     zeroHere: "Hier nullen",
     resetCalibration: "Kalibrierung zurücksetzen",
@@ -1421,6 +1424,8 @@ export const de = {
     tireFrontLabel: "Reifendruck vorne (bar)",
     tireRearLabel: "Reifendruck hinten (bar)",
     serviceDueLabel: "Nächster Service",
+    wheelbaseLabel: "Radstand (cm)",
+    trackLabel: "Spurweite (cm)",
     title: "Zuladungs-Rechner",
     subtitle:
       "Ist dein Gespann überladen? Grenzwerte, Ladung und Ampel auf einen Blick.",
@@ -1525,6 +1530,8 @@ export const de = {
   roadRules: {
     plugTitle: "Steckdosen & Adapter",
     twoWheelsTitle: "Motorrad & Velo",
+    quietTitle: "Ruhezeiten & Gepflogenheiten",
+    dogsTitle: "Mit Hund unterwegs",
     tippingTitle: "Trinkgeld",
     paymentTitle: "Bargeld & Karte",
     title: "Maut, Vignette & Regeln",
@@ -1637,6 +1644,12 @@ export const de = {
     rangeUnknown: "–",
     rangeLabel: "Reichweite",
     consumptionPerDay: "Verbrauch / Tag",
+    powerCostLabel: "Landstrom-Preis",
+    powerCostUnit: "CHF/kWh (steht am Automaten oder an der Rezeption)",
+    powerCostPerDay: (chf: string) => `\u2248 ${chf} CHF Strom pro Tag`,
+    powerCostPerWeek: (chf: string) => `${chf} CHF pro Woche`,
+    powerCostHint:
+      "Gerechnet aus deinem Tagesverbrauch oben. F\u00fcr die Reisekasse: als Ausgabe eintragen \u2013 der Betrag hier ist eine Sch\u00e4tzung.",
     solarPerDay: "Solarertrag / Tag",
     balancePerDay: "Bilanz / Tag",
     availableLabel: "Nutzbar jetzt",
@@ -2123,6 +2136,7 @@ export const de = {
     savedPlacePromote: "Zum Zeltplatz-Favoriten machen",
     savedPlacePromoted: "Merkort ist jetzt ein Zeltplatz-Favorit.",
     colorFilterAria: "Merkorte nach Farbe filtern",
+    placeSearchPlaceholder: "Merkorte durchsuchen (Name oder Notiz)",
     colorAll: "Alle",
     colorLegendEdit: "Legende bearbeiten",
     colorNameAria: (color: string) => `Eigener Name für die Farbe ${color}`,
@@ -2763,6 +2777,12 @@ export const de = {
     submit: "Eintrag speichern",
     moreSections: "Mehr zur Reise",
     statsLink: "Statistik & Meilensteine ansehen",
+    monthIdeasTitle: "Wohin im \u2026?",
+    monthIdeasAria: "Reiseziel-Ideen nach Monat",
+    monthIdeasRow: (visits: number, nights: number, year: number) =>
+      `${visits}\u00d7 \u00b7 ${nights === 1 ? "1 Nacht" : `${nights} N\u00e4chte`} \u00b7 zuletzt ${year}`,
+    monthIdeasEmpty: (month: string) =>
+      `Im ${month} warst du noch nie unterwegs \u2013 Zeit f\u00fcr eine Premiere.`,
     plannedTitle: "Geplante Aufenthalte",
     holidaySectionLabel: "Schulferien & Feiertage",
     holidayCantonAria: "Kanton für Ferien- und Feiertags-Hinweise wählen",
@@ -3003,6 +3023,7 @@ export const de = {
     journalCount: (n: number) => (n === 1 ? "1 Eintrag" : `${n} Einträge`),
     journalEmptyDay: "Noch nichts festgehalten",
     journalPlaceholder: "Was war heute los?",
+    journalMoodAria: "Stimmung des Tages",
     journalEditAria: (day: string) => `Eintrag vom ${day} bearbeiten`,
     journalSave: "Speichern",
     journalSaved: "Tagebuch-Eintrag gespeichert",
@@ -3223,6 +3244,8 @@ export const de = {
     legLine: (km: string, duration: string) =>
       `Fahrt: \u2248 ${km} \u00b7 ${duration}`,
     legEstimated: "Luftlinie gesch\u00e4tzt",
+    legTooLong: (drive: string) =>
+      `Lange Tagesetappe (${drive}) \u2013 ein Zwischenhalt macht den Tag entspannter.`,
     legTotal: (km: string, duration: string) =>
       `Ganze Rundreise: \u2248 ${km} \u00b7 ${duration}`,
     optimizeButton: "K\u00fcrzeste Runde",
@@ -4720,6 +4743,14 @@ export const de = {
       "Die Personen sind dieselben wie im Familien-Modus – wer dort schon angelegt ist, steht hier auch.",
     noPlaceEmpty:
       "Die Reisen zählen, aber ihnen fehlt der Platzname – ein Stempel braucht einen Ort. Trag bei der Reise einen Zeltplatz oder Ort ein, dann erscheint der Stempel.",
+    shareImage: "Als Bild sichern",
+    imageSaved: "Bild gespeichert.",
+    imageFailed: "Das Bild konnte nicht erstellt werden.",
+    countriesTitle: "L\u00e4nder-Stempel",
+    countryStampAria: (country: string, trips: number) =>
+      `L\u00e4nder-Stempel ${country}, ${trips} Reisen`,
+    rankReached: (title: string) =>
+      `Neue Stufe erreicht: \u00ab${title}\u00bb!`,
     print: "Pass drucken",
     note: "Die Stempel entstehen aus den Reisen im Tagebuch; nichts wird doppelt erfasst. Jeder Platz bekommt aus seinem Namen dieselbe Form, Farbe und Schräglage – auf jedem Gerät und nach jedem Neuladen gleich.",
   },
@@ -4762,6 +4793,12 @@ export const de = {
     nightsLeft: (nights: number) =>
       nights === 1 ? "noch 1 Nacht" : `noch ${nights} Nächte`,
     departureToday: "Heute ist Abreisetag",
+    birthdayToday: (name: string, age: number | null) =>
+      age === null
+        ? `Heute hat ${name} Geburtstag \u2013 Kuchen!`
+        : `Heute wird ${name} ${age} \u2013 Kuchen!`,
+    birthdayUpcoming: (name: string, date: string) =>
+      `${name} hat am ${date} Geburtstag \u2013 auf dieser Reise!`,
     stageLine: (name: string, until: string) =>
       `Etappe: ${name} \u00b7 bis ${until}`,
     stageNext: (name: string) => `Morgen weiter nach ${name}`,
@@ -5647,6 +5684,7 @@ export const de = {
       bakery: "Bäckerei",
       farm: "Hofladen",
       butcher: "Metzgerei",
+      vet: "Tierarzt",
     },
     openNow: "Jetzt offen",
     closedNow: "Jetzt geschlossen",
@@ -6509,6 +6547,8 @@ export const de = {
     childrenEmpty:
       "Noch keine Kinder angelegt – füge unten einen Namen hinzu, damit Abzeichen gesammelt werden können.",
     childNamePlaceholder: "Name des Kindes",
+    birthdayLabel: "Geburtstag",
+    birthdayAria: (name: string) => `Geburtstag von ${name}`,
     addChild: "Kind hinzufügen",
     renameChildAria: (name: string) => `${name} umbenennen`,
     renameSaveAria: (name: string) => `Neuen Namen für ${name} speichern`,

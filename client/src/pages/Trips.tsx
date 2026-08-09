@@ -180,6 +180,7 @@ import {
 import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 import TripYearReview from "@/components/trips/TripYearReview";
+import MonthIdeas from "@/components/trips/MonthIdeas";
 import TripTemplatePicker from "@/components/TripTemplatePicker";
 import TripFormDialog, { StarRating } from "@/components/trips/TripFormDialog";
 import { useTodayIso } from "@/lib/useTodayIso";
@@ -895,6 +896,9 @@ export default function TripsPage() {
 
           {/* Jahresrückblick (#62) – herausgelöst in #350 */}
           <TripYearReview trips={trips} tripLikes={pastTripLikes} />
+
+          {/* Reiseziel-Ideen nach Monat (#654) – aus den eigenen Reisen */}
+          <MonthIdeas trips={trips} />
         </>
       )}
 

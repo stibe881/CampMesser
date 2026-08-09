@@ -23,6 +23,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
+import { parseChfInput, rappenToInput } from "@/lib/money";
 import { trpc } from "@/lib/trpc";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import {
@@ -43,6 +44,7 @@ import {
   coolingHoursPerDay,
   evaluatePowerBudget,
   formatWh,
+  landPowerRappenPerDay,
   runtimeDisplay,
   sanitizePowerStorage,
   usablePercentOf,
@@ -73,6 +75,8 @@ import {
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import { cn } from "@/lib/utils";
 
+const POWER_PRICE_KEY = "campmesser.powerPriceRp";
+
 /** Zahl aus einem Eingabefeld lesen: leer oder Unsinn ergibt null. */
 function parseNumberInput(value: string): number | null {
   const cleaned = value.trim().replace(",", ".");
@@ -89,6 +93,16 @@ function numberToInput(value: number | null): string {
 export default function EnergyPage() {
   // Ampere-Helfer am Platz (#639): Säulen-Sicherung + gewählte Geräte
   const [fuseAmps, setFuseAmps] = useState<number>(10);
+  // Landstrom-Kosten (#650): kWh-Preis der Säule in Rappen, nur auf dem Gerät.
+  const [powerPriceRp, setPowerPriceRp] = useState<number | null>(() => {
+    try {
+      const raw = localStorage.getItem(POWER_PRICE_KEY);
+      const value = raw === null ? NaN : Number(raw);
+      return Number.isFinite(value) && value > 0 ? Math.round(value) : null;
+    } catch {
+      return null;
+    }
+  });
   const [ampDevices, setAmpDevices] = useState<string[]>([]);
   const { isAuthenticated, loading } = useAuth();
   const { lang, t } = useI18n();
@@ -535,6 +549,62 @@ export default function EnergyPage() {
                 ? t.energy.yieldSourceForecast
                 : t.energy.yieldSourceSunHours}
             </p>
+          )}
+
+          {/* Landstrom-Kosten (#650): kWh-Preis der Säule × Tagesverbrauch.
+              Der Preis bleibt auf dem Gerät gemerkt – er gehört zur Säule,
+              nicht zum Konto. */}
+          {result.dailyConsumptionWh > 0 && (
+            <div className="mt-4 rounded-lg border border-border/70 p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Label
+                  htmlFor="power-price-chf"
+                  className="text-sm font-medium"
+                >
+                  {t.energy.powerCostLabel}
+                </Label>
+                <Input
+                  id="power-price-chf"
+                  inputMode="decimal"
+                  placeholder="0.70"
+                  className="h-9 w-24"
+                  defaultValue={rappenToInput(powerPriceRp)}
+                  onBlur={event => {
+                    const rp = parseChfInput(event.target.value);
+                    setPowerPriceRp(rp);
+                    try {
+                      if (rp === null) {
+                        localStorage.removeItem(POWER_PRICE_KEY);
+                      } else {
+                        localStorage.setItem(POWER_PRICE_KEY, String(rp));
+                      }
+                    } catch {
+                      /* Sitzung reicht */
+                    }
+                  }}
+                />
+                <span className="text-xs text-muted-foreground">
+                  {t.energy.powerCostUnit}
+                </span>
+              </div>
+              {(() => {
+                const perDay = landPowerRappenPerDay(
+                  result.dailyConsumptionWh,
+                  powerPriceRp
+                );
+                if (perDay === null) return null;
+                return (
+                  <p className="mt-2 text-sm">
+                    {t.energy.powerCostPerDay(rappenToInput(perDay))}
+                    {" · "}
+                    {t.energy.powerCostPerWeek(rappenToInput(perDay * 7))}
+                  </p>
+                );
+              })()}
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                {t.energy.powerCostHint}
+              </p>
+            </div>
           )}
 
           {/* Restkapazität: was über der Tiefentlade-Reserve wirklich übrig ist */}

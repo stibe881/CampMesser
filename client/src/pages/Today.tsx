@@ -26,6 +26,7 @@ import { fmtDayMonth, fmtWeekdayLong } from "@/lib/dateFormat";
 import { Link } from "wouter";
 import { distanceMeters } from "@shared/geo";
 import {
+  Cake,
   ArrowRight,
   CalendarDays,
   Check,
@@ -82,6 +83,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useTodayIso } from "@/lib/useTodayIso";
+import { birthdaysInRange } from "@shared/birthdays";
 import AvalancheDanger from "@/components/AvalancheDanger";
 import CampfireLight from "@/components/CampfireLight";
 import QuickExpense from "@/components/trips/QuickExpense";
@@ -125,6 +127,25 @@ export default function TodayPage() {
   const trip = useMemo(
     () => pickRunningTrip(tripsQuery.data ?? [], today),
     [tripsQuery.data, today]
+  );
+
+  // Geburtstage unterwegs (#656): Personen aus dem Familien-Modus
+  const childrenQuery = trpc.family.children.list.useQuery(undefined, {
+    enabled: isAuthenticated && Boolean(trip),
+    staleTime: 5 * 60_000,
+  });
+  const birthdays = useMemo(
+    () =>
+      trip
+        ? birthdaysInRange(
+            childrenQuery.data ?? [],
+            // Ab HEUTE statt ab Reisebeginn: Ein vorbeigezogener
+            // Geburtstag braucht keinen Hinweis mehr.
+            today > trip.startDate ? today : trip.startDate,
+            trip.endDate
+          )
+        : [],
+    [trip, childrenQuery.data, today]
   );
 
   const menuQuery = trpc.menu.listByTrip.useQuery(
@@ -507,6 +528,26 @@ export default function TodayPage() {
                   {spot.checkinInfo}
                 </p>
               )}
+            {/* Geburtstage unterwegs (#656): Fällt ein Geburtstag der
+                Familien-Personen in die Reise, steht er hier – Kuchen
+                einplanen. */}
+            {birthdays.map(b => (
+              <p
+                key={`${b.name}-${b.date}`}
+                className="mt-1 flex items-center gap-1.5 text-sm font-medium"
+              >
+                <Cake
+                  className="h-4 w-4 shrink-0 text-chart-1"
+                  aria-hidden="true"
+                />
+                {b.date === today
+                  ? td.birthdayToday(b.name, b.age)
+                  : td.birthdayUpcoming(
+                      b.name,
+                      fmtDayMonth(new Date(`${b.date}T00:00:00`), lang)
+                    )}
+              </p>
+            ))}
             {/* Aktuelle Etappe (#536): Bei einer Rundreise steht hier,
                 WO man gerade ist – Wetter und Umgebung unten beziehen
                 sich auf genau diesen Ort. */}

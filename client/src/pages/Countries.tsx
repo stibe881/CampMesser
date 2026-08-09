@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSearch } from "wouter";
 import {
+  Clock,
+  Dog,
   AlertTriangle,
   BadgeEuro,
   Bike,
@@ -278,6 +280,30 @@ export default function CountriesPage() {
           {text(country.camping)}
         </p>
       </RuleCard>
+
+      {/* Ruhezeiten & Gepflogenheiten (#655) – nur wo erfasst */}
+      {country.quiet && (
+        <RuleCard
+          icon={<Clock className="h-4 w-4 text-primary" aria-hidden="true" />}
+          title={t.roadRules.quietTitle}
+        >
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {text(country.quiet)}
+          </p>
+        </RuleCard>
+      )}
+
+      {/* Mit Hund unterwegs (#657) – nur wo erfasst */}
+      {country.dogs && (
+        <RuleCard
+          icon={<Dog className="h-4 w-4 text-primary" aria-hidden="true" />}
+          title={t.roadRules.dogsTitle}
+        >
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {text(country.dogs)}
+          </p>
+        </RuleCard>
+      )}
 
       <p className="text-xs text-muted-foreground">
         {t.roadRules.updatedLine(pick(country.name, lang), updated)}

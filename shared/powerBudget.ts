@@ -461,6 +461,27 @@ export const CONSUMER_TEMPLATES: ConsumerTemplate[] = [
 ];
 
 /** Wh-Wert menschenlesbar formatieren (ab 1000 Wh in kWh, Dezimalkomma ausser im Englischen). */
+/**
+ * Landstrom-Kosten (#650): Tagesverbrauch in Wh × kWh-Preis in Rappen.
+ * Rückgabe in RAPPEN pro Tag (Ganzzahl, Muster der Reisekasse) – null bei
+ * fehlendem oder unsinnigem Preis.
+ */
+export function landPowerRappenPerDay(
+  dailyWh: number,
+  rappenPerKwh: number | null
+): number | null {
+  if (
+    rappenPerKwh === null ||
+    !Number.isFinite(rappenPerKwh) ||
+    rappenPerKwh <= 0 ||
+    !Number.isFinite(dailyWh) ||
+    dailyWh <= 0
+  ) {
+    return null;
+  }
+  return Math.round((dailyWh / 1000) * rappenPerKwh);
+}
+
 export function formatWh(wh: number, lang: string = "de"): string {
   const rounded = Math.round(wh);
   if (Math.abs(rounded) >= 1000) {
