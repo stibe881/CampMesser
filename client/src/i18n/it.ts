@@ -2031,6 +2031,7 @@ export const it: Translation = {
     createNotePlaceholder: "es. consigliato dal vicino",
     createColorLabel: "Colore del segnaposto",
     layerSavedPlaces: "Luoghi salvati",
+    layerRoutes: "Itinerari",
     savedPlaceKind: "Luogo salvato \u2013 meta dei desideri",
     savedPlaceLegend: (n: number) =>
       `${n} luogh${n === 1 ? "o salvato" : "i salvati"}`,
@@ -2669,6 +2670,8 @@ export const it: Translation = {
     yearCompareTitle: "Notti per anno",
     kindFilterAll: "Tutti i tipi",
     kindFilterAria: "Filtra i viaggi per tipo",
+    yearFilterAll: "Tutti gli anni",
+    yearFilterAria: "Filtra i viaggi per anno",
     kindLabel: "Tipo di viaggio",
     kindHint:
       "Determina cosa mette in evidenza la vista Oggi durante il viaggio – tutti i moduli restano accessibili.",
@@ -3117,6 +3120,7 @@ export const it: Translation = {
     noCoordsNote:
       "Le tappe senza risultato dalla ricerca luoghi non compaiono sulla mappa.",
     noCoordsShort: "senza coordinate",
+    stageNights: (n: number) => (n === 1 ? "1 notte" : `${n} notti`),
     mapAria: "Mappa delle tappe",
     maxReached: (n: number) => `Al massimo ${n} tappe`,
     legLine: (km: string, duration: string) =>

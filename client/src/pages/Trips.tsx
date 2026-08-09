@@ -364,6 +364,13 @@ export default function TripsPage() {
     [allTrips]
   );
 
+  /**
+   * Tagebuch nach Jahr filtern (#617); "alle" = kein Filter. Der Filter
+   * greift nur auf vergangene Reisen und das Archiv – geplante Aufenthalte
+   * liegen ohnehin in der Gegenwart und blieben sonst grundlos versteckt.
+   */
+  const [yearFilter, setYearFilter] = useState<string | "alle">("alle");
+
   // Geplante Aufenthalte (Anreise heute oder später) separat oben anzeigen
   /**
    * Einzelne Reise als eigene Adresse (#310): /tagebuch/17 zeigt genau
@@ -405,6 +412,15 @@ export default function TripsPage() {
     [allTrips, today, nowMinutes]
   );
 
+  /** Jahre, in denen es Reisen gibt – neuste zuerst (#617). */
+  const presentYears = useMemo(
+    () =>
+      Array.from(new Set(trips.map(t => t.startDate.slice(0, 4))))
+        .sort()
+        .reverse(),
+    [trips]
+  );
+
   /**
    * Die Listen für die Anzeige. Ohne Fokus alles wie bisher; mit Fokus
    * genau die eine Reise – egal, ob sie vergangen oder geplant ist, sie
@@ -417,10 +433,11 @@ export default function TripsPage() {
             t =>
               t.archivedAt == null &&
               (kindFilter === "alle" ||
-                normalizeTripKind(t.kind) === kindFilter)
+                normalizeTripKind(t.kind) === kindFilter) &&
+              (yearFilter === "alle" || t.startDate.startsWith(yearFilter))
           )
         : trips.filter(t => t.id === focusId),
-    [trips, focusId, kindFilter]
+    [trips, focusId, kindFilter, yearFilter]
   );
   /**
    * Archivierte Aufenthalte (Nutzerwunsch 09.08.2026): aus der Liste
@@ -434,9 +451,10 @@ export default function TripsPage() {
       trips.filter(
         t =>
           t.archivedAt != null &&
-          (kindFilter === "alle" || normalizeTripKind(t.kind) === kindFilter)
+          (kindFilter === "alle" || normalizeTripKind(t.kind) === kindFilter) &&
+          (yearFilter === "alle" || t.startDate.startsWith(yearFilter))
       ),
-    [trips, kindFilter]
+    [trips, kindFilter, yearFilter]
   );
   const [archiveOpen, setArchiveOpen] = useState(false);
   const archiveMutation = trpc.trips.setArchived.useMutation({
@@ -957,6 +975,46 @@ export default function TripsPage() {
                   )}
                 >
                   {tripKindLabel(kind, lang)}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Nach Jahr filtern (#617) – nur in der Liste (der Kalender hat
+              seine eigene Monats-Navigation) und erst ab zwei Jahren */}
+          {tripsView === "list" && presentYears.length > 1 && (
+            <div
+              role="group"
+              aria-label={t.trips.yearFilterAria}
+              className="mb-4 flex flex-wrap gap-1.5"
+            >
+              <button
+                type="button"
+                onClick={() => setYearFilter("alle")}
+                aria-pressed={yearFilter === "alle"}
+                className={cn(
+                  "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                  yearFilter === "alle"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {t.trips.yearFilterAll}
+              </button>
+              {presentYears.map(year => (
+                <button
+                  key={year}
+                  type="button"
+                  onClick={() => setYearFilter(year)}
+                  aria-pressed={yearFilter === year}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                    yearFilter === year
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {year}
                 </button>
               ))}
             </div>

@@ -58,6 +58,34 @@ export default function MapViewPage() {
   const { data: savedPlacesData } = trpc.savedPlaces.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  // Etappen-Routen (#596): pro Rundreise die Kette ihrer Etappen mit
+  // Koordinaten – als Linie auf der eigenen Karten-Ebene «Routen».
+  const { data: allStopsData } = trpc.trips.stops.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 5 * 60_000,
+  });
+  const stageRoutes = useMemo(() => {
+    const byTrip = new Map<number, [number, number][]>();
+    for (const stop of allStopsData ?? []) {
+      if (stop.latitude == null || stop.longitude == null) continue;
+      const list = byTrip.get(stop.tripId) ?? [];
+      list.push([stop.latitude, stop.longitude]);
+      byTrip.set(stop.tripId, list);
+    }
+    const nameOf = new Map(
+      (trips ?? []).map(trip => [
+        trip.id,
+        trip.title || trip.location || String(trip.id),
+      ])
+    );
+    return Array.from(byTrip.entries())
+      .filter(([, points]) => points.length >= 2)
+      .map(([tripId, points]) => ({
+        tripId,
+        name: nameOf.get(tripId) ?? String(tripId),
+        points,
+      }));
+  }, [allStopsData, trips]);
   // Verwaltungsliste (#563): Distanz von zuhause, Sprung zum Pin
   const { data: home } = trpc.home.get.useQuery(undefined, {
     enabled: isAuthenticated && (savedPlacesData?.length ?? 0) > 0,
@@ -342,6 +370,7 @@ export default function MapViewPage() {
             focusExcursionId={focusExcursionId}
             nightsBySpotId={nightsBySpotId}
             savedPlaces={visiblePlaces}
+            stageRoutes={stageRoutes}
             focusPoint={focusPoint}
           />
 

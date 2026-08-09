@@ -578,6 +578,12 @@ export default function TripStops({
                         <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
                           <span>
                             {fmtDay(stop.startDate)} – {fmtDay(stop.endDate)}
+                            {/* Nächte je Etappe (#616): die Zahl, die man
+                                beim Planen ständig im Kopf ausrechnet */}
+                            {isoDayDiff(stop.startDate, stop.endDate) > 0 &&
+                              ` · ${ts.stageNights(
+                                isoDayDiff(stop.startDate, stop.endDate)
+                              )}`}
                             {stop.latitude == null && ` · ${ts.noCoordsShort}`}
                           </span>
                           {/* Wetter am Ankunftstag (#560), soweit die

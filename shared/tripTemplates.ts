@@ -43,6 +43,12 @@ export interface TripTemplate {
   breakfasts: string[];
   /** Lucide-Symbolname für die Auswahl. */
   icon: string;
+  /**
+   * Rundreise-Gerüst (#619): So viele Etappen legt die Vorlage gleich mit
+   * an – gleichmässig über den Zeitraum verteilt, ohne Koordinaten. Die
+   * Orte trägt man nach, sobald sie feststehen.
+   */
+  stages?: number;
 }
 
 /**
@@ -229,6 +235,31 @@ export const tripTemplates: TripTemplate[] = [
     breakfasts: ["porridge", "birchermuesli-overnight"],
     icon: "Footprints",
   },
+  {
+    id: "rundreise",
+    title: l4("Rundreise", "Circuit", "Tour itinerante", "Road trip"),
+    description: l4(
+      "Sieben Nächte, drei Stationen – die Etappen sind schon angelegt, die Orte trägst du nach.",
+      "Sept nuits, trois étapes – les étapes sont déjà créées, tu ajoutes les lieux après.",
+      "Sette notti, tre tappe – le tappe sono già create, i luoghi li aggiungi dopo.",
+      "Seven nights, three legs – the stages are set up, you fill in the places later."
+    ),
+    kind: "camping",
+    nights: 7,
+    packScenario: "solo",
+    dinners: [
+      "one-pot-pasta",
+      "linsen-dal",
+      "gemuese-couscous",
+      "chili-sin-carne",
+      "curry-kokos",
+      "camp-minestrone",
+      "pfannen-pizza",
+    ],
+    breakfasts: ["porridge", "birchermuesli-overnight", "camping-pancakes"],
+    icon: "Route",
+    stages: 3,
+  },
 ];
 
 /** Vorlage nachschlagen; unbekannte Ids ergeben undefined. */
@@ -285,6 +316,49 @@ export function templateMenuPlan(
     }
   }
   return entries;
+}
+
+/** Etappen-Name der Rundreise-Vorlage: «Etappe 1», «Etappe 2», … */
+export const TEMPLATE_STAGE_LABEL = l4("Etappe", "Étape", "Tappa", "Stage");
+
+export interface TemplateStageSpan {
+  startDate: string;
+  endDate: string;
+}
+
+/**
+ * Zeitraum gleichmässig auf Etappen aufteilen (#619): Jede Etappe bekommt
+ * mindestens eine Nacht; die Rest-Nächte gehen der Reihe nach an die
+ * vorderen Etappen. Die Etappen stossen aneinander – der Abreisetag der
+ * einen ist der Anreisetag der nächsten, so wie man wirklich weiterzieht.
+ * Zu wenig Nächte oder weniger als zwei Etappen ergeben `[]` – dann lohnt
+ * sich kein Gerüst.
+ */
+export function templateStageSpans(
+  startDate: string,
+  endDate: string,
+  count: number
+): TemplateStageSpan[] {
+  const stages = Math.round(count);
+  const totalNights = Math.round(
+    (Date.parse(`${endDate}T00:00:00Z`) -
+      Date.parse(`${startDate}T00:00:00Z`)) /
+      86_400_000
+  );
+  if (stages < 2 || !Number.isFinite(totalNights) || totalNights < stages) {
+    return [];
+  }
+  const base = Math.floor(totalNights / stages);
+  const extra = totalNights % stages;
+  const spans: TemplateStageSpan[] = [];
+  let cursor = startDate;
+  for (let i = 0; i < stages; i++) {
+    const nights = base + (i < extra ? 1 : 0);
+    const end = addDaysIso(cursor, nights);
+    spans.push({ startDate: cursor, endDate: end });
+    cursor = end;
+  }
+  return spans;
 }
 
 /**

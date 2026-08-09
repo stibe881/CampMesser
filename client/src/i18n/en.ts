@@ -1996,6 +1996,7 @@ export const en: Translation = {
     createNotePlaceholder: "e.g. recommended by a neighbour",
     createColorLabel: "Pin colour",
     layerSavedPlaces: "Saved places",
+    layerRoutes: "Routes",
     savedPlaceKind: "Saved place \u2013 wish-list destination",
     savedPlaceLegend: (n: number) => `${n} saved place${n === 1 ? "" : "s"}`,
     savedPlaceDelete: "Remove place",
@@ -2608,6 +2609,8 @@ export const en: Translation = {
     yearCompareTitle: "Nights per year",
     kindFilterAll: "All types",
     kindFilterAria: "Filter trips by type",
+    yearFilterAll: "All years",
+    yearFilterAria: "Filter trips by year",
     kindLabel: "Trip type",
     kindHint:
       "Controls what the Today view highlights during the trip – every module stays available.",
@@ -3042,6 +3045,7 @@ export const en: Translation = {
     noCoordsNote:
       "Stages without a place-search match do not appear on the map.",
     noCoordsShort: "no coordinates",
+    stageNights: (n: number) => (n === 1 ? "1 night" : `${n} nights`),
     mapAria: "Map of the stages",
     maxReached: (n: number) => `At most ${n} stages`,
     legLine: (km: string, duration: string) =>

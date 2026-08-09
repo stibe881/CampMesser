@@ -179,9 +179,11 @@ import {
 } from "@shared/routePlan";
 import { MAX_ROUTE_PATH_POINTS, routeLengthM } from "@shared/routing";
 import {
+  TEMPLATE_STAGE_LABEL,
   templateEndDate,
   templateListName,
   templateMenuPlan,
+  templateStageSpans,
   tripTemplateById,
 } from "@shared/tripTemplates";
 import {
@@ -659,9 +661,11 @@ export {
   sortNotes,
   sortTripBoardEntries,
   systemRouter,
+  TEMPLATE_STAGE_LABEL,
   templateEndDate,
   templateListName,
   templateMenuPlan,
+  templateStageSpans,
   thinTrackPoints,
   trackStats,
   tripTemplateById,

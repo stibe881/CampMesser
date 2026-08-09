@@ -2059,6 +2059,7 @@ export const fr: Translation = {
     createNotePlaceholder: "p. ex. recommand\u00e9 par le voisin",
     createColorLabel: "Couleur du rep\u00e8re",
     layerSavedPlaces: "Lieux retenus",
+    layerRoutes: "Itinéraires",
     savedPlaceKind: "Lieu retenu \u2013 destination de r\u00eave",
     savedPlaceLegend: (n: number) =>
       `${n} lieu${n === 1 ? "" : "x"} retenu${n === 1 ? "" : "s"}`,
@@ -2696,6 +2697,8 @@ export const fr: Translation = {
     yearCompareTitle: "Nuitées par année",
     kindFilterAll: "Tous les types",
     kindFilterAria: "Filtrer les voyages par type",
+    yearFilterAll: "Toutes les années",
+    yearFilterAria: "Filtrer les voyages par année",
     kindLabel: "Type de voyage",
     kindHint:
       "Détermine ce que la vue Aujourd’hui met en avant pendant le voyage – tous les modules restent accessibles.",
@@ -3156,6 +3159,7 @@ export const fr: Translation = {
     noCoordsNote:
       "Les \u00e9tapes sans r\u00e9sultat de la recherche de lieu n\u2019apparaissent pas sur la carte.",
     noCoordsShort: "sans coordonn\u00e9es",
+    stageNights: (n: number) => (n === 1 ? "1 nuit" : `${n} nuits`),
     mapAria: "Carte des \u00e9tapes",
     maxReached: (n: number) => `Au plus ${n} \u00e9tapes`,
     legLine: (km: string, duration: string) =>

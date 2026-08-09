@@ -85,6 +85,7 @@ import {
   PawPrint,
   Satellite,
   Search,
+  Route,
   Star,
   Tent,
 } from "lucide-react";
@@ -184,6 +185,7 @@ export default function SpotsMap({
   focusExcursionId,
   nightsBySpotId,
   savedPlaces,
+  stageRoutes = [],
   focusPoint = null,
 }: {
   spots: SpotPin[];
@@ -197,6 +199,12 @@ export default function SpotsMap({
   nightsBySpotId: Map<number, number>;
   /** Merkorte (#537). */
   savedPlaces: SavedPlacePin[];
+  /**
+   * Etappen-Routen der Rundreisen (#596): pro Reise die Kette ihrer
+   * Etappen mit Koordinaten – gezeichnet als gestrichelte Linie auf der
+   * eigenen, abschaltbaren Ebene «Routen».
+   */
+  stageRoutes?: { tripId: number; name: string; points: [number, number][] }[];
   /** Aus der Merkorte-Liste (#563) angefahrener Punkt; nonce = jeder Klick. */
   focusPoint?: { lat: number; lon: number; nonce: number } | null;
 }) {
@@ -1342,6 +1350,20 @@ export default function SpotsMap({
         : []),
     ];
 
+    // Etappen-Routen (#596): gestrichelte Linie je Rundreise – unter den
+    // Pins, in derselben Marker-Ebene (der Neuaufbau räumt sie mit weg).
+    if (layerVisibility.routes) {
+      stageRoutes.forEach(routeInfo => {
+        if (routeInfo.points.length < 2) return;
+        engine.polyline(routeInfo.points, {
+          color: "#2f6b4f",
+          weight: 3,
+          dashArray: "8 6",
+          layer,
+        });
+      });
+    }
+
     const clusters = clusterPoints(
       pins,
       (lat, lon) => projectToPixels(lat, lon, clusterZoom),
@@ -1402,6 +1424,7 @@ export default function SpotsMap({
     firepits,
     familyPlaces,
     savedPlaces,
+    stageRoutes,
     focusExcursionId,
     nightsBySpotId,
     clusterZoom,
@@ -1693,6 +1716,21 @@ export default function SpotsMap({
                 />
               ),
             },
+            // Etappen-Routen (#596) nur anbieten, wenn es welche gibt
+            ...(stageRoutes.length > 0
+              ? ([
+                  {
+                    key: "routes",
+                    label: t.mapView.layerRoutes,
+                    icon: (
+                      <Route
+                        className="h-3.5 w-3.5 text-primary"
+                        aria-hidden="true"
+                      />
+                    ),
+                  },
+                ] as const)
+              : []),
             {
               key: "firepits",
               label: t.mapView.layerFirepits,

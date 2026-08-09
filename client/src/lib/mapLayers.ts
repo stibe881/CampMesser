@@ -60,6 +60,8 @@ export interface MapLayerVisibility {
   family: boolean;
   /** Merkorte / Wunschziele (#537). */
   savedPlaces: boolean;
+  /** Etappen-Routen der Rundreisen als Linien (#596). */
+  routes: boolean;
 }
 
 export const DEFAULT_LAYER_VISIBILITY: MapLayerVisibility = {
@@ -71,6 +73,7 @@ export const DEFAULT_LAYER_VISIBILITY: MapLayerVisibility = {
   firepits: false,
   family: false,
   savedPlaces: true,
+  routes: true,
 };
 
 /**
@@ -99,6 +102,7 @@ export function loadLayerVisibility(): MapLayerVisibility {
       firepits: read("firepits"),
       family: read("family"),
       savedPlaces: read("savedPlaces"),
+      routes: read("routes"),
     };
   } catch {
     return { ...DEFAULT_LAYER_VISIBILITY };

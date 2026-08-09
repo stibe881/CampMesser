@@ -19,6 +19,7 @@ import {
   CalendarRange,
   Footprints,
   LayoutTemplate,
+  Route,
   Sun,
   Umbrella,
   type LucideIcon,
@@ -52,6 +53,7 @@ const TEMPLATE_ICONS: Record<string, LucideIcon> = {
   Building2,
   Umbrella,
   Footprints,
+  Route,
 };
 
 /** Heute als ISO-Tag (lokale Zeitzone, nicht UTC). */

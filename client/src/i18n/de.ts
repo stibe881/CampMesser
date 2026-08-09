@@ -2058,6 +2058,7 @@ export const de = {
     createNotePlaceholder: "z. B. vom Nachbarn empfohlen",
     createColorLabel: "Pin-Farbe",
     layerSavedPlaces: "Merkorte",
+    layerRoutes: "Routen",
     savedPlaceKind: "Merkort \u2013 Wunschziel",
     savedPlaceLegend: (n: number) => `${n} Merkort${n === 1 ? "" : "e"}`,
     savedPlaceDelete: "Merkort entfernen",
@@ -2700,6 +2701,8 @@ export const de = {
     yearCompareTitle: "Übernachtungen pro Jahr",
     kindFilterAll: "Alle Arten",
     kindFilterAria: "Reisen nach Art filtern",
+    yearFilterAll: "Alle Jahre",
+    yearFilterAria: "Reisen nach Jahr filtern",
     kindLabel: "Art der Reise",
     kindHint:
       "Steuert, was die Heute-Ansicht während der Reise hervorhebt – alle Module bleiben trotzdem erreichbar.",
@@ -3156,6 +3159,7 @@ export const de = {
     noCoordsNote:
       "Etappen ohne Treffer aus der Ortssuche stehen nicht auf der Karte.",
     noCoordsShort: "ohne Koordinaten",
+    stageNights: (n: number) => (n === 1 ? "1 Nacht" : `${n} Nächte`),
     mapAria: "Karte der Etappen",
     maxReached: (n: number) => `H\u00f6chstens ${n} Etappen`,
     legLine: (km: string, duration: string) =>
