@@ -621,6 +621,60 @@ export interface EvePackAlert {
   body: string;
   /** Dedup-Schlüssel «evepack:<tripId>» – pro Reise nur ein Vorabend-Check */
   key: string;
+  /** Sprungziel; ohne Angabe die Packlisten (klassischer Vorabend-Check). */
+  url?: string;
+}
+
+/** Texte des Etappen-Vorabend-Hinweises (#579) in vier Sprachen. */
+function stageMoveAlertText(name: string, lang: Language) {
+  const texts: Record<Language, { title: string; body: string }> = {
+    de: {
+      title: `Morgen weiter nach ${name}`,
+      body: "Heute Abend zusammenpacken – morgen zieht die Rundreise weiter.",
+    },
+    fr: {
+      title: `Demain, direction ${name}`,
+      body: "Range tes affaires ce soir – le circuit repart demain.",
+    },
+    it: {
+      title: `Domani si prosegue per ${name}`,
+      body: "Prepara le cose stasera – domani il giro riparte.",
+    },
+    en: {
+      title: `Moving on to ${name} tomorrow`,
+      body: "Pack up tonight – the round trip moves on in the morning.",
+    },
+  };
+  return texts[lang] ?? texts.de;
+}
+
+/**
+ * Etappen-Vorabend-Hinweis (#579): Beginnt MORGEN eine Etappe einer
+ * laufenden Reise, erinnert der Abend-Push ans Zusammenpacken – gleiche
+ * Abend-Logik wie der Vorabend-Check, gleicher Kanal (der Pack-Check
+ * hat Vorrang, wer beides hätte, bekommt den Pack-Check). Reine
+ * Funktion für Tests; bei mehreren Wechseln gewinnt die kleinste
+ * Reise-Id.
+ */
+export function buildStageMoveAlert(
+  stops: readonly { tripId: number; name: string; startDate: string }[],
+  activeTripIds: ReadonlySet<number>,
+  today: string,
+  lang: Language = "de"
+): EvePackAlert | null {
+  const tomorrow = shiftIsoDay(today, 1);
+  const next = stops
+    .filter(
+      stop => activeTripIds.has(stop.tripId) && stop.startDate === tomorrow
+    )
+    .sort((a, b) => a.tripId - b.tripId)[0];
+  if (!next) return null;
+  const text = stageMoveAlertText(next.name, lang);
+  return {
+    ...text,
+    key: `stagemove:${next.tripId}:${next.startDate}`,
+    url: "/heute",
+  };
 }
 
 /** Gesendet wird nur abends (Europe/Zurich), Stunde von–bis (inklusive). */
@@ -1526,6 +1580,28 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         });
       }
     });
+    // Etappen-Vorabend-Hinweis (#579): «Morgen weiter nach …» am Abend
+    // vor dem Wechsel – gleicher Kanal wie der Vorabend-Check, der
+    // Pack-Check hat Vorrang (er steht schon in der Map).
+    if (
+      eveningHour >= EVE_PACK_SEND_HOUR_FROM &&
+      eveningHour <= EVE_PACK_SEND_HOUR_TO
+    ) {
+      const activeByUser = new Map<number, Set<number>>();
+      for (const trip of activeTrips) {
+        const set = activeByUser.get(trip.userId) ?? new Set<number>();
+        set.add(trip.id);
+        activeByUser.set(trip.userId, set);
+      }
+      activeByUser.forEach((tripIds, userId) => {
+        for (const lang of langsOf(userId)) {
+          const mapKey = alertFor(userId, lang);
+          if (evePackAlertByUser.has(mapKey)) continue;
+          const alert = buildStageMoveAlert(stops, tripIds, today, lang);
+          if (alert) evePackAlertByUser.set(mapKey, alert);
+        }
+      });
+    }
   }
   /** Koordinaten einer Reise: aktuelle Etappe vor Platz vor Freitext-Ort. */
   const tripCoords = (trip: (typeof allTrips)[number]) => {
@@ -1965,7 +2041,9 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       const evePackPayload = JSON.stringify({
         title: evePackAlert.title,
         body: evePackAlert.body,
-        url: "/packlisten",
+        // Der Etappen-Hinweis (#579) springt in die Heute-Ansicht,
+        // der klassische Pack-Check weiterhin zu den Packlisten.
+        url: evePackAlert.url ?? "/packlisten",
         // Eigener Tag, damit der Check den Countdown nicht ersetzt
         tag: "campmesser-eve-pack",
       });
@@ -1978,7 +2056,7 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
           evePackAlert.key,
           evePackAlert.title,
           evePackAlert.body,
-          "/packlisten"
+          evePackAlert.url ?? "/packlisten"
         );
         await db
           .update(pushSubscriptions)
