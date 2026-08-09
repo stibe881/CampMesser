@@ -2508,6 +2508,11 @@ export const fr: Translation = {
       "Partagé avec ReiseKompass – ta boussole pour les vacances, le camping et les excursions.",
   },
   trips: {
+    hotelSectionTitle: "Chambre & hébergement",
+    hotelSectionHint:
+      "Pour ce séjour – numéro de chambre, Wi-Fi et notes (p. ex. horaires du petit-déjeuner).",
+    hotelRoomLabel: "Chambre / étage",
+    hotelRoomPlaceholder: "p. ex. chambre 204, 2e étage",
     templateSuggest: (name: string) =>
       `Reprendre le modèle « ${name} » comme liste de bagages`,
     templateListCreated: "Liste créée à partir du modèle et liée.",

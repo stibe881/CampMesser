@@ -806,22 +806,34 @@ export default function TripFormDialog({
               Nur für Arten mit Platz (#485) – im Hotel gibt es keine
               Parzellennummer. Gespeicherte Werte bleiben beim Umschalten
               erhalten, die Felder sind nur ausgeblendet. */}
-          {kindForm.pitchDetails && (
+          {(kindForm.pitchDetails || kindForm.hotelDetails) && (
             <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <p className="text-sm font-medium">{t.trips.pitchSectionTitle}</p>
+              <p className="text-sm font-medium">
+                {kindForm.hotelDetails
+                  ? t.trips.hotelSectionTitle
+                  : t.trips.pitchSectionTitle}
+              </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {t.trips.pitchSectionHint}
+                {kindForm.hotelDetails
+                  ? t.trips.hotelSectionHint
+                  : t.trips.pitchSectionHint}
               </p>
               <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="trip-pitch-number">
-                    {t.trips.pitchNumberLabel}
+                    {kindForm.hotelDetails
+                      ? t.trips.hotelRoomLabel
+                      : t.trips.pitchNumberLabel}
                   </Label>
                   <Input
                     id="trip-pitch-number"
                     className="mt-1.5"
                     maxLength={40}
-                    placeholder={t.trips.pitchNumberPlaceholder}
+                    placeholder={
+                      kindForm.hotelDetails
+                        ? t.trips.hotelRoomPlaceholder
+                        : t.trips.pitchNumberPlaceholder
+                    }
                     value={form.pitchNumber}
                     onChange={e =>
                       setForm(f => ({ ...f, pitchNumber: e.target.value }))

@@ -2512,6 +2512,11 @@ export const de = {
       "Geteilt mit ReiseKompass – deinem Kompass für Ferien, Camping und Ausflüge.",
   },
   trips: {
+    hotelSectionTitle: "Zimmer & Unterkunft",
+    hotelSectionHint:
+      "Gilt für diesen Aufenthalt – Zimmernummer, WLAN und Notizen (z. B. Frühstückszeiten).",
+    hotelRoomLabel: "Zimmer / Etage",
+    hotelRoomPlaceholder: "z. B. Zimmer 204, 2. Stock",
     templateSuggest: (name: string) =>
       `Vorlage «${name}» als Packliste übernehmen`,
     templateListCreated: "Packliste aus der Vorlage erstellt und verknüpft.",

@@ -2484,6 +2484,11 @@ export const it: Translation = {
       "Condiviso con ReiseKompass – la tua bussola per vacanze, campeggio e gite.",
   },
   trips: {
+    hotelSectionTitle: "Camera & alloggio",
+    hotelSectionHint:
+      "Vale per questo soggiorno – numero di camera, Wi-Fi e note (ad es. orari della colazione).",
+    hotelRoomLabel: "Camera / piano",
+    hotelRoomPlaceholder: "ad es. camera 204, 2º piano",
     templateSuggest: (name: string) =>
       `Usa il modello «${name}» come lista bagagli`,
     templateListCreated: "Lista creata dal modello e collegata.",

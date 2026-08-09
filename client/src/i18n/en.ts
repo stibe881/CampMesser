@@ -2430,6 +2430,11 @@ export const en: Translation = {
       "Shared with ReiseKompass – your compass for holidays, camping and day trips.",
   },
   trips: {
+    hotelSectionTitle: "Room & accommodation",
+    hotelSectionHint:
+      "For this stay – room number, Wi-Fi and notes (e.g. breakfast times).",
+    hotelRoomLabel: "Room / floor",
+    hotelRoomPlaceholder: "e.g. room 204, 2nd floor",
     templateSuggest: (name: string) =>
       `Use the “${name}” template as packing list`,
     templateListCreated: "Packing list created from the template and linked.",

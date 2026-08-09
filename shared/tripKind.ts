@@ -260,6 +260,13 @@ export interface TripKindFormPreset {
    */
   pitchDetails: boolean;
   /**
+   * Unterkunfts-Details mit Hotel-Beschriftung zeigen (#520): dieselben
+   * Felder wie die Stellplatz-Details (Nummer, WLAN, Notizen), aber als
+   * «Zimmer & Unterkunft» – gespeichert wird in denselben Spalten, damit
+   * kein zweiter Satz Felder entsteht.
+   */
+  hotelDetails: boolean;
+  /**
    * Ein-Tages-Reise: nur EIN Datum abfragen, Abreise = Anreise. Ein
    * Tagesausflug mit getrennter «Abreise» wäre eine Fangfrage.
    */
@@ -267,15 +274,55 @@ export interface TripKindFormPreset {
 }
 
 export const TRIP_KIND_FORMS: Record<TripKind, TripKindFormPreset> = {
-  camping: { spotSelect: true, pitchDetails: true, singleDay: false },
-  strand: { spotSelect: false, pitchDetails: false, singleDay: false },
-  hotel: { spotSelect: false, pitchDetails: false, singleDay: false },
-  staedte: { spotSelect: false, pitchDetails: false, singleDay: false },
+  camping: {
+    spotSelect: true,
+    pitchDetails: true,
+    hotelDetails: false,
+    singleDay: false,
+  },
+  strand: {
+    spotSelect: false,
+    pitchDetails: false,
+    hotelDetails: true,
+    singleDay: false,
+  },
+  hotel: {
+    spotSelect: false,
+    pitchDetails: false,
+    hotelDetails: true,
+    singleDay: false,
+  },
+  staedte: {
+    spotSelect: false,
+    pitchDetails: false,
+    hotelDetails: true,
+    singleDay: false,
+  },
   // Mehrtages-Touren übernachten oft auf Plätzen – Zeltplatz erlaubt
-  wandern: { spotSelect: true, pitchDetails: true, singleDay: false },
-  velo: { spotSelect: true, pitchDetails: true, singleDay: false },
-  wintersport: { spotSelect: false, pitchDetails: false, singleDay: false },
-  tagesausflug: { spotSelect: false, pitchDetails: false, singleDay: true },
+  wandern: {
+    spotSelect: true,
+    pitchDetails: true,
+    hotelDetails: false,
+    singleDay: false,
+  },
+  velo: {
+    spotSelect: true,
+    pitchDetails: true,
+    hotelDetails: false,
+    singleDay: false,
+  },
+  wintersport: {
+    spotSelect: false,
+    pitchDetails: false,
+    hotelDetails: true,
+    singleDay: false,
+  },
+  tagesausflug: {
+    spotSelect: false,
+    pitchDetails: false,
+    hotelDetails: false,
+    singleDay: true,
+  },
 };
 
 /** Formular-Preset einer (auch unbekannten) Art – nie undefined. */

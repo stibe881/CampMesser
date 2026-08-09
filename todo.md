@@ -6,7 +6,7 @@
 - [x] #517 Vorlagen-Vorschlag im Reise-Formular (Ein-Klick-Liste, ohne Camping/Tagesausflug)
 - [ ] #518 Gepäck-Limite pro Person
 - [ ] #519 Reisekasse in Fremdwährung (EZB-Kurse)
-- [ ] #520 Aufenthalts-Details je Reiseart (Hotel: Zimmer/Etage/Frühstück)
+- [x] #520 Aufenthalts-Details je Reiseart: Übernachtungs-Arten ohne Platz (Hotel, Städte, Strand, Wintersport) zeigen «Zimmer & Unterkunft» mit Hotel-Beschriftung – gleiche Spalten, keine Migration. Altbekannte Randnotiz: trips.add nimmt die Detail-Felder (wie schon immer) erst beim Bearbeiten an
 - [x] #521 SOS kennt das Reiseland – Katalog EXISTIERTE (#432), neu ist die Automatik bei laufender Auslandsreise
 - [x] #522 Steckdosen & Adapter pro Land (9 Länder)
 - [x] #523 Trinkgeld-Knigge pro Land (9 Länder)

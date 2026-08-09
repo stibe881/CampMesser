@@ -117,6 +117,12 @@ describe("Formular-Felder pro Reise-Art (#485)", () => {
         TRIP_KIND_FORMS[kind].spotSelect
       );
     });
+    // Zimmer-Details (#520): bei Übernachtungs-Arten ohne Platz
+    TRIP_KINDS.forEach(kind => {
+      expect(TRIP_KIND_FORMS[kind].hotelDetails, kind).toBe(
+        !TRIP_KIND_FORMS[kind].spotSelect && kind !== "tagesausflug"
+      );
+    });
   });
 
   it("fragt nur beim Tagesausflug ein einzelnes Datum ab", () => {
