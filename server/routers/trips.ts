@@ -108,7 +108,6 @@ export const tripsRouters = {
           ...trip,
           role: "owner" as const,
           ownerName: null as string | null,
-          spotName: null as string | null,
           shared: sharedOwnIds.has(trip.id),
         })),
         ...member.map(({ trip, ownerName, ownerEmail, spotName }) => ({
