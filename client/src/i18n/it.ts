@@ -1485,6 +1485,7 @@ export const it: Translation = {
   roadRules: {
     plugTitle: "Prese e adattatori",
     tippingTitle: "Mancia",
+    paymentTitle: "Contanti e carte",
     title: "Pedaggi, vignetta e regole",
     subtitle:
       "Scheda per il paese di destinazione: pedaggi, velocità con rimorchio, dotazione obbligatoria, emergenze.",

@@ -9,6 +9,7 @@ import {
   Moon,
   ShieldCheck,
   Wine,
+  CreditCard,
   HandCoins,
   Plug,
 } from "lucide-react";
@@ -219,6 +220,17 @@ export default function CountriesPage() {
       >
         <p className="text-sm leading-relaxed text-muted-foreground">
           {text(country.tipping)}
+        </p>
+      </RuleCard>
+
+      <RuleCard
+        icon={
+          <CreditCard className="h-4 w-4 text-primary" aria-hidden="true" />
+        }
+        title={t.roadRules.paymentTitle}
+      >
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {text(country.payment)}
         </p>
       </RuleCard>
 

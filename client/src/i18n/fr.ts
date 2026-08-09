@@ -1507,6 +1507,7 @@ export const fr: Translation = {
   roadRules: {
     plugTitle: "Prises & adaptateurs",
     tippingTitle: "Pourboire",
+    paymentTitle: "Espèces & cartes",
     title: "Péage, vignette & règles",
     subtitle:
       "Fiche pour le pays de destination : péage, vitesse avec remorque, équipement obligatoire, urgences.",

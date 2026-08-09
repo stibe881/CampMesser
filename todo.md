@@ -16,7 +16,7 @@
 - [x] #547 GRÖSSTENTEILS EXISTIERTE BEREITS: LV95-Anzeige im SOS und der Vorlese-Satz (#448) waren da. Neu hängt der Satz in der Schweiz die LV95-Koordinaten an («Schweizer Koordinaten: 2'600'123 / 1'199'456») – die Zahlen, mit denen die Einsatzzentrale arbeitet (formatLv95 + 3 Tests)
 - [ ] #548 Regenwetter-Karte in Heute (Museen/Hallenbäder)
 - [ ] #549 Menüplan-Autofüllen kennt das Wetter
-- [ ] #550 Bargeld & Kartenzahlung pro Land
+- [x] #550 Bargeld & Kartenzahlung pro Land (neues Feld payment für alle 9 Länder, eigene Karte auf der Länder-Seite – inkl. NL-Falle «nur Debitkarten» und DE-Bargeld-Hinweis)
 - [ ] #551 Drei neue Länder komplett (PT, GR, DK)
 - [ ] #552 Offline-Paket für geplante Routen
 - [ ] #553 Jahresziel Reisenächte in der Statistik

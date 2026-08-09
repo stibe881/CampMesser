@@ -1505,6 +1505,7 @@ export const de = {
   roadRules: {
     plugTitle: "Steckdosen & Adapter",
     tippingTitle: "Trinkgeld",
+    paymentTitle: "Bargeld & Karte",
     title: "Maut, Vignette & Regeln",
     subtitle:
       "Kurzinfo fürs Zielland: Maut, Tempo mit Anhänger, Pflichtausrüstung, Notruf.",

@@ -1455,6 +1455,7 @@ export const en: Translation = {
   roadRules: {
     plugTitle: "Sockets & adapters",
     tippingTitle: "Tipping",
+    paymentTitle: "Cash & cards",
     title: "Tolls, vignettes & rules",
     subtitle:
       "Briefing for your destination: tolls, speeds when towing, mandatory kit, emergency number.",

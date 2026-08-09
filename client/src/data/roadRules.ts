@@ -46,6 +46,8 @@ export interface CountryRules {
   plug: L4;
   /** Trinkgeld-Gepflogenheiten, aus Schweizer Sicht (#523). */
   tipping: L4;
+  /** Bargeld oder Karte? Was auf Reisen wirklich angenommen wird (#550). */
+  payment: L4;
   /** Wichtigste Notrufnummer. */
   emergency: string;
   emergencyNote: L4;
@@ -110,6 +112,12 @@ export const roadRules: CountryRules[] = [
       "Le service est compris. Arrondir est courant et suffit – le pourboire est une reconnaissance, pas une obligation.",
       "Il servizio è incluso. Arrotondare è consueto e basta – la mancia è un riconoscimento, non un obbligo.",
       "Service is included. Rounding up is common and enough – a tip is appreciation, not an obligation."
+    ),
+    payment: l4(
+      "Kartenzahlung fast überall, auch kontaktlos und mit Handy – Bargeld braucht es höchstens am Hofladen oder auf sehr kleinen Plätzen.",
+      "Paiement par carte presque partout, aussi sans contact et par téléphone – l'argent liquide ne sert guère qu'au magasin de ferme ou sur de très petits campings.",
+      "Pagamento con carta quasi ovunque, anche contactless e con il telefono – il contante serve al massimo al negozio della fattoria o in campeggi molto piccoli.",
+      "Card payment almost everywhere, including contactless and by phone – cash is only needed at farm shops or very small campsites."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -194,6 +202,12 @@ export const roadRules: CountryRules[] = [
       "Il 5–10 % è consueto; al momento di pagare indica l’importo totale («faccia 27»).",
       "5–10% is customary; when paying, state the total (“make it 27”)."
     ),
+    payment: l4(
+      "Deutlich mehr Bargeld als daheim: Kleinere Restaurants, Bäckereien, Kiosks und manche Campingplätze nehmen NUR Bargeld – immer etwas Euro dabeihaben. Girocard ist verbreiteter als Kreditkarte.",
+      "Nettement plus d'argent liquide que chez nous : petits restaurants, boulangeries, kiosques et certains campings n'acceptent QUE le liquide – garde toujours quelques euros. La Girocard est plus répandue que la carte de crédit.",
+      "Molto più contante che da noi: piccoli ristoranti, panetterie, chioschi e alcuni campeggi accettano SOLO contanti – tieni sempre qualche euro. La Girocard è più diffusa della carta di credito.",
+      "Noticeably more cash than at home: smaller restaurants, bakeries, kiosks and some campsites take CASH ONLY – always carry some euros. Girocard is more common than credit cards."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Feuerwehr und Rettung, 110 für die Polizei.",
@@ -277,6 +291,12 @@ export const roadRules: CountryRules[] = [
       "5–10 % consueto, da dire pagando. In rifugi e caffè basta arrotondare.",
       "5–10% customary, said when paying. In huts and cafés rounding up is fine."
     ),
+    payment: l4(
+      "Karten sind verbreitet, aber Bargeld bleibt beliebt – Berghütten, kleine Beizen und Parkautomaten wollen oft Münz. Ein Euro-Notgroschen gehört ins Handschuhfach.",
+      "Les cartes sont répandues, mais le liquide reste apprécié – refuges, petites auberges et horodateurs veulent souvent des pièces. Garde une réserve d'euros dans la boîte à gants.",
+      "Le carte sono diffuse, ma il contante resta amato – rifugi, piccole osterie e parchimetri vogliono spesso monete. Tieni una riserva di euro nel cassetto.",
+      "Cards are widespread, but cash stays popular – mountain huts, small inns and parking meters often want coins. Keep a euro reserve in the glovebox."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 europaweit, 133 Polizei, 144 Rettung, 140 Bergrettung.",
@@ -357,6 +377,12 @@ export const roadRules: CountryRules[] = [
       "Pas obligatoire : la note comporte souvent un « coperto » (couvert). Arrondir ou laisser quelques euros pour un bon service.",
       "Non obbligatoria: spesso in conto c’è il «coperto». Arrotonda o lascia qualche euro per un buon servizio.",
       "Not a must: the bill often includes a “coperto” (cover charge). Round up or leave a few euros for good service."
+    ),
+    payment: l4(
+      "Kartenzahlung ist seit ein paar Jahren Pflicht für Händler und klappt meist – an Strandbars, Märkten und auf kleinen Plätzen ist Bargeld trotzdem schneller. Autobahn-Maut geht mit Karte.",
+      "Le paiement par carte est obligatoire pour les commerçants depuis quelques années et fonctionne le plus souvent – aux bars de plage, marchés et petits campings, le liquide reste plus rapide. Le péage d'autoroute se paie par carte.",
+      "Il pagamento con carta è obbligatorio per gli esercenti da qualche anno e di solito funziona – nei bar in spiaggia, ai mercati e nei piccoli campeggi il contante resta più veloce. Il pedaggio autostradale si paga con carta.",
+      "Card payment has been mandatory for merchants for a few years and usually works – at beach bars, markets and small campsites cash is still quicker. Motorway tolls take cards."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -445,6 +471,12 @@ export const roadRules: CountryRules[] = [
       "«Service compris» – il servizio è incluso. Lasciare gli spiccioli è un gesto gentile, niente di più.",
       "“Service compris” – service is included. Leaving small change is a nice gesture, nothing more."
     ),
+    payment: l4(
+      "Karte geht fast überall, oft schon ab kleinen Beträgen – nur Wochenmärkte und manche Boulangerien wollen Bargeld. Mautstellen nehmen Karten (nicht immer ausländische Debitkarten – eine Kreditkarte mitführen).",
+      "La carte passe presque partout, souvent dès de petits montants – seuls les marchés et certaines boulangeries veulent du liquide. Les péages acceptent les cartes (pas toujours les cartes de débit étrangères – emporte une carte de crédit).",
+      "La carta va quasi ovunque, spesso già per piccoli importi – solo i mercati e alcune boulangerie vogliono contanti. I caselli accettano carte (non sempre le carte di debito estere – porta una carta di credito).",
+      "Cards work almost everywhere, often even for small amounts – only weekly markets and some bakeries want cash. Toll booths take cards (not always foreign debit cards – carry a credit card)."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 europaweit, 15 Rettungsdienst, 17 Polizei, 18 Feuerwehr.",
@@ -531,6 +563,12 @@ export const roadRules: CountryRules[] = [
       "Arrotondare è consueto; al ristorante fino al 10 % è gradito, ma non obbligatorio.",
       "Rounding up is common; in restaurants up to 10% is appreciated but not required."
     ),
+    payment: l4(
+      "Karten sind in Städten und auf grösseren Plätzen normal, auf Bauernhöfen, Hütten und an Parkuhren hilft Bargeld. Die Vignette kauft man ohnehin online.",
+      "Les cartes sont normales en ville et sur les grands campings ; dans les fermes, refuges et aux parcmètres, le liquide dépanne. La vignette s'achète de toute façon en ligne.",
+      "Le carte sono normali in città e nei campeggi grandi; in agriturismi, rifugi e ai parchimetri aiuta il contante. La vignetta si compra comunque online.",
+      "Cards are normal in cities and on bigger campsites; at farms, huts and parking meters cash helps. The vignette is bought online anyway."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Rettung und Feuerwehr, 113 für die Polizei.",
@@ -608,6 +646,12 @@ export const roadRules: CountryRules[] = [
       "Le service est compris ; arrondis ou laisse 5–10 % pour un bon service.",
       "Il servizio è incluso; arrotonda o lascia il 5–10 % per un buon servizio.",
       "Service is included; round up or leave 5–10% for good service."
+    ),
+    payment: l4(
+      "Vorsicht: Viele Supermärkte und Automaten nehmen NUR Debitkarten (Maestro/V-Pay-Nachfolger), oft KEINE Kreditkarten – die Schweizer Debitkarte funktioniert meist, Bargeld wird vielerorts gar nicht mehr angenommen.",
+      "Attention : beaucoup de supermarchés et d'automates n'acceptent QUE les cartes de débit, souvent PAS les cartes de crédit – la carte de débit suisse passe généralement, et le liquide n'est souvent plus accepté du tout.",
+      "Attenzione: molti supermercati e distributori accettano SOLO carte di debito, spesso NIENTE carte di credito – la carta di debito svizzera di solito funziona, e il contante in molti posti non è più accettato.",
+      "Careful: many supermarkets and machines take DEBIT cards only, often NO credit cards – Swiss debit cards usually work, and cash is no longer accepted in many places."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -687,6 +731,12 @@ export const roadRules: CountryRules[] = [
       "Au restaurant, 5–10 % sont d’usage, au café arrondir suffit – de préférence en espèces, la carte permet rarement le pourboire.",
       "Al ristorante il 5–10 % è consueto, al bar basta arrotondare – meglio in contanti, con la carta la mancia è raramente possibile.",
       "In restaurants 5–10% is customary, in cafés rounding up is fine – best in cash, cards rarely allow tips."
+    ),
+    payment: l4(
+      "Seit dem Euro-Beitritt einfach: Karten in Städten und auf Plätzen üblich, an Stränden, Märkten und für Parkgebühren ist Bargeld praktisch. Keine Kuna mehr wechseln!",
+      "Simple depuis le passage à l'euro : cartes courantes en ville et sur les campings ; aux plages, marchés et pour le parking, le liquide est pratique. Plus besoin de changer des kunas !",
+      "Semplice dall'ingresso nell'euro: carte comuni in città e nei campeggi; in spiaggia, ai mercati e per il parcheggio il contante è pratico. Niente più kune da cambiare!",
+      "Simple since the euro switch: cards are common in towns and on campsites; at beaches, markets and for parking, cash is handy. No more kuna to exchange!"
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -768,6 +818,12 @@ export const roadRules: CountryRules[] = [
       "Pas d’obligation : arrondir suffit, au restaurant 5–10 % sont généreux.",
       "Nessun obbligo: arrotondare basta, al ristorante il 5–10 % è generoso.",
       "No obligation: rounding up is fine; in restaurants 5–10% is generous."
+    ),
+    payment: l4(
+      "Karte geht fast überall, auch für den Kafi – nur Märkte, Chiringuitos und kleine Bars wollen manchmal Bargeld. Ausweis bereithalten: Bei Kartenzahlung wird gelegentlich ein Dokument verlangt.",
+      "La carte passe presque partout, même pour le café – seuls les marchés, chiringuitos et petits bars veulent parfois du liquide. Garde une pièce d'identité : elle est parfois demandée lors du paiement par carte.",
+      "La carta va quasi ovunque, anche per il caffè – solo mercati, chiringuiti e piccoli bar vogliono a volte contanti. Tieni un documento: con la carta a volte lo chiedono.",
+      "Cards work almost everywhere, even for coffee – only markets, chiringuitos and small bars sometimes want cash. Keep ID handy: card payments occasionally require a document."
     ),
     emergency: "112",
     emergencyNote: l4(
