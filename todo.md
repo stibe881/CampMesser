@@ -17,9 +17,9 @@
 - [x] #528 Waschsalons im Platz-Dossier (shop=laundry/dry_cleaning)
 - [x] #529 Apotheken im SOS (amenity=pharmacy, Öffnungszeiten als Detail)
 - [ ] #530 Sprachhilfe Hotel & Städtereise
-- [ ] #531 Statistik: Verteilung nach Reisearten
-- [ ] #532 Wander-Summen in der Statistik
-- [ ] #533 Reise-Ort als Wetter-Ort anbieten
+- [x] #531 EXISTIERTE BEREITS (tripKindRows/kindStatsTitle in der Statistik) – kein Code
+- [x] #532 EXISTIERTE BEREITS (trackYearRows in der Statistik) – kein Code
+- [x] #533 Reise-Ort als Wetter-Ort: Vorschlags-Chip für Freitext-Reisen mit Ortssuche-Koordinaten (Zeltplätze hatten schon eigene Chips)
 - [ ] #534 Tests in die Typprüfung (tsconfig)
 - [ ] #535 Changelog-Chunk entlasten (ältere Blöcke lazy)
 - Druck-Fix vorgezogen: PrintButton mit echtem _blank-Link für alle 9 Druckseiten (iOS-PWA verschluckte window.open)

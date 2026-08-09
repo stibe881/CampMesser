@@ -1004,6 +1004,7 @@ export const fr: Translation = {
     portalLink: "Aperçu officiel des cantons",
   },
   weather: {
+    tripPlaceSuggest: (name: string) => `Retenir le lieu du voyage « ${name} »`,
     mosquitoTitle: "Moustiques ce soir",
     mosquitoAria: "Indice moustiques pour la soirée",
     mosquitoBarAria: (score: number) => `Indice moustiques ${score} sur 100`,

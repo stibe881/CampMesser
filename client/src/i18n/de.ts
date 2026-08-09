@@ -1002,6 +1002,7 @@ export const de = {
     portalLink: "Offizielle Übersicht der Kantone",
   },
   weather: {
+    tripPlaceSuggest: (name: string) => `Reise-Ort «${name}» merken`,
     mosquitoTitle: "Stechmücken heute Abend",
     mosquitoAria: "Stechmücken-Index für den Abend",
     mosquitoBarAria: (score: number) => `Stechmücken-Index ${score} von 100`,

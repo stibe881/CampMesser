@@ -960,6 +960,7 @@ export const en: Translation = {
     portalLink: "Official overview of the cantons",
   },
   weather: {
+    tripPlaceSuggest: (name: string) => `Remember trip place “${name}”`,
     mosquitoTitle: "Mosquitoes tonight",
     mosquitoAria: "Mosquito index for the evening",
     mosquitoBarAria: (score: number) => `Mosquito index ${score} out of 100`,

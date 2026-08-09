@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
+import { useTodayIso } from "@/lib/useTodayIso";
 
 // Diagramme erst nach dem ersten Bild (#354): recharts ist 384 kB.
 const RainChart = lazy(() => import("@/components/charts/RainChart"));
@@ -184,6 +185,12 @@ export default function WeatherPage() {
   const { data: spots } = trpc.spots.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  // Reise-Ort als Wetter-Ort (#533): Freitext-Reisen mit Koordinaten aus
+  // der Ortssuche (Hotel in Rom) tauchen sonst nirgends als Chip auf –
+  // die Zeltplatz-Chips decken nur verknüpfte Plätze ab.
+  const { data: tripsForPlaces } = trpc.trips.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
   // Geräte-Sync: Wetter-Orte vom Konto übernehmen bzw. Änderungen hochladen
   const placesSync = useSyncedSetting<WeatherPlace[]>(
@@ -194,6 +201,30 @@ export default function WeatherPage() {
       storeWeatherPlaces(clean);
     }
   );
+
+  const todayIsoForTrips = useTodayIso();
+  const tripPlaceSuggestion = useMemo(() => {
+    const candidates = (tripsForPlaces ?? [])
+      .filter(
+        trip =>
+          trip.spotId === null &&
+          trip.latitude != null &&
+          trip.longitude != null &&
+          trip.endDate >= todayIsoForTrips
+      )
+      .sort((a, b) => a.startDate.localeCompare(b.startDate));
+    for (const trip of candidates) {
+      const suggestion: WeatherPlace = {
+        name: (trip.location || trip.title || "").slice(0, 80),
+        lat: trip.latitude as number,
+        lon: trip.longitude as number,
+      };
+      if (!suggestion.name) continue;
+      if (places.some(place => isSameWeatherPlace(place, suggestion))) continue;
+      return suggestion;
+    }
+    return null;
+  }, [tripsForPlaces, places, todayIsoForTrips]);
 
   const savePlaces = (next: WeatherPlace[]) => {
     setPlaces(next);
@@ -575,6 +606,19 @@ export default function WeatherPage() {
             </span>
           );
         })}
+        {tripPlaceSuggestion && (
+          <button
+            type="button"
+            onClick={() => {
+              const next = addWeatherPlace(places, tripPlaceSuggestion);
+              if (next) savePlaces(next);
+            }}
+            className="flex items-center gap-1.5 rounded-full border border-dashed border-primary/50 bg-card px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:border-primary"
+          >
+            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+            {t.weather.tripPlaceSuggest(tripPlaceSuggestion.name)}
+          </button>
+        )}
         <button
           type="button"
           onClick={() => setPlaceSearchOpen(open => !open)}

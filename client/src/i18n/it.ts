@@ -983,6 +983,8 @@ export const it: Translation = {
     portalLink: "Panoramica ufficiale dei cantoni",
   },
   weather: {
+    tripPlaceSuggest: (name: string) =>
+      `Ricorda il luogo del viaggio «${name}»`,
     mosquitoTitle: "Zanzare stasera",
     mosquitoAria: "Indice zanzare per la sera",
     mosquitoBarAria: (score: number) => `Indice zanzare ${score} su 100`,
