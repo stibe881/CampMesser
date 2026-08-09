@@ -417,6 +417,50 @@ async function startServer() {
     }
   });
 
+  // Druck-Anmeldung für die installierte App (Fix «Pass drucken», dritter
+  // Anlauf): Der Browser-Tab, den der Druck-Knopf öffnet, teilt die
+  // Cookies der PWA nicht – ohne Ticket landete man dort auf «Anmeldung
+  // erforderlich». Das Ticket (kurzlebig, signiert, siehe
+  // server/printTicket.ts) meldet den Tab mit einer normalen Sitzung an
+  // und leitet auf die gewünschte Druckseite weiter.
+  app.get("/api/print-login", async (req, res) => {
+    const { verifyPrintTicket, sanitizeNextPath } =
+      await import("../printTicket");
+    const { ENV } = await import("./env");
+    const next = sanitizeNextPath(req.query.next);
+    const ticket = typeof req.query.ticket === "string" ? req.query.ticket : "";
+    const userId = verifyPrintTicket(ticket, ENV.cookieSecret);
+    if (userId === null) {
+      // Abgelaufen oder verbogen: auf die Zielseite leiten – dort steht
+      // der ehrliche Anmelde-Hinweis, besser als eine nackte Fehlerseite.
+      res.redirect(302, next);
+      return;
+    }
+    try {
+      const { findUserById, createLocalSessionToken } =
+        await import("../localAuth");
+      const user = await findUserById(userId);
+      if (!user) {
+        res.redirect(302, next);
+        return;
+      }
+      const token = await createLocalSessionToken(
+        user,
+        req.headers["user-agent"]
+      );
+      const { getSessionCookieOptions } = await import("./cookies");
+      const { COOKIE_NAME, ONE_YEAR_MS } = await import("@shared/const");
+      res.cookie(COOKIE_NAME, token, {
+        ...getSessionCookieOptions(req),
+        maxAge: ONE_YEAR_MS,
+      });
+      res.redirect(302, next);
+    } catch (error) {
+      console.error("[Druck-Anmeldung] fehlgeschlagen:", error);
+      res.redirect(302, next);
+    }
+  });
+
   // Auslieferung: Fotos sind privat – nur wer Zugriff auf die Reise hat
   // (Besitzerin/Besitzer oder eingeladenes Mitglied) sieht die Datei.
   app.get("/api/trips/photos/:fileName", async (req, res) => {

@@ -36,6 +36,17 @@ export const authRouters = {
         verifyMailEnabled: mailConfigured(),
       };
     }),
+    /**
+     * Druck-Ticket für die installierte App: Der Druck-Knopf öffnet dort
+     * einen Browser-Tab OHNE die App-Cookies. Das Ticket hängt er an
+     * /api/print-login, das den Tab anmeldet und weiterleitet. Kurzlebig
+     * und signiert – Details in server/printTicket.ts.
+     */
+    printTicket: protectedProcedure.query(async ({ ctx }) => {
+      const { createPrintTicket } = await import("../printTicket");
+      const { ENV } = await import("../_core/env");
+      return { ticket: createPrintTicket(ctx.user.id, ENV.cookieSecret) };
+    }),
     logout: publicProcedure.mutation(async ({ ctx }) => {
       // Angemeldete Geräte (#423): die eigene Anmeldungs-Zeile mitputzen,
       // damit sie nicht als Geist in der Geräte-Liste stehen bleibt.
