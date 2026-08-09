@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { fmtLong } from "@/lib/dateFormat";
 import { useParams } from "wouter";
-import { ArrowLeft, Loader2, Printer } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PrintButton from "@/components/PrintButton";
 import BrandLogo from "@/components/BrandLogo";
 import LoginPrompt from "@/components/LoginPrompt";
 import { BADGES } from "@shared/badges";
@@ -99,19 +100,7 @@ export default function BadgeCertificatePage() {
           <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
           {t.common.back}
         </Button>
-        <Button
-          size="sm"
-          onClick={() => {
-            if (standalone) {
-              window.open(window.location.href, "_blank", "noopener");
-            } else {
-              window.print();
-            }
-          }}
-        >
-          <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          {tc.printButton}
-        </Button>
+        <PrintButton label={tc.printButton} />
       </div>
       {standalone && (
         <p className="mb-6 text-xs text-muted-foreground print:hidden">
