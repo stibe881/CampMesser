@@ -18,6 +18,9 @@ export const phraseGroups = [
   "restaurant",
   "city",
   "emergency",
+  // Panne & Werkstatt (#571): fürs Fahrzeug – der häufigste Ernstfall
+  // unterwegs, der KEIN medizinischer Notfall ist.
+  "breakdown",
   "wayfinding",
   "smalltalk",
 ] as const;
@@ -61,6 +64,12 @@ export const phraseGroupLabels: Record<PhraseGroup, L4> = {
     "Urgence & médecin",
     "Emergenza & medico",
     "Emergency & doctor"
+  ),
+  breakdown: l4(
+    "Panne & Werkstatt",
+    "Panne & garage",
+    "Guasto & officina",
+    "Breakdown & garage"
   ),
   wayfinding: l4(
     "Wetter & Wege",
@@ -886,6 +895,123 @@ export const phrases: Phrase[] = [
       "Où puis-je trouver des toilettes publiques ?",
       "Dove trovo un bagno pubblico?",
       "Where can I find a public toilet?"
+    ),
+  },
+  // ----------------------------------------------- Panne & Werkstatt (#571)
+  {
+    id: "breakdown-happened",
+    group: "breakdown",
+    text: l4(
+      "Wir haben eine Panne – können Sie uns helfen?",
+      "Nous sommes en panne – pouvez-vous nous aider ?",
+      "Abbiamo un guasto – può aiutarci?",
+      "We have broken down – can you help us?"
+    ),
+  },
+  {
+    id: "breakdown-engine",
+    group: "breakdown",
+    text: l4(
+      "Der Motor startet nicht mehr.",
+      "Le moteur ne démarre plus.",
+      "Il motore non parte più.",
+      "The engine will not start anymore."
+    ),
+  },
+  {
+    id: "breakdown-battery",
+    group: "breakdown",
+    text: l4(
+      "Ich glaube, die Batterie ist leer – haben Sie ein Starthilfekabel?",
+      "Je crois que la batterie est à plat – avez-vous des câbles de démarrage ?",
+      "Credo che la batteria sia scarica – avete i cavi per l'avviamento?",
+      "I think the battery is flat – do you have jump leads?"
+    ),
+  },
+  {
+    id: "breakdown-flat-tyre",
+    group: "breakdown",
+    text: l4(
+      "Wir haben einen platten Reifen.",
+      "Nous avons un pneu crevé.",
+      "Abbiamo una gomma a terra.",
+      "We have a flat tyre."
+    ),
+  },
+  {
+    id: "breakdown-warning-light",
+    group: "breakdown",
+    text: l4(
+      "Eine Warnleuchte am Armaturenbrett leuchtet.",
+      "Un voyant s'est allumé au tableau de bord.",
+      "Si è accesa una spia sul cruscotto.",
+      "A warning light on the dashboard has come on."
+    ),
+  },
+  {
+    id: "breakdown-tow",
+    group: "breakdown",
+    text: l4(
+      "Können Sie einen Abschleppdienst rufen?",
+      "Pouvez-vous appeler une dépanneuse ?",
+      "Può chiamare un carro attrezzi?",
+      "Can you call a tow truck?"
+    ),
+    note: l4(
+      "Die Nummer des eigenen Pannendienstes (TCS: +41 58 827 22 20 aus dem Ausland) bereithalten.",
+      "Garder sous la main le numéro de son assistance (TCS : +41 58 827 22 20 depuis l'étranger).",
+      "Tenere a portata di mano il numero del proprio soccorso stradale (TCS: +41 58 827 22 20 dall'estero).",
+      "Keep your breakdown service's number handy (TCS: +41 58 827 22 20 from abroad)."
+    ),
+  },
+  {
+    id: "breakdown-garage-nearby",
+    group: "breakdown",
+    text: l4(
+      "Gibt es hier in der Nähe eine Werkstatt?",
+      "Y a-t-il un garage près d'ici ?",
+      "C'è un'officina qui vicino?",
+      "Is there a garage near here?"
+    ),
+  },
+  {
+    id: "breakdown-look-today",
+    group: "breakdown",
+    text: l4(
+      "Können Sie sich das Fahrzeug heute noch ansehen?",
+      "Pouvez-vous regarder le véhicule aujourd'hui encore ?",
+      "Può dare un'occhiata al veicolo ancora oggi?",
+      "Can you take a look at the vehicle today?"
+    ),
+  },
+  {
+    id: "breakdown-cost-estimate",
+    group: "breakdown",
+    text: l4(
+      "Was wird die Reparatur ungefähr kosten?",
+      "Combien coûtera la réparation, environ ?",
+      "Quanto costerà più o meno la riparazione?",
+      "Roughly how much will the repair cost?"
+    ),
+  },
+  {
+    id: "breakdown-spare-part",
+    group: "breakdown",
+    text: l4(
+      "Wie lange dauert es, bis das Ersatzteil da ist?",
+      "Combien de temps faut-il pour recevoir la pièce de rechange ?",
+      "Quanto ci vuole perché arrivi il pezzo di ricambio?",
+      "How long will it take for the spare part to arrive?"
+    ),
+  },
+  {
+    id: "breakdown-drive-on",
+    group: "breakdown",
+    text: l4(
+      "Können wir damit noch weiterfahren, oder ist das gefährlich?",
+      "Peut-on encore rouler ainsi, ou est-ce dangereux ?",
+      "Possiamo ancora proseguire così, o è pericoloso?",
+      "Can we still drive on like this, or is it dangerous?"
     ),
   },
 ];
