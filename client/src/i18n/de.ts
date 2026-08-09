@@ -1512,6 +1512,7 @@ export const de = {
   },
   roadRules: {
     plugTitle: "Steckdosen & Adapter",
+    twoWheelsTitle: "Motorrad & Velo",
     tippingTitle: "Trinkgeld",
     paymentTitle: "Bargeld & Karte",
     title: "Maut, Vignette & Regeln",

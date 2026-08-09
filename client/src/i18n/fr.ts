@@ -1514,6 +1514,7 @@ export const fr: Translation = {
   },
   roadRules: {
     plugTitle: "Prises & adaptateurs",
+    twoWheelsTitle: "Moto & v\u00e9lo",
     tippingTitle: "Pourboire",
     paymentTitle: "Espèces & cartes",
     title: "Péage, vignette & règles",

@@ -3,6 +3,7 @@ import { useSearch } from "wouter";
 import {
   AlertTriangle,
   BadgeEuro,
+  Bike,
   Gauge,
   Leaf,
   LifeBuoy,
@@ -202,6 +203,17 @@ export default function CountriesPage() {
       >
         <p className="text-sm leading-relaxed text-muted-foreground">
           {text(country.zones)}
+        </p>
+      </RuleCard>
+
+      {/* Motorrad & Velo (#581): Maut, Helm- und Sonderregeln für
+          Zweiräder – passend zur Reiseart Motorradtour/Velotour. */}
+      <RuleCard
+        icon={<Bike className="h-4 w-4 text-primary" aria-hidden="true" />}
+        title={t.roadRules.twoWheelsTitle}
+      >
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {text(country.twoWheels)}
         </p>
       </RuleCard>
 

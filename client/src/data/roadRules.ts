@@ -48,6 +48,8 @@ export interface CountryRules {
   tipping: L4;
   /** Bargeld oder Karte? Was auf Reisen wirklich angenommen wird (#550). */
   payment: L4;
+  /** Motorrad & Velo (#581): Maut, Helm- und Sonderregeln für Zweiräder. */
+  twoWheels: L4;
   /** Wichtigste Notrufnummer. */
   emergency: string;
   emergencyNote: L4;
@@ -118,6 +120,12 @@ export const roadRules: CountryRules[] = [
       "Paiement par carte presque partout, aussi sans contact et par téléphone – l'argent liquide ne sert guère qu'au magasin de ferme ou sur de très petits campings.",
       "Pagamento con carta quasi ovunque, anche contactless e con il telefono – il contante serve al massimo al negozio della fattoria o in campeggi molto piccoli.",
       "Card payment almost everywhere, including contactless and by phone – cash is only needed at farm shops or very small campsites."
+    ),
+    twoWheels: l4(
+      "Das Motorrad braucht eine EIGENE Vignette; Velos fahren vignettefrei. Helmpflicht auf dem Motorrad; auf dem Velo nur für schnelle E-Bikes.",
+      "La moto a besoin de sa PROPRE vignette ; les vélos circulent sans. Casque obligatoire à moto ; à vélo seulement pour les e-bikes rapides.",
+      "La moto ha bisogno di una PROPRIA vignetta; le bici circolano senza. Casco obbligatorio in moto; in bici solo per le e-bike veloci.",
+      "Motorbikes need their OWN vignette; bicycles ride vignette-free. Helmet mandatory on the motorbike; on bicycles only for fast e-bikes."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -208,6 +216,12 @@ export const roadRules: CountryRules[] = [
       "Molto più contante che da noi: piccoli ristoranti, panetterie, chioschi e alcuni campeggi accettano SOLO contanti – tieni sempre qualche euro. La Girocard è più diffusa della carta di credito.",
       "Noticeably more cash than at home: smaller restaurants, bakeries, kiosks and some campsites take CASH ONLY – always carry some euros. Girocard is more common than credit cards."
     ),
+    twoWheels: l4(
+      "Keine Maut für Motorräder. Helmpflicht auf dem Motorrad; fürs Velo gibt es keine Helmpflicht.",
+      "Pas de péage pour les motos. Casque obligatoire à moto ; pas d'obligation à vélo.",
+      "Nessun pedaggio per le moto. Casco obbligatorio in moto; nessun obbligo in bici.",
+      "No toll for motorbikes. Helmet mandatory on the motorbike; no helmet requirement for bicycles."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Feuerwehr und Rettung, 110 für die Polizei.",
@@ -297,6 +311,12 @@ export const roadRules: CountryRules[] = [
       "Le carte sono diffuse, ma il contante resta amato – rifugi, piccole osterie e parchimetri vogliono spesso monete. Tieni una riserva di euro nel cassetto.",
       "Cards are widespread, but cash stays popular – mountain huts, small inns and parking meters often want coins. Keep a euro reserve in the glovebox."
     ),
+    twoWheels: l4(
+      "Das Motorrad braucht eine eigene, günstigere Vignette. Helmpflicht auf dem Motorrad; Velohelm-Pflicht für Kinder unter 12.",
+      "La moto a besoin de sa propre vignette, moins chère. Casque obligatoire à moto ; casque vélo obligatoire pour les moins de 12 ans.",
+      "La moto ha bisogno di una propria vignetta, più economica. Casco obbligatorio in moto; casco in bici obbligatorio sotto i 12 anni.",
+      "Motorbikes need their own, cheaper vignette. Helmet mandatory on the motorbike; bicycle helmet mandatory under 12."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 europaweit, 133 Polizei, 144 Rettung, 140 Bergrettung.",
@@ -383,6 +403,12 @@ export const roadRules: CountryRules[] = [
       "Le paiement par carte est obligatoire pour les commerçants depuis quelques années et fonctionne le plus souvent – aux bars de plage, marchés et petits campings, le liquide reste plus rapide. Le péage d'autoroute se paie par carte.",
       "Il pagamento con carta è obbligatorio per gli esercenti da qualche anno e di solito funziona – nei bar in spiaggia, ai mercati e nei piccoli campeggi il contante resta più veloce. Il pedaggio autostradale si paga con carta.",
       "Card payment has been mandatory for merchants for a few years and usually works – at beach bars, markets and small campsites cash is still quicker. Motorway tolls take cards."
+    ),
+    twoWheels: l4(
+      "Motorräder zahlen Autobahnmaut, auf die Autobahn dürfen sie erst ab 150 ccm. Helmpflicht auch für Roller und Töffli.",
+      "Les motos paient le péage et n'accèdent à l'autoroute qu'à partir de 150 cm³. Casque obligatoire aussi pour les scooters.",
+      "Le moto pagano il pedaggio e possono entrare in autostrada solo da 150 cc. Casco obbligatorio anche per gli scooter.",
+      "Motorbikes pay the motorway toll and may only enter from 150 cc. Helmets are mandatory for scooters and mopeds too."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -477,6 +503,12 @@ export const roadRules: CountryRules[] = [
       "La carta va quasi ovunque, spesso già per piccoli importi – solo i mercati e alcune boulangerie vogliono contanti. I caselli accettano carte (non sempre le carte di debito estere – porta una carta di credito).",
       "Cards work almost everywhere, often even for small amounts – only weekly markets and some bakeries want cash. Toll booths take cards (not always foreign debit cards – carry a credit card)."
     ),
+    twoWheels: l4(
+      "Motorräder zahlen ermässigte Maut (Classe 5). Auf dem Motorrad sind Helm UND zertifizierte Handschuhe Pflicht; Velohelm für Kinder unter 12.",
+      "Les motos paient un péage réduit (classe 5). À moto, casque ET gants certifiés obligatoires ; casque vélo pour les moins de 12 ans.",
+      "Le moto pagano un pedaggio ridotto (classe 5). In moto casco E guanti certificati obbligatori; casco in bici sotto i 12 anni.",
+      "Motorbikes pay a reduced toll (class 5). On the motorbike helmet AND certified gloves are mandatory; bicycle helmet under 12."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 europaweit, 15 Rettungsdienst, 17 Polizei, 18 Feuerwehr.",
@@ -569,6 +601,12 @@ export const roadRules: CountryRules[] = [
       "Le carte sono normali in città e nei campeggi grandi; in agriturismi, rifugi e ai parchimetri aiuta il contante. La vignetta si compra comunque online.",
       "Cards are normal in cities and on bigger campsites; at farms, huts and parking meters cash helps. The vignette is bought online anyway."
     ),
+    twoWheels: l4(
+      "Fürs Motorrad gibt es die halbe Vignette. Helmpflicht auf dem Motorrad; Velohelm-Pflicht bis 18.",
+      "La moto paie une demi-vignette. Casque obligatoire à moto ; casque vélo obligatoire jusqu'à 18 ans.",
+      "Per la moto c'è la mezza vignetta. Casco obbligatorio in moto; casco in bici obbligatorio fino a 18 anni.",
+      "Motorbikes get the half-price vignette. Helmet mandatory on the motorbike; bicycle helmet mandatory up to 18."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Rettung und Feuerwehr, 113 für die Polizei.",
@@ -652,6 +690,12 @@ export const roadRules: CountryRules[] = [
       "Attention : beaucoup de supermarchés et d'automates n'acceptent QUE les cartes de débit, souvent PAS les cartes de crédit – la carte de débit suisse passe généralement, et le liquide n'est souvent plus accepté du tout.",
       "Attenzione: molti supermercati e distributori accettano SOLO carte di debito, spesso NIENTE carte di credito – la carta di debito svizzera di solito funziona, e il contante in molti posti non è più accettato.",
       "Careful: many supermarkets and machines take DEBIT cards only, often NO credit cards – Swiss debit cards usually work, and cash is no longer accepted in many places."
+    ),
+    twoWheels: l4(
+      "Keine Maut. Das Veloland schlechthin: eigene Wege und Ampeln, keine Velohelm-Pflicht; auf dem Motorrad gilt Helmpflicht.",
+      "Pas de péage. LE pays du vélo : pistes et feux dédiés, pas d'obligation de casque à vélo ; à moto, casque obligatoire.",
+      "Nessun pedaggio. IL paese della bici: piste e semafori dedicati, nessun obbligo di casco in bici; in moto casco obbligatorio.",
+      "No toll. THE cycling country: dedicated paths and lights, no bicycle helmet requirement; on the motorbike a helmet is mandatory."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -737,6 +781,12 @@ export const roadRules: CountryRules[] = [
       "Simple depuis le passage à l'euro : cartes courantes en ville et sur les campings ; aux plages, marchés et pour le parking, le liquide est pratique. Plus besoin de changer des kunas !",
       "Semplice dall'ingresso nell'euro: carte comuni in città e nei campeggi; in spiaggia, ai mercati e per il parcheggio il contante è pratico. Niente più kune da cambiare!",
       "Simple since the euro switch: cards are common in towns and on campsites; at beaches, markets and for parking, cash is handy. No more kuna to exchange!"
+    ),
+    twoWheels: l4(
+      "Motorräder zahlen Maut. Helmpflicht; Motorräder fahren auch tagsüber mit Licht.",
+      "Les motos paient le péage. Casque obligatoire ; les motos roulent feux allumés même de jour.",
+      "Le moto pagano il pedaggio. Casco obbligatorio; le moto viaggiano con le luci accese anche di giorno.",
+      "Motorbikes pay the toll. Helmet mandatory; motorbikes ride with lights on during the day too."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -824,6 +874,12 @@ export const roadRules: CountryRules[] = [
       "La carte passe presque partout, même pour le café – seuls les marchés, chiringuitos et petits bars veulent parfois du liquide. Garde une pièce d'identité : elle est parfois demandée lors du paiement par carte.",
       "La carta va quasi ovunque, anche per il caffè – solo mercati, chiringuiti e piccoli bar vogliono a volte contanti. Tieni un documento: con la carta a volte lo chiedono.",
       "Cards work almost everywhere, even for coffee – only markets, chiringuitos and small bars sometimes want cash. Keep ID handy: card payments occasionally require a document."
+    ),
+    twoWheels: l4(
+      "Helmpflicht auf dem Motorrad. BESONDERS: Ausserorts gilt die Helmpflicht auch auf dem Velo (innerorts bis 16).",
+      "Casque obligatoire à moto. PARTICULARITÉ : hors agglomération, le casque est aussi obligatoire à vélo (en ville jusqu'à 16 ans).",
+      "Casco obbligatorio in moto. PARTICOLARITÀ: fuori dai centri abitati il casco è obbligatorio anche in bici (in città fino a 16 anni).",
+      "Helmet mandatory on the motorbike. NOTE: outside built-up areas helmets are mandatory on bicycles too (in town up to 16)."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -914,6 +970,12 @@ export const roadRules: CountryRules[] = [
       "I bancomat Multibanco e la carta vanno ovunque; piccoli caffè, mercati e bar in spiaggia vogliono a volte contanti. Per il pedaggio elettronico serve per forza la registrazione con carta.",
       "Multibanco machines and card payment are everywhere; small cafés, markets and beach bars sometimes want cash. The electronic toll strictly requires card registration."
     ),
+    twoWheels: l4(
+      "Auch Motorräder zahlen die elektronische Maut – die Portal-Falle gilt genauso. Helmpflicht.",
+      "Les motos paient aussi le péage électronique – le piège des portiques vaut pareil. Casque obligatoire.",
+      "Anche le moto pagano il pedaggio elettronico – la trappola dei portali vale ugualmente. Casco obbligatorio.",
+      "Motorbikes also pay the electronic toll – the gantry trap applies just the same. Helmet mandatory."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Polizei, Feuerwehr und Rettung.",
@@ -1000,6 +1062,12 @@ export const roadRules: CountryRules[] = [
       "Les commerçants doivent accepter les cartes, et en ville ça marche – sur les îles, aux kiosques et dans les tavernes familiales, le liquide reste souvent plus rapide. Le péage prend les cartes.",
       "Gli esercenti devono accettare le carte, e in città funziona – sulle isole, ai chioschi e nelle taverne a conduzione familiare il contante resta spesso più veloce. Il pedaggio accetta carte.",
       "Merchants must take cards, and in cities they do – on islands, at kiosks and in family tavernas cash is still often quicker. Tolls take cards."
+    ),
+    twoWheels: l4(
+      "Helmpflicht auf dem Motorrad – auch wenn Einheimische sie oft ignorieren, wird gebüsst. Motorräder zahlen ermässigte Maut.",
+      "Casque obligatoire à moto – même si les locaux l'ignorent souvent, l'amende tombe. Les motos paient un péage réduit.",
+      "Casco obbligatorio in moto – anche se i locali spesso lo ignorano, la multa arriva. Le moto pagano un pedaggio ridotto.",
+      "Helmet mandatory on the motorbike – locals may ignore it, the fine still comes. Motorbikes pay a reduced toll."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -1090,6 +1158,12 @@ export const roadRules: CountryRules[] = [
       "Quasi senza contanti: carta e telefono vanno ovunque, alcuni distributori e negozi non accettano più contante. Una carta di credito più una di debito coprono tutto – cambiare corone conviene poco.",
       "Almost cashless: card and phone pay everywhere, some machines and shops no longer take cash at all. A credit card plus a debit card cover everything – exchanging kroner is hardly worth it."
     ),
+    twoWheels: l4(
+      "Die grossen Brücken kosten auch fürs Motorrad. Keine Velohelm-Pflicht, aber Handzeichen beim Abbiegen sind fürs Velo vorgeschrieben.",
+      "Les grands ponts sont payants aussi pour la moto. Pas de casque vélo obligatoire, mais les signes de la main sont prescrits à vélo.",
+      "I grandi ponti si pagano anche in moto. Nessun obbligo di casco in bici, ma i segnali con la mano sono prescritti.",
+      "The big bridges charge motorbikes too. No bicycle helmet requirement, but hand signals when turning are mandatory on bikes."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Polizei, Feuerwehr und Rettung; 114 für die Polizei ohne Notfall.",
@@ -1179,6 +1253,12 @@ export const roadRules: CountryRules[] = [
       "Presque sans espèces : carte et téléphone passent partout, beaucoup de magasins et cafés n'acceptent plus du tout le liquide – changer des couronnes ne vaut guère la peine. Les locaux paient avec Swish, qui exige toutefois un compte suédois.",
       "Quasi senza contanti: carta e telefono vanno ovunque, molti negozi e caffè non accettano più contante – cambiare corone conviene poco. I locali pagano con Swish, che però richiede un conto svedese.",
       "Almost cashless: card and phone pay everywhere, many shops and cafés no longer take cash at all – exchanging kronor is hardly worth it. Locals pay with Swish, which requires a Swedish account though."
+    ),
+    twoWheels: l4(
+      "Motorräder sind von der City-Maut befreit. Velohelm-Pflicht für Kinder bis 15.",
+      "Les motos sont exemptées du péage urbain. Casque vélo obligatoire jusqu'à 15 ans.",
+      "Le moto sono esenti dal pedaggio urbano. Casco in bici obbligatorio fino a 15 anni.",
+      "Motorbikes are exempt from the congestion tax. Bicycle helmet mandatory up to 15."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -1273,6 +1353,12 @@ export const roadRules: CountryRules[] = [
       "Carta e telefono pagano praticamente ovunque, anche su traghetti e campeggi – la Norvegia è quasi senza contanti. Un po' di contante serve al massimo nelle piazzole natura non presidiate con cassetta.",
       "Card and phone pay practically everywhere, on ferries and campsites too – Norway is almost cashless. A little cash is only needed at unstaffed nature sites with an honesty box."
     ),
+    twoWheels: l4(
+      "Die meisten Mautstationen sind für Motorräder GRATIS. Helmpflicht; die Winterreifen-Regeln gelten auch fürs Motorrad.",
+      "La plupart des stations de péage sont GRATUITES pour les motos. Casque obligatoire ; les règles de pneus d'hiver valent aussi à moto.",
+      "La maggior parte delle stazioni di pedaggio è GRATUITA per le moto. Casco obbligatorio; le regole sugli pneumatici invernali valgono anche in moto.",
+      "Most toll stations are FREE for motorbikes. Helmet mandatory; the winter tyre rules apply to motorbikes too."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 Polizei, 110 Feuerwehr, 113 Sanität – alle drei führen zum Notfall; 112 funktioniert immer.",
@@ -1363,6 +1449,12 @@ export const roadRules: CountryRules[] = [
       "Carte presque partout – les locaux paient avec Bancontact, les cartes de débit et de crédit étrangères passent dans les magasins et stations-service. Un peu de liquide pour le marché, la friterie et les petits cafés ne fait pas de mal.",
       "Carta quasi ovunque – i locali pagano con Bancontact, le carte di debito e credito estere funzionano in negozi e distributori. Un po' di contante per mercato, friggitoria e piccoli caffè non guasta.",
       "Card almost everywhere – locals pay with Bancontact, foreign debit and credit cards work in shops and petrol stations. A little cash for the market, the frituur and small cafés does no harm."
+    ),
+    twoWheels: l4(
+      "Keine Maut; Motorräder sind von den LEZ-Regeln derzeit ausgenommen. Keine allgemeine Velohelm-Pflicht.",
+      "Pas de péage ; les motos sont pour l'instant exemptées des règles LEZ. Pas d'obligation générale de casque à vélo.",
+      "Nessun pedaggio; le moto sono per ora esenti dalle regole LEZ. Nessun obbligo generale di casco in bici.",
+      "No toll; motorbikes are currently exempt from the LEZ rules. No general bicycle helmet requirement."
     ),
     emergency: "112",
     emergencyNote: l4(

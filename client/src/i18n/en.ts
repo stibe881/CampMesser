@@ -1462,6 +1462,7 @@ export const en: Translation = {
   },
   roadRules: {
     plugTitle: "Sockets & adapters",
+    twoWheelsTitle: "Motorbike & bike",
     tippingTitle: "Tipping",
     paymentTitle: "Cash & cards",
     title: "Tolls, vignettes & rules",
