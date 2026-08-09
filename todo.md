@@ -1,5 +1,28 @@
 # CampMesser – Projekt TODO
 
+## Zwanzig Vorschläge (09.08.2026, Runde 54)
+
+- [ ] #536 Etappen-Reisen (Zwischenhalte)
+- [ ] #537 Merkorte (Wunschziele) auf der Karte
+- [ ] #538 Wetterfenster-Finder (bestes Wochenende)
+- [ ] #539 Feiertage des Reiselands
+- [ ] #540 Beleg-Foto pro Reisekassen-Ausgabe
+- [ ] #541 Ausgabe aus der Heute-Ansicht erfassen
+- [ ] #542 Packfortschritt pro Person + Filter «nur meine Sachen»
+- [x] #543 Pack-/Einkaufsliste als Text kopieren (ClipboardCopy-Knopf, gruppiert wie die Anzeige, Häkchen als ✓)
+- [ ] #544 Abhakbare Checkboxen in Notizen
+- [ ] #545 Eigene Sätze in der Sprachhilfe
+- [ ] #546 Schriftgrösse-Einstellung
+- [ ] #547 Notfall-Koordinaten (LV95) im SOS
+- [ ] #548 Regenwetter-Karte in Heute (Museen/Hallenbäder)
+- [ ] #549 Menüplan-Autofüllen kennt das Wetter
+- [ ] #550 Bargeld & Kartenzahlung pro Land
+- [ ] #551 Drei neue Länder komplett (PT, GR, DK)
+- [ ] #552 Offline-Paket für geplante Routen
+- [ ] #553 Jahresziel Reisenächte in der Statistik
+- [ ] #554 Technik: TripsPage aufteilen
+- [ ] #555 Technik: Druckseiten im Playwright-Smoke-Test
+
 ## Zwanzig Vorschläge (09.08.2026, Runde 53)
 
 - [x] #516 Packvorlagen für Reisearten – NUR Hotelferien + Velotour neu; Städtereise/Strand/Wintersport EXISTIERTEN BEREITS

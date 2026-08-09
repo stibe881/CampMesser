@@ -702,6 +702,9 @@ export const de = {
     personBudgetHint:
       "Zum Beispiel 23 kg Fluggepäck – die Traglast-Zeile färbt Personen über der Limite ein. Leer lassen für keine Limite.",
     personBudgetInfo: (limit: string) => `Limite: ${limit} pro Person`,
+    copyTextButton: "Als Text kopieren",
+    copyTextDone: "Liste kopiert – zum Einfügen bereit",
+    copyTextFailed: "Kopieren fehlgeschlagen",
     uncheckAllButton: "Alle Haken lösen",
     uncheckAllConfirm: (n: number) =>
       n === 1
@@ -5883,6 +5886,9 @@ export const de = {
     printButton: "Drucken",
     shareButton: "Teilen",
     shareAria: "Einkaufsliste per Link teilen",
+    copyTextButton: "Als Text kopieren",
+    copyTextDone: "Liste kopiert – zum Einfügen bereit",
+    copyTextFailed: "Kopieren fehlgeschlagen",
     shareTitle: "Einkaufsliste teilen",
     shareDescription:
       "Alle mit diesem Link sehen deine Einkaufsliste und können ohne Anmeldung mit abhaken.",

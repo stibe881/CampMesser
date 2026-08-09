@@ -695,6 +695,9 @@ export const fr: Translation = {
     personBudgetHint:
       "Par exemple 23 kg de bagages en avion – la ligne de charge met en évidence les personnes au-dessus de la limite. Laisser vide pour aucune limite.",
     personBudgetInfo: (limit: string) => `Limite : ${limit} par personne`,
+    copyTextButton: "Copier comme texte",
+    copyTextDone: "Liste copiée – prête à coller",
+    copyTextFailed: "Échec de la copie",
     uncheckAllButton: "Décocher tout",
     uncheckAllConfirm: (n: number) =>
       n === 1
@@ -5878,6 +5881,9 @@ export const fr: Translation = {
     printButton: "Imprimer",
     shareButton: "Partager",
     shareAria: "Partager la liste de courses par lien",
+    copyTextButton: "Copier comme texte",
+    copyTextDone: "Liste copiée – prête à coller",
+    copyTextFailed: "Échec de la copie",
     shareTitle: "Partager la liste de courses",
     shareDescription:
       "Toutes les personnes disposant de ce lien voient ta liste de courses et peuvent cocher sans se connecter.",

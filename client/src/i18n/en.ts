@@ -669,6 +669,9 @@ export const en: Translation = {
     personBudgetHint:
       "For example 23 kg of flight luggage – the load line highlights people over the limit. Leave empty for no limit.",
     personBudgetInfo: (limit: string) => `Limit: ${limit} per person`,
+    copyTextButton: "Copy as text",
+    copyTextDone: "List copied – ready to paste",
+    copyTextFailed: "Copying failed",
     uncheckAllButton: "Untick all",
     uncheckAllConfirm: (n: number) =>
       n === 1
@@ -5722,6 +5725,9 @@ export const en: Translation = {
     printButton: "Print",
     shareButton: "Share",
     shareAria: "Share the shopping list via link",
+    copyTextButton: "Copy as text",
+    copyTextDone: "List copied – ready to paste",
+    copyTextFailed: "Copying failed",
     shareTitle: "Share shopping list",
     shareDescription:
       "Anyone with this link can see your shopping list and tick items off without signing in.",

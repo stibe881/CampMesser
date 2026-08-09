@@ -680,6 +680,9 @@ export const it: Translation = {
     personBudgetHint:
       "Per esempio 23 kg di bagaglio aereo – la riga del carico evidenzia le persone oltre il limite. Lascia vuoto per nessun limite.",
     personBudgetInfo: (limit: string) => `Limite: ${limit} a persona`,
+    copyTextButton: "Copia come testo",
+    copyTextDone: "Lista copiata – pronta da incollare",
+    copyTextFailed: "Copia non riuscita",
     uncheckAllButton: "Togli tutte le spunte",
     uncheckAllConfirm: (n: number) =>
       n === 1
@@ -5838,6 +5841,9 @@ export const it: Translation = {
     printButton: "Stampa",
     shareButton: "Condividi",
     shareAria: "Condividi la lista della spesa tramite link",
+    copyTextButton: "Copia come testo",
+    copyTextDone: "Lista copiata – pronta da incollare",
+    copyTextFailed: "Copia non riuscita",
     shareTitle: "Condividi la lista della spesa",
     shareDescription:
       "Chiunque abbia questo link vede la tua lista della spesa e può spuntare le voci senza accedere.",

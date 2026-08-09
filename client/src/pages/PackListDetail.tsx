@@ -5,6 +5,7 @@ import type { ShareExpiryDays } from "@shared/sharing";
 import { Link, useParams } from "wouter";
 import {
   BookmarkPlus,
+  ClipboardCopy,
   GripVertical,
   Link2,
   Loader2,
@@ -800,6 +801,52 @@ export default function PackListDetailPage() {
   const checkedCount = items.filter(i => i.checked).length;
   const progress = items.length > 0 ? (checkedCount / items.length) * 100 : 0;
 
+  /**
+   * Liste als schlichten Text kopieren (#543) – für WhatsApp an Leute ohne
+   * App. Gruppiert wie die Anzeige: Person (nur wenn es mehrere gibt),
+   * darunter Kategorien; Gepacktes trägt ein Häkchen.
+   */
+  const copyAsText = async () => {
+    const lines: string[] = [query.data?.list?.name ?? ""];
+    const personKeys: (string | null)[] = [null];
+    for (const item of items) {
+      const name = item.assignee?.trim() || null;
+      if (name && !personKeys.includes(name)) personKeys.push(name);
+    }
+    for (const person of personKeys) {
+      const sectionItems = items.filter(
+        i => (i.assignee?.trim() || null) === person
+      );
+      if (sectionItems.length === 0) continue;
+      if (personKeys.length > 1) {
+        lines.push(
+          "",
+          (person ?? t.packListDetail.sectionGeneral).toUpperCase()
+        );
+      }
+      const cats: [string, typeof sectionItems][] = [];
+      for (const item of sectionItems) {
+        const key = item.category || t.packListDetail.generalCategory;
+        const group = cats.find(([c]) => c === key);
+        if (group) group[1].push(item);
+        else cats.push([key, [item]]);
+      }
+      for (const [category, catItems] of cats) {
+        lines.push(`${category}:`);
+        for (const item of catItems) {
+          const qty = item.quantity > 1 ? ` ×${item.quantity}` : "";
+          lines.push(`${item.checked ? "✓" : "•"} ${item.name}${qty}`);
+        }
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      toast.success(t.packListDetail.copyTextDone);
+    } catch {
+      toast.error(t.packListDetail.copyTextFailed);
+    }
+  };
+
   return (
     <div className="container max-w-3xl py-6">
       <PageHeader
@@ -980,6 +1027,15 @@ export default function PackListDetailPage() {
               <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
               {t.packListDetail.printButton}
             </Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={items.length === 0}
+            onClick={() => void copyAsText()}
+          >
+            <ClipboardCopy className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.packListDetail.copyTextButton}
           </Button>
           <Button
             variant="outline"

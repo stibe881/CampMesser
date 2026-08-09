@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowRightLeft,
+  ClipboardCopy,
   GripVertical,
   Link2,
   ListChecks,
@@ -449,6 +450,29 @@ export default function ShoppingPage() {
   const groupLabel = (key: string | null) =>
     shoppingCategoryLabel(key, lang) ?? t.shopping.noCategory;
 
+  /**
+   * Offene Einträge als schlichten Text kopieren (#543) – für WhatsApp an
+   * Leute ohne App. Gruppiert wie die Anzeige, mit Menge und Notiz.
+   */
+  const copyAsText = async () => {
+    const listName = target.lists.find(l => l.id === activeListId)?.name ?? "";
+    const lines: string[] = listName ? [listName] : [];
+    for (const group of grouped) {
+      lines.push(`${groupLabel(group.key)}:`);
+      for (const item of group.items) {
+        const qty = item.quantity ? ` (${item.quantity})` : "";
+        const note = item.note ? ` – ${item.note}` : "";
+        lines.push(`• ${item.name}${qty}${note}`);
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      toast.success(t.shopping.copyTextDone);
+    } catch {
+      toast.error(t.shopping.copyTextFailed);
+    }
+  };
+
   /** Eintrag innerhalb seiner Gruppe verschieben und Gesamt-Reihenfolge speichern. */
   const moveItem = (group: string, fromIdStr: string, toIdStr: string) => {
     const fromId = Number(fromIdStr);
@@ -719,6 +743,17 @@ export default function ShoppingPage() {
                 >
                   <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
                   {t.shopping.shareButton}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void copyAsText()}
+                >
+                  <ClipboardCopy
+                    className="mr-1.5 h-4 w-4"
+                    aria-hidden="true"
+                  />
+                  {t.shopping.copyTextButton}
                 </Button>
               </span>
             </h2>
