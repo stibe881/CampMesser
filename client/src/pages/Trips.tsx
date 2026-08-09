@@ -278,6 +278,12 @@ export default function TripsPage() {
     if (new URLSearchParams(search).get("neu") === "1") openNewTripDialog();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, isAuthenticated]);
+  /**
+   * Sprung zum Rückblick (?rueckblick=1, Nutzerwunsch 09.08.2026): Die
+   * Heimkehr-Karte verlinkt direkt hierher – «Mehr»-Schalter und
+   * Rückblick öffnen sich von selbst, statt dass man beides suchen muss.
+   */
+  const openReview = new URLSearchParams(search).get("rueckblick") === "1";
 
   const removeMutation = trpc.trips.remove.useMutation({
     onSuccess: () => utils.trips.list.invalidate(),
@@ -1359,6 +1365,7 @@ export default function TripsPage() {
                             name={label(trip)}
                             today={today}
                             phase="past"
+                            openReview={openReview}
                           />
                         )}
                       </div>

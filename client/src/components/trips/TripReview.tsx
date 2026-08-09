@@ -16,7 +16,7 @@
  * ein Hinweis. Entschieden wird nie automatisch – die App streicht
  * nichts und fügt nichts ein.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Plus, RotateCcw, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -37,16 +37,36 @@ export default function TripReview({
   tripId,
   packListId,
   tripName,
+  initialOpen = false,
 }: {
   tripId: number;
   /** Verknüpfte Packliste; ohne sie gibt es nichts abzuhaken. */
   packListId: number | null;
   tripName: string;
+  /**
+   * Offen starten und in Sicht scrollen (?rueckblick=1): Der Link der
+   * Heimkehr-Karte soll DIREKT hier landen, nicht auf der Reise-Karte,
+   * unter der man den Rückblick erst suchen muss.
+   */
+  initialOpen?: boolean;
 }) {
   const t = useT();
   const tr = t.tripReview;
   const utils = trpc.useUtils();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialOpen);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!initialOpen) return;
+    // Nach dem ersten Rendern scrollen – der Abschnitt liegt in einer
+    // LazySection, direkt beim Mount stimmt die Position noch nicht.
+    const timer = window.setTimeout(() => {
+      containerRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 150);
+    return () => window.clearTimeout(timer);
+  }, [initialOpen]);
   const [unused, setUnused] = useState<Set<string>>(new Set());
   const [missing, setMissing] = useState<
     { name: string; category: string | null }[]
@@ -132,7 +152,10 @@ export default function TripReview({
   };
 
   return (
-    <div className="mt-2 rounded-xl border border-border p-3">
+    <div
+      ref={containerRef}
+      className="mt-2 scroll-mt-16 rounded-xl border border-border p-3"
+    >
       <button
         type="button"
         className="flex w-full items-center justify-between gap-2 text-left"

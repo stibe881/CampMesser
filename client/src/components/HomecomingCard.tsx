@@ -207,8 +207,10 @@ export default function HomecomingCard() {
             )}
           </li>
           <li>
+            {/* Direkt ZUM Rückblick springen (?rueckblick=1): «Mehr»-
+                Schalter und Rückblick öffnen sich dort von selbst. */}
             <Link
-              href={`/tagebuch/${candidate.id}`}
+              href={`/tagebuch/${candidate.id}?rueckblick=1`}
               className={cn(
                 stepClass(reviewed.has(candidate.id)),
                 "hover:underline"

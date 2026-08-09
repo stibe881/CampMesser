@@ -27,13 +27,16 @@ import { cn } from "@/lib/utils";
 export default function TripMoreSections({
   count,
   children,
+  initialOpen = false,
 }: {
   /** Wie viele Abschnitte dahinterliegen – steht als Zahl am Schalter. */
   count: number;
   children: ReactNode;
+  /** Offen starten – für Sprungadressen wie ?rueckblick=1. */
+  initialOpen?: boolean;
 }) {
   const t = useT();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialOpen);
   if (count <= 0) return null;
   return (
     <div className="mt-2">
