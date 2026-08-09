@@ -328,3 +328,27 @@
     text-align: left;
   }
 }
+
+/*
+ * Bewegung reduzieren (#625): Wer im System «Bewegung reduzieren»
+ * eingeschaltet hat, bekommt keine Dreh-, Gleit- und Zoom-Animationen –
+ * Übergänge und Animationen laufen praktisch sofort ab, Lade-Spinner
+ * (animate-spin) drehen langsam statt schnell weiter, damit «lädt noch»
+ * erkennbar bleibt. Sanftes Scrollen wird zu Springen.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Lade-Anzeigen bleiben als solche erkennbar – nur deutlich ruhiger. */
+  .animate-spin {
+    animation-duration: 3s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

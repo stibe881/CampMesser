@@ -148,12 +148,16 @@ export default function ProfilePage() {
   const [themePref, setThemePref] = useState<ThemePreference | null>(() =>
     getThemePreference()
   );
-  /** Schriftgrösse (#546) – nur auf diesem Gerät gespeichert. */
+  /** Schriftgrösse (#546) – seit #611 auch am Konto (Empfang: SettingsSync). */
   const [fontScale, setFontScale] = useState<FontScale>(() => getFontScale());
+  const fontScaleSync = useSyncedSetting<FontScale>("fontScale", () => {}, {
+    receive: false,
+  });
   const chooseFontScale = (scale: FontScale) => {
     setFontScale(scale);
     saveFontScale(scale);
     applyFontScale(scale);
+    fontScaleSync.push(scale);
   };
   // «Was ist neu»: Dialog mit ALLEN Changelog-Blöcken (unabhängig vom Marker)
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);

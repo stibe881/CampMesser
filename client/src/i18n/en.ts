@@ -3010,6 +3010,8 @@ export const en: Translation = {
     editAria: (label: string) => `Edit expense ${label}`,
     deleteAria: (label: string) => `Delete expense ${label}`,
     paidByLine: (name: string) => `paid by ${name}`,
+    personFilterAll: "All people",
+    personFilterAria: "Filter expenses by person",
     byLine: (name: string) => `recorded by ${name}`,
     untitled: "No description",
     photoLabel: "Receipt photo (optional)",

@@ -6,6 +6,12 @@ import {
   type ThemePreference,
 } from "@/lib/themePreference";
 import { saveMapsPreference, type MapsPreference } from "@/lib/directions";
+import {
+  applyFontScale,
+  isFontScale,
+  saveFontScale,
+  type FontScale,
+} from "@/lib/fontScale";
 
 /**
  * Design und Karten-App vom Konto übernehmen (#360).
@@ -39,6 +45,14 @@ export default function SettingsSync() {
   useSyncedSetting<MapsPreference>("mapsApp", value => {
     if (value !== "apple" && value !== "google" && value !== "ask") return;
     saveMapsPreference(value);
+  });
+
+  // Schriftgrösse (#611): wie das Design – am zweiten Gerät soll die
+  // gewählte Stufe gelten, sobald das Konto antwortet.
+  useSyncedSetting<FontScale>("fontScale", value => {
+    if (!isFontScale(value)) return;
+    saveFontScale(value);
+    applyFontScale(value);
   });
 
   // Die Karten-App braucht kein eigenes Zutun: `openDirections` liest die

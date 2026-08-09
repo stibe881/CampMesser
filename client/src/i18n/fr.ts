@@ -3118,6 +3118,8 @@ export const fr: Translation = {
     editAria: (label: string) => `Modifier la dépense ${label}`,
     deleteAria: (label: string) => `Supprimer la dépense ${label}`,
     paidByLine: (name: string) => `payé par ${name}`,
+    personFilterAll: "Toutes les personnes",
+    personFilterAria: "Filtrer les dépenses par personne",
     byLine: (name: string) => `saisi par ${name}`,
     untitled: "Sans description",
     photoLabel: "Photo du justificatif (optionnel)",

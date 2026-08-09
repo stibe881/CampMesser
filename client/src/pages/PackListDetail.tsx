@@ -1324,6 +1324,19 @@ export default function PackListDetailPage() {
               )}
             </div>
 
+            {/* Fortschritts-Balken je Bereich (#623): Der Zähler oben sagt
+                die Zahl, der Balken zeigt auf einen Blick, wer noch packt. */}
+            {section.items.length > 0 && (
+              <Progress
+                value={(sectionChecked / section.items.length) * 100}
+                className="mb-3 h-1.5"
+                aria-label={t.packListDetail.sectionProgress(
+                  sectionChecked,
+                  section.items.length
+                )}
+              />
+            )}
+
             {section.items.length === 0 && (
               <p className="mb-2 text-sm text-muted-foreground">
                 {t.packListDetail.sectionEmpty}

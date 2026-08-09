@@ -3085,6 +3085,8 @@ export const it: Translation = {
     editAria: (label: string) => `Modifica la spesa ${label}`,
     deleteAria: (label: string) => `Elimina la spesa ${label}`,
     paidByLine: (name: string) => `pagato da ${name}`,
+    personFilterAll: "Tutte le persone",
+    personFilterAria: "Filtra le spese per persona",
     byLine: (name: string) => `registrato da ${name}`,
     untitled: "Senza descrizione",
     photoLabel: "Foto dello scontrino (facoltativa)",

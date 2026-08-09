@@ -3123,6 +3123,8 @@ export const de = {
     editAria: (label: string) => `Ausgabe ${label} bearbeiten`,
     deleteAria: (label: string) => `Ausgabe ${label} löschen`,
     paidByLine: (name: string) => `bezahlt von ${name}`,
+    personFilterAll: "Alle Personen",
+    personFilterAria: "Ausgaben nach Person filtern",
     byLine: (name: string) => `erfasst von ${name}`,
     untitled: "Ohne Beschreibung",
     photoLabel: "Beleg-Foto (optional)",

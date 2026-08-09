@@ -253,6 +253,29 @@ export default function TripExpenses({
   const expenses = useMemo(() => query.data ?? [], [query.data]);
 
   /**
+   * Nach Person filtern (#622): «Was habe eigentlich ICH bezahlt?» –
+   * Chips über der Liste, erst ab zwei Personen. Die Summen und der
+   * Ausgleich rechnen bewusst weiter über ALLE Posten; der Filter ist
+   * eine Ansicht auf die Liste, keine andere Kasse.
+   */
+  const [personFilter, setPersonFilter] = useState<string>("alle");
+  const paidByNames = useMemo(() => {
+    const names = new Set<string>();
+    expenses.forEach(expense => {
+      const name = expense.paidBy.trim();
+      if (name) names.add(name);
+    });
+    return Array.from(names).sort((a, b) => a.localeCompare(b));
+  }, [expenses]);
+  const shownExpenses = useMemo(
+    () =>
+      personFilter === "alle"
+        ? expenses
+        : expenses.filter(expense => expense.paidBy.trim() === personFilter),
+    [expenses, personFilter]
+  );
+
+  /**
    * Der Betrag am ZUGEKLAPPTEN Abschnitt (#345).
    *
    * Die Einzelposten kommen erst beim Aufklappen – zugeklappt gäbe es
@@ -1337,9 +1360,38 @@ export default function TripExpenses({
                     )}
                   </div>
 
+                  {/* Nach Person filtern (#622) – erst ab zwei Personen */}
+                  {paidByNames.length > 1 && (
+                    <div
+                      role="group"
+                      aria-label={t.tripExpenses.personFilterAria}
+                      className="mb-2 flex flex-wrap gap-1.5"
+                    >
+                      {[
+                        ["alle", t.tripExpenses.personFilterAll] as const,
+                        ...paidByNames.map(name => [name, name] as const),
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setPersonFilter(value)}
+                          aria-pressed={personFilter === value}
+                          className={cn(
+                            "rounded-full border px-3 py-1 text-sm transition-colors",
+                            personFilter === value
+                              ? "border-primary bg-accent text-accent-foreground"
+                              : "border-border text-muted-foreground hover:border-primary/40"
+                          )}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Einzelne Ausgaben */}
                   <ul className="space-y-1">
-                    {expenses.map(expense => (
+                    {shownExpenses.map(expense => (
                       <li
                         key={expense.id}
                         className="flex items-start gap-2 rounded-lg bg-muted/40 px-3 py-2"

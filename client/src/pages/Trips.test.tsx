@@ -128,6 +128,34 @@ describe("Meine Reisen", () => {
     expect((await screen.findAllByText(/Thun/)).length).toBeGreaterThan(0);
   });
 
+  it("räumt archivierte Reisen in den Archiv-Abschnitt (#614)", async () => {
+    // Runde 56: Archivierte Aufenthalte verschwinden aus der Liste und
+    // stehen unten im eingeklappten Archiv – beides muss stimmen, sonst
+    // ist eine Reise «weg», obwohl sie nur archiviert ist.
+    trips.length = 0;
+    trips.push({
+      ...PLANNED,
+      id: 3,
+      title: "Elba",
+      location: "Elba",
+      startDate: "2026-07-01",
+      endDate: "2026-07-05",
+      archivedAt: new Date("2026-08-01T10:00:00Z"),
+    });
+    const user = (await import("@testing-library/user-event")).default;
+    await renderTrips();
+    const toggle = await screen.findByRole("button", {
+      name: /Archive \(1\)/,
+    });
+    // Zugeklappt gibt es noch keinen Archiv-Link zur Reise
+    expect(screen.queryAllByRole("link", { name: /Elba/ })).toHaveLength(0);
+    await user.click(toggle);
+    // Aufgeklappt führt ein Link zur archivierten Reise (/tagebuch/3)
+    expect(
+      (await screen.findAllByRole("link", { name: /Elba/ })).length
+    ).toBeGreaterThan(0);
+  });
+
   it("ist barrierefrei, auch mit Reisen darin", async () => {
     trips.length = 0;
     trips.push(PLANNED, RUNNING);
