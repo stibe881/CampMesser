@@ -59,6 +59,9 @@ const KIND_SCENARIO: Partial<Record<TripKind, string>> = {
   staedte: "staedtereise",
   wandern: "solo",
   velo: "velotour",
+  // Das «Motorrad-Zelten»-Szenario gab es längst – jetzt findet es die
+  // passende Reise-Art von selbst (Nutzerwunsch 09.08.2026)
+  motorrad: "motorrad",
   wintersport: "wintersport",
 };
 
