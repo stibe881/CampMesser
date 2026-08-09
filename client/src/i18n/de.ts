@@ -2511,6 +2511,9 @@ export const de = {
       "Geteilt mit ReiseKompass – deinem Kompass für Ferien, Camping und Ausflüge.",
   },
   trips: {
+    readinessAbroadHint: (country: string) =>
+      `Diese Reise führt nach ${country} – denk an Vignette, Maut und Mitführpflichten.`,
+    readinessAbroadLink: "Länder-Merkblatt öffnen",
     whoAlongTitle: "Wer ist dabei?",
     whoAlongHint:
       "Angetippt heisst dabei. Daraus entstehen die Stempel im Reisepass – der Familien-Stempel nur, wenn alle dabei sind.",

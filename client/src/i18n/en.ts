@@ -2429,6 +2429,9 @@ export const en: Translation = {
       "Shared with ReiseKompass – your compass for holidays, camping and day trips.",
   },
   trips: {
+    readinessAbroadHint: (country: string) =>
+      `This trip goes to ${country} – remember vignette, tolls and mandatory equipment.`,
+    readinessAbroadLink: "Open country factsheet",
     whoAlongTitle: "Who’s along?",
     whoAlongHint:
       "Tapped means along. The passport stamps come from this – the family stamp only when everyone is along.",

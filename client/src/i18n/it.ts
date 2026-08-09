@@ -2482,6 +2482,9 @@ export const it: Translation = {
       "Condiviso con ReiseKompass – la tua bussola per vacanze, campeggio e gite.",
   },
   trips: {
+    readinessAbroadHint: (country: string) =>
+      `Questo viaggio porta in ${country} – pensa a vignetta, pedaggi e dotazioni obbligatorie.`,
+    readinessAbroadLink: "Apri la scheda paese",
     whoAlongTitle: "Chi viene?",
     whoAlongHint:
       "Toccato = presente. Da qui nascono i timbri del passaporto – quello di famiglia solo se ci sono tutti.",

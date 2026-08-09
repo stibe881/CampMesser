@@ -2507,6 +2507,9 @@ export const fr: Translation = {
       "Partagé avec ReiseKompass – ta boussole pour les vacances, le camping et les excursions.",
   },
   trips: {
+    readinessAbroadHint: (country: string) =>
+      `Ce voyage mène en ${country} – pense à la vignette, aux péages et aux équipements obligatoires.`,
+    readinessAbroadLink: "Ouvrir la fiche pays",
     whoAlongTitle: "Qui vient ?",
     whoAlongHint:
       "Touché = présent. Les tampons du passeport en découlent – le tampon familial seulement si tout le monde est là.",
