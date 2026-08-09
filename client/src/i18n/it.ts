@@ -2914,6 +2914,9 @@ export const it: Translation = {
     eurRateRemove: "Rimuovi il cambio",
     eurRateHint:
       "Vale per totale, budget e «chi deve a chi» di questo viaggio. Le ricevute restano salvate in euro.",
+    ecbRateLine: (rate: string, date: string) =>
+      `Tasso di riferimento BCE del ${date}: 1 € = ${rate} CHF`,
+    ecbRateApply: "Applica",
     eurConvertedNote: (eur: string, rate: string) =>
       `di cui ${eur}, convertiti al cambio ${rate}`,
     eurUnconvertedNote: (eur: string) =>

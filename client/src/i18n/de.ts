@@ -2952,6 +2952,9 @@ export const de = {
     eurRateRemove: "Kurs entfernen",
     eurRateHint:
       "Gilt für Summe, Budget und «Wer schuldet wem» dieser Reise. Die Belege bleiben in Euro gespeichert.",
+    ecbRateLine: (rate: string, date: string) =>
+      `EZB-Referenzkurs vom ${date}: 1 € = ${rate} CHF`,
+    ecbRateApply: "Übernehmen",
     eurConvertedNote: (eur: string, rate: string) =>
       `davon ${eur}, umgerechnet zum Kurs ${rate}`,
     eurUnconvertedNote: (eur: string) =>

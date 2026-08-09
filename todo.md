@@ -5,7 +5,7 @@
 - [x] #516 Packvorlagen für Reisearten – NUR Hotelferien + Velotour neu; Städtereise/Strand/Wintersport EXISTIERTEN BEREITS
 - [x] #517 Vorlagen-Vorschlag im Reise-Formular (Ein-Klick-Liste, ohne Camping/Tagesausflug)
 - [x] #518 Gepäck-Limite pro Person (personWeightBudgetGrams, Migration 0118 – Server pendent; Traglast-Zeile mit Ampel, zweites kg-Feld im Budget-Dialog)
-- [ ] #519 Reisekasse in Fremdwährung (EZB-Kurse)
+- [x] #519 Reisekasse in Fremdwährung – Euro-Ausgaben samt Kurs EXISTIERTEN BEREITS (#441, manueller Kurs pro Reise); neu ist der EZB-Referenzkurs als Ein-Klick-Übernahme im Kurs-Kasten (serverseitig 12 h gecacht, bei EZB-Ausfall der letzte bekannte Kurs mit ehrlichem Datum, offline über den persistierten Query-Cache). BEWUSST KEINE weiteren Währungen: CHF ist daheim, EUR rundherum – ein dritter Währungsknopf im Erfassen-Formular für Kronen oder Zloty stünde 95 % der Reisen im Weg (dokumentierte Entscheidung in shared/expenses.ts)
 - [x] #520 Aufenthalts-Details je Reiseart: Übernachtungs-Arten ohne Platz (Hotel, Städte, Strand, Wintersport) zeigen «Zimmer & Unterkunft» mit Hotel-Beschriftung – gleiche Spalten, keine Migration. Altbekannte Randnotiz: trips.add nimmt die Detail-Felder (wie schon immer) erst beim Bearbeiten an
 - [x] #521 SOS kennt das Reiseland – Katalog EXISTIERTE (#432), neu ist die Automatik bei laufender Auslandsreise
 - [x] #522 Steckdosen & Adapter pro Land (9 Länder)

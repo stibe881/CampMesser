@@ -2848,6 +2848,9 @@ export const en: Translation = {
     eurRateRemove: "Remove rate",
     eurRateHint:
       "Applies to this trip's total, budget and “who owes whom”. Receipts stay stored in euros.",
+    ecbRateLine: (rate: string, date: string) =>
+      `ECB reference rate of ${date}: €1 = CHF ${rate}`,
+    ecbRateApply: "Apply",
     eurConvertedNote: (eur: string, rate: string) =>
       `of which ${eur}, converted at rate ${rate}`,
     eurUnconvertedNote: (eur: string) =>

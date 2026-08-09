@@ -350,6 +350,16 @@ export default function TripExpenses({
     },
     onError: e => toast.error(e.message || t.common.saveFailed),
   });
+  /**
+   * EZB-Referenzkurs (#519) als Vorschlag im Kurs-Kasten – nur abgefragt,
+   * wenn Euro im Spiel sind. Offline liefert der persistierte Query-Cache
+   * den letzten bekannten Kurs; sein Datum steht ehrlich dabei.
+   */
+  const ecbQuery = trpc.trips.expenses.ecbRate.useQuery(undefined, {
+    enabled: chfView.eurRappen > 0,
+    staleTime: 60 * 60 * 1000,
+  });
+  const ecbRate = ecbQuery.data ?? null;
   /** Bereits erfasste Zahlende – als Vorschläge fürs Namensfeld. */
   const knownPayers = useMemo(() => {
     const names: string[] = [];
@@ -830,6 +840,33 @@ export default function TripExpenses({
                               ? t.tripExpenses.eurRateEdit
                               : t.tripExpenses.eurRateSet}
                           </Button>
+                        </div>
+                      )}
+                      {/* EZB-Vorschlag (#519): ein Klick statt Kurs suchen */}
+                      {ecbRate !== null && (
+                        <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-[11px] text-muted-foreground">
+                            {t.tripExpenses.ecbRateLine(
+                              eurRateToInput(ecbRate.chfPerEurX10000),
+                              fmtDay(ecbRate.date)
+                            )}
+                          </span>
+                          {eurRateX10000 !== ecbRate.chfPerEurX10000 && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-2 text-[11px]"
+                              disabled={rateMutation.isPending}
+                              onClick={() =>
+                                rateMutation.mutate({
+                                  tripId,
+                                  eurRateX10000: ecbRate.chfPerEurX10000,
+                                })
+                              }
+                            >
+                              {t.tripExpenses.ecbRateApply}
+                            </Button>
+                          )}
                         </div>
                       )}
                       <p className="mt-1 text-[11px] text-muted-foreground">
