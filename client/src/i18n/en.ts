@@ -1992,6 +1992,16 @@ export const en: Translation = {
     savedPlaceLegend: (n: number) => `${n} saved place${n === 1 ? "" : "s"}`,
     savedPlaceDelete: "Remove place",
     savedPlaceDeleted: "Place removed",
+    savedPlaceAddStage: "Add as stage",
+    savedPlacePlanTrip: "Plan a trip here",
+    stageDialogTitle: "Which trip?",
+    stageDialogHint:
+      "The place is appended as a stage \u2013 adjust arrival and departure in the trip afterwards.",
+    stageDialogEmpty: "No planned or running trip \u2013 create one first.",
+    stageAdded: (trip: string) => `Stage added \u2013 in \u201c${trip}\u201d`,
+    savedPlacesListTitle: "Your saved places",
+    savedPlacesListAria: (name: string) => `Show place ${name} on the map`,
+    savedPlacesDistance: (km: string) => `${km} from home`,
     savedPlaceCreatedToast: (name: string) =>
       `Saved place \u201c${name}\u201d stored`,
     createdToast: (name: string) => `“${name}” created as favourite`,
@@ -2579,6 +2589,8 @@ export const en: Translation = {
     kindLabel: "Trip type",
     kindHint:
       "Controls what the Today view highlights during the trip – every module stays available.",
+    costHintLine: (amount: string, count: number) =>
+      `Your ${count} comparable trips cost \u2248 ${amount} per night.`,
     locationSearchButton: "Find place",
     locationSearchFailed: "Place search unavailable",
     locationSearchNoResults: "No place found – try another spelling?",
@@ -2782,6 +2794,8 @@ export const en: Translation = {
     calPublicHolidayTitle: names => `Public holiday: ${names}`,
     calLegendOwn: "Your own trip",
     calLegendShared: "Shared trip",
+    calLegendStage: "Stage change",
+    calStageTitle: (name: string) => `Stage: ${name}`,
     calLegendSchool: "School holidays",
     calLegendPublic: "Public holiday",
     duplicateAria: (name: string) => `Duplicate trip ${name}`,
@@ -2842,6 +2856,9 @@ export const en: Translation = {
   },
   tripExpenses: {
     budgetTightNote: "The budget is getting tight.",
+    dailyBudgetLine: (amount: string) =>
+      `${amount} per day left until the end of the trip.`,
+    galleryTitle: "Receipt gallery",
     fuelTitle: "Work out fuel costs",
     fuelHint:
       "Kilometres × consumption × fuel price. The maths uses your average consumption – if you want it exact, type the amount in by hand.",
@@ -2988,6 +3005,16 @@ export const en: Translation = {
     noCoordsShort: "no coordinates",
     mapAria: "Map of the stages",
     maxReached: (n: number) => `At most ${n} stages`,
+    legLine: (km: string, duration: string) =>
+      `Drive: \u2248 ${km} \u00b7 ${duration}`,
+    legEstimated: "estimated as the crow flies",
+    legTotal: (km: string, duration: string) =>
+      `Whole loop: \u2248 ${km} \u00b7 ${duration}`,
+    offlineDownloadAria: (trip: string) =>
+      `Download offline map for loop ${trip}`,
+    offlineDeleteAria: (trip: string) => `Delete offline map for loop ${trip}`,
+    offlineHint:
+      "\u201cDownload offline map\u201d stores the tiles around every stage and along the connections \u2013 for the road without coverage.",
   },
   tripInvite: {
     badge: "Trip invitation",
@@ -4471,6 +4498,12 @@ export const en: Translation = {
     departureToday: "Departure day",
     stageLine: (name: string, until: string) =>
       `Stage: ${name} \u00b7 until ${until}`,
+    stageNext: (name: string) => `Moving on to ${name} tomorrow`,
+    stageNextNavAria: (name: string) => `Start navigation to ${name}`,
+    holidayToday: "Today",
+    holidayTomorrow: "Tomorrow",
+    holidayLine: (when: string, country: string, name: string) =>
+      `${when} is a public holiday (${country}): ${name} \u2013 shops often closed.`,
     weather: "Weather",
     menu: "Meal plan",
     shopping: "Shopping list",
@@ -4973,6 +5006,10 @@ export const en: Translation = {
   tripReview: {
     noCategory: "No category",
     missingCategoryAria: "Category for the missing item",
+    missingPersonAria: "Person for the missing item",
+    personFilterAria: "Filter review by person",
+    personAll: "All",
+    personGeneral: "General",
     title: "Review",
     toggleAria: (trip: string) => `Open the review for ${trip}`,
     intro:
@@ -4987,6 +5024,14 @@ export const en: Translation = {
     save: "Save review",
     saved: "Review saved.",
     note: "Unused once means nothing – the sunscreen from a rainy July comes along again next year. Only from the second time does it become a hint. Anything that was missing is suggested right away.",
+  },
+  airQuality: {
+    title: "Air quality",
+    index: "EU index",
+    pm25: "Fine dust PM2.5",
+    ozone: "Ozone",
+    source: "European air quality index (EAQI), Open-Meteo/CAMS.",
+    briefingLine: (label: string) => `Air quality today: ${label}.`,
   },
   turnaround: {
     stormForecast: (clock: string) => `Thunderstorm forecast from ${clock}.`,

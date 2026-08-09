@@ -323,6 +323,90 @@ export function forgetOfflineRoutePack(routeId: number) {
   storePacks(OFFLINE_ROUTES_KEY, packs);
 }
 
+// ---- Paket für die ganze Rundreise (#561) ----------------------------------
+
+export const OFFLINE_TRIPS_KEY = "campmesser.offlineTrips";
+
+/** Umkreis um jede Etappe – wie das kleinste Platz-Paket. */
+export const TRIP_STAGE_RADIUS_KM = 2;
+
+/** Feinster Zoom um die Etappen selbst. */
+export const TRIP_STAGE_MAX_ZOOM = 14;
+
+/**
+ * Feinster Zoom des Verbindungs-Korridors: gröber als um die Etappen –
+ * unterwegs reicht die Übersicht, angekommen braucht es die Details.
+ */
+export const TRIP_LEG_MAX_ZOOM = 12;
+
+/**
+ * Kacheln einer ganzen Rundreise (#561): Umkreis um jede Etappe ZUERST
+ * (dort verbringt man die Tage – greift die Obergrenze, fehlen zuerst
+ * die Verbindungswege), danach der Korridor entlang der Verbindungs-
+ * geraden in gröberem Zoom. Duplikate zählen einmal.
+ */
+export function tilesForTrip(
+  stops: { lat: number; lon: number }[],
+  options: {
+    stageRadiusKm?: number;
+    stageMaxZoom?: number;
+    legMaxZoom?: number;
+  } = {}
+): MapTile[] {
+  const stageRadiusKm = options.stageRadiusKm ?? TRIP_STAGE_RADIUS_KM;
+  const stageMaxZoom = options.stageMaxZoom ?? TRIP_STAGE_MAX_ZOOM;
+  const legMaxZoom = options.legMaxZoom ?? TRIP_LEG_MAX_ZOOM;
+  const tiles: MapTile[] = [];
+  const seen = new Set<string>();
+  const push = (list: MapTile[]) => {
+    for (const tile of list) {
+      const key = `${tile.z}/${tile.x}/${tile.y}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      if (tiles.length >= MAX_OFFLINE_TILES) return false;
+      tiles.push(tile);
+    }
+    return true;
+  };
+  for (const stop of stops) {
+    if (
+      !push(
+        tilesForArea(
+          stop.lat,
+          stop.lon,
+          stageRadiusKm,
+          zoomLevelsUpTo(stageMaxZoom)
+        )
+      )
+    ) {
+      return tiles;
+    }
+  }
+  if (stops.length > 1) {
+    push(
+      tilesForCorridor(stops, ROUTE_CORRIDOR_KM, zoomLevelsUpTo(legMaxZoom))
+    );
+  }
+  return tiles;
+}
+
+/** Pakete ganzer Rundreisen (Schlüssel = Reise-ID als Text). */
+export function loadOfflineTripPacks(): Record<string, OfflineMapPack> {
+  return loadPacks(OFFLINE_TRIPS_KEY);
+}
+
+export function rememberOfflineTripPack(tripId: number, pack: OfflineMapPack) {
+  const packs = loadOfflineTripPacks();
+  packs[String(tripId)] = pack;
+  storePacks(OFFLINE_TRIPS_KEY, packs);
+}
+
+export function forgetOfflineTripPack(tripId: number) {
+  const packs = loadOfflineTripPacks();
+  delete packs[String(tripId)];
+  storePacks(OFFLINE_TRIPS_KEY, packs);
+}
+
 // ---- Download / Löschen ----------------------------------------------------
 
 /** Gleichzeitige Anfragen – bewusst klein, die Kachel-Server sind gratis. */

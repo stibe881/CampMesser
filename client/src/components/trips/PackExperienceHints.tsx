@@ -85,10 +85,12 @@ export default function PackExperienceHints({ listId }: { listId: number }) {
                       items: [
                         {
                           name: entry.name,
-                          // Kategorie aus dem Rückblick; alte Meldungen
-                          // ohne Angabe landen wie bisher in «Allgemein»
+                          // Kategorie und Person aus dem Rückblick; alte
+                          // Meldungen ohne Angabe landen wie bisher in
+                          // «Allgemein»
                           category: entry.category ?? "Allgemein",
                           quantity: 1,
+                          assignee: entry.person,
                         },
                       ],
                     })

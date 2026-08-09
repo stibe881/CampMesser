@@ -387,6 +387,15 @@ async function startServer() {
         (await import("../db/spots")).getCampSpots(owner.id),
       ]);
       const spotById = new Map(spots.map(spot => [spot.id, spot]));
+      // Etappen (#556): je ein eigenes «Etappe: …»-Ereignis im Abo –
+      // eine Sammelabfrage für alle Reisen statt einer je Reise.
+      const allStops = await db.getTripStopsForTrips(trips.map(t => t.id));
+      const stopsByTrip = new Map<number, typeof allStops>();
+      for (const stop of allStops) {
+        const list = stopsByTrip.get(stop.tripId) ?? [];
+        list.push(stop);
+        stopsByTrip.set(stop.tripId, list);
+      }
       const { buildTripIcs } = await import("@shared/ics");
       const { tripDisplayName } = await import("@shared/tripName");
       const ics = buildTripIcs(
@@ -402,6 +411,7 @@ async function startServer() {
             placeName: spot?.name ?? trip.location ?? null,
             latitude: spot?.latitude ?? null,
             longitude: spot?.longitude ?? null,
+            stops: stopsByTrip.get(trip.id),
           };
         }),
         { dtstamp: new Date() }
@@ -414,6 +424,50 @@ async function startServer() {
     } catch (error) {
       console.error("[Kalender-Abo] Abruf fehlgeschlagen:", error);
       res.status(500).type("text/plain").send("error");
+    }
+  });
+
+  // Druck-Anmeldung für die installierte App (Fix «Pass drucken», dritter
+  // Anlauf): Der Browser-Tab, den der Druck-Knopf öffnet, teilt die
+  // Cookies der PWA nicht – ohne Ticket landete man dort auf «Anmeldung
+  // erforderlich». Das Ticket (kurzlebig, signiert, siehe
+  // server/printTicket.ts) meldet den Tab mit einer normalen Sitzung an
+  // und leitet auf die gewünschte Druckseite weiter.
+  app.get("/api/print-login", async (req, res) => {
+    const { verifyPrintTicket, sanitizeNextPath } =
+      await import("../printTicket");
+    const { ENV } = await import("./env");
+    const next = sanitizeNextPath(req.query.next);
+    const ticket = typeof req.query.ticket === "string" ? req.query.ticket : "";
+    const userId = verifyPrintTicket(ticket, ENV.cookieSecret);
+    if (userId === null) {
+      // Abgelaufen oder verbogen: auf die Zielseite leiten – dort steht
+      // der ehrliche Anmelde-Hinweis, besser als eine nackte Fehlerseite.
+      res.redirect(302, next);
+      return;
+    }
+    try {
+      const { findUserById, createLocalSessionToken } =
+        await import("../localAuth");
+      const user = await findUserById(userId);
+      if (!user) {
+        res.redirect(302, next);
+        return;
+      }
+      const token = await createLocalSessionToken(
+        user,
+        req.headers["user-agent"]
+      );
+      const { getSessionCookieOptions } = await import("./cookies");
+      const { COOKIE_NAME, ONE_YEAR_MS } = await import("@shared/const");
+      res.cookie(COOKIE_NAME, token, {
+        ...getSessionCookieOptions(req),
+        maxAge: ONE_YEAR_MS,
+      });
+      res.redirect(302, next);
+    } catch (error) {
+      console.error("[Druck-Anmeldung] fehlgeschlagen:", error);
+      res.redirect(302, next);
     }
   });
 

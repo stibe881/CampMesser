@@ -24,6 +24,7 @@ export const TRIP_KINDS = [
   "staedte",
   "wandern",
   "velo",
+  "motorrad",
   "wintersport",
   "tagesausflug",
 ] as const;
@@ -50,6 +51,12 @@ const TRIP_KIND_LABELS: Record<TripKind, L4> = {
   staedte: l4("Städtereise", "City trip", "Viaggio in città", "City trip"),
   wandern: l4("Wandern", "Randonnée", "Escursionismo", "Hiking"),
   velo: l4("Velotour", "Tour à vélo", "Giro in bici", "Bike tour"),
+  motorrad: l4(
+    "Motorradtour",
+    "Voyage à moto",
+    "Viaggio in moto",
+    "Motorcycle tour"
+  ),
   wintersport: l4(
     "Wintersport",
     "Sports d'hiver",
@@ -197,7 +204,10 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
   },
   velo: {
     quickModules: ["/wanderung", "/reparatur"],
-    campfire: false,
+    // Schläft im Zelt (tentGear) – dann ist die Abend-Frage «dürfen wir
+    // Feuer machen?» dieselbe wie beim Camping (Nutzerwunsch 09.08.2026:
+    // jede Art zu Ende gedacht).
+    campfire: true,
     bathing: false,
     tentGear: true,
     winter: false,
@@ -206,6 +216,22 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     transit: false,
     excursions: false,
     bike: true,
+  },
+  // Motorradtour (Nutzerwunsch 09.08.2026): unterwegs zählen Landesregeln
+  // (Vignette, Promille, Helmpflicht), das Tankbuch und der Reparatur-
+  // Ratgeber. Übernachtet wird oft im Zelt auf dem Platz – Zeltausrüstung
+  // und Lagerfeuer-Ampel wie beim Camping.
+  motorrad: {
+    quickModules: ["/laenderregeln", "/tankbuch", "/reparatur"],
+    campfire: true,
+    bathing: false,
+    tentGear: true,
+    winter: false,
+    sights: false,
+    beaches: false,
+    transit: false,
+    excursions: false,
+    bike: false,
   },
   wintersport: {
     // «Pisten & Lawinen» (#472) zuerst – das schlägt man am Berg nach
@@ -306,6 +332,13 @@ export const TRIP_KIND_FORMS: Record<TripKind, TripKindFormPreset> = {
     singleDay: false,
   },
   velo: {
+    spotSelect: true,
+    pitchDetails: true,
+    hotelDetails: false,
+    singleDay: false,
+  },
+  // Motorrad-Camper verknüpfen ihren Platz wie Velo-Touren
+  motorrad: {
     spotSelect: true,
     pitchDetails: true,
     hotelDetails: false,

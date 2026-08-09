@@ -1,0 +1,1 @@
+ALTER TABLE `packFeedback` ADD `person` varchar(80);

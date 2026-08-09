@@ -2180,6 +2180,14 @@ export const packFeedback = mysqlTable(
      * Zeilen und ohne Angabe.
      */
     category: varchar("category", { length: 80 }),
+    /**
+     * Person wie auf der Packliste (Nutzerwunsch 09.08.2026): Beim
+     * Nicht-Gebrauchten der Bereich des Eintrags, beim Gefehlten die
+     * Auswahl im Rückblick – der spätere Vorschlag legt den Gegenstand
+     * damit gleich in den richtigen Personen-Bereich. Null = «Allgemein»
+     * bzw. alte Zeilen.
+     */
+    person: varchar("person", { length: 80 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [

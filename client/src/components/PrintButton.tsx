@@ -2,16 +2,19 @@
  * Druck-Knopf für alle Druckseiten.
  *
  * Im Browser genügt window.print(). In der INSTALLIERTEN App (PWA) ist
- * das wirkungslos – und auch window.open() wird dort von iOS teils
- * verschluckt (Nutzermeldung 09.08.2026: «Pass drucken funktioniert
- * nicht», trotz Browser-Öffnen-Weiche). Ein ECHTER Link mit
- * target="_blank" ist der zuverlässige Weg aus dem Standalone-Fenster
- * hinaus nach Safari, wo der Druckdialog («Als PDF sichern»)
- * funktioniert. Deshalb rendert der Knopf im Standalone-Modus einen Link
- * auf die eigene Adresse statt eines onClick.
+ * das wirkungslos – der Knopf öffnet die Seite deshalb als echten Link
+ * mit target="_blank" im Browser. DER HAKEN (dritter Anlauf «Pass
+ * drucken», 09.08.2026): Der so geöffnete Tab teilt die Cookies der
+ * installierten App nicht – er zeigte «Anmeldung erforderlich» statt der
+ * Druckseite. Deshalb hängt am Link jetzt ein kurzlebiges Druck-Ticket:
+ * /api/print-login meldet den Tab an und leitet auf die Druckseite
+ * weiter. Ohne Ticket (noch nicht geladen, abgemeldet) bleibt der nackte
+ * Link als Rückfall.
  */
 import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 import { isStandaloneApp } from "@/lib/standalone";
 
 export default function PrintButton({
@@ -25,15 +28,26 @@ export default function PrintButton({
   variant?: "default" | "outline";
   className?: string;
 }) {
+  const { isAuthenticated } = useAuth();
+  const standalone = isStandaloneApp();
+  // Das Ticket läuft nach 30 Minuten ab – alle 20 Minuten erneuern,
+  // solange die Seite offen ist, dazu beim Fokuswechsel (Query-Standard).
+  const ticketQuery = trpc.auth.printTicket.useQuery(undefined, {
+    enabled: standalone && isAuthenticated,
+    staleTime: 10 * 60_000,
+    refetchInterval: 20 * 60_000,
+  });
+
   const icon = <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />;
-  if (isStandaloneApp()) {
+  if (standalone) {
+    const target = window.location.pathname + window.location.search;
+    const ticket = ticketQuery.data?.ticket;
+    const href = ticket
+      ? `/api/print-login?ticket=${encodeURIComponent(ticket)}&next=${encodeURIComponent(target)}`
+      : window.location.href;
     return (
       <Button asChild size={size} variant={variant} className={className}>
-        <a
-          href={window.location.href}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a href={href} target="_blank" rel="noopener noreferrer">
           {icon}
           {label}
         </a>

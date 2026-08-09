@@ -145,6 +145,7 @@ import {
   type TripBoardKind,
 } from "@shared/tripBoard";
 import { buildTripIcs, icsFileName, type IcsTrip } from "@shared/ics";
+import { forgetOfflineTripPack } from "@/lib/mapTiles";
 import { tripDays } from "@shared/menuPlan";
 import {
   countMainSlots,
@@ -271,16 +272,43 @@ export default function TripsPage() {
     setEditingId(null);
   };
 
-  // Schnellaktion «Neuer Tagebuch-Eintrag» (?neu=1): den Reise-Dialog öffnen
+  // Schnellaktion «Neuer Tagebuch-Eintrag» (?neu=1): den Reise-Dialog
+  // öffnen – mit vorbelegtem Ort, wenn der Merkort ihn mitbringt (#562)
   const search = useSearch();
+  const [newTripPlace, setNewTripPlace] = useState<{
+    name: string;
+    lat: number;
+    lng: number;
+  } | null>(null);
   useEffect(() => {
     if (!isAuthenticated) return;
-    if (new URLSearchParams(search).get("neu") === "1") openNewTripDialog();
+    const params = new URLSearchParams(search);
+    if (params.get("neu") !== "1") return;
+    const ort = params.get("ort");
+    const lat = Number(params.get("lat"));
+    const lng = Number(params.get("lng"));
+    setNewTripPlace(
+      ort && Number.isFinite(lat) && Number.isFinite(lng)
+        ? { name: ort, lat, lng }
+        : null
+    );
+    openNewTripDialog();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, isAuthenticated]);
+  /**
+   * Sprung zum Rückblick (?rueckblick=1, Nutzerwunsch 09.08.2026): Die
+   * Heimkehr-Karte verlinkt direkt hierher – «Mehr»-Schalter und
+   * Rückblick öffnen sich von selbst, statt dass man beides suchen muss.
+   */
+  const openReview = new URLSearchParams(search).get("rueckblick") === "1";
 
   const removeMutation = trpc.trips.remove.useMutation({
-    onSuccess: () => utils.trips.list.invalidate(),
+    onSuccess: (_data, vars) => {
+      // Offline-Paket der Rundreise (#561) mit ausbuchen – die Kacheln im
+      // Cache räumt das nächste Paket bzw. der Cache-Deckel selbst weg.
+      forgetOfflineTripPack(vars.id);
+      void utils.trips.list.invalidate();
+    },
     onError: () => toast.error(t.common.deleteFailed),
   });
 
@@ -483,15 +511,39 @@ export default function TripsPage() {
   };
 
   /**
-   * Kalender-Datei erzeugen und herunterladen – rein im Browser, offline
-   * (gleiches Blob-Muster wie der GPX-Export der Wanderungen).
+   * Kalender-Datei erzeugen und herunterladen (Blob-Muster wie der
+   * GPX-Export der Wanderungen). Vorher werden die Etappen jeder Reise
+   * geholt (#556) – jede bekommt ihr eigenes «Etappe: …»-Ereignis; ohne
+   * Netz fällt nur dieser Teil weg, die Reisen selbst bleiben drin.
    */
-  const downloadIcs = (list: (typeof allTrips)[number][], fileName: string) => {
+  const downloadIcs = async (
+    list: (typeof allTrips)[number][],
+    fileName: string
+  ) => {
     try {
-      const ics = buildTripIcs(list.map(toIcsTrip), {
-        dtstamp: new Date(),
-        lang,
-      });
+      const stopsByTrip = new Map<number, IcsTrip["stops"]>();
+      await Promise.all(
+        list.map(async trip => {
+          try {
+            const stops = await utils.trips.stops.list.fetch({
+              tripId: trip.id,
+            });
+            if (stops.length > 0) stopsByTrip.set(trip.id, stops);
+          } catch {
+            // Etappen nicht ladbar (offline) – Reise-Ereignis genügt
+          }
+        })
+      );
+      const ics = buildTripIcs(
+        list.map(trip => ({
+          ...toIcsTrip(trip),
+          stops: stopsByTrip.get(trip.id),
+        })),
+        {
+          dtstamp: new Date(),
+          lang,
+        }
+      );
       const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -509,7 +561,7 @@ export default function TripsPage() {
 
   /** Eine einzelne Reise als .ics herunterladen. */
   const downloadTripIcs = (trip: (typeof allTrips)[number]) => {
-    downloadIcs([trip], icsFileName(label(trip), trip.startDate));
+    void downloadIcs([trip], icsFileName(label(trip), trip.startDate));
   };
 
   /** Eintrag im Dialog zum Bearbeiten öffnen – den Rest macht der Dialog. */
@@ -534,6 +586,12 @@ export default function TripsPage() {
   // Ansicht der Aufenthalte: Liste (Standard) oder Monats-Kalender –
   // die Wahl bleibt über localStorage erhalten.
   const [tripsView, setTripsView] = useState<TripsView>(loadStoredTripsView);
+  // Etappen aller Reisen (#573): der Kalender markiert die Wechseltage –
+  // eine Abfrage, nur wenn die Kalender-Ansicht offen ist.
+  const allStopsQuery = trpc.trips.stops.listAll.useQuery(undefined, {
+    enabled: isAuthenticated && tripsView === "calendar",
+    staleTime: 5 * 60_000,
+  });
   const selectTripsView = (view: TripsView) => {
     setTripsView(view);
     try {
@@ -799,6 +857,7 @@ export default function TripsPage() {
         spots={spots}
         packLists={listsQuery.data ?? []}
         onClose={closeForm}
+        initialPlace={newTripPlace}
       />
 
       {/* Umschalten und Kalender betreffen die ganze Liste – bei einer
@@ -884,6 +943,7 @@ export default function TripsPage() {
               )}
               <TripCalendar
                 trips={calendarTrips}
+                stops={allStopsQuery.data ?? []}
                 holidays={holidays}
                 onTripClick={openTripFromCalendar}
               />
@@ -909,7 +969,7 @@ export default function TripsPage() {
               variant="outline"
               size="sm"
               onClick={() =>
-                downloadIcs(
+                void downloadIcs(
                   plannedTrips,
                   icsFileName("campmesser-reisen", today, "reisen")
                 )
@@ -1359,6 +1419,7 @@ export default function TripsPage() {
                             name={label(trip)}
                             today={today}
                             phase="past"
+                            openReview={openReview}
                           />
                         )}
                       </div>

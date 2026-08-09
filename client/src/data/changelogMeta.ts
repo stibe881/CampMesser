@@ -24,4 +24,4 @@ export interface ChangelogBlock {
 }
 
 /** Id des obersten (neuesten) Blocks in `changelog.ts`. */
-export const LATEST_CHANGELOG_ID = "2026-08-09.4";
+export const LATEST_CHANGELOG_ID = "2026-08-09.5";

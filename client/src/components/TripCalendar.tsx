@@ -26,12 +26,24 @@ export interface CalendarTrip {
   shared: boolean;
 }
 
+/** Eine Etappe (#573), soweit sie der Kalender braucht. */
+export interface CalendarStop {
+  id: number;
+  tripId: number;
+  name: string;
+  /** Ankunftstag – an diesem Tag steht der Wechsel-Marker. */
+  startDate: string;
+}
+
 export default function TripCalendar({
   trips,
+  stops = [],
   holidays,
   onTripClick,
 }: {
   trips: CalendarTrip[];
+  /** Etappen aller angezeigten Reisen – markiert die Wechseltage. */
+  stops?: CalendarStop[];
   holidays: CantonHolidays | null;
   onTripClick: (tripId: number) => void;
 }) {
@@ -156,9 +168,25 @@ export default function TripCalendar({
                     )
                   : [];
                 const isToday = day.iso === todayDay;
+                // Etappen-Wechsel (#573): Ankunftstage der Etappen der
+                // sichtbaren Reisen, dedupliziert nach Name
+                const visibleTripIds = new Set(dayTrips.map(trip => trip.id));
+                const stageNames = Array.from(
+                  new Set(
+                    stops
+                      .filter(
+                        stop =>
+                          stop.startDate === day.iso &&
+                          visibleTripIds.has(stop.tripId)
+                      )
+                      .map(stop => stop.name)
+                  )
+                );
                 const ariaParts = [fmtDayLong(day.iso)];
                 if (dayTrips.length > 0)
                   ariaParts.push(t.trips.calDayTrips(dayTrips.length));
+                if (stageNames.length > 0)
+                  ariaParts.push(t.trips.calStageTitle(stageNames.join(", ")));
                 if (schoolNames.length > 0)
                   ariaParts.push(
                     t.trips.calSchoolHolidayTitle(schoolNames.join(", "))
@@ -168,6 +196,7 @@ export default function TripCalendar({
                     t.trips.calPublicHolidayTitle(publicNames.join(", "))
                   );
                 const holidayTitle = [
+                  ...stageNames.map(name => t.trips.calStageTitle(name)),
                   ...schoolNames.map(name =>
                     t.trips.calSchoolHolidayTitle(name)
                   ),
@@ -201,6 +230,14 @@ export default function TripCalendar({
                       {publicNames.length > 0 && (
                         <span
                           className="h-1.5 w-1.5 shrink-0 rounded-full bg-chart-1"
+                          aria-hidden="true"
+                        />
+                      )}
+                      {/* Etappen-Wechsel (#573): grüner Marker am
+                          Ankunftstag, der Name steht im title/aria */}
+                      {stageNames.length > 0 && (
+                        <span
+                          className="h-1.5 w-1.5 shrink-0 rounded-full bg-green-600"
                           aria-hidden="true"
                         />
                       )}
@@ -248,6 +285,15 @@ export default function TripCalendar({
           />
           {t.trips.calLegendShared}
         </li>
+        {stops.length > 0 && (
+          <li className="flex items-center gap-1.5">
+            <span
+              className="h-1.5 w-1.5 rounded-full bg-green-600"
+              aria-hidden="true"
+            />
+            {t.trips.calLegendStage}
+          </li>
+        )}
         {holidays && (
           <>
             <li className="flex items-center gap-1.5">

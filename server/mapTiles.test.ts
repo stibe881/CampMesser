@@ -8,6 +8,8 @@ import {
   tileUrl,
   tilesForArea,
   tilesForCorridor,
+  tilesForTrip,
+  TRIP_STAGE_MAX_ZOOM,
   zoomLevelsUpTo,
 } from "../client/src/lib/mapTiles";
 
@@ -203,6 +205,46 @@ describe("tilesForCorridor", () => {
       []
     );
     expect(tilesForCorridor(ROUTE, 1, [])).toEqual([]);
+  });
+});
+
+describe("tilesForTrip (#561)", () => {
+  const STOPS = [
+    { lat: 46.02, lon: 8.96 }, // Lugano
+    { lat: 45.44, lon: 9.19 }, // Mailand
+  ];
+
+  it("sammelt Etappen-Umkreise und den Verbindungs-Korridor ohne Duplikate", () => {
+    const tiles = tilesForTrip(STOPS);
+    expect(tiles.length).toBeGreaterThan(0);
+    expect(tiles.length).toBeLessThanOrEqual(MAX_OFFLINE_TILES);
+    const keys = new Set(tiles.map(t => `${t.z}/${t.x}/${t.y}`));
+    expect(keys.size).toBe(tiles.length);
+    // Die feinen Zoomstufen gibt es nur um die Etappen – der Korridor
+    // bleibt gröber (TRIP_LEG_MAX_ZOOM < TRIP_STAGE_MAX_ZOOM).
+    const fine = tiles.filter(t => t.z === TRIP_STAGE_MAX_ZOOM);
+    expect(fine.length).toBeGreaterThan(0);
+    // Beide Etappen tragen feine Kacheln bei (x der Kachel um Lugano und
+    // Mailand unterscheiden sich auf Zoom 14 deutlich)
+    const luganoX = lonToTileX(STOPS[0].lon, TRIP_STAGE_MAX_ZOOM);
+    const milanX = lonToTileX(STOPS[1].lon, TRIP_STAGE_MAX_ZOOM);
+    expect(fine.some(t => Math.abs(t.x - luganoX) <= 2)).toBe(true);
+    expect(fine.some(t => Math.abs(t.x - milanX) <= 2)).toBe(true);
+  });
+
+  it("eine einzelne Etappe ergibt nur ihren Umkreis, keinen Korridor", () => {
+    const single = tilesForTrip([STOPS[0]]);
+    const area = tilesForArea(
+      STOPS[0].lat,
+      STOPS[0].lon,
+      2,
+      zoomLevelsUpTo(TRIP_STAGE_MAX_ZOOM)
+    );
+    expect(single.length).toBe(area.length);
+  });
+
+  it("ohne Etappen bleibt es leer", () => {
+    expect(tilesForTrip([])).toEqual([]);
   });
 });
 

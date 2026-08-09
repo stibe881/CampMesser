@@ -354,6 +354,7 @@ export async function getPackFeedback(userId: number) {
       kind: packFeedback.kind,
       name: packFeedback.name,
       category: packFeedback.category,
+      person: packFeedback.person,
     })
     .from(packFeedback)
     .where(eq(packFeedback.userId, userId))
@@ -374,6 +375,7 @@ export async function savePackFeedback(
     kind: "unused" | "missing";
     name: string;
     category?: string | null;
+    person?: string | null;
   }[]
 ) {
   const db = requireDb(await getDb());

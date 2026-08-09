@@ -248,6 +248,8 @@ export interface OwnContent {
     spotName?: string | null;
     startDate?: string | null;
   }[];
+  /** Merkorte (#564): gesucht wird über Name und Notiz, Treffer → Karte. */
+  savedPlaces?: { id: number; name: string; note?: string | null }[];
 }
 
 /** Typ-Labels für die Snippet-Zeile eigener Treffer. */
@@ -296,6 +298,7 @@ const OWN_KIND_LABELS = {
     "Registro carburante",
     "Fuel log"
   ),
+  savedPlace: l4("Merkort", "Lieu à retenir", "Luogo salvato", "Saved place"),
   journal: l4(
     "Reise-Journal",
     "Journal du séjour",
@@ -454,6 +457,18 @@ export function searchOwnContent(
       `${fill.day} · ${fill.odometerKm} km`,
       "/tankbuch",
       p(OWN_KIND_LABELS.fuel)
+    );
+  }
+  // Merkorte (#564): «Ossiacher See» tippen → Sprung auf die Karte zum
+  // Stern. Die Notiz zählt zum Suchtext und steht im Snippet.
+  for (const place of own.savedPlaces ?? []) {
+    const kind = p(OWN_KIND_LABELS.savedPlace);
+    add(
+      `own-saved-place-${place.id}`,
+      p(place.name),
+      "/karte",
+      place.note ? `${kind} · ${place.note}` : kind,
+      [place.note ?? undefined]
     );
   }
   // Aufenthalte: Titel ODER Ort führen zum Ziel – man erinnert sich mal an

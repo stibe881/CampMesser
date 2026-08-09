@@ -289,11 +289,18 @@ export function TripDetailSections({
   name,
   today,
   phase,
+  openReview = false,
 }: {
   trip: TripListTrip;
   name: string;
   today: string;
   phase: "planned" | "past";
+  /**
+   * Sprung zum Rückblick (?rueckblick=1): «Mehr»-Schalter und Rückblick
+   * öffnen sich von selbst – der Link der Heimkehr-Karte landet direkt
+   * dort, wo man ausfüllen soll.
+   */
+  openReview?: boolean;
 }) {
   const shared = Boolean(trip.shared) || trip.role === "member";
   return (
@@ -357,7 +364,10 @@ export function TripDetailSections({
           />
         )}
         {/* Seltenes hinter einen Schalter (#357) */}
-        <TripMoreSections count={phase === "planned" ? 4 : 5}>
+        <TripMoreSections
+          count={phase === "planned" ? 4 : 5}
+          initialOpen={openReview && phase === "past"}
+        >
           {phase === "past" && (
             <TripStops
               tripId={trip.id}
@@ -382,6 +392,7 @@ export function TripDetailSections({
               tripId={trip.id}
               packListId={trip.packListId}
               tripName={name}
+              initialOpen={openReview}
             />
           )}
           {/* Änderungsverlauf (#296): nur bei gemeinsamen Reisen */}

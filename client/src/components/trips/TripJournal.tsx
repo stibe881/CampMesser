@@ -6,6 +6,7 @@ import {
   fmtWeekdayLong,
 } from "@/lib/dateFormat";
 import { relativeAge, type ShareExpiryDays } from "@shared/sharing";
+import { currentTripStop } from "@shared/tripStops";
 import {
   ArrowRight,
   Award,
@@ -135,6 +136,14 @@ export default function TripJournal({
   const [editingDay, setEditingDay] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const query = trpc.trips.journal.list.useQuery({ tripId }, { enabled: open });
+  // Etappen (#572): Bei einer Rundreise trägt jeder Tag den Ort, an dem
+  // man ihn verbracht hat – man sieht später, WO «Regentag, Museum» war.
+  const stopsQuery = trpc.trips.stops.list.useQuery(
+    { tripId },
+    { enabled: open, staleTime: 5 * 60_000 }
+  );
+  const stageOf = (day: string): string | null =>
+    currentTripStop(stopsQuery.data ?? [], day)?.name ?? null;
   const badgeCount =
     open && !query.isLoading
       ? (query.data?.length ?? 0)
@@ -212,8 +221,16 @@ export default function TripJournal({
                   <li key={day} className="rounded-lg bg-muted/40 px-3 py-2">
                     <div className="flex items-start gap-2">
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold capitalize text-muted-foreground">
+                        <p className="flex flex-wrap items-center gap-x-1.5 text-xs font-semibold capitalize text-muted-foreground">
                           {fmtDay(day)}
+                          {(() => {
+                            const stage = stageOf(day);
+                            return stage ? (
+                              <span className="rounded-full bg-accent px-1.5 py-0.5 font-medium normal-case text-accent-foreground">
+                                {stage}
+                              </span>
+                            ) : null;
+                          })()}
                         </p>
                         {!editing &&
                           (entry ? (

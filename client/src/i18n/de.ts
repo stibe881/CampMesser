@@ -2053,6 +2053,19 @@ export const de = {
     savedPlaceLegend: (n: number) => `${n} Merkort${n === 1 ? "" : "e"}`,
     savedPlaceDelete: "Merkort entfernen",
     savedPlaceDeleted: "Merkort entfernt",
+    savedPlaceAddStage: "Als Etappe hinzuf\u00fcgen",
+    savedPlacePlanTrip: "Reise hierhin planen",
+    stageDialogTitle: "Zu welcher Reise?",
+    stageDialogHint:
+      "Der Merkort wird als Etappe angeh\u00e4ngt \u2013 Ankunft und Weiterreise passt du danach in der Reise an.",
+    stageDialogEmpty:
+      "Keine geplante oder laufende Reise \u2013 lege zuerst eine an.",
+    stageAdded: (trip: string) =>
+      `Etappe angelegt \u2013 in \u00ab${trip}\u00bb`,
+    savedPlacesListTitle: "Deine Merkorte",
+    savedPlacesListAria: (name: string) =>
+      `Merkort ${name} auf der Karte zeigen`,
+    savedPlacesDistance: (km: string) => `${km} von zuhause`,
     savedPlaceCreatedToast: (name: string) =>
       `Merkort \u00ab${name}\u00bb gespeichert`,
     createdToast: (name: string) => `«${name}» als Favorit angelegt`,
@@ -2666,6 +2679,8 @@ export const de = {
     kindLabel: "Art der Reise",
     kindHint:
       "Steuert, was die Heute-Ansicht während der Reise hervorhebt – alle Module bleiben trotzdem erreichbar.",
+    costHintLine: (amount: string, count: number) =>
+      `Deine ${count} vergleichbaren Reisen kosteten \u2248 ${amount} pro Nacht.`,
     locationSearchButton: "Ort suchen",
     locationSearchFailed: "Ortssuche nicht erreichbar",
     locationSearchNoResults: "Kein Ort gefunden – anders schreiben?",
@@ -2884,6 +2899,8 @@ export const de = {
     calPublicHolidayTitle: (names: string) => `Feiertag: ${names}`,
     calLegendOwn: "Eigene Reise",
     calLegendShared: "Gemeinsame Reise",
+    calLegendStage: "Etappen-Wechsel",
+    calStageTitle: (name: string) => `Etappe: ${name}`,
     calLegendSchool: "Schulferien",
     calLegendPublic: "Feiertag",
     duplicateAria: (name: string) => `Reise ${name} duplizieren`,
@@ -2945,6 +2962,9 @@ export const de = {
   },
   tripExpenses: {
     budgetTightNote: "Das Budget wird knapp.",
+    dailyBudgetLine: (amount: string) =>
+      `Noch ${amount} pro Tag bis Reiseende.`,
+    galleryTitle: "Beleg-Galerie",
     fuelTitle: "Fahrtkosten berechnen",
     fuelHint:
       "Kilometer × Verbrauch × Spritpreis. Gerechnet wird mit dem Durchschnittsverbrauch – wer es genauer will, tippt den Betrag von Hand ein.",
@@ -3096,6 +3116,17 @@ export const de = {
     noCoordsShort: "ohne Koordinaten",
     mapAria: "Karte der Etappen",
     maxReached: (n: number) => `H\u00f6chstens ${n} Etappen`,
+    legLine: (km: string, duration: string) =>
+      `Fahrt: \u2248 ${km} \u00b7 ${duration}`,
+    legEstimated: "Luftlinie gesch\u00e4tzt",
+    legTotal: (km: string, duration: string) =>
+      `Ganze Rundreise: \u2248 ${km} \u00b7 ${duration}`,
+    offlineDownloadAria: (trip: string) =>
+      `Offline-Karte der Rundreise ${trip} laden`,
+    offlineDeleteAria: (trip: string) =>
+      `Offline-Karte der Rundreise ${trip} l\u00f6schen`,
+    offlineHint:
+      "\u00abOffline-Karte laden\u00bb legt die Kacheln um jede Etappe und entlang der Verbindungen auf dem Ger\u00e4t ab \u2013 f\u00fcr unterwegs ohne Empfang.",
   },
   tripInvite: {
     badge: "Reise-Einladung",
@@ -4601,6 +4632,12 @@ export const de = {
     departureToday: "Heute ist Abreisetag",
     stageLine: (name: string, until: string) =>
       `Etappe: ${name} \u00b7 bis ${until}`,
+    stageNext: (name: string) => `Morgen weiter nach ${name}`,
+    stageNextNavAria: (name: string) => `Navigation nach ${name} starten`,
+    holidayToday: "Heute",
+    holidayTomorrow: "Morgen",
+    holidayLine: (when: string, country: string, name: string) =>
+      `${when} Feiertag (${country}): ${name} \u2013 L\u00e4den oft geschlossen.`,
     weather: "Wetter",
     menu: "Menüplan",
     shopping: "Einkaufsliste",
@@ -5116,6 +5153,10 @@ export const de = {
   tripReview: {
     noCategory: "Ohne Kategorie",
     missingCategoryAria: "Kategorie für den fehlenden Gegenstand",
+    missingPersonAria: "Person für den fehlenden Gegenstand",
+    personFilterAria: "Rückblick nach Person filtern",
+    personAll: "Alle",
+    personGeneral: "Allgemein",
     title: "Rückblick",
     toggleAria: (trip: string) => `Rückblick zu ${trip} öffnen`,
     intro:
@@ -5130,6 +5171,15 @@ export const de = {
     save: "Rückblick speichern",
     saved: "Rückblick gespeichert.",
     note: "Einmal nicht gebraucht heisst nichts – die Sonnencreme im verregneten Juli kommt nächstes Jahr wieder mit. Erst ab dem zweiten Mal wird daraus ein Hinweis. Was gefehlt hat, wird sofort vorgeschlagen.",
+  },
+  airQuality: {
+    title: "Luftqualit\u00e4t",
+    index: "EU-Index",
+    pm25: "Feinstaub PM2.5",
+    ozone: "Ozon",
+    source:
+      "Europ\u00e4ischer Luftqualit\u00e4tsindex (EAQI), Open-Meteo/CAMS.",
+    briefingLine: (label: string) => `Luftqualit\u00e4t heute: ${label}.`,
   },
   turnaround: {
     stormForecast: (clock: string) => `Gewitter ab ${clock} angesagt.`,

@@ -42,6 +42,17 @@ export const APP_PUBLIC_URL = "https://meinreisekompass.ch";
 /** Maximale Zeilenlänge in Oktetten (RFC 5545). */
 const MAX_LINE_OCTETS = 75;
 
+/** Eine Etappe (#536) im Kalender-Export (#556). */
+export interface IcsTripStop {
+  /** Etappen-Id – steckt in der stabilen UID */
+  id: number;
+  name: string;
+  /** Ankunft als ISO-Tag (YYYY-MM-DD) */
+  startDate: string;
+  /** Weiterreise als ISO-Tag – im Ereignis exklusiv gerechnet */
+  endDate: string;
+}
+
 /** Minimalform einer Reise für den Kalender-Export. */
 export interface IcsTrip {
   /** Reise-Id – steckt in der stabilen UID */
@@ -60,6 +71,12 @@ export interface IcsTrip {
   placeName?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  /**
+   * Etappen der Rundreise (#556): je ein eigenes ganztägiges Ereignis
+   * («Etappe: Bologna») zusätzlich zum Reise-Ereignis. Leer/weggelassen =
+   * keine Etappen-Ereignisse.
+   */
+  stops?: IcsTripStop[];
 }
 
 const PLANNED_WITH: L4 = l4(
@@ -78,6 +95,9 @@ const NIGHTS_LABEL: Record<Language, (n: number) => string> = {
 
 /** Ersatzname, wenn eine Reise weder Titel noch Ort hat. */
 const FALLBACK_TITLE: L4 = l4("Reise", "Séjour", "Viaggio", "Trip");
+
+/** Präfix der Etappen-Ereignisse (#556). */
+const STAGE_LABEL: L4 = l4("Etappe", "Étape", "Tappa", "Stage");
 
 // ── Bausteine ─────────────────────────────────────────────────────────────
 
@@ -246,9 +266,40 @@ export function tripEventLines(
 }
 
 /**
- * Vollständige .ics-Datei mit einem VEVENT je Reise. Der Zeitstempel kommt von
- * aussen (kein Date.now hier drin), die Sprache steuert nur die Beschreibung.
- * Eine Datei ohne brauchbare Reise ist trotzdem ein gültiger, leerer Kalender.
+ * Ein ganztägiges Ereignis pro Etappe (#556): «Etappe: Bologna» mit dem
+ * Ort als LOCATION. null bei unbrauchbaren Daten – dieselbe Regel wie
+ * beim Reise-Ereignis.
+ */
+export function stopEventLines(
+  tripId: number,
+  stop: IcsTripStop,
+  options: { dtstamp: Date; lang?: Language }
+): string[] | null {
+  const lang = options.lang ?? "de";
+  if (!isIsoDay(stop.startDate) || !isIsoDay(stop.endDate)) return null;
+  if (stop.endDate < stop.startDate) return null;
+  const name = stop.name.trim();
+  if (!name) return null;
+  return [
+    "BEGIN:VEVENT",
+    `UID:trip-${tripId}-stop-${stop.id}@${ICS_UID_DOMAIN}`,
+    `DTSTAMP:${icsUtcStamp(options.dtstamp)}`,
+    `SUMMARY:${escapeIcsText(`${pick(STAGE_LABEL, lang)}: ${name}`)}`,
+    `DTSTART;VALUE=DATE:${icsDate(stop.startDate)}`,
+    // DTEND ist exklusiv: Weiterreisetag + 1
+    `DTEND;VALUE=DATE:${icsDate(addDaysIso(stop.endDate, 1))}`,
+    `LOCATION:${escapeIcsText(name)}`,
+    `DESCRIPTION:${escapeIcsText(`${pick(PLANNED_WITH, lang)}\n${APP_PUBLIC_URL}`)}`,
+    "END:VEVENT",
+  ];
+}
+
+/**
+ * Vollständige .ics-Datei mit einem VEVENT je Reise – und je Etappe
+ * (#556), wo welche mitgegeben sind. Der Zeitstempel kommt von aussen
+ * (kein Date.now hier drin), die Sprache steuert nur die Beschreibung.
+ * Eine Datei ohne brauchbare Reise ist trotzdem ein gültiger, leerer
+ * Kalender.
  */
 export function buildTripIcs(
   trips: IcsTrip[],
@@ -264,6 +315,10 @@ export function buildTripIcs(
   for (const trip of trips) {
     const event = tripEventLines(trip, options);
     if (event !== null) lines.push(...event);
+    for (const stop of trip.stops ?? []) {
+      const stopEvent = stopEventLines(trip.id, stop, options);
+      if (stopEvent !== null) lines.push(...stopEvent);
+    }
   }
   lines.push("END:VCALENDAR");
   return `${lines.map(foldIcsLine).join("\r\n")}\r\n`;

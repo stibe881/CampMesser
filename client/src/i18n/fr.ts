@@ -2056,6 +2056,19 @@ export const fr: Translation = {
       `${n} lieu${n === 1 ? "" : "x"} retenu${n === 1 ? "" : "s"}`,
     savedPlaceDelete: "Retirer le lieu",
     savedPlaceDeleted: "Lieu retir\u00e9",
+    savedPlaceAddStage: "Ajouter comme \u00e9tape",
+    savedPlacePlanTrip: "Planifier un voyage ici",
+    stageDialogTitle: "Pour quel voyage\u00a0?",
+    stageDialogHint:
+      "Le lieu est ajout\u00e9 comme \u00e9tape \u2013 ajuste ensuite l\u2019arriv\u00e9e et le d\u00e9part dans le voyage.",
+    stageDialogEmpty:
+      "Aucun voyage pr\u00e9vu ou en cours \u2013 cr\u00e9es-en un d\u2019abord.",
+    stageAdded: (trip: string) =>
+      `\u00c9tape ajout\u00e9e \u2013 dans \u00ab\u00a0${trip}\u00a0\u00bb`,
+    savedPlacesListTitle: "Tes lieux \u00e0 retenir",
+    savedPlacesListAria: (name: string) =>
+      `Afficher le lieu ${name} sur la carte`,
+    savedPlacesDistance: (km: string) => `${km} de chez toi`,
     savedPlaceCreatedToast: (name: string) =>
       `Lieu \u00ab\u202f${name}\u202f\u00bb enregistr\u00e9`,
     createdToast: (name: string) => `«${name}» créé comme favori`,
@@ -2661,6 +2674,8 @@ export const fr: Translation = {
     kindLabel: "Type de voyage",
     kindHint:
       "Détermine ce que la vue Aujourd’hui met en avant pendant le voyage – tous les modules restent accessibles.",
+    costHintLine: (amount: string, count: number) =>
+      `Tes ${count} voyages comparables ont co\u00fbt\u00e9 \u2248 ${amount} par nuit.`,
     locationSearchButton: "Chercher le lieu",
     locationSearchFailed: "Recherche de lieu indisponible",
     locationSearchNoResults: "Aucun lieu trouvé – autre orthographe ?",
@@ -2874,6 +2889,8 @@ export const fr: Translation = {
     calPublicHolidayTitle: names => `Jour férié : ${names}`,
     calLegendOwn: "Ton voyage",
     calLegendShared: "Voyage partagé",
+    calLegendStage: "Changement d’étape",
+    calStageTitle: (name: string) => `Étape : ${name}`,
     calLegendSchool: "Vacances scolaires",
     calLegendPublic: "Jour férié",
     duplicateAria: (name: string) => `Dupliquer le voyage ${name}`,
@@ -2937,6 +2954,9 @@ export const fr: Translation = {
   },
   tripExpenses: {
     budgetTightNote: "Le budget devient serré.",
+    dailyBudgetLine: (amount: string) =>
+      `Encore ${amount} par jour jusqu\u2019\u00e0 la fin du voyage.`,
+    galleryTitle: "Galerie des re\u00e7us",
     fuelTitle: "Calculer les frais de route",
     fuelHint:
       "Kilomètres × consommation × prix du carburant. Le calcul utilise la consommation moyenne – pour plus de précision, saisis le montant à la main.",
@@ -3093,6 +3113,17 @@ export const fr: Translation = {
     noCoordsShort: "sans coordonn\u00e9es",
     mapAria: "Carte des \u00e9tapes",
     maxReached: (n: number) => `Au plus ${n} \u00e9tapes`,
+    legLine: (km: string, duration: string) =>
+      `Trajet\u00a0: \u2248 ${km} \u00b7 ${duration}`,
+    legEstimated: "estim\u00e9 \u00e0 vol d\u2019oiseau",
+    legTotal: (km: string, duration: string) =>
+      `Tout le circuit\u00a0: \u2248 ${km} \u00b7 ${duration}`,
+    offlineDownloadAria: (trip: string) =>
+      `Charger la carte hors ligne du circuit ${trip}`,
+    offlineDeleteAria: (trip: string) =>
+      `Supprimer la carte hors ligne du circuit ${trip}`,
+    offlineHint:
+      "\u00ab\u00a0Charger la carte hors ligne\u00a0\u00bb enregistre les tuiles autour de chaque \u00e9tape et le long des liaisons \u2013 pour la route sans r\u00e9seau.",
   },
   tripInvite: {
     badge: "Invitation au voyage",
@@ -4597,6 +4628,13 @@ export const fr: Translation = {
     departureToday: "Départ aujourd'hui",
     stageLine: (name: string, until: string) =>
       `\u00c9tape\u202f: ${name} \u00b7 jusqu\u2019au ${until}`,
+    stageNext: (name: string) => `Demain, direction ${name}`,
+    stageNextNavAria: (name: string) =>
+      `D\u00e9marrer la navigation vers ${name}`,
+    holidayToday: "Aujourd\u2019hui",
+    holidayTomorrow: "Demain",
+    holidayLine: (when: string, country: string, name: string) =>
+      `${when}, jour f\u00e9ri\u00e9 (${country})\u202f: ${name} \u2013 magasins souvent ferm\u00e9s.`,
     weather: "Météo",
     menu: "Menu",
     shopping: "Liste de courses",
@@ -5114,6 +5152,10 @@ export const fr: Translation = {
   tripReview: {
     noCategory: "Sans catégorie",
     missingCategoryAria: "Catégorie de l’objet manquant",
+    missingPersonAria: "Personne pour l’objet manquant",
+    personFilterAria: "Filtrer la rétrospective par personne",
+    personAll: "Tous",
+    personGeneral: "Général",
     title: "Bilan",
     toggleAria: (trip: string) => `Ouvrir le bilan de ${trip}`,
     intro:
@@ -5128,6 +5170,16 @@ export const fr: Translation = {
     save: "Enregistrer le bilan",
     saved: "Bilan enregistré.",
     note: "Une fois inutilisé ne veut rien dire – la crème solaire d'un juillet pluvieux repart l'an prochain. Ce n'est qu'à partir de la deuxième fois que cela devient un indice. Ce qui a manqué est proposé tout de suite.",
+  },
+  airQuality: {
+    title: "Qualit\u00e9 de l\u2019air",
+    index: "Indice UE",
+    pm25: "Particules fines PM2.5",
+    ozone: "Ozone",
+    source:
+      "Indice europ\u00e9en de qualit\u00e9 de l\u2019air (EAQI), Open-Meteo/CAMS.",
+    briefingLine: (label: string) =>
+      `Qualit\u00e9 de l\u2019air aujourd\u2019hui\u00a0: ${label}.`,
   },
   turnaround: {
     stormForecast: (clock: string) => `Orage annoncé dès ${clock}.`,

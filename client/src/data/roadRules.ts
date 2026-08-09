@@ -1119,6 +1119,289 @@ export const roadRules: CountryRules[] = [
       "römö",
     ],
   },
+  {
+    code: "SE",
+    flag: "🇸🇪",
+    name: l4("Schweden", "Suède", "Svezia", "Sweden"),
+    updated: "2026-08-09",
+    toll: l4(
+      "Keine Vignette und keine Kilometermaut. City-Maut (trängselskatt) in Stockholm und Göteborg: Kameras lesen das Kennzeichen, ausländische Fahrzeuge erhalten die Rechnung über EPASS24 – nichts kleben, aber die Rechnung bezahlen. Die Brücken bei Motala und Sundsvall kosten eine kleine Abgabe, die Öresundbrücke nach Dänemark richtig Geld (online vorauszahlen lohnt).",
+      "Pas de vignette ni de péage kilométrique. Péage urbain (trängselskatt) à Stockholm et Göteborg : des caméras lisent la plaque, les véhicules étrangers reçoivent la facture via EPASS24 – rien à coller, mais la facture est à payer. Les ponts de Motala et Sundsvall coûtent une petite redevance, le pont de l'Öresund vers le Danemark coûte cher (prépayer en ligne vaut la peine).",
+      "Nessuna vignetta e nessun pedaggio chilometrico. Pedaggio urbano (trängselskatt) a Stoccolma e Göteborg: le telecamere leggono la targa, i veicoli esteri ricevono la fattura tramite EPASS24 – niente da incollare, ma la fattura va pagata. I ponti di Motala e Sundsvall costano una piccola tassa, il ponte sull'Öresund verso la Danimarca costa parecchio (prepagare online conviene).",
+      "No vignette and no per-kilometre toll. Congestion tax (trängselskatt) in Stockholm and Gothenburg: cameras read the plate and foreign vehicles are billed via EPASS24 – nothing to stick on, but the bill must be paid. The Motala and Sundsvall bridges charge a small fee, the Öresund bridge to Denmark serious money (prepaying online pays off)."
+    ),
+    trailer: l4(
+      "Gespanne fahren höchstens 80 – ausländische Tempo-100-Zulassungen gelten nicht. Auf der Öresundbrücke zahlt das Gespann nach Gesamtlänge.",
+      "Les attelages roulent à 80 au maximum – les homologations Tempo 100 étrangères ne comptent pas. Sur le pont de l'Öresund, l'attelage paie selon la longueur totale.",
+      "I traini viaggiano al massimo a 80 – le omologazioni Tempo 100 estere non valgono. Sul ponte dell'Öresund il traino paga in base alla lunghezza totale.",
+      "Rigs drive at 80 at most – foreign Tempo 100 approvals do not apply. On the Öresund bridge rigs pay by total length."
+    ),
+    speed: { motorway: 80, rural: 80, urban: 50 },
+    speedNote: l4(
+      "Angaben für Gespanne mit gebremstem Anhänger. Personenwagen allein: meist 110–120 auf der Autobahn, 70–100 ausserorts – die Tafeln wechseln oft.",
+      "Valeurs pour les attelages avec remorque freinée. Voiture seule : le plus souvent 110–120 sur autoroute, 70–100 hors localité – les panneaux changent souvent.",
+      "Valori per i traini con rimorchio frenato. Automobile da sola: per lo più 110–120 in autostrada, 70–100 fuori dai centri – i cartelli cambiano spesso.",
+      "Figures for rigs with a braked trailer. Car alone: mostly 110–120 on motorways, 70–100 outside built-up areas – the signs change often."
+    ),
+    bacPermille: 0.2,
+    bacNote: l4(
+      "0,2 ‰ – praktisch Nulltoleranz; schon ein Glas Wein kann reichen. Kontrollen sind häufig.",
+      "0,2 ‰ – quasiment tolérance zéro ; un seul verre de vin peut suffire. Les contrôles sont fréquents.",
+      "0,2 ‰ – praticamente tolleranza zero; già un bicchiere di vino può bastare. I controlli sono frequenti.",
+      "0.2 ‰ – practically zero tolerance; a single glass of wine can be enough. Checks are frequent."
+    ),
+    equipment: l4(
+      "Warndreieck Pflicht, Warnweste nur empfohlen. Abblendlicht gilt rund um die Uhr. Vom 1. Dezember bis 31. März sind bei winterlichen Verhältnissen Winterreifen Pflicht – auch am Anhänger und auch für ausländische Fahrzeuge.",
+      "Triangle obligatoire, gilet seulement recommandé. Feux de croisement en permanence. Du 1er décembre au 31 mars, pneus d'hiver obligatoires par conditions hivernales – aussi sur la remorque et aussi pour les véhicules étrangers.",
+      "Triangolo obbligatorio, gilet solo consigliato. Anabbaglianti sempre accesi. Dal 1° dicembre al 31 marzo, con condizioni invernali, pneumatici invernali obbligatori – anche sul rimorchio e anche per i veicoli esteri.",
+      "Warning triangle mandatory, vest only recommended. Dipped lights around the clock. From 1 December to 31 March winter tyres are mandatory in wintry conditions – on the trailer too, and for foreign vehicles as well."
+    ),
+    zones: l4(
+      "Miljözoner in mehreren Städten betreffen vor allem Lastwagen und Busse; Stockholm hat auf einzelnen Strassen eine Zone der Klasse 2 für ältere Diesel-Personenwagen. Fürs Wohnmobil bis 3,5 t reicht es, die City-Maut-Zonen zu kennen.",
+      "Les miljözoner de plusieurs villes concernent surtout camions et bus ; Stockholm a, sur quelques rues, une zone de classe 2 pour les vieilles voitures diesel. Pour un camping-car jusqu'à 3,5 t, il suffit de connaître les zones de péage urbain.",
+      "Le miljözoner di diverse città riguardano soprattutto camion e bus; Stoccolma ha, su alcune strade, una zona di classe 2 per le vecchie auto diesel. Per un camper fino a 3,5 t basta conoscere le zone del pedaggio urbano.",
+      "The miljözoner in several cities mainly affect lorries and buses; Stockholm has a class 2 zone on a few streets for older diesel cars. For a motorhome up to 3.5 t it is enough to know the congestion-tax zones."
+    ),
+    plug: l4(
+      "Typ F (Schuko). Der Eurostecker passt; der Schweizer Dreipol-Stecker braucht einen Adapter.",
+      "Type F (Schuko). L'europlug passe ; la fiche suisse à trois broches nécessite un adaptateur.",
+      "Tipo F (Schuko). L'europlug passa; la spina svizzera a tre poli richiede un adattatore.",
+      "Type F (Schuko). Europlugs fit; the Swiss three-pin plug needs an adapter."
+    ),
+    tipping: l4(
+      "Bedienung ist inbegriffen – Aufrunden ist üblich, im Restaurant sind 5–10 % eine nette Geste, keine Pflicht.",
+      "Le service est compris – arrondir est courant ; au restaurant, 5–10 % sont un geste apprécié, pas une obligation.",
+      "Il servizio è compreso – arrotondare è consueto; al ristorante il 5–10 % è un gesto gradito, non un obbligo.",
+      "Service is included – rounding up is common; in restaurants 5–10 % is a nice gesture, not an obligation."
+    ),
+    payment: l4(
+      "Fast bargeldlos: Karte und Handy zahlen überall, viele Läden und Cafés nehmen gar kein Bargeld mehr – Kronen wechseln lohnt kaum. Die Einheimischen zahlen mit Swish, das braucht aber ein schwedisches Konto.",
+      "Presque sans espèces : carte et téléphone passent partout, beaucoup de magasins et cafés n'acceptent plus du tout le liquide – changer des couronnes ne vaut guère la peine. Les locaux paient avec Swish, qui exige toutefois un compte suédois.",
+      "Quasi senza contanti: carta e telefono vanno ovunque, molti negozi e caffè non accettano più contante – cambiare corone conviene poco. I locali pagano con Swish, che però richiede un conto svedese.",
+      "Almost cashless: card and phone pay everywhere, many shops and cafés no longer take cash at all – exchanging kronor is hardly worth it. Locals pay with Swish, which requires a Swedish account though."
+    ),
+    emergency: "112",
+    emergencyNote: l4(
+      "112 für alle Notfälle; 1177 für medizinischen Rat, 114 14 für die Polizei ohne Notfall.",
+      "112 pour toutes les urgences ; 1177 pour un conseil médical, 114 14 pour la police hors urgence.",
+      "112 per tutte le emergenze; 1177 per un consiglio medico, 114 14 per la polizia senza emergenza.",
+      "112 for all emergencies; 1177 for medical advice, 114 14 for non-urgent police matters."
+    ),
+    camping: l4(
+      "Das Jedermannsrecht (allemansrätten) erlaubt dem ZELT ein bis zwei Nächte in der freien Natur – mit Abstand zu Häusern, nicht auf Äckern und Privatgärten. Fürs Fahrzeug gilt es NICHT: Wohnmobile übernachten auf Plätzen, Stellplätzen oder dort, wo Parken über Nacht ausdrücklich erlaubt ist.",
+      "Le droit d'accès à la nature (allemansrätten) permet à la TENTE une à deux nuits en pleine nature – à distance des maisons, pas dans les champs ni les jardins privés. Il ne vaut PAS pour le véhicule : les camping-cars passent la nuit sur les campings, les aires ou là où le stationnement de nuit est expressément permis.",
+      "Il diritto di accesso alla natura (allemansrätten) consente alla TENDA una o due notti nella natura – a distanza dalle case, non nei campi né nei giardini privati. NON vale per il veicolo: i camper pernottano in campeggio, nelle aree di sosta o dove la sosta notturna è espressamente permessa.",
+      "The right to roam (allemansrätten) lets a TENT stay one or two nights in open nature – away from houses, not on fields or private gardens. It does NOT cover vehicles: motorhomes stay on campsites, aires or where overnight parking is expressly allowed."
+    ),
+    aliases: [
+      "schweden",
+      "suede",
+      "svezia",
+      "sweden",
+      "sverige",
+      "stockholm",
+      "göteborg",
+      "goeteborg",
+      "gotland",
+      "öland",
+      "oeland",
+      "smaland",
+      "småland",
+      "dalarna",
+      "malmö",
+      "malmoe",
+    ],
+  },
+  {
+    code: "NO",
+    flag: "🇳🇴",
+    name: l4("Norwegen", "Norvège", "Norvegia", "Norway"),
+    updated: "2026-08-09",
+    toll: l4(
+      "Keine Vignette, dafür ein dichtes Netz automatischer Mautstationen (bomstasjoner) an Strassen, Tunneln und Stadtzufahrten – Kameras lesen das Kennzeichen, die Rechnung kommt per Post oder über EPASS24. WICHTIG: Wer das Fahrzeug VOR der Reise bei EPASS24 registriert oder einen AutoPASS-Chip mit Vertrag hat, zahlt bis zu 20 % weniger und erhält keine teuren Einzelrechnungen. Manche Fähren gehören zum Strassennetz und kosten ebenfalls.",
+      "Pas de vignette, mais un réseau dense de stations de péage automatiques (bomstasjoner) sur routes, tunnels et accès urbains – des caméras lisent la plaque, la facture arrive par courrier ou via EPASS24. IMPORTANT : qui enregistre son véhicule AVANT le voyage sur EPASS24, ou roule avec un badge AutoPASS sous contrat, paie jusqu'à 20 % de moins et évite les factures individuelles coûteuses. Certains ferries font partie du réseau routier et se paient aussi.",
+      "Nessuna vignetta, ma una fitta rete di stazioni di pedaggio automatiche (bomstasjoner) su strade, gallerie e accessi urbani – le telecamere leggono la targa, la fattura arriva per posta o tramite EPASS24. IMPORTANTE: chi registra il veicolo PRIMA del viaggio su EPASS24, o viaggia con un dispositivo AutoPASS con contratto, paga fino al 20 % in meno ed evita care fatture singole. Alcuni traghetti fanno parte della rete stradale e si pagano anch'essi.",
+      "No vignette, but a dense network of automatic toll stations (bomstasjoner) on roads, tunnels and city approaches – cameras read the plate, the bill arrives by post or via EPASS24. IMPORTANT: registering the vehicle with EPASS24 BEFORE the trip, or driving with a contracted AutoPASS tag, saves up to 20 % and avoids expensive single invoices. Some ferries are part of the road network and also charge."
+    ),
+    trailer: l4(
+      "Gespanne fahren höchstens 80. An den Mautstationen zahlt das Wohnmobil über 3,5 t den höheren Tarif – der Anhänger selbst kostet nichts extra.",
+      "Les attelages roulent à 80 au maximum. Aux stations de péage, le camping-car de plus de 3,5 t paie le tarif supérieur – la remorque elle-même ne coûte rien de plus.",
+      "I traini viaggiano al massimo a 80. Alle stazioni di pedaggio il camper oltre 3,5 t paga la tariffa maggiore – il rimorchio in sé non costa nulla in più.",
+      "Rigs drive at 80 at most. At the toll stations motorhomes over 3.5 t pay the higher rate – the trailer itself costs nothing extra."
+    ),
+    speed: { motorway: 80, rural: 80, urban: 50 },
+    speedNote: l4(
+      "Angaben für Gespanne. Personenwagen allein: 80 ausserorts, 90–110 auf Autobahnen. Die Bussen gehören zu den höchsten Europas – der Tempomat ist dein Freund.",
+      "Valeurs pour les attelages. Voiture seule : 80 hors localité, 90–110 sur autoroute. Les amendes comptent parmi les plus élevées d'Europe – le régulateur est ton ami.",
+      "Valori per i traini. Automobile da sola: 80 fuori dai centri, 90–110 in autostrada. Le multe sono tra le più alte d'Europa – il cruise control è tuo amico.",
+      "Figures for rigs. Car alone: 80 outside built-up areas, 90–110 on motorways. Fines are among the highest in Europe – cruise control is your friend."
+    ),
+    bacPermille: 0.2,
+    bacNote: l4(
+      "0,2 ‰ – praktisch Nulltoleranz, und schon kleine Überschreitungen können den Führerausweis kosten.",
+      "0,2 ‰ – quasiment tolérance zéro, et même de petits dépassements peuvent coûter le permis.",
+      "0,2 ‰ – praticamente tolleranza zero, e già piccoli superamenti possono costare la patente.",
+      "0.2 ‰ – practically zero tolerance, and even small excesses can cost you the licence."
+    ),
+    equipment: l4(
+      "Warndreieck UND Warnweste sind Pflicht. Abblendlicht gilt rund um die Uhr. Im Winter braucht es genügend Profil (mindestens 3 mm) und je nach Verhältnissen Winterreifen; auf Passstrassen können Ketten verlangt werden.",
+      "Triangle ET gilet obligatoires. Feux de croisement en permanence. En hiver, il faut assez de profil (au moins 3 mm) et, selon les conditions, des pneus d'hiver ; sur les routes de col, des chaînes peuvent être exigées.",
+      "Triangolo E gilet obbligatori. Anabbaglianti sempre accesi. In inverno serve profilo sufficiente (almeno 3 mm) e, secondo le condizioni, pneumatici invernali; sulle strade di passo possono essere richieste le catene.",
+      "Warning triangle AND vest are mandatory. Dipped lights around the clock. In winter you need enough tread (at least 3 mm) and, depending on conditions, winter tyres; chains may be required on pass roads."
+    ),
+    zones: l4(
+      "Keine klassischen Umweltzonen, aber die Stadt-Maut ist nach Antrieb und Tageszeit gestaffelt (Diesel zahlt in Oslo mehr als Elektro). Bei sehr schlechter Luft kann Oslo tageweise Diesel-Fahrverbote verhängen; für Spike-Reifen verlangen Oslo und Trondheim eine Gebühr.",
+      "Pas de zones environnementales classiques, mais le péage urbain varie selon la motorisation et l'heure (le diesel paie plus que l'électrique à Oslo). Par très mauvaise qualité de l'air, Oslo peut interdire les diesels certains jours ; pour les pneus à clous, Oslo et Trondheim exigent une redevance.",
+      "Nessuna zona ambientale classica, ma il pedaggio urbano varia secondo l'alimentazione e l'ora (a Oslo il diesel paga più dell'elettrico). Con aria molto cattiva Oslo può vietare i diesel in singoli giorni; per gli pneumatici chiodati Oslo e Trondheim chiedono una tassa.",
+      "No classic low-emission zones, but the city toll is staggered by drivetrain and time of day (diesel pays more than electric in Oslo). On very bad air days Oslo can ban diesels; for studded tyres Oslo and Trondheim charge a fee."
+    ),
+    plug: l4(
+      "Typ F (Schuko). Der Eurostecker passt; der Schweizer Dreipol-Stecker braucht einen Adapter.",
+      "Type F (Schuko). L'europlug passe ; la fiche suisse à trois broches nécessite un adaptateur.",
+      "Tipo F (Schuko). L'europlug passa; la spina svizzera a tre poli richiede un adattatore.",
+      "Type F (Schuko). Europlugs fit; the Swiss three-pin plug needs an adapter."
+    ),
+    tipping: l4(
+      "Bedienung ist inbegriffen – Aufrunden oder 5–10 % bei gutem Service sind willkommen, erwartet wird nichts.",
+      "Le service est compris – arrondir ou laisser 5–10 % pour un bon service est bienvenu, rien n'est attendu.",
+      "Il servizio è compreso – arrotondare o lasciare il 5–10 % per un buon servizio è gradito, nulla è atteso.",
+      "Service is included – rounding up or 5–10 % for good service is welcome, nothing is expected."
+    ),
+    payment: l4(
+      "Karte und Handy zahlen praktisch überall, auch auf Fähren und Campingplätzen – Norwegen ist fast bargeldlos unterwegs. Etwas Bargeld braucht es höchstens an unbedienten Naturplätzen mit Kässeli.",
+      "Carte et téléphone paient pratiquement partout, aussi sur les ferries et les campings – la Norvège vit presque sans espèces. Un peu de liquide ne sert guère qu'aux emplacements nature sans personnel, avec caisse à monnaie.",
+      "Carta e telefono pagano praticamente ovunque, anche su traghetti e campeggi – la Norvegia è quasi senza contanti. Un po' di contante serve al massimo nelle piazzole natura non presidiate con cassetta.",
+      "Card and phone pay practically everywhere, on ferries and campsites too – Norway is almost cashless. A little cash is only needed at unstaffed nature sites with an honesty box."
+    ),
+    emergency: "112",
+    emergencyNote: l4(
+      "112 Polizei, 110 Feuerwehr, 113 Sanität – alle drei führen zum Notfall; 112 funktioniert immer.",
+      "112 police, 110 pompiers, 113 ambulance – les trois mènent aux secours ; le 112 fonctionne toujours.",
+      "112 polizia, 110 pompieri, 113 ambulanza – tutti e tre portano ai soccorsi; il 112 funziona sempre.",
+      "112 police, 110 fire brigade, 113 ambulance – all three reach the emergency services; 112 always works."
+    ),
+    camping: l4(
+      "Das Jedermannsrecht (allemannsretten) erlaubt dem ZELT bis zu zwei Nächte am selben Ort – mindestens 150 m von bewohnten Häusern entfernt, im Hochgebirge auch länger. Fürs Fahrzeug gilt es NICHT: Wohnmobile stehen auf Plätzen, Stellplätzen oder erlaubten Parkplätzen; das Übernachten auf Rastplätzen wird meist geduldet, campieren nicht.",
+      "Le droit d'accès à la nature (allemannsretten) permet à la TENTE jusqu'à deux nuits au même endroit – à au moins 150 m des maisons habitées, plus longtemps en haute montagne. Il ne vaut PAS pour le véhicule : les camping-cars stationnent sur les campings, aires ou parkings autorisés ; dormir sur les aires de repos est le plus souvent toléré, camper non.",
+      "Il diritto di accesso alla natura (allemannsretten) consente alla TENDA fino a due notti nello stesso posto – ad almeno 150 m dalle case abitate, in alta montagna anche di più. NON vale per il veicolo: i camper sostano in campeggio, nelle aree o nei parcheggi consentiti; dormire nelle aree di sosta è per lo più tollerato, campeggiare no.",
+      "The right to roam (allemannsretten) lets a TENT stay up to two nights in the same spot – at least 150 m from inhabited houses, longer in the high mountains. It does NOT cover vehicles: motorhomes stay on campsites, aires or permitted car parks; sleeping at rest areas is mostly tolerated, camping is not."
+    ),
+    aliases: [
+      "norwegen",
+      "norvege",
+      "norvegia",
+      "norway",
+      "norge",
+      "oslo",
+      "bergen",
+      "lofoten",
+      "nordkap",
+      "tromsö",
+      "tromsoe",
+      "trondheim",
+      "stavanger",
+      "geiranger",
+    ],
+  },
+  {
+    code: "BE",
+    flag: "🇧🇪",
+    name: l4("Belgien", "Belgique", "Belgio", "Belgium"),
+    updated: "2026-08-09",
+    toll: l4(
+      "Keine Vignette und keine Maut für Fahrzeuge bis 3,5 t – Autobahnen sind gratis. Über 3,5 t gilt die Viapass-Kilometermaut mit Bordgerät (auch für schwere Wohnmobile in Flandern relevant: dort zählt das zulässige Gesamtgewicht). Der Liefkenshoek-Tunnel bei Antwerpen kostet extra.",
+      "Pas de vignette ni de péage pour les véhicules jusqu'à 3,5 t – les autoroutes sont gratuites. Au-delà de 3,5 t s'applique le péage kilométrique Viapass avec boîtier (pertinent aussi pour les gros camping-cars en Flandre : c'est le poids maximal autorisé qui compte). Le tunnel de Liefkenshoek près d'Anvers est payant.",
+      "Nessuna vignetta e nessun pedaggio per i veicoli fino a 3,5 t – le autostrade sono gratuite. Oltre 3,5 t vale il pedaggio chilometrico Viapass con dispositivo di bordo (rilevante anche per i camper pesanti nelle Fiandre: conta il peso massimo ammesso). Il tunnel di Liefkenshoek presso Anversa si paga a parte.",
+      "No vignette and no toll for vehicles up to 3.5 t – motorways are free. Above 3.5 t the Viapass per-kilometre toll with on-board unit applies (relevant for heavy motorhomes in Flanders too: the permissible total weight counts). The Liefkenshoek tunnel near Antwerp costs extra."
+    ),
+    trailer: l4(
+      "Leichte Gespanne bis 3,5 t Gesamtgewicht fahren wie der Personenwagen; schwerere Gespanne höchstens 90 auf der Autobahn.",
+      "Les attelages légers jusqu'à 3,5 t de poids total roulent comme la voiture ; les attelages plus lourds à 90 au maximum sur autoroute.",
+      "I traini leggeri fino a 3,5 t di peso totale viaggiano come l'automobile; i traini più pesanti al massimo a 90 in autostrada.",
+      "Light rigs up to 3.5 t total weight drive like the car; heavier rigs at 90 at most on the motorway."
+    ),
+    speed: { motorway: 120, rural: 90, urban: 50 },
+    speedNote: l4(
+      "Ausserorts gilt in Flandern 70, in Wallonien 90 – die Regionsgrenze merkt man nur am Schild. In Brüssel gilt fast überall Tempo 30.",
+      "Hors localité, 70 en Flandre et 90 en Wallonie – on ne remarque la limite régionale qu'au panneau. À Bruxelles, le 30 km/h vaut presque partout.",
+      "Fuori dai centri vale 70 nelle Fiandre e 90 in Vallonia – il confine regionale si nota solo dal cartello. A Bruxelles vige quasi ovunque il limite di 30.",
+      "Outside built-up areas Flanders has 70 and Wallonia 90 – you only notice the regional border by the sign. In Brussels 30 km/h applies almost everywhere."
+    ),
+    bacPermille: 0.5,
+    bacNote: l4(
+      "0,5 ‰; für Berufschauffeure gilt 0,2 ‰. Ab 0,8 ‰ wird es sofort teuer und der Ausweis ist weg.",
+      "0,5 ‰ ; 0,2 ‰ pour les chauffeurs professionnels. Dès 0,8 ‰, c'est tout de suite cher et le permis saute.",
+      "0,5 ‰; per gli autisti professionali vale 0,2 ‰. Da 0,8 ‰ diventa subito caro e la patente salta.",
+      "0.5 ‰; 0.2 ‰ for professional drivers. From 0.8 ‰ it gets expensive immediately and the licence is gone."
+    ),
+    equipment: l4(
+      "Warndreieck Pflicht; die Warnweste muss angezogen werden, wer auf Autobahn oder Schnellstrasse ausserhalb des Fahrzeugs steht. Verbandskasten und Feuerlöscher sind nur für in Belgien zugelassene Fahrzeuge Pflicht – an Bord schaden sie trotzdem nicht.",
+      "Triangle obligatoire ; le gilet doit être porté par qui se trouve hors du véhicule sur autoroute ou voie rapide. Trousse de secours et extincteur ne sont obligatoires que pour les véhicules immatriculés en Belgique – à bord, ils ne font pas de mal pour autant.",
+      "Triangolo obbligatorio; il gilet va indossato da chi sta fuori dal veicolo su autostrada o superstrada. Cassetta di pronto soccorso ed estintore sono obbligatori solo per i veicoli immatricolati in Belgio – a bordo comunque non guastano.",
+      "Warning triangle mandatory; the vest must be worn by anyone outside the vehicle on a motorway or expressway. First-aid kit and fire extinguisher are only mandatory for vehicles registered in Belgium – having them on board does no harm though."
+    ),
+    zones: l4(
+      "Umweltzonen (LEZ) in Brüssel, Antwerpen und Gent – DIE FALLE für Reisende: Auch zugelassene ausländische Fahrzeuge müssen sich VOR der Einfahrt online registrieren (gratis), sonst gibt es eine Busse ab 150 Euro, selbst wenn das Fahrzeug die Abgasnorm erfüllt. Die Registrierung gilt mehrere Jahre.",
+      "Zones de basses émissions (LEZ) à Bruxelles, Anvers et Gand – LE PIÈGE pour les voyageurs : même les véhicules étrangers admis doivent s'enregistrer en ligne AVANT d'entrer (gratuit), sous peine d'une amende dès 150 euros, même si le véhicule respecte la norme. L'enregistrement vaut plusieurs années.",
+      "Zone a basse emissioni (LEZ) a Bruxelles, Anversa e Gand – LA TRAPPOLA per chi viaggia: anche i veicoli esteri ammessi devono registrarsi online PRIMA di entrare (gratis), pena una multa da 150 euro, anche se il veicolo rispetta la norma. La registrazione vale più anni.",
+      "Low-emission zones (LEZ) in Brussels, Antwerp and Ghent – THE trap for travellers: even compliant foreign vehicles must register online BEFORE entering (free), or face a fine from 150 euros, even if the vehicle meets the standard. The registration is valid for several years."
+    ),
+    plug: l4(
+      "Typ E (mit Erdungsstift in der Dose). Der Eurostecker passt; der Schweizer Dreipol-Stecker braucht einen Adapter.",
+      "Type E (avec broche de terre dans la prise). L'europlug passe ; la fiche suisse à trois broches nécessite un adaptateur.",
+      "Tipo E (con spinotto di terra nella presa). L'europlug passa; la spina svizzera a tre poli richiede un adattatore.",
+      "Type E (with earth pin in the socket). Europlugs fit; the Swiss three-pin plug needs an adapter."
+    ),
+    tipping: l4(
+      "Bedienung ist inbegriffen – Aufrunden oder ein paar Euro bei gutem Service reichen völlig.",
+      "Le service est compris – arrondir ou laisser quelques euros pour un bon service suffit largement.",
+      "Il servizio è compreso – arrotondare o lasciare qualche euro per un buon servizio basta e avanza.",
+      "Service is included – rounding up or a few euros for good service is plenty."
+    ),
+    payment: l4(
+      "Karte fast überall – die Einheimischen zahlen mit Bancontact, ausländische Debit- und Kreditkarten funktionieren in Läden und an Tankstellen. Etwas Bargeld für Markt, Fritüre und kleine Cafés schadet nicht.",
+      "Carte presque partout – les locaux paient avec Bancontact, les cartes de débit et de crédit étrangères passent dans les magasins et stations-service. Un peu de liquide pour le marché, la friterie et les petits cafés ne fait pas de mal.",
+      "Carta quasi ovunque – i locali pagano con Bancontact, le carte di debito e credito estere funzionano in negozi e distributori. Un po' di contante per mercato, friggitoria e piccoli caffè non guasta.",
+      "Card almost everywhere – locals pay with Bancontact, foreign debit and credit cards work in shops and petrol stations. A little cash for the market, the frituur and small cafés does no harm."
+    ),
+    emergency: "112",
+    emergencyNote: l4(
+      "112 für Rettung und Feuerwehr, 101 für die Polizei; 112 funktioniert für alles.",
+      "112 pour les secours et les pompiers, 101 pour la police ; le 112 fonctionne pour tout.",
+      "112 per soccorso e pompieri, 101 per la polizia; il 112 funziona per tutto.",
+      "112 for ambulance and fire brigade, 101 for the police; 112 works for everything."
+    ),
+    camping: l4(
+      "Wildcampen und freies Übernachten im Fahrzeug sind verboten – auch auf Autobahnrastplätzen wird campieren gebüsst. Dafür gibt es ein dichtes Netz offizieller Wohnmobil-Stellplätze und in Wallonien viele Bauernhof- und Naturplätze.",
+      "Le camping sauvage et la nuit libre en véhicule sont interdits – camper sur les aires d'autoroute est aussi amendé. En revanche, il existe un réseau dense d'aires officielles pour camping-cars et, en Wallonie, beaucoup de campings à la ferme et nature.",
+      "Il campeggio libero e il pernottamento libero in veicolo sono vietati – campeggiare nelle aree autostradali viene multato. In compenso c'è una fitta rete di aree ufficiali per camper e, in Vallonia, molti campeggi in fattoria e natura.",
+      "Wild camping and free overnighting in the vehicle are banned – camping at motorway rest areas is fined too. In return there is a dense network of official motorhome aires and, in Wallonia, many farm and nature sites."
+    ),
+    aliases: [
+      "belgien",
+      "belgique",
+      "belgio",
+      "belgium",
+      "belgie",
+      "belgië",
+      "brüssel",
+      "bruessel",
+      "brussel",
+      "bruxelles",
+      "antwerpen",
+      "anvers",
+      "gent",
+      "gand",
+      "brugge",
+      "bruges",
+      "ardennen",
+      "ardennes",
+      "oostende",
+      "ostende",
+      "flandern",
+      "wallonien",
+    ],
+  },
 ];
 
 /** Land zu einem Code – oder null, wenn der Code unbekannt ist. */

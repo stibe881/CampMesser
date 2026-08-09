@@ -23,6 +23,7 @@ import {
   CloudSunRain,
   Flower2,
   ListTodo,
+  Wind,
   Moon as MoonIcon,
   Sunrise,
   UtensilsCrossed,
@@ -48,6 +49,11 @@ import {
   type PollenReading,
 } from "@shared/pollen";
 import {
+  airQualityLabel,
+  airQualityLevel,
+  airQualityNoteworthy,
+} from "@shared/airQuality";
+import {
   briefingItems,
   briefingTasks,
   isBriefingTime,
@@ -58,6 +64,7 @@ import {
 const ICONS: Record<BriefingKind, typeof CloudSunRain> = {
   weather: CloudSunRain,
   pollen: Flower2,
+  air: Wind,
   water: Waves,
   meals: UtensilsCrossed,
   tasks: ListTodo,
@@ -113,6 +120,36 @@ export default function MorningBriefing({
       cancelled = true;
     };
   }, [morning, latitude, longitude, pollenProfile]);
+  // Luftqualität (#565): Die Zeile erscheint NUR bei schlechter Luft –
+  // ein tägliches «Luft ist gut» wäre Lärm. Ein Abruf pro Morgen.
+  const [airAqi, setAirAqi] = useState<number | null>(null);
+  useEffect(() => {
+    if (!morning || latitude == null || longitude == null) return;
+    let cancelled = false;
+    const params = new URLSearchParams({
+      latitude: String(latitude),
+      longitude: String(longitude),
+      current: "european_aqi",
+    });
+    fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?${params}`)
+      .then(res => (res.ok ? res.json() : null))
+      .then((json: { current?: { european_aqi?: number } } | null) => {
+        const aqi = json?.current?.european_aqi;
+        if (!cancelled && typeof aqi === "number") setAirAqi(aqi);
+      })
+      .catch(() => {
+        // Ohne Netz bleibt die Zeile einfach weg.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [morning, latitude, longitude]);
+  const airLine =
+    airAqi !== null && airQualityNoteworthy(airAqi)
+      ? t.airQuality.briefingLine(
+          airQualityLabel(airQualityLevel(airAqi), lang)
+        )
+      : null;
   // Badewasser (#475): nur bei Strandferien – am Zeltplatz steht die
   // Karte im Dossier, im Briefing wäre sie dort Doppelspurigkeit.
   const bathing = tripKindPreset(tripKind).bathing;
@@ -239,6 +276,7 @@ export default function MorningBriefing({
         }`
       : null,
     pollen: pollenLine,
+    air: airLine,
     water: waterLine,
     meals: mealsLine,
     tasks: openTasks,

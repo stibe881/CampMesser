@@ -1,5 +1,40 @@
 # CampMesser – Projekt TODO
 
+## Zwanzig Vorschläge (09.08.2026, Runde 55)
+
+Nutzerwünsche dieser Runde (alle umgesetzt):
+
+- [x] Neue Reiseart **Motorradurlaub**: TRIP_KINDS um «motorrad» ergänzt (Label, Preset mit Lagerfeuer/Zeltmaterial und Schnellzugriffen Länderregeln/Tankbuch/Reparatur, Formular-Flags, Szenario «Motorrad-Zelten» aus shared/packTemplates EXISTIERTE BEREITS und ist jetzt verknüpft). Alles Bestehende passt sich automatisch an, weil Heute-Ansicht, Packvorschlag, Formular und Statistik überall über tripKindPreset/TRIP_KIND_FORMS laufen – dabei aufgefallen und gleich mitgenommen: die Velotour hatte campfire=false, jetzt true. Test «kennt die neun Arten» + Motorrad-Preset-Test
+- [x] «Rückblick ausfüllen …» springt DIREKT zum Rückblick: Der Startseiten-Hinweis verlinkt neu auf `/tagebuch/<id>?rueckblick=1`; die Reise-Detailseite öffnet damit den «Mehr»-Schalter UND den Rückblick und scrollt hin (initialOpen-Props durch TripDetailSections/TripMoreSections/TripReview)
+- [x] Rückblick auch nach PERSONEN aufgeteilt (wie die Packliste): Personen-Filterchips (Alle/Allgemein/je Person aus item.assignee), «Hat gefehlt» mit Personen-Auswahl; packFeedback.person (Migration **0122**), feedback.save nimmt unused als String ODER {name, person} (alte PWA-Bundles bleiben gültig), missingSuggestions liefert die Person an den Packlisten-Vorschlag weiter (assignee beim Übernehmen)
+- [x] «Pass drucken funktioniert immer noch nicht» (dritter Anlauf, Ursache gefunden): Der _blank-Tab der INSTALLIERTEN PWA teilt die Anmelde-Cookies nicht – die Druckseite zeigte «Anmeldung erforderlich». Neu holt PrintButton im Standalone-Modus ein kurzlebiges Druck-Ticket (HMAC-signiert, 30 min, server/printTicket.ts mit 4 Tests) und der Link läuft über GET /api/print-login, das die normale Session im Browser-Tab setzt und auf die Druckseite weiterleitet – gilt für ALLE 9 Druckseiten
+
+Die zwanzig Vorschläge:
+
+- [x] #556 Etappen im Druckbericht (Tabelle Ort/Von/Bis/Nächte in TripPrint) und im Kalender-Export: buildTripIcs nimmt Etappen als eigene Termine («Etappe: …», UID trip-…-stop-…), sowohl beim ics-Download wie im Abo-Feed. EHRLICH: Der Sammel-Export lädt die Etappen je Reise einzeln (Promise.all); bei sehr vielen Reisen wären das viele Abfragen
+- [x] #557 Unwetter-Push kennt Etappen: weatherPoints nimmt bei Reisen mit Etappen die Koordinaten der AKTUELLEN Etappe (currentTripStop; Platz/Freitext nur noch als Rückfall), Kartenlink auf die Etappe
+- [x] #558 Fahrzeit & Distanz zwischen Etappen: OSRM-Routing (#299, routeOrEstimate «car») je Abschnitt an der Ziel-Etappe («Fahrt: ≈ 190 km · 2 h 40», Luftlinie ehrlich als Schätzung markiert) plus Summenzeile «Ganze Rundreise»
+- [x] #559 Weiterreise-Hinweis in der Heute-Ansicht: Beginnt MORGEN eine Etappe, steht «Morgen weiter nach …» in der Kopfzeile – mit Navigations-Link, wenn Koordinaten da sind
+- [x] #560 Wetter je Etappe: Im Etappen-Abschnitt trägt jede Etappe im 16-Tage-Fenster ihr Wettersymbol samt Höchsttemperatur (Open-Meteo daily, start/end je Etappe)
+- [x] #561 Offline-Karte der Rundreise: tilesForTrip (Umkreise 2 km bis Zoom 14 um jede Etappe ZUERST, Verbindungs-Korridore bis Zoom 12; 3 Tests) + TripStagesOfflinePack nach dem Muster der Routen-Pakete (#552), gleicher Tile-Cache, Löschen beim Reise-Löschen (forgetOfflineTripPack)
+- [x] #562 Merkort → Etappe/Reise: Das Merkort-Popup auf der Karte bekommt «Als Etappe» (wählt eine laufende/kommende Reise, hängt die Etappe ab deren letztem Datum an) und «Reise planen» (öffnet das Reise-Formular mit Ort+Koordinaten vorausgefüllt, /tagebuch?neu=1&ort=…)
+- [x] #563 Merkorte-Verwaltungsliste unter der Karte: alle Merkorte mit Farb-Punkt, Notiz und «X km von zuhause» (home.get); Klick fährt die Karte hin (focusPoint), Papierkorb löscht
+- [x] #564 Merkorte in der globalen Suche (OwnContent.savedPlaces mit Notiz im Suchtext, Treffer führen zur Karte; Test in globalSearch.test.ts)
+- [x] #565 Luftqualität: shared/airQuality.ts (EAQI-Bänder, Ampel-Farben, 4 Tests), AirQualityCard auf der Wetterseite (EAQI + PM2.5/Ozon, air-quality-api.open-meteo.com); das Morgen-Briefing nennt die Luft nur, wenn sie «schlecht» oder schlimmer ist
+- [x] #566 Beleg-Galerie in der Reisekasse: alle Quittungs-Fotos einer Reise als Raster unter der Ausgabenliste (Datum + Betrag als Beschriftung, Klick öffnet den Beleg)
+- [x] #567 Tagesbudget: dailyBudgetLeftRappen (Rest ÷ verbleibende Tage, nur während der Reise und unter Budget; Tests) als Zeile in der Reisekasse. EHRLICH: nur dort – der QuickExpense-Dialog der Heute-Ansicht kennt das Budget nicht
+- [x] #568 Kosten-Schätzung beim Planen: comparableNightCostRappen (Median der Pro-Nacht-Kosten abgeschlossener Reisen GLEICHER Art, ab 2 Reisen; Tests) über trips.expenses.costHint als Zeile im Neu-Formular («Deine bisherigen X-Reisen kosteten ≈ … CHF pro Nacht»)
+- [x] #569 Feiertags-Warnung in der Heute-Ansicht: Ist die laufende Reise im Ausland (Land geraten wie im Cockpit, bei Rundreisen hilft die aktuelle Etappe) und heute/morgen dort landesweiter Feiertag (trips.holidaysAbroad), warnt die Kopfzeile mit Link auf die Einkaufsliste
+- [x] #570 Drei neue Länder komplett: Schweden, Norwegen, Belgien mit allen Feldern (SE: City-Maut via EPASS24, 0,2 ‰, Winterreifen-Pflicht, allemansrätten nur fürs Zelt; NO: bomstasjoner-Netz mit Registrier-Tipp, Warnwesten-Pflicht, Spike-Gebühr; BE: Flandern/Wallonien-Tempi, LEZ-Registrierungsfalle Brüssel/Antwerpen/Gent). SOS-Katalog: nur BE ergänzt – SE/NO/DK EXISTIERTEN BEREITS
+- [x] #571 Sprachhilfe-Kapitel «Panne & Werkstatt»: 11 Sätze ×4 Sprachen (Panne, Motor, Batterie, Reifen, Warnleuchte, Abschleppdienst mit TCS-Nummern-Hinweis, Werkstatt, heute noch ansehen, Kosten, Ersatzteil, Weiterfahrt), landet automatisch in der Suche
+- [x] #572 Journal kennt Etappen: Der Tages-Kopf im Reise-Journal trägt einen Etappen-Chip (currentTripStop je Tag)
+- [x] #573 Kalender zeigt Etappen-Wechsel: grüner Punkt + Etappenname am Starttag (trips.stops.listAll für own+member über getTripStopsForTrips, nur bei sichtbaren Reisen; Legende ergänzt)
+- [x] #574 Technik: MapView.tsx (fast 2500 Zeilen) aufgeteilt: Pin-Vokabular nach components/map/mapPins.ts, die ganze Karten-Komponente nach components/map/SpotsMap.tsx; die Seite (301 Zeilen) holt Daten und zeigt Karte + Merkorte-Liste. Verhalten unverändert
+- [x] #575 Technik: UI-Tests für die Runden 53/54 (je mit axe): Etappen-Abschnitt, Merkorte-Verwaltungsliste (durch #574 erst testbar – SpotsMap als Attrappe), Reisekasse (Beleg-Liste, Galerie #566, Tagesbudget #567), QuickExpense (Komma-Betrag → Rappen). EHRLICH: kein UI-Test für die Wetterfenster-Liste (#538) – sie steckt in der grossen Wetterseite mit Live-Abrufen; die Logik ist in server/weatherWindow.test.ts abgedeckt
+- Migration dieser Runde: **0122** (packFeedback.person) – serverseitig pendent bis zum nächsten Deploy
+- EHRLICH: nichts am Bildschirm verifiziert (kein Browser-Durchklick) – geprüft über tsc, vitest (komplett), Build und Playwright-Smoke
+- Runde abgeschlossen (Changelog-Block 2026-08-09.5; Block .2 ins Archiv rotiert)
+
 ## Zwanzig Vorschläge (09.08.2026, Runde 54)
 
 - [x] #536 Etappen-Reisen (Zwischenhalte): Abschnitt «Etappen» an der Reise (Tabelle tripStops, Migration 0121, Router trips.stops mit canAccessTrip – Mitreisende planen mit, max. 12). Jede Etappe hat Ort (Ortssuche #465 mit Koordinaten), Ankunft und Weiterreise; eine Mini-Karte verbindet die nummerierten Punkte, die aktuelle Etappe ist grün. Die Heute-Ansicht nimmt die Koordinaten der AKTUELLEN Etappe (shared/tripStops.ts, 4 Tests – am Wechseltag gilt der neu angefahrene Ort) für Wetter/Umgebung und zeigt «Etappe: … · bis …»; Papierkorb nimmt die Etappen mit

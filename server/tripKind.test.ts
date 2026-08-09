@@ -11,7 +11,7 @@ import {
 } from "../shared/tripKind";
 
 describe("Reise-Art (#460)", () => {
-  it("kennt die acht Arten, Camping zuerst", () => {
+  it("kennt die neun Arten, Camping zuerst", () => {
     expect(TRIP_KINDS).toEqual([
       "camping",
       "strand",
@@ -19,10 +19,31 @@ describe("Reise-Art (#460)", () => {
       "staedte",
       "wandern",
       "velo",
+      "motorrad",
       "wintersport",
       "tagesausflug",
     ]);
     expect(DEFAULT_TRIP_KIND).toBe("camping");
+  });
+
+  it("Motorradtour (Nutzerwunsch 09.08.2026): Zelt, Feuer, Landesregeln", () => {
+    const preset = tripKindPreset("motorrad");
+    // Übernachtet wie Camping – Zeltausrüstung und Lagerfeuer-Ampel an
+    expect(preset.tentGear).toBe(true);
+    expect(preset.campfire).toBe(true);
+    // Unterwegs zählen Landesregeln, Tankbuch und Reparatur
+    expect(preset.quickModules).toEqual([
+      "/laenderregeln",
+      "/tankbuch",
+      "/reparatur",
+    ]);
+    // Formular wie bei Velotouren: Platz verknüpfbar, kein Hotel-Block
+    expect(tripKindForm("motorrad")).toEqual({
+      spotSelect: true,
+      pitchDetails: true,
+      hotelDetails: false,
+      singleDay: false,
+    });
   });
 
   it("bringt Unbekanntes auf Camping (Zeilen von vor der Spalte)", () => {

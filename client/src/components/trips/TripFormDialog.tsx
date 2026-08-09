@@ -45,6 +45,7 @@ import {
 } from "@shared/tripKind";
 import { cn } from "@/lib/utils";
 import { packScenarios } from "@shared/packTemplates";
+import { formatChf } from "@/lib/money";
 import { pick } from "@shared/i18n";
 
 /**
@@ -59,6 +60,9 @@ const KIND_SCENARIO: Partial<Record<TripKind, string>> = {
   staedte: "staedtereise",
   wandern: "solo",
   velo: "velotour",
+  // Das «Motorrad-Zelten»-Szenario gab es längst – jetzt findet es die
+  // passende Reise-Art von selbst (Nutzerwunsch 09.08.2026)
+  motorrad: "motorrad",
   wintersport: "wintersport",
 };
 
@@ -165,6 +169,7 @@ export default function TripFormDialog({
   spots,
   packLists,
   onClose,
+  initialPlace = null,
 }: {
   open: boolean;
   /** Zu bearbeitende Reise – null heisst «Neue Reise». */
@@ -172,6 +177,11 @@ export default function TripFormDialog({
   spots: FormSpot[];
   packLists: FormPackList[];
   onClose: () => void;
+  /**
+   * Vorbelegter Ort (#562, «Reise hierhin planen» am Merkort): Name und
+   * Koordinaten stehen beim Öffnen schon im Formular – nur bei «Neu».
+   */
+  initialPlace?: { name: string; lat: number; lng: number } | null;
 }) {
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
@@ -271,6 +281,11 @@ export default function TripFormDialog({
 
   /** Welche Felder das Formular für die gewählte Art zeigt (#485). */
   const kindForm = tripKindForm(formKind);
+  // Kosten-Schätzung (#568): nur beim Anlegen, je gewählter Art
+  const costHintQuery = trpc.trips.expenses.costHint.useQuery(
+    { kind: formKind },
+    { enabled: open && editingId === null, staleTime: 5 * 60_000 }
+  );
 
   /**
    * Beim Öffnen den Zustand aufbauen: aus der Reise (Bearbeiten) oder
@@ -334,6 +349,12 @@ export default function TripFormDialog({
       setFormKind("camping");
       setFormCoords(null);
       setPlaceResults(null);
+    }
+    // Vorbelegter Ort (#562): Der Merkort steht beim Öffnen im Formular –
+    // Name als Freitext-Ort, Koordinaten wie ein Ortssuche-Treffer.
+    if (!editing && initialPlace) {
+      setForm(f => ({ ...f, location: initialPlace.name }));
+      setFormCoords({ lat: initialPlace.lat, lng: initialPlace.lng });
     }
     // Nur beim Öffnen bzw. beim Wechsel der geladenen Reise neu aufbauen –
     // Tipp-Zwischenstände dürfen ein Re-Render nicht verlieren.
@@ -718,6 +739,16 @@ export default function TripFormDialog({
             <p className="mt-1 text-xs text-muted-foreground">
               {t.trips.kindHint}
             </p>
+            {/* Kosten-Schätzung (#568): der Median der eigenen Reisen
+                gleicher Art – ehrlich erst ab zwei vergleichbaren. */}
+            {editingId === null && costHintQuery.data && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t.trips.costHintLine(
+                  `${formatChf(costHintQuery.data.perNightRappen, lang)} CHF`,
+                  costHintQuery.data.tripCount
+                )}
+              </p>
+            )}
           </div>
           {/* «Wer ist dabei?» (Reisepass #292): angetippt = dabei. Die
               Auswahl speichert die Abwesenheiten, aus denen die Pässe

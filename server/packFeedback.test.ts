@@ -47,6 +47,7 @@ describe("Zusammenzählen", () => {
       unusedTrips: 1,
       missingTrips: 1,
       category: null,
+      person: null,
     });
   });
 
@@ -127,8 +128,24 @@ describe("Gefehltes", () => {
     ]);
     const suggestions = missingSuggestions([], summary);
     expect(suggestions).toEqual([
-      { name: "Wäscheklammern", missingTrips: 2, category: "Küche" },
+      {
+        name: "Wäscheklammern",
+        missingTrips: 2,
+        category: "Küche",
+        person: null,
+      },
     ]);
+  });
+
+  it("reicht die Person an den Vorschlag weiter (Nutzerwunsch 09.08.2026)", () => {
+    const summary = summarizeFeedback([
+      { tripId: 1, kind: "missing", name: "Badehose", person: "Luca" },
+      { tripId: 2, kind: "unused", name: "Regenhose", person: "Mia" },
+    ]);
+    expect(missingSuggestions([], summary)).toEqual([
+      { name: "Badehose", missingTrips: 1, category: null, person: "Luca" },
+    ]);
+    expect(summary.get("regenhose")?.person).toBe("Mia");
   });
 
   it("reicht EINMAL – Vergessen ist teurer als ein zweiter Blick", () => {
@@ -136,7 +153,12 @@ describe("Gefehltes", () => {
       rows({ tripId: 1, kind: "missing", name: "Wäscheklammern" })
     );
     expect(missingSuggestions([{ name: "Zelt" }], summary)).toEqual([
-      { name: "Wäscheklammern", missingTrips: 1, category: null },
+      {
+        name: "Wäscheklammern",
+        missingTrips: 1,
+        category: null,
+        person: null,
+      },
     ]);
   });
 

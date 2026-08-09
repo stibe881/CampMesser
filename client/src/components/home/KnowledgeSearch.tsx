@@ -118,6 +118,8 @@ export default function KnowledgeSearch({
   // Ausweise & Tankbuch (#482): auch die sollen sich ertippen lassen
   const documentsQuery = trpc.documents.list.useQuery(undefined, queryOpts);
   const fuelLogQuery = trpc.fuelLog.list.useQuery(undefined, queryOpts);
+  // Merkorte (#564): «Ossiacher See» tippen → Sprung auf die Karte
+  const savedPlacesQuery = trpc.savedPlaces.list.useQuery(undefined, queryOpts);
   // Der geschriebene Inhalt der Reisen (#349): Journal, Pinnwand,
   // Gästebuch. Wie alle Listen hier erst beim Antippen des Suchfelds –
   // es sind alle Journal-Texte auf einmal, und wer nie sucht, holt nichts.
@@ -223,6 +225,7 @@ export default function KnowledgeSearch({
             tripTexts: tripTexts,
             documents: documentsQuery.data,
             fuelFills: fuelLogQuery.data,
+            savedPlaces: savedPlacesQuery.data,
           },
           6,
           lang
@@ -255,7 +258,7 @@ export default function KnowledgeSearch({
           }}
           placeholder={t.home.searchPlaceholder}
           aria-label={t.home.searchAria}
-          className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
+          className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
         />
       </div>
       {!hasQuery && focused && recent.length > 0 && (
