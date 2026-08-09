@@ -2884,6 +2884,8 @@ export const de = {
     calPublicHolidayTitle: (names: string) => `Feiertag: ${names}`,
     calLegendOwn: "Eigene Reise",
     calLegendShared: "Gemeinsame Reise",
+    calLegendStage: "Etappen-Wechsel",
+    calStageTitle: (name: string) => `Etappe: ${name}`,
     calLegendSchool: "Schulferien",
     calLegendPublic: "Feiertag",
     duplicateAria: (name: string) => `Reise ${name} duplizieren`,

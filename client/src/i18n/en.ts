@@ -2782,6 +2782,8 @@ export const en: Translation = {
     calPublicHolidayTitle: names => `Public holiday: ${names}`,
     calLegendOwn: "Your own trip",
     calLegendShared: "Shared trip",
+    calLegendStage: "Stage change",
+    calStageTitle: (name: string) => `Stage: ${name}`,
     calLegendSchool: "School holidays",
     calLegendPublic: "Public holiday",
     duplicateAria: (name: string) => `Duplicate trip ${name}`,

@@ -2874,6 +2874,8 @@ export const fr: Translation = {
     calPublicHolidayTitle: names => `Jour férié : ${names}`,
     calLegendOwn: "Ton voyage",
     calLegendShared: "Voyage partagé",
+    calLegendStage: "Changement d’étape",
+    calStageTitle: (name: string) => `Étape : ${name}`,
     calLegendSchool: "Vacances scolaires",
     calLegendPublic: "Jour férié",
     duplicateAria: (name: string) => `Dupliquer le voyage ${name}`,

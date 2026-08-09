@@ -844,6 +844,29 @@ export const tripsRouters = {
           }
           return db.getTripStops(input.tripId);
         }),
+      /**
+       * Alle Etappen aller zugänglichen Reisen auf einmal (#573): Der
+       * Reise-Kalender markiert die Etappen-Wechsel – eine Abfrage für
+       * die ganze Ansicht statt einer je Reise.
+       */
+      listAll: protectedProcedure.query(async ({ ctx }) => {
+        const [own, member] = await Promise.all([
+          db.getTripLogs(ctx.user.id),
+          db.getMemberTripLogs(ctx.user.id),
+        ]);
+        const tripIds = [
+          ...own.map(trip => trip.id),
+          ...member.map(({ trip }) => trip.id),
+        ];
+        const stops = await db.getTripStopsForTrips(tripIds);
+        return stops.map(stop => ({
+          id: stop.id,
+          tripId: stop.tripId,
+          name: stop.name,
+          startDate: stop.startDate,
+          endDate: stop.endDate,
+        }));
+      }),
       add: protectedProcedure
         .input(
           z.object({

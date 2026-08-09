@@ -570,6 +570,12 @@ export default function TripsPage() {
   // Ansicht der Aufenthalte: Liste (Standard) oder Monats-Kalender –
   // die Wahl bleibt über localStorage erhalten.
   const [tripsView, setTripsView] = useState<TripsView>(loadStoredTripsView);
+  // Etappen aller Reisen (#573): der Kalender markiert die Wechseltage –
+  // eine Abfrage, nur wenn die Kalender-Ansicht offen ist.
+  const allStopsQuery = trpc.trips.stops.listAll.useQuery(undefined, {
+    enabled: isAuthenticated && tripsView === "calendar",
+    staleTime: 5 * 60_000,
+  });
   const selectTripsView = (view: TripsView) => {
     setTripsView(view);
     try {
@@ -920,6 +926,7 @@ export default function TripsPage() {
               )}
               <TripCalendar
                 trips={calendarTrips}
+                stops={allStopsQuery.data ?? []}
                 holidays={holidays}
                 onTripClick={openTripFromCalendar}
               />
