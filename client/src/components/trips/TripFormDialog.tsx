@@ -192,10 +192,55 @@ export default function TripFormDialog({
   /** Treffer der Ortssuche; null = (noch) nicht gesucht. */
   const [placeResults, setPlaceResults] = useState<PlaceResult[] | null>(null);
   const [placeSearching, setPlaceSearching] = useState(false);
+  /**
+   * «Wer ist dabei?» (Reisepass #292): Ids der Personen, die bei DIESER
+   * Reise fehlen. Gespeichert wird die Abwesenheit – ohne Antippen sind
+   * alle dabei, wie es bei einer Familienreise der Normalfall ist.
+   */
+  const [absentIds, setAbsentIds] = useState<Set<number>>(new Set());
+  /** Für welchen Dialog-Aufbau `absentIds` schon initialisiert ist. */
+  const [absentInitFor, setAbsentInitFor] = useState<string | null>(null);
 
   const editingId = editing?.id ?? null;
   /** Mitglieds-Trip im Formular: Zeltplatz/Packliste bleiben unveränderbar. */
   const editingShared = editing?.role === "member";
+
+  // Personen und bestehende Abwesenheiten – nur solange der Dialog offen
+  // ist. Bei Mitglieds-Trips entfällt der Abschnitt: Die Personen gehören
+  // zum Konto der Besitzerin/des Besitzers.
+  const peopleQuery = trpc.family.children.list.useQuery(undefined, {
+    enabled: open && !editingShared,
+  });
+  const absencesQuery = trpc.family.passport.absences.useQuery(undefined, {
+    enabled: open && !editingShared,
+  });
+  const people = peopleQuery.data ?? [];
+
+  /**
+   * `absentIds` aufbauen, sobald die Abwesenheiten da sind: beim
+   * Bearbeiten die gespeicherten dieser Reise, bei einer neuen Reise
+   * leer (= alle dabei). Der Schlüssel verhindert, dass ein späteres
+   * Nachladen die Auswahl der Nutzerin überschreibt.
+   */
+  useEffect(() => {
+    if (!open) {
+      setAbsentInitFor(null);
+      return;
+    }
+    const key = editingId === null ? "neu" : String(editingId);
+    if (absentInitFor === key) return;
+    if (editingId !== null && absencesQuery.data === undefined) return;
+    setAbsentIds(
+      new Set(
+        editingId === null
+          ? []
+          : (absencesQuery.data ?? [])
+              .filter(a => a.tripId === editingId)
+              .map(a => a.childId)
+      )
+    );
+    setAbsentInitFor(key);
+  }, [open, editingId, absencesQuery.data, absentInitFor]);
 
   /** Welche Felder das Formular für die gewählte Art zeigt (#485). */
   const kindForm = tripKindForm(formKind);
@@ -271,6 +316,7 @@ export default function TripFormDialog({
   const addMutation = trpc.trips.add.useMutation({
     onSuccess: () => {
       utils.trips.list.invalidate();
+      utils.family.passport.absences.invalidate();
       onClose();
       toast.success(t.trips.entrySaved);
     },
@@ -280,6 +326,7 @@ export default function TripFormDialog({
   const updateMutation = trpc.trips.update.useMutation({
     onSuccess: () => {
       utils.trips.list.invalidate();
+      utils.family.passport.absences.invalidate();
       onClose();
       toast.success(t.trips.entryUpdated);
     },
@@ -409,6 +456,11 @@ export default function TripFormDialog({
               wifiName: form.wifiName.trim() || null,
               wifiPassword: form.wifiPassword.trim() || null,
               pitchNotes: form.pitchNotes.trim() || null,
+              // Nur mitschicken, wenn es Personen gibt – sonst gäbe es
+              // nichts zu speichern und nichts zu löschen
+              ...(people.length > 0
+                ? { absentChildIds: Array.from(absentIds) }
+                : {}),
             };
             if (editingId !== null) {
               updateMutation.mutate({ id: editingId, ...payload });
@@ -576,6 +628,50 @@ export default function TripFormDialog({
               {t.trips.kindHint}
             </p>
           </div>
+          {/* «Wer ist dabei?» (Reisepass #292): angetippt = dabei. Die
+              Auswahl speichert die Abwesenheiten, aus denen die Pässe
+              ihre Stempel ableiten – nichts wird doppelt erfasst. */}
+          {!editingShared && people.length > 0 && (
+            <div>
+              <p className="text-sm font-medium">{t.trips.whoAlongTitle}</p>
+              <div
+                className="mt-1.5 flex flex-wrap gap-1.5"
+                role="group"
+                aria-label={t.trips.whoAlongTitle}
+              >
+                {people.map(person => {
+                  const along = !absentIds.has(person.id);
+                  return (
+                    <button
+                      key={person.id}
+                      type="button"
+                      onClick={() =>
+                        setAbsentIds(prev => {
+                          const next = new Set(prev);
+                          if (along) next.add(person.id);
+                          else next.delete(person.id);
+                          return next;
+                        })
+                      }
+                      className={cn(
+                        "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                        along
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground line-through hover:text-foreground"
+                      )}
+                      aria-pressed={along}
+                      aria-label={t.trips.whoAlongPersonAria(person.name)}
+                    >
+                      {person.name}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t.trips.whoAlongHint}
+              </p>
+            </div>
+          )}
           <div
             className={cn("grid gap-3", !kindForm.singleDay && "grid-cols-2")}
           >

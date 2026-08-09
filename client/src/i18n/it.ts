@@ -2476,6 +2476,10 @@ export const it: Translation = {
       "Condiviso con ReiseKompass – la tua bussola per vacanze, campeggio e gite.",
   },
   trips: {
+    whoAlongTitle: "Chi viene?",
+    whoAlongHint:
+      "Toccato = presente. Da qui nascono i timbri del passaporto – quello di famiglia solo se ci sono tutti.",
+    whoAlongPersonAria: (name: string) => `${name} partecipa a questo viaggio`,
     detailSubtitle: "Un soggiorno in dettaglio",
     backToList: "Tutti i soggiorni",
     openDetailAria: (name: string) => `Apri il soggiorno ${name}`,
@@ -4363,6 +4367,19 @@ export const it: Translation = {
       `Allerte ufficiali: ${issuer}, tramite ${source}.`,
   },
   passport: {
+    personSection: "Impostazioni della persona",
+    familyMemberToggle: (name: string) =>
+      `${name} conta per il passaporto di famiglia`,
+    familyMemberHint:
+      "Senza spunta questa persona non impedisce il timbro di famiglia quando manca – il suo passaporto resta.",
+    familyStrictHint:
+      "Il passaporto di famiglia timbra solo i viaggi con tutta la famiglia. Chi c’era si definisce modificando il viaggio («Chi viene?»).",
+    editAtTripHint:
+      "Chi c’era si definisce modificando il viaggio – sezione «Chi viene?».",
+    familyEmpty:
+      "Ancora nessun viaggio con tutta la famiglia – il passaporto di famiglia timbra solo quelli. I passaporti individuali contano comunque.",
+    personEmpty: (person: string) =>
+      `${person} non ha ancora partecipato a nessun viaggio. Chi c’era si definisce modificando il viaggio.`,
     title: "Passaporto di viaggio",
     intro:
       "Un timbro per ogni campeggio visitato. I timbri vengono dai tuoi viaggi – ciò che è registrato è registrato.",
@@ -4386,18 +4403,8 @@ export const it: Translation = {
     addPersonSave: "Crea",
     addPersonHint:
       "Sono le stesse persone della modalità famiglia – chi è già registrato lì compare anche qui.",
-    whoWasThere: "Chi c'era?",
-    whoWasThereHint:
-      "Senza modifiche ogni viaggio vale per tutti. Togli il segno dove qualcuno non c'era – per esempio prima che un bambino nascesse.",
-    tripUnnamed: "Senza nome del luogo",
-    presenceAria: (place: string, person: string) =>
-      `${person} era presente a «${place}»`,
-    noTrips: "Nessun viaggio registrato finora.",
-    personEmpty: (person: string) =>
-      `${person} non ha ancora partecipato a nessun viaggio. Metti i segni qui sotto.`,
     noPlaceEmpty:
       "I viaggi contano, ma manca il nome del posto – un timbro ha bisogno di un luogo. Aggiungi un campeggio o un luogo al viaggio e il timbro apparirà.",
-    tripNoStamp: "Nessun timbro – al viaggio manca il campeggio o il luogo.",
     print: "Stampa il passaporto",
     note: "I timbri nascono dai viaggi del diario; nulla viene registrato due volte. Ogni campeggio riceve dal proprio nome la stessa forma, lo stesso colore e la stessa inclinazione – uguali su ogni dispositivo.",
   },

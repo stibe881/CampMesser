@@ -2501,6 +2501,10 @@ export const fr: Translation = {
       "Partagé avec ReiseKompass – ta boussole pour les vacances, le camping et les excursions.",
   },
   trips: {
+    whoAlongTitle: "Qui vient ?",
+    whoAlongHint:
+      "Touché = présent. Les tampons du passeport en découlent – le tampon familial seulement si tout le monde est là.",
+    whoAlongPersonAria: (name: string) => `${name} participe à ce voyage`,
     detailSubtitle: "Un séjour en détail",
     backToList: "Tous les séjours",
     openDetailAria: (name: string) => `Ouvrir le séjour ${name}`,
@@ -4394,6 +4398,19 @@ export const fr: Translation = {
       `Alertes officielles : ${issuer}, via ${source}.`,
   },
   passport: {
+    personSection: "Réglages de la personne",
+    familyMemberToggle: (name: string) =>
+      `${name} compte pour le passeport familial`,
+    familyMemberHint:
+      "Sans coche, cette personne n’empêche pas le tampon familial quand elle manque – elle garde son propre passeport.",
+    familyStrictHint:
+      "Le passeport familial ne tamponne que les voyages où toute la famille était là. Qui était là se règle en modifiant le voyage (« Qui vient ? »).",
+    editAtTripHint:
+      "Qui était là se règle en modifiant le voyage – section « Qui vient ? ».",
+    familyEmpty:
+      "Pas encore de voyage avec toute la famille – le passeport familial ne tamponne que ceux-là. Les passeports individuels comptent quand même.",
+    personEmpty: (person: string) =>
+      `${person} n’a encore participé à aucun voyage. Qui était là se règle en modifiant le voyage.`,
     title: "Passeport de voyage",
     intro:
       "Un tampon pour chaque camping visité. Les tampons viennent de tes voyages – ce qui est saisi est saisi.",
@@ -4417,18 +4434,8 @@ export const fr: Translation = {
     addPersonSave: "Créer",
     addPersonHint:
       "Ce sont les mêmes personnes que dans le mode famille – celles qui y figurent apparaissent ici.",
-    whoWasThere: "Qui était du voyage ?",
-    whoWasThereHint:
-      "Sans modification, chaque voyage compte pour tout le monde. Décoche là où quelqu'un n'était pas là – par exemple avant la naissance d'un enfant.",
-    tripUnnamed: "Sans nom de lieu",
-    presenceAria: (place: string, person: string) =>
-      `${person} était du voyage à « ${place} »`,
-    noTrips: "Aucun voyage enregistré pour l'instant.",
-    personEmpty: (person: string) =>
-      `${person} n'a encore participé à aucun voyage. Coche ci-dessous.`,
     noPlaceEmpty:
       "Les voyages comptent, mais il leur manque le nom du lieu – un tampon a besoin d’un lieu. Ajoute un camping ou un lieu au voyage et le tampon apparaîtra.",
-    tripNoStamp: "Pas de tampon – il manque le camping ou le lieu.",
     print: "Imprimer le passeport",
     note: "Les tampons proviennent des voyages du carnet ; rien n'est saisi deux fois. Chaque camping reçoit, à partir de son nom, la même forme, la même couleur et la même inclinaison – identiques sur chaque appareil.",
   },

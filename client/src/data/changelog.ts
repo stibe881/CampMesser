@@ -23,6 +23,24 @@ export type { ChangelogBlock };
 
 export const changelog: ChangelogBlock[] = [
   {
+    id: "2026-08-09.1",
+    date: "2026-08-09",
+    entries: [
+      l4(
+        "«Wer ist dabei?» steht jetzt bei der Reise. Beim Anlegen oder Bearbeiten einer Reise tippst du an, wer mitkommt – die Reisepässe übernehmen das von selbst, die Häkchenliste im Pass ist weg. Neu ist der Familien-Pass streng: Er stempelt nur Reisen, bei denen die ganze Familie dabei war. Und wer zur Familie zählt, bestimmst du pro Person im Pass – das Göttikind darf fehlen, ohne den Familien-Stempel zu verhindern.",
+        "« Qui vient ? » se trouve désormais sur le voyage. En créant ou modifiant un voyage, tu indiques qui participe – les passeports le reprennent tout seuls, la liste à cocher dans le passeport a disparu. Nouveau : le passeport familial est strict et ne tamponne que les voyages où toute la famille était là. Et tu décides par personne qui compte comme famille – le filleul peut manquer sans empêcher le tampon familial.",
+        "«Chi viene?» ora sta sul viaggio. Creando o modificando un viaggio indichi chi partecipa – i passaporti lo riprendono da soli, la lista di spunte nel passaporto è sparita. Novità: il passaporto di famiglia è severo e timbra solo i viaggi con tutta la famiglia. E per ogni persona decidi chi conta come famiglia – il figlioccio può mancare senza impedire il timbro di famiglia.",
+        "“Who’s along?” now lives on the trip. When creating or editing a trip you tap who joins – the passports pick it up automatically, and the tick list in the passport is gone. New: the family passport is strict and only stamps trips where the whole family was along. You decide per person who counts as family – the godchild may be absent without blocking the family stamp."
+      ),
+      l4(
+        "Der Reisepass erkennt den Platznamen jetzt auch bei Reisen, die nur über den verknüpften Zeltplatz benannt sind – vorher blieb der Stempel dort aus.",
+        "Le passeport reconnaît désormais le nom de l’emplacement même pour les voyages nommés seulement via le camping lié – avant, le tampon manquait.",
+        "Il passaporto ora riconosce il nome della piazzola anche per i viaggi denominati solo tramite il campeggio collegato – prima il timbro mancava.",
+        "The passport now recognises the place name even for trips named only via the linked campsite – previously the stamp was missing there."
+      ),
+    ],
+  },
+  {
     id: "2026-08-08.1",
     date: "2026-08-08",
     entries: [

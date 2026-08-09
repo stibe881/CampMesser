@@ -68,6 +68,26 @@ import {
   z,
 } from "./_shared";
 
+/**
+ * «Wer ist dabei?» aus dem Reise-Formular anwenden: nur eigene Personen
+ * zählen (fremde Ids fallen still weg – kein Grund, das Speichern der
+ * Reise scheitern zu lassen), undefined lässt alles unangetastet.
+ */
+async function applyAbsences(
+  userId: number,
+  tripId: number,
+  absentChildIds: readonly number[] | undefined
+) {
+  if (absentChildIds === undefined) return;
+  const children = await db.getFamilyChildren(userId);
+  const own = new Set(children.map(c => c.id));
+  await db.setPassportAbsencesForTrip(
+    userId,
+    tripId,
+    absentChildIds.filter(id => own.has(id))
+  );
+}
+
 export const tripsRouters = {
   trips: router({
     /** Buchungsbestätigung entfernen (#279) – Datei und Verweis. */
@@ -148,6 +168,12 @@ export const tripsRouters = {
               .string()
               .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
               .nullish(),
+            // «Wer ist dabei?»: Personen (familyChildren), die bei DIESER
+            // Reise fehlen. undefined = Abwesenheiten nicht anfassen.
+            absentChildIds: z
+              .array(z.number().int().positive())
+              .max(100)
+              .optional(),
           })
           .refine(v => v.endDate >= v.startDate, {
             message: "Die Abreise darf nicht vor der Anreise liegen.",
@@ -198,6 +224,7 @@ export const tripsRouters = {
           arrivalTime: input.arrivalTime ?? null,
           departureTime: input.departureTime ?? null,
         });
+        await applyAbsences(ctx.user.id, id, input.absentChildIds);
         return { id };
       }),
     /**
@@ -346,6 +373,12 @@ export const tripsRouters = {
             wifiName: z.string().max(80).nullish(),
             wifiPassword: z.string().max(80).nullish(),
             pitchNotes: z.string().max(2000).nullish(),
+            // «Wer ist dabei?» – siehe add; Mitglieder ohne Wirkung, die
+            // Personen gehören dem Konto der Besitzerin/des Besitzers.
+            absentChildIds: z
+              .array(z.number().int().positive())
+              .max(100)
+              .optional(),
           })
           .refine(v => v.endDate >= v.startDate, {
             message: "Die Abreise darf nicht vor der Anreise liegen.",
@@ -439,6 +472,9 @@ export const tripsRouters = {
           pitchNotes: input.pitchNotes?.trim() || null,
           ...(weatherStale ? { weatherJson: null } : {}),
         });
+        if (isOwner) {
+          await applyAbsences(ctx.user.id, input.id, input.absentChildIds);
+        }
         await noteTripChange(input.id, ctx.user.id, "trip", "edit");
         return { success: true } as const;
       }),

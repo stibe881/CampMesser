@@ -518,6 +518,33 @@ export const familyRouters = {
           return { success: true } as const;
         }),
       /**
+       * Familien-Schalter: Zählt die Person zum Familien-Pass? Wer auf
+       * `false` steht, verhindert den Familien-Stempel nicht, wenn er
+       * bei einer Reise fehlt (z. B. das Göttikind).
+       */
+      setFamilyMember: protectedProcedure
+        .input(
+          z.object({
+            id: z.number().int().positive(),
+            familyMember: z.boolean(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const child = await db.getFamilyChild(input.id, ctx.user.id);
+          if (!child) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Person nicht gefunden.",
+            });
+          }
+          await db.setFamilyChildFamilyMember(
+            input.id,
+            ctx.user.id,
+            input.familyMember
+          );
+          return { success: true } as const;
+        }),
+      /**
        * Kind entfernen – Abzeichen, Zähler und Reisepass-Einträge gehen
        * mit.
        */
