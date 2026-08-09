@@ -37,6 +37,7 @@ import RainRadar from "@/components/RainRadar";
 import CondensationCard from "@/components/CondensationCard";
 import WeatherTurnCard from "@/components/WeatherTurnCard";
 import WinterCard from "@/components/WinterCard";
+import AirQualityCard from "@/components/AirQualityCard";
 import DryWindowCard from "@/components/DryWindowCard";
 import { weatherTurn } from "@shared/weatherTurn";
 import { Button } from "@/components/ui/button";
@@ -1177,6 +1178,16 @@ export default function WeatherPage() {
           {/* Frost & Schneefallgrenze (#428/#429): melden sich nur,
               wenn eine der beiden Zahlen betrifft. */}
           <WinterCard days={data.daily} hours={data.hourly} className="mb-4" />
+
+          {/* Luftqualität (#565): EAQI-Ampel mit Feinstaub und Ozon –
+              die Ergänzung zu UV und Pollen. */}
+          {coords && (
+            <AirQualityCard
+              latitude={coords.lat}
+              longitude={coords.lon}
+              className="mb-4"
+            />
+          )}
 
           {/* Wetterumschwung (#417): «Morgen kippt das Wetter» – nur,
               wenn morgen deutlich schlechter wird als heute. */}

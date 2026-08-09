@@ -5016,6 +5016,14 @@ export const en: Translation = {
     saved: "Review saved.",
     note: "Unused once means nothing – the sunscreen from a rainy July comes along again next year. Only from the second time does it become a hint. Anything that was missing is suggested right away.",
   },
+  airQuality: {
+    title: "Air quality",
+    index: "EU index",
+    pm25: "Fine dust PM2.5",
+    ozone: "Ozone",
+    source: "European air quality index (EAQI), Open-Meteo/CAMS.",
+    briefingLine: (label: string) => `Air quality today: ${label}.`,
+  },
   turnaround: {
     stormForecast: (clock: string) => `Thunderstorm forecast from ${clock}.`,
     stormPropensity: (clock: string) =>

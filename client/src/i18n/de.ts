@@ -5163,6 +5163,15 @@ export const de = {
     saved: "Rückblick gespeichert.",
     note: "Einmal nicht gebraucht heisst nichts – die Sonnencreme im verregneten Juli kommt nächstes Jahr wieder mit. Erst ab dem zweiten Mal wird daraus ein Hinweis. Was gefehlt hat, wird sofort vorgeschlagen.",
   },
+  airQuality: {
+    title: "Luftqualit\u00e4t",
+    index: "EU-Index",
+    pm25: "Feinstaub PM2.5",
+    ozone: "Ozon",
+    source:
+      "Europ\u00e4ischer Luftqualit\u00e4tsindex (EAQI), Open-Meteo/CAMS.",
+    briefingLine: (label: string) => `Luftqualit\u00e4t heute: ${label}.`,
+  },
   turnaround: {
     stormForecast: (clock: string) => `Gewitter ab ${clock} angesagt.`,
     stormPropensity: (clock: string) =>

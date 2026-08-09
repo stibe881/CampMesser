@@ -5124,6 +5124,16 @@ export const it: Translation = {
     saved: "Bilancio salvato.",
     note: "Una volta inutilizzato non dice nulla: la crema solare di un luglio piovoso riparte l'anno prossimo. Solo dalla seconda volta diventa un'indicazione. Ciò che è mancato viene proposto subito.",
   },
+  airQuality: {
+    title: "Qualit\u00e0 dell\u2019aria",
+    index: "Indice UE",
+    pm25: "Polveri sottili PM2.5",
+    ozone: "Ozono",
+    source:
+      "Indice europeo di qualit\u00e0 dell\u2019aria (EAQI), Open-Meteo/CAMS.",
+    briefingLine: (label: string) =>
+      `Qualit\u00e0 dell\u2019aria oggi: ${label}.`,
+  },
   turnaround: {
     stormForecast: (clock: string) => `Temporale annunciato dalle ${clock}.`,
     stormPropensity: (clock: string) =>

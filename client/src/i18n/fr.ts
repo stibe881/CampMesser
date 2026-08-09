@@ -5162,6 +5162,16 @@ export const fr: Translation = {
     saved: "Bilan enregistré.",
     note: "Une fois inutilisé ne veut rien dire – la crème solaire d'un juillet pluvieux repart l'an prochain. Ce n'est qu'à partir de la deuxième fois que cela devient un indice. Ce qui a manqué est proposé tout de suite.",
   },
+  airQuality: {
+    title: "Qualit\u00e9 de l\u2019air",
+    index: "Indice UE",
+    pm25: "Particules fines PM2.5",
+    ozone: "Ozone",
+    source:
+      "Indice europ\u00e9en de qualit\u00e9 de l\u2019air (EAQI), Open-Meteo/CAMS.",
+    briefingLine: (label: string) =>
+      `Qualit\u00e9 de l\u2019air aujourd\u2019hui\u00a0: ${label}.`,
+  },
   turnaround: {
     stormForecast: (clock: string) => `Orage annoncé dès ${clock}.`,
     stormPropensity: (clock: string) =>
