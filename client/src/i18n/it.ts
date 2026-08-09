@@ -1209,6 +1209,16 @@ export const it: Translation = {
     rowComfort: "Igiene personale confortevole",
     rowReserve: "Riserva di sicurezza (20 %)",
     rowTotal: "Totale consigliato",
+    tanksTitle: "Tracker acqua chiara e grigia",
+    tanksHint:
+      "Inserisci capienze e livelli dei serbatoi \u2013 il fabbisogno giornaliero qui sopra dice quanto durano. Salvato su questo dispositivo.",
+    tanksFresh: "Acqua chiara",
+    tanksGrey: "Acque grigie",
+    tanksSizeAria: (tank: string) => `Capienza serbatoio ${tank} in litri`,
+    tanksLevelAria: (tank: string) => `Livello ${tank}`,
+    tanksLevel: (pct: number, liters: number) => `${pct} % \u2248 ${liters} l`,
+    tanksForecast: (daily: string, freshDays: string, greyDays: string) =>
+      `Con \u2248 ${daily} l al giorno l\u2019acqua chiara dura ancora \u2248 ${freshDays} giorni; il serbatoio delle acque grigie sar\u00e0 pieno tra \u2248 ${greyDays} giorni.`,
     footnote:
       "Nota: valori indicativi per un clima temperato. In caso di ondate di caldo, altitudine o lavoro fisico pianifica con più margine. Il valore per i cani vale per cani di taglia media (ca. 20 kg). Usa l'acqua dei ruscelli solo filtrata o bollita.",
   },

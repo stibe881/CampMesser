@@ -1180,6 +1180,16 @@ export const en: Translation = {
     rowComfort: "Comfortable personal hygiene",
     rowReserve: "Safety reserve (20 %)",
     rowTotal: "Recommended total",
+    tanksTitle: "Fresh & grey water tracker",
+    tanksHint:
+      "Enter tank sizes and levels \u2013 the daily need above tells you how long they last. Stored on this device.",
+    tanksFresh: "Fresh water",
+    tanksGrey: "Grey water",
+    tanksSizeAria: (tank: string) => `${tank} tank size in litres`,
+    tanksLevelAria: (tank: string) => `${tank} level`,
+    tanksLevel: (pct: number, liters: number) => `${pct} % \u2248 ${liters} l`,
+    tanksForecast: (daily: string, freshDays: string, greyDays: string) =>
+      `At \u2248 ${daily} l per day the fresh water lasts \u2248 ${freshDays} more days; the grey tank is full in \u2248 ${greyDays} days.`,
     footnote:
       "Note: these are guide values for a temperate climate. Plan more generously for heat waves, high altitude or physical work. The dog value applies to medium-sized dogs (approx. 20 kg). Only use stream water filtered or boiled.",
   },

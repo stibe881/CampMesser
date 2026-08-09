@@ -1231,6 +1231,17 @@ export const fr: Translation = {
     rowComfort: "Toilette confortable",
     rowReserve: "Réserve de sécurité (20 %)",
     rowTotal: "Total recommandé",
+    tanksTitle: "Suivi eau propre & eaux grises",
+    tanksHint:
+      "Saisis tailles et niveaux des r\u00e9servoirs \u2013 le besoin quotidien ci-dessus dit combien de temps \u00e7a tient. M\u00e9moris\u00e9 sur cet appareil.",
+    tanksFresh: "Eau propre",
+    tanksGrey: "Eaux grises",
+    tanksSizeAria: (tank: string) =>
+      `Taille du r\u00e9servoir ${tank} en litres`,
+    tanksLevelAria: (tank: string) => `Niveau ${tank}`,
+    tanksLevel: (pct: number, liters: number) => `${pct} % \u2248 ${liters} l`,
+    tanksForecast: (daily: string, freshDays: string, greyDays: string) =>
+      `\u00c0 \u2248 ${daily} l par jour, l\u2019eau propre tient encore \u2248 ${freshDays} jours\u00a0; le r\u00e9servoir d\u2019eaux grises sera plein dans \u2248 ${greyDays} jours.`,
     footnote:
       "Remarque : valeurs indicatives pour un climat tempéré. En cas de canicule, d'altitude ou de travail physique, prévois plus large. La valeur pour les chiens vaut pour un chien de taille moyenne (env. 20 kg). N'utilise l'eau des ruisseaux que filtrée ou bouillie.",
   },

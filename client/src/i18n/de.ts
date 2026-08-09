@@ -1228,6 +1228,16 @@ export const de = {
     rowComfort: "Körperpflege komfortabel",
     rowReserve: "Sicherheitsreserve (20 %)",
     rowTotal: "Total empfohlen",
+    tanksTitle: "Frisch- & Grauwasser-Tracker",
+    tanksHint:
+      "Tankgr\u00f6ssen und F\u00fcllst\u00e4nde eintragen \u2013 der Tagesbedarf von oben sagt, wie lange es reicht. Bleibt auf diesem Ger\u00e4t gespeichert.",
+    tanksFresh: "Frischwasser",
+    tanksGrey: "Grauwasser",
+    tanksSizeAria: (tank: string) => `Tankgr\u00f6sse ${tank} in Litern`,
+    tanksLevelAria: (tank: string) => `F\u00fcllstand ${tank}`,
+    tanksLevel: (pct: number, liters: number) => `${pct} % \u2248 ${liters} l`,
+    tanksForecast: (daily: string, freshDays: string, greyDays: string) =>
+      `Bei \u2248 ${daily} l pro Tag reicht das Frischwasser noch \u2248 ${freshDays} Tage; der Grauwassertank ist in \u2248 ${greyDays} Tagen voll.`,
     footnote:
       "Hinweis: Werte sind Richtwerte für gemässigtes Klima. Bei Hitzewellen, Höhenlagen oder körperlicher Arbeit grosszügiger planen. Hunde-Richtwert gilt für mittelgrosse Hunde (ca. 20 kg). Wasser aus Bächen nur gefiltert oder abgekocht verwenden.",
   },
