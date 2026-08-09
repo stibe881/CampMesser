@@ -2017,6 +2017,8 @@ export const en: Translation = {
     stageDialogEmpty: "No planned or running trip \u2013 create one first.",
     stageAdded: (trip: string) => `Stage added \u2013 in \u201c${trip}\u201d`,
     savedPlacesListTitle: "Your saved places",
+    searchPlaceholder: "Search a place \u2013 e.g. Bellinzona",
+    searchAria: "Search a place on the map",
     savedPlacesListAria: (name: string) => `Show place ${name} on the map`,
     savedPlacesDistance: (km: string) => `${km} from home`,
     placePhotoAdd: (name: string) => `Add a photo to ${name}`,

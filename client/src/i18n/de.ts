@@ -2082,6 +2082,8 @@ export const de = {
     stageAdded: (trip: string) =>
       `Etappe angelegt \u2013 in \u00ab${trip}\u00bb`,
     savedPlacesListTitle: "Deine Merkorte",
+    searchPlaceholder: "Ort suchen \u2013 z. B. Bellinzona",
+    searchAria: "Ort auf der Karte suchen",
     savedPlacesListAria: (name: string) =>
       `Merkort ${name} auf der Karte zeigen`,
     savedPlacesDistance: (km: string) => `${km} von zuhause`,

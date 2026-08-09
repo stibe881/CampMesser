@@ -8,13 +8,15 @@
 import { useMemo, useRef, useState } from "react";
 import { fmtLong } from "@/lib/dateFormat";
 import { Link, useSearch } from "wouter";
-import { Camera, Loader2, MapPin, Star, Trash2, X } from "lucide-react";
+import { Camera, Loader2, MapPin, Search, Star, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { resizeImageForUpload } from "@/lib/imageResize";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -183,6 +185,26 @@ export default function MapViewPage() {
     lon: number;
     nonce: number;
   } | null>(null);
+  // Ortssuche auf der grossen Karte (#631): gleiche Geocoding-Quelle wie
+  // das Reise-Formular (#465) – ein Tipp auf den Treffer fährt die Karte
+  // hin, von dort übernimmt der bestehende Karten-Klick («Platz anlegen»).
+  const [placeSearchTerm, setPlaceSearchTerm] = useState("");
+  const [placeSearchResults, setPlaceSearchResults] = useState<
+    PlaceResult[] | null
+  >(null);
+  const [placeSearching, setPlaceSearching] = useState(false);
+  const runPlaceSearch = async () => {
+    const term = placeSearchTerm.trim();
+    if (!term) return;
+    setPlaceSearching(true);
+    try {
+      setPlaceSearchResults(await searchPlaces(term, lang));
+    } catch {
+      toast.error(t.trips.locationSearchFailed);
+    } finally {
+      setPlaceSearching(false);
+    }
+  };
   const utils = trpc.useUtils();
   const removePlaceMutation = trpc.savedPlaces.remove.useMutation({
     onSuccess: () => {
@@ -361,6 +383,66 @@ export default function MapViewPage() {
               </CardContent>
             </Card>
           )}
+          {/* Ortssuche (#631): Karte zu einem gesuchten Ort fahren */}
+          <form
+            className="mb-3 flex gap-2"
+            onSubmit={e => {
+              e.preventDefault();
+              void runPlaceSearch();
+            }}
+          >
+            <Input
+              value={placeSearchTerm}
+              onChange={e => setPlaceSearchTerm(e.target.value)}
+              placeholder={t.mapView.searchPlaceholder}
+              aria-label={t.mapView.searchAria}
+            />
+            <Button
+              type="submit"
+              variant="outline"
+              disabled={!placeSearchTerm.trim() || placeSearching}
+            >
+              {placeSearching ? (
+                <Loader2
+                  className="mr-1.5 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Search className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              )}
+              {t.trips.locationSearchButton}
+            </Button>
+          </form>
+          {placeSearchResults !== null &&
+            (placeSearchResults.length === 0 ? (
+              <p className="mb-3 text-sm text-muted-foreground">
+                {t.trips.locationSearchNoResults}
+              </p>
+            ) : (
+              <div className="mb-3 flex flex-wrap gap-1.5">
+                {placeSearchResults.map(place => (
+                  <button
+                    key={place.id}
+                    type="button"
+                    onClick={() => {
+                      setFocusPoint({
+                        lat: place.latitude,
+                        lon: place.longitude,
+                        nonce: Date.now(),
+                      });
+                      setPlaceSearchResults(null);
+                      setPlaceSearchTerm(place.name);
+                    }}
+                    className="rounded-full bg-muted px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {place.name}
+                    {place.region && (
+                      <span className="text-xs"> · {place.region}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            ))}
           <SpotsMap
             spots={spotPins}
             targets={targets}

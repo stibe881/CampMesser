@@ -2056,6 +2056,8 @@ export const it: Translation = {
     stageAdded: (trip: string) =>
       `Tappa aggiunta \u2013 in \u00ab${trip}\u00bb`,
     savedPlacesListTitle: "I tuoi luoghi salvati",
+    searchPlaceholder: "Cerca un luogo \u2013 ad es. Bellinzona",
+    searchAria: "Cerca un luogo sulla mappa",
     savedPlacesListAria: (name: string) =>
       `Mostra il luogo ${name} sulla mappa`,
     savedPlacesDistance: (km: string) => `${km} da casa`,
