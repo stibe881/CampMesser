@@ -5077,6 +5077,10 @@ export const it: Translation = {
   tripReview: {
     noCategory: "Senza categoria",
     missingCategoryAria: "Categoria dell’oggetto mancante",
+    missingPersonAria: "Persona per l’oggetto mancante",
+    personFilterAria: "Filtra il riepilogo per persona",
+    personAll: "Tutti",
+    personGeneral: "Generale",
     title: "Bilancio",
     toggleAria: (trip: string) => `Apri il bilancio di ${trip}`,
     intro:

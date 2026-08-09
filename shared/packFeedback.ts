@@ -57,6 +57,8 @@ export interface FeedbackRow {
   name: string;
   /** Kategorie wie auf der Packliste; null bei alten Zeilen/ohne Angabe. */
   category?: string | null;
+  /** Personen-Bereich wie auf der Packliste; null = «Allgemein»/alt. */
+  person?: string | null;
 }
 
 /** Was über einen Gegenstand bekannt ist. */
@@ -69,6 +71,8 @@ export interface FeedbackCount {
   missingTrips: number;
   /** Zuletzt gemeldete Kategorie – für den Vorschlag auf der Liste. */
   category: string | null;
+  /** Zuletzt gemeldeter Personen-Bereich – für den Vorschlag. */
+  person: string | null;
 }
 
 /**
@@ -94,11 +98,13 @@ export function summarizeFeedback(
       unusedTrips: 0,
       missingTrips: 0,
       category: null,
+      person: null,
     };
     // Die zuletzt gesehene Schreibweise gewinnt – Zeilen kommen
     // chronologisch, und die jüngste ist die, die man wiedererkennt.
     entry.label = row.name.trim() || entry.label;
     if (row.category?.trim()) entry.category = row.category.trim();
+    if (row.person?.trim()) entry.person = row.person.trim();
     if (row.kind === "unused") entry.unusedTrips += 1;
     else entry.missingTrips += 1;
     summary.set(key, entry);
@@ -150,7 +156,12 @@ export function unusedHints(
 export function missingSuggestions(
   items: readonly ListedItem[],
   summary: Map<string, FeedbackCount>
-): { name: string; missingTrips: number; category: string | null }[] {
+): {
+  name: string;
+  missingTrips: number;
+  category: string | null;
+  person: string | null;
+}[] {
   const onList = new Set(
     items.map(item => normalizeItemName(item.name)).filter(Boolean)
   );
@@ -158,6 +169,7 @@ export function missingSuggestions(
     name: string;
     missingTrips: number;
     category: string | null;
+    person: string | null;
   }[] = [];
   summary.forEach((count, key) => {
     if (count.missingTrips <= 0 || onList.has(key)) return;
@@ -165,6 +177,7 @@ export function missingSuggestions(
       name: count.label,
       missingTrips: count.missingTrips,
       category: count.category,
+      person: count.person,
     });
   });
   return suggestions.sort(

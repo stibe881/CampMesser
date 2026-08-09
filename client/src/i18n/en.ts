@@ -4973,6 +4973,10 @@ export const en: Translation = {
   tripReview: {
     noCategory: "No category",
     missingCategoryAria: "Category for the missing item",
+    missingPersonAria: "Person for the missing item",
+    personFilterAria: "Filter review by person",
+    personAll: "All",
+    personGeneral: "General",
     title: "Review",
     toggleAria: (trip: string) => `Open the review for ${trip}`,
     intro:

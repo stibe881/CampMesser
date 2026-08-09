@@ -5116,6 +5116,10 @@ export const de = {
   tripReview: {
     noCategory: "Ohne Kategorie",
     missingCategoryAria: "Kategorie für den fehlenden Gegenstand",
+    missingPersonAria: "Person für den fehlenden Gegenstand",
+    personFilterAria: "Rückblick nach Person filtern",
+    personAll: "Alle",
+    personGeneral: "Allgemein",
     title: "Rückblick",
     toggleAria: (trip: string) => `Rückblick zu ${trip} öffnen`,
     intro:

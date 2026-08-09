@@ -769,14 +769,29 @@ export const packingRouters = {
         .input(
           z.object({
             tripId: z.number().int().positive(),
-            unused: z.array(z.string()).max(200),
-            // Kategorie wie auf der Packliste – der spätere Vorschlag
-            // legt den Gegenstand damit gleich in die richtige Gruppe.
+            // Nackte Namen ODER {name, person}: Installierte Apps liefern
+            // nach einem Update noch eine Weile die alte Form – die soll
+            // weiter funktionieren, nur eben ohne Personen-Angabe.
+            unused: z
+              .array(
+                z.union([
+                  z.string(),
+                  z.object({
+                    name: z.string(),
+                    person: z.string().max(80).nullish(),
+                  }),
+                ])
+              )
+              .max(200),
+            // Kategorie und Person wie auf der Packliste – der spätere
+            // Vorschlag legt den Gegenstand damit gleich in die richtige
+            // Gruppe UND den richtigen Personen-Bereich.
             missing: z
               .array(
                 z.object({
                   name: z.string(),
                   category: z.string().max(80).nullish(),
+                  person: z.string().max(80).nullish(),
                 })
               )
               .max(MAX_MISSING_PER_TRIP),
@@ -791,15 +806,20 @@ export const packingRouters = {
             });
           }
           const entries = [
-            ...input.unused.map(name => ({
+            ...input.unused.map(entry => ({
               kind: "unused" as const,
-              name,
+              name: typeof entry === "string" ? entry : entry.name,
               category: null as string | null,
+              person:
+                typeof entry === "string"
+                  ? null
+                  : entry.person?.trim().slice(0, 80) || null,
             })),
             ...input.missing.map(entry => ({
               kind: "missing" as const,
               name: entry.name,
               category: entry.category?.trim().slice(0, 80) || null,
+              person: entry.person?.trim().slice(0, 80) || null,
             })),
           ]
             .map(entry => ({ ...entry, name: cleanFeedbackName(entry.name) }))
