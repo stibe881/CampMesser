@@ -4596,6 +4596,10 @@ export const it: Translation = {
       `Tappa: ${name} \u00b7 fino al ${until}`,
     stageNext: (name: string) => `Domani si prosegue per ${name}`,
     stageNextNavAria: (name: string) => `Avvia la navigazione verso ${name}`,
+    holidayToday: "Oggi",
+    holidayTomorrow: "Domani",
+    holidayLine: (when: string, country: string, name: string) =>
+      `${when} \u00e8 festivo (${country}): ${name} \u2013 negozi spesso chiusi.`,
     weather: "Meteo",
     menu: "Menu",
     shopping: "Lista della spesa",

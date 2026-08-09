@@ -4634,6 +4634,10 @@ export const de = {
       `Etappe: ${name} \u00b7 bis ${until}`,
     stageNext: (name: string) => `Morgen weiter nach ${name}`,
     stageNextNavAria: (name: string) => `Navigation nach ${name} starten`,
+    holidayToday: "Heute",
+    holidayTomorrow: "Morgen",
+    holidayLine: (when: string, country: string, name: string) =>
+      `${when} Feiertag (${country}): ${name} \u2013 L\u00e4den oft geschlossen.`,
     weather: "Wetter",
     menu: "Menüplan",
     shopping: "Einkaufsliste",

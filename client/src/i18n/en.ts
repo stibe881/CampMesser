@@ -4500,6 +4500,10 @@ export const en: Translation = {
       `Stage: ${name} \u00b7 until ${until}`,
     stageNext: (name: string) => `Moving on to ${name} tomorrow`,
     stageNextNavAria: (name: string) => `Start navigation to ${name}`,
+    holidayToday: "Today",
+    holidayTomorrow: "Tomorrow",
+    holidayLine: (when: string, country: string, name: string) =>
+      `${when} is a public holiday (${country}): ${name} \u2013 shops often closed.`,
     weather: "Weather",
     menu: "Meal plan",
     shopping: "Shopping list",

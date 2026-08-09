@@ -101,6 +101,7 @@ import {
 import { Landmark, Umbrella } from "lucide-react";
 import { modules } from "@/data/modules";
 import { tripKindPreset } from "@shared/tripKind";
+import { findCountryRules, guessCountryCode } from "@/data/roadRules";
 
 export default function TodayPage() {
   const { lang, t } = useI18n();
@@ -165,6 +166,35 @@ export default function TodayPage() {
       ) ?? null
     );
   }, [stopsQuery.data, today]);
+  /**
+   * Feiertags-Warnung (#569): Ist die laufende Reise im Ausland und dort
+   * heute oder morgen landesweiter Feiertag, sagt es die Kopfzeile –
+   * Läden sind zu, der Einkauf will vorher erledigt sein. Das Land wird
+   * wie im Reise-Cockpit aus Ort/Titel/Platz geraten; die aktuelle
+   * Etappe hilft bei Rundreisen mit.
+   */
+  const abroadCountry = useMemo(() => {
+    if (!trip) return null;
+    const code = guessCountryCode(
+      [trip.location, trip.title, spot?.name, currentStop?.name]
+        .filter(Boolean)
+        .join(" ")
+    );
+    if (!code || code === "CH") return null;
+    return findCountryRules(code);
+  }, [trip, spot?.name, currentStop?.name]);
+  const holidayQuery = trpc.trips.holidaysAbroad.useQuery(
+    {
+      country: abroadCountry?.code ?? "CH",
+      from: today,
+      to: shiftIsoDay(today, 1),
+    },
+    {
+      enabled: Boolean(trip) && abroadCountry != null,
+      staleTime: 6 * 60 * 60 * 1000,
+    }
+  );
+  const holiday = holidayQuery.data?.[0] ?? null;
   // Koordinaten: aktuelle Etappe zuerst (#536), dann Zeltplatz, sonst die
   // der Reise aus der Ortssuche (#465) – damit haben auch Hotel- und
   // Strandreisen Wetter und Wasser.
@@ -411,6 +441,32 @@ export default function TodayPage() {
                 ) : (
                   td.stageNext(nextStop.name)
                 )}
+              </p>
+            )}
+            {/* Feiertags-Warnung (#569): heute oder morgen Feiertag im
+                Reiseland – Läden zu, also rechtzeitig einkaufen. Der
+                Link springt direkt zur Einkaufsliste. */}
+            {holiday && abroadCountry && (
+              <p className="mt-1 flex items-start gap-1.5 text-sm">
+                <TriangleAlert
+                  className="mt-0.5 h-4 w-4 shrink-0 text-amber-600"
+                  aria-hidden="true"
+                />
+                <span>
+                  {td.holidayLine(
+                    holiday.date === today
+                      ? td.holidayToday
+                      : td.holidayTomorrow,
+                    pick(abroadCountry.name, lang),
+                    holiday.localName
+                  )}{" "}
+                  <Link
+                    href="/einkauf"
+                    className="font-medium text-primary hover:underline"
+                  >
+                    {td.shopping}
+                  </Link>
+                </span>
               </p>
             )}
             {/* Das Wetter bestimmt den Tag – es gehört in die Kopfzeile,

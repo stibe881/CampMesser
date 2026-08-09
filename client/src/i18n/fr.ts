@@ -4631,6 +4631,10 @@ export const fr: Translation = {
     stageNext: (name: string) => `Demain, direction ${name}`,
     stageNextNavAria: (name: string) =>
       `D\u00e9marrer la navigation vers ${name}`,
+    holidayToday: "Aujourd\u2019hui",
+    holidayTomorrow: "Demain",
+    holidayLine: (when: string, country: string, name: string) =>
+      `${when}, jour f\u00e9ri\u00e9 (${country})\u202f: ${name} \u2013 magasins souvent ferm\u00e9s.`,
     weather: "Météo",
     menu: "Menu",
     shopping: "Liste de courses",
