@@ -2805,6 +2805,9 @@ export const en: Translation = {
     hubCreateFailed: "The link could not be created",
     hubLinkCreated: "Hub link created",
     hubStopShare: "Stop sharing",
+    reportLinkHint:
+      "Report link (same token): journal, photos and stages as a memory page – to send to family.",
+    reportLinkCopy: "Copy report link",
     hubStopped: "Sharing stopped – the link is no longer valid",
     hubStopFailed: "Stopping failed",
     hubQrAlt: name => `QR code of the trip hub link for ${name}`,
@@ -2846,6 +2849,12 @@ export const en: Translation = {
     duplicated: "Trip duplicated – you'll find it under planned stays",
     duplicateFailed: "Duplicating failed",
     journalTitle: "Trip journal",
+    timelineTitle: "Timeline",
+    timelineToggleAria: (name: string) =>
+      `Expand or collapse the timeline of ${name}`,
+    timelineEmpty:
+      "Nothing to tell yet – journal, photos and expenses will appear here once they exist.",
+    timelineArrival: (name: string) => `Arrival in ${name}`,
     journalToggleAria: (name: string) =>
       `Expand or collapse the trip journal of ${name}`,
     journalHint:
@@ -3063,6 +3072,11 @@ export const en: Translation = {
     legEstimated: "estimated as the crow flies",
     legTotal: (km: string, duration: string) =>
       `Whole loop: \u2248 ${km} \u00b7 ${duration}`,
+    optimizeButton: "Shortest loop",
+    optimizeConfirm: "Reorder stages along the shortest route?",
+    optimizeAlready: "The order is already the shortest.",
+    optimizeDone: "Stages reordered \u2013 each keeps its nights.",
+    optimizeFailed: "Could not reorder \u2013 try again later.",
     offlineDownloadAria: (trip: string) =>
       `Download offline map for loop ${trip}`,
     offlineDeleteAria: (trip: string) => `Delete offline map for loop ${trip}`,
@@ -3105,6 +3119,19 @@ export const en: Translation = {
       "This packing list is currently not shared separately – view only, ticking off is not possible.",
     footer:
       "Shared with ReiseKompass – your compass for holidays, camping and day trips.",
+  },
+  sharedReport: {
+    kicker: "ReiseKompass · Trip report",
+    notFoundTitle: "This report no longer exists.",
+    notFoundText:
+      "The link was stopped or has expired. Ask the person who shared it for a new one.",
+    coverAlt: (name: string) => `Cover photo of the trip ${name}`,
+    ratingAria: (n: number) => `Rating: ${n} out of 5 stars`,
+    journalPhotoAlt: (day: string) => `Photo of the day, ${day}`,
+    photosTitle: "Photos",
+    photoAlt: (n: number, name: string) => `Photo ${n} of the trip ${name}`,
+    footer:
+      "Shared with ReiseKompass – your compass for holidays, camping and outings.",
   },
   tripPrint: {
     docTitle: name => `${name} – Trip report for printing`,

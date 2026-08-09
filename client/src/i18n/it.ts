@@ -2875,6 +2875,9 @@ export const it: Translation = {
     hubCreateFailed: "Impossibile creare il link",
     hubLinkCreated: "Link dell'hub creato",
     hubStopShare: "Termina la condivisione",
+    reportLinkHint:
+      "Link del rapporto (stesso token): diario, foto e tappe come pagina ricordo – da inviare ai parenti.",
+    reportLinkCopy: "Copia il link del rapporto",
     hubStopped: "Condivisione terminata – il link non è più valido",
     hubStopFailed: "Terminazione non riuscita",
     hubQrAlt: name => `Codice QR del link dell'hub per ${name}`,
@@ -2917,6 +2920,12 @@ export const it: Translation = {
     duplicated: "Viaggio duplicato – lo trovi tra i soggiorni pianificati",
     duplicateFailed: "Duplicazione non riuscita",
     journalTitle: "Diario di viaggio",
+    timelineTitle: "Cronologia",
+    timelineToggleAria: (name: string) =>
+      `Apri o chiudi la cronologia di ${name}`,
+    timelineEmpty:
+      "Ancora niente da raccontare – diario, foto e spese appariranno qui appena ci saranno.",
+    timelineArrival: (name: string) => `Arrivo a ${name}`,
     journalToggleAria: (name: string) =>
       `Apri o chiudi il diario di viaggio di ${name}`,
     journalHint:
@@ -3139,6 +3148,11 @@ export const it: Translation = {
     legEstimated: "stima in linea d\u2019aria",
     legTotal: (km: string, duration: string) =>
       `Intero giro: \u2248 ${km} \u00b7 ${duration}`,
+    optimizeButton: "Giro pi\u00f9 corto",
+    optimizeConfirm: "Riordinare le tappe lungo il percorso pi\u00f9 corto?",
+    optimizeAlready: "L\u2019ordine \u00e8 gi\u00e0 il pi\u00f9 corto.",
+    optimizeDone: "Tappe riordinate \u2013 ognuna mantiene le sue notti.",
+    optimizeFailed: "Riordino non riuscito \u2013 riprova pi\u00f9 tardi.",
     offlineDownloadAria: (trip: string) =>
       `Scarica la mappa offline del giro ${trip}`,
     offlineDeleteAria: (trip: string) =>
@@ -3181,6 +3195,19 @@ export const it: Translation = {
     contactParcel: "Piazzola",
     packListNotShared:
       "Questa lista bagagli al momento non è condivisa separatamente – solo visualizzazione, non si può spuntare.",
+    footer:
+      "Condiviso con ReiseKompass – la tua bussola per vacanze, campeggio e gite.",
+  },
+  sharedReport: {
+    kicker: "ReiseKompass · Rapporto di viaggio",
+    notFoundTitle: "Questo rapporto non esiste più.",
+    notFoundText:
+      "Il link è stato terminato o è scaduto. Chiedi un nuovo link a chi lo ha condiviso.",
+    coverAlt: (name: string) => `Immagine di copertina del viaggio ${name}`,
+    ratingAria: (n: number) => `Valutazione: ${n} stelle su 5`,
+    journalPhotoAlt: (day: string) => `Foto del giorno del ${day}`,
+    photosTitle: "Foto",
+    photoAlt: (n: number, name: string) => `Foto ${n} del viaggio ${name}`,
     footer:
       "Condiviso con ReiseKompass – la tua bussola per vacanze, campeggio e gite.",
   },

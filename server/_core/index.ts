@@ -505,6 +505,80 @@ async function startServer() {
       if (!res.headersSent) res.status(500).json({ error: "serverError" });
     }
   });
+  // ── Geteilter Reise-Bericht (#629): Fotos über den Teil-Token ──────────
+  // Der Bericht-Link ist öffentlich; die Fotos laufen darum über eigene
+  // Token-Routen statt über die privaten Pfade. Der Token ist derselbe wie
+  // beim Reise-Hub – «Teilen beenden» macht auch diese Bilder ungültig.
+  app.get("/api/bericht/:token/fotos/:fileName", async (req, res) => {
+    try {
+      const { PHOTO_FILENAME_PATTERN, tripPhotoStorage } =
+        await import("../photoStorage");
+      const { token, fileName } = req.params;
+      if (
+        !PHOTO_FILENAME_PATTERN.test(fileName) ||
+        token.length < 8 ||
+        token.length > 64
+      ) {
+        res.status(400).json({ error: "badRequest" });
+        return;
+      }
+      const db = await import("../db");
+      const trip = await db.getTripLogByShareToken(token);
+      const photo = trip ? await db.getTripPhotoByFileNameAny(fileName) : null;
+      if (!trip || !photo || photo.tripId !== trip.id) {
+        res.status(404).json({ error: "notFound" });
+        return;
+      }
+      res.sendFile(
+        tripPhotoStorage.photoPath(fileName),
+        { headers: { "Cache-Control": "private, max-age=3600" } },
+        error => {
+          if (error && !res.headersSent) {
+            res.status(404).json({ error: "notFound" });
+          }
+        }
+      );
+    } catch (error) {
+      console.error("[Bericht] Foto-Auslieferung fehlgeschlagen:", error);
+      if (!res.headersSent) res.status(500).json({ error: "serverError" });
+    }
+  });
+  app.get("/api/bericht/:token/journal/:fileName", async (req, res) => {
+    try {
+      const { PHOTO_FILENAME_PATTERN, journalPhotoStorage } =
+        await import("../photoStorage");
+      const { token, fileName } = req.params;
+      if (
+        !PHOTO_FILENAME_PATTERN.test(fileName) ||
+        token.length < 8 ||
+        token.length > 64
+      ) {
+        res.status(400).json({ error: "badRequest" });
+        return;
+      }
+      const db = await import("../db");
+      const trip = await db.getTripLogByShareToken(token);
+      const entry = trip
+        ? await db.getTripJournalEntryByPhotoFileName(fileName)
+        : null;
+      if (!trip || !entry || entry.tripId !== trip.id) {
+        res.status(404).json({ error: "notFound" });
+        return;
+      }
+      res.sendFile(
+        journalPhotoStorage.photoPath(fileName),
+        { headers: { "Cache-Control": "private, max-age=3600" } },
+        error => {
+          if (error && !res.headersSent) {
+            res.status(404).json({ error: "notFound" });
+          }
+        }
+      );
+    } catch (error) {
+      console.error("[Bericht] Journal-Foto fehlgeschlagen:", error);
+      if (!res.headersSent) res.status(500).json({ error: "serverError" });
+    }
+  });
   // ── Ein-Foto-Ablagen über die Fabrik (#457) ─────────────────────────────
   // Rezept, Inventar-Foto, Inventar-Beleg, Beobachtung, Fang und Notiz
   // teilen exakt dieselbe Upload/Auslieferungs-Logik – registriert aus

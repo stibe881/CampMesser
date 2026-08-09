@@ -2910,6 +2910,9 @@ export const de = {
     hubCreateFailed: "Link konnte nicht erstellt werden",
     hubLinkCreated: "Hub-Link erstellt",
     hubStopShare: "Teilen beenden",
+    reportLinkHint:
+      "Bericht-Link (gleicher Token): Journal, Fotos und Etappen als Erinnerungs-Seite – zum Verschicken an Verwandte.",
+    reportLinkCopy: "Bericht-Link kopieren",
     hubStopped: "Teilen beendet – der Link ist nicht mehr gültig",
     hubStopFailed: "Beenden fehlgeschlagen",
     hubQrAlt: (name: string) => `QR-Code des Reise-Hub-Links für ${name}`,
@@ -2954,6 +2957,12 @@ export const de = {
     duplicated: "Reise dupliziert – sie steht bei den geplanten Aufenthalten",
     duplicateFailed: "Duplizieren fehlgeschlagen",
     journalTitle: "Reise-Tagebuch",
+    timelineTitle: "Zeitachse",
+    timelineToggleAria: (name: string) =>
+      `Zeitachse von ${name} ein- oder ausklappen`,
+    timelineEmpty:
+      "Noch nichts zu erzählen – Journal, Fotos und Ausgaben erscheinen hier, sobald es sie gibt.",
+    timelineArrival: (name: string) => `Ankunft in ${name}`,
     journalToggleAria: (name: string) =>
       `Reise-Tagebuch von ${name} auf- oder zuklappen`,
     journalHint:
@@ -3178,6 +3187,13 @@ export const de = {
     legEstimated: "Luftlinie gesch\u00e4tzt",
     legTotal: (km: string, duration: string) =>
       `Ganze Rundreise: \u2248 ${km} \u00b7 ${duration}`,
+    optimizeButton: "K\u00fcrzeste Runde",
+    optimizeConfirm: "Etappen nach k\u00fcrzester Strecke umsortieren?",
+    optimizeAlready: "Die Reihenfolge ist bereits die k\u00fcrzeste.",
+    optimizeDone:
+      "Etappen umsortiert \u2013 jede beh\u00e4lt ihre N\u00e4chte.",
+    optimizeFailed:
+      "Umsortieren nicht m\u00f6glich \u2013 sp\u00e4ter erneut versuchen.",
     offlineDownloadAria: (trip: string) =>
       `Offline-Karte der Rundreise ${trip} laden`,
     offlineDeleteAria: (trip: string) =>
@@ -3223,6 +3239,19 @@ export const de = {
       "Diese Packliste wird momentan nicht separat geteilt – nur Ansicht, Abhaken ist nicht möglich.",
     footer:
       "Geteilt mit ReiseKompass – deinem Kompass für Ferien, Camping und Ausflüge.",
+  },
+  sharedReport: {
+    kicker: "ReiseKompass · Reise-Bericht",
+    notFoundTitle: "Diesen Bericht gibt es nicht mehr.",
+    notFoundText:
+      "Der Link wurde beendet oder ist abgelaufen. Frag die Person, die ihn geteilt hat, nach einem neuen.",
+    coverAlt: (name: string) => `Titelbild der Reise ${name}`,
+    ratingAria: (n: number) => `Bewertung: ${n} von 5 Sternen`,
+    journalPhotoAlt: (day: string) => `Tages-Foto vom ${day}`,
+    photosTitle: "Fotos",
+    photoAlt: (n: number, name: string) => `Foto ${n} der Reise ${name}`,
+    footer:
+      "Geteilt mit ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge.",
   },
   tripPrint: {
     docTitle: (name: string) => `${name} – Reisebericht zum Ausdrucken`,

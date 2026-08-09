@@ -140,6 +140,32 @@ export default function TripShareDialog({
               <p className="break-all rounded-lg bg-muted px-3 py-2 font-mono text-xs">
                 {shareUrl}
               </p>
+              {/* Bericht-Link (#629): derselbe Token, andere Ansicht –
+                  Journal und Fotos als Erinnerungs-Seite für Verwandte */}
+              <p className="mt-2 text-xs text-muted-foreground">
+                {t.trips.reportLinkHint}
+              </p>
+              <p className="mt-1 break-all rounded-lg bg-muted px-3 py-2 font-mono text-xs">
+                {`${window.location.origin}/bericht/${trip.shareToken}`}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(
+                      `${window.location.origin}/bericht/${trip.shareToken}`
+                    );
+                    toast.success(t.common.linkCopied);
+                  } catch {
+                    toast.error(t.common.copyFailed);
+                  }
+                }}
+              >
+                <Copy className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {t.trips.reportLinkCopy}
+              </Button>
               <div className="mt-2 flex flex-wrap gap-2">
                 <Button
                   variant="outline"

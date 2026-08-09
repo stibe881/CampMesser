@@ -47,6 +47,7 @@ import TripReview from "@/components/trips/TripReview";
 import TripStops from "@/components/trips/TripStops";
 
 const TripExpenses = lazy(() => import("@/components/trips/TripExpenses"));
+const TripTimeline = lazy(() => import("@/components/trips/TripTimeline"));
 const TripCollage = lazy(() => import("@/components/trips/TripCollage"));
 
 /** Was die Bausteine von einer Reise wissen müssen – strukturell, kein DB-Typ. */
@@ -337,6 +338,11 @@ export function TripDetailSections({
             shared={shared}
             weatherJson={trip.weatherJson ?? null}
           />
+        )}
+        {/* Zeitachse (#626): die Reise als Geschichte – erst ab dem
+            ersten Reisetag, vorher gibt es nichts zu erzählen */}
+        {(phase === "past" || trip.startDate <= today) && (
+          <TripTimeline tripId={trip.id} tripName={name} />
         )}
         {/* Reisekasse (#219): auch schon vor der Anreise – Platzmiete
             und Sprit fallen oft vorher an */}

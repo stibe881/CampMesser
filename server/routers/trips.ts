@@ -2454,5 +2454,55 @@ export const tripsRouters = {
           })),
         };
       }),
+    /**
+     * Geteilter Reise-BERICHT (#629): Journal, Fotos und Etappen als
+     * schreibgeschützte Seite für Verwandte – über denselben Teil-Token
+     * wie der Hub (ein Link-Leben, ein Ablaufdatum, ein «Teilen beenden»).
+     * Anders als der Hub (bewusst ohne Fotos, #128) ist der Bericht die
+     * ERINNERUNGS-Ansicht: Die Fotos laufen über eigene Token-Routen
+     * (/api/bericht/…), nie über die privaten Foto-Pfade.
+     */
+    sharedReport: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .query(async ({ input }) => {
+        const trip = await db.getTripLogByShareToken(input.token);
+        if (!trip) return null;
+        const spot =
+          trip.spotId != null
+            ? await db.getCampSpot(trip.spotId, trip.userId)
+            : undefined;
+        const journal = await db.getTripJournal(trip.id);
+        const photos = await db.getTripPhotosForTrip(trip.id);
+        const stops = await db.getTripStops(trip.id);
+        return {
+          trip: {
+            title: trip.title,
+            location: trip.location,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            notes: trip.notes,
+            rating: trip.rating,
+            weatherJson: trip.weatherJson,
+            coverPhotoId: trip.coverPhotoId,
+          },
+          spotName: spot?.name ?? null,
+          // Journal ohne Konto-Bezug (Muster Gästebuch): Text und Tag
+          // reichen – wer geschrieben hat, geht Aussenstehende nichts an.
+          journal: journal.map(entry => ({
+            day: entry.day,
+            text: entry.text,
+            photoFileName: entry.photoFileName,
+          })),
+          photos: photos.map(photo => ({
+            id: photo.id,
+            fileName: photo.fileName,
+          })),
+          stops: stops.map(stop => ({
+            name: stop.name,
+            startDate: stop.startDate,
+            endDate: stop.endDate,
+          })),
+        };
+      }),
   }),
 };

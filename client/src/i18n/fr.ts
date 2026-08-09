@@ -2901,6 +2901,9 @@ export const fr: Translation = {
     hubCreateFailed: "Le lien n'a pas pu être créé",
     hubLinkCreated: "Lien du hub créé",
     hubStopShare: "Arrêter le partage",
+    reportLinkHint:
+      "Lien du rapport (même jeton) : journal, photos et étapes comme page souvenir – à envoyer à la famille.",
+    reportLinkCopy: "Copier le lien du rapport",
     hubStopped: "Partage arrêté – le lien n'est plus valable",
     hubStopFailed: "Échec de l'arrêt",
     hubQrAlt: (name: string) => `Code QR du lien du hub pour ${name}`,
@@ -2945,6 +2948,12 @@ export const fr: Translation = {
     duplicated: "Voyage dupliqué – il figure dans les séjours planifiés",
     duplicateFailed: "Échec de la duplication",
     journalTitle: "Journal de voyage",
+    timelineTitle: "Chronologie",
+    timelineToggleAria: (name: string) =>
+      `Déplier ou replier la chronologie de ${name}`,
+    timelineEmpty:
+      "Rien à raconter pour l'instant – journal, photos et dépenses apparaîtront ici dès qu'ils existeront.",
+    timelineArrival: (name: string) => `Arrivée à ${name}`,
     journalToggleAria: (name: string) =>
       `Ouvrir ou fermer le journal de voyage de ${name}`,
     journalHint:
@@ -3178,6 +3187,14 @@ export const fr: Translation = {
     legEstimated: "estim\u00e9 \u00e0 vol d\u2019oiseau",
     legTotal: (km: string, duration: string) =>
       `Tout le circuit\u00a0: \u2248 ${km} \u00b7 ${duration}`,
+    optimizeButton: "Circuit le plus court",
+    optimizeConfirm:
+      "R\u00e9ordonner les \u00e9tapes selon le trajet le plus court\u00a0?",
+    optimizeAlready: "L\u2019ordre est d\u00e9j\u00e0 le plus court.",
+    optimizeDone:
+      "\u00c9tapes r\u00e9ordonn\u00e9es \u2013 chacune garde ses nuits.",
+    optimizeFailed:
+      "R\u00e9organisation impossible \u2013 r\u00e9essayez plus tard.",
     offlineDownloadAria: (trip: string) =>
       `Charger la carte hors ligne du circuit ${trip}`,
     offlineDeleteAria: (trip: string) =>
@@ -3219,6 +3236,19 @@ export const fr: Translation = {
     contactParcel: "Parcelle",
     packListNotShared:
       "Cette liste de bagages n'est pas partagée séparément pour le moment – consultation seule, impossible de cocher.",
+    footer:
+      "Partagé avec ReiseKompass – ta boussole pour les vacances, le camping et les excursions.",
+  },
+  sharedReport: {
+    kicker: "ReiseKompass · Rapport de voyage",
+    notFoundTitle: "Ce rapport n'existe plus.",
+    notFoundText:
+      "Le lien a été arrêté ou a expiré. Demande un nouveau lien à la personne qui l'a partagé.",
+    coverAlt: (name: string) => `Photo de couverture du voyage ${name}`,
+    ratingAria: (n: number) => `Évaluation : ${n} étoiles sur 5`,
+    journalPhotoAlt: (day: string) => `Photo du jour du ${day}`,
+    photosTitle: "Photos",
+    photoAlt: (n: number, name: string) => `Photo ${n} du voyage ${name}`,
     footer:
       "Partagé avec ReiseKompass – ta boussole pour les vacances, le camping et les excursions.",
   },

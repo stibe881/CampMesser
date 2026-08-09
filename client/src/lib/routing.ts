@@ -19,6 +19,7 @@ import {
   osrmRouteUrl,
   osrmTableUrl,
   parseOsrmChain,
+  parseOsrmMatrix,
   parseOsrmRoute,
   parseOsrmTable,
   routeCacheKey,
@@ -259,6 +260,40 @@ export async function fetchChainDistances(
 
 /** Zwischenspeicher der Ketten-Abfragen (Sitzung, nicht localStorage). */
 const chainCache = new Map<string, (number | null)[]>();
+
+/**
+ * Volle Distanz-Matrix zwischen allen Punkten (#627, Etappen-Optimierer):
+ * dieselbe Ketten-Abfrage, gelesen als NxN. Ohne Netz oder bei zu vielen
+ * Punkten kommt eine leere Matrix – dann bleibt die Reihenfolge, wie sie
+ * ist, statt dass geraten wird.
+ */
+export async function fetchDistanceMatrix(
+  points: GeoPoint[],
+  profile: RoutingProfile,
+  options: { signal?: AbortSignal } = {}
+): Promise<(number | null)[][]> {
+  const empty = points.map(() =>
+    new Array<number | null>(points.length).fill(null)
+  );
+  if (points.length < 2 || points.length > MAX_TABLE_TARGETS) return empty;
+
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const onAbort = () => controller.abort();
+  options.signal?.addEventListener("abort", onAbort);
+  try {
+    const response = await fetch(osrmChainTableUrl(profile, points), {
+      signal: controller.signal,
+    });
+    if (!response.ok) return empty;
+    return parseOsrmMatrix(await response.json(), points.length);
+  } catch {
+    return empty;
+  } finally {
+    window.clearTimeout(timer);
+    options.signal?.removeEventListener("abort", onAbort);
+  }
+}
 
 async function fetchTable(
   origin: GeoPoint,
