@@ -2993,6 +2993,11 @@ export const en: Translation = {
     legEstimated: "estimated as the crow flies",
     legTotal: (km: string, duration: string) =>
       `Whole loop: \u2248 ${km} \u00b7 ${duration}`,
+    offlineDownloadAria: (trip: string) =>
+      `Download offline map for loop ${trip}`,
+    offlineDeleteAria: (trip: string) => `Delete offline map for loop ${trip}`,
+    offlineHint:
+      "\u201cDownload offline map\u201d stores the tiles around every stage and along the connections \u2013 for the road without coverage.",
   },
   tripInvite: {
     badge: "Trip invitation",

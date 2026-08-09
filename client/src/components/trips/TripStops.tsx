@@ -36,6 +36,7 @@ import { fmtShort } from "@/lib/dateFormat";
 import { useTodayIso } from "@/lib/useTodayIso";
 import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
 import { routeOrEstimate } from "@/lib/routing";
+import TripStagesOfflinePack from "@/components/trips/TripStagesOfflinePack";
 import WeatherIcon from "@/components/weather/WeatherIcon";
 import { shiftIsoDay } from "@shared/localDate";
 import { loadMapLayer } from "@/lib/mapLayers";
@@ -546,6 +547,17 @@ export default function TripStops({
                     </li>
                   ))}
                 </ol>
+              )}
+              {/* Offline-Paket der ganzen Rundreise (#561) */}
+              {mapStops.length > 0 && (
+                <TripStagesOfflinePack
+                  tripId={tripId}
+                  tripName={tripName}
+                  stops={mapStops.map(stop => ({
+                    lat: stop.latitude,
+                    lon: stop.longitude,
+                  }))}
+                />
               )}
               {/* Summe der Rundreise (#558): erst wenn alle Abschnitte da sind */}
               {legTotal && (

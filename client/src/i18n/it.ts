@@ -3063,6 +3063,12 @@ export const it: Translation = {
     legEstimated: "stima in linea d\u2019aria",
     legTotal: (km: string, duration: string) =>
       `Intero giro: \u2248 ${km} \u00b7 ${duration}`,
+    offlineDownloadAria: (trip: string) =>
+      `Scarica la mappa offline del giro ${trip}`,
+    offlineDeleteAria: (trip: string) =>
+      `Elimina la mappa offline del giro ${trip}`,
+    offlineHint:
+      "\u00abScarica mappa offline\u00bb salva le tessere attorno a ogni tappa e lungo i collegamenti \u2013 per viaggiare senza rete.",
   },
   tripInvite: {
     badge: "Invito al viaggio",

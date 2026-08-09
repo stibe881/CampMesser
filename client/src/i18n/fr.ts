@@ -3098,6 +3098,12 @@ export const fr: Translation = {
     legEstimated: "estim\u00e9 \u00e0 vol d\u2019oiseau",
     legTotal: (km: string, duration: string) =>
       `Tout le circuit\u00a0: \u2248 ${km} \u00b7 ${duration}`,
+    offlineDownloadAria: (trip: string) =>
+      `Charger la carte hors ligne du circuit ${trip}`,
+    offlineDeleteAria: (trip: string) =>
+      `Supprimer la carte hors ligne du circuit ${trip}`,
+    offlineHint:
+      "\u00ab\u00a0Charger la carte hors ligne\u00a0\u00bb enregistre les tuiles autour de chaque \u00e9tape et le long des liaisons \u2013 pour la route sans r\u00e9seau.",
   },
   tripInvite: {
     badge: "Invitation au voyage",

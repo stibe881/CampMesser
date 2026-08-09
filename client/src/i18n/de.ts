@@ -3101,6 +3101,12 @@ export const de = {
     legEstimated: "Luftlinie gesch\u00e4tzt",
     legTotal: (km: string, duration: string) =>
       `Ganze Rundreise: \u2248 ${km} \u00b7 ${duration}`,
+    offlineDownloadAria: (trip: string) =>
+      `Offline-Karte der Rundreise ${trip} laden`,
+    offlineDeleteAria: (trip: string) =>
+      `Offline-Karte der Rundreise ${trip} l\u00f6schen`,
+    offlineHint:
+      "\u00abOffline-Karte laden\u00bb legt die Kacheln um jede Etappe und entlang der Verbindungen auf dem Ger\u00e4t ab \u2013 f\u00fcr unterwegs ohne Empfang.",
   },
   tripInvite: {
     badge: "Reise-Einladung",

@@ -145,6 +145,7 @@ import {
   type TripBoardKind,
 } from "@shared/tripBoard";
 import { buildTripIcs, icsFileName, type IcsTrip } from "@shared/ics";
+import { forgetOfflineTripPack } from "@/lib/mapTiles";
 import { tripDays } from "@shared/menuPlan";
 import {
   countMainSlots,
@@ -286,7 +287,12 @@ export default function TripsPage() {
   const openReview = new URLSearchParams(search).get("rueckblick") === "1";
 
   const removeMutation = trpc.trips.remove.useMutation({
-    onSuccess: () => utils.trips.list.invalidate(),
+    onSuccess: (_data, vars) => {
+      // Offline-Paket der Rundreise (#561) mit ausbuchen – die Kacheln im
+      // Cache räumt das nächste Paket bzw. der Cache-Deckel selbst weg.
+      forgetOfflineTripPack(vars.id);
+      void utils.trips.list.invalidate();
+    },
     onError: () => toast.error(t.common.deleteFailed),
   });
 
