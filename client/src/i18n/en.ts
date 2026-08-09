@@ -4817,6 +4817,8 @@ export const en: Translation = {
     saved: "Sketch saved.",
   },
   tripReview: {
+    noCategory: "No category",
+    missingCategoryAria: "Category for the missing item",
     title: "Review",
     toggleAria: (trip: string) => `Open the review for ${trip}`,
     intro:

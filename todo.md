@@ -3,6 +3,8 @@
 ## Nachbesserungen (09.08.2026)
 
 - [x] Reisepass-Fix: `trips.list` lieferte für eigene Reisen keinen Platznamen (spotName fest null) – Stempel blieben aus, obwohl ein Zeltplatz verknüpft war. getTripLogs joint den Namen jetzt mit. Gemergt (main `abcff98`).
+- [x] Rückblick nach Kategorien (Nutzerwunsch 09.08.): «Nicht gebraucht» gruppiert wie die Packliste; «Hat gefehlt» mit Kategorie-Auswahl (packFeedback.category, Migration 0117 – Server pendent); der Packlisten-Vorschlag übernimmt die Kategorie statt stur «Allgemein».
+- [x] Unwetter-Push nur bei laufender Reise (Nutzer-Entscheid 09.08.): weatherPoints in server/push.ts auf Orte aktiver Reisen begrenzt (Platz ODER Freitext-Koordinaten, neu auch platzlose Reisearten); Heim-Standort nur, wenn eine laufende Reise ≤ 25 km entfernt ist. Nebenwirkung, gewollt: Sonnencreme-/Trink-Erinnerung (#260/#261) hängt an denselben Orten und kommt damit ebenfalls nur noch unterwegs. In-App-Warnübersicht (#169) unverändert.
 - [x] Reisepass-Umbau (Nutzer-Entscheid): «Wer ist dabei?» wird im Reise-Formular erfasst (Personen-Chips, gespeichert als Abwesenheit – bestehende Haken bleiben gültig). Familien-Pass NEU streng: Stempel nur, wenn alle Familien-Personen dabei; pro Person Schalter «zählt zum Familien-Pass» (familyChildren.familyMember, Migration 0116 – Server pendent). Häkchenliste im Pass entfernt, dafür Familien-Schalter + Wegweiser. Alte i18n-Schlüssel (whoWasThere u. a.) in allen vier Sprachen entfernt.
 
 ## Dreissig Vorschläge (08.08.2026, Runde 52)

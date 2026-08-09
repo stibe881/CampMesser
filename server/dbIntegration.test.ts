@@ -369,6 +369,13 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     // Löschen nimmt die Einträge mit; die letzte Liste bleibt bestehen
     await authed.shopping.deleteList({ id: secondList.id });
     expect((await authed.shopping.lists({ lang: "de" })).length).toBe(1);
+    // Seit dem Papierkorb-Ausbau (#318) landet die gelöschte Liste im
+    // Papierkorb – hier endgültig entfernen, damit die Papierkorb-Passage
+    // weiter unten bei einem leeren Korb anfängt.
+    for (const entry of await authed.trash.list()) {
+      await authed.trash.remove({ id: entry.id });
+    }
+    expect(await authed.trash.list()).toHaveLength(0);
     await expect(
       authed.shopping.deleteList({ id: defaultListId })
     ).rejects.toThrow();

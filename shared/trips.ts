@@ -179,6 +179,17 @@ export function daysUntilTrip(startDate: string, today: string): number {
  * heute ≤ Abreise), liefert die Funktion den 1-basierten Aufenthaltstag und
  * die Gesamtzahl der Tage («Tag X von Y»), sonst null. Ungültige Daten → null.
  */
+/**
+ * Läuft die Reise am Stichtag? An- und Abreisetag zählen mit – wer heute
+ * anreist, soll die Unwetterwarnung für den Zielort schon bekommen.
+ */
+export function isTripActiveOn(
+  trip: { startDate: string; endDate: string },
+  todayIso: string
+): boolean {
+  return trip.startDate <= todayIso && trip.endDate >= todayIso;
+}
+
 export function currentTripDay(
   trip: Pick<TripLike, "startDate" | "endDate">,
   today: string

@@ -1,0 +1,1 @@
+ALTER TABLE `packFeedback` ADD `category` varchar(80);

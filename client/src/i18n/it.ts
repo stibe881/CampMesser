@@ -4913,6 +4913,8 @@ export const it: Translation = {
     saved: "Schizzo salvato.",
   },
   tripReview: {
+    noCategory: "Senza categoria",
+    missingCategoryAria: "Categoria dell’oggetto mancante",
     title: "Bilancio",
     toggleAria: (trip: string) => `Apri il bilancio di ${trip}`,
     intro:

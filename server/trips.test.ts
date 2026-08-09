@@ -6,10 +6,21 @@ import {
   computeYearReview,
   currentTripDay,
   daysUntilTrip,
+  isTripActiveOn,
   isUpcomingTrip,
   nightsByYear,
   tripNights,
 } from "@shared/trips";
+
+describe("isTripActiveOn", () => {
+  it("zählt An- und Abreisetag zur laufenden Reise", () => {
+    const reise = { startDate: "2026-08-07", endDate: "2026-08-09" };
+    expect(isTripActiveOn(reise, "2026-08-06")).toBe(false);
+    expect(isTripActiveOn(reise, "2026-08-07")).toBe(true);
+    expect(isTripActiveOn(reise, "2026-08-09")).toBe(true);
+    expect(isTripActiveOn(reise, "2026-08-10")).toBe(false);
+  });
+});
 
 describe("tripNights", () => {
   it("zählt die Nächte zwischen An- und Abreise", () => {
