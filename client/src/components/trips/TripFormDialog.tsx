@@ -45,6 +45,7 @@ import {
 } from "@shared/tripKind";
 import { cn } from "@/lib/utils";
 import { packScenarios } from "@shared/packTemplates";
+import { formatChf } from "@/lib/money";
 import { pick } from "@shared/i18n";
 
 /**
@@ -280,6 +281,11 @@ export default function TripFormDialog({
 
   /** Welche Felder das Formular für die gewählte Art zeigt (#485). */
   const kindForm = tripKindForm(formKind);
+  // Kosten-Schätzung (#568): nur beim Anlegen, je gewählter Art
+  const costHintQuery = trpc.trips.expenses.costHint.useQuery(
+    { kind: formKind },
+    { enabled: open && editingId === null, staleTime: 5 * 60_000 }
+  );
 
   /**
    * Beim Öffnen den Zustand aufbauen: aus der Reise (Bearbeiten) oder
@@ -733,6 +739,16 @@ export default function TripFormDialog({
             <p className="mt-1 text-xs text-muted-foreground">
               {t.trips.kindHint}
             </p>
+            {/* Kosten-Schätzung (#568): der Median der eigenen Reisen
+                gleicher Art – ehrlich erst ab zwei vergleichbaren. */}
+            {editingId === null && costHintQuery.data && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t.trips.costHintLine(
+                  `${formatChf(costHintQuery.data.perNightRappen, lang)} CHF`,
+                  costHintQuery.data.tripCount
+                )}
+              </p>
+            )}
           </div>
           {/* «Wer ist dabei?» (Reisepass #292): angetippt = dabei. Die
               Auswahl speichert die Abwesenheiten, aus denen die Pässe

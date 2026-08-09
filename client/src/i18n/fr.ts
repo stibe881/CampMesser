@@ -2674,6 +2674,8 @@ export const fr: Translation = {
     kindLabel: "Type de voyage",
     kindHint:
       "Détermine ce que la vue Aujourd’hui met en avant pendant le voyage – tous les modules restent accessibles.",
+    costHintLine: (amount: string, count: number) =>
+      `Tes ${count} voyages comparables ont co\u00fbt\u00e9 \u2248 ${amount} par nuit.`,
     locationSearchButton: "Chercher le lieu",
     locationSearchFailed: "Recherche de lieu indisponible",
     locationSearchNoResults: "Aucun lieu trouvé – autre orthographe ?",

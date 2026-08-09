@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   budgetForecast,
   budgetStatus,
+  comparableNightCostRappen,
   dailyBudgetLeftRappen,
   BUDGET_TIGHT_RATIO,
   EXPENSE_CATEGORIES,
@@ -466,5 +467,35 @@ describe("dailyBudgetLeftRappen (#567)", () => {
         todayIso: "2026-08-05",
       })
     ).toBeNull();
+  });
+});
+
+describe("comparableNightCostRappen (#568)", () => {
+  const TRIPS = [
+    // 2 Nächte, 200 CHF → 100/Nacht
+    { id: 1, kind: "camping", startDate: "2026-06-01", endDate: "2026-06-03" },
+    // 4 Nächte, 480 CHF → 120/Nacht
+    { id: 2, kind: "camping", startDate: "2026-07-01", endDate: "2026-07-05" },
+    // andere Art – zählt nicht mit
+    { id: 3, kind: "hotel", startDate: "2026-05-01", endDate: "2026-05-03" },
+    // ohne Ausgaben – zählt nicht mit
+    { id: 4, kind: "camping", startDate: "2026-04-01", endDate: "2026-04-03" },
+  ];
+  const EXPENSES = [
+    { tripId: 1, amountRappen: 20_000, category: "camping" },
+    { tripId: 2, amountRappen: 30_000, category: "camping" },
+    { tripId: 2, amountRappen: 18_000, category: "essen" },
+    { tripId: 3, amountRappen: 90_000, category: "sonstiges" },
+  ];
+
+  it("liefert den Median der Reisen gleicher Art", () => {
+    const hint = comparableNightCostRappen(TRIPS, EXPENSES, "camping");
+    // Median aus [10000, 12000] → 11000
+    expect(hint).toEqual({ perNightRappen: 11_000, tripCount: 2 });
+  });
+
+  it("schweigt unter zwei vergleichbaren Reisen", () => {
+    expect(comparableNightCostRappen(TRIPS, EXPENSES, "hotel")).toBeNull();
+    expect(comparableNightCostRappen([], [], "camping")).toBeNull();
   });
 });

@@ -2589,6 +2589,8 @@ export const en: Translation = {
     kindLabel: "Trip type",
     kindHint:
       "Controls what the Today view highlights during the trip – every module stays available.",
+    costHintLine: (amount: string, count: number) =>
+      `Your ${count} comparable trips cost \u2248 ${amount} per night.`,
     locationSearchButton: "Find place",
     locationSearchFailed: "Place search unavailable",
     locationSearchNoResults: "No place found – try another spelling?",

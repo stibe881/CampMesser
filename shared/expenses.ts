@@ -8,6 +8,8 @@
  * Rappen verloren.
  */
 import { l4, type L4 } from "./i18n";
+import { normalizeTripKind } from "./tripKind";
+import { tripNights } from "./trips";
 
 /** Gespeicherte Kategorie-Schlüssel (deutsch, wie im übrigen Projekt). */
 export const EXPENSE_CATEGORIES = [
@@ -451,6 +453,53 @@ export function perNightRappen(
 ): number | null {
   if (!Number.isFinite(nights) || nights <= 0) return null;
   return Math.round(cleanRappen(totalRappen) / nights);
+}
+
+// ── Kosten-Schätzung beim Planen (#568) ─────────────────────────────────
+
+/** Eine vergangene Reise, so weit die Schätzung sie braucht. */
+export interface NightCostTripLike {
+  id: number;
+  /** Reise-Art (#460); unbekannte Werte gelten wie überall als Camping. */
+  kind?: string | null;
+  startDate: string;
+  endDate: string;
+}
+
+/**
+ * «Vergleichbare Reisen kosteten ≈ X pro Nacht» – der MEDIAN der eigenen
+ * Reisen GLEICHER Art, ehrlich erst ab zwei vergleichbaren Reisen (eine
+ * einzelne wäre eine Anekdote, kein Erfahrungswert). Reisen ohne Nächte
+ * oder ohne Ausgaben zählen nicht mit.
+ */
+export function comparableNightCostRappen(
+  trips: readonly NightCostTripLike[],
+  expenses: readonly TripExpenseLike[],
+  kind: string
+): { perNightRappen: number; tripCount: number } | null {
+  const totalByTrip = new Map<number, number>();
+  for (const expense of expenses) {
+    totalByTrip.set(
+      expense.tripId,
+      (totalByTrip.get(expense.tripId) ?? 0) + cleanRappen(expense.amountRappen)
+    );
+  }
+  const perNight: number[] = [];
+  for (const trip of trips) {
+    if (normalizeTripKind(trip.kind) !== normalizeTripKind(kind)) continue;
+    const nights = tripNights(trip.startDate, trip.endDate);
+    const total = totalByTrip.get(trip.id) ?? 0;
+    if (nights <= 0 || total <= 0) continue;
+    perNight.push(Math.round(total / nights));
+  }
+  if (perNight.length < 2) return null;
+  perNight.sort((a, b) => a - b);
+  const mid = Math.floor(perNight.length / 2);
+  const median =
+    perNight.length % 2 === 1
+      ? perNight[mid]
+      : Math.round((perNight[mid - 1] + perNight[mid]) / 2);
+  return { perNightRappen: median, tripCount: perNight.length };
 }
 
 // ── Ausgaben über alle Reisen (#257) ────────────────────────────────────

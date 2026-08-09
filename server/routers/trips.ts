@@ -5,6 +5,7 @@
  * gemeinsame Unterbau steht in `_shared.ts`.
  */
 import {
+  comparableNightCostRappen,
   EXPENSE_CURRENCIES,
   EUR_RATE_MAX,
   EUR_RATE_MIN,
@@ -988,6 +989,26 @@ export const tripsRouters = {
        * in fremden Reisekassen hat die eigene Statistik nichts verloren,
        * und die Zahl wäre auch nicht vergleichbar.
        */
+      /**
+       * Kosten-Schätzung beim Planen (#568): «Vergleichbare Reisen
+       * kosteten ≈ X pro Nacht» – Median der eigenen Reisen gleicher
+       * Art, ehrlich erst ab zwei vergleichbaren (shared/expenses.ts).
+       */
+      costHint: protectedProcedure
+        .input(z.object({ kind: z.string().max(40) }))
+        .query(async ({ ctx, input }) => {
+          const trips = await db.getTripLogs(ctx.user.id);
+          const expenses = await db.getExpensesForTrips(trips.map(t => t.id));
+          const rateByTrip = new Map(
+            trips.map(trip => [trip.id, trip.eurRateX10000 ?? null])
+          );
+          const converted = expenses.flatMap(
+            expense =>
+              toChfExpenses([expense], rateByTrip.get(expense.tripId) ?? null)
+                .converted
+          );
+          return comparableNightCostRappen(trips, converted, input.kind);
+        }),
       stats: protectedProcedure.query(async ({ ctx }) => {
         const trips = await db.getTripLogs(ctx.user.id);
         const expenses = await db.getExpensesForTrips(trips.map(t => t.id));

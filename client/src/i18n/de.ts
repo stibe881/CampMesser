@@ -2679,6 +2679,8 @@ export const de = {
     kindLabel: "Art der Reise",
     kindHint:
       "Steuert, was die Heute-Ansicht während der Reise hervorhebt – alle Module bleiben trotzdem erreichbar.",
+    costHintLine: (amount: string, count: number) =>
+      `Deine ${count} vergleichbaren Reisen kosteten \u2248 ${amount} pro Nacht.`,
     locationSearchButton: "Ort suchen",
     locationSearchFailed: "Ortssuche nicht erreichbar",
     locationSearchNoResults: "Kein Ort gefunden – anders schreiben?",
