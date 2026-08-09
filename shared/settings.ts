@@ -69,6 +69,10 @@ export const SYNCED_SETTING_KEYS = [
   "phrasebookCustom",
   /** Jahresziel Reisenächte in der Statistik (#553) */
   "nightsGoal",
+  /** Eigene Namen der Merkort-Pin-Farben (#602), z. B. rot = «Badeplätze» */
+  "savedPlaceColorNames",
+  /** Schriftgrösse der App (#611): "s" | "m" | "l" */
+  "fontScale",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];

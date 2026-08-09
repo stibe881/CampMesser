@@ -11,13 +11,26 @@
  * Promille) stehen als Zahl, damit die Tabelle in jeder Sprache gleich aussieht.
  */
 import { l4, type L4 } from "@shared/i18n";
-import { normalizeText } from "@shared/textMatch";
 
 /** Tempolimits mit Anhänger in km/h. */
 export interface CountrySpeedLimits {
   motorway: number;
   rural: number;
   urban: number;
+}
+
+/**
+ * Vignetten-Richtpreis (#604) – zum direkten Übernehmen in die Reisekasse.
+ * Nur Länder mit Vignette in CHF oder EUR tragen ihn: Die Reisekasse kennt
+ * bewusst nur diese zwei Währungen (#441), darum bleiben Kronen- und
+ * Forint-Vignetten (CZ, HU) ohne Knopf.
+ */
+export interface CountryVignette {
+  /** Preis in Rappen bzw. Cent der angegebenen Währung. */
+  amountRappen: number;
+  currency: "CHF" | "EUR";
+  /** Welche Vignette der Preis meint («Jahresvignette», «10 Tage»). */
+  label: L4;
 }
 
 export interface CountryRules {
@@ -30,6 +43,8 @@ export interface CountryRules {
   updated: string;
   /** Vignetten- und Mautpflicht. */
   toll: L4;
+  /** Vignetten-Richtpreis für die Reisekasse (#604), wo sinnvoll. */
+  vignette?: CountryVignette;
   /** Was für den Anhänger gilt. */
   trailer: L4;
   /** Tempolimits MIT Anhänger. */
@@ -55,8 +70,6 @@ export interface CountryRules {
   emergencyNote: L4;
   /** Besonderheiten fürs Campen, inkl. Übernachten auf Rastplätzen. */
   camping: L4;
-  /** Wörter, die auf dieses Land hindeuten (Ortsnamen einer Reise). */
-  aliases: string[];
 }
 
 export const roadRules: CountryRules[] = [
@@ -71,6 +84,16 @@ export const roadRules: CountryRules[] = [
       "Vignetta autostradale obbligatoria per tutti i veicoli fino a 3,5 t – adesivo o vignetta elettronica legata alla targa, valida da inizio dicembre dell'anno precedente a fine gennaio dell'anno successivo (14 mesi). Oltre 3,5 t vale la tassa forfettaria sul traffico pesante. Per il resto non c'è pedaggio a tratta; il tunnel del Gran San Bernardo e i treni navetta (Furka, Lötschberg, Vereina) si pagano a parte.",
       "Motorway vignette required for all vehicles up to 3.5 t – as a sticker or as an e-vignette tied to the number plate, valid from early December of the previous year to the end of January of the following year (14 months). Above 3.5 t the flat heavy vehicle charge applies. There is no distance-based toll otherwise; the Great St Bernard tunnel and the car-carrying trains (Furka, Lötschberg, Vereina) cost extra."
     ),
+    vignette: {
+      amountRappen: 4000,
+      currency: "CHF",
+      label: l4(
+        "Jahresvignette",
+        "Vignette annuelle",
+        "Vignetta annuale",
+        "Annual vignette"
+      ),
+    },
     trailer: l4(
       "Der Anhänger braucht eine EIGENE Vignette – der Wohnwagen genauso wie der kleine Lastenanhänger.",
       "La remorque a besoin de sa PROPRE vignette – la caravane comme la petite remorque de charge.",
@@ -140,20 +163,6 @@ export const roadRules: CountryRules[] = [
       "Nelle aree di sosta puoi dormire in veicolo per riposare; campeggiare con tavolo, sedie e veranda non è permesso. Il pernottamento libero è regolato in modo molto diverso da cantoni e comuni ed è vietato nelle riserve naturali e nelle zone di tranquillità per la fauna.",
       "At rest areas you may sleep in your vehicle to recover; camping with table, chairs and awning is not allowed. Free overnight stays are regulated very differently by canton and municipality and are banned in nature reserves and wildlife sanctuaries."
     ),
-    aliases: [
-      "schweiz",
-      "suisse",
-      "svizzera",
-      "switzerland",
-      "helvetia",
-      "wallis",
-      "valais",
-      "tessin",
-      "ticino",
-      "graubunden",
-      "engadin",
-      "berner oberland",
-    ],
   },
   {
     code: "DE",
@@ -235,20 +244,6 @@ export const roadRules: CountryRules[] = [
       "Nelle aree di sosta e nei parcheggi puoi pernottare una volta per recuperare l'idoneità alla guida – senza sedie, veranda e piedini estratti. Il campeggio libero è vietato, ma le aree camper sono quasi ovunque.",
       "At rest areas and car parks you may stay one night to restore your fitness to drive – without chairs, awning or extended supports. Wild camping is banned, but motorhome pitches are almost everywhere."
     ),
-    aliases: [
-      "deutschland",
-      "allemagne",
-      "germania",
-      "germany",
-      "bayern",
-      "baviere",
-      "schwarzwald",
-      "bodensee",
-      "allgau",
-      "ostsee",
-      "nordsee",
-      "mosel",
-    ],
   },
   {
     code: "AT",
@@ -261,6 +256,16 @@ export const roadRules: CountryRules[] = [
       "Vignetta obbligatoria su autostrade e superstrade per i veicoli fino a 3,5 t – adesivo o vignetta digitale legata alla targa (1 giorno, 10 giorni, 2 mesi, 1 anno). Oltre 3,5 t, quindi anche per i camper pesanti, vale il pedaggio a chilometro con la GO-Box. Brennero e i trafori dei Tauri, dell'Arlberg e delle Caravanche costano un pedaggio speciale.",
       "Vignette required on motorways and expressways for vehicles up to 3.5 t – as a sticker or digitally tied to the number plate (1-day, 10-day, 2-month and annual). Above 3.5 t, which includes heavy motorhomes, distance-based tolling with the GO-Box applies. The Brenner as well as the Tauern, Arlberg and Karawanken tunnels charge a special toll."
     ),
+    vignette: {
+      amountRappen: 1240,
+      currency: "EUR",
+      label: l4(
+        "10-Tages-Vignette",
+        "Vignette 10 jours",
+        "Vignetta 10 giorni",
+        "10-day vignette"
+      ),
+    },
     trailer: l4(
       "Der Anhänger braucht keine eigene Vignette – sie gilt fürs Zugfahrzeug.",
       "La remorque n'a pas besoin de sa propre vignette – elle vaut pour le véhicule tracteur.",
@@ -330,18 +335,6 @@ export const roadRules: CountryRules[] = [
       "Dormire in veicolo per riposare è di solito tollerato nelle aree di sosta – sistemarsi fuori no. Il campeggio libero è regolato dai Länder; in Tirolo, a Salisburgo e in Carinzia è ampiamente vietato.",
       "Sleeping in the vehicle to rest is usually tolerated at rest areas – setting up camp is not. Camping in the open is regulated by the federal states; in Tyrol, Salzburg and Carinthia it is largely banned."
     ),
-    aliases: [
-      "osterreich",
-      "autriche",
-      "austria",
-      "tirol",
-      "tyrol",
-      "salzburg",
-      "karnten",
-      "steiermark",
-      "vorarlberg",
-      "wachau",
-    ],
   },
   {
     code: "IT",
@@ -423,24 +416,6 @@ export const roadRules: CountryRules[] = [
       "La sosta notturna libera è vietata in molti luoghi, sulla costa quasi ovunque, e le multe sono salate. Nelle aree di servizio autostradali puoi fermarti per riposare; più sicure sono le aree di sosta custodite.",
       "Free overnight parking is banned in many places, along the coast almost everywhere, and fines are steep. At motorway service areas you may stop to rest; guarded pitches (aree di sosta) are safer."
     ),
-    aliases: [
-      "italien",
-      "italie",
-      "italia",
-      "italy",
-      "toskana",
-      "toscana",
-      "gardasee",
-      "lago di garda",
-      "sardinien",
-      "sardegna",
-      "sizilien",
-      "sicilia",
-      "sudtirol",
-      "alto adige",
-      "ligurien",
-      "liguria",
-    ],
   },
   {
     code: "FR",
@@ -522,23 +497,6 @@ export const roadRules: CountryRules[] = [
       "Dormire in veicolo nei parcheggi pubblici è permesso finché non campeggi; il campeggio libero è vietato sulla costa, nei parchi naturali e ai bordi delle strade. Nelle aree autostradali puoi dormire – non lasciare nulla in vista nel veicolo.",
       "Sleeping in your vehicle in public car parks is allowed as long as you do not camp; “camping sauvage” is banned on the coast, in nature parks and at the roadside. You may sleep at motorway aires – leave nothing visible in the vehicle."
     ),
-    aliases: [
-      "frankreich",
-      "france",
-      "francia",
-      "bretagne",
-      "provence",
-      "ardeche",
-      "korsika",
-      "corse",
-      "corsica",
-      "cote d azur",
-      "normandie",
-      "elsass",
-      "alsace",
-      "savoyen",
-      "savoie",
-    ],
   },
   {
     code: "SI",
@@ -551,6 +509,16 @@ export const roadRules: CountryRules[] = [
       "Vignetta elettronica obbligatoria su autostrade e superstrade per i veicoli fino a 3,5 t – legata alla targa, online o al distributore. Conta l'altezza sopra l'asse anteriore (oltre 1,3 m categoria 2A, sotto 2B). Oltre 3,5 t vale il pedaggio DarsGo. Il traforo delle Caravanche si paga a parte.",
       "E-vignette required on motorways and expressways for vehicles up to 3.5 t – tied to the number plate, online or at a petrol station. The height above the front axle decides (over 1.3 m category 2A, below 2B). Above 3.5 t the DarsGo toll applies. The Karawanken tunnel costs extra."
     ),
+    vignette: {
+      amountRappen: 1600,
+      currency: "EUR",
+      label: l4(
+        "7-Tage-Vignette",
+        "Vignette 7 jours",
+        "Vignetta 7 giorni",
+        "7-day vignette"
+      ),
+    },
     trailer: l4(
       "Der Anhänger braucht keine eigene Vignette.",
       "La remorque n'a pas besoin de sa propre vignette.",
@@ -620,15 +588,6 @@ export const roadRules: CountryRules[] = [
       "Il campeggio libero e il pernottamento in veicolo fuori dai campeggi sono vietati e multati; le aree di sosta servono solo per la pausa.",
       "Wild camping and sleeping in your vehicle outside campsites are banned and fined; rest areas are for breaks only."
     ),
-    aliases: [
-      "slowenien",
-      "slovenie",
-      "slovenia",
-      "slovenija",
-      "bled",
-      "julische alpen",
-      "piran",
-    ],
   },
   {
     code: "NL",
@@ -710,16 +669,6 @@ export const roadRules: CountryRules[] = [
       "La sosta notturna libera è vietata quasi ovunque, molte aree di sosta la escludono esplicitamente. In compenso la rete di camperplaatsen è fitta.",
       "Free overnight parking is banned almost everywhere and many rest areas explicitly forbid it. In return there is a dense network of camperplaatsen."
     ),
-    aliases: [
-      "niederlande",
-      "holland",
-      "pays bas",
-      "paesi bassi",
-      "netherlands",
-      "nederland",
-      "zeeland",
-      "friesland",
-    ],
   },
   {
     code: "HR",
@@ -801,18 +750,6 @@ export const roadRules: CountryRules[] = [
       "Pernottare fuori dai campeggi è severamente vietato – anche in camper in un parcheggio. Le multe sono salate e sulla costa i controlli sono frequenti.",
       "Staying overnight outside campsites is strictly forbidden – including in a motorhome in a car park. Fines are steep and checks along the coast are frequent."
     ),
-    aliases: [
-      "kroatien",
-      "croatie",
-      "croazia",
-      "croatia",
-      "hrvatska",
-      "istrien",
-      "istria",
-      "dalmatien",
-      "dalmacija",
-      "insel krk",
-    ],
   },
   {
     code: "ES",
@@ -894,20 +831,6 @@ export const roadRules: CountryRules[] = [
       "«Pernoctar» – dormire nel veicolo chiuso – è di solito permesso, «acampar» con piedini, veranda e sedie no. Alle Baleari, in Catalogna e nelle aree protette le regole sono più severe.",
       "“Pernoctar” – sleeping inside a closed vehicle – is usually allowed, “acampar” with supports, awning and chairs is not. The Balearics, Catalonia and protected areas have stricter rules."
     ),
-    aliases: [
-      "spanien",
-      "espagne",
-      "spagna",
-      "spain",
-      "espana",
-      "katalonien",
-      "catalunya",
-      "andalusien",
-      "andalucia",
-      "mallorca",
-      "costa brava",
-      "costa blanca",
-    ],
   },
   {
     code: "PT",
@@ -989,18 +912,6 @@ export const roadRules: CountryRules[] = [
       "Il campeggio libero è vietato e da qualche anno multato severamente – anche la notte in camper fuori dalle aree autorizzate. In compenso c'è una fitta rete di aree ufficiali (áreas de serviço) e campeggi economici.",
       "Wild camping is banned and has been strictly fined for a few years – including motorhome overnights outside permitted spots. In return there is a dense network of official áreas de serviço and cheap campsites."
     ),
-    aliases: [
-      "portugal",
-      "portogallo",
-      "algarve",
-      "lissabon",
-      "lisboa",
-      "lisbonne",
-      "porto",
-      "madeira",
-      "azoren",
-      "nazare",
-    ],
   },
   {
     code: "GR",
@@ -1082,20 +993,6 @@ export const roadRules: CountryRules[] = [
       "Il campeggio libero è ufficialmente vietato – in alta stagione si controlla. I campeggi sono tanti, ma fuori stagione (novembre–aprile) in gran parte chiusi.",
       "Wild camping is officially banned – checks happen especially in high season. There are many campsites, but off season (November to April) most are closed."
     ),
-    aliases: [
-      "griechenland",
-      "grece",
-      "grecia",
-      "greece",
-      "kreta",
-      "rhodos",
-      "korfu",
-      "athen",
-      "peloponnes",
-      "chalkidiki",
-      "thessaloniki",
-      "santorini",
-    ],
   },
   {
     code: "DK",
@@ -1177,21 +1074,6 @@ export const roadRules: CountryRules[] = [
       "Il campeggio libero col veicolo è vietato; per la tenda ci sono centinaia di semplici piazzole natura (shelter) – spesso gratuite o per poche corone. I camper pernottano in campeggio o nelle aree segnalate.",
       "Wild camping with a vehicle is banned; for tents there are hundreds of simple nature camps (shelters) – often free or a few kroner. Motorhomes stay on campsites or marked aires."
     ),
-    aliases: [
-      "daenemark",
-      "dänemark",
-      "danemark",
-      "danimarca",
-      "denmark",
-      "kopenhagen",
-      "copenhague",
-      "jütland",
-      "jylland",
-      "bornholm",
-      "seeland",
-      "skagen",
-      "römö",
-    ],
   },
   {
     code: "SE",
@@ -1273,24 +1155,6 @@ export const roadRules: CountryRules[] = [
       "Il diritto di accesso alla natura (allemansrätten) consente alla TENDA una o due notti nella natura – a distanza dalle case, non nei campi né nei giardini privati. NON vale per il veicolo: i camper pernottano in campeggio, nelle aree di sosta o dove la sosta notturna è espressamente permessa.",
       "The right to roam (allemansrätten) lets a TENT stay one or two nights in open nature – away from houses, not on fields or private gardens. It does NOT cover vehicles: motorhomes stay on campsites, aires or where overnight parking is expressly allowed."
     ),
-    aliases: [
-      "schweden",
-      "suede",
-      "svezia",
-      "sweden",
-      "sverige",
-      "stockholm",
-      "göteborg",
-      "goeteborg",
-      "gotland",
-      "öland",
-      "oeland",
-      "smaland",
-      "småland",
-      "dalarna",
-      "malmö",
-      "malmoe",
-    ],
   },
   {
     code: "NO",
@@ -1372,22 +1236,6 @@ export const roadRules: CountryRules[] = [
       "Il diritto di accesso alla natura (allemannsretten) consente alla TENDA fino a due notti nello stesso posto – ad almeno 150 m dalle case abitate, in alta montagna anche di più. NON vale per il veicolo: i camper sostano in campeggio, nelle aree o nei parcheggi consentiti; dormire nelle aree di sosta è per lo più tollerato, campeggiare no.",
       "The right to roam (allemannsretten) lets a TENT stay up to two nights in the same spot – at least 150 m from inhabited houses, longer in the high mountains. It does NOT cover vehicles: motorhomes stay on campsites, aires or permitted car parks; sleeping at rest areas is mostly tolerated, camping is not."
     ),
-    aliases: [
-      "norwegen",
-      "norvege",
-      "norvegia",
-      "norway",
-      "norge",
-      "oslo",
-      "bergen",
-      "lofoten",
-      "nordkap",
-      "tromsö",
-      "tromsoe",
-      "trondheim",
-      "stavanger",
-      "geiranger",
-    ],
   },
   {
     code: "BE",
@@ -1469,30 +1317,6 @@ export const roadRules: CountryRules[] = [
       "Il campeggio libero e il pernottamento libero in veicolo sono vietati – campeggiare nelle aree autostradali viene multato. In compenso c'è una fitta rete di aree ufficiali per camper e, in Vallonia, molti campeggi in fattoria e natura.",
       "Wild camping and free overnighting in the vehicle are banned – camping at motorway rest areas is fined too. In return there is a dense network of official motorhome aires and, in Wallonia, many farm and nature sites."
     ),
-    aliases: [
-      "belgien",
-      "belgique",
-      "belgio",
-      "belgium",
-      "belgie",
-      "belgië",
-      "brüssel",
-      "bruessel",
-      "brussel",
-      "bruxelles",
-      "antwerpen",
-      "anvers",
-      "gent",
-      "gand",
-      "brugge",
-      "bruges",
-      "ardennen",
-      "ardennes",
-      "oostende",
-      "ostende",
-      "flandern",
-      "wallonien",
-    ],
   },
   {
     code: "CZ",
@@ -1574,26 +1398,6 @@ export const roadRules: CountryRules[] = [
       "Il campeggio libero è vietato, severamente multato nelle aree protette (Monti dei Giganti, Svizzera boema). Dormire in veicolo nei parcheggi è per lo più tollerato, campeggiare no – la rete di campeggi è fitta ed economica.",
       "Wild camping is banned and fined hard in protected areas (Giant Mountains, Bohemian Switzerland). Sleeping in the vehicle in car parks is mostly tolerated, camping is not – the campsite network is dense and cheap."
     ),
-    aliases: [
-      "tschechien",
-      "tchequie",
-      "cechia",
-      "czechia",
-      "cesko",
-      "prag",
-      "praha",
-      "prague",
-      "praga",
-      "böhmen",
-      "boehmen",
-      "mähren",
-      "maehren",
-      "riesengebirge",
-      "krumlov",
-      "pilsen",
-      "brünn",
-      "bruenn",
-    ],
   },
   {
     code: "PL",
@@ -1675,28 +1479,6 @@ export const roadRules: CountryRules[] = [
       "Il campeggio libero è in linea di massima vietato – MA: il programma «Zanocuj w lesie» permette la tenda per una o due notti in molte foreste statali (mappa online, regole da rispettare). I camper pernottano in campeggio o in parcheggi custoditi; sul Baltico e in Masuria la rete è fitta.",
       "Wild camping is banned in principle – BUT: the “Zanocuj w lesie” programme allows tents for a night or two in many state forests (map online, follow the rules). Motorhomes stay on campsites or guarded car parks; the network is dense on the Baltic and in Masuria."
     ),
-    aliases: [
-      "polen",
-      "pologne",
-      "polonia",
-      "poland",
-      "polska",
-      "warschau",
-      "warszawa",
-      "varsovie",
-      "varsavia",
-      "krakau",
-      "krakow",
-      "cracovie",
-      "cracovia",
-      "danzig",
-      "gdansk",
-      "masuren",
-      "mazury",
-      "breslau",
-      "wroclaw",
-      "zakopane",
-    ],
   },
   {
     code: "HU",
@@ -1778,20 +1560,6 @@ export const roadRules: CountryRules[] = [
       "Il campeggio libero e il pernottamento libero in veicolo sono vietati. Attorno al Balaton la rete di campeggi è fitta – in piena estate meglio comunque prenotare.",
       "Wild camping and free overnighting in the vehicle are banned. Around Lake Balaton the campsite network is dense – still book ahead in high summer."
     ),
-    aliases: [
-      "ungarn",
-      "hongrie",
-      "ungheria",
-      "hungary",
-      "magyarorszag",
-      "budapest",
-      "balaton",
-      "plattensee",
-      "puszta",
-      "debrecen",
-      "sopron",
-      "esztergom",
-    ],
   },
 ];
 
@@ -1803,32 +1571,8 @@ export function findCountryRules(code: string | null): CountryRules | null {
 }
 
 /**
- * Text auf Suchform bringen: Umlaute falten, alles ausser Buchstaben und
- * Ziffern zu Leerzeichen, und in Leerzeichen einfassen. So trifft «italien»
- * in «Toskana, Italien» und nicht mitten in einem längeren Wort.
+ * Zielland aus einem Ortsnamen raten – Logik und Aliasse liegen seit #606
+ * in shared/countryGuess.ts, damit auch der Server (Feiertags-Push) sie
+ * nutzen kann. Der Re-Export hält alle bisherigen Importe stabil.
  */
-function searchable(text: string): string {
-  return ` ${normalizeText(text)
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim()} `;
-}
-
-/**
- * Zielland aus einem Ortsnamen raten (Reise-Titel, Ort, Zeltplatz-Name).
- * Bewusst nur über Namen: Aus reinen Koordinaten liesse sich das Land ohne
- * Grenzdaten nicht verlässlich bestimmen – im Alpenraum liegen die Länder zu
- * dicht beieinander. Kein Treffer heisst null; dann wählt man von Hand.
- */
-export function guessCountryCode(
-  text: string | null | undefined
-): string | null {
-  if (!text) return null;
-  const haystack = searchable(text);
-  if (haystack.trim().length === 0) return null;
-  for (const country of roadRules) {
-    for (const alias of country.aliases) {
-      if (haystack.includes(searchable(alias))) return country.code;
-    }
-  }
-  return null;
-}
+export { guessCountryCode } from "@shared/countryGuess";

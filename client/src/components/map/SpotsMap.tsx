@@ -85,6 +85,7 @@ import {
   PawPrint,
   Satellite,
   Search,
+  Route,
   Star,
   Tent,
 } from "lucide-react";
@@ -184,6 +185,7 @@ export default function SpotsMap({
   focusExcursionId,
   nightsBySpotId,
   savedPlaces,
+  stageRoutes = [],
   focusPoint = null,
 }: {
   spots: SpotPin[];
@@ -197,6 +199,12 @@ export default function SpotsMap({
   nightsBySpotId: Map<number, number>;
   /** Merkorte (#537). */
   savedPlaces: SavedPlacePin[];
+  /**
+   * Etappen-Routen der Rundreisen (#596): pro Reise die Kette ihrer
+   * Etappen mit Koordinaten – gezeichnet als gestrichelte Linie auf der
+   * eigenen, abschaltbaren Ebene «Routen».
+   */
+  stageRoutes?: { tripId: number; name: string; points: [number, number][] }[];
   /** Aus der Merkorte-Liste (#563) angefahrener Punkt; nonce = jeder Klick. */
   focusPoint?: { lat: number; lon: number; nonce: number } | null;
 }) {
@@ -1166,6 +1174,15 @@ export default function SpotsMap({
       kind.className = "text-xs";
       kind.textContent = t.mapView.savedPlaceKind;
       popup.appendChild(kind);
+      // Foto (#599): die Vorschau aus der Verwaltungsliste auch im Popup
+      if (place.photoFileName) {
+        const photo = document.createElement("img");
+        photo.src = `/api/places/photos/${place.photoFileName}`;
+        photo.alt = "";
+        photo.loading = "lazy";
+        photo.className = "mt-1 h-24 w-full rounded-md object-cover";
+        popup.appendChild(photo);
+      }
       if (place.note) {
         const note = document.createElement("p");
         note.className = "text-xs";
@@ -1209,6 +1226,29 @@ export default function SpotsMap({
         );
       });
       popup.appendChild(planTrip);
+      // Befördern (#600): aus dem Wunsch wird ein Favorit mit Dossier –
+      // Name, Koordinaten, Notiz und Foto ziehen um, der Merkort geht.
+      const promote = document.createElement("button");
+      promote.type = "button";
+      promote.textContent = t.mapView.savedPlacePromote;
+      promote.className = "block text-sm font-medium underline";
+      promote.addEventListener("click", async () => {
+        promote.disabled = true;
+        try {
+          const { spotId } = await utils.client.savedPlaces.promote.mutate({
+            id: place.id,
+          });
+          toast.success(t.mapView.savedPlacePromoted);
+          void utils.savedPlaces.list.invalidate();
+          void utils.spots.list.invalidate();
+          engineRef.current?.closePopup();
+          navigate(`/zeltplaetze/${spotId}`);
+        } catch {
+          toast.error(t.common.actionFailed);
+          promote.disabled = false;
+        }
+      });
+      popup.appendChild(promote);
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = t.mapView.savedPlaceDelete;
@@ -1310,6 +1350,20 @@ export default function SpotsMap({
         : []),
     ];
 
+    // Etappen-Routen (#596): gestrichelte Linie je Rundreise – unter den
+    // Pins, in derselben Marker-Ebene (der Neuaufbau räumt sie mit weg).
+    if (layerVisibility.routes) {
+      stageRoutes.forEach(routeInfo => {
+        if (routeInfo.points.length < 2) return;
+        engine.polyline(routeInfo.points, {
+          color: "#2f6b4f",
+          weight: 3,
+          dashArray: "8 6",
+          layer,
+        });
+      });
+    }
+
     const clusters = clusterPoints(
       pins,
       (lat, lon) => projectToPixels(lat, lon, clusterZoom),
@@ -1370,6 +1424,7 @@ export default function SpotsMap({
     firepits,
     familyPlaces,
     savedPlaces,
+    stageRoutes,
     focusExcursionId,
     nightsBySpotId,
     clusterZoom,
@@ -1661,6 +1716,21 @@ export default function SpotsMap({
                 />
               ),
             },
+            // Etappen-Routen (#596) nur anbieten, wenn es welche gibt
+            ...(stageRoutes.length > 0
+              ? ([
+                  {
+                    key: "routes",
+                    label: t.mapView.layerRoutes,
+                    icon: (
+                      <Route
+                        className="h-3.5 w-3.5 text-primary"
+                        aria-hidden="true"
+                      />
+                    ),
+                  },
+                ] as const)
+              : []),
             {
               key: "firepits",
               label: t.mapView.layerFirepits,

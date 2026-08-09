@@ -29,11 +29,13 @@ import { useTodayIso } from "@/lib/useTodayIso";
 import NearbyPoints from "@/components/NearbyPoints";
 import {
   defibrillatorsQuery,
+  hospitalsQuery,
   parseDefibrillators,
+  parseHospitals,
   parsePharmacies,
   pharmaciesQuery,
 } from "@/lib/overpass";
-import { HeartPulse, Pill } from "lucide-react";
+import { Cross, HeartPulse, Pill } from "lucide-react";
 import { LANGUAGES, LANGUAGE_LABELS, LOCALE_TAGS, pick } from "@shared/i18n";
 import { emergencyPhrase } from "@shared/emergencyPhrase";
 import {
@@ -630,6 +632,26 @@ export default function SosPage() {
             defaultRadiusM={2000}
             profile="foot"
             sectionId="sos-pharmacies"
+            className="mb-6"
+          />
+        )}
+
+      {/* Spitäler (#620): wenn es ernster ist als die Apotheke – mit
+          Auto-Distanzen, weil man dorthin kaum zu Fuss geht. */}
+      {geo.status === "ok" &&
+        geo.lat !== undefined &&
+        geo.lng !== undefined && (
+          <NearbyPoints
+            latitude={geo.lat}
+            longitude={geo.lng}
+            icon={Cross}
+            texts={t.poi.hospitals}
+            query={hospitalsQuery}
+            parse={parseHospitals}
+            radii={[5000, 10000, 20000]}
+            defaultRadiusM={10000}
+            profile="car"
+            sectionId="sos-hospitals"
             className="mb-6"
           />
         )}

@@ -977,6 +977,7 @@ export const en: Translation = {
   },
   weather: {
     tripPlaceSuggest: (name: string) => `Remember trip place “${name}”`,
+    savedPlaceSuggest: (name: string) => `Remember saved place “${name}”`,
     mosquitoTitle: "Mosquitoes tonight",
     mosquitoAria: "Mosquito index for the evening",
     mosquitoBarAria: (score: number) => `Mosquito index ${score} out of 100`,
@@ -1486,6 +1487,14 @@ export const en: Translation = {
     emergencyTitle: "Emergency number",
     callAria: (number: string) => `Call emergency number ${number}`,
     campingTitle: "Overnight stays & camping",
+    vignetteExpenseButton: (price: string) => `Add ${price} to the travel fund`,
+    vignetteExpenseTitle: "Vignette into the travel fund",
+    vignetteExpenseHint: (what: string, price: string) =>
+      `Records "${what}" as an expense of ${price}. The guide price can be adjusted in the travel fund at any time.`,
+    vignetteExpenseTripLabel: "Choose trip",
+    vignetteExpenseSave: "Record",
+    vignetteExpenseSaved: "Recorded in the travel fund",
+    vignetteExpenseNoTrips: "No trip yet – create one first.",
     updatedLine: (country: string, date: string) =>
       `${country}: as of ${date}. Figures in km/h; no guarantee.`,
   },
@@ -1995,6 +2004,7 @@ export const en: Translation = {
     createNotePlaceholder: "e.g. recommended by a neighbour",
     createColorLabel: "Pin colour",
     layerSavedPlaces: "Saved places",
+    layerRoutes: "Routes",
     savedPlaceKind: "Saved place \u2013 wish-list destination",
     savedPlaceLegend: (n: number) => `${n} saved place${n === 1 ? "" : "s"}`,
     savedPlaceDelete: "Remove place",
@@ -2014,6 +2024,12 @@ export const en: Translation = {
     placePhotoRemove: (name: string) => `Remove photo of ${name}`,
     placePhotoFailed: "Photo could not be uploaded",
     placePhotoHeic: "HEIC photos are not supported – please choose a JPG.",
+    savedPlacePromote: "Turn into a favourite pitch",
+    savedPlacePromoted: "The saved place is now a favourite pitch.",
+    colorFilterAria: "Filter saved places by colour",
+    colorAll: "All",
+    colorLegendEdit: "Edit legend",
+    colorNameAria: (color: string) => `Custom name for the colour ${color}`,
     savedPlaceCreatedToast: (name: string) =>
       `Saved place \u201c${name}\u201d stored`,
     createdToast: (name: string) => `“${name}” created as favourite`,
@@ -2601,6 +2617,8 @@ export const en: Translation = {
     yearCompareTitle: "Nights per year",
     kindFilterAll: "All types",
     kindFilterAria: "Filter trips by type",
+    yearFilterAll: "All years",
+    yearFilterAria: "Filter trips by year",
     kindLabel: "Trip type",
     kindHint:
       "Controls what the Today view highlights during the trip – every module stays available.",
@@ -2992,6 +3010,8 @@ export const en: Translation = {
     editAria: (label: string) => `Edit expense ${label}`,
     deleteAria: (label: string) => `Delete expense ${label}`,
     paidByLine: (name: string) => `paid by ${name}`,
+    personFilterAll: "All people",
+    personFilterAria: "Filter expenses by person",
     byLine: (name: string) => `recorded by ${name}`,
     untitled: "No description",
     photoLabel: "Receipt photo (optional)",
@@ -3035,6 +3055,7 @@ export const en: Translation = {
     noCoordsNote:
       "Stages without a place-search match do not appear on the map.",
     noCoordsShort: "no coordinates",
+    stageNights: (n: number) => (n === 1 ? "1 night" : `${n} nights`),
     mapAria: "Map of the stages",
     maxReached: (n: number) => `At most ${n} stages`,
     legLine: (km: string, duration: string) =>
@@ -3101,6 +3122,7 @@ export const en: Translation = {
     dayHeader: "Day",
     photosTitle: "Photos",
     photoAlt: (n, name) => `Photo ${n} of the stay ${name}`,
+    journalPhotoAlt: (day: string) => `Photo of the day, ${day}`,
     footer:
       "Great memories! · ReiseKompass – your compass for holidays, camping and day trips",
   },
@@ -4534,6 +4556,9 @@ export const en: Translation = {
     stageNextNavAria: (name: string) => `Start navigation to ${name}`,
     holidayToday: "Today",
     holidayTomorrow: "Tomorrow",
+    nearbyPlaceLine: (name: string, km: number) =>
+      `Your saved place “${name}” is only ${km} km away.`,
+    nearbyPlaceMap: "To the map",
     holidayLine: (when: string, country: string, name: string) =>
       `${when} is a public holiday (${country}): ${name} \u2013 shops often closed.`,
     weather: "Weather",
@@ -4787,6 +4812,13 @@ export const en: Translation = {
     source: "Source: transport.opendata.ch – no guarantee.",
   },
   poi: {
+    hospitals: {
+      title: "Hospitals nearby",
+      subtitle:
+        'From OpenStreetMap – "24h" means an emergency department is recorded. In an emergency, call 144 or 112 first.',
+      unnamed: "Hospital",
+      empty: (radius: string) => `No hospital is recorded within ${radius}.`,
+    },
     pharmacies: {
       title: "Pharmacies nearby",
       subtitle:
@@ -6664,6 +6696,10 @@ export const en: Translation = {
     subtitle: "Fill-ups with odometer reading – for your real consumption.",
     loginFeature: "the fuel log",
     averageTitle: "Average consumption",
+    monthlyTitle: "Fuel costs per month",
+    monthlyFills: (n: number) => (n === 1 ? "1 fill-up" : `${n} fill-ups`),
+    monthlyHint:
+      "Only fill-ups with a recorded amount – nothing is guessed without a price.",
     averageHint:
       "Weighted across all plausible segments. The trip cost calculator in the kitty can adopt this value.",
     addTitle: "Record a fill-up",
@@ -6724,6 +6760,10 @@ export const en: Translation = {
     avgRatingLabel: "Avg. rating",
     hikeYearsTitle: "Hiking year totals",
     stageKmTitle: "Round-trip kilometres",
+    recordsTitle: "Records",
+    recordLongestTrip: "Most nights in a row",
+    recordLongestStage: "Longest stage",
+    recordFurthestTrip: "Longest road trip",
     stageKmLine: (km: string) => `\u2248 ${km} km`,
     stageKmHint: "By road between the stages (OSRM/OpenStreetMap).",
     stageKmHintEstimate:

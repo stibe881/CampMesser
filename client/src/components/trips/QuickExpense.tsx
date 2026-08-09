@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Loader2, Wallet } from "lucide-react";
+import { useRef, useState } from "react";
+import { Camera, Loader2, Wallet, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { resizeImageForUpload } from "@/lib/imageResize";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,26 @@ export default function QuickExpense({ tripId }: { tripId: number }) {
   const [currency, setCurrency] = useState<ExpenseCurrency>("CHF");
   const [category, setCategory] = useState<ExpenseCategory>("essen");
   const [description, setDescription] = useState("");
+  // Beleg-Foto (#607): an der Kasse gleich mitfotografieren – hochgeladen
+  // wird NACH dem Speichern, erst dann gibt es eine Id (Muster #540).
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const handlePhotoSelected = async (fileList: FileList | null) => {
+    const file = fileList?.[0];
+    if (photoInputRef.current) photoInputRef.current.value = "";
+    if (!file) return;
+    try {
+      setPhotoBlob(await resizeImageForUpload(file));
+    } catch {
+      const isHeic =
+        /image\/hei[cf]/.test(file.type) || /\.hei[cf]$/i.test(file.name);
+      toast.error(
+        isHeic ? t.tripExpenses.photoHeic : t.tripExpenses.photoReadFailed
+      );
+    }
+  };
 
   /**
    * Tagesbudget im Schnell-Dialog (#586): Wer an der Kasse steht, will
@@ -79,34 +100,57 @@ export default function QuickExpense({ tripId }: { tripId: number }) {
   })();
 
   const mutation = trpc.trips.expenses.add.useMutation({
-    onSuccess: () => {
-      utils.trips.expenses.invalidate();
-      setOpen(false);
-      setAmount("");
-      setDescription("");
-      toast.success(t.today.expenseSaved);
-    },
     onError: e => toast.error(e.message || t.common.saveFailed),
   });
 
-  const submit = () => {
+  const submit = async () => {
     const value = Number(amount.trim().replace(",", "."));
     const rappen = Math.round(value * 100);
     if (!Number.isFinite(value) || rappen < 1 || rappen > EXPENSE_MAX_RAPPEN) {
       toast.error(t.today.expenseInvalid);
       return;
     }
-    mutation.mutate({
-      tripId,
-      amountRappen: rappen,
-      currency,
-      category,
-      description: description.trim() || null,
-      day: todayIso(),
-      paidBy: (user?.name || user?.email || "–")
-        .trim()
-        .slice(0, EXPENSE_PAID_BY_MAX_LENGTH),
-    });
+    setSaving(true);
+    let id: number;
+    try {
+      ({ id } = await mutation.mutateAsync({
+        tripId,
+        amountRappen: rappen,
+        currency,
+        category,
+        description: description.trim() || null,
+        day: todayIso(),
+        paidBy: (user?.name || user?.email || "–")
+          .trim()
+          .slice(0, EXPENSE_PAID_BY_MAX_LENGTH),
+      }));
+    } catch {
+      // Fehler-Toast kommt aus onError der Mutation
+      setSaving(false);
+      return;
+    }
+    // Beleg (#607) NACH dem Speichern – ein gescheiterter Upload lässt
+    // die Ausgabe stehen, das Foto lässt sich auf der Reise-Seite nachreichen
+    if (photoBlob) {
+      try {
+        const response = await fetch(`/api/trips/expenses/${id}/photo`, {
+          method: "POST",
+          headers: { "Content-Type": "image/jpeg" },
+          body: photoBlob,
+          credentials: "include",
+        });
+        if (!response.ok) toast.error(t.tripExpenses.photoUploadFailed);
+      } catch {
+        toast.error(t.tripExpenses.photoUploadFailed);
+      }
+    }
+    setSaving(false);
+    void utils.trips.expenses.invalidate();
+    setOpen(false);
+    setAmount("");
+    setDescription("");
+    setPhotoBlob(null);
+    toast.success(t.today.expenseSaved);
   };
 
   return (
@@ -131,7 +175,7 @@ export default function QuickExpense({ tripId }: { tripId: number }) {
           <form
             onSubmit={e => {
               e.preventDefault();
-              submit();
+              void submit();
             }}
           >
             <Label htmlFor="quick-expense-amount">
@@ -184,12 +228,47 @@ export default function QuickExpense({ tripId }: { tripId: number }) {
               onChange={e => setDescription(e.target.value)}
               maxLength={160}
             />
+            {/* Beleg-Foto (#607): optional, an der Kasse gleich geknipst */}
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              aria-hidden="true"
+              tabIndex={-1}
+              onChange={e => void handlePhotoSelected(e.target.files)}
+            />
+            <div className="mt-3 flex items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => photoInputRef.current?.click()}
+              >
+                <Camera className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {photoBlob
+                  ? t.tripExpenses.photoChange
+                  : t.tripExpenses.photoAdd}
+              </Button>
+              {photoBlob && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="text-muted-foreground"
+                  onClick={() => setPhotoBlob(null)}
+                >
+                  <X className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                  {t.tripExpenses.photoRemove}
+                </Button>
+              )}
+            </div>
             <Button
               type="submit"
               className="mt-4 w-full"
-              disabled={mutation.isPending || !amount.trim()}
+              disabled={saving || !amount.trim()}
             >
-              {mutation.isPending && (
+              {saving && (
                 <Loader2
                   className="mr-2 h-4 w-4 animate-spin"
                   aria-hidden="true"

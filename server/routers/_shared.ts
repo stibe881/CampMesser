@@ -135,6 +135,7 @@ import { FISH_MAX_LENGTH_CM, FISH_MAX_WEIGHT_KG } from "@shared/fishing";
 import { MAX_WARRANTY_MONTHS, MIN_WARRANTY_MONTHS } from "@shared/warranty";
 import { MAX_LENT_TO_LENGTH } from "@shared/lending";
 import {
+  TRIP_WEATHER_MAX_DAY_ENTRIES,
   TRIP_WEATHER_MAX_PRECIP_MM,
   TRIP_WEATHER_MAX_RAIN_DAYS,
   TRIP_WEATHER_TEMP_MAX,
@@ -179,9 +180,11 @@ import {
 } from "@shared/routePlan";
 import { MAX_ROUTE_PATH_POINTS, routeLengthM } from "@shared/routing";
 import {
+  TEMPLATE_STAGE_LABEL,
   templateEndDate,
   templateListName,
   templateMenuPlan,
+  templateStageSpans,
   tripTemplateById,
 } from "@shared/tripTemplates";
 import {
@@ -586,6 +589,7 @@ export {
   TRIP_BOARD_KINDS,
   TRIP_BOARD_TEXT_MAX_LENGTH,
   TRIP_JOURNAL_MAX_LENGTH,
+  TRIP_WEATHER_MAX_DAY_ENTRIES,
   TRIP_WEATHER_MAX_PRECIP_MM,
   TRIP_WEATHER_MAX_RAIN_DAYS,
   TRIP_WEATHER_TEMP_MAX,
@@ -659,9 +663,11 @@ export {
   sortNotes,
   sortTripBoardEntries,
   systemRouter,
+  TEMPLATE_STAGE_LABEL,
   templateEndDate,
   templateListName,
   templateMenuPlan,
+  templateStageSpans,
   thinTrackPoints,
   trackStats,
   tripTemplateById,

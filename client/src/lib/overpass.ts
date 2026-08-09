@@ -1362,6 +1362,31 @@ export function parsePharmacies(json: unknown): OsmPoi[] {
   });
 }
 
+/**
+ * Spitäler (#620): fürs SOS neben den Apotheken – wenn es ernster ist.
+ * Nur echte Spitäler mit Notfall-Tag-Auswertung; Kliniken ohne Notaufnahme
+ * werden nicht ausgefiltert (OSM-Daten sind dafür zu lückig), aber der
+ * emergency-Tag steht dabei, wenn er gepflegt ist.
+ */
+export function hospitalsQuery(
+  lat: number,
+  lon: number,
+  radiusM: number
+): string {
+  return poiQuery(['nwr["amenity"="hospital"]'], lat, lon, radiusM);
+}
+
+export function parseHospitals(json: unknown): OsmPoi[] {
+  return parsePois(json, tags => {
+    const parts: string[] = [];
+    // «emergency=yes» heisst: Notaufnahme vorhanden – das will man wissen
+    if (cleanTag(tags.emergency) === "yes") parts.push("24h");
+    const operator = cleanTag(tags.operator);
+    if (operator) parts.push(operator);
+    return parts.length > 0 ? parts.join(" · ") : undefined;
+  });
+}
+
 /** Waschsalons (#528): auf langen Reisen wichtiger als jede Sehenswürdigkeit. */
 export function laundryQuery(
   lat: number,

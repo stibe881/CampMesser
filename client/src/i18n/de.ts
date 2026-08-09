@@ -1019,6 +1019,7 @@ export const de = {
   },
   weather: {
     tripPlaceSuggest: (name: string) => `Reise-Ort «${name}» merken`,
+    savedPlaceSuggest: (name: string) => `Merkort «${name}» merken`,
     mosquitoTitle: "Stechmücken heute Abend",
     mosquitoAria: "Stechmücken-Index für den Abend",
     mosquitoBarAria: (score: number) => `Stechmücken-Index ${score} von 100`,
@@ -1536,6 +1537,15 @@ export const de = {
     emergencyTitle: "Notruf",
     callAria: (number: string) => `Notruf ${number} anrufen`,
     campingTitle: "Übernachten & Campen",
+    vignetteExpenseButton: (price: string) =>
+      `${price} in die Reisekasse übernehmen`,
+    vignetteExpenseTitle: "Vignette in die Reisekasse",
+    vignetteExpenseHint: (what: string, price: string) =>
+      `Trägt «${what}» mit ${price} als Ausgabe ein. Der Richtpreis lässt sich in der Reisekasse jederzeit anpassen.`,
+    vignetteExpenseTripLabel: "Reise wählen",
+    vignetteExpenseSave: "Eintragen",
+    vignetteExpenseSaved: "In der Reisekasse eingetragen",
+    vignetteExpenseNoTrips: "Noch keine Reise vorhanden – lege zuerst eine an.",
     updatedLine: (country: string, date: string) =>
       `${country}: Stand ${date}. Angaben in km/h; ohne Gewähr.`,
   },
@@ -2057,6 +2067,7 @@ export const de = {
     createNotePlaceholder: "z. B. vom Nachbarn empfohlen",
     createColorLabel: "Pin-Farbe",
     layerSavedPlaces: "Merkorte",
+    layerRoutes: "Routen",
     savedPlaceKind: "Merkort \u2013 Wunschziel",
     savedPlaceLegend: (n: number) => `${n} Merkort${n === 1 ? "" : "e"}`,
     savedPlaceDelete: "Merkort entfernen",
@@ -2080,6 +2091,12 @@ export const de = {
     placePhotoFailed: "Foto konnte nicht hochgeladen werden",
     placePhotoHeic:
       "HEIC-Fotos werden nicht unterstützt – bitte als JPG wählen.",
+    savedPlacePromote: "Zum Zeltplatz-Favoriten machen",
+    savedPlacePromoted: "Merkort ist jetzt ein Zeltplatz-Favorit.",
+    colorFilterAria: "Merkorte nach Farbe filtern",
+    colorAll: "Alle",
+    colorLegendEdit: "Legende bearbeiten",
+    colorNameAria: (color: string) => `Eigener Name für die Farbe ${color}`,
     savedPlaceCreatedToast: (name: string) =>
       `Merkort \u00ab${name}\u00bb gespeichert`,
     createdToast: (name: string) => `«${name}» als Favorit angelegt`,
@@ -2693,6 +2710,8 @@ export const de = {
     yearCompareTitle: "Übernachtungen pro Jahr",
     kindFilterAll: "Alle Arten",
     kindFilterAria: "Reisen nach Art filtern",
+    yearFilterAll: "Alle Jahre",
+    yearFilterAria: "Reisen nach Jahr filtern",
     kindLabel: "Art der Reise",
     kindHint:
       "Steuert, was die Heute-Ansicht während der Reise hervorhebt – alle Module bleiben trotzdem erreichbar.",
@@ -3104,6 +3123,8 @@ export const de = {
     editAria: (label: string) => `Ausgabe ${label} bearbeiten`,
     deleteAria: (label: string) => `Ausgabe ${label} löschen`,
     paidByLine: (name: string) => `bezahlt von ${name}`,
+    personFilterAll: "Alle Personen",
+    personFilterAria: "Ausgaben nach Person filtern",
     byLine: (name: string) => `erfasst von ${name}`,
     untitled: "Ohne Beschreibung",
     photoLabel: "Beleg-Foto (optional)",
@@ -3149,6 +3170,7 @@ export const de = {
     noCoordsNote:
       "Etappen ohne Treffer aus der Ortssuche stehen nicht auf der Karte.",
     noCoordsShort: "ohne Koordinaten",
+    stageNights: (n: number) => (n === 1 ? "1 Nacht" : `${n} Nächte`),
     mapAria: "Karte der Etappen",
     maxReached: (n: number) => `H\u00f6chstens ${n} Etappen`,
     legLine: (km: string, duration: string) =>
@@ -3218,6 +3240,7 @@ export const de = {
     dayHeader: "Tag",
     photosTitle: "Fotos",
     photoAlt: (n: number, name: string) => `Foto ${n} vom Aufenthalt ${name}`,
+    journalPhotoAlt: (day: string) => `Tages-Foto vom ${day}`,
     footer:
       "Schöne Erinnerungen! · ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
   },
@@ -4671,6 +4694,9 @@ export const de = {
     stageNextNavAria: (name: string) => `Navigation nach ${name} starten`,
     holidayToday: "Heute",
     holidayTomorrow: "Morgen",
+    nearbyPlaceLine: (name: string, km: number) =>
+      `Dein Merkort «${name}» liegt nur ${km} km entfernt.`,
+    nearbyPlaceMap: "Zur Karte",
     holidayLine: (when: string, country: string, name: string) =>
       `${when} Feiertag (${country}): ${name} \u2013 L\u00e4den oft geschlossen.`,
     weather: "Wetter",
@@ -4926,6 +4952,14 @@ export const de = {
     source: "Quelle: transport.opendata.ch – ohne Gewähr.",
   },
   poi: {
+    hospitals: {
+      title: "Spitäler in der Nähe",
+      subtitle:
+        "Aus OpenStreetMap – «24h» heisst: Notaufnahme eingetragen. Im Notfall zuerst 144 bzw. 112 anrufen.",
+      unnamed: "Spital",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist kein Spital eingetragen.`,
+    },
     pharmacies: {
       title: "Apotheken in der Nähe",
       subtitle:
@@ -6854,6 +6888,10 @@ export const de = {
     subtitle: "Tankfüllungen mit Kilometerstand – daraus der echte Verbrauch.",
     loginFeature: "das Tankbuch",
     averageTitle: "Durchschnittsverbrauch",
+    monthlyTitle: "Tank-Kosten pro Monat",
+    monthlyFills: (n: number) => (n === 1 ? "1 Füllung" : `${n} Füllungen`),
+    monthlyHint:
+      "Nur Füllungen mit erfasstem Betrag – ohne Preis wird nichts geraten.",
     averageHint:
       "Gewichtet über alle plausiblen Abschnitte. Der Fahrtkosten-Rechner in der Reisekasse kann diesen Wert übernehmen.",
     addTitle: "Tankfüllung erfassen",
@@ -6914,6 +6952,10 @@ export const de = {
     avgRatingLabel: "Ø Bewertung",
     hikeYearsTitle: "Wander-Jahresbilanz",
     stageKmTitle: "Rundreise-Kilometer",
+    recordsTitle: "Rekorde",
+    recordLongestTrip: "Meiste Nächte am Stück",
+    recordLongestStage: "Längste Etappe",
+    recordFurthestTrip: "Weiteste Rundreise",
     stageKmLine: (km: string) => `\u2248 ${km} km`,
     stageKmHint: "Über die Strasse zwischen den Etappen (OSRM/OpenStreetMap).",
     stageKmHintEstimate:

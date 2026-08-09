@@ -28,6 +28,7 @@ import {
   TRIP_BOARD_KINDS,
   TRIP_BOARD_TEXT_MAX_LENGTH,
   TRIP_JOURNAL_MAX_LENGTH,
+  TRIP_WEATHER_MAX_DAY_ENTRIES,
   TRIP_WEATHER_MAX_PRECIP_MM,
   TRIP_WEATHER_MAX_RAIN_DAYS,
   TRIP_WEATHER_TEMP_MAX,
@@ -65,9 +66,11 @@ import {
   shareExpiryFor,
   shareExpiryInput,
   sortTripBoardEntries,
+  TEMPLATE_STAGE_LABEL,
   templateEndDate,
   templateListName,
   templateMenuPlan,
+  templateStageSpans,
   tripTemplateById,
   z,
 } from "./_shared";
@@ -352,6 +355,27 @@ export const tripsRouters = {
           }
           menuEntries = plan.length;
         }
+
+        // 4. Rundreise-Gerüst (#619): Etappen ohne Koordinaten anlegen –
+        // die Orte trägt man nach, sobald die Route feststeht.
+        if (template.stages && template.stages >= 2) {
+          const spans = templateStageSpans(
+            input.startDate,
+            endDate,
+            template.stages
+          );
+          const stageLabel = pick(TEMPLATE_STAGE_LABEL, input.lang);
+          for (let i = 0; i < spans.length; i++) {
+            await db.addTripStop({
+              tripId,
+              name: `${stageLabel} ${i + 1}`,
+              latitude: null,
+              longitude: null,
+              startDate: spans[i].startDate,
+              endDate: spans[i].endDate,
+            });
+          }
+        }
         return { id: tripId, endDate, packListId, menuEntries };
       }),
     /**
@@ -633,6 +657,38 @@ export const tripsRouters = {
             updatedByUserId: ctx.user.id,
           });
         }
+        // Etappen mitnehmen (#609): Rundreisen wiederholen sich gern –
+        // dieselben Orte, um die Tagesdifferenz verschoben. Etappen, die
+        // nach dem neuen Ende lägen, werden aufs Ende gekappt.
+        const stops = await db.getTripStops(input.tripId);
+        const dayShift = Math.round(
+          (new Date(`${input.startDate}T00:00:00Z`).getTime() -
+            new Date(`${trip.startDate}T00:00:00Z`).getTime()) /
+            86_400_000
+        );
+        const shiftDay = (iso: string) => {
+          const date = new Date(`${iso}T00:00:00Z`);
+          date.setUTCDate(date.getUTCDate() + dayShift);
+          return date.toISOString().slice(0, 10);
+        };
+        const clampDay = (iso: string) =>
+          iso > input.endDate
+            ? input.endDate
+            : iso < input.startDate
+              ? input.startDate
+              : iso;
+        for (const stop of stops) {
+          const startDate = clampDay(shiftDay(stop.startDate));
+          const endDate = clampDay(shiftDay(stop.endDate));
+          await db.addTripStop({
+            tripId: id,
+            name: stop.name,
+            startDate,
+            endDate,
+            latitude: stop.latitude,
+            longitude: stop.longitude,
+          });
+        }
         return { id };
       }),
     /**
@@ -660,6 +716,29 @@ export const tripsRouters = {
             .refine(v => v.tMin <= v.tMax, {
               message: "Minimum darf nicht über dem Maximum liegen.",
             }),
+          // Tages-Wetter fürs Journal (#608) – optional, alte Clients
+          // schicken weiterhin nur die Zusammenfassung
+          days: z
+            .array(
+              z
+                .object({
+                  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+                  tMax: z
+                    .number()
+                    .min(TRIP_WEATHER_TEMP_MIN)
+                    .max(TRIP_WEATHER_TEMP_MAX),
+                  tMin: z
+                    .number()
+                    .min(TRIP_WEATHER_TEMP_MIN)
+                    .max(TRIP_WEATHER_TEMP_MAX),
+                  precip: z.number().min(0).max(TRIP_WEATHER_MAX_PRECIP_MM),
+                })
+                .refine(v => v.tMin <= v.tMax, {
+                  message: "Minimum darf nicht über dem Maximum liegen.",
+                })
+            )
+            .max(TRIP_WEATHER_MAX_DAY_ENTRIES)
+            .optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -673,7 +752,11 @@ export const tripsRouters = {
         await db.setTripLogWeather(
           input.id,
           trip.userId,
-          JSON.stringify(input.summary)
+          JSON.stringify(
+            input.days && input.days.length > 0
+              ? { ...input.summary, days: input.days }
+              : input.summary
+          )
         );
         return { success: true } as const;
       }),

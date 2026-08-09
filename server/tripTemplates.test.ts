@@ -3,6 +3,7 @@ import {
   templateEndDate,
   templateListName,
   templateMenuPlan,
+  templateStageSpans,
   tripTemplateById,
   tripTemplates,
 } from "@shared/tripTemplates";
@@ -110,5 +111,46 @@ describe("Reise-Art der Vorlagen (#463)", () => {
     const template = tripTemplateById("staedtetrip")!;
     expect(template.dinners).toEqual([]);
     expect(templateMenuPlan(template, "2026-08-10")).toEqual([]);
+  });
+});
+
+describe("Rundreise-Etappen (#619)", () => {
+  it("teilt sieben Nächte auf drei aneinanderstossende Etappen auf", () => {
+    const spans = templateStageSpans("2026-08-10", "2026-08-17", 3);
+    // 7 Nächte auf 3 Etappen: die Rest-Nacht geht an die erste (3+2+2)
+    expect(spans).toEqual([
+      { startDate: "2026-08-10", endDate: "2026-08-13" },
+      { startDate: "2026-08-13", endDate: "2026-08-15" },
+      { startDate: "2026-08-15", endDate: "2026-08-17" },
+    ]);
+  });
+
+  it("verteilt glatt teilbare Nächte gleichmässig", () => {
+    const spans = templateStageSpans("2026-08-10", "2026-08-16", 3);
+    expect(spans.map(s => s.startDate)).toEqual([
+      "2026-08-10",
+      "2026-08-12",
+      "2026-08-14",
+    ]);
+    expect(spans[2].endDate).toBe("2026-08-16");
+  });
+
+  it("gibt bei zu wenig Nächten oder zu wenig Etappen kein Gerüst", () => {
+    // Eine Nacht auf drei Etappen ergibt keinen Sinn
+    expect(templateStageSpans("2026-08-10", "2026-08-11", 3)).toEqual([]);
+    // Eine einzelne «Etappe» wäre nur die Reise selbst
+    expect(templateStageSpans("2026-08-10", "2026-08-17", 1)).toEqual([]);
+  });
+
+  it("die Rundreise-Vorlage bringt ein gültiges Gerüst mit", () => {
+    const template = tripTemplateById("rundreise")!;
+    expect(template.stages).toBe(3);
+    const end = templateEndDate("2026-08-10", template.nights);
+    const spans = templateStageSpans("2026-08-10", end, template.stages!);
+    expect(spans).toHaveLength(3);
+    // Die Etappen decken den ganzen Zeitraum lückenlos ab
+    expect(spans[0].startDate).toBe("2026-08-10");
+    expect(spans[2].endDate).toBe(end);
+    expect(spans[1].startDate).toBe(spans[0].endDate);
   });
 });

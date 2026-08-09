@@ -1021,6 +1021,7 @@ export const fr: Translation = {
   },
   weather: {
     tripPlaceSuggest: (name: string) => `Retenir le lieu du voyage « ${name} »`,
+    savedPlaceSuggest: (name: string) => `Retenir le lieu repéré « ${name} »`,
     mosquitoTitle: "Moustiques ce soir",
     mosquitoAria: "Indice moustiques pour la soirée",
     mosquitoBarAria: (score: number) => `Indice moustiques ${score} sur 100`,
@@ -1538,6 +1539,15 @@ export const fr: Translation = {
     emergencyTitle: "Appel d'urgence",
     callAria: (number: string) => `Appeler le numéro d'urgence ${number}`,
     campingTitle: "Nuitées & camping",
+    vignetteExpenseButton: (price: string) =>
+      `Ajouter ${price} à la caisse de voyage`,
+    vignetteExpenseTitle: "Vignette dans la caisse de voyage",
+    vignetteExpenseHint: (what: string, price: string) =>
+      `Inscrit « ${what} » comme dépense de ${price}. Le prix indicatif reste modifiable dans la caisse de voyage.`,
+    vignetteExpenseTripLabel: "Choisir le voyage",
+    vignetteExpenseSave: "Inscrire",
+    vignetteExpenseSaved: "Inscrit dans la caisse de voyage",
+    vignetteExpenseNoTrips: "Pas encore de voyage – crées-en un d'abord.",
     updatedLine: (country: string, date: string) =>
       `${country} : état au ${date}. Valeurs en km/h ; sans garantie.`,
   },
@@ -2058,6 +2068,7 @@ export const fr: Translation = {
     createNotePlaceholder: "p. ex. recommand\u00e9 par le voisin",
     createColorLabel: "Couleur du rep\u00e8re",
     layerSavedPlaces: "Lieux retenus",
+    layerRoutes: "Itinéraires",
     savedPlaceKind: "Lieu retenu \u2013 destination de r\u00eave",
     savedPlaceLegend: (n: number) =>
       `${n} lieu${n === 1 ? "" : "x"} retenu${n === 1 ? "" : "s"}`,
@@ -2082,6 +2093,13 @@ export const fr: Translation = {
     placePhotoFailed: "La photo n’a pas pu être envoyée",
     placePhotoHeic:
       "Les photos HEIC ne sont pas prises en charge – choisis un JPG.",
+    savedPlacePromote: "Transformer en emplacement favori",
+    savedPlacePromoted: "Le lieu repéré est maintenant un emplacement favori.",
+    colorFilterAria: "Filtrer les lieux repérés par couleur",
+    colorAll: "Tous",
+    colorLegendEdit: "Modifier la légende",
+    colorNameAria: (color: string) =>
+      `Nom personnalisé pour la couleur ${color}`,
     savedPlaceCreatedToast: (name: string) =>
       `Lieu \u00ab\u202f${name}\u202f\u00bb enregistr\u00e9`,
     createdToast: (name: string) => `«${name}» créé comme favori`,
@@ -2688,6 +2706,8 @@ export const fr: Translation = {
     yearCompareTitle: "Nuitées par année",
     kindFilterAll: "Tous les types",
     kindFilterAria: "Filtrer les voyages par type",
+    yearFilterAll: "Toutes les années",
+    yearFilterAria: "Filtrer les voyages par année",
     kindLabel: "Type de voyage",
     kindHint:
       "Détermine ce que la vue Aujourd’hui met en avant pendant le voyage – tous les modules restent accessibles.",
@@ -3098,6 +3118,8 @@ export const fr: Translation = {
     editAria: (label: string) => `Modifier la dépense ${label}`,
     deleteAria: (label: string) => `Supprimer la dépense ${label}`,
     paidByLine: (name: string) => `payé par ${name}`,
+    personFilterAll: "Toutes les personnes",
+    personFilterAria: "Filtrer les dépenses par personne",
     byLine: (name: string) => `saisi par ${name}`,
     untitled: "Sans description",
     photoLabel: "Photo du justificatif (optionnel)",
@@ -3148,6 +3170,7 @@ export const fr: Translation = {
     noCoordsNote:
       "Les \u00e9tapes sans r\u00e9sultat de la recherche de lieu n\u2019apparaissent pas sur la carte.",
     noCoordsShort: "sans coordonn\u00e9es",
+    stageNights: (n: number) => (n === 1 ? "1 nuit" : `${n} nuits`),
     mapAria: "Carte des \u00e9tapes",
     maxReached: (n: number) => `Au plus ${n} \u00e9tapes`,
     legLine: (km: string, duration: string) =>
@@ -3216,6 +3239,7 @@ export const fr: Translation = {
     dayHeader: "Jour",
     photosTitle: "Photos",
     photoAlt: (n, name) => `Photo ${n} du séjour ${name}`,
+    journalPhotoAlt: (day: string) => `Photo du jour du ${day}`,
     footer:
       "De beaux souvenirs ! · ReiseKompass – ta boussole pour les vacances, le camping et les excursions",
   },
@@ -4670,6 +4694,9 @@ export const fr: Translation = {
       `D\u00e9marrer la navigation vers ${name}`,
     holidayToday: "Aujourd\u2019hui",
     holidayTomorrow: "Demain",
+    nearbyPlaceLine: (name: string, km: number) =>
+      `Ton lieu repéré « ${name} » n’est qu’à ${km} km.`,
+    nearbyPlaceMap: "Vers la carte",
     holidayLine: (when: string, country: string, name: string) =>
       `${when}, jour f\u00e9ri\u00e9 (${country})\u202f: ${name} \u2013 magasins souvent ferm\u00e9s.`,
     weather: "Météo",
@@ -4924,6 +4951,14 @@ export const fr: Translation = {
     source: "Source : transport.opendata.ch – sans garantie.",
   },
   poi: {
+    hospitals: {
+      title: "Hôpitaux à proximité",
+      subtitle:
+        "D'OpenStreetMap – « 24h » signifie : urgences renseignées. En cas d'urgence, appelle d'abord le 144 ou le 112.",
+      unnamed: "Hôpital",
+      empty: (radius: string) =>
+        `Aucun hôpital renseigné dans un rayon de ${radius}.`,
+    },
     pharmacies: {
       title: "Pharmacies à proximité",
       subtitle: "Depuis OpenStreetMap – horaires si renseignés, sans garantie.",
@@ -6862,6 +6897,10 @@ export const fr: Translation = {
     subtitle: "Les pleins avec kilométrage – pour la consommation réelle.",
     loginFeature: "le carnet de carburant",
     averageTitle: "Consommation moyenne",
+    monthlyTitle: "Coûts de carburant par mois",
+    monthlyFills: (n: number) => (n === 1 ? "1 plein" : `${n} pleins`),
+    monthlyHint:
+      "Seuls les pleins avec montant saisi – sans prix, rien n'est deviné.",
     averageHint:
       "Pondérée sur tous les tronçons plausibles. Le calculateur de frais de route de la caisse peut reprendre cette valeur.",
     addTitle: "Saisir un plein",
@@ -6922,6 +6961,10 @@ export const fr: Translation = {
     avgRatingLabel: "Note moyenne",
     hikeYearsTitle: "Bilan annuel des randonnées",
     stageKmTitle: "Kilom\u00e8tres des circuits",
+    recordsTitle: "Records",
+    recordLongestTrip: "Le plus de nuits d'affilée",
+    recordLongestStage: "Étape la plus longue",
+    recordFurthestTrip: "Circuit le plus long",
     stageKmLine: (km: string) => `\u2248 ${km} km`,
     stageKmHint: "Par la route entre les étapes (OSRM/OpenStreetMap).",
     stageKmHintEstimate:

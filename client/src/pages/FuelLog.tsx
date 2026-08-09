@@ -20,11 +20,13 @@ import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { fmtShort } from "@/lib/dateFormat";
 import { formatChf, parseChfInput } from "@/lib/money";
+import { LOCALE_TAGS } from "@shared/i18n";
 import { todayIso } from "@shared/localDate";
 import {
   FUEL_MAX_LITERS10,
   FUEL_MAX_ODOMETER_KM,
   averageConsumptionL100,
+  fuelMonthlyCosts,
   fuelSegments,
 } from "@shared/fuelLog";
 import { fuelLogCsvFileName, fuelLogToCsv } from "@shared/fuelLogCsv";
@@ -109,6 +111,12 @@ export default function FuelLogPage() {
     );
     return map;
   }, [filteredFills]);
+
+  /** Tank-Kosten pro Monat (#610) – nur Füllungen mit erfasstem Betrag. */
+  const monthlyCosts = useMemo(
+    () => fuelMonthlyCosts(filteredFills),
+    [filteredFills]
+  );
 
   /** Verbrauchs-Verlauf (#504): plausible Abschnitte, älteste zuerst. */
   const chartData = useMemo(
@@ -227,6 +235,44 @@ export default function FuelLogPage() {
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {tf.averageHint}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Tank-Kosten pro Monat (#610): was das Fahren wirklich kostet –
+              nur Füllungen mit Betrag, ohne Betrag wird nichts geraten */}
+          {monthlyCosts.length > 0 && (
+            <Card className="mb-5">
+              <CardContent className="pt-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {tf.monthlyTitle}
+                </p>
+                <ul className="mt-2 space-y-1">
+                  {monthlyCosts.map(entry => (
+                    <li
+                      key={entry.month}
+                      className="flex items-baseline justify-between text-sm"
+                    >
+                      <span>
+                        {new Date(
+                          `${entry.month}-01T00:00:00`
+                        ).toLocaleDateString(LOCALE_TAGS[lang], {
+                          month: "long",
+                          year: "numeric",
+                        })}
+                        <span className="ml-1.5 text-xs text-muted-foreground">
+                          {tf.monthlyFills(entry.fills)}
+                        </span>
+                      </span>
+                      <span className="font-medium tabular-nums">
+                        CHF {formatChf(entry.totalRappen, lang)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {tf.monthlyHint}
                 </p>
               </CardContent>
             </Card>

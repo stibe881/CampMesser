@@ -28,9 +28,12 @@ import {
 } from "@/lib/tentFinderTargets";
 import { useI18n } from "@/i18n";
 import {
+  SAVED_PLACE_COLORS,
   SAVED_PLACE_COLOR_HEX,
+  SAVED_PLACE_COLOR_LABELS,
   normalizeSavedPlaceColor,
 } from "@shared/savedPlaces";
+import { pick } from "@shared/i18n";
 import { distanceMeters } from "@shared/geo";
 import { useRoutedDistances } from "@/hooks/useRoutedDistances";
 import { type Excursion } from "@shared/excursions";
@@ -55,21 +58,120 @@ export default function MapViewPage() {
   const { data: savedPlacesData } = trpc.savedPlaces.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  // Etappen-Routen (#596): pro Rundreise die Kette ihrer Etappen mit
+  // Koordinaten – als Linie auf der eigenen Karten-Ebene «Routen».
+  const { data: allStopsData } = trpc.trips.stops.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 5 * 60_000,
+  });
+  const stageRoutes = useMemo(() => {
+    const byTrip = new Map<number, [number, number][]>();
+    for (const stop of allStopsData ?? []) {
+      if (stop.latitude == null || stop.longitude == null) continue;
+      const list = byTrip.get(stop.tripId) ?? [];
+      list.push([stop.latitude, stop.longitude]);
+      byTrip.set(stop.tripId, list);
+    }
+    const nameOf = new Map(
+      (trips ?? []).map(trip => [
+        trip.id,
+        trip.title || trip.location || String(trip.id),
+      ])
+    );
+    return Array.from(byTrip.entries())
+      .filter(([, points]) => points.length >= 2)
+      .map(([tripId, points]) => ({
+        tripId,
+        name: nameOf.get(tripId) ?? String(tripId),
+        points,
+      }));
+  }, [allStopsData, trips]);
   // Verwaltungsliste (#563): Distanz von zuhause, Sprung zum Pin
   const { data: home } = trpc.home.get.useQuery(undefined, {
     enabled: isAuthenticated && (savedPlacesData?.length ?? 0) > 0,
     staleTime: 5 * 60_000,
   });
+  // Farb-Legende (#602): Die fünf Pin-Farben dürfen eigene Namen tragen
+  // («Badeplätze», «Pässe») – gespeichert am Konto, gefiltert wird auf
+  // Karte UND Liste.
+  const [colorNames, setColorNames] = useState<Record<string, string>>(() => {
+    try {
+      const raw = localStorage.getItem("campmesser.savedPlaceColorNames");
+      const parsed = raw ? (JSON.parse(raw) as unknown) : null;
+      return parsed && typeof parsed === "object"
+        ? (parsed as Record<string, string>)
+        : {};
+    } catch {
+      return {};
+    }
+  });
+  const colorNamesSync = useSyncedSetting<Record<string, string>>(
+    "savedPlaceColorNames",
+    value => {
+      if (value && typeof value === "object") {
+        setColorNames(value);
+        try {
+          localStorage.setItem(
+            "campmesser.savedPlaceColorNames",
+            JSON.stringify(value)
+          );
+        } catch {
+          // localStorage nicht verfügbar
+        }
+      }
+    }
+  );
+  const updateColorName = (color: string, name: string) => {
+    setColorNames(prev => {
+      const next = { ...prev };
+      if (name.trim()) next[color] = name.trim().slice(0, 40);
+      else delete next[color];
+      try {
+        localStorage.setItem(
+          "campmesser.savedPlaceColorNames",
+          JSON.stringify(next)
+        );
+      } catch {
+        // localStorage nicht verfügbar
+      }
+      colorNamesSync.push(next);
+      return next;
+    });
+  };
+  const colorLabel = (color: string) =>
+    colorNames[color] ||
+    pick(SAVED_PLACE_COLOR_LABELS[normalizeSavedPlaceColor(color)], lang);
+  const [colorFilter, setColorFilter] = useState<string | null>(null);
+  const [editLegend, setEditLegend] = useState(false);
+  const visiblePlaces = useMemo(
+    () =>
+      (savedPlacesData ?? []).filter(
+        place =>
+          colorFilter === null ||
+          normalizeSavedPlaceColor(place.color) === colorFilter
+      ),
+    [savedPlacesData, colorFilter]
+  );
+  /** Farben, die überhaupt vergeben sind – nur die stehen zur Wahl. */
+  const usedColors = useMemo(
+    () =>
+      SAVED_PLACE_COLORS.filter(color =>
+        (savedPlacesData ?? []).some(
+          place => normalizeSavedPlaceColor(place.color) === color
+        )
+      ),
+    [savedPlacesData]
+  );
   // Strassen-Kilometer statt Luftlinie (Nutzerwunsch 09.08.2026): eine
   // Tabellen-Abfrage für die ganze Liste; ohne Antwort bleibt die Luftlinie.
   const placeTargets = useMemo(
     () =>
-      (savedPlacesData ?? []).map(place => ({
+      visiblePlaces.map(place => ({
         id: String(place.id),
         lat: place.latitude,
         lon: place.longitude,
       })),
-    [savedPlacesData]
+    [visiblePlaces]
   );
   const routedPlaceKm = useRoutedDistances(
     home ? { lat: home.latitude, lon: home.longitude } : null,
@@ -267,7 +369,8 @@ export default function MapViewPage() {
             excursionsAvailable={excursionsAvailable}
             focusExcursionId={focusExcursionId}
             nightsBySpotId={nightsBySpotId}
-            savedPlaces={savedPlacesData ?? []}
+            savedPlaces={visiblePlaces}
+            stageRoutes={stageRoutes}
             focusPoint={focusPoint}
           />
 
@@ -290,8 +393,96 @@ export default function MapViewPage() {
                   tabIndex={-1}
                   onChange={e => void handlePlacePhotoSelected(e.target.files)}
                 />
+                {/* Farb-Legende (#602): eigene Namen für die Pin-Farben,
+                    Filter wirkt auf Karte UND Liste. */}
+                {usedColors.length > 1 && (
+                  <div
+                    className="mb-2 flex flex-wrap items-center gap-1.5"
+                    role="group"
+                    aria-label={t.mapView.colorFilterAria}
+                  >
+                    <button
+                      type="button"
+                      aria-pressed={colorFilter === null}
+                      onClick={() => setColorFilter(null)}
+                      className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                        colorFilter === null
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border hover:bg-accent"
+                      }`}
+                    >
+                      {t.mapView.colorAll}
+                    </button>
+                    {usedColors.map(color => (
+                      <button
+                        key={color}
+                        type="button"
+                        aria-pressed={colorFilter === color}
+                        onClick={() =>
+                          setColorFilter(current =>
+                            current === color ? null : color
+                          )
+                        }
+                        className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                          colorFilter === color
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border hover:bg-accent"
+                        }`}
+                      >
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{
+                            backgroundColor: SAVED_PLACE_COLOR_HEX[color],
+                          }}
+                          aria-hidden="true"
+                        />
+                        {colorLabel(color)}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setEditLegend(value => !value)}
+                      aria-expanded={editLegend}
+                      className="text-xs font-medium text-primary hover:underline"
+                    >
+                      {t.mapView.colorLegendEdit}
+                    </button>
+                  </div>
+                )}
+                {editLegend && (
+                  <div className="mb-3 grid gap-1.5 sm:grid-cols-2">
+                    {SAVED_PLACE_COLORS.map(color => (
+                      <label
+                        key={color}
+                        className="flex items-center gap-2 text-sm"
+                      >
+                        <span
+                          className="h-3 w-3 shrink-0 rounded-full"
+                          style={{
+                            backgroundColor: SAVED_PLACE_COLOR_HEX[color],
+                          }}
+                          aria-hidden="true"
+                        />
+                        <input
+                          type="text"
+                          maxLength={40}
+                          value={colorNames[color] ?? ""}
+                          placeholder={pick(
+                            SAVED_PLACE_COLOR_LABELS[color],
+                            lang
+                          )}
+                          aria-label={t.mapView.colorNameAria(
+                            pick(SAVED_PLACE_COLOR_LABELS[color], lang)
+                          )}
+                          onChange={e => updateColorName(color, e.target.value)}
+                          className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                )}
                 <ul className="space-y-1">
-                  {(savedPlacesData ?? []).map(place => {
+                  {visiblePlaces.map(place => {
                     const routedM = routedPlaceKm.byId.get(String(place.id));
                     const distanceKm =
                       routedM != null

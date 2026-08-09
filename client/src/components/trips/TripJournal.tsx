@@ -7,6 +7,7 @@ import {
 } from "@/lib/dateFormat";
 import { relativeAge, type ShareExpiryDays } from "@shared/sharing";
 import { currentTripStop } from "@shared/tripStops";
+import { parseTripWeatherDays, type TripWeatherDay } from "@shared/tripWeather";
 import {
   ArrowRight,
   Award,
@@ -119,12 +120,15 @@ export default function TripJournal({
   startDate,
   endDate,
   shared,
+  weatherJson = null,
 }: {
   tripId: number;
   tripName: string;
   startDate: string;
   endDate: string;
   shared: boolean;
+  /** Wetterarchiv der Reise (#608) – die Tagesliste steht neben dem Datum. */
+  weatherJson?: string | null;
 }) {
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
@@ -206,6 +210,13 @@ export default function TripJournal({
     (query.data ?? []).forEach(entry => map.set(entry.day, entry));
     return map;
   }, [query.data]);
+  // Archiviertes Tages-Wetter (#608): «Regentag, Museum» bekommt seine
+  // 9 Grad dazu – nur bei Reisen, deren Archiv schon Tageszeilen trägt.
+  const weatherByDay = useMemo(() => {
+    const map = new Map<string, TripWeatherDay>();
+    parseTripWeatherDays(weatherJson).forEach(day => map.set(day.date, day));
+    return map;
+  }, [weatherJson]);
 
   const fmtDay = (iso: string) =>
     fmtWeekdayLong(new Date(`${iso}T00:00:00`), lang);
@@ -274,6 +285,25 @@ export default function TripJournal({
                             return stage ? (
                               <span className="rounded-full bg-accent px-1.5 py-0.5 font-medium normal-case text-accent-foreground">
                                 {stage}
+                              </span>
+                            ) : null;
+                          })()}
+                          {(() => {
+                            // Archiviertes Tages-Wetter (#608)
+                            const dayWeather = weatherByDay.get(day);
+                            return dayWeather ? (
+                              <span
+                                className="flex items-center gap-0.5 font-normal normal-case"
+                                title={t.trips.weatherTitle}
+                              >
+                                <CloudSun
+                                  className="h-3 w-3"
+                                  aria-hidden="true"
+                                />
+                                {Math.round(dayWeather.tMax)}° /{" "}
+                                {Math.round(dayWeather.tMin)}°
+                                {dayWeather.precip >= 1 &&
+                                  ` · ${Math.round(dayWeather.precip)} mm`}
                               </span>
                             ) : null;
                           })()}

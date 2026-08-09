@@ -109,7 +109,15 @@ export function trpcMock(
           const key = path.join(".");
           return () =>
             key in mutations
-              ? { ...mutationResult(), mutate: mutations[key] }
+              ? {
+                  ...mutationResult(),
+                  mutate: mutations[key],
+                  // Spion auch für mutateAsync – Komponenten, die auf das
+                  // Ergebnis warten (z. B. QuickExpense #607), rufen den
+                  // gleichen Pfad asynchron auf.
+                  mutateAsync: (input: unknown) =>
+                    Promise.resolve(mutations[key](input)),
+                }
               : mutationResult();
         }
         if (prop === "useUtils" || prop === "useContext") {

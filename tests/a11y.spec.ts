@@ -67,3 +67,30 @@ test("Länder-Seite ohne A11y-Verstösse", async ({ page }) => {
   await page.getByRole("heading").first().waitFor();
   await expectNoViolations(page);
 });
+
+// Noch vier Seiten (#615): Statistik, Zeltplätze, Tagebuch und Einkauf –
+// abgemeldet zeigen sie Anmelde-Hinweis bzw. leere Zustände, auch die
+// müssen zugänglich sein (Labels, Kontraste, Rollen).
+test("Statistik-Seite ohne A11y-Verstösse", async ({ page }) => {
+  await page.goto("/statistik");
+  await page.getByRole("heading").first().waitFor();
+  await expectNoViolations(page);
+});
+
+test("Zeltplätze-Seite ohne A11y-Verstösse", async ({ page }) => {
+  await page.goto("/zeltplaetze");
+  await page.getByRole("heading").first().waitFor();
+  await expectNoViolations(page);
+});
+
+test("Tagebuch-Seite ohne A11y-Verstösse", async ({ page }) => {
+  await page.goto("/tagebuch");
+  await page.getByRole("heading").first().waitFor();
+  await expectNoViolations(page);
+});
+
+test("Einkaufslisten-Seite ohne A11y-Verstösse", async ({ page }) => {
+  await page.goto("/einkauf");
+  await page.getByRole("heading").first().waitFor();
+  await expectNoViolations(page);
+});

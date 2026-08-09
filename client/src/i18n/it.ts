@@ -1001,6 +1001,7 @@ export const it: Translation = {
   weather: {
     tripPlaceSuggest: (name: string) =>
       `Ricorda il luogo del viaggio «${name}»`,
+    savedPlaceSuggest: (name: string) => `Ricorda il luogo salvato «${name}»`,
     mosquitoTitle: "Zanzare stasera",
     mosquitoAria: "Indice zanzare per la sera",
     mosquitoBarAria: (score: number) => `Indice zanzare ${score} su 100`,
@@ -1516,6 +1517,15 @@ export const it: Translation = {
     emergencyTitle: "Numero d'emergenza",
     callAria: (number: string) => `Chiama il numero d'emergenza ${number}`,
     campingTitle: "Pernottamento e campeggio",
+    vignetteExpenseButton: (price: string) =>
+      `Aggiungi ${price} alla cassa di viaggio`,
+    vignetteExpenseTitle: "Vignetta nella cassa di viaggio",
+    vignetteExpenseHint: (what: string, price: string) =>
+      `Registra «${what}» come spesa di ${price}. Il prezzo indicativo resta modificabile nella cassa di viaggio.`,
+    vignetteExpenseTripLabel: "Scegli il viaggio",
+    vignetteExpenseSave: "Registra",
+    vignetteExpenseSaved: "Registrato nella cassa di viaggio",
+    vignetteExpenseNoTrips: "Nessun viaggio ancora – creane prima uno.",
     updatedLine: (country: string, date: string) =>
       `${country}: aggiornato al ${date}. Valori in km/h; senza garanzia.`,
   },
@@ -2030,6 +2040,7 @@ export const it: Translation = {
     createNotePlaceholder: "es. consigliato dal vicino",
     createColorLabel: "Colore del segnaposto",
     layerSavedPlaces: "Luoghi salvati",
+    layerRoutes: "Itinerari",
     savedPlaceKind: "Luogo salvato \u2013 meta dei desideri",
     savedPlaceLegend: (n: number) =>
       `${n} luogh${n === 1 ? "o salvato" : "i salvati"}`,
@@ -2053,6 +2064,13 @@ export const it: Translation = {
     placePhotoRemove: (name: string) => `Rimuovi la foto di ${name}`,
     placePhotoFailed: "Impossibile caricare la foto",
     placePhotoHeic: "Le foto HEIC non sono supportate – scegli un JPG.",
+    savedPlacePromote: "Trasforma in piazzola preferita",
+    savedPlacePromoted: "Il luogo salvato ora è una piazzola preferita.",
+    colorFilterAria: "Filtra i luoghi salvati per colore",
+    colorAll: "Tutti",
+    colorLegendEdit: "Modifica la legenda",
+    colorNameAria: (color: string) =>
+      `Nome personalizzato per il colore ${color}`,
     savedPlaceCreatedToast: (name: string) =>
       `Luogo \u00ab${name}\u00bb salvato`,
     createdToast: (name: string) => `«${name}» creato come preferito`,
@@ -2661,6 +2679,8 @@ export const it: Translation = {
     yearCompareTitle: "Notti per anno",
     kindFilterAll: "Tutti i tipi",
     kindFilterAria: "Filtra i viaggi per tipo",
+    yearFilterAll: "Tutti gli anni",
+    yearFilterAria: "Filtra i viaggi per anno",
     kindLabel: "Tipo di viaggio",
     kindHint:
       "Determina cosa mette in evidenza la vista Oggi durante il viaggio – tutti i moduli restano accessibili.",
@@ -3065,6 +3085,8 @@ export const it: Translation = {
     editAria: (label: string) => `Modifica la spesa ${label}`,
     deleteAria: (label: string) => `Elimina la spesa ${label}`,
     paidByLine: (name: string) => `pagato da ${name}`,
+    personFilterAll: "Tutte le persone",
+    personFilterAria: "Filtra le spese per persona",
     byLine: (name: string) => `registrato da ${name}`,
     untitled: "Senza descrizione",
     photoLabel: "Foto dello scontrino (facoltativa)",
@@ -3109,6 +3131,7 @@ export const it: Translation = {
     noCoordsNote:
       "Le tappe senza risultato dalla ricerca luoghi non compaiono sulla mappa.",
     noCoordsShort: "senza coordinate",
+    stageNights: (n: number) => (n === 1 ? "1 notte" : `${n} notti`),
     mapAria: "Mappa delle tappe",
     maxReached: (n: number) => `Al massimo ${n} tappe`,
     legLine: (km: string, duration: string) =>
@@ -3177,6 +3200,7 @@ export const it: Translation = {
     dayHeader: "Giorno",
     photosTitle: "Foto",
     photoAlt: (n, name) => `Foto ${n} del soggiorno ${name}`,
+    journalPhotoAlt: (day: string) => `Foto del giorno del ${day}`,
     footer:
       "Bei ricordi! · ReiseKompass – la tua bussola per vacanze, campeggio e gite",
   },
@@ -4631,6 +4655,9 @@ export const it: Translation = {
     stageNextNavAria: (name: string) => `Avvia la navigazione verso ${name}`,
     holidayToday: "Oggi",
     holidayTomorrow: "Domani",
+    nearbyPlaceLine: (name: string, km: number) =>
+      `Il tuo luogo salvato «${name}» dista solo ${km} km.`,
+    nearbyPlaceMap: "Alla mappa",
     holidayLine: (when: string, country: string, name: string) =>
       `${when} \u00e8 festivo (${country}): ${name} \u2013 negozi spesso chiusi.`,
     weather: "Meteo",
@@ -4886,6 +4913,14 @@ export const it: Translation = {
     source: "Fonte: transport.opendata.ch – senza garanzia.",
   },
   poi: {
+    hospitals: {
+      title: "Ospedali nelle vicinanze",
+      subtitle:
+        "Da OpenStreetMap – «24h» significa: pronto soccorso registrato. In emergenza chiama prima il 144 o il 112.",
+      unnamed: "Ospedale",
+      empty: (radius: string) =>
+        `Nel raggio di ${radius} non risulta alcun ospedale.`,
+    },
     pharmacies: {
       title: "Farmacie nelle vicinanze",
       subtitle: "Da OpenStreetMap – orari se registrati, senza garanzia.",
@@ -6806,6 +6841,10 @@ export const it: Translation = {
     subtitle: "I pieni con chilometraggio – per il consumo reale.",
     loginFeature: "il libretto carburante",
     averageTitle: "Consumo medio",
+    monthlyTitle: "Costi carburante al mese",
+    monthlyFills: (n: number) => (n === 1 ? "1 pieno" : `${n} pieni`),
+    monthlyHint:
+      "Solo i pieni con importo registrato – senza prezzo non si indovina nulla.",
     averageHint:
       "Ponderato su tutti i tratti plausibili. Il calcolatore dei costi di viaggio nella cassa può riprendere questo valore.",
     addTitle: "Registra un pieno",
@@ -6866,6 +6905,10 @@ export const it: Translation = {
     avgRatingLabel: "Valutazione media",
     hikeYearsTitle: "Bilancio annuale delle escursioni",
     stageKmTitle: "Chilometri dei giri",
+    recordsTitle: "Record",
+    recordLongestTrip: "Più notti di fila",
+    recordLongestStage: "Tappa più lunga",
+    recordFurthestTrip: "Tour più lungo",
     stageKmLine: (km: string) => `\u2248 ${km} km`,
     stageKmHint: "Su strada tra le tappe (OSRM/OpenStreetMap).",
     stageKmHintEstimate:

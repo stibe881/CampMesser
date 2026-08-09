@@ -2062,4 +2062,412 @@ export const recipes: Recipe[] = [
       "The Swiss answer to French toast – perfect for rescuing yesterday's bread. With apple sauce it's a hit as dessert too."
     ),
   },
+  // ---- Sechs weitere One-Pot-Rezepte (#624): ein Topf, ein Kocher, ----
+  // ---- wenig Abwasch – das Kernversprechen der Camping-Küche.       ----
+  {
+    id: "one-pot-reistopf",
+    name: l4(
+      "Gemüse-Reistopf",
+      "Riz aux légumes en une casserole",
+      "Riso alle verdure in pentola unica",
+      "One-pot vegetable rice"
+    ),
+    method: "Gaskocher",
+    timeMinutes: 25,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: true,
+    kidFriendly: true,
+    ingredients: [
+      l4("Reis", "Riz", "Riso", "Rice"),
+      l4("Rüebli", "Carottes", "Carote", "Carrots"),
+      l4(
+        "Erbsen (Dose oder TK)",
+        "Petits pois (boîte ou surgelés)",
+        "Piselli (in scatola o surgelati)",
+        "Peas (tinned or frozen)"
+      ),
+      l4("Zwiebel", "Oignon", "Cipolla", "Onion"),
+      l4(
+        "Gemüsebouillon",
+        "Bouillon de légumes",
+        "Brodo vegetale",
+        "Vegetable stock"
+      ),
+      l4("Öl", "Huile", "Olio", "Oil"),
+      l4(
+        "Paprika (Gewürz)",
+        "Paprika (épice)",
+        "Paprica (spezia)",
+        "Paprika (spice)"
+      ),
+    ],
+    steps: [
+      l4(
+        "Zwiebel und Rüebli klein schneiden und im Topf mit etwas Öl andünsten.",
+        "Émincer l'oignon et les carottes et les faire revenir dans la casserole avec un peu d'huile.",
+        "Trita cipolla e carote e falle rosolare nella pentola con un po' d'olio.",
+        "Chop the onion and carrots and sauté them in the pot with a little oil."
+      ),
+      l4(
+        "Reis kurz mitdünsten, mit der doppelten Menge Bouillon ablöschen.",
+        "Faire revenir brièvement le riz, puis mouiller avec le double de volume de bouillon.",
+        "Fai tostare brevemente il riso, poi sfuma con il doppio del volume di brodo.",
+        "Briefly toast the rice, then add twice its volume of stock."
+      ),
+      l4(
+        "Zugedeckt 15 Minuten leise köcheln lassen, die Erbsen in den letzten 5 Minuten dazugeben.",
+        "Laisser mijoter à couvert 15 minutes, ajouter les petits pois pour les 5 dernières minutes.",
+        "Lascia sobbollire coperto per 15 minuti, aggiungi i piselli negli ultimi 5 minuti.",
+        "Simmer covered for 15 minutes, adding the peas for the last 5 minutes."
+      ),
+      l4(
+        "Mit Paprika abschmecken und kurz ziehen lassen.",
+        "Assaisonner de paprika et laisser reposer brièvement.",
+        "Insaporisci con la paprica e lascia riposare brevemente.",
+        "Season with paprika and let it rest briefly."
+      ),
+    ],
+    tip: l4(
+      "Ein Rest Wurst oder ein Ei obendrauf macht daraus ein Znacht für hungrige Tage.",
+      "Un reste de saucisse ou un œuf par-dessus en fait un souper pour les jours de grande faim.",
+      "Un avanzo di salsiccia o un uovo sopra lo trasformano in una cena per giorni affamati.",
+      "Leftover sausage or an egg on top turns it into supper for hungry days."
+    ),
+  },
+  {
+    id: "one-pot-gnocchi",
+    name: l4(
+      "Gnocchi-Rahmtopf mit Spinat",
+      "Gnocchis à la crème et aux épinards",
+      "Gnocchi alla panna con spinaci",
+      "Creamy one-pot gnocchi with spinach"
+    ),
+    method: "Gaskocher",
+    timeMinutes: 15,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: true,
+    kidFriendly: true,
+    ingredients: [
+      l4(
+        "Gnocchi (Kühlregal)",
+        "Gnocchis (rayon frais)",
+        "Gnocchi (banco frigo)",
+        "Gnocchi (chilled)"
+      ),
+      l4("Rahm", "Crème", "Panna", "Cream"),
+      l4(
+        "Spinat (frisch oder TK)",
+        "Épinards (frais ou surgelés)",
+        "Spinaci (freschi o surgelati)",
+        "Spinach (fresh or frozen)"
+      ),
+      l4("Knoblauch", "Ail", "Aglio", "Garlic"),
+      l4(
+        "Geriebener Käse",
+        "Fromage râpé",
+        "Formaggio grattugiato",
+        "Grated cheese"
+      ),
+      l4("Wasser", "Eau", "Acqua", "Water"),
+      l4("Salz und Pfeffer", "Sel et poivre", "Sale e pepe", "Salt and pepper"),
+    ],
+    steps: [
+      l4(
+        "Knoblauch im Topf kurz andünsten, Gnocchi mit wenig Wasser zugeben.",
+        "Faire revenir brièvement l'ail dans la casserole, ajouter les gnocchis avec un peu d'eau.",
+        "Fai rosolare brevemente l'aglio nella pentola, aggiungi gli gnocchi con poca acqua.",
+        "Briefly sauté the garlic in the pot, add the gnocchi with a little water."
+      ),
+      l4(
+        "5 Minuten köcheln, bis die Gnocchi weich sind, dann Spinat und Rahm einrühren.",
+        "Laisser mijoter 5 minutes jusqu'à ce que les gnocchis soient tendres, puis incorporer les épinards et la crème.",
+        "Fai sobbollire 5 minuti finché gli gnocchi sono morbidi, poi unisci spinaci e panna.",
+        "Simmer for 5 minutes until the gnocchi are soft, then stir in the spinach and cream."
+      ),
+      l4(
+        "Käse daruntermischen, mit Salz und Pfeffer abschmecken.",
+        "Mélanger le fromage, saler et poivrer.",
+        "Mescola il formaggio, aggiusta di sale e pepe.",
+        "Mix in the cheese and season with salt and pepper."
+      ),
+    ],
+    tip: l4(
+      "Gnocchi aus dem Kühlregal sind vorgegart – sie brauchen nur Minuten und verzeihen jeden Kocher.",
+      "Les gnocchis du rayon frais sont précuits – quelques minutes suffisent, même sur un petit réchaud.",
+      "Gli gnocchi del banco frigo sono precotti – bastano pochi minuti, anche sul fornellino.",
+      "Chilled gnocchi are pre-cooked – they only need minutes and forgive any stove."
+    ),
+  },
+  {
+    id: "one-pot-kartoffelgulasch",
+    name: l4(
+      "Kartoffelgulasch",
+      "Goulasch de pommes de terre",
+      "Gulasch di patate",
+      "Potato goulash"
+    ),
+    method: "Beides",
+    timeMinutes: 35,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: true,
+    kidFriendly: true,
+    ingredients: [
+      l4("Kartoffeln", "Pommes de terre", "Patate", "Potatoes"),
+      l4("Zwiebeln", "Oignons", "Cipolle", "Onions"),
+      l4("Peperoni", "Poivrons", "Peperoni", "Bell peppers"),
+      l4(
+        "Paprika (Gewürz)",
+        "Paprika (épice)",
+        "Paprica (spezia)",
+        "Paprika (spice)"
+      ),
+      l4(
+        "Tomatenpüree",
+        "Purée de tomates",
+        "Concentrato di pomodoro",
+        "Tomato purée"
+      ),
+      l4("Bouillon", "Bouillon", "Brodo", "Stock"),
+      l4("Öl", "Huile", "Olio", "Oil"),
+      l4(
+        "Cervelat oder Wienerli (optional)",
+        "Cervelas ou wienerli (facultatif)",
+        "Cervelat o wienerli (facoltativo)",
+        "Cervelat or frankfurters (optional)"
+      ),
+    ],
+    steps: [
+      l4(
+        "Zwiebeln im Topf goldgelb dünsten, Paprika und Tomatenpüree kurz mitrösten.",
+        "Faire dorer les oignons dans la casserole, faire revenir brièvement le paprika et la purée de tomates.",
+        "Fai dorare le cipolle nella pentola, tosta brevemente paprica e concentrato.",
+        "Sauté the onions until golden, briefly toast the paprika and tomato purée."
+      ),
+      l4(
+        "Kartoffel- und Peperoniwürfel zugeben und mit Bouillon knapp bedecken.",
+        "Ajouter les dés de pommes de terre et de poivron et couvrir à peine de bouillon.",
+        "Aggiungi patate e peperoni a dadini e copri appena con il brodo.",
+        "Add the diced potatoes and peppers and barely cover with stock."
+      ),
+      l4(
+        "Zugedeckt 20–25 Minuten köcheln, bis die Kartoffeln weich sind.",
+        "Laisser mijoter à couvert 20–25 minutes, jusqu'à ce que les pommes de terre soient tendres.",
+        "Fai sobbollire coperto 20–25 minuti, finché le patate sono morbide.",
+        "Simmer covered for 20–25 minutes until the potatoes are soft."
+      ),
+      l4(
+        "Nach Belieben Wurstscheiben zugeben und noch 5 Minuten ziehen lassen.",
+        "Ajouter des rondelles de saucisse selon l'envie et laisser encore 5 minutes.",
+        "A piacere aggiungi fette di salsiccia e lascia insaporire altri 5 minuti.",
+        "Add sausage slices if you like and let it simmer for another 5 minutes."
+      ),
+    ],
+    tip: l4(
+      "Schmeckt am zweiten Tag noch besser – gleich die doppelte Menge kochen.",
+      "Encore meilleur le lendemain – autant en cuire le double.",
+      "Il giorno dopo è ancora più buono – cucinane subito il doppio.",
+      "Even better the next day – cook a double batch right away."
+    ),
+  },
+  {
+    id: "one-pot-tortellini",
+    name: l4(
+      "Tortellini-Suppentopf",
+      "Marmite de tortellinis en bouillon",
+      "Tortellini in brodo",
+      "Tortellini soup pot"
+    ),
+    method: "Gaskocher",
+    timeMinutes: 15,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: true,
+    kidFriendly: true,
+    ingredients: [
+      l4(
+        "Tortellini (Kühlregal)",
+        "Tortellinis (rayon frais)",
+        "Tortellini (banco frigo)",
+        "Tortellini (chilled)"
+      ),
+      l4(
+        "Gemüsebouillon",
+        "Bouillon de légumes",
+        "Brodo vegetale",
+        "Vegetable stock"
+      ),
+      l4("Rüebli", "Carottes", "Carote", "Carrots"),
+      l4("Lauch", "Poireau", "Porro", "Leek"),
+      l4(
+        "Geriebener Käse",
+        "Fromage râpé",
+        "Formaggio grattugiato",
+        "Grated cheese"
+      ),
+    ],
+    steps: [
+      l4(
+        "Rüebli und Lauch in feine Scheiben schneiden und in der Bouillon 5 Minuten kochen.",
+        "Couper les carottes et le poireau en fines rondelles et les cuire 5 minutes dans le bouillon.",
+        "Taglia carote e porro a rondelle sottili e cuocili 5 minuti nel brodo.",
+        "Slice the carrots and leek thinly and cook them in the stock for 5 minutes."
+      ),
+      l4(
+        "Tortellini zugeben und nach Packung gar ziehen lassen (meist 3–4 Minuten).",
+        "Ajouter les tortellinis et les laisser cuire selon l'emballage (souvent 3–4 minutes).",
+        "Aggiungi i tortellini e cuocili secondo la confezione (di solito 3–4 minuti).",
+        "Add the tortellini and cook according to the packet (usually 3–4 minutes)."
+      ),
+      l4(
+        "In Schüsseln verteilen und mit Käse bestreuen.",
+        "Répartir dans des bols et parsemer de fromage.",
+        "Distribuisci nelle ciotole e cospargi di formaggio.",
+        "Ladle into bowls and sprinkle with cheese."
+      ),
+    ],
+    tip: l4(
+      "An kalten Abenden DIE Antwort: heiss, schnell und mit nur einem Topf zum Abwaschen.",
+      "LA réponse des soirs froids : chaud, rapide et une seule casserole à laver.",
+      "LA risposta per le sere fredde: caldo, veloce e una sola pentola da lavare.",
+      "THE answer on cold evenings: hot, fast, and only one pot to wash."
+    ),
+  },
+  {
+    id: "one-pot-orzo",
+    name: l4(
+      "Zitronen-Orzo mit Zucchetti",
+      "Orzo au citron et aux courgettes",
+      "Orzo al limone con zucchine",
+      "Lemon orzo with courgettes"
+    ),
+    method: "Gaskocher",
+    timeMinutes: 20,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: true,
+    kidFriendly: true,
+    ingredients: [
+      l4(
+        "Orzo / Kritharaki (Reisnudeln)",
+        "Orzo / kritharaki (pâtes en forme de riz)",
+        "Orzo / kritharaki (pasta a chicco di riso)",
+        "Orzo / kritharaki (rice-shaped pasta)"
+      ),
+      l4("Zucchetti", "Courgettes", "Zucchine", "Courgettes"),
+      l4("Zitrone", "Citron", "Limone", "Lemon"),
+      l4(
+        "Gemüsebouillon",
+        "Bouillon de légumes",
+        "Brodo vegetale",
+        "Vegetable stock"
+      ),
+      l4("Olivenöl", "Huile d'olive", "Olio d'oliva", "Olive oil"),
+      l4(
+        "Geriebener Käse",
+        "Fromage râpé",
+        "Formaggio grattugiato",
+        "Grated cheese"
+      ),
+    ],
+    steps: [
+      l4(
+        "Zucchettiwürfel im Topf mit Olivenöl kurz anbraten.",
+        "Faire revenir brièvement les dés de courgette dans la casserole avec l'huile d'olive.",
+        "Fai saltare brevemente le zucchine a dadini nella pentola con l'olio d'oliva.",
+        "Briefly fry the diced courgettes in the pot with olive oil."
+      ),
+      l4(
+        "Orzo zugeben und mit Bouillon knapp bedecken; 10 Minuten köcheln und regelmässig rühren.",
+        "Ajouter l'orzo et couvrir à peine de bouillon ; laisser mijoter 10 minutes en remuant régulièrement.",
+        "Aggiungi l'orzo e copri appena con il brodo; fai sobbollire 10 minuti mescolando regolarmente.",
+        "Add the orzo and barely cover with stock; simmer for 10 minutes, stirring regularly."
+      ),
+      l4(
+        "Zitronensaft und -schale einrühren, mit Käse servieren.",
+        "Incorporer le jus et le zeste de citron, servir avec le fromage.",
+        "Unisci succo e scorza di limone, servi con il formaggio.",
+        "Stir in the lemon juice and zest, serve with cheese."
+      ),
+    ],
+    tip: l4(
+      "Orzo gart wie Reis direkt in der Bouillon – kein Abgiessen, kein zweiter Topf.",
+      "L'orzo cuit comme du riz directement dans le bouillon – rien à égoutter, pas de deuxième casserole.",
+      "L'orzo cuoce come il riso direttamente nel brodo – niente da scolare, nessuna seconda pentola.",
+      "Orzo cooks like rice directly in the stock – no draining, no second pot."
+    ),
+  },
+  {
+    id: "one-pot-fajita-reis",
+    name: l4(
+      "Fajita-Reistopf mit Bohnen",
+      "Riz façon fajita aux haricots",
+      "Riso alla fajita con fagioli",
+      "One-pot fajita rice with beans"
+    ),
+    method: "Gaskocher",
+    timeMinutes: 30,
+    servings: 4,
+    difficulty: "einfach",
+    onePot: true,
+    kidFriendly: true,
+    ingredients: [
+      l4("Reis", "Riz", "Riso", "Rice"),
+      l4(
+        "Kidneybohnen (Dose)",
+        "Haricots rouges (boîte)",
+        "Fagioli rossi (in scatola)",
+        "Kidney beans (tinned)"
+      ),
+      l4(
+        "Mais (Dose)",
+        "Maïs (boîte)",
+        "Mais (in scatola)",
+        "Sweetcorn (tinned)"
+      ),
+      l4("Peperoni", "Poivron", "Peperone", "Bell pepper"),
+      l4("Zwiebel", "Oignon", "Cipolla", "Onion"),
+      l4(
+        "Gehackte Tomaten (Dose)",
+        "Tomates concassées (boîte)",
+        "Pomodori a pezzetti (in scatola)",
+        "Chopped tomatoes (tinned)"
+      ),
+      l4(
+        "Fajita- oder Taco-Gewürz",
+        "Épices à fajitas ou tacos",
+        "Spezie per fajita o taco",
+        "Fajita or taco seasoning"
+      ),
+      l4("Öl", "Huile", "Olio", "Oil"),
+    ],
+    steps: [
+      l4(
+        "Zwiebel und Peperoni im Topf anbraten, Gewürz kurz mitrösten.",
+        "Faire revenir l'oignon et le poivron dans la casserole, griller brièvement les épices.",
+        "Fai rosolare cipolla e peperone nella pentola, tosta brevemente le spezie.",
+        "Fry the onion and pepper in the pot, briefly toasting the seasoning."
+      ),
+      l4(
+        "Reis, Tomaten und einen Becher Wasser zugeben, zugedeckt 15 Minuten köcheln.",
+        "Ajouter le riz, les tomates et une tasse d'eau, laisser mijoter à couvert 15 minutes.",
+        "Aggiungi riso, pomodori e una tazza d'acqua, fai sobbollire coperto 15 minuti.",
+        "Add the rice, tomatoes and a cup of water, simmer covered for 15 minutes."
+      ),
+      l4(
+        "Bohnen und Mais abspülen, einrühren und 5 Minuten mitwärmen.",
+        "Rincer les haricots et le maïs, les incorporer et réchauffer 5 minutes.",
+        "Sciacqua fagioli e mais, uniscili e scalda per 5 minuti.",
+        "Rinse the beans and corn, stir them in and heat through for 5 minutes."
+      ),
+    ],
+    tip: l4(
+      "Reste am Morgen mit einem Spiegelei aufwärmen – bestes Camping-Zmorge für Hungrige.",
+      "Réchauffer les restes le matin avec un œuf au plat – le meilleur déjeuner de camping pour les affamés.",
+      "Riscalda gli avanzi al mattino con un uovo al tegamino – la migliore colazione da campeggio per gli affamati.",
+      "Reheat leftovers in the morning with a fried egg – the best camping breakfast for the hungry."
+    ),
+  },
 ];

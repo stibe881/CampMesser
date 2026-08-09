@@ -43,6 +43,9 @@ export const TRASH_KINDS = [
   "box",
   "gear",
   "shoppingList",
+  // Ab #613: Merkorte – seit sie Fotos tragen (#589), ist «aus Versehen
+  // gelöscht» kein Ein-Klick-Schaden mehr.
+  "savedPlace",
 ] as const;
 export type TrashKind = (typeof TRASH_KINDS)[number];
 
@@ -71,6 +74,7 @@ export const TRASH_KIND_LABELS: Record<TrashKind, L4> = {
     "Lista della spesa",
     "Shopping list"
   ),
+  savedPlace: l4("Merkort", "Lieu repéré", "Luogo salvato", "Saved place"),
 };
 
 export function isTrashKind(value: string): value is TrashKind {

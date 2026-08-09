@@ -4,9 +4,11 @@
  * themePreference.ts, damit der App-Start die Stufe anwenden kann, ohne die
  * Profil-Seite ins Haupt-Bundle zu ziehen.
  *
- * Bewusst NUR auf dem Gerät gespeichert (kein Konto-Sync wie beim Design):
- * Die passende Grösse hängt am Bildschirm – auf dem Handy gross, auf dem
- * Tablet normal ist ein völlig üblicher Wunsch.
+ * Seit #611 wandert die Wahl AUCH ans Konto (synchronisierte
+ * Einstellungen, Muster Design #360): Wer die Schrift braucht, braucht
+ * sie auf jedem Gerät – der ursprüngliche Geräte-lokal-Entscheid (#546)
+ * ist damit auf ausdrücklichen Nutzerwunsch revidiert. Der localStorage
+ * bleibt als Sofort-Start-Wert bestehen.
  */
 const FONT_SCALE_KEY = "campmesser.fontScale";
 

@@ -1118,3 +1118,38 @@ Die zwanzig Vorschläge:
 - [x] #595 UI-Tests Runde 55: TripReview (Personen-Filter), Feiertags-Zeile der Heute-Ansicht, AirQualityCard (fetch-Attrappe), Kosten-Schätzung im Reise-Dialog – je mit axe
 
 EHRLICH (Runde 56): Nichts davon wurde am Bildschirm verifiziert (kein Browser-Zugriff auf die laufende App); der iOS-Feld-Fix ist nur nach CSS-Logik geprüft. Migrationen dieser Runde: 0123 (tripLogs.archivedAt) und 0124 (savedPlaces.photoFileName, tripJournal.photoFileName) – laufen beim nächsten Deploy.
+
+## Dreissig Punkte (09.08.2026, Runde 57)
+
+- [x] #596 Etappen-Routen auf der Karte: gestrichelte Linien je Reise als eigene Ebene «Routen» (MapLayerVisibility.routes, Default an; additiv in SpotsMap – der #593-Entscheid, die Marker-Closure nicht zu refactoren, bleibt respektiert)
+- [x] #597 Wetter je Etappe – EXISTIERTE BEREITS: Das Ankunftstag-Wetter je Etappe kam mit #560 in TripStops; nichts doppelt gebaut
+- [x] #598 Journal & Tages-Fotos im Reise-Bericht: Die Druckansicht (#131) zeigt das Tages-Foto jedes Journal-Eintrags klein neben dem Text
+- [x] #599 Merkort-Foto im Karten-Popup (SpotsMap zeigt das Bild über /api/places/photos)
+- [x] #600 Merkort→Favorit befördern: savedPlaces.promote legt den Zeltplatz an, ZÜGELT das Foto (Datei-Kopie places/→spots/, Fehler blockiert die Beförderung nicht) und löscht den Merkort; Popup-Knopf springt ins neue Dossier
+- [x] #601 Merkorte in der Nähe: Heute-Ansicht zeigt den nächsten Merkort im Umkreis von 30 km (Suche per Luftlinie-Radius, ANZEIGE über die Strasse – App-Doktrin)
+- [x] #602 Farb-Legende der Merkorte: Filter-Chips je benutzter Farbe + editierbare eigene Farbnamen (synchronisierte Einstellung savedPlaceColorNames)
+- [x] #603 Länderkatalog DK/SE/NO – EXISTIERTE BEREITS: Dänemark kam mit #551, Schweden/Norwegen inkl. Jedermannsrecht mit #570; auch die Notrufnummern standen schon in shared/emergencyNumbers.ts
+- [x] #604 Vignetten-Preis → Reisekasse: Richtpreis (CH Jahres-, AT 10-Tages-, SI 7-Tage-Vignette) auf der Länder-Seite per Knopf als Ausgabe in eine gewählte Reise; CZ/HU bewusst ohne Knopf – die Reisekasse kennt nur CHF/EUR (#441)
+- [x] #605 Sprachhilfe «Panne & Werkstatt» – EXISTIERTE BEREITS: Kapitel seit #571, SOS-Verlinkung seit #583
+- [x] #606 Feiertags-Warnung als Push: Am Abend vor einem Feiertag im Reiseland einer laufenden Auslands-Reise («Läden oft geschlossen»); Quelle Nager.Date wie Cockpit/Heute (#539), Kanal wie der Vorabend-Check (Pack-Check und Etappen-Hinweis haben Vorrang), CH bewusst still; dafür guessCountryCode samt Aliassen nach shared/countryGuess.ts verschoben (Re-Export hält Client-Importe stabil; 3 Push-Tests)
+- [x] #607 Beleg-Foto in der Schnell-Ausgabe: QuickExpense fotografiert die Quittung gleich mit (Upload nach dem Speichern, Muster #540); trpcMock reicht Mutations-Spione neu auch an mutateAsync durch
+- [x] #608 Journal zeigt archiviertes Tages-Wetter: Das Wetterarchiv (#102) speichert neu optional Tageszeilen (tMax/tMin/mm je Tag, max 92); das Journal zeigt sie neben dem Datum – alte Archive (nur Zusammenfassung) bleiben gültig, kein Schema-Change (JSON-Spalte)
+- [x] #609 Duplizieren nimmt Etappen mit: trips.duplicate kopiert die Etappen, verschiebt die Termine um die Startdatum-Differenz und klemmt sie auf den neuen Zeitraum
+- [x] #610 Tankbuch-Auswertung: Tank-Kosten pro Monat (fuelMonthlyCosts, 2 Tests; nur Füllungen MIT Betrag); l/100 km-Durchschnitt und Verbrauchs-Verlauf EXISTIERTEN BEREITS (#443/#504)
+- [x] #611 Schriftgrösse synchronisiert: Die S/M/L-Stufen existierten seit #546 (bewusst gerätelokal) – auf Nutzerwunsch revidiert, die Wahl wandert jetzt wie das Design ans Konto (SettingsSync empfängt und wendet an)
+- [x] #612 Rekorde-Karte in der Statistik: meiste Nächte am Stück, längste Etappe, weiteste Rundreise (aus den gerouteten Strassen-Kilometern von #580)
+- [x] #613 Papierkorb für Merkorte: savedPlaces.remove archiviert 30 Tage (TABLES-Registry, Snapshot inkl. Foto-Datei – sie überlebt bis zum Purge), Wiederherstellen inklusive photoFileName; kein Schema-Change
+- [x] #614 UI-Tests Runde 56: geteilter Ort im Share-Ziel (Cache-Attrappe, geo:-Link → Merkort), Tages-Foto + Tages-Wetter im Journal, Archiv-Abschnitt der Reisen, Rundreise-km & Rekorde in der Statistik (OSRM-fetch gemockt) – je mit axe
+- [x] #615 Vier weitere axe-Seiten in Playwright: /statistik /zeltplaetze /tagebuch /einkauf
+- [x] #616 Etappen-Nächte-Zähler: «· 2 Nächte» in der Datumszeile jeder Etappe
+- [x] #617 Tagebuch-Filter: Jahr-Chips über der Liste (nur vergangene Reisen + Archiv; geplante blieben bewusst ungefiltert); die Reiseart-Chips EXISTIERTEN BEREITS (#466)
+- [x] #618 Merkorte als Wetter-Orte: Das Wetter-Modul schlägt den nächsten Merkort als Ort vor (Chip unter der Ortswahl)
+- [x] #619 Reise-Vorlage «Rundreise»: 7 Nächte, 3 vorbereitete Etappen «Etappe 1–3» gleichmässig über den Zeitraum (templateStageSpans, Rest-Nächte an die vorderen; 4 Tests), Menü-Rotation, Solo-Packliste
+- [x] #620 SOS: Spitäler in der Nähe (OSM amenity=hospital, «24h» = Notaufnahme-Tag gepflegt), Auto-Distanzen statt Fussweg, Radien 5/10/20 km
+- [x] #621 Feuerverbots-Hinweis Heute – EXISTIERTE BEREITS: Die Lagerfeuer-Ampel (#389) zeigt Gefahrenstufe UND Verbots-Schwelle, nur bei campfire-Arten, nur in der Schweiz
+- [x] #622 Reisekasse nach Person filtern: Chips «Alle Personen / <Name>» über der Posten-Liste (ab zwei Personen); Summen und Ausgleich rechnen bewusst weiter über alles
+- [x] #623 Packlisten-Fortschritt je Personen-Bereich: Balken unter jedem Bereichs-Titel (der Zahlen-Zähler stand schon in den Tabs)
+- [x] #624 Sechs One-Pot-Rezepte: Gemüse-Reistopf, Gnocchi-Rahmtopf mit Spinat, Kartoffelgulasch, Tortellini-Suppentopf, Zitronen-Orzo, Fajita-Reistopf – alle vier Sprachen, ohne Bilder (Feld optional)
+- [x] #625 prefers-reduced-motion: Animationen/Übergänge praktisch sofort, Lade-Spinner drehen ruhig weiter (bleiben als «lädt» erkennbar), sanftes Scrollen wird zu Springen
+
+EHRLICH (Runde 57): Nichts davon wurde am Bildschirm verifiziert (kein Browser-Zugriff auf die laufende App). Keine neuen Migrationen – #608/#613 kommen ohne Schema-Change aus (JSON-Spalte bzw. Papierkorb-Snapshots). Vier Punkte existierten bereits vollständig (#597→#560, #603→#551/#570, #605→#571/#583, #621→#389) und wurden NICHT doppelt gebaut; bei #610/#611/#617/#623 wurde nur der tatsächlich fehlende Teil ergänzt.
